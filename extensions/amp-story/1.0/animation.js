@@ -41,6 +41,7 @@ import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
 import {setStyles} from '#core/dom/style';
 import {timeStrToMillis, unscaledClientRect} from './utils';
+import {isExperimentOn} from '#experiments/';
 
 const TAG = 'AMP-STORY';
 
@@ -794,7 +795,15 @@ export class AnimationManager {
     // TODO(alanorozco): This should be part of a mutate cycle.
     setStyleForPreset(el, name);
 
-    return presets[name];
+    // Apply LCP fix on experiment: first keyframe is 0.01 so element is visible.
+    const preset = presets[name];
+    if (
+      isExperimentOn(this.ampdoc_.win, 'animation-opacity-start-visible') &&
+      name.match(/twirl|fade/)
+    ) {
+      preset.keyframes[0].opacity = 0.01;
+    }
+    return preset;
   }
 
   /**
