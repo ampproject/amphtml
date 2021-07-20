@@ -211,6 +211,41 @@ tags: {  # <amp-story-interactive-img-quiz>
     }
   }
 }
+tags: {  # <amp-story-interactive-img-poll>
+  html_format: AMP
+  tag_name: "AMP-STORY-INTERACTIVE-IMG-POLL"
+  requires_extension: "amp-story-interactive"
+  mandatory_ancestor: "AMP-STORY-GRID-LAYER"
+  attr_lists: "interactive-options-img-attrs"
+  attr_lists: "interactive-options-confetti-attrs"
+  attr_lists: "interactive-shared-configs-attrs"
+  attrs: {
+    name: "option-1-results-category"
+    trigger: {
+      also_requires_attr: "option-2-results-category"
+    }
+  }
+  attrs: {
+    name: "option-2-results-category"
+    trigger: {
+      also_requires_attr: "option-1-results-category"
+    }
+  }
+  attrs: {
+    name: "option-3-results-category"
+    trigger: {
+      also_requires_attr: "option-2-results-category"
+      also_requires_attr: "option-3-image"
+    }
+  }
+  attrs: {
+    name: "option-4-results-category"
+    trigger: {
+      also_requires_attr: "option-3-results-category"
+      also_requires_attr: "option-4-image"
+    }
+  }
+}
 
 attr_lists: {
   name: "interactive-shared-configs-attrs"
