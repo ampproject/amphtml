@@ -375,9 +375,6 @@ export class ManualAdvancement extends AdvancementConfig {
     this.timeoutId_ = this.timer_.delay(() => {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
     }, HOLD_TOUCH_THRESHOLD_MS);
-    this.element_.ownerDocument
-      .querySelector('amp-story')
-      .setAttribute('interacted', '');
   }
 
   /**
