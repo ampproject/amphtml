@@ -155,7 +155,11 @@ The max specified number of items to suggest at once based on a user input, disp
 
 ### `suggest-first`
 
-Suggest the first entry in the list of results by marking it active; only possible if <code>filter==prefix</code> (does nothing otherwise)
+Suggest the first entry in the list of results by marking it active.
+
+[filter formats="websites"]
+This is only possible if <code>filter==prefix</code> (does nothing otherwise).
+[/filter] <!-- formats="websites" -->
 
 ### `submit-on-enter`
 
@@ -170,6 +174,8 @@ If present, exposes the <code>autocomplete-partial</code> class on the substring
 ### `items`
 
 Specifies the key to the data array within the JSON response. Nested keys can be expressed with a dot-notated value such as <code>field1.field2.</code> The default value is <code>"items"</code>. The following are examples with and without usage:
+
+[filter formats="websites"]
 
   <pre lang="html">
 
@@ -192,7 +198,28 @@ Specifies the key to the data array within the JSON response. Nested keys can be
       </amp-autocomplete>
 
   </pre>
-      In the first example, the JSON payload is queued by the "items" key, and thus no component attribute is needed because the default value corresponds. In the second example, the JSON payload is queued by the "fruit" key, so the <code>items</code> attribute is given the value <code>"fruit"</code> so as to accurately etrieve the intended datasource. In both examples, the end user interaction is the same.
+[/filter] <!-- formats="websites" -->
+
+[filter formats="email"]
+
+  <pre lang="html">
+
+      <amp-autocomplete src="{{server_for_email}}/static/samples/json/amp-autocomplete-fruit-items.json">
+        <input type="text">
+      </amp-autocomplete>
+
+  </pre>
+  <pre lang="html">
+
+      <amp-autocomplete src="{{server_for_email}}/static/samples/json/amp-autocomplete-fruit-items.json" items="fruit">
+        <input type="text">
+      </amp-autocomplete>
+
+  </pre>
+
+[/filter] <!-- formats="email" -->
+
+In the first example, the JSON payload is queued by the "items" key, and thus no component attribute is needed because the default value corresponds. In the second example, the JSON payload is queued by the "fruit" key, so the <code>items</code> attribute is given the value <code>"fruit"</code> so as to accurately retrieve the intended datasource. In both examples, the end user interaction is the same.
 
 ### `inline`
 
@@ -219,6 +246,7 @@ representation of the corresponding object, which is then made available in
 the `valueAsObject` field of the `event`.
 
 Example:
+[filter formats="websites"]
 
 ```html
 <amp-autocomplete
@@ -245,6 +273,28 @@ Example:
   No fruit selected
 </p>
 ```
+
+[/filter] <!-- formats="websites" -->
+
+[filter formats="email"]
+
+```html
+<amp-autocomplete
+  id="myAutocomplete"
+  on="select:AMP.setState({chosenFruit: event.value})"
+  src="{{server_for_email}}/static/samples/json/amp-autocomplete-fruit.json"
+>
+  <input />
+  <template type="amp-mustache">
+    <div data-value="{{name}}">{{name}}</div>
+  </template>
+</amp-autocomplete>
+<p [text]="'Your fruit: ' + chosenFruit">
+  No fruit selected
+</p>
+```
+
+[/filter] <!-- formats="email" -->
 
 ## Validation
 
