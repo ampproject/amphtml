@@ -88,10 +88,18 @@ module.exports = {
     },
     {
       'files': [
+        '*.js',
+        'builtins/**/*.js',
         'core/**/*.js',
+        'experiments/**/*.js',
+        'polyfills/**/*.js',
         'preact/**/*.js',
+        'purifier/**/*.js',
+        'service/**/*.js',
+        'utils/**/*.js',
+        'web-worker/**/*.js',
       ],
-      'rules': {'import/order': 2}
-    }
+      'rules': {'import/order': 2},
+    },
   ],
 };

@@ -15,6 +15,9 @@
  */
 
 import {LruCache} from '#core/data-structures/lru-cache';
+
+import {urls} from '../config';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
@@ -26,8 +29,6 @@ import {
   parseUrlWithA,
   resolveRelativeUrl,
 } from '../url';
-import {registerServiceBuilderForDoc} from '../service-helpers';
-import {urls} from '../config';
 
 const SERVICE = 'url';
 
