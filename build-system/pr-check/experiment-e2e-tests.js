@@ -20,15 +20,16 @@
  */
 
 const {
+  getCircleCiShardTestFiles,
   skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
 const {e2eTestPaths} = require('../test-configs/config');
 const {experiment} = require('minimist')(process.argv.slice(2));
-const {getCircleCiShardTestFiles, runCiJob} = require('./ci-job');
 const {getExperimentConfig} = require('../common/utils');
 const {isPushBuild} = require('../common/ci');
+const {runCiJob} = require('./ci-job');
 const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = `${experiment}-e2e-tests.js`;

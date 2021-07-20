@@ -27,7 +27,6 @@ const {
   setLoggingPrefix,
 } = require('../common/logging');
 const {determineBuildTargets} = require('./build-targets');
-const {getStdout} = require('../common/process');
 const {isPullRequestBuild} = require('../common/ci');
 const {red} = require('../common/colors');
 const {updatePackages} = require('../common/update-packages');
@@ -58,22 +57,6 @@ async function runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow) {
   }
 }
 
-/**
- * Returns list of test files that CircleCI should execute in a parallelized job shard.
- *
- * @param {!Array<string>} globs array of glob strings for finding test file paths.
- * @return {string} a comma separated list of test file paths.
- */
-function getCircleCiShardTestFiles(globs) {
-  const joinedGlobs = globs.map((glob) => `"${glob}"`).join(' ');
-  return getStdout(
-    `circleci tests glob ${joinedGlobs} | circleci tests split --split-by=timings`
-  )
-    .trim()
-    .replace(/\s+/g, ',');
-}
-
 module.exports = {
   runCiJob,
-  getCircleCiShardTestFiles,
 };

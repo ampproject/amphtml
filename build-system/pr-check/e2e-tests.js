@@ -20,12 +20,13 @@
  */
 
 const {
+  getCircleCiShardTestFiles,
   skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
 const {e2eTestPaths} = require('../test-configs/config');
-const {getCircleCiShardTestFiles, runCiJob} = require('./ci-job');
+const {runCiJob} = require('./ci-job');
 const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'e2e-tests.js';

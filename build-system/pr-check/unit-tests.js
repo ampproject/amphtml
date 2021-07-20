@@ -20,11 +20,12 @@
  */
 
 const {
+  getCircleCiShardTestFiles,
   skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
-const {getCircleCiShardTestFiles, runCiJob} = require('./ci-job');
+const {runCiJob} = require('./ci-job');
 const {Targets, buildTargetsInclude} = require('./build-targets');
 const {unitTestPaths} = require('../test-configs/config');
 
