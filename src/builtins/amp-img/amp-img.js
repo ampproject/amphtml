@@ -367,7 +367,7 @@ export class AmpImg extends BaseElement {
     if (width <= 0) {
       return Promise.resolve();
     }
-    return this.loadPromise(img).then(() => console.log('img loaded'));
+    return this.loadPromise(img);
   }
 
   /** @override */

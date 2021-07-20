@@ -261,9 +261,15 @@ amp-story-page:not([active]):not([distance]) {
  * Note: If updating the [active] or [distance] attributes names, please also
  * update them in the ampdoc.css file.
  */
-amp-story-page[distance="1"]:not(.i-amphtml-story-page-loaded), amp-story-page[distance="2"]:not(.i-amphtml-story-page-loaded) {
+
+amp-story-page[distance="0"] {
+  transform: translateY(0) !important;
+}
+
+amp-story-page[distance="1"]:not(.i-amphtml-story-page-loaded), amp-story-page[distance="2"] {
   transform: translateX(100vw) !important;
 }
+
 
 amp-story-page [data-text-background-color] {
   border-radius: 3px !important;
