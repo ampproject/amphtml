@@ -2720,6 +2720,14 @@ tags: {
   tag_name: "INPUT"
   spec_name: "INPUT [type=file]"
   attrs: {
+<<<<<<<
+=======
+    disabled_by: "amp4email"
+    name: "capture"
+    value: ""
+  }
+  attrs: {
+>>>>>>>
     disabled_by: "amp4email"
     name: "capture"
     value: ""
