@@ -51,10 +51,14 @@ const CLONE_CHILD = (child) => cloneElement(child);
  * @return {PreactDef.Renderable}
  */
 export function WithLightbox({
+  alt,
+  'aria-label': ariaLabel,
   as: Comp = 'div',
+  caption: captionProp,
   children,
   enableActivation = true,
   group,
+  onMount,
   render: renderProp,
   srcset,
   ...rest
@@ -71,17 +75,28 @@ export function WithLightbox({
     return <Comp srcset={srcset} />;
   }, [children, renderProp, srcset]);
 
+  const caption = useMemo(
+    () => captionProp || alt || ariaLabel,
+    [alt, ariaLabel, captionProp]
+  );
+
   useLayoutEffect(() => {
-    register(genKey, group, render);
+    register(genKey, group, render, caption);
     return () => deregister(genKey, group);
-  }, [genKey, group, deregister, register, render]);
+  }, [caption, genKey, group, deregister, register, render]);
+
+  useLayoutEffect(() => {
+    return onMount?.(Number(genKey) - 1);
+  }, [genKey, onMount]);
 
   const activationProps = useMemo(
     () =>
       enableActivation && {
         ...DEFAULT_ACTIVATION_PROPS,
         /* genKey is 1-indexed, gallery is 0-indexed */
-        onClick: () => open(Number(genKey) - 1, group),
+        onClick: () => {
+          open(Number(genKey) - 1, group);
+        },
       },
     [enableActivation, genKey, group, open]
   );

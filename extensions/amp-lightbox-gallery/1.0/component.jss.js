@@ -25,6 +25,7 @@ const DEFAULT_DIMENSION_LARGE = 40;
 const DEFAULT_PADDING_LARGE = 20;
 
 const DEFAULT_GRID_PADDING = 5;
+export const PADDING_ALLOWANCE = 40;
 
 const gallery = {
   position: 'absolute !important',
@@ -112,6 +113,61 @@ const topControl = {
   },
 };
 
+const auto = {};
+const clip = {};
+const expanded = {};
+const caption = {
+  bottom: 0,
+  boxSizing: 'border-box !important',
+  color: '#ffffff',
+  textShadow: '1px 0 5px rgba(0, 0, 0, 0.4) !important',
+  maxHeight: 'calc(80px + 3rem) !important',
+  transition: 'max-height ease-out 0.3s !important',
+  pointerEvents: 'none !important',
+  /*
+   * Make sure we do not overlap with the buttons. This is not applied to
+   * `captionText` to avoid expanding the hit area when
+   * collapsed.
+   */
+  paddingTop: `${PADDING_ALLOWANCE}px !important`,
+  overflow: 'hidden',
+  '&$auto': {
+    cursor: 'auto !important',
+  },
+  '&$clip': {
+    /* Fade out the text, using an approximated exponential gradient. */
+    maskImage: `linear-gradient(
+to top,
+rgba(0, 0, 0, 0.0) 0rem,
+rgba(0, 0, 0, 0.2) 1rem,
+rgba(0, 0, 0, 0.55) 2rem,
+rgba(0, 0, 0, 1.0) 3rem
+)`,
+  },
+  '&$expanded': {
+    overflowY: 'auto !important',
+    WebkitOverflowScrolling: 'touch !important',
+    maxHeight: '100% !important',
+    transition: 'max-height ease-in-out 0.7s !important',
+    /* Fade out the text, using an approxximated exponential gradient. */
+    maskImage: `linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.0) 0rem,
+      rgba(0, 0, 0, 0.2) 0.5rem,
+      rgba(0, 0, 0, 0.55) 1rem,
+      rgba(0, 0, 0, 1.0) 2rem
+      )`,
+  },
+};
+
+const captionText = {
+  padding: '20px !important',
+  pointerEvents: 'all !important',
+  '&:empty': {
+    display: 'none !important',
+  },
+};
+
 const closeButton = {
   top: 0,
   right: 0,
@@ -157,9 +213,14 @@ const JSS = {
     },
   },
   arrow,
+  auto,
+  caption,
+  captionText,
+  clip,
   closeButton,
   control,
   controlsPanel,
+  expanded,
   hideControls,
   lightbox,
   gallery,
