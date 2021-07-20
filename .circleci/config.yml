@@ -311,7 +311,7 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: 'Experiment << parameters.exp >> Integration Tests'
+          name: 'Exp. << parameters.exp >> Integration Tests'
           command: node build-system/pr-check/experiment-integration-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
       - fail_fast
@@ -329,7 +329,7 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: 'Experiment << parameters.exp >> End-to-End Tests'
+          name: 'Exp. << parameters.exp >> End-to-End Tests'
           command: node build-system/pr-check/experiment-e2e-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
       - fail_fast
