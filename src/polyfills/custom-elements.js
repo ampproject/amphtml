@@ -16,6 +16,7 @@
 
 import {Deferred} from '#core/data-structures/promise';
 import {rethrowAsync} from '#core/error';
+import * as mode from '#core/mode';
 import {map} from '#core/types/object';
 
 /**
@@ -839,10 +840,9 @@ function supportsUnderProto() {
  * old IE.
  * @param {!Object} obj
  * @param {!Object} prototype
- * @suppress {suspiciousCode} due to IS_ESM inlining
  */
 function setPrototypeOf(obj, prototype) {
-  if (IS_ESM || Object.setPrototypeOf) {
+  if (mode.isEsm() || Object.setPrototypeOf) {
     // Every decent browser.
     Object.setPrototypeOf(obj, prototype);
   } else if (supportsUnderProto()) {
