@@ -28,7 +28,6 @@ const {Base} = Mocha.reporters;
 const {green, red, yellow} = require('../../common/colors');
 const {icon, nbDotsPerLine} =
   require('../../test-configs/karma.conf').superDotsReporter;
-const {reportTestFinished} = require('../report-test-status');
 
 /**
  * Custom Mocha reporter for CI builds.
@@ -72,7 +71,6 @@ class MochaDotsReporter extends Base {
           `(Skipped ${pending})`,
           failures == 0 ? green('SUCCESS') : red(`${failures} FAILED`)
         );
-        reportTestFinished(passes, failures);
       });
   }
 }
