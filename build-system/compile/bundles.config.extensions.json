@@ -1017,7 +1017,8 @@
         "amp-story-interactive-poll",
         "amp-story-interactive-quiz",
         "amp-story-interactive-results",
-        "amp-story-interactive-slider"
+        "amp-story-interactive-slider",
+        "amp-story-interactive-disclaimer"
       ]
     }
   },

@@ -15,18 +15,21 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
-import {Pass} from '../pass';
-import {Services} from '#service';
 import {
   addDocumentVisibilityChangeListener,
   isDocumentHidden,
   removeDocumentVisibilityChangeListener,
 } from '#core/document-visibility';
+import {rethrowAsync} from '#core/error';
+
+import {Services} from '#service';
+
+import {installTimerService} from './timer-impl';
+
 import {cancellation} from '../error-reporting';
 import {dev, devAssert} from '../log';
+import {Pass} from '../pass';
 import {getService, registerServiceBuilder} from '../service-helpers';
-import {installTimerService} from './timer-impl';
-import {rethrowAsync} from '#core/error';
 
 /** @const {time} */
 const FRAME_TIME = 16;

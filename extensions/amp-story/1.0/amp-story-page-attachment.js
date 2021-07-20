@@ -276,6 +276,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     link.setAttribute('href', hrefAttr);
     const {openStringEl, urlStringEl} = htmlRefs(link);
 
+    // Navigation is handled programmatically. Disable clicks on the placeholder
+    // anchor to prevent from users triggering double navigations, which has
+    // side effects in native contexts opening webviews/CCTs.
+    link.addEventListener('click', (event) => event.preventDefault());
+
     // Set image.
     const openImgAttr = this.element.getAttribute('cta-image');
     if (openImgAttr && openImgAttr !== 'none') {
@@ -370,6 +375,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     this.storeService_.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
     this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
 
+    this.toggleBackgroundOverlay_(true);
+
     // Don't create a new history entry for remote attachment as user is
     // navigating away.
     if (this.type_ !== AttachmentType.OUTLINK) {
@@ -382,6 +389,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
           StateProperty.CURRENT_PAGE_ID
         ),
       };
+
       this.historyService_.push(() => this.closeInternal_(), historyState);
     }
 
@@ -496,6 +504,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     super.closeInternal_(shouldAnimate);
 
+    this.toggleBackgroundOverlay_(false);
+
     this.storeService_.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, false);
     this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
 
@@ -518,5 +528,22 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     this.analyticsService_.triggerEvent(
       StoryAnalyticsEvent.PAGE_ATTACHMENT_EXIT
     );
+  }
+
+  /**
+   * @param {boolean} isActive
+   * @private
+   */
+  toggleBackgroundOverlay_(isActive) {
+    const activePageEl = closest(
+      this.element,
+      (el) => el.tagName === 'AMP-STORY-PAGE'
+    );
+    this.mutateElement(() => {
+      activePageEl.classList.toggle(
+        'i-amphtml-story-page-attachment-active',
+        isActive
+      );
+    });
   }
 }

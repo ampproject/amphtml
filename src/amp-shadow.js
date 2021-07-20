@@ -22,16 +22,16 @@
 // src/polyfills.js must be the first import.
 import './polyfills';
 
-import {adoptShadowMode} from './runtime';
-import {bodyAlwaysVisible} from './style-installer';
 import {deactivateChunking} from './chunk';
 import {doNotTrackImpression} from './impression';
+import {internalRuntimeVersion} from './internal-version';
+import {adoptShadowMode} from './runtime';
+import {installDocService} from './service/ampdoc-impl';
 import {
   installBuiltinElements,
   installRuntimeServices,
 } from './service/core-services';
-import {installDocService} from './service/ampdoc-impl';
-import {internalRuntimeVersion} from './internal-version';
+import {bodyAlwaysVisible} from './style-installer';
 
 // This feature doesn't make sense in shadow mode as it only applies to
 // background rendered iframes;

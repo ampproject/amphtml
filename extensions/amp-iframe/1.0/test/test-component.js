@@ -18,7 +18,7 @@ import * as Preact from '#preact';
 import {Iframe} from '../component';
 import {mount} from 'enzyme';
 
-describes.sandboxed('Iframe preact component v1.0', {}, () => {
+describes.sandboxed('Iframe preact component v1.0', {}, (env) => {
   it('should render', () => {
     const wrapper = mount(<Iframe src={'https://www.google.com'} />);
 
@@ -42,5 +42,14 @@ describes.sandboxed('Iframe preact component v1.0', {}, () => {
     expect(component.prop('allowFullScreen')).to.be.true;
     // falsy values are stripped by Preact
     expect(component.prop('allowpaymentrequest')).to.be.undefined;
+  });
+
+  it('should trigger onLoadCallback when iframe loads', () => {
+    const onLoadSpy = env.sandbox.spy();
+    const wrapper = mount(
+      <Iframe src={'https://www.google.com'} onLoadCallback={onLoadSpy} />
+    );
+    wrapper.find('iframe').simulate('load');
+    expect(onLoadSpy).to.be.calledOnce;
   });
 });
