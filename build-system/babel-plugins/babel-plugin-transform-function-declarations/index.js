@@ -150,6 +150,11 @@ module.exports = function ({types: t}) {
     (path) => {
       const callExpression = path.findParent((p) => p.isCallExpression());
       if (callExpression) {
+        // If the Callee is the FunctionExpresion itself, then that means it is
+        // a Immediately Invoked Function Expression which we can transform.
+        if (callExpression.node && callExpression.node.callee === path.node) {
+          return false;
+        }
         const {name, property} = (callExpression.node &&
           callExpression.node.callee) || {
           name: null,

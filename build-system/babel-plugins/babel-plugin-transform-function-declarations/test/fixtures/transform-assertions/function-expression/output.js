@@ -22,3 +22,5 @@ let fixedEncodeURIComponentArrow = str => encodeURIComponent(str).replace(/[!'()
 let y;
 
 let fixedEncodeURIComponentArrowAssignment = str => encodeURIComponent(str).replace(/[!'()*]/g, y = c => '%' + c.charCodeAt(0).toString(16));
+
+(() => 'iife')();

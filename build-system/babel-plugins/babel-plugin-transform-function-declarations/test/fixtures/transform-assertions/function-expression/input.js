@@ -31,3 +31,7 @@ let y;
 let fixedEncodeURIComponentArrowAssignment = str => encodeURIComponent(str).replace(/[!'()*]/g, y = function (c) {
   return '%' + c.charCodeAt(0).toString(16);
 });
+
+(function() {
+  return 'iife';
+})()
