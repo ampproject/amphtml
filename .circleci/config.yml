@@ -403,7 +403,6 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'
-            - '⛓️ All Unit Tests'
       - 'Experiment Build':
           name: 'Experiment << matrix.exp >> Build'
           matrix:
