@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as mode from '#core/mode';
+
 import {BaseElement} from './base-element';
 import {startupChunk} from './chunk';
 import {config} from './config';
@@ -106,7 +108,7 @@ function adoptShared(global, callback) {
   // `AMP.extension()` function is only installed in a non-minified mode.
   // This function is meant to play the same role for development and testing
   // as `AMP.push()` in production.
-  if (!getMode().minified) {
+  if (!mode.isMinified()) {
     /**
      * @param {string} unusedName
      * @param {string} unusedVersion

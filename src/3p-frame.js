@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as mode from '#core/mode';
+
 import {urls} from './config';
 import {
   getOptionalSandboxFlags,
@@ -206,7 +208,7 @@ export function addDataAndJsonAttributes_(element, attributes) {
 export function getBootstrapUrl(type) {
   const extension = IS_ESM ? '.mjs' : '.js';
   if (getMode().localDev || getMode().test) {
-    const filename = getMode().minified
+    const filename = mode.isMinified()
       ? `./vendor/${type}`
       : `./vendor/${type}.max`;
     return filename + extension;
@@ -299,7 +301,7 @@ export function getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename) {
     overrideBootstrapBaseUrl ||
     getAdsLocalhost(parentWindow) +
       '/dist.3p/' +
-      (getMode().minified
+      (mode.isMinified()
         ? `${internalRuntimeVersion()}/${srcFileBasename}`
         : `current/${srcFileBasename}.max`) +
       '.html'
