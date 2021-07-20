@@ -86,6 +86,17 @@ commands:
           path: result-reports
       - store_test_results:
           path: result-reports
+  skip_on_push_builds:
+    steps:
+      - unless:
+          condition:
+            matches:
+              pattern: ^pull/\d+$
+              value: << pipeline.git.branch >>
+          steps:
+            - run:
+                name: 'Skip Local Unit Test on Push Builds'
+                command: circleci-agent step halt
 
 jobs:
   'Compute Merge Commit':
@@ -182,15 +193,7 @@ jobs:
     executor:
       name: amphtml-large-executor
     steps:
-      - unless:
-          condition:
-            matches:
-              pattern: ^pull/\d+$
-              value: << pipeline.git.branch >>
-          steps:
-            - run:
-                name: 'Skip Local Unit Test on Push Builds'
-                command: circleci-agent step halt
+      - skip_on_push_builds
       - setup_vm
       - install_chrome
       - run:
