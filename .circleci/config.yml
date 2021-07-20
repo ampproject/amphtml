@@ -88,10 +88,10 @@ commands:
           path: result-reports
   skip_on_push_builds:
     steps:
-      - unless:
+      - when:
           condition:
             matches:
-              pattern: ^pull/\d+$
+              pattern: ^main|amp-release-.*$
               value: << pipeline.git.branch >>
           steps:
             - run:
