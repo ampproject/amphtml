@@ -20,7 +20,7 @@
  */
 
 const {
-  getCircleCiShardTestFiles,
+  generateCircleCiShardTestFilesList,
   skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
@@ -43,9 +43,9 @@ function runExperimentTests(config) {
     const defineFlag = `--define_experiment_constant ${config.define_experiment_constant}`;
     const experimentFlag = `--experiment ${experiment}`;
     const reportFlag = isPushBuild() ? '--report' : '';
-    const shardTestFiles = getCircleCiShardTestFiles(e2eTestPaths);
+    generateCircleCiShardTestFilesList(e2eTestPaths);
     timedExecOrThrow(
-      `amp e2e --nobuild --compiled --headless ${experimentFlag} ${defineFlag} ${reportFlag} --files ${shardTestFiles}`
+      `amp e2e --nobuild --compiled --headless ${experimentFlag} ${defineFlag} ${reportFlag} --fileslist ${TEST_FILES_LIST_FILE_NAME}`
     );
   } catch (e) {
     if (e.status) {

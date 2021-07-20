@@ -35,7 +35,7 @@ const {createKarmaServer, getAdTypes} = require('./helpers');
 const {cyan, green, red, yellow} = require('../../common/colors');
 const {dotWrappingWidth} = require('../../common/logging');
 const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel');
-const {getFilesFromArgv} = require('../../common/utils');
+const {getFilesFromArgv, getFilesFromFilesList} = require('../../common/utils');
 const {isCiBuild, isCircleciBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
 const {SERVER_TRANSFORM_PATH} = require('../../server/typescript-compile');
@@ -233,8 +233,10 @@ class RuntimeTestConfig {
   updateFiles() {
     switch (this.testType) {
       case 'unit':
-        if (argv.files) {
-          this.files = commonUnitTestPaths.concat(getFilesFromArgv());
+        if (argv.files || argv.fileslist) {
+          this.files = commonUnitTestPaths
+            .concat(getFilesFromArgv())
+            .concat(getFilesFromFilesList());
           return;
         }
         if (argv.firefox || argv.safari || argv.edge) {
@@ -324,8 +326,7 @@ class RuntimeTestConfig {
     this.singleRun = !argv.watch;
     this.client.mocha.grep = !!argv.grep;
     this.client.verboseLogging = !!argv.verbose;
-    this.client.captureConsole =
-      !!argv.verbose || (!isCiBuild() && !!argv.files);
+    this.client.captureConsole = !!argv.verbose || !!argv.files;
     this.client.amp = {
       useCompiledJs: !!argv.compiled,
       adTypes: getAdTypes(),

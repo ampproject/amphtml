@@ -83,4 +83,5 @@ unit.flags = {
   'testnames': 'List the name of each test being run',
   'verbose': 'Enable logging',
   'watch': 'Watch for changes in files, runs corresponding test(s)',
+  'fileslist': 'Run tests specified in this comma-separated list of test files',
 };

@@ -42,6 +42,7 @@ const NOMODULE_CONTAINER_DIRECTORY = 'nomodule';
 const MODULE_CONTAINER_DIRECTORY = 'module';
 
 const ARTIFACT_FILE_NAME = '/tmp/artifacts/amp_nomodule_build.tar.gz';
+const TEST_FILES_LIST_FILE_NAME = '/tmp/testfiles.txt';
 
 const BUILD_OUTPUT_DIRS = ['build', 'dist', 'dist.3p'];
 const APP_SERVING_DIRS = [
@@ -308,21 +309,23 @@ async function processAndStoreBuildToArtifacts() {
 }
 
 /**
- * Returns list of test files that CircleCI should execute in a parallelized job shard.
+ * Generates a file with a comma-separated list of test file paths that CircleCI
+ * should execute in a parallelized job shard.
  *
  * @param {!Array<string>} globs array of glob strings for finding test file paths.
- * @return {string} a comma separated list of test file paths.
  */
-function getCircleCiShardTestFiles(globs) {
+function generateCircleCiShardTestFilesList(globs) {
   const joinedGlobs = globs.map((glob) => `"${glob}"`).join(' ');
-  return getStdout(
+  const filesList = getStdout(
     `circleci tests glob ${joinedGlobs} | circleci tests split --split-by=timings`
   )
     .trim()
     .replace(/\s+/g, ',');
+  fs.writeFileSync(TEST_FILES_LIST_FILE_NAME, filesList);
 }
 
 module.exports = {
+  TEST_FILES_LIST_FILE_NAME,
   abortTimedJob,
   printChangeSummary,
   skipDependentJobs,
@@ -337,5 +340,5 @@ module.exports = {
   storeModuleBuildToWorkspace,
   storeExperimentBuildToWorkspace,
   processAndStoreBuildToArtifacts,
-  getCircleCiShardTestFiles,
+  generateCircleCiShardTestFilesList,
 };

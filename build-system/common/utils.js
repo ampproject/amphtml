@@ -114,6 +114,18 @@ function getFilesFromArgv() {
 }
 
 /**
+ * Returns list of files in the comma-separated file named at --fileslist.
+ *
+ * @return {Array<string>}
+ */
+function getFilesFromFilesList() {
+  if (!argv.fileslist) {
+    return [];
+  }
+  return fs.readFileSync(argv.fileslist).trim().split(',');
+}
+
+/**
  * Gets a list of files to be checked based on command line args and the given
  * file matching globs. Used by tasks like prettify, lint, check-links, etc.
  * Optionally takes in options for globbing and a file containing ignore rules.
@@ -175,6 +187,7 @@ module.exports = {
   buildRuntime,
   getExperimentConfig,
   getFilesFromArgv,
+  getFilesFromFilesList,
   getFilesToCheck,
   usesFilesOrLocalChanges,
 };

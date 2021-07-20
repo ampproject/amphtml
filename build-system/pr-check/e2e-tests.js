@@ -20,7 +20,8 @@
  */
 
 const {
-  getCircleCiShardTestFiles,
+  TEST_FILES_LIST_FILE_NAME,
+  generateCircleCiShardTestFilesList,
   skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
@@ -36,9 +37,9 @@ const jobName = 'e2e-tests.js';
  */
 function pushBuildWorkflow() {
   try {
-    const shardTestFiles = getCircleCiShardTestFiles(e2eTestPaths);
+    generateCircleCiShardTestFilesList(e2eTestPaths);
     timedExecOrThrow(
-      `amp e2e --nobuild --headless --compiled --report --files ${shardTestFiles}`,
+      `amp e2e --nobuild --headless --compiled --report --fileslist ${TEST_FILES_LIST_FILE_NAME}`,
       'End-to-end tests failed!'
     );
   } catch (e) {
@@ -55,9 +56,9 @@ function pushBuildWorkflow() {
  */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.E2E_TEST)) {
-    const shardTestFiles = getCircleCiShardTestFiles(e2eTestPaths);
+    generateCircleCiShardTestFilesList(e2eTestPaths);
     timedExecOrDie(
-      `amp e2e --nobuild --headless --compiled --files ${shardTestFiles}`
+      `amp e2e --nobuild --headless --compiled --fileslist ${TEST_FILES_LIST_FILE_NAME}`
     );
   } else {
     skipDependentJobs(
