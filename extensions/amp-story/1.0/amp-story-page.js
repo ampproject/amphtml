@@ -353,6 +353,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.element.setAttribute('role', 'region');
     this.initializeImgAltTags_();
     this.initializeTabbableElements_();
+
+    console.log('buildCallback', this.element.id);
   }
 
   /** @private */
@@ -509,6 +511,12 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @param {!PageState} state
    */
   setState(state) {
+    console.log(
+      'setState',
+      this.element.id,
+      Object.keys(PageState)[state],
+      performance.now()
+    );
     switch (state) {
       case PageState.NOT_ACTIVE:
         this.element.removeAttribute('active');
@@ -629,6 +637,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
 
     this.renderOpenAttachmentUI_();
+
+    console.log('layoutCallback', this.element.id);
 
     return Promise.all([
       this.beforeVisible(),

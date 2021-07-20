@@ -257,6 +257,10 @@ amp-story-page:not(:first-of-type):not([distance]):not([active]) {
   transform: translateY(1000vh) !important;
 }
 
+amp-story:not([desktop]):not([interacted]) amp-story-page:not([active]) {
+  opacity: 0 !important;
+}
+
 amp-story-page:not([active]) {
   transform: translateY(1000vh) !important;
 }
