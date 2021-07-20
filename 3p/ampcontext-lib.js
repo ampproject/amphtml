@@ -17,7 +17,7 @@
 // src/polyfills.js must be the first import.
 import './polyfills';
 
-import {AmpContext} from './ampcontext.js';
+import {AmpContext} from './ampcontext';
 import {initLogConstructor, setReportError} from '../src/log';
 
 initLogConstructor();

@@ -15,10 +15,10 @@
  */
 
 import {BaseElement} from '../../src/base-element';
-import {CommonSignals} from '../../src/common-signals';
+import {CommonSignals} from '#core/constants/common-signals';
 import {ElementStub} from '../../src/element-stub';
-import {LayoutPriority} from '../../src/layout';
-import {Services} from '../../src/services';
+import {LayoutPriority} from '#core/dom/layout';
+import {Services} from '#service';
 import {chunkInstanceForTesting} from '../../src/chunk';
 import {
   createAmpElementForTesting,
@@ -26,7 +26,7 @@ import {
   getImplClassSyncForTesting,
   getImplSyncForTesting,
 } from '../../src/custom-element';
-import {getSchedulerForDoc} from '../../src/service/scheduler';
+import {getSchedulerForDoc} from '#service/scheduler';
 
 describes.realWin('CustomElement V1', {amp: true}, (env) => {
   let win, doc, ampdoc;
@@ -69,7 +69,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
   });
 
   class TestElement extends BaseElement {
-    static V1() {
+    static R1() {
       return true;
     }
 
@@ -139,6 +139,51 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
 
       doc.body.appendChild(element);
       expect(element.readyState).to.equal('building');
+    });
+
+    it('should reschedule build when re-attached after build', async () => {
+      const element = new ElementClass();
+
+      builderMock.expects('schedule').withExactArgs(element).twice();
+      builderMock.expects('unschedule').withExactArgs(element).once();
+
+      doc.body.appendChild(element);
+      expect(element.readyState).to.equal('building');
+
+      const promise = element.buildInternal();
+      expect(element.readyState).to.equal('building');
+
+      await promise;
+      expect(element.readyState).to.equal('mounting');
+
+      doc.body.removeChild(element);
+      expect(element.readyState).to.equal('mounting');
+
+      doc.body.appendChild(element);
+      expect(element.readyState).to.equal('mounting');
+    });
+
+    it('should reschedule build when re-attached after build with usesLoading', async () => {
+      env.sandbox.stub(TestElement, 'usesLoading').returns(true);
+      const element = new ElementClass();
+
+      builderMock.expects('schedule').withExactArgs(element).twice();
+      builderMock.expects('unschedule').withExactArgs(element).once();
+
+      doc.body.appendChild(element);
+      expect(element.readyState).to.equal('building');
+
+      const promise = element.buildInternal();
+      expect(element.readyState).to.equal('building');
+
+      await promise;
+      expect(element.readyState).to.equal('mounting');
+
+      doc.body.removeChild(element);
+      expect(element.readyState).to.equal('mounting');
+
+      doc.body.appendChild(element);
+      expect(element.readyState).to.equal('loading');
     });
   });
 
@@ -886,6 +931,42 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(ensureLoadedStub).to.be.calledOnce;
 
       await element.whenLoaded();
+    });
+  });
+
+  describe('setAsContainerInternal', () => {
+    let element, scroller, impl;
+
+    beforeEach(async () => {
+      builderMock.expects('schedule').atLeast(0);
+
+      element = new ElementClass();
+      doc.body.appendChild(element);
+      impl = await element.getImpl();
+
+      scroller = doc.createElement('div');
+      element.appendChild(scroller);
+    });
+
+    it('should propagate setAsContainerInternal without scroller', () => {
+      builderMock
+        .expects('setContainer')
+        .withExactArgs(element, undefined)
+        .once();
+      impl.setAsContainer();
+    });
+
+    it('should propagate setAsContainerInternal with scroller', () => {
+      builderMock
+        .expects('setContainer')
+        .withExactArgs(element, scroller)
+        .once();
+      impl.setAsContainer(scroller);
+    });
+
+    it('should propagate removeAsContainerInternal', () => {
+      builderMock.expects('removeContainer').withExactArgs(element).once();
+      impl.removeAsContainer();
     });
   });
 

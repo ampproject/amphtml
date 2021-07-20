@@ -29,7 +29,7 @@
 [i-amphtml-stream-gallery-hide-inset-buttons]:not([amp-stream-gallery-outset-arrows]) .i-amphtml-stream-gallery-arrow-prev-slot > *,
 [i-amphtml-stream-gallery-hide-inset-buttons]:not([amp-stream-gallery-outset-arrows]) .i-amphtml-stream-gallery-arrow-next-slot > * {
   opacity: 0;
-  /** 
+  /**
    * Note, screen readers can still activate the buttons when hide buttons is
    * specified, even though we have `pointer-events: none`.
    */

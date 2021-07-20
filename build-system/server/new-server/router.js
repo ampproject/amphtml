@@ -15,6 +15,7 @@
  */
 
 const router = require('express').Router();
+// @ts-ignore
 const {transform} = require('./transforms/dist/transform');
 
 router.get('/examples/*.html', async (req, res) => {
@@ -29,6 +30,10 @@ router.get('/examples/*.html', async (req, res) => {
     );
   }
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  if (req.query.__amp_source_origin) {
+    res.setHeader('Access-Control-Allow-Origin', req.query.__amp_source_origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
   res.end(transformedHTML);
 });
 

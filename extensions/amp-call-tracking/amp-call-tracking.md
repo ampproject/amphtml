@@ -63,4 +63,4 @@ Your XHR endpoint must implement the requirements specified in the [CORS Request
 
 ## Validation
 
-See [amp-call-tracking rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-call-tracking/validator-amp-call-tracking.protoascii) in the AMP validator specification.
+See [amp-call-tracking rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-call-tracking/validator-amp-call-tracking.protoascii) in the AMP validator specification.

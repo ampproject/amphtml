@@ -19,12 +19,19 @@
  * @fileoverview Script that runs the unit tests during CI.
  */
 
-const {buildTargetsInclude, Targets} = require('./build-targets');
-const {printSkipMessage, timedExecOrDie, timedExecOrThrow} = require('./utils');
+const {
+  skipDependentJobs,
+  timedExecOrDie,
+  timedExecOrThrow,
+} = require('./utils');
 const {runCiJob} = require('./ci-job');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'unit-tests.js';
 
+/**
+ * Steps to run during push builds.
+ */
 function pushBuildWorkflow() {
   try {
     timedExecOrThrow(
@@ -44,13 +51,16 @@ function pushBuildWorkflow() {
   }
 }
 
+/**
+ * Steps to run during PR builds.
+ */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
     timedExecOrDie('amp unit --headless --local_changes');
     timedExecOrDie('amp unit --headless --coverage');
     timedExecOrDie('amp codecov-upload');
   } else {
-    printSkipMessage(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or unit tests'
     );

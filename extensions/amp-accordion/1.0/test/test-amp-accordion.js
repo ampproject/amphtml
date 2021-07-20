@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 import '../amp-accordion';
-import {ActionInvocation} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
-import {CanRender} from '../../../../src/core/contextprops';
-import {htmlFor} from '../../../../src/static-template';
-import {subscribe, unsubscribe} from '../../../../src/context';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {ActionInvocation} from '#service/action-impl';
+import {ActionTrust} from '#core/constants/action-constants';
+import {CanRender} from '#preact/contextprops';
+import {htmlFor} from '#core/dom/static-template';
+import {subscribe, unsubscribe} from '#core/context';
+import {toggleExperiment} from '#experiments';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-accordion:1.0',
@@ -55,7 +55,6 @@ describes.realWin(
       win = env.win;
       html = htmlFor(win.document);
       toggleExperiment(win, 'bento-accordion', true, true);
-      toggleExperiment(win, 'amp-accordion-display-locking', true, true);
       element = html`
         <amp-accordion layout="fixed" width="300" height="200">
           <section expanded id="section1">
@@ -111,18 +110,12 @@ describes.realWin(
 
     it('should have amp specific classes for CSS', () => {
       const sections = element.children;
-      const {
-        firstElementChild: header0,
-        lastElementChild: content0,
-      } = sections[0];
-      const {
-        firstElementChild: header1,
-        lastElementChild: content1,
-      } = sections[1];
-      const {
-        firstElementChild: header2,
-        lastElementChild: content2,
-      } = sections[2];
+      const {firstElementChild: header0, lastElementChild: content0} =
+        sections[0];
+      const {firstElementChild: header1, lastElementChild: content1} =
+        sections[1];
+      const {firstElementChild: header2, lastElementChild: content2} =
+        sections[2];
 
       // Check classes
       expect(header0.className).to.include('i-amphtml-accordion-header');
@@ -243,18 +236,12 @@ describes.realWin(
     it('should include a11y related attributes', async () => {
       const sections = element.children;
 
-      const {
-        firstElementChild: header0,
-        lastElementChild: content0,
-      } = sections[0];
-      const {
-        firstElementChild: header1,
-        lastElementChild: content1,
-      } = sections[1];
-      const {
-        firstElementChild: header2,
-        lastElementChild: content2,
-      } = sections[2];
+      const {firstElementChild: header0, lastElementChild: content0} =
+        sections[0];
+      const {firstElementChild: header1, lastElementChild: content1} =
+        sections[1];
+      const {firstElementChild: header2, lastElementChild: content2} =
+        sections[2];
 
       expect(header0).to.have.attribute('tabindex');
       expect(header0).to.have.attribute('aria-controls');
@@ -326,18 +313,12 @@ describes.realWin(
       await element.buildInternal();
 
       const sections = element.children;
-      const {
-        firstElementChild: header0,
-        lastElementChild: content0,
-      } = sections[0];
-      const {
-        firstElementChild: header1,
-        lastElementChild: content1,
-      } = sections[1];
-      const {
-        firstElementChild: header2,
-        lastElementChild: content2,
-      } = sections[2];
+      const {firstElementChild: header0, lastElementChild: content0} =
+        sections[0];
+      const {firstElementChild: header1, lastElementChild: content1} =
+        sections[1];
+      const {firstElementChild: header2, lastElementChild: content2} =
+        sections[2];
 
       expect(header0.getAttribute('id')).to.equal('h1');
       expect(content0.getAttribute('id')).to.equal('c1');
@@ -382,14 +363,10 @@ describes.realWin(
       await element.buildInternal();
 
       const sections = element.children;
-      const {
-        firstElementChild: header0,
-        lastElementChild: content0,
-      } = sections[0];
-      const {
-        firstElementChild: header1,
-        lastElementChild: content1,
-      } = sections[1];
+      const {firstElementChild: header0, lastElementChild: content0} =
+        sections[0];
+      const {firstElementChild: header1, lastElementChild: content1} =
+        sections[1];
 
       expect(header0).to.have.attribute('role');
       expect(header0.getAttribute('role')).to.equal('cat');
@@ -650,89 +627,6 @@ describes.realWin(
         animation.onfinish();
         await waitForExpanded(sections[0], false);
         expect(section.lastElementChild).to.have.display('none');
-      });
-    });
-
-    describe('display locking', () => {
-      let defaultCssSupports;
-      let defaultBeforeMatch;
-
-      beforeEach(async () => {
-        toggleExperiment(win, 'amp-accordion-display-locking', true);
-        element = html`
-          <amp-accordion>
-            <section>
-              <h2>Section 1</h2>
-              <div>Puppies are cute.</div>
-            </section>
-            <section expanded>
-              <h2>Section 2</h2>
-              <div>Kittens are furry.</div>
-            </section>
-            <section expanded>
-              <h2>Section 3</h2>
-              <div>Elephants have great memory.</div>
-            </section>
-          </amp-accordion>
-        `;
-        defaultCssSupports = win.CSS.supports;
-        defaultBeforeMatch = win.document.body.onbeforematch;
-      });
-
-      afterEach(() => {
-        win.CSS.supports = defaultCssSupports;
-        win.document.body.onbeforematch = defaultBeforeMatch;
-        toggleExperiment(win, 'amp-accordion-display-locking', false);
-      });
-
-      it('should expand collpased section with beforematch event', async () => {
-        win.document.body.appendChild(element);
-        win.CSS.supports = () => true;
-        win.document.body.onbeforematch = null;
-        await element.buildInternal();
-
-        const section1 = element.children[0];
-        const content1 = section1.lastElementChild;
-
-        expect(section1).not.to.have.attribute('expanded');
-        content1.dispatchEvent(new Event('beforematch'));
-        await waitForExpanded(section1, true);
-        expect(section1).to.have.attribute('expanded');
-      });
-
-      it('should not expand already expanded section', async () => {
-        win.document.body.appendChild(element);
-        win.CSS.supports = () => true;
-        win.document.body.onbeforematch = null;
-        await element.buildInternal();
-
-        const section2 = element.children[1];
-        const content2 = section2.lastElementChild;
-
-        expect(section2).to.have.attribute('expanded');
-        content2.dispatchEvent(new Event('beforematch'));
-
-        // Section should is already expanded and stays expanded
-        await waitForExpanded(section2, true);
-        expect(section2).to.have.attribute('expanded');
-      });
-
-      it('should not toggle section with two synchronous beforematch events', async () => {
-        win.document.body.appendChild(element);
-        win.CSS.supports = () => true;
-        win.document.body.onbeforematch = null;
-        await element.buildInternal();
-
-        const section1 = element.children[0];
-        const content1 = section1.lastElementChild;
-
-        expect(section1).not.to.have.attribute('expanded');
-        content1.dispatchEvent(new Event('beforematch'));
-        content1.dispatchEvent(new Event('beforematch'));
-
-        // Section should be expanded (not toggled opened then closed)
-        await waitForExpanded(section1, true);
-        expect(section1).to.have.attribute('expanded');
       });
     });
 

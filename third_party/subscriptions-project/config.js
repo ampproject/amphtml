@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.152 */
+/** Version: 0.1.22.173 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -174,9 +174,11 @@ class GlobalDoc {
   constructor(winOrDoc) {
     const isWin = !!winOrDoc.document;
     /** @private @const {!Window} */
-    this.win_ = /** @type {!Window} */ (isWin
-      ? /** @type {!Window} */ (winOrDoc)
-      : /** @type {!Document} */ (winOrDoc).defaultView);
+    this.win_ = /** @type {!Window} */ (
+      isWin
+        ? /** @type {!Window} */ (winOrDoc)
+        : /** @type {!Document} */ (winOrDoc).defaultView
+    );
     /** @private @const {!Document} */
     this.doc_ = isWin
       ? /** @type {!Window} */ (winOrDoc).document
@@ -404,6 +406,7 @@ class ErrorLogger {
 const userLogger = new ErrorLogger(
   self.__AMP_TOP ? AMP_USER_ERROR_SENTINEL : ''
 );
+new ErrorLogger();
 
 const user = () => userLogger;
 
@@ -875,20 +878,21 @@ class JsonLdParser {
       possibleConfigs = [possibleConfigs];
     }
 
-    for (let i = 0; i < /** @type {Array} */ (possibleConfigs).length; i++) {
-      const possibleConfig = possibleConfigs[i];
+    const configs = /** @type {!Array<!JsonObject>} */ (possibleConfigs);
+    for (let i = 0; i < configs.length; i++) {
+      const config = configs[i];
 
       // Must be an ALLOWED_TYPE
-      if (!this.checkType_.checkValue(possibleConfig['@type'], ALLOWED_TYPES)) {
+      if (!this.checkType_.checkValue(config['@type'], ALLOWED_TYPES)) {
         continue;
       }
 
       // Must have a isPartOf[@type=Product].
       let productId = null;
-      const partOfArray = this.valueArray_(possibleConfig, 'isPartOf');
+      const partOfArray = this.valueArray_(config, 'isPartOf');
       if (partOfArray) {
-        for (let i = 0; i < partOfArray.length; i++) {
-          productId = this.discoverProductId_(partOfArray[i]);
+        for (let j = 0; j < partOfArray.length; j++) {
+          productId = this.discoverProductId_(partOfArray[j]);
           if (productId) {
             break;
           }
@@ -900,7 +904,7 @@ class JsonLdParser {
 
       // Found product id, just check for the access flag.
       const isAccessibleForFree = this.bool_(
-        this.singleValue_(possibleConfig, 'isAccessibleForFree'),
+        this.singleValue_(config, 'isAccessibleForFree'),
         /* default */ true
       );
 

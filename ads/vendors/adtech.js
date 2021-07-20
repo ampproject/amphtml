@@ -19,7 +19,7 @@ import {
   validateSrcContains,
   validateSrcPrefix,
   writeScript,
-} from '../../3p/3p';
+} from '#3p/3p';
 
 /**
  * @param {!Window} global

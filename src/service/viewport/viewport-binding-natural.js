@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import {Observable} from '../../observable';
-import {Services} from '../../services';
+import {Observable} from '#core/data-structures/observable';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {computedStyle, px, setImportantStyles} from '#core/dom/style';
+
+import {Services} from '#service';
+
 import {
   ViewportBindingDef,
   marginBottomOfLastChild,
 } from './viewport-binding-def';
-import {computedStyle, px, setImportantStyles} from '../../style';
+
 import {dev} from '../../log';
-import {layoutRectLtwh} from '../../layout-rect';
 
 const TAG_ = 'Viewport';
 
@@ -181,7 +184,9 @@ export class ViewportBindingNatural_ {
       this.getScrollingElement()./*OK*/ scrollTop ||
       this.win./*OK*/ pageYOffset;
     const {host} = this.ampdoc.getRootNode();
-    return host ? pageScrollTop - host./*OK*/ offsetTop : pageScrollTop;
+    return host
+      ? pageScrollTop - /** @type {!HTMLElement} */ (host)./*OK*/ offsetTop
+      : pageScrollTop;
   }
 
   /** @override */
@@ -239,8 +244,8 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
-  getLayoutRect(el, opt_scrollLeft, opt_scrollTop, opt_premeasuredRect) {
-    const b = opt_premeasuredRect || el./*OK*/ getBoundingClientRect();
+  getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
+    const b = el./*OK*/ getBoundingClientRect();
     const scrollTop =
       opt_scrollTop != undefined ? opt_scrollTop : this.getScrollTop();
     const scrollLeft =

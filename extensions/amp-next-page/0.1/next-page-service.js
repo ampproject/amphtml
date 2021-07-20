@@ -16,17 +16,17 @@
 
 import {CSS} from '../../../build/amp-next-page-0.1.css';
 import {MultidocManager} from '../../../src/multidoc-manager';
-import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
-import {Services} from '../../../src/services';
-import {VisibilityState} from '../../../src/visibility-state';
+import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
+import {Services} from '#service';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getAmpdoc} from '../../../src/service';
-import {installPositionObserverServiceForDoc} from '../../../src/service/position-observer/position-observer-impl';
+import {dict} from '#core/types/object';
+import {getAmpdoc} from '../../../src/service-helpers';
+import {installPositionObserverServiceForDoc} from '#service/position-observer/position-observer-impl';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {layoutRectLtwh} from '../../../src/layout-rect';
-import {removeElement} from '../../../src/dom';
-import {setStyle, toggle} from '../../../src/style';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {removeElement} from '#core/dom';
+import {setStyle, toggle} from '#core/dom/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 // TODO(emarchiori): Make this a configurable parameter.
@@ -556,7 +556,7 @@ export class NextPageService {
    * Manually overrides the document's visible state to the given state
    *
    * @param {!DocumentRef} ref Reference to the document to change
-   * @param {!../../../src/visibility-state.VisibilityState} visibilityState
+   * @param {!../../../src/core/constants/visibility-state.VisibilityState} visibilityState
    * @private
    */
   setDocumentVisibility_(ref, visibilityState) {
@@ -585,7 +585,7 @@ export class NextPageService {
    * @private
    */
   setActiveDocumentInHistory_(documentRef) {
-    const {title, canonicalUrl} = documentRef.amp;
+    const {canonicalUrl, title} = documentRef.amp;
     const {pathname, search} = this.urlService_.parse(documentRef.ampUrl);
     this.history_.replace({title, url: pathname + search, canonicalUrl});
   }

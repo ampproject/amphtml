@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../../../src/services';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
+import {dict, getValueForExpr} from '#core/types/object';
+
 const ALLOWED_AD_PROVIDER = 'sr';
-import {createElementWithAttributes} from '../../../../../src/dom';
-import {dict} from '../../../../../src/utils/object';
-import {getValueForExpr} from '../../../../../src/json';
 
 /**
  * @param {!JsonObject} media
@@ -95,7 +95,7 @@ function addCompanionSrElement(videoTag, position, macros, apesterElement) {
     'amp-ad',
     dict({
       'width': size.width,
-      'height': '0',
+      'height': size.height,
       'type': 'blade',
       'layout': 'fixed',
       'data-blade_player_type': 'bladex',
@@ -106,7 +106,7 @@ function addCompanionSrElement(videoTag, position, macros, apesterElement) {
     })
   );
 
-  ampBladeAd.classList.add('amp-apester-companion');
+  ampBladeAd.classList.add('i-amphtml-amp-apester-companion');
 
   const relativeElement =
     position === 'below' ? apesterElement.nextSibling : apesterElement;

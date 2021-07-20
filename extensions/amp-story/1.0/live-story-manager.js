@@ -15,11 +15,12 @@
  */
 
 import {Action, getStoreService} from './amp-story-store-service';
-import {CommonSignals} from '../../../src/common-signals';
-import {Services} from '../../../src/services';
-import {createElementWithAttributes, lastChildElement} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {CommonSignals} from '#core/constants/common-signals';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
+import {dict} from '#core/types/object';
+import {lastChildElement} from '#core/dom/query';
+import {userAssert} from '../../../src/log';
 
 /**
  * Property used for storing id of custom slot. This custom slot can be used to

@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {dev, userAssert} from '../../../src/log';
 import {
   dispatchCustomEvent,
   getDataParamsFromAttributes,
   removeElement,
-} from '../../../src/dom';
+} from '#core/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 
 const TAG = 'amp-gfycat';
 
@@ -87,14 +88,11 @@ class AmpGfycat extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.win.document.createElement('amp-img');
+    const placeholder = this.win.document.createElement('img');
     const videoid = dev().assertString(this.videoid_);
-    this.propagateAttributes(['alt', 'aria-label'], placeholder);
-    placeholder.setAttribute(
-      'src',
-      'https://thumbs.gfycat.com/' + encodeURIComponent(videoid) + '-poster.jpg'
-    );
-    placeholder.setAttribute('layout', 'fill');
+    applyFillContent(placeholder);
+    propagateAttributes(['alt', 'aria-label'], this.element, placeholder);
+    placeholder.setAttribute('loading', 'lazy');
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
     if (this.element.hasAttribute('aria-label')) {
@@ -110,7 +108,10 @@ class AmpGfycat extends AMP.BaseElement {
     } else {
       placeholder.setAttribute('alt', 'Loading gif');
     }
-    this.applyFillContent(placeholder);
+    placeholder.setAttribute(
+      'src',
+      'https://thumbs.gfycat.com/' + encodeURIComponent(videoid) + '-poster.jpg'
+    );
 
     return placeholder;
   }
@@ -153,7 +154,7 @@ class AmpGfycat extends AMP.BaseElement {
 
     iframe.setAttribute('frameborder', '0');
     iframe.src = src;
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
@@ -217,6 +218,8 @@ class AmpGfycat extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
+    // gfycat automatically paused in the zero-size case and additional
+    // intervention is not needed. Additionally, gfycat are always muted.
     this.pause();
   }
 

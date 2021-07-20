@@ -25,7 +25,7 @@ const {
   logWithoutTimestampLocalDev,
 } = require('../common/logging');
 const {buildNewServer} = require('../server/typescript-compile');
-const {cyan, green, red} = require('kleur/colors');
+const {cyan, green, red} = require('../common/colors');
 
 const transformsDir = path.resolve('build-system/server/new-server/transforms');
 const inputPaths = [`${transformsDir}/**/input.html`];
@@ -119,7 +119,7 @@ async function getTransform(inputFile, extraOptions) {
  * @return {Promise<string>}
  */
 async function getOutput(transform, input) {
-  return (await posthtml(transform).process(input)).html;
+  return (await posthtml(/** @type {*} */ (transform)).process(input)).html;
 }
 
 /**
@@ -162,9 +162,7 @@ function reportResult() {
     `(${cyan(passed)} passed, ${cyan(failed)} failed).`;
   if (failed > 0) {
     log(red('ERROR:'), result);
-    const err = new Error('Tests failed');
-    err.showStack = false;
-    throw err;
+    throw new Error('Tests failed');
   } else {
     log(green('SUCCESS:'), result);
   }
@@ -174,6 +172,7 @@ function reportResult() {
  * Runs the test in a single input file
  *
  * @param {string} inputFile
+ * @return {Promise<void>}
  */
 async function runTest(inputFile) {
   const testName = getTestName(inputFile);
@@ -196,6 +195,7 @@ async function runTest(inputFile) {
 
 /**
  * Tests for AMP server custom transforms. Entry point for `amp server-tests`.
+ * @return {Promise<void>}
  */
 async function serverTests() {
   await buildNewServer();
@@ -210,4 +210,4 @@ module.exports = {
   serverTests,
 };
 
-serverTests.description = "Runs tests for the AMP server's custom transforms";
+serverTests.description = "Run tests for the AMP server's custom transforms";

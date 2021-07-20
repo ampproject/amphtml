@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData, validateSrcPrefix} from '../../3p/3p';
+import {loadScript, validateData, validateSrcPrefix} from '#3p/3p';
 
 const jsnPrefix = 'https://api.rnet.plus/';
 

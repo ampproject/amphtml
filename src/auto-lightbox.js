@@ -15,9 +15,9 @@
  */
 
 import {ChunkPriority, chunk} from './chunk';
-import {Services} from './services';
-import {dev} from './log';
 import {isAmphtml} from './format';
+import {dev} from './log';
+import {Services} from './service';
 import {isStoryDocument} from './utils/story';
 
 /** @const @enum {string} */

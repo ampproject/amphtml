@@ -13,26 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ActionTrust} from '../../../src/action-constants';
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
+import {ActionTrust} from '#core/constants/action-constants';
+import {Deferred} from '#core/data-structures/promise';
+import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '#core/types/object';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
+} from '#core/dom/layout/size-observer';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
-import {removeElement} from '../../../src/dom';
+} from '#core/dom/layout/viewport-observer';
+import {removeElement} from '#core/dom';
 
 const TAG = 'amp-3d-gltf';
+const TYPE = '3d-gltf';
 
 const isWebGLSupported = () => {
   const canvas = document.createElement('canvas');
@@ -70,7 +71,7 @@ export class Amp3dGltf extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     const preconnect = Services.preconnectFor(this.win);
-    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preloadBootstrap(this.win, TYPE, this.getAmpDoc(), preconnect);
     preconnect.url(
       this.getAmpDoc(),
       'https://cdnjs.cloudflare.com/ajax/libs/three.js/91/three.js',
@@ -145,11 +146,8 @@ export class Amp3dGltf extends AMP.BaseElement {
     this.registerAction(
       'setModelRotation',
       (invocation) => {
-        this.sendCommandWhenReady_(
-          'setModelRotation',
-          invocation.args
-        ).catch((e) =>
-          dev().error('AMP-3D-GLTF', 'setModelRotation failed: %s', e)
+        this.sendCommandWhenReady_('setModelRotation', invocation.args).catch(
+          (e) => dev().error('AMP-3D-GLTF', 'setModelRotation failed: %s', e)
         );
       },
       ActionTrust.LOW
@@ -166,9 +164,9 @@ export class Amp3dGltf extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    const iframe = getIframe(this.win, this.element, '3d-gltf', this.context_);
+    const iframe = getIframe(this.win, this.element, TYPE, this.context_);
     iframe.title = this.element.title || 'GLTF 3D model';
-    this.applyFillContent(iframe, true);
+    applyFillContent(iframe, true);
     this.iframe_ = iframe;
     this.unlistenMessage_ = devAssert(this.listenGltfViewerMessages_());
 
@@ -254,7 +252,7 @@ export class Amp3dGltf extends AMP.BaseElement {
    * @param {!../layout-rect.LayoutSizeDef} size
    * @private
    */
-  onResized_({width, height}) {
+  onResized_({height, width}) {
     this.sendCommandWhenReady_(
       'setSize',
       dict({'width': width, 'height': height})

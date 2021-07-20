@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
-import {Services} from '../../../src/services';
-import {computedStyle, px, setStyle} from '../../../src/style';
+import {AmpEvents} from '#core/constants/amp-events';
+import {Services} from '#service';
+import {computedStyle, px, setStyle} from '#core/dom/style';
 import {dev, devAssert, user} from '../../../src/log';
-import {iterateCursor, removeElement} from '../../../src/dom';
+import {iterateCursor, removeElement} from '#core/dom';
 import {listen, listenOncePromise} from '../../../src/event-helper';
-import {throttle} from '../../../src/utils/rate-limit';
-import {toArray} from '../../../src/types';
+import {throttle} from '#core/types/function';
+import {toArray} from '#core/types/array';
 
 const AMP_FORM_TEXTAREA_EXPAND_ATTR = 'autoexpand';
 
@@ -249,9 +249,9 @@ function maybeRemoveResizeBehavior(element, startHeight, endHeight) {
  */
 export function maybeResizeTextarea(element) {
   const mutator = Services.mutatorForDoc(element);
-  const win = /** @type {!Window} */ (devAssert(
-    element.ownerDocument.defaultView
-  ));
+  const win = /** @type {!Window} */ (
+    devAssert(element.ownerDocument.defaultView)
+  );
 
   let offset = 0;
   let scrollHeight = 0;

@@ -18,31 +18,34 @@ import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
 } from '../../amp-story/1.0/story-analytics';
+import {clamp} from '#core/math';
 import {
   Action,
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {AnalyticsVariable} from '../../amp-story/1.0/variable-service';
 import {CSS} from '../../../build/amp-story-interactive-0.1.css';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {
   addParamsToUrl,
   appendPathToUrl,
   assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
-import {base64UrlEncodeFromString} from '../../../src/utils/base64';
+import {base64UrlEncodeFromString} from '#core/types/string/base64';
+import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {
   buildInteractiveDisclaimer,
-  tryCloseDisclaimer,
+  buildInteractiveDisclaimerIcon,
 } from './interactive-disclaimer';
-import {closest} from '../../../src/dom';
+import {closest} from '#core/dom/query';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {deduplicateInteractiveIds} from './utils';
 import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '#core/types/object';
 import {emojiConfetti} from './interactive-confetti';
-import {isExperimentOn} from '../../../src/experiments';
-import {toArray} from '../../../src/types';
+import {toArray} from '#core/types/array';
+import {setImportantStyles} from '#core/dom/style';
+import {isExperimentOn} from '#experiments/';
 
 /** @const {string} */
 const TAG = 'amp-story-interactive';
@@ -97,14 +100,12 @@ const fontsToLoad = [
   {
     family: 'Poppins',
     weight: '400',
-    src:
-      "url(https://fonts.gstatic.com/s/poppins/v9/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2) format('woff2')",
+    src: "url(https://fonts.gstatic.com/s/poppins/v9/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2) format('woff2')",
   },
   {
     family: 'Poppins',
     weight: '700',
-    src:
-      "url(https://fonts.gstatic.com/s/poppins/v9/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2')",
+    src: "url(https://fonts.gstatic.com/s/poppins/v9/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2')",
   },
 ];
 
@@ -149,6 +150,12 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     /** @protected {?Promise<JsonObject>} */
     this.clientIdPromise_ = null;
+
+    /** @private {?Element} the disclaimer dialog if open, null if closed */
+    this.disclaimerEl_ = null;
+
+    /** @private {?Element} */
+    this.disclaimerIcon_ = null;
 
     /** @protected {boolean} */
     this.hasUserSelection_ = false;
@@ -268,6 +275,13 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     ]).then(() => {
       this.rootEl_ = this.buildComponent();
       this.rootEl_.classList.add('i-amphtml-story-interactive-container');
+      if (
+        isExperimentOn(this.win, 'amp-story-interactive-disclaimer') &&
+        this.element.hasAttribute('endpoint')
+      ) {
+        this.disclaimerIcon_ = buildInteractiveDisclaimerIcon(this);
+        this.rootEl_.prepend(this.disclaimerIcon_);
+      }
       createShadowRootWithStyle(
         this.element,
         dev().assertElement(this.rootEl_),
@@ -372,14 +386,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (
-      isExperimentOn(this.win, 'amp-story-interactive-disclaimer') &&
-      this.element.hasAttribute('endpoint')
-    ) {
-      // Needs to be called after buildCallback to measure properly.
-      this.disclaimerEl_ = buildInteractiveDisclaimer(this);
-      this.rootEl_.prepend(this.disclaimerEl_);
-    }
     this.initializeListeners_();
     return (this.backendDataPromise_ = this.element.hasAttribute('endpoint')
       ? this.retrieveInteractiveData_()
@@ -467,7 +473,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
           );
           this.toggleTabbableElements_(currPageId === this.getPageId_());
         });
-        tryCloseDisclaimer(this, this.disclaimerEl_);
+        this.closeDisclaimer_();
       },
       true /** callToInitialize */
     );
@@ -481,6 +487,11 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @protected
    */
   handleTap_(e) {
+    if (e.target == this.disclaimerIcon_ && !this.disclaimerEl_) {
+      this.openDisclaimer_();
+      return;
+    }
+
     if (this.hasUserSelection_) {
       return;
     }
@@ -504,7 +515,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
           confettiEmoji
         );
       }
-      tryCloseDisclaimer(this, this.disclaimerEl_);
+      this.closeDisclaimer_();
     }
   }
 
@@ -765,13 +776,13 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       '.i-amphtml-story-interactive-option'
     );
 
-    this.optionsData_ = data;
-    data.forEach((response, index) => {
+    this.optionsData_ = this.orderData_(data);
+    this.optionsData_.forEach((response) => {
       if (response.selected) {
         this.hasUserSelection_ = true;
-        this.updateStoryStoreState_(index);
+        this.updateStoryStoreState_(response.index);
         this.mutateElement(() => {
-          this.updateToPostSelectionState_(options[index]);
+          this.updateToPostSelectionState_(options[response.index]);
         });
       }
     });
@@ -826,6 +837,122 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         el.setAttribute('tabindex', -1);
       } else {
         el.setAttribute('tabindex', toggle ? 0 : -1);
+      }
+    });
+  }
+
+  /**
+   * Reorders options data to account for scrambled or incomplete data.
+   *
+   * @private
+   * @param {!Array<!InteractiveOptionType>} optionsData
+   * @return {!Array<!InteractiveOptionType>}
+   */
+  orderData_(optionsData) {
+    const numOptionElements = this.getOptionElements().length;
+    const orderedData = new Array(numOptionElements);
+    optionsData.forEach((option) => {
+      const {index} = option;
+      if (index >= 0 && index < numOptionElements) {
+        orderedData[index] = option;
+      }
+    });
+
+    for (let i = 0; i < orderedData.length; i++) {
+      if (!orderedData[i]) {
+        orderedData[i] = {
+          count: 0,
+          index: i,
+          selected: false,
+        };
+      }
+    }
+
+    return orderedData;
+  }
+
+  /**
+   * Opens the disclaimer dialog and positions it according to the page and itself.
+   * @private
+   */
+  openDisclaimer_() {
+    if (this.disclaimerEl_) {
+      return;
+    }
+    const dir = this.rootEl_.getAttribute('dir') || 'ltr';
+    this.disclaimerEl_ = buildInteractiveDisclaimer(this, {dir});
+
+    const pageEl = closest(
+      dev().assertElement(this.element),
+      (el) => el.tagName.toLowerCase() === 'amp-story-page'
+    );
+
+    let styles;
+    this.measureMutateElement(
+      () => {
+        // Get rects and calculate position from icon.
+        const interactiveRect = this.element./*OK*/ getBoundingClientRect();
+        const pageRect = pageEl./*OK*/ getBoundingClientRect();
+        const iconRect = this.disclaimerIcon_./*OK*/ getBoundingClientRect();
+        const bottomFraction =
+          1 - (iconRect.y + iconRect.height - pageRect.y) / pageRect.height;
+        const widthFraction = interactiveRect.width / pageRect.width;
+
+        // Clamp values to ensure dialog has space up and left.
+        const bottomPercentage = clamp(bottomFraction * 100, 0, 85); // Ensure 15% of space up.
+        const widthPercentage = Math.max(widthFraction * 100, 65); // Ensure 65% of max-width.
+
+        styles = {
+          'bottom': bottomPercentage + '%',
+          'max-width': widthPercentage + '%',
+          'position': 'absolute',
+          'z-index': 3,
+        };
+
+        // Align disclaimer to left if RTL, otherwise align to the right.
+        if (dir === 'rtl') {
+          const leftFraction = (iconRect.x - pageRect.x) / pageRect.width;
+          styles['left'] = clamp(leftFraction * 100, 0, 25) + '%'; // Ensure 75% of space to the right.
+        } else {
+          const rightFraction =
+            1 - (iconRect.x + iconRect.width - pageRect.x) / pageRect.width;
+          styles['right'] = clamp(rightFraction * 100, 0, 25) + '%'; // Ensure 75% of space to the left.
+        }
+      },
+      () => {
+        setImportantStyles(
+          this.disclaimerEl_,
+          assertDoesNotContainDisplay(styles)
+        );
+        pageEl.appendChild(this.disclaimerEl_);
+        this.disclaimerIcon_.setAttribute('hide', '');
+        // Add click listener through the shadow dom using e.path.
+        this.disclaimerEl_.addEventListener('click', (e) => {
+          if (
+            e.path[0].classList.contains(
+              'i-amphtml-story-interactive-disclaimer-close'
+            )
+          ) {
+            this.closeDisclaimer_();
+          }
+        });
+      }
+    );
+  }
+
+  /**
+   * Closes the disclaimer dialog if open.
+   * @private
+   */
+  closeDisclaimer_() {
+    if (!this.disclaimerEl_) {
+      return;
+    }
+    this.mutateElement(() => {
+      this.disclaimerEl_.remove();
+      this.disclaimerEl_ = null;
+      if (this.disclaimerIcon_) {
+        this.disclaimerIcon_.removeAttribute('hide');
       }
     });
   }

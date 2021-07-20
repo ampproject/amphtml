@@ -38,9 +38,7 @@ function getEslintConfig() {
 }
 
 /**
- * @return {{
- *  manipulateOptions: {Function(_opts: *, parserOpts: *): void}
- * }}
+ * @return {{manipulateOptions(_opts: *, parserOpts: *): void}}
  */
 function enableSyntax() {
   return {

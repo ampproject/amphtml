@@ -20,9 +20,9 @@
  */
 
 import {FxType} from '../fx-type';
-import {Services} from '../../../../src/services';
-import {mapRange} from '../../../../src/utils/math';
-import {pureUserAssert as userAssert} from '../../../../src/core/assert';
+import {Services} from '#service';
+import {mapRange} from '#core/math';
+import {userAssert} from '../../../../src/log';
 
 const MAX_MOBILE_WIDTH = 480;
 const MAX_TABLET_WIDTH = 1000;

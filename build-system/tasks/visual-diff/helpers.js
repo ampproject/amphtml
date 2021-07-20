@@ -16,8 +16,9 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const fancyLog = require('fancy-log');
-const {cyan, green, red, yellow} = require('kleur/colors');
+const puppeteer = require('puppeteer'); // eslint-disable-line no-unused-vars
+const {cyan, green, red, yellow} = require('../../common/colors');
+const {log: logBase} = require('../../common/logging');
 
 const CSS_SELECTOR_RETRY_MS = 200;
 const CSS_SELECTOR_RETRY_ATTEMPTS = 50;
@@ -33,6 +34,14 @@ const HTML_ESCAPE_CHARS = {
   '`': '&#x60;',
 };
 const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
+
+/**
+ * @typedef {{
+ *  visible?: boolean,
+ *  hidden?: boolean,
+ * }}
+ */
+let VisibilityDef;
 
 /**
  * Escapes a string of HTML elements to HTML entities.
@@ -54,21 +63,21 @@ function log(mode, ...messages) {
   switch (mode) {
     case 'verbose':
       if (argv.verbose) {
-        fancyLog.info(green('VERBOSE:'), ...messages);
+        logBase(green('VERBOSE:'), ...messages);
       }
       break;
     case 'info':
-      fancyLog.info(green('INFO:'), ...messages);
+      logBase(green('INFO:'), ...messages);
       break;
     case 'warning':
-      fancyLog.warn(yellow('WARNING:'), ...messages);
+      logBase(yellow('WARNING:'), ...messages);
       break;
     case 'error':
-      fancyLog.error(red('ERROR:'), ...messages);
+      logBase(red('ERROR:'), ...messages);
       break;
     case 'fatal':
       process.exitCode = 1;
-      fancyLog.error(red('FATAL:'), ...messages);
+      logBase(red('FATAL:'), ...messages);
       throw new Error(messages.join(' '));
   }
 }
@@ -80,6 +89,7 @@ function log(mode, ...messages) {
  * @param {string} testName the full name of the test.
  * @param {!Array<string>} selectors Array of CSS selector that must eventually
  *     be removed from the page.
+ * @return {Promise<void>}
  * @throws {Error} an encountered error.
  */
 async function verifySelectorsInvisible(page, testName, selectors) {
@@ -110,6 +120,7 @@ async function verifySelectorsInvisible(page, testName, selectors) {
  * @param {string} testName the full name of the test.
  * @param {!Array<string>} selectors Array of CSS selectors that must
  *     eventually appear on the page.
+ * @return {Promise<void>}
  * @throws {Error} an encountered error.
  */
 async function verifySelectorsVisible(page, testName, selectors) {
@@ -146,6 +157,7 @@ async function verifySelectorsVisible(page, testName, selectors) {
  *
  * @param {!puppeteer.Page} page page to wait on.
  * @param {string} testName the full name of the test.
+ * @return {Promise<void>}
  * @throws {Error} an encountered error.
  */
 async function waitForPageLoad(page, testName) {
@@ -169,8 +181,8 @@ async function waitForPageLoad(page, testName) {
  *
  * @param {!puppeteer.Page} page page to check the visibility of elements in.
  * @param {string} selector CSS selector for elements to wait on.
- * @param {!Object} options with key 'visible' OR 'hidden' set to true.
- * @return {boolean} true if the expectation is met before the timeout.
+ * @param {!VisibilityDef} options with key 'visible' OR 'hidden' set to true.
+ * @return {Promise<boolean>} true if the expectation is met before the timeout.
  * @throws {Error} if the expectation is not met before the timeout, throws an
  *    error with the message value set to the CSS selector.
  */
@@ -237,7 +249,7 @@ async function waitForElementVisibility(page, selector, options) {
  *
  * @param {!puppeteer.Page} page page to check the existence of the selector in.
  * @param {string} selector CSS selector.
- * @return {boolean} true if the element exists before the timeout.
+ * @return {Promise<boolean>} true if the element exists before the timeout.
  * @throws {Error} if the element does not exist before the timeout, throws an
  *    error with the message value set to the CSS selector.
  */
@@ -256,7 +268,7 @@ async function waitForSelectorExistence(page, selector) {
 /**
  * Returns a Promise that resolves after the specified number of milliseconds.
  * @param {number} ms
- * @return {Promise}
+ * @return {Promise<void>}
  */
 async function sleep(ms) {
   return new Promise((res) => setTimeout(res, ms));

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {cancellation} from '../../../src/error';
+import {Services} from '#service';
+import {cancellation} from '../../../src/error-reporting';
 import {dev} from '../../../src/log';
 import {listenOnce} from '../../../src/event-helper';
 

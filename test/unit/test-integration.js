@@ -24,10 +24,10 @@ import {
   validateAllowedEmbeddingOrigins,
   validateAllowedTypes,
   validateParentOrigin,
-} from '../../3p/integration-lib';
-import {getRegistrations, register} from '../../3p/3p';
+} from '#3p/integration-lib';
+import {getRegistrations, register} from '#3p/3p';
 
-describe('3p integration.js', () => {
+describes.sandboxed('3p integration.js', {}, () => {
   const registrations = getRegistrations();
   afterEach(() => {
     delete registrations.testAction;

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import {isElement} from '../core/types';
+
 export function dev() {
   return {
     assertElement: element => {
-      console.assert(element && element.nodeType == 1, 'Element expected');
+      console.assert(isElement(element), 'Element expected');
       return element;
     },
   };

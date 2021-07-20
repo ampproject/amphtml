@@ -20,18 +20,19 @@
  */
 
 const {
-  downloadNomoduleOutput,
-  printSkipMessage,
+  skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
-const {buildTargetsInclude, Targets} = require('./build-targets');
 const {runCiJob} = require('./ci-job');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'e2e-tests.js';
 
+/**
+ * Steps to run during push builds.
+ */
 function pushBuildWorkflow() {
-  downloadNomoduleOutput();
   try {
     timedExecOrThrow(
       'amp e2e --nobuild --headless --compiled --report',
@@ -46,12 +47,14 @@ function pushBuildWorkflow() {
   }
 }
 
+/**
+ * Steps to run during PR builds.
+ */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.E2E_TEST)) {
-    downloadNomoduleOutput();
     timedExecOrDie('amp e2e --nobuild --headless --compiled');
   } else {
-    printSkipMessage(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or end-to-end tests'
     );

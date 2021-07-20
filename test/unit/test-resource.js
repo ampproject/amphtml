@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {LayoutPriority} from '../../src/layout';
-import {OwnersImpl} from '../../src/service/owners-impl';
-import {Resource, ResourceState} from '../../src/service/resource';
-import {ResourcesImpl} from '../../src/service/resources-impl';
-import {Services} from '../../src/services';
-import {isCancellation} from '../../src/error';
-import {layoutRectLtwh} from '../../src/layout-rect';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {LayoutPriority} from '#core/dom/layout';
+import {OwnersImpl} from '#service/owners-impl';
+import {Resource, ResourceState} from '#service/resource';
+import {ResourcesImpl} from '#service/resources-impl';
+import {Services} from '#service';
+import {isCancellation} from '../../src/error-reporting';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 describes.realWin('Resource', {amp: true}, (env) => {
   let win, doc;
@@ -29,11 +29,9 @@ describes.realWin('Resource', {amp: true}, (env) => {
   let elementMock;
   let resources;
   let resource;
-  let sandbox;
 
   beforeEach(() => {
     win = env.win;
-    sandbox = env.sandbox;
     doc = win.document;
 
     element = env.createAmpElement('amp-fake-element');
@@ -104,41 +102,6 @@ describes.realWin('Resource', {amp: true}, (env) => {
     elementMock.expects('updateLayoutBox').never();
     return resource.build().then(() => {
       expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
-    });
-  });
-
-  describe('intersect-resources', () => {
-    beforeEach(() => {
-      sandbox.stub(resources, 'isIntersectionExperimentOn').returns(true);
-      resource = new Resource(1, element, resources);
-    });
-
-    it('should be ready for layout if measured before build', () => {
-      resource.premeasure({left: 0, top: 0, width: 100, height: 100});
-      resource.measure(/* usePremeasuredRect */ true);
-      elementMock.expects('isUpgraded').returns(true).atLeast(1);
-      elementMock.expects('buildInternal').returns(Promise.resolve()).once();
-      elementMock.expects('onMeasure').withArgs(/* sizeChanged */ true).once();
-      return resource.build().then(() => {
-        expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
-      });
-    });
-
-    it('should remeasure if measured before upgrade and isFixed', () => {
-      // First measure
-      element.isAlwaysFixed = () => false;
-      resource.premeasure({left: 0, top: 0, width: 100, height: 100});
-      resource.measure(/* usePremeasuredRect */ true);
-
-      // Now adjust implementation to be alwaysFixed and call build.
-      element.isUpgraded = () => true;
-      element.isAlwaysFixed = () => true;
-      element.buildInternal = () => Promise.resolve();
-      element.onMeasure = () => {};
-      resource.requestMeasure = env.sandbox.stub();
-      return resource.build().then(() => {
-        expect(resource.requestMeasure).calledOnce;
-      });
     });
   });
 
@@ -1018,7 +981,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
   });
 });
 
-describe('Resource idleRenderOutsideViewport', () => {
+describes.sandboxed('Resource idleRenderOutsideViewport', {}, (env) => {
   let element;
   let resources;
   let resource;
@@ -1026,7 +989,7 @@ describe('Resource idleRenderOutsideViewport', () => {
   let isWithinViewportRatio;
 
   beforeEach(() => {
-    idleRenderOutsideViewport = window.sandbox.stub();
+    idleRenderOutsideViewport = env.sandbox.stub();
     element = {
       idleRenderOutsideViewport,
       ownerDocument: {defaultView: window},
@@ -1051,10 +1014,7 @@ describe('Resource idleRenderOutsideViewport', () => {
     };
     resources = new ResourcesImpl(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
-    isWithinViewportRatio = window.sandbox.stub(
-      resource,
-      'isWithinViewportRatio'
-    );
+    isWithinViewportRatio = env.sandbox.stub(resource, 'isWithinViewportRatio');
   });
 
   it('should return true if isWithinViewportRatio', () => {

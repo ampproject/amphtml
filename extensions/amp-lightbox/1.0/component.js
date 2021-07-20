@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {ContainWrapper, useValueRef} from '../../../src/preact/component';
-import {Keys} from '../../../src/utils/key-codes';
-import {forwardRef} from '../../../src/preact/compat';
-import {setStyle} from '../../../src/style';
-import {tryFocus} from '../../../src/dom';
-import {
-  useImperativeHandle,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from '../../../src/preact';
+import * as Preact from '#preact';
+import {ContainWrapper, useValueRef} from '#preact/component';
+import {Keys} from '#core/constants/key-codes';
+import {forwardRef} from '#preact/compat';
+import {setStyle} from '#core/dom/style';
+import {tryFocus} from '#core/dom';
+import {useImperativeHandle, useLayoutEffect, useRef, useState} from '#preact';
 import {useStyles} from './component.jss';
 
 const ANIMATION_DURATION = 200;
@@ -46,9 +41,11 @@ const ANIMATION_PRESETS = {
 
 const DEFAULT_CLOSE_LABEL = 'Close the modal';
 
+const CONTENT_PROPS = {'part': 'scroller'};
+
 /**
  * @param {!LightboxDef.Props} props
- * @param {{current: (!LightboxDef.LightboxApi|null)}} ref
+ * @param {{current: ?LightboxDef.LightboxApi}} ref
  * @return {PreactDef.Renderable}
  */
 function LightboxWithRef(
@@ -56,9 +53,9 @@ function LightboxWithRef(
     animation = 'fade-in',
     children,
     closeButtonAs,
-    onBeforeOpen,
     onAfterClose,
-    scrollable = false,
+    onAfterOpen,
+    onBeforeOpen,
     ...rest
   },
   ref
@@ -78,14 +75,13 @@ function LightboxWithRef(
   const animationRef = useValueRef(animation);
   const onBeforeOpenRef = useValueRef(onBeforeOpen);
   const onAfterCloseRef = useValueRef(onAfterClose);
+  const onAfterOpenRef = useValueRef(onAfterOpen);
 
   useImperativeHandle(
     ref,
     () => ({
       open: () => {
-        if (onBeforeOpenRef.current) {
-          onBeforeOpenRef.current();
-        }
+        onBeforeOpenRef.current?.();
         setMounted(true);
         setVisible(true);
       },
@@ -109,6 +105,7 @@ function LightboxWithRef(
         setStyle(element, 'opacity', 1);
         setStyle(element, 'visibility', 'visible');
         tryFocus(element);
+        onAfterOpenRef.current?.();
       };
       if (!element.animate) {
         postVisibleAnim();
@@ -148,7 +145,7 @@ function LightboxWithRef(
         animation.cancel();
       }
     };
-  }, [visible, animationRef, onAfterCloseRef]);
+  }, [visible, animationRef, onAfterCloseRef, onAfterOpenRef]);
 
   return (
     mounted && (
@@ -158,18 +155,11 @@ function LightboxWithRef(
         layout={true}
         paint={true}
         part="lightbox"
-        contentStyle={
-          // Prefer style over class to override `ContainWrapper`'s overflow
-          scrollable && {
-            overflow: 'scroll',
-            overscrollBehavior: 'none',
-          }
-        }
-        wrapperClassName={`${classes.defaultStyles} ${classes.wrapper} ${
-          scrollable ? '' : classes.containScroll
-        }`}
+        contentClassName={classes.content}
+        wrapperClassName={classes.wrapper}
+        contentProps={CONTENT_PROPS}
         role="dialog"
-        tabindex="0"
+        tabIndex="0"
         onKeyDown={(event) => {
           if (event.key === Keys.ESCAPE) {
             setVisible(false);

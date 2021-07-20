@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import * as Preact from '../';
-import {WithAmpContext, useAmpContext, useLoading} from '../context';
 import {boolean, select, withKnobs} from '@storybook/addon-knobs';
 
-import {withA11y} from '@storybook/addon-a11y';
+import * as Preact from '#preact';
+import {WithAmpContext, useAmpContext, useLoading} from '#preact/context';
 
 export default {
   title: '0/Context',
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 const IMG_SRC =
@@ -67,8 +66,8 @@ function Composite() {
  * @param {{title: string, loading: string}} props
  * @return {PreactDef.Renderable}
  */
-function Info({title, loading: loadingProp, ...rest}) {
-  const {renderable, playable, loading: loadingContext} = useAmpContext();
+function Info({loading: loadingProp, title, ...rest}) {
+  const {loading: loadingContext, playable, renderable} = useAmpContext();
   const loading = useLoading(loadingProp);
   const load = loading != 'unload';
   const infoStyle = {border: '1px dotted gray', margin: 8};

@@ -16,10 +16,16 @@
 
 #include "tokenizer.h"
 
+#include "absl/flags/flag.h"
 #include "atom.h"
 #include "atomutil.h"
 #include "defer.h"
 #include "strings.h"
+
+ABSL_FLAG(std::size_t, htmlparser_max_attributes_per_node,
+          1000,
+          "Protects out of memory errors by dropping insanely large amounts "
+          "of attributes per node.");
 
 namespace htmlparser {
 
@@ -644,6 +650,9 @@ void Tokenizer::ReadTag(bool save_attr, bool template_mode) {
     // Save pending_attribute if save_attr and that attribute has a non-empty
     // key.
     if (save_attr &&
+        // Skip excessive attributes.
+        attributes_.size() < ::absl::GetFlag(
+            FLAGS_htmlparser_max_attributes_per_node) &&
         std::get<0>(pending_attribute_).start !=
         std::get<0>(pending_attribute_).end) {
       attributes_.push_back(pending_attribute_);
@@ -1035,7 +1044,7 @@ std::optional<std::tuple<Attribute, bool>> Tokenizer::TagAttr() {
             {.name_space = "",
              .key = std::move(key),
              .value = std::move(val),
-             .position_in_html_src = std::get<LineCol>(attr)},
+             .line_col_in_html_src = std::get<LineCol>(attr)},
             n_attributes_returned_ < attributes_.size());
       }
       default:
@@ -1107,7 +1116,7 @@ Token Tokenizer::token() {
       break;
   }
 
-  t.position_in_html_src = token_line_col_;
+  t.line_col_in_html_src = token_line_col_;
   return t;
 }
 

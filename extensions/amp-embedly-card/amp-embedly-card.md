@@ -1,5 +1,7 @@
 ---
 $category@: media
+bento: true
+experimental: true
 formats:
   - websites
 teaser:
@@ -129,4 +131,4 @@ extended to AMP components.
 
 ## Validation
 
-See [amp-embedly-card rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-embedly-card/validator-amp-embedly-card.protoascii) in the AMP validator specification.
+See [amp-embedly-card rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-embedly-card/validator-amp-embedly-card.protoascii) in the AMP validator specification.
