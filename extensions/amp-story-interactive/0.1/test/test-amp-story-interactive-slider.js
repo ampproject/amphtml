@@ -127,12 +127,11 @@ describes.realWin(
       const slider = ampStorySlider
         .getRootElement()
         .querySelector('input[type="range"]');
-      const sliderBubble = ampStorySlider
-        .getRootElement()
-        .querySelector('.i-amphtml-story-interactive-slider-bubble');
       // simulates an input event, which is when the user drags the slider
       slider.dispatchEvent(new CustomEvent('input'));
-      expect(sliderBubble).to.have.class('show');
+      expect(ampStorySlider.getRootElement()).to.have.class(
+        'i-amphtml-story-interactive-mid-selection'
+      );
     });
 
     it('should show post-selection state when the user releases the slider', async () => {
