@@ -56,7 +56,6 @@ export class Platform {
     return (
       /Safari/i.test(this.navigator_.userAgent) &&
       !this.isChrome() &&
-      !this.isIe() &&
       !this.isEdge() &&
       !this.isFirefox() &&
       !this.isOpera()
@@ -93,17 +92,6 @@ export class Platform {
     // however real Opera puts put a / after OPR and that's the only tell, so
     // we check for OPR/ instead of OPR
     return /OPR\/|Opera|OPiOS/i.test(this.navigator_.userAgent);
-  }
-
-  /**
-   * Whether the current browser is a IE browser.
-   * @return {boolean}
-   */
-  isIe() {
-    if (IS_ESM) {
-      return false;
-    }
-    return /Trident|MSIE|IEMobile/i.test(this.navigator_.userAgent);
   }
 
   /**
@@ -168,9 +156,6 @@ export class Platform {
     }
     if (this.isOpera()) {
       return this.evalMajorVersion_(/(OPR|Opera|OPiOS)\/(\d+)/, 2);
-    }
-    if (this.isIe()) {
-      return this.evalMajorVersion_(/MSIE\s(\d+)/, 1);
     }
     if (this.isEdge()) {
       return this.evalMajorVersion_(/Edge\/(\d+)/, 1);

@@ -25,8 +25,6 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
-import {ieMediaCheckAndFix} from './ie-media-bug';
 import {Resource, ResourceState} from './resource';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
 import {TaskQueue} from './task-queue';
@@ -257,16 +255,8 @@ export class ResourcesImpl {
         return;
       }
 
-      ieIntrinsicCheckAndFix(this.win);
-
-      const fixPromise = ieMediaCheckAndFix(this.win);
       const remeasure = () => this.remeasurePass_.schedule();
-      if (fixPromise) {
-        fixPromise.then(remeasure);
-      } else {
-        // No promise means that there's no problem.
-        remeasure();
-      }
+      remeasure();
 
       // Safari 10 and under incorrectly estimates font spacing for
       // `@font-face` fonts. This leads to wild measurement errors. The best

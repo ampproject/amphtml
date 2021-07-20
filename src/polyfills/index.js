@@ -20,7 +20,6 @@ import {install as installAbortController} from './abort-controller';
 import {install as installArrayIncludes} from './array-includes';
 import {install as installCustomElements} from './custom-elements';
 import {install as installDocContains} from './document-contains';
-import {install as installDOMTokenList} from './domtokenlist';
 import {install as installFetch} from './fetch';
 import {install as installGetBoundingClientRect} from './get-bounding-client-rect';
 import {install as installIntersectionObserver} from './intersection-observer';
@@ -50,7 +49,6 @@ if (!IS_ESM) {
 // Polyfills that depend on DOM availability
 if (self.document) {
   if (!IS_ESM) {
-    installDOMTokenList(self);
     installDocContains(self);
     installGetBoundingClientRect(self);
   }

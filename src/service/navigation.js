@@ -15,7 +15,7 @@
  */
 
 import {PriorityQueue} from '#core/data-structures/priority-queue';
-import {isIframed, tryFocus} from '#core/dom';
+import {isIframed} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {dict} from '#core/types/object';
@@ -614,23 +614,6 @@ export class Navigation {
    * @private
    */
   handleHashNavigation_(e, toLocation, fromLocation) {
-    // Anchor navigation in IE doesn't change input focus, which can result in
-    // confusing behavior e.g. when pressing "tab" button.
-    // @see https://humanwhocodes.com/blog/2013/01/15/fixing-skip-to-content-links/
-    // @see https://github.com/ampproject/amphtml/issues/18671
-    if (!IS_ESM && Services.platformFor(this.ampdoc.win).isIe()) {
-      const id = toLocation.hash.substring(1);
-      const elementWithId = this.ampdoc.getElementById(id);
-      if (elementWithId) {
-        if (
-          !/^(?:a|select|input|button|textarea)$/i.test(elementWithId.tagName)
-        ) {
-          elementWithId.tabIndex = -1;
-        }
-        tryFocus(elementWithId);
-      }
-    }
-
     // We prevent default so that the current click does not push
     // into the history stack as this messes up the external documents
     // history which contains the amp document.

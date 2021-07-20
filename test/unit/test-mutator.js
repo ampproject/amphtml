@@ -20,11 +20,9 @@ import {LayoutPriority} from '#core/dom/layout';
 import {MutatorImpl} from '#service/mutator-impl';
 import {Resource, ResourceState} from '#service/resource';
 import {ResourcesImpl} from '#service/resources-impl';
-import {Services} from '#service';
 import {Signals} from '#core/data-structures/signals';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {installInputService} from '../../src/input';
-import {installPlatformService} from '#service/platform-impl';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 /** @type {?Event|undefined} */
@@ -60,10 +58,6 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
     mutator = new MutatorImpl(ampdoc);
     mutator.win = resources.win;
     mutator.resources_ = resources;
-
-    installPlatformService(resources.win);
-    const platform = Services.platformFor(resources.win);
-    env.sandbox.stub(platform, 'isIe').returns(false);
 
     installInputService(resources.win);
 
