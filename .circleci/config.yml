@@ -311,7 +311,7 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: 'Exp. << parameters.exp >> Integration Tests'
+          name: 'Experiment << parameters.exp >> Integration Tests'
           command: node build-system/pr-check/experiment-integration-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
       - fail_fast
@@ -329,7 +329,7 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: 'Exp. << parameters.exp >> End-to-End Tests'
+          name: 'Experiment << parameters.exp >> End-to-End Tests'
           command: node build-system/pr-check/experiment-e2e-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
       - fail_fast
@@ -413,7 +413,7 @@ workflows:
           requires:
             - 'Compute Merge Commit'
       - 'Experiment Integration Tests':
-          name: 'Experiment << matrix.exp >> Integration Tests'
+          name: 'Exp. << matrix.exp >> Integration Tests'
           matrix:
             parameters:
               exp: ['A', 'B', 'C']
@@ -421,7 +421,7 @@ workflows:
           requires:
             - 'Experiment << matrix.exp >> Build'
       - 'Experiment End-to-End Tests':
-          name: '⛓️ Experiment << matrix.exp >> End-to-End Tests'
+          name: '⛓️ Exp. << matrix.exp >> End-to-End Tests'
           matrix:
             parameters:
               exp: ['A', 'B', 'C']
