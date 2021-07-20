@@ -2,21 +2,20 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>amp-timeago:1.0, no v0.js</title>
+    <title>bento-timeago</title>
     <link rel="canonical" href="amps.html" />
     <meta
       name="viewport"
       content="width=device-width,minimum-scale=1,initial-scale=1"
     />
-    <!-- <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript> -->
-    <style amp-boilerplate>
-      amp-timeago {
+    <style data-bento-boilerplate>
+      bento-timeago {
         display: inline-block;
         position: relative;
         overflow: hidden;
       }
     </style>
-    <style amp-custom>
+    <style>
       body {
         font-family: sans-serif;
         max-width: 400px;
@@ -32,285 +31,284 @@
     <script src="https://cdn.ampproject.org/custom-elements-polyfill.js"></script>
     <script
       async
-      custom-element="amp-timeago"
       src="https://cdn.ampproject.org/v0/amp-timeago-1.0.js"
     ></script>
   </head>
   <body>
-    <h1>amp-timeago:1.0, no v0.js</h1>
+    <h1>bento-timeago</h1>
     <h2>Basic example</h2>
     <div class="scroll">
       <p>Scroll up and down for updated times</p>
-      <amp-timeago
+      <bento-timeago
         class="time"
         style="width: 160px; height: 20px"
         datetime="2020-01-28T20:52:41+00:00"
         locale="en"
       >
         Saturday 11 April 2018 00.37
-      </amp-timeago>
+      </bento-timeago>
     </div>
     <h2>Locale examples</h2>
-    <amp-timeago
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="be"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="bg"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="ca"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="da"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="de"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="el"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="en"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="enShort"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="es"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="eu"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="fi"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="fr"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="he"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="hu"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="inBG"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="inHI"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="inID"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="it"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="ja"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="ko"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="ml"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="nbNO"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="nl"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="nnNO"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="pl"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="ptBR"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="ro"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="ru"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="sv"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="ta"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="th"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="tr"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="uk"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="vi"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="zhCN"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
-    <amp-timeago
+    </bento-timeago>
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="zhTW"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
+    </bento-timeago>
     <h2>Cutoff example (100 days)</h2>
-    <amp-timeago
+    <bento-timeago
       style="width: 160px; height: 20px"
       datetime="2018-04-11T00:37:33.809Z"
       locale="en"
       cutoff="8640000"
     >
       Saturday 11 April 2018 00.37
-    </amp-timeago>
+    </bento-timeago>
   </body>
 </html>

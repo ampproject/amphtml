@@ -102,6 +102,8 @@ function extensionPayload(name, version, latest, isModule, loadPriority) {
 /**
  * Anonymous function to load a Bento extension's payload (p).
  * @see {@link bento}
+ * TODO(alanorozco): It would be cleaner if we used a "bento-foo" literal for
+ * the tag name instead of replacing the prefix in "amp-foo".
  */
 const bentoLoaderFn = removeWhitespace(`
 function (payload) {
@@ -115,7 +117,10 @@ function (payload) {
             document.head.appendChild(
               document.createElement("style")
             ).textContent = s;
-          customElements.define(n, b.CustomElement(b));
+          customElements.define(
+            n.replace(/^amp-/, 'bento-'),
+            b.CustomElement(b)
+          );
         },
       });
 }
