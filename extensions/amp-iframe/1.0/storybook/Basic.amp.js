@@ -28,7 +28,7 @@ export default {
   },
 };
 
-export const ExampleUseCase = () => {
+export const WithSrc = () => {
   return (
     <amp-iframe
       width="800"
@@ -38,6 +38,14 @@ export const ExampleUseCase = () => {
   );
 };
 
-ExampleUseCase.story = {
-  name: 'amp-iframe with src attribute',
+WithSrc.storyName = 'amp-iframe with src attribute';
+
+export const WithPlaceholder = () => {
+  return (
+    <amp-iframe width="800" height="600" src="https://www.wikipedia.org/">
+      <h1>Placeholder</h1>
+    </amp-iframe>
+  );
 };
+
+WithPlaceholder.storyName = 'amp-iframe with placeholder';
