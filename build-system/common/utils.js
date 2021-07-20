@@ -114,15 +114,15 @@ function getFilesFromArgv() {
 }
 
 /**
- * Returns list of files in the comma-separated file named at --fileslist.
+ * Returns list of files in the comma-separated file named at --filelist.
  *
  * @return {Array<string>}
  */
-function getFilesFromFilesList() {
-  if (!argv.fileslist) {
+function getFilesFromFileList() {
+  if (!argv.filelist) {
     return [];
   }
-  return fs.readFileSync(argv.fileslist, {encoding: 'utf8'}).trim().split(',');
+  return fs.readFileSync(argv.filelist, {encoding: 'utf8'}).trim().split(',');
 }
 
 /**
@@ -187,7 +187,7 @@ module.exports = {
   buildRuntime,
   getExperimentConfig,
   getFilesFromArgv,
-  getFilesFromFilesList,
+  getFilesFromFileList,
   getFilesToCheck,
   usesFilesOrLocalChanges,
 };

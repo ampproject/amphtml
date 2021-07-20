@@ -28,7 +28,7 @@ const path = require('path');
 const {
   buildRuntime,
   getFilesFromArgv,
-  getFilesFromFilesList,
+  getFilesFromFileList,
 } = require('../../common/utils');
 const {
   createCtrlcHandler,
@@ -167,9 +167,9 @@ function runTests_() {
   const addFile = addMochaFile_.bind(null, mocha);
 
   // specify tests to run
-  if (argv.files || argv.fileslist) {
+  if (argv.files || argv.filelist) {
     getFilesFromArgv().forEach(addFile);
-    getFilesFromFilesList().forEach(addFile);
+    getFilesFromFileList().forEach(addFile);
   } else {
     config.e2eTestPaths.forEach((path) => {
       glob.sync(path).forEach(addFile);
@@ -196,8 +196,8 @@ function runTests_() {
  */
 async function runWatch_() {
   const filesToWatch =
-    argv.files || argv.fileslist
-      ? getFilesFromArgv().concat(getFilesFromFilesList())
+    argv.files || argv.filelist
+      ? getFilesFromArgv().concat(getFilesFromFileList())
       : config.e2eTestPaths;
 
   log('Watching', cyan(filesToWatch), 'for changes...');
@@ -247,5 +247,5 @@ e2e.flags = {
   'debug': 'Print debugging information while running tests',
   'report': 'Write test result report to a local file',
   'coverage': 'Collect coverage data from instrumented code',
-  'fileslist': 'Run tests specified in this comma-separated list of test files',
+  'filelist': 'Run tests specified in this comma-separated list of test files',
 };

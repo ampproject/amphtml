@@ -35,7 +35,7 @@ const {createKarmaServer, getAdTypes} = require('./helpers');
 const {cyan, green, red, yellow} = require('../../common/colors');
 const {dotWrappingWidth} = require('../../common/logging');
 const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel');
-const {getFilesFromArgv, getFilesFromFilesList} = require('../../common/utils');
+const {getFilesFromArgv, getFilesFromFileList} = require('../../common/utils');
 const {isCiBuild, isCircleciBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
 const {SERVER_TRANSFORM_PATH} = require('../../server/typescript-compile');
@@ -233,10 +233,10 @@ class RuntimeTestConfig {
   updateFiles() {
     switch (this.testType) {
       case 'unit':
-        if (argv.files || argv.fileslist) {
+        if (argv.files || argv.filelist) {
           this.files = commonUnitTestPaths
             .concat(getFilesFromArgv())
-            .concat(getFilesFromFilesList());
+            .concat(getFilesFromFileList());
           return;
         }
         if (argv.firefox || argv.safari || argv.edge) {

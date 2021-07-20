@@ -21,7 +21,7 @@
 
 const {
   TEST_FILES_LIST_FILE_NAME,
-  generateCircleCiShardTestFilesList,
+  generateCircleCiShardTestFileList,
   skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
@@ -37,9 +37,9 @@ const jobName = 'unit-tests.js';
  */
 function pushBuildWorkflow() {
   try {
-    generateCircleCiShardTestFilesList(unitTestPaths);
+    generateCircleCiShardTestFileList(unitTestPaths);
     timedExecOrThrow(
-      `amp unit --headless --coverage --report --fileslist ${TEST_FILES_LIST_FILE_NAME}`,
+      `amp unit --headless --coverage --report --filelist ${TEST_FILES_LIST_FILE_NAME}`,
       'Unit tests failed!'
     );
     timedExecOrThrow(
@@ -60,9 +60,9 @@ function pushBuildWorkflow() {
  */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
-    generateCircleCiShardTestFilesList(unitTestPaths);
+    generateCircleCiShardTestFileList(unitTestPaths);
     timedExecOrDie(
-      `amp unit --headless --coverage --fileslist ${TEST_FILES_LIST_FILE_NAME}`
+      `amp unit --headless --coverage --filelist ${TEST_FILES_LIST_FILE_NAME}`
     );
     timedExecOrDie('amp codecov-upload');
   } else {
