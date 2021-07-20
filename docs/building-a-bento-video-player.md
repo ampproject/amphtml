@@ -15,7 +15,6 @@
 -   [Getting Started](#getting-started)
 -   [Directory Structure](#directory-structure)
 -   [Extend `VideoBaseElement` for AMP](#extend-videobaseelement-for-amp)
-    -   [Pre-upgrade CSS](#pre-upgrade-css)
     -   [`props`](#props)
 -   [Define a Preact component](#define-a-preact-component)
     -   [Forwarding `ref`](#forwarding-ref)

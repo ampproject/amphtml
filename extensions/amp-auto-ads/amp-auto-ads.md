@@ -57,6 +57,7 @@ should be specified on the tag.
 -   [DoubleClick (experimental)](../../ads/google/doubleclick.md)
 -   [FirstImpression.io](https://www.firstimpression.io)
 -   [Premium Programmatic](https://premiumads.com.br)
+-   [Wunderkind](https://wunderkind.co)
 
 ### Configuration Spec
 
