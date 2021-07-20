@@ -33,7 +33,7 @@ const {Targets, buildTargetsInclude} = require('./build-targets');
 const jobName = `${experiment}-integration-tests.js`;
 
 /**
- * Runs tests for the given configuration and reports results for push builds.
+ * Runs tests for the given configuration and reports results.
  * @param {!Object} config
  */
 function runExperimentTests(config) {
