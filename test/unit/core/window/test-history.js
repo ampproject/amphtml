@@ -18,13 +18,13 @@ import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   History,
   HistoryBindingNatural_,
-  HistoryBindingVirtual_,
   installHistoryServiceForDoc,
 } from '#service/history-impl';
 import {Services} from '#service';
 import {installTimerService} from '#service/timer-impl';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../../src/url';
+import {HistoryBindingVirtual} from '../../../../extensions/amp-viewer-integration/0.1/history-binding-virtual';
 
 describes.fakeWin(
   'Window - History',
@@ -354,7 +354,7 @@ describes.sandboxed('Window - History', {}, (env) => {
     it('should create virtual binding', () => {
       viewer.isOvertakeHistory = () => true;
       const history = Services.historyForDoc(ampdoc);
-      expect(history.binding_).to.be.instanceOf(HistoryBindingVirtual_);
+      expect(history.binding_).to.be.instanceOf(HistoryBindingVirtual);
       expect(win.__AMP_SERVICES.history.obj).to.equal(history);
       // Ensure that the global singleton has not been created.
       expect(win.__AMP_SERVICES['global-history-binding']).to.not.exist;
@@ -662,7 +662,7 @@ describes.sandboxed('Window - History', {}, (env) => {
         sendMessageAwaitResponse: env.sandbox.stub().returns(Promise.resolve()),
         hasCapability: capabilityStub,
       };
-      history = new HistoryBindingVirtual_(window, viewer);
+      history = new HistoryBindingVirtual(window, viewer);
       history.setOnStateUpdated(onStateUpdated);
 
       onHistoryPopped = viewer.onMessage.firstCall.args[1];
@@ -1000,7 +1000,7 @@ describes.fakeWin(
       const viewerMock = env.sandbox.mock(viewer);
       history = new History(
         new AmpDocSingle(env.win),
-        new HistoryBindingVirtual_(env.win, viewer)
+        new HistoryBindingVirtual(env.win, viewer)
       );
       const startIndex = history.stackIndex_;
 
@@ -1108,7 +1108,7 @@ describes.fakeWin('Window - History - Get and update fragment', {}, (env) => {
     () => {
       history = new History(
         new AmpDocSingle(env.win),
-        new HistoryBindingVirtual_(env.win, viewer)
+        new HistoryBindingVirtual(env.win, viewer)
       );
       viewerMock
         .expects('hasCapability')
@@ -1132,7 +1132,7 @@ describes.fakeWin('Window - History - Get and update fragment', {}, (env) => {
     () => {
       history = new History(
         new AmpDocSingle(env.win),
-        new HistoryBindingVirtual_(env.win, viewer)
+        new HistoryBindingVirtual(env.win, viewer)
       );
       viewerMock
         .expects('hasCapability')
@@ -1151,7 +1151,7 @@ describes.fakeWin('Window - History - Get and update fragment', {}, (env) => {
     () => {
       history = new History(
         new AmpDocSingle(env.win),
-        new HistoryBindingVirtual_(env.win, viewer)
+        new HistoryBindingVirtual(env.win, viewer)
       );
       viewerMock
         .expects('hasCapability')
@@ -1175,7 +1175,7 @@ describes.fakeWin('Window - History - Get and update fragment', {}, (env) => {
     () => {
       history = new History(
         new AmpDocSingle(env.win),
-        new HistoryBindingVirtual_(env.win, viewer)
+        new HistoryBindingVirtual(env.win, viewer)
       );
       viewerMock
         .expects('hasCapability')
@@ -1201,7 +1201,7 @@ describes.fakeWin('Window - History - Get and update fragment', {}, (env) => {
     () => {
       history = new History(
         new AmpDocSingle(env.win),
-        new HistoryBindingVirtual_(env.win, viewer)
+        new HistoryBindingVirtual(env.win, viewer)
       );
       viewerMock
         .expects('hasCapability')

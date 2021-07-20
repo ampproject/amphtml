@@ -236,5 +236,10 @@ export class ViewerInterface {
    * @param {?string} newUrl
    */
   replaceUrl(newUrl) {}
+
+  /**
+   * Retrieves a VirtualHistory binding.
+   */
+  getHistoryBindings() {}
 }
 /* eslint-enable no-unused-vars */

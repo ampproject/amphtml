@@ -35,6 +35,7 @@ import {getAmpdoc} from '../../../src/service-helpers';
 import {getData, listen, listenOnce} from '../../../src/event-helper';
 import {getSourceUrl} from '../../../src/url';
 import {isIframed} from '#core/dom';
+import {HistoryBindingVirtual} from './history-binding-virtual';
 
 const TAG = 'amp-viewer-integration';
 const APP = '__AMPHTML__';
@@ -277,5 +278,6 @@ export class AmpViewerIntegration {
 }
 
 AMP.extension(TAG, '0.1', function (AMP) {
+  AMP.registerServiceForDoc('virtual-history', HistoryBindingVirtual);
   new AmpViewerIntegration(AMP.win).init();
 });

@@ -202,6 +202,19 @@ export class Services {
   }
 
   /**
+   * Returns promise for the viewer. This is an unusual case and necessary only
+   * for services that need reference to the viewer before it has been
+   * initialized. Most of the code, however, just should use `viewerForDoc`.
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!Promise<!./service/viewer-interface.ViewerInterface>}
+   */
+  static virtualHistoryBindingForDocOrNull(elementOrAmpDoc) {
+    return /** @type {!Promise<?../extensions/amp-viewer-integration/0.1/history-binding-virtual.HistoryBindingVirtual>} */ (
+      getServicePromiseForDoc(elementOrAmpDoc, 'virtual-history')
+    );
+  }
+
+  /**
    * @param {!Element|!ShadowRoot} element
    * @return {!Promise<?../extensions/amp-script/0.1/amp-script.AmpScriptService>}
    */
