@@ -34,7 +34,7 @@ import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '#core/dom';
 import {setStyle} from '#core/dom/style';
 import {urls} from '../../../src/config';
-import {isMinified} from '#core/mode';
+import * as mode from '#core/mode';
 
 /**
  * @fileoverview
@@ -300,7 +300,7 @@ export class AmpRecaptchaService {
             '.recaptcha.' +
             winLocation.host +
             '/dist.3p/' +
-            (isMinified()
+            (mode.isMinified()
               ? `${internalRuntimeVersion()}/recaptcha`
               : 'current/recaptcha.max') +
             '.html'

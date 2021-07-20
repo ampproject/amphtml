@@ -33,7 +33,7 @@ import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {tryParseJson} from '#core/types/object/json';
 import {urls} from '../../../src/config';
 import {utf8Encode} from '#core/types/string/bytes';
-import {isMinified} from '#core/mode';
+import * as mode from '#core/mode';
 
 /** @const {string} */
 const TAG = 'amp-script';
@@ -286,7 +286,7 @@ export class AmpScript extends AMP.BaseElement {
     const sandboxTokens = sandbox.split(' ').map((s) => s.trim());
     let iframeUrl;
     if (getMode().localDev) {
-      const folder = isMinified() ? 'current-min' : 'current';
+      const folder = mode.isMinified() ? 'current-min' : 'current';
       iframeUrl = `/dist.3p/${folder}/amp-script-proxy-iframe.html`;
     } else {
       iframeUrl = `${urls.thirdParty}/${

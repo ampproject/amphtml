@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isMinified} from '#core/mode';
+import * as mode from '#core/mode';
 
 import {urls} from './config';
 import {
@@ -208,7 +208,9 @@ export function addDataAndJsonAttributes_(element, attributes) {
 export function getBootstrapUrl(type) {
   const extension = IS_ESM ? '.mjs' : '.js';
   if (getMode().localDev || getMode().test) {
-    const filename = isMinified() ? `./vendor/${type}` : `./vendor/${type}.max`;
+    const filename = mode.isMinified()
+      ? `./vendor/${type}`
+      : `./vendor/${type}.max`;
     return filename + extension;
   }
   return `${
@@ -299,7 +301,7 @@ export function getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename) {
     overrideBootstrapBaseUrl ||
     getAdsLocalhost(parentWindow) +
       '/dist.3p/' +
-      (isMinified()
+      (mode.isMinified()
         ? `${internalRuntimeVersion()}/${srcFileBasename}`
         : `current/${srcFileBasename}.max`) +
       '.html'

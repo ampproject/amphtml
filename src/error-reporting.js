@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isMinified} from '#core/mode';
+import * as mode from '#core/mode';
 
 import {triggerAnalyticsEvent} from './analytics';
 import {urls} from './config';
@@ -211,7 +211,7 @@ export function reportError(error, opt_associatedElement) {
       } else {
         if (element) {
           output.call(console, error.message, element);
-        } else if (!isMinified()) {
+        } else if (!mode.isMinified()) {
           output.call(console, error.stack);
         } else {
           output.call(console, error.message);
