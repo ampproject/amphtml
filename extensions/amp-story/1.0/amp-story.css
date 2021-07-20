@@ -253,10 +253,6 @@ amp-story-page[active] {
  * not be automatically laid out. Max distance is set to 2 (next 2 pages) since
  * we don't want to schedule any further pages. */
 
-amp-story-page:not(:first-of-type):not([distance]):not([active]) {
-  transform: translateY(1000vh) !important;
-}
-
 amp-story-page:not([active]):not([distance]) {
   transform: translateY(1000vh) !important;
 }
