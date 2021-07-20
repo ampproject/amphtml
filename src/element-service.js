@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as dom from './dom';
-import {extensionScriptsInNode} from './service/extension-script';
+import * as dom from './core/dom';
+import {userAssert} from './log';
 import {
   getAmpdoc,
   getService,
@@ -24,8 +24,8 @@ import {
   getServicePromiseForDoc,
   getServicePromiseOrNull,
   getServicePromiseOrNullForDoc,
-} from './service';
-import {pureUserAssert as userAssert} from './core/assert';
+} from './service-helpers';
+import {extensionScriptInNode} from './service/extension-script';
 
 /**
  * Same as getElementService but produces null if the given element is not
@@ -160,31 +160,17 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
  * @closurePrimitive {asserts.matchesReturn}
  */
 function assertService(service, id, extension) {
-  return /** @type {!Object} */ (userAssert(
-    service,
-    'Service %s was requested to be provided through %s, ' +
-      'but %s is not loaded in the current page. To fix this ' +
-      'problem load the JavaScript file for %s in this page.',
-    id,
-    extension,
-    extension,
-    extension
-  ));
-}
-
-/**
- * Verifies that an extension script is present in head for
- * installation.
- * @param {!Window} win
- * @param {string} id
- * @param {string} version
- * @return {boolean}
- * @private
- */
-function extensionScriptInNode(win, id, version) {
-  return extensionScriptsInNode(win.document.head).some(
-    ({extensionId, extensionVersion}) =>
-      id == extensionId && version == extensionVersion
+  return /** @type {!Object} */ (
+    userAssert(
+      service,
+      'Service %s was requested to be provided through %s, ' +
+        'but %s is not loaded in the current page. To fix this ' +
+        'problem load the JavaScript file for %s in this page.',
+      id,
+      extension,
+      extension,
+      extension
+    )
   );
 }
 

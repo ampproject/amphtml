@@ -17,7 +17,7 @@
 import {Action, SubscriptionAnalytics} from '../analytics';
 import {Dialog} from '../dialog';
 import {Entitlement, GrantReason} from '../entitlement';
-import {PageConfig} from '../../../../third_party/subscriptions-project/config';
+import {PageConfig} from '#third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 import {localSubscriptionPlatformFactory} from '../local-subscription-platform';
 
@@ -272,9 +272,8 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
       'should return actionMap as is if login and subscribe actions' +
         ' are present',
       () => {
-        const returnedMap = localSubscriptionPlatform.validateActionMap(
-          actionMap
-        );
+        const returnedMap =
+          localSubscriptionPlatform.validateActionMap(actionMap);
         expect(JSON.stringify(returnedMap)).to.be.equal(
           JSON.stringify(actionMap)
         );

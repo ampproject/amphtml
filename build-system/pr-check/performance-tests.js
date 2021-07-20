@@ -19,13 +19,15 @@
  * @fileoverview Script that runs the performance tests during CI.
  */
 
-const {downloadNomoduleOutput, timedExecOrDie} = require('./utils');
 const {runCiJob} = require('./ci-job');
+const {timedExecOrDie} = require('./utils');
 
 const jobName = 'performance-tests.js';
 
+/**
+ * Steps to run during push builds.
+ */
 function pushBuildWorkflow() {
-  downloadNomoduleOutput(jobName);
   timedExecOrDie('amp performance --nobuild --quiet --headless');
 }
 

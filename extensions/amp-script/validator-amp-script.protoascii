@@ -202,6 +202,10 @@ tags: {  # <amp-script>
     name: "nodom"
     value: ""
   }
+  attrs: {
+    name: "sandboxed"
+    value: ""
+  }
   attrs: { name: "sandbox" }
   attrs: {
     name: "script"

@@ -1,0 +1,77 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AMP A4A examples</title>
+  <link rel="canonical" href="http://nonblocking.io/" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <style amp-custom>
+    amp-ad {
+      border: 1px solid #ccc;
+      max-width: 500px;
+    }
+    amp-ad div[placeholder] {
+      background-color: lightgray;
+    }
+    amp-ad div[fallback] {
+      background-color: black;
+    }
+    amp-ad div[placeholder]::after {
+      content: "loading ...";
+    }
+    amp-ad div[fallback]::after {
+      content: "No ad";
+      color: white;
+    }
+    amp-ad div[placeholder]::after,
+    amp-ad div[fallback]::after {
+      font-size: 20px;
+      line-height: 30px;
+      text-align: center;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(50% - 15px);
+    }
+  </style>
+</head>
+<body>
+  <h1>A4A Examples</h1>
+
+  <h2>Fake ad network</h2>
+  <amp-ad width="300" height="400"
+      type="fake"
+      id='i-amphtml-demo-id'
+      data-vars-analytics-var="bar"
+      src="/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.html">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
+  <h2>Regular ad</h2>
+  <amp-ad data-slot="/30497360/a4a/non_a4a_native"
+    height="250"
+    type="doubleclick"
+    width="300">
+  </amp-ad>
+
+  <h2>A4A ad: doubleclick</h2>
+  <amp-ad data-slot="/30497360/a4a/a4a_native"
+    height="250"
+    type="doubleclick"
+    width="300">
+  </amp-ad>
+
+  <h2>AdSense (may or may not be A4A)</h2>
+  <amp-ad
+    width="300"
+    height="250"
+    type="adsense"
+    data-ad-client="ca-pub-5439573510495356">
+  </amp-ad>
+</body>
+</html>

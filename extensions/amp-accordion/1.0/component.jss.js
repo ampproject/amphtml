@@ -40,17 +40,10 @@ const contentHidden = {
   },
 };
 
-const contentHiddenMatchable = {
-  '&:not(.i-amphtml-animating)': {
-    contentVisibility: 'hidden-matchable !important',
-  },
-};
-
 const JSS = {
   sectionChild,
   header,
   contentHidden,
-  contentHiddenMatchable,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.

@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {MessageType} from '../../../src/3p-frame-messaging';
-import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {dict} from '#core/types/object';
 import {
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 class AmpO2Player extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -46,6 +47,9 @@ class AmpO2Player extends AMP.BaseElement {
 
     /** @private {string} */
     this.src_ = '';
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -129,14 +133,27 @@ class AmpO2Player extends AMP.BaseElement {
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = this.src_;
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
 
     listenFor(iframe, MessageType.SEND_CONSENT_DATA, (data, source, origin) => {
       this.sendConsentData_(source, origin);
     });
 
+    this.pauseHelper_.updatePlaying(true);
+
     this.element.appendChild(iframe);
     return this.loadPromise(iframe);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    this.pauseHelper_.updatePlaying(false);
+    return true;
   }
 
   /**
@@ -149,9 +166,8 @@ class AmpO2Player extends AMP.BaseElement {
   sendConsentData_(source, origin) {
     const consentPolicyId = super.getConsentPolicy() || 'default';
     const consentStringPromise = this.getConsentString_(consentPolicyId);
-    const consentPolicyStatePromise = this.getConsentPolicyState_(
-      consentPolicyId
-    );
+    const consentPolicyStatePromise =
+      this.getConsentPolicyState_(consentPolicyId);
 
     Promise.all([consentPolicyStatePromise, consentStringPromise]).then(
       (consents) => {

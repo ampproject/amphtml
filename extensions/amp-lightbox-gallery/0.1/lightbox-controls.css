@@ -108,7 +108,7 @@
 
 .i-amphtml-lbg-button[data-action="prev"] {
   /* Needed for screen reader mode to size correctly. */
-  right: auto !important; 
+  right: auto !important;
   left: 0 !important;
 }
 

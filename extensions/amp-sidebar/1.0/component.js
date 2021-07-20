@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {ContainWrapper, useValueRef} from '../../../src/preact/component';
-import {Keys} from '../../../src/utils/key-codes';
+import * as Preact from '#preact';
+import {ContainWrapper, useValueRef} from '#preact/component';
+import {Keys} from '#core/constants/key-codes';
 import {Side} from './sidebar-config';
-import {forwardRef} from '../../../src/preact/compat';
-import {isRTL} from '../../../src/dom';
+import {forwardRef} from '#preact/compat';
+import {isRTL} from '#core/dom';
 import {
   useCallback,
   useEffect,
@@ -27,24 +27,27 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-} from '../../../src/preact';
+} from '#preact';
 import {useSidebarAnimation} from './sidebar-animations-hook';
 import {useStyles} from './component.jss';
+import {useToolbarHook} from './sidebar-toolbar-hook';
+import objstr from 'obj-str';
 
 /**
- * @param {!SidebarDef.Props} props
+ * @param {!SidebarDef.SidebarProps} props
  * @param {{current: (!SidebarDef.SidebarApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
 function SidebarWithRef(
   {
     as: Comp = 'div',
-    side: sideProp,
-    onBeforeOpen,
-    onAfterClose,
-    backdropStyle,
     backdropClassName,
+    backdropStyle,
     children,
+    onAfterClose,
+    onAfterOpen,
+    onBeforeOpen,
+    side: sideProp,
     ...rest
   },
   ref
@@ -67,18 +70,15 @@ function SidebarWithRef(
   const onBeforeOpenRef = useValueRef(onBeforeOpen);
 
   const open = useCallback(() => {
-    if (onBeforeOpenRef.current) {
-      onBeforeOpenRef.current();
-    }
+    onBeforeOpenRef.current?.();
     setMounted(true);
     setOpened(true);
   }, [onBeforeOpenRef]);
   const close = useCallback(() => setOpened(false), []);
-  const toggle = useCallback(() => (opened ? close() : open()), [
-    opened,
-    open,
-    close,
-  ]);
+  const toggle = useCallback(
+    () => (opened ? close() : open()),
+    [opened, open, close]
+  );
 
   useImperativeHandle(
     ref,
@@ -103,7 +103,9 @@ function SidebarWithRef(
   }, [side, mounted]);
 
   useSidebarAnimation(
+    mounted,
     opened,
+    onAfterOpen,
     onAfterClose,
     side,
     sidebarRef,
@@ -135,42 +137,70 @@ function SidebarWithRef(
   }, [opened, close]);
 
   return (
-    mounted && (
-      <>
-        <ContainWrapper
-          as={Comp}
-          ref={sidebarRef}
-          size={false}
-          layout={true}
-          paint={true}
-          part="sidebar"
-          wrapperClassName={`${classes.sidebar} ${
-            classes.defaultSidebarStyles
-          } ${side === Side.LEFT ? classes.left : classes.right}`}
-          role="menu"
-          tabindex="-1"
-          hidden={!side}
-          {...rest}
-        >
-          {children}
-        </ContainWrapper>
-        <div
-          ref={backdropRef}
-          onClick={() => close()}
-          part="backdrop"
-          style={backdropStyle}
-          className={`${backdropClassName ?? ''} ${classes.backdrop} ${
-            classes.defaultBackdropStyles
-          }`}
-          hidden={!side}
-        >
-          <div className={classes.backdropOverscrollBlocker}></div>
-        </div>
-      </>
-    )
+    <div className={objstr({[classes.unmounted]: !mounted})} part="wrapper">
+      <ContainWrapper
+        as={Comp}
+        ref={sidebarRef}
+        size={false}
+        layout={true}
+        paint={true}
+        part="sidebar"
+        wrapperClassName={objstr({
+          [classes.sidebar]: true,
+          [classes.defaultSidebarStyles]: true,
+          [classes.left]: side === Side.LEFT,
+          [classes.right]: side !== Side.LEFT,
+        })}
+        role="menu"
+        tabindex="-1"
+        hidden={!side}
+        {...rest}
+      >
+        {children}
+      </ContainWrapper>
+      <div
+        ref={backdropRef}
+        onClick={() => close()}
+        part="backdrop"
+        style={backdropStyle}
+        className={objstr({
+          [classes.backdrop]: true,
+          [classes.defaultBackdropStyles]: true,
+          [backdropClassName]: backdropClassName,
+        })}
+        hidden={!side}
+      >
+        <div className={classes.backdropOverscrollBlocker}></div>
+      </div>
+    </div>
   );
 }
 
 const Sidebar = forwardRef(SidebarWithRef);
 Sidebar.displayName = 'Sidebar'; // Make findable for tests.
 export {Sidebar};
+
+/**
+ * @param {!SidebarDef.SidebarToolbarProps} props
+ * @return {PreactDef.Renderable}
+ */
+export function SidebarToolbar({
+  children,
+  toolbar: mediaQueryProp,
+  toolbarTarget: toolbarTargetProp,
+  ...rest
+}) {
+  const ref = useRef(null);
+  useToolbarHook(ref, mediaQueryProp, toolbarTargetProp);
+
+  return (
+    <nav
+      ref={ref}
+      toolbar={mediaQueryProp}
+      toolbar-target={toolbarTargetProp}
+      {...rest}
+    >
+      {children}
+    </nav>
+  );
+}

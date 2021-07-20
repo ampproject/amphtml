@@ -33,6 +33,7 @@ const {
  * Lookup URL from cache and rewrite URLs to build from working branch
  *
  * @param {string} url
+ * @return {Promise<void>}
  */
 async function useLocalScripts(url) {
   const cachePath = urlToCachePath(url, EXPERIMENT);
@@ -64,6 +65,7 @@ async function useLocalScripts(url) {
  * copy
  *
  * @param {string} url
+ * @return {Promise<void>}
  */
 async function useRemoteScripts(url) {
   const cachePath = urlToCachePath(url, CONTROL);
@@ -90,9 +92,9 @@ async function useRemoteScripts(url) {
 }
 
 /**
- * Download local and master version of default extension that
- * are not explicility stated by script tags in the HTML.
- * @return {Promise}
+ * Download default extensions that are not explicility stated by script tags in
+ * the HTML.
+ * @return {Promise<string[]>}
  */
 async function downloadDefaultExtensions() {
   return Promise.all(
@@ -108,7 +110,7 @@ async function downloadDefaultExtensions() {
  * Rewrite script tags for each document downloaded from the urls
  *
  * @param {!Array<string>} urls
- * @return {Promise}
+ * @return {Promise<void[]>}
  */
 async function rewriteScriptTags(urls) {
   await downloadDefaultExtensions();

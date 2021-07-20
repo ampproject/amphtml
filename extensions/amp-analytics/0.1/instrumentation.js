@@ -23,15 +23,15 @@ import {
 } from './events';
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root';
 import {AnalyticsGroup} from './analytics-group';
-import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
+import {Services} from '#service';
+import {dict} from '#core/types/object';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {
   getParentWindowFrameElement,
   getServiceForDoc,
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
-} from '../../../src/service';
+} from '../../../src/service-helpers';
 
 const PROP = '__AMP_AN_ROOT';
 
@@ -105,10 +105,9 @@ export class InstrumentationService {
     const event = new AnalyticsEvent(target, eventType, vars, enableDataVars);
     const root = this.findRoot_(target);
     const trackerName = getTrackerKeyName(eventType);
-    const tracker = /** @type {!CustomEventTracker|!AmpStoryEventTracker} */ (root.getTracker(
-      trackerName,
-      this.getTrackerClass_(trackerName)
-    ));
+    const tracker = /** @type {!CustomEventTracker|!AmpStoryEventTracker} */ (
+      root.getTracker(trackerName, this.getTrackerClass_(trackerName))
+    );
     tracker.trigger(event);
   }
 
@@ -158,10 +157,9 @@ export class InstrumentationService {
  * @return {!Promise<InstrumentationService>}
  */
 export function instrumentationServicePromiseForDoc(elementOrAmpDoc) {
-  return /** @type {!Promise<InstrumentationService>} */ (getServicePromiseForDoc(
-    elementOrAmpDoc,
-    'amp-analytics-instrumentation'
-  ));
+  return /** @type {!Promise<InstrumentationService>} */ (
+    getServicePromiseForDoc(elementOrAmpDoc, 'amp-analytics-instrumentation')
+  );
 }
 
 /**

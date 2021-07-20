@@ -14,37 +14,38 @@
  * limitations under the License.
  */
 
-import {Animation} from '../../animation';
-import {Observable} from '../../observable';
-import {Services} from '../../services';
-import {ViewportBindingDef} from './viewport-binding-def';
-import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
-import {ViewportBindingNatural_} from './viewport-binding-natural';
-import {ViewportInterface} from './viewport-interface';
-import {VisibilityState} from '../../visibility-state';
-import {clamp} from '../../utils/math';
-import {
-  closestAncestorElementBySelector,
-  getVerticalScrollbarWidth,
-  isIframed,
-} from '../../dom';
-import {computedStyle, setStyle} from '../../style';
-import {dev, devAssert} from '../../log';
-import {dict} from '../../utils/object';
-import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';
-import {getMode} from '../../mode';
-import {
-  getParentWindowFrameElement,
-  registerServiceBuilderForDoc,
-} from '../../service';
-import {isExperimentOn} from '../../experiments';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {Observable} from '#core/data-structures/observable';
+import {tryResolve} from '#core/data-structures/promise';
+import {getVerticalScrollbarWidth, isIframed} from '#core/dom';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../../layout-rect';
+} from '#core/dom/layout/rect';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+import {computedStyle, setStyle} from '#core/dom/style';
+import {clamp} from '#core/math';
+import {dict} from '#core/types/object';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {ViewportBindingDef} from './viewport-binding-def';
+import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
+import {ViewportBindingNatural_} from './viewport-binding-natural';
+import {ViewportInterface} from './viewport-interface';
+
+import {Animation} from '../../animation';
+import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';
+import {dev, devAssert} from '../../log';
+import {getMode} from '../../mode';
+import {
+  getParentWindowFrameElement,
+  registerServiceBuilderForDoc,
+} from '../../service-helpers';
 import {numeric} from '../../transition';
-import {tryResolve} from '../../utils/promise';
 
 const TAG_ = 'Viewport';
 const SCROLL_POS_TO_BLOCK = {
@@ -138,7 +139,7 @@ export class ViewportImpl {
     /** @private @const {!Observable<!./viewport-interface.ViewportResizedEventDef>} */
     this.resizeObservable_ = new Observable();
 
-    /** @private {?Element|undefined} */
+    /** @private {?HTMLMetaElement|undefined} */
     this.viewportMeta_ = undefined;
 
     /** @private {string|undefined} */
@@ -354,14 +355,14 @@ export class ViewportImpl {
   }
 
   /** @override */
-  getLayoutRect(el, opt_premeasuredRect) {
+  getLayoutRect(el) {
     const scrollLeft = this.getScrollLeft();
     const scrollTop = this.getScrollTop();
 
     // Go up the window hierarchy through friendly iframes.
     const frameElement = getParentWindowFrameElement(el, this.ampdoc.win);
     if (frameElement) {
-      const b = this.binding_.getLayoutRect(el, 0, 0, opt_premeasuredRect);
+      const b = this.binding_.getLayoutRect(el, 0, 0);
       const c = this.binding_.getLayoutRect(
         frameElement,
         scrollLeft,
@@ -375,12 +376,7 @@ export class ViewportImpl {
       );
     }
 
-    return this.binding_.getLayoutRect(
-      el,
-      scrollLeft,
-      scrollTop,
-      opt_premeasuredRect
-    );
+    return this.binding_.getLayoutRect(el, scrollLeft, scrollTop);
   }
 
   /** @override */
@@ -863,7 +859,7 @@ export class ViewportImpl {
   }
 
   /**
-   * @return {?Element}
+   * @return {?HTMLMetaElement}
    * @private
    */
   getViewportMeta_() {
@@ -872,9 +868,9 @@ export class ViewportImpl {
       return null;
     }
     if (this.viewportMeta_ === undefined) {
-      this.viewportMeta_ = /** @type {?HTMLMetaElement} */ (this.globalDoc_.querySelector(
-        'meta[name=viewport]'
-      ));
+      this.viewportMeta_ = /** @type {?HTMLMetaElement} */ (
+        this.globalDoc_.querySelector('meta[name=viewport]')
+      );
       if (this.viewportMeta_) {
         this.originalViewportMetaString_ = this.viewportMeta_.content;
       }
@@ -1204,7 +1200,7 @@ const ViewportType = {
    * that AMP sets when Viewer has requested "natural" viewport on a iOS
    * device.
    * See:
-   * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
+   * https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-layout.md
    */
   NATURAL_IOS_EMBED: 'natural-ios-embed',
 };

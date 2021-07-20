@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {StateProperty, getStoreService} from './amp-story-store-service';
-import {getDataParamsFromAttributes} from '../../../src/dom';
+import {getDataParamsFromAttributes} from '#core/dom';
 import {getVariableService} from './variable-service';
-import {map} from '../../../src/utils/object';
-import {registerServiceBuilder} from '../../../src/service';
+import {map} from '#core/types/object';
+import {registerServiceBuilder} from '../../../src/service-helpers';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
@@ -26,9 +26,6 @@ export const ANALYTICS_TAG_NAME = '__AMP_ANALYTICS_TAG_NAME__';
 
 /** @enum {string} */
 export const StoryAnalyticsEvent = {
-  BOOKEND_CLICK: 'story-bookend-click',
-  BOOKEND_ENTER: 'story-bookend-enter',
-  BOOKEND_EXIT: 'story-bookend-exit',
   CLICK_THROUGH: 'story-click-through',
   FOCUS: 'story-focus',
   LAST_PAGE_VISIBLE: 'story-last-page-visible',
@@ -38,6 +35,7 @@ export const StoryAnalyticsEvent = {
   PAGE_ATTACHMENT_EXIT: 'story-page-attachment-exit',
   PAGE_VISIBLE: 'story-page-visible',
   INTERACTIVE: 'story-interactive',
+  STORY_CONTENT_LOADED: 'story-content-loaded',
   STORY_MUTED: 'story-audio-muted',
   STORY_UNMUTED: 'story-audio-unmuted',
 };
@@ -111,18 +109,11 @@ export class StoryAnalyticsService {
 
   /** @private */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
-      this.triggerEvent(
-        isActive
-          ? StoryAnalyticsEvent.BOOKEND_ENTER
-          : StoryAnalyticsEvent.BOOKEND_EXIT
-      );
-    });
-
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
       (pageId) => {
-        if (!pageId) {
+        const isAd = this.storeService_.get(StateProperty.AD_STATE);
+        if (!pageId || isAd) {
           return;
         }
 

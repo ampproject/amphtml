@@ -1,4 +1,11 @@
 {
-  "plugins": [["../../../..", {"freeze": true}]],
+  "plugins": [
+    [
+      "../../../..",
+      {
+        "freeze": true
+      }
+    ]
+  ],
   "sourceType": "module"
 }

@@ -23,11 +23,19 @@ import {
   validateCtaMetadata,
 } from './story-ad-ui';
 import {
+  AdvanceExpToTime,
+  StoryAdAutoAdvance,
+} from '#experiments/story-ad-auto-advance';
+import {
   AnalyticsEvents,
   AnalyticsVars,
   STORY_AD_ANALYTICS,
 } from './story-ad-analytics';
-import {CommonSignals} from '../../../src/common-signals';
+import {
+  BranchToTimeValues,
+  StoryAdSegmentExp,
+} from '#experiments/story-ad-progress-segment';
+import {CommonSignals} from '#core/constants/common-signals';
 import {Gestures} from '../../../src/gesture';
 import {
   StateProperty,
@@ -37,17 +45,18 @@ import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {
   createElementWithAttributes,
-  elementByTag,
   isJsonScriptTag,
   toggleAttribute,
-} from '../../../src/dom';
+} from '#core/dom';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
+import {dict, map} from '#core/types/object';
+import {elementByTag} from '#core/dom/query';
 import {getData, listen} from '../../../src/event-helper';
+import {getExperimentBranch} from '#experiments';
 import {getFrameDoc, localizeCtaText} from './utils';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {parseJson} from '../../../src/json';
-import {setStyle} from '../../../src/style';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
+import {parseJson} from '#core/types/object/json';
+import {setStyle} from '#core/dom/style';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page';
@@ -312,6 +321,24 @@ export class StoryAdPage {
       'id': this.id_,
     });
 
+    const autoAdvanceExpBranch = getExperimentBranch(
+      this.win_,
+      StoryAdAutoAdvance.ID
+    );
+    const segmentExpBranch = getExperimentBranch(
+      this.win_,
+      StoryAdSegmentExp.ID
+    );
+
+    if (segmentExpBranch && segmentExpBranch !== StoryAdSegmentExp.CONTROL) {
+      attributes['auto-advance-after'] = BranchToTimeValues[segmentExpBranch];
+    } else if (
+      autoAdvanceExpBranch &&
+      autoAdvanceExpBranch !== StoryAdAutoAdvance.CONTROL
+    ) {
+      attributes['auto-advance-after'] = AdvanceExpToTime[autoAdvanceExpBranch];
+    }
+
     const page = createElementWithAttributes(
       this.doc_,
       'amp-story-page',
@@ -385,10 +412,9 @@ export class StoryAdPage {
     if (this.adFrame_) {
       return this.adFrame_;
     }
-    return (this.adFrame_ = /** @type {?HTMLIFrameElement} */ (elementByTag(
-      devAssert(this.pageElement_),
-      'iframe'
-    )));
+    return (this.adFrame_ = /** @type {?HTMLIFrameElement} */ (
+      elementByTag(devAssert(this.pageElement_), 'iframe')
+    ));
   }
 
   /**

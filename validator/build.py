@@ -47,7 +47,10 @@ def EnsureNodeJsIsInstalled():
       return
   except (subprocess.CalledProcessError, OSError):
     pass
-  Die('Node.js not found. Try "apt-get install nodejs" or follow the install instructions at https://github.com/ampproject/amphtml/blob/master/validator/README.md#installation')
+  Die('Node.js not found. Try "apt-get install nodejs" or follow the install'
+      'instructions at'
+      'https://github.com/ampproject/amphtml/blob/main/validator/README.md#installation'
+     )
 
 
 def CheckPrereqs():
@@ -73,7 +76,10 @@ def CheckPrereqs():
   try:
     libprotoc_version = subprocess.check_output(['protoc', '--version'])
   except (subprocess.CalledProcessError, OSError):
-    Die('Protobuf compiler not found. Try "apt-get install protobuf-compiler" or follow the install instructions at https://github.com/ampproject/amphtml/blob/master/validator/README.md#installation.')
+    Die('Protobuf compiler not found. Try "apt-get install protobuf-compiler" '
+        'or follow the install instructions at '
+        'https://github.com/ampproject/amphtml/blob/main/validator/README.md#installation.'
+       )
 
   # Ensure 'libprotoc 2.5.0' or newer.
   m = re.search(b'^(\\w+) (\\d+)\\.(\\d+)\\.(\\d+)', libprotoc_version)
@@ -90,18 +96,21 @@ def CheckPrereqs():
       # Python3 needs pip3. Python 2 needs pip.
       if sys.version_info < (3, 0):
         Die('%s not found. Try "pip install protobuf" or follow the install '
-            'instructions at https://github.com/ampproject/amphtml/blob/master/'
+            'instructions at https://github.com/ampproject/amphtml/blob/main/'
             'validator/README.md#installation' % module)
       else:
         Die('%s not found. Try "pip3 install protobuf" or follow the install '
-            'instructions at https://github.com/ampproject/amphtml/blob/master/'
+            'instructions at https://github.com/ampproject/amphtml/blob/main/'
             'validator/README.md#installation' % module)
 
   # Ensure JVM installed. TODO: Check for version?
   try:
     subprocess.check_output(['java', '-version'], stderr=subprocess.STDOUT)
   except (subprocess.CalledProcessError, OSError):
-    Die('Java missing. Try "apt-get install openjdk-7-jre" or follow the install instructions at https://github.com/ampproject/amphtml/blob/master/validator/README.md#installation')
+    Die('Java missing. Try "apt-get install openjdk-7-jre" or follow the'
+        'install instructions at'
+        'https://github.com/ampproject/amphtml/blob/main/validator/README.md#installation'
+       )
   logging.info('... done')
 
 
@@ -267,7 +276,7 @@ def GenValidatorGeneratedJs(out_dir):
 
 
 def CompileWithClosure(js_files, definitions, entry_points, output_file):
-  """Compiles the arguments with the Closure compiler for transpilation to ES5.
+  """Compiles the arguments with AMP's Closure compiler for transpilation to ES5.
 
   Args:
     js_files: list of files to compile
@@ -277,17 +286,18 @@ def CompileWithClosure(js_files, definitions, entry_points, output_file):
   """
 
   cmd = [
-      'java', '-jar', 'node_modules/google-closure-compiler-java/compiler.jar',
+      'java', '-jar',
+      '../node_modules/@ampproject/google-closure-compiler-java/compiler.jar',
       '--language_out=ES5_STRICT', '--dependency_mode=PRUNE',
       '--js_output_file=%s' % output_file
   ]
   cmd += ['--entry_point=%s' % e for e in entry_points]
   cmd += ['--output_manifest=%s' % ('%s.manifest' % output_file)]
   cmd += [
-      'node_modules/google-closure-library/closure/**.js',
-      '!node_modules/google-closure-library/closure/**_test.js',
-      'node_modules/google-closure-library/third_party/closure/**.js',
-      '!node_modules/google-closure-library/third_party/closure/**_test.js'
+      '../node_modules/google-closure-library/closure/**.js',
+      '!../node_modules/google-closure-library/closure/**_test.js',
+      '../node_modules/google-closure-library/third_party/closure/**.js',
+      '!../node_modules/google-closure-library/third_party/closure/**_test.js'
   ]
   cmd += js_files
   cmd += definitions

@@ -15,16 +15,18 @@
  */
 
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
-import {CommonSignals} from '../../../src/common-signals';
-import {Services} from '../../../src/services';
+import {CommonSignals} from '#core/constants/common-signals';
+import {Services} from '#service';
 import {
   computedStyle,
   removeAlphaFromColor,
   setStyle,
   toggle,
-} from '../../../src/style';
+} from '#core/dom/style';
 import {dev, user, userAssert} from '../../../src/log';
-import {removeElement, whenUpgradedToCustomElement} from '../../../src/dom';
+import {realChildElements} from '#core/dom/query';
+import {removeElement} from '#core/dom';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -55,10 +57,16 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    userAssert(
+      this.win.document.querySelectorAll(
+        'amp-sticky-ad.i-amphtml-built, amp-ad[sticky].i-amphtml-built'
+      ).length <= 1,
+      'At most one sticky ad can be loaded per page'
+    );
     this.viewport_ = this.getViewport();
     this.element.classList.add('i-amphtml-sticky-ad-layout');
 
-    const children = this.getRealChildren();
+    const children = realChildElements(this.element);
     userAssert(
       children.length == 1 && children[0].tagName == 'AMP-AD',
       'amp-sticky-ad must have a single amp-ad child'

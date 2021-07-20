@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '#core/dom';
 
 /** @const */
 const TAG = 'amp-beopinion';
+
+const TYPE = 'beopinion';
 
 class AmpBeOpinion extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -38,7 +40,7 @@ class AmpBeOpinion extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     const preconnect = Services.preconnectFor(this.win);
-    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preloadBootstrap(this.win, TYPE, this.getAmpDoc(), preconnect);
     // Hosts the script that renders widgets.
     preconnect.preload(
       this.getAmpDoc(),
@@ -68,9 +70,9 @@ class AmpBeOpinion extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.win, this.element, 'beopinion');
+    const iframe = getIframe(this.win, this.element, TYPE);
     iframe.title = this.element.title || 'BeOpinion content';
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     listenFor(
       iframe,
       'embed-size',

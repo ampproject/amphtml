@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
+import {parseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {isFormDataWrapper} from '../form-data-wrapper';
+import {dev, user} from '../log';
+import {getService, registerServiceBuilder} from '../service-helpers';
+import {getCorsUrl, parseUrlDeprecated} from '../url';
 import {
   assertSuccess,
   getViewerInterceptResponse,
@@ -23,11 +30,6 @@ import {
   setupInput,
   setupJsonFetchInit,
 } from '../utils/xhr-utils';
-import {dev, user} from '../log';
-import {getCorsUrl, parseUrlDeprecated} from '../url';
-import {getService, registerServiceBuilder} from '../service';
-import {isFormDataWrapper} from '../form-data-wrapper';
-import {parseJson} from '../json';
 
 /**
  * A service that polyfills Fetch API for use within AMP.
@@ -80,7 +82,9 @@ export class Xhr {
       // will expect a native `FormData` object in the `body` property, so
       // the native `FormData` object needs to be unwrapped.
       if (isFormDataWrapper(init.body)) {
-        const formDataWrapper = /** @type {!FormDataWrapperInterface} */ (init.body);
+        const formDataWrapper = /** @type {!FormDataWrapperInterface} */ (
+          init.body
+        );
         init.body = formDataWrapper.getFormData();
       }
       return this.win.fetch.apply(null, arguments);
@@ -109,7 +113,7 @@ export class Xhr {
         throw user().createExpectedError(
           'XHR',
           `Failed fetching (${targetOrigin}/...):`,
-          reason && reason.message
+          reason && /** @type {!Error} */ (reason).message
         );
       }
     );

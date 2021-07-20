@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {FrameOverlayManager} from '../../../ads/inabox/frame-overlay-manager';
+import {FrameOverlayManager} from '#ads/inabox/frame-overlay-manager';
 import {
   stubCollapseFrameForTesting,
   stubExpandFrameForTesting,
-} from '../../../ads/inabox/frame-overlay-helper';
+} from '#ads/inabox/frame-overlay-helper';
 
 const NOOP = () => {};
 

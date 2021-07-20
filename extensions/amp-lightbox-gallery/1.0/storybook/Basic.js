@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
-import {BaseCarousel} from '../../../amp-base-carousel/1.0/base-carousel';
+import * as Preact from '#preact';
+import {BaseCarousel} from '../../../amp-base-carousel/1.0/component';
 import {LightboxGalleryProvider, WithLightbox} from '../component';
-import {withA11y} from '@storybook/addon-a11y';
 import {withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'LightboxGallery',
   component: LightboxGalleryProvider,
-  decorators: [withKnobs, withA11y],
+  decorators: [withKnobs],
 };
 
 export const _default = () => {
@@ -93,6 +92,57 @@ export const carousel = () => {
             src="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80"
             thumbnailSrc="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80"
           />
+          <img
+            src="https://images.unsplash.com/photo-1583512603806-077998240c7a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+            thumbnailSrc="https://images.unsplash.com/photo-1583512603806-077998240c7a?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
+          />
+          <img
+            src="https://images.unsplash.com/photo-1598133893773-de3574464ef0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+            thumbnailSrc="https://images.unsplash.com/photo-1598133893773-de3574464ef0?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
+          />
+          <img
+            src="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+            thumbnailSrc="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
+          />
+        </BaseCarousel>
+      </LightboxGalleryProvider>
+    </>
+  );
+};
+
+export const grouping = () => {
+  return (
+    <>
+      <style>{`
+    img {
+      width: 240px;
+      height: 160px;
+    }
+  `}</style>
+      <p>
+        Note: The standalone img/amp-img elements are lightboxed in a separate
+        lightbox-gallery group than the carousel elements.
+      </p>
+      <LightboxGalleryProvider>
+        <WithLightbox>
+          <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80" />
+        </WithLightbox>
+        <WithLightbox
+          as="img"
+          alt="larger img"
+          id="foo"
+          src="https://images.unsplash.com/photo-1583511666407-5f06533f2113?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+          render={() => (
+            <img
+              alt="smaller img"
+              src="https://images.unsplash.com/photo-1583511666407-5f06533f2113?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
+            />
+          )}
+        />
+        <WithLightbox>
+          <img src="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80" />
+        </WithLightbox>
+        <BaseCarousel lightbox style={{width: '240px', height: '160px'}}>
           <img
             src="https://images.unsplash.com/photo-1583512603806-077998240c7a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
             thumbnailSrc="https://images.unsplash.com/photo-1583512603806-077998240c7a?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"

@@ -40,13 +40,13 @@ component's visual area. If the user scrolls back, the video reverts to its orig
 
 ### Support
 
-This extension is used in conjunction with a [supported video player](../../spec/amp-video-interface.md).
+This extension is used in conjunction with a [supported video player](../../docs/spec/amp-video-interface.md).
 Currently, the supported players are:
 
 -   [`amp-brid-player`](https://amp.dev/documentation/components/amp-brid-player)
 -   [`amp-brightcove`](https://amp.dev/documentation/components/amp-brightcove)
 -   [`amp-dailymotion`](https://amp.dev/documentation/components/amp-dailymotion)
--   [`amp-delight-player`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-delight-player/amp-delight-player.md)
+-   [`amp-delight-player`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-delight-player/amp-delight-player.md)
 -   [`amp-ima-video`](https://amp.dev/documentation/components/amp-ima-video)
 -   [`amp-video`](https://amp.dev/documentation/components/amp-video)
 -   [`amp-video-iframe`](https://amp.dev/documentation/components/amp-video-iframe)

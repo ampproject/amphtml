@@ -19,12 +19,11 @@
  * @fileoverview Script that builds and tests on Linux, macOS, and Windows during CI.
  */
 
-const {buildTargetsInclude, Targets} = require('./build-targets');
+const {cyan, red} = require('../common/colors');
 const {log} = require('../common/logging');
-const {printSkipMessage, timedExecOrDie} = require('./utils');
-const {red, cyan} = require('kleur/colors');
-const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runCiJob} = require('./ci-job');
+const {skipDependentJobs, timedExecOrDie} = require('./utils');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'cross-browser-tests.js';
 
@@ -98,7 +97,9 @@ function runUnitTestsForPlatform() {
       );
   }
 }
-
+/**
+ * Steps to run during push builds.
+ */
 function pushBuildWorkflow() {
   runUnitTestsForPlatform();
   timedExecOrDie('amp dist --fortesting');
@@ -106,12 +107,9 @@ function pushBuildWorkflow() {
 }
 
 /**
- * @return {Promise<void>}
+ * Steps to run during PR builds.
  */
-async function prBuildWorkflow() {
-  if (process.platform == 'linux') {
-    await reportAllExpectedTests(); // Only once is sufficient.
-  }
+function prBuildWorkflow() {
   if (
     !buildTargetsInclude(
       Targets.RUNTIME,
@@ -120,7 +118,7 @@ async function prBuildWorkflow() {
       Targets.INTEGRATION_TEST
     )
   ) {
-    printSkipMessage(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime, unit tests, integration tests, or end-to-end tests'
     );

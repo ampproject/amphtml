@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {TaskQueue} from '../../src/service/task-queue';
+import {TaskQueue} from '#service/task-queue';
 
-describe('TaskQueue', () => {
+describes.sandboxed('TaskQueue', {}, (env) => {
   let clock;
   let queue;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     queue = new TaskQueue();
   });
 

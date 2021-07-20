@@ -18,12 +18,12 @@ import {
   base64Decode,
   decryptAesGcmImpl,
   safeAesGcmImportKey,
-} from '../../../third_party/subscriptions-project/aes_gcm';
-import {iterateCursor} from '../../../src/dom';
-import {padStart} from '../../../src/string';
-import {toArray} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
-import {utf8Encode} from '../../../src/utils/bytes';
+} from '#third_party/subscriptions-project/aes_gcm';
+import {iterateCursor} from '#core/dom';
+import {padStart} from '#core/types/string';
+import {toArray} from '#core/types/array';
+import {tryParseJson} from '#core/types/object/json';
+import {utf8Encode} from '#core/types/string/bytes';
 
 export class CryptoHandler {
   /**

@@ -17,6 +17,7 @@
 import {AmpStoryEntryPoint} from './amp-story-entry-point/amp-story-entry-point-impl';
 import {AmpStoryPlayer} from './amp-story-player-impl';
 import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
+
 import {initLogConstructor} from '../log';
 
 export class AmpStoryComponentManager {
@@ -30,17 +31,17 @@ export class AmpStoryComponentManager {
   }
 
   /**
-   * Calls layoutCallback on the element when it is close to the viewport.
+   * Calls layoutPlayer on the element when it is close to the viewport.
    * @param {!Element} element
    * @private
    */
   layoutEl_(element) {
     new AmpStoryPlayerViewportObserver(this.win_, element, () =>
-      element.layoutCallback()
+      element.layoutPlayer()
     );
 
     const scrollHandler = () => {
-      element.layoutCallback();
+      element.layoutPlayer();
       this.win_.removeEventListener('scroll', scrollHandler);
     };
 
@@ -58,7 +59,7 @@ export class AmpStoryComponentManager {
     for (let i = 0; i < players.length; i++) {
       const playerEl = players[i];
       const player = new AmpStoryPlayer(this.win_, playerEl);
-      player.buildCallback();
+      player.buildPlayer();
       this.layoutEl_(player);
     }
   }

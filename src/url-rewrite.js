@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import {urls} from './config';
+import {parseSrcset} from './core/dom/srcset';
+import {user} from './log';
 import {
   checkCorsUrl,
   getSourceUrl,
@@ -21,9 +24,6 @@ import {
   parseUrlDeprecated,
   resolveRelativeUrl,
 } from './url';
-import {parseSrcset} from './srcset';
-import {urls} from './config';
-import {user} from './log';
 
 const TAG = 'URL-REWRITE';
 

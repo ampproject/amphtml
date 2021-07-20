@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {createElementWithAttributes, escapeHtml} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
+import {createElementWithAttributes, escapeHtml} from '#core/dom';
+import {dict} from '#core/types/object';
 import {getFieSafeScriptSrcs} from '../../../src/friendly-iframe-embed';
 
 // If making changes also change ALLOWED_FONT_REGEX in head-validation.js
@@ -81,21 +81,28 @@ export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
  */
 export function createSecureFrame(win, title, height, width) {
   const {document} = win;
-  const iframe = /** @type {!HTMLIFrameElement} */ (createElementWithAttributes(
-    document,
-    'iframe',
-    dict({
-      // NOTE: It is possible for either width or height to be 'auto',
-      // a non-numeric value.
-      'height': height,
-      'width': width,
-      'title': title,
-      'frameborder': '0',
-      'allowfullscreen': '',
-      'allowtransparency': '',
-      'scrolling': 'no',
-      'sandbox': sandboxVals,
-    })
-  ));
+  const iframe = /** @type {!HTMLIFrameElement} */ (
+    createElementWithAttributes(
+      document,
+      'iframe',
+      dict({
+        // NOTE: It is possible for either width or height to be 'auto',
+        // a non-numeric value.
+        'height': height,
+        'width': width,
+        'title': title,
+        'frameborder': '0',
+        'allowfullscreen': '',
+        'allowtransparency': '',
+        'scrolling': 'no',
+        'sandbox': sandboxVals,
+      })
+    )
+  );
+
+  if (document.featurePolicy?.features().includes('attribution-reporting')) {
+    iframe.setAttribute('allow', `attribution-reporting 'src'`);
+  }
+
   return iframe;
 }

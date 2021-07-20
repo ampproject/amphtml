@@ -30,7 +30,7 @@ module.exports = {
     'local/no-dynamic-import': 0,
     'local/no-es2015-number-props': 0,
     'local/no-export-side-effect': 0,
-    'local/no-for-of-statement': 0,
+    'local/no-forbidden-terms': 0,
     'local/no-function-async': 0,
     'local/no-function-generator': 0,
     'local/no-global': 0,

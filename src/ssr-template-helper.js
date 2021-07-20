@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {dict} from './utils/object';
-import {isArray} from './types';
+import {isArray} from './core/types';
+import {dict} from './core/types/object';
+import {userAssert} from './log';
 import {toStructuredCloneable} from './utils/xhr-utils';
-import {pureUserAssert as userAssert} from './core/assert';
 
 /**
  * @typedef {{

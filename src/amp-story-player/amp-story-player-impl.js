@@ -15,34 +15,36 @@
  */
 
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
-import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
-import {Deferred} from '../utils/promise';
 import {Messaging} from '@ampproject/viewer-messaging';
+
+// Source for this constant is css/amp-story-player-iframe.css
+import {devAssertElement} from '#core/assert';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {Deferred} from '#core/data-structures/promise';
+import {isJsonScriptTag, tryFocus} from '#core/dom';
+import {resetStyles, setStyle, setStyles} from '#core/dom/style';
+import {findIndex, toArray} from '#core/types/array';
+import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
+import {parseQueryString} from '#core/types/string/url';
+
+import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
 import {PageScroller} from './page-scroller';
-import {VisibilityState} from '../visibility-state';
+
+import {cssText} from '../../build/amp-story-player-iframe.css';
+import {applySandbox} from '../3p-frame';
+import {urls} from '../config';
+import {createCustomEvent, listenOnce} from '../event-helper';
+import {getMode} from '../mode';
 import {
   addParamsToUrl,
   getFragment,
   isProxyOrigin,
-  parseQueryString,
   parseUrlWithA,
   removeFragment,
   removeSearch,
   serializeQueryString,
 } from '../url';
-import {applySandbox} from '../3p-frame';
-import {createCustomEvent} from '../event-helper';
-import {dict} from '../utils/object';
-import {isJsonScriptTag, tryFocus} from '../dom';
-// Source for this constant is css/amp-story-player-iframe.css
-import {cssText} from '../../build/amp-story-player-iframe.css';
-import {dev} from '../log';
-import {findIndex} from '../utils/array';
-import {getMode} from '../../src/mode';
-import {parseJson} from '../json';
-import {resetStyles, setStyle, setStyles} from '../style';
-import {toArray} from '../types';
-import {urls} from '../config';
 
 /** @enum {string} */
 const LoadStateClass = {
@@ -116,6 +118,10 @@ const STORY_MESSAGE_STATE_TYPE = {
 /** @const {string} */
 export const AMP_STORY_PLAYER_EVENT = 'AMP_STORY_PLAYER_EVENT';
 
+/** @const {string} */
+const CLASS_NO_NAVIGATION_TRANSITION =
+  'i-amphtml-story-player-no-navigation-transition';
+
 /** @typedef {{ state:string, value:(boolean|string) }} */
 let DocumentStateTypeDef;
 
@@ -136,17 +142,27 @@ let StoryDef;
 
 /**
  * @typedef {{
- *   on: string,
- *   action: string,
- *   endpoint: string,
+ *   on: ?string,
+ *   action: ?string,
+ *   endpoint: ?string,
+ *   pageScroll: ?boolean,
+ *   autoplay: ?boolean,
  * }}
  */
 let BehaviorDef;
 
 /**
  * @typedef {{
- *   controls: (!Array<!ViewerControlDef>),
- *   behavior: !BehaviorDef,
+ *   attribution: ?string,
+ * }}
+ */
+let DisplayDef;
+
+/**
+ * @typedef {{
+ *   controls: ?Array<!ViewerControlDef>,
+ *   behavior: ?BehaviorDef,
+ *   display: ?DisplayDef,
  * }}
  */
 let ConfigDef;
@@ -234,7 +250,10 @@ export class AmpStoryPlayer {
     this.pageScroller_ = new PageScroller(win);
 
     /** @private {boolean} */
-    this.autoplay_ = true;
+    this.playing_ = true;
+
+    /** @private {?string} */
+    this.attribution_ = null;
 
     return this.element_;
   }
@@ -244,8 +263,8 @@ export class AmpStoryPlayer {
    * @private
    */
   attachCallbacksToElement_() {
-    this.element_.buildCallback = this.buildCallback.bind(this);
-    this.element_.layoutCallback = this.layoutCallback.bind(this);
+    this.element_.buildPlayer = this.buildPlayer.bind(this);
+    this.element_.layoutPlayer = this.layoutPlayer.bind(this);
     this.element_.getElement = this.getElement.bind(this);
     this.element_.getStories = this.getStories.bind(this);
     this.element_.load = this.load.bind(this);
@@ -273,8 +292,8 @@ export class AmpStoryPlayer {
     if (!!this.element_.isBuilt_) {
       throw new Error(`[${TAG}] calling load() on an already loaded element.`);
     }
-    this.buildCallback();
-    this.layoutCallback();
+    this.buildPlayer();
+    this.layoutPlayer();
   }
 
   /**
@@ -322,6 +341,9 @@ export class AmpStoryPlayer {
    * @public
    */
   play() {
+    if (!this.element_.isLaidOut_) {
+      this.layoutPlayer();
+    }
     this.togglePaused_(false);
   }
 
@@ -339,6 +361,7 @@ export class AmpStoryPlayer {
    * @private
    */
   togglePaused_(paused) {
+    this.playing_ = !paused;
     const currentStory = this.stories_[this.currentIdx_];
 
     this.updateVisibilityState_(
@@ -365,7 +388,7 @@ export class AmpStoryPlayer {
   }
 
   /** @public */
-  buildCallback() {
+  buildPlayer() {
     if (!!this.element_.isBuilt_) {
       return;
     }
@@ -377,6 +400,7 @@ export class AmpStoryPlayer {
     this.readPlayerConfig_();
     this.maybeFetchMoreStories_(this.stories_.length - this.currentIdx_ - 1);
     this.initializeAutoplay_();
+    this.initializeAttribution_();
     this.initializePageScroll_();
     this.initializeCircularWrapping_();
     this.signalReady_();
@@ -501,9 +525,9 @@ export class AmpStoryPlayer {
     }
 
     try {
-      this.playerConfig_ = /** @type {!ConfigDef} */ (parseJson(
-        scriptTag.textContent
-      ));
+      this.playerConfig_ = /** @type {!ConfigDef} */ (
+        parseJson(scriptTag.textContent)
+      );
     } catch (reason) {
       console /*OK*/
         .error(`[${TAG}] `, reason);
@@ -595,6 +619,11 @@ export class AmpStoryPlayer {
             false
           );
 
+          messaging.sendRequest(
+            'onDocumentState',
+            dict({'state': STORY_MESSAGE_STATE_TYPE.MUTED_STATE})
+          );
+
           messaging.registerHandler('documentStateUpdate', (event, data) => {
             this.onDocumentStateUpdate_(
               /** @type {!DocumentStateTypeDef} */ (data),
@@ -682,7 +711,7 @@ export class AmpStoryPlayer {
   /**
    * @public
    */
-  layoutCallback() {
+  layoutPlayer() {
     if (!!this.element_.isLaidOut_) {
       return;
     }
@@ -748,9 +777,10 @@ export class AmpStoryPlayer {
    * Shows the story provided by the URL in the player and go to the page if provided.
    * @param {?string} storyUrl
    * @param {string=} pageId
+   * @param {{animate: boolean?}} options
    * @return {!Promise}
    */
-  show(storyUrl, pageId = null) {
+  show(storyUrl, pageId = null, options = {}) {
     const story = this.getStoryFromUrl_(storyUrl);
 
     let renderPromise = Promise.resolve();
@@ -758,6 +788,13 @@ export class AmpStoryPlayer {
       this.currentIdx_ = story.idx;
 
       renderPromise = this.render_();
+
+      if (options.animate === false) {
+        this.rootEl_.classList.toggle(CLASS_NO_NAVIGATION_TRANSITION, true);
+        listenOnce(story.iframe, 'transitionend', () => {
+          this.rootEl_.classList.remove(CLASS_NO_NAVIGATION_TRANSITION);
+        });
+      }
       this.onNavigation_();
     }
 
@@ -937,8 +974,9 @@ export class AmpStoryPlayer {
    * Navigates stories given a number.
    * @param {number} storyDelta
    * @param {number=} pageDelta
+   * @param {{animate: boolean?}} options
    */
-  go(storyDelta, pageDelta = 0) {
+  go(storyDelta, pageDelta = 0, options = {}) {
     if (storyDelta === 0 && pageDelta === 0) {
       return;
     }
@@ -961,7 +999,7 @@ export class AmpStoryPlayer {
 
     let showPromise = Promise.resolve();
     if (this.currentIdx_ !== newStory.idx) {
-      showPromise = this.show(newStory.href);
+      showPromise = this.show(newStory.href, /* pageId */ null, options);
     }
 
     showPromise.then(() => {
@@ -972,6 +1010,7 @@ export class AmpStoryPlayer {
   /**
    * Updates story position.
    * @param {!StoryDef} story
+   * @return {!Promise}
    * @private
    */
   updatePosition_(story) {
@@ -1064,7 +1103,7 @@ export class AmpStoryPlayer {
           .then(() => this.visibleDeferred_.promise)
           // 4. Update the visibility state of the story.
           .then(() => {
-            if (story.distance === 0 && this.autoplay_) {
+            if (story.distance === 0 && this.playing_) {
               this.updateVisibilityState_(story, VisibilityState.VISIBLE);
             }
 
@@ -1188,6 +1227,10 @@ export class AmpStoryPlayer {
       'storyPlayer': 'v0',
       'cap': 'swipe',
     };
+
+    if (this.attribution_ === 'auto') {
+      playerFragmentParams['attribution'] = 'auto';
+    }
 
     const originalFragmentString = getFragment(href);
     const originalFragments = parseQueryString(originalFragmentString);
@@ -1367,6 +1410,9 @@ export class AmpStoryPlayer {
           messaging
         );
         break;
+      case STORY_MESSAGE_STATE_TYPE.MUTED_STATE:
+        this.onMutedStateUpdate_(/** @type {string} */ (data.value));
+        break;
       case AMP_STORY_PLAYER_EVENT:
         this.onPlayerEvent_(/** @type {string} */ (data.value));
         break;
@@ -1392,6 +1438,17 @@ export class AmpStoryPlayer {
         );
         break;
     }
+  }
+
+  /**
+   * Reacts to mute/unmute events coming from the story.
+   * @param {string} muted
+   * @private
+   */
+  onMutedStateUpdate_(muted) {
+    this.element_.dispatchEvent(
+      createCustomEvent(this.win_, 'amp-story-muted-state', {muted})
+    );
   }
 
   /**
@@ -1652,16 +1709,13 @@ export class AmpStoryPlayer {
     const currentIframe = this.stories_[this.currentIdx_].iframe;
 
     requestAnimationFrame(() => {
-      resetStyles(dev().assertElement(currentIframe), [
-        'transform',
-        'transition',
-      ]);
+      resetStyles(devAssertElement(currentIframe), ['transform', 'transition']);
     });
 
     const secondaryStory = this.getSecondaryStory_();
     if (secondaryStory) {
       requestAnimationFrame(() => {
-        resetStyles(dev().assertElement(secondaryStory.iframe), [
+        resetStyles(devAssertElement(secondaryStory.iframe), [
           'transform',
           'transition',
         ]);
@@ -1706,7 +1760,20 @@ export class AmpStoryPlayer {
     const {behavior} = this.playerConfig_;
 
     if (behavior && typeof behavior.autoplay === 'boolean') {
-      this.autoplay_ = behavior.autoplay;
+      this.playing_ = behavior.autoplay;
+    }
+  }
+
+  /** @private */
+  initializeAttribution_() {
+    if (!this.playerConfig_) {
+      return;
+    }
+
+    const {display} = this.playerConfig_;
+
+    if (display && display.attribution === 'auto') {
+      this.attribution_ = 'auto';
     }
   }
 
@@ -1770,7 +1837,7 @@ export class AmpStoryPlayer {
     const translate = `translate3d(${deltaX}px, 0, 0)`;
 
     requestAnimationFrame(() => {
-      setStyles(dev().assertElement(iframe), {
+      setStyles(devAssertElement(iframe), {
         transform: translate,
         transition: 'none',
       });
@@ -1782,7 +1849,7 @@ export class AmpStoryPlayer {
     }
 
     requestAnimationFrame(() => {
-      setStyles(dev().assertElement(secondaryStory.iframe), {
+      setStyles(devAssertElement(secondaryStory.iframe), {
         transform: secondaryTranslate,
         transition: 'none',
       });
@@ -1801,7 +1868,7 @@ export class AmpStoryPlayer {
       return null;
     }
 
-    const {screenX, screenY, clientX, clientY} = touches[0];
+    const {clientX, clientY, screenX, screenY} = touches[0];
     return {screenX, screenY, clientX, clientY};
   }
 }

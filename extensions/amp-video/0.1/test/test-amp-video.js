@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
+import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
 import {AmpVideo, isCachedByCdn} from '../amp-video';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 import {VideoEvents} from '../../../../src/video-interface';
-import {VisibilityState} from '../../../../src/visibility-state';
-import {dispatchCustomEvent} from '../../../../src/dom';
-import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {dispatchCustomEvent} from '#core/dom';
+import {installPerformanceService} from '#service/performance-impl';
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {toggleExperiment} from '../../../../src/experiments';
+import {toggleExperiment} from '#experiments';
+import {xhrServiceForTesting} from '#service/xhr-impl';
 
 describes.realWin(
   'amp-video',
@@ -40,6 +43,7 @@ describes.realWin(
       doc = win.document;
       timer = Services.timerFor(win);
 
+      installPerformanceService(win);
       resizeObserverStub = installResizeObserverStub(env.sandbox, win);
     });
 
@@ -165,6 +169,46 @@ describes.realWin(
       expect(sources[3].getAttribute('src')).to.equal(
         'https://example.com/video.mp4'
       );
+    });
+
+    it('should set an attribute on cached video sources', async () => {
+      const source = doc.createElement('source');
+      source.setAttribute(
+        'src',
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+      );
+      source.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+      source.setAttribute('data-bitrate', '1000');
+      const v = await getVideo(
+        {
+          width: 160,
+          height: 90,
+        },
+        [source]
+      );
+      const sources = v.querySelectorAll('source');
+      expect(sources[0]).to.have.attribute('i-amphtml-video-cached-source');
+      expect(sources[1]).to.have.attribute('i-amphtml-video-cached-source');
+      expect(sources[2]).to.have.attribute('i-amphtml-video-cached-source');
+    });
+
+    it('should not set an attribute on non cached video sources', async () => {
+      const source = doc.createElement('source');
+      source.setAttribute(
+        'src',
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+      );
+      source.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+      source.setAttribute('data-bitrate', '1000');
+      const v = await getVideo(
+        {
+          width: 160,
+          height: 90,
+        },
+        [source]
+      );
+      const sources = v.querySelectorAll('source');
+      expect(sources[3]).to.not.have.attribute('i-amphtml-video-cached-source');
     });
 
     it('should load a video', async () => {
@@ -465,9 +509,14 @@ describes.realWin(
       env.sandbox.spy(video, 'pause');
       // The auto-pause only happens on when the video is actually playing.
       dispatchCustomEvent(video, 'play');
+      // First send "size" event and then "no size".
       resizeObserverStub.notifySync({
         target: v,
-        contentRect: {width: 0, height: 0},
+        borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+      });
+      resizeObserverStub.notifySync({
+        target: v,
+        borderBoxSize: [{inlineSize: 0, blockSize: 0}],
       });
       expect(video.pause.called).to.be.true;
     });
@@ -686,6 +735,92 @@ describes.realWin(
       const pEnded = listenOncePromise(v, VideoEvents.ENDED);
       const pPause = listenOncePromise(v, VideoEvents.PAUSE);
       return Promise.all([pEnded, pPause]);
+    });
+
+    describe('remote video cache (amp-video[cache=*])', () => {
+      let remoteSources;
+      beforeEach(() => {
+        const cacheUrlService = new AmpCacheUrlService();
+        env.sandbox
+          .stub(Services, 'cacheUrlServicePromiseForDoc')
+          .resolves(cacheUrlService);
+
+        const extensionsService = {
+          installExtensionForDoc: env.sandbox.spy(() => Promise.resolve()),
+        };
+        env.sandbox.stub(Services, 'extensionsFor').returns(extensionsService);
+
+        const xhrService = xhrServiceForTesting(env.win);
+        env.sandbox.stub(Services, 'xhrFor').returns(xhrService);
+        remoteSources = [];
+        env.sandbox.stub(xhrService, 'fetch').resolves({
+          json: () => Promise.resolve({sources: remoteSources}),
+        });
+      });
+
+      it('should play a source fetched from video caching', async () => {
+        remoteSources.push({
+          url: 'https://example.com/cached-video.mp4',
+          type: 'video/mp4',
+        });
+        const v = await getVideo({
+          src: 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+          type: 'video/mp4',
+          'amp-orig-src': 'https://example.com/video.mp4',
+          cache: 'google',
+          layout: 'responsive',
+          height: '100px',
+          width: '100px',
+        });
+        const sources = v.querySelectorAll('source');
+        expect(sources.length).to.equal(2);
+        expect(v.querySelector('video')).to.not.have.attribute('src');
+        expect(sources[0].getAttribute('src')).to.equal(
+          'https://example.com/cached-video.mp4'
+        );
+        expect(sources[1].getAttribute('src')).to.equal(
+          'https://example.com/video.mp4'
+        );
+      });
+
+      it('should remove AMP Cache video caching on video[src] if remote video caching is provided', async () => {
+        const origSrc = 'https://example.com/video.mp4';
+        const v = await getVideo({
+          src: 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+          type: 'video/mp4',
+          'amp-orig-src': origSrc,
+          cache: 'google',
+          layout: 'responsive',
+          height: '100px',
+          width: '100px',
+        });
+        const sources = v.querySelectorAll('source');
+        expect(sources.length).to.equal(1);
+        expect(sources[0].getAttribute('src')).to.equal(origSrc);
+      });
+
+      it('should remove AMP Cache video caching on source elements if remote video caching is provided', async () => {
+        const origSrc = 'https://example.com/video.mp4';
+        const cachedSource = doc.createElement('source');
+        cachedSource.setAttribute(
+          'src',
+          'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+        );
+        cachedSource.setAttribute('amp-orig-src', origSrc);
+        const v = await getVideo(
+          {
+            type: 'video/mp4',
+            cache: 'google',
+            layout: 'responsive',
+            height: '100px',
+            width: '100px',
+          },
+          [cachedSource]
+        );
+        const sources = v.querySelectorAll('source');
+        expect(sources.length).to.equal(1);
+        expect(sources[0].getAttribute('src')).to.equal(origSrc);
+      });
     });
 
     describe('blurred image placeholder', () => {

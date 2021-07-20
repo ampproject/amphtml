@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {getMode} from '../mode';
 import {urls} from '../config';
+import {getMode} from '../mode';
 
 const CUSTOM_TEMPLATES = ['amp-mustache'];
 const LATEST_VERSION = 'latest';
@@ -235,6 +235,21 @@ export function extensionScriptsInNode(head) {
     }
   }
   return scripts;
+}
+
+/**
+ * Verifies that an extension script is present in head for
+ * installation.
+ * @param {!Window} win
+ * @param {string} id
+ * @param {string} version
+ * @return {boolean}
+ */
+export function extensionScriptInNode(win, id, version) {
+  return extensionScriptsInNode(win.document.head).some(
+    ({extensionId, extensionVersion}) =>
+      id == extensionId && version == extensionVersion
+  );
 }
 
 /**

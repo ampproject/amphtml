@@ -15,11 +15,11 @@
  */
 
 import '../amp-3q-player';
-import * as dom from '../../../../src/dom';
-import {Services} from '../../../../src/services';
+import * as fullscreen from '#core/dom/fullscreen';
+import {Services} from '#service';
 import {VideoEvents} from '../../../../src/video-interface';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
+import {createElementWithAttributes} from '#core/dom';
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {listenOncePromise} from '../../../../src/event-helper';
 
 describes.realWin(
@@ -77,7 +77,11 @@ describes.realWin(
         sendFakeMessage(impl, iframe, 'playing');
         resizeObserverStub.notifySync({
           target: player,
-          contentRect: {width: 0, height: 0},
+          borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+        });
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
         });
         expect(postMessageSpy).to.be.calledWith('pause');
       });
@@ -87,7 +91,11 @@ describes.realWin(
         sendFakeMessage(impl, iframe, 'paused');
         resizeObserverStub.notifySync({
           target: player,
-          contentRect: {width: 0, height: 0},
+          borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+        });
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
         });
         expect(postMessageSpy).to.not.be.calledWith('pause');
       });
@@ -200,13 +208,13 @@ describes.realWin(
       });
 
       it('can enter fullscreen', () => {
-        const spy = env.sandbox.spy(dom, 'fullscreenEnter');
+        const spy = env.sandbox.spy(fullscreen, 'fullscreenEnter');
         impl.fullscreenEnter();
         expect(spy).calledWith(impl.iframe_);
       });
 
       it('can exit fullscreen', () => {
-        const spy = env.sandbox.spy(dom, 'fullscreenExit');
+        const spy = env.sandbox.spy(fullscreen, 'fullscreenExit');
         impl.fullscreenExit();
         expect(spy).calledWith(impl.iframe_);
         expect(impl.isFullscreen()).to.be.false;

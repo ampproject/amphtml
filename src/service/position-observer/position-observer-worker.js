@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import {Services} from '../../services';
-import {pureDevAssert as devAssert} from '../../core/assert';
 import {
   layoutRectEquals,
   layoutRectLtwh,
   layoutRectsRelativePos,
   rectsOverlap,
-} from '../../layout-rect';
+} from '#core/dom/layout/rect';
+
+import {Services} from '#service';
+
+import {devAssert} from '../../log';
 
 /** @enum {number} */
 export const PositionObserverFidelity = {
@@ -95,7 +97,9 @@ export class PositionObserverWorker {
       position.positionRect,
       'PositionObserver should always trigger entry with clientRect'
     );
-    const positionRect = /** @type {!../../layout-rect.LayoutRectDef} */ (position.positionRect);
+    const positionRect = /** @type {!../../layout-rect.LayoutRectDef} */ (
+      position.positionRect
+    );
     // Add the relative position of the element to its viewport
     position.relativePos = layoutRectsRelativePos(
       positionRect,

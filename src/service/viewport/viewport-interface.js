@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Disposable} from '../../service';
+import {Disposable} from '../../service-helpers';
 
 /**
  * @typedef {{
@@ -144,11 +144,9 @@ export class ViewportInterface extends Disposable {
    * Note that this function should be called in vsync measure. Please consider
    * using `getClientRectAsync` instead.
    * @param {!Element} el
-   * @param {!ClientRect=} opt_premeasuredRect If provided, use this
-   *    premeasured ClientRect instead of calling getBoundingClientRect.
    * @return {!../../layout-rect.LayoutRectDef}
    */
-  getLayoutRect(el, opt_premeasuredRect) {}
+  getLayoutRect(el) {}
 
   /**
    * Returns the clientRect of the element.

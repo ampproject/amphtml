@@ -15,8 +15,8 @@
  */
 
 import {BaseElement} from './base-element';
-import {isExperimentOn} from '../../../src/experiments';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {isExperimentOn} from '#experiments';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-timeago';

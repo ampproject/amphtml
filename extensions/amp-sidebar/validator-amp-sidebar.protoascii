@@ -84,6 +84,8 @@ tags: { # <amp-sidebar> in amp-story
     marker: AUTOSCROLL
   }
   spec_url: "https://amp.dev/documentation/components/amp-sidebar/"
+  deprecation: "anchor tags or amp-story-player controls"
+  deprecation_url: "https://github.com/ampproject/amphtml/issues/33293"
 }
 tags: {  # amp-sidebar > nav
   html_format: AMP

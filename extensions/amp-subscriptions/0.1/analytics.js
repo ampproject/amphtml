@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/utils/object';
+import {dict} from '#core/types/object';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {user} from '../../../src/log';
 
@@ -103,12 +103,14 @@ export class SubscriptionAnalytics {
   serviceEvent(eventType, platformKey, opt_vars, internalVars) {
     this.event(
       eventType,
-      /** @type {!JsonObject} */ (Object.assign(
-        dict({
-          'serviceId': platformKey,
-        }),
-        opt_vars
-      )),
+      /** @type {!JsonObject} */ (
+        Object.assign(
+          dict({
+            'serviceId': platformKey,
+          }),
+          opt_vars
+        )
+      ),
       internalVars
     );
   }

@@ -234,10 +234,10 @@ describes.realWin(
   }
 );
 
-describe
+describes.sandboxed
   .configure()
   .ifChrome()
-  .run('Unit Tests for messaging.js', () => {
+  .run('Unit Tests for messaging.js', {}, () => {
     describes.sandboxed('amp-viewer-integration', {}, (env) => {
       const viewerOrigin = 'http://localhost:9876';
       const messagingToken = '32q4pAwei09W845V3j24o8OJIO3fE9l3q49p';

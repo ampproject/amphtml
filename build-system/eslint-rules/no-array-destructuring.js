@@ -49,7 +49,7 @@ module.exports = function (context) {
     }
 
     if (callee.type === 'MemberExpression') {
-      const {object, property, computed} = callee;
+      const {computed, object, property} = callee;
       if (computed) {
         return false;
       }

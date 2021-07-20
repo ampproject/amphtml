@@ -16,14 +16,13 @@
 
 // To do: how to add CSS
 //import '!style-loader!css-loader!./Basic-styles.css';
-import * as Preact from '../../../../src/preact';
-import {withA11y} from '@storybook/addon-a11y';
+import * as Preact from '#preact';
 import {withAmp} from '@ampproject/storybook-addon';
 import {withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'amp-sidebar-0_1',
-  decorators: [withKnobs, withA11y, withAmp],
+  decorators: [withKnobs, withAmp],
 
   parameters: {
     extensions: [{name: 'amp-sidebar', version: 0.1}],

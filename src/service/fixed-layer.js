@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import {Animation} from '../animation';
-import {Pass} from '../pass';
-import {Services} from '../services';
+import {domOrderComparator} from '#core/dom';
+import {closest, matches} from '#core/dom/query';
 import {
-  assertDoesNotContainDisplay,
   computedStyle,
   getStyle,
   getVendorJsPropertyName,
@@ -27,12 +25,17 @@ import {
   setStyle,
   setStyles,
   toggle,
-} from '../style';
-import {closest, domOrderComparator, matches} from '../dom';
+} from '#core/dom/style';
+import {remove} from '#core/types/array';
+import {endsWith} from '#core/types/string';
+
+import {Services} from '#service';
+
+import {Animation} from '../animation';
+import {assertDoesNotContainDisplay} from '../assert-display';
 import {dev, user} from '../log';
-import {endsWith} from '../string';
 import {getMode} from '../mode';
-import {remove} from '../utils/array';
+import {Pass} from '../pass';
 
 const TAG = 'FixedLayer';
 
@@ -463,8 +466,8 @@ export class FixedLayer {
               const {element, forceTransfer} = fe;
               const style = computedStyle(win, element);
 
-              const {offsetWidth, offsetHeight, offsetTop} = element;
-              const {position = '', display = '', bottom, zIndex} = style;
+              const {offsetHeight, offsetTop, offsetWidth} = element;
+              const {bottom, display = '', position = '', zIndex} = style;
               const opacity = parseFloat(style.opacity);
               const transform =
                 style[getVendorJsPropertyName(style, 'transform')];
@@ -1097,9 +1100,8 @@ class TransferLayerBody {
     if (!fe.placeholder) {
       // Never been transfered before: ensure that it's properly configured.
       setStyle(element, 'pointer-events', 'initial');
-      const placeholder = (fe.placeholder = this.doc_.createElement(
-        'i-amphtml-fpa'
-      ));
+      const placeholder = (fe.placeholder =
+        this.doc_.createElement('i-amphtml-fpa'));
       toggle(placeholder, false);
       placeholder.setAttribute('i-amphtml-fixedid', fe.id);
     }

@@ -108,4 +108,4 @@ You can style the `amp-fit-text` with standard CSS. In particular, you can use `
 
 ## Validation
 
-See [amp-fit-text rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-fit-text/validator-amp-fit-text.protoascii) in the AMP validator specification.
+See [amp-fit-text rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-fit-text/validator-amp-fit-text.protoascii) in the AMP validator specification.

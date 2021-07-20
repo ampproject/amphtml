@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-import {VisibilityState} from '../visibility-state';
-import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
-import {pushIfNotExist, removeItem} from './array';
-import {rethrowAsync} from '../log';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {containsNotSelf} from '#core/dom';
+import {rethrowAsync} from '#core/error';
+import {pushIfNotExist, removeItem} from '#core/types/array';
+
+import {
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+} from '../service-helpers';
 
 const SERVICE_ID = 'DisplayObserver';
 
@@ -365,7 +370,7 @@ export class DisplayObserver {
   observed_(entries, io) {
     const seen = new Set();
     for (let i = entries.length - 1; i >= 0; i--) {
-      const {target, isIntersecting} = entries[i];
+      const {isIntersecting, target} = entries[i];
       if (seen.has(target)) {
         continue;
       }
@@ -491,15 +496,6 @@ function findObserverByContainer(observers, container) {
     }
   }
   return -1;
-}
-
-/**
- * @param {!Element} container
- * @param {!Element} child
- * @return {boolean}
- */
-function containsNotSelf(container, child) {
-  return child !== container && container.contains(child);
 }
 
 /**

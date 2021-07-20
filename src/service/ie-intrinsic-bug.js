@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {closestAncestorElementBySelector} from '../dom';
-import {getLengthNumeral} from '../layout';
-import {transparentPng} from '../utils/img';
+import {transparentPng} from '#core/dom/img';
+import {getLengthNumeral} from '#core/dom/layout';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+
+import {Services} from '#service';
 
 /**
  * IE can't handle auto-scaling SVG images used for intrinsic layout. Generate

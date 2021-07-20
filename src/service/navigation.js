@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {
-  closestAncestorElementBySelector,
-  isIframed,
-  openWindowDialog,
-  tryFocus,
-} from '../dom';
-import {dev, user, userAssert} from '../log';
-import {dict} from '../utils/object';
-import {escapeCssSelectorIdent} from '../css';
+import {PriorityQueue} from '#core/data-structures/priority-queue';
+import {isIframed, tryFocus} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+import {dict} from '#core/types/object';
+import {toWin} from '#core/window';
+
+import {Services} from '#service';
+
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
+import {dev, user, userAssert} from '../log';
 import {getMode} from '../mode';
+import {openWindowDialog} from '../open-window-dialog';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 import {isLocalhostOrigin} from '../url';
-import {registerServiceBuilderForDoc} from '../service';
-import {toWin} from '../types';
-import PriorityQueue from '../utils/priority-queue';
 
 const TAG = 'navigation';
 
@@ -131,10 +130,11 @@ export class Navigation {
      * Must use URL parsing scoped to `rootNode_` for correct FIE behavior.
      * @private @const {!Element|!ShadowRoot}
      */
-    this.serviceContext_ = /** @type {!Element|!ShadowRoot} */ (this.rootNode_
-      .nodeType == Node.DOCUMENT_NODE
-      ? this.rootNode_.documentElement
-      : this.rootNode_);
+    this.serviceContext_ = /** @type {!Element|!ShadowRoot} */ (
+      this.rootNode_.nodeType == Node.DOCUMENT_NODE
+        ? this.rootNode_.documentElement
+        : this.rootNode_
+    );
 
     /** @private @const {!function(!Event)|undefined} */
     this.boundHandle_ = this.handle_.bind(this);
@@ -248,7 +248,7 @@ export class Navigation {
    * }=} options
    */
   navigateTo(win, url, opt_requestedBy, options = {}) {
-    const {target = '_top', opener = false} = options;
+    const {opener = false, target = '_top'} = options;
     url = this.applyNavigateToMutators_(url);
     const urlService = Services.urlForDoc(this.serviceContext_);
     if (!urlService.isProtocolValid(url)) {

@@ -19,11 +19,8 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
-import * as bytesUtils from '../../../../src/utils/bytes';
-import {
-  AMP_EXPERIMENT_ATTRIBUTE,
-  QQID_HEADER,
-} from '../../../../ads/google/a4a/utils';
+import * as bytesUtils from '#core/types/string/bytes';
+import {AMP_EXPERIMENT_ATTRIBUTE, QQID_HEADER} from '#ads/google/a4a/utils';
 import {
   AMP_SIGNATURE_HEADER,
   VerificationStatus,
@@ -43,14 +40,17 @@ import {
   resetLocationQueryParametersForTesting,
   resetTokensToInstancesMap,
 } from '../amp-ad-network-doubleclick-impl';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {Deferred} from '../../../../src/utils/promise';
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '#core/constants/consent-state';
+import {Deferred} from '#core/data-structures/promise';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
-import {Layout} from '../../../../src/layout';
+import {Layout} from '#core/dom/layout';
 import {SafeframeHostApi} from '../safeframe-host';
-import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {toggleExperiment} from '../../../../src/experiments';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
+import {toggleExperiment} from '#experiments';
 
 /**
  * We're allowing external resources because otherwise using realWin causes
@@ -518,9 +518,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
               '1';
           }
           impl.onCreativeRender(false);
-          const ampAnalyticsElement = impl.element.querySelector(
-            'amp-analytics'
-          );
+          const ampAnalyticsElement =
+            impl.element.querySelector('amp-analytics');
           expect(ampAnalyticsElement).to.be.ok;
           expect(ampAnalyticsElement.CONFIG).jsonEqual(
             impl.ampAnalyticsConfig_
@@ -629,7 +628,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       doc.body.appendChild(element);
       impl = new AmpAdNetworkDoubleclickImpl(element);
       // Temporary fix for local test failure.
-      window.sandbox
+      env.sandbox
         .stub(impl, 'getIntersectionElementLayoutBox')
         .callsFake(() => {
           return {
@@ -1083,8 +1082,38 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
 
     it('should not include addtl_consent, if additionalConsent is missing', () =>
       impl.getAdUrl({}).then((url) => {
-        expect(url).to.not.match(/(\?|&)addtl_consent=(&|$)/);
+        expect(url).to.not.match(/(\?|&)addtl_consent=/);
       }));
+
+    it('should include us_privacy, if consentStringType matches', () =>
+      impl
+        .getAdUrl({
+          consentStringType: CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+          consentString: 'usPrivacyString',
+        })
+        .then((url) => {
+          expect(url).to.match(/(\?|&)us_privacy=usPrivacyString(&|$)/);
+          expect(url).to.not.match(/(\?|&)gdpr_consent=/);
+        }));
+
+    it('should include gdpr_consent, if consentStringType is not US_PRIVACY_STRING', () =>
+      impl
+        .getAdUrl({
+          consentStringType: CONSENT_STRING_TYPE.TCF_V2,
+          consentString: 'gdprString',
+        })
+        .then((url) => {
+          expect(url).to.match(/(\?|&)gdpr_consent=gdprString(&|$)/);
+          expect(url).to.not.match(/(\?|&)us_privacy=/);
+        }));
+
+    it('should include gdpr_consent, if consentStringType is undefined', () =>
+      impl
+        .getAdUrl({consentStringType: undefined, consentString: 'gdprString'})
+        .then((url) => {
+          expect(url).to.match(/(\?|&)gdpr_consent=gdprString(&|$)/);
+          expect(url).to.not.match(/(\?|&)us_privacy=/);
+        }));
 
     it('should include msz/psz/fws if in holdback control', () => {
       env.sandbox

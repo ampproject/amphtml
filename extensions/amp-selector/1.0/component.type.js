@@ -56,7 +56,7 @@ SelectorDef.OptionProps;
 /**
  * @typedef {{
  *   disabled: (boolean|undefined),
- *   focusRef: ({current: {active: *, focusMap: !Object}),
+ *   focusRef: ({current: {active: *, focusMap: !Object}}),
  *   keyboardSelectMode: (string|undefined),
  *   multiple: (boolean|undefined),
  *   optionsRef: ({current: !Array<*>}),

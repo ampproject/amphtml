@@ -15,15 +15,17 @@
  */
 
 import {DEFAULT_CONFIG} from './default-config';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {assertHttpsUrl} from '../../../src/url';
-import {calculateScriptBaseUrl} from '../../../src/service/extension-script';
-import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
+import {calculateScriptBaseUrl} from '#service/extension-script';
+import {deepMerge, dict, hasOwn} from '#core/types/object';
 import {dev, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
-import {isArray, isObject, toWin} from '../../../src/types';
-import {isCanary} from '../../../src/experiments';
+import {isArray, isObject} from '#core/types';
+import {isCanary} from '#experiments';
+
+import {toWin} from '#core/window';
 import {variableServiceForDoc} from './variables';
 
 const TAG = 'amp-analytics/config';
@@ -215,9 +217,8 @@ export class AnalyticsConfig {
         body: config,
       };
       if (this.element_.hasAttribute('data-credentials')) {
-        fetchConfig.credentials = this.element_.getAttribute(
-          'data-credentials'
-        );
+        fetchConfig.credentials =
+          this.element_.getAttribute('data-credentials');
       }
       return (
         Services.urlReplacementsForDoc(this.element_)
