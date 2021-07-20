@@ -20,6 +20,7 @@
  */
 
 const {
+  TEST_FILES_LIST_FILE_NAME,
   generateCircleCiShardTestFilesList,
   skipDependentJobs,
   timedExecOrDie,
