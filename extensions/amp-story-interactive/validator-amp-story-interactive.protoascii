@@ -281,3 +281,47 @@ attr_lists: {
     }
   }
 }
+attr_lists: {
+  name: "interactive-options-img-attrs"
+  attrs: {
+    name: "option-1-image"
+    mandatory: true
+  }
+  attrs: {
+    name: "option-2-image"
+    mandatory: true
+  }
+  attrs: {
+    name: "option-3-image"
+    trigger: {
+      also_requires_attr: "option-3-image-alt"
+    }
+  }
+  attrs: {
+    name: "option-4-image"
+    trigger: {
+      also_requires_attr: "option-3-image"
+      also_requires_attr: "option-4-image-alt"
+    }
+  }
+  attrs: {
+    name: "option-1-image-alt"
+    mandatory: true
+  }
+  attrs: {
+    name: "option-2-image-alt"
+    mandatory: true
+  }
+  attrs: {
+    name: "option-3-image-alt"
+    trigger: {
+      also_requires_attr: "option-3-image"
+    }
+  }
+  attrs: {
+    name: "option-4-image-alt"
+    trigger: {
+      also_requires_attr: "option-4-image"
+    }
+  }
+}
