@@ -15,7 +15,8 @@
  */
 
 .i-amphtml-story-interactive-slider-container {
-  --percentage: 0%;
+  --fraction: 0;
+  --percentage: calc(var(--fraction) * 100%) !important;
   /* This maps the range and has the gradient follow behind the thumb */
   --percentage-corrected: calc(2.5% + 0.95 * var(--percentage)) !important;
   --thumb-size: 1.5em !important;
@@ -46,7 +47,9 @@
 }
 
 .i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-bubble {
-  transform: translate(-50%, -160%) scale(1) !important;
+  --scale-var: calc(var(--fraction) + 1) !important;
+  /* 70.7% is the sqrt of 2 over 2 */
+  transform: translate(-50%, calc(-160% - var(--fraction)*70.7%)) scale(var(--scale-var)) !important;
 }
 
 .i-amphtml-story-interactive-slider-bubble::after {
@@ -55,6 +58,7 @@
   box-sizing: border-box !important;
   height: 100% !important;
   width: 100% !important;
+  top: 0% !important;
   background: var(--interactive-accent-color) !important;
   z-index: -1 !important;
   left: 50% !important;
@@ -71,6 +75,12 @@
   cursor: initial !important;
   border: 0.1em solid var(--i-amphtml-interactive-option-background-color) !important;
   border-bottom-right-radius: 50% !important;
+}
+
+[type="emoji"] .i-amphtml-story-interactive-slider-bubble-content {
+  height: 100% !important;
+  width: 100% !important;
+  font-size: 1.5em !important;
 }
 
 .i-amphtml-story-interactive-slider-input {

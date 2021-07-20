@@ -43,7 +43,11 @@ const buildSliderTemplate = (element) => {
             max="100"
             value="0"
           />
-          <div class="i-amphtml-story-interactive-slider-bubble">50</div>
+          <div class="i-amphtml-story-interactive-slider-bubble">
+            <div
+              class="i-amphtml-story-interactive-slider-bubble-content"
+            ></div>
+          </div>
         </div>
       </div>
     </div>
@@ -53,8 +57,8 @@ const buildSliderTemplate = (element) => {
  * @const @enum {number}
  */
 const SliderType = {
-  PERCENTAGE: 0,
-  EMOJI: 1,
+  PERCENTAGE: 'percentage',
+  EMOJI: 'emoji',
 };
 
 export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
@@ -75,7 +79,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
   buildComponent() {
     this.rootEl_ = buildSliderTemplate(this.element);
     this.bubbleEl_ = this.rootEl_.querySelector(
-      '.i-amphtml-story-interactive-slider-bubble'
+      '.i-amphtml-story-interactive-slider-bubble-content'
     );
     this.inputEl_ = this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-slider-input'
@@ -85,6 +89,8 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
       this.bubbleEl_.textContent = this.options_[0].text;
       this.sliderType_ = SliderType.EMOJI;
     }
+
+    this.rootEl_.setAttribute('type', this.sliderType_);
 
     this.attachPrompt_(this.rootEl_);
     return this.rootEl_;
@@ -116,7 +122,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
       this.bubbleEl_.textContent = value + '%';
     }
     this.rootEl_.classList.add('i-amphtml-story-interactive-mid-selection');
-    setImportantStyles(this.rootEl_, {'--percentage': value + '%'});
+    setImportantStyles(this.rootEl_, {'--fraction': value / 100});
   }
 
   /**
