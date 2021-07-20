@@ -83,6 +83,8 @@ export class BaseElement extends PreactBaseElement {
       'onBeforeOpen': () => this.beforeOpen(),
       'onAfterOpen': () => this.afterOpen(),
       'onAfterClose': () => this.afterClose(),
+      'onViewGrid': () => this.onViewGrid(),
+      'onToggleCaption': () => this.onToggleCaption(),
       'render': () => lightboxElements,
     });
   }
@@ -108,6 +110,12 @@ export class BaseElement extends PreactBaseElement {
     toggleAttribute(this.element, 'open', false);
     toggle(this.element, false);
   }
+
+  /** @protected */
+  onViewGrid() {}
+
+  /** @protected */
+  onToggleCaption() {}
 
   /** @override */
   mutationObserverCallback() {
