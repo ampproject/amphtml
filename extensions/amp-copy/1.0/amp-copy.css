@@ -13,23 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-amp-copy {
-  /** Component styles */
-}
-
-amp-copy .disabled{
-  background: red;
-}
-
-amp-copy .enabled{
-  background: green;
-}
-
-amp-copy .success{
-  background: limegreen;
-}
-
-amp-copy .failed{
-  background: orange;
-}

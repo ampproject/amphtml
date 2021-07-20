@@ -16,31 +16,21 @@
 
 import {createUseStyles} from 'react-jss';
 
-// DO NOT SUBMIT: Example class used for styling
-const exampleContentHidden = {
-  display: 'none',
-};
-
 const disabled = {
-  background: 'red',
 };
 
 
 const enabled = {
-  background: 'green',
 };
 
 
 const success = {
-  background: 'limegreen',
 };
 
 const failed = {
-  background: 'orange',
 };
 
 const JSS = {
-  exampleContentHidden,
   enabled,
   disabled,
   success,
