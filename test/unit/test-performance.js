@@ -306,60 +306,6 @@ describes.realWin('performance', {amp: true}, (env) => {
         });
       });
 
-      describe('tickSinceVisible', () => {
-        let tickDeltaStub;
-        let firstVisibleTime;
-
-        beforeEach(() => {
-          tickDeltaStub = env.sandbox.stub(perf, 'tickDelta');
-          firstVisibleTime = null;
-          env.sandbox
-            .stub(ampdoc, 'getFirstVisibleTime')
-            .callsFake(() => firstVisibleTime);
-        });
-
-        it('should always be zero before viewer is set', () => {
-          clock.tick(10);
-          perf.tickSinceVisible('test');
-
-          expect(tickDeltaStub).to.have.been.calledOnce;
-          expect(tickDeltaStub.firstCall.args[1]).to.equal(0);
-        });
-
-        it('should always be zero before visible', () => {
-          perf.coreServicesAvailable();
-
-          clock.tick(10);
-          perf.tickSinceVisible('test');
-
-          expect(tickDeltaStub).to.have.been.calledOnce;
-          expect(tickDeltaStub.firstCall.args[1]).to.equal(0);
-        });
-
-        it('should calculate after visible', () => {
-          perf.coreServicesAvailable();
-          firstVisibleTime = timeOrigin + 5;
-
-          clock.tick(10);
-          perf.tickSinceVisible('test');
-
-          expect(tickDeltaStub).to.have.been.calledOnce;
-          expect(tickDeltaStub.firstCall.args[1]).to.equal(5);
-        });
-
-        it('should be zero after visible but for earlier event', () => {
-          perf.coreServicesAvailable();
-          firstVisibleTime = timeOrigin + 5;
-
-          // An earlier event, since event time (4) is less than visible time (5).
-          clock.tick(4);
-          perf.tickSinceVisible('test');
-
-          expect(tickDeltaStub).to.have.been.calledOnce;
-          expect(tickDeltaStub.firstCall.args[1]).to.equal(0);
-        });
-      });
-
       describe('and performanceTracking is off', () => {
         beforeEach(() => {
           env.sandbox.stub(viewer, 'getParam').withArgs('csi').returns(null);
@@ -929,7 +875,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
 
       const perf = Services.performanceFor(env.win);
 
-      expect(perf.events_.length).to.equal(3);
+      expect(perf.events_.length).to.equal(2);
       expect(perf.events_[0]).to.be.jsonEqual(
         {
           label: 'fp',
@@ -937,10 +883,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         },
         {
           label: 'fcp',
-          delta: 15,
-        },
-        {
-          label: 'fcpv',
           delta: 15,
         }
       );
@@ -991,7 +933,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       };
       // Fake a triggering of the first-input event.
       performanceObserver.triggerCallback(list);
-      expect(perf.events_.length).to.equal(3);
+      expect(perf.events_.length).to.equal(2);
       expect(perf.events_[0]).to.be.jsonEqual(
         {
           label: 'fp',
@@ -999,10 +941,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         },
         {
           label: 'fcp',
-          delta: 15,
-        },
-        {
-          label: 'fcpv',
           delta: 15,
         }
       );
@@ -1061,7 +999,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       const lcpEvents = perf.events_.filter(({label}) =>
         label.startsWith('lcp')
       );
-      expect(lcpEvents.length).to.equal(2);
+      expect(lcpEvents.length).to.equal(1);
       expect(lcpEvents).deep.include({
         label: 'lcp',
         delta: 23,
