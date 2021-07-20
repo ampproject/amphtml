@@ -230,6 +230,36 @@ describes.realWin('amp-story-auto-ads:config', {amp: true}, (env) => {
     });
   });
 
+  it('Remote config sanitizes unallowed attributes', async () => {
+    const config = {
+      type: 'doubleclick',
+      'data-slot': '/30497360/a4a/amp_story_dfp_example',
+      height: '1000px', // Should scrub.
+      width: '1000px', // Should scrub.
+      layout: 'intrinsic', // Should overwrite to fill.
+    };
+
+    const exampleURL = 'foo.example';
+    const xhrService = Services.xhrFor(win);
+    const fetchStub = env.sandbox.stub(xhrService, 'fetchJson').resolves({
+      json: () => Promise.resolve({'ad-attributes': config}),
+    });
+
+    const storyAutoAdsElem = doc.createElement('amp-story-auto-ads');
+    storyAutoAdsElem.setAttribute('src', exampleURL);
+
+    const result = await new StoryAdConfig(storyAutoAdsElem, win).getConfig();
+    expect(fetchStub).to.be.calledWith(exampleURL);
+
+    expect(result).to.eql({
+      'amp-story': '',
+      class: 'i-amphtml-story-ad',
+      'data-slot': '/30497360/a4a/amp_story_dfp_example',
+      layout: 'fill',
+      type: 'doubleclick',
+    });
+  });
+
   it('Test Invalid Remote Config URL', async () => {
     const exampleURL = 'invalidRemoteURL';
     const storyAutoAdsElem = doc.createElement('amp-story-auto-ads');
