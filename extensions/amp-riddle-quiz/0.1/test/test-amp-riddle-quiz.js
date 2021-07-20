@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {createElementWithAttributes} from '#core/dom';
 import '../amp-riddle-quiz';
 
 describes.realWin(
@@ -28,7 +29,11 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
-      element = win.document.createElement('amp-riddle-quiz');
+      element = createElementWithAttributes(win.document, 'amp-riddle-quiz', {
+        layout: 'responsive',
+        width: '100',
+        height: '100',
+      });
       win.document.body.appendChild(element);
     });
 
