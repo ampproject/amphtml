@@ -342,7 +342,7 @@ export class VariableService {
       : {
           'FIRST_CONTENTFUL_PAINT': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE
+              TickLabel.FIRST_CONTENTFUL_PAINT
             ),
           'FIRST_VIEWPORT_READY': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
@@ -354,7 +354,7 @@ export class VariableService {
             ),
           'LARGEST_CONTENTFUL_PAINT': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE
+              TickLabel.LARGEST_CONTENTFUL_PAINT
             ),
           'FIRST_INPUT_DELAY': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(

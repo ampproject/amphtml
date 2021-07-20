@@ -333,7 +333,6 @@ export class Performance {
       ) {
         const value = entry.startTime + entry.duration;
         this.tickDelta(TickLabel.FIRST_CONTENTFUL_PAINT, value);
-        this.tickSinceVisible(TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE, value);
         recordedFirstContentfulPaint = true;
       } else if (
         entry.entryType === 'first-input' &&
@@ -559,10 +558,6 @@ export class Performance {
       TickLabel.LARGEST_CONTENTFUL_PAINT,
       this.largestContentfulPaint_
     );
-    this.tickSinceVisible(
-      TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE,
-      this.largestContentfulPaint_
-    );
     this.flush();
   }
 
@@ -704,22 +699,6 @@ export class Performance {
    */
   tickDelta(label, value) {
     this.tick(label, value);
-  }
-
-  /**
-   * Tick time delta since the document has become visible.
-   * @param {TickLabel} label The variable name as it will be reported.
-   * @param {number=} opt_delta The optional delta value in milliseconds.
-   */
-  tickSinceVisible(label, opt_delta) {
-    const delta =
-      opt_delta == undefined ? this.win.performance.now() : opt_delta;
-    const end = this.timeOrigin_ + delta;
-
-    // Order is timeOrigin -> firstVisibleTime -> end.
-    const visibleTime = this.ampdoc_ && this.ampdoc_.getFirstVisibleTime();
-    const v = visibleTime ? Math.max(end - visibleTime, 0) : 0;
-    this.tickDelta(label, v);
   }
 
   /**
