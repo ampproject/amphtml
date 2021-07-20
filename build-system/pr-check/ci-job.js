@@ -65,7 +65,7 @@ async function runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow) {
  * @return {string} a comma separated list of test file paths.
  */
 function getCircleCiShardTestFiles(globs) {
-  const joinedGlobs = `"${globs.join('" "')}"`;
+  const joinedGlobs = globs.map((glob) => `"${glob}"`).join(' ');
   return getStdout(
     `circleci tests glob ${joinedGlobs} | circleci tests split --split-by=timings`
   )
