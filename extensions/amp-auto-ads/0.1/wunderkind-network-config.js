@@ -36,7 +36,7 @@ export class WunderkindNetworkConfig {
   isEnabled(unused) {
     const websiteID = this.autoAmpAdsElement_.getAttribute('data-website-id');
 
-    return websiteID && websiteID.match(/^[0-9]+$/);
+    return !!(websiteID && websiteID.match(/^[0-9]+$/));
   }
 
   /**
