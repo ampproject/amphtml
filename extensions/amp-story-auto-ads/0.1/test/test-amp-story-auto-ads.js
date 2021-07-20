@@ -216,7 +216,7 @@ describes.realWin(
         new MockStoryImpl(storyElement);
         addStoryAutoAdsConfig(adElement);
         await autoAds.buildCallback();
-        autoAds.layoutCallback();
+        await autoAds.layoutCallback();
       });
 
       it('should create glassPane', () => {
