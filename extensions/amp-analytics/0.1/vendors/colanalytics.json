@@ -3,19 +3,19 @@
     "host": "https://ase.clmbtech.com",
     "base": "${host}/message",
     "pageview": "${base}?cid=${id}&val_101=${id}&val_101=${int}${canonicalPath}&ch=${canonicalHost}&val_108=${title}&val_120=3&val_102=${sourceUrl}&val_124=${externalReferrer}&uuid=${uid}",
-  "event": "${base}?cid=${id}&val_101=${id}&val_101=${int}${canonicalPath}&val_101=${tet}${totalEngagedTime}&val_102=${clk}${sourceUrl}"
+    "event": "${base}?cid=${id}&val_101=${id}&val_101=${int}${canonicalPath}&val_101=${tet}${totalEngagedTime}&val_102=${clk}${sourceUrl}"
   },
   "vars": {
-	"int": "int:",
-	"clk": "clk:pg:",
-	"tet": "tet:"
+    "int": "int:",
+    "clk": "clk:pg:",
+    "tet": "tet:"
 	},
   "triggers": {
     "defaultPageview": {
       "on": "visible",
       "request": "pageview"
     },
-	"anchorClicks": {
+    "anchorClicks": {
       "on": "click",
 	  "selector": "a",
       "request": "event"
