@@ -205,7 +205,7 @@ describes.realWin('amp-story-auto-ads:config', {amp: true}, (env) => {
     });
   });
 
-  it('Does use remote config when src attribute is provided', async () => {
+  it('does use remote config when src attribute is provided', async () => {
     const config = {
       type: 'doubleclick',
       'data-slot': '/30497360/a4a/amp_story_dfp_example',
@@ -230,7 +230,7 @@ describes.realWin('amp-story-auto-ads:config', {amp: true}, (env) => {
     });
   });
 
-  it('Remote config sanitizes unallowed attributes', async () => {
+  it('remote config sanitizes unallowed attributes', async () => {
     const config = {
       type: 'doubleclick',
       'data-slot': '/30497360/a4a/amp_story_dfp_example',
@@ -268,7 +268,7 @@ describes.realWin('amp-story-auto-ads:config', {amp: true}, (env) => {
       expect(async () => {
         await new StoryAdConfig(storyAutoAdsElem, win).getConfig();
       }).to.throw(
-        /'Error determining if remote config is valid JSON, Bad URL or Bad JSON'​​​/
+        /'amp-story-auto-ads:config error determining if remote config is valid json: bad url or bad json'​​​/
       );
     });
   });
