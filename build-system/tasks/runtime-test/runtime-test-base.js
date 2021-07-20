@@ -38,7 +38,6 @@ const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel');
 const {getFilesFromArgv} = require('../../common/utils');
 const {isCiBuild, isCircleciBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
-const {reportTestStarted} = require('../report-test-status');
 const {SERVER_TRANSFORM_PATH} = require('../../server/typescript-compile');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
@@ -400,7 +399,6 @@ class RuntimeTestRunner {
    * @return {Promise<void>}
    */
   async run() {
-    await reportTestStarted();
     this.exitCode = await createKarmaServer(this.config);
   }
 
