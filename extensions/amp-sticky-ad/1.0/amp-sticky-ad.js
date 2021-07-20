@@ -17,6 +17,7 @@
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
 import {CommonSignals} from '#core/constants/common-signals';
 import {Services} from '#service';
+import {addExperimentIdToElement} from '#ads/google/a4a/traffic-experiments';
 import {
   computedStyle,
   removeAlphaFromColor,
@@ -24,6 +25,7 @@ import {
   toggle,
 } from '#core/dom/style';
 import {dev, user, userAssert} from '../../../src/log';
+import {isExperimentOn} from '#experiments';
 import {realChildElements} from '#core/dom/query';
 import {removeElement} from '#core/dom';
 import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
@@ -110,6 +112,41 @@ class AmpStickyAd extends AMP.BaseElement {
       owners.scheduleLayout(this.element, dev().assertElement(this.ad_));
     }
     return Promise.resolve();
+  }
+
+  /** @override */
+  upgradeCallback() {
+    if (!isExperimentOn(this.win, 'amp-sticky-ad-to-amp-ad')) {
+      return null;
+    }
+
+    const children = realChildElements(this.element);
+    userAssert(
+      children.length == 1 && children[0].tagName == 'AMP-AD',
+      'amp-sticky-ad must have a single amp-ad child'
+    );
+
+    const ad = children[0];
+    const enableConversion = Math.random() < 0.5;
+
+    const adType = (ad.getAttribute('type') || '').toLowerCase();
+    if (adType == 'doubleclick' || adType == 'adsense') {
+      addExperimentIdToElement(enableConversion ? '31061856' : '31061855', ad);
+    }
+
+    if (!enableConversion) {
+      return null;
+    }
+
+    ad.setAttribute('sticky', 'bottom');
+    this.element.parentElement.replaceChild(ad, this.element);
+    return Services.extensionsFor(this.win)
+      .loadElementClass('amp-ad', '0.1')
+      .then((AmpAd) => {
+        const impl = new AmpAd(ad);
+        impl.upgradeCallback();
+        return impl;
+      });
   }
 
   /** @override */
