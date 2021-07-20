@@ -193,7 +193,7 @@ Specifies the key to the data array within the JSON response. Nested keys can be
       <amp-autocomplete filter="prefix" items="fruit">
         <input type="text">
         <script type=application/json>
-          { "fruit" : ["apples", "bananas", "pears"] }
+          { "fruit" : ["kiwis", "oranges", "watermelons"]  }
           </script>
       </amp-autocomplete>
 
@@ -201,6 +201,15 @@ Specifies the key to the data array within the JSON response. Nested keys can be
 [/filter] <!-- formats="websites" -->
 
 [filter formats="email"]
+
+Note that the following data is returned by the remote `src`:
+
+  <pre lang="json">
+    { 
+      "items" : ["apples", "bananas", "pears"], 
+      "fruit" : ["kiwis", "oranges", "watermelons"] 
+    }
+  </pre>
 
   <pre lang="html">
 
