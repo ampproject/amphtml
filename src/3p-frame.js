@@ -208,9 +208,7 @@ export function addDataAndJsonAttributes_(element, attributes) {
 export function getBootstrapUrl(type) {
   const extension = IS_ESM ? '.mjs' : '.js';
   if (getMode().localDev || getMode().test) {
-    const filename = getMode().minified
-      ? `./vendor/${type}`
-      : `./vendor/${type}.max`;
+    const filename = isMinified() ? `./vendor/${type}` : `./vendor/${type}.max`;
     return filename + extension;
   }
   return `${
