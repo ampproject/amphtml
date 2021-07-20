@@ -43,11 +43,7 @@ const buildSliderTemplate = (element) => {
             max="100"
             value="0"
           />
-          <div class="i-amphtml-story-interactive-slider-bubble">
-            <div
-              class="i-amphtml-story-interactive-slider-bubble-content"
-            ></div>
-          </div>
+          <div class="i-amphtml-story-interactive-slider-bubble"></div>
         </div>
       </div>
     </div>
@@ -79,7 +75,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
   buildComponent() {
     this.rootEl_ = buildSliderTemplate(this.element);
     this.bubbleEl_ = this.rootEl_.querySelector(
-      '.i-amphtml-story-interactive-slider-bubble-content'
+      '.i-amphtml-story-interactive-slider-bubble'
     );
     this.inputEl_ = this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-slider-input'
