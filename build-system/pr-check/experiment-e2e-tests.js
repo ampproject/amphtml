@@ -70,18 +70,12 @@ function pushBuildWorkflow() {
  * Steps to run during PR builds.
  */
 function prBuildWorkflow() {
-  if (
-    buildTargetsInclude(
-      Targets.RUNTIME,
-      Targets.INTEGRATION_TEST,
-      Targets.E2E_TEST
-    )
-  ) {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.E2E_TEST)) {
     pushBuildWorkflow();
   } else {
     skipDependentJobs(
       jobName,
-      'this PR does not affect the runtime, integration tests, or end-to-end tests'
+      'this PR does not affect the runtime or end-to-end tests'
     );
   }
 }
