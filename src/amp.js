@@ -135,9 +135,6 @@ startupChunk(self.document, function initial() {
   if (self.document.documentElement.hasAttribute('i-amphtml-no-boilerplate')) {
     perf.addEnabledExperiment('no-boilerplate');
   }
-  if (IS_ESM) {
-    perf.addEnabledExperiment('esm');
-  }
   fontStylesheetTimeout(self);
   perf.tick(TickLabel.INSTALL_STYLES);
   if (IS_ESM) {
