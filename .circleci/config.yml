@@ -111,7 +111,7 @@ commands:
                 command: circleci-agent step halt
 
 jobs:
-  'Compute Merge Commit':
+  'Initialize Git':
     executor:
       name: amphtml-small-executor
     steps:
@@ -126,7 +126,7 @@ jobs:
           paths:
             - .git
       - run:
-          name: 'Compute Merge Commit'
+          name: 'Initialize Git'
           command: ./.circleci/compute_merge_commit.sh
       - teardown_vm
   'Checks':
@@ -333,32 +333,32 @@ jobs:
 workflows:
   'CircleCI':
     jobs:
-      - 'Compute Merge Commit':
+      - 'Initialize Git':
           <<: *push_and_pr_builds
       - 'Checks':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Git'
       - 'Unminified Build':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Git'
       - 'Nomodule Build':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Git'
       - 'Module Build':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Git'
       - 'Bundle Size':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Git'
       - 'Validator Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Git'
       - 'Visual Diff Tests':
           <<: *push_and_pr_builds
           requires:
@@ -366,7 +366,7 @@ workflows:
       - 'Local Unit Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Git'
       - 'All Unit Tests':
           name: '⛓️ All Unit Tests'
           <<: *push_and_pr_builds
@@ -405,7 +405,7 @@ workflows:
               exp: ['A', 'B', 'C']
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Git'
       - 'Experiment Integration Tests':
           name: 'Exp. << matrix.exp >> Integration Tests'
           matrix:
