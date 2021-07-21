@@ -135,7 +135,7 @@ String representing a URL pointing to an image. 48x48px is suggested. Two images
 </amp-story-page-attachment>
 ```
 
-![amp-story-page-attachment-2-image](img/amp-story-page-attachment-2-image.png)
+![amp-story-page-attachment-2-images](img/amp-story-page-attachment-2-images.png)
 
 ### `title` (optional)
 
