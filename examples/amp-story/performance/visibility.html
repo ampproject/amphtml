@@ -37,13 +37,19 @@
     amp-img.larger {
       margin-bottom: 10%;
     }
+    p.up {
+      bottom: 2em;
+    }
+    p.small {
+      font-size: .7em;
+    }
   </style>
 </head>
   <body>
     <script>
-      const loadFirst = location.hash.includes('load=first');
+      const loadOutside = location.hash.includes('load=outside');
       (self.AMP = self.AMP || []).push(function(AMP) {
-        AMP.toggleExperiment('story-load-first-page-only', loadFirst);
+        AMP.toggleExperiment('story-load-inactive-outside-viewport', loadOutside);
       });
     </script>
     <amp-story standalone id="cats"
@@ -62,7 +68,8 @@
           </amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical" class="bottom">
-          <p>Larger images on other pages should not trigger LCP</p>
+          <p class="up">Larger images on other pages should not trigger LCP</p>
+          <p class="small">Add <code>load=outside</code> to not count inactive pages for LCP</p>
         </amp-story-grid-layer>
       </amp-story-page>
 
