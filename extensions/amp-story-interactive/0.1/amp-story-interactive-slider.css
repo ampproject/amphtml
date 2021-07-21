@@ -46,10 +46,20 @@
   z-index: 1 !important;
 }
 
+[dir="rtl"] .i-amphtml-story-interactive-slider-bubble {
+  right: var(--percentage) !important;
+}
+
 .i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-bubble {
   --scale-var: calc(var(--fraction) + 1) !important;
   /* Move the bubble up by sqrt(2)/2=70.7% to account for the pointy corner */
   transform: translate(-50%, calc(-160% - var(--fraction) * 70.7%)) scale(var(--scale-var)) !important;
+}
+
+[dir="rtl"].i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-bubble {
+  --scale-var: calc(var(--fraction) + 1) !important;
+  /* Move the bubble up by sqrt(2)/2=70.7% to account for the pointy corner */
+  transform: translate(50%, calc(-160% - var(--fraction) * 70.7%)) scale(var(--scale-var)) !important;
 }
 
 .i-amphtml-story-interactive-slider-bubble::after {
@@ -69,6 +79,10 @@
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble {
   transform: translate(-50%, -50%) scale(0.9) !important;
+}
+
+[dir="rtl"].i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble {
+  transform: translate(50%, -50%) scale(0.9) !important;
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble::after {
@@ -101,6 +115,14 @@
   cursor: pointer !important;
 }
 
+[dir="rtl"] .i-amphtml-story-interactive-slider-input {
+  background: linear-gradient(
+    270deg,
+    var(--interactive-accent-color) var(--percentage-corrected),
+    transparent var(--percentage-corrected)
+  ) !important;
+}
+
 .i-amphtml-story-interactive-slider-input-size {
   position: relative !important;
   flex: 1 !important;
@@ -120,6 +142,14 @@
   height: 100% !important;
   border-radius: 0.5em !important;
   position: absolute !important;
+}
+
+[dir="rtl"] .i-amphtml-story-interactive-slider-input::before {
+  background: linear-gradient(
+    270deg,
+    white,
+    var(--interactive-accent-color) var(--percentage-corrected)
+  ) !important;
 }
 
 .i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
