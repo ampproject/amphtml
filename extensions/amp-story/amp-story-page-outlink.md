@@ -26,7 +26,7 @@ limitations under the License.
 
 ## Usage
 
-`amp-story-page-outlink` provide a UI for a one-tap outlink experience. The outlink can be opened by users through a "swipe up" gesture, or a tap on the call to action element. 
+`amp-story-page-outlink` provide a UI for a one-tap outlink experience. The outlink can be opened by users through a "swipe up" gesture, or a tap on the call to action element.
 A UI button prompting the viewer to open the attachment will appear at the bottom of every page with a `amp-story-page-outlink` element.
 It must have the `layout="nodisplay"` attribute.
 
@@ -61,7 +61,7 @@ Both [`amp-story-page-outlink`](amp-story-page-outlink.md) and [`amp-story-page-
 
 When no attributes are set, the default UI will render:
 
-![amp-story-page-outlink-default](img/amp-story-page-outlink-default.png)
+![amp-story-page-outlink-default](img/amp-story-page-outlink-default.jpg)
 
 ```html
 <amp-story-page-outlink layout="nodisplay">
@@ -73,11 +73,11 @@ When no attributes are set, the default UI will render:
 
 String that customizes the button text. The default is "Swipe up".
 
-![amp-story-page-outlink-cta-text](img/amp-story-page-outlink-cta-text.png)
+![amp-story-page-outlink-cta-text](img/amp-story-page-outlink-cta-text.jpg)
 
 ```html
-<amp-story-page-outlink 
-  layout="nodisplay" 
+<amp-story-page-outlink
+  layout="nodisplay"
   cta-text="Read More">
   ...
 </amp-story-page-outlink>
@@ -96,24 +96,36 @@ String representing the color theme, default is light. Accepts values `light`, `
 
 Contrast protection is automatically applied to ensure readability and a11y compliance. For example, when the accent element is “background”, the higher contrast color (black or white) is applied to the text.
 
-![amp-story-page-outlink-dark-theme](img/amp-story-page-outlink-dark-theme.png)
+![amp-story-page-outlink-dark-theme](img/amp-story-page-outlink-dark-theme.jpg)
 
 ```html
 <amp-story-page-outlink
-  layout="nodisplay" 
+  layout="nodisplay"
   theme="dark">
     <a href="https://www.google.com">Call To Action</a>
 </amp-story-page-outlink>
 ```
 
-![amp-story-page-outlink-custom-theme](img/amp-story-page-outlink-custom-theme.png)
+![amp-story-page-outlink-custom-theme](img/amp-story-page-outlink-custom-theme-background.jpg)
 
 ```html
 <amp-story-page-outlink
-  layout="nodisplay" 
+  layout="nodisplay"
   theme="custom"
-  cta-accent-color="#0047FF"
-  cta-accent-element="background">
+  cta-accent-element="background"
+  cta-accent-color="#0047FF">
+    <a href="https://www.google.com">Call To Action</a>
+</amp-story-page-outlink>
+```
+
+![amp-story-page-outlink-custom-theme](img/amp-story-page-outlink-custom-theme-text.jpg)
+
+```html
+<amp-story-page-outlink
+  layout="nodisplay"
+  theme="custom"
+  cta-accent-element="text"
+  cta-accent-color="#247C3C">
     <a href="https://www.google.com">Call To Action</a>
 </amp-story-page-outlink>
 ```
@@ -122,11 +134,11 @@ Contrast protection is automatically applied to ensure readability and a11y comp
 
 String representing a URL pointing to an image. 32x32px is suggested. A link icon will be displayed by default.
 
-![amp-story-page-outlink-cta-image](img/amp-story-page-outlink-cta-image.png)
+![amp-story-page-outlink-cta-image](img/amp-story-page-outlink-cta-image.jpg)
 
 ```html
 <amp-story-page-outlink
-  layout="nodisplay" 
+  layout="nodisplay"
   cta-image="/static/images/32x32icon.jpg">
     <a href="https://www.google.com">Call To Action</a>
 </amp-story-page-outlink>
@@ -134,7 +146,7 @@ String representing a URL pointing to an image. 32x32px is suggested. A link ico
 
 Specifying `cta-image=none` will remove the default link icon.
 
-![amp-story-page-outlink-cta-image-none](img/amp-story-page-outlink-cta-image-none.png)
+![amp-story-page-outlink-cta-image-none](img/amp-story-page-outlink-cta-image-none.jpg)
 
 ```html
 <amp-story-page-outlink
