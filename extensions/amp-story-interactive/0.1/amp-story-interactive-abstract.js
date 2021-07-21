@@ -880,17 +880,12 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     const dir = this.rootEl_.getAttribute('dir') || 'ltr';
     this.disclaimerEl_ = buildInteractiveDisclaimer(this, {dir});
 
-    const pageEl = closest(
-      dev().assertElement(this.element),
-      (el) => el.tagName.toLowerCase() === 'amp-story-page'
-    );
-
     let styles;
     this.measureMutateElement(
       () => {
         // Get rects and calculate position from icon.
         const interactiveRect = this.element./*OK*/ getBoundingClientRect();
-        const pageRect = pageEl./*OK*/ getBoundingClientRect();
+        const pageRect = this.getPageEl_()./*OK*/ getBoundingClientRect();
         const iconRect = this.disclaimerIcon_./*OK*/ getBoundingClientRect();
         const bottomFraction =
           1 - (iconRect.y + iconRect.height - pageRect.y) / pageRect.height;
@@ -922,7 +917,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
           this.disclaimerEl_,
           assertDoesNotContainDisplay(styles)
         );
-        pageEl.appendChild(this.disclaimerEl_);
+        this.getPageEl_().appendChild(this.disclaimerEl_);
         this.disclaimerIcon_.setAttribute('hide', '');
         // Add click listener through the shadow dom using e.path.
         this.disclaimerEl_.addEventListener('click', (e) => {
