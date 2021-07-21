@@ -117,8 +117,8 @@ describes.realWin(
       expect(
         win
           .getComputedStyle(ampStorySlider.getRootElement())
-          .getPropertyValue('--percentage')
-      ).to.be.equal('calc(0.3*100%)');
+          .getPropertyValue('--fraction')
+      ).to.be.equal('0.3');
     });
 
     it('should show the bubble when the user drags the slider', async () => {
