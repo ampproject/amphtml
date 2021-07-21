@@ -4754,16 +4754,14 @@ function getExtensionNameAttribute(extensionSpec) {
 /**
  * Validates whether an encountered attribute is validated by an
  * generated.ExtensionSpec. ExtensionSpec's validate the 'custom-element',
- * 'custom-template', and 'src' attributes. If an error is found, it is added
- * to the |result|. The return value indicates whether or not the provided
- * attribute is explained by this validation function.
+ * 'custom-template', and 'host-service' attributes. If an error is found, it
+ * is added to the |result|. The return value indicates whether or not the
+ * provided attribute is explained by this validation function.
  * @param {!generated.TagSpec} tagSpec
- * @param {!Context} context
  * @param {!parserInterface.ParsedAttr} attr
- * @param {!generated.ValidationResult} result
  * @return {boolean}
  */
-function validateAttrInExtension(tagSpec, context, attr, result) {
+function validateAttrInExtension(tagSpec, attr) {
   asserts.assert(tagSpec.extensionSpec !== null);
 
   const {extensionSpec} = tagSpec;
@@ -4779,31 +4777,6 @@ function validateAttrInExtension(tagSpec, context, attr, result) {
       asserts.assert(extensionSpec.name === attr.value.toLowerCase());
       return false;
     }
-    return true;
-  } else if (attr.name === 'src') {
-    const srcUrlRe =
-        /^https:\/\/cdn\.ampproject\.org(?:\/lts)?\/v0\/(amp-[a-z0-9-]*)-([a-z0-9.]*)\.(?:m)?js(?:\?f=sxg)?$/;
-    const reResult = srcUrlRe.exec(attr.value);
-    // If the src URL matches this regex and the base name of the file matches
-    // the extension, look to see if the version matches.
-    if (reResult !== null && reResult[1] === extensionSpec.name) {
-      const encounteredVersion = reResult[2];
-      if (extensionSpec.deprecatedVersion.indexOf(encounteredVersion) !== -1) {
-        context.addWarning(
-            generated.ValidationError.Code.WARNING_EXTENSION_DEPRECATED_VERSION,
-            context.getLineCol(),
-            /* params */[extensionSpec.name, encounteredVersion],
-            getTagSpecUrl(tagSpec), result);
-        return true;
-      }
-      if (extensionSpec.version.indexOf(encounteredVersion) !== -1) {
-        return true;
-      }
-    }
-    context.addError(
-        generated.ValidationError.Code.INVALID_ATTR_VALUE, context.getLineCol(),
-        /* params */[attr.name, getTagDescriptiveName(tagSpec), attr.value],
-        getTagSpecUrl(tagSpec), result);
     return true;
   }
   return false;
@@ -4829,79 +4802,134 @@ function validateClassAttr(attr, tagSpec, context, result) {
 }
 
 /**
- * Validates the script is using an AMP domain and that the same script release
- * version is used for all script sources.
+ * Validates the 'src' attribute for AMP JavaScript (Runtime and Extensions)
+ * script tags. This validates:
+ *  - the script is using an AMP domain
+ *  - the script path is valid (for extensions only, runtime uses attrSpec)
+ *  - that the same script release version is used for all script sources
  * @param {!parserInterface.ParsedHtmlTag} tag
+ * @param {string} attrValue
  * @param {!generated.TagSpec} tagSpec
  * @param {!Context} context
  * @param {!generated.ValidationResult} result
  */
-function validateScriptSrcAttr(tag, tagSpec, context, result) {
-  if (context.getScriptReleaseVersion() ===
-      parserInterface.ScriptReleaseVersion.UNKNOWN)
-    return;
-
+function validateAmpScriptSrcAttr(tag, attrValue, tagSpec, context, result) {
   if (!tag.isAmpDomain()) {
     context.addError(
         generated.ValidationError.Code.DISALLOWED_AMP_DOMAIN,
-        context.getLineCol(),
-        /*params=*/[],
-        'https://amp.dev/documentation/guides-and-tutorials/learn/spec/' +
-            'amphtml#required-markup',
-        result);
-    return;
+        context.getLineCol(), /* params */[], /* spec_url*/ '', result);
   }
 
-  const scriptReleaseVersion = tag.getScriptReleaseVersion();
+  if (tag.isExtensionScript() && tagSpec.extensionSpec !== null) {
+    const {extensionSpec} = tagSpec;
+    const extensionName = tag.getExtensionName();
+    const extensionVersion = tag.getExtensionVersion();
 
-  if (context.getScriptReleaseVersion() != scriptReleaseVersion) {
-    const specName = tagSpec.extensionSpec !== null ?
-        tagSpec.extensionSpec.name :
-        tagSpec.specName;
+    // If the path is invalid, then do not evaluate further.
+    if (!tag.hasValidAmpScriptPath()) {
+      // If path is not empty use invalid path error, otherwise use the invalid
+      // attribute value error. This is to avoid errors saying "has a path ''".
+      if (tag.getAmpScriptPath().length > 0) {
+        context.addError(
+            generated.ValidationError.Code.INVALID_EXTENSION_PATH,
+            context.getLineCol(),
+            /* params */[extensionSpec.name, tag.getAmpScriptPath()],
+            getTagSpecUrl(tagSpec), result);
+      } else {
+        context.addError(
+            generated.ValidationError.Code.INVALID_ATTR_VALUE,
+            context.getLineCol(),
+            /* params */['src', getTagDescriptiveName(tagSpec), attrValue],
+            getTagSpecUrl(tagSpec), result);
+      }
+      return;
+    }
 
-    switch (context.getScriptReleaseVersion()) {
-      case parserInterface.ScriptReleaseVersion.LTS:
-        context.addError(
-            generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
+    if (extensionName === extensionSpec.name) {
+      // Validate deprecated version.
+      if (extensionSpec.deprecatedVersion.indexOf(extensionVersion) !== -1) {
+        context.addWarning(
+            generated.ValidationError.Code.WARNING_EXTENSION_DEPRECATED_VERSION,
             context.getLineCol(),
-            /*params=*/
-            [specName, scriptReleaseVersion, context.getScriptReleaseVersion()],
-            'https://amp.dev/documentation/guides-and-tutorials/learn/spec/' +
-                'amphtml#required-markup',
-            result);
-        break;
-      case parserInterface.ScriptReleaseVersion.MODULE_NOMODULE:
+            /* params */[extensionSpec.name, extensionVersion],
+            getTagSpecUrl(tagSpec), result);
+      }
+      // Validate version.
+      if (extensionSpec.version.indexOf(extensionVersion) === -1) {
         context.addError(
-            generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
+            generated.ValidationError.Code.INVALID_EXTENSION_VERSION,
             context.getLineCol(),
-            /*params=*/
-            [specName, scriptReleaseVersion, context.getScriptReleaseVersion()],
-            'https://amp.dev/documentation/guides-and-tutorials/learn/spec/' +
-                'amphtml#required-markup',
-            result);
-        break;
-      case parserInterface.ScriptReleaseVersion.MODULE_NOMODULE_LTS:
-        context.addError(
-            generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
-            context.getLineCol(),
-            /*params=*/
-            [specName, scriptReleaseVersion, context.getScriptReleaseVersion()],
-            'https://amp.dev/documentation/guides-and-tutorials/learn/spec/' +
-                'amphtml#required-markup',
-            result);
-        break;
-      case parserInterface.ScriptReleaseVersion.STANDARD:
-        context.addError(
-            generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
-            context.getLineCol(),
-            /*params=*/
-            [specName, scriptReleaseVersion, context.getScriptReleaseVersion()],
-            'https://amp.dev/documentation/guides-and-tutorials/learn/spec/' +
-                'amphtml#required-markup',
-            result);
-        break;
-      default:
-        break;
+            /* params */[extensionSpec.name, extensionVersion],
+            getTagSpecUrl(tagSpec), result);
+      }
+    } else {
+      // Extension name does not match extension spec name.
+      context.addError(
+          generated.ValidationError.Code.INVALID_ATTR_VALUE,
+          context.getLineCol(),
+          /* params */['src', getTagDescriptiveName(tagSpec), attrValue],
+          getTagSpecUrl(tagSpec), result);
+    }
+  }
+
+  // Only evaluate the script tag's release version if the first script tag's
+  // release version is not UNKNOWN.
+  if (context.getScriptReleaseVersion() !==
+      parserInterface.ScriptReleaseVersion.UNKNOWN) {
+    const scriptReleaseVersion = tag.getScriptReleaseVersion();
+    if (context.getScriptReleaseVersion() != scriptReleaseVersion) {
+      const specName = tagSpec.extensionSpec !== null ?
+          tagSpec.extensionSpec.name :
+          tagSpec.specName;
+
+      switch (context.getScriptReleaseVersion()) {
+        case parserInterface.ScriptReleaseVersion.LTS:
+          context.addError(
+              generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
+              context.getLineCol(), /*params=*/
+              [
+                specName, scriptReleaseVersion,
+                context.getScriptReleaseVersion()
+              ],
+              'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+              result);
+          break;
+        case parserInterface.ScriptReleaseVersion.MODULE_NOMODULE:
+          context.addError(
+              generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
+              context.getLineCol(), /*params=*/
+              [
+                specName, scriptReleaseVersion,
+                context.getScriptReleaseVersion()
+              ],
+              'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+              result);
+          break;
+        case parserInterface.ScriptReleaseVersion.MODULE_NOMODULE_LTS:
+          context.addError(
+              generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
+              context.getLineCol(), /*params=*/
+              [
+                specName, scriptReleaseVersion,
+                context.getScriptReleaseVersion()
+              ],
+              'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+              result);
+          break;
+        case parserInterface.ScriptReleaseVersion.STANDARD:
+          context.addError(
+              generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
+              context.getLineCol(), /*params=*/
+              [
+                specName, scriptReleaseVersion,
+                context.getScriptReleaseVersion()
+              ],
+              'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+              result);
+          break;
+        default:
+          break;
+      }
     }
   }
 }
@@ -5258,13 +5286,19 @@ function validateAttributes(
       validateClassAttr(attr, spec, context, result.validationResult);
     }
 
-    // If |spec| is the runtime or an extension script, validate that LTS is
-    // either used by all pages or no pages.
+    // If 'src' attribute and an extension or runtime script, then validate the
+    // 'src' attribute by calling this method.
     if (attr.name == 'src' &&
         (encounteredTag.isExtensionScript() ||
          encounteredTag.isAmpRuntimeScript())) {
-      validateScriptSrcAttr(
-          encounteredTag, spec, context, result.validationResult);
+      validateAmpScriptSrcAttr(
+          encounteredTag, attr.value, spec, context, result.validationResult);
+      if (encounteredTag.isExtensionScript()) {
+        seenExtensionSrcAttr = true;
+        // Extension TagSpecs do not have an explicit 'src' attribute, while
+        // Runtime TagSpecs do. For Extension TagSpecs, continue.
+        continue;
+      }
     }
 
     if (!(attr.name in attrsByName)) {
@@ -5287,15 +5321,9 @@ function validateAttributes(
       }
 
       // If |spec| is an extension, then we ad-hoc validate 'custom-element',
-      // 'custom-template', 'host-service', and 'src' attributes by calling
-      // this method.  For 'src', we also keep track whether we validated it
-      // this way, (seen_src_attr), since it's a mandatory attr.
-      if (spec.extensionSpec !== null &&
-          validateAttrInExtension(
-              spec, context, attr, result.validationResult)) {
-        if (attr.name === 'src') {
-          seenExtensionSrcAttr = true;
-        }
+      // 'custom-template', and 'host-service' attributes by calling this
+      // method.
+      if (spec.extensionSpec !== null && validateAttrInExtension(spec, attr)) {
         continue;
       }
       validateAttrNotFoundInSpec(

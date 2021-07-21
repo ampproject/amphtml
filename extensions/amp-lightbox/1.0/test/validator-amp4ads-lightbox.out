@@ -28,7 +28,7 @@ FAIL
 |    <!-- Invalid: importing disallowed version in the ads format. -->
 |    <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-1.0.js"></script>
 >>   ^~~~~~~~~
-amp-lightbox/1.0/test/validator-amp4ads-lightbox.html:28:2 The attribute 'src' in tag 'SCRIPT[custom-element=amp-lightbox] (AMP4ADS)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-lightbox-1.0.js'. (see https://amp.dev/documentation/components/amp-lightbox)
+amp-lightbox/1.0/test/validator-amp4ads-lightbox.html:28:2 The extension 'amp-lightbox' is referenced at version '1.0' which is an invalid version. Please use a valid version of this extension. (see https://amp.dev/documentation/components/amp-lightbox)
 |  </head>
 |  <body>
 |    <!-- Valid use with close-button despite importing the wrong version. -->
