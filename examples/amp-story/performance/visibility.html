@@ -23,31 +23,18 @@
       color: white;
       background: black;
     }
-    code {
-      font-family: 'Source Code Pro', monospace;
-      background: #fff2;
-    }
-    amp-story p {
+    p {
       line-height: 1.5;
-    }
-    .bold {
       font-weight: bold;
-    }
-    .bottom {
-      align-content: end;
-    }
-    .last {
-      padding-bottom: 8.83vh;
-    }
-    .byline {
-      letter-spacing: 1.28px;
+      position: absolute;
+      bottom: 1em;
+      left: 1em;
     }
     amp-img {
       margin: 1em;
       margin-bottom: 50%;
     }
     amp-img.larger {
-      margin: 1em;
       margin-bottom: 10%;
     }
   </style>
@@ -75,11 +62,37 @@
           </amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical" class="bottom">
-          <p class="bold">Larger image on second page</p>
+          <p>Larger image on second page</p>
         </amp-story-grid-layer>
       </amp-story-page>
 
       <amp-story-page id="page-2">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            id="img2"
+            class="larger"
+            width="400"
+            height="750"
+            src="https://images.unsplash.com/photo-1502318217862-aa4e294ba657?w=1080&q=100&fm=webp"
+            layout="fill">
+          </amp-img>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-3">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            id="img2"
+            class="larger"
+            width="400"
+            height="750"
+            src="https://images.unsplash.com/photo-1502318217862-aa4e294ba657?w=1080&q=100&fm=webp"
+            layout="fill">
+          </amp-img>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-4">
         <amp-story-grid-layer template="fill">
           <amp-img
             id="img2"
