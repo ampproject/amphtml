@@ -266,11 +266,14 @@ amp-story-page:not([active]) {
  * update them in the ampdoc.css file.
  */
 
-amp-story-page[active], amp-story-page[distance="0"] {
+amp-story-page[active],
+amp-story-page[distance="0"],
+amp-story-page[distance="1"] {
   transform: translateY(0) !important;
 }
 
-amp-story:not([desktop]) amp-story-page:where([distance="1"], [distance="2"]):not(.i-amphtml-story-page-loaded):not(.i-amphtml-visited) {
+amp-story:not([desktop]) amp-story-page[distance="1"]:not(.i-amphtml-story-page-loaded):not(.i-amphtml-visited),
+amp-story-page[distance="2"] {
   transform: translateY(100vh) !important;
 }
 

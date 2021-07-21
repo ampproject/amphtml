@@ -27,8 +27,8 @@
       line-height: 1.5;
       font-weight: bold;
       position: absolute;
-      bottom: 1em;
-      left: 1em;
+      bottom: 0;
+      padding: 1em;
     }
     amp-img {
       margin: 1em;
@@ -62,7 +62,7 @@
           </amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical" class="bottom">
-          <p>Larger image on second page</p>
+          <p>Larger images on other pages should not trigger LCP</p>
         </amp-story-grid-layer>
       </amp-story-page>
 
@@ -77,6 +77,9 @@
             layout="fill">
           </amp-img>
         </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="bottom">
+          <p>Page 2</p>
+        </amp-story-grid-layer>
       </amp-story-page>
 
       <amp-story-page id="page-3">
@@ -90,6 +93,9 @@
             layout="fill">
           </amp-img>
         </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="bottom">
+          <p>Page 3</p>
+        </amp-story-grid-layer>
       </amp-story-page>
 
       <amp-story-page id="page-4">
@@ -102,6 +108,9 @@
             src="https://images.unsplash.com/photo-1502318217862-aa4e294ba657?w=1080&q=100&fm=webp"
             layout="fill">
           </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="bottom">
+          <p>Page 4</p>
         </amp-story-grid-layer>
       </amp-story-page>
     </amp-story>
