@@ -23,6 +23,6 @@
  * Calls are DCE'd when compiled.
  * @return {boolean}
  */
-export function isForDistribution() {
-  return IS_FOR_DISTRIBUTION;
+export function isProd() {
+  return IS_PROD;
 }

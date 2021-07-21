@@ -73,7 +73,7 @@ module.exports = {
     'IS_ESM': 'readonly',
     'IS_SXG': 'readonly',
     'IS_MINIFIED': 'readonly',
-    'IS_FOR_DISTRIBUTION': 'readonly',
+    'IS_PROD': 'readonly',
     'INTERNAL_RUNTIME_VERSION': 'readonly',
     'AMP': 'readonly',
     'context': 'readonly',

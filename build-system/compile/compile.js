@@ -287,7 +287,7 @@ function generateCompilerOptions(outputFilename, options) {
     // Some optimizations get turned off when pseudo_names is on.
     // This causes some errors caused by the babel transformations
     // that we apply like unreachable code because we turn a conditional
-    // falsey. (ex. is IS_FOR_DISTRIBUTION transformation which causes some conditionals
+    // falsey. (ex. is IS_PROD transformation which causes some conditionals
     // to be unreachable/suspicious code since the whole expression is
     // falsey)
     compilerOptions.jscomp_off.push('uselessCode', 'externsValidation');

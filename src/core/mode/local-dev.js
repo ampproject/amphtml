@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isForDistribution} from './for-distribution';
+import {isProd} from './prod';
 import {isTest} from './test';
 
 /**
@@ -25,7 +25,7 @@ import {isTest} from './test';
  * @return {boolean}
  */
 export function isLocalDev(opt_win) {
-  if (isForDistribution()) {
+  if (isProd()) {
     return false;
   }
 
