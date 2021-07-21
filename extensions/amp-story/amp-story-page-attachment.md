@@ -28,6 +28,7 @@ limitations under the License.
 
 Story page attachments allow you to provide additional content in the form of inline AMPHTML content on specific AMP story pages. This content can be revealed by users through a "swipe up" gesture, or a tap on the call to action element. 
 A UI button prompting the viewer to open the attachment will appear at the bottom of every page with a `amp-story-page-attachment` element.
+It must have the `layout="nodisplay"` attribute.
 
 <amp-img alt="AMP Story page attachment" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment.gif" width="240" height="480">
   <noscript>
