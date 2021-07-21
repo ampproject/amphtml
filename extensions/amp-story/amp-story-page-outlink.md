@@ -3,11 +3,11 @@ $category@: presentation
 formats:
   - stories
 teaser:
-  text: An additional pane of content that can be associated with a single page of an AMP story.
+  text: A CTA button for opening external links with one tap in AMP story pages.
 ---
 
 <!--
-Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,9 +26,11 @@ limitations under the License.
 
 ## Usage
 
-Story page outlinks allow you to provide additional content in the form of a link on specific pages. This content can be revealed by users through a "swipe up" gesture, or a tap on bottom of the page. A UI button guiding the viewer to open the attachment will appear at the bottom of every page with a `amp-story-page-outlink` element.
+`amp-story-page-outlink` provide a UI for a one-tap outlink experience. The outlink can be opened by users through a "swipe up" gesture, or a tap on the call to action element. 
+A UI button prompting the viewer to open the attachment will appear at the bottom of every page with a `amp-story-page-outlink` element.
+It must have the `layout="nodisplay"` attribute.
 
-`amp-story-page-outlink` elements accept a single `a` element child.
+`amp-story-page-outlink` requires a single `a` element child.
 
 <amp-img alt="AMP Story page attachment" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-outlink.gif" width="240" height="480">
   <noscript>
@@ -37,12 +39,11 @@ Story page outlinks allow you to provide additional content in the form of a lin
 </amp-img>
 
 ```html
-<amp-story-page id="foo">
+<amp-story-page id="page-outlink-example">
   <amp-story-grid-layer template="fill">
     <amp-img src="https://example.ampproject.org/helloworld/bg1.jpg" width="900" height="1600">
   </amp-story-grid-layer>
-  <amp-story-page-outlink
-    layout="nodisplay">
+  <amp-story-page-outlink layout="nodisplay">
     <a href="https://www.google.com" title="Link Description"></a>
   </amp-story-page-outlink>
 </amp-story-page>
@@ -53,37 +54,38 @@ Story page outlinks allow you to provide additional content in the form of a lin
 The `<amp-story-page-outlink>` element must be the last child of `<amp-story-page>`, and must have the `layout="nodisplay"` attribute.
 
 [tip type="important"]
-Both [`amp-story-page-outlink`](amp-story-page-outlink.md) and `amp-story-page-attachment` must be the last child tag of an [`amp-story-page`](amp-story-page.md). Because of this, you may include neither or one, but not both.
+Both [`amp-story-page-outlink`](amp-story-page-outlink.md) and [`amp-story-page-attachment`](amp-story-page-attachment.md) must be the last child tag of an [`amp-story-page`](amp-story-page.md). Because of this, you may include neither or one, but not both.
 [/tip]
 
-## Customizeable Attributes
+## Attributes
 
-When no special attributes are set, the following default UI will render at the bottom of every page with a `amp-story-page-outlink` element:
+When no attributes are set, the default UI will render:
 
 ![amp-story-page-outlink-default](img/amp-story-page-outlink-default.png)
 
 ```html
-<amp-story-page-outlink
-  layout="nodisplay">
-    <a href="https://www.google.com">Call To Action</a>
+<amp-story-page-outlink layout="nodisplay">
+    <a href="https://www.google.com"></a>
 </amp-story-page-outlink>
 ```
 
-### `cta-text`
+### `cta-text` (optional)
 
-Customizes the call to action text displayed on the UI prompt to open the attachment.
-Default: "Swipe up"
+String that customizes the button text. The default is "Swipe up".
 
 ![amp-story-page-outlink-cta-text](img/amp-story-page-outlink-cta-text.png)
 
 ```html
-<amp-story-page-outlink layout="nodisplay" cta-text="Read More"
-  >...</amp-story-page-outlink>
+<amp-story-page-outlink 
+  layout="nodisplay" 
+  cta-text="Read More">
+  ...
+</amp-story-page-outlink>
 ```
 
-### `theme`
+### `theme` (optional)
 
-String that represents the color theme, default is light. Accepts values `light`, `dark`, and `custom`.
+String representing the color theme, default is light. Accepts values `light`, `dark`, and `custom`.
 
 `theme="custom"` requires two additional attributes:
 
@@ -92,13 +94,13 @@ String that represents the color theme, default is light. Accepts values `light`
   <li>cta-accent-element: String that represents the element to apply the custom theme to. Accepts values `text` and `background`.</li>
 </ul>
 
-Contrast protection is automatically applied to ensure readability and a11y compliance ie. When the accent element is “background”, the higher contrast color (black or white) is applied to the text.
+Contrast protection is automatically applied to ensure readability and a11y compliance. For example, when the accent element is “background”, the higher contrast color (black or white) is applied to the text.
 
 ![amp-story-page-outlink-dark-theme](img/amp-story-page-outlink-dark-theme.png)
 
 ```html
 <amp-story-page-outlink
-  ...
+  layout="nodisplay" 
   theme="dark">
     <a href="https://www.google.com">Call To Action</a>
 </amp-story-page-outlink>
@@ -108,7 +110,7 @@ Contrast protection is automatically applied to ensure readability and a11y comp
 
 ```html
 <amp-story-page-outlink
-  ...
+  layout="nodisplay" 
   theme="custom"
   cta-accent-color="#0047FF"
   cta-accent-element="background">
@@ -116,28 +118,32 @@ Contrast protection is automatically applied to ensure readability and a11y comp
 </amp-story-page-outlink>
 ```
 
-### `cta-image`
+### `cta-image` (optional)
 
-String that represents a URL pointing to an img. 32 x 32px is suggested. A link icon will be displayed by default if this attribute is not set.
+String representing a URL pointing to an image. 32x32px is suggested. A link icon will be displayed by default.
 
 ![amp-story-page-outlink-cta-image](img/amp-story-page-outlink-cta-image.png)
 
 ```html
 <amp-story-page-outlink
-  ...
+  layout="nodisplay" 
   cta-image="/static/images/32x32icon.jpg">
     <a href="https://www.google.com">Call To Action</a>
 </amp-story-page-outlink>
 ```
 
-Specifying `none` will remove the default link icon.
+Specifying `cta-image=none` will remove the default link icon.
 
 ![amp-story-page-outlink-cta-image-none](img/amp-story-page-outlink-cta-image-none.png)
 
 ```html
 <amp-story-page-outlink
-  ...
+  layout="nodisplay"
   cta-image="none">
     <a href="https://www.google.com">Call To Action</a>
 </amp-story-page-outlink>
 ```
+
+[tip type="note"]
+The functionality of `amp-story-page-outlink` used to be supported by [`amp-story-page-attachment`](https://amp.dev/documentation/components/amp-story-page-attachment/?format=stories). Please use `amp-story-page-outlink` for one-tap outlinking UI.
+[/tip]
