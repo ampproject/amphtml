@@ -22,6 +22,16 @@ var AudioDef = {};
 /**
  * @typedef {{
  *   children: (?PreactDef.Renderable|undefined),
+ *   album: (string),
+ *   artist: (string),
+ *   artwork: (string),
+ *   autoplay: (boolean),
+ *   controlsList: (boolean|undefined),,
+ *   loop: (boolean),
+ *   muted: (boolean),
+ *   preload: (string|undefined),
+ *   src: (string|undefined),
+ *   title: (string),
  * }}
  */
 AudioDef.Props;

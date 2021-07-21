@@ -25,22 +25,35 @@ export default {
 };
 
 export const _default = () => {
-  // DO NOT SUBMIT: This is example code only.
   return (
     <Audio
-      style={{width: 300, height: 200}}
       src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
       artwork="https://storage.googleapis.com/media-session/sintel/artwork-512.png"
       title="Snow Fight"
       album="Jan Morgenstern"
       artist="Sintel"
-      height="50"
+      height="75"
+      width="auto"
+      controls
+    ></Audio>
+  );
+};
+
+export const LoadAudioThroughSources = () => {
+  return (
+    <Audio
+      // src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
+      artwork="https://storage.googleapis.com/media-session/sintel/artwork-512.png"
+      title="Snow Fight"
+      album="Jan Morgenstern"
+      artist="Sintel"
+      height="75"
       width="auto"
       controls
     >
       <source
         src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
-        type="audio/mp3"
+        type="audio/mpeg"
       />
     </Audio>
   );

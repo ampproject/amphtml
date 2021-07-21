@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-audio';
+import {AmpAudio} from '../amp-audio';
 import {htmlFor} from '#core/dom/static-template';
 import {toggleExperiment} from '#experiments';
 import {waitFor} from '#testing/test-helper';
@@ -30,14 +30,14 @@ describes.realWin(
   (env) => {
     let win;
     let doc;
-    let html;
+    // let html;
     let element;
     let ampAudio;
 
     beforeEach(async () => {
       win = env.win;
       doc = win.document;
-      html = htmlFor(doc);
+      // html = htmlFor(doc);
       toggleExperiment(win, 'bento-audio', true, true);
     });
 
@@ -228,9 +228,6 @@ describes.realWin(
       const {shadowRoot} = element;
       const audio = shadowRoot.querySelector('audio');
 
-      //expect(element).to.equal('AUDIO'); // -----
-      //expect(audio).to.equal('AUDIO'); // -----
-
       expect(audio.tagName).to.equal('AUDIO');
       expect(element.getAttribute('width')).to.be.equal('503');
       expect(element.getAttribute('height')).to.be.equal('53');
@@ -238,7 +235,7 @@ describes.realWin(
       expect(audio.offsetHeight).to.be.greaterThan(1);
       expect(audio.hasAttribute('controls')).to.be.true;
       expect(audio.hasAttribute('autoplay')).to.be.true;
-      //expect(audio.hasAttribute('muted')).to.be.true;
+      expect(audio.hasAttribute('muted')).to.be.true;
       expect(audio.hasAttribute('preload')).to.be.true;
       expect(audio.hasAttribute('loop')).to.be.true;
       expect(audio.hasAttribute('src')).to.be.false;
@@ -286,24 +283,24 @@ describes.realWin(
       expect(element.style.height).to.be.equal('30px');
     });
 
-    // it('should fallback when not available', () => {
-    //   // For this single test, cause audio elements that are
-    //   // created to lack the necessary feature set, which should trigger
-    //   // fallback behavior.
-    //   const {createElement} = doc;
-    //   doc.createElement = (name) => {
-    //     if (name === 'audio') {
-    //       name = 'busted-audio';
-    //     }
-    //     return createElement.call(doc, name);
-    //   };
+    it('should fallback when not available', () => {
+      // For this single test, cause audio elements that are
+      // created to lack the necessary feature set, which should trigger
+      // fallback behavior.
+      const {createElement} = doc;
+      doc.createElement = (name) => {
+        if (name === 'audio') {
+          name = 'busted-audio';
+        }
+        return createElement.call(doc, name);
+      };
 
-    //   const element = doc.createElement('div');
-    //   element.toggleFallback = env.sandbox.spy();
-    //   const audio = new AmpAudio(element);
-    //   audio.buildAudioElement();
-    //   expect(element.toggleFallback).to.be.calledOnce;
-    // });
+      const element = doc.createElement('div');
+      element.toggleFallback = env.sandbox.spy();
+      const audio = new AmpAudio(element);
+      audio.buildAudioElement();
+      expect(element.toggleFallback).to.be.calledOnce;
+    });
 
     it('should propagate ARIA attributes', async () => {
       element = attachAndRun({
@@ -319,9 +316,9 @@ describes.realWin(
       const {shadowRoot} = element;
       const audio = shadowRoot.querySelector('audio');
 
-      // expect(audio.getAttribute('aria-label')).to.equal('Hello');
-      // expect(audio.getAttribute('aria-labelledby')).to.equal('id2');
-      // expect(audio.getAttribute('aria-describedby')).to.equal('id3');
+      expect(audio.getAttribute('aria-label')).to.equal('Hello');
+      expect(audio.getAttribute('aria-labelledby')).to.equal('id2');
+      expect(audio.getAttribute('aria-describedby')).to.equal('id3');
     });
 
     it('should play/pause when `play`/`pause` actions are called', async () => {

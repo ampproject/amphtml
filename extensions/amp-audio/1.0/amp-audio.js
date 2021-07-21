@@ -24,7 +24,10 @@ import {validateMediaMetadata} from '../../../src/mediasession-helper';
 /** @const {string} */
 const TAG = 'amp-audio';
 
-class AmpAudio extends BaseElement {
+/**
+ * Visible for testing only.
+ */
+export class AmpAudio extends BaseElement {
   /** @override */
   init() {
     this.registerApiAction('play', (api) => api./*OK*/ play());

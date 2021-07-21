@@ -15,17 +15,12 @@
  */
 
 import * as Preact from '#preact';
-import {ContainWrapper} from '#preact/component';
 import {listen} from '../../../src/event-helper';
 import {setMediaSession} from '../../../src/mediasession-helper';
 import {forwardRef} from '#preact/compat';
-import {assertHttpsUrl} from '../../../src/url';
-
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {arrayOrSingleItemToArray} from '#core/types/array';
-import {
-  closestAncestorElementBySelector,
-  realChildNodes,
-} from '#core/dom/query';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 
 const {useCallback, useEffect, useImperativeHandle, useMemo, useRef} = Preact;
 
@@ -82,15 +77,6 @@ export function AudioWithRef(props, ref) {
     ...rest
   } = props;
 
-  /**
-   * TODO:
-   *  + [ ] !audio.play -> this.toggleFallback(true)
-   *  + [ ] check src   -> assertHttpUrl(src, this.element)
-   *  + [*] propagateAttributes( [attrs] , this.element , audioElement/ref )
-   *  + [ ] for all child -> check getAttribute && getAttribute(src) -> assertHttpUrl / OR / add to audio as child
-   *  + [ ] if `amp-story` is closest ancestor element -> do not auto play
-   */
-
   /** @public {boolean} */
   const isPlaying = useRef(false);
 
@@ -103,16 +89,27 @@ export function AudioWithRef(props, ref) {
       return false;
     }
 
-    if (isStoryDescendant_(ref.current)) {
-      console /*OK*/
-        .warn(
-          '<amp-story> elements do not support actions on <amp-audio> elements'
-        );
-      return false;
-    }
+    /**
+     * ERROR:
+     * Uncaught TypeError: Cannot read property 'closest' of undefined
+     *    at closestAncestorElementBySelector (query.js:154)
+     *    at isStoryDescendant_ (component.js:228)
+     *    at component.js:100
+     *    at MediaSession.<anonymous> (component.js:141)
+     */
+    // if (isStoryDescendant_(ref.current)) {
+    //   console /*OK*/
+    //     .warn(
+    //       '<amp-story> elements do not support actions on <amp-audio> elements'
+    //     );
+    //   return false;
+    // }
     return true;
-  }, [ref]);
+  }, []);
 
+  /**
+   * Prepares Media Metadata
+   */
   const metaData = useMemo(() => {
     return {
       title,
@@ -122,7 +119,12 @@ export function AudioWithRef(props, ref) {
     };
   }, [title, artist, album, artwork]);
 
+  /**
+   * Plays audio callback
+   */
   const playCallback = useCallback(() => {
+    triggerAnalyticsEvent(audioRef.current, 'audio-play');
+
     if (!isInvocationValid_()) {
       return;
     }
@@ -130,7 +132,12 @@ export function AudioWithRef(props, ref) {
     isPlaying.current = true;
   }, [isPlaying, isInvocationValid_]);
 
+  /**
+   * Pauses audio callback
+   */
   const pauseCallback = useCallback(() => {
+    triggerAnalyticsEvent(audioRef.current, 'audio-pause');
+
     if (!isInvocationValid_()) {
       return;
     }
@@ -138,23 +145,12 @@ export function AudioWithRef(props, ref) {
     isPlaying.current = false;
   }, [isPlaying, isInvocationValid_]);
 
+  /**
+   * Updates media session for current window/tab
+   */
   const audioPlaying = useCallback(() => {
     const win = audioRef.current?.ownerDocument?.defaultView;
     const element = audioRef.current;
-
-    // const playHandler = () => {
-    //   if (!isInvocationValid_()) {
-    //     return;
-    //   }
-    //   audioRef.current.play();
-    // };
-
-    // const pauseHandler = () => {
-    //   if (!isInvocationValid_()) {
-    //     return;
-    //   }
-    //   audioRef.current.pause();
-    // };
 
     if (validateMediaMetadata) {
       validateMediaMetadata(element, metaData);
@@ -168,23 +164,17 @@ export function AudioWithRef(props, ref) {
       audioPlaying()
     );
 
-    console /*OK*/
-      .log(' + + + + CHILDS + ');
-    console /*OK*/
-      .log(realChildNodes(audioRef.current.parentNode.parentNode));
-
-    // Propagate Attributes
     propagateAttributes(
       [
-        'src',
-        'preload',
-        'autoplay',
-        'muted',
-        'loop',
-        'aria-label',
         'aria-describedby',
+        'aria-label',
         'aria-labelledby',
+        'autoplay',
         'controlsList',
+        'loop',
+        'muted',
+        'preload',
+        'src',
       ],
       props,
       audioRef.current
@@ -196,6 +186,7 @@ export function AudioWithRef(props, ref) {
     };
   }, [audioPlaying, children, props]);
 
+  /** Audio Component - API Functions */
   useImperativeHandle(
     ref,
     () =>
@@ -208,20 +199,22 @@ export function AudioWithRef(props, ref) {
   );
 
   return (
-    <ContainWrapper layout size paint {...rest}>
-      <audio
-        ref={audioRef}
-        autoplay={autoplay}
-        controls // Force controls otherwise there is no player UI.
-        controlsList={controlsList}
-        loop={loop}
-        muted={muted}
-        preload={preload}
-        src={src}
-      >
-        {children}
-      </audio>
-    </ContainWrapper>
+    <audio
+      ref={audioRef}
+      autoplay={autoplay}
+      controls // Force controls otherwise there is no player UI.
+      controlsList={controlsList}
+      loop={loop}
+      muted={muted}
+      preload={preload}
+      src={src}
+      layout
+      size
+      paint
+      {...rest}
+    >
+      {children}
+    </audio>
   );
 }
 

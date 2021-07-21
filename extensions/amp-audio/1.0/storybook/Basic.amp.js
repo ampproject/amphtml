@@ -28,8 +28,25 @@ export default {
   },
 };
 
-// DO NOT SUBMIT: This is example code only.
-export const ExampleUseCase = () => {
+export const _default = () => {
+  return (
+    <amp-audio
+      src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
+      artwork="https://storage.googleapis.com/media-session/sintel/artwork-512.png"
+      title="Snow Fight"
+      album="Jan Morgenstern"
+      artist="Sintel"
+      height="75"
+      width="auto"
+      layout="fixed-height"
+      controls
+    >
+      <div>Your browser doesn’t support HTML5 audio</div>
+    </amp-audio>
+  );
+};
+
+export const LoadAudioThroughSources = () => {
   return (
     <amp-audio
       // src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
@@ -44,13 +61,9 @@ export const ExampleUseCase = () => {
     >
       <source
         src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
-        type="audio/mp3"
+        type="audio/mpeg"
       />
-      <div fallback>Your browser doesn’t support HTML5 audio</div>
+      <div>Your browser doesn’t support HTML5 audio</div>
     </amp-audio>
   );
-};
-
-ExampleUseCase.story = {
-  name: 'Example use case story',
 };
