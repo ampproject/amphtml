@@ -1702,12 +1702,12 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
       env.sandbox
         .stub(a4a, 'maybeValidateAmpCreative')
         .returns(Promise.resolve());
-      a4a.onLayoutMeasure();
       a4a.uiHandler = {
         getScrollPromiseForStickyAd: () => Promise.resolve(null),
         isStickyAd: () => false,
         maybeInitStickyAd: () => {},
       };
+      a4a.onLayoutMeasure();
       await a4a.buildCallback();
       await a4a.layoutCallback();
       expect(
@@ -1781,6 +1781,9 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
       doc.head.appendChild(s);
       a4aElement.className = 'fixed';
       const a4a = new MockA4AImpl(a4aElement);
+      a4a.uiHandler = {
+        isStickyAd: () => false,
+      };
       a4a.onLayoutMeasure();
       expect(a4a.adPromise_).to.not.be.ok;
     });
@@ -2141,6 +2144,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             unlayoutUISpy();
           },
           getScrollPromiseForStickyAd: () => Promise.resolve(null),
+          isStickyAd: () => false,
           maybeInitStickyAd: () => {},
           cleanup: () => {},
         };

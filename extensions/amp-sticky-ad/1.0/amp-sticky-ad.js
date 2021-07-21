@@ -142,11 +142,7 @@ class AmpStickyAd extends AMP.BaseElement {
     this.element.parentElement.replaceChild(ad, this.element);
     return Services.extensionsFor(this.win)
       .loadElementClass('amp-ad', '0.1')
-      .then((AmpAd) => {
-        const impl = new AmpAd(ad);
-        impl.upgradeCallback();
-        return impl;
-      });
+      .then((AmpAd) => new AmpAd(ad));
   }
 
   /** @override */
