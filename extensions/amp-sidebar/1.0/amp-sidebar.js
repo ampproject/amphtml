@@ -18,13 +18,27 @@ import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-sidebar-1.0.css';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';
+import {Services} from '#service/';
 
 /** @const {string} */
 const TAG = 'amp-sidebar';
 
 class AmpSidebar extends BaseElement {
   /** @override */
+  constructor(element) {
+    super(element);
+
+    /** @private {!../../../src/service/history-impl.History} */
+    this.history_ = null;
+
+    /** @private {number} */
+    this.historyId_ = -1;
+  }
+
+  /** @override */
   init() {
+    this.history_ = Services.historyForDoc(this.getAmpDoc());
+
     this.registerApiAction('toggle', (api) => api./*OK*/ toggle());
     this.registerApiAction('open', (api) => api./*OK*/ open());
     this.registerApiAction('close', (api) => api./*OK*/ close());
@@ -62,12 +76,21 @@ class AmpSidebar extends BaseElement {
     super.afterOpen();
     const sidebar = this.element.shadowRoot.querySelector('[part=sidebar]');
     this.setAsContainer?.(sidebar);
+
+    this.history_
+      .push(() => this.api().close())
+      .then((historyId) => (this.historyId_ = historyId));
   }
 
   /** @override */
   afterClose() {
     super.afterClose();
     this.removeAsContainer?.();
+
+    if (this.historyId_ != -1) {
+      this.history_.pop(this.historyId_);
+      this.historyId_ = -1;
+    }
   }
 
   /** @override */
