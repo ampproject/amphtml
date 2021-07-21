@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export {isFortesting} from './for-testing';
+export {isForDistribution} from './for-distribution';
 export {isLocalDev} from './local-dev';
 export {isMinified} from './minified';
 export {isTest} from './test';
