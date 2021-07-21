@@ -26,7 +26,8 @@ limitations under the License.
 
 ## Usage
 
-Story page attachments allow you to provide additional content in the form of inline AMPHTML content on specific AMP story pages. This content can be revealed by users through a "swipe up" gesture, or a tap on bottom of the page. A UI button guiding the viewer to open the attachment will appear at the bottom of every page with a `amp-story-page-attachment` element.
+Story page attachments allow you to provide additional content in the form of inline AMPHTML content on specific AMP story pages. This content can be revealed by users through a "swipe up" gesture, or a tap on the call to action element. 
+A UI button guiding the viewer to open the attachment will appear at the bottom of every page with a `amp-story-page-attachment` element.
 
 <amp-img alt="AMP Story page attachment" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment.gif" width="240" height="480">
   <noscript>
@@ -35,7 +36,7 @@ Story page attachments allow you to provide additional content in the form of in
 </amp-img>
 
 ```html
-<amp-story-page id="foo">
+<amp-story-page id="page-attachment-example">
   <amp-story-grid-layer template="fill">
     <amp-img src="https://example.ampproject.org/helloworld/bg1.jpg" width="900" height="1600">
   </amp-story-grid-layer>
@@ -60,15 +61,11 @@ Story page attachments allow you to provide additional content in the form of in
 
 ## Placement
 
-The `<amp-story-page-attachment>` element must be the last child of `<amp-story-page>`, and must have the `layout="nodisplay"` attribute.
+Both `amp-story-page-attachment` and [`amp-story-page-outlink`](amp-story-page-outlink.md) must be the last child tag of an [`amp-story-page`](amp-story-page.md). Because of this, you may include neither or one, but not both.
 
-[tip type="important"]
-Both [`amp-story-page-outlink`](amp-story-page-outlink.md) and `amp-story-page-attachment` must be the last child tag of an [`amp-story-page`](amp-story-page.md). Because of this, you may include neither or one, but not both.
-[/tip]
+## Attributes
 
-## Customizeable Attributes
-
-When no special attributes are set, the following default UI will render at the bottom of every page with a `amp-story-page-attachment` element:
+When no attributes are set, the default UI will render:
 
 ![amp-story-page-attachment-default](img/amp-story-page-attachment-default.png)
 
@@ -79,9 +76,9 @@ When no special attributes are set, the following default UI will render at the 
 </amp-story-page-attachment>
 ```
 
-### `theme`
+### `theme` (optional)
 
-String that represents the color theme, default is light. Accepts values `light` & `dark`.
+String representing the color theme, default is `light`. Accepts values `light` & `dark`.
 
 ![amp-story-page-attachment-dark-theme](img/amp-story-page-attachment-dark-theme.png)
 
@@ -93,10 +90,9 @@ String that represents the color theme, default is light. Accepts values `light`
 </amp-story-page-attachment>
 ```
 
-### `cta-text`
+### `cta-text` (optional)
 
-Customizes the call to action text displayed on the UI prompt to open the attachment.
-Default: "Swipe up"
+String that customizes the button text. The default is "Swipe up".
 
 ![amp-story-page-attachment-cta-text](img/amp-story-page-attachment-cta-text.png)
 
@@ -108,37 +104,51 @@ Default: "Swipe up"
 </amp-story-page-attachment>
 ```
 
-### `cta-image` & `cta-image-2`
+### `cta-image` (optional)
 
-A UI button guiding the viewer to open the attachment can display with 0, 1, or 2 images. If neither of these attributes are set, the default button is rendered. If `cta-image` is set, the UI will render a button with only that image. If both are set, both images will be included in the UI.
-
-<ul>
-  <li>`cta-image`: String that represents a URL pointing to an image. 48 x 48px is suggested.</li>
-  <li>`cta-image-2`: String that represents a URL pointing to an image. 48 x 48px is suggested.</li>
-</ul>
-
-![amp-story-page-attachment-1-image](img/amp-story-page-attachment-1-image.png)
-![amp-story-page-attachment-2-images](img/amp-story-page-attachment-2-images.png)
+String representing a URL pointing to an img. 48x48px is suggested.
 
 ```html
 <amp-story-page-attachment
-  ...
+  layout="nodisplay"
+  cta-image="images/48x48image.jpg">
+   ...
+</amp-story-page-attachment>
+```
+
+![amp-story-page-attachment-1-image](img/amp-story-page-attachment-1-image.png)
+
+### `cta-image-2` (optional)
+
+String representing a URL pointing to an img. 48x48px is suggested. Two images will display when `cta-image` and `cta-image-2` are defined.
+
+```html
+<amp-story-page-attachment
+  layout="nodisplay"
   cta-image="images/48x48image.jpg"
   cta-image-2="images/48x48image2.jpg">
    ...
 </amp-story-page-attachment>
 ```
 
-### `title`
+![amp-story-page-attachment-2-image](img/amp-story-page-attachment-2-image.png)
 
-Displays the provided title in the pulled-out page attachment's header.
-Default: `amp-null`
+### `title` (optional)
+
+String that displays in the attachment's header when scrolling beyond the height of the viewport.
 
 ```html
-<amp-story-page-attachment layout="nodisplay" title="My title"
-  >...</amp-story-page-attachment
->
+<amp-story-page-attachment
+  layout="nodisplay"
+  title="My title"
+  >
+  ...
+</amp-story-page-attachment>
 ```
+
+[tip type="note"]
+`amp-story-page-attachment` previously supported outlinking. Please use [`amp-story-page-outlink`](https://amp.dev/documentation/components/amp-story-page-outlink/?format=stories) for one-tap outlinking UI.
+[/tip]
 
 ### Supported AMP Components in a Page Attachment
 
