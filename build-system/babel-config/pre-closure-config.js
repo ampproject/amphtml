@@ -25,7 +25,8 @@ const {getReplacePlugin} = require('./helpers');
  * @return {!Object}
  */
 function getPreClosureConfig() {
-  const isCheckTypes = argv._.includes('check-types');
+  const isCheckTypes = !argv.fortesting && argv._.includes('check-types');
+  const isForDistribution = !argv.fortesting && argv._.includes('dist');
 
   const reactJsxPlugin = [
     '@babel/plugin-transform-react-jsx',
@@ -73,7 +74,7 @@ function getPreClosureConfig() {
     !isCheckTypes
       ? './build-system/babel-plugins/babel-plugin-transform-json-configuration'
       : null,
-    [
+    isForDistribution && [
       './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
       {isEsmBuild: !!argv.esm},
     ],
