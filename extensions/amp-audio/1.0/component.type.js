@@ -21,13 +21,7 @@ var AudioDef = {};
 
 /**
  * @typedef {{
- *   exampleProperty: (string|undefined), (DO NOT SUBMIT)
+ *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
 AudioDef.Props;
-
-/** @interface */
-AudioDef.AudioApi = class {
-  /** Example: API method to toggle the component */
-  exampleToggle() {} // DO NOT SUBMIT
-};

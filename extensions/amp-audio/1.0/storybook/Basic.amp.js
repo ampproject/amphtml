@@ -32,7 +32,7 @@ export default {
 export const ExampleUseCase = () => {
   return (
     <amp-audio
-      src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
+      // src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
       artwork="https://storage.googleapis.com/media-session/sintel/artwork-512.png"
       title="Snow Fight"
       album="Jan Morgenstern"
@@ -42,6 +42,10 @@ export const ExampleUseCase = () => {
       layout="fixed-height"
       controls
     >
+      <source
+        src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
+        type="audio/mp3"
+      />
       <div fallback>Your browser doesn’t support HTML5 audio</div>
     </amp-audio>
   );

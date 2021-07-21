@@ -38,7 +38,10 @@ export const _default = () => {
       width="auto"
       controls
     >
-      This text is inside.
+      <source
+        src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
+        type="audio/mp3"
+      />
     </Audio>
   );
 };

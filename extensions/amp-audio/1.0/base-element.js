@@ -25,7 +25,8 @@ BaseElement['Component'] = Audio;
 
 /** @override */
 BaseElement['props'] = {
-  'children': {passthroughNonEmpty: true},
+  //'children': {passthroughNonEmpty: true},
+  'children': {passthrough: true},
   album: {attr: 'album', type: 'string', default: EMPTY_METADATA.album},
   artist: {attr: 'artist', type: 'string', default: EMPTY_METADATA.artist},
   artwork: {attr: 'artwork', type: 'string', default: EMPTY_METADATA.artwork},

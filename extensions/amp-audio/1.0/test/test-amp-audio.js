@@ -48,7 +48,10 @@ describes.realWin(
       await element.buildInternal();
       const loadPromise = element.layoutCallback();
       const {shadowRoot} = element;
-      await waitFor(() => shadowRoot.querySelector('audio'), 'iframe mounted');
+      await waitFor(
+        () => shadowRoot.querySelector('audio'),
+        'audio tag mounted'
+      );
       await loadPromise;
     };
 
@@ -61,7 +64,7 @@ describes.realWin(
         opt_childNodesAttrs.forEach((childNodeAttrs) => {
           let child;
           if (childNodeAttrs.tag === 'text') {
-            child = doc.createTextNode(childNodeAttrs.text);
+            child = doc.createElement('p');
           } else {
             child = doc.createElement(childNodeAttrs.tag);
             for (const key in childNodeAttrs) {
@@ -225,6 +228,9 @@ describes.realWin(
       const {shadowRoot} = element;
       const audio = shadowRoot.querySelector('audio');
 
+      //expect(element).to.equal('AUDIO'); // -----
+      //expect(audio).to.equal('AUDIO'); // -----
+
       expect(audio.tagName).to.equal('AUDIO');
       expect(element.getAttribute('width')).to.be.equal('503');
       expect(element.getAttribute('height')).to.be.equal('53');
@@ -232,16 +238,16 @@ describes.realWin(
       expect(audio.offsetHeight).to.be.greaterThan(1);
       expect(audio.hasAttribute('controls')).to.be.true;
       expect(audio.hasAttribute('autoplay')).to.be.true;
-      // expect(audio.hasAttribute('muted')).to.be.true;
+      //expect(audio.hasAttribute('muted')).to.be.true;
       expect(audio.hasAttribute('preload')).to.be.true;
       expect(audio.hasAttribute('loop')).to.be.true;
       expect(audio.hasAttribute('src')).to.be.false;
-      // expect(audio.childNodes[0].tagName).to.equal('SOURCE');
-      // expect(audio.childNodes[0].getAttribute('src')).to.equal('audio.mp3');
-      // expect(audio.childNodes[1].tagName).to.equal('SOURCE');
-      // expect(audio.childNodes[1].getAttribute('src')).to.equal('audio.ogg');
-      // expect(audio.childNodes[2].nodeType).to.equal(Node.TEXT_NODE);
-      // expect(audio.childNodes[2].textContent).to.equal('Unsupported.');
+      expect(audio.childNodes[0].tagName).to.equal('SOURCE');
+      expect(audio.childNodes[0].getAttribute('src')).to.equal('audio.mp3');
+      expect(audio.childNodes[1].tagName).to.equal('SOURCE');
+      expect(audio.childNodes[1].getAttribute('src')).to.equal('audio.ogg');
+      expect(audio.childNodes[2].nodeType).to.equal(Node.TEXT_NODE);
+      expect(audio.childNodes[2].textContent).to.equal('Unsupported.');
     });
 
     it('should set its dimensions to the browser natural', async () => {
