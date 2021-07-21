@@ -32,9 +32,9 @@ It must have the `layout="nodisplay"` attribute.
 
 `amp-story-page-outlink` requires a single `a` element child.
 
-<amp-img alt="AMP Story page attachment" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-outlink.gif" width="240" height="480">
+<amp-img alt="AMP Story page attachment" layout="fixed" src="img/amp-story-page-outlink.gif" width="240" height="480">
   <noscript>
-    <img alt="AMP Story page attachment" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-outlink.gif" />
+    <img alt="AMP Story page attachment" src="img/amp-story-page-outlink.gif" />
   </noscript>
 </amp-img>
 
