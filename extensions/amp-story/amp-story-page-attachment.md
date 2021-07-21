@@ -3,7 +3,7 @@ $category@: presentation
 formats:
   - stories
 teaser:
-  text: An additional pane of content that can be associated with a single page of an AMP story.
+  text: A panel of content that opens inline with an AMP story page.
 ---
 
 <!--
@@ -26,7 +26,7 @@ limitations under the License.
 
 ## Usage
 
-Story page attachments allow you to provide additional content in the form of inline AMPHTML content on specific AMP story pages. This content can be revealed by users through a "swipe up" gesture, or a tap on the call to action element. 
+`amp-story-page-attachment` allows additional content in the form of inline AMPHTML content on specific AMP story pages. This content is revealed to users through a "swipe up" gesture, or a tap on the call to action element.
 A UI button prompting the viewer to open the attachment will appear at the bottom of every page with a `amp-story-page-attachment` element.
 
 <amp-img alt="AMP Story page attachment" layout="fixed" src="img/amp-story-page-attachment.gif" width="240" height="480">
