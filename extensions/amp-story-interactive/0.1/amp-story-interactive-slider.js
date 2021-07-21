@@ -67,7 +67,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.bubbleEl_ = null;
     /** @private {?Element} tracks user input */
     this.inputEl_ = null;
-    /** @private {?Element}  */
+    /** @private {!SliderType}  */
     this.sliderType_ = SliderType.PERCENTAGE;
   }
 
@@ -82,8 +82,10 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     );
 
     if (this.options_.length > 0) {
-      this.bubbleEl_.textContent = this.options_[0].text;
       this.sliderType_ = SliderType.EMOJI;
+      const emojiWrapper = this.win.document.createElement('span');
+      emojiWrapper.textContent = this.options_[0].text;
+      this.bubbleEl_.appendChild(emojiWrapper);
     }
 
     this.rootEl_.setAttribute('type', this.sliderType_);

@@ -118,7 +118,7 @@ describes.realWin(
         win
           .getComputedStyle(ampStorySlider.getRootElement())
           .getPropertyValue('--percentage')
-      ).to.be.equal('30%');
+      ).to.be.equal('calc(0.3*100%)');
     });
 
     it('should show the bubble when the user drags the slider', async () => {
@@ -147,7 +147,7 @@ describes.realWin(
       );
     });
 
-    it.only('should display the emoji in the bubble when the user drags the slider', async () => {
+    it('should display the emoji in the bubble from the attribute configuration', async () => {
       ampStorySlider.element.setAttribute('option-1-text', '😄');
       await ampStorySlider.buildCallback();
       await ampStorySlider.layoutCallback();
