@@ -63,7 +63,7 @@ export const LoadAudioThroughSources = () => {
         src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
         type="audio/mpeg"
       />
-      <div>Your browser doesn’t support HTML5 audio</div>
+      <div fallback>Your browser doesn’t support HTML5 audio</div>
     </amp-audio>
   );
 };

@@ -20,7 +20,6 @@ import {setMediaSession} from '../../../src/mediasession-helper';
 import {forwardRef} from '#preact/compat';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {arrayOrSingleItemToArray} from '#core/types/array';
-import {closestAncestorElementBySelector} from '#core/dom/query';
 
 const {useCallback, useEffect, useImperativeHandle, useMemo, useRef} = Preact;
 
@@ -68,11 +67,13 @@ export function AudioWithRef(props, ref) {
     autoplay,
     children,
     controlsList,
+    isStoryDescendant_,
     loop,
     muted,
     preload,
     src,
     title,
+    toggleFallback,
     validateMediaMetadata,
     ...rest
   } = props;
@@ -89,23 +90,15 @@ export function AudioWithRef(props, ref) {
       return false;
     }
 
-    /**
-     * ERROR:
-     * Uncaught TypeError: Cannot read property 'closest' of undefined
-     *    at closestAncestorElementBySelector (query.js:154)
-     *    at isStoryDescendant_ (component.js:228)
-     *    at component.js:100
-     *    at MediaSession.<anonymous> (component.js:141)
-     */
-    // if (isStoryDescendant_(ref.current)) {
-    //   console /*OK*/
-    //     .warn(
-    //       '<amp-story> elements do not support actions on <amp-audio> elements'
-    //     );
-    //   return false;
-    // }
+    if (isStoryDescendant_()) {
+      console /*OK*/
+        .warn(
+          '<amp-story> elements do not support actions on <amp-audio> elements'
+        );
+      return false;
+    }
     return true;
-  }, []);
+  }, [isStoryDescendant_]);
 
   /**
    * Prepares Media Metadata
@@ -160,6 +153,11 @@ export function AudioWithRef(props, ref) {
   }, [metaData, validateMediaMetadata, playCallback, pauseCallback]);
 
   useEffect(() => {
+    if (!audioRef.current.play) {
+      toggleFallback(true);
+      return;
+    }
+
     const unlistenPlaying = listen(audioRef.current, 'playing', () =>
       audioPlaying()
     );
@@ -184,7 +182,7 @@ export function AudioWithRef(props, ref) {
     return () => {
       unlistenPlaying();
     };
-  }, [audioPlaying, children, props]);
+  }, [audioPlaying, children, toggleFallback, props]);
 
   /** Audio Component - API Functions */
   useImperativeHandle(
@@ -216,16 +214,6 @@ export function AudioWithRef(props, ref) {
       {children}
     </audio>
   );
-}
-
-/**
- * Returns whether `<amp-audio>` has an `<amp-story>` for an ancestor.
- * @param {?Element} element
- * @return {?Element}
- * @private
- */
-function isStoryDescendant_(element) {
-  return closestAncestorElementBySelector(element, 'AMP-STORY');
 }
 
 const Audio = forwardRef(AudioWithRef);

@@ -20,6 +20,7 @@ import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';
 import {validateMediaMetadata} from '../../../src/mediasession-helper';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 
 /** @const {string} */
 const TAG = 'amp-audio';
@@ -37,6 +38,12 @@ export class AmpAudio extends BaseElement {
     return dict({
       'validateMediaMetadata': (element, metaData) => {
         validateMediaMetadata(element, metaData);
+      },
+      'isStoryDescendant_': () => {
+        return closestAncestorElementBySelector(this.element, 'AMP-STORY');
+      },
+      'toggleFallback': (fallback) => {
+        this.toggleFallback(fallback);
       },
     });
   }
