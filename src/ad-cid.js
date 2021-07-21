@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from './service';
 import {adConfig} from '#ads/_config';
-import {dev} from '../src/log';
+
+import {dev} from './log';
+import {Services} from './service';
 
 /**
  * @param {AMP.BaseElement} adElement

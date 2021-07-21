@@ -19,8 +19,8 @@
 import {install as installAbortController} from './abort-controller';
 import {install as installArrayIncludes} from './array-includes';
 import {install as installCustomElements} from './custom-elements';
-import {install as installDOMTokenList} from './domtokenlist';
 import {install as installDocContains} from './document-contains';
+import {install as installDOMTokenList} from './domtokenlist';
 import {install as installFetch} from './fetch';
 import {install as installGetBoundingClientRect} from './get-bounding-client-rect';
 import {install as installIntersectionObserver} from './intersection-observer';
@@ -30,7 +30,7 @@ import {install as installObjectAssign} from './object-assign';
 import {install as installObjectValues} from './object-values';
 import {install as installPromise} from './promise';
 import {install as installResizeObserver} from './resize-observer';
-import {install as installSetAdd} from './set-add';
+import {install as installSet} from './set';
 import {install as installStringStartsWith} from './string-starts-with';
 import {install as installWeakMapSet} from './weakmap-set';
 
@@ -43,7 +43,7 @@ if (!IS_ESM) {
   installArrayIncludes(self);
   installMapSet(self);
   installWeakMapSet(self);
-  installSetAdd(self);
+  installSet(self);
   installStringStartsWith(self);
 }
 

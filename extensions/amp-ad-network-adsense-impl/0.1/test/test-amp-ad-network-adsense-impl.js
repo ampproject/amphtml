@@ -958,6 +958,13 @@ describes.realWin(
         });
       });
 
+      it('should set spsa param to amp-ad element layout box', () => {
+        impl.isSinglePageStoryAd = true;
+        return impl.getAdUrl().then((url) => {
+          expect(url).to.match(/spsa=320x50/);
+        });
+      });
+
       describe('module/nomodule', () => {
         it('should have module nomodule experiment id in url when runtime type is 2', () => {
           env.sandbox

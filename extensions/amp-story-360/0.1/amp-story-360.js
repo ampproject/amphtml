@@ -22,18 +22,18 @@
 import {
   Action,
   StateProperty,
-} from '../../../extensions/amp-story/1.0/amp-story-store-service';
+} from '../../amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-360-0.1.css';
 import {CommonSignals} from '#core/constants/common-signals';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
+import {LocalizedStringId} from '#service/localization/strings';
+import {Matrix, Renderer} from '#third_party/zuho/zuho';
 import {Services} from '#service';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {closest} from '#core/dom/query';
 import {dev, user, userAssert} from '../../../src/log';
 import {htmlFor} from '#core/dom/static-template';
 import {listenOncePromise} from '../../../src/event-helper';
-import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
+import {timeStrToMillis} from '../../amp-story/1.0/utils';
 import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 /** @const {string} */

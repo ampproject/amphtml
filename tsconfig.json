@@ -2,12 +2,14 @@
   "compilerOptions": {
     "allowJs": true,
     "baseUrl": ".",
+    "outDir": "dist",
+    "noEmit": true,
     "paths": {
       "#3p/*": ["./3p/*"],
       "#ads/*": ["./ads/*"],
       "#build/*": ["./build/*"],
-      "#builtins/*": ["./builtins/*"],
 
+      "#builtins/*": ["./src/builtins/*"],
       "#core/*": ["./src/core/*"],
       "#experiments/*": ["./src/experiments/*"],
       "#inabox/*": ["./src/inabox/*"],
@@ -17,7 +19,10 @@
       "#service/*": ["./src/service/*"],
 
       "#test/*": ["./test/*"],
-      "#testing/*": ["./testing/*"]
+      "#testing/*": ["./testing/*"],
+
+      "#third_party/*": ["./third_party/*"]
     }
-  }
+  },
+  "exclude": ["node_modules", "dist"]
 }

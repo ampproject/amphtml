@@ -64,6 +64,7 @@ const MUSTACHE_TAG = 'amp-mustache';
 /** @enum {string} */
 export const Attributes = {
   AD_SHOWING: 'ad-showing',
+  DESKTOP_ONE_PANEL: 'desktop-one-panel',
   DESKTOP_PANELS: 'desktop-panels',
   DIR: 'dir',
   PAUSED: 'paused',
@@ -145,8 +146,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     return this.ampStory_
       .signals()
       .whenSignal(CommonSignals.INI_LOAD)
+      .then(() => this.handleConfig_())
       .then(() => {
-        this.handleConfig_();
         this.adPageManager_ = new StoryAdPageManager(
           this.ampStory_,
           this.config_
@@ -214,16 +215,22 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Sets config and installs additional extensions if necessary.
    * @private
+   * @return {Promise}
    */
   handleConfig_() {
-    this.config_ = new StoryAdConfig(this.element).getConfig();
-    if (this.config_['type'] === 'custom') {
-      Services.extensionsFor(this.win)./*OK*/ installExtensionForDoc(
-        this.element.getAmpDoc(),
-        MUSTACHE_TAG,
-        'latest'
-      );
-    }
+    return new StoryAdConfig(this.element, this.win)
+      .getConfig()
+      .then((config) => {
+        this.config_ = config;
+        if (config['type'] === 'custom') {
+          Services.extensionsFor(this.win)./*OK*/ installExtensionForDoc(
+            this.element.getAmpDoc(),
+            MUSTACHE_TAG,
+            'latest'
+          );
+        }
+        return config;
+      });
   }
 
   /**
@@ -315,14 +322,20 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   onUIStateUpdate_(uiState) {
     this.mutateElement(() => {
-      const {DESKTOP_PANELS} = Attributes;
+      const {DESKTOP_ONE_PANEL, DESKTOP_PANELS} = Attributes;
       this.adBadgeContainer_.removeAttribute(DESKTOP_PANELS);
+      this.adBadgeContainer_.removeAttribute(DESKTOP_ONE_PANEL);
       // TODO(#33969) can no longer be null when launched.
       this.progressBarBackground_?.removeAttribute(DESKTOP_PANELS);
+      this.progressBarBackground_?.removeAttribute(DESKTOP_ONE_PANEL);
 
       if (uiState === UIType.DESKTOP_PANELS) {
         this.adBadgeContainer_.setAttribute(DESKTOP_PANELS, '');
         this.progressBarBackground_?.setAttribute(DESKTOP_PANELS, '');
+      }
+      if (uiState === UIType.DESKTOP_ONE_PANEL) {
+        this.adBadgeContainer_.setAttribute(DESKTOP_ONE_PANEL, '');
+        this.progressBarBackground_?.setAttribute(DESKTOP_ONE_PANEL, '');
       }
     });
   }

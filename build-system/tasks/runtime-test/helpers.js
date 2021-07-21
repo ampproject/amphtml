@@ -22,7 +22,6 @@ const {cyan, green, red, yellow} = require('../../common/colors');
 const {isCiBuild} = require('../../common/ci');
 const {log, logWithoutTimestamp} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
-const {reportTestRunComplete} = require('../report-test-status');
 const {Server} = require('karma');
 
 const CHROMEBASE = argv.chrome_canary ? 'ChromeCanary' : 'Chrome';
@@ -136,7 +135,7 @@ function maybePrintArgvMessages() {
       green('to run tests in a headless Chrome window.')
     );
   }
-  if (argv.compiled || !argv.nobuild) {
+  if (argv.compiled) {
     log(green('Running tests against minified code.'));
   } else {
     log(green('Running tests against unminified code.'));
@@ -152,6 +151,7 @@ function maybePrintArgvMessages() {
 
 /**
  * @param {Object} browser
+ * @return {Promise<void>}
  * @private
  */
 async function karmaBrowserComplete_(browser) {
@@ -184,23 +184,19 @@ function karmaBrowserStart_() {
  * @return {!Promise<number>}
  */
 async function createKarmaServer(config) {
-  let resolver, results_;
+  let resolver;
   const deferred = new Promise((resolverIn) => {
     resolver = resolverIn;
   });
 
-  const karmaServer = new Server(config, async (exitCode) => {
-    await reportTestRunComplete(results_);
+  const karmaServer = new Server(config, (exitCode) => {
     maybePrintCoverageMessage('test/coverage/index.html');
     resolver(exitCode);
   });
 
   karmaServer
     .on('browser_start', karmaBrowserStart_)
-    .on('browser_complete', karmaBrowserComplete_)
-    .on('run_complete', (_browsers, results) => {
-      results_ = results;
-    });
+    .on('browser_complete', karmaBrowserComplete_);
 
   karmaServer.start();
 

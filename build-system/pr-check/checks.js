@@ -19,7 +19,6 @@
  * @fileoverview Script that runs various checks during CI.
  */
 
-const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runCiJob} = require('./ci-job');
 const {Targets, buildTargetsInclude} = require('./build-targets');
 const {timedExecOrDie} = require('./utils');
@@ -39,7 +38,6 @@ function pushBuildWorkflow() {
   timedExecOrDie('amp check-build-system');
   timedExecOrDie('amp babel-plugin-tests');
   timedExecOrDie('amp caches-json');
-  timedExecOrDie('amp dev-dashboard-tests');
   timedExecOrDie('amp check-exact-versions');
   timedExecOrDie('amp check-renovate-config');
   timedExecOrDie('amp server-tests');
@@ -57,11 +55,8 @@ function pushBuildWorkflow() {
 
 /**
  * Steps to run during PR builds.
- * @return {Promise<void>}
  */
-async function prBuildWorkflow() {
-  await reportAllExpectedTests();
-
+function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.PRESUBMIT)) {
     timedExecOrDie('amp presubmit');
   }
@@ -103,10 +98,6 @@ async function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.DOCS)) {
     timedExecOrDie('amp check-links --local_changes'); // only for PR builds
     timedExecOrDie('amp markdown-toc');
-  }
-
-  if (buildTargetsInclude(Targets.DEV_DASHBOARD)) {
-    timedExecOrDie('amp dev-dashboard-tests');
   }
 
   if (buildTargetsInclude(Targets.OWNERS)) {

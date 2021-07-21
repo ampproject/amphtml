@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {LocalizedStringId} from '../../../../src/localized-strings';
-import localesObjs from '../_locales/index';
+import {LocalizedStringId} from '#service/localization/strings';
+import localesObjs from '../_locales';
 
 describes.fakeWin('amp-story-ad-localization-strings', {amp: true}, () => {
   describe('localized strings', () => {

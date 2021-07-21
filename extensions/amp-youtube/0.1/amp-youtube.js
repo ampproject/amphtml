@@ -44,6 +44,7 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {htmlFor} from '#core/dom/static-template';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {setStyles} from '#core/dom/style';
 
 const TAG = 'amp-youtube';
@@ -499,7 +500,7 @@ class AmpYoutube extends AMP.BaseElement {
       // the object-fit: cover.
       'visibility': 'hidden',
     });
-    this.propagateAttributes(['aria-label'], imgPlaceholder);
+    propagateAttributes(['aria-label'], this.element, imgPlaceholder);
     // TODO(mkhatib): Maybe add srcset to allow the browser to
     // load the needed size or even better match YTPlayer logic for loading
     // player thumbnails for different screen sizes for a cache win!

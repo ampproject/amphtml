@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-import {FocusHistory} from '../focus-history';
-import {MutatorInterface} from './mutator-interface';
-import {Resource} from './resource';
-import {Services} from '#service';
-import {areMarginsChanged} from '#core/math/layout-rect';
+import {areMarginsChanged} from '#core/dom/layout/rect';
 import {closest} from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
-import {dev} from '../log';
+
 import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {MutatorInterface} from './mutator-interface';
+import {Resource} from './resource';
+
+import {FocusHistory} from '../focus-history';
+import {dev} from '../log';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 
 const FOUR_FRAME_DELAY_ = 70;

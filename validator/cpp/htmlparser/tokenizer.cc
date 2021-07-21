@@ -1044,7 +1044,7 @@ std::optional<std::tuple<Attribute, bool>> Tokenizer::TagAttr() {
             {.name_space = "",
              .key = std::move(key),
              .value = std::move(val),
-             .position_in_html_src = std::get<LineCol>(attr)},
+             .line_col_in_html_src = std::get<LineCol>(attr)},
             n_attributes_returned_ < attributes_.size());
       }
       default:
@@ -1116,7 +1116,7 @@ Token Tokenizer::token() {
       break;
   }
 
-  t.position_in_html_src = token_line_col_;
+  t.line_col_in_html_src = token_line_col_;
   return t;
 }
 

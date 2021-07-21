@@ -102,7 +102,7 @@ describes.realWin(
     });
 
     it('rejects other supported and unsupported data-embed-as types', async () => {
-      expectAsyncConsoleError();
+      expectAsyncConsoleError(/.*/);
       await expect(getAmpFacebook(fbVideoHref, 'comments')).to.be.rejectedWith(
         /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post", "video" or "comment" but was: comments/
       );

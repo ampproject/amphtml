@@ -15,11 +15,27 @@
  */
 
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
-import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
-import {Deferred} from '#core/data-structures/promise';
 import {Messaging} from '@ampproject/viewer-messaging';
-import {PageScroller} from './page-scroller';
+
+// Source for this constant is css/amp-story-player-iframe.css
+import {devAssertElement} from '#core/assert';
 import {VisibilityState} from '#core/constants/visibility-state';
+import {Deferred} from '#core/data-structures/promise';
+import {isJsonScriptTag, tryFocus} from '#core/dom';
+import {resetStyles, setStyle, setStyles} from '#core/dom/style';
+import {findIndex, toArray} from '#core/types/array';
+import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
+import {parseQueryString} from '#core/types/string/url';
+
+import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
+import {PageScroller} from './page-scroller';
+
+import {cssText} from '../../build/amp-story-player-iframe.css';
+import {applySandbox} from '../3p-frame';
+import {urls} from '../config';
+import {createCustomEvent, listenOnce} from '../event-helper';
+import {getMode} from '../mode';
 import {
   addParamsToUrl,
   getFragment,
@@ -29,19 +45,6 @@ import {
   removeSearch,
   serializeQueryString,
 } from '../url';
-import {applySandbox} from '../3p-frame';
-import {createCustomEvent, listenOnce} from '../event-helper';
-import {dict} from '#core/types/object';
-import {isJsonScriptTag, tryFocus} from '#core/dom';
-import {parseQueryString} from '#core/types/string/url';
-// Source for this constant is css/amp-story-player-iframe.css
-import {cssText} from '../../build/amp-story-player-iframe.css';
-import {devAssertElement} from '#core/assert';
-import {findIndex, toArray} from '#core/types/array';
-import {getMode} from '../../src/mode';
-import {parseJson} from '#core/types/object/json';
-import {resetStyles, setStyle, setStyles} from '#core/dom/style';
-import {urls} from '../config';
 
 /** @enum {string} */
 const LoadStateClass = {

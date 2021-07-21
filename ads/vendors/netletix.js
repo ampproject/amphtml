@@ -15,7 +15,7 @@
  */
 
 import {addParamsToUrl, assertHttpsUrl} from '../../src/url';
-import {dev} from '../../src/log.js';
+import {dev} from '../../src/log';
 import {dict} from '#core/types/object';
 import {loadScript, validateData, writeScript} from '#3p/3p';
 

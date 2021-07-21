@@ -14,44 +14,31 @@
  * limitations under the License.
  */
 
-const {expect} = require('chai');
-const {JSDOM} = require('jsdom');
+const posthtml = require('posthtml');
 
-const parseHtmlChunk = (htmlStr) => {
-  const {body} = new JSDOM(htmlStr).window.document;
-  expect(body.children).to.have.length(1);
-  return body.firstElementChild;
-};
+function getElementChildren(content) {
+  return content?.filter?.((node) => typeof node !== 'string') || [];
+}
 
-const boundAttrRe = (attr) =>
-  new RegExp(`\\[${attr}\\]=(("[^"]+")|('[^']+')|([^\\s\\>]+))`);
+async function posthtmlGetTextContent(document, matcher) {
+  let textContent;
 
-// JSDom doesn't parse attributes whose names don't follow the spec, so
-// our only way to test [attr] values is via regex.
-const getBoundAttr = ({outerHTML}, attr) => {
-  const match = outerHTML.match(boundAttrRe(attr));
-  if (!match) {
-    return;
-  }
-  const [, valuePart] = match;
-  if (valuePart.charAt(0) == '"' || valuePart.charAt(0) == "'") {
-    return valuePart.substring(1, valuePart.length - 1);
-  }
-  return valuePart;
-};
+  await posthtml([
+    (tree) => {
+      tree.match(matcher, (node) => {
+        if (node.content) {
+          textContent = node.content.join('');
+        }
+        return node;
+      });
+      return tree;
+    },
+  ]).process(document);
 
-const expectValidAmphtml = (validator, string) => {
-  const {errors: errorsAndWarnings, status} = validator.validateString(string);
-  const errors = errorsAndWarnings.filter(({severity}) => severity == 'ERROR');
-
-  // Compare with empty array instead of checking `to.be.empty` so
-  // validation errors are output as AssertionErrors.
-  expect(errors).to.deep.equal([]);
-  expect(status).to.equal('PASS');
-};
+  return textContent;
+}
 
 module.exports = {
-  expectValidAmphtml,
-  getBoundAttr,
-  parseHtmlChunk,
+  getElementChildren,
+  posthtmlGetTextContent,
 };

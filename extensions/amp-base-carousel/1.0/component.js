@@ -27,10 +27,9 @@ import {CarouselContext} from './carousel-context';
 import {ContainWrapper} from '#preact/component';
 import {Scroller} from './scroller';
 import {WithAmpContext} from '#preact/context';
-import {WithLightbox} from '../../amp-lightbox-gallery/1.0/component';
 import {forwardRef, toChildArray} from '#preact/compat';
 import {isRTL} from '#core/dom';
-import {mod} from '#core/math';
+import {sequentialIdGenerator} from '#core/data-structures/id-generator';
 import {toWin} from '#core/window';
 import {
   useCallback,
@@ -43,6 +42,7 @@ import {
   useState,
 } from '#preact';
 import {useStyles} from './component.jss';
+import {mod} from '#core/math';
 
 /**
  * @enum {string}
@@ -75,6 +75,8 @@ const Direction = {
 
 const MIN_AUTO_ADVANCE_INTERVAL = 1000;
 
+const generateCarouselKey = sequentialIdGenerator();
+
 /**
  * @param {!BaseCarouselDef.Props} props
  * @param {{current: ?BaseCarouselDef.CarouselApi}} ref
@@ -96,6 +98,7 @@ function BaseCarouselWithRef(
     lightbox = false,
     loop,
     mixedLength = false,
+    onClick,
     onFocus,
     onMouseEnter,
     onSlideChange,
@@ -127,6 +130,7 @@ function BaseCarouselWithRef(
     : setGlobalCurrentSlide;
   const currentSlideRef = useRef(currentSlide);
   const axis = orientation == Orientation.HORIZONTAL ? Axis.X : Axis.Y;
+  const [id] = useState(generateCarouselKey);
 
   useLayoutEffect(() => {
     // noop if !_thumbnails || !carouselContext.
@@ -184,7 +188,9 @@ function BaseCarouselWithRef(
       if (length <= 0 || isNaN(index)) {
         return;
       }
-      index = Math.min(Math.max(index, 0), length - 1);
+      index = loop
+        ? mod(index, length)
+        : Math.min(Math.max(index, 0), length - 1);
       setCurrentSlide(index);
       if (currentSlideRef.current !== index) {
         currentSlideRef.current = index;
@@ -193,7 +199,7 @@ function BaseCarouselWithRef(
         }
       }
     },
-    [length, setCurrentSlide, onSlideChange]
+    [length, loop, setCurrentSlide, onSlideChange]
   );
 
   useImperativeHandle(
@@ -319,12 +325,7 @@ function BaseCarouselWithRef(
       }}
       tabIndex="0"
       wrapperClassName={classes.carousel}
-      contentAs={lightbox ? WithLightbox : 'div'}
       contentRef={contentRef}
-      contentProps={{
-        enableActivation: false,
-        render: () => children,
-      }}
       {...rest}
     >
       {!hideControls && (
@@ -341,9 +342,10 @@ function BaseCarouselWithRef(
         advanceCount={advanceCount}
         alignment={snapAlign}
         axis={axis}
-        lightbox={lightbox}
+        lightboxGroup={lightbox && 'carousel' + id}
         loop={loop}
         mixedLength={mixedLength}
+        onClick={onClick}
         restingIndex={currentSlide}
         setRestingIndex={setRestingIndex}
         snap={snap}
@@ -352,36 +354,19 @@ function BaseCarouselWithRef(
         visibleCount={mixedLength ? 1 : visibleCount}
         _thumbnails={_thumbnails}
       >
-        {/*
-          TODO(#30283): TBD: this is an interesting concept. We could decide
-          to render only N slides at a time and for others just output an empty
-          placeholder. When a slide's slot is unrendered, the slide
-          automatically gets unslotted and gets CanRender=false w/o any extra
-          state management code.
-
-          Note: We naively display all slides for mixedLength as multiple
-          can be visible within the carousel viewport - eventually these can also
-          be optimized to only display the minimum necessary for the current
-          and next viewport.
-        */}
-        {childrenArray.map((child, index) =>
-          Math.min(
-            // Distance from currentSlide.
-            Math.abs(index - currentSlide),
-            // Account for wraparound when looping.
-            loop ? mod(length + currentSlide - index, length) : length
-          ) < Math.ceil(visibleCount * 3) || mixedLength ? (
+        {childrenArray.map((child, index) => {
+          const {alt, 'aria-label': ariaLabel} = child.props;
+          return (
             <WithAmpContext
+              caption={alt || ariaLabel}
               key={index}
               renderable={index == currentSlide}
               playable={index == currentSlide}
             >
               {child}
             </WithAmpContext>
-          ) : (
-            <></>
-          )
-        )}
+          );
+        })}
       </Scroller>
       {!hideControls && (
         <Arrow

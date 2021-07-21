@@ -395,6 +395,7 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
         'src',
         'htps://foo-com.cdn.ampproject.org/bv/s/foo.com/foo.mp4'
       );
+      cacheSource.setAttribute('i-amphtml-video-cached-source', '');
       originSource.setAttribute('src', 'foo.mp4');
       video.appendChild(cacheSource);
       video.appendChild(originSource);
@@ -411,6 +412,7 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
       const video = win.document.createElement('video');
       const source = win.document.createElement('source');
       source.setAttribute('src', url);
+      source.setAttribute('i-amphtml-video-cached-source', '');
       video.appendChild(source);
       env.sandbox.stub(video, 'currentSrc').value(url);
 

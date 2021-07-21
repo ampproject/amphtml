@@ -1,0 +1,8 @@
+{
+  "experiments": [
+    {
+      "name": "flexible-bitrate",
+      "percentage": 0.1
+    }
+  ]
+}

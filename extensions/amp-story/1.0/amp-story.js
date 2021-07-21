@@ -54,6 +54,7 @@ import {AmpStoryPageAttachment} from './amp-story-page-attachment';
 import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {AnalyticsVariable, getVariableService} from './variable-service';
+import {BackgroundBlur} from './background-blur';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '#core/constants/common-signals';
 import {EventType, dispatch} from './events';
@@ -83,7 +84,7 @@ import {
   scopedQuerySelectorAll,
 } from '#core/dom/query';
 import {computedStyle, setImportantStyles, toggle} from '#core/dom/style';
-import {createPseudoLocale} from '../../../src/localized-strings';
+import {createPseudoLocale} from '#service/localization/strings';
 import {debounce} from '#core/types/function';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '#core/types/object';
@@ -95,21 +96,18 @@ import {getDetail} from '../../../src/event-helper';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode, isModeDevelopment} from '../../../src/mode';
-import {getState} from '#core/window/history';
+import {getHistoryState as getWindowHistoryState} from '#core/window/history';
 import {isDesktopOnePanelExperimentOn} from './amp-story-desktop-one-panel';
 import {isExperimentOn} from '#experiments';
-import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {isRTL} from '#core/dom';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
-
 import {parseQueryString} from '#core/types/string/url';
 import {
   removeAttributeInMutate,
   setAttributeInMutate,
   shouldShowStoryUrlInfo,
 } from './utils';
-
 import {upgradeBackgroundAudio} from './audio';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsDe from './_locales/de.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsDefault from './_locales/default.json' assert {type: 'json'}; // lgtm[js/syntax-error]
@@ -138,6 +136,9 @@ const DESKTOP_WIDTH_THRESHOLD = 1024;
 
 /** @private @const {number} */
 const DESKTOP_HEIGHT_THRESHOLD = 550;
+
+/** @private @const {string} */
+const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = '3 / 4';
 
 /** @private @const {number} */
 const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
@@ -287,6 +288,11 @@ export class AmpStory extends AMP.BaseElement {
     );
 
     /** @private @const */
+    this.desktopOnePanelMedia_ = this.win.matchMedia(
+      `(min-aspect-ratio: ${DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD})`
+    );
+
+    /** @private @const */
     this.canRotateToDesktopMedia_ = this.win.matchMedia(
       `(min-width: ${DESKTOP_HEIGHT_THRESHOLD}px) and ` +
         `(min-height: ${DESKTOP_WIDTH_THRESHOLD}px)`
@@ -345,6 +351,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?LiveStoryManager} */
     this.liveStoryManager_ = null;
+
+    /** @private {?BackgroundBlur} */
+    this.backgroundBlur_ = null;
   }
 
   /** @override */
@@ -450,6 +459,11 @@ export class AmpStory extends AMP.BaseElement {
           this.switchTo_(args['id'], NavigationDirection.NEXT)
         );
       });
+    }
+    if (isExperimentOn(this.win, 'story-load-first-page-only')) {
+      Services.performanceFor(this.win).addEnabledExperiment(
+        'story-load-first-page-only'
+      );
     }
 
     if (this.maybeLoadStoryDevTools_()) {
@@ -743,15 +757,6 @@ export class AmpStory extends AMP.BaseElement {
       this.onAdStateUpdate_(isAd);
     });
 
-    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-      this.storeService_.subscribe(
-        StateProperty.PAGE_ATTACHMENT_STATE,
-        (isActive) => {
-          this.onAttachmentStateUpdate_(isActive);
-        }
-      );
-    }
-
     this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
       this.onPausedStateUpdate_(isPaused);
     });
@@ -806,7 +811,8 @@ export class AmpStory extends AMP.BaseElement {
         href = href.slice(0, -1);
       }
       this.win.history.replaceState(
-        (this.win.history && getState(this.win.history)) || {} /** data */,
+        (this.win.history && getWindowHistoryState(this.win.history)) ||
+          {} /** data */,
         this.win.document.title /** title */,
         href /** URL */
       );
@@ -1439,6 +1445,8 @@ export class AmpStory extends AMP.BaseElement {
       this.updateNavigationPath_(targetPageId, direction);
     }
 
+    this.backgroundBlur_?.update(targetPage.element);
+
     // Each step will run in a requestAnimationFrame, and wait for the next
     // frame before executing the following step.
     const steps = [
@@ -1525,7 +1533,7 @@ export class AmpStory extends AMP.BaseElement {
       // the navigation happened, like preloading the following pages, or
       // sending analytics events.
       () => {
-        this.preloadPagesByDistance_();
+        this.preloadPagesByDistance_(/* prioritizeActivePage */ !oldPage);
         this.triggerActiveEventForPage_();
 
         this.systemLayer_.resetDeveloperLogs();
@@ -1813,6 +1821,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onUIStateUpdate_(uiState) {
+    this.backgroundBlur_?.detach();
+    this.backgroundBlur_ = null;
     switch (uiState) {
       case UIType.MOBILE:
         this.vsync_.mutate(() => {
@@ -1833,6 +1843,13 @@ export class AmpStory extends AMP.BaseElement {
         break;
       case UIType.DESKTOP_ONE_PANEL:
         this.setDesktopPositionAttributes_(this.activePage_);
+        if (!this.backgroundBlur_) {
+          this.backgroundBlur_ = new BackgroundBlur(this.win, this.element);
+          this.backgroundBlur_.attach();
+          if (this.activePage_) {
+            this.backgroundBlur_.update(this.activePage_.element);
+          }
+        }
         this.vsync_.mutate(() => {
           this.element.removeAttribute('desktop');
           this.element.classList.add('i-amphtml-story-desktop-one-panel');
@@ -1918,6 +1935,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   isDesktop_() {
+    if (isDesktopOnePanelExperimentOn(this.win)) {
+      return this.desktopOnePanelMedia_.matches && !this.platform_.isBot();
+    }
     return this.desktopMedia_.matches && !this.platform_.isBot();
   }
 
@@ -2113,17 +2133,6 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * @param {boolean} isActive
-   * @private
-   */
-  onAttachmentStateUpdate_(isActive) {
-    this.element.classList.toggle(
-      'i-amphtml-story-attachment-active',
-      isActive
-    );
-  }
-
-  /**
    * @return {!Array<!Array<string>>} A 2D array representing lists of pages by
    *     distance.  The outer array index represents the distance from the
    *     active page; the inner array is a list of page IDs at the specified
@@ -2215,8 +2224,11 @@ export class AmpStory extends AMP.BaseElement {
     return map;
   }
 
-  /** @private */
-  preloadPagesByDistance_() {
+  /**
+   * @param {boolean=} prioritizeActivePage
+   * @private
+   */
+  preloadPagesByDistance_(prioritizeActivePage = false) {
     if (this.platform_.isBot()) {
       this.pages_.forEach((page) => {
         page.setDistance(0);
@@ -2226,13 +2238,34 @@ export class AmpStory extends AMP.BaseElement {
 
     const pagesByDistance = this.getPagesByDistance_();
 
-    this.mutateElement(() => {
+    const preloadAllPages = () => {
       pagesByDistance.forEach((pageIds, distance) => {
         pageIds.forEach((pageId) => {
           const page = this.getPageById(pageId);
           page.setDistance(distance);
         });
       });
+    };
+
+    this.mutateElement(() => {
+      if (
+        !isExperimentOn(this.win, 'story-load-first-page-only') ||
+        !prioritizeActivePage
+      ) {
+        return preloadAllPages();
+      }
+
+      const activePageId = devAssert(pagesByDistance[0][0]);
+      new Promise((res, rej) => {
+        const page = this.getPageById(activePageId);
+        page.setDistance(0);
+        page.signals().whenSignal(CommonSignals.LOAD_END).then(res);
+        // Don't call preload if user navigates before page loads, since the navigation will call preload properly.
+        this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, rej);
+      }).then(
+        () => preloadAllPages(),
+        () => {}
+      );
     });
   }
 

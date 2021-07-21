@@ -15,7 +15,6 @@
 -   [Getting Started](#getting-started)
 -   [Directory Structure](#directory-structure)
 -   [Extend `VideoBaseElement` for AMP](#extend-videobaseelement-for-amp)
-    -   [Pre-upgrade CSS](#pre-upgrade-css)
     -   [`props`](#props)
 -   [Define a Preact component](#define-a-preact-component)
     -   [Forwarding `ref`](#forwarding-ref)
@@ -57,7 +56,7 @@ This guide covers how to implement video player components that are internally i
 
 ## Getting Started
 
-Start by generating an extension specifying `--bento` and `--nojss`. We name our extension **`amp-fantastic-player`**, ending with `-player` according to our [guidelines for naming a third-party component](../spec/amp-3p-naming.md).
+Start by generating an extension specifying `--bento` and `--nojss`. We name our extension **`amp-fantastic-player`**, ending with `-player` according to our [guidelines for naming a third-party component](./spec/amp-3p-naming.md).
 
 ```console
 amp make-extension --bento --nojss --name=amp-fantastic-player
@@ -81,8 +80,8 @@ Our `BaseElement` should be a superclass of `VideoBaseElement`. In **`base-eleme
 
 ```diff
   import {MyFantasticPlayer} from './component';
-- import {PreactBaseElement} from '../../../src/preact/base-element';
-+ import {VideoBaseElement} from '../../amp-video/1.0/base-element';
+- import {PreactBaseElement} from '#preact/base-element';
++ import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
 
 - export class BaseElement extends PreactBaseElement {}
 + export class BaseElement extends VideoBaseElement {}
@@ -100,31 +99,6 @@ export class BaseElement extends VideoBaseElement {}
 ```
 
 This enables support for AMP actions and analytics, once we map attributes to their prop counterparts in `BaseElement['props']`, and we implement the Preact component.
-
-### Pre-upgrade CSS
-
-Bento components must specify certain layout properties in order to prevent [Cumulative Layout Shift (CLS)](https://web.dev/cls). Video extensions must include the following in the generated **`amp-fantastic-player.css`**:
-
-```css
-/* amp-fantastic-player.css */
-
-/*
- * Pre-upgrade:
- * - display:block element
- * - size-defined element
- */
-amp-fantastic-player {
-  display: block;
-  overflow: hidden;
-  position: relative;
-}
-
-/* Pre-upgrade: size-defining element - hide children. */
-amp-fantastic-player:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc) {
-  display: none;
-  content-visibility: hidden;
-}
-```
 
 ### `props`
 
@@ -145,7 +119,7 @@ If you need to directly insert nodes to the document, like a `<video>` element, 
 
 However, it's more likely that you load a third-party iframe and you communicate with the host via `postMessage`. In this case you should use a `<VideoIframe>` as opposed to a `<VideoWrapper>`.
 
-> ⚠️ Components may **not** embed scripts from a third-party location into host documents. If a third-party script is absolutely required, like on `<amp-ima-video>`, it must be inserted in an intermediate iframe, which we call a **proxy frame**.
+> ⚠️ Components may **not** embed scripts from a third-party location into host documents. If a third-party script is absolutely required, like on `<amp-ima-video>`, it must be inserted in an intermediate iframe, which we call a [**proxy frame**](./building-a-bento-iframe-component.md).
 >
 > Proxy frames on Bento have not yet been tested as video player components, so they're not covered in this guide. If you wish to use one, please get in touch with `@alanorozco` via a Github issue or on on [Slack](https://bit.ly/amp-slack-signup) in the [`#contributing` channel](https://amphtml.slack.com/messages/C9HRJ1GPN/).
 
@@ -154,7 +128,7 @@ However, it's more likely that you load a third-party iframe and you communicate
 To enable AMP actions (`my-element.play`) and the Preact component's imperative handle (`myPlayerRef.current.play()`), you'll have to [`forwardRef`](https://reactjs.org/docs/forwarding-refs.html). Rename `FantasticPlayer` to `FantasticPlayerWithRef`, and export a `FantasticPlayer` that forwards a `ref` into the former.
 
 ```diff
-+ import {forwardRef} from '../../../src/preact/compat';
++ import {forwardRef} from '#preact/compat';
 
 - export function FantasticPlayer({...rest}) {
 + function FantasticPlayerWithRef({...rest}, ref) {
@@ -171,7 +145,7 @@ So the outer structure looks like:
 ```js
 // component.js
 // ...
-import {forwardRef} from '../../../src/preact/compat';
+import {forwardRef} from '#preact/compat';
 // ...
 function FantasticPlayerWithRef({...rest}, ref) {
   // ...
@@ -187,7 +161,7 @@ export {FantasticPlayer};
 Your `FantasticPlayer` component should return a `VideoIframe` that's configured to a corresponding `postMessage` API. To start, we update the implementation in **`component.js`**:
 
 ```diff
-- import {ContainWrapper} from '../../../src/preact/component';
+- import {ContainWrapper} from '#preact/component';
 + import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 
   function FantasticPlayerWithRef({...rest}, ref) {
@@ -381,8 +355,8 @@ Your iframe's interface to post messages is likely different, but your component
 Your `FantasticPlayer` component should return a `VideoWrapper` that's configured to a corresponding `postMessage` API. To start, we update the implementation in **`component.js`**.
 
 ```diff
-- import {ContainWrapper} from '../../../src/preact/component';
-+ import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
+- import {ContainWrapper} from '#preact/component';
++ import {VideoWrapper} from '../../amp-video/1.0/component';
 
   function FantasticPlayerWithRef({...rest}, ref) {
 -   ...
@@ -400,7 +374,7 @@ So that our component returns a `<VideoWrapper>`:
 ```js
 // component.js
 // ...
-import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
+import {VideoWrapper} from '../../amp-video/1.0/component';
 
 // ...
 function FantasticPlayerWithRef({...rest}, ref) {
@@ -513,7 +487,7 @@ We set the wrapped method as the `<video>`'s actual event handler:
 +   onCanPlay={onVideoCanPlay}
 ```
 
-You may similarly choose to pass or override properties at the higher level, passed from `FantasticPlayer` into the `VideoWrapper` we instantiate. For a list of these properties [see `video-wrapper.type.js`](../extensions/amp-video/1.0/video-wrapper.type.js)
+You may similarly choose to pass or override properties at the higher level, passed from `FantasticPlayer` into the `VideoWrapper` we instantiate. For a list of these properties [see `amp-video/1.0/component.type.js`](../extensions/amp-video/1.0/component.type.js)
 
 #### Imperative handle
 
