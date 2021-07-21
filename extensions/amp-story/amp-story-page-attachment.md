@@ -28,7 +28,6 @@ limitations under the License.
 
 Story page attachments allow you to provide additional content in the form of inline AMPHTML content on specific AMP story pages. This content can be revealed by users through a "swipe up" gesture, or a tap on the call to action element. 
 A UI button prompting the viewer to open the attachment will appear at the bottom of every page with a `amp-story-page-attachment` element.
-It must have the `layout="nodisplay"` attribute.
 
 <amp-img alt="AMP Story page attachment" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment.gif" width="240" height="480">
   <noscript>
@@ -62,7 +61,11 @@ It must have the `layout="nodisplay"` attribute.
 
 ## Placement
 
-Both `amp-story-page-attachment` and [`amp-story-page-outlink`](amp-story-page-outlink.md) must be the last child tag of an [`amp-story-page`](amp-story-page.md). Because of this, you may include neither or one, but not both.
+The `<amp-story-page-attachment>` element must be the last child of `<amp-story-page>`, and must have the `layout="nodisplay"` attribute. The attachment AMPHTML content is expected to be provided inline in your AMP Story, within this `<amp-story-page-attachment>` tag.
+
+[tip type="important"]
+Both [`amp-story-page-attachment`](amp-story-page-attachment.md) and [`amp-story-page-outlink`](amp-story-page-outlink.md) must be the last child tag of an [`amp-story-page`](amp-story-page.md). Because of this, you may include neither or one, but not both.
+[/tip]
 
 ## Attributes
 
