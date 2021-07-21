@@ -7,7 +7,7 @@ import {Services} from '#service';
  * using describes.configure(), describe.configure(), or it.configure().
  *
  * Example usage:
- * 1. describes.configure().skipChrome().run(name, spec, function);
+ * 1. describes.configure().skipChrome().skipIos().run(name, spec, function);
  * 2. describe.configure().skipFirefox().skipSafari().run(name, function);
  * 3. it.configure().skipEdge().run(name, function);
  */
@@ -43,11 +43,6 @@ export class TestConfig {
     this.runOnFirefox = this.platform.isFirefox.bind(this.platform);
     this.runOnSafari = this.platform.isSafari.bind(this.platform);
     this.runOnIos = this.platform.isIos.bind(this.platform);
-
-    /**
-     * By default, IE is skipped. Individual tests may opt in.
-     */
-    this.skip(() => /Trident|MSIE|IEMobile/i.test(window.navigator.userAgent));
   }
 
   skipModuleBuild() {
