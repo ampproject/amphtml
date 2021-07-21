@@ -71,7 +71,7 @@ Both [`amp-story-page-attachment`](amp-story-page-attachment.md) and [`amp-story
 
 When no attributes are set, the default UI will render:
 
-![amp-story-page-attachment-default](img/amp-story-page-attachment-default.png)
+![amp-story-page-attachment-default](img/amp-story-page-attachment-default.jpeg)
 
 ```html
 <amp-story-page-attachment
@@ -84,7 +84,7 @@ When no attributes are set, the default UI will render:
 
 String representing the color theme, default is `light`. Accepts values `light` & `dark`.
 
-![amp-story-page-attachment-dark-theme](img/amp-story-page-attachment-dark-theme.png)
+![amp-story-page-attachment-dark-theme](img/amp-story-page-attachment-dark-theme.jpeg)
 
 ```html
 <amp-story-page-attachment
@@ -98,7 +98,7 @@ String representing the color theme, default is `light`. Accepts values `light` 
 
 String that customizes the button text. The default is "Swipe up".
 
-![amp-story-page-attachment-cta-text](img/amp-story-page-attachment-cta-text.png)
+![amp-story-page-attachment-cta-text](img/amp-story-page-attachment-cta-text.jpeg)
 
 ```html
 <amp-story-page-attachment
@@ -120,7 +120,7 @@ String representing a URL pointing to an image. 48x48px is suggested.
 </amp-story-page-attachment>
 ```
 
-![amp-story-page-attachment-1-image](img/amp-story-page-attachment-1-image.png)
+![amp-story-page-attachment-1-image](img/amp-story-page-attachment-1-image.jpeg)
 
 ### `cta-image-2` (optional)
 
@@ -135,7 +135,7 @@ String representing a URL pointing to an image. 48x48px is suggested. Two images
 </amp-story-page-attachment>
 ```
 
-![amp-story-page-attachment-2-images](img/amp-story-page-attachment-2-images.png)
+![amp-story-page-attachment-2-images](img/amp-story-page-attachment-2-images.jpeg)
 
 ### `title` (optional)
 
