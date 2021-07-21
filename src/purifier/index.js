@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import purify from 'dompurify';
+
+import {devAssertElement} from '#core/assert';
+import {removeElement} from '#core/dom';
+
 import {
   ALLOWLISTED_ATTRS,
   ALLOWLISTED_ATTRS_BY_TAGS,
@@ -25,11 +30,9 @@ import {
   isValidAttr,
   markElementForDiffing,
 } from './sanitation';
-import {devAssertElement} from '#core/assert';
+
 import {isAmp4Email} from '../format';
-import {removeElement} from '#core/dom';
 import {user} from '../log';
-import purify from 'dompurify';
 
 /** @private @const {string} */
 const TAG = 'purifier';

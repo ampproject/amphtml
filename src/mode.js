@@ -15,14 +15,13 @@
  */
 
 import * as coreMode from './core/mode';
-import {internalRuntimeVersion} from './internal-version';
 import {parseQueryString} from './core/types/string/url';
+import {internalRuntimeVersion} from './internal-version';
 
 /**
  * @typedef {{
  *   localDev: boolean,
  *   development: boolean,
- *   minified: boolean,
  *   test: boolean,
  *   log: (string|undefined),
  *   version: string,
@@ -76,7 +75,6 @@ function getMode_(win) {
     esm: IS_ESM,
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
-    minified: coreMode.isMinified(),
     test: coreMode.isTest(win),
     log: hashQuery['log'],
     version: internalRuntimeVersion(),

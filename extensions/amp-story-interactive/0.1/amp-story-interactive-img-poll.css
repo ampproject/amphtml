@@ -13,3 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+.i-amphtml-story-interactive-img-option {
+  --i-amphtml-interactive-option-post-color: var(
+    --interactive-accent-color
+  ) !important;
+}

@@ -15,10 +15,17 @@
  */
 
 import {AmpStoryInteractiveImgQuiz} from '../amp-story-interactive-img-quiz';
+import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
-import {populateQuiz} from './test-amp-story-interactive-quiz';
+import {
+  getMockIncompleteData,
+  getMockInteractiveData,
+  getMockOutOfBoundsData,
+  getMockScrambledData,
+  populateQuiz,
+} from './helpers';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(
@@ -30,6 +37,7 @@ describes.realWin(
     let win;
     let ampStoryQuiz;
     let storyEl;
+    let requestService;
 
     beforeEach(() => {
       win = env.win;
@@ -41,6 +49,11 @@ describes.realWin(
       const ampStoryQuizEl = win.document.createElement(
         'amp-story-interactive-img-quiz'
       );
+      ampStoryQuizEl.getResources = () => win.__AMP_SERVICES.resources.obj;
+      requestService = new AmpStoryRequestService(win);
+      registerServiceBuilder(win, 'story-request', function () {
+        return requestService;
+      });
 
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
@@ -163,6 +176,84 @@ describes.realWin(
           ampStoryQuiz.buildCallback();
         }).to.throw(/Improper number of options/);
       });
+    });
+
+    it('should handle the percentage pipeline', async () => {
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getMockInteractiveData());
+
+      ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
+
+      populateQuiz(ampStoryQuiz);
+      await ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.layoutCallback();
+
+      expect(ampStoryQuiz.getOptionElements()[0].innerText).to.contain('30%');
+      expect(ampStoryQuiz.getOptionElements()[3].innerText).to.contain('10%');
+    });
+
+    it('should handle the percentage pipeline with scrambled data', async () => {
+      const NUM_OPTIONS = 4;
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getMockScrambledData());
+
+      ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
+
+      populateQuiz(ampStoryQuiz, NUM_OPTIONS);
+      await ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.layoutCallback();
+
+      const expectedPercentages = [10, 20, 30, 40];
+      for (let i = 0; i < NUM_OPTIONS; i++) {
+        const expectedText = `${expectedPercentages[i]}%`;
+        expect(ampStoryQuiz.getOptionElements()[i].innerText).to.contain(
+          expectedText
+        );
+      }
+    });
+
+    it('should handle the percentage pipeline with incomplete data', async () => {
+      const NUM_OPTIONS = 4;
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getMockIncompleteData());
+
+      ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
+
+      populateQuiz(ampStoryQuiz, NUM_OPTIONS);
+      await ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.layoutCallback();
+
+      const expectedPercentages = [0, 50, 50, 0];
+      for (let i = 0; i < NUM_OPTIONS; i++) {
+        const expectedText = `${expectedPercentages[i]}%`;
+        expect(ampStoryQuiz.getOptionElements()[i].innerText).to.contain(
+          expectedText
+        );
+      }
+    });
+
+    it('should handle the percentage pipeline with out of bounds data', async () => {
+      const NUM_OPTIONS = 4;
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getMockOutOfBoundsData());
+
+      ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
+
+      populateQuiz(ampStoryQuiz, NUM_OPTIONS);
+      await ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.layoutCallback();
+
+      const expectedPercentages = [20, 0, 0, 80];
+      for (let i = 0; i < NUM_OPTIONS; i++) {
+        const expectedText = `${expectedPercentages[i]}%`;
+        expect(ampStoryQuiz.getOptionElements()[i].innerText).to.contain(
+          expectedText
+        );
+      }
     });
   }
 );

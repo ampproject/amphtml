@@ -54,10 +54,8 @@ function getMinifiedConfig() {
       './build-system/babel-plugins/babel-plugin-transform-json-import',
       {freeze: false},
     ],
-    './build-system/babel-plugins/babel-plugin-is_minified-constant-transformer',
     './build-system/babel-plugins/babel-plugin-transform-html-template',
     './build-system/babel-plugins/babel-plugin-transform-jss',
-    './build-system/babel-plugins/babel-plugin-transform-version-call',
     './build-system/babel-plugins/babel-plugin-transform-simple-array-destructure',
     './build-system/babel-plugins/babel-plugin-transform-default-assignment',
     replacePlugin,
@@ -75,9 +73,6 @@ function getMinifiedConfig() {
           './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
           {isEsmBuild: !!argv.esm},
         ],
-    argv.fortesting
-      ? null
-      : './build-system/babel-plugins/babel-plugin-is_fortesting-constant-transformer',
   ].filter(Boolean);
   const presetEnv = [
     '@babel/preset-env',
