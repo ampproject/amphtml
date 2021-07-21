@@ -283,7 +283,7 @@ describes.realWin(
       expect(element.style.height).to.be.equal('30px');
     });
 
-    it('should fallback when not available', () => {
+    it('should fallback when not available', async () => {
       // For this single test, cause audio elements that are
       // created to lack the necessary feature set, which should trigger
       // fallback behavior.
@@ -298,7 +298,8 @@ describes.realWin(
       const element = doc.createElement('div');
       element.toggleFallback = env.sandbox.spy();
       const audio = new AmpAudio(element);
-      audio.buildAudioElement();
+      // audio.buildAudioElement();
+      await audio.layoutCallback();
       expect(element.toggleFallback).to.be.calledOnce;
     });
 
