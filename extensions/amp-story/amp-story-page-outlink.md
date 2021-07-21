@@ -90,8 +90,8 @@ String representing the color theme, default is light. Accepts values `light`, `
 `theme="custom"` requires two additional attributes:
 
 <ul>
-  <li>cta-accent-color: String that represents the custom theme’s color.</li>
-  <li>cta-accent-element: String that represents the element to apply the custom theme to. Accepts values `text` and `background`.</li>
+  <li>`cta-accent-color`: String that represents the custom theme’s color.</li>
+  <li>`cta-accent-element`: String that represents the element to apply the custom theme to. Accepts values `text` and `background`.</li>
 </ul>
 
 Contrast protection is automatically applied to ensure readability and a11y compliance. For example, when the accent element is “background”, the higher contrast color (black or white) is applied to the text.
