@@ -727,7 +727,7 @@ Provides the approximate, country level, location of the user provided by the [`
 -   **platform variable**: AMP_GEO
     -   Example: <br>
     ```html
-    <amp-pixel src="https://foo.com/pixel?domInteractiveTime=AMP_GEO"></amp-pixel>
+    <amp-pixel src="https://foo.com/pixel?geolocation=AMP_GEO"></amp-pixel>
     ```
 -   **amp-analytics variable**: `${ampGeo}`
     -   Example value: `ca`
