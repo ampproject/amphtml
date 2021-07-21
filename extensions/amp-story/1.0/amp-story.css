@@ -262,12 +262,12 @@ amp-story-page:not([active]):not([distance]) {
  * update them in the ampdoc.css file.
  */
 
-amp-story-page[distance="0"] {
+amp-story-page[active], amp-story-page[distance="0"] {
   transform: translateY(0) !important;
 }
 
-amp-story-page[distance="1"]:not(.i-amphtml-story-page-loaded), amp-story-page[distance="2"] {
-  transform: translateX(100vw) !important;
+amp-story:not([desktop]) amp-story-page:where([distance="1"], [distance="2"]):not(.i-amphtml-story-page-loaded):not(.i-amphtml-visited) {
+  transform: translateY(100vh) !important;
 }
 
 amp-story-page [data-text-background-color] {
