@@ -1,38 +1,266 @@
 {
-  "2": {"string": "ចុច \"បន្ទាប់\""},
-  "3": {"string": "ចុច​ថយក្រោយ"},
-  "4": {"string": "មិន​អាច​ចម្លង​តំណ​ទៅ​ឃ្លីបបត​បាន​ទេ :("},
-  "5": {"string": "បាន​ចម្លង​តំណរួចហើយ!"},
-  "6": {"string": "អ៊ីមែល"},
-  "7": {"string": "Facebook"},
-  "8": {"string": "Google+"},
-  "9": {"string": "ទទួលបាន​តំណ"},
-  "10": {"string": "LinkedIn"},
-  "11": {"string": "Pinterest"},
-  "12": {"string": "សារ SMS"},
-  "14": {"string": "Tumblr"},
-  "15": {"string": "Twitter"},
-  "16": {"string": "WhatsApp"},
+  "2": {
+    "string": "ចុច \"បន្ទាប់\"",
+    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
+  },
+  "3": {
+    "string": "ចុច \"ថយ​ក្រោយ\"",
+    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
+  },
+  "4": {
+    "string": "មិន​អាច​ចម្លង​តំណ​ទៅ​ឃ្លីបបត​បាន​ទេ :(",
+    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
+  },
+  "5": {
+    "string": "បាន​ចម្លង​តំណ​រួច​ហើយ!",
+    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
+  },
+  "6": {
+    "string": "អ៊ីមែល",
+    "description": "Button label for the share target that shares a link via email."
+  },
+  "7": {
+    "string": "Facebook",
+    "description": "Button label for the share target that shares a link via Facebook."
+  },
+  "8": {
+    "string": "Google+",
+    "description": "Button label for the share target that shares a link via Google+."
+  },
+  "9": {
+    "string": "យក​តំណ",
+    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
+  },
+  "10": {
+    "string": "LinkedIn",
+    "description": "Button label for the share target that shares a link via LinkedIn."
+  },
+  "11": {
+    "string": "Pinterest",
+    "description": "Button label for the share target that shares a link via Pinterest."
+  },
+  "12": {
+    "string": "សារ SMS",
+    "description": "Button label for the share target that shares a link via SMS."
+  },
+  "13": {
+    "string": "ច្រើន​ទៀត",
+    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
+  },
+  "14": {
+    "string": "Tumblr",
+    "description": "Button label for the share target that shares a link via Tumblr."
+  },
+  "15": {
+    "string": "Twitter",
+    "description": "Button label for the share target that shares a link via Twitter."
+  },
+  "16": {
+    "string": "WhatsApp",
+    "description": "Button label for the share target that shares a link via WhatsApp."
+  },
   "18": {
-    "string": "ពង្រីក​កម្ពស់ និង​ទទឹង​វិនដូ​របស់អ្នក ដើម្បី​មើល​បទពិសោធន៍​នេះ"
+    "string": "ពង្រីក​កម្ពស់ និង​ទទឹង​វិនដូ​របស់​អ្នក ដើម្បី​មើល​បទពិសោធន៍​ទំព័រ​នេះ",
+    "description": "Text for a warning screen that informs the user that stories are only supported in larger browser windows."
   },
-  "19": {"string": "អ្នក​ត្រូវតែ​បើក​ការពិសោធរឿង AMP ដើម្បី​មើល​ខ្លឹមសារ​នេះ។"},
-  "20": {"string": "អាចមើលឃើញ​ទំព័រ​ល្អបំផុត​នៅក្នុង​មុខងារបញ្ឈរ"},
+  "19": {
+    "string": "អ្នក​ត្រូវ​តែ​បើក​ការពិសោធ amp-story ដើម្បី​មើល​ខ្លឹមសារ​នេះ។",
+    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
+  },
+  "20": {
+    "string": "ល្អ​បំបផុត មើល​ទំព័រ​នេះ​ក្នុង​មុខងារ​បញ្ឈរ",
+    "description": "Text for a warning screen that informs the user that stories are only supported in portrait orientation."
+  },
   "21": {
-    "string": "សូម​អភ័យទោស កម្មវិធីរុករកតាមអ៊ីនធឺណិត​របស់អ្នក​ហាក់ដូចជា​មិនស្គាល់​បទពិសោធន៍​នេះ​ទេ"
+    "string": "សូម​អភ័យ​ទោស កម្មវិធី​រុករក​តាម​អ៊ីនធឺណិត​របស់​អ្នក​ហាក់​ដូចជា​មិន​អាច​ដំណើរការ​បទពិសោធន៍​ទំព័រ​នេះ​បាន​ទេ",
+    "description": "Text for a warning screen that informs the user that their browser does not support stories."
   },
-  "22": {"string": "ទទួលយក"},
-  "23": {"string": "បដិសេធ"},
-  "25": {"string": "មើល​នៅលើ​ដែន​ដើម៖"},
-  "26": {"string": "ច្រើនទៀត​អំពី​លទ្ធផល AMP"},
-  "27": {"string": "មិនអីទេ​ បន្តចុះ"},
-  "31": {"string": "បិទ​សំឡេង"},
-  "32": {"string": "បើក​សំឡេង"},
-  "33": {"string": "ទំព័រនេះ​គ្មាន​សំឡេងទេ"},
-  "34": {"string": "ចាក់​វីដេអូ"},
-  "35": {"string": "អូសឡើង"},
-  "36": {"string": "ពង្រីកធ្វីត"},
-  "37": {"string": "ពង្រីក​កម្ពស់​វិនដូ​របស់អ្នក ដើម្បី​មើល​បទពិសោធន៍​នេះ"},
-  "38": {"string": "ពង្រីក​ទទឹង​វិនដូ​របស់អ្នក ដើម្បី​មើល​បទពិសោធន៍​នេះ"},
-  "63": {"string": "Line"}
+  "22": {
+    "string": "ទទួល​យក",
+    "description": "Label for a button that allows the user to consent to providing their cookie access."
+  },
+  "23": {
+    "string": "បដិសេធ",
+    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
+  },
+  "25": {
+    "string": "មើល​នៅ​ក្នុង​ដែន​ដើម៖",
+    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
+  },
+  "26": {
+    "string": "ព័ត៌មាន​បន្ថែម​ទៀត​អំពី​លទ្ធផល AMP",
+    "description": "Label for a link to documentation on how AMP links are handled."
+  },
+  "27": {
+    "string": "មិន​អី​ទេ បន្ត​ចុះ",
+    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
+  },
+  "31": {
+    "string": "សំឡេង​ត្រូវ​បាន​បិទ",
+    "description": "Text that informs users that the sound is off after they click the mute button"
+  },
+  "32": {
+    "string": "សំឡេង​ត្រូវ​បាន​បើក",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
+  },
+  "33": {
+    "string": "ទំព័រ​នេះ​គ្មាន​សំឡេង​ទេ",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
+  },
+  "34": {
+    "string": "ចាក់​វីដេអូ",
+    "description": "Label for a button to play the video visible on the page."
+  },
+  "35": {
+    "string": "អូស​ឡើង​លើ",
+    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
+  },
+  "36": {
+    "string": "ពង្រីក​ធ្វីត",
+    "description": "Label in the tooltip text for when a Twitter embed is expandable."
+  },
+  "37": {
+    "string": "ពង្រីក​កម្ពស់​វិនដូ​របស់​អ្នក ដើម្បី​មើល​បទពិសោធន៍​ទំព័រ​នេះ",
+    "description": "Text for a warning screen that informs the user that stories are only supported in taller browser windows."
+  },
+  "38": {
+    "string": "ពង្រីក​ទទឹង​វិនដូ​របស់​អ្នក ដើម្បី​មើល​បទពិសោធន៍​ទំព័រ​នេះ",
+    "description": "Text for a warning screen that informs the user that stories are only supported in wider browser windows."
+  },
+  "62": {
+    "string": "ចែក​រំលែក​ចាប់​ពី​ទំព័រ​នេះ​ទៅ",
+    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
+  },
+  "63": {
+    "string": "Line",
+    "description": "Button label for the share target that shares a link via Line."
+  },
+  "64": {
+    "string": "បាន​ធ្វើ​បច្ចុប្បន្នភាព",
+    "description": "Label that indicates that additional content has been added to a story"
+  },
+  "65": {
+    "string": "មិន​អាច​ចាក់​វីដេអូ​បាន​ទេ",
+    "description": "Label indicating that the video visible on the page failed to play."
+  },
+  "66": {
+    "string": "បិទ​សំឡេង​រឿង",
+    "description": "Label for the mute button that turns off the sound in the story"
+  },
+  "67": {
+    "string": "បើក​សំឡេង​រឿង​វិញ",
+    "description": "Label for the unmute button that turns the sound in the story back on"
+  },
+  "68": {
+    "string": "ព័ត៌មាន​រឿង",
+    "description": "Label for the information button that pulls up relevant information about the story content"
+  },
+  "69": {
+    "string": "ចែក​រំលែក​រឿង",
+    "description": "Label for the share button that pulls up a panel of options for sharing the story"
+  },
+  "70": {
+    "string": "ម៉ឺនុយ​បិទ/បើក​រឿង",
+    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
+  },
+  "71": {
+    "string": "A",
+    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
+  },
+  "72": {
+    "string": "B",
+    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
+  },
+  "73": {
+    "string": "C",
+    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
+  },
+  "74": {
+    "string": "D",
+    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
+  },
+  "75": {
+    "string": "គន្លឹះ 1 នៃ 2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+  },
+  "76": {
+    "string": "ចុច ដើម្បី​ទៅ​កាន់​អេក្រង់​បន្ទាប់",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+  },
+  "77": {
+    "string": "បន្ទាប់",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+  },
+  "78": {
+    "string": "គន្លឹះ 2 នៃ 2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+  },
+  "79": {
+    "string": "អូស ដើម្បី​ទៅ​កាន់​រឿង​បន្ទាប់",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+  },
+  "80": {
+    "string": "យល់​ហើយ",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+  },
+  "81": {
+    "string": "គន្លឹះ",
+    "description": "Label for a hint in the context of an onboarding user education tutorial."
+  },
+  "82": {
+    "string": "ទំព័រ​មុន",
+    "description": "Label indicating that users can navigate to the previous page."
+  },
+  "83": {
+    "string": "បើក​ដំណើរការ",
+    "description": "Label for the activate button to ask for device orientation permission"
+  },
+  "84": {
+    "string": "ពិន្ទុ៖",
+    "description": "Label for the results component preceding the score in percentages"
+  },
+  "85": {
+    "string": "ផ្អាក​រឿង",
+    "description": "Label for a button that pauses the media content on the story"
+  },
+  "86": {
+    "string": "ចាក់​រឿង",
+    "description": "Label for a button that plays the media content on the story"
+  },
+  "87": {
+    "string": "បិទ",
+    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
+  },
+  "88": {
+    "string": "រំលង​ទៅ \"បន្ទាប់\"",
+    "description": "Label for a button that advances to the next element in the carousel"
+  },
+  "89": {
+    "string": "ការឆ្លើយតប​របស់​អ្នក​នឹង​ត្រូវ​បាន​ផ្ញើ​ទៅ",
+    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
+  },
+  "90": {
+    "string": "រឿង​បន្ទាប់",
+    "description": "Label for a button that advances to the next element in the carousel."
+  },
+  "91": {
+    "string": "ទំព័រ​បន្ទាប់",
+    "description": "Label for a button that advances to the next page of the story."
+  },
+  "92": {
+    "string": "ចាក់​ឡើង​វិញ",
+    "description": "Label for a button that replays the story."
+  },
+  "93": {
+    "string": "ទំព័រ​មុន",
+    "description": "Label for a button that returns the user to the previous page of the story."
+  },
+  "96": {
+    "string": "ផ្លាស់ទី​ឧបករណ៍ ដើម្បី​ស្វែងយល់",
+    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
+  },
+  "97": {
+    "string": "កំពុង​បើក",
+    "description": "Text displayed to users on tap of outlink button."
+  }
 }

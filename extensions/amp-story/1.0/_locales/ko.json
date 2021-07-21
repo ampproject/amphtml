@@ -1,38 +1,266 @@
 {
-  "2": {"string": "다음을 탭하세요."},
-  "3": {"string": "뒤로를 탭하세요."},
-  "4": {"string": "링크를 클립보드에 복사할 수 없습니다."},
-  "5": {"string": "링크가 복사되었습니다."},
-  "6": {"string": "이메일"},
-  "7": {"string": "Facebook"},
-  "8": {"string": "Google+"},
-  "9": {"string": "링크 받기"},
-  "10": {"string": "LinkedIn"},
-  "11": {"string": "Pinterest"},
-  "12": {"string": "SMS"},
-  "14": {"string": "Tumblr"},
-  "15": {"string": "Twitter"},
-  "16": {"string": "WhatsApp"},
-  "18": {"string": "이 환경을 보려면 창 높이와 너비를 늘리세요."},
+  "2": {
+    "string": "다음을 탭하세요.",
+    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
+  },
+  "3": {
+    "string": "뒤로를 탭하세요.",
+    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
+  },
+  "4": {
+    "string": "링크를 클립보드에 복사할 수 없습니다.",
+    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
+  },
+  "5": {
+    "string": "링크가 복사되었습니다.",
+    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
+  },
+  "6": {
+    "string": "이메일",
+    "description": "Button label for the share target that shares a link via email."
+  },
+  "7": {
+    "string": "Facebook",
+    "description": "Button label for the share target that shares a link via Facebook."
+  },
+  "8": {
+    "string": "Google+",
+    "description": "Button label for the share target that shares a link via Google+."
+  },
+  "9": {
+    "string": "링크 받기",
+    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
+  },
+  "10": {
+    "string": "LinkedIn",
+    "description": "Button label for the share target that shares a link via LinkedIn."
+  },
+  "11": {
+    "string": "Pinterest",
+    "description": "Button label for the share target that shares a link via Pinterest."
+  },
+  "12": {
+    "string": "SMS",
+    "description": "Button label for the share target that shares a link via SMS."
+  },
+  "13": {
+    "string": "기타",
+    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
+  },
+  "14": {
+    "string": "Tumblr",
+    "description": "Button label for the share target that shares a link via Tumblr."
+  },
+  "15": {
+    "string": "Twitter",
+    "description": "Button label for the share target that shares a link via Twitter."
+  },
+  "16": {
+    "string": "WhatsApp",
+    "description": "Button label for the share target that shares a link via WhatsApp."
+  },
+  "18": {
+    "string": "이 스토리를 보려면 창 높이와 너비를 늘리세요.",
+    "description": "Text for a warning screen that informs the user that stories are only supported in larger browser windows."
+  },
   "19": {
-    "string": "이 콘텐츠를 보려면 amp-story 실험을 사용하도록 설정해야 합니다."
+    "string": "이 콘텐츠를 보려면 amp-story 실험을 사용하도록 설정해야 합니다.",
+    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
   },
-  "20": {"string": "이 페이지는 세로 모드에서 가장 잘 표시됩니다."},
+  "20": {
+    "string": "이 페이지는 세로 모드에서 가장 잘 표시됩니다.",
+    "description": "Text for a warning screen that informs the user that stories are only supported in portrait orientation."
+  },
   "21": {
-    "string": "사용 중인 브라우저에서 이 환경을 지원하지 않는 것 같습니다."
+    "string": "사용 중인 브라우저에서 이 스토리를 지원하지 않는 것 같습니다.",
+    "description": "Text for a warning screen that informs the user that their browser does not support stories."
   },
-  "22": {"string": "수락"},
-  "23": {"string": "거부"},
-  "25": {"string": "원래 도메인에서 보기:"},
-  "26": {"string": "AMP 결과 자세히 알아보기"},
-  "27": {"string": "계속하기"},
-  "31": {"string": "사운드 꺼짐"},
-  "32": {"string": "사운드 켜짐"},
-  "33": {"string": "이 페이지에는 사운드가 없습니다."},
-  "34": {"string": "동영상 재생"},
-  "35": {"string": "위로 스와이프"},
-  "36": {"string": "트윗 펼치기"},
-  "37": {"string": "이 환경을 보려면 창 높이를 늘리세요."},
-  "38": {"string": "이 환경을 보려면 창 너비를 늘리세요."},
-  "63": {"string": "Line"}
+  "22": {
+    "string": "수락",
+    "description": "Label for a button that allows the user to consent to providing their cookie access."
+  },
+  "23": {
+    "string": "거부",
+    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
+  },
+  "25": {
+    "string": "원래 도메인에서 보기:",
+    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
+  },
+  "26": {
+    "string": "AMP 결과 자세히 알아보기",
+    "description": "Label for a link to documentation on how AMP links are handled."
+  },
+  "27": {
+    "string": "계속하기",
+    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
+  },
+  "31": {
+    "string": "사운드 꺼짐",
+    "description": "Text that informs users that the sound is off after they click the mute button"
+  },
+  "32": {
+    "string": "사운드 켜짐",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
+  },
+  "33": {
+    "string": "이 페이지에는 사운드가 없습니다.",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
+  },
+  "34": {
+    "string": "동영상 재생",
+    "description": "Label for a button to play the video visible on the page."
+  },
+  "35": {
+    "string": "위로 스와이프",
+    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
+  },
+  "36": {
+    "string": "트윗 펼치기",
+    "description": "Label in the tooltip text for when a Twitter embed is expandable."
+  },
+  "37": {
+    "string": "이 스토리를 보려면 창 높이를 늘리세요",
+    "description": "Text for a warning screen that informs the user that stories are only supported in taller browser windows."
+  },
+  "38": {
+    "string": "이 스토리를 보려면 창 너비를 늘리세요.",
+    "description": "Text for a warning screen that informs the user that stories are only supported in wider browser windows."
+  },
+  "62": {
+    "string": "이 페이지부터 공유 시작",
+    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
+  },
+  "63": {
+    "string": "Line",
+    "description": "Button label for the share target that shares a link via Line."
+  },
+  "64": {
+    "string": "업데이트됨",
+    "description": "Label that indicates that additional content has been added to a story"
+  },
+  "65": {
+    "string": "동영상을 재생할 수 없습니다.",
+    "description": "Label indicating that the video visible on the page failed to play."
+  },
+  "66": {
+    "string": "스토리 음소거",
+    "description": "Label for the mute button that turns off the sound in the story"
+  },
+  "67": {
+    "string": "스토리 음소거 해제",
+    "description": "Label for the unmute button that turns the sound in the story back on"
+  },
+  "68": {
+    "string": "스토리 정보",
+    "description": "Label for the information button that pulls up relevant information about the story content"
+  },
+  "69": {
+    "string": "스토리 공유",
+    "description": "Label for the share button that pulls up a panel of options for sharing the story"
+  },
+  "70": {
+    "string": "스토리 메뉴 토글",
+    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
+  },
+  "71": {
+    "string": "A",
+    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
+  },
+  "72": {
+    "string": "B",
+    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
+  },
+  "73": {
+    "string": "C",
+    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
+  },
+  "74": {
+    "string": "D",
+    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
+  },
+  "75": {
+    "string": "팁 1/2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+  },
+  "76": {
+    "string": "다음 화면으로 이동하려면 탭하세요.",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+  },
+  "77": {
+    "string": "다음",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+  },
+  "78": {
+    "string": "팁 2/2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+  },
+  "79": {
+    "string": "다음 스토리로 이동하려면 스와이프하세요.",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+  },
+  "80": {
+    "string": "확인",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+  },
+  "81": {
+    "string": "팁",
+    "description": "Label for a hint in the context of an onboarding user education tutorial."
+  },
+  "82": {
+    "string": "이전 페이지",
+    "description": "Label indicating that users can navigate to the previous page."
+  },
+  "83": {
+    "string": "활성화",
+    "description": "Label for the activate button to ask for device orientation permission"
+  },
+  "84": {
+    "string": "점수:",
+    "description": "Label for the results component preceding the score in percentages"
+  },
+  "85": {
+    "string": "스토리 일시 중지",
+    "description": "Label for a button that pauses the media content on the story"
+  },
+  "86": {
+    "string": "스토리 재생",
+    "description": "Label for a button that plays the media content on the story"
+  },
+  "87": {
+    "string": "닫기",
+    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
+  },
+  "88": {
+    "string": "다음으로 건너뛰기",
+    "description": "Label for a button that advances to the next element in the carousel"
+  },
+  "89": {
+    "string": "응답이 다음으로 발송됩니다 -",
+    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
+  },
+  "90": {
+    "string": "다음 스토리",
+    "description": "Label for a button that advances to the next element in the carousel."
+  },
+  "91": {
+    "string": "다음 페이지",
+    "description": "Label for a button that advances to the next page of the story."
+  },
+  "92": {
+    "string": "다시 재생",
+    "description": "Label for a button that replays the story."
+  },
+  "93": {
+    "string": "이전 페이지",
+    "description": "Label for a button that returns the user to the previous page of the story."
+  },
+  "96": {
+    "string": "탐색하려면 기기를 이동하세요.",
+    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
+  },
+  "97": {
+    "string": "여는 중",
+    "description": "Text displayed to users on tap of outlink button."
+  }
 }

@@ -1,44 +1,266 @@
 {
-  "2": {"string": "I-tap ang Susunod"},
-  "3": {"string": "I-tap ang Bumalik"},
-  "4": {"string": "Hindi makopya sa clipboard ang link :("},
-  "5": {"string": "Nakopya ang link!"},
-  "6": {"string": "Email"},
-  "7": {"string": "Facebook"},
-  "8": {"string": "Google+"},
-  "9": {"string": "Kunin ang Link"},
-  "10": {"string": "LinkedIn"},
-  "11": {"string": "Pinterest"},
-  "12": {"string": "SMS"},
-  "14": {"string": "Tumblr"},
-  "15": {"string": "Twitter"},
-  "16": {"string": "WhatsApp"},
+  "2": {
+    "string": "I-tap ang Susunod",
+    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
+  },
+  "3": {
+    "string": "I-tap ang Bumalik",
+    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
+  },
+  "4": {
+    "string": "Hindi makopya ang link sa clipboard :(",
+    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
+  },
+  "5": {
+    "string": "Nakopya na ang link!",
+    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
+  },
+  "6": {
+    "string": "Email",
+    "description": "Button label for the share target that shares a link via email."
+  },
+  "7": {
+    "string": "Facebook",
+    "description": "Button label for the share target that shares a link via Facebook."
+  },
+  "8": {
+    "string": "Google+",
+    "description": "Button label for the share target that shares a link via Google+."
+  },
+  "9": {
+    "string": "Kunin ang Link",
+    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
+  },
+  "10": {
+    "string": "LinkedIn",
+    "description": "Button label for the share target that shares a link via LinkedIn."
+  },
+  "11": {
+    "string": "Pinterest",
+    "description": "Button label for the share target that shares a link via Pinterest."
+  },
+  "12": {
+    "string": "SMS",
+    "description": "Button label for the share target that shares a link via SMS."
+  },
+  "13": {
+    "string": "Higit pa",
+    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
+  },
+  "14": {
+    "string": "Tumblr",
+    "description": "Button label for the share target that shares a link via Tumblr."
+  },
+  "15": {
+    "string": "Twitter",
+    "description": "Button label for the share target that shares a link via Twitter."
+  },
+  "16": {
+    "string": "WhatsApp",
+    "description": "Button label for the share target that shares a link via WhatsApp."
+  },
   "18": {
-    "string": "Palawakin ang parehong taas at lapad ng iyong window para tingnan ang karanasang ito"
+    "string": "I-expand ang taas at lapad ng iyong window para makita ang karanasang ito",
+    "description": "Text for a warning screen that informs the user that stories are only supported in larger browser windows."
   },
   "19": {
-    "string": "Kailangan mong i-enable ang amp-story experiment para makita ang content na ito."
+    "string": "Kailangan mong i-enable ang amp-story experiment para makita ang content na ito.",
+    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
   },
-  "20": {"string": "Pinakamahusay na tingnan ang page na ito sa portrait mode"},
+  "20": {
+    "string": "Pinakamahusay na tignan ang page sa portrait mode",
+    "description": "Text for a warning screen that informs the user that stories are only supported in portrait orientation."
+  },
   "21": {
-    "string": "Ikinalulungkot namin, mukhang hindi sinusuportahan ng iyong browser ang karanasang ito"
+    "string": "Paumanhin, mukhang hindi sinusuportahan ng browser mo ang karanasang ito",
+    "description": "Text for a warning screen that informs the user that their browser does not support stories."
   },
-  "22": {"string": "Tanggapin"},
-  "23": {"string": "Tanggihan"},
-  "25": {"string": "Tingnan sa orihinal na domain:"},
-  "26": {"string": "Higit pa tungkol sa mga resulta ng AMP"},
-  "27": {"string": "Magpatuloy Pa Rin"},
-  "31": {"string": "I-off ang tunog"},
-  "32": {"string": "I-on ang tunog"},
-  "33": {"string": "Walang tunog ang page na ito"},
-  "34": {"string": "I-play ang video"},
-  "35": {"string": "Mag-swipe pataas"},
-  "36": {"string": "I-expand ang Tweet"},
+  "22": {
+    "string": "Tanggapin",
+    "description": "Label for a button that allows the user to consent to providing their cookie access."
+  },
+  "23": {
+    "string": "Tanggihan",
+    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
+  },
+  "25": {
+    "string": "Tingnan sa orihinal na domain:",
+    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
+  },
+  "26": {
+    "string": "Dagdag pa tungkol sa Mga AMP result",
+    "description": "Label for a link to documentation on how AMP links are handled."
+  },
+  "27": {
+    "string": "Magpatuloy Pa Rin",
+    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
+  },
+  "31": {
+    "string": "I-off ang Tunog",
+    "description": "Text that informs users that the sound is off after they click the mute button"
+  },
+  "32": {
+    "string": "I-on ang Tunog",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
+  },
+  "33": {
+    "string": "Walang tunog ang page na ito",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
+  },
+  "34": {
+    "string": "I-play ang video",
+    "description": "Label for a button to play the video visible on the page."
+  },
+  "35": {
+    "string": "Mag-swipe pataas",
+    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
+  },
+  "36": {
+    "string": "I-expand ang Tweet",
+    "description": "Label in the tooltip text for when a Twitter embed is expandable."
+  },
   "37": {
-    "string": "Palawakin ang taas ng iyong window para makita ang karanasang ito"
+    "string": "I-expand ang taas ng iyong window para makita ang karanasang ito",
+    "description": "Text for a warning screen that informs the user that stories are only supported in taller browser windows."
   },
   "38": {
-    "string": "Palawakin ang lapad ng iyong window para makita ang karanasang ito"
+    "string": "I-expand ang lapad ng iyong window para makita ang karanasang ito",
+    "description": "Text for a warning screen that informs the user that stories are only supported in wider browser windows."
   },
-  "63": {"string": "Line"}
+  "62": {
+    "string": "Ibahagi simula sa page na ito",
+    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
+  },
+  "63": {
+    "string": "Line",
+    "description": "Button label for the share target that shares a link via Line."
+  },
+  "64": {
+    "string": "Na-update na",
+    "description": "Label that indicates that additional content has been added to a story"
+  },
+  "65": {
+    "string": "Hindi nag-play ang video",
+    "description": "Label indicating that the video visible on the page failed to play."
+  },
+  "66": {
+    "string": "I-mute ang kwento",
+    "description": "Label for the mute button that turns off the sound in the story"
+  },
+  "67": {
+    "string": "I-unmute ang kwento",
+    "description": "Label for the unmute button that turns the sound in the story back on"
+  },
+  "68": {
+    "string": "Impormasyon sa kwento",
+    "description": "Label for the information button that pulls up relevant information about the story content"
+  },
+  "69": {
+    "string": "Ibahagi ang kwento",
+    "description": "Label for the share button that pulls up a panel of options for sharing the story"
+  },
+  "70": {
+    "string": "I-toggle ang menu ng kwento",
+    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
+  },
+  "71": {
+    "string": "A",
+    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
+  },
+  "72": {
+    "string": "B",
+    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
+  },
+  "73": {
+    "string": "C",
+    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
+  },
+  "74": {
+    "string": "D",
+    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
+  },
+  "75": {
+    "string": "Tip 1 ng 2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+  },
+  "76": {
+    "string": "I-tap para pumunta sa susunod na screen",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+  },
+  "77": {
+    "string": "Susunod",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+  },
+  "78": {
+    "string": "Tip 2 ng 2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+  },
+  "79": {
+    "string": "Mag-swipe upang pumunta sa susunod na kwento",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+  },
+  "80": {
+    "string": "Kuha ko na",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+  },
+  "81": {
+    "string": "Tip",
+    "description": "Label for a hint in the context of an onboarding user education tutorial."
+  },
+  "82": {
+    "string": "Nakaraang page",
+    "description": "Label indicating that users can navigate to the previous page."
+  },
+  "83": {
+    "string": "I-activate",
+    "description": "Label for the activate button to ask for device orientation permission"
+  },
+  "84": {
+    "string": "ISKOR:",
+    "description": "Label for the results component preceding the score in percentages"
+  },
+  "85": {
+    "string": "I-pause ang kwento",
+    "description": "Label for a button that pauses the media content on the story"
+  },
+  "86": {
+    "string": "I-play ang kwento",
+    "description": "Label for a button that plays the media content on the story"
+  },
+  "87": {
+    "string": "Isara",
+    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
+  },
+  "88": {
+    "string": "Laktawan ang susunod",
+    "description": "Label for a button that advances to the next element in the carousel"
+  },
+  "89": {
+    "string": "Ipapadala ang sagot mo sa",
+    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
+  },
+  "90": {
+    "string": "Susunod na kwento",
+    "description": "Label for a button that advances to the next element in the carousel."
+  },
+  "91": {
+    "string": "Susunod na page",
+    "description": "Label for a button that advances to the next page of the story."
+  },
+  "92": {
+    "string": "I-replay",
+    "description": "Label for a button that replays the story."
+  },
+  "93": {
+    "string": "Nakaraang page",
+    "description": "Label for a button that returns the user to the previous page of the story."
+  },
+  "96": {
+    "string": "Igalaw ang device para tumuklas",
+    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
+  },
+  "97": {
+    "string": "Binubuksan",
+    "description": "Text displayed to users on tap of outlink button."
+  }
 }

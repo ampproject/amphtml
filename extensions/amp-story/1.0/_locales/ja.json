@@ -1,40 +1,266 @@
 {
-  "2": {"string": "[次へ] をタップ"},
-  "3": {"string": "戻るアイコンをタップ"},
-  "4": {"string": "リンクをクリップボードにコピーできませんでした。"},
-  "5": {"string": "リンクをコピーしました"},
-  "6": {"string": "メール"},
-  "7": {"string": "Facebook"},
-  "8": {"string": "Google+"},
-  "9": {"string": "リンクを取得"},
-  "10": {"string": "LinkedIn"},
-  "11": {"string": "Pinterest"},
-  "12": {"string": "SMS"},
-  "14": {"string": "Tumblr"},
-  "15": {"string": "Twitter"},
-  "16": {"string": "WhatsApp"},
+  "2": {
+    "string": "[次へ] をタップ",
+    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
+  },
+  "3": {
+    "string": "[戻る] をタップ",
+    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
+  },
+  "4": {
+    "string": "リンクをクリップボードにコピーできませんでした :(",
+    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
+  },
+  "5": {
+    "string": "リンクをコピーしました！",
+    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
+  },
+  "6": {
+    "string": "メール",
+    "description": "Button label for the share target that shares a link via email."
+  },
+  "7": {
+    "string": "Facebook",
+    "description": "Button label for the share target that shares a link via Facebook."
+  },
+  "8": {
+    "string": "Google+",
+    "description": "Button label for the share target that shares a link via Google+."
+  },
+  "9": {
+    "string": "リンクを取得",
+    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
+  },
+  "10": {
+    "string": "LinkedIn",
+    "description": "Button label for the share target that shares a link via LinkedIn."
+  },
+  "11": {
+    "string": "Pinterest",
+    "description": "Button label for the share target that shares a link via Pinterest."
+  },
+  "12": {
+    "string": "SMS",
+    "description": "Button label for the share target that shares a link via SMS."
+  },
+  "13": {
+    "string": "その他",
+    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
+  },
+  "14": {
+    "string": "Tumblr",
+    "description": "Button label for the share target that shares a link via Tumblr."
+  },
+  "15": {
+    "string": "Twitter",
+    "description": "Button label for the share target that shares a link via Twitter."
+  },
+  "16": {
+    "string": "WhatsApp",
+    "description": "Button label for the share target that shares a link via WhatsApp."
+  },
   "18": {
-    "string": "この記事を表示するには、ウィンドウの高さと幅の両方を拡大してください"
+    "string": "このページ エクスペリエンスを表示するには、ウィンドウの高さと幅の両方を拡大してください",
+    "description": "Text for a warning screen that informs the user that stories are only supported in larger browser windows."
   },
   "19": {
-    "string": "このコンテンツを表示するには amp-story テストを有効にする必要があります。"
+    "string": "このコンテンツを表示するには、amp-story テストを有効にする必要があります。",
+    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
   },
-  "20": {"string": "このページはポートレート モードで最適に表示されます"},
-  "21": {"string": "ご利用のブラウザはこの記事に対応していません"},
-  "22": {"string": "同意する"},
-  "23": {"string": "同意しない"},
-  "25": {"string": "元のドメインで表示:"},
-  "26": {"string": "AMP の結果に関する詳細"},
-  "27": {"string": "続行する"},
-  "31": {"string": "サウンドはオフです"},
-  "32": {"string": "サウンドオン"},
-  "33": {"string": "このページには音声がありません"},
-  "34": {"string": "動画を再生"},
-  "35": {"string": "上にスワイプ"},
-  "36": {"string": "ツイートを展開"},
+  "20": {
+    "string": "このページはポートレート モードで最適に表示されます",
+    "description": "Text for a warning screen that informs the user that stories are only supported in portrait orientation."
+  },
+  "21": {
+    "string": "ご利用のブラウザはこのエクスペリエンスに対応していません",
+    "description": "Text for a warning screen that informs the user that their browser does not support stories."
+  },
+  "22": {
+    "string": "同意する",
+    "description": "Label for a button that allows the user to consent to providing their cookie access."
+  },
+  "23": {
+    "string": "同意しない",
+    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
+  },
+  "25": {
+    "string": "元のドメインで表示:",
+    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
+  },
+  "26": {
+    "string": "AMP 結果に関する詳細",
+    "description": "Label for a link to documentation on how AMP links are handled."
+  },
+  "27": {
+    "string": "このまま続行する",
+    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
+  },
+  "31": {
+    "string": "音声がオフになりました",
+    "description": "Text that informs users that the sound is off after they click the mute button"
+  },
+  "32": {
+    "string": "音声がオンになりました",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
+  },
+  "33": {
+    "string": "このページには音声がありません",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
+  },
+  "34": {
+    "string": "動画を再生",
+    "description": "Label for a button to play the video visible on the page."
+  },
+  "35": {
+    "string": "上にスワイプ",
+    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
+  },
+  "36": {
+    "string": "ツイートを展開",
+    "description": "Label in the tooltip text for when a Twitter embed is expandable."
+  },
   "37": {
-    "string": "この記事を表示するには、ウィンドウの高さを拡大してください"
+    "string": "このページ エクスペリエンスを表示するには、ウィンドウの高さを拡大してください",
+    "description": "Text for a warning screen that informs the user that stories are only supported in taller browser windows."
   },
-  "38": {"string": "この記事を表示するには、ウィンドウの幅を拡大してください"},
-  "63": {"string": "Line"}
+  "38": {
+    "string": "このページ エクスペリエンスを表示するには、ウィンドウの幅を拡大してください",
+    "description": "Text for a warning screen that informs the user that stories are only supported in wider browser windows."
+  },
+  "62": {
+    "string": "このページから共有を開始",
+    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
+  },
+  "63": {
+    "string": "Line",
+    "description": "Button label for the share target that shares a link via Line."
+  },
+  "64": {
+    "string": "更新あり",
+    "description": "Label that indicates that additional content has been added to a story"
+  },
+  "65": {
+    "string": "動画の再生に失敗しました",
+    "description": "Label indicating that the video visible on the page failed to play."
+  },
+  "66": {
+    "string": "ストーリーをミュート",
+    "description": "Label for the mute button that turns off the sound in the story"
+  },
+  "67": {
+    "string": "ストーリーをミュート解除",
+    "description": "Label for the unmute button that turns the sound in the story back on"
+  },
+  "68": {
+    "string": "ストーリー情報",
+    "description": "Label for the information button that pulls up relevant information about the story content"
+  },
+  "69": {
+    "string": "ストーリーを共有",
+    "description": "Label for the share button that pulls up a panel of options for sharing the story"
+  },
+  "70": {
+    "string": "ストーリーメニューの切り替え",
+    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
+  },
+  "71": {
+    "string": "A",
+    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
+  },
+  "72": {
+    "string": "B",
+    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
+  },
+  "73": {
+    "string": "C",
+    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
+  },
+  "74": {
+    "string": "D",
+    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
+  },
+  "75": {
+    "string": "ヒント 1/2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+  },
+  "76": {
+    "string": "タップすると次の画面に進みます",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+  },
+  "77": {
+    "string": "次へ",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+  },
+  "78": {
+    "string": "ヒント 2/2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+  },
+  "79": {
+    "string": "スワイプすると次のストーリーに進みます",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+  },
+  "80": {
+    "string": "了解",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+  },
+  "81": {
+    "string": "ヒント",
+    "description": "Label for a hint in the context of an onboarding user education tutorial."
+  },
+  "82": {
+    "string": "前のページ",
+    "description": "Label indicating that users can navigate to the previous page."
+  },
+  "83": {
+    "string": "有効にする",
+    "description": "Label for the activate button to ask for device orientation permission"
+  },
+  "84": {
+    "string": "スコア:",
+    "description": "Label for the results component preceding the score in percentages"
+  },
+  "85": {
+    "string": "ストーリーを一時停止",
+    "description": "Label for a button that pauses the media content on the story"
+  },
+  "86": {
+    "string": "ストーリーを再生",
+    "description": "Label for a button that plays the media content on the story"
+  },
+  "87": {
+    "string": "閉じる",
+    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
+  },
+  "88": {
+    "string": "次へスキップ",
+    "description": "Label for a button that advances to the next element in the carousel"
+  },
+  "89": {
+    "string": "回答は次へ送信されます:",
+    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
+  },
+  "90": {
+    "string": "次のストーリー",
+    "description": "Label for a button that advances to the next element in the carousel."
+  },
+  "91": {
+    "string": "次のページ",
+    "description": "Label for a button that advances to the next page of the story."
+  },
+  "92": {
+    "string": "もう一度再生",
+    "description": "Label for a button that replays the story."
+  },
+  "93": {
+    "string": "前のページ",
+    "description": "Label for a button that returns the user to the previous page of the story."
+  },
+  "96": {
+    "string": "デバイスを動かして試してください",
+    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
+  },
+  "97": {
+    "string": "開いています",
+    "description": "Text displayed to users on tap of outlink button."
+  }
 }

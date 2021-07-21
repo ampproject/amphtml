@@ -1,38 +1,266 @@
 {
-  "2": {"string": "'මීළඟ' තට්ටු කරන්න"},
-  "3": {"string": "'ආපසු' තට්ටු කරන්න"},
-  "4": {"string": "සබැඳිය පසුරු පුවරුවට පිටපත් කිරීමට නොහැකි විය :("},
-  "5": {"string": "සබැඳිය පිටපත් විය!"},
-  "6": {"string": "ඉ-තැපෑල"},
-  "7": {"string": "Facebook"},
-  "8": {"string": "Google+"},
-  "9": {"string": "සබැඳිය ලබා ගන්න"},
-  "10": {"string": "LinkedIn"},
-  "11": {"string": "Pinterest"},
-  "12": {"string": "කෙටිපණිවුඩ"},
-  "14": {"string": "Tumblr"},
-  "15": {"string": "Twitter"},
-  "16": {"string": "WhatsApp"},
+  "2": {
+    "string": "ඊලඟ තට්ටු කරන්න",
+    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
+  },
+  "3": {
+    "string": "ආපසු තට්ටු කරන්න",
+    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
+  },
+  "4": {
+    "string": "ක්ලිප් පුවරුවට සබැඳිය පිටපත් කිරීමට නොහැකි විය :(",
+    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
+  },
+  "5": {
+    "string": "සබැඳිය පිටපත් කෙරිණි!",
+    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
+  },
+  "6": {
+    "string": "ඊමේල්",
+    "description": "Button label for the share target that shares a link via email."
+  },
+  "7": {
+    "string": "Facebook",
+    "description": "Button label for the share target that shares a link via Facebook."
+  },
+  "8": {
+    "string": "Google+",
+    "description": "Button label for the share target that shares a link via Google+."
+  },
+  "9": {
+    "string": "සබැඳිය ලබා ගන්න",
+    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
+  },
+  "10": {
+    "string": "LinkedIn",
+    "description": "Button label for the share target that shares a link via LinkedIn."
+  },
+  "11": {
+    "string": "Pinterest",
+    "description": "Button label for the share target that shares a link via Pinterest."
+  },
+  "12": {
+    "string": "SMS",
+    "description": "Button label for the share target that shares a link via SMS."
+  },
+  "13": {
+    "string": "තවත්",
+    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
+  },
+  "14": {
+    "string": "Tumblr",
+    "description": "Button label for the share target that shares a link via Tumblr."
+  },
+  "15": {
+    "string": "Twitter",
+    "description": "Button label for the share target that shares a link via Twitter."
+  },
+  "16": {
+    "string": "WhatsApp",
+    "description": "Button label for the share target that shares a link via WhatsApp."
+  },
   "18": {
-    "string": "මෙම අත්දැකීම බැලීමට ඔබේ කවුළුවේ දිග සහ පළල යන දෙකම දිග හරින්න"
+    "string": "මෙම අත්දැකීම බැලීමට ඔබේ කවුළුවේ උස සහ පළල යන දෙකම පුළුල් කරන්න",
+    "description": "Text for a warning screen that informs the user that stories are only supported in larger browser windows."
   },
   "19": {
-    "string": "ඔබ මෙම අන්තර්ගතය බැලීමට amp-කතා අත්හදා බැලීම සබල කළ යුතුමයි."
+    "string": "මෙම අන්තර්ගතය බැලීමට ඔබ amp-story අත්හදා බැලීම සක්‍රීය කළ යුතුය.",
+    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
   },
-  "20": {"string": "පිටුව හොඳටම බැලිය හැක්කේ ආලේඛ්‍ය ප්‍රකාරයෙනි"},
-  "21": {"string": "කනගාටුයි, ඔබේ බ්‍රවුසරය මෙම අත්දැකීමට සහය නොදක්වන බව පෙනේ"},
-  "22": {"string": "පිළිගන්න"},
-  "23": {"string": "ප්‍රතික්‍ෂේප කරන්න"},
-  "25": {"string": "මුල් වසහ මත බලන්න:"},
-  "26": {"string": "AMP ප්‍රතිඵල ගැන තවත්"},
-  "27": {"string": "කෙසේ හෝ ඉදිරියට යන්න"},
-  "31": {"string": "හඬ ක්‍රියා විරහිතයි"},
-  "32": {"string": "හඬ ක්‍රියාත්මකයි"},
-  "33": {"string": "මෙම පිටුවේ ශබ්ද නැත"},
-  "34": {"string": "වීඩියෝව ධාවන කරන්න"},
-  "35": {"string": "ඉහළට ස්වයිප් කරන්න"},
-  "36": {"string": "ට්වීට් එක දිග හරින්න"},
-  "37": {"string": "මෙම අත්දැකීම බැලීමට ඔබේ කවුළුවේ උස දිග හරින්න"},
-  "38": {"string": "මෙම අත්දැකීම බැලීමට ඔබේ කවුළුවේ පළල දිග හරින්න"},
-  "63": {"string": "Line"}
+  "20": {
+    "string": "පිටුව හොඳින්ම බලාගත හැක්කේ සිරස් දැකුම් ප්‍රකාරයෙනි",
+    "description": "Text for a warning screen that informs the user that stories are only supported in portrait orientation."
+  },
+  "21": {
+    "string": "කනගාටුයි, ඔබේ බ්‍රවුසරය මෙම අත්දැකීමට සහාය නොදක්වන බව පෙනේ",
+    "description": "Text for a warning screen that informs the user that their browser does not support stories."
+  },
+  "22": {
+    "string": "පිළිගන්න",
+    "description": "Label for a button that allows the user to consent to providing their cookie access."
+  },
+  "23": {
+    "string": "ප්‍රතික්‍ෂේප කරන්න",
+    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
+  },
+  "25": {
+    "string": "මුල් ඩොමේනය මත බලන්න:",
+    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
+  },
+  "26": {
+    "string": "AMP ප්‍රතිඵල ගැන වැඩි විස්තර",
+    "description": "Label for a link to documentation on how AMP links are handled."
+  },
+  "27": {
+    "string": "කෙසේ වෙතත් ඉදිරියට යන්න",
+    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
+  },
+  "31": {
+    "string": "හඬ ක්‍රියා විරහිතයි",
+    "description": "Text that informs users that the sound is off after they click the mute button"
+  },
+  "32": {
+    "string": "හඬ ක්‍රියාත්මකයි",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
+  },
+  "33": {
+    "string": "මෙම පිටුවේ හඬ නොමැත",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
+  },
+  "34": {
+    "string": "වීඩියෝව වාදනය කරන්න",
+    "description": "Label for a button to play the video visible on the page."
+  },
+  "35": {
+    "string": "ඉහළට ස්වයිප් කරන්න",
+    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
+  },
+  "36": {
+    "string": "ට්වීට් පුළුල් කරන්න",
+    "description": "Label in the tooltip text for when a Twitter embed is expandable."
+  },
+  "37": {
+    "string": "මෙම අත්දැකීම බැලීමට ඔබේ කවුළුවේ උස පුළුල් කරන්න",
+    "description": "Text for a warning screen that informs the user that stories are only supported in taller browser windows."
+  },
+  "38": {
+    "string": "මෙම අත්දැකීම බැලීමට ඔබේ කවුළුවේ පළල පුළුල් කරන්න",
+    "description": "Text for a warning screen that informs the user that stories are only supported in wider browser windows."
+  },
+  "62": {
+    "string": "මෙම පිටුවෙන් පටන්ගෙන බෙදාගන්න",
+    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
+  },
+  "63": {
+    "string": "Line",
+    "description": "Button label for the share target that shares a link via Line."
+  },
+  "64": {
+    "string": "යාවත්කාලීන කරන ලදි",
+    "description": "Label that indicates that additional content has been added to a story"
+  },
+  "65": {
+    "string": "වීඩියෝව වාදනය කිරීමට අසමත් විය",
+    "description": "Label indicating that the video visible on the page failed to play."
+  },
+  "66": {
+    "string": "කතාව නිහඬ කරන්න",
+    "description": "Label for the mute button that turns off the sound in the story"
+  },
+  "67": {
+    "string": "කතාව නිහඬහරණය කරන්න",
+    "description": "Label for the unmute button that turns the sound in the story back on"
+  },
+  "68": {
+    "string": "කතාවෙහි තොරතුරු",
+    "description": "Label for the information button that pulls up relevant information about the story content"
+  },
+  "69": {
+    "string": "කතාව බෙදා ගන්න",
+    "description": "Label for the share button that pulls up a panel of options for sharing the story"
+  },
+  "70": {
+    "string": "කතා මෙනුව ටොගල කරන්න",
+    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
+  },
+  "71": {
+    "string": "අ",
+    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
+  },
+  "72": {
+    "string": "ආ",
+    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
+  },
+  "73": {
+    "string": "ඇ",
+    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
+  },
+  "74": {
+    "string": "ඈ",
+    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
+  },
+  "75": {
+    "string": "ඉඟි 2 න් 1",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+  },
+  "76": {
+    "string": "ඊළඟ තිරයට යාමට තට්ටු කරන්න",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+  },
+  "77": {
+    "string": "ඊළඟ",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+  },
+  "78": {
+    "string": "ඉඟි 2 න් 2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+  },
+  "79": {
+    "string": "ඊළඟ කතාවට යාමට ස්වයිප් කරන්න",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+  },
+  "80": {
+    "string": "තේරුණා",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+  },
+  "81": {
+    "string": "ඉඟිය",
+    "description": "Label for a hint in the context of an onboarding user education tutorial."
+  },
+  "82": {
+    "string": "පෙර පිටුව",
+    "description": "Label indicating that users can navigate to the previous page."
+  },
+  "83": {
+    "string": "සක්‍රිය කරන්න",
+    "description": "Label for the activate button to ask for device orientation permission"
+  },
+  "84": {
+    "string": "ලකුණු:",
+    "description": "Label for the results component preceding the score in percentages"
+  },
+  "85": {
+    "string": "කතාව විරාම කරන්න",
+    "description": "Label for a button that pauses the media content on the story"
+  },
+  "86": {
+    "string": "කතාව ධාවනය කරන්න",
+    "description": "Label for a button that plays the media content on the story"
+  },
+  "87": {
+    "string": "වසන්න",
+    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
+  },
+  "88": {
+    "string": "ඊලඟ එකට යන්න",
+    "description": "Label for a button that advances to the next element in the carousel"
+  },
+  "89": {
+    "string": "ඔබගේ ප්‍රතිචාරය යැවෙනු ඇත්තේ",
+    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
+  },
+  "90": {
+    "string": "ඊළඟ කතාව",
+    "description": "Label for a button that advances to the next element in the carousel."
+  },
+  "91": {
+    "string": "ඊළඟ පිටුව",
+    "description": "Label for a button that advances to the next page of the story."
+  },
+  "92": {
+    "string": "නැවත ධාවනය කරන්න",
+    "description": "Label for a button that replays the story."
+  },
+  "93": {
+    "string": "පෙර පිටුව",
+    "description": "Label for a button that returns the user to the previous page of the story."
+  },
+  "96": {
+    "string": "ගවේෂණය කිරීමට උපාංගය චලනය කරන්න",
+    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
+  },
+  "97": {
+    "string": "විවෘත වෙමින්",
+    "description": "Text displayed to users on tap of outlink button."
+  }
 }

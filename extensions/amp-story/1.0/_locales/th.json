@@ -1,34 +1,266 @@
 {
-  "2": {"string": "แตะ \"ถัดไป\""},
-  "3": {"string": "แตะ \"กลับ\""},
-  "4": {"string": "คัดลอกลิงก์ไปยังคลิปบอร์ดไม่ได้ :("},
-  "5": {"string": "คัดลอกลิงก์แล้ว"},
-  "6": {"string": "อีเมล"},
-  "7": {"string": "Facebook"},
-  "8": {"string": "Google+"},
-  "9": {"string": "ดูลิงก์"},
-  "10": {"string": "LinkedIn"},
-  "11": {"string": "Pinterest"},
-  "12": {"string": "SMS"},
-  "14": {"string": "Tumblr"},
-  "15": {"string": "Twitter"},
-  "16": {"string": "WhatsApp"},
-  "18": {"string": "ขยายทั้งความกว้างและความสูงของหน้าต่างเพื่อดูเรื่องราว"},
-  "19": {"string": "คุณต้องเปิดใช้การทดสอบเรื่องราว AMP เพื่อดูเนื้อหานี้"},
-  "20": {"string": "หน้านี้เหมาะกับการดูในโหมดแนวตั้ง"},
-  "21": {"string": "ขออภัย ดูเหมือนเบราว์เซอร์ไม่รองรับประสบการณ์นี้"},
-  "22": {"string": "ยอมรับ"},
-  "23": {"string": "ปฏิเสธ"},
-  "25": {"string": "ดูในโดเมนดั้งเดิม:"},
-  "26": {"string": "ข้อมูลเพิ่มเติมเกี่ยวกับผลการค้นหา AMP"},
-  "27": {"string": "ดำเนินการต่อ"},
-  "31": {"string": "ปิดเสียง"},
-  "32": {"string": "เปิดเสียง"},
-  "33": {"string": "หน้านี้ไม่มีเสียง"},
-  "34": {"string": "เล่นวิดีโอ"},
-  "35": {"string": "เลื่อนขึ้น"},
-  "36": {"string": "ขยายทวีต"},
-  "37": {"string": "ขยายความสูงของหน้าต่างเพื่อดูเรื่องราว"},
-  "38": {"string": "ขยายความกว้างของหน้าต่างเพื่อดูเรื่องราว"},
-  "63": {"string": "Line"}
+  "2": {
+    "string": "แตะถัดไป",
+    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
+  },
+  "3": {
+    "string": "แตะย้อนกลับ",
+    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
+  },
+  "4": {
+    "string": "ไม่สามารถคัดลอกลิงก์ไปยังคลิปบอร์ดได้ :(",
+    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
+  },
+  "5": {
+    "string": "คัดลอกลิงก์แล้ว!",
+    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
+  },
+  "6": {
+    "string": "อีเมล",
+    "description": "Button label for the share target that shares a link via email."
+  },
+  "7": {
+    "string": "Facebook",
+    "description": "Button label for the share target that shares a link via Facebook."
+  },
+  "8": {
+    "string": "Google+",
+    "description": "Button label for the share target that shares a link via Google+."
+  },
+  "9": {
+    "string": "รับลิงก์",
+    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
+  },
+  "10": {
+    "string": "LinkedIn",
+    "description": "Button label for the share target that shares a link via LinkedIn."
+  },
+  "11": {
+    "string": "Pinterest",
+    "description": "Button label for the share target that shares a link via Pinterest."
+  },
+  "12": {
+    "string": "SMS",
+    "description": "Button label for the share target that shares a link via SMS."
+  },
+  "13": {
+    "string": "เพิ่มเติม",
+    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
+  },
+  "14": {
+    "string": "Tumblr",
+    "description": "Button label for the share target that shares a link via Tumblr."
+  },
+  "15": {
+    "string": "Twitter",
+    "description": "Button label for the share target that shares a link via Twitter."
+  },
+  "16": {
+    "string": "WhatsApp",
+    "description": "Button label for the share target that shares a link via WhatsApp."
+  },
+  "18": {
+    "string": "ขยายทั้งความกว้างและความสูงของหน้าต่าง เพื่อดูประสบการณ์นี้",
+    "description": "Text for a warning screen that informs the user that stories are only supported in larger browser windows."
+  },
+  "19": {
+    "string": "คุณจำเป็นต้องเปิดใช้งานการทดลอง amp-story เพื่อดูเนื้อหานี้",
+    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
+  },
+  "20": {
+    "string": "หน้านี้เหมาะกับการดูในโหมดแนวตั้ง",
+    "description": "Text for a warning screen that informs the user that stories are only supported in portrait orientation."
+  },
+  "21": {
+    "string": "ขออภัย ดูเหมือนเบราว์เซอร์ของคุณไม่รองรับประสบการณ์นี้",
+    "description": "Text for a warning screen that informs the user that their browser does not support stories."
+  },
+  "22": {
+    "string": "ยอมรับ",
+    "description": "Label for a button that allows the user to consent to providing their cookie access."
+  },
+  "23": {
+    "string": "ปฏิเสธ",
+    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
+  },
+  "25": {
+    "string": "ดูในโดเมนดั้งเดิม:",
+    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
+  },
+  "26": {
+    "string": "ข้อมูลเพิ่มเติมเกี่ยวกับผลการค้นหา AMP",
+    "description": "Label for a link to documentation on how AMP links are handled."
+  },
+  "27": {
+    "string": "ดำเนินการต่อ",
+    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
+  },
+  "31": {
+    "string": "ปิดเสียง",
+    "description": "Text that informs users that the sound is off after they click the mute button"
+  },
+  "32": {
+    "string": "เปิดเสียง",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
+  },
+  "33": {
+    "string": "หน้านี้ไม่มีเสียง",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
+  },
+  "34": {
+    "string": "เล่นวิดีโอ",
+    "description": "Label for a button to play the video visible on the page."
+  },
+  "35": {
+    "string": "ปัดขึ้น",
+    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
+  },
+  "36": {
+    "string": "ขยายทวีต",
+    "description": "Label in the tooltip text for when a Twitter embed is expandable."
+  },
+  "37": {
+    "string": "ขยายความสูงของหน้าต่าง เพื่อดูประสบการณ์นี้",
+    "description": "Text for a warning screen that informs the user that stories are only supported in taller browser windows."
+  },
+  "38": {
+    "string": "ขยายความกว้างของหน้าต่าง เพื่อดูประสบการณ์นี้",
+    "description": "Text for a warning screen that informs the user that stories are only supported in wider browser windows."
+  },
+  "62": {
+    "string": "เริ่มแชร์จากหน้าเพจนี้",
+    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
+  },
+  "63": {
+    "string": "Line",
+    "description": "Button label for the share target that shares a link via Line."
+  },
+  "64": {
+    "string": "อัปเดตแล้ว",
+    "description": "Label that indicates that additional content has been added to a story"
+  },
+  "65": {
+    "string": "ไม่สามารถเล่นวิดีโอได้",
+    "description": "Label indicating that the video visible on the page failed to play."
+  },
+  "66": {
+    "string": "ปิดเสียงของเรื่องราว",
+    "description": "Label for the mute button that turns off the sound in the story"
+  },
+  "67": {
+    "string": "เปิดเสียงของเรื่องราว",
+    "description": "Label for the unmute button that turns the sound in the story back on"
+  },
+  "68": {
+    "string": "ข้อมูลของเรื่องราว",
+    "description": "Label for the information button that pulls up relevant information about the story content"
+  },
+  "69": {
+    "string": "แชร์เรื่องราว",
+    "description": "Label for the share button that pulls up a panel of options for sharing the story"
+  },
+  "70": {
+    "string": "เปิด/ปิดเมนูเรื่องราว",
+    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
+  },
+  "71": {
+    "string": "ก",
+    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
+  },
+  "72": {
+    "string": "ข",
+    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
+  },
+  "73": {
+    "string": "ค",
+    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
+  },
+  "74": {
+    "string": "ง",
+    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
+  },
+  "75": {
+    "string": "เคล็ดลับ 1 จาก 2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+  },
+  "76": {
+    "string": "แตะเพื่อไปยังหน้าจอถัดไป",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+  },
+  "77": {
+    "string": "ถัดไป",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+  },
+  "78": {
+    "string": "เคล็ดลับ 2 จาก 2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+  },
+  "79": {
+    "string": "ปัดเพื่อไปยังเรื่องราวถัดไป",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+  },
+  "80": {
+    "string": "เข้าใจแล้ว",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+  },
+  "81": {
+    "string": "เคล็ดลับ",
+    "description": "Label for a hint in the context of an onboarding user education tutorial."
+  },
+  "82": {
+    "string": "หน้าเพจก่อนหน้า",
+    "description": "Label indicating that users can navigate to the previous page."
+  },
+  "83": {
+    "string": "เปิดใช้งาน",
+    "description": "Label for the activate button to ask for device orientation permission"
+  },
+  "84": {
+    "string": "คะแนน:",
+    "description": "Label for the results component preceding the score in percentages"
+  },
+  "85": {
+    "string": "หยุดเรื่องราวชั่วคราว",
+    "description": "Label for a button that pauses the media content on the story"
+  },
+  "86": {
+    "string": "เล่นเรื่องราว",
+    "description": "Label for a button that plays the media content on the story"
+  },
+  "87": {
+    "string": "ปิด",
+    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
+  },
+  "88": {
+    "string": "ข้ามไปยังองค์ประกอบถัดไป",
+    "description": "Label for a button that advances to the next element in the carousel"
+  },
+  "89": {
+    "string": "คำตอบของคุณจะถูกส่งไปที่",
+    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
+  },
+  "90": {
+    "string": "เรื่องราวถัดไป",
+    "description": "Label for a button that advances to the next element in the carousel."
+  },
+  "91": {
+    "string": "หน้าถัดไป",
+    "description": "Label for a button that advances to the next page of the story."
+  },
+  "92": {
+    "string": "เล่นซ้ำ",
+    "description": "Label for a button that replays the story."
+  },
+  "93": {
+    "string": "หน้าเพจก่อนหน้า",
+    "description": "Label for a button that returns the user to the previous page of the story."
+  },
+  "96": {
+    "string": "ขยับอุปกรณ์เพื่อสำรวจ",
+    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
+  },
+  "97": {
+    "string": "กำลังเปิด",
+    "description": "Text displayed to users on tap of outlink button."
+  }
 }

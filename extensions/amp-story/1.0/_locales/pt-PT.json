@@ -1,42 +1,266 @@
 {
-  "2": {"string": "Toque em Seguinte."},
-  "3": {"string": "Toque em Anterior"},
-  "4": {
-    "string": "Não foi possível copiar o link para a área de transferência :("
+  "2": {
+    "string": "Toque em Seguinte",
+    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
   },
-  "5": {"string": "Link copiado!"},
-  "6": {"string": "Email"},
-  "7": {"string": "Facebook"},
-  "8": {"string": "Google+"},
-  "9": {"string": "Obter link"},
-  "10": {"string": "LinkedIn"},
-  "11": {"string": "Pinterest"},
-  "12": {"string": "SMS"},
-  "14": {"string": "Tumblr"},
-  "15": {"string": "Twitter"},
-  "16": {"string": "WhatsApp"},
+  "3": {
+    "string": "Toque em Anterior",
+    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
+  },
+  "4": {
+    "string": "Não foi possível copiar a ligação para a área de transferência :(",
+    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
+  },
+  "5": {
+    "string": "Ligação copiada!",
+    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
+  },
+  "6": {
+    "string": "E-mail",
+    "description": "Button label for the share target that shares a link via email."
+  },
+  "7": {
+    "string": "Facebook",
+    "description": "Button label for the share target that shares a link via Facebook."
+  },
+  "8": {
+    "string": "Google+",
+    "description": "Button label for the share target that shares a link via Google+."
+  },
+  "9": {
+    "string": "Obter ligação",
+    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
+  },
+  "10": {
+    "string": "LinkedIn",
+    "description": "Button label for the share target that shares a link via LinkedIn."
+  },
+  "11": {
+    "string": "Pinterest",
+    "description": "Button label for the share target that shares a link via Pinterest."
+  },
+  "12": {
+    "string": "SMS",
+    "description": "Button label for the share target that shares a link via SMS."
+  },
+  "13": {
+    "string": "Mais",
+    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
+  },
+  "14": {
+    "string": "Tumblr",
+    "description": "Button label for the share target that shares a link via Tumblr."
+  },
+  "15": {
+    "string": "Twitter",
+    "description": "Button label for the share target that shares a link via Twitter."
+  },
+  "16": {
+    "string": "WhatsApp",
+    "description": "Button label for the share target that shares a link via WhatsApp."
+  },
   "18": {
-    "string": "Expanda a altura e a largura da sua janela para ver esta experiência."
+    "string": "Expanda a altura e largura da sua janela para ver esta experiência",
+    "description": "Text for a warning screen that informs the user that stories are only supported in larger browser windows."
   },
   "19": {
-    "string": "Tem de ativar a experiência da história AMP para ver este conteúdo."
+    "string": "Deve ativar a experiência de amp-story para ver este conteúdo.",
+    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
   },
-  "20": {"string": "Conseguirá visualizar melhor esta página no modo retrato."},
+  "20": {
+    "string": "Conseguirá visualizar melhor esta página no modo retrato",
+    "description": "Text for a warning screen that informs the user that stories are only supported in portrait orientation."
+  },
   "21": {
-    "string": "Lamentamos, mas parece que o seu navegador não suporta esta experiência."
+    "string": "Pedimos desculpa, mas parece que o seu navegador não suporta esta experiência",
+    "description": "Text for a warning screen that informs the user that their browser does not support stories."
   },
-  "22": {"string": "Aceitar"},
-  "23": {"string": "Recusar"},
-  "25": {"string": "Veja no domínio original:"},
-  "26": {"string": "Mais acerca dos resultados AMP"},
-  "27": {"string": "Continuar mesmo assim"},
-  "31": {"string": "Som desativado"},
-  "32": {"string": "Som ativado"},
-  "33": {"string": "Esta página não tem som."},
-  "34": {"string": "Reproduzir vídeo"},
-  "35": {"string": "Deslizar rapidamente para cima"},
-  "36": {"string": "Expandir twit"},
-  "37": {"string": "Expanda a altura da janela para ver esta experiência."},
-  "38": {"string": "Expanda a largura da janela para ver esta experiência."},
-  "63": {"string": "Line"}
+  "22": {
+    "string": "Aceitar",
+    "description": "Label for a button that allows the user to consent to providing their cookie access."
+  },
+  "23": {
+    "string": "Recusar",
+    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
+  },
+  "25": {
+    "string": "Ver no domínio original:",
+    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
+  },
+  "26": {
+    "string": "Mais sobre os resultados AMP",
+    "description": "Label for a link to documentation on how AMP links are handled."
+  },
+  "27": {
+    "string": "Continuar mesmo assim",
+    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
+  },
+  "31": {
+    "string": "Som desligado",
+    "description": "Text that informs users that the sound is off after they click the mute button"
+  },
+  "32": {
+    "string": "Som ligado",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
+  },
+  "33": {
+    "string": "Esta página não tem som",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
+  },
+  "34": {
+    "string": "Reproduzir vídeo",
+    "description": "Label for a button to play the video visible on the page."
+  },
+  "35": {
+    "string": "Deslizar para cima",
+    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
+  },
+  "36": {
+    "string": "Expandir Tweet",
+    "description": "Label in the tooltip text for when a Twitter embed is expandable."
+  },
+  "37": {
+    "string": "Expanda a altura e largura da sua janela para visualizar esta experiência",
+    "description": "Text for a warning screen that informs the user that stories are only supported in taller browser windows."
+  },
+  "38": {
+    "string": "Expanda a largura da sua janela para visualizar esta experiência",
+    "description": "Text for a warning screen that informs the user that stories are only supported in wider browser windows."
+  },
+  "62": {
+    "string": "Partilhar a partir desta página",
+    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
+  },
+  "63": {
+    "string": "Line",
+    "description": "Button label for the share target that shares a link via Line."
+  },
+  "64": {
+    "string": "Atualizada",
+    "description": "Label that indicates that additional content has been added to a story"
+  },
+  "65": {
+    "string": "A reprodução do vídeo falhou",
+    "description": "Label indicating that the video visible on the page failed to play."
+  },
+  "66": {
+    "string": "Desativar o som da história",
+    "description": "Label for the mute button that turns off the sound in the story"
+  },
+  "67": {
+    "string": "Ativar o som da história",
+    "description": "Label for the unmute button that turns the sound in the story back on"
+  },
+  "68": {
+    "string": "Informação da história",
+    "description": "Label for the information button that pulls up relevant information about the story content"
+  },
+  "69": {
+    "string": "Partilhar história",
+    "description": "Label for the share button that pulls up a panel of options for sharing the story"
+  },
+  "70": {
+    "string": "Alternar menu da história",
+    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
+  },
+  "71": {
+    "string": "A",
+    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
+  },
+  "72": {
+    "string": "B",
+    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
+  },
+  "73": {
+    "string": "C",
+    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
+  },
+  "74": {
+    "string": "D",
+    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
+  },
+  "75": {
+    "string": "Dica 1 de 2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+  },
+  "76": {
+    "string": "Toque para ir para o próximo ecrã",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+  },
+  "77": {
+    "string": "Próximo",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+  },
+  "78": {
+    "string": "Dica 2 de 2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+  },
+  "79": {
+    "string": "Deslize para ir para a próxima história",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+  },
+  "80": {
+    "string": "Compreendi",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+  },
+  "81": {
+    "string": "Dica",
+    "description": "Label for a hint in the context of an onboarding user education tutorial."
+  },
+  "82": {
+    "string": "Página anterior",
+    "description": "Label indicating that users can navigate to the previous page."
+  },
+  "83": {
+    "string": "Ativar",
+    "description": "Label for the activate button to ask for device orientation permission"
+  },
+  "84": {
+    "string": "PONTUAÇÃO:",
+    "description": "Label for the results component preceding the score in percentages"
+  },
+  "85": {
+    "string": "Pausar história",
+    "description": "Label for a button that pauses the media content on the story"
+  },
+  "86": {
+    "string": "Reproduzir história",
+    "description": "Label for a button that plays the media content on the story"
+  },
+  "87": {
+    "string": "Fechar",
+    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
+  },
+  "88": {
+    "string": "Ir para o próximo",
+    "description": "Label for a button that advances to the next element in the carousel"
+  },
+  "89": {
+    "string": "A sua resposta será enviada para",
+    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
+  },
+  "90": {
+    "string": "Próxima história",
+    "description": "Label for a button that advances to the next element in the carousel."
+  },
+  "91": {
+    "string": "Próxima página",
+    "description": "Label for a button that advances to the next page of the story."
+  },
+  "92": {
+    "string": "Repetir",
+    "description": "Label for a button that replays the story."
+  },
+  "93": {
+    "string": "Página anterior",
+    "description": "Label for a button that returns the user to the previous page of the story."
+  },
+  "96": {
+    "string": "Mover dispositivo para explorar",
+    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
+  },
+  "97": {
+    "string": "A abrir",
+    "description": "Text displayed to users on tap of outlink button."
+  }
 }

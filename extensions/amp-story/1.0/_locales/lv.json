@@ -1,36 +1,266 @@
 {
-  "2": {"string": "Pieskarieties vienumam Tālāk"},
-  "3": {"string": "Pieskarieties vienumam Atpakaļ"},
-  "4": {"string": "Diemžēl neizdevās kopēt saiti starpliktuvē"},
-  "5": {"string": "Saite ir nokopēta."},
-  "6": {"string": "Sūtīt e-pasta ziņojumu"},
-  "7": {"string": "Facebook"},
-  "8": {"string": "Google+"},
-  "9": {"string": "Iegūt saiti"},
-  "10": {"string": "LinkedIn"},
-  "11": {"string": "Pinterest"},
-  "12": {"string": "Īsziņas"},
-  "14": {"string": "Tumblr"},
-  "15": {"string": "Twitter"},
-  "16": {"string": "WhatsApp"},
-  "18": {"string": "Lai skatītu šo saturu, izvērsiet loga augstumu un platumu"},
-  "19": {
-    "string": "Lai skatītu šo saturu, jums jāiespējo AMP stāstu eksperiments."
+  "2": {
+    "string": "Pieskarties Tālāk",
+    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
   },
-  "20": {"string": "Lapu ieteicams skatīt portreta režīmā"},
-  "21": {"string": "Diemžēl jūsu pārlūkprogramma neatbalsta šo iespēju"},
-  "22": {"string": "Piekrist"},
-  "23": {"string": "Noraidīt"},
-  "25": {"string": "Skatīt sākotnējā domēnā:"},
-  "26": {"string": "Uzzināt vairāk par AMP rezultātiem"},
-  "27": {"string": "Tomēr turpināt"},
-  "31": {"string": "Skaņa ir izslēgta"},
-  "32": {"string": "Skaņa ir ieslēgta"},
-  "33": {"string": "Šajā lapā nav skaņas"},
-  "34": {"string": "Atskaņot videoklipu"},
-  "35": {"string": "Vilkt augšup"},
-  "36": {"string": "Izvērst tvītu"},
-  "37": {"string": "Lai skatītu šo saturu, izvērsiet loga augstumu"},
-  "38": {"string": "Lai skatītu šo saturu, izvērsiet loga platumu"},
-  "63": {"string": "Line"}
+  "3": {
+    "string": "Pieskarties Atpakaļ",
+    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
+  },
+  "4": {
+    "string": "Neizdevās kopēt saiti starpliktuvē :(",
+    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
+  },
+  "5": {
+    "string": "Saite nokopēta!",
+    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
+  },
+  "6": {
+    "string": "E-pasts",
+    "description": "Button label for the share target that shares a link via email."
+  },
+  "7": {
+    "string": "Facebook",
+    "description": "Button label for the share target that shares a link via Facebook."
+  },
+  "8": {
+    "string": "Google+",
+    "description": "Button label for the share target that shares a link via Google+."
+  },
+  "9": {
+    "string": "Saņemt saiti",
+    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
+  },
+  "10": {
+    "string": "LinkedIn",
+    "description": "Button label for the share target that shares a link via LinkedIn."
+  },
+  "11": {
+    "string": "Pinterest",
+    "description": "Button label for the share target that shares a link via Pinterest."
+  },
+  "12": {
+    "string": "Īsziņa",
+    "description": "Button label for the share target that shares a link via SMS."
+  },
+  "13": {
+    "string": "Vairāk",
+    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
+  },
+  "14": {
+    "string": "Tumblr",
+    "description": "Button label for the share target that shares a link via Tumblr."
+  },
+  "15": {
+    "string": "Twitter",
+    "description": "Button label for the share target that shares a link via Twitter."
+  },
+  "16": {
+    "string": "WhatsApp",
+    "description": "Button label for the share target that shares a link via WhatsApp."
+  },
+  "18": {
+    "string": "Lai skatītu šo saturu, palieliniet loga augstumu un platumu",
+    "description": "Text for a warning screen that informs the user that stories are only supported in larger browser windows."
+  },
+  "19": {
+    "string": "Lai skaitītu šo saturu, jums ir jāiespējo amp-story eksperiments.",
+    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
+  },
+  "20": {
+    "string": "Šo lapu vislabāk ir skatīt portreta režīmā",
+    "description": "Text for a warning screen that informs the user that stories are only supported in portrait orientation."
+  },
+  "21": {
+    "string": "Atvainojiet! Izskatās, ka jūsu pārlūkprogramma neatbalsta šo saturu",
+    "description": "Text for a warning screen that informs the user that their browser does not support stories."
+  },
+  "22": {
+    "string": "Piekrist",
+    "description": "Label for a button that allows the user to consent to providing their cookie access."
+  },
+  "23": {
+    "string": "Nepiekrist",
+    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
+  },
+  "25": {
+    "string": "Skatīt sākotnējo domēnu:",
+    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
+  },
+  "26": {
+    "string": "Vairāk par AMP rezultātiem",
+    "description": "Label for a link to documentation on how AMP links are handled."
+  },
+  "27": {
+    "string": "Turpināt",
+    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
+  },
+  "31": {
+    "string": "Skaņa izslēgta",
+    "description": "Text that informs users that the sound is off after they click the mute button"
+  },
+  "32": {
+    "string": "Skaņa ieslēgta",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
+  },
+  "33": {
+    "string": "Šajā lapā nav skaņas",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
+  },
+  "34": {
+    "string": "Atskaņot video",
+    "description": "Label for a button to play the video visible on the page."
+  },
+  "35": {
+    "string": "Pavilkt uz augšu",
+    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
+  },
+  "36": {
+    "string": "Izvērst Twitter ierakstu",
+    "description": "Label in the tooltip text for when a Twitter embed is expandable."
+  },
+  "37": {
+    "string": "Lai skatītu šo saturu, palieliniet loga augstumu",
+    "description": "Text for a warning screen that informs the user that stories are only supported in taller browser windows."
+  },
+  "38": {
+    "string": "Lai skatītu šo saturu, palieliniet loga platumu",
+    "description": "Text for a warning screen that informs the user that stories are only supported in wider browser windows."
+  },
+  "62": {
+    "string": "Kopīgot, sākot ar šo lapu",
+    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
+  },
+  "63": {
+    "string": "Line",
+    "description": "Button label for the share target that shares a link via Line."
+  },
+  "64": {
+    "string": "Atjaunināts",
+    "description": "Label that indicates that additional content has been added to a story"
+  },
+  "65": {
+    "string": "Neizdevās atskaņot video",
+    "description": "Label indicating that the video visible on the page failed to play."
+  },
+  "66": {
+    "string": "Izslēgt skaņu",
+    "description": "Label for the mute button that turns off the sound in the story"
+  },
+  "67": {
+    "string": "Ieslēgt skaņu",
+    "description": "Label for the unmute button that turns the sound in the story back on"
+  },
+  "68": {
+    "string": "Informācija par stāstu",
+    "description": "Label for the information button that pulls up relevant information about the story content"
+  },
+  "69": {
+    "string": "Kopīgot stāstu",
+    "description": "Label for the share button that pulls up a panel of options for sharing the story"
+  },
+  "70": {
+    "string": "Pārslēgt stāsta izvēlni",
+    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
+  },
+  "71": {
+    "string": "A",
+    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
+  },
+  "72": {
+    "string": "B",
+    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
+  },
+  "73": {
+    "string": "C",
+    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
+  },
+  "74": {
+    "string": "D",
+    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
+  },
+  "75": {
+    "string": "1. ieteikums no 2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+  },
+  "76": {
+    "string": "Pieskarieties, lai pārietu uz nākamo ekrānu",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+  },
+  "77": {
+    "string": "Tālāk",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+  },
+  "78": {
+    "string": "2. ieteikums no 2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+  },
+  "79": {
+    "string": "Velciet, lai pārietu pie nākamā stāsta",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+  },
+  "80": {
+    "string": "Sapratu",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+  },
+  "81": {
+    "string": "Ieteikums",
+    "description": "Label for a hint in the context of an onboarding user education tutorial."
+  },
+  "82": {
+    "string": "Iepriekšējā lapa",
+    "description": "Label indicating that users can navigate to the previous page."
+  },
+  "83": {
+    "string": "Aktivizēt",
+    "description": "Label for the activate button to ask for device orientation permission"
+  },
+  "84": {
+    "string": "REZULTĀTS:",
+    "description": "Label for the results component preceding the score in percentages"
+  },
+  "85": {
+    "string": "Pauzēt stāstu",
+    "description": "Label for a button that pauses the media content on the story"
+  },
+  "86": {
+    "string": "Atskaņot stāstu",
+    "description": "Label for a button that plays the media content on the story"
+  },
+  "87": {
+    "string": "Aizvērt",
+    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
+  },
+  "88": {
+    "string": "Pāriet pie nākamā",
+    "description": "Label for a button that advances to the next element in the carousel"
+  },
+  "89": {
+    "string": "Jūsu atbilde tiks nosūtīta",
+    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
+  },
+  "90": {
+    "string": "Nākamais stāsts",
+    "description": "Label for a button that advances to the next element in the carousel."
+  },
+  "91": {
+    "string": "Nākamā lapa",
+    "description": "Label for a button that advances to the next page of the story."
+  },
+  "92": {
+    "string": "Atkārtot",
+    "description": "Label for a button that replays the story."
+  },
+  "93": {
+    "string": "Iepriekšējā lapa",
+    "description": "Label for a button that returns the user to the previous page of the story."
+  },
+  "96": {
+    "string": "Kustiniet ierīci, lai pārlūkotu",
+    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
+  },
+  "97": {
+    "string": "Notiek atvēršana",
+    "description": "Text displayed to users on tap of outlink button."
+  }
 }
