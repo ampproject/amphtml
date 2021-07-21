@@ -36,7 +36,7 @@ const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
 const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
-const {validateTestsIfNecessary} = require('./validate-tests');
+const {validateTests} = require('./validate-tests');
 const {watch} = require('chokidar');
 
 const COV_DOWNLOAD_PATH = '/coverage/download';
@@ -119,8 +119,10 @@ async function fetchCoverage_(outDir) {
 async function runTests_() {
   const mocha = createMochaWithFiles();
 
-  // DO_NOT_SUBMIT remove this.
-  await validateTestsIfNecessary();
+  if (argv.validate) {
+    await validateTests();
+    return;
+  }
 
   // return promise to amp that resolves when there's an error.
   return new Promise((resolve) => {
@@ -131,8 +133,6 @@ async function runTests_() {
       }
       await stopServer();
       process.exitCode = failures ? 1 : 0;
-      // DO_NOT_SUBMIT uncomment this.
-      // await validateTestsIfNecessary_();
       resolve();
     });
   });

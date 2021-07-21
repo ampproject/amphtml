@@ -17,12 +17,12 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const config = require('../../test-configs/config');
-const glob = require('glob');
-const path = require('path');
 const ciReporter = require('./mocha-ci-reporter');
+const config = require('../../test-configs/config');
 const dotsReporter = require('./mocha-dots-reporter');
+const glob = require('glob');
 const Mocha = require('mocha');
+const path = require('path');
 const {isCiBuild, isCircleciBuild} = require('../../common/ci');
 const {getFilesFromArgv, getFilesFromFileList} = require('../../common/utils');
 
@@ -69,6 +69,9 @@ function addMochaFile_(mocha, file) {
   mocha.addFile(file);
 }
 
+/**
+ * @return {string[]}
+ */
 function getDefaultMochaFiles() {
   /** @type {string[]} */
   const files = [];  if (argv.files || argv.filelist) {
@@ -77,7 +80,7 @@ function getDefaultMochaFiles() {
     getFilesFromFileList().forEach(file => files.push(file));
   } else {
     config.e2eTestPaths.forEach((path) => {
-      glob.sync(path).forEach(file => files.push(file));
+      glob.sync(path).forEach((file) => files.push(file));
     });
   }
 
@@ -85,6 +88,7 @@ function getDefaultMochaFiles() {
 }
 
 /**
+ * @param {string[]} files
  * @return {!Mocha}
  */
 function createMochaWithFiles(files = getDefaultMochaFiles()) {

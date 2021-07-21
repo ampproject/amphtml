@@ -17,12 +17,11 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {cyan, red, green} = require('../../common/colors');
-const {gitDiffNameOnlyMain} = require('../../common/git');
-const {isCiBuild} = require('../../common/ci');
-const {log} = require('../../common/logging');
 const {createMochaWithFiles, getDefaultMochaFiles} = require('./mocha-utils');
+const {cyan, green, red} = require('../../common/colors');
 const {getFilesFromArgv} = require('../../common/utils');
+const {gitDiffNameOnlyMain} = require('../../common/git');
+const {log} = require('../../common/logging');
 
 /**
  * @typedef {{
@@ -151,13 +150,8 @@ function computeTestFlakiness(results) {
  * flakiness complaince.
  * @return {Promise<void>}
  */
-async function validateTestsIfNecessary() {
+async function validateTests() {
   return new Promise(async (resolve) => {
-    if (!isCiBuild() && !argv.validate) {
-      resolve();
-      return;
-    }
-
     // specify tests to run
     const testFilesRequiringValidation = getTestsFilesToValidate();
 
@@ -166,6 +160,10 @@ async function validateTestsIfNecessary() {
       resolve();
       return;
     }
+    log(
+      green('Test Files Requiring Validation:\n'),
+      testFilesRequiringValidation.join('\n')
+    );
 
     /** @type {Record<string, TestResultDef>[]} */
     const results = [];
@@ -272,5 +270,5 @@ async function validateTestsIfNecessary() {
 }
 
 module.exports = {
-  validateTestsIfNecessary,
+  validateTests,
 };
