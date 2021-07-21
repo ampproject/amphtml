@@ -43,7 +43,7 @@ class AmpFacebook extends BaseElement {
       // Base URL for 3p bootstrap iframes
       getBootstrapBaseUrl(win, ampdoc),
       // Script URL for iframe
-      getBootstrapUrl(TYPE, win),
+      getBootstrapUrl(TYPE),
       'https://facebook.com',
       // This domain serves the actual tweets as JSONP.
       'https://connect.facebook.net/' + locale + '/sdk.js',
@@ -54,7 +54,7 @@ class AmpFacebook extends BaseElement {
   init() {
     return dict({
       'onReady': () => this.togglePlaceholder(false),
-      'requestResize': (height) => this.forceChangeHeight(height),
+      'requestResize': (height) => this.attemptChangeHeight(height),
     });
   }
 

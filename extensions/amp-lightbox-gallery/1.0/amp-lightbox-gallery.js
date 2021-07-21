@@ -70,6 +70,7 @@ class AmpLightboxGallery extends BaseElement {
 
   /** @override */
   afterOpen() {
+    super.afterOpen();
     const scroller = this.element.shadowRoot.querySelector('[part=scroller]');
     this.setAsContainer?.(scroller);
   }
@@ -82,6 +83,7 @@ class AmpLightboxGallery extends BaseElement {
 
   /** @override */
   unmountCallback() {
+    super.unmountCallback();
     this.removeAsContainer?.();
   }
 }

@@ -15,8 +15,9 @@
  */
 
 import {dict} from '#core/types/object';
-import {matches} from './query';
 import {toWin} from '#core/window';
+
+import {matches} from './query';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',

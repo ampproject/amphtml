@@ -1,0 +1,50 @@
+<!doctype html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Image Quiz Story</title>
+    <link rel="canonical" href="amp-story-interactive-img-quiz.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      body {
+        font-family: 'Rubik', sans-serif;
+      }
+      amp-story-interactive-img-quiz {
+        justify-self: center;
+      }
+    </style>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <amp-story
+      standalone
+      title="Image Quiz Story"
+      publisher="AMP Story testing"
+      publisher-logo-src="example.com/logo.png"
+      poster-portrait-src="example.com/poster.jpg">
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-img-quiz
+            id="4-options-quiz"
+            prompt-text="Which of these structures is oldest?"
+            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+            option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-image-alt="Statue of Liberty"
+            option-1-correct
+            option-1-confetti="🎉"
+            option-2-image="https://images.unsplash.com/photo-1610312278520-bcc893a3ff1d?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1460&q=80"
+            option-2-image-alt="Golden Gate Bridge"
+            option-3-image="https://images.unsplash.com/photo-1585436588477-340db86fc852?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2804&q=80"
+            option-3-image-alt="Christ the Redeemer"
+            option-4-image="https://images.unsplash.com/photo-1543349689-9a4d426bee8e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1382&q=80"
+            option-4-image-alt="Eiffel Tower">
+          </amp-story-interactive-img-quiz>
+        </amp-story-grid-layer>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

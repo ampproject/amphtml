@@ -118,7 +118,7 @@ describes.realWin(
 
     it('should throw if the child script element has non-JSON content', () => {
       addConfigElement('script', 'application/json', '{not json}');
-      expectAsyncConsoleError();
+      expectAsyncConsoleError(/.*/);
       return experiment.buildCallback().then(
         () => {
           throw new Error('must have failed');

@@ -20,35 +20,13 @@ import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-servi
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
 import {
-  addConfigToInteractive,
   getMockIncompleteData,
   getMockInteractiveData,
   getMockOutOfBoundsData,
   getMockScrambledData,
-} from './test-amp-story-interactive';
+  populateQuiz,
+} from './helpers';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-
-/**
- * Populates the quiz with some number of prompts and some number of options.
- *
- * @param {Window} win
- * @param {AmpStoryInteractiveQuiz} quiz
- * @param {=number} numOptions
- * @param {?string} prompt
- * @param {=number} correctOption
- */
-const populateQuiz = (
-  quiz,
-  numOptions = 4,
-  prompt = undefined,
-  correctOption = 1
-) => {
-  if (prompt) {
-    quiz.element.setAttribute('prompt-text', prompt);
-  }
-  addConfigToInteractive(quiz, numOptions, correctOption);
-  quiz.element.setAttribute('id', 'TEST_quizId');
-};
 
 describes.realWin(
   'amp-story-interactive-quiz',
