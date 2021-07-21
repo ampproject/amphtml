@@ -50,6 +50,12 @@
   right: var(--percentage) !important;
 }
 
+[type='emoji'] .i-amphtml-story-interactive-slider-bubble {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
 .i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-bubble {
   --scale-var: calc(var(--fraction) + 1) !important;
   /* Move the bubble up by sqrt(2)/2=70.7% to account for the pointy corner */
@@ -91,10 +97,10 @@
   border-bottom-right-radius: 50% !important;
 }
 
-[type="emoji"] .i-amphtml-story-interactive-slider-bubble::first-line {
-  height: 100% !important;
-  width: 100% !important;
-  font-size: 1.5em !important;
+[type='emoji'] .i-amphtml-story-interactive-slider-bubble span {
+  display: inline-block !important;
+  font-size: 3em !important;
+  transform: scale(0.5) !important;
 }
 
 .i-amphtml-story-interactive-slider-input {
@@ -137,7 +143,7 @@
     var(--interactive-accent-color) var(--percentage-corrected)
   ) !important;
   content: '' !important;
-  opacity: 0.5 !important;
+  opacity: 0.3 !important;
   width: 100% !important;
   height: 100% !important;
   border-radius: 0.5em !important;

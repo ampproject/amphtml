@@ -38,12 +38,10 @@ feature_tests/regexps.html:27:2 The mandatory attribute 'amp-custom' is missing 
 |    <script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-latest.js"> </script>
 |    <script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar"></script>
 >>   ^~~~~~~~~
-feature_tests/regexps.html:36:2 The script version for 'amp-vine' is a unknown version which mismatches with the first script on the page using the standard version. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
->>   ^~~~~~~~~
-feature_tests/regexps.html:36:2 The attribute 'src' in tag 'amp-vine extension script' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar'. (see https://amp.dev/documentation/components/amp-vine)
+feature_tests/regexps.html:36:2 The extension 'amp-vine' has a path 'v0/amp-vine-0.1.js?foobar' which is invalid. Please use a valid path for this extension. (see https://amp.dev/documentation/components/amp-vine)
 |    <script async custom-element="amp-vine" src="http://xss.com/https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar"></script>
 >>   ^~~~~~~~~
-feature_tests/regexps.html:37:2 The script tag includes an invalid AMP domain in the src attribute. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
+feature_tests/regexps.html:37:2 The script tag includes an invalid AMP domain in the src attribute.
 >>   ^~~~~~~~~
 feature_tests/regexps.html:37:2 The attribute 'src' in tag 'amp-vine extension script' is set to the invalid value 'http://xss.com/https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar'. (see https://amp.dev/documentation/components/amp-vine)
 |    <script async custom-element="amp-hulu" src="https://cdn.ampproject.org/v0/amp-hulu-latest.js"> Only whitespace is allowed here. </script>
