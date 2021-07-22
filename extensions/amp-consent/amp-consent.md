@@ -487,22 +487,11 @@ When one of the pre-defined attributes is used, AMP assumes that the publisher t
 
 ### Customize Consent Blocking Behaviors
 
-An optional `policy` object can be added to the `<amp-consent>` element's JSON configuration object to customize consent blocking behaviors.
+An optional `policy` property can be added to the `<amp-consent>` element's JSON configuration object. Its value is an object that customizes consent blocking behaviors.
 
 ```html
 <amp-consent layout="nodisplay" id="consent-element">
   <script type="application/json">
-    {
-      "checkConsentHref"
-      "consentInstanceId": "ping2"
-      "geo": abc,
-      "extraConfig" : {
-        'id': xxx
-        'config': asdsdfasd,
-      },
-      "postPromptUI": 'test'
-    }
-
     {
       "consentInstanceId": xxx
       "checkConsentHref": "https://example.com/api/show-consent"
@@ -519,7 +508,7 @@ An optional `policy` object can be added to the `<amp-consent>` element's JSON c
 </amp-consent>
 ```
 
-Right now only customizing the `default` policy instance is supported. The "default" behavior policy applies to every component that is blocked by consent with `data-block-on-consent` attribute.
+The `default` policy is the only one allowed to be configured. This policy applies to every element that is blocked by the `data-block-on-consent` attribute.
 
 ### Policy Instance (optional)
 
