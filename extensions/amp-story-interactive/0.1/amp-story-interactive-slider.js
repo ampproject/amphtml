@@ -43,11 +43,18 @@ const buildSliderTemplate = (element) => {
             max="100"
             value="0"
           />
-          <div class="i-amphtml-story-interactive-slider-bubble">50</div>
+          <div class="i-amphtml-story-interactive-slider-bubble"></div>
         </div>
       </div>
     </div>
   `;
+};
+/**
+ * @const @enum {number}
+ */
+const SliderType = {
+  PERCENTAGE: 'percentage',
+  EMOJI: 'emoji',
 };
 
 export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
@@ -60,6 +67,8 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.bubbleEl_ = null;
     /** @private {?Element} tracks user input */
     this.inputEl_ = null;
+    /** @private {!SliderType}  */
+    this.sliderType_ = SliderType.PERCENTAGE;
   }
 
   /** @override */
@@ -71,6 +80,15 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.inputEl_ = this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-slider-input'
     );
+
+    if (this.options_.length > 0) {
+      this.sliderType_ = SliderType.EMOJI;
+      const emojiWrapper = this.win.document.createElement('span');
+      emojiWrapper.textContent = this.options_[0].text;
+      this.bubbleEl_.appendChild(emojiWrapper);
+    }
+
+    this.rootEl_.setAttribute('type', this.sliderType_);
 
     this.attachPrompt_(this.rootEl_);
     return this.rootEl_;
@@ -98,9 +116,11 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
    */
   onDrag_() {
     const {value} = this.inputEl_;
-    this.bubbleEl_.textContent = value + '%';
-    this.bubbleEl_.classList.add('show');
-    setImportantStyles(this.rootEl_, {'--percentage': value + '%'});
+    if (this.sliderType_ == SliderType.PERCENTAGE) {
+      this.bubbleEl_.textContent = value + '%';
+    }
+    this.rootEl_.classList.add('i-amphtml-story-interactive-mid-selection');
+    setImportantStyles(this.rootEl_, {'--fraction': value / 100});
   }
 
   /**
@@ -109,6 +129,6 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
   onRelease_() {
     this.updateToPostSelectionState_();
     this.inputEl_.setAttribute('disabled', '');
-    this.bubbleEl_.classList.remove('show');
+    this.rootEl_.classList.remove('i-amphtml-story-interactive-mid-selection');
   }
 }

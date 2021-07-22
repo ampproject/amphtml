@@ -156,6 +156,16 @@ function getZindexChainsInJs(glob, cwd = '.') {
 
     const result = {};
 
+    let resultCountInverse = filesIncludingString.length;
+
+    if (resultCountInverse === 0) {
+      // We don't expect this fileset to be empty since it's unlikely that we
+      // never change the z-index from JS, but we add this just in case to
+      // prevent hanging infinitely.
+      resolve(result);
+      return;
+    }
+
     const process = jscodeshiftAsync([
       '--dry',
       '--no-babel',
@@ -182,15 +192,13 @@ function getZindexChainsInJs(glob, cwd = '.') {
 
       try {
         const reportParsed = JSON.parse(report);
-
         if (reportParsed.length) {
           result[relative] = reportParsed.sort(sortedByEntryKey);
         }
+        if (--resultCountInverse === 0) {
+          resolve(result);
+        }
       } catch (_) {}
-    });
-
-    process.on('close', () => {
-      resolve(result);
     });
   });
 }
