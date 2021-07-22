@@ -261,6 +261,11 @@ export class AmpAdUIHandler {
           )
         );
       }
+
+      if (!this.closeButtonRendered_) {
+        this.addCloseButton_();
+        this.closeButtonRendered_ = true;
+      }
     }
   }
 
@@ -286,11 +291,6 @@ export class AmpAdUIHandler {
    * When a sticky ad is shown, the close button should be rendered at the same time.
    */
   onResizeSuccess() {
-    if (this.isStickyAd() && !this.closeButtonRendered_) {
-      this.addCloseButton_();
-      this.closeButtonRendered_ = true;
-    }
-
     if (this.isStickyAd() && !this.topStickyAdScrollListener_) {
       const doc = this.element_.getAmpDoc();
       this.topStickyAdScrollListener_ = Services.viewportForDoc(doc).onScroll(
