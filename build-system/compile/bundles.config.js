@@ -53,18 +53,18 @@ exports.jsBundles = {
       includePolyfills: true,
     },
   },
-  'integration.js': {
-    srcDir: './3p/',
-    srcFilename: 'integration.js',
-    destDir: './dist.3p/current',
-    minifiedDestDir: './dist.3p/' + internalRuntimeVersion,
-    options: {
-      minifiedName: 'f.js',
-      externs: ['./ads/ads.extern.js'],
-      include3pDirectories: true,
-      includePolyfills: true,
-    },
-  },
+  // 'integration.js': {
+  //   srcDir: './3p/',
+  //   srcFilename: 'integration.js',
+  //   destDir: './dist.3p/current',
+  //   minifiedDestDir: './dist.3p/' + internalRuntimeVersion,
+  //   options: {
+  //     minifiedName: 'f.js',
+  //     externs: ['./ads/ads.extern.js'],
+  //     include3pDirectories: true,
+  //     includePolyfills: true,
+  //   },
+  // },
   'ampcontext-lib.js': {
     srcDir: './3p/',
     srcFilename: 'ampcontext-lib.js',

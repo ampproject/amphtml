@@ -168,17 +168,20 @@ const rules = depCheckConfig.rules.map((config) => new Rule(config));
  * Returns a single module that contains a list of entry points to these files:
  * - extensions/{$extension}/{$version}/{$extension}.js
  * - src/amp.js
- * - 3p/integration.js
  * @return {Promise<string>}
  */
 async function getEntryPointModule() {
-  const coreBinaries = ['src/amp.js', '3p/integration.js'];
+  const coreBinaries = ['src/amp.js'];
   const extensions = await fs.promises.readdir('extensions');
   const extensionEntryPoints = extensions
     .map((x) => `extensions/${x}`)
     .filter((x) => fs.statSync(x).isDirectory())
     .map(getEntryPoint);
-  const allEntryPoints = flatten(extensionEntryPoints).concat(coreBinaries);
+  const vendors = await fs.promises.readdir('3p/vendors');
+  const vendorEntryPoints = vendors.map((x) => `3p/vendors/${x}`);
+  const allEntryPoints = flatten(extensionEntryPoints)
+    .concat(coreBinaries)
+    .concat(vendorEntryPoints);
   const entryPointData = allEntryPoints
     .map((file) => `import './${file}';`)
     .join('\n');

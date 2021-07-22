@@ -159,11 +159,11 @@ const TYPE_CHECK_TARGETS = {
     extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
     warningLevel: 'QUIET',
   }),
-  'integration': {
-    entryPoints: '3p/integration.js',
-    externs: ['ads/ads.extern.js'],
-    warningLevel: 'QUIET',
-  },
+  // 'integration': {
+  //   entryPoints: '3p/integration.js',
+  //   externs: ['ads/ads.extern.js'],
+  //   warningLevel: 'QUIET',
+  // },
   'ampcontext': {
     entryPoints: '3p/ampcontext-lib.js',
     externs: ['ads/ads.extern.js'],

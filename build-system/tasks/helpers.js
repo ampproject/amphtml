@@ -78,11 +78,6 @@ const UNMINIFIED_TARGETS = ['alp.max', 'amp-inabox', 'amp-shadow', 'amp'];
 const MINIFIED_TARGETS = ['alp', 'amp4ads-v0', 'shadow-v0', 'v0'];
 
 /**
- * Used while building the 3p frame
- **/
-const hostname3p = argv.hostname3p || '3p.ampproject.net';
-
-/**
  * Used to debounce file edits during watch to prevent races.
  */
 const watchDebounceDelay = 1000;
@@ -174,7 +169,7 @@ async function compileAllJs(options) {
   await Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
     doBuildJs(jsBundles, 'alp.max.js', options),
-    doBuildJs(jsBundles, 'integration.js', options),
+    // doBuildJs(jsBundles, 'integration.js', options),
     doBuildJs(jsBundles, 'ampcontext-lib.js', options),
     doBuildJs(jsBundles, 'iframe-transport-client-lib.js', options),
     doBuildJs(jsBundles, 'recaptcha.js', options),
@@ -802,7 +797,7 @@ async function applyAmpConfig(targetFile, localDev, fortesting) {
  * @return {!Promise}
  */
 async function thirdPartyBootstrap(input, outputName, options) {
-  const {fortesting, minify} = options;
+  const {minify} = options;
   const destDir = `dist.3p/${minify ? internalRuntimeVersion : 'current'}`;
   await fs.ensureDir(destDir);
 
@@ -811,17 +806,8 @@ async function thirdPartyBootstrap(input, outputName, options) {
     return;
   }
 
-  // By default we use an absolute URL, that is independent of the
-  // actual frame host for the JS inside the frame.
-  // But during testing we need a relative reference because the
-  // version is not available on the absolute path.
-  const integrationJs = fortesting
-    ? './f.js'
-    : `https://${hostname3p}/${internalRuntimeVersion}/f.js`;
   // Convert default relative URL to absolute min URL.
-  const html = fs
-    .readFileSync(input, 'utf8')
-    .replace(/\.\/integration\.js/g, integrationJs);
+  const html = fs.readFileSync(input, 'utf8');
   await fs.writeFile(`${destDir}/${outputName}`, html);
   const aliasToLatestBuild = 'dist.3p/current-min';
   if (fs.existsSync(aliasToLatestBuild)) {
