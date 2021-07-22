@@ -326,17 +326,13 @@ describes.realWin(
     });
 
     describe('sticky ads', () => {
-      it('should render close buttons on render once', () => {
+      it('should render close buttons', () => {
         expect(uiHandler.unlisteners_).to.be.empty;
         uiHandler.stickyAdPosition_ = 'bottom';
-        uiHandler.onResizeSuccess();
-        expect(uiHandler.closeButtonRendered_).to.be.true;
-        expect(uiHandler.unlisteners_.length).to.equal(2);
+        uiHandler.maybeInitStickyAd();
+        expect(uiHandler.unlisteners_.length).to.equal(1);
         expect(uiHandler.element_.querySelector('.amp-ad-close-button')).to.be
           .not.null;
-
-        uiHandler.onResizeSuccess();
-        expect(uiHandler.unlisteners_.length).to.equal(2);
       });
 
       it('onResizeSuccess top sticky ads shall cause padding top adjustment', () => {
