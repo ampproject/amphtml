@@ -19,7 +19,7 @@
   height: 1.5em !important;
   width: 1.5em !important;
   bottom: 0.5em !important;
-  border: 0.125em solid var(--i-amphtml-interactive-option-background-color) !important;
+  box-shadow: 0 0 0 0.125em var(--i-amphtml-interactive-option-background-color) !important;
   background-color: var(--interactive-accent-color) !important;
   border-radius: 50% !important;
   text-align: center !important;
