@@ -25,10 +25,11 @@ const AD_CONTAINER_PROP = '__AMP__AD_CONTAINER';
  * @const {!Object<string, boolean>}
  */
 const CONTAINERS = {
+  'AMP-AD': true,
   'AMP-FX-FLYING-CARPET': true,
+  'AMP-LIGHTBOX-GALLERY': true,
   'AMP-LIGHTBOX': true,
   'AMP-STICKY-AD': true,
-  'AMP-LIGHTBOX-GALLERY': true,
 };
 
 /**
@@ -61,7 +62,13 @@ export function isAdPositionAllowed(element, win) {
     if (CONTAINERS[el.tagName]) {
       // The containers must not themselves be contained in a fixed-position
       // element. Continue the search.
-      containers++;
+
+      // TODO(AnuragVasanwala): Remove following impl when <amp-sticky-ad> is depricated.
+      // This is temporary workaround to have <amp-ad> as child inside <amp-sticky-ad> for fixed bottom and top.
+      if (el.tagName != 'AMP-STICKY-AD') {
+        containers++;
+      }
+
       hasFixedAncestor = false;
     } else if (isPositionFixed(dev().assertElement(el), win)) {
       // Because certain blessed elements may contain a position fixed
