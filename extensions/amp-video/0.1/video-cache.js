@@ -36,6 +36,10 @@ import {user} from '../../../src/log';
  */
 export function fetchCachedSources(videoEl, ampdoc) {
   const {win} = ampdoc;
+  // Keep non cached evergreen sources for crawlers.
+  if (Services.platformFor(win).isBot()) {
+    return Promise.resolve();
+  }
   if (
     !(
       videoEl.getAttribute('src') ||
