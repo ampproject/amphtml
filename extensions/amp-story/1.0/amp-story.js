@@ -59,6 +59,7 @@ import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '#core/constants/common-signals';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
+import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {HistoryState, getHistoryState, setHistoryState} from './history';
 import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '#core/constants/key-codes';
@@ -465,9 +466,12 @@ export class AmpStory extends AMP.BaseElement {
         'story-load-first-page-only'
       );
     }
-    if (isExperimentOn(this.win, 'story-disable-animations-first-page')) {
+    if (
+      isExperimentOn(this.win, 'story-disable-animations-first-page') ||
+      prefersReducedMotion(this.win)
+    ) {
       Services.performanceFor(this.win).addEnabledExperiment(
-        'story-load-first-page-only'
+        'story-disable-animations-first-page'
       );
     }
 
