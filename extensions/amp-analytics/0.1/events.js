@@ -343,6 +343,8 @@ export class CustomBrowserEventTracker extends EventTracker {
    * @param {!./analytics-root.AnalyticsRoot} root
    */
   constructor(root) {
+    
+    const TIME_WAIT = 500;
     super(root);
 
     /** @private {?Observable<!Event>} */
@@ -353,7 +355,7 @@ export class CustomBrowserEventTracker extends EventTracker {
     this.debouncedBoundOnSession_ = debounce(
       this.root.ampdoc.win,
       this.boundOnSession_,
-      500
+      TIME_WAIT
     );
   }
 
