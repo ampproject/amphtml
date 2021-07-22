@@ -71,7 +71,7 @@ describes.realWin(
       const impl = await v.getImpl(false);
 
       if (opt_noLayout) {
-        return;
+        return v;
       }
       if (opt_beforeLayoutCallback) {
         opt_beforeLayoutCallback(v, impl);
@@ -821,6 +821,87 @@ describes.realWin(
         expect(sources.length).to.equal(1);
         expect(sources[0].getAttribute('src')).to.equal(origSrc);
       });
+
+      describe('prerendering', () => {
+        let makeVisible;
+        let visibilityStubs;
+
+        beforeEach(() => {
+          visibilityStubs = {
+            getVisibilityState: env.sandbox.stub(
+              env.ampdoc,
+              'getVisibilityState'
+            ),
+            whenFirstVisible: env.sandbox.stub(env.ampdoc, 'whenFirstVisible'),
+          };
+          visibilityStubs.getVisibilityState.returns(VisibilityState.PRERENDER);
+          const visiblePromise = new Promise((resolve) => {
+            makeVisible = resolve;
+          });
+          visibilityStubs.whenFirstVisible.returns(visiblePromise);
+        });
+
+        it('should propagate cached sources in prerendering', async () => {
+          remoteSources.push({
+            url: 'https://example.com/cached-video.mp4',
+            type: 'video/mp4',
+          });
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'https://example.com/video.mp4');
+          const v = await getVideo(
+            {
+              type: 'video/mp4',
+              cache: 'google',
+              layout: 'responsive',
+              height: '100px',
+              width: '100px',
+            },
+            [source],
+            null,
+            /* opt_noLayout */ true
+          );
+          v.layoutCallback();
+          const sources = v.querySelectorAll('video source');
+          // Only one source, and the cached one.
+          expect(sources.length).to.equal(1);
+          expect(sources[0].getAttribute('src')).to.equal(
+            'https://example.com/cached-video.mp4'
+          );
+        });
+
+        it('should have all sources when visible after prerendering', async () => {
+          remoteSources.push({
+            url: 'https://example.com/cached-video.mp4',
+            type: 'video/mp4',
+          });
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'https://example.com/video.mp4');
+          const v = await getVideo(
+            {
+              type: 'video/mp4',
+              cache: 'google',
+              layout: 'responsive',
+              height: '100px',
+              width: '100px',
+            },
+            [source],
+            null,
+            /* opt_noLayout */ true
+          );
+          v.layoutCallback();
+          makeVisible();
+          await Promise.resolve();
+          const sources = v.querySelectorAll('video source');
+          // Cached + non cached source and in the right order.
+          expect(sources.length).to.equal(2);
+          expect(sources[0].getAttribute('src')).to.equal(
+            'https://example.com/cached-video.mp4'
+          );
+          expect(sources[1].getAttribute('src')).to.equal(
+            'https://example.com/video.mp4'
+          );
+        });
+      });
     });
 
     describe('blurred image placeholder', () => {
@@ -1009,6 +1090,14 @@ describes.realWin(
         it('with just cached src', () => {
           video.setAttribute('src', 'https://example.com/video.mp4');
           video.setAttribute('poster', 'https://example.com/poster.jpg');
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+        });
+      });
+
+      describe('should prerender remote video cache', () => {
+        it('with cache="*"', () => {
+          video.setAttribute('src', 'https://example.com/video.mp4');
+          video.setAttribute('cache', 'google');
           expect(AmpVideo.prerenderAllowed(video)).to.be.true;
         });
       });
