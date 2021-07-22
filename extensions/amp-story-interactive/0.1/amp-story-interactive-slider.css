@@ -20,8 +20,8 @@
   /* This maps the range and has the gradient follow behind the thumb */
   --percentage-corrected: calc(2.5% + 0.95 * var(--percentage)) !important;
   --thumb-size: 1.5em !important;
-  --gradient-angle: 90deg;
-  --translate-x-center: -50%;
+  --gradient-angle: 90deg !important;
+  --translate-x-center: -50% !important;
 }
 
 .i-amphtml-story-interactive-slider-input-container {
@@ -48,7 +48,7 @@
   z-index: 1 !important;
 }
 
-[dir='rtl'] .i-amphtml-story-interactive-slider-container {
+[dir='rtl'].i-amphtml-story-interactive-slider-container {
   --gradient-angle: 270deg !important;
   --translate-x-center: 50% !important;
 }
@@ -70,10 +70,6 @@
     scale(var(--scale-var)) !important;
 }
 
-/*[dir='rtl'].i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-bubble {
-  --translate-x-center: 50%;
-}*/
-
 .i-amphtml-story-interactive-slider-bubble::after {
   position: absolute !important;
   content: '' !important;
@@ -92,10 +88,6 @@
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble {
   transform: translate(var(--translate-x-center), -50%) scale(0.9) !important;
 }
-
-/*[dir='rtl'].i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble {
-  --translate-x-center: 50%;
-}*/
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble::after {
   cursor: initial !important;
@@ -126,10 +118,6 @@
   pointer-events: all !important;
   cursor: pointer !important;
 }
-
-/*[dir='rtl'] .i-amphtml-story-interactive-slider-input {
-  --gradient-angle: 270deg;
-}*/
 
 .i-amphtml-story-interactive-slider-input-size {
   position: relative !important;
