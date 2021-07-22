@@ -29,7 +29,8 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('should restrict fullscreen until user interaction', async () => {
+    it('should restrict fullscreen until user interaction', async function () {
+      this.timeout(10000);
       // Await the CMP to load
       await sleep(3000);
 
