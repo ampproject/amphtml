@@ -20,6 +20,8 @@
   /* This maps the range and has the gradient follow behind the thumb */
   --percentage-corrected: calc(2.5% + 0.95 * var(--percentage)) !important;
   --thumb-size: 1.5em !important;
+  --gradient-angle: 90deg;
+  --translate-x-center: -50%;
 }
 
 .i-amphtml-story-interactive-slider-input-container {
@@ -46,6 +48,11 @@
   z-index: 1 !important;
 }
 
+[dir='rtl'] .i-amphtml-story-interactive-slider-container {
+  --gradient-angle: 270deg !important;
+  --translate-x-center: 50% !important;
+}
+
 [dir='rtl'] .i-amphtml-story-interactive-slider-bubble {
   right: var(--percentage) !important;
 }
@@ -59,16 +66,13 @@
 .i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-bubble {
   --scale-var: calc(var(--fraction) + 1) !important;
   /* Move the bubble up by sqrt(2)/2=70.7% to account for the pointy corner */
-  transform: translate(-50%, calc(-160% - var(--fraction) * 70.7%))
+  transform: translate(var(--translate-x-center), calc(-160% - var(--fraction) * 70.7%))
     scale(var(--scale-var)) !important;
 }
 
-[dir='rtl'].i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-bubble {
-  --scale-var: calc(var(--fraction) + 1) !important;
-  /* Move the bubble up by sqrt(2)/2=70.7% to account for the pointy corner */
-  transform: translate(50%, calc(-160% - var(--fraction) * 70.7%))
-    scale(var(--scale-var)) !important;
-}
+/*[dir='rtl'].i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-bubble {
+  --translate-x-center: 50%;
+}*/
 
 .i-amphtml-story-interactive-slider-bubble::after {
   position: absolute !important;
@@ -86,12 +90,12 @@
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble {
-  transform: translate(-50%, -50%) scale(0.9) !important;
+  transform: translate(var(--translate-x-center), -50%) scale(0.9) !important;
 }
 
-[dir='rtl'].i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble {
-  transform: translate(50%, -50%) scale(0.9) !important;
-}
+/*[dir='rtl'].i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble {
+  --translate-x-center: 50%;
+}*/
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble::after {
   cursor: initial !important;
@@ -113,7 +117,7 @@
   width: calc(100% + var(--thumb-size)) !important;
   margin: 0em calc(var(--thumb-size) * -0.5) !important;
   background: linear-gradient(
-    90deg,
+    var(--gradient-angle),
     var(--interactive-accent-color) var(--percentage-corrected),
     transparent var(--percentage-corrected)
   ) !important;
@@ -123,13 +127,9 @@
   cursor: pointer !important;
 }
 
-[dir='rtl'] .i-amphtml-story-interactive-slider-input {
-  background: linear-gradient(
-    270deg,
-    var(--interactive-accent-color) var(--percentage-corrected),
-    transparent var(--percentage-corrected)
-  ) !important;
-}
+/*[dir='rtl'] .i-amphtml-story-interactive-slider-input {
+  --gradient-angle: 270deg;
+}*/
 
 .i-amphtml-story-interactive-slider-input-size {
   position: relative !important;
@@ -140,7 +140,7 @@
 
 .i-amphtml-story-interactive-slider-input::before {
   background: linear-gradient(
-    90deg,
+    var(--gradient-angle),
     white,
     var(--interactive-accent-color) var(--percentage-corrected)
   ) !important;
@@ -150,14 +150,6 @@
   height: 100% !important;
   border-radius: 0.5em !important;
   position: absolute !important;
-}
-
-[dir='rtl'] .i-amphtml-story-interactive-slider-input::before {
-  background: linear-gradient(
-    270deg,
-    white,
-    var(--interactive-accent-color) var(--percentage-corrected)
-  ) !important;
 }
 
 .i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
