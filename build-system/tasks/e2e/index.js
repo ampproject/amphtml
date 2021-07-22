@@ -121,7 +121,7 @@ async function runTests_() {
 
   if (argv.validate) {
     await validateTests();
-    return;
+    process.exit(0);
   }
 
   // return promise to amp that resolves when there's an error.

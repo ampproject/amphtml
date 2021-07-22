@@ -306,14 +306,14 @@ jobs:
           command: node build-system/pr-check/e2e-tests.js
       - store_test_output
       - teardown_vm
-  'End-to-End Test Validation':
+  'Validate End-to-End Tests':
     executor:
       name: amphtml-large-executor
     steps:
       - setup_vm
       - install_chrome
       - run:
-          name: 'End-to-End Test Validation'
+          name: 'Validate End-to-End Tests'
           command: node build-system/pr-check/validate-e2e-tests.js
       - store_test_output
       - fail_fast
@@ -447,7 +447,7 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build (Test)'
-      - 'End-to-End Test Validation':
+      - 'Validate End-to-End Tests':
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build (Test)'

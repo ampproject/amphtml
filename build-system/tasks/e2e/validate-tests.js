@@ -17,11 +17,12 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {createMochaWithFiles, getDefaultMochaFiles} = require('./mocha-utils');
-const {cyan, green, red} = require('../../common/colors');
+const {getDefaultMochaFiles} = require('./mocha-utils');
 const {getFilesFromArgv} = require('../../common/utils');
 const {gitDiffNameOnlyMain} = require('../../common/git');
+const {green, red} = require('../../common/colors');
 const {log} = require('../../common/logging');
+const {Worker} = require('worker_threads');
 
 /**
  * @typedef {{
@@ -31,18 +32,6 @@ const {log} = require('../../common/logging');
  * }}
  */
 let TestResultDef;
-
-/**
- * Strip information about test hooks from a test name.
- * i.e. '"before each" hook for "Should call amp-img layoutCallback"'
- * becomes 'Should call amp-img layoutCallback'
- * @param {string} testName
- * @return {string}
- */
-function getBaseTestName_(testName) {
-  const chunks = testName.replace(/"/g, '').split(' hook for ');
-  return chunks[chunks.length - 1];
-}
 
 /**
  * Get the maximum allowed average runtime of a test.
@@ -114,7 +103,9 @@ function computeAverageTestRuntimes(results) {
 
   return Object.entries(totalTestRuntimes).reduce(
     (averageRuntimes, [testName, totalRuntime]) => {
-      averageRuntimes[testName] = (totalRuntime / results.length).toFixed(2);
+      averageRuntimes[testName] = parseFloat(
+        (totalRuntime / results.length).toFixed(2)
+      );
       return averageRuntimes;
     },
     {}
@@ -146,127 +137,101 @@ function computeTestFlakiness(results) {
 }
 
 /**
+ * Runs the modified tests the configured number of times and returns their speeds and success rates.
+ * @return {Promise<Record<string, TestResultDef>[]|void>}
+ */
+async function runValidatorIterations() {
+  // specify tests to run
+  const testFilesRequiringValidation = getTestsFilesToValidate();
+
+  if (!testFilesRequiringValidation.length) {
+    log(green('No Tests Require Validation'));
+    return;
+  }
+  log(
+    green('Test Files Requiring Validation:\n'),
+    testFilesRequiringValidation.join('\n')
+  );
+
+  /** @type {Record<string, TestResultDef>[]} */
+  const results = [];
+  await /** @type {Promise<void>} */ (
+    new Promise((resolve) => {
+      const iterations = getTestValidatorIterations_();
+      log(green(`Creating ${iterations} workers`));
+      for (let i = 0; i < iterations; i++) {
+        const worker = new Worker(
+          './build-system/tasks/e2e/validator-worker.js',
+          {
+            workerData: {
+              runId: i + 1,
+              testFilesRequiringValidation,
+              describesConfiguration: {
+                browsers: argv.browsers,
+                headless: true,
+              },
+            },
+          }
+        );
+        worker.on('message', ({complete, message}) => {
+          log(green(`Recieved Message from worker: ${i}`), message);
+          if (complete) {
+            results.push(JSON.parse(message));
+            if (results.length === iterations) {
+              resolve();
+            }
+          }
+        });
+      }
+    })
+  );
+
+  return results;
+}
+
+/**
  * Runs the e2e tests in modified files additional times to validate runtime and
  * flakiness complaince.
- * @return {Promise<void>}
+ * @return {Promise<boolean>}
  */
 async function validateTests() {
-  return new Promise(async (resolve) => {
-    // specify tests to run
-    const testFilesRequiringValidation = getTestsFilesToValidate();
-
-    if (!testFilesRequiringValidation.length) {
-      log(green('No Tests Require Validation'));
-      resolve();
-      return;
-    }
-    log(
-      green('Test Files Requiring Validation:\n'),
-      testFilesRequiringValidation.join('\n')
-    );
-
-    /** @type {Record<string, TestResultDef>[]} */
-    const results = [];
-    const iterations = getTestValidatorIterations_();
-    for (let i = 0; i < iterations; i++) {
-      log('Beginning', cyan(`Run ${i}`), 'complete');
-      const result = await runEffectedTests();
-      results.push(result);
-      const aggregates = Object.values(result).reduce(
-        (aggregate, value) => {
-          if (value.passed) {
-            aggregate.pass++;
-          } else {
-            aggregate.fail++;
-          }
-
-          return aggregate;
-        },
-        {pass: 0, fail: 0}
-      );
-      log(
-        'During',
-        cyan(`Run ${i}`),
-        'there where',
-        red(`${aggregates.fail} tests failed`),
-        'and',
-        green(`${aggregates.pass} tests passed`)
-      );
-    }
-
-    log('Average Test Runtimes:');
-    const testRuntimes = computeAverageTestRuntimes(results);
-    const maxAllowedRuntime = getMaxAllowedTestTime_();
-    Object.entries(testRuntimes).forEach(([testName, averageTime]) => {
-      const color = averageTime > maxAllowedRuntime ? red : green;
-      log(color(testName), `${averageTime}ms`);
-    });
-    const slowTests = Object.entries(testRuntimes).filter(
-      ([, runtime]) => runtime > maxAllowedRuntime
-    );
-    if (slowTests.length > 0) {
-      const testOrTests = `test${slowTests.length > 1 ? 's' : ''}`;
-      log(`The following ${testOrTests} exceeded the max runtime`);
-      slowTests.forEach(([testName, runtime]) => {
-        log(red(testName), ':', `${runtime}ms`);
-      });
-    }
-
-    const minPassPercentage = getMinTestPassPercentage_();
-    const flakyTests = Object.entries(computeTestFlakiness(results)).filter(
-      ([, passPercentage]) => passPercentage < minPassPercentage
-    );
-    if (flakyTests.length > 0) {
-      const testOrTests = `test${flakyTests.length > 1 ? 's' : ''}`;
-      log(
-        `The following ${testOrTests} failed to meet the flakiness threshold of ${minPassPercentage}%`
-      );
-      flakyTests.forEach(([testName, passPercentage]) => {
-        log(red(testName), ':', red(`${passPercentage}%`));
-      });
-    }
-
-    /**
-     * @return {Promise<Record<string, TestResultDef>>}
-     */
-    async function runEffectedTests() {
-      const mocha = createMochaWithFiles(testFilesRequiringValidation);
-
-      return new Promise((resolve) => {
-        /** @type {Record<string, Partial<TestResultDef>>} */
-        const results = {};
-        mocha
-          .run()
-          .on('test', (test) => {
-            log('Running', test.title);
-            results[test.title] = {
-              startTime: Date.now(),
-            };
-          })
-          .on('pass', (test) => {
-            const title = getBaseTestName_(test.title);
-            log(title, 'passed');
-            if (!results[title]) {
-              results[title] = {};
-            }
-            results[title].passed = true;
-            results[title].endTime = Date.now();
-          })
-          .on('fail', (test) => {
-            const title = getBaseTestName_(test.title);
-            log(title, 'failed');
-            if (!results[title]) {
-              results[title] = {};
-            }
-            results[title].passed = false;
-            results[title].endTime = Date.now();
-          })
-          .on('end', () => {
-            resolve(/** @type {Record<string, TestResultDef>} */ (results));
-          });
-      });
-    }
+  const results = await runValidatorIterations();
+  if (!results) {
+    return true;
+  }
+  log('Average Test Runtimes:');
+  const testRuntimes = computeAverageTestRuntimes(results);
+  const maxAllowedRuntime = getMaxAllowedTestTime_();
+  Object.entries(testRuntimes).forEach(([testName, averageTime]) => {
+    const color = averageTime > maxAllowedRuntime ? red : green;
+    log(color(testName), `${averageTime}ms`);
   });
+  const slowTests = Object.entries(testRuntimes).filter(
+    ([, runtime]) => runtime > maxAllowedRuntime
+  );
+  if (slowTests.length > 0) {
+    const testOrTests = `test${slowTests.length > 1 ? 's' : ''}`;
+    log(`The following ${testOrTests} exceeded the max runtime`);
+    slowTests.forEach(([testName, runtime]) => {
+      log(red(testName), ':', `${runtime}ms`);
+    });
+  }
+
+  const minPassPercentage = getMinTestPassPercentage_();
+  const flakyTests = Object.entries(computeTestFlakiness(results)).filter(
+    ([, passPercentage]) => passPercentage < minPassPercentage
+  );
+  if (flakyTests.length > 0) {
+    const testOrTests = `test${flakyTests.length > 1 ? 's' : ''}`;
+    log(
+      `The following ${testOrTests} failed to meet the flakiness threshold of ${minPassPercentage}%`
+    );
+    flakyTests.forEach(([testName, passPercentage]) => {
+      log(red(testName), ':', red(`${passPercentage}%`));
+    });
+  }
+
+  return flakyTests.length === 0 && slowTests.length === 0;
 }
 
 module.exports = {
