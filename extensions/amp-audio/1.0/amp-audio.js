@@ -15,12 +15,13 @@
  */
 
 import {BaseElement} from './base-element';
-import {Layout} from '#core/dom/layout';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
+import {Layout} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {userAssert} from '../../../src/log';
 import {validateMediaMetadata} from '../../../src/mediasession-helper';
-import {closestAncestorElementBySelector} from '#core/dom/query';
 
 /** @const {string} */
 const TAG = 'amp-audio';
@@ -44,6 +45,18 @@ export class AmpAudio extends BaseElement {
       },
       'toggleFallback': (fallback) => {
         this.toggleFallback(fallback);
+      },
+      'propagateAttributes': (
+        attributes,
+        updateElement,
+        opt_removeMissingAttrs
+      ) => {
+        propagateAttributes(
+          attributes,
+          this.element,
+          updateElement,
+          opt_removeMissingAttrs
+        );
       },
     });
   }

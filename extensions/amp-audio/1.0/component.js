@@ -19,38 +19,8 @@ import {listen} from '../../../src/event-helper';
 import {setMediaSession} from '../../../src/mediasession-helper';
 import {forwardRef} from '#preact/compat';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {arrayOrSingleItemToArray} from '#core/types/array';
 
 const {useCallback, useEffect, useImperativeHandle, useMemo, useRef} = Preact;
-
-/**
- * Utility method that propagates attributes from a source element
- * to an updateable element.
- * If `opt_removeMissingAttrs` is true, then also removes any specified
- * attributes that are missing on the source element from the updateable element.
- * @param {string|!Array<string>} attributes
- * @param {!Array<string>} sourceProps
- * @param {!Element} updateElement
- * @param {boolean=} opt_removeMissingAttrs
- */
-function propagateAttributes(
-  attributes,
-  sourceProps,
-  updateElement,
-  opt_removeMissingAttrs
-) {
-  const attrs = arrayOrSingleItemToArray(attributes);
-
-  for (const attr of attrs) {
-    const val = sourceProps[attr];
-
-    if (val !== null && val != undefined) {
-      updateElement.setAttribute(attr, val);
-    } else if (opt_removeMissingAttrs) {
-      updateElement.removeAttribute(attr);
-    }
-  }
-}
 
 /**
  * @param {!AudioDef.Props} props
@@ -71,6 +41,7 @@ export function AudioWithRef(props, ref) {
     loop,
     muted,
     preload,
+    propagateAttributes,
     src,
     title,
     toggleFallback,
@@ -90,7 +61,7 @@ export function AudioWithRef(props, ref) {
       return false;
     }
 
-    if (isStoryDescendant_()) {
+    if (isStoryDescendant_ && isStoryDescendant_()) {
       console /*OK*/
         .warn(
           '<amp-story> elements do not support actions on <amp-audio> elements'
@@ -154,7 +125,9 @@ export function AudioWithRef(props, ref) {
 
   useEffect(() => {
     if (!audioRef.current.play) {
-      toggleFallback(true);
+      if (toggleFallback) {
+        toggleFallback(true);
+      }
       return;
     }
 
@@ -162,27 +135,28 @@ export function AudioWithRef(props, ref) {
       audioPlaying()
     );
 
-    propagateAttributes(
-      [
-        'aria-describedby',
-        'aria-label',
-        'aria-labelledby',
-        'autoplay',
-        'controlsList',
-        'loop',
-        'muted',
-        'preload',
-        'src',
-      ],
-      props,
-      audioRef.current
-    );
+    if (propagateAttributes) {
+      propagateAttributes(
+        [
+          'aria-describedby',
+          'aria-label',
+          'aria-labelledby',
+          'autoplay',
+          'controlsList',
+          'loop',
+          'muted',
+          'preload',
+          'src',
+        ],
+        audioRef.current
+      );
+    }
 
     // Execute at unlayout
     return () => {
       unlistenPlaying();
     };
-  }, [audioPlaying, children, toggleFallback, props]);
+  }, [audioPlaying, children, propagateAttributes, toggleFallback]);
 
   /** Audio Component - API Functions */
   useImperativeHandle(
