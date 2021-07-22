@@ -18,7 +18,7 @@ const {VERSION} = require('./internal-version');
 
 const testTasks = ['e2e', 'integration', 'visual-diff', 'unit', 'check-types'];
 const isTestTask = testTasks.some((task) => argv._.includes(task));
-const isForTesting = argv.fortesting || !argv._.includes('dist');
+const isProd = argv._.includes('dist') && !argv.fortesting;
 const isMinified = argv._.includes('dist') || !!argv.compiled;
 
 /**
@@ -30,7 +30,7 @@ const isMinified = argv._.includes('dist') || !!argv.compiled;
  * @type {Object<string, boolean|string>}
  */
 const BUILD_CONSTANTS = {
-  IS_FORTESTING: isForTesting,
+  IS_PROD: isProd,
   IS_MINIFIED: isMinified,
   INTERNAL_RUNTIME_VERSION: isTestTask ? '$internalRuntimeVersion$' : VERSION,
 
