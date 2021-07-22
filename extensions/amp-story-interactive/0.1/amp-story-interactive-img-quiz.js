@@ -81,7 +81,9 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
 
   /** @override */
   layoutCallback() {
-    this.setBubbleTextColor_(dev().assertElement(this.rootEl_));
+    const root = dev().assertElement(this.rootEl_);
+    this.setBackgroundImage(root);
+    this.setBubbleTextColor_(root);
     return super.layoutCallback();
   }
 
@@ -128,15 +130,6 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
     );
     answerChoiceEl.textContent = this.localizedAnswerChoices_[index];
     convertedOption.optionIndex_ = option['optionIndex'];
-
-    // Extract and structure the option information
-    // TODO: Rewrite image URL (https://github.com/ampproject/amphtml/pull/35043#discussion_r660874389)
-    setImportantStyles(
-      convertedOption.querySelector(
-        '.i-amphtml-story-interactive-img-option-img'
-      ),
-      {'background-image': 'url(' + option['image'] + ')'}
-    );
 
     convertedOption.setAttribute('aria-label', option['imagealt']);
 

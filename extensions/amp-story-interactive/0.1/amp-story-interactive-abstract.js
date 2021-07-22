@@ -38,7 +38,10 @@ import {
   buildInteractiveDisclaimerIcon,
 } from './interactive-disclaimer';
 import {closest} from '#core/dom/query';
-import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
+import {
+  createShadowRootWithStyle,
+  maybeMakeProxyUrl,
+} from '../../amp-story/1.0/utils';
 import {deduplicateInteractiveIds} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
@@ -553,6 +556,28 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    */
   displayOptionsData(unusedOptionsData) {
     // Subclass must implement
+  }
+
+  /**
+   * Sets the background image for each option of an image component
+   *
+   * @param {!Element} root
+   * @protected
+   */
+  setBackgroundImage(root) {
+    root
+      .querySelectorAll('.i-amphtml-story-interactive-img-option-img')
+      .forEach((container, index) => {
+        setImportantStyles(container, {
+          'background-image':
+            'url(' +
+            maybeMakeProxyUrl(
+              this.options_[index]['image'],
+              this.getPageEl_()
+            ) +
+            ')',
+        });
+      });
   }
 
   /**
