@@ -18,7 +18,7 @@
   --fraction: 0;
   --percentage: calc(var(--fraction) * 100%) !important;
   /* This maps the range and has the gradient follow behind the thumb */
-  --percentage-corrected: calc(2.5% + 0.95 * var(--percentage)) !important;
+  --percentage-corrected: calc(2.5% + 0.97 * var(--percentage)) !important;
   --thumb-size: 1.5em !important;
   --gradient-angle: 90deg !important;
   --translate-x-center: -50% !important;
@@ -46,6 +46,7 @@
   font-weight: 700 !important;
   color: white !important;
   z-index: 1 !important;
+  transition: transform 0.1s linear;
 }
 
 [dir='rtl'].i-amphtml-story-interactive-slider-container {
@@ -87,6 +88,7 @@
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble {
   transform: translate(var(--translate-x-center), -50%) scale(0.9) !important;
+  transition: transform 0.3s ease-in-out !important;
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble::after {
@@ -148,6 +150,11 @@
   border-radius: 50% !important;
   position: relative !important;
 }
+
+.i-amphtml-story-interactive-slider-input::-webkit-slider-thumb:hover {
+  transform: translateX(25%) scale(1) !important;
+  transition: transform 0.2s ease-in-out;
+} 
 
 .i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
   transform: rotate(45deg) !important;
