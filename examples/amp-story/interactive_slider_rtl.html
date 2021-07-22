@@ -51,120 +51,124 @@
     <title>Slider</title>
   </head>
   <body>
-  <amp-story
-    standalone
-    publisher="The Publisher"
-    title="RTL Story"
-    publisher-logo-src="logo.png"
-    poster-portrait-src="poster-portrait.png"
-    poster-square-src="poster-square.png"
-    poster-landscape-src="poster-landscape.png"
-  >
-    <amp-story-page id="cover">
-      <amp-story-grid-layer template="fill">
-        <amp-img
-          layout="fixed"
-          width="1600"
-          height="1600"
-          src="https://images.unsplash.com/photo-1587270613304-4cc9ef012b92?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTl8fHN1cGVyaGVybyUyMGNvbWljJTIwYm9va3xlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=60"
-        />
-      </amp-story-grid-layer>
-      <amp-story-grid-layer template="vertical">
-        <div class="title">
-          <h1>Slider Component</h1>
-          <p>
-            This is the most basic form of slider in the light theme, with a
-            custom accent color. The direction is right to left
-          </p>
-        </div>
+    <amp-story
+      standalone
+      publisher="The Publisher"
+      title="RTL Story"
+      publisher-logo-src="logo.png"
+      poster-portrait-src="poster-portrait.png"
+      poster-square-src="poster-square.png"
+      poster-landscape-src="poster-landscape.png"
+    >
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            layout="fixed"
+            width="1600"
+            height="1600"
+            src="https://images.unsplash.com/photo-1587270613304-4cc9ef012b92?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTl8fHN1cGVyaGVybyUyMGNvbWljJTIwYm9va3xlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=60"
+          />
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <div class="title">
+            <h1>Slider Component</h1>
+            <p>
+              This is the most basic form of slider in the light theme, with a
+              custom accent color. The direction is right to left
+            </p>
+          </div>
 
-        <amp-story-interactive-slider
-          style="--interactive-accent-color: #651ffe"
-          prompt-text="How much do you like this product?"
-          align-self="center"
-          justify-self="center"
-        >
-        </amp-story-interactive-slider>
-      </amp-story-grid-layer>
-    </amp-story-page>
-    <amp-story-page id="cover-dark">
-      <amp-story-grid-layer template="fill">
-        <amp-img
-          layout="fixed"
-          width="1600"
-          height="1600"
-          src="https://images.unsplash.com/photo-1587270613304-4cc9ef012b92?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTl8fHN1cGVyaGVybyUyMGNvbWljJTIwYm9va3xlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=60"
-        />
-      </amp-story-grid-layer>
-      <amp-story-grid-layer template="vertical">
-        <div class="title">
-          <h1>Slider Component</h1>
-          <p>This is the most basic form of slider in the dark theme. The direction is right to left</p>
-        </div>
+          <amp-story-interactive-slider
+            style="--interactive-accent-color: #651ffe"
+            prompt-text="How much do you like this product?"
+            align-self="center"
+            justify-self="center"
+          >
+          </amp-story-interactive-slider>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="cover-dark">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            layout="fixed"
+            width="1600"
+            height="1600"
+            src="https://images.unsplash.com/photo-1587270613304-4cc9ef012b92?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTl8fHN1cGVyaGVybyUyMGNvbWljJTIwYm9va3xlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=60"
+          />
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <div class="title">
+            <h1>Slider Component</h1>
+            <p>
+              This is the most basic form of slider in the dark theme. The
+              direction is right to left
+            </p>
+          </div>
 
-        <amp-story-interactive-slider
-          prompt-text="How much do you like this product?"
-          theme="dark"
-          align-self="center"
-          justify-self="center"
-        >
-        </amp-story-interactive-slider>
-      </amp-story-grid-layer>
-    </amp-story-page>
-    <amp-story-page id="cover-transparent">
-      <amp-story-grid-layer template="fill">
-        <amp-img
-          layout="fixed"
-          width="1600"
-          height="1600"
-          src="https://images.unsplash.com/photo-1587270613304-4cc9ef012b92?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTl8fHN1cGVyaGVybyUyMGNvbWljJTIwYm9va3xlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=60"
-        />
-      </amp-story-grid-layer>
-      <amp-story-grid-layer template="vertical">
-        <div class="title">
-          <h1>Slider Component</h1>
-          <p>This is the most basic form of slider in the transparent chip-style transparent theme. The direction is right to left
-          </p>
-        </div>
+          <amp-story-interactive-slider
+            prompt-text="How much do you like this product?"
+            theme="dark"
+            align-self="center"
+            justify-self="center"
+          >
+          </amp-story-interactive-slider>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="cover-transparent">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            layout="fixed"
+            width="1600"
+            height="1600"
+            src="https://images.unsplash.com/photo-1587270613304-4cc9ef012b92?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTl8fHN1cGVyaGVybyUyMGNvbWljJTIwYm9va3xlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=60"
+          />
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <div class="title">
+            <h1>Slider Component</h1>
+            <p>
+              This is the most basic form of slider in the transparent
+              chip-style transparent theme. The direction is right to left
+            </p>
+          </div>
 
-        <amp-story-interactive-slider
-          chip-style="transparent"
-          prompt-text="How much do you like this product?"
-          align-self="center"
-          justify-self="center"
-        >
-        </amp-story-interactive-slider>
-      </amp-story-grid-layer>
-    </amp-story-page>
-  <amp-story-page id="emoji_style">
-    <amp-story-grid-layer template="fill">
-      <amp-img
-        layout="fixed"
-        width="1600"
-        height="1600"
-        src="https://images.unsplash.com/photo-1587270613304-4cc9ef012b92?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTl8fHN1cGVyaGVybyUyMGNvbWljJTIwYm9va3xlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=60"
-      />
-    </amp-story-grid-layer>
-    <amp-story-grid-layer template="vertical">
-      <div class="title">
-        <h1>Slider Component</h1>
-        <p>
-          This is the emoji-based slider in the light theme, with a
-          custom accent color. The direction is right to left
-        </p>
-      </div>
+          <amp-story-interactive-slider
+            chip-style="transparent"
+            prompt-text="How much do you like this product?"
+            align-self="center"
+            justify-self="center"
+          >
+          </amp-story-interactive-slider>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="emoji_style">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            layout="fixed"
+            width="1600"
+            height="1600"
+            src="https://images.unsplash.com/photo-1587270613304-4cc9ef012b92?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTl8fHN1cGVyaGVybyUyMGNvbWljJTIwYm9va3xlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=60"
+          />
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <div class="title">
+            <h1>Slider Component</h1>
+            <p>
+              This is the emoji-based slider in the light theme, with a custom
+              accent color. The direction is right to left
+            </p>
+          </div>
 
-      <amp-story-interactive-slider
-        style="--interactive-accent-color: #651ffe"
-        prompt-text="How much do you like this product?"
-        align-self="center"
-        justify-self="center"
-        option-1-text="😄"
-      >
-      </amp-story-interactive-slider>
-    </amp-story-grid-layer>
-  </amp-story-page>
-</amp-story>
-</body>
+          <amp-story-interactive-slider
+            style="--interactive-accent-color: #651ffe"
+            prompt-text="How much do you like this product?"
+            align-self="center"
+            justify-self="center"
+            option-1-text="😄"
+          >
+          </amp-story-interactive-slider>
+        </amp-story-grid-layer>
+      </amp-story-page>
+    </amp-story>
+  </body>
 </html>
-
