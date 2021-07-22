@@ -114,7 +114,6 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
       'touchmove',
       (event) => {
         event.stopPropagation();
-        console.log('running');
       },
       true
     );
