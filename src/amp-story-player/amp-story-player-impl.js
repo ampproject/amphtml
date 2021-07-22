@@ -17,7 +17,7 @@
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
 import {Messaging} from '@ampproject/viewer-messaging';
 
-// Source for this constant is css/amp-story-player-iframe.css
+// Source for this constant is css/amp-story-player-shadow.css
 import {devAssertElement} from '#core/assert';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
@@ -31,7 +31,7 @@ import {parseQueryString} from '#core/types/string/url';
 import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
 import {PageScroller} from './page-scroller';
 
-import {cssText} from '../../build/amp-story-player-iframe.css';
+import {cssText} from '../../build/amp-story-player-shadow.css';
 import {applySandbox} from '../3p-frame';
 import {urls} from '../config';
 import {createCustomEvent, listenOnce} from '../event-helper';
@@ -191,7 +191,7 @@ const LOG_TYPE = {
  * Flag to show or hide the desktop panels player experiment.
  * @const {boolean}
  */
-const DESKTOP_PANEL_STORY_PLAYER_EXP_ON = true;
+const DESKTOP_PANEL_STORY_PLAYER_EXP_ON = false;
 
 /**
  * NOTE: If udpated here, update in amp-story.js
@@ -741,12 +741,17 @@ export class AmpStoryPlayer {
       this.visibleDeferred_.resolve()
     );
     if (DESKTOP_PANEL_STORY_PLAYER_EXP_ON) {
-      new this.win_.ResizeObserver((e) => {
-        const {width, height} = e[0].contentRect;
+      if (this.win_.ResizeObserver) {
+        new this.win_.ResizeObserver((e) => {
+          const {width, height} = e[0].contentRect;
+          this.onPlayerResize_(width, height);
+        }).observe(this.element_);
+      } else {
+        // Set size once as fallback for browsers not supporting ResizeObserver.
+        const {width, height} = this.element_.getBoundingClientRect();
         this.onPlayerResize_(width, height);
-      }).observe(this.element_);
+      }
     }
-
     this.render_();
 
     this.element_.isLaidOut_ = true;
