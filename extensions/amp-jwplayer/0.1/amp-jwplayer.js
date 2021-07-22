@@ -327,9 +327,7 @@ class AmpJWPlayer extends AMP.BaseElement {
         'isAMP': true,
         'consentState': this.consentState_ || undefined,
         'consentValue': this.consentString_ || undefined,
-        'consentGdpr': this.consentMetadata_
-          ? this.consentMetadata_.gdprApplies
-          : undefined,
+        'consentGdpr': this.consentMetadata_?.gdprApplies || undefined,
       });
 
       const url = this.getSingleLineEmbed_();
