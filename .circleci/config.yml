@@ -204,8 +204,8 @@ jobs:
       - teardown_vm
   'All Unit Tests':
     executor:
-      name: amphtml-large-executor
-    parallelism: 16
+      name: amphtml-medium-executor
+    parallelism: 6
     steps:
       - setup_vm
       - install_chrome
@@ -262,8 +262,8 @@ jobs:
       - teardown_vm
   'End-to-End Tests':
     executor:
-      name: amphtml-large-executor
-    parallelism: 16
+      name: amphtml-medium-executor
+    parallelism: 6
     steps:
       - setup_vm
       - install_chrome
@@ -324,7 +324,7 @@ jobs:
         description: 'Which of the three (A/B/C) experiments to use'
         type: enum
         enum: ['A', 'B', 'C']
-    parallelism: 16
+    parallelism: 6
     steps:
       - setup_vm
       - install_chrome
