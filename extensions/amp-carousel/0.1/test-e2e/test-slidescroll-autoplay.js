@@ -47,7 +47,8 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('should fire low trust event for autoplay advance', async () => {
+    it('should fire low trust event for autoplay advance', async function () {
+      this.timeout(5000);
       for (let i = 0; i < 3; i++) {
         const event = await slideChangeEventAfterClicking(/* autoplay */);
         await expect(event.actionTrust).to.equal(1); // ActionTrust.LOW
