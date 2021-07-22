@@ -872,7 +872,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.setState(PageState.PLAYING);
 
     const openAttachmentLabelEl = element.querySelector(
-      '.i-amphtml-story-page-open-attachment-label'
+      '.i-amphtml-story-page-attachment-label'
     );
     expect(openAttachmentLabelEl.textContent).to.equal('Custom label');
   });
@@ -891,7 +891,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.setState(PageState.PLAYING);
 
     const openAttachmentLabelEl = element.querySelector(
-      '.i-amphtml-story-page-open-attachment-label'
+      '.i-amphtml-story-page-attachment-label'
     );
 
     expect(openAttachmentLabelEl.textContent).to.equal('CTA text');

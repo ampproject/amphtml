@@ -1828,10 +1828,8 @@ export class AmpStoryPage extends AMP.BaseElement {
       container.setAttribute('role', 'button');
 
       container.addEventListener('click', (e) => {
-        if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-          // Prevent default so link can be opened programmatically after URL preview is shown.
-          e.preventDefault();
-        }
+        // Prevent default so link can be opened programmatically after URL preview is shown.
+        e.preventDefault();
         this.openAttachment();
       });
 
