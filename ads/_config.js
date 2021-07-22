@@ -476,6 +476,7 @@ const adConfig = jsonConfiguration({
     ],
     clientIdScope: 'AMP_ECID_EZOIC',
     consentHandlingOverride: true,
+    renderStartImplemented: true,
   },
 
   'f1e': {
