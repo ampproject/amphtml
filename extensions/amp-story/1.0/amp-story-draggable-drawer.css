@@ -159,3 +159,43 @@ body:not(.amp-mode-keyboard-active) amp-story:not([desktop]) .i-amphtml-amp-stor
 amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-content {
   border-radius: inherit !important;
 }
+
+amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-remote .i-amphtml-story-draggable-drawer-spacer {
+  /* Hide spacer in remote attachment. */
+  display: none !important;
+}
+
+/* Remote-attachment overrides. */
+
+.amp-story-draggable-drawer-root.i-amphtml-story-page-attachment-remote {
+  /* Faster duration for outlink drawer. */
+  transition-duration: .2s !important;
+}
+
+/* Opening progress bar animation. */
+
+.i-amphtml-story-page-attachment-remote.i-amphtml-story-draggable-drawer-open:after {
+  content: "" !important;
+  position: absolute !important;
+  width: 100% !important;
+  height: 4px !important;
+  color: black !important;
+  bottom: 0 !important;
+  background-color: var(--i-amphtml-outlink-cta-text-color) !important;
+  opacity: .6 !important;
+  transform-origin: left !important;
+  animation: progress-bar-animation .6s both cubic-bezier(0.4, 0.0, 1, 1) !important;
+}
+
+[dir="rtl"] .i-amphtml-story-page-attachment-remote.i-amphtml-story-draggable-drawer-open:after {
+  transform-origin: right !important;
+}
+
+@keyframes progress-bar-animation {
+  0% {
+    transform: scaleX(0)
+  }
+  100% {
+    transform: scaleX(1)
+  }
+}
