@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryInteractiveImgQuiz} from '../amp-story-interactive-img-quiz';
 import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
@@ -67,6 +68,7 @@ describes.realWin(
 
       storyEl = win.document.createElement('amp-story');
       const storyPage = win.document.createElement('amp-story-page');
+      storyPage.getAmpDoc = () => new AmpDocSingle(win);
       const gridLayer = win.document.createElement('amp-story-grid-layer');
       gridLayer.appendChild(ampStoryQuizEl);
       storyPage.appendChild(gridLayer);
