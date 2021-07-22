@@ -669,10 +669,6 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
   it('should call for remeasure upon resize', async () => {
     const iframe = document.createElement('iframe');
     const {promise, resolve} = new Deferred();
-    const mutateSpy = env.sandbox.stub(
-      Services.mutatorForDoc(env.ampdoc),
-      'mutateElement'
-    );
 
     await installFriendlyIframeEmbed(iframe, document.body, {
       url: 'https://acme.org/url1',
@@ -680,6 +676,10 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       extensions: [],
     });
 
+    const mutateSpy = env.sandbox.stub(
+      Services.mutatorForDoc(env.ampdoc),
+      'mutateElement'
+    );
     expect(mutateSpy).to.not.be.called;
     setStyles(iframe, {height: '100px', width: '100px'});
     // Need to wait for resize event.
