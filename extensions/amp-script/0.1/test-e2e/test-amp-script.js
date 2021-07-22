@@ -30,7 +30,7 @@ describes.endtoend(
     });
 
     it('should support local scripts', async function () {
-      this.timeout(5000);
+      this.timeout(10000);
       const element = await controller.findElement('amp-script#local');
       await expect(controller.getElementAttribute(element, 'class')).to.contain(
         'i-amphtml-hydrated'
