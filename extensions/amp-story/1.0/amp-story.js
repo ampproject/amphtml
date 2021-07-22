@@ -465,6 +465,11 @@ export class AmpStory extends AMP.BaseElement {
         'story-load-first-page-only'
       );
     }
+    if (isExperimentOn(this.win, 'story-disable-animations-first-page')) {
+      Services.performanceFor(this.win).addEnabledExperiment(
+        'story-load-first-page-only'
+      );
+    }
 
     if (this.maybeLoadStoryDevTools_()) {
       return;
