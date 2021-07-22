@@ -316,7 +316,7 @@ For complete documentation and additional examples please see: https://marketing
           "data": {
             "eventType": "EVENT",
             "eventName": "purchase_success",
-            "eventRevenue": "1.99",
+            "eventRevenue": "${formFields[revenue]}",
             "eventRevenueCurrency": "ILS",
             "eventValue": "{'key0': 'value0', 'key1': 1}"
           }
@@ -329,7 +329,7 @@ For complete documentation and additional examples please see: https://marketing
         "extraUrlParams": {
           "data": {
             "eventType": "IDENTIFY",
-            "customerUserId": "cuid0"
+            "customerUserId": "AUTHDATA(cuid)"
           }
         }
       }
