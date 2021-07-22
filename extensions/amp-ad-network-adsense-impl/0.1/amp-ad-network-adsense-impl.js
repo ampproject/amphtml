@@ -250,10 +250,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     Object.keys(setExps).forEach((expName) =>
       addExperimentIdToElement(setExps[expName], this.element)
     );
-    const moduleNomoduleExpId = this.getModuleNomoduleExpIds_();
-    if (moduleNomoduleExpId) {
-      addExperimentIdToElement(moduleNomoduleExpId, this.element);
-    }
 
     const ssrExpIds = this.getSsrExpIds_();
     for (let i = 0; i < ssrExpIds.length; i++) {
@@ -426,7 +422,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // create ad.
       'pwprc': this.element.getAttribute('data-package'),
       'spsa': this.isSinglePageStoryAd
-        ? `${viewportSize.width}x${viewportSize.height}`
+        ? `${this.size_.width}x${this.size_.height}`
         : null,
     };
 

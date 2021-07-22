@@ -29,6 +29,12 @@ const DURATION_MS = 400;
 /** @const {string} */
 const CLASS_NAME = 'BACKGROUND-BLUR';
 
+/**
+ * readyState for first rendrable frame of video element.
+ * @const {number}
+ */
+const HAVE_CURRENT_DATA = 2;
+
 export class BackgroundBlur {
   /**
    * @param {!Window} win
@@ -84,22 +90,44 @@ export class BackgroundBlur {
    * @param {!Element} pageElement
    */
   update(pageElement) {
-    const ampImgEl = this.getBiggestImage_(pageElement);
-    if (!ampImgEl) {
-      user().info(CLASS_NAME, 'No image found for background blur.');
+    const mediaEl = this.getBiggestMediaEl_(pageElement);
+    if (!mediaEl) {
+      user().info(CLASS_NAME, 'No amp-img or amp-video found.');
       this.animate_();
       return;
     }
 
-    // Ensures img element exists and is loaded.
-    whenUpgradedToCustomElement(ampImgEl)
-      .then(() => ampImgEl.signals().whenSignal(CommonSignals.LOAD_END))
+    // Ensure element is loaded before calling animate.
+    whenUpgradedToCustomElement(mediaEl)
+      .then(() => mediaEl.signals().whenSignal(CommonSignals.LOAD_END))
       .then(
         () => {
-          this.animate_(ampImgEl.querySelector('img'));
+          // If image, render it.
+          if (mediaEl.tagName === 'AMP-IMG') {
+            this.animate_(mediaEl.querySelector('img'));
+            return;
+          }
+
+          // If video, render first frame or poster image.
+          const innerVideoEl = mediaEl.querySelector('video');
+          const alreadyHasData = innerVideoEl.readyState >= HAVE_CURRENT_DATA;
+          if (alreadyHasData) {
+            this.animate_(innerVideoEl);
+            return;
+          }
+          // If video doesnt have data, render from the poster image.
+          const posterSrc = mediaEl.getAttribute('poster');
+          if (!posterSrc) {
+            this.animate_();
+            user().info(CLASS_NAME, 'No "poster" attribute on amp-video.');
+            return;
+          }
+          const img = new Image();
+          img.onload = () => this.animate_(img);
+          img.src = posterSrc;
         },
         () => {
-          user().error(CLASS_NAME, 'Failed to load the amp-img.');
+          user().error(CLASS_NAME, 'Failed to load the amp-img or amp-video.');
         }
       );
   }
@@ -169,12 +197,12 @@ export class BackgroundBlur {
   }
 
   /**
-   * Get active page's biggest amp-img element.
+   * Get active page's biggest amp-img or amp-video element.
    * @private
    * @param {!Element} pageElement
-   * @return {?Element} An amp-img element or null.
+   * @return {?Element} An amp-img, amp-video or null.
    */
-  getBiggestImage_(pageElement) {
+  getBiggestMediaEl_(pageElement) {
     const getSize = (el) => {
       if (!el) {
         return false;
@@ -183,7 +211,10 @@ export class BackgroundBlur {
       return layoutBox.width * layoutBox.height;
     };
     return Array.from(
-      scopedQuerySelectorAll(pageElement, 'amp-story-grid-layer amp-img')
+      scopedQuerySelectorAll(
+        pageElement,
+        'amp-story-grid-layer amp-img, amp-story-grid-layer amp-video'
+      )
     ).sort((firstEl, secondEl) => getSize(secondEl) - getSize(firstEl))[0];
   }
 }

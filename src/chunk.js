@@ -15,9 +15,9 @@
  */
 
 import {PriorityQueue} from './core/data-structures/priority-queue';
-import {Services} from './service';
-import {dev} from './log';
 import {getData} from './event-helper';
+import {dev} from './log';
+import {Services} from './service';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,

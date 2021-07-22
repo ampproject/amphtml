@@ -40,7 +40,8 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('should render correctly', async () => {
+    // TODO(#35241): flaky test disabled in #35176
+    it.skip('should render correctly', async () => {
       await clickThroughPages(controller, /* numPages */ 7);
       const activePage = await controller.findElement('[active]');
       await expect(controller.getElementAttribute(activePage, 'ad')).to.exist;
