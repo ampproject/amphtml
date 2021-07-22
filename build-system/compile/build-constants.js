@@ -18,7 +18,7 @@ const {VERSION} = require('./internal-version');
 
 const testTasks = ['e2e', 'integration', 'visual-diff', 'unit', 'check-types'];
 const isTestTask = testTasks.some((task) => argv._.includes(task));
-const isForTesting = argv.fortesting || isTestTask;
+const isForTesting = argv.fortesting || !argv._.includes('dist');
 const isMinified = argv._.includes('dist') || !!argv.compiled;
 
 /**
