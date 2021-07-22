@@ -62,7 +62,6 @@ const SMOOTH_SCROLL_DELAY_ = 300;
  * @return {number}
  */
 function getComputedStylePropertyPixels(win, element, property) {
-  // We use computedStyle to always get value in pixels.
   const value = parseInt(computedStyle(win, element)[property], 10);
   return isNaN(value) ? 0 : value;
 }
@@ -81,8 +80,7 @@ function getScrollPadding(win, element, property) {
   // selector across browsers, thus we use the `documentElement`.
   const effectiveElement =
     element === win.document.body ? win.document.documentElement : element;
-  const value = getComputedStylePropertyPixels(win, effectiveElement, property);
-  return value;
+  return getComputedStylePropertyPixels(win, effectiveElement, property);
 }
 
 /**
