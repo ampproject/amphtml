@@ -630,7 +630,10 @@ export class AmpA4A extends AMP.BaseElement {
       );
       return false;
     }
-    if (!isAdPositionAllowed(this.element, this.win)) {
+    if (
+      !this.uiHandler.isStickyAd() &&
+      !isAdPositionAllowed(this.element, this.win)
+    ) {
       user().warn(
         TAG,
         `<${this.element.tagName}> is not allowed to be ` +

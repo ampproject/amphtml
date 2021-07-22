@@ -862,6 +862,7 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'src/service/extensions-impl.js',
       'extensions/amp-ad/0.1/amp-ad.js',
+      'extensions/amp-sticky-ad/1.0/amp-sticky-ad.js',
     ],
   },
   'reject\\(\\)': {
