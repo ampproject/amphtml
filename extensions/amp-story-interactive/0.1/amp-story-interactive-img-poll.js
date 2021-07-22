@@ -21,6 +21,7 @@ import {
 import {CSS} from '../../../build/amp-story-interactive-img-poll-0.1.css';
 import {CSS as ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
 import {buildImgTemplate} from './utils';
+import {dev} from '../../../src/log';
 import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles} from '#core/dom/style';
 
@@ -66,6 +67,12 @@ export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
     return this.rootEl_;
   }
 
+  /** @override */
+  layoutCallback() {
+    this.setBackgroundImage(dev().assertElement(this.rootEl_));
+    return super.layoutCallback();
+  }
+
   /**
    * Finds the prompt and options content
    * and adds it to the poll element.
@@ -95,15 +102,6 @@ export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
   configureOption_(option) {
     const convertedOption = buildOptionTemplate(this.element);
     convertedOption.optionIndex_ = option['optionIndex'];
-
-    // Extract and structure the option information
-    // TODO: Rewrite image URL (https://github.com/ampproject/amphtml/pull/35043#discussion_r660874389)
-    setImportantStyles(
-      convertedOption.querySelector(
-        '.i-amphtml-story-interactive-img-option-img'
-      ),
-      {'background-image': 'url(' + option['image'] + ')'}
-    );
 
     convertedOption.setAttribute('aria-label', option['imagealt']);
 
