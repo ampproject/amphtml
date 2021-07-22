@@ -27,6 +27,7 @@
   font-weight: 700 !important;
   line-height: 1.5em !important;
   z-index: 1 !important;
+  /** Prevents 1 pixel layout shifts after post-selection animations */
   backface-visibility: hidden !important;
 }
 
