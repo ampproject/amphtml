@@ -146,13 +146,13 @@ const forbiddenTermsGlobal = {
     message: realiasGetMode,
     allowlist: ['src/mode-object.js', 'src/iframe-attributes.js'],
   },
-  'INTERNAL_RUNTIME_VERSION|IS_(FORTESTING|MINIFIED)': {
+  'INTERNAL_RUNTIME_VERSION|IS_(PROD|MINIFIED)': {
     message:
       'Do not use build constants directly. Instead, use the helpers in `#core/mode`.',
     allowlist: [
       'src/internal-version.js',
       'src/core/mode/minified.js',
-      'src/core/mode/for-testing.js',
+      'src/core/mode/prod.js',
       'build-system/compile/build-constants.js',
     ],
   },

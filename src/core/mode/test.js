@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {isFortesting} from './for-testing';
+import {isProd} from './prod';
 
 /**
  * Returns true if executing in a testing environment. Calls may be DCE'd when
- * compiled based on isFortesting.
+ * compiled based on isForDistribution.
  * @param {!Window=} opt_win
  * @return {boolean}
  */
 export function isTest(opt_win) {
-  if (!isFortesting()) {
+  if (isProd()) {
     return false;
   }
   const win = opt_win || self;
