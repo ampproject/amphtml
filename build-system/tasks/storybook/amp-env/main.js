@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+const {webpackConfigNoChunkTilde} = require('../env-utils');
+
 module.exports = {
   stories: [
-    '../../../../builtins/storybook/*.amp.js',
+    '../../../../src/builtins/storybook/*.amp.js',
     '../../../../extensions/**/*.*/storybook/*.amp.js',
   ],
   addons: [
@@ -29,7 +31,10 @@ module.exports = {
     '@storybook/addon-knobs',
     '@ampproject/storybook-addon',
   ],
-  webpackFinal: async (config) => {
+  managerWebpack: (config) => {
+    return webpackConfigNoChunkTilde(config);
+  },
+  webpackFinal: (config) => {
     // Disable entry point size warnings.
     config.performance.hints = false;
     return config;

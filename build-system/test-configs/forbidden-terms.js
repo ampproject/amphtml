@@ -146,13 +146,15 @@ const forbiddenTermsGlobal = {
     message: realiasGetMode,
     allowlist: ['src/mode-object.js', 'src/iframe-attributes.js'],
   },
-  '(?:var|let|const) +IS_FORTESTING +=': {
-    message: 'IS_FORTESTING local var only allowed in mode.js.',
-    allowlist: ['src/core/mode/for-testing.js'],
-  },
-  '(?:var|let|const) +IS_MINIFIED +=': {
-    message: 'IS_MINIFIED local var only allowed in core/mode/minified.js',
-    allowlist: ['src/core/mode/minified.js'],
+  'INTERNAL_RUNTIME_VERSION|IS_(PROD|MINIFIED)': {
+    message:
+      'Do not use build constants directly. Instead, use the helpers in `#core/mode`.',
+    allowlist: [
+      'src/internal-version.js',
+      'src/core/mode/minified.js',
+      'src/core/mode/prod.js',
+      'build-system/compile/build-constants.js',
+    ],
   },
   '\\.prefetch\\(': {
     message: 'Do not use preconnect.prefetch, use preconnect.preload instead.',
@@ -429,6 +431,7 @@ const forbiddenTermsGlobal = {
     allowlist: [
       'build-system/externs/amp.extern.js',
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js',
+      'extensions/amp-video/0.1/video-cache.js',
       'src/utils/xhr-utils.js',
     ],
   },
@@ -859,6 +862,7 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'src/service/extensions-impl.js',
       'extensions/amp-ad/0.1/amp-ad.js',
+      'extensions/amp-sticky-ad/1.0/amp-sticky-ad.js',
     ],
   },
   'reject\\(\\)': {
@@ -995,7 +999,7 @@ const forbiddenTermsSrcInclusive = {
     message: measurementApiDeprecated,
     allowlist: [
       'build-system/externs/amp.extern.js',
-      'builtins/amp-img/amp-img.js',
+      'src/builtins/amp-img/amp-img.js',
       'src/base-element.js',
       'src/custom-element.js',
       'src/iframe-helper.js',

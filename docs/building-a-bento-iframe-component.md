@@ -18,8 +18,8 @@
     -   [Loading an iframe with `IframeEmbed`](#loading-an-iframe-with-iframeembed)
         -   [`src`](#src)
         -   [Handling events with `messageHandler`](#handling-events-with-messagehandler)
-        -   [Resizing AMP components](#handling-events-with-messagehandler)
     -   [Use `ProxyIframeEmbed` directly](#use-proxyiframeembed-directly)
+        -   [Resizing components in AMP](#resizing-components-in-amp)
         -   [Passing or overriding props](#passing-or-overriding-props)
 -   [Completing your extension](#completing-your-extension)
 -   [Example Pull Requests](#example-pull-requests)
@@ -233,7 +233,7 @@ function FantasticEmbedWithRef({...rest}, ref) {
 
 AMP documents additionally guarantee layout stability to the degree that it manages when components may or may not resize on the page. Because of this, the `IframeEmbed` component takes a `requestResize` prop where a different flow of logic may be passed in by the publisher to respond to measure events.
 
-In your AMP element implementation, you will use `requestResize` to pass in the `attemptChangeHeight` method that is extended from the `BaseElement` class:
+In your AMP element implementation, you will use `requestResize` to pass in the `attemptChangeHeight` method that is extended from the `PreactBaseElement` class:
 
 ```javascript
 // amp-fantastic-embed.js
@@ -242,12 +242,21 @@ class AmpFantasticEmbed extends BaseElement {
   /** @override */
   init() {
     return dict({
-      'requestResize': (height) => {
-        this.attemptChangeHeight(height);
-      },
+      'requestResize': (height) => this.attemptChangeHeight(height),
     });
   }
 }
+```
+
+For components that request a resize that is denied by the AMP runtime, publishers are recommended to use an `overflow` element to solicit user interaction in order to resize as a layout stability best-practice.
+
+This information can be provided in the component documentation with an exemplary code sample:
+
+```html
+<amp-fantastic-embed layout="fixed" width="400" height="200">
+  <button overflow>Click me to load the full iframed content!</button>
+</amp-fantastic-embed>
+<p>Content below the component.</p>
 ```
 
 #### Passing or overriding props

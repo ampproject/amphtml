@@ -39,6 +39,11 @@ exports.rules = [
   },
   {
     filesMatching: '**/*.js',
+    mustNotDependOn: 'src/compiler/**/*.js',
+    allowlist: [],
+  },
+  {
+    filesMatching: '**/*.js',
     mustNotDependOn: 'src/purifier/**/*.js',
     allowlist: [
       // WARNING: Importing purifier.js will also bundle DOMPurify (13KB).
@@ -144,6 +149,7 @@ exports.rules = [
       'ads/google/a4a/**->src/service/index.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',
       'ads/google/a4a/utils.js->src/ini-load.js',
+      'ads/google/a4a/utils.js->src/core/dom/index.js',
       'ads/google/a4a/utils.js->src/core/dom/layout/page-layout-box.js',
       // Some ads need to depend on json.js
       'ads/**->src/core/types/object/json.js',
@@ -301,7 +307,9 @@ exports.rules = [
       'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/story-analytics.js',
       'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/variable-service.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-img-quiz.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-interactive/0.1/amp-story-interactive-results.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-interactive/0.1/interactive-disclaimer.js->extensions/amp-story/1.0/utils.js',
 
       // Subscriptions.
       'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',
@@ -513,7 +521,7 @@ exports.rules = [
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/service/custom-element-registry.js',
     allowlist: [
-      'builtins/**->src/service/custom-element-registry.js',
+      'src/builtins/**->src/service/custom-element-registry.js',
       'src/amp.js->src/service/custom-element-registry.js',
       'src/runtime.js->src/service/custom-element-registry.js',
       'src/service/extensions-impl.js->src/service/custom-element-registry.js',

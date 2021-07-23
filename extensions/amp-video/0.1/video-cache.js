@@ -36,6 +36,10 @@ import {user} from '../../../src/log';
  */
 export function fetchCachedSources(videoEl, ampdoc) {
   const {win} = ampdoc;
+  // Keep non cached evergreen sources for crawlers.
+  if (Services.platformFor(win).isBot()) {
+    return Promise.resolve();
+  }
   if (
     !(
       videoEl.getAttribute('src') ||
@@ -45,6 +49,9 @@ export function fetchCachedSources(videoEl, ampdoc) {
     user().error('AMP-VIDEO', 'Video cache not properly configured');
     return Promise.resolve();
   }
+
+  Services.performanceFor(ampdoc.win).addEnabledExperiment('video-cache');
+
   const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(win.document);
   maybeReplaceSrcWithSourceElement(videoEl, win);
   const videoUrl = resolveRelativeUrl(selectVideoSource(videoEl), sourceUrl);
@@ -55,7 +62,7 @@ export function fetchCachedSources(videoEl, ampdoc) {
         'amp_video_host_url':
           /* document url that contains the video */ canonicalUrl,
       });
-      return Services.xhrFor(win).fetch(requestUrl);
+      return Services.xhrFor(win).fetch(requestUrl, {prerenderSafe: true});
     })
     .then((response) => response.json())
     .then((jsonResponse) =>
@@ -97,6 +104,7 @@ function applySourcesToVideo(videoEl, sources) {
           'src': source['url'],
           'type': source['type'],
           'data-bitrate': source['bitrate_kbps'],
+          'i-amphtml-video-cached-source': '',
         }
       );
       videoEl.insertBefore(sourceEl, videoEl.firstChild);

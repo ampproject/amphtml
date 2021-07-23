@@ -679,8 +679,8 @@ TEST(StringsTest, CountTermsTest) {
   EXPECT_EQ(0, htmlparser::Strings::CountTerms("        \n         "));
   EXPECT_EQ(4, htmlparser::Strings::CountTerms(
       "  hello world \nbye\r\n bye"));
-  EXPECT_EQ(0, htmlparser::Strings::CountTerms("hello world", ""));
-  EXPECT_EQ(0, htmlparser::Strings::CountTerms("", " \n"));
-  EXPECT_EQ(0, htmlparser::Strings::CountTerms("", ""));
+  EXPECT_EQ(10, htmlparser::Strings::CountTerms(
+      "Accept: application/signed-exchange;v=b3\nAMP-Cache-Transform: "
+      "google\n"));
 }
 
