@@ -31,6 +31,7 @@ import {getTimingDataSync} from '#service/variable-source';
 import {internalRuntimeVersion} from '../../../src/internal-version';
 import {parseJson} from '#core/types/object/json';
 import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+import {createElementWithAttributes} from '#core/dom';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -112,6 +113,26 @@ export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 /** @const {Object} */
 const CDN_PROXY_REGEXP =
   /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
+
+/** @const {string} */
+const TOKEN_VALUE =
+  'A8Ujr8y+9sg/ZBmCs90ZfQGOUFJsAS/YaHYtjLAsNn05OaQXSmZeRZ2U1wAj3PD74WY9re2x/TwinJoOaYuqFQoAAACBeyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3QubmV0OjQ0MyIsImZlYXR1cmUiOiJDb252ZXJzaW9uTWVhc3VyZW1lbnQiLCJleHBpcnkiOjE2MzE2NjM5OTksImlzU3ViZG9tYWluIjp0cnVlLCJ1c2FnZSI6InN1YnNldCJ9';
+
+/**
+ * Inserts origin-trial token for `attribution-reporting` if not already
+ * present in the DOM.
+ * @param {!Window} win
+ */
+export function maybeInsertOriginTrialToken(win) {
+  if (win.document.querySelector(`meta[content='${TOKEN_VALUE}']`)) {
+    return;
+  }
+  const metaEl = createElementWithAttributes(win.document, 'meta', {
+    'http-equiv': 'origin-trial',
+    content: TOKEN_VALUE,
+  });
+  win.document.head.appendChild(metaEl);
+}
 
 /**
  * Returns the value of some navigation timing parameter.
