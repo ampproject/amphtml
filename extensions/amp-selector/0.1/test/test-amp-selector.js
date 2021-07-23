@@ -1473,7 +1473,7 @@ describes.realWin(
       const impl = await element.getImpl();
       env.sandbox.stub(impl, 'setSelection_');
 
-      [('clear', 'selectDown', 'selectUp', 'toggle')].forEach((method) => {
+      ['clear', 'selectDown', 'selectUp', 'toggle'].forEach((method) => {
         action.execute(
           element,
           method,

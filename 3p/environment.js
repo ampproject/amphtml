@@ -197,6 +197,7 @@ function instrumentEntryPoints(win) {
       next();
       if (typeof fn == 'string') {
         // Handle rare and dangerous string arg case.
+        // eslint-disable-next-line no-sequences
         return (0, win.eval) /*NOT OK but whatcha gonna do.*/
           .call(win, fn); // lgtm [js/useless-expression]
       } else {
