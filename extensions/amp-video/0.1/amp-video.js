@@ -25,6 +25,7 @@ import {
   childElement,
   childElementByTag,
   childElementsByTag,
+  matches,
 } from '#core/dom/query';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert, user} from '../../../src/log';
@@ -677,7 +678,7 @@ export class AmpVideo extends AMP.BaseElement {
   getMaxBitrate_() {
     if (
       this.isManagedByPool_() &&
-      isExperimentOn('amp-story-first-page-max-bitrate') &&
+      isExperimentOn(this.win, 'amp-story-first-page-max-bitrate') &&
       matches(this.element, 'amp-story-page:first-of-type amp-video')
     ) {
       Services.performanceFor(this.win).addEnabledExperiment(

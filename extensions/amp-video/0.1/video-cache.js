@@ -103,7 +103,7 @@ function applySourcesToVideo(videoEl, sources, maxBitrate) {
   sources
     .sort((a, b) => a['bitrate_kbps'] - b['bitrate_kbps'])
     .forEach((source) => {
-      if (source[bitrate_kbps] > maxBitrate) {
+      if (source['bitrate_kbps'] > maxBitrate) {
         return;
       }
       const sourceEl = createElementWithAttributes(
