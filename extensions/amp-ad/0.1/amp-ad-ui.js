@@ -337,12 +337,22 @@ export class AmpAdUIHandler {
   getScrollPromiseForStickyAd() {
     if (this.isStickyAd()) {
       return new Promise((resolve) => {
-        const unlisten = Services.viewportForDoc(
-          this.element_.getAmpDoc()
-        ).onScroll(() => {
+        if (
+          this.stickyAdPosition_ == StickyAdPositions.LEFT ||
+          this.stickyAdPosition_ == StickyAdPositions.RIGHT ||
+          this.stickyAdPosition_ == StickyAdPositions.SIDEBAR
+        ) {
+          // Directly load ad for sticky `left`, `right` and `sidebar`
           resolve();
-          unlisten();
-        });
+        } else {
+          // Wait for scrolling event before loading the ad (for sticky `bottom` and `top`)
+          const unlisten = Services.viewportForDoc(
+            this.element_.getAmpDoc()
+          ).onScroll(() => {
+            resolve();
+            unlisten();
+          });
+        }
       });
     }
     return Promise.resolve(null);
