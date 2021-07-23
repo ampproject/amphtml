@@ -104,6 +104,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     super.initializeListeners_();
 
     this.inputEl_.addEventListener('input', () => {
+      this.isInteracting_ = true;
       this.onDrag_();
     });
     this.inputEl_.addEventListener('change', () => {
@@ -115,17 +116,49 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
       (event) => event.stopPropagation(),
       true
     );
+
+    const DURATION_MS = 1500;
+    let startTime;
+    const animateFrame = (currTime) => {
+      // Set current startTime if not defined.
+      if (!startTime) {
+        startTime = currTime;
+      }
+      const elapsed = currTime - startTime;
+      if (elapsed < DURATION_MS) {
+        // Value between 0 and 1;
+        const timePercentage = elapsed / DURATION_MS;
+        // example with Math.sin animation
+        // Converts oscillation between 1 and -1, to 0 and 30.
+        const val = map(Math.cos(timePercentage * Math.PI * 2), 1, -1, 0, 30);
+        this.inputEl_.value = val;
+        this.onDrag_();
+        if (!this.isInteracting_) {
+          requestAnimationFrame(animateFrame);
+        }
+      }
+    };
+    requestAnimationFrame(animateFrame);
+
+    function map(num, in_min, in_max, out_min, out_max) {
+      return (
+        ((num - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
+      );
+    }
   }
 
   /**
    * @private
+   * @param {this.isInteracting_} boolean
    */
   onDrag_() {
     const {value} = this.inputEl_;
-    if (this.sliderType_ == SliderType.PERCENTAGE) {
-      this.bubbleEl_.textContent = value + '%';
+    if (this.isInteracting_) {
+      if (this.sliderType_ == SliderType.PERCENTAGE) {
+        this.bubbleEl_.textContent = value + '%';
+      }
+      this.rootEl_.classList.add('i-amphtml-story-interactive-mid-selection');
     }
-    this.rootEl_.classList.add('i-amphtml-story-interactive-mid-selection');
     setImportantStyles(this.rootEl_, {'--fraction': value / 100});
   }
 
