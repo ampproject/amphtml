@@ -1058,6 +1058,30 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         expect(fetchMock.called('ad')).to.be.true;
       });
 
+      it('should set feature policy for attribution-reporting when supported', async () => {
+        env.sandbox
+          .stub(secureFrame, 'isAttributionReportingSupported')
+          .returns(true);
+        a4a.sandboxHTMLCreativeFrame = () => false;
+        a4a.onLayoutMeasure();
+        await a4a.layoutCallback();
+        verifyNameFrameRender(a4aElement, false /* shouldSandbox */);
+        expect(a4a.iframe.getAttribute('allow')).to.equal(
+          "sync-xhr 'none';attribution-reporting 'src';"
+        );
+      });
+
+      it('should not set feature policy for attribution-reporting when not supported', async () => {
+        env.sandbox
+          .stub(secureFrame, 'isAttributionReportingSupported')
+          .returns(false);
+        a4a.sandboxHTMLCreativeFrame = () => false;
+        a4a.onLayoutMeasure();
+        await a4a.layoutCallback();
+        verifyNameFrameRender(a4aElement, false /* shouldSandbox */);
+        expect(a4a.iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
+      });
+
       ['', 'client_cache', 'safeframe', 'some_random_thing'].forEach(
         (headerVal) => {
           // TODO(wg-monetization, #25690): Fails on CI.
@@ -1166,6 +1190,38 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           false /* shouldSandbox */
         );
         expect(fetchMock.called('ad')).to.be.true;
+      });
+
+      it('should set feature policy for attribution-reporting when supported', async () => {
+        env.sandbox
+          .stub(secureFrame, 'isAttributionReportingSupported')
+          .returns(true);
+        a4a.sandboxHTMLCreativeFrame = () => false;
+        a4a.onLayoutMeasure();
+        await a4a.layoutCallback();
+        verifySafeFrameRender(
+          a4aElement,
+          DEFAULT_SAFEFRAME_VERSION,
+          false /* shouldSandbox */
+        );
+        expect(a4a.iframe.getAttribute('allow')).to.equal(
+          "sync-xhr 'none';attribution-reporting 'src';"
+        );
+      });
+
+      it('should not set feature policy for attribution-reporting when not supported', async () => {
+        env.sandbox
+          .stub(secureFrame, 'isAttributionReportingSupported')
+          .returns(false);
+        a4a.sandboxHTMLCreativeFrame = () => false;
+        a4a.onLayoutMeasure();
+        await a4a.layoutCallback();
+        verifySafeFrameRender(
+          a4aElement,
+          DEFAULT_SAFEFRAME_VERSION,
+          false /* shouldSandbox */
+        );
+        expect(a4a.iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
       });
 
       ['', 'client_cache', 'nameframe', 'some_random_thing'].forEach(
