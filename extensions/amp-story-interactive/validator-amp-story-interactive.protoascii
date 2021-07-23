@@ -352,15 +352,27 @@ attr_lists: {
   attrs: {
     name: "option-1-image"
     mandatory: true
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
   }
   attrs: {
     name: "option-2-image"
     mandatory: true
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
   }
   attrs: {
     name: "option-3-image"
     trigger: {
       also_requires_attr: "option-3-image-alt"
+    }
+    value_url: {
+      protocol: "http"
+      protocol: "https"
     }
   }
   attrs: {
@@ -368,6 +380,10 @@ attr_lists: {
     trigger: {
       also_requires_attr: "option-3-image"
       also_requires_attr: "option-4-image-alt"
+    }
+    value_url: {
+      protocol: "http"
+      protocol: "https"
     }
   }
   attrs: {

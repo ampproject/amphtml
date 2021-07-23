@@ -104,6 +104,27 @@
         </amp-story-interactive-img-quiz>
       </amp-story-grid-layer>
     </amp-story-page>
+    <amp-story-page id="5">
+      <amp-story-grid-layer template="fill">
+        <!-- Invalid: Image quiz image URL must use a valid protocol -->
+        <amp-story-interactive-img-quiz
+          id="invalid-img-url-img-quiz"
+          prompt-text="Which of these structures is oldest?"
+          prompt-size="large"
+          endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+          option-1-image="nothttps://images.com/1"
+          option-1-image-alt="Statue of Liberty"
+          option-1-correct
+          option-1-confetti="🎉"
+          option-2-image="nothttps://images.com/2"
+          option-2-image-alt="Golden Gate Bridge"
+          option-3-image="nothttps://images.com/3"
+          option-3-image-alt="Christ the Redeemer"
+          option-4-image="nothttps://images.com/4"
+          option-4-image-alt="Eiffel Tower">
+        </amp-story-interactive-img-quiz>
+      </amp-story-grid-layer>
+    </amp-story-page>
   </amp-story>
 </body>
 </html>

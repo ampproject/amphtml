@@ -91,7 +91,7 @@ amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:62:
 |          <amp-story-interactive-img-poll
 >>         ^~~~~~~~~
 amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:88:8 Missing URL for attribute 'endpoint' in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
-|            id="invalid-endpiont-img-poll"
+|            id="invalid-endpoint-img-poll"
 |            prompt-text="Which of these places would you travel to first?"
 |            prompt-size="large"
 |            endpoint=""
@@ -124,7 +124,7 @@ amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:113
 amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:113:8 The mandatory attribute 'option-1-image-alt' is missing in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
 >>         ^~~~~~~~~
 amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:113:8 The mandatory attribute 'option-2-image-alt' is missing in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
-|            id="invalid-correct-img-poll"
+|            id="missing-alt-img-poll"
 |            prompt-text="Which of these places would you travel to first?"
 |            prompt-size="large"
 |            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
@@ -137,6 +137,39 @@ amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:113
 |            option-3-image="https://images.com/3"
 |            option-3-confetti="🏝️"
 |            option-4-image="https://images.com/4"
+|            option-4-confetti="🏞️">
+|          </amp-story-interactive-img-poll>
+|        </amp-story-grid-layer>
+|      </amp-story-page>
+|      <amp-story-page id="5">
+|        <amp-story-grid-layer template="fill">
+|          <!-- Invalid: Image poll image URL must use a valid protocol -->
+|          <amp-story-interactive-img-poll
+>>         ^~~~~~~~~
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:134:8 Invalid URL protocol 'nothttps:' for attribute 'option-1-image' in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
+>>         ^~~~~~~~~
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:134:8 Invalid URL protocol 'nothttps:' for attribute 'option-2-image' in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
+>>         ^~~~~~~~~
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:134:8 Invalid URL protocol 'nothttps:' for attribute 'option-3-image' in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
+>>         ^~~~~~~~~
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:134:8 Invalid URL protocol 'nothttps:' for attribute 'option-4-image' in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
+|            id="invalid-img-url-img-poll"
+|            prompt-text="Which of these places would you travel to first?"
+|            prompt-size="large"
+|            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+|            theme="dark"
+|            chip-style="transparent"
+|            option-1-image="nothttps://images.com/1"
+|            option-1-image-alt="Lake Tahoe"
+|            option-1-confetti="🌲"
+|            option-2-image="nothttps://images.com/2"
+|            option-2-image-alt="Hong Kong"
+|            option-2-confetti="🏙️"
+|            option-3-image="nothttps://images.com/3"
+|            option-3-image-alt="Hawaii"
+|            option-3-confetti="🏝️"
+|            option-4-image="nothttps://images.com/4"
+|            option-4-image-alt="Grand Canyon"
 |            option-4-confetti="🏞️">
 |          </amp-story-interactive-img-poll>
 |        </amp-story-grid-layer>
