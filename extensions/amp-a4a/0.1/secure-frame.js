@@ -100,9 +100,18 @@ export function createSecureFrame(win, title, height, width) {
     )
   );
 
-  if (document.featurePolicy?.features().includes('attribution-reporting')) {
+  if (isAttributionReportingSupported(document)) {
     iframe.setAttribute('allow', `attribution-reporting 'src'`);
   }
 
   return iframe;
+}
+
+/**
+ * Determine if `attribution-reporting` API is available in browser.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+export function isAttributionReportingSupported(doc) {
+  return doc.featurePolicy?.features().includes('attribution-reporting');
 }
