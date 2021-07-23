@@ -31,8 +31,8 @@ class AmpSidebar extends BaseElement {
     /** @private {!../../../src/service/history-impl.History} */
     this.history_ = null;
 
-    /** @private {number} */
-    this.historyId_ = -1;
+    /** @private {number|null} */
+    this.historyId_ = null;
   }
 
   /** @override */
@@ -87,9 +87,9 @@ class AmpSidebar extends BaseElement {
     super.afterClose();
     this.removeAsContainer?.();
 
-    if (this.historyId_ != -1) {
+    if (this.historyId_ != null) {
       this.history_.pop(this.historyId_);
-      this.historyId_ = -1;
+      this.historyId_ = null;
     }
   }
 
