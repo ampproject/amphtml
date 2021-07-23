@@ -29,7 +29,7 @@ if ls /tmp/restored-workspace/.CI_GRACEFULLY_HALT_* 1>/dev/null 2>&1; then
   exit 0
 fi
 
-if [[ $CIRCLE_JOB == Experiment* ]]; then
+if [[ $CIRCLE_JOB == Experiment* || $CIRCLECI_JOB == Exp.* ]]; then
   # Extract the experiment name from the job name in `config.yml`.
   EXP=$(echo $CIRCLE_JOB | awk '{print $2}')
 
