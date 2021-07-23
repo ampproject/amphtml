@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview
- * Publish functions for the release tagger.
+ * Update release functions for the release tagger.
  * Parameters
  * 1. tag (or AMP version)
  * 2. action (publish | rollback)
@@ -50,17 +50,19 @@ async function _rollback(tag) {
 
 /**
  * Main function
+ * @param {string} tag
+ * @param {string} action
  * @return {Promise<Object>}
  */
-async function main() {
-  if (argv.action == 'publish') {
-    return await _publish(argv.tag);
+async function updateReleaseFunction(tag, action) {
+  if (action == 'publish') {
+    return await _publish(tag);
   }
 
-  if (argv.action == 'rollback') {
-    return await _rollback(argv.tag);
+  if (action == 'rollback') {
+    return await _rollback(tag);
   }
 }
 
-main();
-module.exports = {main};
+updateReleaseFunction(argv.tag, argv.action);
+module.exports = {updateReleaseFunction};

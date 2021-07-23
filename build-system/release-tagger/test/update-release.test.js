@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-process.argv.push('--action', 'publish', '--tag', '2007210123000');
-
 const nock = require('nock');
 const test = require('ava');
-const {main} = require('../update-release');
+const {updateReleaseFunction} = require('../update-release');
 
 test.before(() => nock.disableNetConnect());
 test.after(() => {
@@ -36,6 +34,26 @@ test('publish', async (t) => {
     .patch('/repos/ampproject/amphtml/releases/1', {prerelease: false})
     .reply(200, {id: 1});
 
-  await main();
+  await updateReleaseFunction('2007210123000', 'publish');
+  t.true(scope.isDone());
+});
+
+test('rollback', async (t) => {
+  const scope = nock('https://api.github.com')
+    // https://docs.github.com/en/rest/reference/repos#get-a-release-by-tag-name
+    .get('/repos/ampproject/amphtml/releases/tags/2007210123000')
+    .reply(200, {
+      id: 1,
+      body: 'This is a test release body',
+    })
+
+    // https://docs.github.com/en/rest/reference/repos#update-a-release
+    .patch('/repos/ampproject/amphtml/releases/1', {
+      prerelease: true,
+      body: '#### :back: This release was rolled back.\nThis is a test release body',
+    })
+    .reply(200, {id: 1});
+
+  await updateReleaseFunction('2007210123000', 'rollback');
   t.true(scope.isDone());
 });
