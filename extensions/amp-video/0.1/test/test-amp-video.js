@@ -916,12 +916,12 @@ describes.realWin(
           remoteSources.push({
             url: 'https://example.com/cached-video-2000.mp4',
             type: 'video/mp4',
-            bitrate_kbps: 2000,
+            'bitrate_kbps': 2000,
           });
           remoteSources.push({
             url: 'https://example.com/cached-video-720.mp4',
             type: 'video/mp4',
-            bitrate_kbps: 720,
+            'bitrate_kbps': 720,
           });
           const attrs = {
             src: 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
@@ -942,7 +942,7 @@ describes.realWin(
           storyPageEl.appendChild(v);
           doc.body.appendChild(storyEl);
           await v.buildInternal();
-          const impl = await v.getImpl(false);
+          await v.getImpl(false);
 
           try {
             await v.layoutCallback();
@@ -958,12 +958,12 @@ describes.realWin(
           remoteSources.push({
             url: 'https://example.com/cached-video-2000.mp4',
             type: 'video/mp4',
-            bitrate_kbps: 2000,
+            'bitrate_kbps': 2000,
           });
           remoteSources.push({
             url: 'https://example.com/cached-video-720.mp4',
             type: 'video/mp4',
-            bitrate_kbps: 720,
+            'bitrate_kbps': 720,
           });
           const attrs = {
             src: 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
@@ -986,7 +986,7 @@ describes.realWin(
           storyPageEl2.appendChild(v);
           doc.body.appendChild(storyEl);
           await v.buildInternal();
-          const impl = await v.getImpl(false);
+          await v.getImpl(false);
 
           try {
             await v.layoutCallback();
@@ -1017,7 +1017,7 @@ describes.realWin(
           storyPageEl.appendChild(v);
           doc.body.appendChild(storyEl);
           await v.buildInternal();
-          const impl = await v.getImpl(false);
+          await v.getImpl(false);
 
           try {
             await v.layoutCallback();
