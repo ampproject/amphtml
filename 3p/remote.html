@@ -6,7 +6,7 @@
 (function() {
 var v = location.search.substr(1);
 if (!(/^\d+(-canary)?$/.test(v))) return;
-var u = 'https://3p.ampproject.net/'+encodeURIComponent(v)+'/_ping_.js'; // Replace _ping_ with the vendor you wish to use
+var u = 'https://3p.ampproject.net/'+encodeURIComponent(v)+'/vendor/_ping_.js'; // Replace _ping_ with the vendor you wish to use
 document.write('<script'+' src="'+encodeURI(u)+'"><'+'/script>'); // lgtm [js/eval-like-call]
 })();
 </script>
