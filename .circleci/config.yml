@@ -60,7 +60,7 @@ commands:
             mkdir -p /tmp/workspace
       - run:
           name: 'Maybe Gracefully Halt'
-          command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/maybe_gracefully_halt.sh | bash
+          command: /tmp/restored-workspace/maybe_gracefully_halt.sh
       - restore_cache:
           keys:
             - source-v1-{{ .Branch }}-{{ .Revision }}
@@ -128,6 +128,9 @@ jobs:
       - run:
           name: 'Initialize Git'
           command: ./.circleci/compute_merge_commit.sh
+      - run:
+          name: 'Store maybe_gracefully_halt.sh in Workspace'
+          command: cp .circleci/maybe_gracefully_halt.sh /tmp/workspace
       - teardown_vm
   'Checks':
     executor:
