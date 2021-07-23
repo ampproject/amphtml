@@ -36,6 +36,7 @@ import {
   googleAdUrl,
   groupAmpAdsByType,
   maybeAppendErrorParameter,
+  maybeInsertOriginTrialToken,
   mergeExperimentIds,
 } from '#ads/google/a4a/utils';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
@@ -1222,5 +1223,29 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, (env) => {
           )
       );
     });
+  });
+});
+
+describes.realWin('maybeInsertOriginTrialToken', {}, (env) => {
+  let doc;
+  let win;
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
+
+  it('should insert the token', () => {
+    expect(doc.querySelector('meta[http-equiv=origin-trial]')).to.not.exist;
+    maybeInsertOriginTrialToken(win);
+    expect(doc.querySelector('meta[http-equiv=origin-trial]')).to.exist;
+  });
+
+  it('should only insert the token once on multiple calls', () => {
+    maybeInsertOriginTrialToken(win);
+    maybeInsertOriginTrialToken(win);
+    maybeInsertOriginTrialToken(win);
+    expect(
+      doc.querySelectorAll('meta[http-equiv=origin-trial]').length
+    ).to.equal(1);
   });
 });

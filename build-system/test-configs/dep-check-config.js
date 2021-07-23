@@ -149,6 +149,7 @@ exports.rules = [
       'ads/google/a4a/**->src/service/index.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',
       'ads/google/a4a/utils.js->src/ini-load.js',
+      'ads/google/a4a/utils.js->src/core/dom/index.js',
       'ads/google/a4a/utils.js->src/core/dom/layout/page-layout-box.js',
       // Some ads need to depend on json.js
       'ads/**->src/core/types/object/json.js',

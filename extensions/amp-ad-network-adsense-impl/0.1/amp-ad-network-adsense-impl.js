@@ -45,6 +45,7 @@ import {
   isCdnProxy,
   isReportingEnabled,
   maybeAppendErrorParameter,
+  maybeInsertOriginTrialToken,
 } from '#ads/google/a4a/utils';
 import {ResponsiveState} from './responsive-state';
 import {Services} from '#service';
@@ -183,6 +184,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   */
   buildCallback() {
     super.buildCallback();
+    maybeInsertOriginTrialToken(this.win);
     this.identityTokenPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() =>
