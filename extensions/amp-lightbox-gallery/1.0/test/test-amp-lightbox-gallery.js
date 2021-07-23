@@ -170,8 +170,7 @@ describes.realWin(
         await whenCalled(element.setAsContainerInternal);
         expect(triggerAnalyticsStub).to.have.been.calledOnceWithExactly(
           element,
-          'lightboxOpened',
-          env.sandbox.match({})
+          'lightboxOpened'
         );
 
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
@@ -258,8 +257,7 @@ describes.realWin(
         await whenCalled(element.setAsContainerInternal);
         expect(triggerAnalyticsStub).to.have.been.calledOnceWithExactly(
           element,
-          'lightboxOpened',
-          env.sandbox.match({})
+          'lightboxOpened'
         );
 
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
@@ -293,8 +291,7 @@ describes.realWin(
         await whenCalled(element.setAsContainerInternal);
         expect(triggerAnalyticsStub).to.have.been.calledOnceWithExactly(
           element,
-          'lightboxOpened',
-          env.sandbox.match({})
+          'lightboxOpened'
         );
 
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
@@ -325,8 +322,7 @@ describes.realWin(
           .dispatchEvent(event);
         expect(triggerAnalyticsStub).to.have.been.calledOnceWithExactly(
           element,
-          'thumbnailsViewToggled',
-          env.sandbox.match({})
+          'thumbnailsViewToggled'
         );
       });
     });
@@ -719,8 +715,7 @@ describes.realWin(
           .click();
         expect(triggerAnalyticsStub).to.have.been.calledOnceWithExactly(
           element,
-          'descriptionOverflowToggled',
-          env.sandbox.match({})
+          'descriptionOverflowToggled'
         );
       });
     });
