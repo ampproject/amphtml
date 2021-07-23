@@ -15,11 +15,12 @@
  */
 
 /**
- * AMP Components must implement this function in order to be server-rendered.
+ * AMP Components must implement this "buildDom" function in order to be server-rendered.
  *
- * - The BuildDomFunction should perform all of the DOM manipulations necessary
- *   in order to render a components.
- * - It cannot perform any side effects, such as adding event listeners.
+ * - It must perform all of the DOM manipulations necessary to render a component.
+ *   Note: this is a subset of the responsibilities of buildCallback.
+ * - It must not perform any side effects, such as adding event listeners or assigning instance variables.
+ * - It must not perform any of the operations involved with layoutCallback (loading).
  *
- * @typedef {function(element:!Element): *} BuildDom
+ * @typedef {function(!Element):*} BuildDom
  */
