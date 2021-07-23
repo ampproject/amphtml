@@ -37,7 +37,11 @@ import {
 import {assertHttpsUrl} from '../../../src/url';
 import {cancellation, isCancellation} from '../../../src/error-reporting';
 import {createElementWithAttributes} from '#core/dom';
-import {createSecureDocSkeleton, createSecureFrame} from './secure-frame';
+import {
+  createSecureDocSkeleton,
+  createSecureFrame,
+  isAttributionReportingSupported,
+} from './secure-frame';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {duplicateErrorIfNecessary} from '#core/error';
@@ -2040,7 +2044,14 @@ export class AmpA4A extends AMP.BaseElement {
     // Block synchronous XHR in ad. These are very rare, but super bad for UX
     // as they block the UI thread for the arbitrary amount of time until the
     // request completes.
-    mergedAttributes['allow'] = "sync-xhr 'none';";
+    let featurePolicies = "sync-xhr 'none';";
+
+    if (isAttributionReportingSupported(this.win.document)) {
+      featurePolicies += "attribution-reporting 'src';";
+    }
+
+    mergedAttributes['allow'] = featurePolicies;
+
     this.iframe = /** @type {!HTMLIFrameElement} */ (
       createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),
