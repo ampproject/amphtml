@@ -76,14 +76,13 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
   buildComponent() {
     this.rootEl_ = buildImgTemplate(this.element);
     this.attachContent_(this.rootEl_);
+    this.setBackgroundImage(this.rootEl_);
     return this.rootEl_;
   }
 
   /** @override */
   layoutCallback() {
-    const root = dev().assertElement(this.rootEl_);
-    this.setBackgroundImage(root);
-    this.setBubbleTextColor_(root);
+    this.setBubbleTextColor_(dev().assertElement(this.rootEl_));
     return super.layoutCallback();
   }
 

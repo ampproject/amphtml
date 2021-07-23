@@ -21,7 +21,6 @@ import {
 import {CSS} from '../../../build/amp-story-interactive-img-poll-0.1.css';
 import {CSS as ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
 import {buildImgTemplate} from './utils';
-import {dev} from '../../../src/log';
 import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles} from '#core/dom/style';
 
@@ -64,13 +63,8 @@ export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
   buildComponent() {
     this.rootEl_ = buildImgTemplate(this.element);
     this.attachContent_(this.rootEl_);
+    this.setBackgroundImage(this.rootEl_);
     return this.rootEl_;
-  }
-
-  /** @override */
-  layoutCallback() {
-    this.setBackgroundImage(dev().assertElement(this.rootEl_));
-    return super.layoutCallback();
   }
 
   /**
