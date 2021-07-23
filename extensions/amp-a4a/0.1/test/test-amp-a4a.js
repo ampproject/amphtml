@@ -25,6 +25,7 @@ import '../../../amp-ad/0.1/amp-ad';
 import * as analytics from '../../../../src/analytics';
 import * as analyticsExtension from '../../../../src/extension-analytics';
 import * as mode from '../../../../src/mode';
+import * as secureFrame from '../secure-frame';
 import {AMP_SIGNATURE_HEADER, VerificationStatus} from '../signature-verifier';
 import {
   AmpA4A,
@@ -938,6 +939,30 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
       });
 
       it('should set feature policy for sync-xhr', async () => {
+        a4a.sandboxHTMLCreativeFrame = () => true;
+        a4a.onLayoutMeasure();
+        await a4a.layoutCallback();
+        verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
+        expect(a4a.iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
+      });
+
+      it('should set feature policy for attribution-reporting when supported', async () => {
+        env.sandbox
+          .stub(secureFrame, 'isAttributionReportingSupported')
+          .returns(true);
+        a4a.sandboxHTMLCreativeFrame = () => true;
+        a4a.onLayoutMeasure();
+        await a4a.layoutCallback();
+        verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
+        expect(a4a.iframe.getAttribute('allow')).to.equal(
+          "sync-xhr 'none';attribution-reporting 'src';"
+        );
+      });
+
+      it('should not set feature policy for attribution-reporting when not supported', async () => {
+        env.sandbox
+          .stub(secureFrame, 'isAttributionReportingSupported')
+          .returns(false);
         a4a.sandboxHTMLCreativeFrame = () => true;
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
