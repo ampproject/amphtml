@@ -140,10 +140,8 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     };
     requestAnimationFrame(animateFrame);
 
-    function map(num, in_min, in_max, out_min, out_max) {
-      return (
-        ((num - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
-      );
+    function map(num, inMin, inMax, outMin, outMax) {
+      return ((num - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
     }
   }
 

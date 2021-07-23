@@ -66,7 +66,10 @@
 .i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-bubble {
   --scale-var: calc(var(--fraction) + 1) !important;
   /* Move the bubble up by sqrt(2)/2=70.7% to account for the pointy corner */
-  transform: translate(var(--translate-x-center), calc(-160% - var(--fraction) * 70.7%))
+  transform: translate(
+      var(--translate-x-center),
+      calc(-160% - var(--fraction) * 70.7%)
+    )
     scale(var(--scale-var)) !important;
 }
 
@@ -148,7 +151,7 @@
   background: var(--interactive-accent-color) !important;
   border-radius: 50% !important;
   position: relative !important;
- }
+}
 
 .i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
   transform: rotate(45deg) !important;
