@@ -50,6 +50,16 @@ const TAG = 'amp-ad-exit';
  */
 let NavigationTargetDef;
 
+/**
+ * Indicates the status of the `attribution-reporting` API.
+ * @enum
+ */
+const AttributionReportingStatus = {
+  ATTRIBUTION_MACRO_PRESENT: 1,
+  ATTRIBUTION_DATA_PRESENT: 2,
+  ATTRIBUTION_DATA_PRESENT_AND_POLICY_ENABLED: 3,
+};
+
 export class AmpAdExit extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -193,14 +203,20 @@ export class AmpAdExit extends AMP.BaseElement {
    */
   getUrlVariableRewriter_(args, event, target) {
     const substitutionFunctions = {
+      'ATTRIBUTION_REPORTING_STATUS': () =>
+        getAttributionReportingStatus(
+          this.isAttributionReportingSupported_,
+          target
+        ),
       'CLICK_X': () => event.clientX,
       'CLICK_Y': () => event.clientY,
     };
     const replacements = Services.urlReplacementsForDoc(this.element);
     const allowlist = {
-      'RANDOM': true,
+      'ATTRIBUTION_REPORTING_STATUS': true,
       'CLICK_X': true,
       'CLICK_Y': true,
+      'RANDOM': true,
     };
     if (target['vars']) {
       for (const customVarName in target['vars']) {
@@ -574,3 +590,26 @@ export class AmpAdExit extends AMP.BaseElement {
 AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAdExit);
 });
+
+/**
+ * Resolves the ATTRIBUTION_REPORTING_STATUS macro to the appropriate value
+ * based on the given config and browser support.
+ * @param {boolean} isAttributionReportingSupported
+ * @param {!NavigationTargetDef} target
+ * @return {AttributionReportingStatus}
+ * @visibleForTesting
+ */
+export function getAttributionReportingStatus(
+  isAttributionReportingSupported,
+  target
+) {
+  if (
+    target?.behaviors?.browserAdConversion &&
+    isAttributionReportingSupported
+  ) {
+    return AttributionReportingStatus.ATTRIBUTION_DATA_PRESENT_AND_POLICY_ENABLED;
+  } else if (target?.behaviors?.browserAdConversion) {
+    return AttributionReportingStatus.ATTRIBUTION_DATA_PRESENT;
+  }
+  return AttributionReportingStatus.ATTRIBUTION_MACRO_PRESENT;
+}
