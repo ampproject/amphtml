@@ -158,7 +158,9 @@ amp-ad[sticky='top'] {
 }
 
 amp-ad[sticky='bottom'] {
+  max-width: 100%;
   width: 100% !important;
+  max-height: 20%;
   padding-bottom: env(safe-area-inset-bottom, 0px);
   background: #fff;
   bottom: 0;
