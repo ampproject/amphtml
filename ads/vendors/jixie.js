@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript} from '../../3p/3p';
+import {loadScript} from '#3p/3p';
 
 /**
  * @param {!Window} global
@@ -23,8 +23,5 @@ import {loadScript} from '../../3p/3p';
 export function jixie(global, data) {
   // For flexibility, all validations are performed in the
   // Jixie side based on the data on the page for the amp-ad 
-  const {src} = data;
   loadScript(global, 'https://scripts.jixie.io/jxamp.min.js');
-
-  
 }

@@ -649,7 +649,7 @@ const adConfig = jsonConfiguration({
     prefetch: ['https://scripts.jixie.io/jxamp.min.js'],
     clientIdScope: '__jxamp',
     clientIdCookieName: '_jx',
-    renderStartImplemented: true
+    renderStartImplemented: true,
   },
 
   'kixer': {
