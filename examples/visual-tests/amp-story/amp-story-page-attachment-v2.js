@@ -176,6 +176,42 @@ module.exports = {
     ]);
   },
 
+  'Inline CTA attachment opens to max of content on mobile and in modal on desktop':
+    async (page, name) => {
+      const url = await page.url();
+      const pageID = 'inline-custom-text';
+      await page.goto(`${url}#page=${pageID}`);
+      await page.waitForSelector(
+        `amp-story-page#${pageID}[active][distance="0"]`
+      );
+      await verifySelectorsVisible(page, name, [
+        '.i-amphtml-story-page-open-attachment[active]',
+      ]);
+      await page.tap('.i-amphtml-story-page-open-attachment[active]');
+      await page.waitForTimeout(1000);
+    },
+
+  'Inline CTA attachment opens to 80% on mobile and in modal on desktop':
+    async (page, name) => {
+      const url = await page.url();
+      const pageID = 'inline-dark-theme';
+      await page.goto(`${url}#page=${pageID}`);
+      await page.waitForSelector(
+        `amp-story-page#${pageID}[active][distance="0"]`
+      );
+      await verifySelectorsVisible(page, name, [
+        '.i-amphtml-story-page-open-attachment[active]',
+      ]);
+      await page.tap('.i-amphtml-story-page-open-attachment[active]');
+      await page.waitForTimeout(1000);
+      await page.evaluate(() => {
+        window.scrollBy(0, window.innerHeight);
+      });
+      await page.waitForSelector(
+        '.i-amphtml-story-draggable-drawer-header-stuck'
+      );
+    },
+
   'Legacy amp-story-page-attachment with href should display': async (
     page,
     name
