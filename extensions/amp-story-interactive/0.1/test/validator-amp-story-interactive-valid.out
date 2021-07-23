@@ -16,7 +16,7 @@ PASS
 |  -->
 |  <!--
 |    Test Description:
-|    One correct component of each type: binary-poll, poll, quiz, results
+|    One correct component of each type: binary-poll, poll, quiz, image poll, image quiz, results
 |  -->
 |  <!doctype html>
 |  <html ⚡ lang="en">
@@ -77,6 +77,43 @@ PASS
 |        </amp-story-grid-layer>
 |      </amp-story-page>
 |      <amp-story-page id="4">
+|        <amp-story-grid-layer template="fill">
+|          <!-- Valid: Example of amp-story-interactive-img-poll -->
+|          <amp-story-interactive-img-poll
+|            id="correct-img-poll"
+|            prompt-text="Which of these places would you travel to first?"
+|            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+|            option-1-image="https://images.unsplash.com/photo-1577416026704-0fe2d48a0f20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+|            option-1-image-alt="Lake Tahoe"
+|            option-2-image="https://images.unsplash.com/photo-1506970845246-18f21d533b20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+|            option-2-image-alt="Hong Kong"
+|            option-3-image="https://images.unsplash.com/photo-1559494007-9f5847c49d94?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+|            option-3-image-alt="Hawaii"
+|            option-4-image="https://images.unsplash.com/photo-1516302350523-4c29d47b89e0?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+|            option-4-image-alt="Grand Canyon">
+|          </amp-story-interactive-img-poll>
+|        </amp-story-grid-layer>
+|      </amp-story-page>
+|      <amp-story-page id="5">
+|        <amp-story-grid-layer template="fill">
+|          <!-- Valid: Example of amp-story-interactive-img-quiz -->
+|          <amp-story-interactive-img-quiz
+|            id="correct-img-quiz"
+|            prompt-text="Which of these structures is oldest?"
+|            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+|            option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+|            option-1-image-alt="Statue of Liberty"
+|            option-1-correct
+|            option-2-image="https://images.unsplash.com/photo-1610312278520-bcc893a3ff1d?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1460&q=80"
+|            option-2-image-alt="Golden Gate Bridge"
+|            option-3-image="https://images.unsplash.com/photo-1585436588477-340db86fc852?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2804&q=80"
+|            option-3-image-alt="Christ the Redeemer"
+|            option-4-image="https://images.unsplash.com/photo-1543349689-9a4d426bee8e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1382&q=80"
+|            option-4-image-alt="Eiffel Tower">
+|          </amp-story-interactive-img-quiz>
+|        </amp-story-grid-layer>
+|      </amp-story-page>
+|      <amp-story-page id="6">
 |        <amp-story-grid-layer template="fill">
 |        <!-- Valid: Example of amp-story-interactive-results -->
 |          <amp-story-interactive-results

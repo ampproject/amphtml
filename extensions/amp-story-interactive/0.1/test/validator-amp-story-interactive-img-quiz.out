@@ -1,0 +1,127 @@
+FAIL
+|  <!--
+|    Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+|
+|    Licensed under the Apache License, Version 2.0 (the "License");
+|    you may not use this file except in compliance with the License.
+|    You may obtain a copy of the License at
+|
+|        http://www.apache.org/licenses/LICENSE-2.0
+|
+|    Unless required by applicable law or agreed to in writing, software
+|    distributed under the License is distributed on an "AS-IS" BASIS,
+|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+|    See the License for the specific language governing permissions and
+|    limitations under the license.
+|  -->
+|  <!--
+|    Test Description:
+|    Correct image quiz, as well as 3 incorrect image quizzes
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <title>STAMP examples</title>
+|    <link rel="canonical" href="http://nonblocking.io/" >
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+|    <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>
+|  </head>
+|  <body>
+|    <amp-story standalone title="My Story" publisher="Me" publisher-logo-src="http://me.com/logo.png" poster-portrait-src="http://me.com/portrait.jpg" poster-square-src="http://me.com/square.jpg" poster-landscape-src="http://me.com/landscape.jpg" background-audio="http://me.com/path/to/my.mp3" entity="Someone else" entity-logo-src="http://someoneelse.com/logo.png" entity-url="http://someoneelse.com/profile">
+|      <amp-story-page id="1">
+|        <amp-story-grid-layer template="fill">
+|          <!-- Valid: Example of amp-story-interactive-img-quiz -->
+|          <amp-story-interactive-img-quiz
+|            id="correct-img-quiz"
+|            prompt-text="Which of these structures is oldest?"
+|            prompt-size="large"
+|            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+|            style="
+|              --interactive-accent-color: rgb(16, 218, 93);
+|              --interactive-prompt-background: rgb(4, 41, 18);
+|              --interactive-prompt-text-color: rgb(16, 218, 93);
+|            "
+|            option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+|            option-1-image-alt="Statue of Liberty"
+|            option-1-correct
+|            option-1-confetti="🎉"
+|            option-2-image="https://images.unsplash.com/photo-1610312278520-bcc893a3ff1d?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1460&q=80"
+|            option-2-image-alt="Golden Gate Bridge"
+|            option-3-image="https://images.unsplash.com/photo-1585436588477-340db86fc852?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2804&q=80"
+|            option-3-image-alt="Christ the Redeemer"
+|            option-4-image="https://images.unsplash.com/photo-1543349689-9a4d426bee8e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1382&q=80"
+|            option-4-image-alt="Eiffel Tower">
+|          </amp-story-interactive-img-quiz>
+|        </amp-story-grid-layer>
+|      </amp-story-page>
+|      <amp-story-page id="2">
+|        <amp-story-grid-layer template="fill">
+|          <!-- Invalid: Image quiz missing a option-{1/2/3/4}-correct -->
+|          <amp-story-interactive-img-quiz
+>>         ^~~~~~~~~
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:63:8 The tag 'amp-story-interactive-img-quiz' is missing a mandatory attribute - pick one of ['option-1-correct', 'option-2-correct', 'option-3-correct', 'option-4-correct']. (see https://amp.dev/documentation/components/amp-story-interactive)
+|            id="missing-correct-img-quiz"
+|            prompt-text="Which of these structures is oldest?"
+|            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+|            option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+|            option-1-image-alt="Statue of Liberty"
+|            option-2-image="https://images.unsplash.com/photo-1610312278520-bcc893a3ff1d?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1460&q=80"
+|            option-2-image-alt="Golden Gate Bridge"
+|            option-3-image="https://images.unsplash.com/photo-1585436588477-340db86fc852?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2804&q=80"
+|            option-3-image-alt="Christ the Redeemer"
+|            option-4-image="https://images.unsplash.com/photo-1543349689-9a4d426bee8e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1382&q=80"
+|            option-4-image-alt="Eiffel Tower">
+|          </amp-story-interactive-img-quiz>
+|        </amp-story-grid-layer>
+|      </amp-story-page>
+|      <amp-story-page id="3">
+|        <amp-story-grid-layer template="fill">
+|          <!-- Invalid: Image quiz endpoint must be a valid URL -->
+|          <amp-story-interactive-img-quiz
+>>         ^~~~~~~~~
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:81:8 Missing URL for attribute 'endpoint' in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
+|            id="invalid-endpoint-img-quiz"
+|            prompt-text="Which of these structures is oldest?"
+|            endpoint=""
+|            option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+|            option-1-image-alt="Statue of Liberty"
+|            option-1-correct
+|            option-2-image="https://images.unsplash.com/photo-1610312278520-bcc893a3ff1d?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1460&q=80"
+|            option-2-image-alt="Golden Gate Bridge"
+|            option-3-image="https://images.unsplash.com/photo-1585436588477-340db86fc852?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2804&q=80"
+|            option-3-image-alt="Christ the Redeemer"
+|            option-4-image="https://images.unsplash.com/photo-1543349689-9a4d426bee8e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1382&q=80"
+|            option-4-image-alt="Eiffel Tower">
+|          </amp-story-interactive-img-quiz>
+|        </amp-story-grid-layer>
+|      </amp-story-page>
+|  		<amp-story-page id="4">
+|        <amp-story-grid-layer template="fill">
+|          <!-- Invalid: Image quiz options must have alt attributes -->
+|          <amp-story-interactive-img-quiz
+>>         ^~~~~~~~~
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:100:8 The attribute 'option-3-image-alt' in tag 'amp-story-interactive-img-quiz' is missing or incorrect, but required by attribute 'option-3-image'. (see https://amp.dev/documentation/components/amp-story-interactive)
+>>         ^~~~~~~~~
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:100:8 The attribute 'option-4-image-alt' in tag 'amp-story-interactive-img-quiz' is missing or incorrect, but required by attribute 'option-4-image'. (see https://amp.dev/documentation/components/amp-story-interactive)
+>>         ^~~~~~~~~
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:100:8 The mandatory attribute 'option-1-image-alt' is missing in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
+>>         ^~~~~~~~~
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:100:8 The mandatory attribute 'option-2-image-alt' is missing in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
+|            id="missing-alt-img-quiz"
+|            prompt-text="Which of these structures is oldest?"
+|            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+|            option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+|            option-1-correct
+|            option-2-image="https://images.unsplash.com/photo-1610312278520-bcc893a3ff1d?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1460&q=80"
+|            option-3-image="https://images.unsplash.com/photo-1585436588477-340db86fc852?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2804&q=80"
+|            option-4-image="https://images.unsplash.com/photo-1543349689-9a4d426bee8e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1382&q=80">
+|          </amp-story-interactive-img-quiz>
+|        </amp-story-grid-layer>
+|      </amp-story-page>
+|    </amp-story>
+|  </body>
+|  </html>
