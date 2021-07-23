@@ -743,13 +743,13 @@ export class AmpStoryPlayer {
     if (DESKTOP_PANEL_STORY_PLAYER_EXP_ON) {
       if (this.win_.ResizeObserver) {
         new this.win_.ResizeObserver((e) => {
-          const {width, height} = e[0].contentRect;
-          this.onPlayerResize_(width, height);
+          const {height, width} = e[0].contentRect;
+          this.onPlayerResize_(height, width);
         }).observe(this.element_);
       } else {
         // Set size once as fallback for browsers not supporting ResizeObserver.
-        const {width, height} = this.element_.getBoundingClientRect();
-        this.onPlayerResize_(width, height);
+        const {height, width} = this.element_./*OK*/ getBoundingClientRect();
+        this.onPlayerResize_(height, width);
       }
     }
     this.render_();
@@ -795,11 +795,11 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * @param {number} width
    * @param {number} height
+   * @param {number} width
    * @private
    */
-  onPlayerResize_(width, height) {
+  onPlayerResize_(height, width) {
     const isDesktopOnePanel =
       width / height > DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD;
 
