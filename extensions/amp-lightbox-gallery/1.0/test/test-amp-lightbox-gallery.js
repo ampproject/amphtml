@@ -20,6 +20,7 @@ import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
 import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 import {installLightboxGallery} from '../amp-lightbox-gallery';
+import * as analytics from '../../../../src/analytics';
 import {poll} from '#testing/iframe';
 import {toggleExperiment} from '#experiments';
 import {waitFor, whenCalled} from '#testing/test-helper';
@@ -143,6 +144,10 @@ describes.realWin(
       });
 
       it('should open when writing "open" attribute', async () => {
+        const triggerAnalyticsStub = env.sandbox.stub(
+          analytics,
+          'triggerAnalyticsEvent'
+        );
         env.sandbox.stub(element, 'setAsContainerInternal');
         env.sandbox.stub(element, 'removeAsContainerInternal');
 
@@ -163,6 +168,11 @@ describes.realWin(
         expect(renderedImgs[0].srcset).to.equal('img.jpg 1x');
 
         await whenCalled(element.setAsContainerInternal);
+        expect(triggerAnalyticsStub).to.have.been.calledOnceWithExactly(
+          element,
+          'lightboxOpened'
+        );
+
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
         expect(scroller).not.to.be.null;
         expect(element.setAsContainerInternal).to.be.calledWith(scroller);
@@ -223,6 +233,10 @@ describes.realWin(
       });
 
       it('should open with default action', async () => {
+        const triggerAnalyticsStub = env.sandbox.stub(
+          analytics,
+          'triggerAnalyticsEvent'
+        );
         env.sandbox.stub(element, 'setAsContainerInternal');
         env.sandbox.stub(element, 'removeAsContainerInternal');
 
@@ -241,6 +255,11 @@ describes.realWin(
         expect(renderedImgs[0].srcset).to.equal('img.jpg 1x');
 
         await whenCalled(element.setAsContainerInternal);
+        expect(triggerAnalyticsStub).to.have.been.calledOnceWithExactly(
+          element,
+          'lightboxOpened'
+        );
+
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
         expect(scroller).not.to.be.null;
         expect(element.setAsContainerInternal).to.be.calledWith(scroller);
@@ -248,6 +267,10 @@ describes.realWin(
       });
 
       it('should open with "open" action', async () => {
+        const triggerAnalyticsStub = env.sandbox.stub(
+          analytics,
+          'triggerAnalyticsEvent'
+        );
         env.sandbox.stub(element, 'setAsContainerInternal');
         env.sandbox.stub(element, 'removeAsContainerInternal');
 
@@ -266,10 +289,41 @@ describes.realWin(
         expect(renderedImgs[0].srcset).to.equal('img.jpg 1x');
 
         await whenCalled(element.setAsContainerInternal);
+        expect(triggerAnalyticsStub).to.have.been.calledOnceWithExactly(
+          element,
+          'lightboxOpened'
+        );
+
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
         expect(scroller).not.to.be.null;
         expect(element.setAsContainerInternal).to.be.calledWith(scroller);
         expect(element.removeAsContainerInternal).to.not.be.called;
+      });
+
+      it('should open with "open" action and toggle to grid view', async () => {
+        env.sandbox.stub(element, 'setAsContainerInternal');
+        env.sandbox.stub(element, 'removeAsContainerInternal');
+
+        expect(element.hasAttribute('open')).to.be.false;
+        expect(element.hasAttribute('hidden')).to.be.true;
+
+        element.enqueAction(invocation(element, 'open'));
+        await waitForOpen(element, true);
+        expect(element.hasAttribute('hidden')).to.be.false;
+
+        const triggerAnalyticsStub = env.sandbox.stub(
+          analytics,
+          'triggerAnalyticsEvent'
+        );
+        const event = document.createEvent('SVGEvents');
+        event.initEvent('click');
+        element.shadowRoot
+          .querySelector('[aria-label="Switch to grid view"]')
+          .dispatchEvent(event);
+        expect(triggerAnalyticsStub).to.have.been.calledOnceWithExactly(
+          element,
+          'thumbnailsViewToggled'
+        );
       });
     });
 
@@ -622,6 +676,47 @@ describes.realWin(
           element.shadowRoot.querySelector('.amp-lightbox-gallery-caption')
             .textContent
         ).to.equal('alt img');
+      });
+
+      it('should toggle overflowing caption on click', async () => {
+        const img = html` <figure>
+          <img lightbox src="img.jpg" />
+          <figcaption>
+            This is the caption for the first image. Lorem Ipsum is simply dummy
+            text of the printing and typesetting industry. Lorem Ipsum has been
+            the industry's standard dummy text ever since the 1500s, when an
+            unknown printer took a galley of type and scrambled it to make a
+            type specimen book. It has survived not only five centuries, but
+            also the leap into electronic typesetting, remaining essentially
+            unchanged. It was popularised in the 1960s with the release of
+            Letraset sheets containing Lorem Ipsum passages, and more recently
+            with desktop publishing software like Aldus PageMaker including
+            versions of Lorem Ipsum. Lorem Ipsum is simply dummy text of the
+            printing and typesetting industry. Lorem Ipsum is simply dummy text
+            of the printing and typesetting industry. Lorem Ipsum is simply
+            dummy text of the printing and typesetting industry.
+          </figcaption>
+        </figure>`;
+        doc.body.appendChild(img);
+        await installLightboxGallery(env.ampdoc);
+        element = doc.getElementById(TAG);
+        await element.buildInternal();
+
+        element.enqueAction(invocation(element, DEFAULT_ACTION));
+        await waitForOpen(element, true);
+        expect(element.hasAttribute('hidden')).to.be.false;
+
+        const triggerAnalyticsStub = env.sandbox.stub(
+          analytics,
+          'triggerAnalyticsEvent'
+        );
+        element.shadowRoot
+          .querySelector('.amp-lightbox-gallery-caption')
+          .click();
+        expect(triggerAnalyticsStub).to.have.been.calledOnceWithExactly(
+          element,
+          'descriptionOverflowToggled'
+        );
       });
     });
   }

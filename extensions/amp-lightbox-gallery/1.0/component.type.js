@@ -22,6 +22,11 @@ var LightboxGalleryDef = {};
 /**
  * @typedef {{
  *   children: (PreactDef.Renderable),
+ *   onBeforeOpen: (function():void|undefined),
+ *   onAfterOpen: (function():void|undefined),
+ *   onAfterClose: (function():void|undefined),
+ *   onViewGrid: (function():void|undefined),
+ *   onToggleCaption: (function():void|undefined),
  *   render: (function():PreactDef.Renderable|undefined),
  * }}
  */
