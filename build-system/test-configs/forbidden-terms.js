@@ -431,6 +431,7 @@ const forbiddenTermsGlobal = {
     allowlist: [
       'build-system/externs/amp.extern.js',
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js',
+      'extensions/amp-video/0.1/video-cache.js',
       'src/utils/xhr-utils.js',
     ],
   },
@@ -861,6 +862,7 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'src/service/extensions-impl.js',
       'extensions/amp-ad/0.1/amp-ad.js',
+      'extensions/amp-sticky-ad/1.0/amp-sticky-ad.js',
     ],
   },
   'reject\\(\\)': {
