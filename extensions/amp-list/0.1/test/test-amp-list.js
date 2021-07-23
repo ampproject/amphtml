@@ -345,7 +345,8 @@ describes.repeated(
                   return list.layoutCallback();
                 });
 
-                it('should not unlock height for layout=container for unsuccessful attemptChangeHeight', () => {
+                // TODO(#35361): disabled in #35379
+                it.skip('should not unlock height for layout=container for unsuccessful attemptChangeHeight', () => {
                   expect(list.isLayoutSupported('container')).to.be.true;
                   expect(list.enableManagedResizing_).to.be.true;
                   expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
