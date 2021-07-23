@@ -242,7 +242,6 @@ window.__AMP_PARENT;
 window.__AMP_WEAKREF_ID;
 window.__AMP_URL_CACHE;
 window.__AMP_LOG;
-window.__AMP_OT_INSERTED;
 
 /** @type {undefined|boolean} */
 window.ENABLE_LOG;

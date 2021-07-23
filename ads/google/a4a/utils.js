@@ -124,7 +124,7 @@ const TOKEN_VALUE =
  * @param {!Window} win
  */
 export function maybeInsertOriginTrialToken(win) {
-  if (win.__AMP_OT_INSERTED) {
+  if (win.document.querySelector(`meta[content=${TOKEN_VALUE}]`)) {
     return;
   }
   const metaEl = createElementWithAttributes(win.document, 'meta', {
@@ -132,7 +132,6 @@ export function maybeInsertOriginTrialToken(win) {
     content: TOKEN_VALUE,
   });
   win.document.head.appendChild(metaEl);
-  win.__AMP_OT_INSERTED = true;
 }
 
 /**
