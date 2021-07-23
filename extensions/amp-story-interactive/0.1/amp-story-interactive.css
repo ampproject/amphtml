@@ -26,6 +26,10 @@
   border-radius: 2em !important;
 }
 
+.i-amphtml-story-interactive-no-prompt {
+  background: transparent !important;
+}
+
 .i-amphtml-story-interactive-prompt-container {
   display: flex !important;
   justify-items: center !important;
