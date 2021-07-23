@@ -40,20 +40,15 @@ FAIL
 |            prompt-text="Which of these structures is oldest?"
 |            prompt-size="large"
 |            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
-|            style="
-|              --interactive-accent-color: rgb(16, 218, 93);
-|              --interactive-prompt-background: rgb(4, 41, 18);
-|              --interactive-prompt-text-color: rgb(16, 218, 93);
-|            "
-|            option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+|            option-1-image="https://images.com/1"
 |            option-1-image-alt="Statue of Liberty"
 |            option-1-correct
 |            option-1-confetti="🎉"
-|            option-2-image="https://images.unsplash.com/photo-1610312278520-bcc893a3ff1d?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1460&q=80"
+|            option-2-image="https://images.com/2"
 |            option-2-image-alt="Golden Gate Bridge"
-|            option-3-image="https://images.unsplash.com/photo-1585436588477-340db86fc852?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2804&q=80"
+|            option-3-image="https://images.com/3"
 |            option-3-image-alt="Christ the Redeemer"
-|            option-4-image="https://images.unsplash.com/photo-1543349689-9a4d426bee8e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1382&q=80"
+|            option-4-image="https://images.com/4"
 |            option-4-image-alt="Eiffel Tower">
 |          </amp-story-interactive-img-quiz>
 |        </amp-story-grid-layer>
@@ -63,17 +58,17 @@ FAIL
 |          <!-- Invalid: Image quiz missing a option-{1/2/3/4}-correct -->
 |          <amp-story-interactive-img-quiz
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:63:8 The tag 'amp-story-interactive-img-quiz' is missing a mandatory attribute - pick one of ['option-1-correct', 'option-2-correct', 'option-3-correct', 'option-4-correct']. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:58:8 The tag 'amp-story-interactive-img-quiz' is missing a mandatory attribute - pick one of ['option-1-correct', 'option-2-correct', 'option-3-correct', 'option-4-correct']. (see https://amp.dev/documentation/components/amp-story-interactive)
 |            id="missing-correct-img-quiz"
 |            prompt-text="Which of these structures is oldest?"
 |            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
-|            option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+|            option-1-image="https://images.com/1"
 |            option-1-image-alt="Statue of Liberty"
-|            option-2-image="https://images.unsplash.com/photo-1610312278520-bcc893a3ff1d?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1460&q=80"
+|            option-2-image="https://images.com/2"
 |            option-2-image-alt="Golden Gate Bridge"
-|            option-3-image="https://images.unsplash.com/photo-1585436588477-340db86fc852?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2804&q=80"
+|            option-3-image="https://images.com/3"
 |            option-3-image-alt="Christ the Redeemer"
-|            option-4-image="https://images.unsplash.com/photo-1543349689-9a4d426bee8e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1382&q=80"
+|            option-4-image="https://images.com/4"
 |            option-4-image-alt="Eiffel Tower">
 |          </amp-story-interactive-img-quiz>
 |        </amp-story-grid-layer>
@@ -83,18 +78,18 @@ amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:63:
 |          <!-- Invalid: Image quiz endpoint must be a valid URL -->
 |          <amp-story-interactive-img-quiz
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:81:8 Missing URL for attribute 'endpoint' in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:76:8 Missing URL for attribute 'endpoint' in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
 |            id="invalid-endpoint-img-quiz"
 |            prompt-text="Which of these structures is oldest?"
 |            endpoint=""
-|            option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+|            option-1-image="https://images.com/1"
 |            option-1-image-alt="Statue of Liberty"
 |            option-1-correct
-|            option-2-image="https://images.unsplash.com/photo-1610312278520-bcc893a3ff1d?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1460&q=80"
+|            option-2-image="https://images.com/2"
 |            option-2-image-alt="Golden Gate Bridge"
-|            option-3-image="https://images.unsplash.com/photo-1585436588477-340db86fc852?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2804&q=80"
+|            option-3-image="https://images.com/3"
 |            option-3-image-alt="Christ the Redeemer"
-|            option-4-image="https://images.unsplash.com/photo-1543349689-9a4d426bee8e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1382&q=80"
+|            option-4-image="https://images.com/4"
 |            option-4-image-alt="Eiffel Tower">
 |          </amp-story-interactive-img-quiz>
 |        </amp-story-grid-layer>
@@ -104,21 +99,21 @@ amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:81:
 |          <!-- Invalid: Image quiz options must have alt attributes -->
 |          <amp-story-interactive-img-quiz
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:100:8 The attribute 'option-3-image-alt' in tag 'amp-story-interactive-img-quiz' is missing or incorrect, but required by attribute 'option-3-image'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:95:8 The attribute 'option-3-image-alt' in tag 'amp-story-interactive-img-quiz' is missing or incorrect, but required by attribute 'option-3-image'. (see https://amp.dev/documentation/components/amp-story-interactive)
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:100:8 The attribute 'option-4-image-alt' in tag 'amp-story-interactive-img-quiz' is missing or incorrect, but required by attribute 'option-4-image'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:95:8 The attribute 'option-4-image-alt' in tag 'amp-story-interactive-img-quiz' is missing or incorrect, but required by attribute 'option-4-image'. (see https://amp.dev/documentation/components/amp-story-interactive)
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:100:8 The mandatory attribute 'option-1-image-alt' is missing in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:95:8 The mandatory attribute 'option-1-image-alt' is missing in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:100:8 The mandatory attribute 'option-2-image-alt' is missing in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:95:8 The mandatory attribute 'option-2-image-alt' is missing in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
 |            id="missing-alt-img-quiz"
 |            prompt-text="Which of these structures is oldest?"
 |            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
-|            option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+|            option-1-image="https://images.com/1"
 |            option-1-correct
-|            option-2-image="https://images.unsplash.com/photo-1610312278520-bcc893a3ff1d?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1460&q=80"
-|            option-3-image="https://images.unsplash.com/photo-1585436588477-340db86fc852?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2804&q=80"
-|            option-4-image="https://images.unsplash.com/photo-1543349689-9a4d426bee8e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1382&q=80">
+|            option-2-image="https://images.com/2"
+|            option-3-image="https://images.com/3"
+|            option-4-image="https://images.com/4">
 |          </amp-story-interactive-img-quiz>
 |        </amp-story-grid-layer>
 |      </amp-story-page>
