@@ -196,7 +196,7 @@ module.exports = {
     const pageID = 'inline-dark-theme';
     await page.goto(`${url}#page=${pageID}`);
     const attachmentSelector = '.i-amphtml-story-page-open-attachment[active]';
-    await page.waitForSelector(page, name, [attachmentSelector]);
+    await verifySelectorsVisible(page, name, [attachmentSelector]);
     await page.tap(attachmentSelector);
     await page.waitForTimeout(1000);
     await page.evaluate(() => {
@@ -215,7 +215,7 @@ module.exports = {
     const pageID = 'outlink-default';
     await page.goto(`${url}#page=${pageID}`);
     const attachmentSelector = '.i-amphtml-story-page-open-attachment[active]';
-    await page.waitForSelector(page, name, [attachmentSelector]);
+    await verifySelectorsVisible(page, name, [attachmentSelector]);
     await page.tap(attachmentSelector);
     await page.waitForTimeout(700);
     await verifySelectorsVisible(page, name, [
@@ -230,7 +230,7 @@ module.exports = {
       await page.goto(`${url}#page=${pageID}`);
       const attachmentSelector =
         '.i-amphtml-story-page-open-attachment[active]';
-      await page.waitForSelector(attachmentSelector);
+      await verifySelectorsVisible(page, name, [attachmentSelector]);
       await page.tap(attachmentSelector);
       await page.waitForTimeout(700);
       await verifySelectorsVisible(page, name, [
