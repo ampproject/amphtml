@@ -328,7 +328,8 @@ describes.repeated(
                   }
                 });
 
-                it('should unlock height for layout=container with successful attemptChangeHeight', () => {
+                // TODO(#35361): disabled in #35360
+                it.skip('should unlock height for layout=container with successful attemptChangeHeight', () => {
                   expect(list.isLayoutSupported('container')).to.be.true;
                   expect(list.enableManagedResizing_).to.be.true;
                   expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
@@ -360,7 +361,8 @@ describes.repeated(
                   return list.layoutCallback();
                 });
 
-                it('should not unlock height for layout=container for null return', () => {
+                // TODO(#35361): disabled in #35360
+                it.skip('should not unlock height for layout=container for null return', () => {
                   expect(list.isLayoutSupported('container')).to.be.true;
                   expect(list.enableManagedResizing_).to.be.true;
                   expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
@@ -379,7 +381,8 @@ describes.repeated(
             );
           });
 
-          it('should attemptChangeHeight rendered contents', () => {
+          // TODO(#35361): disabled in #35360
+          it.skip('should attemptChangeHeight rendered contents', () => {
             const itemElement = doc.createElement('div');
             itemElement.style.height = '1337px';
 
@@ -762,7 +765,8 @@ describes.repeated(
               expect(list.container_.contains(newImg)).to.be.true;
             });
 
-            it('should attemptChangeHeight initial content', async () => {
+            // TODO(#35361): disabled in #35360
+            it.skip('should attemptChangeHeight initial content', async () => {
               const initialContent = doc.createElement('div');
               initialContent.setAttribute('role', 'list');
               initialContent.setAttribute('style', 'height: 123px');
