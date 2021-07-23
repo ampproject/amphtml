@@ -366,6 +366,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     if (!this.element.hasAttribute('prompt-text')) {
       this.rootEl_.removeChild(promptContainer);
+      this.rootEl_.classList.add('i-amphtml-story-interactive-no-prompt');
     } else {
       const prompt = document.createElement('p');
       prompt.textContent = this.element.getAttribute('prompt-text');
