@@ -150,7 +150,6 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
         mockMode({
           localDev: true,
           development: false,
-          minified: false,
           test: false,
           version: '$internalRuntimeVersion$',
         });
@@ -225,7 +224,6 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
             'mode': {
               'localDev': true,
               'development': false,
-              'minified': false,
               'test': false,
               'version': '$internalRuntimeVersion$',
               'esm': false,
