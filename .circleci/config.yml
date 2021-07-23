@@ -17,6 +17,15 @@ push_builds_only: &push_builds_only
         - main
         - /^amp-release-.*$/
 
+experiment_job: &experiment_job
+  parameters:
+    exp:
+      description: 'Which of the three (A/B/C) experiments to use'
+      type: enum
+      enum: ['A', 'B', 'C']
+  environment:
+    EXP: << parameters.exp >>
+
 executors:
   amphtml-small-executor:
     docker:
@@ -287,11 +296,7 @@ jobs:
   'Experiment Build':
     executor:
       name: amphtml-xlarge-executor
-    parameters:
-      exp:
-        description: 'Which of the three (A/B/C) experiments to use'
-        type: enum
-        enum: ['A', 'B', 'C']
+    <<: *experiment_job
     steps:
       - setup_vm
       - run:
@@ -302,11 +307,7 @@ jobs:
   'Experiment Integration Tests':
     executor:
       name: amphtml-large-executor
-    parameters:
-      exp:
-        description: 'Which of the three (A/B/C) experiments to use'
-        type: enum
-        enum: ['A', 'B', 'C']
+    <<: *experiment_job
     steps:
       - setup_vm
       - install_chrome
@@ -319,11 +320,7 @@ jobs:
   'Experiment End-to-End Tests':
     executor:
       name: amphtml-large-executor
-    parameters:
-      exp:
-        description: 'Which of the three (A/B/C) experiments to use'
-        type: enum
-        enum: ['A', 'B', 'C']
+    <<: *experiment_job
     parallelism: 6
     steps:
       - setup_vm
