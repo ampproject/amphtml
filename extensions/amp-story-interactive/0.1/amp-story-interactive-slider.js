@@ -109,6 +109,12 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.inputEl_.addEventListener('change', () => {
       this.onRelease_();
     });
+
+    this.inputEl_.addEventListener(
+      'touchmove',
+      (event) => event.stopPropagation(),
+      true
+    );
   }
 
   /**
