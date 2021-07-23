@@ -28,6 +28,7 @@ import './polyfills';
 import {draw3p, init} from './integration-lib';
 import {getMode} from '../src/mode';
 import {register} from './3p';
+import {user} from 'src/log';
 
 // 3P - please keep in alphabetic order
 import {beopinion} from './beopinion';
@@ -310,6 +311,11 @@ import {zedo} from '#ads/vendors/zedo';
 import {zen} from '#ads/vendors/zen';
 import {zergnet} from '#ads/vendors/zergnet';
 import {zucks} from '#ads/vendors/zucks';
+
+user().warn(
+  '3P-IFRAME',
+  'f.js in iframe is being deprecated (see https://github.com/ampproject/amphtml/issues/35349 for details)'
+);
 
 init(window);
 
