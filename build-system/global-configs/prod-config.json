@@ -19,6 +19,5 @@
   "story-ad-placements": 0.01,
   "story-load-first-page-only": 0.1,
   "amp-story-page-attachment-ui-v2": 1,
-  "amp-sticky-ad-to-amp-ad": 0,
-  "amp-story-first-page-max-bitrate": 0.1
+  "amp-sticky-ad-to-amp-ad": 0
 }
