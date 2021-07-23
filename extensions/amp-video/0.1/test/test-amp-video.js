@@ -997,6 +997,38 @@ describes.realWin(
             'https://example.com/cached-video-2000.mp4'
           );
         });
+
+        it('should apply a max bitrate on first story page with legacy caching', async () => {
+          const attrs = {
+            src: 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+            type: 'video/mp4',
+            'amp-orig-src': 'https://example.com/video.mp4',
+            layout: 'responsive',
+            height: '100px',
+            width: '100px',
+          };
+          const storyEl = doc.createElement('amp-story');
+          const storyPageEl = doc.createElement('amp-story-page');
+          const v = doc.createElement('amp-video');
+          for (const key in attrs) {
+            v.setAttribute(key, attrs[key]);
+          }
+          storyEl.appendChild(storyPageEl);
+          storyPageEl.appendChild(v);
+          doc.body.appendChild(storyEl);
+          await v.buildInternal();
+          const impl = await v.getImpl(false);
+
+          try {
+            await v.layoutCallback();
+          } catch (e) {}
+
+          const sources = v.querySelectorAll('source');
+          expect(sources[0].getAttribute('src')).to.equal(
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_video_quality=medium'
+          );
+          expect(sources[0].getAttribute('data-bitrate')).to.equal('720');
+        });
       });
     });
 

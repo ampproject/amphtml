@@ -543,7 +543,7 @@ export class AmpVideo extends AMP.BaseElement {
         const origSrc = source.getAttribute('amp-orig-src');
         const maxBitrate = this.getMaxBitrate_();
         qualities.forEach((quality, index) => {
-          if (maxBitrate > AMP_VIDEO_QUALITY_BITRATES[quality]) {
+          if (maxBitrate < AMP_VIDEO_QUALITY_BITRATES[quality]) {
             return;
           }
           const cachedSource = addParamsToUrl(source.src, {
