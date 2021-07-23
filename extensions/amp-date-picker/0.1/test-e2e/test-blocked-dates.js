@@ -90,7 +90,8 @@ describes.endtoend(
 
     describe('without allow-blocked-end-date', () => {
       const ID = 'disallow-blocked';
-      it('should NOT be able to select the first blocked date', async () => {
+      it('should NOT be able to select the first blocked date', async function () {
+        this.timeout(5000);
         const today = new Date();
         const nextWeek = new Date(new Date().setDate(today.getDate() + 7));
         const todayCell = await selectDate(controller, ID, today);
