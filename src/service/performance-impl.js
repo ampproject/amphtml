@@ -474,8 +474,9 @@ export class Performance {
     if (this.supportsLayoutShift_) {
       if (!this.googleFontExpRecorded_) {
         this.googleFontExpRecorded_ = true;
+        const {win} = this;
         const googleFontExp = parseInt(
-          computedStyle(this.win.document.body).getPropertyValue(
+          computedStyle(win, win.document.body).getPropertyValue(
             '--google-font-exp'
           ),
           10
