@@ -29,6 +29,9 @@
   z-index: 1 !important;
   /** Prevents 1 pixel layout shifts after post-selection animations */
   backface-visibility: hidden !important;
+  /** Prevents box-shadow and background color clipping */
+  clip-path: circle(1em) !important;
+  background-clip: content-box !important;
 }
 
 .i-amphtml-story-interactive-img-container:not([dir='rtl'])
