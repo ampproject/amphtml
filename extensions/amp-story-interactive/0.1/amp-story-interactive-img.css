@@ -65,6 +65,8 @@
   /* Needed for overflow inconsistencies during animations on some browsers */
   position: relative !important;
   z-index: 1 !important;
+  /** Needed for occasional image clipping during animation */
+  clip-path: circle(3.75em) !important;
 }
 
 .i-amphtml-story-interactive-img-option:focus {
