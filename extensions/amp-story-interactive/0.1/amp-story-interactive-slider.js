@@ -22,6 +22,7 @@ import {CSS} from '../../../build/amp-story-interactive-slider-0.1.css';
 import {htmlFor} from '#core/dom/static-template';
 //import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
 import {setImportantStyles} from '#core/dom/style';
+import {StateProperty} from 'extensions/amp-story/1.0/amp-story-store-service';
 
 /**
  * Generates the template for the slider.
@@ -55,7 +56,6 @@ const buildSliderTemplate = (element) => {
 const SliderType = {
   PERCENTAGE: 'percentage',
   EMOJI: 'emoji',
-  RESULTS: 'results',
 };
 
 export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
@@ -70,6 +70,8 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.inputEl_ = null;
     /** @private {!SliderType}  */
     this.sliderType_ = SliderType.PERCENTAGE;
+    /** @private {boolean}  */
+    this.isInteracting_ = false;
   }
 
   /** @override */
@@ -118,29 +120,48 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
       true
     );
 
-    const DURATION_MS = 1500;
-    let startTime;
-    const animateFrame = (currTime) => {
-      // Set current startTime if not defined.
-      if (!startTime) {
-        startTime = currTime;
-      }
-      const elapsed = currTime - startTime;
-      if (elapsed < DURATION_MS) {
-        // Value between 0 and 1;
-        const timePercentage = elapsed / DURATION_MS;
-        // example with Math.sin animation
-        // Converts oscillation between 1 and -1, to 0 and 30.
-        const val = map(Math.cos(timePercentage * Math.PI * 2), 1, -1, 0, 30);
-        this.inputEl_.value = val;
-        --fraction;
-        // if (!this.isInteracting_) {
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_ID,
+      (currPageId) => {
+        const DURATION_MS = 1500;
+        let startTime;
+        const animateFrame = (currTime) => {
+          // Set current startTime if not defined.
+          if (!startTime) {
+            startTime = currTime;
+          }
+          const elapsed = currTime - startTime;
+          if (elapsed < DURATION_MS) {
+            // Value between 0 and 1;
+            const timePercentage = elapsed / DURATION_MS;
+            // example with Math.sin animation
+            // Converts oscillation between 1 and -1, to 0 and 30.
+            const val = map(
+              Math.cos(timePercentage * Math.PI * 2),
+              1,
+              -1,
+              0,
+              30
+            );
+            this.inputEl_.value = val;
+            this.onDrag_();
+            if (!this.isInteracting_) {
+              requestAnimationFrame(animateFrame);
+            }
+          }
+        };
         requestAnimationFrame(animateFrame);
-        // }
       }
-    };
-    requestAnimationFrame(animateFrame);
-
+    );
+    /**
+     * @private
+     * @param {number} num
+     * @param {number} inMin
+     * @param {number} inMax
+     * @param {number} outMin
+     * @param {number} outMax
+     * @return {!Element}
+     */
     function map(num, inMin, inMax, outMin, outMax) {
       return ((num - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
     }
@@ -148,7 +169,6 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
 
   /**
    * @private
-   * @param {this.isInteracting_} boolean
    */
   onDrag_() {
     const {value} = this.inputEl_;
