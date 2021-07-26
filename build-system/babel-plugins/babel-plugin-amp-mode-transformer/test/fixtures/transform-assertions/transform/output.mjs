@@ -18,6 +18,7 @@ const test = false;
 const localDev = false;
 const minified = true;
 const development = false;
+const version = "$internalRuntimeVersion$";
 
 function foo() {
   if (false == false) {
