@@ -1510,5 +1510,22 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         )
       ).to.be.false;
     });
+
+    it('should create previous and next story buttons when desktop panel story player experiment is on', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+
+      attachPlayerWithStories(playerEl, 5);
+      win.DESKTOP_PANEL_STORY_PLAYER_EXP_ON = true;
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      expect(
+        playerEl.querySelector('.i-amphtml-story-player-desktop-panel-prev')
+      ).to.exist;
+      expect(
+        playerEl.querySelector('.i-amphtml-story-player-desktop-panel-next')
+      ).to.exist;
+    });
   });
 });
