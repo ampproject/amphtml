@@ -54,7 +54,15 @@ const CAPTION_PROPS = {
  * @return {PreactDef.Renderable}
  */
 export function LightboxGalleryProviderWithRef(
-  {children, onAfterClose, onAfterOpen, onBeforeOpen, render},
+  {
+    children,
+    onAfterClose,
+    onAfterOpen,
+    onBeforeOpen,
+    onToggleCaption,
+    onViewGrid,
+    render,
+  },
   ref
 ) {
   const classes = useStyles();
@@ -198,7 +206,12 @@ export function LightboxGalleryProviderWithRef(
       >
         <div className={classes.controlsPanel}>
           <ToggleViewIcon
-            onClick={() => setShowCarousel(!showCarousel)}
+            onClick={() => {
+              if (showCarousel) {
+                onViewGrid?.();
+              }
+              setShowCarousel(!showCarousel);
+            }}
             showCarousel={showCarousel}
           />
         </div>
@@ -227,6 +240,7 @@ export function LightboxGalleryProviderWithRef(
             ? null
             : {
                 onClick: () => {
+                  onToggleCaption?.();
                   if (captionState === CaptionState.CLIP) {
                     setCaptionState(CaptionState.EXPAND);
                   } else {

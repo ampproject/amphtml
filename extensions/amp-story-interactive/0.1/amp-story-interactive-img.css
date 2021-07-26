@@ -114,6 +114,7 @@
   left: 0 !important;
   color: white !important;
   font-weight: 700 !important;
+  text-shadow: 0 0 0.7em rgba(0, 0, 0, 0.5) !important;
 }
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
