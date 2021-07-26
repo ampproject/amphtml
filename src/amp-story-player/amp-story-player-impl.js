@@ -189,18 +189,6 @@ const LOG_TYPE = {
 };
 
 /**
- * Different UI experiences to display the story.
- * @const @enum {number}
- */
-export const UIType = {
-  MOBILE: 0,
-  DESKTOP_PANELS: 1, // Default desktop UI displaying previous and next pages.
-  DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
-  DESKTOP_ONE_PANEL: 4, // Desktop UI with one panel and space around story.
-  VERTICAL: 3, // Vertical scrolling versions, for search engine bots indexing.
-};
-
-/**
  * NOTE: If udpated here, update in amp-story.js
  * @private @const {number}
  */
@@ -1011,12 +999,12 @@ export class AmpStoryPlayer {
    * @private
    */
   onUiStateUpdate_(uiTypeNumber) {
-    const isFullBleedDesktop =
-      uiTypeNumber === UIType.DESKTOP_FULLBLEED ||
-      uiTypeNumber === UIType.MOBILE;
+    const isFullbleed =
+      uiTypeNumber === 2 /** DESKTOP_FULLBLEED */ ||
+      uiTypeNumber === 0; /** MOBILE */
     this.rootEl_.classList.toggle(
       'i-amphtml-story-player-full-bleed-story',
-      isFullBleedDesktop
+      isFullbleed
     );
   }
 
