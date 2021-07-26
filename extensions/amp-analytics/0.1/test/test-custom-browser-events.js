@@ -21,6 +21,7 @@ import {
   CustomBrowserEventTracker,
 } from '../events';
 import {macroTask} from '#testing/yield';
+import {toggleExperiment} from '#experiments';
 
 describes.realWin(
   'Events',
@@ -56,6 +57,8 @@ describes.realWin(
       inputField2 = win.document.createElement('input');
       inputField2.setAttribute('id', 'inputField2');
       target.appendChild(inputField2);
+
+      toggleExperiment(win, 'custom-browser-event-tracker', true);
     });
 
     describe('CustomBrowserEventTracker', () => {
