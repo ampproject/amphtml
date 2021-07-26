@@ -27,7 +27,8 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('should render in correct font-size', async () => {
+    // TODO(#35405) skipping due to flakiness
+    it.skip('should render in correct font-size', async () => {
       await verifyElementStyles(await selectContentDiv('test1'), {
         'font-size': '32px',
       });

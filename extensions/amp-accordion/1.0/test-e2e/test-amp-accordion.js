@@ -47,7 +47,8 @@ describes.endtoend(
       button2 = await controller.findElement('#button2');
     });
 
-    it('expands and collapses when a header section is clicked', async () => {
+    // TODO(#35405) skipping due to flakiness
+    it.skip('expands and collapses when a header section is clicked', async () => {
       // section 1 is not expanded
       await expect(
         controller.getElementProperty(content1, 'clientHeight')
@@ -68,7 +69,8 @@ describes.endtoend(
       ).to.equal(0);
     });
 
-    it('renders section in expanded state when expanded attribute provided', async () => {
+    // TODO(#35405) skipping due to flakiness
+    it.skip('renders section in expanded state when expanded attribute provided', async () => {
       // section 3 should start in expanded state since it has
       // "expanded" attribute
       await expect(
@@ -76,7 +78,8 @@ describes.endtoend(
       ).to.equal(25);
     });
 
-    it('expands and collapses when buttons are clicked', async () => {
+    // TODO(#35405) skipping due to flakiness
+    it.skip('expands and collapses when buttons are clicked', async () => {
       // section 1 is not expanded
       await expect(
         controller.getElementProperty(content1, 'clientHeight')
