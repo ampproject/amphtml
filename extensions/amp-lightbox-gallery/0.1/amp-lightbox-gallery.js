@@ -42,7 +42,6 @@ import {
   secondsToTimestampString,
 } from './utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
 import {getElementServiceForDoc} from '../../../src/element-service';
@@ -451,11 +450,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     );
     const el = this.lightboxCaption_.getElement();
     el.addEventListener('click', (event) => {
-      triggerAnalyticsEvent(
-        this.element,
-        'descriptionOverflowToggled',
-        dict({})
-      );
+      triggerAnalyticsEvent(this.element, 'descriptionOverflowToggled');
       this.lightboxCaption_.toggleOverflow();
       event.stopPropagation();
       event.preventDefault();
@@ -583,7 +578,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.hideControls_();
       }
     }
-    triggerAnalyticsEvent(this.element, 'controlsToggled', dict({}));
+    triggerAnalyticsEvent(this.element, 'controlsToggled');
   }
 
   /**
@@ -782,7 +777,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       .then(() => {
         setStyle(this.element, 'opacity', '');
         this.showOverlay_();
-        triggerAnalyticsEvent(this.element, 'lightboxOpened', dict({}));
+        triggerAnalyticsEvent(this.element, 'lightboxOpened');
       });
   }
 
@@ -1249,7 +1244,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.container_.setAttribute('gallery-view', '');
       toggle(dev().assertElement(this.carousel_), false);
     });
-    triggerAnalyticsEvent(this.element, 'thumbnailsViewToggled', dict({}));
+    triggerAnalyticsEvent(this.element, 'thumbnailsViewToggled');
   }
 
   /**
