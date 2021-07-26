@@ -19,11 +19,12 @@
 #include <memory>
 #include <vector>
 
-#include "glog/logging.h"
+#include <gmock/gmock.h>
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "css/parse-css.pb.h"
+#include "logging.h"
 #include "strings.h"
 
 using std::unique_ptr;
@@ -2841,9 +2842,9 @@ vector<unique_ptr<Token>> ParseSelectorForTest(const std::string& selector) {
   unique_ptr<Stylesheet> sheet =
       ParseAStylesheet(&tokens, AmpCssParsingConfig(), &errors);
   EXPECT_EQ(JsonFromList(errors), "[]");
-  CHECK_EQ(1, sheet->rules().size());
+  EXPECT_EQ(1, sheet->rules().size());
   Rule* rule = (*sheet->mutable_rules()).front().get();
-  CHECK_EQ(TokenType::QUALIFIED_RULE, rule->Type());
+  CHECK(TokenType::QUALIFIED_RULE == rule->Type(), "");
   QualifiedRule* qualified = static_cast<QualifiedRule*>(rule);
   vector<unique_ptr<Token>> selector_tokens;
   qualified->mutable_prelude()->swap(selector_tokens);

@@ -21,13 +21,13 @@
 #include <iostream>  // For DumpDocument
 #endif               // DUMP_NODES
 
-#include "glog/logging.h"
 #include "absl/flags/flag.h"
 #include "atomutil.h"
 #include "comparators.h"
 #include "defer.h"
 #include "doctype.h"
 #include "foreign.h"
+#include "logging.h"
 #include "parser.h"
 #include "strings.h"
 
@@ -152,10 +152,7 @@ std::unique_ptr<Document> Parser::Parse() {
   while (!eof) {
     if (open_elements_stack_.size() >
         ::absl::GetFlag(FLAGS_htmlparser_max_nodes_depth_count)) {
-      LOG(WARNING) << "Skipped parsing. Document too complex: "
-                   << open_elements_stack_.size() << " vs. Max allowed: ("
-                   << ::absl::GetFlag(FLAGS_htmlparser_max_nodes_depth_count)
-                   << ")";
+      // Skipping parsing. Document too complex.
       delete document_.release();
       return nullptr;
     }
@@ -236,7 +233,7 @@ int Parser::IndexOfElementInScope(Scope scope,
           }
           break;
         default:
-          CHECK(false) << "HTML Parser reached unreachable scope";
+          CHECK(false, "HTML Parser reached unreachable scope");
       }
     }
 
@@ -293,7 +290,7 @@ void Parser::ClearStackToContext(Scope scope) {
         }
         break;
       default:
-        CHECK(false) << "HTML Parser reached unreachable scope";
+        CHECK(false, "HTML Parser reached unreachable scope");
     }
   }
 }  // Parser::ClearStackToContext.
@@ -567,8 +564,8 @@ void Parser::AcknowledgeSelfClosingTag() {
 
 // Section 12.2.4.1, "using the rules for".
 void Parser::SetOriginalIM() {
-  CHECK(!original_insertion_mode_)
-       << "html: bad parser state: original_insertion_mode was set twice";
+  CHECK(!original_insertion_mode_,
+        "html: bad parser state: original_insertion_mode was set twice");
   original_insertion_mode_ = insertion_mode_;
 }  // Parser::SetOriginalIM.
 
@@ -1035,8 +1032,8 @@ bool Parser::InHeadNoscriptIM() {
       break;
   }
   open_elements_stack_.Pop();
-  CHECK(top()->atom_ == Atom::HEAD)
-       << "html: the new current node will be a head element.";
+  CHECK(top()->atom_ == Atom::HEAD,
+        "html: the new current node will be a head element.");
 
   insertion_mode_ = std::bind(&Parser::InHeadIM, this);
   if (token_.atom == Atom::NOSCRIPT) {
@@ -2886,10 +2883,10 @@ bool Parser::AfterBodyIM() {
       break;
     case TokenType::COMMENT_TOKEN: {
       // The comment is attached to the <html> element.
-      CHECK((open_elements_stack_.size() > 0 &&
-             open_elements_stack_.at(0)->atom_ == Atom::HTML))
-            << "html: bad parser state: <html> element not found, in the "
-               "after-body insertion mode";
+      CHECK(open_elements_stack_.size() > 0 &&
+                open_elements_stack_.at(0)->atom_ == Atom::HTML,
+            "html: bad parser state: <html> element not found, in the "
+            "after-body insertion mode");
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
       if (record_node_offsets_) {
@@ -3155,8 +3152,7 @@ bool Parser::ParseForeignContent() {
         }
         AdjustSVGAttributeNames(&token_.attributes);
       } else {
-        throw std::runtime_error(
-             "html: bad parser state: unexpected namespace");
+        CHECK(false, "html: bad parser state: unexpected namespace");
       }
 
       AdjustForeignAttributes(&token_.attributes);

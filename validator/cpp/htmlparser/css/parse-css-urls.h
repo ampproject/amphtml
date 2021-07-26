@@ -34,8 +34,6 @@
 #include "absl/memory/memory.h"
 #include "absl/types/variant.h"
 #include "css/parse-css-urls.pb.h"
-#include "validator.pb.h"
-
 
 namespace htmlparser::css::url {
 // Implements 3.3. Preprocessing the input stream.
