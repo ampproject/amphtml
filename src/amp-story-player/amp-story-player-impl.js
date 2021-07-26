@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
 import {Messaging} from '@ampproject/viewer-messaging';
 
-// Source for this constant is css/amp-story-player-iframe.css
+// Source for this constant is css/amp-story-player-shadow.css
 import {devAssertElement} from '#core/assert';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
@@ -31,7 +31,7 @@ import {parseQueryString} from '#core/types/string/url';
 import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
 import {PageScroller} from './page-scroller';
 
-import {cssText} from '../../build/amp-story-player-iframe.css';
+import {cssText} from '../../build/amp-story-player-shadow.css';
 import {applySandbox} from '../3p-frame';
 import {urls} from '../config';
 import {createCustomEvent, listenOnce} from '../event-helper';
@@ -188,6 +188,17 @@ const LOG_TYPE = {
 };
 
 /**
+ * Flag to show or hide the desktop panels player experiment.
+ * @const {boolean}
+ */
+
+/**
+ * NOTE: If udpated here, update in amp-story.js
+ * @private @const {number}
+ */
+const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = 3 / 4;
+
+/**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
  * services, as v0.js is not expected to be loaded in this context.
  */
@@ -254,6 +265,20 @@ export class AmpStoryPlayer {
 
     /** @private {?string} */
     this.attribution_ = null;
+
+    /** @private {?Element} */
+    this.prevButton_ = null;
+
+    /** @private {?Element} */
+    this.nextButton_ = null;
+
+    /**
+     * Shows or hides the desktop panels player experiment.
+     * Variable is set on window for unit testing new features.
+     * @private {?boolean}
+     */
+    this.isDesktopPanelExperimentOn_ =
+      this.win_.DESKTOP_PANEL_STORY_PLAYER_EXP_ON;
 
     return this.element_;
   }
@@ -403,6 +428,9 @@ export class AmpStoryPlayer {
     this.initializeAttribution_();
     this.initializePageScroll_();
     this.initializeCircularWrapping_();
+    if (this.isDesktopPanelExperimentOn_) {
+      this.initializeDesktopStoryControlUI_();
+    }
     this.signalReady_();
     this.element_.isBuilt_ = true;
   }
@@ -719,10 +747,89 @@ export class AmpStoryPlayer {
     new AmpStoryPlayerViewportObserver(this.win_, this.element_, () =>
       this.visibleDeferred_.resolve()
     );
-
+    if (this.isDesktopPanelExperimentOn_) {
+      if (this.win_.ResizeObserver) {
+        new this.win_.ResizeObserver((e) => {
+          const {height, width} = e[0].contentRect;
+          this.onPlayerResize_(height, width);
+        }).observe(this.element_);
+      } else {
+        // Set size once as fallback for browsers not supporting ResizeObserver.
+        const {height, width} = this.element_./*OK*/ getBoundingClientRect();
+        this.onPlayerResize_(height, width);
+      }
+    }
     this.render_();
 
     this.element_.isLaidOut_ = true;
+  }
+
+  /**
+   * Builds desktop "previous" and "next" story UI.
+   * @private
+   */
+  initializeDesktopStoryControlUI_() {
+    this.prevButton_ = this.doc_.createElement('button');
+    this.prevButton_.classList.add('i-amphtml-story-player-desktop-panel-prev');
+    this.prevButton_.addEventListener('click', () => this.previous_());
+    this.prevButton_.setAttribute('aria-label', 'previous story');
+    this.rootEl_.appendChild(this.prevButton_);
+
+    this.nextButton_ = this.doc_.createElement('button');
+    this.nextButton_.classList.add('i-amphtml-story-player-desktop-panel-next');
+    this.nextButton_.addEventListener('click', () => this.next_());
+    this.nextButton_.setAttribute('aria-label', 'next story');
+    this.rootEl_.appendChild(this.nextButton_);
+
+    this.checkButtonsDisabled_();
+  }
+
+  /**
+   * Toggles disabled attribute on desktop "previous" and "next" buttons.
+   * @private
+   */
+  checkButtonsDisabled_() {
+    this.prevButton_.toggleAttribute(
+      'disabled',
+      this.isIndexOutofBounds_(this.currentIdx_ - 1) &&
+        !this.isCircularWrappingEnabled_
+    );
+    this.nextButton_.toggleAttribute(
+      'disabled',
+      this.isIndexOutofBounds_(this.currentIdx_ + 1) &&
+        !this.isCircularWrappingEnabled_
+    );
+  }
+
+  /**
+   * @param {number} height
+   * @param {number} width
+   * @private
+   */
+  onPlayerResize_(height, width) {
+    const isDesktopOnePanel =
+      width / height > DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD;
+
+    this.rootEl_.classList.toggle(
+      'i-amphtml-story-player-desktop-panel',
+      isDesktopOnePanel
+    );
+
+    if (isDesktopOnePanel) {
+      setStyles(this.rootEl_, {
+        '--i-amphtml-story-player-height': `${height}px`,
+      });
+
+      this.rootEl_.classList.toggle(
+        'i-amphtml-story-player-desktop-panel-medium',
+        height < 756
+      );
+
+      this.rootEl_.classList.toggle(
+        'i-amphtml-story-player-desktop-panel-small',
+        height < 538
+      );
+    }
   }
 
   /**
@@ -858,6 +965,9 @@ export class AmpStoryPlayer {
       'remaining': remaining,
     };
 
+    if (this.isDesktopPanelExperimentOn_) {
+      this.checkButtonsDisabled_();
+    }
     this.signalNavigation_(navigation);
     this.maybeFetchMoreStories_(remaining);
   }

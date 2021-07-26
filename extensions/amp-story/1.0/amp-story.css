@@ -271,6 +271,8 @@ amp-story-page[distance="1"] {
   transform: translateY(0) !important;
 }
 
+amp-story.i-amphtml-experiment-story-load-inactive-outside-viewport:not([desktop])
+  amp-story-page[distance="1"]:not(.i-amphtml-story-page-loaded):not(.i-amphtml-visited),
 amp-story-page[distance="2"] {
   transform: translateY(100vh) !important;
 }
@@ -966,6 +968,10 @@ amp-story .amp-video-eq,
 
 .i-amphtml-story-interactive-component[prompt-size="small"] {
   --i-amphtml-interactive-prompt-text-size: 1.125em !important;
+}
+
+.i-amphtml-story-interactive-component:not([prompt-text]) {
+  --interactive-prompt-background: transparent !important;
 }
 
 amp-story-interactive-binary-poll.i-amphtml-story-interactive-component, amp-story-interactive-results.i-amphtml-story-interactive-component,
