@@ -51,7 +51,7 @@ module.exports = function ({types: t}) {
         const {node} = path;
         const {object: obj, property} = node;
         const {callee} = obj;
-        const {INTERNAL_RUNTIME_VERSION, IS_ESM} = this.opts;
+        const {INTERNAL_RUNTIME_VERSION} = this.opts;
 
         if (callee && callee.name === 'getMode') {
           if (property.name === 'test' || property.name === 'localDev') {
@@ -60,8 +60,6 @@ module.exports = function ({types: t}) {
             path.replaceWith(t.booleanLiteral(false));
           } else if (property.name === 'minified') {
             path.replaceWith(t.booleanLiteral(true));
-          } else if (property.name === 'esm') {
-            path.replaceWith(t.booleanLiteral(IS_ESM));
           } else if (property.name === 'version') {
             path.replaceWith(t.stringLiteral(INTERNAL_RUNTIME_VERSION));
           }
