@@ -77,10 +77,7 @@ class AmpFitText extends AMP.BaseElement {
   buildCallback() {
     const {element} = this;
 
-    const {content, contentWrapper, measurer} = buildDom(
-      element.ownerDocument,
-      element
-    );
+    const {content, contentWrapper, measurer} = buildDom(element);
     this.content_ = content;
     this.contentWrapper_ = contentWrapper;
     this.measurer_ = measurer;
@@ -224,21 +221,22 @@ export function updateOverflow_(content, measurer, maxHeight, fontSize) {
 }
 
 /**
+ * @see amphtml/compiler/types.js for full description
  *
- * @param {!Document} document
  * @param {!Element} element
  * @return {{content: !Element, contentWrapper: !Element, measurer: !Element}}
  */
-export function buildDom(document, element) {
-  const content = document.createElement('div');
+export function buildDom(element) {
+  const doc = element.ownerDocument;
+  const content = doc.createElement('div');
   applyFillContent(content);
   content.classList.add(CONTENT_CLASS);
 
-  const contentWrapper = document.createElement('div');
+  const contentWrapper = doc.createElement('div');
   contentWrapper.classList.add(CONTENT_WRAPPER_CLASS);
   content.appendChild(contentWrapper);
 
-  const measurer = document.createElement('div');
+  const measurer = doc.createElement('div');
   measurer.classList.add(MEASURER_CLASS);
 
   realChildNodes(element).forEach((node) => contentWrapper.appendChild(node));
