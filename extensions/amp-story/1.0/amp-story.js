@@ -468,6 +468,14 @@ export class AmpStory extends AMP.BaseElement {
         'story-load-first-page-only'
       );
     }
+    if (isExperimentOn(this.win, 'story-load-inactive-outside-viewport')) {
+      Services.performanceFor(this.win).addEnabledExperiment(
+        'story-load-inactive-outside-viewport'
+      );
+      this.element.classList.add(
+        'i-amphtml-experiment-story-load-inactive-outside-viewport'
+      );
+    }
 
     if (this.maybeLoadStoryDevTools_()) {
       return;
