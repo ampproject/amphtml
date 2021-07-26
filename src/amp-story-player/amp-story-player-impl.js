@@ -999,6 +999,7 @@ export class AmpStoryPlayer {
 
   /**
    * Shows or hides one panel UI on state update.
+   * @param number uiTypeNumber
    * @private
    */
   onUiStateUpdate_(uiTypeNumber) {
