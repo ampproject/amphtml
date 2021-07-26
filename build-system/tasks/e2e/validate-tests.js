@@ -17,12 +17,21 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const {cyan, green, red} = require('../../common/colors');
 const {getDefaultMochaFiles} = require('./mocha-utils');
 const {getFilesFromArgv} = require('../../common/utils');
 const {gitDiffNameOnlyMain} = require('../../common/git');
-const {green, red} = require('../../common/colors');
+const {isCircleciBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
+const {Octokit} = require('@octokit/rest');
 const {Worker} = require('worker_threads');
+
+const octokit = new Octokit({
+  auth: '',
+  userAgent: 'amp release tagger',
+  previews: ['groot-preview'], // to list pull requests by commit
+  timeZone: 'America/New_York',
+});
 
 /**
  * @typedef {{
@@ -137,10 +146,25 @@ function computeTestFlakiness(results) {
 }
 
 /**
+ *
+ */
+async function shouldSkipValidation() {
+  // if (!isCircleciBuild()) {
+  //   return;
+  // }
+  // DO_NOT_SUBMIT this PR number should be removed.
+  const PR = process.env.CIRCLE_PR_NUMBER || '35012';
+  await octokit.request(`GET /repos/ampproject/amphtml/pulls/${PR}`);
+}
+
+/**
  * Runs the modified tests the configured number of times and returns their speeds and success rates.
  * @return {Promise<Record<string, TestResultDef>[]|void>}
  */
 async function runValidatorIterations() {
+  log(await shouldSkipValidation());
+  return;
+
   // specify tests to run
   const testFilesRequiringValidation = getTestsFilesToValidate();
 
@@ -199,7 +223,7 @@ async function validateTests() {
   if (!results) {
     return true;
   }
-  log('Average Test Runtimes:');
+  log(cyan('Average Test Runtimes:'));
   const testRuntimes = computeAverageTestRuntimes(results);
   const maxAllowedRuntime = getMaxAllowedTestTime_();
   Object.entries(testRuntimes).forEach(([testName, averageTime]) => {
@@ -211,7 +235,9 @@ async function validateTests() {
   );
   if (slowTests.length > 0) {
     const testOrTests = `test${slowTests.length > 1 ? 's' : ''}`;
-    log(`The following ${testOrTests} exceeded the max runtime`);
+    log(
+      `The following ${testOrTests} exceeded the max runtime of ${maxAllowedRuntime}`
+    );
     slowTests.forEach(([testName, runtime]) => {
       log(red(testName), ':', `${runtime}ms`);
     });
@@ -224,10 +250,12 @@ async function validateTests() {
   if (flakyTests.length > 0) {
     const testOrTests = `test${flakyTests.length > 1 ? 's' : ''}`;
     log(
-      `The following ${testOrTests} failed to meet the flakiness threshold of ${minPassPercentage}%`
+      `The following ${testOrTests} failed to meet the flakiness threshold of ${
+        minPassPercentage * 100
+      }%`
     );
     flakyTests.forEach(([testName, passPercentage]) => {
-      log(red(testName), ':', red(`${passPercentage}%`));
+      log(red(testName), ':', red(`${passPercentage * 100}%`));
     });
   }
 

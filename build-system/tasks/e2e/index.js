@@ -120,8 +120,8 @@ async function runTests_() {
   const mocha = createMochaWithFiles();
 
   if (argv.validate) {
-    await validateTests();
-    process.exit(0);
+    const testsValid = await validateTests();
+    process.exit(testsValid ? 0 : 1);
   }
 
   // return promise to amp that resolves when there's an error.
