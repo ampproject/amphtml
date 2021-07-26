@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-facebook-like';
+import '../amp-facebook';
 import {createElementWithAttributes} from '#core/dom';
 import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 import {resetServiceForTesting} from '../../../../src/service-helpers';
@@ -27,7 +27,7 @@ describes.realWin(
   'amp-facebook-like',
   {
     amp: {
-      extensions: ['amp-facebook-like:1.0'],
+      extensions: ['amp-facebook:1.0'],
     },
   },
   (env) => {
@@ -44,7 +44,7 @@ describes.realWin(
     beforeEach(async function () {
       win = env.win;
       doc = win.document;
-      toggleExperiment(win, 'bento-facebook-like', true, true);
+      toggleExperiment(win, 'bento-facebook', true, true);
       // Override global window here because Preact uses global `createElement`.
       doNotLoadExternalResourcesInTest(window, env.sandbox);
     });
