@@ -968,7 +968,9 @@ export class AmpStoryPlayer {
 
     if (this.isDesktopPanelExperimentOn_) {
       this.checkButtonsDisabled_();
-      this.getUiState_();
+      this.getUiState_().then((uiTypeNumber) =>
+        this.onUiStateUpdate_(uiTypeNumber)
+      );
     }
     this.signalNavigation_(navigation);
     this.maybeFetchMoreStories_(remaining);
@@ -977,20 +979,23 @@ export class AmpStoryPlayer {
   /**
    * Gets UI state from active story.
    * @private
+   * @return {Promise}
    */
   getUiState_() {
     const story = this.stories_[this.currentIdx_];
 
-    story.messagingPromise.then((messaging) => {
-      messaging
-        .sendRequest(
-          'getDocumentState',
-          {state: STORY_MESSAGE_STATE_TYPE.UI_STATE},
-          true
-        )
-        .then((event) => {
-          this.onUiStateUpdate_(event.value);
-        });
+    return new Promise((resolve) => {
+      story.messagingPromise.then((messaging) => {
+        messaging
+          .sendRequest(
+            'getDocumentState',
+            {state: STORY_MESSAGE_STATE_TYPE.UI_STATE},
+            true
+          )
+          .then((event) => {
+            resolve(event.value);
+          });
+      });
     });
   }
 
@@ -1561,6 +1566,7 @@ export class AmpStoryPlayer {
         break;
       case STORY_MESSAGE_STATE_TYPE.UI_STATE:
         if (this.isDesktopPanelExperimentOn_) {
+          // Handles UI state updates on window resize.
           this.onUiStateUpdate_(/** @type {number} */ (data.value));
         }
         break;
