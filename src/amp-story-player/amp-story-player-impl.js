@@ -980,14 +980,14 @@ export class AmpStoryPlayer {
 
     if (this.isDesktopPanelExperimentOn_) {
       this.checkButtonsDisabled_();
+      this.getUiState_();
     }
     this.signalNavigation_(navigation);
     this.maybeFetchMoreStories_(remaining);
-    this.getUiState_();
   }
 
   /**
-   * Shows or hides one panel UI on state update.
+   * Gets UI state from active story.
    * @private
    */
   getUiState_() {
@@ -1006,6 +1006,10 @@ export class AmpStoryPlayer {
     });
   }
 
+  /**
+   * Shows or hides one panel UI on state update.
+   * @private
+   */
   onUiStateUpdate_(uiTypeNumber) {
     const isFullBleedDesktop =
       uiTypeNumber === UIType.DESKTOP_FULLBLEED ||
@@ -1568,7 +1572,9 @@ export class AmpStoryPlayer {
         this.onMutedStateUpdate_(/** @type {string} */ (data.value));
         break;
       case STORY_MESSAGE_STATE_TYPE.UI_STATE:
-        this.onUiStateUpdate_(/** @type {number} */ (data.value));
+        if (this.isDesktopPanelExperimentOn_) {
+          this.onUiStateUpdate_(/** @type {number} */ (data.value));
+        }
         break;
       case AMP_STORY_PLAYER_EVENT:
         this.onPlayerEvent_(/** @type {string} */ (data.value));
