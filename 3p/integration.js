@@ -28,6 +28,7 @@ import './polyfills';
 import {draw3p, init} from './integration-lib';
 import {getMode} from '../src/mode';
 import {register} from './3p';
+import {user} from 'src/log';
 
 // 3P - please keep in alphabetic order
 import {beopinion} from './beopinion';
@@ -293,6 +294,7 @@ import {whopainfeed} from '#ads/vendors/whopainfeed';
 import {widespace} from '#ads/vendors/widespace';
 import {wisteria} from '#ads/vendors/wisteria';
 import {wpmedia} from '#ads/vendors/wpmedia';
+import {wunderkind} from '#ads/vendors/wunderkind';
 import {xlift} from '#ads/vendors/xlift';
 import {yahoo} from '#ads/vendors/yahoo';
 import {yahoofedads} from '#ads/vendors/yahoofedads';
@@ -311,6 +313,10 @@ import {zergnet} from '#ads/vendors/zergnet';
 import {zucks} from '#ads/vendors/zucks';
 
 init(window);
+user().warn(
+  '3P-IFRAME',
+  'f.js in iframe is being deprecated (see https://github.com/ampproject/amphtml/issues/35349 for details)'
+);
 
 if (getMode().test || getMode().localDev) {
   register('_ping_', _ping_);
@@ -577,6 +583,7 @@ register('weborama-display', weboramaDisplay);
 register('whopainfeed', whopainfeed);
 register('widespace', widespace);
 register('wisteria', wisteria);
+register('wunderkind', wunderkind);
 register('wpmedia', wpmedia);
 register('xlift', xlift);
 register('yahoo', yahoo);

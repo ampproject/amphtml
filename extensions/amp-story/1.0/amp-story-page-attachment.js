@@ -106,10 +106,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     const theme = this.element.getAttribute('theme')?.toLowerCase();
     if (theme && AttachmentTheme.DARK === theme) {
       if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-        this.headerEl_.setAttribute('theme', theme);
+        this.headerEl.setAttribute('theme', theme);
         this.element.setAttribute('theme', theme);
       } else {
-        this.headerEl_.classList.add(DARK_THEME_CLASS);
+        this.headerEl.classList.add(DARK_THEME_CLASS);
         this.element.classList.add(DARK_THEME_CLASS);
       }
     }
@@ -185,15 +185,15 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     }
 
     if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-      const titleAndCloseWrapperEl = this.headerEl_.appendChild(
+      const titleAndCloseWrapperEl = this.headerEl.appendChild(
         htmlFor(this.element)`
             <div class="i-amphtml-story-draggable-drawer-header-title-and-close"></div>`
       );
       titleAndCloseWrapperEl.appendChild(closeButtonEl);
       titleAndCloseWrapperEl.appendChild(titleEl);
     } else {
-      this.headerEl_.appendChild(closeButtonEl);
-      this.headerEl_.appendChild(titleEl);
+      this.headerEl.appendChild(closeButtonEl);
+      this.headerEl.appendChild(titleEl);
     }
 
     const templateEl = this.element.querySelector(
@@ -201,12 +201,12 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     );
 
     while (this.element.firstChild && this.element.firstChild !== templateEl) {
-      this.contentEl_.appendChild(this.element.firstChild);
+      this.contentEl.appendChild(this.element.firstChild);
     }
 
     // Ensures the content of the attachment won't be rendered/loaded until we
     // actually need it.
-    toggle(dev().assertElement(this.containerEl_), true);
+    toggle(dev().assertElement(this.containerEl), true);
   }
 
   /**
@@ -218,7 +218,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     this.setDragCap_(DRAG_CAP_PX);
     this.setOpenThreshold_(OPEN_THRESHOLD_PX);
 
-    this.headerEl_.classList.add(
+    this.headerEl.classList.add(
       'i-amphtml-story-draggable-drawer-header-attachment-remote'
     );
     this.element.classList.add('i-amphtml-story-page-attachment-remote');
@@ -231,9 +231,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     // URL will be validated and resolved based on the canonical URL if relative
     // when navigating.
     link.setAttribute('href', this.element.getAttribute('href'));
-    this.contentEl_.appendChild(link);
+    this.contentEl.appendChild(link);
 
-    this.contentEl_.querySelector(
+    this.contentEl.querySelector(
       '.i-amphtml-story-page-attachment-remote-title'
     ).textContent =
       this.element.getAttribute('data-title') ||
@@ -254,7 +254,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     this.setDragCap_(DRAG_CAP_PX_V2);
     this.setOpenThreshold_(OPEN_THRESHOLD_PX);
 
-    this.headerEl_.classList.add(
+    this.headerEl.classList.add(
       'i-amphtml-story-draggable-drawer-header-attachment-remote'
     );
     this.element.classList.add('i-amphtml-story-page-attachment-remote');
@@ -275,6 +275,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     // when navigating.
     link.setAttribute('href', hrefAttr);
     const {openStringEl, urlStringEl} = htmlRefs(link);
+
+    // Navigation is handled programmatically. Disable clicks on the placeholder
+    // anchor to prevent from users triggering double navigations, which has
+    // side effects in native contexts opening webviews/CCTs.
+    link.addEventListener('click', (event) => event.preventDefault());
 
     // Set image.
     const openImgAttr = this.element.getAttribute('cta-image');
@@ -301,7 +306,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     }
     urlStringEl.textContent = hrefAttr;
 
-    this.contentEl_.appendChild(link);
+    this.contentEl.appendChild(link);
   }
 
   /**
@@ -310,7 +315,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   initializeListeners_() {
     super.initializeListeners_();
 
-    const closeButtonEl = this.headerEl_.querySelector(
+    const closeButtonEl = this.headerEl.querySelector(
       '.i-amphtml-story-page-attachment-close-button'
     );
     if (closeButtonEl) {
@@ -322,7 +327,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     }
 
     // Always open links in a new tab.
-    this.contentEl_.addEventListener(
+    this.contentEl.addEventListener(
       'click',
       (event) => {
         const {target} = event;
@@ -350,7 +355,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     if (this.type_ === AttachmentType.OUTLINK) {
       const ampdoc = this.getAmpDoc();
       ampdoc.onVisibilityChanged(() => {
-        if (ampdoc.isVisible() && this.state_ === DrawerState.OPEN) {
+        if (ampdoc.isVisible() && this.state === DrawerState.OPEN) {
           this.closeInternal_(false /** shouldAnimate */);
         }
       });
@@ -361,14 +366,16 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @override
    */
   open(shouldAnimate = true) {
-    if (this.state_ === DrawerState.OPEN) {
+    if (this.state === DrawerState.OPEN) {
       return;
     }
 
     super.open(shouldAnimate);
 
-    this.storeService_.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
-    this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
+    this.storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
+    this.storeService.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
+
+    this.toggleBackgroundOverlay_(true);
 
     // Don't create a new history entry for remote attachment as user is
     // navigating away.
@@ -378,10 +385,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       );
       const historyState = {
         ...currentHistoryState,
-        [HistoryState.ATTACHMENT_PAGE_ID]: this.storeService_.get(
+        [HistoryState.ATTACHMENT_PAGE_ID]: this.storeService.get(
           StateProperty.CURRENT_PAGE_ID
         ),
       };
+
       this.historyService_.push(() => this.closeInternal_(), historyState);
     }
 
@@ -429,7 +437,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     };
 
     const isMobileUI =
-      this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE;
+      this.storeService.get(StateProperty.UI_STATE) === UIType.MOBILE;
     if (!isMobileUI) {
       programaticallyClickOnTarget();
     } else {
@@ -471,7 +479,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @override
    */
   close_() {
-    switch (this.state_) {
+    switch (this.state) {
       // If the drawer was open, pop the history entry that was added, which
       // will close the drawer through the onPop callback.
       case DrawerState.OPEN:
@@ -490,14 +498,16 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @override
    */
   closeInternal_(shouldAnimate = true) {
-    if (this.state_ === DrawerState.CLOSED) {
+    if (this.state === DrawerState.CLOSED) {
       return;
     }
 
     super.closeInternal_(shouldAnimate);
 
-    this.storeService_.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, false);
-    this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
+    this.toggleBackgroundOverlay_(false);
+
+    this.storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, false);
+    this.storeService.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
 
     const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
     const animationEl = storyEl.querySelector(
@@ -518,5 +528,22 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     this.analyticsService_.triggerEvent(
       StoryAnalyticsEvent.PAGE_ATTACHMENT_EXIT
     );
+  }
+
+  /**
+   * @param {boolean} isActive
+   * @private
+   */
+  toggleBackgroundOverlay_(isActive) {
+    const activePageEl = closest(
+      this.element,
+      (el) => el.tagName === 'AMP-STORY-PAGE'
+    );
+    this.mutateElement(() => {
+      activePageEl.classList.toggle(
+        'i-amphtml-story-page-attachment-active',
+        isActive
+      );
+    });
   }
 }

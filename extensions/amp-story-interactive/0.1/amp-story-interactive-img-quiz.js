@@ -22,8 +22,14 @@ import {CSS} from '../../../build/amp-story-interactive-img-quiz-0.1.css';
 import {CSS as ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
 import {LocalizedStringId} from '#service/localization/strings';
 import {buildImgTemplate} from './utils';
+import {dev} from '../../../src/log';
+import {
+  getRGBFromCssColorValue,
+  getTextColorForRGB,
+} from '../../amp-story/1.0/utils';
 import {htmlFor} from '#core/dom/static-template';
-import {setImportantStyles} from '#core/dom/style';
+import {computedStyle, setImportantStyles} from '#core/dom/style';
+import objstr from 'obj-str';
 
 /**
  * Generates the template for each option.
@@ -38,7 +44,11 @@ const buildOptionTemplate = (option) => {
       class="i-amphtml-story-interactive-img-option i-amphtml-story-interactive-option"
       aria-live="polite"
     >
-      <div class="i-amphtml-story-interactive-img-option-img"></div>
+      <div class="i-amphtml-story-interactive-img-option-img">
+        <span
+          class="i-amphtml-story-interactive-img-option-percentage-text"
+        ></span>
+      </div>
       <div
         class="i-amphtml-story-interactive-img-quiz-answer-choice notranslate"
       ></div>
@@ -67,6 +77,12 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
     this.rootEl_ = buildImgTemplate(this.element);
     this.attachContent_(this.rootEl_);
     return this.rootEl_;
+  }
+
+  /** @override */
+  layoutCallback() {
+    this.setBubbleTextColor_(dev().assertElement(this.rootEl_));
+    return super.layoutCallback();
   }
 
   /**
@@ -129,5 +145,54 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
     }
 
     return convertedOption;
+  }
+
+  /**
+   * @override
+   */
+  displayOptionsData(optionsData) {
+    if (!optionsData) {
+      return;
+    }
+
+    const percentages = this.preprocessPercentages_(optionsData);
+
+    this.getOptionElements().forEach((el, index) => {
+      // Update the aria-label so they read "selected" and "correct" or "incorrect"
+      const ariaDescription = objstr({
+        selected: optionsData[index].selected,
+        correct: el.hasAttribute('correct'),
+        incorrect: !el.hasAttribute('correct'),
+      });
+      el.setAttribute(
+        'aria-label',
+        ariaDescription + ' ' + this.options_[index]['imagealt']
+      );
+      // Update percentage text
+      el.querySelector(
+        '.i-amphtml-story-interactive-img-option-percentage-text'
+      ).textContent = `${percentages[index]}%`;
+      setImportantStyles(el, {'--option-percentage': percentages[index] / 100});
+    });
+  }
+
+  /**
+   * Set the text color of the answer choice bubble to be readable and
+   * accessible according to the background color.
+   *
+   * @param {!Element} root
+   * @private
+   */
+  setBubbleTextColor_(root) {
+    // Only retrieves first bubble, but styles all bubbles accordingly
+    const answerChoiceEl = root.querySelector(
+      '.i-amphtml-story-interactive-img-quiz-answer-choice'
+    );
+    const {backgroundColor} = computedStyle(this.win, answerChoiceEl);
+    const rgb = getRGBFromCssColorValue(backgroundColor);
+    const contrastColor = getTextColorForRGB(rgb);
+    setImportantStyles(root, {
+      '--i-amphtml-interactive-option-answer-choice-color': contrastColor,
+    });
   }
 }

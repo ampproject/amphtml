@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-// Magic constant that is replaced by babel.
-// IS_MINIFIED is always replaced with true when closure compiler is used
-const IS_MINIFIED = false;
-
 /**
  * Returns true whenever closure compiler is used.
+ * This is a magic constant that is replaced by babel.
+ *
  * @return {boolean}
  */
 export function isMinified() {
