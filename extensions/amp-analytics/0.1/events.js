@@ -29,6 +29,7 @@ import {getDataParamsFromAttributes} from '#core/dom';
 import {isAmpElement} from '../../../src/amp-element-helpers';
 import {isArray, isEnumValue, isFiniteNumber} from '#core/types';
 import {debounce} from '#core/types/function';
+import {isExperimentOn} from '#experiments';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -343,7 +344,6 @@ export class CustomBrowserEventTracker extends EventTracker {
    * @param {!./analytics-root.AnalyticsRoot} root
    */
   constructor(root) {
-    
     const TIME_WAIT = 500;
     super(root);
 
@@ -371,6 +371,11 @@ export class CustomBrowserEventTracker extends EventTracker {
 
   /** @override */
   add(context, eventType, config, listener) {
+    userAssert(
+      isExperimentOn(this.root.ampdoc.win, 'custom-browser-event-tracker'),
+      'expected global "custom-browser-event-tracker" experiment to be enabled'
+    );
+
     const selector = userAssert(
       config['selector'],
       'Missing required selector on browser event trigger'
