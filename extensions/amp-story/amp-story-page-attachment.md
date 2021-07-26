@@ -151,7 +151,7 @@ String that displays in the attachment's header when scrolling beyond the height
 ```
 
 [tip type="note"]
-`amp-story-page-attachment` previously supported outlinking. Please use [`amp-story-page-outlink`](https://amp.dev/documentation/components/amp-story-page-outlink/?format=stories) for one-tap outlinking UI.
+`amp-story-page-attachment` previously supported outlinking. Please use `amp-story-page-outlink` for one-tap outlinking UI.
 [/tip]
 
 ### Supported AMP Components in a Page Attachment
