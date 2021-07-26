@@ -17,8 +17,6 @@
 tags: {  # amp-facebook-page
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp facebook 0.1"
-  excludes: "amp facebook 1.0"
   extension_spec: {
     name: "amp-facebook-page"
     version: "0.1"
