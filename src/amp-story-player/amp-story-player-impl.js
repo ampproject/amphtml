@@ -992,9 +992,7 @@ export class AmpStoryPlayer {
             {state: STORY_MESSAGE_STATE_TYPE.UI_STATE},
             true
           )
-          .then((event) => {
-            resolve(event.value);
-          });
+          .then((event) => resolve(event.value));
       });
     });
   }
