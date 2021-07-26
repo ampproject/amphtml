@@ -50,6 +50,7 @@ describes.realWin(
       const ampStoryQuizEl = win.document.createElement(
         'amp-story-interactive-img-quiz'
       );
+      ampStoryQuizEl.getAmpDoc = () => new AmpDocSingle(win);
       ampStoryQuizEl.getResources = () => win.__AMP_SERVICES.resources.obj;
       requestService = new AmpStoryRequestService(win);
       registerServiceBuilder(win, 'story-request', function () {
@@ -68,7 +69,6 @@ describes.realWin(
 
       storyEl = win.document.createElement('amp-story');
       const storyPage = win.document.createElement('amp-story-page');
-      storyPage.getAmpDoc = () => new AmpDocSingle(win);
       const gridLayer = win.document.createElement('amp-story-grid-layer');
       gridLayer.appendChild(ampStoryQuizEl);
       storyPage.appendChild(gridLayer);

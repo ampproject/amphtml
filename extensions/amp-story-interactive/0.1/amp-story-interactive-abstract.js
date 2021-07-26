@@ -336,7 +336,15 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         while (options.length < optionNumber) {
           options.push({'optionIndex': options.length});
         }
-        options[optionNumber - 1][splitParts.slice(2).join('')] = attr.value;
+        const key = splitParts.slice(2).join('');
+        if (key === 'image') {
+          options[optionNumber - 1][key] = maybeMakeProxyUrl(
+            attr.value,
+            this.element
+          );
+        } else {
+          options[optionNumber - 1][key] = attr.value;
+        }
       }
     });
     if (
@@ -556,28 +564,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    */
   displayOptionsData(unusedOptionsData) {
     // Subclass must implement
-  }
-
-  /**
-   * Sets the background image for each option of an image component
-   *
-   * @param {!Element} root
-   * @protected
-   */
-  setBackgroundImage(root) {
-    root
-      .querySelectorAll('.i-amphtml-story-interactive-img-option-img')
-      .forEach((container, index) => {
-        setImportantStyles(container, {
-          'background-image':
-            'url(' +
-            maybeMakeProxyUrl(
-              this.options_[index]['image'],
-              this.getPageEl_()
-            ) +
-            ')',
-        });
-      });
   }
 
   /**

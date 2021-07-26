@@ -76,7 +76,6 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
   buildComponent() {
     this.rootEl_ = buildImgTemplate(this.element);
     this.attachContent_(this.rootEl_);
-    this.setBackgroundImage(this.rootEl_);
     return this.rootEl_;
   }
 
@@ -129,6 +128,14 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
     );
     answerChoiceEl.textContent = this.localizedAnswerChoices_[index];
     convertedOption.optionIndex_ = option['optionIndex'];
+
+    // Extract and structure the option information
+    setImportantStyles(
+      convertedOption.querySelector(
+        '.i-amphtml-story-interactive-img-option-img'
+      ),
+      {'background-image': 'url(' + option['image'] + ')'}
+    );
 
     convertedOption.setAttribute('aria-label', option['imagealt']);
 
