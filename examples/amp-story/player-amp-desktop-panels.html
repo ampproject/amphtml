@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Story Player (Non-AMP)</title>
+    <script async src="../../dist/amp-story-player.js"></script>
+    <link href="../../build/css/amp-story-player-v0.css" rel='stylesheet' type='text/css'>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>This is a non-AMP page that embeds the desktop panel story player.</h1>
+    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras viverra neque ex, sit amet varius sem maximus sed. Suspendisse potenti. Donec erat purus, sagittis sit amet tincidunt ut, maximus sit amet massa. Maecenas venenatis fringilla dui vitae vestibulum. Fusce imperdiet euismod lobortis. Nullam sagittis nunc at tristique mattis. In sodales consectetur mollis. Maecenas sollicitudin, ex vel tempor rutrum, turpis eros interdum enim, sit amet volutpat tortor dolor at ipsum. Nam posuere velit vel urna vulputate interdum. Aenean eu vulputate lorem. Praesent nec nunc sodales, egestas orci sed, hendrerit mauris. Ut blandit turpis non erat sagittis, quis fermentum odio feugiat.</div>
+    <amp-story-player style="width: 100vw; height: 60vh">
+      <script type="application/json">
+        {
+          "controls": [
+            {
+              "name": "close",
+              "position": "start"
+            },
+            {
+              "name": "skip-to-next"
+            }
+          ]
+        }
+      </script>
+      <a href="https://wsdemos.uc.r.appspot.com/cta-buttons" class="story">
+        <img data-amp-story-player-poster-img src="https://www-washingtonpost-com.cdn.ampproject.org/i/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-miami/img/promo3x4.jpg" width="360" height="600" loading="lazy">
+        <span class="title">A local’s guide to what to eat and do in Miami</span>
+      </a>
+      <a href="https://wsdemos.uc.r.appspot.com/homewarrior" class="story">
+        <img data-amp-story-player-poster-img src="https://www-washingtonpost-com.cdn.ampproject.org/i/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/img/promo3x4.jpg" width="360" height="600" loading="lazy">
+        <span class="title">A local’s guide to what to eat and do in New York City</span>
+      </a>
+      <a href="https://wsdemos.uc.r.appspot.com/constellations" class="story">
+        <img data-amp-story-player-poster-img src="https://www-washingtonpost-com.cdn.ampproject.org/i/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-mexico-city/img/promo3x4.jpg" width="360" height="600" loading="lazy">
+        <span class="title">A local’s guide to what to eat and do in Mexico City</span>
+      </a>
+      <a href="https://wsdemos.uc.r.appspot.com/art-quiz" class="story">
+        <img data-amp-story-player-poster-img src="https://www-washingtonpost-com.cdn.ampproject.org/i/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-rome/img/promo3x4.jpg" width="360" height="600" loading="lazy">
+        <span class="title">A local’s guide to what to eat and do in Rome</span>
+      </a>
+      <a href="https://wsdemos.uc.r.appspot.com/animal-poll" class="story">
+        <img data-amp-story-player-poster-img src="https://www-washingtonpost-com.cdn.ampproject.org/i/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-rome/img/promo3x4.jpg" width="360" height="600" loading="lazy">
+        <span class="title">A local’s guide to what to eat and do in Rome</span>
+      </a>
+    </amp-story-player>
+    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras viverra neque ex, sit amet varius sem maximus sed. Suspendisse potenti. Donec erat purus, sagittis sit amet tincidunt ut, maximus sit amet massa. Maecenas venenatis fringilla dui vitae vestibulum. Fusce imperdiet euismod lobortis. Nullam sagittis nunc at tristique mattis. In sodales consectetur mollis. Maecenas sollicitudin, ex vel tempor rutrum, turpis eros interdum enim, sit amet volutpat tortor dolor at ipsum. Nam posuere velit vel urna vulputate interdum. Aenean eu vulputate lorem. Praesent nec nunc sodales, egestas orci sed, hendrerit mauris. Ut blandit turpis non erat sagittis, quis fermentum odio feugiat.</div>
+    <script>
+      document.querySelector("amp-story-player").addEventListener("amp-story-player-close", (e) => alert("Hello!"));
+    </script>
+  </body>
+</html>
