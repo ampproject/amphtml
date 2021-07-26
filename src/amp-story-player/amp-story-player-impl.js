@@ -191,7 +191,6 @@ const LOG_TYPE = {
  * Flag to show or hide the desktop panels player experiment.
  * @const {boolean}
  */
-const DESKTOP_PANEL_STORY_PLAYER_EXP_ON = false;
 
 /**
  * NOTE: If udpated here, update in amp-story.js
@@ -272,6 +271,14 @@ export class AmpStoryPlayer {
 
     /** @private {?Element} */
     this.nextButton_ = null;
+
+    /**
+     * Shows or hides the desktop panels player experiment.
+     * Variable is set on window for unit testing new features.
+     * @private {?boolean}
+     */
+    this.isDesktopPanelExperimentOn_ =
+      this.win_.DESKTOP_PANEL_STORY_PLAYER_EXP_ON;
 
     return this.element_;
   }
@@ -421,7 +428,7 @@ export class AmpStoryPlayer {
     this.initializeAttribution_();
     this.initializePageScroll_();
     this.initializeCircularWrapping_();
-    if (DESKTOP_PANEL_STORY_PLAYER_EXP_ON) {
+    if (this.isDesktopPanelExperimentOn_) {
       this.initializeDesktopStoryControlUI_();
     }
     this.signalReady_();
@@ -740,7 +747,7 @@ export class AmpStoryPlayer {
     new AmpStoryPlayerViewportObserver(this.win_, this.element_, () =>
       this.visibleDeferred_.resolve()
     );
-    if (DESKTOP_PANEL_STORY_PLAYER_EXP_ON) {
+    if (this.isDesktopPanelExperimentOn_) {
       if (this.win_.ResizeObserver) {
         new this.win_.ResizeObserver((e) => {
           const {height, width} = e[0].contentRect;
@@ -958,7 +965,7 @@ export class AmpStoryPlayer {
       'remaining': remaining,
     };
 
-    if (DESKTOP_PANEL_STORY_PLAYER_EXP_ON) {
+    if (this.isDesktopPanelExperimentOn_) {
       this.checkButtonsDisabled_();
     }
     this.signalNavigation_(navigation);
