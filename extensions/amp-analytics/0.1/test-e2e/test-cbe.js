@@ -32,28 +32,29 @@ describes.endtoend(
       return new Promise((res) => setTimeout(res, ms));
     }
 
-    it('click on input field and fropdown menu to focus and then blur', async () => {
-      debugger;
-      const inputField = await controller.findElement('#inputText');
-      const inputField2 = await controller.findElement('#inputText2');
+    it('click on input field to focus and then blur', async () => {
+      const focusedInputField = await controller.findElement('#inputText');
+      const blurredInputField = await controller.findElement('#inputText2');
 
-      await controller.click(inputField2);
-      await controller.click(inputField);
+      await controller.click(blurredInputField);
+      await controller.click(focusedInputField);
 
+      // Sleep 1 second for the blur event to be sent
       await sleep(1000);
       await expect(
         'https://foo.com/event?type=blur&eventId='
       ).to.have.been.sent;
     });
 
-    it('click on input field and fropdown menu to focus and then blur', async () => {
+    it('click on dropdown menu to focus and then blur', async () => {
 
-      const dropdown = await controller.findElement('#numChild');
-      const dropdown2 = await controller.findElement('#numChild2');
+      const focusedDropdown = await controller.findElement('#numChild');
+      const blurredDropdown = await controller.findElement('#numChild2');
 
-      await controller.click(dropdown2);
-      await controller.click(dropdown);
+      await controller.click(blurredDropdown);
+      await controller.click(focusedDropdown);
 
+      // Sleep 1 second for the blur event to be sent
       await sleep(1000);
       await expect(
         'https://foo.com/event?type=blur&eventId='
@@ -61,13 +62,13 @@ describes.endtoend(
     });
 
     it('change the content of the input field to trigger on change event', async () => {
-      debugger;
-      const inputField = await controller.findElement('#inputText');
+      const changedInputField = await controller.findElement('#inputText');
 
-      await controller.click(inputField);
+      await controller.click(changedInputField);
       await sleep(300);
-      await controller.type(inputField, 'test-text');
-      await controller.type(inputField, Key.Enter);
+      await controller.type(changedInputField, 'test-text');
+      await controller.type(changedInputField, Key.Enter);
+
       // Sleep 1 second for the change event to be sent
       await sleep(1000);
       await expect(
@@ -76,14 +77,12 @@ describes.endtoend(
 
     });
 
-    it('change drop down ', async () => {
-      debugger;
-      const dropdown = await controller.findElement('#numChild');
+    it('change drop down option selected to trigger on change event', async () => {
+      const changedDropdown = await controller.findElement('#numChild');
 
-      await controller.click(dropdown);
-      await controller.type(dropdown, '1');
-      await controller.type(dropdown, Key.Enter);
-      debugger
+      await controller.click(changedDropdown);
+      await controller.type(changedDropdown, '1');
+      await controller.type(changedDropdown, Key.Enter);
       // Sleep 1 second for the change event to be sent
       await sleep(1000);
       await expect(
