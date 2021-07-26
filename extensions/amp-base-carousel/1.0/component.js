@@ -42,6 +42,7 @@ import {
   useState,
 } from '#preact';
 import {useStyles} from './component.jss';
+import {mod} from '#core/math';
 
 /**
  * @enum {string}
@@ -187,7 +188,9 @@ function BaseCarouselWithRef(
       if (length <= 0 || isNaN(index)) {
         return;
       }
-      index = Math.min(Math.max(index, 0), length - 1);
+      index = loop
+        ? mod(index, length)
+        : Math.min(Math.max(index, 0), length - 1);
       setCurrentSlide(index);
       if (currentSlideRef.current !== index) {
         currentSlideRef.current = index;
@@ -196,7 +199,7 @@ function BaseCarouselWithRef(
         }
       }
     },
-    [length, setCurrentSlide, onSlideChange]
+    [length, loop, setCurrentSlide, onSlideChange]
   );
 
   useImperativeHandle(
@@ -351,15 +354,19 @@ function BaseCarouselWithRef(
         visibleCount={mixedLength ? 1 : visibleCount}
         _thumbnails={_thumbnails}
       >
-        {childrenArray.map((child, index) => (
-          <WithAmpContext
-            key={index}
-            renderable={index == currentSlide}
-            playable={index == currentSlide}
-          >
-            {child}
-          </WithAmpContext>
-        ))}
+        {childrenArray.map((child, index) => {
+          const {alt, 'aria-label': ariaLabel} = child.props;
+          return (
+            <WithAmpContext
+              caption={alt || ariaLabel}
+              key={index}
+              renderable={index == currentSlide}
+              playable={index == currentSlide}
+            >
+              {child}
+            </WithAmpContext>
+          );
+        })}
       </Scroller>
       {!hideControls && (
         <Arrow

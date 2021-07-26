@@ -47,6 +47,7 @@ const AMP_EMBED_ALLOWED = {
   epeex: true,
   firstimpression: true,
   forkmedia: true,
+  gecko: true,
   glomex: true,
   idealmedia: true,
   insticator: true,
