@@ -14,7 +14,7 @@
 # limitations under the license.
 #
 
-tags: { # amp-facebook
+tags: {  # amp-facebook
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
