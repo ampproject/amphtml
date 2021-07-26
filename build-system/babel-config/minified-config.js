@@ -16,6 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const {BUILD_CONSTANTS} = require('../compile/build-constants');
 const {getImportResolverPlugin} = require('./import-resolver');
 const {getReplacePlugin} = require('./helpers');
 
@@ -71,7 +72,7 @@ function getMinifiedConfig() {
       ? null
       : [
           './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
-          {isEsmBuild: !!argv.esm},
+          BUILD_CONSTANTS,
         ],
   ].filter(Boolean);
   const presetEnv = [

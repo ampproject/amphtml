@@ -16,7 +16,14 @@
 const argv = require('minimist')(process.argv.slice(2));
 const {VERSION} = require('./internal-version');
 
-const testTasks = ['e2e', 'integration', 'visual-diff', 'unit', 'check-types'];
+const testTasks = [
+  'e2e',
+  'integration',
+  'visual-diff',
+  'unit',
+  'check-types',
+  'babel-plugin-tests',
+];
 const isTestTask = testTasks.some((task) => argv._.includes(task));
 const isProd = argv._.includes('dist') && !argv.fortesting;
 const isMinified = argv._.includes('dist') || !!argv.compiled;
