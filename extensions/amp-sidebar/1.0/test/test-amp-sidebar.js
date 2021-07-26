@@ -20,6 +20,7 @@ import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 import {toggleExperiment} from '#experiments';
 import {waitFor, whenCalled} from '#testing/test-helper';
+import {Services} from '#service/';
 
 describes.realWin(
   'amp-sidebar:1.0',
@@ -50,6 +51,8 @@ describes.realWin(
       let animateFunction;
       let consoleWarnSpy;
       let consoleWarn;
+      let historyPopSpy;
+      let historyPushSpy;
 
       function invocation(method, args = {}) {
         const source = null;
@@ -78,6 +81,19 @@ describes.realWin(
         consoleWarn = console.warn;
         console.warn = () => true;
         consoleWarnSpy = env.sandbox.spy(console, 'warn');
+
+        historyPopSpy = env.sandbox.spy();
+        historyPushSpy = env.sandbox.spy();
+        env.sandbox.stub(Services, 'historyForDoc').returns({
+          push() {
+            historyPushSpy();
+            return Promise.resolve(11);
+          },
+          pop() {
+            historyPopSpy();
+            return Promise.resolve(11);
+          },
+        });
 
         fullHtml = html`
           <div>
@@ -156,6 +172,9 @@ describes.realWin(
         expect(isMounted(win, container)).to.equal(true);
 
         await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
+
         const sidebar = element.shadowRoot.querySelector('[part=sidebar]');
         expect(sidebar).to.exist;
         expect(element.setAsContainerInternal).to.be.calledOnce.calledWith(
@@ -171,6 +190,8 @@ describes.realWin(
 
         expect(element.removeAsContainerInternal).to.be.calledOnce;
         expect(element.setAsContainerInternal).to.be.calledOnce; // no change.
+        expect(historyPopSpy).to.be.calledOnce;
+        expect(historyPushSpy).to.be.calledOnce; // no change.
         expect(child.pause).to.be.calledOnce;
         expect(child.unmount).to.not.be.called;
       });
