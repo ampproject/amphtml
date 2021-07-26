@@ -336,6 +336,7 @@ class AmpJWPlayer extends AMP.BaseElement {
         src,
         getDataParamsFromAttributes(this.element, null, /^playerParam(.+)/)
       );
+      // TODO: If no query parameters are added to the src, an arbitrary & may be appended.
       if (this.queryString_) {
         src += `&${this.queryString_}`;
       }
