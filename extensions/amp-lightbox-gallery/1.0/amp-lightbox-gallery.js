@@ -22,6 +22,7 @@ import {createElementWithAttributes} from '#core/dom';
 import {elementByTag} from '#core/dom/query';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
 const TAG = 'amp-lightbox-gallery';
@@ -73,12 +74,25 @@ class AmpLightboxGallery extends BaseElement {
     super.afterOpen();
     const scroller = this.element.shadowRoot.querySelector('[part=scroller]');
     this.setAsContainer?.(scroller);
+    triggerAnalyticsEvent(this.element, 'lightboxOpened');
   }
 
   /** @override */
   afterClose() {
     super.afterClose();
     this.removeAsContainer?.();
+  }
+
+  /** @override */
+  onViewGrid() {
+    super.onViewGrid();
+    triggerAnalyticsEvent(this.element, 'thumbnailsViewToggled');
+  }
+
+  /** @override */
+  onToggleCaption() {
+    super.onToggleCaption();
+    triggerAnalyticsEvent(this.element, 'descriptionOverflowToggled');
   }
 
   /** @override */

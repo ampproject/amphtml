@@ -154,6 +154,7 @@ const forbiddenTermsGlobal = {
       'src/core/mode/minified.js',
       'src/core/mode/prod.js',
       'build-system/compile/build-constants.js',
+      'build-system/babel-plugins/babel-plugin-amp-mode-transformer/index.js',
     ],
   },
   '\\.prefetch\\(': {
@@ -862,6 +863,7 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'src/service/extensions-impl.js',
       'extensions/amp-ad/0.1/amp-ad.js',
+      'extensions/amp-sticky-ad/1.0/amp-sticky-ad.js',
     ],
   },
   'reject\\(\\)': {
