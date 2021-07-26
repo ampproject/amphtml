@@ -320,6 +320,7 @@ TEST(HTMLDatasetTest, WebkitData) {
   int num_test_cases = 0;
   for (auto pattern : htmlparser::testing::kTestDataDirs) {
     std::string full_path =
+        absl::GetFlag(FLAGS_test_srcdir) +
         pattern.data();
     std::vector<std::string> filenames;
     EXPECT_TRUE(FileUtil::Glob(full_path, &filenames))

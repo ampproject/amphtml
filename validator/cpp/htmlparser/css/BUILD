@@ -6,7 +6,7 @@
 #
 # bazel build --repo_env=CC=clang --cxxopt='-std=c++17' <build_target>
 
-load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test", "cc_proto_library")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_proto_library", "cc_test")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 
 package(default_visibility = ["//visibility:public"])
@@ -96,9 +96,9 @@ cc_library(
     hdrs = ["amp4ads-parse-css.h"],
     deps = [
         ":parse-css",
+        "@com_github_re2//:re2",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
-        "@com_github_re2//:re2",
     ],
 )
 

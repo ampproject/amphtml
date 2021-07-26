@@ -499,7 +499,6 @@ class RuleVisitor;
 class Rule : public Token {
  public:
   explicit Rule(TokenType::Code type) : Token(type) {}
-  std::unique_ptr<Token> Clone() const final;
 
   // Accept will first dispatch to the appropriate
   // visitor->VisitRuleType method, then recurse into the children of

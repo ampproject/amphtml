@@ -21,7 +21,6 @@
 #include <functional>
 #include <sstream>
 #include <tuple>
-#include "glog/logging.h"
 #include "casetable.h"
 #include "entity.h"
 #include "whitespacetable.h"

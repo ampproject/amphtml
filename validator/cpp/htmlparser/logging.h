@@ -20,15 +20,16 @@
 #ifndef HTMLPARSER__LOGGING_H_
 #define HTMLPARSER__LOGGING_H_
 
+#include <cstdlib>
 #include <iostream>
 
-#define CHECK(condition, message) \
-do { \
-  if (!(condition)) { \
-    std::cerr << "CHECK(`" #condition "`) failed in " << __FILE__ \
-              << " line " << __LINE__ << ": " << message << std::endl; \
-    throw std::runtime_error("CHECK failed with error: "  message); \
-  } \
-} while (false)
+#define CHECK(condition, message)                                        \
+  do {                                                                   \
+    if (!(condition)) {                                                  \
+      std::cerr << "CHECK(`" #condition "`) failed in " << __FILE__      \
+                << " line " << __LINE__ << ": " << message << std::endl; \
+      abort();                                                           \
+    }                                                                    \
+  } while (false)
 
 #endif  // HTMLPARSER__LOGGING_H_
