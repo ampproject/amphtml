@@ -55,6 +55,7 @@ const buildSliderTemplate = (element) => {
 const SliderType = {
   PERCENTAGE: 'percentage',
   EMOJI: 'emoji',
+  RESULTS: 'results',
 };
 
 export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
@@ -132,10 +133,10 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
         // Converts oscillation between 1 and -1, to 0 and 30.
         const val = map(Math.cos(timePercentage * Math.PI * 2), 1, -1, 0, 30);
         this.inputEl_.value = val;
-        this.onDrag_();
-        if (!this.isInteracting_) {
-          requestAnimationFrame(animateFrame);
-        }
+        --fraction;
+        // if (!this.isInteracting_) {
+        requestAnimationFrame(animateFrame);
+        // }
       }
     };
     requestAnimationFrame(animateFrame);
