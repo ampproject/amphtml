@@ -234,10 +234,10 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   }
 
   /**
-   * @private
+   * @protected
    * @return {Element} the page element
    */
-  getPageEl_() {
+  getPageEl() {
     if (this.pageEl_ == null) {
       this.pageEl_ = closest(dev().assertElement(this.element), (el) => {
         return el.tagName.toLowerCase() === 'amp-story-page';
@@ -468,7 +468,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       StateProperty.CURRENT_PAGE_ID,
       (currPageId) => {
         this.mutateElement(() => {
-          const toggle = currPageId === this.getPageEl_().getAttribute('id');
+          const toggle = currPageId === this.getPageEl().getAttribute('id');
           this.rootEl_.classList.toggle(INTERACTIVE_ACTIVE_CLASS, toggle);
           this.toggleTabbableElements_(toggle);
         });
@@ -886,7 +886,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       () => {
         // Get rects and calculate position from icon.
         const interactiveRect = this.element./*OK*/ getBoundingClientRect();
-        const pageRect = this.getPageEl_()./*OK*/ getBoundingClientRect();
+        const pageRect = this.getPageEl()./*OK*/ getBoundingClientRect();
         const iconRect = this.disclaimerIcon_./*OK*/ getBoundingClientRect();
         const bottomFraction =
           1 - (iconRect.y + iconRect.height - pageRect.y) / pageRect.height;
@@ -918,7 +918,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
           this.disclaimerEl_,
           assertDoesNotContainDisplay(styles)
         );
-        this.getPageEl_().appendChild(this.disclaimerEl_);
+        this.getPageEl().appendChild(this.disclaimerEl_);
         this.disclaimerIcon_.setAttribute('hide', '');
         // Add click listener through the shadow dom using e.path.
         this.disclaimerEl_.addEventListener('click', (e) => {

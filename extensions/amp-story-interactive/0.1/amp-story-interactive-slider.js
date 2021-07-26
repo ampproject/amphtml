@@ -123,6 +123,9 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
       (currPageId) => {
+        if (currPageId != this.getPageEl().getAttribute('id')) {
+          return;
+        }
         const DURATION_MS = 1500;
         let startTime;
         const animateFrame = (currTime) => {
