@@ -66,7 +66,9 @@
   position: relative !important;
   z-index: 1 !important;
   /** Needed for occasional image clipping during animation */
-  clip-path: circle(3.75em) !important;
+  clip-path: circle(
+    calc(var(--i-amphtml-interactive-img-option-size))
+  ) !important;
 }
 
 .i-amphtml-story-interactive-img-option:focus {
