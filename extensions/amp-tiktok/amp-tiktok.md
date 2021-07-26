@@ -65,7 +65,8 @@ If you choose to set the height of to a value which is which is greater than the
 
 ## Placeholder
 
-If you would like your component to display a placeholder image: in lieu of the video-id, use the full TikTok URL for the `data-src` attribute; or use the blockquote implementation.  
+If you would like your component to display a placeholder image make sure a source URL for the TikTok is provided.
+Either using the source URL as the `data-src` attribute or by using the TikTok provided `blockquote` which provides the URL in the `cite` attribute.  
 
 ## Attributes
 
