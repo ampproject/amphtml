@@ -20,7 +20,7 @@ const pageHeight = 600;
 describes.endtoend(
   'AMP Lightbox Gallery Open/Close',
   {
-    fixture: 'amp-lightbox-gallery/open-close.amp.html',
+    fixture: 'bento/amp-lightbox-gallery.html',
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single'],
   },
