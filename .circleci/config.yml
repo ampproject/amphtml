@@ -60,8 +60,17 @@ commands:
             mkdir -p /tmp/workspace
       - run:
           name: 'Maybe Gracefully Halt'
-          command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/maybe_gracefully_halt.sh | bash
+          command: /tmp/restored-workspace/maybe_gracefully_halt.sh
+      - restore_cache:
+          keys:
+            - source-v1-{{ .Branch }}-{{ .Revision }}
+            - source-v1-{{ .Branch }}-
+            - source-v1-
       - checkout
+      - save_cache:
+          key: source-v1-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - .git
       - run:
           name: 'Configure Development Environment'
           command: |
@@ -102,13 +111,28 @@ commands:
                 command: circleci-agent step halt
 
 jobs:
-  'Compute Merge Commit':
+  'Initialize Repository':
     executor:
       name: amphtml-small-executor
     steps:
+      - restore_cache:
+          keys:
+            - source-v1-{{ .Branch }}-{{ .Revision }}
+            - source-v1-{{ .Branch }}-
+            - source-v1-
+      - checkout
       - run:
-          name: 'Compute Merge Commit'
-          command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/compute_merge_commit.sh | bash
+          name: 'Compute and Fetch Merge Commit'
+          command: |
+            ./.circleci/compute_merge_commit.sh
+            ./.circleci/fetch_merge_commit.sh
+      - save_cache:
+          key: source-v1-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - .git
+      - run:
+          name: 'Initialize Workspace'
+          command: cp .circleci/maybe_gracefully_halt.sh /tmp/workspace
       - teardown_vm
   'Checks':
     executor:
@@ -314,32 +338,32 @@ jobs:
 workflows:
   'CircleCI':
     jobs:
-      - 'Compute Merge Commit':
+      - 'Initialize Repository':
           <<: *push_and_pr_builds
       - 'Checks':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
       - 'Unminified Build':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
       - 'Nomodule Build':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
       - 'Module Build':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
       - 'Bundle Size':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
       - 'Validator Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
       - 'Visual Diff Tests':
           <<: *push_and_pr_builds
           requires:
@@ -347,7 +371,7 @@ workflows:
       - 'Local Unit Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
       - 'All Unit Tests':
           name: '⛓️ All Unit Tests'
           <<: *push_and_pr_builds
@@ -386,7 +410,7 @@ workflows:
               exp: ['A', 'B', 'C']
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
       - 'Experiment Integration Tests':
           name: 'Exp. << matrix.exp >> Integration Tests'
           matrix:
