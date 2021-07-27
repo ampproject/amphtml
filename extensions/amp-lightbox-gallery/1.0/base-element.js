@@ -38,6 +38,8 @@ const LIGHTBOX_ELIGIBLE_TAGS = ['AMP-IMG', 'IMG'];
 const LIGHTBOX_ELIGIBLE_GROUP_SELECTORS = [
   'AMP-BASE-CAROUSEL[lightbox]',
   'AMP-STREAM-GALLERY[lightbox]',
+  'BENTO-BASE-CAROUSEL[lightbox]',
+  'BENTO-STREAM-GALLERY[lightbox]',
 ];
 
 /** @const {string} */
@@ -67,7 +69,7 @@ export class BaseElement extends PreactBaseElement {
     if (count++) {
       console /*OK */
         .warn(
-          `<amp-lightbox-gallery> already exists in the document. Removing additional instance: ${this.element}`
+          `${this.element.tagName} already exists in the document. Removing additional instance: ${this.element}`
         );
       this.element.parentNode?.removeChild(this.element);
     }
@@ -83,6 +85,8 @@ export class BaseElement extends PreactBaseElement {
       'onBeforeOpen': () => this.beforeOpen(),
       'onAfterOpen': () => this.afterOpen(),
       'onAfterClose': () => this.afterClose(),
+      'onViewGrid': () => this.onViewGrid(),
+      'onToggleCaption': () => this.onToggleCaption(),
       'render': () => lightboxElements,
     });
   }
@@ -108,6 +112,12 @@ export class BaseElement extends PreactBaseElement {
     toggleAttribute(this.element, 'open', false);
     toggle(this.element, false);
   }
+
+  /** @protected */
+  onViewGrid() {}
+
+  /** @protected */
+  onToggleCaption() {}
 
   /** @override */
   mutationObserverCallback() {
