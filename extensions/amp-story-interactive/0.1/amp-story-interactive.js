@@ -20,6 +20,7 @@ import {AmpStoryInteractiveImgQuiz} from './amp-story-interactive-img-quiz';
 import {AmpStoryInteractivePoll} from './amp-story-interactive-poll';
 import {AmpStoryInteractiveQuiz} from './amp-story-interactive-quiz';
 import {AmpStoryInteractiveResults} from './amp-story-interactive-results';
+import {AmpStoryInteractiveResultsDetailed} from './amp-story-interactive-results-detailed';
 import {AmpStoryInteractiveSlider} from './amp-story-interactive-slider';
 
 /**
@@ -56,5 +57,9 @@ AMP.extension('amp-story-interactive', '0.1', (AMP) => {
   AMP.registerElement(
     'amp-story-interactive-results',
     AmpStoryInteractiveResults
+  );
+  AMP.registerElement(
+    'amp-story-interactive-results-detailed',
+    AmpStoryInteractiveResultsDetailed
   );
 });

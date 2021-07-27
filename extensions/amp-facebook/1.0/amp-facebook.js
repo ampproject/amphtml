@@ -24,6 +24,9 @@ import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-facebook';
+const COMMENTS_TAG = 'amp-facebook-comments';
+const LIKE_TAG = 'amp-facebook-like';
+const PAGE_TAG = 'amp-facebook-page';
 const TYPE = 'facebook';
 
 class AmpFacebook extends BaseElement {
@@ -77,9 +80,12 @@ class AmpFacebook extends BaseElement {
 function parseEmbed(element) {
   const embedAs = element.getAttribute('data-embed-as');
   userAssert(
-    !embedAs || ['post', 'video', 'comment'].indexOf(embedAs) !== -1,
+    !embedAs ||
+      ['post', 'video', 'comment', 'comments', 'like', 'page'].indexOf(
+        embedAs
+      ) !== -1,
     'Attribute data-embed-as for <amp-facebook> value is wrong, should be' +
-      ' "post", "video" or "comment" but was: %s',
+      ' "post", "video", "comment", "comments", "like", or "page", but was: %s',
     embedAs
   );
   return embedAs;
@@ -94,6 +100,24 @@ AmpFacebook['props'] = {
   },
 };
 
+class AmpFacebookComments extends AmpFacebook {}
+
+/** @override */
+AmpFacebookComments['staticProps'] = {'embedAs': 'comments'};
+
+class AmpFacebookLike extends AmpFacebook {}
+
+/** @override */
+AmpFacebookLike['staticProps'] = {'embedAs': 'like'};
+
+class AmpFacebookPage extends AmpFacebook {}
+
+/** @override */
+AmpFacebookPage['staticProps'] = {'embedAs': 'page'};
+
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpFacebook);
+  AMP.registerElement(COMMENTS_TAG, AmpFacebookComments);
+  AMP.registerElement(LIKE_TAG, AmpFacebookLike);
+  AMP.registerElement(PAGE_TAG, AmpFacebookPage);
 });
