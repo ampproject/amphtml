@@ -138,7 +138,10 @@ const DESKTOP_WIDTH_THRESHOLD = 1024;
 /** @private @const {number} */
 const DESKTOP_HEIGHT_THRESHOLD = 550;
 
-/** @private @const {string} */
+/**
+ * NOTE: If udpated here, update in amp-story-player-impl.js
+ * @private @const {string}
+ */
 const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = '3 / 4';
 
 /** @private @const {number} */
@@ -472,6 +475,14 @@ export class AmpStory extends AMP.BaseElement {
     ) {
       Services.performanceFor(this.win).addEnabledExperiment(
         'story-disable-animations-first-page'
+      );
+    }
+    if (isExperimentOn(this.win, 'story-load-inactive-outside-viewport')) {
+      Services.performanceFor(this.win).addEnabledExperiment(
+        'story-load-inactive-outside-viewport'
+      );
+      this.element.classList.add(
+        'i-amphtml-experiment-story-load-inactive-outside-viewport'
       );
     }
 

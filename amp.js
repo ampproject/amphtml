@@ -54,7 +54,6 @@ createTask('cherry-pick', 'cherryPick');
 createTask('clean');
 createTask('codecov-upload', 'codecovUpload');
 createTask('compile-jison', 'compileJison');
-createTask('coverage-map', 'coverageMap');
 createTask('css');
 createTask('default', 'defaultTask', 'default-task');
 createTask('dep-check', 'depCheck');

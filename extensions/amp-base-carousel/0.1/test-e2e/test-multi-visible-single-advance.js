@@ -38,7 +38,8 @@ describes.endtoend(
       prevArrow = await getPrevArrow(controller);
     });
 
-    it('should not go forward past end and it should be able to go back correctly', async () => {
+    it('should not go forward past end and it should be able to go back correctly', async function () {
+      this.timeout(10000);
       const slideCount = 7;
       const slidesInView = 3;
       const slides = await getSlides(controller);
