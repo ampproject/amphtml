@@ -340,7 +340,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         if (key === 'image') {
           options[optionNumber - 1][key] = maybeMakeProxyUrl(
             attr.value,
-            this.element,
+            this.getAmpDoc(),
             '/ii/w128/s/'
           );
         } else {

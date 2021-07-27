@@ -277,13 +277,13 @@ const renderInlinePageAttachmentUi = (pageEl, attachmentEl) => {
 
   const openImgAttr2 = attachmentEl.getAttribute('cta-image-2');
   if (openImgAttr2) {
-    const src = maybeMakeProxyUrl(openImgAttr2, pageEl);
+    const src = maybeMakeProxyUrl(openImgAttr2, pageEl.getAmpDoc());
     chipEl.prepend(makeImgElWithBG(src));
   }
 
   const openImgAttr = attachmentEl.getAttribute('cta-image');
   if (openImgAttr) {
-    const src = maybeMakeProxyUrl(openImgAttr, pageEl);
+    const src = maybeMakeProxyUrl(openImgAttr, pageEl.getAmpDoc());
     chipEl.prepend(makeImgElWithBG(src));
   }
 
