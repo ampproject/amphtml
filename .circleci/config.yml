@@ -131,7 +131,7 @@ jobs:
           paths:
             - .git
       - run:
-          name: 'Store maybe_gracefully_halt.sh in Workspace'
+          name: 'Initialize Workspace'
           command: cp .circleci/maybe_gracefully_halt.sh /tmp/workspace
       - teardown_vm
   'Checks':
