@@ -308,7 +308,7 @@ jobs:
       - teardown_vm
   'Validate End-to-End Tests':
     executor:
-      name: amphtml-large-executor
+      name: amphtml-medium-executor
     steps:
       - setup_vm
       - install_chrome
@@ -316,7 +316,6 @@ jobs:
           name: 'Validate End-to-End Tests'
           command: node build-system/pr-check/validate-e2e-tests.js
       - store_test_output
-      - fail_fast
       - teardown_vm
   'Performance Tests':
     executor:

@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,13 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const testOverrides = require('../../test-configs/test-overrides.json');
 const {cyan, green, red} = require('../../common/colors');
 const {getDefaultMochaFiles} = require('./mocha-utils');
 const {getFilesFromArgv} = require('../../common/utils');
 const {gitDiffNameOnlyMain} = require('../../common/git');
-const {isCircleciBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
-const {Octokit} = require('@octokit/rest');
 const {Worker} = require('worker_threads');
-
-const octokit = new Octokit({
-  auth: '',
-  userAgent: 'amp release tagger',
-  previews: ['groot-preview'], // to list pull requests by commit
-  timeZone: 'America/New_York',
-});
 
 /**
  * @typedef {{
@@ -50,6 +42,28 @@ function getMaxAllowedTestTime_() {
   return process.env.MAX_TEST_TIME
     ? parseInt(process.env.MAX_TEST_TIME, 10)
     : 1000;
+}
+
+/**
+ * Get the maximum allowed average runtime for a "LARGE" test.
+ * Tests are defined as "LARGE" in the build-system/test-configs/test-overrides.json file.
+ * @return {number}
+ */
+function getMaxLargeTestTime_() {
+  return process.env.MAX_LARGE_TEST_TIME
+    ? parseInt(process.env.MAX_LARGE_TEST_TIME, 10)
+    : 5000;
+}
+
+/**
+ * Get the maximum allowed average runtime for a "XLARGE" test.
+ * Tests are defined as "XLARGE" in the build-system/test-configs/test-overrides.json file.
+ * @return {number}
+ */
+function getMaxXLargeTestTime_() {
+  return process.env.MAX_XLARGE_TEST_TIME
+    ? parseInt(process.env.MAX_XLARGE_TEST_TIME, 10)
+    : 10000;
 }
 
 /**
@@ -75,6 +89,15 @@ function getMinTestPassPercentage_() {
 }
 
 /**
+ * Validation can be skipped by entering a
+ * @param {string} testName
+ * @return {boolean}
+ */
+function shouldSkipValidation(testName) {
+  return Boolean(testOverrides.SKIP[testName]);
+}
+
+/**
  * Get the modified test files which require validation.
  * This can be manually overridden with the command line argument `files` to
  * validate arbitrary files.
@@ -89,14 +112,16 @@ function getTestsFilesToValidate() {
     changedFiles.includes(file)
   );
 
-  return testFilesRequiringValidation;
+  return testFilesRequiringValidation.filter(
+    (file) => !shouldSkipValidation(file)
+  );
 }
 
 /**
  * @param {Record<string, TestResultDef>[]} results
  * @return {Record<string, number>}
  */
-function computeAverageTestRuntimes(results) {
+function computeAverageTestRuntimes_(results) {
   // Computing runtimes by test.
   const totalTestRuntimes = results.reduce((testTimes, result) => {
     Object.entries(result).forEach(([testName, testInfo]) => {
@@ -119,6 +144,22 @@ function computeAverageTestRuntimes(results) {
     },
     {}
   );
+}
+
+/**
+ * Get the maximum allowed average runtime for a test.
+ * @param {string} testName
+ * @return {number}
+ */
+function getMaxRuntimeForTest_(testName) {
+  if (testOverrides.XLARGE[testName]) {
+    return getMaxXLargeTestTime_();
+  }
+  if (testOverrides.LARGE[testName]) {
+    return getMaxLargeTestTime_();
+  }
+
+  return getMaxAllowedTestTime_();
 }
 
 /**
@@ -146,25 +187,10 @@ function computeTestFlakiness(results) {
 }
 
 /**
- *
- */
-async function shouldSkipValidation() {
-  // if (!isCircleciBuild()) {
-  //   return;
-  // }
-  // DO_NOT_SUBMIT this PR number should be removed.
-  const PR = process.env.CIRCLE_PR_NUMBER || '35012';
-  await octokit.request(`GET /repos/ampproject/amphtml/pulls/${PR}`);
-}
-
-/**
  * Runs the modified tests the configured number of times and returns their speeds and success rates.
  * @return {Promise<Record<string, TestResultDef>[]|void>}
  */
-async function runValidatorIterations() {
-  log(await shouldSkipValidation());
-  return;
-
+async function runValidatorIterations_() {
   // specify tests to run
   const testFilesRequiringValidation = getTestsFilesToValidate();
 
@@ -215,23 +241,31 @@ async function runValidatorIterations() {
 
 /**
  * Runs the e2e tests in modified files additional times to validate runtime and
- * flakiness complaince.
+ * flakiness complaince, prints validation results, then returns true if there are
+ * no slow or flaky tests.
  * @return {Promise<boolean>}
  */
 async function validateTests() {
-  const results = await runValidatorIterations();
+  // Validate Tests
+  const results = await runValidatorIterations_();
   if (!results) {
     return true;
   }
+  // Print Results
+  // Average Test Runtimes
   log(cyan('Average Test Runtimes:'));
-  const testRuntimes = computeAverageTestRuntimes(results);
+  const testRuntimes = computeAverageTestRuntimes_(results);
   const maxAllowedRuntime = getMaxAllowedTestTime_();
   Object.entries(testRuntimes).forEach(([testName, averageTime]) => {
-    const color = averageTime > maxAllowedRuntime ? red : green;
+    const color = averageTime > getMaxRuntimeForTest_(testName) ? red : green;
     log(color(testName), `${averageTime}ms`);
   });
+
+  // Slow Tests
   const slowTests = Object.entries(testRuntimes).filter(
-    ([, runtime]) => runtime > maxAllowedRuntime
+    ([testName, runtime]) => {
+      return runtime > getMaxRuntimeForTest_(testName);
+    }
   );
   if (slowTests.length > 0) {
     const testOrTests = `test${slowTests.length > 1 ? 's' : ''}`;
@@ -243,6 +277,7 @@ async function validateTests() {
     });
   }
 
+  // Flaky Tests
   const minPassPercentage = getMinTestPassPercentage_();
   const flakyTests = Object.entries(computeTestFlakiness(results)).filter(
     ([, passPercentage]) => passPercentage < minPassPercentage

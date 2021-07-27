@@ -23,8 +23,8 @@ const dotsReporter = require('./mocha-dots-reporter');
 const glob = require('glob');
 const Mocha = require('mocha');
 const path = require('path');
-const {isCiBuild, isCircleciBuild} = require('../../common/ci');
 const {getFilesFromArgv, getFilesFromFileList} = require('../../common/utils');
+const {isCiBuild, isCircleciBuild} = require('../../common/ci');
 
 const SLOW_TEST_THRESHOLD_MS = 2500;
 const TEST_RETRIES = isCiBuild() ? 2 : 0;
@@ -74,10 +74,10 @@ function addMochaFile_(mocha, file) {
  */
 function getDefaultMochaFiles() {
   /** @type {string[]} */
-  const files = [];  if (argv.files || argv.filelist) {
-  if (argv.files) {
-    getFilesFromArgv().forEach(file => files.push(file));
-    getFilesFromFileList().forEach(file => files.push(file));
+  const files = [];
+  if (argv.files || argv.filelist) {
+    getFilesFromArgv().forEach((file) => files.push(file));
+    getFilesFromFileList().forEach((file) => files.push(file));
   } else {
     config.e2eTestPaths.forEach((path) => {
       glob.sync(path).forEach((file) => files.push(file));
