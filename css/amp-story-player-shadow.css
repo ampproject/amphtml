@@ -141,6 +141,12 @@
     cursor: initial;
   }
 
+  .i-amphtml-story-player-full-bleed-story .i-amphtml-story-player-desktop-panel-prev,
+  .i-amphtml-story-player-full-bleed-story .i-amphtml-story-player-desktop-panel-next {
+    opacity: 0;
+    pointer-events: none;
+  }
+
   .i-amphtml-story-player-desktop-panel-prev {
     margin-inline-start: calc(var(--i-amphtml-story-player-desktop-panel-button-margin));
     background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="16" viewBox="0 0 16 16" fill="white" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M4.66667 8L16 16V0L4.66667 8ZM0 16H2.66667V0H0V16Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M4.66667 8L16 16V0L4.66667 8ZM0 16H2.66667V0H0V16Z"/></svg>')!important;
