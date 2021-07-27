@@ -24,14 +24,11 @@
     />
     <script src="https://cdn.ampproject.org/custom-elements-polyfill.js"></script>
     <!-- TODO(alanorozco): Once available, change src to bento-video.js -->
-    <script
-      async
-      src="https://cdn.ampproject.org/v0/amp-video-1.0.js"
-    ></script>
+    <script async src="https://cdn.ampproject.org/v0/amp-video-1.0.js"></script>
   </head>
   <body>
     <bento-video
-      style="display: block; width: 160px; height: 90px"
+      style="display: block; position: relative; width: 160px; height: 90px"
       src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4"
     >
     </bento-video>
@@ -49,9 +46,9 @@
 
         // We follow the `data-method` attribute in this example, but that's not
         // necessary. Otherwise, we would call a method like api.play() directly.
-        function onDataMethodButtonClick({target}) {
+        async function onDataMethodButtonClick({target}) {
           const api = await element.getApi();
-          api[target.dataset.method]()
+          api[target.dataset.method]();
         }
 
         const buttons = document.querySelectorAll('button[data-method]');
