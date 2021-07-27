@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-// TODO(alanorozco): These lint exceptions are required by initLogConstructor.
-/* eslint-disable import/no-restricted-paths */
-/* eslint-disable local/no-forbidden-terms */
-
-import {initLogConstructor} from '../log';
 import {toWin} from '#core/window';
 
 /** @type {typeof AMP.BaseElement} */
@@ -44,7 +39,6 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
      * @return {typeof HTMLElement}
      */
     static 'CustomElement'(BaseElement) {
-      initLogConstructor();
       return class CustomElement extends HTMLElement {
         /** */
         constructor() {
