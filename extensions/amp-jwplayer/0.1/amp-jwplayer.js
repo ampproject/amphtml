@@ -35,12 +35,12 @@ import {
   dispatchCustomEvent,
   getDataParamsFromAttributes,
   removeElement,
-} from '../../../src/dom';
+} from '#core/dom';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-} from '../../../src/core/dom/fullscreen';
+} from '#core/dom/fullscreen';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
