@@ -19,7 +19,7 @@ import {AmpStoryPlayer} from '../../src/amp-story-player/amp-story-player-impl';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {PageScroller} from '../../src/amp-story-player/page-scroller';
 import {expect} from 'chai';
-import {listenOncePromise} from '../../src/event-helper';
+import {createCustomEvent, listenOncePromise} from '../../src/event-helper';
 import {macroTask} from '#testing/yield';
 
 describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
@@ -1526,6 +1526,25 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       expect(
         playerEl.querySelector('.i-amphtml-story-player-desktop-panel-next')
       ).to.exist;
+    });
+
+    it('Should get UI state on resize', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+
+      attachPlayerWithStories(playerEl, 5);
+      win.DESKTOP_PANEL_STORY_PLAYER_EXP_ON = true;
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+
+      win.dispatchEvent(createCustomEvent(win, 'resize', null));
+      await nextTick();
+
+      expect(sendRequestSpy).to.have.been.calledWith('onDocumentState', {
+        'state': 'UI_STATE',
+      });
     });
   });
 });
