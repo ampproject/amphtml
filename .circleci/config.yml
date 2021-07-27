@@ -83,12 +83,6 @@ commands:
       - browser-tools/install-chrome:
           replace-existing: true
       - browser-tools/install-chromedriver
-  fail_fast:
-    steps:
-      - run:
-          name: 'Fail Fast'
-          when: on_fail
-          command: ./.circleci/fail_fast.sh
   store_test_output:
     steps:
       - store_artifacts:
@@ -125,7 +119,6 @@ jobs:
       - run:
           name: 'Checks'
           command: node build-system/pr-check/checks.js
-      - fail_fast
       - teardown_vm
   'Unminified Build':
     executor:
@@ -135,7 +128,6 @@ jobs:
       - run:
           name: 'Unminified Build'
           command: node build-system/pr-check/unminified-build.js
-      - fail_fast
       - teardown_vm
   'Nomodule Build':
     executor:
@@ -150,7 +142,6 @@ jobs:
           command: node build-system/pr-check/nomodule-build.js
       - store_artifacts:
           path: /tmp/artifacts/amp_nomodule_build.tar.gz
-      - fail_fast
       - teardown_vm
   'Module Build':
     executor:
@@ -160,7 +151,6 @@ jobs:
       - run:
           name: 'Module Build'
           command: node build-system/pr-check/module-build.js
-      - fail_fast
       - teardown_vm
   'Bundle Size':
     executor:
@@ -170,7 +160,6 @@ jobs:
       - run:
           name: 'Bundle Size'
           command: node build-system/pr-check/bundle-size.js
-      - fail_fast
       - teardown_vm
   'Validator Tests':
     executor:
@@ -184,7 +173,6 @@ jobs:
           name: 'Validator Tests'
           command: node build-system/pr-check/validator-tests.js
       - store_test_output
-      - fail_fast
       - teardown_vm
   'Visual Diff Tests':
     executor:
@@ -196,7 +184,6 @@ jobs:
           name: 'Visual Diff Tests'
           command: node build-system/pr-check/visual-diff-tests.js
       - store_test_output
-      - fail_fast
       - teardown_vm
   'Local Unit Tests':
     executor:
@@ -209,7 +196,6 @@ jobs:
           name: 'Local Unit Tests'
           command: node build-system/pr-check/unit-tests-local.js
       - store_test_output
-      - fail_fast
       - teardown_vm
   'All Unit Tests':
     executor:
@@ -233,7 +219,6 @@ jobs:
           name: 'Unminified Tests'
           command: node build-system/pr-check/unminified-tests.js
       - store_test_output
-      - fail_fast
       - teardown_vm
   'Nomodule Tests':
     executor:
@@ -250,7 +235,6 @@ jobs:
           name: 'Nomodule Tests (<< parameters.config >>)'
           command: node build-system/pr-check/nomodule-tests.js --config=<< parameters.config >>
       - store_test_output
-      - fail_fast
       - teardown_vm
   'Module Tests':
     executor:
@@ -267,7 +251,6 @@ jobs:
           name: 'Module Tests (<< parameters.config >>)'
           command: node build-system/pr-check/module-tests.js --config=<< parameters.config >>
       - store_test_output
-      - fail_fast
       - teardown_vm
   'End-to-End Tests':
     executor:
@@ -291,7 +274,6 @@ jobs:
           name: 'Performance Tests'
           command: node build-system/pr-check/performance-tests.js
       - store_test_output
-      - fail_fast
       - teardown_vm
   'Experiment Build':
     executor:
@@ -302,7 +284,6 @@ jobs:
       - run:
           name: 'Experiment << parameters.exp >> Build'
           command: node build-system/pr-check/experiment-build.js --experiment=experiment<< parameters.exp >>
-      - fail_fast
       - teardown_vm
   'Experiment Integration Tests':
     executor:
@@ -315,7 +296,6 @@ jobs:
           name: 'Experiment << parameters.exp >> Integration Tests'
           command: node build-system/pr-check/experiment-integration-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
-      - fail_fast
       - teardown_vm
   'Experiment End-to-End Tests':
     executor:
@@ -329,7 +309,6 @@ jobs:
           name: 'Experiment << parameters.exp >> End-to-End Tests'
           command: node build-system/pr-check/experiment-e2e-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
-      - fail_fast
       - teardown_vm
 
 workflows:
