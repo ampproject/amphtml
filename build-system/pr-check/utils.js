@@ -16,8 +16,6 @@
 'use strict';
 
 const fs = require('fs-extra');
-const globby = require('globby');
-const path = require('path');
 const {
   ciPullRequestSha,
   circleciBuildNumber,
@@ -251,18 +249,6 @@ function storeBuildToWorkspace_(containerDirectory) {
       fs.moveSync(
         `${outputDir}/`,
         `/tmp/workspace/builds/${containerDirectory}/${outputDir}`
-      );
-    }
-    // Bento components are compiled inside the extension source file.
-    for (const componentFile of globby.sync('extensions/*/?.?/dist/*.js')) {
-      fs.ensureDirSync(
-        `/tmp/workspace/builds/${containerDirectory}/${path.dirname(
-          componentFile
-        )}`
-      );
-      fs.moveSync(
-        componentFile,
-        `/tmp/workspace/builds/${containerDirectory}/${componentFile}`
       );
     }
   }
