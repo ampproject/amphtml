@@ -50,6 +50,9 @@ const buildSliderTemplate = (element) => {
     </div>
   `;
 };
+
+const easeInOutQuad = (t) =>
+  t < 0.5 ? 8 * t * t * t * t : 1 - 8 * --t * t * t * t;
 /**
  * @const @enum {number}
  */
@@ -57,6 +60,8 @@ const SliderType = {
   PERCENTAGE: 'percentage',
   EMOJI: 'emoji',
 };
+
+const SLIDER_HINT_DURATION_MS = 1500;
 
 export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
   /**
@@ -126,7 +131,6 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
         if (currPageId != this.getPageEl().getAttribute('id')) {
           return;
         }
-        const DURATION_MS = 1500;
         let startTime;
         const animateFrame = (currTime) => {
           // Set current startTime if not defined.
@@ -134,40 +138,29 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
             startTime = currTime;
           }
           const elapsed = currTime - startTime;
-          if (elapsed < DURATION_MS) {
-            // Value between 0 and 1;
-            const timePercentage = elapsed / DURATION_MS;
-            // example with Math.sin animation
-            // Converts oscillation between 1 and -1, to 0 and 30.
-            const val = map(
-              Math.cos(timePercentage * Math.PI * 2),
-              1,
-              -1,
-              0,
-              30
-            );
-            this.inputEl_.value = val;
-            this.onDrag_();
-            if (!this.isInteracting_) {
-              requestAnimationFrame(animateFrame);
-            }
+          if (SLIDER_HINT_DURATION_MS < elapsed) {
+            return;
+          }
+          // Value between 0 and 1;
+          const timePercentage = elapsed / SLIDER_HINT_DURATION_MS;
+          // example with Math.sin animation
+          // Converts oscillation between 1 and -1, to 0 and 30.
+          const val =
+            timePercentage < 0.5
+              ? easeInOutQuad(timePercentage * 2) * 30
+              : easeInOutQuad(2 - timePercentage * 2) * 30;
+
+          console.log(timePercentage, val);
+
+          this.inputEl_.value = val;
+          this.onDrag_();
+          if (!this.isInteracting_) {
+            requestAnimationFrame(animateFrame);
           }
         };
         requestAnimationFrame(animateFrame);
       }
     );
-    /**
-     * @private
-     * @param {number} num
-     * @param {number} inMin
-     * @param {number} inMax
-     * @param {number} outMin
-     * @param {number} outMax
-     * @return {!Element}
-     */
-    function map(num, inMin, inMax, outMin, outMax) {
-      return ((num - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
-    }
   }
 
   /**
