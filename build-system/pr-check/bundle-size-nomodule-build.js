@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,25 @@
 'use strict';
 
 /**
- * @fileoverview Script that runs the bundle-size checks during CI.
+ * @fileoverview Script that builds the nomodule AMP runtime for bundle-size during CI.
  */
 
+const {
+  skipDependentJobs,
+  storeNomoduleBuildToWorkspace,
+  timedExecOrDie,
+} = require('./utils');
 const {runCiJob} = require('./ci-job');
-const {skipDependentJobs, timedExecOrDie} = require('./utils');
 const {Targets, buildTargetsInclude} = require('./build-targets');
 
-const jobName = 'bundle-size.js';
+const jobName = 'bundle-size-nomodule-build.js';
 
 /**
  * Steps to run during push builds.
  */
 function pushBuildWorkflow() {
-  timedExecOrDie('amp bundle-size --on_push_build');
+  timedExecOrDie('amp dist --noconfig');
+  storeNomoduleBuildToWorkspace();
 }
 
 /**
@@ -37,9 +42,8 @@ function pushBuildWorkflow() {
  */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME)) {
-    timedExecOrDie('amp bundle-size --on_pr_build');
+    pushBuildWorkflow();
   } else {
-    timedExecOrDie('amp bundle-size --on_skipped_build');
     skipDependentJobs(jobName, 'this PR does not affect the runtime');
   }
 }
