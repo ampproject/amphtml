@@ -15,6 +15,12 @@
  */
 
 import {
+  getElementServiceForDoc,
+  getElementServiceIfAvailable,
+  getElementServiceIfAvailableForDoc,
+  getElementServiceIfAvailableForDocInEmbedScope,
+} from '../element-service';
+import {
   getAmpdoc,
   getExistingServiceOrNull,
   getService,
@@ -23,12 +29,6 @@ import {
   getServiceInEmbedWin,
   getServicePromiseForDoc,
 } from '../service-helpers';
-import {
-  getElementServiceForDoc,
-  getElementServiceIfAvailable,
-  getElementServiceIfAvailableForDoc,
-  getElementServiceIfAvailableForDocInEmbedScope,
-} from '../element-service';
 
 /** @typedef {!../extensions/amp-subscriptions/0.1/amp-subscriptions.SubscriptionService} */
 export let SubscriptionService;

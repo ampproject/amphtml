@@ -1842,11 +1842,11 @@ describes.realWin(
       });
     });
 
-    describe('experiment for amp-story-load-first-page-only', () => {
+    describe('experiment for story-load-first-page-only', () => {
       let pages;
       let performanceImpl;
       beforeEach(async () => {
-        toggleExperiment(win, 'amp-story-load-first-page-only', true);
+        toggleExperiment(win, 'story-load-first-page-only', true);
         performanceImpl = new Performance(env.win);
         env.sandbox.stub(Services, 'performanceFor').returns(performanceImpl);
         pages = await createStoryWithPages(2, ['page-1', 'page-2'], false);
@@ -1895,7 +1895,7 @@ describes.realWin(
         story.buildCallback();
         await story.layoutCallback();
 
-        expect(enableSpy).to.be.calledWith('amp-story-load-first-page-only');
+        expect(enableSpy).to.be.calledWith('story-load-first-page-only');
       });
     });
   }

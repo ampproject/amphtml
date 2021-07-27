@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html ⚡ lang="en">
   <head>
     <meta charset="utf-8">
@@ -11,7 +11,7 @@
         font-family: 'Poppins', sans-serif;
       }
 
-      amp-story-interactive-img-quiz {
+      amp-story-interactive-img-quiz, amp-story-interactive-results {
         justify-self: center;
       }
 
@@ -90,13 +90,7 @@
             <br />
             <p>
               The exception to this is that all of the quizzes unless otherwise
-              noted have prompt-size="large" and --interactive-prompt-alignment:
-              center;
-            </p>
-            <br />
-            <p>
-              These are not the default typography options, but I set them this
-              way to match the Figma designs
+              noted have prompt-size="large"
             </p>
           </div>
         </amp-story-grid-layer>
@@ -124,7 +118,6 @@
             prompt-text="Which of these structures is oldest?"
             prompt-size="large"
             endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
-            style="--interactive-prompt-alignment: center"
             option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
             option-1-image-alt="Statue of Liberty"
             option-1-correct
@@ -162,7 +155,6 @@
             prompt-text="Which of these structures is oldest?"
             prompt-size="large"
             endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
-            style="--interactive-prompt-alignment: center"
             option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
             option-1-image-alt="Statue of Liberty"
             option-1-correct
@@ -198,7 +190,6 @@
             prompt-text="Which of these structures is oldest?"
             prompt-size="large"
             endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
-            style="--interactive-prompt-alignment: center"
             option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
             option-1-image-alt="Statue of Liberty"
             option-1-correct
@@ -222,7 +213,7 @@
         <amp-story-grid-layer template="fill">
           <div>
             <div class="label">
-              <p>Default prompt size and alignment</p>
+              <p>Custom prompt alignment with default prompt size</p>
             </div>
           </div>
         </amp-story-grid-layer>
@@ -231,6 +222,7 @@
             id="default-prompt-quiz"
             prompt-text="Which of these structures is oldest?"
             endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+            style="--interactive-prompt-alignment: left"
             option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
             option-1-image-alt="Statue of Liberty"
             option-1-correct
@@ -258,7 +250,7 @@
         <amp-story-grid-layer template="fill">
           <div>
             <div class="label">
-              <p>Custom accent color set to background</p>
+              <p>Custom accent color set to prompt background</p>
             </div>
           </div>
         </amp-story-grid-layer>
@@ -268,10 +260,7 @@
             prompt-text="Which of these structures is oldest?"
             prompt-size="large"
             endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
-            style="
-              --interactive-accent-color: #f34e4e;
-              --interactive-prompt-alignment: center;
-            "
+            style="--interactive-accent-color: #f34e4e"
             option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
             option-1-image-alt="Statue of Liberty"
             option-1-correct
@@ -299,10 +288,7 @@
         <amp-story-grid-layer template="fill">
           <div>
             <div class="label">
-              <p>
-                Custom accent color set to text color (10% opacity on option
-                letter background)
-              </p>
+              <p>Custom accent color set to prompt text color</p>
             </div>
           </div>
         </amp-story-grid-layer>
@@ -316,7 +302,6 @@
               --interactive-accent-color: #f34e4e;
               --interactive-prompt-background: white;
               --interactive-prompt-text-color: #f34e4e;
-              --interactive-prompt-alignment: center;
             "
             option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
             option-1-image-alt="Statue of Liberty"
@@ -359,7 +344,6 @@
               --interactive-accent-color: rgb(16, 218, 93);
               --interactive-prompt-background: rgb(4, 41, 18);
               --interactive-prompt-text-color: rgb(16, 218, 93);
-              --interactive-prompt-alignment: center;
             "
             option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
             option-1-image-alt="Statue of Liberty"
@@ -398,7 +382,6 @@
             prompt-text="Which of these structures is oldest?"
             prompt-size="large"
             endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
-            style="--interactive-prompt-alignment: center"
             theme="dark"
             option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
             option-1-image-alt="Statue of Liberty"
@@ -440,7 +423,6 @@
             style="
               --interactive-prompt-background: #001f6d;
               --interactive-prompt-text-color: yellow;
-              --interactive-prompt-alignment: center;
             "
             theme="dark"
             option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
@@ -480,7 +462,6 @@
             prompt-text="Which of these structures is oldest?"
             prompt-size="large"
             endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
-            style="--interactive-prompt-alignment: center"
             chip-style="shadow"
             option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
             option-1-image-alt="Statue of Liberty"
@@ -496,7 +477,7 @@
           </amp-story-interactive-img-quiz>
         </amp-story-grid-layer>
       </amp-story-page>
-      <amp-story-page id="transparent-shadow-chip-style">
+      <amp-story-page id="transparent-chip-style">
         <amp-story-grid-layer template="fill">
           <amp-img
             src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
@@ -509,7 +490,7 @@
         <amp-story-grid-layer template="fill">
           <div>
             <div class="label">
-              <p>Chip style = transparent (not yet supported)</p>
+              <p>Chip style = transparent</p>
             </div>
           </div>
         </amp-story-grid-layer>
@@ -519,7 +500,6 @@
             prompt-text="Which of these structures is oldest?"
             prompt-size="large"
             endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
-            style="--interactive-prompt-alignment: center"
             chip-style="transparent"
             option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
             option-1-image-alt="Statue of Liberty"
@@ -533,6 +513,221 @@
             option-4-image-alt="Eiffel Tower"
           >
           </amp-story-interactive-img-quiz>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="dark-transparent-chip-style">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Dark theme with chip style = transparent</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-img-quiz
+            id="dark-transparent-chip-style-quiz"
+            prompt-text="Which of these structures is oldest?"
+            prompt-size="large"
+            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+            theme="dark"
+            chip-style="transparent"
+            option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-image-alt="Statue of Liberty"
+            option-1-correct
+            option-1-confetti="🎉"
+            option-2-image="https://images.unsplash.com/photo-1610312278520-bcc893a3ff1d?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1460&q=80"
+            option-2-image-alt="Golden Gate Bridge"
+            option-3-image="https://images.unsplash.com/photo-1585436588477-340db86fc852?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2804&q=80"
+            option-3-image-alt="Christ the Redeemer"
+            option-4-image="https://images.unsplash.com/photo-1543349689-9a4d426bee8e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1382&q=80"
+            option-4-image-alt="Eiffel Tower"
+          >
+          </amp-story-interactive-img-quiz>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="invalid-endpoint">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Invalid endpoint</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-img-quiz
+            id="invalid-endpoint-quiz"
+            prompt-text="Which of these structures is oldest?"
+            prompt-size="large"
+            endpoint="https://amp.dev/about/stories/"
+            option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-image-alt="Statue of Liberty"
+            option-1-correct
+            option-1-confetti="🎉"
+            option-2-image="https://images.unsplash.com/photo-1610312278520-bcc893a3ff1d?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1460&q=80"
+            option-2-image-alt="Golden Gate Bridge"
+            option-3-image="https://images.unsplash.com/photo-1585436588477-340db86fc852?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2804&q=80"
+            option-3-image-alt="Christ the Redeemer"
+            option-4-image="https://images.unsplash.com/photo-1543349689-9a4d426bee8e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1382&q=80"
+            option-4-image-alt="Eiffel Tower"
+          >
+          </amp-story-interactive-img-quiz>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="no-prompt">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>No prompt</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-img-quiz
+            id="no-prompt-quiz"
+            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+            option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-image-alt="Statue of Liberty"
+            option-1-correct
+            option-1-confetti="🎉"
+            option-2-image="https://images.unsplash.com/photo-1610312278520-bcc893a3ff1d?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1460&q=80"
+            option-2-image-alt="Golden Gate Bridge"
+            option-3-image="https://images.unsplash.com/photo-1585436588477-340db86fc852?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2804&q=80"
+            option-3-image-alt="Christ the Redeemer"
+            option-4-image="https://images.unsplash.com/photo-1543349689-9a4d426bee8e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1382&q=80"
+            option-4-image-alt="Eiffel Tower"
+          >
+          </amp-story-interactive-img-quiz>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="missing-img">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Missing image</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-img-quiz
+            id="missing-img-quiz"
+            prompt-text="Which of these structures is oldest?"
+            prompt-size="large"
+            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+            option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-image-alt="Statue of Liberty"
+            option-1-correct
+            option-1-confetti="🎉"
+            option-2-image="https://webstoriesinteractivity-beta.web.app/api/v1"
+            option-2-image-alt="Golden Gate Bridge"
+            option-3-image="https://images.unsplash.com/photo-1585436588477-340db86fc852?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2804&q=80"
+            option-3-image-alt="Christ the Redeemer"
+            option-4-image="https://images.unsplash.com/photo-1543349689-9a4d426bee8e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1382&q=80"
+            option-4-image-alt="Eiffel Tower"
+          >
+          </amp-story-interactive-img-quiz>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="missing-img-dark">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Missing image with dark theme</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-img-quiz
+            id="missing-img-dark-quiz"
+            prompt-text="Which of these structures is oldest?"
+            prompt-size="large"
+            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+            theme="dark"
+            option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-image-alt="Statue of Liberty"
+            option-1-correct
+            option-1-confetti="🎉"
+            option-2-image="https://webstoriesinteractivity-beta.web.app/api/v1"
+            option-2-image-alt="Golden Gate Bridge"
+            option-3-image="https://images.unsplash.com/photo-1585436588477-340db86fc852?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2804&q=80"
+            option-3-image-alt="Christ the Redeemer"
+            option-4-image="https://images.unsplash.com/photo-1543349689-9a4d426bee8e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1382&q=80"
+            option-4-image-alt="Eiffel Tower"
+          >
+          </amp-story-interactive-img-quiz>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="results">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Integration with results component</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-results
+            id="results-component"
+            prompt-text="You are a(n)"
+            option-1-results-category="Expert"
+            option-1-results-threshold="100"
+            option-2-results-category="Beginner"
+            option-2-results-threshold="0"
+          >
+          </amp-story-interactive-results>
         </amp-story-grid-layer>
       </amp-story-page>
     </amp-story>

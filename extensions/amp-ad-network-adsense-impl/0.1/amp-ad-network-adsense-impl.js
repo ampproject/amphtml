@@ -45,6 +45,7 @@ import {
   isCdnProxy,
   isReportingEnabled,
   maybeAppendErrorParameter,
+  maybeInsertOriginTrialToken,
 } from '#ads/google/a4a/utils';
 import {ResponsiveState} from './responsive-state';
 import {Services} from '#service';
@@ -183,6 +184,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   */
   buildCallback() {
     super.buildCallback();
+    maybeInsertOriginTrialToken(this.win);
     this.identityTokenPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() =>
@@ -250,10 +252,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     Object.keys(setExps).forEach((expName) =>
       addExperimentIdToElement(setExps[expName], this.element)
     );
-    const moduleNomoduleExpId = this.getModuleNomoduleExpIds_();
-    if (moduleNomoduleExpId) {
-      addExperimentIdToElement(moduleNomoduleExpId, this.element);
-    }
 
     const ssrExpIds = this.getSsrExpIds_();
     for (let i = 0; i < ssrExpIds.length; i++) {
@@ -426,7 +424,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // create ad.
       'pwprc': this.element.getAttribute('data-package'),
       'spsa': this.isSinglePageStoryAd
-        ? `${viewportSize.width}x${viewportSize.height}`
+        ? `${this.size_.width}x${this.size_.height}`
         : null,
     };
 
