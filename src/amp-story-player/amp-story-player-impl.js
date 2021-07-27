@@ -110,6 +110,7 @@ const STORY_STATE_TYPE = {
 /** @enum {string} */
 const STORY_MESSAGE_STATE_TYPE = {
   PAGE_ATTACHMENT_STATE: 'PAGE_ATTACHMENT_STATE',
+  UI_STATE: 'UI_STATE',
   MUTED_STATE: 'MUTED_STATE',
   CURRENT_PAGE_ID: 'CURRENT_PAGE_ID',
   STORY_PROGRESS: 'STORY_PROGRESS',
@@ -186,11 +187,6 @@ const TAG = 'amp-story-player';
 const LOG_TYPE = {
   DEV: 'amp-story-player-dev',
 };
-
-/**
- * Flag to show or hide the desktop panels player experiment.
- * @const {boolean}
- */
 
 /**
  * NOTE: If udpated here, update in amp-story.js
@@ -652,6 +648,11 @@ export class AmpStoryPlayer {
             dict({'state': STORY_MESSAGE_STATE_TYPE.MUTED_STATE})
           );
 
+          messaging.sendRequest(
+            'onDocumentState',
+            dict({'state': STORY_MESSAGE_STATE_TYPE.UI_STATE})
+          );
+
           messaging.registerHandler('documentStateUpdate', (event, data) => {
             this.onDocumentStateUpdate_(
               /** @type {!DocumentStateTypeDef} */ (data),
@@ -967,9 +968,48 @@ export class AmpStoryPlayer {
 
     if (this.isDesktopPanelExperimentOn_) {
       this.checkButtonsDisabled_();
+      this.getUiState_().then((uiTypeNumber) =>
+        this.onUiStateUpdate_(uiTypeNumber)
+      );
     }
     this.signalNavigation_(navigation);
     this.maybeFetchMoreStories_(remaining);
+  }
+
+  /**
+   * Gets UI state from active story.
+   * @private
+   * @return {Promise}
+   */
+  getUiState_() {
+    const story = this.stories_[this.currentIdx_];
+
+    return new Promise((resolve) => {
+      story.messagingPromise.then((messaging) => {
+        messaging
+          .sendRequest(
+            'getDocumentState',
+            {state: STORY_MESSAGE_STATE_TYPE.UI_STATE},
+            true
+          )
+          .then((event) => resolve(event.value));
+      });
+    });
+  }
+
+  /**
+   * Shows or hides one panel UI on state update.
+   * @param {number} uiTypeNumber
+   * @private
+   */
+  onUiStateUpdate_(uiTypeNumber) {
+    const isFullbleed =
+      uiTypeNumber === 2 /** DESKTOP_FULLBLEED */ ||
+      uiTypeNumber === 0; /** MOBILE */
+    this.rootEl_.classList.toggle(
+      'i-amphtml-story-player-full-bleed-story',
+      isFullbleed
+    );
   }
 
   /**
@@ -1522,6 +1562,12 @@ export class AmpStoryPlayer {
         break;
       case STORY_MESSAGE_STATE_TYPE.MUTED_STATE:
         this.onMutedStateUpdate_(/** @type {string} */ (data.value));
+        break;
+      case STORY_MESSAGE_STATE_TYPE.UI_STATE:
+        if (this.isDesktopPanelExperimentOn_) {
+          // Handles UI state updates on window resize.
+          this.onUiStateUpdate_(/** @type {number} */ (data.value));
+        }
         break;
       case AMP_STORY_PLAYER_EVENT:
         this.onPlayerEvent_(/** @type {string} */ (data.value));
