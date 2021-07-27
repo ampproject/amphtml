@@ -36,7 +36,8 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('should respect server side decision and clear on next visit', async () => {
+    it('should respect server side decision and clear on next visit', async function () {
+      this.timeout(10000);
       resetAllElements();
       const currentUrl = await controller.getCurrentUrl();
       const nextGeoUrl = currentUrl.replace('mx', 'ca');

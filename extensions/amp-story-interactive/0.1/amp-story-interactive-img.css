@@ -65,6 +65,10 @@
   /* Needed for overflow inconsistencies during animations on some browsers */
   position: relative !important;
   z-index: 1 !important;
+  /** Needed for occasional image clipping during animation */
+  clip-path: circle(
+    calc(var(--i-amphtml-interactive-img-option-size))
+  ) !important;
 }
 
 .i-amphtml-story-interactive-img-option:focus {
@@ -110,6 +114,7 @@
   left: 0 !important;
   color: white !important;
   font-weight: 700 !important;
+  text-shadow: 0 0 0.7em rgba(0, 0, 0, 0.5) !important;
 }
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)

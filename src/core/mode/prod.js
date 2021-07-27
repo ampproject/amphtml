@@ -14,25 +14,15 @@
  * limitations under the License.
  */
 
-/*
- * Pre-upgrade:
- * - display:block element
- * - size-defined element
+/**
+ * Returns true when the build is meant for distribution.
+ * This means `amp dist` was called _without_ the --fortesting flag.
+ *
+ * This is a magic constant replaced by babel.
+ *
+ * Calls are DCE'd when compiled.
+ * @return {boolean}
  */
- amp-facebook-comments {
-  display: block;
-  overflow: hidden;
-  position: relative;
-}
-
-/* Pre-upgrade: size-defining element - hide text. */
-amp-facebook-comments:not(.i-amphtml-built) {
-  color: transparent !important;
-}
-
-/* Pre-upgrade: size-defining element - hide children. */
-amp-facebook-comments:not(.i-amphtml-built)
-  > :not([placeholder]):not(.i-amphtml-svc) {
-  display: none;
-  content-visibility: hidden;
+export function isProd() {
+  return IS_PROD;
 }
