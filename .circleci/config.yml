@@ -153,7 +153,7 @@ jobs:
           name: 'Unminified Build'
           command: node build-system/pr-check/unminified-build.js
       - teardown_vm
-  'Testable Nomodule Build':
+  'Nomodule Build - Test':
     executor:
       name: amphtml-xlarge-executor
     steps:
@@ -167,7 +167,7 @@ jobs:
       - store_artifacts:
           path: /tmp/artifacts/amp_nomodule_build.tar.gz
       - teardown_vm
-  'Testable Module Build':
+  'Module Build - Test':
     executor:
       name: amphtml-xlarge-executor
     steps:
@@ -176,7 +176,7 @@ jobs:
           name: 'Module Build'
           command: node build-system/pr-check/module-build.js
       - teardown_vm
-  'Production Nomodule Build':
+  'Nomodule Build - Prod':
     executor:
       name: amphtml-xlarge-executor
     steps:
@@ -185,7 +185,7 @@ jobs:
           name: 'Nomodule Build'
           command: node build-system/pr-check/bundle-size-nomodule-build.js
       - teardown_vm
-  'Production Module Build':
+  'Module Build - Prod':
     executor:
       name: amphtml-xlarge-executor
     steps:
@@ -363,35 +363,35 @@ workflows:
           requires:
             - 'Initialize Repository'
       - 'Unminified Build':
-          name: 'Unminified Build (debug)'
+          name: 'Unminified Build (Test)'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - 'Testable Nomodule Build':
-          name: 'Nomodule Build (debug)'
+      - 'Nomodule Build - Test':
+          name: 'Nomodule Build (Test)'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - 'Testable Module Build':
-          name: 'Module Build (debug)'
+      - 'Module Build - Test':
+          name: 'Module Build (Test)'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - 'Production Nomodule Build':
-          name: 'Nomodule Build (release)'
+      - 'Nomodule Build - Prod':
+          name: 'Nomodule Build (Prod)'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - 'Production Module Build':
-          name: 'Module Build (release)'
+      - 'Module Build - Prod':
+          name: 'Module Build (Prod)'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
       - 'Bundle Size':
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build (release)'
-            - 'Module Build (release)'
+            - 'Nomodule Build (Prod)'
+            - 'Module Build (Prod)'
       - 'Validator Tests':
           <<: *push_and_pr_builds
           requires:
@@ -399,7 +399,7 @@ workflows:
       - 'Visual Diff Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build (debug)'
+            - 'Nomodule Build (Test)'
       - 'Local Unit Tests':
           <<: *push_and_pr_builds
           requires:
@@ -412,7 +412,7 @@ workflows:
       - 'Unminified Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Unminified Build (debug)'
+            - 'Unminified Build (Test)'
       - 'Nomodule Tests':
           name: 'Nomodule Tests (<< matrix.config >>)'
           matrix:
@@ -420,7 +420,7 @@ workflows:
               config: ['prod', 'canary']
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build (debug)'
+            - 'Nomodule Build (Test)'
       - 'Module Tests':
           name: 'Module Tests (<< matrix.config >>)'
           matrix:
@@ -428,13 +428,13 @@ workflows:
               config: ['prod', 'canary']
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build (debug)'
-            - 'Module Build (debug)'
+            - 'Nomodule Build (Test)'
+            - 'Module Build (Test)'
       - 'End-to-End Tests':
           name: '⛓️ End-to-End Tests'
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build (debug)'
+            - 'Nomodule Build (Test)'
       - 'Experiment Build':
           name: 'Experiment << matrix.exp >> Build'
           matrix:
@@ -463,4 +463,4 @@ workflows:
       # - 'Performance Tests':
       #     <<: *push_builds_only
       #     requires:
-      #       - 'Nomodule Build (debug)'
+      #       - 'Nomodule Build (Test)'
