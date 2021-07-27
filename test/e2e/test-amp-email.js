@@ -14,13 +14,6 @@
  * limitations under the License.
  */
 
-function sleep(ms) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve();
-    }, ms);
-  });
-}
 describes.endtoend(
   'layoutCallback depends on updated viewport size after documentHeight change.',
   {
@@ -30,7 +23,6 @@ describes.endtoend(
   async (env) => {
     it('Should call amp-img layoutCallback', async () => {
       const {controller} = env;
-      await sleep(5000);
       const imgEl = await controller.findElement('img');
       await expect(imgEl).ok;
     });
