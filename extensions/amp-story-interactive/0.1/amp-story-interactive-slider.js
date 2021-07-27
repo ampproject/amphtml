@@ -42,6 +42,7 @@ const buildSliderTemplate = (element) => {
             type="range"
             min="0"
             max="100"
+            step="0.1"
             value="0"
           />
           <div class="i-amphtml-story-interactive-slider-bubble"></div>
@@ -51,8 +52,8 @@ const buildSliderTemplate = (element) => {
   `;
 };
 
-const easeInOutQuad = (t) =>
-  t < 0.5 ? 8 * t * t * t * t : 1 - 8 * --t * t * t * t;
+const easeInOutCubic = (t) =>
+  t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
 /**
  * @const @enum {number}
  */
@@ -147,11 +148,8 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
           // Converts oscillation between 1 and -1, to 0 and 30.
           const val =
             timePercentage < 0.5
-              ? easeInOutQuad(timePercentage * 2) * 30
-              : easeInOutQuad(2 - timePercentage * 2) * 30;
-
-          console.log(timePercentage, val);
-
+              ? easeInOutCubic(timePercentage * 2) * 30
+              : easeInOutCubic(2 - timePercentage * 2) * 30;
           this.inputEl_.value = val;
           this.onDrag_();
           if (!this.isInteracting_) {
@@ -168,12 +166,11 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
    */
   onDrag_() {
     const {value} = this.inputEl_;
-    if (this.isInteracting_) {
-      if (this.sliderType_ == SliderType.PERCENTAGE) {
-        this.bubbleEl_.textContent = value + '%';
-      }
-      this.rootEl_.classList.add('i-amphtml-story-interactive-mid-selection');
+    // if (this.isInteracting_) {
+    if (this.sliderType_ == SliderType.PERCENTAGE) {
+      this.bubbleEl_.textContent = Math.round(value) + '%';
     }
+    this.rootEl_.classList.add('i-amphtml-story-interactive-mid-selection');
     setImportantStyles(this.rootEl_, {'--fraction': value / 100});
   }
 
