@@ -19,13 +19,19 @@
   height: 1.5em !important;
   width: 1.5em !important;
   bottom: 0.5em !important;
-  border: 0.125em solid var(--i-amphtml-interactive-option-background-color) !important;
+  box-shadow: 0 0 0 0.125em var(--i-amphtml-interactive-option-background-color) !important;
   background-color: var(--interactive-accent-color) !important;
   border-radius: 50% !important;
   text-align: center !important;
   color: var(--i-amphtml-interactive-option-answer-choice-color) !important;
   font-weight: 700 !important;
   line-height: 1.5em !important;
+  z-index: 1 !important;
+  /** Prevents 1 pixel layout shifts after post-selection animations */
+  backface-visibility: hidden !important;
+  /** Prevents box-shadow and background color clipping */
+  clip-path: circle(1em) !important;
+  background-clip: content-box !important;
 }
 
 .i-amphtml-story-interactive-img-container:not([dir='rtl'])
@@ -44,6 +50,7 @@
   height: 100% !important;
   border-radius: 50% !important;
   position: absolute !important;
+  left: 0 !important;
 }
 
 .i-amphtml-story-interactive-img-option[correct='correct'] {
@@ -67,7 +74,7 @@
   display: block !important;
   background-color: transparent !important;
   background-image: var(--i-amphtml-interactive-option-post-marker) !important;
-  background-position: 0.375em !important;
+  background-position: center !important;
   background-repeat: no-repeat !important;
   background-size: 0.75em !important;
   filter: var(--i-amphtml-story-interactive-img-quiz-answer-filter) !important;

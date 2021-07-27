@@ -93,25 +93,25 @@ const /** string */ ampProjectDomain = 'https://cdn.ampproject.org/';
 // v0.js
 // v0/amp-ad-0.1.js
 const /** !RegExp */ standardScriptPathRegex =
-    new RegExp('(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$', 'i');
+    new RegExp('^(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$', 'i');
 
 // LTS and Nomodule LTS JavaScript:
 // lts/v0.js
 // lts/v0/amp-ad-0.1.js
 const /** !RegExp */ ltsScriptPathRegex =
-    new RegExp('lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$', 'i');
+    new RegExp('^lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$', 'i');
 
 // Module JavaScript:
 // v0.mjs
 // amp-ad-0.1.mjs
 const /** !RegExp */ moduleScriptPathRegex =
-    new RegExp('(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs$', 'i');
+    new RegExp('^(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs$', 'i');
 
 // Module LTS JavaScript:
 // lts/v0.mjs
 // lts/v0/amp-ad-0.1.mjs
 const /** !RegExp */ moduleLtsScriptPathRegex =
-    new RegExp('lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs$', 'i');
+    new RegExp('^lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs$', 'i');
 
 // Runtime JavaScript:
 // v0.js
@@ -121,7 +121,17 @@ const /** !RegExp */ moduleLtsScriptPathRegex =
 // lts/v0.js?f=sxg
 // lts/v0.mjs
 const /** !RegExp */ runtimeScriptPathRegex =
-    new RegExp('(lts/)?v0\\.m?js(\\?f=sxg)?', 'i');
+    new RegExp('^(lts/)?v0\\.m?js(\\?f=sxg)?$', 'i');
+
+// Extension JavaScript:
+// lts/v0/amp-ad-0.1.js
+// lts/v0/amp-ad-0.1.js?f=sxg
+// lts/v0/amp-ad-0.1.mjs
+// v0/amp-ad-0.1.js
+// v0/amp-ad-0.1.js?f=sxg
+// v0/am-ad-0.1.mjs
+const /** !RegExp */ extensionScriptPathRegex = new RegExp(
+    '^(?:lts/)?v0/(amp-[a-z0-9-]*)-([a-z0-9.]*)\\.(?:m)?js(?:\\?f=sxg)?$', 'i');
 
 /**
  * Represents the state of a script tag.
@@ -132,23 +142,29 @@ const ScriptTag = class {
    * @param {!Array<!ParsedAttr>} attrs Array of attributes.
    */
   constructor(tagName, attrs) {
+    /** @type {string} */
+    this.extensionName = '';
+    /** @type {string} */
+    this.extensionVersion = '';
+    /** @type {string} */
+    this.path = '';
     /** @type {boolean} */
-    this.is_amp_domain = false;
+    this.isAmpDomain = false;
     /** @type {boolean} */
-    this.is_extension = false;
+    this.isExtension = false;
     /** @type {boolean} */
-    this.is_runtime = false;
+    this.isRuntime = false;
+    /** @type {boolean} */
+    this.hasValidPath = false;
     /** @type {!ScriptReleaseVersion} */
-    this.release_version = ScriptReleaseVersion.UNKNOWN;
+    this.releaseVersion = ScriptReleaseVersion.UNKNOWN;
 
     /** @type {boolean} */
-    let is_async = false;
+    let isAsync = false;
     /** @type {boolean} */
-    let is_module = false;
+    let isModule = false;
     /** @type {boolean} */
-    let is_nomodule = false;
-    /** @type {string} */
-    let path = '';
+    let isNomodule = false;
     /** @type {string} */
     let src = '';
 
@@ -158,45 +174,56 @@ const ScriptTag = class {
 
     for (const attr of attrs) {
       if (attr.name === 'async') {
-        is_async = true;
+        isAsync = true;
       } else if (
           (attr.name === 'custom-element') ||
           (attr.name === 'custom-template') || (attr.name === 'host-service')) {
-        this.is_extension = true;
+        this.isExtension = true;
       } else if (attr.name === 'nomodule') {
-        is_nomodule = true;
+        isNomodule = true;
       } else if (attr.name === 'src') {
         src = attr.value;
       } else if ((attr.name === 'type') && (attr.value === 'module')) {
-        is_module = true;
+        isModule = true;
       }
     }
 
     // Determine if this has a valid AMP domain and separate the path from the
     // attribute 'src'.
     if (src.startsWith(ampProjectDomain)) {
-      this.is_amp_domain = true;
-      path = src.substr(ampProjectDomain.length);
+      this.isAmpDomain = true;
+      this.path = src.substr(ampProjectDomain.length);
 
       // Only look at script tags that have attribute 'async'.
-      if (is_async) {
+      if (isAsync) {
         // Determine if this is the AMP Runtime.
-        if (!this.is_extension && runtimeScriptPathRegex.test(path)) {
-          this.is_runtime = true;
+        if (!this.isExtension && runtimeScriptPathRegex.test(this.path)) {
+          this.isRuntime = true;
+          this.hasValidPath = true;
+        }
+
+        // For AMP Extensions, validate path and extract name and version.
+        if (this.isExtension && extensionScriptPathRegex.test(this.path)) {
+          this.hasValidPath = true;
+          const reResult = extensionScriptPathRegex.exec(this.path);
+          if (reResult != null) {
+            this.extensionName = reResult[1];
+            this.extensionVersion = reResult[2];
+          }
         }
 
         // Determine the release version (LTS, module, standard, etc).
-        if ((is_module && moduleLtsScriptPathRegex.test(path)) ||
-            (is_nomodule && ltsScriptPathRegex.test(path))) {
-          this.release_version = ScriptReleaseVersion.MODULE_NOMODULE_LTS;
+        if ((isModule && moduleLtsScriptPathRegex.test(this.path)) ||
+            (isNomodule && ltsScriptPathRegex.test(this.path))) {
+          this.releaseVersion = ScriptReleaseVersion.MODULE_NOMODULE_LTS;
         } else if (
-            (is_module && moduleScriptPathRegex.test(path)) ||
-            (is_nomodule && standardScriptPathRegex.test(path))) {
-          this.release_version = ScriptReleaseVersion.MODULE_NOMODULE;
-        } else if (ltsScriptPathRegex.test(path)) {
-          this.release_version = ScriptReleaseVersion.LTS;
-        } else if (standardScriptPathRegex.test(path)) {
-          this.release_version = ScriptReleaseVersion.STANDARD;
+            (isModule && moduleScriptPathRegex.test(this.path)) ||
+            (isNomodule && standardScriptPathRegex.test(this.path))) {
+          this.releaseVersion = ScriptReleaseVersion.MODULE_NOMODULE;
+        } else if (ltsScriptPathRegex.test(this.path)) {
+          this.releaseVersion = ScriptReleaseVersion.LTS;
+        } else if (standardScriptPathRegex.test(this.path)) {
+          this.releaseVersion = ScriptReleaseVersion.STANDARD;
         }
       }
     }
@@ -354,11 +381,43 @@ const ParsedHtmlTag = class {
   }
 
   /**
+   * Returns the extension name.
+   * @return {string}
+   */
+  getExtensionName() {
+    return this.scriptTag_.extensionName;
+  }
+
+  /**
+   * Returns the extension version.
+   * @return {string}
+   */
+  getExtensionVersion() {
+    return this.scriptTag_.extensionVersion;
+  }
+
+  /**
    * Returns the script release version, otherwise ScriptReleaseVersion.UNKNOWN.
    * @return {!ScriptReleaseVersion}
    */
   getScriptReleaseVersion() {
-    return this.scriptTag_.release_version;
+    return this.scriptTag_.releaseVersion;
+  }
+
+  /**
+   * Returns the script tag path of the 'src' attribute.
+   * @return {string}
+   */
+  getAmpScriptPath() {
+    return this.scriptTag_.path;
+  }
+
+  /**
+   * Tests if this tag is a script with a valid AMP script path.
+   * @return {boolean}
+   */
+  hasValidAmpScriptPath() {
+    return this.scriptTag_.hasValidPath;
   }
 
   /**
@@ -366,7 +425,7 @@ const ParsedHtmlTag = class {
    * @return {boolean}
    */
   isAmpDomain() {
-    return this.scriptTag_.is_amp_domain;
+    return this.scriptTag_.isAmpDomain;
   }
 
   /**
@@ -374,7 +433,7 @@ const ParsedHtmlTag = class {
    * @return {boolean}
    */
   isAmpRuntimeScript() {
-    return this.scriptTag_.is_runtime;
+    return this.scriptTag_.isRuntime;
   }
 
   /**
@@ -382,7 +441,7 @@ const ParsedHtmlTag = class {
    * @return {boolean}
    */
   isExtensionScript() {
-    return this.scriptTag_.is_extension;
+    return this.scriptTag_.isExtension;
   }
 };
 exports.ParsedHtmlTag = ParsedHtmlTag;
