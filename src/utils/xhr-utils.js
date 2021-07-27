@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {devAssert, userAssert} from '../core/assert';
-import {dict, isObject, map} from '../core/types/object';
-import {fromIterator, isArray} from '../core/types/array';
+import {devAssert, userAssert} from '#core/assert';
+import {fromIterator, isArray} from '#core/types/array';
+import {dict, isObject, map} from '#core/types/object';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {isFormDataWrapper} from '../form-data-wrapper';
+import {user} from '../log';
+import {getMode} from '../mode';
 import {
   getCorsUrl,
   getWinOrigin,
@@ -25,11 +32,6 @@ import {
   parseUrlDeprecated,
   serializeQueryString,
 } from '../url';
-import {getMode} from '../mode';
-import {user} from '../log';
-
-import {isExperimentOn} from '../experiments';
-import {isFormDataWrapper} from '../form-data-wrapper';
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];

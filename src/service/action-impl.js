@@ -19,20 +19,23 @@ import {
   DEFAULT_ACTION,
   RAW_OBJECT_ARGS_KEY,
   actionTrustToString,
-} from '../core/constants/action-constants';
-import {Keys} from '../core/constants/key-codes';
-import {Services} from '../services';
-import {debounce, throttle} from '../core/types/function';
-import {dev, devAssert, user, userAssert} from '../log';
-import {dict, getValueForExpr, hasOwn, map} from '../core/types/object';
-import {getDetail} from '../event-helper';
-import {getMode} from '../mode';
-import {isAmp4Email} from '../format';
-import {isArray, toArray} from '../core/types/array';
-import {isEnabled} from '../dom';
-import {isFiniteNumber, toWin} from '../types';
-import {registerServiceBuilderForDoc} from '../service';
+} from '#core/constants/action-constants';
+import {Keys} from '#core/constants/key-codes';
+import {isEnabled} from '#core/dom';
+import {isFiniteNumber} from '#core/types';
+import {isArray, toArray} from '#core/types/array';
+import {debounce, throttle} from '#core/types/function';
+import {dict, getValueForExpr, hasOwn, map} from '#core/types/object';
+import {toWin} from '#core/window';
+
+import {Services} from '#service';
+
 import {reportError} from '../error-reporting';
+import {getDetail} from '../event-helper';
+import {isAmp4Email} from '../format';
+import {dev, devAssert, user, userAssert} from '../log';
+import {getMode} from '../mode';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 
 /** @const {string} */
 const TAG_ = 'Action';
@@ -627,7 +630,7 @@ export class ActionService {
     /** @type {?Promise} */
     let currentPromise = null;
     action.actionInfos.forEach((actionInfo) => {
-      const {target, args, method, str} = actionInfo;
+      const {args, method, str, target} = actionInfo;
       const dereferencedArgs = dereferenceArgsVariables(args, event, opt_args);
       const invokeAction = () => {
         const node = this.getActionNode_(target);

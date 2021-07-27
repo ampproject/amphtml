@@ -21,21 +21,16 @@ module.exports = function () {
       Statement(path) {
         const {node} = path;
         const {trailingComments} = node;
-        if (!trailingComments || trailingComments.length <= 0) {
-          return;
+        if (trailingComments?.length) {
+          node.trailingComments = trailingComments.map((comment) => ({
+            ...comment,
+            value: comment.value.replace(/\s+/g, ' '),
+          }));
+          const next = path.getNextSibling();
+          if (next?.node) {
+            next.node.leadingComments = null;
+          }
         }
-
-        const next = path.getNextSibling();
-        if (!next) {
-          return;
-        }
-
-        node.trailingComments = null;
-        const formattedComments = (trailingComments || []).map((comment) => ({
-          ...comment,
-          value: comment.value.replace(/\n +/g, `\n`),
-        }));
-        next.addComments('leading', formattedComments);
       },
     },
   };

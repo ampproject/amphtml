@@ -19,9 +19,9 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
-import * as experiments from '../../../../src/experiments';
+import * as experiments from '#experiments';
 import {AD_SIZE_OPTIMIZATION_EXP} from '../responsive-state';
-import {AmpA4A, MODULE_NOMODULE_PARAMS_EXP} from '../../../amp-a4a/0.1/amp-a4a';
+import {AmpA4A} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
@@ -33,18 +33,12 @@ import {
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
-} from '../../../../src/core/constants/consent-state';
-import {Services} from '../../../../src/services';
-import {
-  addAttributesToElement,
-  createElementWithAttributes,
-} from '../../../../src/dom';
-import {
-  forceExperimentBranch,
-  toggleExperiment,
-} from '../../../../src/experiments';
-import {toWin} from '../../../../src/types';
-import {utf8Decode, utf8Encode} from '../../../../src/core/types/string/bytes';
+} from '#core/constants/consent-state';
+import {Services} from '#service';
+import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
+import {forceExperimentBranch, toggleExperiment} from '#experiments';
+import {toWin} from '#core/window';
+import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';
@@ -964,44 +958,10 @@ describes.realWin(
         });
       });
 
-      describe('module/nomodule', () => {
-        it('should have module nomodule experiment id in url when runtime type is 2', () => {
-          env.sandbox
-            .stub(ampdoc, 'getMetaByName')
-            .withArgs('runtime-type')
-            .returns('2');
-          return impl.buildCallback().then(() => {
-            impl.getAdUrl().then((url) => {
-              expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
-            });
-          });
-        });
-
-        it('should have module nomodule experiment id in url when runtime type is 10', () => {
-          env.sandbox
-            .stub(ampdoc, 'getMetaByName')
-            .withArgs('runtime-type')
-            .returns('10');
-          return impl.buildCallback().then(() => {
-            impl.getAdUrl().then((url) => {
-              expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.CONTROL);
-            });
-          });
-        });
-
-        // 2, 4, and 10 should the only one that triggers this experiment diversion.
-        it('should not have module nomodule experiment id in url when runtime type is 0', () => {
-          env.sandbox
-            .stub(ampdoc, 'getMetaByName')
-            .withArgs('runtime-type')
-            .returns('0');
-          impl.buildCallback();
-          return impl.getAdUrl().then((url) => {
-            expect(url).to.not.have.string(MODULE_NOMODULE_PARAMS_EXP.CONTROL);
-            expect(url).to.not.have.string(
-              MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT
-            );
-          });
+      it('should set spsa param to amp-ad element layout box', () => {
+        impl.isSinglePageStoryAd = true;
+        return impl.getAdUrl().then((url) => {
+          expect(url).to.match(/spsa=320x50/);
         });
       });
 

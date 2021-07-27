@@ -19,17 +19,17 @@ import {
   ADSENSE_RSPV_ALLOWED_HEIGHT,
   ADSENSE_RSPV_TAG,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
-} from '../../../ads/google/utils';
-import {Services} from '../../../src/services';
-import {addExperimentIdToElement} from '../../../ads/google/a4a/traffic-experiments';
-import {clamp} from '../../../src/utils/math';
-import {computedStyle, getStyle, setStyle} from '../../../src/style';
+} from '#ads/google/utils';
+import {Services} from '#service';
+import {addExperimentIdToElement} from '#ads/google/a4a/traffic-experiments';
+import {clamp} from '#core/math';
+import {computedStyle, getStyle, setStyle} from '#core/dom/style';
 import {dev, devAssert, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
-import {hasOwn} from '../../../src/core/types/object';
-import {randomlySelectUnsetExperiments} from '../../../src/experiments';
-import {toWin} from '../../../src/types';
-import {tryParseJson} from '../../../src/core/types/object/json';
+import {hasOwn} from '#core/types/object';
+import {randomlySelectUnsetExperiments} from '#experiments';
+import {toWin} from '#core/window';
+import {tryParseJson} from '#core/types/object/json';
 
 const TAG = 'amp-ad-network-adsense-impl';
 

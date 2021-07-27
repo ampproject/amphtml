@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {Signals} from '../core/data-structures/signals';
-import {TickLabel} from '../core/constants/enums';
-import {VisibilityState} from '../core/constants/visibility-state';
+import {TickLabel} from '#core/constants/enums';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {Signals} from '#core/data-structures/signals';
+import {whenDocumentComplete, whenDocumentReady} from '#core/document-ready';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {computedStyle} from '#core/dom/style';
+import {throttle} from '#core/types/function';
+import {dict, map} from '#core/types/object';
+
+import {Services} from '#service';
+
 import {createCustomEvent} from '../event-helper';
-import {dev, devAssert} from '../log';
-import {dict, map} from '../core/types/object';
-import {getMode} from '../mode';
-import {getService, registerServiceBuilder} from '../service';
-import {isStoryDocument} from '../utils/story';
-import {layoutRectLtwh} from '../layout-rect';
-import {throttle} from '../core/types/function';
 import {whenContentIniLoad} from '../ini-load';
-import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
+import {dev, devAssert} from '../log';
+import {getMode} from '../mode';
+import {getService, registerServiceBuilder} from '../service-helpers';
+import {isStoryDocument} from '../utils/story';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -163,7 +166,7 @@ export class Performance {
 
     if (!this.supportsLargestContentfulPaint_) {
       this.metrics_.rejectSignal(
-        TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE,
+        TickLabel.LARGEST_CONTENTFUL_PAINT,
         dev().createExpectedError('Largest Contentful Paint not supported')
       );
     }
@@ -176,20 +179,15 @@ export class Performance {
     this.supportsNavigation_ = supportedEntryTypes.includes('navigation');
 
     /**
-     * The latest reported largest contentful paint time, where the loadTime
-     * is specified.
+     * The latest reported largest contentful paint time. Uses entry.startTime,
+     * which equates to: renderTime ?? loadTime. We can't always use one or the other
+     * because:
+     * - loadTime is 0 for non-remote resources (text)
+     * - renderTime is undefined for crossorigin resources
      *
      * @private {?number}
      */
-    this.largestContentfulPaintLoadTime_ = null;
-
-    /**
-     * The latest reported largest contentful paint time, where the renderTime
-     * is specified.
-     *
-     * @private {?number}
-     */
-    this.largestContentfulPaintRenderTime_ = null;
+    this.largestContentfulPaint_ = null;
 
     this.onAmpDocVisibilityChange_ = this.onAmpDocVisibilityChange_.bind(this);
 
@@ -206,6 +204,11 @@ export class Performance {
     whenDocumentComplete(win.document).then(() => this.onload_());
     this.registerPerformanceObserver_();
     this.registerFirstInputDelayPolyfillListener_();
+
+    /**
+     * @private {boolean}
+     */
+    this.googleFontExpRecorded_ = false;
   }
 
   /**
@@ -353,12 +356,7 @@ export class Performance {
           this.layoutShifts_.push(entry);
         }
       } else if (entry.entryType === 'largest-contentful-paint') {
-        if (entry.loadTime) {
-          this.largestContentfulPaintLoadTime_ = entry.loadTime;
-        }
-        if (entry.renderTime) {
-          this.largestContentfulPaintRenderTime_ = entry.renderTime;
-        }
+        this.largestContentfulPaint_ = entry.startTime;
       } else if (entry.entryType == 'navigation' && !recordedNavigation) {
         [
           'domComplete',
@@ -474,6 +472,20 @@ export class Performance {
    */
   tickCumulativeMetrics_() {
     if (this.supportsLayoutShift_) {
+      if (!this.googleFontExpRecorded_) {
+        this.googleFontExpRecorded_ = true;
+        const {win} = this;
+        const googleFontExp = parseInt(
+          computedStyle(win, win.document.body).getPropertyValue(
+            '--google-font-exp'
+          ),
+          10
+        );
+        if (googleFontExp >= 0) {
+          this.addEnabledExperiment(`google-font-exp=${googleFontExp}`);
+        }
+      }
+
       this.tickLayoutShiftScore_();
     }
     if (this.supportsLargestContentfulPaint_) {
@@ -559,24 +571,18 @@ export class Performance {
    * Tick the largest contentful paint metrics.
    */
   tickLargestContentfulPaint_() {
-    /** @type {?number} */ let end;
-    if (this.largestContentfulPaintLoadTime_ !== null) {
-      this.tickDelta(
-        TickLabel.LARGEST_CONTENTFUL_PAINT_LOAD,
-        this.largestContentfulPaintLoadTime_
-      );
-      end = this.largestContentfulPaintLoadTime_;
+    if (this.largestContentfulPaint_ == null) {
+      return;
     }
-    if (this.largestContentfulPaintRenderTime_ !== null) {
-      this.tickDelta(
-        TickLabel.LARGEST_CONTENTFUL_PAINT_RENDER,
-        this.largestContentfulPaintRenderTime_
-      );
-      end = end || this.largestContentfulPaintRenderTime_;
-    }
-    if (end !== null) {
-      this.tickSinceVisible(TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE, end);
-    }
+
+    this.tickDelta(
+      TickLabel.LARGEST_CONTENTFUL_PAINT,
+      this.largestContentfulPaint_
+    );
+    this.tickSinceVisible(
+      TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE,
+      this.largestContentfulPaint_
+    );
     this.flush();
   }
 

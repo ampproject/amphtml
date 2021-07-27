@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {IframeEmbed} from './iframe';
-import {dict} from '../../core/types/object';
-import {forwardRef} from '../compat';
-import {
-  generateSentinel,
-  getBootstrapUrl,
-  getDefaultBootstrapBaseUrl,
-} from '../../3p-frame';
-import {
-  getOptionalSandboxFlags,
-  getRequiredSandboxFlags,
-} from '../../core/3p-frame';
-import {includes} from '../../core/types/string';
-import {parseUrlDeprecated} from '../../url';
-import {sequentialIdGenerator} from '../../utils/id-generator';
+import {getOptionalSandboxFlags, getRequiredSandboxFlags} from '#core/3p-frame';
+import {sequentialIdGenerator} from '#core/data-structures/id-generator';
+import {dict} from '#core/types/object';
+import {includes} from '#core/types/string';
+
+import * as Preact from '#preact';
 import {
   useEffect,
   useImperativeHandle,
@@ -37,7 +27,17 @@ import {
   useMemo,
   useRef,
   useState,
-} from '../../../src/preact';
+} from '#preact';
+import {forwardRef} from '#preact/compat';
+
+import {IframeEmbed} from './iframe';
+
+import {
+  generateSentinel,
+  getBootstrapUrl,
+  getDefaultBootstrapBaseUrl,
+} from '../../3p-frame';
+import {parseUrlDeprecated} from '../../url';
 
 /** @type {!Object<string,function():void>} 3p frames for that type. */
 export const countGenerators = {};
@@ -131,7 +131,7 @@ function ProxyIframeEmbedWithRef(
       name: JSON.stringify(
         dict({
           'host': parseUrlDeprecated(src).hostname,
-          'bootstrap': bootstrap ?? getBootstrapUrl(type, win),
+          'bootstrap': bootstrap ?? getBootstrapUrl(type),
           'type': type,
           // "name" must be unique across iframes, so we add a count.
           // See: https://github.com/ampproject/amphtml/pull/2955

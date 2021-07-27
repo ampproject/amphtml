@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 import {LogLevel, dev} from '../../../src/log';
-import {Services} from '../../../src/services';
-import {isArray} from '../../../src/core/types';
-import {removeChildren} from '../../../src/dom';
-import {toggle} from '../../../src/style';
+import {Services} from '#service';
+import {isArray} from '#core/types';
+import {removeChildren} from '#core/dom';
+import {toggle} from '#core/dom/style';
 
 /**
  * @param {!../../../src/service/vsync-impl.Vsync} vsync

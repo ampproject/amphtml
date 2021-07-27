@@ -20,16 +20,26 @@ import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {Services} from '../../../src/services';
+import {Layout} from '#core/dom/layout';
+import {Services} from '#service';
+import {computedStyle, setStyles} from '#core/dom/style';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
-import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-render';
 
+/** @const {string} */
 const AMP_STATE_URI_SCHEME = 'amp-state:';
+
+/** @enum {string}  */
+const Binding = {
+  ALWAYS: 'always',
+  REFRESH: 'refresh',
+  NEVER: 'never',
+  NO: 'no',
+};
 
 /**
  * Returns true if element's src points to amp-state.
@@ -40,10 +50,8 @@ const isAmpStateSrc = (src) => src && src.startsWith(AMP_STATE_URI_SCHEME);
 
 /**
  * Gets the json from an "amp-state:" uri. For example, src="amp-state:json.path".
- *
  * TODO: this is similar to the implementation in amp-list. Move it
  * to a common file and import it.
- *
  * @param {!AmpElement} element
  * @param {string} src
  * @return {Promise<!JsonObject>}
@@ -71,6 +79,24 @@ const getAmpStateJson = (element, src) => {
     });
 };
 
+/**
+ * @param {string} bindingValue
+ * @param {boolean} isFirstMutation
+ * @return {boolean} Whether bind should evaluate and apply changes.
+ */
+function getUpdateValue(bindingValue, isFirstMutation) {
+  if (!bindingValue || bindingValue === Binding.REFRESH) {
+    // default is 'refresh', so check that its not the first mutation
+    return !isFirstMutation;
+  }
+  if (bindingValue === Binding.ALWAYS) {
+    // TODO(dmanek): add link to amp-render docs that elaborates on performance implications of "always"
+    user().warn(TAG, 'binding="always" has performance implications.');
+    return true;
+  }
+  return false;
+}
+
 export class AmpRender extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -87,15 +113,6 @@ export class AmpRender extends BaseElement {
 
     /** @private {?string} */
     this.src_ = null;
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'amp-render'),
-      'Experiment "amp-render" is not turned on.'
-    );
-    return super.isLayoutSupported(layout);
   }
 
   /**
@@ -164,9 +181,62 @@ export class AmpRender extends BaseElement {
   }
 
   /** @override */
+  isLayoutSupported(layout) {
+    if (layout === Layout.CONTAINER) {
+      userAssert(
+        this.getPlaceholder(),
+        'placeholder required with layout="container"'
+      );
+    }
+    return true;
+  }
+
+  /** @private */
+  handleResizeToContentsAction_() {
+    let currentHeight, targetHeight;
+    this.measureMutateElement(
+      () => {
+        currentHeight = this.element./*OK*/ offsetHeight;
+        targetHeight = this.element./*OK*/ scrollHeight;
+        if (targetHeight < currentHeight) {
+          // targetHeight is smaller than currentHeight, we need to shrink the height.
+          const container = this.element.querySelector(
+            'div[i-amphtml-rendered]'
+          );
+          targetHeight = container./*OK*/ scrollHeight;
+          // Check if the first child has any margin-top and add it to the target height
+          if (container.firstElementChild) {
+            const marginTop = computedStyle(
+              this.getAmpDoc().win,
+              container.firstElementChild
+            ).getPropertyValue('margin-top');
+            targetHeight += parseInt(marginTop, 10);
+          }
+          // Check if the last child has any margin-bottom and add it to the target height
+          if (container.lastElementChild) {
+            const marginBottom = computedStyle(
+              this.getAmpDoc().win,
+              container.lastElementChild
+            ).getPropertyValue('margin-bottom');
+            targetHeight += parseInt(marginBottom, 10);
+          }
+        }
+      },
+      () => {
+        this.forceChangeHeight(targetHeight);
+      }
+    );
+  }
+
+  /** @override */
   init() {
     this.initialSrc_ = this.element.getAttribute('src');
     this.src_ = this.initialSrc_;
+
+    const hasAriaLive = this.element.hasAttribute('aria-live');
+    if (!hasAriaLive) {
+      this.element.setAttribute('aria-live', 'polite');
+    }
 
     this.registerApiAction('refresh', (api) => {
       const src = this.element.getAttribute('src');
@@ -180,14 +250,58 @@ export class AmpRender extends BaseElement {
       api.refresh();
     });
 
+    this.registerAction('resizeToContents', () => {
+      this.handleResizeToContentsAction_();
+    });
+
     return dict({
+      'ariaLiveValue': hasAriaLive
+        ? this.element.getAttribute('aria-live')
+        : 'polite',
       'getJson': this.getFetchJsonFn(),
-      'onReady': () => this.togglePlaceholder(false),
-      'onRefresh': () => {
-        this.togglePlaceholder(true);
-        this.toggleFallback(false);
+      'onLoading': () => {
+        this.toggleLoading(true);
+      },
+      'onReady': () => {
+        this.toggleLoading(false);
+        if (this.element.getAttribute('layout') !== Layout.CONTAINER) {
+          this.togglePlaceholder(false);
+          return;
+        }
+
+        let componentHeight, contentHeight;
+        // TODO(dmanek): Look into using measureIntersection instead
+        this.measureMutateElement(
+          () => {
+            componentHeight = computedStyle(
+              this.getAmpDoc().win,
+              this.element
+            ).getPropertyValue('height');
+            contentHeight = this.element.querySelector(
+              '[i-amphtml-rendered]'
+            )./*OK*/ scrollHeight;
+          },
+          () => {
+            setStyles(this.element, {
+              'overflow': 'hidden',
+              'height': componentHeight,
+            });
+          }
+        ).then(() => {
+          return this.attemptChangeHeight(contentHeight)
+            .then(() => {
+              this.togglePlaceholder(false);
+              setStyles(this.element, {
+                'overflow': '',
+              });
+            })
+            .catch(() => {
+              this.togglePlaceholder(false);
+            });
+        });
       },
       'onError': () => {
+        this.toggleLoading(false);
         // If the content fails to load and there's a fallback element, display the fallback.
         // Otherwise, continue displaying the placeholder.
         if (this.getFallback()) {
@@ -201,14 +315,6 @@ export class AmpRender extends BaseElement {
   }
 
   /** @override */
-  buildCallback() {
-    super.buildCallback();
-    if (!this.element.hasAttribute('aria-live')) {
-      this.element.setAttribute('aria-live', 'polite');
-    }
-  }
-
-  /** @override */
   mutationObserverCallback() {
     const src = this.element.getAttribute('src');
     if (src === this.src_) {
@@ -219,11 +325,17 @@ export class AmpRender extends BaseElement {
   }
 
   /**
-   * TODO: this implementation is identical to one in amp-date-display &
-   * amp-date-countdown. Move it to a common file and import it.
-   *
-   * @override
+   * @param {!JsonObject} data
+   * @return {!Promise<!Element>}
+   * @private
    */
+  renderTemplateAsString_(data) {
+    return this.templates_
+      .renderTemplateAsString(dev().assertElement(this.template_), data)
+      .then((html) => dict({'__html': html}));
+  }
+
+  /** @override */
   checkPropsPostMutations() {
     const templates =
       this.templates_ ||
@@ -237,6 +349,7 @@ export class AmpRender extends BaseElement {
       this.mutateProps(dict({'render': null}));
       return;
     }
+
     // Only overwrite `render` when template is ready to minimize FOUC.
     templates.whenReady(template).then(() => {
       if (template != this.template_) {
@@ -246,9 +359,30 @@ export class AmpRender extends BaseElement {
       this.mutateProps(
         dict({
           'render': (data) => {
-            return templates
-              .renderTemplateAsString(dev().assertElement(template), data)
-              .then((html) => dict({'__html': html}));
+            const bindingValue = this.element.getAttribute('binding');
+            if (bindingValue === Binding.NEVER || bindingValue === Binding.NO) {
+              return this.renderTemplateAsString_(data);
+            }
+            return Services.bindForDocOrNull(this.element).then((bind) => {
+              if (!bind) {
+                return this.renderTemplateAsString_(data);
+              }
+              return templates
+                .renderTemplate(dev().assertElement(template), data)
+                .then((element) => {
+                  return bind
+                    .rescan([element], [], {
+                      'fast': true,
+                      'update': getUpdateValue(
+                        bindingValue,
+                        // bind.signals().get('FIRST_MUTATE') returns timestamp (in ms) when first
+                        // mutation occured, which is null for the initial render
+                        bind.signals().get('FIRST_MUTATE') === null
+                      ),
+                    })
+                    .then(() => dict({'__html': element./* OK */ innerHTML}));
+                });
+            });
           },
         })
       );
@@ -258,7 +392,6 @@ export class AmpRender extends BaseElement {
   /**
    * TODO: this implementation is identical to one in amp-date-display &
    * amp-date-countdown. Move it to a common file and import it.
-   *
    * @override
    */
   isReady(props) {
@@ -266,6 +399,12 @@ export class AmpRender extends BaseElement {
     return !this.template_ || 'render' in props;
   }
 }
+
+/**
+ * This is disabled to remove the fill content style in the AMP layer.
+ * @override
+ */
+AmpRender['layoutSizeDefined'] = false;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpRender);

@@ -100,7 +100,7 @@ function buildEnv(env) {
  * @return {Promise<void>}
  */
 async function storybook() {
-  const {'storybook_env': env = 'amp,preact', build = false} = argv;
+  const {build = false, 'storybook_env': env = 'amp,preact'} = argv;
   const envs = env.split(',');
   if (!build && envs.includes('amp')) {
     await runAmpDevBuildServer();
@@ -115,12 +115,12 @@ module.exports = {
   storybook,
 };
 
-storybook.description = 'Isolated testing and development for AMP components.';
+storybook.description =
+  'Set up isolated development and testing for AMP components';
 
 storybook.flags = {
-  'build':
-    'Builds a static web application, as described in https://storybook.js.org/docs/react/workflows/publish-storybook',
+  'build': 'Build a static web application (see https://storybook.js.org/docs)',
   'storybook_env':
-    "Set environment(s) to run Storybook, either 'amp', 'preact' or a list as 'amp,preact'",
-  'storybook_port': 'Set port from which to run the Storybook dashboard.',
+    "Environment(s) to run Storybook (either 'amp', 'preact' or a list as 'amp,preact')",
+  'storybook_port': 'Port from which to run the Storybook dashboard',
 };

@@ -43,6 +43,7 @@ To use RTC, you must meet the following requirements:
 -   Rubicon
 -   Salesforce
 -   T13
+-   Tail
 -   The Ozone Project
 -   Yieldbot
 -   Yieldlab

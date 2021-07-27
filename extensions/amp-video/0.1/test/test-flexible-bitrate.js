@@ -16,9 +16,9 @@
 
 import '../flexible-bitrate';
 import {BitrateManager} from '../flexible-bitrate';
-import {childElementsByTag} from '../../../../src/dom';
-import {toArray} from '../../../../src/core/types/array';
-import {toggleExperiment} from '../../../../src/experiments';
+import {childElementsByTag} from '#core/dom/query';
+import {toArray} from '#core/types/array';
+import {toggleExperiment} from '#experiments';
 
 describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
   let clock;

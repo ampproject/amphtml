@@ -19,6 +19,15 @@ module.exports = {
   'rules': {
     'local/no-global': 2,
 
+    // These rules should apply to all AMP code. For now, they apply only to src
+    'import/newline-after-import': 2,
+    'import/no-dynamic-require': 2,
+    'import/no-unused-modules': 2,
+    'import/no-commonjs': 2,
+    'import/no-amd': 2,
+    'import/no-nodejs-modules': 2,
+    'import/no-import-module-exports': 2,
+
     'import/no-restricted-paths': [
       'error',
       {
@@ -33,14 +42,7 @@ module.exports = {
             // Disallow importing AMP dependencies into preact/Bento
             'target': 'src/preact',
             'from': 'src',
-            'except': ['./core', './context', './preact'],
-          },
-          {
-            // Disallow importing AMP dependencies into context module
-            // TODO(rcebulko): Try to migrate src/context into src/preact
-            'target': 'src/context',
-            'from': 'src',
-            'except': ['./core', './context'],
+            'except': ['./core', './preact'],
           },
           {
             // Disallow importing non-core dependencies into polyfills
@@ -59,9 +61,7 @@ module.exports = {
       'files': [
         './preact/base-element.js',
         './preact/slot.js',
-        './context/node.js',
         './polyfills/fetch.js',
-        './polyfills/get-bounding-client-rect.js',
         // TEMPORARY, follow tracking issue #33631
         './preact/component/3p-frame.js',
       ],
@@ -69,7 +69,7 @@ module.exports = {
     },
     {
       'files': [
-        './core/window.extern.js',
+        './core/window/window.extern.js',
         './polyfills/custom-elements.extern.js',
         './experiments/experiments.extern.js',
         './experiments/shame.extern.js',
@@ -81,6 +81,25 @@ module.exports = {
       'rules': {
         'local/no-private-props': 2,
       },
+    },
+    {
+      'files': ['**/storybook/*.js', '**/rollup.config.js'],
+      'rules': {'import/no-nodejs-modules': 0},
+    },
+    {
+      'files': [
+        '*.js',
+        'builtins/**/*.js',
+        'core/**/*.js',
+        'experiments/**/*.js',
+        'polyfills/**/*.js',
+        'preact/**/*.js',
+        'purifier/**/*.js',
+        'service/**/*.js',
+        'utils/**/*.js',
+        'web-worker/**/*.js',
+      ],
+      'rules': {'import/order': 2},
     },
   ],
 };

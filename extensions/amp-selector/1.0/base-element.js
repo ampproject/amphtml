@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {Option, Selector} from './component';
-import {PreactBaseElement} from '../../../src/preact/base-element';
+import {PreactBaseElement} from '#preact/base-element';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {
-  closestAncestorElementBySelector,
   createElementWithAttributes,
   toggleAttribute,
   tryFocus,
-} from '../../../src/dom';
+} from '#core/dom';
 import {devAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {toArray} from '../../../src/core/types/array';
-import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
+import {dict} from '#core/types/object';
+import {toArray} from '#core/types/array';
+import {useCallback, useLayoutEffect, useRef} from '#preact';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */
@@ -68,7 +68,7 @@ export class BaseElement extends PreactBaseElement {
     };
 
     // Return props
-    const {children, value, options} = getOptions(element, mu);
+    const {children, options, value} = getOptions(element, mu);
     this.optionState = options;
     return dict({
       'as': SelectorShim,
@@ -137,13 +137,13 @@ function getOptions(element, mu) {
  * @return {PreactDef.Renderable}
  */
 export function OptionShim({
-  shimDomElement,
+  disabled,
   onClick,
   onFocus,
   onKeyDown,
-  selected,
-  disabled,
   role = 'option',
+  selected,
+  shimDomElement,
   tabIndex,
 }) {
   const syncEvent = useCallback(
@@ -191,14 +191,14 @@ export function OptionShim({
  * @return {PreactDef.Renderable}
  */
 function SelectorShim({
-  shimDomElement,
   children,
+  disabled,
   form,
   multiple,
   name,
-  disabled,
   onKeyDown,
   role = 'listbox',
+  shimDomElement,
   tabIndex,
   value,
 }) {

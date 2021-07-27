@@ -15,14 +15,14 @@
  */
 
 import {ActionTrust} from './core/constants/action-constants';
+import {dev, user, userAssert} from './log';
+import {Services} from './service';
 import {
   SOURCE_ORIGIN_PARAM,
   assertHttpsUrl,
   checkCorsUrl,
   isProxyOrigin,
 } from './url';
-import {Services} from './services';
-import {dev, user, userAssert} from './log';
 
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc

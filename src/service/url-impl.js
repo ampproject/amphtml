@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {LruCache} from '../core/data-structures/lru-cache';
+import {LruCache} from '#core/data-structures/lru-cache';
+
+import {urls} from '../config';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
@@ -26,8 +29,6 @@ import {
   parseUrlWithA,
   resolveRelativeUrl,
 } from '../url';
-import {registerServiceBuilderForDoc} from '../service';
-import {urls} from '../config';
 
 const SERVICE = 'url';
 
@@ -179,7 +180,7 @@ export class Url {
       return resourceUrl;
     }
 
-    const {host, hash, pathname, search} = this.parse_(resourceUrl);
+    const {hash, host, pathname, search} = this.parse_(resourceUrl);
     const encodedHost = encodeURIComponent(host);
     return `${urls.cdn}/c/${encodedHost}${pathname}${search}${hash}`;
   }

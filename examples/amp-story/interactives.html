@@ -13,11 +13,17 @@
       amp-story-interactive-quiz, amp-story-interactive-binary-poll, amp-story-interactive-poll, amp-story-interactive-results {
         justify-self: center;
       }
+
+      #expToggle {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 10000;
+      }
     </style>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>
-    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
   </head>
   <body>
@@ -50,11 +56,6 @@
                 layout="responsive"
                 height="1600"
                 width="900">
-                <h1 style="position: absolute;top: 0;z-index: 1">
-                  This is a
-                  <a href="https://example.com" tabindex="2">Link</a>
-                </h1>
-
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
@@ -87,7 +88,7 @@
             <amp-story-interactive-quiz
                 id="first-cup-dark"
                 endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
-                style="--interactive-accent-color: #20AC5E;"
+                style="--interactive-accent-color: #20AC5E;font-size: calc(var(--story-page-vmin) * 4)"
                 theme="dark"
                 prompt-text="Who won the first soccer world cup?"
                 option-1-text="France"
@@ -168,7 +169,7 @@
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
             <amp-story-interactive-quiz
-                id="smallest-mammal-light"
+                id="smallest-mammal-transparent"
                 endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
                 prompt-size="large"
                 chip-style="transparent"
@@ -261,12 +262,11 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="thirds">
-            <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
-              <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
+            <div grid-area="lower-third" style="display: flex;justify-content:center;flex-direction:column;">
               <amp-story-interactive-binary-poll
                 endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
                 id="movie-light-black"
-                style="--interactive-accent-color: rgb(0, 0, 0);"
+                style="--interactive-accent-color: rgb(0, 0, 0); transform: translateX(-40%) rotate(-45deg);"
                 option-1-text="Doctor"
                 option-2-text="Panther"
                 option-1-confetti="🎥"
@@ -394,7 +394,7 @@
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
             <amp-story-interactive-poll
-              id="poll-4"
+              id="poll-5"
               chip-style="shadow"
               endpoint="http://localhost:3000/interactives"
               style="--interactive-accent-color: #ff6347"
@@ -422,7 +422,7 @@
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
             <amp-story-interactive-poll
-              id="poll-4"
+              id="poll-6"
               chip-style="shadow"
               endpoint="http://localhost:3000/interactives"
               style="--interactive-accent-color: #ff6347"
@@ -469,7 +469,7 @@
             amp-story-interactive-poll>
           </amp-story-grid-layer>
         </amp-story-page>
-        <amp-story-page id="poll-7">
+        <amp-story-page id="poll-8">
           <amp-story-grid-layer template="fill" style="background:linear-gradient(rgb(255, 255, 255), rgb(178, 243, 255))">
             <amp-img
                 src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
@@ -481,7 +481,7 @@
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
             <amp-story-interactive-poll
-              id="poll-7"
+              id="poll-8"
               endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
               style="--interactive-accent-color: #ff6347;--interactive-prompt-text-color:black"
               theme="dark"
@@ -542,5 +542,15 @@
           </amp-story-grid-layer>
         </amp-story-page>
     </amp-story>
+    <button id="expToggle" onclick="
+      AMP.toggleExperiment('amp-story-interactive-disclaimer');
+      location.reload();
+    ">Toggle amp-story-interactive-disclaimer</button>
   </body>
+  <script>
+    // Indicate whether experiment is on.
+    document.addEventListener('ampstory:load', () => {
+      expToggle.innerHTML = "amp-story-interactive-disclaimer active: " + AMP.isExperimentOn('amp-story-interactive-disclaimer');
+    });
+  </script>
 </html>

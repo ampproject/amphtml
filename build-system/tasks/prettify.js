@@ -34,9 +34,9 @@ const {
   logOnSameLineLocalDev,
   logWithoutTimestamp,
 } = require('../common/logging');
+const {cyan, green, red, yellow} = require('../common/colors');
 const {exec} = require('../common/exec');
 const {getFilesToCheck} = require('../common/utils');
-const {green, cyan, red, yellow} = require('../common/colors');
 const {prettifyGlobs} = require('../test-configs/config');
 
 const rootDir = path.dirname(path.dirname(__dirname));
@@ -45,6 +45,7 @@ const tempDir = tempy.directory();
 /**
  * Checks files for formatting (and optionally fixes them) with Prettier.
  * Explicitly makes sure the API doesn't check files in `.prettierignore`.
+ * @return {Promise<void>}
  */
 async function prettify() {
   const filesToCheck = getFilesToCheck(
@@ -73,6 +74,7 @@ async function getOptions(file) {
  * formatting errors.
  *
  * @param {string} file
+ * @return {Promise<void>}
  */
 async function printErrorWithSuggestedFixes(file) {
   logWithoutTimestamp('\n');
@@ -119,6 +121,7 @@ function printFixMessages() {
 /**
  * Prettifies on the given list of files.
  * @param {!Array<string>} filesToCheck
+ * @return {Promise<void>}
  */
 async function runPrettify(filesToCheck) {
   logLocalDev(green('Starting checks...'));
@@ -160,9 +163,9 @@ module.exports = {
 };
 
 prettify.description =
-  'Checks several non-JS files in the repo for formatting using prettier';
+  'Check several non-JS files in the repo for formatting using prettier';
 prettify.flags = {
-  'files': 'Checks only the specified files',
-  'local_changes': 'Checks just the files changed in the local branch',
-  'fix': 'Fixes formatting errors',
+  'files': 'Check only the specified files',
+  'local_changes': 'Check just the files changed in the local branch',
+  'fix': 'Fix all auto-fixable formatting errors',
 };

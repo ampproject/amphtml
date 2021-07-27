@@ -14,14 +14,26 @@
  * limitations under the License.
  */
 
-import {Deferred, tryResolve} from '../core/data-structures/promise';
-import {Observable} from '../core/data-structures/observable';
-import {Services} from '../services';
-import {VisibilityState} from '../core/constants/visibility-state';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {Observable} from '#core/data-structures/observable';
+import {Deferred, tryResolve} from '#core/data-structures/promise';
+import {isIframed} from '#core/dom';
+import {duplicateErrorIfNecessary} from '#core/error';
+import {isEnumValue} from '#core/types';
+import {findIndex} from '#core/types/array';
+import {map} from '#core/types/object';
+import {endsWith} from '#core/types/string';
+import {parseQueryString} from '#core/types/string/url';
+
+import {Services} from '#service';
+
+import {ViewerInterface} from './viewer-interface';
+
+import {urls} from '../config';
+import {reportError} from '../error-reporting';
+import {listen} from '../event-helper';
 import {dev, devAssert, stripUserError} from '../log';
-import {duplicateErrorIfNecessary} from '../core/error';
-import {endsWith} from '../core/types/string';
-import {findIndex} from '../core/types/array';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 import {
   getSourceOrigin,
   isProxyOrigin,
@@ -29,15 +41,6 @@ import {
   removeFragment,
   serializeQueryString,
 } from '../url';
-import {isIframed} from '../dom';
-import {listen} from '../event-helper';
-import {map} from '../core/types/object';
-import {parseQueryString} from '../core/types/string/url';
-import {registerServiceBuilderForDoc} from '../service';
-import {reportError} from '../error-reporting';
-import {urls} from '../config';
-
-import {ViewerInterface} from './viewer-interface';
 
 const TAG_ = 'Viewer';
 
@@ -529,7 +532,8 @@ export class ViewerImpl {
     if (!state) {
       return;
     }
-    state = dev().assertEnumValue(VisibilityState, state, 'VisibilityState');
+
+    devAssert(isEnumValue(VisibilityState, state));
 
     // The viewer is informing us we are not currently active because we are
     // being pre-rendered, or the user swiped to another doc (or closed the

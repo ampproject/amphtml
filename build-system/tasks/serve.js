@@ -16,7 +16,7 @@
 'use strict';
 
 const connect = require('gulp-connect');
-const debounce = require('debounce');
+const debounce = require('../common/debounce');
 const globby = require('globby');
 const header = require('connect-header');
 const minimist = require('minimist');
@@ -25,16 +25,16 @@ const open = require('open');
 const os = require('os');
 const path = require('path');
 const {
-  buildNewServer,
-  SERVER_TRANSFORM_PATH,
-} = require('../server/typescript-compile');
-const {
+  lazyBuild3pVendor,
   lazyBuildExtensions,
   lazyBuildJs,
-  lazyBuild3pVendor,
-  preBuildRuntimeFiles,
   preBuildExtensions,
+  preBuildRuntimeFiles,
 } = require('../server/lazy-build');
+const {
+  SERVER_TRANSFORM_PATH,
+  buildNewServer,
+} = require('../server/typescript-compile');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green, red} = require('../common/colors');
 const {logServeMode, setServeMode} = require('../server/app-utils');
@@ -106,6 +106,7 @@ function getMiddleware() {
  * @param {?Object} connectOptions
  * @param {?Object} serverOptions
  * @param {?Object} modeOptions
+ * @return {Promise<void>}
  */
 async function startServer(
   connectOptions = {},
@@ -179,6 +180,7 @@ function resetServerFiles() {
 
 /**
  * Stops the currently running server
+ * @return {Promise<void>}
  */
 async function stopServer() {
   if (url) {
@@ -190,6 +192,7 @@ async function stopServer() {
 
 /**
  * Closes the existing server and restarts it
+ * @return {Promise<void>}
  */
 async function restartServer() {
   stopServer();
@@ -205,6 +208,7 @@ async function restartServer() {
 
 /**
  * Performs pre-build steps requested via command line args.
+ * @return {Promise<void>}
  */
 async function performPreBuildSteps() {
   await preBuildRuntimeFiles();
@@ -213,6 +217,7 @@ async function performPreBuildSteps() {
 
 /**
  * Entry point of the `amp serve` task.
+ * @return {Promise<void>}
  */
 async function serve() {
   await doServe();
@@ -221,6 +226,7 @@ async function serve() {
 /**
  * Starts a webserver at the repository root to serve built files.
  * @param {boolean=} lazyBuild
+ * @return {Promise<void>}
  */
 async function doServe(lazyBuild = false) {
   createCtrlcHandler('serve');
@@ -245,10 +251,10 @@ module.exports = {
 
 /* eslint "google-camelcase/google-camelcase": 0 */
 
-serve.description = 'Starts a webserver at the project root directory';
+serve.description = 'Start a webserver at the project root directory';
 serve.flags = {
   host: 'Hostname or IP address to bind to (default: localhost)',
-  port: 'Specifies alternative port (default: 8000)',
+  port: 'Specify alternative port (default: 8000)',
   https: 'Use HTTPS server',
   quiet: "Run in quiet mode and don't log HTTP requests",
   cache: 'Make local resources cacheable by the browser',
@@ -258,6 +264,5 @@ serve.flags = {
   cdn: 'Serve current prod JS',
   rtv: 'Serve JS from the RTV provided',
   coverage:
-    'Serve instrumented code to collect coverage info; use ' +
-    '--coverage=live to auto-report coverage on page unload',
+    'Serve instrumented code to collect coverage info (use --coverage=live to auto-report coverage on page unload)',
 };

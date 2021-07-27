@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
-import {dict} from '../../../src/core/types/object';
-import {parseQueryString} from '../../../src/core/types/string/url';
+import {Services} from '#service';
+import {buildUrl} from '#ads/google/a4a/shared/url-builder';
+import {dict} from '#core/types/object';
+import {parseQueryString} from '#core/types/string/url';
 
 /**
  * @implements {./ad-network-config.AdNetworkConfigDef}
@@ -56,7 +56,7 @@ export class FirstImpressionIoConfig {
       }
     );
 
-    const {host, pathname, hash, search} = window.location;
+    const {hash, host, pathname, search} = window.location;
     const hashParams = Object.assign(
       parseQueryString(hash),
       parseQueryString(search)

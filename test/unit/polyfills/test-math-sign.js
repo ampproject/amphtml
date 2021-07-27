@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {sign} from '../../../src/polyfills/math-sign';
+import {sign} from '#polyfills/math-sign';
 
 describes.sandboxed('Math.sign', {}, () => {
   it('returns 1 for positive x', () => {

@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-import * as Preact from './index';
-import {Loading, reducer as loadingReducer} from '../core/loading-instructions';
-import {createContext, useContext, useMemo} from './index';
+import {
+  Loading,
+  reducer as loadingReducer,
+} from '#core/constants/loading-instructions';
+
+import * as Preact from '#preact';
+import {createContext, useContext, useMemo} from '#preact';
 
 /** @type {PreactDef.Context} */
 let context;
@@ -50,11 +54,11 @@ function getAmpContext() {
  * @return {!PreactDef.VNode}
  */
 export function WithAmpContext({
-  renderable: renderableProp = true,
-  playable: playableProp = true,
+  children,
   loading: loadingProp = 'auto',
   notify: notifyProp,
-  children,
+  playable: playableProp = true,
+  renderable: renderableProp = true,
 }) {
   const parent = useAmpContext();
   const renderable = renderableProp && parent.renderable;

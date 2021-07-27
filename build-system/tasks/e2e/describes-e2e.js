@@ -38,8 +38,10 @@ const {Builder, Capabilities, logging} = selenium;
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
-const TEST_TIMEOUT = 40000;
-const SETUP_TIMEOUT = 30000;
+const TEST_TIMEOUT = 3000;
+// This can be much lower when the OSX container can be sped up allowing tests
+// in extensions/amp-script/0.1/test-e2e/test-amp-script.js to run faster
+const SETUP_TIMEOUT = 10000;
 const SETUP_RETRIES = 3;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
 const COV_REPORT_PATH = '/coverage/client';
@@ -60,13 +62,6 @@ if (argv.coverage) {
  * }}
  */
 let DescribesConfigDef;
-
-/**
- * @typedef {{
- *  headless?: boolean,
- * }}
- */
-let PuppeteerConfigDef;
 
 /**
  * @typedef {{
@@ -222,7 +217,8 @@ let TestSpec;
  *  fixture: string,
  *  initialRect: ({width: number, height:number}|undefined),
  *  deviceName: string|undefined,
- *  versions: {[version: string]: TestSpec}
+ *  versions: {[version: string]: TestSpec},
+ *  version: string|undefined
  * }}
  */
 let RootSpec;
@@ -413,9 +409,11 @@ function describeEnv(factory) {
       spec.browsers = ['chrome'];
     }
 
+    /**
+     * Initializes the describe object for all applicable browsers.
+     */
     function createBrowserDescribe() {
       const allowedBrowsers = getAllowedBrowsers();
-
       spec.browsers
         .filter((x) => allowedBrowsers.has(x))
         .forEach((browserName) => {
@@ -471,6 +469,7 @@ function describeEnv(factory) {
      */
     function doTemplate(_name, variant, browserName) {
       const env = Object.create(variant);
+      // @ts-ignore
       this.timeout(TEST_TIMEOUT);
       beforeEach(async function () {
         this.timeout(SETUP_TIMEOUT);
@@ -490,7 +489,7 @@ function describeEnv(factory) {
         // If there is an async expect error, throw it in the final state.
         const lastExpectError = getLastExpectError();
         if (lastExpectError) {
-          this.test.error(lastExpectError);
+          /** @type {any} */ (this.test).error(lastExpectError);
           clearLastExpectError();
         }
 
@@ -581,6 +580,7 @@ class EndToEndFixture {
    * @param {!Object} env
    * @param {string} browserName
    * @param {number} retries
+   * @return {Promise<void>}
    */
   async setup(env, browserName, retries = 0) {
     const config = getConfig();
@@ -598,7 +598,7 @@ class EndToEndFixture {
       // Set env props that require the fixture to be set up.
       if (env.environment === AmpdocEnvironment.VIEWER_DEMO) {
         env.receivedMessages = await controller.evaluate(() => {
-          return window.parent.viewer.receivedMessages;
+          return window.parent.viewer?.receivedMessages;
         });
       }
     } catch (ex) {
@@ -628,7 +628,7 @@ class EndToEndFixture {
    * @return {!TestSpec}
    */
   setTestUrl(spec) {
-    const {testUrl, fixture} = spec;
+    const {fixture, testUrl} = spec;
 
     if (testUrl) {
       throw new Error(
@@ -664,7 +664,7 @@ function getDriver({headless = false}, browserName, deviceName) {
  * @return {Promise<void>}
  */
 async function setUpTest(
-  {environment, ampDriver, controller},
+  {ampDriver, controller, environment},
   {testUrl = '', version, experiments = [], initialRect}
 ) {
   const url = new URL(testUrl);
@@ -686,7 +686,7 @@ async function setUpTest(
   }
 
   if (initialRect) {
-    const {width, height} = initialRect;
+    const {height, width} = initialRect;
     await controller.setWindowRect({width, height});
   }
 

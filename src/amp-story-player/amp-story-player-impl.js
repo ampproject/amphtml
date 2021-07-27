@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,27 @@
  */
 
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
-import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
-import {Deferred} from '../core/data-structures/promise';
 import {Messaging} from '@ampproject/viewer-messaging';
+
+// Source for this constant is css/amp-story-player-shadow.css
+import {devAssertElement} from '#core/assert';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {Deferred} from '#core/data-structures/promise';
+import {isJsonScriptTag, tryFocus} from '#core/dom';
+import {resetStyles, setStyle, setStyles} from '#core/dom/style';
+import {findIndex, toArray} from '#core/types/array';
+import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
+import {parseQueryString} from '#core/types/string/url';
+
+import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
 import {PageScroller} from './page-scroller';
-import {VisibilityState} from '../core/constants/visibility-state';
+
+import {cssText} from '../../build/amp-story-player-shadow.css';
+import {applySandbox} from '../3p-frame';
+import {urls} from '../config';
+import {createCustomEvent, listenOnce} from '../event-helper';
+import {getMode} from '../mode';
 import {
   addParamsToUrl,
   getFragment,
@@ -29,19 +45,6 @@ import {
   removeSearch,
   serializeQueryString,
 } from '../url';
-import {applySandbox} from '../3p-frame';
-import {createCustomEvent, listenOnce} from '../event-helper';
-import {dict} from '../core/types/object';
-import {isJsonScriptTag, tryFocus} from '../dom';
-import {parseQueryString} from '../core/types/string/url';
-// Source for this constant is css/amp-story-player-iframe.css
-import {cssText} from '../../build/amp-story-player-iframe.css';
-import {devAssertElement} from '../core/assert';
-import {findIndex, toArray} from '../core/types/array';
-import {getMode} from '../../src/mode';
-import {parseJson} from '../core/types/object/json';
-import {resetStyles, setStyle, setStyles} from '../style';
-import {urls} from '../config';
 
 /** @enum {string} */
 const LoadStateClass = {
@@ -107,6 +110,7 @@ const STORY_STATE_TYPE = {
 /** @enum {string} */
 const STORY_MESSAGE_STATE_TYPE = {
   PAGE_ATTACHMENT_STATE: 'PAGE_ATTACHMENT_STATE',
+  UI_STATE: 'UI_STATE',
   MUTED_STATE: 'MUTED_STATE',
   CURRENT_PAGE_ID: 'CURRENT_PAGE_ID',
   STORY_PROGRESS: 'STORY_PROGRESS',
@@ -185,6 +189,12 @@ const LOG_TYPE = {
 };
 
 /**
+ * NOTE: If udpated here, update in amp-story.js
+ * @private @const {number}
+ */
+const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = 3 / 4;
+
+/**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
  * services, as v0.js is not expected to be loaded in this context.
  */
@@ -251,6 +261,20 @@ export class AmpStoryPlayer {
 
     /** @private {?string} */
     this.attribution_ = null;
+
+    /** @private {?Element} */
+    this.prevButton_ = null;
+
+    /** @private {?Element} */
+    this.nextButton_ = null;
+
+    /**
+     * Shows or hides the desktop panels player experiment.
+     * Variable is set on window for unit testing new features.
+     * @private {?boolean}
+     */
+    this.isDesktopPanelExperimentOn_ =
+      this.win_.DESKTOP_PANEL_STORY_PLAYER_EXP_ON;
 
     return this.element_;
   }
@@ -400,6 +424,9 @@ export class AmpStoryPlayer {
     this.initializeAttribution_();
     this.initializePageScroll_();
     this.initializeCircularWrapping_();
+    if (this.isDesktopPanelExperimentOn_) {
+      this.initializeDesktopStoryControlUI_();
+    }
     this.signalReady_();
     this.element_.isBuilt_ = true;
   }
@@ -621,6 +648,11 @@ export class AmpStoryPlayer {
             dict({'state': STORY_MESSAGE_STATE_TYPE.MUTED_STATE})
           );
 
+          messaging.sendRequest(
+            'onDocumentState',
+            dict({'state': STORY_MESSAGE_STATE_TYPE.UI_STATE})
+          );
+
           messaging.registerHandler('documentStateUpdate', (event, data) => {
             this.onDocumentStateUpdate_(
               /** @type {!DocumentStateTypeDef} */ (data),
@@ -716,10 +748,89 @@ export class AmpStoryPlayer {
     new AmpStoryPlayerViewportObserver(this.win_, this.element_, () =>
       this.visibleDeferred_.resolve()
     );
-
+    if (this.isDesktopPanelExperimentOn_) {
+      if (this.win_.ResizeObserver) {
+        new this.win_.ResizeObserver((e) => {
+          const {height, width} = e[0].contentRect;
+          this.onPlayerResize_(height, width);
+        }).observe(this.element_);
+      } else {
+        // Set size once as fallback for browsers not supporting ResizeObserver.
+        const {height, width} = this.element_./*OK*/ getBoundingClientRect();
+        this.onPlayerResize_(height, width);
+      }
+    }
     this.render_();
 
     this.element_.isLaidOut_ = true;
+  }
+
+  /**
+   * Builds desktop "previous" and "next" story UI.
+   * @private
+   */
+  initializeDesktopStoryControlUI_() {
+    this.prevButton_ = this.doc_.createElement('button');
+    this.prevButton_.classList.add('i-amphtml-story-player-desktop-panel-prev');
+    this.prevButton_.addEventListener('click', () => this.previous_());
+    this.prevButton_.setAttribute('aria-label', 'previous story');
+    this.rootEl_.appendChild(this.prevButton_);
+
+    this.nextButton_ = this.doc_.createElement('button');
+    this.nextButton_.classList.add('i-amphtml-story-player-desktop-panel-next');
+    this.nextButton_.addEventListener('click', () => this.next_());
+    this.nextButton_.setAttribute('aria-label', 'next story');
+    this.rootEl_.appendChild(this.nextButton_);
+
+    this.checkButtonsDisabled_();
+  }
+
+  /**
+   * Toggles disabled attribute on desktop "previous" and "next" buttons.
+   * @private
+   */
+  checkButtonsDisabled_() {
+    this.prevButton_.toggleAttribute(
+      'disabled',
+      this.isIndexOutofBounds_(this.currentIdx_ - 1) &&
+        !this.isCircularWrappingEnabled_
+    );
+    this.nextButton_.toggleAttribute(
+      'disabled',
+      this.isIndexOutofBounds_(this.currentIdx_ + 1) &&
+        !this.isCircularWrappingEnabled_
+    );
+  }
+
+  /**
+   * @param {number} height
+   * @param {number} width
+   * @private
+   */
+  onPlayerResize_(height, width) {
+    const isDesktopOnePanel =
+      width / height > DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD;
+
+    this.rootEl_.classList.toggle(
+      'i-amphtml-story-player-desktop-panel',
+      isDesktopOnePanel
+    );
+
+    if (isDesktopOnePanel) {
+      setStyles(this.rootEl_, {
+        '--i-amphtml-story-player-height': `${height}px`,
+      });
+
+      this.rootEl_.classList.toggle(
+        'i-amphtml-story-player-desktop-panel-medium',
+        height < 756
+      );
+
+      this.rootEl_.classList.toggle(
+        'i-amphtml-story-player-desktop-panel-small',
+        height < 538
+      );
+    }
   }
 
   /**
@@ -855,8 +966,50 @@ export class AmpStoryPlayer {
       'remaining': remaining,
     };
 
+    if (this.isDesktopPanelExperimentOn_) {
+      this.checkButtonsDisabled_();
+      this.getUiState_().then((uiTypeNumber) =>
+        this.onUiStateUpdate_(uiTypeNumber)
+      );
+    }
     this.signalNavigation_(navigation);
     this.maybeFetchMoreStories_(remaining);
+  }
+
+  /**
+   * Gets UI state from active story.
+   * @private
+   * @return {Promise}
+   */
+  getUiState_() {
+    const story = this.stories_[this.currentIdx_];
+
+    return new Promise((resolve) => {
+      story.messagingPromise.then((messaging) => {
+        messaging
+          .sendRequest(
+            'getDocumentState',
+            {state: STORY_MESSAGE_STATE_TYPE.UI_STATE},
+            true
+          )
+          .then((event) => resolve(event.value));
+      });
+    });
+  }
+
+  /**
+   * Shows or hides one panel UI on state update.
+   * @param {number} uiTypeNumber
+   * @private
+   */
+  onUiStateUpdate_(uiTypeNumber) {
+    const isFullbleed =
+      uiTypeNumber === 2 /** DESKTOP_FULLBLEED */ ||
+      uiTypeNumber === 0; /** MOBILE */
+    this.rootEl_.classList.toggle(
+      'i-amphtml-story-player-full-bleed-story',
+      isFullbleed
+    );
   }
 
   /**
@@ -1410,6 +1563,12 @@ export class AmpStoryPlayer {
       case STORY_MESSAGE_STATE_TYPE.MUTED_STATE:
         this.onMutedStateUpdate_(/** @type {string} */ (data.value));
         break;
+      case STORY_MESSAGE_STATE_TYPE.UI_STATE:
+        if (this.isDesktopPanelExperimentOn_) {
+          // Handles UI state updates on window resize.
+          this.onUiStateUpdate_(/** @type {number} */ (data.value));
+        }
+        break;
       case AMP_STORY_PLAYER_EVENT:
         this.onPlayerEvent_(/** @type {string} */ (data.value));
         break;
@@ -1865,7 +2024,7 @@ export class AmpStoryPlayer {
       return null;
     }
 
-    const {screenX, screenY, clientX, clientY} = touches[0];
+    const {clientX, clientY, screenX, screenY} = touches[0];
     return {screenX, screenY, clientX, clientY};
   }
 }

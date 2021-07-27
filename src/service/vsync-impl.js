@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../core/data-structures/promise';
-import {Pass} from '../pass';
-import {Services} from '../services';
+import {Deferred} from '#core/data-structures/promise';
 import {
   addDocumentVisibilityChangeListener,
   isDocumentHidden,
   removeDocumentVisibilityChangeListener,
-} from '../utils/document-visibility';
+} from '#core/document-visibility';
+import {rethrowAsync} from '#core/error';
+
+import {Services} from '#service';
+
+import {installTimerService} from './timer-impl';
+
 import {cancellation} from '../error-reporting';
 import {dev, devAssert} from '../log';
-import {getService, registerServiceBuilder} from '../service';
-import {installTimerService} from './timer-impl';
-import {rethrowAsync} from '../core/error';
+import {Pass} from '../pass';
+import {getService, registerServiceBuilder} from '../service-helpers';
 
 /** @const {time} */
 const FRAME_TIME = 16;
@@ -406,7 +409,7 @@ export class Vsync {
     this.backupPass_.cancel();
     this.scheduled_ = false;
 
-    const {tasks_: tasks, states_: states, nextFrameResolver_: resolver} = this;
+    const {nextFrameResolver_: resolver, states_: states, tasks_: tasks} = this;
     this.nextFrameResolver_ = null;
     this.nextFramePromise_ = null;
     // Double buffering

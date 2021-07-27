@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {PauseHelper} from '../../../src/utils/pause-helper';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
 import {
   createFrameFor,
@@ -25,19 +25,22 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
+import {dispatchCustomEvent, getDataParamsFromAttributes} from '#core/dom';
 import {
-  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
-  getDataParamsFromAttributes,
   isFullscreenElement,
+<<<<<<< HEAD
 } from '../../../src/dom';
 import {getDailymotionIframeSrc} from '../dailymotion-api';
+=======
+} from '#core/dom/fullscreen';
+>>>>>>> 9d197f79ddf5b17c7c716c4584adaaea22ed9ba6
 import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {parseQueryString} from '../../../src/core/types/string/url';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {parseQueryString} from '#core/types/string/url';
 
 const TAG = 'amp-dailymotion';
 

@@ -33,7 +33,7 @@ const HOST = 'http://localhost:8000';
 
 const EnvironmentBehaviorMap = {
   [AmpdocEnvironment.SINGLE]: {
-    ready(unusedController) {
+    ready() {
       return Promise.resolve();
     },
 
@@ -192,6 +192,7 @@ class AmpDriver {
    * given environment.
    * @param {!AmpdocEnvironment} environment
    * @param {string} url
+   * @return {Promise<void>}
    */
   async navigateToEnvironment(environment, url) {
     const ampEnv = EnvironmentBehaviorMap[environment];

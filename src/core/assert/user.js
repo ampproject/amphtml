@@ -29,8 +29,9 @@
  * limitations under the License.
  */
 
+import {USER_ERROR_SENTINEL} from '#core/error/message-helpers';
+
 import * as assertions from './base';
-import {USER_ERROR_SENTINEL} from '../error-message-helpers';
 
 /**
  * @fileoverview This file provides the entrypoint for user assertions. It's
@@ -181,25 +182,5 @@ export function userAssertBoolean(shouldBeBoolean, opt_message) {
     /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
     shouldBeBoolean,
     opt_message
-  );
-}
-
-/**
- * Asserts and returns the enum value. If the enum doesn't contain such a
- * value, the error is thrown.
- *
- * @param {!Object<T>} enumObj
- * @param {*} shouldBeEnum
- * @param {string=} opt_enumName
- * @return {T}
- * @template T
- * @closurePrimitive {asserts.matchesReturn}
- */
-export function userAssertEnumValue(enumObj, shouldBeEnum, opt_enumName) {
-  return assertions.assertEnumValue(
-    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
-    enumObj,
-    shouldBeEnum,
-    opt_enumName
   );
 }

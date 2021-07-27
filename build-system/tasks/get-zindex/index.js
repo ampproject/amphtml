@@ -22,12 +22,12 @@ const Postcss = require('postcss');
 const prettier = require('prettier');
 const textTable = require('text-table');
 const {
-  jscodeshiftAsync,
   getJscodeshiftReport,
+  jscodeshiftAsync,
 } = require('../../test-configs/jscodeshift');
 const {getStdout} = require('../../common/process');
 const {gray, magenta} = require('../../common/colors');
-const {logOnSameLineLocalDev, logLocalDev} = require('../../common/logging');
+const {logLocalDev, logOnSameLineLocalDev} = require('../../common/logging');
 const {writeDiffOrFail} = require('../../common/diff');
 
 /** @type {Postcss.default} */
@@ -69,7 +69,7 @@ function zIndexCollector(acc, css) {
           .forEach((selector) => {
             // If multiple redeclaration of a selector and z index
             // are done in a single file, this will get overridden.
-            acc[selector] = decl.value;
+            acc[selector.trim()] = decl.value;
           });
       }
     });
@@ -91,6 +91,7 @@ function createTable(filesData) {
     const entry = Array.isArray(filesData[filename])
       ? filesData[filename]
       : Object.entries(filesData[filename]).sort(sortedByEntryKey);
+    // @ts-ignore
     for (const [context, zIndex] of entry) {
       rows.push([`\`${context}\``, zIndex, `[${filename}](/${filename})`]);
     }
@@ -155,12 +156,23 @@ function getZindexChainsInJs(glob, cwd = '.') {
 
     const result = {};
 
-    const {stdout, stderr} = jscodeshiftAsync([
+    let resultCountInverse = filesIncludingString.length;
+
+    if (resultCountInverse === 0) {
+      // We don't expect this fileset to be empty since it's unlikely that we
+      // never change the z-index from JS, but we add this just in case to
+      // prevent hanging infinitely.
+      resolve(result);
+      return;
+    }
+
+    const process = jscodeshiftAsync([
       '--dry',
       '--no-babel',
       `--transform=${__dirname}/jscodeshift/collect-zindex.js`,
       ...filesIncludingString,
     ]);
+    const {stderr, stdout} = process;
 
     stderr.on('data', (data) => {
       throw new Error(data.toString());
@@ -180,21 +192,20 @@ function getZindexChainsInJs(glob, cwd = '.') {
 
       try {
         const reportParsed = JSON.parse(report);
-
         if (reportParsed.length) {
           result[relative] = reportParsed.sort(sortedByEntryKey);
         }
+        if (--resultCountInverse === 0) {
+          resolve(result);
+        }
       } catch (_) {}
-    });
-
-    stdout.on('close', () => {
-      resolve(result);
     });
   });
 }
 
 /**
  * Entry point for amp get-zindex
+ * @return {Promise<void>}
  */
 async function getZindex() {
   logLocalDev('...');
@@ -205,6 +216,7 @@ async function getZindex() {
       getZindexSelectors('{css,src,extensions}/**/*.css'),
       getZindexChainsInJs([
         '{3p,src,extensions}/**/*.js',
+        '!**/dist/**/*.js',
         '!extensions/**/test/**/*.js',
         '!extensions/**/storybook/**/*.js',
       ]),
@@ -254,8 +266,8 @@ module.exports = {
 };
 
 getZindex.description =
-  'Runs through all css files of project to gather z-index values';
+  'Run through all css files in the repo to gather z-index values';
 
 getZindex.flags = {
-  'fix': 'Write to file',
+  'fix': 'Write the results to file',
 };

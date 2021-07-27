@@ -19,12 +19,12 @@ import * as fakeTimers from '@sinonjs/fake-timers';
 import {
   Performance,
   installPerformanceService,
-} from '../../src/service/performance-impl';
-import {Services} from '../../src/services';
-import {VisibilityState} from '../../src/core/constants/visibility-state';
+} from '#service/performance-impl';
+import {Services} from '#service';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {getMode} from '../../src/mode';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installRuntimeServices} from '../../src/service/core-services';
+import {installPlatformService} from '#service/platform-impl';
+import {installRuntimeServices} from '#service/core-services';
 
 describes.realWin('performance', {amp: false}, (env) => {
   it('should be resilient to unsupported PerformanceObserver entry types', () => {
@@ -1025,29 +1025,31 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       perf.coreServicesAvailable();
       expect(perf.events_.length).to.equal(0);
 
-      // Fake a largest-contentful-paint entry specifying a loadTime,
-      // simulating an image on a different origin without a proper
-      // Timing-Allow-Origin header.
+      // Fake a largest-contentful-paint entry specifying a renderTime/startTime,
+      // simulating an image on the same origin or with a Timing-Allow-Origin header.
       performanceObserver.triggerCallback({
         getEntries() {
           return [
             {
               entryType: 'largest-contentful-paint',
               loadTime: 10,
+              renderTime: 12,
+              startTime: 12,
             },
           ];
         },
       });
 
-      // Fake a largest-contentful-paint entry specifying a renderTime,
-      // simulating an image on the same origin or with a proper
-      // Timing-Allow-Origin header.
+      // Fake a largest-contentful-paint entry with a loadTime/startTime
+      // simulating an image on a different origin without a Timing-Allow-Origin header.
       performanceObserver.triggerCallback({
         getEntries() {
           return [
             {
               entryType: 'largest-contentful-paint',
-              renderTime: 23,
+              loadTime: 23,
+              renderTime: undefined,
+              startTime: 23,
             },
           ];
         },
@@ -1056,16 +1058,12 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       // The document has become hidden, e.g. via the user switching tabs.
       toggleVisibility(perf, false);
 
-      const lcpEvents = perf.events_.filter((evt) =>
-        evt.label.startsWith('lcp')
+      const lcpEvents = perf.events_.filter(({label}) =>
+        label.startsWith('lcp')
       );
-      expect(lcpEvents.length).to.equal(3);
-      expect(perf.events_).deep.include({
-        label: 'lcpl',
-        delta: 10,
-      });
-      expect(perf.events_).deep.include({
-        label: 'lcpr',
+      expect(lcpEvents.length).to.equal(2);
+      expect(lcpEvents).deep.include({
+        label: 'lcp',
         delta: 23,
       });
     });

@@ -141,18 +141,16 @@ describes.realWin(
 
     it('renders image placeholder', () => {
       return renderIframely(paramsID).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.not.be.null;
-        expect(image.tagName).to.equal('AMP-IMG');
-        expect(image.className).to.match(
-          /i-amphtml-element i-amphtml-notbuilt amp-notbuilt i-amphtml-layout-fill i-amphtml-layout-size-defined/
-        );
+        expect(image).to.have.class('i-amphtml-fill-content');
+        expect(image.getAttribute('loading')).to.equal('lazy');
       });
     });
 
     it('renders image placeholder with proper URL for ID version', () => {
       return renderIframely(paramsID).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.not.be.null;
         expect(image.getAttribute('src')).to.equal(
           `https://cdn.iframe.ly/${TestID}/thumbnail?amp=1`
@@ -162,7 +160,7 @@ describes.realWin(
 
     it('renders image placeholder with proper URL for Key-URL version', () => {
       return renderIframely(paramsKU).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.not.be.null;
         expect(image.getAttribute('src')).to.equal(
           `https://cdn.iframe.ly/api/thumbnail?url=${encodeURIComponent(
@@ -183,7 +181,7 @@ describes.realWin(
         'layout': 'responsive',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.not.be.null;
         expect(image.getAttribute('src')).to.equal(
           `https://${properDomain}/${TestID}/thumbnail?amp=1`
@@ -203,7 +201,7 @@ describes.realWin(
         'layout': 'responsive',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.not.be.null;
         expect(image.getAttribute('src')).to.equal(
           `https://${domain}/${TestID}/thumbnail?amp=1`
@@ -220,7 +218,7 @@ describes.realWin(
         'layout': 'fill',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.not.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
       });
@@ -235,7 +233,7 @@ describes.realWin(
         'layout': 'responsive',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
       });
@@ -251,7 +249,7 @@ describes.realWin(
         'layout': 'responsive',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.not.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
       });
@@ -265,7 +263,7 @@ describes.realWin(
         'layout': 'fixed',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
       });
@@ -280,7 +278,7 @@ describes.realWin(
         'layout': 'fixed',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
       });
@@ -296,7 +294,7 @@ describes.realWin(
         'layout': 'responsive',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.not.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
       });
@@ -311,7 +309,7 @@ describes.realWin(
         'layout': 'fixed',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.not.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
       });
@@ -325,7 +323,7 @@ describes.realWin(
         'resizable': '',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
       });
@@ -340,7 +338,7 @@ describes.realWin(
         'layout': 'responsive',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
       });
@@ -372,7 +370,7 @@ describes.realWin(
         'layout': 'responsive',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         const iframe = iframely.querySelector('iframe');
         expect(image).to.not.be.null;
         expect(iframe).to.not.be.null;

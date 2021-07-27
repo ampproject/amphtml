@@ -532,7 +532,7 @@ Defines a `credentials` option as specified by the [Fetch API](https://fetch.spe
 -   Supported values: `omit`, `include`
 -   Default: `omit`
 
-To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
+To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests/#cors-security-in-amp).
 
 Here's an example that specifies including credentials to display personalized content in a list:
 

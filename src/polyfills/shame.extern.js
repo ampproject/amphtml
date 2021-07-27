@@ -33,27 +33,7 @@
 /** @type {function(!Window)} */
 let install$$module$src$polyfills$fetch;
 
-// These definitions live in non-core files but are consumed by
-// get-bounding-client-rect. They should be removed as dom.js and layout-rect.js
-// are moved to core.
-/**
- * The structure that combines position and size for an element. The exact
- * interpretation of position and size depends on the use case. Replicated from
- * layout-rect.js
- *
- * @typedef {{
- *   top: number,
- *   bottom: number,
- *   left: number,
- *   right: number,
- *   width: number,
- *   height: number,
- *   x: number,
- *   y: number
- * }}
- */
-let LayoutRectDef$$module$src$layout_rect;
-/** @type {function(number, number, number, number):LayoutRectDef$$module$src$layout_rect} */
-let layoutRectLtwh$$module$src$layout_rect;
+// This definition lives in non-core files but is consumed by
+// get-bounding-client-rect. Is should be removed once dom.js is moved to core.
 /** @type {function(!Element):boolean} */
 let isConnectedNode$$module$src$dom;

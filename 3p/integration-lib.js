@@ -15,8 +15,8 @@
  */
 
 import {IntegrationAmpContext} from './ampcontext-integration';
-import {dict} from '../src/core/types/object';
-import {endsWith} from '../src/core/types/string';
+import {dict} from '#core/types/object';
+import {endsWith} from '#core/types/string';
 import {getAmpConfig, getEmbedType, getLocation} from './frame-metadata';
 import {getSourceUrl, isProxyOrigin, parseUrlDeprecated} from '../src/url';
 import {
@@ -27,7 +27,7 @@ import {
 } from '../src/log';
 import {installEmbedStateListener, manageWin} from './environment';
 import {internalRuntimeVersion} from '../src/internal-version';
-import {parseJson} from '../src/core/types/object/json';
+import {parseJson} from '#core/types/object/json';
 import {run, setExperimentToggles} from './3p';
 import {urls} from '../src/config';
 
@@ -47,6 +47,7 @@ const AMP_EMBED_ALLOWED = {
   epeex: true,
   firstimpression: true,
   forkmedia: true,
+  gecko: true,
   glomex: true,
   idealmedia: true,
   insticator: true,

@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-import * as dom from './dom';
+import {
+  UPGRADE_TO_CUSTOMELEMENT_PROMISE,
+  UPGRADE_TO_CUSTOMELEMENT_RESOLVER,
+} from './amp-element-helpers';
+import {startupChunk} from './chunk';
+import {shouldBlockOnConsentByMeta} from './consent';
 import {AmpEvents} from './core/constants/amp-events';
 import {CommonSignals} from './core/constants/common-signals';
-import {ElementStub} from './element-stub';
-import {
-  Layout,
-  LayoutPriority,
-  applyStaticLayout,
-  isInternalElement,
-  isLoadingAllowed,
-} from './layout';
-import {MediaQueryProps} from './utils/media-query-props';
 import {ReadyState} from './core/constants/ready-state';
-import {ResourceState} from './service/resource';
-import {Services} from './services';
+import {tryResolve} from './core/data-structures/promise';
 import {Signals} from './core/data-structures/signals';
+import * as dom from './core/dom';
+import {Layout, LayoutPriority, isLoadingAllowed} from './core/dom/layout';
+import {MediaQueryProps} from './core/dom/media-query-props';
+import * as query from './core/dom/query';
+import {setStyle} from './core/dom/style';
+import {rethrowAsync} from './core/error';
+import {toWin} from './core/window';
+import {ElementStub} from './element-stub';
 import {
   blockedByConsentError,
   cancellation,
@@ -37,17 +40,14 @@ import {
   isCancellation,
   reportError,
 } from './error-reporting';
-import {dev, devAssert, user, userAssert} from './log';
-import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
-import {getMode} from './mode';
-import {getSchedulerForDoc} from './service/scheduler';
 import {isExperimentOn} from './experiments';
-import {rethrowAsync} from './core/error';
-import {setStyle} from './style';
-import {shouldBlockOnConsentByMeta} from './consent';
-import {startupChunk} from './chunk';
-import {toWin} from './types';
-import {tryResolve} from './core/data-structures/promise';
+import {dev, devAssert, user, userAssert} from './log';
+import {getMode} from './mode';
+import {Services} from './service';
+import {ResourceState} from './service/resource';
+import {getSchedulerForDoc} from './service/scheduler';
+import {applyStaticLayout} from './static-layout';
+import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
 
 const TAG = 'CustomElement';
 
@@ -98,7 +98,20 @@ export function createCustomElementClass(win, elementConnectedCallback) {
   );
   // It's necessary to create a subclass, because the same "base" class cannot
   // be registered to multiple custom elements.
-  class CustomAmpElement extends BaseCustomElement {}
+  class CustomAmpElement extends BaseCustomElement {
+    /**
+     * adoptedCallback is only called when using a Native implementation of Custom Elements V1.
+     * Our polyfill does not call this method.
+     */
+    adoptedCallback() {
+      // Work around an issue with Firefox changing the prototype of our
+      // already constructed element to the new document's HTMLElement.
+      if (Object.getPrototypeOf(this) !== customAmpElementProto) {
+        Object.setPrototypeOf(this, customAmpElementProto);
+      }
+    }
+  }
+  const customAmpElementProto = CustomAmpElement.prototype;
   return /** @type {typeof AmpElement} */ (CustomAmpElement);
 }
 
@@ -279,10 +292,10 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       /** @private {?MediaQueryProps} */
       this.mediaQueryProps_ = null;
 
-      if (nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
-        nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER](nonStructThis);
-        delete nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER];
-        delete nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_PROMISE];
+      if (nonStructThis[UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
+        nonStructThis[UPGRADE_TO_CUSTOMELEMENT_RESOLVER](nonStructThis);
+        delete nonStructThis[UPGRADE_TO_CUSTOMELEMENT_RESOLVER];
+        delete nonStructThis[UPGRADE_TO_CUSTOMELEMENT_PROMISE];
       }
     }
 
@@ -1132,7 +1145,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      */
     connectedCallback() {
       if (!isTemplateTagSupported() && this.isInTemplate_ === undefined) {
-        this.isInTemplate_ = !!dom.closestAncestorElementBySelector(
+        this.isInTemplate_ = !!query.closestAncestorElementBySelector(
           this,
           'template'
         );
@@ -1879,36 +1892,12 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     }
 
     /**
-     * Returns the original nodes of the custom element without any service
-     * nodes that could have been added for markup. These nodes can include
-     * Text, Comment and other child nodes.
-     * @return {!Array<!Node>}
-     * @package @final
-     */
-    getRealChildNodes() {
-      return dom.childNodes(this, (node) => !isInternalOrServiceNode(node));
-    }
-
-    /**
-     * Returns the original children of the custom element without any service
-     * nodes that could have been added for markup.
-     * @return {!Array<!Element>}
-     * @package @final
-     */
-    getRealChildren() {
-      return dom.childElements(
-        this,
-        (element) => !isInternalOrServiceNode(element)
-      );
-    }
-
-    /**
      * Returns an optional placeholder element for this custom element.
      * @return {?Element}
      * @package @final
      */
     getPlaceholder() {
-      return dom.lastChildElement(this, (el) => {
+      return query.lastChildElement(this, (el) => {
         return (
           el.hasAttribute('placeholder') &&
           // Denylist elements that has a native placeholder property
@@ -1932,7 +1921,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           dev().assertElement(placeholder).classList.remove('amp-hidden');
         }
       } else {
-        const placeholders = dom.childElementsByAttr(this, 'placeholder');
+        const placeholders = query.childElementsByAttr(this, 'placeholder');
         for (let i = 0; i < placeholders.length; i++) {
           // Don't toggle elements with a native placeholder property
           // e.g. input, textarea
@@ -1950,7 +1939,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @package @final
      */
     getFallback() {
-      return dom.childElementByAttr(this, 'fallback');
+      return query.childElementByAttr(this, 'fallback');
     }
 
     /**
@@ -2024,7 +2013,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         this.hasAttribute('noloading') ||
         (laidOut && !force) ||
         !isLoadingAllowed(this) ||
-        isInternalOrServiceNode(this)
+        query.isInternalOrServiceNode(this)
       ) {
         return false;
       }
@@ -2065,7 +2054,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      */
     getOverflowElement() {
       if (this.overflowElement_ === undefined) {
-        this.overflowElement_ = dom.childElementByAttr(this, 'overflow');
+        this.overflowElement_ = query.childElementByAttr(this, 'overflow');
         if (this.overflowElement_) {
           if (!this.overflowElement_.hasAttribute('tabindex')) {
             this.overflowElement_.setAttribute('tabindex', '0');
@@ -2151,26 +2140,6 @@ function isInputPlaceholder(element) {
 /** @param {!Element} element */
 function assertNotTemplate(element) {
   devAssert(!element.isInTemplate_, 'Must never be called in template');
-}
-
-/**
- * Returns "true" for internal AMP nodes or for placeholder elements.
- * @param {!Node} node
- * @return {boolean}
- */
-function isInternalOrServiceNode(node) {
-  if (isInternalElement(node)) {
-    return true;
-  }
-  if (
-    node.tagName &&
-    (node.hasAttribute('placeholder') ||
-      node.hasAttribute('fallback') ||
-      node.hasAttribute('overflow'))
-  ) {
-    return true;
-  }
-  return false;
 }
 
 /**

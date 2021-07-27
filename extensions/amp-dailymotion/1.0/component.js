@@ -34,7 +34,7 @@ import { getDailymotionIframeSrc } from '../dailymotion-api';
 export function DailymotionWithRef({videoId, ...rest}, ref) {
   const src = useMemo(
     () =>
-      getDailymotionIframeSrc(videoId, mute, endscreenEnable, sharingEnable, start, uiHighlight, uiLog, info);
+      getDailymotionIframeSrc(videoId, mute, endscreenEnable, sharingEnable, start, uiHighlight, uiLog, info),
     [videoId]
   );
   const makeMethodMessage = useCallback(() => '{}', []);

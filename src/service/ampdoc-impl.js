@@ -14,26 +14,28 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../core/data-structures/promise';
-import {Observable} from '../core/data-structures/observable';
-import {Signals} from '../core/data-structures/signals';
-import {VisibilityState} from '../core/constants/visibility-state';
-import {WindowInterface} from '../window-interface';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {Observable} from '#core/data-structures/observable';
+import {Deferred} from '#core/data-structures/promise';
+import {Signals} from '#core/data-structures/signals';
+import {isDocumentReady, whenDocumentReady} from '#core/document-ready';
 import {
   addDocumentVisibilityChangeListener,
   getDocumentVisibilityState,
   removeDocumentVisibilityChangeListener,
-} from '../utils/document-visibility';
+} from '#core/document-visibility';
+import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '#core/dom';
+import {isEnumValue} from '#core/types';
+import {map} from '#core/types/object';
+import {parseQueryString} from '#core/types/string/url';
+import {WindowInterface} from '#core/window/interface';
+
 import {dev, devAssert} from '../log';
 import {
   disposeServicesForDoc,
   getParentWindowFrameElement,
   registerServiceBuilder,
-} from '../service';
-import {isDocumentReady, whenDocumentReady} from '../document-ready';
-import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../dom';
-import {map} from '../core/types/object';
-import {parseQueryString} from '../core/types/string/url';
+} from '../service-helpers';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
@@ -268,15 +270,16 @@ export class AmpDoc {
     /** @private @const {!Object<string, string>} */
     this.declaredExtensions_ = {};
 
+    const paramsVisibilityState = this.params_['visibilityState'];
+    devAssert(
+      !paramsVisibilityState ||
+        isEnumValue(VisibilityState, paramsVisibilityState)
+    );
+
     /** @private {?VisibilityState} */
     this.visibilityStateOverride_ =
       (opt_options && opt_options.visibilityState) ||
-      (this.params_['visibilityState'] &&
-        dev().assertEnumValue(
-          VisibilityState,
-          this.params_['visibilityState'],
-          'VisibilityState'
-        )) ||
+      paramsVisibilityState ||
       null;
 
     // Start with `null` to be updated by updateVisibilityState_ in the end

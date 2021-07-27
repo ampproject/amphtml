@@ -22,10 +22,10 @@ const {
 } = require('../tasks/3p-vendor-helpers');
 const {
   doBuildExtension,
-  maybeInitializeExtensions,
   getExtensionsToBuild,
+  maybeInitializeExtensions,
 } = require('../tasks/extension-helpers');
-const {doBuildJs, compileCoreRuntime} = require('../tasks/helpers');
+const {compileCoreRuntime, doBuildJs} = require('../tasks/helpers');
 const {jsBundles} = require('../compile/bundles.config');
 const {VERSION} = require('../compile/internal-version');
 
@@ -64,6 +64,7 @@ function maybeGetUnminifiedName(bundles, name) {
  * @param {!Object} bundles
  * @param {function(!Object, string, ?Object):Promise} buildFunc
  * @param {function(): void} next
+ * @return {Promise<void>}
  */
 async function lazyBuild(url, matcher, bundles, buildFunc, next) {
   const match = url.match(matcher);
@@ -114,6 +115,7 @@ async function build(bundles, name, buildFunc) {
  * @param {!Object} req
  * @param {!Object} _res
  * @param {function(): void} next
+ * @return {Promise<void>}
  */
 async function lazyBuildExtensions(req, _res, next) {
   const matcher = argv.compiled
@@ -128,6 +130,7 @@ async function lazyBuildExtensions(req, _res, next) {
  * @param {!Object} req
  * @param {!Object} _res
  * @param {function(): void} next
+ * @return {Promise<void>}
  */
 async function lazyBuildJs(req, _res, next) {
   const matcher = /\/.*\/([^\/]*\.js)/;
@@ -140,6 +143,7 @@ async function lazyBuildJs(req, _res, next) {
  * @param {!Object} req
  * @param {!Object} _res
  * @param {function(): void} next
+ * @return {Promise<void>}
  */
 async function lazyBuild3pVendor(req, _res, next) {
   const matcher = argv.compiled
@@ -150,6 +154,7 @@ async function lazyBuild3pVendor(req, _res, next) {
 
 /**
  * Pre-builds the core runtime and the JS files that it loads.
+ * @return {Promise<void>}
  */
 async function preBuildRuntimeFiles() {
   await build(jsBundles, 'amp.js', (_bundles, _name, options) =>
@@ -159,6 +164,7 @@ async function preBuildRuntimeFiles() {
 
 /**
  * Pre-builds default extensions and ones requested via command line flags.
+ * @return {Promise<void>}
  */
 async function preBuildExtensions() {
   const extensions = getExtensionsToBuild(/* preBuild */ true);

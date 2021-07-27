@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../core/data-structures/promise';
-import {Layout} from '../layout';
-import {Services} from '../services';
-import {
-  cancellation,
-  isBlockedByConsent,
-  reportError,
-} from '../error-reporting';
-import {computedStyle, toggle} from '../style';
-import {dev, devAssert} from '../log';
+import {Deferred} from '#core/data-structures/promise';
+import {Layout} from '#core/dom/layout';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
   layoutSizeFromRect,
   moveLayoutRect,
   rectsOverlap,
-} from '../layout-rect';
-import {toWin} from '../types';
+} from '#core/dom/layout/rect';
+import {computedStyle, toggle} from '#core/dom/style';
+import {toWin} from '#core/window';
+
+import {Services} from '#service';
+
+import {
+  cancellation,
+  isBlockedByConsent,
+  reportError,
+} from '../error-reporting';
+import {dev, devAssert} from '../log';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';

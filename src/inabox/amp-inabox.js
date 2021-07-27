@@ -18,35 +18,38 @@
  * The entry point for AMP inabox runtime (inabox-v0.js).
  */
 
-import '../polyfills';
-import {Navigation} from '../service/navigation';
-import {Services} from '../services';
-import {TickLabel} from '../core/constants/enums';
-import {adopt} from '../runtime';
-import {allowLongTasksInChunking, startupChunk} from '../chunk';
-import {cssText as ampSharedCss} from '../../build/ampshared.css';
-import {doNotTrackImpression} from '../impression';
-import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
-import {getA4AId, registerIniLoadListener} from './utils';
-import {getMode} from '../mode';
-import {installAmpdocServicesForInabox} from './inabox-services';
+import '#polyfills';
+import {TickLabel} from '#core/constants/enums';
+
+import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
 import {
   installBuiltinElements,
   installRuntimeServices,
-} from '../service/core-services';
-import {installDocService} from '../service/ampdoc-impl';
+} from '#service/core-services';
+import {stubElementsForDoc} from '#service/custom-element-registry';
+import {Navigation} from '#service/navigation';
+import {installPerformanceService} from '#service/performance-impl';
+import {installPlatformService} from '#service/platform-impl';
+
+import {installAmpdocServicesForInabox} from './inabox-services';
+import {maybeRenderInaboxAsStoryAd} from './inabox-story-ad';
+import {getA4AId, registerIniLoadListener} from './utils';
+
+import {cssText as ampSharedCss} from '../../build/ampshared.css';
+import {allowLongTasksInChunking, startupChunk} from '../chunk';
 import {installErrorReporting} from '../error-reporting';
-import {installPerformanceService} from '../service/performance-impl';
-import {installPlatformService} from '../service/platform-impl';
+import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
+import {doNotTrackImpression} from '../impression';
+import {internalRuntimeVersion} from '../internal-version';
+import {getMode} from '../mode';
+import {adopt} from '../runtime';
 import {
   installStylesForDoc,
   makeBodyVisible,
   makeBodyVisibleRecovery,
 } from '../style-installer';
-import {internalRuntimeVersion} from '../internal-version';
-import {maybeRenderInaboxAsStoryAd} from './inabox-story-ad';
 import {maybeValidate} from '../validator-integration';
-import {stubElementsForDoc} from '../service/custom-element-registry';
 
 getMode(self).runtime = 'inabox';
 getMode(self).a4aId = getA4AId(self);

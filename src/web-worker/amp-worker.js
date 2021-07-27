@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import {ModeDef, getMode} from '../mode';
-import {Services} from '../services';
-import {calculateEntryPointScriptUrl} from '../service/extension-script';
+import {devAssert} from '#core/assert';
+
+import {Services} from '#service';
+import {calculateEntryPointScriptUrl} from '#service/extension-script';
+
 import {dev} from '../log';
-import {devAssert} from '../core/assert';
-import {getService, registerServiceBuilder} from '../service';
+import {ModeDef, getMode} from '../mode';
+import {getService, registerServiceBuilder} from '../service-helpers';
 
 const TAG = 'web-worker';
 
@@ -176,7 +178,7 @@ class AmpWorker {
    * @private
    */
   receiveMessage_(event) {
-    const {method, returnValue, id} = /** @type {FromWorkerMessageDef} */ (
+    const {id, method, returnValue} = /** @type {FromWorkerMessageDef} */ (
       event.data
     );
 

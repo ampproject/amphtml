@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../../src/core/constants/common-signals';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {Observable} from '../../../src/core/data-structures/observable';
+import {CommonSignals} from '#core/constants/common-signals';
+import {Deferred} from '#core/data-structures/promise';
+import {Observable} from '#core/data-structures/observable';
 import {
   PlayingStates,
   VideoAnalyticsEvents,
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
-import {deepMerge, dict, hasOwn} from '../../../src/core/types/object';
+import {deepMerge, dict, hasOwn} from '#core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
-import {getDataParamsFromAttributes, isAmpElement} from '../../../src/dom';
-import {isArray, isEnumValue} from '../../../src/core/types';
-
-import {isFiniteNumber} from '../../../src/types';
+import {getDataParamsFromAttributes} from '#core/dom';
+import {isAmpElement} from '../../../src/amp-element-helpers';
+import {isArray, isEnumValue, isFiniteNumber} from '#core/types';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -153,6 +152,18 @@ function isAmpStoryTriggerType(triggerType) {
 }
 
 /**
+ * Assert that the selectors are all unique
+ * @param {!Array<string>|string} selectors
+ */
+function assertUniqueSelectors(selectors) {
+  userAssert(
+    !isArray(selectors) || new Set(selectors).size === selectors.length,
+    'Cannot have duplicate selectors in selectors list: %s',
+    selectors
+  );
+}
+
+/**
  * @param {string} triggerType
  * @return {boolean}
  */
@@ -214,7 +225,8 @@ export function getTrackerTypesForParentType(parentType) {
 function mergeDataVars(target, eventVars) {
   const vars = getDataParamsFromAttributes(
     target,
-    /* computeParamNameFunc */ undefined,
+    /* computeParamNameFunc */
+    undefined,
     VARIABLE_DATA_ATTRIBUTE_KEY
   );
   // Merge eventVars into vars, depth=0 because
@@ -468,7 +480,6 @@ export class AmpStoryEventTracker extends CustomEventTracker {
    * @param {!AnalyticsEvent} event
    * @param {!Element} rootTarget
    * @param {!JsonObject} config
-
    * @param {function(!AnalyticsEvent)} listener
    */
   fireListener_(event, rootTarget, config, listener) {
@@ -648,7 +659,7 @@ export class ScrollEventTracker extends EventTracker {
   scrollHandler_(boundsH, boundsV, useInitialPageSize, listener, e) {
     // Calculates percentage scrolled by adding screen height/width to
     // top/left and dividing by the total scroll height/width.
-    const {scrollWidth, scrollHeight} = useInitialPageSize ? e.initialSize : e;
+    const {scrollHeight, scrollWidth} = useInitialPageSize ? e.initialSize : e;
 
     this.triggerScrollEvents_(
       boundsV,
@@ -1280,19 +1291,25 @@ export class VideoEventTracker extends EventTracker {
   /** @override */
   add(context, eventType, config, listener) {
     const videoSpec = config['videoSpec'] || {};
-    const selector = config['selector'] || videoSpec['selector'];
+    const selector = userAssert(
+      config['selector'] || videoSpec['selector'],
+      'Missing required selector on video trigger'
+    );
+
+    userAssert(selector.length, 'Missing required selector on video trigger');
+    assertUniqueSelectors(selector);
     const selectionMethod = config['selectionMethod'] || null;
-    const targetReady = this.root.getElement(
+    const targetPromises = this.root.getElements(
       context,
       selector,
-      selectionMethod
+      selectionMethod,
+      false
     );
 
     const endSessionWhenInvisible = videoSpec['end-session-when-invisible'];
     const excludeAutoplay = videoSpec['exclude-autoplay'];
     const interval = videoSpec['interval'];
     const percentages = videoSpec['percentages'];
-
     const on = config['on'];
 
     const percentageInterval = 5;
@@ -1385,12 +1402,17 @@ export class VideoEventTracker extends EventTracker {
         event.target,
         'No target specified by video session event.'
       );
-      targetReady.then((target) => {
-        if (!target.contains(el)) {
-          return;
-        }
-        const normalizedDetails = removeInternalVars(details);
-        listener(new AnalyticsEvent(target, normalizedType, normalizedDetails));
+
+      targetPromises.then((targets) => {
+        targets.forEach((target) => {
+          if (!target.contains(el)) {
+            return;
+          }
+          const normalizedDetails = removeInternalVars(details);
+          listener(
+            new AnalyticsEvent(target, normalizedType, normalizedDetails)
+          );
+        });
       });
     });
   }
@@ -1512,7 +1534,7 @@ export class VisibilityTracker extends EventTracker {
     // Array selectors do not suppor the special cases: ':host' & ':root'
     const selectionMethod =
       config['selectionMethod'] || visibilitySpec['selectionMethod'];
-    this.assertUniqueSelectors_(selector);
+    assertUniqueSelectors(selector);
     const unlistenPromise = this.root
       .getElements(context.parentElement || context, selector, selectionMethod)
       .then((elements) => {
@@ -1538,24 +1560,6 @@ export class VisibilityTracker extends EventTracker {
         }
       });
     };
-  }
-
-  /**
-   * Assert that the selectors are all unique
-   * @param {!Array<string>|string} selectors
-   */
-  assertUniqueSelectors_(selectors) {
-    if (isArray(selectors)) {
-      const map = {};
-      for (let i = 0; i < selectors.length; i++) {
-        userAssert(
-          !map[selectors[i]],
-          'Cannot have duplicate selectors in selectors list: %s',
-          selectors
-        );
-        map[selectors[i]] = selectors[i];
-      }
-    }
   }
 
   /**

@@ -49,7 +49,7 @@
 
 'use strict';
 
-const {cyan, red, green} = require('../common/colors');
+const {cyan, green, red} = require('../common/colors');
 const {getOutput} = require('../common/process');
 const {log} = require('../common/logging');
 
@@ -58,6 +58,7 @@ const {log} = require('../common/logging');
  * `renovate` package.
  * The cumulative result is returned to the `amp` process via process.exitCode
  * so that all OWNERS files can be checked / fixed.
+ * @return {Promise<void>}
  */
 async function checkRenovateConfig() {
   const {status, stdout} = getOutput(
@@ -101,4 +102,4 @@ module.exports = {
 };
 
 checkRenovateConfig.description =
-  'Checks the Renovate config file for correctness';
+  'Check the Renovate config file for correctness';

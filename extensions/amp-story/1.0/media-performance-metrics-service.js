@@ -18,13 +18,12 @@ import {
   MEDIA_LOAD_FAILURE_SRC_PROPERTY,
   listen,
 } from '../../../src/event-helper';
-import {Services} from '../../../src/services';
-import {TickLabel} from '../../../src/core/constants/enums';
+import {Services} from '#service';
+import {TickLabel} from '#core/constants/enums';
 import {dev} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
-import {lastChildElement, matches} from '../../../src/dom';
-import {registerServiceBuilder} from '../../../src/service';
-import {urls} from '../../../src/config';
+import {lastChildElement, matches} from '#core/dom/query';
+import {registerServiceBuilder} from '../../../src/service-helpers';
+import {toArray} from '#core/types/array';
 
 /**
  * Media status.
@@ -130,9 +129,6 @@ export class MediaPerformanceMetricsService {
 
     /** @private @const {!../../../src/service/performance-impl.Performance} */
     this.performanceService_ = Services.performanceFor(win);
-
-    /** @private @const {!../../../src/service/url-impl.Url} */
-    this.urlService_ = Services.urlForDoc(win.document.body);
   }
 
   /**
@@ -211,21 +207,9 @@ export class MediaPerformanceMetricsService {
   sendMetrics_(mediaEntry) {
     const {media, metrics} = mediaEntry;
 
-    let videoCacheState;
-    if (this.urlService_.isProxyOrigin(media.currentSrc)) {
-      videoCacheState = CacheState.CACHE;
-    } else {
-      // Media is served from origin. Checks if there was a cached source.
-      const {hostname} = this.urlService_.parse(urls.cdn);
-      videoCacheState = media.querySelector(
-        `[src*="${escapeCssSelectorIdent(hostname)}"]`
-      )
-        ? CacheState.ORIGIN_CACHE_MISS
-        : CacheState.ORIGIN;
-    }
     this.performanceService_.tickDelta(
       TickLabel.VIDEO_CACHE_STATE,
-      videoCacheState
+      this.getVideoCacheState_(media)
     );
     this.performanceService_.tickDelta(
       TickLabel.VIDEO_ON_FIRST_PAGE,
@@ -405,7 +389,7 @@ export class MediaPerformanceMetricsService {
    */
   onPlaying_(event) {
     const mediaEntry = this.mediaMap_.get(event.target);
-    const {timeStamps, metrics} = mediaEntry;
+    const {metrics, timeStamps} = mediaEntry;
 
     if (!metrics.jointLatency) {
       metrics.jointLatency = Date.now() - timeStamps.start;
@@ -433,5 +417,32 @@ export class MediaPerformanceMetricsService {
 
     timeStamps.waiting = Date.now();
     mediaEntry.status = Status.WAITING;
+  }
+
+  /**
+   * @param {!HTMLMediaElement} media
+   * @return {!CacheState}
+   * @private
+   */
+  getVideoCacheState_(media) {
+    let hasCachedSource = false;
+    // All video caching mechanisms rely on HTMLSourceElements and never a src
+    // on the HTMLMediaElement as it does not allow for fallback sources.
+    const sources = toArray(media.querySelectorAll('source'));
+    for (const source of sources) {
+      const isCachedSource = source.hasAttribute(
+        'i-amphtml-video-cached-source'
+      );
+      // Playing source is cached.
+      if (isCachedSource && media.currentSrc === source.src) {
+        return CacheState.CACHE;
+      }
+      // Non playing source but is cached. Used to differentiate a cache miss
+      // (e.g. cache returned a 40x) vs no cached source at all.
+      if (isCachedSource) {
+        hasCachedSource = true;
+      }
+    }
+    return hasCachedSource ? CacheState.ORIGIN_CACHE_MISS : CacheState.ORIGIN;
   }
 }

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
-import {assertHttpsUrl} from './url';
 import {getValueForExpr} from './core/types/object';
 import {user} from './log';
+import {Services} from './service';
+import {assertHttpsUrl} from './url';
 
 /**
  * Detail of each `options` property:

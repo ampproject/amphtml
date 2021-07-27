@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import {VisibilityState} from '../core/constants/visibility-state';
-import {containsNotSelf} from '../dom';
-import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
-import {pushIfNotExist, removeItem} from '../core/types/array';
-import {rethrowAsync} from '../core/error';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {containsNotSelf} from '#core/dom';
+import {rethrowAsync} from '#core/error';
+import {pushIfNotExist, removeItem} from '#core/types/array';
+
+import {
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+} from '../service-helpers';
 
 const SERVICE_ID = 'DisplayObserver';
 
@@ -366,7 +370,7 @@ export class DisplayObserver {
   observed_(entries, io) {
     const seen = new Set();
     for (let i = entries.length - 1; i >= 0; i--) {
-      const {target, isIntersecting} = entries[i];
+      const {isIntersecting, target} = entries[i];
       if (seen.has(target)) {
         continue;
       }

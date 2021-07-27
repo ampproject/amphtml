@@ -16,7 +16,7 @@
 'use strict';
 
 const fs = require('fs').promises;
-const {cyan, red, green} = require('../common/colors');
+const {cyan, green, red} = require('../common/colors');
 const {log} = require('../common/logging');
 
 const DEV_ASSERT_SENTINEL = '__devAssert_sentinel__';
@@ -27,8 +27,9 @@ const MINIFIED_JS = './dist/v0.js';
 /**
  * Checks that a provided sentinel is/is not contained in a file.
  * @param {string} filePath JS binary to check
- * @param {Map<string, boolean>} sentinels map from sentinels to whether or not
+ * @param {Record<string, boolean>} sentinels map from sentinels to whether or not
  *                               they should be present
+ * @return {Promise<void>}
  * @throws if a sentinel isn't/is present when it should/shouldn't be
  */
 async function checkSentinels(filePath, sentinels) {
@@ -67,6 +68,7 @@ async function checkSentinels(filePath, sentinels) {
  * - In unminified code, it should remain present but never execute.
  * - Even when devAssert is DCE'd, pureAssert still includes the base assertion
  *   logic, so the 'Assertion failed' string will be present.
+ * @return {Promise<void>}
  */
 async function checkAsserts() {
   await checkSentinels(UNMINIFIED_JS, {
@@ -84,4 +86,4 @@ module.exports = {
 };
 
 checkAsserts.description =
-  "Checks amp.js and v0.js to validate that assertions are DCE'd correctly";
+  "Check amp.js and v0.js to validate that assertions are DCE'd correctly";

@@ -307,6 +307,9 @@ class Strings {
   // Returns 0, if the character at current position is not a whitespace.
   static int IsUtf8WhiteSpaceChar(std::string_view s, std::size_t position = 0);
 
+  // Counts number of terms in a text separated by whitespace and punctuations.
+  static int CountTerms(std::string_view s);
+
  private:
   // No instance of this class.
   Strings() = default;

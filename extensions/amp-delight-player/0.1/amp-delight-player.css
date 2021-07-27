@@ -16,10 +16,6 @@
 
 amp-delight-player [placeholder] {
   transition: opacity 0.5s ease-out;
-  background: no-repeat 50%;
-  background-size: cover;
-  width: 100%;
-  height: 100%;
 }
 
 amp-delight-player [placeholder].i-amphtml-delight-player-faded {

@@ -22,7 +22,7 @@ const {getStdout} = require('../common/process');
 const {log} = require('../common/logging');
 const {shortSha} = require('../common/git');
 
-const {green, yellow, cyan} = colors;
+const {cyan, green, yellow} = colors;
 const CODECOV_EXEC = './node_modules/.bin/codecov';
 const COVERAGE_REPORTS = {
   'unit_tests': 'test/coverage/lcov-unit.info',
@@ -53,6 +53,7 @@ function uploadReport(file, flags) {
 
 /**
  * Uploads code coverage reports for unit / integration tests during CI builds.
+ * @return {Promise<void>}
  */
 async function codecovUpload() {
   if (!isCiBuild()) {
@@ -80,4 +81,4 @@ module.exports = {
 };
 
 codecovUpload.description =
-  'Uploads code coverage reports to codecov.io during CI builds.';
+  'Upload code coverage reports to codecov.io during CI';

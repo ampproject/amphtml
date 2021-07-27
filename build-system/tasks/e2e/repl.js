@@ -65,6 +65,9 @@ function installRepl(global, env) {
     return replPromise;
   };
 
+  /**
+   * Continues execution while debugging.
+   */
   function replContinue() {
     if (!replResolve) {
       return;
@@ -81,6 +84,9 @@ function installRepl(global, env) {
   }
 }
 
+/**
+ * Ends the debugging session.
+ */
 function uninstallRepl() {
   delete global.repl;
 }

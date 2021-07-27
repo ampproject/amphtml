@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
+import {
+  layoutRectLtwh,
+  moveLayoutRect,
+  rectIntersection,
+} from '#core/dom/layout/rect';
+import {dict} from '#core/types/object';
+
 import {MessageType} from '../3p-frame-messaging';
 import {SubscriptionApi} from '../iframe-helper';
-import {dict} from '../core/types/object';
-import {layoutRectLtwh, moveLayoutRect, rectIntersection} from '../layout-rect';
 
 /**
  * The structure that defines the rectangle used in intersection observers.

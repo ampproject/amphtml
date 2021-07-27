@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/core/constants/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {CSS} from '../../../build/amp-mega-menu-0.1.css';
-import {Keys} from '../../../src/core/constants/key-codes';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {Keys} from '#core/constants/key-codes';
+import {Layout} from '#core/dom/layout';
+import {Services} from '#service';
 import {
   closest,
   closestAncestorElementBySelector,
-  isConnectedNode,
-  isRTL,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-  tryFocus,
-} from '../../../src/dom';
+} from '#core/dom/query';
 import {dev, userAssert} from '../../../src/log';
-import {mod} from '../../../src/utils/math';
+import {isConnectedNode, isRTL, tryFocus} from '#core/dom';
+import {mod} from '#core/math';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
-import {toArray} from '../../../src/core/types/array';
+import {toArray} from '#core/types/array';
 
 /** @const {string} */
 const TAG = 'amp-mega-menu';
