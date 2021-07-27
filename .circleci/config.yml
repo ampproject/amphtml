@@ -111,7 +111,7 @@ commands:
                 command: circleci-agent step halt
 
 jobs:
-  'Initialize Git':
+  'Initialize Repository':
     executor:
       name: amphtml-small-executor
     steps:
@@ -338,32 +338,32 @@ jobs:
 workflows:
   'CircleCI':
     jobs:
-      - 'Initialize Git':
+      - 'Initialize Repository':
           <<: *push_and_pr_builds
       - 'Checks':
           <<: *push_and_pr_builds
           requires:
-            - 'Initialize Git'
+            - 'Initialize Repository'
       - 'Unminified Build':
           <<: *push_and_pr_builds
           requires:
-            - 'Initialize Git'
+            - 'Initialize Repository'
       - 'Nomodule Build':
           <<: *push_and_pr_builds
           requires:
-            - 'Initialize Git'
+            - 'Initialize Repository'
       - 'Module Build':
           <<: *push_and_pr_builds
           requires:
-            - 'Initialize Git'
+            - 'Initialize Repository'
       - 'Bundle Size':
           <<: *push_and_pr_builds
           requires:
-            - 'Initialize Git'
+            - 'Initialize Repository'
       - 'Validator Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Initialize Git'
+            - 'Initialize Repository'
       - 'Visual Diff Tests':
           <<: *push_and_pr_builds
           requires:
@@ -371,7 +371,7 @@ workflows:
       - 'Local Unit Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Initialize Git'
+            - 'Initialize Repository'
       - 'All Unit Tests':
           name: '⛓️ All Unit Tests'
           <<: *push_and_pr_builds
@@ -410,7 +410,7 @@ workflows:
               exp: ['A', 'B', 'C']
           <<: *push_and_pr_builds
           requires:
-            - 'Initialize Git'
+            - 'Initialize Repository'
       - 'Experiment Integration Tests':
           name: 'Exp. << matrix.exp >> Integration Tests'
           matrix:
