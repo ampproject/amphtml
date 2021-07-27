@@ -165,8 +165,8 @@ export class DraggableDrawer extends AMP.BaseElement {
       );
       spacerEl.setAttribute('aria-label', localizedCloseString);
     }
-    this.containerEl_.insertBefore(spacerEl, this.contentEl_);
-    this.contentEl_.appendChild(headerShadowRootEl);
+    this.containerEl.insertBefore(spacerEl, this.contentEl);
+    this.contentEl.appendChild(headerShadowRootEl);
 
     this.element.appendChild(templateEl);
     this.element.setAttribute('aria-hidden', true);
@@ -215,7 +215,7 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     // For displaying sticky header on mobile.
     new this.win.IntersectionObserver((e) => {
-      this.headerEl_.classList.toggle(
+      this.headerEl.classList.toggle(
         'i-amphtml-story-draggable-drawer-header-stuck',
         !e[0].isIntersecting
       );
@@ -232,7 +232,7 @@ export class DraggableDrawer extends AMP.BaseElement {
         e.propertyName === 'transform' &&
         this.state_ === DrawerState.CLOSED
       ) {
-        this.containerEl_./*OK*/ scrollTop = 0;
+        this.containerEl./*OK*/ scrollTop = 0;
       }
     });
   }

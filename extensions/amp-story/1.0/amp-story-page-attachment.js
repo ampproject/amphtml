@@ -93,7 +93,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     const theme = this.element.getAttribute('theme')?.toLowerCase();
     if (theme && AttachmentTheme.DARK === theme) {
-      this.headerEl_.setAttribute('theme', theme);
+      this.headerEl.setAttribute('theme', theme);
       this.element.setAttribute('theme', theme);
     }
 
@@ -157,7 +157,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       titleEl.textContent = this.element.getAttribute('data-title');
     }
 
-    const titleAndCloseWrapperEl = this.headerEl_.appendChild(
+    const titleAndCloseWrapperEl = this.headerEl.appendChild(
       htmlFor(this.element)`
             <div class="i-amphtml-story-draggable-drawer-header-title-and-close"></div>`
     );
