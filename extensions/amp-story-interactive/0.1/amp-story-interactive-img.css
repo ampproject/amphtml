@@ -59,6 +59,9 @@
   overflow: hidden !important;
   width: 100% !important;
   height: 100% !important;
+  background-color: var(
+    --i-amphtml-interactive-missing-img-background
+  ) !important;
   background-position: center !important;
   background-size: cover !important;
   box-shadow: var(--i-amphtml-interactive-img-border) !important;
