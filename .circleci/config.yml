@@ -60,8 +60,17 @@ commands:
             mkdir -p /tmp/workspace
       - run:
           name: 'Maybe Gracefully Halt'
-          command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/maybe_gracefully_halt.sh | bash
+          command: /tmp/restored-workspace/maybe_gracefully_halt.sh
+      - restore_cache:
+          keys:
+            - source-v1-{{ .Branch }}-{{ .Revision }}
+            - source-v1-{{ .Branch }}-
+            - source-v1-
       - checkout
+      - save_cache:
+          key: source-v1-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - .git
       - run:
           name: 'Configure Development Environment'
           command: |
@@ -102,13 +111,28 @@ commands:
                 command: circleci-agent step halt
 
 jobs:
-  'Compute Merge Commit':
+  'Initialize Repository':
     executor:
       name: amphtml-small-executor
     steps:
+      - restore_cache:
+          keys:
+            - source-v1-{{ .Branch }}-{{ .Revision }}
+            - source-v1-{{ .Branch }}-
+            - source-v1-
+      - checkout
       - run:
-          name: 'Compute Merge Commit'
-          command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/compute_merge_commit.sh | bash
+          name: 'Compute and Fetch Merge Commit'
+          command: |
+            ./.circleci/compute_merge_commit.sh
+            ./.circleci/fetch_merge_commit.sh
+      - save_cache:
+          key: source-v1-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - .git
+      - run:
+          name: 'Initialize Workspace'
+          command: cp .circleci/maybe_gracefully_halt.sh /tmp/workspace
       - teardown_vm
   'Checks':
     executor:
@@ -129,7 +153,7 @@ jobs:
           name: 'Unminified Build'
           command: node build-system/pr-check/unminified-build.js
       - teardown_vm
-  'Nomodule Build':
+  'Nomodule Build - Test':
     executor:
       name: amphtml-xlarge-executor
     steps:
@@ -143,7 +167,7 @@ jobs:
       - store_artifacts:
           path: /tmp/artifacts/amp_nomodule_build.tar.gz
       - teardown_vm
-  'Module Build':
+  'Module Build - Test':
     executor:
       name: amphtml-xlarge-executor
     steps:
@@ -152,9 +176,27 @@ jobs:
           name: 'Module Build'
           command: node build-system/pr-check/module-build.js
       - teardown_vm
-  'Bundle Size':
+  'Nomodule Build - Prod':
     executor:
       name: amphtml-xlarge-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Nomodule Build'
+          command: node build-system/pr-check/bundle-size-nomodule-build.js
+      - teardown_vm
+  'Module Build - Prod':
+    executor:
+      name: amphtml-xlarge-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Module Build'
+          command: node build-system/pr-check/bundle-size-module-build.js
+      - teardown_vm
+  'Bundle Size':
+    executor:
+      name: amphtml-medium-executor
     steps:
       - setup_vm
       - run:
@@ -314,40 +356,54 @@ jobs:
 workflows:
   'CircleCI':
     jobs:
-      - 'Compute Merge Commit':
+      - 'Initialize Repository':
           <<: *push_and_pr_builds
       - 'Checks':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
       - 'Unminified Build':
+          name: 'Unminified Build (Test)'
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
-      - 'Nomodule Build':
+            - 'Initialize Repository'
+      - 'Nomodule Build - Test':
+          name: 'Nomodule Build (Test)'
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
-      - 'Module Build':
+            - 'Initialize Repository'
+      - 'Module Build - Test':
+          name: 'Module Build (Test)'
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
+      - 'Nomodule Build - Prod':
+          name: 'Nomodule Build (Prod)'
+          <<: *push_and_pr_builds
+          requires:
+            - 'Initialize Repository'
+      - 'Module Build - Prod':
+          name: 'Module Build (Prod)'
+          <<: *push_and_pr_builds
+          requires:
+            - 'Initialize Repository'
       - 'Bundle Size':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Nomodule Build (Prod)'
+            - 'Module Build (Prod)'
       - 'Validator Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
       - 'Visual Diff Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build'
+            - 'Nomodule Build (Test)'
       - 'Local Unit Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
       - 'All Unit Tests':
           name: '⛓️ All Unit Tests'
           <<: *push_and_pr_builds
@@ -356,7 +412,7 @@ workflows:
       - 'Unminified Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Unminified Build'
+            - 'Unminified Build (Test)'
       - 'Nomodule Tests':
           name: 'Nomodule Tests (<< matrix.config >>)'
           matrix:
@@ -364,7 +420,7 @@ workflows:
               config: ['prod', 'canary']
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build'
+            - 'Nomodule Build (Test)'
       - 'Module Tests':
           name: 'Module Tests (<< matrix.config >>)'
           matrix:
@@ -372,13 +428,13 @@ workflows:
               config: ['prod', 'canary']
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build'
-            - 'Module Build'
+            - 'Nomodule Build (Test)'
+            - 'Module Build (Test)'
       - 'End-to-End Tests':
           name: '⛓️ End-to-End Tests'
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build'
+            - 'Nomodule Build (Test)'
       - 'Experiment Build':
           name: 'Experiment << matrix.exp >> Build'
           matrix:
@@ -386,7 +442,7 @@ workflows:
               exp: ['A', 'B', 'C']
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
       - 'Experiment Integration Tests':
           name: 'Exp. << matrix.exp >> Integration Tests'
           matrix:
@@ -407,4 +463,4 @@ workflows:
       # - 'Performance Tests':
       #     <<: *push_builds_only
       #     requires:
-      #       - 'Nomodule Build'
+      #       - 'Nomodule Build (Test)'
