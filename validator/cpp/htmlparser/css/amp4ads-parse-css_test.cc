@@ -16,8 +16,7 @@
 
 #include "css/amp4ads-parse-css.h"
 
-#include "glog/logging.h"
-#include "gmock/gmock.h"
+#include <gmock/gmock.h>
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
