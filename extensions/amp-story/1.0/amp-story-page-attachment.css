@@ -108,10 +108,6 @@ amp-story[desktop] .i-amphtml-story-page-attachment-remote  {
   text-overflow: ellipsis !important;
 }
 
-.i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-page-attachment-remote-title {
-  color: #9AA0A6 !important;
-}
-
 .i-amphtml-story-page-attachment-remote-icon {
   display: block !important;
   height: 20px !important;

@@ -26,6 +26,17 @@
   transform: translate3d(0, 100%, 0) !important;
   transition: transform 0.25s cubic-bezier(0.4, 0.0, 1, 1), visibility 0s linear 0.4s !important;
   visibility: hidden !important;
+  --i-amphtml-draggable-drawer-background-color: #fff !important;
+  --i-amphtml-draggable-drawer-text-color: #202125 !important;
+}
+
+[theme="dark"].amp-story-draggable-drawer-root {
+  --i-amphtml-draggable-drawer-background-color: #202125 !important;
+  --i-amphtml-draggable-drawer-text-color: #fff !important;
+}
+
+[desktop] .amp-story-draggable-drawer-root {
+  background: none !important;
 }
 
 .amp-story-draggable-drawer-root[hidden] {
@@ -50,22 +61,25 @@
   transition: background 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
-.i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-draggable-drawer-container {
-  background: rgba(32, 33, 37, 1) !important;
-}
-
 .i-amphtml-story-draggable-drawer-container[hidden] {
   display: block !important;
   background: rgba(255, 255, 255, 0.92) !important;
 }
 
-.i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-draggable-drawer-container[hidden] {
-  background: rgba(32, 33, 37, 0.82) !important;
-}
-
 .i-amphtml-story-draggable-drawer-content {
   opacity: 1 !important;
   transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  background: var(--i-amphtml-draggable-drawer-background-color) !important;
+  color: var(--i-amphtml-draggable-drawer-text-color) !important;
+}
+
+amp-story:not([desktop]) .i-amphtml-story-draggable-drawer-content {
+  border-radius: inherit !important;
+}
+
+amp-story:not([desktop]) .i-amphtml-story-page-attachment-remote .i-amphtml-story-draggable-drawer-spacer {
+  /* Hide spacer in remote attachment. */
+  display: none !important;
 }
 
 
@@ -76,6 +90,36 @@
 .i-amphtml-story-draggable-drawer-container[hidden] .i-amphtml-story-draggable-drawer-content > * {
   display: none !important;
 }
+
+amp-story:not([desktop]) .i-amphtml-story-draggable-drawer-container {
+  border-radius: 16px 16px 0 0 !important;
+  height: 100% !important;
+  background: none !important;
+  /* This makes the spacer elmement take up all available space to push content to the bottom of the screen. */
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.i-amphtml-story-draggable-drawer-spacer {
+  /* spacer is mobile only */
+  display: none !important;
+}
+
+amp-story:not([desktop]) .i-amphtml-story-draggable-drawer-spacer {
+  /* Removes default button background. */
+  background: none !important;
+  /* This placeholder element takes up all available space when drawer-content is less than 80vh. */
+  display: block !important;
+  height: calc(var(--story-page-vh) * 100) !important;
+  /* Sets the minimum size of the placeholder element */
+  min-height: calc(var(--story-page-vh) * 20) !important;
+}
+
+body:not(.amp-mode-keyboard-active) amp-story:not([desktop]) .i-amphtml-story-draggable-drawer-spacer {
+  /* Remove outline if user is not navigating via keyboard */
+  outline: none !important;
+}
+
 
 [desktop] .amp-story-draggable-drawer-root {
   display: flex !important;
@@ -97,72 +141,6 @@
   width: 800px !important;
   border-radius: 8px !important;
   overflow: hidden !important;
-}
-
-/* For amp-story-page-attachment-ui-v2 experiment. */
-
-[desktop] .i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root {
-  background: none !important;
-}
-
-.i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root {
-  --i-amphtml-draggable-drawer-background-color: #fff !important;
-  --i-amphtml-draggable-drawer-text-color: #202125 !important;
-}
-
-[theme="dark"].i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root {
-  --i-amphtml-draggable-drawer-background-color: #202125 !important;
-  --i-amphtml-draggable-drawer-text-color: #fff !important;
-}
-
-amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container {
-  border-radius: 16px !important;
-  height: 100% !important;
-}
-
-amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container {
-  border-radius: 16px 16px 0 0 !important;
-}
-
-amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container {
-  background: none !important;
-  /* This makes the spacer elmement take up all available space to push content to the bottom of the screen. */
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-spacer {
-  /* spacer is mobile only */
-  display: none !important;
-}
-
-amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-spacer {
-  /* Removes default button background. */
-  background: none !important;
-  /* This placeholder element takes up all available space when drawer-content is less than 80vh. */
-  display: block !important;
-  height: calc(var(--story-page-vh) * 100) !important;
-  /* Sets the minimum size of the placeholder element */
-  min-height: calc(var(--story-page-vh) * 20) !important;
-}
-
-body:not(.amp-mode-keyboard-active) amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-spacer {
-  /* Remove outline if user is not navigating via keyboard */
-  outline: none !important;
-}
-
-.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-content {
-  background: var(--i-amphtml-draggable-drawer-background-color) !important;
-  color: var(--i-amphtml-draggable-drawer-text-color) !important;
-}
-
-amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-content {
-  border-radius: inherit !important;
-}
-
-amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-remote .i-amphtml-story-draggable-drawer-spacer {
-  /* Hide spacer in remote attachment. */
-  display: none !important;
 }
 
 /* Remote-attachment overrides. */
