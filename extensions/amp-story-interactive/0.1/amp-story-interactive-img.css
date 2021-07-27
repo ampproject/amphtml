@@ -60,7 +60,7 @@
   width: 100% !important;
   height: 100% !important;
   background-color: var(
-    --i-amphtml-interactive-missing-img-background
+    --i-amphtml-interactive-placeholder-background
   ) !important;
   background-position: center !important;
   background-size: cover !important;
