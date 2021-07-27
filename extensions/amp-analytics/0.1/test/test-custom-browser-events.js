@@ -58,7 +58,7 @@ describes.realWin(
       inputField2.setAttribute('id', 'inputField2');
       target.appendChild(inputField2);
 
-      toggleExperiment(win, 'custom-browser-event-tracker', true);
+      toggleExperiment(win, 'analytics-browser-events', true);
     });
 
     describe('CustomBrowserEventTracker', () => {

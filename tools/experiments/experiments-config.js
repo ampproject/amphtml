@@ -65,7 +65,7 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
   },
   {
-    id: 'custom-browser-event-tracker',
+    id: 'analytics-browser-events',
     name: 'Allows tracking of a custom set of browser events',
     spec: 'https://github.com/ampproject/amphtml/pull/35193',
   },

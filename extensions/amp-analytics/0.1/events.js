@@ -39,6 +39,7 @@ const DEFAULT_MAX_TIMER_LENGTH_SECONDS = 7200;
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function () {};
 const TAG = 'amp-analytics/events';
+const TIME_WAIT = 500;
 
 /**
  * Events that can result in analytics data to be sent.
@@ -192,10 +193,7 @@ function isVideoTriggerType(triggerType) {
  * @return {boolean}
  */
 function isCustomBrowserTriggerType(triggerType) {
-  const values = Object.keys(BrowserEventType).map((key) => {
-    return BrowserEventType[key];
-  });
-  return values.indexOf(triggerType) > -1;
+  return isEnumValue(BrowserEventType, triggerType);
 }
 
 /**
@@ -344,7 +342,6 @@ export class CustomBrowserEventTracker extends EventTracker {
    * @param {!./analytics-root.AnalyticsRoot} root
    */
   constructor(root) {
-    const TIME_WAIT = 500;
     super(root);
 
     /** @private {?Observable<!Event>} */
@@ -352,7 +349,7 @@ export class CustomBrowserEventTracker extends EventTracker {
 
     /** @private {?function(!Event)} */
     this.boundOnSession_ = this.observables_.fire.bind(this.observables_);
-    this.debouncedBoundOnSession_ = debounce(
+    /** @type {?function(!Event)} */ this.debouncedBoundOnSession_ = debounce(
       this.root.ampdoc.win,
       this.boundOnSession_,
       TIME_WAIT
@@ -363,7 +360,10 @@ export class CustomBrowserEventTracker extends EventTracker {
   dispose() {
     const root = this.root.getRoot();
     Object.keys(BrowserEventType).forEach((key) => {
-      root.removeEventListener(BrowserEventType[key], this.boundOnSession_);
+      root.removeEventListener(
+        BrowserEventType[key],
+        this.debouncedBoundOnSession_
+      );
     });
     this.boundOnSession_ = null;
     this.observables_ = null;
@@ -372,24 +372,23 @@ export class CustomBrowserEventTracker extends EventTracker {
   /** @override */
   add(context, eventType, config, listener) {
     userAssert(
-      isExperimentOn(this.root.ampdoc.win, 'custom-browser-event-tracker'),
-      'expected global "custom-browser-event-tracker" experiment to be enabled'
+      isExperimentOn(this.root.ampdoc.win, 'analytics-browser-events'),
+      'expected global "analytics-browser-events" experiment to be enabled'
     );
 
-    const selector = userAssert(
-      config['selector'],
-      'Missing required selector on browser event trigger'
-    );
+    const {
+      'on': eventName,
+      'selectionMethod': selectionMethod = null,
+      'selector': selector,
+    } = config;
+
     userAssert(
       selector.length,
       'Missing required selector on browser event trigger'
     );
     assertUniqueSelectors(selector);
 
-    const selectionMethod = config['selectionMethod'] || null;
-    const eventName = config['on'];
-
-    const targetReady = this.root.getElements(
+    const targetPromises = this.root.getElements(
       context,
       selector,
       selectionMethod,
@@ -404,7 +403,7 @@ export class CustomBrowserEventTracker extends EventTracker {
       if (event.type !== eventName) {
         return;
       }
-      targetReady.then((targets) => {
+      targetPromises.then((targets) => {
         targets.forEach((target) => {
           const el = event.target;
           if (!target.contains(el)) {
