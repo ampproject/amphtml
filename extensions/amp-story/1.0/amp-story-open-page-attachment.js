@@ -118,7 +118,8 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
 
   // Copy title to the element if it exists.
   const attachmentTitle =
-    anchorChild?.getAttribute('title') || attachmentEl.getAttribute('title');
+    anchorChild?.getAttribute('title') ||
+    attachmentEl.getAttribute('data-title');
   if (attachmentTitle) {
     openAttachmentEl.setAttribute('title', attachmentTitle);
   }
