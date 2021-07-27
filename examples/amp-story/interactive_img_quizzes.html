@@ -11,7 +11,7 @@
         font-family: 'Poppins', sans-serif;
       }
 
-      amp-story-interactive-img-quiz {
+      amp-story-interactive-img-quiz, amp-story-interactive-results {
         justify-self: center;
       }
 
@@ -624,6 +624,35 @@
             option-4-image-alt="Eiffel Tower"
           >
           </amp-story-interactive-img-quiz>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="results">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Integration with results component</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-results
+            id="results-component"
+            prompt-text="You are a(n)"
+            option-1-results-category="Expert"
+            option-1-results-threshold="100"
+            option-2-results-category="Beginner"
+            option-2-results-threshold="0"
+          >
+          </amp-story-interactive-results>
         </amp-story-grid-layer>
       </amp-story-page>
     </amp-story>
