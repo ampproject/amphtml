@@ -24,6 +24,30 @@ import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles} from '#core/dom/style';
 
 /**
+ * @typedef 
+ * {{"options": [
+      "index": 0,
+      "selected": false,
+      "count": 2.5
+    },
+    {
+      "index": 1,
+      "selected": false,
+      "count": 3
+    },
+    {
+      "index": 2,
+      "selected": false,
+      "count": 5
+    },
+    {
+      "index": 3,
+      "selected": false,
+      "count": 1
+    }]}
+ */
+
+/**
  * Generates the template for the slider.
  *
  * @param {!Element} element
@@ -69,6 +93,110 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.inputEl_ = null;
     /** @private {!SliderType}  */
     this.sliderType_ = SliderType.PERCENTAGE;
+  }
+
+  /** @override */
+  layoutCallback() {
+    this.initializeListeners_();
+    return (this.backendDataPromise_ = this.element.hasAttribute('endpoint')
+      ? this.retrieveInteractiveData_()
+      : Promise.resolve());
+  }
+
+  /**
+   * Get the Interactive data from the datastore
+   *
+   * @return {?Promise<?InteractiveResponseType|?JsonObject|undefined>}
+   * @private
+   */
+   retrieveInteractiveData_() {
+    return this.executeInteractiveRequest_('GET').then((response) => {
+      this.handleSuccessfulDataRetrieval_(
+        /** @type {InteractiveResponseType} */ (response)
+      );
+    });
+  }
+
+
+  /**
+   * Handles incoming interactive data response
+   *
+   * RESPONSE FORMAT
+   * {
+   *  options: [
+   *    {
+   *      index:
+   *      count:
+   *      selected:
+   *    },
+   *    ...
+   *  ]
+   * }
+   * @param {InteractiveResponseType|undefined} response
+   * @private
+   */
+   handleSuccessfulDataRetrieval_(response) {
+    if (!(response && response['options'])) {
+      devAssert(
+        response && 'options' in response,
+        `Invalid interactive response, expected { data: InteractiveResponseType, ...} but received ${response}`
+      );
+      dev().error(
+        TAG,
+        `Invalid interactive response, expected { data: InteractiveResponseType, ...} but received ${response}`
+      );
+      return;
+    }
+    const numOptions = 101;
+    // Only keep the visible options to ensure visible percentages add up to 100.
+    this.updateComponentOnDataRetrieval_(
+      response['options'].slice(0, numOptions)
+    );
+  }
+
+  /**
+   * Updates the quiz to reflect the state of the remote data.
+   * @param {!Array<InteractiveOptionType>} data
+   * @private
+   */
+  updateComponentOnDataRetrieval_(data) {
+    const options = this.rootEl_.querySelectorAll(
+      '.i-amphtml-story-interactive-option'
+    );
+
+    this.optionsData_ = this.orderData_(data);
+    this.optionsData_.forEach((response) => {
+      if (response.selected) {
+        this.hasUserSelection_ = true;
+        this.updateStoryStoreState_(response.index);
+        this.mutateElement(() => {
+          this.inputEl.value = response.index;
+          this.updateToPostSelectionState_(options[response.index]);
+        });
+      }
+    });
+  }
+
+  /**
+   * Updates the selected classes on component and option selected.
+   * @param {?Element} selectedOption
+   * @protected
+   */
+  updateToPostSelectionState_(selectedOption) {
+    this.rootEl_.classList.add('i-amphtml-story-interactive-post-selection');
+    if (selectedOption != null) {
+      selectedOption.classList.add(
+        'i-amphtml-story-interactive-option-selected'
+      );
+    }
+
+    if (this.optionsData_) {
+      this.rootEl_.classList.add('i-amphtml-story-interactive-has-data');
+      this.displayOptionsData(this.optionsData_);
+    }
+    this.getOptionElements().forEach((el) => {
+      el.setAttribute('tabindex', -1);
+    });
   }
 
   /** @override */
@@ -138,3 +266,6 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.rootEl_.classList.remove('i-amphtml-story-interactive-mid-selection');
   }
 }
+
+
+
