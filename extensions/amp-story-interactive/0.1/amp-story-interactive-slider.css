@@ -166,6 +166,7 @@
   border: none !important;
 }
 
+/* Vendor pseudo-selectors are invalid on unsuported browsers, so we need to keep rules separate to avoid invalidating rulesets. */
 .i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
   transform: rotate(45deg) !important;
   box-shadow: 0em 0em 0.5em rgba(0, 0, 0, 0.25),
