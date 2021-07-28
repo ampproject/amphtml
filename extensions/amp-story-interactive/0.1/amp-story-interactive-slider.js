@@ -97,7 +97,6 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     }
 
     this.rootEl_.setAttribute('type', this.sliderType_);
-
     this.attachPrompt_(this.rootEl_);
     return this.rootEl_;
   }
@@ -139,6 +138,9 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
           }
           const elapsed = currTime - startTime;
           if (SLIDER_HINT_DURATION_MS < elapsed) {
+            this.rootEl_.classList.remove(
+              'i-amphtml-story-interactive-mid-selection'
+            );
             return;
           }
           // Value between 0 and 1;
@@ -155,7 +157,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
             requestAnimationFrame(animateFrame);
           }
         };
-        requestAnimationFrame(animateFrame);
+        setTimeout(() => requestAnimationFrame(animateFrame), 500);
       }
     );
   }
@@ -165,7 +167,6 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
    */
   onDrag_() {
     const {value} = this.inputEl_;
-    // if (this.isInteracting_) {
     if (this.sliderType_ == SliderType.PERCENTAGE) {
       this.bubbleEl_.textContent = Math.round(value) + '%';
     }
