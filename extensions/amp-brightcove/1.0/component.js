@@ -193,12 +193,9 @@ function makeMessage(method, arg) {
     case 'unmute':
       arg = false;
       break;
-    case 'play':
-    // TODO(wg-bento): Pass isAutoplay?
     default:
       break;
   }
-  // TODO(wg-bento): Pass targetOrigin 'https://players.brightcove.net'?
   return JSON.stringify({
     'command': methods[method] ?? method,
     'args': arg,
