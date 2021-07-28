@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import * as Preact from '#preact';
-import {useCallback, useRef, useState} from '#preact';
+import {useCallback, useLayoutEffect, useRef, useState} from '#preact';
+import objstr from 'obj-str';
 import {
   copyTextToClipboard,
   isCopyingToClipboardSupported,
 } from '../../../src/clipboard';
 import {useStyles} from './component.jss';
-
 /**
  * @param {!CopyDef.Props} props
  * @return {PreactDef.Renderable}
@@ -31,28 +30,21 @@ export function Copy({children, sourceId, text, ...rest}) {
   const [status, setStatus] = useState(null);
   const [isCopySupported, setIsCopySupported] = useState(false);
   const classes = useStyles();
-
   useLayoutEffect(() => {
     if (!ref.current) {
       return;
     }
-
     if (isCopyingToClipboardSupported(ref.current.ownerDocument)) {
       setIsCopySupported(true);
     } else {
       setIsCopySupported(false);
     }
-  });
-
-  const copy = useCallback(
-    (sourceId) => {
-      const content = document.getElementById(sourceId);
-      const text = (content.value ?? content.textContent).trim();
-      setStatus(copyTextToClipboard(window, text));
-    },
-    [sourceId]
-  );
-
+  }, [setIsCopySupported]);
+  const copy = useCallback((sourceId) => {
+    const content = document.getElementById(sourceId);
+    const text = (content.value ?? content.textContent).trim();
+    setStatus(copyTextToClipboard(window, text));
+  }, []);
   return (
     <button
       ref={ref}
