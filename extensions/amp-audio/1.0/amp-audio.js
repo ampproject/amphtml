@@ -49,8 +49,11 @@ export class AmpAudio extends BaseElement {
       'validateMediaMetadata': (element, metaData) => {
         validateMediaMetadata(element, metaData);
       },
-      'toggleFallback': (fallback) => {
-        this.toggleFallback(fallback);
+      'onLoad': () => {
+        this.toggleFallback(false);
+      },
+      'onError': () => {
+        this.toggleFallback(true);
       },
       'propagateAttributes': (
         attributes,
