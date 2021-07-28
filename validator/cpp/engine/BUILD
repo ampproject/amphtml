@@ -36,13 +36,13 @@ cc_library(
     name = "parse-layout",
     srcs = ["parse-layout.cc"],
     hdrs = ["parse-layout.h"],
+    copts = ["-std=c++17"],
     deps = [
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
         "@com_googlesource_code_re2//:re2",
         "@validator//:validator_cc_proto",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -60,12 +60,12 @@ cc_library(
     name = "parse-layout-sizes",
     srcs = ["parse-layout-sizes.cc"],
     hdrs = ["parse-layout-sizes.h"],
+    copts = ["-std=c++17"],
     deps = [
         "@com_google_absl//absl/strings",
         "@com_googlesource_code_re2//:re2",
         "@htmlparser//:strings",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -82,13 +82,13 @@ cc_library(
     name = "parse-srcset",
     srcs = ["parse-srcset.cc"],
     hdrs = ["parse-srcset.h"],
+    copts = ["-std=c++17"],
     deps = [
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/strings",
         "@com_googlesource_code_re2//:re2",
         "@validator//:validator_cc_proto",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -105,13 +105,13 @@ cc_library(
     name = "parse-viewport",
     srcs = ["parse-viewport.cc"],
     hdrs = ["parse-viewport.h"],
+    copts = ["-std=c++17"],
     deps = [
         ":utf8-util",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/strings",
         "@htmlparser//:strings",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -128,13 +128,13 @@ cc_library(
     name = "utf8-util",
     srcs = ["utf8-util.cc"],
     hdrs = ["utf8-util.h"],
+    copts = ["-std=c++17"],
     deps = [
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:cord",
         "@htmlparser//:strings",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -152,13 +152,13 @@ cc_library(
     name = "keyframes-parse-css",
     srcs = ["keyframes-parse-css.cc"],
     hdrs = ["keyframes-parse-css.h"],
+    copts = ["-std=c++17"],
     deps = [
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@htmlparser//css:parse-css",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -177,11 +177,11 @@ cc_library(
     name = "type-identifier",
     srcs = ["type-identifier.cc"],
     hdrs = ["type-identifier.h"],
+    copts = ["-std=c++17"],
     deps = [
         "@com_google_absl//absl/strings",
         "@validator//:validator_cc_proto",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -198,14 +198,14 @@ cc_library(
     name = "error-formatter",
     srcs = ["error-formatter.cc"],
     hdrs = ["error-formatter.h"],
+    copts = ["-std=c++17"],
     deps = [
         ":validator_pb",
         "@com_googlesource_code_re2//:re2",
-        "@com_github_glog//:glog",
+        "@htmlparser//:logging",
         "@htmlparser//:strings",
         "@validator//:validator_cc_proto",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -221,13 +221,13 @@ cc_test(
 cc_binary(
     name = "validator-convert",
     srcs = ["validator-convert.cc"],
+    copts = ["-std=c++17"],
     deps = [
         "@com_google_protobuf//:protobuf",
         "@htmlparser//:defer",
         "@htmlparser//:fileutil",
         "@validator//:validator_cc_proto",
     ],
-    copts = ["-std=c++17"],
 )
 
 genrule(
@@ -244,6 +244,7 @@ cc_library(
     srcs = [
         "validator-internal.cc",
     ],
+    copts = ["-std=c++17"],
     visibility = ["//visibility:private"],
     deps = [
         ":keyframes-parse-css",
@@ -279,7 +280,6 @@ cc_library(
         "@htmlparser//json:parser",
         "@validator//:validator_cc_proto",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_library(
@@ -287,12 +287,12 @@ cc_library(
     hdrs = [
         "validator.h",
     ],
+    copts = ["-std=c++17"],
     deps = [
         ":validator-internal",
         "@validator//:validator_cc_proto",
     ],
     alwayslink = 1,
-    copts = ["-std=c++17"],
 )
 
 cc_library(
@@ -303,9 +303,10 @@ cc_library(
     hdrs = [
         "testing-utils.h",
     ],
+    copts = ["-std=c++17"],
     data = [
-        "@validator//:testdata_files",
         "@amphtml-extensions//:testdata_files",
+        "@validator//:testdata_files",
     ],
     deps = [
         ":error-formatter",
@@ -314,7 +315,6 @@ cc_library(
         "@htmlparser//:strings",
         "@validator//:validator_cc_proto",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(

@@ -18,8 +18,9 @@
 
 #include <algorithm>
 
+#include "absl/strings/case.h"
 #include "absl/strings/match.h"
-#include "validator.pb.h"
+#include "../../validator.pb.h"
 
 namespace amp::validator {
 
@@ -101,11 +102,9 @@ std::vector<TypeIdentifier> GetTypeIdentifiers(
 bool HasSignedExchangeTypeIdentifiers(
     std::vector<TypeIdentifier> type_identifiers) {
   return std::find(type_identifiers.begin(), type_identifiers.end(),
-                   TypeIdentifier::kAmp) !=
-             type_identifiers.end() &&
+                   TypeIdentifier::kAmp) != type_identifiers.end() &&
          std::find(type_identifiers.begin(), type_identifiers.end(),
-                   TypeIdentifier::kTransformed) !=
-             type_identifiers.end();
+                   TypeIdentifier::kTransformed) != type_identifiers.end();
 }
 
 }  // namespace amp::validator

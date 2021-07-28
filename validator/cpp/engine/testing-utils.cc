@@ -17,17 +17,18 @@
 // document.
 //
 
+#include "testing-utils.h"
+
 #include <filesystem>
 
-#include "glog/logging.h"
-#include "testing-utils.h"
-#include "error-formatter.h"
-#include "absl/strings/substitute.h"
-#include "absl/strings/str_cat.h"
-#include "fileutil.h"
-#include "strings.h"
 #include "absl/strings/ascii.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/strip.h"
+#include "absl/strings/substitute.h"
+#include "error-formatter.h"
+#include "fileutil.h"
+#include "logging.h"
+#include "strings.h"
 
 namespace fs = std::filesystem;
 
@@ -106,10 +107,10 @@ const std::map<std::string, TestCase>& TestCases() {
     std::vector<std::string> tl;
     std::vector<TestCase> cases;
     std::vector<std::string> html_files;
-    CHECK(htmlparser::FileUtil::Glob(
+    CHECKORDIE(htmlparser::FileUtil::Glob(
            "external/validator/testdata/*/*.html",
            &html_files)) << "Test cases file pattern not found.";
-    CHECK(htmlparser::FileUtil::Glob(
+    CHECKORDIE(htmlparser::FileUtil::Glob(
            "external/amphtml-extensions/*/*/test/*.html",
             &html_files)) << "Test cases file pattern not found.";
 
@@ -156,8 +157,8 @@ const std::map<std::string, TestCase>& TestCases() {
     std::map<std::string, TestCase>* test_cases_by_name =
         new std::map<std::string, TestCase>;
     for (const TestCase& t : cases)
-      CHECK(test_cases_by_name->emplace(t.name, t).second)
-          << "duplicate name: " << t.name;
+      CHECKORDIE(test_cases_by_name->emplace(t.name, t).second,
+                 absl::StrCat("duplicate name: ", t.name));
     return test_cases_by_name;
   }();
 
