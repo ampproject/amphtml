@@ -148,6 +148,7 @@ function createDriver(browserName, args, deviceName) {
     case 'chrome':
       const chromeOptions = new chrome.Options(capabilities);
       chromeOptions.addArguments(args);
+      chromeOptions.setChromeBinaryPath(require('puppeteer').executablePath());
       if (deviceName) {
         chromeOptions.setMobileEmulation({deviceName});
       }
