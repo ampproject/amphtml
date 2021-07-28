@@ -16,8 +16,8 @@
 
 #include "utf8-util.h"
 
+#include "glog/logging.h"
 #include "absl/strings/string_view.h"
-#include "logging.h"
 #include "strings.h"
 
 using absl::string_view;
@@ -88,9 +88,9 @@ CodePointTraverser::CodePointTraverser(const vector<char32_t>* const codes)
     : codes_(codes) {}
 
 void CodePointTraverser::TraverseTo(int traverse_to) {
-  CHECKORDIE(traverse_to >= codepoint_idx_, "");
+  CHECK_GE(traverse_to, codepoint_idx_);
   while (codepoint_idx_ < traverse_to) {
-    CHECKORDIE(codepoint_idx_ < codes_->size(), "");
+    CHECK_LT(codepoint_idx_, codes_->size());
     utf16_idx_ += ((*codes_)[codepoint_idx_] >= 0x00010000 ? 2 : 1);
     codepoint_idx_++;
   }

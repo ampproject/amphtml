@@ -2844,7 +2844,7 @@ vector<unique_ptr<Token>> ParseSelectorForTest(const std::string& selector) {
   EXPECT_EQ(JsonFromList(errors), "[]");
   EXPECT_EQ(1, sheet->rules().size());
   Rule* rule = (*sheet->mutable_rules()).front().get();
-  CHECKORDIE(TokenType::QUALIFIED_RULE == rule->Type(), "");
+  CHECK(TokenType::QUALIFIED_RULE == rule->Type(), "");
   QualifiedRule* qualified = static_cast<QualifiedRule*>(rule);
   vector<unique_ptr<Token>> selector_tokens;
   qualified->mutable_prelude()->swap(selector_tokens);

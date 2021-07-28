@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "absl/strings/string_view.h"
-#include "../../validator.pb.h"
+#include "validator.pb.h"
 #include "re2/re2.h"
 
 namespace amp::validator::parse_srcset {
@@ -57,7 +57,9 @@ struct SrcsetParsingResult {
 // will be non-empty.
 //
 // Returns SrcsetParsingResult.
-SrcsetParsingResult ParseSourceSet(absl::string_view srcset);
+SrcsetParsingResult ParseSourceSet(
+    re2::StringPiece srcset
+);
 
 }  // namespace amp::validator::parse_srcset
 

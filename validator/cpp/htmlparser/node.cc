@@ -26,12 +26,16 @@
 
 namespace htmlparser {
 
-Node::Node(NodeType node_type, Atom atom, std::string name_space)
-    : node_type_(node_type), atom_(atom), name_space_(name_space) {}
+Node::Node(NodeType node_type, Atom atom, std::string name_space) :
+    node_type_(node_type), atom_(atom), name_space_(name_space) {}
 
-void Node::SetData(std::string_view data) { data_ = data; }
+void Node::SetData(std::string_view data) {
+  data_ = data;
+}
 
-void Node::AddAttribute(const Attribute& attr) { attributes_.push_back(attr); }
+void Node::AddAttribute(const Attribute& attr) {
+  attributes_.push_back(attr);
+}
 
 void Node::SortAttributes(bool remove_duplicates) {
   std::sort(attributes_.begin(), attributes_.end(),
@@ -56,16 +60,21 @@ void Node::DropDuplicateAttributes() {
 
 bool Node::IsSpecialElement() const {
   if (name_space_ == "" || name_space_ == "html") {
-    return std::find(kSpecialElements.begin(), kSpecialElements.end(), atom_) !=
-           kSpecialElements.end();
+    return std::find(kSpecialElements.begin(),
+                     kSpecialElements.end(),
+                     atom_) != kSpecialElements.end();
   } else if (name_space_ == "math") {
-    if (atom_ == Atom::MI || atom_ == Atom::MO || atom_ == Atom::MN ||
-        atom_ == Atom::MS || atom_ == Atom::MTEXT ||
+    if (atom_ == Atom::MI ||
+        atom_ == Atom::MO ||
+        atom_ == Atom::MN ||
+        atom_ == Atom::MS ||
+        atom_ == Atom::MTEXT ||
         atom_ == Atom::ANNOTATION_XML) {
       return true;
     }
   } else if (name_space_ == "svg") {
-    if (atom_ == Atom::FOREIGN_OBJECT || atom_ == Atom::DESC ||
+    if (atom_ == Atom::FOREIGN_OBJECT ||
+        atom_ == Atom::DESC ||
         atom_ == Atom::TITLE) {
       return true;
     }
@@ -75,7 +84,8 @@ bool Node::IsSpecialElement() const {
 
 bool Node::InsertBefore(Node* new_child, Node* old_child) {
   // Checks if it new_child is already attached.
-  if (new_child->Parent() || new_child->PrevSibling() ||
+  if (new_child->Parent() ||
+      new_child->PrevSibling() ||
       new_child->NextSibling()) {
     return false;
   }
@@ -108,9 +118,9 @@ bool Node::InsertBefore(Node* new_child, Node* old_child) {
 }
 
 bool Node::AppendChild(Node* new_child) {
-  CHECKORDIE(!(new_child->Parent() || new_child->PrevSibling() ||
-               new_child->NextSibling()),
-             "html: AppendChild called for an attached child Node.");
+  CHECK(!(new_child->Parent() || new_child->PrevSibling() ||
+          new_child->NextSibling()),
+        "html: AppendChild called for an attached child Node.");
 
   Node* last = LastChild();
   if (last) {
@@ -127,8 +137,7 @@ bool Node::AppendChild(Node* new_child) {
 
 Node* Node::RemoveChild(Node* c) {
   // Remove child called for a non-child node.
-  CHECKORDIE(c->parent_ == this,
-             "html: RemoveChild called for a non-child Node");
+  CHECK(c->parent_ == this, "html: RemoveChild called for a non-child Node");
 
   if (first_child_ == c) {
     first_child_ = c->next_sibling_;
@@ -202,7 +211,9 @@ bool NodeStack::Contains(Atom atom) {
   return false;
 }
 
-void NodeStack::Push(Node* node) { stack_.push_back(node); }
+void NodeStack::Push(Node* node) {
+  stack_.push_back(node);
+}
 
 void NodeStack::Insert(int index, Node* node) {
   stack_.insert(stack_.begin() + index, node);
@@ -235,7 +246,7 @@ std::optional<Error> CheckTreeConsistencyInternal(Node* node, int depth) {
   }
 
   for (Node* c = node->FirstChild(); c; c = c->NextSibling()) {
-    auto err = CheckTreeConsistencyInternal(c, depth + 1);
+    auto err = CheckTreeConsistencyInternal(c, depth+1);
     if (err) {
       return err;
     }
@@ -266,9 +277,8 @@ std::optional<Error> CheckNodeConsistency(Node* node) {
   for (Node* c = node->FirstChild(); c; c = c->NextSibling()) {
     num_forwards++;
     if (num_forwards == 0x1e6) {
-      return error(
-          "html: forward list of children looks like an infinite "
-          "loop");
+      return error("html: forward list of children looks like an infinite "
+                   "loop");
     }
     if (c->Parent() != node) {
       return error("html: inconsistent child/parent relationship");
@@ -279,9 +289,8 @@ std::optional<Error> CheckNodeConsistency(Node* node) {
   for (Node* c = node->LastChild(); c; c = c->PrevSibling()) {
     num_backwards++;
     if (num_backwards == 0x1e6) {
-      return error(
-          "html: backward list of children looks like an infinite "
-          "loop");
+      return error("html: backward list of children looks like an infinite "
+                   "loop");
     }
     if (c->Parent() != node) {
       return error("html: inconsistent child/parent relationship");
@@ -338,7 +347,9 @@ std::optional<Error> CheckNodeConsistency(Node* node) {
   std::vector<Node*> seen;
   Node* last = nullptr;
   for (Node* c = node->FirstChild(); c; c = c->NextSibling()) {
-    auto insert_position = std::lower_bound(seen.begin(), seen.end(), c);
+    auto insert_position = std::lower_bound(seen.begin(),
+                                            seen.end(),
+                                            c);
     if (insert_position != seen.end() && *insert_position == c) {
       return error("html: inconsistent repeated child");
     }
@@ -353,7 +364,9 @@ std::optional<Error> CheckNodeConsistency(Node* node) {
 
   Node* first = nullptr;
   for (Node* c = node->LastChild(); c; c = c->PrevSibling()) {
-    auto iter = std::lower_bound(seen.begin(), seen.end(), c);
+    auto iter = std::lower_bound(seen.begin(),
+                                 seen.end(),
+                                 c);
     if (iter == seen.end() || *iter != c) {
       return error("html: inconsistent missing child");
     }
@@ -372,8 +385,9 @@ std::optional<Error> CheckNodeConsistency(Node* node) {
 }
 
 bool Node::IsBlockElementNode() {
-  return std::find(kBlockElements.begin(), kBlockElements.end(), atom_) !=
-         kBlockElements.end();
+  return std::find(kBlockElements.begin(),
+                   kBlockElements.end(),
+                   atom_) != kBlockElements.end();
 }
 
 std::string Node::InnerText() const {
@@ -417,11 +431,9 @@ void Node::UpdateChildNodesPositions(Node* relative_node) {
   // Update the positions of this node.
   if (line_col_in_html_src_.has_value()) {
     auto [line, col] = line_col_in_html_src_.value();
-    int effective_col =
-        line == 1 ? r_col + col +
-                        AtomUtil::ToString(relative_node->DataAtom()).size() +
-                        1 /* closing > */
-                  : col;
+    int effective_col = line == 1 ?
+        r_col + col + AtomUtil::ToString(
+            relative_node->DataAtom()).size() + 1 /* closing > */ : col;
     line_col_in_html_src_ = LineCol({line + r_line - 1, effective_col});
   }
 
