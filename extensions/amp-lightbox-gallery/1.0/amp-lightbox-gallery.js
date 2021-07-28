@@ -32,7 +32,20 @@ const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
 
 class AmpLightboxGallery extends BaseElement {
   /** @override */
+  constructor(element) {
+    super(element);
+
+    /** @private {!../../../src/service/history-impl.History} */
+    this.history_ = null;
+
+    /** @private {number|null} */
+    this.historyId_ = null;
+  }
+
+  /** @override */
   init() {
+    this.history_ = Services.historyForDoc(this.getAmpDoc());
+
     this.registerApiAction(
       DEFAULT_ACTION,
       (api, invocation) => this.openAction(api, invocation),
@@ -75,12 +88,21 @@ class AmpLightboxGallery extends BaseElement {
     const scroller = this.element.shadowRoot.querySelector('[part=scroller]');
     this.setAsContainer?.(scroller);
     triggerAnalyticsEvent(this.element, 'lightboxOpened');
+
+    this.history_
+      .push(() => this.api().close())
+      .then((historyId) => (this.historyId_ = historyId));
   }
 
   /** @override */
   afterClose() {
     super.afterClose();
     this.removeAsContainer?.();
+
+    if (this.historyId_ != null) {
+      this.history_.pop(this.historyId_);
+      this.historyId_ = null;
+    }
   }
 
   /** @override */
