@@ -20,7 +20,7 @@ import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
 import {Layout} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {userAssert} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 import {validateMediaMetadata} from '../../../src/mediasession-helper';
 
 /** @const {string} */
@@ -36,12 +36,18 @@ export class AmpAudio extends BaseElement {
     this.registerApiAction('pause', (api) => api./*OK*/ pause());
     this.registerApiAction('isPlaying', (api) => api./*OK*/ isPlaying());
 
+    // Actions won't work with `<amp-story>` element
+    if (closestAncestorElementBySelector(this.element, 'AMP-STORY')) {
+      user().warn(
+        TAG,
+        '<amp-story> elements do not support actions on ' +
+          '<amp-audio> elements'
+      );
+    }
+
     return dict({
       'validateMediaMetadata': (element, metaData) => {
         validateMediaMetadata(element, metaData);
-      },
-      'isStoryDescendant_': () => {
-        return closestAncestorElementBySelector(this.element, 'AMP-STORY');
       },
       'toggleFallback': (fallback) => {
         this.toggleFallback(fallback);

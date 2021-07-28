@@ -37,7 +37,6 @@ export function AudioWithRef(props, ref) {
     autoplay,
     children,
     controlsList,
-    isStoryDescendant_,
     loop,
     muted,
     preload,
@@ -51,25 +50,6 @@ export function AudioWithRef(props, ref) {
 
   /** @public {boolean} */
   const isPlaying = useRef(false);
-
-  /**
-   * Checks if the function is allowed to be called
-   * @return {boolean}
-   */
-  const isInvocationValid_ = useCallback(() => {
-    if (!audioRef) {
-      return false;
-    }
-
-    if (isStoryDescendant_ && isStoryDescendant_()) {
-      console /*OK*/
-        .warn(
-          '<amp-story> elements do not support actions on <amp-audio> elements'
-        );
-      return false;
-    }
-    return true;
-  }, [isStoryDescendant_]);
 
   /**
    * Prepares Media Metadata
@@ -88,26 +68,18 @@ export function AudioWithRef(props, ref) {
    */
   const playCallback = useCallback(() => {
     triggerAnalyticsEvent(audioRef.current, 'audio-play');
-
-    if (!isInvocationValid_()) {
-      return;
-    }
     audioRef.current.play();
     isPlaying.current = true;
-  }, [isPlaying, isInvocationValid_]);
+  }, [isPlaying]);
 
   /**
    * Pauses audio callback
    */
   const pauseCallback = useCallback(() => {
     triggerAnalyticsEvent(audioRef.current, 'audio-pause');
-
-    if (!isInvocationValid_()) {
-      return;
-    }
     audioRef.current.pause();
     isPlaying.current = false;
-  }, [isPlaying, isInvocationValid_]);
+  }, [isPlaying]);
 
   /**
    * Updates media session for current window/tab
