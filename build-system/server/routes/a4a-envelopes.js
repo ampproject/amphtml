@@ -15,8 +15,8 @@
  */
 
 const express = require('express');
+const fetch = require('node-fetch');
 const fs = require('fs');
-const request = require('request');
 const {getServeMode, replaceUrls} = require('../app-utils');
 const {log} = require('../../common/logging');
 const {red} = require('kleur/colors');
@@ -141,23 +141,15 @@ function getInaboxUrl(req, extraExperiment) {
  * @param {Object} query
  * @return {!Promise<?string>}
  */
-function requestFromUrl(template, url, query) {
-  return new Promise((resolve, reject) => {
-    request(url, (error, response, body) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-      if (
-        !response.headers['content-type'] ||
-        response.headers['content-type'].startsWith('text/html')
-      ) {
-        resolve(fillTemplate(template, url, query, body));
-      } else {
-        resolve(null);
-      }
-    });
-  });
+async function requestFromUrl(template, url, query) {
+  const response = await fetch(url);
+  if (
+    !response.headers.has('Content-Type') ||
+    response.headers.get('Content-Type').startsWith('text/html')
+  ) {
+    return fillTemplate(template, url, query, await response.text());
+  }
+  return null;
 }
 
 /**

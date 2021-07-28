@@ -244,8 +244,8 @@ export class AmpStoryPlayer {
    * @private
    */
   attachCallbacksToElement_() {
-    this.element_.buildCallback = this.buildCallback.bind(this);
-    this.element_.layoutCallback = this.layoutCallback.bind(this);
+    this.element_.buildPlayer = this.buildPlayer.bind(this);
+    this.element_.layoutPlayer = this.layoutPlayer.bind(this);
     this.element_.getElement = this.getElement.bind(this);
     this.element_.getStories = this.getStories.bind(this);
     this.element_.load = this.load.bind(this);
@@ -273,8 +273,8 @@ export class AmpStoryPlayer {
     if (!!this.element_.isBuilt_) {
       throw new Error(`[${TAG}] calling load() on an already loaded element.`);
     }
-    this.buildCallback();
-    this.layoutCallback();
+    this.buildPlayer();
+    this.layoutPlayer();
   }
 
   /**
@@ -365,7 +365,7 @@ export class AmpStoryPlayer {
   }
 
   /** @public */
-  buildCallback() {
+  buildPlayer() {
     if (!!this.element_.isBuilt_) {
       return;
     }
@@ -682,7 +682,7 @@ export class AmpStoryPlayer {
   /**
    * @public
    */
-  layoutCallback() {
+  layoutPlayer() {
     if (!!this.element_.isLaidOut_) {
       return;
     }

@@ -29,11 +29,15 @@ import {
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
-import {createShadowRootWithStyle, shouldShowStoryUrlInfo} from './utils';
+import {closest, matches, scopedQuerySelector} from '../../../src/dom';
+import {
+  createShadowRootWithStyle,
+  shouldShowStoryUrlInfo,
+  triggerClickFromLightDom,
+} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {matches, scopedQuerySelector} from '../../../src/dom';
 import {renderAsElement} from './simple-template';
 import {setImportantStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
@@ -92,6 +96,9 @@ const SIDEBAR_CLASS = 'i-amphtml-story-sidebar-control';
 /** @private @const {string} */
 const HAS_NEW_PAGE_ATTRIBUTE = 'i-amphtml-story-has-new-page';
 
+/** @private @const {string} */
+const ATTRIBUTION_CLASS = 'i-amphtml-story-story-attribution';
+
 /** @private @const {number} */
 const HIDE_MESSAGE_TIMEOUT_MS = 1500;
 
@@ -102,6 +109,36 @@ const TEMPLATE = {
     'class': 'i-amphtml-story-system-layer i-amphtml-story-system-reset',
   }),
   children: [
+    {
+      tag: 'a',
+      attrs: dict({
+        'class': ATTRIBUTION_CLASS,
+        'target': '_blank',
+      }),
+      children: [
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-story-attribution-logo-container',
+          }),
+          children: [
+            {
+              tag: 'img',
+              attrs: dict({
+                'alt': '',
+                'class': 'i-amphtml-story-attribution-logo',
+              }),
+            },
+          ],
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-story-attribution-text',
+          }),
+        },
+      ],
+    },
     {
       tag: 'div',
       attrs: dict({
@@ -479,6 +516,11 @@ export class SystemLayer {
         )
       ) {
         this.onViewerControlClick_(dev().assertElement(event.target));
+      } else if (
+        matches(target, `.${ATTRIBUTION_CLASS}, .${ATTRIBUTION_CLASS} *`)
+      ) {
+        const anchorClicked = closest(target, (e) => matches(e, 'a[href]'));
+        triggerClickFromLightDom(anchorClicked, this.parentEl_);
       }
     });
 

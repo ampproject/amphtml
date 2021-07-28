@@ -35,6 +35,8 @@ createTask('build', 'build', 'build');
 createTask('bundle-size', 'bundleSize', 'bundle-size');
 createTask('caches-json', 'cachesJson', 'caches-json');
 createTask('check-analytics-vendors-list', 'checkAnalyticsVendorsList', 'check-analytics-vendors-list'); // prettier-ignore
+createTask('check-asserts', 'checkAsserts', 'check-asserts'); // prettier-ignore
+createTask('check-build-system', 'checkBuildSystem', 'check-build-system');
 createTask('check-exact-versions', 'checkExactVersions','check-exact-versions'); // prettier-ignore
 createTask('check-links', 'checkLinks', 'check-links');
 createTask('check-owners', 'checkOwners', 'check-owners');

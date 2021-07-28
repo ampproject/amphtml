@@ -161,6 +161,4 @@ export const mixedLength = () => {
   );
 };
 
-Default.story = {
-  name: 'default',
-};
+Default.storyName = 'default';

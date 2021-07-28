@@ -15,19 +15,26 @@
  */
 'use strict';
 
+const fs = require('fs');
+const {
+  ciBuildSha,
+  ciPullRequestSha,
+  isCiBuild,
+  isCircleciBuild,
+} = require('../common/ci');
 const {
   gitBranchCreationPoint,
   gitBranchName,
   gitCommitHash,
   gitDiffCommitLog,
-  gitDiffStatMaster,
-  gitCiMasterBaseline,
+  gitDiffStatMain,
+  gitCiMainBaseline,
   shortSha,
 } = require('../common/git');
-const {ciBuildSha, ciPullRequestSha, isCiBuild} = require('../common/ci');
 const {cyan, green, yellow} = require('kleur/colors');
 const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
+const {mainBranch} = require('../common/main-branch');
 const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
 
 const UNMINIFIED_OUTPUT_FILE = `amp_unminified_${ciBuildSha()}.zip`;
@@ -54,8 +61,8 @@ function printChangeSummary() {
 
   if (isCiBuild()) {
     logWithoutTimestamp(
-      `${loggingPrefix} Latest commit from ${cyan('master')} included ` +
-        `in this build: ${cyan(shortSha(gitCiMasterBaseline()))}`
+      `${loggingPrefix} Latest commit from ${cyan(mainBranch)} included ` +
+        `in this build: ${cyan(shortSha(gitCiMainBaseline()))}`
     );
     commitSha = ciPullRequestSha();
   } else {
@@ -66,7 +73,7 @@ function printChangeSummary() {
       `${cyan(shortSha(commitSha))}`
   );
 
-  const filesChanged = gitDiffStatMaster();
+  const filesChanged = gitDiffStatMain();
   logWithoutTimestamp(filesChanged);
 
   const branchCreationPoint = gitBranchCreationPoint();
@@ -74,7 +81,7 @@ function printChangeSummary() {
     logWithoutTimestamp(
       `${loggingPrefix} Commit log since branch`,
       `${cyan(gitBranchName())} was forked from`,
-      `${cyan('master')} at`,
+      `${cyan(mainBranch)} at`,
       `${cyan(shortSha(branchCreationPoint))}:`
     );
     logWithoutTimestamp(gitDiffCommitLog() + '\n');
@@ -85,13 +92,13 @@ function printChangeSummary() {
       'Could not find a common ancestor for',
       cyan(gitBranchName()),
       'and',
-      cyan('master') + '. (This can happen with older PR branches.)'
+      cyan(mainBranch) + '. (This can happen with older PR branches.)'
     );
     logWithoutTimestamp(
       loggingPrefix,
       yellow('NOTE 1:'),
       'If this causes unexpected test failures, try rebasing the PR branch on',
-      cyan('master') + '.'
+      cyan(mainBranch) + '.'
     );
     logWithoutTimestamp(
       loggingPrefix,
@@ -103,15 +110,28 @@ function printChangeSummary() {
 }
 
 /**
- * Prints a message indicating why a job was skipped.
+ * Signal to dependent jobs that they should be skipped.
+ *
+ * Currently only relevant for CircleCI builds.
+ */
+function signalGracefulHalt() {
+  if (isCircleciBuild()) {
+    fs.closeSync(fs.openSync('/tmp/workspace/.CI_GRACEFULLY_HALT', 'w'));
+  }
+}
+
+/**
+ * Prints a message indicating why a job was skipped and mark its dependent jobs
+ * for skipping.
  * @param {string} jobName
  * @param {string} skipReason
  */
-function printSkipMessage(jobName, skipReason) {
+function skipDependentJobs(jobName, skipReason) {
   const loggingPrefix = getLoggingPrefix();
   logWithoutTimestamp(
     `${loggingPrefix} Skipping ${cyan(jobName)} because ${skipReason}.`
   );
+  signalGracefulHalt();
 }
 
 /**
@@ -341,7 +361,7 @@ module.exports = {
   downloadNomoduleOutput,
   downloadModuleOutput,
   printChangeSummary,
-  printSkipMessage,
+  skipDependentJobs,
   processAndUploadNomoduleOutput,
   startTimer,
   stopTimer,

@@ -1,17 +1,5 @@
 {
-  "experimentA": {
-    "name": "A4A No Signing RTV Experiment",
-    "environment": "AMP",
-    "issue": "https://github.com/ampproject/amphtml/issues/27189",
-    "expiration_date_utc": "2021-06-30",
-    "define_experiment_constant": "NO_SIGNING_RTV"
-  },
-  "experimentB": {
-    "name": "Ini-load signal without blocking measurements",
-    "environment": "AMP",
-    "issue": "https://github.com/ampproject/amphtml/issues/31540",
-    "expiration_date_utc": "2021-06-30",
-    "define_experiment_constant": "INI_LOAD_INOB"
-  },
+  "experimentA": {},
+  "experimentB": {},
   "experimentC": {}
 }

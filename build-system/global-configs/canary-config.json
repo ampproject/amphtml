@@ -1,7 +1,6 @@
 {
   "allow-doc-opt-in": ["amp-next-page"],
   "allow-url-opt-in": [],
-  "amp-accordion-display-locking": 1,
   "canary": 1,
   "a4aProfilingRate": 0.01,
   "adsense-ad-size-optimization": 1,

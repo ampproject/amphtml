@@ -142,6 +142,25 @@ describes.realWin(
       );
     });
 
+    it('unlayout and relayout', async () => {
+      const bc = await getSpringboardPlayer({
+        'data-site-id': '261',
+        'data-mode': 'video',
+        'data-content-id': '1578473',
+        'data-player-id': 'test401',
+        'data-domain': 'test.com',
+        'data-items': '10',
+      });
+      expect(bc.querySelector('iframe')).to.exist;
+
+      const unlayoutResult = bc.unlayoutCallback();
+      expect(unlayoutResult).to.be.true;
+      expect(bc.querySelector('iframe')).to.not.exist;
+
+      await bc.layoutCallback();
+      expect(bc.querySelector('iframe')).to.exist;
+    });
+
     describe('createPlaceholderCallback', () => {
       it('should create a placeholder image', () => {
         return getSpringboardPlayer({

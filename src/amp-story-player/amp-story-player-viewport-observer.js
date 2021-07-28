@@ -77,7 +77,7 @@ export class AmpStoryPlayerViewportObserver {
 
   /**
    * Fallback for when IntersectionObserver is not supported. Calls
-   * layoutCallback on the element when it is close to the viewport.
+   * layoutPlayer on the element when it is close to the viewport.
    * @private
    */
   createInObFallback_() {

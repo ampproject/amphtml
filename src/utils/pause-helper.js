@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {observeContentSize, unobserveContentSize} from './size-observer';
+import {observeBorderBoxSize, unobserveBorderBoxSize} from './size-observer';
 
 export class PauseHelper {
   /**
@@ -26,6 +26,9 @@ export class PauseHelper {
 
     /** @private {boolean} */
     this.isPlaying_ = false;
+
+    /** @private {boolean} */
+    this.hasSize_ = false;
 
     this.pauseWhenNoSize_ = this.pauseWhenNoSize_.bind(this);
   }
@@ -39,18 +42,26 @@ export class PauseHelper {
     }
     this.isPlaying_ = isPlaying;
     if (isPlaying) {
-      observeContentSize(this.element_, this.pauseWhenNoSize_);
+      // Pause will not be called until transitioning from "has size" to
+      // "no size". Which means a measurement must first be received that
+      // has size, then a measurement that does not have size.
+      this.hasSize_ = false;
+      observeBorderBoxSize(this.element_, this.pauseWhenNoSize_);
     } else {
-      unobserveContentSize(this.element_, this.pauseWhenNoSize_);
+      unobserveBorderBoxSize(this.element_, this.pauseWhenNoSize_);
     }
   }
 
   /**
-   * @param {!../layout-rect.LayoutSizeDef} size
+   * @param {!ResizeObserverSize} size
    * @private
    */
-  pauseWhenNoSize_({width, height}) {
-    const hasSize = width > 0 && height > 0;
+  pauseWhenNoSize_({inlineSize, blockSize}) {
+    const hasSize = inlineSize > 0 && blockSize > 0;
+    if (hasSize === this.hasSize_) {
+      return;
+    }
+    this.hasSize_ = hasSize;
     if (!hasSize) {
       this.element_.pause();
     }

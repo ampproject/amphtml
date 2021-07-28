@@ -21,7 +21,7 @@
 
 const {
   downloadExperimentOutput,
-  printSkipMessage,
+  skipDependentJobs: skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
@@ -65,7 +65,7 @@ function pushBuildWorkflow() {
     downloadExperimentOutput(experiment);
     runExperimentTests(config);
   } else {
-    printSkipMessage(
+    skipDependentJobs(
       jobName,
       `${experiment} is expired, misconfigured, or does not exist`
     );
@@ -82,7 +82,7 @@ function prBuildWorkflow() {
   ) {
     pushBuildWorkflow();
   } else {
-    printSkipMessage(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime, integration tests, or end-to-end tests'
     );

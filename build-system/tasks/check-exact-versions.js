@@ -19,7 +19,7 @@ const fs = require('fs-extra');
 const globby = require('globby');
 const semver = require('semver');
 const {cyan, green, red} = require('kleur/colors');
-const {gitDiffFileMaster} = require('../common/git');
+const {gitDiffFileMain} = require('../common/git');
 const {log, logLocalDev, logWithoutTimestamp} = require('../common/logging');
 
 /**
@@ -66,7 +66,7 @@ async function checkExactVersions() {
         cyan(file),
         'do not have an exact version.'
       );
-      logWithoutTimestamp(gitDiffFileMaster(file));
+      logWithoutTimestamp(gitDiffFileMain(file));
       throw new Error('Check failed');
     }
   });

@@ -1527,6 +1527,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentState: null,
             consentString: null,
             gdprApplies: null,
+            consentStringType: null,
             additionalConsent: null,
           },
           rtcResponse
@@ -1707,6 +1708,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         isStickyAd: () => false,
         maybeInitStickyAd: () => {},
       };
+      await a4a.buildCallback();
       await a4a.layoutCallback();
       expect(
         renderNonAmpCreativeSpy.calledOnce,
@@ -2778,6 +2780,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentState: CONSENT_POLICY_STATE.SUFFICIENT,
             consentString,
             gdprApplies,
+            consentStringType: consentMetadata['consentStringType'],
             additionalConsent: consentMetadata['additionalConsent'],
           })
         ).calledOnce;
@@ -2831,6 +2834,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentState: CONSENT_POLICY_STATE.SUFFICIENT,
             consentString,
             gdprApplies,
+            consentStringType: consentMetadata['consentStringType'],
             additionalConsent: consentMetadata['additionalConsent'],
           })
         ).calledOnce;
@@ -2875,6 +2879,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           getAdUrlSpy.withArgs({
             consentState: CONSENT_POLICY_STATE.UNKNOWN,
             consentString: null,
+            consentStringType: null,
             gdprApplies: null,
             additionalConsent: null,
           })

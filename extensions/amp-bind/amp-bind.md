@@ -91,6 +91,9 @@ Calling `AMP.setState()` in some examples may set or change states of other exam
     .redBorder {
       border: 5px solid red;
     }
+    .defaultBorder {
+      border: 5px solid transparent;
+    }
   </style>
 </head>
 <body>
@@ -108,7 +111,7 @@ Calling `AMP.setState()` in some examples may set or change states of other exam
       }
     </script>
   </amp-state>
-  <div class="greenBorder" [class]="theFood[currentMeal].style">
+  <div class="defaultBorder" [class]="theFood[currentMeal].style || 'defaultBorder'">
     <p>Each food has a different border color.</p>
     <p [text]="'I want to eat ' + currentMeal + '.'">I want to eat cupcakes.</p>
     <amp-img

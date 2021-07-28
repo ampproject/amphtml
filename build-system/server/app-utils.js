@@ -85,19 +85,11 @@ const isRtvMode = (serveMode) => {
  * @param {string} file
  * @param {string=} hostName
  * @param {boolean=} inabox
- * @param {boolean=} storyV1
  * @return {string}
  */
-const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
+const replaceUrls = (mode, file, hostName, inabox) => {
   hostName = hostName || '';
   if (mode == 'default') {
-    // TODO:(ccordry) remove this when story 0.1 is deprecated
-    if (storyV1) {
-      file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/v0\/amp-story-0\.1\.js/g,
-        hostName + '/dist/v0/amp-story-1.0.max.js'
-      );
-    }
     file = file.replace(
       /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
       hostName + '/dist/amp.js'

@@ -1522,7 +1522,8 @@ describe('ValidatorRulesMakeSense', () => {
         expect(specNameIsUnique.hasOwnProperty(tagSpec.specName)).toBe(false);
         specNameIsUnique[tagSpec.specName] = 0;
       } else if (tagSpec.extensionSpec !== null) {
-        const specName = tagSpec.extensionSpec.name + ' extension script';
+        const specName = tagSpec.extensionSpec.name + ' ' +
+            tagSpec.extensionSpec.versionName + ' extension script';
 
         expect(specNameIsUnique.hasOwnProperty(specName)).toBe(false);
         specNameIsUnique[specName] = 0;
@@ -1887,8 +1888,8 @@ describe('ValidatorRulesMakeSense', () => {
            () => {
              expect(
                  hasSrc || hasJson || hasTextPlain ||
-                 (hasOctetStream && hasCiphertext) ||
-                 hasAmpOnerror).toBe(true);
+                 (hasOctetStream && hasCiphertext) || hasAmpOnerror)
+                 .toBe(true);
            });
       }
       // cdata_regex and mandatory_cdata

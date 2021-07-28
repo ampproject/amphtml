@@ -105,6 +105,16 @@ class AmpKaltura extends AMP.BaseElement {
   }
 
   /** @override */
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    return true;
+  }
+
+  /** @override */
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('amp-img');
     this.propagateAttributes(['aria-label'], placeholder);

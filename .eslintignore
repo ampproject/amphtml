@@ -8,6 +8,7 @@ firebase/**
 out/**
 test/coverage/**
 .babel-cache/**
+.css-cache/**
 
 # Code directories
 build-system/tasks/visual-diff/snippets/*.js
