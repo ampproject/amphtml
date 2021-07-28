@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-_;
 import {Dailymotion} from './component';
-import {VideoBaseElement} from '../../amp-video/1.0/base-element';
+import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
 
 export class BaseElement extends VideoBaseElement {}
 

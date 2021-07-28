@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {ContainWrapper} from '../../../src/preact/component';
-import {forwardRef} from '../../../src/preact/compat';
+import * as Preact from '#preact';
+import {forwardRef} from '#preact/compat';
 import {
   useCallback,
   useEffect,
@@ -24,24 +23,100 @@ import {
   useMemo,
   useRef,
   useState,
-} from '../../../src/preact';
-import { getDailymotionIframeSrc } from '../dailymotion-api';
+} from '#preact';
+import {dispatchCustomEvent} from '#core/dom';
+import {
+  DailymotionEvents,
+  getDailymotionIframeSrc,
+  makeDailymotionMessage,
+} from '../dailymotion-api';
+import {VideoIframe} from '../../amp-video/1.0/video-iframe';
+import {parseQueryString} from '#core/types/string/url';
+
+/**
+ * @param {string} method
+ * @return {string}
+ */
+function makeMethodMessage(method) {
+  switch (method) {
+    case 'mute':
+      return makeDailymotionMessage('muted', [true]);
+      break;
+    case 'unmute':
+      return makeDailymotionMessage('muted', [false]);
+      break;
+    case 'showControls':
+      return makeDailymotionMessage('controls', [true]);
+      break;
+    case 'hideControls':
+      return makeDailymotionMessage('controls', [false]);
+      break;
+
+    default:
+      makeDailymotionMessage(method);
+  }
+}
+
 /**
  * @param {!DailymotionDef.Props} props
  * @param ref
  * @return {PreactDef.Renderable}
  */
-export function DailymotionWithRef({videoId, ...rest}, ref) {
+export function DailymotionWithRef(
+  {
+    endscreenEnable,
+    info,
+    mute,
+    sharingEnable,
+    start,
+    uiHighlight,
+    uiLog,
+    videoId,
+    ...rest
+  },
+  ref
+) {
   const src = useMemo(
     () =>
-      getDailymotionIframeSrc(videoId, mute, endscreenEnable, sharingEnable, start, uiHighlight, uiLog, info),
-    [videoId]
+      getDailymotionIframeSrc(
+        videoId,
+        mute,
+        endscreenEnable,
+        sharingEnable,
+        start,
+        uiHighlight,
+        uiLog,
+        info
+      ),
+    [
+      endscreenEnable,
+      info,
+      mute,
+      sharingEnable,
+      start,
+      uiHighlight,
+      uiLog,
+      videoId,
+    ]
   );
-  const makeMethodMessage = useCallback(() => '{}', []);
 
   const onMessage = useCallback((e) => {
-    console.log(e);
+    const {currentTarget} = e;
+    const data = parseQueryString(/** @type {string} */ (eventData));
+    if (data === undefined) {
+      return; // The message isn't valid
+    }
+    console.log(data);
+    if (data['event'] === DailymotionEvents.API_READY) {
+      dispatchCustomEvent(currentTarget, 'canplay');
+      return;
+    }
+    if (DailymotionEvents.event) {
+      dispatchEvent(currentTarget, DailymotionEvents.event);
+      return;
+    }
   }, []);
+
   return (
     <VideoIframe
       ref={ref}

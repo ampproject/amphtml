@@ -31,12 +31,8 @@ import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-<<<<<<< HEAD
-} from '../../../src/dom';
-import {getDailymotionIframeSrc} from '../dailymotion-api';
-=======
 } from '#core/dom/fullscreen';
->>>>>>> 9d197f79ddf5b17c7c716c4584adaaea22ed9ba6
+import {DailymotionEvents, getDailymotionIframeSrc} from '../dailymotion-api';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {isLayoutSizeDefined} from '#core/dom/layout';
@@ -44,35 +40,7 @@ import {parseQueryString} from '#core/types/string/url';
 
 const TAG = 'amp-dailymotion';
 
-/**
- * Player events reverse-engineered from the Dailymotion API
- * NOTE: 'unstarted' isn't part of the API, just a placeholder
- * as an initial state
- *
- * @enum {string}
- * @private
- */
-const DailymotionEvents = {
-  UNSTARTED: 'unstarted',
-  API_READY: 'apiready',
-  // Events fired for both the original content or ads
-  START: 'start',
-  PLAY: 'play',
-  PAUSE: 'pause',
-  END: 'end',
-  // Events fired only for ads
-  AD_START: 'ad_start',
-  AD_PLAY: 'ad_play',
-  AD_PAUSE: 'ad_pause',
-  AD_END: 'ad_end',
-  // Events fired only for the original content
-  VIDEO_START: 'video_start',
-  VIDEO_END: 'video_end',
-  // Other events
-  VOLUMECHANGE: 'volumechange',
-  STARTED_BUFFERING: 'progress',
-  FULLSCREEN_CHANGE: 'fullscreenchange',
-};
+;
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -208,6 +176,7 @@ class AmpDailymotion extends AMP.BaseElement {
       return; // The message isn't valid
     }
 
+    console.log(data);
     redispatch(this.element, data['event'], {
       [DailymotionEvents.API_READY]: VideoEvents.LOAD,
       [DailymotionEvents.END]: [VideoEvents.ENDED, VideoEvents.PAUSE],

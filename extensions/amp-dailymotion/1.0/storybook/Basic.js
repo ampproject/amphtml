@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {Dailymotion} from '../component';
 import {withKnobs} from '@storybook/addon-knobs';
 
@@ -27,10 +27,7 @@ export default {
 export const _default = () => {
   // DO NOT SUBMIT: This is example code only.
   return (
-    <Dailymotion
-      style={{width: 300, height: 200}}
-      example-property="example string property value"
-    >
+    <Dailymotion style={{width: 300, height: 200}} videoId="x3rdtfy">
       This text is inside.
     </Dailymotion>
   );

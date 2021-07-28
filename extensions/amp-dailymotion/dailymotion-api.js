@@ -15,7 +15,7 @@
  */
 
 import {addParamsToUrl} from '../../src/url';
-import {dict} from '../../src/core/types/object';
+import {dict} from '#core/types/object';
 
 /**
  *
@@ -59,3 +59,47 @@ export function getDailymotionIframeSrc(
   iframeUrl = addParamsToUrl(iframeUrl, implicitParams);
   return iframeUrl;
 }
+
+/**
+ * @param {string} method
+ * @param {?Object|string=} params
+ * @return {string}
+ */
+export function makeDailymotionMessage(method, params = '') {
+  return JSON.stringify(
+    dict({
+      'method': method,
+      'value': params,
+    })
+  );
+}
+
+/**
+ * Player events reverse-engineered from the Dailymotion API
+ * NOTE: 'unstarted' isn't part of the API, just a placeholder
+ * as an initial state
+ *
+ * @enum {string}
+ * @private
+ */
+export const DailymotionEvents = {
+  UNSTARTED: 'unstarted',
+  API_READY: 'apiready',
+  // Events fired for both the original content or ads
+  START: 'start',
+  PLAY: 'play',
+  PAUSE: 'pause',
+  END: 'end',
+  // Events fired only for ads
+  AD_START: 'ad_start',
+  AD_PLAY: 'ad_play',
+  AD_PAUSE: 'ad_pause',
+  AD_END: 'ad_end',
+  // Events fired only for the original content
+  VIDEO_START: 'video_start',
+  VIDEO_END: 'video_end',
+  // Other events
+  VOLUMECHANGE: 'volumechange',
+  STARTED_BUFFERING: 'progress',
+  FULLSCREEN_CHANGE: 'fullscreenchange',
+};
