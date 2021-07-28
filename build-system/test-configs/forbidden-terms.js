@@ -103,13 +103,23 @@ const forbiddenTermsGlobal = {
   'describes.*\\.only': {
     message: 'Please remove all instances of describes.only',
   },
+  // TODO(#35443) Reduce the number of files that use non default timeouts.
   'this.timeout': {
     message: 'Tests are not allowed to override the default timeout',
     allowlist: [
-      'ads/google/a4a/test/test-utils.js',
-      'build-system/tasks/e2e/describes-e2e.js',
-      'extensions/amp-a4a/rtc-publisher-implementation-guide.md',
+      // Markdown files.
       'extensions/amp-a4a/rtc-documentation.md',
+      'extensions/amp-a4a/rtc-publisher-implementation-guide.md',
+
+      // Infrastructure
+      'build-system/tasks/e2e/describes-e2e.js',
+      'testing/describes.js',
+
+      // Thirdparty
+      'ads/google/a4a/test/test-utils.js',
+      'third_party/subscriptions-project/swg.js',
+
+      // Tests
       'extensions/amp-accordion/0.1/test/integration/test-amp-accordion.js',
       'extensions/amp-ad-network-adsense-impl/0.1/test/test-amp-ad-network-adsense-impl.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/test/test-amp-ad-network-doubleclick-impl.js',
@@ -164,8 +174,6 @@ const forbiddenTermsGlobal = {
       'test/integration/test-video-manager.js',
       'test/integration/test-amp-ad-doubleclick.js',
       'test/integration/test-amp-bind.js',
-      'third_party/subscriptions-project/swg.js',
-      'testing/describes.js',
     ],
   },
   'dev\\(\\)\\.assert\\(': 'Use the devAssert function instead.',
