@@ -65,6 +65,7 @@ export function BrightcoveWithRef(
     onReady,
     player = DEFAULT,
     playlistId,
+    referrer,
     videoId,
     onPlayingState,
     urlParams,
@@ -87,9 +88,9 @@ export function BrightcoveWithRef(
             : videoId
             ? '&videoId=' + encodeId(videoId)
             : ''),
-        {...urlParams, playsinline: true, autoplay: undefined}
+        {...urlParams, referrer, playsinline: true, autoplay: undefined}
       ),
-    [account, embed, player, playlistId, urlParams, videoId]
+    [account, embed, player, playlistId, referrer, urlParams, videoId]
   );
 
   const makeMethodMessage = useCallback((method) => makeMessage(method), []);
