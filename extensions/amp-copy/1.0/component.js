@@ -41,9 +41,18 @@ export function Copy({children, sourceId, text, ...rest}) {
     }
   }, [setIsCopySupported]);
   const copy = useCallback((sourceId) => {
-    const content = ref.current.ownerDocument.getElementById(sourceId);
-    const text = (content.value ?? content.textContent).trim();
-    setStatus(copyTextToClipboard(window, text));
+    let textToCopy = '';
+
+    if (sourceId == undefined) {
+      // Copy static text value
+      textToCopy = text;
+    } else {
+      // Copy conent of sourceId element
+      const content = ref.current.ownerDocument.getElementById(sourceId);
+      textToCopy = (content.value ?? content.textContent).trim();
+    }
+
+    setStatus(copyTextToClipboard(window, textToCopy));
   }, []);
   return (
     <button
