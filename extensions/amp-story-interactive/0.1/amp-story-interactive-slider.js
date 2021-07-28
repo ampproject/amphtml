@@ -20,9 +20,7 @@ import {
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-slider-0.1.css';
 import {htmlFor} from '#core/dom/static-template';
-//import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
 import {setImportantStyles} from '#core/dom/style';
-import {StateProperty} from 'extensions/amp-story/1.0/amp-story-store-service';
 
 /**
  * Generates the template for the slider.
