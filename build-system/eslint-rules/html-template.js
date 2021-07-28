@@ -181,7 +181,7 @@ function create(context) {
     const matches = [];
 
     let match;
-    while ((match = invalid.exec(string))) {
+    while ((match = invalid.exec(string)) && !string.includes('<svg')) {
       const [fullMatch, tag] = match;
       matches.push({
         tag,
