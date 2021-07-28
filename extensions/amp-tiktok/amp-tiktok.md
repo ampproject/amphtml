@@ -67,8 +67,8 @@ If you choose to set the height of to a value which is which is greater than the
 
 There are two ways to set a placeholder image:
 
-- Pointing the `data-src` attribute to the image URL
-- Pointing the TikTok provided  `cite` attribute, made available through `blockquote`, to the image URL.  
+-   Pointing the `data-src` attribute to the image URL
+-   Pointing the TikTok provided `cite` attribute, made available through `blockquote`, to the image URL.
 
 ## Attributes
 
