@@ -349,7 +349,9 @@ export class CustomBrowserEventTracker extends EventTracker {
 
     /** @private {?function(!Event)} */
     this.boundOnSession_ = this.observables_.fire.bind(this.observables_);
-    /** @type {?function(!Event)} */ this.debouncedBoundOnSession_ = debounce(
+
+    /** @private {?function(!Event)} */
+    this.debouncedBoundOnSession_ = debounce(
       this.root.ampdoc.win,
       this.boundOnSession_,
       TIME_WAIT
