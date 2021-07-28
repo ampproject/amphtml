@@ -552,7 +552,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @param {!Array<!InteractiveOptionType>} unusedOptionsData
    */
   displayOptionsData(unusedOptionsData) {
-    
     // Subclass must implement
   }
 
@@ -642,6 +641,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * Triggers changes to component state on response interactive.
    *
    * @param {!Element} optionEl
+   * @param {!Array} option_index
    * @protected
    */
   handleOptionSelection(optionEl) {

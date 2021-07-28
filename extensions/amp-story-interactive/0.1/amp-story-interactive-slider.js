@@ -94,24 +94,15 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.sliderType_ = SliderType.PERCENTAGE;
   }
 
-  /**
-   * Handles incoming interactive data response
-   *
-   * RESPONSE FORMAT
-   * {
-   *  options: [
-   *    {
-   *      index:
-   *      count:
-   *      selected:
-   *    },
-   *    ...
-   *  ]
-   * }
-   * @param {InteractiveResponseType|undefined} response
-   * @override
-   */
-   handleSuccessfulDataRetrieval(response) {
+  /** @override */
+  displayOptionsData(responseData) {
+    if (!responseData) {
+      return;
+    }
+  }
+
+  /** @override*/
+  handleSuccessfulDataRetrieval(response) {
     if (!(response && response['options'])) {
       devAssert(
         response && 'options' in response,
@@ -130,11 +121,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     );
   }
 
-  /**
-   * Updates the quiz to reflect the state of the remote data.
-   * @param {!Array<InteractiveOptionType>} data
-   * @override
-   */
+  /** @override*/
   updateComponentOnDataRetrieval(data) {
     this.optionsData_ = this.orderData_(data);
     this.optionsData_.forEach((response) => {
