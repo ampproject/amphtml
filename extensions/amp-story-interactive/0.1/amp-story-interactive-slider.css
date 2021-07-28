@@ -144,7 +144,7 @@
     var(--gradient-angle),
     white,
     var(--interactive-accent-color) var(--percentage-corrected)
-  ) !important; 
+  ) !important;
   opacity: 0.3 !important;
   z-index: 0 !important;
 }
