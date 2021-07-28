@@ -20,7 +20,7 @@
 #include <vector>
 
 #include "absl/strings/string_view.h"
-#include "../../validator.pb.h"
+#include "validator.pb.h"
 
 namespace amp::validator {
 

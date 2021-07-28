@@ -16,10 +16,10 @@
 
 #include "keyframes-parse-css.h"
 
+#include "glog/logging.h"
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
-#include "logging.h"
 
 using absl::make_unique;
 using amp::validator::ValidationError;

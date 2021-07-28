@@ -477,9 +477,8 @@ class Tokenizer {
   }
 
   char32_t Next(int num = 1) {
-    CHECKORDIE(num >= 0, "Spec Error; cannot lookahead a negative amount");
-    CHECKORDIE(num <= 3,
-               "Spec Error; no more than three codepoints of lookahead.");
+    CHECK(num >= 0, "Spec Error; cannot lookahead a negative amount");
+    CHECK(num <= 3, "Spec Error; no more than three codepoints of lookahead.");
     return Codepoint(pos_ + num);
   }
 
@@ -967,9 +966,8 @@ unique_ptr<ErrorToken> CreateParseErrorTokenAt(
 //
 TokenStream::TokenStream(vector<unique_ptr<Token>> tokens)
     : tokens_(std::move(tokens)), pos_(-1) {
-  CHECKORDIE(!tokens_.empty(), "empty tokens");
-  CHECKORDIE(tokens_.back()->Type() == TokenType::EOF_TOKEN,
-             tokens_.back()->Type());
+  CHECK(tokens_.size() > 0, "empty tokens");
+  CHECK(tokens_.back()->Type() == TokenType::EOF_TOKEN, tokens_.back()->Type());
 
   // Since the last element in |tokens| may get released, we make a
   // copy so that TokenAt may safely return it for n >=
@@ -979,7 +977,7 @@ TokenStream::TokenStream(vector<unique_ptr<Token>> tokens)
 
 const Token& TokenStream::TokenAt(int n) const {
   const unique_ptr<Token>& token = (n < tokens_.size()) ? tokens_[n] : eof_;
-  CHECKORDIE(token.get(), n);
+  CHECK(token.get(), n);
   return *token;
 }
 
@@ -990,13 +988,13 @@ const Token& TokenStream::Next() { return TokenAt(pos_ + 1); }
 void TokenStream::Reconsume() { --pos_; }
 
 const Token& TokenStream::Current() const {
-  CHECKORDIE(pos_ >= 0, "Consume not called");
+  CHECK(pos_ >= 0, "Consume not called");
   return TokenAt(pos_);
 }
 
 unique_ptr<Token> TokenStream::ReleaseCurrentOrCreateEof() {
   if (pos_ < tokens_.size()) {
-    CHECKORDIE(tokens_[pos_].get(), "null token");
+    CHECK(tokens_[pos_].get(), "null token");
     return std::move(tokens_[pos_]);
   }
   return CreateEOFTokenAt(*eof_);
@@ -1052,7 +1050,7 @@ class Canonicalizer {
   // Parses an At Rule.
   unique_ptr<AtRule> ParseAnAtRule(TokenStream* s,
                                    vector<unique_ptr<ErrorToken>>* errors) {
-    CHECKORDIE(s->Current().Type() == TokenType::AT_KEYWORD, "invalid type");
+    CHECK(s->Current().Type() == TokenType::AT_KEYWORD, "invalid type");
     auto rule = make_unique<AtRule>(s->Current().StringValue());
     s->Current().CopyStartPositionTo(rule.get());
 
@@ -1098,8 +1096,8 @@ class Canonicalizer {
   // selector (if any) and a list of declarations.
   void ParseAQualifiedRule(TokenStream* s, vector<unique_ptr<Rule>>* rules,
                            vector<unique_ptr<ErrorToken>>* errors) {
-    CHECKORDIE(s->Current().Type() != TokenType::EOF_TOKEN, "EOF_TOKEN");
-    CHECKORDIE(s->Current().Type() != TokenType::AT_KEYWORD, "AT_KEYWORD");
+    CHECK(s->Current().Type() != TokenType::EOF_TOKEN, "EOF_TOKEN");
+    CHECK(s->Current().Type() != TokenType::AT_KEYWORD, "AT_KEYWORD");
 
     auto rule = make_unique<QualifiedRule>();
     s->Current().CopyStartPositionTo(rule.get());
@@ -1175,7 +1173,7 @@ class Canonicalizer {
   void ParseADeclaration(TokenStream* s,
                          vector<unique_ptr<Declaration>>* declarations,
                          vector<unique_ptr<ErrorToken>>* errors) {
-    CHECKORDIE(s->Current().Type() == TokenType::IDENT, "invalid type");
+    CHECK(s->Current().Type() == TokenType::IDENT, "invalid type");
 
     auto decl = make_unique<Declaration>(s->Current().StringValue());
     s->Current().CopyStartPositionTo(decl.get());
@@ -1258,10 +1256,10 @@ class Canonicalizer {
                                   vector<unique_ptr<Token>>* tokens,
                                   int depth) {
     if (depth > kMaximumCssRecursion) return false;
-    CHECKORDIE(s->Current().Type() == TokenType::OPEN_CURLY ||
-                   s->Current().Type() == TokenType::OPEN_SQUARE ||
-                   s->Current().Type() == TokenType::OPEN_PAREN,
-               TokenType::Code_Name(s->Current().Type()));
+    CHECK(s->Current().Type() == TokenType::OPEN_CURLY ||
+              s->Current().Type() == TokenType::OPEN_SQUARE ||
+              s->Current().Type() == TokenType::OPEN_PAREN,
+          TokenType::Code_Name(s->Current().Type()));
     std::string mirror =
         static_cast<const GroupingToken&>(s->Current()).Mirror();
     tokens->emplace_back(s->ReleaseCurrentOrCreateEof());
@@ -1292,7 +1290,7 @@ class Canonicalizer {
                                   vector<std::string>{"style"}));
     // A simple block always has a start token (e.g. '{') and
     // either a closing token or EOF token.
-    CHECKORDIE(simple_block.size() >= 2, "");
+    CHECK(simple_block.size() >= 2, "");
 
     int original_size = simple_block.size();
 
@@ -1300,7 +1298,7 @@ class Canonicalizer {
     simple_block.erase(simple_block.begin());
     unique_ptr<Token> eof = CreateEOFTokenAt(*simple_block.back());
     simple_block.back().swap(eof);
-    CHECKORDIE(simple_block.size() == original_size - 1, "");
+    CHECK(simple_block.size() == original_size - 1, "");
     return simple_block;
   }
 
@@ -1311,7 +1309,7 @@ class Canonicalizer {
   static bool ConsumeAFunction(TokenStream* s,
                                vector<unique_ptr<Token>>* tokens, int depth) {
     if (depth > kMaximumCssRecursion) return false;
-    CHECKORDIE(s->Current().Type() == TokenType::FUNCTION_TOKEN, "");
+    CHECK(s->Current().Type() == TokenType::FUNCTION_TOKEN, "");
     tokens->emplace_back(s->ReleaseCurrentOrCreateEof());
     while (true) {
       s->Consume();
@@ -1339,7 +1337,7 @@ class Canonicalizer {
 
     // A simple block always has a start function token
     // either a close paren token or EOF token.
-    CHECKORDIE(function.size() >= 2, "");
+    CHECK(function.size() >= 2, "");
 
     // Convert end token to EOF.
     unique_ptr<Token> eof = CreateEOFTokenAt(*function.back());
@@ -1381,9 +1379,9 @@ namespace {
 //                and token_idx + 1 is in range.
 void ParseUrlToken(const vector<unique_ptr<Token>>& tokens, int token_idx,
                    ParsedCssUrl* parsed) {
-  CHECKORDIE(token_idx + 1 < tokens.size(), "");
+  CHECK(token_idx + 1 < tokens.size(), "");
   const Token& token = *tokens[token_idx];
-  CHECKORDIE(token.Type() == TokenType::URL, "");
+  CHECK(token.Type() == TokenType::URL, "");
   token.CopyStartPositionTo(parsed);
   parsed->set_end_pos(tokens[token_idx + 1]->pos());
   parsed->set_utf8_url(static_cast<const URLToken&>(token).StringValue());
@@ -1397,19 +1395,18 @@ void ParseUrlToken(const vector<unique_ptr<Token>>& tokens, int token_idx,
 int ParseUrlFunction(const vector<unique_ptr<Token>>& tokens, int token_idx,
                      ParsedCssUrl* parsed) {
   const Token& token = *tokens[token_idx];
-  CHECKORDIE(token.Type() == TokenType::FUNCTION_TOKEN, "");
-  CHECKORDIE(static_cast<const FunctionToken&>(token).StringValue() == "url",
-             "");
-  CHECKORDIE(tokens.back()->Type() == TokenType::EOF_TOKEN, "");
+  CHECK(token.Type() == TokenType::FUNCTION_TOKEN, "");
+  CHECK(static_cast<const FunctionToken&>(token).StringValue() == "url", "");
+  CHECK(tokens.back()->Type() == TokenType::EOF_TOKEN, "");
   token.CopyStartPositionTo(parsed);
 
   ++token_idx;  // We've digested the function token above.
-  CHECKORDIE(token_idx < tokens.size(), "tokens missing EOF_TOKEN");
+  CHECK(token_idx < tokens.size(), "tokens missing EOF_TOKEN");
 
   // Consume optional whitespace.
   while (tokens[token_idx]->Type() == TokenType::WHITESPACE) {
     ++token_idx;
-    CHECKORDIE(token_idx < tokens.size(), "tokens missing EOF_TOKEN");
+    CHECK(token_idx < tokens.size(), "tokens missing EOF_TOKEN");
   }
 
   // Consume URL.
@@ -1417,17 +1414,17 @@ int ParseUrlFunction(const vector<unique_ptr<Token>>& tokens, int token_idx,
   parsed->set_utf8_url(
       static_cast<const StringToken&>(*tokens[token_idx]).StringValue());
   ++token_idx;
-  CHECKORDIE(token_idx < tokens.size(), "tokens missing EOF_TOKEN");
+  CHECK(token_idx < tokens.size(), "tokens missing EOF_TOKEN");
 
   // Consume optional whitespace.
   while (tokens[token_idx]->Type() == TokenType::WHITESPACE) {
     ++token_idx;
-    CHECKORDIE(token_idx < tokens.size(), "tokens missing EOF_TOKEN");
+    CHECK(token_idx < tokens.size(), "tokens missing EOF_TOKEN");
   }
 
   // Consume ')'
   if (tokens[token_idx]->Type() != TokenType::CLOSE_PAREN) return -1;
-  CHECKORDIE(token_idx + 1 < tokens.size(), "tokens missing EOF_TOKEN");
+  CHECK(token_idx + 1 < tokens.size(), "tokens missing EOF_TOKEN");
   parsed->set_end_pos(tokens[token_idx + 1]->pos());
   return token_idx + 1;
 }
@@ -1446,8 +1443,8 @@ class UrlFunctionVisitor : public RuleVisitor {
   void LeaveAtRule(const AtRule& at_rule) override { at_rule_scope_.clear(); }
 
   void VisitDeclaration(const Declaration& declaration) override {
-    CHECKORDIE(!declaration.value().empty(), "");
-    CHECKORDIE(declaration.value().back()->Type() == TokenType::EOF_TOKEN, "");
+    CHECK(declaration.value().size() > 0, "");
+    CHECK(declaration.value().back()->Type() == TokenType::EOF_TOKEN, "");
     for (int ii = 0; ii < declaration.value().size() - 1;) {
       const Token& token = *declaration.value()[ii];
       if (token.Type() == TokenType::URL) {
@@ -1541,10 +1538,9 @@ class MediaQueryVisitor : public RuleVisitor {
     // [ AND S* expression ]*
     // ;
     //
-    // This is more convenient because we know that expressions must start
-    // with
-    // '(', so it's simpler to use as a check to distinguis the expression
-    // case from the media type case.
+    // This is more convenient because we know that expressions must start with
+    // '(', so it's simpler to use as a check to distinguis the expression case
+    // from the media type case.
     if (token_stream->Current().Type() == TokenType::OPEN_PAREN) {
       if (!ParseAMediaExpression(token_stream)) return false;
     } else {
@@ -2079,7 +2075,7 @@ htmlparser::json::JsonDict IdSelector::ToJson() const {
 }
 
 unique_ptr<IdSelector> ParseAnIdSelector(TokenStream* token_stream) {
-  CHECKORDIE(TokenType::HASH == token_stream->Current().Type(), "");
+  CHECK(TokenType::HASH == token_stream->Current().Type(), "");
   const HashToken& hash =
       *static_cast<const HashToken*>(&token_stream->Current());
   token_stream->Consume();
@@ -2139,7 +2135,7 @@ unique_ptr<ErrorToken> NewInvalidAttrSelectorError(const Token& start) {
 // token_stream->Current() must be the open square token.
 // Returns either an AttrSelector or a ErrorToken.
 ErrorTokenOr<AttrSelector> ParseAnAttrSelector(TokenStream* token_stream) {
-  CHECKORDIE(TokenType::OPEN_SQUARE == token_stream->Current().Type(), "");
+  CHECK(TokenType::OPEN_SQUARE == token_stream->Current().Type(), "");
   const Token& start = token_stream->Current();
   token_stream->Consume();  // Consumes '['.
   if (token_stream->Current().Type() == TokenType::WHITESPACE)
@@ -2263,7 +2259,7 @@ htmlparser::json::JsonDict PseudoSelector::ToJson() const {
 // the pseudo token can't be parsed (e.g., a lone ':').
 // Returns either a PseudoSelector or an ErrorToken.
 ErrorTokenOr<PseudoSelector> ParseAPseudoSelector(TokenStream* token_stream) {
-  CHECKORDIE(TokenType::COLON == token_stream->Current().Type(), "");
+  CHECK(TokenType::COLON == token_stream->Current().Type(), "");
   const Token& first_colon = token_stream->Current();
   token_stream->Consume();
   bool is_class = true;
@@ -2320,9 +2316,8 @@ void ClassSelector::Accept(SelectorVisitor* visitor) const {
 
 // token_stream->Current() must be the '.' delimiter token.
 unique_ptr<ClassSelector> ParseAClassSelector(TokenStream* token_stream) {
-  CHECKORDIE(IsDelim(token_stream->Current(), "."), "invalid delimiter token");
-  CHECKORDIE(TokenType::IDENT == token_stream->Next().Type(),
-             "invalid ident token");
+  CHECK(IsDelim(token_stream->Current(), "."), "invalid delimiter token");
+  CHECK(TokenType::IDENT == token_stream->Next().Type(), "invalid ident token");
   const DelimToken& dot =
       *static_cast<const DelimToken*>(&token_stream->Current());
   token_stream->Consume();
@@ -2460,9 +2455,9 @@ CombinatorType::Code CombinatorTypeForToken(const Token& token) {
   if (IsDelim(token, "~")) return CombinatorType::GENERAL_SIBLING;
   // CombinatorTypeForToken is only ever called if the token has one of these
   // delimitors, so reaching this point is impossible.
-  CHECKORDIE(false, absl::StrCat("not a combinator token - type=",
-                                 TokenType::Code_Name(token.Type()),
-                                 " value=", token.StringValue()));
+  CHECK(false, absl::StrCat("not a combinator token - type=",
+                            TokenType::Code_Name(token.Type()),
+                            " value=", token.StringValue()));
 }
 
 // Whether or not the provided token could be the start of a simple
