@@ -135,7 +135,12 @@ function create(context) {
       });
     }
 
-    const invalids = invalidVoidTag(string);
+    let invalids = 0;
+
+    if (!/<(svg)/i.test(string)) {
+      invalids = invalidVoidTag(string);
+    }
+
     if (invalids.length) {
       const sourceCode = context.getSourceCode();
       const {start} = template;
@@ -177,7 +182,7 @@ function create(context) {
     // Void tags are defined at
     // https://html.spec.whatwg.org/multipage/syntax.html#void-elements
     const invalid =
-      /<(?!area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)(((svg)?)([a-zA-Z-])+)([\s\n][^>]*)?\/>/gm;
+      /<(?!area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)([a-zA-Z-]+)([\s\n][^>]*)?\/>/gm;
     const matches = [];
 
     let match;
