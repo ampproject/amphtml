@@ -224,7 +224,6 @@ cc_library(
         ":error",
         ":logging",
         ":token",
-        "@com_github_glog//:glog",
     ],
 )
 
@@ -327,7 +326,6 @@ cc_library(
         ":node",
         ":strings",
         ":tokenizer",
-        "@com_github_glog//:glog",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/flags:flag",
     ],
@@ -402,7 +400,6 @@ cc_library(
         ":htmlentities",
         ":logging",
         ":whitespacetable",
-        "@com_github_glog//:glog",
         "@com_google_absl//absl/base",
     ],
 )

@@ -23,10 +23,10 @@
 #include <cstdlib>
 #include <iostream>
 
-#define CHECK(condition, message)                                        \
+#define CHECKORDIE(condition, message)                                   \
   do {                                                                   \
     if (!(condition)) {                                                  \
-      std::cerr << "CHECK(`" #condition "`) failed in " << __FILE__      \
+      std::cerr << "CHECKORDIE(`" #condition "`) failed in " << __FILE__ \
                 << " line " << __LINE__ << ": " << message << std::endl; \
       abort();                                                           \
     }                                                                    \

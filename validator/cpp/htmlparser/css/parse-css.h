@@ -47,7 +47,7 @@
 #include "absl/strings/strip.h"
 #include "css/parse-css.pb.h"
 #include "json/types.h"
-#include "validator.pb.h"
+#include "../../validator.pb.h"
 
 namespace htmlparser::css {
 
@@ -463,25 +463,27 @@ std::string_view StripMinMaxPrefix(absl::string_view prefixed_string);
 
 // Macro to generate method that may accept any string parameter of type
 // absl::string_view, std::string_view, std::string, char* and const char*
-#define TEMPLATED_METHOD_FOR_STRING_TYPES(PUBLIC_METHOD, INTERNAL_IMPL)\
-    /* absl::string_view specialization */\
-template<class T, \
-         typename std::enable_if<std::is_same<T, absl::string_view>::value, \
-                                              bool>::type = true>\
-std::string_view PUBLIC_METHOD(T prefixed_string) {\
-  return INTERNAL_IMPL(prefixed_string);\
-}\
-\
-    /* std::string, char* specialization */\
-template<class T, typename std::enable_if<\
-    std::is_same<T, std::string>::value || \
-    std::is_same<char const*, typename std::decay<T>::type>::value || \
-    std::is_same<char*, typename std::decay<T>::type>::value, \
-    bool>::type = true>\
-std::string_view PUBLIC_METHOD(const T& str) {\
-  absl::string_view prefixed_string(str);\
-  return INTERNAL_IMPL(prefixed_string);\
-}
+#define TEMPLATED_METHOD_FOR_STRING_TYPES(PUBLIC_METHOD, INTERNAL_IMPL)        \
+  /* absl::string_view specialization */                                       \
+  template <class T,                                                           \
+            typename std::enable_if<std::is_same<T, absl::string_view>::value, \
+                                    bool>::type = true>                        \
+  std::string_view PUBLIC_METHOD(T prefixed_string) {                          \
+    return INTERNAL_IMPL(prefixed_string);                                     \
+  }                                                                            \
+                                                                               \
+  /* std::string, char* specialization */                                      \
+  template <class T,                                                           \
+            typename std::enable_if<                                           \
+                std::is_same<T, std::string>::value ||                         \
+                    std::is_same<char const*,                                  \
+                                 typename std::decay<T>::type>::value ||       \
+                    std::is_same<char*, typename std::decay<T>::type>::value,  \
+                bool>::type = true>                                            \
+  std::string_view PUBLIC_METHOD(const T& str) {                               \
+    absl::string_view prefixed_string(str);                                    \
+    return INTERNAL_IMPL(prefixed_string);                                     \
+  }
 
 }  // namespace internal
 
