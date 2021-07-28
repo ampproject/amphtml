@@ -504,7 +504,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     if (optionEl) {
       this.updateStoryStoreState_(optionEl.optionIndex_);
-      this.handleOptionSelection_(optionEl);
+      this.handleOptionSelection(optionEl);
       const confettiEmoji = this.options_[optionEl.optionIndex_].confetti;
       if (confettiEmoji) {
         emojiConfetti(
@@ -552,6 +552,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @param {!Array<!InteractiveOptionType>} unusedOptionsData
    */
   displayOptionsData(unusedOptionsData) {
+    
     // Subclass must implement
   }
 
@@ -641,9 +642,9 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * Triggers changes to component state on response interactive.
    *
    * @param {!Element} optionEl
-   * @private
+   * @protected
    */
-  handleOptionSelection_(optionEl) {
+  handleOptionSelection(optionEl) {
     this.backendDataPromise_
       .then(() => {
         if (this.hasUserSelection_) {
@@ -684,7 +685,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    */
   retrieveInteractiveData_() {
     return this.executeInteractiveRequest_('GET').then((response) => {
-      this.handleSuccessfulDataRetrieval_(
+      this.handleSuccessfulDataRetrieval(
         /** @type {InteractiveResponseType} */ (response)
       );
     });
@@ -741,9 +742,9 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    *  ]
    * }
    * @param {InteractiveResponseType|undefined} response
-   * @private
+   * @protected
    */
-  handleSuccessfulDataRetrieval_(response) {
+  handleSuccessfulDataRetrieval(response) {
     if (!(response && response['options'])) {
       devAssert(
         response && 'options' in response,
@@ -759,7 +760,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       '.i-amphtml-story-interactive-option'
     ).length;
     // Only keep the visible options to ensure visible percentages add up to 100.
-    this.updateComponentOnDataRetrieval_(
+    this.updateComponentOnDataRetrieval(
       response['options'].slice(0, numOptions)
     );
   }
@@ -767,9 +768,9 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   /**
    * Updates the quiz to reflect the state of the remote data.
    * @param {!Array<InteractiveOptionType>} data
-   * @private
+   * @protected
    */
-  updateComponentOnDataRetrieval_(data) {
+  updateComponentOnDataRetrieval(data) {
     const options = this.rootEl_.querySelectorAll(
       '.i-amphtml-story-interactive-option'
     );

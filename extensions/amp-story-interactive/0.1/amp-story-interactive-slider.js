@@ -24,7 +24,6 @@ import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles} from '#core/dom/style';
 
 /**
- * @typedef 
  * {{"options": [
       "index": 0,
       "selected": false,
@@ -95,29 +94,6 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.sliderType_ = SliderType.PERCENTAGE;
   }
 
-  /** @override */
-  layoutCallback() {
-    this.initializeListeners_();
-    return (this.backendDataPromise_ = this.element.hasAttribute('endpoint')
-      ? this.retrieveInteractiveData_()
-      : Promise.resolve());
-  }
-
-  /**
-   * Get the Interactive data from the datastore
-   *
-   * @return {?Promise<?InteractiveResponseType|?JsonObject|undefined>}
-   * @private
-   */
-   retrieveInteractiveData_() {
-    return this.executeInteractiveRequest_('GET').then((response) => {
-      this.handleSuccessfulDataRetrieval_(
-        /** @type {InteractiveResponseType} */ (response)
-      );
-    });
-  }
-
-
   /**
    * Handles incoming interactive data response
    *
@@ -133,9 +109,9 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
    *  ]
    * }
    * @param {InteractiveResponseType|undefined} response
-   * @private
+   * @override
    */
-   handleSuccessfulDataRetrieval_(response) {
+   handleSuccessfulDataRetrieval(response) {
     if (!(response && response['options'])) {
       devAssert(
         response && 'options' in response,
@@ -149,7 +125,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     }
     const numOptions = 101;
     // Only keep the visible options to ensure visible percentages add up to 100.
-    this.updateComponentOnDataRetrieval_(
+    this.updateComponentOnDataRetrieval(
       response['options'].slice(0, numOptions)
     );
   }
@@ -157,13 +133,9 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
   /**
    * Updates the quiz to reflect the state of the remote data.
    * @param {!Array<InteractiveOptionType>} data
-   * @private
+   * @override
    */
-  updateComponentOnDataRetrieval_(data) {
-    const options = this.rootEl_.querySelectorAll(
-      '.i-amphtml-story-interactive-option'
-    );
-
+  updateComponentOnDataRetrieval(data) {
     this.optionsData_ = this.orderData_(data);
     this.optionsData_.forEach((response) => {
       if (response.selected) {
@@ -171,31 +143,9 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
         this.updateStoryStoreState_(response.index);
         this.mutateElement(() => {
           this.inputEl.value = response.index;
-          this.updateToPostSelectionState_(options[response.index]);
+          this.updateToPostSelectionState_(null);
         });
       }
-    });
-  }
-
-  /**
-   * Updates the selected classes on component and option selected.
-   * @param {?Element} selectedOption
-   * @protected
-   */
-  updateToPostSelectionState_(selectedOption) {
-    this.rootEl_.classList.add('i-amphtml-story-interactive-post-selection');
-    if (selectedOption != null) {
-      selectedOption.classList.add(
-        'i-amphtml-story-interactive-option-selected'
-      );
-    }
-
-    if (this.optionsData_) {
-      this.rootEl_.classList.add('i-amphtml-story-interactive-has-data');
-      this.displayOptionsData(this.optionsData_);
-    }
-    this.getOptionElements().forEach((el) => {
-      el.setAttribute('tabindex', -1);
     });
   }
 
@@ -215,10 +165,9 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
       emojiWrapper.textContent = this.options_[0].text;
       this.bubbleEl_.appendChild(emojiWrapper);
     }
-
     this.rootEl_.setAttribute('type', this.sliderType_);
-
     this.attachPrompt_(this.rootEl_);
+    this.updateStoryStoreState_(optionEl.optionIndex_);
     return this.rootEl_;
   }
 
@@ -264,8 +213,6 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.updateToPostSelectionState_();
     this.inputEl_.setAttribute('disabled', '');
     this.rootEl_.classList.remove('i-amphtml-story-interactive-mid-selection');
+    this.handleOptionSelection_(this.inputEl.value);
   }
 }
-
-
-
