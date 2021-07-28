@@ -26,6 +26,7 @@ import {computedStyle, setStyles} from '#core/dom/style';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
+// import {createElementWithAttributes} from '#core/dom';
 
 /** @const {string} */
 const TAG = 'amp-render';
@@ -335,6 +336,37 @@ export class AmpRender extends BaseElement {
       .then((html) => dict({'__html': html}));
   }
 
+  /**
+   *
+   * @param {?Element} template
+   * @return {number} count of non-empty child nodes
+   */
+  getTemplateNonEmptyNodeCount(template) {
+    let childNodes = [];
+    // We should use innerHTML when the template lacks a wrapper
+    // element, outerHTML otherwise in order to include the wrapper
+    // element itself.
+    if (template.tagName === 'SCRIPT') {
+      const div = this.element.ownerDocument.createElement('div');
+      div./*OK*/ innerHTML = template./*OK*/ innerHTML;
+      const fragment = new DocumentFragment();
+      fragment.append(div);
+      childNodes = fragment.children;
+    } else {
+      childNodes = template.content.childNodes;
+    }
+    return Array.from(childNodes).reduce(
+      (count, node) =>
+        count +
+        Number(
+          node.nodeType === Node.TEXT_NODE
+            ? node.textContent.trim().length > 0
+            : node.nodeType !== Node.COMMENT_NODE
+        ),
+      0
+    );
+  }
+
   /** @override */
   checkPropsPostMutations() {
     const templates =
@@ -367,6 +399,8 @@ export class AmpRender extends BaseElement {
               if (!bind) {
                 return this.renderTemplateAsString_(data);
               }
+              const nonEmptyNodeCount =
+                this.getTemplateNonEmptyNodeCount(template);
               return templates
                 .renderTemplate(dev().assertElement(template), data)
                 .then((element) => {
@@ -380,7 +414,14 @@ export class AmpRender extends BaseElement {
                         bind.signals().get('FIRST_MUTATE') === null
                       ),
                     })
-                    .then(() => dict({'__html': element./* OK */ innerHTML}));
+                    .then(() =>
+                      dict({
+                        '__html':
+                          nonEmptyNodeCount === 1
+                            ? element./* OK */ outerHTML
+                            : element./* OK */ innerHTML,
+                      })
+                    );
                 });
             });
           },
