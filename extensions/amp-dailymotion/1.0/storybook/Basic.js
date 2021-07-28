@@ -25,10 +25,10 @@ export default {
 };
 
 export const _default = () => {
-  // DO NOT SUBMIT: This is example code only.
   return (
-    <Dailymotion style={{width: 300, height: 200}} videoId="x3rdtfy">
-      This text is inside.
-    </Dailymotion>
+    <Dailymotion
+      style={{width: 300, height: 200}}
+      videoId="x3rdtfy"
+    ></Dailymotion>
   );
 };

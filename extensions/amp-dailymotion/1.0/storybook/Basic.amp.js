@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
+import {VideoElementWithActions} from '../../../amp-video/1.0/storybook/_helpers';
 import {withAmp} from '@ampproject/storybook-addon';
 import {withKnobs} from '@storybook/addon-knobs';
 
@@ -28,19 +29,22 @@ export default {
   },
 };
 
-// DO NOT SUBMIT: This is example code only.
-export const ExampleUseCase = () => {
+export const Default = ({id}) => {
   return (
     <amp-dailymotion
-      width="300"
-      height="200"
-      example-property="example string property value"
-    >
-      This text is inside.
-    </amp-dailymotion>
+      id={id}
+      width="500"
+      height="281"
+      videoId="x3rdtfy"
+    ></amp-dailymotion>
   );
 };
 
-ExampleUseCase.story = {
-  name: 'Example use case story',
+export const Actions = () => {
+  const id = 'my-dailymotion';
+  return (
+    <VideoElementWithActions id={id}>
+      <Default id={id} />
+    </VideoElementWithActions>
+  );
 };
