@@ -367,6 +367,11 @@ module.exports = function ({template, types: t}) {
         const {css} = transformCssSync(sheet.toString());
         const cssStr = t.stringLiteral(css);
         const cssExport = template.ast`export const CSS = ${cssStr}`;
+        const relativeFilepath = relative(
+          join(__dirname, '../../..'),
+          filename
+        );
+        cssMap[relativeFilepath] = css;
         exportDeclaration.insertAfter(cssExport);
       },
 
@@ -383,4 +388,18 @@ module.exports = function ({template, types: t}) {
       },
     },
   };
+};
+
+/**
+ * Filename --> CSS String map.
+ * @type {Object<string, string>}
+ */
+const cssMap = {};
+
+/**
+ * @param {string} filename
+ * @return {string}
+ */
+module.exports.getCssForFile = function getCssForFile(filename) {
+  return cssMap[filename];
 };

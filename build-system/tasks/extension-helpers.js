@@ -17,6 +17,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const debounce = require('../common/debounce');
 const fs = require('fs-extra');
+const globby = require('globby');
 const path = require('path');
 const wrappers = require('../compile/compile-wrappers');
 const {
@@ -41,6 +42,7 @@ const {
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {compileJison} = require('./compile-jison');
 const {cyan, green, red} = require('../common/colors');
+const {getCssForFile} = require('../babel-plugins/babel-plugin-transform-jss');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');
@@ -490,6 +492,7 @@ async function buildExtension(
   if (name === 'amp-bind') {
     await doBuildJs(jsBundles, 'ww.max.js', options);
   }
+
   if (options.npm) {
     await buildNpmBinaries(extDir, options);
   }
@@ -505,6 +508,29 @@ async function buildExtension(
   }
 
   await buildExtensionJs(extDir, name, version, latestVersion, options);
+  if (options.npm) {
+    await buildNpmCss(extDir, options);
+  }
+}
+
+/**
+ * Writes an extensions's CSS to its npm dist folder.
+ *
+ * @param {string} extDir
+ * @param {Object} options
+ * @return {Promise<void>}
+ */
+async function buildNpmCss(extDir, options) {
+  const startCssTime = Date.now();
+  const jssFile = (await globby(path.join(extDir, '**', '*.jss.js')))[0];
+  if (jssFile) {
+    const css = getCssForFile(jssFile);
+    if (css) {
+      const outfile = `${extDir}/dist/${options.name}.css`;
+      await fs.writeFile(outfile, css);
+      endBuildStep('Wrote CSS', options.name, startCssTime);
+    }
+  }
 }
 
 /**
@@ -610,14 +636,14 @@ function buildNpmBinaries(extDir, options) {
  * @param {!Object} options
  * @return {!Promise}
  */
-function buildBinaries(extDir, binaries, options) {
+async function buildBinaries(extDir, binaries, options) {
   mkdirSync(`${extDir}/dist`);
 
-  const promises = binaries.map((binary) => {
+  const promises = binaries.map(async (binary) => {
     const {entryPoint, external, outfile, remap} = binary;
     const {name} = pathParse(outfile);
     const esm = argv.esm || argv.sxg || false;
-    return compileJsWithEsbuild(
+    await compileJsWithEsbuild(
       extDir + '/',
       entryPoint,
       `${extDir}/dist`,
@@ -631,6 +657,7 @@ function buildBinaries(extDir, binaries, options) {
       })
     );
   });
+
   return Promise.all(promises);
 }
 
