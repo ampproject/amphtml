@@ -15,9 +15,9 @@
  */
 
 import '../amp-dailymotion';
-import {htmlFor} from '../../../../src/static-template';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {htmlFor} from '#core/dom/static-template';
+import {toggleExperiment} from '#experiments';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-dailymotion-v1.0',
@@ -27,22 +27,35 @@ describes.realWin(
     },
   },
   (env) => {
-    let win;
-    let doc;
     let html;
 
+    const waitForRender = async (element) => {
+      await element.buildInternal();
+      const loadPromise = element.layoutCallback();
+      const {shadowRoot} = element;
+      await waitFor(() => shadowRoot.querySelector('iframe'), 'iframe mounted');
+      await loadPromise;
+    };
+
     beforeEach(async () => {
-      win = env.win;
-      doc = win.document;
-      html = htmlFor(doc);
-      toggleExperiment(win, 'bento-dailymotion', true, true);
+      html = htmlFor(env.win.document);
+      toggleExperiment(env.win, 'bento-dailymotion', true, true);
     });
 
-    it('example test renders', async () => {
-      const element = html` <amp-dailymotion></amp-dailymotion> `;
-      doc.body.appendChild(element);
-      await waitFor(() => element.isConnected, 'element connected');
-      expect(element.parentNode).to.equal(doc.body);
+    it('renders', async () => {
+      const element = html`
+        <amp-dailymotion
+          data-videoid="x3rdtfy"
+          width="500"
+          height="281"
+        ></amp-dailymotion>
+      `;
+      env.win.document.body.appendChild(element);
+
+      await waitForRender(element);
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      expect(iframe).to.not.be.null;
     });
   }
 );

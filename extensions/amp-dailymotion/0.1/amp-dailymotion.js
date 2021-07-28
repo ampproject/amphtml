@@ -40,8 +40,6 @@ import {parseQueryString} from '#core/types/string/url';
 
 const TAG = 'amp-dailymotion';
 
-;
-
 /**
  * @implements {../../../src/video-interface.VideoInterface}
  */
@@ -176,7 +174,6 @@ class AmpDailymotion extends AMP.BaseElement {
       return; // The message isn't valid
     }
 
-    console.log(data);
     redispatch(this.element, data['event'], {
       [DailymotionEvents.API_READY]: VideoEvents.LOAD,
       [DailymotionEvents.END]: [VideoEvents.ENDED, VideoEvents.PAUSE],

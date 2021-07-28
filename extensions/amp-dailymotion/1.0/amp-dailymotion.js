@@ -24,18 +24,18 @@ import {userAssert} from '../../../src/log';
 const TAG = 'amp-dailymotion';
 
 class AmpDailymotion extends BaseElement {
-  /** @override */
-  init() {
-    // DO NOT SUBMIT: This is example code only.
-    this.registerApiAction('exampleToggle', (api) =>
-      api./*OK*/ exampleToggle()
-    );
+  // /** @override */
+  // init() {
+  //   // DO NOT SUBMIT: This is example code only.
+  //   this.registerApiAction('exampleToggle', (api) =>
+  //     api./*OK*/ exampleToggle()
+  //   );
 
-    return dict({
-      // Extra props passed by wrapper AMP component
-      'exampleTagNameProp': this.element.tagName,
-    });
-  }
+  //   return dict({
+  //     // Extra props passed by wrapper AMP component
+  //     'exampleTagNameProp': this.element.tagName,
+  //   });
+  // }
 
   /** @override */
   isLayoutSupported(layout) {
