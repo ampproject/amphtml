@@ -149,6 +149,10 @@ export function BrightcoveWithRef(
       autoplay={autoplay}
       makeMethodMessage={makeMethodMessage}
       muted={muted}
+      onIframeLoad={(event) => {
+        const {currentTarget} = event;
+        dispatchCustomEvent(currentTarget, 'canplay');
+      }}
       onMessage={onMessage}
       playerStateRef={playerStateRef}
       src={src}
