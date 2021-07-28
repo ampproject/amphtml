@@ -24,7 +24,6 @@ const https = require('https');
 const path = require('path');
 const program = require('commander');
 const Promise = require('promise');
-const url = require('url');
 const util = require('util');
 const vm = require('vm');
 
