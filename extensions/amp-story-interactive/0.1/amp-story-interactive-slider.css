@@ -113,6 +113,7 @@
   pointer-events: all !important;
   cursor: pointer !important;
   background: transparent;
+  z-index: 1 !important;
 }
 
 .i-amphtml-story-interactive-slider-input-size {
@@ -155,7 +156,6 @@
   background: var(--interactive-accent-color) !important;
   border-radius: 50% !important;
   position: relative !important;
-  z-index: 1 !important;
 }
 
 .i-amphtml-story-interactive-slider-input::-moz-range-thumb {
@@ -164,7 +164,6 @@
   background: var(--interactive-accent-color) !important;
   border-radius: 50% !important;
   border: none;
-  z-index: 1 !important;
 }
 
 .i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
