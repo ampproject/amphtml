@@ -40,7 +40,6 @@ import {
   isCancellation,
   reportError,
 } from './error-reporting';
-import {isExperimentOn} from './experiments';
 import {dev, devAssert, user, userAssert} from './log';
 import {getMode} from './mode';
 import {Services} from './service';
@@ -513,10 +512,12 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       // Wait for consent.
       const consentPromise = implPromise.then(() => {
         const policyId = this.getConsentPolicy_();
-        const isGranularConsentExperimentOn = isExperimentOn(
+        const isGranularConsentExperimentOn =
+          /* isExperimentOn(
           win,
           'amp-consent-granular-consent'
-        );
+        ) // launched: true */
+          true;
         const purposeConsents =
           isGranularConsentExperimentOn && !policyId
             ? this.getPurposesConsent_()

@@ -131,10 +131,12 @@ export class AmpConsent extends AMP.BaseElement {
     );
 
     /** @private {?boolean} */
-    this.isGranularConsentExperimentOn_ = isExperimentOn(
+    this.isGranularConsentExperimentOn_ =
+      /* isExperimentOn(
       this.win,
       'amp-consent-granular-consent'
-    );
+    ) // launched: true */
+      true;
 
     /** @private {?Promise<?Array>} */
     this.purposeConsentRequired_ = this.isGranularConsentExperimentOn_

@@ -30,7 +30,6 @@ import {
   isAmpElement,
   whenUpgradedToCustomElement,
 } from '../../../src/amp-element-helpers';
-import {isExperimentOn} from '#experiments';
 import {setImportantStyles, setStyles, toggle} from '#core/dom/style';
 
 const TAG = 'amp-consent-ui';
@@ -181,10 +180,12 @@ export class ConsentUI {
     /** @private {?Promise<string>} */
     this.promptUISrcPromise_ = null;
 
-    this.isGranularConsentExperimentOn_ = isExperimentOn(
+    this.isGranularConsentExperimentOn_ =
+      /* isExperimentOn(
       this.win_,
       'amp-consent-granular-consent'
-    );
+    ) // launched: true */
+      true;
 
     this.init_(config, opt_postPromptUI);
   }

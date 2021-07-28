@@ -512,7 +512,6 @@ describes.realWin(
         });
 
         it('updates local storage and uses those values (granular consent on)', async () => {
-          toggleExperiment(win, 'amp-consent-granular-consent', true);
           const inlineConfig = {
             'consentInstanceId': 'abc',
             'consentRequired': 'remote',
@@ -544,7 +543,8 @@ describes.realWin(
               'xyz': PURPOSE_CONSENT_STATE.REJECTED,
             },
           });
-          toggleExperiment(win, 'amp-consent-granular-consent', false);
+          /* toggleExperiment(win, 'amp-consent-granular-consent', false) // launched: true */
+          false;
         });
 
         it('accepts unknown as a response', async () => {
@@ -651,7 +651,6 @@ describes.realWin(
         });
 
         it('syncs purposeConsents from server', async () => {
-          toggleExperiment(win, 'amp-consent-granular-consent', true);
           const inlineConfig = {
             'consentInstanceId': 'abc',
             'consentRequired': true,
@@ -686,7 +685,8 @@ describes.realWin(
               {'xyz': PURPOSE_CONSENT_STATE.REJECTED}
             )
           );
-          toggleExperiment(win, 'amp-consent-granular-consent', false);
+          /* toggleExperiment(win, 'amp-consent-granular-consent', false) // launched: true */
+          false;
         });
 
         it('syncs metadata from server', async () => {
@@ -762,7 +762,6 @@ describes.realWin(
         });
 
         it('should validate purpose consents before syncing', async () => {
-          toggleExperiment(win, 'amp-consent-granular-consent', true);
           const inlineConfig = {
             'consentInstanceId': 'abc',
             'consentRequired': true,
@@ -777,7 +776,8 @@ describes.realWin(
           await macroTask();
           expect(validationSpy).to.be.calledOnce;
           expect(validationSpy).to.be.calledWith({'xyz': false});
-          toggleExperiment(win, 'amp-consent-granular-consent', false);
+          /* toggleExperiment(win, 'amp-consent-granular-consent', false) // launched: true */
+          false;
         });
 
         it('should not sync data if response is null', async () => {
@@ -1222,11 +1222,11 @@ describes.realWin(
               'purpose-bar': false,
             },
           };
-          toggleExperiment(win, 'amp-consent-granular-consent', true);
         });
 
         afterEach(() => {
-          toggleExperiment(win, 'amp-consent-granular-consent', false);
+          /* toggleExperiment(win, 'amp-consent-granular-consent', false) // launched: true */
+          false;
         });
 
         it('handles purposeConsentMap w/ accept', () => {
@@ -1569,7 +1569,6 @@ describes.realWin(
       let consentElement;
 
       beforeEach(() => {
-        toggleExperiment(win, 'amp-consent-granular-consent', true);
         jsonMockResponses = {
           'https://server-test-1/':
             '{"consentRequired": true, "purposeConsentRequired": ["abc", "bcd"]}',
@@ -1583,7 +1582,8 @@ describes.realWin(
       });
 
       afterEach(() => {
-        toggleExperiment(win, 'amp-consent-granular-consent', false);
+        /* toggleExperiment(win, 'amp-consent-granular-consent', false) // launched: true */
+        false;
       });
 
       describe('purposeConsentRequired', () => {

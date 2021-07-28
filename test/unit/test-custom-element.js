@@ -28,7 +28,6 @@ import {
   getImplSyncForTesting,
 } from '../../src/custom-element';
 import {elementConnectedCallback} from '#service/custom-element-registry';
-import {toggleExperiment} from '#experiments';
 
 describes.realWin('CustomElement', {amp: true}, (env) => {
   // TODO(dvoytenko, #11827): Make this test work on Safari.
@@ -705,12 +704,11 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       });
 
       describe('granular consent experiment', () => {
-        beforeEach(() => {
-          toggleExperiment(win, 'amp-consent-granular-consent', true);
-        });
+        beforeEach(() => {});
 
         afterEach(() => {
-          toggleExperiment(win, 'amp-consent-granular-consent', false);
+          /* toggleExperiment(win, 'amp-consent-granular-consent', false) // launched: true */
+          false;
         });
 
         describe('getPurposeConsent_', () => {
