@@ -426,7 +426,7 @@ prefixed with `custom_`, i.e. the object `{myVar: 'foo'}` will be available as
 #### <a name="getConsentData"></a> `getConsentData(callback)`
 
 The iframe document can request user consent data when the host document uses
-[`amp-consent`](hhttps://amp.dev/documentation/components/amp-consent/).
+[`amp-consent`](https://amp.dev/documentation/components/amp-consent/).
 
 Note: If you only require to block the iframe from loading when consent is not given, it's preferable to [set the `data-block-on-consent` attribute](https://amp.dev/documentation/components/amp-consent/#basic-blocking-behaviors) instead of calling `getConsentData()`
 
