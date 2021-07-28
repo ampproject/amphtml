@@ -55,11 +55,7 @@ export function Copy({children, sourceId, text, ...rest}) {
     } else {
       text = content.textContent.trim();
     }
-    if (copyTextToClipboard(window, text)) {
-      setStaus(true);
-    } else {
-      setStaus(false);
-    }
+    setStatus(copyTextToClipboard(window, text));
   },[sourceId]);
 
   return (
