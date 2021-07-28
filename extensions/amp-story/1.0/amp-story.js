@@ -2115,7 +2115,7 @@ export class AmpStory extends AMP.BaseElement {
     const fallbackEl = this.getFallback();
     if (isBrowserSupported) {
       // Removes the default unsupported browser layer or throws an error
-      // if the publisher has provided their own fallback
+      // if the publisher has provided their own fallback.
       if (fallbackEl) {
         dev().error(
           TAG,
