@@ -54,6 +54,13 @@
       </amp-story-grid-layer>
       <amp-story-cta-layer>
         <svg height="100" width="100">
+          <defs>
+            <filter id="spotlight">
+              <feFlood result="flood" x="0" y="0" width="100%" height="100%"
+                  flood-color="blue" flood-opacity="1"/>
+              <feBlend in="SourceGraphic" in2="flood" mode="multiply"/>
+            </filter>
+          </defs>
           <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
         </svg>
       </amp-story-page-attachment>
