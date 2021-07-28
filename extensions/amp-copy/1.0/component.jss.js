@@ -19,10 +19,8 @@ import {createUseStyles} from 'react-jss';
 const disabled = {
 };
 
-
 const enabled = {
 };
-
 
 const success = {
 };

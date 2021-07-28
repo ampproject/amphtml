@@ -53,13 +53,17 @@ export function Copy({children, sourceId, text, ...rest}) {
     }
 
     setStatus(copyTextToClipboard(window, textToCopy));
+
+    setTimeout(() => {
+      setStatus(null);
+    }, 3000);
   }, []);
   return (
     <button
       ref={ref}
       className={objstr({
         [classes.success]: status,
-        [classes.failed]: !status,
+        [classes.failed]: status === false,
         [classes.enabled]: isCopySupported,
         [classes.disabled]: !isCopySupported,
       })}
