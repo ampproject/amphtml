@@ -112,7 +112,7 @@
   position: absolute !important;
   pointer-events: all !important;
   cursor: pointer !important;
-  background: transparent;
+  background: transparent !important;
   z-index: 1 !important;
 }
 
@@ -146,7 +146,7 @@
     var(--interactive-accent-color) var(--percentage-corrected)
   ) !important; 
   opacity: 0.3 !important;
-  z-index: 0;
+  z-index: 0 !important;
 }
 
 .i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
@@ -163,7 +163,7 @@
   height: var(--thumb-size) !important;
   background: var(--interactive-accent-color) !important;
   border-radius: 50% !important;
-  border: none;
+  border: none !important;
 }
 
 .i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
