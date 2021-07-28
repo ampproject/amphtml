@@ -31,35 +31,31 @@ import {useStyles} from './component.jss';
  * @return {PreactDef.Renderable}
  */
 export function Copy({children, sourceId, text, ...rest}) {
-  const [status, setStaus] = useState(null);
+  const [status, setStatus] = useState(null);
+  const classes = useStyles();
   let theme = useMemo(()=>{
     if(status!=null){
       if(status==true){
-        return useStyles().success;  
+        return classes.success;  
       }else{
-        return useStyles().failed;
+        return classes.failed;
       }
     }
     if(isCopyingToClipboardSupported(document)){
-      return useStyles().enabled;
+      return classes.enabled;
     } else {
-      return useStyles().disabled;
+      return classes.disabled;
     }
   }, [status]);
 
   const copy = useCallback((sourceId)=> {
     const content = document.getElementById(sourceId);
-    let text;
-    if(content.value != undefined){
-      text = content.value.trim();
-    } else {
-      text = content.textContent.trim();
-    }
+    const text = (content.value ?? content.textContent).trim();
     setStatus(copyTextToClipboard(window, text));
   },[sourceId]);
 
   return (
-    <button className={theme} layout size paint {...rest} onClick={(e) => copy(sourceId)}>
+    <button className={theme} layout size paint {...rest} onClick={() => copy(sourceId)}>
       {children}
     </button>
   );
