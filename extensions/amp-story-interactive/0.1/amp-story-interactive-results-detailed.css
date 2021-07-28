@@ -13,26 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/*
- * Pre-upgrade:
- * - display:block element
- * - size-defined element
- */
-amp-facebook-like {
-  display: block;
-  overflow: hidden;
-  position: relative;
-}
-
-/* Pre-upgrade: size-defining element - hide text. */
-amp-facebook-like:not(.i-amphtml-built) {
-  color: transparent !important;
-}
-
-/* Pre-upgrade: size-defining element - hide children. */
-amp-facebook-like:not(.i-amphtml-built)
-  > :not([placeholder]):not(.i-amphtml-svc) {
-  display: none;
-  content-visibility: hidden;
-}

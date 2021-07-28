@@ -37,7 +37,7 @@ declare global {
     value: number;
   }
   interface Error {
-    status?: string;
+    status?: string | number;
   }
 
   namespace Mocha {
