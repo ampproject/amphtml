@@ -20,7 +20,7 @@
 #include <vector>
 
 #include "absl/strings/string_view.h"
-#include "re2/re2.h"
+#include "re2/re2.h"  // NOLINT(build/deprecated)
 
 using amp::validator::ValidationError;
 using std::unordered_set;
@@ -28,9 +28,7 @@ using std::vector;
 
 namespace amp::validator::parse_srcset {
 // If parsing fails, returns false in SrcsetParsingResult.status.
-SrcsetParsingResult ParseSourceSet(
-    re2::StringPiece srcset
-) {
+SrcsetParsingResult ParseSourceSet(absl::string_view srcset) {
   // Regex for leading spaces, followed by an optional comma and whitespace,
   // followed by an URL*, followed by an optional space, followed by an
   // optional width or pixel density**, followed by spaces, followed by an

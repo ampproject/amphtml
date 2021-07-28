@@ -18,10 +18,10 @@
 //
 #include "error-formatter.h"
 
-#include "glog/logging.h"
 #include "validator_pb.h"
+#include "logging.h"
 #include "strings.h"
-#include "validator.pb.h"
+#include "../../validator.pb.h"
 #include "re2/re2.h"  // NOLINT(build/deprecated)
 
 namespace amp::validator {
@@ -96,9 +96,10 @@ std::string ErrorFormatter::ApplyFormat(const std::string& format,
 std::string ErrorFormatter::FormattedMessageFor(const ValidationError& error) {
   static const std::vector<std::string>* format_by_code = []() {
     ValidatorRules rules;
-    CHECK(rules.ParseFromArray(
-        amp::validator::data::kValidatorProtoBytes,
-        amp::validator::data::kValidatorProtoBytesSize));
+    CHECKORDIE(
+        rules.ParseFromArray(amp::validator::data::kValidatorProtoBytes,
+                             amp::validator::data::kValidatorProtoBytesSize),
+        "Rules could not be parsed");
     std::vector<std::string> format_by_code(ValidationError::Code_MAX + 1);
     for (const ErrorFormat& error_format : rules.error_formats())
       format_by_code[error_format.code()] = error_format.format();
