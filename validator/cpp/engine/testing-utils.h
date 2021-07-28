@@ -21,7 +21,7 @@
 
 #include <map>
 
-#include "../../validator.pb.h"
+#include "validator.pb.h"
 
 namespace amp::validator::testing {
 
@@ -34,6 +34,7 @@ struct TestCase {
   std::string output_content;
   ::amp::validator::HtmlFormat::Code html_format;
 };
+
 
 // Emits message, spec url, and category.
 std::string RenderError(const amp::validator::ValidationError& error);
@@ -52,5 +53,6 @@ std::string RenderInlineResult(const std::string& filename,
 const std::map<std::string, TestCase>& TestCases();
 
 }  // namespace amp::validator::testing
+
 
 #endif  // AMPVALIDATOR__TESTING_UTILS_H_

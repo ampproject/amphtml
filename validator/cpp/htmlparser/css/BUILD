@@ -29,6 +29,7 @@ cc_library(
     hdrs = ["parse-css.h"],
     deps = [
         ":parse_css_cc_proto",
+        "@com_github_glog//:glog",
         "@com_google_absl//absl/algorithm:container",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
@@ -68,6 +69,7 @@ cc_library(
     hdrs = ["parse-css-urls.h"],
     deps = [
         ":parse_css_urls_cc_proto",
+        "@com_github_glog//:glog",
         "@com_google_absl//absl/algorithm:container",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
