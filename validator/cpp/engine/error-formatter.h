@@ -28,7 +28,7 @@
 
 #include <string>
 
-#include "validator.pb.h"
+#include "../../validator.pb.h"
 
 namespace amp::validator {
 // TODO(johannes): Port more of

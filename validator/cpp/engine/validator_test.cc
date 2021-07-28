@@ -1,9 +1,9 @@
+#include "validator.h"
+
 #include <filesystem>
 #include <fstream>
 #include <memory>
 
-#include "glog/logging.h"
-#include "validator_pb.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "absl/strings/cord.h"
@@ -14,9 +14,10 @@
 #include "absl/strings/str_replace.h"
 #include "absl/strings/str_split.h"
 #include "testing-utils.h"
-#include "validator.h"
+#include "validator_pb.h"
 #include "css/parse-css.pb.h"
-#include "validator.pb.h"
+#include "logging.h"
+#include "../../validator.pb.h"
 
 using absl::StartsWith;
 using absl::StrAppend;
@@ -36,10 +37,10 @@ using amp::validator::TagSpec;
 using amp::validator::ValidationError;
 using amp::validator::ValidationResult;
 using amp::validator::ValidatorRules;
-using amp::validator::testing::TestCase;
-using amp::validator::testing::TestCases;
 using amp::validator::testing::RenderInlineResult;
 using amp::validator::testing::RenderResult;
+using amp::validator::testing::TestCase;
+using amp::validator::testing::TestCases;
 
 namespace fs = std::filesystem;
 
@@ -49,7 +50,7 @@ namespace {
 TestCase FindOrDie(std::map<std::string, TestCase> cases,
                    std::string case_filename) {
   auto iter = cases.find(case_filename);
-  CHECK(iter != cases.end()) << case_filename << " not found.";
+  CHECKORDIE(iter != cases.end(), absl::StrCat(case_filename, " not found."));
   return iter->second;
 }
 
@@ -115,9 +116,8 @@ TEST(ValidatorTest, TestVariousMaxErrorsSettings) {
            {7, FirstNLines(test_case.output_content, 8)},
            {100, test_case.output_content},
            {-1, test_case.output_content}}) {
-    ValidationResult result = amp::validator::Validate(test_case.input_content,
-                                                       test_case.html_format,
-                                                       entry.max_errors);
+    ValidationResult result = amp::validator::Validate(
+        test_case.input_content, test_case.html_format, entry.max_errors);
     std::string output = RenderResult(
         /*filename=*/test_case.name, result);
     SCOPED_TRACE(StrCat("max_errors=", entry.max_errors));
@@ -130,11 +130,9 @@ TEST(ValidatorTest, TestExitEarlyNotAmp) {
   // This triggers early exit code when we encounter an html tag that doesn't
   // have an AMP identifier in it, so we only get one output error even
   // though there would normally be ~7 due to missing required elements.
-  TestCase test_case =
-      FindOrDie(TestCases(), "feature_tests/not_amp.html");
-  ValidationResult result = amp::validator::Validate(test_case.input_content,
-                                                     test_case.html_format,
-                                                     100000000);
+  TestCase test_case = FindOrDie(TestCases(), "feature_tests/not_amp.html");
+  ValidationResult result = amp::validator::Validate(
+      test_case.input_content, test_case.html_format, 100000000);
 
   EXPECT_EQ(1, result.errors_size());
   EXPECT_EQ(ValidationResult::FAIL, result.status());
@@ -146,9 +144,8 @@ TEST(ValidatorTest, TestExitEarlyManufacturedHtml) {
   // instead of explicit.
   TestCase test_case =
       FindOrDie(TestCases(), "feature_tests/unprintable_chars.html");
-  ValidationResult result = amp::validator::Validate(test_case.input_content,
-                                                     test_case.html_format,
-                                                     100000000);
+  ValidationResult result = amp::validator::Validate(
+      test_case.input_content, test_case.html_format, 100000000);
   EXPECT_GT(result.errors_size(), 1);
   EXPECT_EQ(ValidationResult::FAIL, result.status());
 }
@@ -156,8 +153,8 @@ TEST(ValidatorTest, TestExitEarlyManufacturedHtml) {
 TEST(ValidatorTest, TestValidationResultTransformerVersion) {
   TestCase test_case = FindOrDie(
       TestCases(), "transformed_feature_tests/minimum_valid_amp.html");
-  ValidationResult result = amp::validator::Validate(test_case.input_content,
-                                                     test_case.html_format);
+  ValidationResult result =
+      amp::validator::Validate(test_case.input_content, test_case.html_format);
   EXPECT_EQ(result.transformer_version(), 1);
 }
 
@@ -238,8 +235,7 @@ TEST(ValidatorTest, TestScriptLengthAmp) {
     std::string test_html =
         TestWithScript(test_case.input_content, inline_script);
     std::string output = RenderResult(
-        /*filename=*/test_case_name,
-        amp::validator::Validate(test_html));
+        /*filename=*/test_case_name, amp::validator::Validate(test_html));
     std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
@@ -253,8 +249,7 @@ TEST(ValidatorTest, TestScriptLengthAmp) {
     std::string test_html =
         TestWithScript(test_case.input_content, inline_script);
     std::string output = RenderResult(
-        /*filename=*/test_case_name,
-        amp::validator::Validate(test_html));
+        /*filename=*/test_case_name, amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
         ":35:2 The inline script is 10001 bytes, which exceeds the limit of "
@@ -267,10 +262,9 @@ TEST(ValidatorTest, TestScriptLengthAmp) {
 std::string TestWithCSS(const std::string& test_content,
                         const std::string& stylesheet,
                         const std::string& inline_style) {
-  return StrReplaceAll(StrReplaceAll(test_content,
-                                     {{".replace_amp_custom {}",
-                                       stylesheet}}),
-                       {{"replace_inline_style", inline_style}});
+  return StrReplaceAll(
+      StrReplaceAll(test_content, {{".replace_amp_custom {}", stylesheet}}),
+      {{"replace_inline_style", inline_style}});
 }
 
 TEST(ValidatorTest, TestCssLengthAmp) {
@@ -293,8 +287,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
     std::string output = RenderResult(
-        /*filename=*/test_case_name,
-        amp::validator::Validate(test_html));
+        /*filename=*/test_case_name, amp::validator::Validate(test_html));
     std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
@@ -308,8 +301,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
     std::string output = RenderResult(
-        /*filename=*/test_case_name,
-        amp::validator::Validate(test_html));
+        /*filename=*/test_case_name, amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
         ":28:2 The author stylesheet specified in tag 'style amp-custom' is "
@@ -328,8 +320,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
     std::string output = RenderResult(
-        /*filename=*/test_case_name,
-        amp::validator::Validate(test_html));
+        /*filename=*/test_case_name, amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
         ":28:2 The author stylesheet specified in tag 'style amp-custom' is "
@@ -346,8 +337,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name,
-        amp::validator::Validate(test_html));
+        /*filename=*/test_case_name, amp::validator::Validate(test_html));
     std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
@@ -360,8 +350,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name,
-        amp::validator::Validate(test_html));
+        /*filename=*/test_case_name, amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
         ":36:6 The author stylesheet specified in tag 'style amp-custom' "
@@ -380,8 +369,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, inline_10_bytes);
     std::string output = RenderResult(
-        /*filename=*/test_case_name,
-        amp::validator::Validate(test_html));
+        /*filename=*/test_case_name, amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
         ":7536:6 The author stylesheet specified in tag 'style amp-custom' "
@@ -399,8 +387,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name,
-        amp::validator::Validate(test_html));
+        /*filename=*/test_case_name, amp::validator::Validate(test_html));
     std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
@@ -414,8 +401,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name,
-        amp::validator::Validate(test_html));
+        /*filename=*/test_case_name, amp::validator::Validate(test_html));
     std::string expected_output =
         StrCat("FAIL\n", test_case_name,
                ":34:2 The inline style specified in tag 'div' is too long - "
@@ -605,8 +591,8 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
 }
 
 TEST(ValidatorTest, TestCssLengthAmpEmailStrict) {
-  const TestCase& test_case = FindOrDie(
-      TestCases(), "amp4email_feature_tests/css_length_strict.html");
+  const TestCase& test_case =
+      FindOrDie(TestCases(), "amp4email_feature_tests/css_length_strict.html");
   const std::string test_template = test_case.input_content;
 
   // We use a blob of length 20 (both bytes and chars) to make it easy to
@@ -842,8 +828,7 @@ TEST(ValidatorTest, TestCssLengthWithUrls) {
         TestWithCSS(test_case.input_content, stylesheet, "");
 
     std::string output = RenderResult(
-        /*filename=*/test_case_name,
-        amp::validator::Validate(test_html));
+        /*filename=*/test_case_name, amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
         ":28:2 The author stylesheet specified in tag 'style amp-custom' "
@@ -868,8 +853,7 @@ TEST(ValidatorTest, TestCssLengthWithUrls) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
     std::string output = RenderResult(
-        /*filename=*/test_case_name,
-        amp::validator::Validate(test_html));
+        /*filename=*/test_case_name, amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
         ":28:2 The author stylesheet specified in tag 'style amp-custom' "
@@ -894,8 +878,7 @@ TEST(ValidatorTest, TestCssLengthWithUrls) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
     std::string output = RenderResult(
-        /*filename=*/test_case_name,
-        amp::validator::Validate(test_html));
+        /*filename=*/test_case_name, amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
         ":28:2 The author stylesheet specified in tag 'style amp-custom' is "
@@ -917,8 +900,7 @@ TEST(ValidatorTest, TestCssLengthWithUrls) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name,
-        amp::validator::Validate(test_html));
+        /*filename=*/test_case_name, amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
         ":36:6 The author stylesheet specified in tag 'style amp-custom' "
@@ -941,8 +923,7 @@ TEST(ValidatorTest, TestCssLengthWithUrls) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name,
-        amp::validator::Validate(test_html));
+        /*filename=*/test_case_name, amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
         ":36:6 The author stylesheet specified in tag 'style amp-custom' "
@@ -978,8 +959,7 @@ TEST(ValidatorTest, TestTransformedAmpCssLengthWithUrls) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
     std::string output = RenderResult(
-        /*filename=*/test_case_name,
-        amp::validator::Validate(test_html));
+        /*filename=*/test_case_name, amp::validator::Validate(test_html));
     std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
@@ -999,8 +979,7 @@ TEST(ValidatorTest, TestTransformedAmpCssLengthWithUrls) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
     std::string output = RenderResult(
-        /*filename=*/test_case_name,
-        amp::validator::Validate(test_html));
+        /*filename=*/test_case_name, amp::validator::Validate(test_html));
     std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
@@ -1020,8 +999,7 @@ TEST(ValidatorTest, TestTransformedAmpCssLengthWithUrls) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
     std::string output = RenderResult(
-        /*filename=*/test_case_name,
-        amp::validator::Validate(test_html));
+        /*filename=*/test_case_name, amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
         ":29:2 The author stylesheet specified in tag 'style amp-custom' "
@@ -1044,8 +1022,7 @@ TEST(ValidatorTest, TestTransformedAmpCssLengthWithUrls) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name,
-        amp::validator::Validate(test_html));
+        /*filename=*/test_case_name, amp::validator::Validate(test_html));
     std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
@@ -1062,8 +1039,7 @@ TEST(ValidatorTest, TestTransformedAmpCssLengthWithUrls) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name,
-        amp::validator::Validate(test_html));
+        /*filename=*/test_case_name, amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
         ":36:6 The author stylesheet specified in tag 'style amp-custom' "
@@ -1083,15 +1059,13 @@ TEST(ValidatorTest, ConsidersDifferentNewlines) {
   {
     std::string test_html = "\ninvalid doc";
     std::string output = RenderResult(
-        /*filename=*/"newline_test",
-        amp::validator::Validate(test_html));
+        /*filename=*/"newline_test", amp::validator::Validate(test_html));
     EXPECT_TRUE(StartsWith(output, "FAIL\nnewline_test:1:0")) << output;
   }
   {
     std::string test_html = "\rinvalid doc";
     std::string output = RenderResult(
-        /*filename=*/"newline_test",
-        amp::validator::Validate(test_html));
+        /*filename=*/"newline_test", amp::validator::Validate(test_html));
     EXPECT_TRUE(StartsWith(output, "FAIL\nnewline_test:1:0")) << output;
   }
   {
@@ -1101,8 +1075,7 @@ TEST(ValidatorTest, ConsidersDifferentNewlines) {
     // before the newline which avoids this issue.
     std::string test_html = " \r\ninvalid doc";
     std::string output = RenderResult(
-        /*filename=*/"newline_test",
-        amp::validator::Validate(test_html));
+        /*filename=*/"newline_test", amp::validator::Validate(test_html));
     EXPECT_TRUE(StartsWith(output, "FAIL\nnewline_test:1:1")) << output;
   }
 }
@@ -1112,9 +1085,10 @@ TEST(ValidatorTest, ConsidersDifferentNewlines) {
 // updated to mark the JSON offsets for it as it currently doesn't do this.
 TEST(ValidatorTest, Amp4AdsAmpAccess) {
   ValidatorRules rules;
-  CHECK(rules.ParseFromArray(
-      amp::validator::data::kValidatorProtoBytes,
-      amp::validator::data::kValidatorProtoBytesSize));
+  CHECKORDIE(
+      rules.ParseFromArray(amp::validator::data::kValidatorProtoBytes,
+                           amp::validator::data::kValidatorProtoBytesSize),
+      "Failed to parse validator rules.");
   for (const TagSpec& tag_spec : rules.tags()) {
     if ((tag_spec.tag_name() == "SCRIPT") &&
         (tag_spec.spec_name() == "amp-access extension .json script")) {
@@ -1130,10 +1104,10 @@ TEST(ValidatorTest, Amp4AdsAmpAccess) {
 TEST(ValidatorTest, InvalidHyphenCharacter) {
   const TestCase& test_case =
       FindOrDie(TestCases(), "feature_tests/minimum_valid_amp.html");
-  std::string bad_html = StrReplaceAll(test_case.input_content,
-                {{"amp-boilerplate", "amp\xE2\x80\x90 boilerplate"}});
-  ValidationResult result = amp::validator::Validate(bad_html,
-                                                     HtmlFormat::AMP);
+  std::string bad_html =
+      StrReplaceAll(test_case.input_content,
+                    {{"amp-boilerplate", "amp\xE2\x80\x90 boilerplate"}});
+  ValidationResult result = amp::validator::Validate(bad_html, HtmlFormat::AMP);
   EXPECT_EQ(ValidationResult::FAIL, result.status());
 }
 

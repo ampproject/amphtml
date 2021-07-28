@@ -25,19 +25,15 @@
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_replace.h"
 #include "absl/strings/string_view.h"
-#include "google/protobuf/descriptor.pb.h"  // For GetEnumDescriptor
-#include "validator.pb.h"
+#include "../../validator.pb.h"
 #include "re2/re2.h"  // NOLINT(build/deprecated)
 
 using absl::AsciiStrToLower;
 using absl::StrCat;
-using absl::StrReplaceAll;
 using absl::StrFormat;
 using absl::string_view;
 using amp::validator::AmpLayout;
 using std::unordered_map;
-
-namespace protocolbuffer = google::protobuf;
 
 namespace amp::validator::parse_layout {
 const char kUnitPx[] = "px";
@@ -63,9 +59,7 @@ CssLength::CssLength()
       is_fluid(false),
       numeral(std::numeric_limits<double>::quiet_NaN()),
       unit(kUnitPx) {}
-CssLength::CssLength(
-    re2::StringPiece input,
-    bool allow_auto, bool allow_fluid)
+CssLength::CssLength(absl::string_view input, bool allow_auto, bool allow_fluid)
     : is_valid(false),
       is_set(false),
       is_auto(false),
@@ -230,8 +224,7 @@ std::string GetCssLengthStyle(const CssLength& length,
                               const std::string& type) {
   if (!length.is_set) return "";
   if (length.is_auto) return StrCat(type, ":auto;");
-  return StrCat(type, ":", absl::AlphaNum(length.numeral), length.unit,
-                ";");
+  return StrCat(type, ":", absl::AlphaNum(length.numeral), length.unit, ";");
 }
 
 std::string GetLayoutClass(AmpLayout::Layout layout) {
