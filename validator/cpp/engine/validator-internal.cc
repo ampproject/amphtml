@@ -22,6 +22,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "glog/logging.h"
+#include "google/protobuf/repeated_field.h"
 #include "absl/algorithm/container.h"
 #include "absl/base/thread_annotations.h"
 #include "absl/container/flat_hash_map.h"
@@ -55,12 +57,11 @@
 #include "defer.h"
 #include "elements.h"
 #include "json/parser.h"
-#include "logging.h"
 #include "node.h"
 #include "parser.h"
 #include "strings.h"
 #include "url.h"
-#include "../../validator.pb.h"
+#include "validator.pb.h"
 #include "re2/re2.h"  // NOLINT(build/deprecated)
 
 using absl::AsciiStrToLower;
@@ -627,7 +628,7 @@ class ParsedReferencePoints {
       : parent_(&parent) {
     for (const ReferencePoint& p : parent.reference_points()) {
       auto iter = tag_spec_ids_by_tag_spec_name.find(p.tag_spec_name());
-      CHECKORDIE(iter != tag_spec_ids_by_tag_spec_name.end(), "");
+      CHECK(iter != tag_spec_ids_by_tag_spec_name.end());
       parsed_.emplace_back(ParsedReferencePoint{&p, iter->second});
     }
   }
@@ -879,7 +880,7 @@ CssParsingConfig GenCssParsingConfig() {
 class ParsedCdataSpec {
  public:
   explicit ParsedCdataSpec(const TagSpec* parent_tag_spec)
-      : spec_(&parent_tag_spec->cdata()),
+      : spec_(&CHECK_NOTNULL(parent_tag_spec)->cdata()),
         parent_tag_spec_(parent_tag_spec),
         css_parsing_config_(GenCssParsingConfig()) {
     RE2::Options options;
@@ -984,7 +985,7 @@ std::string DispatchKey(AttrSpec::DispatchKeyType dispatch_key_type,
   // Constructing a string using foo("\0") constructs an empty string, since
   // the char array is considered null-terminated.
   const std::string sep("\0", 1);
-  CHECKORDIE(sep.length() == 1, "");
+  CHECK_EQ(1, sep.length());
 
   switch (dispatch_key_type) {
     case AttrSpec::NONE_DISPATCH:
@@ -1102,7 +1103,7 @@ class ParsedTagSpec {
     c_copy(spec->excludes(), std::back_inserter(excludes_));
     for (const std::string& tag_spec_name : spec->also_requires_tag_warning()) {
       auto iter = tag_spec_ids_by_tag_spec_name.find(tag_spec_name);
-      CHECKORDIE(iter != tag_spec_ids_by_tag_spec_name.end(), "");
+      CHECK(iter != tag_spec_ids_by_tag_spec_name.end());
       also_requires_tag_warnings_.push_back(iter->second);
     }
   }
@@ -1298,7 +1299,7 @@ class ChildTagMatcher {
  public:
   explicit ChildTagMatcher(const TagSpec* parent_spec, const LineCol& line_col)
       : parent_spec_(parent_spec), line_col_(line_col) {
-    CHECKORDIE(parent_spec->has_child_tags(), "");
+    CHECK(parent_spec->has_child_tags());
   }
 
   void MatchChildTagName(const ParsedHtmlTag& encountered_tag,
@@ -1366,6 +1367,7 @@ class TagSpecDispatch {
 
     // Special case for foo=foo. We consider this a match for a dispatch key of
     // foo="" or just <tag foo>.
+    DCHECK(!attr_name.empty());
     if (attr_name == attr_value) {
       auto more_tag_spec_ids = MatchingDispatchKey(attr_name, "", parent);
       tag_spec_ids.insert(tag_spec_ids.end(), more_tag_spec_ids.begin(),
@@ -1547,10 +1549,10 @@ class ReferencePointMatcher {
       const ParsedReferencePoints* parsed_reference_points,
       const LineCol& line_col)
       // These checks are only used in initialization.
-      : parsed_rules_(parsed_rules),
-        parsed_reference_points_(parsed_reference_points),
+      : parsed_rules_(CHECK_NOTNULL(parsed_rules)),
+        parsed_reference_points_(CHECK_NOTNULL(parsed_reference_points)),
         line_col_(line_col) {
-    CHECKORDIE(!parsed_reference_points->empty(), "");
+    CHECK(!parsed_reference_points->empty());
   }
 
   // This method gets invoked when matching a child tag of the parent
@@ -1690,7 +1692,8 @@ class TagStack {
     if (reference_point_result.best_match_tag_spec) {
       const ParsedTagSpec* parsed_ref_point =
           reference_point_result.best_match_tag_spec;
-      MutableParentReferencePointMatcher()->RecordMatch(*parsed_ref_point);
+      CHECK_NOTNULL(MutableParentReferencePointMatcher())
+          ->RecordMatch(*parsed_ref_point);
     }
 
     // The following only add new constraints, not new allowances, so
@@ -1774,7 +1777,7 @@ class TagStack {
   }
 
   bool HasAncestorMarker(const AncestorMarker::Marker query) const {
-    CHECKORDIE(AncestorMarker::UNKNOWN != query, "");
+    CHECK_NE(AncestorMarker::UNKNOWN, query);
     // Skip the first element, which is "$ROOT".
     for (int i = 1; i < stack_.size(); ++i) {
       if (!stack_[i].tag_spec) continue;
@@ -1874,14 +1877,14 @@ class TagStack {
   const StackEntry& ParentStackEntry() const {
     // There should always be a root entry whose parent shouldn't be accessed,
     // until the document is exited.
-    CHECKORDIE(!stack_.empty(), "");
+    CHECK_GE(stack_.size(), 1);
     return stack_.back();
   }
 
   StackEntry* MutableParentStackEntry() {
     // There should always be a root entry whose parent shouldn't be accessed,
     // until the document is exited.
-    CHECKORDIE(!stack_.empty(), "");
+    CHECK_GE(stack_.size(), 1);
     return &stack_.back();
   }
 
@@ -2341,8 +2344,8 @@ class Context {
     for (const ParsedDocSpec& spec : rules().doc()) {
       if (rules().IsDocSpecCorrectHtmlFormat(spec.spec()) &&
           IsDocSpecValidForTypeIdentifiers(spec)) {
-        CHECKORDIE(!out.has_value(),
-                   "Panic: Two DocCssSpec's match the same document.");
+        DCHECK(!out.has_value())
+            << "Panic: Two DocSpec's match the same document.";
         return &spec;
       }
     }
@@ -2350,10 +2353,10 @@ class Context {
     // These tests won't have any DocSpec rules defined. This is OK. The DLOG
     // is to verify that a particular format hasn't been ignored in the real
     // rule set.
-    CHECKORDIE(
-        rules().doc().empty(),
-        absl::StrCat("Panic: No ParsedDocSpec for this document setting ",
-                     rules().html_format()));
+    if (!rules().doc().empty()) {
+      DLOG(FATAL) << "Panic: No ParsedDocSpec for this document setting "
+                  << rules().html_format();
+    }
     return std::nullopt;
   }
 
@@ -2376,8 +2379,8 @@ class Context {
     for (const ParsedDocCssSpec& spec : rules().css()) {
       if (rules().IsDocCssSpecCorrectHtmlFormat(spec.spec()) &&
           IsDocCssSpecValidForTypeIdentifiers(spec)) {
-        CHECKORDIE(!out.has_value(),
-                   "Panic: Two DocCssSpec's match the same document.");
+        DCHECK(!out.has_value())
+            << "Panic: Two DocCssSpec's match the same document.";
         return &spec;
       }
     }
@@ -3113,6 +3116,8 @@ void CdataMatcher::MatchCss(string_view cdata, const CssSpec& css_spec,
   // Similarly, we extract query types and features from @media rules.
   for (const AtRuleSpec& at_rule_spec : css_spec.at_rule_spec()) {
     if (!at_rule_spec.has_media_query_spec()) continue;
+    DCHECK_EQ(at_rule_spec.name(), "media")
+        << "Only 'media' AT rules should have a MediaQuerySpec";
     const MediaQuerySpec& media_query_spec = at_rule_spec.media_query_spec();
     auto* error_buffer =
         media_query_spec.issues_as_error() ? &css_errors : &css_warnings;
@@ -3939,7 +3944,7 @@ bool ValidateAttrInExtension(const TagSpec& tag_spec,
                              const std::string& attr_name,
                              const std::string& attr_value) {
   // The only callpoint for this method is guarded by this same condition.
-  CHECKORDIE(tag_spec.has_extension_spec(), "Missing extension spec");
+  CHECK(tag_spec.has_extension_spec());
 
   const auto& extension_spec = tag_spec.extension_spec();
   // TagSpecs with extensions will only be evaluated if their dispatch_key
@@ -4708,10 +4713,10 @@ ParsedValidatorRules::ParsedValidatorRules(HtmlFormat::Code html_format)
   for (int ii = 0; ii < rules_.tags_size(); ++ii) {
     const TagSpec& tag = rules_.tags(ii);
     // This check only occurs during initialization.
-    CHECKORDIE(tag_spec_ids_by_tag_spec_name
-                   .insert(std::make_pair(TagSpecName(tag), ii))
-                   .second,
-               TagSpecName(tag));
+    CHECK(tag_spec_ids_by_tag_spec_name
+              .insert(std::make_pair(TagSpecName(tag), ii))
+              .second)
+        << TagSpecName(tag);
     if (!tag.also_requires_tag_warning().empty())
       tag_spec_names_to_track.insert(TagSpecName(tag));
     c_copy(
@@ -5668,7 +5673,9 @@ class ParsedValidatorRulesProvider {
 class Validator {
  public:
   Validator(const ParsedValidatorRules* rules, int max_errors = -1)
-      : rules_(rules), max_errors_(max_errors), context_(rules_, max_errors_) {}
+      : rules_(rules),
+        max_errors_(max_errors),
+        context_(rules_, max_errors_) {}
 
   ValidationResult Validate(const htmlparser::Document& doc) {
     doc_metadata_ = doc.Metadata();

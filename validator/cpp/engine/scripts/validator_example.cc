@@ -19,7 +19,7 @@
 #include <string_view>
 
 #include "validator.h"
-#include "../../validator.pb.h"
+#include "validator.pb.h"
 
 static constexpr std::string_view kValidAMPHtml{R"HTML(
 <!--
@@ -38,9 +38,10 @@ static constexpr std::string_view kValidAMPHtml{R"HTML(
 <body>Hello, AMP world.</body>
 </html>)HTML"};
 
+
 int main(int argc, char** argv) {
-  auto result =
-      amp::validator::Validate(kValidAMPHtml, amp::validator::HtmlFormat::AMP);
+  auto result = amp::validator::Validate(kValidAMPHtml,
+                                         amp::validator::HtmlFormat::AMP);
   // DO NOT USE assert in production. For demonstration purpose only.
   assert(result.status() == amp::validator::ValidationResult::PASS);
 

@@ -61,11 +61,12 @@ void DumpDocument(Document* doc) { DumpNode(doc->RootNode()); }
 
 std::unique_ptr<Document> Parse(std::string_view html) {
   std::unique_ptr<Parser> parser = std::make_unique<Parser>(
-      html, ParseOptions{.scripting = true,
-                         .frameset_ok = true,
-                         .record_node_offsets = true,
-                         .record_attribute_offsets = true,
-                         .count_num_terms_in_text_node = true});
+      html,
+      ParseOptions{.scripting = true,
+                   .frameset_ok = true,
+                   .record_node_offsets = true,
+                   .record_attribute_offsets = true,
+                   .count_num_terms_in_text_node = true});
   return parser->Parse();
 }
 
@@ -77,15 +78,15 @@ std::unique_ptr<Document> ParseWithOptions(std::string_view html,
 std::unique_ptr<Document> ParseFragmentWithOptions(std::string_view html,
                                                    const ParseOptions& options,
                                                    Node* fragment_parent) {
-  std::unique_ptr<Parser> parser =
-      std::make_unique<Parser>(html, options, fragment_parent);
+  std::unique_ptr<Parser> parser = std::make_unique<Parser>(
+      html, options, fragment_parent);
   Node* root = parser->document_->NewNode(NodeType::ELEMENT_NODE, Atom::HTML);
   parser->document_->root_node_->AppendChild(root);
   parser->open_elements_stack_.Push(root);
 
   if (fragment_parent && fragment_parent->DataAtom() == Atom::TEMPLATE) {
-    parser->template_stack_.push_back(
-        std::bind(&Parser::InTemplateIM, parser.get()));
+    parser->template_stack_.push_back(std::bind(&Parser::InTemplateIM,
+                                                parser.get()));
   }
 
   parser->ResetInsertionMode();
@@ -232,7 +233,7 @@ int Parser::IndexOfElementInScope(Scope scope,
           }
           break;
         default:
-          CHECKORDIE(false, "HTML Parser reached unreachable scope");
+          CHECK(false, "HTML Parser reached unreachable scope");
       }
     }
 
@@ -289,7 +290,7 @@ void Parser::ClearStackToContext(Scope scope) {
         }
         break;
       default:
-        CHECKORDIE(false, "HTML Parser reached unreachable scope");
+        CHECK(false, "HTML Parser reached unreachable scope");
     }
   }
 }  // Parser::ClearStackToContext.
@@ -563,8 +564,8 @@ void Parser::AcknowledgeSelfClosingTag() {
 
 // Section 12.2.4.1, "using the rules for".
 void Parser::SetOriginalIM() {
-  CHECKORDIE(!original_insertion_mode_,
-             "html: bad parser state: original_insertion_mode was set twice");
+  CHECK(!original_insertion_mode_,
+        "html: bad parser state: original_insertion_mode was set twice");
   original_insertion_mode_ = insertion_mode_;
 }  // Parser::SetOriginalIM.
 
@@ -1031,8 +1032,8 @@ bool Parser::InHeadNoscriptIM() {
       break;
   }
   open_elements_stack_.Pop();
-  CHECKORDIE(top()->atom_ == Atom::HEAD,
-             "html: the new current node will be a head element.");
+  CHECK(top()->atom_ == Atom::HEAD,
+        "html: the new current node will be a head element.");
 
   insertion_mode_ = std::bind(&Parser::InHeadIM, this);
   if (token_.atom == Atom::NOSCRIPT) {
@@ -1443,8 +1444,8 @@ bool Parser::InBodyIM() {
             for (auto& attr : token_.attributes) {
               if (attr.key == "type" &&
                   Strings::EqualFold(attr.value, "hidden")) {
-                // Skip setting frameset_ok_ = false;
-                return true;
+                  // Skip setting frameset_ok_ = false;
+                  return true;
               }
             }
           }
@@ -2882,10 +2883,10 @@ bool Parser::AfterBodyIM() {
       break;
     case TokenType::COMMENT_TOKEN: {
       // The comment is attached to the <html> element.
-      CHECKORDIE(open_elements_stack_.size() > 0 &&
-                     open_elements_stack_.at(0)->atom_ == Atom::HTML,
-                 "html: bad parser state: <html> element not found, in the "
-                 "after-body insertion mode");
+      CHECK(open_elements_stack_.size() > 0 &&
+                open_elements_stack_.at(0)->atom_ == Atom::HTML,
+            "html: bad parser state: <html> element not found, in the "
+            "after-body insertion mode");
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
       if (record_node_offsets_) {
@@ -3151,7 +3152,7 @@ bool Parser::ParseForeignContent() {
         }
         AdjustSVGAttributeNames(&token_.attributes);
       } else {
-        CHECKORDIE(false, "html: bad parser state: unexpected namespace");
+        CHECK(false, "html: bad parser state: unexpected namespace");
       }
 
       AdjustForeignAttributes(&token_.attributes);
@@ -3323,8 +3324,7 @@ void Parser::CopyAttributes(Node* node, Token token) const {
 
 void Parser::RecordBaseURLMetadata(Node* base_node) {
   if (base_node->Type() != NodeType::ELEMENT_NODE ||
-      base_node->DataAtom() != Atom::BASE)
-    return;
+      base_node->DataAtom() != Atom::BASE) return;
 
   for (auto& attr : base_node->Attributes()) {
     if (Strings::EqualFold(attr.key, "href")) {
@@ -3337,8 +3337,7 @@ void Parser::RecordBaseURLMetadata(Node* base_node) {
 
 void Parser::RecordLinkRelCanonical(Node* link_node) {
   if (link_node->Type() != NodeType::ELEMENT_NODE ||
-      link_node->DataAtom() != Atom::LINK)
-    return;
+      link_node->DataAtom() != Atom::LINK) return;
 
   bool canonical;
   std::string canonical_url;

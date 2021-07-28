@@ -19,7 +19,6 @@
 
 #include <string>
 #include <vector>
-
 #include "absl/strings/string_view.h"
 
 namespace amp::validator::utf8_util {
