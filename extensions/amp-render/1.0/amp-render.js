@@ -367,6 +367,20 @@ export class AmpRender extends BaseElement {
               if (!bind) {
                 return this.renderTemplateAsString_(data);
               }
+              // We should use innerHTML when the template lacks a wrapper
+              // element, outerHTML otherwise in order to include the wrapper
+              // element itself.
+              const {childNodes} = template.content;
+              const nonEmptyNodeCount = Array.from(childNodes).reduce(
+                (count, node) =>
+                  count +
+                  Number(
+                    node.nodeType === Node.TEXT_NODE
+                      ? node.textContent.trim().length > 0
+                      : node.nodeType !== Node.COMMENT_NODE
+                  ),
+                0
+              );
               return templates
                 .renderTemplate(dev().assertElement(template), data)
                 .then((element) => {
@@ -380,7 +394,14 @@ export class AmpRender extends BaseElement {
                         bind.signals().get('FIRST_MUTATE') === null
                       ),
                     })
-                    .then(() => dict({'__html': element./* OK */ innerHTML}));
+                    .then(() =>
+                      dict({
+                        '__html':
+                          nonEmptyNodeCount === 1
+                            ? element./* OK */ outerHTML
+                            : element./* OK */ innerHTML,
+                      })
+                    );
                 });
             });
           },
