@@ -24,29 +24,6 @@ import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles} from '#core/dom/style';
 
 /**
- * {{"options": [
-      "index": 0,
-      "selected": false,
-      "count": 2.5
-    },
-    {
-      "index": 1,
-      "selected": false,
-      "count": 3
-    },
-    {
-      "index": 2,
-      "selected": false,
-      "count": 5
-    },
-    {
-      "index": 3,
-      "selected": false,
-      "count": 1
-    }]}
- */
-
-/**
  * Generates the template for the slider.
  *
  * @param {!Element} element
@@ -154,7 +131,6 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     }
     this.rootEl_.setAttribute('type', this.sliderType_);
     this.attachPrompt_(this.rootEl_);
-    this.updateStoryStoreState_(optionEl.optionIndex_);
     return this.rootEl_;
   }
 
@@ -200,6 +176,6 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.updateToPostSelectionState_();
     this.inputEl_.setAttribute('disabled', '');
     this.rootEl_.classList.remove('i-amphtml-story-interactive-mid-selection');
-    this.handleOptionSelection_(this.inputEl.value);
+    this.handleOptionSelection(this.inputEl.value);
   }
 }

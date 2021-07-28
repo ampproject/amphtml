@@ -640,23 +640,23 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   /**
    * Triggers changes to component state on response interactive.
    *
-   * @param {!Element} optionEl
-   * @param {!Array} option_index
+   * @param {number} optionIndex
+   * @param {?Element} optionEl
    * @protected
    */
-  handleOptionSelection(optionEl) {
+  handleOptionSelection(optionIndex, optionEl) {
     this.backendDataPromise_
       .then(() => {
         if (this.hasUserSelection_) {
           return;
         }
 
-        this.triggerAnalytics_(optionEl);
+        this.triggerAnalytics_(optionIndex);
         this.hasUserSelection_ = true;
 
         if (this.optionsData_) {
-          this.optionsData_[optionEl.optionIndex_]['count']++;
-          this.optionsData_[optionEl.optionIndex_]['selected'] = true;
+          this.optionsData_[optionIndex]['count']++;
+          this.optionsData_[optionIndex]['selected'] = true;
         }
 
         this.mutateElement(() => {
@@ -664,12 +664,12 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         });
 
         if (this.element.hasAttribute('endpoint')) {
-          this.executeInteractiveRequest_('POST', optionEl.optionIndex_);
+          this.executeInteractiveRequest_('POST', optionIndex);
         }
       })
       .catch(() => {
         // If backend is not properly connected, still update state.
-        this.triggerAnalytics_(optionEl);
+        this.triggerAnalytics_(optionIndex);
         this.hasUserSelection_ = true;
         this.mutateElement(() => {
           this.updateToPostSelectionState_(optionEl);
