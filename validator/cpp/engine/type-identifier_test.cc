@@ -17,21 +17,18 @@
 #include "type-identifier.h"
 
 #include "gtest/gtest.h"
-#include "validator.pb.h"
+#include "../../validator.pb.h"
 
 TEST(TypeIdentifier, TypeIdentifierToString) {
-  EXPECT_EQ(
-      amp::validator::TypeIdentifierToString(
-          amp::validator::TypeIdentifier::kAmp),
-      "amp");
-  EXPECT_EQ(
-      amp::validator::TypeIdentifierToString(
-          amp::validator::TypeIdentifier::kAds),
-      "amp4ads");
-  EXPECT_EQ(
-      amp::validator::TypeIdentifierToString(
-          amp::validator::TypeIdentifier::kEmail),
-      "amp4email");
+  EXPECT_EQ(amp::validator::TypeIdentifierToString(
+                amp::validator::TypeIdentifier::kAmp),
+            "amp");
+  EXPECT_EQ(amp::validator::TypeIdentifierToString(
+                amp::validator::TypeIdentifier::kAds),
+            "amp4ads");
+  EXPECT_EQ(amp::validator::TypeIdentifierToString(
+                amp::validator::TypeIdentifier::kEmail),
+            "amp4email");
   EXPECT_EQ(amp::validator::TypeIdentifierToString(
                 amp::validator::TypeIdentifier::kTransformed),
             "transformed");

@@ -2,13 +2,13 @@
 #include <fstream>
 #include <string>
 
-#include "glog/logging.h"
 #include "google/protobuf/text_format.h"
 
+#include "absl/strings/str_cat.h"
 #include "defer.h"
 #include "fileutil.h"
-
-#include "validator.pb.h"
+#include "logging.h"
+#include "../../validator.pb.h"
 
 using google::protobuf::TextFormat;
 
@@ -17,9 +17,10 @@ namespace fs = std::filesystem;
 int main(int argc, char* argv[]) {
   fs::path text_proto_path = argv[1];
   fs::path output_file = argv[2];
-  CHECK(fs::exists(text_proto_path)) << text_proto_path << " proto not found.";
+  CHECKORDIE(fs::exists(text_proto_path),
+             absl::StrCat(argv[1], " proto not found."));
   std::string text_proto = htmlparser::FileUtil::FileContents(argv[1]);
-  CHECK(!text_proto.empty()) << text_proto_path << " read failed.";
+  CHECKORDIE(!text_proto.empty(), absl::StrCat(argv[1], " read failed."));
   amp::validator::ValidatorRules rules;
   TextFormat::ParseFromString(text_proto, &rules);
   std::ofstream ofs(argv[2], std::ofstream::out);
