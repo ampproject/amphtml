@@ -56,6 +56,52 @@ const SCROLL_POS_TO_BLOCK = {
 const SMOOTH_SCROLL_DELAY_ = 300;
 
 /**
+ * @param {!Window} win
+ * @param {!Element} element
+ * @param {string=} property
+ * @return {number}
+ */
+function getComputedStylePropertyPixels(win, element, property) {
+  const value = parseInt(computedStyle(win, element)[property], 10);
+  return isNaN(value) ? 0 : value;
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Element} element
+ * @param {string=} property
+ * @return {number}
+ */
+function getScrollPadding(win, element, property) {
+  // Due to https://bugs.webkit.org/show_bug.cgi?id=106133, WebKit browsers use
+  // use `body` and NOT `documentElement` for scrolling purposes.
+  // (We get this node from `ViewportBindingNatural`.)
+  // However, `scroll-padding-*` properties are effective only on the `html`
+  // selector across browsers, thus we use the `documentElement`.
+  const effectiveElement =
+    element === win.document.body ? win.document.documentElement : element;
+  return getComputedStylePropertyPixels(win, effectiveElement, property);
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Element} element
+ * @return {number}
+ */
+function getScrollPaddingTop(win, element) {
+  return getScrollPadding(win, element, 'scrollPaddingTop');
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Element} element
+ * @return {number}
+ */
+function getScrollPaddingBottom(win, element) {
+  return getScrollPadding(win, element, 'scrollPaddingBottom');
+}
+
+/**
  * This object represents the viewport. It tracks scroll position, resize
  * and other events and notifies interesting parties when viewport has changed
  * and how.
@@ -434,8 +480,9 @@ export class ViewportImpl {
    */
   scrollIntoViewInternal_(element, parent) {
     const elementTop = this.binding_.getLayoutRect(element).top;
+    const scrollPaddingTop = getScrollPaddingTop(this.ampdoc.win, parent);
     const newScrollTopPromise = tryResolve(() =>
-      Math.max(0, elementTop - this.paddingTop_)
+      Math.max(0, elementTop - this.paddingTop_ - scrollPaddingTop)
     );
 
     newScrollTopPromise.then((newScrollTop) =>
@@ -484,17 +531,18 @@ export class ViewportImpl {
       ? this.getSize()
       : this.getLayoutRect(parent);
 
-    let offset;
-    switch (pos) {
-      case 'bottom':
-        offset = -parentHeight + elementRect.height;
-        break;
-      case 'center':
-        offset = -parentHeight / 2 + elementRect.height / 2;
-        break;
-      default:
-        offset = 0;
-        break;
+    const {win} = this.ampdoc;
+    const scrollPaddingTop = getScrollPaddingTop(win, parent);
+    const scrollPaddingBottom = getScrollPaddingBottom(win, parent);
+
+    let offset = -scrollPaddingTop; // default pos === 'top'
+
+    if (pos === 'bottom') {
+      offset = -parentHeight + scrollPaddingBottom + elementRect.height;
+    } else if (pos === 'center') {
+      const effectiveParentHeight =
+        parentHeight - scrollPaddingTop - scrollPaddingBottom;
+      offset = -effectiveParentHeight / 2 + elementRect.height / 2;
     }
 
     return this.getElementScrollTop_(parent).then((curScrollTop) => {

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <!-- prettier-ignore -->
+  <head>
+    <meta charset="utf-8" />
+    <title>scroll-padding-*</title>
+    <link rel="canonical" href="/" />
+    <meta
+      name="viewport"
+      content="width=device-width,minimum-scale=1,initial-scale=1"
+    />
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <style amp-custom>
+      html {
+        font-family: sans-serif;
+        scroll-padding-top: 60px;
+        scroll-padding-bottom: 90px;
+      }
+      header, footer {
+        box-sizing: border-box;
+        padding: 0 20px;
+        width: 100%;
+        background: #ddd;
+      }
+      header {
+        position: sticky;
+        top: 0;
+        border-bottom: 4px solid #aaa;
+        /* same as scroll-padding-top applied to html */
+        height: 60px;
+        /* same as above, but only for text alignment */
+        line-height: 60px;
+      }
+      footer {
+        position: fixed;
+        bottom: 0;
+        border-top: 4px solid #aaa;
+        /* same as scroll-padding-bottom applied to html */
+        height: 90px;
+        /* same as above, but only for text alignment */
+        line-height: 90px;
+      }
+      main {
+        padding: 0 20px;
+      }
+      .spacer {
+        height: 100vh;
+      }
+      /* An element to scroll to */
+      .reference-element {
+        padding: 20px;
+        font-weight: bold;
+        background: #4ee9e9;
+        border: 4px solid #339797;
+      }
+      /* Padding on top and bottom is meant to make the element taller than viewport */
+      #tall {
+        padding: 50vh 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>Header should never cover linked elements from the top.</header>
+    <footer>Footer should never cover linked elements from the bottom.</footer>
+    <main>
+      <h1><code>scroll-padding-*</code> CSS property support</h1>
+
+      <h2>Hash navigation</h2>
+
+      <h3>
+        <a href="#short"><code>#short</code></a>
+      </h3>
+      <h3>
+        <a href="#tall"><code>#tall</code></a>
+      </h3>
+
+      <h2><code>AMP.scrollTo()</code> action</h2>
+      <div class="button-set">
+        <p>
+          <button on="tap: AMP.scrollTo(id='short')">
+            <code>AMP.scrollTo(id='short')</code>
+          </button>
+        </p>
+        <p>
+          <button on="tap: AMP.scrollTo(id='short', position='center')">
+            <code>AMP.scrollTo(id='short', position='center')</code>
+          </button>
+        </p>
+        <p>
+          <button on="tap: AMP.scrollTo(id='short', position='bottom')">
+            <code>AMP.scrollTo(id='short', position='bottom')</code>
+          </button>
+        </p>
+        <p>
+          <button on="tap: AMP.scrollTo(id='tall')">
+            <code>AMP.scrollTo(id='tall')</code>
+          </button>
+        </p>
+        <p>
+          <button on="tap: AMP.scrollTo(id='tall', position='center')">
+            <code>AMP.scrollTo(id='tall', position='center')</code>
+          </button>
+        </p>
+        <p>
+          <button on="tap: AMP.scrollTo(id='tall', position='bottom')">
+            <code>AMP.scrollTo(id='tall', position='bottom')</code>
+          </button>
+        </p>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="reference-element" id="short">Short element</div>
+
+      <div class="spacer"></div>
+
+      <div class="reference-element" id="tall">
+        Element taller than viewport
+      </div>
+
+      <div class="spacer"></div>
+    </main>
+  </body>
+</html>
