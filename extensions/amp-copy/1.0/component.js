@@ -41,7 +41,7 @@ export function Copy({children, sourceId, text, ...rest}) {
     }
   }, [setIsCopySupported]);
   const copy = useCallback((sourceId) => {
-    const content = document.getElementById(sourceId);
+    const content = ref.current.ownerDocument.getElementById(sourceId);
     const text = (content.value ?? content.textContent).trim();
     setStatus(copyTextToClipboard(window, text));
   }, []);
