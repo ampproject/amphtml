@@ -177,11 +177,11 @@ function create(context) {
     // Void tags are defined at
     // https://html.spec.whatwg.org/multipage/syntax.html#void-elements
     const invalid =
-      /<(?!area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)([a-zA-Z-]+)([\s\n][^>]*)?\/>/gm;
+      /<(?!area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)(((svg)?)([a-zA-Z-])+)([\s\n][^>]*)?\/>/gm;
     const matches = [];
 
     let match;
-    while ((match = invalid.exec(string)) && !string.includes('<svg')) {
+    while ((match = invalid.exec(string))) {
       const [fullMatch, tag] = match;
       matches.push({
         tag,
