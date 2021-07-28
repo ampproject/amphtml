@@ -43,7 +43,6 @@ export function AudioWithRef(props, ref) {
     propagateAttributes,
     src,
     title,
-    toggleFallback,
     validateMediaMetadata,
     ...rest
   } = props;
@@ -97,9 +96,6 @@ export function AudioWithRef(props, ref) {
 
   useEffect(() => {
     if (!audioRef.current.play) {
-      if (toggleFallback) {
-        toggleFallback(true);
-      }
       return;
     }
 
@@ -128,7 +124,7 @@ export function AudioWithRef(props, ref) {
     return () => {
       unlistenPlaying();
     };
-  }, [audioPlaying, children, propagateAttributes, toggleFallback]);
+  }, [audioPlaying, children, propagateAttributes]);
 
   /** Audio Component - API Functions */
   useImperativeHandle(
