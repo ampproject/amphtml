@@ -15,11 +15,7 @@
  */
 
 import * as Preact from '#preact';
-import {
-  useCallback,
-  useMemo,
-  useState,
-} from '#preact';
+import {useCallback, useRef, useState} from '#preact';
 import {
   copyTextToClipboard,
   isCopyingToClipboardSupported,
@@ -31,31 +27,47 @@ import {useStyles} from './component.jss';
  * @return {PreactDef.Renderable}
  */
 export function Copy({children, sourceId, text, ...rest}) {
+  const ref = useRef(null);
   const [status, setStatus] = useState(null);
+  const [isCopySupported, setIsCopySupported] = useState(false);
   const classes = useStyles();
-  let theme = useMemo(()=>{
-    if(status!=null){
-      if(status==true){
-        return classes.success;  
-      }else{
-        return classes.failed;
-      }
-    }
-    if(isCopyingToClipboardSupported(document)){
-      return classes.enabled;
-    } else {
-      return classes.disabled;
-    }
-  }, [status]);
 
-  const copy = useCallback((sourceId)=> {
-    const content = document.getElementById(sourceId);
-    const text = (content.value ?? content.textContent).trim();
-    setStatus(copyTextToClipboard(window, text));
-  },[sourceId]);
+  useLayoutEffect(() => {
+    if (!ref.current) {
+      return;
+    }
+
+    if (isCopyingToClipboardSupported(ref.current.ownerDocument)) {
+      setIsCopySupported(true);
+    } else {
+      setIsCopySupported(false);
+    }
+  });
+
+  const copy = useCallback(
+    (sourceId) => {
+      const content = document.getElementById(sourceId);
+      const text = (content.value ?? content.textContent).trim();
+      setStatus(copyTextToClipboard(window, text));
+    },
+    [sourceId]
+  );
 
   return (
-    <button className={theme} layout size paint {...rest} onClick={() => copy(sourceId)}>
+    <button
+      ref={ref}
+      className={objstr({
+        [classes.success]: status,
+        [classes.failed]: !status,
+        [classes.enabled]: isCopySupported,
+        [classes.disabled]: !isCopySupported,
+      })}
+      layout
+      size
+      paint
+      {...rest}
+      onClick={() => copy(sourceId)}
+    >
       {children}
     </button>
   );
