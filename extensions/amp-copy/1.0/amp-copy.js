@@ -24,13 +24,6 @@ import {userAssert} from '../../../src/log';
 const TAG = 'amp-copy';
 
 class AmpCopy extends BaseElement {
-  /** @override */
-  init() {
-    return dict({
-      // Extra props passed by wrapper AMP component
-      'exampleTagNameProp': this.element.tagName,
-    });
-  }
 
   /** @override */
   isLayoutSupported(layout) {
