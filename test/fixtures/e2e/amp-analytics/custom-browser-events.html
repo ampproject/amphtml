@@ -52,6 +52,11 @@
   <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script>
+  (self.AMP = self.AMP || []).push(function (AMP) {
+    AMP.toggleExperiment('analytics-browser-events', true);
+  });
+</script>
 </head>
 <body>
   <div style="display: flex; flex-direction: column; height: 100vh">
@@ -116,23 +121,45 @@
           "genericTrigger-1":{
             "on": "change",
             "request": "event",
-            "selector": ["#inputText","#numChild"],
+            "selector": "#inputText",
             "vars": {
               "eventType": "change"
             },
             "extraUrlParams":{
-                "eventId": "${id}"
+                "eventId": "inputText"
             }
           },
           "genericTrigger-2":{
+            "on": "change",
+            "request": "event",
+            "selector": "#numChild",
+            "vars": {
+              "eventType": "change"
+            },
+            "extraUrlParams":{
+                "eventId": "numChild"
+            }
+          },
+          "genericTrigger-3":{
             "on": "blur",
             "request": "event",
-            "selector": ["#inputText2", "#numChild2"],
+            "selector": "#inputText2",
             "vars": {
               "eventType": "blur"
             },
             "extraUrlParams":{
-                "eventId": "${id}"
+                "eventId": "inputText2"
+            }
+          },
+          "genericTrigger-4":{
+            "on": "blur",
+            "request": "event",
+            "selector": "#numChild2",
+            "vars": {
+              "eventType": "blur"
+            },
+            "extraUrlParams":{
+                "eventId": "numChild2"
             }
           }
         }

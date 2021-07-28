@@ -41,13 +41,11 @@ describes.endtoend(
 
       // Sleep 1 second for the blur event to be sent
       await sleep(1000);
-      await expect(
-        'https://foo.com/event?type=blur&eventId='
-      ).to.have.been.sent;
+      await expect('https://foo.com/event?type=blur&eventId=inputText2').to.have
+        .been.sent;
     });
 
     it('click on dropdown menu to focus and then blur', async () => {
-
       const focusedDropdown = await controller.findElement('#numChild');
       const blurredDropdown = await controller.findElement('#numChild2');
 
@@ -56,9 +54,8 @@ describes.endtoend(
 
       // Sleep 1 second for the blur event to be sent
       await sleep(1000);
-      await expect(
-        'https://foo.com/event?type=blur&eventId='
-      ).to.have.been.sent;
+      await expect('https://foo.com/event?type=blur&eventId=numChild2').to.have
+        .been.sent;
     });
 
     it('change the content of the input field to trigger on change event', async () => {
@@ -71,10 +68,8 @@ describes.endtoend(
 
       // Sleep 1 second for the change event to be sent
       await sleep(1000);
-      await expect(
-        'https://foo.com/event?type=change&eventId='
-      ).to.have.been.sent;
-
+      await expect('https://foo.com/event?type=change&eventId=inputText').to
+        .have.been.sent;
     });
 
     it('change drop down option selected to trigger on change event', async () => {
@@ -84,11 +79,9 @@ describes.endtoend(
       await controller.type(changedDropdown, '1');
       await controller.type(changedDropdown, Key.Enter);
       // Sleep 1 second for the change event to be sent
-      await sleep(1000);
-      await expect(
-        'https://foo.com/event?type=change&eventId='
-      ).to.have.been.sent;
-
+      await sleep(5000);
+      await expect('https://foo.com/event?type=change&eventId=numChild').to.have
+        .been.sent;
     });
   }
 );
