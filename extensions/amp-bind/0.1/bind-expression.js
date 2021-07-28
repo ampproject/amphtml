@@ -16,10 +16,11 @@
 
 import {AstNodeType} from './bind-expr-defines';
 import {devAssert, user} from '../../../src/log';
-import {dict, hasOwn, map} from '../../../src/utils/object';
+import {dict, hasOwn, map} from '#core/types/object';
 import {getMode} from '../../../src/mode';
-import {isArray, isObject} from '../../../src/types';
-import {bindParser as parser} from '../../../build/parsers/bind-expr-impl';
+import {isArray, isObject} from '#core/types';
+
+import {bindParser as parser} from '#build/parsers/bind-expr-impl';
 
 const TAG = 'amp-bind';
 
@@ -339,7 +340,7 @@ export class BindExpression {
       return null;
     }
 
-    const {type, args, value} = node;
+    const {args, type, value} = node;
 
     // `value` should always exist for literals.
     if (type === AstNodeType.LITERAL && value !== undefined) {

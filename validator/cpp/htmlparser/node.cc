@@ -19,9 +19,10 @@
 #include <algorithm>
 #include <functional>
 #include <sstream>
-#include "glog/logging.h"
+
 #include "atomutil.h"
 #include "elements.h"
+#include "logging.h"
 
 namespace htmlparser {
 
@@ -41,13 +42,20 @@ void Node::SortAttributes(bool remove_duplicates) {
             [](const Attribute& left, const Attribute& right) -> bool {
               return left.KeyPart() < right.KeyPart();
             });
-  if (remove_duplicates) {
-    attributes_.erase(
-        std::unique(attributes_.begin(), attributes_.end(),
-                    [](const Attribute& left, const Attribute& right) -> bool {
-                      return left.KeyPart() == right.KeyPart();
-                    }), attributes_.end());
-  }
+  if (remove_duplicates) DropDuplicateAttributes();
+}
+
+void Node::DropDuplicateAttributes() {
+  auto remove_attributes = [&](auto first, auto last) {
+    for (; first != last; ++first) {
+      last = std::remove_if(std::next(first), last, [first](const auto& attr) {
+        return first->KeyPart() == attr.KeyPart();
+      });
+    }
+    return last;
+  };
+  attributes_.erase(remove_attributes(attributes_.begin(), attributes_.end()),
+                    attributes_.end());
 }
 
 bool Node::IsSpecialElement() const {
@@ -110,10 +118,9 @@ bool Node::InsertBefore(Node* new_child, Node* old_child) {
 }
 
 bool Node::AppendChild(Node* new_child) {
-  CHECK(!(new_child->Parent() ||
-          new_child->PrevSibling() ||
-          new_child->NextSibling()))
-        << "html: AppendChild called for an attached child Node";
+  CHECK(!(new_child->Parent() || new_child->PrevSibling() ||
+          new_child->NextSibling()),
+        "html: AppendChild called for an attached child Node.");
 
   Node* last = LastChild();
   if (last) {
@@ -130,8 +137,7 @@ bool Node::AppendChild(Node* new_child) {
 
 Node* Node::RemoveChild(Node* c) {
   // Remove child called for a non-child node.
-  CHECK(c->parent_ == this)
-      << "html: RemoveChild called for a non-child Node";
+  CHECK(c->parent_ == this, "html: RemoveChild called for a non-child Node");
 
   if (first_child_ == c) {
     first_child_ = c->next_sibling_;
@@ -418,17 +424,17 @@ std::string Node::InnerText() const {
 
 void Node::UpdateChildNodesPositions(Node* relative_node) {
   // Cannot proceed if relative node has no positional information.
-  if (!relative_node->PositionInHtmlSrc().has_value()) return;
+  if (!relative_node->LineColInHtmlSrc().has_value()) return;
 
-  auto [r_line, r_col] = relative_node->PositionInHtmlSrc().value();
+  auto [r_line, r_col] = relative_node->LineColInHtmlSrc().value();
 
   // Update the positions of this node.
-  if (position_in_html_src_.has_value()) {
-    auto [line, col] = position_in_html_src_.value();
+  if (line_col_in_html_src_.has_value()) {
+    auto [line, col] = line_col_in_html_src_.value();
     int effective_col = line == 1 ?
         r_col + col + AtomUtil::ToString(
             relative_node->DataAtom()).size() + 1 /* closing > */ : col;
-    position_in_html_src_ = LineCol({line + r_line - 1, effective_col});
+    line_col_in_html_src_ = LineCol({line + r_line - 1, effective_col});
   }
 
   // Update the positions of this node's children.
@@ -454,9 +460,9 @@ std::string Node::DebugString() {
       break;
   }
 
-  if (position_in_html_src_.has_value()) {
-    ost << position_in_html_src_.value().first << ":"
-        << position_in_html_src_.value().second;
+  if (line_col_in_html_src_.has_value()) {
+    ost << line_col_in_html_src_.value().first << ":"
+        << line_col_in_html_src_.value().second;
   }
   ost << "\n";
 

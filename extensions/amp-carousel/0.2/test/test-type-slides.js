@@ -16,9 +16,9 @@
 
 import '../amp-carousel';
 import * as Listen from '../../../../src/event-helper';
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {CarouselEvents} from '../../../amp-base-carousel/0.1/carousel-events';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 import {getDetail, listenOncePromise} from '../../../../src/event-helper';
 
 /**
@@ -98,9 +98,9 @@ describes.realWin(
     });
 
     async function getCarousel({
+      dir = null,
       loop = false,
       slideCount = 5,
-      dir = null,
     } = {}) {
       const imgUrl =
         'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
@@ -171,8 +171,9 @@ describes.realWin(
       const slideWrappers = getSlideWrappers(carousel);
       expect(slideWrappers.length).to.equal(5);
 
-      const slides = carousel.querySelector('.i-amphtml-carousel-scroll')
-        .children;
+      const slides = carousel.querySelector(
+        '.i-amphtml-carousel-scroll'
+      ).children;
 
       // Ensure that the spacers have the snap property and not the
       // slides.
@@ -405,12 +406,10 @@ describes.realWin(
 
         const {left: firstLeft} = slideWrappers[0].getBoundingClientRect();
         const {left: secondLeft} = slideWrappers[1].getBoundingClientRect();
-        const {left: nextLeft} = getNextButton(
-          carousel
-        ).getBoundingClientRect();
-        const {left: prevLeft} = getPrevButton(
-          carousel
-        ).getBoundingClientRect();
+        const {left: nextLeft} =
+          getNextButton(carousel).getBoundingClientRect();
+        const {left: prevLeft} =
+          getPrevButton(carousel).getBoundingClientRect();
 
         expect(firstLeft).to.be.greaterThan(secondLeft);
         expect(prevLeft).to.be.greaterThan(nextLeft);
@@ -424,12 +423,10 @@ describes.realWin(
 
         const {left: firstLeft} = slideWrappers[0].getBoundingClientRect();
         const {left: secondLeft} = slideWrappers[1].getBoundingClientRect();
-        const {left: nextLeft} = getNextButton(
-          carousel
-        ).getBoundingClientRect();
-        const {left: prevLeft} = getPrevButton(
-          carousel
-        ).getBoundingClientRect();
+        const {left: nextLeft} =
+          getNextButton(carousel).getBoundingClientRect();
+        const {left: prevLeft} =
+          getPrevButton(carousel).getBoundingClientRect();
 
         expect(firstLeft).to.be.greaterThan(secondLeft);
         expect(prevLeft).to.be.greaterThan(nextLeft);
@@ -443,12 +440,10 @@ describes.realWin(
 
         const {left: firstLeft} = slideWrappers[0].getBoundingClientRect();
         const {left: secondLeft} = slideWrappers[1].getBoundingClientRect();
-        const {left: nextLeft} = getNextButton(
-          carousel
-        ).getBoundingClientRect();
-        const {left: prevLeft} = getPrevButton(
-          carousel
-        ).getBoundingClientRect();
+        const {left: nextLeft} =
+          getNextButton(carousel).getBoundingClientRect();
+        const {left: prevLeft} =
+          getPrevButton(carousel).getBoundingClientRect();
 
         expect(secondLeft).to.be.greaterThan(firstLeft);
         expect(nextLeft).to.be.greaterThan(prevLeft);
@@ -462,12 +457,10 @@ describes.realWin(
 
         const {left: firstLeft} = slideWrappers[0].getBoundingClientRect();
         const {left: secondLeft} = slideWrappers[1].getBoundingClientRect();
-        const {left: nextLeft} = getNextButton(
-          carousel
-        ).getBoundingClientRect();
-        const {left: prevLeft} = getPrevButton(
-          carousel
-        ).getBoundingClientRect();
+        const {left: nextLeft} =
+          getNextButton(carousel).getBoundingClientRect();
+        const {left: prevLeft} =
+          getPrevButton(carousel).getBoundingClientRect();
 
         expect(secondLeft).to.be.greaterThan(firstLeft);
         expect(nextLeft).to.be.greaterThan(prevLeft);
@@ -535,9 +528,7 @@ describes.realWin(
     describe('event propogation', () => {
       it('should add touchmove event if in viewer', async () => {
         env.sandbox.stub(Services, 'viewerForDoc').returns({
-          isEmbedded: () => {
-            return true;
-          },
+          isEmbedded: () => true,
         });
         const listenSpy = env.sandbox.spy(Listen, 'listen');
         const carousel = await getCarousel({loop: false});
@@ -550,9 +541,7 @@ describes.realWin(
 
       it('should not add touchmove event if not in the viewer', async () => {
         env.sandbox.stub(Services, 'viewerForDoc').returns({
-          isEmbedded: () => {
-            return false;
-          },
+          isEmbedded: () => false,
         });
         const listenSpy = env.sandbox.spy(Listen, 'listen');
         await getCarousel({loop: false});

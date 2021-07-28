@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-const {getOutput, execScriptAsync} = require('../../common/exec');
+const {execScriptAsync} = require('../../common/exec');
+const {getOutput} = require('../../common/process');
 
 const command = (args = []) =>
   [
@@ -26,24 +27,24 @@ const command = (args = []) =>
 
 /**
  * @param {Array<string>} args
- * @param {Object} opts
- * @return {string}
+ * @param {?Object=} opts
+ * @return {!Object}
  */
 const jscodeshift = (args = [], opts) => getOutput(command(args), opts);
 
 /**
  * @param {Array<string>} args
- * @param {Object} opts
- * @return {ChildProcess}
+ * @param {Object=} opts
+ * @return {ReturnType<execScriptAsync>}
  */
-const jscodeshiftAsync = (args = [], opts) =>
+const jscodeshiftAsync = (args = [], opts = {}) =>
   execScriptAsync(command(args), opts);
 
 const stripColors = (str) => str.replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
 
 /**
  * @param {string} line
- * @return {Array<string>} [filename, report]
+ * @return {?Array<string>} [filename, report]
  */
 function getJscodeshiftReport(line) {
   const stripped = stripColors(line);

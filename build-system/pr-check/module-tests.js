@@ -20,18 +20,16 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
-const {
-  downloadModuleOutput,
-  downloadNomoduleOutput,
-  skipDependentJobs,
-  timedExecOrDie,
-} = require('./utils');
-const {buildTargetsInclude, Targets} = require('./build-targets');
 const {MINIFIED_TARGETS} = require('../tasks/helpers');
 const {runCiJob} = require('./ci-job');
+const {skipDependentJobs, timedExecOrDie} = require('./utils');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'module-tests.js';
 
+/**
+ * Adds a canary or prod config string to all esm and non-esm minified targets.
+ */
 function prependConfig() {
   const targets = MINIFIED_TARGETS.flatMap((target) => [
     `dist/${target}.js`,
@@ -42,17 +40,19 @@ function prependConfig() {
   );
 }
 
+/**
+ * Steps to run during push builds.
+ */
 function pushBuildWorkflow() {
-  downloadNomoduleOutput();
-  downloadModuleOutput();
   prependConfig();
   timedExecOrDie('amp integration --nobuild --compiled --headless --esm');
 }
 
+/**
+ * Steps to run during PR builds.
+ */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
-    downloadNomoduleOutput();
-    downloadModuleOutput();
     prependConfig();
     timedExecOrDie(
       `amp integration --nobuild --compiled --headless --esm --config=${argv.config}`

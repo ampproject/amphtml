@@ -94,4 +94,4 @@ For additional information about widgets attributes, please see [VK post widget 
 
 ## Validation
 
-See [amp-vk rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vk/validator-amp-vk.protoascii) in the AMP validator specification.
+See [amp-vk rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-vk/validator-amp-vk.protoascii) in the AMP validator specification.

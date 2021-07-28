@@ -30,7 +30,7 @@ const https = require('https');
 const {getStdout} = require('./process');
 
 const setupInstructionsUrl =
-  'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup';
+  'https://github.com/ampproject/amphtml/blob/main/docs/getting-started-quick.md#one-time-setup';
 const nodeDistributionsUrl = 'https://nodejs.org/dist/index.json';
 
 const warningDelaySecs = 10;
@@ -63,7 +63,7 @@ ${yellow('For detailed instructions, see')} ${cyan(setupInstructionsUrl)}`;
 /**
  * Formats the text to appear red
  *
- * @param {string} text
+ * @param {*} text
  * @return {string}
  */
 function red(text) {
@@ -72,7 +72,7 @@ function red(text) {
 /**
  * Formats the text to appear cyan
  *
- * @param {string} text
+ * @param {*} text
  * @return {string}
  */
 function cyan(text) {
@@ -81,7 +81,7 @@ function cyan(text) {
 /**
  * Formats the text to appear green
  *
- * @param {string} text
+ * @param {*} text
  * @return {string}
  */
 function green(text) {
@@ -90,7 +90,7 @@ function green(text) {
 /**
  * Formats the text to appear yellow
  *
- * @param {string} text
+ * @param {*} text
  * @return {string}
  */
 function yellow(text) {
@@ -103,7 +103,7 @@ function yellow(text) {
  * package manager being used is determined.
  **/
 function ensureNpm() {
-  if (!process.env.npm_execpath.includes('npm')) {
+  if (!process.env.npm_execpath?.includes('npm')) {
     console.log(npmInfoMessage);
     process.exit(1);
   }
@@ -112,7 +112,7 @@ function ensureNpm() {
 /**
  * Check the node version and print a warning if it is not the latest LTS.
  *
- * @return {Promise}
+ * @return {Promise<void>}
  **/
 function checkNodeVersion() {
   const nodeVersion = getStdout('node --version').trim();
@@ -217,10 +217,10 @@ function logNpmVersion() {
  */
 function checkPythonVersion() {
   // Python 2.7 is EOL but still supported
-  // Python 3.5+ are still supported (TODO: deprecate 3.5 on 2020-09-13)
+  // Python 3.6+ are still supported
   // https://devguide.python.org/#status-of-python-branches
-  const recommendedVersion = '2.7 or 3.5+';
-  const recommendedVersionRegex = /^2\.7|^3\.[5-9]/;
+  const recommendedVersion = '2.7 or 3.6+';
+  const recommendedVersionRegex = /^2\.7|^3\.(?:[6-9]|1\d)/;
 
   // Python2 prints its version to stderr (fixed in Python 3.4)
   // See: https://bugs.python.org/issue18338
@@ -276,6 +276,14 @@ async function main() {
       yellow('\nWARNING: Detected problems with'),
       cyan(Array.from(updatesNeeded).join(', '))
     );
+    if (process.env.CI) {
+      console.log(
+        yellow('Skipping delay prompt for'),
+        cyan('CI'),
+        yellow('environment.')
+      );
+      return;
+    }
     console.log(
       yellow('⤷ Continuing install in'),
       cyan(warningDelaySecs),

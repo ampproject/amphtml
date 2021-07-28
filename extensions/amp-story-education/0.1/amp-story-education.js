@@ -20,17 +20,17 @@ import {
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-education-0.1.css';
-import {Layout} from '../../../src/layout';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
+import {Layout} from '#core/dom/layout';
+import {LocalizedStringId} from '#service/localization/strings';
+import {Services} from '#service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '#core/types/object';
 import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service';
-import {htmlFor} from '../../../src/static-template';
-import {removeChildren} from '../../../src/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {removeChildren} from '#core/dom';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
-import {toggle} from '../../../src/style';
+import {toggle} from '#core/dom/style';
 
 /** @type {string} */
 const TAG = 'amp-story-education';
@@ -86,9 +86,10 @@ export class AmpStoryEducation extends AMP.BaseElement {
     this.state_ = State.HIDDEN;
 
     /** @private @const {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = /** @type {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */ (Services.storyStoreService(
-      this.win
-    ));
+    this.storeService_ =
+      /** @type {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */ (
+        Services.storyStoreService(this.win)
+      );
 
     /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = null;
@@ -220,9 +221,8 @@ export class AmpStoryEducation extends AMP.BaseElement {
           : LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS_SINGLE;
         el.querySelector(
           '.i-amphtml-story-education-navigation-progress'
-        ).textContent = this.localizationService_.getLocalizedString(
-          progressStringId
-        );
+        ).textContent =
+          this.localizationService_.getLocalizedString(progressStringId);
         el.querySelector(
           '.i-amphtml-story-education-navigation-instructions'
         ).textContent = this.localizationService_.getLocalizedString(

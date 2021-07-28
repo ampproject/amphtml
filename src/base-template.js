@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
+import {isElement} from './core/types';
 import {dev} from './log';
+import {Services} from './service';
 
 /**
  * The interface that is implemented by all templates.
@@ -87,7 +88,7 @@ export class BaseTemplate {
         }
       } else if (n.nodeType == /* COMMENT */ 8) {
         // Ignore comments.
-      } else if (n.nodeType == /* ELEMENT */ 1) {
+      } else if (isElement(n)) {
         callback(dev().assertElement(n));
       }
     }

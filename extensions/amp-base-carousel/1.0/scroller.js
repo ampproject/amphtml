@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {
   Alignment,
   Axis,
@@ -21,21 +21,20 @@ import {
   getPercentageOffsetFromAlignment,
   scrollContainerToElement,
 } from './dimensions';
-import {LightboxGalleryContext} from '../../amp-lightbox-gallery/1.0/context';
-import {debounce} from '../../../src/utils/rate-limit';
-import {forwardRef} from '../../../src/preact/compat';
-import {mod} from '../../../src/utils/math';
-import {setStyle} from '../../../src/style';
-import {toWin} from '../../../src/types';
+import {WithLightbox} from '../../amp-lightbox-gallery/1.0/component';
+import {debounce} from '#core/types/function';
+import {forwardRef} from '#preact/compat';
+import {mod} from '#core/math';
+import {setStyle} from '#core/dom/style';
+import {toWin} from '#core/window';
 import {
   useCallback,
-  useContext,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
   useRef,
-} from '../../../src/preact';
-import {useStyles} from './base-carousel.jss';
+} from '#preact';
+import {useStyles} from './component.jss';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last
@@ -49,17 +48,18 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
 
 /**
  * @param {!BaseCarouselDef.ScrollerProps} props
- * @param {{current: (T|null)}} ref
+ * @param {{current: ?T}} ref
  * @return {PreactDef.Renderable}
  * @template T
  */
 function ScrollerWithRef(
   {
+    _thumbnails,
     advanceCount,
     alignment,
     axis,
     children,
-    lightbox,
+    lightboxGroup,
     loop,
     mixedLength,
     restingIndex,
@@ -67,7 +67,6 @@ function ScrollerWithRef(
     snap,
     snapBy = 1,
     visibleCount,
-    _thumbnails,
     ...rest
   },
   ref
@@ -138,7 +137,6 @@ function ScrollerWithRef(
    */
   const scrollOffset = useRef(0);
 
-  const {open: openLightbox} = useContext(LightboxGalleryContext);
   const slides = renderSlides(
     {
       alignment,
@@ -146,7 +144,7 @@ function ScrollerWithRef(
       loop,
       mixedLength,
       offsetRef,
-      openLightbox: lightbox && openLightbox,
+      lightboxGroup,
       pivotIndex,
       restingIndex,
       snap,
@@ -340,31 +338,28 @@ export {Scroller};
  */
 function renderSlides(
   {
+    _thumbnails,
     alignment,
     children,
+    lightboxGroup,
     loop,
     mixedLength,
-    restingIndex,
     offsetRef,
-    openLightbox,
     pivotIndex,
+    restingIndex,
     snap,
     snapBy,
     visibleCount,
-    _thumbnails,
   },
   classes
 ) {
   const {length} = children;
-  const lightboxProps = openLightbox && {
-    role: 'button',
-    tabindex: '0',
-    onClick: () => openLightbox(),
-  };
+  const Comp = lightboxGroup ? WithLightbox : 'div';
   const slides = children.map((child, index) => {
     const key = `slide-${child.key || index}`;
     return (
-      <div
+      <Comp
+        caption={child.props.caption}
         key={key}
         data-slide={index}
         class={`${classes.slideSizing} ${classes.slideElement} ${
@@ -376,14 +371,14 @@ function renderSlides(
             ? classes.centerAlign
             : classes.startAlign
         } ${_thumbnails ? classes.thumbnails : ''} `}
+        group={lightboxGroup}
         part="slide"
         style={{
           flex: mixedLength ? '0 0 auto' : `0 0 ${100 / visibleCount}%`,
         }}
-        {...lightboxProps}
       >
         {child}
-      </div>
+      </Comp>
     );
   });
 

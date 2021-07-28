@@ -16,8 +16,8 @@
 
 import * as variant from '../variant';
 import {AmpExperiment} from '../amp-experiment';
-import {Services} from '../../../../src/services';
-import {hasOwn} from '../../../../src/utils/object';
+import {Services} from '#service';
+import {hasOwn} from '#core/types/object';
 
 describes.realWin(
   'amp-experiment',
@@ -118,7 +118,7 @@ describes.realWin(
 
     it('should throw if the child script element has non-JSON content', () => {
       addConfigElement('script', 'application/json', '{not json}');
-      expectAsyncConsoleError();
+      expectAsyncConsoleError(/.*/);
       return experiment.buildCallback().then(
         () => {
           throw new Error('must have failed');

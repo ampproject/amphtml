@@ -16,8 +16,8 @@
 
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-instagram-1.0.css';
-import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
+import {dict} from '#core/types/object';
+import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -37,9 +37,7 @@ class AmpInstagram extends BaseElement {
   /** @override */
   init() {
     return dict({
-      'requestResize': (height) => {
-        this.forceChangeHeight(height);
-      },
+      'requestResize': (height) => this.attemptChangeHeight(height),
     });
   }
 }

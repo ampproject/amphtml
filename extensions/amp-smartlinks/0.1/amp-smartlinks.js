@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../../src/common-signals';
-import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
-import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
-import {getData} from './../../../src/event-helper';
+import {CommonSignals} from '#core/constants/common-signals';
+import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
+import {Services} from '#service';
+import {dict} from '#core/types/object';
+import {getData} from '../../../src/event-helper';
 
 import {ENDPOINTS} from './constants';
 import {LinkRewriterManager} from '../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
@@ -199,17 +199,19 @@ export class AmpSmartlinks extends AMP.BaseElement {
    * @private
    */
   buildPageImpressionPayload_() {
-    return /** @type {!JsonObject} */ (dict({
-      'events': [{'is_amp': true}],
-      'organization_id': this.linkmateOptions_.publisherID,
-      'organization_type': 'publisher',
-      'user': {
-        'page_session_uuid': this.generateUUID_(),
-        'source_url': this.getLocationHref_(),
-        'previous_url': this.referrer_,
-        'user_agent': this.ampDoc_.win.navigator.userAgent,
-      },
-    }));
+    return /** @type {!JsonObject} */ (
+      dict({
+        'events': [{'is_amp': true}],
+        'organization_id': this.linkmateOptions_.publisherID,
+        'organization_type': 'publisher',
+        'user': {
+          'page_session_uuid': this.generateUUID_(),
+          'source_url': this.getLocationHref_(),
+          'previous_url': this.referrer_,
+          'user_agent': this.ampDoc_.win.navigator.userAgent,
+        },
+      })
+    );
   }
 
   /**

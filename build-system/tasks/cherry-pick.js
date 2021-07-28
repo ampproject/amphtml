@@ -16,10 +16,10 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {execOrThrow, getOutput} = require('../common/exec');
-const {green, cyan, red, yellow} = require('kleur/colors');
+const {cyan, green, red, yellow} = require('../common/colors');
+const {execOrThrow} = require('../common/exec');
+const {getOutput} = require('../common/process');
 const {log} = require('../common/logging');
-const {mainBranch} = require('../common/main-branch');
 
 /**
  * Determines the name of the cherry-pick branch.
@@ -129,17 +129,17 @@ async function cherryPick() {
   } catch (e) {
     log(red('ERROR:'), e.message);
     log('Deleting branch', cyan(branch));
-    getOutput(`git checkout ${mainBranch} && git branch -d ${branch}`);
+    getOutput(`git checkout main && git branch -d ${branch}`);
     throw e;
   }
 }
 
 module.exports = {cherryPick};
 
-cherryPick.description = 'Cherry-picks one or more commits onto a new branch';
+cherryPick.description = 'Cherry-pick one or more commits onto a new branch';
 cherryPick.flags = {
   'commits': 'Comma-delimited list of commit SHAs to cherry-pick',
-  'push': 'If set, will push the created branch to the remote',
-  'remote': 'Remote to refresh tags from (default: origin)',
+  'push': 'If set, push the created branch to the remote',
+  'remote': 'Remote ref to refresh tags from (default: origin)',
   'onto': '13-digit AMP version to cherry-pick onto',
 };

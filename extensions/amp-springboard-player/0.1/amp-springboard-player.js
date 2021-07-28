@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 
@@ -41,6 +43,9 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -120,9 +125,12 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
       encodeURIComponent(this.domain_) +
       '/' +
       encodeURIComponent(items);
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
     this.element.appendChild(iframe);
+
+    this.pauseHelper_.updatePlaying(true);
+
     return this.loadPromise(iframe);
   }
 
@@ -133,6 +141,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
       this.element.removeChild(iframe);
       this.iframe_ = null;
     }
+    this.pauseHelper_.updatePlaying(false);
     return true;
   }
 
@@ -145,27 +154,11 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.win.document.createElement('amp-img');
-    this.propagateAttributes(['aria-label'], placeholder);
-    placeholder.setAttribute(
-      'src',
-      'https://www.springboardplatform.com/storage/' +
-        encodeURIComponent(this.domain_) +
-        '/snapshots/' +
-        encodeURIComponent(this.contentId_) +
-        '.jpg'
-    );
-    /** Show default image for playlist */
-    if (this.mode_ == 'playlist') {
-      placeholder.setAttribute(
-        'src',
-        'https://www.springboardplatform.com/storage/default/' +
-          'snapshots/default_snapshot.png'
-      );
-    }
+    const placeholder = this.win.document.createElement('img');
+    propagateAttributes(['aria-label'], this.element, placeholder);
+    applyFillContent(placeholder);
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
-    placeholder.setAttribute('layout', 'fill');
     if (placeholder.hasAttribute('aria-label')) {
       placeholder.setAttribute(
         'alt',
@@ -174,6 +167,15 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
     } else {
       placeholder.setAttribute('alt', 'Loading video');
     }
+    placeholder.setAttribute(
+      'src',
+      'https://www.springboardplatform.com/storage/' +
+        (this.mode_ == 'playlist'
+          ? 'default/snapshots/default_snapshot.png'
+          : `${encodeURIComponent(this.domain_)}/snapshots/${encodeURIComponent(
+              this.contentId_
+            )}.jpg`)
+    );
     return placeholder;
   }
 }

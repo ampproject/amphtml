@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
+import {ActionTrust} from '#core/constants/action-constants';
+import {Deferred} from '#core/data-structures/promise';
+import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {assertHttpsUrl} from '../../../src/url';
 import {batchFetchJsonFor} from '../../../src/batched-json';
-import {clamp} from '../../../src/utils/math';
-import {dict} from '../../../src/utils/object';
+import {clamp} from '#core/math';
+import {dict} from '#core/types/object';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isFiniteNumber, isObject} from '../../../src/types';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {parseJson} from '../../../src/json';
-import {removeElement} from '../../../src/dom';
+import {isFiniteNumber, isObject} from '#core/types';
+
+import {parseJson} from '#core/types/object/json';
+import {removeElement} from '#core/dom';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-bodymovin-animation';
@@ -145,7 +146,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
       iframe.title = this.element.title || 'Airbnb BodyMovin animation';
       return Services.vsyncFor(this.win)
         .mutatePromise(() => {
-          this.applyFillContent(iframe);
+          applyFillContent(iframe);
           this.unlistenMessage_ = listen(
             this.win,
             'message',
@@ -194,9 +195,9 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     }
 
     /** @const {?JsonObject} */
-    const eventData = /** @type {?JsonObject} */ (isObject(getData(event))
-      ? getData(event)
-      : parseJson(getData(event)));
+    const eventData = /** @type {?JsonObject} */ (
+      isObject(getData(event)) ? getData(event) : parseJson(getData(event))
+    );
     if (eventData === undefined) {
       return; // We only process valid JSON.
     }

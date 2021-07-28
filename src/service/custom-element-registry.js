@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import {ElementStub} from '../element-stub';
-import {Services} from '../services';
-import {createCustomElementClass, stubbedElements} from '../custom-element';
+import {Services} from '#service';
+
 import {extensionScriptsInNode} from './extension-script';
-import {reportError} from '../error';
+
+import {createCustomElementClass, stubbedElements} from '../custom-element';
+import {ElementStub} from '../element-stub';
+import {reportError} from '../error-reporting';
 import {userAssert} from '../log';
 
 /** @type {!WeakMap<!./service/ampdoc-impl.AmpDoc, boolean>} */

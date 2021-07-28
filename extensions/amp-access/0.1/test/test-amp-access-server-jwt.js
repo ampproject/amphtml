@@ -472,7 +472,8 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, (env) => {
           );
       });
 
-      it('should verified JWT after fetch when supported', () => {
+      // TODO(wg-components, #34695): This test is flaky during CI.
+      it.skip('should verified JWT after fetch when supported', () => {
         const authdata = {};
         const jwt = {'amp_authdata': authdata};
         const encoded = 'rAnDoM';

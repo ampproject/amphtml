@@ -15,8 +15,8 @@
  */
 
 import {IntegrationAmpContext} from './ampcontext-integration';
-import {dict} from '../src/utils/object.js';
-import {endsWith} from '../src/string';
+import {dict} from '#core/types/object';
+import {endsWith} from '#core/types/string';
 import {getAmpConfig, getEmbedType, getLocation} from './frame-metadata';
 import {getSourceUrl, isProxyOrigin, parseUrlDeprecated} from '../src/url';
 import {
@@ -27,7 +27,7 @@ import {
 } from '../src/log';
 import {installEmbedStateListener, manageWin} from './environment';
 import {internalRuntimeVersion} from '../src/internal-version';
-import {parseJson} from '../src/json';
+import {parseJson} from '#core/types/object/json';
 import {run, setExperimentToggles} from './3p';
 import {urls} from '../src/config';
 
@@ -47,6 +47,7 @@ const AMP_EMBED_ALLOWED = {
   epeex: true,
   firstimpression: true,
   forkmedia: true,
+  gecko: true,
   glomex: true,
   idealmedia: true,
   insticator: true,
@@ -67,6 +68,7 @@ const AMP_EMBED_ALLOWED = {
   pubexchange: true,
   pulse: true,
   rbinfox: true,
+  rcmwidget: true,
   readmo: true,
   recreativ: true,
   runative: true,
@@ -276,8 +278,9 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
     // If we are on the cache domain, parse the source hostname from
     // the referrer. The referrer is used because it should be
     // trustable.
-    hostname = parseUrlDeprecated(getSourceUrl(window.document.referrer))
-      .hostname;
+    hostname = parseUrlDeprecated(
+      getSourceUrl(window.document.referrer)
+    ).hostname;
   }
   for (let i = 0; i < allowedHostnames.length; i++) {
     // Either the hostname is allowed

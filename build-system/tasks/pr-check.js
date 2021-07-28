@@ -17,18 +17,17 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
-  abortTimedJob,
   printChangeSummary,
   startTimer,
   stopTimer,
   timedExec,
 } = require('../pr-check/utils');
 const {
+  Targets,
   buildTargetsInclude,
   determineBuildTargets,
-  Targets,
 } = require('../pr-check/build-targets');
-const {runNpmChecks} = require('../pr-check/npm-checks');
+const {runNpmChecks} = require('../common/npm-checks');
 const {setLoggingPrefix} = require('../common/logging');
 
 const jobName = 'pr-check.js';
@@ -36,28 +35,20 @@ const jobName = 'pr-check.js';
 /**
  * This file runs tests against the local workspace to mimic the CI build as
  * closely as possible.
+ * @return {Promise<void>}
  */
 async function prCheck() {
-  setLoggingPrefix(jobName);
-
-  const failTask = () => {
-    stopTimer(jobName, startTime);
-    throw new Error('Local PR check failed. See logs above.');
-  };
-
   const runCheck = (cmd) => {
     const {status} = timedExec(cmd);
     if (status != 0) {
-      failTask();
+      stopTimer(jobName, startTime);
+      throw new Error('Local PR check failed. See logs above.');
     }
   };
 
+  setLoggingPrefix(jobName);
   const startTime = startTimer(jobName);
-  if (!runNpmChecks()) {
-    abortTimedJob(jobName, startTime);
-    failTask();
-  }
-
+  runNpmChecks();
   printChangeSummary();
   determineBuildTargets();
 
@@ -65,7 +56,17 @@ async function prCheck() {
     runCheck('amp presubmit');
   }
 
-  if (buildTargetsInclude(Targets.LINT)) {
+  if (buildTargetsInclude(Targets.INVALID_WHITESPACES)) {
+    runCheck('amp check-invalid-whitespaces --local_changes');
+  }
+
+  if (buildTargetsInclude(Targets.HTML_FIXTURES)) {
+    runCheck('amp validate-html-fixtures --local_changes');
+  }
+
+  if (buildTargetsInclude(Targets.LINT_RULES)) {
+    runCheck('amp lint');
+  } else if (buildTargetsInclude(Targets.LINT)) {
     runCheck('amp lint --local_changes');
   }
 
@@ -75,6 +76,10 @@ async function prCheck() {
 
   if (buildTargetsInclude(Targets.AVA)) {
     runCheck('amp ava');
+  }
+
+  if (buildTargetsInclude(Targets.BUILD_SYSTEM)) {
+    runCheck('amp check-build-system');
   }
 
   if (buildTargetsInclude(Targets.BABEL_PLUGIN)) {
@@ -87,10 +92,6 @@ async function prCheck() {
 
   if (buildTargetsInclude(Targets.DOCS)) {
     runCheck('amp check-links --local_changes');
-  }
-
-  if (buildTargetsInclude(Targets.DEV_DASHBOARD)) {
-    runCheck('amp dev-dashboard-tests');
   }
 
   if (buildTargetsInclude(Targets.OWNERS)) {
@@ -142,7 +143,7 @@ module.exports = {
   prCheck,
 };
 
-prCheck.description = 'Runs a subset of the CI checks against local changes.';
+prCheck.description = 'Run almost all CI checks against the local branch';
 prCheck.flags = {
-  'nobuild': 'Skips building the runtime via `amp dist`.',
+  'nobuild': 'Skip building the runtime',
 };

@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {poll} from '../../../../../testing/iframe';
+import {poll} from '#testing/iframe';
 
 const RENDER_TIMEOUT = 15000;
 
-const describeChrome = describe.configure().ifChrome();
+const describeChrome = describes.sandboxed.configure().ifChrome();
 
 // TODO(cvializ, #19647): Broken on SL Chrome 71.
-describeChrome.skip('amp-form verifiers', function () {
+describeChrome.skip('amp-form verifiers', {}, function () {
   const {testServerPort} = window.ampTestRuntimeConfig;
   const baseUrl = `http://localhost:${testServerPort}`;
 

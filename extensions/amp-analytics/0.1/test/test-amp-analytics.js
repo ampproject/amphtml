@@ -17,24 +17,23 @@
 import {AmpAnalytics} from '../amp-analytics';
 import {AnalyticsConfig} from '../config';
 import {ClickEventTracker, VisibilityTracker} from '../events';
-import {
-  ImagePixelVerifier,
-  mockWindowInterface,
-} from '../../../../testing/test-helper';
-import {LayoutPriority} from '../../../../src/layout';
+import {ImagePixelVerifier, mockWindowInterface} from '#testing/test-helper';
+import {LayoutPriority} from '#core/dom/layout';
 import {LinkerManager} from '../linker-manager';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
+import {SessionManager} from '../session-manager';
 import {Transport} from '../transport';
-import {cidServiceForDocForTesting} from '../../../../src/service/cid-impl';
+import {cidServiceForDocForTesting} from '#service/cid-impl';
+import {expect} from 'chai';
 import {
   getService,
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../../../src/service';
-import {installCryptoService} from '../../../../src/service/crypto-impl';
+} from '../../../../src/service-helpers';
+import {installCryptoService} from '#service/crypto-impl';
 import {installUserNotificationManagerForTesting} from '../../../amp-user-notification/0.1/amp-user-notification';
 import {instrumentationServiceForDocForTesting} from '../instrumentation';
-import {macroTask} from '../../../../testing/yield';
+import {macroTask} from '#testing/yield';
 
 describes.realWin(
   'amp-analytics',
@@ -1509,8 +1508,7 @@ describes.realWin(
           },
           {
             'sandbox': 'true',
-          },
-          true
+          }
         );
         return waitForNoSendRequest(analytics).then(() => {
           expect(addStub).to.be.calledOnce;
@@ -1580,8 +1578,7 @@ describes.realWin(
           },
           {
             'sandbox': 'true',
-          },
-          true
+          }
         );
 
         return waitForSendRequest(analytics).then(() => {
@@ -1602,8 +1599,7 @@ describes.realWin(
           },
           {
             'sandbox': 'true',
-          },
-          true
+          }
         );
 
         return waitForSendRequest(analytics).then(() => {
@@ -1635,8 +1631,7 @@ describes.realWin(
           },
           {
             'sandbox': 'true',
-          },
-          true
+          }
         );
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest(
@@ -1664,13 +1659,9 @@ describes.realWin(
           },
         };
         config.triggers.sampled.sampleSpec.sampleOn = '${clientId}';
-        const analytics = getAnalyticsTag(
-          config,
-          {
-            'sandbox': 'true',
-          },
-          true
-        );
+        const analytics = getAnalyticsTag(config, {
+          'sandbox': 'true',
+        });
 
         const urlReplacements = Services.urlReplacementsForDoc(
           analytics.element
@@ -1711,6 +1702,248 @@ describes.realWin(
         await macroTask();
         return analytics.layoutCallback().then(() => {
           expect(linkerStub.calledOnce).to.be.true;
+        });
+      });
+    });
+
+    describe('session manager', () => {
+      describe('initalize', () => {
+        it('should initialize manager with flag', async () => {
+          const analytics = getAnalyticsTag(
+            {
+              'requests': {'foo': 'https://example.test/bar'},
+              'triggers': {
+                'pageview': {
+                  'on': 'visible',
+                  'request': 'foo',
+                  'session': {'persistEvent': true},
+                },
+              },
+            },
+            {
+              'type': 'testVendor',
+            }
+          );
+
+          await analytics.layoutCallback();
+          expect(analytics.sessionManager_).to.not.be.null;
+        });
+
+        it('should not initialize without flag', async () => {
+          const analytics = getAnalyticsTag(
+            {
+              'requests': {'foo': 'https://example.test/bar'},
+              'triggers': {
+                'pageview': {
+                  'on': 'visible',
+                  'request': 'foo',
+                },
+              },
+            },
+            {
+              'type': 'testVendor',
+            }
+          );
+
+          await analytics.layoutCallback();
+          expect(analytics.sessionManager_).to.be.null;
+        });
+
+        it('should not initialize manager without type', async () => {
+          const analytics = getAnalyticsTag({
+            'requests': {'foo': 'https://example.test/bar'},
+            'triggers': {
+              'pageview': {
+                'on': 'visible',
+                'request': 'foo',
+                'session': {'persistEvent': true},
+              },
+            },
+          });
+
+          await analytics.layoutCallback();
+          expect(analytics.sessionManager_).to.be.null;
+        });
+      });
+
+      describe('trigger event with persist session value', () => {
+        let vendorType;
+
+        beforeEach(() => {
+          vendorType = 'testVendor';
+        });
+
+        describe('initialize session manager', () => {
+          it('should add flag for when `persistEvent` opted in', async () => {
+            const analytics = getAnalyticsTag(
+              {
+                'requests': {'foo': 'https://example.test/bar'},
+                'triggers': {
+                  'pageview': {
+                    'on': 'visible',
+                    'request': 'foo',
+                    'session': {'persistEvent': true},
+                  },
+                },
+              },
+              {
+                'type': vendorType,
+              }
+            );
+
+            await waitForSendRequest(analytics);
+            expect(analytics.sessionManager_).to.not.be.null;
+          });
+
+          it('should handle multiple opt ins', async () => {
+            const analytics = getAnalyticsTag(
+              {
+                'requests': {'foo': 'https://example.test/bar'},
+                'triggers': {
+                  'pageview1': {
+                    'on': 'visible',
+                    'request': 'foo',
+                    'session': {'persistEvent': true},
+                  },
+                  'pageview2': {
+                    'on': 'click',
+                    'request': 'foo',
+                    'selector': '.className1',
+                    'session': {'persistEvent': true},
+                  },
+                },
+              },
+              {
+                'type': vendorType,
+              }
+            );
+            await waitForSendRequest(analytics);
+            expect(analytics.sessionManager_).to.not.be.null;
+          });
+
+          it('should handle no triggers', async () => {
+            const analytics = getAnalyticsTag(
+              {
+                'requests': {'foo': 'https://example.test/bar'},
+              },
+              {
+                'type': vendorType,
+              }
+            );
+            await waitForNoSendRequest(analytics);
+            expect(analytics.sessionManager_).to.be.null;
+          });
+        });
+
+        it('should update session manager for eventTimestamp when event is triggered', async () => {
+          const analytics = getAnalyticsTag(
+            {
+              'requests': {'foo': 'https://example.test/bar'},
+              'triggers': {
+                'pageview': {
+                  'on': 'visible',
+                  'request': 'foo',
+                  'session': {'persistEvent': true},
+                },
+              },
+            },
+            {
+              'type': vendorType,
+            }
+          );
+
+          const sessionSpy = env.sandbox.spy(
+            SessionManager.prototype,
+            'updateEvent'
+          );
+
+          await waitForSendRequest(analytics);
+          expect(sessionSpy).to.be.calledOnce;
+          expect(sessionSpy).to.be.calledWith(vendorType);
+        });
+
+        it('should update manager for multiple events', async () => {
+          const analytics = getAnalyticsTag(
+            {
+              'requests': {'foo': 'https://example.test/bar'},
+              'triggers': {
+                'pageview': {
+                  'on': 'visible',
+                  'request': 'foo',
+                  'session': {'persistEvent': true},
+                },
+                'pageview2': {
+                  'on': 'visible',
+                  'request': 'foo',
+                  'session': {'persistEvent': true},
+                },
+              },
+            },
+            {
+              'type': vendorType,
+            }
+          );
+
+          const sessionSpy = env.sandbox.spy(
+            SessionManager.prototype,
+            'updateEvent'
+          );
+
+          await waitForSendRequest(analytics);
+          expect(sessionSpy).to.be.calledTwice;
+          expect(sessionSpy.firstCall).to.be.calledWith(vendorType);
+          expect(sessionSpy.secondCall).to.be.calledWith(vendorType);
+        });
+
+        it('should not update manager without `persistEvent`', async () => {
+          const analytics = getAnalyticsTag(
+            {
+              'requests': {'foo': 'https://example.test/bar'},
+              'triggers': {
+                'pageview': {
+                  'on': 'visible',
+                  'request': 'foo',
+                },
+              },
+            },
+            {
+              'type': vendorType,
+            }
+          );
+
+          const sessionSpy = env.sandbox.spy(
+            SessionManager.prototype,
+            'updateEvent'
+          );
+
+          await waitForSendRequest(analytics);
+          expect(sessionSpy).to.not.be.called;
+        });
+
+        it('should not update manager with opt in at top level config', async () => {
+          const analytics = getAnalyticsTag(
+            {
+              'requests': {'foo': 'https://example.test/bar'},
+              'session': {'persistEvent': true},
+              'triggers': {
+                'pageview': {
+                  'on': 'visible',
+                  'request': 'foo',
+                },
+              },
+            },
+            {
+              'type': vendorType,
+            }
+          );
+
+          const sessionSpy = env.sandbox.spy(
+            SessionManager.prototype,
+            'updateEvent'
+          );
+
+          await waitForSendRequest(analytics);
+          expect(sessionSpy).to.not.be.called;
         });
       });
     });

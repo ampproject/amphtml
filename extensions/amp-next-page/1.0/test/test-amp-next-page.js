@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 import '../amp-next-page';
-import {PageState} from '../page';
+import {HostPage, PageState} from '../page';
 import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
-import {Services} from '../../../../src/services';
-import {VisibilityState} from '../../../../src/visibility-state';
-import {htmlFor} from '../../../../src/static-template';
-import {setStyle} from '../../../../src/style';
+import {Services} from '#service';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyle} from '#core/dom/style';
 
 const MOCK_NEXT_PAGE = `<header>Header</header>
     <div style="height:1000px"></div>
@@ -438,6 +438,7 @@ describes.realWin(
     describe('initial behavior', () => {
       let element;
       let service;
+      let hostPage;
 
       beforeEach(async () => {
         element = await getAmpNextPage(
@@ -448,8 +449,21 @@ describes.realWin(
           /* no awaiting */ false
         );
 
+        hostPage = new HostPage(
+          {} /* nextPageService */,
+          {
+            url: 'test.html',
+            title: 'test title',
+            img: '/img.jpg',
+          },
+          PageState.INSERTED /** initState */,
+          VisibilityState.VISIBLE /** initVisibility */,
+          {} /* Document */
+        );
+
         service = Services.nextPageServiceForDoc(doc);
         env.sandbox.stub(service, 'getViewportsAway_').returns(2);
+        env.sandbox.stub(service, 'createHostPage').returns(hostPage);
       });
 
       afterEach(async () => {
@@ -460,6 +474,8 @@ describes.realWin(
         element.buildInternal();
         await new Promise(setTimeout);
         expect(service.pages_.length).to.equal(1);
+        expect(service.hostPage_).to.equal(hostPage);
+        expect(service.currentTitlePage_).to.equal(service.hostPage_);
         win.dispatchEvent(new Event('scroll'));
         await new Promise(setTimeout);
         expect(service.pages_.length).to.equal(3);
@@ -585,6 +601,37 @@ describes.realWin(
       });
     });
 
+    describe('amp-next-page within Viewer', () => {
+      let element;
+      let service;
+
+      beforeEach(async () => {
+        element = await getAmpNextPage({
+          inlineConfig: VALID_CONFIG,
+        });
+
+        service = Services.nextPageServiceForDoc(doc);
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
+      });
+
+      afterEach(async () => {
+        element.parentNode.removeChild(element);
+      });
+
+      it('propagates viewer cid capabilties', async () => {
+        // Fake capabilities
+        ampdoc.params_['cap'] = 'swipe,cid';
+        await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
+        // Don't need to check the host page.
+        // Will only be forwarded `cid`
+        [1, 2].forEach((index) => {
+          expect(
+            service.pages_[index].shadowDoc.ampdoc.getParam('cap')
+          ).to.equal('cid');
+        });
+      });
+    });
+
     describe('default separators & footers', () => {
       let element;
       let service;
@@ -704,12 +751,10 @@ describes.realWin(
           }
         );
 
-        const template1 = service.pages_[1].container.querySelector(
-          '[separator]'
-        );
-        const template2 = service.pages_[2].container.querySelector(
-          '[separator]'
-        );
+        const template1 =
+          service.pages_[1].container.querySelector('[separator]');
+        const template2 =
+          service.pages_[2].container.querySelector('[separator]');
 
         expect(template1.innerText).to.equal('Rendered 1');
         expect(template2.innerText).to.equal('Rendered 2');

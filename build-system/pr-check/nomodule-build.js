@@ -22,27 +22,31 @@
 const atob = require('atob');
 const {
   abortTimedJob,
+  processAndStoreBuildToArtifacts,
   skipDependentJobs,
-  processAndUploadNomoduleOutput,
   startTimer,
-  timedExecWithError,
+  storeNomoduleBuildToWorkspace,
   timedExecOrDie,
-  uploadNomoduleOutput,
+  timedExecWithError,
 } = require('./utils');
-const {buildTargetsInclude, Targets} = require('./build-targets');
 const {log} = require('../common/logging');
-const {red, yellow} = require('kleur/colors');
+const {red, yellow} = require('../common/colors');
 const {runCiJob} = require('./ci-job');
 const {signalPrDeployUpload} = require('../tasks/pr-deploy-bot-utils');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'nomodule-build.js';
 
+/**
+ * Steps to run during push builds.
+ */
 function pushBuildWorkflow() {
   timedExecOrDie('amp dist --fortesting');
-  uploadNomoduleOutput();
+  storeNomoduleBuildToWorkspace();
 }
 
 /**
+ * Steps to run during PR builds.
  * @return {Promise<void>}
  */
 async function prBuildWorkflow() {
@@ -65,8 +69,9 @@ async function prBuildWorkflow() {
       return abortTimedJob(jobName, startTime);
     }
     timedExecOrDie('amp storybook --build');
-    await processAndUploadNomoduleOutput();
+    await processAndStoreBuildToArtifacts();
     await signalPrDeployUpload('success');
+    storeNomoduleBuildToWorkspace();
   } else {
     await signalPrDeployUpload('skipped');
 

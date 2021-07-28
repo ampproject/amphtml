@@ -15,8 +15,6 @@
  */
 'use strict';
 
-const {mainBranch} = require('./main-branch');
-
 /**
  * @fileoverview Provides various kinds of CI state.
  *
@@ -72,7 +70,7 @@ const isCircleci = isCircleciBuild();
  * @return {boolean}
  */
 function isCircleciPushBranch(branchName) {
-  return branchName == mainBranch || /^amp-release-.*$/.test(branchName);
+  return branchName == 'main' || /^amp-release-.*$/.test(branchName);
 }
 
 /**
@@ -206,6 +204,15 @@ function circleciPrMergeCommit() {
 }
 
 /**
+ * Returns an identifier that is unique to each CircleCI job. This is different
+ * from the workflow ID, which is common across all jobs in a workflow.
+ * @return {string}
+ */
+function circleciBuildNumber() {
+  return isCircleci ? env('CIRCLE_BUILD_NUM') : '';
+}
+
+/**
  * Returns the repo slug for the ongoing build.
  * @return {string}
  */
@@ -235,6 +242,7 @@ module.exports = {
   ciPullRequestBranch,
   ciPullRequestSha,
   ciPushBranch,
+  circleciBuildNumber,
   circleciPrMergeCommit,
   ciRepoSlug,
   isCiBuild,

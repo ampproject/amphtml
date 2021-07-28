@@ -23,33 +23,54 @@ import {loadScript, maybeValidate} from '../../src/validator-integration';
 
 describes.fakeWin('validator-integration', {}, (env) => {
   let loadScriptStub;
-  let modeStub;
+  let getModeStub;
+  let isModeDevelopmentStub;
   let win;
   describe('maybeValidate', () => {
     beforeEach(() => {
       win = env.win;
-      loadScriptStub = env.sandbox.stub(eventHelper, 'loadPromise');
-      modeStub = env.sandbox.stub(mode, 'getMode');
+      loadScriptStub = env.sandbox
+        .stub(eventHelper, 'loadPromise')
+        .returns(Promise.resolve());
+      getModeStub = env.sandbox.stub(mode, 'getMode');
+      isModeDevelopmentStub = env.sandbox.stub(mode, 'isModeDevelopment');
     });
 
     it('should not load validator script if not in dev mode', () => {
-      modeStub.returns({development: false});
+      getModeStub.returns({});
+      isModeDevelopmentStub.returns(false);
       maybeValidate(win);
       expect(loadScriptStub).not.to.have.been.called;
     });
 
     it('should not load validator script if bypassed', () => {
-      modeStub.returns({development: true, test: true});
+      getModeStub.returns({test: true});
+      isModeDevelopmentStub.returns(true);
       win.location = 'https://www.example.com/#development=1&validate=0';
       maybeValidate(win);
       expect(loadScriptStub).not.to.have.been.called;
     });
 
     it('should load validator script if dev mode', () => {
-      modeStub.returns({development: true});
+      getModeStub.returns({});
+      isModeDevelopmentStub.returns(true);
       loadScriptStub.returns(Promise.resolve());
       maybeValidate(win);
       expect(loadScriptStub).to.have.been.called;
+    });
+
+    it('should load WebAssembly validator', () => {
+      getModeStub.returns({test: true});
+      isModeDevelopmentStub.returns(true);
+      win.location = 'https://www.example.com/#development=1';
+      maybeValidate(win);
+      expect(loadScriptStub).to.have.been.calledWith(
+        env.sandbox.match(
+          (el) =>
+            el.getAttribute('src') ===
+            'https://cdn.ampproject.org/v0/validator_wasm.js'
+        )
+      );
     });
   });
 

@@ -23,7 +23,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const bacon = require('baconipsum');
 const bodyParser = require('body-parser');
 const cors = require('./amp-cors');
-const devDashboard = require('./app-index/index');
+const devDashboard = require('./app-index');
 const express = require('express');
 const fetch = require('node-fetch');
 const formidable = require('formidable');
@@ -36,6 +36,12 @@ const autocompleteEmailData = require('./autocomplete-test-data');
 const header = require('connect-header');
 const runVideoTestBench = require('./app-video-testbench');
 const {
+  getServeMode,
+  isRtvMode,
+  replaceUrls,
+  toInaboxDocument,
+} = require('./app-utils');
+const {
   getVariableRequest,
   runVariableSubstitution,
   saveVariableRequest,
@@ -45,12 +51,10 @@ const {
   recaptchaFrameRequestHandler,
   recaptchaRouter,
 } = require('./recaptcha-router');
-const {getServeMode} = require('./app-utils');
 const {logWithoutTimestamp} = require('../common/logging');
 const {log} = require('../common/logging');
-const {red} = require('kleur/colors');
+const {red} = require('../common/colors');
 const {renderShadowViewer} = require('./shadow-viewer');
-const {replaceUrls, isRtvMode} = require('./app-utils');
 
 /**
  * Respond with content received from a URL when SERVE_MODE is "cdn".
@@ -241,7 +245,6 @@ app.get(
     '/examples/*.(min|max).html',
     '/test/manual/*.(min|max).html',
     '/test/fixtures/e2e/*/*.(min|max).html',
-    '/dist/cache-sw.(min|max).html',
   ],
   (req, res) => {
     const filePath = req.url;
@@ -519,6 +522,7 @@ app.use('/form/verify-search-json/post', (req, res) => {
  * @param {express.Request} req
  * @param {express.Response} res
  * @param {string} mode
+ * @return {Promise<void>}
  */
 async function proxyToAmpProxy(req, res, mode) {
   const url =
@@ -559,12 +563,13 @@ async function proxyToAmpProxy(req, res, mode) {
           ' </script>'
       );
   }
-  body = replaceUrls(mode, body, urlPrefix, inabox);
   if (inabox) {
+    body = toInaboxDocument(body);
     // Allow CORS requests for A4A.
     const origin = req.headers.origin || urlPrefix;
     cors.enableCors(req, res, origin);
   }
+  body = replaceUrls(mode, body, urlPrefix);
   res.status(urlResponse.status).send(body);
 }
 
@@ -1045,12 +1050,15 @@ app.get(
           file = file.replace(/-latest.js/g, `-${componentVersion}.js`);
         }
 
-        if (inabox && req.headers.origin) {
+        if (inabox) {
+          file = toInaboxDocument(file);
           // Allow CORS requests for A4A.
-          cors.enableCors(req, res, req.headers.origin);
-        } else {
-          file = replaceUrls(mode, file, '', inabox);
+          if (req.headers.origin) {
+            cors.enableCors(req, res, req.headers.origin);
+          }
         }
+
+        file = replaceUrls(mode, file);
 
         const ampExperimentsOptIn = req.query['exp'];
         if (ampExperimentsOptIn) {
@@ -1317,7 +1325,7 @@ app.use('/subscription/pingback', (req, res) => {
     },
     // Associate this ID with the registration. Use it to look up metering state
     // for future entitlements requests
-    // https://github.com/ampproject/amphtml/blob/master/extensions/amp-subscriptions/amp-subscriptions.md#combining-the-amp-reader-id-with-publisher-cookies
+    // https://github.com/ampproject/amphtml/blob/main/extensions/amp-subscriptions/amp-subscriptions.md#combining-the-amp-reader-id-with-publisher-cookies
     "ampReaderId": "amp-s0m31d3nt1f13r"
   }
 
@@ -1434,24 +1442,18 @@ window.addEventListener('beforeunload', (evt) => {
   });
 }
 
-/**
- * Serve entry point script url
- */
-app.get(
-  ['/dist/sw.(m?js)', '/dist/sw-kill.(m?js)', '/dist/ww.(m?js)'],
-  async (req, res, next) => {
-    // Special case for entry point script url. Use compiled for testing
-    const mode = SERVE_MODE;
-    const fileName = path.basename(req.path);
-    if (await passthroughServeModeCdn(res, fileName)) {
-      return;
-    }
-    if (mode == 'default') {
-      req.url = req.url.replace(/\.(m?js)$/, '.max.$1');
-    }
-    next();
+app.get('/dist/ww.(m?js)', async (req, res, next) => {
+  // Special case for entry point script url. Use compiled for testing
+  const mode = SERVE_MODE;
+  const fileName = path.basename(req.path);
+  if (await passthroughServeModeCdn(res, fileName)) {
+    return;
   }
-);
+  if (mode == 'default') {
+    req.url = req.url.replace(/\.(m?js)$/, '.max.$1');
+  }
+  next();
+});
 
 app.get('/dist/iframe-transport-client-lib.(m?js)', (req, _res, next) => {
   req.url = req.url.replace(/dist/, 'dist.3p/current');
@@ -1465,88 +1467,6 @@ app.get('/dist/amp-inabox-host.(m?js)', (req, _res, next) => {
   }
   next();
 });
-
-/*
- * Start Cache SW LOCALDEV section
- */
-app.get('/dist/sw(.max)?.(m?js)', (req, res, next) => {
-  const filePath = req.path;
-  fs.promises
-    .readFile(pc.cwd() + filePath, 'utf8')
-    .then((file) => {
-      const n = nearestFiveMinutes();
-      file =
-        'self.AMP_CONFIG = {v: "99' +
-        n +
-        '",' +
-        'cdnUrl: "http://localhost:8000/dist"};' +
-        file;
-      res.setHeader('Content-Type', 'application/javascript');
-      res.setHeader('Date', new Date().toUTCString());
-      res.setHeader('Cache-Control', 'no-cache;max-age=150');
-      res.end(file);
-    })
-    .catch(next);
-});
-
-app.get('/dist/rtv/9[89]*/*.(m?js)', (req, res, next) => {
-  res.setHeader('Content-Type', 'application/javascript');
-  res.setHeader('Date', new Date().toUTCString());
-  res.setHeader('Cache-Control', 'no-cache;max-age=31536000');
-
-  setTimeout(() => {
-    // Cause a delay, to show the "stale-while-revalidate"
-    if (req.path.includes('v0.js') || req.path.includes('v0.mjs')) {
-      const path = req.path.replace(/rtv\/\d+/, '');
-      return fs.promises
-        .readFile(pc.cwd() + path, 'utf8')
-        .then((file) => {
-          res.end(file);
-        })
-        .catch(next);
-    }
-
-    res.end(`
-      const li = document.createElement('li');
-      li.textContent = '${req.path}';
-      loaded.appendChild(li);
-    `);
-  }, 2000);
-});
-
-app.get(['/dist/cache-sw.html'], (req, res, next) => {
-  const filePath = '/test/manual/cache-sw.html';
-  fs.promises
-    .readFile(pc.cwd() + filePath, 'utf8')
-    .then((file) => {
-      let n = nearestFiveMinutes();
-      const percent = parseFloat(req.query.canary) || 0.01;
-      let env = '99';
-      if (Math.random() < percent) {
-        env = '98';
-        n += 5 * 1000 * 60;
-      }
-      file = file.replace(/dist\/v0/g, `dist/rtv/${env}${n}/v0`);
-      file = file.replace(/CURRENT_RTV/, env + n);
-
-      res.setHeader('Content-Type', 'text/html');
-      res.end(file);
-    })
-    .catch(next);
-});
-
-app.get('/dist/diversions', (_req, res) => {
-  let n = nearestFiveMinutes();
-  n += 5 * 1000 * 60;
-  res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Date', new Date().toUTCString());
-  res.setHeader('Cache-Control', 'no-cache;max-age=150');
-  res.end(JSON.stringify(['98' + n]));
-});
-
-/*
- * End Cache SW LOCALDEV section
- */
 
 app.get('/mraid.js', (req, _res, next) => {
   req.url = req.url.replace('mraid.js', 'examples/mraid/mraid.js');
@@ -1580,21 +1500,6 @@ app.use('/shadow/', (req, res) => {
 app.use('/mraid/', (req, res) => {
   res.redirect(req.url + '?inabox=1&mraid=1');
 });
-
-/**
- * Get the current time rounded down to the nearest 5 minutes.
- * @return {number}
- */
-function nearestFiveMinutes() {
-  const date = new Date();
-  // Round down to the nearest 5 minutes.
-  const time =
-    Number(date) -
-    (date.getMinutes() % 5) * 1000 * 60 +
-    date.getSeconds() * 1000 +
-    date.getMilliseconds();
-  return time;
-}
 
 /**
  * @param {string} ampJsVersionString
@@ -1664,7 +1569,7 @@ function generateInfo(filePath) {
 
 /**
  * @param {string} encryptedDocumentKey
- * @return {string|null}
+ * @return {?string}
  */
 function decryptDocumentKey(encryptedDocumentKey) {
   if (!encryptedDocumentKey) {

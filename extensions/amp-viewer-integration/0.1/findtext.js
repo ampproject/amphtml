@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {computedStyle} from '../../../src/style';
+import {computedStyle} from '#core/dom/style';
 import {devAssert} from '../../../src/log';
 
 /**
@@ -178,7 +178,7 @@ class Matcher {
       this.skip_--;
       return;
     }
-    const {sen_: sen, buf_: buf} = this;
+    const {buf_: buf, sen_: sen} = this;
     const bufSize = buf.size();
     for (let j = 0; j < sen.length; j++) {
       const c = canonicalizeChar(textPosChar(buf.get(bufSize - 1 - j).pos));

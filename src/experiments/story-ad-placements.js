@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import {randomlySelectUnsetExperiments} from '../experiments';
+import {randomlySelectUnsetExperiments} from '#experiments';
 
-/** @const {!{id: string, control: string, experiment: string}} */
+import {ExperimentInfoDef} from './experiments.type';
+
+/** @const */
 export const StoryAdPlacements = {
   ID: 'story-ad-placements',
   CONTROL: '31060567',
   PREDETERMINED_EIGHT: '31060568',
+  PREDETERMINED_TEN: '31060817',
   PREDETERMINED_TWELVE: '31060569',
 };
 
@@ -29,16 +32,16 @@ export const StoryAdPlacements = {
  * @param {!Window} win
  */
 export function divertStoryAdPlacements(win) {
-  const experimentInfo = [
-    {
-      experimentId: StoryAdPlacements.ID,
-      isTrafficEligible: () => true,
-      branches: [
-        StoryAdPlacements.CONTROL,
-        StoryAdPlacements.PREDETERMINED_EIGHT,
-        StoryAdPlacements.PREDETERMINED_TWELVE,
-      ],
-    },
-  ];
-  randomlySelectUnsetExperiments(win, experimentInfo);
+  /** @type {!ExperimentInfoDef} */
+  const experimentInfo = {
+    experimentId: StoryAdPlacements.ID,
+    isTrafficEligible: () => true,
+    branches: [
+      StoryAdPlacements.CONTROL,
+      StoryAdPlacements.PREDETERMINED_EIGHT,
+      StoryAdPlacements.PREDETERMINED_TEN,
+      StoryAdPlacements.PREDETERMINED_TWELVE,
+    ],
+  };
+  randomlySelectUnsetExperiments(win, [experimentInfo]);
 }

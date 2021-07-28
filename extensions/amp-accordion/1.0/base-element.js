@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {
   Accordion,
   AccordionContent,
   AccordionHeader,
   AccordionSection,
 } from './component';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {childElementsByTag, toggleAttribute} from '../../../src/dom';
+import {PreactBaseElement} from '#preact/base-element';
+import {childElementsByTag} from '#core/dom/query';
 import {devAssert} from '../../../src/log';
-import {dict, memo} from '../../../src/utils/object';
-import {forwardRef} from '../../../src/preact/compat';
-import {toArray} from '../../../src/types';
-import {
-  useImperativeHandle,
-  useLayoutEffect,
-  useRef,
-} from '../../../src/preact';
-import {useSlotContext} from '../../../src/preact/slot';
+import {dict, memo} from '#core/types/object';
+import {forwardRef} from '#preact/compat';
+import {toArray} from '#core/types/array';
+import {toggleAttribute} from '#core/dom';
+import {useDOMHandle} from '#preact/component';
+import {useLayoutEffect, useRef} from '#preact';
+import {useSlotContext} from '#preact/slot';
 
 const SECTION_SHIM_PROP = '__AMP_S_SHIM';
 const HEADER_SHIM_PROP = '__AMP_H_SHIM';
@@ -135,7 +133,7 @@ function getState(element, mu, getExpandStateTrigger) {
  * @param {!AccordionDef.SectionShimProps} props
  * @return {PreactDef.Renderable}
  */
-function SectionShim(sectionElement, {expanded, children}) {
+function SectionShim(sectionElement, {children, expanded}) {
   useLayoutEffect(() => {
     toggleAttribute(sectionElement, 'expanded', expanded);
     if (sectionElement[SECTION_POST_RENDER]) {
@@ -159,11 +157,11 @@ const bindSectionShimToElement = (element) => SectionShim.bind(null, element);
 function HeaderShim(
   sectionElement,
   {
-    id,
-    role,
-    onClick,
     'aria-controls': ariaControls,
     'aria-expanded': ariaExpanded,
+    id,
+    onClick,
+    role,
   }
 ) {
   const headerElement = sectionElement.firstElementChild;
@@ -212,14 +210,14 @@ const bindHeaderShimToElement = (element) => HeaderShim.bind(null, element);
  */
 function ContentShimWithRef(
   sectionElement,
-  {id, role, 'aria-labelledby': ariaLabelledBy},
+  {'aria-labelledby': ariaLabelledBy, id, role},
   ref
 ) {
   const contentElement = sectionElement.lastElementChild;
   const contentRef = useRef();
   contentRef.current = contentElement;
   useSlotContext(contentRef);
-  useImperativeHandle(ref, () => contentElement, [contentElement]);
+  useDOMHandle(ref, contentElement);
   useLayoutEffect(() => {
     if (!contentElement) {
       return;
@@ -241,10 +239,9 @@ function ContentShimWithRef(
  */
 const bindContentShimToElement = (element) =>
   forwardRef(
-    /** @type {function(?, {current:?}):PreactDef.Renderable} */ (ContentShimWithRef.bind(
-      null,
-      element
-    ))
+    /** @type {function(?, {current:?}):PreactDef.Renderable} */ (
+      ContentShimWithRef.bind(null, element)
+    )
   );
 
 /** @override */

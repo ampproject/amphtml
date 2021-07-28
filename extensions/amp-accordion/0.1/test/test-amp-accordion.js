@@ -15,17 +15,15 @@
  */
 
 import '../amp-accordion';
-import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
-import {Keys} from '../../../../src/utils/key-codes';
-import {Services} from '../../../../src/services';
-import {computedStyle} from '../../../../src/style';
-import {
-  createElementWithAttributes,
-  tryFocus,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
-import {poll} from '../../../../testing/iframe';
+import {ActionService} from '#service/action-impl';
+import {ActionTrust} from '#core/constants/action-constants';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
+import {computedStyle} from '#core/dom/style';
+import {createElementWithAttributes, tryFocus} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {poll} from '#testing/iframe';
+import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
 describes.realWin(
   'amp-accordion',
@@ -844,6 +842,33 @@ describes.realWin(
       expect(header2.getAttribute('id')).to.equal(
         content2.getAttribute('aria-labelledby')
       );
+    });
+
+    it('should throw an error when amp-bind used with expanded attribute ', async () => {
+      const errors = [];
+      const consoleError = console.error;
+      console.error = (msg) => {
+        errors.push(msg);
+      };
+
+      const html = htmlFor(win.document);
+      const accordion = html`
+        <amp-accordion animate>
+          <section [expanded]="section1">
+            <h2>Section 1</h2>
+            <div>Puppies are cute.</div>
+          </section>
+        </amp-accordion>
+      `;
+      doc.body.appendChild(accordion);
+
+      await accordion.buildInternal().catch((err) => {
+        expect(err.message).to.include('The "expanded" attribute');
+      });
+
+      expect(errors.length).to.equal(1);
+      expect(errors[0]).to.include('The "expanded" attribute');
+      console.error = consoleError;
     });
   }
 );

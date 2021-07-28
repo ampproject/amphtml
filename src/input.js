@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Observable} from './observable';
-import {Services} from './services';
-import {dev} from './log';
+import {Observable} from './core/data-structures/observable';
 import {listenOnce, listenOncePromise} from './event-helper';
-import {registerServiceBuilder} from './service';
+import {dev} from './log';
+import {Services} from './service';
+import {registerServiceBuilder} from './service-helpers';
 
 const TAG_ = 'Input';
 
@@ -84,15 +84,15 @@ export class Input {
     // mouse events.
     if (this.hasTouch_) {
       this.hasMouse_ = !this.hasTouch_;
-      this.boundOnMouseMove_ = /** @type {function(!Event)} */ (this.onMouseMove_.bind(
-        this
-      ));
+      this.boundOnMouseMove_ = /** @type {function(!Event)} */ (
+        this.onMouseMove_.bind(this)
+      );
       listenOnce(win.document, 'mousemove', this.boundOnMouseMove_);
     }
   }
 
   /**
-   * See https://github.com/ampproject/amphtml/blob/master/spec/amp-css-classes.md#input-mode-classes
+   * See https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-css-classes.md#input-mode-classes
    * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    */
   setupInputModeClasses(ampdoc) {

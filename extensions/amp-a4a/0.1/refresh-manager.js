@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '#core/types/object';
 
 /**
  * - visibilePercentageMin: The percentage of pixels that need to be on screen
@@ -80,6 +80,9 @@ export function getPublisherSpecifiedRefreshInterval(element, unusedWin) {
  * @return {?number}
  */
 function checkAndSanitizeRefreshInterval(refreshInterval) {
+  if (refreshInterval === 'false') {
+    return null;
+  }
   const refreshIntervalNum = Number(refreshInterval);
   if (isNaN(refreshIntervalNum) || refreshIntervalNum < MIN_REFRESH_INTERVAL) {
     user().warn(
@@ -231,9 +234,10 @@ export class RefreshManager {
     const thresholdString = String(threshold);
     return (
       observers[thresholdString] ||
-      (observers[
-        thresholdString
-      ] = new this.win_.IntersectionObserver(this.ioCallback_, {threshold}))
+      (observers[thresholdString] = new this.win_.IntersectionObserver(
+        this.ioCallback_,
+        {threshold}
+      ))
     );
   }
 

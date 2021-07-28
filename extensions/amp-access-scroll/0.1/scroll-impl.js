@@ -17,16 +17,17 @@
 import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
 import {CSS} from '../../../build/amp-access-scroll-0.1.css';
 import {PROTOCOL_VERSION} from './scroll-protocol';
-import {ReadDepthTracker} from './read-depth-tracker.js';
+import {ReadDepthTracker} from './read-depth-tracker';
 import {Relay} from './scroll-relay';
 import {ScrollBar} from './scroll-bar';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {Sheet} from './scroll-sheet';
-import {addParamToUrl, isProxyOrigin, parseQueryString} from '../../../src/url';
+import {addParamToUrl, isProxyOrigin} from '../../../src/url';
 import {buildUrl, connectHostname} from './scroll-url';
-import {createElementWithAttributes} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
+import {createElementWithAttributes} from '#core/dom';
+import {dict} from '#core/types/object';
 import {installStylesForDoc} from '../../../src/style-installer';
+import {parseQueryString} from '#core/types/string/url';
 
 const TAG = 'amp-access-scroll-elt';
 /**

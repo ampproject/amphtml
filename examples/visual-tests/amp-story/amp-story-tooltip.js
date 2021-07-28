@@ -16,8 +16,8 @@
 'use strict';
 
 const {
-  verifySelectorsVisible,
   verifySelectorsInvisible,
+  verifySelectorsVisible,
 } = require('../../../build-system/tasks/visual-diff/helpers');
 
 module.exports = {
@@ -76,22 +76,22 @@ module.exports = {
       'amp-story-page.i-amphtml-expanded-mode',
     ]);
   },
-  'tapping on non-interactive embed should not show tooltip or block navigation': async (
-    page,
-    name
-  ) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#page-2[active]');
-    await page.waitForTimeout(150); // For animations to finish.
-    await screen.tap(300, 400);
-    await page.waitForSelector('amp-story-page#page-3[active]');
-    await page.waitForTimeout(150); // For animations to finish.
-    await page.tap('amp-twitter.non-interactive-embed');
-    await page.waitForTimeout(150); // For animations to finish.
-    await verifySelectorsInvisible(page, name, ['a.i-amphtml-story-tooltip']);
-    await verifySelectorsVisible(page, name, ['amp-story-page#page-2[active]']);
-  },
+  'tapping on non-interactive embed should not show tooltip or block navigation':
+    async (page, name) => {
+      const screen = page.touchscreen;
+      await screen.tap(200, 240);
+      await page.waitForSelector('amp-story-page#page-2[active]');
+      await page.waitForTimeout(150); // For animations to finish.
+      await screen.tap(300, 400);
+      await page.waitForSelector('amp-story-page#page-3[active]');
+      await page.waitForTimeout(150); // For animations to finish.
+      await page.tap('amp-twitter.non-interactive-embed');
+      await page.waitForTimeout(150); // For animations to finish.
+      await verifySelectorsInvisible(page, name, ['a.i-amphtml-story-tooltip']);
+      await verifySelectorsVisible(page, name, [
+        'amp-story-page#page-2[active]',
+      ]);
+    },
   'tapping on closing button should exit expanded view': async (page, name) => {
     const screen = page.touchscreen;
     await screen.tap(200, 240);

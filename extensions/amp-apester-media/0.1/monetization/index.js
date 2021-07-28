@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {getConsentData} from './consent-util';
+import {handleCompanionBottomAd} from './companion/bottomAd';
 import {handleCompanionDisplay} from './companion/display';
 import {handleCompanionVideo} from './companion/video';
 
@@ -28,6 +29,7 @@ export function handleCompanionAds(media, apesterElement) {
     return getConsentData(apesterElement).then((consentData) => {
       handleCompanionDisplay(media, apesterElement);
       handleCompanionVideo(media, apesterElement, consentData);
+      handleCompanionBottomAd(media, apesterElement);
     });
   }
   return Promise.resolve();

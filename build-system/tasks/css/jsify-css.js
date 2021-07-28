@@ -26,7 +26,7 @@ const {
   md5,
 } = require('../../common/transform-cache');
 const {log} = require('../../common/logging');
-const {red} = require('kleur/colors');
+const {red} = require('../../common/colors');
 
 // NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
 const browsersList = {
@@ -79,13 +79,11 @@ function getEnvironmentHash() {
   return environmentHash;
 }
 
-const CACHE_DIR = path.join(__dirname, '..', '..', '..', '.css-cache');
-
 /**
  * Used to cache css transforms done by postcss.
- * @const {!TransformCache}
+ * @const {TransformCache}
  */
-const transformCache = new TransformCache(CACHE_DIR, '.css');
+let transformCache;
 
 /**
  * @typedef {{css: string, warnings: string[]}}:
@@ -130,6 +128,9 @@ async function jsifyCssAsync(filename) {
  * @return {Promise<CssTransformResultDef>}
  */
 async function transformCss(contents, hash, opt_filename) {
+  if (!transformCache) {
+    transformCache = new TransformCache('.css-cache', '.css');
+  }
   const cached = transformCache.get(hash);
   if (cached) {
     return JSON.parse((await cached).toString());

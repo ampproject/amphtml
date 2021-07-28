@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {map} from '../src/utils/object';
+import {map} from '#core/types/object';
 
 /**
  * Registry for A4A (AMP Ads for AMPHTML pages) "is supported" predicates.
@@ -40,6 +40,7 @@ export function getA4ARegistry() {
     a4aRegistry = map({
       'adsense': () => true,
       'adzerk': () => true,
+      'dianomi': () => true,
       'doubleclick': () => true,
       'fake': () => true,
       'nws': () => true,

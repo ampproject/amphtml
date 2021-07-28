@@ -29,9 +29,9 @@ limitations under the License.
 Story page attachments allow you to provide additional content in the form of a link or inline AMPHTML content to specific pages. This content can be revealed by users through a "swipe up" gesture, or a tap on the call to action element.
 A UI prompt to open the attachment will automatically be added at the bottom of every page that configured an attachment.
 
-<amp-img alt="AMP Story page attachment" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-page-attachment.gif" width="240" height="480">
+<amp-img alt="AMP Story page attachment" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment.gif" width="240" height="480">
   <noscript>
-    <img alt="AMP Story page attachment" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-page-attachment.gif" />
+    <img alt="AMP Story page attachment" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment.gif" />
   </noscript>
 </amp-img>
 
@@ -153,24 +153,24 @@ Story page attachments allow the same HTML elements as AMP Story along with addi
 
 ## Attributes
 
-### `data-cta-text`
+### `cta-text`
 
 Customizes the call to action text displayed on the UI prompt to open the attachment.
 Default: "Swipe up"
 
 ```html
-<amp-story-page-attachment layout="nodisplay" data-cta-text="Read more"
+<amp-story-page-attachment layout="nodisplay" cta-text="Read more"
   >...</amp-story-page-attachment
 >
 ```
 
-### `data-title`
+### `title`
 
 Displays the provided title in the page attachment header.
 Default: `null`
 
 ```html
-<amp-story-page-attachment layout="nodisplay" data-title="My title"
+<amp-story-page-attachment layout="nodisplay" title="My title"
   >...</amp-story-page-attachment
 >
 ```

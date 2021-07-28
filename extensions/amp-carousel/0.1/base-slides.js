@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {BaseCarousel} from './base-carousel';
-import {Services} from '../../../src/services';
-import {isFiniteNumber} from '../../../src/types';
+import {Services} from '#service';
+import {isFiniteNumber} from '#core/types';
 import {userAssert} from '../../../src/log';
 
 export class BaseSlides extends BaseCarousel {
@@ -168,12 +168,17 @@ export class BaseSlides extends BaseCarousel {
       return;
     }
     this.clearAutoplay();
-    this.autoplayTimeoutId_ = /** @type {number} */ (Services.timerFor(
-      this.win
-    ).delay(
-      this.go.bind(this, /* dir */ 1, /* animate */ true, /* autoplay */ true),
-      this.autoplayDelay_
-    ));
+    this.autoplayTimeoutId_ = /** @type {number} */ (
+      Services.timerFor(this.win).delay(
+        this.go.bind(
+          this,
+          /* dir */ 1,
+          /* animate */ true,
+          /* autoplay */ true
+        ),
+        this.autoplayDelay_
+      )
+    );
   }
 
   /**

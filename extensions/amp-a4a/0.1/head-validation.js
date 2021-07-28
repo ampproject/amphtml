@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {getMode} from '../../../src/mode';
-import {includes} from '../../../src/string';
-import {map} from '../../../src/utils/object';
-import {parseExtensionUrl} from '../../../src/service/extension-script';
+import {includes} from '#core/types/string';
+import {map} from '#core/types/object';
+import {parseExtensionUrl} from '#service/extension-script';
 import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
-import {removeElement, rootNodeFor} from '../../../src/dom';
+import {removeElement, rootNodeFor} from '#core/dom';
 import {urls} from '../../../src/config';
 
 /**
@@ -63,6 +63,7 @@ const EXTENSION_ALLOWLIST = map({
   'amp-fit-text': true,
   'amp-font': true,
   'amp-form': true,
+  'amp-gwd-animation': true,
   'amp-img': true,
   'amp-layout': true,
   'amp-lightbox': true,
@@ -75,8 +76,18 @@ const EXTENSION_ALLOWLIST = map({
   'amp-video': true,
 });
 
+/**
+ * Escape any regex chars from given string.
+ * https://developer.cdn.mozilla.net/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#escaping
+ * @param {string} string
+ * @return {string}
+ */
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
 const EXTENSION_URL_PREFIX = new RegExp(
-  urls.cdn.replace(/\./g, '\\.') + '/v0/'
+  '^' + escapeRegExp(urls.cdn) + '/(rtv/\\d+/)?v0/'
 );
 
 /**
@@ -191,7 +202,7 @@ function handleScript(extensions, script) {
  * @param {!Element} link
  */
 function handleLink(fonts, images, link) {
-  const {href, as, rel} = link;
+  const {as, href, rel} = link;
   if (rel === 'preload' && as === 'image') {
     images.push(href);
     return;

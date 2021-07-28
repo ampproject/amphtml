@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
+import {Services} from '#service';
+
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
   rejectServicePromiseForDoc,
-} from '../service';
+} from '../service-helpers';
 
 const ServiceNames = {
   VISIBILITY: 'host-visibility',
@@ -69,10 +70,9 @@ export class HostServices {
    * @return {!Promise<!VisibilityInterface>}
    */
   static visibilityForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!VisibilityInterface>} */ (getServicePromiseForDoc(
-      elementOrAmpDoc,
-      ServiceNames.VISIBILITY
-    ));
+    return /** @type {!Promise<!VisibilityInterface>} */ (
+      getServicePromiseForDoc(elementOrAmpDoc, ServiceNames.VISIBILITY)
+    );
   }
 
   /**
@@ -101,10 +101,9 @@ export class HostServices {
    * @return {!Promise<!FullscreenInterface>}
    */
   static fullscreenForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!FullscreenInterface>} */ (getServicePromiseForDoc(
-      elementOrAmpDoc,
-      ServiceNames.FULLSCREEN
-    ));
+    return /** @type {!Promise<!FullscreenInterface>} */ (
+      getServicePromiseForDoc(elementOrAmpDoc, ServiceNames.FULLSCREEN)
+    );
   }
 
   /**
@@ -133,10 +132,9 @@ export class HostServices {
    * @return {!Promise<!ExitInterface>}
    */
   static exitForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!ExitInterface>} */ (getServicePromiseForDoc(
-      elementOrAmpDoc,
-      ServiceNames.EXIT
-    ));
+    return /** @type {!Promise<!ExitInterface>} */ (
+      getServicePromiseForDoc(elementOrAmpDoc, ServiceNames.EXIT)
+    );
   }
 
   /**

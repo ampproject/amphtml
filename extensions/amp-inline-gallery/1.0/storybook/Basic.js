@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
-import {BaseCarousel} from '../../../amp-base-carousel/1.0/base-carousel';
+import * as Preact from '#preact';
+import {BaseCarousel} from '../../../amp-base-carousel/1.0/component';
 import {InlineGallery} from '../component';
 import {Pagination} from '../pagination';
 import {Thumbnails} from '../thumbnails';
 import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 
 export default {
   title: 'InlineGallery',
   component: InlineGallery,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 export const _default = () => {

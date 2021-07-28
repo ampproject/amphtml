@@ -14,27 +14,24 @@
  * limitations under the License.
  */
 
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {DomFingerprint} from '#core/dom/fingerprint';
 import {GEO_IN_GROUP} from '../../../extensions/amp-geo/0.1/amp-geo-in-group';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {buildUrl} from './shared/url-builder';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {
-  getBinaryType,
-  isExperimentOn,
-  toggleExperiment,
-} from '../../../src/experiments';
+import {dict} from '#core/types/object';
+import {getBinaryType, isExperimentOn, toggleExperiment} from '#experiments';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getMeasuredResources} from '../../../src/ini-load';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
-import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
-import {getTimingDataSync} from '../../../src/service/variable-source';
+import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
+import {getTimingDataSync} from '#service/variable-source';
 import {internalRuntimeVersion} from '../../../src/internal-version';
-import {parseJson} from '../../../src/json';
-import {whenUpgradedToCustomElement} from '../../../src/dom';
+import {parseJson} from '#core/types/object/json';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+import {createElementWithAttributes} from '#core/dom';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -114,7 +111,28 @@ export let NameframeExperimentConfig;
 export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 
 /** @const {Object} */
-const CDN_PROXY_REGEXP = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
+const CDN_PROXY_REGEXP =
+  /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
+
+/** @const {string} */
+const TOKEN_VALUE =
+  'A8Ujr8y+9sg/ZBmCs90ZfQGOUFJsAS/YaHYtjLAsNn05OaQXSmZeRZ2U1wAj3PD74WY9re2x/TwinJoOaYuqFQoAAACBeyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3QubmV0OjQ0MyIsImZlYXR1cmUiOiJDb252ZXJzaW9uTWVhc3VyZW1lbnQiLCJleHBpcnkiOjE2MzE2NjM5OTksImlzU3ViZG9tYWluIjp0cnVlLCJ1c2FnZSI6InN1YnNldCJ9';
+
+/**
+ * Inserts origin-trial token for `attribution-reporting` if not already
+ * present in the DOM.
+ * @param {!Window} win
+ */
+export function maybeInsertOriginTrialToken(win) {
+  if (win.document.querySelector(`meta[content='${TOKEN_VALUE}']`)) {
+    return;
+  }
+  const metaEl = createElementWithAttributes(win.document, 'meta', {
+    'http-equiv': 'origin-trial',
+    content: TOKEN_VALUE,
+  });
+  win.document.head.appendChild(metaEl);
+}
 
 /**
  * Returns the value of some navigation timing parameter.
@@ -304,7 +322,7 @@ export function googlePageParameters(a4a, startTime) {
     const clientId = promiseResults[0];
     const referrer = promiseResults[1];
     const uaDataValues = promiseResults[2];
-    const {pageViewId, canonicalUrl} = Services.documentInfoForDoc(ampDoc);
+    const {canonicalUrl, pageViewId} = Services.documentInfoForDoc(ampDoc);
     // Read by GPT for GA/GPT integration.
     win.gaGlobal = win.gaGlobal || {cid: clientId, hid: pageViewId};
     const {screen} = win;
@@ -532,7 +550,7 @@ function makeCorrelator(pageViewId, opt_clientId) {
 /**
  * Collect additional dimensions for the brdim parameter.
  * @param {!Window} win The window for which we read the browser dimensions.
- * @param {{width: number, height: number}|null} viewportSize
+ * @param {?{width: number, height: number}} viewportSize
  * @return {string}
  * @visibleForTesting
  */

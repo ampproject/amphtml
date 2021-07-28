@@ -19,11 +19,12 @@ const checkDependencies = require('check-dependencies');
 const del = require('del');
 const fs = require('fs-extra');
 const path = require('path');
-const {cyan, red} = require('kleur/colors');
+const {cyan, red} = require('./colors');
 const {execOrDie} = require('./exec');
 const {getOutput} = require('./process');
 const {isCiBuild} = require('./ci');
 const {log, logLocalDev} = require('./logging');
+const {runNpmChecks} = require('./npm-checks');
 
 /**
  * Writes the given contents to the patched file if updated
@@ -200,7 +201,9 @@ function patchShadowDom() {
 
   writeIfUpdated(patchedName, file);
 }
-
+/**
+ * Adds a missing export statement to the preact module.
+ */
 function patchPreact() {
   fs.ensureDirSync('node_modules/preact/dom');
   const file = `export { render, hydrate } from 'preact';`;
@@ -230,7 +233,7 @@ function updateDeps() {
     error: console.log,
   });
   if (results.depsWereOk) {
-    logLocalDev('All packages in', cyan('node_modules'), 'are up to date.');
+    log('All packages in', cyan('node_modules'), 'are up to date.');
   } else {
     log('Running', cyan('npm install') + '...');
     execOrDie('npm install');
@@ -238,11 +241,17 @@ function updateDeps() {
 }
 
 /**
- * Updates `npm` packages and applies various custom patches when necessary.
- * Work is done only during first time install and soon after a repo sync.
- * At all other times, this function is a no-op and returns almost instantly.
+ * This function updates repo root packages.
+ *
+ * 1. Update root-level packages if necessary.
+ * 2. Apply various custom patches if not already applied.
+ * 3. During CI, make sure that the root package files were correctly updated.
+ *
+ * During local development, work is done only during first time install and
+ * soon after a repo sync. At all other times, this function is a no-op and
+ * returns almost instantly.
  */
-async function updatePackages() {
+function updatePackages() {
   updateDeps();
   patchWebAnimations();
   patchIntersectionObserver();
@@ -250,32 +259,39 @@ async function updatePackages() {
   patchShadowDom();
   patchPreact();
   removeRruleSourcemap();
+  if (isCiBuild()) {
+    runNpmChecks();
+  }
 }
 
 /**
- * Update packages in a given task directory. Some notes:
- * - During CI, do a clean install.
- * - During local development, do an incremental install if necessary.
- * - Since install scripts can be async, `await` the process object.
- * - Since script output is noisy, capture and print the stderr if needed.
+ * This function updates the packages in a given task directory.
+ *
+ * 1. During CI, do a clean install.
+ * 2. During local development, do an incremental install if necessary.
+ * 3. Since script output is noisy, capture and print the stderr if needed.
+ * 4. During CI, if not skipped, ensure package files were correctly updated.
  *
  * @param {string} dir
- * @return {Promise<void>}
+ * @param {boolean=} skipNpmChecks
  */
-async function updateSubpackages(dir) {
+function updateSubpackages(dir, skipNpmChecks = false) {
   const results = checkDependencies.sync({packageDir: dir});
   const relativeDir = path.relative(process.cwd(), dir);
   if (results.depsWereOk) {
     const nodeModulesDir = path.join(relativeDir, 'node_modules');
-    logLocalDev('All packages in', cyan(nodeModulesDir), 'are up to date.');
+    log('All packages in', cyan(nodeModulesDir), 'are up to date.');
   } else {
     const installCmd = isCiBuild() ? 'npm ci' : 'npm install';
     log('Running', cyan(installCmd), 'in', cyan(relativeDir) + '...');
-    const output = await getOutput(`${installCmd} --prefix ${dir}`);
+    const output = getOutput(`${installCmd} --prefix ${dir}`);
     if (output.status !== 0) {
       log(red('ERROR:'), output.stderr);
       throw new Error('Installation failed');
     }
+  }
+  if (isCiBuild() && !skipNpmChecks) {
+    runNpmChecks(dir);
   }
 }
 

@@ -17,35 +17,38 @@
 import {CSS} from '../../../build/amp-next-page-1.0.css';
 import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page';
 import {MultidocManager} from '../../../src/multidoc-manager';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {VisibilityState} from '../../../src/visibility-state';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {
   childElementByAttr,
   childElementsByTag,
+  scopedQuerySelector,
+} from '#core/dom/query';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {findIndex, toArray} from '#core/types/array';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {
   insertAtStart,
   isJsonScriptTag,
   removeChildren,
   removeElement,
-  scopedQuerySelector,
-} from '../../../src/dom';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {findIndex} from '../../../src/utils/array';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
+} from '#core/dom';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
   parseFavicon,
   parseOgImage,
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
-import {setStyles, toggle} from '../../../src/style';
-import {toArray} from '../../../src/types';
+
+import {setStyles, toggle} from '#core/dom/style';
+
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '#core/types/object/json';
 import {validatePage, validateUrl} from './utils';
 import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
 
@@ -81,6 +84,9 @@ export class NextPageService {
      * @const {!../../../src/service/viewport/viewport-interface.ViewportInterface}
      */
     this.viewport_ = Services.viewportForDoc(ampdoc);
+
+    /** @private {!../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = Services.viewerForDoc(ampdoc);
 
     /**
      * @private
@@ -198,12 +204,17 @@ export class NextPageService {
 
     // Create a reference to the host page
     this.hostPage_ = this.createHostPage();
+
+    // Set the current title page as the host page so we don't do replaceState and
+    // trigger `amp-next-page-scroll` event (in `setPageTitle` method) when
+    // next page is not even displayed (issue #33404).
+    this.currentTitlePage_ = this.hostPage_;
+
     this.toggleHiddenAndReplaceableElements(this.doc_);
     // Have the recommendation box be always visible
     insertAtStart(this.host_, this.recBox_);
 
     this.history_ = Services.historyForDoc(this.ampdoc_);
-    this.initializeHistory();
 
     this.navigation_ = Services.navigationForDoc(this.ampdoc_);
 
@@ -483,20 +494,11 @@ export class NextPageService {
   }
 
   /**
-   * Adds an initial entry in history that sub-pages can
-   * replace when they become visible
-   */
-  initializeHistory() {
-    const {title, url} = this.hostPage_;
-    this.history_.push(undefined /** opt_onPop */, {title, url});
-  }
-
-  /**
    * Creates the initial (host) page based on the window's metadata
    * @return {!HostPage}
    */
   createHostPage() {
-    const {title, location} = this.doc_;
+    const {location, title} = this.doc_;
     const {href: url} = location;
     const image =
       parseSchemaImage(this.doc_) ||
@@ -504,17 +506,19 @@ export class NextPageService {
       parseFavicon(this.doc_) ||
       '';
 
-    return /** @type {!HostPage} */ (new HostPage(
-      this,
-      {
-        url,
-        title: title || '',
-        image,
-      },
-      PageState.INSERTED /** initState */,
-      VisibilityState.VISIBLE /** initVisibility */,
-      this.doc_
-    ));
+    return /** @type {!HostPage} */ (
+      new HostPage(
+        this,
+        {
+          url,
+          title: title || '',
+          image,
+        },
+        PageState.INSERTED /** initState */,
+        VisibilityState.VISIBLE /** initVisibility */,
+        this.doc_
+      )
+    );
   }
 
   /**
@@ -544,6 +548,20 @@ export class NextPageService {
     );
 
     return container;
+  }
+
+  /**
+   * Forward the allowlisted capabilities from the viewer
+   * to the multidoc's ampdocs (i.e. CID), so they know
+   * the viewer supports it for the multidoc.
+   * @return {?string}
+   */
+  getCapabilities_() {
+    const hasCidCapabilities = this.viewer_.hasCapability('cid');
+    if (hasCidCapabilities) {
+      return 'cid';
+    }
+    return null;
   }
 
   /**
@@ -594,9 +612,10 @@ export class NextPageService {
       const amp = this.multidocManager_.attachShadowDoc(
         shadowRoot,
         content,
-        '',
+        page.url,
         {
           visibilityState: VisibilityState.PRERENDER,
+          cap: this.getCapabilities_(),
         }
       );
 
@@ -868,10 +887,12 @@ export class NextPageService {
       user().error(TAG, 'failed to parse inline page list', error);
     });
 
-    const pages = /** @type {!Array<!./page.PageMeta>} */ (user().assertArray(
-      parsed,
-      `${TAG} Page list expected an array, found: ${typeof parsed}`
-    ));
+    const pages = /** @type {!Array<!./page.PageMeta>} */ (
+      user().assertArray(
+        parsed,
+        `${TAG} Page list expected an array, found: ${typeof parsed}`
+      )
+    );
 
     removeElement(scriptElement);
     return pages;
@@ -889,8 +910,9 @@ export class NextPageService {
     }
 
     if (this.remoteFetchingPromise_) {
-      return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (this
-        .remoteFetchingPromise_);
+      return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (
+        this.remoteFetchingPromise_
+      );
     }
 
     this.remoteFetchingPromise_ = batchFetchJsonFor(
@@ -914,8 +936,9 @@ export class NextPageService {
         return [];
       });
 
-    return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (this
-      .remoteFetchingPromise_);
+    return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (
+      this.remoteFetchingPromise_
+    );
   }
 
   /**

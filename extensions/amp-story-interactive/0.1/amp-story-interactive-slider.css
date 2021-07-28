@@ -1,0 +1,186 @@
+/**
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.i-amphtml-story-interactive-slider-container {
+  --fraction: 0;
+  --percentage: calc(var(--fraction) * 100%) !important;
+  /* This maps the range and has the gradient follow behind the thumb */
+  --percentage-corrected: calc(2.5% + 0.95 * var(--percentage)) !important;
+  --thumb-size: 1.5em !important;
+  --gradient-angle: 90deg !important;
+  --translate-x-center: -50% !important;
+}
+
+.i-amphtml-story-interactive-slider-input-container {
+  display: flex !important;
+  background: var(--i-amphtml-interactive-option-background-color) !important;
+  border-radius: 2em !important;
+  box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0em 1em !important;
+}
+
+.i-amphtml-story-interactive-slider-bubble {
+  position: absolute !important;
+  transform: translate(-50%, -50%) scale(0) !important;
+  width: 2.8em !important;
+  height: 2.8em !important;
+  top: 50% !important;
+  left: var(--percentage) !important;
+  text-align: center !important;
+  line-height: 2.9em !important;
+  font-weight: 700 !important;
+  color: white !important;
+  z-index: 1 !important;
+}
+
+[dir='rtl'].i-amphtml-story-interactive-slider-container {
+  --gradient-angle: 270deg !important;
+  --translate-x-center: 50% !important;
+}
+
+[dir='rtl'] .i-amphtml-story-interactive-slider-bubble {
+  right: var(--percentage) !important;
+}
+
+[type='emoji'] .i-amphtml-story-interactive-slider-bubble {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-bubble {
+  --scale-var: calc(var(--fraction) + 1) !important;
+  /* Move the bubble up by sqrt(2)/2=70.7% to account for the pointy corner */
+  transform: translate(var(--translate-x-center), calc(-160% - var(--fraction) * 70.7%))
+    scale(var(--scale-var)) !important;
+}
+
+.i-amphtml-story-interactive-slider-bubble::after {
+  position: absolute !important;
+  content: '' !important;
+  box-sizing: border-box !important;
+  height: 100% !important;
+  width: 100% !important;
+  top: 0% !important;
+  background: var(--interactive-accent-color) !important;
+  z-index: -1 !important;
+  left: 50% !important;
+  transform: translateX(-50%) rotate(45deg) !important;
+  border-radius: 50% 50% 0% 50% !important;
+  box-shadow: 0em 0em 0.5em rgba(0, 0, 0, 0.25) !important;
+}
+
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble {
+  transform: translate(var(--translate-x-center), -50%) scale(0.9) !important;
+}
+
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble::after {
+  cursor: initial !important;
+  border: 0.1em solid var(--i-amphtml-interactive-option-background-color) !important;
+  border-bottom-right-radius: 50% !important;
+}
+
+[type='emoji'] .i-amphtml-story-interactive-slider-bubble span {
+  display: inline-block !important;
+  font-size: 3em !important;
+  transform: scale(0.5) !important;
+}
+
+.i-amphtml-story-interactive-slider-input {
+  -webkit-opacity: 1 !important;
+  -webkit-appearance: none !important;
+  font-size: inherit !important;
+  height: 1em !important;
+  width: calc(100% + var(--thumb-size)) !important;
+  margin: 0em calc(var(--thumb-size) * -0.5) !important;
+  border-radius: 0.5em !important;
+  position: absolute !important;
+  pointer-events: all !important;
+  cursor: pointer !important;
+  background: transparent !important;
+  z-index: 1 !important;
+}
+
+.i-amphtml-story-interactive-slider-input-size {
+  position: relative !important;
+  flex: 1 !important;
+  margin: 1em calc(var(--thumb-size) * 0.5) !important;
+  height: 1em !important;
+}
+
+.i-amphtml-story-interactive-slider-input-size::before,
+.i-amphtml-story-interactive-slider-input-size::after {
+  content: '' !important;
+  background: linear-gradient(
+    var(--gradient-angle),
+    var(--interactive-accent-color) var(--percentage-corrected),
+    transparent var(--percentage-corrected)
+  ) !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0.5em !important;
+  position: absolute !important;
+  margin: 0em calc(var(--thumb-size) * -0.5) !important;
+  width: calc(100% + var(--thumb-size)) !important;
+}
+
+.i-amphtml-story-interactive-slider-input-size::after {
+  background: linear-gradient(
+    var(--gradient-angle),
+    white,
+    var(--interactive-accent-color) var(--percentage-corrected)
+  ) !important;
+  opacity: 0.3 !important;
+  z-index: 0 !important;
+}
+
+.i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  width: var(--thumb-size) !important;
+  height: var(--thumb-size) !important;
+  background: var(--interactive-accent-color) !important;
+  border-radius: 50% !important;
+  position: relative !important;
+}
+
+.i-amphtml-story-interactive-slider-input::-moz-range-thumb {
+  width: var(--thumb-size) !important;
+  height: var(--thumb-size) !important;
+  background: var(--interactive-accent-color) !important;
+  border-radius: 50% !important;
+  border: none !important;
+}
+
+/* Vendor pseudo-selectors are invalid on unsuported browsers, so we need to keep rules separate to avoid invalidating rulesets. */
+.i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
+  transform: rotate(45deg) !important;
+  box-shadow: 0em 0em 0.5em rgba(0, 0, 0, 0.25),
+    0em 0em 0em 0.07em var(--i-amphtml-interactive-option-background-color) !important;
+  border-top-left-radius: 0% !important;
+}
+
+.i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-input::-moz-range-thumb {
+  transform: rotate(45deg) !important;
+  box-shadow: 0em 0em 0.5em rgba(0, 0, 0, 0.25),
+    0em 0em 0em 0.07em var(--i-amphtml-interactive-option-background-color) !important;
+  border-top-left-radius: 0% !important;
+}
+
+.i-amphtml-story-interactive-slider-input[disabled] {
+  pointer-events: none !important;
+}

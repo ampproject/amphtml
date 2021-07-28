@@ -20,14 +20,14 @@ import {
   insertAnalyticsElement,
   useAnalyticsInSandbox,
 } from '../../src/extension-analytics';
-import {Services} from '../../src/services';
+import {Services} from '#service';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
-} from '../../src/service';
-import {macroTask} from '../../testing/yield';
-import {registerElement} from '../../src/service/custom-element-registry';
+} from '../../src/service-helpers';
+import {macroTask} from '#testing/yield';
+import {registerElement} from '#service/custom-element-registry';
 
 /* eslint-disable react-hooks/rules-of-hooks */
 
@@ -86,9 +86,8 @@ describes.realWin(
               )
             ).to.be.ok;
             return timer.promise(50).then(() => {
-              const analyticsEle = baseEle.element.querySelector(
-                'amp-analytics'
-              );
+              const analyticsEle =
+                baseEle.element.querySelector('amp-analytics');
               expect(analyticsEle).to.not.be.null;
               expect(analyticsEle.getAttribute('sandbox')).to.equal('true');
               expect(analyticsEle.getAttribute('trigger')).to.equal(

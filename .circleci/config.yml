@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   browser-tools: circleci/browser-tools@1.1.3
+  node: circleci/node@4.5.1
 
 push_and_pr_builds: &push_and_pr_builds
   filters:
@@ -13,69 +14,73 @@ push_builds_only: &push_builds_only
   filters:
     branches:
       only:
-        - master
+        - main
         - /^amp-release-.*$/
 
+experiment_job: &experiment_job
+  parameters:
+    exp:
+      description: 'Which of the three (A/B/C) experiments to use'
+      type: enum
+      enum: ['A', 'B', 'C']
+  environment:
+    EXP: << parameters.exp >>
+
 executors:
-  amphtml-docker-small-executor:
+  amphtml-small-executor:
     docker:
-      - image: cimg/base:2020.12
+      - image: cimg/base:stable
     resource_class: small
   amphtml-medium-executor:
-    machine:
-      image: ubuntu-2004:202010-01
+    docker:
+      - image: cimg/node:lts-browsers
     resource_class: medium
   amphtml-large-executor:
-    machine:
-      image: ubuntu-2004:202010-01
+    docker:
+      - image: cimg/node:lts-browsers
     resource_class: large
   amphtml-xlarge-executor:
-    machine:
-      image: ubuntu-2004:202010-01
+    docker:
+      - image: cimg/node:lts-browsers
+    resource_class: xlarge
+  validator-xlarge-executor:
+    docker:
+      - image: cimg/openjdk:16.0-node
     resource_class: xlarge
 
 commands:
-  save_merge_commit:
-    steps:
-      - save_cache:
-          name: 'Save Merge Commit'
-          key: git-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - .CIRCLECI_MERGE_COMMIT
-  restore_merge_commit:
-    steps:
-      - restore_cache:
-          name: 'Restore Merge Commit'
-          key: git-{{ .Branch }}-{{ .Revision }}
-  maybe_gracefully_halt:
+  setup_vm:
     steps:
       - attach_workspace:
           at: /tmp
       - run:
+          name: 'Configure Temporary Workspace'
+          command: |
+            mv /tmp/workspace /tmp/restored-workspace
+            mkdir -p /tmp/workspace
+      - run:
           name: 'Maybe Gracefully Halt'
-          command: if [[ -f "/tmp/workspace/.CI_GRACEFULLY_HALT" ]]; then echo "Gracefully halting this job."; circleci-agent step halt; fi
-  setup_vm:
-    steps:
-      - run:
-          name: 'Create Workspace'
-          command: mkdir -p /tmp/workspace
+          command: /tmp/restored-workspace/maybe_gracefully_halt.sh
+      - restore_cache:
+          keys:
+            - source-v1-{{ .Branch }}-{{ .Revision }}
+            - source-v1-{{ .Branch }}-
+            - source-v1-
       - checkout
-      - restore_merge_commit
+      - save_cache:
+          key: source-v1-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - .git
       - run:
-          name: 'Fetch Merge Commit'
-          command: ./.circleci/fetch_merge_commit.sh
-      - run:
-          name: 'Check Config'
-          command: ./.circleci/check_config.sh
-      - run:
-          name: 'Setup Google Cloud Storage'
-          command: ./.circleci/setup_storage.sh
-      - run:
-          name: 'Configure Hosts'
-          command: cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
-      - run:
-          name: 'Install Dependencies'
-          command: ./.circleci/install_dependencies.sh
+          name: 'Configure Development Environment'
+          command: |
+            ./.circleci/fetch_merge_commit.sh
+            ./.circleci/check_config.sh
+            ./.circleci/restore_build_output.sh
+            cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
+      # TODO(danielrozenberg): consolidate the extra steps.
+      - node/install-packages:
+          override-ci-command: npm config set prefix $HOME && npm ci
   teardown_vm:
     steps:
       - persist_to_workspace:
@@ -86,82 +91,122 @@ commands:
     steps:
       - browser-tools/install-chrome:
           replace-existing: true
-  fail_fast:
+      - browser-tools/install-chromedriver
+  store_test_output:
     steps:
-      - run:
-          name: 'Fail Fast'
-          when: on_fail
-          command: ./.circleci/fail_fast.sh
+      - store_artifacts:
+          path: result-reports
+      - store_test_results:
+          path: result-reports
+  skip_on_push_builds:
+    steps:
+      - when:
+          condition:
+            matches:
+              pattern: ^main|amp-release-.*$
+              value: << pipeline.git.branch >>
+          steps:
+            - run:
+                name: 'Skip Local Unit Test on Push Builds'
+                command: circleci-agent step halt
 
 jobs:
-  'Compute Merge Commit':
+  'Initialize Repository':
     executor:
-      name: amphtml-docker-small-executor
+      name: amphtml-small-executor
     steps:
+      - restore_cache:
+          keys:
+            - source-v1-{{ .Branch }}-{{ .Revision }}
+            - source-v1-{{ .Branch }}-
+            - source-v1-
+      - checkout
       - run:
-          name: 'Compute Merge Commit'
-          command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/master/.circleci/compute_merge_commit.sh | bash
-      - save_merge_commit
+          name: 'Compute and Fetch Merge Commit'
+          command: |
+            ./.circleci/compute_merge_commit.sh
+            ./.circleci/fetch_merge_commit.sh
+      - save_cache:
+          key: source-v1-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - .git
+      - run:
+          name: 'Initialize Workspace'
+          command: cp .circleci/maybe_gracefully_halt.sh /tmp/workspace
+      - teardown_vm
   'Checks':
     executor:
       name: amphtml-medium-executor
     steps:
-      - maybe_gracefully_halt
       - setup_vm
+      - install_chrome
       - run:
           name: 'Checks'
           command: node build-system/pr-check/checks.js
-      - fail_fast
       - teardown_vm
   'Unminified Build':
     executor:
       name: amphtml-xlarge-executor
     steps:
-      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Unminified Build'
           command: node build-system/pr-check/unminified-build.js
-      - fail_fast
       - teardown_vm
-  'Nomodule Build':
+  'Nomodule Build - Test':
     executor:
       name: amphtml-xlarge-executor
     steps:
-      - maybe_gracefully_halt
       - setup_vm
+      - run:
+          name: 'Create Artifacts Directory'
+          command: mkdir -p /tmp/artifacts
       - run:
           name: 'Nomodule Build'
           command: node build-system/pr-check/nomodule-build.js
-      - fail_fast
+      - store_artifacts:
+          path: /tmp/artifacts/amp_nomodule_build.tar.gz
       - teardown_vm
-  'Module Build':
+  'Module Build - Test':
     executor:
       name: amphtml-xlarge-executor
     steps:
-      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Module Build'
           command: node build-system/pr-check/module-build.js
-      - fail_fast
       - teardown_vm
-  'Bundle Size':
+  'Nomodule Build - Prod':
     executor:
       name: amphtml-xlarge-executor
     steps:
-      - maybe_gracefully_halt
+      - setup_vm
+      - run:
+          name: 'Nomodule Build'
+          command: node build-system/pr-check/bundle-size-nomodule-build.js
+      - teardown_vm
+  'Module Build - Prod':
+    executor:
+      name: amphtml-xlarge-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Module Build'
+          command: node build-system/pr-check/bundle-size-module-build.js
+      - teardown_vm
+  'Bundle Size':
+    executor:
+      name: amphtml-medium-executor
+    steps:
       - setup_vm
       - run:
           name: 'Bundle Size'
           command: node build-system/pr-check/bundle-size.js
-      - fail_fast
       - teardown_vm
   'Validator Tests':
     executor:
-      name: amphtml-xlarge-executor
+      name: validator-xlarge-executor
     steps:
-      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Install Validator Dependencies'
@@ -169,43 +214,53 @@ jobs:
       - run:
           name: 'Validator Tests'
           command: node build-system/pr-check/validator-tests.js
-      - fail_fast
+      - store_test_output
       - teardown_vm
   'Visual Diff Tests':
     executor:
       name: amphtml-large-executor
     steps:
-      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'Visual Diff Tests'
           command: node build-system/pr-check/visual-diff-tests.js
-      - fail_fast
+      - store_test_output
       - teardown_vm
-  'Unit Tests':
+  'Local Unit Tests':
     executor:
       name: amphtml-large-executor
     steps:
-      - maybe_gracefully_halt
+      - skip_on_push_builds
       - setup_vm
       - install_chrome
       - run:
-          name: 'Unit Tests'
+          name: 'Local Unit Tests'
+          command: node build-system/pr-check/unit-tests-local.js
+      - store_test_output
+      - teardown_vm
+  'All Unit Tests':
+    executor:
+      name: amphtml-medium-executor
+    parallelism: 6
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: 'All Unit Tests'
           command: node build-system/pr-check/unit-tests.js
-      - fail_fast
+      - store_test_output
       - teardown_vm
   'Unminified Tests':
     executor:
       name: amphtml-large-executor
     steps:
-      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'Unminified Tests'
           command: node build-system/pr-check/unminified-tests.js
-      - fail_fast
+      - store_test_output
       - teardown_vm
   'Nomodule Tests':
     executor:
@@ -216,13 +271,12 @@ jobs:
         type: enum
         enum: ['prod', 'canary']
     steps:
-      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'Nomodule Tests (<< parameters.config >>)'
           command: node build-system/pr-check/nomodule-tests.js --config=<< parameters.config >>
-      - fail_fast
+      - store_test_output
       - teardown_vm
   'Module Tests':
     executor:
@@ -233,113 +287,132 @@ jobs:
         type: enum
         enum: ['prod', 'canary']
     steps:
-      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'Module Tests (<< parameters.config >>)'
           command: node build-system/pr-check/module-tests.js --config=<< parameters.config >>
-      - fail_fast
+      - store_test_output
       - teardown_vm
   'End-to-End Tests':
     executor:
-      name: amphtml-large-executor
+      name: amphtml-medium-executor
+    parallelism: 6
     steps:
-      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'End-to-End Tests'
           command: node build-system/pr-check/e2e-tests.js
-      - fail_fast
+      - store_test_output
       - teardown_vm
   'Performance Tests':
     executor:
       name: amphtml-xlarge-executor
     steps:
-      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'Performance Tests'
           command: node build-system/pr-check/performance-tests.js
-      - fail_fast
+      - store_test_output
       - teardown_vm
   'Experiment Build':
     executor:
       name: amphtml-xlarge-executor
-    parameters:
-      exp:
-        description: 'Which of the three (A/B/C) experiments to use'
-        type: enum
-        enum: ['A', 'B', 'C']
+    <<: *experiment_job
     steps:
-      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Experiment << parameters.exp >> Build'
           command: node build-system/pr-check/experiment-build.js --experiment=experiment<< parameters.exp >>
-      - fail_fast
       - teardown_vm
-  'Experiment Tests':
+  'Experiment Integration Tests':
     executor:
       name: amphtml-large-executor
-    parameters:
-      exp:
-        description: 'Which of the three (A/B/C) experiments to use'
-        type: enum
-        enum: ['A', 'B', 'C']
+    <<: *experiment_job
     steps:
-      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
-          name: 'Experiment << parameters.exp >> Tests'
-          command: node build-system/pr-check/experiment-tests.js --experiment=experiment<< parameters.exp >>
-      - fail_fast
+          name: 'Experiment << parameters.exp >> Integration Tests'
+          command: node build-system/pr-check/experiment-integration-tests.js --experiment=experiment<< parameters.exp >>
+      - store_test_output
+      - teardown_vm
+  'Experiment End-to-End Tests':
+    executor:
+      name: amphtml-large-executor
+    <<: *experiment_job
+    parallelism: 6
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: 'Experiment << parameters.exp >> End-to-End Tests'
+          command: node build-system/pr-check/experiment-e2e-tests.js --experiment=experiment<< parameters.exp >>
+      - store_test_output
       - teardown_vm
 
 workflows:
   'CircleCI':
     jobs:
-      - 'Compute Merge Commit':
+      - 'Initialize Repository':
           <<: *push_and_pr_builds
       - 'Checks':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
       - 'Unminified Build':
+          name: 'Unminified Build (Test)'
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
-      - 'Nomodule Build':
+            - 'Initialize Repository'
+      - 'Nomodule Build - Test':
+          name: 'Nomodule Build (Test)'
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
-      - 'Module Build':
+            - 'Initialize Repository'
+      - 'Module Build - Test':
+          name: 'Module Build (Test)'
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
+      - 'Nomodule Build - Prod':
+          name: 'Nomodule Build (Prod)'
+          <<: *push_and_pr_builds
+          requires:
+            - 'Initialize Repository'
+      - 'Module Build - Prod':
+          name: 'Module Build (Prod)'
+          <<: *push_and_pr_builds
+          requires:
+            - 'Initialize Repository'
       - 'Bundle Size':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Nomodule Build (Prod)'
+            - 'Module Build (Prod)'
       - 'Validator Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
       - 'Visual Diff Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build'
-      - 'Unit Tests':
+            - 'Nomodule Build (Test)'
+      - 'Local Unit Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
+      - 'All Unit Tests':
+          name: '⛓️ All Unit Tests'
+          <<: *push_and_pr_builds
+          requires:
+            - 'Local Unit Tests'
       - 'Unminified Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Unminified Build'
+            - 'Unminified Build (Test)'
       - 'Nomodule Tests':
           name: 'Nomodule Tests (<< matrix.config >>)'
           matrix:
@@ -347,7 +420,7 @@ workflows:
               config: ['prod', 'canary']
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build'
+            - 'Nomodule Build (Test)'
       - 'Module Tests':
           name: 'Module Tests (<< matrix.config >>)'
           matrix:
@@ -355,12 +428,13 @@ workflows:
               config: ['prod', 'canary']
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build'
-            - 'Module Build'
+            - 'Nomodule Build (Test)'
+            - 'Module Build (Test)'
       - 'End-to-End Tests':
+          name: '⛓️ End-to-End Tests'
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build'
+            - 'Nomodule Build (Test)'
       - 'Experiment Build':
           name: 'Experiment << matrix.exp >> Build'
           matrix:
@@ -368,9 +442,17 @@ workflows:
               exp: ['A', 'B', 'C']
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
-      - 'Experiment Tests':
-          name: 'Experiment << matrix.exp >> Tests'
+            - 'Initialize Repository'
+      - 'Experiment Integration Tests':
+          name: 'Exp. << matrix.exp >> Integration Tests'
+          matrix:
+            parameters:
+              exp: ['A', 'B', 'C']
+          <<: *push_and_pr_builds
+          requires:
+            - 'Experiment << matrix.exp >> Build'
+      - 'Experiment End-to-End Tests':
+          name: '⛓️ Exp. << matrix.exp >> End-to-End Tests'
           matrix:
             parameters:
               exp: ['A', 'B', 'C']
@@ -381,4 +463,4 @@ workflows:
       # - 'Performance Tests':
       #     <<: *push_builds_only
       #     requires:
-      #       - 'Nomodule Build'
+      #       - 'Nomodule Build (Test)'

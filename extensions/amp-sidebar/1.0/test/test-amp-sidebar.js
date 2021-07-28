@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 import '../amp-sidebar';
-import {ActionInvocation} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {htmlFor} from '../../../../src/static-template';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor, whenCalled} from '../../../../testing/test-helper';
+import {ActionInvocation} from '#service/action-impl';
+import {ActionTrust} from '#core/constants/action-constants';
+import {createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {toggleExperiment} from '#experiments';
+import {waitFor, whenCalled} from '#testing/test-helper';
+import {Services} from '#service/';
 
 describes.realWin(
   'amp-sidebar:1.0',
@@ -50,6 +51,8 @@ describes.realWin(
       let animateFunction;
       let consoleWarnSpy;
       let consoleWarn;
+      let historyPopSpy;
+      let historyPushSpy;
 
       function invocation(method, args = {}) {
         const source = null;
@@ -78,6 +81,19 @@ describes.realWin(
         consoleWarn = console.warn;
         console.warn = () => true;
         consoleWarnSpy = env.sandbox.spy(console, 'warn');
+
+        historyPopSpy = env.sandbox.spy();
+        historyPushSpy = env.sandbox.spy();
+        env.sandbox.stub(Services, 'historyForDoc').returns({
+          push() {
+            historyPushSpy();
+            return Promise.resolve(11);
+          },
+          pop() {
+            historyPopSpy();
+            return Promise.resolve(11);
+          },
+        });
 
         fullHtml = html`
           <div>
@@ -156,6 +172,9 @@ describes.realWin(
         expect(isMounted(win, container)).to.equal(true);
 
         await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
+
         const sidebar = element.shadowRoot.querySelector('[part=sidebar]');
         expect(sidebar).to.exist;
         expect(element.setAsContainerInternal).to.be.calledOnce.calledWith(
@@ -171,6 +190,8 @@ describes.realWin(
 
         expect(element.removeAsContainerInternal).to.be.calledOnce;
         expect(element.setAsContainerInternal).to.be.calledOnce; // no change.
+        expect(historyPopSpy).to.be.calledOnce;
+        expect(historyPushSpy).to.be.calledOnce; // no change.
         expect(child.pause).to.be.calledOnce;
         expect(child.unmount).to.not.be.called;
       });
@@ -758,6 +779,143 @@ describes.realWin(
           'reverse animation has begun'
         );
         expect(animation.reverse).to.be.calledTwice;
+      });
+    });
+
+    describe('toolbar', () => {
+      let win;
+      let html;
+      let element;
+      let target;
+
+      beforeEach(async () => {
+        win = env.win;
+        html = htmlFor(win.document);
+        toggleExperiment(win, 'bento-sidebar', true, true);
+      });
+
+      it('toolbar target should receive expected content from toolbar', async () => {
+        target = html`<div id="toolbar-target"></div>`;
+        element = html`
+          <amp-sidebar id="sidebar" side="left">
+            <span>
+              Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at
+              aeque inermis reprehendunt.
+            </span>
+            <nav toolbar="" toolbar-target="toolbar-target">
+              <ul>
+                <li>Toolbar Item 1</li>
+                <li>Toolbar Item 2</li>
+              </ul>
+            </nav>
+          </amp-sidebar>
+        `;
+
+        win.document.body.appendChild(target);
+        win.document.body.appendChild(element);
+        await element.buildInternal();
+        await waitFor(() => target.hasChildNodes(), 'effects have run');
+
+        expect(target.hasChildNodes()).to.be.true;
+        expect(target.childElementCount).to.equal(2);
+        expect(target.firstElementChild.nodeName).to.equal('NAV');
+        expect(target.lastElementChild.nodeName).to.equal('STYLE');
+      });
+
+      it('existing children in toolbar target should not be overwritten', async () => {
+        target = html`
+        <div id="toolbar-target">
+          <span>hello world<span>
+        </div>`;
+        element = html`
+          <amp-sidebar id="sidebar" side="left">
+            <span>
+              Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at
+              aeque inermis reprehendunt.
+            </span>
+            <nav toolbar="" toolbar-target="toolbar-target">
+              <ul>
+                <li>Toolbar Item 1</li>
+                <li>Toolbar Item 2</li>
+              </ul>
+            </nav>
+          </amp-sidebar>
+        `;
+
+        win.document.body.appendChild(target);
+        win.document.body.appendChild(element);
+        await element.buildInternal();
+        await waitFor(() => target.childElementCount != 1, 'effects have run');
+
+        expect(target.hasChildNodes()).to.be.true;
+        expect(target.childElementCount).to.equal(3);
+        expect(target.firstElementChild.nodeName).to.equal('SPAN');
+        expect(target.children[1].nodeName).to.equal('NAV');
+        expect(target.lastElementChild.nodeName).to.equal('STYLE');
+      });
+
+      it('toolbar should sanitize an invalid media query', async () => {
+        target = html`<div id="toolbar-target"></div>`;
+        element = html`
+          <amp-sidebar id="sidebar" side="left">
+            <span>
+              Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at
+              aeque inermis reprehendunt.
+            </span>
+            <nav toolbar="foo {}" toolbar-target="toolbar-target">
+              <ul>
+                <li>Toolbar Item 1</li>
+                <li>Toolbar Item 2</li>
+              </ul>
+            </nav>
+          </amp-sidebar>
+        `;
+
+        win.document.body.appendChild(target);
+        win.document.body.appendChild(element);
+        await element.buildInternal();
+        await waitFor(() => target.hasChildNodes(), 'effects have run');
+
+        expect(target.hasChildNodes()).to.be.true;
+        expect(target.childElementCount).to.equal(2);
+        const styleElementText = target.lastElementChild.textContent;
+        expect(styleElementText).to.include('not all'); //sanitized media query
+        expect(styleElementText).not.to.include('foo'); //unsanitized media query
+      });
+
+      it('toolbar should sanitize the toolbar target attribute', async () => {
+        const getElementByIdSpy = env.sandbox.spy(
+          win.document,
+          'getElementById'
+        );
+        target = html`<div id="toolbar-target"></div>`;
+        element = html`
+          <amp-sidebar id="sidebar" side="left">
+            <span>
+              Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at
+              aeque inermis reprehendunt.
+            </span>
+            <nav toolbar="foo {}" toolbar-target="toolbar-target:.">
+              <ul>
+                <li>Toolbar Item 1</li>
+                <li>Toolbar Item 2</li>
+              </ul>
+            </nav>
+          </amp-sidebar>
+        `;
+
+        win.document.body.appendChild(target);
+        win.document.body.appendChild(element);
+        await element.buildInternal();
+        await waitFor(
+          () => getElementByIdSpy.callCount != 0,
+          'effects have run'
+        );
+
+        expect(getElementByIdSpy).to.be.calledOnce;
+        //sanitized toolbar target attribute
+        expect(getElementByIdSpy).to.be.calledWith('toolbar-target\\:\\.');
+        expect(target.hasChildNodes()).to.be.false;
       });
     });
   }

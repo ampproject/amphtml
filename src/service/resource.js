@@ -14,20 +14,26 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
-import {Layout} from '../layout';
-import {Services} from '../services';
-import {cancellation, isBlockedByConsent, reportError} from '../error';
-import {computedStyle, toggle} from '../style';
-import {dev, devAssert} from '../log';
+import {Deferred} from '#core/data-structures/promise';
+import {Layout} from '#core/dom/layout';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
   layoutSizeFromRect,
   moveLayoutRect,
   rectsOverlap,
-} from '../layout-rect';
-import {toWin} from '../types';
+} from '#core/dom/layout/rect';
+import {computedStyle, toggle} from '#core/dom/style';
+import {toWin} from '#core/window';
+
+import {Services} from '#service';
+
+import {
+  cancellation,
+  isBlockedByConsent,
+  reportError,
+} from '../error-reporting';
+import {dev, devAssert} from '../log';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -88,11 +94,13 @@ export class Resource {
    * @return {!Resource}
    */
   static forElement(element) {
-    return /** @type {!Resource} */ (devAssert(
-      Resource.forElementOptional(element),
-      'Missing resource prop on %s',
-      element
-    ));
+    return /** @type {!Resource} */ (
+      devAssert(
+        Resource.forElementOptional(element),
+        'Missing resource prop on %s',
+        element
+      )
+    );
   }
 
   /**
@@ -862,8 +870,7 @@ export class Resource {
         'currently: ',
         this.state_
       );
-      err.associatedElement = this.element;
-      reportError(err);
+      reportError(err, this.element);
       return Promise.reject(err);
     }
 
@@ -957,7 +964,7 @@ export class Resource {
    * @return {!Promise}
    */
   loadedOnce() {
-    if (this.element.V1()) {
+    if (this.element.R1()) {
       return this.element.whenLoaded();
     }
     return this.loadPromise_;

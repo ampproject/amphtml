@@ -17,20 +17,19 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const childProcess = require('child_process');
-const colors = require('kleur/colors');
+const colors = require('../../common/colors');
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
 const {log} = require('../../common/logging');
-const {mainBranch} = require('../../common/main-branch');
 
 const exec = util.promisify(childProcess.exec);
 
-const {red, cyan} = colors;
+const {cyan, red} = colors;
 
 // custom-config.json overlays the active config. It is not part of checked-in
 // source (.gitignore'd). See:
-// https://github.com/ampproject/amphtml/blob/master/build-system/global-configs/README.md#custom-configjson
+// https://github.com/ampproject/amphtml/blob/main/build-system/global-configs/README.md#custom-configjson
 const customConfigFile = 'build-system/global-configs/custom-config.json';
 
 /**
@@ -69,7 +68,7 @@ async function fetchConfigFromBranch_(filename, opt_localBranch, opt_branch) {
   if (opt_localBranch) {
     return fs.promises.readFile(filename, 'utf8');
   }
-  const branch = opt_branch || `origin/${mainBranch}`;
+  const branch = opt_branch || 'origin/main';
   return (await exec(`git show ${branch}:${filename}`)).stdout;
 }
 
@@ -307,21 +306,19 @@ module.exports = {
   valueOrDefault,
 };
 
-prependGlobal.description = 'Prepends a json config to a target file';
+prependGlobal.description = 'Prepend a json config to a target file';
 prependGlobal.flags = {
-  'target': 'Comma separated list of files to prepend the json config to.',
+  'target': 'Comma-separated list of files to prepend the json config to',
   'canary':
-    'Prepend the default canary config. ' +
-    'Takes in an optional value for a custom canary config source.',
+    'Prepend the default canary config (takes an optional value for a custom config source)',
   'prod':
-    'Prepend the default prod config. ' +
-    'Takes in an optional value for a custom prod config source.',
-  'local_dev': 'Enables runtime to be used for local development.',
+    'Prepend the default prod config (takes an optional value for a custom config source)',
+  'local_dev': 'Enable the runtime to be used for local development',
   'branch':
-    'Get config source from the given branch. Uses the main branch by default.',
+    'Get config source from the given branch (uses the main branch by default)',
   'local_branch':
-    "Don't switch branches and use the config from the local branch.",
-  'fortesting': 'Force the config to return true for getMode().test',
+    'Use the config from the local branch (does not switch branches)',
+  'fortesting': 'Enable local testing by setting getMode().test to true',
   'derandomize':
-    'Rounds all experiment percentages to 0 or 1, whichever is closest.',
+    'Round all experiment percentages to 0 or 1, whichever is closest',
 };

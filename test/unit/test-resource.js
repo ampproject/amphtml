@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {LayoutPriority} from '../../src/layout';
-import {OwnersImpl} from '../../src/service/owners-impl';
-import {Resource, ResourceState} from '../../src/service/resource';
-import {ResourcesImpl} from '../../src/service/resources-impl';
-import {Services} from '../../src/services';
-import {isCancellation} from '../../src/error';
-import {layoutRectLtwh} from '../../src/layout-rect';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {LayoutPriority} from '#core/dom/layout';
+import {OwnersImpl} from '#service/owners-impl';
+import {Resource, ResourceState} from '#service/resource';
+import {ResourcesImpl} from '#service/resources-impl';
+import {Services} from '#service';
+import {isCancellation} from '../../src/error-reporting';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 describes.realWin('Resource', {amp: true}, (env) => {
   let win, doc;
@@ -981,7 +981,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
   });
 });
 
-describe('Resource idleRenderOutsideViewport', () => {
+describes.sandboxed('Resource idleRenderOutsideViewport', {}, (env) => {
   let element;
   let resources;
   let resource;
@@ -989,7 +989,7 @@ describe('Resource idleRenderOutsideViewport', () => {
   let isWithinViewportRatio;
 
   beforeEach(() => {
-    idleRenderOutsideViewport = window.sandbox.stub();
+    idleRenderOutsideViewport = env.sandbox.stub();
     element = {
       idleRenderOutsideViewport,
       ownerDocument: {defaultView: window},
@@ -1014,10 +1014,7 @@ describe('Resource idleRenderOutsideViewport', () => {
     };
     resources = new ResourcesImpl(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
-    isWithinViewportRatio = window.sandbox.stub(
-      resource,
-      'isWithinViewportRatio'
-    );
+    isWithinViewportRatio = env.sandbox.stub(resource, 'isWithinViewportRatio');
   });
 
   it('should return true if isWithinViewportRatio', () => {

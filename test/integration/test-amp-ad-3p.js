@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {ADS_INITIAL_INTERSECTION_EXP} from '../../src/experiments/ads-initial-intersection-exp';
-import {Services} from '../../src/services';
+import {ADS_INITIAL_INTERSECTION_EXP} from '#experiments/ads-initial-intersection-exp';
+import {Services} from '#service';
 import {createCustomEvent} from '../../src/event-helper';
-import {createFixtureIframe, poll} from '../../testing/iframe';
-import {forceExperimentBranch} from '../../src/experiments';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {layoutRectLtwh} from '../../src/layout-rect';
+import {createFixtureIframe, poll} from '#testing/iframe';
+import {forceExperimentBranch} from '#experiments';
+import {installPlatformService} from '#service/platform-impl';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 const IFRAME_HEIGHT = 3000;
 function createFixture() {
@@ -31,7 +31,7 @@ function createFixture() {
   );
 }
 
-describe('amp-ad 3P', () => {
+describes.sandboxed('amp-ad 3P', {}, () => {
   let fixture;
 
   beforeEach(() => {
@@ -178,9 +178,8 @@ describe('amp-ad 3P', () => {
       .then(() => {
         // The userActivation feature is known to be available on Chrome 74+
         if (platform.isChrome() && platform.getMajorVersion() >= 74) {
-          const event = fixture.messages.getFirstMessageEventOfType(
-            'embed-size'
-          );
+          const event =
+            fixture.messages.getFirstMessageEventOfType('embed-size');
           expect(event.userActivation).to.be.ok;
           expect(event.userActivation.isActive).to.be.a('boolean');
         }

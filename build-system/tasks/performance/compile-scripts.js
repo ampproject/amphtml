@@ -17,12 +17,13 @@
 const argv = require('minimist')(process.argv.slice(2));
 const {doDist} = require('../dist');
 const {EXPERIMENT, urlToCachePath} = require('./helpers');
-const {setExtensionsToBuildFromDocuments} = require('../extension-helpers.js');
+const {setExtensionsToBuildFromDocuments} = require('../extension-helpers');
 
 /**
  * Compiles and minifies AMP runtime and components required by the urls
  * argument, unless the --nobuild flag is passed.
  * @param {Array<string>} urls
+ * @return {Promise<void>}
  */
 async function compileScripts(urls) {
   if (!argv.nobuild) {

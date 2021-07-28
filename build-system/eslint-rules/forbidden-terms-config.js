@@ -31,6 +31,10 @@ module.exports = {
     // greatly speeds up this rule.
     const fileContent = {};
 
+    /**
+     * @param {string} filename
+     * @return {string}
+     */
     function readFileContent(filename) {
       try {
         return (
@@ -42,6 +46,10 @@ module.exports = {
       }
     }
 
+    /**
+     * @param {Object} fixer
+     * @param {Node} node
+     */
     function* removeFromArray(fixer, node) {
       const {text} = context.getSourceCode();
       let {start} = node;
