@@ -27,25 +27,26 @@ const {useCallback, useEffect, useImperativeHandle, useMemo, useRef} = Preact;
  * @param {{current: (!AudioDef.AudioApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
-export function AudioWithRef(props, ref) {
-  const audioRef = useRef(null);
-
-  const {
+export function AudioWithRef(
+  {
     album,
     artist,
     artwork,
     autoplay,
-    sources,
     controlsList,
     loop,
     muted,
     preload,
     propagateAttributes,
+    sources,
     src,
     title,
     validateMediaMetadata,
     ...rest
-  } = props;
+  },
+  ref
+) {
+  const audioRef = useRef(null);
 
   /** @public {boolean} */
   const isPlaying = useRef(false);
