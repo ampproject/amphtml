@@ -340,19 +340,17 @@ export class AmpRender extends BaseElement {
    *
    * @param {?Element} template
    * @return {number} count of non-empty child nodes
+   * @private
    */
-  getTemplateNonEmptyNodeCount(template) {
+  getTemplateNonEmptyNodeCount_(template) {
     let childNodes = [];
-    // We should use innerHTML when the template lacks a wrapper
-    // element, outerHTML otherwise in order to include the wrapper
-    // element itself.
     if (template.tagName === 'SCRIPT') {
       const div = this.element.ownerDocument.createElement('div');
       div./*OK*/ innerHTML = template./*OK*/ innerHTML;
-      const fragment = new DocumentFragment();
+      const fragment = this.element.ownerDocument.createDocumentFragment();
       fragment.append(div);
-      childNodes = fragment.children;
-    } else {
+      childNodes = fragment.firstElementChild.children;
+    } else if (template.tagName == 'TEMPLATE') {
       childNodes = template.content.childNodes;
     }
     return Array.from(childNodes).reduce(
@@ -400,7 +398,7 @@ export class AmpRender extends BaseElement {
                 return this.renderTemplateAsString_(data);
               }
               const nonEmptyNodeCount =
-                this.getTemplateNonEmptyNodeCount(template);
+                this.getTemplateNonEmptyNodeCount_(template);
               return templates
                 .renderTemplate(dev().assertElement(template), data)
                 .then((element) => {
@@ -416,6 +414,9 @@ export class AmpRender extends BaseElement {
                     })
                     .then(() =>
                       dict({
+                        // We should use innerHTML when the template lacks a wrapper
+                        // element, outerHTML otherwise in order to include the wrapper
+                        // element itself.
                         '__html':
                           nonEmptyNodeCount === 1
                             ? element./* OK */ outerHTML
