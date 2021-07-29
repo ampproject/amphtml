@@ -26,7 +26,7 @@ import {computedStyle, setStyles} from '#core/dom/style';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
-// import {createElementWithAttributes} from '#core/dom';
+import {toArray} from '#core/types/array';
 
 /** @const {string} */
 const TAG = 'amp-render';
@@ -353,7 +353,7 @@ export class AmpRender extends BaseElement {
     } else if (template.tagName == 'TEMPLATE') {
       childNodes = template.content.childNodes;
     }
-    return Array.from(childNodes).reduce(
+    return toArray(childNodes).reduce(
       (count, node) =>
         count +
         Number(
