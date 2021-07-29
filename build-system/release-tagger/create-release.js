@@ -35,7 +35,7 @@ const {
  * @return {string}
  */
 function _createBody(prs) {
-  return prs.map((pr) => pr.number).join('\n'); // TODO: build this out
+  return prs.map((pr) => pr.number).join('\n'); // TODO: build this out please
 }
 
 /**
