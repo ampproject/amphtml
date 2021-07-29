@@ -186,7 +186,7 @@ export class Log {
    * @private
    */
   getLevel_() {
-    return levelOverride_ !== undefined ? levelOverride_ : this.level_;
+    return levelOverride_ ?? this.level_;
   }
 
   /**
@@ -229,34 +229,28 @@ export class Log {
    * @param {string} tag
    * @param {!LogLevel} level
    * @param {!Array} messages
-   * @return {boolean} true if a message was logged
    */
   msg_(tag, level, messages) {
-    if (this.getLevel_() < level) {
-      return false;
-    }
-    const cs = this.win.console;
-    let fn = cs.log;
-    if (level == LogLevel.ERROR) {
-      fn = cs.error || fn;
-    } else if (level == LogLevel.INFO) {
-      fn = cs.info || fn;
-    } else if (level == LogLevel.WARN) {
-      fn = cs.warn || fn;
-    }
+    if (this.getLevel_() >= level) {
+      const cs = this.win.console;
+      const fn =
+        {
+          [LogLevel.ERROR]: cs.error,
+          [LogLevel.INFO]: cs.info,
+          [LogLevel.WARN]: cs.warn,
+        }[level] ?? cs.log;
 
-    const args = this.maybeExpandMessageArgs_(messages);
-    // Prefix console message with "[tag]".
-    const prefix = `[${tag}]`;
-    if (isString(args[0])) {
-      // Prepend string to avoid breaking string substitutions e.g. %s.
-      args[0] = prefix + ' ' + args[0];
-    } else {
-      args.unshift(prefix);
+      const args = this.maybeExpandMessageArgs_(messages);
+      // Prefix console message with "[tag]".
+      const prefix = `[${tag}]`;
+      if (isString(args[0])) {
+        // Prepend string to avoid breaking string substitutions e.g. %s.
+        args[0] = prefix + ' ' + args[0];
+      } else {
+        args.unshift(prefix);
+      }
+      fn.apply(cs, args);
     }
-    fn.apply(cs, args);
-
-    return true;
   }
 
   /**
