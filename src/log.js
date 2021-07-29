@@ -35,7 +35,7 @@ const noop = () => {};
 
 // These are exported here despite being defined in core to avoid updating
 // imports for now.
-export {USER_ERROR_SENTINEL, isUserErrorMessage, stripUserError};
+export {USER_ERROR_SENTINEL, isUserErrorMessage};
 
 /**
  * @enum {number}
