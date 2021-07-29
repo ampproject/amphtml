@@ -30,7 +30,7 @@ import {Services} from '#service';
 import {addConfigToInteractive} from './helpers';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
-const addThresholdsToInteractive = (interactive, thresholdList) => {
+export const addThresholdsToInteractive = (interactive, thresholdList) => {
   addConfigToInteractive(interactive, thresholdList.length, null, [
     'results-category',
   ]);
