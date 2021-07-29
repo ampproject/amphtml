@@ -30,22 +30,6 @@ const {
  */
 function create(context) {
   /**
-   * SVG elements can be safely autofixed from an invalid self-closing tag
-   * like <path /> into its valid closed form <path></path>.
-   */
-  const svgSelfClosing = new Set([
-    'circle',
-    'ellipse',
-    'line',
-    'path',
-    'polygon',
-    'polyline',
-    'rect',
-    'stop',
-    'use',
-  ]);
-
-  /**
    * @param {CompilerNode} node
    */
   function tagCannotBeCalled(node) {
@@ -135,26 +119,14 @@ function create(context) {
       });
     }
 
-    let invalids = 0;
-
-    if (!/<(svg)/i.test(string)) {
-      invalids = invalidVoidTag(string);
-    }
+    const invalids = /<(svg)/i.test(string) ? [] : invalidVoidTag(string);
 
     if (invalids.length) {
       const sourceCode = context.getSourceCode();
       const {start} = template;
 
-      for (const {fixable, length, offset, tag} of invalids) {
+      for (const {offset, tag} of invalids) {
         const itemStart = start + offset;
-        let fix;
-        if (fixable) {
-          fix = (fixer) =>
-            fixer.replaceTextRange(
-              [itemStart + length - 2, itemStart + length - 1],
-              `></${tag}`
-            );
-        }
         const loc = {
           start: sourceCode.getLocFromIndex(itemStart),
           end: sourceCode.getLocFromIndex(itemStart + tag.length + 1),
@@ -163,7 +135,6 @@ function create(context) {
           node: template,
           loc,
           message: `Invalid void tag "${tag}"`,
-          fix,
         });
       }
     }
@@ -175,7 +146,6 @@ function create(context) {
    *   tag: string,
    *   offset: number,
    *   length: number,
-   *   fixable: boolean,
    * }[]}
    */
   function invalidVoidTag(string) {
@@ -192,7 +162,6 @@ function create(context) {
         tag,
         offset: match.index,
         length: fullMatch.length,
-        fixable: svgSelfClosing.has(tag),
       });
     }
 
