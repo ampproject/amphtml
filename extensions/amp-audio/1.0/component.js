@@ -35,7 +35,7 @@ export function AudioWithRef(props, ref) {
     artist,
     artwork,
     autoplay,
-    children,
+    sources,
     controlsList,
     loop,
     muted,
@@ -153,7 +153,7 @@ export function AudioWithRef(props, ref) {
       paint
       {...rest}
     >
-      {children}
+      {sources}
     </audio>
   );
 }

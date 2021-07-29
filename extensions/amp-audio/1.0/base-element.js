@@ -25,7 +25,6 @@ BaseElement['Component'] = Audio;
 
 /** @override */
 BaseElement['props'] = {
-  'children': {passthroughNonEmpty: true},
   album: {attr: 'album', type: 'string', default: EMPTY_METADATA.album},
   artist: {attr: 'artist', type: 'string', default: EMPTY_METADATA.artist},
   artwork: {attr: 'artwork', type: 'string', default: EMPTY_METADATA.artwork},
@@ -34,6 +33,11 @@ BaseElement['props'] = {
   loop: {attr: 'loop', type: 'boolean', default: false},
   muted: {attr: 'muted', type: 'boolean', default: false},
   preload: {attr: 'preload'},
+  sources: {
+    selector: 'source',
+    single: false,
+    clone: true,
+  },
   src: {attr: 'src'},
   title: {attr: 'title', type: 'string', default: EMPTY_METADATA.title},
 };

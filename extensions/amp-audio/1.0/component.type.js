@@ -21,7 +21,7 @@ var AudioDef = {};
 
 /**
  * @typedef {{
- *   children: (?PreactDef.Renderable|undefined),
+ *   sources: (?PreactDef.Renderable|undefined),
  *   album: (string),
  *   artist: (string),
  *   artwork: (string),
