@@ -189,6 +189,11 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/31607',
   },
   {
+    id: 'amp-story-desktop-one-panel',
+    name: 'New desktop one-panel UI with background blur for stories.',
+    spec: 'https://github.com/ampproject/amphtml/projects/128',
+  },
+  {
     id: 'amp-story-page-attachment-ui-v2',
     name: 'New UI for all new page attachments in stories format',
     spec: 'https://github.com/ampproject/amphtml/projects/123',
