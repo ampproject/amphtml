@@ -555,7 +555,7 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
     let map = result.outputFiles.find(({path}) => path.endsWith('.map')).text;
 
     if (options.minify) {
-      ({code, map} = await minify(code, map, /* manglePrivates */ false));
+      ({code, map} = await minify(code, map));
     }
 
     await Promise.all([
@@ -622,10 +622,9 @@ const nameCache = {};
  *
  * @param {string} code
  * @param {string} map
- * @param {boolean=} manglePrivates
  * @return {!Promise<{code: string, map: *, error?: Error}>}
  */
-async function minify(code, map, manglePrivates = false) {
+async function minify(code, map) {
   const terserOptions = {
     mangle: {},
     compress: {
@@ -641,19 +640,6 @@ async function minify(code, map, manglePrivates = false) {
     module: !!argv.esm,
     nameCache,
   };
-
-  if (manglePrivates) {
-    // Preserve property access via bracket notation.
-    // Ensures a['b'] does not become a.b.
-    terserOptions.compress.properties = false;
-    terserOptions.mangle.properties = {
-      regex: '_$',
-
-      // Do not mangle properties accessed via bracket notation.
-      // eslint-disable-next-line google-camelcase/google-camelcase
-      keep_quoted: true,
-    };
-  }
 
   const minified = await terser.minify(code, terserOptions);
   return {code: minified.code ?? '', map: minified.map};
