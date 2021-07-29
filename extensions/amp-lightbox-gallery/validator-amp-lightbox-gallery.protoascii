@@ -20,6 +20,7 @@ tags: {  # amp-lightbox-gallery
   extension_spec: {
     name: "amp-lightbox-gallery"
     version: "0.1"
+    version: "1.0"
     version: "latest"
     requires_usage: NONE
   }
