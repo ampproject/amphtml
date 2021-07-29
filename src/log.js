@@ -254,14 +254,6 @@ export class Log {
   }
 
   /**
-   * Whether the logging is enabled.
-   * @return {boolean}
-   */
-  isEnabled() {
-    return this.getLevel_() != LogLevel.OFF;
-  }
-
-  /**
    * Reports a fine-grained message.
    * @param {string} tag
    * @param {...*} args
