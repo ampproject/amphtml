@@ -77,7 +77,6 @@ export class AmpAudio extends BaseElement {
         isExperimentOn(this.win, 'bento-audio'),
       'expected global "bento" or specific "bento-audio" experiment to be enabled'
     );
-    //return super.isLayoutSupported(layout);
     return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
   }
 }
