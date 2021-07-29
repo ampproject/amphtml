@@ -125,7 +125,7 @@ export function AudioWithRef(
     return () => {
       unlistenPlaying();
     };
-  }, [audioPlaying, children, propagateAttributes]);
+  }, [audioPlaying, propagateAttributes]);
 
   /** Audio Component - API Functions */
   useImperativeHandle(
