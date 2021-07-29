@@ -80,6 +80,15 @@ let accumulatedErrorMessages = self.__AMP_ERRORS || [];
 self.__AMP_ERRORS = accumulatedErrorMessages;
 
 /**
+ * Sets reportError function. Called from error-reporting.js to break cyclic
+ * dependency.
+ * @param {function(this:Window, Error, (?Element)=): ?|undefined} fn
+ */
+export function setReportError(fn) {
+  self.__AMP_REPORT_ERROR = fn;
+}
+
+/**
  * Pushes element into array, keeping at most the most recent limit elements
  *
  * @param {!Array<T>} array

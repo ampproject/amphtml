@@ -20,7 +20,6 @@ import {
   USER_ERROR_EMBED_SENTINEL,
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
-  isUserErrorEmbedMessage,
   isUserErrorMessage,
   stripUserError,
 } from '#core/error/message-helpers';
@@ -33,8 +32,9 @@ import {getMode} from './mode';
 
 const noop = () => {};
 
-// These are exported here despite being defined in core to avoid updating
-// imports for now.
+// These are exported here despite being defined elswhere to avoid updating
+// imports across many files for now.
+export {setReportError} from './error-reporting';
 export {USER_ERROR_SENTINEL, isUserErrorMessage};
 
 /**
@@ -47,15 +47,6 @@ export const LogLevel = {
   INFO: 3,
   FINE: 4,
 };
-
-/**
- * Sets reportError function. Called from error-reporting.js to break cyclic
- * dependency.
- * @param {function(this:Window, Error, (?Element)=): ?|undefined} fn
- */
-export function setReportError(fn) {
-  self.__AMP_REPORT_ERROR = fn;
-}
 
 /**
  * @type {!LogLevel|undefined}
