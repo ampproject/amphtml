@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {removeElement} from './core/dom';
-import {setStyles} from './core/dom/style';
+import {removeElement} from '#core/dom';
+import {setStyles} from '#core/dom/style';
 
 /**
  * @param {!Window} win
@@ -25,7 +25,9 @@ export function copyTextToClipboard(win, text) {
   let copySuccessful = false;
   const doc = win.document;
 
-  const textarea = doc.createElement('textarea');
+  const textarea =
+    /** @type {!HTMLTextAreaElement} */
+    (doc.createElement('textarea'));
 
   setStyles(textarea, {
     'position': 'fixed',
