@@ -64,7 +64,7 @@ export function hydrate(vnode, container) {
  * @return {PreactDef.Renderable}
  */
 export function Fragment(props) {
-  return preact.Fragment(props);
+  return props.children;
 }
 
 /**
