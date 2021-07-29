@@ -63,6 +63,13 @@ If you choose to set the width to a value which is greater than 325px, the `ifra
 
 If you choose to set the height of to a value which is which is greater than the height the height will remain the height of the `iframe`.
 
+## Placeholder
+
+There are two ways to set a placeholder image:
+
+-   Pointing the `data-src` attribute to the image URL
+-   Pointing the TikTok provided `cite` attribute, made available through `blockquote`, to the image URL.
+
 ## Attributes
 
 ### `data-src`
@@ -81,7 +88,7 @@ Example with video-id
 ></amp-tiktok>
 ```
 
-[\example]
+[/example]
 
 Example with source url:
 
@@ -95,9 +102,9 @@ Example with source url:
 ></amp-tiktok>
 ```
 
-[\example]
+[/example]
 
-In liu of the `data-src` attribute, `amp-tiktok` also allows the use of the TikTok generated embed code to display.
+In lieu of the `data-src` attribute, `amp-tiktok` also allows the use of the TikTok generated embed code to display.
 
 To use this method copy the blockquote from the TikTok Embed code:
 
@@ -139,9 +146,9 @@ To use this method copy the blockquote from the TikTok Embed code:
 </amp-tiktok>
 ```
 
-[\example]
+[/example]
 
 ## Accessibility
 
 If the user provides an `aria-label` then that label will be propogated to the `iframe`.
-Otherwise the `aria-label` will default to 'TikTok'.
+If the user proides an oEmbed source URL as the `data-src` then the TikTok's caption will be used as the `aria-label` with the format 'Tiktok: "Caption"'. Otherwise the `aria-label` will default to 'TikTok'.
