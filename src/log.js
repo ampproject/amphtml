@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-import * as mode from '#core/mode';
-
-import {urls} from './config';
-import * as assertions from './core/assert/base';
-import {createErrorVargs, duplicateErrorIfNecessary} from './core/error';
+import * as assertions from '#core/assert/base';
+import {createErrorVargs, duplicateErrorIfNecessary} from '#core/error';
 import {
+  USER_ERROR_EMBED_SENTINEL,
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
+  isUserErrorEmbedMessage,
   isUserErrorMessage,
   stripUserError,
-} from './core/error/message-helpers';
-import {isArray, isString} from './core/types';
-import {once} from './core/types/function';
+} from '#core/error/message-helpers';
+import * as mode from '#core/mode';
+import {isArray, isString} from '#core/types';
+import {once} from '#core/types/function';
+
+import {urls} from './config';
 import {getMode} from './mode';
 
 const noop = () => {};
@@ -34,21 +36,6 @@ const noop = () => {};
 // These are exported here despite being defined in core to avoid updating
 // imports for now.
 export {USER_ERROR_SENTINEL, isUserErrorMessage, stripUserError};
-
-/**
- * Four zero width space.
- *
- * @const {string}
- */
-export const USER_ERROR_EMBED_SENTINEL = '\u200B\u200B\u200B\u200B';
-
-/**
- * @param {string} message
- * @return {boolean} Whether this message was a a user error from an iframe embed.
- */
-export function isUserErrorEmbed(message) {
-  return message.indexOf(USER_ERROR_EMBED_SENTINEL) >= 0;
-}
 
 /**
  * @enum {number}
@@ -395,6 +382,7 @@ export class Log {
     if (getMode(this.win).development) {
       this.fetchExternalMessagesOnce_();
     }
+
     return this.messages_?.[id]
       ? [this.messages_[id]].concat(parts)
       : [`More info at ${externalMessageUrl(id, parts)}`];
@@ -577,8 +565,9 @@ export function resetLogConstructorForTesting() {
 
 /**
  * Calls the log constructor with a given level function and suffix.
- * @param levelFunc
- * @param opt_suffix
+ * @param {function(number, boolean):!LogLevel} levelFunc
+ * @param {string=} opt_suffix
+ * @return {!Log}
  */
 function callLogConstructor(levelFunc, opt_suffix) {
   if (!logConstructor) {

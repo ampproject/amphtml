@@ -17,15 +17,17 @@
 import {
   Log,
   LogLevel,
-  USER_ERROR_SENTINEL,
   dev,
   devAssert,
-  isUserErrorEmbed,
-  isUserErrorMessage,
   setReportError,
   user,
   userAssert,
 } from '../../src/log';
+import {
+  USER_ERROR_SENTINEL,
+  isUserErrorEmbedMessage,
+  isUserErrorMessage,
+} from '#core/error/message-helpers';
 
 describes.sandboxed('Logging', {}, (env) => {
   const RETURNS_FINE = () => LogLevel.FINE;
@@ -611,7 +613,7 @@ describes.sandboxed('Logging', {}, (env) => {
 
     it('should return logger for user-error', () => {
       const error = user().createError();
-      expect(isUserErrorEmbed(error.message)).to.be.false;
+      expect(isUserErrorEmbedMessage(error.message)).to.be.false;
       expect(isUserErrorMessage(error.message)).to.be.true;
     });
 
@@ -619,7 +621,7 @@ describes.sandboxed('Logging', {}, (env) => {
       element = document.createElement('embed');
       iframe.contentWindow.document.body.appendChild(element);
       const error = user(element).createError();
-      expect(isUserErrorEmbed(error.message)).to.be.true;
+      expect(isUserErrorEmbedMessage(error.message)).to.be.true;
     });
 
     it('should not create extra identical loggers', () => {
