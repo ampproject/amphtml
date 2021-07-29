@@ -185,14 +185,6 @@ export class Log {
    * @return {!LogLevel}
    * @private
    */
-  getLevel_() {
-    return levelOverride_ ?? this.level_;
-  }
-
-  /**
-   * @return {!LogLevel}
-   * @private
-   */
   defaultLevel_() {
     // No console - can't enable logging.
     if (
@@ -231,7 +223,7 @@ export class Log {
    * @param {!Array} messages
    */
   msg_(tag, level, messages) {
-    if (this.getLevel_() >= level) {
+    if (level <= (levelOverride_ ?? this.level_)) {
       const cs = this.win.console;
       const fn =
         {
