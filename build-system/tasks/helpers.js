@@ -529,10 +529,10 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
   let result = null;
 
   /**
-   * @param {number} time
+   * @param {number} startTime
    * @return {Promise<void>}
    */
-  async function build(time) {
+  async function build(startTime) {
     if (!result) {
       result = await esbuild.build({
         entryPoints: [entryPoint],
@@ -540,18 +540,31 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
         sourcemap: true,
         outfile: destFile,
         plugins,
-        minify: options.minify,
         format: options.outputFormat || undefined,
+        // For es5 builds, ensure esbuild-injected code is transpiled.
         target: argv.esm ? 'es6' : 'es5',
         incremental: !!options.watch,
         logLevel: 'silent',
         external: options.externalDependencies,
+        write: false,
       });
     } else {
       result = await result.rebuild();
     }
-    await minifyWithTerser(destDir, destFilename, options);
-    await finishBundle(srcFilename, destDir, destFilename, options, time);
+    let code = result.outputFiles.find(({path}) => !path.endsWith('.map')).text;
+    let map = result.outputFiles.find(({path}) => path.endsWith('.map')).text;
+
+    if (options.minify) {
+      ({code, map} = await minify(code, map, /* manglePrivates */ false));
+    }
+
+    await Promise.all([
+      fs.outputFile(destFile, code),
+      fs.outputFile(`${destFile}.map`, map),
+    ]);
+
+    // TODO: finishBundle should operate in-mem instead of reading/writing from FS.
+    await finishBundle(srcFilename, destDir, destFilename, options, startTime);
   }
 
   /**
@@ -586,8 +599,8 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
   if (options.watch) {
     watchedTargets.set(entryPoint, {
       rebuild: async () => {
-        const time = Date.now();
-        const buildPromise = build(time).catch((err) =>
+        const startTime = Date.now();
+        const buildPromise = build(startTime).catch((err) =>
           handleBundleError(err, !!options.watch, destFilename)
         );
         if (options.onWatchBuild) {
@@ -600,41 +613,50 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
 }
 
 /**
+ * Name cache to help terser perform cross-binary property mangling.
+ */
+const nameCache = {};
+
+/**
  * Minify the code with Terser. Only used by the ESBuild.
  *
- * @param {string} destDir
- * @param {string} destFilename
- * @param {?Object} options
- * @return {!Promise}
+ * @param {string} code
+ * @param {string} map
+ * @param {boolean=} manglePrivates
+ * @return {!Promise<{code: string, map: *, error?: Error}>}
  */
-async function minifyWithTerser(destDir, destFilename, options) {
-  if (!options.minify) {
-    return;
-  }
-
-  const filename = path.join(destDir, destFilename);
+async function minify(code, map, manglePrivates = false) {
   const terserOptions = {
-    mangle: true,
-    compress: true,
+    mangle: {},
+    compress: {
+      passes: 3,
+    },
     output: {
       beautify: !!argv.pretty_print,
-      comments: /\/*/,
       // eslint-disable-next-line google-camelcase/google-camelcase
       keep_quoted_props: true,
+      preamble: ';',
     },
-    sourceMap: true,
+    sourceMap: {content: map},
+    module: !!argv.esm,
+    nameCache,
   };
-  const minified = await terser.minify(
-    fs.readFileSync(filename, 'utf8'),
-    terserOptions
-  );
-  const remapped = remapping(
-    [minified.map, fs.readFileSync(`${filename}.map`, 'utf8')],
-    () => null,
-    !argv.full_sourcemaps
-  );
-  fs.writeFileSync(filename, minified.code);
-  fs.writeFileSync(`${filename}.map`, remapped.toString());
+
+  if (manglePrivates) {
+    // Preserve property access via bracket notation.
+    // Ensures a['b'] does not become a.b.
+    terserOptions.compress.properties = false;
+    terserOptions.mangle.properties = {
+      regex: '_$',
+
+      // Do not mangle properties accessed via bracket notation.
+      // eslint-disable-next-line google-camelcase/google-camelcase
+      keep_quoted: true,
+    };
+  }
+
+  const minified = await terser.minify(code, terserOptions);
+  return {code: minified.code ?? '', map: minified.map};
 }
 
 /**
