@@ -25,7 +25,7 @@ import {
   isUserErrorMessage,
   stripUserError,
 } from './core/error/message-helpers';
-import {isArray} from './core/types';
+import {isArray, isString} from './core/types';
 import {once} from './core/types/function';
 import {getMode} from './mode';
 
@@ -235,24 +235,27 @@ export class Log {
     if (this.getLevel_() < level) {
       return false;
     }
-    let fn = this.win.console.log;
+    const cs = this.win.console;
+    let fn = cs.log;
     if (level == LogLevel.ERROR) {
-      fn = this.win.console.error || fn;
+      fn = cs.error || fn;
     } else if (level == LogLevel.INFO) {
-      fn = this.win.console.info || fn;
+      fn = cs.info || fn;
     } else if (level == LogLevel.WARN) {
-      fn = this.win.console.warn || fn;
+      fn = cs.warn || fn;
     }
+
     const args = this.maybeExpandMessageArgs_(messages);
     // Prefix console message with "[tag]".
     const prefix = `[${tag}]`;
-    if (typeof args[0] === 'string') {
+    if (isString(args[0])) {
       // Prepend string to avoid breaking string substitutions e.g. %s.
       args[0] = prefix + ' ' + args[0];
     } else {
       args.unshift(prefix);
     }
-    fn.apply(this.win.console, args);
+    fn.apply(cs, args);
+
     return true;
   }
 
@@ -673,7 +676,7 @@ export function dev() {
  * @param {!Element=} opt_element
  * @return {boolean} isEmbed
  */
-export function isFromEmbed(win, opt_element) {
+function isFromEmbed(win, opt_element) {
   if (!opt_element) {
     return false;
   }
