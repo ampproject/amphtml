@@ -28,10 +28,11 @@ const {
   getPullRequestsBetweenCommits,
   getRelease,
 } = require('./utils');
+const {GraphQlQueryResponseData} = require('@octokit/graphql'); //eslint-disable-line no-unused-vars
 
 /**
  * Create body for GitHub release
- * @param {Array<Object>} prs
+ * @param {Array<GraphQlQueryResponseData>} prs
  * @return {string}
  */
 function _createBody(prs) {

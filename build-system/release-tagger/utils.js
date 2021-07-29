@@ -22,7 +22,7 @@
  */
 
 const dedent = require('dedent');
-const {graphql} = require('@octokit/graphql');
+const {GraphQlQueryResponseData, graphql} = require('@octokit/graphql'); //eslint-disable-line no-unused-vars
 const {Octokit} = require('@octokit/rest');
 
 // setup
@@ -51,7 +51,7 @@ const config = {
  * Queries the GitHub GraphQL API in batches.
  * @param {string} queryType
  * @param {Array<string>} queries
- * @return {Promise<Array<Object>>}
+ * @return {Promise<Array<GraphQlQueryResponseData>>}
  */
 async function _runQueryInBatches(queryType, queries) {
   const responses = [];
@@ -126,7 +126,7 @@ async function compareCommits(base, head) {
 /**
  * Get pull requests associated with a list of commits
  * @param {Array<string>} shas
- * @return {Promise<Array<Object>>}
+ * @return {Promise<Array<GraphQlQueryResponseData>>}
  */
 async function getPullRequests(shas) {
   const queries = [];
@@ -147,13 +147,12 @@ async function getPullRequests(shas) {
  * Get pull requests between two commits
  * @param {string} commit
  * @param {string} previousCommit
- * @return {Promise<Object>}
+ * @return {Promise<Array<GraphQlQueryResponseData>>}
  */
 async function getPullRequestsBetweenCommits(commit, previousCommit) {
   const {commits} = await compareCommits(previousCommit, commit);
   const shas = commits.map((commit) => commit.sha);
-  const data = getPullRequests(shas);
-  return data;
+  return await getPullRequests(shas);
 }
 
 module.exports = {
