@@ -356,6 +356,64 @@ export class Log {
   }
 
   /**
+   * @param {!Error} error
+   * @private
+   */
+  prepareError_(error) {
+    error = duplicateErrorIfNecessary(error);
+
+    if (this.suffix_) {
+      if (!error.message) {
+        error.message = this.suffix_;
+      } else if (error.message.indexOf(this.suffix_) == -1) {
+        error.message += this.suffix_;
+      }
+    } else if (isUserErrorMessage(error.message)) {
+      error.message = error.message.replace(USER_ERROR_SENTINEL, '');
+    }
+  }
+
+  /**
+   * @param {!Array} args
+   * @return {!Array}
+   * @private
+   */
+  maybeExpandMessageArgs_(args) {
+    if (isArray(args[0])) {
+      return this.expandMessageArgs_(/** @type {!Array} */ (args[0]));
+    }
+    return args;
+  }
+
+  /**
+   * Either redirects a pair of (errorId, ...args) to a URL where the full
+   * message is displayed, or displays it from a fetched table.
+   *
+   * This method is used by the output of the `transform-log-methods` babel
+   * plugin. It should not be used directly. Use the (*error|assert*|info|warn)
+   * methods instead.
+   *
+   * @param {!Array} parts
+   * @return {!Array}
+   * @private
+   */
+  expandMessageArgs_(parts) {
+    // First value should exist.
+    const id = parts.shift();
+    // Best effort fetch of message template table.
+    // Since this is async, the first few logs might be indirected to a URL even
+    // if in development mode. Message table is ~small so this should be a short
+    // gap.
+    if (getMode(this.win).development) {
+      this.fetchExternalMessagesOnce_();
+    }
+    if (this.messages_ && id in this.messages_) {
+      return [this.messages_[id]].concat(parts);
+    }
+    return [`More info at ${externalMessageUrl(id, parts)}`];
+  }
+
+  /**
    * Throws an error if the first argument isn't trueish.
    *
    * Supports argument substitution into the message via %s placeholders.
@@ -482,64 +540,6 @@ export class Log {
       shouldBeBoolean,
       opt_message
     );
-  }
-
-  /**
-   * @param {!Error} error
-   * @private
-   */
-  prepareError_(error) {
-    error = duplicateErrorIfNecessary(error);
-
-    if (this.suffix_) {
-      if (!error.message) {
-        error.message = this.suffix_;
-      } else if (error.message.indexOf(this.suffix_) == -1) {
-        error.message += this.suffix_;
-      }
-    } else if (isUserErrorMessage(error.message)) {
-      error.message = error.message.replace(USER_ERROR_SENTINEL, '');
-    }
-  }
-
-  /**
-   * @param {!Array} args
-   * @return {!Array}
-   * @private
-   */
-  maybeExpandMessageArgs_(args) {
-    if (isArray(args[0])) {
-      return this.expandMessageArgs_(/** @type {!Array} */ (args[0]));
-    }
-    return args;
-  }
-
-  /**
-   * Either redirects a pair of (errorId, ...args) to a URL where the full
-   * message is displayed, or displays it from a fetched table.
-   *
-   * This method is used by the output of the `transform-log-methods` babel
-   * plugin. It should not be used directly. Use the (*error|assert*|info|warn)
-   * methods instead.
-   *
-   * @param {!Array} parts
-   * @return {!Array}
-   * @private
-   */
-  expandMessageArgs_(parts) {
-    // First value should exist.
-    const id = parts.shift();
-    // Best effort fetch of message template table.
-    // Since this is async, the first few logs might be indirected to a URL even
-    // if in development mode. Message table is ~small so this should be a short
-    // gap.
-    if (getMode(this.win).development) {
-      this.fetchExternalMessagesOnce_();
-    }
-    if (this.messages_ && id in this.messages_) {
-      return [this.messages_[id]].concat(parts);
-    }
-    return [`More info at ${externalMessageUrl(id, parts)}`];
   }
 }
 
