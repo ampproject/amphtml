@@ -467,6 +467,57 @@ describes.sandboxed('DOM', {}, (env) => {
     });
   });
 
+  describe('getChildJsonConfig', () => {
+    let element;
+    let script;
+    let text;
+    beforeEach(() => {
+      element = document.createElement('div');
+      script = document.createElement('script');
+      script.setAttribute('type', 'application/json');
+      text = '{"a":{"b": "c"}}';
+      script.textContent = text;
+    });
+
+    it('return json config', () => {
+      element.appendChild(script);
+      expect(dom.getChildJsonConfig(element)).to.deep.equal({
+        'a': {
+          'b': 'c',
+        },
+      });
+    });
+
+    it('throw if not one script', () => {
+      expect(() => dom.getChildJsonConfig(element)).to.throw(
+        'Found 0 <script> children. Expected 1'
+      );
+      element.appendChild(script);
+      const script2 = document.createElement('script');
+      element.appendChild(script2);
+      expect(() => dom.getChildJsonConfig(element)).to.throw(
+        'Found 2 <script> children. Expected 1'
+      );
+    });
+
+    it('throw if type is not application/json', () => {
+      script.setAttribute('type', '');
+      element.appendChild(script);
+      expect(() => dom.getChildJsonConfig(element)).to.throw(
+        '<script> child must have type="application/json"'
+      );
+    });
+
+    it('throw if cannot parse json', () => {
+      const invalidText = '{"a":{"b": "c",}}';
+      script.textContent = invalidText;
+      element.appendChild(script);
+      expect(() => dom.getChildJsonConfig(element)).to.throw(
+        'Failed to parse <script> contents. Is it valid JSON?'
+      );
+    });
+  });
+
   describe('escapeHtml', () => {
     it('should tolerate empty string', () => {
       expect(dom.escapeHtml('')).to.equal('');

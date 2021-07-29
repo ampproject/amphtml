@@ -32,6 +32,7 @@ import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {MediaQueryProps} from '#core/dom/media-query-props';
 import {childElementByAttr, childElementByTag} from '#core/dom/query';
 import {PauseHelper} from '#core/dom/video/pause-helper';
+import * as mode from '#core/mode';
 import {isElement} from '#core/types';
 import {dict, hasOwn, map} from '#core/types/object';
 
@@ -42,7 +43,6 @@ import {WithAmpContext} from './context';
 import {CanPlay, CanRender, LoadingProp} from './contextprops';
 import {AmpElementPropDef, collectProps} from './parse-props';
 
-import {getMode} from '../mode';
 import {installShadowStyle} from '../shadow-embed';
 
 /** @const {!MutationObserverInit} */
@@ -740,7 +740,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    * @private
    */
   checkApiWrapper_(current) {
-    if (!getMode().localDev) {
+    if (!mode.isLocalDev()) {
       return;
     }
     // Hack around https://github.com/preactjs/preact/issues/3084
@@ -858,7 +858,7 @@ PreactBaseElement['staticProps'] = undefined;
 /**
  * @protected {!Array<!ContextProp>}
  */
-PreactBaseElement['useContexts'] = getMode().localDev ? Object.freeze([]) : [];
+PreactBaseElement['useContexts'] = mode.isLocalDev() ? Object.freeze([]) : [];
 
 /**
  * Whether the component implements a loading protocol.
