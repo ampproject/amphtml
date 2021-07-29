@@ -90,7 +90,7 @@
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble {
   transform: translate(var(--translate-x-center), -50%) scale(0.9) !important;
-  transition: transform 0.3s --i-amphtml-interactive-ease-out-curve !important;
+  transition: transform 0.5s var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble::after {
