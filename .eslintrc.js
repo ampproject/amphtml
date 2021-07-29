@@ -461,5 +461,9 @@ module.exports = {
         ],
       },
     },
+    {
+      'files': ['src/**/*.js'],
+      'settings': {'import/order': 2},
+    },
   ],
 };
