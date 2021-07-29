@@ -35,7 +35,7 @@ import {
 import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getChildJsonConfig} from '../../../src/json';
+import {getChildJsonConfig} from '#core/dom';
 import {map, omit} from '#core/types/object';
 import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {

@@ -15,6 +15,7 @@
  */
 
 import {tryCallback} from '#core/error';
+import {arrayOrSingleItemToArray} from '#core/types/array';
 
 const AMP_CLASS = 'i-amphtml-element';
 const DEEP = true;
@@ -67,17 +68,9 @@ export function forAllWithin(
   deep,
   callback
 ) {
-  if (Array.isArray(containerOrContainers)) {
-    for (let i = 0; i < containerOrContainers.length; i++) {
-      forAllWithinInternal(
-        containerOrContainers[i],
-        includeSelf,
-        deep,
-        callback
-      );
-    }
-  } else {
-    forAllWithinInternal(containerOrContainers, includeSelf, deep, callback);
+  const containers = arrayOrSingleItemToArray(containerOrContainers);
+  for (let i = 0; i < containers.length; i++) {
+    forAllWithinInternal(containers[i], includeSelf, deep, callback);
   }
 }
 
@@ -108,10 +101,13 @@ function forAllWithinInternal(container, includeSelf, deep, callback) {
     }
   }
 
-  const descendants = container.getElementsByClassName(AMP_CLASS);
+  const descendants =
+    /** @type {!HTMLCollection<!AmpElement>} */
+    (container.getElementsByClassName(AMP_CLASS));
+  /** @type {?Array<Element>} */
   let seen = null;
   for (let i = 0; i < descendants.length; i++) {
-    const descendant = /** @type {!AmpElement} */ (descendants[i]);
+    const descendant = descendants[i];
     if (deep) {
       // In deep search all elements will be covered.
       tryCallback(callback, descendant);
