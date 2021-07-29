@@ -88,7 +88,8 @@
   "colanalytics": {
     "host": "https://ase.clmbtech.com",
     "base": "https://ase.clmbtech.com/message",
-    "pageview": "https://ase.clmbtech.com/message?cid=!id&val_101=!id&val_101=int%3A_canonical_path_&ch=_canonical_host_&val_108=_title_&val_120=3&val_102=_source_url_&val_124=_external_referrer_&uuid=!uid"
+    "pageview": "https://ase.clmbtech.com/message?cid=!id&val_101=!id&val_101=int%3A_canonical_path_&ch=_canonical_host_&val_108=_title_&val_120=3&val_102=_source_url_&val_124=_external_referrer_&uuid=!uid",
+	"event": "https://ase.clmbtech.com/message?cid=!id&val_101=!id&val_101=int%3A_canonical_path_&val_101=tet%3A_total_engaged_time_&val_102=clk%3Apg%3A_source_url_"
   },
   "comscore": {
     "host": "https://sb.scorecardresearch.com",
