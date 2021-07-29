@@ -104,7 +104,7 @@ const forbiddenTermsGlobal = {
     message: 'Please remove all instances of describes.only',
   },
   // TODO(#35443) Reduce the number of files that use non default timeouts.
-  'this.timeout': {
+  'this\.timeout\(': {
     message: 'Tests are not allowed to override the default timeout',
     allowlist: [
       // Markdown files.
