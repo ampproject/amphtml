@@ -964,5 +964,49 @@ describes.realWin(
       await getRenderedData();
       expect(fakeMutator.forceChangeSize).to.be.calledOnce;
     });
+
+    it('should preserve the wrapper element for template tag', async () => {
+      env.sandbox.stub(BatchedJsonModule, 'batchFetchJsonFor').resolves({
+        'menu': '<li>Item 2</li><li>Item 3</li>',
+      });
+
+      // prettier-ignore
+      element = html`
+        <amp-render
+          binding="never"
+          src="https://example.com/data.json"
+          width="auto"
+          height="300"
+          layout="fixed-height">
+          <template type="amp-mustache"><ul><li>Item 1</li>{{{menu}}}</ul></template></amp-render>`;
+      doc.body.appendChild(element);
+
+      const wrapper = await waitRendered();
+      expect(wrapper.innerHTML).to.equal(
+        '<ul><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul>'
+      );
+    });
+
+    it('should preserve the wrapper element for script template tag', async () => {
+      env.sandbox.stub(BatchedJsonModule, 'batchFetchJsonFor').resolves({
+        'menu': '<li>Item 2</li><li>Item 3</li>',
+      });
+
+      // prettier-ignore
+      element = html`
+        <amp-render
+          binding="never"
+          src="https://example.com/data.json"
+          width="auto"
+          height="300"
+          layout="fixed-height">
+          <script type="text/plain" template="amp-mustache"><ul><li>Item 1</li>{{{menu}}}</ul></script></amp-render>`;
+      doc.body.appendChild(element);
+
+      const wrapper = await waitRendered();
+      expect(wrapper.innerHTML).to.equal(
+        '<ul><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul>'
+      );
+    });
   }
 );
