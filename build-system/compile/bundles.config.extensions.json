@@ -371,40 +371,14 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-facebook-comments",
-    "version": "1.0",
-    "latestVersion": "0.1",
-    "options": {
-      "wrapper": "bento"
-    }
-  },
-  {
     "name": "amp-facebook-like",
     "version": "0.1",
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-facebook-like",
-    "version": "1.0",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true,
-      "wrapper": "bento"
-    }
-  },
-  {
     "name": "amp-facebook-page",
     "version": "0.1",
     "latestVersion": "0.1"
-  },
-  {
-    "name": "amp-facebook-page",
-    "version": "1.0",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true,
-      "wrapper": "bento"
-    }
   },
   {
     "name": "amp-fit-text",
@@ -1043,6 +1017,7 @@
         "amp-story-interactive-poll",
         "amp-story-interactive-quiz",
         "amp-story-interactive-results",
+        "amp-story-interactive-results-detailed",
         "amp-story-interactive-slider",
         "amp-story-interactive-disclaimer"
       ]
