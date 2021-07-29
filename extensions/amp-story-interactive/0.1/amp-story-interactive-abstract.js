@@ -685,9 +685,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    */
   retrieveInteractiveData_() {
     return this.executeInteractiveRequest_('GET').then((response) => {
-      this.handleSuccessfulDataRetrieval(
-        /** @type {InteractiveResponseType} */ (response)
-      );
+      this.onDataRetrieved_(/** @type {InteractiveResponseType} */ (response));
     });
   }
 
@@ -742,9 +740,9 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    *  ]
    * }
    * @param {InteractiveResponseType|undefined} response
-   * @protected
+   * @private
    */
-  handleSuccessfulDataRetrieval(response) {
+  onDataRetrieved_(response) {
     if (!(response && response['options'])) {
       devAssert(
         response && 'options' in response,
@@ -756,13 +754,9 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       );
       return;
     }
-    const numOptions = this.rootEl_.querySelectorAll(
-      '.i-amphtml-story-interactive-option'
-    ).length;
+    const numOptions = this.getNumberOfOptions();
     // Only keep the visible options to ensure visible percentages add up to 100.
-    this.updateComponentOnDataRetrieval(
-      response['options'].slice(0, numOptions)
-    );
+    this.updateComponentWithData(response['options'].slice(0, numOptions));
   }
 
   /**
@@ -770,7 +764,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @param {!Array<InteractiveOptionType>} data
    * @protected
    */
-  updateComponentOnDataRetrieval(data) {
+  updateComponentWithData(data) {
     const options = this.rootEl_.querySelectorAll(
       '.i-amphtml-story-interactive-option'
     );
@@ -841,6 +835,16 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   }
 
   /**
+   * Returns the number of options.
+   *
+   * @protected
+   * @return {number}
+   */
+  getNumberOfOptions() {
+    return this.getOptionElements().length;
+  }
+
+  /**
    * Reorders options data to account for scrambled or incomplete data.
    *
    * @private
@@ -848,7 +852,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @return {!Array<!InteractiveOptionType>}
    */
   orderData_(optionsData) {
-    const numOptionElements = this.getOptionElements().length;
+    const numOptionElements = this.getNumberOfOptions();
     const orderedData = new Array(numOptionElements);
     optionsData.forEach((option) => {
       const {index} = option;

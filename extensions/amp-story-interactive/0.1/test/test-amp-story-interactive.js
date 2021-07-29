@@ -342,7 +342,7 @@ describes.realWin(
       const responseData = dict({'wrongKey': []});
       allowConsoleError(() => {
         expect(() =>
-          ampStoryInteractive.handleSuccessfulDataRetrieval_(responseData)
+          ampStoryInteractive.onDataRetrieved_(responseData)
         ).to.throw();
       });
     });

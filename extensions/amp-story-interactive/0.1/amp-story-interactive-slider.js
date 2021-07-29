@@ -20,8 +20,9 @@ import {
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-slider-0.1.css';
 import {htmlFor} from '#core/dom/static-template';
-//import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
 import {setImportantStyles} from '#core/dom/style';
+import {dev, devAssert} from '../../../src/log';
+import {StateProperty} from 'extensions/amp-story/1.0/amp-story-store-service';
 
 /**
  * Generates the template for the slider.
@@ -44,11 +45,19 @@ const buildSliderTemplate = (element) => {
             value="0"
           />
           <div class="i-amphtml-story-interactive-slider-bubble"></div>
+          <div class="i-amphtml-story-interactive-slider-average-bubble"></div>
+          <div class="i-amphtml-story-interactive-slider-average-text">
+            Average answer
+          </div>
         </div>
       </div>
     </div>
   `;
 };
+
+/** @const {string} */
+const TAG = 'amp-story-interactive';
+
 /**
  * @const @enum {number}
  */
@@ -73,40 +82,35 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
 
   /** @override */
   displayOptionsData(responseData) {
-    if (!responseData) {
-      return;
+    let average = this.calculateWeightedAverage_(responseData);
+    console.log(responseData);
+    setImportantStyles(this.rootEl_, {'--average': average + '%'});
+  }
+
+  /**@private */
+  calculateWeightedAverage_(responseData) {
+    let numerator = 0;
+    let denominator = 0;
+    for (let i = 0; i < responseData.length; i++) {
+      numerator += responseData[i].index * responseData[i].count;
+      denominator += responseData[i].count;
+      console.log(numerator);
     }
+    if (denominator == 0) {
+      return 0;
+    }
+    return numerator / denominator;
   }
 
   /** @override*/
-  handleSuccessfulDataRetrieval(response) {
-    if (!(response && response['options'])) {
-      devAssert(
-        response && 'options' in response,
-        `Invalid interactive response, expected { data: InteractiveResponseType, ...} but received ${response}`
-      );
-      dev().error(
-        TAG,
-        `Invalid interactive response, expected { data: InteractiveResponseType, ...} but received ${response}`
-      );
-      return;
-    }
-    const numOptions = 101;
-    // Only keep the visible options to ensure visible percentages add up to 100.
-    this.updateComponentOnDataRetrieval(
-      response['options'].slice(0, numOptions)
-    );
-  }
-
-  /** @override*/
-  updateComponentOnDataRetrieval(data) {
+  updateComponentWithData(data) {
     this.optionsData_ = this.orderData_(data);
     this.optionsData_.forEach((response) => {
       if (response.selected) {
         this.hasUserSelection_ = true;
         this.updateStoryStoreState_(response.index);
         this.mutateElement(() => {
-          this.inputEl.value = response.index;
+          this.inputEl_.value = response.index;
           this.updateToPostSelectionState_(null);
         });
       }
@@ -176,6 +180,11 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.updateToPostSelectionState_();
     this.inputEl_.setAttribute('disabled', '');
     this.rootEl_.classList.remove('i-amphtml-story-interactive-mid-selection');
-    this.handleOptionSelection(this.inputEl.value);
+    this.handleOptionSelection(Math.round(this.inputEl_.value));
+  }
+
+  /**@override */
+  getNumberOfOptions() {
+    return 101;
   }
 }

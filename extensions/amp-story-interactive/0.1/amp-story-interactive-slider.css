@@ -15,6 +15,7 @@
  */
 
 .i-amphtml-story-interactive-slider-container {
+  --average: 0;
   --fraction: 0;
   --percentage: calc(var(--fraction) * 100%) !important;
   /* This maps the range and has the gradient follow behind the thumb */
@@ -66,7 +67,10 @@
 .i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-bubble {
   --scale-var: calc(var(--fraction) + 1) !important;
   /* Move the bubble up by sqrt(2)/2=70.7% to account for the pointy corner */
-  transform: translate(var(--translate-x-center), calc(-160% - var(--fraction) * 70.7%))
+  transform: translate(
+      var(--translate-x-center),
+      calc(-160% - var(--fraction) * 70.7%)
+    )
     scale(var(--scale-var)) !important;
 }
 
@@ -93,6 +97,80 @@
   cursor: initial !important;
   border: 0.1em solid var(--i-amphtml-interactive-option-background-color) !important;
   border-bottom-right-radius: 50% !important;
+}
+
+.i-amphtml-story-interactive-slider-average-bubble {
+  position: absolute !important;
+  transform: translate(-50%, -50%) scale(0) !important;
+  width: 2.8em !important;
+  height: 2.8em !important;
+  top: 50% !important;
+  left: var(--average) !important;
+  text-align: center !important;
+  line-height: 1em !important;
+  font-weight: 300 !important;
+  color: black !important;
+  z-index: 1 !important;
+}
+
+.i-amphtml-story-interactive-slider-average-bubble::after {
+  position: absolute !important;
+  content: '' !important;
+  box-sizing: border-box !important;
+  height: 100% !important;
+  width: 100% !important;
+  top: 0% !important;
+  background: black !important;
+  z-index: -1 !important;
+  left: 50% !important;
+  transform: translateX(-50%) rotate(45deg) !important;
+  border-radius: 50% 50% 0% 50% !important;
+  box-shadow: 0em 0em 0.5em rgba(0, 0, 0, 0.25) !important;
+}
+
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-bubble {
+  transform: translate(-50%, -50%) scale(0.5) !important;
+  left: var(--average) !important;
+  position: absolute !important;
+  top: 50% !important;
+}
+
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-bubble::after {
+  cursor: initial !important;
+  border: 0.1em solid var(--i-amphtml-interactive-option-background-color) !important;
+  border-bottom-right-radius: 50% !important;
+}
+
+.i-amphtml-story-interactive-slider-average-text {
+  position: absolute !important;
+  left: var(--average) !important;
+  transform: translateX(-50%) scale(0) !important;
+  bottom: 250% !important;
+  text-align: center !important;
+  line-height: 1.5em !important;
+  font-size: 0.5em !important;
+  font-weight: 10 !important;
+  padding: 0.5em 1em !important;
+  color: black !important;
+  z-index: 1 !important;
+  border-radius: 1.5em !important;
+  box-shadow: 0 0.4em 0.5em -0.25em rgba(0, 0, 0, 0.2),
+    0 0.3em 1.4em 0.25em rgba(0, 0, 0, 0.14), 0 0.75em 1em 0.125em rgba(0, 0, 0, 0.14) !important;
+  background-color: white !important;
+}
+
+.i-amphtml-story-interactive-slider-average-text::after {
+  content: '' !important;
+  position: absolute !important;
+  transform: translateX(-50%) rotate(90deg) !important;
+  left: 50% !important;
+  top: 90% !important;
+  border: 0.75em solid !important;
+  border-color: transparent transparent transparent white !important;
+}
+
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-text {
+  transform: translate(-50%) scale(0.9) !important;
 }
 
 [type='emoji'] .i-amphtml-story-interactive-slider-bubble span {
