@@ -358,7 +358,7 @@ export class Log {
         error.message += this.suffix_;
       }
     } else if (isUserErrorMessage(error.message)) {
-      error.message = error.message.replace(USER_ERROR_SENTINEL, '');
+      error.message = stripUserError(error.message);
     }
   }
 
@@ -368,10 +368,9 @@ export class Log {
    * @private
    */
   maybeExpandMessageArgs_(args) {
-    if (isArray(args[0])) {
-      return this.expandMessageArgs_(/** @type {!Array} */ (args[0]));
-    }
-    return args;
+    return isArray(args[0])
+      ? this.expandMessageArgs_(/** @type {!Array} */ (args[0]))
+      : args;
   }
 
   /**
@@ -396,10 +395,9 @@ export class Log {
     if (getMode(this.win).development) {
       this.fetchExternalMessagesOnce_();
     }
-    if (this.messages_ && id in this.messages_) {
-      return [this.messages_[id]].concat(parts);
-    }
-    return [`More info at ${externalMessageUrl(id, parts)}`];
+    return this.messages_?.[id]
+      ? [this.messages_[id]].concat(parts)
+      : [`More info at ${externalMessageUrl(id, parts)}`];
   }
 
   /**
