@@ -104,22 +104,15 @@ const forbiddenTermsGlobal = {
     message: 'Please remove all instances of describes.only',
   },
   // TODO(#35443) Reduce the number of files that use non default timeouts.
-  'this\.timeout\(': {
+  'this\\.timeout\\(': {
     message: 'Tests are not allowed to override the default timeout',
     allowlist: [
-      // Markdown files.
-      'extensions/amp-a4a/rtc-documentation.md',
-      'extensions/amp-a4a/rtc-publisher-implementation-guide.md',
-
       // Infrastructure
       'build-system/tasks/e2e/describes-e2e.js',
       'testing/describes.js',
 
-      // Thirdparty
-      'ads/google/a4a/test/test-utils.js',
-      'third_party/subscriptions-project/swg.js',
-
       // Tests
+      'ads/google/a4a/test/test-utils.js',
       'extensions/amp-accordion/0.1/test/integration/test-amp-accordion.js',
       'extensions/amp-ad-network-adsense-impl/0.1/test/test-amp-ad-network-adsense-impl.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/test/test-amp-ad-network-doubleclick-impl.js',
@@ -153,8 +146,6 @@ const forbiddenTermsGlobal = {
       'extensions/amp-list/0.1/test/integration/test-amp-list.js',
       'extensions/amp-mowplayer/0.1/test/test-amp-mowplayer.js',
       'extensions/amp-pan-zoom/0.1/test/integration/test-amp-pan-zoom.js',
-      'extensions/amp-story/1.0/page-advancement.js',
-      'extensions/amp-story/1.0/amp-story-system-layer.js',
       'extensions/amp-story-auto-ads/0.1/test-e2e/test-amp-story-auto-ads.js',
       'extensions/amp-sidebar/0.2/test/integration/test-amp-sidebar.js',
       'extensions/amp-sidebar/0.1/test/integration/test-amp-sidebar.js',
@@ -171,7 +162,6 @@ const forbiddenTermsGlobal = {
       'test/integration/test-amp-carousel.js',
       'test/integration/test-errors.js',
       'test/integration/test-extensions-loading.js',
-      'test/integration/test-video-manager.js',
       'test/integration/test-amp-ad-doubleclick.js',
       'test/integration/test-amp-bind.js',
     ],
