@@ -261,17 +261,17 @@ describes.sandboxed('Logging', {}, (env) => {
     });
 
     it('should NOT be enabled with log=1', () => {
-      mode.log = '1';
+      mode.log = 1;
       expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.OFF);
     });
 
     it('should be enabled as INFO with log=2', () => {
-      mode.log = '2';
+      mode.log = 2;
       expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.INFO);
     });
 
     it('should be enabled as FINE with log=3', () => {
-      mode.log = '3';
+      mode.log = 3;
       expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
     });
 

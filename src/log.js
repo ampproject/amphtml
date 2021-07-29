@@ -195,12 +195,11 @@ export class Log {
    */
   defaultLevel_() {
     // No console - can't enable logging.
-    if (!this.win.console || !this.win.console.log) {
-      return LogLevel.OFF;
-    }
-
-    // Logging has been explicitly disabled.
-    if (getMode().log == '0') {
+    if (
+      !this.win.console?.log ||
+      // Logging has been explicitly disabled.
+      getMode().log == 0
+    ) {
       return LogLevel.OFF;
     }
 
@@ -210,7 +209,7 @@ export class Log {
     }
 
     // LocalDev by default allows INFO level, unless overriden by `#log`.
-    if (getMode().localDev && !getMode().log) {
+    if (getMode().localDev) {
       return LogLevel.INFO;
     }
 
@@ -223,7 +222,7 @@ export class Log {
    */
   defaultLevelWithFunc_() {
     // Delegate to the specific resolver.
-    return this.levelFunc_(parseInt(getMode().log, 10), getMode().development);
+    return this.levelFunc_(getMode().log, getMode().development);
   }
 
   /**
