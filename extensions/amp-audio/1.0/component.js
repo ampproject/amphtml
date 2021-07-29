@@ -28,7 +28,7 @@ const {useCallback, useEffect, useImperativeHandle, useMemo, useRef} = Preact;
  * @return {PreactDef.Renderable}
  */
 export function AudioWithRef(props, ref) {
-  const audioRef = useRef();
+  const audioRef = useRef(null);
 
   const {
     album,
