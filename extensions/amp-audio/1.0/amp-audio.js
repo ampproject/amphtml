@@ -32,9 +32,9 @@ const TAG = 'amp-audio';
 export class AmpAudio extends BaseElement {
   /** @override */
   init() {
-    this.registerApiAction('play', (api) => api./*OK*/ play());
-    this.registerApiAction('pause', (api) => api./*OK*/ pause());
-    this.registerApiAction('isPlaying', (api) => api./*OK*/ isPlaying());
+    this.registerApiAction('play', (api) => api.play());
+    this.registerApiAction('pause', (api) => api.pause());
+    this.registerApiAction('isPlaying', (api) => api.isPlaying());
 
     // Actions won't work with `<amp-story>` element
     if (closestAncestorElementBySelector(this.element, 'AMP-STORY')) {
