@@ -40,6 +40,7 @@ const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function () {};
 const TAG = 'amp-analytics/events';
 const TIME_WAIT = 500;
+const status = {};
 
 /**
  * Events that can result in analytics data to be sent.
@@ -156,6 +157,19 @@ const TRACKER_TYPE = Object.freeze({
     },
   },
 });
+
+/**
+ * Make an object of the browser events that are
+ * supported. The object is useful to avoid multiple
+ * tracking of the same event.
+ * @return {!Object<BrowserEventType, boolean>} status
+ */
+function browserEventListeners() {
+  Object.keys(BrowserEventType).forEach((key) => {
+    status[BrowserEventType[key]] = false;
+  });
+  return status;
+}
 
 /** @visibleForTesting */
 export const trackerTypeForTesting = TRACKER_TYPE;
@@ -350,12 +364,13 @@ export class CustomBrowserEventTracker extends EventTracker {
     /** @private {?function(!Event)} */
     this.boundOnSession_ = this.observables_.fire.bind(this.observables_);
 
-    /** @private {?function(!Event)} */
+    /** @private {function(!Event):void} */
     this.debouncedBoundOnSession_ = debounce(
       this.root.ampdoc.win,
       this.boundOnSession_,
       TIME_WAIT
     );
+    browserEventListeners();
   }
 
   /** @override */
@@ -397,9 +412,12 @@ export class CustomBrowserEventTracker extends EventTracker {
       false
     );
 
-    this.root
-      .getRootElement()
-      .addEventListener(eventName, this.debouncedBoundOnSession_, true);
+    if (!status[eventName]) {
+      this.root
+        .getRootElement()
+        .addEventListener(eventName, this.debouncedBoundOnSession_, true);
+      status[eventName] = true;
+    }
 
     return this.observables_.add((event) => {
       if (event.type !== eventName) {
