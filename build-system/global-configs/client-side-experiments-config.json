@@ -3,6 +3,10 @@
     {
       "name": "flexible-bitrate",
       "percentage": 0.1
+    },
+    {
+      "name": "amp-story-desktop-one-panel",
+      "percentage": 1
     }
   ]
 }
