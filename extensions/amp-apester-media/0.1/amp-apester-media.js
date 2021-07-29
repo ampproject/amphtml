@@ -325,6 +325,7 @@ class AmpApesterMedia extends AMP.BaseElement {
             vsync.mutatePromise(() => {
               if (this.iframe_) {
                 this.iframe_.classList.add('i-amphtml-apester-iframe-ready');
+
                 const campaignData = media['campaignData'];
                 if (campaignData) {
                   const bottomAdOptions = campaignData['bottomAdOptions'];
@@ -339,6 +340,7 @@ class AmpApesterMedia extends AMP.BaseElement {
                       '*'
                     );
                   }
+
                   this.iframe_.contentWindow./*OK*/ postMessage(
                     /** @type {JsonObject} */ ({
                       type: 'campaigns',
@@ -348,6 +350,7 @@ class AmpApesterMedia extends AMP.BaseElement {
                   );
                 }
               }
+
               const height = media?.['data']?.['size'] ?? 0;
               if (height != this.height_) {
                 this.height_ = height;
