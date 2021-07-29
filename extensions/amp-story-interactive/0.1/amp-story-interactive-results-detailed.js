@@ -14,19 +14,40 @@
  * limitations under the License.
  */
 
-import {
-  AmpStoryInteractive,
-  InteractiveType,
-} from './amp-story-interactive-abstract';
+import {AmpStoryInteractiveResults} from './amp-story-interactive-results';
 import {CSS} from '../../../build/amp-story-interactive-results-detailed-0.1.css';
 import {htmlFor} from '#core/dom/static-template';
+import {setImportantStyles} from '#core/dom/style';
 
-export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractive {
+/**
+ * Generates the template for the detailed results component.
+ *
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildResultsDetailedTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <div class="i-amphtml-story-interactive-results-container">
+      <div class="i-amphtml-story-interactive-results-prompt"></div>
+      <div class="i-amphtml-story-interactive-results-title"></div>
+      <div class="i-amphtml-story-interactive-results-detailed">
+        <div class="i-amphtml-story-interactive-results-image"></div>
+      </div>
+      <div class="i-amphtml-story-interactive-results-description"></div>
+    </div>
+  `;
+};
+
+export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResults {
   /**
    * @param {!AmpElement} element
    */
   constructor(element) {
-    super(element, InteractiveType.RESULTS, [2, 4]);
+    super(element);
+
+    /** @private {?Object} */
+    this.selectedResultEls_ = null;
   }
 
   /** @override */
@@ -36,7 +57,74 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractive {
 
   /** @override */
   buildComponent() {
-    this.rootEl_ = htmlFor(this.element)`<p>Detailed results component</p>`;
+    this.rootEl_ = buildResultsDetailedTemplate(this.element);
+    this.buildTop();
     return this.rootEl_;
+  }
+
+  /** @override */
+  onInteractiveReactStateUpdate(interactiveState) {
+    const components = Object.values(interactiveState);
+    if (this.selectedResultEls_) {
+      // Function not passed in directly to ensure "this" works correctly
+      components.forEach((e) => this.updateSelectedResult_(e));
+    } else {
+      this.initializeSelectedResultContainers_(components);
+    }
+
+    super.onInteractiveReactStateUpdate(interactiveState);
+  }
+
+  /**
+   * Create and store elements that will show results
+   * for each interactive component.
+   *
+   * @param {!Array<Object>} components
+   * @private
+   */
+  initializeSelectedResultContainers_(components) {
+    this.selectedResultEls_ = {};
+    const detailedResultsContainer = this.rootEl_.querySelector(
+      '.i-amphtml-story-interactive-results-detailed'
+    );
+    components.forEach((e) => {
+      const container = document.createElement('div');
+      container.classList.add(
+        'i-amphtml-story-interactive-results-selected-result'
+      );
+      setImportantStyles(container, {
+        'height': '5em',
+        'width': '5em',
+      });
+      detailedResultsContainer.appendChild(container);
+      this.selectedResultEls_[e.interactiveId] = {
+        el: container,
+        updated: false,
+      };
+      this.updateSelectedResult_(e);
+    });
+  }
+
+  /**
+   * Sets the background image or text content for an updated result.
+   *
+   * @param {!Object} e
+   * @private
+   */
+  updateSelectedResult_(e) {
+    if (
+      e.option &&
+      e.interactiveId in this.selectedResultEls_ &&
+      !this.selectedResultEls_[e.interactiveId].updated
+    ) {
+      if (e.option.image) {
+        setImportantStyles(this.selectedResultEls_[e.interactiveId].el, {
+          'background-image': 'url(' + e.option.image + ')',
+        });
+      } else {
+        this.selectedResultEls_[e.interactiveId].el.textContent = e.option.text;
+      }
+      this.selectedResultEls_[e.interactiveId].updated = true;
+    }
   }
 }
