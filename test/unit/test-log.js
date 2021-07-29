@@ -58,6 +58,8 @@ describes.sandboxed('Logging', {}, (env) => {
 
   afterEach(() => {
     window.__AMP_MODE = undefined;
+    delete window.__AMP_LOG.user;
+    delete window.__AMP_LOG.dev;
   });
 
   describe('Level', () => {

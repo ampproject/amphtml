@@ -589,6 +589,18 @@ export function resetLogConstructorForTesting() {
 }
 
 /**
+ * Calls the log constructor with a given level function and suffix.
+ * @param levelFunc
+ * @param opt_suffix
+ */
+function callLogConstructor(levelFunc, opt_suffix) {
+  if (!logConstructor) {
+    throw new Error('failed to call initLogConstructor');
+  }
+  return new logConstructor(self, levelFunc, opt_suffix);
+}
+
+/**
  * Publisher level log.
  *
  * Enabled in the following conditions:
@@ -601,17 +613,18 @@ export function resetLogConstructorForTesting() {
  * @return {!Log}
  */
 export function user(opt_element) {
+  // logs.user must exist first to perform the logs.user.win check below
   if (!logs.user) {
     logs.user = getUserLogger(USER_ERROR_SENTINEL);
   }
-  if (!isFromEmbed(logs.user.win, opt_element)) {
-    return logs.user;
-  } else {
-    if (logs.userForEmbed) {
-      return logs.userForEmbed;
-    }
-    return (logs.userForEmbed = getUserLogger(USER_ERROR_EMBED_SENTINEL));
+
+  if (isFromEmbed(logs.user.win, opt_element)) {
+    return (
+      logs.userForEmbed ||
+      (logs.userForEmbed = getUserLogger(USER_ERROR_EMBED_SENTINEL))
+    );
   }
+  return logs.user;
 }
 
 /**
@@ -620,17 +633,9 @@ export function user(opt_element) {
  * @return {!Log}
  */
 function getUserLogger(suffix) {
-  if (!logConstructor) {
-    throw new Error('failed to call initLogConstructor');
-  }
-  return new logConstructor(
-    self,
-    (logNum, development) => {
-      if (development || logNum >= 1) {
-        return LogLevel.FINE;
-      }
-      return LogLevel.WARN;
-    },
+  return callLogConstructor(
+    (logNum, development) =>
+      development || logNum >= 1 ? LogLevel.FINE : LogLevel.WARN,
     suffix
   );
 }
@@ -648,21 +653,12 @@ function getUserLogger(suffix) {
  * @return {!Log}
  */
 export function dev() {
-  if (logs.dev) {
-    return logs.dev;
-  }
-  if (!logConstructor) {
-    throw new Error('failed to call initLogConstructor');
-  }
-  return (logs.dev = new logConstructor(self, (logNum) => {
-    if (logNum >= 3) {
-      return LogLevel.FINE;
-    }
-    if (logNum >= 2) {
-      return LogLevel.INFO;
-    }
-    return LogLevel.OFF;
-  }));
+  return (
+    logs.dev ||
+    (logs.dev = callLogConstructor((logNum) =>
+      logNum >= 3 ? LogLevel.FINE : logNum >= 2 ? LogLevel.INFO : LogLevel.OFF
+    ))
+  );
 }
 
 /**
@@ -671,10 +667,7 @@ export function dev() {
  * @return {boolean} isEmbed
  */
 function isFromEmbed(win, opt_element) {
-  if (!opt_element) {
-    return false;
-  }
-  return opt_element.ownerDocument.defaultView != win;
+  return opt_element && opt_element.ownerDocument.defaultView != win;
 }
 
 /**
