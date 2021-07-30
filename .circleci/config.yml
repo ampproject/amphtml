@@ -67,10 +67,6 @@ commands:
             - source-v1-{{ .Branch }}-
             - source-v1-
       - checkout
-      - save_cache:
-          key: source-v1-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - .git
       - run:
           name: 'Configure Development Environment'
           command: |
@@ -121,15 +117,13 @@ jobs:
             - source-v1-{{ .Branch }}-
             - source-v1-
       - checkout
-      - run:
-          name: 'Compute and Fetch Merge Commit'
-          command: |
-            ./.circleci/compute_merge_commit.sh
-            ./.circleci/fetch_merge_commit.sh
       - save_cache:
           key: source-v1-{{ .Branch }}-{{ .Revision }}
           paths:
             - .git
+      - run:
+          name: 'Initialize Repository'
+          command: ./.circleci/initialize_repo.sh
       - run:
           name: 'Initialize Workspace'
           command: cp .circleci/maybe_gracefully_halt.sh /tmp/workspace
