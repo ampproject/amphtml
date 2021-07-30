@@ -231,8 +231,8 @@ describes.realWin(
       expect(audio.tagName).to.equal('AUDIO');
       expect(element.getAttribute('width')).to.be.equal('503');
       expect(element.getAttribute('height')).to.be.equal('53');
-      expect(audio.offsetWidth).to.be.greaterThan(1);
-      expect(audio.offsetHeight).to.be.greaterThan(1);
+      expect(element.offsetWidth).to.be.greaterThan(1);
+      expect(element.offsetHeight).to.be.greaterThan(1);
       expect(audio.hasAttribute('controls')).to.be.true;
       expect(audio.hasAttribute('autoplay')).to.be.true;
       expect(audio.muted).to.be.true;
