@@ -15,9 +15,10 @@
  */
 
 import '../amp-audio';
+import {createElementWithAttributes} from '#core/dom';
+import {naturalDimensions_} from '../../../../src/static-layout';
 import {toggleExperiment} from '#experiments';
 import {waitFor} from '#testing/test-helper';
-import {naturalDimensions_} from '../../../../src/static-layout';
 
 describes.realWin(
   'amp-audio-v1.0',
@@ -62,7 +63,11 @@ describes.realWin(
           if (childNodeAttrs.tag === 'text') {
             child = doc.createElement('p');
           } else {
-            child = createElementWithAttributes(doc, childNodeAttrs.tag, childNodeAttrs);
+            child = createElementWithAttributes(
+              doc,
+              childNodeAttrs.tag,
+              childNodeAttrs
+            );
           }
           ampAudio.appendChild(child);
         });
