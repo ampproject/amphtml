@@ -544,9 +544,21 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
     it('support expansion in allowed list', async () => {
       const url = await expandConsentEndpointUrl(
         doc.body,
-        'https://example.test?cid=CLIENT_ID&pid=PAGE_VIEW_ID&pid64=PAGE_VIEW_ID_64&r=RANDOM'
+        'https://example.test?' +
+          // CLIENT_ID is allowed
+          'cid=CLIENT_ID&' +
+          // PAGE_VIEW_ID is allowed
+          'pid=PAGE_VIEW_ID&' +
+          // PAGE_VIEW_ID_64 is allowed
+          'pid64=PAGE_VIEW_ID_64&' +
+          // SOURCE_URL is allowed
+          'sourceurl=SOURCE_URL&' +
+          // RANDOM is not allowed
+          'r=RANDOM'
       );
-      expect(url).to.match(/cid=amp-.{22}&pid=[0-9]+&pid64=.{22}&r=RANDOM/);
+      expect(url).to.match(
+        /cid=amp-.{22}&pid=[0-9]+&pid64=.{22}&sourceurl=about%3Asrcdoc&r=RANDOM/
+      );
     });
 
     it('override CLIENT_ID scope', async () => {
