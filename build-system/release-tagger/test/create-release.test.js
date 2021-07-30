@@ -16,7 +16,7 @@
 
 const nock = require('nock');
 const test = require('ava');
-const {createReleaseFunction} = require('../create-release');
+const {main: createRelease} = require('../create-release');
 
 test.before(() => nock.disableNetConnect());
 test.after(() => {
@@ -72,7 +72,7 @@ test('create', async (t) => {
     )
     .reply(200, {data: {pr0: 'todo', pr1: 'todo', pr2: 'todo'}});
 
-  await createReleaseFunction('2107280123000', '2107210123000');
+  await createRelease('2107280123000', '2107210123000');
   t.true(rest.isDone());
   t.true(graphql.isDone());
 });

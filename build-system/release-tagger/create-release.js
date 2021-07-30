@@ -45,7 +45,7 @@ function _createBody(prs) {
  * @param {string} previousTag
  * @return {Promise<Object>}
  */
-async function createReleaseFunction(tag, previousTag) {
+async function main(tag, previousTag) {
   const {'target_commitish': commit} = await getRelease(tag);
   const {'target_commitish': previousCommit} = await getRelease(previousTag);
   const prs = await getPullRequestsBetweenCommits(commit, previousCommit);
@@ -53,5 +53,5 @@ async function createReleaseFunction(tag, previousTag) {
   return await createRelease(tag, commit, body);
 }
 
-createReleaseFunction(argv.tag, argv.previousTag);
-module.exports = {createReleaseFunction};
+main(argv.tag, argv.previousTag);
+module.exports = {main};
