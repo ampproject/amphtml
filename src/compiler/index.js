@@ -29,6 +29,4 @@ function compileAst(ast, versions) {
   return compiler.renderAst(ast, getBuilders(versions));
 }
 
-// TODO: build this with esbuild instead of with closure.
-// Then we can use export function compileAst instead.
 globalThis['compileAst'] = compileAst;
