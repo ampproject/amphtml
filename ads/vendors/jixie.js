@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import {loadScript} from '#3p/3p';
+
 /**
- * An interface for elements with pause functionality.
- * @interface
+ * @param {!Window} global
  */
-export class PausableInterface {
-  /** @function */
-  pause() {}
+export function jixie(global) {
+  // For flexibility, all validations are performed in the
+  // Jixie side based on the data on the page for the amp-ad
+  loadScript(global, 'https://scripts.jixie.io/jxamp.min.js');
 }
