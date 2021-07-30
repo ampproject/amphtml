@@ -41,7 +41,6 @@ export function AudioWithRef(
     loop,
     muted,
     preload,
-    propagateAttributes,
     sources,
     src,
     title,
@@ -109,28 +108,11 @@ export function AudioWithRef(
       audioPlaying()
     );
 
-    if (propagateAttributes) {
-      propagateAttributes(
-        [
-          'aria-describedby',
-          'aria-label',
-          'aria-labelledby',
-          'autoplay',
-          'controlsList',
-          'loop',
-          'muted',
-          'preload',
-          'src',
-        ],
-        audioRef.current
-      );
-    }
-
     // Execute at unlayout
     return () => {
       unlistenPlaying();
     };
-  }, [audioPlaying, propagateAttributes]);
+  }, [audioPlaying]);
 
   /** Audio Component - API Functions */
   useImperativeHandle(

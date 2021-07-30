@@ -19,7 +19,6 @@ import {closestAncestorElementBySelector} from '#core/dom/query';
 import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
 import {Layout} from '#core/dom/layout';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {user, userAssert} from '../../../src/log';
 import {validateMediaMetadata} from '../../../src/mediasession-helper';
 
@@ -54,18 +53,6 @@ export class AmpAudio extends BaseElement {
       },
       'onError': () => {
         this.toggleFallback(true);
-      },
-      'propagateAttributes': (
-        attributes,
-        updateElement,
-        opt_removeMissingAttrs
-      ) => {
-        propagateAttributes(
-          attributes,
-          this.element,
-          updateElement,
-          opt_removeMissingAttrs
-        );
       },
     });
   }
