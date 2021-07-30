@@ -337,7 +337,11 @@ export class AmpRender extends BaseElement {
   }
 
   /**
-   *
+   * Returns the non-empty node count in a template (defined as a `template`
+   * or `script` element). This is required to establish if the template content has
+   * a single wrapper element and if so we need to include it while rendering the
+   * template. For more info, see https://github.com/ampproject/amphtml/issues/35401.
+   * TODO(dmanek): Observe rewrapping at a lower level in BaseTemplate.
    * @param {?Element} template
    * @return {number} count of non-empty child nodes
    * @private
