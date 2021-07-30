@@ -63,8 +63,8 @@ const SliderType = {
   EMOJI: 'emoji',
 };
 
-const SLIDER_HINT_DURATION_MS = 1500;
-const ANIMATION_DELAY_MS = 500;
+const HINT_ANIMATION_DURATION_MS = 1500;
+const HINT_ANIMATION_DELAY_MS = 500;
 
 export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
   /**
@@ -78,11 +78,9 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.inputEl_ = null;
     /** @private {!SliderType}  */
     this.sliderType_ = SliderType.PERCENTAGE;
-    /** @private {boolean}  */
-    this.isInteracting_ = false;
     /** @private {?number} Reference to timeout so we can cancel it if needed. */
     this.landingAnimationDelayTimeout_ = null;
-    /**  @private {?number} */
+    /**  @private {?number} Reference to requestAnimationFrame so we can cancel it if needed.*/
     this.currentRAF_ = null;
   }
 
@@ -159,14 +157,14 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
             startTime = currTime;
           }
           const elapsed = currTime - startTime;
-          if (SLIDER_HINT_DURATION_MS < elapsed) {
+          if (HINT_ANIMATION_DURATION_MS < elapsed) {
             this.rootEl_.classList.remove(
               'i-amphtml-story-interactive-mid-selection'
             );
             return;
           }
           // Value between 0 and 1;
-          const timePercentage = elapsed / SLIDER_HINT_DURATION_MS;
+          const timePercentage = elapsed / HINT_ANIMATION_DURATION_MS;
           const val =
             timePercentage < 0.5
               ? easeInOutCubic(timePercentage * 2) * 30
@@ -177,7 +175,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
         };
         this.landingAnimationDelayTimeout_ = setTimeout(
           () => requestAnimationFrame(animateFrame),
-          ANIMATION_DELAY_MS
+          HINT_ANIMATION_DELAY_MS
         );
       }
     );
