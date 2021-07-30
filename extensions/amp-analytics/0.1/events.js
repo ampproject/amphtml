@@ -40,7 +40,7 @@ const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function () {};
 const TAG = 'amp-analytics/events';
 const TIME_WAIT = 500;
-const status = {};
+const hasAddedListenerForType_ = {};
 
 /**
  * Events that can result in analytics data to be sent.
@@ -157,19 +157,6 @@ const TRACKER_TYPE = Object.freeze({
     },
   },
 });
-
-/**
- * Make an object of the browser events that are
- * supported. The object is useful to avoid multiple
- * tracking of the same event.
- * @return {!Object<BrowserEventType, boolean>} status
- */
-function browserEventListeners() {
-  Object.keys(BrowserEventType).forEach((key) => {
-    status[BrowserEventType[key]] = false;
-  });
-  return status;
-}
 
 /** @visibleForTesting */
 export const trackerTypeForTesting = TRACKER_TYPE;
@@ -370,17 +357,15 @@ export class CustomBrowserEventTracker extends EventTracker {
       this.boundOnSession_,
       TIME_WAIT
     );
-    browserEventListeners();
+    //browserEventListeners();
   }
 
   /** @override */
   dispose() {
     const root = this.root.getRoot();
-    Object.keys(BrowserEventType).forEach((key) => {
-      root.removeEventListener(
-        BrowserEventType[key],
-        this.debouncedBoundOnSession_
-      );
+    Object.keys(this.hasListener_).forEach((eventName) => {
+      root.removeEventListener(eventName, this.debouncedBoundOnSession_);
+      this.hasListener_[eventName] = false;
     });
     this.boundOnSession_ = null;
     this.observables_ = null;
@@ -412,11 +397,11 @@ export class CustomBrowserEventTracker extends EventTracker {
       false
     );
 
-    if (!status[eventName]) {
+    if (!this.hasListener_[eventName]) {
       this.root
         .getRootElement()
         .addEventListener(eventName, this.debouncedBoundOnSession_, true);
-      status[eventName] = true;
+      this.hasListener_[eventName] = true;
     }
 
     return this.observables_.add((event) => {
@@ -433,6 +418,19 @@ export class CustomBrowserEventTracker extends EventTracker {
         });
       });
     });
+  }
+
+  /**
+   * Make an object of the browser events that are
+   * supported. The object is useful to avoid multiple
+   * tracking of the same event.
+   * @return {!Object<BrowserEventType, boolean>} hasAddedListenerForType_
+   */
+  hasListener_() {
+    Object.keys(BrowserEventType).forEach((key) => {
+      hasAddedListenerForType_[BrowserEventType[key]] = false;
+    });
+    return hasAddedListenerForType_;
   }
 }
 
