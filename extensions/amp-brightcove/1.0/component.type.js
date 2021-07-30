@@ -25,7 +25,7 @@ var BrightcoveDef = {};
  *   autoplay: (boolean|undefined),
  *   embed: (string|undefined),
  *   muted: (boolean|undefined),
- *   onReady: (function(!JsonObject, string|undefined)|undefined),
+ *   onReady: (function(!JsonObject, string)|undefined),
  *   player: (string|undefined),
  *   playlistId: (string|undefined),
  *   videoId: (string|undefined),
