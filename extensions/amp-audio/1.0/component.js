@@ -74,7 +74,7 @@ export function AudioWithRef(
     triggerAnalyticsEvent(audioRef.current, 'audio-play');
     audioRef.current.play();
     isPlaying.current = true;
-  }, [isPlaying]);
+  }, []);
 
   /**
    * Pauses audio callback
@@ -83,7 +83,7 @@ export function AudioWithRef(
     triggerAnalyticsEvent(audioRef.current, 'audio-pause');
     audioRef.current.pause();
     isPlaying.current = false;
-  }, [isPlaying]);
+  }, []);
 
   /**
    * Updates media session for current window/tab
