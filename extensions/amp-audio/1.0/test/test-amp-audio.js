@@ -55,22 +55,14 @@ describes.realWin(
     };
 
     function getAmpAudio(attributes, opt_childNodesAttrs) {
-      ampAudio = doc.createElement('amp-audio');
-      for (const key in attributes) {
-        ampAudio.setAttribute(key, attributes[key]);
-      }
+      ampAudio = createElementWithAttributes(doc, 'amp-audio', attributes);
       if (opt_childNodesAttrs) {
         opt_childNodesAttrs.forEach((childNodeAttrs) => {
           let child;
           if (childNodeAttrs.tag === 'text') {
             child = doc.createElement('p');
           } else {
-            child = doc.createElement(childNodeAttrs.tag);
-            for (const key in childNodeAttrs) {
-              if (key !== 'tag') {
-                child.setAttribute(key, childNodeAttrs[key]);
-              }
-            }
+            child = createElementWithAttributes(doc, childNodeAttrs.tag, childNodeAttrs);
           }
           ampAudio.appendChild(child);
         });
