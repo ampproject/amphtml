@@ -15,9 +15,10 @@
  */
 
 import * as Preact from '#preact';
+import {ContainWrapper} from '#preact/component';
+import {forwardRef} from '#preact/compat';
 import {listen} from '../../../src/event-helper';
 import {setMediaSession} from '../../../src/mediasession-helper';
-import {forwardRef} from '#preact/compat';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 const {useCallback, useEffect, useImperativeHandle, useMemo, useRef} = Preact;
@@ -47,6 +48,7 @@ export function AudioWithRef(
   ref
 ) {
   const audioRef = useRef(null);
+  const wrapperRef = useRef(null);
 
   /** @public {boolean} */
   const isPlaying = useRef(false);
@@ -140,22 +142,21 @@ export function AudioWithRef(
   );
 
   return (
-    <audio
-      ref={audioRef}
-      autoplay={autoplay}
-      controls // Force controls otherwise there is no player UI.
-      controlsList={controlsList}
-      loop={loop}
-      muted={muted}
-      preload={preload}
-      src={src}
-      layout
-      size
-      paint
-      {...rest}
-    >
-      {sources}
-    </audio>
+    <ContainWrapper contentRef={wrapperRef} size layout paint>
+      <audio
+        ref={audioRef}
+        autoplay={autoplay}
+        controls // Force controls otherwise there is no player UI.
+        controlsList={controlsList}
+        loop={loop}
+        muted={muted}
+        preload={preload}
+        src={src}
+        {...rest}
+      >
+        {sources}
+      </audio>
+    </ContainWrapper>
   );
 }
 
