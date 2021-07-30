@@ -99,38 +99,63 @@
   border-bottom-right-radius: 50% !important;
 }
 
-.i-amphtml-story-interactive-slider-average-indicator {
+/* .i-amphtml-story-interactive-slider-average-indicator {
   position: absolute !important;
   transform: translate(-50%, -50%) scale(0) !important;
-  width: 1em !important;
-  height: 1em !important;
+  width: 0.75em !important;
+  height: 0.75em !important;
   top: 50% !important;
   left: var(--average) !important;
-
-  color: black !important;
   z-index: 1 !important;
+  border-radius: 50% !important;
+  background-color: black;
+  background-clip: content-box;
+  padding: 0.5em;
+  border: 0.25em solid black;
+} */
+
+.i-amphtml-story-interactive-slider-average-indicator {
+  font-size: 40px;
+  width: 0.4em;
+  height: 0.4em;
+  background-color: var(--color);
+  border-radius: 50%;
+  position: relative;
+  --color: black;
 }
 
-.i-amphtml-story-interactive-slider-average-indicator::after {
-  position: absolute !important;
-  content: '' !important;
+.i-amphtml-story-interactive-slider-average-indicator::after, .i-amphtml-story-interactive-slider-average-indicator::before {
+  transform: scale(0);
+  box-sizing: border-box;
+  content: "";
+  width: 1em;
+  height: 1em;
+  position: absolute;
+  top: -0.3em;
+  left: -0.3em;
+  border: 0.05em solid var(--color);
+  border-radius: 50%;
+  animation: pulse 2s linear infinite forwards !important;
+}
 
-  height: 100% !important;
-  width: 100% !important;
-  top: 0% !important;
-  background: black !important;
-  z-index: -1 !important;
-  left: 50% !important;
-  transform: translateX(-50%) rotate(45deg) !important;
-  border-radius: 50% 50% 0% 50% !important;
-  box-shadow: 0em 0em 0.5em rgba(0, 0, 0, 0.25) !important;
-  
-  border-bottom-right-radius: 50% !important;
+@keyframes pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.4);
+    opacity: 1;
+  }
+  70% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-indicator {
   transform: translate(-50%, -50%) scale(0.5) !important;
-  border-bottom-right-radius: 50% !important;
+  /* animation: pulse 2s linear infinite forwards !important; */
 }
 
 .i-amphtml-story-interactive-slider-average-indicator-text {
