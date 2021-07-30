@@ -21,7 +21,6 @@ var AudioDef = {};
 
 /**
  * @typedef {{
- *   sources: (?PreactDef.Renderable|undefined),
  *   album: (string),
  *   ariaDescribedBy: (string|undefined),
  *   ariaLabel: (string|undefined),
@@ -33,6 +32,7 @@ var AudioDef = {};
  *   loop: (boolean),
  *   muted: (boolean),
  *   preload: (string|undefined),
+ *   sources: (?PreactDef.Renderable|undefined),
  *   src: (string|undefined),
  *   title: (string),
  * }}
