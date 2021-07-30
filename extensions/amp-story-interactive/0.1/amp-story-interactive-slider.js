@@ -21,8 +21,6 @@ import {
 import {CSS} from '../../../build/amp-story-interactive-slider-0.1.css';
 import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles} from '#core/dom/style';
-import {dev, devAssert} from '../../../src/log';
-import {StateProperty} from 'extensions/amp-story/1.0/amp-story-store-service';
 
 /**
  * Generates the template for the slider.
@@ -55,9 +53,6 @@ const buildSliderTemplate = (element) => {
   `;
 };
 
-/** @const {string} */
-const TAG = 'amp-story-interactive';
-
 /**
  * @const @enum {number}
  */
@@ -82,19 +77,21 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
 
   /** @override */
   displayOptionsData(responseData) {
-    let average = this.calculateWeightedAverage_(responseData);
-    console.log(responseData);
+    const average = this.calculateWeightedAverage_(responseData);
     setImportantStyles(this.rootEl_, {'--average': average + '%'});
   }
 
-  /**@private */
+  /**
+   * @private
+   * @param {!Array<!InteractiveOptionType>} responseData
+   * @return {number}
+   */
   calculateWeightedAverage_(responseData) {
     let numerator = 0;
     let denominator = 0;
     for (let i = 0; i < responseData.length; i++) {
       numerator += responseData[i].index * responseData[i].count;
       denominator += responseData[i].count;
-      console.log(numerator);
     }
     if (denominator == 0) {
       return 0;
