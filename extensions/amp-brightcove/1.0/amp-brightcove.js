@@ -84,12 +84,13 @@ AMP.extension(TAG, '1.0', (AMP) => {
  * @param {!Element} element
  * @return {string|undefined}
  */
-const getReferrerFromElement = (element) =>
+function getReferrerFromElement(element) {
   element.hasAttribute('data-referrer')
     ? Services.urlReplacementsForDoc(element).expandUrlSync(
         element.getAttribute('data-referrer')
       )
     : undefined;
+}
 
 /**
  * @param {!JsonObject} data

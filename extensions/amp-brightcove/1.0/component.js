@@ -56,8 +56,8 @@ const events = {
  * @param {{current: ?VideoWrapperDef.Api.CarouselApi}} ref
  * @return {PreactDef.Renderable}
  */
-export function BrightcoveWithRef(
-  {
+export function BrightcoveWithRef(props, ref) {
+  const {
     account,
     autoplay,
     embed = DEFAULT,
@@ -70,9 +70,8 @@ export function BrightcoveWithRef(
     onPlayingState,
     urlParams,
     ...rest
-  },
-  ref
-) {
+  } = props;
+
   const playerStateRef = useRef({});
   const [muted, setMuted] = useState(mutedProp);
   const src = useMemo(
@@ -82,7 +81,7 @@ export function BrightcoveWithRef(
           `/${encodeURIComponent(player)}` +
           `_${encodeURIComponent(embed)}/index.html` +
           '?amp=1' +
-          // These are encodeURIComponent'd in encodeId_().
+          // These are encodeURIComponent'd in encodeId().
           (playlistId
             ? '&playlistId=' + encodeId(playlistId)
             : videoId
@@ -93,7 +92,6 @@ export function BrightcoveWithRef(
     [account, embed, player, playlistId, referrer, urlParams, videoId]
   );
 
-  const makeMethodMessage = useCallback((method) => makeMessage(method), []);
   const onMessage = useCallback(
     ({currentTarget, data}) => {
       const eventType = data?.event;
@@ -138,7 +136,7 @@ export function BrightcoveWithRef(
   );
 
   // Check for valid props
-  if (!checkProps(account)) {
+  if (!checkProps(props)) {
     return null;
   }
 
@@ -147,7 +145,7 @@ export function BrightcoveWithRef(
       ref={ref}
       {...rest}
       autoplay={autoplay}
-      makeMethodMessage={makeMethodMessage}
+      makeMethodMessage={makeMessage}
       muted={muted}
       onIframeLoad={(event) => {
         const {currentTarget} = event;
@@ -164,14 +162,13 @@ Brightcove.displayName = 'Brightcove'; // Make findable for tests.
 export {Brightcove};
 
 /**
- * id is either a Brightcove-assigned id, or a customer-generated
+ * id is either a Brightcove-assigned id, or a publisher-generated
  * reference id. Reference ids are prefixed 'ref:' and the colon
  * must be preserved unencoded.
  * @param {string} id
  * @return {string}
  */
 function encodeId(id) {
-  /*  */
   if (id.substring(0, 4) === 'ref:') {
     return `ref:${encodeURIComponent(id.substring(4))}`;
   }
@@ -180,10 +177,10 @@ function encodeId(id) {
 
 /**
  * @param {string} method
- * @param {*=} arg
  * @return {string}
  */
-function makeMessage(method, arg) {
+function makeMessage(method) {
+  let arg;
   switch (method) {
     case 'showControls':
     case 'mute':
@@ -204,10 +201,10 @@ function makeMessage(method, arg) {
 
 /**
  * Verify required props and throw error if necessary.
- * @param {string|undefined} account
+ * @param {!BrightcoveDef.Props} props
  * @return {boolean} true on valid
  */
-function checkProps(account) {
+function checkProps({account}) {
   // Perform manual checking as assertion is not available for Bento: Issue #32739
   if (!account) {
     displayWarning('account is required for <Brightcove>');
