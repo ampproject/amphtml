@@ -243,8 +243,16 @@ describes.realWin(
       expect(audio.childNodes[0].getAttribute('src')).to.equal('audio.mp3');
       expect(audio.childNodes[1].tagName).to.equal('SOURCE');
       expect(audio.childNodes[1].getAttribute('src')).to.equal('audio.ogg');
-      expect(audio.childNodes[2].nodeType).to.equal(Node.TEXT_NODE);
-      expect(audio.childNodes[2].textContent).to.equal('Unsupported.');
+
+      /**
+       * This will not be defined once we have sources prop defined in base-element.js
+       * Instead assert expect(audio.childNodes).to.have.lengthOf(2) since the third
+       * child is disregarded due to being not a <source> tag.
+       *
+       *   expect(audio.childNodes[2].nodeType).to.equal(Node.TEXT_NODE);
+       *   expect(audio.childNodes[2].textContent).to.equal('Unsupported.');
+       */
+      expect(audio.childNodes).to.have.lengthOf(2);
     });
 
     it('should set its dimensions to the browser natural', async () => {
