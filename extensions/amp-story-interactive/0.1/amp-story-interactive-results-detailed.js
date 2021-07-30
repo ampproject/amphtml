@@ -19,6 +19,21 @@ import {CSS} from '../../../build/amp-story-interactive-results-detailed-0.1.css
 import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles} from '#core/dom/style';
 
+/** @const {number} */
+const CENTER = 9;
+
+/** @const {number} */
+const MIN_SIZE = 5;
+
+/** @const {number} */
+const MAX_SIZE = 6;
+
+/** @const {number} */
+const MIN_DIST = 5;
+
+/** @const {number} */
+const MAX_DIST = 6;
+
 /**
  * Generates the template for the detailed results component.
  *
@@ -87,16 +102,34 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
     const detailedResultsContainer = this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-results-detailed'
     );
-    components.forEach((e) => {
+
+    const slice = (2 * Math.PI) / components.length;
+    const offset = Math.random() * slice;
+
+    components.forEach((e, index) => {
       const container = document.createElement('div');
       container.classList.add(
         'i-amphtml-story-interactive-results-selected-result'
       );
+
+      const angleBuffer = slice / 4;
+      const size = Math.random() * (MAX_SIZE - MIN_SIZE) + MIN_SIZE;
+      const angle =
+        Math.random() * (slice - 2 * angleBuffer) +
+        slice * index +
+        angleBuffer +
+        offset;
+      const dist = Math.random() * (MAX_DIST - MIN_DIST) + MIN_DIST;
+      const top = CENTER + Math.cos(angle) * dist - size / 2;
+      const left = CENTER + Math.sin(angle) * dist - size / 2;
+
       setImportantStyles(container, {
-        'height': '5em',
-        'width': '5em',
+        'height': size + 'em',
+        'width': size + 'em',
+        'top': top + 'em',
+        'left': left + 'em',
       });
-      detailedResultsContainer.appendChild(container);
+      detailedResultsContainer.prepend(container);
       this.selectedResultEls_[e.interactiveId] = {
         el: container,
         updated: false,
@@ -122,7 +155,9 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
           'background-image': 'url(' + e.option.image + ')',
         });
       } else {
-        this.selectedResultEls_[e.interactiveId].el.textContent = e.option.text;
+        const textEl = document.createElement('span');
+        textEl.textContent = e.option.text;
+        this.selectedResultEls_[e.interactiveId].el.appendChild(textEl);
       }
       this.selectedResultEls_[e.interactiveId].updated = true;
     }
