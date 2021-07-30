@@ -35,13 +35,14 @@
 }
 
 .i-amphtml-story-interactive-slider-bubble {
-  position: relative;
+  position: relative !important;
   transform: translate(-50%, -50%) scale(0) !important;
   text-align: center !important;
   line-height: 2.9em !important;
   font-weight: 700 !important;
   color: white !important;
-  transition: transform 0.5s var(--i-amphtml-interactive-ease-out-curve) !important;
+  transition: transform var(--i-amphtml-interactive-animation-time)
+    var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 [dir='rtl'].i-amphtml-story-interactive-slider-container {
@@ -81,15 +82,18 @@
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble {
   transform: translate(var(--translate-x-center), -50%) scale(0.9) !important;
-  transition: transform 0.5s var(--i-amphtml-interactive-ease-out-curve) !important;
+  transition: transform var(--i-amphtml-interactive-animation-time)
+    var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble::after {
   cursor: initial !important;
   border: 0.1em solid var(--i-amphtml-interactive-option-background-color) !important;
   border-bottom-right-radius: 50% !important;
-  transition: border-radius 0.5s var(--i-amphtml-interactive-ease-out-curve),
-    border-color 0.5s var(--i-amphtml-interactive-ease-out-curve) !important;
+  transition: border-radius var(--i-amphtml-interactive-animation-time)
+      var(--i-amphtml-interactive-ease-out-curve),
+    border-color var(--i-amphtml-interactive-animation-time)
+      var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 .i-amphtml-story-interactive-slider-bubble-wrapper {
@@ -110,7 +114,8 @@
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble-wrapper {
   transform: scale(1) !important;
-  transition: transform 0.5s var(--i-amphtml-interactive-ease-out-curve) !important;
+  transition: transform var(--i-amphtml-interactive-animation-time)
+    var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 [type='emoji'] .i-amphtml-story-interactive-slider-bubble span {
@@ -174,7 +179,10 @@
   background: var(--interactive-accent-color) !important;
   border-radius: 50% !important;
   position: relative !important;
-  transition: border-radius 0.5s, box-shadow 0.5s !important;
+  transition: border-radius var(--i-amphtml-interactive-animation-time)
+      var(--i-amphtml-interactive-ease-out-curve),
+    box-shadow var(--i-amphtml-interactive-animation-time)
+      var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 .i-amphtml-story-interactive-slider-input::-moz-range-thumb {
@@ -184,7 +192,10 @@
   background: var(--interactive-accent-color) !important;
   border-radius: 50% !important;
   border: none !important;
-  transition: border-radius 0.5s, box-shadow 0.5s !important;
+  transition: border-radius var(--i-amphtml-interactive-animation-time)
+      var(--i-amphtml-interactive-ease-out-curve),
+    box-shadow var(--i-amphtml-interactive-animation-time)
+      var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 /* Vendor pseudo-selectors are invalid on unsuported browsers, so we need to keep rules separate to avoid invalidating rulesets. */

@@ -64,6 +64,7 @@ const SliderType = {
 };
 
 const SLIDER_HINT_DURATION_MS = 1500;
+const ANIMATION_DELAY_MS = 500;
 
 export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
   /**
@@ -117,7 +118,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     super.initializeListeners_();
 
     this.inputEl_.addEventListener('input', () => {
-      this.isInteracting_ = true;
+      cancelAnimationFrame(this.currentRAF_);
       this.onDrag_();
     });
     this.inputEl_.addEventListener('change', () => {
@@ -166,21 +167,17 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
           }
           // Value between 0 and 1;
           const timePercentage = elapsed / SLIDER_HINT_DURATION_MS;
-          // example with Math.sin animation
-          // Converts oscillation between 1 and -1, to 0 and 30.
           const val =
             timePercentage < 0.5
               ? easeInOutCubic(timePercentage * 2) * 30
               : easeInOutCubic(2 - timePercentage * 2) * 30;
           this.inputEl_.value = val;
           this.onDrag_();
-          if (!this.isInteracting_) {
-            this.currentRAF_ = requestAnimationFrame(animateFrame);
-          }
+          this.currentRAF_ = requestAnimationFrame(animateFrame);
         };
         this.landingAnimationDelayTimeout_ = setTimeout(
           () => requestAnimationFrame(animateFrame),
-          500
+          ANIMATION_DELAY_MS
         );
       }
     );
