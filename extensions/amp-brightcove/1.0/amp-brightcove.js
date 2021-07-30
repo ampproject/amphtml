@@ -23,7 +23,7 @@ import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-brightcove-1.0.css';
 import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
-import {dev, userAssert} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 import {Services} from '#service';
 
 /** @const {string} */
@@ -85,26 +85,11 @@ AMP.extension(TAG, '1.0', (AMP) => {
  * @return {string|undefined}
  */
 function getReferrerFromElement(element) {
-  element.hasAttribute('data-referrer')
+  return element.hasAttribute('data-referrer')
     ? Services.urlReplacementsForDoc(element).expandUrlSync(
         element.getAttribute('data-referrer')
       )
     : undefined;
-}
-
-/**
- * @param {!JsonObject} data
- * @param {string} playerId
- */
-function onReady(data, playerId) {
-  dev().info(
-    TAG,
-    'Player %s ready. ' +
-      'Brightcove Player version: %s AMP Support version: %s',
-    playerId,
-    data['bcVersion'],
-    data['ampSupportVersion']
-  );
 }
 
 AmpBrightcove['props'] = {
@@ -113,8 +98,4 @@ AmpBrightcove['props'] = {
     attrs: ['data-referrer'],
     parseAttrs: getReferrerFromElement,
   },
-};
-
-AmpBrightcove['staticProps'] = {
-  'onReady': onReady,
 };
