@@ -31,9 +31,9 @@ const {useCallback, useEffect, useImperativeHandle, useMemo, useRef} = Preact;
 export function AudioWithRef(
   {
     album,
-    ariaDescribedby,
-    ariaLabel,
-    ariaLabelledby,
+    'aria-describedby': ariaDescribedby,
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledby,
     artist,
     artwork,
     autoplay,

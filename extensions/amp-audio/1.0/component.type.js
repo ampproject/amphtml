@@ -22,9 +22,9 @@ var AudioDef = {};
 /**
  * @typedef {{
  *   album: (string),
- *   ariaDescribedBy: (string|undefined),
- *   ariaLabel: (string|undefined),
- *   ariaLabelledBy: (string|undefined),
+ *   'aria-describedby': (string|undefined),
+ *   'aria-label': (string|undefined),
+ *   'aria-labelledby': (string|undefined),
  *   artist: (string),
  *   artwork: (string),
  *   autoplay: (boolean),
