@@ -20,7 +20,8 @@
 set -e
 err=0
 
-GREEN() { echo -e "\n\033[0;32m$1\033[0m"; }
+GREEN() { echo -e "\033[0;32m$1\033[0m"; }
+RED() { echo -e "\033[0;31m$1\033[0m"; }
 CYAN() { echo -e "\033[0;36m$1\033[0m"; }
 
 # Ensure the CircleCI workspace directory exists.
