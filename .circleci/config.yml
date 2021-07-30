@@ -123,9 +123,7 @@ jobs:
       - checkout
       - run:
           name: 'Compute and Fetch Merge Commit'
-          command: |
-            ./.circleci/compute_merge_commit.sh
-            ./.circleci/fetch_merge_commit.sh
+          command: ./.circleci/compute_merge_commit.sh
       - save_cache:
           key: source-v1-{{ .Branch }}-{{ .Revision }}
           paths:

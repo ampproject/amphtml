@@ -26,8 +26,8 @@ GREEN() { echo -e "\n\033[0;32m$1\033[0m"; }
 mkdir -p /tmp/workspace
 
 # Try to determine the PR number.
-curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/get_pr_number.sh | bash
-if [[ -f "$BASH_ENV" ]]; then
+./.circleci/get_pr_number.sh
+if [[ -f "${BASH_ENV}" ]]; then
   source $BASH_ENV
 fi
 
@@ -35,6 +35,9 @@ fi
 if [[ -z "$PR_NUMBER" ]]; then
   exit 0
 fi
+
+echo "$(GREEN "Fetching all branches to update") $(CYAN ".git") $(GREEN "cache.")"
+git fetch
 
 # GitHub provides refs/pull/<PR_NUMBER>/merge, an up-to-date merge branch for
 # every PR branch that can be cleanly merged to the main branch. For more
