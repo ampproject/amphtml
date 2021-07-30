@@ -613,11 +613,6 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
 }
 
 /**
- * Name cache to help terser perform cross-binary property mangling.
- */
-const nameCache = {};
-
-/**
  * Minify the code with Terser. Only used by the ESBuild.
  *
  * @param {string} code
@@ -638,7 +633,6 @@ async function minify(code, map) {
     },
     sourceMap: {content: map},
     module: !!argv.esm,
-    nameCache,
   };
 
   const minified = await terser.minify(code, terserOptions);
