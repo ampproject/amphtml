@@ -67,10 +67,6 @@ commands:
             - source-v1-{{ .Branch }}-
             - source-v1-
       - checkout
-      - save_cache:
-          key: source-v1-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - .git
       - run:
           name: 'Configure Development Environment'
           command: |
