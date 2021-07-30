@@ -30,11 +30,7 @@ tags: {  # <amp-facebook-comments>
   html_format: AMP
   tag_name: "AMP-FACEBOOK-COMMENTS"
   requires_extension: "amp-facebook-comments"
-  # data-* is generally allowed, but it's not generally mandatory.
-  attrs: {
-    name: "data-href"
-    mandatory: true
-  }
+  attr_lists: "amp-facebook"
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL

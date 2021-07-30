@@ -1,4 +1,4 @@
-FAIL
+PASS
 |  <!--
 |    Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 |
@@ -38,8 +38,6 @@ FAIL
 |    </amp-facebook>
 |    <!-- Example of a valid amp-facebook-comments -->
 |    <amp-facebook-comments
->>   ^~~~~~~~~
-amp-facebook/1.0/test/validator-amp-facebook-comments.html:39:2 The tag 'amp-facebook-comments' requires including the 'amp-facebook-comments' extension JavaScript. (see https://amp.dev/documentation/components/amp-facebook-comments)
 |        width=486
 |        height=657
 |        layout="responsive"

@@ -1,4 +1,4 @@
-FAIL
+PASS
 |  <!--
 |    Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 |
@@ -38,8 +38,6 @@ FAIL
 |      </amp-facebook>
 |      <!-- Example of a valid amp-facebook-like -->
 |      <amp-facebook-like width=225 height=80
->>     ^~~~~~~~~
-amp-facebook/1.0/test/validator-amp-facebook-like.html:39:4 The tag 'amp-facebook-like' requires including the 'amp-facebook-like' extension JavaScript. (see https://amp.dev/documentation/components/amp-facebook-like)
 |          layout="fixed"
 |          title="Like Button"
 |          data-layout="standard"

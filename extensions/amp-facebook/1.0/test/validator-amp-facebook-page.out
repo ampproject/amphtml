@@ -1,4 +1,4 @@
-FAIL
+PASS
 |  <!--
 |    Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 |
@@ -38,16 +38,12 @@ FAIL
 |    </amp-facebook>
 |    <!-- Example of a valid amp-facebook-page -->
 |    <amp-facebook-page width=552 height=310
->>   ^~~~~~~~~
-amp-facebook/1.0/test/validator-amp-facebook-page.html:39:2 The tag 'amp-facebook-page' requires including the 'amp-facebook-page' extension JavaScript. (see https://amp.dev/documentation/components/amp-facebook-page)
 |        layout="responsive"
 |        data-tabs="timeline"
 |        data-href="https://www.facebook.com/barackobama/">
 |    </amp-facebook-page>
 |    <!-- Example of a valid amp-facebook-page -->
 |    <amp-facebook-page width="300" height="300"
->>   ^~~~~~~~~
-amp-facebook/1.0/test/validator-amp-facebook-page.html:45:2 The tag 'amp-facebook-page' requires including the 'amp-facebook-page' extension JavaScript. (see https://amp.dev/documentation/components/amp-facebook-page)
 |        layout="fixed"
 |        data-adapt-container-width="true"
 |        data-show-facepile="true"
