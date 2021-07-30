@@ -11,6 +11,7 @@
 
       "#builtins/*": ["./src/builtins/*"],
       "#core/*": ["./src/core/*"],
+      "#compiler/*": ["./src/compiler/*"],
       "#experiments/*": ["./src/experiments/*"],
       "#inabox/*": ["./src/inabox/*"],
       "#polyfills/*": ["./src/polyfills/*"],
