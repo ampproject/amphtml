@@ -43,10 +43,7 @@ function isInvocationValid(element) {
   return true;
 }
 
-/**
- * Visible for testing only.
- */
-export class AmpAudio extends BaseElement {
+class AmpAudio extends BaseElement {
   /** @override */
   init() {
     this.registerApiAction('play', (api) => {

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpAudio} from '../amp-audio';
-// import {htmlFor} from '#core/dom/static-template';
+import '../amp-audio';
 import {toggleExperiment} from '#experiments';
 import {waitFor} from '#testing/test-helper';
 import {naturalDimensions_} from '../../../../src/static-layout';
