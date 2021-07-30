@@ -1017,6 +1017,7 @@
         "amp-story-interactive-poll",
         "amp-story-interactive-quiz",
         "amp-story-interactive-results",
+        "amp-story-interactive-results-detailed",
         "amp-story-interactive-slider",
         "amp-story-interactive-disclaimer"
       ]
@@ -1090,6 +1091,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
+      "hasCss": true,
       "npm": true,
       "wrapper": "bento"
     }
@@ -1116,6 +1118,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
+      "hasCss": true,
       "npm": true,
       "wrapper": "bento"
     }

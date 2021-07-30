@@ -59,12 +59,19 @@
   overflow: hidden !important;
   width: 100% !important;
   height: 100% !important;
+  background-color: var(
+    --i-amphtml-interactive-placeholder-background
+  ) !important;
   background-position: center !important;
   background-size: cover !important;
   box-shadow: var(--i-amphtml-interactive-img-border) !important;
   /* Needed for overflow inconsistencies during animations on some browsers */
   position: relative !important;
   z-index: 1 !important;
+  /** Needed for occasional image clipping during animation */
+  clip-path: circle(
+    calc(var(--i-amphtml-interactive-img-option-size))
+  ) !important;
 }
 
 .i-amphtml-story-interactive-img-option:focus {

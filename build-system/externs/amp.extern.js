@@ -467,7 +467,26 @@ let time;
  * Just an element, but used with AMP custom elements..
  * @constructor @extends {HTMLElement}
  */
-let AmpElement = function () {};
+
+// Commented out segments below have been migrated into
+// #core/dom/amp-element.extern, but are left here for now for easy access
+// during migration
+
+// let AmpElement = function () {};
+// /** */
+// AmpElement.prototype.pause = function () {};
+
+// /** */
+// AmpElement.prototype.unmount = function () {};
+
+// *
+//  * @param {number=} opt_parentPriority
+//  * @return {!Promise}
+
+// AmpElement.prototype.ensureLoaded = function (opt_parentPriority) {};
+
+// /** @return {?Element} */
+// AmpElement.prototype.getPlaceholder = function () {};
 
 /** @return {boolean} */
 AmpElement.prototype.R1 = function () {};
@@ -477,21 +496,6 @@ AmpElement.prototype.deferredMount = function () {};
 
 /** @return {!Signals} */
 AmpElement.prototype.signals = function () {};
-
-/** */
-AmpElement.prototype.pause = function () {};
-
-/** */
-AmpElement.prototype.unmount = function () {};
-
-/**
- * @param {number=} opt_parentPriority
- * @return {!Promise}
- */
-AmpElement.prototype.ensureLoaded = function (opt_parentPriority) {};
-
-/** @return {?Element} */
-AmpElement.prototype.getPlaceholder = function () {};
 
 /** @param {boolean} show */
 AmpElement.prototype.togglePlaceholder = function (show) {};

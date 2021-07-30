@@ -13,12 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/**
- * An interface for elements with pause functionality.
- * @interface
- */
-export class PausableInterface {
-  /** @function */
-  pause() {}
-}
