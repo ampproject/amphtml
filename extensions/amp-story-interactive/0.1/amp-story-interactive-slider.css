@@ -35,17 +35,13 @@
 }
 
 .i-amphtml-story-interactive-slider-bubble {
-  position: absolute !important;
+  position: relative;
   transform: translate(-50%, -50%) scale(0) !important;
-  width: 2.8em !important;
-  height: 2.8em !important;
-  top: 50% !important;
-  left: var(--percentage) !important;
   text-align: center !important;
   line-height: 2.9em !important;
   font-weight: 700 !important;
   color: white !important;
-  z-index: 1 !important;
+  transition: transform 0.5s var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 [dir='rtl'].i-amphtml-story-interactive-slider-container {
@@ -64,13 +60,7 @@
 }
 
 .i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-bubble {
-  --scale-var: calc(var(--fraction) + 1) !important;
-  /* Move the bubble up by sqrt(2)/2=70.7% to account for the pointy corner */
-  transform: translate(
-      var(--translate-x-center),
-      calc(-160% - var(--fraction) * 70.7%)
-    )
-    scale(var(--scale-var)) !important;
+  transform: translate(calc(var(--translate-x-center)), calc(-160%)) scale(1) !important;
 }
 
 .i-amphtml-story-interactive-slider-bubble::after {
@@ -84,6 +74,7 @@
   z-index: -1 !important;
   left: 50% !important;
   transform: translateX(-50%) rotate(45deg) !important;
+  border: 0.1em solid transparent !important;
   border-radius: 50% 50% 0% 50% !important;
   box-shadow: 0em 0em 0.5em rgba(0, 0, 0, 0.25) !important;
 }
@@ -97,6 +88,29 @@
   cursor: initial !important;
   border: 0.1em solid var(--i-amphtml-interactive-option-background-color) !important;
   border-bottom-right-radius: 50% !important;
+  transition: border-radius 0.5s var(--i-amphtml-interactive-ease-out-curve),
+    border-color 0.5s var(--i-amphtml-interactive-ease-out-curve) !important;
+}
+
+.i-amphtml-story-interactive-slider-bubble-wrapper {
+  /* Move the bubble up by sqrt(2)/2=70.7% to account for the pointy corner */
+  --scale-var: calc(var(--fraction) + 1) !important;
+  transform: translate(
+      calc(var(--thumb-size) * var(--fraction)),
+      calc(var(--fraction) * 90%)
+    )
+    scale(var(--scale-var)) !important;
+  position: absolute !important;
+  width: 2.8em !important;
+  height: 2.8em !important;
+  top: 50% !important;
+  left: var(--percentage) !important;
+  z-index: 1 !important;
+}
+
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble-wrapper {
+  transform: scale(1) !important;
+  transition: transform 0.5s var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 [type='emoji'] .i-amphtml-story-interactive-slider-bubble span {
@@ -127,8 +141,7 @@
   height: 1em !important;
 }
 
-.i-amphtml-story-interactive-slider-input-size::before,
-.i-amphtml-story-interactive-slider-input-size::after {
+.i-amphtml-story-interactive-slider-input-size::before, .i-amphtml-story-interactive-slider-input-size::after {
   content: '' !important;
   background: linear-gradient(
     var(--gradient-angle),
@@ -154,32 +167,34 @@
 }
 
 .i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
+  transform: rotate(45deg) !important;
   -webkit-appearance: none !important;
   width: var(--thumb-size) !important;
   height: var(--thumb-size) !important;
   background: var(--interactive-accent-color) !important;
   border-radius: 50% !important;
   position: relative !important;
+  transition: border-radius 0.5s, box-shadow 0.5s !important;
 }
 
 .i-amphtml-story-interactive-slider-input::-moz-range-thumb {
+  transform: rotate(45deg) !important;
   width: var(--thumb-size) !important;
   height: var(--thumb-size) !important;
   background: var(--interactive-accent-color) !important;
   border-radius: 50% !important;
   border: none !important;
+  transition: border-radius 0.5s, box-shadow 0.5s !important;
 }
 
 /* Vendor pseudo-selectors are invalid on unsuported browsers, so we need to keep rules separate to avoid invalidating rulesets. */
 .i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
-  transform: rotate(45deg) !important;
   box-shadow: 0em 0em 0.5em rgba(0, 0, 0, 0.25),
     0em 0em 0em 0.07em var(--i-amphtml-interactive-option-background-color) !important;
   border-top-left-radius: 0% !important;
 }
 
 .i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-input::-moz-range-thumb {
-  transform: rotate(45deg) !important;
   box-shadow: 0em 0em 0.5em rgba(0, 0, 0, 0.25),
     0em 0em 0em 0.07em var(--i-amphtml-interactive-option-background-color) !important;
   border-top-left-radius: 0% !important;

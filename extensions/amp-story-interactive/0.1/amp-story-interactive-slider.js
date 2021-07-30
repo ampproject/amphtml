@@ -44,7 +44,9 @@ const buildSliderTemplate = (element) => {
             step="0.1"
             value="0"
           />
-          <div class="i-amphtml-story-interactive-slider-bubble"></div>
+          <div class="i-amphtml-story-interactive-slider-bubble-wrapper">
+            <div class="i-amphtml-story-interactive-slider-bubble"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -77,6 +79,10 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.sliderType_ = SliderType.PERCENTAGE;
     /** @private {boolean}  */
     this.isInteracting_ = false;
+    /** @private {?number} Reference to timeout so we can cancel it if needed. */
+    this.landingAnimationDelayTimeout_ = null;
+    /**  @private {?number} */
+    this.currentRAF_ = null;
   }
 
   /** @override */
@@ -127,7 +133,22 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
       (currPageId) => {
+        const isPostState = this.rootEl_.classList.contains(
+          'i-amphtml-story-interactive-post-selection'
+        );
+        if (isPostState) {
+          // If it's already been interacted with, do not animate.
+          return;
+        }
         if (currPageId != this.getPageEl().getAttribute('id')) {
+          // Resets animation when navigating away.
+          cancelAnimationFrame(this.currentRAF_);
+          clearTimeout(this.landingAnimationDelayTimeout_);
+          this.inputEl_.value = 0;
+          this.onDrag_();
+          this.rootEl_.classList.remove(
+            'i-amphtml-story-interactive-mid-selection'
+          );
           return;
         }
         let startTime;
@@ -154,10 +175,13 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
           this.inputEl_.value = val;
           this.onDrag_();
           if (!this.isInteracting_) {
-            requestAnimationFrame(animateFrame);
+            this.currentRAF_ = requestAnimationFrame(animateFrame);
           }
         };
-        setTimeout(() => requestAnimationFrame(animateFrame), 500);
+        this.landingAnimationDelayTimeout_ = setTimeout(
+          () => requestAnimationFrame(animateFrame),
+          500
+        );
       }
     );
   }
