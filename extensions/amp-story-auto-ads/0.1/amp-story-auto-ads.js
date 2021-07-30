@@ -364,6 +364,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       height="31"
       viewBox="0 0 39 31"
       fill="none"
+      class="i-amphtml-story-ad-badge-svg"
       xmlns="http://www.w3.org/2000/svg"
     >
       <g filter="url(#filter0_d)">
