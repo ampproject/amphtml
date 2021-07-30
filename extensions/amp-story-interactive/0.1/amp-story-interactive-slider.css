@@ -99,78 +99,76 @@
   border-bottom-right-radius: 50% !important;
 }
 
-/* .i-amphtml-story-interactive-slider-average-indicator {
-  position: absolute !important;
+.i-amphtml-story-interactive-slider-average-indicator {
   transform: translate(-50%, -50%) scale(0) !important;
-  width: 0.75em !important;
-  height: 0.75em !important;
+  width: 2em !important;
+  height: 2em !important;
   top: 50% !important;
   left: var(--average) !important;
   z-index: 1 !important;
-  border-radius: 50% !important;
-  background-color: black;
-  background-clip: content-box;
-  padding: 0.5em;
-  border: 0.25em solid black;
-} */
-
-.i-amphtml-story-interactive-slider-average-indicator {
-  font-size: 40px;
-  width: 0.4em;
-  height: 0.4em;
-  background-color: var(--color);
   border-radius: 50%;
-  position: relative;
-  --color: black;
+  position: absolute;
 }
 
-.i-amphtml-story-interactive-slider-average-indicator::after, .i-amphtml-story-interactive-slider-average-indicator::before {
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-indicator::after,
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-indicator::before {
   transform: scale(0);
   box-sizing: border-box;
-  content: "";
-  width: 1em;
-  height: 1em;
+  content: '';
+  width: 2em;
+  height: 2em;
   position: absolute;
-  top: -0.3em;
-  left: -0.3em;
-  border: 0.05em solid var(--color);
+  box-shadow: inset 0 0 0 0.05em var(--i-amphtml-interactive-strong-text-color);
   border-radius: 50%;
   animation: pulse 2s linear infinite forwards !important;
 }
 
 @keyframes pulse {
   0% {
-    transform: translate(-50%, -50%) scale(0.4);
+    transform: scale(0.2);
+    opacity: 0;
+    box-shadow: inset 0 0 0 0.6em var(--i-amphtml-interactive-strong-text-color);
+  }
+  10% {
     opacity: 1;
   }
-  70% {
-    transform: translate(-50%, -50%) scale(0.8);
+  20% {
+    opacity: 1;
+    box-shadow: inset 0 0 0 0.3em var(--i-amphtml-interactive-strong-text-color);
+  }
+  60% {
     opacity: 1;
   }
   100% {
-    transform: translate(-50%, -50%) scale(1);
+    transform: scale(1);
     opacity: 0;
+    box-shadow: inset 0 0 0 0.01em
+      var(--i-amphtml-interactive-strong-text-color);
   }
 }
 
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-indicator::before {
+  animation-delay: 1s !important;
+}
+
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-indicator {
-  transform: translate(-50%, -50%) scale(0.5) !important;
-  /* animation: pulse 2s linear infinite forwards !important; */
+  transform: translate(-50%, -50%) !important;
 }
 
 .i-amphtml-story-interactive-slider-average-indicator-text {
   position: absolute !important;
   left: var(--average) !important;
   transform: translateX(-50%) scale(0) !important;
-  bottom: 250% !important;
+  bottom: 180% !important;
   line-height: 1.5em !important;
-  font-size: 0.5em !important;
+  font-size: 0.8em !important;
   padding: 0.5em 1em !important;
   color: black !important;
   z-index: 1 !important;
   border-radius: 1.5em !important;
   box-shadow: 0 0.4em 0.5em -0.25em rgba(0, 0, 0, 0.2),
-    0 0.3em 1.4em 0.25em rgba(0, 0, 0, 0.14), 0 0.75em 1em 0.125em rgba(0, 0, 0, 0.14) !important;
+    0 0.3em 1.4em 0.25em rgba(0, 0, 0, 0.14),
+    0 0.75em 1em 0.125em rgba(0, 0, 0, 0.14) !important;
   background-color: white !important;
 }
 
@@ -186,6 +184,8 @@
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-indicator-text {
   transform: translate(-50%) scale(0.9) !important;
+  transition: var(--i-amphtml-interactive-animation-time)
+    var(--i-amphtml-interactive-ease-out-curve);
 }
 
 [type='emoji'] .i-amphtml-story-interactive-slider-bubble span {
@@ -216,8 +216,7 @@
   height: 1em !important;
 }
 
-.i-amphtml-story-interactive-slider-input-size::before,
-.i-amphtml-story-interactive-slider-input-size::after {
+.i-amphtml-story-interactive-slider-input-size::before, .i-amphtml-story-interactive-slider-input-size::after {
   content: '' !important;
   background: linear-gradient(
     var(--gradient-angle),
