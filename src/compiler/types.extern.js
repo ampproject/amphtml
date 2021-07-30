@@ -27,7 +27,6 @@
  *
  * @typedef {function(!Element):*}
  */
-
 let BuildDomDef;
 
 /**
