@@ -26,6 +26,9 @@ BaseElement['Component'] = Audio;
 /** @override */
 BaseElement['props'] = {
   album: {attr: 'album', type: 'string', default: EMPTY_METADATA.album},
+  ariaDescribedBy: {attr: 'aria-describedby', type: 'string'},
+  ariaLabel: {attr: 'aria-label', type: 'string'},
+  ariaLabelledBy: {attr: 'aria-labelledby', type: 'string'},
   artist: {attr: 'artist', type: 'string', default: EMPTY_METADATA.artist},
   artwork: {attr: 'artwork', type: 'string', default: EMPTY_METADATA.artwork},
   autoplay: {attr: 'autoplay', type: 'boolean', default: false},
@@ -33,11 +36,7 @@ BaseElement['props'] = {
   loop: {attr: 'loop', type: 'boolean', default: false},
   muted: {attr: 'muted', type: 'boolean', default: false},
   preload: {attr: 'preload'},
-  sources: {
-    selector: 'source',
-    single: false,
-    clone: true,
-  },
+  sources: {selector: 'source', single: false, clone: true},
   src: {attr: 'src'},
   title: {attr: 'title', type: 'string', default: EMPTY_METADATA.title},
 };

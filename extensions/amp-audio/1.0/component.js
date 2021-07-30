@@ -31,6 +31,9 @@ const {useCallback, useEffect, useImperativeHandle, useMemo, useRef} = Preact;
 export function AudioWithRef(
   {
     album,
+    ariaDescribedby,
+    ariaLabel,
+    ariaLabelledby,
     artist,
     artwork,
     autoplay,
@@ -145,6 +148,9 @@ export function AudioWithRef(
     <ContainWrapper contentRef={wrapperRef} size layout paint>
       <audio
         ref={audioRef}
+        aria-describedby={ariaDescribedby}
+        aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledby}
         autoplay={autoplay}
         controls // Force controls otherwise there is no player UI.
         controlsList={controlsList}
