@@ -19,7 +19,6 @@ import {ContainWrapper} from '#preact/component';
 import {forwardRef} from '#preact/compat';
 import {listen} from '../../../src/event-helper';
 import {setMediaSession} from '../../../src/mediasession-helper';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 const {useCallback, useEffect, useImperativeHandle, useMemo, useRef} = Preact;
 
@@ -40,6 +39,8 @@ export function AudioWithRef(
     controlsList,
     loop,
     muted,
+    onPause,
+    onPlay,
     preload,
     sources,
     src,
@@ -71,19 +72,19 @@ export function AudioWithRef(
    * Plays audio callback
    */
   const playCallback = useCallback(() => {
-    triggerAnalyticsEvent(audioRef.current, 'audio-play');
+    onPlay?.();
     audioRef.current.play();
     isPlaying.current = true;
-  }, []);
+  }, [onPlay]);
 
   /**
    * Pauses audio callback
    */
   const pauseCallback = useCallback(() => {
-    triggerAnalyticsEvent(audioRef.current, 'audio-pause');
+    onPause?.();
     audioRef.current.pause();
     isPlaying.current = false;
-  }, []);
+  }, [onPause]);
 
   /**
    * Updates media session for current window/tab

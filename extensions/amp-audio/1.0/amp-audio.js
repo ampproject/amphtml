@@ -19,6 +19,7 @@ import {closestAncestorElementBySelector} from '#core/dom/query';
 import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
 import {Layout} from '#core/dom/layout';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {user, userAssert} from '../../../src/log';
 import {validateMediaMetadata} from '../../../src/mediasession-helper';
 
@@ -67,6 +68,12 @@ class AmpAudio extends BaseElement {
       },
       'onError': () => {
         this.toggleFallback(true);
+      },
+      'onPlay': () => {
+        triggerAnalyticsEvent(this.element, 'audio-play');
+      },
+      'onPause': () => {
+        triggerAnalyticsEvent(this.element, 'audio-pause');
       },
     });
   }
