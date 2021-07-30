@@ -83,7 +83,7 @@
    target="_top">
    <label for="numChild">Child (0-17)</label>
    <div class="custom-select sg__select-wrapper">
-     <select name="numChild" id="numChild">
+     <select name="numChild" id="dropDown">
        <option data-vars-num-child="0" value="0">0</option>
        <option data-vars-num-child="1" value="1">1</option>
        <option data-vars-num-child="2" value="2">2</option>
@@ -92,7 +92,7 @@
      </select>
    </div>
    <div class="custom-select sg__select-wrapper">
-     <select name="numChild2" id="numChild2">
+     <select name="numChild2" id="dropDown2">
        <option data-vars-num-child="0" value="0">0</option>
        <option data-vars-num-child="1" value="1">1</option>
        <option data-vars-num-child="2" value="2">2</option>
@@ -132,12 +132,12 @@
           "genericTrigger-2":{
             "on": "change",
             "request": "event",
-            "selector": "#numChild",
+            "selector": "#dropDown",
             "vars": {
               "eventType": "change"
             },
             "extraUrlParams":{
-                "eventId": "numChild"
+                "eventId": "dropDown"
             }
           },
           "genericTrigger-3":{
@@ -154,12 +154,12 @@
           "genericTrigger-4":{
             "on": "blur",
             "request": "event",
-            "selector": "#numChild2",
+            "selector": "#dropDown2",
             "vars": {
               "eventType": "blur"
             },
             "extraUrlParams":{
-                "eventId": "numChild2"
+                "eventId": "dropDown2"
             }
           }
         }
