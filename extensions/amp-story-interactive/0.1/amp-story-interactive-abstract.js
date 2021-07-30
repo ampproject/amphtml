@@ -504,7 +504,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     if (optionEl) {
       this.updateStoryStoreState_(optionEl.optionIndex_);
-      this.handleOptionSelection(optionEl);
+      this.handleOptionSelection_(optionEl);
       const confettiEmoji = this.options_[optionEl.optionIndex_].confetti;
       if (confettiEmoji) {
         emojiConfetti(
@@ -642,9 +642,9 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    *
    * @param {number} optionIndex
    * @param {?Element} optionEl
-   * @protected
+   * @private
    */
-  handleOptionSelection(optionIndex, optionEl) {
+  handleOptionSelection_(optionIndex, optionEl) {
     this.backendDataPromise_
       .then(() => {
         if (this.hasUserSelection_) {

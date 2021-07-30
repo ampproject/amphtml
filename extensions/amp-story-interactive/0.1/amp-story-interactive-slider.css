@@ -99,24 +99,22 @@
   border-bottom-right-radius: 50% !important;
 }
 
-.i-amphtml-story-interactive-slider-average-bubble {
+.i-amphtml-story-interactive-slider-average-indicator {
   position: absolute !important;
   transform: translate(-50%, -50%) scale(0) !important;
-  width: 2.8em !important;
-  height: 2.8em !important;
+  width: 1em !important;
+  height: 1em !important;
   top: 50% !important;
   left: var(--average) !important;
-  text-align: center !important;
-  line-height: 1em !important;
-  font-weight: 300 !important;
+
   color: black !important;
   z-index: 1 !important;
 }
 
-.i-amphtml-story-interactive-slider-average-bubble::after {
+.i-amphtml-story-interactive-slider-average-indicator::after {
   position: absolute !important;
   content: '' !important;
-  box-sizing: border-box !important;
+
   height: 100% !important;
   width: 100% !important;
   top: 0% !important;
@@ -126,30 +124,22 @@
   transform: translateX(-50%) rotate(45deg) !important;
   border-radius: 50% 50% 0% 50% !important;
   box-shadow: 0em 0em 0.5em rgba(0, 0, 0, 0.25) !important;
-}
-
-.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-bubble {
-  transform: translate(-50%, -50%) scale(0.5) !important;
-  left: var(--average) !important;
-  position: absolute !important;
-  top: 50% !important;
-}
-
-.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-bubble::after {
-  cursor: initial !important;
-  border: 0.1em solid var(--i-amphtml-interactive-option-background-color) !important;
+  
   border-bottom-right-radius: 50% !important;
 }
 
-.i-amphtml-story-interactive-slider-average-text {
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-indicator {
+  transform: translate(-50%, -50%) scale(0.5) !important;
+  border-bottom-right-radius: 50% !important;
+}
+
+.i-amphtml-story-interactive-slider-average-indicator-text {
   position: absolute !important;
   left: var(--average) !important;
   transform: translateX(-50%) scale(0) !important;
   bottom: 250% !important;
-  text-align: center !important;
   line-height: 1.5em !important;
   font-size: 0.5em !important;
-  font-weight: 10 !important;
   padding: 0.5em 1em !important;
   color: black !important;
   z-index: 1 !important;
@@ -159,7 +149,7 @@
   background-color: white !important;
 }
 
-.i-amphtml-story-interactive-slider-average-text::after {
+.i-amphtml-story-interactive-slider-average-indicator-text::after {
   content: '' !important;
   position: absolute !important;
   transform: translateX(-50%) rotate(90deg) !important;
@@ -169,7 +159,7 @@
   border-color: transparent transparent transparent white !important;
 }
 
-.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-text {
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-indicator-text {
   transform: translate(-50%) scale(0.9) !important;
 }
 

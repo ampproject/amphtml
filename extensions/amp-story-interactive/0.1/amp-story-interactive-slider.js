@@ -43,8 +43,8 @@ const buildSliderTemplate = (element) => {
             value="0"
           />
           <div class="i-amphtml-story-interactive-slider-bubble"></div>
-          <div class="i-amphtml-story-interactive-slider-average-bubble"></div>
-          <div class="i-amphtml-story-interactive-slider-average-text">
+          <div class="i-amphtml-story-interactive-slider-average-indicator"></div>
+          <div class="i-amphtml-story-interactive-slider-average-indicator-text">
             Average answer
           </div>
         </div>
@@ -177,7 +177,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.updateToPostSelectionState_();
     this.inputEl_.setAttribute('disabled', '');
     this.rootEl_.classList.remove('i-amphtml-story-interactive-mid-selection');
-    this.handleOptionSelection(Math.round(this.inputEl_.value));
+    this.handleOptionSelection_(Math.round(this.inputEl_.value));
   }
 
   /**@override */
