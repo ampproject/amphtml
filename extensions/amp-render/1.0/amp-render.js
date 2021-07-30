@@ -347,9 +347,7 @@ export class AmpRender extends BaseElement {
     if (template.tagName === 'SCRIPT') {
       const div = this.element.ownerDocument.createElement('div');
       div./*OK*/ innerHTML = template./*OK*/ innerHTML;
-      const fragment = this.element.ownerDocument.createDocumentFragment();
-      fragment.append(div);
-      childNodes = fragment.firstElementChild.children;
+      childNodes = div.childNodes;
     } else if (template.tagName == 'TEMPLATE') {
       childNodes = template.content.childNodes;
     }
