@@ -47,10 +47,12 @@
 </head>
   <body>
     <script>
-      const loadOutside = location.hash.includes('load=outside');
-      (self.AMP = self.AMP || []).push(function(AMP) {
-        AMP.toggleExperiment('story-load-inactive-outside-viewport', loadOutside);
-      });
+      if (window.location.hash.includes("load")) {
+        const loadOutside = location.hash.includes('load=outside');
+        (self.AMP = self.AMP || []).push(function(AMP) {
+          AMP.toggleExperiment('story-load-inactive-outside-viewport', loadOutside);
+        });
+      }
     </script>
     <amp-story standalone id="cats"
         title="LCP test" publisher="The AMP team"
