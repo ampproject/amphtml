@@ -1,4 +1,4 @@
-PASS
+FAIL
 |  <!--
 |    Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 |
@@ -38,3 +38,5 @@ PASS
 |    </amp-facebook>
 |  </body>
 |  </html>
+>>       ^~~~~~~~~
+amp-facebook-comments/0.1/test/validator-amp-facebook-comments-invalid.html:39:6 The tag 'amp-facebook 1.0' is missing or incorrect, but required by 'amp-facebook-comments'. (see https://amp.dev/documentation/components/amp-facebook)

@@ -18,6 +18,7 @@
 tags: {  # amp-facebook 1.0
   html_format: AMP
   tag_name: "SCRIPT"
+  spec_name: "amp-facebook 1.0"
   satisfies: "amp-facebook 1.0"
   excludes: "amp-facebook 0.1"
   extension_spec: {
@@ -61,6 +62,7 @@ tags: {  # <amp-facebook-comments> via amp-facebook script
   html_format: AMP
   tag_name: "AMP-FACEBOOK-COMMENTS"
   requires_extension: "amp-facebook"
+  requires: "amp-facebook 1.0"
   attr_lists: "amp-facebook"
   attr_lists: "extended-amp-global"
   amp_layout: {
@@ -76,6 +78,7 @@ tags: {  # <amp-facebook-like> via amp-facebook script
   html_format: AMP
   tag_name: "AMP-FACEBOOK-LIKE"
   requires_extension: "amp-facebook"
+  requires: "amp-facebook 1.0"
   attr_lists: "amp-facebook-strict"
   attr_lists: "extended-amp-global"
   amp_layout: {
@@ -91,6 +94,7 @@ tags: {  # <amp-facebook-page> via amp-facebook script
   html_format: AMP
   tag_name: "AMP-FACEBOOK-PAGE"
   requires_extension: "amp-facebook"
+  requires: "amp-facebook 1.0"
   attr_lists: "amp-facebook-strict"
   attr_lists: "extended-amp-global"
   amp_layout: {

@@ -1,4 +1,4 @@
-PASS
+FAIL
 |  <!--
 |    Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 |
@@ -40,3 +40,5 @@ PASS
 |      </amp-facebook-like>
 |  </body>
 |  </html>
+>>       ^~~~~~~~~
+amp-facebook-like/0.1/test/validator-amp-facebook-like-invalid.html:41:6 The tag 'amp-facebook 1.0' is missing or incorrect, but required by 'amp-facebook-like'. (see https://amp.dev/documentation/components/amp-facebook)
