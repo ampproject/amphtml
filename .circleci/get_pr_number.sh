@@ -20,8 +20,8 @@
 set -e
 err=0
 
-GREEN() { echo -e "\n\033[0;32m$1\033[0m"; }
-YELLOW() { echo -e "\n\033[0;33m$1\033[0m"; }
+GREEN() { echo -e "\033[0;32m$1\033[0m"; }
+YELLOW() { echo -e "\033[0;33m$1\033[0m"; }
 
 # Push builds are only run against the main branch and amp-release branches.
 if [[ "$CIRCLE_BRANCH" == "main" || "$CIRCLE_BRANCH" =~ ^amp-release-* ]]; then
