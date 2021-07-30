@@ -36,7 +36,7 @@ describes.sandboxed('getBuilders', {}, () => {
     const runtime = 'nonexistent';
 
     const builders = getBuilders({runtime, extensions});
-    expect(builders).have.all.keys([]);
+    expect(builders).to.eql({});
   });
 
   it('should return eligible extensions', () => {
