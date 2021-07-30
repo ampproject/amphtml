@@ -170,7 +170,6 @@ describes.realWin(
         );
         expect(getElementSpy).to.be.calledOnce;
         expect(tracker.observables_.handlers_.length).to.equal(1);
-        tracker.dispose();
       });
 
       it('fires on one selector with on blur', async () => {
@@ -197,7 +196,6 @@ describes.realWin(
         );
         expect(getElementSpy).to.be.calledOnce;
         expect(tracker.observables_.handlers_.length).to.equal(1);
-        tracker.dispose();
       });
 
       it('fires on multiple selectors with on blur', async () => {
@@ -231,7 +229,6 @@ describes.realWin(
         );
         expect(getElementSpy).to.be.calledOnce;
         expect(tracker.observables_.handlers_.length).to.equal(1);
-        tracker.dispose();
       });
 
       it('fires on multiple selectors with on change', async () => {
@@ -265,7 +262,6 @@ describes.realWin(
         );
         expect(getElementSpy).to.be.calledOnce;
         expect(tracker.observables_.handlers_.length).to.equal(1);
-        tracker.dispose();
       });
 
       it('fires with on change and on blur', async () => {

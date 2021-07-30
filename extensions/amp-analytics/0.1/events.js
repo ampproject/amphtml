@@ -39,8 +39,7 @@ const DEFAULT_MAX_TIMER_LENGTH_SECONDS = 7200;
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function () {};
 const TAG = 'amp-analytics/events';
-const TIME_WAIT = 500;
-const hasAddedListenerForType_ = {};
+const SESSION_DEBOUNCE_TIME_MS = 500;
 
 /**
  * Events that can result in analytics data to be sent.
@@ -348,6 +347,9 @@ export class CustomBrowserEventTracker extends EventTracker {
     /** @private {?Observable<!Event>} */
     this.observables_ = new Observable();
 
+    /** @private {?Object<BrowserEventType:Boolean>} */
+    this.hasListener_ = new Object(null);
+
     /** @private {?function(!Event)} */
     this.boundOnSession_ = this.observables_.fire.bind(this.observables_);
 
@@ -355,9 +357,8 @@ export class CustomBrowserEventTracker extends EventTracker {
     this.debouncedBoundOnSession_ = debounce(
       this.root.ampdoc.win,
       this.boundOnSession_,
-      TIME_WAIT
+      SESSION_DEBOUNCE_TIME_MS
     );
-    //browserEventListeners();
   }
 
   /** @override */
@@ -365,7 +366,6 @@ export class CustomBrowserEventTracker extends EventTracker {
     const root = this.root.getRoot();
     Object.keys(this.hasListener_).forEach((eventName) => {
       root.removeEventListener(eventName, this.debouncedBoundOnSession_);
-      this.hasListener_[eventName] = false;
     });
     this.boundOnSession_ = null;
     this.observables_ = null;
@@ -418,19 +418,6 @@ export class CustomBrowserEventTracker extends EventTracker {
         });
       });
     });
-  }
-
-  /**
-   * Make an object of the browser events that are
-   * supported. The object is useful to avoid multiple
-   * tracking of the same event.
-   * @return {!Object<BrowserEventType, boolean>} hasAddedListenerForType_
-   */
-  hasListener_() {
-    Object.keys(BrowserEventType).forEach((key) => {
-      hasAddedListenerForType_[BrowserEventType[key]] = false;
-    });
-    return hasAddedListenerForType_;
   }
 }
 
