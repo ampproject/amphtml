@@ -122,8 +122,8 @@ jobs:
           paths:
             - .git
       - run:
-          name: 'Compute and Fetch Merge Commit'
-          command: ./.circleci/compute_merge_commit.sh
+          name: 'Initialize Repository'
+          command: ./.circleci/initialize_repo.sh
       - run:
           name: 'Initialize Workspace'
           command: cp .circleci/maybe_gracefully_halt.sh /tmp/workspace
