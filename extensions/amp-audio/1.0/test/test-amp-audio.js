@@ -235,7 +235,7 @@ describes.realWin(
       expect(audio.offsetHeight).to.be.greaterThan(1);
       expect(audio.hasAttribute('controls')).to.be.true;
       expect(audio.hasAttribute('autoplay')).to.be.true;
-      expect(audio.hasAttribute('muted')).to.be.true;
+      expect(audio.muted).to.be.true;
       expect(audio.hasAttribute('preload')).to.be.true;
       expect(audio.hasAttribute('loop')).to.be.true;
       expect(audio.hasAttribute('src')).to.be.false;
@@ -284,22 +284,17 @@ describes.realWin(
     });
 
     it('should fallback when not available', async () => {
-      // For this single test, cause audio elements that are
-      // created to lack the necessary feature set, which should trigger
-      // fallback behavior.
-      const {createElement} = doc;
-      doc.createElement = (name) => {
-        if (name === 'audio') {
-          name = 'busted-audio';
-        }
-        return createElement.call(doc, name);
-      };
-
-      const element = doc.createElement('div');
+      element = attachAndRun({
+        'width': '500',
+        src: 'audio.mp3',
+      });
       element.toggleFallback = env.sandbox.spy();
-      const audio = new AmpAudio(element);
-      // audio.buildAudioElement();
-      await audio.layoutCallback();
+      await waitForRender();
+
+      // Fetch audio element from shadowRoot
+      const {shadowRoot} = element;
+      const audio = shadowRoot.querySelector('audio');
+      audio.dispatchEvent(new Event('error'));
       expect(element.toggleFallback).to.be.calledOnce;
     });
 
