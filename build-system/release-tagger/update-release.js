@@ -54,7 +54,7 @@ async function _rollback(tag) {
  * @param {string} action
  * @return {Promise<Object>}
  */
-async function updateReleaseFunction(tag, action) {
+async function main(tag, action) {
   if (action == 'publish') {
     return await _publish(tag);
   }
@@ -64,5 +64,5 @@ async function updateReleaseFunction(tag, action) {
   }
 }
 
-updateReleaseFunction(argv.tag, argv.action);
-module.exports = {updateReleaseFunction};
+main(argv.tag, argv.action);
+module.exports = {main};
