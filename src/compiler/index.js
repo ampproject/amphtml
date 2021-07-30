@@ -19,26 +19,16 @@ import * as compiler from '@ampproject/bento-compiler';
 import {getBuilders} from './builders';
 
 /**
- * @typedef {*} TreeProto
- * TODO: replace with definition in bento-compiler.
- */
-
-/**
- * @typedef {{
- *   runtimeVersion: string,
- *   extensionList: Array<{name: string, version:string}>
- * }} VersionData
- */
-
-/**
  * Returns the AST for an AMP Document with eligible components server-rendered.
  *
- * @param {TreeProto} ast
- * @param {VersionData} versionData
- * @return {TreeProto}
+ * @param {TreeProtoDef} ast
+ * @param {!VersionsDef} versions
+ * @return {TreeProtoDef}
  */
-function compileAst(ast, versionData) {
-  return compiler.renderAst(ast, getBuilders(versionData));
+function compileAst(ast, versions) {
+  return compiler.renderAst(ast, getBuilders(versions));
 }
 
-globalThis.compileAst = compileAst;
+// TODO: build this with esbuild instead of with closure.
+// Then we can use export function compileAst instead.
+globalThis['compileAst'] = compileAst;
