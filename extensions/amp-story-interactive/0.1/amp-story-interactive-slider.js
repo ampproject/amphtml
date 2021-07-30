@@ -77,8 +77,6 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.inputEl_ = null;
     /** @private {!SliderType}  */
     this.sliderType_ = SliderType.PERCENTAGE;
-    /** @private {boolean}  */
-    this.isInteracting_ = false;
     /** @private {?number} Reference to timeout so we can cancel it if needed. */
     this.landingAnimationDelayTimeout_ = null;
     /**  @private {?number} */
@@ -117,7 +115,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     super.initializeListeners_();
 
     this.inputEl_.addEventListener('input', () => {
-      this.isInteracting_ = true;
+      cancelAnimationFrame(this.currentRAF_);
       this.onDrag_();
     });
     this.inputEl_.addEventListener('change', () => {
@@ -174,9 +172,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
               : easeInOutCubic(2 - timePercentage * 2) * 30;
           this.inputEl_.value = val;
           this.onDrag_();
-          if (!this.isInteracting_) {
-            this.currentRAF_ = requestAnimationFrame(animateFrame);
-          }
+          this.currentRAF_ = requestAnimationFrame(animateFrame);
         };
         this.landingAnimationDelayTimeout_ = setTimeout(
           () => requestAnimationFrame(animateFrame),
