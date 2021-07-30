@@ -41,6 +41,9 @@ if [[ ! -f /tmp/restored-workspace/.CIRCLECI_MERGE_COMMIT ]]; then
   exit 0
 fi
 
+echo "$(GREEN "Fetching all branches to update") $(CYAN ".git") $(GREEN "cache.")"
+git fetch
+
 # Extract the merge commit for this workflow and make it visible to other steps.
 CIRCLECI_MERGE_COMMIT="$(cat /tmp/restored-workspace/.CIRCLECI_MERGE_COMMIT)"
 echo "export CIRCLECI_MERGE_COMMIT=${CIRCLECI_MERGE_COMMIT}" >> $BASH_ENV
