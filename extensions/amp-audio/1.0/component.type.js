@@ -23,6 +23,9 @@ var AudioDef = {};
  * @typedef {{
  *   sources: (?PreactDef.Renderable|undefined),
  *   album: (string),
+ *   ariaDescribedBy: (string|undefined),
+ *   ariaLabel: (string|undefined),
+ *   ariaLabelledBy: (string|undefined),
  *   artist: (string),
  *   artwork: (string),
  *   autoplay: (boolean),
