@@ -13,5 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var buildDom$$module$builtins$amp_layout$amp_layout;
+
+/**
+ * @type {{buildDom: BuildDomDef}}
+ */
+var buildDom$$module$src$builtins$amp_layout$amp_layout;
+
+/**
+ * @type {{buildDom: BuildDomDef}}
+ */
 var buildDom$$module$extensions$amp_fit_text$0_1$amp_fit_text;
+
+/** @type {{renderAst: function(TreeProtoDef, Object<string, BuildDomDef>): TreeProtoDef}} */
+var module$$ampproject$bento_compiler;

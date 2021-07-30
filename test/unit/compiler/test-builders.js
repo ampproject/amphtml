@@ -20,13 +20,13 @@ describes.sandboxed('getBuilders', {}, () => {
     const extensions = [];
     const runtime = 'nonexistent';
 
-    expect(getBuilders(extensions, runtime)).to.eql({});
+    expect(getBuilders({runtime, extensions})).to.eql({});
   });
 
   it('should return eligible builtins when provided valid runtime', () => {
     const extensions = [];
     const runtime = 'v0';
-    const builders = getBuilders(runtime, extensions);
+    const builders = getBuilders({runtime, extensions});
 
     expect(builders).have.all.keys(['amp-layout']);
   });
@@ -35,7 +35,7 @@ describes.sandboxed('getBuilders', {}, () => {
     const extensions = [{name: 'amp-fit-text', version: '1.0'}];
     const runtime = 'nonexistent';
 
-    const builders = getBuilders(runtime, extensions);
+    const builders = getBuilders({runtime, extensions});
     expect(builders).have.all.keys([]);
   });
 
@@ -43,7 +43,7 @@ describes.sandboxed('getBuilders', {}, () => {
     const extensions = [{name: 'amp-fit-text', version: '0.1'}];
     const runtime = 'v0';
 
-    const builders = getBuilders(runtime, extensions);
+    const builders = getBuilders({runtime, extensions});
     expect(builders).have.all.keys(['amp-layout', 'amp-fit-text']);
   });
 });
