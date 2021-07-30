@@ -100,7 +100,7 @@
   /* Move the bubble up by sqrt(2)/2=70.7% to account for the pointy corner */
   --scale-var: calc(var(--fraction) + 1) !important;
   transform: translate(
-      calc(var(--thumb-size) * var(--fraction)),
+      calc(var(--thumb-size) * var(--fraction) + var(--fraction)),
       calc(var(--fraction) * 90%)
     )
     scale(var(--scale-var)) !important;
