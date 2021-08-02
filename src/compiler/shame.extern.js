@@ -15,12 +15,12 @@
  */
 
 /**
- * @type {{buildDom: BuildDomDef}}
+ * @type {BuildDomDef}
  */
 var buildDom$$module$src$builtins$amp_layout$amp_layout;
 
 /**
- * @type {{buildDom: BuildDomDef}}
+ * @type {BuildDomDef}
  */
 var buildDom$$module$extensions$amp_fit_text$0_1$amp_fit_text;
 
