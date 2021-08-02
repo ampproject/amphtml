@@ -20,7 +20,6 @@ import {whenUpgradedToCustomElement} from '../../src/amp-element-helpers';
 
 describes.sandboxed
   .configure()
-  .enableIe()
   .run('Render a shadow-dom based element', {}, () => {
     let fixture;
 
