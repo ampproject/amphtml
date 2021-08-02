@@ -117,8 +117,8 @@ describes.realWin(
       expect(
         win
           .getComputedStyle(ampStorySlider.getRootElement())
-          .getPropertyValue('--percentage')
-      ).to.be.equal('30%');
+          .getPropertyValue('--fraction')
+      ).to.be.equal('0.3');
     });
 
     it('should show the bubble when the user drags the slider', async () => {
@@ -127,12 +127,11 @@ describes.realWin(
       const slider = ampStorySlider
         .getRootElement()
         .querySelector('input[type="range"]');
-      const sliderBubble = ampStorySlider
-        .getRootElement()
-        .querySelector('.i-amphtml-story-interactive-slider-bubble');
       // simulates an input event, which is when the user drags the slider
       slider.dispatchEvent(new CustomEvent('input'));
-      expect(sliderBubble).to.have.class('show');
+      expect(ampStorySlider.getRootElement()).to.have.class(
+        'i-amphtml-story-interactive-mid-selection'
+      );
     });
 
     it('should show post-selection state when the user releases the slider', async () => {
@@ -146,6 +145,16 @@ describes.realWin(
       expect(ampStorySlider.getRootElement()).to.have.class(
         'i-amphtml-story-interactive-post-selection'
       );
+    });
+
+    it('should display the emoji in the bubble from the attribute configuration', async () => {
+      ampStorySlider.element.setAttribute('option-1-text', '😄');
+      await ampStorySlider.buildCallback();
+      await ampStorySlider.layoutCallback();
+      const sliderBubble = ampStorySlider
+        .getRootElement()
+        .querySelector('.i-amphtml-story-interactive-slider-bubble');
+      expect(sliderBubble.textContent).to.be.equal('😄');
     });
   }
 );

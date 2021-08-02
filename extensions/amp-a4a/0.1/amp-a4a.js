@@ -37,7 +37,11 @@ import {
 import {assertHttpsUrl} from '../../../src/url';
 import {cancellation, isCancellation} from '../../../src/error-reporting';
 import {createElementWithAttributes} from '#core/dom';
-import {createSecureDocSkeleton, createSecureFrame} from './secure-frame';
+import {
+  createSecureDocSkeleton,
+  createSecureFrame,
+  isAttributionReportingSupported,
+} from './secure-frame';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {duplicateErrorIfNecessary} from '#core/error';
@@ -195,13 +199,6 @@ const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
   'renderCrossDomainEnd': AnalyticsTrigger.AD_RENDER_END,
   'friendlyIframeIniLoad': AnalyticsTrigger.AD_IFRAME_LOADED,
   'crossDomainIframeLoaded': AnalyticsTrigger.AD_IFRAME_LOADED,
-};
-
-/** @const @enum {string} */
-export const MODULE_NOMODULE_PARAMS_EXP = {
-  ID: 'module-nomodule',
-  CONTROL: '21066677',
-  EXPERIMENT: '21066678',
 };
 
 /**
@@ -637,7 +634,10 @@ export class AmpA4A extends AMP.BaseElement {
       );
       return false;
     }
-    if (!isAdPositionAllowed(this.element, this.win)) {
+    if (
+      !this.uiHandler.isStickyAd() &&
+      !isAdPositionAllowed(this.element, this.win)
+    ) {
       user().warn(
         TAG,
         `<${this.element.tagName}> is not allowed to be ` +
@@ -2044,7 +2044,14 @@ export class AmpA4A extends AMP.BaseElement {
     // Block synchronous XHR in ad. These are very rare, but super bad for UX
     // as they block the UI thread for the arbitrary amount of time until the
     // request completes.
-    mergedAttributes['allow'] = "sync-xhr 'none';";
+    let featurePolicies = "sync-xhr 'none';";
+
+    if (isAttributionReportingSupported(this.win.document)) {
+      featurePolicies += "attribution-reporting 'src';";
+    }
+
+    mergedAttributes['allow'] = featurePolicies;
+
     this.iframe = /** @type {!HTMLIFrameElement} */ (
       createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),
@@ -2485,27 +2492,6 @@ export class AmpA4A extends AMP.BaseElement {
    */
   getIframeTitle() {
     return this.element.getAttribute('title') || '3rd party ad content';
-  }
-
-  /**
-   * Queries the dom through the `runtime-type` meta. If the value is one of
-   * 2, 4, 10 (which corresponds to module/nomodule or its control diversion)
-   * and returns the correct experiment ID.
-   *
-   * @protected
-   * @return {?string}
-   */
-  getModuleNomoduleExpIds_() {
-    const runtimeType = this.getAmpDoc().getMetaByName('runtime-type');
-    // ModuleNomoduleControl = 10 (current default, just nomodule)
-    if (runtimeType === '10') {
-      return MODULE_NOMODULE_PARAMS_EXP.CONTROL;
-    }
-    // ES6 = 2 (module/nomodule mode)
-    if (runtimeType === '2') {
-      return MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT;
-    }
-    return null;
   }
 
   /**

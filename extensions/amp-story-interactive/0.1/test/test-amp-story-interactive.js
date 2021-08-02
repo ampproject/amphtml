@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   AmpStoryInteractive,
   InteractiveType,
@@ -110,6 +111,7 @@ describes.realWin(
         'amp-story-interactive'
       );
       ampStoryInteractiveEl.id = 'TEST_interactiveId';
+      ampStoryInteractiveEl.getAmpDoc = () => new AmpDocSingle(win);
       ampStoryInteractiveEl.getResources = () =>
         win.__AMP_SERVICES.resources.obj;
 

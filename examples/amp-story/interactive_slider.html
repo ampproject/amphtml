@@ -138,6 +138,34 @@
           </amp-story-interactive-slider>
         </amp-story-grid-layer>
       </amp-story-page>
-    </amp-story>
+    <amp-story-page id="emoji_style">
+      <amp-story-grid-layer template="fill">
+        <amp-img
+          layout="fixed"
+          width="1600"
+          height="1600"
+          src="https://images.unsplash.com/photo-1587270613304-4cc9ef012b92?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTl8fHN1cGVyaGVybyUyMGNvbWljJTIwYm9va3xlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=60"
+        />
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="vertical">
+        <div class="title">
+          <h1>Slider Component</h1>
+          <p>
+            This is the emoji-based slider in the light theme, with a
+            custom accent color
+          </p>
+        </div>
+
+        <amp-story-interactive-slider
+          style="--interactive-accent-color: #651ffe"
+          prompt-text="How much do you like this product?"
+          align-self="center"
+          justify-self="center"
+          option-1-text="😄"
+        >
+        </amp-story-interactive-slider>
+      </amp-story-grid-layer>
+    </amp-story-page>
+  </amp-story>
   </body>
 </html>
