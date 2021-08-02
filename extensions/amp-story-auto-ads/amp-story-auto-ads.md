@@ -49,7 +49,7 @@ right part of the screen.
 
 ## Configuration
 
-There are two ways of configuring an ad: 
+There are two ways of configuring an ad:
 **Inline**
 and 
 **Remote**
@@ -95,7 +95,7 @@ here, as ads in stories will only be displayed once fully rendered.
 Instead of adding in the JSON configuration file inside a script tag (as shown in the Inline Ad Config section),
 One may also host the remote URL using a
 
-[remote JSON ad Configuration file](https://github.com/ampproject/amphtml/blob/main/examples/amp-story/ads/remote.json) 
+[emote JSON ad configuration file](https://github.com/ampproject/amphtml/blob/main/examples/amp-story/ads/remote.json)
 
 ```json
 {
@@ -109,7 +109,7 @@ One may also host the remote URL using a
 
 Once you have your JSON configuration file setup, simply use the
 
-[html ad config code to retrive the remote URL:]( https://github.com/ampproject/amphtml/blob/main/examples/amp-story/story-ad-remote-config.html )
+[html ad config code to retrive the remote URL:](https://github.com/ampproject/amphtml/blob/main/examples/amp-story/story-ad-remote-config.html)
 
 in the `<amp-story-auto-ads>` element as shown here:
 
