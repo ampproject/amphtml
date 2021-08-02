@@ -37,6 +37,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {parseQueryString} from '#core/types/string/url';
+import {isAutoplaySupported} from '#core/dom/video';
 
 const TAG = 'amp-dailymotion';
 
@@ -203,6 +204,7 @@ class AmpDailymotion extends AMP.BaseElement {
     if (data === undefined) {
       return; // The message isn't valid
     }
+    console.log(data);
 
     redispatch(this.element, data['event'], {
       [DailymotionEvents.API_READY]: VideoEvents.LOAD,
@@ -302,6 +304,14 @@ class AmpDailymotion extends AMP.BaseElement {
     const implicitParams = getDataParamsFromAttributes(this.element);
     iframeSrc = addParamsToUrl(iframeSrc, implicitParams);
 
+    // In order to support autoplay the video needs to be muted on load so we
+    // dont receive an unmute event which prevents the video from autoplay.
+    if (
+      this.element.hasAttribute('autoplay') &&
+      isAutoplaySupported(this.win)
+    ) {
+      iframeSrc = addParamsToUrl(iframeSrc, {'mute': 1});
+    }
     return iframeSrc;
   }
 
