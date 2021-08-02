@@ -213,6 +213,11 @@ export function applyStaticLayout(element) {
         <img alt="" role="presentation" aria-hidden="true"
              class="i-amphtml-intrinsic-sizer" />
       </i-amphtml-sizer>`;
+    const intrinsicSizer = sizer.firstElementChild;
+    intrinsicSizer.setAttribute(
+      'src',
+      `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`
+    );
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement = sizer;
   } else if (layout == Layout.FILL) {
