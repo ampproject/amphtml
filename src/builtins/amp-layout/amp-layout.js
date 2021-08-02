@@ -22,7 +22,7 @@ import {registerElement} from '#service/custom-element-registry';
 import {BaseElement} from '../../base-element';
 import {getEffectiveLayout} from '../../static-layout';
 
-class AmpLayout extends BaseElement {
+export class AmpLayout extends BaseElement {
   /** @override @nocollapse */
   static prerenderAllowed() {
     return true;

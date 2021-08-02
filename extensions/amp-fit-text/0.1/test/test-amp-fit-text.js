@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import {calculateFontSize_, updateOverflow_} from '../amp-fit-text';
+import {createElementWithAttributes} from '#core/dom';
+import {expect} from 'chai';
+import {
+  AmpFitText,
+  buildDom,
+  calculateFontSize_,
+  updateOverflow_,
+} from '../amp-fit-text';
 
 describes.realWin(
   'amp-fit-text component',
@@ -52,6 +59,19 @@ describes.realWin(
         .then(() => ft.layoutCallback())
         .then(() => ft);
     }
+
+    it('buildDom should have same DOM mutations as buildCallback', () => {
+      const fitText1 = createElementWithAttributes(doc, 'amp-fit-text', {
+        width: '111px',
+        height: '222px',
+      });
+      const fitText2 = fitText1.cloneNode(/* deep */ true);
+
+      new AmpFitText(fitText1).buildCallback();
+      buildDom(fitText2);
+
+      expect(fitText1.outerHTML).to.equal(fitText2.outerHTML);
+    });
 
     it('renders', () => {
       const text = 'Lorem ipsum';
