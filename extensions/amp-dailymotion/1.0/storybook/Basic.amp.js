@@ -35,7 +35,7 @@ export const Default = ({id}) => {
       id={id}
       width="500"
       height="281"
-      videoId="x3rdtfy"
+      data-videoid="x3rdtfy"
     ></amp-dailymotion>
   );
 };

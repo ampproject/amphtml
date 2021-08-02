@@ -25,7 +25,7 @@ BaseElement['Component'] = Dailymotion;
 /** @override */
 BaseElement['props'] = {
   'autoplay': {attr: 'autoplay', type: 'boolean'},
-  'videoid': {attr: 'data-videoid'},
+  'videoId': {attr: 'data-videoid'},
   'mute': {attr: 'data-mute', type: 'boolean'},
   'endscreenEnable': {attr: 'data-endscreen-enable', type: 'boolean'},
   'sharingEnable': {attr: 'data-sharing-enable', type: 'boolean'},

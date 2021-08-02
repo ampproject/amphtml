@@ -100,14 +100,15 @@ export function DailymotionWithRef(
     ]
   );
 
-  const onMessage = useCallback((e) => {
-    const {currentTarget} = e;
-    const data = parseQueryString(/** @type {string} */ (eventData));
-    if (data === undefined) {
+  const onMessage = ({data, currentTarget}) => {
+    console.log(data);
+    const parsedData = parseQueryString(/** @type {string} */ (data));
+    console.log(parsedData);
+    if (parsedData === undefined) {
       return; // The message isn't valid
     }
-    console.log(data);
-    if (data['event'] === DailymotionEvents.API_READY) {
+    // console.log(data);
+    if (parsedData['event'] === DailymotionEvents.API_READY) {
       dispatchCustomEvent(currentTarget, 'canplay');
       return;
     }
@@ -115,7 +116,7 @@ export function DailymotionWithRef(
       dispatchEvent(currentTarget, DailymotionEvents.event);
       return;
     }
-  }, []);
+  }
 
   return (
     <VideoIframe

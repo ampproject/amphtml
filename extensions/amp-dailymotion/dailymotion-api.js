@@ -31,7 +31,7 @@ import {dict} from '#core/types/object';
  * @return {string}
  */
 export function getDailymotionIframeSrc(
-  videoid,
+  videoId,
   mute,
   endscreenEnable,
   sharingEnable,
@@ -43,7 +43,7 @@ export function getDailymotionIframeSrc(
 ) {
   let iframeUrl = addParamsToUrl(
     `https://www.dailymotion.com/embed/video/${encodeURIComponent(
-      videoid
+      videoId
     )}?api=1&html=1&app=amp`,
     dict({
       'mute': mute ? mute : undefined,
