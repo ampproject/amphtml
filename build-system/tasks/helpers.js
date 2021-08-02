@@ -623,6 +623,8 @@ async function minify(code, map) {
   const terserOptions = {
     mangle: {},
     compress: {
+      // Settled on this count by incrementing number until there was no more
+      // effect on minification quality.
       passes: 3,
     },
     output: {
@@ -636,7 +638,13 @@ async function minify(code, map) {
   };
 
   const minified = await terser.minify(code, terserOptions);
-  return {code: minified.code ?? '', map: minified.map};
+  if (!minified.code) {
+    throw new Error(
+      `Minification resulted in an empty bundle. This should never happen.`
+    );
+  }
+
+  return {code: minified.code, map: minified.map};
 }
 
 /**
