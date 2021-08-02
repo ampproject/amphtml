@@ -49,7 +49,10 @@ right part of the screen.
 
 ## Configuration
 
-There are two ways of configuring an ad: inline and remote:
+There are two ways of configuring an ad: 
+**Inline**
+and 
+**Remote**
 
 ### Inline Ad Config
 
