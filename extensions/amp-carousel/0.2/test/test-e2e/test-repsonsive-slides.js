@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {getNextArrow, getSlides, sleep} from './helpers';
+import {getNextArrow, getSlides} from './helpers';
+import {sleep} from '#testing/helpers';
 
 describes.endtoend(
   'AMP carousel 0.2 with responsive slides',

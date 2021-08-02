@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-const TAG_NAME = 'amp-carousel';
-const SCROLLABLE_SLIDE = 'amp-scrollable-carousel-slide';
-const NEXT_ARROW_SELECTOR = `.amp-carousel-button.amp-carousel-button-next`;
-
-export function getSlides(controller) {
-  return controller.findElements(`${TAG_NAME} .${SCROLLABLE_SLIDE}`);
-}
-
-export async function getSlide(controller, n) {
-  const slides = await getSlides(controller);
-  return slides[n];
-}
-
-export function getNextArrow(controller) {
-  return controller.findElement(NEXT_ARROW_SELECTOR);
+/**
+ * Returns a Promise that resolves after the specified number of milliseconds.
+ * @param {number} ms
+ * @return {Promise<void>}
+ */
+export function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, ms);
+  });
 }

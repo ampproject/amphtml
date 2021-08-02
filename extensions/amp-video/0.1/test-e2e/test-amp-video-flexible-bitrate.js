@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {sleep} from '#testing/helpers';
+
 const VIEWPORT = {
   HEIGHT: 768,
   WIDTH: 1024,
@@ -267,10 +269,6 @@ describes.endtoend(
         ).contains('#med');
       });
     });
-
-    function sleep(ms) {
-      return new Promise((res) => setTimeout(res, ms));
-    }
 
     async function forceEventOnVideo(videoEvent, videoId, delayMs = 50) {
       await controller.type(debugField, videoId + videoEvent);
