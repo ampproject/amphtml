@@ -16,6 +16,9 @@
 
 /** @externs */
 
+/** @const */
+var BrightcoveDef = {};
+
 /**
  * @typedef {{
  *   account: (string|undefined),
