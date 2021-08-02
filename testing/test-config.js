@@ -58,6 +58,12 @@ export class TestConfig {
     this.runOnFirefox = this.platform.isFirefox.bind(this.platform);
     this.runOnSafari = this.platform.isSafari.bind(this.platform);
     this.runOnIos = this.platform.isIos.bind(this.platform);
+    this.runOnIe = this.platform.isIe.bind(this.platform);
+
+    /**
+     * By default, IE is skipped. Individual tests may opt in.
+     */
+    this.skip(this.runOnIe);
   }
 
   skipModuleBuild() {
