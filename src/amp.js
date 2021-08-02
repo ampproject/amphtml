@@ -132,20 +132,28 @@ startupChunk(self.document, function initial() {
   installPerformanceService(self);
   /** @const {!./service/performance-impl.Performance} */
   const perf = Services.performanceFor(self);
-  if (self.document.documentElement.hasAttribute('i-amphtml-no-boilerplate')) {
-    perf.addEnabledExperiment('no-boilerplate');
+  if (IS_ESM) {
+    perf.addEnabledExperiment('esm');
   }
   fontStylesheetTimeout(self);
   perf.tick(TickLabel.INSTALL_STYLES);
   if (IS_ESM) {
     bootstrap(ampdoc, perf);
-  } else {
-    installStylesForDoc(
-      ampdoc,
-      ampDocCss + ampSharedCss,
-      () => bootstrap(ampdoc, perf),
-      /* opt_isRuntimeCss */ true,
-      /* opt_ext */ 'amp-runtime'
+    return;
+  }
+
+  installStylesForDoc(
+    ampdoc,
+    ampDocCss + ampSharedCss,
+    () => bootstrap(ampdoc, perf),
+    /* opt_isRuntimeCss */ true,
+    /* opt_ext */ 'amp-runtime'
+  );
+  // TODO(kbax) Remove this IE deprecation warning on 26 August 2021.
+  if (Services.platformFor(self).isIe() && self.console) {
+    (console.info || console.log).call(
+      console,
+      'IE Support is being deprecated, in September 2021 IE will no longer be supported. See https://github.com/ampproject/amphtml/issues/34453 for more details.'
     );
   }
 });

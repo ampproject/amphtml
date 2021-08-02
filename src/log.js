@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as mode from '#core/mode';
+
 import {urls} from './config';
 import * as assertions from './core/assert/base';
 import {createErrorVargs, duplicateErrorIfNecessary} from './core/error';
@@ -722,7 +724,7 @@ export function devAssert(
   opt_8,
   opt_9
 ) {
-  if (getMode().minified) {
+  if (mode.isMinified()) {
     return shouldBeTrueish;
   }
   if (self.__AMP_ASSERTION_CHECK) {

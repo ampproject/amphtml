@@ -1707,7 +1707,6 @@ describes.sandboxed('FixedLayer Setup Execution Bailouts', {}, () => {
     window.__AMP_MODE = {
       localDev: false,
       development: false,
-      minified: false,
       test: false,
       version: '$internalRuntimeVersion$',
     };
@@ -1777,7 +1776,6 @@ describes.sandboxed(
       window.__AMP_MODE = {
         localDev: true,
         development: false,
-        minified: false,
         test: false,
         version: '$internalRuntimeVersion$',
       };
@@ -1848,7 +1846,6 @@ describes.sandboxed(
       window.__AMP_MODE = {
         localDev: true,
         development: false,
-        minified: false,
         test: false,
         version: '$internalRuntimeVersion$',
       };
