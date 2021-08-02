@@ -62,7 +62,6 @@ export function BrightcoveWithRef(props, ref) {
     autoplay,
     embed = DEFAULT,
     muted: mutedProp,
-    onReady,
     player = DEFAULT,
     playlistId,
     referrer,
@@ -97,7 +96,7 @@ export function BrightcoveWithRef(props, ref) {
       const eventType = data?.event;
       switch (eventType) {
         case 'ready':
-          onReady?.(data, player);
+          dispatchCustomEvent(currentTarget, 'canplay');
           break;
         case 'playing':
           onPlayingState?.(true);
@@ -132,7 +131,7 @@ export function BrightcoveWithRef(props, ref) {
         dispatchCustomEvent(currentTarget, mutedOrUnmutedEvent(isMuted));
       }
     },
-    [muted, onReady, player, onPlayingState]
+    [muted, player, onPlayingState]
   );
 
   // Check for valid props
@@ -147,10 +146,6 @@ export function BrightcoveWithRef(props, ref) {
       autoplay={autoplay}
       makeMethodMessage={makeMessage}
       muted={muted}
-      onIframeLoad={(event) => {
-        const {currentTarget} = event;
-        dispatchCustomEvent(currentTarget, 'canplay');
-      }}
       onMessage={onMessage}
       playerStateRef={playerStateRef}
       src={src}
