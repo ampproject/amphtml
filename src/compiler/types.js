@@ -27,21 +27,17 @@
  *
  * @typedef {function(!Element):*}
  */
-let BuildDomDef;
+export let BuildDomDef;
 
 /**
  * See @ampproject/bento-compiler for the definition.
  * @typedef {*}
  */
-let TreeProtoDef;
+export let TreeProtoDef;
 
 /**
- * Contains versioning data for which Runtime, if any, is present.
- * As well as the full list of (extension, version) tuples.
+ * Contains versioning data of <component, version> tuples.
  *
- * @typedef {{
- *   runtime: ?string,
- *   extensions: !Array<{name: string, version:string}>
- * }}
+ * @typedef {!Array<{name: string, version:string}>}
  */
-let VersionsDef;
+export let VersionsDef;

@@ -21,9 +21,9 @@ import {getBuilders} from './builders';
 /**
  * Returns the AST for an AMP Document with eligible components server-rendered.
  *
- * @param {TreeProtoDef} ast
- * @param {!VersionsDef} versions
- * @return {TreeProtoDef}
+ * @param {!./types.TreeProtoDef} ast
+ * @param {!./types.VersionsDef} versions
+ * @return {!./types.TreeProtoDef}
  */
 function compileAst(ast, versions) {
   return compiler.renderAst(ast, getBuilders(versions));

@@ -16,34 +16,32 @@
 import {getBuilders} from '#compiler/builders';
 
 describes.sandboxed('getBuilders', {}, () => {
-  it('should return an empty list for empty extensions with nonexistent runtime', () => {
-    const extensions = [];
-    const runtime = 'nonexistent';
-
-    expect(getBuilders({runtime, extensions})).to.eql({});
+  it('should return an empty list for empty component list', () => {
+    const components = [];
+    expect(getBuilders(components)).to.eql({});
   });
 
-  it('should return eligible builtins when provided valid runtime', () => {
-    const extensions = [];
-    const runtime = 'v0';
-    const builders = getBuilders({runtime, extensions});
+  it('should return eligible builtins when provided them as components', () => {
+    const components = [{name: 'amp-layout', version: 'v0'}];
+    const builders = getBuilders(components);
 
     expect(builders).have.all.keys(['amp-layout']);
   });
 
-  it('eligible extension with wrong version is not used', () => {
-    const extensions = [{name: 'amp-fit-text', version: '1.0'}];
-    const runtime = 'nonexistent';
+  it('eligible component with ineligible version is not used', () => {
+    const components = [{name: 'amp-fit-text', version: '1.0'}];
+    const builders = getBuilders(components);
 
-    const builders = getBuilders({runtime, extensions});
     expect(builders).to.eql({});
   });
 
-  it('should return eligible extensions', () => {
-    const extensions = [{name: 'amp-fit-text', version: '0.1'}];
-    const runtime = 'v0';
+  it('should return eligible components', () => {
+    const components = [
+      {name: 'amp-fit-text', version: '0.1'},
+      {name: 'amp-layout', version: 'v0'},
+    ];
 
-    const builders = getBuilders({runtime, extensions});
+    const builders = getBuilders(components);
     expect(builders).have.all.keys(['amp-layout', 'amp-fit-text']);
   });
 });
