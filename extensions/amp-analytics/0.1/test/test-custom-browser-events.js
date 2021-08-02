@@ -18,7 +18,7 @@ import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {
   AnalyticsEvent,
   AnalyticsEventType,
-  CustomBrowserEventTracker,
+  BrowserEventTracker,
 } from '../events';
 import {macroTask} from '#testing/yield';
 import {toggleExperiment} from '#experiments';
@@ -61,7 +61,7 @@ describes.realWin(
       toggleExperiment(win, 'analytics-browser-events', true);
     });
 
-    describe('CustomBrowserEventTracker', () => {
+    describe('BrowserEventTracker', () => {
       let tracker;
       let changeEventConfig,
         blurEventConfig,
@@ -72,7 +72,7 @@ describes.realWin(
       beforeEach(() => {
         tracker = root.getTracker(
           AnalyticsEventType.BROWSER_EVENT,
-          CustomBrowserEventTracker
+          BrowserEventTracker
         );
         selectors = ['#inputField', '#inputField2'];
 

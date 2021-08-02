@@ -426,8 +426,10 @@ export class CustomEventTracker extends EventTracker {
    */
   constructor(root) {
     super(root);
+
     /** @const @private {!Object<string, !Observable<!AnalyticsEvent>>} */
     this.observables_ = {};
+    
     /**
      * Early events have to be buffered because there's no way to predict
      * how fast all `amp-analytics` elements will be instrumented.
