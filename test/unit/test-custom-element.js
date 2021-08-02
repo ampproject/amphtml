@@ -703,14 +703,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         );
       });
 
-      describe('granular consent experiment', () => {
-        beforeEach(() => {});
-
-        afterEach(() => {
-          /* toggleExperiment(win, 'amp-consent-granular-consent', false) // launched: true */
-          false;
-        });
-
+      describe('consent', () => {
         describe('getPurposeConsent_', () => {
           let element;
           beforeEach(() => {
