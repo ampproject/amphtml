@@ -132,7 +132,7 @@ Contrast protection is automatically applied to ensure readability and a11y comp
 
 ### `cta-image` (optional)
 
-String representing a URL pointing to an image. 32x32px is suggested. A link icon will be displayed by default.
+String representing a URL pointing to an image. Optimize performance and avoid distortion by using a 32x32px image. A link icon will be displayed by default.
 
 ![amp-story-page-outlink-cta-image](img/amp-story-page-outlink-cta-image.jpg)
 
