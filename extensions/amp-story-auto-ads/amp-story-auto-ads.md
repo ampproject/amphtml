@@ -51,7 +51,7 @@ right part of the screen.
 
 There are two ways of configuring an ad:
 **Inline**
-and 
+and
 **Remote**
 
 ### Inline Ad Config
@@ -119,7 +119,6 @@ in the `<amp-story-auto-ads>` element as shown here:
       This is an example of JSON retrieved from a source file.
     -->
     <amp-story-auto-ads src="/examples/amp-story/ads/remote.json" ></amp-story-auto-ads>
-    
     <amp-story-page id="page-1">
     .
     .
