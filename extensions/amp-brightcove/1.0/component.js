@@ -15,13 +15,13 @@
  */
 
 import * as Preact from '#preact';
-import {addParamsToUrl} from '../../../src/url';
 import {useCallback, useMemo, useRef, useState} from '#preact';
 import {forwardRef} from '#preact/compat';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {VideoEvents} from '../../../src/video-interface';
 import {dispatchCustomEvent} from '#core/dom';
+import {getBrightcoveIframeSrc} from '../brightcove-api';
 
 /** @const {string} */
 const DEFAULT = 'default';
@@ -75,18 +75,14 @@ export function BrightcoveWithRef(props, ref) {
   const [muted, setMuted] = useState(mutedProp);
   const src = useMemo(
     () =>
-      addParamsToUrl(
-        `https://players.brightcove.net/${encodeURIComponent(account)}` +
-          `/${encodeURIComponent(player)}` +
-          `_${encodeURIComponent(embed)}/index.html` +
-          '?amp=1' +
-          // These are encodeURIComponent'd in encodeId().
-          (playlistId
-            ? '&playlistId=' + encodeId(playlistId)
-            : videoId
-            ? '&videoId=' + encodeId(videoId)
-            : ''),
-        {...urlParams, referrer, playsinline: true, autoplay: undefined}
+      getBrightcoveIframeSrc(
+        account,
+        player,
+        embed,
+        playlistId,
+        videoId,
+        referrer,
+        urlParams
       ),
     [account, embed, player, playlistId, referrer, urlParams, videoId]
   );
@@ -131,7 +127,7 @@ export function BrightcoveWithRef(props, ref) {
         dispatchCustomEvent(currentTarget, mutedOrUnmutedEvent(isMuted));
       }
     },
-    [muted, player, onPlayingState]
+    [muted, onPlayingState]
   );
 
   // Check for valid props
@@ -155,20 +151,6 @@ export function BrightcoveWithRef(props, ref) {
 const Brightcove = forwardRef(BrightcoveWithRef);
 Brightcove.displayName = 'Brightcove'; // Make findable for tests.
 export {Brightcove};
-
-/**
- * id is either a Brightcove-assigned id, or a publisher-generated
- * reference id. Reference ids are prefixed 'ref:' and the colon
- * must be preserved unencoded.
- * @param {string} id
- * @return {string}
- */
-function encodeId(id) {
-  if (id.substring(0, 4) === 'ref:') {
-    return `ref:${encodeURIComponent(id.substring(4))}`;
-  }
-  return encodeURIComponent(id);
-}
 
 /**
  * @param {string} method
