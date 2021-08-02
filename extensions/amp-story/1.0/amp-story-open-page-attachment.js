@@ -19,10 +19,13 @@
  */
 import {AttachmentTheme} from './amp-story-page-attachment';
 import {LocalizedStringId} from '#service/localization/strings';
-import {Services} from '#service';
 import {computedStyle, setImportantStyles} from '#core/dom/style';
 import {getLocalizationService} from './amp-story-localization-service';
-import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
+import {
+  getRGBFromCssColorValue,
+  getTextColorForRGB,
+  maybeMakeProxyUrl,
+} from './utils';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {toWin} from '#core/window';
@@ -274,36 +277,17 @@ const renderInlinePageAttachmentUi = (pageEl, attachmentEl) => {
 
   const openImgAttr2 = attachmentEl.getAttribute('cta-image-2');
   if (openImgAttr2) {
-    const src = maybeMakeProxyUrl(openImgAttr2, pageEl);
+    const src = maybeMakeProxyUrl(openImgAttr2, pageEl.getAmpDoc());
     chipEl.prepend(makeImgElWithBG(src));
   }
 
   const openImgAttr = attachmentEl.getAttribute('cta-image');
   if (openImgAttr) {
-    const src = maybeMakeProxyUrl(openImgAttr, pageEl);
+    const src = maybeMakeProxyUrl(openImgAttr, pageEl.getAmpDoc());
     chipEl.prepend(makeImgElWithBG(src));
   }
 
   return openAttachmentEl;
-};
-
-/**
- * Makes a proxy URL if document is served from a proxy origin. No-op otherwise.
- * @param {string} url
- * @param {!Element} pageEl
- * @return {string}
- */
-const maybeMakeProxyUrl = (url, pageEl) => {
-  const urlService = Services.urlForDoc(pageEl);
-  const loc = pageEl.getAmpDoc().win.location;
-  if (!urlService.isProxyOrigin(loc.origin) || urlService.isProxyOrigin(url)) {
-    return url;
-  }
-  const resolvedRelativeUrl = urlService.resolveRelativeUrl(
-    url,
-    urlService.getSourceOrigin(loc.href)
-  );
-  return loc.origin + '/i/s/' + resolvedRelativeUrl.replace(/https?:\/\//, '');
 };
 
 /**

@@ -18,6 +18,7 @@ import {
   Action,
   AmpStoryStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   AmpStoryInteractiveResults,
   decideStrategy,
@@ -59,6 +60,7 @@ describes.realWin(
       const ampStoryResultsEl = win.document.createElement(
         'amp-story-interactive-results'
       );
+      ampStoryResultsEl.getAmpDoc = () => new AmpDocSingle(win);
       ampStoryResultsEl.getResources = () => win.__AMP_SERVICES.resources.obj;
 
       storeService = new AmpStoryStoreService(win);

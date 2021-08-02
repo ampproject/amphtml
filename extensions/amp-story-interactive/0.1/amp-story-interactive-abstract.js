@@ -38,7 +38,10 @@ import {
   buildInteractiveDisclaimerIcon,
 } from './interactive-disclaimer';
 import {closest} from '#core/dom/query';
-import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
+import {
+  createShadowRootWithStyle,
+  maybeMakeProxyUrl,
+} from '../../amp-story/1.0/utils';
 import {deduplicateInteractiveIds} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
@@ -333,7 +336,15 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         while (options.length < optionNumber) {
           options.push({'optionIndex': options.length});
         }
-        options[optionNumber - 1][splitParts.slice(2).join('')] = attr.value;
+        const key = splitParts.slice(2).join('');
+        if (key === 'image') {
+          options[optionNumber - 1][key] = maybeMakeProxyUrl(
+            attr.value,
+            this.getAmpDoc()
+          );
+        } else {
+          options[optionNumber - 1][key] = attr.value;
+        }
       }
     });
     if (

@@ -323,3 +323,22 @@ export function triggerClickFromLightDom(anchorElement, domElement) {
   outerAnchor.click();
   outerAnchor.remove();
 }
+
+/**
+ * Makes a proxy URL if document is served from a proxy origin. No-op otherwise.
+ * @param {string} url
+ * @param {!AmpDoc} ampDoc
+ * @return {string}
+ */
+export const maybeMakeProxyUrl = (url, ampDoc) => {
+  const urlService = Services.urlForDoc(ampDoc);
+  const loc = ampDoc.win.location;
+  if (!urlService.isProxyOrigin(loc.origin) || urlService.isProxyOrigin(url)) {
+    return url;
+  }
+  const resolvedRelativeUrl = urlService.resolveRelativeUrl(
+    url,
+    urlService.getSourceOrigin(loc.href)
+  );
+  return loc.origin + '/i/s/' + resolvedRelativeUrl.replace(/https?:\/\//, '');
+};
