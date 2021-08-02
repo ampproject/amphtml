@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {sleep} from '#testing/helpers';
+
 describes.endtoend(
   'amp-video with video analytics',
   {
@@ -29,10 +31,6 @@ describes.endtoend(
 
     function isPaused(elem) {
       return controller.getElementProperty(elem, 'paused');
-    }
-
-    function sleep(ms) {
-      return new Promise((res) => setTimeout(res, ms));
     }
 
     it('control buttons should manipulate video box behavior', async () => {

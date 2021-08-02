@@ -17,7 +17,7 @@
 'use strict';
 
 const {fillIframeSrcdoc} = require('./helpers');
-const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+const {sleep} = require('#testing/helpers');
 
 /**
  * Percy preserves the DOM object as snapshot so the content of iframe is not

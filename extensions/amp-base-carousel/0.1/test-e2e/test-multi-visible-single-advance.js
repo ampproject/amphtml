@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {getNextArrow, getPrevArrow, getSlides, sleep} from './helpers';
+import {getNextArrow, getPrevArrow, getSlides} from './helpers';
+import {sleep} from '#testing/helpers';
 
 describes.endtoend(
   'amp-base-carousel - advancing with multiple visible slides',

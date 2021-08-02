@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {sleep} from './common';
+import {sleep} from '#testing/helpers';
 
 describes.endtoend(
   'amp-consent',
