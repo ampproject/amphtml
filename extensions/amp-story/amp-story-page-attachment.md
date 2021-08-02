@@ -110,7 +110,7 @@ String that customizes the button text. The default is "Swipe up".
 
 ### `cta-image` (optional)
 
-String representing a URL pointing to an image. 48x48px is suggested.
+String representing a URL pointing to an image. Optimize performance and avoid distortion by using a 48x48px image.
 
 ```html
 <amp-story-page-attachment
@@ -124,7 +124,7 @@ String representing a URL pointing to an image. 48x48px is suggested.
 
 ### `cta-image-2` (optional)
 
-String representing a URL pointing to an image. 48x48px is suggested. Two images will display when `cta-image` and `cta-image-2` are defined.
+String representing a URL pointing to an image. Two images will display when `cta-image` and `cta-image-2` are defined. Optimize performance and avoid distortion by using a 48x48px image.
 
 ```html
 <amp-story-page-attachment
