@@ -204,7 +204,6 @@ class AmpDailymotion extends AMP.BaseElement {
     if (data === undefined) {
       return; // The message isn't valid
     }
-    console.log(data);
 
     redispatch(this.element, data['event'], {
       [DailymotionEvents.API_READY]: VideoEvents.LOAD,
