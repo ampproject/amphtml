@@ -89,7 +89,7 @@ const TRACKER_TYPE = Object.freeze({
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     // Escape the temporal dead zone by not referencing a class directly.
     klass: function (root) {
-      return new CustomBrowserEventTracker(root);
+      return new BrowserEventTracker(root);
     },
   },
   [AnalyticsEventType.CUSTOM]: {
@@ -335,9 +335,9 @@ export class EventTracker {
 }
 
 /**
- * Tracks custom browser events.
+ * Tracks browser events as a pass-through.
  */
-export class CustomBrowserEventTracker extends EventTracker {
+export class BrowserEventTracker extends EventTracker {
   /**
    * @param {!./analytics-root.AnalyticsRoot} root
    */
@@ -383,27 +383,23 @@ export class CustomBrowserEventTracker extends EventTracker {
       'selectionMethod': selectionMethod = null,
       'selector': selector,
     } = config;
-
     userAssert(
-      selector.length,
+      selector?.length,
       'Missing required selector on browser event trigger'
     );
     assertUniqueSelectors(selector);
-
     const targetPromises = this.root.getElements(
       context,
       selector,
       selectionMethod,
       false
     );
-
     if (!this.hasListener_[eventName]) {
       this.root
         .getRootElement()
         .addEventListener(eventName, this.debouncedBoundOnSession_, true);
       this.hasListener_[eventName] = true;
     }
-
     return this.observables_.add((event) => {
       if (event.type !== eventName) {
         return;
@@ -420,7 +416,6 @@ export class CustomBrowserEventTracker extends EventTracker {
     });
   }
 }
-
 /**
  * Tracks custom events.
  */
@@ -430,10 +425,8 @@ export class CustomEventTracker extends EventTracker {
    */
   constructor(root) {
     super(root);
-
     /** @const @private {!Object<string, !Observable<!AnalyticsEvent>>} */
     this.observables_ = {};
-
     /**
      * Early events have to be buffered because there's no way to predict
      * how fast all `amp-analytics` elements will be instrumented.
@@ -1385,6 +1378,7 @@ export class VideoEventTracker extends EventTracker {
     this.boundOnSession_ = this.sessionObservable_.fire.bind(
       this.sessionObservable_
     );
+
     Object.keys(VideoAnalyticsEvents).forEach((key) => {
       this.root
         .getRoot()
