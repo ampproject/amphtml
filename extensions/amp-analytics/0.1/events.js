@@ -410,7 +410,8 @@ export class BrowserEventTracker extends EventTracker {
           if (!target.contains(el)) {
             return;
           }
-          listener(new AnalyticsEvent(target, eventName, event.detail));
+          // TODO(kalemuw): Allowlist properties from event.detail to pass as vars.
+          listener(new AnalyticsEvent(target, eventName, {}));
         });
       });
     });
