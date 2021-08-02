@@ -127,11 +127,6 @@ export class TestConfig {
     return this.if(this.runOnIos);
   }
 
-  ifIe() {
-    // It's necessary to first enable IE because we skip it by default.
-    return this.enableIe().if(this.runOnIe);
-  }
-
   /**
    * @param {function():boolean} fn
    */

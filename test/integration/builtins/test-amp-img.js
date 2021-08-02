@@ -16,11 +16,7 @@
 
 import {AmpEvents} from '#core/constants/amp-events';
 import {createCustomEvent} from '../../../src/event-helper';
-import {
-  createFixtureIframe,
-  expectBodyToBecomeVisible,
-  poll,
-} from '#testing/iframe';
+import {createFixtureIframe, expectBodyToBecomeVisible} from '#testing/iframe';
 
 describes.sandboxed
   .configure()
@@ -102,64 +98,3 @@ describes.sandboxed
       expect(ampImage.querySelectorAll('img').length).to.equal(1);
     });
   });
-
-// Move IE tests into its own `describe()`
-// so that we can load a different fixture.
-describes.sandboxed
-  .configure()
-  .enableIe()
-  .run('Rendering of amp-img', {}, () => {
-    let fixture;
-    beforeEach(async () => {
-      fixture = await createFixtureIframe('test/fixtures/images-ie.html', 500);
-    });
-
-    // IE doesn't support the srcset attribute, so if the developer
-    // provides a srcset but no src to amp-img, it should set the src
-    // attribute to the first entry in srcset.
-    describe
-      .configure()
-      .ifIe()
-      .run('srcset support - Internet Explorer edge cases', () => {
-        it('should guarantee src if srcset is not supported', async () => {
-          await waitForImageToLoad(fixture.doc, 'img[amp-img-id="srcset"]');
-
-          const img = fixture.doc.querySelector(
-            '#srcset img[amp-img-id="srcset"]'
-          );
-          expect(img.getAttribute('src')).to.equal('/examples/img/hero@1x.jpg');
-        });
-      });
-
-    // IE can't scale SVG images, so intrinsic sizers use a PNG instead.
-    describe
-      .configure()
-      .enableIe()
-      .run('intrinsic layout', () => {
-        it('renders intrinsic layout with correct size', async () => {
-          await waitForImageToLoad(fixture.doc, 'img[amp-img-id="intrinsic"]');
-
-          const ampImg = fixture.doc.getElementById('intrinsic');
-          const width = parseInt(ampImg.getAttribute('width'), 10);
-          const height = parseInt(ampImg.getAttribute('height'), 10);
-          const bounds = ampImg.getBoundingClientRect();
-
-          expect(bounds.width / bounds.height).to.be.closeTo(
-            width / height,
-            0.001
-          );
-        });
-      });
-  });
-
-function waitForImageToLoad(document, selector) {
-  return poll(
-    'wait for img to load',
-    () => {
-      const img = document.querySelector(selector);
-      return img !== null;
-    },
-    () => {},
-    8000
-  );
-}
