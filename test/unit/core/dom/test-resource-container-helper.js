@@ -19,12 +19,12 @@ import {
   loadAll,
   pauseAll,
   unmountAll,
-} from '../../../src/utils/resource-container-helper';
+} from '#core/dom/resource-container-helper';
 
 const INCLUDE_SELF = true;
 const DEEP = true;
 
-describes.realWin('resource-container-helper', {}, (env) => {
+describes.realWin('DOM - resource-container-helper', {}, (env) => {
   let win, doc;
   let tree;
   let ampGrandparent, ampGrandparentSibling;

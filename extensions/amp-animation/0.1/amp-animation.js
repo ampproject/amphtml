@@ -22,7 +22,7 @@ import {WebAnimationPlayState} from './web-animation-types';
 import {WebAnimationService} from './web-animation-service';
 import {clamp} from '#core/math';
 import {dev, userAssert} from '../../../src/log';
-import {getChildJsonConfig} from '../../../src/json';
+import {getChildJsonConfig} from '#core/dom';
 import {getDetail, listen} from '../../../src/event-helper';
 import {installWebAnimationsIfNecessary} from './install-polyfill';
 import {isFiniteNumber} from '#core/types';
