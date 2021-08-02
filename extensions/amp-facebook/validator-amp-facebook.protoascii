@@ -24,6 +24,7 @@ tags: {  # amp-facebook 1.0
   excludes: "amp-facebook-comments 0.1"
   excludes: "amp-facebook-like 0.1"
   excludes: "amp-facebook-page 0.1"
+  excludes: "amp-facebook-page 0.1 tag"
   extension_spec: {
     name: "amp-facebook"
     version_name: "v1.0"
@@ -100,7 +101,7 @@ tags: {  # <amp-facebook-page> via amp-facebook script
   tag_name: "AMP-FACEBOOK-PAGE"
   requires_extension: "amp-facebook"
   requires: "amp-facebook 1.0"
-  spec_name: "amp-facebook-page 1.0"
+  spec_name: "amp-facebook-page 1.0 tag"
   attr_lists: "amp-facebook-strict"
   attr_lists: "extended-amp-global"
   amp_layout: {
