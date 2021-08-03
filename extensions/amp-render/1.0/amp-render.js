@@ -107,7 +107,6 @@ function getUpdateValue(bindingValue, isFirstMutation) {
  * @param {!Document} doc
  * @param {?Element} template
  * @return {number} count of non-empty child nodes
- * @private
  */
 function getTemplateNonEmptyNodeCount(doc, template) {
   let childNodes = [];
