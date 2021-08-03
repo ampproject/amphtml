@@ -18,6 +18,7 @@
 import './polyfills';
 
 import {IframeTransportClient} from './iframe-transport-client';
+
 import {initLogConstructor, setReportError} from '../src/log';
 
 initLogConstructor();

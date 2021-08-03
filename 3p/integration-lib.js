@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
-import {IntegrationAmpContext} from './ampcontext-integration';
 import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
 import {endsWith} from '#core/types/string';
+
+import {run, setExperimentToggles} from './3p';
+import {IntegrationAmpContext} from './ampcontext-integration';
+import {installEmbedStateListener, manageWin} from './environment';
 import {getAmpConfig, getEmbedType, getLocation} from './frame-metadata';
-import {getSourceUrl, isProxyOrigin, parseUrlDeprecated} from '../src/url';
+
+import {urls} from '../src/config';
+import {internalRuntimeVersion} from '../src/internal-version';
 import {
   initLogConstructor,
   isUserErrorMessage,
   setReportError,
   userAssert,
 } from '../src/log';
-import {installEmbedStateListener, manageWin} from './environment';
-import {internalRuntimeVersion} from '../src/internal-version';
-import {parseJson} from '#core/types/object/json';
-import {run, setExperimentToggles} from './3p';
-import {urls} from '../src/config';
+import {getSourceUrl, isProxyOrigin, parseUrlDeprecated} from '../src/url';
 
 /**
  * Whether the embed type may be used with amp-embed tag.

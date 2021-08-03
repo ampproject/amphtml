@@ -461,5 +461,9 @@ module.exports = {
         ],
       },
     },
+    {
+      'files': ['3p/**/*.js', 'src/**/*.js'],
+      'rules': {'import/order': 2},
+    },
   ],
 };

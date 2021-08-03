@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import {dashToUnderline} from '#core/types/string';
-import {devAssert} from '../src/log';
-import {dict} from '#core/types/object';
-import {isEnumValue} from '#core/types/enum';
-import {loadScript} from './3p';
 import {setStyle} from '#core/dom/style';
+import {isEnumValue} from '#core/types/enum';
+import {dict} from '#core/types/object';
+import {dashToUnderline} from '#core/types/string';
+
+import {loadScript} from './3p';
+
+import {devAssert} from '../src/log';
 
 /** @const @enum {string} */
 export const FacebookEmbedType = {
