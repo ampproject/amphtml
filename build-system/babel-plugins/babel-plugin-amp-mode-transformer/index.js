@@ -24,7 +24,6 @@ const {dirname, join, relative, resolve} = require('path').posix;
 // This plugin is only executed when bundling for production builds (minified).
 module.exports = function ({types: t}) {
   let getModeFound = false;
-  let modeNamespaceFound = false;
   return {
     visitor: {
       ImportDeclaration({node}, state) {
@@ -32,17 +31,6 @@ module.exports = function ({types: t}) {
         if (!source.value.endsWith('/mode')) {
           return;
         }
-
-        if (source.value === '#core/mode') {
-          if (
-            specifiers.length === 1 &&
-            specifiers[0].local.name === 'mode' &&
-            specifiers[0].type === 'ImportNamespaceSpecifier'
-          ) {
-            modeNamespaceFound = true;
-          }
-        }
-
         specifiers.forEach((specifier) => {
           if (specifier.imported && specifier.imported.name === 'getMode') {
             const filepath = relative(
@@ -78,16 +66,8 @@ module.exports = function ({types: t}) {
         }
       },
       CallExpression(path) {
-        if (!modeNamespaceFound) {
-          return;
-        }
-
         const {INTERNAL_RUNTIME_VERSION: version} = this.opts;
-        const {callee} = path.node;
-        if (
-          callee?.object?.name === 'mode' &&
-          callee?.property?.name === 'version'
-        ) {
+        if (path.get('callee').referencesImport('#core/mode', 'version')) {
           path.replaceWith(t.stringLiteral(version));
         }
       },
