@@ -120,7 +120,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
       this.onDrag_();
     });
     this.inputEl_.addEventListener('change', () => {
-      // this.onRelease_();
+      this.onRelease_();
     });
 
     this.inputEl_.addEventListener(
