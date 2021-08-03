@@ -30,11 +30,11 @@ limitations under the License.
 
 The `amp-story-interactive` component provides a set of experiences, such as quizzes or polls, in [Web Stories](https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/?format=stories).
 
-<div layout="container" width="3" height="2">
+<amp-layout layout="container" width="3" height="2">
 <div style="width:32%;display:inline-block"><amp-img src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/quiz-art.png" layout="responsive" width="200" height="350"/></div>
 <div style="width:32%;display:inline-block"><amp-img src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/animal-poll.png" layout="responsive" width="200" height="350"/></div>
 <div style="width:32%;display:inline-block"><amp-img src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/results-art.png" layout="responsive" width="200" height="350"/></div>
-</div>
+</amp-layout>
 
 ## Usage
 
