@@ -1322,6 +1322,19 @@ tags: {
 
 # 4.5 Text-level semantics
 # 4.5.1 The a element
+attr_lists: {
+  # https://github.com/ampproject/amphtml/issues/35067
+  name: "click-attributions"
+  attrs: { name: "attributiondestination" }
+  attrs: { name: "attributionexpiry" }
+  attrs: { name: "attributionreportto" }
+  attrs: { name: "attributionsourceeventid" }
+  attrs: { name: "attributionsourceid" }
+  attrs: { name: "conversiondestination" }
+  attrs: { name: "impressiondata" }
+  attrs: { name: "impressionexpiry" }
+  attrs: { name: "reportingorigin" }
+}
 tags: {
   html_format: AMP
   html_format: AMP4ADS
@@ -1427,6 +1440,7 @@ tags: {
     value: "auto"
     value: "true"
   }
+  attr_lists: "click-attributions"
   attr_lists: "name-attr"
   # <amp-bind>
   attrs: { name: "[href]" }
