@@ -18,7 +18,7 @@ import {Key} from '../../../../build-system/tasks/e2e/e2e-types';
 describes.endtoend(
   'custom browser events',
   {
-    fixture: 'amp-analytics/custom-browser-events.html',
+    fixture: 'amp-analytics/browser-events.html',
     environments: ['single'],
   },
   (env) => {
