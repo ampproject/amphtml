@@ -44,7 +44,11 @@ function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME)) {
     pushBuildWorkflow();
   } else {
-    skipDependentJobs(jobName, 'this PR does not affect the runtime');
+    skipDependentJobs(
+      jobName,
+      'this PR does not affect the runtime',
+      /* gracefullyHaltNextJobs= */ false
+    );
   }
 }
 
