@@ -66,9 +66,10 @@ PASS
 |              layout="fixed-height"
 |              height="100"
 |              src="/examples/images.json"
-|              binding="no">
-|              <template type="amp-mustache">
-|                <div><a href="{{url}}">{{title}}</a></div>
+|              binding="no"
+|              template="my-page-template">
+|              <template id="my-page-template" type="amp-mustache">
+|                <div>{{#images}}<b><a href="{{urls.picsum}}">{{author}}</a></b>{{/images}}</div>
 |              </template>
 |              <div placeholder>Loading ...</div>
 |              <div fallback>Failed to load data.</div>
@@ -78,9 +79,8 @@ PASS
 |
 |        <amp-story-page id="attachment-rendering">
 |          <amp-story-grid-layer template="fill">
-|            <amp-img src="/examples/" width="900" height="1600">
-|            <template type="amp-mustache" id="my-template">
-|              <div><a href="{{url}}">{{title}}</a></div>
+|            <template id="my-attachment-template" type="amp-mustache">
+|              <div>{{#images}}<b><a href="{{urls.picsum}}">{{author}}</a></b>{{/images}}</div>
 |            </template>
 |          </amp-story-grid-layer>
 |          <amp-story-page-attachment layout="nodisplay">
@@ -90,7 +90,7 @@ PASS
 |              height="100"
 |              src="/examples/images.json"
 |              binding="no"
-|              template="my-template">
+|              template="my-attachment-template">
 |            </amp-render>
 |          </amp-story-page-attachment>
 |        </amp-story-page>
