@@ -39,12 +39,16 @@
   top: 12.5vh !important;
 }
 
+.i-amphtml-story-ad-badge-svg {
+  top: 50%  !important;
+  left: 50% !important;
+  position: relative !important;
+  transform: translate(-50%, -50%) !important;
+}
+
 .i-amphtml-story-ad-badge {
-  background-position: center !important;
   height: 24px !important;
-  margin: 0 !important;
   opacity: 0 !important;
-  padding: 0 !important;
   width: 24px !important;
   visibility: hidden !important;
 }
