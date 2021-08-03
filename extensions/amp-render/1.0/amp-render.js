@@ -98,6 +98,38 @@ function getUpdateValue(bindingValue, isFirstMutation) {
   return false;
 }
 
+/**
+ * Returns the non-empty node count in a template (defined as a `template`
+ * or `script` element). This is required to establish if the template content has
+ * a single wrapper element and if so we need to include it while rendering the
+ * template. For more info, see https://github.com/ampproject/amphtml/issues/35401.
+ * TODO(dmanek): Observe rewrapping at a lower level in BaseTemplate.
+ * @param {!Document} doc
+ * @param {?Element} template
+ * @return {number} count of non-empty child nodes
+ * @private
+ */
+function getTemplateNonEmptyNodeCount(doc, template) {
+  let childNodes = [];
+  if (template.tagName === 'SCRIPT') {
+    const div = doc.createElement('div');
+    div./*OK*/ innerHTML = template./*OK*/ innerHTML;
+    childNodes = div.childNodes;
+  } else if (template.tagName == 'TEMPLATE') {
+    childNodes = template.content.childNodes;
+  }
+  return toArray(childNodes).reduce(
+    (count, node) =>
+      count +
+      Number(
+        node.nodeType === Node.TEXT_NODE
+          ? node.textContent.trim().length > 0
+          : node.nodeType !== Node.COMMENT_NODE
+      ),
+    0
+  );
+}
+
 export class AmpRender extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -336,37 +368,6 @@ export class AmpRender extends BaseElement {
       .then((html) => dict({'__html': html}));
   }
 
-  /**
-   * Returns the non-empty node count in a template (defined as a `template`
-   * or `script` element). This is required to establish if the template content has
-   * a single wrapper element and if so we need to include it while rendering the
-   * template. For more info, see https://github.com/ampproject/amphtml/issues/35401.
-   * TODO(dmanek): Observe rewrapping at a lower level in BaseTemplate.
-   * @param {?Element} template
-   * @return {number} count of non-empty child nodes
-   * @private
-   */
-  getTemplateNonEmptyNodeCount_(template) {
-    let childNodes = [];
-    if (template.tagName === 'SCRIPT') {
-      const div = this.element.ownerDocument.createElement('div');
-      div./*OK*/ innerHTML = template./*OK*/ innerHTML;
-      childNodes = div.childNodes;
-    } else if (template.tagName == 'TEMPLATE') {
-      childNodes = template.content.childNodes;
-    }
-    return toArray(childNodes).reduce(
-      (count, node) =>
-        count +
-        Number(
-          node.nodeType === Node.TEXT_NODE
-            ? node.textContent.trim().length > 0
-            : node.nodeType !== Node.COMMENT_NODE
-        ),
-      0
-    );
-  }
-
   /** @override */
   checkPropsPostMutations() {
     const templates =
@@ -399,8 +400,10 @@ export class AmpRender extends BaseElement {
               if (!bind) {
                 return this.renderTemplateAsString_(data);
               }
-              const nonEmptyNodeCount =
-                this.getTemplateNonEmptyNodeCount_(template);
+              const nonEmptyNodeCount = getTemplateNonEmptyNodeCount(
+                this.element.ownerDocument,
+                template
+              );
               return templates
                 .renderTemplate(dev().assertElement(template), data)
                 .then((element) => {

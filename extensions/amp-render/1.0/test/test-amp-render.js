@@ -989,7 +989,7 @@ describes.realWin(
 
     it('should preserve the wrapper element for script template tag', async () => {
       env.sandbox.stub(BatchedJsonModule, 'batchFetchJsonFor').resolves({
-        'menu': '<li>Item 2</li><li>Item 3</li>',
+        'menu': '<p>Hello</p>',
       });
 
       // prettier-ignore
@@ -1000,13 +1000,11 @@ describes.realWin(
           width="auto"
           height="300"
           layout="fixed-height">
-          <script type="text/plain" template="amp-mustache"><ul><li>Item 1</li>{{{menu}}}</ul></script></amp-render>`;
+          <script type="text/plain" template="amp-mustache">{{{menu}}}</script></amp-render>`;
       doc.body.appendChild(element);
 
       const wrapper = await waitRendered();
-      expect(wrapper.innerHTML).to.equal(
-        '<ul><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul>'
-      );
+      expect(wrapper.innerHTML).to.equal('<p>Hello</p>');
     });
   }
 );
