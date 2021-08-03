@@ -92,19 +92,11 @@
           </div>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
-          <amp-story-interactive-quiz
-            id="quiz"
-            prompt-text="Which of these structures is oldest?"
-            prompt-size="large"
-            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
-            option-1-text="Statue of Liberty"
-            option-1-correct
-            option-1-confetti="🎉"
-						option-2-text="Golden Gate Bridge"
-            option-3-text="Christ the Redeemer"
-            option-4-text="Eiffel Tower"
-          >
-          </amp-story-interactive-quiz>
+          <div>
+            <input type="range" id="quiz-count" name="quiz-count" min="0" max="10">
+            <label for="quiz-count"># of quizzes</label>
+          </div>
+          <div id="quizzes"></div>
         </amp-story-grid-layer>
       </amp-story-page>
 			<amp-story-page id="img-quiz-page">
@@ -359,5 +351,26 @@
         </amp-story-grid-layer>
       </amp-story-page>
     </amp-story>
+    <script>
+      var quizCounter = document.getElementById('quiz-count');
+      quizCounter.addEventListener('touchmove', function(e) {
+        e.stopPropagation();
+        console.log('hi');
+      }, true);
+      quizCounter.oninput = function (e) {
+        e.stopPropagation();
+        var quizzes = document.getElementById('quizzes');
+        quizzes.innerHTML = '';
+        for (var i = 0; i < quizCounter.value; i++) {
+          var quiz = document.createElement('amp-story-interactive-quiz');
+          quiz.setAttribute('id', 'quiz-' + i);
+          quiz.setAttribute('endpoint', 'https://webstoriesinteractivity-beta.web.app/api/v1');
+          quiz.setAttribute('option-1-text', 'Statue of Liberty');
+          quiz.setAttribute('option-1-correct', 'true');
+          quiz.setAttribute('option-2-text', 'Golden Gate Bridge');
+          quizzes.append(quiz);
+        }
+      }
+    </script>
   </body>
 </html>
