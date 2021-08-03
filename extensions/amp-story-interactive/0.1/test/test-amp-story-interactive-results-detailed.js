@@ -18,6 +18,7 @@ import {
   Action,
   AmpStoryStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryInteractiveResultsDetailed} from '../amp-story-interactive-results-detailed';
 import {InteractiveType} from '../amp-story-interactive-abstract';
 import {LocalizationService} from '#service/localization';
@@ -43,6 +44,7 @@ describes.realWin(
       const ampStoryResultsDetailedEl = win.document.createElement(
         'amp-story-interactive-results-detailed'
       );
+      ampStoryResultsDetailedEl.getAmpDoc = () => new AmpDocSingle(win);
       ampStoryResultsDetailedEl.getResources = () =>
         win.__AMP_SERVICES.resources.obj;
 
