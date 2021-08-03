@@ -95,7 +95,7 @@ here, as ads in stories will only be displayed once fully rendered.
 Instead of adding in the JSON configuration file inside a script tag (as shown in the Inline Ad Config section),
 One may also host the remote URL using a
 
-[emote JSON ad configuration file](https://github.com/ampproject/amphtml/blob/main/examples/amp-story/ads/remote.json)
+[Remote JSON ad configuration file](https://github.com/ampproject/amphtml/blob/main/examples/amp-story/ads/remote.json)
 
 ```json
 {
