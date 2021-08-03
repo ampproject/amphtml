@@ -62,6 +62,7 @@ PASS
 |        poster-portrait-src="http://me.com/poster.jpg">
 |        <amp-story-page id="page-rendering">
 |          <amp-story-grid-layer template="vertical">
+|            <!-- Valid: amp-render within amp-story-page -->
 |            <amp-render
 |              layout="fixed-height"
 |              height="100"
@@ -84,6 +85,7 @@ PASS
 |          </amp-story-grid-layer>
 |          <amp-story-page-attachment layout="nodisplay">
 |            <h1>Page Attachment</h1>
+|            <!-- Valid: amp-render within amp-story-page-attachment -->
 |            <amp-render
 |              layout="fixed-height"
 |              height="100"
