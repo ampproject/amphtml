@@ -26,6 +26,7 @@ import {computedStyle, setStyles} from '#core/dom/style';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
+import {toArray} from '#core/types/array';
 
 /** @const {string} */
 const TAG = 'amp-render';
@@ -56,7 +57,7 @@ const isAmpStateSrc = (src) => src && src.startsWith(AMP_STATE_URI_SCHEME);
  * @param {string} src
  * @return {Promise<!JsonObject>}
  */
-const getAmpStateJson = (element, src) => {
+function getAmpStateJson(element, src) {
   return Services.bindForDocOrNull(element)
     .then((bind) => {
       userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
@@ -77,7 +78,7 @@ const getAmpStateJson = (element, src) => {
       );
       return json;
     });
-};
+}
 
 /**
  * @param {string} bindingValue
@@ -95,6 +96,37 @@ function getUpdateValue(bindingValue, isFirstMutation) {
     return true;
   }
   return false;
+}
+
+/**
+ * Returns the non-empty node count in a template (defined as a `template`
+ * or `script` element). This is required to establish if the template content has
+ * a single wrapper element and if so we need to include it while rendering the
+ * template. For more info, see https://github.com/ampproject/amphtml/issues/35401.
+ * TODO(dmanek): Observe rewrapping at a lower level in BaseTemplate.
+ * @param {!Document} doc
+ * @param {?Element} template
+ * @return {number} count of non-empty child nodes
+ */
+function getTemplateNonEmptyNodeCount(doc, template) {
+  let childNodes = [];
+  if (template.tagName === 'SCRIPT') {
+    const div = doc.createElement('div');
+    div./*OK*/ innerHTML = template./*OK*/ innerHTML;
+    childNodes = div.childNodes;
+  } else if (template.tagName == 'TEMPLATE') {
+    childNodes = template.content.childNodes;
+  }
+  return toArray(childNodes).reduce(
+    (count, node) =>
+      count +
+      Number(
+        node.nodeType === Node.TEXT_NODE
+          ? node.textContent.trim().length > 0
+          : node.nodeType !== Node.COMMENT_NODE
+      ),
+    0
+  );
 }
 
 export class AmpRender extends BaseElement {
@@ -367,6 +399,10 @@ export class AmpRender extends BaseElement {
               if (!bind) {
                 return this.renderTemplateAsString_(data);
               }
+              const nonEmptyNodeCount = getTemplateNonEmptyNodeCount(
+                this.element.ownerDocument,
+                template
+              );
               return templates
                 .renderTemplate(dev().assertElement(template), data)
                 .then((element) => {
@@ -380,7 +416,17 @@ export class AmpRender extends BaseElement {
                         bind.signals().get('FIRST_MUTATE') === null
                       ),
                     })
-                    .then(() => dict({'__html': element./* OK */ innerHTML}));
+                    .then(() =>
+                      dict({
+                        // We should use innerHTML when the template lacks a wrapper
+                        // element, outerHTML otherwise in order to include the wrapper
+                        // element itself.
+                        '__html':
+                          nonEmptyNodeCount === 1
+                            ? element./* OK */ outerHTML
+                            : element./* OK */ innerHTML,
+                      })
+                    );
                 });
             });
           },
