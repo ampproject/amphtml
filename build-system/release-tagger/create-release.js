@@ -45,15 +45,6 @@ function _formatPullRequestLine(pr) {
 }
 
 /**
- * Create raw notes
- * @param {Array<GraphQlQueryResponseData>} prs
- * @return {Array<string>}
- */
-function _createRawNotes(prs) {
-  return prs.map((pr) => _formatPullRequestLine(pr));
-}
-
-/**
  * Organize pull requests into sections
  * @param {Array<GraphQlQueryResponseData>} prs
  * @return {Array<string>}
@@ -117,7 +108,7 @@ function _createSections(prs) {
  * @return {string}
  */
 function _createBody(base, prs) {
-  const rawNotes = _createRawNotes(prs);
+  const rawNotes = prs.map(_formatPullRequestLine);
   const sections = _createSections(prs);
   const template = dedent`\
       #### *Baseline release: [${base}]\
