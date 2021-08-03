@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -522,7 +522,7 @@ export class DraggableDrawer extends AMP.BaseElement {
           return;
         }
         this.state = DrawerState.DRAGGING_TO_OPEN;
-        let drag = Math.max(deltaY, -this.dragCap_) - this.spacerElHeight_;
+        const drag = Math.max(deltaY, -this.dragCap_) - this.spacerElHeight_;
 
         translate = `translate3d(0, calc(100% + ${drag}px), 0)`;
         break;
