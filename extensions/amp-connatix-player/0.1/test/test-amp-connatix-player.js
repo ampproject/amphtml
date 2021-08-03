@@ -73,6 +73,18 @@ describes.realWin(
         'https://cdm.connatix.com/amp-embed/index.html?playerId=f721b0d8-7a79-42b6-b637-fa4e86138ed9&mediaId=527207df-2007-43c4-b87a-f90814bafd2e&url=about%3Asrcdoc'
       );
     });
+    it('renders when data-elements-player is set', async () => {
+      const cnx = await getConnatixPlayer({
+        'data-player-id': 'f721b0d8-7a79-42b6-b637-fa4e86138ed9',
+        'data-elements-player': true,
+      });
+      const iframe = cnx.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(
+        'https://cdm.elements.video/amp-embed/index.html?playerId=f721b0d8-7a79-42b6-b637-fa4e86138ed9&url=about%3Asrcdoc'
+      );
+    });
 
     it('fails if no playerId is specified', () => {
       return allowConsoleError(() => {
