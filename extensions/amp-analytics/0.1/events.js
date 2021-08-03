@@ -347,7 +347,7 @@ export class BrowserEventTracker extends EventTracker {
     /** @private {?Observable<!Event>} */
     this.observables_ = new Observable();
 
-    /** @private {!Object<BrowserEventType, Boolean>} */
+    /** @private {!Object<BrowserEventType, boolean>} */
     this.listenerMap_ = dict({});
 
     /** @private {?function(!Event)} */
@@ -426,7 +426,6 @@ export class CustomEventTracker extends EventTracker {
    */
   constructor(root) {
     super(root);
-
     /** @const @private {!Object<string, !Observable<!AnalyticsEvent>>} */
     this.observables_ = {};
     /**
