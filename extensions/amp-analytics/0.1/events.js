@@ -347,13 +347,13 @@ export class BrowserEventTracker extends EventTracker {
     /** @private {?Observable<!Event>} */
     this.observables_ = new Observable();
 
-    /** @private {?Object<BrowserEventType>} */
+    /** @private {!Object<BrowserEventType, Boolean>} */
     this.listenerMap_ = dict({});
 
     /** @private {?function(!Event)} */
     this.boundOnSession_ = this.observables_.fire.bind(this.observables_);
 
-    /** @private {function(!Event):void} */
+    /** @private {?function(!Event):void} */
     this.debouncedBoundOnSession_ = debounce(
       this.root.ampdoc.win,
       this.boundOnSession_,
