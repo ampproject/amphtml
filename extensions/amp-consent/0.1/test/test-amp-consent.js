@@ -1166,11 +1166,6 @@ describes.realWin(
           };
         });
 
-        afterEach(() => {
-          /* toggleExperiment(win, 'amp-consent-granular-consent', false) // launched: true */
-          false;
-        });
-
         it('handles purposeConsentMap w/ accept', () => {
           event.source = iframe.contentWindow;
           win.dispatchEvent(event);
@@ -1521,11 +1516,6 @@ describes.realWin(
         defaultConfig = dict({
           'consentInstanceId': 'abc',
         });
-      });
-
-      afterEach(() => {
-        /* toggleExperiment(win, 'amp-consent-granular-consent', false) // launched: true */
-        false;
       });
 
       describe('purposeConsentRequired', () => {
