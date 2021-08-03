@@ -308,7 +308,12 @@ export function googlePageParameters(a4a, startTime) {
       return '';
     });
   // Collect user agent hints info
-  const uaHintsPromise = getUserAgentClientHintParameters(win);
+  const uaHintsPromise = Services.timerFor(win)
+    .timeoutPromise(1000, getUserAgentClientHintParameters(win))
+    .catch(() => {
+      dev().expectedError('AMP-A4A', 'UACH timeout!');
+      return {};
+    });
   // Set dom loading time to first visible if page started in prerender state
   // determined by truthy value for visibilityState param.
   const domLoading = a4a.getAmpDoc().getParam('visibilityState')
