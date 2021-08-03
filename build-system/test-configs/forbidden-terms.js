@@ -154,6 +154,7 @@ const forbiddenTermsGlobal = {
       'src/core/mode/minified.js',
       'src/core/mode/prod.js',
       'build-system/compile/build-constants.js',
+      'build-system/babel-plugins/babel-plugin-amp-mode-transformer/index.js',
     ],
   },
   '\\.prefetch\\(': {
@@ -805,10 +806,7 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Due to various bugs in Firefox, you must use the computedStyle ' +
       'helper in style.js.',
-    allowlist: [
-      'src/core/dom/style.js',
-      'build-system/tasks/coverage-map/index.js',
-    ],
+    allowlist: ['src/core/dom/style.js'],
   },
   'decodeURIComponent\\(': {
     message:

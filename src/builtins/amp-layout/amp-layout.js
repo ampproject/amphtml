@@ -22,7 +22,7 @@ import {registerElement} from '#service/custom-element-registry';
 import {BaseElement} from '../../base-element';
 import {getEffectiveLayout} from '../../static-layout';
 
-class AmpLayout extends BaseElement {
+export class AmpLayout extends BaseElement {
   /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
@@ -35,22 +35,23 @@ class AmpLayout extends BaseElement {
 
   /** @override */
   buildCallback() {
-    buildDom(this.win.document, this.element);
+    buildDom(this.element);
   }
 }
 
 /**
+ * @see amphtml/compiler/types.js for full description
  *
- * @param {!Document} document
  * @param {!Element} element
  */
-export function buildDom(document, element) {
+export function buildDom(element) {
   const layout = getEffectiveLayout(element);
   if (layout == Layout.CONTAINER) {
     return;
   }
 
-  const container = document.createElement('div');
+  const doc = element.ownerDocument;
+  const container = doc.createElement('div');
   applyFillContent(container);
   realChildNodes(element).forEach((child) => {
     container.appendChild(child);

@@ -60,7 +60,12 @@ commands:
             mkdir -p /tmp/workspace
       - run:
           name: 'Maybe Gracefully Halt'
-          command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/maybe_gracefully_halt.sh | bash
+          command: /tmp/restored-workspace/maybe_gracefully_halt.sh
+      - restore_cache:
+          keys:
+            - source-v1-{{ .Branch }}-{{ .Revision }}
+            - source-v1-{{ .Branch }}-
+            - source-v1-
       - checkout
       - run:
           name: 'Configure Development Environment'
@@ -83,12 +88,6 @@ commands:
       - browser-tools/install-chrome:
           replace-existing: true
       - browser-tools/install-chromedriver
-  fail_fast:
-    steps:
-      - run:
-          name: 'Fail Fast'
-          when: on_fail
-          command: ./.circleci/fail_fast.sh
   store_test_output:
     steps:
       - store_artifacts:
@@ -108,13 +107,26 @@ commands:
                 command: circleci-agent step halt
 
 jobs:
-  'Compute Merge Commit':
+  'Initialize Repository':
     executor:
       name: amphtml-small-executor
     steps:
+      - restore_cache:
+          keys:
+            - source-v1-{{ .Branch }}-{{ .Revision }}
+            - source-v1-{{ .Branch }}-
+            - source-v1-
+      - checkout
+      - save_cache:
+          key: source-v1-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - .git
       - run:
-          name: 'Compute Merge Commit'
-          command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/compute_merge_commit.sh | bash
+          name: 'Initialize Repository'
+          command: ./.circleci/initialize_repo.sh
+      - run:
+          name: 'Initialize Workspace'
+          command: cp .circleci/maybe_gracefully_halt.sh /tmp/workspace
       - teardown_vm
   'Checks':
     executor:
@@ -125,7 +137,6 @@ jobs:
       - run:
           name: 'Checks'
           command: node build-system/pr-check/checks.js
-      - fail_fast
       - teardown_vm
   'Unminified Build':
     executor:
@@ -135,9 +146,8 @@ jobs:
       - run:
           name: 'Unminified Build'
           command: node build-system/pr-check/unminified-build.js
-      - fail_fast
       - teardown_vm
-  'Nomodule Build':
+  'Nomodule Build - Test':
     executor:
       name: amphtml-xlarge-executor
     steps:
@@ -150,9 +160,8 @@ jobs:
           command: node build-system/pr-check/nomodule-build.js
       - store_artifacts:
           path: /tmp/artifacts/amp_nomodule_build.tar.gz
-      - fail_fast
       - teardown_vm
-  'Module Build':
+  'Module Build - Test':
     executor:
       name: amphtml-xlarge-executor
     steps:
@@ -160,17 +169,33 @@ jobs:
       - run:
           name: 'Module Build'
           command: node build-system/pr-check/module-build.js
-      - fail_fast
       - teardown_vm
-  'Bundle Size':
+  'Nomodule Build - Prod':
     executor:
       name: amphtml-xlarge-executor
     steps:
       - setup_vm
       - run:
+          name: 'Nomodule Build'
+          command: node build-system/pr-check/bundle-size-nomodule-build.js
+      - teardown_vm
+  'Module Build - Prod':
+    executor:
+      name: amphtml-xlarge-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Module Build'
+          command: node build-system/pr-check/bundle-size-module-build.js
+      - teardown_vm
+  'Bundle Size':
+    executor:
+      name: amphtml-medium-executor
+    steps:
+      - setup_vm
+      - run:
           name: 'Bundle Size'
           command: node build-system/pr-check/bundle-size.js
-      - fail_fast
       - teardown_vm
   'Validator Tests':
     executor:
@@ -184,7 +209,6 @@ jobs:
           name: 'Validator Tests'
           command: node build-system/pr-check/validator-tests.js
       - store_test_output
-      - fail_fast
       - teardown_vm
   'Visual Diff Tests':
     executor:
@@ -196,7 +220,6 @@ jobs:
           name: 'Visual Diff Tests'
           command: node build-system/pr-check/visual-diff-tests.js
       - store_test_output
-      - fail_fast
       - teardown_vm
   'Local Unit Tests':
     executor:
@@ -209,7 +232,6 @@ jobs:
           name: 'Local Unit Tests'
           command: node build-system/pr-check/unit-tests-local.js
       - store_test_output
-      - fail_fast
       - teardown_vm
   'All Unit Tests':
     executor:
@@ -233,7 +255,6 @@ jobs:
           name: 'Unminified Tests'
           command: node build-system/pr-check/unminified-tests.js
       - store_test_output
-      - fail_fast
       - teardown_vm
   'Nomodule Tests':
     executor:
@@ -250,7 +271,6 @@ jobs:
           name: 'Nomodule Tests (<< parameters.config >>)'
           command: node build-system/pr-check/nomodule-tests.js --config=<< parameters.config >>
       - store_test_output
-      - fail_fast
       - teardown_vm
   'Module Tests':
     executor:
@@ -267,7 +287,6 @@ jobs:
           name: 'Module Tests (<< parameters.config >>)'
           command: node build-system/pr-check/module-tests.js --config=<< parameters.config >>
       - store_test_output
-      - fail_fast
       - teardown_vm
   'End-to-End Tests':
     executor:
@@ -291,7 +310,6 @@ jobs:
           name: 'Performance Tests'
           command: node build-system/pr-check/performance-tests.js
       - store_test_output
-      - fail_fast
       - teardown_vm
   'Experiment Build':
     executor:
@@ -302,7 +320,6 @@ jobs:
       - run:
           name: 'Experiment << parameters.exp >> Build'
           command: node build-system/pr-check/experiment-build.js --experiment=experiment<< parameters.exp >>
-      - fail_fast
       - teardown_vm
   'Experiment Integration Tests':
     executor:
@@ -315,7 +332,6 @@ jobs:
           name: 'Experiment << parameters.exp >> Integration Tests'
           command: node build-system/pr-check/experiment-integration-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
-      - fail_fast
       - teardown_vm
   'Experiment End-to-End Tests':
     executor:
@@ -329,46 +345,59 @@ jobs:
           name: 'Experiment << parameters.exp >> End-to-End Tests'
           command: node build-system/pr-check/experiment-e2e-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
-      - fail_fast
       - teardown_vm
 
 workflows:
   'CircleCI':
     jobs:
-      - 'Compute Merge Commit':
+      - 'Initialize Repository':
           <<: *push_and_pr_builds
       - 'Checks':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
       - 'Unminified Build':
+          name: 'Unminified Build (Test)'
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
-      - 'Nomodule Build':
+            - 'Initialize Repository'
+      - 'Nomodule Build - Test':
+          name: 'Nomodule Build (Test)'
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
-      - 'Module Build':
+            - 'Initialize Repository'
+      - 'Module Build - Test':
+          name: 'Module Build (Test)'
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
+      - 'Nomodule Build - Prod':
+          name: 'Nomodule Build (Prod)'
+          <<: *push_and_pr_builds
+          requires:
+            - 'Initialize Repository'
+      - 'Module Build - Prod':
+          name: 'Module Build (Prod)'
+          <<: *push_and_pr_builds
+          requires:
+            - 'Initialize Repository'
       - 'Bundle Size':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Nomodule Build (Prod)'
+            - 'Module Build (Prod)'
       - 'Validator Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
       - 'Visual Diff Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build'
+            - 'Nomodule Build (Test)'
       - 'Local Unit Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
       - 'All Unit Tests':
           name: '⛓️ All Unit Tests'
           <<: *push_and_pr_builds
@@ -377,7 +406,7 @@ workflows:
       - 'Unminified Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Unminified Build'
+            - 'Unminified Build (Test)'
       - 'Nomodule Tests':
           name: 'Nomodule Tests (<< matrix.config >>)'
           matrix:
@@ -385,7 +414,7 @@ workflows:
               config: ['prod', 'canary']
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build'
+            - 'Nomodule Build (Test)'
       - 'Module Tests':
           name: 'Module Tests (<< matrix.config >>)'
           matrix:
@@ -393,13 +422,13 @@ workflows:
               config: ['prod', 'canary']
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build'
-            - 'Module Build'
+            - 'Nomodule Build (Test)'
+            - 'Module Build (Test)'
       - 'End-to-End Tests':
           name: '⛓️ End-to-End Tests'
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build'
+            - 'Nomodule Build (Test)'
       - 'Experiment Build':
           name: 'Experiment << matrix.exp >> Build'
           matrix:
@@ -407,7 +436,7 @@ workflows:
               exp: ['A', 'B', 'C']
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Repository'
       - 'Experiment Integration Tests':
           name: 'Exp. << matrix.exp >> Integration Tests'
           matrix:
@@ -428,4 +457,4 @@ workflows:
       # - 'Performance Tests':
       #     <<: *push_builds_only
       #     requires:
-      #       - 'Nomodule Build'
+      #       - 'Nomodule Build (Test)'

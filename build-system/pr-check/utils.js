@@ -16,6 +16,8 @@
 'use strict';
 
 const fs = require('fs-extra');
+const globby = require('globby');
+const path = require('path');
 const {
   ciPullRequestSha,
   circleciBuildNumber,
@@ -136,13 +138,16 @@ function signalGracefulHalt() {
  * for skipping.
  * @param {string} jobName
  * @param {string} skipReason
+ * @param {boolean} gracefullyHaltNextJobs true to signal to downstreams jobs that they too should be skipped.
  */
-function skipDependentJobs(jobName, skipReason) {
+function skipDependentJobs(jobName, skipReason, gracefullyHaltNextJobs = true) {
   const loggingPrefix = getLoggingPrefix();
   logWithoutTimestamp(
     `${loggingPrefix} Skipping ${cyan(jobName)} because ${skipReason}.`
   );
-  signalGracefulHalt();
+  if (gracefullyHaltNextJobs) {
+    signalGracefulHalt();
+  }
 }
 
 /**
@@ -249,6 +254,18 @@ function storeBuildToWorkspace_(containerDirectory) {
       fs.moveSync(
         `${outputDir}/`,
         `/tmp/workspace/builds/${containerDirectory}/${outputDir}`
+      );
+    }
+    // Bento components are compiled inside the extension source file.
+    for (const componentFile of globby.sync('extensions/*/?.?/dist/*.js')) {
+      fs.ensureDirSync(
+        `/tmp/workspace/builds/${containerDirectory}/${path.dirname(
+          componentFile
+        )}`
+      );
+      fs.moveSync(
+        componentFile,
+        `/tmp/workspace/builds/${containerDirectory}/${componentFile}`
       );
     }
   }
