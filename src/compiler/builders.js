@@ -35,10 +35,11 @@ const builderMap = {
 export function getBuilders(versions) {
   const builders = {};
 
-  for (const {name, version} of versions) {
-    const builder = builderMap?.[version]?.[name];
+  for (const tag of Object.keys(versions)) {
+    const version = versions[tag];
+    const builder = builderMap?.[version]?.[tag];
     if (builder) {
-      builders[name] = builder;
+      builders[tag] = builder;
     }
   }
 

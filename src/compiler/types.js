@@ -36,8 +36,8 @@ export let BuildDomDef;
 export let TreeProtoDef;
 
 /**
- * Contains versioning data of <component, version> tuples.
+ * Contains component versioning data via a map from tagName --> version.
  *
- * @typedef {!Array<{name: string, version:string}>}
+ * @typedef {Object<string, string>}}
  */
 export let VersionsDef;
