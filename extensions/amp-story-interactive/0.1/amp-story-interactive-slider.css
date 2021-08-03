@@ -35,14 +35,14 @@
 }
 
 .i-amphtml-story-interactive-slider-bubble {
-  position: relative !important;
+  position: absolute !important;
   transform: translate(-50%, -50%) scale(0) !important;
   text-align: center !important;
   line-height: 2.9em !important;
   font-weight: 700 !important;
+  height: 100% !important;
+  width: 100% !important;
   color: white !important;
-  transition: transform var(--i-amphtml-interactive-animation-time)
-    var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 [dir='rtl'].i-amphtml-story-interactive-slider-container {
@@ -61,7 +61,8 @@
 }
 
 .i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-bubble {
-  transform: translate(var(--translate-x-center), -160%) scale(1) !important;
+  --scale-var: calc(var(--fraction) + 1) !important;
+  transform: translateY(calc(var(--scale-var) * -70% - 40%)) scale(var(--scale-var)) !important;
 }
 
 .i-amphtml-story-interactive-slider-bubble::after {
@@ -97,18 +98,14 @@
 }
 
 .i-amphtml-story-interactive-slider-bubble-wrapper {
-  --scale-var: calc(var(--fraction) + 1) !important;
-  transform: translate(
-      calc(var(--thumb-size) * var(--fraction)),
-      calc(var(--fraction) * 90%)
-    )
-    scale(var(--scale-var)) !important;
+  transform: translate(-50%, -50%) !important;
   position: absolute !important;
   width: 2.8em !important;
   height: 2.8em !important;
   top: 50% !important;
   left: var(--percentage) !important;
-  z-index: 1 !important;
+  transition: transform var(--i-amphtml-interactive-animation-time)
+    var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble-wrapper {
@@ -182,6 +179,8 @@
       var(--i-amphtml-interactive-ease-out-curve),
     box-shadow var(--i-amphtml-interactive-animation-time)
       var(--i-amphtml-interactive-ease-out-curve) !important;
+  border: none !important;
+  z-index: 1 !important;
 }
 
 .i-amphtml-story-interactive-slider-input::-moz-range-thumb {
