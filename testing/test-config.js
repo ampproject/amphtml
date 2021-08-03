@@ -62,7 +62,7 @@ export class TestConfig {
     /**
      * By default, IE is skipped. Individual tests may opt in.
      */
-    this.skip(/Trident|MSIE|IEMobile/i.test(window.navigator.userAgent));
+    this.skip(() => /Trident|MSIE|IEMobile/i.test(window.navigator.userAgent));
   }
 
   skipModuleBuild() {
@@ -90,7 +90,7 @@ export class TestConfig {
   }
 
   skipIfPropertiesObfuscated() {
-    return this.skip(window.__karma__.config.amp.propertiesObfuscated);
+    return this.skip(() => window.__karma__.config.amp.propertiesObfuscated);
   }
 
   /**
