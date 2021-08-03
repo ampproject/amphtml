@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as mode from '#core/mode';
 import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {endsWith} from '#core/types/string';
@@ -24,7 +25,6 @@ import {installEmbedStateListener, manageWin} from './environment';
 import {getAmpConfig, getEmbedType, getLocation} from './frame-metadata';
 
 import {urls} from '../src/config';
-import * as mode from '#core/mode';
 import {
   initLogConstructor,
   isUserErrorMessage,
