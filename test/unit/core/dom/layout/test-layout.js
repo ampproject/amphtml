@@ -662,7 +662,7 @@ describes.realWin('ampshared.css', {amp: true}, function (env) {
     doc.body.appendChild(element);
   });
 
-  describe.configure().run('overflow', function () {
+  describe('overflow', function () {
     let overflow;
 
     beforeEach(() => {
@@ -717,7 +717,7 @@ describes.realWin('Layout: aspect-ratio CSS', {amp: true}, function (env) {
     resetShouldUseAspectRatioCssForTesting();
   });
 
-  describe.configure().run('aspect-ratio not supported', function () {
+  describe('aspect-ratio not supported', function () {
     before(function () {
       if (CSS.supports('aspect-ratio: 1/1')) {
         this.skipTest();
@@ -750,7 +750,7 @@ describes.realWin('Layout: aspect-ratio CSS', {amp: true}, function (env) {
     });
   });
 
-  describe.configure().run('aspect-ratio supported', function () {
+  describe('aspect-ratio supported', function () {
     before(function () {
       if (!CSS.supports('aspect-ratio: 1/1')) {
         this.skipTest();
