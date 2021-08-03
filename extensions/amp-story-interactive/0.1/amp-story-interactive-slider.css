@@ -112,6 +112,7 @@
   transform: scale(1) !important;
   transition: transform var(--i-amphtml-interactive-animation-time)
     var(--i-amphtml-interactive-ease-out-curve) !important;
+    z-index: 1 !important;
 }
 
 [type='emoji'] .i-amphtml-story-interactive-slider-bubble span {
