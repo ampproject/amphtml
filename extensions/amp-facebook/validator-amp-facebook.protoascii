@@ -63,6 +63,7 @@ tags: {  # <amp-facebook>
 }
 tags: {  # <amp-facebook-comments> via amp-facebook script
   html_format: AMP
+  spec_name: "amp-facebook-comments 1.0"
   tag_name: "AMP-FACEBOOK-COMMENTS"
   requires_extension: "amp-facebook"
   requires: "amp-facebook 1.0"
@@ -79,6 +80,7 @@ tags: {  # <amp-facebook-comments> via amp-facebook script
 }
 tags: {  # <amp-facebook-like> via amp-facebook script
   html_format: AMP
+  spec_name: "amp-facebook-like 1.0"
   tag_name: "AMP-FACEBOOK-LIKE"
   requires_extension: "amp-facebook"
   requires: "amp-facebook 1.0"
@@ -95,6 +97,7 @@ tags: {  # <amp-facebook-like> via amp-facebook script
 }
 tags: {  # <amp-facebook-page> via amp-facebook script
   html_format: AMP
+  spec_name: "amp-facebook-page 1.0"
   tag_name: "AMP-FACEBOOK-PAGE"
   requires_extension: "amp-facebook"
   requires: "amp-facebook 1.0"
