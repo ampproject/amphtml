@@ -504,7 +504,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     if (optionEl) {
       this.updateStoryStoreState_(optionEl.optionIndex_);
-      this.handleOptionSelection_(optionEl);
+      this.handleOptionSelection_(optionEl.optionIndex_, optionEl);
       const confettiEmoji = this.options_[optionEl.optionIndex_].confetti;
       if (confettiEmoji) {
         emojiConfetti(
@@ -520,17 +520,17 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   /**
    * Triggers the analytics event for quiz response.
    *
-   * @param {!Element} optionEl
+   * @param {number} optionIndex
    * @private
    */
-  triggerAnalytics_(optionEl) {
+  triggerAnalytics_(optionIndex) {
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.STORY_INTERACTIVE_ID,
       this.element.getAttribute('id')
     );
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.STORY_INTERACTIVE_RESPONSE,
-      optionEl.optionIndex_
+      optionIndex
     );
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.STORY_INTERACTIVE_TYPE,
