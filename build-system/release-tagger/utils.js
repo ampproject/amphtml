@@ -27,15 +27,14 @@ const {Octokit} = require('@octokit/rest');
 
 // setup
 const octokit = new Octokit({
-  auth: '',
+  auth: process.env.GITHUB_TOKEN,
   userAgent: 'amp release tagger',
-  previews: ['groot-preview'], // to list pull requests by commit
   timeZone: 'America/New_York',
 });
 
 const graphqlWithAuth = graphql.defaults({
   headers: {
-    authorization: `token todo`,
+    authorization: `token ${process.env.GITHUB_TOKEN}`,
   },
 });
 const owner = 'ampproject';
@@ -58,7 +57,8 @@ async function _runQueryInBatches(queryType, queries) {
   for (let i = 0; i < queries.length; i += config.batchSize) {
     const join = queries.slice(i, config.batchSize).join(' ');
     const query = `${queryType} {${join}}`;
-    responses.push(await graphqlWithAuth(query));
+    const data = await graphqlWithAuth(query);
+    responses.push(...Object.values(data));
   }
   return responses;
 }
@@ -140,7 +140,18 @@ async function getPullRequests(shas) {
       mergeCommit { commitUrl oid abbreviatedOid }}}}`
     );
   }
-  return await _runQueryInBatches('query', queries);
+  const nodesLists = await _runQueryInBatches('query', queries);
+
+  // Only return pull requests with the merge commit shas
+  const prs = [];
+  for (const nodesList of nodesLists) {
+    for (const node of nodesList.nodes) {
+      if (node.mergeCommit && shas.includes(node.mergeCommit.oid)) {
+        prs.push(node);
+      }
+    }
+  }
+  return prs;
 }
 
 /**

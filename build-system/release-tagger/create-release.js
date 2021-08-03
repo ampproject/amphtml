@@ -23,6 +23,7 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
+const dedent = require('dedent');
 const {
   createRelease,
   getPullRequestsBetweenCommits,
@@ -31,12 +32,104 @@ const {
 const {GraphQlQueryResponseData} = require('@octokit/graphql'); //eslint-disable-line no-unused-vars
 
 /**
+ * Format pull request line
+ * @param {GraphQlQueryResponseData} pr
+ * @return {string}
+ */
+function _formatPullRequestLine(pr) {
+  const {mergeCommit, number, title, url} = pr;
+  const {abbreviatedOid, commitUrl} = mergeCommit;
+  return dedent`\
+  <a href="${commitUrl}"><code>${abbreviatedOid}</code></a> ${title} \
+  (<a href="${url}">#${number}</a>)`;
+}
+
+/**
+ * Create raw notes
+ * @param {Array<GraphQlQueryResponseData>} prs
+ * @return {Array<string>}
+ */
+function _createRawNotes(prs) {
+  return prs.map((pr) => _formatPullRequestLine(pr));
+}
+
+/**
+ * Organize pull requests into sections
+ * @param {Array<GraphQlQueryResponseData>} prs
+ * @return {Array<string>}
+ */
+function _createSections(prs) {
+  const sections = {
+    'ads': [],
+    'build-system': [],
+    'src': [],
+    'third_party': [],
+    'validator': [],
+    'package updates': [],
+  };
+
+  for (const pr of prs) {
+    // renovate bot
+    if (pr.author.login === 'renovate-bot') {
+      sections['package updates'].push(_formatPullRequestLine(pr));
+      continue;
+    }
+
+    // directories
+    for (const key of Object.keys(sections)) {
+      if (pr.files.nodes.some((node) => node.path.startsWith(`${key}/`))) {
+        sections[key].push(_formatPullRequestLine(pr));
+      }
+    }
+
+    // components
+    for (const node of pr.files.nodes) {
+      if (node.path.startsWith('extensions/')) {
+        const component = node.path.split('/')[1];
+        if (!Object.keys(sections).includes(component)) {
+          sections[component] = [];
+        }
+        sections[component].push(_formatPullRequestLine(pr));
+      }
+    }
+  }
+
+  const sectionsMarkdown = [];
+  for (const key of Object.keys(sections).sort()) {
+    const orderedPrs = sections[key].sort();
+    const template = dedent`
+      <details>\
+        <summary>\
+          ${key} (${orderedPrs.length})\
+        </summary>\
+        ${orderedPrs.join('<br />')}\
+      </details>`;
+    sectionsMarkdown.push(template);
+  }
+
+  return sectionsMarkdown;
+}
+
+/**
  * Create body for GitHub release
+ * @param {string} base
  * @param {Array<GraphQlQueryResponseData>} prs
  * @return {string}
  */
-function _createBody(prs) {
-  return prs.map((pr) => pr.number).join('\n'); // TODO: build this out please
+function _createBody(base, prs) {
+  const rawNotes = _createRawNotes(prs);
+  const sections = _createSections(prs);
+  const template = dedent`\
+      #### *Baseline release: [${base}]\
+      (https://github.com/ampproject/amphtml/releases/${base})*
+
+      #### Raw notes
+      ${rawNotes.join('\n')}
+
+      #### Breakdown by component
+      ${sections.join('')}\
+  `;
+  return template;
 }
 
 /**
@@ -49,7 +142,7 @@ async function main(tag, previousTag) {
   const {'target_commitish': commit} = await getRelease(tag);
   const {'target_commitish': previousCommit} = await getRelease(previousTag);
   const prs = await getPullRequestsBetweenCommits(commit, previousCommit);
-  const body = _createBody(prs);
+  const body = _createBody(previousTag, prs);
   return await createRelease(tag, commit, body);
 }
 
