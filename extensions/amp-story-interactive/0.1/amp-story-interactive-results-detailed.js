@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {AmpStoryInteractiveResults} from './amp-story-interactive-results';
+import {InteractiveType} from './amp-story-interactive-abstract';
+import {
+  AmpStoryInteractiveResults,
+  decideStrategy,
+} from './amp-story-interactive-results';
 import {CSS} from '../../../build/amp-story-interactive-results-detailed-0.1.css';
 import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles} from '#core/dom/style';
@@ -61,8 +65,11 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
   constructor(element) {
     super(element);
 
-    /** @private {?Object} */
+    /** @private {?Map<string, Object>} */
     this.selectedResultEls_ = null;
+
+    /** @private {number} */
+    this.componentCount_ = 0;
   }
 
   /** @override */
@@ -80,7 +87,7 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
   /** @override */
   onInteractiveReactStateUpdate(interactiveState) {
     const components = Object.values(interactiveState);
-    if (this.selectedResultEls_) {
+    if (components.length === this.componentCount_) {
       // Function not passed in directly to ensure "this" works correctly
       components.forEach((e) => this.updateSelectedResult_(e));
     } else {
@@ -99,6 +106,7 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
    */
   initializeSelectedResultContainers_(components) {
     this.selectedResultEls_ = {};
+    this.componentCount_ = components.length;
     const detailedResultsContainer = this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-results-detailed'
     );
@@ -106,35 +114,42 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
     const slice = (2 * Math.PI) / components.length;
     const offset = Math.random() * slice;
 
+    const usePercentage = decideStrategy(this.options_) === 'percentage';
+
     components.forEach((e, index) => {
-      const container = document.createElement('div');
-      container.classList.add(
-        'i-amphtml-story-interactive-results-selected-result'
-      );
+      if (
+        (usePercentage && e.type === InteractiveType.QUIZ) ||
+        (!usePercentage && e.type === InteractiveType.POLL)
+      ) {
+        const container = document.createElement('div');
+        container.classList.add(
+          'i-amphtml-story-interactive-results-selected-result'
+        );
 
-      const angleBuffer = slice / 4;
-      const size = Math.random() * (MAX_SIZE - MIN_SIZE) + MIN_SIZE;
-      const angle =
-        Math.random() * (slice - 2 * angleBuffer) +
-        slice * index +
-        angleBuffer +
-        offset;
-      const dist = Math.random() * (MAX_DIST - MIN_DIST) + MIN_DIST;
-      const top = CENTER + Math.cos(angle) * dist - size / 2;
-      const left = CENTER + Math.sin(angle) * dist - size / 2;
+        const angleBuffer = slice / 4;
+        const size = Math.random() * (MAX_SIZE - MIN_SIZE) + MIN_SIZE;
+        const angle =
+          Math.random() * (slice - 2 * angleBuffer) +
+          slice * index +
+          angleBuffer +
+          offset;
+        const dist = Math.random() * (MAX_DIST - MIN_DIST) + MIN_DIST;
+        const top = CENTER + Math.cos(angle) * dist - size / 2;
+        const left = CENTER + Math.sin(angle) * dist - size / 2;
 
-      setImportantStyles(container, {
-        'height': size + 'em',
-        'width': size + 'em',
-        'top': top + 'em',
-        'left': left + 'em',
-      });
-      detailedResultsContainer.prepend(container);
-      this.selectedResultEls_[e.interactiveId] = {
-        el: container,
-        updated: false,
-      };
-      this.updateSelectedResult_(e);
+        setImportantStyles(container, {
+          'height': size + 'em',
+          'width': size + 'em',
+          'top': top + 'em',
+          'left': left + 'em',
+        });
+        detailedResultsContainer.prepend(container);
+        this.selectedResultEls_[e.interactiveId] = {
+          el: container,
+          updated: false,
+        };
+        this.updateSelectedResult_(e);
+      }
     });
   }
 

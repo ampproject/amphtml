@@ -18,12 +18,12 @@ import {
   Action,
   AmpStoryStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryInteractiveResultsDetailed} from '../amp-story-interactive-results-detailed';
 import {InteractiveType} from '../amp-story-interactive-abstract';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
-import {addConfigToInteractive} from './helpers';
-import {addThresholdsToInteractive} from './test-amp-story-interactive-results';
+import {addConfigToInteractive, addThresholdsToInteractive} from './helpers';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(
@@ -43,6 +43,7 @@ describes.realWin(
       const ampStoryResultsDetailedEl = win.document.createElement(
         'amp-story-interactive-results-detailed'
       );
+      ampStoryResultsDetailedEl.getAmpDoc = () => new AmpDocSingle(win);
       ampStoryResultsDetailedEl.getResources = () =>
         win.__AMP_SERVICES.resources.obj;
 
@@ -158,7 +159,7 @@ describes.realWin(
       ).to.equal('33');
     });
 
-    it('should correctly create elements corresponding to the number of interactive components', async () => {
+    it('should correctly create elements corresponding to the number of quizzes', async () => {
       addThresholdsToInteractive(ampStoryResultsDetailed, [80, 20, 50]);
       storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
@@ -175,13 +176,65 @@ describes.realWin(
         'option': {},
         'type': InteractiveType.QUIZ,
       });
+      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+        'interactiveId': 'l',
+        'option': {},
+        'type': InteractiveType.POLL,
+      });
       await ampStoryResultsDetailed.buildCallback();
       await ampStoryResultsDetailed.layoutCallback();
       expect(
-        ampStoryResultsDetailed.rootEl_.querySelector(
-          '.i-amphtml-story-interactive-results-detailed'
-        ).children.length
-      ).to.equal(4);
+        ampStoryResultsDetailed.rootEl_.querySelectorAll(
+          '.i-amphtml-story-interactive-results-selected-result'
+        ).length
+      ).to.equal(3);
+    });
+
+    it('should correctly create elements corresponding to the number of polls', async () => {
+      addConfigToInteractive(ampStoryResultsDetailed, 3);
+      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+        'interactiveId': 'i',
+        'option': {},
+        'type': InteractiveType.POLL,
+      });
+      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+        'interactiveId': 'j',
+        'option': {},
+        'type': InteractiveType.POLL,
+      });
+      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+        'interactiveId': 'k',
+        'option': {},
+        'type': InteractiveType.QUIZ,
+      });
+      await ampStoryResultsDetailed.buildCallback();
+      await ampStoryResultsDetailed.layoutCallback();
+      expect(
+        ampStoryResultsDetailed.rootEl_.querySelectorAll(
+          '.i-amphtml-story-interactive-results-selected-result'
+        ).length
+      ).to.equal(2);
+    });
+
+    it('should correctly set images for the detailed results elements', async () => {
+      addThresholdsToInteractive(ampStoryResultsDetailed, [80, 20, 50]);
+      const image = 'https://example.com/image';
+      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+        'interactiveId': 'i',
+        'option': {correct: 'correct', image},
+        'type': InteractiveType.QUIZ,
+      });
+      await ampStoryResultsDetailed.buildCallback();
+      await ampStoryResultsDetailed.layoutCallback();
+      expect(
+        win
+          .getComputedStyle(
+            ampStoryResultsDetailed.rootEl_.querySelector(
+              '.i-amphtml-story-interactive-results-selected-result'
+            )
+          )
+          .getPropertyValue('background-image')
+      ).to.contain(image);
     });
   }
 );
