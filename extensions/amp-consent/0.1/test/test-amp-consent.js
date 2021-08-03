@@ -220,34 +220,15 @@ describes.realWin(
         ampConsent = new AmpConsent(consentElement);
       });
 
-      it('send post request to server', async () => {
+      it('sends post request to server', async () => {
         await ampConsent.buildCallback();
         await macroTask();
-        expect(requestBody).to.deep.equal({
+        expect(requestBody).to.jsonEqual({
           'consentInstanceId': 'ABC',
           'consentStateValue': 'unknown',
-          'consentString': undefined,
-          'consentMetadata': undefined,
           'isDirty': false,
           'matchedGeoGroup': null,
         });
-      });
-
-      // TODO(micajuineho): remove test once granular consent launches
-      it('send post request to server with stores purpose consents', async () => {
-        ampConsent.isGranularConsentExperimentOn_ = true;
-        await ampConsent.buildCallback();
-        await macroTask();
-        expect(requestBody).to.deep.equal({
-          'consentInstanceId': 'ABC',
-          'consentStateValue': 'unknown',
-          'consentString': undefined,
-          'consentMetadata': undefined,
-          'purposeConsents': undefined,
-          'isDirty': false,
-          'matchedGeoGroup': null,
-        });
-        ampConsent.isGranularConsentExperimentOn_ = false;
       });
 
       it('read promptIfUnknown from server response', async () => {
@@ -360,7 +341,7 @@ describes.realWin(
       });
 
       describe('geoOverride server communication', () => {
-        it('send post request to server with matched group', async () => {
+        it('sends post request to server with matched group', async () => {
           const remoteConfig = {
             'consentInstanceId': 'abc',
             'geoOverride': {
@@ -374,11 +355,9 @@ describes.realWin(
           ampConsent = getAmpConsent(doc, remoteConfig);
           await ampConsent.buildCallback();
           await macroTask();
-          expect(requestBody).to.deep.equal({
+          expect(requestBody).to.jsonEqual({
             'consentInstanceId': 'abc',
             'consentStateValue': 'unknown',
-            'consentString': undefined,
-            'consentMetadata': undefined,
             'isDirty': false,
             'matchedGeoGroup': 'nafta',
           });
@@ -404,7 +383,7 @@ describes.realWin(
           expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
             .true;
           expect(ampConsent.matchedGeoGroup_).to.equal('na');
-          expect(requestBody).to.deep.equal({
+          expect(requestBody).to.jsonEqual({
             'consentInstanceId': 'abc',
             'consentStateValue': 'unknown',
             'consentString': undefined,
@@ -451,7 +430,7 @@ describes.realWin(
           expect(stateValue).to.equal('unknown');
           // 3 is dismissed, 4 is not requried, and 5 is unknown.
           // All 3 turn into 'unknown'.
-          expect(stateManagerInfo).to.deep.equal(
+          expect(stateManagerInfo).to.jsonEqual(
             constructConsentInfo(CONSENT_ITEM_STATE.NOT_REQUIRED)
           );
         });
@@ -507,44 +486,11 @@ describes.realWin(
               true
             ),
             'isDirty': undefined,
-            'purposeConsents': undefined,
-          });
-        });
-
-        it('updates local storage and uses those values (granular consent on)', async () => {
-          toggleExperiment(win, 'amp-consent-granular-consent', true);
-          const inlineConfig = {
-            'consentInstanceId': 'abc',
-            'consentRequired': 'remote',
-            'checkConsentHref': 'https://server-test-2/',
-          };
-          ampConsent = getAmpConsent(doc, inlineConfig);
-          await ampConsent.buildCallback();
-          await macroTask();
-          const stateManagerInfo = await ampConsent
-            .getConsentStateManagerForTesting()
-            .getConsentInstanceInfo();
-          const stateValue = getConsentStateValue(
-            stateManagerInfo.consentState
-          );
-
-          expect(stateValue).to.equal('rejected');
-          expect(stateManagerInfo).to.deep.equal({
-            'consentState': CONSENT_ITEM_STATE.REJECTED,
-            'consentString': 'mystring',
-            'consentMetadata': constructMetadata(
-              CONSENT_STRING_TYPE.US_PRIVACY_STRING,
-              '1~1.35.41.101',
-              false,
-              true
-            ),
-            'isDirty': undefined,
             'purposeConsents': {
               'abc': PURPOSE_CONSENT_STATE.ACCEPTED,
               'xyz': PURPOSE_CONSENT_STATE.REJECTED,
             },
           });
-          toggleExperiment(win, 'amp-consent-granular-consent', false);
         });
 
         it('accepts unknown as a response', async () => {
@@ -651,7 +597,6 @@ describes.realWin(
         });
 
         it('syncs purposeConsents from server', async () => {
-          toggleExperiment(win, 'amp-consent-granular-consent', true);
           const inlineConfig = {
             'consentInstanceId': 'abc',
             'consentRequired': true,
@@ -686,7 +631,6 @@ describes.realWin(
               {'xyz': PURPOSE_CONSENT_STATE.REJECTED}
             )
           );
-          toggleExperiment(win, 'amp-consent-granular-consent', false);
         });
 
         it('syncs metadata from server', async () => {
@@ -762,7 +706,6 @@ describes.realWin(
         });
 
         it('should validate purpose consents before syncing', async () => {
-          toggleExperiment(win, 'amp-consent-granular-consent', true);
           const inlineConfig = {
             'consentInstanceId': 'abc',
             'consentRequired': true,
@@ -777,7 +720,6 @@ describes.realWin(
           await macroTask();
           expect(validationSpy).to.be.calledOnce;
           expect(validationSpy).to.be.calledWith({'xyz': false});
-          toggleExperiment(win, 'amp-consent-granular-consent', false);
         });
 
         it('should not sync data if response is null', async () => {
@@ -1222,11 +1164,6 @@ describes.realWin(
               'purpose-bar': false,
             },
           };
-          toggleExperiment(win, 'amp-consent-granular-consent', true);
-        });
-
-        afterEach(() => {
-          toggleExperiment(win, 'amp-consent-granular-consent', false);
         });
 
         it('handles purposeConsentMap w/ accept', () => {
@@ -1569,7 +1506,6 @@ describes.realWin(
       let consentElement;
 
       beforeEach(() => {
-        toggleExperiment(win, 'amp-consent-granular-consent', true);
         jsonMockResponses = {
           'https://server-test-1/':
             '{"consentRequired": true, "purposeConsentRequired": ["abc", "bcd"]}',
@@ -1580,10 +1516,6 @@ describes.realWin(
         defaultConfig = dict({
           'consentInstanceId': 'abc',
         });
-      });
-
-      afterEach(() => {
-        toggleExperiment(win, 'amp-consent-granular-consent', false);
       });
 
       describe('purposeConsentRequired', () => {
