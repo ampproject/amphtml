@@ -14,25 +14,27 @@
  * limitations under the License.
  */
 
+import * as mode from '#core/mode';
+
+import {triggerAnalyticsEvent} from './analytics';
+import {urls} from './config';
 import {AmpEvents} from './core/constants/amp-events';
-import {Services} from './service';
+import {duplicateErrorIfNecessary} from './core/error';
+import {findIndex} from './core/types/array';
+import {exponentialBackoff} from './core/types/function/exponential-backoff';
+import {dict} from './core/types/object';
+import {isLoadErrorMessage} from './event-helper';
+import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
 import {
   USER_ERROR_SENTINEL,
   dev,
   isUserErrorEmbed,
   isUserErrorMessage,
 } from './log';
-import {dict} from './core/types/object';
-import {duplicateErrorIfNecessary} from './core/error';
-import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
-import {exponentialBackoff} from './core/types/function/exponential-backoff';
-import {findIndex} from './core/types/array';
 import {getMode} from './mode';
-import {isLoadErrorMessage} from './event-helper';
-import {isProxyOrigin} from './url';
+import {Services} from './service';
 import {makeBodyVisibleRecovery} from './style-installer';
-import {triggerAnalyticsEvent} from './analytics';
-import {urls} from './config';
+import {isProxyOrigin} from './url';
 
 /**
  * @const {string}
@@ -209,7 +211,7 @@ export function reportError(error, opt_associatedElement) {
       } else {
         if (element) {
           output.call(console, error.message, element);
-        } else if (!getMode().minified) {
+        } else if (!mode.isMinified()) {
           output.call(console, error.stack);
         } else {
           output.call(console, error.message);
