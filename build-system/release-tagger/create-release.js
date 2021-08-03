@@ -65,7 +65,7 @@ function _createSections(prs) {
     'src': [],
     'third_party': [],
     'validator': [],
-    'package updates': [],
+    'package updates': new Array(), // [] defaults to never[], which tsc flags
   };
 
   for (const pr of prs) {
