@@ -89,7 +89,7 @@ const TRACKER_TYPE = Object.freeze({
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     // Escape the temporal dead zone by not referencing a class directly.
     klass: function (root) {
-      return new CustomBrowserEventTracker(root);
+      return new BrowserEventTracker(root);
     },
   },
   [AnalyticsEventType.CUSTOM]: {
@@ -335,9 +335,9 @@ export class EventTracker {
 }
 
 /**
- * Tracks custom browser events.
+ * Tracks browser events as a pass-through.
  */
-export class CustomBrowserEventTracker extends EventTracker {
+export class BrowserEventTracker extends EventTracker {
   /**
    * @param {!./analytics-root.AnalyticsRoot} root
    */
@@ -384,7 +384,7 @@ export class CustomBrowserEventTracker extends EventTracker {
       'selector': selector,
     } = config;
     userAssert(
-      selector.length,
+      selector?.length,
       'Missing required selector on browser event trigger'
     );
     assertUniqueSelectors(selector);
@@ -410,7 +410,8 @@ export class CustomBrowserEventTracker extends EventTracker {
           if (!target.contains(el)) {
             return;
           }
-          listener(new AnalyticsEvent(target, eventName, event.detail));
+          // TODO(kalemuw): Allowlist properties from event.detail to pass as vars.
+          listener(new AnalyticsEvent(target, eventName, {}));
         });
       });
     });
@@ -1378,6 +1379,7 @@ export class VideoEventTracker extends EventTracker {
     this.boundOnSession_ = this.sessionObservable_.fire.bind(
       this.sessionObservable_
     );
+
     Object.keys(VideoAnalyticsEvents).forEach((key) => {
       this.root
         .getRoot()
