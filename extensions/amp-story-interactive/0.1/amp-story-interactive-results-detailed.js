@@ -50,8 +50,11 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
   constructor(element) {
     super(element);
 
-    /** @private {?Object} */
+    /** @private {?Map<string, Object>} */
     this.selectedResultEls_ = null;
+
+    /** @private {number} */
+    this.componentCount_ = 0;
   }
 
   /** @override */
@@ -69,7 +72,7 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
   /** @override */
   onInteractiveReactStateUpdate(interactiveState) {
     const components = Object.values(interactiveState);
-    if (this.selectedResultEls_) {
+    if (components.length === this.componentCount_) {
       // Function not passed in directly to ensure "this" works correctly
       components.forEach((e) => this.updateSelectedResult_(e));
     } else {
@@ -88,6 +91,7 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
    */
   initializeSelectedResultContainers_(components) {
     this.selectedResultEls_ = {};
+    this.componentCount_ = components.length;
     const detailedResultsContainer = this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-results-detailed'
     );
