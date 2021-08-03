@@ -32,7 +32,7 @@ const MEASURER_CLASS = 'i-amphtml-fit-text-measurer';
 const CONTENT_CLASS = 'i-amphtml-fit-text-content';
 const CONTENT_WRAPPER_CLASS = 'i-amphtml-fit-text-content-wrapper';
 
-class AmpFitText extends AMP.BaseElement {
+export class AmpFitText extends AMP.BaseElement {
   /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
