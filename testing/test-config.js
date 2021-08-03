@@ -58,12 +58,11 @@ export class TestConfig {
     this.runOnFirefox = this.platform.isFirefox.bind(this.platform);
     this.runOnSafari = this.platform.isSafari.bind(this.platform);
     this.runOnIos = this.platform.isIos.bind(this.platform);
-    this.runOnIe = this.platform.isIe.bind(this.platform);
 
     /**
      * By default, IE is skipped. Individual tests may opt in.
      */
-    this.skip(this.runOnIe);
+    this.skip(/Trident|MSIE|IEMobile/i.test(window.navigator.userAgent));
   }
 
   skipModuleBuild() {
@@ -91,9 +90,7 @@ export class TestConfig {
   }
 
   skipIfPropertiesObfuscated() {
-    return this.skip(function () {
-      return window.__karma__.config.amp.propertiesObfuscated;
-    });
+    return this.skip(window.__karma__.config.amp.propertiesObfuscated);
   }
 
   /**
