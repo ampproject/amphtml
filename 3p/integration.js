@@ -21,6 +21,7 @@
  * This files gets minified and published to
  * https://3p.ampproject.net/$version/f.js
  */
+/* eslint-disable import/order */
 
 // src/polyfills.js must be the first import.
 import './polyfills';

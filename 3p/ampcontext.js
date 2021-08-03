@@ -15,13 +15,15 @@
  */
 import {AmpEvents} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';
+import {isObject} from '#core/types';
+import {dict, map} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
+
 import {IframeMessagingClient} from './iframe-messaging-client';
+
 import {MessageType} from '../src/3p-frame-messaging';
 import {dev, devAssert} from '../src/log';
-import {dict, map} from '#core/types/object';
-import {isObject} from '#core/types';
 import {parseUrlDeprecated} from '../src/url';
-import {tryParseJson} from '#core/types/object/json';
 
 export class AbstractAmpContext {
   /**
