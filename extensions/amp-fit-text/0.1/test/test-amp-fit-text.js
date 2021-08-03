@@ -15,7 +15,6 @@
  */
 
 import {createElementWithAttributes} from '#core/dom';
-import {expect} from 'chai';
 import {
   AmpFitText,
   buildDom,
@@ -60,7 +59,7 @@ describes.realWin(
         .then(() => ft);
     }
 
-    it('buildDom should have same DOM mutations as buildCallback', () => {
+    it('buildDom and buildCallback should result in the same outerHTML', async () => {
       const fitText1 = createElementWithAttributes(doc, 'amp-fit-text', {
         width: '111px',
         height: '222px',
