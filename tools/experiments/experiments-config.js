@@ -65,6 +65,11 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
   },
   {
+    id: 'analytics-browser-events',
+    name: 'Allows tracking of a custom set of browser events',
+    spec: 'https://github.com/ampproject/amphtml/pull/35193',
+  },
+  {
     id: 'ios-fixed-no-transfer',
     name: 'Remove fixed transfer from iOS 12.2 and up',
     spec: 'https://github.com/ampproject/amphtml/issues/22220',
