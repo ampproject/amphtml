@@ -78,7 +78,8 @@ export class AmpMustache extends BaseTemplate {
       const container = this.element.ownerDocument.createElement('div');
       container.appendChild(content);
       return container./*OK*/ innerHTML;
-    } else if (this.element.tagName == 'SCRIPT') {
+    }
+    if (this.element.tagName == 'SCRIPT') {
       return this.element.textContent;
     }
 
