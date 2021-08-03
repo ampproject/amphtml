@@ -61,7 +61,7 @@
 }
 
 .i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-bubble {
-  transform: translate(calc(var(--translate-x-center)), calc(-160%)) scale(1) !important;
+  transform: translate(var(--translate-x-center), -160%) scale(1) !important;
 }
 
 .i-amphtml-story-interactive-slider-bubble::after {
