@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {AmpStoryInteractiveResults} from './amp-story-interactive-results';
+import {InteractiveType} from './amp-story-interactive-abstract';
+import {
+  AmpStoryInteractiveResults,
+  decideStrategy,
+} from './amp-story-interactive-results';
 import {CSS} from '../../../build/amp-story-interactive-results-detailed-0.1.css';
 import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles} from '#core/dom/style';
@@ -87,21 +91,27 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
     const detailedResultsContainer = this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-results-detailed'
     );
+    const usePercentage = decideStrategy(this.options_) === 'percentage';
     components.forEach((e) => {
-      const container = document.createElement('div');
-      container.classList.add(
-        'i-amphtml-story-interactive-results-selected-result'
-      );
-      setImportantStyles(container, {
-        'height': '5em',
-        'width': '5em',
-      });
-      detailedResultsContainer.appendChild(container);
-      this.selectedResultEls_[e.interactiveId] = {
-        el: container,
-        updated: false,
-      };
-      this.updateSelectedResult_(e);
+      if (
+        (usePercentage && e.type === InteractiveType.QUIZ) ||
+        (!usePercentage && e.type === InteractiveType.POLL)
+      ) {
+        const container = document.createElement('div');
+        container.classList.add(
+          'i-amphtml-story-interactive-results-selected-result'
+        );
+        setImportantStyles(container, {
+          'height': '5em',
+          'width': '5em',
+        });
+        detailedResultsContainer.appendChild(container);
+        this.selectedResultEls_[e.interactiveId] = {
+          el: container,
+          updated: false,
+        };
+        this.updateSelectedResult_(e);
+      }
     });
   }
 
