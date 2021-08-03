@@ -35,12 +35,17 @@ import {
 import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getChildJsonConfig} from '../../../src/json';
+import {getChildJsonConfig} from '#core/dom';
 import {map, omit} from '#core/types/object';
 import {prefersReducedMotion} from '#core/dom/media-query-props';
-import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
+import {
+  matches,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '#core/dom/query';
 import {setStyles} from '#core/dom/style';
 import {timeStrToMillis, unscaledClientRect} from './utils';
+import {isExperimentOn} from '#experiments';
 
 const TAG = 'AMP-STORY';
 
@@ -554,7 +559,10 @@ export class AnimationManager {
     this.builderPromise_ = this.createAnimationBuilderPromise_();
 
     /** @private @const {bool} */
-    this.prefersReducedMotion_ = prefersReducedMotion(ampdoc.win);
+    this.skipAnimations_ =
+      prefersReducedMotion(ampdoc.win) ||
+      (isExperimentOn(ampdoc.win, 'story-disable-animations-first-page') &&
+        matches(page, 'amp-story-page:first-of-type'));
 
     /** @private {?Array<!AnimationRunner>} */
     this.runners_ = null;
@@ -581,7 +589,7 @@ export class AnimationManager {
   applyFirstFrameOrFinish() {
     return Promise.all(
       this.getOrCreateRunners_().map((runner) =>
-        this.prefersReducedMotion_
+        this.skipAnimations_
           ? runner.applyLastFrame()
           : runner.applyFirstFrame()
       )
@@ -600,7 +608,7 @@ export class AnimationManager {
 
   /** Starts all entrance animations for the page. */
   animateIn() {
-    if (this.prefersReducedMotion_) {
+    if (this.skipAnimations_) {
       return;
     }
     this.getRunners_().forEach((runner) => runner.start());
@@ -622,7 +630,7 @@ export class AnimationManager {
 
   /** Pauses all animations in the page. */
   pauseAll() {
-    if (!this.runners_ || this.prefersReducedMotion_) {
+    if (!this.runners_ || this.skipAnimations_) {
       return;
     }
     this.getRunners_().forEach((runner) => runner.pause());
@@ -630,7 +638,7 @@ export class AnimationManager {
 
   /** Resumes all animations in the page. */
   resumeAll() {
-    if (!this.runners_ || this.prefersReducedMotion_) {
+    if (!this.runners_ || this.skipAnimations_) {
       return;
     }
     this.getRunners_().forEach((runner) => runner.resume());
