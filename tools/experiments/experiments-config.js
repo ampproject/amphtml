@@ -184,11 +184,6 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/31436',
   },
   {
-    id: 'amp-consent-granular-consent',
-    name: 'Client-side granular consent',
-    spec: 'https://github.com/ampproject/amphtml/issues/31607',
-  },
-  {
     id: 'amp-story-page-attachment-ui-v2',
     name: 'New UI for all new page attachments in stories format',
     spec: 'https://github.com/ampproject/amphtml/projects/123',
