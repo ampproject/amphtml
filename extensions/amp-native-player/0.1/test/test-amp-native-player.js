@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import '../amp-brid-player';
-import {Services} from '#service';
-import {VideoEvents} from '../../../../src/video-interface';
-import {listenOncePromise} from '../../../../src/event-helper';
+import '../amp-native-player';
+import { Services } from '#service';
+import { VideoEvents } from '../../../../src/video-interface';
+import { listenOncePromise } from '../../../../src/event-helper';
 
 describes.realWin(
-  'amp-brid-player',
+  'amp-native-player',
   {
     amp: {
-      extensions: ['amp-brid-player'],
+      extensions: ['amp-native-player'],
     },
   },
   (env) => {
@@ -36,8 +36,8 @@ describes.realWin(
       timer = Services.timerFor(win);
     });
 
-    function getBridPlayer(attributes, opt_responsive) {
-      const bc = doc.createElement('amp-brid-player');
+    function getNativePlayer(attributes, opt_responsive) {
+      const bc = doc.createElement('amp-native-player');
 
       for (const key in attributes) {
         bc.setAttribute(key, attributes[key]);
@@ -53,12 +53,12 @@ describes.realWin(
         .promise(50)
         .then(() => bc.getImpl())
         .then((impl) => {
-          const bridTimerIframe = bc.querySelector('iframe');
+          const nativeTimerIframe = bc.querySelector('iframe');
 
-          impl.handleBridMessage_({
-            origin: 'https://services.brid.tv',
-            source: bridTimerIframe.contentWindow,
-            data: 'Brid|0|trigger|ready',
+          impl.handleNativeMessage_({
+            origin: 'https://services.target-video.com',
+            source: nativeTimerIframe.contentWindow,
+            data: 'Native|0|trigger|ready',
           });
         });
       doc.body.appendChild(bc);
@@ -71,7 +71,7 @@ describes.realWin(
     }
 
     it('renders', () => {
-      return getBridPlayer({
+      return getNativePlayer({
         'data-partner': '264',
         'data-player': '4144',
         'data-video': '13663',
@@ -80,13 +80,13 @@ describes.realWin(
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.src).to.equal(
-          'https://services.brid.tv/services/iframe/video/13663/264/4144/0/1/?amp=1'
+          'https://services.target-video.com/services/iframe/video/13663/264/4144/0/1/?amp=1'
         );
       });
     });
 
     it('renders responsively', () => {
-      return getBridPlayer(
+      return getNativePlayer(
         {
           'data-partner': '1177',
           'data-player': '979',
@@ -102,7 +102,7 @@ describes.realWin(
 
     it('requires data-partner', () => {
       return allowConsoleError(() => {
-        return getBridPlayer({
+        return getNativePlayer({
           'data-player': '4144',
           'data-video': '13663',
         }).should.eventually.be.rejectedWith(
@@ -113,7 +113,7 @@ describes.realWin(
 
     it('requires data-player', () => {
       return allowConsoleError(() => {
-        return getBridPlayer({
+        return getNativePlayer({
           'data-partner': '264',
           'data-video': '13663',
         }).should.eventually.be.rejectedWith(
@@ -124,7 +124,7 @@ describes.realWin(
 
     it('requires data-partner for playlists', () => {
       return allowConsoleError(() => {
-        return getBridPlayer({
+        return getNativePlayer({
           'data-player': '4144',
           'data-playlist': '13663',
         }).should.eventually.be.rejectedWith(
@@ -135,7 +135,7 @@ describes.realWin(
 
     it('requires data-player for playlists', () => {
       return allowConsoleError(() => {
-        return getBridPlayer({
+        return getNativePlayer({
           'data-partner': '264',
           'data-playlist': '13663',
         }).should.eventually.be.rejectedWith(
@@ -146,7 +146,7 @@ describes.realWin(
 
     it('requires data-partner for carousels', () => {
       return allowConsoleError(() => {
-        return getBridPlayer({
+        return getNativePlayer({
           'data-player': '4144',
           'data-carousel': '459',
         }).should.eventually.be.rejectedWith(
@@ -157,7 +157,7 @@ describes.realWin(
 
     it('requires data-player for carousels', () => {
       return allowConsoleError(() => {
-        return getBridPlayer({
+        return getNativePlayer({
           'data-partner': '264',
           'data-carousel': '459',
         }).should.eventually.be.rejectedWith(
@@ -166,8 +166,8 @@ describes.realWin(
       });
     });
 
-    it('should forward events from brid-player to the amp element', async () => {
-      const bc = await getBridPlayer(
+    it('should forward events from native-player to the amp element', async () => {
+      const bc = await getNativePlayer(
         {
           'data-partner': '1177',
           'data-player': '979',
@@ -202,24 +202,24 @@ describes.realWin(
     });
 
     function sendFakeMessage(impl, iframe, command) {
-      impl.handleBridMessage_({
-        origin: 'https://services.brid.tv',
+      impl.handleNativeMessage_({
+        origin: 'https://services.target-video.com',
         source: iframe.contentWindow,
-        data: 'Brid|0|' + command,
+        data: 'Native|0|' + command,
       });
     }
 
     describe('createPlaceholderCallback', () => {
       it('should create a placeholder image', () => {
-        return getBridPlayer({
+        return getNativePlayer({
           'data-partner': '264',
           'data-player': '979',
           'data-video': '13663',
-        }).then((brid) => {
-          const img = brid.querySelector('img');
+        }).then((native) => {
+          const img = native.querySelector('img');
           expect(img).to.not.be.null;
           expect(img.getAttribute('src')).to.equal(
-            'https://cdn.brid.tv/live/partners/264/snapshot/13663.jpg'
+            'https://cdn.target-video.com/live/partners/264/snapshot/13663.jpg'
           );
           expect(img).to.have.class('i-amphtml-fill-content');
           expect(img).to.have.attribute('placeholder');
@@ -228,13 +228,13 @@ describes.realWin(
         });
       });
       it('should propagate aria label for placeholder image', () => {
-        return getBridPlayer({
+        return getNativePlayer({
           'data-partner': '264',
           'data-player': '979',
           'data-video': '13663',
           'aria-label': 'great video',
-        }).then((brid) => {
-          const img = brid.querySelector('img');
+        }).then((native) => {
+          const img = native.querySelector('img');
           expect(img).to.not.be.null;
           expect(img.getAttribute('alt')).to.equal(
             'Loading video - great video'
