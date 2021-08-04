@@ -799,6 +799,15 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-reddit",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "wrapper": "bento"
+    }
+  },
+  {
     "name": "amp-render",
     "version": "1.0",
     "latestVersion": "1.0",
