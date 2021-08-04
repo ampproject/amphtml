@@ -196,9 +196,6 @@ describes.realWin(
       ampStorySlider.element.setAttribute('endpoint', 'https://example.com');
       await ampStorySlider.buildCallback();
       await ampStorySlider.layoutCallback();
-      const sliderIndicator = ampStorySlider
-        .getRootElement()
-        .querySelector('.i-amphtml-story-interactive-slider-average-indicator');
       expect(
         win
           .getComputedStyle(ampStorySlider.getRootElement())
