@@ -21,7 +21,6 @@
         color: #fff;
         font-weight: normal;
         line-height: 1.174;
-        text-transform: uppercase;
       }
     </style>
   </head>
@@ -38,12 +37,12 @@
 
       <amp-story-page id="cover">
           <amp-story-grid-layer template="fill">
-              <amp-img src="https://images.unsplash.com/photo-1484151709479-3996843263cf?dpr=2&auto=format&fit=crop&w=568&h=379&q=60&cs=tinysrgb&ixid=dW5zcGxhc2guY29tOzs7Ozs%3D"
-                  width="900" height="1600">
-              </amp-img>
+            <amp-img src="https://images.unsplash.com/photo-1484151709479-3996843263cf?dpr=2&auto=format&fit=crop&w=568&h=379&q=60&cs=tinysrgb&ixid=dW5zcGxhc2guY29tOzs7Ozs%3D"
+                width="900" height="1600">
+            </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="vertical">
-            <h3>Hello, amp-story!</h3>
+            <h3>Background jpeg shuld be used for blur.</h3>
           </amp-story-grid-layer>
       </amp-story-page>
 
@@ -53,19 +52,66 @@
             width="900" height="1600">
           </amp-img>
         </amp-story-grid-layer>
-      </amp-story-page>
-
-      <amp-story-page id="page-2">
         <amp-story-grid-layer template="vertical">
-          <h1>Second Page</h1>
-          <p>This is the second page of this story.</p>
+          <h3>Background jpeg shuld be used for blur.</h3>
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-page id="page-3">
+      <amp-story-page id="no-image-page">
         <amp-story-grid-layer template="vertical">
-          <h1>Third Page</h1>
-          <p>This is the third page of this story.</p>
+          <p>No image page, background should fade to black.</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="video-page">
+        <amp-story-grid-layer template="fill">
+          <amp-video autoplay loop
+            width="400"
+            height="750"
+            poster="./img/poster2.jpg"
+            layout="fill">
+            <source src="./video/p1.mp4" type="video/mp4">
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h3>First frame of video should blur.</h3>
+          <h3>If slow connection, poster image should blur.</h3>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="transparent-png-and-img-page">
+        <amp-story-grid-layer template="thirds">
+          <amp-img grid-area="upper-third" src="img/amplogo.png" width="120" height="120">
+          </amp-img>
+          <amp-img grid-area="middle-third" src="https://images.unsplash.com/photo-1440658172029-9d9e5cdc127c?dpr=2&auto=format&fit=crop&w=568&h=344&q=60&cs=tinysrgb&ixid=dW5zcGxhc2guY29tOzs7Ozs%3D"
+            width="90" height="90">
+          </amp-img>
+          <p template="lower-third">
+            jpeg should blur even though it's smaller than png.
+          </p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      
+      <amp-story-page id="transparent-png-only-page">
+        <amp-story-grid-layer template="thirds">
+            <amp-img grid-area="upper-third" src="img/amplogo.png" width="120" height="120">
+            </amp-img>
+            <p template="lower-third">
+              png with transparency should not blur. Should fade to black.
+            </p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="solid-png-only-page">
+        <amp-story-grid-layer template="fill">
+          <amp-img src="img/ad-coffee.png"
+            width="90" height="90">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h3 template="lower-third">
+            Solid png (no transparency) should blur.
+          </h3>
         </amp-story-grid-layer>
       </amp-story-page>
     </amp-story>
