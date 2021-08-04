@@ -36,9 +36,9 @@
 
 .i-amphtml-story-interactive-slider-bubble {
   position: absolute !important;
-  transform: translate(-50%, -50%) scale(0) !important;
+  --scale-var: calc(var(--fraction) + 1) !important;
+  transform: translateY(calc(var(--scale-var) * -70% - 40%)) scale(var(--scale-var)) !important;
   text-align: center !important;
-  line-height: 2.9em !important;
   font-weight: 700 !important;
   height: 100% !important;
   width: 100% !important;
@@ -50,7 +50,7 @@
   --translate-x-center: 50% !important;
 }
 
-[dir='rtl'] .i-amphtml-story-interactive-slider-bubble {
+[dir='rtl'] .i-amphtml-story-interactive-slider-bubble-wrapper {
   right: var(--percentage) !important;
 }
 
@@ -60,9 +60,8 @@
   justify-content: center !important;
 }
 
-.i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-bubble {
-  --scale-var: calc(var(--fraction) + 1) !important;
-  transform: translateY(calc(var(--scale-var) * -70% - 40%)) scale(var(--scale-var)) !important;
+[type='percentage'] .i-amphtml-story-interactive-slider-bubble {
+  line-height: 2.9em !important;
 }
 
 .i-amphtml-story-interactive-slider-bubble::after {
@@ -82,7 +81,8 @@
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble {
-  transform: translate(var(--translate-x-center), -50%) scale(0.9) !important;
+  z-index: 2 !important;
+  transform: scale(0.9) !important;
   transition: transform var(--i-amphtml-interactive-animation-time)
     var(--i-amphtml-interactive-ease-out-curve) !important;
 }
@@ -98,7 +98,7 @@
 }
 
 .i-amphtml-story-interactive-slider-bubble-wrapper {
-  transform: translate(-50%, -50%) !important;
+  transform: translate(var(--translate-x-center), -50%) scale(0) !important;
   position: absolute !important;
   width: 2.8em !important;
   height: 2.8em !important;
@@ -108,11 +108,13 @@
     var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble-wrapper,
+.i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-bubble-wrapper  {
+  transform: translate(var(--translate-x-center), -50%)  scale(1) !important;
+}
+
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble-wrapper {
-  transform: scale(1) !important;
-  transition: transform var(--i-amphtml-interactive-animation-time)
-    var(--i-amphtml-interactive-ease-out-curve) !important;
-    z-index: 1 !important;
+  z-index: 2 !important;
 }
 
 [type='emoji'] .i-amphtml-story-interactive-slider-bubble span {
