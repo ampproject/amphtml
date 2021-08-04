@@ -87,20 +87,12 @@ export function BrightcoveWithRef(props, ref) {
     [account, embed, player, playlistId, referrer, urlParams, videoId]
   );
 
-  const readyRef = useRef(false);
   const onMessage = useCallback(
     ({currentTarget, data}) => {
       const eventType = data?.event;
       switch (eventType) {
         case 'ready':
-          if (!readyRef.current) {
-            readyRef.current = true;
-            dispatchCustomEvent(currentTarget, 'canplay');
-            // Reset the src so inline controls appear if not already autoplaying.
-            if (!autoplay) {
-              currentTarget.src = currentTarget.src;
-            }
-          }
+          dispatchCustomEvent(currentTarget, 'canplay');
           break;
         case 'playing':
           onPlayingState?.(true);
@@ -135,7 +127,7 @@ export function BrightcoveWithRef(props, ref) {
         dispatchCustomEvent(currentTarget, mutedOrUnmutedEvent(isMuted));
       }
     },
-    [autoplay, muted, onPlayingState]
+    [muted, onPlayingState]
   );
 
   // Check for valid props
@@ -148,6 +140,7 @@ export function BrightcoveWithRef(props, ref) {
       ref={ref}
       {...rest}
       autoplay={autoplay}
+      controls={true}
       makeMethodMessage={makeMessage}
       muted={muted}
       onMessage={onMessage}
