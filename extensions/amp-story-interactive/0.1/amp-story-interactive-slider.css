@@ -105,7 +105,6 @@
   height: 2em !important;
   top: 50% !important;
   left: var(--average) !important;
-  z-index: 1 !important;
   border-radius: 50%;
   position: absolute;
 }
@@ -192,14 +191,14 @@
     transform: translate(-50%, 100%) scale(0);
     opacity: 0;
   }
-  10% {
+  3% {
     opacity: 1;
   }
-  20%,
-  80% {
+  6%,
+  94% {
     transform: translate(-50%, 0) scale(0.9);
   }
-  90% {
+  97% {
     opacity: 1;
   }
   100% {
