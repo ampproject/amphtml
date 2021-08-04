@@ -417,7 +417,7 @@ To accurately identify the Reader, the Publisher should associate the [AMP Reade
 
 <amp-img alt="reader id cookie association" layout="responsive" width="1195" height="1148" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-subscriptions/images/reader-id-assoociation.png">
   <noscript>
-    <img alt="reader id cookie association" layout="responsive" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-subscriptions/images/reader-id-assoociation.png">
+    <img alt="reader id cookie association" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-subscriptions/images/reader-id-assoociation.png">
   </noscript>
 </amp-img>
 
