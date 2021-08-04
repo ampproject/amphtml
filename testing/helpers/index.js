@@ -26,3 +26,43 @@ export function sleep(ms) {
     }, ms);
   });
 }
+
+/**
+ * Returns a Promise that resolves after the next browser frame has been rendered.
+ * @return {Promise<void>}
+ */
+export function awaitNextFrame() {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      resolve();
+    });
+  });
+}
+
+/**
+ * Returns a Promise that resolves after n frames have been rendered.
+ * @param {number} n
+ */
+export function awaitNFrames(n) {
+  return new Promise(async (resolve) => {
+    for (let i = 0; i < n; i++) {
+      await awaitNextFrame();
+    }
+    resolve();
+  });
+}
+
+/**
+ * Returns a Promise that resolves upon the next frame being rendered after ms have passed.
+ * @param {number} ms
+ * @return {Promise<void>}
+ */
+export function awaitFrameAfter(ms) {
+  return new Promise(async (resolve) => {
+    const start = Date.now();
+    while (Date.now() - start < ms) {
+      await awaitNextFrame();
+    }
+    resolve();
+  });
+}
