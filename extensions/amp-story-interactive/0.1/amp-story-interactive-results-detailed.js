@@ -24,6 +24,13 @@ import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles} from '#core/dom/style';
 
 /**
+ * @typedef {{
+ *    el: !Element,
+ *    answered: boolean
+ * }} ResultEl
+ */
+
+/**
  * Generates the template for the detailed results component.
  *
  * @param {!Element} element
@@ -50,7 +57,7 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
   constructor(element) {
     super(element);
 
-    /** @private {!Map<string, Object>} */
+    /** @private {!Map<string, ResultEl>} */
     this.resultEls_ = {};
 
     /** @private {?Element} */
@@ -86,55 +93,57 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
         (this.usePercentage_ && e.type === InteractiveType.QUIZ) ||
         (!this.usePercentage_ && e.type === InteractiveType.POLL)
       ) {
-        if (!(e.interactiveId in this.resultEls_)) {
+        if (!this.resultEls_[e.interactiveId]) {
           updateLayout = true;
-          this.initializeResult_(e);
+          this.createResultEl_(e);
         }
-        this.updateSelectedResult_(e);
+        this.updateAnsweredResult_(e);
       }
     });
 
     if (updateLayout) {
-      this.updateLayout_();
+      this.positionResultEls_();
     }
 
     super.onInteractiveReactStateUpdate(interactiveState);
   }
 
   /**
-   * Create and store elements that will show results
-   * for each interactive component.
+   * Create and store an element that will show the results
+   * for an interactive component.
    *
-   * @param {!Array<Object>} e
+   * @param {!Object} e
    * @private
    */
-  initializeResult_(e) {
+  createResultEl_(e) {
     const el = document.createElement('div');
     el.classList.add('i-amphtml-story-interactive-results-result');
     this.resultsContainer_.appendChild(el);
     this.resultEls_[e.interactiveId] = {
       el,
-      updated: false,
+      answered: false,
     };
   }
 
   /**
-   * Sets the background image or text content for an updated result.
+   * Sets the background image or text content for an answered result.
    *
    * @param {!Object} e
    * @private
    */
-  updateSelectedResult_(e) {
-    if (e.option && !this.resultEls_[e.interactiveId].updated) {
-      if (e.option.image) {
-        setImportantStyles(this.resultEls_[e.interactiveId].el, {
-          'background-image': 'url(' + e.option.image + ')',
-        });
-      } else {
-        this.resultEls_[e.interactiveId].el.textContent = e.option.text;
-      }
-      this.resultEls_[e.interactiveId].updated = true;
+  updateAnsweredResult_(e) {
+    if (!e.option || this.resultEls_[e.interactiveId].answered) {
+      return;
     }
+
+    if (e.option.image) {
+      setImportantStyles(this.resultEls_[e.interactiveId].el, {
+        'background-image': 'url(' + e.option.image + ')',
+      });
+    } else {
+      this.resultEls_[e.interactiveId].el.textContent = e.option.text;
+    }
+    this.resultEls_[e.interactiveId].answered = true;
   }
 
   /**
@@ -142,7 +151,7 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
    *
    * @private
    */
-  updateLayout_() {
+  positionResultEls_() {
     for (const id in this.resultEls_) {
       setImportantStyles(this.resultEls_[id].el, {
         'height': '5em',
