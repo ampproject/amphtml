@@ -105,6 +105,7 @@
   height: 2em !important;
   top: 50% !important;
   left: var(--average) !important;
+  opacity: 0.6 !important;
   border-radius: 50%;
   position: absolute;
 }
