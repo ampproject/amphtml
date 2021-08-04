@@ -1,6 +1,6 @@
-PASS
+FAIL
 |  <!--
-|    Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+|    Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 |
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
@@ -26,15 +26,17 @@ PASS
 |    <meta name="viewport" content="width=device-width,minimum-scale=1">
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
-|    <script async custom-element="amp-facebook-comments" src="https://cdn.ampproject.org/v0/amp-facebook-comments-0.1.js"></script>
+|    <!-- Invalid: amp-facebook 0.1 does not suffice for amp-facebook-comments -->
+|    <script async custom-element="amp-facebook" src="https://cdn.ampproject.org/v0/amp-facebook-0.1.js"></script>
 |  </head>
 |  <body>
-|    <!-- Example of a valid amp-facebook-comments -->
 |    <amp-facebook-comments
 |        width=486
 |        height=657
 |        layout="responsive"
 |        data-href="http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html">
-|    </amp-facebook-comments>
+|    </amp-facebook>
 |  </body>
 |  </html>
+>>       ^~~~~~~~~
+amp-facebook-comments/0.1/test/validator-amp-facebook-comments-invalid.html:39:6 The tag 'amp-facebook 1.0' is missing or incorrect, but required by 'amp-facebook-comments'. (see https://amp.dev/documentation/components/amp-facebook)
