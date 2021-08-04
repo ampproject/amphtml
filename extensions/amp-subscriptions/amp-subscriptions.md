@@ -415,7 +415,7 @@ By default, as the body, pingback POST request receives the entitlement object r
 
 To accurately identify the Reader, the Publisher should associate the [AMP Reader ID][1] with any Publisher cookies relevant to the Reader.
 
-<amp-img alt="reader id cookie association" layout="responsive" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-subscriptions/images/reader-id-assoociation.png">
+<amp-img alt="reader id cookie association" layout="responsive" width="1195" height="1148" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-subscriptions/images/reader-id-assoociation.png">
   <noscript>
     <img alt="reader id cookie association" layout="responsive" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-subscriptions/images/reader-id-assoociation.png">
   </noscript>
