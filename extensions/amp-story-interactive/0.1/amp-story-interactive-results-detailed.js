@@ -25,9 +25,9 @@ import {setImportantStyles} from '#core/dom/style';
 
 /**
  * @typedef {{
- *    el: !Element,
+ *    element: !Element,
  *    answered: boolean
- * }} ResultEl
+ * }} ResultElementType
  */
 
 /**
@@ -57,7 +57,7 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
   constructor(element) {
     super(element);
 
-    /** @private {!Map<string, ResultEl>} */
+    /** @private {!Map<string, ResultElementType>} */
     this.resultEls_ = {};
 
     /** @private {?Element} */
@@ -116,11 +116,11 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
    * @private
    */
   createResultEl_(e) {
-    const el = document.createElement('div');
-    el.classList.add('i-amphtml-story-interactive-results-result');
-    this.resultsContainer_.appendChild(el);
+    const element = document.createElement('div');
+    element.classList.add('i-amphtml-story-interactive-results-result');
+    this.resultsContainer_.appendChild(element);
     this.resultEls_[e.interactiveId] = {
-      el,
+      element,
       answered: false,
     };
   }
@@ -137,11 +137,11 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
     }
 
     if (e.option.image) {
-      setImportantStyles(this.resultEls_[e.interactiveId].el, {
+      setImportantStyles(this.resultEls_[e.interactiveId].element, {
         'background-image': 'url(' + e.option.image + ')',
       });
     } else {
-      this.resultEls_[e.interactiveId].el.textContent = e.option.text;
+      this.resultEls_[e.interactiveId].element.textContent = e.option.text;
     }
     this.resultEls_[e.interactiveId].answered = true;
   }
@@ -153,7 +153,7 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
    */
   positionResultEls_() {
     for (const id in this.resultEls_) {
-      setImportantStyles(this.resultEls_[id].el, {
+      setImportantStyles(this.resultEls_[id].element, {
         'height': '5em',
         'width': '5em',
       });
