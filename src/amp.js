@@ -21,13 +21,14 @@
 // src/polyfills.js must be the first import.
 import './polyfills';
 
+import * as mode from '#core/mode';
+
 import {installAutoLightboxExtension} from './auto-lightbox';
 import {startupChunk} from './chunk';
 import {TickLabel} from './core/constants/enums';
 import {installErrorReporting} from './error-reporting';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
 import {maybeTrackImpression} from './impression';
-import {internalRuntimeVersion} from './internal-version';
 import {getMode} from './mode';
 import {preconnectToOrigin} from './preconnect';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
@@ -164,7 +165,7 @@ startupChunk(self.document, function initial() {
 if (self.console) {
   (console.info || console.log).call(
     console,
-    `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
+    `Powered by AMP ⚡ HTML – Version ${mode.version()}`,
     self.location.href
   );
 }
@@ -172,7 +173,4 @@ if (self.console) {
 if (getMode().localDev) {
   self.document.documentElement.setAttribute('esm', IS_ESM ? 1 : 0);
 }
-self.document.documentElement.setAttribute(
-  'amp-version',
-  internalRuntimeVersion()
-);
+self.document.documentElement.setAttribute('amp-version', mode.version());

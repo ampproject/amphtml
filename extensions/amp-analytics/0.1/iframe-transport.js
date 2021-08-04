@@ -19,7 +19,7 @@ import {createElementWithAttributes} from '#core/dom';
 import {devAssert, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {hasOwn} from '#core/types/object';
-import {internalRuntimeVersion} from '../../../src/internal-version';
+import * as mode from '#core/mode';
 import {toggle} from '#core/dom/style';
 import {urls} from '../../../src/config';
 
@@ -67,10 +67,7 @@ function getIframeTransportScriptUrl(ampWin, opt_forceProdUrl) {
     const loc = ampWin.parent.location;
     return `${loc.protocol}//${loc.host}/dist/iframe-transport-client-lib.js`;
   }
-  return (
-    urls.thirdParty +
-    `/${internalRuntimeVersion()}/iframe-transport-client-v0.js`
-  );
+  return urls.thirdParty + `/${mode.version()}/iframe-transport-client-v0.js`;
 }
 
 /**

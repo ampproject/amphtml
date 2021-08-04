@@ -150,7 +150,7 @@ const forbiddenTermsGlobal = {
     message:
       'Do not use build constants directly. Instead, use the helpers in `#core/mode`.',
     allowlist: [
-      'src/internal-version.js',
+      'src/core/mode/version.js',
       'src/core/mode/minified.js',
       'src/core/mode/prod.js',
       'build-system/compile/build-constants.js',

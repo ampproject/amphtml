@@ -23,7 +23,6 @@ import {waitForBodyOpenPromise} from './core/dom';
 import {setStyle} from './core/dom/style';
 import {reportErrorForWin} from './error-reporting';
 import {isExperimentOn, toggleExperiment} from './experiments';
-import {internalRuntimeVersion} from './internal-version';
 import {
   LogLevel, // eslint-disable-line no-unused-vars
   dev,
@@ -462,7 +461,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   // This is non-obvious, but we only care about the release version,
   // not about the full rtv version, because these only differ
   // in the config that is fully determined by the primary binary.
-  if (internalRuntimeVersion() == v) {
+  if (mode.version() == v) {
     return false;
   }
   Services.extensionsFor(win).reloadExtension(
