@@ -52,7 +52,8 @@ const realiasGetMode =
  *   check term in files whose path includes /test/ (false by default)
  *
  * - checkProse:
- *   check term in comments and documentation (.md) (false by default)
+ *   check term in comments and documentation (.md)
+ *   (false by default, implies `checkInTestFolder`)
  */
 let ForbiddenTermDef;
 
@@ -64,15 +65,15 @@ const forbiddenTermsGlobal = {
   'DO NOT SUBMIT': {
     checkProse: true,
   },
-  'whitelist|white-list': {
+  'white[-\\s]*list': {
     message: 'Please use the term allowlist instead',
     checkProse: true,
   },
-  'blacklist|black-list': {
+  'black[-\\s]*list': {
     message: 'Please use the term denylist instead',
     checkProse: true,
   },
-  'grandfather|grandfathered': {
+  'grandfather': {
     message: 'Please use the term legacy instead',
     checkProse: true,
   },
@@ -1129,7 +1130,7 @@ function matchForbiddenTerms(srcFile, contents, terms) {
       // if needed but that might be too permissive.
       if (
         (Array.isArray(allowlist) && allowlist.indexOf(srcFile) != -1) ||
-        (isInTestFolder(srcFile) && !checkInTestFolder) ||
+        (isInTestFolder(srcFile) && !checkInTestFolder && !checkProse) ||
         (srcFile.endsWith('.md') && !checkProse)
       ) {
         return [];

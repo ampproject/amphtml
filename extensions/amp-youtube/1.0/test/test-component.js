@@ -78,8 +78,9 @@ describes.realWin('YouTube preact component v1.0', {}, (env) => {
     const iframe = wrapper.find('iframe');
 
     expect(iframe.prop('src')).to.contain('&myparam=hello%20world');
+    // data-param-autoplay is disallowed in favor of just autoplay
     expect(iframe.prop('src')).to.not.contain('autoplay=1');
-    // data-param-loop is black listed in favor of just loop for single videos
+    // data-param-loop is disallowed in favor of just loop for single videos
     expect(iframe.prop('src')).to.not.contain('loop=1');
     // playsinline should default to 1 if not provided.
     expect(iframe.prop('src')).to.contain('playsinline=1');
