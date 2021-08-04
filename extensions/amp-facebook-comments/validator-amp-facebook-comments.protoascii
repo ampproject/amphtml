@@ -32,7 +32,7 @@ tags: {  # <amp-facebook-comments>
   requires_extension: "amp-facebook-comments"
   requires: "amp-facebook-comments 0.1"
   # The amp-facebook attr_list is defined in the amp-facebook protoascii
-  attr_lists: "amp-facebook" 
+  attr_lists: "amp-facebook"
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL
