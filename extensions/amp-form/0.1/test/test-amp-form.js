@@ -16,9 +16,9 @@
 
 import '../../../amp-mustache/0.1/amp-mustache';
 import * as xhrUtils from '../../../../src/utils/xhr-utils';
-import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
-import {AmpEvents} from '../../../../src/core/constants/amp-events';
+import {ActionService} from '#service/action-impl';
+import {ActionTrust} from '#core/constants/action-constants';
+import {AmpEvents} from '#core/constants/amp-events';
 import {
   AmpForm,
   AmpFormService,
@@ -28,24 +28,24 @@ import {AmpSelector} from '../../../amp-selector/0.1/amp-selector';
 import {
   AsyncInputAttributes,
   AsyncInputClasses,
-} from '../../../../src/async-input';
+} from '#core/constants/async-input';
 import {DIRTINESS_INDICATOR_CLASS} from '../form-dirtiness';
-import {Services} from '../../../../src/services';
-import {cidServiceForDocForTesting} from '../../../../src/service/cid-impl';
+import {Services} from '#service';
+import {cidServiceForDocForTesting} from '#service/cid-impl';
 import {createCustomEvent} from '../../../../src/event-helper';
-import {createElementWithAttributes} from '../../../../src/core/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {
   createFormDataWrapper,
   isFormDataWrapper,
 } from '../../../../src/form-data-wrapper';
-import {fromIterator} from '../../../../src/core/types/array';
-import {parseQueryString} from '../../../../src/core/types/string/url';
+import {fromIterator} from '#core/types/array';
+import {parseQueryString} from '#core/types/string/url';
 import {
   setCheckValiditySupportedForTesting,
   setReportValiditySupportedForTesting,
 } from '../form-validators';
 import {user} from '../../../../src/log';
-import {whenCalled} from '../../../../testing/test-helper.js';
+import {whenCalled} from '#testing/test-helper';
 
 describes.repeated(
   '',

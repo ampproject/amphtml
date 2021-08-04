@@ -21,12 +21,12 @@ import {
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
 import {EventType, dispatch} from './events';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
+import {LocalizedStringId} from '#service/localization/strings';
+import {Services} from '#service';
 import {dev, devAssert} from '../../../src/log';
 
 import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '../../../src/core/dom/static-template';
+import {htmlFor} from '#core/dom/static-template';
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
 let ButtonState_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase

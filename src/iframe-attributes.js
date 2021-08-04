@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as mode from '#core/mode';
+
+import {urls} from './config';
 import {DomFingerprint} from './core/dom/fingerprint';
-import {Services} from './services';
+import {getLengthNumeral} from './core/dom/layout';
+import {getPageLayoutBoxBlocking} from './core/dom/layout/page-layout-box';
 import {dict} from './core/types/object';
 import {experimentToggles, isCanary} from './experiments';
-import {getLengthNumeral} from './core/dom/layout';
 import {getModeObject} from './mode-object';
-import {getPageLayoutBoxBlocking} from './core/dom/page-layout-box';
-import {internalRuntimeVersion} from './internal-version';
-import {urls} from './config';
+import {Services} from './service';
 
 /**
  * Produces the attributes for the ad template.
@@ -70,10 +71,10 @@ export function getContextMetadata(
   // Please also add new introduced variable
   // name to the extern list.
   attributes['_context'] = dict({
-    'ampcontextVersion': internalRuntimeVersion(),
+    'ampcontextVersion': mode.version(),
     'ampcontextFilepath': `${
       urls.thirdParty
-    }/${internalRuntimeVersion()}/ampcontext-v0.js`,
+    }/${mode.version()}/ampcontext-v0.js`,
     'sourceUrl': docInfo.sourceUrl,
     'referrer': referrer,
     'canonicalUrl': docInfo.canonicalUrl,

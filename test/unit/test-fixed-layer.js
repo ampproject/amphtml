@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
+import {AmpDocSingle, installDocService} from '#service/ampdoc-impl';
 import {Animation} from '../../src/animation';
-import {FakeMutationObserver, FakeWindow} from '../../testing/fake-dom';
-import {FixedLayer} from '../../src/service/fixed-layer';
-import {Services} from '../../src/services';
-import {endsWith} from '../../src/core/types/string';
-import {installHiddenObserverForDoc} from '../../src/service/hidden-observer-impl';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installTimerService} from '../../src/service/timer-impl';
-import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
-import {toggle} from '../../src/core/dom/style';
+import {FakeMutationObserver, FakeWindow} from '#testing/fake-dom';
+import {FixedLayer} from '#service/fixed-layer';
+import {Services} from '#service';
+import {endsWith} from '#core/types/string';
+import {installHiddenObserverForDoc} from '#service/hidden-observer-impl';
+import {installPlatformService} from '#service/platform-impl';
+import {installTimerService} from '#service/timer-impl';
+import {installViewerServiceForDoc} from '#service/viewer-impl';
+import {toggle} from '#core/dom/style';
 import {user} from '../../src/log';
 
 describes.sandboxed('FixedLayer', {}, (env) => {
@@ -1707,7 +1707,6 @@ describes.sandboxed('FixedLayer Setup Execution Bailouts', {}, () => {
     window.__AMP_MODE = {
       localDev: false,
       development: false,
-      minified: false,
       test: false,
       version: '$internalRuntimeVersion$',
     };
@@ -1777,7 +1776,6 @@ describes.sandboxed(
       window.__AMP_MODE = {
         localDev: true,
         development: false,
-        minified: false,
         test: false,
         version: '$internalRuntimeVersion$',
       };
@@ -1848,7 +1846,6 @@ describes.sandboxed(
       window.__AMP_MODE = {
         localDev: true,
         development: false,
-        minified: false,
         test: false,
         version: '$internalRuntimeVersion$',
       };

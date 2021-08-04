@@ -19,7 +19,7 @@ import {
   MIN_PUB_CONTROL_WIDTH_OF_DESKTOP,
   getAutoConfig,
   getPubControlConfig,
-} from './a4a/shared/content-recommendation.js';
+} from './a4a/shared/content-recommendation';
 import {user} from '../../src/log';
 
 /**

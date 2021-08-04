@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/core/constants/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {
   FxBindings,
   FxObservesSignal,
@@ -26,9 +26,9 @@ import {
   installPositionBoundFx,
   installScrollToggledFx,
 } from './providers/fx-provider';
-import {iterateCursor} from '../../../src/core/dom';
+import {iterateCursor} from '#core/dom';
 import {listen} from '../../../src/event-helper';
-import {tryCallback} from '../../../src/core/error';
+import {tryCallback} from '#core/error';
 
 const TAG = 'amp-fx-collection';
 

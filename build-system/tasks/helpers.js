@@ -15,7 +15,7 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
-const debounce = require('debounce');
+const debounce = require('../common/debounce');
 const esbuild = require('esbuild');
 /** @type {Object} */
 const experimentDefines = require('../global-configs/experiments-const.json');
@@ -29,7 +29,7 @@ const wrappers = require('../compile/compile-wrappers');
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
-const {applyConfig, removeConfig} = require('./prepend-global/index.js');
+const {applyConfig, removeConfig} = require('./prepend-global');
 const {closureCompile} = require('../compile/compile');
 const {cyan, green, red} = require('../common/colors');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
@@ -60,11 +60,6 @@ const MODULE_SEPARATOR = ';';
  * Used during minification to concatenate extension bundles
  */
 const EXTENSION_BUNDLE_MAP = {
-  'amp-viz-vega.js': [
-    'third_party/d3/d3.js',
-    'third_party/d3-geo-projection/d3-geo-projection.js',
-    'third_party/vega/vega.js',
-  ],
   'amp-inputmask.js': ['third_party/inputmask/bundle.js'],
   'amp-date-picker.js': ['third_party/react-dates/bundle.js'],
   'amp-shadow-dom-polyfill.js': [
@@ -124,6 +119,7 @@ function doBuildJs(jsBundles, name, extraOptions) {
  * Generates frames.html
  *
  * @param {!Object} options
+ * @return {Promise<void>}
  */
 async function bootstrapThirdPartyFrames(options) {
   const startTime = Date.now();
@@ -178,12 +174,12 @@ async function compileAllJs(options) {
   await Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
     doBuildJs(jsBundles, 'alp.max.js', options),
-    doBuildJs(jsBundles, 'examiner.max.js', options),
     doBuildJs(jsBundles, 'integration.js', options),
     doBuildJs(jsBundles, 'ampcontext-lib.js', options),
     doBuildJs(jsBundles, 'iframe-transport-client-lib.js', options),
     doBuildJs(jsBundles, 'recaptcha.js', options),
     doBuildJs(jsBundles, 'amp-viewer-host.max.js', options),
+    doBuildJs(jsBundles, 'compiler.js', options),
     doBuildJs(jsBundles, 'video-iframe-integration.js', options),
     doBuildJs(jsBundles, 'amp-story-entry-point.js', options),
     doBuildJs(jsBundles, 'amp-story-player.js', options),
@@ -374,6 +370,7 @@ function handleBundleError(err, continueOnError, destFilename) {
  * @param {string} destFilename
  * @param {?Object} options
  * @param {number} startTime
+ * @return {Promise<void>}
  */
 async function finishBundle(
   srcFilename,
@@ -532,9 +529,10 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
   let result = null;
 
   /**
-   * @param {number} time
+   * @param {number} startTime
+   * @return {Promise<void>}
    */
-  async function build(time) {
+  async function build(startTime) {
     if (!result) {
       result = await esbuild.build({
         entryPoints: [entryPoint],
@@ -542,18 +540,31 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
         sourcemap: true,
         outfile: destFile,
         plugins,
-        minify: options.minify,
         format: options.outputFormat || undefined,
+        // For es5 builds, ensure esbuild-injected code is transpiled.
         target: argv.esm ? 'es6' : 'es5',
         incremental: !!options.watch,
         logLevel: 'silent',
         external: options.externalDependencies,
+        write: false,
       });
     } else {
       result = await result.rebuild();
     }
-    await minifyWithTerser(destDir, destFilename, options);
-    await finishBundle(srcFilename, destDir, destFilename, options, time);
+    let code = result.outputFiles.find(({path}) => !path.endsWith('.map')).text;
+    let map = result.outputFiles.find(({path}) => path.endsWith('.map')).text;
+
+    if (options.minify) {
+      ({code, map} = await minify(code, map));
+    }
+
+    await Promise.all([
+      fs.outputFile(destFile, code),
+      fs.outputFile(`${destFile}.map`, map),
+    ]);
+
+    // TODO: finishBundle should operate in-mem instead of reading/writing from FS.
+    await finishBundle(srcFilename, destDir, destFilename, options, startTime);
   }
 
   /**
@@ -588,8 +599,8 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
   if (options.watch) {
     watchedTargets.set(entryPoint, {
       rebuild: async () => {
-        const time = Date.now();
-        const buildPromise = build(time).catch((err) =>
+        const startTime = Date.now();
+        const buildPromise = build(startTime).catch((err) =>
           handleBundleError(err, !!options.watch, destFilename)
         );
         if (options.onWatchBuild) {
@@ -604,39 +615,36 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
 /**
  * Minify the code with Terser. Only used by the ESBuild.
  *
- * @param {string} destDir
- * @param {string} destFilename
- * @param {?Object} options
- * @return {!Promise}
+ * @param {string} code
+ * @param {string} map
+ * @return {!Promise<{code: string, map: *, error?: Error}>}
  */
-async function minifyWithTerser(destDir, destFilename, options) {
-  if (!options.minify) {
-    return;
-  }
-
-  const filename = path.join(destDir, destFilename);
+async function minify(code, map) {
   const terserOptions = {
-    mangle: true,
-    compress: true,
+    mangle: {},
+    compress: {
+      // Settled on this count by incrementing number until there was no more
+      // effect on minification quality.
+      passes: 3,
+    },
     output: {
       beautify: !!argv.pretty_print,
-      comments: /\/*/,
       // eslint-disable-next-line google-camelcase/google-camelcase
       keep_quoted_props: true,
+      preamble: ';',
     },
-    sourceMap: true,
+    sourceMap: {content: map},
+    module: !!argv.esm,
   };
-  const minified = await terser.minify(
-    fs.readFileSync(filename, 'utf8'),
-    terserOptions
-  );
-  const remapped = remapping(
-    [minified.map, fs.readFileSync(`${filename}.map`, 'utf8')],
-    () => null,
-    !argv.full_sourcemaps
-  );
-  fs.writeFileSync(filename, minified.code);
-  fs.writeFileSync(`${filename}.map`, remapped.toString());
+
+  const minified = await terser.minify(code, terserOptions);
+  if (!minified.code) {
+    throw new Error(
+      `Minification resulted in an empty bundle. This should never happen.`
+    );
+  }
+
+  return {code: minified.code, map: minified.map};
 }
 
 /**

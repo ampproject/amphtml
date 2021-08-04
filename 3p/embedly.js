@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {hasOwn} from '../src/core/types/object';
+import {setStyle} from '#core/dom/style';
+import {hasOwn} from '#core/types/object';
+
 import {loadScript} from './3p';
-import {setStyle} from '../src/core/dom/style';
 
 /**
  * Embedly platform library url to create cards.

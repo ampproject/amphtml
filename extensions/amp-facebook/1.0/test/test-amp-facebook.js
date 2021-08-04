@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,14 @@
  */
 
 import '../amp-facebook';
-import {createElementWithAttributes} from '../../../../src/core/dom';
-import {doNotLoadExternalResourcesInTest} from '../../../../testing/iframe';
-import {facebook} from '../../../../3p/facebook';
-import {resetServiceForTesting} from '../../../../src/service';
+import {createElementWithAttributes} from '#core/dom';
+import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
+import {facebook} from '#3p/facebook';
+import {resetServiceForTesting} from '../../../../src/service-helpers';
 import {serializeMessage} from '../../../../src/3p-frame-messaging';
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {toggleExperiment} from '#experiments';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-facebook',
@@ -286,7 +286,11 @@ describes.realWin(
       await waitForRender();
 
       const impl = await element.getImpl(false);
-      const forceChangeHeightStub = env.sandbox.stub(impl, 'forceChangeHeight');
+      const attemptChangeHeightStub = env.sandbox.stub(
+        impl,
+        'attemptChangeHeight'
+      );
+      attemptChangeHeightStub.returns(Promise.resolve());
 
       const mockEvent = new CustomEvent('message');
       const sentinel = JSON.parse(
@@ -298,7 +302,7 @@ describes.realWin(
       mockEvent.source =
         element.shadowRoot.querySelector('iframe').contentWindow;
       win.dispatchEvent(mockEvent);
-      expect(forceChangeHeightStub).to.be.calledOnce.calledWith(1000);
+      expect(attemptChangeHeightStub).to.be.calledOnce.calledWith(1000);
     });
   }
 );

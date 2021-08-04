@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {VideoEvents} from '../../../src/video-interface';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/core/types/object';
-import {dispatchCustomEvent} from '../../../src/core/dom';
-import {forwardRef} from '../../../src/preact/compat';
+import {dict} from '#core/types/object';
+import {dispatchCustomEvent} from '#core/dom';
+import {forwardRef} from '#preact/compat';
 import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';
-import {useRef} from '../../../src/preact';
+import {useRef} from '#preact';
 
 // Correct PlayerStates taken from
 // https://developers.google.com/youtube/iframe_api_reference#Playback_status

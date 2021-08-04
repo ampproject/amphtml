@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import {reportError} from '../error-reporting';
+import {user} from '../log';
 import {getMode} from '../mode';
 import {
   registerServiceBuilder,
   registerServiceBuilderInEmbedWin,
-} from '../service';
-import {reportError} from '../error-reporting';
-import {user} from '../log';
+} from '../service-helpers';
 
 const TAG = 'timer';
 let timersForTesting;

@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
+import * as mode from '#core/mode';
+
+import {urls} from './config';
 import * as assertions from './core/assert/base';
+import {createErrorVargs, duplicateErrorIfNecessary} from './core/error';
 import {
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
   isUserErrorMessage,
   stripUserError,
 } from './core/error/message-helpers';
-import {createErrorVargs, duplicateErrorIfNecessary} from './core/error';
-import {getMode} from './mode';
-import {internalRuntimeVersion} from './internal-version';
 import {isArray} from './core/types';
 import {once} from './core/types/function';
-import {urls} from './config';
+import {getMode} from './mode';
 
 const noop = () => {};
 
@@ -88,7 +89,7 @@ export function overrideLogLevel(level) {
  * (Specific channel is irrelevant: message tables are invariant on internal version.)
  * @return {string}
  */
-const messageUrlRtv = () => `01${internalRuntimeVersion()}`;
+const messageUrlRtv = () => `01${mode.version()}`;
 
 /**
  * Gets a URL to display a message on amp.dev.
@@ -722,7 +723,7 @@ export function devAssert(
   opt_8,
   opt_9
 ) {
-  if (getMode().minified) {
+  if (mode.isMinified()) {
     return shouldBeTrueish;
   }
   if (self.__AMP_ASSERTION_CHECK) {

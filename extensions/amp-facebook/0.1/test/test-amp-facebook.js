@@ -16,8 +16,8 @@
 
 import '../amp-facebook';
 import {expect} from 'chai';
-import {facebook} from '../../../../3p/facebook';
-import {resetServiceForTesting} from '../../../../src/service';
+import {facebook} from '#3p/facebook';
+import {resetServiceForTesting} from '../../../../src/service-helpers';
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
 
 describes.realWin(
@@ -102,7 +102,7 @@ describes.realWin(
     });
 
     it('rejects other supported and unsupported data-embed-as types', async () => {
-      expectAsyncConsoleError();
+      expectAsyncConsoleError(/.*/);
       await expect(getAmpFacebook(fbVideoHref, 'comments')).to.be.rejectedWith(
         /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post", "video" or "comment" but was: comments/
       );

@@ -18,13 +18,17 @@
  * @fileoverview Helper for amp-story rendering of page-attachment UI.
  */
 import {AttachmentTheme} from './amp-story-page-attachment';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {computedStyle, setImportantStyles} from '../../../src/core/dom/style';
+import {LocalizedStringId} from '#service/localization/strings';
+import {computedStyle, setImportantStyles} from '#core/dom/style';
 import {getLocalizationService} from './amp-story-localization-service';
-import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
-import {htmlFor, htmlRefs} from '../../../src/core/dom/static-template';
+import {
+  getRGBFromCssColorValue,
+  getTextColorForRGB,
+  maybeMakeProxyUrl,
+} from './utils';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
-import {toWin} from '../../../src/core/window';
+import {toWin} from '#core/window';
 
 /**
  * @enum {string}
@@ -273,12 +277,14 @@ const renderInlinePageAttachmentUi = (pageEl, attachmentEl) => {
 
   const openImgAttr2 = attachmentEl.getAttribute('cta-image-2');
   if (openImgAttr2) {
-    chipEl.prepend(makeImgElWithBG(openImgAttr2));
+    const src = maybeMakeProxyUrl(openImgAttr2, pageEl.getAmpDoc());
+    chipEl.prepend(makeImgElWithBG(src));
   }
 
   const openImgAttr = attachmentEl.getAttribute('cta-image');
   if (openImgAttr) {
-    chipEl.prepend(makeImgElWithBG(openImgAttr));
+    const src = maybeMakeProxyUrl(openImgAttr, pageEl.getAmpDoc());
+    chipEl.prepend(makeImgElWithBG(src));
   }
 
   return openAttachmentEl;

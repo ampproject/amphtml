@@ -25,15 +25,15 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-info-dialog-1.0.css';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
+import {LocalizedStringId} from '#service/localization/strings';
+import {Services} from '#service';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
-import {closest, matches} from '../../../src/core/dom/query';
+import {closest, matches} from '#core/dom/query';
 import {createShadowRootWithStyle, triggerClickFromLightDom} from './utils';
 import {dev} from '../../../src/log';
-import {getAmpdoc} from '../../../src/service';
+import {getAmpdoc} from '../../../src/service-helpers';
 import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '../../../src/core/dom/static-template';
+import {htmlFor} from '#core/dom/static-template';
 
 /** @const {string} Class to toggle the info dialog. */
 export const DIALOG_VISIBLE_CLASS = 'i-amphtml-story-info-dialog-visible';

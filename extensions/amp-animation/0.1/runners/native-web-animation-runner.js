@@ -15,7 +15,7 @@
  */
 
 import {AnimationRunner} from './animation-runner';
-import {Observable} from '../../../../src/core/data-structures/observable';
+import {Observable} from '#core/data-structures/observable';
 import {
   WebAnimationDef,
   WebAnimationPlayState,
@@ -31,7 +31,7 @@ import {
 import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
 import {devAssert} from '../../../../src/log';
 import {getTotalDuration} from './utils';
-import {setStyles} from '../../../../src/core/dom/style';
+import {setStyles} from '#core/dom/style';
 
 /**
  */
@@ -173,7 +173,9 @@ export class NativeWebAnimationRunner extends AnimationRunner {
    * @param {time} time
    */
   seekTo(time) {
-    devAssert(this.players_);
+    if (!this.players_) {
+      return;
+    }
     this.setPlayState_(WebAnimationPlayState.PAUSED);
     this.players_.forEach((player) => {
       player.pause();
@@ -197,7 +199,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
   /**
    * @override
    */
-  finish() {
+  finish(pauseOnError = false) {
     if (!this.players_) {
       return;
     }
@@ -205,7 +207,16 @@ export class NativeWebAnimationRunner extends AnimationRunner {
     this.players_ = null;
     this.setPlayState_(WebAnimationPlayState.FINISHED);
     players.forEach((player) => {
-      player.finish();
+      if (pauseOnError) {
+        try {
+          // Will fail if animation is infinite, in that case we pause it.
+          player.finish();
+        } catch (error) {
+          player.pause();
+        }
+      } else {
+        player.finish();
+      }
     });
   }
 

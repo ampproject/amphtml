@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {elementStringOrPassThru} from '../error/message-helpers';
-import {includes} from '../types/string';
-import {isArray, isElement, isString} from '../types';
-import {remove} from '../types/array';
+import {elementStringOrPassThru} from '#core/error/message-helpers';
+import {isArray, isElement, isString} from '#core/types';
+import {remove} from '#core/types/array';
 
 /**
  * @fileoverview This file provides the base implementation for assertion
@@ -59,7 +58,7 @@ export function assert(
   }
 
   // Include the sentinel string if provided and not already present
-  if (sentinel && !includes(opt_message, sentinel)) {
+  if (sentinel && opt_message.indexOf(sentinel) == -1) {
     opt_message += sentinel;
   }
 

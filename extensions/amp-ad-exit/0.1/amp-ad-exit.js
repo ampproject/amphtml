@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {FilterType} from './filters/filter';
-import {HostServices} from '../../../src/inabox/host-services';
+import {HostServices} from '#inabox/host-services';
 import {
   MessageType,
   deserializeMessage,
   listen,
 } from '../../../src/3p-frame-messaging';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {TransportMode, assertConfig, assertVendor} from './config';
 import {createFilter} from './filters/factory';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
-import {getTopWindow} from '../../../src/service';
-import {isJsonScriptTag} from '../../../src/core/dom';
-import {isObject} from '../../../src/core/types';
+import {getTopWindow} from '../../../src/service-helpers';
+import {isJsonScriptTag} from '#core/dom';
+import {isObject} from '#core/types';
 import {makeClickDelaySpec} from './filters/click-delay';
 import {makeInactiveElementSpec} from './filters/inactive-element';
 import {openWindowDialog} from '../../../src/open-window-dialog';
-import {parseJson} from '../../../src/core/types/object/json';
+import {parseJson} from '#core/types/object/json';
 import {parseUrlDeprecated} from '../../../src/url';
 
 const TAG = 'amp-ad-exit';
@@ -49,6 +49,16 @@ const TAG = 'amp-ad-exit';
  * }}
  */
 let NavigationTargetDef;
+
+/**
+ * Indicates the status of the `attribution-reporting` API.
+ * @enum
+ */
+const AttributionReportingStatus = {
+  ATTRIBUTION_MACRO_PRESENT: 1,
+  ATTRIBUTION_DATA_PRESENT: 2,
+  ATTRIBUTION_DATA_PRESENT_AND_POLICY_ENABLED: 3,
+};
 
 export class AmpAdExit extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -193,14 +203,20 @@ export class AmpAdExit extends AMP.BaseElement {
    */
   getUrlVariableRewriter_(args, event, target) {
     const substitutionFunctions = {
+      'ATTRIBUTION_REPORTING_STATUS': () =>
+        getAttributionReportingStatus(
+          this.isAttributionReportingSupported_,
+          target
+        ),
       'CLICK_X': () => event.clientX,
       'CLICK_Y': () => event.clientY,
     };
     const replacements = Services.urlReplacementsForDoc(this.element);
     const allowlist = {
-      'RANDOM': true,
+      'ATTRIBUTION_REPORTING_STATUS': true,
       'CLICK_X': true,
       'CLICK_Y': true,
+      'RANDOM': true,
     };
     if (target['vars']) {
       for (const customVarName in target['vars']) {
@@ -574,3 +590,26 @@ export class AmpAdExit extends AMP.BaseElement {
 AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAdExit);
 });
+
+/**
+ * Resolves the ATTRIBUTION_REPORTING_STATUS macro to the appropriate value
+ * based on the given config and browser support.
+ * @param {boolean} isAttributionReportingSupported
+ * @param {!NavigationTargetDef} target
+ * @return {AttributionReportingStatus}
+ * @visibleForTesting
+ */
+export function getAttributionReportingStatus(
+  isAttributionReportingSupported,
+  target
+) {
+  if (
+    target?.behaviors?.browserAdConversion &&
+    isAttributionReportingSupported
+  ) {
+    return AttributionReportingStatus.ATTRIBUTION_DATA_PRESENT_AND_POLICY_ENABLED;
+  } else if (target?.behaviors?.browserAdConversion) {
+    return AttributionReportingStatus.ATTRIBUTION_DATA_PRESENT;
+  }
+  return AttributionReportingStatus.ATTRIBUTION_MACRO_PRESENT;
+}

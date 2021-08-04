@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 import '../amp-lightbox';
-import {ActionInvocation} from '../../../../src/service/action-impl';
-import {
-  ActionTrust,
-  DEFAULT_ACTION,
-} from '../../../../src/core/constants/action-constants';
-import {htmlFor} from '../../../../src/core/dom/static-template';
-import {poll} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
-import {whenCalled} from '../../../../testing/test-helper';
+import {ActionInvocation} from '#service/action-impl';
+import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
+import {htmlFor} from '#core/dom/static-template';
+import {poll} from '#testing/iframe';
+import {toggleExperiment} from '#experiments';
+import {whenCalled} from '#testing/test-helper';
+import {Services} from '#service/';
 
 describes.realWin(
   'amp-lightbox:1.0',
@@ -35,6 +33,8 @@ describes.realWin(
     let win;
     let html;
     let element;
+    let historyPopSpy;
+    let historyPushSpy;
 
     async function waitForOpen(el, open) {
       const isOpenOrNot = () => el.hasAttribute('open') === open;
@@ -51,7 +51,21 @@ describes.realWin(
     beforeEach(async () => {
       win = env.win;
       html = htmlFor(win.document);
-      toggleExperiment(win, 'bento-selector', true, true);
+      toggleExperiment(win, 'bento-lightbox', true, true);
+
+      historyPopSpy = env.sandbox.spy();
+      historyPushSpy = env.sandbox.spy();
+      env.sandbox.stub(Services, 'historyForDoc').returns({
+        push() {
+          historyPushSpy();
+          return Promise.resolve(11);
+        },
+        pop() {
+          historyPopSpy();
+          return Promise.resolve(11);
+        },
+      });
+
       element = html`
         <amp-lightbox layout="nodisplay">
           <p>Hello World</p>
@@ -114,6 +128,9 @@ describes.realWin(
         expect(eventSpy).to.be.calledOnce;
 
         await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
+
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
         expect(scroller).to.exist;
         expect(element.setAsContainerInternal).to.be.calledWith(scroller);

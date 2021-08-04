@@ -23,13 +23,13 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
-import {Services} from '../../../src/services';
-import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
+import {Services} from '#service';
+import {TAPPABLE_ARIA_ROLES} from '#service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
-import {closest, matches} from '../../../src/core/dom/query';
+import {closest, matches} from '#core/dom/query';
 import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
-import {getAmpdoc} from '../../../src/service';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {getAmpdoc} from '../../../src/service-helpers';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {interactiveElementsSelectors} from './amp-story-embedded-component';
 import {listenOnce} from '../../../src/event-helper';
@@ -487,7 +487,18 @@ export class ManualAdvancement extends AdvancementConfig {
 
         if (
           tagName.startsWith('amp-story-interactive-') &&
-          !this.isInStoryPageSideEdge_(event, this.getStoryPageRect_())
+          (!this.isInStoryPageSideEdge_(event, this.getStoryPageRect_()) ||
+            event.path[0].classList.contains(
+              'i-amphtml-story-interactive-disclaimer-icon'
+            ))
+        ) {
+          shouldHandleEvent = false;
+          return true;
+        }
+        if (
+          el.classList.contains(
+            'i-amphtml-story-interactive-disclaimer-dialog-container'
+          )
         ) {
           shouldHandleEvent = false;
           return true;
@@ -524,24 +535,7 @@ export class ManualAdvancement extends AdvancementConfig {
     // <span>).
     const target = dev().assertElement(event.target);
 
-    if (
-      this.isInStoryPageSideEdge_(event, pageRect) ||
-      this.isTooLargeOnPage_(event, pageRect)
-    ) {
-      event.preventDefault();
-      return false;
-    }
-
-    if (
-      target.getAttribute('show-tooltip') === 'auto' &&
-      this.isInScreenBottom_(target, pageRect)
-    ) {
-      target.setAttribute('target', '_blank');
-      target.setAttribute('role', 'link');
-      return false;
-    }
-
-    return !!closest(
+    const canShow = !!closest(
       target,
       (el) => {
         tagName = el.tagName.toLowerCase();
@@ -559,6 +553,26 @@ export class ManualAdvancement extends AdvancementConfig {
       },
       /* opt_stopAt */ this.element_
     );
+
+    if (
+      canShow &&
+      (this.isInStoryPageSideEdge_(event, pageRect) ||
+        this.isTooLargeOnPage_(event, pageRect))
+    ) {
+      event.preventDefault();
+      return false;
+    }
+
+    if (
+      target.getAttribute('show-tooltip') === 'auto' &&
+      this.isInScreenBottom_(target, pageRect)
+    ) {
+      target.setAttribute('target', '_blank');
+      target.setAttribute('role', 'link');
+      return false;
+    }
+
+    return canShow;
   }
 
   /**
@@ -752,8 +766,10 @@ export class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   getStoryPageRect_() {
+    const uiState = this.storeService_.get(StateProperty.UI_STATE);
     if (
-      this.storeService_.get(StateProperty.UI_STATE) !== UIType.DESKTOP_PANELS
+      uiState !== UIType.DESKTOP_PANELS &&
+      uiState !== UIType.DESKTOP_ONE_PANEL
     ) {
       return this.element_.getLayoutBox();
     } else {

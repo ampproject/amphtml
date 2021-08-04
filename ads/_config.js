@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {jsonConfiguration} from '../src/core/types/object/json';
+import {jsonConfiguration} from '#core/types/object/json';
 
 /**
  * @typedef {{
@@ -476,6 +476,7 @@ const adConfig = jsonConfiguration({
     ],
     clientIdScope: 'AMP_ECID_EZOIC',
     consentHandlingOverride: true,
+    renderStartImplemented: true,
   },
 
   'f1e': {
@@ -641,6 +642,13 @@ const adConfig = jsonConfiguration({
   'ketshwa': {},
 
   'kiosked': {
+    renderStartImplemented: true,
+  },
+
+  'jixie': {
+    prefetch: ['https://scripts.jixie.io/jxamp.min.js'],
+    clientIdScope: '__jxamp',
+    clientIdCookieName: '_jx',
     renderStartImplemented: true,
   },
 
@@ -1195,6 +1203,10 @@ const adConfig = jsonConfiguration({
 
   'taboola': {},
 
+  'tagon': {
+    prefetch: 'https://js.tagon.co/tagon-amp.min.js',
+  },
+
   'tail': {
     renderStartImplemented: true,
   },
@@ -1323,6 +1335,11 @@ const adConfig = jsonConfiguration({
   'wpmedia': {
     prefetch: 'https://std.wpcdn.pl/wpjslib/wpjslib-amp.js',
     preconnect: ['https://www.wp.pl', 'https://v.wpimg.pl'],
+    renderStartImplemented: true,
+  },
+
+  'wunderkind': {
+    preconnect: ['https://tag.wknd.ai', 'https://api.bounceexchange.com'],
     renderStartImplemented: true,
   },
 

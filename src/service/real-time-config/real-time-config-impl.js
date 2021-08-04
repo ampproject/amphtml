@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CONSENT_POLICY_STATE} from '../../core/constants/consent-state';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {isArray, isObject} from '#core/types';
+import {tryParseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
 import {RTC_VENDORS} from './callout-vendors';
-import {Services} from '../../services';
+
+import {isCancellation} from '../../error-reporting';
 import {dev, user, userAssert} from '../../log';
 import {getMode} from '../../mode';
-import {isAmpScriptUri} from '../../../src/url';
-import {isArray, isObject} from '../../core/types';
-import {isCancellation} from '../../error-reporting';
-import {registerServiceBuilderForDoc} from '../../service';
-import {tryParseJson} from '../../core/types/object/json';
+import {registerServiceBuilderForDoc} from '../../service-helpers';
+import {isAmpScriptUri} from '../../url';
 
 /** @type {string} */
 const TAG = 'real-time-config';

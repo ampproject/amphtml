@@ -60,15 +60,14 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3824',
   },
   {
-    id: 'amp-viz-vega',
-    name: 'AMP Visualization using Vega grammar',
-    spec: 'https://github.com/ampproject/amphtml/issues/3991',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
-  },
-  {
     id: 'amp-lightbox-a4a-proto',
     name: 'Allows the new lightbox experience to be used in A4A (prototype).',
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
+  },
+  {
+    id: 'analytics-browser-events',
+    name: 'Allows tracking of a custom set of browser events',
+    spec: 'https://github.com/ampproject/amphtml/pull/35193',
   },
   {
     id: 'ios-fixed-no-transfer',
@@ -159,12 +158,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26709',
   },
   {
-    id: 'visibility-trigger-improvements',
-    name: 'AMP Analytics Visibility Trigger Improvements',
-    spec: 'https://github.com/ampproject/amphtml/issues/26823',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26823',
-  },
-  {
     id: 'a4a-no-signing',
     name: 'Remove signing requirement for AMPHTML ads',
     spec: 'https://github.com/ampproject/amphtml/issues/27189',
@@ -194,11 +187,6 @@ export const EXPERIMENTS = [
     id: 'dfp-render-on-idle-cwv-exp',
     name: 'To measure the CWV impact of ads idle rendering',
     spec: 'https://github.com/ampproject/amphtml/issues/31436',
-  },
-  {
-    id: 'amp-consent-granular-consent',
-    name: 'Client-side granular consent',
-    spec: 'https://github.com/ampproject/amphtml/issues/31607',
   },
   {
     id: 'amp-story-page-attachment-ui-v2',

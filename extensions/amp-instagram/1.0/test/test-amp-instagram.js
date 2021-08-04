@@ -15,10 +15,10 @@
  */
 
 import '../amp-instagram';
-import {createElementWithAttributes} from '../../../../src/core/dom';
-import {doNotLoadExternalResourcesInTest} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {createElementWithAttributes} from '#core/dom';
+import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
+import {toggleExperiment} from '#experiments';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-instagram-v1.0',
@@ -93,7 +93,11 @@ describes.realWin(
       await waitForRender();
 
       const impl = await element.getImpl(false);
-      const forceChangeHeightStub = env.sandbox.stub(impl, 'forceChangeHeight');
+      const attemptChangeHeightStub = env.sandbox.stub(
+        impl,
+        'attemptChangeHeight'
+      );
+      attemptChangeHeightStub.returns(Promise.resolve());
 
       const mockEvent = new CustomEvent('message');
       mockEvent.origin = 'https://www.instagram.com';
@@ -107,7 +111,7 @@ describes.realWin(
         element.shadowRoot.querySelector('iframe').contentWindow;
       win.dispatchEvent(mockEvent);
 
-      expect(forceChangeHeightStub).to.be.calledOnce.calledWith(1000);
+      expect(attemptChangeHeightStub).to.be.calledOnce.calledWith(1000);
     });
   }
 );

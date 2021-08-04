@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+import * as mode from '#core/mode';
+import {hasOwn} from '#core/types/object';
+import {parseQueryString} from '#core/types/string/url';
+import {WindowInterface} from '#core/window/interface';
+
+import {Services} from '#service';
+
+import {Expander} from './url-expander/expander';
 import {
   AsyncResolverDef,
   ResolverReturnDef,
@@ -23,9 +31,13 @@ import {
   getTimingDataAsync,
   getTimingDataSync,
 } from './variable-source';
-import {Expander} from './url-expander/expander';
-import {Services} from '../services';
-import {WindowInterface} from '../core/window/interface';
+
+import {getTrackImpressionPromise} from '../impression';
+import {dev, devAssert, user, userAssert} from '../log';
+import {
+  installServiceInEmbedDoc,
+  registerServiceBuilderForDoc,
+} from '../service-helpers';
 import {
   addMissingParamsToUrl,
   addParamsToUrl,
@@ -35,15 +47,6 @@ import {
   removeAmpJsParamsFromUrl,
   removeFragment,
 } from '../url';
-import {dev, devAssert, user, userAssert} from '../log';
-import {getTrackImpressionPromise} from '../impression.js';
-import {hasOwn} from '../core/types/object';
-import {
-  installServiceInEmbedDoc,
-  registerServiceBuilderForDoc,
-} from '../service';
-import {internalRuntimeVersion} from '../internal-version';
-import {parseQueryString} from '../core/types/string/url';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -589,7 +592,7 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // returns the AMP version number
-    this.set('AMP_VERSION', () => internalRuntimeVersion());
+    this.set('AMP_VERSION', () => mode.version());
 
     this.set('BACKGROUND_STATE', () => {
       return this.ampdoc.isVisible() ? '0' : '1';

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {getChildJsonConfig} from '../../../src/json';
+import {Services} from '#service';
+import {getChildJsonConfig} from '#core/dom';
 import {isProtocolValid} from '../../../src/url';
-import {once} from '../../../src/core/types/function';
-import {registerServiceBuilder} from '../../../src/service';
+import {once} from '#core/types/function';
+import {registerServiceBuilder} from '../../../src/service-helpers';
 import {user, userAssert} from '../../../src/log';
 
 /** @private @const {string} */

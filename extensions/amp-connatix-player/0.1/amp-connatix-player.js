@@ -17,12 +17,13 @@
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
-} from '../../../src/core/constants/consent-state';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
-import {Services} from '../../../src/services';
+} from '#core/constants/consent-state';
+import {Deferred} from '#core/data-structures/promise';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/core/types/object';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {dict} from '#core/types/object';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
@@ -30,14 +31,13 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getData} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/core/dom/size-observer';
-import {removeElement} from '../../../src/core/dom';
+} from '#core/dom/layout/size-observer';
+import {removeElement} from '#core/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {tryParseJson} from '../../../src/core/types/object/json';
+import {tryParseJson} from '#core/types/object/json';
 import {userAssert} from '../../../src/log';
 
 /**
@@ -83,7 +83,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     this.mediaId_ = '';
 
     /** @private {string} */
-    this.iframeDomain_ = 'https://cdm.connatix.com';
+    this.iframeDomain_ = null;
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -254,7 +254,13 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
     // Media id is optional
     this.mediaId_ = element.getAttribute('data-media-id') || '';
-
+    const elementsPlayer =
+      element.getAttribute('data-elements-player') || false;
+    if (elementsPlayer) {
+      this.iframeDomain_ = 'https://cdm.elements.video';
+    } else {
+      this.iframeDomain_ = 'https://cdm.connatix.com';
+    }
     // will be used by sendCommand in order to send only after the player is rendered
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
@@ -292,7 +298,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     iframe.src = src;
 
     // applyFillContent so that frame covers the entire component.
-    this.applyFillContent(iframe, /* replacedContent */ true);
+    applyFillContent(iframe, /* replacedContent */ true);
 
     // append child iframe for element
     element.appendChild(iframe);

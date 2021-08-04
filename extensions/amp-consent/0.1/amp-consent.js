@@ -33,12 +33,12 @@ import {ConsentPolicyManager} from './consent-policy-manager';
 import {ConsentStateManager} from './consent-state-manager';
 import {ConsentUI} from './consent-ui';
 import {CookieWriter} from './cookie-writer';
-import {Deferred} from '../../../src/core/data-structures/promise';
+import {Deferred} from '#core/data-structures/promise';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
-} from '../../../src/service/notification-ui-manager';
-import {Services} from '../../../src/services';
+} from '#service/notification-ui-manager';
+import {Services} from '#service';
 import {TcfApiCommandManager} from './tcf-api-command-manager';
 import {
   assertHttpsUrl,
@@ -46,14 +46,15 @@ import {
   resolveRelativeUrl,
 } from '../../../src/url';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/core/types/object';
+import {dict, hasOwn} from '#core/types/object';
 import {getData} from '../../../src/event-helper';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {isArray, isEnumValue, isObject} from '../../../src/core/types';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
+import {isArray, isEnumValue, isObject} from '#core/types';
+import {realChildElements} from '#core/dom/query';
 
-import {isExperimentOn} from '../../../src/experiments';
+import {isExperimentOn} from '#experiments';
 
-import {toggle} from '../../../src/core/dom/style';
+import {toggle} from '#core/dom/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
@@ -129,16 +130,8 @@ export class AmpConsent extends AMP.BaseElement {
       'tcf-post-message-proxy-api'
     );
 
-    /** @private {?boolean} */
-    this.isGranularConsentExperimentOn_ = isExperimentOn(
-      this.win,
-      'amp-consent-granular-consent'
-    );
-
     /** @private {?Promise<?Array>} */
-    this.purposeConsentRequired_ = this.isGranularConsentExperimentOn_
-      ? null
-      : Promise.resolve();
+    this.purposeConsentRequired_ = null;
 
     /** @private @const {?Function} */
     this.boundHandleIframeMessages_ = this.isTcfPostMessageProxyExperimentOn_
@@ -223,7 +216,7 @@ export class AmpConsent extends AMP.BaseElement {
       /** @type {string} */ (this.consentId_)
     );
 
-    const children = this.getRealChildren();
+    const children = realChildElements(this.element);
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
       toggle(child, false);
@@ -299,11 +292,9 @@ export class AmpConsent extends AMP.BaseElement {
       this.handleClosingUiAction_(ACTION_TYPE.DISMISS);
     });
 
-    if (this.isGranularConsentExperimentOn_) {
-      this.registerAction('setPurpose', (invocation) => {
-        this.handleSetPurpose_(invocation);
-      });
-    }
+    this.registerAction('setPurpose', (invocation) => {
+      this.handleSetPurpose_(invocation);
+    });
 
     this.registerAction('prompt', (invocation) =>
       this.handleReprompt_(invocation)
@@ -526,10 +517,7 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {!Promise}
    */
   maybeSetConsentPurposeDefaults_(action, opt_invocation) {
-    if (
-      !this.isGranularConsentExperimentOn_ ||
-      typeof opt_invocation?.args?.purposeConsentDefault !== 'boolean'
-    ) {
+    if (typeof opt_invocation?.args?.purposeConsentDefault !== 'boolean') {
       return Promise.resolve();
     }
     if (action === ACTION_TYPE.DISMISS) {
@@ -706,7 +694,6 @@ export class AmpConsent extends AMP.BaseElement {
     // consentStateValue and consentString are treated as a pair that will update together
     if (consentStateValue !== null) {
       if (
-        this.isGranularConsentExperimentOn_ &&
         responsePurposeConsents &&
         isObject(responsePurposeConsents) &&
         Object.keys(responsePurposeConsents).length
@@ -730,40 +717,37 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {!Promise<?JsonObject>}
    */
   getConsentRemote_() {
+    // TODO(alanorozco): once() this instead of using an instance property.
     if (this.remoteConfigPromise_) {
       return this.remoteConfigPromise_;
     }
-    if (!this.consentConfig_['checkConsentHref']) {
+    const {'checkConsentHref': checkConsentHref} = this.consentConfig_;
+    if (!checkConsentHref) {
       this.remoteConfigPromise_ = Promise.resolve(null);
     } else {
       const storeConsentPromise =
         this.consentStateManager_.getLastConsentInstanceInfo();
       this.remoteConfigPromise_ = storeConsentPromise.then((storedInfo) => {
         // Note: Expect the request to look different in following versions.
-        const request = /** @type {!JsonObject} */ ({
+        const body = dict({
           'consentInstanceId': this.consentId_,
           'consentStateValue': getConsentStateValue(storedInfo['consentState']),
           'consentMetadata': storedInfo['consentMetadata'],
           'consentString': storedInfo['consentString'],
           'isDirty': !!storedInfo['isDirty'],
           'matchedGeoGroup': this.matchedGeoGroup_,
+          'purposeConsents': storedInfo['purposeConsents'],
+          'clientConfig': this.consentConfig_['clientConfig'],
         });
-        if (this.isGranularConsentExperimentOn_) {
-          request['purposeConsents'] = storedInfo['purposeConsents'];
-        }
-        if (this.consentConfig_['clientConfig']) {
-          request['clientConfig'] = this.consentConfig_['clientConfig'];
-        }
         const init = {
           credentials: 'include',
           method: 'POST',
-          body: request,
+          body,
         };
-        const href = this.consentConfig_['checkConsentHref'];
-        assertHttpsUrl(href, this.element);
+        assertHttpsUrl(checkConsentHref, this.element);
         const ampdoc = this.getAmpDoc();
         const sourceBase = getSourceUrl(ampdoc.getUrl());
-        const resolvedHref = resolveRelativeUrl(href, sourceBase);
+        const resolvedHref = resolveRelativeUrl(checkConsentHref, sourceBase);
         const xhrService = Services.xhrFor(this.win);
         return ampdoc.whenFirstVisible().then(() =>
           expandConsentEndpointUrl(this.element, resolvedHref).then(
@@ -793,9 +777,6 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {!Promise<boolean>}
    */
   checkGranularConsentRequired_(consentInfo) {
-    if (!this.isGranularConsentExperimentOn_) {
-      return Promise.resolve(true);
-    }
     return this.getPurposeConsentRequired_().then((purposeConsentRequired) => {
       // True if there are no required purposes
       if (!purposeConsentRequired?.length) {
@@ -829,6 +810,7 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {!Promise<?Array>}
    */
   getPurposeConsentRequired_() {
+    // TODO(alanorozco): once() this instead of using an instance property.
     if (this.purposeConsentRequired_) {
       return this.purposeConsentRequired_;
     }

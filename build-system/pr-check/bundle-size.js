@@ -29,8 +29,6 @@ const jobName = 'bundle-size.js';
  * Steps to run during push builds.
  */
 function pushBuildWorkflow() {
-  timedExecOrDie('amp dist --noconfig --esm');
-  timedExecOrDie('amp dist --noconfig');
   timedExecOrDie('amp bundle-size --on_push_build');
 }
 
@@ -39,8 +37,6 @@ function pushBuildWorkflow() {
  */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME)) {
-    timedExecOrDie('amp dist --noconfig --esm');
-    timedExecOrDie('amp dist --noconfig');
     timedExecOrDie('amp bundle-size --on_pr_build');
   } else {
     timedExecOrDie('amp bundle-size --on_skipped_build');

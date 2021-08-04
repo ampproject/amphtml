@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../core/data-structures/promise';
-import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
-import {rootNodeFor} from '../core/dom';
-import {scopedQuerySelector} from '../core/dom/query';
+import {Deferred} from '#core/data-structures/promise';
+import {rootNodeFor} from '#core/dom';
+import {scopedQuerySelector} from '#core/dom/query';
+
 import {userAssert} from '../log';
+import {
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+} from '../service-helpers';
 
 /**
  * @fileoverview

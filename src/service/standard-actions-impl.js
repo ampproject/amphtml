@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../core/constants/action-constants';
-import {Layout, getLayoutClass} from '../core/dom/layout';
-import {Services} from '../services';
-import {computedStyle, toggle} from '../core/dom/style';
+import {ActionTrust} from '#core/constants/action-constants';
+import {tryFocus} from '#core/dom';
+import {Layout, getLayoutClass} from '#core/dom/layout';
+import {computedStyle, toggle} from '#core/dom/style';
+import {isFiniteNumber} from '#core/types';
+import {toWin} from '#core/window';
+
+import {Services} from '#service';
+
 import {dev, user, userAssert} from '../log';
-import {getAmpdoc, registerServiceBuilderForDoc} from '../service';
-import {isFiniteNumber} from '../core/types';
-import {toWin} from '../core/window';
-import {tryFocus} from '../core/dom';
+import {getAmpdoc, registerServiceBuilderForDoc} from '../service-helpers';
 
 /**
  * @param {!Element} element

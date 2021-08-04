@@ -14,21 +14,27 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../core/data-structures/promise';
-import {Services} from '../services';
+import {Deferred} from '#core/data-structures/promise';
+import {rethrowAsync} from '#core/error';
+import {map} from '#core/types/object';
+
+import {Services} from '#service';
+
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
   upgradeOrRegisterElement,
 } from './custom-element-registry';
 import {createExtensionScript, getExtensionScripts} from './extension-script';
+import {registerExtendedTemplateForDoc} from './template-impl';
+
 import {dev, devAssert, user} from '../log';
 import {getMode} from '../mode';
+import {
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+} from '../service-helpers';
 import {installStylesForDoc} from '../style-installer';
-import {map} from '../core/types/object';
-import {registerExtendedTemplateForDoc} from './template-impl';
-import {registerServiceBuilder, registerServiceBuilderForDoc} from '../service';
-import {rethrowAsync} from '../core/error';
 
 export const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
 const TAG = 'extensions';

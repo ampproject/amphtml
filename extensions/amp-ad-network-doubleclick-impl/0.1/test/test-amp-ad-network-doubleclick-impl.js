@@ -19,11 +19,8 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
-import * as bytesUtils from '../../../../src/core/types/string/bytes';
-import {
-  AMP_EXPERIMENT_ATTRIBUTE,
-  QQID_HEADER,
-} from '../../../../ads/google/a4a/utils';
+import * as bytesUtils from '#core/types/string/bytes';
+import {AMP_EXPERIMENT_ATTRIBUTE, QQID_HEADER} from '#ads/google/a4a/utils';
 import {
   AMP_SIGNATURE_HEADER,
   VerificationStatus,
@@ -31,7 +28,6 @@ import {
 import {
   AmpA4A,
   CREATIVE_SIZE_HEADER,
-  MODULE_NOMODULE_PARAMS_EXP,
   XORIGIN_MODE,
   signatureVerifierFor,
 } from '../../../amp-a4a/0.1/amp-a4a';
@@ -46,14 +42,14 @@ import {
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
-} from '../../../../src/core/constants/consent-state';
-import {Deferred} from '../../../../src/core/data-structures/promise';
+} from '#core/constants/consent-state';
+import {Deferred} from '#core/data-structures/promise';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
-import {Layout} from '../../../../src/core/dom/layout';
+import {Layout} from '#core/dom/layout';
 import {SafeframeHostApi} from '../safeframe-host';
-import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/core/dom';
-import {toggleExperiment} from '../../../../src/experiments';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
+import {toggleExperiment} from '#experiments';
 
 /**
  * We're allowing external resources because otherwise using realWin causes
@@ -1992,48 +1988,6 @@ describes.realWin(
         it('should not allow if block level refresh', () => {
           impl.element.setAttribute('data-enable-refresh', '');
           expect(experimentInfoMap.isTrafficEligible()).to.be.false;
-        });
-      });
-
-      describe('detect module/nomodule experiment', () => {
-        it('should identify module/nomodule control when runtime-type is 10', () => {
-          env.sandbox
-            .stub(ampdocMock, 'getMetaByName')
-            .withArgs('runtime-type')
-            .returns('10');
-          randomlySelectUnsetExperimentsStub.returns({});
-          impl.setPageLevelExperiments();
-          expect(impl.experimentIds).to.include(
-            MODULE_NOMODULE_PARAMS_EXP.CONTROL
-          );
-        });
-
-        it('should identify module/nomodule experiment when runtime-type is 2', () => {
-          env.sandbox
-            .stub(ampdocMock, 'getMetaByName')
-            .withArgs('runtime-type')
-            .returns('2');
-          randomlySelectUnsetExperimentsStub.returns({});
-          impl.setPageLevelExperiments();
-          expect(impl.experimentIds).to.include(
-            MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT
-          );
-        });
-
-        // Only 2, 4, 10 should be recognized.
-        it('should ignore module/nomodule experiment when runtime-type is 6', () => {
-          env.sandbox
-            .stub(ampdocMock, 'getMetaByName')
-            .withArgs('runtime-type')
-            .returns('6');
-          randomlySelectUnsetExperimentsStub.returns({});
-          impl.setPageLevelExperiments();
-          expect(
-            impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT)
-          ).to.be.false;
-          expect(
-            impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.CONTROL)
-          ).to.be.false;
         });
       });
 

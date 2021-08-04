@@ -15,15 +15,15 @@
  */
 
 import {CommonSignals} from './core/constants/common-signals';
-import {Services} from './services';
 import {TickLabel} from './core/constants/enums';
-import {dev, devAssert} from './log';
-import {getAmpdoc} from './service';
 import {insertAfterOrAtStart, waitForBodyOpenPromise} from './core/dom';
-import {map} from './core/types/object';
-import {rethrowAsync} from './core/error';
 import {setStyles} from './core/dom/style';
+import {rethrowAsync} from './core/error';
+import {map} from './core/types/object';
+import {dev, devAssert} from './log';
 import {waitForServices} from './render-delaying-services';
+import {Services} from './service';
+import {getAmpdoc} from './service-helpers';
 
 const TRANSFORMER_PROP = '__AMP_CSS_TR';
 const STYLE_MAP_PROP = '__AMP_CSS_SM';

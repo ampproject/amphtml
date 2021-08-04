@@ -28,7 +28,7 @@ const {
  *   TaggedTemplateExpression: {Function(node: CompilerNode): void}
  * }}
  */
-module.exports = function (context) {
+function create(context) {
   /**
    * @param {CompilerNode} node
    */
@@ -119,16 +119,21 @@ module.exports = function (context) {
       });
     }
 
-    const invalids = invalidVoidTag(string);
+    const invalids = /<(svg)/i.test(string) ? [] : invalidVoidTag(string);
+
     if (invalids.length) {
       const sourceCode = context.getSourceCode();
       const {start} = template;
 
-      for (let i = 0; i < invalids.length; i++) {
-        const {offset, tag} = invalids[i];
+      for (const {offset, tag} of invalids) {
+        const itemStart = start + offset;
+        const loc = {
+          start: sourceCode.getLocFromIndex(itemStart),
+          end: sourceCode.getLocFromIndex(itemStart + tag.length + 1),
+        };
         context.report({
           node: template,
-          loc: sourceCode.getLocFromIndex(start + offset),
+          loc,
           message: `Invalid void tag "${tag}"`,
         });
       }
@@ -140,20 +145,23 @@ module.exports = function (context) {
    * @return {{
    *   tag: string,
    *   offset: number,
+   *   length: number,
    * }[]}
    */
   function invalidVoidTag(string) {
     // Void tags are defined at
     // https://html.spec.whatwg.org/multipage/syntax.html#void-elements
     const invalid =
-      /<(?!area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)([a-zA-Z-]+)( [^>]*)?\/>/g;
+      /<(?!area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)([a-zA-Z-]+)([\s\n][^>]*)?\/>/gm;
     const matches = [];
 
     let match;
     while ((match = invalid.exec(string))) {
+      const [fullMatch, tag] = match;
       matches.push({
-        tag: match[1],
+        tag,
         offset: match.index,
+        length: fullMatch.length,
       });
     }
 
@@ -188,4 +196,11 @@ module.exports = function (context) {
       tagUsage(node);
     },
   };
+}
+
+module.exports = {
+  meta: {
+    fixable: 'code',
+  },
+  create,
 };

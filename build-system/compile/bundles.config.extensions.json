@@ -93,6 +93,11 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-ad-network-dianomi-impl",
+    "version": "0.1",
+    "latestVersion": "0.1"
+  },
+  {
     "name": "amp-ad-network-doubleclick-impl",
     "version": "0.1",
     "latestVersion": "0.1"
@@ -329,6 +334,15 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-embedly-card",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "npm": true,
+      "wrappers": "bento"
+    }
+  },
+  {
     "name": "amp-experiment",
     "version": [
       "0.1",
@@ -357,40 +371,14 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-facebook-comments",
-    "version": "1.0",
-    "latestVersion": "0.1",
-    "options": {
-      "wrapper": "bento"
-    }
-  },
-  {
     "name": "amp-facebook-like",
     "version": "0.1",
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-facebook-like",
-    "version": "1.0",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true,
-      "wrapper": "bento"
-    }
-  },
-  {
     "name": "amp-facebook-page",
     "version": "0.1",
     "latestVersion": "0.1"
-  },
-  {
-    "name": "amp-facebook-page",
-    "version": "1.0",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true,
-      "wrapper": "bento"
-    }
   },
   {
     "name": "amp-fit-text",
@@ -452,14 +440,6 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-google-assistant-assistjs",
-    "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
-  },
-  {
     "name": "amp-google-document-embed",
     "version": "0.1",
     "latestVersion": "0.1"
@@ -481,6 +461,14 @@
     "name": "amp-iframe",
     "version": "0.1",
     "latestVersion": "0.1"
+  },
+  {
+    "name": "amp-iframe",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "wrapper": "bento"
+    }
   },
   {
     "name": "amp-iframely",
@@ -621,6 +609,16 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
+    }
+  },
+  {
+    "name": "amp-lightbox-gallery",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "wrapper": "bento"
     }
   },
   {
@@ -849,7 +847,7 @@
     "version": "0.1",
     "latestVersion": "0.1",
     "options": {
-      "noWrapper": true
+      "wrapper": "none"
     }
   },
   {
@@ -903,6 +901,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
+      "npm": true,
       "wrapper": "bento"
     }
   },
@@ -910,6 +909,15 @@
     "name": "amp-soundcloud",
     "version": "0.1",
     "latestVersion": "0.1"
+  },
+  {
+    "name": "amp-soundcloud",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "npm": true,
+      "wrappers": "bento"
+    }
   },
   {
     "name": "amp-springboard-player",
@@ -1003,9 +1011,15 @@
       "hasCss": true,
       "cssBinaries": [
         "amp-story-interactive-binary-poll",
+        "amp-story-interactive-img",
+        "amp-story-interactive-img-poll",
+        "amp-story-interactive-img-quiz",
         "amp-story-interactive-poll",
         "amp-story-interactive-quiz",
-        "amp-story-interactive-results"
+        "amp-story-interactive-results",
+        "amp-story-interactive-results-detailed",
+        "amp-story-interactive-slider",
+        "amp-story-interactive-disclaimer"
       ]
     }
   },
@@ -1077,6 +1091,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
+      "hasCss": true,
       "npm": true,
       "wrapper": "bento"
     }
@@ -1103,6 +1118,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
+      "hasCss": true,
       "npm": true,
       "wrapper": "bento"
     }
@@ -1190,14 +1206,6 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-viz-vega",
-    "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
-  },
-  {
     "name": "amp-vk",
     "version": "0.1",
     "latestVersion": "0.1"
@@ -1214,6 +1222,15 @@
     "name": "amp-wistia-player",
     "version": "0.1",
     "latestVersion": "0.1"
+  },
+  {
+    "name": "amp-wordpress-embed",
+    "version": "1.0",
+    "latestVersion": "1.0",
+    "options": {
+      "npm": true,
+      "wrappers": "bento"
+    }
   },
   {
     "name": "amp-yotpo",

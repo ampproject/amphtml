@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "baseUrl": ".",
+    "outDir": "dist",
+    "noEmit": true,
+    "paths": {
+      "#3p/*": ["./3p/*"],
+      "#ads/*": ["./ads/*"],
+      "#build/*": ["./build/*"],
+
+      "#builtins/*": ["./src/builtins/*"],
+      "#core/*": ["./src/core/*"],
+      "#experiments/*": ["./src/experiments/*"],
+      "#inabox/*": ["./src/inabox/*"],
+      "#polyfills/*": ["./src/polyfills/*"],
+      "#preact/*": ["./src/preact/*"],
+      "#purifier/*": ["./src/purifier/*"],
+      "#service/*": ["./src/service/*"],
+
+      "#test/*": ["./test/*"],
+      "#testing/*": ["./testing/*"],
+
+      "#third_party/*": ["./third_party/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist"]
+}

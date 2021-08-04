@@ -23,7 +23,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const bacon = require('baconipsum');
 const bodyParser = require('body-parser');
 const cors = require('./amp-cors');
-const devDashboard = require('./app-index/index');
+const devDashboard = require('./app-index');
 const express = require('express');
 const fetch = require('node-fetch');
 const formidable = require('formidable');
@@ -522,6 +522,7 @@ app.use('/form/verify-search-json/post', (req, res) => {
  * @param {express.Request} req
  * @param {express.Response} res
  * @param {string} mode
+ * @return {Promise<void>}
  */
 async function proxyToAmpProxy(req, res, mode) {
   const url =

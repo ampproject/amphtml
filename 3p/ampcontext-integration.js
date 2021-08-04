@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AbstractAmpContext} from './ampcontext';
+import {dict} from '#core/types/object';
+
 import {computeInMasterFrame} from './3p';
+import {AbstractAmpContext} from './ampcontext';
+
 import {dev, user, userAssert} from '../src/log';
-import {dict} from '../src/core/types/object';
 
 /**
  * Returns the "master frame" for all widgets of a given type.

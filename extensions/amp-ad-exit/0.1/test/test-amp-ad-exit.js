@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {AmpAdExit} from '../amp-ad-exit';
+import {AmpAdExit, getAttributionReportingStatus} from '../amp-ad-exit';
 import {FilterType} from '../filters/filter';
 import {IFRAME_TRANSPORTS} from '../../../amp-analytics/0.1/iframe-transport-vendors';
-import {installPlatformService} from '../../../../src/service/platform-impl';
-import {installTimerService} from '../../../../src/service/timer-impl';
-import {setParentWindow} from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
+import {installPlatformService} from '#service/platform-impl';
+import {installTimerService} from '#service/timer-impl';
+import {setParentWindow} from '../../../../src/service-helpers';
+import {toggleExperiment} from '#experiments';
 
 const TEST_3P_VENDOR = '3p-vendor';
 
@@ -980,6 +980,56 @@ describes.realWin(
         'http://localhost:8000/tracking?numVar=0&boolVar=false',
         ''
       );
+    });
+
+    describe('ATTRIBUTION_REPORTING_STATUS macro', () => {
+      it('should return ATTRIBUTION_DATA_PRESENT_AND_POLICY_ENABLED if browserAdConfig is present and browser supported', () => {
+        const target = {
+          behaviors: {
+            browserAdConversion: {
+              attributiondestination: 'https://example.com',
+              attributionsourceeventid: 'EFnZ8GunL1xrwNTIHbXrvQ==',
+              attributionreportto: 'https://google.com',
+            },
+          },
+        };
+        expect(
+          getAttributionReportingStatus(
+            true /* isAttributionReportingSupported*/,
+            target
+          )
+        ).to.equal(3);
+      });
+
+      it('should return ATTRIBUTION_DATA_PRESENT if browserAdConfig is present and no browser support', () => {
+        const target = {
+          behaviors: {
+            browserAdConversion: {
+              attributiondestination: 'https://example.com',
+              attributionsourceeventid: 'EFnZ8GunL1xrwNTIHbXrvQ==',
+              attributionreportto: 'https://google.com',
+            },
+          },
+        };
+        expect(
+          getAttributionReportingStatus(
+            false /* isAttributionReportingSupported*/,
+            target
+          )
+        ).to.equal(2);
+      });
+
+      it('should return ATTRIBUTION_MACRO_PRESENT if browserAdConfig not present', () => {
+        const target = {
+          behaviors: {},
+        };
+        expect(
+          getAttributionReportingStatus(
+            false /* isAttributionReportingSupported*/,
+            target
+          )
+        ).to.equal(1);
+      });
     });
   }
 );

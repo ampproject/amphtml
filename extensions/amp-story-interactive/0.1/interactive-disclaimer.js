@@ -22,9 +22,12 @@
  * submit a PR with a new entry on the DisclaimerBackendList and tag @ampproject/wg-stories to review it.
  */
 
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {htmlFor} from '../../../src/core/dom/static-template';
+import {LocalizedStringId} from '#service/localization/strings';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import DisclaimerBackendsList from './disclaimer-backends-list.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import {createShadowRootWithStyle} from 'extensions/amp-story/1.0/utils';
+import {CSS} from '../../../build/amp-story-interactive-disclaimer-0.1.css';
+import {addAttributesToElement} from '#core/dom';
 
 /**
  * Creates a disclaimer icon and dialog.
@@ -33,140 +36,91 @@ import DisclaimerBackendsList from './disclaimer-backends-list.json' assert {typ
  */
 function buildDisclaimerLayout(element) {
   const html = htmlFor(element);
-  return html`<div class="i-amphtml-story-interactive-disclaimer">
-    <button
-      class="i-amphtml-story-interactive-disclaimer-alert"
-      aria-label="Open disclaimer"
-    ></button>
+  return html`<div
+    class="i-amphtml-story-interactive-disclaimer-dialog"
+    role="alertdialog"
+  >
     <div
-      class="i-amphtml-story-interactive-disclaimer-dialog"
-      role="alertdialog"
+      class="i-amphtml-story-interactive-disclaimer-description"
+      ref="descriptionEl"
     >
-      <div class="i-amphtml-story-interactive-disclaimer-description">
-        <span class="i-amphtml-story-interactive-disclaimer-note"
-          >Your response will be sent to
-        </span>
-        <span class="i-amphtml-story-interactive-disclaimer-entity"></span>
-        <div class="i-amphtml-story-interactive-disclaimer-url"></div>
-      </div>
-      <div>
-        <a target="_blank" class="i-amphtml-story-interactive-disclaimer-link"
-          >Learn more</a
-        >
-      </div>
-      <button
-        class="i-amphtml-story-interactive-disclaimer-close"
-        aria-label="Close disclaimer"
-      ></button>
+      <span class="i-amphtml-story-interactive-disclaimer-note" ref="noteEl"
+        >Your response will be sent to
+      </span>
+      <span
+        class="i-amphtml-story-interactive-disclaimer-entity"
+        ref="entityEl"
+      ></span>
+      <div class="i-amphtml-story-interactive-disclaimer-url" ref="urlEl"></div>
     </div>
+    <a
+      target="_blank"
+      class="i-amphtml-story-interactive-disclaimer-link"
+      ref="linkEl"
+      >Learn more</a
+    >
+    <button
+      class="i-amphtml-story-interactive-disclaimer-close"
+      aria-label="Close disclaimer"
+    ></button>
   </div>`;
 }
 
 /**
- * Creates a disclaimer icon and dialog from the interactive element passed in.
+ * Creates a disclaimer dialog from the interactive element passed in.
+ * @param {!AmpStoryInteractive} interactive the interactive element.
+ * @param {JsonObject<string, string>=} attrs optional attributes for the disclaimer.
+ * @return {!Element} the container for the shadow root that has the disclaimer.
+ */
+export function buildInteractiveDisclaimer(interactive, attrs = {}) {
+  const disclaimer = buildDisclaimerLayout(interactive.element);
+  addAttributesToElement(disclaimer, attrs);
+
+  // Fill information
+  const {descriptionEl, entityEl, linkEl, noteEl, urlEl} = htmlRefs(disclaimer);
+  const backendUrl = interactive.element
+    .getAttribute('endpoint')
+    .replace('https://', '');
+  const backendSpecs = getBackendSpecs(backendUrl, DisclaimerBackendsList);
+  if (backendSpecs) {
+    entityEl.textContent = backendSpecs[1].entityName;
+    urlEl.textContent = backendSpecs[0];
+    backendSpecs[1].learnMoreUrl
+      ? (linkEl.href = backendSpecs[1].learnMoreUrl)
+      : linkEl.remove();
+  } else {
+    entityEl.remove();
+    urlEl.textContent = backendUrl;
+    linkEl.remove();
+  }
+  noteEl.textContent = interactive.localizationService.getLocalizedString(
+    LocalizedStringId.AMP_STORY_INTERACTIVE_DISCLAIMER_NOTE
+  );
+
+  // Set the described-by for a11y.
+  const disclaimerDescriptionId = `i-amphtml-story-disclaimer-${interactive.element.id}-description`;
+  descriptionEl.id = disclaimerDescriptionId;
+  disclaimer.setAttribute('aria-describedby', disclaimerDescriptionId);
+
+  // Create container and return.
+  const disclaimerContainer = htmlFor(
+    interactive.element
+  )`<div class="i-amphtml-story-interactive-disclaimer-dialog-container"></div>`;
+  createShadowRootWithStyle(disclaimerContainer, disclaimer, CSS);
+  return disclaimerContainer;
+}
+
+/**
+ * Creates a disclaimer icon from the interactive element passed in.
  * @param {!AmpStoryInteractive} interactive the interactive element.
  * @return {!Element} the icon with the dialog that should be added to the shadowRoot.
  */
-export function buildInteractiveDisclaimer(interactive) {
-  const {element} = interactive;
-  const backendUrl = element.getAttribute('endpoint').replace('https://', '');
-
-  const disclaimer = buildDisclaimerLayout(element);
-  const dialogEl = disclaimer.querySelector(
-    '.i-amphtml-story-interactive-disclaimer-dialog'
-  );
-  const descriptionEl = disclaimer.querySelector(
-    '.i-amphtml-story-interactive-disclaimer-description'
-  );
-  const urlEl = disclaimer.querySelector(
-    '.i-amphtml-story-interactive-disclaimer-url'
-  );
-  const linkEl = disclaimer.querySelector(
-    '.i-amphtml-story-interactive-disclaimer-link'
-  );
-  const entityEl = disclaimer.querySelector(
-    '.i-amphtml-story-interactive-disclaimer-entity'
-  );
-  const noteEl = disclaimer.querySelector(
-    '.i-amphtml-story-interactive-disclaimer-note'
-  );
-
-  // Fill information
-  const backendSpecs = getBackendSpecs(backendUrl, DisclaimerBackendsList);
-  const disclaimerDescriptionId = `i-amphtml-story-disclaimer-${interactive.element.id}-description`;
-  interactive.mutateElement(() => {
-    if (backendSpecs) {
-      entityEl.textContent = backendSpecs[1].entityName;
-      urlEl.textContent = backendSpecs[0];
-      backendSpecs[1].learnMoreUrl
-        ? (linkEl.href = backendSpecs[1].learnMoreUrl)
-        : linkEl.remove();
-    } else {
-      entityEl.remove();
-      urlEl.textContent = backendUrl;
-      linkEl.remove();
-    }
-    noteEl.textContent = interactive.localizationService.getLocalizedString(
-      LocalizedStringId.AMP_STORY_INTERACTIVE_DISCLAIMER_NOTE
-    );
-    descriptionEl.id = disclaimerDescriptionId;
-    dialogEl.setAttribute('aria-describedby', disclaimerDescriptionId); // For screen readers.
-    return closeDisclaimer(interactive, disclaimer);
-  });
-
-  // Add click listener to open or close the dialog.
-  disclaimer.addEventListener('click', (event) => {
-    if (
-      event.target.classList.contains(
-        'i-amphtml-story-interactive-disclaimer-close'
-      )
-    ) {
-      closeDisclaimer(interactive, disclaimer);
-    } else if (
-      event.target.classList.contains(
-        'i-amphtml-story-interactive-disclaimer-alert'
-      )
-    ) {
-      openDisclaimer(interactive, disclaimer);
-    }
-  });
-  return disclaimer;
-}
-
-/**
- * Sets the styles to open the disclaimer dialog.
- * @param {!AmpStoryInteractive} interactive
- * @param {!Element} disclaimerEl
- */
-function openDisclaimer(interactive, disclaimerEl) {
-  interactive.mutateElement(() => {
-    disclaimerEl.setAttribute('active', '');
-  });
-}
-
-/**
- * Sets the styles to close the disclaimer dialog.
- * @param {!AmpStoryInteractive} interactive
- * @param {!Element} disclaimerEl
- * @return {!Promise}
- */
-function closeDisclaimer(interactive, disclaimerEl) {
-  return interactive.mutateElement(() => {
-    disclaimerEl.removeAttribute('active');
-  });
-}
-
-/**
- * Close the disclaimer if it's open.
- * @param {!AmpStoryInteractive} interactive
- * @param {?Element} disclaimerEl
- * @return {!Promise}
- */
-export function tryCloseDisclaimer(interactive, disclaimerEl) {
-  if (disclaimerEl && disclaimerEl.hasAttribute('active')) {
-    return closeDisclaimer(interactive, disclaimerEl);
-  }
-  return Promise.resolve();
+export function buildInteractiveDisclaimerIcon(interactive) {
+  const html = htmlFor(interactive.element);
+  return html`<button
+    class="i-amphtml-story-interactive-disclaimer-icon"
+    aria-label="Open disclaimer"
+  ></button>`;
 }
 
 /**

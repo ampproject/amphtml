@@ -16,10 +16,12 @@
 
 /* 1em = 16px for interactive components, unless overriden by font-size */
 .i-amphtml-story-interactive-container {
-  font-family: 'Poppins', sans-serif !important;
-}
+  --correct-color: #5bba74 !important;
+  --correct-color-shaded: #00600f !important;
+  --incorrect-color: #f34e4e !important;
+  --incorrect-color-shaded: #b71c1c !important;
 
-.i-amphtml-story-interactive-container {
+  font-family: 'Poppins', sans-serif !important;
   background: var(--interactive-prompt-background) !important;
   border-radius: 2em !important;
 }
@@ -61,6 +63,38 @@
   }
   100% {
     background-color: var(--i-amphtml-interactive-theme-shading-base);
+  }
+}
+
+@keyframes answer-choice-bounce {
+  0% {
+    visibility: hidden;
+    transform: scale(0);
+    visibility: hidden;
+  }
+  21% {
+    visibility: visible;
+    transform: scale(.01);
+    animation-timing-function: cubic-bezier(.3, .5, .7, 1);
+  }
+  43% {
+    transform: scale(1.203);
+    animation-timing-function: ease-in-out;
+  }
+  62% {
+    transform: scale(0.956);
+  }
+  83% {
+    transform: scale(1.008);
+  }
+  96% {
+    transform: scale(1);
+  }
+  99% {
+    transform: scale(.998);
+  }
+  100% {
+    transform: scale(1);
   }
 }
 
@@ -111,24 +145,12 @@
   }
 }
 
-/* Disclaimer CSS rules */
-.i-amphtml-story-interactive-disclaimer {
-  position: absolute !important;
-  color: black !important;
-  bottom: calc(100% - 1.75em) !important;
-  right: 0 !important;
-  z-index: 1 !important;
-  --i-amphtml-story-interactive-disclaimer-black-transparent: #00000040 !important;
-  --i-amphtml-story-interactive-disclaimer-blue: #005af0 !important;
-  pointer-events: all !important;
-}
-
-.i-amphtml-story-interactive-disclaimer-alert {
+.i-amphtml-story-interactive-disclaimer-icon {
   width: 1.75em !important;
   height: 1.75em !important;
   position: absolute !important;
   right: 0 !important;
-  bottom: 0 !important;
+  top: 0 !important;
   padding: .25em !important;
   font-size: inherit !important;
   transform-origin: bottom right !important;
@@ -142,51 +164,17 @@
   box-shadow: 0 .2em .2em 0 var(--i-amphtml-story-interactive-disclaimer-black-transparent) !important;
   box-sizing: border-box !important;
   cursor: pointer !important;
+  pointer-events: all !important;
+  z-index: 2 !important;
+
+  --i-amphtml-story-interactive-disclaimer-black-transparent: #00000040 !important;
 }
 
-.i-amphtml-story-interactive-disclaimer[active]
-  .i-amphtml-story-interactive-disclaimer-alert {
+.i-amphtml-story-interactive-disclaimer-icon[hide] {
   display: none !important;
 }
 
-.i-amphtml-story-interactive-disclaimer-dialog {
-  overflow: hidden !important;
-  padding: 1em !important;
-  text-align: initial !important;
-  box-sizing: border-box !important;
-  font-size: 1em !important;
-  background: white;
-  border-radius: 1em;
-  box-shadow: 0px .2em .2em 0px var(--i-amphtml-story-interactive-disclaimer-black-transparent) !important;
-}
-
-.i-amphtml-story-interactive-disclaimer:not([active])
-  .i-amphtml-story-interactive-disclaimer-dialog {
-  display: none !important;
-}
-
-.i-amphtml-story-interactive-disclaimer-url {
-  color: #5f6368 !important;
-  padding-bottom: 0.2em !important;
-}
-
-.i-amphtml-story-interactive-disclaimer-link {
-  color: var(--i-amphtml-story-interactive-disclaimer-blue) !important;
-  font-weight: bold !important;
-  text-decoration: none !important;
-}
-
-.i-amphtml-story-interactive-disclaimer-close {
-  position: absolute !important;
-  bottom: 0 !important;
-  right: 0 !important;
-  cursor: pointer !important;
-  background: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="#9AA0A6"><rect x="0.787868" y="1.83337" width="1.47851" height="13.2636" rx="0.739255" transform="rotate(-45 0.787868 1.83337)"/><rect x="10.1669" y="0.787868" width="1.47851" height="13.2636" rx="0.739255" transform="rotate(45 10.1669 0.787868)"/></svg>') !important;
-  width: 3em !important;
-  height: 3em !important;
-  background-size: 1em !important;
-  background-repeat: no-repeat !important;
-  background-position: center !important;
-  border: none !important;
-  font-size: inherit !important;
+[dir="rtl"] .i-amphtml-story-interactive-disclaimer-icon {
+  left: 0 !important;
+  right: auto !important;
 }

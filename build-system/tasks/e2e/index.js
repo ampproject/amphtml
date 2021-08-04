@@ -26,17 +26,20 @@ const http = require('http');
 const Mocha = require('mocha');
 const path = require('path');
 const {
+  buildRuntime,
+  getFilesFromArgv,
+  getFilesFromFileList,
+} = require('../../common/utils');
+const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../../common/ctrlcHandler');
-const {buildRuntime, getFilesFromArgv} = require('../../common/utils');
 const {cyan} = require('../../common/colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
 const {isCiBuild, isCircleciBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
-const {reportTestStarted} = require('../report-test-status');
 const {watch} = require('chokidar');
 
 const SLOW_TEST_THRESHOLD_MS = 2500;
@@ -159,20 +162,19 @@ async function fetchCoverage_(outDir) {
  * Runs e2e tests on all files under test.
  * @return {!Promise<void>}
  */
-async function runTests_() {
+function runTests_() {
   const mocha = createMocha_();
   const addFile = addMochaFile_.bind(null, mocha);
 
   // specify tests to run
-  if (argv.files) {
+  if (argv.files || argv.filelist) {
     getFilesFromArgv().forEach(addFile);
+    getFilesFromFileList().forEach(addFile);
   } else {
     config.e2eTestPaths.forEach((path) => {
       glob.sync(path).forEach(addFile);
     });
   }
-
-  await reportTestStarted();
 
   // return promise to amp that resolves when there's an error.
   return new Promise((resolve) => {
@@ -193,7 +195,10 @@ async function runTests_() {
  * @return {!Promise<void>}
  */
 async function runWatch_() {
-  const filesToWatch = argv.files ? getFilesFromArgv() : config.e2eTestPaths;
+  const filesToWatch =
+    argv.files || argv.filelist
+      ? getFilesFromArgv().concat(getFilesFromFileList())
+      : config.e2eTestPaths;
 
   log('Watching', cyan(filesToWatch), 'for changes...');
   watch(filesToWatch).on('change', (file) => {
@@ -209,6 +214,7 @@ async function runWatch_() {
 
 /**
  * Entry-point to run e2e tests.
+ * @return {Promise<void>}
  */
 async function e2e() {
   const handlerProcess = createCtrlcHandler('e2e');
@@ -241,4 +247,5 @@ e2e.flags = {
   'debug': 'Print debugging information while running tests',
   'report': 'Write test result report to a local file',
   'coverage': 'Collect coverage data from instrumented code',
+  'filelist': 'Run tests specified in this comma-separated list of test files',
 };

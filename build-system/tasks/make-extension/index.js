@@ -55,7 +55,7 @@ let ArgsDef;
  *   name: string,
  *   version: string,
  *   latestVersion?: (string|undefined)
- *   options?: ({hasCss: boolean}|undefined)
+ *   options?: ({hasCss?: boolean, wrapper?: string}|undefined)
  * }}
  */
 let BundleDef;
@@ -84,6 +84,7 @@ const replace = (inputText, replacements) =>
 /**
  * Generate a sequence of all files in a directory recursively.
  * @param {string} dir
+ * @return {AsyncIterable<string>}
  * @yields {string}
  */
 async function* walkDir(dir) {
@@ -163,6 +164,7 @@ async function writeFromTemplateDir(
  *
  * @param {BundleDef} bundle
  * @param {string=} destination
+ * @return {Promise<void>}
  */
 async function insertExtensionBundlesConfig(
   bundle,
@@ -305,7 +307,10 @@ async function makeExtensionFromTemplates(
   };
 
   if (!options.nocss) {
-    bundleConfig.options = {hasCss: true};
+    bundleConfig.options = {...bundleConfig.options, hasCss: true};
+  }
+  if (options.bento) {
+    bundleConfig.options = {...bundleConfig.options, wrapper: 'bento'};
   }
 
   await insertExtensionBundlesConfig(

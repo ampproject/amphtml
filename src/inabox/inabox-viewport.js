@@ -14,26 +14,30 @@
  * limitations under the License.
  */
 
-import {MessageType} from '../../src/3p-frame-messaging';
-import {Observable} from '../core/data-structures/observable';
-import {Services} from '../services';
-import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
-import {ViewportInterface} from '../service/viewport/viewport-interface';
-import {canInspectWindow} from '../iframe-helper';
-import {dev} from '../log';
-import {devAssert, devAssertElement} from '../core/assert';
-import {getFrameOverlayManager} from '../../ads/inabox/frame-overlay-manager.js';
-import {getPositionObserver} from '../../ads/inabox/position-observer';
-import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
-import {isIframed} from '../core/dom';
+import {getFrameOverlayManager} from '#ads/inabox/frame-overlay-manager';
+import {getPositionObserver} from '#ads/inabox/position-observer';
+
+import {devAssert, devAssertElement} from '#core/assert';
+import {Observable} from '#core/data-structures/observable';
+import {isIframed} from '#core/dom';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../core/math/layout-rect';
-import {px, resetStyles, setImportantStyles} from '../core/dom/style';
-import {registerServiceBuilderForDoc} from '../service';
-import {throttle} from '../core/types/function';
+} from '#core/dom/layout/rect';
+import {px, resetStyles, setImportantStyles} from '#core/dom/style';
+import {throttle} from '#core/types/function';
+
+import {Services} from '#service';
+import {ViewportBindingDef} from '#service/viewport/viewport-binding-def';
+import {ViewportInterface} from '#service/viewport/viewport-interface';
+
+import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
+
+import {MessageType} from '../3p-frame-messaging';
+import {canInspectWindow} from '../iframe-helper';
+import {dev} from '../log';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 
 /** @const {string} */
 const TAG = 'inabox-viewport';

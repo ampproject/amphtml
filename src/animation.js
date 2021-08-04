@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Deferred} from './core/data-structures/promise';
 import {NormTimeDef, getCurve} from './core/data-structures/curve';
-import {Services} from './services';
+import {Deferred} from './core/data-structures/promise';
 import {TimestampDef} from './core/types/date';
 import {dev} from './log';
+import {Services} from './service';
 
 const TAG_ = 'Animation';
 
