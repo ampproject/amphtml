@@ -27,7 +27,7 @@
   border: 0.3em solid var(--interactive-accent-color) !important;
 }
 
-.i-amphtml-story-interactive-results-selected-result {
+.i-amphtml-story-interactive-results-result {
   position: absolute !important;
   border-radius: 50% !important;
   filter: grayscale(100%) !important;

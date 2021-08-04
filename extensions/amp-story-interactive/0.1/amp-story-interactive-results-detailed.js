@@ -39,6 +39,13 @@ const MIN_DIST = 5;
 const MAX_DIST = 6;
 
 /**
+ * @typedef {{
+ *    el: !Element,
+ *    answered: boolean
+ * }} ResultEl
+ */
+
+/**
  * Generates the template for the detailed results component.
  *
  * @param {!Element} element
@@ -65,11 +72,14 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
   constructor(element) {
     super(element);
 
-    /** @private {?Map<string, Object>} */
-    this.selectedResultEls_ = null;
+    /** @private {!Map<string, ResultEl>} */
+    this.resultEls_ = {};
 
-    /** @private {number} */
-    this.componentCount_ = 0;
+    /** @private {?Element} */
+    this.resultsContainer_ = null;
+
+    /** @private {boolean} */
+    this.usePercentage_ = false;
   }
 
   /** @override */
@@ -81,100 +91,104 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
   buildComponent() {
     this.rootEl_ = buildResultsDetailedTemplate(this.element);
     this.buildTop();
+    this.resultsContainer_ = this.rootEl_.querySelector(
+      '.i-amphtml-story-interactive-results-detailed'
+    );
+    this.usePercentage_ = decideStrategy(this.options_) === 'percentage';
     return this.rootEl_;
   }
 
   /** @override */
   onInteractiveReactStateUpdate(interactiveState) {
     const components = Object.values(interactiveState);
-    if (components.length === this.componentCount_) {
-      // Function not passed in directly to ensure "this" works correctly
-      components.forEach((e) => this.updateSelectedResult_(e));
-    } else {
-      this.initializeSelectedResultContainers_(components);
+    let updateLayout = false;
+
+    components.forEach((e) => {
+      if (
+        (this.usePercentage_ && e.type === InteractiveType.QUIZ) ||
+        (!this.usePercentage_ && e.type === InteractiveType.POLL)
+      ) {
+        if (!this.resultEls_[e.interactiveId]) {
+          updateLayout = true;
+          this.createResultEl_(e);
+        }
+        this.updateAnsweredResult_(e);
+      }
+    });
+
+    if (updateLayout) {
+      this.positionResultEls_();
     }
 
     super.onInteractiveReactStateUpdate(interactiveState);
   }
 
   /**
-   * Create and store elements that will show results
-   * for each interactive component.
-   *
-   * @param {!Array<Object>} components
-   * @private
-   */
-  initializeSelectedResultContainers_(components) {
-    this.selectedResultEls_ = {};
-    this.componentCount_ = components.length;
-    const detailedResultsContainer = this.rootEl_.querySelector(
-      '.i-amphtml-story-interactive-results-detailed'
-    );
-
-    const slice = (2 * Math.PI) / components.length;
-    const offset = Math.random() * slice;
-
-    const usePercentage = decideStrategy(this.options_) === 'percentage';
-
-    components.forEach((e, index) => {
-      if (
-        (usePercentage && e.type === InteractiveType.QUIZ) ||
-        (!usePercentage && e.type === InteractiveType.POLL)
-      ) {
-        const container = document.createElement('div');
-        container.classList.add(
-          'i-amphtml-story-interactive-results-selected-result'
-        );
-
-        const angleBuffer = slice / 4;
-        const size = Math.random() * (MAX_SIZE - MIN_SIZE) + MIN_SIZE;
-        const angle =
-          Math.random() * (slice - 2 * angleBuffer) +
-          slice * index +
-          angleBuffer +
-          offset;
-        const dist = Math.random() * (MAX_DIST - MIN_DIST) + MIN_DIST;
-        const top = CENTER + Math.cos(angle) * dist - size / 2;
-        const left = CENTER + Math.sin(angle) * dist - size / 2;
-
-        setImportantStyles(container, {
-          'height': size + 'em',
-          'width': size + 'em',
-          'top': top + 'em',
-          'left': left + 'em',
-        });
-        detailedResultsContainer.prepend(container);
-        this.selectedResultEls_[e.interactiveId] = {
-          el: container,
-          updated: false,
-        };
-        this.updateSelectedResult_(e);
-      }
-    });
-  }
-
-  /**
-   * Sets the background image or text content for an updated result.
+   * Create and store an element that will show the results
+   * for an interactive component.
    *
    * @param {!Object} e
    * @private
    */
-  updateSelectedResult_(e) {
-    if (
-      e.option &&
-      e.interactiveId in this.selectedResultEls_ &&
-      !this.selectedResultEls_[e.interactiveId].updated
-    ) {
-      if (e.option.image) {
-        setImportantStyles(this.selectedResultEls_[e.interactiveId].el, {
-          'background-image': 'url(' + e.option.image + ')',
-        });
-      } else {
-        const textEl = document.createElement('span');
-        textEl.textContent = e.option.text;
-        this.selectedResultEls_[e.interactiveId].el.appendChild(textEl);
-      }
-      this.selectedResultEls_[e.interactiveId].updated = true;
+  createResultEl_(e) {
+    const el = document.createElement('div');
+    el.classList.add('i-amphtml-story-interactive-results-result');
+    this.resultsContainer_.prepend(el);
+    this.resultEls_[e.interactiveId] = {
+      el,
+      answered: false,
+    };
+  }
+
+  /**
+   * Sets the background image or text content for an answered result.
+   *
+   * @param {!Object} e
+   * @private
+   */
+  updateAnsweredResult_(e) {
+    if (!e.option || this.resultEls_[e.interactiveId].answered) {
+      return;
     }
+
+    if (e.option.image) {
+      setImportantStyles(this.resultEls_[e.interactiveId].el, {
+        'background-image': 'url(' + e.option.image + ')',
+      });
+    } else {
+      this.resultEls_[e.interactiveId].el.textContent = e.option.text;
+    }
+    this.resultEls_[e.interactiveId].answered = true;
+  }
+
+  /**
+   * Sets (or resets) the positioning and sizing of each result.
+   *
+   * @private
+   */
+  positionResultEls_() {
+    const results = Object.values(this.resultEls_);
+    const slice = (2 * Math.PI) / results.length;
+
+    results.forEach(({el}, index) => {
+      const offset = Math.random() * slice;
+      const angleBuffer = slice / 4;
+      const size = Math.random() * (MAX_SIZE - MIN_SIZE) + MIN_SIZE;
+      const angle =
+        Math.random() * (slice - 2 * angleBuffer) +
+        slice * index +
+        angleBuffer +
+        offset;
+      const dist = Math.random() * (MAX_DIST - MIN_DIST) + MIN_DIST;
+      const top = CENTER + Math.cos(angle) * dist - size / 2;
+      const left = CENTER + Math.sin(angle) * dist - size / 2;
+
+      setImportantStyles(el, {
+        'height': size + 'em',
+        'width': size + 'em',
+        'top': top + 'em',
+        'left': left + 'em',
+      });
+    });
   }
 }
