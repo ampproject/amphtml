@@ -39,7 +39,7 @@ function pushBuildWorkflow() {
   try {
     generateCircleCiShardTestFileList(unitTestPaths);
     timedExecOrThrow(
-      `amp unit --headless --coverage --report --filelist ${TEST_FILES_LIST_FILE_NAME}`,
+      `amp unit --headless --coverage --report`,
       'Unit tests failed!'
     );
     timedExecOrThrow(
@@ -62,7 +62,7 @@ function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
     generateCircleCiShardTestFileList(unitTestPaths);
     timedExecOrDie(
-      `amp unit --headless --coverage --filelist ${TEST_FILES_LIST_FILE_NAME}`
+      `amp unit --headless --coverage`
     );
     timedExecOrDie('amp codecov-upload');
   } else {
