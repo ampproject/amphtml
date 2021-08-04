@@ -55,6 +55,9 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
 
     /** @private {?Element} */
     this.resultsContainer_ = null;
+
+    /** @private {boolean} */
+    this.usePercentage_ = false;
   }
 
   /** @override */
@@ -69,19 +72,19 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
     this.resultsContainer_ = this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-results-detailed'
     );
+    this.usePercentage_ = decideStrategy(this.options_) === 'percentage';
     return this.rootEl_;
   }
 
   /** @override */
   onInteractiveReactStateUpdate(interactiveState) {
     const components = Object.values(interactiveState);
-    const usePercentage = decideStrategy(this.options_) === 'percentage';
     let updateLayout = false;
 
     components.forEach((e) => {
       if (
-        (usePercentage && e.type === InteractiveType.QUIZ) ||
-        (!usePercentage && e.type === InteractiveType.POLL)
+        (this.usePercentage_ && e.type === InteractiveType.QUIZ) ||
+        (!this.usePercentage_ && e.type === InteractiveType.POLL)
       ) {
         if (!(e.interactiveId in this.resultEls_)) {
           updateLayout = true;
