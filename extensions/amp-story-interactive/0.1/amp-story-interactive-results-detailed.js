@@ -112,7 +112,7 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
    * Create and store an element that will show the results
    * for an interactive component.
    *
-   * @param {!Object} e
+   * @param {!./amp-story-interactive-results.InteractiveStateEntryType} e
    * @private
    */
   createResultEl_(e) {
@@ -128,7 +128,7 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
   /**
    * Sets the background image or text content for an answered result.
    *
-   * @param {!Object} e
+   * @param {!./amp-story-interactive-results.InteractiveStateEntryType} e
    * @private
    */
   updateAnsweredResult_(e) {

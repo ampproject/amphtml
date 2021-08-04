@@ -33,6 +33,14 @@ import {htmlFor} from '#core/dom/static-template';
 export let InteractiveResultsDef;
 
 /**
+ * @typedef {{
+ *    option: ?./amp-story-interactive-abstract.OptionConfigType,
+ *    interactiveId: string
+ * }}
+ */
+export let InteractiveStateEntryType;
+
+/**
  * Generates the template for the results component.
  *
  * @param {!Element} element
@@ -234,7 +242,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
 
   /**
    * Receives state updates and fills up DOM with the result
-   * @param {!Map<string, {option: ?./amp-story-interactive-abstract.OptionConfigType, interactiveId: string}>} interactiveState
+   * @param {!Map<string, InteractiveStateEntryType>} interactiveState
    * @protected
    */
   onInteractiveReactStateUpdate(interactiveState) {
