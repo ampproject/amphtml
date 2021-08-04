@@ -347,13 +347,13 @@ export class BrowserEventTracker extends EventTracker {
     /** @private {?Observable<!Event>} */
     this.observables_ = new Observable();
 
-    /** @private {?Object<BrowserEventType:Boolean>} */
-    this.hasListener_ = new Object(null);
+    /** @private {!Object<BrowserEventType, boolean>} */
+    this.listenerMap_ = dict({});
 
     /** @private {?function(!Event)} */
     this.boundOnSession_ = this.observables_.fire.bind(this.observables_);
 
-    /** @private {function(!Event):void} */
+    /** @private {?function(!Event):void} */
     this.debouncedBoundOnSession_ = debounce(
       this.root.ampdoc.win,
       this.boundOnSession_,
@@ -364,7 +364,7 @@ export class BrowserEventTracker extends EventTracker {
   /** @override */
   dispose() {
     const root = this.root.getRoot();
-    Object.keys(this.hasListener_).forEach((eventName) => {
+    Object.keys(this.listenerMap_).forEach((eventName) => {
       root.removeEventListener(eventName, this.debouncedBoundOnSession_);
     });
     this.boundOnSession_ = null;
@@ -394,11 +394,11 @@ export class BrowserEventTracker extends EventTracker {
       selectionMethod,
       false
     );
-    if (!this.hasListener_[eventName]) {
+    if (!this.listenerMap_[eventName]) {
       this.root
         .getRootElement()
         .addEventListener(eventName, this.debouncedBoundOnSession_, true);
-      this.hasListener_[eventName] = true;
+      this.listenerMap_[eventName] = true;
     }
     return this.observables_.add((event) => {
       if (event.type !== eventName) {
