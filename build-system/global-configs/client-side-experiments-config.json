@@ -7,6 +7,10 @@
     {
       "name": "story-disable-animations-first-page",
       "percentage": 0.5
+    },
+    {
+      "name": "amp-sticky-ad-to-amp-ad",
+      "percentage": 0.05
     }
   ]
 }
