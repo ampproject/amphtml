@@ -736,8 +736,11 @@ export class Performance {
       opt_delta == undefined ? this.win.performance.now() : opt_delta;
     const end = this.timeOrigin_ + delta;
 
-    // Order is timeOrigin -> firstVisibleTime -> end.
-    const visibleTime = this.ampdoc_ && this.ampdoc_.getFirstVisibleTime();
+    // If on Origin, use timeOrigin
+    // If in a viewer, use firstVisibleTime
+    const visibleTime = this.viewer_?.isEmbedded()
+      ? this.ampdoc_ && this.ampdoc_.getFirstVisibleTime()
+      : this.timeOrigin_;
     const v = visibleTime ? Math.max(end - visibleTime, 0) : 0;
     this.tickDelta(label, v);
   }
