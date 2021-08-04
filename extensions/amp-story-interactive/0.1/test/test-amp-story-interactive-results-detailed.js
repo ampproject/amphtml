@@ -185,7 +185,7 @@ describes.realWin(
       await ampStoryResultsDetailed.layoutCallback();
       expect(
         ampStoryResultsDetailed.rootEl_.querySelectorAll(
-          '.i-amphtml-story-interactive-results-selected-result'
+          '.i-amphtml-story-interactive-results-result'
         ).length
       ).to.equal(3);
     });
@@ -211,7 +211,7 @@ describes.realWin(
       await ampStoryResultsDetailed.layoutCallback();
       expect(
         ampStoryResultsDetailed.rootEl_.querySelectorAll(
-          '.i-amphtml-story-interactive-results-selected-result'
+          '.i-amphtml-story-interactive-results-result'
         ).length
       ).to.equal(2);
     });
@@ -230,7 +230,7 @@ describes.realWin(
         win
           .getComputedStyle(
             ampStoryResultsDetailed.rootEl_.querySelector(
-              '.i-amphtml-story-interactive-results-selected-result'
+              '.i-amphtml-story-interactive-results-result'
             )
           )
           .getPropertyValue('background-image')
