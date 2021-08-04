@@ -178,7 +178,11 @@ async function getEntryPointModule() {
     .map((x) => `extensions/${x}`)
     .filter((x) => fs.statSync(x).isDirectory())
     .map(getEntryPoint);
-  const allEntryPoints = flatten(extensionEntryPoints).concat(coreBinaries);
+  const vendors = await fs.promises.readdir('3p/vendors');
+  const vendorEntryPoints = vendors.map((x) => `3p/vendors/${x}`);
+  const allEntryPoints = flatten(extensionEntryPoints)
+    .concat(coreBinaries)
+    .concat(vendorEntryPoints);
   const entryPointData = allEntryPoints
     .map((file) => `import './${file}';`)
     .join('\n');
