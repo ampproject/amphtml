@@ -156,7 +156,7 @@
   transform: translate(-50%, -50%) !important;
 }
 
-.i-amphtml-story-interactive-slider-average-indicator-text {
+.i-amphtml-story-interactive-slider-average-text {
   position: absolute !important;
   transform: translate(-50%, 100%) scale(0) !important;
   bottom: 180% !important;
@@ -172,7 +172,7 @@
   background-color: white !important;
 }
 
-.i-amphtml-story-interactive-slider-average-indicator-text::after {
+.i-amphtml-story-interactive-slider-average-text::after {
   content: '' !important;
   position: absolute !important;
   transform: translateX(-50%) rotate(90deg) !important;
@@ -182,9 +182,9 @@
   border-color: transparent transparent transparent white !important;
 }
 
-.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-indicator-text {
+.i-amphtml-story-interactive-active.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-text {
   left: var(--average) !important;
-  animation: average-pop 3s forwards;
+  animation: average-pop 5s forwards;
 }
 
 @keyframes average-pop {

@@ -160,7 +160,7 @@ describes.realWin(
       expect(sliderBubble.textContent).to.be.equal('😄');
     });
 
-    it('should mock a true response and show post-selection state', async () => {
+    it('should show post-selection state when backend replies with user selection', async () => {
       env.sandbox
         .stub(requestService, 'executeRequest')
         .resolves(getSliderInteractiveData());
@@ -189,7 +189,7 @@ describes.realWin(
       expect(sliderBubble.textContent).to.be.equal('30%');
     });
 
-    it('should display the average indicator in the correct position', async () => {
+    it.only('should display the average indicator in the correct position', async () => {
       env.sandbox
         .stub(requestService, 'executeRequest')
         .resolves(getSliderInteractiveData());
@@ -199,10 +199,11 @@ describes.realWin(
       const sliderIndicator = ampStorySlider
         .getRootElement()
         .querySelector('.i-amphtml-story-interactive-slider-average-indicator');
-      const computedAverageValue = '124.438px';
       expect(
-        win.getComputedStyle(sliderIndicator).getPropertyValue('left')
-      ).to.be.equal(computedAverageValue);
+        win
+          .getComputedStyle(ampStorySlider.getRootElement())
+          .getPropertyValue('--average')
+      ).to.be.equal('51%');
     });
   }
 );

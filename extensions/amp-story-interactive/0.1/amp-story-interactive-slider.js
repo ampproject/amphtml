@@ -46,9 +46,7 @@ const buildSliderTemplate = (element) => {
           <div
             class="i-amphtml-story-interactive-slider-average-indicator"
           ></div>
-          <div
-            class="i-amphtml-story-interactive-slider-average-indicator-text"
-          >
+          <div class="i-amphtml-story-interactive-slider-average-text">
             Average answer
           </div>
         </div>
@@ -109,7 +107,6 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.optionsData_.forEach((response) => {
       if (response.selected) {
         this.hasUserSelection_ = true;
-        this.updateStoryStoreState_(response.index);
         this.mutateElement(() => {
           this.inputEl_.value = response.index;
           this.onDrag_();
