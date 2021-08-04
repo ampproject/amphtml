@@ -50,11 +50,11 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
   constructor(element) {
     super(element);
 
-    /** @private {?Map<string, Object>} */
-    this.selectedResultEls_ = null;
+    /** @private {!Map<string, Object>} */
+    this.resultEls_ = {};
 
-    /** @private {number} */
-    this.componentCount_ = 0;
+    /** @private {?Element} */
+    this.resultsContainer_ = null;
   }
 
   /** @override */
@@ -66,17 +66,33 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
   buildComponent() {
     this.rootEl_ = buildResultsDetailedTemplate(this.element);
     this.buildTop();
+    this.resultsContainer_ = this.rootEl_.querySelector(
+      '.i-amphtml-story-interactive-results-detailed'
+    );
     return this.rootEl_;
   }
 
   /** @override */
   onInteractiveReactStateUpdate(interactiveState) {
     const components = Object.values(interactiveState);
-    if (components.length === this.componentCount_) {
-      // Function not passed in directly to ensure "this" works correctly
-      components.forEach((e) => this.updateSelectedResult_(e));
-    } else {
-      this.initializeSelectedResultContainers_(components);
+    const usePercentage = decideStrategy(this.options_) === 'percentage';
+    let updateLayout = false;
+
+    components.forEach((e) => {
+      if (
+        (usePercentage && e.type === InteractiveType.QUIZ) ||
+        (!usePercentage && e.type === InteractiveType.POLL)
+      ) {
+        if (!(e.interactiveId in this.resultEls_)) {
+          updateLayout = true;
+          this.initializeResult_(e);
+        }
+        this.updateSelectedResult_(e);
+      }
+    });
+
+    if (updateLayout) {
+      this.updateLayout_();
     }
 
     super.onInteractiveReactStateUpdate(interactiveState);
@@ -86,37 +102,17 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
    * Create and store elements that will show results
    * for each interactive component.
    *
-   * @param {!Array<Object>} components
+   * @param {!Array<Object>} e
    * @private
    */
-  initializeSelectedResultContainers_(components) {
-    this.selectedResultEls_ = {};
-    this.componentCount_ = components.length;
-    const detailedResultsContainer = this.rootEl_.querySelector(
-      '.i-amphtml-story-interactive-results-detailed'
-    );
-    const usePercentage = decideStrategy(this.options_) === 'percentage';
-    components.forEach((e) => {
-      if (
-        (usePercentage && e.type === InteractiveType.QUIZ) ||
-        (!usePercentage && e.type === InteractiveType.POLL)
-      ) {
-        const container = document.createElement('div');
-        container.classList.add(
-          'i-amphtml-story-interactive-results-selected-result'
-        );
-        setImportantStyles(container, {
-          'height': '5em',
-          'width': '5em',
-        });
-        detailedResultsContainer.appendChild(container);
-        this.selectedResultEls_[e.interactiveId] = {
-          el: container,
-          updated: false,
-        };
-        this.updateSelectedResult_(e);
-      }
-    });
+  initializeResult_(e) {
+    const el = document.createElement('div');
+    el.classList.add('i-amphtml-story-interactive-results-result');
+    this.resultsContainer_.appendChild(el);
+    this.resultEls_[e.interactiveId] = {
+      el,
+      updated: false,
+    };
   }
 
   /**
@@ -126,19 +122,29 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
    * @private
    */
   updateSelectedResult_(e) {
-    if (
-      e.option &&
-      e.interactiveId in this.selectedResultEls_ &&
-      !this.selectedResultEls_[e.interactiveId].updated
-    ) {
+    if (e.option && !this.resultEls_[e.interactiveId].updated) {
       if (e.option.image) {
-        setImportantStyles(this.selectedResultEls_[e.interactiveId].el, {
+        setImportantStyles(this.resultEls_[e.interactiveId].el, {
           'background-image': 'url(' + e.option.image + ')',
         });
       } else {
-        this.selectedResultEls_[e.interactiveId].el.textContent = e.option.text;
+        this.resultEls_[e.interactiveId].el.textContent = e.option.text;
       }
-      this.selectedResultEls_[e.interactiveId].updated = true;
+      this.resultEls_[e.interactiveId].updated = true;
+    }
+  }
+
+  /**
+   * Sets (or resets) the positioning and sizing of each result.
+   *
+   * @private
+   */
+  updateLayout_() {
+    for (const id in this.resultEls_) {
+      setImportantStyles(this.resultEls_[id].el, {
+        'height': '5em',
+        'width': '5em',
+      });
     }
   }
 }
