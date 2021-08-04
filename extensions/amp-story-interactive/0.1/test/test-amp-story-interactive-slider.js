@@ -189,7 +189,7 @@ describes.realWin(
       expect(sliderBubble.textContent).to.be.equal('30%');
     });
 
-    it.only('should display the average indicator in the correct position', async () => {
+    it('should display the average indicator in the correct position', async () => {
       env.sandbox
         .stub(requestService, 'executeRequest')
         .resolves(getSliderInteractiveData());
