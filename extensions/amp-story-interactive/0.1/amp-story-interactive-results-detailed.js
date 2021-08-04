@@ -40,9 +40,9 @@ const MAX_DIST = 6;
 
 /**
  * @typedef {{
- *    el: !Element,
+ *    element: !Element,
  *    answered: boolean
- * }} ResultEl
+ * }} ResultElementType
  */
 
 /**
@@ -72,7 +72,7 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
   constructor(element) {
     super(element);
 
-    /** @private {!Map<string, ResultEl>} */
+    /** @private {!Map<string, ResultElementType>} */
     this.resultEls_ = {};
 
     /** @private {?Element} */
@@ -127,15 +127,15 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
    * Create and store an element that will show the results
    * for an interactive component.
    *
-   * @param {!Object} e
+   * @param {!./amp-story-interactive-results.InteractiveStateEntryType} e
    * @private
    */
   createResultEl_(e) {
-    const el = document.createElement('div');
-    el.classList.add('i-amphtml-story-interactive-results-result');
-    this.resultsContainer_.prepend(el);
+    const element = document.createElement('div');
+    element.classList.add('i-amphtml-story-interactive-results-result');
+    this.resultsContainer_.prepend(element);
     this.resultEls_[e.interactiveId] = {
-      el,
+      element,
       answered: false,
     };
   }
@@ -143,7 +143,7 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
   /**
    * Sets the background image or text content for an answered result.
    *
-   * @param {!Object} e
+   * @param {!./amp-story-interactive-results.InteractiveStateEntryType} e
    * @private
    */
   updateAnsweredResult_(e) {
@@ -152,11 +152,11 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
     }
 
     if (e.option.image) {
-      setImportantStyles(this.resultEls_[e.interactiveId].el, {
+      setImportantStyles(this.resultEls_[e.interactiveId].element, {
         'background-image': 'url(' + e.option.image + ')',
       });
     } else {
-      this.resultEls_[e.interactiveId].el.textContent = e.option.text;
+      this.resultEls_[e.interactiveId].element.textContent = e.option.text;
     }
     this.resultEls_[e.interactiveId].answered = true;
   }
@@ -170,7 +170,7 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
     const results = Object.values(this.resultEls_);
     const slice = (2 * Math.PI) / results.length;
 
-    results.forEach(({el}, index) => {
+    results.forEach(({element}, index) => {
       const offset = Math.random() * slice;
       const angleBuffer = slice / 4;
       const size = Math.random() * (MAX_SIZE - MIN_SIZE) + MIN_SIZE;
@@ -183,7 +183,7 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
       const top = CENTER + Math.cos(angle) * dist - size / 2;
       const left = CENTER + Math.sin(angle) * dist - size / 2;
 
-      setImportantStyles(el, {
+      setImportantStyles(element, {
         'height': size + 'em',
         'width': size + 'em',
         'top': top + 'em',
