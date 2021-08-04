@@ -28,7 +28,6 @@ import {dict} from '#core/types/object';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {getSourceOrigin} from '../../../src/url';
-import {internalRuntimeVersion} from '../../../src/internal-version';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '#core/dom';
@@ -301,7 +300,7 @@ export class AmpRecaptchaService {
             winLocation.host +
             '/dist.3p/' +
             (mode.isMinified()
-              ? `${internalRuntimeVersion()}/recaptcha`
+              ? `${mode.version()}/recaptcha`
               : 'current/recaptcha.max') +
             '.html'
           );
@@ -329,7 +328,7 @@ export class AmpRecaptchaService {
       const recaptchaFrameSrc =
         'https://' +
         curlsSubdomain +
-        `.recaptcha.${urls.thirdPartyFrameHost}/${internalRuntimeVersion()}/` +
+        `.recaptcha.${urls.thirdPartyFrameHost}/${mode.version()}/` +
         'recaptcha.html';
       return recaptchaFrameSrc;
     });
