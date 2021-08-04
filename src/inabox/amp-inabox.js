@@ -20,6 +20,7 @@
 
 import '#polyfills';
 import {TickLabel} from '#core/constants/enums';
+import * as mode from '#core/mode';
 
 import {Services} from '#service';
 import {installDocService} from '#service/ampdoc-impl';
@@ -41,7 +42,6 @@ import {allowLongTasksInChunking, startupChunk} from '../chunk';
 import {installErrorReporting} from '../error-reporting';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {doNotTrackImpression} from '../impression';
-import {internalRuntimeVersion} from '../internal-version';
 import {getMode} from '../mode';
 import {adopt} from '../runtime';
 import {
@@ -141,11 +141,8 @@ startupChunk(self.document, function initial() {
 if (self.console) {
   (console.info || console.log).call(
     console,
-    `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
+    `Powered by AMP ⚡ HTML – Version ${mode.version()}`,
     self.location.href
   );
 }
-self.document.documentElement.setAttribute(
-  'amp-version',
-  internalRuntimeVersion()
-);
+self.document.documentElement.setAttribute('amp-version', mode.version());

@@ -66,7 +66,7 @@ import {
 } from './addthis-utils/mode';
 import {getOgImage} from './addthis-utils/meta';
 import {getWidgetOverload} from './addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
-import {internalRuntimeVersion} from '../../../src/internal-version';
+import * as mode from '#core/mode';
 import {listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
 import {setStyle} from '#core/dom/style';
@@ -302,7 +302,7 @@ class AmpAddThis extends AMP.BaseElement {
         // Document has overly long cache age: go.amp.dev/issue/24848
         // Adding AMP runtime version as a meaningless query param to force bust
         // cached versions.
-        'src': `${ORIGIN}/dc/amp-addthis.html?_amp_=${internalRuntimeVersion()}`,
+        'src': `${ORIGIN}/dc/amp-addthis.html?_amp_=${mode.version()}`,
         'id': this.widgetId_,
         'pco': this.productCode_,
         'containerClassName': this.containerClassName_,

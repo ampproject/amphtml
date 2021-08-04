@@ -26,7 +26,7 @@ import {getBinaryType, isExperimentOn} from '#experiments';
 import {getFlexibleAdSlotData} from './flexible-ad-slot-utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
-import {internalRuntimeVersion} from '../../../src/internal-version';
+import * as mode from '#core/mode';
 import {stringHash32} from '#core/types/string';
 
 /** @type {string} */
@@ -335,7 +335,7 @@ export class AmpAdNetworkValueimpressionImpl extends AmpA4A {
         'is_amp': this.isXhrAllowed()
           ? AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP
           : AmpAdImplementation.AMP_AD_IFRAME_GET,
-        'amp_v': internalRuntimeVersion(),
+        'amp_v': mode.version(),
         'd_imp': 1,
         'c': getCorrelator(win, ampDoc, clientId),
         'ga_cid': win.gaGlobal.cid || null,

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as mode from '#core/mode';
 import {hasOwn} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
 import {WindowInterface} from '#core/window/interface';
@@ -32,7 +33,6 @@ import {
 } from './variable-source';
 
 import {getTrackImpressionPromise} from '../impression';
-import {internalRuntimeVersion} from '../internal-version';
 import {dev, devAssert, user, userAssert} from '../log';
 import {
   installServiceInEmbedDoc,
@@ -592,7 +592,7 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // returns the AMP version number
-    this.set('AMP_VERSION', () => internalRuntimeVersion());
+    this.set('AMP_VERSION', () => mode.version());
 
     this.set('BACKGROUND_STATE', () => {
       return this.ampdoc.isVisible() ? '0' : '1';
