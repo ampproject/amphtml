@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {getBuilders} from '#compiler/builders';
-
 describes.sandboxed('getBuilders', {}, () => {
   it('should not fail a random other test file', () => {});
 });
