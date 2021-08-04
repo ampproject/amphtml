@@ -438,6 +438,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [rnetplus](../../ads/vendors/rnetplus.md)
 -   [Rubicon Project](../../ads/vendors/rubicon.md)
 -   [RUNative](../../ads/vendors/runative.md)
+-   [Sabavision](../../ads/vendors/sabavision.md)
 -   [SAS CI 360 Match](../../ads/vendors/sas.md)
 -   [Seeding Alliance](../../ads/vendors/seedingalliance.md)
 -   [Sekindo](../../ads/vendors/sekindo.md)
