@@ -93,6 +93,15 @@ describes.realWin(
       );
     });
 
+    it('renders without mute when autoplay and mute are not explicitly added', async () => {
+      const dailymotion = await getDailymotion('x2m8jpp', false, false);
+      const iframe = dailymotion.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).to.equal(
+        'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp'
+      );
+    });
+
     it('requires data-videoid', () => {
       return allowConsoleError(() => {
         return getDailymotion('').should.eventually.be.rejectedWith(
