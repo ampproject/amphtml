@@ -177,7 +177,8 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
           () => requestAnimationFrame(animateFrame),
           HINT_ANIMATION_DELAY_MS
         );
-      }
+      },
+      true
     );
   }
 
