@@ -1,5 +1,5 @@
 <!--
-  Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+  Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 -->
 <!--
   Test Description:
-  Tests support for the amp-facebook-comments tag.
+  Tests support for the amp-facebook tag.
 -->
 <!doctype html>
 <html ⚡ lang="en">
@@ -25,15 +25,48 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1">
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async custom-element="amp-facebook-comments" src="https://cdn.ampproject.org/v0/amp-facebook-comments-0.1.js"></script>
+  <script async custom-element="amp-facebook" src="https://cdn.ampproject.org/v0/amp-facebook-1.0.js"></script>
 </head>
 <body>
-  <!-- Example of a valid amp-facebook-comments -->
-  <amp-facebook-comments
+  <!-- Example of a valid amp-facebook (embedded post) -->
+  <amp-facebook
       width=486
       height=657
       layout="responsive"
-      data-href="http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html">
-  </amp-facebook-comments>
+      data-href="https://www.facebook.com/zuck/posts/10102593740125791">
+  </amp-facebook>
+  <!-- Example of a valid amp-facebook (embedded post) with data-locale specified -->
+  <amp-facebook
+      width=486
+      height=657
+      layout="responsive"
+      data-href="https://www.facebook.com/zuck/posts/10102593740125791"
+      data-locale="fr_FR">
+  </amp-facebook>
+  <!-- Example of a valid amp-facebook (embedded video) -->
+  <amp-facebook
+      width=552
+      height=574
+      layout="responsive"
+      data-embed-as="video"
+      data-allowfullscreen="true"
+      data-href="https://www.facebook.com/zuck/videos/10102509264909801/">
+  </amp-facebook>
+  <!-- Example of a valid amp-facebook (embedded video) -->
+  <amp-facebook
+      width=552
+      height=574
+      layout="responsive"
+      data-href="https://www.facebook.com/zuck/videos/10102509264909801/">
+  </amp-facebook>
+  <!-- Example of a valid amp-facebook (embedded comment) -->
+  <amp-facebook
+      width=552
+      height=200
+      layout="responsive"
+      data-embed-as="comment"
+      data-include-parent="true"
+      data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=717538375088203">
+  </amp-facebook>
 </body>
 </html>

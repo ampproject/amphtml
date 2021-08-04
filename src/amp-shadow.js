@@ -22,9 +22,10 @@
 // src/polyfills.js must be the first import.
 import './polyfills';
 
+import * as mode from '#core/mode';
+
 import {deactivateChunking} from './chunk';
 import {doNotTrackImpression} from './impression';
-import {internalRuntimeVersion} from './internal-version';
 import {adoptShadowMode} from './runtime';
 import {installDocService} from './service/ampdoc-impl';
 import {
@@ -62,10 +63,7 @@ adoptShadowMode(self);
 if (self.console) {
   (console.info || console.log).call(
     console,
-    `Powered by AMP ⚡ HTML shadows – Version ${internalRuntimeVersion()}`
+    `Powered by AMP ⚡ HTML shadows – Version ${mode.version()}`
   );
 }
-self.document.documentElement.setAttribute(
-  'amp-version',
-  internalRuntimeVersion()
-);
+self.document.documentElement.setAttribute('amp-version', mode.version());
