@@ -4,12 +4,10 @@ formats:
   - websites
 teaser:
   text: Displays an iframe.
-experimental: true
-bento: true
 ---
 
 <!---
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,12 +26,6 @@ limitations under the License.
 
 ## Usage
 
-[tip type="warning"]
-
-This component is work in progress.
-
-[/tip]
-
 Displays an AMP valid iframe. `amp-iframe` has several important differences from vanilla iframes that are
 designed to make it more secure and avoid AMP files that are dominated by a
 single iframe:
@@ -48,7 +40,7 @@ single iframe:
     via the `srcdoc` attribute.
 -   An `amp-iframe` must not be in the same origin as the container unless they
     do not allow `allow-same-origin` in the `sandbox` attribute. See the
-    ["Iframe origin policy"](../../docs/spec/amp-iframe-origin-policy.md)
+    ["Iframe origin policy"](../../../docs/spec/amp-iframe-origin-policy.md)
     doc for further details on allowed origins for iframes.
 
 ```html
@@ -96,7 +88,7 @@ where part of the videos are advertising. This AMP policy may be enforced by not
 rendering the respective iframes.
 
 Advertising use cases should use
-[`amp-ad`](../amp-ad/amp-ad.md) instead.
+[`amp-ad`](../../amp-ad/amp-ad.md) instead.
 
 The reasons for this policy are that:
 
@@ -282,7 +274,7 @@ The iframe can receive the consent data response by listening to the `consent-da
 **Please note:**
 
 -   The `consent-data` response will only be sent once and won't update the iframe when the consent state changes (for example when the user decides to reject consent by using the post prompt ui)
--   When omitting `data-block-on-consent` the `default` policy is used and the iframe will be loaded immediately. The `consent-data` response may be delayed based on the selected policy. See [`amp-consent`](../amp-consent/amp-consent.md) for more information.
+-   When omitting `data-block-on-consent` the `default` policy is used and the iframe will be loaded immediately. The `consent-data` response may be delayed based on the selected policy. See [`amp-consent`](../../amp-consent/amp-consent.md) for more information.
 
 _Example: iframe `send-consent-data` request_
 
@@ -354,7 +346,7 @@ extended to AMP components.
 ## Analytics
 
 We strongly recommend using
-[`amp-analytics`](../amp-analytics/amp-analytics.md) for
+[`amp-analytics`](../../amp-analytics/amp-analytics.md) for
 analytics purposes, because it is significantly more robust, complete and an
 efficient solution which can be configured for a wide range of analytics
 vendors.
@@ -369,5 +361,5 @@ direct user purpose such as being invisible or small.
 
 ## Validation
 
-See [`amp-iframe` rules](validator-amp-iframe.protoascii)
+See [`amp-iframe` rules](../validator-amp-iframe.protoascii)
 in the AMP validator specification.
