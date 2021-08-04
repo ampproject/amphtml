@@ -57,7 +57,7 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
     autoplaySpy = env.sandbox.spy(AmpSlideScroll.prototype, 'autoplay_');
     clearAutoplaySpy = env.sandbox.spy(
       AmpSlideScroll.prototype,
-      'clearAutoplay_'
+      'clearAutoplayTimer_'
     );
     viewportCallbackSpy = env.sandbox.spy(
       AmpSlideScroll.prototype,
@@ -291,7 +291,7 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
     expect(clearAutoplaySpy).to.have.been.called;
     expect(carousel.autoplayTimeoutId_).to.not.be.null;
 
-    carousel.clearAutoplay_();
+    carousel.clearAutoplayTimer_();
     expect(carousel.autoplayTimeoutId_).to.be.null;
   });
 

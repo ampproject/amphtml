@@ -353,7 +353,7 @@ export class AmpSlideScroll extends BaseCarousel {
    * @private
    */
   touchMoveHandler_() {
-    this.clearAutoplay_();
+    this.clearAutoplayTimer_();
     this.isTouching_ = true;
   }
 
@@ -363,7 +363,7 @@ export class AmpSlideScroll extends BaseCarousel {
     if (inViewport) {
       this.autoplay_();
     } else {
-      this.clearAutoplay_();
+      this.clearAutoplayTimer_();
     }
   }
 
@@ -374,7 +374,7 @@ export class AmpSlideScroll extends BaseCarousel {
     if (opt_autoplay) {
       this.autoplay_();
     } else {
-      this.clearAutoplay_();
+      this.clearAutoplayTimer_();
     }
   }
 
@@ -1052,7 +1052,7 @@ export class AmpSlideScroll extends BaseCarousel {
     if (!this.shouldAutoplay_ || this.autoplayLoops_ == 0) {
       return;
     }
-    this.clearAutoplay_();
+    this.clearAutoplayTimer_();
     this.autoplayTimeoutId_ = /** @type {number} */ (
       Services.timerFor(this.win).delay(
         this.go.bind(
@@ -1088,7 +1088,7 @@ export class AmpSlideScroll extends BaseCarousel {
     if (this.shouldAutoplay_) {
       this.autoplay_();
     } else {
-      this.clearAutoplay_();
+      this.clearAutoplayTimer_();
     }
   }
 
@@ -1096,7 +1096,7 @@ export class AmpSlideScroll extends BaseCarousel {
    * Clear the autoplay timer.
    * @private
    */
-  clearAutoplay_() {
+  clearAutoplayTimer_() {
     if (this.autoplayTimeoutId_ !== null) {
       Services.timerFor(this.win).cancel(this.autoplayTimeoutId_);
       this.autoplayTimeoutId_ = null;
@@ -1108,7 +1108,7 @@ export class AmpSlideScroll extends BaseCarousel {
    * @private
    */
   removeAutoplay_() {
-    this.clearAutoplay_();
+    this.clearAutoplayTimer_();
     if (this.loopAdded_) {
       // Only remove if specified due to the `autoplay` attribute
       this.element.removeAttribute('loop');
