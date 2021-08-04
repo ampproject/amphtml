@@ -59,7 +59,7 @@ The example below demonstrates `amp-lightbox` component in standalone use.
   <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-lightbox-1.0.css">
   <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-1.0.js"></script>
 </head>
-<amp-lightbox id="my-lightbox">
+<amp-lightbox id="my-lightbox" layout="nodisplay">
   Lightboxed content
   <button id='close-button'>Close lightbox</button>
 </amp-lightbox>

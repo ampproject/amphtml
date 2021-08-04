@@ -36,7 +36,8 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('should respect server side decision and persist it', async () => {
+    it('should respect server side decision and persist it', async function () {
+      this.timeout(5000);
       resetAllElements();
 
       const currentUrl = await controller.getCurrentUrl();

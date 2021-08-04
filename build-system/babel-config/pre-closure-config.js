@@ -16,6 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const {BUILD_CONSTANTS} = require('../compile/build-constants');
 const {getImportResolverPlugin} = require('./import-resolver');
 const {getReplacePlugin} = require('./helpers');
 
@@ -26,9 +27,7 @@ const {getReplacePlugin} = require('./helpers');
  */
 function getPreClosureConfig() {
   const isCheckTypes = argv._.includes('check-types');
-  const testTasks = ['e2e', 'integration', 'visual-diff'];
-  const isTestTask = testTasks.some((task) => argv._.includes(task));
-  const isFortesting = argv.fortesting || isTestTask;
+  const isProd = argv._.includes('dist') && !argv.fortesting;
 
   const reactJsxPlugin = [
     '@babel/plugin-transform-react-jsx',
@@ -73,15 +72,12 @@ function getPreClosureConfig() {
     // argv.esm
     //? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
     //: null,
-    !isCheckTypes
-      ? './build-system/babel-plugins/babel-plugin-transform-json-configuration'
-      : null,
-    !(isFortesting || isCheckTypes)
-      ? [
-          './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
-          {isEsmBuild: !!argv.esm},
-        ]
-      : null,
+    !isCheckTypes &&
+      './build-system/babel-plugins/babel-plugin-transform-json-configuration',
+    isProd && [
+      './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
+      BUILD_CONSTANTS,
+    ],
   ].filter(Boolean);
   const presetEnv = [
     '@babel/preset-env',

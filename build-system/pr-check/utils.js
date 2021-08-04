@@ -16,6 +16,8 @@
 'use strict';
 
 const fs = require('fs-extra');
+const globby = require('globby');
+const path = require('path');
 const {
   ciPullRequestSha,
   circleciBuildNumber,
@@ -34,6 +36,7 @@ const {
 const {cyan, green, yellow} = require('../common/colors');
 const {exec, execOrDie, execOrThrow, execWithError} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
+const {getStdout} = require('../common/process');
 const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
 
 const UNMINIFIED_CONTAINER_DIRECTORY = 'unminified';
@@ -41,6 +44,7 @@ const NOMODULE_CONTAINER_DIRECTORY = 'nomodule';
 const MODULE_CONTAINER_DIRECTORY = 'module';
 
 const ARTIFACT_FILE_NAME = '/tmp/artifacts/amp_nomodule_build.tar.gz';
+const TEST_FILES_LIST_FILE_NAME = '/tmp/testfiles.txt';
 
 const BUILD_OUTPUT_DIRS = ['build', 'dist', 'dist.3p'];
 const APP_SERVING_DIRS = [
@@ -134,13 +138,16 @@ function signalGracefulHalt() {
  * for skipping.
  * @param {string} jobName
  * @param {string} skipReason
+ * @param {boolean} gracefullyHaltNextJobs true to signal to downstreams jobs that they too should be skipped.
  */
-function skipDependentJobs(jobName, skipReason) {
+function skipDependentJobs(jobName, skipReason, gracefullyHaltNextJobs = true) {
   const loggingPrefix = getLoggingPrefix();
   logWithoutTimestamp(
     `${loggingPrefix} Skipping ${cyan(jobName)} because ${skipReason}.`
   );
-  signalGracefulHalt();
+  if (gracefullyHaltNextJobs) {
+    signalGracefulHalt();
+  }
 }
 
 /**
@@ -249,6 +256,18 @@ function storeBuildToWorkspace_(containerDirectory) {
         `/tmp/workspace/builds/${containerDirectory}/${outputDir}`
       );
     }
+    // Bento components are compiled inside the extension source file.
+    for (const componentFile of globby.sync('extensions/*/?.?/dist/*.js')) {
+      fs.ensureDirSync(
+        `/tmp/workspace/builds/${containerDirectory}/${path.dirname(
+          componentFile
+        )}`
+      );
+      fs.moveSync(
+        componentFile,
+        `/tmp/workspace/builds/${containerDirectory}/${componentFile}`
+      );
+    }
   }
 }
 
@@ -306,7 +325,30 @@ async function processAndStoreBuildToArtifacts() {
   execOrDie(`du -sh ${ARTIFACT_FILE_NAME}`);
 }
 
+/**
+ * Generates a file with a comma-separated list of test file paths that CircleCI
+ * should execute in a parallelized job shard.
+ *
+ * @param {!Array<string>} globs array of glob strings for finding test file paths.
+ */
+function generateCircleCiShardTestFileList(globs) {
+  const joinedGlobs = globs.map((glob) => `"${glob}"`).join(' ');
+  const fileList = getStdout(
+    `circleci tests glob ${joinedGlobs} | circleci tests split --split-by=timings`
+  )
+    .trim()
+    .replace(/\s+/g, ',');
+  fs.writeFileSync(TEST_FILES_LIST_FILE_NAME, fileList, {encoding: 'utf8'});
+  logWithoutTimestamp(
+    'Stored list of',
+    cyan(fileList.split(',').length),
+    'test files in',
+    cyan(TEST_FILES_LIST_FILE_NAME)
+  );
+}
+
 module.exports = {
+  TEST_FILES_LIST_FILE_NAME,
   abortTimedJob,
   printChangeSummary,
   skipDependentJobs,
@@ -321,4 +363,5 @@ module.exports = {
   storeModuleBuildToWorkspace,
   storeExperimentBuildToWorkspace,
   processAndStoreBuildToArtifacts,
+  generateCircleCiShardTestFileList,
 };

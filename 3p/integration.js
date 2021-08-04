@@ -21,6 +21,7 @@
  * This files gets minified and published to
  * https://3p.ampproject.net/$version/f.js
  */
+/* eslint-disable import/order */
 
 // src/polyfills.js must be the first import.
 import './polyfills';
@@ -28,6 +29,7 @@ import './polyfills';
 import {draw3p, init} from './integration-lib';
 import {getMode} from '../src/mode';
 import {register} from './3p';
+import {user} from 'src/log';
 
 // 3P - please keep in alphabetic order
 import {beopinion} from './beopinion';
@@ -160,6 +162,7 @@ import {insticator} from '#ads/vendors/insticator';
 import {invibes} from '#ads/vendors/invibes';
 import {iprom} from '#ads/vendors/iprom';
 import {ix} from '#ads/vendors/ix';
+import {jixie} from '#ads/vendors/jixie';
 import {jubna} from '#ads/vendors/jubna';
 import {kargo} from '#ads/vendors/kargo';
 import {ketshwa} from '#ads/vendors/ketshwa';
@@ -312,6 +315,10 @@ import {zergnet} from '#ads/vendors/zergnet';
 import {zucks} from '#ads/vendors/zucks';
 
 init(window);
+user().warn(
+  '3P-IFRAME',
+  'f.js in iframe is being deprecated (see https://github.com/ampproject/amphtml/issues/35349 for details)'
+);
 
 if (getMode().test || getMode().localDev) {
   register('_ping_', _ping_);
@@ -440,6 +447,7 @@ register('insticator', insticator);
 register('invibes', invibes);
 register('iprom', iprom);
 register('ix', ix);
+register('jixie', jixie);
 register('jubna', jubna);
 register('kargo', kargo);
 register('ketshwa', ketshwa);

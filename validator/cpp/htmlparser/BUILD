@@ -51,11 +51,11 @@ cc_library(
     hdrs = [
         "atomutil.h",
     ],
+    copts = ["-std=c++17"],
     deps = [
         ":atom",
         ":hash",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -90,11 +90,11 @@ cc_library(
     hdrs = [
         "doctype.h",
     ],
+    copts = ["-std=c++17"],
     deps = [
         ":node",
         ":strings",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -138,11 +138,11 @@ cc_library(
     hdrs = [
         "fileutil.h",
     ],
+    copts = ["-std=c++17"],
     deps = [
         ":defer",
         ":strings",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -165,12 +165,12 @@ cc_library(
     hdrs = [
         "foreign.h",
     ],
+    copts = ["-std=c++17"],
     deps = [
         ":comparators",
         ":node",
         ":strings",
     ],
-    copts = ["-std=c++17"],
 )
 
 # Various hashing utility functions.
@@ -199,11 +199,11 @@ cc_library(
     hdrs = [
         "token.h",
     ],
+    copts = ["-std=c++17"],
     deps = [
         ":atom",
         ":strings",
     ],
-    copts = ["-std=c++17"],
 )
 
 # Defines node and node stack.
@@ -217,6 +217,7 @@ cc_library(
         "elements.h",
         "node.h",
     ],
+    copts = ["-std=c++17"],
     deps = [
         ":atom",
         ":atomutil",
@@ -225,7 +226,6 @@ cc_library(
         ":token",
         "@com_github_glog//:glog",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -248,10 +248,10 @@ cc_library(
     hdrs = [
         "entity.h",
     ],
+    copts = ["-std=c++17"],
     deps = [
         ":comparators",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -273,13 +273,13 @@ cc_library(
     hdrs = [
         "document.h",
     ],
+    copts = ["-std=c++17"],
     deps = [
         ":allocator",
         ":node",
         ":token",
         "@com_google_absl//absl/flags:flag",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_library(
@@ -287,10 +287,10 @@ cc_library(
     hdrs = [
         "casetable.h",
     ],
+    copts = ["-std=c++17"],
     deps = [
         ":comparators",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -314,6 +314,7 @@ cc_library(
     hdrs = [
         "parser.h",
     ],
+    copts = ["-std=c++17"],
     deps = [
         ":atom",
         ":atomutil",
@@ -326,11 +327,10 @@ cc_library(
         ":node",
         ":strings",
         ":tokenizer",
+        "@com_github_glog//:glog",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/flags:flag",
-        "@com_github_glog//:glog",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -359,12 +359,12 @@ cc_library(
     hdrs = [
         "renderer.h",
     ],
+    copts = ["-std=c++17"],
     deps = [
         ":atomutil",
         ":node",
         ":strings",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -396,15 +396,15 @@ cc_library(
     hdrs = [
         "strings.h",
     ],
+    copts = ["-std=c++17"],
     deps = [
         ":casetable",
         ":htmlentities",
         ":logging",
         ":whitespacetable",
-        "@com_google_absl//absl/base",
         "@com_github_glog//:glog",
+        "@com_google_absl//absl/base",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -427,6 +427,7 @@ cc_library(
     hdrs = [
         "tokenizer.h",
     ],
+    copts = ["-std=c++17"],
     deps = [
         ":atom",
         ":atomutil",
@@ -435,7 +436,6 @@ cc_library(
         ":token",
         "@com_google_absl//absl/flags:flag",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -459,10 +459,10 @@ cc_library(
     hdrs = [
         "url.h",
     ],
+    copts = ["-std=c++17"],
     deps = [
         ":strings",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -491,8 +491,10 @@ filegroup(
 
 filegroup(
     name = "html5lib_test_files",
-    srcs = glob(["testdata/tree-construction/*.dat",
-                 "testdata/tree-construction/scripted/*.dat"]),
+    srcs = glob([
+        "testdata/tree-construction/*.dat",
+        "testdata/tree-construction/scripted/*.dat",
+    ]),
 )
 
 cc_test(

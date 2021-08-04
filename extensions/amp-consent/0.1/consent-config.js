@@ -21,7 +21,7 @@ import {Services} from '#service';
 import {childElementByTag} from '#core/dom/query';
 import {deepMerge, hasOwn, map} from '#core/types/object';
 import {devAssert, user, userAssert} from '../../../src/log';
-import {getChildJsonConfig} from '../../../src/json';
+import {getChildJsonConfig} from '#core/dom';
 
 const TAG = 'amp-consent/consent-config';
 const AMP_STORY_CONSENT_TAG = 'amp-story-consent';
@@ -39,6 +39,7 @@ const CONSENT_VARS_ALLOWED_LIST = {
   'CLIENT_ID': true,
   'PAGE_VIEW_ID': true,
   'PAGE_VIEW_ID_64': true,
+  'SOURCE_URL': true,
 };
 
 /** @const @type {string} */
