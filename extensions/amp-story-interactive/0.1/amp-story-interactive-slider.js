@@ -112,6 +112,8 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
         this.updateStoryStoreState_(response.index);
         this.mutateElement(() => {
           this.inputEl_.value = response.index;
+          this.onDrag_();
+          this.onRelease_();
           this.updateToPostSelectionState_(null);
         });
       }

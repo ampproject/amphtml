@@ -20,6 +20,8 @@ import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {Services} from '#service';
 import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {LocalizationService} from '#service/localization';
+import {getSliderInteractiveData} from './helpers';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 
 describes.realWin(
   'amp-story-interactive-slider',
@@ -53,6 +55,7 @@ describes.realWin(
       win.document.body.appendChild(storyEl);
       ampStorySlider = new AmpStoryInteractiveSlider(ampStorySliderEl);
 
+      ampStorySliderEl.getAmpDoc = () => new AmpDocSingle(win);
       ampStorySliderEl.getResources = () => win.__AMP_SERVICES.resources.obj;
       requestService = new AmpStoryRequestService(win);
       registerServiceBuilder(win, 'story-request', function () {
@@ -155,6 +158,51 @@ describes.realWin(
         .getRootElement()
         .querySelector('.i-amphtml-story-interactive-slider-bubble');
       expect(sliderBubble.textContent).to.be.equal('😄');
+    });
+
+    it('should mock a true response and show post-selection state', async () => {
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getSliderInteractiveData());
+      ampStorySlider.element.setAttribute('endpoint', 'https://example.com');
+      await ampStorySlider.buildCallback();
+      await ampStorySlider.layoutCallback();
+      expect(ampStorySlider.getRootElement()).to.have.class(
+        'i-amphtml-story-interactive-post-selection'
+      );
+    });
+
+    it('should display the selected value in the post-state bubble', async () => {
+      await ampStorySlider.buildCallback();
+      await ampStorySlider.layoutCallback();
+      const slider = ampStorySlider
+        .getRootElement()
+        .querySelector('input[type="range"]');
+      const sliderBubble = ampStorySlider
+        .getRootElement()
+        .querySelector('.i-amphtml-story-interactive-slider-bubble');
+      slider.value = 30;
+      // simulates an input event, which is when the user drags the slider
+      // simulates a change event, which is when the user releases the slider
+      slider.dispatchEvent(new CustomEvent('input'));
+      slider.dispatchEvent(new CustomEvent('change'));
+      expect(sliderBubble.textContent).to.be.equal('30%');
+    });
+
+    it('should display the average indicator in the correct position', async () => {
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getSliderInteractiveData());
+      ampStorySlider.element.setAttribute('endpoint', 'https://example.com');
+      await ampStorySlider.buildCallback();
+      await ampStorySlider.layoutCallback();
+      const sliderIndicator = ampStorySlider
+        .getRootElement()
+        .querySelector('.i-amphtml-story-interactive-slider-average-indicator');
+      const computedAverageValue = '124.438px';
+      expect(
+        win.getComputedStyle(sliderIndicator).getPropertyValue('left')
+      ).to.be.equal(computedAverageValue);
     });
   }
 );
