@@ -52,8 +52,6 @@ import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {isArray, isEnumValue, isObject} from '#core/types';
 import {realChildElements} from '#core/dom/query';
 
-import {isExperimentOn} from '#experiments';
-
 import {toggle} from '#core/dom/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
@@ -125,10 +123,12 @@ export class AmpConsent extends AMP.BaseElement {
     this.matchedGeoGroup_ = null;
 
     /** @private {?boolean} */
-    this.isTcfPostMessageProxyExperimentOn_ = isExperimentOn(
+    this.isTcfPostMessageProxyExperimentOn_ =
+      /* isExperimentOn(
       this.win,
       'tcf-post-message-proxy-api'
-    );
+    ) // launched: true */
+      true;
 
     /** @private {?Promise<?Array>} */
     this.purposeConsentRequired_ = null;
