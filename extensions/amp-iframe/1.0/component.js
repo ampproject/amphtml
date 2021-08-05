@@ -15,6 +15,7 @@
  */
 
 import * as Preact from '#preact';
+import {useEffect} from '#preact';
 
 const NOOP = () => {};
 
@@ -33,8 +34,39 @@ export function Iframe({
   srcdoc,
   ...rest
 }) {
+  const ref = Preact.useRef();
+
+  useEffect(() => {
+    const iframe = ref.current;
+    let data;
+    const io = new IntersectionObserver((entries) => {
+      if (data?.type !== 'embed-size' || !entries[0].isIntersecting) {
+        return;
+      }
+      if (data?.height) {
+        iframe.height = Number(data.height);
+      }
+      if (data?.width) {
+        iframe.width = Number(data.width);
+      }
+    });
+
+    const handleEmbedSizePostMessage = (event) => {
+      data = event.data;
+      io.observe(iframe);
+    };
+
+    window.addEventListener('message', handleEmbedSizePostMessage);
+
+    return () => {
+      io.unobserve(iframe);
+      window.removeEventListener('message', handleEmbedSizePostMessage);
+    };
+  });
+
   return (
     <iframe
+      ref={ref}
       src={src}
       srcdoc={srcdoc}
       sandbox={sandbox}
