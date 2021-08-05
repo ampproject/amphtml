@@ -25,6 +25,7 @@
   top: 4.475em !important;
   left: 4.475em !important;
   border: 0.3em solid var(--interactive-accent-color) !important;
+  box-shadow: 0 0 2.4em 0 black !important;
 }
 
 .i-amphtml-story-interactive-results-result {
