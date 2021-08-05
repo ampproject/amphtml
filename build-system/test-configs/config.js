@@ -384,6 +384,7 @@ const htmlFixtureGlobs = [
   '!examples/xhr-intercept.html',
   '!test/fixtures/e2e/amp-accordion/amp-accordion.html',
   '!test/fixtures/e2e/amp-accordion/single-expand.html',
+  '!test/fixtures/e2e/amp-analytics/browser-events.html',
   '!test/fixtures/e2e/amp-auto-lightbox/amp-auto-lightbox.html',
   '!test/fixtures/e2e/amp-autocomplete/amp-autocomplete-inline.amp.html',
   '!test/fixtures/e2e/amp-autocomplete/amp-autocomplete.amp.html',
