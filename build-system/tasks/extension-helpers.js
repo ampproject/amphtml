@@ -492,7 +492,6 @@ async function buildExtension(
   if (name === 'amp-bind') {
     await doBuildJs(jsBundles, 'ww.max.js', options);
   }
-
   if (options.npm) {
     await buildNpmBinaries(extDir, options);
     await buildNpmCss(extDir, options);
@@ -632,14 +631,14 @@ function buildNpmBinaries(extDir, options) {
  * @param {!Object} options
  * @return {!Promise}
  */
-async function buildBinaries(extDir, binaries, options) {
+function buildBinaries(extDir, binaries, options) {
   mkdirSync(`${extDir}/dist`);
 
-  const promises = binaries.map(async (binary) => {
+  const promises = binaries.map((binary) => {
     const {entryPoint, external, outfile, remap} = binary;
     const {name} = pathParse(outfile);
     const esm = argv.esm || argv.sxg || false;
-    await compileJsWithEsbuild(
+    return compileJsWithEsbuild(
       extDir + '/',
       entryPoint,
       `${extDir}/dist`,
@@ -653,7 +652,6 @@ async function buildBinaries(extDir, binaries, options) {
       })
     );
   });
-
   return Promise.all(promises);
 }
 
