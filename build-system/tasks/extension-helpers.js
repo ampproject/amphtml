@@ -15,6 +15,7 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
+const babel = require('@babel/core');
 const debounce = require('../common/debounce');
 const fs = require('fs-extra');
 const globby = require('globby');
@@ -42,11 +43,11 @@ const {
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {compileJison} = require('./compile-jison');
 const {cyan, green, red} = require('../common/colors');
-const {getCssForFile} = require('../babel-plugins/babel-plugin-transform-jss');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');
 const {parse: pathParse} = require('path');
+const {TransformCache, batchedRead} = require('../common/transform-cache');
 const {watch} = require('chokidar');
 
 /**
@@ -510,6 +511,9 @@ async function buildExtension(
   await buildExtensionJs(extDir, name, version, latestVersion, options);
 }
 
+/** @type {TransformCache} */
+let cssCache;
+
 /**
  * Writes an extensions's CSS to its npm dist folder.
  *
@@ -520,12 +524,32 @@ async function buildExtension(
 async function buildNpmCss(extDir, options) {
   const startCssTime = Date.now();
   const jssFile = (await globby(path.join(extDir, '**', '*.jss.js')))[0];
-  if (jssFile) {
-    const css = await getCssForFile(jssFile);
-    const outfile = `${extDir}/dist/${options.name}.css`;
-    await fs.writeFile(outfile, css);
-    endBuildStep('Wrote CSS', options.name, startCssTime);
+  if (!jssFile) {
+    return;
   }
+
+  // Lazily instantiate the TransformCache
+  if (!cssCache) {
+    cssCache = new TransformCache('jss-cache', '.css');
+  }
+
+  const {contents, hash} = await batchedRead(jssFile);
+  let css = await cssCache.get(hash);
+  if (!css) {
+    const options = {css: 'REPLACED_BY_BABEL_PLUGIN'};
+    await babel.transform(contents, {
+      filename: jssFile,
+      plugins: [
+        ['./build-system/babel-plugins/babel-plugin-transform-jss', options],
+      ],
+      sourceType: 'module',
+    });
+    css = options.css;
+    cssCache.set(hash, Promise.resolve(css));
+  }
+  const outfile = `${extDir}/dist/${options.name}.css`;
+  await fs.writeFile(outfile, css);
+  endBuildStep('Wrote CSS', options.name, startCssTime);
 }
 
 /**

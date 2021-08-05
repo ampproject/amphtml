@@ -51,9 +51,7 @@ const {addNamed} = require('@babel/helper-module-imports');
 const {create} = require('jss');
 const {default: preset} = require('jss-preset-default');
 const {join, relative} = require('path');
-const {TransformCache, batchedRead} = require('../../common/transform-cache');
 const {transformCssSync} = require('../../tasks/css/jsify-css-sync');
-const babel = require('@babel/core');
 
 module.exports = function ({template, types: t}) {
   /**
@@ -339,6 +337,13 @@ module.exports = function ({template, types: t}) {
           );
         }
 
+        // This codepath is used when generating CSS files for npm distribution, separate from
+        // AMP-mode compilation.
+        if (this.opts.css) {
+          this.opts.css = transformCssSync(sheet.toString()).css;
+          return;
+        }
+
         // Create the classes var.
         // This is required for compatibility when a useStyles() result is
         // passed around.
@@ -369,11 +374,6 @@ module.exports = function ({template, types: t}) {
         const {css} = transformCssSync(sheet.toString());
         const cssStr = t.stringLiteral(css);
         const cssExport = template.ast`export const CSS = ${cssStr}`;
-        const relativeFilepath = relative(
-          join(__dirname, '../../..'),
-          filename
-        );
-        cssMap[relativeFilepath] = css;
         exportDeclaration.insertAfter(cssExport);
       },
 
@@ -390,51 +390,4 @@ module.exports = function ({template, types: t}) {
       },
     },
   };
-};
-
-/**
- * Filename --> CSS String map.
- * Created as a side effect of transforming a .jss file.
- *
- * @type {Object<string, string>}
- */
-const cssMap = {};
-
-/** @type {TransformCache} */
-let cache;
-
-/**
- * Returns the compiled CSS for JSS file.
- * - First looks into the runtime cache to see if the file has already been transformed.
- * - If not, then transfrom the JSS file to generate the css.
- *
- * @param {string} filename
- * @return {Promise<string|Buffer>}
- */
-module.exports.getCssForFile = async function (filename) {
-  // Lazily instantiate the TransformCache
-  if (!cache) {
-    cache = new TransformCache('.jss-cache', '.css');
-  }
-
-  const {hash, contents} = await batchedRead(filename);
-  const cached = cache.get(hash);
-  if (cached) {
-    return cached;
-  }
-
-  // If the css value wasn't cached, that means this must be a clean run.
-  // All clean runs should have the value stored in-mem from an earlier
-  // of compiling the JS. Therefore this block is to account for case
-  // of if the .babel-cache exists but the .css-cache was deleted.
-  if (!cssMap[filename]) {
-    babel.transform(contents, {
-      filename,
-      plugins: ['./build-system/babel-plugins/babel-plugin-transform-jss'],
-      sourceType: 'module',
-    });
-  }
-  cache.set(hash, Promise.resolve(cssMap[filename]));
-
-  return cssMap[filename];
 };
