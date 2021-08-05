@@ -73,7 +73,7 @@ module.exports = {
     'IS_ESM': 'readonly',
     'IS_SXG': 'readonly',
     'IS_MINIFIED': 'readonly',
-    'IS_FORTESTING': 'readonly',
+    'IS_PROD': 'readonly',
     'INTERNAL_RUNTIME_VERSION': 'readonly',
     'AMP': 'readonly',
     'context': 'readonly',
@@ -460,6 +460,10 @@ module.exports = {
           'rollup-plugin-cleanup',
         ],
       },
+    },
+    {
+      'files': ['3p/**/*.js', 'src/**/*.js'],
+      'rules': {'import/order': 2},
     },
   ],
 };

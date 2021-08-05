@@ -476,6 +476,7 @@ const adConfig = jsonConfiguration({
     ],
     clientIdScope: 'AMP_ECID_EZOIC',
     consentHandlingOverride: true,
+    renderStartImplemented: true,
   },
 
   'f1e': {
@@ -641,6 +642,13 @@ const adConfig = jsonConfiguration({
   'ketshwa': {},
 
   'kiosked': {
+    renderStartImplemented: true,
+  },
+
+  'jixie': {
+    prefetch: ['https://scripts.jixie.io/jxamp.min.js'],
+    clientIdScope: '__jxamp',
+    clientIdCookieName: '_jx',
     renderStartImplemented: true,
   },
 

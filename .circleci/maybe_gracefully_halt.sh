@@ -20,8 +20,8 @@
 
 set -e
 
-GREEN() { echo -e "\n\033[0;32m$1\033[0m"; }
-YELLOW() { echo -e "\n\033[0;33m$1\033[0m"; }
+GREEN() { echo -e "\033[0;32m$1\033[0m"; }
+YELLOW() { echo -e "\033[0;33m$1\033[0m"; }
 
 if ls /tmp/restored-workspace/.CI_GRACEFULLY_HALT_* 1>/dev/null 2>&1; then
   echo $(GREEN "Gracefully halting this job.")
@@ -29,10 +29,7 @@ if ls /tmp/restored-workspace/.CI_GRACEFULLY_HALT_* 1>/dev/null 2>&1; then
   exit 0
 fi
 
-if [[ $CIRCLE_JOB == Experiment* ]]; then
-  # Extract the experiment name from the job name in `config.yml`.
-  EXP=$(echo $CIRCLE_JOB | awk '{print $2}')
-
+if [[ $EXP ]]; then
   # Extract the commit SHA. For PR jobs, this is written to .CIRCLECI_MERGE_COMMIT.
   if [[ -f /tmp/restored-workspace/.CIRCLECI_MERGE_COMMIT ]]; then
     COMMIT_SHA="$(cat /tmp/restored-workspace/.CIRCLECI_MERGE_COMMIT)"
