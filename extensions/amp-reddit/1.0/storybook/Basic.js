@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS-IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+* limitations under the License.
  */
 
 import * as Preact from '#preact';
@@ -28,7 +28,9 @@ export const _default = () => {
   return (
     <Reddit
       style={{width: 300, height: 200}}
-      src="https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed"
+      bootstrap="./vendor/reddit.max.js"
+      src="http://ads.localhost:8000/dist.3p/current/frame.max.html"
+      options={{"src":"https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed"}}
     >
     </Reddit>
   );

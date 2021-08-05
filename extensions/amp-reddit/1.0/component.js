@@ -15,7 +15,8 @@
  */
 
 import * as Preact from '#preact';
-import {IframeEmbed} from '#preact/component/iframe';
+import {forwardRef} from '#preact/compat';
+import {ProxyIframeEmbed} from '#preact/component/3p-frame';
 import {
   useCallback,
   useEffect,
@@ -53,11 +54,11 @@ export function RedditWithRef({src, embedtype , ...rest}, ref) {
   }, []);
 
   return (
-    <IframeEmbed
+    <ProxyIframeEmbed
       ref={ref}
       src={src}
+      type='reddit'
       {...rest}
-      messageHandler={messageHandler}
       />
   );
 }

@@ -24,5 +24,7 @@
  * @return {boolean}
  */
 export function isProd() {
-  return IS_PROD;
+  // return IS_PROD;
+  // DO NOT SUBMIT
+  return true;
 }
