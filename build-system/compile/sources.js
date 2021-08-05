@@ -113,6 +113,8 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-animation/**/*.js',
   // Needed for amp-carousel 0.2, amp-inline-gallery, amp-stream-gallery
   'extensions/amp-base-carousel/**/*.js',
+  // amp-brightcove 0.1 and 1.0 share this file.
+  'extensions/amp-brightcove/brightcove-api.js',
   // Needed for carousel autolightbox
   'extensions/amp-lightbox-gallery/1.0/*.js',
   // Needed for amp-lightbox-gallery using amp-lightbox
