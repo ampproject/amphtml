@@ -22,6 +22,10 @@ import {CSS} from '../../../build/amp-story-interactive-slider-0.1.css';
 import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles} from '#core/dom/style';
 import {StateProperty} from 'extensions/amp-story/1.0/amp-story-store-service';
+import {
+  POST_SELECTION_CLASS,
+  MID_SELECTION_CLASS,
+} from '../amp-story-interactive-abstract';
 
 /**
  * Generates the template for the slider.
@@ -132,9 +136,8 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
       (currPageId) => {
-        const isPostState = this.rootEl_.classList.contains(
-          'i-amphtml-story-interactive-post-selection'
-        );
+        const isPostState =
+          this.rootEl_.classList.contains(POST_SELECTION_CLASS);
         if (isPostState) {
           // If it's already been interacted with, do not animate.
           return;
@@ -145,9 +148,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
           clearTimeout(this.landingAnimationDelayTimeout_);
           this.inputEl_.value = 0;
           this.onDrag_();
-          this.rootEl_.classList.remove(
-            'i-amphtml-story-interactive-mid-selection'
-          );
+          this.rootEl_.classList.remove(MID_SELECTION_CLASS);
           return;
         }
         let startTime;
@@ -158,9 +159,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
           }
           const elapsed = currTime - startTime;
           if (HINT_ANIMATION_DURATION_MS < elapsed) {
-            this.rootEl_.classList.remove(
-              'i-amphtml-story-interactive-mid-selection'
-            );
+            this.rootEl_.classList.remove(MID_SELECTION_CLASS);
             return;
           }
           // Value between 0 and 1;
@@ -190,7 +189,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     if (this.sliderType_ == SliderType.PERCENTAGE) {
       this.bubbleEl_.textContent = Math.round(value) + '%';
     }
-    this.rootEl_.classList.add('i-amphtml-story-interactive-mid-selection');
+    this.rootEl_.classList.add(MID_SELECTION_CLASS);
     setImportantStyles(this.rootEl_, {'--fraction': value / 100});
   }
 
@@ -200,6 +199,6 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
   onRelease_() {
     this.updateToPostSelectionState_();
     this.inputEl_.setAttribute('disabled', '');
-    this.rootEl_.classList.remove('i-amphtml-story-interactive-mid-selection');
+    this.rootEl_.classList.remove(MID_SELECTION_CLASS);
   }
 }

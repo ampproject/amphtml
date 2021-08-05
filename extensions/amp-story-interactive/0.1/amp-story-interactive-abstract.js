@@ -53,6 +53,11 @@ import {isExperimentOn} from '#experiments/';
 /** @const {string} */
 const TAG = 'amp-story-interactive';
 
+/** @const {string} */
+export const MID_SELECTION_CLASS = 'i-amphtml-story-interactive-mid-selection';
+/** @const {string} */
+export const POST_SELECTION_CLASS = 'i-amphtml-story-interactive-post-selection';
+
 /**
  * @const @enum {number}
  */
@@ -804,7 +809,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @protected
    */
   updateToPostSelectionState_(selectedOption) {
-    this.rootEl_.classList.add('i-amphtml-story-interactive-post-selection');
+    this.rootEl_.classList.add(POST_SELECTION_CLASS);
     if (selectedOption != null) {
       selectedOption.classList.add(
         'i-amphtml-story-interactive-option-selected'
