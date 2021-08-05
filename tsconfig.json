@@ -10,6 +10,7 @@
       "#build/*": ["./build/*"],
 
       "#builtins/*": ["./src/builtins/*"],
+      "#compiler/*": ["./src/compiler/*"],
       "#core/*": ["./src/core/*"],
       "#experiments/*": ["./src/experiments/*"],
       "#inabox/*": ["./src/inabox/*"],
