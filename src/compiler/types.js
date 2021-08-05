@@ -25,5 +25,19 @@
  * The return value is set to *, so that we may optionally return any DOM nodes
  * created during a client-side render. These nodes are often needed for ivars.
  *
- * @typedef {function(!Element):*} BuildDom
+ * @typedef {function(!Element):*}
  */
+export let BuildDomDef;
+
+/**
+ * See @ampproject/bento-compiler for the definition.
+ * @typedef {*}
+ */
+export let TreeProtoDef;
+
+/**
+ * Contains component versioning data via a map from tagName --> version.
+ *
+ * @typedef {Object<string, string>}}
+ */
+export let VersionsDef;

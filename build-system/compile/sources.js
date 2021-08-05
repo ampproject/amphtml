@@ -55,6 +55,8 @@ const COMMON_GLOBS = [
   'node_modules/web-activities/activity-ports.js',
   'node_modules/@ampproject/animations/package.json',
   'node_modules/@ampproject/animations/dist/animations.mjs',
+  'node_modules/@ampproject/bento-compiler/package.json',
+  'node_modules/@ampproject/bento-compiler/dist/index.js',
   'node_modules/@ampproject/toolbox-cache-url/package.json',
   'node_modules/@ampproject/toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js',
   'node_modules/@ampproject/viewer-messaging/package.json',
