@@ -29,10 +29,10 @@ BaseElement['props'] = {
   'embed': {attr: 'data-embed', type: 'string', default: 'default'},
   'player': {
     attrs: ['data-player', 'data-player-id'],
-    parseAttrs: (element) =>
-      element.getAttribute('data-player') ||
-      element.getAttribute('data-player-id') ||
-      'default',
+    parseAttrs(element) {
+      const {'player': player, 'playerId': playerId} = element.dataset;
+      return player || playerId || 'default';
+    },
   },
   'playlistId': {attr: 'data-playlist-id', type: 'string'},
   'referrer': {attr: 'data-referrer', type: 'string'},

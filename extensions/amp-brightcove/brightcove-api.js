@@ -15,6 +15,25 @@
  */
 
 import {addParamsToUrl} from '../../src/url';
+import {VideoEvents} from '../../src/video-interface';
+
+/**
+ * Maps events coming from the Brightcove frame to events to be dispatched from the
+ * component element.
+ *
+ * If the item does not have a value, the event will not be forwarded 1:1, but
+ * it will be listened to.
+ *
+ * @const {!Object<string, ?string>}
+ */
+export const BRIGHTCOVE_EVENTS = {
+  'playing': VideoEvents.PLAYING,
+  'pause': VideoEvents.PAUSE,
+  'ended': VideoEvents.ENDED,
+  'ads-ad-started': VideoEvents.AD_START,
+  'ads-ad-ended': VideoEvents.AD_END,
+  'loadedmetadata': VideoEvents.LOADEDMETADATA,
+};
 
 /**
  * id is either a Brightcove-assigned id, or a publisher-generated

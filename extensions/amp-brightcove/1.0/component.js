@@ -19,9 +19,8 @@ import {useCallback, useMemo, useRef, useState} from '#preact';
 import {forwardRef} from '#preact/compat';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
-import {VideoEvents} from '../../../src/video-interface';
 import {dispatchCustomEvent} from '#core/dom';
-import {getBrightcoveIframeSrc} from '../brightcove-api';
+import {BRIGHTCOVE_EVENTS, getBrightcoveIframeSrc} from '../brightcove-api';
 
 /** @const {string} */
 const DEFAULT = 'default';
@@ -38,22 +37,8 @@ const methods = {
 };
 
 /**
- * @enum {string}
- * @private
- */
-const events = {
-  'ready': VideoEvents.LOAD,
-  'playing': VideoEvents.PLAYING,
-  'pause': VideoEvents.PAUSE,
-  'ended': VideoEvents.ENDED,
-  'ads-ad-started': VideoEvents.AD_START,
-  'ads-ad-ended': VideoEvents.AD_END,
-  'loadedmetadata': VideoEvents.LOADEDMETADATA,
-};
-
-/**
  * @param {!BrightcoveDef.Props} props
- * @param {{current: ?VideoWrapperDef.Api.CarouselApi}} ref
+ * @param {{current: ?VideoWrapperDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
 export function BrightcoveWithRef(props, ref) {
@@ -113,8 +98,8 @@ export function BrightcoveWithRef(props, ref) {
         playerStateRef.current['duration'] = data['dur'];
       }
 
-      if (events[eventType]) {
-        dispatchCustomEvent(currentTarget, events[eventType]);
+      if (BRIGHTCOVE_EVENTS[eventType]) {
+        dispatchCustomEvent(currentTarget, BRIGHTCOVE_EVENTS[eventType]);
         return;
       }
 
@@ -185,16 +170,9 @@ function makeMessage(method) {
 function checkProps({account}) {
   // Perform manual checking as assertion is not available for Bento: Issue #32739
   if (!account) {
-    displayWarning('account is required for <Brightcove>');
+    console /*OK*/
+      .warn('account is required for <Brightcove>');
     return false;
   }
   return true;
-}
-
-/**
- * @param {?string} message
- */
-function displayWarning(message) {
-  console /*OK*/
-    .warn(message);
 }

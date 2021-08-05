@@ -18,7 +18,7 @@ import {Deferred} from '#core/data-structures/promise';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
-import {getBrightcoveIframeSrc} from '../brightcove-api';
+import {BRIGHTCOVE_EVENTS, getBrightcoveIframeSrc} from '../brightcove-api';
 import {
   createFrameFor,
   isJsonOrObj,
@@ -261,12 +261,7 @@ class AmpBrightcove extends AMP.BaseElement {
     if (
       redispatch(element, eventType, {
         'ready': VideoEvents.LOAD,
-        'playing': VideoEvents.PLAYING,
-        'pause': VideoEvents.PAUSE,
-        'ended': VideoEvents.ENDED,
-        'ads-ad-started': VideoEvents.AD_START,
-        'ads-ad-ended': VideoEvents.AD_END,
-        'loadedmetadata': VideoEvents.LOADEDMETADATA,
+        ...BRIGHTCOVE_EVENTS,
       })
     ) {
       return;
@@ -341,16 +336,21 @@ class AmpBrightcove extends AMP.BaseElement {
     el.setAttribute('data-param-playsinline', 'true');
     el.removeAttribute('data-param-autoplay');
 
-    // Pass through data-param-* attributes as params for plugin use
+    const {
+      'embed': embed = 'default',
+      'playlistId': playlistId,
+      'referrer': referrer,
+      'videoId': videoId,
+    } = el.dataset;
     return getBrightcoveIframeSrc(
       account,
       this.playerId_,
-      el.getAttribute('data-embed') || 'default',
-      el.getAttribute('data-playlist-id'),
-      el.getAttribute('data-video-id'),
-      el.hasAttribute('data-referrer')
-        ? this.urlReplacements_.expandUrlSync(el.getAttribute('data-referrer'))
-        : undefined,
+      embed,
+      playlistId,
+      videoId,
+      referrer != null
+        ? this.urlReplacements_.expandUrlSync(referrer)
+        : referrer,
       {...urlParams, ...getDataParamsFromAttributes(el)}
     );
   }
