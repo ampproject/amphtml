@@ -316,19 +316,20 @@ describes.realWin('performance', {amp: true}, (env) => {
           env.sandbox
             .stub(ampdoc, 'getFirstVisibleTime')
             .callsFake(() => firstVisibleTime);
+          perf.coreServicesAvailable();
+          perf.viewer_ = {isEmbedded: () => true};
         });
 
-        it('should always be zero before viewer is set', () => {
+        it('should not offset by visible time when viewer is not set', () => {
+          perf.viewer_ = {isEmbedded: () => false};
           clock.tick(10);
           perf.tickSinceVisible('test');
 
           expect(tickDeltaStub).to.have.been.calledOnce;
-          expect(tickDeltaStub.firstCall.args[1]).to.equal(0);
+          expect(tickDeltaStub.firstCall.args[1]).to.equal(10);
         });
 
         it('should always be zero before visible', () => {
-          perf.coreServicesAvailable();
-
           clock.tick(10);
           perf.tickSinceVisible('test');
 
@@ -337,7 +338,6 @@ describes.realWin('performance', {amp: true}, (env) => {
         });
 
         it('should calculate after visible', () => {
-          perf.coreServicesAvailable();
           firstVisibleTime = timeOrigin + 5;
 
           clock.tick(10);
@@ -348,7 +348,6 @@ describes.realWin('performance', {amp: true}, (env) => {
         });
 
         it('should be zero after visible but for earlier event', () => {
-          perf.coreServicesAvailable();
           firstVisibleTime = timeOrigin + 5;
 
           // An earlier event, since event time (4) is less than visible time (5).
