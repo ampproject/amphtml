@@ -38,6 +38,9 @@ const MIN_DIST = 5;
 /** @const {number} */
 const MAX_DIST = 6;
 
+/** @const {number} */
+const BORDER_BUFFER = 0.125;
+
 /**
  * @typedef {{
  *    element: !Element,
@@ -178,17 +181,23 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
   positionResultEls_() {
     const results = Object.values(this.resultEls_);
     const slice = (2 * Math.PI) / results.length;
+    const offset = Math.random() * slice;
 
     results.forEach(({element}, index) => {
-      const offset = Math.random() * slice;
-      const angleBuffer = slice / 4;
-      const size = Math.random() * (MAX_SIZE - MIN_SIZE) + MIN_SIZE;
+      const dist = Math.random() * (MAX_DIST - MIN_DIST) + MIN_DIST;
+      const adjustedMaxSize = Math.min(
+        MAX_SIZE,
+        2 * (dist * Math.sin(slice / 2) - BORDER_BUFFER)
+      );
+      const size = Math.random() * (adjustedMaxSize - MIN_SIZE) + MIN_SIZE;
+      const angleBuffer = Math.asin((size / 2 + BORDER_BUFFER) / dist);
+      console.log(slice);
+      console.log(angleBuffer);
       const angle =
         Math.random() * (slice - 2 * angleBuffer) +
         slice * index +
         angleBuffer +
         offset;
-      const dist = Math.random() * (MAX_DIST - MIN_DIST) + MIN_DIST;
       const top = CENTER + Math.cos(angle) * dist - size / 2;
       const left = CENTER + Math.sin(angle) * dist - size / 2;
 
