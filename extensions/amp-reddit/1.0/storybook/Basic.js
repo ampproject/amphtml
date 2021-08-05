@@ -25,13 +25,11 @@ export default {
 };
 
 export const _default = () => {
-  // DO NOT SUBMIT: This is example code only.
   return (
     <Reddit
       style={{width: 300, height: 200}}
-      example-property="example string property value"
+      src="https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed"
     >
-      This text is inside.
     </Reddit>
   );
 };

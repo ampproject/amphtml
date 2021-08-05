@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '#preact';
-import {ContainWrapper} from '#preact/component';
+import {IframeEmbed} from '#preact/component/iframe';
 import {
   useCallback,
   useEffect,
@@ -28,7 +28,13 @@ import {
  * @param {!RedditDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function Reddit({exampleTagNameProp, ...rest}) {
+export function RedditWithRef({src, embedtype , ...rest}, ref) {
+    
+  const onMessage = useCallback((e) => {
+    console.log(e);
+
+  }, []);
+
   // Examples of state and hooks
   // DO NOT SUBMIT: This is example code only.
   const [exampleValue, setExampleValue] = useState(0);
@@ -47,9 +53,15 @@ export function Reddit({exampleTagNameProp, ...rest}) {
   }, []);
 
   return (
-    <ContainWrapper layout size paint {...rest}>
-      {exampleTagNameProp}
-      <div className={'my-classname'}>This is hidden</div>
-    </ContainWrapper>
+    <IframeEmbed
+      ref={ref}
+      src={src}
+      {...rest}
+      messageHandler={messageHandler}
+      />
   );
 }
+
+const Reddit = forwardRef(RedditWithRef);
+Reddit.displayName = 'Reddit';
+export {Reddit};
