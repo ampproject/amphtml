@@ -53,7 +53,23 @@ function makeMethodMessage(method) {
       break;
 
     default:
-      makeDailymotionMessage(method);
+      return makeDailymotionMessage(method);
+  }
+}
+
+/**
+ * @param {MessageEvent} event
+ */
+function onMessage({currentTarget, data}) {
+  const parsedData = parseQueryString(/** @type {string} */ (data));
+  const event = parsedData?.['event'];
+  if (event === DailymotionEvents.API_READY) {
+    dispatchCustomEvent(currentTarget, 'canplay');
+    return;
+  }
+  if (DailymotionEvents[event]) {
+    dispatchEvent(currentTarget, DailymotionEvents.event);
+    return;
   }
 }
 
@@ -99,24 +115,6 @@ export function DailymotionWithRef(
       videoId,
     ]
   );
-
-  const onMessage = ({data, currentTarget}) => {
-    console.log(data);
-    const parsedData = parseQueryString(/** @type {string} */ (data));
-    console.log(parsedData);
-    if (parsedData === undefined) {
-      return; // The message isn't valid
-    }
-    // console.log(data);
-    if (parsedData['event'] === DailymotionEvents.API_READY) {
-      dispatchCustomEvent(currentTarget, 'canplay');
-      return;
-    }
-    if (DailymotionEvents.event) {
-      dispatchEvent(currentTarget, DailymotionEvents.event);
-      return;
-    }
-  }
 
   return (
     <VideoIframe

@@ -20,6 +20,7 @@ import {dict} from '#core/types/object';
 /**
  *
  * @param {string} videoid
+ * @param videoId
  * @param {string} mute
  * @param {string} endscreenEnable
  * @param {string} sharingEnable
@@ -61,15 +62,15 @@ export function getDailymotionIframeSrc(
 }
 
 /**
- * @param {string} method
+ * @param {string} command
  * @param {?Object|string=} params
  * @return {string}
  */
-export function makeDailymotionMessage(method, params = '') {
+export function makeDailymotionMessage(command, params = []) {
   return JSON.stringify(
     dict({
-      'method': method,
-      'value': params,
+      'command': command,
+      'parameters': params,
     })
   );
 }
