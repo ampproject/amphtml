@@ -23,9 +23,13 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
   let windowPostMessageSpy;
   let windowMessageHandler;
   let win;
+  let clock;
 
   beforeEach(() => {
     windowPostMessageSpy = env.sandbox.spy();
+
+    clock = env.sandbox.useFakeTimers();
+
     win = {
       addEventListener: (eventType, handlerFn) => {
         expect(eventType).to.equal('message');
@@ -280,6 +284,81 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
           expect(failureCallbackSpy).to.be.calledOnce;
         }),
     ]);
+
+    // send a resize success message down
+    const messagePayloadSuccess = {
+      sentinel: '1-291921',
+      type: MessageType.EMBED_SIZE_CHANGED,
+      id: initialId,
+      requestedHeight: 300,
+      requestedWidth: 200,
+    };
+    windowMessageHandler({
+      source: context.client_.hostWindow_,
+      data: 'amp-' + JSON.stringify(messagePayloadSuccess),
+    });
+
+    // send a resize failure message down
+    const messagePayloadFailure = {
+      sentinel: '1-291921',
+      type: MessageType.EMBED_SIZE_DENIED,
+      id: initialId + 1,
+      requestedHeight: 300,
+      requestedWidth: 200,
+    };
+    windowMessageHandler({
+      source: context.client_.hostWindow_,
+      data: 'amp-' + JSON.stringify(messagePayloadFailure),
+    });
+    return promise;
+  });
+
+  it('Should return failure message on invalid resize requests made after invalid request before 500ms timeout', async () => {
+    win.name = generateSerializedAttributes();
+    const context = new AmpContext(win);
+
+    // Resetting since a message is sent on construction.
+    windowPostMessageSpy.resetHistory();
+
+    const successCallbackSpy = env.sandbox.spy();
+    const failureCallbackSpy = env.sandbox.spy();
+    const initialId = context.nextResizeRequestId_;
+
+    const height = 100;
+    const width = 200;
+
+    //initially, accept all requests
+    expect(context.blockRepeatedInvalidRequests_).equal(false);
+
+    const promise = Promise.all([
+      context
+        .requestResize(height, width)
+        .then(successCallbackSpy)
+        .then(() => {
+          expect(successCallbackSpy).to.be.calledOnce;
+        }),
+      context
+        .requestResize(height, width)
+        .catch(failureCallbackSpy)
+        .then(() => {
+          expect(failureCallbackSpy).to.be.calledOnce;
+        }),
+    ]).then(() => {
+      //will block requests for the next 500ms since the last request was invalid.
+      expect(context.blockRepeatedInvalidRequests_).equal(true);
+
+      clock.tick(100);
+      expect(context.blockRepeatedInvalidRequests_).equal(true);
+      clock.tick(100);
+      expect(context.blockRepeatedInvalidRequests_).equal(true);
+      clock.tick(100);
+      expect(context.blockRepeatedInvalidRequests_).equal(true);
+      clock.tick(100);
+      expect(context.blockRepeatedInvalidRequests_).equal(true);
+      clock.tick(100);
+      //after 500msec delay (context.msecRepeatedRequestDelay_), requests should be clear to go again.
+      expect(context.blockRepeatedInvalidRequests_).equal(false);
+    });
 
     // send a resize success message down
     const messagePayloadSuccess = {
