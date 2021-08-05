@@ -27,7 +27,6 @@ import {
 } from './core/error/message-helpers';
 import {isArray} from './core/types';
 import {once} from './core/types/function';
-import {internalRuntimeVersion} from './internal-version';
 import {getMode} from './mode';
 
 const noop = () => {};
@@ -90,7 +89,7 @@ export function overrideLogLevel(level) {
  * (Specific channel is irrelevant: message tables are invariant on internal version.)
  * @return {string}
  */
-const messageUrlRtv = () => `01${internalRuntimeVersion()}`;
+const messageUrlRtv = () => `01${mode.version()}`;
 
 /**
  * Gets a URL to display a message on amp.dev.
