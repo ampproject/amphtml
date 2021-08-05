@@ -27,7 +27,7 @@ import {setImportantStyles} from '#core/dom/style';
 const CENTER = 9;
 
 /** @const {number} */
-const MIN_SIZE = 5;
+const MIN_SIZE = 3;
 
 /** @const {number} */
 const MAX_SIZE = 6;
@@ -190,10 +190,13 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
 
     results.forEach(({element}, index) => {
       const dist = Math.random() * (MAX_DIST - MIN_DIST) + MIN_DIST;
-      const adjustedMaxSize = Math.min(
-        MAX_SIZE,
-        2 * (dist * Math.sin(slice / 2) - BORDER_BUFFER)
-      );
+      const adjustedMaxSize =
+        results.length === 1
+          ? MAX_SIZE
+          : Math.min(
+              MAX_SIZE,
+              2 * (dist * Math.sin(slice / 2) - BORDER_BUFFER)
+            );
       const size = Math.random() * (adjustedMaxSize - MIN_SIZE) + MIN_SIZE;
       const angleBuffer = Math.asin((size / 2 + BORDER_BUFFER) / dist);
       const angle =
