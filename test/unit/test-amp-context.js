@@ -354,18 +354,11 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
             'Resizing is denied, recent invalid request parameters'
           )
         );
-
-      clock.tick(100);
-      expect(context.blockRepeatedInvalidRequests_).equal(true);
-      clock.tick(100);
-      expect(context.blockRepeatedInvalidRequests_).equal(true);
-      clock.tick(100);
-      expect(context.blockRepeatedInvalidRequests_).equal(true);
-      clock.tick(100);
-      expect(context.blockRepeatedInvalidRequests_).equal(true);
-      clock.tick(100);
-      //after 500msec delay (context.msecRepeatedRequestDelay_), requests should be clear to go again.
+      clock.tick(500);
       expect(context.blockRepeatedInvalidRequests_).equal(false);
+
+      //after 500msec delay (context.msecRepeatedRequestDelay_), requests should be clear to go again.
+      env.sandbox.stub(context, 'requestResize').returns(Promise.accept());
     });
 
     // send a resize success message down
