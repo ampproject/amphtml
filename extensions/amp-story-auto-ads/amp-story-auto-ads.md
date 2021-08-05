@@ -49,6 +49,13 @@ right part of the screen.
 
 ## Configuration
 
+There are two ways of configuring an ad:
+**Inline**
+and
+**Remote**
+
+### Inline Ad Config
+
 In the `<amp-story-auto-ads>` element, you specify a JSON configuration object
 that contains the details for how ads should be fetched and displayed, which
 looks like the following:
@@ -82,6 +89,42 @@ a [ad served by doubleclick](../../extensions/amp-ad-network-doubleclick-impl/am
 
 Unlike normal `amp-ad`, no `<fallback>` or `<placeholder>` needs to be specified
 here, as ads in stories will only be displayed once fully rendered.
+
+### Remote Ad Config
+
+Instead of adding in the JSON configuration file inside a script tag (as shown in the Inline Ad Config section),
+One may also host the remote URL using a
+
+[Remote JSON ad configuration file](https://github.com/ampproject/amphtml/blob/main/examples/amp-story/ads/remote.json)
+
+```json
+{
+  "ad-attributes": {
+    "type": "doubleclick",
+    "data-slot": "/30497360/a4a/amp_story_dfp_example"
+  }
+}
+
+```
+
+Once you have your JSON configuration file setup, simply use the
+
+[html ad config code to retrive the remote URL:](https://github.com/ampproject/amphtml/blob/main/examples/amp-story/story-ad-remote-config.html)
+
+in the `<amp-story-auto-ads>` element as shown here:
+
+```html
+<amp-story standalone supports-landscape>
+    <!--
+      This is an example of JSON retrieved from a source file.
+    -->
+    <amp-story-auto-ads src="/examples/amp-story/ads/remote.json" ></amp-story-auto-ads>
+    <amp-story-page id="page-1">
+    .
+    .
+    .
+</amp-story>
+```
 
 ### Passing additional attributes (RTC, Targeting, etc.)
 

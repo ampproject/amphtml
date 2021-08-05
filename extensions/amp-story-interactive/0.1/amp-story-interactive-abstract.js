@@ -38,7 +38,10 @@ import {
   buildInteractiveDisclaimerIcon,
 } from './interactive-disclaimer';
 import {closest} from '#core/dom/query';
-import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
+import {
+  createShadowRootWithStyle,
+  maybeMakeProxyUrl,
+} from '../../amp-story/1.0/utils';
 import {deduplicateInteractiveIds} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
@@ -333,7 +336,15 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         while (options.length < optionNumber) {
           options.push({'optionIndex': options.length});
         }
-        options[optionNumber - 1][splitParts.slice(2).join('')] = attr.value;
+        const key = splitParts.slice(2).join('');
+        if (key === 'image') {
+          options[optionNumber - 1][key] = maybeMakeProxyUrl(
+            attr.value,
+            this.getAmpDoc()
+          );
+        } else {
+          options[optionNumber - 1][key] = attr.value;
+        }
       }
     });
     if (
@@ -504,7 +515,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     if (optionEl) {
       this.updateStoryStoreState_(optionEl.optionIndex_);
-      this.handleOptionSelection_(optionEl);
+      this.handleOptionSelection_(optionEl.optionIndex_, optionEl);
       const confettiEmoji = this.options_[optionEl.optionIndex_].confetti;
       if (confettiEmoji) {
         emojiConfetti(
@@ -520,17 +531,17 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   /**
    * Triggers the analytics event for quiz response.
    *
-   * @param {!Element} optionEl
+   * @param {number} optionIndex
    * @private
    */
-  triggerAnalytics_(optionEl) {
+  triggerAnalytics_(optionIndex) {
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.STORY_INTERACTIVE_ID,
       this.element.getAttribute('id')
     );
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.STORY_INTERACTIVE_RESPONSE,
-      optionEl.optionIndex_
+      optionIndex
     );
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.STORY_INTERACTIVE_TYPE,
@@ -640,22 +651,23 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   /**
    * Triggers changes to component state on response interactive.
    *
-   * @param {!Element} optionEl
+   * @param {number} optionIndex
+   * @param {?Element} optionEl
    * @private
    */
-  handleOptionSelection_(optionEl) {
+  handleOptionSelection_(optionIndex, optionEl) {
     this.backendDataPromise_
       .then(() => {
         if (this.hasUserSelection_) {
           return;
         }
 
-        this.triggerAnalytics_(optionEl);
+        this.triggerAnalytics_(optionIndex);
         this.hasUserSelection_ = true;
 
         if (this.optionsData_) {
-          this.optionsData_[optionEl.optionIndex_]['count']++;
-          this.optionsData_[optionEl.optionIndex_]['selected'] = true;
+          this.optionsData_[optionIndex]['count']++;
+          this.optionsData_[optionIndex]['selected'] = true;
         }
 
         this.mutateElement(() => {
@@ -663,12 +675,12 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         });
 
         if (this.element.hasAttribute('endpoint')) {
-          this.executeInteractiveRequest_('POST', optionEl.optionIndex_);
+          this.executeInteractiveRequest_('POST', optionIndex);
         }
       })
       .catch(() => {
         // If backend is not properly connected, still update state.
-        this.triggerAnalytics_(optionEl);
+        this.triggerAnalytics_(optionIndex);
         this.hasUserSelection_ = true;
         this.mutateElement(() => {
           this.updateToPostSelectionState_(optionEl);
@@ -684,9 +696,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    */
   retrieveInteractiveData_() {
     return this.executeInteractiveRequest_('GET').then((response) => {
-      this.handleSuccessfulDataRetrieval_(
-        /** @type {InteractiveResponseType} */ (response)
-      );
+      this.onDataRetrieved_(/** @type {InteractiveResponseType} */ (response));
     });
   }
 
@@ -743,7 +753,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @param {InteractiveResponseType|undefined} response
    * @private
    */
-  handleSuccessfulDataRetrieval_(response) {
+  onDataRetrieved_(response) {
     if (!(response && response['options'])) {
       devAssert(
         response && 'options' in response,
@@ -755,21 +765,17 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       );
       return;
     }
-    const numOptions = this.rootEl_.querySelectorAll(
-      '.i-amphtml-story-interactive-option'
-    ).length;
+    const numOptions = this.getNumberOfOptions();
     // Only keep the visible options to ensure visible percentages add up to 100.
-    this.updateComponentOnDataRetrieval_(
-      response['options'].slice(0, numOptions)
-    );
+    this.updateComponentWithData(response['options'].slice(0, numOptions));
   }
 
   /**
    * Updates the quiz to reflect the state of the remote data.
    * @param {!Array<InteractiveOptionType>} data
-   * @private
+   * @protected
    */
-  updateComponentOnDataRetrieval_(data) {
+  updateComponentWithData(data) {
     const options = this.rootEl_.querySelectorAll(
       '.i-amphtml-story-interactive-option'
     );
@@ -840,6 +846,16 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   }
 
   /**
+   * Returns the number of options.
+   *
+   * @protected
+   * @return {number}
+   */
+  getNumberOfOptions() {
+    return this.getOptionElements().length;
+  }
+
+  /**
    * Reorders options data to account for scrambled or incomplete data.
    *
    * @private
@@ -847,7 +863,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @return {!Array<!InteractiveOptionType>}
    */
   orderData_(optionsData) {
-    const numOptionElements = this.getOptionElements().length;
+    const numOptionElements = this.getNumberOfOptions();
     const orderedData = new Array(numOptionElements);
     optionsData.forEach((option) => {
       const {index} = option;

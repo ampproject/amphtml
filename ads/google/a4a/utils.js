@@ -28,7 +28,7 @@ import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {getTimingDataSync} from '#service/variable-source';
-import {internalRuntimeVersion} from '../../../src/internal-version';
+import * as mode from '#core/mode';
 import {parseJson} from '#core/types/object/json';
 import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 import {createElementWithAttributes} from '#core/dom';
@@ -124,7 +124,7 @@ const TOKEN_VALUE =
  * @param {!Window} win
  */
 export function maybeInsertOriginTrialToken(win) {
-  if (win.document.querySelector(`meta[content='${TOKEN_VALUE}']`)) {
+  if (win.document.head.querySelector(`meta[content='${TOKEN_VALUE}']`)) {
     return;
   }
   const metaEl = createElementWithAttributes(win.document, 'meta', {
@@ -330,7 +330,7 @@ export function googlePageParameters(a4a, startTime) {
       'is_amp': a4a.isXhrAllowed()
         ? AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP
         : AmpAdImplementation.AMP_AD_IFRAME_GET,
-      'amp_v': internalRuntimeVersion(),
+      'amp_v': mode.version(),
       'd_imp': '1',
       'c': getCorrelator(win, ampDoc, clientId),
       'ga_cid': win.gaGlobal.cid || null,
@@ -834,7 +834,7 @@ export function addCsiSignalsToAmpAnalyticsConfig(
     `&dt=${initTime}` +
     (eids != 'null' ? `&e.${slotId}=${eids}` : '') +
     (aexp ? `&aexp=${aexp}` : '') +
-    `&rls=${internalRuntimeVersion()}&adt.${slotId}=${adType}`;
+    `&rls=${mode.version()}&adt.${slotId}=${adType}`;
   const isAmpSuffix = isVerifiedAmpCreative ? 'Friendly' : 'CrossDomain';
   config['triggers']['continuousVisibleIniLoad'] = {
     'on': 'ini-load',

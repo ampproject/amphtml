@@ -21,6 +21,7 @@
  * This files gets minified and published to
  * https://3p.ampproject.net/$version/f.js
  */
+/* eslint-disable import/order */
 
 // src/polyfills.js must be the first import.
 import './polyfills';
@@ -161,6 +162,7 @@ import {insticator} from '#ads/vendors/insticator';
 import {invibes} from '#ads/vendors/invibes';
 import {iprom} from '#ads/vendors/iprom';
 import {ix} from '#ads/vendors/ix';
+import {jixie} from '#ads/vendors/jixie';
 import {jubna} from '#ads/vendors/jubna';
 import {kargo} from '#ads/vendors/kargo';
 import {ketshwa} from '#ads/vendors/ketshwa';
@@ -445,6 +447,7 @@ register('insticator', insticator);
 register('invibes', invibes);
 register('iprom', iprom);
 register('ix', ix);
+register('jixie', jixie);
 register('jubna', jubna);
 register('kargo', kargo);
 register('ketshwa', ketshwa);
