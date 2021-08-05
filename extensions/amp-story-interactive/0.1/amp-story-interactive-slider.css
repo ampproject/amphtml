@@ -15,7 +15,7 @@
  */
 
 .i-amphtml-story-interactive-slider-container {
-  --average: 0;
+  --average: 0%;
   --fraction: 0;
   --percentage: calc(var(--fraction) * 100%) !important;
   /* This maps the range and has the gradient follow behind the thumb */
@@ -101,6 +101,8 @@
 
 .i-amphtml-story-interactive-slider-average-indicator {
   transform: translate(-50%, -50%) scale(0) !important;
+  transition: transform var(--i-amphtml-interactive-animation-time)
+    var(--i-amphtml-interactive-ease-out-curve) !important;
   width: 2em !important;
   height: 2em !important;
   top: 50% !important;
@@ -110,9 +112,13 @@
   position: absolute;
 }
 
-.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-indicator::after,
-.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-indicator::before {
-  --animation-duration: 3s;
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-indicator {
+  transform: translate(-50%, -50%) scale(1) !important;
+}
+
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-indicator
+  span {
+  --pulse-animation-duration: 3s;
   transform: scale(0);
   box-sizing: border-box;
   content: '';
@@ -121,48 +127,50 @@
   position: absolute;
   box-shadow: inset 0 0 0 0.05em var(--i-amphtml-interactive-strong-text-color);
   border-radius: 50%;
-  animation: pulse var(--animation-duration) linear infinite forwards !important;
+  animation: pulse var(--pulse-animation-duration) linear infinite forwards !important;
 }
 
-.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-indicator::before {
-  animation-delay: calc(var(--animation-duration) / 2) !important;
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-indicator span:nth-child(1) {
+  animation-delay: calc(var(--pulse-animation-duration) * 0.33) !important;
+}
+
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-indicator span:nth-child(2) {
+  animation-delay: calc(var(--pulse-animation-duration) * 0.66) !important;
 }
 
 @keyframes pulse {
   0% {
-    transform: scale(0.2);
     opacity: 0;
-    box-shadow: inset 0 0 0 0.6em var(--i-amphtml-interactive-strong-text-color);
+    transform: scale(0.15);
+    box-shadow: inset 0 0 0 3em var(--i-amphtml-interactive-strong-text-color);
   }
   10% {
     opacity: 1;
+    transform: scale(0.2);
+    box-shadow: inset 0 0 0 0.5em var(--i-amphtml-interactive-strong-text-color);
   }
   20% {
     opacity: 1;
-    box-shadow: inset 0 0 0 0.3em var(--i-amphtml-interactive-strong-text-color);
+    box-shadow: inset 0 0 0 0.4em var(--i-amphtml-interactive-strong-text-color);
   }
   60% {
     opacity: 1;
   }
   100% {
-    transform: scale(1);
     opacity: 0;
-    box-shadow: inset 0 0 0 0.01em
+    transform: scale(1);
+    box-shadow: inset 0 0 0 0.08em
       var(--i-amphtml-interactive-strong-text-color);
   }
-}
-
-.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-indicator {
-  transform: translate(-50%, -50%) !important;
 }
 
 .i-amphtml-story-interactive-slider-average-text {
   position: absolute !important;
   transform: translate(-50%, 100%) scale(0) !important;
-  bottom: 180% !important;
+  bottom: 250% !important;
   line-height: 1.5em !important;
-  font-size: 0.8em !important;
-  padding: 0.5em 1em !important;
+  font-size: 0.7em !important;
+  padding: 0.5em 1.5em !important;
   color: black !important;
   z-index: 1 !important;
   border-radius: 1.5em !important;
@@ -184,7 +192,7 @@
 
 .i-amphtml-story-interactive-active.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-text {
   left: var(--average) !important;
-  animation: average-pop 5s forwards;
+  animation: average-pop 3s forwards;
 }
 
 @keyframes average-pop {
@@ -192,14 +200,14 @@
     transform: translate(-50%, 100%) scale(0);
     opacity: 0;
   }
-  3% {
+  5% {
     opacity: 1;
   }
-  6%,
-  94% {
+  10%,
+  90% {
     transform: translate(-50%, 0) scale(0.9);
   }
-  97% {
+  95% {
     opacity: 1;
   }
   100% {

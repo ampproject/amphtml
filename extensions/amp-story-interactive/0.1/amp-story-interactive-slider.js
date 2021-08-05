@@ -43,9 +43,9 @@ const buildSliderTemplate = (element) => {
             value="0"
           />
           <div class="i-amphtml-story-interactive-slider-bubble"></div>
-          <div
-            class="i-amphtml-story-interactive-slider-average-indicator"
-          ></div>
+          <div class="i-amphtml-story-interactive-slider-average-indicator">
+            <span></span><span></span><span></span>
+          </div>
           <div class="i-amphtml-story-interactive-slider-average-text">
             Average answer
           </div>
