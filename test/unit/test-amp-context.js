@@ -355,10 +355,8 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
           )
         );
       clock.tick(500);
-      expect(context.blockRepeatedInvalidRequests_).equal(false);
-
       //after 500msec delay (context.msecRepeatedRequestDelay_), requests should be clear to go again.
-      env.sandbox.stub(context, 'requestResize').returns(Promise.accept());
+      expect(context.blockRepeatedInvalidRequests_).equal(false);
     });
 
     // send a resize success message down
