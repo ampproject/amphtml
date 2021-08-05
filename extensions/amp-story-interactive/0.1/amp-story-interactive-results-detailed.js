@@ -158,6 +158,15 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
     } else {
       this.resultEls_[e.interactiveId].element.textContent = e.option.text;
     }
+
+    if (e.type === InteractiveType.QUIZ) {
+      const correctnessClass =
+        'i-amphtml-story-interactive-results-' +
+        ('correct' in e.option ? '' : 'in') +
+        'correct';
+      this.resultEls_[e.interactiveId].element.classList.add(correctnessClass);
+    }
+
     this.resultEls_[e.interactiveId].answered = true;
   }
 

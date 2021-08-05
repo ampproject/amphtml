@@ -30,15 +30,35 @@
 .i-amphtml-story-interactive-results-result {
   position: absolute !important;
   border-radius: 50% !important;
-  filter: grayscale(100%) !important;
-  background-position: center !important;
-  background-size: cover !important;
-  background-color: var(
-    --i-amphtml-interactive-placeholder-background
-  ) !important;
   display: flex !important;
   align-items: center !important;
   overflow: hidden !important;
+  background-size: 0 !important;
+}
+
+.i-amphtml-story-interactive-results-result.i-amphtml-story-interactive-results-correct {
+  box-shadow: 0 0 0 0.125em var(--correct-color);
+}
+
+.i-amphtml-story-interactive-results-result.i-amphtml-story-interactive-results-incorrect {
+  box-shadow: 0 0 0 0.125em var(--incorrect-color);
+}
+
+.i-amphtml-story-interactive-results-result::before {
+  content: '' !important;
+  display: block !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  background-color: var(
+    --i-amphtml-interactive-placeholder-background
+  ) !important;
+  background-image: inherit !important;
+  filter: grayscale(100%) !important;
+  background-position: center !important;
+  background-size: cover !important;
 }
 
 .i-amphtml-story-interactive-results-selected-result span {
