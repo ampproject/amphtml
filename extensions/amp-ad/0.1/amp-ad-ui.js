@@ -339,8 +339,7 @@ export class AmpAdUIHandler {
       return new Promise((resolve) => {
         if (
           this.stickyAdPosition_ == StickyAdPositions.LEFT ||
-          this.stickyAdPosition_ == StickyAdPositions.RIGHT ||
-          this.stickyAdPosition_ == StickyAdPositions.SIDEBAR
+          this.stickyAdPosition_ == StickyAdPositions.RIGHT
         ) {
           // Directly load ad for sticky `left`, `right` and `sidebar`
           resolve();
