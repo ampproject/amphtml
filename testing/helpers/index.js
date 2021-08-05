@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+let env_;
+
+export function configHelpers(env) {
+  env_ = env;
+}
+
 /**
  * Returns a Promise that resolves after the specified number of milliseconds.
  * @param {number} ms
@@ -29,12 +35,20 @@ export function sleep(ms) {
 
 /**
  * Returns a Promise that resolves after the next browser frame has been rendered.
+ * @param {Window=} window
  * @return {Promise<void>}
  */
-export function awaitNextFrame() {
+export function afterRenderPromise() {
   return new Promise((resolve) => {
+    const requestAnimationFrame = env_.win
+      ? env_.win.requestAnimationFrame
+      : async (cb) => {
+          await sleep(1);
+          cb();
+        };
+
     requestAnimationFrame(() => {
-      resolve();
+      setTimeout(resolve);
     });
   });
 }
@@ -46,7 +60,7 @@ export function awaitNextFrame() {
 export function awaitNFrames(n) {
   return new Promise(async (resolve) => {
     for (let i = 0; i < n; i++) {
-      await awaitNextFrame();
+      await afterRenderPromise();
     }
     resolve();
   });
@@ -61,7 +75,7 @@ export function awaitFrameAfter(ms) {
   return new Promise(async (resolve) => {
     const start = Date.now();
     while (Date.now() - start < ms) {
-      await awaitNextFrame();
+      await afterRenderPromise();
     }
     resolve();
   });

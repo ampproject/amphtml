@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {awaitFrameAfter, awaitNextFrame} from '#testing/helpers';
+import {afterRenderPromise, awaitFrameAfter} from '#testing/helpers';
 
 describes.endtoend(
   'amp-consent',
@@ -30,7 +30,7 @@ describes.endtoend(
     });
 
     it('should restrict fullscreen until user interaction', async function () {
-      this.timeout(10000);
+      this.timeout(5000);
       // Await the CMP to load
       await awaitFrameAfter(1000);
 
@@ -47,7 +47,7 @@ describes.endtoend(
 
       // Verify that it's fullscreen
       await controller.click(await controller.findElement('#consent-wrapper'));
-      await awaitNextFrame(1000);
+      await afterRenderPromise();
       await controller.switchToParent();
       await expect(
         controller.getElementAttribute(consentPrompt, 'class')

@@ -17,23 +17,13 @@
 import '../amp-story-panning-media';
 import {createElementWithAttributes} from '#core/dom';
 
+import {afterRenderPromise} from '#testing/helpers';
+
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
   Action,
   AmpStoryStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
-
-/**
- * @return {!Promise<undefined>} A Promise that resolves after the browser has
- *    rendered.
- */
-function afterRenderPromise() {
-  return new Promise((resolve) => {
-    requestAnimationFrame(() => {
-      setTimeout(resolve);
-    });
-  });
-}
 
 describes.realWin(
   'amp-story-panning-media',

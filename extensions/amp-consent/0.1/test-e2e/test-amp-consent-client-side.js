@@ -20,7 +20,7 @@ import {
   verifyElementsBuilt,
   verifyPromptsHidden,
 } from './common';
-import {awaitNextFrame} from '#testing/helpers';
+import {afterRenderPromise} from '#testing/helpers';
 
 describes.endtoend(
   'amp-consent',
@@ -98,7 +98,7 @@ describes.endtoend(
 
       // Check the analytics request consentState. Wait for 1 second for the
       // request to arrive to avoid flaky test.
-      await awaitNextFrame();
+      await afterRenderPromise();
       await expect(
         'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking?consentState=sufficient'
       ).to.have.been.sent;

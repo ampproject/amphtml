@@ -15,7 +15,7 @@
  */
 
 import {getNextArrow, getSlides} from './helpers';
-import {awaitNextFrame} from '#testing/helpers';
+import {afterRenderPromise} from '#testing/helpers';
 
 describes.endtoend(
   'AMP carousel 0.2 with responsive slides',
@@ -45,7 +45,7 @@ describes.endtoend(
       await expect(slideRect['height']).to.be.greaterThan(0);
 
       await controller.click(nextArrow);
-      await awaitNextFrame();
+      await afterRenderPromise();
       slideRect = await rect(slides[1]);
 
       // Check the size of the new image

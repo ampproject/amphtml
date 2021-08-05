@@ -81,7 +81,7 @@ describes.endtoend(
 
       // Check the analytics request consentState. Wait for 1 second for the
       // request to arrive to avoid flaky test.
-      await awaitFrameAfter(1000);
+      await awaitFrameAfter(500);
       await expect(
         'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking?consentState=insufficient'
       ).to.have.been.sent;
