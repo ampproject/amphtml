@@ -122,21 +122,8 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {?string} */
     this.matchedGeoGroup_ = null;
 
-    /** @private {?boolean} */
-    this.isTcfPostMessageProxyExperimentOn_ =
-      /* isExperimentOn(
-      this.win,
-      'tcf-post-message-proxy-api'
-    ) // launched: true */
-      true;
-
     /** @private {?Promise<?Array>} */
     this.purposeConsentRequired_ = null;
-
-    /** @private @const {?Function} */
-    this.boundHandleIframeMessages_ = this.isTcfPostMessageProxyExperimentOn_
-      ? this.handleIframeMessages_.bind(this)
-      : null;
   }
 
   /** @override */
@@ -972,27 +959,25 @@ export class AmpConsent extends AMP.BaseElement {
    * that the document supports the tcfPostMessage API.
    */
   maybeSetUpTcfPostMessageProxy_() {
-    if (
-      !this.isTcfPostMessageProxyExperimentOn_ ||
-      !this.consentConfig_['exposesTcfApi']
-    ) {
+    if (!this.consentConfig_['exposesTcfApi']) {
       return;
     }
-    // Check if __tcfApiLocator API already exists (dirty AMP)
-    if (!this.win.frames[TCF_API_LOCATOR]) {
-      this.tcfApiCommandManager_ = new TcfApiCommandManager(
-        this.consentPolicyManager_
-      );
-      // Add window listener for 3p iframe PostMessages
-      this.win.addEventListener('message', this.boundHandleIframeMessages_);
-
-      // Set up the __tcfApiLocator window to singal PostMessage support
-      const iframe = this.element.ownerDocument.createElement('iframe');
-      iframe.setAttribute('name', TCF_API_LOCATOR);
-      toggle(iframe, false);
-      iframe.setAttribute('aria-hidden', true);
-      this.element.appendChild(dev().assertElement(iframe));
+    // Bail if __tcfApiLocator API already exists (dirty AMP)
+    if (this.win.frames[TCF_API_LOCATOR]) {
+      return;
     }
+    this.tcfApiCommandManager_ = new TcfApiCommandManager(
+      this.consentPolicyManager_
+    );
+    // Add window listener for 3p iframe PostMessages
+    this.win.addEventListener('message', (e) => this.handleTcfMessages_(e));
+
+    // Set up the __tcfApiLocator window to singal PostMessage support
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    iframe.setAttribute('name', TCF_API_LOCATOR);
+    iframe.setAttribute('aria-hidden', 'true');
+    toggle(iframe, false);
+    this.element.appendChild(dev().assertElement(iframe));
   }
 
   /**
@@ -1011,7 +996,7 @@ export class AmpConsent extends AMP.BaseElement {
    *
    * @param {!Event} event
    */
-  handleIframeMessages_(event) {
+  handleTcfMessages_(event) {
     const data = getData(event);
 
     if (!data || !data['__tcfapiCall']) {

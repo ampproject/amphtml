@@ -937,13 +937,6 @@ describes.realWin(
       let ampConsent;
       let consentElement;
 
-      beforeEach(() => {});
-
-      afterEach(() => {
-        /* toggleExperiment(win, 'tcf-post-message-proxy-api', false) // launched: true */
-        false;
-      });
-
       describe('config', () => {
         it('shoud expose if in config', async () => {
           consentElement = createConsentElement(
