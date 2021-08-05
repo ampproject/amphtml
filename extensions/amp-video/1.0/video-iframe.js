@@ -98,6 +98,11 @@ function VideoIframeInternalWithRef(
       get duration() {
         return playerStateRef?.current?.['duration'] ?? NaN;
       },
+      requestFullscreen: () => {
+        return readyDeferred.promise.then(() =>
+          iframeRef.current.requestFullscreen()
+        );
+      },
       play: () => postMethodMessage('play'),
       pause: () => {
         if (unloadOnPause) {
@@ -110,7 +115,7 @@ function VideoIframeInternalWithRef(
         }
       },
     }),
-    [playerStateRef, postMethodMessage, unloadOnPause]
+    [playerStateRef, postMethodMessage, readyDeferred.promise, unloadOnPause]
   );
 
   // Keep `onMessage` in a ref to prevent re-listening on every render.
