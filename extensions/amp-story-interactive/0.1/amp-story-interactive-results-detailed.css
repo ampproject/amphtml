@@ -29,6 +29,9 @@
 }
 
 .i-amphtml-story-interactive-results-result {
+  --size: 5em !important;
+  height: var(--size) !important;
+  width: var(--size) !important;
   position: absolute !important;
   border-radius: 50% !important;
   display: flex !important;
@@ -63,6 +66,7 @@
 }
 
 .i-amphtml-story-interactive-results-result-text {
+  font-size: calc(var(--size) / 5) !important;
   width: 100% !important;
   text-align: center !important;
   line-height: 1.25em !important;

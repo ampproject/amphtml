@@ -208,8 +208,7 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
       const left = CENTER + Math.sin(angle) * dist - size / 2;
 
       setImportantStyles(element, {
-        'height': size + 'em',
-        'width': size + 'em',
+        '--size': size + 'em',
         'top': top + 'em',
         'left': left + 'em',
       });
