@@ -17,15 +17,13 @@
 import {
   AmpStoryInteractive,
   InteractiveType,
+  MID_SELECTION_CLASS,
+  POST_SELECTION_CLASS,
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-slider-0.1.css';
 import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles} from '#core/dom/style';
 import {StateProperty} from 'extensions/amp-story/1.0/amp-story-store-service';
-import {
-  POST_SELECTION_CLASS,
-  MID_SELECTION_CLASS,
-} from '../amp-story-interactive-abstract';
 
 /**
  * Generates the template for the slider.

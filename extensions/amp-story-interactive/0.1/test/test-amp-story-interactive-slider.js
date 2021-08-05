@@ -21,8 +21,8 @@ import {Services} from '#service';
 import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {LocalizationService} from '#service/localization';
 import {
-  POST_SELECTION_CLASS,
   MID_SELECTION_CLASS,
+  POST_SELECTION_CLASS,
 } from '../amp-story-interactive-abstract';
 
 describes.realWin(

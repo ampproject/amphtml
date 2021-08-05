@@ -56,7 +56,8 @@ const TAG = 'amp-story-interactive';
 /** @const {string} */
 export const MID_SELECTION_CLASS = 'i-amphtml-story-interactive-mid-selection';
 /** @const {string} */
-export const POST_SELECTION_CLASS = 'i-amphtml-story-interactive-post-selection';
+export const POST_SELECTION_CLASS =
+  'i-amphtml-story-interactive-post-selection';
 
 /**
  * @const @enum {number}
