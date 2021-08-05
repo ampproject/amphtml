@@ -13,12 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
+tags: {  # amp-audio 1.0
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "SCRIPT"
+  satisfies: "amp-audio 1.0"
+  excludes: "amp-audio 0.1"
+  extension_spec: {
+    name: "amp-audio"
+    version_name: "v1.0"
+    version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
 tags: {  # amp-audio
   html_format: AMP
   html_format: AMP4ADS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-audio"
+    version_name: "v0.1"
     version: "0.1"
     version: "latest"
     deprecated_allow_duplicates: true
