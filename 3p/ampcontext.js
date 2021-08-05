@@ -43,7 +43,7 @@ export class AbstractAmpContext {
     /** @private {?string} */
     this.cachedFrameName_ = this.win_.name || null;
 
-    // This varaible keeps keeps track when an invalid resize request is made, and
+    // This variable keeps keeps track when an invalid resize request is made, and
     // is associated with each iframe. If the request is invalid, then a new request
     // cannot be made until a certain amount of time has passed, 500 ms by default
     //(see msecRepeatedRequestDelay). Once the timer has cooled down, a new request can be made.
