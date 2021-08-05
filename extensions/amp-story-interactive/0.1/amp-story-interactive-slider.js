@@ -20,7 +20,6 @@ import {
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-slider-0.1.css';
 import {htmlFor} from '#core/dom/static-template';
-//import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
 import {setImportantStyles} from '#core/dom/style';
 
 /**
@@ -44,11 +43,18 @@ const buildSliderTemplate = (element) => {
             value="0"
           />
           <div class="i-amphtml-story-interactive-slider-bubble"></div>
+          <div class="i-amphtml-story-interactive-slider-average-indicator">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="i-amphtml-story-interactive-slider-average-text">
+            Average answer
+          </div>
         </div>
       </div>
     </div>
   `;
 };
+
 /**
  * @const @enum {number}
  */
@@ -72,6 +78,46 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
   }
 
   /** @override */
+  displayOptionsData(responseData) {
+    const average = this.calculateWeightedAverage_(responseData);
+    setImportantStyles(this.rootEl_, {'--average': average + '%'});
+  }
+
+  /**
+   * @private
+   * @param {!Array<!InteractiveOptionType>} responseData
+   * @return {number}
+   */
+  calculateWeightedAverage_(responseData) {
+    let numerator = 0;
+    let denominator = 0;
+    for (let i = 0; i < responseData.length; i++) {
+      numerator += responseData[i].index * responseData[i].count;
+      denominator += responseData[i].count;
+    }
+    if (denominator == 0) {
+      return 0;
+    }
+    return numerator / denominator;
+  }
+
+  /** @override*/
+  updateComponentWithData(data) {
+    this.optionsData_ = this.orderData_(data);
+    this.optionsData_.forEach((response) => {
+      if (response.selected) {
+        this.hasUserSelection_ = true;
+        this.mutateElement(() => {
+          this.inputEl_.value = response.index;
+          this.onDrag_();
+          this.onRelease_();
+          this.updateToPostSelectionState_(null);
+        });
+      }
+    });
+  }
+
+  /** @override */
   buildComponent() {
     this.rootEl_ = buildSliderTemplate(this.element);
     this.bubbleEl_ = this.rootEl_.querySelector(
@@ -87,9 +133,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
       emojiWrapper.textContent = this.options_[0].text;
       this.bubbleEl_.appendChild(emojiWrapper);
     }
-
     this.rootEl_.setAttribute('type', this.sliderType_);
-
     this.attachPrompt_(this.rootEl_);
     return this.rootEl_;
   }
@@ -136,5 +180,11 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.updateToPostSelectionState_();
     this.inputEl_.setAttribute('disabled', '');
     this.rootEl_.classList.remove('i-amphtml-story-interactive-mid-selection');
+    this.handleOptionSelection_(Math.round(this.inputEl_.value));
+  }
+
+  /**@override */
+  getNumberOfOptions() {
+    return 101;
   }
 }
