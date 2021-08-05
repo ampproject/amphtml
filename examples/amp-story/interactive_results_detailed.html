@@ -12,8 +12,11 @@
       }
 
       amp-story-interactive-quiz, amp-story-interactive-img-quiz,
-			amp-story-interactive-poll, amp-story-interactive-img-poll,
-			amp-story-interactive-results-detailed {
+			amp-story-interactive-poll, amp-story-interactive-img-poll {
+        font-size: 0.3em !important;
+      }
+
+      amp-story-interactive-results-detailed {
         justify-self: center;
       }
 
@@ -28,6 +31,11 @@
         background-color: white;
         border-radius: 60px;
         padding: 40px;
+      }
+
+      .interactive-container {
+        display: flex;
+        flex-wrap: wrap;
       }
 
       .label {
@@ -84,20 +92,15 @@
           >
           </amp-img>
         </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <div>
-            <div class="label">
-              <p>Quiz</p>
-            </div>
-          </div>
-        </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
-          <div>
-            <input type="range" id="quiz-count" name="quiz-count" min="0" max="10">
-            <label for="quiz-count"># of quizzes</label>
-          </div>
-          <div id="quizzes"></div>
+          <div id="quizzes" class="interactive-container"></div>
         </amp-story-grid-layer>
+        <amp-story-cta-layer template="vertical">
+          <div>
+            <input type="range" id="quiz-count" min="1" max="10" value="1">
+            <button id="add-quizzes">Add quizzes</button>
+          </div>
+        </amp-story-cta-layer>
       </amp-story-page>
 			<amp-story-page id="img-quiz-page">
         <amp-story-grid-layer template="fill">
@@ -109,32 +112,15 @@
           >
           </amp-img>
         </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <div>
-            <div class="label">
-              <p>Image quiz</p>
-            </div>
-          </div>
-        </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
-          <amp-story-interactive-img-quiz
-            id="img-quiz"
-            prompt-text="Which of these structures is oldest?"
-            prompt-size="large"
-            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
-            option-1-image="https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
-            option-1-image-alt="Statue of Liberty"
-            option-1-correct
-            option-1-confetti="🎉"
-            option-2-image="https://images.unsplash.com/photo-1610312278520-bcc893a3ff1d?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1460&q=80"
-            option-2-image-alt="Golden Gate Bridge"
-            option-3-image="https://images.unsplash.com/photo-1585436588477-340db86fc852?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2804&q=80"
-            option-3-image-alt="Christ the Redeemer"
-            option-4-image="https://images.unsplash.com/photo-1543349689-9a4d426bee8e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1382&q=80"
-            option-4-image-alt="Eiffel Tower"
-          >
-          </amp-story-interactive-img-quiz>
+          <div id="img-quizzes" class="interactive-container"></div>
         </amp-story-grid-layer>
+        <amp-story-cta-layer template="vertical">
+          <div>
+            <input type="range" id="img-quiz-count" min="1" max="10" value="1">
+            <button id="add-img-quizzes">Add image quizzes</button>
+          </div>
+        </amp-story-cta-layer>
       </amp-story-page>
 			<amp-story-page id="poll-page">
         <amp-story-grid-layer template="fill">
@@ -146,34 +132,15 @@
           >
           </amp-img>
         </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <div>
-            <div class="label">
-              <p>Poll</p>
-            </div>
-          </div>
-        </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
-          <amp-story-interactive-poll
-            id="poll"
-            prompt-text="Which of these places would you travel to first?"
-            prompt-size="large"
-            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
-            option-1-text="Lake Tahoe"
-            option-1-confetti="🌲"
-            option-1-results-category="Lake lover"
-            option-2-text="Hong Kong"
-            option-2-confetti="🏙️"
-            option-2-results-category="City-goer"
-            option-3-text="Hawaii"
-            option-3-confetti="🏝️"
-            option-3-results-category="Tropical explorer"
-            option-4-text="Grand Canyon"
-            option-4-confetti="🏞️"
-            option-4-results-category="National Park lover"
-          >
-          </amp-story-interactive-poll>
+          <div id="polls" class="interactive-container"></div>
         </amp-story-grid-layer>
+        <amp-story-cta-layer template="vertical">
+          <div>
+            <input type="range" id="poll-count" min="1" max="10" value="1">
+            <button id="add-polls">Add polls</button>
+          </div>
+        </amp-story-cta-layer>
       </amp-story-page>
 			<amp-story-page id="img-poll-page">
         <amp-story-grid-layer template="fill">
@@ -185,38 +152,15 @@
           >
           </amp-img>
         </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <div>
-            <div class="label">
-              <p>Image poll</p>
-            </div>
-          </div>
-        </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
-          <amp-story-interactive-img-poll
-            id="img-poll"
-            prompt-text="Which of these places would you travel to first?"
-            prompt-size="large"
-            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
-            option-1-image="https://images.unsplash.com/photo-1577416026704-0fe2d48a0f20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
-            option-1-image-alt="Lake Tahoe"
-            option-1-confetti="🌲"
-            option-1-results-category="Lake lover"
-            option-2-image="https://images.unsplash.com/photo-1506970845246-18f21d533b20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
-            option-2-image-alt="Hong Kong"
-            option-2-confetti="🏙️"
-            option-2-results-category="City-goer"
-            option-3-image="https://images.unsplash.com/photo-1559494007-9f5847c49d94?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
-            option-3-image-alt="Hawaii"
-            option-3-confetti="🏝️"
-            option-3-results-category="Tropical explorer"
-            option-4-image="https://images.unsplash.com/photo-1516302350523-4c29d47b89e0?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
-            option-4-image-alt="Grand Canyon"
-            option-4-confetti="🏞️"
-            option-4-results-category="National Park lover"
-          >
-          </amp-story-interactive-img-poll>
+          <div id="img-polls" class="interactive-container"></div>
         </amp-story-grid-layer>
+        <amp-story-cta-layer template="vertical">
+          <div>
+            <input type="range" id="img-poll-count" min="1" max="10" value="1">
+            <button id="add-img-polls">Add image polls</button>
+          </div>
+        </amp-story-cta-layer>
       </amp-story-page>
 			<amp-story-page id="quiz-results-page">
         <amp-story-grid-layer template="fill">
@@ -352,23 +296,65 @@
       </amp-story-page>
     </amp-story>
     <script>
-      var quizCounter = document.getElementById('quiz-count');
-      quizCounter.addEventListener('touchmove', function(e) {
-        e.stopPropagation();
-        console.log('hi');
-      }, true);
-      quizCounter.oninput = function (e) {
-        e.stopPropagation();
+      document.getElementById('add-quizzes').onclick = function (e) {
+        var quizCounter = document.getElementById('quiz-count');
         var quizzes = document.getElementById('quizzes');
-        quizzes.innerHTML = '';
         for (var i = 0; i < quizCounter.value; i++) {
           var quiz = document.createElement('amp-story-interactive-quiz');
           quiz.setAttribute('id', 'quiz-' + i);
           quiz.setAttribute('endpoint', 'https://webstoriesinteractivity-beta.web.app/api/v1');
           quiz.setAttribute('option-1-text', 'Statue of Liberty');
-          quiz.setAttribute('option-1-correct', 'true');
+          quiz.setAttribute('option-1-correct', '');
           quiz.setAttribute('option-2-text', 'Golden Gate Bridge');
           quizzes.append(quiz);
+        }
+      }
+
+      document.getElementById('add-img-quizzes').onclick = function () {
+        var imgQuizCounter = document.getElementById('img-quiz-count');
+        var imgQuizzes = document.getElementById('img-quizzes');
+        for (var i = 0; i < imgQuizCounter.value; i++) {
+          var imgQuiz = document.createElement('amp-story-interactive-img-quiz');
+          imgQuiz.setAttribute('id', 'img-quiz-' + i);
+          imgQuiz.setAttribute('endpoint', 'https://webstoriesinteractivity-beta.web.app/api/v1');
+          imgQuiz.setAttribute('option-1-image', 'https://images.unsplash.com/photo-1565475783696-96001eff1b45?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80');
+          imgQuiz.setAttribute('option-1-image-alt', 'Statue of Liberty');
+          imgQuiz.setAttribute('option-1-correct', '');
+          imgQuiz.setAttribute('option-2-image', 'https://images.unsplash.com/photo-1610312278520-bcc893a3ff1d?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1460&q=80');
+          imgQuiz.setAttribute('option-2-image-alt', 'Golden Gate Bridge');
+          imgQuizzes.append(imgQuiz);
+        }
+      }
+
+      document.getElementById('add-polls').onclick = function () {
+        var pollCounter = document.getElementById('poll-count');
+        var polls = document.getElementById('polls');
+        for (var i = 0; i < pollCounter.value; i++) {
+          var poll = document.createElement('amp-story-interactive-poll');
+          poll.setAttribute('id', 'poll-' + i);
+          poll.setAttribute('endpoint', 'https://webstoriesinteractivity-beta.web.app/api/v1');
+          poll.setAttribute('option-1-text', 'Lake Tahoe');
+          poll.setAttribute('option-1-results-category', 'Lake lover');
+          poll.setAttribute('option-2-text', 'Hong Kong');
+          poll.setAttribute('option-2-results-category', 'City-goer');
+          polls.append(poll);
+        }
+      }
+
+      document.getElementById('add-img-polls').onclick = function () {
+        var imgPollCounter = document.getElementById('img-poll-count');
+        var imgPolls = document.getElementById('img-polls');
+        for (var i = 0; i < imgPollCounter.value; i++) {
+          var imgPoll = document.createElement('amp-story-interactive-img-poll');
+          imgPoll.setAttribute('id', 'img-poll-' + i);
+          imgPoll.setAttribute('endpoint', 'https://webstoriesinteractivity-beta.web.app/api/v1');
+          imgPoll.setAttribute('option-1-image', 'https://images.unsplash.com/photo-1577416026704-0fe2d48a0f20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80');
+          imgPoll.setAttribute('option-1-image-alt', 'Lake Tahoe');
+          imgPoll.setAttribute('option-1-results-category', 'Lake lover');
+          imgPoll.setAttribute('option-2-image', 'https://images.unsplash.com/photo-1506970845246-18f21d533b20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80');
+          imgPoll.setAttribute('option-2-image-alt', 'Hong Kong');
+          imgPoll.setAttribute('option-2-results-category', 'City-goer');
+          imgPolls.append(imgPoll);
         }
       }
     </script>
