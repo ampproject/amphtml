@@ -254,22 +254,22 @@ export class AmpAdUIHandler {
         setStyle(this.element_, 'top', `${paddingTop}px`);
       }
 
-      // TODO: (@anuragvasanwala) - Implement custom padding/margin for left & right support for respective mode.
+      // Gutter Ad - Left
       if (this.stickyAdPosition_ == StickyAdPositions.LEFT) {
-        // // Let the top sticky ad be below the viewer top.
-        // const paddingTop = Services.viewportForDoc(
-        //   this.element_.getAmpDoc()
-        // ).getPaddingTop();
+        const userDefinedTop = this.element_.getAttribute('top');
+        const userDefinedLeft = this.element_.getAttribute('left');
 
-        setStyle(this.element_, 'top', `${100}px`);
+        // Let the top sticky ad be below user defined top OR the viewer top.
+        const paddingTop = userDefinedTop
+          ? userDefinedTop
+          : Services.viewportForDoc(this.element_.getAmpDoc()).getPaddingTop();
 
-        console /*OK*/
-          .warn(
-            'Ad Size: ' +
-              this.element_.getAttribute('width') +
-              ' x ' +
-              this.element_.getAttribute('height')
-          );
+        // Left padding
+        const paddingLeft = userDefinedLeft ? userDefinedLeft : 20;
+
+        // Set ad padding
+        setStyle(this.element_, 'top', `${paddingTop}px`);
+        setStyle(this.element_, 'left', `${paddingLeft}px`);
 
         devAssert(
           this.validSize(
@@ -280,20 +280,22 @@ export class AmpAdUIHandler {
         );
       }
 
+      // Gutter Ad - Right
       if (this.stickyAdPosition_ == StickyAdPositions.RIGHT) {
-        // // Let the top sticky ad be below the viewer top.
-        // const paddingTop = Services.viewportForDoc(
-        //   this.element_.getAmpDoc()
-        // ).getPaddingTop();
-        setStyle(this.element_, 'top', `${100}px`);
+        const userDefinedTop = this.element_.getAttribute('top');
+        const userDefinedRight = this.element_.getAttribute('right');
 
-        console /*OK*/
-          .warn(
-            'Ad Size: ' +
-              this.element_.getAttribute('width') +
-              ' x ' +
-              this.element_.getAttribute('height')
-          );
+        // Let the top sticky ad be below user defined top OR the viewer top.
+        const paddingTop = userDefinedTop
+          ? userDefinedTop
+          : Services.viewportForDoc(this.element_.getAmpDoc()).getPaddingTop();
+
+        // Right padding
+        const paddingRight = userDefinedRight ? userDefinedRight : 20;
+
+        // Set ad padding
+        setStyle(this.element_, 'top', `${paddingTop}px`);
+        setStyle(this.element_, 'right', `${paddingRight}px`);
 
         devAssert(
           this.validSize(
