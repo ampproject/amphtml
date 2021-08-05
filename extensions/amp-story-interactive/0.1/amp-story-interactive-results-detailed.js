@@ -136,6 +136,10 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
   createResultEl_(e) {
     const element = document.createElement('div');
     element.classList.add('i-amphtml-story-interactive-results-result');
+    const text = document.createElement('span');
+    text.classList.add('i-amphtml-story-interactive-results-result-text');
+    text.textContent = '?';
+    element.append(text);
     this.resultsContainer_.prepend(element);
     this.resultEls_[e.interactiveId] = {
       element,
@@ -159,7 +163,8 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
         'background-image': 'url(' + e.option.image + ')',
       });
     } else {
-      this.resultEls_[e.interactiveId].element.textContent = e.option.text;
+      this.resultEls_[e.interactiveId].element.children[0].textContent =
+        e.option.text;
     }
 
     if (e.type === InteractiveType.QUIZ) {
@@ -191,8 +196,6 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
       );
       const size = Math.random() * (adjustedMaxSize - MIN_SIZE) + MIN_SIZE;
       const angleBuffer = Math.asin((size / 2 + BORDER_BUFFER) / dist);
-      console.log(slice);
-      console.log(angleBuffer);
       const angle =
         Math.random() * (slice - 2 * angleBuffer) +
         slice * index +

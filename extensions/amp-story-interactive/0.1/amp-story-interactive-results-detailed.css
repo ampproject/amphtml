@@ -61,7 +61,9 @@
   background-size: cover !important;
 }
 
-.i-amphtml-story-interactive-results-selected-result span {
+.i-amphtml-story-interactive-results-result-text {
+  width: 100% !important;
+  text-align: center !important;
   line-height: 1.25em !important;
   display: -webkit-box !important;
   -webkit-line-clamp: 2 !important;
