@@ -542,7 +542,6 @@ async function buildNpmCss(extDir, options) {
       plugins: [
         ['./build-system/babel-plugins/babel-plugin-transform-jss', options],
       ],
-      sourceType: 'module',
     });
     css = options.css;
     cssCache.set(hash, Promise.resolve(css));
