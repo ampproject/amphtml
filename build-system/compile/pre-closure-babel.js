@@ -119,9 +119,7 @@ async function preClosureBabel(file, outputFilename, options) {
           sourceFileName: path.relative(process.cwd(), file),
         })
         .then((result) => result?.code);
-      if (isCacheEligible(file)) {
-        transformCache.set(hash, transformPromise);
-      }
+      transformCache.set(hash, transformPromise);
       await fs.outputFile(transformedFile, await transformPromise);
       debug(CompilationLifecycles['pre-closure'], transformedFile);
     }
@@ -152,17 +150,6 @@ function handlePreClosureError(err, outputFilename, options) {
     return;
   }
   return new Error(reasonMessage);
-}
-
-/**
- * Returns whether a file may use the TransformCache during a `dist` build.
- *
- * @param {string} filename
- * @return {boolean}
- */
-function isCacheEligible(filename) {
-  // JSS Files should not be cached since their transformation performs a side effect.
-  return !filename.endsWith('.jss.js');
 }
 
 module.exports = {

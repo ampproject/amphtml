@@ -495,6 +495,7 @@ async function buildExtension(
 
   if (options.npm) {
     await buildNpmBinaries(extDir, options);
+    await buildNpmCss(extDir, options);
   }
   if (options.binaries) {
     await buildBinaries(extDir, options.binaries, options);
@@ -508,9 +509,6 @@ async function buildExtension(
   }
 
   await buildExtensionJs(extDir, name, version, latestVersion, options);
-  if (options.npm) {
-    await buildNpmCss(extDir, options);
-  }
 }
 
 /**
@@ -524,12 +522,10 @@ async function buildNpmCss(extDir, options) {
   const startCssTime = Date.now();
   const jssFile = (await globby(path.join(extDir, '**', '*.jss.js')))[0];
   if (jssFile) {
-    const css = getCssForFile(jssFile);
-    if (css) {
-      const outfile = `${extDir}/dist/${options.name}.css`;
-      await fs.writeFile(outfile, css);
-      endBuildStep('Wrote CSS', options.name, startCssTime);
-    }
+    const css = await getCssForFile(jssFile);
+    const outfile = `${extDir}/dist/${options.name}.css`;
+    await fs.writeFile(outfile, css);
+    endBuildStep('Wrote CSS', options.name, startCssTime);
   }
 }
 

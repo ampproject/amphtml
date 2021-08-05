@@ -46,6 +46,8 @@
  * ```
  */
 
+const babel = require('@babel/core');
+const fs = require('fs');
 const hash = require('./create-hash');
 const {addNamed} = require('@babel/helper-module-imports');
 const {create} = require('jss');
@@ -392,14 +394,28 @@ module.exports = function ({template, types: t}) {
 
 /**
  * Filename --> CSS String map.
+ * Created as a side effect of transforming a .jss file.
+ *
  * @type {Object<string, string>}
  */
 const cssMap = {};
 
 /**
+ * Returns the compiled CSS for JSS file.
+ * - First looks into the runtime cache to see if the file has already been transformed.
+ * - If not, then transfrom the JSS file to generate the css.
+ *
  * @param {string} filename
- * @return {string}
+ * @return {Promise<string>}
  */
-module.exports.getCssForFile = function getCssForFile(filename) {
+module.exports.getCssForFile = async function getCssForFile(filename) {
+  if (!cssMap[filename]) {
+    const jssFileContents = await fs.promises.readFile(filename, 'utf8');
+    await babel.transform(jssFileContents, {
+      filename,
+      plugins: ['./build-system/babel-plugins/babel-plugin-transform-jss'],
+      sourceType: 'module',
+    });
+  }
   return cssMap[filename];
 };
