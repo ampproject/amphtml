@@ -347,6 +347,14 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
       //will block requests for the next 500ms since the last request was invalid.
       expect(context.blockRepeatedInvalidRequests_).equal(true);
 
+      env.sandbox
+        .stub(context, 'requestResize')
+        .returns(
+          Promise.reject(
+            'Resizing is denied, recent invalid request parameters'
+          )
+        );
+
       clock.tick(100);
       expect(context.blockRepeatedInvalidRequests_).equal(true);
       clock.tick(100);
