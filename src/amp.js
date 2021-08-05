@@ -21,36 +21,38 @@
 // src/polyfills.js must be the first import.
 import './polyfills';
 
-import {Services} from './service';
+import * as mode from '#core/mode';
+
+import {installAutoLightboxExtension} from './auto-lightbox';
+import {startupChunk} from './chunk';
 import {TickLabel} from './core/constants/enums';
-import {adoptWithMultidocDeps} from './runtime';
-import {cssText as ampDocCss} from '../build/ampdoc.css';
-import {cssText as ampSharedCss} from '../build/ampshared.css';
+import {installErrorReporting} from './error-reporting';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
+import {maybeTrackImpression} from './impression';
 import {getMode} from './mode';
+import {preconnectToOrigin} from './preconnect';
+import {installPullToRefreshBlocker} from './pull-to-refresh';
+import {adoptWithMultidocDeps} from './runtime';
+import {Services} from './service';
+import {installDocService} from './service/ampdoc-impl';
 import {
   installAmpdocServices,
   installBuiltinElements,
   installRuntimeServices,
 } from './service/core-services';
-import {installAutoLightboxExtension} from './auto-lightbox';
-import {installDocService} from './service/ampdoc-impl';
-import {installErrorReporting} from './error-reporting';
+import {stubElementsForDoc} from './service/custom-element-registry';
 import {installPerformanceService} from './service/performance-impl';
 import {installPlatformService} from './service/platform-impl';
-import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {installStandaloneExtension} from './standalone';
 import {
   installStylesForDoc,
   makeBodyVisible,
   makeBodyVisibleRecovery,
 } from './style-installer';
-import {internalRuntimeVersion} from './internal-version';
-import {maybeTrackImpression} from './impression';
 import {maybeValidate} from './validator-integration';
-import {preconnectToOrigin} from './preconnect';
-import {startupChunk} from './chunk';
-import {stubElementsForDoc} from './service/custom-element-registry';
+
+import {cssText as ampDocCss} from '../build/ampdoc.css';
+import {cssText as ampSharedCss} from '../build/ampshared.css';
 
 /**
  * Execute the bootstrap
@@ -131,9 +133,6 @@ startupChunk(self.document, function initial() {
   installPerformanceService(self);
   /** @const {!./service/performance-impl.Performance} */
   const perf = Services.performanceFor(self);
-  if (self.document.documentElement.hasAttribute('i-amphtml-no-boilerplate')) {
-    perf.addEnabledExperiment('no-boilerplate');
-  }
   if (IS_ESM) {
     perf.addEnabledExperiment('esm');
   }
@@ -141,13 +140,21 @@ startupChunk(self.document, function initial() {
   perf.tick(TickLabel.INSTALL_STYLES);
   if (IS_ESM) {
     bootstrap(ampdoc, perf);
-  } else {
-    installStylesForDoc(
-      ampdoc,
-      ampDocCss + ampSharedCss,
-      () => bootstrap(ampdoc, perf),
-      /* opt_isRuntimeCss */ true,
-      /* opt_ext */ 'amp-runtime'
+    return;
+  }
+
+  installStylesForDoc(
+    ampdoc,
+    ampDocCss + ampSharedCss,
+    () => bootstrap(ampdoc, perf),
+    /* opt_isRuntimeCss */ true,
+    /* opt_ext */ 'amp-runtime'
+  );
+  // TODO(kbax) Remove this IE deprecation warning on 26 August 2021.
+  if (Services.platformFor(self).isIe() && self.console) {
+    (console.info || console.log).call(
+      console,
+      'IE Support is being deprecated, in September 2021 IE will no longer be supported. See https://github.com/ampproject/amphtml/issues/34453 for more details.'
     );
   }
 });
@@ -158,7 +165,7 @@ startupChunk(self.document, function initial() {
 if (self.console) {
   (console.info || console.log).call(
     console,
-    `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
+    `Powered by AMP ⚡ HTML – Version ${mode.version()}`,
     self.location.href
   );
 }
@@ -166,7 +173,4 @@ if (self.console) {
 if (getMode().localDev) {
   self.document.documentElement.setAttribute('esm', IS_ESM ? 1 : 0);
 }
-self.document.documentElement.setAttribute(
-  'amp-version',
-  internalRuntimeVersion()
-);
+self.document.documentElement.setAttribute('amp-version', mode.version());

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryInteractiveImgQuiz} from '../amp-story-interactive-img-quiz';
 import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
@@ -24,8 +25,8 @@ import {
   getMockInteractiveData,
   getMockOutOfBoundsData,
   getMockScrambledData,
-} from './test-amp-story-interactive';
-import {populateQuiz} from './test-amp-story-interactive-quiz';
+  populateQuiz,
+} from './helpers';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(
@@ -49,6 +50,7 @@ describes.realWin(
       const ampStoryQuizEl = win.document.createElement(
         'amp-story-interactive-img-quiz'
       );
+      ampStoryQuizEl.getAmpDoc = () => new AmpDocSingle(win);
       ampStoryQuizEl.getResources = () => win.__AMP_SERVICES.resources.obj;
       requestService = new AmpStoryRequestService(win);
       registerServiceBuilder(win, 'story-request', function () {

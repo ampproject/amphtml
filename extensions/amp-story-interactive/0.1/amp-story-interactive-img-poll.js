@@ -97,7 +97,6 @@ export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
     convertedOption.optionIndex_ = option['optionIndex'];
 
     // Extract and structure the option information
-    // TODO: Rewrite image URL (https://github.com/ampproject/amphtml/pull/35043#discussion_r660874389)
     setImportantStyles(
       convertedOption.querySelector(
         '.i-amphtml-story-interactive-img-option-img'
@@ -130,7 +129,7 @@ export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
       el.querySelector(
         '.i-amphtml-story-interactive-img-option-percentage-text'
       ).textContent = `${percentages[index]}%`;
-      setImportantStyles(el, {'--option-percentage': `${percentages[index]}%`});
+      setImportantStyles(el, {'--option-percentage': percentages[index] / 100});
     });
   }
 }

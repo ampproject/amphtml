@@ -60,7 +60,6 @@ module.exports = {
     {
       'files': [
         './preact/base-element.js',
-        './preact/slot.js',
         './polyfills/fetch.js',
         // TEMPORARY, follow tracking issue #33631
         './preact/component/3p-frame.js',
@@ -85,10 +84,6 @@ module.exports = {
     {
       'files': ['**/storybook/*.js', '**/rollup.config.js'],
       'rules': {'import/no-nodejs-modules': 0},
-    },
-    {
-      'files': ['builtins/**/*.js', 'core/**/*.js', 'preact/**/*.js'],
-      'rules': {'import/order': 2},
     },
   ],
 };

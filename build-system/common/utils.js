@@ -60,14 +60,6 @@ function getExperimentConfig(experiment) {
 }
 
 /**
- * Returns the names of all valid experiments.
- * @return {!Array<string>}
- */
-function getValidExperiments() {
-  return Object.keys(experimentsConfig).filter(getExperimentConfig);
-}
-
-/**
  * Gets the list of files changed on the current branch that match the given
  * array of glob patterns using the given options.
  *
@@ -119,6 +111,18 @@ function getFilesFromArgv() {
     allFiles.push(...files);
   }
   return allFiles;
+}
+
+/**
+ * Returns list of files in the comma-separated file named at --filelist.
+ *
+ * @return {Array<string>}
+ */
+function getFilesFromFileList() {
+  if (!argv.filelist) {
+    return [];
+  }
+  return fs.readFileSync(argv.filelist, {encoding: 'utf8'}).trim().split(',');
 }
 
 /**
@@ -182,8 +186,8 @@ function usesFilesOrLocalChanges(taskName) {
 module.exports = {
   buildRuntime,
   getExperimentConfig,
-  getValidExperiments,
   getFilesFromArgv,
+  getFilesFromFileList,
   getFilesToCheck,
   usesFilesOrLocalChanges,
 };

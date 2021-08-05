@@ -17,8 +17,8 @@
 #include "css/parse-css-urls.h"
 
 #include <ostream>
-#include "glog/logging.h"
-#include "gmock/gmock.h"
+
+#include <gmock/gmock.h>
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
 #include "strings.h"

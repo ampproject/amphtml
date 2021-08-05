@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
-import {Signals} from '#core/data-structures/signals';
 import {TickLabel} from '#core/constants/enums';
 import {VisibilityState} from '#core/constants/visibility-state';
-import {createCustomEvent} from '../event-helper';
-import {dev, devAssert} from '../log';
+import {Signals} from '#core/data-structures/signals';
+import {whenDocumentComplete, whenDocumentReady} from '#core/document-ready';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {computedStyle} from '#core/dom/style';
+import {throttle} from '#core/types/function';
 import {dict, map} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {createCustomEvent} from '../event-helper';
+import {whenContentIniLoad} from '../ini-load';
+import {dev, devAssert} from '../log';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service-helpers';
 import {isStoryDocument} from '../utils/story';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {throttle} from '#core/types/function';
-import {whenContentIniLoad} from '../ini-load';
-import {whenDocumentComplete, whenDocumentReady} from '#core/document-ready';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -201,6 +204,11 @@ export class Performance {
     whenDocumentComplete(win.document).then(() => this.onload_());
     this.registerPerformanceObserver_();
     this.registerFirstInputDelayPolyfillListener_();
+
+    /**
+     * @private {boolean}
+     */
+    this.googleFontExpRecorded_ = false;
   }
 
   /**
@@ -464,6 +472,20 @@ export class Performance {
    */
   tickCumulativeMetrics_() {
     if (this.supportsLayoutShift_) {
+      if (!this.googleFontExpRecorded_) {
+        this.googleFontExpRecorded_ = true;
+        const {win} = this;
+        const googleFontExp = parseInt(
+          computedStyle(win, win.document.body).getPropertyValue(
+            '--google-font-exp'
+          ),
+          10
+        );
+        if (googleFontExp >= 0) {
+          this.addEnabledExperiment(`google-font-exp=${googleFontExp}`);
+        }
+      }
+
       this.tickLayoutShiftScore_();
     }
     if (this.supportsLargestContentfulPaint_) {
