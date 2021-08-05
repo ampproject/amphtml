@@ -134,6 +134,38 @@ export const getMockOutOfBoundsData = () => {
   };
 };
 
+/**
+ * Returns mock interactive slider data.
+ *
+ * @return {Object}
+ */
+export const getSliderInteractiveData = () => {
+  return {
+    options: [
+      {
+        index: 15,
+        count: 5,
+        selected: true,
+      },
+      {
+        index: 32,
+        count: 3,
+        selected: true,
+      },
+      {
+        index: 47,
+        count: 2,
+        selected: true,
+      },
+      {
+        index: 86,
+        count: 7,
+        selected: true,
+      },
+    ],
+  };
+};
+
 export const addConfigToInteractive = (
   interactive,
   options = 4,
