@@ -666,7 +666,7 @@ matched by the specified selector. The selector can either be a single CSS query
 
 Similar to the blur trigger, the change trigger is part of the Browser Events.
 Use the change trigger (`"on": "change"`) to fire a request when a specified
-element undergoes a state change. The state change may vary for different elements. Use [`selector`](#element-selector) to control which elements will cause this request to fire. The selector can either be a single CSS query selector or an array of selectors.  The trigger will fire for all elements matched by the specified selector.
+element undergoes a state change. The state change may vary for different elements. Use [`selector`](#element-selector) to control which elements will cause this request to fire. The selector can either be a single CSS query selector or an array of selectors. The trigger will fire for all elements matched by the specified selector.
 
 ```json
 "triggers": {
@@ -964,7 +964,7 @@ reports errors from A4A iframe embeds, which are irrelevant to the page.
     occurring during a video's lifecycle. More details are available in
     [AMP Video Analytics](amp-video-analytics.md).
 -   Browser Event Trackers: AMP provides the ability to track a custom set of browser events. The set of browser events that are supported are listed in the allow-list.
-Currently, events (`"on": "change"`) and (`"on": "blur"`) are supported.
+    Currently, events (`"on": "change"`) and (`"on": "blur"`) are supported.
 
 ###### `request` trigger
 
