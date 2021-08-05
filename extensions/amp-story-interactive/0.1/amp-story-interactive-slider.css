@@ -112,7 +112,7 @@
   position: absolute;
 }
 
-.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-indicator {
+.i-amphtml-story-interactive-active.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-indicator {
   transform: translate(-50%, -50%) scale(1) !important;
 }
 
@@ -131,11 +131,11 @@
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-indicator span:nth-child(1) {
-  animation-delay: calc(var(--pulse-animation-duration) * 0.33) !important;
+  animation-delay: calc(var(--pulse-animation-duration) * -0.33) !important;
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-indicator span:nth-child(2) {
-  animation-delay: calc(var(--pulse-animation-duration) * 0.66) !important;
+  animation-delay: calc(var(--pulse-animation-duration) * -0.66) !important;
 }
 
 @keyframes pulse {
@@ -192,27 +192,17 @@
 
 .i-amphtml-story-interactive-active.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-average-text {
   left: var(--average) !important;
-  animation: average-pop 3s forwards;
+  animation: average-pop 3s 0.3s forwards;
 }
 
 @keyframes average-pop {
-  0% {
-    transform: translate(-50%, 100%) scale(0);
+  0%, 100% {
+    transform: translate(-50%, 35%);
     opacity: 0;
   }
-  5% {
+  10%, 90% {
     opacity: 1;
-  }
-  10%,
-  90% {
-    transform: translate(-50%, 0) scale(0.9);
-  }
-  95% {
-    opacity: 1;
-  }
-  100% {
-    transform: translate(-50%, 100%) scale(0);
-    opacity: 0;
+    transform: translate(-50%, 0);
   }
 }
 
