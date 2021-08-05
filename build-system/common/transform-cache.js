@@ -104,7 +104,7 @@ const readCache = new Map();
  *
  * @param {string} path
  * @param {string=} optionsHash
- * @return {{contents: string, hash: string}}
+ * @return {Promise<{contents: string, hash: string}>}
  */
 function batchedRead(path, optionsHash) {
   let read = readCache.get(path);
