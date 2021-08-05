@@ -105,6 +105,9 @@ export class DocInfo {
         // Must be calculated async since getRandomString64() can load the
         // amp-crypto-polyfill on some browsers, and extensions service
         // may not be registered yet.
+        // Here's where the global PAGE_VIEW_ID_64 is set. We have to persist
+        // a second result of getRandomString64() from the context of amp-consent
+        // that we can expand through CONSENT_PAGE_VIEW_ID_64.
         if (!this.pageViewId64_) {
           this.pageViewId64_ = getRandomString64(ampdoc.win);
         }

@@ -749,6 +749,8 @@ export class AmpConsent extends AMP.BaseElement {
         const sourceBase = getSourceUrl(ampdoc.getUrl());
         const resolvedHref = resolveRelativeUrl(checkConsentHref, sourceBase);
         const xhrService = Services.xhrFor(this.win);
+        // We should support CONSENT_PAGE_VIEW_ID_64 everywhere we call
+        // expandConsentEndpointUrl. (CONSENT_CLIENT_INFO only where we resolve it)
         return ampdoc.whenFirstVisible().then(() =>
           expandConsentEndpointUrl(this.element, resolvedHref).then(
             (expandedHref) =>

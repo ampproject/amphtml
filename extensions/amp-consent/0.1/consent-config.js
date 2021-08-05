@@ -37,6 +37,8 @@ const ALLOWED_DEPR_CONSENTINSTANCE_ATTRS = {
 /** @const @type {!Object<string, boolean>} */
 const CONSENT_VARS_ALLOWED_LIST = {
   'CLIENT_ID': true,
+  'CONSENT_PAGE_VIEW_ID_64': true,
+  'CONSENT_CLIENT_INFO': true,
   'PAGE_VIEW_ID': true,
   'PAGE_VIEW_ID_64': true,
   'SOURCE_URL': true,
@@ -320,13 +322,20 @@ export class ConsentConfig {
  * Expand consent endpoint url
  * @param {!Element|!ShadowRoot} element
  * @param {string} url
+ * @param {Object<string, *>=} opt_vars
  * @return {!Promise<string>}
  */
-export function expandConsentEndpointUrl(element, url) {
+export function expandConsentEndpointUrl(element, url, opt_vars) {
   return Services.urlReplacementsForDoc(element).expandUrlAsync(
     url,
     {
       'CLIENT_ID': getConsentCID(element),
+      // Note that properties in `opt_vars` can be either a string, or a function.
+      // We'll pass CONSENT_PAGE_VIEW_ID as a string, while CONSENT_CLIENT_INFO
+      // needs to be a function in order to pass the property name as
+      // CONSENT_CLIENT_INFO(property). (`property` is the first argument of the
+      // function.)
+      ...opt_vars,
     },
     CONSENT_VARS_ALLOWED_LIST
   );

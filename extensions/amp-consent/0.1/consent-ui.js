@@ -219,6 +219,8 @@ export class ConsentUI {
       this.isCreatedIframe_ = true;
       assertHttpsUrl(promptUISrc, this.parent_);
       // TODO: Preconnect to the promptUISrc?
+      // We're setting this too early, it needs to occur once we have the
+      // clientInfo. See below.
       this.promptUISrcPromise_ = expandConsentEndpointUrl(
         this.parent_,
         promptUISrc
@@ -565,10 +567,17 @@ export class ConsentUI {
     classList.add(consentUiClasses.loading);
     toggle(dev().assertElement(this.ui_), false);
 
+    // We load the iframe here with 1) the expanded `src` and 2) the clientInfo
+    // to set as the `name` attribute.
+    // We need to flip the order of the promise chain, so that we get the
+    // clientInfo first, and we then expand the `src` using the clientInfo.
     const iframePromise = this.promptUISrcPromise_.then((expandedSrc) => {
       this.removeIframe_ = false;
       this.ui_.src = expandedSrc;
       return this.getClientInfoPromise_().then((clientInfo) => {
+        // We're stringifying the entire clientInfo object here, but note that
+        // for CONSENT_CLIENT_INFO(property), we'd like to return the serialized
+        // result of only the given property.
         this.ui_.setAttribute('name', JSON.stringify(clientInfo));
         this.win_.addEventListener('message', this.boundHandleIframeMessages_);
         insertAtStart(this.parent_, dev().assertElement(this.ui_));

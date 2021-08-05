@@ -538,6 +538,8 @@ export class ConsentInstance {
         body: request,
         ampCors: false,
       };
+      // We should support CONSENT_PAGE_VIEW_ID_64 everywhere we call
+      // expandConsentEndpointUrl. (CONSENT_CLIENT_INFO only where we resolve it)
       this.ampdoc_.whenFirstVisible().then(() => {
         expandConsentEndpointUrl(
           this.ampdoc_.getHeadNode(),
