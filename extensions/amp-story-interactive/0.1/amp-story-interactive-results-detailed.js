@@ -23,6 +23,13 @@ import {CSS} from '../../../build/amp-story-interactive-results-detailed-0.1.css
 import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles} from '#core/dom/style';
 
+/**
+ * @typedef {{
+ *    element: !Element,
+ *    answered: boolean
+ * }} ResultElementType
+ */
+
 /** @const {number} */
 const CENTER = 9;
 
@@ -40,13 +47,6 @@ const MAX_DIST = 6;
 
 /** @const {number} */
 const BORDER_BUFFER = 0.125;
-
-/**
- * @typedef {{
- *    element: !Element,
- *    answered: boolean
- * }} ResultElementType
- */
 
 /**
  * Generates the template for the detailed results component.
