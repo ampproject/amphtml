@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 const path = require('path');
+const {BUILD_CONSTANTS} = require('../../../compile/build-constants');
 const {DefinePlugin} = require('webpack');
 const {getRelativeAliasMap} = require('../../../babel-config/import-resolver');
 const {webpackConfigNoChunkTilde} = require('../env-utils');
@@ -72,7 +73,7 @@ module.exports = ({config}) => {
   };
   // Replaced by minify-replace (babel) in the usual build pipeline
   // build-system/babel-config/helpers.js#getReplacePlugin
-  config.plugins.push(new DefinePlugin({IS_ESM: false}));
+  config.plugins.push(new DefinePlugin(BUILD_CONSTANTS));
 
   return webpackConfigNoChunkTilde(config);
 };
