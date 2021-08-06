@@ -1,5 +1,7 @@
 ---
 $category@: media
+bento: true
+experimental: true
 formats:
   - websites
   - stories
