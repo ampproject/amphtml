@@ -24,7 +24,7 @@ describes.sandboxed('Audio preact component v1.0', {}, () => {
       <Audio src="audio.mp3" style="height: 30px; width: 300px" />
     );
 
-    const component = wrapper.find(Audio.name).find('audio');
+    const component = wrapper.find('audio');
 
     expect(component).to.have.lengthOf(1);
     expect(component.name()).to.equal('audio');
@@ -40,14 +40,14 @@ describes.sandboxed('Audio preact component v1.0', {}, () => {
   it('should not preload audio', () => {
     const wrapper = mount(<Audio src="audio.mp3" preload="none" />);
 
-    const component = wrapper.find(Audio.name).find('audio');
+    const component = wrapper.find('audio');
     expect(component).to.have.lengthOf(1);
     expect(component.prop('preload')).to.equal('none');
   });
   it('should only preload audio metadata', () => {
     const wrapper = mount(<Audio src="audio.mp3" preload="metadata" />);
 
-    const component = wrapper.find(Audio.name).find('audio');
+    const component = wrapper.find('audio');
     expect(component).to.have.lengthOf(1);
     expect(component.prop('preload')).to.equal('metadata');
   });
@@ -107,7 +107,7 @@ describes.sandboxed('Audio preact component v1.0', {}, () => {
       />
     );
 
-    const component = wrapper.find(Audio.name).find('audio');
+    const component = wrapper.find('audio');
     expect(component).to.have.lengthOf(1);
     expect(component.prop('aria-label')).to.equal('Hello');
     expect(component.prop('aria-labelledby')).to.equal('id2');
