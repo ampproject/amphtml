@@ -123,3 +123,7 @@ For example:
   background-audio="./media/switzerland.mp3"
 ></amp-story-page>
 ```
+
+## Related resources
+
+-   [animations](https://amp.dev/documentation/components/amp-story/?format=stories#animations)
