@@ -91,15 +91,15 @@ extended to AMP components.
 
 ## Styling
 
-You can directly style `amp-img` with CSS properties. The following example sets
+You can directly style `amp-anim` with CSS properties. The following example sets
 a grey background placeholder:
 
 ```html
 <style amp-custom>
-      .amp-anim {
-          background-color: grey;
-       }
-</amp style-custom>
+  .amp-anim {
+      background-color: grey;
+  }
+</style>
 ```
 
 ## Validation
