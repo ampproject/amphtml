@@ -43,6 +43,15 @@ const MIN_INABOX_POSITION_EVENT_INTERVAL = 100;
 
 /** @type {string} */
 const TAG = 'amp-ad-xorigin-iframe';
+// This variable keeps keeps track when an invalid resize request is made, and
+// is associated with each iframe. If the request is invalid, then a new request
+// cannot be made until a certain amount of time has passed, 500 ms by default
+//(see MSEC_REPEATED_REQUEST_DELAY). Once the timer has cooled down, a new request can be made.
+/** @type {boolean} */
+let RESIZE_REQUESTS_ENABLED = true;
+
+/** @type {number} */
+const MSEC_REPEATED_REQUEST_DELAY = 500;
 
 export class AmpAdXOriginIframeHandler {
   /**
@@ -170,14 +179,26 @@ export class AmpAdXOriginIframeHandler {
           if (!!data['hasOverflow']) {
             this.element_.warnOnMissingOverflow = false;
           }
-          this.handleResize_(
-            data['id'],
-            data['height'],
-            data['width'],
-            source,
-            origin,
-            event
-          );
+          if (RESIZE_REQUESTS_ENABLED) {
+            this.handleResize_(
+              data['id'],
+              data['height'],
+              data['width'],
+              source,
+              origin,
+              event
+            );
+          } else {
+            //  need to wait 500ms until next resize request is allowed.
+            this.sendEmbedSizeResponse_(
+              false,
+              data['id'],
+              data['width'],
+              data['height'],
+              source,
+              origin
+            );
+          }
         },
         true,
         true
@@ -455,6 +476,13 @@ export class AmpAdXOriginIframeHandler {
         .updateSize(height, width, iframeHeight, iframeWidth, event)
         .then(
           (info) => {
+            if (!info.success) {
+              //invalid request parameters disable requests for 500ms
+              RESIZE_REQUESTS_ENABLED = false;
+              setTimeout(() => {
+                RESIZE_REQUESTS_ENABLED = true;
+              }, MSEC_REPEATED_REQUEST_DELAY);
+            }
             this.uiHandler_.onResizeSuccess();
             this.sendEmbedSizeResponse_(
               info.success,
