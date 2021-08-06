@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {devAssertBoolean} from './core/assert';
+import {devAssert} from './core/assert';
 import {internalListenImplementation} from './core/dom/event-helper-listen';
 import {rethrowAsync} from './core/error';
 import {dict} from './core/types/object';
@@ -120,7 +120,7 @@ export function deserializeMessage(message) {
     return null;
   }
   const startPos = message.indexOf('{');
-  devAssertBoolean(startPos != -1, 'JSON missing in %s', message);
+  devAssert(startPos != -1, 'JSON missing in %s', message);
   return tryParseJson(message.substr(startPos), (e) => {
     rethrowAsync(
       new Error('MESSAGING: Failed to parse message: ' + message, e.message)
