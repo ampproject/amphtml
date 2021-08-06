@@ -970,7 +970,7 @@ export class AmpConsent extends AMP.BaseElement {
       this.consentPolicyManager_
     );
     // Add window listener for 3p iframe postMessages
-    this.win.addEventListener('message', (e) => this.handleTcfMessages_(e));
+    this.win.addEventListener('message', (e) => this.handleTcfMessage_(e));
 
     // Set up the __tcfApiLocator window to signal postMessage support
     const iframe = this.element.ownerDocument.createElement('iframe');
@@ -996,7 +996,7 @@ export class AmpConsent extends AMP.BaseElement {
    *
    * @param {!Event} event
    */
-  handleTcfMessages_(event) {
+  handleTcfMessage_(event) {
     const data = getData(event);
 
     if (!data || !data['__tcfapiCall']) {
