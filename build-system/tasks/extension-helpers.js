@@ -511,9 +511,6 @@ async function buildExtension(
   await buildExtensionJs(extDir, name, version, latestVersion, options);
 }
 
-/** @type {TransformCache} */
-let jssCache;
-
 /**
  * Writes an extensions's CSS to its npm dist folder.
  *
@@ -523,32 +520,47 @@ let jssCache;
  */
 async function buildNpmCss(extDir, options) {
   const startCssTime = Date.now();
-  const jssFile = (await globby(path.join(extDir, '**', '*.jss.js')))[0];
-  if (!jssFile) {
+  const jssFiles = await globby(path.join(extDir, '**', '*.jss.js'));
+  if (!jssFiles.length) {
     return;
   }
 
+  const css = (await Promise.all(jssFiles.map(getCssForJssFile))).join('');
+  const outfile = path.join(extDir, 'dist', 'style.css');
+  await fs.writeFile(outfile, css);
+  endBuildStep('Wrote CSS', options.name, startCssTime);
+}
+
+/** @type {TransformCache} */
+let jssCache;
+
+/**
+ * Returns the minified CSS for a .jss.js file.
+ *
+ * @param {string} jssFile
+ * @return {Promise<string|Buffer>}
+ */
+async function getCssForJssFile(jssFile) {
   // Lazily instantiate the TransformCache
   if (!jssCache) {
     jssCache = new TransformCache('.jss-cache', '.css');
   }
 
   const {contents, hash} = await batchedRead(jssFile);
-  let css = await jssCache.get(hash);
-  if (!css) {
-    const options = {css: 'REPLACED_BY_BABEL_PLUGIN'};
-    await babel.transform(contents, {
-      filename: jssFile,
-      plugins: [
-        ['./build-system/babel-plugins/babel-plugin-transform-jss', options],
-      ],
-    });
-    css = options.css;
-    jssCache.set(hash, Promise.resolve(css));
+  const fileCss = await jssCache.get(hash);
+  if (fileCss) {
+    return fileCss;
   }
-  const outfile = `${extDir}/dist/${options.name}.css`;
-  await fs.writeFile(outfile, css);
-  endBuildStep('Wrote CSS', options.name, startCssTime);
+
+  const options = {css: 'REPLACED_BY_BABEL_PLUGIN'};
+  await babel.transform(contents, {
+    filename: jssFile,
+    plugins: [
+      ['./build-system/babel-plugins/babel-plugin-transform-jss', options],
+    ],
+  });
+  jssCache.set(hash, Promise.resolve(options.css));
+  return options.css;
 }
 
 /**
