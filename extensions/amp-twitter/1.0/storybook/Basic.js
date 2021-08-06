@@ -67,12 +67,14 @@ export const timelines = () => {
   const timelineUserId = '3450662892';
   return (
     <Twitter
+      bootstrap="https://3p.ampproject.net/2104170104001/vendor/twitter.js"
       options={{
         tweetLimit,
         timelineSourceType,
         timelineScreenName,
         timelineUserId,
       }}
+      src="https://d-41929527682976137678.ampproject.net/2104170104001/frame.html"
       style={{width: '300px', height: '200px'}}
     />
   );
