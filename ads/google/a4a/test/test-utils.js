@@ -681,11 +681,13 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
         });
         expectAsyncConsoleError('[AMP-A4A] UACH timeout!', 1);
         return fixture.addElement(elem).then(() => {
-          const promise = googleAdUrl(impl, '', Date.now(), [], []).then((url) => {
-            expect(url).to.not.match(
-              /[&?]uap=Windows&uapv=10&uaa=x86&uam=Pixel&uafv=3.14159[&$]/
-            );
-          });
+          const promise = googleAdUrl(impl, '', Date.now(), [], []).then(
+            (url) => {
+              expect(url).to.not.match(
+                /[&?]uap=Windows&uapv=10&uaa=x86&uam=Pixel&uafv=3.14159[&$]/
+              );
+            }
+          );
           clock.tick(1001);
           return promise;
         });
