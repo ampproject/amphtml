@@ -526,9 +526,9 @@ async function buildNpmCss(extDir, options) {
   }
 
   const css = (await Promise.all(filenames.map(getCssForJssFile))).join('');
-  const outfile = path.join(extDir, 'dist', 'style.css');
+  const outfile = path.join(extDir, 'dist', 'styles.css');
   await fs.writeFile(outfile, css);
-  endBuildStep('Wrote CSS', options.name, startCssTime);
+  endBuildStep('Wrote CSS', `${options.name} → styles.css`, startCssTime);
 }
 
 /** @type {TransformCache} */
