@@ -135,7 +135,10 @@ class AmpStickyAd extends AMP.BaseElement {
     }
 
     if (!enableConversion) {
-      return null;
+      // Wait for the amp-ad extension to be loaded for a fairer comparison
+      return Services.extensionsFor(this.win)
+        .loadElementClass('amp-ad', '0.1')
+        .then(() => null);
     }
 
     ad.setAttribute('sticky', 'bottom');
