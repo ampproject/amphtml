@@ -185,6 +185,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
           // If it's already been interacted with, do not animate.
           return;
         }
+
         if (currPageId != this.getPageEl().getAttribute('id')) {
           // Resets animation when navigating away.
           cancelAnimationFrame(this.currentRAF_);
@@ -197,6 +198,13 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
         let startTime;
         const animateFrame = (currTime) => {
           // Set current startTime if not defined.
+          const hasData = this.rootEl_.classList.contains(
+            'i-amphtml-story-interactive-has-data'
+          );
+          if (hasData) {
+            // If it's already been interacted with, do not animate.
+            return;
+          }
           if (!startTime) {
             startTime = currTime;
           }
