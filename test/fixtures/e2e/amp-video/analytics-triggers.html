@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <head>
+    <title>amp-video</title>
+    <meta charset="utf-8" />
+    <link rel="canonical" href="/">
+    <meta name="viewport" content="width=device-width,minimum-scale=1" />
+    <style amp-boilerplate>
+      body {
+        -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      }
+      @-webkit-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-moz-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-ms-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-o-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+    </style>
+    <noscript>
+      <style amp-boilerplate>
+        body {
+          -webkit-animation: none;
+          -moz-animation: none;
+          -ms-animation: none;
+          animation: none;
+        }
+      </style>
+    </noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  </head>
+  <body>
+    <amp-analytics>
+      <script type="application/json">
+        {
+          "requests": {
+            "event": "http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking&id=${id}"
+          },
+          "transport": {
+            "image": true,
+            "beacon": false,
+            "xhrpost": false
+          },
+          "triggers": {
+            "trackVideoQuartileCompleted2": {
+              "on": "video-percentage-played",
+              "request": "event",
+              "selector": "#myVideo2",
+              "videoSpec": {
+                "percentages": [5]
+              },
+              "vars": {
+                  "id": "myVideo"
+              }
+            },
+            "trackVideoQuartileCompleted": {
+              "on": "video-percentage-played",
+              "request": "event",
+              "selector": "#myVideo",
+              "videoSpec": {
+                "percentages": [5]
+              },
+              "vars": {
+                  "id": "myVideo2"
+              }
+            }
+          }
+        }
+      </script>
+    </amp-analytics>
+    <amp-video id="myVideo" src="/examples/av/ForBiggerJoyrides-short.mp4" width="358" height="204" layout="responsive">
+      <div placeholder>This is a placeholder</div>
+      <div fallback>This is a fallback</div>
+    </amp-video>
+
+    <amp-video id="myVideo2" src="/examples/av/ForBiggerJoyrides-short.mp4" width="358" height="204" layout="responsive">
+      <div placeholder>This is a placeholder</div>
+      <div fallback>This is a fallback</div>
+    </amp-video>
+    <button id="playBtn1" on="tap:myVideo.play">Play First Video</button>
+    <button id="playBtn2" on="tap:myVideo2.play">Play Second Video</button>
+  </body>
+</html>

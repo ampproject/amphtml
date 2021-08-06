@@ -1,0 +1,12 @@
+{
+  "experiments": [
+    {
+      "name": "flexible-bitrate",
+      "percentage": 0.1
+    },
+    {
+      "name": "story-disable-animations-first-page",
+      "percentage": 0.5
+    }
+  ]
+}

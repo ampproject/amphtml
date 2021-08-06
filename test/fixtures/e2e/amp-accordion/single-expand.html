@@ -1,0 +1,38 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>amp-accordion</title>
+    <link rel="canonical" href="//example.com" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-latest.js"></script>
+    <style amp-custom>
+        section div {
+            height: 25px;
+        }
+    </style>
+</head>
+
+<body>
+    <amp-accordion
+        id="accordion2"
+        animate="true"
+        expand-single-section="true"
+      >
+        <section id="section2-1">
+            <h2 id="header2-1">Section 1</h2>
+            <div id="content2-1">Puppies are cute.</div>
+        </section>
+        <section id="section2-2">
+            <h2 id="header2-2">Section 2</h2>
+            <div id="content2-2">Kittens are furry.</div>
+        </section>
+        <section id="section2-3" expanded>
+            <h2 id="header2-3">Section 3</h2>
+            <div id="content2-3">Elephants have great memory.</div>
+        </section>
+    </amp-accordion>
+</body>
+</html>

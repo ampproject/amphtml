@@ -1,0 +1,114 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>amp-date-display example</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    body {
+      font-family: sans-serif;
+      max-width: 400px;
+      font-size: 16px;
+      line-height: 20px;
+    }
+    .meta {
+      overflow: auto;
+    }
+  </style>
+  <script async custom-element="amp-date-display" src="https://cdn.ampproject.org/v0/amp-date-display-1.0.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <h1>Date & time</h1>
+  <div class="meta">
+    <h2>Available variables</h2>
+    <amp-date-display datetime="2017-08-02T20:05:05.000Z" display-in="utc" layout="fixed" width="360" height="140" >
+      <template type="amp-mustache">
+        <div>iso: <time datetime="{{iso}}">{{iso}}</time></div>
+        <div>day: {{day}} {{dayTwoDigit}} {{dayName}} {{dayNameShort}}</div>
+        <div>month: {{month}} {{monthTwoDigit}} {{monthName}} {{monthNameShort}}</div>
+        <div>year: {{year}} {{yearTwoDigit}}</div>
+        <div>hour: {{hour}} {{hourTwoDigit}} {{hour12}} {{hour12TwoDigit}} {{dayPeriod}}</div>
+        <div>minute: {{minute}} {{minuteTwoDigit}}</div>
+        <div>second: {{second}} {{secondTwoDigit}}</div>
+      </template>
+    </amp-date-display>
+
+    <h2>UTC vs local</h2>
+    <amp-date-display datetime="2017-08-02T15:05:05.000Z" layout="fixed" width="360" height="20" >
+      <template type="amp-mustache">
+        UTC in local: {{dayName}} {{day}} {{monthName}} {{year}}, {{hourTwoDigit}}:{{minuteTwoDigit}}:{{secondTwoDigit}}
+      </template>
+    </amp-date-display>
+    <amp-date-display datetime="2017-08-02T15:05:05.000Z" display-in="utc" layout="fixed" width="360" height="20" >
+      <template type="amp-mustache">
+        UTC in UTC: {{dayName}} {{day}} {{monthName}} {{year}}, {{hourTwoDigit}}:{{minuteTwoDigit}}:{{secondTwoDigit}}
+      </template>
+    </amp-date-display>
+    <amp-date-display datetime="2017-08-02T15:05:05.000" layout="fixed" width="360" height="20" >
+      <template type="amp-mustache">
+        local in local: {{dayName}} {{day}} {{monthName}} {{year}}, {{hourTwoDigit}}:{{minuteTwoDigit}}:{{secondTwoDigit}}
+      </template>
+    </amp-date-display>
+    <amp-date-display datetime="2017-08-02T15:05:05.000" display-in="utc" layout="fixed" width="360" height="20" >
+      <template type="amp-mustache">
+        local in UTC: {{dayName}} {{day}} {{monthName}} {{year}}, {{hourTwoDigit}}:{{minuteTwoDigit}}:{{secondTwoDigit}}
+      </template>
+    </amp-date-display>
+
+    <h2>Now & offset</h2>
+    <amp-date-display datetime="now" layout="fixed" width="360" height="20" >
+      <template type="amp-mustache">
+        now: {{iso}}
+      </template>
+    </amp-date-display>
+    <amp-date-display datetime="now" offset-seconds="-3600" layout="fixed" width="360" height="20" >
+      <template type="amp-mustache">
+        now - 1h: {{iso}}
+      </template>
+    </amp-date-display>
+
+    <h2>Timestamps</h2>
+    <amp-date-display timestamp-seconds="1501686305" layout="fixed" width="360" height="20" >
+      <template type="amp-mustache">
+        from seconds: {{iso}}
+      </template>
+    </amp-date-display>
+    <amp-date-display timestamp-ms="1501686305000" layout="fixed" width="360" height="20" >
+      <template type="amp-mustache">
+        from ms: {{iso}}
+      </template>
+    </amp-date-display>
+
+    <h2>Locales</h2>
+    <amp-date-display datetime="now" locale="de" layout="fixed" width="360" height="20" >
+      <template type="amp-mustache">
+        de: {{dayName}} {{day}} {{monthName}} {{year}}
+      </template>
+    </amp-date-display>
+    <amp-date-display datetime="now" locale="fr" layout="fixed" width="360" height="20" >
+      <template type="amp-mustache">
+        fr: {{dayName}} {{day}} {{monthName}} {{year}}
+      </template>
+    </amp-date-display>
+    <amp-date-display datetime="now" locale="cs" layout="fixed" width="360" height="20" >
+      <template type="amp-mustache">
+        cs: {{dayName}} {{day}} {{monthName}} {{year}}
+      </template>
+    </amp-date-display>
+    <amp-date-display datetime="now" locale="en-GB" layout="fixed" width="360" height="20" >
+      <template type="amp-mustache">
+        en-GB: {{dayName}} {{day}} {{monthName}} {{year}}
+      </template>
+    </amp-date-display>
+    <amp-date-display datetime="now" locale="zh-TW" layout="fixed" width="360" height="20" data-options-time-style="short">
+      <template type="amp-mustache">
+        zh-TW: {{localeString}}
+      </template>
+    </amp-date-display>
+  </div>
+</body>
+</html>

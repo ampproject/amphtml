@@ -1,0 +1,20 @@
+// For an explanation of the OWNERS rules and syntax, see:
+// https://github.com/ampproject/amp-github-apps/blob/main/owners/OWNERS.example
+
+{
+  rules: [
+    {
+      owners: [
+        {name: 'adeolaawoyemi'},
+        {name: 'arielginsburg'},
+        {name: 'aharoyairncohen'},
+        {name: 'lironka'},
+        {name: 'adir-kandel-vzm'},
+        {name: 'batsheva-evers'},
+        {name: 'sganti16'},
+        {name: 'akathuria'},
+        {name: 'ampproject/wg-components'},
+      ],
+    },
+  ],
+}

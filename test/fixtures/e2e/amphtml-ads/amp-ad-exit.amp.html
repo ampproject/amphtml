@@ -1,0 +1,105 @@
+<!doctype html>
+<html amp4ads>
+<head>
+  <title>amp-ad-exit</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  <script async custom-element="amp-ad-exit" src="https://cdn.ampproject.org/v0/amp-ad-exit-0.1.js"></script>
+  <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
+  <style amp-custom>
+    .ad {
+      border: 1px solid black;
+      width: 280px;
+      height: 230px;
+      background: #fff;
+    }
+
+    h1 {
+      font-size: 150%;
+      margin: 0;
+      color: #4285f4;
+      text-decoration: underline;
+    }
+
+    .product {
+      width: 100px;
+      height: 100px;
+      margin: 10px;
+      padding: 10px;
+      background: #0f9d58;
+      float: left;
+    }
+  </style>
+</head>
+<body>
+<amp-ad-exit id="exit-api" layout="nodisplay">
+  <script type="application/json">
+    {
+      "targets": {
+        "target1": {
+          "finalUrl": "http://localhost:8000/?product1&x=CLICK_X&y=CLICK_Y&e=_elem&shouldNotBeReplaced=AMP_VERSION",
+          "vars": {
+            "_elem": {"defaultValue": "headline"}
+          },
+          "filters": ["longDelay"]
+        },
+        "border_protected_target1": {
+          "finalUrl": "http://localhost:8000/?product1&x=CLICK_X&y=CLICK_Y&e=_elem&shouldNotBeReplaced=AMP_VERSION",
+          "vars": {
+            "_elem": {"defaultValue": "headline"}
+          },
+          "filters": ["longDelay", "borderProtection"]
+        },
+        "target2": {
+          "finalUrl": "http://localhost:8000/?product2&r=RANDOM",
+          "trackingUrls": [
+            "http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking"
+          ],
+          "vars": {
+            "_elem": {"defaultValue": "headline"}
+          },
+          "filters": ["longDelay"]
+        }
+      },
+      "filters": {
+        "longDelay": {
+          "type": "clickDelay",
+          "delay": 10000
+        },
+        "borderProtection": {
+          "type": "clickLocation",
+          "bottom": 10,
+          "left": 10,
+          "right": 10,
+          "relativeTo": "#product1"
+        }
+      },
+      "transport": {
+        "beacon": true,
+        "image": true
+      }
+    }
+  </script>
+</amp-ad-exit>
+<div class="ad">
+  <h1 on="tap:exit-api.exit(variable='current', default='target1')" role="button" tabindex="1">amp-ad-exit e2e test</h1>
+  <div class="product" id="product1" on="tap:exit-api.exit(target='border_protected_target1', _elem='Product 1')" role="button" tabindex="1">
+    <p>product 1</p>
+  </div>
+  <div class="product" id="product2" on="tap:exit-api.exit(target='target2', _elem='Product 2')" role="button" tabindex="1">
+    <p>product 2</p>
+  </div>
+</div>
+<div class="ad">
+  <button id="prev-btn" tabindex="1" on="tap:exit-selector.selectUp">Previous product</button>
+  <button id="next-btn" tabindex="1" on="tap:exit-selector.selectDown">Next product</button>
+  <amp-selector id="exit-selector"
+      on="select:exit-api.setVariable(name='current', target=event.targetOption)">
+    <option option="target1" selected>product 1</option>
+    <option option="target2">product 2</option>
+  </amp-selector>
+</div>
+</body>
+</html>

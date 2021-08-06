@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-import {timerFor} from '../../../src/timer';
+import {Deferred} from '#core/data-structures/promise';
+import {Services} from '#service';
+import {user, userAssert} from '../../../src/log';
 
 /**
  * Store loading ads info within window to ensure it can be properly stored
@@ -22,63 +24,76 @@ import {timerFor} from '../../../src/timer';
  */
 const LOADING_ADS_WIN_ID_ = '3pla';
 
-/**
- * @param {!Element} element
- * @param {!Window} win
- * @return {number|boolean}
- */
-export function allowRenderOutsideViewport(element, win) {
-  // Store in window Object that serves as a set of timers associated with
-  // waiting elements.
-  const loadingAds = win[LOADING_ADS_WIN_ID_] || {};
-  // If another ad is currently loading we only load ads that are currently
-  // in viewport.
-  for (const key in loadingAds) {
-    if (Object.prototype.hasOwnProperty.call(loadingAds, key)) {
-      return false;
-    }
-  }
+/** @private {?Promise} resolves when no 3p throttle */
+let throttlePromise_ = null;
+/** @private {?Function} resolver for throttle promise */
+let throttlePromiseResolver_ = null;
 
-  // Ad opts into lazier loading strategy where we only load ads that are
-  // at closer than 1.25 viewports away.
-  if (element.getAttribute('data-loading-strategy') ==
-      'prefer-viewability-over-views') {
-    return 1.25;
-  }
-  return true;
+/**
+ * @param {!Window} win
+ * @return {boolean} Whether 3p is currently throttled.
+ */
+export function is3pThrottled(win) {
+  return !!win[LOADING_ADS_WIN_ID_];
+}
+
+/** @return {!Promise} resolves when no 3p throttle */
+export function waitFor3pThrottle() {
+  return throttlePromise_ || Promise.resolve();
 }
 
 /**
- * Decrements loading ads count used for throttling.
- * @param {number} timerId of timer returned from incrementLoadingAds
- * @param {!Window} win
+ * @param {!Element} element
+ * @return {?number} number if explicit value should be used otherwise super
+ *    default should be used.
  */
-export function decrementLoadingAds(timerId, win) {
-  timerFor(win).cancel(timerId);
-  const loadingAds = win[LOADING_ADS_WIN_ID_];
-  if (loadingAds) {
-    delete loadingAds[timerId];
+export function getAmpAdRenderOutsideViewport(element) {
+  const rawValue = element.getAttribute('data-loading-strategy');
+  if (rawValue == null) {
+    return null;
   }
+  // Ad opts into lazier loading strategy where we only load ads that are
+  // at closer given number of viewports away.
+  if (rawValue == 'prefer-viewability-over-views' || rawValue == '') {
+    return 1.25;
+  }
+  const errorMessage =
+    'Value of data-loading-strategy should be a float number in range ' +
+    'of [0, 3], but got ' +
+    rawValue;
+  const viewportNumber = user().assertNumber(
+    parseFloat(rawValue),
+    errorMessage
+  );
+  userAssert(viewportNumber >= 0 && viewportNumber <= 3, errorMessage);
+  return viewportNumber;
 }
 
 /**
  * Increments loading ads count for throttling.
  * @param {!Window} win
- * @return {number} timer ID for testing
+ * @param {!Promise=} opt_loadingPromise
  */
-export function incrementLoadingAds(win) {
-  let loadingAds = win[LOADING_ADS_WIN_ID_];
-  if (!loadingAds) {
-    loadingAds = {};
-    win[LOADING_ADS_WIN_ID_] = loadingAds;
+export function incrementLoadingAds(win, opt_loadingPromise) {
+  if (win[LOADING_ADS_WIN_ID_] === undefined) {
+    win[LOADING_ADS_WIN_ID_] = 0;
+  }
+  win[LOADING_ADS_WIN_ID_]++;
+
+  if (!throttlePromise_) {
+    const deferred = new Deferred();
+    throttlePromise_ = deferred.promise;
+    throttlePromiseResolver_ = deferred.resolve;
   }
 
-  const timerId = timerFor(win).delay(() => {
-    // Unfortunately we don't really have a good way to measure how long it
-    // takes to load an ad, so we'll just pretend it takes 1 second for
-    // now.
-    decrementLoadingAds(timerId, win);
-  }, 1000);
-  loadingAds[timerId] = 1;
-  return timerId;
+  Services.timerFor(win)
+    .timeoutPromise(1000, opt_loadingPromise)
+    .catch(() => {})
+    .then(() => {
+      if (!--win[LOADING_ADS_WIN_ID_]) {
+        throttlePromiseResolver_();
+        throttlePromise_ = null;
+        throttlePromiseResolver_ = null;
+      }
+    });
 }

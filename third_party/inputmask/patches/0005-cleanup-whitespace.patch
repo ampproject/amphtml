@@ -1,0 +1,13 @@
+diff --git a/third_party/inputmask/inputmask.js b/third_party/inputmask/inputmask.js
+index f1f0fa849..11baa083a 100644
+--- a/third_party/inputmask/inputmask.js
++++ b/third_party/inputmask/inputmask.js
+@@ -1507,7 +1507,7 @@ export function factory($, window, document, undefined) {
+         function seekPrevious(pos, newBlock) {
+             var position = pos, tests;
+             if (position <= 0) return 0;
+-            while (--position > 0 && (newBlock === true && getTest(position).match.newBlockMarker !== true || newBlock !== true && !isMask(position) && (tests = getTests(position), 
++            while (--position > 0 && (newBlock === true && getTest(position).match.newBlockMarker !== true || newBlock !== true && !isMask(position) && (tests = getTests(position),
+             tests.length < 2 || tests.length === 2 && tests[1].match.def === ""))) {}
+             return position;
+         }

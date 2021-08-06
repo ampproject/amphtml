@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8">
+    <link rel="canonical" href="https://amp.dev/documentation/examples/components/amp-lightbox-gallery/index.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <title>amp-lightbox-gallery</title>
+    <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
+    <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      amp-carousel{
+        max-width: 400px;
+        margin-bottom: 100px;
+      }
+      .amp-lightbox-gallery-caption{
+        color: red;
+        font-size: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>AMP lightbox gallery with just regualar old jpgs.</h2>
+    <amp-img
+      lightbox
+      src="https://picsum.photos/id/494/400/400.jpg"
+      layout="fixed"
+      width="400"
+      height="400"
+    >
+    </amp-img>
+    <amp-img
+      lightbox
+      src="https://picsum.photos/id/525/400/400.jpg"
+      layout="fixed"
+      width="400"
+      height="400"
+    >
+    </amp-img>
+    <amp-img
+      lightbox
+      src="https://picsum.photos/id/78/400/400.jpg"
+      layout="fixed"
+      width="400"
+      height="400"
+    >
+    </amp-img>
+
+    <h2>AMP lightbox gallery with caption styling.</h2>
+    <p>We set captions to be colored red and have a 30px font size.</p>
+    <div class="container" style="display: flex">
+      <figure class="dog-walking-caption">
+        <amp-img
+          lightbox
+          src="https://picsum.photos/id/494/400/400.jpg"
+          layout="fixed"
+          width="400"
+          height="400"
+        ></amp-img>
+        <figcaption>
+          Let's walk the dog.
+        </figcaption>
+      </figure>
+      <figure class="desert-caption">
+        <amp-img
+          lightbox="caption"
+          src="https://picsum.photos/id/525/400/400.jpg"
+          layout="fixed"
+          width="400"
+          height="400"
+        ></amp-img>
+        <figcaption>
+          This is the desert.
+        </figcaption>
+      </figure>
+      <figure class="door-caption">
+        <amp-img
+          lightbox
+          src="https://picsum.photos/id/78/400/400.jpg"
+          layout="fixed"
+          width="400"
+          height="400"
+        ></amp-img>
+        <figcaption>
+          This is a door.
+        </figcaption>
+      </figure>
+    </div>
+
+    <h2>AMP lightbox gallery with webp and jpeg fallback.</h2>
+    <p>This doesnt work in browsers that doesnt support webp</p>
+    <amp-img
+      lightbox
+      src="https://picsum.photos/id/494/400/400sdfsdf.webp"
+      layout="fixed"
+      width="400"
+      height="400"
+    >
+      <amp-img
+        fallback
+        src="https://picsum.photos/id/494/400/400.jpg"
+        layout="fill"
+      ></amp-img>
+    </amp-img>
+    <amp-img
+      lightbox
+      src="https://picsum.photos/id/525/400/400.webp"
+      layout="fixed"
+      width="400"
+      height="400"
+    >
+      <amp-img
+        fallback
+        src="https://picsum.photos/id/525/400/400.jpg"
+        layout="fill"
+      ></amp-img>
+    </amp-img>
+    <amp-img
+      lightbox
+      src="https://picsum.photos/id/78/400/400.webp"
+      layout="fixed"
+      width="400"
+      height="400"
+    >
+      <amp-img
+        fallback
+        src="https://picsum.photos/id/78/400/400.jpg"
+        layout="fill"
+      ></amp-img>
+    </amp-img>
+
+    <h2>AMP Carousel with just regualar old jpgs.</h2>
+    <amp-carousel
+      class="storslider"
+      width="400"
+      height="400"
+      layout="fixed"
+      type="slides"
+      lightbox
+      loop
+    >
+      <amp-img
+        src="https://picsum.photos/id/494/400/400.jpg"
+        layout="fill"
+      ></amp-img>
+      <amp-img
+        src="https://picsum.photos/id/525/400/400.jpg"
+        layout="fill"
+      ></amp-img>
+      <amp-img
+        src="https://picsum.photos/id/78/400/400.jpg"
+        layout="fill"
+      ></amp-img>
+    </amp-carousel>
+
+    <h2>AMP Carousel with webp and jpeg fallback.</h2>
+    <p>This doesnt work in browsers that doesnt support webp</p>
+    <amp-carousel
+      class="storslider"
+      width="400"
+      height="400"
+      layout="fixed"
+      type="slides"
+      lightbox
+      loop
+    >
+      <amp-img src="https://picsum.photos/id/494/400/400.webp" layout="fill">
+        <amp-img
+          fallback
+          src="https://picsum.photos/id/494/400/400.jpg"
+          layout="fill"
+        ></amp-img>
+      </amp-img>
+      <amp-img src="https://picsum.photos/id/525/400/400.webp" layout="fill">
+        <amp-img
+          fallback
+          src="https://picsum.photos/id/525/400/400.jpg"
+          layout="fill"
+        ></amp-img>
+      </amp-img>
+      <amp-img src="https://picsum.photos/id/78/400/400.webp" layout="fill">
+        <amp-img
+          fallback
+          src="https://picsum.photos/id/78/400/400.jpg"
+          layout="fill"
+        ></amp-img>
+      </amp-img>
+    </amp-carousel>
+  </body>
+</html>

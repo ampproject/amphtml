@@ -1,0 +1,96 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>amp-mega-menu</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    #title {
+      text-align: center;
+      font-size: 25px;
+      padding: 15px;
+    }
+    header > * {
+      background: white;
+    }
+    .heading, .content, .section {
+      padding: 10px;
+      margin: 0;
+    }
+    .section {
+      display: inline-block;
+      vertical-align: top;
+    }
+    ul {
+      list-style-type: none;
+    }
+    amp-embed {
+      float: right;
+      margin-right: 50px;
+    }
+    fieldset {
+      border: none;
+    }
+    #main {
+      background: #ccc;
+      font-size: 18px;
+    }
+  </style>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-mega-menu" src="https://cdn.ampproject.org/v0/amp-mega-menu-0.1.js"></script>
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+  <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+</head>
+<body>
+  <header>
+    <div id="title">amp-mega-menu</div>
+
+    <amp-mega-menu layout="fixed-height" height="55">
+      <amp-list layout="fixed-height" height="600" src="/list/ecommerce-nested-menu" items="." single-item>
+        <template type="amp-mustache">
+          <nav>
+            <ul>
+              {{#menu}}
+              <li>
+                <h4 class="heading" role="button">{{title}}</h4>
+                <div class="content" role="dialog">
+                  <amp-img layout="fixed" width="300" height="250" src="{{image}}" alt="{{title}}"></amp-img>
+                  {{#content}}
+                  <div class="section">
+                    <h4 aria-hidden="true">{{title}}</h4>
+                    <ul aria-label="{{title}}">
+                      {{#content}}
+                      <li><a href="https://amp.dev/{{.}}">{{.}}</a></li>
+                      {{/content}}
+                    </ul>
+                  </div>
+                  {{/content}}
+                  <amp-ad width="10" height="1"
+                    layout="responsive"
+                    type="doubleclick"
+                    data-slot="/4119129/mobile_ad_banner">
+                  </amp-ad>
+                </div>
+              </li>
+              {{/menu}}
+            </ul>
+          </nav>
+        </template>
+      </amp-list>
+    </amp-mega-menu>
+  </header>
+
+  <amp-img src="https://placeimg.com/1000/200/tech" layout="responsive" width="5" height="1"></amp-img>
+  <amp-layout id="main" layout="responsive" width="1" height="3">
+    <h2>Main Content</h2>
+    <p><a href="https://amp.dev/">Visit AMP</a></p>
+  </amp-layout>
+
+</body>
+</html>

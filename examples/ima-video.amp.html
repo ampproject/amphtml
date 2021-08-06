@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>IMA examples</title>
+    <link rel="canonical" href="amps.html" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <script async custom-element="amp-ima-video" src="https://cdn.ampproject.org/v0/amp-ima-video-0.1.js"></script>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <style amp-custom>
+      body {
+        padding: 10px;
+      }
+      .spacer {
+        height: 50px;
+      }
+      .player-wrapper {
+        max-width: 600px;
+      }
+      .description {
+        margin-top: 5px;
+        margin-bottom: 5px;
+      }
+    </style>
+</head>
+  <body>
+    <h1>amp-ima-video</h1>
+    <h3>Resources</h3>
+    <ul>
+      <li>
+        <a
+          href="https://developers.google.com/interactive-media-ads/docs/sdks/html5/tags"
+          target="_blank"
+          >IMA Sample Tags</a
+        >
+      </li>
+    </ul>
+    <h2>Video1</h2>
+    <div class="description">
+      Uses the Pre roll + Bumper IMA Sample Tag. Also, with custom ad label in
+      Spanish
+    </div>
+    <div id="player-wrapper1" class="player-wrapper">
+      <amp-ima-video
+        id="Video1"
+        width="640"
+        height="360"
+        layout="responsive"
+        data-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpreonlybumper&cmsid=496&vid=short_onecue&correlator="
+        data-ad-label="Publicidad (%s de %s)"
+        data-poster="/examples/img/ima-poster.png"
+      >
+        <source
+          src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+          type="video/mp4"
+        />
+      </amp-ima-video>
+    </div>
+    <h3>Video1 Actions</h3>
+    <button on="tap:Video1.play">Play</button>
+    <button on="tap:Video1.pause">Pause</button>
+    <button on="tap:Video1.mute">Mute</button>
+    <button on="tap:Video1.unmute">Unmute</button>
+    <button on="tap:Video1.fullscreen">Fullscreen</button>
+
+    <div class="spacer"></div>
+
+    <h2>Video2</h2>
+    <div class="description">Uses the Post roll IMA Sample Tag.</div>
+    <div id="player-wrapper2" class="player-wrapper">
+      <amp-ima-video
+        id="Video2"
+        width="640"
+        height="360"
+        layout="responsive"
+        data-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpostonly&cmsid=496&vid=short_onecue&correlator="
+        data-poster="/examples/img/ima-poster.png"
+      >
+        <source
+          src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+          type="video/mp4"
+        />
+      </amp-ima-video>
+    </div>
+    <h3>Video2 Actions</h3>
+    <button on="tap:Video2.play">Play</button>
+    <button on="tap:Video2.pause">Pause</button>
+    <button on="tap:Video2.mute">Mute</button>
+    <button on="tap:Video2.unmute">Unmute</button>
+    <button on="tap:Video2.fullscreen">Fullscreen</button>
+
+    <div class="spacer"></div>
+
+    <h2>Video3</h2>
+    <div class="description">
+      Uses the Pre-, Mid-, and Post Roll IMA Sample Tag.
+    </div>
+    <div id="player-wrapper3" class="player-wrapper">
+      <amp-ima-video
+        id="Video3"
+        width="640"
+        height="360"
+        layout="responsive"
+        data-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpost&cmsid=496&vid=short_onecue&correlator="
+        data-poster="/examples/img/ima-poster.png"
+      >
+        <source
+          src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+          type="video/mp4"
+        />
+      </amp-ima-video>
+    </div>
+    <h3>Video3 Actions</h3>
+    <button on="tap:Video3.play">Play</button>
+    <button on="tap:Video3.pause">Pause</button>
+    <button on="tap:Video3.mute">Mute</button>
+    <button on="tap:Video3.unmute">Unmute</button>
+    <button on="tap:Video3.fullscreen">Fullscreen</button>
+
+    <div class="spacer"></div>
+
+    <h2>Video4</h2>
+    <div class="description">
+      Uses the Single Skippable Inline IMA Sample Tag. Also, this video with
+      autoplay
+    </div>
+    <div id="player-wrapper4" class="player-wrapper">
+      <amp-ima-video
+        id="Video4"
+        autoplay
+        width="640"
+        height="360"
+        layout="responsive"
+        data-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dskippablelinear&correlator="
+        data-poster="/examples/img/ima-poster.png"
+      >
+        <source
+          src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+          type="video/mp4"
+        />
+      </amp-ima-video>
+    </div>
+    <h3>Video4 Actions</h3>
+    <button on="tap:Video4.play">Play</button>
+    <button on="tap:Video4.pause">Pause</button>
+    <button on="tap:Video4.mute">Mute</button>
+    <button on="tap:Video4.unmute">Unmute</button>
+    <button on="tap:Video4.fullscreen">Fullscreen</button>
+
+    <h2>Video5</h2>
+    <div class="player-wrapper">
+      <div class="description">With Source and Track Captions</div>
+      <amp-ima-video
+        id="Video4"
+        width="640"
+        height="360"
+        layout="responsive"
+        data-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dskippablelinear&correlator="
+        data-poster="/examples/img/ima-poster.png"
+        data-crossorigin
+      >
+        <source
+          src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+          type="video/mp4"
+        />
+        <track
+          kind="captions"
+          srclang="en"
+          src="https://brightcove.hs.llnwd.net/v2/unsecured/media/5359769197001/201903/2015/5359769197001_581bc84b-c6d3-425e-9537-a1f27209782e.vtt?pubId=5359769197001&videoId=6013200383001"
+        />
+      </amp-ima-video>
+    </div>
+  </body>
+</html>

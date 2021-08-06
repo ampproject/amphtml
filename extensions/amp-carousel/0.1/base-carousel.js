@@ -13,12 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {timerFor} from '../../../src/timer';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
+import {isAmp4Email} from '../../../src/format';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '#core/dom/layout/viewport-observer';
+import {toggleAttribute} from '#core/dom';
 
+const _CONTROL_HIDE_ATTRIBUTE = 'i-amphtml-carousel-hide-buttons';
+const _HAS_CONTROL_CLASS = 'i-amphtml-carousel-has-controls';
 /**
  * @abstract
  */
 export class BaseCarousel extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
 
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -36,60 +49,95 @@ export class BaseCarousel extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.showControls_ = this.element.hasAttribute('controls');
+    const input = Services.inputFor(this.win);
+    const doc = /** @type {!Document} */ (this.element.ownerDocument);
 
-    if (this.showControls_) {
-      this.element.classList.add('-amp-carousel-has-controls');
+    if (isAmp4Email(doc) || this.element.hasAttribute('controls')) {
+      this.showControls_ = true;
+      this.element.classList.add(_HAS_CONTROL_CLASS);
+    } else {
+      input.onMouseDetected((mouseDetected) => {
+        if (mouseDetected) {
+          this.showControls_ = true;
+          toggleAttribute(
+            this.element,
+            _CONTROL_HIDE_ATTRIBUTE,
+            !this.showControls_
+          );
+          this.element.classList.add(_HAS_CONTROL_CLASS);
+        }
+      }, true);
     }
+
     this.buildCarousel();
     this.buildButtons();
     this.setupGestures();
     this.setControlsState();
   }
 
-  /** @override */
-  viewportCallback(inViewport) {
-    this.onViewportCallback(inViewport);
+  // TODO(samouri): rename to viewportCallback once
+  // BaseElement.viewportCallback is deleted
+
+  /**
+   * @param {boolean} inViewport
+   * @protected
+   */
+  viewportCallbackTemp(inViewport) {
     if (inViewport) {
       this.hintControls();
     }
   }
 
   /**
-   * Handles element specific viewport based events.
-   * @param {boolean} unusedInViewport.
-   * @protected
+   * Builds a carousel button for next/prev.
+   * @param {string} className
+   * @param {function()} onInteraction
+   * @return {?Element}
    */
-  onViewportCallback(unusedInViewport) {}
-
-
-  buildButtons() {
-    this.prevButton_ = this.element.ownerDocument.createElement('div');
-    this.prevButton_.classList.add('amp-carousel-button');
-    this.prevButton_.classList.add('amp-carousel-button-prev');
-    this.prevButton_.setAttribute('role', 'button');
-    // TODO(erwinm): Does label need i18n support in the future? or provide
-    // a way to be overridden.
-    this.prevButton_.setAttribute('aria-label', 'previous');
-    this.prevButton_.onclick = () => {
-      this.interactionPrev();
+  buildButton(className, onInteraction) {
+    const button = this.element.ownerDocument.createElement('div');
+    button.tabIndex = 0;
+    button.classList.add('amp-carousel-button');
+    button.classList.add(className);
+    button.setAttribute('role', this.buttonsAriaRole());
+    button.onkeydown = (event) => {
+      if (event.key == Keys.ENTER || event.key == Keys.SPACE) {
+        if (!event.defaultPrevented) {
+          event.preventDefault();
+          onInteraction();
+        }
+      }
     };
-    this.element.appendChild(this.prevButton_);
+    button.onclick = onInteraction;
 
-    this.nextButton_ = this.element.ownerDocument.createElement('div');
-    this.nextButton_.classList.add('amp-carousel-button');
-    this.nextButton_.classList.add('amp-carousel-button-next');
-    this.nextButton_.setAttribute('role', 'button');
-    this.nextButton_.setAttribute('aria-label', 'next');
-    this.nextButton_.onclick = () => {
-      this.interactionNext();
-    };
-    this.element.appendChild(this.nextButton_);
+    return button;
   }
 
-  /** @override */
-  prerenderAllowed() {
-    return true;
+  /**
+   * The ARIA role for the controls. Either `button` or `presentation` based
+   * on usage.
+   * @return {string}
+   * @protected
+   */
+  buttonsAriaRole() {
+    // Subclasses may override.
+    return 'button';
+  }
+
+  /**
+   * Builds the next and previous buttons.
+   */
+  buildButtons() {
+    this.prevButton_ = this.buildButton('amp-carousel-button-prev', () => {
+      this.interactionPrev();
+    });
+    this.element.appendChild(this.prevButton_);
+
+    this.nextButton_ = this.buildButton('amp-carousel-button-next', () => {
+      this.interactionNext();
+    });
+    this.updateButtonTitles();
+    this.element.appendChild(this.nextButton_);
   }
 
   /** @override */
@@ -106,8 +154,7 @@ export class BaseCarousel extends AMP.BaseElement {
   }
 
   /**
-   * Subclasses should override this method to configure gestures for carousel.
-   * @abstract
+   * Subclasses may override this method to configure gestures for carousel.
    */
   setupGestures() {
     // Subclasses may override.
@@ -142,26 +189,74 @@ export class BaseCarousel extends AMP.BaseElement {
     this.prevButton_.setAttribute('aria-disabled', !this.hasPrev());
     this.nextButton_.classList.toggle('amp-disabled', !this.hasNext());
     this.nextButton_.setAttribute('aria-disabled', !this.hasNext());
+    this.prevButton_.tabIndex = this.hasPrev() ? 0 : -1;
+    this.nextButton_.tabIndex = this.hasNext() ? 0 : -1;
   }
 
   /**
    * Shows the controls and then fades them away.
    */
   hintControls() {
-    if (this.showControls_ || !this.isInViewport()) {
+    if (this.showControls_) {
       return;
     }
     this.getVsync().mutate(() => {
-      const className = '-amp-carousel-button-start-hint';
+      const className = 'i-amphtml-carousel-button-start-hint';
+      const hideAttribute = 'i-amphtml-carousel-hide-buttons';
       this.element.classList.add(className);
-      timerFor(this.win).delay(() => {
-        this.deferMutate(() => this.element.classList.remove(className));
-      }, 1000);
+      Services.timerFor(this.win).delay(() => {
+        this.mutateElement(() => {
+          this.element.classList.remove(className);
+          toggleAttribute(this.element, hideAttribute, !this.showControls_);
+        });
+      }, 4000);
     });
   }
 
+  /**
+   * Updates the titles for the next/previous buttons. This should be called
+   * by subclasses if they want to update the button labels. The
+   * `getNextButtonTitle` and `getPrevButtonTitle` should be overwritten to
+   * provide the title values.
+   * @protected
+   */
+  updateButtonTitles() {
+    this.nextButton_.title = this.getNextButtonTitle();
+    this.prevButton_.title = this.getPrevButtonTitle();
+  }
+
+  /**
+   * @return {string} The title to use for the next button.
+   * @protected
+   */
+  getNextButtonTitle() {
+    return (
+      this.element.getAttribute('data-next-button-aria-label') ||
+      'Next item in carousel'
+    );
+  }
+
+  /**
+   * @return {string} The title to use for the pevious button.
+   * @protected
+   */
+  getPrevButtonTitle() {
+    return (
+      this.element.getAttribute('data-prev-button-aria-label') ||
+      'Previous item in carousel'
+    );
+  }
+
+  /** @override */
+  layoutCallback() {
+    observeWithSharedInOb(this.element, (inViewport) =>
+      this.viewportCallbackTemp(inViewport)
+    );
+    return Promise.resolve();
+  }
   /** @override */
   unlayoutCallback() {
+    unobserveWithSharedInOb(this.element);
     return true;
   }
 

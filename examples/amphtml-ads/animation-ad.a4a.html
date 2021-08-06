@@ -1,0 +1,36 @@
+<!doctype html>
+<html ⚡4ads lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+  <meta name="amp4ads-id" content="vendor=doubleclick,type=impression-id,value=12345">
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
+  <style amp-custom>
+    body {
+      background-color: yellowgreen;
+      color: white;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+
+<div id="animation-target"><b>amp-animation</b></div>
+<amp-animation layout="nodisplay"  trigger="visibility">
+  <script type="application/json">
+    {
+      "duration": "1s",
+      "iterations": "5",
+      "fill": "both",
+      "direction": "alternate",
+      "selector": "#animation-target",
+      "easing": "cubic-bezier(0,0,.21,1)",
+      "keyframes": {"transform": "scale(2) translate(100px, 100px)"}
+    }
+  </script>
+</amp-animation>
+</body>
+</html>

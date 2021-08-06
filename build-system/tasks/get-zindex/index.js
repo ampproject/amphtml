@@ -13,126 +13,261 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
+const fs = require('fs');
+const globby = require('globby');
+const path = require('path');
+const Postcss = require('postcss');
+const prettier = require('prettier');
+const textTable = require('text-table');
+const {
+  getJscodeshiftReport,
+  jscodeshiftAsync,
+} = require('../../test-configs/jscodeshift');
+const {getStdout} = require('../../common/process');
+const {gray, magenta} = require('../../common/colors');
+const {logLocalDev, logOnSameLineLocalDev} = require('../../common/logging');
+const {writeDiffOrFail} = require('../../common/diff');
 
-var fs = require('fs');
-var gulp = require('gulp-help')(require('gulp'));
-var postcss = require('postcss');
-var table = require('text-table');
-var through = require('through2');
-var util = require('gulp-util');
+/** @type {Postcss.default} */
+const postcss = /** @type {*} */ (Postcss);
 
-var tableHeaders = [
- ['selector', 'z-index', 'file'],
- ['---', '---', '---'],
+const tableHeaders = [
+  ['context', 'z-index', 'file'],
+  ['---', '---', '---'],
 ];
 
-var tableOptions = {
+const tableOptions = {
   align: ['l', 'l', 'l'],
   hsep: '   |   ',
 };
 
+const preamble = `
+**Run \`amp get-zindex --fix\` to generate this file.**
+
+<!-- markdown-link-check-disable -->
+`.trim();
+
+const logChecking = (filename) =>
+  logOnSameLineLocalDev(gray(path.basename(filename)));
+
+const sortedByEntryKey = (a, b) => a[0].localeCompare(b[0]);
 
 /**
- * @param {!Object<string, !Array<number>} acc accumulator object for selectors
- * @param {!Rules} css post css rules object
+ * @param {!Object<string, string>} acc accumulator object for selectors
+ * @param {!Postcss.Rule} css post css rules object
  */
 function zIndexCollector(acc, css) {
-  css.walkRules(rule => {
-    rule.walkDecls(decl => {
+  css.walkRules((rule) => {
+    rule.walkDecls((decl) => {
       // Split out multi selector rules
-      var selectorNames = rule.selector.replace('\n', '');
-      selectorNames = selectorNames.split(',');
       if (decl.prop == 'z-index') {
-        selectorNames.forEach(selector => {
-          // If multiple redeclaration of a selector and z index
-          // are done in a single file, this will get overridden.
-          acc[selector] = decl.value;
-        });
+        rule.selector
+          .replace('\n', '')
+          .split(',')
+          .forEach((selector) => {
+            // If multiple redeclaration of a selector and z index
+            // are done in a single file, this will get overridden.
+            acc[selector.trim()] = decl.value;
+          });
       }
     });
   });
 }
 
 /**
- * @param {!Vinyl} file vinyl fs object
- * @param {string} enc encoding value
- * @param {function(err: ?Object, data: !Vinyl|string)} cb chunk data through
- */
-function onFileThrough(file, enc, cb) {
-  if (file.isNull()) {
-    cb(null, file);
-    return;
-  }
-
-  if (file.isStream()) {
-    cb(new util.PluginError('size', 'Stream not supported'));
-    return;
-  }
-
-  var selectors = Object.create(null);
-
-  postcss([zIndexCollector.bind(null, selectors)])
-      .process(file.contents.toString(), {
-        from: file.relative
-      }).then(res => {
-        cb(null, { name: file.relative, selectors: selectors });
-      });
-}
-
-/**
- * @param {!Object<string, !Object<string, !Array<number>} filesData
+ * @param {!Object<string, !Object<string, !Array<number>>>} filesData
  *    accumulation of files and the rules and z index values.
- * @param {function()} cb callback to end the stream
  * @return {!Array<!Array<string>>}
  */
-function createTable(filesData, cb) {
-  var rows = [];
-  Object.keys(filesData).sort().forEach((fileName, fileIdx) => {
-    var selectors = filesData[fileName];
-    Object.keys(selectors).sort().forEach((selectorName, selectorIdx) => {
-      var zIndex = selectors[selectorName];
-      var row = [selectorName, zIndex, fileName];
-      rows.push(row);
-    });
-  });
+function createTable(filesData) {
+  const rows = [];
+  for (const filename of Object.keys(filesData).sort()) {
+    // JS entries are Arrays of Arrays since they can have duplicate contexts
+    // like [['context', 9999]]
+    // CSS entries are Obejcts since they should not have duplicate selectors
+    // like {'.selector': 9999}
+    const entry = Array.isArray(filesData[filename])
+      ? filesData[filename]
+      : Object.entries(filesData[filename]).sort(sortedByEntryKey);
+    // @ts-ignore
+    for (const [context, zIndex] of entry) {
+      rows.push([`\`${context}\``, zIndex, `[${filename}](/${filename})`]);
+    }
+  }
   rows.sort((a, b) => {
-    var aZIndex = parseInt(a[1], 10);
-    var bZIndex = parseInt(b[1], 10);
-    return aZIndex - bZIndex;
+    const aZIndex = parseInt(a[1], 10);
+    const bZIndex = parseInt(b[1], 10);
+    // Word values sorted lexicographically.
+    if (isNaN(aZIndex) && isNaN(bZIndex)) {
+      return a[1].localeCompare(b[1]);
+    }
+    // Word values before length values.
+    if (isNaN(aZIndex)) {
+      return -1;
+    }
+    if (isNaN(bZIndex)) {
+      return 1;
+    }
+    // By length descending.
+    return bZIndex - aZIndex;
   });
   return rows;
 }
 
-
 /**
- * @return {!Stream}
+ * Extract z-index selectors from all files matching the given glob starting at
+ * the given working directory
+ * @param {string|Array<string>} glob
+ * @param {string=} cwd
+ * @return {Promise<Object>}
  */
-function getZindex(glob) {
-  return gulp.src(glob).pipe(through.obj(onFileThrough));
+async function getZindexSelectors(glob, cwd = '.') {
+  const filesData = Object.create(null);
+  const files = globby.sync(glob, {cwd});
+  for (const file of files) {
+    const contents = await fs.promises.readFile(path.join(cwd, file), 'utf-8');
+    const selectors = Object.create(null);
+    const plugins = [zIndexCollector.bind(null, selectors)];
+    logChecking(file);
+    await postcss(plugins).process(contents, {from: file});
+    if (Object.keys(selectors).length) {
+      filesData[file] = selectors;
+    }
+  }
+  return filesData;
 }
 
 /**
- * @param {function()} cb
+ * @param {string|Array<string>} glob
+ * @param {string=} cwd
+ * @return {!Promise<Object>}
  */
-function getZindexForAmp(cb) {
-  var filesData = Object.create(null);
-  // Don't return the stream here since we do a `writeFileSync`
-  getZindex('{css,src,extensions}/**/*.css')
-      .on('data', (chunk) => {
-        filesData[chunk.name] = chunk.selectors;
-      })
-      .on('end', () => {
-        var rows = createTable(filesData);
-        rows.unshift.apply(rows, tableHeaders);
-        var tbl = table(rows, tableOptions);
-        fs.writeFileSync('css/Z_INDEX.md', tbl);
-        cb();
-      });
+function getZindexChainsInJs(glob, cwd = '.') {
+  return new Promise((resolve) => {
+    const files = globby.sync(glob, {cwd}).map((file) => path.join(cwd, file));
+
+    const filesIncludingString = getStdout(
+      ['grep -irl "z-*index"', ...files].join(' ')
+    )
+      .trim()
+      .split('\n');
+
+    const result = {};
+
+    let resultCountInverse = filesIncludingString.length;
+
+    if (resultCountInverse === 0) {
+      // We don't expect this fileset to be empty since it's unlikely that we
+      // never change the z-index from JS, but we add this just in case to
+      // prevent hanging infinitely.
+      resolve(result);
+      return;
+    }
+
+    const process = jscodeshiftAsync([
+      '--dry',
+      '--no-babel',
+      `--transform=${__dirname}/jscodeshift/collect-zindex.js`,
+      ...filesIncludingString,
+    ]);
+    const {stderr, stdout} = process;
+
+    stderr.on('data', (data) => {
+      throw new Error(data.toString());
+    });
+
+    stdout.on('data', (data) => {
+      const reportLine = getJscodeshiftReport(data.toString());
+
+      if (!reportLine) {
+        return;
+      }
+
+      const [filename, report] = reportLine;
+      const relative = path.relative(cwd, filename);
+
+      logChecking(filename);
+
+      try {
+        const reportParsed = JSON.parse(report);
+        if (reportParsed.length) {
+          result[relative] = reportParsed.sort(sortedByEntryKey);
+        }
+        if (--resultCountInverse === 0) {
+          resolve(result);
+        }
+      } catch (_) {}
+    });
+  });
 }
 
-gulp.task('get-zindex', 'Runs through all css files of project to gather ' +
-    'z-index values', getZindexForAmp);
+/**
+ * Entry point for amp get-zindex
+ * @return {Promise<void>}
+ */
+async function getZindex() {
+  logLocalDev('...');
 
-exports.getZindex = getZindex;
-exports.createTable = createTable;
+  const filesData = Object.assign(
+    {},
+    ...(await Promise.all([
+      getZindexSelectors('{css,src,extensions}/**/*.css'),
+      getZindexChainsInJs([
+        '{3p,src,extensions}/**/*.js',
+        '!**/dist/**/*.js',
+        '!extensions/**/test/**/*.js',
+        '!extensions/**/storybook/**/*.js',
+      ]),
+    ]))
+  );
+
+  logOnSameLineLocalDev(
+    'Generating z-index table from',
+    magenta(`${Object.keys(filesData).length} files`)
+  );
+
+  const filename = 'css/Z_INDEX.md';
+  const rows = [...tableHeaders, ...createTable(filesData)];
+  const table = textTable(rows, tableOptions);
+  const output = await prettierFormat(filename, `${preamble}\n\n${table}`);
+
+  await writeDiffOrFail(
+    'get-zindex',
+    filename,
+    output,
+    /* gitDiffFlags */ [
+      '-U1',
+      // Rows are formatted to align, so rows with unchanged content may change
+      // in whitespace, forcing the diff to contain the entire table.
+      '--ignore-space-change',
+    ]
+  );
+}
+
+/**
+ * @param {string} filename
+ * @param {string} output
+ * @return {Promise<string>}
+ */
+async function prettierFormat(filename, output) {
+  return prettier.format(output, {
+    ...(await prettier.resolveConfig(filename)),
+    parser: 'markdown',
+  });
+}
+
+module.exports = {
+  createTable,
+  getZindex,
+  getZindexSelectors,
+  getZindexChainsInJs,
+};
+
+getZindex.description =
+  'Run through all css files in the repo to gather z-index values';
+
+getZindex.flags = {
+  'fix': 'Write the results to file',
+};

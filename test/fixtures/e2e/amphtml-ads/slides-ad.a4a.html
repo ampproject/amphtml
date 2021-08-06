@@ -1,0 +1,211 @@
+<!doctype html>
+<html amp4ads lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Slides Ad</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+  <!-- ## Summary-->
+  <!--
+  Sample AMPHTML ad using [amp-carousel]({{g.doc('/content/amp-dev/documentation/components/reference/amp-carousel.md', locale=doc.locale).url.path}}) to create an interactive ad.
+  -->
+  <!-- ## Styling -->
+  <!--
+  This is an advanced example that requires some styling to make it look and function properly.
+  -->
+  <style amp-custom>
+    /* Main element that contains the creative. */
+    .root-container {
+      font-family: 'Roboto', sans-serif;
+      font-size: 12px;
+      background: #151717 url(/test/fixtures/e2e/amphtml-ads/resource/car-mesh.jpg) center center;
+      background-size: cover;
+      color: #fff;
+      width: 100%;
+      height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .root-container h1 {
+      font-weight: normal;
+      margin: 10px 0 0;
+      text-align: center;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+    .carousel-container {
+      position: relative;
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+    }
+    .carousel-img {
+      display: block;
+    }
+    /*
+     * Dimensions of the carousel item are the same as the size of each image
+     * plus the border width. Using `calc()` for the sake of the example.
+     */
+    .carousel-item {
+      width: calc(216px + 2 * 4px);
+      height: calc(117px + 2 * 4px);
+      box-sizing: border-box;
+      background: #000;
+      float: left;
+    }
+    .carousel-item .carousel-img {
+      border: 4px solid #c9cccc;
+    }
+    /* Styling for footer */
+    .footer {
+      background: #000;
+      box-sizing: border-box;
+      padding: 8px;
+      display: flex;
+    }
+    .stretch {
+      flex: 1;
+    }
+    .logo-img {
+      display: block;
+    }
+    .button {
+      text-transform: uppercase;
+      padding: 8px;
+      color: #fff;
+      display: inline-block;
+      background-color: #2979ff;
+      text-decoration: none;
+    }
+    .button-secondary {
+      background: transparent;
+      border-right: 1px solid white;
+      margin-right: 8px;
+    }
+
+    #pause, #play {
+      /* Place in center */
+      z-index: 1;
+      margin: 0 auto;
+      top: calc(-50% - 10px);
+      position: relative;
+
+      /* Button styles */
+      border: 1px solid grey;
+      vertical-align: center;
+      text-align: center;
+      background-color: rgba(0,0,0, 0.8);
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+    }
+  </style>
+</head>
+<body>
+<div class="root-container">
+  <h1>The all-new Howdy WX-S Series</h1>
+  <div class="carousel-container">
+    <!-- ## Carousel -->
+    <!--
+    We use the `amp-carousel` component to display multiple slides.
+
+    All elements with the `carousel-item` class-name have essentially the same markup.
+
+    AMP has a system in place for [events and actions](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-actions-and-events.md). It uses a domain-specific language to describe how actions are triggered. In this example, we use the actions system in combination with `amp-bind` to keep a state variable of the current selected slide.
+
+    This is only used for transitions that are activated when the selected item slides into view. If the transition is not desired, `amp-bind` is no longer a requisite for this example.
+    -->
+    <amp-carousel
+        id="scrollable-carousel"
+        height="132"
+        layout="fixed-height"
+        type="slides"
+        class="carousel"
+        controls>
+      <div class="carousel-item">
+        <amp-img src="/test/fixtures/e2e/amphtml-ads/resource/car-sideview2.jpg"
+            width="216"
+            height="117"
+            layout="fixed"
+            class="carousel-img"></amp-img>
+      </div>
+      <div class="carousel-item">
+        <amp-img src="/test/fixtures/e2e/amphtml-ads/resource/car-gauges.jpg"
+            width="216"
+            height="117"
+            layout="fixed"
+            class="carousel-img"></amp-img>
+      </div>
+      <div class="carousel-item">
+        <amp-video id="my-video"
+            layout="fixed-height"
+            height="117"
+            src="https://amp.dev/static/samples/video/tokyo.mp4"
+            loop>
+        </amp-video>
+        <div role="button"
+            id="pause"
+            hidden
+            on="tap:my-video.pause,
+              play.show,
+              pause.hide">
+          ||
+        </div>
+        <div role="button"
+            id="play"
+            on="tap:my-video.play,
+              play.hide,
+              pause.show">
+          ▶
+        </div>
+      </div>
+      <div class="carousel-item">
+        <amp-anim
+            width="216"
+            height="117"
+            srcset="https://media.giphy.com/media/yFQ0ywscgobJK/giphy.gif 1282w,
+              https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif 1923w" >
+          <amp-img fallback src="/examples/img/sample.jpg" width=216 height=117 layout=responsive noloading></amp-img>
+          <div placeholder>This is a placeholder</div>
+        </amp-anim>
+      </div>
+      <div class="carousel-item">
+        <amp-img src="/test/fixtures/e2e/amphtml-ads/resource/car-sideview1.jpg"
+            width="216"
+            height="117"
+            layout="fixed"
+            class="carousel-img"></amp-img>
+      </div>
+    </amp-carousel>
+  </div>
+
+  <!-- ## Ad footer -->
+  <!--
+  By using the action system, we can activate a lightbox when the "Locate Store" button is tapped.
+  -->
+  <div class="footer">
+    <div class="stretch">
+      <amp-img src="/test/fixtures/e2e/amphtml-ads/resource/car-logo.png"
+          width="72"
+          height="32"
+          layout="fixed"
+          class="logo-img"></amp-img>
+    </div>
+    <button class="button button-secondary" on="tap:scrollable-carousel.goToSlide(index=2)">
+      The last slide
+    </button>
+    <a href="https://amp.dev/documentation/examples/" target="_blank" class="button">
+      Explore
+    </a>
+  </div>
+</div>
+</body>
+</html>

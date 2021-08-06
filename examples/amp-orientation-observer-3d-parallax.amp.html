@@ -1,0 +1,167 @@
+<html ⚡ lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>amp-orientation-observer</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
+  <script async custom-element="amp-orientation-observer" src="https://cdn.ampproject.org/v0/amp-orientation-observer-0.1.js"></script>
+  <style amp-custom>
+    body {
+      font-family: Helvetica, sans-serif;
+      margin: auto;
+    }
+
+    .title {
+      background-color: black;
+      color: white;
+      line-height: 1.2em;
+    }
+
+    #header-x {
+      position: absolute;
+      top: 20vh;
+      left: 5vw;
+      z-index: 2;
+    }
+
+    #header-y {
+      padding: 5px;
+    }
+
+    .spacer {
+      height: 70vh;
+      width: 100%;
+      background-image: -webkit-linear-gradient(#EEE 50%, white 50%);
+      background-image: linear-gradient(#EEE 50%, white 50%);
+      background-size: 100% 3em;
+    }
+
+    #animation {
+      position: relative;
+      top: 0;
+      left: 0;
+    }
+
+    #stars-x {
+      width: 100vw;
+      height: 80vh;
+      top: 0;
+      position:absolute;
+    }
+
+    #stars-y {
+      background-image: url(img/stars.png);
+      background-repeat: repeat-y;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+
+<body>
+  <amp-animation id="starsX" layout="nodisplay">
+    <script type="application/json">
+      {
+      "duration": "3s",
+      "fill": "both",
+      "direction": "alternate",
+      "animations": [
+        {
+          "selector": "#stars-x",
+          "keyframes": [
+            { "transform": "translateX(-10vw)" },
+            { "transform": "translateX(10vw)" }
+          ]
+        }
+      ]
+    }
+    </script>
+  </amp-animation>
+  <amp-animation id="starsY" layout="nodisplay">
+    <script type="application/json">
+      {
+      "duration": "3s",
+      "fill": "both",
+      "direction": "alternate",
+      "animations": [
+        {
+          "selector": "#stars-y",
+          "keyframes": [
+            { "transform": "translateY(-10vw)" },
+            { "transform": "translateY(10vw)" }
+          ]
+        }
+      ]
+    }
+    </script>
+  </amp-animation>
+  <amp-animation id="headerX" layout="nodisplay">
+    <script type="application/json">
+      {
+      "duration": "3s",
+      "fill": "both",
+      "direction": "alternate",
+      "animations": [
+        {
+          "selector": "#header-x",
+          "keyframes": [
+            { "transform": "translateX(0)" },
+            { "transform": "translateX(20vh)" }
+          ]
+        }
+      ]
+    }
+    </script>
+  </amp-animation>
+  <amp-animation id="headerY" layout="nodisplay">
+      <script type="application/json">
+        {
+        "duration": "3s",
+        "fill": "both",
+        "direction": "alternate",
+        "animations": [
+          {
+            "selector": "#header-y",
+            "keyframes": [
+              { "transform": "translateY(0)" },
+              { "transform": "translateY(20vh)" }
+            ]
+          }
+        ]
+      }
+      </script>
+    </amp-animation>
+  <amp-orientation-observer
+    on="gamma:starsX.seekTo(percent=event.percent);beta:starsY.seekTo(percent=event.percent);"
+    layout="nodisplay" smoothing="5">
+  </amp-orientation-observer>
+  <amp-orientation-observer
+    on="gamma:headerX.seekTo(percent=event.percent);beta:headerY.seekTo(percent=event.percent);"
+    layout="nodisplay" smoothing="5">
+  </amp-orientation-observer>
+
+  <div class="spacer"></div>
+  <div id="animation">
+    <amp-img alt="A view of the galaxy"
+      src="https://images.unsplash.com/photo-1445233566136-a2a4e2c38bc2?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=d7c6f165202ef84fb935dac255bf5052&auto=format&fit=crop&w=934&q=80"
+      width="434"
+      height="651"
+      layout="responsive">
+    </amp-img>
+    <div id="stars-x">
+      <div id="stars-y"></div>
+    </div>
+    <div id="header-x">
+      <h1 id="header-y">
+        <span class="title">Lorem Ipsum </br>Dolor Sit </br>Lorem Ipsum<span>
+      </h1>
+    </div>
+  </div>
+  <div class="spacer"></div>
+
+</body>
+</html>

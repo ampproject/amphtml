@@ -1,0 +1,93 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Stream Gallery</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async custom-element="amp-stream-gallery" src="https://cdn.ampproject.org/v0/amp-stream-gallery-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    .item {
+      display: flex;
+      padding: 0 5px
+    }
+
+    .item img {
+      object-fit: contain;
+    }
+
+    .gallery-container {
+      position: relative;
+    }
+  </style>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <h1>Stream Gallery</h1>
+  <div class="gallery-container">
+    <!--
+      a_w: arrow width - defaults to 48px
+      m_h: margin between items
+      n: number of visible slides
+      ar_h: aspect ratio height
+      ar_w: aspect ratio width
+
+      <div style="padding: 0  calc(a_w + n * m / 2)">
+        <div style="padding-top: calc(100% * (ar_h / (n * ar_w))))"></div>
+      </div>
+    -->
+    <!--
+      For this example: a_w = 48px, m = 10px, n = 3, ar_h = 2 and ar_w = 3
+    -->
+    <div style="padding: 0 calc(48px + 3 * 10px / 2)">
+      <div style="padding-top: calc(100% * (2 / (3 * 3)))"></div>
+    </div>
+    <amp-stream-gallery id="carousel-1" layout="fill"
+        loop="true"
+        snap="true"
+        outset-arrows="true"
+        min-item-width="(pointer: coarse) 130, 150"
+        max-item-width="180"
+        min-visible-count="3">
+      <div class="item">
+        <amp-img src="../amp-base-carousel/img/redgradient.png" layout="flex-item"></amp-img>
+      </div>
+      <div class="item">
+        <amp-img src="../amp-base-carousel/img/greengradient.png" layout="flex-item"></amp-img>
+      </div>
+      <div class="item">
+        <amp-img src="../amp-base-carousel/img/bluegradient.png" layout="flex-item"></amp-img>
+      </div>
+      <div class="item">
+        <amp-img src="../amp-base-carousel/img/orangegradient.png" layout="flex-item"></amp-img>
+      </div>
+      <div class="item">
+        <amp-img src="../amp-base-carousel/img/tealgradient.png" layout="flex-item"></amp-img>
+      </div>
+      <div class="item">
+        <amp-img src="../amp-base-carousel/img/lemonyellowgradient.png" layout="flex-item"></amp-img>
+      </div>
+      <div class="item">
+        <amp-img src="../amp-base-carousel/img/lilacgradient.png" layout="flex-item"></amp-img>
+      </div>
+      <!-- Dummy divs so that we have enough for looping-->
+      <div>intentionally left blank</div>
+      <div>intentionally left blank</div>
+    </amp-stream-gallery>
+  </div>
+  <p>Configuration:</p>
+  <ul>
+    <li>Looping</li>
+    <li>Snapping</li>
+    <li>Outset arrows</li>
+    <li>Showing 3 items at a time</li>
+    <li>3:2 aspect ratio of slides</li>
+    <li>10px spacing between items</li>
+    <li>Exact sizing of component</li>
+  </ul>
+  <p>
+    Note: there are two intentionally blank slides at the end. We need at least 9 slides to enable looping.
+  </p>
+</body>
+</html>

@@ -13,70 +13,82 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-
-var $$ = require('gulp-load-plugins')();
-var BBPromise = require('bluebird');
-var babel = require('babelify');
-var browserify = require('browserify');
-var buffer = require('vinyl-buffer');
-var depCheckConfig = require('../dep-check-config');
-var fs = BBPromise.promisifyAll(require('fs-extra'));
-var gulp = require('gulp-help')(require('gulp'));
-var minimatch = require('minimatch');
-var minimist = require('minimist');
-var path = require('path');
-var source = require('vinyl-source-stream');
-var through = require('through2');
-var util = require('gulp-util');
-
-
-var root = process.cwd();
-var absPathRegExp = new RegExp(`^${root}/`);
-var argv = minimist(process.argv.slice(2), {boolean: ['strictBabelTransform']});
-var red = (msg) => $$.util.log($$.util.colors.red(msg));
-
+const depCheckConfig = require('../test-configs/dep-check-config');
+const esbuild = require('esbuild');
+const fs = require('fs-extra');
+const minimatch = require('minimatch');
+const path = require('path');
+const {
+  createCtrlcHandler,
+  exitCtrlcHandler,
+} = require('../common/ctrlcHandler');
+const {compileJison} = require('./compile-jison');
+const {css} = require('./css');
+const {cyan, green, red, yellow} = require('../common/colors');
+const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
+const {log, logLocalDev} = require('../common/logging');
 
 /**
  * @typedef {{
  *   name: string,
- *   deps: ?Array<!Object<string, !ModuleDef>
+ *   deps: !Array<string>
  * }}
  */
-var ModuleDef;
+let ModuleDef;
 
 /**
  * @typedef {string}
  */
-var GlobDef;
+let GlobDef;
 
 /**
  * @typedef {!Array<!GlobDef>}
  */
-var GlobsDef;
+let GlobsDef;
+
+/**
+ * - type - Is assumed to be "forbidden" if not provided.
+ * - filesMatching - Is assumed to be all files if not provided.
+ * - mustNotDependOn - If type is "forbidden" (default) then the files
+ *     matched must not match the glob(s) provided.
+ * - allowlist - Skip rule if this particular dependency is found.
+ *     Syntax: fileAGlob->fileB where -> reads "depends on"
+ * @typedef {{
+ *  type?: (string|undefined),
+ *  filesMatching?: (string|!Array<string>|undefined),
+ *  mustNotDependOn?: (string|!Array<string>|undefined),
+ *  allowlist?: (string|!Array<string>|undefined),
+ * }}
+ */
+let RuleConfigDef;
 
 /**
  * @constructor @final @struct
+ * @param {!RuleConfigDef} config
  */
 function Rule(config) {
-
-  /** @private @const {!RuleConfigDef} */
+  /** @const {!RuleConfigDef} */
   this.config_ = config;
 
-  /** @private @const {string} */
+  /** @const {string} */
   this.type_ = config.type || 'forbidden';
 
   /**
    * Default to all files if none given.
-   * @private @const {!GlobsDef}
+   * @const {!GlobsDef}
    */
   this.filesMatching_ = toArrayOrDefault(config.filesMatching, ['**/*.js']);
 
-  /** @private @const {!GlobsDef} */
+  /** @const {!GlobsDef} */
   this.mustNotDependOn_ = toArrayOrDefault(config.mustNotDependOn, []);
 
-  /** @private @const {!Array<string>} */
-  this.whitelist_ = toArrayOrDefault(config.whitelist, []);
+  /** @const {!Array<string>} */
+  this.allowlist_ = toArrayOrDefault(config.allowlist, []);
+
+  /** @const {!Set<string>} */
+  this.unusedAllowlistEntries = new Set(this.allowlist_);
 }
 
 /**
@@ -84,16 +96,14 @@ function Rule(config) {
  * @param {!Array<string>} deps
  * @return {!Array<string>}
  */
-Rule.prototype.run = function(moduleName, deps) {
-  var errors = [];
-
+Rule.prototype.run = function (moduleName, deps) {
   // If forbidden rule and current module has no dependencies at all
   // then no need to match.
   if (this.type_ == 'forbidden' && !deps.length) {
-    return errors;
+    return [];
   }
 
-  return errors.concat(this.matchBadDeps(moduleName, deps));
+  return this.matchBadDeps(moduleName, deps);
 };
 
 /**
@@ -101,198 +111,230 @@ Rule.prototype.run = function(moduleName, deps) {
  * @param {!Array<string>} deps
  * @return {!Array<string>}
  */
-Rule.prototype.matchBadDeps = function(moduleName, deps) {
+Rule.prototype.matchBadDeps = function (moduleName, deps) {
   if (this.type_ != 'forbidden') {
     return [];
   }
 
-  var isFilenameMatch = this.filesMatching_
-      .some(x => minimatch(moduleName, x));
+  const isFilenameMatch = this.filesMatching_.some((x) =>
+    minimatch(moduleName, x)
+  );
   if (!isFilenameMatch) {
     return [];
   }
 
-  var mustNotDependErrors = [];
+  const mustNotDependErrors = [];
   // These nested loops are ok as we usually only have a few rules
   // to run against.
-  deps.forEach(dep => {
-    this.mustNotDependOn_.forEach(badDepPattern => {
+  deps.forEach((dep) => {
+    this.mustNotDependOn_.forEach((badDepPattern) => {
       if (minimatch(dep, badDepPattern)) {
-        var inWhitelist = this.whitelist_.some(entry => {
-          var pair = entry.split('->');
-          var whitelistedModuleName = pair[0];
-          var whitelistedDep = pair[1];
-          if (!minimatch(moduleName, whitelistedModuleName)) {
-            return false;
+        // Allow extension files to depend on their own code.
+        const dir = path.dirname(dep);
+        if (dir.startsWith('extensions/')) {
+          // eg, 'extensions/amp-geo/0.1'
+          const match = /extensions\/[^\/]+\/[^\/]+/.exec(dir);
+          if (match && path.dirname(moduleName).startsWith(match[0])) {
+            return;
           }
-          return dep == whitelistedDep;
-        });
-        if (inWhitelist) {
-          return;
         }
-        mustNotDependErrors.push(`${moduleName} must not depend on ${dep}. ` +
-            `Rule: ${JSON.stringify(this.config_)}.`);
+
+        for (const entry of this.allowlist_) {
+          const pair = entry.split('->');
+          const allowlistedModuleName = pair[0];
+          const allowlistedDep = pair[1];
+          if (!minimatch(moduleName, allowlistedModuleName)) {
+            continue;
+          }
+
+          if (dep == allowlistedDep) {
+            this.unusedAllowlistEntries.delete(entry);
+            return;
+          }
+        }
+        mustNotDependErrors.push(
+          cyan(moduleName) + ' must not depend on ' + cyan(dep)
+        );
       }
     });
   });
+
   return mustNotDependErrors;
 };
 
-var rules = depCheckConfig.rules.map(config => new Rule(config));
+const rules = depCheckConfig.rules.map((config) => new Rule(config));
 
 /**
- * Returns a list of entryPoint modules.
- * extenstions/0.1/*.js/amp.js/integration.js
- *
- * @return {!Promise<!Array<string>>}
+ * Returns a single module that contains a list of entry points to these files:
+ * - extensions/{$extension}/{$version}/{$extension}.js
+ * - src/amp.js
+ * - 3p/integration.js
+ * @return {Promise<string>}
  */
-function getSrcs() {
-  return fs.readdirAsync('extensions').then(dirItems => {
-    // Look for extension entry points
-    return dirItems
-      .map(x => `extensions/${x}`)
-      .filter(x => fs.statSync(x).isDirectory())
-      // If we ever need more than 0.1, just return an array and flatten
-      // the Array.
-      .map(getEntryModule)
-      // Concat the core binary and integration binary as entry points.
-      .concat(`src/amp.js`, `3p/integration.js`);
-  });
+async function getEntryPointModule() {
+  const coreBinaries = ['src/amp.js', '3p/integration.js'];
+  const extensions = await fs.promises.readdir('extensions');
+  const extensionEntryPoints = extensions
+    .map((x) => `extensions/${x}`)
+    .filter((x) => fs.statSync(x).isDirectory())
+    .map(getEntryPoint);
+  const vendors = await fs.promises.readdir('3p/vendors');
+  const vendorEntryPoints = vendors.map((x) => `3p/vendors/${x}`);
+  const allEntryPoints = flatten(extensionEntryPoints)
+    .concat(coreBinaries)
+    .concat(vendorEntryPoints);
+  const entryPointData = allEntryPoints
+    .map((file) => `import './${file}';`)
+    .join('\n');
+  return entryPointData;
 }
 
 /**
- * @param {string} entryModule
- * @return {!Promise<!ModuleDef>}
+ * @param {string} entryPointModule
+ * @return {!Promise<ModuleDef>}
  */
-function getGraph(entryModule) {
-  var resolve;
-  var promise = new BBPromise(r => {
-    resolve = r;
+async function getModuleGraph(entryPointModule) {
+  const plugin = getEsbuildBabelPlugin('unminified', /* enableCache */ true);
+  const result = await esbuild.build({
+    stdin: {
+      contents: entryPointModule,
+      resolveDir: '.',
+    },
+    bundle: true,
+    write: false,
+    metafile: true,
+    plugins: [plugin],
   });
-  var module = Object.create(null);
-  module.name = entryModule;
-  module.deps = [];
 
-  // TODO(erwinm): Try and work this in with `gulp build` so that
-  // we're not running browserify twice on travis.
-  var bundler = browserify(entryModule, {debug: true, deps: true})
-      .transform(babel, {
-        loose: argv.strictBabelTransform ? undefined : 'all'
-      });
+  const entryPoints = result.metafile?.inputs || [];
+  const moduleGraph = Object.create(null);
+  moduleGraph.name = entryPointModule;
+  moduleGraph.deps = [];
 
-  bundler.pipeline.get('deps').push(through.obj(function(row, enc, next) {
-    module.deps.push({
-      name: row.file.replace(absPathRegExp, ''),
-      deps: row.deps,
+  for (const entryPoint in entryPoints) {
+    moduleGraph.deps.push({
+      name: entryPoint,
+      deps: entryPoints[entryPoint].imports.map((dep) => dep.path),
     });
-    this.push(row);
-    next();
-  }));
-  bundler.bundle()
-      .pipe(source(entryModule))
-      // Unfortunately we need to write the files out.
-      .pipe(gulp.dest('./.amp-build'))
-      .on('end', resolve.bind(null, module));
-  return promise;
+  }
+  logLocalDev('Extracted module graph');
+  return moduleGraph;
 }
 
 /**
  * @param {string} extensionFolder
  * @return {!Array<!ModuleDef>}
  */
-function getEntryModule(extensionFolder) {
-  // TODO: handle more than just 0.1
-  return `${extensionFolder}/0.1/${path.basename(extensionFolder)}.js`;
+function getEntryPoint(extensionFolder) {
+  const extension = path.basename(extensionFolder);
+  return fs
+    .readdirSync(extensionFolder)
+    .map((x) => `${extensionFolder}/${x}`)
+    .filter((x) => fs.statSync(x).isDirectory())
+    .map((x) => `${x}/${extension}.js`)
+    .filter((x) => fs.existsSync(x))
+    .filter((x) => fs.statSync(x).isFile());
 }
 
 /**
- * Flattens the graph to easily run through the Rules. Original graph
- * would be nested ModuleDef's wherein the top level are entry points
- * with nested dependencies. We flatten it so all we have are individual
- * modules and their imports as well as making the entries unique.
+ * Flattens the module dependency graph and makes its entries unique. This
+ * serves as the input on which all rules are tested.
  *
- * @param {!ModuleDef} entryModule
+ * @param {!ModuleDef} entryPoints
  * @return {!ModuleDef}
  */
 function flattenGraph(entryPoints) {
-  // Flatten the graph by just getting all the deps from all
-  // the entry points.
-  entryPoints = entryPoints.map(entryPoint => entryPoint.deps);
-  // Now make the graph have unique entries
-  return flatten(entryPoints)
-      .reduce((acc, cur, i, arr) => {
-        var name = cur.name;
-        if (!acc[name]) {
-          acc[name] = Object.keys(cur.deps)
-              // Get rid of the absolute path for minimatch'ing
-              .map(x => cur.deps[x].replace(absPathRegExp, ''));
-        }
-        return acc;
-      }, Object.create(null));
+  return flatten(entryPoints.deps).reduce((acc, cur) => {
+    const {name} = cur;
+    if (!acc[name]) {
+      acc[name] = Object.values(cur.deps);
+    }
+    return acc;
+  }, Object.create(null));
 }
 
 /**
  * Run Module dependency graph against the rules.
  *
- * @param {!Array<!ModuleDef>} modules
+ * @param {!ModuleDef} moduleGraph
+ * @return {boolean} true if violations were discovered.
  */
-function runRules(modules) {
-  var errorsFound = false;
-  Object.keys(modules).forEach(moduleName => {
-    var deps = modules[moduleName];
+function runRules(moduleGraph) {
+  const errors = [];
+  Object.keys(moduleGraph).forEach((moduleName) => {
     // Run Rules against the modules and flatten for reporting.
-    var errors = flatten(rules.map(rule => rule.run(moduleName, deps)));
-
-    if (errors.length) {
-      errorsFound = true;
-      // Report errors.
-      errors.forEach(red);
-    }
+    const results = rules.flatMap((rule) =>
+      rule.run(moduleName, moduleGraph[moduleName])
+    );
+    errors.push(...results);
   });
-  return errorsFound;
+
+  rules
+    .flatMap((r) => Array.from(r.unusedAllowlistEntries))
+    .forEach((unusedEntry) => {
+      errors.push(cyan(unusedEntry) + ' is an unused allowlist entry');
+    });
+
+  errors.forEach((error) => {
+    log(red('ERROR:'), error);
+  });
+
+  return errors.length > 0;
 }
 
-function depCheck() {
-  var errorsFound = false;
-  return getSrcs().then(entryPoints => {
-    // This check is for extension folders that actually dont have
-    // an extension entry point module yet.
-    entryPoints = entryPoints.filter(x => fs.existsSync(x));
-    return BBPromise.all(entryPoints.map(getGraph));
-  })
-  .then(flattenGraph)
-  .then(runRules)
-  .then(errorsFound => {
-    if (errorsFound) {
-      process.exit(1);
-    }
-  });
+/**
+ * @return {Promise<void>}
+ */
+async function depCheck() {
+  const handlerProcess = createCtrlcHandler('dep-check');
+  await css();
+  await compileJison();
+  logLocalDev('Checking dependencies...');
+  const entryPointModule = await getEntryPointModule();
+  const moduleGraph = await getModuleGraph(entryPointModule);
+  const errorsFound = runRules(flattenGraph(moduleGraph));
+  if (errorsFound) {
+    log(
+      yellow('NOTE:'),
+      'Invalid dependencies must be removed, while valid ones must be added to',
+      cyan('build-system/test-configs/dep-check-config.js')
+    );
+    throw new Error('Dependency checks failed');
+  } else {
+    logLocalDev(green('SUCCESS:'), 'Checked all dependencies.');
+  }
+  exitCtrlcHandler(handlerProcess);
 }
 
 /**
  * Put value in Array context.
  *
- * @param {!GlobsDef|string} value
- * @param {!Array<string>} defaultValue
+ * @param {GlobsDef|string|undefined} value
+ * @param {!GlobsDef} defaultValue
  * @return {!GlobsDef}
  */
 function toArrayOrDefault(value, defaultValue) {
   if (Array.isArray(value)) {
     return value;
   }
-  if (typeof value == 'string') {
+  if (typeof value === 'string') {
     return [value];
   }
   return defaultValue;
 }
 
 /**
- * Flatten array of arrays.
+ * Flatten array of arrays if necessary.
  *
- * @type {!Array<!Array>}
+ * @param {Array} arr
+ * @return {!Array}
  */
 function flatten(arr) {
   return [].concat.apply([], arr);
 }
 
-gulp.task('dep-check', 'Runs a dependency check on each module', depCheck);
+module.exports = {
+  depCheck,
+};
+
+depCheck.description = 'Run a dependency check on each module';

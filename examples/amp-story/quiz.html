@@ -1,0 +1,139 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>amp-story-interactive-quiz example</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    h1 #cat-facts-title {
+      color: white;
+      font-family: Helvetica;
+      text-align: center;
+      font-size: 48px;
+    }
+  </style>
+  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <amp-story standalone id="cat-facts"
+    title="Cat Facts!"
+    publisher="The AMP Team"
+    publisher-logo-src="./img/AMP-Brand-White-Icon.svg"
+    poster-portrait-src="./img/overview.jpg">
+
+    <amp-analytics id="analytics1">
+      <script type="application/json">
+        {
+          "requests": {
+            "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/main/examples/img/ampicon.png",
+            "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
+            "click": "${base}?&index=${storyPageIndex}&id=${storyPageId}&interactiveType=${storyInteractiveType}&interactiveId=${storyInteractiveId}&interactiveesponseId=${storyInteractiveResponse}"
+          },
+          "triggers": {
+            "trackQuizResponse": {
+              "on": "story-interactive",
+              "tagname": "amp-story-interactive-quiz",
+              "request": "click"
+            }
+          }
+        }
+      </script>
+    </amp-analytics>
+
+    <amp-story-page id="cover">
+      <amp-story-grid-layer template="fill">
+          <amp-img src="https://i.pinimg.com/originals/60/3d/be/603dbeae12bb77121f912d48aee8ee4e.jpg"
+          width="720" height="1280"
+          layout="responsive">
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="vertical">
+        <h1 id="cat-facts-title">Cat Facts!</h1>
+      </amp-story-grid-layer>
+    </amp-story-page>
+    <amp-story-page id="quiz-question-1">
+      <amp-story-grid-layer template="fill">
+          <amp-img src="https://dw5orfsilhv7r.cloudfront.net/wp-content/uploads/2016/03/petandco-wallpapers-cats-phone-01.png"
+          width="720" height="1280"
+          layout="responsive">
+      </amp-story-grid-layer>
+      <amp-story-grid-layer>
+        <style>
+          #cat-question-appear {
+            --accent-color: cadetblue;
+          }
+        </style>
+        <amp-story-interactive-quiz
+          id='cat-question-appear'
+          endpoint="http://localhost:3000/interactives"
+          theme="dark"
+          prompt-text="When did the domestic cat first appear on the scene?"
+          option-1-text="7,000 years ago"
+          option-2-text="500,000 years ago" option-2-correct=""
+          option-3-text="2 million years ago"
+          option-4-text="34 million years ago">
+        </amp-story-interactive-quiz>
+      </amp-story-grid-layer>
+    </amp-story-page>
+    <amp-story-page id="quiz-question-2">
+        <amp-story-grid-layer template="fill">
+            <amp-img src="https://i.pinimg.com/originals/08/20/d3/0820d30c849627c7939761637ac90219.jpg"
+            width="720" height="1280"
+            layout="responsive">
+        </amp-story-grid-layer>
+        <amp-story-grid-layer>
+          <amp-story-interactive-quiz
+            id='cat-question-handedness'
+            chip-style="shadow"
+            prompt-text="True or False: Cats can be right-pawed or left-pawed."
+            option-1-text="True" option-1-correct="correct"
+            option-2-text="False"
+            option-3-text="The quick brown fox jumped over the lazy dog lorem ipsum dolor sit amet as d f ghjkl">
+          </amp-story-interactive-quiz>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="quiz-question-3">
+        <amp-story-grid-layer template="fill">
+            <amp-img src="https://i.pinimg.com/originals/8d/b1/e9/8db1e9b7cc3ee52b13cabe3a53c62f05.jpg"
+            width="720" height="1280"
+            layout="responsive">
+        </amp-story-grid-layer>
+        <style>
+          #cat-question-cute {
+            justify-content: flex-end;
+            align-content: flex-end;
+          }
+        </style>
+        <amp-story-grid-layer id="cat-question-cute">
+          <amp-story-interactive-quiz
+            id="cats-cute-quiz"
+            prompt-text="Are cats cute?"
+            option-1-text="Yes" option-1-correct="correct"
+            option-2-text="No">
+          </amp-story-interactive-quiz>
+        </amp-story-grid-layer>
+        <amp-story-page-attachment layout="nodisplay" theme="dark">
+          <h1>Amazing title</h1>
+          <p>Bacon ipsum dolor cat cat cat.</p>
+          <amp-youtube
+              id="myLiveChannel"
+              data-live-channelid="UCB8Kb4pxYzsDsHxzBfnid4Q"
+              width="358"
+              height="204"
+              layout="responsive">
+            <amp-img
+                src="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg"
+                placeholder
+                layout="fill">
+            </amp-img>
+          </amp-youtube>
+        </amp-story-page-attachment>
+      </amp-story-page>
+  </amp-story>
+</body>
+</html>

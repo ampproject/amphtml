@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <link href="https://vjs.zencdn.net/7.3.0/video-js.css" rel="stylesheet">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <script async src="https://cdn.ampproject.org/video-iframe-integration-v0.js"></script>
+  <style type="text/css">
+  /* Hide big play button for a smoother autoplay experience. */
+  .video-js .vjs-big-play-button {
+    display: none;
+  }
+  </style>
+</head>
+<body style="margin: 0; padding: 0">
+  <video
+      id="my-video"
+      playsinline
+      controls
+      style="width: 100vw; height: 100vh;"
+      preload="auto"
+      class="video-js"
+      data-setup="{}">
+    <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+        type="video/mp4">
+    <p class="vjs-no-js">
+      To view this video please enable JavaScript, and consider upgrading to a web browser that
+      <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+    </p>
+  </video>
+
+  <script src="https://vjs.zencdn.net/7.3.0/video.js"></script>
+
+  <!-- Integration script -->
+  <script>
+    // Wait for API to initialize
+    (window.AmpVideoIframe = window.AmpVideoIframe || [])
+        .push(function(ampIntegration) {
+          var myVideo = document.querySelector('#my-video');
+          ampIntegration.listenTo('videojs', myVideo);
+        });
+  </script>
+</body>
+</html>

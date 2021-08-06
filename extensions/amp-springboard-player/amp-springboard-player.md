@@ -1,3 +1,11 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Displays a Springboard Platform video player.
+---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,75 +22,60 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-springboard-player"></a> `amp-springboard-player`
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>An <code>amp-springboard-player</code> displays the Springboard Player used in <a href="http://publishers.springboardplatform.com">Springboard</a> Video Platform.
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-springboard-player" src="https://cdn.ampproject.org/v0/amp-springboard-player-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, flex-item, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/springboard-player.amp.html">springboard-player.amp.html</a></td>
-  </tr>
-</table>
+# amp-springboard-player
 
 ## Example
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
 
-Examples:
-
 ```html
 <amp-springboard-player
-	data-site-id="261"
-	data-mode="video"
-	data-content-id="1578473"
-	data-player-id="test401"
-	data-domain="test.com"
-	data-items="10"
-	layout="responsive" width="480" height="270">
+  data-site-id="261"
+  data-mode="video"
+  data-content-id="1578473"
+  data-player-id="test401"
+  data-domain="test.com"
+  data-items="10"
+  layout="responsive"
+  width="480"
+  height="270"
+>
 </amp-springboard-player>
 ```
 
 ## Attributes
 
-**data-site-id**
-
-The SpringBoard site id. Specific to every partner.
-
-**data-mode**
-
-The SpringBoard player mode (video|playlist).
-
-**data-content-id**
-
-The SpringBoard player content id (video or playlist id).
-
-**data-player-id**
-
-The Springboard player ID.
-
-**data-domain**
-
-The Springboard partner domain.
-
-**data-items**
-
-The number of videos in playlist
+<table>
+  <tr>
+    <td width="40%"><strong>data-site-id (required)</strong></td>
+    <td>The SpringBoard site ID. Specific to every partner.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-mode (required)</strong></td>
+    <td>The SpringBoard player mode: <code>video</code> or <code>playlist</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-content-id (required)</strong></td>
+    <td>The SpringBoard player content ID (video or playlist ID).</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-player-id (required)</strong></td>
+    <td>The Springboard player ID.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-domain (required)</strong></td>
+    <td>The Springboard partner domain.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-items (required)</strong></td>
+    <td>The number of videos in the playlist.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
 ## Validation
 
-See [amp-springboard-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-springboard-player/0.1/validator-amp-springboard-player.protoascii) in the AMP validator specification.
+See [amp-springboard-player rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-springboard-player/validator-amp-springboard-player.protoascii) in the AMP validator specification.

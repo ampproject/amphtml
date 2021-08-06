@@ -15,20 +15,14 @@
  */
 
 export const data = {
-  jsonBlob: `<html><head></head>
-<body>
-<p>some text</p>
-<script type="application/json" amp-ad-metadata>
-{
-  "aString": "a string",
-  "anArray": [0, 1, 2, 3, 4],
-  "anObject": { "data": 3.14159 }
-}
-</script></body></html>`,
+  minimalDocOneStyleSrcDoc: `<html><head>
+<style amp-custom>p { background: green }</style>
+</head>
+<body><p>some text</p></body></html>`,
 
   minimalDocOneStyle: `<html><head>
-<style>p { background: green }</style>
-</head>
-<body><p>some text</p></body></html>
-`,
+<style amp-custom>p { background: green }</style>
+<style amp4ads-boilerplate>body{visibility:hidden}</style>
+<script async src="https://cdn.ampproject.org/v0.js"></script></head>
+<body><p>some text</p></body></html>`,
 };

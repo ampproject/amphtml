@@ -1,0 +1,444 @@
+<!doctype html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>AMP Consent CMP Vendors</title>
+    <link rel="canonical" href="cmp-vendors.amp.html" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-custom>
+    .box {
+      background: #ccc;
+      border: 1px solid #aaa;
+      padding: 10px;
+      margin: 10px;
+    }
+
+    #container {
+      position: absolute;
+      top: 10000px;
+      height: 10px;
+    }
+
+    .filterBar {
+      background: #eee;
+      padding: 3px;
+      font-size: 1.2em;
+    }
+
+    .filterBar form {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    .filterBar form * {
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+
+    .filterBar .clearLocalStorage {
+      margin-left: auto;
+    }
+
+    select {
+      border: 1px solid #999;
+    }
+
+    input[type=submit] {
+      font-size: 14px;
+      border: 1px solid #999;
+      border-radius: 3px;
+      margin-left: 10px;
+    }
+
+    amp-consent {
+      min-height: 30px;
+      font-family: 'Roboto';
+      font-weight: 500;
+      line-height: 30px;
+      padding: 8px;
+      background: #46b6ac;
+    }
+
+    amp-consent button {
+      border: none;
+      border-radius: 2px;
+
+      color: #fafafa;
+      height: 26px;
+      min-width: 32px;
+      padding: 0 16px;
+      margin: 0 16px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      cursor: pointer;
+      vertical-align: middle;
+      line-height: 26px;
+      text-align: center;
+      background: #3f51b5;
+    }
+
+    </style>
+    <script async custom-element="amp-geo" src="https://cdn.ampproject.org/v0/amp-geo-0.1.js"></script>
+    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+      <script async src="https://cdn.ampproject.org/v0.js"></script>
+      <script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"></script>
+  </head>
+  <body>
+
+    <div class="filterBar">
+      <form action="cmp-vendors.amp.html" method="get" target="_top">
+        <label for="filter">Vendor filter</label>
+        <select id="filter" name="type">
+          <option>[Select a vendor]</option>
+          <!-- This should be in alphabetical order. _ping_ should be the first -->
+          <option>_ping_</option>
+          <option>appconsent</option>
+          <option>ConsentManager</option>
+          <option>didomi</option>
+          <option>iubenda</option>
+          <option>LiveRamp</option>
+          <option>Marfeel</option>
+          <option>Ogury</option>
+          <option>opencmp</option>
+          <option>pubtech</option>
+          <option>quantcast</option>
+          <option>sirdata</option>
+          <option>SourcePoint</option>
+          <option>UniConsent</option>
+          <option>Usercentrics</option>
+        </select>
+        <input type="submit" value="Go">
+        <button type="button" class="clearLocalStorage" onclick="localStorage.clear(); alert('localStorage Cleared!')">Clear localStorage</button>
+      </form>
+    </div>
+
+    <h1 id="top">AMP Consent CMP</h1>
+    <h3>Image that is blocked by both consent</h3>
+    <amp-img data-block-on-consent src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no-n" width=300 height=200></amp-img>
+
+    <h3>Image that is NOT blocked by consent</h3>
+    <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no-n" width=300 height=200></amp-img>
+
+
+    <div id="container">
+      Container for amp-consent tags.
+
+      <!-- This should be in alphabetical order. _ping_ should be the first -->
+
+      <!-- _ping_ example -->
+      <amp-consent id='ABC' layout='nodisplay' type='_ping_'>
+        <script type="application/json">
+          {
+            "postPromptUI": "postPromptUI",
+            "clientConfig": {
+              "CMP_id": "test_id",
+              "other_info": "test_info"
+            }
+          }
+        </script>
+        <div id="postPromptUI">
+          Post Prompt UI
+          <button on="tap:ABC.prompt(consent=_ping_)">Manage</button>
+        </div>
+      </amp-consent>
+      <!-- End _ping_ example -->
+
+      <!-- appconsent example -->
+      <amp-consent id='ABC' layout='nodisplay' type='appconsent'>
+        <script type="application/json">
+          {
+            "postPromptUI": "postPromptUI",
+            "clientConfig": {
+              "id": "1/10/v5eCA1JV4"
+            }
+          }
+        </script>
+        <div id="postPromptUI">
+          Post Prompt UI
+          <button on="tap:ABC.prompt(consent=appconsent)">Manage</button>
+        </div>
+      </amp-consent>
+      <!-- End appconsent example -->
+
+
+      <!-- ConsentManager example -->
+      <amp-consent id="ConsentManager" layout="nodisplay" type="ConsentManager">
+        <script type="application/json">
+          {
+            "postPromptUI": "postPromptUI",
+            "clientConfig": { "id": "1" }
+          }
+        </script>
+        <div id="postPromptUI">
+          Post Prompt UI
+          <button on="tap:consent.prompt(consent=ConsentManager)">Manage</button>
+        </div>
+      </amp-consent>
+      <!-- End appconsent example -->
+
+      <!-- didomi example -->
+      <amp-consent id='didomi' layout='nodisplay' type='didomi'>
+          <script type="application/json">
+            {
+              "postPromptUI": "postPromptUI",
+              "clientConfig": {
+                "config": {
+                  "app": {
+                    "apiKey": "03f1af55-a479-4c1f-891a-7481345171ce",
+                    "name": "AMP - Didomi",
+                    "vendors": {
+                      "iab": {
+                        "all": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          </script>
+          <div id="postPromptUI">
+            Post Prompt UI
+            <button on="tap:didomi.prompt(consent=didomi)">Manage</button>
+          </div>
+        </amp-consent>
+        <!-- End didomi example -->
+
+      <!-- iubenda example -->
+      <amp-consent id="iubenda" layout="nodisplay" type="iubenda">
+        <script type="application/json">
+          {
+            "promptUISrc": "https://cdn.iubenda.com/cs/test/cs-for-amp.html",
+            "postPromptUI": "iubendaPostPromptUI"
+          }
+        </script>
+        <div id="iubendaPostPromptUI">
+          Post Prompt UI
+          <button on="tap:iubenda.prompt(consent=iubenda)">Manage</button>
+        </div>
+      </amp-consent>
+      <!-- End iubenda example -->
+
+      <!-- LiveRamp example -->
+      <amp-consent id="consent" layout="nodisplay" type="LiveRamp">
+        <script type="application/json">
+          {
+            "postPromptUI": "post-consent-ui",
+            "clientConfig": {
+              "appId": "c65a09d5-eda1-4eef-bf38-90e73059f4d6"
+            },
+            "uiConfig": {
+              "overlay": true
+            }
+          }
+        </script>
+
+        <div id="post-consent-ui" tabindex="0" role="button" on="tap:consent.prompt(consent=LiveRamp)" style="display: flex; width: 40px; height: 40px; justify-content: center; align-items: center; cursor: pointer; margin: 0 0 10px 10px;
+                    float: left; border-radius: 25px; background-color: #ffffff">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 100 100">
+            <path fill="#ff0a0a"
+              d="M68.884 25.318c-6.503-3.34-12.126-4.757-18.867-4.757-6.706 0-13.074 1.586-18.866 4.757-.813.439-1.83.135-2.303-.674-.44-.81-.136-1.856.677-2.295 6.3-3.407 13.21-5.162 20.492-5.162 7.215 0 13.515 1.586 20.425 5.129.847.438 1.152 1.45.711 2.26-.304.607-.88.945-1.49.945-.27 0-.542-.068-.779-.203zm-47.895 16.87c-.341 0-.683-.098-.99-.293-.786-.521-.956-1.53-.41-2.28 3.38-4.556 7.684-8.137 12.806-10.644 10.724-5.273 24.452-5.306 35.21-.032 5.122 2.506 9.425 6.055 12.806 10.58.546.715.376 1.757-.41 2.278-.785.52-1.844.358-2.39-.39-3.074-4.102-6.967-7.325-11.577-9.571-9.802-4.785-22.335-4.785-32.102.033-4.644 2.278-8.537 5.533-11.611 9.635-.273.456-.785.684-1.332.684zm22.028 38.541c-.449 0-.897-.162-1.208-.487-3.002-2.823-4.624-4.64-6.936-8.566-2.38-3.991-3.623-8.858-3.623-14.082 0-9.637 8.765-17.49 19.531-17.49 10.767 0 19.532 7.853 19.532 17.49 0 .908-.76 1.622-1.726 1.622s-1.725-.714-1.725-1.622c0-7.853-7.212-14.245-16.08-14.245-8.87 0-16.081 6.392-16.081 14.245 0 4.672 1.104 8.988 3.209 12.492 2.208 3.732 3.727 5.322 6.384 7.853.655.649.655 1.654 0 2.303-.38.325-.828.487-1.277.487zm23.652-5.208c-4.185 0-7.878-1-10.903-2.967-5.24-3.368-8.37-8.836-8.37-14.637 0-.934.774-1.667 1.758-1.667.985 0 1.759.733 1.759 1.667 0 4.701 2.532 9.135 6.823 11.87 2.497 1.6 5.416 2.366 8.933 2.366.844 0 2.25-.1 3.658-.333.95-.167 1.864.433 2.04 1.367.175.9-.458 1.767-1.442 1.934-2.005.366-3.764.4-4.256.4zm-6.157 7.291c-.137 0-.308-.032-.445-.065-5.44-1.45-8.999-3.393-12.728-6.917-4.79-4.579-7.425-10.672-7.425-17.194 0-5.336 4.722-9.684 10.538-9.684 5.817 0 10.539 4.348 10.539 9.684 0 3.524 3.182 6.39 7.117 6.39 3.934 0 7.116-2.866 7.116-6.39 0-12.418-11.12-22.497-24.806-22.497-9.717 0-18.613 5.204-22.616 13.274-1.335 2.668-2.019 5.797-2.019 9.223 0 2.57.24 6.62 2.293 11.89.342.857-.103 1.812-.993 2.109-.89.329-1.882-.132-2.19-.956-1.676-4.314-2.497-8.596-2.497-13.043 0-3.953.787-7.543 2.326-10.672 4.551-9.19 14.645-15.151 25.696-15.151 15.568 0 28.228 11.56 28.228 25.79 0 5.336-4.722 9.684-10.538 9.684-5.817 0-10.539-4.348-10.539-9.684 0-3.524-3.182-6.39-7.117-6.39-3.934 0-7.116 2.866-7.116 6.39 0 5.632 2.258 10.903 6.398 14.855 3.25 3.096 6.364 4.809 11.188 6.094.924.23 1.437 1.152 1.198 2.009-.171.757-.89 1.251-1.608 1.251z" />
+          </svg>
+        </div>
+      </amp-consent>
+      <!-- End LiveRamp example-->
+
+      <!-- Marfeel example -->
+      <amp-consent id='marfeelConsent' layout='nodisplay' type='Marfeel'>
+        <script type="application/json">
+          {
+            "postPromptUI": "postPromptUI",
+            "clientConfig": {
+              "consentLanguage": "en",
+              "publisherLogo": "https://marfeel.mgr.consensu.org/amp/img/marfeel-logo.png"
+            }
+          }
+        </script>
+        <div id="postPromptUI">
+          Post Prompt UI
+          <button on="tap:marfeelConsent.prompt(consent=Marfeel)">Manage</button>
+        </div>
+      </amp-consent>
+      <!-- End Marfeel example -->
+
+      <!-- Ogury example -->
+      <amp-consent id='ogury' layout='nodisplay' type='Ogury'>
+        <script type="application/json">
+          {
+            "postPromptUI": "custom-prompt-ui",
+            "clientConfig": {
+              "assetKey": "OGY-316B32F7E5B7"
+            },
+            "uiConfig": {
+              "overlay": true
+            }
+          }
+        </script>
+        <div id="custom-prompt-ui">
+          Post Prompt UI
+          <button on="tap:ogury.prompt(consent=Ogury)">
+            Privacy Settings
+          </button>
+        </div>
+      </amp-consent>
+      <!-- End Ogury example -->
+
+      <!-- OneTrust example -->
+      <amp-consent id='consent' layout='nodisplay' type='onetrust'>
+        <script type="application/json">
+        {
+          "postPromptUI": "onetrust-consent-prompt-ui",
+          "clientConfig": {
+            "CMP_id": "ac6c1ea9-9ac8-460e-a132-b328dea3f56f-test",
+            "Env": "App",
+            "Opt_Out": "C0004"
+          }
+        }
+        </script>
+        <div id="onetrust-consent-prompt-ui">
+          Post Prompt UI
+          <button on="tap:consent.prompt(consent=onetrust)">Privacy Settings</button>
+        </div>
+      </amp-consent>
+      <!-- End OneTrust example -->
+
+      <!-- opencmp example -->
+      <amp-consent id='consent' layout='nodisplay' type='opencmp'>
+        <script type="application/json">
+          {
+            "postPromptUI": "opencmp-consent-prompt-ui",
+            "clientConfig": {}
+          }
+        </script>
+        <div id="opencmp-consent-prompt-ui">
+          Post Prompt UI
+          <button on="tap:consent.prompt(consent=opencmp)">Privacy Settings</button>
+        </div>
+      </amp-consent>
+      <!-- End opencmp example -->
+
+      <!-- Pubtech Example -->
+      <amp-consent id="pubtech" layout="nodisplay" type="pubtech">
+        <script type="application/json">
+              {
+                "postPromptUI": "pubtech-post-prompt",
+                "clientConfig": {
+                  "privacyUrl": "",
+                  "isAmp": true,
+                  "websiteName": "Pubtech"
+                }
+              }
+            </script>
+        <div id="pubtech-post-prompt">
+          <button on="tap:pubtech.prompt(consent=pubtech)">Privacy settings</button>
+        </div>
+      </amp-consent>
+      <!-- End Pubtech example -->
+
+      <!-- Quantcast Example -->
+      <amp-consent id="quantcast" layout="nodisplay" type="quantcast">
+        <script type="application/json">
+            {
+              "postPromptUI": "quantcast-post-prompt",
+              "clientConfig": {
+                "coreConfig": {
+                  "googleEnabled": false
+                }
+              }
+            }
+          </script>
+          <div id="quantcast-post-prompt">
+            <button on="tap:consent.prompt(consent=quantcast)">Privacy settings</button>
+          </div>
+      </amp-consent>
+      <!-- End Quantcast example -->
+
+      <!-- sirdata example -->
+      <amp-consent id="consent" layout="nodisplay" type="sirdata">
+        <script type="application/json">
+          {
+            "postPromptUI": "promptConsentUI",
+            "clientConfig": {
+              "cmp": {
+                "theme": {
+                  "noConsentButton": "refuse"
+                }
+              }
+            }
+          }
+        </script>
+        <div id="promptConsentUI">
+          Post Prompt UI
+          <button on="tap:consent.prompt(consent=sirdata)">Privacy settings</button>
+        </div>
+      </amp-consent>
+      <!-- End sirdata example -->
+
+      <!-- SourcePoint example -->
+      <amp-consent id='consent' layout='nodisplay' type='SourcePoint'>
+        <script type="application/json">
+          {
+            "postPromptUI": "my-consent-prompt-ui",
+            "clientConfig": {
+              "accountId": 22,
+              "siteName": "mobile.demo",
+              "siteId": 2372,
+              "privacyManagerId": "5c0e81b7d74b3c30c6852301",
+              "stageCampaign": false,
+              "authId": "MY-UUID",
+              "targetingParams": {
+                "MyPrivacyManager": "false"
+              }
+            }
+          }
+        </script>
+        <div id="my-consent-prompt-ui">
+          Post Prompt UI
+          <button on="tap:consent.prompt(consent=SourcePoint)">Privacy Settings</button>
+        </div>
+      </amp-consent>
+      <!-- End SourcePoint example -->
+
+      <!-- UniConsent example -->
+      <amp-consent id="uniconsent" layout="nodisplay" type="UniConsent">
+        <script type="application/json">
+          {
+            "postPromptUI": "post-consent-ui",
+            "clientConfig": {
+              "id": "8d3a00eb37"
+            },
+            "uiConfig": {
+              "overlay": true
+            }
+          }
+        </script>
+
+        <div id="post-consent-ui" tabindex="0" role="button" on="tap:uniconsent.prompt(consent=UniConsent)" style="display: flex; width: 30px; height: 30px; justify-content: center; align-items: center; cursor: pointer; margin: 0 0 10px 10px;
+                    float: left; border-radius: 4px; background-image: linear-gradient(37deg,#c7c7c7,#e0e0e0);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 80 80"><g xmlns="http://www.w3.org/2000/svg"><path d="M34,0 C34,0 23.6964545,11.1724138 0,11.1724138 L0,37.8256034 C0,51.7436379 6.68872727,65.1658966 18.7989091,73.7658621 C23.0844545,76.8103448 28.1396364,79.4288793 34,81 C39.8603636,79.4288793 44.914,76.8103448 49.2010909,73.7658621 C61.3112727,65.1658966 68,51.7436379 68,37.8256034 L68,11.1724138 C44.3035455,11.1724138 34,0 34,0 Z" id="Shape" fill="#556080" fill-rule="nonzero"></path> <path d="M33.5,72 C30.2491562,70.8407063 27.1024375,69.1817891 24.1165,67.0482991 C14.6503125,60.2873765 9,49.3527184 9,37.797358 L9,19.0691292 C20.3174687,17.7567475 28.3534687,14.1786635 33.5,11 C38.6465312,14.1786635 46.6825312,17.7567475 58,19.0691292 L58,37.797358 C58,49.3527184 52.3496875,60.2873765 42.8850312,67.0482991 C39.8975625,69.1817891 36.7508438,70.8407063 33.5,72 Z" id="Shape" fill="#4FBA6F" fill-rule="nonzero"></path> <path d="M52.4745773,28.3573401 C51.8332457,27.8315443 50.8604567,27.8936575 50.2992916,28.4931226 L29.799806,50.4422109 L18.6320032,39.9782954 C18.0292132,39.4134982 17.0548825,39.4134982 16.4520925,39.9782954 C15.8493025,40.5430927 15.8493025,41.4560129 16.4520925,42.0208102 L28.7853921,53.5767632 C29.0752247,53.8483281 29.4668069,54 29.8753475,54 C29.8923058,54 29.909264,54 29.9262223,54 C30.3532628,53.9869996 30.7540951,53.8078823 31.0346776,53.5074275 L52.6179519,30.3955214 C53.1791171,29.7946118 53.1143672,28.8816915 52.4745773,28.3573401 Z" id="Shape" fill="#FFFFFF" fill-rule="nonzero"></path></g></svg>
+        </div>
+      </amp-consent>
+      <!-- End UniConsent example-->
+
+      <!-- Usercentrics example -->
+      <amp-consent id='consent' layout='nodisplay' type='Usercentrics'>
+        <script type="application/json">
+          {
+            "postPromptUI": "my-consent-prompt-ui",
+            "clientConfig": {
+              "id": "i3_E5TN2b"
+            }
+          }
+        </script>
+        <div id="my-consent-prompt-ui">
+          Post Prompt UI
+          <button on="tap:consent.prompt(consent=Usercentrics)">Privacy Settings</button>
+        </div>
+      </amp-consent>
+      <!-- End Usercentrics example -->
+
+    </div>
+  </body>
+</html>

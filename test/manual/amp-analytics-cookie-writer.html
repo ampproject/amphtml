@@ -1,0 +1,211 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AMP Analytics</title>
+  <link rel="canonical" href="analytics.amp.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-custom>
+    .box {
+      background: #ccc;
+      border: 1px solid #aaa;
+      padding: 10px;
+      margin: 10px;
+    }
+    #container {
+      position: absolute;
+      top: 10000px;
+      height: 10px;
+    }
+    #ele1 {
+      background-color: red;
+      height: 100px;
+      width: 100px;
+    }
+
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+
+</head>
+<h1>Instructions</h1>
+<p>
+  This page is intended to test the amp-analytics cookies config.
+</p>
+<p>
+  Copy the value in the console and append to the url.
+  Check document.cookie to see if it
+  is set correctly. And the window location is set correctly
+</p>
+<h4>Expected Cookie value</h4>
+<p>"cookie1=123; cookie2=bob; cookie3=green; cookie4=value1; cookie5=value1; _ga=helloworld"</p>
+
+<h4>Click the red box to check if 3 request have been sent out</h4>
+<script>
+  //Calculate url
+  const DELIMITER = '*'
+  function getCheckSum(serializedIds, opt_offsetMin) {
+    const fingerprint = getFingerprint();
+
+    const offset = opt_offsetMin || 0;
+    const timestamp = getMinSinceEpoch() - offset;
+    const crc = crc32([fingerprint, timestamp, serializedIds].join(DELIMITER));
+    // Encoded to base36 for less bytes.
+    return crc.toString(36);
+  }
+
+  function getFingerprint() {
+    const date = new Date();
+    const timezone = date.getTimezoneOffset();
+
+    const language = window.navigator.language;
+    return [window.navigator.userAgent, timezone, language]
+        .join(DELIMITER);
+  }
+
+  function getMinSinceEpoch() {
+    // Timestamp in minutes, floored.
+    return Math.floor(Date.now() / 60000);
+  }
+  const CRC32_KEY = 0xEDB88320;
+
+  function crc32(str) {
+    const crcTable = makeCrcTable();
+
+    const bytes = new TextEncoder('utf-8').encode(str);
+
+    // Shrink to 32 bits.
+    let crc = -1 >>> 0;
+    for (let i = 0; i < bytes.length; i++) {
+      const lookupIndex = (crc ^ bytes[i]) & 0xFF;
+      crc = (crc >>> 8) ^ crcTable[lookupIndex];
+    }
+    return (crc ^ (-1)) >>> 0;
+  }
+
+  function makeCrcTable() {
+    const crcTable = new Array(256);
+    for (let i = 0; i < 256; i++) {
+      let c = i;
+      for (let j = 0; j < 8; j++) {
+        if (c & 1) {
+          c = (c >>> 1) ^ CRC32_KEY;
+        } else {
+          c = c >>> 1;
+        }
+      }
+      crcTable[i] = c;
+    }
+    return crcTable;
+  }
+
+  const serializedIds1 = 'key1*dmFsdWUx*name*Ym9i*color*Z3JlZW4.*car*dGVzbGE.';
+  const checksum1 = getCheckSum(serializedIds1);
+  const serializedIds2 = 'key1*dmFsdWUx';
+  const checksum2 = getCheckSum(serializedIds2);
+
+  const serializedGAIds = '_ga*aGVsbG93b3JsZA..';
+  const ga_checksum = getCheckSum(serializedGAIds);
+
+  const ga_url = `1*${ga_checksum}*${serializedGAIds}`;
+
+  const url1 = `1*${checksum1}*${serializedIds1}`;
+  const url2 = `1*${checksum2}*${serializedIds2}`;
+  let url = `?test=123&a=1&testlinker=invalid&testlinker=${url1}&testlinker2=${url2}`
+  url = `${url}&brand=whatever&version=aaa&_gl=${ga_url}&produce=12345`;
+  console.log('copy: ', url);
+</script>
+
+<amp-analytics type="_ping_">
+  <script type="application/json">
+  {
+    "requests": {
+      "old": "https://fake.com/analytics?click_request"
+    },
+    "triggers": {
+      "click": {
+        "on": "click",
+        "selector": "#ele1",
+        "request": "old"
+      }
+    },
+    "transport": {
+      "beacon": false,
+      "xhrpost": false,
+      "image": true
+    },
+    "cookies": {
+      "cookie1": {
+        "value": "QUERY_PARAM(test)"
+      },
+      "cookie2": {
+        "value": "LINKER_PARAM(testlinker, name)"
+      }
+    }
+  }
+  </script>
+</amp-analytics>
+<amp-analytics type="_ping_">
+  <script type="application/json">
+  {
+    "requests": {
+      "old": "https://fake.com/analytics?click_request2"
+    },
+    "triggers": {
+      "click": {
+        "on": "click",
+        "selector": "#ele1",
+        "request": "old"
+      }
+    },
+    "transport": {
+      "beacon": false,
+      "xhrpost": false,
+      "image": true
+    },
+    "cookies": {
+      "cookie3": {
+        "value": "LINKER_PARAM(testlinker, color)"
+      }
+    }
+  }
+  </script>
+</amp-analytics>
+<amp-analytics type="_ping_">
+  <script type="application/json">
+  {
+    "requests": {
+      "old": "https://fake.com/analytics?click_request3"
+    },
+    "triggers": {
+      "click": {
+        "on": "click",
+        "selector": "#ele1",
+        "request": "old"
+      }
+    },
+    "transport": {
+      "beacon": false,
+      "xhrpost": false,
+      "image": true
+    },
+    "cookies": {
+      "cookie4": {
+        "value": "LINKER_PARAM(testlinker, key1)"
+      },
+      "cookie5": {
+        "value": "LINKER_PARAM(testlinker2, key1)"
+      },
+      "cookie6": {
+        "value": "LINKER_PARAM(noexist, key1)"
+      },
+      "cookie7": {
+        "value": "QUERY_PARAM(noexist)"
+      }
+    }
+  }
+  </script>
+</amp-analytics>
+<amp-analytics type="googleanalytics"></amp-analytics>
+<div id="ele1">click me</div>

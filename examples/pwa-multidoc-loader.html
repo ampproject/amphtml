@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>PWA multidoc loader</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/shadow-v0.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+    }
+    h2 {
+      text-align: center;
+      margin: 10px 0 0 0;
+      font-size: 20px;
+      line-height: 1;
+    }
+    .doc-container {
+      margin: 0.5em;
+      flex: 1;
+      max-height: calc(100vh - 1em - 30px);
+      height: calc(100vh - 1em - 30px);
+      width: calc(50vw - 1em);
+      display: flex;
+      flex-direction: column;
+    }
+    .form {
+      padding: 0.25em;
+    }
+    .host {
+      box-sizing: border-box;
+      border: 1px solid #333;
+      flex: 1 1 0;
+      overflow: auto;
+    }
+    .wrapper {
+      display: flex;
+    }
+    .url-row input[type="text"] {
+      width: 70%;
+    }
+  </style>
+</head>
+<body>
+  <h2>PWA multidoc loader</h2>
+  <div class="wrapper">
+    <div class="doc-container">
+      <form id="form1">
+        <div class="url-row"><label>URL1 <input type="text" id="ampurl1" placeholder="absolute or relative to examples/" value="amp-geo.amp.html"></label> <input type="submit" value="Go"></div>
+        <div><label><input type="checkbox" id="navint1"> Intercept anchor navigations</label></div>
+      </form>
+      <div id="shadowHost1" class="host"></div>
+    </div>
+    <div class="doc-container">
+      <form id="form2">
+        <div class="url-row"><label>URL2 <input type="text" id="ampurl2" placeholder="absolute or relative to examples/" value="amp-script/example.amp.html"></label> <input type="submit" value="Go"></div>
+        <div><label><input type="checkbox" id="navint2"> Intercept anchor navigations</label></div>
+      </form>
+      <div id="shadowHost2" class="host"></div>
+    </div>
+  </div>
+  <script>
+    (window.AMP = window.AMP || []).push(function(AMP) {
+      // Make ampdocs easily accessible for debugging
+      window.shadowDoc = {
+        '1': undefined,
+        '2': undefined
+      };
+
+      // Maintain references to URL inputs (accessed often)
+      const ampurlInputs = {
+        '1': document.getElementById('ampurl1'),
+        '2': document.getElementById('ampurl2')
+      };
+
+      // Fetch AMP page and attached to host element
+      const loadInPwa = function(url, docnum) {
+        const id = 'shadowHost' + docnum;
+        console.log('Navigating to: ' + url);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+        xhr.responseType = 'document';
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+              // Close shadow AMP
+              (window.shadowDoc[id] ? window.shadowDoc[id].close() : Promise.resolve())
+                .then(() => {
+                  // Restore host element
+                  const oldHostElement = document.querySelector('#' + id);
+                  const newHostElement = document.createElement('div');
+                  newHostElement.id = id;
+                  newHostElement.setAttribute('class', 'host');
+                  oldHostElement.parentNode.replaceChild(newHostElement, oldHostElement);
+
+                  window.shadowDoc[id] = AMP.attachShadowDoc(newHostElement, xhr.response, url);
+                  const shadowBody = window.shadowDoc[id].ampdoc.getBody();
+                  shadowBody.setAttribute('data-docnum', docnum);
+
+                  // Listen for anchor clicks
+                  shadowBody.onclick = clickHandler;
+                });
+            }
+          }
+        };
+        xhr.send();
+      };
+
+      // Optionally intercept anchor navigations
+      function clickHandler(event) {
+        const docnum = event.currentTarget.dataset.docnum;
+        const intercept = document.getElementById('navint' + docnum).checked;
+        if (!intercept)
+          return;
+
+        let anchor;
+        let node = event.target;
+        while (node && node.nodeType === Node.ELEMENT_NODE) {
+            if (node.tagName === 'A') {
+                anchor = node;
+                break;
+            }
+            node = node.parentNode;
+        }
+
+        if (anchor && anchor.href) {
+          event.preventDefault();
+          ampurlInputs[docnum].value = anchor.href;
+          loadInPwa(anchor.href, docnum);
+        }
+      }
+
+      const incomingUrlObj = new URL(location.href);
+      Object.keys(ampurlInputs).forEach((docnum) => {
+        // Check whether URL specified by param (e.g. &url1=)
+        const incomingUrl = incomingUrlObj.searchParams.get('url' + docnum);
+        if (incomingUrl) {
+          ampurlInputs[docnum].value = incomingUrl;
+        }
+
+        // Listen for user input URL
+        document.getElementById('form' + docnum).addEventListener('submit', function () {
+          event.preventDefault();
+          loadInPwa(ampurlInputs[docnum].value, docnum);
+        });
+
+        // Load AMP page in ShadowRoot
+        loadInPwa(ampurlInputs[docnum].value, docnum);
+      });
+    });
+  </script>
+</body>
+</html>

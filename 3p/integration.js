@@ -21,565 +21,589 @@
  * This files gets minified and published to
  * https://3p.ampproject.net/$version/f.js
  */
+/* eslint-disable import/order */
 
+// src/polyfills.js must be the first import.
 import './polyfills';
-import {installEmbedStateListener, manageWin} from './environment';
-import {nonSensitiveDataPostMessage, listenParent} from './messaging';
-import {computeInMasterFrame, nextTick, register, run} from './3p';
-import {urls} from '../src/config';
-import {endsWith} from '../src/string';
-import {parseUrl, getSourceUrl} from '../src/url';
-import {initLogConstructor, user} from '../src/log';
+
+import {draw3p, init} from './integration-lib';
+import {getMode} from '../src/mode';
+import {register} from './3p';
+import {user} from 'src/log';
 
 // 3P - please keep in alphabetic order
+import {beopinion} from './beopinion';
+import {bodymovinanimation} from './bodymovinanimation';
+import {embedly} from './embedly';
 import {facebook} from './facebook';
+import {github} from './github';
+import {gltfViewer} from './3d-gltf';
+import {mathml} from './mathml';
+import {reddit} from './reddit';
 import {twitter} from './twitter';
+import {viqeoplayer} from './viqeoplayer';
+import {yotpo} from './yotpo';
+
+import {_ping_} from '#ads/vendors/_ping_';
 
 // 3P Ad Networks - please keep in alphabetic order
-import {a9} from '../ads/a9';
-import {accesstrade} from '../ads/accesstrade';
-import {adblade, industrybrains} from '../ads/adblade';
-import {adform} from '../ads/adform';
-import {adgeneration} from '../ads/adgeneration';
-import {adition} from '../ads/adition';
-import {adman} from '../ads/adman';
-import {adreactor} from '../ads/adreactor';
-import {adsense} from '../ads/google/adsense';
-import {adsnative} from '../ads/adsnative';
-import {adspirit} from '../ads/adspirit';
-import {adstir} from '../ads/adstir';
-import {adtech} from '../ads/adtech';
-import {aduptech} from '../ads/aduptech';
-import {amoad} from '../ads/amoad';
-import {appnexus} from '../ads/appnexus';
-import {atomx} from '../ads/atomx';
-import {caprofitx} from '../ads/caprofitx';
-import {chargeads} from '../ads/chargeads';
-import {colombia} from '../ads/colombia';
-import {contentad} from '../ads/contentad';
-import {criteo} from '../ads/criteo';
-import {ezoic} from '../ads/ezoic';
-import {dotandads} from '../ads/dotandads';
-import {doubleclick} from '../ads/google/doubleclick';
-import {eplanning} from '../ads/eplanning';
-import {fakead3p} from '../ads/fakead3p';
-import {flite} from '../ads/flite';
-import {genieessp} from '../ads/genieessp';
-import {gmossp} from '../ads/gmossp';
-import {imobile} from '../ads/imobile';
-import {improvedigital} from '../ads/improvedigital';
-import {kargo} from '../ads/kargo';
-import {mads} from '../ads/mads';
-import {mantisDisplay, mantisRecommend} from '../ads/mantis';
-import {mediaimpact} from '../ads/mediaimpact';
-import {microad} from '../ads/microad';
-import {nativo} from '../ads/nativo';
-import {nend} from '../ads/nend';
-import {openadstream} from '../ads/openadstream';
-import {openx} from '../ads/openx';
-import {plista} from '../ads/plista';
-import {pubmatic} from '../ads/pubmatic';
-import {pubmine} from '../ads/pubmine';
-import {pulsepoint} from '../ads/pulsepoint';
-import {revcontent} from '../ads/revcontent';
-import {rubicon} from '../ads/rubicon';
-import {sharethrough} from '../ads/sharethrough';
-import {smartadserver} from '../ads/smartadserver';
-import {sortable} from '../ads/sortable';
-import {sovrn} from '../ads/sovrn';
-import {taboola} from '../ads/taboola';
-import {teads} from '../ads/teads';
-import {triplelift} from '../ads/triplelift';
-import {webediads} from '../ads/webediads';
-import {weboramaDisplay} from '../ads/weborama';
-import {widespace} from '../ads/widespace';
-import {yahoojp} from '../ads/yahoojp';
-import {yieldbot} from '../ads/yieldbot';
-import {yieldmo} from '../ads/yieldmo';
-import {yieldone} from '../ads/yieldone';
-import {zergnet} from '../ads/zergnet';
+import {_1wo} from '#ads/vendors/1wo';
+import {_24smi} from '#ads/vendors/24smi';
+import {a8} from '#ads/vendors/a8';
+import {a9} from '#ads/vendors/a9';
+import {accesstrade} from '#ads/vendors/accesstrade';
+import {adagio} from '#ads/vendors/adagio';
+import {adblade, industrybrains} from '#ads/vendors/adblade';
+import {adbutler} from '#ads/vendors/adbutler';
+import {adform} from '#ads/vendors/adform';
+import {adfox} from '#ads/vendors/adfox';
+import {adgeneration} from '#ads/vendors/adgeneration';
+import {adglare} from '#ads/vendors/adglare';
+import {adhese} from '#ads/vendors/adhese';
+import {adincube} from '#ads/vendors/adincube';
+import {adition} from '#ads/vendors/adition';
+import {adman} from '#ads/vendors/adman';
+import {admanmedia} from '#ads/vendors/admanmedia';
+import {admixer} from '#ads/vendors/admixer';
+import {adnuntius} from '#ads/vendors/adnuntius';
+import {adocean} from '#ads/vendors/adocean';
+import {adop} from '#ads/vendors/adop';
+import {adpicker} from '#ads/vendors/adpicker';
+import {adplugg} from '#ads/vendors/adplugg';
+import {adpon} from '#ads/vendors/adpon';
+import {adpushup} from '#ads/vendors/adpushup';
+import {adreactor} from '#ads/vendors/adreactor';
+import {adsensor} from '#ads/vendors/adsensor';
+import {adservsolutions} from '#ads/vendors/adservsolutions';
+import {adsloom} from '#ads/vendors/adsloom';
+import {adsnative} from '#ads/vendors/adsnative';
+import {adspeed} from '#ads/vendors/adspeed';
+import {adspirit} from '#ads/vendors/adspirit';
+import {adstir} from '#ads/vendors/adstir';
+import {adstyle} from '#ads/vendors/adstyle';
+import {adtech} from '#ads/vendors/adtech';
+import {adtelligent} from '#ads/vendors/adtelligent';
+import {adthrive} from '#ads/vendors/adthrive';
+import {adunity} from '#ads/vendors/adunity';
+import {aduptech} from '#ads/vendors/aduptech';
+import {adventive} from '#ads/vendors/adventive';
+import {adverline} from '#ads/vendors/adverline';
+import {adverticum} from '#ads/vendors/adverticum';
+import {advertserve} from '#ads/vendors/advertserve';
+import {adyoulike} from '#ads/vendors/adyoulike';
+import {affiliateb} from '#ads/vendors/affiliateb';
+import {aja} from '#ads/vendors/aja';
+import {amoad} from '#ads/vendors/amoad';
+import {aniview} from '#ads/vendors/aniview';
+import {anyclip} from '#ads/vendors/anyclip';
+import {appnexus} from '#ads/vendors/appnexus';
+import {appvador} from '#ads/vendors/appvador';
+import {atomx} from '#ads/vendors/atomx';
+import {baidu} from '#ads/vendors/baidu';
+import {beaverads} from '#ads/vendors/beaverads';
+import {bidtellect} from '#ads/vendors/bidtellect';
+import {blade} from '#ads/vendors/blade';
+import {brainy} from '#ads/vendors/brainy';
+import {bringhub} from '#ads/vendors/bringhub';
+import {broadstreetads} from '#ads/vendors/broadstreetads';
+import {byplay} from '#ads/vendors/byplay';
+import {caajainfeed} from '#ads/vendors/caajainfeed';
+import {capirs} from '#ads/vendors/capirs';
+import {caprofitx} from '#ads/vendors/caprofitx';
+import {cedato} from '#ads/vendors/cedato';
+import {chargeads, nws} from '#ads/vendors/nws';
+import {colombia} from '#ads/vendors/colombia';
+import {conative} from '#ads/vendors/conative';
+import {connatix} from '#ads/vendors/connatix';
+import {contentad} from '#ads/vendors/contentad';
+import {criteo} from '#ads/vendors/criteo';
+import {csa} from '#ads/vendors/csa';
+import {dable} from '#ads/vendors/dable';
+import {digiteka} from '#ads/vendors/digiteka';
+import {directadvert} from '#ads/vendors/directadvert';
+import {distroscale} from '#ads/vendors/distroscale';
+import {dotandads} from '#ads/vendors/dotandads';
+import {dynad} from '#ads/vendors/dynad';
+import {eadv} from '#ads/vendors/eadv';
+import {empower} from '#ads/vendors/empower';
+import {engageya} from '#ads/vendors/engageya';
+import {epeex} from '#ads/vendors/epeex';
+import {eplanning} from '#ads/vendors/eplanning';
+import {ezoic} from '#ads/vendors/ezoic';
+import {f1e} from '#ads/vendors/f1e';
+import {f1h} from '#ads/vendors/f1h';
+import {fakeDelayed} from '#ads/vendors/_fakedelayed_';
+import {feedad} from '#ads/vendors/feedad';
+import {felmat} from '#ads/vendors/felmat';
+import {finative} from '#ads/vendors/finative';
+import {firstimpression} from '#ads/vendors/firstimpression';
+import {flite} from '#ads/vendors/flite';
+import {fluct} from '#ads/vendors/fluct';
+import {forkmedia} from '#ads/vendors/forkmedia';
+import {freewheel} from '#ads/vendors/freewheel';
+import {fusion} from '#ads/vendors/fusion';
+import {gecko} from '#ads/vendors/gecko';
+import {genieessp} from '#ads/vendors/genieessp';
+import {giraff} from '#ads/vendors/giraff';
+import {glomex} from '#ads/vendors/glomex';
+import {gmossp} from '#ads/vendors/gmossp';
+import {gumgum} from '#ads/vendors/gumgum';
+import {holder} from '#ads/vendors/holder';
+import {ibillboard} from '#ads/vendors/ibillboard';
+import {idealmedia} from '#ads/vendors/idealmedia';
+import {imaVideo} from '#ads/google/ima/ima-video';
+import {imedia} from '#ads/vendors/imedia';
+import {imobile} from '#ads/vendors/imobile';
+import {imonomy} from '#ads/vendors/imonomy';
+import {improvedigital} from '#ads/vendors/improvedigital';
+import {inmobi} from '#ads/vendors/inmobi';
+import {innity} from '#ads/vendors/innity';
+import {insticator} from '#ads/vendors/insticator';
+import {invibes} from '#ads/vendors/invibes';
+import {iprom} from '#ads/vendors/iprom';
+import {ix} from '#ads/vendors/ix';
+import {jixie} from '#ads/vendors/jixie';
+import {jubna} from '#ads/vendors/jubna';
+import {kargo} from '#ads/vendors/kargo';
+import {ketshwa} from '#ads/vendors/ketshwa';
+import {kiosked} from '#ads/vendors/kiosked';
+import {kixer} from '#ads/vendors/kixer';
+import {kuadio} from '#ads/vendors/kuadio';
+import {lentainform} from '#ads/vendors/lentainform';
+import {ligatus} from '#ads/vendors/ligatus';
+import {lockerdome} from '#ads/vendors/lockerdome';
+import {logly} from '#ads/vendors/logly';
+import {loka} from '#ads/vendors/loka';
+import {luckyads} from '#ads/vendors/luckyads';
+import {macaw} from '#ads/vendors/macaw';
+import {mads} from '#ads/vendors/mads';
+import {mantisDisplay, mantisRecommend} from '#ads/vendors/mantis';
+import {marfeel} from '#ads/vendors/marfeel';
+import {mediaad} from '#ads/vendors/mediaad';
+import {medianet} from '#ads/vendors/medianet';
+import {mediavine} from '#ads/vendors/mediavine';
+import {medyanet} from '#ads/vendors/medyanet';
+import {meg} from '#ads/vendors/meg';
+import {mgid} from '#ads/vendors/mgid';
+import {microad} from '#ads/vendors/microad';
+import {miximedia} from '#ads/vendors/miximedia';
+import {mixpo} from '#ads/vendors/mixpo';
+import {monetizer101} from '#ads/vendors/monetizer101';
+import {mox} from '#ads/vendors/mox';
+import {my6sense} from '#ads/vendors/my6sense';
+import {myfinance} from '#ads/vendors/myfinance';
+import {myoffrz} from '#ads/vendors/myoffrz';
+import {mytarget} from '#ads/vendors/mytarget';
+import {mywidget} from '#ads/vendors/mywidget';
+import {nativeroll} from '#ads/vendors/nativeroll';
+import {nativery} from '#ads/vendors/nativery';
+import {nativo} from '#ads/vendors/nativo';
+import {navegg} from '#ads/vendors/navegg';
+import {nend} from '#ads/vendors/nend';
+import {netletix} from '#ads/vendors/netletix';
+import {noddus} from '#ads/vendors/noddus';
+import {nokta} from '#ads/vendors/nokta';
+import {oblivki} from '#ads/vendors/oblivki';
+import {onead} from '#ads/vendors/onead';
+import {onnetwork} from '#ads/vendors/onnetwork';
+import {openadstream} from '#ads/vendors/openadstream';
+import {openx} from '#ads/vendors/openx';
+import {opinary} from '#ads/vendors/opinary';
+import {outbrain} from '#ads/vendors/outbrain';
+import {pixels} from '#ads/vendors/pixels';
+import {playstream} from '#ads/vendors/playstream';
+import {plista} from '#ads/vendors/plista';
+import {polymorphicads} from '#ads/vendors/polymorphicads';
+import {popin} from '#ads/vendors/popin';
+import {postquare} from '#ads/vendors/postquare';
+import {ppstudio} from '#ads/vendors/ppstudio';
+import {pressboard} from '#ads/vendors/pressboard';
+import {promoteiq} from '#ads/vendors/promoteiq';
+import {pubexchange} from '#ads/vendors/pubexchange';
+import {pubguru} from '#ads/vendors/pubguru';
+import {pubmatic} from '#ads/vendors/pubmatic';
+import {pubmine} from '#ads/vendors/pubmine';
+import {puffnetwork} from '#ads/vendors/puffnetwork';
+import {pulse} from '#ads/vendors/pulse';
+import {pulsepoint} from '#ads/vendors/pulsepoint';
+import {purch} from '#ads/vendors/purch';
+import {quoraad} from '#ads/vendors/quoraad';
+import {rakutenunifiedads} from '#ads/vendors/rakutenunifiedads';
+import {rbinfox} from '#ads/vendors/rbinfox';
+import {rcmwidget} from '#ads/vendors/rcmwidget';
+import {readmo} from '#ads/vendors/readmo';
+import {realclick} from '#ads/vendors/realclick';
+import {recomad} from '#ads/vendors/recomad';
+import {recreativ} from '#ads/vendors/recreativ';
+import {relap} from '#ads/vendors/relap';
+import {relappro} from '#ads/vendors/relappro';
+import {remixd} from '#ads/vendors/remixd';
+import {revcontent} from '#ads/vendors/revcontent';
+import {revjet} from '#ads/vendors/revjet';
+import {rfp} from '#ads/vendors/rfp';
+import {rnetplus} from '#ads/vendors/rnetplus';
+import {rubicon} from '#ads/vendors/rubicon';
+import {runative} from '#ads/vendors/runative';
+import {sas} from '#ads/vendors/sas';
+import {seedingalliance} from '#ads/vendors/seedingalliance';
+import {sekindo} from '#ads/vendors/sekindo';
+import {sharethrough} from '#ads/vendors/sharethrough';
+import {shemedia} from '#ads/vendors/shemedia';
+import {sklik} from '#ads/vendors/sklik';
+import {slimcutmedia} from '#ads/vendors/slimcutmedia';
+import {smartadserver} from '#ads/vendors/smartadserver';
+import {smartclip} from '#ads/vendors/smartclip';
+import {smi2} from '#ads/vendors/smi2';
+import {smilewanted} from '#ads/vendors/smilewanted';
+import {sogouad} from '#ads/vendors/sogouad';
+import {sona} from '#ads/vendors/sona';
+import {sortable} from '#ads/vendors/sortable';
+import {sovrn} from '#ads/vendors/sovrn';
+import {speakol} from '#ads/vendors/speakol';
+import {spotx} from '#ads/vendors/spotx';
+import {springAds} from '#ads/vendors/springAds';
+import {ssp} from '#ads/vendors/ssp';
+import {strossle} from '#ads/vendors/strossle';
+import {sulvo} from '#ads/vendors/sulvo';
+import {sunmedia} from '#ads/vendors/sunmedia';
+import {svknative} from '#ads/vendors/svknative';
+import {swoop} from '#ads/vendors/swoop';
+import {taboola} from '#ads/vendors/taboola';
+import {tagon} from '#ads/vendors/tagon';
+import {tail} from '#ads/vendors/tail';
+import {tcsemotion} from '#ads/vendors/tcsemotion';
+import {teads} from '#ads/vendors/teads';
+import {temedya} from '#ads/vendors/temedya';
+import {torimochi} from '#ads/vendors/torimochi';
+import {tracdelight} from '#ads/vendors/tracdelight';
+import {triplelift} from '#ads/vendors/triplelift';
+import {trugaze} from '#ads/vendors/trugaze';
+import {uas} from '#ads/vendors/uas';
+import {ucfunnel} from '#ads/vendors/ucfunnel';
+import {unruly} from '#ads/vendors/unruly';
+import {uzou} from '#ads/vendors/uzou';
+import {valuecommerce} from '#ads/vendors/valuecommerce';
+import {vdoai} from '#ads/vendors/vdoai';
+import {verizonmedia} from '#ads/vendors/verizonmedia';
+import {videointelligence} from '#ads/vendors/videointelligence';
+import {videonow} from '#ads/vendors/videonow';
+import {viralize} from '#ads/vendors/viralize';
+import {vlyby} from '#ads/vendors/vlyby';
+import {vmfive} from '#ads/vendors/vmfive';
+import {webediads} from '#ads/vendors/webediads';
+import {weboramaDisplay} from '#ads/vendors/weborama';
+import {whopainfeed} from '#ads/vendors/whopainfeed';
+import {widespace} from '#ads/vendors/widespace';
+import {wisteria} from '#ads/vendors/wisteria';
+import {wpmedia} from '#ads/vendors/wpmedia';
+import {wunderkind} from '#ads/vendors/wunderkind';
+import {xlift} from '#ads/vendors/xlift';
+import {yahoo} from '#ads/vendors/yahoo';
+import {yahoofedads} from '#ads/vendors/yahoofedads';
+import {yahoojp} from '#ads/vendors/yahoojp';
+import {yahoonativeads} from '#ads/vendors/yahoonativeads';
+import {yandex} from '#ads/vendors/yandex';
+import {yektanet} from '#ads/vendors/yektanet';
+import {yengo} from '#ads/vendors/yengo';
+import {yieldbot} from '#ads/vendors/yieldbot';
+import {yieldmo} from '#ads/vendors/yieldmo';
+import {yieldone} from '#ads/vendors/yieldone';
+import {yieldpro} from '#ads/vendors/yieldpro';
+import {zedo} from '#ads/vendors/zedo';
+import {zen} from '#ads/vendors/zen';
+import {zergnet} from '#ads/vendors/zergnet';
+import {zucks} from '#ads/vendors/zucks';
 
-initLogConstructor();
+init(window);
+user().warn(
+  '3P-IFRAME',
+  'f.js in iframe is being deprecated (see https://github.com/ampproject/amphtml/issues/35349 for details)'
+);
 
-/**
- * Whether the embed type may be used with amp-embed tag.
- * @const {!Object<string, boolean>}
- */
-const AMP_EMBED_ALLOWED = {
-  taboola: true,
-  'mantis-recommend': true,
-  plista: true,
-  zergnet: true,
-  _ping_: true,
-};
-
-// used for extracting fakead3p from production code.
-const IS_DEV = true;
+if (getMode().test || getMode().localDev) {
+  register('_ping_', _ping_);
+  register('fake-delayed', fakeDelayed);
+}
 
 // Keep the list in alphabetic order
+register('1wo', _1wo);
+register('24smi', _24smi);
+register('3d-gltf', gltfViewer);
+register('a8', a8);
 register('a9', a9);
 register('accesstrade', accesstrade);
+register('adagio', adagio);
 register('adblade', adblade);
+register('adbutler', adbutler);
 register('adform', adform);
+register('adfox', adfox);
 register('adgeneration', adgeneration);
+register('adglare', adglare);
+register('adhese', adhese);
+register('adincube', adincube);
 register('adition', adition);
 register('adman', adman);
+register('admanmedia', admanmedia);
+register('admixer', admixer);
+register('adnuntius', adnuntius);
+register('adocean', adocean);
+register('adop', adop);
+register('adpicker', adpicker);
+register('adplugg', adplugg);
+register('adpon', adpon);
+register('adpushup', adpushup);
 register('adreactor', adreactor);
-register('adsense', adsense);
+register('adsensor', adsensor);
+register('adservsolutions', adservsolutions);
+register('adsloom', adsloom);
 register('adsnative', adsnative);
+register('adspeed', adspeed);
 register('adspirit', adspirit);
 register('adstir', adstir);
+register('adstyle', adstyle);
 register('adtech', adtech);
+register('adtelligent', adtelligent);
+register('adthrive', adthrive);
+register('adunity', adunity);
 register('aduptech', aduptech);
+register('adventive', adventive);
+register('adverline', adverline);
+register('adverticum', adverticum);
+register('advertserve', advertserve);
+register('adyoulike', adyoulike);
+register('affiliateb', affiliateb);
+register('aja', aja);
 register('amoad', amoad);
+register('aniview', aniview);
+register('anyclip', anyclip);
 register('appnexus', appnexus);
+register('appvador', appvador);
 register('atomx', atomx);
+register('baidu', baidu);
+register('beaverads', beaverads);
+register('beopinion', beopinion);
+register('bidtellect', bidtellect);
+register('blade', blade);
+register('bodymovinanimation', bodymovinanimation);
+register('brainy', brainy);
+register('bringhub', bringhub);
+register('broadstreetads', broadstreetads);
+register('byplay', byplay);
+register('caajainfeed', caajainfeed);
+register('capirs', capirs);
 register('caprofitx', caprofitx);
+register('cedato', cedato);
 register('chargeads', chargeads);
 register('colombia', colombia);
+register('conative', conative);
+register('connatix', connatix);
 register('contentad', contentad);
 register('criteo', criteo);
+register('csa', csa);
+register('dable', dable);
+register('digiteka', digiteka);
+register('directadvert', directadvert);
+register('distroscale', distroscale);
 register('dotandads', dotandads);
-register('doubleclick', doubleclick);
+register('dynad', dynad);
+register('eadv', eadv);
+register('embedly', embedly);
+register('empower', empower);
+register('engageya', engageya);
+register('epeex', epeex);
 register('eplanning', eplanning);
 register('ezoic', ezoic);
+register('f1e', f1e);
+register('f1h', f1h);
 register('facebook', facebook);
+register('feedad', feedad);
+register('felmat', felmat);
+register('finative', finative);
+register('firstimpression', firstimpression);
 register('flite', flite);
+register('fluct', fluct);
+register('forkmedia', forkmedia);
+register('freewheel', freewheel);
+register('fusion', fusion);
+register('gecko', gecko);
 register('genieessp', genieessp);
+register('giraff', giraff);
+register('github', github);
+register('glomex', glomex);
 register('gmossp', gmossp);
+register('gumgum', gumgum);
+register('holder', holder);
+register('ibillboard', ibillboard);
+register('idealmedia', idealmedia);
+register('ima-video', imaVideo);
+register('imedia', imedia);
 register('imobile', imobile);
+register('imonomy', imonomy);
 register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
+register('inmobi', inmobi);
+register('innity', innity);
+register('insticator', insticator);
+register('invibes', invibes);
+register('iprom', iprom);
+register('ix', ix);
+register('jixie', jixie);
+register('jubna', jubna);
 register('kargo', kargo);
+register('ketshwa', ketshwa);
+register('kiosked', kiosked);
+register('kixer', kixer);
+register('kuadio', kuadio);
+register('lentainform', lentainform);
+register('ligatus', ligatus);
+register('lockerdome', lockerdome);
+register('logly', logly);
+register('loka', loka);
+register('luckyads', luckyads);
+register('macaw', macaw);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
 register('mantis-recommend', mantisRecommend);
-register('mediaimpact', mediaimpact);
+register('marfeel', marfeel);
+register('mathml', mathml);
+register('mediaad', mediaad);
+register('medianet', medianet);
+register('mediavine', mediavine);
+register('medyanet', medyanet);
+register('meg', meg);
+register('mgid', mgid);
 register('microad', microad);
+register('miximedia', miximedia);
+register('mixpo', mixpo);
+register('monetizer101', monetizer101);
+register('mox', mox);
+register('my6sense', my6sense);
+register('myfinance', myfinance);
+register('myoffrz', myoffrz);
+register('mytarget', mytarget);
+register('mywidget', mywidget);
+register('nativeroll', nativeroll);
+register('nativery', nativery);
 register('nativo', nativo);
+register('navegg', navegg);
 register('nend', nend);
+register('netletix', netletix);
+register('noddus', noddus);
+register('nokta', nokta);
+register('nws', nws);
+register('oblivki', oblivki);
+register('onead', onead);
+register('onnetwork', onnetwork);
 register('openadstream', openadstream);
 register('openx', openx);
+register('opinary', opinary);
+register('outbrain', outbrain);
+register('pixels', pixels);
+register('playstream', playstream);
 register('plista', plista);
+register('polymorphicads', polymorphicads);
+register('popin', popin);
+register('postquare', postquare);
+register('ppstudio', ppstudio);
+register('pressboard', pressboard);
+register('promoteiq', promoteiq);
+register('pubexchange', pubexchange);
+register('pubguru', pubguru);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
+register('puffnetwork', puffnetwork);
+register('pulse', pulse);
 register('pulsepoint', pulsepoint);
+register('purch', purch);
+register('quoraad', quoraad);
+register('rakutenunifiedads', rakutenunifiedads);
+register('rbinfox', rbinfox);
+register('rcmwidget', rcmwidget);
+register('readmo', readmo);
+register('realclick', realclick);
+register('reddit', reddit);
+register('recomad', recomad);
+register('recreativ', recreativ);
+register('relap', relap);
+register('relappro', relappro);
+register('remixd', remixd);
 register('revcontent', revcontent);
+register('revjet', revjet);
+register('rfp', rfp);
+register('rnetplus', rnetplus);
 register('rubicon', rubicon);
+register('runative', runative);
+register('sas', sas);
+register('seedingalliance', seedingalliance);
+register('sekindo', sekindo);
 register('sharethrough', sharethrough);
+register('shemedia', shemedia);
+register('sklik', sklik);
+register('ssp', ssp);
+register('slimcutmedia', slimcutmedia);
 register('smartadserver', smartadserver);
+register('smartclip', smartclip);
+register('smi2', smi2);
+register('smilewanted', smilewanted);
+register('sogouad', sogouad);
+register('sona', sona);
 register('sortable', sortable);
 register('sovrn', sovrn);
+register('speakol', speakol);
+register('spotx', spotx);
+register('springAds', springAds);
+register('strossle', strossle);
+register('sulvo', sulvo);
+register('sunmedia', sunmedia);
+register('svknative', svknative);
+register('swoop', swoop);
 register('taboola', taboola);
+register('tagon', tagon);
+register('tail', tail);
+register('tcsemotion', tcsemotion);
 register('teads', teads);
+register('temedya', temedya);
+register('torimochi', torimochi);
+register('tracdelight', tracdelight);
 register('triplelift', triplelift);
+register('trugaze', trugaze);
 register('twitter', twitter);
+register('uas', uas);
+register('ucfunnel', ucfunnel);
+register('unruly', unruly);
+register('uzou', uzou);
+register('valuecommerce', valuecommerce);
+register('vdoai', vdoai);
+register('verizonmedia', verizonmedia);
+register('videointelligence', videointelligence);
+register('videonow', videonow);
+register('viqeoplayer', viqeoplayer);
+register('viralize', viralize);
+register('vlyby', vlyby);
+register('vmfive', vmfive);
 register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
+register('whopainfeed', whopainfeed);
 register('widespace', widespace);
+register('wisteria', wisteria);
+register('wunderkind', wunderkind);
+register('wpmedia', wpmedia);
+register('xlift', xlift);
+register('yahoo', yahoo);
+register('yahoofedads', yahoofedads);
 register('yahoojp', yahoojp);
+register('yahoonativeads', yahoonativeads);
+register('yandex', yandex);
+register('yektanet', yektanet);
+register('yengo', yengo);
 register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
-register('zergnet', zergnet);
 register('yieldone', yieldone);
+register('yieldpro', yieldpro);
+register('yotpo', yotpo);
+register('zedo', zedo);
+register('zen', zen);
+register('zergnet', zergnet);
+register('zucks', zucks);
 
-register('_ping_', function(win, data) {
-  win.document.getElementById('c').textContent = data.ping;
-});
-
-// For backward compat, we always allow these types without the iframe
-// opting in.
-const defaultAllowedTypesInCustomFrame = [
-  // Entries must be reasonably safe and not allow overriding the injected
-  // JS URL.
-  // Each custom iframe can override this through the second argument to
-  // draw3p. See amp-ad docs.
-  'facebook',
-  'twitter',
-  'doubleclick',
-  'yieldbot',
-  '_ping_',
-];
-
-/**
- * Visible for testing.
- * Draws a 3p embed to the window. Expects the data to include the 3p type.
- * @param {!Window} win
- * @param {!Object} data
- * @param {function(!Object, function(!Object))|undefined} configCallback
- *     Optional callback that allows user code to manipulate the incoming
- *     configuration. See
- *     https://github.com/ampproject/amphtml/issues/1210 for some context
- *     on this.
- */
-export function draw3p(win, data, configCallback) {
-  const type = data.type;
-
-  user().assert(isTagNameAllowed(data.type, win.context.tagName),
-      'Embed type %s not allowed with tag %s', data.type, win.context.tagName);
-  if (configCallback) {
-    configCallback(data, data => {
-      user().assert(data,
-          'Expected configuration to be passed as first argument');
-      run(type, win, data);
-    });
-  } else {
-    run(type, win, data);
-  }
-};
-
-/**
- * Returns the "master frame" for all widgets of a given type.
- * This frame should be used to e.g. fetch scripts that can
- * be reused across frames.
- * @param {string} type
- * @return {!Window}
- */
-function masterSelection(type) {
-  // The master has a special name.
-  const masterName = 'frame_' + type + '_master';
-  let master;
-  try {
-    // Try to get the master from the parent. If it does not
-    // exist yet we get a security exception that we catch
-    // and ignore.
-    master = window.parent.frames[masterName];
-  } catch (expected) {
-    /* ignore */
-  }
-  if (!master) {
-    // No master yet, rename ourselves to be master. Yaihh.
-    window.name = masterName;
-    master = window;
-  }
-  return master;
-}
-
-/**
- * @return {boolean} Whether this is the master iframe.
- */
-function isMaster() {
-  return window.context.master == window;
-}
-
-/**
- * Draws an embed, optionally synchronously, to the DOM.
- * @param {function(!Object, function(!Object))} opt_configCallback If provided
- *     will be invoked with two arguments:
- *     1. The configuration parameters supplied to this embed.
- *     2. A callback that MUST be called for rendering to proceed. It takes
- *        no arguments. Configuration is expected to be modified in-place.
- * @param {!Array<string>=} opt_allowed3pTypes List of advertising network
- *     types you expect.
- * @param {!Array<string>=} opt_allowedEmbeddingOrigins List of domain suffixes
- *     that are allowed to embed this frame.
- */
-window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
-    opt_allowedEmbeddingOrigins) {
-  try {
-    ensureFramed(window);
-    const data = parseFragment(location.hash);
-    window.context = data._context;
-    window.context.location = parseUrl(data._context.location.href);
-    validateParentOrigin(window, window.context.location);
-    validateAllowedTypes(window, data.type, opt_allowed3pTypes);
-    if (opt_allowedEmbeddingOrigins) {
-      validateAllowedEmbeddingOrigins(window, opt_allowedEmbeddingOrigins);
-    }
-    // Define master related properties to be lazily read.
-    Object.defineProperties(window.context, {
-      master: {
-        get: () => masterSelection(data.type),
-      },
-      isMaster: {
-        get: isMaster,
-      },
-    });
-    window.context.data = data;
-    window.context.noContentAvailable = triggerNoContentAvailable;
-    window.context.requestResize = triggerResizeRequest;
-    window.context.renderStart = triggerRenderStart;
-
-    if (IS_DEV && data.type === 'fakead3p' && window.context.mode.localDev) {
-      register('fakead3p', fakead3p);
-    }
-
-    if (data.type === 'facebook' || data.type === 'twitter') {
-      // Only make this available to selected embeds until the
-      // generic solution is available.
-      window.context.updateDimensions = triggerDimensions;
-    }
-
-    // This only actually works for ads.
-    const initialIntersection = window.context.initialIntersection;
-    window.context.observeIntersection = cb => {
-      const unlisten = observeIntersection(cb);
-      // Call the callback with the value that was transmitted when the
-      // iframe was drawn. Called in nextTick, so that callers don't
-      // have to specially handle the sync case.
-      nextTick(window, () => cb([initialIntersection]));
-      return unlisten;
-    };
-    window.context.onResizeSuccess = onResizeSuccess;
-    window.context.onResizeDenied = onResizeDenied;
-    window.context.reportRenderedEntityIdentifier =
-        reportRenderedEntityIdentifier;
-    window.context.computeInMasterFrame = computeInMasterFrame;
-    delete data._context;
-    manageWin(window);
-    installEmbedStateListener();
-    draw3p(window, data, opt_configCallback);
-    updateVisibilityState(window);
-    // Subscribe to page visibility updates.
-    nonSensitiveDataPostMessage('send-embed-state');
-    nonSensitiveDataPostMessage('bootstrap-loaded');
-  } catch (e) {
-    const c = window.context || {mode: {test: false}};
-    if (!c.mode.test) {
-      lightweightErrorReport(e, c.canary);
-      throw e;
-    }
-  }
-};
-
-function triggerNoContentAvailable() {
-  nonSensitiveDataPostMessage('no-content');
-}
-
-function triggerDimensions(width, height) {
-  nonSensitiveDataPostMessage('embed-size', {width, height});
-}
-
-function triggerResizeRequest(width, height) {
-  nonSensitiveDataPostMessage('embed-size', {width, height});
-}
-
-/**
- * @param {{width, height}=} opt_data
- */
-function triggerRenderStart(opt_data) {
-  nonSensitiveDataPostMessage('render-start', opt_data);
-}
-
-/**
- * Registers a callback for intersections of this iframe with the current
- * viewport.
- * The passed in array has entries that aim to be compatible with
- * the IntersectionObserver spec callback.
- * http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#callbackdef-intersectionobservercallback
- * @param {function(!Array<IntersectionObserverEntry>)} observerCallback
- * @returns {!function()} A function which removes the event listener that
- *    observes for intersection messages.
- */
-function observeIntersection(observerCallback) {
-  // Send request to received records.
-  nonSensitiveDataPostMessage('send-intersections');
-  return listenParent(window, 'intersection', data => {
-    observerCallback(data.changes);
-  });
-}
-
-/**
- * Listens for events via postMessage and updates `context.hidden` based on
- * it and forwards the event to a custom event called `amp:visibilitychange`.
- * @param {!Window} global
- */
-function updateVisibilityState(global) {
-  listenParent(window, 'embed-state', function(data) {
-    global.context.hidden = data.pageHidden;
-    const event = global.document.createEvent('Event');
-    event.data = {
-      hidden: data.pageHidden,
-    };
-    event.initEvent('amp:visibilitychange', true, true);
-    global.dispatchEvent(event);
-  });
-}
-
-/**
- * Registers a callback for communicating when a resize request succeeds.
- * @param {function(number, number)} observerCallback
- * @returns {!function()} A function which removes the event listener that
- *    observes for resize status messages.
- */
-function onResizeSuccess(observerCallback) {
-  return listenParent(window, 'embed-size-changed', data => {
-    observerCallback(data.requestedHeight, data.requestedWidth);
-  });
-}
-
-/**
- * Registers a callback for communicating when a resize request is denied.
- * @param {function(number, number)} observerCallback
- * @returns {!function()} A function which removes the event listener that
- *    observes for resize status messages.
- */
-function onResizeDenied(observerCallback) {
-  return listenParent(window, 'embed-size-denied', data => {
-    observerCallback(data.requestedHeight, data.requestedWidth);
-  });
-}
-
-/**
- * Reports the "entity" that was rendered to this frame to the parent for
- * reporting purposes.
- * The entityId MUST NOT contain user data or personal identifiable
- * information. One example for an acceptable data item would be the
- * creative id of an ad, while the user's location would not be
- * acceptable.
- * @param {string} entityId See comment above for content.
- */
-function reportRenderedEntityIdentifier(entityId) {
-  user().assert(typeof entityId == 'string',
-      'entityId should be a string %s', entityId);
-  nonSensitiveDataPostMessage('entity-id', {
-    id: entityId,
-  });
-}
-
-/**
- * Throws if the current frame's parent origin is not equal to
- * the claimed origin.
- * Only check for browsers that support ancestorOrigins
- * @param {!Window} window
- * @param {!Location} parentLocation
- * @visibleForTesting
- */
-export function validateParentOrigin(window, parentLocation) {
-  const ancestors = window.location.ancestorOrigins;
-  // Currently only webkit and blink based browsers support
-  // ancestorOrigins. In that case we proceed but mark the origin
-  // as non-validated.
-  if (!ancestors || !ancestors.length) {
-    return;
-  }
-  user().assert(ancestors[0] == parentLocation.origin,
-      'Parent origin mismatch: %s, %s',
-      ancestors[0], parentLocation.origin);
-}
-
-/**
- * Check that this iframe intended this particular ad type to run.
- * @param {!Window} window
- * @param {string} type 3p type
- * @param {!Array<string>|undefined} allowedTypes May be undefined.
- * @visiblefortesting
- */
-export function validateAllowedTypes(window, type, allowedTypes) {
-  const thirdPartyHost = parseUrl(urls.thirdParty).hostname;
-
-  // Everything allowed in default iframe.
-  if (window.location.hostname == thirdPartyHost) {
-    return;
-  }
-  if (urls.thirdPartyFrameRegex.test(window.location.hostname)) {
-    return;
-  }
-  if (window.location.hostname == 'ads.localhost') {
-    return;
-  }
-  if (defaultAllowedTypesInCustomFrame.indexOf(type) != -1) {
-    return;
-  }
-  user().assert(allowedTypes && allowedTypes.indexOf(type) != -1,
-      'Non-whitelisted 3p type for custom iframe: ' + type);
-}
-
-/**
- * Check that parent host name was whitelisted.
- * @param {!Window} window
- * @param {!Array<string>} allowedHostnames Suffixes of allowed host names.
- * @visiblefortesting
- */
-export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
-  if (!window.document.referrer) {
-    throw new Error('Referrer expected: ' + window.location.href);
-  }
-  const ancestors = window.location.ancestorOrigins;
-  // We prefer the unforgable ancestorOrigins, but referrer is better than
-  // nothing.
-  const ancestor = ancestors ? ancestors[0] : window.document.referrer;
-  let hostname = parseUrl(ancestor).hostname;
-  const cdnHostname = parseUrl(urls.cdn).hostname;
-  const onDefault = hostname == cdnHostname;
-  if (onDefault) {
-    // If we are on the cache domain, parse the source hostname from
-    // the referrer. The referrer is used because it should be
-    // trustable.
-    hostname = parseUrl(getSourceUrl(window.document.referrer)).hostname;
-  }
-  for (let i = 0; i < allowedHostnames.length; i++) {
-    // Either the hostname is exactly as whitelisted…
-    if (allowedHostnames[i] == hostname) {
-      return;
-    }
-    // Or it ends in .$hostname (aka is a sub domain of the whitelisted domain.
-    if (endsWith(hostname, '.' + allowedHostnames[i])) {
-      return;
-    }
-  }
-  throw new Error('Invalid embedding hostname: ' + hostname + ' not in '
-      + allowedHostnames);
-}
-
-/**
- * Throws if this window is a top level window.
- * @param {!Window} window
- * @visiblefortesting
- */
-export function ensureFramed(window) {
-  if (window == window.parent) {
-    throw new Error('Must be framed: ' + window.location.href);
-  }
-}
-
-/**
- * Expects the fragment to contain JSON.
- * @param {string} fragment Value of location.fragment
- * @return {!JSONType}
- * @visibleForTesting
- */
-export function parseFragment(fragment) {
-  let json = fragment.substr(1);
-  // Some browser, notably Firefox produce an encoded version of the fragment
-  // while most don't. Since we know how the string should start, this is easy
-  // to detect.
-  if (json.indexOf('{%22') == 0) {
-    json = decodeURIComponent(json);
-  }
-  return /** @type {!JSONType} */ (json ? JSON.parse(json) : {});
-}
-
-/**
- * Not all types of embeds are allowed to be used with all tag names on the
- * AMP side. This function checks whether the current usage is permissible.
- * @param {string} type
- * @param {string|undefined} tagName The tagName that was used to embed this
- *     3p-frame.
- * @return {boolean}
- */
-export function isTagNameAllowed(type, tagName) {
-  if (tagName == 'AMP-EMBED') {
-    return !!AMP_EMBED_ALLOWED[type];
-  }
-  return true;
-}
-
-/**
- * Reports an error to the server. Must only be called once per page.
- * Not for use in event handlers.
- *
- * We don't use the default error in error.js handler because it has
- * too many deps for this small JS binary.
- *
- * @param {!Error} e
- * @param {boolean} isCanary
- */
-function lightweightErrorReport(e, isCanary) {
-  new Image().src = urls.errorReporting +
-      '?3p=1&v=' + encodeURIComponent('$internalRuntimeVersion$') +
-      '&m=' + encodeURIComponent(e.message) +
-      '&ca=' + (isCanary ? 1 : 0) +
-      '&r=' + encodeURIComponent(document.referrer) +
-      '&s=' + encodeURIComponent(e.stack || '');
-}
+window.draw3p = draw3p;

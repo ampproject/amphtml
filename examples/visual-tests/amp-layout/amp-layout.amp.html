@@ -1,0 +1,84 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>amp-layout example</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    amp-layout {
+      background-color: yellow;
+    }
+  </style>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <h1>amp-layout</h1>
+
+  <h2>responsive - 2x1 ratio - Text Node</h2>
+  <amp-layout layout="responsive" width="2" height="1">
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec tincidunt augue ut dolor rutrum, sit amet tristique velit fringilla. Duis pretium ante dui, a congue erat elementum dictum. Suspendisse sit amet dui libero. Sed sodales quam in mauris aliquet laoreet. Ut iaculis leo ipsum, ac commodo tellus tempus lobortis. Nam molestie semper suscipit. Quisque consectetur purus et tortor mollis porttitor. Morbi tempus sit amet mauris eget mattis. Sed dignissim, quam ut mattis ullamcorper, lorem ex venenatis purus, a sollicitudin enim tortor sit amet justo.
+  </amp-layout>
+
+  <h2>responsive - 2x1 ratio - DIV Node</h2>
+  <amp-layout layout="responsive" width="2" height="1">
+    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec tincidunt augue ut dolor rutrum, sit amet tristique velit fringilla. Duis pretium ante dui, a congue erat elementum dictum. Suspendisse sit amet dui libero. Sed sodales quam in mauris aliquet laoreet. Ut iaculis leo ipsum, ac commodo tellus tempus lobortis. Nam molestie semper suscipit. Quisque consectetur purus et tortor mollis porttitor. Morbi tempus sit amet mauris eget mattis. Sed dignissim, quam ut mattis ullamcorper, lorem ex venenatis purus, a sollicitudin enim tortor sit amet justo.</div>
+  </amp-layout>
+
+  <h2>responsive - svg - 1x1 ratio </h2>
+  <amp-layout layout="responsive" width="1" height="1">
+    <svg viewBox="0 0 100 100">
+      <circle cx="50%" cy="50%" r="40%" stroke="black" stroke-width="3" />
+      Sorry, your browser does not support inline SVG.
+    </svg>
+  </amp-layout>
+
+  <h2>fixed - 100x100 - Text Node</h2>
+  <amp-layout layout="fixed" width="100" height="100">
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec tincidunt augue ut dolor rutrum, sit amet tristique velit fringilla. Duis pretium ante dui, a congue erat elementum dictum. Suspendisse sit amet dui libero. Sed sodales quam in mauris aliquet laoreet. Ut iaculis leo ipsum, ac commodo tellus tempus lobortis. Nam molestie semper suscipit. Quisque consectetur purus et tortor mollis porttitor. Morbi tempus sit amet mauris eget mattis. Sed dignissim, quam ut mattis ullamcorper, lorem ex venenatis purus, a sollicitudin enim tortor sit amet justo.
+  </amp-layout>
+
+  <h2>fixed - 100x100 - SPAN Node</h2>
+  <amp-layout layout="fixed" width="100" height="100">
+    <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec tincidunt augue ut dolor rutrum, sit amet tristique velit fringilla. Duis pretium ante dui, a congue erat elementum dictum. Suspendisse sit amet dui libero. Sed sodales quam in mauris aliquet laoreet. Ut iaculis leo ipsum, ac commodo tellus tempus lobortis. Nam molestie semper suscipit. Quisque consectetur purus et tortor mollis porttitor. Morbi tempus sit amet mauris eget mattis. Sed dignissim, quam ut mattis ullamcorper, lorem ex venenatis purus, a sollicitudin enim tortor sit amet justo.</span>
+  </amp-layout>
+
+  <h2>fixed height - 100 - Text Node</h2>
+  <amp-layout layout="fixed-height" height="100">
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec tincidunt augue ut dolor rutrum, sit amet tristique velit fringilla. Duis pretium ante dui, a congue erat elementum dictum. Suspendisse sit amet dui libero. Sed sodales quam in mauris aliquet laoreet. Ut iaculis leo ipsum, ac commodo tellus tempus lobortis. Nam molestie semper suscipit. Quisque consectetur purus et tortor mollis porttitor. Morbi tempus sit amet mauris eget mattis. Sed dignissim, quam ut mattis ullamcorper, lorem ex venenatis purus, a sollicitudin enim tortor sit amet justo.
+  </amp-layout>
+
+  <h2>fixed - 100x100 - SPAN Node</h2>
+  <amp-layout layout="fixed-height" height="100">
+    <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec tincidunt augue ut dolor rutrum, sit amet tristique velit fringilla. Duis pretium ante dui, a congue erat elementum dictum. Suspendisse sit amet dui libero. Sed sodales quam in mauris aliquet laoreet. Ut iaculis leo ipsum, ac commodo tellus tempus lobortis. Nam molestie semper suscipit. Quisque consectetur purus et tortor mollis porttitor. Morbi tempus sit amet mauris eget mattis. Sed dignissim, quam ut mattis ullamcorper, lorem ex venenatis purus, a sollicitudin enim tortor sit amet justo.</span>
+  </amp-layout>
+
+  <h2>With Placeholder</h2>
+  <amp-layout layout="fixed" width="100" height="100">
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec tincidunt augue ut dolor rutrum, sit amet tristique velit fringilla. Duis pretium ante dui, a congue erat elementum dictum. Suspendisse sit amet dui libero. Sed sodales quam in mauris aliquet laoreet. Ut iaculis leo ipsum, ac commodo tellus tempus lobortis. Nam molestie semper suscipit. Quisque consectetur purus et tortor mollis porttitor. Morbi tempus sit amet mauris eget mattis. Sed dignissim, quam ut mattis ullamcorper, lorem ex venenatis purus, a sollicitudin enim tortor sit amet justo.
+    <div placeholder>
+      SHOULD NOT SEE THIS
+    </div>
+  </amp-layout>
+
+  <h2>intrinsic - 200x100 - Text Node</h2>
+  <amp-layout layout="intrinsic" width="200" height="100">
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec tincidunt augue ut dolor rutrum, sit amet tristique velit fringilla. Duis pretium ante dui, a congue erat elementum dictum. Suspendisse sit amet dui libero. Sed sodales quam in mauris aliquet laoreet. Ut iaculis leo ipsum, ac commodo tellus tempus lobortis. Nam molestie semper suscipit. Quisque consectetur purus et tortor mollis porttitor. Morbi tempus sit amet mauris eget mattis. Sed dignissim, quam ut mattis ullamcorper, lorem ex venenatis purus, a sollicitudin enim tortor sit amet justo.
+  </amp-layout>
+
+  <h2>intrinsic - 200x100 ratio - DIV Node</h2>
+  <amp-layout layout="intrinsic" width="200" height="100">
+    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec tincidunt augue ut dolor rutrum, sit amet tristique velit fringilla. Duis pretium ante dui, a congue erat elementum dictum. Suspendisse sit amet dui libero. Sed sodales quam in mauris aliquet laoreet. Ut iaculis leo ipsum, ac commodo tellus tempus lobortis. Nam molestie semper suscipit. Quisque consectetur purus et tortor mollis porttitor. Morbi tempus sit amet mauris eget mattis. Sed dignissim, quam ut mattis ullamcorper, lorem ex venenatis purus, a sollicitudin enim tortor sit amet justo.</div>
+  </amp-layout>
+
+  <h2>intrinsic - svg - 100x100</h2>
+  <amp-layout layout="intrinsic" width="100" height="100">
+    <svg viewBox="0 0 100 100">
+      <circle cx="50%" cy="50%" r="40%" stroke="black" stroke-width="3" />
+      Sorry, your browser does not support inline SVG.
+    </svg>
+  </amp-layout>
+
+</body>
+</html>

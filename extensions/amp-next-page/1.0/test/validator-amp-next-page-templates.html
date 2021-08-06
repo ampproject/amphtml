@@ -1,0 +1,53 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AMP next page examples</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-next-page" src="https://cdn.ampproject.org/v0/amp-next-page-1.0.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+  <style amp-custom>
+    .amp-next-page-text {
+      font-family: serif;
+    }
+  </style>
+</head>
+<body>
+  <h2>Content discovery</h2>
+  <amp-next-page src="https://foo.com/data.json">
+    <div separator class="my-custom-separator">
+      <!-- Valid: Correct use of templated separators in amp-next-page -->
+      <template type="amp-mustache">
+        <div class="my-custom-separator-content">
+          <amp-img
+            src="{{image}}"
+            layout="fixed"
+            height="16"
+            width="16"
+          ></amp-img>
+          <span>Next article: {{title}}</span>
+        </div>
+      </template>
+    </div>
+    <!-- Valid: Custom amp-next-page recommendation-box -->
+    <div recommendation-box>
+      <!-- Valid: Correct use of templated recommendation box in amp-next-page -->
+      <template type="amp-mustache">
+        <div class="rec-box-content">
+          {{#pages}}
+          <span class="title">{{title}}</span>
+          <span class="url">{{url}}</span>
+          <span class="image">{{image}}</span>
+          {{/pages}}
+        </div>
+      </template>
+    </div>
+    <div ooter>
+        Footer
+    </div>
+  </amp-next-page>
+</body>
+</html>

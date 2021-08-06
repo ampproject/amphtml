@@ -1,0 +1,218 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AMP Consent GEO Test</title>
+  <link rel="canonical" href="amp-consent.amp.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <meta name="amp-consent-blocking" content="amp-twitter">
+
+  <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
+
+  <style amp-custom>
+    body {
+      margin: 0;
+      font-family: 'Georgia', Serif;
+    }
+    .brand-logo {
+      font-family: 'Open Sans';
+    }
+    .content-container p {
+      line-height: 24px;
+    }
+    header,
+    .article-body {
+      padding: 15px;
+    }
+    figure {
+      margin: 0;
+    }
+    figcaption {
+      color: #6f757a;
+      padding: 15px 0;
+      font-size: .9em;
+    }
+    .author {
+      display: flex;
+      align-items: center;
+      background: #f4f4f4;
+      padding: 0 15px;
+      font-size: .8em;
+      border: solid #dcdcdc;
+      border-width: 1px 0;
+    }
+    .header-time {
+      color: #a8a3ae;
+      font-family: 'Roboto';
+      font-size: 12px;
+    }
+    .author p {
+      margin: 5px;
+    }
+    .byline {
+      font-family: 'Roboto';
+      display: inline-block;
+    }
+    .byline p {
+      line-height: normal;
+    }
+    .byline .brand {
+      color: #6f757a;
+    }
+    .standfirst {
+      color: #6f757a;
+    }
+    .mailto {
+      text-decoration: none;
+    }
+    /* defaults */
+    .unknown:after {
+    content: 'in unknown geo group';
+    }
+    /* override */
+    .amp-geo-group-na .unknown:after {
+    content: 'in na geogroup';
+    }
+    h1 {
+      margin: 5px 0;
+      font-weight: normal;
+    }
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 226px;
+      background: #f4f4f4;
+    }
+    amp-consent {
+      min-height: 30px;
+      font-family: 'Roboto';
+      font-weight: 500;
+      line-height: 30px;
+      padding: 8px;
+      background: #46b6ac;
+    }
+    amp-consent button {
+      border: none;
+      border-radius: 2px;
+      color: #fafafa;
+      height: 26px;
+      min-width: 32px;
+      padding: 0 16px;
+      margin: 0 16px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      cursor: pointer;
+      vertical-align: middle;
+      line-height: 26px;
+      text-align: center;
+      background: #3f51b5;
+    }
+    hr {
+      margin: 0;
+    }
+  </style>
+  <script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+<header>
+  <div class="brand-logo">
+    PublisherLogo
+  </div>
+</header>
+<main role="main">
+
+
+  <h3>Image that is blocked by '_till_responded' consent</h3>
+
+  <amp-img
+    data-block-on-consent='_till_responded'
+    src="/examples/img/bigbuckbunny.jpg" width=300 height=200></amp-img>
+
+  <h3>Image that is blocked by '_till_accepted' consent</h3>
+  <amp-img
+    data-block-on-consent='_till_accepted'
+    src="/examples/img/bigbuckbunny.jpg" width=300 height=200></amp-img>
+
+  <h3>Image that is blocked by '_auto_reject' consent</h3>
+  <amp-img
+    data-block-on-consent='_auto_reject'
+    src="/examples/img/bigbuckbunny.jpg" width=300 height=200></amp-img>
+
+  <h3>Image that is blocked by 'default' consent</h3>
+  <amp-img
+    data-block-on-consent='default'
+    src="/examples/img/bigbuckbunny.jpg" width=300 height=200></amp-img>
+
+  <h3>Image that is NOT blocked by consent</h3>
+  <amp-img
+    src="/examples/img/ima-poster.png" width=300 height=200></amp-img>
+
+  <amp-consent id='ABC' layout='nodisplay'>
+    <script type="application/json">{
+      "consentInstanceId": "consent-clinet",
+      "consentRequired": true,
+      "postPromptUI": "postPromptUI",
+      "checkConsentHref": "/check-consent?consentRequired=true",
+      "promptUI": "ui1"
+    }</script>
+
+    <div id="ui1">
+      NA: Can I load the image??
+      <button on="tap:ABC.accept">Accept</button>
+      <button on="tap:ABC.reject">Reject</button>
+      <button on="tap:ABC.dismiss">Dismiss</button>
+    </div>
+
+    <div id="postPromptUI">
+      <button on="tap:ABC.prompt()">Manage Consent</button>
+      <button on="tap:ABC.prompt(expireCache=true)">Revoke & Manage Consent</button>
+    </div>
+  </amp-consent>
+
+  <article>
+    <div class="content-container">
+      <header>
+        <h1 itemprop="headline">Lorem Ipsum</h1>
+        <time class="header-time" itemprop="datePublished"
+              datetime="2015-09-14 13:00">September 14, 2015</time>
+        <p class="standfirst">
+          Fusce pretium tempor justo, vitae consequat dolor maximus eget.
+        </p>
+      </header>
+
+      <div class="author">
+        <div class="byline">
+          <p>
+            by <span itemscope itemtype="http://schema.org/Person"
+                     itemprop="author"><b>Lorem Ipsum</b>
+              <a class="mailto" href="mailto:lorem.ipsum@">
+              lorem.ipsum@</a></span>
+          </p>
+          <p class="brand">PublisherName News Reporter<p>
+        </div>
+      </div>
+      <div class="article-body" itemprop="articleBody">
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+          Curabitur ullamcorper turpis vel commodo scelerisque. Phasellus
+          luctus nunc ut elit cursus, et imperdiet diam vehicula.
+          Duis et nisi sed urna blandit bibendum et sit amet erat.
+          Suspendisse potenti. Curabitur consequat volutpat arcu nec
+          elementum. Etiam a turpis ac libero varius condimentum.
+          Maecenas sollicitudin felis aliquam tortor vulputate,
+          ac posuere velit semper.
+        </p>
+      </div>
+    </div>
+  </article>
+</main>
+
+<footer>
+  <div class="brand-logo">PublisherLogo</div>
+</footer>
+</body>
+</html>

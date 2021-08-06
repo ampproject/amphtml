@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Ad visible repeat examples</title>
+    <link rel="canonical" href="http://nonblocking.io/" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1" />
+    <style amp-custom>
+      amp-ad {
+        border: 2px solid red;
+        padding: 0;
+        margin: 0;
+      }
+      /* Included here to make sure it does not render. */
+      .fixed {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        background-color: #eee;
+        opacity: 0.8;
+      }
+
+      .fill {
+        height: 750px;
+        width: 10px;
+        background-color: yellow;
+        opacity: 0.2;
+      }
+    </style>
+    <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+    <style amp-boilerplate>
+      body {
+        -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      }
+      @-webkit-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-moz-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-ms-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-o-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+    </style>
+    <noscript>
+      <style amp-boilerplate>
+        body {
+          -webkit-animation: none;
+          -moz-animation: none;
+          -ms-animation: none;
+          animation: none;
+        }
+      </style>
+    </noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+
+  <body>
+    <amp-analytics>
+      <script type="application/json">
+        {
+          "transport": { "beacon": false, "xhrpost": false },
+          "requests": {
+            "base": "fake.com/ad?multiVisible=true&adId=${id}",
+            "queryAll": "fake.com/ad?queryAll=true",
+            "restrictDataVars": "fake.com/ad?restrictDataVars=true&adId=${id}",
+            "nonAmpElements": "fake.com/paragraph?nonAmpElement=true&paragraphId=${id}"
+          },
+          "triggers": {
+            "multiVisible": {
+              "on": "visible",
+              "request": "base",
+              "selector": ["#ad1", "#ad2"]
+            },
+            "querySelectorAll": {
+              "on": "visible",
+              "request": "queryAll",
+              "selector": [".myClass"]
+            },
+            "restrictDataVars": {
+              "on": "visible",
+              "request": "restrictDataVars",
+              "selector": [".restrictDataVars"]
+            },
+            "nonAmpElements": {
+              "on": "visible",
+              "request": "nonAmpElements",
+              "selector": ["#paragraph"],
+              "visibilitySpec": {
+                "visiblePercentageMin": 20,
+                "visiblePercentageMax": 80,
+                "totalTimeMin": 5000,
+                "continuousTimeMin": 2000
+              }
+            }
+          }
+        }
+      </script>
+    </amp-analytics>
+    <div class="fill"></div>
+    <div>
+      <amp-ad
+        id="ad1"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad1"
+        data-ad-width="300"
+        data-ad-height="250"
+      >
+      </amp-ad>
+      <p id="paragraph" data-vars-id="paragraph1">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sed vehicula justo, quis blandit tortor. Curabitur in mollis elit. Sed sed lorem vel mi elementum eleifend ut vel sapien. Suspendisse sed blandit nulla. Sed dignissim
+        eros nec felis malesuada consectetur. Etiam quis nunc quis sapien tempus euismod in eget velit.
+      </p>
+      <amp-ad
+        id="ad2"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad2"
+        data-ad-width="300"
+        data-ad-height="250"
+      >
+      </amp-ad>
+      <p id="paragraph" data-vars-id="paragraph2">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sed vehicula justo, quis blandit tortor. Curabitur in mollis elit. Sed sed lorem vel mi elementum eleifend ut vel sapien. Suspendisse sed blandit nulla. Sed dignissim
+        eros nec felis malesuada consectetur. Etiam quis nunc quis sapien tempus euismod in eget velit.
+      </p>
+      <amp-ad
+        id="ad3"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad3"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass"
+      >
+      </amp-ad>
+      <p id="paragraph" data-vars-id="paragraph3">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sed vehicula justo, quis blandit tortor. Curabitur in mollis elit. Sed sed lorem vel mi elementum eleifend ut vel sapien. Suspendisse sed blandit nulla. Sed dignissim
+        eros nec felis malesuada consectetur. Etiam quis nunc quis sapien tempus euismod in eget velit.
+      </p>
+      <amp-ad
+        id="ad4"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad4"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass"
+      >
+      </amp-ad>
+      <p id="paragraph" data-vars-id="paragraph4">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sed vehicula justo, quis blandit tortor. Curabitur in mollis elit. Sed sed lorem vel mi elementum eleifend ut vel sapien. Suspendisse sed blandit nulla. Sed dignissim
+        eros nec felis malesuada consectetur. Etiam quis nunc quis sapien tempus euismod in eget velit.
+      </p>
+      <amp-ad
+        id="ad5"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad5"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass"
+      >
+      </amp-ad>
+      <p id="paragraph" data-vars-id="paragraph5">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sed vehicula justo, quis blandit tortor. Curabitur in mollis elit. Sed sed lorem vel mi elementum eleifend ut vel sapien. Suspendisse sed blandit nulla. Sed dignissim
+        eros nec felis malesuada consectetur. Etiam quis nunc quis sapien tempus euismod in eget velit.
+      </p>
+      <amp-ad
+        id="ad6"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad6"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass"
+      >
+      </amp-ad>
+      <p id="paragraph" data-vars-id="paragraph6">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sed vehicula justo, quis blandit tortor. Curabitur in mollis elit. Sed sed lorem vel mi elementum eleifend ut vel sapien. Suspendisse sed blandit nulla. Sed dignissim
+        eros nec felis malesuada consectetur. Etiam quis nunc quis sapien tempus euismod in eget velit.
+      </p>
+      <amp-ad
+        id="ad7"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad7"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass"
+      >
+      </amp-ad>
+      <p id="paragraph" data-vars-id="paragraph7">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sed vehicula justo, quis blandit tortor. Curabitur in mollis elit. Sed sed lorem vel mi elementum eleifend ut vel sapien. Suspendisse sed blandit nulla. Sed dignissim
+        eros nec felis malesuada consectetur. Etiam quis nunc quis sapien tempus euismod in eget velit.
+      </p>
+      <amp-ad
+        id="ad8"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad8"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass"
+      >
+      </amp-ad>
+      <p id="paragraph" data-vars-id="paragraph8">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sed vehicula justo, quis blandit tortor. Curabitur in mollis elit. Sed sed lorem vel mi elementum eleifend ut vel sapien. Suspendisse sed blandit nulla. Sed dignissim
+        eros nec felis malesuada consectetur. Etiam quis nunc quis sapien tempus euismod in eget velit.
+      </p>
+      <amp-ad
+        id="ad9"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad9"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass"
+      >
+      </amp-ad>
+      <p id="paragraph" data-vars-id="paragraph9">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sed vehicula justo, quis blandit tortor. Curabitur in mollis elit. Sed sed lorem vel mi elementum eleifend ut vel sapien. Suspendisse sed blandit nulla. Sed dignissim
+        eros nec felis malesuada consectetur. Etiam quis nunc quis sapien tempus euismod in eget velit.
+      </p>
+      <amp-ad
+        id="ad10"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad10"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass"
+      >
+      </amp-ad>
+      <p id="paragraph" data-vars-id="paragraph10">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sed vehicula justo, quis blandit tortor. Curabitur in mollis elit. Sed sed lorem vel mi elementum eleifend ut vel sapien. Suspendisse sed blandit nulla. Sed dignissim
+        eros nec felis malesuada consectetur. Etiam quis nunc quis sapien tempus euismod in eget velit.
+      </p>
+      <amp-ad
+        id="ad11"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad11"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass"
+      >
+      </amp-ad>
+      <amp-ad
+        id="ad12"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad12"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass"
+      >
+      </amp-ad>
+      <amp-ad
+        id="ad13"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad13"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass"
+      >
+      </amp-ad>
+      <amp-ad
+        id="ad14"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad14"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass"
+      >
+      </amp-ad>
+      <amp-ad
+        id="ad15"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad15"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass"
+      >
+      </amp-ad>
+      <amp-ad
+        id="ad16"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad16"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass"
+      >
+      </amp-ad>
+      <amp-ad
+        id="ad17"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad17"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass"
+      >
+      </amp-ad>
+      <amp-ad
+        id="ad18"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad18"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass"
+      >
+      </amp-ad>
+      <amp-ad
+        id="ad19"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad19"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass"
+      >
+      </amp-ad>
+      <amp-ad
+        id="ad20"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad20"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass restrictDataVars"
+      >
+      </amp-ad>
+      <amp-ad
+        id="ad21"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad21"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass restrictDataVars"
+      >
+      </amp-ad>
+      <amp-ad
+        id="ad22"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad22"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass restrictDataVars"
+      >
+      </amp-ad>
+      <amp-ad
+        id="ad23"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad23"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass restrictDataVars"
+      >
+      </amp-ad>
+      <amp-ad
+        id="ad24"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-vars-id="ad24"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass restrictDataVars"
+      >
+      </amp-ad>
+      <amp-ad
+        id="ad25"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass restrictDataVars"
+      >
+      </amp-ad>
+      <amp-ad
+        id="ad26"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass restrictDataVars"
+      >
+      </amp-ad>
+      <amp-ad
+        id="ad27"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass restrictDataVars"
+      >
+      </amp-ad>
+      <amp-ad
+        id="ad28"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass restrictDataVars"
+      >
+      </amp-ad>
+      <amp-ad
+        id="ad29"
+        width="300"
+        height="250"
+        type="_ping_"
+        data-url="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+        data-valid="true"
+        data-ad-width="300"
+        data-ad-height="250"
+        class="myClass restrictDataVars"
+      >
+      </amp-ad>
+    </div>
+  </body>
+</html>

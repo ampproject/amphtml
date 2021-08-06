@@ -14,19 +14,26 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
-import {toggle} from '../../../src/style';
-import {Layout} from '../../../src/layout';
-import {waitForBodyPromise} from '../../../src/dom';
-import {allocateVariant} from './variant';
-import {getService} from '../../../src/service';
+import {Layout} from '#core/dom/layout';
+import {Variants, allocateVariant} from './variant';
+import {dev, devAssert, userAssert} from '../../../src/log';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
+import {parseJson} from '#core/types/object/json';
 
-/** @const */
-const EXPERIMENT = 'amp-experiment';
+const TAG = 'amp-experiment';
 const ATTR_PREFIX = 'amp-x-';
 
 export class AmpExperiment extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    /*
+     * Prerender is allowed because the client_id is only used to calculate
+     * the variant bucket.
+     * In the case where a client_id is first generated
+     * during prerender, the base cid will be stored in the AMP viewer domain.
+     */
+    return true;
+  }
 
   /** @override */
   isLayoutSupported(layout) {
@@ -34,43 +41,55 @@ export class AmpExperiment extends AMP.BaseElement {
   }
 
   /** @override */
-  buildCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.win, EXPERIMENT);
-    if (!this.isExperimentOn_) {
-      dev().warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
-      toggle(this.element, false);
-      getService(this.win, 'variant', () => Promise.resolve());
-      return;
-    }
-
-    const config = this.getConfig_();
-    const results = Object.create(null);
-    const variants = Object.keys(config).map(experimentName => {
-      return allocateVariant(
-          this.win, experimentName, config[experimentName])
-              .then(variantName => {
-                results[experimentName] = variantName;
-              });
-    });
-
-    /** @private @const {!Promise<!Object<string, ?string>>} */
-    this.experimentVariants_ = Promise.all(variants)
-        .then(() => results)
-        .then(this.addToBody_.bind(this));
-
-    getService(this.win, 'variant', () => this.experimentVariants_);
+  isBuildRenderBlocking() {
+    // variantService is render blocking
+    return true;
   }
 
-  getConfig_() {
-    const children = this.element.children;
-    user().assert(
-        children.length == 1 && children[0].tagName == 'SCRIPT'
-            && children[0].getAttribute('type').toUpperCase()
-                == 'APPLICATION/JSON',
-        '<amp-experiment> should contain exactly one ' +
-        '<script type="application/json"> child.');
+  /** @override */
+  buildCallback() {
+    return getServicePromiseForDoc(this.getAmpDoc(), 'variant').then(
+      (variantsService) => {
+        try {
+          const config = this.getConfig_();
+          const results = Object.create(null);
+          const variants = Object.keys(config).map((experimentName) => {
+            return allocateVariant(
+              this.getAmpDoc(),
+              experimentName,
+              config[experimentName]
+            ).then((variantName) => {
+              results[experimentName] = variantName;
+            });
+          });
 
-    return JSON.parse(children[0].textContent);
+          /** @private @const {!Promise<!Object<string, ?string>>} */
+          const experimentVariants = Promise.all(variants)
+            .then(() => results)
+            .then(this.addToBody_.bind(this));
+
+          variantsService.init(experimentVariants);
+        } catch (e) {
+          // Ensure downstream consumers don't wait for the promise forever.
+          variantsService.init({});
+          throw e;
+        }
+      }
+    );
+  }
+
+  /** @return {!JsonObject} [description] */
+  getConfig_() {
+    const {children} = this.element;
+    userAssert(
+      children.length == 1 &&
+        children[0].tagName == 'SCRIPT' &&
+        children[0].getAttribute('type').toUpperCase() == 'APPLICATION/JSON',
+      '<amp-experiment> should contain exactly one ' +
+        '<script type="application/json"> child.'
+    );
+
+    return devAssert(parseJson(children[0].textContent));
   }
 
   /**
@@ -82,11 +101,14 @@ export class AmpExperiment extends AMP.BaseElement {
    * @private
    */
   addToBody_(experiments) {
-    const doc = this.win.document;
-    return waitForBodyPromise(doc).then(() => {
+    const doc = this.getAmpDoc();
+    return doc.waitForBodyOpen().then((body) => {
       for (const name in experiments) {
         if (experiments[name]) {
-          doc.body.setAttribute(ATTR_PREFIX + name, experiments[name]);
+          body.setAttribute(
+            ATTR_PREFIX + name,
+            dev().assertString(experiments[name])
+          );
         }
       }
       return experiments;
@@ -94,4 +116,7 @@ export class AmpExperiment extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-experiment', AmpExperiment);
+AMP.extension(TAG, '0.1', (AMP) => {
+  AMP.registerServiceForDoc('variant', Variants);
+  AMP.registerElement(TAG, AmpExperiment);
+});

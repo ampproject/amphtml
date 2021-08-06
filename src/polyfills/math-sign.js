@@ -20,7 +20,7 @@
  * that parses to NaN, returns NaN.
  *
  * @param {number} x
- * @returns {number}
+ * @return {number}
  */
 export function sign(x) {
   x = Number(x);
@@ -31,8 +31,7 @@ export function sign(x) {
   }
 
   return x > 0 ? 1 : -1;
-};
-
+}
 
 /**
  * Sets the Math.sign polyfill if it does not exist.
@@ -40,6 +39,11 @@ export function sign(x) {
  */
 export function install(win) {
   if (!win.Math.sign) {
-    win.Math.sign = sign;
+    win.Object.defineProperty(win.Math, 'sign', {
+      enumerable: false,
+      configurable: true,
+      writable: true,
+      value: sign,
+    });
   }
 }

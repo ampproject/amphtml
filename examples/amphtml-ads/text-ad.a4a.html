@@ -1,0 +1,82 @@
+<!doctype html>
+<html ⚡4ads lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+  <meta name="amp4ads-id" content="vendor=doubleclick,type=impression-id,value=12345">
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
+  <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script>
+  <script async custom-element="amp-ad-exit" src="https://cdn.ampproject.org/v0/amp-ad-exit-0.1.js"></script>
+  <style amp-custom>
+    .row {
+      display: flex;
+      align-items: center;
+      background-color: yellowgreen;
+    }
+    .row > * {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+<amp-fit-text id="ad" width="300" height="200"
+    on="tap:exit-api.exit(target='target2')">
+  <b>amp-fit-text</b> clicks are handled by <b>amp-ad-exit</b> with 20px border click protection and
+  5s delay protection enabled
+</amp-fit-text>
+<div class="row">
+  <b>amp-social-share</b>
+  <amp-social-share type="email"
+      data-param-subject="Hello World"
+      data-param-body="What's up?"
+      data-param-recipient="sample@xyz.com"
+      aria-label="Share by email">
+  </amp-social-share>
+</div>
+
+<amp-ad-exit id="exit-api" layout="nodisplay">
+  <script type="application/json">
+    {
+      "targets": {
+        "target1": {
+          "finalUrl": "http://localhost:8000/?product1&x=CLICK_X&y=CLICK_Y&e=_elem&shouldNotBeReplaced=AMP_VERSION",
+          "vars": {
+            "_elem": {"defaultValue": "headline"}
+          }
+        },
+        "target2": {
+          "finalUrl": "http://localhost:8000/?product2&r=RANDOM",
+          "trackingUrls": [
+            "http://localhost:8000/api/ping?clicked=_elem"
+          ],
+          "vars": {
+            "_elem": {"defaultValue": "headline"}
+          },
+          "filters": ["longDelay", "borderProtection"]
+        }
+      },
+      "filters": {
+        "longDelay": {
+          "type": "clickDelay",
+          "delay": 5000
+        },
+        "borderProtection": {
+          "type": "clickLocation",
+          "top": 20,
+          "bottom": 20,
+          "left": 20,
+          "right": 20,
+          "relativeTo": "#ad"
+        }
+      },
+      "transport": {
+        "beacon": true,
+        "image": true
+      }
+    }
+  </script>
+</amp-ad-exit>
+</body>
+</html>

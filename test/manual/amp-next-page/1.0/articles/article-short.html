@@ -1,0 +1,103 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AMP Article with parallax title</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+  <style amp-custom>
+    header {
+      position: relative;
+    }
+
+    h1 {
+      margin: 0px 10px;
+    }
+
+    header h1 {
+      position: absolute;
+      top: 20vh;
+      padding: 5px;
+      z-index: 1;
+    }
+
+    header h1 span, .title {
+      background-color: black;
+      color: white;
+      line-height: 1.2em;
+    }
+
+    amp-img img {
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+    <amp-iframe width=5 height=5
+      sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+      layout="fixed"
+      frameborder="0"
+      src="https://www.w3.org/TR/page-visibility/">
+    </amp-iframe>
+  <amp-analytics>
+    <script type="application/json">
+    {
+      "requests": {
+        "scroll": "https://article-short/${eventId}/${eventLabel}/${account}",
+        "pageview": "https://article-short/${ampdocUrl}/${title}/${account}"
+      },
+      "vars": {
+        "account": "ABC123"
+      },
+      "triggers": {
+        "scrollPings": {
+          "on": "scroll",
+          "request": "scroll",
+          "scrollSpec": {
+            "verticalBoundaries": [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+            "horizontalBoundaries": [90]
+          },
+          "vars": {
+            "eventId": "scroll",
+            "eventLabel": "${verticalScrollBoundary}"
+          }
+        },
+        "trackPageview": {
+          "on": "visible",
+          "request": "pageview",
+          "vars": {
+            "eventCategory": "${canonicalUrl}",
+            "eventAction": "view"
+          }
+        }
+      }
+    }
+    </script>
+  </amp-analytics>
+  <main>
+    <h2>Short Article</h2>
+
+    <article>
+        <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean vitae
+            libero porta nulla iaculis viverra. Vestibulum consectetur scelerisque
+            varius. Nam pulvinar dui a tortor hendrerit, id iaculis elit auctor. Nam
+            dapibus felis in gravida ornare. Nulla varius id mauris sed venenatis. Sed
+            turpis ex, aliquet nec fermentum eget, sollicitudin non est. Suspendisse
+            tincidunt ornare tortor, at vehicula orci aliquam a. Aliquam eleifend odio
+            quis quam dignissim posuere. Proin ac dolor rhoncus, consectetur ipsum
+            non, dictum est. Nam sollicitudin est eu est aliquet eleifend. Duis
+            condimentum, nisl eu finibus auctor, lectus odio fringilla nisi, quis
+            cursus libero magna imperdiet purus. In condimentum vehicula est, nec
+            varius est suscipit vitae. Maecenas ut sapien diam. Vivamus viverra nisl
+            at quam pellentesque posuere. Cras ut nibh non arcu dignissim elementum.
+        </p>
+    </article>
+  </main>
+</body>
+
+</html>

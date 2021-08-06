@@ -1,0 +1,196 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="https://amp.dev/documentation/examples/components/amp-selector/index.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
+  <script async custom-element="amp-auto-lightbox" src="https://cdn.ampproject.org/v0/amp-auto-lightbox-0.1.js"></script>
+  <script async custom-element="amp-loader" src="https://cdn.ampproject.org/v0/amp-loader-0.1.js"></script>
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    amp-sidebar {
+      width: 300px;
+    }
+    h4, li > a {
+      margin: 0;
+      padding: 10px;
+      display: block;
+    }
+    h4 > b {
+      float: right;
+    }
+    body > button {
+      padding: 20px;
+      margin: 20px;
+      font-size: 1em;
+    }
+    #sidebar1 {
+      display: flex;
+      flex-flow: column;
+    }
+    #sidebar1 > div {
+      flex-grow: 1;
+      position: relative;
+    }
+    .scrollable {
+      height: 100%;
+      overflow: scroll;
+    }
+  </style>
+</head>
+<body>
+  <amp-state id="data">
+    <script type="application/json">
+      {
+        "items": ["list item 1", "list item 2", "list item 3"]
+      }
+    </script>
+  </amp-state>
+
+  <button on="tap:sidebar1.open">LTR Menu</button>
+  <button on="tap:sidebar2.open">RTL Menu</button>
+
+  <amp-sidebar id="sidebar1" layout="nodisplay" on="sidebarClose:menu1.reset">
+    <amp-img src="http://placeimg.com/500/100/tech" layout="responsive" width="5" height="1"></amp-img>
+    <h4>this text sticks around</h4>
+    <div>
+    <amp-nested-menu id="menu1" layout="fill" side="right">
+      <ul>
+        <li>
+          <h4 amp-nested-submenu-open>with links & on actions<b>></b></h4>
+          <div amp-nested-submenu>
+            <ul>
+              <li>
+                <h4 amp-nested-submenu-close>
+                  <span>return to main</span>
+                  <button on="tap:sidebar1.close">close sidebar</button>
+                </h4>
+              </li>
+              <li>
+                <h4 amp-nested-submenu-open>
+                  <span>checkout links</span>
+                  <a href="https://amp.dev/">AMP</a>
+                  <b>></b>
+                </h4>
+                <div amp-nested-submenu>
+                  <ul>
+                    <li>
+                      <h4 amp-nested-submenu-close>return to previous</h4>
+                    </li>
+                    <li>
+                      <a href="https://amp.dev/">link 1</a>
+                    </li>
+                    <li>
+                      <a href="https://amp.dev/">link 2</a>
+                    </li>
+                    <li>
+                      <a href="https://amp.dev/">link 3</a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li>
+                <a href="https://amp.dev/">just another link</a>
+              </li>
+            </ul>
+          </div>
+        </li>
+        <li>
+          <h4 amp-nested-submenu-open>with other components<b>></b></h4>
+          <div amp-nested-submenu>
+            <ul>
+              <li>
+                <h4 amp-nested-submenu-close>return to main</h4>
+              </li>
+              <li>
+                <h4 amp-nested-submenu-open>amp-img<b>></b></h4>
+                <div amp-nested-submenu>
+                  <div class="scrollable">
+                    <h4 amp-nested-submenu-close>return to previous</h4>
+                    <amp-img src="http://placeimg.com/300/900/tech"
+                      layout="responsive" width="1" height="3"></amp-img>
+                  </div>
+                </div>
+              </li>
+              <li>
+                <h4 amp-nested-submenu-open>amp-accordion<b>></b></h4>
+                <div amp-nested-submenu>
+                  <ul>
+                    <li>
+                      <h4 amp-nested-submenu-close>return to previous</h4>
+                    </li>
+                    <li>
+                      <amp-accordion layout="container">
+                        <section>
+                          <h4>header 1</h4>
+                          <div>content 1</div>
+                        </section>
+                        <section>
+                          <h4>header 2</h4>
+                          <div>content 2</div>
+                        </section>
+                      </amp-accordion>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li>
+                <h4 amp-nested-submenu-open>amp-list<b>></b></h4>
+                <div amp-nested-submenu>
+                  <ul>
+                    <li>
+                      <h4 amp-nested-submenu-close>return to previous</h4>
+                    </li>
+                    <li>
+                      <amp-list src="https://api.myjson.com/bins/v2t98"
+                        layout="fixed-height" height="100" items="." single-item>
+                        <template type="amp-mustache">
+                          <ul>
+                            {{#items}}
+                            <li>
+                              <h4 tabindex="0">{{title}}</h4>
+                            </li>
+                            {{/items}}
+                          </ul>
+                        </template>
+                      </amp-list>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </li>
+      </ul>
+    </amp-nested-menu>
+    </div>
+  </amp-sidebar>
+
+  <amp-sidebar id="sidebar2" layout="nodisplay" side="right" dir="rtl" on="sidebarClose:menu2.reset">
+    <amp-list layout="fill" src="https://api.myjson.com/bins/v2t98" items="." single-item>
+      <template type="amp-mustache">
+        <amp-nested-menu id="menu2" layout="fill" side="left">
+            <ul>
+              {{#items}}
+              <li>
+                <h4 amp-nested-submenu-open>{{title}}</h4>
+                <div amp-nested-submenu>
+                  <h4 amp-nested-submenu-close>go back</h4>
+                  <amp-img src="{{imageUrl}}" layout="responsive" width="3" height="2"></amp-img>
+                </div>
+              </li>
+              {{/items}}
+            </ul>
+        </amp-nested-menu>
+      </template>
+    </amp-list>
+  </amp-sidebar>
+
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  },
+  "requests": {
+    "pageview": "${url}?s=${s}&amp=1&cp=${cp}&host=${canonicalHost}&path=${canonicalPath}"
+  },
+  "triggers": {
+    "pageview": {
+      "on": "visible",
+      "request": "pageview",
+      "iframePing": true
+    }
+  }
+}

@@ -1,0 +1,78 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>amp-3d-gltf example</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    amp-3d-gltf [fallback] {
+      background: red;
+      color: white;
+    }
+    amp-3d-gltf [placeholder] {
+      background: green;
+    }
+
+    section amp-3d-gltf {
+      max-width: 600px;
+      border: 1px solid black;
+    }
+  </style>
+  <script async custom-element="amp-3d-gltf" src="https://cdn.ampproject.org/v0/amp-3d-gltf-0.1.js"></script>
+  <script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"></script>
+  <script async custom-element="amp-orientation-observer" src="https://cdn.ampproject.org/v0/amp-orientation-observer-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <h1>Usage examples for &lt;amp-3d-gltf /&gt;</h1>
+
+  <h2>Layout: fixed</h2>
+  <section>
+    <amp-3d-gltf layout="fixed"
+                 clearColor="cyan"
+                 antialiasing="true"
+                 width="320"
+                 height="240"
+                 src="https://webgears-3d.github.io/3d-gltf-static/m/BoxVertexColors.glb"></amp-3d-gltf>
+  </section>
+
+  <h2>Layout: responsive</h2>
+  <section>
+    <amp-3d-gltf id="bottle"
+                 layout="responsive"
+                 antialiasing="true"
+                 maxPixelRatio="1.5"
+                 width="240"
+                 height="320"
+                 src="https://webgears-3d.github.io/3d-gltf-static/m/WaterBottle.glb"></amp-3d-gltf>
+    <amp-position-observer on="scroll:bottle.setModelRotation(z=event.percent, zMin=6.59, zMax=5.96)"
+                           intersection-ratios="0.6"
+                           layout="nodisplay">
+    </amp-position-observer>
+    <amp-orientation-observer on="gamma:bottle.setModelRotation(y=event.percent)"
+                              layout="nodisplay"></amp-orientation-observer>
+  </section>
+
+  <h2>With placeholder</h2>
+  <section>
+    <amp-3d-gltf layout="fixed"
+                 alpha="true"
+                 antialiasing="true"
+                 maxPixelRatio="1.5"
+                 width="320"
+                 height="240"
+                 src="https://webgears-3d.github.io/3d-gltf-static/m/DamagedHelmet.glb">
+      <div placeholder>Loading...</div>
+    </amp-3d-gltf>
+  </section>
+
+  <h2>With fallback</h2>
+  <section>
+    <amp-3d-gltf layout="fixed" width="400" height="100">
+      <div fallback>Something went wrong</div>
+    </amp-3d-gltf>
+  </section>
+</body>
+</html>

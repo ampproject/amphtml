@@ -1,0 +1,16 @@
+{
+  "requests": {
+    "pageview": "https://${beacon}/amp?appId=${appId}&licenseKey=${licenseKey}&ampUrl=${ampdocUrl}&canonicalUrl=${canonicalUrl}&timeToDomContentLoadedEventEnd=${navTiming(domContentLoadedEventEnd)}&timeToDomInteractive=${navTiming(domInteractive)}&timeToDomComplete=${navTiming(domComplete)}&timeToDomLoading=${navTiming(domLoading)}&timeToResponseStart=${navTiming(responseStart)}&timeToResponseEnd=${navTiming(responseEnd)}&timeToLoadEventStart=${navTiming(loadEventStart)}&timeToLoadEventEnd=${navTiming(loadEventEnd)}&timeToConnectStart=${navTiming(connectStart)}&timeToConnectEnd=${navTiming(connectEnd)}&timeToFetchStart=${navTiming(fetchStart)}&timeToRequestStart=${navTiming(requestStart)}&timeToUnloadEventStart=${navTiming(unloadEventStart)}&timeToUnloadEventEnd=${navTiming(unloadEventEnd)}&timeToDomainLookupStart=${navTiming(domainLookupStart)}&timeToDomainLookupEnd=${navTiming(domainLookupEnd)}&timeToRedirectStart=${navTiming(redirectStart)}&timeToRedirectEnd=${navTiming(redirectEnd)}&timeToSecureConnection=${navTiming(secureConnectionStart)}&timestamp=${timestamp}&ampVersion=${ampVersion}&pageLoadTime=${pageLoadTime}"
+  },
+  "vars": {
+    "beacon": "bam.nr-data.net",
+    "appId": [],
+    "licenseKey": ""
+  },
+  "triggers": {
+    "trackPageview": {
+      "on": "ini-load",
+      "request": "pageview"
+    }
+  }
+}

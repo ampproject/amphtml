@@ -14,24 +14,37 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {srcsetFromElement} from '../../../src/srcset';
-import * as st from '../../../src/style';
+import * as st from '#core/dom/style';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {dev} from '../../../src/log';
+import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '#core/dom/img';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '#core/dom/layout/viewport-observer';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {propagateObjectFitStyles} from '#core/dom/style';
 
-class AmpAnim extends AMP.BaseElement {
+const TAG = 'amp-anim';
+const BUILD_ATTRIBUTES = [
+  'alt',
+  'aria-label',
+  'aria-describedby',
+  'aria-labelledby',
+];
+const LAYOUT_ATTRIBUTES = ['src', 'srcset'];
+/** @visibleForTesting */
+export const SRC_PLACEHOLDER =
+  'data:image/gif;base64,' +
+  'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
+export class AmpAnim extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
-    /** @private @const {!Element} */
-    this.img_ = new Image();
-
-    /** @private {?../../../src/srcset.Srcset} */
-    this.srcset_ = null;
-
-    /** @private {?Promise} */
-    this.loadPromise_ = null;
+    /** @private {?Element} */
+    this.img_ = null;
   }
 
   /** @override */
@@ -41,15 +54,29 @@ class AmpAnim extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.propagateAttributes(['alt'], this.img_);
-    this.applyFillContent(this.img_, true);
+    this.img_ = new Image();
+    this.img_.setAttribute('decoding', 'async');
+    propagateAttributes(BUILD_ATTRIBUTES, this.element, this.img_);
+    applyFillContent(this.img_, true);
+    propagateObjectFitStyles(this.element, this.img_);
+
+    // Remove role=img otherwise this breaks screen-readers focus and
+    // only read "Graphic" when using only 'alt'.
+    if (this.element.getAttribute('role') == 'img') {
+      this.element.removeAttribute('role');
+      this.user().error(
+        'AMP-ANIM',
+        'Setting role=img on amp-anim elements ' +
+          'breaks screen readers. Please just set alt or ARIA attributes, ' +
+          'they will be correctly propagated for the underlying <img> ' +
+          'element.'
+      );
+    }
 
     // The image is initially hidden if a placeholder is available.
-    st.toggle(this.img_, !this.getPlaceholder());
+    st.toggle(dev().assertElement(this.img_), !this.getPlaceholder());
 
     this.element.appendChild(this.img_);
-
-    this.srcset_ = srcsetFromElement(this.element);
   }
 
   /** @override */
@@ -59,7 +86,21 @@ class AmpAnim extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return this.updateImageSrc_();
+    const img = dev().assertElement(this.img_);
+    // Remove missing attributes to remove the placeholder srcset if none is
+    // specified on the element.
+    propagateAttributes(
+      LAYOUT_ATTRIBUTES,
+      this.element,
+      img,
+      /* opt_removeMissingAttrs */ true
+    );
+    guaranteeSrcForSrcsetUnsupportedBrowsers(img);
+    return this.loadPromise(img).then(() => {
+      observeWithSharedInOb(this.element, (inViewport) =>
+        this.viewportCallback_(inViewport)
+      );
+    });
   }
 
   /** @override */
@@ -68,51 +109,25 @@ class AmpAnim extends AMP.BaseElement {
   }
 
   /** @override */
-  viewportCallback(inViewport) {
-    if (!inViewport || !this.loadPromise_) {
-      this.updateInViewport_();
-    } else {
-      this.loadPromise_.then(() => this.updateInViewport_());
-    }
-  }
-
-  /** @override */
   unlayoutCallback() {
+    unobserveWithSharedInOb(this.element);
+    this.viewportCallback_(false);
     // Release memory held by the image - animations are typically large.
-    this.img_.src = '';
+    this.img_.src = SRC_PLACEHOLDER;
+    this.img_.srcset = SRC_PLACEHOLDER;
     return true;
   }
 
-  /** @private */
-  updateInViewport_() {
-    const inViewport = this.isInViewport();
-    this.togglePlaceholder(!inViewport);
-    st.toggle(this.img_, inViewport);
-  }
-
   /**
-   * @return {!Promise}
+   * @param {boolean} inViewport
    * @private
    */
-  updateImageSrc_() {
-    if (this.getLayoutWidth() <= 0) {
-      return Promise.resolve();
-    }
-    const src = this.srcset_.select(this.getLayoutWidth(),
-        this.getDpr()).url;
-    if (src == this.img_.getAttribute('src')) {
-      return Promise.resolve();
-    }
-    this.img_.setAttribute('src', src);
-    this.loadPromise_ = this.loadPromise(this.img_)
-        .catch(error => {
-          if (!this.img_.getAttribute('src')) {
-            return;
-          }
-          throw error;
-        });
-    return this.loadPromise_;
+  viewportCallback_(inViewport) {
+    this.togglePlaceholder(!inViewport);
+    st.toggle(dev().assertElement(this.img_), inViewport);
   }
-};
+}
 
-AMP.registerElement('amp-anim', AmpAnim);
+AMP.extension(TAG, '0.1', (AMP) => {
+  AMP.registerElement(TAG, AmpAnim);
+});

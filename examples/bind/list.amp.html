@@ -1,0 +1,127 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>amp-bind: Lists</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+  <style amp-custom>
+    amp-list {
+      font-family: monospace;
+      font-size: 11pt;
+    }
+    button {
+      font-family: monospace;
+      font-size: 9pt;
+      border: solid 1px black;
+    }
+  </style>
+</head>
+<body>
+  <amp-state id="otherFoods">
+    <script type="application/json">
+      [{
+        "name": "pizza",
+        "quantity": 1976,
+        "unitPrice": 3.50
+      }, {
+        "name": "ice cream",
+        "quantity": 108,
+        "unitPrice": 6.50
+      }]
+    </script>
+  </amp-state>
+
+  <h3>setState() for amp-list[src]: Remote (URL)</h3>
+  <button on="tap:AMP.setState({src:'/list/fruit-data/get'})">Show Fruit</button>
+  <button on="tap:AMP.setState({src:'/list/vegetable-data/get'})">Show Vegetables</button>
+  <button on="tap:AMP.setState({src: otherFoods})">Show Other Foods</button>
+
+  <h3>setState() for amp-list[src]: Local (JSON)</h3>
+  <button on="tap:AMP.setState({
+    src: [{
+      name: 'pizza',
+      quantity: 1976,
+      unitPrice: 3.50
+    }, {
+      name: 'burger',
+      quantity: 108,
+      unitPrice: 6.50
+    }]
+  })">Show Junk Food</button>
+
+  <button on="tap:AMP.setState({
+    src: [{
+      name: 'cake',
+      quantity: 424,
+      unitPrice: 14.2
+    }, {
+      name: 'ice cream',
+      quantity: 23,
+      unitPrice: 0.78
+    }]
+  })">Show Desserts</button>
+
+  <button on="tap:AMP.setState({src: (src || []).concat([{name: 'burger', quantity: 1, unitPrice: random()}])})">Add burger</button>
+
+  <h3>setState() for children of amp-list</h3>
+  <button on="tap:AMP.setState({foo: foo+1})">Increment foo</button>
+
+  <hr>
+
+  <template id="my-template" type="amp-mustache">
+    <strong>name</strong> {{name}}
+    <strong>#</strong> {{quantity}}
+    <strong>$</strong> {{unitPrice}}
+    <strong>1+1</strong>=<span [text]="1+1">?</span>
+    <strong>foo</strong>=<span data-amp-bind-text="foo">?</span>
+  </template>
+
+  <h3>amp-list:not([binding])</h3>
+  <h4>Expected: The same behavior as [binding=always].</h4>
+  <amp-list src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="360" height="60" template="my-template">
+    <div placeholder>(Placeholder)</div>
+  </amp-list>
+
+  <h3>amp-list[binding=always]</h3>
+  <h4>Expected: The "1+1" and "foo" items should be "2" and "bar" on page load, respectively.</h4>
+  <amp-list binding="always" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="360" height="60" template="my-template">
+    <div placeholder>(Placeholder)</div>
+  </amp-list>
+
+  <h3>amp-list[binding=refresh]</h3>
+  <h4>Expected: The "1+1" and "foo" items should be "?" on page load.</h4>
+  <amp-list binding="refresh" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="360" height="60" template="my-template">
+    <div placeholder>(Placeholder)</div>
+  </amp-list>
+
+  <h3>amp-list[binding=refresh-evaluate]</h3>
+  <h4>Expected: Tapping "Increment foo" should update "foo" items but _not_ the "1+1" items.</h4>
+  <amp-list binding="refresh-evaluate" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="360" height="60" template="my-template">
+    <div placeholder>(Placeholder)</div>
+  </amp-list>
+
+  <h3>amp-list[binding=no]</h3>
+  <h4>Expected: Tapping "Increment foo" should have no effect.</h4>
+  <amp-list binding="no" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="360" height="60" template="my-template">
+    <div placeholder>(Placeholder)</div>
+  </amp-list>
+
+  <hr style="margin: 2400px 0">
+
+  <p>Due to viewport position, this amp-list will be laid out after amp-bind's initial DOM scan.</p>
+  <ol>
+    <li>Scroll down so that this amp-list enters viewport and is laid out.</li>
+    <li>Tap the "Increment foo" button.</li>
+  </ol>
+  <p>Expected: The amp-list's children should update their "Foo:" values.</p>
+  <h3>amp-list vs. amp-bind race condition test</h3>
+  <amp-list binding="refresh" layout="responsive" src="/list/fruit-data/get" width="360" height="60" template="my-template">
+    <div placeholder>(Placeholder)</div>
+  </amp-list>
+</body>

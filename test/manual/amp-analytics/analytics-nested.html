@@ -1,0 +1,55 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AMP Analytics</title>
+  <link rel="canonical" href="analytics.amp.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+</head>
+<body>
+  <!--
+    Macros in `vars` are now resolved asynchronously before macros in `requests`. As a result
+    it is possible to have expensive macros in `vars` that will delay macro resolution in requests
+    by a meaningful amount of time. In the example below `ts2` will be resolved slightly ahead of `ts1`.
+    This would be further delayed if there were more complicated nested macros inside of the `vars` config.
+
+    RESOURCE_TIMING will only resolve to anything other than an empty string as part of a request. This
+    excludes this macro from selectors.
+
+    Our regex for finding macros in the ${} format will not work when nested. See broken below.
+
+    Multiple ${} are fine as long as they are not nested, see adjacent below.
+
+    You can use the ${} format in conjuction with nested macros, as long as there are no nested ${}.
+    See combo below.
+   -->
+  <amp-analytics>
+    <script type="application/json">
+      {
+        "requests": {
+          "base": "https://www.example.com",
+          "complicated": "${base}?ts1=TIMESTAMP&ts2=${ts2}&n=${nested}&b=${broken}&c=${combo}&a=${adjacent}"
+        },
+        "triggers": {
+          "visible": {
+            "on": "visible",
+            "request": "complicated"
+          }
+        },
+        "vars": {
+          "ts2": "TIMESTAMP",
+          "nested": "$IF(QUERY_PARAM(foo), QUERY_PARAM(foo), default)",
+          "broken": "${queryParam(foo), ${a}}",
+          "combo": "${deeper}",
+          "deeper":  "${nested}",
+          "adjacent": "${ts2}sometext${ts2}"
+        }
+      }
+    </script>
+  </amp-analytics>
+  <h1>Nested macros in analytics</h1>
+</body>

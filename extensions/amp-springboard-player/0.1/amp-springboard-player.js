@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyles} from '../../../src/style';
-import {user} from '../../../src/log';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {setIsMediaComponent} from '../../../src/video-interface';
+import {userAssert} from '../../../src/log';
 
 class AmpSpringboardPlayer extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -33,17 +35,34 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
     /** @private {string} */
     this.domain_ = '';
 
-    /** @private {?Element} */
+    /** @private {string} */
+    this.siteId_ = '';
+
+    /** @private {string} */
+    this.playerId_ = '';
+
+    /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
- /**
-  * @param {boolean=} opt_onLayout
-  * @override
-  */
+  /**
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://cms.springboardplatform.com', opt_onLayout);
-    this.preconnect.url('https://www.springboardplatform.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://cms.springboardplatform.com',
+      opt_onLayout
+    );
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://www.springboardplatform.com',
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -53,96 +72,114 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.mode_ = user().assert(
-        this.element.getAttribute('data-mode'),
-        'The data-mode attribute is required for <amp-springboard-player> %s',
-        this.element);
-    this.contentId_ = user().assert(
-        this.element.getAttribute('data-content-id'),
-        'The data-content-id attribute is required for' +
-        '<amp-springboard-player> %s',
-        this.element);
-    this.domain_ = user().assert(
-        this.element.getAttribute('data-domain'),
-        'The data-domain attribute is required for <amp-springboard-player> %s',
-        this.element);
+    setIsMediaComponent(this.element);
 
-    if (!this.getPlaceholder()) {
-      this.buildImagePlaceholder_();
-    }
+    this.mode_ = userAssert(
+      this.element.getAttribute('data-mode'),
+      'The data-mode attribute is required for <amp-springboard-player> %s',
+      this.element
+    );
+    this.contentId_ = userAssert(
+      this.element.getAttribute('data-content-id'),
+      'The data-content-id attribute is required for' +
+        '<amp-springboard-player> %s',
+      this.element
+    );
+    this.domain_ = userAssert(
+      this.element.getAttribute('data-domain'),
+      'The data-domain attribute is required for <amp-springboard-player> %s',
+      this.element
+    );
+    this.siteId_ = userAssert(
+      this.element.getAttribute('data-site-id'),
+      'The data-site-id attribute is required for' +
+        '<amp-springboard-player> %s',
+      this.element
+    );
+    this.playerId_ = userAssert(
+      this.element.getAttribute('data-player-id'),
+      'The data-player-id attribute is required for' +
+        '<amp-springboard-player> %s',
+      this.element
+    );
   }
 
   /** @override */
   layoutCallback() {
     const iframe = this.element.ownerDocument.createElement('iframe');
-    const siteId = user().assert(
-        this.element.getAttribute('data-site-id'),
-        'The data-site-id attribute is required for' +
-        '<amp-springboard-player> %s',
-        this.element);
-    const playerId = user().assert(
-        this.element.getAttribute('data-player-id'),
-        'The data-player-id attribute is required for' +
-        '<amp-springboard-player> %s',
-        this.element);
     const items = this.element.getAttribute('data-items') || '10';
 
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.id = playerId + '_' + this.contentId_;
-    iframe.src = 'https://cms.springboardplatform.com/embed_iframe/' +
-        encodeURIComponent(siteId) + '/' +
-        encodeURIComponent(this.mode_) +
-        '/' + encodeURIComponent(this.contentId_) + '/' +
-        encodeURIComponent(playerId) + '/' +
-        encodeURIComponent(this.domain_) +
-        '/' + encodeURIComponent(items);
-    this.applyFillContent(iframe);
-    this.iframe_ = iframe;
+    iframe.id = this.playerId_ + '_' + this.contentId_;
+    iframe.src =
+      'https://cms.springboardplatform.com/embed_iframe/' +
+      encodeURIComponent(this.siteId_) +
+      '/' +
+      encodeURIComponent(this.mode_) +
+      '/' +
+      encodeURIComponent(this.contentId_) +
+      '/' +
+      encodeURIComponent(this.playerId_) +
+      '/' +
+      encodeURIComponent(this.domain_) +
+      '/' +
+      encodeURIComponent(items);
+    applyFillContent(iframe);
+    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
     this.element.appendChild(iframe);
+
+    this.pauseHelper_.updatePlaying(true);
+
     return this.loadPromise(iframe);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    this.pauseHelper_.updatePlaying(false);
+    return true;
   }
 
   /** @override */
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
-      this.iframe_.contentWindow./*OK*/postMessage('ampPause', '*');
+      this.iframe_.contentWindow./*OK*/ postMessage('ampPause', '*');
     }
   }
 
-  /** @private */
-  buildImagePlaceholder_() {
-    const imgPlaceholder = new Image();
-
-    setStyles(imgPlaceholder, {
-      // Cover matches Springboard Player size.
-      'object-fit': 'cover',
-      // Hiding the placeholder initially to give the browser time to fix
-      // the object-fit: cover.
-      'visibility': 'hidden',
-    });
-
-    imgPlaceholder.src = 'https://www.springboardplatform.com/storage/' +
-        encodeURIComponent(this.domain_) + '/snapshots/' +
-        encodeURIComponent(this.contentId_) + '.jpg';
-    /** Show default image for playlist */
-    if (this.mode_ == 'playlist') {
-      imgPlaceholder.src =
-        'https://www.springboardplatform.com/storage/default/' +
-        'snapshots/default_snapshot.png';
+  /** @override */
+  createPlaceholderCallback() {
+    const placeholder = this.win.document.createElement('img');
+    propagateAttributes(['aria-label'], this.element, placeholder);
+    applyFillContent(placeholder);
+    placeholder.setAttribute('placeholder', '');
+    placeholder.setAttribute('referrerpolicy', 'origin');
+    if (placeholder.hasAttribute('aria-label')) {
+      placeholder.setAttribute(
+        'alt',
+        'Loading video - ' + placeholder.getAttribute('aria-label')
+      );
+    } else {
+      placeholder.setAttribute('alt', 'Loading video');
     }
-    imgPlaceholder.setAttribute('placeholder', '');
-    imgPlaceholder.setAttribute('referrerpolicy', 'origin');
-
-    this.applyFillContent(imgPlaceholder);
-    this.element.appendChild(imgPlaceholder);
-
-    this.loadPromise(imgPlaceholder).then(() => {
-      setStyles(imgPlaceholder, {
-        'visibility': '',
-      });
-    });
+    placeholder.setAttribute(
+      'src',
+      'https://www.springboardplatform.com/storage/' +
+        (this.mode_ == 'playlist'
+          ? 'default/snapshots/default_snapshot.png'
+          : `${encodeURIComponent(this.domain_)}/snapshots/${encodeURIComponent(
+              this.contentId_
+            )}.jpg`)
+    );
+    return placeholder;
   }
 }
 
-AMP.registerElement('amp-springboard-player', AmpSpringboardPlayer);
+AMP.extension('amp-springboard-player', '0.1', (AMP) => {
+  AMP.registerElement('amp-springboard-player', AmpSpringboardPlayer);
+});

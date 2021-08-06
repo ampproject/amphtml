@@ -1,0 +1,123 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="https://amp.dev/documentation/examples/components/amp-selector/index.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    button {
+      margin: 20px;
+      padding: 20px;
+    }
+    ul {
+      list-style-type: none;
+    }
+    #sidebar1 {
+      width: 300px;
+    }
+    #sidebar1 button {
+      width: 100%;
+      border: none;
+      padding: 10px;
+      margin: 0;
+      text-align: left;
+      font-size: 15px;
+      background: rgba(0,0,0,0);
+    }
+    .container {
+      height: 100vh;
+      overflow: scroll;
+    }
+    .heading {
+      color: #fff;
+      background: #888;
+    }
+  </style>
+</head>
+<body>
+  <button on="tap:sidebar1.open">Open Sidebar</button>
+
+  <amp-sidebar id="sidebar1" layout="nodisplay" side="left">
+    <amp-list layout="fill" src="/list/ecommerce-nested-menu" items="." single-item>
+      <template type="amp-mustache">
+        <amp-nested-menu layout="fill">
+          <p>nested menu options:</p>
+
+          <div>
+            <button amp-nested-submenu-open>drilldowns</button>
+            <div amp-nested-submenu>
+              <div class="container">
+              <button amp-nested-submenu-close>back to main</button>
+              {{#menu}}
+              <section>
+                <button amp-nested-submenu-open>{{title}}</button>
+                <div amp-nested-submenu>
+                  <button amp-nested-submenu-close>back to categories</button>
+                  <amp-img src="{{image}}" layout="responsive" width="10" height="3"></amp-img>
+                  {{#content}}
+                  <section>
+                    <button amp-nested-submenu-open>{{title}}</button>
+                    <div amp-nested-submenu>
+                      <button amp-nested-submenu-close>back to sub-categories</button>
+                      <ul>
+                        {{#content}}
+                        <li><button>{{.}}</button></li>
+                        {{/content}}
+                      </ul>
+                    </div>
+                  </section>
+                  {{/content}}
+                </div>
+              </section>
+              {{/menu}}
+              <amp-img src="http://placeimg.com/300/600/tech" layout="responsive" width="1" height="2"></amp-img>
+            </div>
+            </div>
+          </div>
+
+          <div>
+            <button amp-nested-submenu-open>accordions</button>
+            <div amp-nested-submenu>
+              <div class="container">
+              <button amp-nested-submenu-close>back to main</button>
+              <amp-accordion expand-single-section>
+                {{#menu}}
+                <section>
+                  <h3 class="heading">{{title}}</h3>
+                  <div>
+                    <amp-accordion expand-single-section>
+                      {{#content}}
+                      <section>
+                        <h4>{{title}}</h4>
+                        <div>
+                          <ul>
+                            {{#content}}
+                            <li>{{.}}</li>
+                            {{/content}}
+                          </ul>
+                        </div>
+                      </section>
+                      {{/content}}
+                    </amp-accordion>
+                  </div>
+                </section>
+                {{/menu}}
+              </amp-accordion>
+              </div>
+            </div>
+          </div>
+
+        </amp-nested-menu>
+      </template>
+    </amp-list>
+  </amp-sidebar>
+</body>
+</html>

@@ -1,0 +1,315 @@
+<html lang="en">
+  <head>
+    <link rel="stylesheet" type="text/css" href="https://raw.githack.com/ganapativs/bttn.css/master/dist/bttn.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <style>
+      html {
+        width: 100%;
+        background-color: #fff;
+        padding: 0px !important;
+
+        height: 1500px;
+      }
+
+      body {
+        width: 90%;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 800px;
+        background-color: #fff;
+        line-height: initial;
+        margin: 0;
+        padding: 10px;
+      }
+
+      .bttn-primary {
+        margin-right: 10px;
+        cursor: pointer;
+      }
+
+      .decision-text {
+        font-size: 0.85em;
+        word-wrap: break-word;
+      }
+
+      h1 {
+        font-size: 1.15em;
+      }
+
+      h2 {
+        font-size: 1em;
+      }
+
+      #decision-buttons {
+        margin-top: 10px;
+        margin-bottom: 10px;
+      }
+
+      #always-show {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+
+      .close {
+        transition: all 0.5s;
+        color: red;
+        font-size: 1em;
+        background-color: transparent;
+        border: 1px solid #000;
+        padding-left: 5px;
+        padding-right: 5px;
+        padding-top: 2px;
+        padding-bottom: 2px;
+      }
+
+      .close:hover {
+        color: red;
+        font-size: 1.25em;
+        background-color: transparent;
+        border: 1px solid #000;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="consent-wrapper">
+      <div id="decision-state">
+        <h1 class="animated fadeIn">Cookies, and Privacy</h1>
+        <h2 class="animated fadeIn">I am scrollable</h2>
+        <div class="decision-text animated fadeIn">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+          consequat. Duis aute irure dolor.
+        </div>
+        <h1 class="animated fadeIn">Additional consent information</h1>
+        <div id="clientState" class="decision-text animated fadeIn"></div>
+      </div>
+      <div id="learn-more-state">
+        <h1 class="animated fadeIn">More Information</h1>
+        <h2 class="animated fadeIn">I am scrollable</h2>
+        <div class="animated fadeIn">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+          consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem
+          ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis
+          aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </div>
+
+        <div class="animated fadeIn">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+          consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </div>
+      </div>
+      <div id="decision-buttons" class="animated fadeInUp">
+        <button id="a" class="bttn-primary bttn-jelly bttn-xs">Accept All</button>
+        <button id="r" class="bttn-primary bttn-jelly bttn-xs">Reject All</button>
+        <button id="f" class="bttn-primary bttn-jelly bttn-xs">Learn More</button>
+      </div>
+      <div id="always-show">
+        <button id="d" class="close">X</button>
+      </div>
+    </div>
+    <div id="confirmation-wrapper">
+      <h1>Thank you!</h1>
+    </div>
+
+    <script type="text/javascript">
+      // Default values for non-3P iframe.
+      var sentinel = "amp";
+      var ampWindow = parent;
+
+      // Write passed in stored state and client config
+      var clientInfo;
+      var cmpId;
+      var consentStr;
+      var consentState;
+      var purposeConsentMap;
+      if (window && window.name) {
+        try {
+          clientInfo = JSON.parse(window.name);
+          cmpId = clientInfo["clientConfig"] && clientInfo["clientConfig"]["CMP_id"];
+          consentStr = clientInfo["consentString"];
+          consentState = clientInfo["consentState"];
+          purposeConsentMap = clientInfo["purposeConsentMap"];
+          // TODO: convert consentState to readable value
+        } catch (e) {
+          console.log("Caught error when parsing window.name,", e);
+        }
+      }
+
+      // Add event listener for focus for a11y
+      window.addEventListener("focus", () => {
+        const headerElement = document.querySelector("h1");
+        console.log("I am focused after you clicked on me!", headerElement);
+        if (headerElement) {
+          headerElement.focus();
+        }
+      });
+
+      var text = `Passed in cmpId is '${cmpId}', previously stored consent string is` + ` '${consentStr}', consent state is '${consentState}', purpose consent map is '${JSON.stringify(purposeConsentMap)}'`;
+
+      document.getElementById("clientState").textContent = text;
+
+      // Detect 3P sentinel in the location.hash.
+      var hashMatch = location.hash.match(/amp-3p-sentinel=((\d+)-\d+)/);
+      if (hashMatch) {
+        sentinel = hashMatch[1];
+        // Depth is measured from window.top.
+        var depth = Number(hashMatch[2]);
+        var ancestors = [];
+        for (var win = window; win && win != win.parent; win = win.parent) {
+          // Add window keeping the top-most one at the front.
+          ancestors.unshift(win.parent);
+        }
+        ampWindow = ancestors[depth];
+      }
+
+      // Send our ready event
+      setTimeout(() => {
+        // Our ready object
+        const readyObject = {
+          type: "consent-ui",
+          action: "ready",
+        };
+
+        // Check if we should randomly do some custom stuff
+        const shouldApplyCustom = Math.random() > 0.5;
+        if (shouldApplyCustom) {
+          // 30-60 is bottom pane, 60 > is modal
+          const initialHeight = 30 + Math.floor(Math.random() * 50);
+          readyObject.initialHeight = `${initialHeight}vh`;
+          readyObject.border = Math.random() < 0.5;
+        }
+
+        console.log("diy-consent: Sending Ready Message!", readyObject);
+
+        parent.postMessage(readyObject, "*");
+      }, 2000);
+
+      function registerClickConsentMessage(querySelector, type, action, info, consentMetadata, purposeConsents, timeout) {
+        document.querySelector(querySelector).onclick = function () {
+          // parent.postMessage("message to be sent", "http://the-website-that-will-receive-the-msg.com")
+          setTimeout(() => {
+            parent.postMessage(
+              {
+                type,
+                action,
+                info,
+                consentMetadata,
+                purposeConsents,
+              },
+              "*"
+            );
+            setTimeout(() => {
+              navigator.sendBeacon("https://example.test/beacon");
+            }, 500);
+          }, timeout);
+        };
+      }
+
+      function showDecisionState() {
+        document.querySelector("#decision-state").style = "display: block";
+        document.querySelector("#learn-more-state").style = "display: none";
+        document.querySelector("#f").style = "display: inline-block";
+      }
+
+      function showLearnMoreState() {
+        document.querySelector("#decision-state").style = "display: none";
+        document.querySelector("#learn-more-state").style = "display: block";
+        document.querySelector("#f").style = "display: none";
+      }
+
+      function showConsent() {
+        document.querySelector("#consent-wrapper").style = "display: block";
+        document.querySelector("#confirmation-wrapper").style = "display: none";
+      }
+
+      function showConfirmation() {
+        document.querySelector("#consent-wrapper").style = "display: none";
+        document.querySelector("#confirmation-wrapper").style = "display: block";
+      }
+
+      function getConsentString() {
+        // Check if served from a viewer
+        if (window.location.ancestorOrigins.length == 2) {
+          // Return full consent string
+          return "full-accept-string";
+        }
+        // Otherwise return abbriviated version
+        return "accept-string";
+      }
+
+      function getAdditionalConsentString() {
+        // Check if served from a viewer
+        if (window.location.ancestorOrigins.length == 2) {
+          // Return full consent string
+          return "full-additional-consent-string";
+        }
+        // Otherwise return abbriviated version
+        return "additional-consent-string";
+      }
+
+      const consentObjects = [
+        {
+          querySelector: "#a",
+          type: "consent-response",
+          action: "accept",
+          info: getConsentString(),
+          consentMetadata: {
+            consentStringType: 2,
+            additionalConsent: getAdditionalConsentString(),
+            gdprApplies: true,
+            purposeOne: true,
+          },
+          purposeConsents: {
+            "purpose-foo": true,
+            "purpose-bar": false,
+          },
+          timeout: 1000,
+          onclick: () => {
+            showConfirmation();
+          },
+        },
+        {
+          querySelector: "#r",
+          type: "consent-response",
+          action: "reject",
+          timeout: 1000,
+          onclick: () => {
+            showConfirmation();
+          },
+        },
+        {
+          querySelector: "#d",
+          type: "consent-response",
+          action: "dismiss",
+          timeout: 1000,
+          onclick: () => {
+            showConfirmation();
+          },
+        },
+        {
+          querySelector: "#f",
+          type: "consent-ui",
+          action: "enter-fullscreen",
+          timeout: 0,
+          onclick: () => {
+            showLearnMoreState();
+          },
+        },
+      ];
+      consentObjects.forEach((consentObject) => {
+        registerClickConsentMessage(consentObject.querySelector, consentObject.type, consentObject.action, consentObject.info, consentObject.consentMetadata, consentObject.purposeConsents, consentObject.timeout || 0);
+
+        if (consentObject.onclick) {
+          document.querySelector(consentObject.querySelector).addEventListener("click", () => {
+            consentObject.onclick();
+          });
+        }
+      });
+
+      showConsent();
+      showDecisionState();
+    </script>
+  </body>
+</html>

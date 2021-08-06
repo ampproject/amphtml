@@ -1,0 +1,67 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <link rel="canonical" href="https://amp.dev/documentation/examples/components/amp-list/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    amp-list {
+      margin-left: 16px;
+    }
+    .list-overflow {
+      width: 160px;
+      margin-left: auto;
+    }
+  </style>
+</head>
+<body>
+  <div on="tap:list1.refresh,list2.refresh,list3.refresh">
+    Refresh All Lists
+  </div>
+
+  <h3>Static amp-list, inlined state.
+    <button on="tap:AMP.setState({'listExample': {'items': listExample.items.concat([{'title': 'appended item'}])}}),list1.refresh"> Append items</button>
+  </h3>
+  <amp-list id="list1" width="auto" height="100" [height]="20 * listExample.items.length"
+    layout="fixed-height" src="amp-state:listExample">
+    <template type="amp-mustache" id="amp-template-id">
+      <div><a href="{{url}}">{{title}}</a></div>
+    </template>
+  </amp-list>
+
+  <h3>Static amp-list, async state</h3>
+  <amp-list id="list2" width="auto" height="100" layout="fixed-height" src="amp-state:listAsyncExample" reset-on-refresh>
+    <template type="amp-mustache" id="amp-template-id">
+      <div><a href="{{url}}">{{title}}</a></div>
+    </template>
+  </amp-list>
+
+  <h3>Paging amp-list</h3>
+  <amp-list id="list3" width="auto" height="200" layout="fixed-height" src="amp-state:listAsyncExample" template="amp-template-id" class="m1" load-more="auto" load-more-bookmark="next">
+    <div overflow role="button" aria-label="Show more">
+      Show more
+    </div>
+  </amp-list>
+
+  <amp-state id="listAsyncExample" src="./list.example.json"></amp-state>
+  <amp-state id="listExample">
+    <script type="application/json">
+    {
+      "items": [
+        { "title": "amp-carousel" },
+        { "title": "amp-img" },
+        { "title": "amp-ad" },
+        { "title": "amp-accordion" }
+      ],
+      "next": "./list.example.json"
+    }
+    </script>
+  </amp-state>
+
+</body>
+</html>

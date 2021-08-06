@@ -1,0 +1,74 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style type="text/css" media="screen">
+  section[expanded] .show-on-collapse {
+    display: none;
+  }
+  .show-on-expand  {
+    display: none;
+  }
+  section[expanded] .show-on-expand {
+    display: block;
+  }
+  </style>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
+</head>
+<body>
+  <h1>AMP #0</h1>
+  <amp-accordion expand-single-section>
+    <section>
+      <h2 tabindex="0">Section 1</h2>
+      <div>
+        <a href="https://google.com">Google</a>
+      </div>
+    </section>
+    <section expanded>
+      <h2 tabindex="0">Section 2. Move focus here and press enter/space to open.</h2>
+      <div>
+        Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus
+      </div>
+    </section>
+    <section>
+      <h2 tabindex="0">Section 3. <a href="https://google.com" target="_blank">Clicking this link should not expand/collapse this section.</a></h2>
+      <div>
+        <amp-img id="img1" srcset="/examples/visual-tests/picsum.photos/image1043_1024x768.jpg" width=512 height=344></amp-img>
+      </div>
+    </section>
+  </amp-accordion>
+  <amp-accordion disable-session-states>
+    <section>
+      <h1 tabindex="0">1) Click me first... two time - <i>2) Click me now ... two time</i></h1>
+      <p>Bunch of awesome content</p>
+    </section>
+  </amp-accordion>
+
+  <amp-accordion>
+    <section>
+      <h1 tabindex="0">
+        Click here to open
+        <amp-img src="/examples/visual-tests/picsum.photos/image1026_300x200.jpg" layout="fixed" height=45 width=45 class="show-on-collapse"></amp-img>
+        <amp-img src="/examples/visual-tests/picsum.photos/image1068_300x169.jpg" layout="fixed" height=45 width=45 class="show-on-expand"></amp-img>
+      </h1>
+      <p>Bunch of awesome content</p>
+    </section>
+  </amp-accordion>
+
+  <h1>AMP Accordion Media Query Test</h1>
+
+  <amp-accordion media="(min-width: 480px)">
+    <section>
+      <h1>
+        Title
+      </h1>
+      <p>Bunch of awesome content</p>
+    </section>
+  </amp-accordion>
+</body>
+</html>

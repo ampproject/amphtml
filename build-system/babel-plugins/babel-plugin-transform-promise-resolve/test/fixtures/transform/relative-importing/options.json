@@ -1,0 +1,11 @@
+{
+  "plugins": [
+    [
+      "../../../..",
+      {
+        "importFrom": "build-system/babel-plugins/babel-plugin-transform-promise-resolve/test/fixtures/transform/relative-importing/core/data-structures/promise"
+      }
+    ]
+  ],
+  "sourceType": "module"
+}

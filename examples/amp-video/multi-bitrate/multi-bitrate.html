@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Multi bitrate</title>
+    <link rel="canonical" href="amps.html" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+    <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+    <style amp-custom>
+      body {
+        max-width: 527px;
+        font-family: 'Questrial', Arial;
+      }
+      [fallback] {
+        display: block;
+        /* @alternative */ display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.5);
+        color: #fff;
+      }
+      .spacer {
+        height: 100vh;
+      }
+      p, h1, h2, h3 {
+        padding: 10px;
+      }
+    </style>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>
+    <h1>amp-video</h1>
+
+    <amp-video
+      width="608"
+      height="1080"
+      layout="fixed"
+      controls
+      autoplay
+      muted
+      loop
+    >
+      <source src="./223.mp4" data-bitrate="223" />
+      <source src="./320.mp4" data-bitrate="320" />
+      <source src="./611.mp4" data-bitrate="611" />
+      <source src="./1000.mp4" data-bitrate="1000" />
+      <source src="./2000.mp4" data-bitrate="2000" />
+    </amp-video>
+  </body>
+</html>

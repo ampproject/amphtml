@@ -1,0 +1,40 @@
+<!--
+  Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!--
+  Test Description:
+  This test demonstrates that all LTS scripts must have a module and nomodule
+  pairing when the first script is module.
+-->
+<!doctype html>
+<html ⚡ transformed="google;v=1">
+<head>
+  <meta charset=utf-8>
+  <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
+  <meta name=viewport content="width=device-width">
+
+  <!-- Invalid: missing nomodule pair for AMP runtime LTS script -->
+  <script async crossorigin=anonymous src=https://cdn.ampproject.org/lts/v0.mjs type=module></script>
+
+  <!-- Invalid: missing nomodule pair for AMP extension LTS script -->
+  <script async crossorigin=anonymous custom-element=amp-ad src=https://cdn.ampproject.org/lts/v0/amp-ad-0.1.mjs type=module></script>
+
+  <link rel=canonical href="./regular-html-version.html">
+</head>
+<body>
+  Hello, world.
+  <amp-ad layout=nodisplay type></amp-ad>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "@ampproject/viewer-messaging",
+  "version": "1.1.2",
+  "description": "Messaging between an AMP Doc and a Viewer",
+  "author": "The AMP HTML Authors",
+  "license": "Apache-2.0",
+  "main": "messaging.js",
+  "types": "messaging.d.ts",
+  "keywords": ["amp"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ampproject/amphtml.git",
+    "directory": "extensions/amp-viewer-integration/0.1/messaging"
+  },
+  "homepage": "https://github.com/ampproject/amphtml/tree/main/extensions/amp-viewer-integration/0.1/messaging"
+}

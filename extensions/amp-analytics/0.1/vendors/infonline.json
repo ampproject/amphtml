@@ -1,0 +1,22 @@
+{
+  "vars": {
+    "sv": "ke",
+    "ap": "1"
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  },
+  "requests": {
+    "pageview": "${url}?st=${st}&sv=${sv}&ap=${ap}&co=${co}&cp=${cp}&ps=${ps}&act=${consentString}&acs=$IF($EQUALS(${consentState}, sufficient), 1)$IF($EQUALS(${consentState}, insufficient), 0)$IF($EQUALS(${consentState}, ), -1)&host=${canonicalHost}&path=${canonicalPath}&type=pageview",
+    "event": "${url}?st=${st}&ev=${ev}&sv=${sv}&ap=${ap}&co=${co}&cp=${cp}&ps=${ps}&act=${consentString}&acs=$IF($EQUALS(${consentState}, sufficient), 1)$IF($EQUALS(${consentState}, insufficient), 0)$IF($EQUALS(${consentState}, ), -1)&host=${canonicalHost}&path=${canonicalPath}&type=event"
+  },
+  "triggers": {
+    "pageview": {
+      "on": "visible",
+      "request": "pageview",
+      "iframePing": true
+    }
+  }
+}

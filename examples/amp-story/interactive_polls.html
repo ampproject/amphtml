@@ -1,0 +1,171 @@
+<!doctype html>
+<html ⚡ lang="es">
+  <head>
+    <meta charset="utf-8">
+    <title >Interactive Story</title>
+    <link rel="canonical" href="interactive_Results.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>
+    <style amp-custom>
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+
+    amp-story-interactive-poll, amp-story-interactive-results {
+      align-self: center;
+      justify-self: center;
+    }
+    </style>
+  </head>
+  <body>
+    <amp-story
+        standalone
+        title="Interactive Story"
+        publisher="AMP Story testing"
+        publisher-logo-src="example.com/logo.png"
+        poster-portrait-src="example.com/poster.jpg">
+        <amp-story-page id="cover">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                animate-in="pan-left"
+                animate-in-duration="30s"
+                src="https://images.unsplash.com/photo-1415369629372-26f2fe60c467?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1268&q=80"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="thirds">
+            <div style="color:white;padding:10px;align-self:end" grid-area="lower-third">
+              <h1>What adorable animal are you?</h1>
+              <p>The ultimate animal quiz</p>
+              <p>Provided with love by the AMP team</p>
+            </div>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="quiz-1">
+          <amp-story-grid-layer template="fill">
+            <amp-img style="filter:blur(4px) saturate(0.7);"
+                src="https://images.unsplash.com/photo-1546548970-71785318a17b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1268&q=80" layout="responsive" height="1600" width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+            id="poll-1"
+                prompt-text="Whats your favorite food?"
+                endpoint="http://localhost:3000/interactives"
+                theme="dark"
+                chip-style="shadow"
+                style="--interactive-prompt-background: linear-gradient(120deg, rgb(255,103,38), rgb(235,69,69));"
+                option-1-text="Bones" option-1-results-category="Dog"
+                option-2-text="Fish" option-2-results-category="Cat"
+                option-3-text="Carrots" option-3-results-category="Bunny"
+                option-4-text="Cheese" option-4-results-category="Mouse">
+            </amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="quiz-2">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="img/green-stuff.jpg" layout="responsive" height="1600" width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+            id="poll-2"
+                prompt-text="How do you spend your free time?"
+                endpoint="http://localhost:3000/interactives"
+                style="--interactive-prompt-background: linear-gradient(120deg, rgb(251, 255, 38), rgb(144, 235, 69)); --interactive-prompt-text-color: black"
+                chip-style="shadow"
+                option-1-text="Stretching your back" option-1-results-category="Cat"
+                option-2-text="Caressing your mustache" option-2-results-category="Mouse"
+                option-3-text="Jumping all over the place nonstop because they want and they can do that because they are free" option-3-results-category="Bunny"
+                option-4-text="Running behind a ball" option-4-results-category="Dog">
+            </amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="quiz-3">
+          <amp-story-grid-layer template="fill">
+            <amp-img style="filter:blur(4px)"
+                src="https://images.unsplash.com/photo-1534534573898-db5148bc8b0c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1275&q=80" layout="responsive" height="1600" width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+            id="poll-3"
+                prompt-text="What would you do for holidays?"
+                style="--interactive-prompt-background: linear-gradient(120deg, rgb(83, 32, 10), rgb(143, 89, 8));"
+                endpoint="http://localhost:3000/interactives"
+                theme="dark"
+                option-1-text="Easter island" option-1-results-category="Bunny"
+                option-2-text="Drive with your tongue out" option-2-results-category="Dog"
+                option-3-text="Get far away from cats" option-3-results-category="Mouse"
+                option-4-text="Stay in bed sleeping" option-4-results-category="Cat">
+            </amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="quiz-4">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://images.unsplash.com/photo-1559807424-a38a6b10c833?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1268&q=80" layout="responsive" height="1600" width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+            id="poll-4"
+                prompt-text="What's your favorite place in the house?"
+                endpoint="http://localhost:3000/interactives"
+                option-1-text="Inside my spacious cage" option-1-results-category="Mouse"
+                option-2-text="On the backyard" option-2-results-category="Bunny"
+                option-3-text="Where my owner is" option-3-results-category="Dog"
+                option-4-text="On top of the fridge" option-4-results-category="Cat">
+            </amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="quiz-results">
+          <amp-story-grid-layer template="fill">
+            <amp-img style="filter:blur(4px)"
+                src="https://www.positive.news/wp-content/uploads/2019/03/feat-1800x0-c-center.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer>
+            <amp-story-interactive-results
+								style="--interactive-accent-color: #F34E4E"
+								prompt-text="You are a"
+                option-1-results-category="Cat" option-1-text="Everyone loves cats, and so do you! Cats are the best companion to WFH" option-1-image="https://images.pexels.com/photos/104827/cat-pet-animal-domestic-104827.jpeg"
+                option-2-results-category="Dog" option-2-text="You always have energy and love being with friends. Outdoors is your favorite place" option-2-image="https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg"
+                option-3-results-category="Bunny" option-3-text="You love jumping around and having fun. Your bubbly personality is contagious, and your love for carrots is unconditional" option-3-image="https://images.pexels.com/photos/326012/pexels-photo-326012.jpeg"
+                option-4-results-category="Mouse" option-4-text="Even though you're small, you're also full of curiosity and love going around finding new things to do" option-4-image="https://images.pexels.com/photos/51340/rat-pets-eat-51340.jpeg">
+            </amp-story-interactive-results>
+          </amp-story-grid-layer>
+				</amp-story-page>
+				<amp-story-page id="quiz-results-2">
+          <amp-story-grid-layer template="fill">
+            <amp-img style="filter:blur(4px)"
+                src="https://www.positive.news/wp-content/uploads/2019/03/feat-1800x0-c-center.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer>
+            <amp-story-interactive-results
+								style="--interactive-accent-color: #F34E4E"
+								prompt-text="You are a"
+								theme="dark"
+                option-1-results-category="Cat" option-1-text="Everyone loves cats, and so do you! Cats are the best companion to WFH" option-1-image="https://images.pexels.com/photos/104827/cat-pet-animal-domestic-104827.jpeg"
+                option-2-results-category="Dog" option-2-text="You always have energy and love being with friends. Outdoors is your favorite place" option-2-image="https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg"
+                option-3-results-category="Bunny" option-3-text="You love jumping around and having fun. Your bubbly personality is contagious, and your love for carrots is unconditional" option-3-image="https://images.pexels.com/photos/326012/pexels-photo-326012.jpeg"
+                option-4-results-category="Mouse" option-4-text="Even though you're small, you're also full of curiosity and love going around finding new things to do" option-4-image="https://images.pexels.com/photos/51340/rat-pets-eat-51340.jpeg">
+            </amp-story-interactive-results>
+          </amp-story-grid-layer>
+        </amp-story-page>
+    </amp-story>
+  </body>
+</html>

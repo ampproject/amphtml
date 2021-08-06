@@ -1,0 +1,35 @@
+<!doctype html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>amp-story-360 Visual Diff</title>
+    <link rel="canonical" href="example.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-story-360" src="https://cdn.ampproject.org/v0/amp-story-360-0.1.js"></script>
+    <script>
+      // TODO(#17108): Remove this when getMode().test is set.
+      __AMP_TEST = true;
+    </script>
+  </head>
+  <body>
+    <amp-story
+        standalone
+        title="Demo Story"
+        publisher="AMP Story"
+        publisher-logo-src="example.com/logo.png"
+        poster-portrait-src="example.com/poster.jpg">
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="fill">
+          <amp-story-360 layout="fill" heading-start="45" pitch-start="-20" scene-pitch="-5">
+            <!-- Curiosity self-portrat, Sol 1462 (September 2016) Credit: NASA / JPL / MSSS / Seán Doran -->
+            <!-- https://informal.jpl.nasa.gov/museum/360-video -->
+            <amp-img src="/examples/visual-tests/amp-story/img/SeanDoran-Quela-sol1462-edited_ver2-sm.jpg" width="1998" height="999"></amp-img>
+          </amp-story-360>
+        </amp-story-grid-layer>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

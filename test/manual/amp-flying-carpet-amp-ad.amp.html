@@ -1,0 +1,117 @@
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <title>AMP flying carpet with amp ads</title>
+    <link rel="canonical" href="http://example.ampproject.org/article-metadata.html" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+
+    <script async custom-element="amp-fx-flying-carpet" src="https://cdn.ampproject.org/v0/amp-fx-flying-carpet-0.1.js"></script>
+    <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+      <style amp-custom>
+        .spacer {
+          display: flex;
+          justify-content: space-around;
+          align-items: center;
+          color: white;
+          height:100vh;
+          background-color: #0653b6;
+        }
+
+        .ad-border {
+          background-color: black;
+          color: white;
+          text-align: center;
+        }
+      </style>
+  </head>
+
+
+  <body>
+
+    <div class="spacer">One viewport before flying carpet.<br>Scroll down to see demo.</div>
+
+    <h1>Should collapse, Doubleclick / Doesn't exits Ad</h1>
+    <div class="ad-border">&darr; advertisement &darr;</div>
+    <amp-fx-flying-carpet layout="fixed-height" height="50vh">
+      <amp-ad width="736" height="737"
+        layout="fixed"
+        type="doubleclick"
+        data-slot="/4119129/doesnt-exist"
+        json='{"useSameDomainRenderingUntilDeprecated":1}'>
+        <div fallback>
+          <a href="http://www.repubblica.it/sport/2016/02/09/news/app_rep-133068373/">
+            <amp-img placeholder width=300 height=100 src="//www.repstatic.it/cless-mobile/main/amp/2016-v1/img/adv-300-100.jpg">
+          </a>
+        </div>
+      </amp-ad>
+    </amp-fx-flying-carpet>
+    <div class="ad-border">&uarr; advertisement &uarr;</div>
+
+    <div class="spacer">Keep Scrolling for another ad </div>
+
+    <h1>Should Collapse, Collapsing Test _ping_ Ad</h1>
+    <div class="ad-border">&darr; advertisement &darr;</div>
+      <amp-fx-flying-carpet layout="fixed-height" height="50vh">
+          <amp-ad width=300 height=250
+              type="_ping_"
+              data-url='not-exist'
+              data-valid='false'>
+          </amp-ad>
+        </amp-fx-flying-carpet>
+    <div class="ad-border">&uarr; advertisement &uarr;</div>
+
+
+    <div class="spacer">Keep Scrolling for another ad </div>
+
+    <h1>Should not collapse, even though _ping_ Ad Collapses</h1>
+    <div class="ad-border">&darr; advertisement &darr;</div>
+    <amp-fx-flying-carpet layout="fixed-height" height="50vh">
+      <amp-ad width=300 height=250
+        type="_ping_"
+        data-url='not-exist'
+        data-valid='false'>
+      </amp-ad>
+      <amp-img src="https://amp.dev/static/samples/img/amp.jpg"
+        width="500"
+        height="300"
+        layout="responsive"
+        alt="AMP">
+      </amp-img>
+    </amp-fx-flying-carpet>
+    <div class="ad-border">&uarr; advertisement &uarr;</div>
+
+    <div class="spacer">Keep Scrolling for another ad </div>
+
+    <h1>Should not collapse, even though _ping_ Ad Collapses, in a complex case</h1>
+    <div class="ad-border">&darr; advertisement &darr;</div>
+    <amp-fx-flying-carpet layout="fixed-height" height="50vh">
+      <div>
+        <div>
+          <amp-ad width=300 height=250
+            type="_ping_"
+            data-url='not-exist'
+            data-valid='false'>
+          </amp-ad>
+        </div>
+        <div>
+          I am a text node in the flying carpet
+        </div>
+        <amp-img src="https://amp.dev/static/samples/img/amp.jpg"
+         width="500"
+         height="300"
+         layout="responsive"
+         alt="AMP">
+        </amp-img>
+      </div>
+    </amp-fx-flying-carpet>
+    <div class="ad-border">&uarr; advertisement &uarr;</div>
+
+
+
+    <div class="spacer">One viewport after flying carpet</div>
+
+  </body>
+</html>

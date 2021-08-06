@@ -14,351 +14,593 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
-import {platformFor} from '../../../../src/platform';
-import * as sinon from 'sinon';
-import {toggleExperiment} from '../../../../src/experiments';
-import {vsyncFor} from '../../../../src/vsync';
 import {
-    AmpAppBanner,
-    AbstractAppBanner,
-    AmpIosAppBanner,
-    AmpAndroidAppBanner,
+  AbstractAppBanner,
+  AmpAndroidAppBanner,
+  AmpAppBanner,
+  AmpIosAppBanner,
 } from '../amp-app-banner';
+import {Services} from '#service';
 
-import {xhrFor} from '../../../../src/xhr';
-import {installStorageService} from '../../../../src/service/storage-impl';
-import '../../../amp-analytics/0.1/amp-analytics';
-import {timerFor} from '../../../../src/timer';
-
-describe('amp-app-banner', () => {
-
-  let sandbox;
-  let vsync;
-  let platform;
-  let isAndroid = false;
-  let isIos = false;
-  let isChrome = false;
-  let isSafari = false;
-
-  const meta = {
-    content: 'app-id=828256236, app-argument=medium://p/cb7f223fad86',
-  };
-  const manifest = {
-    href: 'https://example.com/manifest.json',
-    content: {
-      'prefer_related_applications': true,
-      'related_applications': [
-        {
-          'platform': 'play',
-          'id': 'com.medium.reader',
-          'url': 'https://play.google.com/com.medium.reader',
-        },
-      ],
+describes.realWin(
+  'amp-app-banner',
+  {
+    amp: {
+      extensions: ['amp-app-banner'],
+      canonicalUrl: 'https://example.com/amps.html',
     },
-  };
-  toggleExperiment(window, 'amp-app-banner', true);
+  },
+  (env) => {
+    let win, doc, ampdoc;
+    let vsync;
+    let platform;
+    let isAndroid = false;
+    let isIos = false;
+    let isChrome = false;
+    let isSafari = false;
+    let isFirefox = false;
+    let isEdge = false;
+    let isEmbedded = false;
+    let hasNavigateToCapability = true;
 
-  function runTask(task, state) {
-    if (task.measure) {
-      task.measure(state);
+    const iosMeta = {
+      content: 'app-id=828256236, app-argument=medium://p/cb7f223fad86',
+    };
+    const androidManifest = {
+      href: 'https://example.com/manifest.json',
+      content: {
+        'prefer_related_applications': true,
+        'related_applications': [
+          {
+            'platform': 'play',
+            'id': 'com.medium.reader',
+            'url': 'https://play.google.com/com.medium.reader',
+          },
+        ],
+      },
+    };
+
+    function runTask(task, state) {
+      if (task.measure) {
+        task.measure(state);
+      }
+      if (task.mutate) {
+        task.mutate(state);
+      }
     }
-    if (task.mutate) {
-      task.mutate(state);
+
+    async function getAppBanner(config = {}) {
+      if (config.iosMeta) {
+        const meta = doc.createElement('meta');
+        meta.setAttribute('name', 'apple-itunes-app');
+        meta.setAttribute('content', config.iosMeta.content);
+        doc.head.appendChild(meta);
+      }
+
+      const manifestObj = config.originManifest || config.androidManifest;
+      if (manifestObj) {
+        const rel = config.originManifest ? 'origin-manifest' : 'manifest';
+        const manifest = doc.createElement('link');
+        manifest.setAttribute('rel', rel);
+        manifest.setAttribute('href', manifestObj.href);
+        doc.head.appendChild(manifest);
+        env.sandbox
+          .mock(Services.xhrFor(win))
+          .expects('fetchJson')
+          .returns(
+            Promise.resolve({
+              json() {
+                return Promise.resolve(manifestObj.content);
+              },
+            })
+          );
+      }
+
+      const banner = doc.createElement('amp-app-banner');
+      banner.setAttribute('layout', 'nodisplay');
+      if (!config.noOpenButton) {
+        const openButton = doc.createElement('button');
+        openButton.setAttribute('open-button', '');
+        banner.appendChild(openButton);
+      }
+
+      banner.id = 'banner0';
+      doc.body.appendChild(banner);
+      await banner.buildInternal();
+      await banner.layoutCallback();
+      return banner;
     }
-  }
 
-  function getTestFrame() {
-    return createIframePromise(true).then(iframe => {
-      installStorageService(iframe.win);
-      platform = platformFor(iframe.win);
-      sandbox.stub(platform, 'isIos', () => isIos);
-      sandbox.stub(platform, 'isAndroid', () => isAndroid);
-      sandbox.stub(platform, 'isChrome', () => isChrome);
-      sandbox.stub(platform, 'isSafari', () => isSafari);
+    async function testSetupAndShowBanner() {
+      const banner = await getAppBanner({iosMeta, androidManifest});
+      const impl = await banner.getImpl();
+      await impl.isDismissed();
 
-      vsync = vsyncFor(iframe.win);
-      sandbox.stub(vsync, 'runPromise', (task, state) => {
+      expect(banner.parentElement).to.not.be.null;
+      expect(banner).to.not.have.display('none');
+      const bannerTop = banner.querySelector(
+        'i-amphtml-app-banner-top-padding'
+      );
+      expect(bannerTop).to.exist;
+      const dismissBtn = banner.querySelector('.amp-app-banner-dismiss-button');
+      expect(dismissBtn).to.exist;
+    }
+
+    function testRemoveBanner(config = {iosMeta, androidManifest}) {
+      return getAppBanner(config).then((banner) => {
+        expect(banner.parentElement).to.be.null;
+      });
+    }
+
+    function testButtonMissing() {
+      return allowConsoleError(() => {
+        return getAppBanner({
+          iosMeta,
+          androidManifest,
+          noOpenButton: true,
+        }).should.eventually.be.rejectedWith(
+          /<button open-button> is required/
+        );
+      });
+    }
+
+    function testRemoveBannerIfDismissed() {
+      env.sandbox
+        .stub(AbstractAppBanner.prototype, 'isDismissed')
+        .callsFake(() => {
+          return Promise.resolve(true);
+        });
+      return testRemoveBanner();
+    }
+
+    function testSuiteIos() {
+      it('should preconnect to app store', async () => {
+        const banner = await getAppBanner({iosMeta});
+        const preconnect = Services.preconnectFor(win);
+        env.sandbox.stub(preconnect, 'url');
+
+        const impl = await banner.getImpl();
+        impl.preconnectCallback(true);
+        expect(preconnect.url).to.be.calledOnce;
+        expect(preconnect.url).to.have.been.calledWith(
+          env.sandbox.match.object, // AmpDoc
+          'https://itunes.apple.com'
+        );
+      });
+
+      // TODO(alanorozco, #15844): Unskip.
+      it.skip(
+        'should show banner and set up correctly',
+        testSetupAndShowBanner
+      );
+
+      it('should throw if open button is missing', testButtonMissing);
+
+      // TODO(#16916): Make this test work with synchronous throws.
+      it.skip(
+        'should remove banner if already dismissed',
+        testRemoveBannerIfDismissed
+      );
+
+      it('should remove banner if meta is not provided', () => {
+        testRemoveBanner({iosMeta: null});
+      });
+
+      it('should parse meta content and setup hrefs', () => {
+        env.sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
+        return getAppBanner({iosMeta}).then((el) => {
+          expect(
+            AbstractAppBanner.prototype.setupOpenButton_
+          ).to.have.been.calledWith(
+            el.querySelector('button[open-button]'),
+            'medium://p/cb7f223fad86',
+            'https://itunes.apple.com/us/app/id828256236'
+          );
+        });
+      });
+
+      it(
+        'should parse meta content and setup hrefs if app-argument is ' +
+          'not provided',
+        () => {
+          expectAsyncConsoleError(
+            '[amp-app-banner] <meta name="apple-itunes-app">\'s content ' +
+              'should contain app-argument to allow opening an already ' +
+              'installed application on iOS.'
+          );
+          env.sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
+          return getAppBanner({
+            iosMeta: {content: 'app-id=828256236'},
+          }).then((el) => {
+            expect(
+              AbstractAppBanner.prototype.setupOpenButton_
+            ).to.have.been.calledWith(
+              el.querySelector('button[open-button]'),
+              'https://itunes.apple.com/us/app/id828256236',
+              'https://itunes.apple.com/us/app/id828256236'
+            );
+          });
+        }
+      );
+
+      it('should parse meta content and validate app-argument url', () => {
+        return allowConsoleError(() => {
+          return getAppBanner({
+            iosMeta: {
+              content:
+                'app-id=828256236, app-argument=javascript:alert("foo");',
+            },
+          }).should.eventually.be.rejectedWith(
+            /The url in app-argument has invalid protocol/
+          );
+        });
+      });
+    }
+
+    function testSuiteAndroid() {
+      it('should preconnect to play store and preload manifest', async () => {
+        const banner = await getAppBanner({androidManifest});
+        const preconnect = Services.preconnectFor(win);
+        env.sandbox.stub(preconnect, 'url');
+        env.sandbox.stub(preconnect, 'preload');
+
+        const impl = await banner.getImpl();
+        impl.preconnectCallback(true);
+        expect(preconnect.url).to.have.been.calledOnce;
+        expect(preconnect.url).to.have.been.calledWith(
+          env.sandbox.match.object, // AmpDoc
+          'https://play.google.com'
+        );
+
+        expect(preconnect.preload).to.be.calledOnce;
+        expect(preconnect.preload).to.have.been.calledWith(
+          env.sandbox.match.object, // AmpDoc
+          'https://example.com/manifest.json'
+        );
+      });
+
+      it('should preconnect to play store and preload origin-manifest', async () => {
+        const banner = await getAppBanner({originManifest: androidManifest});
+        const preconnect = Services.preconnectFor(win);
+        env.sandbox.stub(preconnect, 'url');
+        env.sandbox.stub(preconnect, 'preload');
+
+        const impl = await banner.getImpl();
+        impl.preconnectCallback(true);
+        expect(preconnect.url).to.have.been.calledOnce;
+        expect(preconnect.url).to.have.been.calledWith(
+          env.sandbox.match.object, // AmpDoc
+          'https://play.google.com'
+        );
+        expect(preconnect.preload).to.be.calledOnce;
+        expect(preconnect.preload).to.have.been.calledWith(
+          env.sandbox.match.object, // AmpDoc
+          'https://example.com/manifest.json'
+        );
+      });
+
+      it('should show banner and set up correctly', testSetupAndShowBanner);
+
+      it('should throw if open button is missing', testButtonMissing);
+
+      // TODO(#16916): Make this test work with synchronous throws.
+      it.skip(
+        'should remove banner if already dismissed',
+        testRemoveBannerIfDismissed
+      );
+
+      it('should remove banner if manifest is not provided', () => {
+        testRemoveBanner({androidManifest: null, originManifest: null});
+      });
+
+      it('should parse manifest and set hrefs', () => {
+        env.sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
+        return getAppBanner({androidManifest}).then((el) => {
+          expect(
+            AbstractAppBanner.prototype.setupOpenButton_
+          ).to.have.been.calledWith(
+            el.querySelector('button[open-button]'),
+            'android-app://com.medium.reader/https/example.com/amps.html',
+            'https://play.google.com/store/apps/details?id=com.medium.reader'
+          );
+        });
+      });
+
+      it('should parse origin manifest and set hrefs', () => {
+        env.sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
+        return getAppBanner({originManifest: androidManifest}).then((el) => {
+          expect(
+            AbstractAppBanner.prototype.setupOpenButton_
+          ).to.have.been.calledWith(
+            el.querySelector('button[open-button]'),
+            'android-app://com.medium.reader/https/example.com/amps.html',
+            'https://play.google.com/store/apps/details?id=com.medium.reader'
+          );
+        });
+      });
+    }
+
+    beforeEach(() => {
+      isAndroid = false;
+      isIos = false;
+      isChrome = false;
+      isSafari = false;
+      isFirefox = false;
+      isEdge = false;
+      isEmbedded = false;
+      hasNavigateToCapability = true;
+
+      win = env.win;
+      doc = win.document;
+      ampdoc = env.ampdoc;
+      const viewer = Services.viewerForDoc(ampdoc);
+      env.sandbox.stub(viewer, 'isEmbedded').callsFake(() => isEmbedded);
+      env.sandbox
+        .stub(viewer, 'hasCapability')
+        .callsFake(() => hasNavigateToCapability);
+      platform = Services.platformFor(win);
+      env.sandbox.stub(platform, 'isIos').callsFake(() => isIos);
+      env.sandbox.stub(platform, 'isAndroid').callsFake(() => isAndroid);
+      env.sandbox.stub(platform, 'isChrome').callsFake(() => isChrome);
+      env.sandbox.stub(platform, 'isSafari').callsFake(() => isSafari);
+      env.sandbox.stub(platform, 'isFirefox').callsFake(() => isFirefox);
+      env.sandbox.stub(platform, 'isEdge').callsFake(() => isEdge);
+
+      vsync = Services.vsyncFor(win);
+      env.sandbox.stub(vsync, 'runPromise').callsFake((task, state) => {
         runTask(task, state);
         return Promise.resolve();
       });
-      sandbox.stub(vsync, 'run', runTask);
-      toggleExperiment(iframe.win, 'amp-app-banner', true);
-      return iframe;
+      env.sandbox.stub(vsync, 'run').callsFake(runTask);
     });
-  }
 
-  function getAppBanner(config = {}) {
-    return getTestFrame().then(iframe => {
-      const link = iframe.doc.createElement('link');
-      link.setAttribute('rel', 'canonical');
-      link.setAttribute('href', 'https://example.com/amps.html');
-      iframe.doc.head.appendChild(link);
+    describe('Choosing platform', () => {
+      it('should upgrade to AmpIosAppBanner on iOS', async () => {
+        isIos = true;
+        const banner = await getAppBanner({iosMeta, androidManifest});
+        const impl = await banner.getImpl();
+        expect(impl).to.be.instanceof(AmpIosAppBanner);
+      });
 
-      if (config.meta) {
-        const meta = iframe.doc.createElement('meta');
-        meta.setAttribute('name', 'apple-itunes-app');
-        meta.setAttribute('content', config.meta.content);
-        iframe.doc.head.appendChild(meta);
-      }
+      it('should upgrade to AmpAndroidAppBanner on Android', async () => {
+        isAndroid = true;
+        const banner = await getAppBanner({iosMeta, androidManifest});
+        const impl = await banner.getImpl();
+        expect(impl).to.be.instanceof(AmpAndroidAppBanner);
+      });
 
-      if (config.manifest) {
-        const manifest = iframe.doc.createElement('link');
-        manifest.setAttribute('rel', 'amp-manifest');
-        manifest.setAttribute('href', config.manifest.href);
-        iframe.doc.head.appendChild(manifest);
-        sandbox.mock(xhrFor(iframe.win)).expects('fetchJson')
-            .returns(Promise.resolve(config.manifest.content));
-      }
-
-      const banner = iframe.doc.createElement('amp-app-banner');
-      banner.setAttribute('layout', 'nodisplay');
-      if (!config.noOpenLink) {
-        const openLink = iframe.doc.createElement('a');
-        openLink.setAttribute('open-link', '');
-        banner.appendChild(openLink);
-      }
-
-      return iframe.addElement(banner);
-    });
-  }
-
-  function testLinkMissing() {
-    return getAppBanner({
-      meta,
-      manifest,
-      noOpenLink: true,
-    }).should.eventually.be.rejectedWith(/<a open-link> is required/);
-  }
-
-  function testAddDismissButton() {
-    sandbox.stub(AbstractAppBanner.prototype, 'isDismissed', () => {
-      return Promise.resolve(false);
-    });
-    sandbox.spy(AbstractAppBanner.prototype, 'addDismissButton_');
-    sandbox.spy(AbstractAppBanner.prototype, 'updateViewportPadding_');
-    return getAppBanner({meta, manifest}).then(banner => {
-      expect(banner.parentElement).to.not.be.null;
-      expect(AbstractAppBanner.prototype.addDismissButton_.called).to.be.true;
-      expect(AbstractAppBanner.prototype.updateViewportPadding_.called)
-          .to.be.true;
-      expect(banner.style.display).to.be.equal('');
-      expect(banner.style.visibility).to.be.equal('');
-    });
-  }
-
-  function testRemoveIfDismissed() {
-    sandbox.stub(AbstractAppBanner.prototype, 'isDismissed', () => {
-      return Promise.resolve(true);
-    });
-    return getAppBanner().then(banner => {
-      expect(banner.parentElement).to.be.null;
-      expect(banner.style.display).to.be.equal('');
-      expect(banner.style.visibility).to.be.equal('hidden');
-    });
-  }
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    platform = platformFor(window);
-    sandbox.stub(platform, 'isIos', () => isIos);
-    sandbox.stub(platform, 'isAndroid', () => isAndroid);
-    sandbox.stub(platform, 'isChrome', () => isChrome);
-    sandbox.stub(platform, 'isSafari', () => isSafari);
-    isAndroid = false;
-    isIos = false;
-    isChrome = false;
-    isSafari = false;
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
-
-  describe('Choosing platform', () => {
-    it('should upgrade to AmpIosAppBanner on iOS', () => {
-      isIos = true;
-      return getTestFrame().then(() => {
-        const banner = new AmpAppBanner(document.createElement('div'));
-        const newInstance = banner.upgradeCallback();
-        expect(newInstance instanceof AmpIosAppBanner).to.be.true;
+      it('should not upgrade if platform not supported', async () => {
+        isEdge = true;
+        const banner = await getAppBanner({iosMeta, androidManifest});
+        const impl = await banner.getImpl();
+        expect(impl).to.be.instanceof(AmpAppBanner);
+        expect(impl.upgradeCallback()).to.be.null;
       });
     });
 
-    it('should upgrade to AmpAndroidAppBanner on Android', () => {
-      isAndroid = true;
-      return getTestFrame().then(() => {
-        const banner = new AmpAppBanner(document.createElement('div'));
-        const newInstance = banner.upgradeCallback();
-        expect(newInstance instanceof AmpAndroidAppBanner).to.be.true;
+    describe('non-supported platform', () => {
+      it('should remove the banner', () => {
+        return getAppBanner().then((banner) => {
+          expect(banner.parentElement).to.be.null;
+        });
       });
     });
 
-    it('should not upgrade if platform not supported', () => {
-      return getTestFrame().then(() => {
-        const banner = new AmpAppBanner(document.createElement('div'));
-        expect(banner.upgradeCallback()).to.be.null;
+    describe('iOS', () => {
+      beforeEach(() => {
+        isIos = true;
       });
-    });
-  });
 
-  describe('non-supported platform', () => {
-    it('should remove the banner', () => {
-      return getAppBanner().then(banner => {
-        expect(banner.parentElement).to.be.null;
+      describe('Embedded', () => {
+        beforeEach(() => {
+          isEmbedded = true;
+        });
+
+        describe('Safari', () => {
+          beforeEach(() => {
+            isSafari = true;
+          });
+
+          testSuiteIos();
+
+          it(
+            'should hide banner if embedded but viewer does not support ' +
+              'navigateTo',
+            () => {
+              hasNavigateToCapability = false;
+              testRemoveBanner();
+            }
+          );
+        });
+
+        describe('Chrome', () => {
+          beforeEach(() => {
+            isChrome = true;
+          });
+
+          testSuiteIos();
+
+          it(
+            'should hide banner if embedded but viewer does not support ' +
+              'navigateTo',
+            () => {
+              hasNavigateToCapability = false;
+              testRemoveBanner();
+            }
+          );
+        });
+
+        describe('Firefox', () => {
+          beforeEach(() => {
+            isFirefox = true;
+          });
+
+          testSuiteIos();
+
+          it(
+            'should hide banner if embedded but viewer does not support ' +
+              'navigateTo',
+            () => {
+              hasNavigateToCapability = false;
+              testRemoveBanner();
+            }
+          );
+        });
       });
-    });
-  });
 
-  describe('iOS', () => {
-    beforeEach(() => {
-      isIos = true;
-    });
+      describe('Non-embedded', () => {
+        beforeEach(() => {
+          isEmbedded = false;
+        });
 
-    it('should preconnect to app store', () => {
-      return getAppBanner().then(banner => {
-        const impl = banner.implementation_;
-        sandbox.stub(impl.preconnect, 'url');
-        impl.preconnectCallback(true);
-        expect(impl.preconnect.url.called).to.be.true;
-        expect(impl.preconnect.url.callCount).to.equal(1);
-        expect(impl.preconnect.url.calledWith('https://itunes.apple.com'))
-            .to.be.true;
-      });
-    });
+        describe('Safari', () => {
+          beforeEach(() => {
+            isSafari = true;
+          });
 
-    it('should throw if open link is missing', testLinkMissing);
+          // TODO(#18655): Fails with "Cannot read property 'getItem' of null'"
+          it.skip('should NOT show banner', testRemoveBanner);
+        });
 
-    it('should remove banner if meta is not provided', () => {
-      return getAppBanner({meta: null}).then(banner => {
-        expect(banner.parentElement).to.be.null;
-      });
-    });
+        describe('Chrome', () => {
+          beforeEach(() => {
+            isChrome = true;
+          });
 
-    it('should remove banner if safari', () => {
-      isSafari = true;
-      return getAppBanner().then(banner => {
-        expect(banner.parentElement).to.be.null;
-      });
-    });
+          testSuiteIos();
+        });
 
-    it('should add dismiss button and update padding', testAddDismissButton);
+        describe('Firefox', () => {
+          beforeEach(() => {
+            isFirefox = true;
+          });
 
-    it('should remove banner if already dismissed', testRemoveIfDismissed);
-
-    it('should parse meta content and setup hrefs', () => {
-      sandbox.spy(AbstractAppBanner.prototype, 'setupOpenLink_');
-      return getAppBanner({meta}).then(el => {
-        expect(AbstractAppBanner.prototype.setupOpenLink_.calledWith(
-            el.querySelector('a[open-link]'),
-            'medium://p/cb7f223fad86',
-            'https://itunes.apple.com/us/app/id828256236'
-        )).to.be.true;
-      });
-    });
-  });
-
-  describe('Android', () => {
-    beforeEach(() => {
-      isAndroid = true;
-      isChrome = false;
-    });
-
-    it('should preconnect to play store and preload manifest', () => {
-      return getAppBanner({manifest}).then(banner => {
-        const impl = banner.implementation_;
-        sandbox.stub(impl.preconnect, 'url');
-        sandbox.stub(impl.preconnect, 'preload');
-        impl.preconnectCallback(true);
-        expect(impl.preconnect.url.called).to.be.true;
-        expect(impl.preconnect.url.callCount).to.equal(1);
-        expect(impl.preconnect.url.calledWith('https://play.google.com'))
-            .to.be.true;
-        expect(impl.preconnect.preload.called).to.be.true;
-        expect(impl.preconnect.preload.callCount).to.equal(1);
-        expect(impl.preconnect.preload.calledWith(
-            'https://example.com/manifest.json')).to.be.true;
-      });
-    });
-
-    it('should throw if open link is missing', testLinkMissing);
-    it('should add dismiss button and update padding', testAddDismissButton);
-    it('should remove banner if already dismissed', testRemoveIfDismissed);
-
-    it('should remove banner if manifest is not provided', () => {
-      return getAppBanner({manifest: null}).then(banner => {
-        expect(banner.parentElement).to.be.null;
+          testSuiteIos();
+        });
       });
     });
 
-    it('should remove banner if chrome', () => {
-      isChrome = true;
-      return getAppBanner().then(banner => {
-        expect(banner.parentElement).to.be.null;
+    describe('Android', () => {
+      beforeEach(() => {
+        isAndroid = true;
+      });
+
+      describe('Embedded', () => {
+        beforeEach(() => {
+          isEmbedded = true;
+        });
+
+        describe('Chrome', () => {
+          beforeEach(() => {
+            isChrome = true;
+          });
+
+          testSuiteAndroid();
+
+          it(
+            'should hide banner if embedded but viewer does not support ' +
+              'navigateTo',
+            () => {
+              hasNavigateToCapability = false;
+              testRemoveBanner();
+            }
+          );
+        });
+
+        describe('Firefox', () => {
+          beforeEach(() => {
+            isFirefox = true;
+          });
+
+          testSuiteAndroid();
+
+          it(
+            'should hide banner if embedded but viewer does not support ' +
+              'navigateTo',
+            () => {
+              hasNavigateToCapability = false;
+              testRemoveBanner();
+            }
+          );
+        });
+      });
+
+      describe('Non-embedded', () => {
+        beforeEach(() => {
+          isEmbedded = false;
+        });
+
+        describe('Chrome', () => {
+          beforeEach(() => {
+            isChrome = true;
+          });
+
+          // TODO(#18655): Fails with "Cannot read property 'getItem' of null'"
+          it.skip('should NOT show banner', testRemoveBanner);
+        });
+
+        describe('Firefox', () => {
+          beforeEach(() => {
+            isFirefox = true;
+          });
+
+          testSuiteAndroid();
+        });
       });
     });
 
-    it('should parse manifest and set hrefs', () => {
-      sandbox.spy(AbstractAppBanner.prototype, 'setupOpenLink_');
-      return getAppBanner({manifest}).then(el => {
-        expect(AbstractAppBanner.prototype.setupOpenLink_.calledWith(
-            el.querySelector('a[open-link]'),
-            'android-app://com.medium.reader/https/example.com/amps.html',
-            'https://play.google.com/store/apps/details?id=com.medium.reader'
-        )).to.be.true;
+    describe('Windows Edge', () => {
+      beforeEach(() => {
+        isEdge = true;
+      });
+
+      it('Embedded should NOT show banner', () => {
+        isEmbedded = true;
+        testRemoveBanner();
+      });
+
+      it('Non-embedded should NOT show banner', () => {
+        isEmbedded = false;
+        testRemoveBanner();
       });
     });
-  });
 
-  describe('Abstract App Banner', () => {
-    it('should setup click listener', () => {
-      return createIframePromise(true).then(iframe => {
-        const win = iframe.win;
-        const doc = iframe.doc;
+    describe('Abstract App Banner', () => {
+      it('should setup click listener', () => {
         const element = doc.createElement('div');
         doc.body.appendChild(element);
-        const openLink = doc.createElement('a');
-        element.appendChild(openLink);
-        openLink.setAttribute('open-link', '');
-        openLink.addEventListener = sandbox.spy();
+        const openButton = doc.createElement('button');
+        element.appendChild(openButton);
+        openButton.setAttribute('open-button', '');
+        openButton.addEventListener = env.sandbox.spy();
         const banner = new AbstractAppBanner(element);
-        banner.setupOpenLink_(openLink, 'open-link', 'install-link');
-        expect(openLink.addEventListener.calledWith('click')).to.be.true;
-        win.open = sandbox.spy();
-        sandbox.stub(banner, 'redirectTopLocation_', () => {});
-        banner.openLinkClicked_('open-link', 'install-link');
-        expect(win.open.calledWith('open-link', '_top')).to.be.true;
-        return timerFor(iframe.win).delay(() => {
-          expect(banner.redirectTopLocation_.called)
-              .to.be.true;
-          expect(banner.redirectTopLocation_.calledWith('install-link'))
-              .to.be.true;
-        }, 2000);
+        banner.setupOpenButton_(openButton, 'open-button', 'install-link');
+        expect(openButton.addEventListener).to.have.been.calledWith('click');
       });
-    });
 
-    it('should create dismiss button and setup click listener', () => {
-      return createIframePromise(true).then(iframe => {
-        const win = iframe.win;
-        const doc = iframe.doc;
-        installStorageService(win);
-        vsync = vsyncFor(win);
-        sandbox.stub(vsync, 'run', runTask);
+      it('should create dismiss button and setup click listener', () => {
         const element = doc.createElement('div');
         element.id = 'banner1';
+        element.getAmpDoc = () => ampdoc;
         doc.body.appendChild(element);
         const banner = new AbstractAppBanner(element);
         banner.addDismissButton_();
+
+        const bannerTop = element.querySelector(
+          'i-amphtml-app-banner-top-padding'
+        );
+        expect(bannerTop).to.exist;
         const dismissBtn = element.querySelector(
-            '.amp-app-banner-dismiss-button');
+          '.amp-app-banner-dismiss-button'
+        );
         expect(dismissBtn).to.not.be.null;
         expect(dismissBtn.parentElement).to.be.equal(element);
         dismissBtn.dispatchEvent(new Event('click'));
-        expect(element.parentElement).to.be.null;
-        return banner.isDismissed().then(value => {
+        return banner.isDismissed().then((value) => {
+          expect(element.parentElement).to.be.null;
           expect(value).to.be.true;
         });
       });
     });
-  });
-});
+  }
+);

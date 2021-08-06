@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Story Player (Non-AMP)</title>
+    <script async src="../../dist/amp-story-player.js"></script>
+    <link href="../../build/css/amp-story-player-v0.css" rel='stylesheet' type='text/css'>
+    <style page>
+      body {
+        font-family: sans-serif;
+      }
+    </style>
+    <style injected>
+      .story-player-iframe {
+        background-size: cover;
+        display: block;
+        position: relative;
+        height: 100%;
+        width: 100%;
+        flex: 0 0 100%;
+      }
+
+      .title {
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
+        display: block;
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        color: #fff;
+        font-size: 40px;
+        padding: 88px 32px 32px 32px;
+        line-height: 1.25;
+        text-shadow: 3px 3px #000;
+      }
+      .actions .circle {
+        width: 65px;
+        height: 65px;
+        background-size: cover;
+        overflow: hidden;
+        border-radius: 50%;
+        display: inline-block;
+        margin: 10px;
+        box-shadow:
+          0 0 0 3px white,
+          0 0 0 7px hsl(20, 79%, 60%);
+        color: white;
+        text-align: center;
+        padding-top: 20px;
+        box-sizing: border-box;
+        text-shadow: 0px 2px 4px #000000;
+        cursor: pointer;
+      }
+
+      .actions .circle.active {
+        box-shadow:
+          0 0 0 3px white,
+          0 0 0 7px hsl(257, 79%, 60%);
+      }
+    </style>
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <script>
+      window.onload = () => {
+        const player = document.querySelector('amp-story-player');
+        document.querySelector('.actions').addEventListener('click', (e) => {
+          if (e.target.hasAttribute('data-story')) {
+            player.show(e.target.getAttribute('data-story'), null, {animate: false});
+          }
+        })
+        player.addEventListener('navigation', (e) => {
+          document.querySelectorAll('.actions .circle').forEach((circle, index) => {
+            circle.classList.toggle('active', index === e.detail.index)
+          })
+        });
+      };
+    </script>
+  </head>
+  <body>
+    <h1>This is a NON-AMP page that embeds a story below:</h1>
+    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras viverra neque ex, sit amet varius sem maximus sed. Suspendisse potenti. Donec erat purus, sagittis sit amet tincidunt ut, maximus sit amet massa. Maecenas venenatis fringilla dui vitae vestibulum. Fusce imperdiet euismod lobortis. Nullam sagittis nunc at tristique mattis. In sodales consectetur mollis. Maecenas sollicitudin, ex vel tempor rutrum, turpis eros interdum enim, sit amet volutpat tortor dolor at ipsum. Nam posuere velit vel urna vulputate interdum. Aenean eu vulputate lorem. Praesent nec nunc sodales, egestas orci sed, hendrerit mauris. Ut blandit turpis non erat sagittis, quis fermentum odio feugiat.</div>
+    <div>
+      <amp-story-player style="width: 360px; height: 600px;">
+        <a href="https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/"
+            class="story">
+          <img data-amp-story-player-poster-img src="https://www-washingtonpost-com.cdn.ampproject.org/i/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/img/promo3x4.jpg" width="360" height="600" loading="lazy">
+          <span class="title">A local’s guide to what to eat and do in New York City</span>
+        </a>
+        <a href="https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-miami/">
+          <img data-amp-story-player-poster-img src="https://www-washingtonpost-com.cdn.ampproject.org/i/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-miami/img/promo3x4.jpg" width="360" height="600" loading="lazy">
+          <span class="title">A local’s guide to what to eat and do in Miami</span>
+        </a>
+        <a href="https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-mexico-city/">
+          <img data-amp-story-player-poster-img src="https://www-washingtonpost-com.cdn.ampproject.org/i/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-mexico-city/img/promo3x4.jpg" width="360" height="600" loading="lazy">
+          <span class="title">A local’s guide to what to eat and do in Mexico City</span>
+        </a>
+        <a href="https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-rome/">
+          <img data-amp-story-player-poster-img src="https://www-washingtonpost-com.cdn.ampproject.org/i/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-rome/img/promo3x4.jpg" width="360" height="600" loading="lazy">
+          <span class="title">A local’s guide to what to eat and do in Rome</span>
+        </a>
+      </amp-story-player>
+
+      <div class="actions">
+        <div class="circle active"
+            data-story="https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/"
+            style="background-image: url('https://www-washingtonpost-com.cdn.ampproject.org/i/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/img/42a59562-834d-11e9-b585-e36b16a531aa.jpg')">New York</div>
+        <div class="circle"
+            data-story="https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-miami/"
+            style="background-image: url('https://www-washingtonpost-com.cdn.ampproject.org/i/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-miami/img/9f1d2656-6b7a-11e9-bbe7-1c798fb80536.jpg')">Miami</div>
+        <div class="circle"
+            data-story="https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-mexico-city/"
+            style="background-image: url('https://www-washingtonpost-com.cdn.ampproject.org/i/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-mexico-city/img/2e0f5178-746c-11e9-9331-30bc5836f48e.jpg')">Mexico City</div>
+        <div class="circle"
+            data-story="https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-rome/"
+            style="background-image: url('https://www-washingtonpost-com.cdn.ampproject.org/i/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-rome/img/f5903e2e-86fa-11e9-9d73-e2ba6bbf1b9b.jpg')">Rome</div>
+      </div>
+    </div>
+    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras viverra neque ex, sit amet varius sem maximus sed. Suspendisse potenti. Donec erat purus, sagittis sit amet tincidunt ut, maximus sit amet massa. Maecenas venenatis fringilla dui vitae vestibulum. Fusce imperdiet euismod lobortis. Nullam sagittis nunc at tristique mattis. In sodales consectetur mollis. Maecenas sollicitudin, ex vel tempor rutrum, turpis eros interdum enim, sit amet volutpat tortor dolor at ipsum. Nam posuere velit vel urna vulputate interdum. Aenean eu vulputate lorem. Praesent nec nunc sodales, egestas orci sed, hendrerit mauris. Ut blandit turpis non erat sagittis, quis fermentum odio feugiat.</div>
+  </body>
+</html>

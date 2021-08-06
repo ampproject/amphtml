@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "name": "amp-performance",
+  "version": "0.1.0",
+  "description": "Dev dependencies used by `amp performance`",
+  "devDependencies": {
+    "chai": "4.3.4",
+    "mocha": "9.0.1",
+    "puppeteer": "10.0.0"
+  }
+}

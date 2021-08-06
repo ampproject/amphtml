@@ -1,0 +1,37 @@
+// For an explanation of the OWNERS rules and syntax, see:
+// https://github.com/ampproject/amp-github-apps/blob/main/owners/OWNERS.example
+
+{
+  rules: [
+    {
+      owners: [{name: 'dvoytenko'}, {name: 'ampproject/wg-performance'}],
+    },
+    {
+      pattern: '{iframe-video,mediasession-helper,video-*}.js',
+      owners: [{name: 'ampproject/wg-components'}],
+    },
+    {
+      pattern: '{cid-*,*-cid-*,*-cid,extension-analytics,analytics}.js',
+      owners: [{name: 'ampproject/wg-components'}],
+    },
+    {
+      pattern: '{consent,consent-state}.js',
+      owners: [{name: 'ampproject/wg-components'}],
+    },
+    {
+      pattern: 'amp-story-*.js',
+      owners: [{name: 'newmuis'}, {name: 'gmajoulet'}, {name: 'enriqe'}],
+    },
+    {
+      pattern: 'friendly-iframe-embed.js',
+      owners: [{name: 'ampproject/wg-ads-reviewers'}],
+    },
+    {
+      pattern: '{3p-frame, 3p-frame-*}.js',
+      owners: [
+        {name: 'ampproject/wg-ads-reviewers'},
+        {name: 'ampproject/wg-components'},
+      ],
+    },
+  ],
+}

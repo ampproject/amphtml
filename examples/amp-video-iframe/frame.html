@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <script async src="https://cdn.ampproject.org/video-iframe-integration-v0.js"></script>
+</head>
+<body style="margin: 0; padding: 0">
+  <video
+    playsinline
+    controls
+    style="width: 100vw; height: 100vh;"
+    src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4">
+  </video>
+
+  <!-- Integration script -->
+  <script>
+    //  #######  #####  #######
+    //  #       #     # #
+    //  #       #       #
+    //  #####    #####  ######
+    //  #             #       #
+    //  #       #     # #     #
+    //  #######  #####   #####
+
+    // This example is written in ES5 for browser compatibility.
+    // If you wish to write an integration script in ES2015+ that doesn't
+    // require older browser support or is otherwise transpiled into ES5, see
+    // ./frame-es2015.html.
+
+    // Wait for API to initialize
+    (window.AmpVideoIframe = window.AmpVideoIframe || [])
+        .push(onAmpIntegrationReady);
+
+    function onAmpIntegrationReady(ampIntegration) {
+      // `ampIntegration` is an object containing the tools required to
+      // integrate.
+
+      var video = document.querySelector('video');
+      var muted = false;
+
+      var events = ['canplay', 'playing', 'pause', 'ended'];
+
+      for (var i = 0; i < events.length; i++) {
+        // Wrap in IIFE to preserve iterated value.
+        (function(e) {
+          video.addEventListener(e, function() {
+            ampIntegration.postEvent(e);
+          });
+        })(events[i]);
+      }
+
+      // in case we miss `canplay`.
+      if (video.readyState >= video.HAVE_FUTURE_DATA) {
+        ampIntegration.postEvent('canplay');
+      }
+
+      video.addEventListener('volumechange', function() {
+        if (video.volume < 0.01) {
+          muted = true;
+          ampIntegration.postEvent('muted');
+          return;
+        }
+        if (muted) {
+          muted = false;
+          ampIntegration.postEvent('unmuted');
+        }
+      });
+
+      ampIntegration.method('play', function() {
+        video.play();
+      });
+      ampIntegration.method('pause', function() {
+        video.pause();
+      });
+      ampIntegration.method('mute', function() {
+        video.muted = true;
+      });
+      ampIntegration.method('unmute', function() {
+        video.muted = false;
+      });
+      ampIntegration.method('showcontrols', function() {
+        video.controls = true;
+      });
+      ampIntegration.method('hidecontrols', function() {
+        video.controls = false;
+      });
+      ampIntegration.method('fullscreenenter', function() {
+        // Unsupported in example. This should be a call to `requestFullscreen`
+        // or browser equivalents.
+      });
+      ampIntegration.method('fullscreenexit', function() {
+        // Unsupported in example. This should be a call to `exitFullscreen`
+        // or browser equivalents.
+      });
+
+      setInterval(function() {
+        // Post a custom analytics event every 3 seconds.
+        ampIntegration.postAnalyticsEvent('video-custom-foo', /* optional */ {
+          'myVar': Math.random().toString(),
+        });
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

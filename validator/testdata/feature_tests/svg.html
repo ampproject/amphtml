@@ -21,7 +21,7 @@
 <html ⚡>
 <head>
   <meta charset="utf-8">
-  <link rel="canonical" href="./regular-html-version.html" />
+  <link rel="canonical" href="./regular-html-version.html">
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -81,6 +81,34 @@
       <stop offset="0%" stop-color="#aaa" offset="67.36%" />
       <stop offset="0%" stop-color="#333" offset="100%" />
     </radialgradient>
+  </svg>
+
+  <!-- Invalid: xml:base present -->
+  <svg xml:base="javascript:alert('hello world')">
+    <a href="#"><circle r="10"></a>
+  </svg>
+
+  <!-- Valid: style attribute allowed in svgs. -->
+  <svg>
+    <g style="display: block; position: relative; -webkit-box-shadow: 4px 6px 6px 4px #ccc"/>
+  </svg>
+
+  <!-- Valid: these declarations are allowed since they are allowed in the style tag -->
+  <svg>
+    <g style="display: block; position: sticky;"/>
+    <g style="DISPLAY:BLOCK;POSITION:STICKY;"/>
+    <g style="foo:bar;"/>
+  </svg>
+
+  <!-- Invalid: these media queries are not allowed in style attributes. -->
+  <svg>
+    <g style="@media only screen and (max-width: 600px)"/>
+  </svg>
+
+  <!-- Invalid: style tag isn't allowed. Note this is really testing the
+        parsing of a self closing style tag in an svg, not validity. -->
+  <svg>
+    <style/>
   </svg>
 </body>
 </html>

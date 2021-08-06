@@ -19,7 +19,7 @@
 
   // Echo back a message received from parent window with a marker field
   // 'testStubEcho'.
-  window.addEventListener('message', event => {
+  window.addEventListener('message', function(event) {
     if (event.source == window.parent && !event.data.testStubEcho) {
       const data = {
         testStubEcho: true,

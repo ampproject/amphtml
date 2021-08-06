@@ -1,0 +1,68 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Always Serve NPA Example</title>
+  <link rel="canonical" href="http://nonblocking.io/" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-custom>
+    amp-ad {
+      border: 1px solid #ccc;
+      max-width: 500px;
+    }
+  </style>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-geo" src="https://cdn.ampproject.org/v0/amp-geo-0.1.js"></script>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <amp-geo layout="nodisplay">
+    <script type="application/json">
+      {
+        "AmpBind": true,
+        "ISOCountryGroups": {
+          "gdpr": [ "preset-eea", "unknown" ],
+          "usca": [ "preset-us-ca" ]
+        }
+      }
+    </script>
+  </amp-geo>
+
+  <p>
+      Can test with: http://localhost:8000/test/manual/always-serve-npa.amp.html#amp-geo=at
+  </p>
+  <button on="tap:AMP.setState({myCountry: ampGeo.ISOCountry})">Where am I?</button>
+  <p [text]="'The country code is: ' + myCountry "></p>
+  <p [text]="'Matched country groups: ' + ampGeo.ISOCountryGroups.join(', ') "></p>
+
+  <h2> NOTE: Must disable check that isSecureUrl for testing </h2>
+  <h2>Doubleclick with RTC</h2>
+    <amp-ad width="320" height="50"
+            always-serve-npa="gdpr,usca"
+            block-rtc="gdpr,usca"
+            type="doubleclick"
+            data-slot="/4119129/mobile_ad_banner"
+            rtc-config='{"vendors": {"fakeVendor": {"SLOT_ID": "1", "PAGE_ID": "1"}, "nonexistent-vendor": {"SLOT_ID": "1"}, "fakeVendor2": {"SLOT_ID": "1"}}, "urls": ["https://localhost:4443/posts?slot_id=1", "https://localhost:4443/abc?timeout=true", "https://broken.zzzzzz", "https://localhost:4443/zqq?slot_id=1"], "timeoutMillis": 500}'
+            json='{"targeting":{"food":["burgers","chicken"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'>
+    </amp-ad>
+    <amp-ad width=300 height=200
+        type="adsense"
+        always-serve-npa="gdpr,usca"
+        data-ad-client="ca-pub-9350112648257122">
+    </amp-ad>
+
+
+    <amp-ad width="320" height="50"
+            type="doubleclick"
+            data-slot="/4119129/mobile_ad_banner"
+            rtc-config='{"urls": ["https://www.example.biz/?pvi=PAGEVIEWID&href=HREF&ds=ATTR(data-slot)&h=ATTR(height)&w=ATTR(width)&ovw=ATTR(data-override-width)&json=ATTR(data-json)&ovh=ATTR(data-override-height)"], "timeoutMillis": 500}'
+            json='{"targeting":{"food":["burgers","chicken"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'>
+    </amp-ad>
+
+    <amp-ad width=300 height=200
+        type="adsense"
+        data-ad-client="ca-pub-9350112648257122">
+    </amp-ad>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <style amp-custom>
+    .menu {
+      padding: 1em;
+    }
+
+    .menu h3 {
+      display: inline-block;
+    }
+
+    .menu nav {
+      display: inline-block;
+    }
+
+    .menu li {
+      display: inline-block;
+    }
+
+    .menu amp-accordion h1 {
+      background-color: transparent;
+      border: transparent;
+    }
+  </style>
+</head>
+<body>
+  <button onclick="document.querySelector('#initClosed').scrollIntoView()">Scroll</button>
+  <button on="tap:AMP.setState({expandAc1: true})">Expand item 1</button>
+  <button on="tap:AMP.setState({expandAc1: false})">Collapse item 1</button>
+
+  <button on="tap:AMP.setState({expandAc2: true})">Expand section 1</button>
+  <button on="tap:AMP.setState({expandAc2: false})">Collapse section 1</button>
+  <header class="menu">
+    <h3>MENU</h3>
+    <nav>
+      <ul>
+        <li>
+          <amp-accordion id="ac1" animate>
+            <section id="item1" on="expand:ac2.collapse(section='item2'),AMP.setState({expandAc1: true});collapse:AMP.setState({expandAc1: false})" [data-expand]="expandAc1">
+              <h1>Item 1 (Expanding it closes Item 2)</h1>
+              <div>
+                <p>1A</p>
+                <p>1B</p>
+              </div>
+            </section>
+          </amp-accordion>
+        </li>
+        <li>
+          <amp-accordion id="ac2" animate>
+            <section id="item2" on="expand:ac1.collapse(section='item1')">
+              <h1>Item 2 (Expanding it closes Item 1)</h1>
+              <div>
+                <p>2A</p>
+                <p>2B</p>
+              </div>
+            </section>
+          </amp-accordion>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <amp-accordion expand-single-section>
+    <section [data-expand]="expandAc2" on="expand:AMP.setState({expandAc2: true});collapse:AMP.setState({expandAc2: false})">
+      <h2>Section 1</h2>
+      <amp-video
+        id=myVideo
+        title="Big Buck Bunny"
+        artist="Blender Foundation"
+        poster="img/bigbuckbunny.jpg"
+        album="The Peach Open Movie Project"
+        src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        width="720"
+        height="405"
+        layout="responsive"
+        controls>
+    </amp-video>
+    </section>
+    <section>
+      <h2>Section 2</h2>
+      <div id="initClosed">Bunch of awesome content</div>
+    </section>
+    <section>
+      <h2>Section 3</h2>
+      <div>
+          <amp-img src="./img/sea@1x.jpg" width="300" height="300"></amp-img>
+          Check out the sea!
+          <input>
+      </div>
+    </section>
+    <section>
+      <h2>Properly nested amp-accordion</h2>
+      <amp-accordion>
+        <section>
+          <h2>Nested section</h2>
+          <p>It's possible to nest amp-accordions.</p>
+        </section>
+      </amp-accordion>
+    </section>
+    <section>
+      <header>The header tag is supported as well.</header>
+      <p>Even more awesome. <input> </p>
+    </section>
+  </amp-accordion>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Ad examples</title>
+    <link rel="canonical" href="http://nonblocking.io/" />
+    <meta
+      name="viewport"
+      content="width=device-width,minimum-scale=1,initial-scale=1"
+    />
+    <style amp-custom>
+      .spacer {
+        margin-top: 10px;
+        height: 70vh;
+        width: 100%;
+        background-image: -webkit-linear-gradient(#EEE 50%, white 50%);
+        background-image: linear-gradient(#EEE 50%, white 50%);
+        background-size: 100% 3em;
+      }
+
+      header {
+        position: relative;
+      }
+
+      h1 {
+        margin: 0px 10px;
+      }
+
+      header h1 {
+        position: absolute;
+        top: 20vh;
+        padding: 5px;
+        z-index: 1;
+      }
+
+      header h1 span, .title {
+        background-color: black;
+        color: white;
+        line-height: 1.2em;
+      }
+
+      amp-img img {
+        object-fit: cover;
+      }
+    </style>
+    <script
+      async
+      custom-element="amp-ad"
+      src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"
+    ></script>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+
+  <body>
+    <header>
+      <h1>
+        <span class="title">Lorem Ipsum Dolor Sit Lorem Ipsum<span>
+      </h1>
+      <amp-img height="50vh" layout="fixed-height" src="https://picsum.photos/1600/900?image=1069"></amp-img>
+    </header>
+    <div class="spacer"></div>
+    <div class="spacer"></div>
+    <div class="spacer"></div>
+    <div class="spacer"></div>
+    <div class="spacer"></div>
+    <div class="spacer"></div>
+    <div class="spacer"></div>
+    <div class="spacer"></div>
+    <amp-ad
+      width="1"
+      height="1"
+      id="i-amphtml-demo-id"
+      type="fake-delayed"
+      sticky="bottom"
+      data-bootstrap-script="/examples/amp-ad/sticky.js"
+      src="/examples/amp-ad/sticky-creative.html"
+    ></amp-ad>
+  </body>
+</html>

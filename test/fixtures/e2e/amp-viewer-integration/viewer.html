@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Viewer</title>
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui"
+    />
+    <script src="https://cdn.ampproject.org/v0/examples/amp-viewer-host.js"></script>
+    <style>
+      body, #viewer {
+        margin: 0;
+        border: 0;
+        padding: 0;
+      }
+      body,.fill {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+    <script>
+      var viewer = null;
+      function Viewer(url, opt_caps, simulateEmail = false) {
+        this.id = 'viewer';
+        this.url = url;
+        this.stackIndex_ = 0;
+        this.prerenderSize_ = 1;
+        this.csi_ = 1;
+        this.caps_ =
+          opt_caps || 'a2a,focus-rect,foo,keyboard,swipe,iframeScroll';
+        this.receivedMessages = [];
+        this.simulateEmail = simulateEmail;
+
+        this.container = document.body;
+        this.iframe = document.createElement('iframe');
+        this.iframe.setAttribute('id', this.id);
+        this.iframe.setAttribute(
+          'sandbox',
+          'allow-popups allow-scripts allow-forms allow-pointer-lock' +
+            ' allow-popups-to-escape-sandbox allow-same-origin'
+        );
+        this.iframe.setAttribute('scrolling', 'yes');
+
+        if (simulateEmail) {
+          this.iframe.setAttribute('height', '0');
+          this.iframe.setAttribute('width', '0');
+        } else {
+          this.iframe.classList.add('fill');
+        }
+
+        window.addEventListener('resize', this.onResize_.bind(this));
+        window.addEventListener('popstate', this.onPopState_.bind(this));
+
+        this.start();
+      }
+
+      Viewer.prototype.start = function () {
+        var params = {
+          history: 1,
+          width: this.container./*OK*/ offsetWidth,
+          height: this.container./*OK*/ offsetHeight,
+          prerenderSize: this.prerenderSize_,
+          origin: parseUrlDeprecated(window.location.href).origin,
+          csi: this.csi_,
+          cap: this.caps_,
+        };
+        log('Params:' + JSON.stringify(params));
+
+        var inputUrl = this.url + '#' + paramsStr(params);
+        if (window.location.hash && window.location.hash.length > 1) {
+          inputUrl += '&' + window.location.hash.substring(1);
+        }
+        var parsedUrl = parseUrlDeprecated(inputUrl);
+        var url = parsedUrl.href;
+        this.frameOrigin_ = parsedUrl.origin;
+        log('AMP URL = ', url);
+        this.container.appendChild(this.iframe);
+
+        this.ampViewerHost_ = new AmpViewerHost(
+          window,
+          this.iframe,
+          this.frameOrigin_,
+          this.processRequest_.bind(this),
+          /* logs id */ this.id
+        );
+
+        setTimeout(
+          function () {
+            this.iframe.setAttribute('src', url);
+          }.bind(this)
+        );
+      };
+
+      Viewer.prototype.documentReady_ = function () {
+        log('AMP document ready');
+        this.iframe.dataset['loaded'] = '';
+        return Promise.resolve();
+      };
+
+      Viewer.prototype.onScroll_ = function () {
+        log('Viewer.prototype.onScroll_');
+        this.ampViewerHost_.sendRequest(
+          'viewport',
+          {
+            scrollTop: this.container./*OK*/ scrollTop,
+          },
+          false
+        );
+      };
+
+      Viewer.prototype.onResize_ = function () {
+        log(
+          'Resized to ',
+          this.container./*OK*/ offsetWidth,
+          this.container./*OK*/ offsetHeight,
+          this.container./*OK*/ scrollTop
+        );
+        this.ampViewerHost_.sendRequest(
+          'viewport',
+          {
+            scrollTop: this.container./*OK*/ scrollTop,
+            width: this.container./*OK*/ offsetWidth,
+            height: this.container./*OK*/ offsetHeight,
+          },
+          false
+        );
+      };
+
+      Viewer.prototype.pushHistory_ = function (stackIndex) {
+        log('push history to ', stackIndex);
+        // Super trivial. Only one step allowed.
+        if (stackIndex != this.stackIndex_ + 1) {
+          throw new Error('Only one step push allowed');
+        }
+        this.stackIndex_ = stackIndex;
+        window.history.pushState({}, '');
+        return Promise.resolve();
+      };
+
+      Viewer.prototype.popHistory_ = function (stackIndex) {
+        log('pop history at ', stackIndex);
+        // Super trivial. Only one step allowed.
+        if (stackIndex != this.stackIndex_) {
+          throw new Error('Only one step pop allowed');
+        }
+        this.stackIndex_ = stackIndex;
+        window.history.go(-1);
+        return Promise.resolve();
+      };
+
+      Viewer.prototype.onPopState_ = function () {
+        // Even more trivial. Always assumes that only one step was popped in
+        // history.
+        this.stackIndex_--;
+        this.ampViewerHost_.sendRequest(
+          'historyPopped',
+          {
+            newStackIndex: this.stackIndex_,
+          },
+          false
+        );
+        log('history popped to ', this.stackIndex_);
+      };
+
+      Viewer.prototype.scrollAmpDoc = function (scrollTop) {
+        log('viewer scroll amp doc: ', scrollTop);
+        this.ampViewerHost_.sendRequest('scroll', {scrollTop: scrollTop}, true);
+      };
+
+      Viewer.prototype.processRequest_ = function (name, data, awaitResponse) {
+        log('Viewer.prototype.processRequest_', name);
+        this.receivedMessages.push({name, data});
+        switch (name) {
+          case 'documentLoaded':
+            return this.documentReady_();
+          case 'pushHistory':
+            return this.pushHistory_(data.stackIndex);
+          case 'popHistory':
+            return this.popHistory_(data.stackIndex);
+          case 'documentHeight':
+            if (this.simulateEmail) {
+              const {height} = data;
+              this.iframe.style.height = height + 'px';
+              this.iframe.removeAttribute('width');
+            }
+            return Promise.resolve();
+          case 'broadcast':
+          case 'bindReady':
+          case 'focusin':
+          case 'requestFullOverlay':
+          case 'cancelFullOverlay':
+          case 'unloaded':
+          case 'tick':
+          case 'a2aNavigate':
+          case 'sendCsi':
+          case 'touchstart':
+          case 'touchmove':
+          case 'touchend':
+          case 'setFlushParams':
+          case 'prerenderComplete':
+          case 'scroll':
+          case 'replaceHistory':
+          case 'visibilitychange':
+            return Promise.resolve();
+          case 'xhr':
+          case 'viewerRenderTemplate':
+          default:
+            return Promise.reject('Request not supported: ', name);
+        }
+      };
+
+      function log() {
+        var var_args = Array.prototype.slice.call(arguments, 0);
+        var_args.unshift('[VIEWER]');
+        console /*OK*/.log
+          .apply(console, var_args);
+      }
+
+      function parseUrlDeprecated(urlString) {
+        var a = document.createElement('a');
+        a.href = urlString;
+        return {
+          href: a.href,
+          protocol: a.protocol,
+          host: a.host,
+          hostname: a.hostname,
+          port: a.port == '0' ? '' : a.port,
+          pathname: a.pathname,
+          search: a.search,
+          hash: a.hash,
+          origin: a.protocol + '//' + a.host,
+        };
+      }
+
+      function paramsStr(params) {
+        var s = '';
+        for (var k in params) {
+          var v = params[k];
+          if (v === null || v === undefined) {
+            continue;
+          }
+          if (s.length > 0) {
+            s += '&';
+          }
+          s += encodeURIComponent(k) + '=' + encodeURIComponent(v);
+        }
+        return s;
+      }
+
+      /**
+       * Parses the query string of an URL. This method returns a simple key/value
+       * map. If there are duplicate keys the latest value is returned.
+       * @param {string} queryString
+       * @return {!Object<string>}
+       */
+      function parseQueryString(queryString) {
+        const params = Object.create(null);
+        if (!queryString) {
+          return params;
+        }
+        if (startsWith(queryString, '?') || startsWith(queryString, '#')) {
+          queryString = queryString.substr(1);
+        }
+        const pairs = queryString.split('&');
+        for (let i = 0; i < pairs.length; i++) {
+          const pair = pairs[i];
+          const eqIndex = pair.indexOf('=');
+          let name;
+          let value;
+          if (eqIndex != -1) {
+            name = decodeURIComponent(pair.substring(0, eqIndex)).trim();
+            value = decodeURIComponent(pair.substring(eqIndex + 1)).trim();
+          } else {
+            name = decodeURIComponent(pair).trim();
+            value = '';
+          }
+          if (name) {
+            params[name] = value;
+          }
+        }
+        return params;
+      }
+
+      function startsWith(string, prefix) {
+        return string.lastIndexOf(prefix, 0) == 0;
+      }
+
+      /**
+       * @param {string} url
+       * @param {string} param
+       * @param {*} value
+       * @return {string}
+       */
+      function addQueryParam(url, param, value) {
+        const paramValue =
+          encodeURIComponent(param) + '=' + encodeURIComponent(value);
+        if (!url.includes('?')) {
+          url += '?' + paramValue;
+        } else {
+          url += '&' + paramValue;
+        }
+        return url;
+      }
+
+      function loadAmpDoc() {
+        const hash = window.location.hash;
+        const hashParams = parseQueryString(hash);
+        const href = hashParams['href'];
+        const caps = hashParams['caps'];
+        const isEmail = 'true' === hashParams['isEmail'];
+
+        viewer = new Viewer(
+          addQueryParam(href, 'amp_js_v', '0.1'),
+          caps,
+          isEmail
+        );
+      }
+      window.onload = loadAmpDoc;
+    </script>
+  </head>
+  <body></body>
+</html>

@@ -1,0 +1,152 @@
+<!doctype html>
+<html ⚡ lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+  <link rel="canonical" href="http://quinta.transformacion/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <meta property="og:type" content="article">
+  <link href="https://fonts.googleapis.com/css?family=Poppins:400,700" rel="stylesheet" type="text/css">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    body {
+      font-family: 'Helvetica Neue', sans-serif;
+      font-size: 18px;
+      line-height: 24px;
+    }
+
+    h1 {
+      font-family: 'Poppins', 'Helvetica Neue', sans-serif;
+      margin: 40px 0 0;
+      font-size: 24px;
+    }
+
+    p {
+      margin: 20px 0;
+      color: #888;
+    }
+
+    main {
+      padding: 0 40px;
+      margin: 40px 0;
+    }
+    amp-lightbox {
+      padding: 40px;
+      text-align: center;
+      background: #eee;
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <h1>Applies</h1>
+    <p>No tap action and should cover 25% of viewport.</p>
+    <div>
+      <amp-img src="http://picsum.photos/400?20" width="400" height="400" layout="responsive"></amp-img>
+    </div>
+
+    <h1>Does not apply</h1>
+    <p>Wrapped in hyperlink.</p>
+    <a href="http://picsum.photos/400?19" target="_blank">
+      <amp-img src="http://picsum.photos/400?19" width="400" height="400" layout="responsive"></amp-img>
+    </a>
+
+    <h1>Does not apply</h1>
+    <p>Too small.</p>
+    <div>
+      <amp-img src="http://picsum.photos/60?20" width="60" height="60"></amp-img>
+    </div>
+
+    <h1>Applies</h1>
+    <p>Carousel only has images.</p>
+    <div>
+      <amp-carousel layout="fixed-height" height="200">
+        <amp-img src="http://picsum.photos/200?20" width="200" height="200"></amp-img>
+        <amp-img src="http://picsum.photos/200?19" width="200" height="200"></amp-img>
+        <amp-img src="http://picsum.photos/200?18" width="200" height="200"></amp-img>
+        <amp-img src="http://picsum.photos/200?17" width="200" height="200"></amp-img>
+        <amp-img src="http://picsum.photos/200?16" width="200" height="200"></amp-img>
+      </amp-carousel>
+    </div>
+
+    <h1>Does not apply</h1>
+    <p>Slide has a tap action.</p>
+    <div>
+      <amp-carousel layout="fixed-height" height="200">
+        <amp-img on="tap: my-lightbox" src="http://picsum.photos/200?15" width="200" height="200"></amp-img>
+        <amp-img src="http://picsum.photos/200?14" width="200" height="200"></amp-img>
+        <amp-img src="http://picsum.photos/200?13" width="200" height="200"></amp-img>
+        <amp-img src="http://picsum.photos/200?12" width="200" height="200"></amp-img>
+        <amp-img src="http://picsum.photos/200?11" width="200" height="200"></amp-img>
+      </amp-carousel>
+    </div>
+
+    <h1>Applies</h1>
+    <p>Carousel only has images and text.</p>
+    <amp-carousel layout="fixed-height" height="230">
+      <div>
+        <amp-img src="http://picsum.photos/200?10" width="200" height="200"></amp-img>
+        <div>Lorem ipsum</div>
+      </div>
+      <div>
+        <amp-img src="http://picsum.photos/200?9" width="200" height="200"></amp-img>
+        <div>Lorem ipsum</div>
+      </div>
+      <div>
+        <amp-img src="http://picsum.photos/200?8" width="200" height="200"></amp-img>
+        <div>Lorem ipsum</div>
+      </div>
+      <div>
+        <amp-img src="http://picsum.photos/200?7" width="200" height="200"></amp-img>
+        <div>Lorem ipsum</div>
+      </div>
+      <div>
+        <amp-img src="http://picsum.photos/200?6" width="200" height="200"></amp-img>
+        <div>Lorem ipsum</div>
+      </div>
+    </amp-carousel>
+
+    <h1>Does not apply</h1>
+    <p>Carousel only has images and text, but images are too small.</p>
+    <amp-carousel layout="fixed-height" height="300">
+      <div style="width: 200px; white-space: normal">
+        <amp-img src="http://picsum.photos/50?10" width="50" height="50"></amp-img>
+        <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus pretium eros a sem gravida, quis tempor sem luctus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae.</div>
+      </div>
+      <div style="width: 200px; white-space: normal">
+        <amp-img src="http://picsum.photos/50?9" width="50" height="50"></amp-img>
+        <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus pretium eros a sem gravida, quis tempor sem luctus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae.</div>
+      </div>
+      <div style="width: 200px; white-space: normal">
+        <amp-img src="http://picsum.photos/50?8" width="50" height="50"></amp-img>
+        <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus pretium eros a sem gravida, quis tempor sem luctus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae.</div>
+      </div>
+      <div style="width: 200px; white-space: normal">
+        <amp-img src="http://picsum.photos/50?7" width="50" height="50"></amp-img>
+        <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus pretium eros a sem gravida, quis tempor sem luctus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae.</div>
+      </div>
+      <div style="width: 200px; white-space: normal">
+        <amp-img src="http://picsum.photos/50?6" width="50" height="50"></amp-img>
+        <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus pretium eros a sem gravida, quis tempor sem luctus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae.</div>
+      </div>
+    </amp-carousel>
+
+    <h1>Applies</h1>
+    <p>Loaded dynamically. <button on="tap:my-list.refresh">Refresh</button></p>
+    <amp-list width="auto" height="500" layout="fixed-height" src="./amp-list.json" id="my-list">
+      <template type="amp-mustache">
+        <amp-img src={{src}} width=500 height=500></amp-img>
+      </template>
+    </amp-list>
+  </main>
+  <amp-lightbox id="my-lightbox" on="tap: my-lightbox.close" layout="nodisplay">
+    I do nothing. Click me to close.
+  </amp-lightbox>
+</body>
+</html>

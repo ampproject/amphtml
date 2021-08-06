@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1" />
+    <link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js" />
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-base-carousel" src="https://cdn.ampproject.org/v0/amp-base-carousel-latest.js"></script>
+    <style amp-boilerplate> body { -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both; -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both; -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both; animation: -amp-start 8s steps(1, end) 0s 1 normal both; } @-webkit-keyframes -amp-start { from { visibility: hidden; } to { visibility: visible; } } @-moz-keyframes -amp-start { from { visibility: hidden; } to { visibility: visible; } } @-ms-keyframes -amp-start { from { visibility: hidden; } to { visibility: visible; } } @-o-keyframes -amp-start { from { visibility: hidden; } to { visibility: visible; } } @keyframes -amp-start { from { visibility: hidden; } to { visibility: visible; } } </style>
+    <noscript> <style amp-boilerplate> body { -webkit-animation: none; -moz-animation: none; -ms-animation: none; animation: none; } </style> </noscript>
+    <link rel="canonical" href="." />
+    <title>My AMP Page</title>
+    <style amp-custom>
+      body {
+        max-width: 527px;
+      }
+
+      amp-base-carousel img {
+        object-fit: cover;
+      }
+
+      .slide {
+        padding: 4px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Has snap on spacers-->
+    <amp-base-carousel id="snap-spacers" width="300" height="200"  class="carousel" visible-count="2" loop="true">
+        <amp-img  height="440" width="1000" class="snap" src="../img/redgradient.png" >Slide 1</amp-img>
+        <amp-img  height="440" width="1000" class="slide" src="../img/tealgradient.png" >Slide 2</amp-img>
+        <div>Hello</div>
+        <amp-img  height="440" width="1000"class="slide" src="../img/lemonyellowgradient.png" >Slide 4</amp-img>
+        <p>Goodbye</p>
+        <amp-img  height="440" width="1000" class="slide" src="../img/lilacgradient.png" >Slide 6</amp-img>
+    </amp-base-carousel>
+
+    <!-- Has snap on slides-->
+    <amp-base-carousel id="snap-slides" width="300" height="200"  class="carousel" visible-count="2" loop="false">
+        <amp-img  height="440" width="1000" class="slide" src="../img/redgradient.png" >Slide 1</amp-img>
+        <amp-img  height="440" width="1000" class="slide" src="../img/tealgradient.png" >Slide 2</amp-img>
+        <div>Hello</div>
+        <amp-img  height="440" width="1000"class="slide" src="../img/lemonyellowgradient.png" >Slide 4</amp-img>
+        <p>Goodbye</p>
+        <amp-img  height="440" width="1000" class="slide" src="../img/lilacgradient.png" >Slide 6</amp-img>
+    </amp-base-carousel>
+  </body>
+</html>

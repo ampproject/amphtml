@@ -1,0 +1,160 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
+    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+    <title>Bot rendering</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="amp-story-bot-rendering.html">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      body {
+        font-family: 'Roboto', sans-serif;
+        color: #fff;
+      }
+
+      amp-story-page {
+        background-color: #000;
+      }
+
+      span {
+        padding: 0 96px 0 20px;
+        align-items: center;
+        font-size: 18px;
+        line-height: 1.5em;
+      }
+
+      amp-story-page-attachment {
+        color: rgba(0, 0, 0, 0.93);
+      }
+
+      .block-to-hide-video-controls {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 80px;
+        background-color:#fff;
+      }
+    </style>
+    <script type="text/javascript">
+      // Override user agent to trigger bot rendering.
+      Object.defineProperty(navigator, 'userAgent', {value: 'bot'});
+    </script>
+  </head>
+
+  <body>
+    <amp-story
+        standalone
+        publisher="The AMP team"
+        publisher-logo-src="./img/AMP-Brand-White-Icon.svg"
+        poster-portrait-src="./img/overview.jpg"
+        title="Landscape story"
+        supports-landscape>
+      <amp-story-page id="cover" title="Relentlessly pursues moth annoy owner">
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="./img/cat1.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="bottom blue-bottom-gradient">
+          <p>
+            <span data-text-background-color="#00A3DB">Relentlessly pursues moth annoy owner until he gives you food say meow repeatedly until belly rubs, feels good drool that box?</span>
+          </p>
+        </amp-story-grid-layer>
+        <amp-story-page-attachment data-title="Lorem ipsum" layout="nodisplay">
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ultricies integer quis auctor elit. Quis eleifend quam adipiscing vitae proin. Id faucibus nisl tincidunt eget nullam. Est pellentesque elit ullamcorper dignissim cras tincidunt lobortis feugiat. Sodales ut etiam sit amet nisl purus. Non enim praesent elementum facilisis leo vel fringilla. Sagittis vitae et leo duis ut diam quam nulla. Id diam maecenas ultricies mi eget mauris pharetra et. Sodales neque sodales ut etiam sit amet. Eu sem integer vitae justo eget magna fermentum iaculis eu. Faucibus interdum posuere lorem ipsum dolor sit amet consectetur. Bibendum est ultricies integer quis auctor elit sed vulputate.</p>
+
+          <p>In nisl nisi scelerisque eu ultrices vitae auctor eu. Tristique magna sit amet purus gravida. Tincidunt id aliquet risus feugiat in ante metus dictum. Mattis nunc sed blandit libero volutpat sed. Imperdiet massa tincidunt nunc pulvinar sapien et ligula ullamcorper malesuada. Sit amet mattis vulputate enim nulla aliquet porttitor lacus luctus. Proin sagittis nisl rhoncus mattis rhoncus. Pulvinar neque laoreet suspendisse interdum consectetur libero. Nibh tellus molestie nunc non blandit massa enim nec dui. Sagittis eu volutpat odio facilisis. Tristique senectus et netus et malesuada fames ac. Molestie a iaculis at erat. Sit amet cursus sit amet. Suscipit tellus mauris a diam maecenas sed enim ut. Gravida quis blandit turpis cursus in. Tincidunt vitae semper quis lectus nulla at volutpat diam ut. Morbi tempus iaculis urna id. Faucibus et molestie ac feugiat sed lectus vestibulum. Mauris augue neque gravida in. Ac turpis egestas sed tempus.</p>
+
+          <p>Ut tristique et egestas quis ipsum. Aliquam malesuada bibendum arcu vitae elementum curabitur vitae nunc sed. Elementum curabitur vitae nunc sed velit dignissim. Tristique et egestas quis ipsum suspendisse ultrices gravida dictum fusce. At elementum eu facilisis sed odio morbi. Imperdiet proin fermentum leo vel orci porta non. Quam lacus suspendisse faucibus interdum. Eu non diam phasellus vestibulum lorem sed risus. Commodo viverra maecenas accumsan lacus vel facilisis volutpat est velit. Sagittis aliquam malesuada bibendum arcu vitae elementum. Ut sem viverra aliquet eget sit amet. Nulla facilisi morbi tempus iaculis. Sed odio morbi quis commodo odio aenean sed adipiscing diam. Donec ultrices tincidunt arcu non sodales. Amet venenatis urna cursus eget. Sapien et ligula ullamcorper malesuada proin. Tristique sollicitudin nibh sit amet commodo nulla facilisi. Venenatis tellus in metus vulputate eu scelerisque felis.</p>
+        </amp-story-page-attachment>
+      </amp-story-page>
+
+      <amp-story-page id="page-link">
+        <amp-story-animation layout="nodisplay" trigger="visibility">
+          <script type="application/json">
+            [
+              {
+                "selector": ".anim",
+                "keyframes": {
+                  "opacity": ["0", "1"]
+                },
+                "direction": "normal",
+                "fill": "both",
+                "duration": 1
+              }
+            ]
+          </script>
+        </amp-story-animation>
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="./img/cat2.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <p class="anim">
+            <span data-text-background-color="crimson">i can fit in that box but inspect anything brought into the house wack the mini furry mouse intently stare at the same spot. Flee in terror at cucumber discovered on floor shake treat bag</span>
+          </p>
+        </amp-story-grid-layer>
+        <amp-story-page-attachment href="https://www.google.com" layout="nodisplay"></amp-story-page-attachment>
+      </amp-story-page>
+
+      <amp-story-page id="page-link-with-title">
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="./img/cat2.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <p>
+            <span data-text-background-color="crimson">i can fit in that box but inspect anything brought into the house wack the mini furry mouse intently stare at the same spot. Flee in terror at cucumber discovered on floor shake treat bag</span>
+          </p>
+        </amp-story-grid-layer>
+        <amp-story-page-attachment data-title="Google" href="https://www.google.com" layout="nodisplay"></amp-story-page-attachment>
+      </amp-story-page>
+
+      <amp-story-page id="page2" title="This is a page title">
+        <amp-story-grid-layer template="fill">
+          <amp-video autoplay
+            id="stamp-vid"
+            width="400"
+            height="750"
+            poster="../../amp-story/img/poster2.jpg"
+            alt="This is a video alt text"
+            title="This is a video title"
+            layout="fill">
+            <source src="../../amp-story/video/stamp.mp4" type="video/mp4">
+            <track default src="../../amp-story/video/stamp.vtt" srclang="en">
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <div class="block-to-hide-video-controls"></div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page3">
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="./img/cat1.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="bottom blue-bottom-gradient">
+          <p>
+            <span data-text-background-color="#00A3DB">Third page</span>
+          </p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-social-share layout="nodisplay">
+        <script type="application/json">
+          {
+            "shareProviders": [
+              "email",
+              {"provider": "facebook", "app_id": "254325784911610"},
+              {"provider": "twitter", "text": "This is custom share text that I would like for the Twitter platform"},
+              "whatsapp",
+              "pinterest",
+              "line"
+            ]
+          }
+        </script>
+      </amp-story-social-share>
+    </amp-story>
+  </body>
+</html>

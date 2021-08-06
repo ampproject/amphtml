@@ -1,0 +1,79 @@
+<!doctype html>
+<html ⚡4ads lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+  <meta name="amp4ads-id" content="vendor=doubleclick,type=impression-id,value=12345">
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async host-service="amp-mraid" src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js"></script>
+  <!--  <script async host-service="amp-mraid" no-fallback src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js"></script> -->
+  <!-- <script async src="https://cdn.ampproject.org/v0.js"></script> -->
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  <style amp-custom>
+    .left {
+      text-align: left;
+    }
+    .right {
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <div class="left">
+    <amp-img id="img-1" width="150" height="100"
+        src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h50-no">
+    </amp-img>
+  </div>
+  <div class="right">
+    <a href="https://google.com" target="_blank">
+      <amp-img id="img-2" width="150" height="100"
+          src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h80-no">
+      </amp-img>
+    </a>
+  </div>
+  <amp-pixel src="//localhost:8000/pixel?cid=CLIENT_ID(a)"></amp-pixel>
+  <amp-analytics>
+    <script type="application/json">
+      {
+        "transport": {"beacon": false, "xhrpost": false},
+        "requests": {
+          "visibility": "/${type}?cid=CLIENT_ID(a)&elementX=${elementX}&elementY=${elementY}&elementWidth=${elementWidth}&elementHeight=${elementHeight}&totalTime=${totalTime}&totalVisibleTime=${totalVisibleTime}&maxContinuousVisibleTime=${maxContinuousVisibleTime}&loadTimeVisibility=${loadTimeVisibility}&backgrounded=${backgrounded}&backgroundedAtStart=${backgroundedAtStart}&firstSeenTime=${firstSeenTime}&lastSeenTime=${lastSeenTime}&firstVisibleTime=${firstVisibleTime}&lastVisibleTime=${lastVisibleTime}&minVisiblePercentage=${minVisiblePercentage}&maxVisiblePercentage=${maxVisiblePercentage}&intersectionRatio=${intersectionRatio}&elementX=${elementX}&elementY=${elementY}&elementWidth=${elementWidth}&elementHeight=${elementHeight}&backgrounded=${backgrounded}&backgroundedAtStart=${backgroundedAtStart}"
+        },
+        "triggers": {
+          "rootVisible": {
+            "on": "visible",
+            "request": "visibility",
+            "vars": { "type": "rootVisible" }
+          },
+          "imgVisible": {
+            "on": "visible",
+            "request": "visibility",
+            "visibilitySpec": {
+              "selector": "#img-2",
+              "selectionMethod": "scope",
+              "visiblePercentageMin": 0
+            },
+            "vars": { "type": "img2Visible-ShouldNeverSeeThis" }
+          },
+          "specVisible": {
+            "on": "visible",
+            "request": "visibility",
+            "visibilitySpec": {
+              "selector": ":root",
+              "visiblePercentageMin": 50,
+              "totalTimeMin": 3000
+            },
+            "vars": { "type": "rootVisible50" }
+          },
+          "hidden": {
+            "on": "hidden",
+            "request": "visibility",
+            "vars": { "type": "HiddenTrigger" }
+          }
+        }
+      }
+    </script>
+  </amp-analytics>
+</body>
+</html>

@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import {dev} from '../log';
-import {platformFor} from '../platform';
+import {Services} from '#service';
 
+import {dev} from '../log';
 
 const TAG = 'ie-media-bug';
-
 
 /**
  * An ugly fix for IE's problem with `matchMedia` API, where media queries
@@ -30,15 +29,17 @@ const TAG = 'ie-media-bug';
  * @return {?Promise}
  * @package
  */
-export function checkAndFix(win, opt_platform) {
-  const platform = opt_platform || platformFor(win);
+export function ieMediaCheckAndFix(win, opt_platform) {
+  const platform = opt_platform || Services.platformFor(win);
   if (!platform.isIe() || matchMediaIeQuite(win)) {
     return null;
   }
 
   // Poll until the expression resolves correctly, but only up to a point.
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
+    /** @const {number} */
     const endTime = Date.now() + 2000;
+    /** @const {number} */
     const interval = win.setInterval(() => {
       const now = Date.now();
       const matches = matchMediaIeQuite(win);
@@ -59,8 +60,13 @@ export function checkAndFix(win, opt_platform) {
  * @private
  */
 function matchMediaIeQuite(win) {
-  const q = `(min-width: ${win./*OK*/innerWidth}px)` +
-      ` AND (max-width: ${win./*OK*/innerWidth}px)`;
+  // The expression is `min-width <= W <= max-width`.
+  // In IE `min-width: X` actually compares string `<`, thus we add -1 to
+  // `min-width` and add +1 to `max-width`. Given the expression above, it's
+  // a non-essential correction by 1px.
+  const q =
+    `(min-width: ${win./*OK*/ innerWidth - 1}px)` +
+    ` AND (max-width: ${win./*OK*/ innerWidth + 1}px)`;
   try {
     return win.matchMedia(q).matches;
   } catch (e) {

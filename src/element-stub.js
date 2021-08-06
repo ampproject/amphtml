@@ -15,51 +15,6 @@
  */
 
 import {BaseElement} from './base-element';
-import {dev} from './log';
-import {extensionsFor} from './extensions';
 
-/** @type {!Array} */
-export const stubbedElements = [];
-
-/** @type {!Object<string, boolean>} */
-const loadingChecked = {};
-
-
-export class ElementStub extends BaseElement {
-  constructor(element) {
-    super(element);
-    // Fetch amp-ad script if it is not present.
-    const name = element.tagName.toLowerCase();
-    if (!loadingChecked[name]) {
-      loadingChecked[name] = true;
-      extensionsFor(this.win).loadExtension(name, /* stubElement */ false);
-    }
-    stubbedElements.push(this);
-  }
-
-  /** @override */
-  getPriority() {
-    return dev().assert(0, 'Cannot get priority of stubbed element');
-  }
-
-  /** @override */
-  isLayoutSupported(unusedLayout) {
-    // Always returns true and will eventually call this method on the actual
-    // element.
-    return true;
-  }
-}
-
-
-/**
- * @visibleForTesting
- */
-export function resetLoadingCheckForTests() {
-  const keys = Object.keys(loadingChecked);
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    if (loadingChecked.hasOwnProperty(key)) {
-      delete loadingChecked[key];
-    }
-  }
-}
+// TODO(#31915): completely eliminate this class.
+export class ElementStub extends BaseElement {}

@@ -1,0 +1,117 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Stream Gallery</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async custom-element="amp-stream-gallery" src="https://cdn.ampproject.org/v0/amp-stream-gallery-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    .item {
+      display: flex;
+      padding: 0 5px
+    }
+
+    .item img {
+      object-fit: contain;
+    }
+
+    .custom-arrow {
+      all: unset;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      transition: 200ms opacity ease-in;
+    }
+
+    .custom-arrow[disabled] {
+      transition-timing-function: ease-out;
+    }
+
+    .custom-arrow > svg {
+      position: relative;
+      z-index: 1;
+      width: 24px;
+      height: 24px;
+      stroke: white;
+      filter: drop-shadow(0 0 2px black);
+    }
+
+    .custom-arrow::after {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      content: '';
+      display: block;
+      background: radial-gradient(rgba(242, 242, 242, 0.2), transparent 80%);
+      filter: blur(10px);
+    }
+
+    [stream-gallery-outset-arrows] .custom-arrow {
+      width: 24px;
+    }
+
+    [stream-gallery-outset-arrows] .custom-arrow svg {
+      stroke: black;
+      filter: none;
+    }
+
+    [stream-gallery-outset-arrows] .custom-arrow::after {
+      background: #fefefe;
+      filter: none;
+    }
+  </style>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <h1>Stream Gallery</h1>
+  <amp-stream-gallery
+      layout="fixed-height"
+      height="128"
+      loop="true"
+      min-item-width="(pointer: coarse) 130, 150"
+      max-item-width="180"
+      max-visible-count="5"
+      inset-arrow-visibility="auto"
+      outset-arrows="(pointer: coarse) false, true">
+    <button class="custom-arrow" slot="next-arrow">
+      <svg viewBox="0 0 24 24">
+        <path d="M10,7.4 L14.6,12 L10,16.6" fill="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+      </svg>
+    </button>
+    <button class="custom-arrow" slot="prev-arrow">
+      <svg viewBox="0 0 24 24">
+        <path d="M14,7.4 L9.4,12 L14,16.6" fill="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+      </svg>
+    </button>
+    <div class="item">
+      <amp-img src="../amp-base-carousel/img/redgradient.png" layout="flex-item"></amp-img>
+    </div>
+    <div class="item">
+      <amp-img src="../amp-base-carousel/img/greengradient.png" layout="flex-item"></amp-img>
+    </div>
+    <div class="item">
+      <amp-img src="../amp-base-carousel/img/bluegradient.png" layout="flex-item"></amp-img>
+    </div>
+    <div class="item">
+      <amp-img src="../amp-base-carousel/img/orangegradient.png" layout="flex-item"></amp-img>
+    </div>
+    <div class="item">
+      <amp-img src="../amp-base-carousel/img/tealgradient.png" layout="flex-item"></amp-img>
+    </div>
+    <div class="item">
+      <amp-img src="../amp-base-carousel/img/lemonyellowgradient.png" layout="flex-item"></amp-img>
+    </div>
+    <div class="item">
+      <amp-img src="../amp-base-carousel/img/lilacgradient.png" layout="flex-item"></amp-img>
+    </div>
+  </amp-stream-gallery>
+  <p>Custom arrows</p>
+</body>
+</html>

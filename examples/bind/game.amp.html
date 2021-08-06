@@ -1,0 +1,258 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>amp-bind: Game</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <!-- We'd inline this in production. -->
+  <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+
+  <style amp-custom>
+    #container {
+      padding: 64px 16px;
+      text-align: center;
+    }
+    .hidden {
+      display: none;
+    }
+    #score {
+      margin: 32px 0;
+    }
+    #grid {
+      margin: 0 auto;
+    }
+    #grid td.cell {
+      background-color: #EFEBE9;
+      font-weight: bold;
+      font-size: 12pt;
+      color: #5D4037;
+    }
+    #grid td.cell.zero {
+      background-color: #D7CCC8;
+    }
+    #grid td {
+      width: 70px;
+      height: 70px;
+    }
+    #grid td[colspan='4'] {
+      height: 40px;
+    }
+    #ng {
+      margin-top: 32px;
+    }
+    .light {
+      color: #9E9E9E;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container">
+    <h6 id="title">2<span class="light">(04)</span>8 with <code>&lt;amp-bind&gt;</code></h6>
+
+    <p id="score" class="mdl-chip mdl-chip--contact">
+      <span class="mdl-chip__contact mdl-color-text--white mdl-color--amber" [class]="'mdl-chip__contact mdl-color-text--white ' +
+        ((G.grid[0][0] != G.grid[0][1] && G.grid[1][0] != G.grid[1][1] && G.grid[0][0] != G.grid[1][0] && G.grid[0][1] != G.grid[1][1]) &&
+        (G.grid[0][0] > 0 && G.grid[0][1] > 0 && G.grid[1][0] > 0 && G.grid[1][1] > 0)
+            ? ((G.grid[0][0] + G.grid[0][1] + G.grid[1][0] + G.grid[1][1] >= 30) ? 'mdl-color--green' : 'mdl-color--red')
+            : 'mdl-color--amber')
+      ">
+        <code [text]="
+          (G.grid[0][0] != G.grid[0][1] && G.grid[1][0] != G.grid[1][1] && G.grid[0][0] != G.grid[1][0] && G.grid[0][1] != G.grid[1][1]) &&
+          (G.grid[0][0] > 0 && G.grid[0][1] > 0 && G.grid[1][0] > 0 && G.grid[1][1] > 0)
+              ? ((G.grid[0][0] + G.grid[0][1] + G.grid[1][0] + G.grid[1][1] >= 30) ? '👍' : '💩')
+              : '👾'
+        ">👾</code>
+      </span>
+      <span class="mdl-chip__text" [text]="G.grid[0][0] + G.grid[0][1] + G.grid[1][0] + G.grid[1][1]">0</span>
+    </p>
+
+    <table id="grid">
+      <tr>
+        <td colspan=4>
+            <!--
+            cases for UP:
+              1. X, -> X+X,
+                 X     ?
+              2. 0, -> X,
+                 X     ?
+              3. X, -> X,
+                 0     0
+            4. X, -> X,
+               Y     Y
+          -->
+          <button class="mdl-button mdl-button--raised mdl-button--accent" on="tap:AMP.setState({
+            'G': {
+              'grid': [
+                [
+                  (G.grid[0][0] > 0 && G.grid[0][0] == G.grid[1][0] ? G.grid[0][0] + G.grid[1][0] :
+                      (G.grid[0][0] == 0 && G.grid[1][0] > 0 ? G.grid[1][0] :
+                          (G.grid[0][0] > 0 && G.grid[1][0] == 0 ? G.grid[0][0] :
+                              G.grid[0][0]
+                          )
+                      )
+                  ),
+                  (G.grid[0][1] > 0 && G.grid[0][1] == G.grid[1][1] ? G.grid[0][1] + G.grid[1][1] :
+                      (G.grid[0][1] == 0 && G.grid[1][1] > 0 ? G.grid[1][1] :
+                          (G.grid[0][1] > 0 && G.grid[1][1] == 0 ? G.grid[0][1] :
+                              G.grid[0][1]
+                          )
+                      )
+                  )
+                ],
+                [
+                  (G.grid[0][0] > 0 && G.grid[0][0] == G.grid[1][0] ? (random() < G.spawnChance ? 2 : 0) :
+                      (G.grid[0][0] == 0 && G.grid[1][0] > 0 ? (random() < G.spawnChance ? 2 : 0) :
+                          (G.grid[0][0] > 0 && G.grid[1][0] == 0 ? 0 :
+                              G.grid[1][0]
+                          )
+                      )
+                  ),
+                  (G.grid[0][1] > 0 && G.grid[0][1] == G.grid[1][1] ? (random() < G.spawnChance ? 2 : 0) :
+                      (G.grid[0][1] == 0 && G.grid[1][1] > 0 ? (random() < G.spawnChance ? 2 : 0) :
+                          (G.grid[0][1] > 0 && G.grid[1][1] == 0 ? 0 :
+                              G.grid[1][1]
+                          )
+                      )
+                  )
+                ]
+              ]
+            }
+          })">UP</button>
+        </td>
+      </tr>
+      <tr>
+        <td rowspan=2>
+          <!--
+          cases for LEFT:
+            1. X, X -> X+X, ?
+            2. 0, X -> X, 0
+            3. X, 0 -> X, ?
+            4. X, Y -> X, Y
+          -->
+          <button class="mdl-button mdl-button--raised mdl-button--accent" on="tap:AMP.setState({
+            'G': {
+              'grid': [
+                (G.grid[0][0] > 0 && G.grid[0][0] == G.grid[0][1] ? [G.grid[0][0] + G.grid[0][1], (random() < G.spawnChance ? 2 : 0)] :
+                    (G.grid[0][0] == 0 && G.grid[0][1] > 0 ? [G.grid[0][1], (random() < G.spawnChance ? 2 : 0)] :
+                        (G.grid[0][0] > 0 && G.grid[0][1] == 0 ? [G.grid[0][0], 0] :
+                            G.grid[0]
+                        )
+                    )
+                ),
+                (G.grid[1][0] > 0 && G.grid[1][0] == G.grid[1][1] ? [G.grid[1][0] + G.grid[1][1], (random() < G.spawnChance ? 2 : 0)] :
+                    (G.grid[1][0] == 0 && G.grid[1][1] > 0 ? [G.grid[1][1], (random() < G.spawnChance ? 2 : 0)] :
+                        (G.grid[1][0] > 0 && G.grid[1][1] == 0 ? [G.grid[1][0], 0] :
+                            G.grid[1]
+                        )
+                    )
+                )
+              ]
+            }
+          })">LEFT</button>
+        </td>
+        <td class="cell" [class]="'cell ' + (G.grid[0][0] == 0 ? 'zero' : '')" [text]="G.grid[0][0] > 0 ? G.grid[0][0] : ''">2</td>
+        <td class="cell" [class]="'cell ' + (G.grid[0][1] == 0 ? 'zero' : '')" [text]="G.grid[0][1] > 0 ? G.grid[0][1] : ''">2</td>
+        <td rowspan=2>
+          <button class="mdl-button mdl-button--raised mdl-button--accent" on="tap:AMP.setState({
+            'G': {
+              'grid': [
+                (G.grid[0][0] > 0 && G.grid[0][0] == G.grid[0][1] ? [(random() < G.spawnChance ? 2 : 0), G.grid[0][0] + G.grid[0][1]] :
+                    (G.grid[0][0] == 0 && G.grid[0][1] > 0 ? [0, G.grid[0][1]] :
+                        (G.grid[0][0] > 0 && G.grid[0][1] == 0 ? [(random() < G.spawnChance ? 2 : 0), G.grid[0][0]] :
+                            G.grid[0]
+                        )
+                    )
+                ),
+                (G.grid[1][0] > 0 && G.grid[1][0] == G.grid[1][1] ? [(random() < G.spawnChance ? 2 : 0), G.grid[1][0] + G.grid[1][1]] :
+                    (G.grid[1][0] == 0 && G.grid[1][1] > 0 ? [0, G.grid[1][1]] :
+                        (G.grid[1][0] > 0 && G.grid[1][1] == 0 ? [(random() < G.spawnChance ? 2 : 0), G.grid[1][0]] :
+                            G.grid[1]
+                        )
+                    )
+                )
+              ]
+            }
+          })">RIGHT</button>
+        </td>
+      </tr>
+      <tr>
+        <td class="cell" [class]="'cell ' + (G.grid[1][0] == 0 ? 'zero' : '')" [text]="G.grid[1][0] > 0 ? G.grid[1][0] : ''">2</td>
+        <td class="cell zero" [class]="'cell ' + (G.grid[1][1] == 0 ? 'zero' : '')" [text]="G.grid[1][1] > 0 ? G.grid[1][1] : ''"></td>
+      </tr>
+      <tr>
+        <td colspan=4>
+          <button class="mdl-button mdl-button--raised mdl-button--accent" on="tap:AMP.setState({
+            'G': {
+              'grid': [
+                [
+                  (G.grid[0][0] > 0 && G.grid[0][0] == G.grid[1][0] ? (random() < G.spawnChance ? 2 : 0):
+                      (G.grid[0][0] == 0 && G.grid[1][0] > 0 ? (random() < G.spawnChance ? 2 : 0) :
+                          (G.grid[0][0] > 0 && G.grid[1][0] == 0 ? 0 :
+                              G.grid[0][0]
+                          )
+                      )
+                  ),
+                  (G.grid[0][1] > 0 && G.grid[0][1] == G.grid[1][1] ? (random() < G.spawnChance ? 2 : 0) :
+                      (G.grid[0][1] == 0 && G.grid[1][1] > 0 ? (random() < G.spawnChance ? 2 : 0) :
+                          (G.grid[0][1] > 0 && G.grid[1][1] == 0 ? 0 :
+                              G.grid[0][1]
+                          )
+                      )
+                  )
+                ],
+                [
+                  (G.grid[0][0] > 0 && G.grid[0][0] == G.grid[1][0] ? G.grid[0][0] + G.grid[1][0] :
+                      (G.grid[0][0] == 0 && G.grid[1][0] > 0 ? G.grid[1][0] :
+                          (G.grid[0][0] > 0 && G.grid[1][0] == 0 ? G.grid[0][0] :
+                              G.grid[1][0]
+                          )
+                      )
+                  ),
+                  (G.grid[0][1] > 0 && G.grid[0][1] == G.grid[1][1] ? G.grid[0][1] + G.grid[1][1] :
+                      (G.grid[0][1] == 0 && G.grid[1][1] > 0 ? G.grid[1][1]  :
+                          (G.grid[0][1] > 0 && G.grid[1][1] == 0 ? G.grid[0][1] :
+                              G.grid[1][1]
+                          )
+                      )
+                  )
+                ]
+              ]
+            }
+          })">DOWN</button>
+        </td>
+      </tr>
+    </table>
+
+    <div id="ng">
+      <button class="mdl-button mdl-button--raised" on="tap:AMP.setState({
+        'G': {
+          'grid': [
+            [ (random() < G.spawnChance ? 2 : 0) , (random() < G.spawnChance ? 2 : 0) ],
+            [ (random() < G.spawnChance ? 2 : 0) , (random() < G.spawnChance ? 2 : 0) ]
+          ]
+        }
+      })">New game</button>
+    </div>
+
+  </div>
+
+  <amp-state id="G">
+    <script type="application/json">
+      {
+        "grid": [
+          [2, 2],
+          [2, 0]
+        ],
+        "spawnChance": 0.5
+      }
+    </script>
+  </amp-state>
+</body>
+</html>

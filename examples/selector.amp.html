@@ -1,0 +1,170 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <title>AMP Selector Demo</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-1.0.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-latest.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+  <script>
+    (self.AMP = self.AMP || []).push(function(AMP) {
+      AMP.toggleExperiment('amp-selector-bento', true);
+    });
+  </script>
+  <style amp-custom>
+    .radio-selector [option] {
+      display: flex;
+      align-items: center;
+    }
+    .radio-selector [option]:before {
+      transition: background 0.25s ease-in-out;
+      content: "";
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      margin: 4px;
+      border-radius: 100%;
+      border: solid 1px blue;
+    }
+    .radio-selector [option][selected]:before {
+      text-align: center;
+      content: "✓";
+      color: white;
+      background-color: blue;
+    }
+  </style>
+</head>
+<body>
+    <h2>Form Select</h2>
+    <form id="myForm" method="post" action-xhr="/form/echo-json/post" target="_blank">
+      <amp-selector class="radio-selector"
+        name="selectorInput"
+        layout="container" multiple
+        name="my-selector">
+        <div option="a">Option A</div>
+        <div option="b">Option B</div>
+        <div option="c">Option C</div>
+      </amp-selector>
+      <button>Submit</button>
+      <div submit-success>
+        <template type="amp-mustache">
+          Success! {{selectorInput}}, {{selectorInput2}}
+        </template>
+      </div>
+    </form>
+
+    <h2>More Form Options</h2>
+    <amp-selector class="radio-selector"
+      form="myForm"
+      name="selectorInput2"
+      layout="container" multiple
+      name="my-selector">
+      <div option="d" selected>Option D</div>
+      <div option="e">Option E</div>
+      <div option="f">Option F</div>
+    </amp-selector>
+
+    <h2>Img Select</h2>
+    <amp-selector class="sample-selector" layout="container">
+      <amp-img
+        src="https://amp.dev/static/samples/img/landscape_sea_300x199.jpg"
+        width="90"
+        height="60"
+        option="1"
+      ></amp-img>
+      <amp-img
+        src="https://amp.dev/static/samples/img/landscape_desert_300x200.jpg"
+        width="90"
+        height="60"
+        disabled
+        option="2"
+      ></amp-img>
+      <div class="divider inline-block mx1"></div>
+      <amp-img
+        src="https://amp.dev/static/samples/img/landscape_ship_300x200.jpg"
+        width="90"
+        height="60"
+        option="3"
+      ></amp-img>
+      <amp-img
+        src="https://amp.dev/static/samples/img/landscape_village_300x200.jpg"
+        width="90"
+        height="60"
+        option="4"
+      ></amp-img>
+    </amp-selector>
+
+    <h2>Single Select</h2>
+    <amp-selector disabled
+      class="sample-selector"
+      layout="container"
+      on="select:AMP.setState({singleTarget: event.targetOption, singleSelections: event.selectedOptions})"
+    >
+    <ul>
+        <li option="1">Option 1</li>
+        <li option="2">Option 2</li>
+        <li option="3" selected>Option 3</li>
+        <li option="4">Option 4</li>
+    </ul>
+    </amp-selector>
+    <p
+      [text]="singleTarget == NULL ? 'Nothing selected yet.' : 'Selected target: ' + singleTarget + '. All selections: ' + singleSelections"
+    >
+      Nothing selected yet.
+    </p>
+
+    <h2>Multi Select</h2>
+    <amp-selector
+      layout="container"
+    class="sample-selector"
+      on="select:AMP.setState({multiTarget: event.targetOption, multiSelections: event.selectedOptions})"
+      multiple
+    >
+    <ul>
+        <li option="1">Option 1</li>
+        <li option="2">Option 2</li>
+        <li option="3">Option 3</li>
+        <li option="4">Option 4</li>
+    </ul>
+    </amp-selector>
+
+    <p
+      [text]="multiTarget == NULL ? 'Nothing selected yet.' : 'Selected target: ' + multiTarget + '. All selections: ' + multiSelections"
+    >
+      Nothing selected yet.
+    </p>
+
+    <h2>Actions</h2>
+    <amp-selector
+      id="actionsSample"
+  layout="container"
+  class="sample-selector"
+      multiple
+    >
+  <ul>
+        <li option="1">Option 1</li>
+        <li option="2">Option 2</li>
+        <li option="3">Option 3</li>
+        <li option="4">Option 4</li>
+        <li option="5">Option 5</li>
+        <li option="6">Option 6</li>
+    </ul>
+    </amp-selector>
+<button on="tap:actionsSample.clear">clear</button>
+<button on="tap:actionsSample.selectUp">selectUp</button>
+<button on="tap:actionsSample.selectUp(delta=2)">selectUp(delta=2)</button>
+<button on="tap:actionsSample.selectDown">selectDown</button>
+    <button on="tap:actionsSample.selectDown(delta=2)">
+      selectDown(delta=2)
+    </button>
+<button on="tap:actionsSample.toggle(index=1)">toggle(index=1)</button>
+    <button on="tap:actionsSample.toggle(index=1, value=true)">
+      toggle(index=1, value=true)
+    </button>
+</body>
+</html>

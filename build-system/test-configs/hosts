@@ -1,0 +1,12 @@
+# Used by various ads tests.
+127.0.0.1 ads.localhost
+
+# Used by various iframe tests.
+127.0.0.1 iframe.localhost
+
+# Used by tests that need a valid font host.
+127.0.0.1 fonts.googleapis.com
+
+# Used by integration tests for amp-recaptcha-input.
+# The hash is the cURL subdomain for localhost:9876.
+127.0.0.1 jgla3zmib2ggq5buc4hwi5taloh6jlvzukddfr4zltz3vay5s5rq.recaptcha.localhost

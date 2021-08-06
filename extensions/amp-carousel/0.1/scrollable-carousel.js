@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '#core/constants/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
-import {Layout} from '../../../src/layout';
-import {timerFor} from '../../../src/timer';
-import {numeric} from '../../../src/transition';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
 import {dev} from '../../../src/log';
-import * as st from '../../../src/style';
+import {isLayoutSizeFixed} from '#core/dom/layout';
+import {listen} from '../../../src/event-helper';
+import {numeric} from '../../../src/transition';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '#core/dom/layout/viewport-observer';
+import {realChildElements} from '#core/dom/query';
 
 /** @const {string} */
 const TAG = 'amp-scrollable-carousel';
 
 export class AmpScrollableCarousel extends BaseCarousel {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -49,41 +55,71 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
+    return isLayoutSizeFixed(layout);
   }
 
   /** @override */
   buildCarousel() {
-    this.cells_ = this.getRealChildren();
+    this.cells_ = realChildElements(this.element);
 
     this.container_ = this.element.ownerDocument.createElement('div');
-    st.setStyles(this.container_, {
-      'white-space': 'nowrap',
-      'overflow-x': 'auto',
-      'overflow-y': 'hidden',
-      '-webkit-overflow-scrolling': 'touch',
-    });
+    this.container_.classList.add('i-amphtml-scrollable-carousel-container');
+    // Focusable container makes it possible to fully consume Arrow key events.
+    this.container_.setAttribute('tabindex', '-1');
     this.element.appendChild(this.container_);
 
-    this.cells_.forEach(cell => {
-      this.setAsOwner(cell);
+    this.cells_.forEach((cell) => {
+      Services.ownersForDoc(this.element).setOwner(cell, this.element);
       cell.classList.add('amp-carousel-slide');
-      cell.style.display = 'inline-block';
-      if (cell != this.cells_[0]) {
-        // TODO(dvoytenko): this has to be customizable
-        cell.style.marginLeft = '8px';
-      }
+      cell.classList.add('amp-scrollable-carousel-slide');
       this.container_.appendChild(cell);
     });
 
     this.cancelTouchEvents_();
 
+    this.container_.addEventListener('scroll', this.scrollHandler_.bind(this));
     this.container_.addEventListener(
-        'scroll', this.scrollHandler_.bind(this));
+      'keydown',
+      this.keydownHandler_.bind(this)
+    );
+
+    this.registerAction(
+      'goToSlide',
+      (invocation) => {
+        const {args} = invocation;
+        if (args) {
+          const index = parseInt(args['index'], 10);
+          this.goToSlide_(index);
+        }
+      },
+      ActionTrust.LOW
+    );
+    /** If the element is in an email document, allow its `goToSlide` action. */
+    Services.actionServiceForDoc(this.element).addToAllowlist(
+      'amp-carousel',
+      'goToSlide',
+      ['email']
+    );
+  }
+
+  /** @override */
+  buttonsAriaRole() {
+    /**
+     * In scrollable carousel, the next/previous buttons add no functionality
+     * for screen readers as scrollable carousel is just a horizontally
+     * scrollable div which ATs navigate just like any other content.
+     * To avoid confusion, we therefore set the role to presentation for the
+     * controls in this case.
+     */
+    return 'presentation';
   }
 
   /** @override */
   layoutCallback() {
+    observeWithSharedInOb(this.element, (inViewport) =>
+      this.viewportCallbackTemp(inViewport)
+    );
+
     this.doLayout_(this.pos_);
     this.preloadNext_(this.pos_, 1);
     this.setControlsState();
@@ -91,7 +127,14 @@ export class AmpScrollableCarousel extends BaseCarousel {
   }
 
   /** @override */
-  onViewportCallback(unusedInViewport) {
+  unlayoutCallback() {
+    unobserveWithSharedInOb(this.element);
+    return super.unlayoutCallback();
+  }
+
+  /** @override */
+  viewportCallbackTemp(inViewport) {
+    super.viewportCallbackTemp(inViewport);
     this.updateInViewport_(this.pos_, this.pos_);
   }
 
@@ -106,17 +149,79 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     if (!animate) {
       this.commitSwitch_(newPos);
-      this.container_./*OK*/scrollLeft = newPos;
+      this.container_./*OK*/ scrollLeft = newPos;
     } else {
+      /** @const {!TransitionDef<number>} */
       const interpolate = numeric(oldPos, newPos);
       const duration = 200;
       const curve = 'ease-in-out';
-      Animation.animate(this.element, pos => {
-        this.container_./*OK*/scrollLeft = interpolate(pos);
-      }, duration, curve).thenAlways(() => {
+      Animation.animate(
+        this.element,
+        (pos) => {
+          this.container_./*OK*/ scrollLeft = interpolate(pos);
+        },
+        duration,
+        curve
+      ).thenAlways(() => {
         this.commitSwitch_(newPos);
       });
     }
+  }
+
+  /**
+   * Scrolls to the slide at the given slide index.
+   * @param {number} index
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
+  goToSlide_(index) {
+    const noOfSlides = this.cells_.length;
+
+    if (!isFinite(index) || index < 0 || index >= noOfSlides) {
+      this.user().error(TAG, 'Invalid [slide] value: %s', index);
+      return Promise.resolve();
+    }
+
+    const oldPos = this.pos_;
+    let newPos = oldPos;
+
+    const measureNewPosition = () => {
+      newPos = this.getPosForSlideIndex_(index);
+    };
+
+    const mutateNewPosition = () => {
+      if (newPos == oldPos) {
+        return;
+      }
+      /** @const {!TransitionDef<number>} */
+      const interpolate = numeric(oldPos, newPos);
+      const duration = 200;
+      const curve = 'ease-in-out';
+      Animation.animate(
+        this.element,
+        (pos) => {
+          this.container_./*OK*/ scrollLeft = interpolate(pos);
+        },
+        duration,
+        curve
+      ).thenAlways(() => {
+        this.commitSwitch_(newPos);
+      });
+    };
+
+    this.measureMutateElement(measureNewPosition, mutateNewPosition);
+  }
+
+  /**
+   * Calculates the target scroll position for the given slide index.
+   * @param {number} index
+   * @return {number}
+   */
+  getPosForSlideIndex_(index) {
+    const containerWidth = this.element./*OK*/ offsetWidth;
+    const targetPosition = this.cells_[index]./*OK*/ offsetLeft;
+    const targetWidth = this.cells_[index]./*OK*/ offsetWidth;
+    return targetPosition - (containerWidth - targetWidth) / 2;
   }
 
   /**
@@ -124,7 +229,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   scrollHandler_() {
-    const currentScrollLeft = this.container_./*OK*/scrollLeft;
+    const currentScrollLeft = this.container_./*OK*/ scrollLeft;
     this.pos_ = currentScrollLeft;
 
     if (this.scrollTimerId_ === null) {
@@ -133,53 +238,79 @@ export class AmpScrollableCarousel extends BaseCarousel {
   }
 
   /**
-   * @param {!number} startingScrollLeft
+   * Escapes Left and Right arrow key events on the carousel container.
+   * This is to prevent them from doubly interacting with surrounding viewer
+   * contexts such as email clients when interacting with the amp-carousel.
+   * @param {!Event} event
    * @private
    */
-  waitForScroll_(startingScrollLeft) {
-    this.scrollTimerId_ = timerFor(this.win).delay(() => {
-      // TODO(yuxichen): test out the threshold for identifying fast scrolling
-      if (Math.abs(startingScrollLeft - this.pos_) < 30) {
-        dev().fine(TAG, 'slow scrolling: ' + startingScrollLeft + ' - '
-            + this.pos_);
-        this.scrollTimerId_ = null;
-        this.commitSwitch_(this.pos_);
-      } else {
-        dev().fine(TAG, 'fast scrolling: ' + startingScrollLeft + ' - '
-            + this.pos_);
-        this.waitForScroll_(this.pos_);
-      }
-    }, 100);
+  keydownHandler_(event) {
+    const {key} = event;
+    if (key == Keys.LEFT_ARROW || key == Keys.RIGHT_ARROW) {
+      event.stopPropagation();
+    }
   }
 
   /**
+   * @param {number} startingScrollLeft
+   * @private
+   */
+  waitForScroll_(startingScrollLeft) {
+    this.scrollTimerId_ = /** @type {number} */ (
+      Services.timerFor(this.win).delay(() => {
+        // TODO(yuxichen): test out the threshold for identifying fast scrolling
+        if (Math.abs(startingScrollLeft - this.pos_) < 30) {
+          dev().fine(
+            TAG,
+            'slow scrolling: %s - %s',
+            startingScrollLeft,
+            this.pos_
+          );
+          this.scrollTimerId_ = null;
+          this.commitSwitch_(this.pos_);
+        } else {
+          dev().fine(
+            TAG,
+            'fast scrolling: %s - %s',
+            startingScrollLeft,
+            this.pos_
+          );
+          this.waitForScroll_(this.pos_);
+        }
+      }, 100)
+    );
+  }
+
+  /**
+   * Update the slides need to be loaded given current position.
+   * Preload next slides and update control button state.
    * @param {number} pos
    * @private
    */
   commitSwitch_(pos) {
-    dev().fine(TAG, 'commitSwitch_');
     this.updateInViewport_(pos, this.oldPos_);
     this.doLayout_(pos);
     this.preloadNext_(pos, Math.sign(pos - this.oldPos_));
-    this.setControlsState();
     this.oldPos_ = pos;
     this.pos_ = pos;
+    this.setControlsState();
   }
 
   /**
    * @param {number} pos
    * @param {number} dir
+   * @return {number}
    * @private
    */
   nextPos_(pos, dir) {
-    const containerWidth = this.element./*OK*/offsetWidth;
-    const fullWidth = this.container_./*OK*/scrollWidth;
+    // TODO(jridgewell): this could be using cached values from Layers.
+    const containerWidth = this.element./*OK*/ offsetWidth;
+    const fullWidth = this.container_./*OK*/ scrollWidth;
     const newPos = pos + dir * containerWidth;
     if (newPos < 0) {
       return 0;
     }
-    if (fullWidth >= containerWidth &&
-            newPos > fullWidth - containerWidth) {
+    if (fullWidth >= containerWidth && newPos > fullWidth - containerWidth) {
       return fullWidth - containerWidth;
     }
     return newPos;
@@ -191,11 +322,13 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   withinWindow_(pos, callback) {
-    const containerWidth = this.getLayoutWidth();
+    const containerWidth = this.element./*OK*/ offsetWidth;
     for (let i = 0; i < this.cells_.length; i++) {
       const cell = this.cells_[i];
-      if (cell./*OK*/offsetLeft + cell./*OK*/offsetWidth >= pos &&
-            cell./*OK*/offsetLeft <= pos + containerWidth) {
+      if (
+        cell./*OK*/ offsetLeft + cell./*OK*/ offsetWidth >= pos &&
+        cell./*OK*/ offsetLeft <= pos + containerWidth
+      ) {
         callback(cell);
       }
     }
@@ -206,8 +339,8 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   doLayout_(pos) {
-    this.withinWindow_(pos, cell => {
-      this.scheduleLayout(cell);
+    this.withinWindow_(pos, (cell) => {
+      Services.ownersForDoc(this.element).scheduleLayout(this.element, cell);
     });
   }
 
@@ -219,8 +352,8 @@ export class AmpScrollableCarousel extends BaseCarousel {
   preloadNext_(pos, dir) {
     const nextPos = this.nextPos_(pos, dir);
     if (nextPos != pos) {
-      this.withinWindow_(nextPos, cell => {
-        this.schedulePreload(cell);
+      this.withinWindow_(nextPos, (cell) => {
+        Services.ownersForDoc(this.element).schedulePreload(this.element, cell);
       });
     }
   }
@@ -232,15 +365,14 @@ export class AmpScrollableCarousel extends BaseCarousel {
    */
   updateInViewport_(newPos, oldPos) {
     const seen = [];
-    this.withinWindow_(newPos, cell => {
+    this.withinWindow_(newPos, (cell) => {
       seen.push(cell);
-      this.updateInViewport(cell, true);
     });
     if (oldPos != newPos) {
-      this.withinWindow_(oldPos, cell => {
-        if (seen.indexOf(cell) == -1) {
-          this.updateInViewport(cell, false);
-          this.schedulePause(cell);
+      this.withinWindow_(oldPos, (cell) => {
+        if (!seen.includes(cell)) {
+          const owners = Services.ownersForDoc(this.element);
+          owners.schedulePause(this.element, cell);
         }
       });
     }
@@ -253,8 +385,8 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   hasNext() {
-    const containerWidth = this.getLayoutWidth();
-    const scrollWidth = this.container_./*OK*/scrollWidth;
+    const containerWidth = this.element./*OK*/ offsetWidth;
+    const scrollWidth = this.container_./*OK*/ scrollWidth;
     const maxPos = Math.max(scrollWidth - containerWidth, 0);
     return this.pos_ != maxPos;
   }
@@ -267,8 +399,8 @@ export class AmpScrollableCarousel extends BaseCarousel {
   cancelTouchEvents_() {
     // TODO(aghassemi, #4754): Ideally we only stop propagation of horizontal
     // touchmove events.
-    this.element.addEventListener('touchmove', event => {
-      event.stopPropagation();
+    listen(this.element, 'touchmove', (event) => event.stopPropagation(), {
+      passive: true,
     });
   }
 }

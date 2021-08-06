@@ -1,0 +1,233 @@
+<!doctype html>
+<html ⚡ lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>AMP Consent E2E Test</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
+
+  <style amp-custom>
+    body {
+      margin: 0;
+      font-family: 'Georgia', Serif;
+    }
+
+    .brand-logo {
+      font-family: 'Open Sans';
+    }
+
+    .ad-container {
+      display: flex;
+      justify-content: center;
+    }
+
+    .content-container p {
+      line-height: 24px;
+    }
+
+    header,
+    .article-body {
+      padding: 15px;
+    }
+
+    .full-bleed {
+      margin: 0 -15px;
+    }
+
+    figure {
+      margin: 0;
+    }
+
+    figcaption {
+      color: #6f757a;
+      padding: 15px 0;
+      font-size: .9em;
+    }
+
+    .author {
+      display: flex;
+      align-items: center;
+
+      background: #f4f4f4;
+      padding: 0 15px;
+
+      font-size: .8em;
+
+      border: solid #dcdcdc;
+      border-width: 1px 0;
+    }
+
+    .header-time {
+      color: #a8a3ae;
+      font-family: 'Roboto';
+      font-size: 12px;
+    }
+
+    .author p {
+      margin: 5px;
+    }
+
+    .byline {
+      font-family: 'Roboto';
+      display: inline-block;
+    }
+
+    .byline p {
+      line-height: normal;
+    }
+
+    .byline .brand {
+      color: #6f757a;
+    }
+
+    .standfirst {
+      color: #6f757a;
+    }
+
+    .mailto {
+      text-decoration: none;
+    }
+
+    #author-avatar {
+      margin: 10px;
+      border: 5px solid #fff;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+    }
+
+    h1 {
+      margin: 5px 0;
+      font-weight: normal;
+    }
+
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 226px;
+      background: #f4f4f4;
+    }
+
+    amp-consent {
+      min-height: 30px;
+      font-family: 'Roboto';
+      font-weight: 500;
+      line-height: 30px;
+      padding: 8px;
+      background: #46b6ac;
+    }
+
+    amp-consent button {
+      border: none;
+      border-radius: 2px;
+
+      color: #fafafa;
+      height: 26px;
+      min-width: 32px;
+      padding: 0 16px;
+      margin: 0 16px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      cursor: pointer;
+      vertical-align: middle;
+      line-height: 26px;
+      text-align: center;
+      background: #3f51b5;
+    }
+
+    #ui1 {
+      height: 100vh;
+    }
+
+    hr {
+      margin: 0;
+    }
+  </style>
+  <script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"></script>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+
+<body>
+  <header>
+    <div class="brand-logo">
+      PublisherLogo
+    </div>
+  </header>
+  <main role="main">
+    <h3>Image that is blocked by both consent</h3>
+    <amp-img data-block-on-consent src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no-n"
+      width=300 height=200></amp-img>
+
+    <h3>Image that is NOT blocked by consent</h3>
+    <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no-n" width=300 height=200></amp-img>
+
+    <!-- Override promptUISrc from _ping_ -->
+    <amp-consent id='ConsentPrompt' layout='nodisplay' type="_ping_">
+      <script type="application/json">
+        {
+            "consentInstanceId": "ConsentPrompt",
+            "promptUISrc": "/test/fixtures/served/cmp-iframe.html",
+            "postPromptUI": "postPromptUI"
+        }
+      </script>
+      <div id="ui1">
+        Please Accept to load image.
+        <button on="tap:ABC.accept">Accept</button>
+        <button on="tap:ABC.reject">Reject</button>
+        <button on="tap:ABC.dismiss">Dismiss</button>
+      </div>
+      <div id="ui2">
+        Please Accept to load image.
+        <button on="tap:ABC.accept">Accept</button>
+        <button on="tap:ABC.reject">Reject</button>
+        <button on="tap:ABC.dismiss">Dismiss</button>
+      </div>
+      <div id="postPromptUI">
+        Post Prompt UI
+        <button on="tap:ABC.prompt(consent=_ping_)">Manage</button>
+      </div>
+    </amp-consent>
+    <article>
+
+      <div class="content-container">
+        <header>
+          <h1 itemprop="headline">Lorem Ipsum</h1>
+          <time class="header-time" itemprop="datePublished" datetime="2015-09-14 13:00">September 14, 2015</time>
+          <p class="standfirst">
+            Fusce pretium tempor justo, vitae consequat dolor maximus eget.
+          </p>
+        </header>
+
+        <div>
+          Revoke consent ABC and DEF
+          <button class="button" on="tap:ABC.prompt(consent=ABC),ABC.prompt(consent=DEF)">Manage</button>
+        </div>
+        <div>
+          Revoke error consent doesn't exsit
+          <button class="button" on="tap:ABC.prompt(consent=ABCd)">Manage</button>
+        </div>
+        <div>
+          Only revoke DEF
+          <button class="button" on="tap:ABC.prompt(consent=DEF)">Manage</button>
+        </div>
+
+        <div class="author">
+          <div class="byline">
+            <p>
+              by <span itemscope itemtype="http://schema.org/Person" itemprop="author"><b>Lorem Ipsum</b>
+          <a class="mailto" href="mailto:lorem.ipsum@">
+          lorem.ipsum@</a></span>
+            </p>
+            <p class="brand">PublisherName News Reporter
+              <p>
+          </div>
+        </div>
+      </div>
+    </article>
+  </main>
+</body>
+</html>

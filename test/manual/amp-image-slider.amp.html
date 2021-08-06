@@ -1,0 +1,252 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>amp-image-slider example</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    #content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    img.custom-fill {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+
+    .flex {
+      display: flex;
+      justify-content: space-between
+    }
+
+    .label {
+      color: white;
+      border: 4px solid white;
+      padding: 1em;
+      font-family: Arial, Helvetica, sans-serif;
+      box-shadow: 2px 2px 27px 5px rgba(0,0,0,0.75);
+    }
+
+    .top-label {
+      top: 0;
+    }
+
+    .center-y-label {
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .bottom-label {
+      bottom: 0;
+    }
+
+    .left-label-left {
+      left: 0;
+    }
+
+    .left-label-center {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .left-label-right {
+      right: 0;
+      left: auto;
+    }
+
+    .right-label-left {
+      left: 0;
+      right: auto;
+    }
+
+    .right-label-center {
+      right: 50%;
+      transform: translateX(50%);
+    }
+
+    .right-label-right {
+      right: 0;
+    }
+
+    .left-label-center-xy {
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .right-label-center-xy {
+      right: 50%;
+      top: 50%;
+      transform: translate(50%, -50%);
+    }
+
+    .triangle-hint .amp-image-slider-hint-left {
+      width: 10px;
+      height: 20px;
+      background-size: 10px 20px;
+      margin-right: 10px;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='20' viewBox='0 0 10 20'%3e%3cpolygon points='10,0 0,10 10,20' style='fill:white;stroke:black;stroke-width:1' /%3e%3c/svg%3e");
+    }
+
+    .triangle-hint .amp-image-slider-hint-right {
+      width: 10px;
+      height: 20px;
+      background-size: 10px 20px;
+      margin-left: 10px;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='20' viewBox='0 0 10 20'%3e%3cpolygon points='0,0 10,10 0,20' style='fill:white;stroke:black;stroke-width:1' /%3e%3c/svg%3e");
+    }
+  </style>
+  <script async custom-element="amp-image-slider" src="https://cdn.ampproject.org/v0/amp-image-slider-0.1.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <main id="content">
+    <h1>P0 TESTS</h1>
+
+    <p>NO labels; NO whatever modifications</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1024/600?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1024/600?image=1038" layout="fill"></amp-img>
+    </amp-image-slider>
+
+    <p>NO labels; NO whatever modifications using ImageElements</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
+      <img src="https://unsplash.it/1024/600?image=1037" loading="lazy" width="1024" height="600" class="custom-fill" />
+      <img src="https://unsplash.it/1024/600?image=1038" loading="lazy" width="1024" height="600" class="custom-fill" />
+    </amp-image-slider>
+
+    <p>Labels with NO positioning rules specified (default to both top left)</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1024/600?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1024/600?image=1038" layout="fill"></amp-img>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
+    </amp-image-slider>
+
+    <p>Labels with NO positioning rules specified (default to both top left) using ImageElements</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
+      <img src="https://unsplash.it/1024/600?image=1037" loading="lazy" width="1024" height="600" class="custom-fill" />
+      <img src="https://unsplash.it/1024/600?image=1038" loading="lazy" width="1024" height="600" class="custom-fill" />
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
+    </amp-image-slider>
+
+    <p>Labels with positioning rules specified (both should be at the center)</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1024/600?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1024/600?image=1038" layout="fill"></amp-img>
+      <div first class="label left-label-center-xy">BEFORE</div>
+      <div second class="label right-label-center-xy">AFTER</div>
+    </amp-image-slider>
+
+    <p>Labels with positioning rules specified (both should be at the center) using ImageElements</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
+      <img src="https://unsplash.it/1024/600?image=1037" loading="lazy" width="1024" height="600" class="custom-fill" />
+      <img src="https://unsplash.it/1024/600?image=1038" loading="lazy" width="1024" height="600" class="custom-fill" />
+      <div first class="label left-label-center-xy">BEFORE</div>
+      <div second class="label right-label-center-xy">AFTER</div>
+    </amp-image-slider>
+
+    <p>Has <code>alt</code> on <code>amp-img</code>s. ARIA order: [label content], [alt text if present], left/right image</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1024/600?image=1037" layout="fill" alt="Mountain"></amp-img>
+      <amp-img src="https://unsplash.it/1024/600?image=1038" layout="fill" alt="Ocean"></amp-img>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
+    </amp-image-slider>
+
+    <p>Has <code>alt</code> on <code>amp-img</code>s. ARIA order: [label content], [alt text if present], left/right image using ImageElements</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
+      <img src="https://unsplash.it/1024/600?image=1037" loading="lazy" width="1024" height="600" alt="Mountain" class="custom-fill" />
+      <img src="https://unsplash.it/1024/600?image=1038" loading="lazy" width="1024" height="600" alt="Ocean" class="custom-fill" />
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
+    </amp-image-slider>
+
+    <h1>Customizable Hints</h1>
+
+    <p>Disable default viewport behavior (hint would NOT reappear after the slider interacted, out of viewport, and then back into viewport)</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600" disable-hint-reappear>
+      <amp-img src="https://unsplash.it/1024/600?image=1037" layout="fill" alt="Mountain"></amp-img>
+      <amp-img src="https://unsplash.it/1024/600?image=1038" layout="fill" alt="Ocean"></amp-img>
+    </amp-image-slider>
+
+    <p>Disable default viewport behavior (hint would NOT reappear after the slider interacted, out of viewport, and then back into viewport) using ImageElements</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600" disable-hint-reappear>
+      <img src="https://unsplash.it/1024/600?image=1037" loading="lazy" width="1024" height="600" alt="Mountain" class="custom-fill" />
+      <img src="https://unsplash.it/1024/600?image=1038" loading="lazy" width="1024" height="600" alt="Ocean" class="custom-fill" />
+    </amp-image-slider>
+
+    <p>Fully customized hint (replace with triangles)</p>
+    <amp-image-slider class="triangle-hint" tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1024/600?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1024/600?image=1038" layout="fill"></amp-img>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
+    </amp-image-slider>
+
+    <p>Fully customized hint (replace with triangles) using ImageElements</p>
+    <amp-image-slider class="triangle-hint" tabindex="0" layout="responsive" width="1024" height="600">
+      <img src="https://unsplash.it/1024/600?image=1037" loading="lazy" width="1024" height="600" class="custom-fill" />
+      <img src="https://unsplash.it/1024/600?image=1038" loading="lazy" width="1024" height="600" class="custom-fill" />
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
+    </amp-image-slider>
+
+    <h1><code>Actions</code></h1>
+
+    <p><code>seekTo</code> test (currently, <code>seekTo</code> is not considered as user interaction)</p>
+    <amp-image-slider id="seekable" tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1024/600?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1024/600?image=1038" layout="fill"></amp-img>
+    </amp-image-slider>
+    <div class="flex">
+      <button on="tap:seekable.seekTo(percent=0)">Click me to Seek to Left</button>
+      <button on="tap:seekable.seekTo(percent=0.5)">Click me to Seek to Center</button>
+      <button on="tap:seekable.seekTo(percent=1)">Click me to Seek to Right</button>
+    </div>
+
+    <p><code>seekTo</code> test (currently, <code>seekTo</code> is not considered as user interaction) using ImageElements</p>
+    <amp-image-slider id="seekableImages" tabindex="0" layout="responsive" width="1024" height="600">
+      <img src="https://unsplash.it/1024/600?image=1037" loading="lazy" width="1024" height="600" class="custom-fill" />
+      <img src="https://unsplash.it/1024/600?image=1038" loading="lazy" width="1024" height="600" class="custom-fill" />
+    </amp-image-slider>
+    <div class="flex">
+      <button on="tap:seekableImages.seekTo(percent=0)">Click me to Seek to Left</button>
+      <button on="tap:seekableImages.seekTo(percent=0.5)">Click me to Seek to Center</button>
+      <button on="tap:seekableImages.seekTo(percent=1)">Click me to Seek to Right</button>
+    </div>
+
+    <h1>Customization</h1>
+
+    <p>Set <code>initial-slider-position</code> to 0.3</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600" initial-slider-position="0.3">
+      <amp-img src="https://unsplash.it/1024/600?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1024/600?image=1038" layout="fill"></amp-img>
+    </amp-image-slider>
+
+    <p>Set <code>initial-slider-position</code> to 0.3 using ImageElements</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600" initial-slider-position="0.3">
+      <img src="https://unsplash.it/1024/600?image=1037" loading="lazy" width="1024" height="600" class="custom-fill" />
+      <img src="https://unsplash.it/1024/600?image=1038" loading="lazy" width="1024" height="600" class="custom-fill" />
+    </amp-image-slider>
+
+    <p>Set <code>step-size</code> to 0.2</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600" step-size="0.2">
+      <amp-img src="https://unsplash.it/1024/600?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1024/600?image=1038" layout="fill"></amp-img>
+    </amp-image-slider>
+
+    <p>Set <code>step-size</code> to 0.2 using ImageElements</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600" step-size="0.2">
+      <img src="https://unsplash.it/1024/600?image=1037" loading="lazy" width="1024" height="600" class="custom-fill" />
+      <img src="https://unsplash.it/1024/600?image=1038" loading="lazy" width="1024" height="600" class="custom-fill" />
+    </amp-image-slider>
+  </main>
+</body>
+</html>

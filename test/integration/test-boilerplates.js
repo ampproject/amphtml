@@ -14,52 +14,47 @@
  * limitations under the License.
  */
 
-import {
-  createFixtureIframe,
-  expectBodyToBecomeVisible,
-} from '../../testing/iframe.js';
-import {getStyle} from '../../src/style';
+import {createFixtureIframe, expectBodyToBecomeVisible} from '#testing/iframe';
+import {getStyle} from '#core/dom/style';
+import {isAnimationNone} from '#testing/test-helper';
 
-describe.configure().retryOnSaucelabs().run('Old Opacity Boilerplate', () => {
+const timeout = window.ampTestRuntimeConfig.mochaTimeout;
 
+describes.sandboxed('Old Opacity Boilerplate', {}, () => {
   let fixture;
   beforeEach(() => {
     return createFixtureIframe(
-      'test/fixtures/boilerplate-old-opacity.html', 1000).then(f => {
-        fixture = f;
-      });
+      'test/fixtures/boilerplate-old-opacity.html',
+      1000
+    ).then((f) => {
+      fixture = f;
+    });
   });
 
   it('should show the body when opacity boilerplate is used', () => {
-    return expectBodyToBecomeVisible(fixture.win).then(() => {
+    return expectBodyToBecomeVisible(fixture.win, timeout).then(() => {
       expect(getStyle(fixture.win.document.body, 'opacity')).to.equal('1');
     });
   });
 });
 
-
-describe('New Visibility Boilerplate', () => {
-
+describes.sandboxed('New Visibility Boilerplate', {}, () => {
   let fixture;
   beforeEach(() => {
     return createFixtureIframe(
-      'test/fixtures/boilerplate-new-visibility.html', 10000).then(f => {
-        fixture = f;
-      });
+      'test/fixtures/boilerplate-new-visibility.html',
+      10000
+    ).then((f) => {
+      fixture = f;
+    });
   });
 
   it('should show the body in boilerplate test', () => {
-    return expectBodyToBecomeVisible(fixture.win).then(() => {
-      expect(getStyle(
-          fixture.win.document.body, 'visibility')).to.equal('visible');
-      // Firefox spells out the values when assigning none.
-      const ffValue = '0s ease 0s normal none 1 running none';
-      const animation = getStyle(fixture.win.document.body, 'animation');
-      if (animation == ffValue) {
-        expect(animation).to.equal(ffValue);
-      } else {
-        expect(animation).to.equal('none');
-      }
+    return expectBodyToBecomeVisible(fixture.win, timeout).then(() => {
+      expect(getStyle(fixture.win.document.body, 'visibility')).to.equal(
+        'visible'
+      );
+      expect(isAnimationNone(fixture.win.document.body)).to.be.true;
     });
   });
 });

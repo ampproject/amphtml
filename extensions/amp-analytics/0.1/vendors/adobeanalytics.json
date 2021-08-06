@@ -1,0 +1,28 @@
+{
+  "vars": {
+    "pageName": "TITLE",
+    "host": "",
+    "reportSuites": "",
+    "linkType": "o",
+    "linkUrl": "",
+    "linkName": "",
+    "vid": "z${clientId(adobe_amp_id)}"
+  },
+  "requests": {
+    "requestPath": "/b/ss/${reportSuites}/2/amp-1.0/s${random}",
+    "basePrefix": "vid=${vid}&ndh=0&ce=${documentCharset}&pageName=${pageName}&g=${ampdocUrl}&r=${documentReferrer}&bh=${availableScreenHeight}&bw=${availableScreenWidth}&c=${screenColorDepth}&j=amp&s=${screenWidth}x${screenHeight}",
+    "pageview": "https://${host}${requestPath}?${basePrefix}",
+    "click": "https://${host}${requestPath}?${basePrefix}&pe=lnk_${linkType}&pev1=${linkUrl}&pev2=${linkName}"
+  },
+  "linkers": {
+    "adobeanalytics": {
+      "ids": {
+        "adobe_amp_id": "${vid}"
+      },
+      "proxyOnly": false
+    }
+  },
+  "configRewriter": {
+    "url": "https://ampconfig.sc.omtrdc.net/aa/services/ampconfig?adobe_amp_id=CLIENT_ID(adobe_amp_id)"
+  }
+}

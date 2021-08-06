@@ -1,0 +1,96 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AMP Analytics reportWhen</title>
+  <link rel="canonical" href="analytics.amp.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-custom>
+    .box {
+      background: #ccc;
+      border: 1px solid #aaa;
+      padding: 10px;
+      margin: 10px;
+      display: inline-block;
+      min-width: 300px;
+      text-align: center;
+    }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  <script>
+    function mockUnload() {
+      window.dispatchEvent(new Event('unload'));
+    }
+  </script>
+</head>
+<body>
+<h1 id="top">AMP Analytics reportWhen</h1>
+<div>
+  An event will be triggered once the image below becomes visible. But it won't be reported until the document exits
+  (e.g. an unload or pagehide event is fired). Look in the developer console, and then scroll to the bottom of the page
+  to show the image, and finally scroll back up and click the button just below this text. The network request will not
+  appear until the button is clicked.
+</div>
+
+<span id="test2" class="box" data-vars-title="Mock the unload event" onclick="mockUnload();">
+  Click here to generate an unload event
+</span>
+<div>
+<amp-analytics id="analytics1">
+<!-- The second and third triggers will fire pings on documentExit even if totalVisibleTime is 0.
+     Note that ${totalVisibleTime}, etc. variables are based on visiblePercentageMin. -->
+<script type="application/json">
+{
+  "transport": {"beacon": true, "xhrpost": false},
+  "requests": {
+    "endpoint": "/analytics?totalTime=${totalTime}&totalVisibleTime=${totalVisibleTime}&maxContinuousVisibleTime=${maxContinuousVisibleTime}&minVisiblePercentage=${minVisiblePercentage}&maxVisiblePercentage=${maxVisiblePercentage}&firstVisibleTime=${firstVisibleTime}"
+  },
+  "triggers": {
+    "image_viewed": {
+      "on": "visible",
+      "request": ["endpoint"],
+      "selector": "#target",
+      "visibilitySpec": {
+        "reportWhen": "documentExit"
+      }
+    },
+    "50pct_visible_time": {
+      "on": "visible",
+      "request": ["endpoint"],
+      "selector": "#target",
+      "visibilitySpec": {
+        "reportWhen": "documentExit",
+        "visiblePercentageMin": 50
+      },
+      "extraUrlParams": {
+        "50PctMin": true
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
+
+<p>
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam pellentesque augue quis elementum tempus. Pellentesque sit amet neque bibendum, sagittis purus vitae, pellentesque magna. Vestibulum non viverra metus, eget feugiat lacus. Nulla in maximus orci. Maecenas id turpis vel ipsum vestibulum bibendum ut sit amet magna. Nullam hendrerit ex at est eleifend, nec dignissim nibh rutrum. Aliquam quis tellus et nibh faucibus laoreet in eget turpis. Nam quam nisl, porttitor vel ex eget, dapibus placerat dui. Mauris commodo pellentesque leo, eu tempus quam. In hac habitasse platea dictumst. Suspendisse non ante finibus, luctus augue non, luctus orci. Vestibulum ornare lacinia aliquam. In sollicitudin vehicula vulputate. Sed mi elit, commodo nec sapien nec, pretium bibendum leo. Donec id justo tortor. Ut in mauris dapibus, laoreet metus vitae, dictum nisi.
+</p>
+<p>
+Integer dapibus egestas arcu. Nunc vitae velit congue, placerat augue quis, suscipit nisi. Donec suscipit imperdiet turpis pharetra feugiat. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Phasellus aliquam eleifend dolor, at lacinia orci semper vel. Nunc semper sem vel tincidunt posuere. Nunc lobortis velit vitae condimentum mollis. Morbi eu ullamcorper mauris. Pellentesque ac eros maximus, pulvinar sapien vitae, semper nisi. Curabitur imperdiet non mauris vitae sollicitudin.
+</p>
+<p>
+Nam posuere velit euismod risus pulvinar, in sollicitudin sapien consectetur. Vestibulum nec ex odio. Quisque at elit nec nunc ultricies lacinia nec non lorem. Maecenas porttitor consequat mauris, vitae porttitor ligula pellentesque ut. Pellentesque rhoncus diam vel lacus lobortis imperdiet. Sed maximus dictum hendrerit. Vivamus ornare, purus in laoreet sagittis, est ante pretium mauris, vel vulputate arcu erat eget mauris. Suspendisse eu lorem metus. Aliquam tempus aliquet urna, vitae mollis lacus pretium vitae. Etiam semper gravida commodo. Maecenas at pulvinar quam. Nullam dolor ipsum, ornare a sollicitudin et, sodales porttitor neque.
+</p>
+<p>
+Integer in felis at lacus mattis facilisis. Curabitur tincidunt, felis porttitor mollis finibus, tortor elit elementum dolor, vel vulputate lorem dui id ante. Vivamus in velit at lectus blandit gravida vitae quis arcu. Nam et magna magna. Fusce condimentum diam lacus, ac ullamcorper purus malesuada eu. Mauris ullamcorper elit et venenatis faucibus. Nullam lobortis molestie purus quis pellentesque. Sed at libero id nisi rhoncus tincidunt. Praesent vestibulum vehicula tristique. Etiam rutrum, nunc id porta interdum, nulla nisi molestie leo, at fermentum justo dolor at lorem. Duis in egestas sapien.
+</p>
+<p>
+Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctus tincidunt lacus, vitae lobortis nisi malesuada ac. Aliquam mattis leo vel elit rutrum, nec consequat massa vestibulum. Maecenas bibendum metus nec ante feugiat, eu faucibus orci mattis. Cras tristique sem non elit congue malesuada. Proin ornare, lacus et porttitor consequat, sapien urna rutrum diam, ac pellentesque ligula est eget nisi. Interdum et malesuada fames ac ante ipsum primis in faucibus. Donec ultrices sollicitudin eros a placerat. Proin eget pulvinar est. Donec posuere ultrices odio at ultrices. Suspendisse potenti. Phasellus id orci id purus porttitor consectetur a at erat. Nullam volutpat ultricies nisl id maximus. Morbi porta ex ante, et egestas odio ultricies consequat.
+</p>
+<amp-img src="img/cats-anim-placeholder.gif" id="target" layout="responsive" height="23" width="40"></amp-img>
+</div>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script
+      async
+      custom-element="amp-list"
+      src="https://cdn.ampproject.org/v0/amp-list-0.1.js"
+    ></script>
+    <script
+      async
+      custom-template="amp-mustache"
+      src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"
+    ></script>
+    <link
+      rel="canonical"
+      href="https://amp.dev/documentation/examples/components/amp-list/"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width,minimum-scale=1,initial-scale=1"
+    />
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      body {
+        padding: 2em 2em 0em;
+      }
+    </style>
+  </head>
+  <body>
+    <button on="tap:list1.refresh">
+      Refresh List
+    </button>
+    <button on="tap:text.toggleVisibility">
+      Toggle text
+    </button>
+    <amp-list
+      layout="container"
+      src="https://amp.dev/documentation/examples/api/slow-json/?delay=10000"
+      binding="no">
+    <div placeholder>
+      <div role="listitem">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus vel quam
+        eu turpis eleifend pretium. Aenean sagittis, leo ac congue mattis, est
+        nisl accumsan eros, sit amet suscipit massa lectus non nibh. In justo
+        libero, ultricies sed tristique vel, tincidunt non nulla. Pellentesque vel
+        pharetra risus. Donec tempus tortor at est vulputate ultrices. Quisque
+        sagittis pretium facilisis. Aliquam dignissim dapibus nibh sed bibendum.
+        Phasellus et nulla pulvinar, placerat sapien ac, vehicula mauris. Mauris
+        efficitur quis orci sed convallis.
+      </div>
+      <div role="listitem">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus vel quam
+        eu turpis eleifend pretium. Aenean sagittis, leo ac congue mattis, est
+        nisl accumsan eros, sit amet suscipit massa lectus non nibh. In justo
+        libero, ultricies sed tristique vel, tincidunt non nulla. Pellentesque vel
+        pharetra risus. Donec tempus tortor at est vulputate ultrices. Quisque
+        sagittis pretium facilisis. Aliquam dignissim dapibus nibh sed bibendum.
+        Phasellus et nulla pulvinar, placerat sapien ac, vehicula mauris. Mauris
+        efficitur quis orci sed convallis.
+      </div>
+    </div>
+    <template type="amp-mustache">
+      <div>
+        <p>{{title}}</p>
+      </div>
+    </template>
+  </amp-list>
+    <h3>amp-list with layout="container"</h3>
+    <amp-list
+      id="list1"
+      layout="container"
+      src="list.example.json"
+      class="m1"
+      reset-on-refresh
+    >
+      <div placeholder>
+        <div role="listitem">
+          <a target="_top" href="http://localhost:8000/components/amp-img/"
+            >amp-img</a
+          >
+        </div>
+        <div role="listitem">
+          <a
+            target="_top"
+            href="http://localhost:8000/components/amp-accordion/"
+            >amp-accordion</a
+          >
+        </div>
+      </div>
+      <template type="amp-mustache" id="amp-template-id">
+        <div><a href="{{url}}">{{title}}</a></div>
+      </template>
+    </amp-list>
+
+    <p id="text">
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus vel quam
+      eu turpis eleifend pretium. Aenean sagittis, leo ac congue mattis, est
+      nisl accumsan eros, sit amet suscipit massa lectus non nibh. In justo
+      libero, ultricies sed tristique vel, tincidunt non nulla. Pellentesque vel
+      pharetra risus. Donec tempus tortor at est vulputate ultrices. Quisque
+      sagittis pretium facilisis. Aliquam dignissim dapibus nibh sed bibendum.
+      Phasellus et nulla pulvinar, placerat sapien ac, vehicula mauris. Mauris
+      efficitur quis orci sed convallis. Maecenas ut nibh placerat, gravida
+      risus eu, tincidunt diam. Vivamus vitae mauris interdum, iaculis nisi
+      eget, vulputate lectus. Maecenas condimentum risus eu sapien molestie
+      sollicitudin. Fusce lobortis purus at fringilla imperdiet. Duis non orci
+      ultricies, vulputate urna sit amet, euismod velit. Vivamus tempor, nisi
+      vitae suscipit dignissim, risus lacus imperdiet risus, et mattis leo massa
+      nec erat. Nulla cursus a leo a dapibus. Nullam dapibus est ut condimentum
+      iaculis. Sed mollis lorem at sagittis dignissim. Donec euismod urna nec
+      ligula rhoncus dapibus ullamcorper at erat. Curabitur nec quam vitae nisi
+      efficitur tincidunt. Aliquam molestie turpis eget risus molestie, non
+      cursus metus cursus. Nullam diam nisl, tincidunt viverra luctus id, mattis
+      sed dui. Integer egestas, nunc eu hendrerit tristique, est magna cursus
+      ex, nec gravida elit magna sit amet neque. Pellentesque luctus leo sed
+      purus blandit malesuada et eu magna. Praesent molestie dolor diam, at
+      finibus purus efficitur ullamcorper. Mauris sit amet neque sapien. Nunc
+      tincidunt velit id nisl eleifend, a imperdiet ligula sagittis.
+    </p>
+  </body>
+</html>

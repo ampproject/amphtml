@@ -1,0 +1,136 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="self.html" />
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <!-- Token for "amp-script" experiment on "http://localhost:8000" that expires on 1/1/2030. -->
+  <meta name="amp-experiment-token" content="AAAAAFd7Im9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODAwMCIsImV4cGVyaW1lbnQiOiJhbXAtc2NyaXB0IiwiZXhwaXJhdGlvbiI6MTg5NjEzNDQwMDAwMH08Wb1WA4ZcsTLNK1pxwXdmfYUlv4ybtfIMw3yS66dZhsJl11JYrTanag4ZlAr4sfBRTVmQfKLsiJq/JJHdrpRzT9M6EQD/JYos1SlohtQiK2YfhvXgN7zot3WBuFkqoxSiyvX/l23UYKSo2ebNTnMDFhI+yrX8uc9BblbYniRtQGXBPktjJUIgavEBS5t45bgbPNutNvAreYGlz7na4lImrpnNa8K28Ow4hqOxcqqdFoHD9hlwtKlpydJQpEmtM+S+jdDLKWq6JtC+HoUSovuitrqkioJ4cfuVkFqtoaKWPLXSOwoc5UJl3zNjlTjvQ/Gnk33NdWs6/FtZbxCq+lWe">
+  <!-- CSP-like hashes for amp-script [src] or inline scripts. -->
+  <meta name="amp-script-src" content="
+    sha384-Eb9GcUanX2ZUs7CEQjXlLwVr5bnYgT0ftOqc5GJhqTnA1ch8-riSJ8UG4XB8W-av
+    sha384-VccwjjkxpJ4EOyfwOGgmtq4Wm1Q-91s7U04Zmt_ibev7CqYY2VSDVjRqhAcQr7ek
+    sha384-Lt7boYsc_IZzUnjictHgfcDUVJz5AxZ5FT8NFVPpb4nuEapiTS8oyWA6gCHcFaqY
+    sha384-AF-M5D_r38BY1b-WB7IoNMV2x5o4nwEFiXzLiM0OUYiz3aRwXv7-UfTx2GkwYn_s
+  ">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    h1 {
+      font-size: 1.2em;
+    }
+    button, input {
+      border: solid 1px black;
+    }
+    amp-script {
+      border: dotted 1px orangered;
+      margin: 5px;
+      padding: 5px;
+    }
+  </style>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+</head>
+<body>
+  <h1>Example: Demo</h1>
+  <amp-script layout=container src="/examples/amp-script/amp-script-demo.js">
+    <button id="hello">Insert Hello World!</button>
+    <button id="long">Long task</button>
+    <button id="amp-img">Insert amp-img</button>
+    <button id="script">Insert &lt;script&gt;</button>
+    <button id="img">Insert &lt;img&gt;</button>
+  </amp-script>
+
+  <h1>Example: empty.js</h1>
+  <amp-script layout=container src="/examples/amp-script/empty.js">
+    Should be empty.
+  </amp-script>
+
+  <h1>Example: #local-script</h1>
+  <amp-script width=300 height=20 script="local-script">
+    Should say "Hi there!".
+  </amp-script>
+  <script type="text/plain" target="amp-script" id="local-script">
+    document.body.textContent = 'Hi there!';
+  </script>
+
+  <h1>Example: sandbox=""</h1>
+  <amp-script width=300 height=20 script="no-sandbox">
+    Should be empty.
+  </amp-script>
+  <script type="text/plain" target="amp-script" id="no-sandbox">
+    document.body.appendChild(document.createElement('input'));
+  </script>
+
+  <h1>Example: sandbox="allow-forms"</h1>
+  <amp-script width=300 height=20 script="sandbox-allow-forms" sandbox="allow-forms">
+    Should add an input field.
+  </amp-script>
+  <script type="text/plain" target="amp-script" id="sandbox-allow-forms">
+    document.body.appendChild(document.createElement('input'));
+  </script>
+
+  <h1>Example: localStorage</h1>
+  <amp-script width=300 height=40 script="local-storage" sandbox="allow-forms">
+    <input id=input type=text>
+    <input id=output type=text disabled style="border-color: lightgray">
+    <div>
+      <button id=get>get</button>
+      <button id=set>set</button>
+      <button id=remove>remove</button>
+      <button id=clear>clear</button>
+    </div>
+  </amp-script>
+  <script type="text/plain" target="amp-script" id="local-storage">
+    const input = document.querySelector('#input');
+    const output = document.querySelector('#output');
+    const get = document.querySelector('#get');
+    const set = document.querySelector('#set');
+    const remove = document.querySelector('#remove');
+    const clear = document.querySelector('#clear');
+
+    // Necessary so worker-dom will listen to value changes.
+    input.addEventListener('change', () => {});
+
+    get.addEventListener('click', () => {
+      output.value = input.value ? localStorage.getItem(input.value) : JSON.stringify(localStorage);
+    });
+    set.addEventListener('click', () => {
+      const tuple = input.value.split('=');
+      localStorage.setItem(tuple[0], tuple[1]);
+    });
+    remove.addEventListener('click', () => {
+      localStorage.removeItem(input.value);
+    });
+    clear.addEventListener('click', () => {
+      localStorage.clear();
+    });
+  </script>
+
+  <h1>Example: Canvas</h1>
+  <amp-script width=300 height=120 src="/examples/amp-script/canvas.js">
+    <canvas id="canvas"></canvas>
+  </amp-script>
+
+  <h1>Example: amp-state</h1>
+  <p [text]="bar">Should read "123" after tapping button below.</p>
+  <button on="tap: AMP.setState({})">setState()</button>
+  <amp-script width=300 height=80 script="bind">
+    <pre>AMP.setState({bar: 123})</pre>
+    <pre>Prints AMP.getState('foo')</pre>
+  </amp-script>
+  <script type="text/plain" target="amp-script" id="bind">
+    AMP.setState({bar: 123});
+
+    AMP.getState('foo').then(state => console.log(state));
+  </script>
+  <amp-state id="foo">
+    <script type=application/json>
+      {
+        "bar": "foobar"
+      }
+    </script>
+  </amp-state>
+
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>amp-bind: Sandbox</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+
+  <style amp-custom>
+    button, textarea {
+      border: solid 1px black;
+    }
+    #sandbox {
+      border: solid 1px red;
+    }
+  </style>
+
+  <script type="text/javascript">
+    function parse() {
+      const input = document.getElementById('input');
+      const sandbox = document.getElementById('sandbox');
+
+      // Publishers won't do this. Only necessary for this sandbox since
+      // browser's `setAttribute` fails if attribute contains brackets.
+      sandbox.innerHTML = input.value;
+
+      // This function only exists on dev builds.
+      AMP.reinitializeBind();
+    }
+  </script>
+</head>
+
+<body>
+  <amp-state id="myState">
+    <script type="application/json">
+      {
+        "imageSrc": "https://amp.dev/static/samples/img/Shetland_Sheepdog.jpg"
+      }
+    </script>
+  </amp-state>
+
+  <h2>Sandbox</h2>
+
+  <textarea id="input" rows=10 cols=50>
+<!-- Write HTML here -->
+<p>1 + 1 = <span [text]="1+1">?</span></p>
+  </textarea>
+
+  <p>HTML appears below:</p>
+  <div id="sandbox">
+    <p>1 + 1 = <span [text]="1+1">?</span></p>
+  </div>
+
+  <hr>
+
+  <p>1. Use text box above to create elements and bindings. Click "Parse" button to force amp-bind to parse them.</p>
+
+  <div>
+    <button onclick="parse();">Parse</button>
+  </div>
+
+  <p>2. Click "Evaluate" to reevaluate all expressions and apply updates to page.</p>
+
+  <div>
+    <button on="tap:AMP.setState({})">Evaluate</button>
+  </div>
+</body>
+</html>

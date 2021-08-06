@@ -1,0 +1,30 @@
+{
+  "transport": {"beacon": true, "xhrpost": true, "image": false},
+  "requests": {
+    "host": "https://events.browsiprod.com/events/amp",
+    "base": "${host}?pk=${pubKey}&sk=${siteKey}&et=${type}&pvid=PAGE_VIEW_ID_64&aid=${ampdocUrl}&now=${timestamp}",
+    "pageview": "${base}&ref=${documentReferrer}&sh=${viewportHeight}&pl=${scrollHeight}&plt=${pageLoadTime}&clt=${contentLoadTime}&nt=${navType}&eup=${extraUrlParams}",
+    "engagement": "${base}&ul=${scrollTop}&top=${totalEngagedTime}",
+    "visibility": "${base}&adix=${index}&ex=${elementX}&ey=${elementY}&ew=${elementWidth}&eh=${elementHeight}"
+  },
+  "triggers": {
+    "page-view": {
+      "on": "visible",
+      "request": "pageview",
+      "vars": {
+        "type": "pv"
+      }
+    },
+    "timer": {
+      "on": "timer",
+      "timerSpec": {
+        "interval": 3,
+        "maxTimerLength": 30
+      },
+      "request": "engagement",
+      "vars": {
+        "type": "engagement"
+      }
+    }
+  }
+}

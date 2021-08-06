@@ -1,0 +1,76 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>A Basic inline gallery</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async custom-element="amp-base-carousel" src="https://cdn.ampproject.org/v0/amp-base-carousel-0.1.js"></script>
+  <script async custom-element="amp-inline-gallery" src="https://cdn.ampproject.org/v0/amp-inline-gallery-0.1.js"></script>
+  <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp-custom>
+    .gallery .slide img {
+      object-fit: cover;
+    }
+
+    .flex {
+      display: flex;
+    }
+
+    .white {
+      background-color: white;
+    }
+
+    .grey {
+      background-color: hsla(0, 0%, 33%);
+    }
+
+    .black {
+      background-color: black;
+    }
+
+    .checkered {
+      background-image:
+          linear-gradient(45deg, #666 25%, transparent 25%),
+          linear-gradient(-45deg, #666 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, #666 75%),
+          linear-gradient(-45deg, transparent 75%, #666 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+  </style>
+</head>
+<body>
+  <h1>A pagination-only inline gallery</h1>
+  <amp-inline-gallery layout="container">
+    <amp-base-carousel class="gallery" layout="responsive" width="3.6" height="2" snap-align="center" loop="true" visible-count="1.2">
+      <amp-img class="slide" alt="A moon in a cloudy sky" src="./img/sander-dewerte--jcP3xbN88w-unsplash-small.jpg" layout="flex-item"></amp-img>
+      <amp-img class="slide" alt="A desert with a single tree and a mountain backdrop" class="slide" src="./img/ivars-krutainis-jTJ9-4ESzU4-unsplash-small.jpg" layout="flex-item"></amp-img>
+      <amp-img class="slide" alt="Blossoming flowers" src="./img/ola-gronlund--MuvLw5G6x8-unsplash-small.jpg" layout="flex-item"></amp-img>
+      <amp-img class="slide" alt="A sunset"src="./img/alan-jones-OQsxdghBKrU-unsplash-small.jpg" layout="flex-item"></amp-img>
+      <div class="flex">
+        <div class="white" style="flex: 3;"></div>
+        <div class="grey" style="flex: 1;"></div>
+        <div class="black" style="flex: 3;"></div>
+      </div>
+      <div class="checkered"></div>
+    </amp-base-carousel>
+    <amp-inline-gallery-pagination layout="fixed-height" height="24">
+    </amp-inline-gallery-pagination>
+  </amp-inline-gallery>
+  <h2>Config</h2>
+  <ul>
+    <li>
+      Looping
+    </li>
+    <li>
+      10% peek on each slide
+    </li>
+    <li>
+      Outset pagination dots
+    </li>
+  </ul>
+</body>
+</html>

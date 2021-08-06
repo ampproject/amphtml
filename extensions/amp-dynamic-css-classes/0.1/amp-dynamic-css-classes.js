@@ -14,29 +14,26 @@
  * limitations under the License.
  */
 
-import {getService} from '../../../src/service';
-import {parseUrl} from '../../../src/url';
-import {viewerFor} from '../../../src/viewer';
-import {vsyncFor} from '../../../src/vsync';
-import {waitForBody} from '../../../src/dom';
+import {Services} from '#service';
 
 /**
  * Strips everything but the domain from referrer string.
- * @param {!Window} win
- * @returns {string}
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {string}
  */
-function referrerDomain(win) {
-  const referrer = viewerFor(win).getUnconfirmedReferrerUrl();
-  if (referrer) {
-    return parseUrl(referrer).hostname;
+function referrerDomain(ampdoc) {
+  const referrer = Services.viewerForDoc(ampdoc).getUnconfirmedReferrerUrl();
+  if (!referrer) {
+    return '';
   }
-  return '';
+  const {hostname} = Services.urlForDoc(ampdoc.getHeadNode()).parse(referrer);
+  return hostname;
 }
 
 /**
  * Grabs the User Agent string.
  * @param {!Window} win
- * @returns {string}
+ * @return {string}
  */
 function userAgent(win) {
   return win.navigator.userAgent;
@@ -65,11 +62,11 @@ export function referrers_(referrer) {
 
 /**
  * Normalizes certain referrers across devices.
- * @param {!Window} win
- * @returns {!Array<string>}
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {!Array<string>}
  */
-function normalizedReferrers(win) {
-  const referrer = referrerDomain(win);
+function normalizedReferrers(ampdoc) {
+  const referrer = referrerDomain(ampdoc);
 
   // Normalize t.co names to twitter.com
   if (referrer === 't.co') {
@@ -78,81 +75,95 @@ function normalizedReferrers(win) {
 
   // Pinterest does not reliably set the referrer on Android
   // Instead, we inspect the User Agent string.
-  if (!referrer && /Pinterest/.test(userAgent(win))) {
+  if (!referrer && /Pinterest/.test(userAgent(ampdoc.win))) {
     return referrers_('www.pinterest.com');
   }
 
   return referrers_(referrer);
 }
 
-
 /**
  * Adds CSS classes onto the HTML element.
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Array<string>} classes
  */
-function addDynamicCssClasses(win, classes) {
-  waitForBody(win.document, () => {
-    const body = win.document.body;
-    const classList = body.classList;
-
-    for (let i = 0; i < classes.length; i++) {
-      classList.add(classes[i]);
-    }
-  });
+function addDynamicCssClasses(ampdoc, classes) {
+  if (ampdoc.isBodyAvailable()) {
+    addCssClassesToBody(ampdoc.getBody(), classes);
+  } else {
+    ampdoc.waitForBodyOpen().then((body) => addCssClassesToBody(body, classes));
+  }
 }
 
+/**
+ * @param {!Element} body
+ * @param {!Array<string>} classes
+ */
+function addCssClassesToBody(body, classes) {
+  const {classList} = body;
+  for (let i = 0; i < classes.length; i++) {
+    classList.add(classes[i]);
+  }
+}
 
 /**
  * Adds dynamic css classes based on the referrer, with a separate class for
  * each level of subdomain specificity.
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  */
-function addReferrerClasses(win) {
-  const referrers = normalizedReferrers(win);
-  const classes = referrers.map(referrer => {
+function addReferrerClasses(ampdoc) {
+  const referrers = normalizedReferrers(ampdoc);
+  const classes = referrers.map((referrer) => {
     return `amp-referrer-${referrer.replace(/\./g, '-')}`;
   });
 
-  vsyncFor(win).mutate(() => {
-    addDynamicCssClasses(win, classes);
+  Services.vsyncFor(ampdoc.win).mutate(() => {
+    addDynamicCssClasses(ampdoc, classes);
   });
 }
 
-
 /**
  * Adds a dynamic css class `amp-viewer` if this document is inside a viewer.
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  */
-function addViewerClass(win) {
-  const viewer = viewerFor(win);
+function addViewerClass(ampdoc) {
+  const viewer = Services.viewerForDoc(ampdoc);
   if (viewer.isEmbedded()) {
-    vsyncFor(win).mutate(() => {
-      addDynamicCssClasses(win, ['amp-viewer']);
+    Services.vsyncFor(ampdoc.win).mutate(() => {
+      addDynamicCssClasses(ampdoc, ['amp-viewer']);
     });
   }
 }
 
-
 /**
- * @param {!Window} win
- * @private visible for testing
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  */
-function addRuntimeClasses(win) {
-  addReferrerClasses(win);
-  addViewerClass(win);
+function addRuntimeClasses(ampdoc) {
+  addReferrerClasses(ampdoc);
+  addViewerClass(ampdoc);
 }
 
-/**
- * @param {!Window} win
- * @return {!Object} All services need to return an object to "load".
- * @visiblefortesting
- */
-export function installDynamicClassesService(win) {
-  return getService(win, 'amp-dynamic-css-classes', () => {
-    addRuntimeClasses(win);
-    return {};
-  });
-};
+/** @implements {../../../src/render-delaying-services.RenderDelayingService} */
+class AmpDynamicCssClasses {
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    addRuntimeClasses(ampdoc);
+  }
 
-installDynamicClassesService(AMP.win);
+  /**
+   * Function to return a promise for when
+   * it is finished delaying render, and is ready.
+   * Implemented from RenderDelayingService
+   * @return {!Promise}
+   */
+  whenReady() {
+    return Promise.resolve();
+  }
+}
+
+// Register doc-service factory.
+AMP.extension('amp-dynamic-css-classes', '0.1', (AMP) => {
+  AMP.registerServiceForDoc('amp-dynamic-css-classes', AmpDynamicCssClasses);
+});

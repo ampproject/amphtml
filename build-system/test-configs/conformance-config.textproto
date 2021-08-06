@@ -1,0 +1,533 @@
+# Custom Rules
+
+requirement: {
+  rule_id: 'closure:throwOfNonErrorTypes'
+  type: CUSTOM
+  java_class: 'com.google.javascript.jscomp.ConformanceRules$BanThrowOfNonErrorTypes'
+  error_message: 'Should not throw a non-Error object.'
+}
+
+# Element
+
+requirement: {
+  type: BANNED_PROPERTY_READ
+  error_message: 'Use getStyle, setStyle, or setStyles in src/core/dom/style.js'
+  value: 'Element.prototype.style'
+  allowlist: 'src/core/dom/style.js'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'toggleAttribute is not supported in IE and iOS prior to 13.3. Switch to setAttribute and removeAttribute.'
+  value: 'Element.prototype.toggleAttribute'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Use closestAncestorElementBySelector in src/core/dom/query.js'
+  value: 'Element.prototype.closest'
+  allowlist: 'src/core/dom/query.js'
+}
+
+# CSSStyleDeclaration
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Use setStyle or setStyles in src/core/dom/style.js'
+  value: 'CSSStyleDeclaration.prototype.setProperty'
+  allowlist: 'src/core/dom/style.js'
+}
+
+# History
+
+requirement: {
+  type: BANNED_PROPERTY
+  error_message: 'History.p.state is broken in IE11. Please use the helper methods provided in src/core/window/history.js'
+  value: 'History.prototype.state'
+  allowlist: 'src/core/window/history.js'
+}
+
+# Strings
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.padStart is not allowed'
+  value: 'string.prototype.padStart'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.padEnd is not allowed'
+  value: 'string.prototype.padEnd'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.endsWith is not allowed'
+  value: 'string.prototype.endsWith'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.includes is not allowed'
+  value: 'string.prototype.includes'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.repeat is not allowed'
+  value: 'string.prototype.repeat'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.normalize is not allowed'
+  value: 'string.prototype.normalize'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.codePointAt is not allowed'
+  value: 'string.prototype.codePointAt'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'String.fromCodePoint is not allowed'
+  value: 'String.fromCodePoint'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.trimStart is not allowed'
+  value: 'string.prototype.trimStart'
+  value: 'string.prototype.trimLeft'
+  allowlist: 'src/core/types/string/index.js'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.trimEnd is not allowed'
+  value: 'string.prototype.trimEnd'
+  value: 'string.prototype.trimRight'
+  allowlist: 'src/core/types/string/index.js'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.matchAll is not allowed'
+  value: 'string.prototype.matchAll'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.replaceAll is not allowed'
+  value: 'string.prototype.replaceAll'
+}
+
+# Object
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Object.entries is not allowed'
+  value: 'Object.entries'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Object.getOwnPropertyDescriptors is not allowed'
+  value: 'Object.getOwnPropertyDescriptors'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Object.fromEntries is not allowed'
+  value: 'Object.fromEntries'
+}
+
+# Array
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Array.from is not allowed'
+  value: 'Array.from'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Array.of is not allowed'
+  value: 'Array.of'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Array.prototype.find is not allowed'
+  value: 'Array.prototype.find'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Array.prototype.findIndex is not allowed'
+  value: 'Array.prototype.findIndex'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Array.prototype.flat is not allowed'
+  value: 'Array.prototype.flat'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Array.prototype.flatMap is not allowed'
+  value: 'Array.prototype.flatMap'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Array.prototype.keys is not allowed'
+  value: 'Array.prototype.keys'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Array.prototype.values is not allowed'
+  value: 'Array.prototype.values'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Array.prototype.entries is not allowed'
+  value: 'Array.prototype.entries'
+}
+
+# Map
+
+requirement: {
+  type: BANNED_CODE_PATTERN
+  error_message: 'Cannot construct Map with Iterable'
+  value: '/** @param {Array|Object} a */function template(a) {new Map(a)}'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Map.prototype.keys is not allowed'
+  value: 'Map.prototype.keys'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Map.prototype.values is not allowed'
+  value: 'Map.prototype.values'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Map.prototype.entries is not allowed'
+  value: 'Map.prototype.entries'
+}
+
+# WeakMap
+
+requirement: {
+  type: BANNED_CODE_PATTERN
+  error_message: 'Cannot construct WeakMap with Iterable'
+  value: '/** @param {Array|Object} a */function template(a) {new WeakMap(a)}'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'WeakMap.prototype.keys is not allowed'
+  value: 'WeakMap.prototype.keys'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'WeakMap.prototype.values is not allowed'
+  value: 'WeakMap.prototype.values'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'WeakMap.prototype.entries is not allowed'
+  value: 'WeakMap.prototype.entries'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'WeakMap.prototype.clear is not allowed'
+  value: 'WeakMap.prototype.clear'
+}
+
+# Set
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Set.prototype.keys is not allowed'
+  value: 'Set.prototype.keys'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Set.prototype.values is not allowed'
+  value: 'Set.prototype.values'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Set.prototype.entries is not allowed'
+  value: 'Set.prototype.entries'
+}
+
+# Math
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Math.trunc is not allowed'
+  value: 'Math.trunc'
+}
+
+# Promise
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Promise.prototype.finally is not allowed'
+  value: 'Promise.prototype.finally'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Promise.prototype.allSettled is not allowed'
+  value: 'Promise.prototype.allSettled'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Promise.prototype.any is not allowed'
+  value: 'Promise.prototype.any'
+}
+
+# Number
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Number.isSafeInteger is not allowed'
+  value: 'Number.isSafeInteger'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Number.isNaN is not allowed'
+  value: 'Number.isNaN'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Number.isFinite is not allowed'
+  value: 'Number.isFinite'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Number.EPSILON is not allowed'
+  value: 'Number.EPSILON'
+}
+
+# Structures
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Reflect is not allowed'
+  value: 'Reflect'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Proxy is not allowed'
+  value: 'Proxy'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Intl is not allowed'
+  value: 'Intl'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'WeakSet is not allowed. You can use a WeakMap instead'
+  value: 'WeakSet'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Symbol is not allowed'
+  value: 'Symbol'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'BigInt is not allowed'
+  value: 'BigInt'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Use parseJson instead. Usage in 3p ads can be allowlisted for now.'
+  value: 'JSON.parse'
+  allowlist: 'ads/vendors/adfox.js'
+  allowlist: 'ads/vendors/adincube.js'
+  allowlist: 'ads/vendors/imedia.js'
+  allowlist: 'ads/vendors/kargo.js'
+  allowlist: 'ads/vendors/mads.js'
+  allowlist: 'ads/google/ima/ima-video.js'
+  allowlist: 'ads/vendors/zen.js'
+  allowlist: 'extensions/amp-viewer-integration/0.1/messaging/messaging.js' # published as standalone library
+  allowlist: 'src/core/types/object/json.js' # Where parseJson itself is implemented.
+  allowlist_regexp: '.*\\.jss\\.js'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_READ
+  error_message: 'Use eventHelper#getData to read the data property. OK to allowlist 3p ads for now.'
+  value: 'Event.prototype.data'
+  value: 'MessageEvent.prototype.data'
+  allowlist: 'src/event-helper.js' # getData is implemented here
+  allowlist: 'src/web-worker/amp-worker.js' # OK to use in version bound worker
+  allowlist: 'src/web-worker/web-worker.js' # OK to use in version bound worker
+
+  # 3p ads are OK
+  allowlist: 'ads/vendors/adfox.js'
+  allowlist: 'ads/vendors/google/ima/ima-video.js'
+  allowlist: 'ads/vendors/netletix.js'
+  allowlist: 'ads/vendors/yandex.js'
+  allowlist: 'extensions/amp-access/0.1/amp-access-iframe.js' # False-positive
+  allowlist: 'extensions/amp-access/0.1/iframe-api/messenger.js' # 3p-intent
+  allowlist: 'src/service/history-impl.js' # False-positive
+  allowlist: 'extensions/amp-viewer-integration/0.1/messaging/messaging.js' # published as standalone library
+}
+
+requirement: {
+  type: BANNED_PROPERTY_READ
+  error_message: 'Use eventHelper#getDetail to read the detail property. OK to allowlist 3p ads for now.'
+  value: 'Event.prototype.detail'
+  value: 'MessageEvent.prototype.detail'
+  allowlist: 'src/event-helper.js' # getDetail is implemented here
+
+  # 3p ads are OK
+  allowlist: 'ads/vendors/adhese.js'
+  allowlist: 'ads/vendors/loka.js'
+  allowlist: 'ads/vendors/nativery.js'
+  allowlist: 'ads/vendors/xlift.js'
+}
+
+requirement: {
+  type: RESTRICTED_METHOD_CALL
+  error_message: 'postMessage must be called with a string or a JsonObject'
+  value: 'Window.prototype.postMessage:function((string|?JsonObject), string, (Array|Transferable)=)'
+  # Guaranteed same version call
+  allowlist: 'src/web-worker/web-worker.js'
+  # Allowing violations in ads code for now.
+  # We would have to fix this to property obfuscated the 3p frame code.
+  allowlist: '3p/iframe-messaging-client.js'
+  allowlist: 'ads/google/deprecated_doubleclick.js'
+  allowlist: 'ads/google/ima/ima-video.js'
+}
+
+requirement: {
+  type: RESTRICTED_NAME_CALL
+  error_message: 'JSON.stringify must be called with a JsonObject'
+  # Unfortunately the Array is untyped, because the compiler doesn't check
+  # for the template type.
+  value: 'JSON.stringify:function((?JsonObject|AmpViewerMessage|string|number|boolean|undefined|Array),!Function=)'
+  # Allowing violations in ads code for now.
+  # We would have to fix this to property obfuscated the 3p frame code.
+  allowlist: 'ads/google/deprecated_doubleclick.js'
+}
+
+# Cookies
+
+requirement: {
+  type: BANNED_PROPERTY
+  error_message: 'Use cookies#getCookie or cookies#setCookie to read or write cookies. Note that usage of cookies requires dedicated review due to being privacy sensitive. Please file an issue asking for permission to use if you have not yet done so'
+  value: 'Document.prototype.cookie'
+  allowlist: 'src/cookies.js'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Usage of cookies requires dedicated review due to being privacy sensitive. Please file an issue asking for permission to use if you have not yet done so'
+  value: 'module$src$cookies.getCookie'
+  value: 'module$src$cookies.setCookie'
+  allowlist: 'src/cookies.js'
+  allowlist: 'src/experiments/index.js'
+  allowlist: 'src/service/cid-api.js'
+  allowlist: 'src/service/cid-impl.js'
+  allowlist: 'extensions/amp-analytics/0.1/cookie-writer.js'
+}
+
+# Function
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Function.prototype.name is not allowed due to IE11 non-support.'
+  value: 'Function.prototype.name'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'NodeList.prototype.forEach is not available in IE11. Convert to Array first.'
+  value: 'NodeList.prototype.forEach'
+}
+
+
+# Bans DOM v4 methods, to limit the surface area of the Custom Elements Polyfill
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ChildNode.p.remove() is unusual. Please use Node.p.removeChild()'
+  value: 'DocumentType.prototype.remove'
+  value: 'Element.prototype.remove'
+  value: 'CharacterData.prototype.remove'
+  allowlist: 'extensions/amp-inputmask/0.1/mask-impl.js'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ChildNode.p.replaceWith() is unusual. Please use Node.p.replaceChild()'
+  value: 'DocumentType.prototype.replaceWith'
+  value: 'Element.prototype.replaceWith'
+  value: 'CharacterData.prototype.replaceWith'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ParentNode.p.append() is unusual. Please use Node.p.appendChild()'
+  value: 'Element.prototype.append'
+  value: 'Document.prototype.append'
+  value: 'DocumentFragment.prototype.append'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ParentNode.p.prepend() is unusual. Please use Node.p.insertBefore()'
+  value: 'Element.prototype.prepend'
+  value: 'Document.prototype.prepend'
+  value: 'DocumentFragment.prototype.prepend'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ChildNode.p.before() is unusual. Please use Node.p.insertBefore()'
+  value: 'Element.prototype.before'
+  value: 'DocumentType.prototype.before'
+  value: 'CharacterData.prototype.before'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ChildNode.p.after() is unusual. Please use Node.p.insertBefore()'
+  value: 'Element.prototype.after'
+  value: 'DocumentType.prototype.after'
+  value: 'CharacterData.prototype.after'
+}

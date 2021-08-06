@@ -1,0 +1,20 @@
+{
+  "vars": {
+    "aid": ""
+  },
+  "requests": {
+    "loadamptrkhtml": "https://c3.taboola.com/amp/amp-analytics-taboola.html?url=${canonicalUrl}&aid=${aid}&cnsntstr=${consentString}&cnsntst=$IF($EQUALS(${consentState}, sufficient), 1)$IF($EQUALS(${consentState}, insufficient), 0)$IF($EQUALS(${consentState}, ), -1)"
+  },
+  "triggers": {
+    "pageview": {
+      "on": "visible",
+      "request": "loadamptrkhtml",
+      "iframePing": true
+    }
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "bracketSpacing": false,
+  "singleQuote": true,
+  "trailingComma": "es5",
+  "quoteProps": "preserve",
+  "overrides": [
+    {
+      "files": "OWNERS",
+      "options": {"parser": "json5"}
+    },
+    {
+      "files": "*.md",
+      "options": {
+        "parser": "markdown",
+        "embeddedLanguageFormatting": "off",
+        "tabWidth": 4
+      }
+    },
+    {
+      "files": [".prettierrc", ".renovaterc.json", "*.json"],
+      "options": {"parser": "json"}
+    },
+    {
+      "files": "build-system/**/*.json",
+      "options": {"parser": "json-stringify"}
+    },
+    {
+      "files": "build-system/tasks/make-extension/template/**",
+      "options": {
+        "requirePragma": true
+      }
+    }
+  ]
+}
