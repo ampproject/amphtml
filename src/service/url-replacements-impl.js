@@ -80,9 +80,40 @@ function screenProperty(screen, property) {
 }
 
 /**
+ *
+ * @param {Object<string,(string|Array<string>)>} geo
+ * @param {string} geoType
+ * @return {string}
+ */
+function geoData(geo, geoType) {
+  if (geoType) {
+    userAssert(
+      geoType === 'ISOCountry',
+      'The value passed to AMP_GEO() is not valid name:' + geoType
+    );
+    return /** @type {string} */ (geo[geoType] || 'unknown');
+  }
+  return /** @type {string} */ (geo.matchedISOCountryGroups.join(GEO_DELIM));
+}
+
+/**
  * Class to provide variables that pertain to top level AMP window.
  */
 export class GlobalVariableSource extends VariableSource {
+  /**
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    super(ampdoc);
+
+    /** @type {Object<string,(string|Array<string>)>|null} */
+    this.cachedGeo_ = null;
+
+    Services.geoForDocOrNull(this.ampdoc.getHeadNode()).then((geo) => {
+      this.cachedGeo_ = geo;
+    });
+  }
+
   /**
    * Utility function for setting resolver for timing data that supports
    * sync and async.
@@ -372,24 +403,15 @@ export class GlobalVariableSource extends VariableSource {
     );
 
     // Returns assigned geo value for geoType or all groups.
-    this.setAsync(
+    this.setBoth(
       'AMP_GEO',
-      /** @type {AsyncResolverDef} */ (
-        (geoType) => {
-          return this.getGeo_((geos) => {
-            if (geoType) {
-              userAssert(
-                geoType === 'ISOCountry',
-                'The value passed to AMP_GEO() is not valid name:' + geoType
-              );
-              return /** @type {string} */ (geos[geoType] || 'unknown');
-            }
-            return /** @type {string} */ (
-              geos.matchedISOCountryGroups.join(GEO_DELIM)
-            );
-          }, 'AMP_GEO');
+      (geoType) => {
+        if (this.cachedGeo_ === null) {
+          return 'unknown';
         }
-      )
+        return geoData(this.cachedGeo_, geoType);
+      },
+      (geoType) => this.getGeo_((geos) => geoData(geos, geoType), 'AMP_GEO')
     );
 
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
@@ -766,6 +788,10 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   getGeo_(getter, expr) {
+    if (this.cachedGeo_ !== null) {
+      return getter(this.cachedGeo_);
+    }
+
     const element = this.ampdoc.getHeadNode();
     return Services.geoForDocOrNull(element).then((geo) => {
       userAssert(geo, 'To use variable %s, amp-geo should be configured', expr);
