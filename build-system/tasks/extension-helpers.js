@@ -512,7 +512,7 @@ async function buildExtension(
 }
 
 /** @type {TransformCache} */
-let cssCache;
+let jssCache;
 
 /**
  * Writes an extensions's CSS to its npm dist folder.
@@ -529,12 +529,12 @@ async function buildNpmCss(extDir, options) {
   }
 
   // Lazily instantiate the TransformCache
-  if (!cssCache) {
-    cssCache = new TransformCache('jss-cache', '.css');
+  if (!jssCache) {
+    jssCache = new TransformCache('.jss-cache', '.css');
   }
 
   const {contents, hash} = await batchedRead(jssFile);
-  let css = await cssCache.get(hash);
+  let css = await jssCache.get(hash);
   if (!css) {
     const options = {css: 'REPLACED_BY_BABEL_PLUGIN'};
     await babel.transform(contents, {
@@ -544,7 +544,7 @@ async function buildNpmCss(extDir, options) {
       ],
     });
     css = options.css;
-    cssCache.set(hash, Promise.resolve(css));
+    jssCache.set(hash, Promise.resolve(css));
   }
   const outfile = `${extDir}/dist/${options.name}.css`;
   await fs.writeFile(outfile, css);
