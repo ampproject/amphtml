@@ -32,7 +32,7 @@ describes.sandboxed('Audio preact component v1.0', {}, () => {
     expect(component.prop('controls')).to.be.true;
 
     /**
-     * Please verify the following assertion code
+     * Please verify the following assertion code.
      */
     expect(component.prop('style')).to.contain('width: 300px');
     expect(component.prop('style')).to.contain('height: 30px');
@@ -74,10 +74,11 @@ describes.sandboxed('Audio preact component v1.0', {}, () => {
     expect(component.prop('height')).to.equal('53px');
 
     /**
-     * I am not sure about offset* properties
+     * I am not sure about offset* properties.
+     * May be by using getComputedStyle?
      */
-    //expect(element.offsetWidth).to.be.greaterThan(1);
-    //expect(element.offsetHeight).to.be.greaterThan(1);
+    expect(component.prop('offsetWidth')).to.be.greaterThan(1);
+    expect(component.prop('offsetHeight')).to.be.greaterThan(1);
 
     expect(component.prop('controls')).to.be.true;
 
@@ -85,12 +86,12 @@ describes.sandboxed('Audio preact component v1.0', {}, () => {
      * Following remains false.
      * May be due to removal of propagateAttributes?
      */
-    //expect(component.prop('autoplay')).to.be.true;
-    //expect(component.prop('muted')).to.be.true;
-    //expect(component.muted).to.be.true;
-    //expect(component.prop('preload')).to.be.true;
-    //expect(component.prop('loop')).to.be.true;
-    //expect(component.prop('src')).to.be.false;
+    expect(component.prop('autoplay')).to.be.true;
+    expect(component.prop('muted')).to.be.true;
+    expect(component.muted).to.be.true;
+    expect(component.prop('preload')).to.be.true;
+    expect(component.prop('loop')).to.be.true;
+    expect(component.prop('src')).to.be.false;
 
     expect(component.childAt(0).name()).to.equal('source');
     expect(component.childAt(0).prop('src')).to.equal('audio.mp3');
