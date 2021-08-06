@@ -22,6 +22,10 @@ import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-s
 import {LocalizationService} from '#service/localization';
 import {getSliderInteractiveData} from './helpers';
 import {AmpDocSingle} from '#service/ampdoc-impl';
+import {
+  MID_SELECTION_CLASS,
+  POST_SELECTION_CLASS,
+} from '../amp-story-interactive-abstract';
 
 describes.realWin(
   'amp-story-interactive-slider',
@@ -133,7 +137,7 @@ describes.realWin(
       // simulates an input event, which is when the user drags the slider
       slider.dispatchEvent(new CustomEvent('input'));
       expect(ampStorySlider.getRootElement()).to.have.class(
-        'i-amphtml-story-interactive-mid-selection'
+        MID_SELECTION_CLASS
       );
     });
 
@@ -146,7 +150,7 @@ describes.realWin(
       // simulates a change event, which is when the user releases the slider
       slider.dispatchEvent(new CustomEvent('change'));
       expect(ampStorySlider.getRootElement()).to.have.class(
-        'i-amphtml-story-interactive-post-selection'
+        POST_SELECTION_CLASS
       );
     });
 
@@ -168,7 +172,7 @@ describes.realWin(
       await ampStorySlider.buildCallback();
       await ampStorySlider.layoutCallback();
       expect(ampStorySlider.getRootElement()).to.have.class(
-        'i-amphtml-story-interactive-post-selection'
+        POST_SELECTION_CLASS
       );
     });
 
