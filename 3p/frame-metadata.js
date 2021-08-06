@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import {dev} from '../src/log';
-import {dict} from '#core/types/object';
-import {getMode} from '../src/mode';
 import {once} from '#core/types/function';
+import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
+
+import {dev} from '../src/log';
+import {getMode} from '../src/mode';
 import {parseUrlDeprecated} from '../src/url';
 
 /**
