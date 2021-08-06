@@ -520,12 +520,12 @@ async function buildExtension(
  */
 async function buildNpmCss(extDir, options) {
   const startCssTime = Date.now();
-  const jssFiles = await globby(path.join(extDir, '**', '*.jss.js'));
-  if (!jssFiles.length) {
+  const filenames = await globby(path.join(extDir, '**', '*.jss.js'));
+  if (!filenames.length) {
     return;
   }
 
-  const css = (await Promise.all(jssFiles.map(getCssForJssFile))).join('');
+  const css = (await Promise.all(filenames.map(getCssForJssFile))).join('');
   const outfile = path.join(extDir, 'dist', 'style.css');
   await fs.writeFile(outfile, css);
   endBuildStep('Wrote CSS', options.name, startCssTime);
