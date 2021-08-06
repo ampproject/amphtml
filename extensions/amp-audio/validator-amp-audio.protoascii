@@ -23,13 +23,17 @@ tags: {  # amp-audio 1.0
     name: "amp-audio"
     version_name: "v1.0"
     version: "1.0"
+    deprecated_allow_duplicates: true
+    requires_usage: EXEMPTED
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # amp-audio
+tags: {  # amp-audio 0.1
   html_format: AMP
   html_format: AMP4ADS
   tag_name: "SCRIPT"
+  satisfies: "amp-audio 0.1"
+  excludes: "amp-audio 1.0"
   extension_spec: {
     name: "amp-audio"
     version_name: "v0.1"
