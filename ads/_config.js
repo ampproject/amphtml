@@ -1086,6 +1086,11 @@ const adConfig = jsonConfiguration({
 
   'seedingalliance': {},
 
+  'seedtag': {
+    prefetch: 'https://config.seedtag.com/omid/bridge/bridge.js',
+    consentHandlingOverride: true,
+  },
+  
   'sekindo': {
     renderStartImplemented: true,
   },

@@ -632,6 +632,11 @@ data.callback;
 // sharethrough.js
 data.pkey;
 
+// seedtag.js
+data.adunitId
+data.placement
+data.publisherId
+
 // sklik.js
 data.elm;
 
