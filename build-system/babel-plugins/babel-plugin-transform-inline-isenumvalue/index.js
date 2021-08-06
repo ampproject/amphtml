@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// @ts-nocheck
+
 const {dirname, join: joinPath, relative} = require('path');
 const {readFileSync} = require('fs');
 
@@ -28,6 +30,11 @@ const {readFileSync} = require('fs');
  *     x === 'foo' || x === 'bar'
  */
 
+/**
+ * @interface {babel.PluginPass}
+ * @param {babel} babel
+ * @return {babel.PluginObj}
+ */
 module.exports = function (babel) {
   const {parseSync, traverse, types: t} = babel;
 

@@ -35,6 +35,11 @@ const buildVarDeclAndComment = (t, name, comment) => {
   return decl;
 };
 
+/**
+ * @interface {babel.PluginPass}
+ * @param {babel} babel
+ * @return {babel.PluginObj}
+ */
 module.exports = function (babel) {
   const {types: t} = babel;
   // `shouldWriteToFile` should only be true in the production pipeline.

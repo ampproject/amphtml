@@ -40,6 +40,11 @@ const helperMap = {
  */
 const importNamesPerFile = new WeakMap();
 
+/**
+ * @interface {babel.PluginPass}
+ * @param {babel} babel
+ * @return {babel.PluginObj}
+ */
 module.exports = function ({types: t}) {
   return {
     name: 'imported-helpers',
@@ -67,5 +72,6 @@ module.exports = function ({types: t}) {
         return t.cloneNode(importNames[name]);
       });
     },
+    visitor: {},
   };
 };

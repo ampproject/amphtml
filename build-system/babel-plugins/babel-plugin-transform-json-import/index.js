@@ -28,6 +28,13 @@ const {readFileSync} = require('fs');
 // ```
 // const key = JSON.parse('{"imported": "json"}');
 // ```
+
+/**
+ * @interface {babel.PluginPass}
+ * @param {babel} babel
+ * @param {*} options
+ * @return {babel.PluginObj}
+ */
 module.exports = function ({template, types: t}, options) {
   const {freeze = true} = options;
 
@@ -41,6 +48,9 @@ module.exports = function ({template, types: t}, options) {
         const {assertions, source, specifiers} = path.node;
         if (!assertions || assertions.length === 0) {
           return;
+        }
+        if (!this.file.opts.filename) {
+          throw new Error('Plugin must be called with a filename');
         }
 
         if (assertions.length !== 1) {

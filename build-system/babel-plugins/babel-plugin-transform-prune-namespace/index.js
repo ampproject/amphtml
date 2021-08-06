@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * @interface {babel.PluginPass}
+ * @return {babel.PluginObj}
+ */
 module.exports = function () {
   const namespace = '_';
 
@@ -39,12 +43,12 @@ module.exports = function () {
   };
 
   /**
-   * @param {BabelPath} path
-   * @return {BabelPath|void}
+   * @param {babel.NodePath<babel.types.MemberExpression>} path
+   * @return {babel.NodePath<babel.types.MemberExpression>}
    */
   function deepestMember(path) {
     while (true) {
-      const object = path.get('object');
+      const object = /** @type {babel.NodePath} */ (path.get('object'));
       if (!object.isMemberExpression()) {
         return path;
       }
@@ -54,25 +58,29 @@ module.exports = function () {
 
   /**
    *
-   * @param {BabelPath} path
-   * @param {T} namespaceMember
-   * @param {T} state
+   * @param {babel.NodePath} path
+   * @param {babel.NodePath<babel.types.MemberExpression>} namespaceMember
+   * @param {*} state
    * @return {void}
    */
   function memberInAssignmentExpression(path, namespaceMember, state) {
-    const {name} = namespaceMember.node.property;
+    const {name} = /** @type {babel.types.Identifier} */ (
+      namespaceMember.node.property
+    );
     state.declaredNames.set(name, path.parentPath);
   }
 
   /**
    *
-   * @param {BabelPath} _path
-   * @param {T} namespaceMember
-   * @param {T} state
+   * @param {babel.NodePath} _path
+   * @param {babel.NodePath<babel.types.MemberExpression>} namespaceMember
+   * @param {*} state
    * @return {void}
    */
   function memberExpression(_path, namespaceMember, state) {
-    const {name} = namespaceMember.node.property;
+    const {name} = /** @type {babel.types.Identifier} */ (
+      namespaceMember.node.property
+    );
     state.usedNames.add(name);
   }
 

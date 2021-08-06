@@ -26,7 +26,7 @@ const INSERTED_TEMPLATES = new Map();
  * Optimizes the tagged template literal by removing whitespace, comments
  * and removes attribute quoting where possible.
  * @param {*} templateLiteral original tagged template literal.
- * @return {string} optimized template
+ * @return {string|null} optimized template
  */
 function optimizeLiteralOutput(templateLiteral) {
   if (templateLiteral.quasis.length !== 1) {
@@ -44,6 +44,11 @@ function optimizeLiteralOutput(templateLiteral) {
   });
 }
 
+/**
+ * @interface {babel.PluginPass}
+ * @param {babel} babel
+ * @return {babel.PluginObj}
+ */
 module.exports = function ({types: t}) {
   /**
    * Determines whether a TaggedTemplateExpression should be handled based on
@@ -53,7 +58,7 @@ module.exports = function ({types: t}) {
    *
    *    htmlFor(element)`<content>...` for `htmlFor` and `svgFor` tag factories.
    *
-   * @param {Node} tag
+   * @param {babel.types.Expression} tag
    * @return {boolean}
    */
   const isTagOrFactoryByName = (tag) =>
@@ -68,6 +73,7 @@ module.exports = function ({types: t}) {
       Program() {
         INSERTED_TEMPLATES.clear();
       },
+
       TaggedTemplateExpression(path) {
         const {tag} = path.node;
 
@@ -99,7 +105,10 @@ module.exports = function ({types: t}) {
                 // Template not hoisted. Hoist it.
                 hoistedIdentifier =
                   path.scope.generateUidIdentifier('template');
-                const program = path.findParent((path) => path.isProgram());
+                const program =
+                  /** @type {babel.NodePath<babel.types.Program>}*/ (
+                    path.findParent((path) => path.isProgram())
+                  );
 
                 program.scope.push({
                   id: t.cloneNode(hoistedIdentifier),

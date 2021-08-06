@@ -39,6 +39,11 @@
  * ```
  */
 
+/**
+ * @interface {babel.PluginPass}
+ * @param {babel} babel
+ * @return {babel.PluginObj}
+ */
 module.exports = function ({types: t}) {
   return {
     visitor: {

@@ -69,6 +69,15 @@ const roughNestedLength = '["xx"]'.length;
  */
 const relativeToRoot = (path) => `${__dirname}/../../../${path}`;
 
+/**
+ * @typedef {{replaceCallArguments: boolean, messagesPath?: string}} TransformLogOptions
+ */
+
+/**
+ * @interface {babel.PluginPass}
+ * @param {babel} babel
+ * @return {babel.PluginObj}
+ */
 module.exports = function ({types: t}) {
   let messages;
   let nextMessageId;
@@ -91,8 +100,8 @@ module.exports = function ({types: t}) {
 
   /**
    * Builds a message template using printf syntax from a starting node.
-   * @param {!Node} node
-   * @param {!Array<!Node>} interpolationArgs
+   * @param {!babel.Node} node
+   * @param {!Array<!babel.Node>} interpolationArgs
    * @return {string} Template for the message.
    */
   function buildMessageSprintf(node, interpolationArgs) {
@@ -123,8 +132,8 @@ module.exports = function ({types: t}) {
   }
 
   /**
-   * @param {!Node} node
-   * @return {../log-module-metadata.LogMethodMetadataDef}
+   * @param {babel.types.CallExpression} node
+   * @return {import('../log-module-metadata').LogMethodMetadataDef|undefined}
    */
   function getTransformableCalleeMeta({callee}) {
     if (assertAliases.some((name) => t.isIdentifier(callee, {name}))) {
@@ -155,11 +164,16 @@ module.exports = function ({types: t}) {
     pre() {
       // Temporary option to not replace call arguments, but still output the
       // table to keep build code and infra independent from rollout.
-      const {replaceCallArguments = true} = this.opts;
+      const {replaceCallArguments = true} = /** @type {TransformLogOptions} */ (
+        this.opts
+      );
       shouldReplaceCallArguments = replaceCallArguments;
 
       // Configurable to isolate test output.
-      messagesPath = relativeToRoot(this.opts.messagesPath || extractedPath);
+      messagesPath = relativeToRoot(
+        /** @type {TransformLogOptions}*/ (this.opts).messagesPath ||
+          extractedPath
+      );
 
       // Read table.
       messages = fs.readJsonSync(messagesPath, {throws: false}) || {};
@@ -172,9 +186,10 @@ module.exports = function ({types: t}) {
           fs.outputJsonSync(messagesPath, messages, {spaces: 2});
         },
       },
+
       /**
        * Visits call expressions for known log assertion/error methods.
-       * @param {*} path babel.path
+       * @param {babel.NodePath<babel.types.CallExpression>} path
        */
       CallExpression({node}) {
         const meta = getTransformableCalleeMeta(node);

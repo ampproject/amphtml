@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @interface {babel.PluginPass}
+ * @param {babel} babel
+ * @return {babel.PluginObj}
+ */
 module.exports = function ({template, types: t}) {
   /**
    * Produces a random number that is guaranteed not to be present in str.
@@ -23,7 +28,7 @@ module.exports = function ({template, types: t}) {
   function uniqInString(str) {
     while (true) {
       const uniq = Math.floor(Math.random() * 2 ** 31);
-      if (!str.includes(uniq)) {
+      if (!str.includes(uniq.toString())) {
         return uniq;
       }
     }
@@ -36,8 +41,8 @@ module.exports = function ({template, types: t}) {
    * Special "includes" may be used join multiple nested sections
    * into a single JSONified string.
    *
-   * @param {!NodePath} path
-   * @return {string}
+   * @param {!babel.NodePath} path
+   * @return {babel.types.TemplateLiteral}
    */
   function stringifyValue(path) {
     const arg = path.get('arguments.0');
@@ -73,13 +78,13 @@ module.exports = function ({template, types: t}) {
       const proxy = new Proxy(
         {},
         {
-          has(target, prop) {
+          has(_target, prop) {
             // Anything not on the global is assumed to be an inclusion. This
             // includes the `includeJsonLiteral` function call and the
             // identifier it is passed as an argument.
             return !(prop in global);
           },
-          get(target, prop) {
+          get(_target, prop) {
             // With statements first attempt to look up the
             // `Symbol.unscopables` from object. We're explicitly allowing any
             // references, so return nothing.
@@ -103,7 +108,7 @@ module.exports = function ({template, types: t}) {
 
             // The argument to `includeJsonLiteral`. We'll create a new
             // identifier reference to it for our template literal expression.
-            expressions.push(t.identifier(prop));
+            expressions.push(t.identifier(prop.toString()));
 
             // Finally, we can't actually return the reference's real value
             // (because it may be runtime dynamic, or in another file, etc).
@@ -179,7 +184,7 @@ module.exports = function ({template, types: t}) {
       // ```
       return t.templateLiteral(quasis, expressions);
     } catch (e) {
-      const ref = arg || path;
+      const ref = /** @type {babel.NodePath} */ (arg || path);
       throw ref.buildCodeFrameError(
         'failed to parse JSON value. Is this a statically computable value?'
       );
@@ -207,7 +212,7 @@ module.exports = function ({template, types: t}) {
 
     visitor: {
       CallExpression(path) {
-        const handler = handlers[path.node.callee.name];
+        const handler = handlers[path.node.callee['name']];
         if (handler) {
           handler(path);
         }

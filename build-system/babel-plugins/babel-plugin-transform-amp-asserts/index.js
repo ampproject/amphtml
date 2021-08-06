@@ -33,11 +33,16 @@ const REMOVABLE = {
   ],
 };
 
+/**
+ * @interface {babel.PluginPass}
+ * @param {babel} babel
+ * @return {babel.PluginObj}
+ */
 module.exports = function (babel) {
   const {types: t} = babel;
 
   /**
-   * @param {!NodePath} path
+   * @param {babel.NodePath} path
    * @param {!Array<string>} names
    * @return {boolean}
    */
@@ -51,7 +56,7 @@ module.exports = function (babel) {
   }
 
   /**
-   * @param {!NodePath} path
+   * @param {!babel.NodePath} path
    * @param {string|undefined} type
    * @param {boolean} assertion
    */

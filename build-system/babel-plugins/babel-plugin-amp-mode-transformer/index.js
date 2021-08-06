@@ -21,7 +21,15 @@
  */
 const {dirname, join, relative, resolve} = require('path').posix;
 
-// This plugin is only executed when bundling for production builds (minified).
+/** @typedef {*} BuildConstantsDef */
+
+/**
+ * This plugin is only executed when bundling for production builds (minified).
+ *
+ * @interface {babel.PluginPass}
+ * @param {babel} babel
+ * @return {babel.PluginObj}
+ */
 module.exports = function ({types: t}) {
   let getModeFound = false;
   return {
@@ -51,7 +59,8 @@ module.exports = function ({types: t}) {
         const {node} = path;
         const {object: obj, property} = node;
         const {callee} = obj;
-        const {INTERNAL_RUNTIME_VERSION: version} = this.opts;
+        const {INTERNAL_RUNTIME_VERSION: version} =
+          /** @type {BuildConstantsDef} */ (this.opts);
 
         if (callee && callee.name === 'getMode') {
           if (property.name === 'test' || property.name === 'localDev') {
@@ -66,7 +75,8 @@ module.exports = function ({types: t}) {
         }
       },
       CallExpression(path) {
-        const {INTERNAL_RUNTIME_VERSION: version} = this.opts;
+        const {INTERNAL_RUNTIME_VERSION: version} =
+          /** @type {BuildConstantsDef} */ (this.opts);
         if (path.get('callee').referencesImport('#core/mode', 'version')) {
           path.replaceWith(t.stringLiteral(version));
         }

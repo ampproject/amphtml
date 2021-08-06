@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-// Attempt to convert simple single ReturnStatement FunctionDeclarations to ArrowFunctionExpressions.
-// See BAIL_OUT_CONDITIONS for reasons why FunctionDeclarations would not be modified.
+/**
+ * Attempt to convert simple single ReturnStatement FunctionDeclarations to ArrowFunctionExpressions.
+ * See BAIL_OUT_CONDITIONS for reasons why FunctionDeclarations would not be modified.
+ *
+ * @interface {babel.PluginPass}
+ * @param {babel} babel
+ * @return {babel.PluginObj}
+ */
 module.exports = function ({types: t}) {
   /**
    * This transform is targetted toward these types only.
-   * @param {BabelPath} path
+   * @param {babel.NodePath} path
    * @return {boolean}
    */
   function isNotFunction(path) {
@@ -30,7 +36,7 @@ module.exports = function ({types: t}) {
 
   /**
    * This transform cannot safely convert generator functions.
-   * @param {BabelPath} path
+   * @param {babel.NodePath} path
    * @return {boolean}
    */
   function isGenerator(path) {
@@ -39,7 +45,7 @@ module.exports = function ({types: t}) {
 
   /**
    * Only transform a body with a single return statement.
-   * @param {BabelPath} path
+   * @param {babel.NodePath} path
    * @return {boolean}
    */
   function isNotSingleReturnStatement(path) {
@@ -52,7 +58,7 @@ module.exports = function ({types: t}) {
 
   /**
    * Only convert functions that do not contains usage of `arguments`.
-   * @param {BabelPath} path
+   * @param {babel.NodePath} path
    * @return {boolean}
    */
   function containsArgumentsUsage(path) {
@@ -71,7 +77,7 @@ module.exports = function ({types: t}) {
   /**
    * If the FunctionDeclaration contains a ThisExpression, converting from a FunctionDeclaration to a
    * VariableDeclaration => VariableDeclarator => ArrowFunctionExpression isn't necessarily valid.
-   * @param {BabelPath} path
+   * @param {babel.NodePath} path
    * @return {boolean}
    */
   function containsThisExpression(path) {
@@ -87,7 +93,7 @@ module.exports = function ({types: t}) {
 
   /**
    * If the FunctionDeclaration identifier is used a manner besides a CallExpression, bail.
-   * @param {BabelPath} path
+   * @param {babel.NodePath} path
    * @param {string} name
    * @return {boolean}
    */
@@ -99,8 +105,8 @@ module.exports = function ({types: t}) {
   }
 
   /**
-   * @param {CompilerNode} node
-   * @return {ReturnType<t['arrowFunctionExpression']>}
+   * @param {babel.types.Node} node
+   * @return {babel.types.ArrowFunctionExpression}
    */
   function createArrowFunctionExpression(node) {
     const {async, body, params} = t.cloneNode(node);
@@ -108,7 +114,7 @@ module.exports = function ({types: t}) {
   }
 
   /**
-   * @param {BabelPath} path
+   * @param {babel.NodePath} path
    * @param {string} name
    * @return {ReturnType<t['variableDeclarator']>}
    */
@@ -118,8 +124,8 @@ module.exports = function ({types: t}) {
   }
 
   /**
-   * @param {BabelPath} path
-   * @return {ReturnType<t['variableDeclaration']>}
+   * @param {babel.NodePath<babel.types.FunctionDeclaration>} path
+   * @return {babel.types.VariableDeclaration}
    */
   function createVariableDeclaration(path) {
     const declarator = createVariableDeclarator(path, path.node.id.name);
@@ -195,13 +201,12 @@ module.exports = function ({types: t}) {
             }
           }
           const name =
-            (declarator.node &&
-              declarator.node.id &&
-              declarator.node.id.name) ||
+            (declarator.node && declarator.node.d && declarator.node.id.name) ||
             null;
           declarator.replaceWith(createVariableDeclarator(path, name));
         }
       },
+
       FunctionDeclaration(path) {
         const usableBlock = path.findParent(
           (path) => path.isBlockStatement() || path.isProgram()

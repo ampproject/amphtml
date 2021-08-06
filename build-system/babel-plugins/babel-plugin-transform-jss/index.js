@@ -52,13 +52,18 @@ const {default: preset} = require('jss-preset-default');
 const {join, relative} = require('path');
 const {transformCssSync} = require('../../tasks/css/jsify-css-sync');
 
+/**
+ * @interface {babel.PluginPass}
+ * @param {babel} babel
+ * @return {babel.PluginObj}
+ */
 module.exports = function ({template, types: t}) {
   /**
-   * @param {string} filename
+   * @param {string|null|undefined} filename
    * @return {boolean}
    */
   function isJssFile(filename) {
-    return filename.endsWith('.jss.js');
+    return !!filename?.endsWith('.jss.js');
   }
 
   /**
@@ -70,9 +75,9 @@ module.exports = function ({template, types: t}) {
   }
 
   /**
-   * @param {Path} reference
+   * @param {babel.NodePath} reference
    * @param {string} importedName
-   * @return {?Path}
+   * @return {?babel.NodePath<babel.types.ImportDeclaration>}
    */
   function findImportDeclaration(reference, importedName) {
     if (!reference.isIdentifier()) {
@@ -116,8 +121,8 @@ module.exports = function ({template, types: t}) {
    *   $_b;
    *   $_c;
    * ```
-   * @param {Path} importDeclaration
-   * @param {Path} memberExpression
+   * @param {babel.NodePath<babel.types.ImportDeclaration>} importDeclaration
+   * @param {babel.NodePath} memberExpression
    * @return {boolean}
    */
   function replaceMemberExpression(importDeclaration, memberExpression) {
@@ -150,8 +155,8 @@ module.exports = function ({template, types: t}) {
    *   const {a: _unused, ...rest} = useStyles();
    *   const a = $_a;
    * ```
-   * @param {Path} importDeclaration
-   * @param {Path} variableDeclarator
+   * @param {babel.NodePath<babel.types.ImportDeclaration>} importDeclaration
+   * @param {babel.NodePath} variableDeclarator
    * @return {boolean}
    */
   function replaceObjectPattern(importDeclaration, variableDeclarator) {
@@ -161,19 +166,25 @@ module.exports = function ({template, types: t}) {
     ) {
       return false;
     }
-    const {properties} = variableDeclarator.node.id;
+    const properties = /**@type {babel.types.ObjectProperty[]}*/ (
+      variableDeclarator.node.id.properties
+    );
     const replacedPropertyCount = properties.reduce((count, property) => {
       const {computed, key, value} = property;
       if (computed || !t.isIdentifier(value) || !t.isIdentifier(key)) {
         return count;
       }
       const importId = getImportIdentifier(importDeclaration, key.name);
-      const declaration = variableDeclarator.parentPath;
+      const declaration =
+        /** @type {babel.NodePath<babel.types.VariableDeclaration>}*/ (
+          variableDeclarator.parentPath
+        );
       declaration.insertAfter(
         template.statement.ast(
           `${declaration.node.kind} ${value.name} = ${importId.name}`
         )
       );
+
       // Unused props are required to allow ...rest:
       // const {a: _unused, ...rest} = useStyles();
       // const a = _$a;
@@ -201,8 +212,8 @@ module.exports = function ({template, types: t}) {
    *   import {$b as _$b} from 'foo';
    *   $_b;
    * ```
-   * @param {Path} importDeclaration
-   * @param {Path} variableDeclarator
+   * @param {babel.NodePath<babel.types.ImportDeclaration>} importDeclaration
+   * @param {babel.NodePath} variableDeclarator
    * @return {boolean}
    */
   function replaceVariableDeclaratorRefs(
@@ -219,7 +230,12 @@ module.exports = function ({template, types: t}) {
       variableDeclarator.scope.bindings[variableDeclarator.node.id.name];
     const replacedReferenceCount = referencePaths.reduce(
       (count, identifier) =>
-        replaceExpression(importDeclaration, identifier) ? count + 1 : count,
+        replaceExpression(
+          importDeclaration,
+          /** @type {babel.NodePath<babel.types.Identifier>}*/ (identifier)
+        )
+          ? count + 1
+          : count,
       0
     );
     if (referencePaths.length === replacedReferenceCount) {
@@ -229,8 +245,8 @@ module.exports = function ({template, types: t}) {
   }
 
   /**
-   * @param {Path} importDeclaration
-   * @param {Path} callExpressionOrIdentifier
+   * @param {babel.NodePath<babel.types.ImportDeclaration>} importDeclaration
+   * @param {babel.NodePath<babel.types.CallExpression | babel.types.Identifier>} callExpressionOrIdentifier
    * @return {boolean}
    */
   function replaceExpression(importDeclaration, callExpressionOrIdentifier) {
@@ -243,9 +259,9 @@ module.exports = function ({template, types: t}) {
   }
 
   /**
-   * @param {Path} importDeclaration
+   * @param {babel.NodePath<babel.types.ImportDeclaration>} importDeclaration
    * @param {string} name
-   * @return {string}
+   * @return {babel.types.Identifier}
    */
   function getImportIdentifier(importDeclaration, name) {
     return addNamed(
@@ -257,15 +273,9 @@ module.exports = function ({template, types: t}) {
 
   const seen = new Map();
   /**
-   * @param {string} JSS
+   * @param {Object} JSS
    * @param {string} filename
-   * @return {{
-   *   visitor: {
-   *     Program: {Function(path: string, state: *): void},
-   *     CallExpression: {Function(path: string, state: *): void},
-   *     ImportDeclaration: {Function(path: string, state: *): void},
-   *   }
-   * }}
+   * @return {import('jss').StyleSheet}
    */
   function compileJss(JSS, filename) {
     const relativeFilepath = relative(join(__dirname, '../../..'), filename);
@@ -315,7 +325,7 @@ module.exports = function ({template, types: t}) {
 
         // Replace JSS exporter
         const {filename} = state.file.opts;
-        if (!isJssFile(filename)) {
+        if (!filename || !isJssFile(filename)) {
           return;
         }
 
@@ -323,7 +333,10 @@ module.exports = function ({template, types: t}) {
           return;
         }
 
-        const {confident, value: JSS} = path.get('arguments.0').evaluate();
+        const {confident, value: JSS} =
+          /** @type {babel.NodePath<babel.Node>} */ (
+            path.get('arguments.0')
+          ).evaluate();
         if (!confident) {
           throw path.buildCodeFrameError(
             `First argument to createUseStyles must be statically evaluatable.`
@@ -351,9 +364,10 @@ module.exports = function ({template, types: t}) {
         path.replaceWith(template.expression.ast`(() => ${t.cloneNode(id)})`);
 
         // Export each classname.
-        const exportDeclaration = path.findParent(
-          (p) => p.type === 'ExportNamedDeclaration'
-        );
+        const exportDeclaration =
+          /** @type {babel.NodePath<babel.types.ExportNamedDeclaration>} */ (
+            path.findParent((p) => p.type === 'ExportNamedDeclaration')
+          );
         for (const key in sheet.classes) {
           const id = t.identifier(classnameId(key));
           const init = t.valueToNode(sheet.classes[key]);

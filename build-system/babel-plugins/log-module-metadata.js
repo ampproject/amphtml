@@ -16,7 +16,7 @@
 
 /** @fileoverview Definitions of logging methods for transforms and linting. */
 
-/** @typedef {{variadic: boolean, messageArgPos: number}} */
+/** @typedef {{variadic: boolean, messageArgPos: number, extractMessages: boolean}} */
 let LogMethodMetadataDef;
 
 const definitionFile = 'src/log.js';
@@ -54,4 +54,5 @@ module.exports = {
   definitionFile,
   singletonFunctions,
   transformableMethods,
+  LogMethodMetadataDef,
 };

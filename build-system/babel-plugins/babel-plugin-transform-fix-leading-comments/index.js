@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-// Reassigns the trailing comments of a statement to be leading comment of its
-// next sibling. This is because JSDoc comments (which should be on the next
-// statement) get erroneously assigned as trailing comments of this statement.
+/**
+ * Reassigns the trailing comments of a statement to be leading comment of its
+ * next sibling. This is because JSDoc comments (which should be on the next
+ * statement) get erroneously assigned as trailing comments of this statement.
+ *
+ * @interface {babel.PluginPass}
+ * @return {babel.PluginObj}
+ */
 module.exports = function () {
   return {
     visitor: {

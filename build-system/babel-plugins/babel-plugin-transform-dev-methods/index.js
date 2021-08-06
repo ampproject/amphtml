@@ -22,7 +22,7 @@ const {dirname, join, relative, resolve} = require('path').posix;
  * value.detected indicates if the callee name (key) was imported into the current module.
  * value.removeable is the array of property names that can be removed.
  * Example: ['dev', {detected: false, removeable: ['fine']}] would mean ... `dev().fine(...)` can be removed.
- * @return {Map<string, {detected: boolean, removeable: Array<string>}}
+ * @return {Map<string, {detected: boolean, removeable: Array<string>}>}
  */
 function defaultCalleeToPropertiesMap() {
   return new Map([
@@ -43,11 +43,17 @@ function defaultCalleeToPropertiesMap() {
   ]);
 }
 
-// This Babel Plugin removes
-// - `dev().(info|fine|warn)(...)`
-// - `user().(info|fine|warn)(...)`
-// CallExpressions for production ESM builds.
-module.exports = function () {
+/**
+ * This Babel Plugin removes
+ * - `dev().(info|fine|warn)(...)`
+ * - `user().(info|fine|warn)(...)`
+ * CallExpressions for production ESM builds.
+ *
+ * @interface {babel.PluginPass}
+ * @param {babel} babel
+ * @return {babel.PluginObj}
+ */
+module.exports = function (babel) {
   let calleeToPropertiesMap = defaultCalleeToPropertiesMap();
   let parseCallExpressions = false;
   return {
@@ -92,7 +98,7 @@ module.exports = function () {
 
         const {node} = path;
         const {callee} = node;
-        if (callee.type === 'MemberExpression') {
+        if (babel.types.isMemberExpression(callee)) {
           const {object: obj, property} = callee;
           const {callee: memberCallee} = obj;
           if (memberCallee) {
