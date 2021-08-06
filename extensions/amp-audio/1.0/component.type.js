@@ -28,7 +28,7 @@ var AudioDef = {};
  *   artist: (string),
  *   artwork: (string),
  *   autoplay: (boolean),
- *   controlsList: (boolean|undefined),,
+ *   controlsList: (boolean|undefined),
  *   loop: (boolean),
  *   muted: (boolean),
  *   preload: (string|undefined),
