@@ -17,7 +17,6 @@
 import * as Preact from '#preact';
 import {ContainWrapper} from '#preact/component';
 import {forwardRef} from '#preact/compat';
-import {listen} from '../../../src/event-helper';
 import {setMediaSession} from '../../../src/mediasession-helper';
 
 const {useCallback, useEffect, useImperativeHandle, useMemo, useRef} = Preact;
@@ -105,13 +104,9 @@ export function AudioWithRef(
       return;
     }
 
-    const unlistenPlaying = listen(audioRef.current, 'playing', () =>
-      audioPlaying()
-    );
-
     // Execute at unlayout
     return () => {
-      unlistenPlaying();
+      audioPlaying();
     };
   }, [audioPlaying]);
 
@@ -139,6 +134,7 @@ export function AudioWithRef(
         controlsList={controlsList}
         loop={loop}
         muted={muted}
+        onPlaying={() => audioPlaying()}
         preload={preload}
         src={src}
         {...rest}
