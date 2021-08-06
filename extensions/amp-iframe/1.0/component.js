@@ -40,7 +40,7 @@ export function Iframe({
     const iframe = ref.current;
     let data;
     const io = new IntersectionObserver((entries) => {
-      if (data?.type !== 'embed-size' || !entries[0].isIntersecting) {
+      if (!entries[0].isIntersecting) {
         return;
       }
       if (data?.height) {
@@ -52,6 +52,9 @@ export function Iframe({
     });
 
     const handleEmbedSizePostMessage = (event) => {
+      if (event.data?.type !== 'embed-size') {
+        return;
+      }
       data = event.data;
       io.observe(iframe);
     };
