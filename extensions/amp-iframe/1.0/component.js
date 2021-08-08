@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '#preact';
-import {useEffect} from '#preact';
+import {useEffect, useRef} from '#preact';
 
 const NOOP = () => {};
 
@@ -34,7 +34,7 @@ export function Iframe({
   srcdoc,
   ...rest
 }) {
-  const ref = Preact.useRef();
+  const ref = useRef();
 
   useEffect(() => {
     const iframe = ref.current;
@@ -65,7 +65,7 @@ export function Iframe({
       io.unobserve(iframe);
       window.removeEventListener('message', handleEmbedSizePostMessage);
     };
-  });
+  }, []);
 
   return (
     <iframe
