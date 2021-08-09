@@ -19,6 +19,7 @@ import {Observable} from '#core/data-structures/observable';
 import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {isIframed} from '#core/dom';
 import {duplicateErrorIfNecessary} from '#core/error';
+import {stripUserError} from '#core/error/message-helpers';
 import {isEnumValue} from '#core/types';
 import {findIndex} from '#core/types/array';
 import {map} from '#core/types/object';
@@ -32,7 +33,7 @@ import {ViewerInterface} from './viewer-interface';
 import {urls} from '../config';
 import {reportError} from '../error-reporting';
 import {listen} from '../event-helper';
-import {dev, devAssert, stripUserError} from '../log';
+import {dev, devAssert} from '../log';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 import {
   getSourceOrigin,

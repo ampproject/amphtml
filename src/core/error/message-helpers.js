@@ -26,6 +26,12 @@ import {isElement} from '#core/types';
  * @const {string}
  */
 export const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
+/**
+ * Four zero width space.
+ *
+ * @const {string}
+ */
+export const USER_ERROR_EMBED_SENTINEL = '\u200B\u200B\u200B\u200B';
 
 /**
  * Converts an element to a readable string; all other types are unchanged.
@@ -49,6 +55,14 @@ export function elementStringOrPassThru(val) {
  */
 export function isUserErrorMessage(message) {
   return message.indexOf(USER_ERROR_SENTINEL) >= 0;
+}
+
+/**
+ * @param {string} message
+ * @return {boolean} Whether this message was a a user error from an iframe embed.
+ */
+export function isUserErrorEmbedMessage(message) {
+  return message.indexOf(USER_ERROR_EMBED_SENTINEL) >= 0;
 }
 
 /**

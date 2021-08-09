@@ -338,6 +338,7 @@ const forbiddenTermsGlobal = {
       'src/amp-story-player/amp-story-component-manager.js',
       'src/runtime.js',
       'src/log.js',
+      'src/error-reporting.js',
       'src/web-worker/web-worker.js',
       'testing/async-errors.js',
       'tools/experiments/experiments.js',
