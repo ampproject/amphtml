@@ -244,21 +244,21 @@ export class ConsentConfig {
   }
 
   /**
-   * Validate if story consent then no promptUiSrc
+   * Validate if story consent then no promptUISrc
    * @param {!JsonObject} config
    * @return {!JsonObject}
    */
   checkStoryConsent_(config) {
     // TODO(wg-stories):
     // We verify that configurations with an <amp-story-consent> descendant have
-    // no promptUiSrc, but we don't verify that the element is present in
+    // no promptUISrc, but we don't verify that the element is present in
     // Stories with <amp-cosent>. Thus, Stories could be configured using a
-    // promptUiSrc. This is likely not what we want for UX, so wg-stories
+    // promptUISrc. This is likely not what we want for UX, so wg-stories
     // should provide a migration path for these documents if they exist.
     userAssert(
       !config['promptUISrc'] ||
         !childElementByTag(this.element_, 'amp-story-consent'),
-      '%s: `promptUiSrc` cannot be specified while using amp-story-consent.',
+      '%s: `promptUISrc` cannot be specified while using amp-story-consent.',
       TAG
     );
     return config;
