@@ -96,15 +96,16 @@ export function DailymotionWithRef(
     () =>
       getDailymotionIframeSrc(
         videoId,
-        mute,
         endscreenEnable,
+        info,
+        mute,
         sharingEnable,
         start,
         uiHighlight,
-        uiLog,
-        info
+        uiLog
       ),
     [
+      videoId,
       endscreenEnable,
       info,
       mute,
@@ -112,7 +113,6 @@ export function DailymotionWithRef(
       start,
       uiHighlight,
       uiLog,
-      videoId,
     ]
   );
 

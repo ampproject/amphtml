@@ -284,6 +284,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
+      "npm": true,
       "hasCss": true,
       "wrapper": "bento"
     }

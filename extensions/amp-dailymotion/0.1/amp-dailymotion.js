@@ -247,13 +247,15 @@ class AmpDailymotion extends AMP.BaseElement {
 
   /** @private */
   getIframeSrc_() {
-    const mute = this.element.getAttribute(`data-mute`);
-    const endscreenEnable = this.element.getAttribute(`data-endscreen-enable`);
-    const sharingEnable = this.element.getAttribute(`data-sharing-enable`);
-    const start = this.element.getAttribute(`data-start`);
-    const uiHighlight = this.element.getAttribute(`data-ui-highlight`);
-    const uiLogo = this.element.getAttribute(`data-ui-logo`);
-    const info = this.element.getAttribute(`data-info`);
+    const {
+      'endscreenEnable': endscreenEnable,
+      'info': info,
+      'mute': mute,
+      'sharingEnable': sharingEnable,
+      'start': start,
+      'uiHighlight': uiHighlight,
+      'uiLogo': uiLogo,
+    } = this.element.dataset;
 
     return getDailymotionIframeSrc(
       this.videoid_,

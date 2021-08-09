@@ -33,13 +33,13 @@ import {dict} from '#core/types/object';
  */
 export function getDailymotionIframeSrc(
   videoId,
-  mute,
   endscreenEnable,
+  info,
+  mute,
   sharingEnable,
   start,
   uiHighlight,
   uiLogo,
-  info,
   implicitParams
 ) {
   let iframeUrl = addParamsToUrl(
@@ -47,13 +47,13 @@ export function getDailymotionIframeSrc(
       videoId
     )}?api=1&html=1&app=amp`,
     dict({
-      'mute': mute ? mute : undefined,
       'endscreen-enable': endscreenEnable ? endscreenEnable : undefined,
+      'info': info ? info : undefined,
+      'mute': mute ? mute : undefined,
       'sharing-enable': sharingEnable ? sharingEnable : undefined,
       'start': start ? start : undefined,
       'ui-highlight': uiHighlight ? uiHighlight : undefined,
       'ui-logo': uiLogo ? uiLogo : undefined,
-      'info': info ? info : undefined,
     })
   );
 
