@@ -469,6 +469,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://us.img.e-planning.net/layers/epl-amp.js',
   },
 
+  'exco': {
+    renderStartImplemented: true,
+  },
+
   'ezoic': {
     prefetch: [
       'https://www.googletagservices.com/tag/js/gpt.js',

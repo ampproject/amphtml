@@ -344,6 +344,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [DynAd](../../ads/vendors/dynad.md)
 -   [eADV](../../ads/vendors/eadv.md)
 -   [E-Planning](../../ads/vendors/eplanning.md)
+-   [EXCO](../../ads/vendors/exco.md)
 -   [Empower](../../ads/vendors/empower.md)
 -   [Ezoic](../../ads/vendors/ezoic.md)
 -   [FeedAd](../../ads/vendors/feedad.md)
