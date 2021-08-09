@@ -21,13 +21,15 @@ var DailymotionDef = {};
 
 /**
  * @typedef {{
- *   exampleProperty: (string|undefined), (DO NOT SUBMIT)
+ *   videoId: string,
+ *   autoplay: (boolean|undefined),
+ *   endscreenEnable: string,
+ *   info: string,
+ *   mute: string,
+ *   sharingEnable: string
+ *   start: string,
+ *   uiHighlight: string,
+ *   uiLogo: string,
  * }}
  */
 DailymotionDef.Props;
-
-/** @interface */
-DailymotionDef.DailymotionApi = class {
-  /** Example: API method to toggle the component */
-  exampleToggle() {} // DO NOT SUBMIT
-};
