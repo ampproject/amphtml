@@ -559,14 +559,14 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @param {!Element} element The element upon which to set the dark theme.
    * @private
    */
-     maybeSetDarkThemeForElement_(element) {
-      const theme = this.element.getAttribute('theme')?.toLowerCase();
-      if (theme && AttachmentTheme.DARK === theme) {
-        isPageAttachmentUiV2ExperimentOn(this.win)
-          ? element.setAttribute('theme', theme)
-          : element.classList.add(DARK_THEME_CLASS);
-      }
+  maybeSetDarkThemeForElement_(element) {
+    const theme = this.element.getAttribute('theme')?.toLowerCase();
+    if (theme && AttachmentTheme.DARK === theme) {
+      isPageAttachmentUiV2ExperimentOn(this.win)
+        ? element.setAttribute('theme', theme)
+        : element.classList.add(DARK_THEME_CLASS);
     }
+  }
 
   /**
    * Create the domain label element to be displayed at the top of the page
@@ -576,13 +576,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    */
   createDomainLabelElement_() {
     const domainLabelEl = this.win.document.createElement('div');
-    domainLabelEl.classList.add(
-      'i-amphtml-story-page-attachment-domain-label'
-    );
+    domainLabelEl.classList.add('i-amphtml-story-page-attachment-domain-label');
     if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-      domainLabelEl.classList.add(
-        'i-amphtml-amp-story-page-attachment-ui-v2'
-      );
+      domainLabelEl.classList.add('i-amphtml-amp-story-page-attachment-ui-v2');
     }
     this.maybeSetDarkThemeForElement_(domainLabelEl);
     domainLabelEl.textContent = this.getPublisherDomain_();
