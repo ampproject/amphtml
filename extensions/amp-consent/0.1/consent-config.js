@@ -23,8 +23,7 @@ import {deepMerge, hasOwn, map} from '#core/types/object';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '#core/dom';
 
-const TAG = 'amp-consent/consent-config';
-const AMP_STORY_CONSENT_TAG = 'amp-story-consent';
+const TAG = 'amp-consent';
 
 const ALLOWED_DEPR_CONSENTINSTANCE_ATTRS = {
   'promptUI': true,
@@ -250,14 +249,18 @@ export class ConsentConfig {
    * @return {!JsonObject}
    */
   checkStoryConsent_(config) {
-    if (childElementByTag(this.element_, AMP_STORY_CONSENT_TAG)) {
-      userAssert(
+    // TODO(wg-stories):
+    // We verify that configurations with an <amp-story-consent> descendant have
+    // no promptUiSrc, but we don't verify that the element is present in
+    // Stories with <amp-cosent>. Thus, Stories could be configured using a
+    // promptUiSrc. This is likely not what we want for UX, so wg-stories
+    // should provide a migration path for these documents if they exist.
+    userAssert(
+      !childElementByTag(this.element_, 'amp-story-consent') ||
         !config['promptUISrc'],
-        '%s: `promptUiSrc` cannot be specified while using %s.',
-        TAG,
-        AMP_STORY_CONSENT_TAG
-      );
-    }
+      '%s: `promptUiSrc` cannot be specified while using amp-story-consent.',
+      TAG
+    );
     return config;
   }
 
