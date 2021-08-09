@@ -30,11 +30,13 @@ import {exponentialBackoff} from './core/types/function/exponential-backoff';
 import {dict} from './core/types/object';
 import {isLoadErrorMessage} from './event-helper';
 import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
-import {dev} from './log';
+import {dev, setReportError} from './log';
 import {getMode} from './mode';
 import {Services} from './service';
 import {makeBodyVisibleRecovery} from './style-installer';
 import {isProxyOrigin} from './url';
+
+export {setReportError};
 
 /**
  * @const {string}
@@ -78,15 +80,6 @@ const BETA_ERROR_REPORT_URL_FREQ = 0.1;
 let accumulatedErrorMessages = self.__AMP_ERRORS || [];
 // Use a true global, to avoid multi-module inclusion issues.
 self.__AMP_ERRORS = accumulatedErrorMessages;
-
-/**
- * Sets reportError function. Called from error-reporting.js to break cyclic
- * dependency.
- * @param {function(this:Window, Error, (?Element)=): ?|undefined} fn
- */
-export function setReportError(fn) {
-  self.__AMP_REPORT_ERROR = fn;
-}
 
 /**
  * Pushes element into array, keeping at most the most recent limit elements

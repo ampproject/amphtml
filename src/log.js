@@ -34,8 +34,16 @@ const noop = () => {};
 
 // These are exported here despite being defined elswhere to avoid updating
 // imports across many files for now.
-export {setReportError} from './error-reporting';
 export {USER_ERROR_SENTINEL, isUserErrorMessage};
+
+/**
+ * Sets reportError function. Called from error-reporting.js to break cyclic
+ * dependency.
+ * @param {function(this:Window, Error, (?Element)=): ?|undefined} fn
+ */
+export function setReportError(fn) {
+  self.__AMP_REPORT_ERROR = fn;
+}
 
 /**
  * @enum {number}
