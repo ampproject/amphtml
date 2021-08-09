@@ -520,7 +520,7 @@ const forbiddenTermsGlobal = {
     ],
   },
   'debugger': {
-    message: 'remove debugger',
+    message: 'Please remove all instances of debugger',
     checkInTestFolder: true,
   },
   // Overridden APIs.
