@@ -64,12 +64,13 @@
 }
 
 .i-amphtml-story-page-attachment-domain-label {
+  background: #fff !important;
   color: rgba(0, 0, 0, 0.87) !important;
   display: block !important;
   font-family: 'Roboto', sans-serif !important;
   font-size: 16px !important;
-  margin: 10px 20px !important;
   overflow: hidden !important;
+  padding: 10px 20px !important;
   text-align: center !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
@@ -80,6 +81,11 @@
 .i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-page-attachment-title,
 .i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-page-attachment-close-button {
   color: #9AA0A6 !important;
+}
+
+.i-amphtml-story-draggable-drawer-theme-dark.i-amphtml-story-page-attachment-domain-label {
+  background: #202125 !important;
+  color: #fff !important;
 }
 
 .i-amphtml-story-draggable-drawer-header-attachment-remote {
@@ -163,6 +169,7 @@
 }
 
 [theme="dark"].i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-domain-label {
+  background: #202125 !important;
   color: #fff !important;
 }
 
