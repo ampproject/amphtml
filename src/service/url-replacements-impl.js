@@ -108,7 +108,7 @@ export class GlobalVariableSource extends VariableSource {
   constructor(ampdoc) {
     super(ampdoc);
 
-    /** @type {Object<string,(string|Array<string>)>|null} */
+    /** @private {Object<string,(string|Array<string>)>|null} */
     this.cachedGeo_ = null;
   }
 
@@ -793,6 +793,7 @@ export class GlobalVariableSource extends VariableSource {
     const element = this.ampdoc.getHeadNode();
     return Services.geoForDocOrNull(element).then((geo) => {
       userAssert(geo, 'To use variable %s, amp-geo should be configured', expr);
+      this.cachedGeo_ = geo;
       return getter(geo);
     });
   }
