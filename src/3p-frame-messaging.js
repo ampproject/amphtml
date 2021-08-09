@@ -123,7 +123,7 @@ export function deserializeMessage(message) {
   devAssert(startPos != -1, 'JSON missing in %s', message);
   return tryParseJson(message.substr(startPos), (e) => {
     rethrowAsync(
-      new Error('MESSAGING: Failed to parse message: ' + message, e.message)
+      new Error(`MESSAGING: Failed to parse message: ${message}\n${e.message}`)
     );
   });
 }
