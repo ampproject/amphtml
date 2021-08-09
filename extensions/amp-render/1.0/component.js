@@ -34,6 +34,8 @@ const DEFAULT_GET_JSON = (url) => {
   return fetch(url).then((res) => res.json());
 };
 
+const DEFAULT_DATA = Object.create({});
+
 /**
  * @param {!RenderDef.Props} props
  * @param {{current: ?RenderDef.RenderApi}} ref
@@ -55,7 +57,7 @@ export function RenderWithRef(
 ) {
   useResourcesNotify();
 
-  const [data, setData] = useState({});
+  const [data, setData] = useState(DEFAULT_DATA);
 
   useEffect(() => {
     // TODO(dmanek): Add additional validation for src
@@ -100,7 +102,7 @@ export function RenderWithRef(
     [refresh]
   );
 
-  const rendered = useRenderer(render, data);
+  const rendered = useRenderer(data === DEFAULT_DATA ? null : render, data);
   const isHtml =
     rendered && typeof rendered == 'object' && '__html' in rendered;
 
