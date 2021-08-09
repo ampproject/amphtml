@@ -19,15 +19,14 @@ import {dict} from '#core/types/object';
 
 /**
  *
- * @param {string} videoid
- * @param videoId
- * @param {string} mute
+ * @param {string} videoId
  * @param {string} endscreenEnable
+ * @param {string} info
+ * @param {string} mute
  * @param {string} sharingEnable
  * @param {string} start
  * @param {string} uiHighlight
  * @param {string} uiLogo
- * @param {string} info
  * @param {!JsonObject} implicitParams
  * @return {string}
  */
@@ -47,13 +46,13 @@ export function getDailymotionIframeSrc(
       videoId
     )}?api=1&html=1&app=amp`,
     dict({
-      'endscreen-enable': endscreenEnable ? endscreenEnable : undefined,
-      'info': info ? info : undefined,
-      'mute': mute ? mute : undefined,
-      'sharing-enable': sharingEnable ? sharingEnable : undefined,
-      'start': start ? start : undefined,
-      'ui-highlight': uiHighlight ? uiHighlight : undefined,
-      'ui-logo': uiLogo ? uiLogo : undefined,
+      'endscreen-enable': endscreenEnable,
+      'info': info,
+      'mute': mute,
+      'sharing-enable': sharingEnable,
+      'start': start,
+      'ui-highlight': uiHighlight,
+      'ui-logo': uiLogo,
     })
   );
 

@@ -41,17 +41,12 @@ function makeMethodMessage(method) {
   switch (method) {
     case 'mute':
       return makeDailymotionMessage('muted', [true]);
-      break;
     case 'unmute':
       return makeDailymotionMessage('muted', [false]);
-      break;
     case 'showControls':
       return makeDailymotionMessage('controls', [true]);
-      break;
     case 'hideControls':
       return makeDailymotionMessage('controls', [false]);
-      break;
-
     default:
       return makeDailymotionMessage(method);
   }
@@ -75,7 +70,7 @@ function onMessage({currentTarget, data}) {
 
 /**
  * @param {!DailymotionDef.Props} props
- * @param ref
+ * @param {{current: ?VideoWrapperDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
 export function DailymotionWithRef(
@@ -118,6 +113,7 @@ export function DailymotionWithRef(
 
   return (
     <VideoIframe
+      controls={true}
       ref={ref}
       {...rest}
       src={src}

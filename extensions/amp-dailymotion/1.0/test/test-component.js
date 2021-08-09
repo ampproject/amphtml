@@ -17,8 +17,6 @@
 import * as Preact from '#preact';
 import {Dailymotion} from '../component';
 import {mount} from 'enzyme';
-import {waitFor} from '#testing/test-helper';
-import {dereferenceArgsVariables} from '#service/action-impl';
 import {expect} from 'chai';
 
 describes.sandboxed('Dailymotion preact component v1.0', {}, (env) => {
@@ -51,7 +49,6 @@ describes.sandboxed('Dailymotion preact component v1.0', {}, (env) => {
         sharingEnable="false"
         uiHighlight="444444"
         info="false"
-        params={{}}
       ></Dailymotion>
     );
 
