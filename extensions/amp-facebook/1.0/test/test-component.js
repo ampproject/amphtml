@@ -152,7 +152,7 @@ describes.sandboxed('Facebook preact component', {}, (env) => {
     expect(wrapper.find('iframe')).to.have.lengthOf(1);
 
     const iframe = wrapper.find('iframe').getDOMNode();
-    const spy = env.sandbox.spy(iframe, 'src', ['set']);
+    const spy = env.sandbox./*OK*/ spy(iframe, 'src', ['set']);
     wrapper.setProps({playable: false});
     expect(spy.set).to.be.calledOnce;
   });
