@@ -33,7 +33,7 @@
     "./**/node_modules/**",
     "./**/test/**/*.js",
     "./**/*test*.js",
-    "./babel-plugins/**/*.js",
+    "./babel-plugins/**/(input|output).js",
     "./eslint-rules/**/*.js",
     "./externs/**/*.js",
     "./tasks/make-extension/template/**/*.js",

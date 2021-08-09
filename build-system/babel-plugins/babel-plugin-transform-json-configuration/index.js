@@ -13,7 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// @ts-nocheck
 
+/**
+ * @interface {babel.PluginPass}
+ * @param {babel} babel
+ * @return {babel.PluginObj}
+ */
 module.exports = function ({template, types: t}) {
   /**
    * Produces a random number that is guaranteed not to be present in str.
