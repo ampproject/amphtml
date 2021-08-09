@@ -124,7 +124,7 @@ export class DocInfo {
  * @param {!Window} win
  * @return {string}
  */
-export function getPageViewId(win) {
+function getPageViewId(win) {
   return String(Math.floor(win.Math.random() * 10000));
 }
 
