@@ -16,7 +16,6 @@
 
 import * as trackPromise from '../../src/impression';
 
-import {AmpGeo} from '../../extensions/amp-geo/0.1/amp-geo';
 import {
   extractClientIdFromGaCookie,
   installUrlReplacementsServiceForDoc,
