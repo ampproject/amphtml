@@ -25,6 +25,7 @@ import {closest} from '#core/dom/query';
 import {dev, devAssert} from '../../../src/log';
 import {getHistoryState} from '#core/window/history';
 import {getLocalizationService} from './amp-story-localization-service';
+import {getSourceOrigin} from '../../../src/url';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {removeElement} from '#core/dom';
@@ -589,16 +590,13 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   }
 
   /**
-   * Returns the publisher domain (e.g., "stories.example.com").
+   * Returns the publisher domain URL string (e.g., "stories.example.com").
    * @return {string} The domain of the publisher.
    * @private
    */
   getPublisherDomain_() {
-    // This regex is designed to ignore the URL's protocol prefix and then
-    // match the subsequent string of consecutive characters that are valid
-    // in a domain.
-    const publisherDomainRegex = new RegExp('(?<=//)[a-zA-z0-0.-]+');
-    // TODO(#23915): Confirm that this regex works for all AMP URLs.
-    return this.getAmpDoc().getUrl().match(publisherDomainRegex);
+    const publisherUrl = getSourceOrigin(this.getAmpDoc().getUrl());
+    const urlWithoutProtocol = publisherUrl.replace(/http(s)?:\/\//, '');
+    return urlWithoutProtocol;
   }
 }
