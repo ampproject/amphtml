@@ -38,6 +38,9 @@ export function Iframe({
 
   useEffect(() => {
     const iframe = ref.current;
+    if (!iframe) {
+      return;
+    }
     let data;
     const io = new IntersectionObserver((entries) => {
       if (!entries[0].isIntersecting) {
