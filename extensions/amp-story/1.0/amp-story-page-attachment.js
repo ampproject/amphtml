@@ -586,7 +586,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   doesContainFormElement_() {
-    return true;//Boolean(this.element.querySelector('form'));
+    return Boolean(this.element.querySelector('form'));
   }
 
   /**
