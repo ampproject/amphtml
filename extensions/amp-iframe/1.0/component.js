@@ -16,8 +16,10 @@
 
 import * as Preact from '#preact';
 import {useEffect, useRef} from '#preact';
+import {MessageType} from '#preact/component/3p-frame';
 
 const NOOP = () => {};
+const FULL_HEIGHT = '100%';
 
 /**
  * @param {!IframeDef.Props} props
@@ -29,6 +31,7 @@ export function Iframe({
   allowTransparency,
   onLoadCallback = NOOP,
   referrerPolicy,
+  requestResize,
   sandbox,
   src,
   srcdoc,
@@ -43,19 +46,26 @@ export function Iframe({
     }
     let data;
     const io = new IntersectionObserver((entries) => {
-      if (!entries[0].isIntersecting) {
+      if (!entries[0].isIntersecting || !data) {
         return;
       }
-      if (data?.height) {
-        iframe.height = Number(data.height);
-      }
-      if (data?.width) {
-        iframe.width = Number(data.width);
+
+      if (requestResize) {
+        requestResize(data.width, data.height);
+        iframe.height = FULL_HEIGHT;
+        iframe.width = FULL_HEIGHT;
+      } else {
+        if (data.width) {
+          iframe.width = data.width;
+        }
+        if (data.height) {
+          iframe.height = data.height;
+        }
       }
     });
 
     const handleEmbedSizePostMessage = (event) => {
-      if (event.data?.type !== 'embed-size') {
+      if (event.data?.type !== MessageType.EMBED_SIZE) {
         return;
       }
       data = event.data;
@@ -68,7 +78,7 @@ export function Iframe({
       io.unobserve(iframe);
       window.removeEventListener('message', handleEmbedSizePostMessage);
     };
-  }, []);
+  }, [requestResize]);
 
   return (
     <iframe

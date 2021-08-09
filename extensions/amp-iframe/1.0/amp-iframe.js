@@ -24,6 +24,17 @@ import {measureIntersection} from '#core/dom/layout/intersection';
 const TAG = 'amp-iframe';
 
 class AmpIframe extends BaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /**
+     * Keep track if we've already errored on `embed-size` request to resize the iframe.
+     * @private {boolean}
+     */
+    this.hasErroredEmbedSize_ = false;
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
@@ -32,6 +43,86 @@ class AmpIframe extends BaseElement {
       'expected global "bento" or specific "bento-iframe" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
+  }
+
+  /**
+   * Updates the element's dimensions to accommodate the iframe's
+   * requested dimensions.
+   * @param {number|undefined} height
+   * @param {number|undefined} width
+   * @private
+   */
+  updateSize_(height, width) {
+    if (!this.element.hasAttribute('resizable')) {
+      if (!this.hasErroredEmbedSize_) {
+        this.user().error(
+          TAG,
+          'Ignoring embed-size request because this iframe is not resizable',
+          this.element
+        );
+        this.hasErroredEmbedSize_ = true;
+      }
+      return;
+    }
+
+    if (height < 100) {
+      this.user().error(
+        TAG,
+        'Ignoring embed-size request because the resize height is less ' +
+          'than 100px. If you are using amp-iframe to display ads, consider ' +
+          'using amp-ad instead.',
+        this.element
+      );
+      return;
+    }
+
+    // Calculate new width and height of the container to include the padding.
+    // If padding is negative, just use the requested width and height directly.
+    let newHeight, newWidth;
+    height = parseInt(height, 10);
+    if (!isNaN(height)) {
+      newHeight = height;
+      // newHeight = Math.max(
+      //   height +
+      //     (this.element./*OK*/ offsetHeight - this.iframe_./*OK*/ offsetHeight),
+      //   height
+      // );
+    }
+    width = parseInt(width, 10);
+    if (!isNaN(width)) {
+      newWidth = width;
+      // newWidth = Math.max(
+      //   width +
+      //     (this.element./*OK*/ offsetWidth - this.iframe_./*OK*/ offsetWidth),
+      //   width
+      // );
+    }
+
+    if (newHeight !== undefined || newWidth !== undefined) {
+      this.attemptChangeSize(newHeight, newWidth).then(
+        () => {
+          if (newHeight !== undefined) {
+            this.element.setAttribute('height', newHeight);
+          }
+          if (newWidth !== undefined) {
+            this.element.setAttribute('width', newWidth);
+          }
+          this.element.overflowCallback(
+            /* overflown */ false,
+            newHeight,
+            newWidth
+          );
+        },
+        () => {}
+      );
+    } else {
+      this.user().error(
+        TAG,
+        'Ignoring embed-size request because ' +
+          'no width or height value is provided',
+        this.element
+      );
+    }
   }
 
   /** @override */
@@ -62,6 +153,9 @@ class AmpIframe extends BaseElement {
             minTop
           );
         });
+      },
+      'requestResize': (height, width) => {
+        this.updateSize_(height, width);
       },
     });
   }
