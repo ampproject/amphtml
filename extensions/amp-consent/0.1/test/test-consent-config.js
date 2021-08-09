@@ -84,13 +84,11 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
       appendConfigScriptElement(doc, element, dict({}));
       element.setAttribute('type', '_ping_');
       element.appendChild(doc.createElement('amp-story-consent'));
-      const expectedError =
-        'amp-consent/consent-config: ' +
-        '`promptUiSrc` cannot be specified while using' +
-        ' amp-story-consent.';
       await expect(
         new ConsentConfig(element).getConsentConfigPromise()
-      ).to.be.rejectedWith(expectedError);
+      ).to.be.rejectedWith(
+        /`promptUISrc` cannot be specified while using amp-story-consent/
+      );
     });
 
     it('converts deprecated format to new format', async () => {
@@ -429,23 +427,16 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
 
     it('assert valid config', async () => {
       const scriptTypeError =
-        'amp-consent/consent-config: <script> child ' +
-        'must have type="application/json"';
+        /<script> child must have type="application\/json"/;
       const consentExistError =
-        'amp-consent/consent-config: ' +
-        'consentInstanceId to store consent info is required';
-      const multiScriptError =
-        'amp-consent/consent-config: Found 2 <script> children. Expected 1';
+        /consentInstanceId to store consent info is required/;
+      const multiScriptError = /Found 2 <script> children\. Expected 1/;
       const invalidJsonError =
-        'amp-consent/consent-config: ' +
-        'Failed to parse <script> contents. Is it valid JSON?';
-      const invalidCMPError = 'amp-consent/consent-config: invalid CMP type';
-      const multiConsentError =
-        'amp-consent/consent-config: ' +
-        'only single consent instance is supported';
+        /Failed to parse <script> contents\. Is it valid JSON\?/;
+      const invalidCMPError = /invalid CMP type/;
+      const multiConsentError = /only single consent instance is supported/;
       const checkConsentHrefError =
-        'amp-consent/consent-config: ' +
-        '`checkConsentHref` must be specified if `consentRequired` is remote';
+        /`checkConsentHref` must be specified if `consentRequired` is remote/;
 
       env.sandbox.stub(Services, 'geoForDocOrNull').returns(
         Promise.resolve({
