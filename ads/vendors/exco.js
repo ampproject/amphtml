@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// @ts-nocheck
+
+import {validateData, writeScript} from '#3p/3p';
+
+const requiredParams = ['id'];
 
 /**
- * @interface {babel.PluginPass}
- * @return {babel.PluginObj}
+ * @param {!Window} global
+ * @param {!Object} data
  */
-module.exports = function () {
-  return {
-    name: 'remove-strict-directives',
-    visitor: {
-      Directive(path) {
-        const {node} = path;
-        if (node.value.value === 'use strict') {
-          path.remove();
-        }
-      },
-    },
-  };
-};
+export function exco(global, data) {
+  validateData(data, requiredParams);
+  writeScript(global, 'https://player.ex.co/amp.js');
+}

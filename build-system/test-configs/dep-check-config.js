@@ -151,6 +151,7 @@ exports.rules = [
       'ads/google/a4a/utils.js->src/ini-load.js',
       'ads/google/a4a/utils.js->src/core/dom/index.js',
       'ads/google/a4a/utils.js->src/core/dom/layout/page-layout-box.js',
+      'ads/google/a4a/utils.js->src/core/data-structures/promise.js',
       // Some ads need to depend on json.js
       'ads/**->src/core/types/object/json.js',
       // IMA, similar to other non-Ad 3Ps above, needs access to event-helper
@@ -307,6 +308,7 @@ exports.rules = [
       'extensions/amp-story-interactive/0.1/amp-story-interactive-img-quiz.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-interactive/0.1/amp-story-interactive-results.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-interactive/0.1/interactive-disclaimer.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-slider.js->extensions/amp-story/1.0/amp-story-store-service.js',
 
       // Subscriptions.
       'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',
