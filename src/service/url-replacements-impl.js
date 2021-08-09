@@ -141,7 +141,7 @@ export class GlobalVariableSource extends VariableSource {
     /** @const {!./viewport/viewport-interface.ViewportInterface} */
     const viewport = Services.viewportForDoc(this.ampdoc);
 
-    // Lazily cache the geo location if available.
+    // Greedily cache the geo location if available for synchronous replacements.
     Services.geoForDocOrNull(this.ampdoc).then((geo) => {
       this.cachedGeo_ = geo;
     });
