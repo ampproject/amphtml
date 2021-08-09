@@ -32,7 +32,6 @@
   <section>
     <!-- Valid: true -->
     <amp-stream-gallery width="4" height="3" loop="true">
-    </amp-stream-gallery>
     <!-- Valid: false -->
     <amp-stream-gallery width="4" height="3" loop="false">
     </amp-stream-gallery>
@@ -42,11 +41,14 @@
     <!-- Valid: booleans with multiple media queries -->
     <amp-stream-gallery width="4" height="3" loop="(min-width: 800px) true, (max-height: 1000px) true, false">
     </amp-stream-gallery>
+    <!-- Valid: no value for loop -->
+    <amp-stream-gallery width="4" height="3" loop>
+    </amp-stream-gallery>
     <!-- Invalid: no default value-->
     <amp-stream-gallery width="4" height="3" loop="(min-width: 800px) true">
     </amp-stream-gallery>
     <!-- Invalid: no value -->
-    <amp-stream-gallery width="4" height="3" loop>
+    <amp-stream-gallery width="4" height="3" snap>
     </amp-stream-gallery>
     <!-- Invalid: incorrect value -->
     <amp-stream-gallery width="4" height="3" loop="5">
