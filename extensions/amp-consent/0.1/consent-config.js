@@ -256,8 +256,8 @@ export class ConsentConfig {
     // promptUiSrc. This is likely not what we want for UX, so wg-stories
     // should provide a migration path for these documents if they exist.
     userAssert(
-      !childElementByTag(this.element_, 'amp-story-consent') ||
-        !config['promptUISrc'],
+      !config['promptUISrc'] ||
+        !childElementByTag(this.element_, 'amp-story-consent'),
       '%s: `promptUiSrc` cannot be specified while using amp-story-consent.',
       TAG
     );
