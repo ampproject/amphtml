@@ -151,6 +151,7 @@ exports.rules = [
       'ads/google/a4a/utils.js->src/ini-load.js',
       'ads/google/a4a/utils.js->src/core/dom/index.js',
       'ads/google/a4a/utils.js->src/core/dom/layout/page-layout-box.js',
+      'ads/google/a4a/utils.js->src/core/data-structures/promise.js',
       // Some ads need to depend on json.js
       'ads/**->src/core/types/object/json.js',
       // IMA, similar to other non-Ad 3Ps above, needs access to event-helper

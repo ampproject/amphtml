@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as fakeTimers from '@sinonjs/fake-timers';
 import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import * as IniLoad from '../../../../src/ini-load';
@@ -627,6 +628,68 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           return googleAdUrl(impl, '', Date.now(), [], []).then((url) => {
             expect(url).to.match(/[&?]bdt=[1-9][0-9]*[&$]/);
           });
+        });
+      });
+    });
+
+    it('should include user agent hint params', () => {
+      return createIframePromise().then((fixture) => {
+        setupForAdTesting(fixture);
+        const {doc} = fixture;
+        doc.win = fixture.win;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {});
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, fixture.ampdoc, env.sandbox);
+        Object.defineProperty(impl.win.navigator, 'userAgentData', {
+          'value': {
+            'getHighEntropyValues': () =>
+              Promise.resolve({
+                platform: 'Windows',
+                platformVersion: 10,
+                architecture: 'x86',
+                model: 'Pixel',
+                uaFullVersion: 3.14159,
+              }),
+          },
+        });
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', Date.now(), [], []).then((url) => {
+            expect(url).to.match(
+              /[&?]uap=Windows&uapv=10&uaa=x86&uam=Pixel&uafv=3.14159[&$]/
+            );
+          });
+        });
+      });
+    });
+
+    it('should proceed if user agent hint params time outs', () => {
+      return createIframePromise().then((fixture) => {
+        setupForAdTesting(fixture);
+        const clock = fakeTimers.withGlobal(fixture.win).install({
+          toFake: ['Date', 'setTimeout', 'clearTimeout'],
+        });
+        const {doc} = fixture;
+        doc.win = fixture.win;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {});
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, fixture.ampdoc, env.sandbox);
+        Object.defineProperty(impl.win.navigator, 'userAgentData', {
+          'value': {
+            // Promise that never resolves
+            'getHighEntropyValues': () => new Promise(() => {}),
+          },
+        });
+        expectAsyncConsoleError('[AMP-A4A] UACH timeout!', 1);
+        return fixture.addElement(elem).then(() => {
+          const promise = googleAdUrl(impl, '', Date.now(), [], []).then(
+            (url) => {
+              expect(url).to.not.match(
+                /[&?]uap=Windows&uapv=10&uaa=x86&uam=Pixel&uafv=3.14159[&$]/
+              );
+            }
+          );
+          clock.tick(1001);
+          return promise;
         });
       });
     });
