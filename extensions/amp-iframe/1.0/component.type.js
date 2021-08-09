@@ -24,7 +24,7 @@ var IframeDef = {};
  *   allowFullScreen: (boolean),
  *   allowPaymentRequest: (boolean),
  *   allowTransparency: (boolean),
- *   onLoadCallback: (function),
+ *   onLoadCallback: (function():undefined),
  *   referrerPolicy: (string),
  *   sandbox: (string),
  *   src: (!string),
