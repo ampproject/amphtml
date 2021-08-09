@@ -15,8 +15,13 @@
  */
 // @ts-nocheck
 
-// Attempt to convert simple single ReturnStatement FunctionDeclarations to ArrowFunctionExpressions.
-// See BAIL_OUT_CONDITIONS for reasons why FunctionDeclarations would not be modified.
+/**
+ * Attempt to convert simple single ReturnStatement FunctionDeclarations to ArrowFunctionExpressions.
+ * See BAIL_OUT_CONDITIONS for reasons why FunctionDeclarations would not be modified.
+ * @interface {babel.PluginPass}
+ * @param {babel} babel
+ * @return {babel.PluginObj}
+ */
 module.exports = function ({types: t}) {
   /**
    * This transform is targetted toward these types only.

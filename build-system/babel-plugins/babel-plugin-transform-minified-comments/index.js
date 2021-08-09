@@ -15,7 +15,12 @@
  */
 // @ts-nocheck
 
-// Ensure comments in minified build output is minimal.
+/**
+ * Ensure comments in minified build output is minimal.
+ *
+ * @interface {babel.PluginPass}
+ * @return {babel.PluginObj}
+ */
 module.exports = function () {
   return {
     visitor: {

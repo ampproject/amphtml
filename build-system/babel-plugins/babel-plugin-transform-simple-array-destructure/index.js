@@ -15,6 +15,11 @@
  */
 // @ts-nocheck
 
+/**
+ * @interface {babel.PluginPass}
+ * @param {babel} babel
+ * @return {babel.PluginObj}
+ */
 module.exports = function (babel) {
   const {types: t} = babel;
 
