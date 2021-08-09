@@ -46,6 +46,7 @@ const {cyan, green, red} = require('../common/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');
+const {options: jssOptions} = require('../babel-config/jss-config');
 const {parse: pathParse} = require('path');
 const {TransformCache, batchedRead} = require('../common/transform-cache');
 const {watch} = require('chokidar');
@@ -552,15 +553,15 @@ async function getCssForJssFile(jssFile) {
     return fileCss;
   }
 
-  const options = {css: 'REPLACED_BY_BABEL_PLUGIN'};
-  await babel.transform(contents, {
-    filename: jssFile,
-    plugins: [
-      ['./build-system/babel-plugins/babel-plugin-transform-jss', options],
-    ],
-  });
-  jssCache.set(hash, Promise.resolve(options.css));
-  return options.css;
+  const babelOptions = babel.loadOptions({caller: {name: 'jss'}});
+  if (!babelOptions) {
+    throw new Error('Could not find babel config for jss');
+  }
+  babelOptions['filename'] = jssFile;
+
+  await babel.transform(contents, babelOptions);
+  jssCache.set(hash, Promise.resolve(jssOptions.css));
+  return jssOptions.css;
 }
 
 /**
