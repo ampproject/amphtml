@@ -168,9 +168,13 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     // trustworthiness of publishers before sending data to them.
     if (this.doesContainFormElement_()) {
       this.domainLabelEl = this.win.document.createElement('div');
-      this.domainLabelEl.classList.add('i-amphtml-story-page-attachment-domain-label');
+      this.domainLabelEl.classList.add(
+        'i-amphtml-story-page-attachment-domain-label'
+      );
       if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-        this.domainLabelEl.classList.add('i-amphtml-amp-story-page-attachment-ui-v2');
+        this.domainLabelEl.classList.add(
+          'i-amphtml-amp-story-page-attachment-ui-v2'
+        );
       }
       this.maybeSetDarkThemeForElement_(this.domainLabelEl);
       this.domainLabelEl.textContent = this.getPublisherDomain_();
