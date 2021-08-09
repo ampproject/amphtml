@@ -163,22 +163,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildInline_() {
-    // Page attachments that contain forms must display the page's publisher
-    // domain above the attachment's contents. This enables users to gauge the
-    // trustworthiness of publishers before sending data to them.
     if (this.doesContainFormElement_()) {
-      this.domainLabelEl = this.win.document.createElement('div');
-      this.domainLabelEl.classList.add(
-        'i-amphtml-story-page-attachment-domain-label'
-      );
-      if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-        this.domainLabelEl.classList.add(
-          'i-amphtml-amp-story-page-attachment-ui-v2'
-        );
-      }
-      this.maybeSetDarkThemeForElement_(this.domainLabelEl);
-      this.domainLabelEl.textContent = this.getPublisherDomain_();
-      this.headerEl.after(this.domainLabelEl);
+      // Page attachments that contain forms must display the page's publisher
+      // domain above the attachment's contents. This enables users to gauge
+      // the trustworthiness of publishers before sending data to them.
+      this.headerEl.after(this.createDomainLabelElement_());
     }
 
     const closeButtonEl = htmlFor(this.element)`
@@ -570,13 +559,34 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @param {!Element} element The element upon which to set the dark theme.
    * @private
    */
-  maybeSetDarkThemeForElement_(element) {
-    const theme = this.element.getAttribute('theme')?.toLowerCase();
-    if (theme && AttachmentTheme.DARK === theme) {
-      isPageAttachmentUiV2ExperimentOn(this.win)
-        ? element.setAttribute('theme', theme)
-        : element.classList.add(DARK_THEME_CLASS);
+     maybeSetDarkThemeForElement_(element) {
+      const theme = this.element.getAttribute('theme')?.toLowerCase();
+      if (theme && AttachmentTheme.DARK === theme) {
+        isPageAttachmentUiV2ExperimentOn(this.win)
+          ? element.setAttribute('theme', theme)
+          : element.classList.add(DARK_THEME_CLASS);
+      }
     }
+
+  /**
+   * Create the domain label element to be displayed at the top of the page
+   * attachment.
+   * @return {!Element} element The domain label element.
+   * @private
+   */
+  createDomainLabelElement_() {
+    const domainLabelEl = this.win.document.createElement('div');
+    domainLabelEl.classList.add(
+      'i-amphtml-story-page-attachment-domain-label'
+    );
+    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+      domainLabelEl.classList.add(
+        'i-amphtml-amp-story-page-attachment-ui-v2'
+      );
+    }
+    this.maybeSetDarkThemeForElement_(domainLabelEl);
+    domainLabelEl.textContent = this.getPublisherDomain_();
+    return domainLabelEl;
   }
 
   /**
@@ -595,8 +605,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   getPublisherDomain_() {
-    const publisherUrl = getSourceOrigin(this.getAmpDoc().getUrl());
-    const urlWithoutProtocol = publisherUrl.replace(/http(s)?:\/\//, '');
-    return urlWithoutProtocol;
+    const publisherDomain = getSourceOrigin(this.getAmpDoc().getUrl());
+    return publisherDomain.replace(/https?:\/\//, '');
   }
 }
