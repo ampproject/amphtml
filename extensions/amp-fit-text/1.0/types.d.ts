@@ -13,14 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as Preact from 'preact';
 
-/** @externs */
-
-/**
- * @typedef {{
- *   minFontSize: (number|undefined),
- *   maxFontSize: (number|undefined),
- *   children: (?PreactDef.Renderable|undefined),
- * }}
- */
-var FitTextProps;
+export interface FitTextProps {
+  minFontSize: number | undefined;
+  maxFontSize: number | undefined;
+  children: Preact.ComponentChildren | undefined;
+}

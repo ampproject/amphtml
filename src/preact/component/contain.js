@@ -99,6 +99,7 @@ function ContainWrapperWithRef(
   );
 }
 
+/** @type {import('preact').FunctionComponent} */
 const ContainWrapper = forwardRef(ContainWrapperWithRef);
 
 export {ContainWrapper};

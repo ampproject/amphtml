@@ -22,8 +22,8 @@ import {toWin} from '#core/window';
 import {useCallback, useLayoutEffect, useRef} from '#preact';
 
 /**
- * @param {!FitTextProps} props
- * @return {PreactDef.Renderable}
+ * @param {!import('./types').FitTextProps} props
+ * @return {ReturnType<Preact.FunctionComponent>}
  */
 export function FitText({
   children,

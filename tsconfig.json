@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "jsx": "react",
     "allowJs": true,
     "baseUrl": ".",
     "outDir": "dist",
@@ -25,5 +26,10 @@
       "#third_party/*": ["./third_party/*"]
     }
   },
-  "exclude": ["node_modules", "dist"]
+  "exclude": [
+    "dist",
+    "node_modules",
+    "extensions/amp-fit-text/1.0/**/test/**/*.js"
+  ],
+  "include": ["extensions/amp-fit-text/1.0/**/*.js"]
 }

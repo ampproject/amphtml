@@ -27,6 +27,7 @@ const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {cyan, green, red, yellow} = require('../common/colors');
+const {execOrThrow} = require('../common/exec');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {logClosureCompilerError} = require('../compile/closure-compile');
 const {log} = require('../common/logging');
@@ -118,7 +119,10 @@ const TYPE_CHECK_TARGETS = {
   // errors.
   'low-bar': {
     entryPoints: ['src/amp.js'],
-    extraGlobs: ['{src,extensions}/**/*.js'],
+    extraGlobs: [
+      '{src,extensions}/**/*.js',
+      '!extensions/amp-fit-text/1.0/**/*.js',
+    ],
     onError(msg) {
       const lowBarErrors = [
         'JSC_BAD_JSDOC_ANNOTATION',
@@ -264,7 +268,11 @@ async function typeCheck(targetName) {
     }
     target.onError(errorMsg);
   });
-  log(green('SUCCESS:'), 'Type-checking passed for target', cyan(targetName));
+  log(
+    green('SUCCESS:'),
+    'Closure Type-checking passed for target',
+    cyan(targetName)
+  );
 }
 
 /**
@@ -290,6 +298,13 @@ async function checkTypes() {
   displayLifecycleDebugging();
 
   await Promise.all(targets.map(typeCheck));
+
+  log('Checking types in', cyan('Bento') + '...');
+  execOrThrow(
+    'npx -p typescript tsc --project ./tsconfig.json',
+    'Type checking failed'
+  );
+
   exitCtrlcHandler(handlerProcess);
 }
 
