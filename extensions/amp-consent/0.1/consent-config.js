@@ -252,7 +252,7 @@ export class ConsentConfig {
     // TODO(wg-stories):
     // We verify that configurations with an <amp-story-consent> descendant have
     // no promptUISrc, but we don't verify that the element is present in
-    // Stories with <amp-cosent>. Thus, Stories could be configured using a
+    // Stories with <amp-consent>. Thus, Stories could be configured using a
     // promptUISrc. This is likely not what we want for UX, so wg-stories
     // should provide a migration path for these documents if they exist.
     userAssert(
