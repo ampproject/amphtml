@@ -81,7 +81,7 @@ function screenProperty(screen, property) {
 
 /**
  *
- * @param {Object<string,(string|Array<string>)>} geo
+ * @param {Object<string,(string|Array<string>)>|null} geo
  * @param {string} geoType
  * @return {string}
  */
