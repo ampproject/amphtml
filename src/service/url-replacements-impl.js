@@ -91,9 +91,11 @@ function geoData(geo, geoType) {
       geoType === 'ISOCountry',
       'The value passed to AMP_GEO() is not valid name:' + geoType
     );
-    return /** @type {string} */ (geo[geoType] || 'unknown');
+    return /** @type {string} */ ((geo && geo[geoType]) || 'unknown');
   }
-  return /** @type {string} */ (geo.matchedISOCountryGroups.join(GEO_DELIM));
+  return /** @type {string} */ (
+    geo?.matchedISOCountryGroups.join(GEO_DELIM) || 'unknown'
+  );
 }
 
 /**
@@ -108,10 +110,6 @@ export class GlobalVariableSource extends VariableSource {
 
     /** @type {Object<string,(string|Array<string>)>|null} */
     this.cachedGeo_ = null;
-
-    Services.geoForDocOrNull(this.ampdoc.getHeadNode()).then((geo) => {
-      this.cachedGeo_ = geo;
-    });
   }
 
   /**
@@ -142,6 +140,11 @@ export class GlobalVariableSource extends VariableSource {
 
     /** @const {!./viewport/viewport-interface.ViewportInterface} */
     const viewport = Services.viewportForDoc(this.ampdoc);
+
+    // Lazily cache the geo location if available.
+    Services.geoForDocOrNull(this.ampdoc).then((geo) => {
+      this.cachedGeo_ = geo;
+    });
 
     // Returns a random value for cache busters.
     this.set('RANDOM', () => Math.random());
@@ -405,13 +408,8 @@ export class GlobalVariableSource extends VariableSource {
     // Returns assigned geo value for geoType or all groups.
     this.setBoth(
       'AMP_GEO',
-      (geoType) => {
-        if (this.cachedGeo_ === null) {
-          return 'unknown';
-        }
-        return geoData(this.cachedGeo_, geoType);
-      },
-      (geoType) => this.getGeo_((geos) => geoData(geos, geoType), 'AMP_GEO')
+      (geoType) => geoData(this.cachedGeo_, geoType),
+      (geoType) => this.getGeo_((geo) => geoData(geo, geoType), 'AMP_GEO')
     );
 
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
