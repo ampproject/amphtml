@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   browser-tools: circleci/browser-tools@1.1.3
-  node: circleci/node@4.6.0
+  node: circleci/node@4.7.0
 
 push_and_pr_builds: &push_and_pr_builds
   filters:
@@ -27,19 +27,19 @@ experiment_job: &experiment_job
     EXP: << parameters.exp >>
 
 executors:
-  docker-small:
+  base-docker-small:
     docker:
       - image: cimg/base:stable
     resource_class: small
-  docker-medium:
+  node-docker-medium:
     docker:
       - image: cimg/node:lts-browsers
     resource_class: medium
-  docker-large:
+  node-docker-large:
     docker:
       - image: cimg/node:lts-browsers
     resource_class: large
-  docker-xlarge:
+  node-docker-xlarge:
     docker:
       - image: cimg/node:lts-browsers
     resource_class: xlarge
@@ -134,7 +134,7 @@ commands:
 jobs:
   'Initialize Repository':
     executor:
-      name: docker-small
+      name: base-docker-small
     steps:
       - checkout_repo
       - run:
@@ -146,7 +146,7 @@ jobs:
       - teardown_vm
   'Checks':
     executor:
-      name: docker-medium
+      name: node-docker-medium
     steps:
       - setup_vm
       - install_chrome
@@ -156,7 +156,7 @@ jobs:
       - teardown_vm
   'Unminified Build':
     executor:
-      name: docker-xlarge
+      name: node-docker-xlarge
     steps:
       - setup_vm
       - run:
@@ -165,7 +165,7 @@ jobs:
       - teardown_vm
   'Nomodule Build - Test':
     executor:
-      name: docker-xlarge
+      name: node-docker-xlarge
     steps:
       - setup_vm
       - run:
@@ -179,7 +179,7 @@ jobs:
       - teardown_vm
   'Module Build - Test':
     executor:
-      name: docker-xlarge
+      name: node-docker-xlarge
     steps:
       - setup_vm
       - run:
@@ -188,7 +188,7 @@ jobs:
       - teardown_vm
   'Nomodule Build - Prod':
     executor:
-      name: docker-xlarge
+      name: node-docker-xlarge
     steps:
       - setup_vm
       - run:
@@ -197,7 +197,7 @@ jobs:
       - teardown_vm
   'Module Build - Prod':
     executor:
-      name: docker-xlarge
+      name: node-docker-xlarge
     steps:
       - setup_vm
       - run:
@@ -206,7 +206,7 @@ jobs:
       - teardown_vm
   'Bundle Size':
     executor:
-      name: docker-medium
+      name: node-docker-medium
     steps:
       - setup_vm
       - run:
@@ -228,7 +228,7 @@ jobs:
       - teardown_vm
   'Visual Diff Tests':
     executor:
-      name: docker-large
+      name: node-docker-large
     steps:
       - setup_vm
       - install_chrome
@@ -239,7 +239,7 @@ jobs:
       - teardown_vm
   'Local Unit Tests':
     executor:
-      name: docker-large
+      name: node-docker-large
     steps:
       - skip_on_push_builds
       - setup_vm
@@ -251,7 +251,7 @@ jobs:
       - teardown_vm
   'All Unit Tests':
     executor:
-      name: docker-medium
+      name: node-docker-medium
     parallelism: 6
     steps:
       - setup_vm
@@ -263,7 +263,7 @@ jobs:
       - teardown_vm
   'Unminified Tests':
     executor:
-      name: docker-large
+      name: node-docker-large
     steps:
       - setup_vm
       - install_chrome
@@ -274,7 +274,7 @@ jobs:
       - teardown_vm
   'Nomodule Tests':
     executor:
-      name: docker-large
+      name: node-docker-large
     parameters:
       config:
         description: 'Which config file to use'
@@ -290,7 +290,7 @@ jobs:
       - teardown_vm
   'Module Tests':
     executor:
-      name: docker-large
+      name: node-docker-large
     parameters:
       config:
         description: 'Which config file to use'
@@ -306,7 +306,7 @@ jobs:
       - teardown_vm
   'End-to-End Tests':
     executor:
-      name: docker-medium
+      name: node-docker-medium
     parallelism: 6
     steps:
       - setup_vm
@@ -329,7 +329,7 @@ jobs:
       - teardown_vm
   'Performance Tests':
     executor:
-      name: docker-xlarge
+      name: node-docker-xlarge
     steps:
       - setup_vm
       - install_chrome
@@ -340,7 +340,7 @@ jobs:
       - teardown_vm
   'Experiment Build':
     executor:
-      name: docker-xlarge
+      name: node-docker-xlarge
     <<: *experiment_job
     steps:
       - setup_vm
@@ -350,7 +350,7 @@ jobs:
       - teardown_vm
   'Experiment Integration Tests':
     executor:
-      name: docker-large
+      name: node-docker-large
     <<: *experiment_job
     steps:
       - setup_vm
@@ -362,7 +362,7 @@ jobs:
       - teardown_vm
   'Experiment End-to-End Tests':
     executor:
-      name: docker-large
+      name: node-docker-large
     <<: *experiment_job
     parallelism: 6
     steps:
