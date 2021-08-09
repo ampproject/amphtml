@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// @ts-nocheck
 
 /**
  * Takes a .jss.js file and transforms the `useStyles` export to remove side effects

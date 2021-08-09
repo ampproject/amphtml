@@ -13,7 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// @ts-nocheck
 
+/**
+ * @interface {babel.PluginPass}
+ * @return {babel.PluginObj}
+ */
 module.exports = function () {
   return {
     name: 'remove-strict-directives',

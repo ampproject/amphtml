@@ -13,8 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// @ts-nocheck
 
-// Ensure comments in minified build output is minimal.
+/**
+ * Ensure comments in minified build output is minimal.
+ *
+ * @interface {babel.PluginPass}
+ * @return {babel.PluginObj}
+ */
 module.exports = function () {
   return {
     visitor: {
