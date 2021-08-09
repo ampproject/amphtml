@@ -180,6 +180,9 @@ export class ConsentUI {
     /** @private {?Promise<string>} */
     this.promptUISrcPromise_ = null;
 
+    this.config_ = config;
+
+
     this.init_(config, opt_postPromptUI);
   }
 
@@ -565,16 +568,16 @@ export class ConsentUI {
     classList.add(consentUiClasses.loading);
     toggle(dev().assertElement(this.ui_), false);
 
-    this.promptUISrcPromise_ = expandConsentEndpointUrl(
-      this.parent_,
-      promptUISrc
-    );
 
-    const iframePromise = this.promptUISrcPromise_.then((expandedSrc) => {
-      console.log(expandedSrc)
-      this.removeIframe_ = false;
-      this.ui_.src = expandedSrc;
-      return this.getClientInfoPromise_().then((clientInfo) => {
+    this.removeIframe_ = false;
+    const iframePromise = this.getClientInfoPromise_().then((clientInfo) => {
+      return expandConsentEndpointUrl(
+        this.parent_,
+        this.config_['promptUISrc'],
+        {CONSENT_INFO : property => JSON.stringify(clientInfo[property])}
+      ).then((expandedSrc) => {
+        console.log(expandedSrc)
+        this.ui_.src = expandedSrc;
         this.ui_.setAttribute('name', JSON.stringify(clientInfo));
         this.win_.addEventListener('message', this.boundHandleIframeMessages_);
         insertAtStart(this.parent_, dev().assertElement(this.ui_));

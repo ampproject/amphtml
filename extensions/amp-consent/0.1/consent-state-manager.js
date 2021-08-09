@@ -34,6 +34,8 @@ import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert} from '../../../src/log';
 import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
 import {hasOwn} from '#core/types/object';
+import {once} from '#core/types/function';
+import {getRandomString64} from '#service/cid-impl'
 
 const TAG = 'CONSENT-STATE-MANAGER';
 
@@ -71,6 +73,8 @@ export class ConsentStateManager {
 
     /** @private {!Promise} */
     this.hasAllPurposeConsentsPromise_ = allPurposeConsentsDeferred.promise;
+
+    this.getConsentPageViewID64 = once(() => getRandomString64(ampdoc.win))
   }
 
   /**
@@ -538,13 +542,10 @@ export class ConsentInstance {
         body: request,
         ampCors: false,
       };
-      const consentPageViewId64 = Services.documentInfoForDoc(this.ampdoc_).consentPageViewId64
-      console.log("yeet", consentPageViewId64)
       this.ampdoc_.whenFirstVisible().then(() => {
         expandConsentEndpointUrl(
           this.ampdoc_.getHeadNode(),
-          /** @type {string} */ (this.onUpdateHref_),
-          consentPageViewId64
+          /** @type {string} */ (this.onUpdateHref_)
         ).then((expandedUpdateHref) => {
           Services.xhrFor(this.ampdoc_.win).fetchJson(expandedUpdateHref, init);
         });

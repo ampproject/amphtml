@@ -55,7 +55,6 @@ import {realChildElements} from '#core/dom/query';
 import {isExperimentOn} from '#experiments';
 
 import {toggle} from '#core/dom/style';
-import {DocInfo} from 'src/service/document-info-impl'
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
@@ -750,9 +749,8 @@ export class AmpConsent extends AMP.BaseElement {
         const sourceBase = getSourceUrl(ampdoc.getUrl());
         const resolvedHref = resolveRelativeUrl(checkConsentHref, sourceBase);
         const xhrService = Services.xhrFor(this.win);
-        const consentPageViewId64 = Services.documentInfoForDoc(ampdoc).consentPageViewId64
         return ampdoc.whenFirstVisible().then(() =>
-          expandConsentEndpointUrl(this.element, resolvedHref, consentPageViewId64).then(
+          expandConsentEndpointUrl(this.element, resolvedHref).then(
             (expandedHref) =>
               xhrService.fetchJson(expandedHref, init).then((res) =>
                 xhrService

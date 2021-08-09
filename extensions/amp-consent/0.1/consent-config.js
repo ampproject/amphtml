@@ -22,6 +22,8 @@ import {childElementByTag} from '#core/dom/query';
 import {deepMerge, hasOwn, map} from '#core/types/object';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '#core/dom';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
+
 
 const TAG = 'amp-consent/consent-config';
 const AMP_STORY_CONSENT_TAG = 'amp-story-consent';
@@ -37,8 +39,7 @@ const ALLOWED_DEPR_CONSENTINSTANCE_ATTRS = {
 /** @const @type {!Object<string, boolean>} */
 const CONSENT_VARS_ALLOWED_LIST = {
   'CLIENT_ID': true,
-  'CONSENT_CLIENT_INFO': true,
-  'CONSENT_PAGE_VIEW_ID': true,
+  'CONSENT_PAGE_VIEW_ID_64': true,
   'PAGE_VIEW_ID': true,
   'PAGE_VIEW_ID_64': true,
   'SOURCE_URL': true,
@@ -322,19 +323,24 @@ export class ConsentConfig {
  * Expand consent endpoint url
  * @param {!Element|!ShadowRoot} element
  * @param {string} url
- * @param {Object<string, *>=} opt_vars
  * @return {!Promise<string>}
  */
 export function expandConsentEndpointUrl(element, url, opt_vars) {
-  console.log("here", element, url, opt_vars)
-  return Services.urlReplacementsForDoc(element).expandUrlAsync(
-    url,
-    {
-      'CLIENT_ID': getConsentCID(element),
-      'CONSENT_PAGE_VIEW_ID': opt_vars,
-    },
-    CONSENT_VARS_ALLOWED_LIST
-  );
+  const consentStateManagerPromise = getServicePromiseForDoc(
+    Services.ampdoc(element),
+    'consentStateManager'
+  )
+  return consentStateManagerPromise.then(consentStateManager => {
+    return Services.urlReplacementsForDoc(element).expandUrlAsync(
+      url,
+      {
+        'CLIENT_ID': getConsentCID(element),
+        'CONSENT_PAGE_VIEW_ID_64': consentStateManager.getConsentPageViewID64,
+        ... opt_vars
+      },
+      {...opt_vars, ...CONSENT_VARS_ALLOWED_LIST}
+    )
+  })
 }
 
 /**
