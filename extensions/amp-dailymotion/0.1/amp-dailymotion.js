@@ -162,7 +162,6 @@ class AmpDailymotion extends AMP.BaseElement {
    * @private
    */
   handleEvents_(event) {
-    console.log(event);
     if (!originMatches(event, this.iframe_, 'https://www.dailymotion.com')) {
       return;
     }

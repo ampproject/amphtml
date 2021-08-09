@@ -13,11 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
-tags: {  # amp-dailymotion
+tags: {  # amp-dailymotion 1.0
   html_format: AMP
   tag_name: "SCRIPT"
+  satisfies: "amp-dailymotion 1.0"
+  excludes: "amp-dailymotion 0.1"
   extension_spec: {
     name: "amp-dailymotion"
+    version_name: "v1.0"
+    version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-dailymotion 0.1 and latest
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies: "amp-dailymotion 0.1"
+  excludes: "amp-dailymotion 1.0"
+  extension_spec: {
+    name: "amp-dailymotion"
+    version_name: "v0.1"
     version: "0.1"
     version: "latest"
     requires_usage: EXEMPTED
