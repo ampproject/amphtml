@@ -168,14 +168,12 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     // trustworthiness of publishers before sending data to them.
     if (this.doesContainFormElement_()) {
       this.domainLabelEl = this.win.document.createElement('div');
-      this.domainLabelEl.classList.add(
-        'i-amphtml-story-page-attachment-domain-label');
+      this.domainLabelEl.classList.add('i-amphtml-story-page-attachment-domain-label');
       if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-        this.domainLabelEl.classList.add(
-          'i-amphtml-amp-story-page-attachment-ui-v2');
+        this.domainLabelEl.classList.add('i-amphtml-amp-story-page-attachment-ui-v2');
       }
       this.maybeSetDarkThemeForElement_(this.domainLabelEl);
-      this.domainLabelEl.innerHTML = this.getPublisherDomain_();
+      this.domainLabelEl.textContent = this.getPublisherDomain_();
       this.headerEl.after(this.domainLabelEl);
     }
 
@@ -597,6 +595,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     // match the subsequent string of consecutive characters that are valid
     // in a domain.
     const publisherDomainRegex = new RegExp('(?<=\/\/)[a-zA-z0-0.-]+');
+    // TODO(#23915): Confirm that this regex works for all AMP URLs.
     return this.getAmpDoc().getUrl().match(publisherDomainRegex);
   }
 }
