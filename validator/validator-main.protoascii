@@ -100,14 +100,6 @@ tags: {  # HTML tag for non-transformed AMP.
   tag_name: "HTML"
   mandatory: true
   mandatory_parent: "!DOCTYPE"
-  attrs: {
-    # This attribute should always be invalid. See https://github.com/ampproject/amphtml/pull/27174
-    # To align with HTML spec, custom attributes should be prefixed with `data-`.
-    # Because `data-*` attributes are always valid AMP, the following rules explicitly disallow usage.
-    name: "data-amp-autocomplete-opt-in"
-    value: "false"
-    disallowed_value_regex: "false"
-  }
   unique: true
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
 }

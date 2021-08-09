@@ -29,12 +29,6 @@ limitations under the License.
 
 The `amp-autocomplete` extension should be used for suggesting completed items based on user input to help users carry out their task more quickly.
 
-[filter formats="email"]
-
-Warning: This component is currently experimental in the AMP for Email format as email clients add support for the feature. Until the component is publicly available in the format, you will notice the component is in some cases valid and sendable in emails but may be only functioning in its fallback behavior capacity across email clients as well as in their respective playgrounds. The fallback for the component does not display autocomplete suggestions, and will behave as the unenhanced `input` or `textarea` field it is given.
-
-[/filter] <!-- formats="email" -->
-
 This can be used to power search experiences, in cases where the user may not know the full range of potential inputs, or in forms to help ensure inputs where there may be multiple ways to express the same intent (using a state abbreviation instead of its full name, for example) yield more predictable results.
 
 Example:
