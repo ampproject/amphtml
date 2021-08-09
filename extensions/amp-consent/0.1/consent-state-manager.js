@@ -35,7 +35,7 @@ import {dev, devAssert} from '../../../src/log';
 import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
 import {hasOwn} from '#core/types/object';
 import {once} from '#core/types/function';
-import {getRandomString64} from '#service/cid-impl'
+import {getRandomString64} from '#service/cid-impl';
 
 const TAG = 'CONSENT-STATE-MANAGER';
 
@@ -74,7 +74,8 @@ export class ConsentStateManager {
     /** @private {!Promise} */
     this.hasAllPurposeConsentsPromise_ = allPurposeConsentsDeferred.promise;
 
-    this.getConsentPageViewID64 = once(() => getRandomString64(ampdoc.win))
+    /** @private {?string} */
+    this.getConsentPageViewID64_ = once(() => getRandomString64(ampdoc.win));
   }
 
   /**

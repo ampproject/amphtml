@@ -24,7 +24,6 @@ import {devAssert, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '#core/dom';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 
-
 const TAG = 'amp-consent/consent-config';
 const AMP_STORY_CONSENT_TAG = 'amp-story-consent';
 
@@ -323,24 +322,25 @@ export class ConsentConfig {
  * Expand consent endpoint url
  * @param {!Element|!ShadowRoot} element
  * @param {string} url
+ * @param {Object<string, *>=} opt_vars
  * @return {!Promise<string>}
  */
 export function expandConsentEndpointUrl(element, url, opt_vars) {
   const consentStateManagerPromise = getServicePromiseForDoc(
     Services.ampdoc(element),
     'consentStateManager'
-  )
-  return consentStateManagerPromise.then(consentStateManager => {
+  );
+  return consentStateManagerPromise.then((consentStateManager) => {
     return Services.urlReplacementsForDoc(element).expandUrlAsync(
       url,
       {
         'CLIENT_ID': getConsentCID(element),
-        'CONSENT_PAGE_VIEW_ID_64': consentStateManager.getConsentPageViewID64,
-        ... opt_vars
+        'CONSENT_PAGE_VIEW_ID_64': consentStateManager.getConsentPageViewID64_,
+        ...opt_vars,
       },
       {...opt_vars, ...CONSENT_VARS_ALLOWED_LIST}
-    )
-  })
+    );
+  });
 }
 
 /**

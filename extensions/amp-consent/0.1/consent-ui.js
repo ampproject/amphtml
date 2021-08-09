@@ -177,11 +177,8 @@ export class ConsentUI {
     /** @private @const {!Function} */
     this.boundHandleIframeMessages_ = this.handleIframeMessages_.bind(this);
 
-    /** @private {?Promise<string>} */
-    this.promptUISrcPromise_ = null;
-
+    /** @private {?Object} */
     this.config_ = config;
-
 
     this.init_(config, opt_postPromptUI);
   }
@@ -222,10 +219,7 @@ export class ConsentUI {
       this.isCreatedIframe_ = true;
       assertHttpsUrl(promptUISrc, this.parent_);
       // TODO: Preconnect to the promptUISrc?
-      // this.promptUISrcPromise_ = expandConsentEndpointUrl(
-      //   this.parent_,
-      //   promptUISrc
-      // );
+
       this.ui_ = this.createPromptIframe_(promptUISrc);
       this.placeholder_ = this.createPlaceholder_();
       this.clientConfig_ = config['clientConfig'] || null;
@@ -568,23 +562,19 @@ export class ConsentUI {
     classList.add(consentUiClasses.loading);
     toggle(dev().assertElement(this.ui_), false);
 
-
     this.removeIframe_ = false;
     const iframePromise = this.getClientInfoPromise_().then((clientInfo) => {
       return expandConsentEndpointUrl(
         this.parent_,
         this.config_['promptUISrc'],
-        {CONSENT_INFO : property => JSON.stringify(clientInfo[property])}
+        {CONSENT_INFO: (property) => JSON.stringify(clientInfo[property])}
       ).then((expandedSrc) => {
-        console.log(expandedSrc)
         this.ui_.src = expandedSrc;
         this.ui_.setAttribute('name', JSON.stringify(clientInfo));
         this.win_.addEventListener('message', this.boundHandleIframeMessages_);
         insertAtStart(this.parent_, dev().assertElement(this.ui_));
       });
     });
-
-
 
     return Promise.all([
       iframePromise,

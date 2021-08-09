@@ -51,6 +51,8 @@ import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {isArray, isEnumValue, isObject} from '#core/types';
 import {realChildElements} from '#core/dom/query';
+import {once} from '#core/types/function';
+import {getRandomString64} from '#service/cid-impl';
 
 import {isExperimentOn} from '#experiments';
 
@@ -137,6 +139,11 @@ export class AmpConsent extends AMP.BaseElement {
     this.boundHandleIframeMessages_ = this.isTcfPostMessageProxyExperimentOn_
       ? this.handleIframeMessages_.bind(this)
       : null;
+
+    /** @private {?string} */
+    this.getConsentPageViewID64_ = once(() =>
+      getRandomString64(this.ampdoc.win)
+    );
   }
 
   /** @override */
