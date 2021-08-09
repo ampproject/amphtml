@@ -1102,6 +1102,17 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         );
       });
 
+      it('should sync replace AMP_GEO(ISOCountry) and AMP_GEO with unknown when geo is not available', () => {
+        env.sandbox.stub(Services, 'geoForDocOrNull').returns(null);
+        getReplacements().then((replacements) =>
+          expect(
+            replacements.expandUrlSync(
+              '?geo=AMP_GEO,country=AMP_GEO(ISOCountry)'
+            )
+          ).to.equal('?geo=unknown,country=unknown')
+        );
+      });
+
       it.configure()
         .skipFirefox()
         .run('should accept $expressions', () => {
