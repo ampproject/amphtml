@@ -538,10 +538,13 @@ export class ConsentInstance {
         body: request,
         ampCors: false,
       };
+      const consentPageViewId64 = Services.documentInfoForDoc(this.ampdoc_).consentPageViewId64
+      console.log("yeet", consentPageViewId64)
       this.ampdoc_.whenFirstVisible().then(() => {
         expandConsentEndpointUrl(
           this.ampdoc_.getHeadNode(),
-          /** @type {string} */ (this.onUpdateHref_)
+          /** @type {string} */ (this.onUpdateHref_),
+          consentPageViewId64
         ).then((expandedUpdateHref) => {
           Services.xhrFor(this.ampdoc_.win).fetchJson(expandedUpdateHref, init);
         });

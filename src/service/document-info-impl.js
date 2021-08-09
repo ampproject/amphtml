@@ -89,6 +89,7 @@ export class DocInfo {
         ? parseUrlDeprecated(canonicalTag.href).href
         : sourceUrl;
     }
+    const consentPageViewId = getPageViewId(ampdoc.win);
     const pageViewId = getPageViewId(ampdoc.win);
     const linkRels = getLinkRels(ampdoc.win.document);
     const viewport = getViewport(ampdoc.win.document);
@@ -100,6 +101,16 @@ export class DocInfo {
         return getSourceUrl(ampdoc.getUrl());
       },
       canonicalUrl,
+      consentPageViewId,
+      get consentPageViewId64() {
+        // Must be calculated async since getRandomString64() can load the
+        // amp-crypto-polyfill on some browsers, and extensions service
+        // may not be registered yet.
+        if (!this.consentPageViewId64_) {
+          this.consentPageViewId64_ = getRandomString64(ampdoc.win);
+        }
+        return this.consentPageViewId64_;
+      },
       pageViewId,
       get pageViewId64() {
         // Must be calculated async since getRandomString64() can load the
@@ -116,6 +127,7 @@ export class DocInfo {
     });
   }
 }
+
 
 /**
  * Returns a relatively low entropy random string.

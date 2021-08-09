@@ -219,10 +219,10 @@ export class ConsentUI {
       this.isCreatedIframe_ = true;
       assertHttpsUrl(promptUISrc, this.parent_);
       // TODO: Preconnect to the promptUISrc?
-      this.promptUISrcPromise_ = expandConsentEndpointUrl(
-        this.parent_,
-        promptUISrc
-      );
+      // this.promptUISrcPromise_ = expandConsentEndpointUrl(
+      //   this.parent_,
+      //   promptUISrc
+      // );
       this.ui_ = this.createPromptIframe_(promptUISrc);
       this.placeholder_ = this.createPlaceholder_();
       this.clientConfig_ = config['clientConfig'] || null;
@@ -248,7 +248,7 @@ export class ConsentUI {
     classList.remove('amp-hidden');
     // Add to fixed layer
     this.baseInstance_.getViewport().addToFixedLayer(this.parent_);
-    if (this.isCreatedIframe_ && this.promptUISrcPromise_) {
+    if (this.isCreatedIframe_) {
       // show() can be called multiple times, but notificationsUiManager
       // ensures that only 1 is shown at a time, so no race condition here
       this.isActionPromptTrigger_ = isActionPromptTrigger;
@@ -565,7 +565,13 @@ export class ConsentUI {
     classList.add(consentUiClasses.loading);
     toggle(dev().assertElement(this.ui_), false);
 
+    this.promptUISrcPromise_ = expandConsentEndpointUrl(
+      this.parent_,
+      promptUISrc
+    );
+
     const iframePromise = this.promptUISrcPromise_.then((expandedSrc) => {
+      console.log(expandedSrc)
       this.removeIframe_ = false;
       this.ui_.src = expandedSrc;
       return this.getClientInfoPromise_().then((clientInfo) => {
@@ -574,6 +580,8 @@ export class ConsentUI {
         insertAtStart(this.parent_, dev().assertElement(this.ui_));
       });
     });
+
+
 
     return Promise.all([
       iframePromise,
