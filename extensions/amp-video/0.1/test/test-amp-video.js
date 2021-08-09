@@ -903,7 +903,7 @@ describes.realWin(
         });
       });
 
-      describe('max bitrate', () => {
+      describe.only('max bitrate', () => {
         beforeEach(() => {
           toggleExperiment(env.win, 'amp-story-first-page-max-bitrate', true);
         });
