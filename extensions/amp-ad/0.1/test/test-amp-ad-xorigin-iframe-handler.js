@@ -31,6 +31,7 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
   let iframeHandler;
   let iframe;
   let testIndex = 0;
+  let clock;
 
   beforeEach(() => {
     const ampdocService = Services.ampdocServiceFor(window);
@@ -335,6 +336,89 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
             type: 'embed-size-denied',
             sentinel: 'amp3ptest' + testIndex,
           });
+        });
+    });
+
+    it('should be able to use embed-size API, change size deny repeated attempts, but then works after 500ms delay', () => {
+      clock = env.sandbox.useFakeTimers();
+      clock.tick(0);
+      const updateSizeWrapper = env.sandbox.stub(
+        adImpl.uiHandler,
+        'updateSize'
+      );
+
+      //expected to fail (invalid request)
+      updateSizeWrapper.callsFake(() => {
+        return Promise.resolve({
+          success: false,
+          newWidth: 114,
+          newHeight: 217,
+        });
+      });
+      iframe.postMessageToParent({
+        width: 114,
+        height: 217,
+        type: 'embed-size',
+        sentinel: 'amp3ptest' + testIndex,
+      });
+      iframe.expectMessageFromParent('embed-size-denied').then((data) => {
+        expect(data).to.jsonEqual({
+          requestedWidth: 114,
+          requestedHeight: 217,
+          type: 'embed-size-denied',
+          sentinel: 'amp3ptest' + testIndex,
+        });
+      });
+
+      //expected to fail (invalid request was just made, and 500 ms have not passed)
+      updateSizeWrapper.callsFake(() => {
+        return Promise.resolve({
+          success: true,
+          newWidth: 114,
+          newHeight: 217,
+        });
+      });
+      iframe.postMessageToParent({
+        width: 114,
+        height: '217', // should be tolerant to string number
+        type: 'embed-size',
+        sentinel: 'amp3ptest' + testIndex,
+      });
+      iframe.expectMessageFromParent('embed-size-denied').then((data) => {
+        expect(data).to.jsonEqual({
+          requestedWidth: 114,
+          requestedHeight: 217,
+          type: 'embed-size-denied',
+          sentinel: 'amp3ptest' + testIndex,
+        });
+      });
+
+      clock.tick(500);
+
+      //expect to succeed (500 ms have passed, valid request was just made)
+      updateSizeWrapper.callsFake(() => {
+        return Promise.resolve({
+          success: true,
+          newWidth: 114,
+          newHeight: 217,
+        });
+      });
+      iframe.postMessageToParent({
+        width: 114,
+        height: '217', // should be tolerant to string number
+        type: 'embed-size',
+        sentinel: 'amp3ptest' + testIndex,
+      });
+      return iframe
+        .expectMessageFromParent('embed-size-changed')
+        .then((data) => {
+          expect(data).to.jsonEqual({
+            requestedWidth: 114,
+            requestedHeight: 217,
+            type: 'embed-size-changed',
+            sentinel: 'amp3ptest' + testIndex,
+          });
+          expect(adImpl.uiHandler.onResizeSuccess).to.be.called;
         });
     });
 

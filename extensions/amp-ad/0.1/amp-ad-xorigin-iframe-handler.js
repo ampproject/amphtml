@@ -476,13 +476,6 @@ export class AmpAdXOriginIframeHandler {
         .updateSize(height, width, iframeHeight, iframeWidth, event)
         .then(
           (info) => {
-            if (!info.success) {
-              //invalid request parameters disable requests for 500ms
-              RESIZE_REQUESTS_ENABLED = false;
-              setTimeout(() => {
-                RESIZE_REQUESTS_ENABLED = true;
-              }, MSEC_REPEATED_REQUEST_DELAY);
-            }
             this.uiHandler_.onResizeSuccess();
             this.sendEmbedSizeResponse_(
               info.success,
@@ -491,7 +484,15 @@ export class AmpAdXOriginIframeHandler {
               info.newHeight,
               source,
               origin
-            );
+            ).then(() => {
+              if (!info.success) {
+                //invalid request parameters disable requests for 500ms
+                RESIZE_REQUESTS_ENABLED = false;
+                setTimeout(() => {
+                  RESIZE_REQUESTS_ENABLED = true;
+                }, MSEC_REPEATED_REQUEST_DELAY);
+              }
+            });
           },
           () => {}
         );
