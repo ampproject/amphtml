@@ -16,6 +16,7 @@
 
 import * as trackPromise from '../../src/impression';
 
+import {AmpGeo} from '../../extensions/amp-geo/0.1/amp-geo';
 import {
   extractClientIdFromGaCookie,
   installUrlReplacementsServiceForDoc,
@@ -1065,7 +1066,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           });
       });
 
-      it('should replace AMP_GEO(ISOCountry) and AMP_GEO', () => {
+      it('should async replace AMP_GEO(ISOCountry) and AMP_GEO', () => {
         env.sandbox.stub(Services, 'geoForDocOrNull').returns(
           Promise.resolve({
             'ISOCountry': 'unknown',
@@ -1079,6 +1080,25 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           (res) => {
             expect(res).to.equal('?geo=nafta%2Cwaldo,country=unknown');
           }
+        );
+      });
+
+      it('should sync replace AMP_GEO(ISOCountry) and AMP_GEO', () => {
+        env.sandbox.stub(Services, 'geoForDocOrNull').returns(
+          Promise.resolve({
+            'ISOCountry': 'unknown',
+            'ISOCountryGroups': ['nafta', 'waldo'],
+            'nafta': true,
+            'waldo': true,
+            'matchedISOCountryGroups': ['nafta', 'waldo'],
+          })
+        );
+        getReplacements().then((replacements) =>
+          expect(
+            replacements.expandUrlSync(
+              '?geo=AMP_GEO,country=AMP_GEO(ISOCountry)'
+            )
+          ).to.equal('?geo=nafta%2Cwaldo,country=unknown')
         );
       });
 
