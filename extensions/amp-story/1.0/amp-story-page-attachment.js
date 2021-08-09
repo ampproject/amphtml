@@ -88,7 +88,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     super(element);
 
     /**
-     * The header label containing the publisher domain.
+     * The label containing the publisher domain.
      * @protected {?Element}
      */
     this.domainLabelEl = null;
@@ -148,7 +148,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    */
   layoutCallback() {
     super.layoutCallback();
-
     // Outlink attachment v2 renders an image and must be built in layoutCallback.
     if (
       this.type_ === AttachmentType.OUTLINK &&
@@ -164,7 +163,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    */
   buildInline_() {
     // Page attachments that contain forms must display the page's publisher
-    // domain within the header. This enables users to gauge the
+    // domain above the attachment's contents. This enables users to gauge the
     // trustworthiness of publishers before sending data to them.
     if (this.doesContainFormElement_()) {
       this.domainLabelEl = this.win.document.createElement('div');
