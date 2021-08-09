@@ -586,7 +586,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   doesContainFormElement_() {
-    return Boolean(this.element.querySelector('form'));
+    return true;//Boolean(this.element.querySelector('form'));
   }
 
   /**
@@ -598,7 +598,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     // This regex is designed to ignore the URL's protocol prefix and then
     // match the subsequent string of consecutive characters that are valid
     // in a domain.
-    const publisherDomainRegex = new RegExp('(?<=\/\/)[a-zA-z0-0.-]+');
+    const publisherDomainRegex = new RegExp('(?<=//)[a-zA-z0-0.-]+');
     // TODO(#23915): Confirm that this regex works for all AMP URLs.
     return this.getAmpDoc().getUrl().match(publisherDomainRegex);
   }
