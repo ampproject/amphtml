@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
+import {whenDocumentReady} from '#core/document-ready';
+
+import {toggleExperiment} from '#experiments';
+
 import {Services} from '#service';
-import {ViewportBindingIosEmbedWrapper_} from '#service/viewport/viewport-binding-ios-embed-wrapper';
-import {ViewportBindingNatural_} from '#service/viewport/viewport-binding-natural';
 import {installDocService} from '#service/ampdoc-impl';
 import {installPlatformService} from '#service/platform-impl';
+import {ViewportBindingIosEmbedWrapper_} from '#service/viewport/viewport-binding-ios-embed-wrapper';
+import {ViewportBindingNatural_} from '#service/viewport/viewport-binding-natural';
 import {installVsyncService} from '#service/vsync-impl';
-import {toggleExperiment} from '#experiments';
-import {whenDocumentReady} from '#core/document-ready';
 
 describes.realWin('ViewportBindingNatural', {ampCss: true}, (env) => {
   let binding;

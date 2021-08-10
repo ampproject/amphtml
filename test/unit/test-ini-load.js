@@ -15,8 +15,10 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
 import {removeItem} from '#core/types/array';
+
+import {Services} from '#service';
+
 import {
   whenContentIniLoadInOb,
   whenContentIniLoadMeasure,

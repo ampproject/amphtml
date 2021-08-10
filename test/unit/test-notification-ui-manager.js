@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {NotificationUiManager} from '#service/notification-ui-manager';
+
 import {macroTask} from '#testing/yield';
 
 describes.realWin('NotificationUiManager', {amp: 1}, (env) => {

@@ -16,9 +16,9 @@
 
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import stringify from 'json-stable-stringify';
 import sinon from 'sinon'; // eslint-disable-line local/no-import
 import sinonChai from 'sinon-chai';
-import stringify from 'json-stable-stringify';
 
 chai.use(sinonChai);
 window.chai = chai;

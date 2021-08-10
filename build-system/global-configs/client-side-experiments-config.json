@@ -5,12 +5,16 @@
       "percentage": 0.1
     },
     {
+      "name": "amp-story-desktop-one-panel",
+      "percentage": 1
+    },
+    {
       "name": "story-disable-animations-first-page",
       "percentage": 0.5
     },
     {
-      "name": "amp-sticky-ad-to-amp-ad",
-      "percentage": 0.05
+      "name": "story-load-inactive-outside-viewport",
+      "percentage": 0.1
     }
   ]
 }

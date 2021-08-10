@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * @interface {babel.PluginPass}
+ * @return {babel.PluginObj}
+ */
 module.exports = function () {
   return {
     name: 'remove-strict-directives',
