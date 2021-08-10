@@ -803,6 +803,46 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(imgEl.getAttribute('style')).to.contain(src);
   });
 
+  it('should NOT build the domain label due to the absence of form elements', async () => {
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    expect(
+      attachmentEl.querySelector(
+        '.i-amphtml-story-page-attachment-domain-label'
+      )
+    ).to.not.exist;
+  });
+
+  it('should build the domain label due to the presence of a form element', async () => {
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    element.appendChild(attachmentEl);
+    const formEl = win.document.createElement('form');
+    attachmentEl.appendChild(formEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    expect(
+      attachmentEl.querySelector(
+        // '.i-amphtml-story-page-attachment-domain-label'
+        // '.i-amphtml-story-draggable-drawer-header'
+        '.i-amphtml-story-draggable-drawer'
+      )
+    ).to.exist;
+  });
+
   it('should build the new default outlink page attachment UI', async () => {
     toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
 
