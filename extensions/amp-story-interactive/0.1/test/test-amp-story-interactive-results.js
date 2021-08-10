@@ -28,20 +28,8 @@ import {
 import {InteractiveType} from '../amp-story-interactive-abstract';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
-import {addConfigToInteractive} from './helpers';
+import {addConfigToInteractive, addThresholdsToInteractive} from './helpers';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-
-const addThresholdsToInteractive = (interactive, thresholdList) => {
-  addConfigToInteractive(interactive, thresholdList.length, null, [
-    'results-category',
-  ]);
-  thresholdList.forEach((threshold, index) => {
-    interactive.element.setAttribute(
-      `option-${index + 1}-results-threshold`,
-      threshold
-    );
-  });
-};
 
 describes.realWin(
   'amp-story-interactive-results',
