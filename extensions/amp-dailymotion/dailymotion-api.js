@@ -41,23 +41,23 @@ export function getDailymotionIframeSrc(
   uiLogo,
   implicitParams
 ) {
-  let iframeUrl = addParamsToUrl(
+  return addParamsToUrl(
     `https://www.dailymotion.com/embed/video/${encodeURIComponent(
       videoId
     )}?api=1&html=1&app=amp`,
-    dict({
-      'endscreen-enable': endscreenEnable,
-      'info': info,
-      'mute': mute,
-      'sharing-enable': sharingEnable,
-      'start': start,
-      'ui-highlight': uiHighlight,
-      'ui-logo': uiLogo,
-    })
+    Object.assign(
+      dict({
+        'endscreen-enable': endscreenEnable,
+        'info': info,
+        'mute': mute,
+        'sharing-enable': sharingEnable,
+        'start': start,
+        'ui-highlight': uiHighlight,
+        'ui-logo': uiLogo,
+      }),
+      implicitParams
+    )
   );
-
-  iframeUrl = addParamsToUrl(iframeUrl, implicitParams);
-  return iframeUrl;
 }
 
 /**
