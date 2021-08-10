@@ -205,3 +205,15 @@ export const populateQuiz = (
   addConfigToInteractive(quiz, numOptions, correctOption);
   quiz.element.setAttribute('id', 'TEST_quizId');
 };
+
+export const addThresholdsToInteractive = (interactive, thresholdList) => {
+  addConfigToInteractive(interactive, thresholdList.length, null, [
+    'results-category',
+  ]);
+  thresholdList.forEach((threshold, index) => {
+    interactive.element.setAttribute(
+      `option-${index + 1}-results-threshold`,
+      threshold
+    );
+  });
+};

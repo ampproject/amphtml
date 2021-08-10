@@ -33,7 +33,15 @@ import {htmlFor} from '#core/dom/static-template';
 export let InteractiveResultsDef;
 
 /**
- * Generates the template for the quiz.
+ * @typedef {{
+ *    option: ?./amp-story-interactive-abstract.OptionConfigType,
+ *    interactiveId: string
+ * }}
+ */
+export let InteractiveStateEntryType;
+
+/**
+ * Generates the template for the results component.
  *
  * @param {!Element} element
  * @return {!Element}
@@ -42,20 +50,32 @@ const buildResultsTemplate = (element) => {
   const html = htmlFor(element);
   return html`
     <div class="i-amphtml-story-interactive-results-container">
-      <div class="i-amphtml-story-interactive-results-top">
-        <div class="i-amphtml-story-interactive-results-top-score">SCORE:</div>
-        <div class="i-amphtml-story-interactive-results-top-value">
-          <span class="i-amphtml-story-interactive-results-top-value-number"
-            >100</span
-          ><span>%</span>
-        </div>
-      </div>
       <div class="i-amphtml-story-interactive-results-image-border">
         <div class="i-amphtml-story-interactive-results-image"></div>
       </div>
       <div class="i-amphtml-story-interactive-results-prompt"></div>
       <div class="i-amphtml-story-interactive-results-title"></div>
       <div class="i-amphtml-story-interactive-results-description"></div>
+    </div>
+  `;
+};
+
+/**
+ * Generates the template for the top bar of the results component.
+ *
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildResultsTopTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <div class="i-amphtml-story-interactive-results-top">
+      <div class="i-amphtml-story-interactive-results-top-score">SCORE:</div>
+      <div class="i-amphtml-story-interactive-results-top-value">
+        <span class="i-amphtml-story-interactive-results-top-value-number"
+          >100</span
+        ><span>%</span>
+      </div>
     </div>
   `;
 };
@@ -186,14 +206,24 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
   }
 
   /** @override */
-  buildCallback() {
-    return super.buildCallback(CSS);
+  buildCallback(additionalCSS = '') {
+    return super.buildCallback(CSS + additionalCSS);
   }
 
   /** @override */
   buildComponent() {
     this.rootEl_ = buildResultsTemplate(this.element);
+    this.buildTop();
     return this.rootEl_;
+  }
+
+  /**
+   * Inserts the HTML for the top bar into the rest of the results component.
+   *
+   * @protected
+   */
+  buildTop() {
+    this.rootEl_.prepend(buildResultsTopTemplate(this.element));
   }
 
   /** @override */
@@ -205,17 +235,17 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
     }
     this.storeService_.subscribe(
       StateProperty.INTERACTIVE_REACT_STATE,
-      (data) => this.onInteractiveReactStateUpdate_(data),
+      (data) => this.onInteractiveReactStateUpdate(data),
       true
     );
   }
 
   /**
    * Receives state updates and fills up DOM with the result
-   * @param {!Map<string, {option: ?./amp-story-interactive-abstract.OptionConfigType, interactiveId: string}>} interactiveState
-   * @private
+   * @param {!Map<string, InteractiveStateEntryType>} interactiveState
+   * @protected
    */
-  onInteractiveReactStateUpdate_(interactiveState) {
+  onInteractiveReactStateUpdate(interactiveState) {
     const results = processResults(interactiveState, this.options_);
     this.rootEl_.classList.toggle(HAS_SCORE_CLASS, results.percentage != null);
     this.rootEl_.querySelector(
