@@ -16,6 +16,8 @@
 
 import {iterateCursor} from '#core/dom';
 import {ancestorElementsByTag} from '#core/dom/query';
+import {toArray} from '#core/types/array';
+import {dict} from '#core/types/object';
 
 /** @const {string} */
 const FORM_PROP_ = '__AMP_FORM';
@@ -44,7 +46,7 @@ export function setFormForElement(element, form) {
  */
 export function getFormAsObject(form) {
   const {elements} = form;
-  const data = /** @type {!JsonObject} */ ({});
+  const data = dict();
   // <button> is handled separately
   const submittableTagsRegex = /^(?:input|select|textarea)$/i;
   // type=submit is handled separately
@@ -80,12 +82,12 @@ export function getFormAsObject(form) {
   }
 
   const submitButton = getSubmitButtonUsed(form);
-  if (submitButton && submitButton.name) {
-    const {name} = submitButton;
+  if (submitButton?.name) {
+    const {name, value} = submitButton;
     if (data[name] === undefined) {
       data[name] = [];
     }
-    data[submitButton.name].push(submitButton.value);
+    data[name].push(value);
   }
 
   // Wait until the end to remove the empty values, since
@@ -114,26 +116,12 @@ export function getFormAsObject(form) {
  */
 export function getSubmitButtonUsed(form) {
   const {elements} = form;
-  const {length} = elements;
   const {activeElement} = form.ownerDocument;
-  let firstSubmitButton = null;
 
-  for (let i = 0; i < length; i++) {
-    const element = elements[i];
-
-    if (!isSubmitButton(element)) {
-      continue;
-    }
-
-    if (!firstSubmitButton) {
-      firstSubmitButton = element;
-    }
-
-    if (activeElement == element) {
-      return activeElement;
-    }
-  }
-  return firstSubmitButton;
+  const submitBtns = toArray(elements).filter(isSubmitButton);
+  return submitBtns.includes(activeElement)
+    ? activeElement
+    : submitBtns[0] || null;
 }
 
 /**
@@ -152,17 +140,10 @@ function isSubmitButton(element) {
  * @return {boolean}
  */
 export function isDisabled(element) {
-  if (element.disabled) {
-    return true;
-  }
-
-  const ancestors = ancestorElementsByTag(element, 'fieldset');
-  for (let i = 0; i < ancestors.length; i++) {
-    if (ancestors[i].disabled) {
-      return true;
-    }
-  }
-  return false;
+  return (
+    element.disabled ||
+    ancestorElementsByTag(element, 'fieldset').some((el) => el.disabled)
+  );
 }
 
 /**
@@ -174,13 +155,9 @@ export function isFieldDefault(field) {
   switch (field.type) {
     case 'select-multiple':
     case 'select-one':
-      const {options} = field;
-      for (let j = 0; j < options.length; j++) {
-        if (options[j].selected !== options[j].defaultSelected) {
-          return false;
-        }
-      }
-      break;
+      return toArray(field.options).every(
+        ({defaultSelected, selected}) => selected === defaultSelected
+      );
     case 'checkbox':
     case 'radio':
       return field.checked === field.defaultChecked;
