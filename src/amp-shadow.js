@@ -24,14 +24,15 @@ import './polyfills';
 
 import * as mode from '#core/mode';
 
-import {deactivateChunking} from './chunk';
-import {doNotTrackImpression} from './impression';
-import {adoptShadowMode} from './runtime';
-import {installDocService} from './service/ampdoc-impl';
+import {installDocService} from '#service/ampdoc-impl';
 import {
   installBuiltinElements,
   installRuntimeServices,
-} from './service/core-services';
+} from '#service/core-services';
+
+import {deactivateChunking} from './chunk';
+import {doNotTrackImpression} from './impression';
+import {adoptShadowMode} from './runtime';
 import {bodyAlwaysVisible} from './style-installer';
 
 // This feature doesn't make sense in shadow mode as it only applies to

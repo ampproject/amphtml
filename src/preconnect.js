@@ -19,10 +19,12 @@
  * connection before the real request can be made.
  */
 
-import {whenDocumentComplete} from './core/document-ready';
-import {htmlFor} from './core/dom/static-template';
+import {whenDocumentComplete} from '#core/document-ready';
+import {htmlFor} from '#core/dom/static-template';
+
+import {Services} from '#service';
+
 import {dev} from './log';
-import {Services} from './service';
 import {registerServiceBuilder} from './service-helpers';
 import {parseUrlDeprecated} from './url';
 

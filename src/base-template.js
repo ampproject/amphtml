@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {isElement} from './core/types';
+import {isElement} from '#core/types';
+
+import {Services} from '#service';
+
 import {dev} from './log';
-import {Services} from './service';
 
 /**
  * The interface that is implemented by all templates.

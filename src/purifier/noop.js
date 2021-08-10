@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isElement} from '../core/types';
+import {isElement} from '#core/types';
 
 export function dev() {
   return {

@@ -16,8 +16,9 @@
 
 import {adConfig} from '#ads/_config';
 
+import {Services} from '#service';
+
 import {dev} from './log';
-import {Services} from './service';
 
 /**
  * @param {AMP.BaseElement} adElement

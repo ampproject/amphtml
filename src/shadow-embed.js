@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-import {ShadowCSS} from '#third_party/webcomponentsjs/ShadowCSS';
-
-import {iterateCursor} from './core/dom';
-import {escapeCssSelectorIdent} from './core/dom/css-selectors';
-import {setInitialDisplay, setStyle} from './core/dom/style';
+import {iterateCursor} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {setInitialDisplay, setStyle} from '#core/dom/style';
 import {
   ShadowDomVersion,
   getShadowDomSupportedVersion,
   isShadowCssSupported,
-} from './core/dom/web-components';
-import {toArray} from './core/types/array';
-import {toWin} from './core/window';
+} from '#core/dom/web-components';
+import {toArray} from '#core/types/array';
+import {toWin} from '#core/window';
+
+import {Services} from '#service';
+
+import {ShadowCSS} from '#third_party/webcomponentsjs/ShadowCSS';
+
 import {dev, devAssert} from './log';
-import {Services} from './service';
 import {installCssTransformer} from './style-installer';
 import {DomWriterBulk, DomWriterStreamer} from './utils/dom-writer';
 

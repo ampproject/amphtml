@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from './core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
+
+import {Services} from '#service';
+
 import {dev, user, userAssert} from './log';
-import {Services} from './service';
 import {
   SOURCE_ORIGIN_PARAM,
   assertHttpsUrl,

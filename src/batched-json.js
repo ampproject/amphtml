@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {getValueForExpr} from './core/types/object';
+import {getValueForExpr} from '#core/types/object';
+
+import {Services} from '#service';
+
 import {user} from './log';
-import {Services} from './service';
 import {assertHttpsUrl} from './url';
 
 /**
