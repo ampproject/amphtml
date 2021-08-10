@@ -30,6 +30,6 @@ jobs:
         env:
           BODY: ${{ github.event.issue.body }}
           COMMENT_BEFORE: ${{ github.event.changes.body.from }}
-          COMMENT_AFTER: ${{ github.event.comment.body}}
+          COMMENT_AFTER: ${{ github.event.comment.body }}
           STATUS_PAGE_ID: ${{ secrets.STATUS_PAGE_ID }}
           STATUS_PAGE_TOKEN: ${{ secrets.STATUS_PAGE_TOKEN }}
