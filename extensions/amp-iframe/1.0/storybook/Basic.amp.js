@@ -49,3 +49,21 @@ export const WithPlaceholder = () => {
 };
 
 WithPlaceholder.storyName = 'amp-iframe with placeholder';
+
+export const WithResizableIframe = () => {
+  return (
+    <amp-iframe
+      id="sample-resizable-iframe"
+      title="Resizable iframe example"
+      width="100"
+      height="100"
+      sandbox="allow-scripts allow-same-origin"
+      resizable
+      src="/examples/amp-iframe-storybook.html"
+    >
+      <div placeholder>Placeholder</div>
+    </amp-iframe>
+  );
+};
+
+WithResizableIframe.storyName = 'resizable amp-iframe';

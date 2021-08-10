@@ -33,3 +33,19 @@ export const _default = () => {
     ></Iframe>
   );
 };
+
+export const WithResizableIframe = () => {
+  return (
+    <Iframe
+      title="Resizable iframe example"
+      style={{width: 100, height: 100}}
+      sandbox="allow-scripts allow-same-origin"
+      resizable
+      src="/examples/amp-iframe-storybook.html"
+    >
+      <div placeholder>Placeholder</div>
+    </Iframe>
+  );
+};
+
+WithResizableIframe.storyName = 'resizable amp-iframe';
