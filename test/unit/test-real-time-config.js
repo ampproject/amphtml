@@ -19,16 +19,18 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {createElementWithAttributes} from '#core/dom';
+import {isFiniteNumber} from '#core/types';
+
+import {Services} from '#service';
 import {
   RTC_ERROR_ENUM,
   RealTimeConfigManager,
 } from '#service/real-time-config/real-time-config-impl';
-import {Services} from '#service';
 import {Xhr} from '#service/xhr-impl';
+
 import {cancellation} from '../../src/error-reporting';
-import {createElementWithAttributes} from '#core/dom';
 import {dev, user} from '../../src/log';
-import {isFiniteNumber} from '#core/types';
 
 describes.realWin('real-time-config service', {amp: true}, (env) => {
   let element;

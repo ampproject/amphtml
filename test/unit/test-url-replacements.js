@@ -14,30 +14,31 @@
  * limitations under the License.
  */
 
-import * as trackPromise from '../../src/impression';
+import {Observable} from '#core/data-structures/observable';
 
-import {
-  extractClientIdFromGaCookie,
-  installUrlReplacementsServiceForDoc,
-} from '#service/url-replacements-impl';
+import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
+import {cidServiceForDocForTesting} from '#service/cid-impl';
+import {installCryptoService} from '#service/crypto-impl';
 import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
 } from '#service/custom-element-registry';
+import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
+import {
+  extractClientIdFromGaCookie,
+  installUrlReplacementsServiceForDoc,
+} from '#service/url-replacements-impl';
+
+import {createIframePromise} from '#testing/iframe';
 import {mockWindowInterface, stubServiceForDoc} from '#testing/test-helper';
 
-import {Observable} from '#core/data-structures/observable';
-import {Services} from '#service';
-import {cidServiceForDocForTesting} from '#service/cid-impl';
-import {createIframePromise} from '#testing/iframe';
 import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
-import {installCryptoService} from '#service/crypto-impl';
-import {installDocService} from '#service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
-import {parseUrlDeprecated} from '../../src/url';
-import {registerServiceBuilder} from '../../src/service-helpers';
 import {setCookie} from '../../src/cookies';
+import * as trackPromise from '../../src/impression';
 import {user} from '../../src/log';
+import {registerServiceBuilder} from '../../src/service-helpers';
+import {parseUrlDeprecated} from '../../src/url';
 
 describes.sandboxed('UrlReplacements', {}, (env) => {
   let canonical;
