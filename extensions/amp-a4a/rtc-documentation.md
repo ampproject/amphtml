@@ -840,6 +840,8 @@ The Fast Fetch Implementation for FadNetwork then uses this array of RTC respons
 }
 ```
 
+pub-8924498097353634
+
 **Result of merging successful RTC Callouts 1, 4, and 5**
 
 FadNetwork then constructs and encodes their Ad URL as:
