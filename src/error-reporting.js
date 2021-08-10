@@ -20,19 +20,19 @@ import {
   isUserErrorMessage,
 } from '#core/error/message-helpers';
 import * as mode from '#core/mode';
+import {findIndex} from '#core/types/array';
+import {exponentialBackoff} from '#core/types/function/exponential-backoff';
+import {dict} from '#core/types/object';
+
+import {experimentTogglesOrNull, getBinaryType, isCanary} from '#experiments';
+
+import {Services} from '#service';
 
 import {triggerAnalyticsEvent} from './analytics';
 import {urls} from './config';
-import {AmpEvents} from './core/constants/amp-events';
-import {duplicateErrorIfNecessary} from './core/error';
-import {findIndex} from './core/types/array';
-import {exponentialBackoff} from './core/types/function/exponential-backoff';
-import {dict} from './core/types/object';
 import {isLoadErrorMessage} from './event-helper';
-import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
 import {dev, setReportError} from './log';
 import {getMode} from './mode';
-import {Services} from './service';
 import {makeBodyVisibleRecovery} from './style-installer';
 import {isProxyOrigin} from './url';
 

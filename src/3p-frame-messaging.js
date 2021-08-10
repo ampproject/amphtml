@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {internalListenImplementation} from './core/dom/event-helper-listen';
-import {dict} from './core/types/object';
-import {tryParseJson} from './core/types/object/json';
+import {internalListenImplementation} from '#core/dom/event-helper-listen';
+import {dict} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
+
 import {dev, devAssert} from './log';
 
 /** @const */
