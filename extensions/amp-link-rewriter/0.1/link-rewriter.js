@@ -25,6 +25,7 @@ const REG_DOMAIN_URL = /^(?:https?:)?(?:\/\/)?([^\/?]+)/i;
 const PAGE_PROP_ALLOWLIST = {
   'SOURCE_URL': true,
   'DOCUMENT_REFERRER': true,
+  'AMP_GEO': true,
 };
 
 export class LinkRewriter {

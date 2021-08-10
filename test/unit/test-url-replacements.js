@@ -1065,7 +1065,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           });
       });
 
-      it('should replace AMP_GEO(ISOCountry) and AMP_GEO', () => {
+      it('should async replace AMP_GEO(ISOCountry) and AMP_GEO', () => {
         env.sandbox.stub(Services, 'geoForDocOrNull').returns(
           Promise.resolve({
             'ISOCountry': 'unknown',
@@ -1079,6 +1079,46 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           (res) => {
             expect(res).to.equal('?geo=nafta%2Cwaldo,country=unknown');
           }
+        );
+      });
+
+      it('should sync replace AMP_GEO(ISOCountry) and AMP_GEO', () => {
+        env.sandbox.stub(Services, 'geoForDocOrNull').returns(
+          Promise.resolve({
+            'ISOCountry': 'unknown',
+            'ISOCountryGroups': ['nafta', 'waldo'],
+            'nafta': true,
+            'waldo': true,
+            'matchedISOCountryGroups': ['nafta', 'waldo'],
+          })
+        );
+        getReplacements().then((replacements) =>
+          expect(
+            replacements.expandUrlSync(
+              '?geo=AMP_GEO,country=AMP_GEO(ISOCountry)'
+            )
+          ).to.equal('?geo=nafta%2Cwaldo,country=unknown')
+        );
+      });
+
+      it('should sync replace AMP_GEO(ISOCountry) and AMP_GEO with unknown when geo is not available', () => {
+        env.sandbox.stub(Services, 'geoForDocOrNull').returns(null);
+        getReplacements().then((replacements) =>
+          expect(
+            replacements.expandUrlSync(
+              '?geo=AMP_GEO,country=AMP_GEO(ISOCountry)'
+            )
+          ).to.equal('?geo=unknown,country=unknown')
+        );
+      });
+
+      it('should sync replace AMP_GEO(ISOCountry) and AMP_GEO with unknown when geo is unknown', () => {
+        getReplacements().then((replacements) =>
+          expect(
+            replacements.expandUrlSync(
+              '?geo=AMP_GEO,country=AMP_GEO(ISOCountry)'
+            )
+          ).to.equal('?geo=unknown,country=unknown')
         );
       });
 
