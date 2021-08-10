@@ -21,8 +21,7 @@ import {
   EMPTY_METADATA,
   setMediaSession,
 } from '../../../src/mediasession-helper';
-
-const {useCallback, useEffect, useImperativeHandle, useMemo, useRef} = Preact;
+import {useCallback, useEffect, useImperativeHandle, useMemo, useRef} from '#preact';
 
 /**
  * @param {!AudioDef.Props} props
@@ -95,9 +94,7 @@ export function AudioWithRef(
     const win = audioRef.current?.ownerDocument?.defaultView;
     const element = audioRef.current;
 
-    if (validateMediaMetadata) {
-      validateMediaMetadata(element, metaData);
-    }
+    validateMediaMetadata?.(element, metaData);
 
     setMediaSession(win, metaData, playCallback, pauseCallback);
   }, [metaData, validateMediaMetadata, playCallback, pauseCallback]);
