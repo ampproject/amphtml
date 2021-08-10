@@ -72,8 +72,8 @@ export class AmpAdXOriginIframeHandler {
      * cannot be made until a certain amount of time has passed, 500 ms by default
      * (see MSEC_REPEATED_REQUEST_DELAY). Once the timer has cooled down, a new request can be made.
      */
-    /** @type {number} */
-    this.lastRejectedResizeTime_ = 0.0;
+    /** @private {number} */
+    this.lastRejectedResizeTime_ = 0;
 
     /** @private {?LegacyAdIntersectionObserverHost} */
     this.legacyIntersectionObserverApiHost_ = null;
@@ -485,7 +485,7 @@ export class AmpAdXOriginIframeHandler {
               // invalid request parameters, disable requests for 500ms
               this.lastRejectedResizeTime_ = Date.now();
             } else {
-              this.lastRejectedResizeTime_ = 0.0;
+              this.lastRejectedResizeTime_ = 0;
             }
             this.uiHandler_.onResizeSuccess();
             this.sendEmbedSizeResponse_(
