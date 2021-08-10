@@ -347,15 +347,13 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
           'updateSize'
         );
 
-        const dataPromise = iframe.expectMessageFromParent('embed-size-denied');
-
         updateSizeWrapper.resolves({
           success: false,
           newWidth: 114,
           newHeight: 217,
         });
 
-        //expect to fail, first call invalid request
+        // expect to fail, first call invalid request
         iframe.postMessageToParent({
           width: 114,
           height: 217,
@@ -363,7 +361,8 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
           sentinel: 'amp3ptest' + testIndex,
         });
 
-        const data = await dataPromise;
+        const data = await iframe.expectMessageFromParent('embed-size-denied');
+
         expect(data).to.jsonEqual({
           requestedWidth: 114,
           requestedHeight: 217,
@@ -377,10 +376,7 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
           newHeight: 217,
         });
 
-        //expect to fail invalid request right before 500ms
-        const data2Promise =
-          iframe.expectMessageFromParent('embed-size-denied');
-
+        // expect to fail invalid request right before 500ms
         iframe.postMessageToParent({
           width: 120,
           height: 217,
@@ -388,7 +384,8 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
           sentinel: 'amp3ptest' + testIndex,
         });
 
-        const data2 = await data2Promise;
+        const data2 = await iframe.expectMessageFromParent('embed-size-denied');
+
         expect(data2).to.jsonEqual({
           requestedWidth: 120,
           requestedHeight: 217,
@@ -398,10 +395,8 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
       });
 
       it('should be able to use embed-size API, change size deny repeated attempts, but then denies valid attempt before 500ms delay', async () => {
-        //expect to fail, valid request, but called before 500ms
+        // expect to fail, valid request, but called before 500ms
         clock.tick(250);
-        const data3Promise =
-          iframe.expectMessageFromParent('embed-size-denied');
 
         iframe.postMessageToParent({
           width: 114,
@@ -410,7 +405,7 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
           sentinel: 'amp3ptest' + testIndex,
         });
 
-        const data3 = await data3Promise;
+        const data3 = await iframe.expectMessageFromParent('embed-size-denied');
         expect(data3).to.jsonEqual({
           requestedWidth: 114,
           requestedHeight: 217,
@@ -420,10 +415,8 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
       });
 
       it('should be able to use embed-size API, change size deny repeated attempts, but then works after 500ms delay', async () => {
-        //expect to succeed: valid request right after 500ms
+        // expect to succeed: valid request right after 500ms
         clock.tick(500);
-        const data3Promise =
-          iframe.expectMessageFromParent('embed-size-changed');
 
         iframe.postMessageToParent({
           width: 114,
@@ -432,7 +425,10 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
           sentinel: 'amp3ptest' + testIndex,
         });
 
-        const data3 = await data3Promise;
+        const data3 = await iframe.expectMessageFromParent(
+          'embed-size-changed'
+        );
+
         expect(data3).to.jsonEqual({
           requestedWidth: 114,
           requestedHeight: 217,

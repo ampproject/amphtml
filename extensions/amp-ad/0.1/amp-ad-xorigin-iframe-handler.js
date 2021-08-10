@@ -67,13 +67,11 @@ export class AmpAdXOriginIframeHandler {
     /** @type {?HTMLIFrameElement} iframe instance */
     this.iframe = null;
 
-    // This variable keeps keeps track when an invalid resize request is made, and
-    // is associated with each iframe. If the request is invalid, then a new request
-    // cannot be made until a certain amount of time has passed, 500 ms by default
-    //(see MSEC_REPEATED_REQUEST_DELAY). Once the timer has cooled down, a new request can be made.
-    /** @type {boolean} */
-    this.resizeRequestsEnabled_ = true;
-
+    /* This variable keeps keeps track when an invalid resize request is made, and
+     * is associated with each iframe. If the request is invalid, then a new request
+     *cannot be made until a certain amount of time has passed, 500 ms by default
+     *(see MSEC_REPEATED_REQUEST_DELAY). Once the timer has cooled down, a new request can be made.
+     */
     /** @type {number} */
     this.lastRejectedResizeTime_ = 0.0;
 
@@ -187,9 +185,6 @@ export class AmpAdXOriginIframeHandler {
             Date.now() - this.lastRejectedResizeTime_ >=
             MSEC_REPEATED_REQUEST_DELAY
           ) {
-            this.resizeRequestsEnabled_ = true;
-          }
-          if (this.resizeRequestsEnabled_) {
             this.handleResize_(
               data['id'],
               data['height'],
@@ -199,7 +194,7 @@ export class AmpAdXOriginIframeHandler {
               event
             );
           } else {
-            //  need to wait 500ms until next resize request is allowed.
+            // need to wait 500ms until next resize request is allowed.
             this.sendEmbedSizeResponse_(
               false,
               data['id'],
@@ -487,8 +482,7 @@ export class AmpAdXOriginIframeHandler {
         .then(
           (info) => {
             if (!info.success) {
-              //invalid request parameters disable requests for 500ms
-              this.resizeRequestsEnabled_ = false;
+              // invalid request parameters disable requests for 500ms
               this.lastRejectedResizeTime_ = Date.now();
             }
             this.uiHandler_.onResizeSuccess();
