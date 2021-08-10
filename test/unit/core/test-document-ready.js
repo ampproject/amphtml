@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
 import {
   isDocumentReady,
   onDocumentReady,
   whenDocumentComplete,
   whenDocumentReady,
 } from '#core/document-ready';
+
+import {Services} from '#service';
 
 describes.sandboxed('documentReady', {}, (env) => {
   let testDoc;

@@ -15,6 +15,7 @@
  */
 
 import {Services} from '#service';
+
 import {SsrTemplateHelper} from '../../src/ssr-template-helper';
 
 describes.fakeWin(

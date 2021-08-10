@@ -977,7 +977,8 @@ amp-story .amp-video-eq,
 }
 
 amp-story-interactive-binary-poll.i-amphtml-story-interactive-component, amp-story-interactive-results.i-amphtml-story-interactive-component,
-amp-story-interactive-img-poll.i-amphtml-story-interactive-component, amp-story-interactive-img-quiz.i-amphtml-story-interactive-component {
+amp-story-interactive-img-poll.i-amphtml-story-interactive-component, amp-story-interactive-img-quiz.i-amphtml-story-interactive-component,
+amp-story-interactive-results-detailed.i-amphtml-story-interactive-component {
   max-width: 18em !important;
 }
 
