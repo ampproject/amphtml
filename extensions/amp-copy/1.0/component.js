@@ -30,7 +30,7 @@ import objstr from 'obj-str';
 
 /**
  * @param {!CopyDef.Props} props
- * @param {{current: ?CopyDef.Api}} ref
+ * @param {{current: ?CopyDef.CopyApi}} ref
  * @return {PreactDef.Renderable}
  */
 export function CopyWithRef({children, sourceId, text, ...rest}, ref) {
@@ -83,7 +83,7 @@ export function CopyWithRef({children, sourceId, text, ...rest}, ref) {
     ref,
     () =>
       /** @type {!CopyDef.CopyApi} */ ({
-        copyToClipboard: (selector, staticText) => {
+        copyToClipboard: (selector = null, staticText = null) => {
           if (selector !== null) {
             copy(selector);
           } else if (staticText !== null) {

@@ -26,3 +26,13 @@ var CopyDef = {};
  * }}
  */
 CopyDef.Props;
+
+/** @interface */
+CopyDef.CopyApi = class {
+  /**
+   * Copies content or static text
+   * @param {string} selector
+   * @param {string} staticText
+   */
+  copyToClipboard(selector = null, staticText = null) {}
+};

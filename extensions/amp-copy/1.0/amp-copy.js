@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '#core/constants/action-constants';
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-copy-1.0.css';
 import {isExperimentOn} from '#experiments';
@@ -25,9 +26,14 @@ const TAG = 'amp-copy';
 class AmpCopy extends BaseElement {
   /** @override */
   init() {
-    this.registerApiAction('copyToClipboard', (api) => {
-      api.copyToClipboard();
-    });
+    this.registerApiAction(
+      'copyToClipboard',
+      (api, invocation) => {
+        const {args} = invocation;
+        api.copyToClipboard(args['selector'], args['staticText']);
+      },
+      ActionTrust.LOW
+    );
   }
 
   /** @override */
