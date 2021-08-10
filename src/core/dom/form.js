@@ -19,12 +19,19 @@ import {ancestorElementsByTag} from '#core/dom/query';
 import {toArray} from '#core/types/array';
 import {dict} from '#core/types/object';
 
+/**
+ * Stub type until an AmpForm interface is available in typechecked-land.
+ * Should be satisfied by `#extensions/amp-form/0.1/amp-form.AmpForm`
+ * @typedef {?}
+ */
+let AmpFormDef;
+
 /** @const {string} */
 const FORM_PROP_ = '__AMP_FORM';
 
 /**
  * @param {!Element} element
- * @return {../extensions/amp-form/0.1/amp-form.AmpForm}
+ * @return {AmpFormDef}
  */
 export function formOrNullForElement(element) {
   return element[FORM_PROP_] || null;
@@ -32,7 +39,7 @@ export function formOrNullForElement(element) {
 
 /**
  * @param {!Element} element
- * @param {!../extensions/amp-form/0.1/amp-form.AmpForm} form
+ * @param {!AmpFormDef} form
  */
 export function setFormForElement(element, form) {
   element[FORM_PROP_] = form;
@@ -54,6 +61,12 @@ export function getFormAsObject(form) {
   const checkableType = /^(?:checkbox|radio)$/i;
 
   for (let i = 0; i < elements.length; i++) {
+    /**
+     * Real type is one of several, but we treat as any old object since we're
+     * testing which (if any) it matches
+     * https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements
+     * @type {?}
+     */
     const input = elements[i];
     const {checked, multiple, name, options, tagName, type, value} = input;
     if (
@@ -112,15 +125,17 @@ export function getFormAsObject(form) {
  * 2. a focused submit button, indicating it was specifically used to submit.
  * 3. null, if neither of the above is found.
  * @param {!HTMLFormElement} form
- * @return {?Element}
+ * @return {?HTMLButtonElement}
  */
 export function getSubmitButtonUsed(form) {
   const {elements} = form;
   const {activeElement} = form.ownerDocument;
 
-  const submitBtns = toArray(elements).filter(isSubmitButton);
-  return submitBtns.includes(activeElement)
-    ? activeElement
+  const submitBtns = /** @type {!Array<!HTMLButtonElement>} */ (
+    toArray(elements).filter(isSubmitButton)
+  );
+  return submitBtns.includes(/** @type {?} */ (activeElement))
+    ? /** @type {HTMLButtonElement} */ (activeElement)
     : submitBtns[0] || null;
 }
 
@@ -130,32 +145,34 @@ export function getSubmitButtonUsed(form) {
  * @return {boolean}
  */
 function isSubmitButton(element) {
-  const {tagName, type} = element;
+  const {tagName, type} = /** @type {!HTMLButtonElement} */ (element);
   return tagName == 'BUTTON' || type == 'submit';
 }
 
 /**
  * Checks if a field is disabled.
- * @param {!Element} element
+ * @param {!HTMLInputElement} element
  * @return {boolean}
  */
 export function isDisabled(element) {
   return (
     element.disabled ||
-    ancestorElementsByTag(element, 'fieldset').some((el) => el.disabled)
+    ancestorElementsByTag(element, 'fieldset').some(
+      (el) => /** @type {!HTMLFieldSetElement} */ (el).disabled
+    )
   );
 }
 
 /**
  * Checks if a form field is in its default state.
- * @param {!Element} field
+ * @param {!HTMLInputElement|!HTMLSelectElement} field
  * @return {boolean}
  */
 export function isFieldDefault(field) {
   switch (field.type) {
     case 'select-multiple':
     case 'select-one':
-      return toArray(field.options).every(
+      return toArray(/** @type {!HTMLSelectElement} */ (field).options).every(
         ({defaultSelected, selected}) => selected === defaultSelected
       );
     case 'checkbox':
@@ -164,13 +181,12 @@ export function isFieldDefault(field) {
     default:
       return field.value === field.defaultValue;
   }
-  return true;
 }
 
 /**
  * Checks if a form field is empty. It expects a form field element,
  * i.e. `<input>`, `<textarea>`, or `<select>`.
- * @param {!Element} field
+ * @param {!HTMLInputElement} field
  * @throws {Error}
  * @return {boolean}
  */

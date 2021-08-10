@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {devAssert} from '#core/assert';
+import {devAssert, devAssertElement} from '#core/assert';
 import {isConnectedNode, rootNodeFor} from '#core/dom';
 import {isElement} from '#core/types';
 import {toArray} from '#core/types/array';
@@ -70,7 +70,7 @@ export function getElementsToAriaHide(element) {
       continue;
     }
 
-    toArray(cur.parentNode.children)
+    toArray(devAssertElement(cur.parentNode).children)
       .filter((c) => c != cur)
       .forEach((c) => arr.push(c));
   }
@@ -95,7 +95,7 @@ function getAncestors(element) {
 }
 
 /**
- * Gets the potentially focusable elements, relative to a given element. Not
+ * Gets the potentially focusable elements, relative to a given element. Note
  * that we do not need to go into ShadowRoots, giving their host
  * `tabindex="-1"` is sufficient.
  *
@@ -135,7 +135,7 @@ function getPotentiallyFocusableElements(element) {
     );
     Array.prototype.push.apply(arr, potentiallyFocusable);
 
-    cur = root.host;
+    cur = /** @type {!ShadowRoot|?} */ (root).host;
   }
 
   return arr;
