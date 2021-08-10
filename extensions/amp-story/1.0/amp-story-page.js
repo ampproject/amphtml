@@ -71,7 +71,6 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '#core/dom/static-template';
 import {isAutoplaySupported} from '#core/dom/video';
 import {isExperimentOn} from '#experiments';
-import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
@@ -1828,10 +1827,8 @@ export class AmpStoryPage extends AMP.BaseElement {
       container.setAttribute('role', 'button');
 
       container.addEventListener('click', (e) => {
-        if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-          // Prevent default so link can be opened programmatically after URL preview is shown.
-          e.preventDefault();
-        }
+        // Prevent default so link can be opened programmatically after URL preview is shown.
+        e.preventDefault();
         this.openAttachment();
       });
 
