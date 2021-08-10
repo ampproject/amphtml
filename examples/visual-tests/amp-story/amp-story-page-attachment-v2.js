@@ -190,4 +190,40 @@ module.exports = {
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
   },
+
+  'form presence - the domain label should display': async (page, name) => {
+    const url = await page.url();
+    const pageID = 'attachment-with-form';
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-open-attachment[active]',
+    ]);
+    await page.tap('.i-amphtml-story-page-attachment-label');
+
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-attachment-domain-label',
+    ]);
+  },
+
+  'form absence - the domain label should not display': async (page, name) => {
+    const url = await page.url();
+    const pageID = 'inline-default';
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-open-attachment[active]',
+    ]);
+    await page.tap('.i-amphtml-story-page-attachment-label');
+
+    await verifySelectorsInvisible(page, name, [
+      '.i-amphtml-story-page-attachment-domain-label',
+    ]);
+  },
 };
