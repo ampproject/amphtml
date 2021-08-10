@@ -34,6 +34,7 @@ export const AnalyticsVariable = {
   STORY_IS_MUTED: 'storyIsMuted',
   STORY_PROGRESS: 'storyProgress',
   STORY_PREVIOUS_PAGE_ID: 'storyPreviousPageId',
+  STORY_PREVIOUS_PAGE_INDEX: 'storyPreviousPageIndex',
   STORY_ADVANCEMENT_MODE: 'storyAdvancementMode',
 };
 
@@ -78,6 +79,7 @@ export class AmpStoryVariableService {
       [AnalyticsVariable.STORY_PROGRESS]: null,
       [AnalyticsVariable.STORY_IS_MUTED]: null,
       [AnalyticsVariable.STORY_PREVIOUS_PAGE_ID]: null,
+      [AnalyticsVariable.STORY_PREVIOUS_PAGE_INDEX]: null,
       [AnalyticsVariable.STORY_ADVANCEMENT_MODE]: null,
     });
 
@@ -108,6 +110,8 @@ export class AmpStoryVariableService {
         const pageIndex = /** @type {number} */ (
           this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX)
         );
+        this.variables_[AnalyticsVariable.STORY_PREVIOUS_PAGE_INDEX] =
+          this.variables_[AnalyticsVariable.STORY_PAGE_INDEX];
         this.variables_[AnalyticsVariable.STORY_PAGE_INDEX] = pageIndex;
 
         const numberOfPages = this.storeService_.get(
