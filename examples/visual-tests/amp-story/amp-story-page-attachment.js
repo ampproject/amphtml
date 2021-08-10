@@ -16,6 +16,7 @@
 'use strict';
 
 const {
+  verifySelectorsInvisible,
   verifySelectorsVisible,
 } = require('../../../build-system/tasks/visual-diff/helpers');
 
