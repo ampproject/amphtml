@@ -482,7 +482,7 @@ export class AmpAdXOriginIframeHandler {
         .then(
           (info) => {
             if (!info.success) {
-              // invalid request parameters disable requests for 500ms
+              // invalid request parameters, disable requests for 500ms
               this.lastRejectedResizeTime_ = Date.now();
             } else {
               this.lastRejectedResizeTime_ = 0.0;
