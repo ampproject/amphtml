@@ -24,6 +24,10 @@ import {userAssert} from '../../../src/log';
 const TAG = 'amp-copy';
 
 class AmpCopy extends BaseElement {
+  /** @override */
+  init() {
+    this.registerApiAction('copyToClipboard', (api) => api.copyToClipboard());
+  }
 
   /** @override */
   isLayoutSupported(layout) {
