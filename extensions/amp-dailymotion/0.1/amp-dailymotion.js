@@ -249,6 +249,7 @@ class AmpDailymotion extends AMP.BaseElement {
   /** @private */
   getIframeSrc_() {
     const {
+      'autoplay': autoplay,
       'endscreenEnable': endscreenEnable,
       'info': info,
       'mute': mute,
@@ -259,7 +260,9 @@ class AmpDailymotion extends AMP.BaseElement {
     } = this.element.dataset;
 
     return getDailymotionIframeSrc(
+      this.win,
       this.videoid_,
+      autoplay,
       endscreenEnable,
       info,
       mute,

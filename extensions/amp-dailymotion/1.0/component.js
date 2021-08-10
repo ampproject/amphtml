@@ -75,6 +75,7 @@ function onMessage({currentTarget, data}) {
  */
 export function DailymotionWithRef(
   {
+    autoplay,
     endscreenEnable,
     info,
     mute,
@@ -90,7 +91,9 @@ export function DailymotionWithRef(
   const src = useMemo(
     () =>
       getDailymotionIframeSrc(
+        this.win,
         videoId,
+        autoplay,
         endscreenEnable,
         info,
         mute,
