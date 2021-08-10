@@ -3,59 +3,25 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
-    <style>
-    /* body {
-      margin: 0;
-      padding: 0;
-      font-size: 16px;
-      font-family: 'Noto Sans', sans-serif;
-      -webkit-font-smoothing: antialiased;
-    }
-    #box {
-      width: 200px;
-      height: 200px;
-      border: 2px solid #005af0;
-      padding: 1rem;
-      background: #ccc;
-      box-sizing: border-box;
-    }
-    p {
-      margin-top: 1rem;
-    }
-    button {
-      font-weight: 700;
-      line-height: 1.2em;
-      color: #20202a;
-      font-size: 1em;
-      color: #fff;
-      padding: .75em 1.75em;
-      text-align: center;
-      border-radius: 3px;
-      background-color: #005af0;
-      border: none;
-    } */
-    </style>
   </head>
   <body>
-    <div id="box">
-      <p>This iframe is initially sized 100x100px, but will resize to 300x300px</p>
-    </div>
-  <script>
-    function postSize(size) {
-      // post new height after re-layout
-      window.requestAnimationFrame(() => {
-        var message = {
-          sentinel: 'amp',
-          type: 'embed-size',
-          height: size,
-          width: size,
-        };
-        console.log('post new embed-height', message);
-        window.parent.postMessage(message, '*');
-      })
-    }
+    <p>This iframe is initially sized 100x100px, but will resize to 300x300px on page load.</p>
+    <script>
+      function postSize(size) {
+        // post new height after re-layout
+        window.requestAnimationFrame(() => {
+          var message = {
+            sentinel: 'amp',
+            type: 'embed-size',
+            height: size,
+            width: size,
+          };
+          console.log('post new embed-height', message);
+          window.parent.postMessage(message, '*');
+        })
+      }
 
-    postSize(300);
-  </script>
+      postSize(300);
+    </script>
   </body>
 </html>
