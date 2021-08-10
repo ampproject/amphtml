@@ -276,7 +276,7 @@ export class BackgroundBlur {
    * sorted by size (possibly empty).
    * @private
    * @param {!Element} pageElement
-   * @return {Array<Element>}
+   * @return {!Array<Element>}
    */
   getBiggestMediaElements_(pageElement) {
     const getSize = (el) => {
