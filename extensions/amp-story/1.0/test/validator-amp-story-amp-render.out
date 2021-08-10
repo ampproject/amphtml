@@ -78,11 +78,6 @@ PASS
 |        </amp-story-page>
 |
 |        <amp-story-page id="attachment-rendering">
-|          <amp-story-grid-layer template="fill">
-|            <template id="my-attachment-template" type="amp-mustache">
-|              <div>{{#images}}<b><a href="{{urls.picsum}}">{{author}}</a></b>{{/images}}</div>
-|            </template>
-|          </amp-story-grid-layer>
 |          <amp-story-page-attachment layout="nodisplay">
 |            <h1>Page Attachment</h1>
 |            <!-- Valid: amp-render within amp-story-page-attachment -->
@@ -93,6 +88,9 @@ PASS
 |              binding="no"
 |              template="my-attachment-template">
 |            </amp-render>
+|            <template id="my-attachment-template" type="amp-mustache">
+|              <div>{{#images}}<b><a href="{{urls.picsum}}">{{author}}</a></b>{{/images}}</div>
+|            </template>
 |          </amp-story-page-attachment>
 |        </amp-story-page>
 |      </amp-story>
