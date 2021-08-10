@@ -23,7 +23,8 @@ const fetch = require('node-fetch');
 const {getChannels, steps} = require('./common');
 const {log} = require('../common/logging');
 
-const [number, body, user] = process.argv.slice(2);
+const [number, user] = process.argv.slice(2);
+const body = process.env.BODY;
 
 const commentTemplate = (channels) => {
   const reducer = (current, step) => {

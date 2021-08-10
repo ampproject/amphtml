@@ -23,7 +23,8 @@ const fetch = require('node-fetch');
 const {getChannels, getFormats, steps} = require('./common');
 const {log} = require('../common/logging');
 
-const [number, body, before, after] = process.argv.slice(2);
+const [number] = process.argv.slice(2);
+const {BODY: body, COMMENT_AFTER: after, COMMENT_BEFORE: before} = process.env;
 
 const apiUrl = `https://api.statuspage.io/v1/pages/${process.env.STATUS_PAGE_ID}`;
 const headers = {
