@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import {ViewerCidApi} from '#service/viewer-cid-api';
 import {dict} from '#core/types/object';
+
+import {ViewerCidApi} from '#service/viewer-cid-api';
+
 import {mockServiceForDoc} from '#testing/test-helper';
 
 describes.realWin('viewerCidApi', {amp: true}, (env) => {

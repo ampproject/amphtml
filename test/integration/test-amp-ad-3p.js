@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-import {ADS_INITIAL_INTERSECTION_EXP} from '#experiments/ads-initial-intersection-exp';
-import {Services} from '#service';
-import {createCustomEvent} from '../../src/event-helper';
-import {createFixtureIframe, poll} from '#testing/iframe';
-import {forceExperimentBranch} from '#experiments';
-import {installPlatformService} from '#service/platform-impl';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
+
+import {forceExperimentBranch} from '#experiments';
+import {ADS_INITIAL_INTERSECTION_EXP} from '#experiments/ads-initial-intersection-exp';
+
+import {Services} from '#service';
+import {installPlatformService} from '#service/platform-impl';
+
+import {createFixtureIframe, poll} from '#testing/iframe';
+
+import {createCustomEvent} from '../../src/event-helper';
 
 const IFRAME_HEIGHT = 3000;
 function createFixture() {
