@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import {
+  USER_ERROR_SENTINEL,
+  isUserErrorEmbedMessage,
+  isUserErrorMessage,
+} from '#core/error/message-helpers';
 import * as mode from '#core/mode';
 
 import {triggerAnalyticsEvent} from './analytics';
@@ -25,16 +30,13 @@ import {exponentialBackoff} from './core/types/function/exponential-backoff';
 import {dict} from './core/types/object';
 import {isLoadErrorMessage} from './event-helper';
 import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
-import {
-  USER_ERROR_SENTINEL,
-  dev,
-  isUserErrorEmbed,
-  isUserErrorMessage,
-} from './log';
+import {dev, setReportError} from './log';
 import {getMode} from './mode';
 import {Services} from './service';
 import {makeBodyVisibleRecovery} from './style-installer';
 import {isProxyOrigin} from './url';
+
+export {setReportError};
 
 /**
  * @const {string}
@@ -131,7 +133,7 @@ export function reportErrorForWin(win, error, opt_associatedElement) {
     error &&
     !!win &&
     isUserErrorMessage(error.message) &&
-    !isUserErrorEmbed(error.message)
+    !isUserErrorEmbedMessage(error.message)
   ) {
     reportErrorToAnalytics(/** @type {!Error} */ (error), win);
   }

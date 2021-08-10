@@ -7,6 +7,14 @@
     {
       "name": "amp-story-desktop-one-panel",
       "percentage": 1
+    },
+    {
+      "name": "story-disable-animations-first-page",
+      "percentage": 0.5
+    },
+    {
+      "name": "story-load-inactive-outside-viewport",
+      "percentage": 0.1
     }
   ]
 }

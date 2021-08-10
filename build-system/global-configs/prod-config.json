@@ -13,13 +13,11 @@
   "ios-fixed-no-transfer": 0,
   "layout-aspect-ratio-css": 0,
   "disable-a4a-non-sd": 1,
-  "tcf-post-message-proxy-api": 1,
-  "amp-consent-granular-consent": 1,
   "amp-cid-backup": 1,
   "story-ad-placements": 0.01,
-  "story-disable-animations-first-page": 0.1,
+  "story-disable-animations-first-page": 0.5,
   "story-load-first-page-only": 0.1,
-  "amp-story-desktop-one-panel": 1,
+  "story-load-inactive-outside-viewport": 0.1,
   "amp-story-page-attachment-ui-v2": 1,
   "amp-sticky-ad-to-amp-ad": 0
 }

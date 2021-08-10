@@ -469,6 +469,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://us.img.e-planning.net/layers/epl-amp.js',
   },
 
+  'exco': {
+    renderStartImplemented: true,
+  },
+
   'ezoic': {
     prefetch: [
       'https://www.googletagservices.com/tag/js/gpt.js',
@@ -642,6 +646,13 @@ const adConfig = jsonConfiguration({
   'ketshwa': {},
 
   'kiosked': {
+    renderStartImplemented: true,
+  },
+
+  'jixie': {
+    prefetch: ['https://scripts.jixie.io/jxamp.min.js'],
+    clientIdScope: '__jxamp',
+    clientIdCookieName: '_jx',
     renderStartImplemented: true,
   },
 
