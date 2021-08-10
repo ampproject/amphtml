@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {AmpDocShadow, installDocService} from '#service/ampdoc-impl';
 import {Services} from '#service';
-import {Vsync} from '#service/vsync-impl';
+import {AmpDocShadow, installDocService} from '#service/ampdoc-impl';
 import {installTimerService} from '#service/timer-impl';
+import {Vsync} from '#service/vsync-impl';
 
 describes.fakeWin('vsync', {}, (env) => {
   let win, doc;

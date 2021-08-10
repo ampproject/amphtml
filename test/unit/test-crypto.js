@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {Crypto} from '#service/crypto-impl';
-import {Platform} from '#service/platform-impl';
 import {Services} from '#service';
-import {installCryptoPolyfill} from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
 import {installDocService} from '#service/ampdoc-impl';
+import {Crypto} from '#service/crypto-impl';
 import {installExtensionsService} from '#service/extensions-impl';
+import {Platform} from '#service/platform-impl';
+
+import {installCryptoPolyfill} from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
 
 describes.realWin('crypto-impl', {}, (env) => {
   let win;

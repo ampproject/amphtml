@@ -15,8 +15,9 @@
  */
 
 import {doesOriginDomainMatchIframeSrc, initRecaptcha} from '#3p/recaptcha';
-import {parseUrlDeprecated} from '../../../src/url';
+
 import {urls} from '../../../src/config';
+import {parseUrlDeprecated} from '../../../src/url';
 
 describes.sandboxed('3p recaptcha.js', {}, () => {
   it('should require a window.name', () => {

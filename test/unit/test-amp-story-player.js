@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
+import {Messaging} from '@ampproject/viewer-messaging';
+import {expect} from 'chai';
+
+import {macroTask} from '#testing/yield';
+
 import {AmpStoryComponentManager} from '../../src/amp-story-player/amp-story-component-manager';
 import {AmpStoryPlayer} from '../../src/amp-story-player/amp-story-player-impl';
-import {Messaging} from '@ampproject/viewer-messaging';
 import {PageScroller} from '../../src/amp-story-player/page-scroller';
-import {expect} from 'chai';
 import {createCustomEvent, listenOncePromise} from '../../src/event-helper';
-import {macroTask} from '#testing/yield';
 
 describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let win;

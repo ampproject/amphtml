@@ -15,8 +15,10 @@
  */
 
 import {InaboxMessagingHost} from '#ads/inabox/inabox-messaging-host';
-import {deserializeMessage} from '../../../src/3p-frame-messaging';
+
 import {layoutRectLtwh} from '#core/dom/layout/rect';
+
+import {deserializeMessage} from '../../../src/3p-frame-messaging';
 
 describes.realWin('inabox-host:messaging', {}, (env) => {
   let win;

@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {BrowserController, RequestBank} from '#testing/test-helper';
-import {PLATFORM_NAME} from '../../extensions/amp-skimlinks/0.1/constants';
 import {parseQueryString} from '#core/types/string/url';
+
+import {BrowserController, RequestBank} from '#testing/test-helper';
+
+import {PLATFORM_NAME} from '../../extensions/amp-skimlinks/0.1/constants';
 
 // Create fake test urls to replace skimlinks API urls.
 // RequestBank allow us to check if an API request has been made

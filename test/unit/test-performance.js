@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-import * as IniLoad from '../../src/ini-load';
 import * as fakeTimers from '@sinonjs/fake-timers';
+
+import {VisibilityState} from '#core/constants/visibility-state';
+
+import {Services} from '#service';
+import {installRuntimeServices} from '#service/core-services';
 import {
   Performance,
   installPerformanceService,
 } from '#service/performance-impl';
-import {Services} from '#service';
-import {VisibilityState} from '#core/constants/visibility-state';
-import {getMode} from '../../src/mode';
 import {installPlatformService} from '#service/platform-impl';
-import {installRuntimeServices} from '#service/core-services';
+
+import * as IniLoad from '../../src/ini-load';
+import {getMode} from '../../src/mode';
 
 describes.realWin('performance', {amp: false}, (env) => {
   it('should be resilient to unsupported PerformanceObserver entry types', () => {

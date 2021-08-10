@@ -15,10 +15,12 @@
  */
 'use strict';
 
+import sinon from 'sinon'; // eslint-disable-line local/no-import
+
 import * as coreError from '#core/error';
+
 import {reportError} from '../src/error-reporting';
 import {setReportError} from '../src/log';
-import sinon from 'sinon'; // eslint-disable-line local/no-import
 
 let rethrowAsyncSandbox;
 

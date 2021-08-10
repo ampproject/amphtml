@@ -15,7 +15,7 @@
  */
 
 import {Services} from '#service';
-import {isProtocolValid} from '../../src/url';
+
 import {
   parseFavicon,
   parseOgImage,
@@ -23,6 +23,7 @@ import {
   setMediaSession,
   validateMediaMetadata,
 } from '../../src/mediasession-helper';
+import {isProtocolValid} from '../../src/url';
 
 const schemaTemplate = `
 {

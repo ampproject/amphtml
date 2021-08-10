@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {Input} from '../../src/input';
 import {installTimerService} from '#service/timer-impl';
+
 import {stubService} from '#testing/test-helper';
+
+import {Input} from '../../src/input';
 
 describes.sandboxed('Input', {}, (env) => {
   let clock;

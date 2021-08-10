@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {Pass} from '../../src/pass';
 import {Services} from '#service';
+
+import {Pass} from '../../src/pass';
 
 describes.sandboxed('Pass', {}, (env) => {
   let pass;

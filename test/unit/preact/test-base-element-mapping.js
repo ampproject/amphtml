@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {PreactBaseElement} from '#preact/base-element';
-import {Slot} from '#preact/slot';
 import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 import {omit} from '#core/types/object';
-import {testElementR1} from '#testing/element-v1';
+
+import * as Preact from '#preact';
+import {PreactBaseElement} from '#preact/base-element';
+import {Slot} from '#preact/slot';
+
 import {upgradeOrRegisterElement} from '#service/custom-element-registry';
+
+import {testElementR1} from '#testing/element-v1';
 import {waitFor} from '#testing/test-helper';
 
 const spec = {amp: true, frameStyle: {width: '300px'}};

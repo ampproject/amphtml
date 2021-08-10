@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Gestures} from '../../src/gesture';
 import {
   DoubletapRecognizer,
   PinchRecognizer,
@@ -21,7 +22,6 @@ import {
   TapRecognizer,
   TapzoomRecognizer,
 } from '../../src/gesture-recognizers';
-import {Gestures} from '../../src/gesture';
 
 describes.sandboxed('TapRecognizer', {}, (env) => {
   let element;

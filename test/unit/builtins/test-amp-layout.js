@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import {AmpLayout, buildDom} from '#builtins/amp-layout/amp-layout';
+
 import {createElementWithAttributes} from '#core/dom';
 import {Layout} from '#core/dom/layout';
-import {AmpLayout, buildDom} from '#builtins/amp-layout/amp-layout';
 
 describes.realWin('amp-layout', {amp: true}, (env) => {
   async function getAmpLayout(attrs, innerHTML) {

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import {RequestBank} from '#testing/test-helper';
-import {maybeSwitchToCompiledJs} from '#testing/iframe';
 import {parseQueryString} from '#core/types/string/url';
+
 import {xhrServiceForTesting} from '#service/xhr-impl';
+
+import {maybeSwitchToCompiledJs} from '#testing/iframe';
+import {RequestBank} from '#testing/test-helper';
 
 // TODO(wg-monetization, #29112): Unskip on Safari.
 const t = describes.sandboxed.configure().skipSafari();

@@ -15,10 +15,11 @@
  */
 
 import * as dom from '#core/dom';
-import {loadPromise} from '../../../../src/event-helper';
-import {matches} from '#core/dom/query';
 import {setScopeSelectorSupportedForTesting} from '#core/dom/css-selectors';
+import {matches} from '#core/dom/query';
 import {setShadowDomSupportedVersionForTesting} from '#core/dom/web-components';
+
+import {loadPromise} from '../../../../src/event-helper';
 
 describes.sandboxed('DOM', {}, (env) => {
   afterEach(() => {

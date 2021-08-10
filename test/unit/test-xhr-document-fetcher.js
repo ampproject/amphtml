@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {Services} from '#service';
+
 import {fetchDocument} from '../../src/document-fetcher';
 
 describes.realWin('DocumentFetcher', {amp: true}, function (env) {

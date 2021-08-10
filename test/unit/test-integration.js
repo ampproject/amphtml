@@ -17,6 +17,7 @@
 // Tests integration.js
 // Most coverage through test-3p-frame
 
+import {getRegistrations, register} from '#3p/3p';
 import {
   draw3pInternal,
   ensureFramed,
@@ -25,7 +26,6 @@ import {
   validateAllowedTypes,
   validateParentOrigin,
 } from '#3p/integration-lib';
-import {getRegistrations, register} from '#3p/3p';
 
 describes.sandboxed('3p integration.js', {}, () => {
   const registrations = getRegistrations();

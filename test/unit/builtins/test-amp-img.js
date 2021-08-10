@@ -19,11 +19,15 @@ import {
   AmpImg,
   installImg,
 } from '#builtins/amp-img/amp-img';
-import {BaseElement} from '../../../src/base-element';
+
 import {Layout, LayoutPriority} from '#core/dom/layout';
+
 import {Services} from '#service';
-import {createCustomEvent} from '../../../src/event-helper';
+
 import {createIframePromise} from '#testing/iframe';
+
+import {BaseElement} from '../../../src/base-element';
+import {createCustomEvent} from '../../../src/event-helper';
 
 describes.sandboxed('amp-img', {}, (env) => {
   let sandbox;

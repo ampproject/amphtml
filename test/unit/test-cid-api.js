@@ -15,8 +15,10 @@
  */
 
 import {GoogleCidApi} from '#service/cid-api';
-import {getCookie, setCookie} from '../../src/cookies';
+
 import {mockWindowInterface, stubService} from '#testing/test-helper';
+
+import {getCookie, setCookie} from '../../src/cookies';
 
 describes.realWin('test-cid-api', {amp: true}, (env) => {
   let win;

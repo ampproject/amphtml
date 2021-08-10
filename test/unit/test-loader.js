@@ -15,6 +15,7 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
+
 import {Services} from '#service';
 import {createLoaderElement} from '#service/loader-element';
 

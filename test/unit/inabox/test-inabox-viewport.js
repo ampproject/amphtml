@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-import * as iframeHelper from '../../../src/iframe-helper';
 import {FrameOverlayManager} from '#ads/inabox/frame-overlay-manager';
-import {Observable} from '#core/data-structures/observable';
 import {PositionObserver} from '#ads/inabox/position-observer';
-import {Services} from '#service';
+
+import {Observable} from '#core/data-structures/observable';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+
+import {installIframeMessagingClient} from '#inabox/inabox-iframe-messaging-client';
 import {
   ViewportBindingInabox,
   prepareBodyForOverlay,
   resetBodyForOverlay,
 } from '#inabox/inabox-viewport';
-import {installIframeMessagingClient} from '#inabox/inabox-iframe-messaging-client';
+
+import {Services} from '#service';
 import {installPlatformService} from '#service/platform-impl';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
+
+import * as iframeHelper from '../../../src/iframe-helper';
 
 const NOOP = () => {};
 

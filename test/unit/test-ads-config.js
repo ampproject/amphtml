@@ -15,6 +15,7 @@
  */
 
 import {adConfig} from '#ads/_config';
+
 import {hasOwn} from '#core/types/object';
 
 describes.sandboxed('test-ads-config', {}, () => {

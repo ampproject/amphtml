@@ -17,14 +17,15 @@
  * @fileoverview Description of this file.
  */
 
+import {htmlFor} from '#core/dom/static-template';
+import {toArray} from '#core/types/array';
+
 import {
   clearModalStack,
   getElementsToAriaHide,
   setModalAsClosed,
   setModalAsOpen,
 } from '../../src/modal';
-import {htmlFor} from '#core/dom/static-template';
-import {toArray} from '#core/types/array';
 
 describes.fakeWin('modal', {}, (env) => {
   let win;
