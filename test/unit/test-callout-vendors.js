@@ -15,6 +15,7 @@
  */
 
 import {RTC_VENDORS} from '#service/real-time-config/callout-vendors';
+
 import {isSecureUrlDeprecated} from '../../src/url';
 
 // The keys of RTC_VENDORS are not allowed to have any capital letters.
