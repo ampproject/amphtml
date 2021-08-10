@@ -16,35 +16,43 @@
 'use strict';
 
 /**
- * @fileoverview Script that runs the visual diff tests during CI.
+ * @fileoverview Script that deploys a PR's nomodule and storybook output during CI.
  */
 
+const {
+  processAndStoreBuildToArtifacts,
+  skipDependentJobs,
+  timedExecOrDie,
+} = require('./utils');
 const {runCiJob} = require('./ci-job');
-const {skipDependentJobs, timedExecOrDie} = require('./utils');
+const {signalPrDeployUpload} = require('../tasks/pr-deploy-bot-utils');
 const {Targets, buildTargetsInclude} = require('./build-targets');
 
-const jobName = 'visual-diff-tests.js';
-
-/**
- * Steps to run during push builds.
- */
-function pushBuildWorkflow() {
-  timedExecOrDie('amp visual-diff --nobuild --main');
-}
+const jobName = 'pr-deploy.js';
 
 /**
  * Steps to run during PR builds.
+ * @return {Promise<void>}
  */
-function prBuildWorkflow() {
-  if (buildTargetsInclude(Targets.RUNTIME, Targets.VISUAL_DIFF)) {
-    timedExecOrDie('amp visual-diff --nobuild');
+async function prBuildWorkflow() {
+  if (
+    buildTargetsInclude(
+      Targets.RUNTIME,
+      Targets.INTEGRATION_TEST,
+      Targets.E2E_TEST,
+      Targets.VISUAL_DIFF
+    )
+  ) {
+    timedExecOrDie('amp storybook --build');
+    await processAndStoreBuildToArtifacts();
+    await signalPrDeployUpload('success');
   } else {
-    timedExecOrDie('amp visual-diff --empty');
+    await signalPrDeployUpload('skipped');
     skipDependentJobs(
       jobName,
-      'this PR does not affect the runtime or visual diff tests'
+      'this PR does not affect the runtime, integration tests, end-to-end tests, or visual diff tests'
     );
   }
 }
 
-runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);
+runCiJob(jobName, () => {}, prBuildWorkflow);
