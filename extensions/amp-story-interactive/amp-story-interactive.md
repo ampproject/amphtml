@@ -65,27 +65,6 @@ Does not support pairing with `amp-story-interactive-results`, and can optionall
 </amp-story-interactive-binary-poll>
 ```
 
-### amp-story-interactive-poll
-
-The `amp-story-interactive-poll` element provides a voting experience with 2-4 options displayed vertically, where all options are valid. When selected, each option displays the total percentage of votes.
-
-Display different categories based on user poll answers by pairing `amp-story-interactive-poll` with `amp-story-interactive-results`. Add a prompt for extra context.
-
-<amp-img alt="An example of an interactive poll: 'Pick a season' with options for each season, and their respective percentage votes" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/poll-raw.png" layout="intrinsic" width="400" height="450">
-
-[sourcecode:html]
-<amp-story-interactive-poll
-    id="season-poll"
-    theme="dark"
-    endpoint="https://backend.com/v1/interactives"
-    prompt-text="Pick a season"
-    option-1-text="Spring" option-1-confetti="🌼"
-    option-2-text="Summer" option-2-confetti="☀️"
-    option-3-text="Fall" option-3-confetti="🍁"
-    option-4-text="Winter" option-4-confetti="☃️">
-</amp-story-interactive-poll>
-[/sourcecode]
-
 ### amp-story-interactive-img-poll
 
 The `amp-story-interactive-img-poll` element provides a voting experience with 2-4 options displayed in a grid, where all options are valid, selectable images. When selected, each option displays the total percentage of votes.
@@ -111,24 +90,25 @@ Display different categories based on user poll answers by pairing `amp-story-in
 </amp-story-interactive-img-poll>
 [/sourcecode]
 
-### amp-story-interactive-quiz
+### amp-story-interactive-poll
 
-The `amp-story-interactive-quiz` element provides a guessing experience with 2-4 options, one of which is correct. It displays the voting percentages after the user makes a selection. The user selection is green if correct and red if incorrect.
+The `amp-story-interactive-poll` element provides a voting experience with 2-4 options displayed vertically, where all options are valid. When selected, each option displays the total percentage of votes.
 
-Display different categories based on percentage of correct user answers by pairing `amp-story-interactive-quiz` with `amp-story-interactive-results`. Add a prompt for extra context.
+Display different categories based on user poll answers by pairing `amp-story-interactive-poll` with `amp-story-interactive-results`. Add a prompt for extra context.
 
-<amp-img alt="Example of an interactive quiz: 'Who was the artist that created the famous painting The Last Supper?', with various options; the correct answer, 'Leonardo da Vinci', has a green tick next to it, compared to the wrong answers which have a red cross; all answers show a percentage of how many people picked that particular answer" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/quiz-raw.png" layout="intrinsic" width="400" height="450">
+<amp-img alt="An example of an interactive poll: 'Pick a season' with options for each season, and their respective percentage votes" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/poll-raw.png" layout="intrinsic" width="400" height="450">
 
 [sourcecode:html]
-<amp-story-interactive-quiz
-    id="arts-quiz"
+<amp-story-interactive-poll
+    id="season-poll"
+    theme="dark"
     endpoint="https://backend.com/v1/interactives"
-    prompt-text='Who was the artist that created the famous painting "The Last Supper"?'
-    option-1-text="Michelangelo"
-    option-2-text="Leonardo da Vinci" option-2-correct option-2-confetti="🎨"
-    option-3-text="Rahael"
-    option-4-text="Sandro Boticelli">
-</amp-story-interactive-quiz>
+    prompt-text="Pick a season"
+    option-1-text="Spring" option-1-confetti="🌼"
+    option-2-text="Summer" option-2-confetti="☀️"
+    option-3-text="Fall" option-3-confetti="🍁"
+    option-4-text="Winter" option-4-confetti="☃️">
+</amp-story-interactive-poll>
 [/sourcecode]
 
 ### amp-story-interactive-img-quiz
@@ -157,6 +137,26 @@ Display different categories based on percentage of correct user answers by pair
 </amp-story-interactive-img-quiz>
 [/sourcecode]
 
+### amp-story-interactive-quiz
+
+The `amp-story-interactive-quiz` element provides a guessing experience with 2-4 options, one of which is correct. It displays the voting percentages after the user makes a selection. The user selection is green if correct and red if incorrect.
+
+Display different categories based on percentage of correct user answers by pairing `amp-story-interactive-quiz` with `amp-story-interactive-results`. Add a prompt for extra context.
+
+<amp-img alt="Example of an interactive quiz: 'Who was the artist that created the famous painting The Last Supper?', with various options; the correct answer, 'Leonardo da Vinci', has a green tick next to it, compared to the wrong answers which have a red cross; all answers show a percentage of how many people picked that particular answer" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/quiz-raw.png" layout="intrinsic" width="400" height="450">
+
+[sourcecode:html]
+<amp-story-interactive-quiz
+    id="arts-quiz"
+    endpoint="https://backend.com/v1/interactives"
+    prompt-text='Who was the artist that created the famous painting "The Last Supper"?'
+    option-1-text="Michelangelo"
+    option-2-text="Leonardo da Vinci" option-2-correct option-2-confetti="🎨"
+    option-3-text="Rahael"
+    option-4-text="Sandro Boticelli">
+</amp-story-interactive-quiz>
+[/sourcecode]
+
 ### amp-story-interactive-results
 
 The `amp-story-interactive-result` element displays a customized state defined by the user's selection from previous polls or quizzes. This element requires use of polls or quizzes from previous pages to calculate an answer-based state. Each result category may include an image, title and description to display to the user.
@@ -180,7 +180,7 @@ Results can feed its state from quizzes if all categories also specify `option-{
 
 ### Store and display user selection
 
-All selectable interactive elements (`amp-story-interactive-binary-poll`, `amp-story-interactive-poll`, `amp-story-interactive-img-poll`, `amp-story-interactive-quiz`, `amp-story-interactive-img-quiz`) show the percentage of users that selected each option. The backend specified with the `endpoint` attribute will store the aggregate data for the interaction following the API described below.
+All selectable interactive elements (`amp-story-interactive-binary-poll`, `amp-story-interactive-img-poll`, `amp-story-interactive-img-quiz`, `amp-story-interactive-poll`, `amp-story-interactive-quiz`) show the percentage of users that selected each option. The backend specified with the `endpoint` attribute will store the aggregate data for the interaction following the API described below.
 To fetch the data for an interactive element, the necessary fields are:
 
 -   <div id="interactiveId"></div> `interactiveId`: the `base64encode(CANONICAL_URL) + "+" + element.id`
@@ -222,11 +222,11 @@ Backends need to be specified on the necessary components (binary-poll, poll, qu
 
 The interactive experience elements from `amp-story-interactive` share an API language for customizing options.
 
-### id (required for binary-poll, poll, img-poll, quiz, img-quiz)
+### id (required for binary-poll, img-poll, img-quiz, poll, quiz)
 
 Element ID that identifies the interactive component in the story. Used to compose the [`interactiveId`](#interactiveId) sent to the backend. Should be unique for each component in the story.
 
-### endpoint (required for binary-poll, poll, img-poll, quiz, img-quiz)
+### endpoint (required for binary-poll, img-poll, img-quiz, poll, quiz)
 
 Complete URL of backend. Stores interactive element votes.
 
@@ -234,7 +234,7 @@ Complete URL of backend. Stores interactive element votes.
 
 Controls the color of the chips and text. Can be `light` (default), `dark`.
 
-### chip-style (optional for poll, img-poll, quiz, img-quiz, results)
+### chip-style (optional for img-poll, img-quiz, poll, quiz, results)
 
 Controls the style of the component. Can be `flat` (default), `shadow`, or `transparent`.
 Results, binary-poll, img-poll, and img-quiz elements don't support shadow.
@@ -243,7 +243,7 @@ Results, binary-poll, img-poll, and img-quiz elements don't support shadow.
 
 Adds a prompt to the top of the component. Use `prompt-text` to write the poll/quiz question, or as a prefix to the category in the `amp-story-interactive-result` element.
 
-### prompt-size (optional for binary-poll, poll, img-poll, quiz,, img-quiz)
+### prompt-size (optional for binary-poll, img-poll, img-quiz, poll, quiz)
 
 Controls the `font-size` of prompt text. Can be `small`, `medium` (default), `large`. Large prompts will hold up to 3 lines of text, other sizes will hold up to 4 lines of text.
 
@@ -255,11 +255,11 @@ String that represents a numbered option. Binary polls require 2 options. Polls,
 
 The `amp-story-interactive-result` element uses this string value as category description.
 
-### option-{1/2/3/4}-confetti (optional for binary-poll, poll, img-poll, quiz, img-quiz)
+### option-{1/2/3/4}-confetti (optional for binary-poll, img-poll, img-quiz, poll, quiz)
 
 Emoji that bursts in an explosion animation when selecting an options. On quizzes, only the correct option should have a confetti.
 
-### option-{1/2/3/4}-results-category (optional for poll and img-poll, required for results)
+### option-{1/2/3/4}-results-category (optional for img-poll and poll, required for results)
 
 The name of the category on the `amp-story-interactive-results` element. Shows in large text after the `prompt-text` and before the category description. It displays category with the most options selected in polls from the entire story if `option-{1/2/3/4}-results-threshold` is not defined.
 
