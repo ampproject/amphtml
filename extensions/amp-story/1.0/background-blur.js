@@ -175,7 +175,7 @@ export class BackgroundBlur {
    * @return {boolean}
    */
   isGifOrPng_(mediaEl) {
-    const src = mediaEl.getAttribute('src');
+    const src = mediaEl.getAttribute('src').toLowerCase();
     return src.includes('.png') || src.includes('.gif');
   }
 
