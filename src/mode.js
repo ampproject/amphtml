@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as coreMode from './core/mode';
-import {parseQueryString} from './core/types/string/url';
+import * as coreMode from '#core/mode';
+import {parseQueryString} from '#core/types/string/url';
 
 /**
  * @typedef {{

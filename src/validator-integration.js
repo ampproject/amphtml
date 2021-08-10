@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import {parseQueryString} from '#core/types/string/url';
+
 import {urls} from './config';
-import {parseQueryString} from './core/types/string/url';
 import {loadPromise} from './event-helper';
 import {isModeDevelopment} from './mode';
 

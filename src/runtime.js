@@ -14,15 +14,30 @@
  * limitations under the License.
  */
 
+import {waitForBodyOpenPromise} from '#core/dom';
+import {setStyle} from '#core/dom/style';
 import * as mode from '#core/mode';
+
+import {isExperimentOn, toggleExperiment} from '#experiments';
+
+import {shouldLoadPolyfill as shouldLoadInObPolyfill} from '#polyfills/stubs/intersection-observer-stub';
+import {shouldLoadPolyfill as shouldLoadResObPolyfill} from '#polyfills/stubs/resize-observer-stub';
+
+import {Services} from '#service';
+import {
+  installAmpdocServices,
+  installRuntimeServices,
+} from '#service/core-services';
+import {stubElementsForDoc} from '#service/custom-element-registry';
+import {
+  installExtensionsService,
+  stubLegacyElements,
+} from '#service/extensions-impl';
 
 import {BaseElement} from './base-element';
 import {startupChunk} from './chunk';
 import {config} from './config';
-import {waitForBodyOpenPromise} from './core/dom';
-import {setStyle} from './core/dom/style';
 import {reportErrorForWin} from './error-reporting';
-import {isExperimentOn, toggleExperiment} from './experiments';
 import {
   LogLevel, // eslint-disable-line no-unused-vars
   dev,
@@ -32,19 +47,7 @@ import {
 } from './log';
 import {getMode} from './mode';
 import {MultidocManager} from './multidoc-manager';
-import {shouldLoadPolyfill as shouldLoadInObPolyfill} from './polyfills/stubs/intersection-observer-stub';
-import {shouldLoadPolyfill as shouldLoadResObPolyfill} from './polyfills/stubs/resize-observer-stub';
 import {hasRenderDelayingServices} from './render-delaying-services';
-import {Services} from './service';
-import {
-  installAmpdocServices,
-  installRuntimeServices,
-} from './service/core-services';
-import {stubElementsForDoc} from './service/custom-element-registry';
-import {
-  installExtensionsService,
-  stubLegacyElements,
-} from './service/extensions-impl';
 
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';

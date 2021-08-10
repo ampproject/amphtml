@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import {addAttributesToElement} from '#core/dom';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+import {setStyle} from '#core/dom/style';
+import {remove} from '#core/types/array';
+import {dict} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
+
 import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
-import {addAttributesToElement} from './core/dom';
-import {closestAncestorElementBySelector} from './core/dom/query';
-import {setStyle} from './core/dom/style';
-import {remove} from './core/types/array';
-import {dict} from './core/types/object';
-import {tryParseJson} from './core/types/object/json';
 import {getData} from './event-helper';
 import {dev, devAssert} from './log';
 import {parseUrlDeprecated} from './url';

@@ -1,6 +1,7 @@
-import {isConnectedNode, rootNodeFor} from './core/dom';
-import {isElement} from './core/types';
-import {toArray} from './core/types/array';
+import {isConnectedNode, rootNodeFor} from '#core/dom';
+import {isElement} from '#core/types';
+import {toArray} from '#core/types/array';
+
 import {devAssert} from './log';
 
 /**

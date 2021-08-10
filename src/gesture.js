@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {Observable} from './core/data-structures/observable';
-import {supportsPassiveEventListener} from './core/dom/event-helper-listen';
-import {findIndex} from './core/types/array';
-import {toWin} from './core/window';
+import {Observable} from '#core/data-structures/observable';
+import {supportsPassiveEventListener} from '#core/dom/event-helper-listen';
+import {findIndex} from '#core/types/array';
+import {toWin} from '#core/window';
+
 import {devAssert} from './log';
 import {Pass} from './pass';
 

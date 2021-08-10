@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
+import {getOptionalSandboxFlags, getRequiredSandboxFlags} from '#core/3p-frame';
+import {setStyle} from '#core/dom/style';
 import * as mode from '#core/mode';
+import {dict} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
 
 import {urls} from './config';
-import {
-  getOptionalSandboxFlags,
-  getRequiredSandboxFlags,
-} from './core/3p-frame';
-import {setStyle} from './core/dom/style';
-import {dict} from './core/types/object';
-import {tryParseJson} from './core/types/object/json';
 import {getContextMetadata} from './iframe-attributes';
 import {dev, devAssert, user, userAssert} from './log';
 import {getMode} from './mode';

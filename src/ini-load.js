@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {isIframed} from './core/dom';
-import {Services} from './service';
-import {READY_SCAN_SIGNAL} from './service/resources-interface';
+import {isIframed} from '#core/dom';
+
+import {Services} from '#service';
+import {READY_SCAN_SIGNAL} from '#service/resources-interface';
 
 /** @const {!Array<string>} */
 const EXCLUDE_INI_LOAD = [
