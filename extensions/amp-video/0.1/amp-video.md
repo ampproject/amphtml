@@ -156,6 +156,13 @@ Indicates the album/collection the video was taken from, specified as a string.
 
 Indicates the name/title of the video, specified as a string. If not provided, the Media Session API helper uses either the `aria-label` attribute or falls back to the page's title.
 
+[filter formats="stories"]
+
+#### cache
+
+Indicates what video cache to fetch the sources from (eg: `cache="google"`). This will reduce your resources utilization
+[/filter]
+
 ## Analytics
 
 `amp-video` supports analytics out of the box. See [video analytics](../../amp-analytics/amp-video-analytics.md) for more information.
