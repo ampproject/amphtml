@@ -503,7 +503,7 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
       });
       iframe.postMessageToParent({
         width: 114,
-        height: 217,
+        height: '217', // should be tolerant to string number
         type: 'embed-size',
         sentinel: 'amp3ptest' + testIndex,
       });
@@ -516,6 +516,7 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
             type: 'embed-size-changed',
             sentinel: 'amp3ptest' + testIndex,
           });
+          expect(adImpl.uiHandler.onResizeSuccess).to.be.called;
         });
     });
 
@@ -541,6 +542,7 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
             type: 'embed-size-changed',
             sentinel: 'amp3ptest' + testIndex,
           });
+          expect(adImpl.uiHandler.onResizeSuccess).to.be.called;
         });
     });
 
