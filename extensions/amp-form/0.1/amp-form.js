@@ -20,7 +20,7 @@ import {AmpFormTextarea} from './amp-form-textarea';
 import {
   AsyncInputAttributes,
   AsyncInputClasses,
-} from '../../../src/async-input';
+} from '#core/constants/async-input';
 import {CSS} from '../../../build/amp-form-0.1.css';
 import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {

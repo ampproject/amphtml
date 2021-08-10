@@ -27,11 +27,13 @@ import {dict} from '#core/types/object';
  * @param {string} start
  * @param {string} uiHighlight
  * @param {string} uiLogo
+ * @param {boolean} autoplay
  * @param {!JsonObject} implicitParams
  * @return {string}
  */
 export function getDailymotionIframeSrc(
   videoId,
+  autoplay,
   endscreenEnable,
   info,
   mute,
@@ -41,7 +43,7 @@ export function getDailymotionIframeSrc(
   uiLogo,
   implicitParams
 ) {
-  return addParamsToUrl(
+  const iframeSrc = addParamsToUrl(
     `https://www.dailymotion.com/embed/video/${encodeURIComponent(
       videoId
     )}?api=1&html=1&app=amp`,
@@ -56,8 +58,14 @@ export function getDailymotionIframeSrc(
         'ui-logo': uiLogo,
       }),
       implicitParams
-    )
+    
   );
+  // In order to support autoplay the video needs to be muted on load so we
+  // dont receive an unmute event which prevents the video from autoplay.
+  if (this.element.hasAttribute('autoplay') && isAutoplaySupported(this.win)) {
+    iframeSrc = addParamsToUrl(iframeSrc, {'mute': 1});
+  }
+  return iframeSrc;
 }
 
 /**

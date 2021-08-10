@@ -21,10 +21,11 @@
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 
-import {devAssert, userAssert} from '../src/log';
-import {hasOwn, map} from '#core/types/object';
-import {isArray} from '#core/types';
 import {rethrowAsync} from '#core/error';
+import {isArray} from '#core/types';
+import {hasOwn, map} from '#core/types/object';
+
+import {devAssert, userAssert} from '../src/log';
 
 /** @typedef {function(!Window, !Object)}  */
 let ThirdPartyFunctionDef;

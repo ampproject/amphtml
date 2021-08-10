@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// @ts-nocheck
 
 /**
  * Changes the values of getMode().test, getMode().localDev to false
@@ -51,7 +52,7 @@ module.exports = function ({types: t}) {
         const {node} = path;
         const {object: obj, property} = node;
         const {callee} = obj;
-        const {INTERNAL_RUNTIME_VERSION} = this.opts;
+        const {INTERNAL_RUNTIME_VERSION: version} = this.opts;
 
         if (callee && callee.name === 'getMode') {
           if (property.name === 'test' || property.name === 'localDev') {
@@ -61,8 +62,14 @@ module.exports = function ({types: t}) {
           } else if (property.name === 'minified') {
             path.replaceWith(t.booleanLiteral(true));
           } else if (property.name === 'version') {
-            path.replaceWith(t.stringLiteral(INTERNAL_RUNTIME_VERSION));
+            path.replaceWith(t.stringLiteral(version));
           }
+        }
+      },
+      CallExpression(path) {
+        const {INTERNAL_RUNTIME_VERSION: version} = this.opts;
+        if (path.get('callee').referencesImport('#core/mode', 'version')) {
+          path.replaceWith(t.stringLiteral(version));
         }
       },
     },

@@ -15,12 +15,12 @@
   "amp-cid-backup": 1,
   "flexible-bitrate": 0.1,
   "layout-aspect-ratio-css": 1,
-  "tcf-post-message-proxy-api": 1,
-  "amp-consent-granular-consent": 1,
   "disable-a4a-non-sd": 1,
   "story-ad-auto-advance": 1,
   "story-ad-placements": 1,
   "story-load-first-page-only": 0.1,
+  "story-load-inactive-outside-viewport": 0.1,
+  "story-disable-animations-first-page": 0.5,
   "amp-story-page-attachment-ui-v2": 1,
   "amp-sticky-ad-to-amp-ad": 0
 }
