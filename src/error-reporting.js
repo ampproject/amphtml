@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '#core/constants/amp-events';
+import {duplicateErrorIfNecessary} from '#core/error';
 import {
   USER_ERROR_SENTINEL,
   isUserErrorEmbedMessage,
