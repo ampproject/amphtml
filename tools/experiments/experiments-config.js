@@ -65,6 +65,11 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
   },
   {
+    id: 'analytics-browser-events',
+    name: 'Allows tracking of a custom set of browser events',
+    spec: 'https://github.com/ampproject/amphtml/pull/35193',
+  },
+  {
     id: 'ios-fixed-no-transfer',
     name: 'Remove fixed transfer from iOS 12.2 and up',
     spec: 'https://github.com/ampproject/amphtml/issues/22220',
@@ -174,19 +179,9 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/30291',
   },
   {
-    id: 'tcf-post-message-proxy-api',
-    name: 'Proxy for TCF PostMessageAPI to send TCData to 3p iframes',
-    spec: 'https://github.com/ampproject/amphtml/issues/30385',
-  },
-  {
     id: 'dfp-render-on-idle-cwv-exp',
     name: 'To measure the CWV impact of ads idle rendering',
     spec: 'https://github.com/ampproject/amphtml/issues/31436',
-  },
-  {
-    id: 'amp-consent-granular-consent',
-    name: 'Client-side granular consent',
-    spec: 'https://github.com/ampproject/amphtml/issues/31607',
   },
   {
     id: 'amp-story-page-attachment-ui-v2',

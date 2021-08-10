@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import {dict} from '#core/types/object';
-import {getData} from '../src/event-helper';
-import {loadScript} from './3p';
-import {parseJson} from '#core/types/object/json';
 import {setStyles} from '#core/dom/style';
+import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
+
+import {loadScript} from './3p';
+
+import {getData} from '../src/event-helper';
 
 const libSourceUrl = dict({
   'canvas':

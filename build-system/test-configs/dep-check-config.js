@@ -99,12 +99,12 @@ exports.rules = [
       '3p/**->src/core/types/string/url.js',
       '3p/**->src/log.js',
       '3p/**->src/core/dom/style.js',
+      '3p/**->src/core/mode/index.js',
       '3p/**->src/url.js',
       '3p/**->src/config.js',
       '3p/**->src/mode.js',
       '3p/**->src/core/types/object/json.js',
       '3p/**->src/3p-frame-messaging.js',
-      '3p/**->src/internal-version.js',
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
@@ -139,7 +139,7 @@ exports.rules = [
       'ads/**->src/url.js',
       'ads/**->src/core/dom/static-template.js',
       'ads/**->src/core/dom/style.js',
-      'ads/**->src/internal-version.js',
+      'ads/**->src/core/mode/index.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
       'ads/google/a4a/**->src/ad-cid.js',
@@ -151,6 +151,7 @@ exports.rules = [
       'ads/google/a4a/utils.js->src/ini-load.js',
       'ads/google/a4a/utils.js->src/core/dom/index.js',
       'ads/google/a4a/utils.js->src/core/dom/layout/page-layout-box.js',
+      'ads/google/a4a/utils.js->src/core/data-structures/promise.js',
       // Some ads need to depend on json.js
       'ads/**->src/core/types/object/json.js',
       // IMA, similar to other non-Ad 3Ps above, needs access to event-helper
@@ -221,6 +222,9 @@ exports.rules = [
 
       // Ads needs iframe transports
       'extensions/amp-ad-exit/0.1/config.js->extensions/amp-analytics/0.1/iframe-transport-vendors.js',
+
+      // <amp-brightcove> versions share this message API definition.
+      'extensions/amp-brightcove/**->extensions/amp-brightcove/brightcove-api.js',
 
       // Amp carousel (and friends) depending on base carousel
       'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/action-source.js',
@@ -304,6 +308,7 @@ exports.rules = [
       'extensions/amp-story-interactive/0.1/amp-story-interactive-img-quiz.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-interactive/0.1/amp-story-interactive-results.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-interactive/0.1/interactive-disclaimer.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-slider.js->extensions/amp-story/1.0/amp-story-store-service.js',
 
       // Subscriptions.
       'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',

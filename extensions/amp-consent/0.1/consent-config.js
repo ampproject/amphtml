@@ -39,6 +39,7 @@ const CONSENT_VARS_ALLOWED_LIST = {
   'CLIENT_ID': true,
   'PAGE_VIEW_ID': true,
   'PAGE_VIEW_ID_64': true,
+  'SOURCE_URL': true,
 };
 
 /** @const @type {string} */

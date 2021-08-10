@@ -237,6 +237,15 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-brightcove",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "wrapper": "bento"
+    }
+  },
+  {
     "name": "amp-byside-content",
     "version": "0.1",
     "latestVersion": "0.1",
@@ -1100,6 +1109,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
+      "hasCss": true,
       "npm": true,
       "wrapper": "bento"
     }
@@ -1126,6 +1136,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
+      "hasCss": true,
       "npm": true,
       "wrapper": "bento"
     }
