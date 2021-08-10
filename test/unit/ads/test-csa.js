@@ -15,6 +15,7 @@
  */
 
 import * as _3p from '#3p/3p';
+
 import {
   AD_TYPE,
   callbackWithBackfill,
@@ -22,6 +23,7 @@ import {
   csa,
   resizeIframe,
 } from '#ads/vendors/csa';
+
 import {createIframePromise} from '#testing/iframe';
 
 function getAds(type) {
