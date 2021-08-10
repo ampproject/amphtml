@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// @ts-nocheck
 
-/**
- * @interface {babel.PluginPass}
- * @return {babel.PluginObj}
- */
-module.exports = function () {
-  return {
-    name: 'remove-strict-directives',
-    visitor: {
-      Directive(path) {
-        const {node} = path;
-        if (node.value.value === 'use strict') {
-          path.remove();
-        }
-      },
-    },
-  };
-};
+// src/polyfills.js must be the first import.
+import '#3p/polyfills';
+
+import {register} from '#3p/3p';
+import {draw3p, init} from '#3p/integration-lib';
+
+import {exco} from '#ads/vendors/exco';
+
+init(window);
+register('exco', exco);
+
+window.draw3p = draw3p;
