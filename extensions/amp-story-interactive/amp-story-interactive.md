@@ -92,6 +92,25 @@ The `amp-story-interactive-img-poll` element provides a voting experience with 2
 
 Display different categories based on user poll answers by pairing `amp-story-interactive-img-poll` with `amp-story-interactive-results`. Add a prompt for extra context.
 
+<amp-img alt="An example of an interactive image poll: 'Where would you travel?' with options of Lake Tahoe, Hong Kong, Hawaii, and the Grand Canyon, and their respective percentage votes" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/img-poll-raw.png" layout="intrinsic" width="400" height="554">
+
+[sourcecode:html]
+<amp-story-interactive-img-poll
+    id="travel-poll"
+    prompt-text="Where would you travel?"
+    prompt-size="large"
+    endpoint="https://backend.com/v1/interactives"
+    option-1-image="tahoe.png"
+    option-1-image-alt="Lake Tahoe"
+    option-2-image="hk.png"
+    option-2-image-alt="Hong Kong"
+    option-3-image="hawaii.png"
+    option-3-image-alt="Hawaii"
+    option-4-image="grand-canyon.png"
+    option-4-image-alt="Grand Canyon">
+</amp-story-interactive-img-poll>
+[/sourcecode]
+
 ### amp-story-interactive-quiz
 
 The `amp-story-interactive-quiz` element provides a guessing experience with 2-4 options, one of which is correct. It displays the voting percentages after the user makes a selection. The user selection is green if correct and red if incorrect.
@@ -117,6 +136,26 @@ Display different categories based on percentage of correct user answers by pair
 The `amp-story-interactive-img-quiz` element provides a guessing experience with 2-4 image options, one of which is correct. It displays the voting percentages after the user makes a selection. The user selection is green if correct and red if incorrect.
 
 Display different categories based on percentage of correct user answers by pairing `amp-story-interactive-img-quiz` with `amp-story-interactive-results`. Add a prompt for extra context.
+
+<amp-img alt="Example of an interactive image quiz: Which of these structures is oldest?, with various options; the correct answer, the Statue of Liberty has a green tick next to it. compared to the wrong answers which have a red cross; all answers show a percentage of how many people picked that particular answer" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/img-quiz-raw.png" layout="intrinsic" width="400" height="581">
+
+[sourcecode:html]
+<amp-story-interactive-img-quiz
+    id="structure-quiz"
+    prompt-text="Which of these structures is oldest?"
+    prompt-size="large"
+    endpoint="https://backend.com/v1/interactives"
+    option-1-image="liberty.png"
+    option-1-image-alt="Statue of Liberty"
+    option-1-correct
+    option-2-image="golden-gate.png"
+    option-2-image-alt="Golden Gate Bridge"
+    option-3-image="redeemer.png"
+    option-3-image-alt="Christ the Redeemer"
+    option-4-image="eiffel.png"
+    option-4-image-alt="Eiffel Tower">
+</amp-story-interactive-img-quiz>
+[/sourcecode]
 
 ### amp-story-interactive-results
 
