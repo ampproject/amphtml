@@ -790,8 +790,7 @@ export class GlobalVariableSource extends VariableSource {
       return getter(this.cachedGeo_);
     }
 
-    const element = this.ampdoc.getHeadNode();
-    return Services.geoForDocOrNull(element).then((geo) => {
+    return Services.geoForDocOrNull(this.ampdoc.getHeadNode()).then((geo) => {
       userAssert(geo, 'To use variable %s, amp-geo should be configured', expr);
       this.cachedGeo_ = geo;
       return getter(geo);
