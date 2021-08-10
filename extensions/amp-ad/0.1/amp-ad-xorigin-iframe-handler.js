@@ -44,6 +44,9 @@ const MIN_INABOX_POSITION_EVENT_INTERVAL = 100;
 /** @type {string} */
 const TAG = 'amp-ad-xorigin-iframe';
 
+/** @type {number} */
+const MSEC_REPEATED_REQUEST_DELAY = 500;
+
 export class AmpAdXOriginIframeHandler {
   /**
    * @param {!./amp-ad-3p-impl.AmpAd3PImpl|!../../amp-a4a/0.1/amp-a4a.AmpA4A} baseInstance
@@ -63,6 +66,14 @@ export class AmpAdXOriginIframeHandler {
 
     /** @type {?HTMLIFrameElement} iframe instance */
     this.iframe = null;
+
+    /* This variable keeps keeps track when an invalid resize request is made, and
+     * is associated with each iframe. If the request is invalid, then a new request
+     * cannot be made until a certain amount of time has passed, 500 ms by default
+     * (see MSEC_REPEATED_REQUEST_DELAY). Once the timer has cooled down, a new request can be made.
+     */
+    /** @type {number} */
+    this.lastRejectedResizeTime_ = 0.0;
 
     /** @private {?LegacyAdIntersectionObserverHost} */
     this.legacyIntersectionObserverApiHost_ = null;
@@ -170,14 +181,29 @@ export class AmpAdXOriginIframeHandler {
           if (!!data['hasOverflow']) {
             this.element_.warnOnMissingOverflow = false;
           }
-          this.handleResize_(
-            data['id'],
-            data['height'],
-            data['width'],
-            source,
-            origin,
-            event
-          );
+          if (
+            Date.now() - this.lastRejectedResizeTime_ >=
+            MSEC_REPEATED_REQUEST_DELAY
+          ) {
+            this.handleResize_(
+              data['id'],
+              data['height'],
+              data['width'],
+              source,
+              origin,
+              event
+            );
+          } else {
+            // need to wait 500ms until next resize request is allowed.
+            this.sendEmbedSizeResponse_(
+              false,
+              data['id'],
+              data['width'],
+              data['height'],
+              source,
+              origin
+            );
+          }
         },
         true,
         true
@@ -455,6 +481,12 @@ export class AmpAdXOriginIframeHandler {
         .updateSize(height, width, iframeHeight, iframeWidth, event)
         .then(
           (info) => {
+            if (!info.success) {
+              // invalid request parameters, disable requests for 500ms
+              this.lastRejectedResizeTime_ = Date.now();
+            } else {
+              this.lastRejectedResizeTime_ = 0.0;
+            }
             this.uiHandler_.onResizeSuccess();
             this.sendEmbedSizeResponse_(
               info.success,
