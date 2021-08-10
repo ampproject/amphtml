@@ -30,6 +30,7 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
   let renderStartedSpy;
   let iframeHandler;
   let iframe;
+  let clock;
   let testIndex = 0;
 
   beforeEach(() => {
@@ -338,6 +339,160 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
         });
     });
 
+    it('should be able to use embed-size API, change size deny repeated attempts, but then denies valid attempt before 500ms delay', async () => {
+      clock = env.sandbox.useFakeTimers();
+      clock.tick(0);
+      const updateSizeWrapper = env.sandbox.stub(
+        adImpl.uiHandler,
+        'updateSize'
+      );
+
+      const dataPromise = iframe.expectMessageFromParent('embed-size-denied');
+
+      updateSizeWrapper.resolves({
+        success: false,
+        newWidth: 114,
+        newHeight: 217,
+      });
+
+      //expect to fail, first call invalid request
+      iframe.postMessageToParent({
+        width: 114,
+        height: 217,
+        type: 'embed-size',
+        sentinel: 'amp3ptest' + testIndex,
+      });
+
+      const data = await dataPromise;
+      expect(data).to.jsonEqual({
+        requestedWidth: 114,
+        requestedHeight: 217,
+        type: 'embed-size-denied',
+        sentinel: 'amp3ptest' + testIndex,
+      });
+
+      updateSizeWrapper.resolves({
+        success: true,
+        newWidth: 114,
+        newHeight: 217,
+      });
+
+      //expect to fail invalid request right before 500ms
+      const data2Promise = iframe.expectMessageFromParent('embed-size-denied');
+
+      iframe.postMessageToParent({
+        width: 120,
+        height: 217,
+        type: 'embed-size',
+        sentinel: 'amp3ptest' + testIndex,
+      });
+
+      const data2 = await data2Promise;
+      expect(data2).to.jsonEqual({
+        requestedWidth: 120,
+        requestedHeight: 217,
+        type: 'embed-size-denied',
+        sentinel: 'amp3ptest' + testIndex,
+      });
+
+      clock.tick(250);
+
+      //expect to fail, valid request, but called before 500ms
+      const data3Promise = iframe.expectMessageFromParent('embed-size-denied');
+
+      iframe.postMessageToParent({
+        width: 114,
+        height: 217,
+        type: 'embed-size',
+        sentinel: 'amp3ptest' + testIndex,
+      });
+
+      const data3 = await data3Promise;
+      expect(data3).to.jsonEqual({
+        requestedWidth: 114,
+        requestedHeight: 217,
+        type: 'embed-size-denied',
+        sentinel: 'amp3ptest' + testIndex,
+      });
+    });
+
+    it('should be able to use embed-size API, change size deny repeated attempts, but then works after 500ms delay', async () => {
+      clock = env.sandbox.useFakeTimers();
+      clock.tick(0);
+      const updateSizeWrapper = env.sandbox.stub(
+        adImpl.uiHandler,
+        'updateSize'
+      );
+
+      const dataPromise = iframe.expectMessageFromParent('embed-size-denied');
+
+      updateSizeWrapper.resolves({
+        success: false,
+        newWidth: 114,
+        newHeight: 217,
+      });
+
+      //expect to fail, first call invalid request
+      iframe.postMessageToParent({
+        width: 114,
+        height: 217,
+        type: 'embed-size',
+        sentinel: 'amp3ptest' + testIndex,
+      });
+
+      const data = await dataPromise;
+      expect(data).to.jsonEqual({
+        requestedWidth: 114,
+        requestedHeight: 217,
+        type: 'embed-size-denied',
+        sentinel: 'amp3ptest' + testIndex,
+      });
+
+      updateSizeWrapper.resolves({
+        success: true,
+        newWidth: 114,
+        newHeight: 217,
+      });
+
+      //expect to fail invalid request right before 500ms
+      const data2Promise = iframe.expectMessageFromParent('embed-size-denied');
+
+      iframe.postMessageToParent({
+        width: 120,
+        height: 217,
+        type: 'embed-size',
+        sentinel: 'amp3ptest' + testIndex,
+      });
+
+      const data2 = await data2Promise;
+      expect(data2).to.jsonEqual({
+        requestedWidth: 120,
+        requestedHeight: 217,
+        type: 'embed-size-denied',
+        sentinel: 'amp3ptest' + testIndex,
+      });
+
+      clock.tick(500);
+
+      //expect to succeed: valid request right after 500ms
+      const data3Promise = iframe.expectMessageFromParent('embed-size-changed');
+
+      iframe.postMessageToParent({
+        width: 114,
+        height: 217,
+        type: 'embed-size',
+        sentinel: 'amp3ptest' + testIndex,
+      });
+
+      const data3 = await data3Promise;
+      expect(data3).to.jsonEqual({
+        requestedWidth: 114,
+        requestedHeight: 217,
+        type: 'embed-size-changed',
+        sentinel: 'amp3ptest' + testIndex,
+      });
+    });
+
     it('should be able to use embed-size API, change size succeed', () => {
       env.sandbox.stub(adImpl.uiHandler, 'updateSize').callsFake(() => {
         return Promise.resolve({
@@ -348,7 +503,7 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
       });
       iframe.postMessageToParent({
         width: 114,
-        height: '217', // should be tolerant to string number
+        height: 217,
         type: 'embed-size',
         sentinel: 'amp3ptest' + testIndex,
       });
@@ -361,7 +516,6 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
             type: 'embed-size-changed',
             sentinel: 'amp3ptest' + testIndex,
           });
-          expect(adImpl.uiHandler.onResizeSuccess).to.be.called;
         });
     });
 
@@ -387,7 +541,6 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
             type: 'embed-size-changed',
             sentinel: 'amp3ptest' + testIndex,
           });
-          expect(adImpl.uiHandler.onResizeSuccess).to.be.called;
         });
     });
 
