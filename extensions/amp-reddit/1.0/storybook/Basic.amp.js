@@ -16,7 +16,7 @@
 
 import * as Preact from '#preact';
 import {withAmp} from '@ampproject/storybook-addon';
-import {withKnobs} from '@storybook/addon-knobs';
+import {boolean, text, withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'amp-reddit-1_0',
@@ -28,8 +28,12 @@ export default {
   },
 };
 
-// DO NOT SUBMIT: This is example code only.
-export const ExampleUseCase = () => {
+export const Default = () => {
+  const redditSrc = text(
+    'redditSrc',
+    'https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed'
+  );
+  const embedType = text('embedType', 'post');
   return (
     <amp-reddit
       width="300"
