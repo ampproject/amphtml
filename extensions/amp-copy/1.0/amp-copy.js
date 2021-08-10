@@ -16,7 +16,6 @@
 
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-copy-1.0.css';
-import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';
 
@@ -26,7 +25,9 @@ const TAG = 'amp-copy';
 class AmpCopy extends BaseElement {
   /** @override */
   init() {
-    this.registerApiAction('copyToClipboard', (api) => api.copyToClipboard());
+    this.registerApiAction('copyToClipboard', (api) => {
+      api.copyToClipboard();
+    });
   }
 
   /** @override */

@@ -14,19 +14,26 @@
  * limitations under the License.
  */
 import * as Preact from '#preact';
-import {useCallback, useLayoutEffect, useRef, useState} from '#preact';
-import objstr from 'obj-str';
 import {
   copyTextToClipboard,
   isCopyingToClipboardSupported,
-} from '../../../src/clipboard';
+} from '#core/window/clipboard';
+import {
+  useCallback,
+  useImperativeHandle,
+  useLayoutEffect,
+  useState,
+} from '#preact';
+import {forwardRef} from '#preact/compat';
 import {useStyles} from './component.jss';
+import objstr from 'obj-str';
+
 /**
  * @param {!CopyDef.Props} props
+ * @param {{current: ?CopyDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
-export function Copy({children, sourceId, text, ...rest}) {
-  const ref = useRef(null);
+export function CopyWithRef({children, sourceId, text, ...rest}, ref) {
   const [status, setStatus] = useState(null);
   const [isCopySupported, setIsCopySupported] = useState(false);
   const classes = useStyles();
@@ -39,25 +46,56 @@ export function Copy({children, sourceId, text, ...rest}) {
     } else {
       setIsCopySupported(false);
     }
-  }, [setIsCopySupported]);
-  const copy = useCallback((sourceId) => {
-    let textToCopy = '';
+  }, [ref, setIsCopySupported]);
 
-    if (sourceId == undefined) {
-      // Copy static text value
-      textToCopy = text;
-    } else {
-      // Copy conent of sourceId element
-      const content = ref.current.ownerDocument.getElementById(sourceId);
-      textToCopy = (content.value ?? content.textContent).trim();
-    }
+  const copy = useCallback(
+    (sourceId) => {
+      let textToCopy = '';
 
+      if (sourceId == undefined) {
+        // Copy static text value
+        textToCopy = text;
+      } else {
+        // Copy content of sourceId element
+        const content = ref.current.ownerDocument.getElementById(sourceId);
+        textToCopy = (content.value ?? content.textContent).trim();
+      }
+
+      setStatus(copyTextToClipboard(window, textToCopy));
+
+      setTimeout(() => {
+        setStatus(null);
+      }, 3000);
+    },
+    [ref, text]
+  );
+
+  const copyText = useCallback((textToCopy) => {
     setStatus(copyTextToClipboard(window, textToCopy));
 
     setTimeout(() => {
       setStatus(null);
     }, 3000);
   }, []);
+
+  /** Copy Component - API Function */
+  useImperativeHandle(
+    ref,
+    () =>
+      /** @type {!CopyDef.CopyApi} */ ({
+        copyToClipboard: (selector, staticText) => {
+          if (selector !== null) {
+            copy(selector);
+          } else if (staticText !== null) {
+            copyText(staticText);
+          } else {
+            // TODO: Assert Error
+          }
+        },
+      }),
+    [copy, copyText]
+  );
+
   return (
     <button
       ref={ref}
@@ -77,3 +115,7 @@ export function Copy({children, sourceId, text, ...rest}) {
     </button>
   );
 }
+
+const Copy = forwardRef(CopyWithRef);
+Copy.displayName = 'Copy'; // Make findable for tests.
+export {Copy};
