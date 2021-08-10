@@ -56,7 +56,8 @@ export function getDailymotionIframeSrc(
         'info': info,
         // In order to support autoplay the video needs to be muted on load so we
         // dont receive an unmute event which prevents the video from autoplay.
-        'mute': mute || (autoplay && isAutoplaySupported(win)),
+        'mute':
+          mute || (autoplay && isAutoplaySupported(win)) ? true : undefined,
         'sharing-enable': sharingEnable,
         'start': start,
         'ui-highlight': uiHighlight,

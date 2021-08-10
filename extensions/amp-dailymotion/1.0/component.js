@@ -16,14 +16,7 @@
 
 import * as Preact from '#preact';
 import {forwardRef} from '#preact/compat';
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from '#preact';
+import {useMemo} from '#preact';
 import {dispatchCustomEvent} from '#core/dom';
 import {
   DailymotionEvents,
@@ -32,6 +25,7 @@ import {
 } from '../dailymotion-api';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {parseQueryString} from '#core/types/string/url';
+import {toWin} from '#core/window';
 
 /**
  * @param {string} method
@@ -91,7 +85,7 @@ export function DailymotionWithRef(
   const src = useMemo(
     () =>
       getDailymotionIframeSrc(
-        this.win,
+        ref?.current?.ownerDocument?.defaultView,
         videoId,
         autoplay,
         endscreenEnable,
@@ -103,7 +97,9 @@ export function DailymotionWithRef(
         uiLog
       ),
     [
+      ref,
       videoId,
+      autoplay,
       endscreenEnable,
       info,
       mute,
