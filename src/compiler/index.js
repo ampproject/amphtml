@@ -14,25 +14,19 @@
  * limitations under the License.
  */
 
-/**
- * Returns the HTML for an AMP Document with eligible components server-rendered.
- *
- * @param {string} html
- * @return {string}
- */
-function compileHtml(html) {
-  return html;
-}
+import * as compiler from '@ampproject/bento-compiler';
+
+import {getBuilders} from './builders';
 
 /**
  * Returns the AST for an AMP Document with eligible components server-rendered.
  *
- * @param {*} ast
- * @return {*}
+ * @param {!./types.TreeProtoDef} ast
+ * @param {!./types.VersionsDef} versions
+ * @return {!./types.TreeProtoDef}
  */
-function compileAst(ast) {
-  return ast;
+function compileAst(ast, versions) {
+  return compiler.renderAst(ast, getBuilders(versions));
 }
 
-globalThis.compileHtml = compileHtml;
-globalThis.compileAst = compileAst;
+globalThis['compileAst'] = compileAst;

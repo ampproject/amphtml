@@ -52,7 +52,8 @@ const realiasGetMode =
  *   check term in files whose path includes /test/ (false by default)
  *
  * - checkProse:
- *   check term in comments and documentation (.md) (false by default)
+ *   check term in comments and documentation (.md)
+ *   (false by default, implies `checkInTestFolder`)
  */
 let ForbiddenTermDef;
 
@@ -64,15 +65,15 @@ const forbiddenTermsGlobal = {
   'DO NOT SUBMIT': {
     checkProse: true,
   },
-  'whitelist|white-list': {
+  'white[-\\s]*list': {
     message: 'Please use the term allowlist instead',
     checkProse: true,
   },
-  'blacklist|black-list': {
+  'black[-\\s]*list': {
     message: 'Please use the term denylist instead',
     checkProse: true,
   },
-  'grandfather|grandfathered': {
+  'grandfather': {
     message: 'Please use the term legacy instead',
     checkProse: true,
   },
@@ -98,29 +99,38 @@ const forbiddenTermsGlobal = {
   },
   'describe\\.only': {
     message: 'Please remove all instances of describe.only',
+    checkInTestFolder: true,
     allowlist: ['testing/describes.js'],
   },
   'describes.*\\.only': {
     message: 'Please remove all instances of describes.only',
+    checkInTestFolder: true,
   },
   'dev\\(\\)\\.assert\\(': 'Use the devAssert function instead.',
   '[^.]user\\(\\)\\.assert\\(': 'Use the userAssert function instead.',
-  'it\\.only': '',
+  'it\\.only': {
+    message: 'Please remove all instances of it.only',
+    checkInTestFolder: true,
+  },
   'Math.random[^;()]*=': 'Use Sinon to stub!!!',
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
+    checkInTestFolder: true,
   },
   '(\\w*([sS]py|[sS]tub|[mM]ock|clock).restore)': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
+    checkInTestFolder: true,
   },
   'sinon\\.useFake\\w+': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
+    checkInTestFolder: true,
   },
   'sandbox\\.(spy|stub|mock)\\([^,\\s]*[iI]?frame[^,\\s]*,': {
     message:
       'Do NOT stub on a cross domain iframe! #5359\n' +
       '  If this is same domain, mark /*OK*/.\n' +
       '  If this is cross domain, overwrite the method directly.',
+    checkInTestFolder: true,
   },
   'window\\.sandbox': {
     message: 'Usage of window.sandbox is forbidden. Use env.sandbox instead.',
@@ -337,6 +347,7 @@ const forbiddenTermsGlobal = {
       'src/amp-story-player/amp-story-component-manager.js',
       'src/runtime.js',
       'src/log.js',
+      'src/error-reporting.js',
       'src/web-worker/web-worker.js',
       'testing/async-errors.js',
       'tools/experiments/experiments.js',
@@ -509,7 +520,10 @@ const forbiddenTermsGlobal = {
       'src/service/url-replacements-impl.js',
     ],
   },
-  'debugger': '',
+  'debugger': {
+    message: 'Please remove all instances of debugger',
+    checkInTestFolder: true,
+  },
   // Overridden APIs.
   '(doc.*)\\.referrer': {
     message: 'Use Viewer.getReferrerUrl() instead.',
@@ -1129,7 +1143,7 @@ function matchForbiddenTerms(srcFile, contents, terms) {
       // if needed but that might be too permissive.
       if (
         (Array.isArray(allowlist) && allowlist.indexOf(srcFile) != -1) ||
-        (isInTestFolder(srcFile) && !checkInTestFolder) ||
+        (isInTestFolder(srcFile) && !checkInTestFolder && !checkProse) ||
         (srcFile.endsWith('.md') && !checkProse)
       ) {
         return [];
