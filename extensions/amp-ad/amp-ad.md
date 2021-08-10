@@ -63,6 +63,7 @@ The `<amp-ad>` requires width and height values to be specified according to the
   width="300"
   height="250"
   type="industrybrains"
+  sticky="bottom"
   data-width="300"
   data-height="250"
   data-cid="19626-3798936394"
@@ -96,6 +97,8 @@ Optionally, `amp-ad` supports a child element with the `placeholder` attribute. 
 ### No ad available
 
 If no ad is available for the slot, AMP attempts to collapse the `amp-ad` element (that is, set to `display: none`). AMP determines that this operation can be performed without affecting the user's scroll position. If the ad is in the current viewport, the ad will not be collapsed because it affects the user's scroll position; however, if the ad is outside of the current viewport, it will be collapsed.
+
+If this is a sticky ad unit (`sticky` attribute is set), the entire sticky ad will not be displayed without regards to `fallback` attribute.
 
 In the case that the attempt to collapse fails. The `amp-ad` component supports a child element with the `fallback` attribute. If there is a fallback element in presence, the customized fallback element is shown. Otherwise AMP will apply a default fallback.
 
@@ -177,6 +180,14 @@ Specifies an identifier for the
 [ad network](#supported-ad-networks).
 The `type` attribute selects the template to use for the ad tag.
 
+### `sticky` (optional)
+
+Use to denote that this is a sticky ad unit and specify the position of this unit. Its value must be one of:
+
+-   top
+-   bottom
+-   bottom-right
+
 ### `data-foo-bar`
 
 Most ad networks require further configuration, which can be passed to the
@@ -249,7 +260,7 @@ to AMP components.
 
 ## Styling
 
-`<amp-ad>` elements may not themselves have or be placed in containers that have CSS `position: fixed` set (with the exception of `amp-lightbox`).
+`<amp-ad>` elements may not themselves have or be placed in containers that have CSS `position: fixed` set (with the exception of `amp-lightbox` and sticky ad unit).
 This is due to the UX implications of full page overlay ads. It may be considered to allow similar ad formats in the future inside of AMP controlled containers that maintain certain UX invariants.
 
 ## Validation
@@ -333,6 +344,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [DynAd](../../ads/vendors/dynad.md)
 -   [eADV](../../ads/vendors/eadv.md)
 -   [E-Planning](../../ads/vendors/eplanning.md)
+-   [EXCO](../../ads/vendors/exco.md)
 -   [Empower](../../ads/vendors/empower.md)
 -   [Ezoic](../../ads/vendors/ezoic.md)
 -   [FeedAd](../../ads/vendors/feedad.md)

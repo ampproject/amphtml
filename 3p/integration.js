@@ -21,6 +21,7 @@
  * This files gets minified and published to
  * https://3p.ampproject.net/$version/f.js
  */
+/* eslint-disable import/order */
 
 // src/polyfills.js must be the first import.
 import './polyfills';
@@ -128,6 +129,7 @@ import {empower} from '#ads/vendors/empower';
 import {engageya} from '#ads/vendors/engageya';
 import {epeex} from '#ads/vendors/epeex';
 import {eplanning} from '#ads/vendors/eplanning';
+import {exco} from '#ads/vendors/exco';
 import {ezoic} from '#ads/vendors/ezoic';
 import {f1e} from '#ads/vendors/f1e';
 import {f1h} from '#ads/vendors/f1h';
@@ -411,6 +413,7 @@ register('empower', empower);
 register('engageya', engageya);
 register('epeex', epeex);
 register('eplanning', eplanning);
+register('exco', exco);
 register('ezoic', ezoic);
 register('f1e', f1e);
 register('f1h', f1h);
