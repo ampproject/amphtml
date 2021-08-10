@@ -28,7 +28,7 @@ export let VisitorCallbackTypeDef;
  * Utility class that will visit every ancestor of a given element, and call
  * the provided callback functions on each element, passing in the element and
  * its computed styles as arguments to the callbacks. Callbacks may cease
- * visiting further nodes by returning a value, which may later be retrived by
+ * visiting further nodes by returning a value, which may later be retrieved by
  * calling 'getValueFor(visitorName)'. Once all visitors have returned or hit
  * their maximum nodes to visit, no more nodes will be visited.
  *
