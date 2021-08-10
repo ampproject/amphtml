@@ -34,12 +34,8 @@ const DEFAULT_GET_JSON = (url) => {
   return fetch(url).then((res) => res.json());
 };
 
-/**
- * Use `Object.create({})` since `Object.create(null)` behaves in unexpected ways
- * (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create#custom_and_null_objects)
- * @const {Object}
- */
-const DEFAULT_DATA = Object.create({});
+/** @const {Object} */
+const DEFAULT_DATA = {};
 
 /**
  * @param {!RenderDef.Props} props
@@ -107,6 +103,10 @@ export function RenderWithRef(
     [refresh]
   );
 
+  // We check data === DEFAULT_DATA below to prevent a race condition where rendered data
+  // is overwritten by another render with empty data. Therefore, we check that data is not empty
+  // otherise we pass null to the renderer function.
+  // See https://github.com/ampproject/amphtml/issues/35484 for more context.
   const rendered = useRenderer(data === DEFAULT_DATA ? null : render, data);
   const isHtml =
     rendered && typeof rendered == 'object' && '__html' in rendered;
