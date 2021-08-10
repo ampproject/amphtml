@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import {createFixtureIframe} from '#testing/iframe';
 import {toggleExperiment} from '#experiments';
+
+import {createFixtureIframe} from '#testing/iframe';
+
 import {whenUpgradedToCustomElement} from '../../src/amp-element-helpers';
 
 describes.sandboxed

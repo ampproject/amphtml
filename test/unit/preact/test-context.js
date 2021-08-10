@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import {mount} from 'enzyme';
+
 import * as Preact from '#preact';
 import {WithAmpContext, useAmpContext, useLoading} from '#preact/context';
-import {mount} from 'enzyme';
 
 describes.sandboxed('preact/context', {}, () => {
   function Component(props) {

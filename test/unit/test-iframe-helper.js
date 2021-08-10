@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as IframeHelper from '../../src/iframe-helper';
 import {createIframePromise} from '#testing/iframe';
+
 import {generateSentinel} from '../../src/3p-frame';
+import * as IframeHelper from '../../src/iframe-helper';
 
 describes.sandboxed
   .configure()

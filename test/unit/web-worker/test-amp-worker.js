@@ -15,13 +15,14 @@
  */
 
 import {Services} from '#service';
+import {installXhrService} from '#service/xhr-impl';
+
+import {dev} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {
   ampWorkerForTesting,
   invokeWebWorker,
 } from '../../../src/web-worker/amp-worker';
-import {dev} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {installXhrService} from '#service/xhr-impl';
 
 describes.sandboxed('invokeWebWorker', {}, (env) => {
   let fakeWin;

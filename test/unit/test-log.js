@@ -15,6 +15,12 @@
  */
 
 import {
+  USER_ERROR_SENTINEL,
+  isUserErrorEmbedMessage,
+  isUserErrorMessage,
+} from '#core/error/message-helpers';
+
+import {
   Log,
   LogLevel,
   dev,
@@ -23,11 +29,6 @@ import {
   user,
   userAssert,
 } from '../../src/log';
-import {
-  USER_ERROR_SENTINEL,
-  isUserErrorEmbedMessage,
-  isUserErrorMessage,
-} from '#core/error/message-helpers';
 
 describes.sandboxed('Logging', {}, (env) => {
   const RETURNS_FINE = () => LogLevel.FINE;

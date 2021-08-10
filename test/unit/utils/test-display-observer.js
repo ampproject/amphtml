@@ -15,6 +15,8 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
+import {removeItem} from '#core/types/array';
+
 import {
   measureDisplay,
   observeDisplay,
@@ -22,7 +24,6 @@ import {
   unobserveDisplay,
   unregisterContainer,
 } from '../../../src/utils/display-observer';
-import {removeItem} from '#core/types/array';
 
 describes.realWin('display-observer', {amp: true}, (env) => {
   let win, doc, ampdoc;

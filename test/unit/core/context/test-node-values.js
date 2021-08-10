@@ -15,8 +15,8 @@
  */
 
 import {ContextNode} from '#core/context/node';
-import {Values} from '#core/context/values';
 import {contextProp} from '#core/context/prop';
+import {Values} from '#core/context/values';
 
 const NonRecursive = contextProp('NonRecursive');
 

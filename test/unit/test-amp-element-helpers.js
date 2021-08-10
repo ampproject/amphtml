@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {whenUpgradedToCustomElement} from '../../src/amp-element-helpers';
 import {BaseElement} from '../../src/base-element';
 import {createAmpElementForTesting} from '../../src/custom-element';
-import {whenUpgradedToCustomElement} from '../../src/amp-element-helpers';
 
 describes.realWin(
   'AMPElement helpers',

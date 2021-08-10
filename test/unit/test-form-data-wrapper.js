@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import {fromIterator} from '#core/types/array';
+
+import {Services} from '#service';
+
 import {
   PolyfillFormDataWrapper,
   createFormDataWrapper,
 } from '../../src/form-data-wrapper';
-import {Services} from '#service';
-import {fromIterator} from '#core/types/array';
 
 describes.realWin('FormDataWrapper', {}, (env) => {
   describe('entries', () => {

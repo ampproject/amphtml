@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {install, installForChildWin} from '#polyfills/resize-observer';
 import {
   ResizeObserverStub,
   installStub,
@@ -21,7 +22,6 @@ import {
   shouldLoadPolyfill,
   upgradePolyfill,
 } from '#polyfills/stubs/resize-observer-stub';
-import {install, installForChildWin} from '#polyfills/resize-observer';
 
 class NativeResizeObserver {
   constructor(callback) {

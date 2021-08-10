@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+import {Observable} from '#core/data-structures/observable';
+import {
+  detectEvtListenerOptsSupport,
+  resetEvtListenerOptsSupportForTesting,
+  resetPassiveSupportedForTesting,
+  supportsPassiveEventListener,
+} from '#core/dom/event-helper-listen';
+
 import {
   MEDIA_LOAD_FAILURE_SRC_PROPERTY,
   createCustomEvent,
@@ -23,13 +31,6 @@ import {
   listenOncePromise,
   loadPromise,
 } from '../../src/event-helper';
-import {Observable} from '#core/data-structures/observable';
-import {
-  detectEvtListenerOptsSupport,
-  resetEvtListenerOptsSupportForTesting,
-  resetPassiveSupportedForTesting,
-  supportsPassiveEventListener,
-} from '#core/dom/event-helper-listen';
 
 describes.sandboxed('EventHelper', {}, (env) => {
   function getEvent(name, target) {

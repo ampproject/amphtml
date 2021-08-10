@@ -15,6 +15,8 @@
  */
 
 import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
+
 import {
   activateChunkingForTesting,
   chunkInstanceForTesting,
@@ -22,7 +24,6 @@ import {
   onIdle,
   startupChunk,
 } from '../../src/chunk';
-import {installDocService} from '#service/ampdoc-impl';
 
 describes.sandboxed('chunk2', {}, () => {
   beforeEach(() => {

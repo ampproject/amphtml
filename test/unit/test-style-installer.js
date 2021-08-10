@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-import * as rds from '../../src/render-delaying-services';
-import * as styles from '../../src/style-installer';
-import {AmpDocShadow, AmpDocSingle} from '#service/ampdoc-impl';
-import {Services} from '#service';
-import {createShadowRoot} from '../../src/shadow-embed';
 import {getStyle} from '#core/dom/style';
+import {setShadowDomSupportedVersionForTesting} from '#core/dom/web-components';
+
+import {Services} from '#service';
+import {AmpDocShadow, AmpDocSingle} from '#service/ampdoc-impl';
 import {installPerformanceService} from '#service/performance-impl';
 import {installPlatformService} from '#service/platform-impl';
+
 import {isAnimationNone} from '#testing/test-helper';
-import {setShadowDomSupportedVersionForTesting} from '#core/dom/web-components';
+
+import * as rds from '../../src/render-delaying-services';
+import {createShadowRoot} from '../../src/shadow-embed';
+import * as styles from '../../src/style-installer';
 
 describes.sandboxed('Styles', {}, () => {
   describes.realWin('makeBodyVisible', {amp: true}, (env) => {

@@ -14,32 +14,35 @@
  * limitations under the License.
  */
 
-import * as cookie from '../../src/cookies';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import * as url from '../../src/url';
-import {Crypto, installCryptoService} from '#service/crypto-impl';
+
 import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
 import {
   cidServiceForDocForTesting,
   getProxySourceOrigin,
   isOptedOutOfCid,
   optOutOfCid,
 } from '#service/cid-impl';
-import {getCookie, setCookie} from '../../src/cookies';
-import {installCryptoPolyfill} from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
-import {installDocService} from '#service/ampdoc-impl';
+import {Crypto, installCryptoService} from '#service/crypto-impl';
 import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
 import {installExtensionsService} from '#service/extensions-impl';
 import {installPlatformService} from '#service/platform-impl';
 import {installTimerService} from '#service/timer-impl';
 import {installViewerServiceForDoc} from '#service/viewer-impl';
+
+import {stubServiceForDoc} from '#testing/test-helper';
 import {macroTask} from '#testing/yield';
-import {parseUrlDeprecated} from '../../src/url';
+
+import {installCryptoPolyfill} from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
+import {getCookie, setCookie} from '../../src/cookies';
+import * as cookie from '../../src/cookies';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../src/service-helpers';
-import {stubServiceForDoc} from '#testing/test-helper';
+import {parseUrlDeprecated} from '../../src/url';
+import * as url from '../../src/url';
 
 const DAY = 24 * 3600 * 1000;
 

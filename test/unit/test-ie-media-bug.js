@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {dev} from '../../src/log';
 import {ieMediaCheckAndFix} from '#service/ie-media-bug';
+
+import {dev} from '../../src/log';
 
 describes.sandboxed('ie-media-bug', {}, (env) => {
   let clock;

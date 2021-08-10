@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import * as analytics from '../../src/analytics';
+import {resetExperimentTogglesForTesting, toggleExperiment} from '#experiments';
+
 import {Services} from '#service';
+
+import * as analytics from '../../src/analytics';
 import {
   blockedByConsentError,
   cancellation,
@@ -28,9 +31,8 @@ import {
   reportErrorToAnalytics,
   reportErrorToServerOrViewer,
 } from '../../src/error-reporting';
-import {getRtvVersionForTesting} from '../../src/mode';
-import {resetExperimentTogglesForTesting, toggleExperiment} from '#experiments';
 import {user, userAssert} from '../../src/log';
+import {getRtvVersionForTesting} from '../../src/mode';
 
 describes.fakeWin('installErrorReporting', {}, (env) => {
   let win;

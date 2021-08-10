@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 import {AmpContext} from '#3p/ampcontext';
-import {MessageType, serializeMessage} from '../../src/3p-frame-messaging';
+
 import {Platform} from '#service/platform-impl';
+
+import {MessageType, serializeMessage} from '../../src/3p-frame-messaging';
 
 const NOOP = () => {};
 

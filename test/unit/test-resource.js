@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '#service/ampdoc-impl';
 import {LayoutPriority} from '#core/dom/layout';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+
+import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {OwnersImpl} from '#service/owners-impl';
 import {Resource, ResourceState} from '#service/resource';
 import {ResourcesImpl} from '#service/resources-impl';
-import {Services} from '#service';
+
 import {isCancellation} from '../../src/error-reporting';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 describes.realWin('Resource', {amp: true}, (env) => {
   let win, doc;

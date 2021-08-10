@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   History,
@@ -21,8 +22,8 @@ import {
   HistoryBindingVirtual_,
   installHistoryServiceForDoc,
 } from '#service/history-impl';
-import {Services} from '#service';
 import {installTimerService} from '#service/timer-impl';
+
 import {listenOncePromise} from '../../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../../src/url';
 

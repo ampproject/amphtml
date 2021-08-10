@@ -14,9 +14,19 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle, installDocService} from '#service/ampdoc-impl';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+
 import {Services} from '#service';
+import {AmpDocSingle, installDocService} from '#service/ampdoc-impl';
+import {installPlatformService} from '#service/platform-impl';
+import {installTimerService} from '#service/timer-impl';
+import {installViewerServiceForDoc} from '#service/viewer-impl';
+import {
+  ViewportBindingDef,
+  marginBottomOfLastChild,
+} from '#service/viewport/viewport-binding-def';
 import {ViewportBindingIosEmbedWrapper_} from '#service/viewport/viewport-binding-ios-embed-wrapper';
+import {ViewportBindingNatural_} from '#service/viewport/viewport-binding-natural';
 import {
   ViewportImpl,
   installViewportServiceForDoc,
@@ -24,20 +34,11 @@ import {
   stringifyViewportMeta,
   updateViewportMetaString,
 } from '#service/viewport/viewport-impl';
+import {installVsyncService} from '#service/vsync-impl';
 
-import {
-  ViewportBindingDef,
-  marginBottomOfLastChild,
-} from '#service/viewport/viewport-binding-def';
-import {ViewportBindingNatural_} from '#service/viewport/viewport-binding-natural';
+import {loadPromise} from '../../src/event-helper';
 import {dev} from '../../src/log';
 import {getMode} from '../../src/mode';
-import {installPlatformService} from '#service/platform-impl';
-import {installTimerService} from '#service/timer-impl';
-import {installViewerServiceForDoc} from '#service/viewer-impl';
-import {installVsyncService} from '#service/vsync-impl';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {loadPromise} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service-helpers';
 
 const NOOP = () => {};

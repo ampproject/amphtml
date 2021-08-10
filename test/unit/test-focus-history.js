@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {FocusHistory} from '../../src/focus-history';
 import {installTimerService} from '#service/timer-impl';
+
+import {FocusHistory} from '../../src/focus-history';
 
 describes.sandboxed('FocusHistory', {}, (env) => {
   let clock;

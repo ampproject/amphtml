@@ -14,21 +14,25 @@
  * limitations under the License.
  */
 
+import {removeElement} from '#core/dom';
+import {detectIsAutoplaySupported} from '#core/dom/video';
+
+import {toggleExperiment} from '#experiments';
+
 import {Services} from '#service';
-import {
-  VideoAnalyticsEvents,
-  VideoEvents,
-  VideoInterface,
-} from '../../src/video-interface';
+
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
   poll,
 } from '#testing/iframe';
-import {detectIsAutoplaySupported} from '#core/dom/video';
+
 import {getData, listenOncePromise} from '../../src/event-helper';
-import {removeElement} from '#core/dom';
-import {toggleExperiment} from '#experiments';
+import {
+  VideoAnalyticsEvents,
+  VideoEvents,
+  VideoInterface,
+} from '../../src/video-interface';
 
 function skipIfAutoplayUnsupported(win) {
   return detectIsAutoplaySupported(win).then((isSupported) => {

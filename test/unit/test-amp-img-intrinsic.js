@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import {BrowserController} from '#testing/test-helper';
-import {applyStaticLayout} from '../../src/static-layout';
-import {createElementWithAttributes} from '#core/dom';
-import {createIframePromise} from '#testing/iframe';
 import {installImg} from '#builtins/amp-img/amp-img';
+
+import {createElementWithAttributes} from '#core/dom';
 import {toArray} from '#core/types/array';
+
+import {createIframePromise} from '#testing/iframe';
+import {BrowserController} from '#testing/test-helper';
+
+import {applyStaticLayout} from '../../src/static-layout';
 
 describes.sandboxed('amp-img layout intrinsic', {}, () => {
   let fixture;

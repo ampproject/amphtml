@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '#core/dom';
+
 import {
   calculateEntryPointScriptUrl,
   calculateExtensionScriptUrl,
   getExtensionScripts,
   parseExtensionUrl,
 } from '#service/extension-script';
-import {createElementWithAttributes} from '#core/dom';
+
 import {initLogConstructor, resetLogConstructorForTesting} from '../../src/log';
 
 describes.sandboxed('Extension Location', {}, () => {

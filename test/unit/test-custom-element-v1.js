@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import {BaseElement} from '../../src/base-element';
 import {CommonSignals} from '#core/constants/common-signals';
-import {ElementStub} from '../../src/element-stub';
 import {LayoutPriority} from '#core/dom/layout';
+
 import {Services} from '#service';
+import {getSchedulerForDoc} from '#service/scheduler';
+
+import {BaseElement} from '../../src/base-element';
 import {chunkInstanceForTesting} from '../../src/chunk';
 import {
   createAmpElementForTesting,
@@ -26,7 +28,7 @@ import {
   getImplClassSyncForTesting,
   getImplSyncForTesting,
 } from '../../src/custom-element';
-import {getSchedulerForDoc} from '#service/scheduler';
+import {ElementStub} from '../../src/element-stub';
 
 describes.realWin('CustomElement V1', {amp: true}, (env) => {
   let win, doc, ampdoc;

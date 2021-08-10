@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-import * as IniLoad from '../../../src/ini-load';
 import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
+
 import {getA4AId, registerIniLoadListener} from '#inabox/utils';
+
+import {Services} from '#service';
+
+import * as IniLoad from '../../../src/ini-load';
 
 describes.realWin('inabox-utils', {}, (env) => {
   let dispatchEventStub;

@@ -15,8 +15,10 @@
  */
 
 import {AmpPixel} from '#builtins/amp-pixel/amp-pixel';
-import {BrowserController, RequestBank} from '#testing/test-helper';
+
 import {createElementWithAttributes} from '#core/dom';
+
+import {BrowserController, RequestBank} from '#testing/test-helper';
 
 describes.sandboxed('amp-pixel', {}, function () {
   describes.integration(
