@@ -46,6 +46,36 @@ class AmpIframe extends BaseElement {
   }
 
   /**
+   * @return {!Promise<!IntersectionObserverEntry>}
+   */
+  handleOnLoad_() {
+    const hasPlaceholder = Boolean(this.getPlaceholder());
+    if (hasPlaceholder) {
+      this.togglePlaceholder(false);
+      return;
+    }
+    // TODO(dmanek): Extract this to a common function & share
+    // between 0.1 and 1.0 versions.
+    return measureIntersection(this.element).then((intersectionEntry) => {
+      const {top} = intersectionEntry.boundingClientRect;
+      const viewportHeight = intersectionEntry.rootBounds.height;
+      const minTop = Math.min(600, viewportHeight * 0.75);
+      userAssert(
+        top >= minTop,
+        '<amp-iframe> elements must be positioned outside the first 75% ' +
+          'of the viewport or 600px from the top (whichever is smaller): %s ' +
+          ' Current position %s. Min: %s' +
+          "Positioning rules don't apply for iframes that use `placeholder`." +
+          'See https://github.com/ampproject/amphtml/blob/main/extensions/' +
+          'amp-iframe/amp-iframe.md#iframe-with-placeholder for details.',
+        this.element,
+        top,
+        minTop
+      );
+    });
+  }
+
+  /**
    * Updates the element's dimensions to accommodate the iframe's
    * requested dimensions.
    * @param {number|undefined} height
@@ -76,26 +106,15 @@ class AmpIframe extends BaseElement {
       return;
     }
 
-    // Calculate new width and height of the container to include the padding.
-    // If padding is negative, just use the requested width and height directly.
+    // TODO(dmanek): Calculate width and height of the container to include padding.
     let newHeight, newWidth;
     height = parseInt(height, 10);
     if (!isNaN(height)) {
       newHeight = height;
-      // newHeight = Math.max(
-      //   height +
-      //     (this.element./*OK*/ offsetHeight - this.iframe_./*OK*/ offsetHeight),
-      //   height
-      // );
     }
     width = parseInt(width, 10);
     if (!isNaN(width)) {
       newWidth = width;
-      // newWidth = Math.max(
-      //   width +
-      //     (this.element./*OK*/ offsetWidth - this.iframe_./*OK*/ offsetWidth),
-      //   width
-      // );
     }
 
     if (newHeight !== undefined || newWidth !== undefined) {
@@ -129,30 +148,7 @@ class AmpIframe extends BaseElement {
   init() {
     return dict({
       'onLoadCallback': () => {
-        const hasPlaceholder = Boolean(this.getPlaceholder());
-        if (hasPlaceholder) {
-          this.togglePlaceholder(false);
-          return;
-        }
-        // TODO(dmanek): Extract this to a common function & share
-        // between 0.1 and 1.0 versions.
-        measureIntersection(this.element).then((intersectionEntry) => {
-          const {top} = intersectionEntry.boundingClientRect;
-          const viewportHeight = intersectionEntry.rootBounds.height;
-          const minTop = Math.min(600, viewportHeight * 0.75);
-          userAssert(
-            top >= minTop,
-            '<amp-iframe> elements must be positioned outside the first 75% ' +
-              'of the viewport or 600px from the top (whichever is smaller): %s ' +
-              ' Current position %s. Min: %s' +
-              "Positioning rules don't apply for iframes that use `placeholder`." +
-              'See https://github.com/ampproject/amphtml/blob/main/extensions/' +
-              'amp-iframe/amp-iframe.md#iframe-with-placeholder for details.',
-            this.element,
-            top,
-            minTop
-          );
-        });
+        this.handleOnLoad_();
       },
       'requestResize': (height, width) => {
         this.updateSize_(height, width);
