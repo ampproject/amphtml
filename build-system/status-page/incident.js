@@ -24,7 +24,9 @@ const {getChannels, getFormats, steps} = require('./common');
 const {log} = require('../common/logging');
 
 const [number] = process.argv.slice(2);
-const {BODY: body, COMMENT_AFTER: after, COMMENT_BEFORE: before} = process.env;
+const body = process.env.BODY || '';
+const after = process.env.COMMENT_AFTER || '';
+const before = process.env.COMMENT_BEFORE || '';
 
 const apiUrl = `https://api.statuspage.io/v1/pages/${process.env.STATUS_PAGE_ID}`;
 const headers = {

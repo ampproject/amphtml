@@ -24,7 +24,7 @@ const {getChannels, steps} = require('./common');
 const {log} = require('../common/logging');
 
 const [number, user] = process.argv.slice(2);
-const body = process.env.BODY;
+const body = process.env.BODY || '';
 
 const commentTemplate = (channels) => {
   const reducer = (current, step) => {
