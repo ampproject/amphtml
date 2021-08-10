@@ -55,17 +55,21 @@ export function restoreConsoleSandbox() {
   }
 }
 
+/**
+ * @param {string} message Message of error that's about to be logged.
+ * @return {number} index or -1
+ */
 export function indexOfExpectedMessage(message) {
+  // Match equal strings.
   const exact = expectedAsyncErrors.indexOf(message);
   if (exact != -1) {
     return exact;
   }
+  // Match regex.
   for (let i = 0; i < expectedAsyncErrors.length; i++) {
     const expectedError = expectedAsyncErrors[i];
-    if (typeof expectedError != 'string') {
-      if (expectedError.test(message)) {
-        return i;
-      }
+    if (typeof expectedError != 'string' && expectedError.test(message)) {
+      return i;
     }
   }
   return -1;
@@ -78,7 +82,6 @@ export function indexOfExpectedMessage(message) {
 function printWarning(...messages) {
   const message = messages.join(' ');
 
-  // Match equal strings.
   const index = indexOfExpectedMessage(message);
   if (index != -1) {
     expectedAsyncErrors.splice(index, 1);
