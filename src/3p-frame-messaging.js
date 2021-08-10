@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {devAssert} from './core/assert';
-import {internalListenImplementation} from './core/dom/event-helper-listen';
-import {rethrowAsync} from './core/error';
-import {dict} from './core/types/object';
-import {tryParseJson} from './core/types/object/json';
+import {devAssert} from '#core/assert';
+import {internalListenImplementation} from '#core/dom/event-helper-listen';
+import {rethrowAsync} from '#core/error';
+import {dict} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
 
 /** @const */
 const AMP_MESSAGE_PREFIX = 'amp-';
