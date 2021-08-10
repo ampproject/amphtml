@@ -34,6 +34,11 @@ const DEFAULT_GET_JSON = (url) => {
   return fetch(url).then((res) => res.json());
 };
 
+/**
+ * Use `Object.create({})` since `Object.create(null)` behaves in unexpected ways
+ * (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create#custom_and_null_objects)
+ * @const {Object}
+ */
 const DEFAULT_DATA = Object.create({});
 
 /**
