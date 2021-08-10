@@ -38,7 +38,8 @@ export const WithResizableIframe = () => {
   return (
     <Iframe
       title="Resizable iframe example"
-      style={{width: 100, height: 100}}
+      width="100"
+      height="100"
       sandbox="allow-scripts allow-same-origin"
       resizable
       src="/examples/amp-iframe-storybook.html"
