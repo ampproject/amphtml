@@ -25,7 +25,6 @@ import {setStyle} from './core/dom/style';
 import {dict} from './core/types/object';
 import {tryParseJson} from './core/types/object/json';
 import {getContextMetadata} from './iframe-attributes';
-import {internalRuntimeVersion} from './internal-version';
 import {dev, devAssert, user, userAssert} from './log';
 import {getMode} from './mode';
 import {assertHttpsUrl, parseUrlDeprecated} from './url';
@@ -213,9 +212,7 @@ export function getBootstrapUrl(type) {
       : `./vendor/${type}.max`;
     return filename + extension;
   }
-  return `${
-    urls.thirdParty
-  }/${internalRuntimeVersion()}/vendor/${type}${extension}`;
+  return `${urls.thirdParty}/${mode.version()}/vendor/${type}${extension}`;
 }
 
 /**
@@ -285,7 +282,7 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
   return (
     'https://' +
     parentWindow.__AMP_DEFAULT_BOOTSTRAP_SUBDOMAIN +
-    `.${urls.thirdPartyFrameHost}/${internalRuntimeVersion()}/` +
+    `.${urls.thirdPartyFrameHost}/${mode.version()}/` +
     `${srcFileBasename}.html`
   );
 }
@@ -302,7 +299,7 @@ export function getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename) {
     getAdsLocalhost(parentWindow) +
       '/dist.3p/' +
       (mode.isMinified()
-        ? `${internalRuntimeVersion()}/${srcFileBasename}`
+        ? `${mode.version()}/${srcFileBasename}`
         : `current/${srcFileBasename}.max`) +
       '.html'
   );
@@ -389,7 +386,7 @@ function getCustomBootstrapBaseUrl(
     parsed.origin,
     meta
   );
-  return `${url}?${internalRuntimeVersion()}`;
+  return `${url}?${mode.version()}`;
 }
 
 /**

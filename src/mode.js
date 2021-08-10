@@ -16,7 +16,6 @@
 
 import * as coreMode from './core/mode';
 import {parseQueryString} from './core/types/string/url';
-import {internalRuntimeVersion} from './internal-version';
 
 /**
  * @typedef {{
@@ -76,8 +75,8 @@ function getMode_(win) {
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
     test: coreMode.isTest(win),
-    log: hashQuery['log'],
-    version: internalRuntimeVersion(),
+    log: parseInt(hashQuery['log'], 10),
+    version: coreMode.version(),
     rtvVersion: getRtvVersion(win),
   };
 }
@@ -97,7 +96,7 @@ function getRtvVersion(win) {
     // We will default to production default `01` minor version for now.
     // TODO(erwinmombay): decide whether internalRuntimeVersion should contain
     // minor version.
-    rtvVersion = win.AMP_CONFIG?.v || `01${internalRuntimeVersion()}`;
+    rtvVersion = win.AMP_CONFIG?.v || `01${coreMode.version()}`;
   }
   return rtvVersion;
 }
