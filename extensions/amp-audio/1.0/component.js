@@ -21,7 +21,13 @@ import {
   EMPTY_METADATA,
   setMediaSession,
 } from '../../../src/mediasession-helper';
-import {useCallback, useEffect, useImperativeHandle, useMemo, useRef} from '#preact';
+import {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+} from '#preact';
 
 /**
  * @param {!AudioDef.Props} props
@@ -72,7 +78,7 @@ export function AudioWithRef(
   /**
    * Plays audio callback
    */
-  const playCallback = useCallback(() => {
+  const play = useCallback(() => {
     onPlay?.();
     audioRef.current.play();
     isPlaying.current = true;
@@ -81,7 +87,7 @@ export function AudioWithRef(
   /**
    * Pauses audio callback
    */
-  const pauseCallback = useCallback(() => {
+  const pause = useCallback(() => {
     onPause?.();
     audioRef.current.pause();
     isPlaying.current = false;
@@ -96,8 +102,8 @@ export function AudioWithRef(
 
     validateMediaMetadata?.(element, metaData);
 
-    setMediaSession(win, metaData, playCallback, pauseCallback);
-  }, [metaData, validateMediaMetadata, playCallback, pauseCallback]);
+    setMediaSession(win, metaData, play, pause);
+  }, [metaData, validateMediaMetadata, play, pause]);
 
   useEffect(() => {
     if (!audioRef.current.play) {
@@ -115,11 +121,11 @@ export function AudioWithRef(
     ref,
     () =>
       /** @type {!AudioDef.AudioApi} */ ({
-        play: () => playCallback(),
-        pause: () => pauseCallback(),
+        play,
+        pause,
         isPlaying: () => isPlaying.current,
       }),
-    [playCallback, pauseCallback]
+    [play, pause]
   );
 
   return (
