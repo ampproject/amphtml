@@ -98,16 +98,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   buildCallback() {
     super.buildCallback();
 
-<<<<<<< HEAD
     this.maybeSetDarkThemeForElement_(this.headerEl);
     this.maybeSetDarkThemeForElement_(this.element);
-=======
-    const theme = this.element.getAttribute('theme')?.toLowerCase();
-    if (theme && AttachmentTheme.DARK === theme) {
-      this.headerEl.setAttribute('theme', theme);
-      this.element.setAttribute('theme', theme);
-    }
->>>>>>> main
 
     // Outlinks can be an amp-story-page-outlink or the legacy version,
     // an amp-story-page-attachment with an href.
@@ -474,9 +466,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   maybeSetDarkThemeForElement_(element) {
     const theme = this.element.getAttribute('theme')?.toLowerCase();
     if (theme && AttachmentTheme.DARK === theme) {
-      isPageAttachmentUiV2ExperimentOn(this.win)
-        ? element.setAttribute('theme', theme)
-        : element.classList.add(DARK_THEME_CLASS);
+      element.setAttribute('theme', theme);
     }
   }
 
@@ -489,9 +479,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   createDomainLabelElement_() {
     const domainLabelEl = this.win.document.createElement('div');
     domainLabelEl.classList.add('i-amphtml-story-page-attachment-domain-label');
-    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-      domainLabelEl.classList.add('i-amphtml-amp-story-page-attachment-ui-v2');
-    }
     this.maybeSetDarkThemeForElement_(domainLabelEl);
     domainLabelEl.textContent = this.getPublisherDomain_();
     return domainLabelEl;
@@ -504,7 +491,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   doesContainFormElement_() {
-    return Boolean(this.element.querySelector('form'));
+    return true;// Boolean(this.element.querySelector('form'));
   }
 
   /**
