@@ -1507,10 +1507,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
 
       expect(
-        playerEl.querySelector('.i-amphtml-story-player-desktop-panel-prev')
+        playerEl.querySelector('.i-amphtml-story-player-panel-prev')
       ).to.exist;
       expect(
-        playerEl.querySelector('.i-amphtml-story-player-desktop-panel-next')
+        playerEl.querySelector('.i-amphtml-story-player-panel-next')
       ).to.exist;
     });
 
