@@ -160,7 +160,7 @@ Indicates the name/title of the video, specified as a string. If not provided, t
 
 #### cache
 
-Indicates what video cache to fetch the sources from (eg: `cache="google"`). This will reduce your resources utilization
+Indicates what video cache to fetch the sources from (eg: `cache="google"`). This will reduce your server requests for video resources by using the cache to serve the sources when possible.
 [/filter]
 
 ## Analytics
