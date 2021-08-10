@@ -17,6 +17,14 @@ push_builds_only: &push_builds_only
         - main
         - /^amp-release-.*$/
 
+pr_builds_only: &pr_builds_only
+  filters:
+    branches:
+      ignore:
+        - main
+        - /^amp-release-.*$/
+        - nightly
+
 experiment_job: &experiment_job
   parameters:
     exp:
@@ -169,13 +177,8 @@ jobs:
     steps:
       - setup_vm
       - run:
-          name: 'Create Artifacts Directory'
-          command: mkdir -p /tmp/artifacts
-      - run:
           name: '⭐ Nomodule Build ⭐'
           command: node build-system/pr-check/nomodule-build.js
-      - store_artifacts:
-          path: /tmp/artifacts/amp_nomodule_build.tar.gz
       - teardown_vm
   'Module Build - Test':
     executor:
@@ -203,6 +206,17 @@ jobs:
       - run:
           name: '⭐ Module Build ⭐'
           command: node build-system/pr-check/bundle-size-module-build.js
+      - teardown_vm
+  'PR Deploy':
+    executor:
+      name: node-docker-medium
+    steps:
+      - setup_vm
+      - run:
+          name: '⭐ PR Deploy ⭐'
+          command: node build-system/pr-check/pr-deploy.js
+      - store_artifacts:
+          path: /tmp/artifacts/amp_nomodule_build.tar.gz
       - teardown_vm
   'Bundle Size':
     executor:
@@ -408,6 +422,10 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
+      - 'PR Deploy':
+          <<: *pr_builds_only
+          requires:
+            - 'Nomodule Build (Test)'
       - 'Bundle Size':
           <<: *push_and_pr_builds
           requires:
