@@ -32,9 +32,7 @@ module.exports = function () {
           return;
         }
 
-        path.getAllNextSiblings;
         // Babel NodePath definition is missing getNextSibling
-        //
         const next = /** @type {babel.NodePath}*/ (
           /** @type {*} */ (path).getNextSibling()
         );
