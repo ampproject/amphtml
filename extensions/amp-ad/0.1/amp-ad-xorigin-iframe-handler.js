@@ -191,7 +191,7 @@ export class AmpAdXOriginIframeHandler {
           } else {
             //  need to wait 500ms until next resize request is allowed.
             this.sendEmbedSizeResponse_(
-              false,
+              false, // success
               data['id'],
               data['width'],
               data['height'],
@@ -456,7 +456,8 @@ export class AmpAdXOriginIframeHandler {
    * Updates the element's dimensions to accommodate the iframe's
    * requested dimensions. Notifies the window that request the resize
    * of success or failure.
-   * @param {number|undefined} id
+   * @param {number|undefined} idhttps://github.com/ampproject/amphtml/pull/35565/files
+   * @param id
    * @param {number|string|undefined} height
    * @param {number|string|undefined} width
    * @param {!Window} source
@@ -476,6 +477,13 @@ export class AmpAdXOriginIframeHandler {
         .updateSize(height, width, iframeHeight, iframeWidth, event)
         .then(
           (info) => {
+            if (!info.success) {
+              //invalid request parameters disable requests for 500ms
+              RESIZE_REQUESTS_ENABLED = false;
+              setTimeout(() => {
+                RESIZE_REQUESTS_ENABLED = true;
+              }, MSEC_REPEATED_REQUEST_DELAY);
+            }
             this.uiHandler_.onResizeSuccess();
             this.sendEmbedSizeResponse_(
               info.success,
@@ -484,15 +492,7 @@ export class AmpAdXOriginIframeHandler {
               info.newHeight,
               source,
               origin
-            ).then(() => {
-              if (!info.success) {
-                //invalid request parameters disable requests for 500ms
-                RESIZE_REQUESTS_ENABLED = false;
-                setTimeout(() => {
-                  RESIZE_REQUESTS_ENABLED = true;
-                }, MSEC_REPEATED_REQUEST_DELAY);
-              }
-            });
+            );
           },
           () => {}
         );
