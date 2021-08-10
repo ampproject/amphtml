@@ -339,10 +339,9 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
         });
     });
 
-    describe('Initialized iframe', async () => {
+    describe('request valid and invalid ad resize useing embed-size API', async () => {
       beforeEach(async () => {
         clock = env.sandbox.useFakeTimers();
-        clock.tick(0);
         const updateSizeWrapper = env.sandbox.stub(
           adImpl.uiHandler,
           'updateSize'
