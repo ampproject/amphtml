@@ -15,8 +15,7 @@
  */
 
 import {devAssertElement} from '#core/assert';
-
-import {whenUpgradedToCustomElement} from './amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 export const MIN_VISIBILITY_RATIO_FOR_AUTOPLAY = 0.5;
 

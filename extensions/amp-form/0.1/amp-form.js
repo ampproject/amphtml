@@ -56,7 +56,7 @@ import {
   formOrNullForElement,
   getFormAsObject,
   setFormForElement,
-} from '../../../src/form';
+} from '#core/dom/form';
 import {getFormValidator, isCheckValiditySupported} from './form-validators';
 import {getMode} from '../../../src/mode';
 import {installFormProxy} from './form-proxy';
