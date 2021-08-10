@@ -113,6 +113,9 @@ commands:
       - browser-tools/install-chrome:
           replace-existing: true
       - browser-tools/install-chromedriver
+  install_firefox:
+    steps:
+      - browser-tools/install-firefox
   enable_safari_automation:
     steps:
       - run:
@@ -140,7 +143,7 @@ commands:
                 command: circleci-agent step halt
 
 jobs:
-  'Initialize Repository':
+  initialize_repository:
     executor:
       name: base-docker-small
     steps:
@@ -152,7 +155,7 @@ jobs:
           name: 'Initialize Workspace'
           command: cp .circleci/maybe_gracefully_halt.sh /tmp/workspace
       - teardown_vm
-  'Checks':
+  checks:
     executor:
       name: node-docker-medium
     steps:
@@ -162,7 +165,7 @@ jobs:
           name: '⭐ Checks ⭐'
           command: node build-system/pr-check/checks.js
       - teardown_vm
-  'Unminified Build':
+  unminified_build:
     executor:
       name: node-docker-xlarge
     steps:
@@ -171,7 +174,7 @@ jobs:
           name: '⭐ Unminified Build ⭐'
           command: node build-system/pr-check/unminified-build.js
       - teardown_vm
-  'Nomodule Build - Test':
+  nomodule_build_test:
     executor:
       name: node-docker-xlarge
     steps:
@@ -180,7 +183,7 @@ jobs:
           name: '⭐ Nomodule Build ⭐'
           command: node build-system/pr-check/nomodule-build.js
       - teardown_vm
-  'Module Build - Test':
+  module_build_test:
     executor:
       name: node-docker-xlarge
     steps:
@@ -189,7 +192,7 @@ jobs:
           name: '⭐ Module Build ⭐'
           command: node build-system/pr-check/module-build.js
       - teardown_vm
-  'Nomodule Build - Prod':
+  nomodule_build_prod:
     executor:
       name: node-docker-xlarge
     steps:
@@ -198,7 +201,7 @@ jobs:
           name: '⭐ Nomodule Build ⭐'
           command: node build-system/pr-check/bundle-size-nomodule-build.js
       - teardown_vm
-  'Module Build - Prod':
+  module_build_prod:
     executor:
       name: node-docker-xlarge
     steps:
@@ -207,7 +210,7 @@ jobs:
           name: '⭐ Module Build ⭐'
           command: node build-system/pr-check/bundle-size-module-build.js
       - teardown_vm
-  'PR Deploy':
+  pr_deploy:
     executor:
       name: node-docker-medium
     steps:
@@ -218,7 +221,7 @@ jobs:
       - store_artifacts:
           path: /tmp/artifacts/amp_nomodule_build.tar.gz
       - teardown_vm
-  'Bundle Size':
+  bundle_size:
     executor:
       name: node-docker-medium
     steps:
@@ -227,7 +230,7 @@ jobs:
           name: '⭐ Bundle Size ⭐'
           command: node build-system/pr-check/bundle-size.js
       - teardown_vm
-  'Validator Tests':
+  validator_tests:
     executor:
       name: jdk-docker-xlarge
     steps:
@@ -240,7 +243,7 @@ jobs:
           command: node build-system/pr-check/validator-tests.js
       - store_test_output
       - teardown_vm
-  'Visual Diff Tests':
+  visual_diff_tests:
     executor:
       name: node-docker-large
     steps:
@@ -251,7 +254,7 @@ jobs:
           command: node build-system/pr-check/visual-diff-tests.js
       - store_test_output
       - teardown_vm
-  'Local Unit Tests':
+  local_unit_tests:
     executor:
       name: node-docker-large
     steps:
@@ -263,7 +266,7 @@ jobs:
           command: node build-system/pr-check/unit-tests-local.js
       - store_test_output
       - teardown_vm
-  'All Unit Tests':
+  all_unit_tests:
     executor:
       name: node-docker-medium
     parallelism: 6
@@ -275,7 +278,7 @@ jobs:
           command: node build-system/pr-check/unit-tests.js
       - store_test_output
       - teardown_vm
-  'Unminified Tests':
+  unminified_tests:
     executor:
       name: node-docker-large
     steps:
@@ -286,7 +289,7 @@ jobs:
           command: node build-system/pr-check/unminified-tests.js
       - store_test_output
       - teardown_vm
-  'Nomodule Tests':
+  nomodule_tests:
     executor:
       name: node-docker-large
     parameters:
@@ -302,7 +305,7 @@ jobs:
           command: node build-system/pr-check/nomodule-tests.js --config=<< parameters.config >>
       - store_test_output
       - teardown_vm
-  'Module Tests':
+  module_tests:
     executor:
       name: node-docker-large
     parameters:
@@ -318,7 +321,7 @@ jobs:
           command: node build-system/pr-check/module-tests.js --config=<< parameters.config >>
       - store_test_output
       - teardown_vm
-  'End-to-End Tests':
+  end_to_end_tests:
     executor:
       name: node-docker-medium
     parallelism: 6
@@ -330,18 +333,29 @@ jobs:
           command: node build-system/pr-check/e2e-tests.js
       - store_test_output
       - teardown_vm
-  'Safari Tests':
+  browser_tests_safari:
     executor:
       name: macos-medium
     steps:
       - setup_vm
       - enable_safari_automation
       - run:
-          name: '⭐ Safari Tests ⭐'
+          name: '⭐ Browser Tests (Safari) ⭐'
           command: node build-system/pr-check/safari-tests.js
       - store_test_output
       - teardown_vm
-  'Performance Tests':
+  browser_tests_firefox:
+    executor:
+      name: node-docker-medium
+    steps:
+      - setup_vm
+      - install_firefox
+      - run:
+          name: '⭐ Browser Tests (Firefox) ⭐'
+          command: node build-system/pr-check/firefox-tests.js
+      - store_test_output
+      - teardown_vm
+  performance_tests:
     executor:
       name: node-docker-xlarge
     steps:
@@ -352,7 +366,7 @@ jobs:
           command: node build-system/pr-check/performance-tests.js
       - store_test_output
       - teardown_vm
-  'Experiment Build':
+  experiment_build:
     executor:
       name: node-docker-xlarge
     <<: *experiment_job
@@ -362,7 +376,7 @@ jobs:
           name: '⭐ Experiment << parameters.exp >> Build ⭐'
           command: node build-system/pr-check/experiment-build.js --experiment=experiment<< parameters.exp >>
       - teardown_vm
-  'Experiment Integration Tests':
+  experiment_integration_tests:
     executor:
       name: node-docker-large
     <<: *experiment_job
@@ -374,7 +388,7 @@ jobs:
           command: node build-system/pr-check/experiment-integration-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
       - teardown_vm
-  'Experiment End-to-End Tests':
+  experiment_end_to_end_tests:
     executor:
       name: node-docker-large
     <<: *experiment_job
@@ -391,68 +405,76 @@ jobs:
 workflows:
   'CircleCI':
     jobs:
-      - 'Initialize Repository':
+      - initialize_repository:
+          name: 'Initialize Repository'
           <<: *push_and_pr_builds
-      - 'Checks':
+      - checks:
+          name: 'Checks'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - 'Unminified Build':
+      - unminified_build:
           name: 'Unminified Build (Test)'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - 'Nomodule Build - Test':
+      - nomodule_build_test:
           name: 'Nomodule Build (Test)'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - 'Module Build - Test':
+      - module_build_test:
           name: 'Module Build (Test)'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - 'Nomodule Build - Prod':
+      - nomodule_build_prod:
           name: 'Nomodule Build (Prod)'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - 'Module Build - Prod':
+      - module_build_prod:
           name: 'Module Build (Prod)'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - 'PR Deploy':
+      - pr_deploy:
+          name: 'PR Deploy'
           <<: *pr_builds_only
           requires:
             - 'Nomodule Build (Test)'
-      - 'Bundle Size':
+      - bundle_size:
+          name: 'Bundle Size'
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build (Prod)'
             - 'Module Build (Prod)'
-      - 'Validator Tests':
+      - validator_tests:
+          name: 'Validator Tests'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - 'Visual Diff Tests':
+      - visual_diff_tests:
+          name: 'Visual Diff Tests'
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build (Test)'
-      - 'Local Unit Tests':
+      - local_unit_tests:
+          name: 'Local Unit Tests'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - 'All Unit Tests':
+      - all_unit_tests:
           name: '⛓️ All Unit Tests'
           <<: *push_and_pr_builds
           requires:
             - 'Local Unit Tests'
-      - 'Unminified Tests':
+      - unminified_tests:
+          name: 'Unminified Tests'
           <<: *push_and_pr_builds
           requires:
             - 'Unminified Build (Test)'
-      - 'Nomodule Tests':
+      - nomodule_tests:
           name: 'Nomodule Tests (<< matrix.config >>)'
           matrix:
             parameters:
@@ -460,7 +482,7 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build (Test)'
-      - 'Module Tests':
+      - module_tests:
           name: 'Module Tests (<< matrix.config >>)'
           matrix:
             parameters:
@@ -469,17 +491,22 @@ workflows:
           requires:
             - 'Nomodule Build (Test)'
             - 'Module Build (Test)'
-      - 'End-to-End Tests':
+      - end_to_end_tests:
           name: '⛓️ End-to-End Tests'
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build (Test)'
-      - 'Safari Tests':
-          name: 'Safari Tests'
+      - browser_tests_safari:
+          name: 'Browser Tests (Safari)'
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build (Test)'
-      - 'Experiment Build':
+      - browser_tests_firefox:
+          name: 'Browser Tests (Firefox)'
+          <<: *push_and_pr_builds
+          requires:
+            - 'Nomodule Build (Test)'
+      - experiment_build:
           name: 'Experiment << matrix.exp >> Build'
           matrix:
             parameters:
@@ -487,7 +514,7 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - 'Experiment Integration Tests':
+      - experiment_integration_tests:
           name: 'Exp. << matrix.exp >> Integration Tests'
           matrix:
             parameters:
@@ -495,7 +522,7 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Experiment << matrix.exp >> Build'
-      - 'Experiment End-to-End Tests':
+      - experiment_end_to_end_tests:
           name: '⛓️ Exp. << matrix.exp >> End-to-End Tests'
           matrix:
             parameters:
@@ -504,7 +531,7 @@ workflows:
           requires:
             - 'Experiment << matrix.exp >> Build'
       # TODO(wg-performance, #12128): This takes 30 mins and fails regularly.
-      # - 'Performance Tests':
+      # - performance_tests:
       #     <<: *push_builds_only
       #     requires:
       #       - 'Nomodule Build (Test)'
