@@ -129,7 +129,7 @@ export function AudioWithRef(
   );
 
   return (
-    <ContainWrapper contentRef={wrapperRef} size layout paint>
+    <ContainWrapper contentRef={wrapperRef} size layout paint {...rest}>
       <audio
         ref={audioRef}
         aria-describedby={ariaDescribedby}
@@ -143,7 +143,6 @@ export function AudioWithRef(
         onPlaying={() => audioPlaying()}
         preload={preload}
         src={src}
-        {...rest}
       >
         {sources}
       </audio>
