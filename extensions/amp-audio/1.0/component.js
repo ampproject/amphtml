@@ -17,7 +17,10 @@
 import * as Preact from '#preact';
 import {ContainWrapper} from '#preact/component';
 import {forwardRef} from '#preact/compat';
-import {setMediaSession} from '../../../src/mediasession-helper';
+import {
+  EMPTY_METADATA,
+  setMediaSession,
+} from '../../../src/mediasession-helper';
 
 const {useCallback, useEffect, useImperativeHandle, useMemo, useRef} = Preact;
 
@@ -28,12 +31,12 @@ const {useCallback, useEffect, useImperativeHandle, useMemo, useRef} = Preact;
  */
 export function AudioWithRef(
   {
-    album,
+    album = EMPTY_METADATA.album,
     'aria-describedby': ariaDescribedby,
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledby,
-    artist,
-    artwork,
+    artist = EMPTY_METADATA.artist,
+    artwork = EMPTY_METADATA.artwork,
     autoplay,
     controlsList,
     loop,
@@ -43,7 +46,7 @@ export function AudioWithRef(
     preload,
     sources,
     src,
-    title,
+    title = EMPTY_METADATA.title,
     validateMediaMetadata,
     ...rest
   },
