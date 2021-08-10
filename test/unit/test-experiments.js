@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '#core/dom';
+
 import {
   RANDOM_NUMBER_GENERATORS,
   experimentToggles,
@@ -28,7 +30,6 @@ import {
   resetExperimentTogglesForTesting,
   toggleExperiment,
 } from '#experiments';
-import {createElementWithAttributes} from '#core/dom';
 
 function fakeLocalStorage(initial = {}) {
   const state = {...initial};

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {ControllerPromise} from '../../build-system/tasks/e2e/controller-promise';
 import sinon from /*OK*/ 'sinon';
+
+import {ControllerPromise} from '../../build-system/tasks/e2e/controller-promise';
 
 /**
  * This is a unit test that is located with the E2E tests because it

@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-_.foo = {
-  baz: 1
-};
-_.foo.baz;
+
+import {validateData, writeScript} from '#3p/3p';
+
+const requiredParams = ['id'];
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function exco(global, data) {
+  validateData(data, requiredParams);
+  writeScript(global, 'https://player.ex.co/amp.js');
+}
