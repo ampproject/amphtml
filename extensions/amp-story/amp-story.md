@@ -395,7 +395,7 @@ This same image can be used for both mobile portrait and landscape desktop using
 <amp-img src="cat.jpg" alt="..." object-position="75% 40%"></amp-img>
 ```
 
-##### Optimize `amp-video` by using a video cache on origin documents
+##### Optimize `amp-video` by using a free Google hosted video cache on origin documents
 
 The `<amp-video>` element on stories supports specifying a video cache to be used on origin documents through the attribute `cache`.
 The video cache can serve copies of the video at multiple bitrates, reducing the server's workload on delivering videos.
