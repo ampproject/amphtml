@@ -249,11 +249,21 @@ Controls the `font-size` of prompt text. Can be `small`, `medium` (default), `la
 
 This attribute does not apply styling to `amp-story-interactive-result` category prefix text.
 
-### option-{1/2/3/4}-text (required)
+### option-{1/2/3/4}-text (required for binary-poll, poll, quiz, results)
 
 String that represents a numbered option. Binary polls require 2 options. Polls, quizzes, and image polls and quizzes may include between 2 and 4 options.
 
 The `amp-story-interactive-result` element uses this string value as category description.
+
+### option-{1/2/3/4}-image (required for img-poll, img-quiz, optional for results)
+
+Path to an image that represents a numbered option, for anywhere between 2 to 4 options.
+
+The `amp-story-interactive-result` element uses this path as a visual category description.
+
+### option-{1/2/3/4}-image-alt (required for img-poll, img-quiz)
+
+Text description of the image for the corresponding option used for accessibility.
 
 ### option-{1/2/3/4}-confetti (optional for binary-poll, img-poll, img-quiz, poll, quiz)
 
