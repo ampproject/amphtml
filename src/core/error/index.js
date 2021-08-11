@@ -17,7 +17,7 @@
 /**
  * Some exceptions (DOMException, namely) have read-only message.
  * @param {!Error} error
- * @return {!Error};
+ * @return {!Error}
  */
 export function duplicateErrorIfNecessary(error) {
   const messageProperty = Object.getOwnPropertyDescriptor(error, 'message');
