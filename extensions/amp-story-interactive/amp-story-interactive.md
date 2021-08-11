@@ -251,7 +251,7 @@ This attribute does not apply styling to `amp-story-interactive-result` category
 
 ### option-{1/2/3/4}-text (required for binary-poll, poll, quiz, results)
 
-String that represents a numbered option. Binary polls require 2 options. Polls, quizzes, and image polls and quizzes may include between 2 and 4 options.
+String that represents a numbered option. Binary polls require 2 options. Polls and quizzes may include between 2 and 4 options.
 
 The `amp-story-interactive-result` element uses this string value as category description.
 
