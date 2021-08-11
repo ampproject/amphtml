@@ -66,6 +66,7 @@
 }
 
 .i-amphtml-story-interactive-results-result-text {
+  position: absolute;
   font-size: calc(var(--size) / 5) !important;
   width: 100% !important;
   text-align: center !important;
