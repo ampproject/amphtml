@@ -15,7 +15,6 @@
 #
 tags: {  # amp-audio 1.0
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   satisfies: "amp-audio 1.0"
   excludes: "amp-audio 0.1"
