@@ -373,6 +373,7 @@ export function googlePageParameters(a4a, startTime) {
       'uaa': uaDataValues?.architecture,
       'uam': uaDataValues?.model,
       'uafv': uaDataValues?.uaFullVersion,
+      'uab': uaDataValues?.bitness,
     };
   });
 }
@@ -1198,5 +1199,6 @@ function getUserAgentClientHintParameters(win) {
     'architecture',
     'model',
     'uaFullVersion',
+    'bitness'
   ]);
 }
