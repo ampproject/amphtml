@@ -343,7 +343,7 @@ All `amp-story-interactive` elements use the [container](https://amp.dev/documen
 
 The default `font-size` is `3*var(--story-page-vmin)` so that elements take 75% of the width of portrait stories, independently of the screen size.
 
-The `amp-story-interactive-poll` and `amp-story-interactive-quiz` elements have a `min-width: 14em` and `max-width: 25em`. The `amp-story-interactive-binary-poll`, `amp-story-interactive-img-poll`, `amp-story-interactive-img-quiz`, and `amp-story-interactive-results` have a `min-width: 14em` and `max-width: 18em`.
+The `amp-story-interactive-poll` and `amp-story-interactive-quiz` elements have a `min-width: 14em` and `max-width: 25em`. The `amp-story-interactive-binary-poll`, `amp-story-interactive-img-poll`, `amp-story-interactive-img-quiz`, and `amp-story-interactive-results` elements have a `min-width: 14em` and `max-width: 18em`.
 
 #### Sizing within amp-story-grid-layer[aspect-ratio]
 
