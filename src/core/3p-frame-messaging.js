@@ -119,9 +119,9 @@ export function deserializeMessage(message) {
   if (!isAmpMessage(message)) {
     return null;
   }
-  const startPos = message.indexOf('{');
+  const startPos = /** @type {string} */ (message).indexOf('{');
   devAssert(startPos != -1, 'JSON missing in %s', message);
-  return tryParseJson(message.substr(startPos), (e) => {
+  return tryParseJson(/** @type {string} */ (message).substr(startPos), (e) => {
     rethrowAsync(
       new Error(`MESSAGING: Failed to parse message: ${message}\n${e.message}`)
     );
