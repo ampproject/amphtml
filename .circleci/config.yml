@@ -70,16 +70,16 @@ commands:
       - restore_cache:
           name: 'Restore Git Cache'
           keys:
-            - git-cache-v2-{{ arch }}-{{ .Branch }}-{{ .Revision }}
-            - git-cache-v2-{{ arch }}-{{ .Branch }}-
-            - git-cache-v2-{{ arch }}-
+            - git-cache-{{ arch }}-v2-{{ .Branch }}-{{ .Revision }}
+            - git-cache-{{ arch }}-v2-{{ .Branch }}-
+            - git-cache-{{ arch }}-v2-
       - checkout
       - when:
           condition: << parameters.save-git-cache >>
           steps:
             - save_cache:
                 name: 'Save Git Cache'
-                key: git-cache-v2-{{ arch }}-{{ .Branch }}-{{ .Revision }}
+                key: git-cache-{{ arch }}-v2-{{ .Branch }}-{{ .Revision }}
                 paths:
                   - .git
   setup_node_environment:
