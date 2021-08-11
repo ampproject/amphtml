@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// @ts-nocheck
 
 /**
  * Ensure comments in minified build output is minimal.
@@ -32,7 +31,8 @@ module.exports = function () {
             ...comment,
             value: comment.value.replace(/\s+/g, ' '),
           }));
-          const next = path.getNextSibling();
+
+          const next = /** @type {*} */ (path).getNextSibling();
           if (next?.node) {
             next.node.leadingComments = null;
           }

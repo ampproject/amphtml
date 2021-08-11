@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// @ts-nocheck
 
 const {dirname, join, relative, resolve} = require('path').posix;
 
@@ -23,7 +22,7 @@ const {dirname, join, relative, resolve} = require('path').posix;
  * value.detected indicates if the callee name (key) was imported into the current module.
  * value.removeable is the array of property names that can be removed.
  * Example: ['dev', {detected: false, removeable: ['fine']}] would mean ... `dev().fine(...)` can be removed.
- * @return {Map<string, {detected: boolean, removeable: Array<string>}}
+ * @return {Map<string, {detected: boolean, removeable: Array<string>}>}
  */
 function defaultCalleeToPropertiesMap() {
   return new Map([
