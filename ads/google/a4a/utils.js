@@ -1199,6 +1199,6 @@ function getUserAgentClientHintParameters(win) {
     'architecture',
     'model',
     'uaFullVersion',
-    'bitness'
+    'bitness',
   ]);
 }
