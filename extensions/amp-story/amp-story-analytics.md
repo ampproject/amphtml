@@ -124,7 +124,6 @@ The `story-open` trigger is fired when opening a drawer or dialog inside a story
 -   Page attachment (`<amp-story-page-attachment>`)
 -   Share dialog (`<amp-story-share-menu>`)
 -   Info dialog (`<amp-story-info-dialog>`)
--   Sidebar (`<amp-sidebar>`)
 
 To use it, specify the trigger on your `"triggers"` property of your analytics configuration, accompanied by the `"tagName"` of the element you want to track.
 
