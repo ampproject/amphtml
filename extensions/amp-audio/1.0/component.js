@@ -109,12 +109,7 @@ export function AudioWithRef(
     if (!audioRef.current.play) {
       return;
     }
-
-    // Execute at unlayout
-    return () => {
-      audioPlaying();
-    };
-  }, [audioPlaying]);
+  }, []);
 
   /** Audio Component - API Functions */
   useImperativeHandle(
