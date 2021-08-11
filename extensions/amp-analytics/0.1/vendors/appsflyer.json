@@ -1,0 +1,62 @@
+{
+  "transport": {
+    "useBody": true,
+    "beacon": true
+  },
+  "requests": {
+    "onelink": "https://amp.onelink.me/amp/v1/onelink?webAppId=${webAppId}&afWebUserId=${afWebUserId}&amp-afUserId=${amp-afUserId}&amp-afRefUserId=${amp-afRefUserId}",
+    "event": "https://amp.appsflyer.com/amp/v1/events?webAppId=${webAppId}&afWebUserId=${afWebUserId}&amp-afUserId=${amp-afUserId}&amp-afRefUserId=${amp-afRefUserId}"
+  },
+  "triggers": {
+    "onelink": {
+      "on": "visible",
+      "request": "onelink",
+      "extraUrlParams": {
+        "data": {
+          "eventType": "LOAD"
+        },
+        "meta": {
+          "referrer": "${documentReferrer}",
+          "timestamp": "${timestamp}",
+          "userAgent": "${userAgent}",
+          "locationHref": "${ampdocUrl}"
+        }
+      }
+    },
+    "event": {
+      "on": "visible",
+      "request": "event",
+      "extraUrlParams": {
+        "data": {
+          "eventType": "LOAD"
+        },
+        "meta": {
+          "referrer": "${documentReferrer}",
+          "timestamp": "${timestamp}",
+          "userAgent": "${userAgent}",
+          "locationHref": "${ampdocUrl}"
+        }
+      }
+    }
+  },
+  "linkers": {
+    "enabled": true,
+    "proxyOnly": false,
+    "linker": {
+      "ids": {
+        "afRefUserId": "CLIENT_ID(amp-afUserId)"
+      }
+    }
+  },
+  "cookies": {
+    "enabled": true,
+    "amp-afRefUserId": {
+      "value": "LINKER_PARAM(linker, afRefUserId)"
+    }
+  },
+  "vars": {
+    "afWebUserId": "COOKIE(afUserId)",
+    "amp-afUserId": "CLIENT_ID(amp-afUserId)",
+    "amp-afRefUserId": "COOKIE(amp-afRefUserId)"
+  }
+}
