@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,10 @@
  */
 'use strict';
 
-const options = {css: 'REPLACED_BY_BABEL'};
+// Babel cannot directly return a valid css file.
+// Therefore we provide and export this options object to allow extraction
+// of the created css file via side effect from running babel.transfrorm().
+const jssOptions = {css: 'REPLACED_BY_BABEL'};
 
 /**
  * Gets the config for transforming a JSS file to CSS
@@ -26,12 +29,12 @@ const options = {css: 'REPLACED_BY_BABEL'};
 function getJssConfig() {
   return {
     plugins: [
-      ['./build-system/babel-plugins/babel-plugin-transform-jss', options],
+      ['./build-system/babel-plugins/babel-plugin-transform-jss', jssOptions],
     ],
   };
 }
 
 module.exports = {
   getJssConfig,
-  options,
+  jssOptions,
 };
