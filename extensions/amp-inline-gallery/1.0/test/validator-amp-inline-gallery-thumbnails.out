@@ -41,6 +41,11 @@ FAIL
 |      <amp-inline-gallery-thumbnails layout="fixed-height" height="96" loop="true">
 |      </amp-inline-gallery-thumbnails>
 |    </amp-inline-gallery>
+|    <!-- Valid: Loop attribute specified with no value -->
+|    <amp-inline-gallery layout="container">
+|      <amp-inline-gallery-thumbnails layout="fixed-height" height="96" loop>
+|      </amp-inline-gallery-thumbnails>
+|    </amp-inline-gallery>
 |    <!-- Valid: Aspect ratio -->
 |    <amp-inline-gallery layout="container">
 |      <amp-inline-gallery-thumbnails layout="fixed-height" height="96" aspect-ratio="3">
@@ -54,34 +59,34 @@ FAIL
 |    <!-- Invalid: Not in a gallery -->
 |    <amp-inline-gallery-thumbnails layout="fixed-height" height="96">
 >>   ^~~~~~~~~
-amp-inline-gallery/1.0/test/validator-amp-inline-gallery-thumbnails.html:54:2 The tag 'amp-inline-gallery-thumbnails' may only appear as a descendant of tag 'amp-inline-gallery'. (see https://amp.dev/documentation/components/amp-inline-gallery/)
+amp-inline-gallery/1.0/test/validator-amp-inline-gallery-thumbnails.html:59:2 The tag 'amp-inline-gallery-thumbnails' may only appear as a descendant of tag 'amp-inline-gallery'. (see https://amp.dev/documentation/components/amp-inline-gallery/)
 |    </amp-inline-gallery-thumbnails>
 |    <!-- Invalid: Non-number aspect ratio-->
 |    <amp-inline-gallery layout="container">
 |      <amp-inline-gallery-thumbnails layout="fixed-height" height="96" aspect-ratio="two">
 >>     ^~~~~~~~~
-amp-inline-gallery/1.0/test/validator-amp-inline-gallery-thumbnails.html:58:4 The attribute 'aspect-ratio' in tag 'amp-inline-gallery-thumbnails' is set to the invalid value 'two'. (see https://amp.dev/documentation/components/amp-inline-gallery/)
+amp-inline-gallery/1.0/test/validator-amp-inline-gallery-thumbnails.html:63:4 The attribute 'aspect-ratio' in tag 'amp-inline-gallery-thumbnails' is set to the invalid value 'two'. (see https://amp.dev/documentation/components/amp-inline-gallery/)
 |      </amp-inline-gallery-thumbnails>
 |    </amp-inline-gallery>
 |    <!-- Invalid: Aspect ratio of zero -->
 |    <amp-inline-gallery layout="container">
 |      <amp-inline-gallery-thumbnails layout="fixed-height" height="96" aspect-ratio="0">
 >>     ^~~~~~~~~
-amp-inline-gallery/1.0/test/validator-amp-inline-gallery-thumbnails.html:63:4 The attribute 'aspect-ratio' in tag 'amp-inline-gallery-thumbnails' is set to the invalid value '0'. (see https://amp.dev/documentation/components/amp-inline-gallery/)
+amp-inline-gallery/1.0/test/validator-amp-inline-gallery-thumbnails.html:68:4 The attribute 'aspect-ratio' in tag 'amp-inline-gallery-thumbnails' is set to the invalid value '0'. (see https://amp.dev/documentation/components/amp-inline-gallery/)
 |      </amp-inline-gallery-thumbnails>
 |    </amp-inline-gallery>
 |    <!-- Invalid: Aspect ratio of zero (float) -->
 |    <amp-inline-gallery layout="container">
 |      <amp-inline-gallery-thumbnails layout="fixed-height" height="96" aspect-ratio-height="0.00">
 >>     ^~~~~~~~~
-amp-inline-gallery/1.0/test/validator-amp-inline-gallery-thumbnails.html:68:4 The attribute 'aspect-ratio-height' in tag 'amp-inline-gallery-thumbnails' is set to the invalid value '0.00'. (see https://amp.dev/documentation/components/amp-inline-gallery/)
+amp-inline-gallery/1.0/test/validator-amp-inline-gallery-thumbnails.html:73:4 The attribute 'aspect-ratio-height' in tag 'amp-inline-gallery-thumbnails' is set to the invalid value '0.00'. (see https://amp.dev/documentation/components/amp-inline-gallery/)
 |      </amp-inline-gallery-thumbnails>
 |    </amp-inline-gallery>
-|    <!-- Invalid: Loop attribute without value -->
+|    <!-- Invalid: Snap attribute without value -->
 |    <amp-inline-gallery layout="container">
-|      <amp-inline-gallery-thumbnails layout="fixed-height" height="96" loop>
+|      <amp-inline-gallery-thumbnails layout="fixed-height" height="96" snap>
 >>     ^~~~~~~~~
-amp-inline-gallery/1.0/test/validator-amp-inline-gallery-thumbnails.html:73:4 The attribute 'loop' in tag 'amp-inline-gallery-thumbnails' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-inline-gallery/)
+amp-inline-gallery/1.0/test/validator-amp-inline-gallery-thumbnails.html:78:4 The attribute 'snap' may not appear in tag 'amp-inline-gallery-thumbnails'. (see https://amp.dev/documentation/components/amp-inline-gallery/)
 |      </amp-inline-gallery-thumbnails>
 |    </amp-inline-gallery>
 |  </body>

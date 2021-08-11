@@ -101,6 +101,7 @@ tags: {  # <amp-inline-gallery-thumbnails>
     name: "loop"
     value: "true"
     value: "false"
+    value: ""
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-inline-gallery/"
