@@ -30,7 +30,6 @@ describes.endtoend(
     });
 
     it('should restrict fullscreen until user interaction', async function () {
-      this.timeout(5000);
       // Await the CMP to load
       await awaitFrameAfter(1000);
 

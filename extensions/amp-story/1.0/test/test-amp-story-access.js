@@ -85,7 +85,7 @@ describes.realWin('amp-story-access', {amp: true}, (env) => {
 
     storeService.dispatch(Action.TOGGLE_ACCESS, true);
 
-    await afterRenderPromise();
+    await afterRenderPromise(win);
     expect(storyAccess.element).to.have.class('i-amphtml-story-access-visible');
   });
 
@@ -98,7 +98,7 @@ describes.realWin('amp-story-access', {amp: true}, (env) => {
       index: 0,
     });
 
-    await afterRenderPromise();
+    await afterRenderPromise(win);
     expect(storyAccess.element).to.have.class('i-amphtml-story-access-visible');
   });
 

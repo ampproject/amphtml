@@ -17,9 +17,18 @@
 import {ChildLayoutManager} from '../child-layout-manager';
 import {Services} from '#service';
 import {setInitialDisplay, setStyles} from '#core/dom/style';
-import {afterRenderPromise} from '#testing/helpers';
 
-let win;
+/**
+ * @return {!Promise<undefined>} A Promise that resolves after the browser has
+ *    rendered.
+ */
+function afterRenderPromise() {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      setTimeout(resolve);
+    });
+  });
+}
 
 /**
  * @param {!Element} el
@@ -60,6 +69,7 @@ async function afterScrollAndIntersectingPromise(el, root) {
 }
 
 describes.realWin('child layout manager', {}, (env) => {
+  let win;
   let doc;
   let container;
   let ampElementMock;

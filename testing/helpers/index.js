@@ -35,22 +35,24 @@ export function sleep(ms) {
 
 /**
  * Returns a Promise that resolves after the next browser frame has been rendered.
- * @param {Window=} window
+ * @param {Window=} win
  * @return {Promise<void>}
  */
-export function afterRenderPromise() {
-  return new Promise((resolve) => {
-    const requestAnimationFrame = env_.win
-      ? env_.win.requestAnimationFrame
-      : async (cb) => {
-          await sleep(1);
-          cb();
-        };
+export function afterRenderPromise(win = env_?.win) {
+  return /** @type {Promise<void>} */ (
+    new Promise((resolve) => {
+      const requestAnimationFrame = win
+        ? win.requestAnimationFrame
+        : async (cb) => {
+            await sleep(1);
+            cb();
+          };
 
-    requestAnimationFrame(() => {
-      setTimeout(resolve);
-    });
-  });
+      requestAnimationFrame(() => {
+        setTimeout(resolve);
+      });
+    })
+  );
 }
 
 /**
@@ -58,12 +60,14 @@ export function afterRenderPromise() {
  * @param {number} n
  */
 export function awaitNFrames(n) {
-  return new Promise(async (resolve) => {
-    for (let i = 0; i < n; i++) {
-      await afterRenderPromise();
-    }
-    resolve();
-  });
+  return /** @type {Promise<void>} */ (
+    new Promise(async (resolve) => {
+      for (let i = 0; i < n; i++) {
+        await afterRenderPromise();
+      }
+      resolve();
+    })
+  );
 }
 
 /**

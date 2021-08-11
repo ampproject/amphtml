@@ -207,8 +207,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         // `setState` runs code that creates subtasks (Promise callbacks).
         // Waits for the next frame to make sure all the subtasks are
         // already executed when we run the assertions.
-        mediaPoolMock.verify();
         await afterRenderPromise();
+        mediaPoolMock.verify();
         done();
       });
   });
