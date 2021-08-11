@@ -260,7 +260,6 @@
        "loading_complete_selectors": [
         "amp-story[ad-showing]",
       ],
-      
       "enable_percy_javascript": true
     },
     {
