@@ -38,3 +38,22 @@ var AudioDef = {};
  * }}
  */
 AudioDef.Props;
+
+/** @interface */
+AudioDef.AudioApi = class {
+  /**
+   * Plays/Resume the audio
+   */
+  play() {}
+
+  /**
+   * Pauses the audio
+   */
+  pause() {}
+
+  /**
+   * Get playing state of audio
+   * @return {boolean} Returns true if audio is playing
+   */
+  isPlaying() {}
+};
