@@ -90,27 +90,6 @@ Display different categories based on user poll answers by pairing `amp-story-in
 </amp-story-interactive-img-poll>
 [/sourcecode]
 
-### amp-story-interactive-poll
-
-The `amp-story-interactive-poll` element provides a voting experience with 2-4 options displayed vertically, where all options are valid. When selected, each option displays the total percentage of votes.
-
-Display different categories based on user poll answers by pairing `amp-story-interactive-poll` with `amp-story-interactive-results`. Add a prompt for extra context.
-
-<amp-img alt="An example of an interactive poll: 'Pick a season' with options for each season, and their respective percentage votes" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/poll-raw.png" layout="intrinsic" width="400" height="450">
-
-[sourcecode:html]
-<amp-story-interactive-poll
-    id="season-poll"
-    theme="dark"
-    endpoint="https://backend.com/v1/interactives"
-    prompt-text="Pick a season"
-    option-1-text="Spring" option-1-confetti="🌼"
-    option-2-text="Summer" option-2-confetti="☀️"
-    option-3-text="Fall" option-3-confetti="🍁"
-    option-4-text="Winter" option-4-confetti="☃️">
-</amp-story-interactive-poll>
-[/sourcecode]
-
 ### amp-story-interactive-img-quiz
 
 The `amp-story-interactive-img-quiz` element provides a guessing experience with 2-4 image options, one of which is correct. It displays the voting percentages after the user makes a selection. The user selection is green if correct and red if incorrect.
@@ -135,6 +114,27 @@ Display different categories based on percentage of correct user answers by pair
     option-4-image="eiffel.png"
     option-4-image-alt="Eiffel Tower">
 </amp-story-interactive-img-quiz>
+[/sourcecode]
+
+### amp-story-interactive-poll
+
+The `amp-story-interactive-poll` element provides a voting experience with 2-4 options displayed vertically, where all options are valid. When selected, each option displays the total percentage of votes.
+
+Display different categories based on user poll answers by pairing `amp-story-interactive-poll` with `amp-story-interactive-results`. Add a prompt for extra context.
+
+<amp-img alt="An example of an interactive poll: 'Pick a season' with options for each season, and their respective percentage votes" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/poll-raw.png" layout="intrinsic" width="400" height="450">
+
+[sourcecode:html]
+<amp-story-interactive-poll
+    id="season-poll"
+    theme="dark"
+    endpoint="https://backend.com/v1/interactives"
+    prompt-text="Pick a season"
+    option-1-text="Spring" option-1-confetti="🌼"
+    option-2-text="Summer" option-2-confetti="☀️"
+    option-3-text="Fall" option-3-confetti="🍁"
+    option-4-text="Winter" option-4-confetti="☃️">
+</amp-story-interactive-poll>
 [/sourcecode]
 
 ### amp-story-interactive-quiz
