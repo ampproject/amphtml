@@ -127,6 +127,25 @@ Results can feed its state from quizzes if all categories also specify `option-{
 </amp-story-interactive-results>
 [/sourcecode]
 
+### amp-story-interactive-slider
+
+The `amp-story-interactive-slider` element provides a voting experience with 101 options. The options take the form of values along a horizontal line, where all options are valid. When selected, an average indicator and the average response is displayed.
+
+Display different categories based on user poll answers by pairing `amp-story-interactive-slider` with `amp-story-interactive-results`. Add a prompt for extra context.
+
+<amp-img alt="An example of an interactive poll: 'Pick a season' with options for each season, and their respective percentage votes" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/poll-raw.png" layout="intrinsic" width="400" height="450">
+
+[sourcecode:html]
+<amp-story-interactive-slider
+    style="--interactive-accent-color: #651ffe"
+    prompt-text="How much do you like this product?"
+    align-self="center"
+    justify-self="center"
+    endpoint="https://webstoriesinteractivity-beta.web.app/api/slider.json"
+    <!-- endpoint="https://backend.com/v1/interactives" -->
+</amp-story-interactive-slider>
+[/sourcecode]
+
 ### Store and display user selection
 
 All selectable interactive elements (`amp-story-interactive-binary-poll`, `amp-story-interactive-poll`, `amp-story-interactive-quiz`) show the percentage of users that selected each option. The backend specified with the `endpoint` attribute will store the aggregate data for the interaction following the API described below.
@@ -171,11 +190,11 @@ Backends need to be specified on the necessary components (binary-poll, poll, qu
 
 The interactive experience elements from `amp-story-interactive` share an API language for customizing options.
 
-### id (required for binary-poll, poll, quiz)
+### id (required for binary-poll, poll, quiz, slider)
 
 Element ID that identifies the interactive component in the story. Used to compose the [`interactiveId`](#interactiveId) sent to the backend. Should be unique for each component in the story.
 
-### endpoint (required for binary-poll, poll, quiz)
+### endpoint (required for binary-poll, poll, quiz, slider)
 
 Complete URL of backend. Stores interactive element votes.
 
@@ -183,7 +202,7 @@ Complete URL of backend. Stores interactive element votes.
 
 Controls the color of the chips and text. Can be `light` (default), `dark`.
 
-### chip-style (optional for poll, quiz, results)
+### chip-style (optional for poll, quiz, results, slider)
 
 Controls the style of the component. Can be `flat` (default), `shadow`, or `transparent`.
 Results and binary-poll elements don't support shadow.
@@ -192,7 +211,7 @@ Results and binary-poll elements don't support shadow.
 
 Adds a prompt to the top of the component. Use `prompt-text` to write the poll/quiz question, or as a prefix to the category in the `amp-story-interactive-result` element.
 
-### prompt-size (optional for binary-poll, poll, quiz)
+### prompt-size (optional for binary-poll, poll, quiz, slider)
 
 Controls the `font-size` of prompt text. Can be `small`, `medium` (default), `large`. Large prompts will hold up to 3 lines of text, other sizes will hold up to 4 lines of text.
 
@@ -200,7 +219,7 @@ This attribute does not apply styling to `amp-story-interactive-result` category
 
 ### option-{1/2/3/4}-text (required)
 
-String that represents a numbered option. Binary polls require 2 options. Polls and quizzes may include between 2 and 4 options.
+String that represents a numbered option. Binary polls require 2 options. Polls and quizzes may include between 2 and 4 options. Sliders may include 1 option for an optional emoji.
 
 The `amp-story-interactive-result` element uses this string value as category description.
 
