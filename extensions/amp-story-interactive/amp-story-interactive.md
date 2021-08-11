@@ -141,8 +141,7 @@ Does not support pairing with `amp-story-interactive-results`, and can optionall
     prompt-text="How much do you like this product?"
     align-self="center"
     justify-self="center"
-    endpoint="https://webstoriesinteractivity-beta.web.app/api/slider.json"
-    <!-- endpoint="https://backend.com/v1/interactives" -->
+    endpoint="https://backend.com/v1/interactives"
 </amp-story-interactive-slider>
 [/sourcecode]
 
