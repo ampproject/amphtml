@@ -199,14 +199,12 @@ module.exports = {
     await page.waitForSelector(
       `amp-story-page#${pageID}[active][distance="0"]`
     );
+    await page.tap('.i-amphtml-story-inline-page-attachment-chip');
+    await page.waitForSelector('.i-amphtml-story-draggable-drawer-open');
 
     await verifySelectorsVisible(page, name, [
-      '.i-amphtml-story-page-open-attachment[active]',
-    ]);
-    await page.tap('.i-amphtml-story-page-attachment-label');
-
-    await verifySelectorsVisible(page, name, [
-      '.i-amphtml-story-page-attachment-domain-label',
+      '.i-amphtml-story-draggable-drawer-open ' +
+        '.i-amphtml-story-page-attachment-domain-label',
     ]);
   },
 
@@ -217,14 +215,12 @@ module.exports = {
     await page.waitForSelector(
       `amp-story-page#${pageID}[active][distance="0"]`
     );
-
-    await verifySelectorsVisible(page, name, [
-      '.i-amphtml-story-page-open-attachment[active]',
-    ]);
-    await page.tap('.i-amphtml-story-page-attachment-label');
+    await page.tap('.i-amphtml-story-inline-page-attachment-chip');
+    await page.waitForSelector('.i-amphtml-story-draggable-drawer-open');
 
     await verifySelectorsInvisible(page, name, [
-      '.i-amphtml-story-page-attachment-domain-label',
+      '.i-amphtml-story-draggable-drawer-open ' +
+        '.i-amphtml-story-page-attachment-domain-label',
     ]);
   },
 };
