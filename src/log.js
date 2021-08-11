@@ -268,22 +268,6 @@ export class Log {
   }
 
   /**
-   * Reports an error message. If the logging is disabled, the error is rethrown
-   * asynchronously.
-   * @param {string} tag
-   * @param {boolean} expected
-   * @param {...*} args
-   * @return {!Error|undefined}
-   * @private
-   */
-  error_(tag, expected, args) {
-    if (!this.msg_(tag, LogLevel.ERROR, args)) {
-      const errorFn = expected ? this.createExpectedError : this.createError;
-      self.__AMP_REPORT_ERROR?.(errorFn.apply(this, args));
-    }
-  }
-
-  /**
    * Reports an error message.
    * @param {string} tag
    * @param {...*} args
