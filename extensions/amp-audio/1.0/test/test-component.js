@@ -18,7 +18,7 @@ import * as Preact from '#preact';
 import {Audio} from '../component';
 import {mount} from 'enzyme';
 
-describes.sandboxed('Audio preact component v1.0', {}, () => {
+describes.realWin('Audio preact component v1.0', {}, (env) => {
   it('should load audio through attribute', () => {
     const wrapper = mount(
       <Audio src="audio.mp3" style="height: 30px; width: 300px" />
