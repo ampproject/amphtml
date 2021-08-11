@@ -63,26 +63,23 @@ executors:
 commands:
   checkout_repo:
     parameters:
-      cache:
+      save-git-cache:
         type: boolean
-        default: true
+        default: false
     steps:
-      - when:
-          condition: << parameters.cache >>
-          steps:
-            - restore_cache:
-                name: 'Restore Git Cache'
-                keys:
-                  - git-cache-{{ arch }}-{{ .Branch }}-{{ .Revision }}
-                  - git-cache-{{ arch }}-{{ .Branch }}-
-                  - git-cache-{{ arch }}-
+      - restore_cache:
+          name: 'Restore Git Cache'
+          keys:
+            - git-cache-v2-{{ arch }}-{{ .Branch }}-{{ .Revision }}
+            - git-cache-v2-{{ arch }}-{{ .Branch }}-
+            - git-cache-v2-{{ arch }}-
       - checkout
       - when:
-          condition: << parameters.cache >>
+          condition: << parameters.save-git-cache >>
           steps:
             - save_cache:
                 name: 'Save Git Cache'
-                key: git-cache-{{ arch }}-{{ .Branch }}-{{ .Revision }}
+                key: git-cache-v2-{{ arch }}-{{ .Branch }}-{{ .Revision }}
                 paths:
                   - .git
   setup_node_environment:
@@ -92,10 +89,6 @@ commands:
           install-npm: false
       - node/install-packages
   setup_vm:
-    parameters:
-      git-cache:
-        type: boolean
-        default: true
     steps:
       - attach_workspace:
           at: /tmp
@@ -107,8 +100,7 @@ commands:
       - run:
           name: 'Maybe Gracefully Halt'
           command: /tmp/restored-workspace/maybe_gracefully_halt.sh
-      - checkout_repo:
-          cache: << parameters.git-cache >>
+      - checkout_repo
       - run:
           name: 'Configure Development Environment'
           command: |
@@ -162,7 +154,8 @@ jobs:
     executor:
       name: base-docker-small
     steps:
-      - checkout_repo
+      - checkout_repo:
+          save-git-cache: true
       - run:
           name: 'Initialize Repository'
           command: ./.circleci/initialize_repo.sh
@@ -352,9 +345,7 @@ jobs:
     executor:
       name: macos-medium
     steps:
-      - setup_vm:
-          # Restoring/saving Git cache on MacOS ends up being slower than a cold `git clone`.
-          git-cache: false
+      - setup_vm
       - enable_safari_automation
       - run:
           name: '⭐ Browser Tests (Safari) ⭐'
