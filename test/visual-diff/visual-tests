@@ -258,6 +258,7 @@
       },
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-ad.js",
        "loading_complete_selectors": [
+        ".i-amphtml-fill-content",
         "amp-story[ad-showing]",
       ],
       // for page navigation
