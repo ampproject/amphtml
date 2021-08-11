@@ -60,11 +60,11 @@ export function parseQueryString(queryString) {
 
 /**
  * Parses the query # params.
- * @param {!Window=} win
+ * @param {!Window=} opt_win
  * @return {!JsonObject}
  */
-export function getHashParams(win) {
-  const {location} = win;
+export function getHashParams(opt_win) {
+  const {location} = opt_win || self;
   return parseQueryString(
     // location.originalHash is set by the viewer when it removes the fragment
     // from the URL.
