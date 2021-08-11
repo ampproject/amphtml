@@ -37,11 +37,11 @@ export function duplicateErrorIfNecessary(error) {
 }
 
 /**
+ * Creates an error object.
  * @param {...*} var_args
  * @return {!Error}
- * @visibleForTesting
  */
-export function createErrorVargs(var_args) {
+export function createError(var_args) {
   let error = null;
   let message = '';
   for (const arg of arguments) {
@@ -78,7 +78,7 @@ function maybeReportError(error) {
  * @param {...*} var_args
  */
 export function rethrowAsync(var_args) {
-  const error = createErrorVargs.apply(null, arguments);
+  const error = createError.apply(null, arguments);
   setTimeout(() => {
     // __AMP_REPORT_ERROR is installed globally per window in the entry point.
     // It may not exist for Bento components without the runtime.
@@ -106,19 +106,12 @@ export function tryCallback(callback, ...args) {
 }
 
 /**
- * Creates an error object.
- * @param {...*} var_args
- * @return {!Error}
- */
-export const createError = createErrorVargs;
-
-/**
  * Creates an error object with its expected property set to true.
  * @param {...*} var_args
  * @return {!Error}
  */
 export function createExpectedError(var_args) {
-  const error = createErrorVargs.apply(null, arguments);
+  const error = createError.apply(null, arguments);
   error.expected = true;
   return error;
 }
