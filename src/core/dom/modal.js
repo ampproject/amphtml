@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {devAssert, devAssertElement} from '#core/assert';
+import {devAssert} from '#core/assert';
 import {isConnectedNode, rootNodeFor} from '#core/dom';
 import {isElement} from '#core/types';
 import {toArray} from '#core/types/array';
@@ -70,7 +70,7 @@ export function getElementsToAriaHide(element) {
       continue;
     }
 
-    toArray(devAssertElement(cur.parentNode).children)
+    toArray(/** @type {!HTMLDocument|!HTMLElement} */ (cur.parentNode).children)
       .filter((c) => c != cur)
       .forEach((c) => arr.push(c));
   }
