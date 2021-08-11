@@ -73,14 +73,8 @@ describes.realWin('Audio preact component v1.0', {}, (env) => {
     expect(component.name()).to.equal('audio');
     expect(component.prop('width')).to.equal('503px');
     expect(component.prop('height')).to.equal('53px');
-
-    /**
-     * I am not sure about offset* properties.
-     * May be by using getComputedStyle?
-     */
-    expect(component.prop('offsetWidth')).to.be.greaterThan(1);
-    expect(component.prop('offsetHeight')).to.be.greaterThan(1);
-
+    expect(component.getDOMNode().offsetWidth).to.be.greaterThan(1);
+    expect(component.getDOMNode().offsetHeight).to.be.greaterThan(1);
     expect(component.prop('controls')).to.be.true;
 
     /**
