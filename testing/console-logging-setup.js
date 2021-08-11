@@ -22,10 +22,10 @@ import sinon from 'sinon'; // eslint-disable-line local/no-import
  * tests and prints warnings when they are detected.
  */
 
+export let expectedAsyncErrors = [];
 let consoleErrorSandbox;
 let testRunner;
 let testName;
-let expectedAsyncErrors;
 let consoleInfoLogWarnSandbox;
 const originalConsoleError = console.error;
 
@@ -56,27 +56,36 @@ export function restoreConsoleSandbox() {
 }
 
 /**
+ * @param {string} message Message of error that's about to be logged.
+ * @return {number} index or -1
+ */
+export function indexOfExpectedMessage(message) {
+  // Match equal strings.
+  const exact = expectedAsyncErrors.indexOf(message);
+  if (exact != -1) {
+    return exact;
+  }
+  // Match regex.
+  for (let i = 0; i < expectedAsyncErrors.length; i++) {
+    const expectedError = expectedAsyncErrors[i];
+    if (typeof expectedError != 'string' && expectedError.test(message)) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+/**
  * Prints a warning when a console error is detected during a test.
  * @param {*} messages One or more error messages
  */
 function printWarning(...messages) {
   const message = messages.join(' ');
 
-  // Match equal strings.
-  if (expectedAsyncErrors.includes(message)) {
-    expectedAsyncErrors.splice(expectedAsyncErrors.indexOf(message), 1);
+  const index = indexOfExpectedMessage(message);
+  if (index != -1) {
+    expectedAsyncErrors.splice(index, 1);
     return;
-  }
-
-  // Match regex.
-  for (let i = 0; i < expectedAsyncErrors.length; i++) {
-    const expectedError = expectedAsyncErrors[i];
-    if (typeof expectedError != 'string') {
-      if (expectedError.test(message)) {
-        expectedAsyncErrors.splice(i, 1);
-        return;
-      }
-    }
   }
 
   const errorMessage = message.split('\n', 1)[0]; // First line.
