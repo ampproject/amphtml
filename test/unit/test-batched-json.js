@@ -15,6 +15,7 @@
  */
 
 import {Services} from '#service';
+
 import {UrlReplacementPolicy, batchFetchJsonFor} from '../../src/batched-json';
 import {user} from '../../src/log';
 

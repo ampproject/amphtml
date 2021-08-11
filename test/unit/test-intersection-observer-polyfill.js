@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+
 import {AmpDocService} from '#service/ampdoc-impl';
+import {installHiddenObserverForDoc} from '#service/hidden-observer-impl';
+
 import {
   IntersectionObserver3pHost,
   getIntersectionChangeEntry,
   intersectionRatio,
 } from '../../src/utils/intersection-observer-3p-host';
-import {installHiddenObserverForDoc} from '#service/hidden-observer-impl';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 const fakeAmpDoc = {
   getRootNode: () => {

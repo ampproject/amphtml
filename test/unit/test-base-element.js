@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import {BaseElement} from '../../src/base-element';
 import {DEFAULT_ACTION} from '#core/constants/action-constants';
 import {LayoutPriority} from '#core/dom/layout';
-import {Resource} from '#service/resource';
-import {Services} from '#service';
-import {createAmpElementForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
+
+import {Services} from '#service';
+import {Resource} from '#service/resource';
+
+import {BaseElement} from '../../src/base-element';
+import {createAmpElementForTesting} from '../../src/custom-element';
 import {listenOncePromise} from '../../src/event-helper';
 
 describes.realWin('BaseElement', {amp: true}, (env) => {
