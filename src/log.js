@@ -312,6 +312,7 @@ export class Log {
 
   /**
    * @param {!Error} error
+   * @return {!Error}
    * @private
    */
   setErrorSuffix_(error) {
