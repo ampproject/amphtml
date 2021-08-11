@@ -1,0 +1,70 @@
+/**
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { WebAnimationBuilderOptionsDef, WebAnimationDef, WebAnimationPlayState, WebAnimationSelectorDef, WebAnimationTimingDef, WebKeyframesDef } from "../../amp-animation/0.1/web-animation-types";
+export { WebAnimationBuilderOptionsDef, WebAnimationDef, WebAnimationPlayState, WebKeyframesDef, WebAnimationSelectorDef, WebAnimationTimingDef };
+
+/** @typedef {function(StoryAnimationDimsDef, Object<string, *>):!WebKeyframesDef} */
+export var WebKeyframesCreateFnDef;
+
+/**
+ * @typedef {{
+ *   pageWidth: number,
+ *   pageHeight: number,
+ *   targetWidth: number,
+ *   targetHeight: number,
+ *   targetX: number,
+ *   targetY: number,
+ * }}
+ */
+export var StoryAnimationDimsDef;
+
+/**
+ * @typedef {{
+ *   duration: number,
+ *   easing: (string|undefined),
+ *   keyframes: (!WebKeyframesCreateFnDef|!WebKeyframesDef),
+ * }}
+ */
+export var StoryAnimationPresetDef;
+
+/**
+ * @typedef {{
+ *   source: !Element,
+ *   startAfterId: (?string),
+ *   preset: (!StoryAnimationPresetDef|undefined),
+ *   keyframeOptions: (!Object<string, *>|undefined),
+ *   spec: !WebAnimationDef,
+ * }}
+ *
+ * - source: Element that defines this animation. This is either an
+ *   <amp-story-animation> element with a JSON spec, or an animated element with
+ *   a preset that is the same as the target ([animate-in] elements).
+ *
+ * - startAfterId: This animation is sequenced after the animation defined by
+ *   the element with this id.
+ *
+ * - preset: Optional, when using [animate-in]
+ *
+ * - keyframeOptions: These are taken from element attributes and passed to a
+ *   preset keyframes() function.
+ *
+ * - spec: An effect spec defined like in <amp-animation>. If a preset is also
+ *   provided, the spec's keyframes property will be resolved with the preset
+ *   configuration.
+ */
+export var StoryAnimationConfigDef;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFuaW1hdGlvbi10eXBlcy5qcyJdLCJuYW1lcyI6WyJXZWJBbmltYXRpb25CdWlsZGVyT3B0aW9uc0RlZiIsIldlYkFuaW1hdGlvbkRlZiIsIldlYkFuaW1hdGlvblBsYXlTdGF0ZSIsIldlYkFuaW1hdGlvblNlbGVjdG9yRGVmIiwiV2ViQW5pbWF0aW9uVGltaW5nRGVmIiwiV2ViS2V5ZnJhbWVzRGVmIiwiV2ViS2V5ZnJhbWVzQ3JlYXRlRm5EZWYiLCJTdG9yeUFuaW1hdGlvbkRpbXNEZWYiLCJTdG9yeUFuaW1hdGlvblByZXNldERlZiIsIlN0b3J5QW5pbWF0aW9uQ29uZmlnRGVmIl0sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFFQSxTQUNFQSw2QkFERixFQUVFQyxlQUZGLEVBR0VDLHFCQUhGLEVBSUVDLHVCQUpGLEVBS0VDLHFCQUxGLEVBTUVDLGVBTkY7QUFTQSxTQUNFTCw2QkFERixFQUVFQyxlQUZGLEVBR0VDLHFCQUhGLEVBSUVHLGVBSkYsRUFLRUYsdUJBTEYsRUFNRUMscUJBTkY7O0FBU0E7QUFDQSxPQUFPLElBQUlFLHVCQUFKOztBQUVQO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxJQUFJQyxxQkFBSjs7QUFFUDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sSUFBSUMsdUJBQUo7O0FBRVA7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLElBQUlDLHVCQUFKIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb3B5cmlnaHQgMjAxNyBUaGUgQU1QIEhUTUwgQXV0aG9ycy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTLUlTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbmltcG9ydCB7XG4gIFdlYkFuaW1hdGlvbkJ1aWxkZXJPcHRpb25zRGVmLFxuICBXZWJBbmltYXRpb25EZWYsXG4gIFdlYkFuaW1hdGlvblBsYXlTdGF0ZSxcbiAgV2ViQW5pbWF0aW9uU2VsZWN0b3JEZWYsXG4gIFdlYkFuaW1hdGlvblRpbWluZ0RlZixcbiAgV2ViS2V5ZnJhbWVzRGVmLFxufSBmcm9tICcuLi8uLi9hbXAtYW5pbWF0aW9uLzAuMS93ZWItYW5pbWF0aW9uLXR5cGVzJztcblxuZXhwb3J0IHtcbiAgV2ViQW5pbWF0aW9uQnVpbGRlck9wdGlvbnNEZWYsXG4gIFdlYkFuaW1hdGlvbkRlZixcbiAgV2ViQW5pbWF0aW9uUGxheVN0YXRlLFxuICBXZWJLZXlmcmFtZXNEZWYsXG4gIFdlYkFuaW1hdGlvblNlbGVjdG9yRGVmLFxuICBXZWJBbmltYXRpb25UaW1pbmdEZWYsXG59O1xuXG4vKiogQHR5cGVkZWYge2Z1bmN0aW9uKFN0b3J5QW5pbWF0aW9uRGltc0RlZiwgT2JqZWN0PHN0cmluZywgKj4pOiFXZWJLZXlmcmFtZXNEZWZ9ICovXG5leHBvcnQgbGV0IFdlYktleWZyYW1lc0NyZWF0ZUZuRGVmO1xuXG4vKipcbiAqIEB0eXBlZGVmIHt7XG4gKiAgIHBhZ2VXaWR0aDogbnVtYmVyLFxuICogICBwYWdlSGVpZ2h0OiBudW1iZXIsXG4gKiAgIHRhcmdldFdpZHRoOiBudW1iZXIsXG4gKiAgIHRhcmdldEhlaWdodDogbnVtYmVyLFxuICogICB0YXJnZXRYOiBudW1iZXIsXG4gKiAgIHRhcmdldFk6IG51bWJlcixcbiAqIH19XG4gKi9cbmV4cG9ydCBsZXQgU3RvcnlBbmltYXRpb25EaW1zRGVmO1xuXG4vKipcbiAqIEB0eXBlZGVmIHt7XG4gKiAgIGR1cmF0aW9uOiBudW1iZXIsXG4gKiAgIGVhc2luZzogKHN0cmluZ3x1bmRlZmluZWQpLFxuICogICBrZXlmcmFtZXM6ICghV2ViS2V5ZnJhbWVzQ3JlYXRlRm5EZWZ8IVdlYktleWZyYW1lc0RlZiksXG4gKiB9fVxuICovXG5leHBvcnQgbGV0IFN0b3J5QW5pbWF0aW9uUHJlc2V0RGVmO1xuXG4vKipcbiAqIEB0eXBlZGVmIHt7XG4gKiAgIHNvdXJjZTogIUVsZW1lbnQsXG4gKiAgIHN0YXJ0QWZ0ZXJJZDogKD9zdHJpbmcpLFxuICogICBwcmVzZXQ6ICghU3RvcnlBbmltYXRpb25QcmVzZXREZWZ8dW5kZWZpbmVkKSxcbiAqICAga2V5ZnJhbWVPcHRpb25zOiAoIU9iamVjdDxzdHJpbmcsICo+fHVuZGVmaW5lZCksXG4gKiAgIHNwZWM6ICFXZWJBbmltYXRpb25EZWYsXG4gKiB9fVxuICpcbiAqIC0gc291cmNlOiBFbGVtZW50IHRoYXQgZGVmaW5lcyB0aGlzIGFuaW1hdGlvbi4gVGhpcyBpcyBlaXRoZXIgYW5cbiAqICAgPGFtcC1zdG9yeS1hbmltYXRpb24+IGVsZW1lbnQgd2l0aCBhIEpTT04gc3BlYywgb3IgYW4gYW5pbWF0ZWQgZWxlbWVudCB3aXRoXG4gKiAgIGEgcHJlc2V0IHRoYXQgaXMgdGhlIHNhbWUgYXMgdGhlIHRhcmdldCAoW2FuaW1hdGUtaW5dIGVsZW1lbnRzKS5cbiAqXG4gKiAtIHN0YXJ0QWZ0ZXJJZDogVGhpcyBhbmltYXRpb24gaXMgc2VxdWVuY2VkIGFmdGVyIHRoZSBhbmltYXRpb24gZGVmaW5lZCBieVxuICogICB0aGUgZWxlbWVudCB3aXRoIHRoaXMgaWQuXG4gKlxuICogLSBwcmVzZXQ6IE9wdGlvbmFsLCB3aGVuIHVzaW5nIFthbmltYXRlLWluXVxuICpcbiAqIC0ga2V5ZnJhbWVPcHRpb25zOiBUaGVzZSBhcmUgdGFrZW4gZnJvbSBlbGVtZW50IGF0dHJpYnV0ZXMgYW5kIHBhc3NlZCB0byBhXG4gKiAgIHByZXNldCBrZXlmcmFtZXMoKSBmdW5jdGlvbi5cbiAqXG4gKiAtIHNwZWM6IEFuIGVmZmVjdCBzcGVjIGRlZmluZWQgbGlrZSBpbiA8YW1wLWFuaW1hdGlvbj4uIElmIGEgcHJlc2V0IGlzIGFsc29cbiAqICAgcHJvdmlkZWQsIHRoZSBzcGVjJ3Mga2V5ZnJhbWVzIHByb3BlcnR5IHdpbGwgYmUgcmVzb2x2ZWQgd2l0aCB0aGUgcHJlc2V0XG4gKiAgIGNvbmZpZ3VyYXRpb24uXG4gKi9cbmV4cG9ydCBsZXQgU3RvcnlBbmltYXRpb25Db25maWdEZWY7XG4iXX0=
+// /Users/mszylkowski/src/amphtml/extensions/amp-story/1.0/animation-types.js

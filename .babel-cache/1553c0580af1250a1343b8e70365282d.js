@@ -1,0 +1,80 @@
+/**
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { isElement } from "../types";
+
+/**
+ * Triple zero width space.
+ *
+ * This is added to user error messages, so that we can later identify
+ * them, when the only thing that we have is the message. This is the
+ * case in many browsers when the global exception handler is invoked.
+ *
+ * @const {string}
+ */
+export var USER_ERROR_SENTINEL = "\u200B\u200B\u200B";
+
+/**
+ * Four zero width space.
+ *
+ * @const {string}
+ */
+export var USER_ERROR_EMBED_SENTINEL = "\u200B\u200B\u200B\u200B";
+
+/**
+ * Converts an element to a readable string; all other types are unchanged.
+ * TODO(rcebulko): Unify with log.js
+ * @param {*} val
+ * @return {*}
+ */
+export function elementStringOrPassThru(val) {
+  // Do check equivalent to `val instanceof Element` without cross-window bug
+  if (isElement(val)) {
+    val =
+    /** @type {Element} */
+    val;
+    return val.tagName.toLowerCase() + (val.id ? "#" + val.id : '');
+  }
+
+  return val;
+}
+
+/**
+ * Tests if an error message contains the user sentinel.
+ * @param {string} message
+ * @return {boolean} Whether this message was a user error.
+ */
+export function isUserErrorMessage(message) {
+  return message.indexOf(USER_ERROR_SENTINEL) >= 0;
+}
+
+/**
+ * @param {string} message
+ * @return {boolean} Whether this message was a a user error from an iframe embed.
+ */
+export function isUserErrorEmbedMessage(message) {
+  return message.indexOf(USER_ERROR_EMBED_SENTINEL) >= 0;
+}
+
+/**
+ * Strips the user error sentinel from an error message.
+ * @param {string} message
+ * @return {string} The new message without USER_ERROR_SENTINEL
+ */
+export function stripUserError(message) {
+  return message.replace(USER_ERROR_SENTINEL, '');
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm1lc3NhZ2UtaGVscGVycy5qcyJdLCJuYW1lcyI6WyJpc0VsZW1lbnQiLCJVU0VSX0VSUk9SX1NFTlRJTkVMIiwiVVNFUl9FUlJPUl9FTUJFRF9TRU5USU5FTCIsImVsZW1lbnRTdHJpbmdPclBhc3NUaHJ1IiwidmFsIiwidGFnTmFtZSIsInRvTG93ZXJDYXNlIiwiaWQiLCJpc1VzZXJFcnJvck1lc3NhZ2UiLCJtZXNzYWdlIiwiaW5kZXhPZiIsImlzVXNlckVycm9yRW1iZWRNZXNzYWdlIiwic3RyaXBVc2VyRXJyb3IiLCJyZXBsYWNlIl0sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFFQSxTQUFRQSxTQUFSOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sSUFBTUMsbUJBQW1CLEdBQUcsb0JBQTVCOztBQUNQO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLElBQU1DLHlCQUF5QixHQUFHLDBCQUFsQzs7QUFFUDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVNDLHVCQUFULENBQWlDQyxHQUFqQyxFQUFzQztBQUMzQztBQUNBLE1BQUlKLFNBQVMsQ0FBQ0ksR0FBRCxDQUFiLEVBQW9CO0FBQ2xCQSxJQUFBQSxHQUFHO0FBQUc7QUFBd0JBLElBQUFBLEdBQTlCO0FBQ0EsV0FBT0EsR0FBRyxDQUFDQyxPQUFKLENBQVlDLFdBQVosTUFBNkJGLEdBQUcsQ0FBQ0csRUFBSixTQUFhSCxHQUFHLENBQUNHLEVBQWpCLEdBQXdCLEVBQXJELENBQVA7QUFDRDs7QUFDRCxTQUFPSCxHQUFQO0FBQ0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0ksa0JBQVQsQ0FBNEJDLE9BQTVCLEVBQXFDO0FBQzFDLFNBQU9BLE9BQU8sQ0FBQ0MsT0FBUixDQUFnQlQsbUJBQWhCLEtBQXdDLENBQS9DO0FBQ0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVNVLHVCQUFULENBQWlDRixPQUFqQyxFQUEwQztBQUMvQyxTQUFPQSxPQUFPLENBQUNDLE9BQVIsQ0FBZ0JSLHlCQUFoQixLQUE4QyxDQUFyRDtBQUNEOztBQUVEO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVNVLGNBQVQsQ0FBd0JILE9BQXhCLEVBQWlDO0FBQ3RDLFNBQU9BLE9BQU8sQ0FBQ0ksT0FBUixDQUFnQlosbUJBQWhCLEVBQXFDLEVBQXJDLENBQVA7QUFDRCIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ29weXJpZ2h0IDIwMjEgVGhlIEFNUCBIVE1MIEF1dGhvcnMuIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlIFwiTGljZW5zZVwiKTtcbiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS5cbiAqIFlvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdFxuICpcbiAqICAgICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wXG4gKlxuICogVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZVxuICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gXCJBUy1JU1wiIEJBU0lTLFxuICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuXG4gKiBTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZSBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kXG4gKiBsaW1pdGF0aW9ucyB1bmRlciB0aGUgTGljZW5zZS5cbiAqL1xuXG5pbXBvcnQge2lzRWxlbWVudH0gZnJvbSAnI2NvcmUvdHlwZXMnO1xuXG4vKipcbiAqIFRyaXBsZSB6ZXJvIHdpZHRoIHNwYWNlLlxuICpcbiAqIFRoaXMgaXMgYWRkZWQgdG8gdXNlciBlcnJvciBtZXNzYWdlcywgc28gdGhhdCB3ZSBjYW4gbGF0ZXIgaWRlbnRpZnlcbiAqIHRoZW0sIHdoZW4gdGhlIG9ubHkgdGhpbmcgdGhhdCB3ZSBoYXZlIGlzIHRoZSBtZXNzYWdlLiBUaGlzIGlzIHRoZVxuICogY2FzZSBpbiBtYW55IGJyb3dzZXJzIHdoZW4gdGhlIGdsb2JhbCBleGNlcHRpb24gaGFuZGxlciBpcyBpbnZva2VkLlxuICpcbiAqIEBjb25zdCB7c3RyaW5nfVxuICovXG5leHBvcnQgY29uc3QgVVNFUl9FUlJPUl9TRU5USU5FTCA9ICdcXHUyMDBCXFx1MjAwQlxcdTIwMEInO1xuLyoqXG4gKiBGb3VyIHplcm8gd2lkdGggc3BhY2UuXG4gKlxuICogQGNvbnN0IHtzdHJpbmd9XG4gKi9cbmV4cG9ydCBjb25zdCBVU0VSX0VSUk9SX0VNQkVEX1NFTlRJTkVMID0gJ1xcdTIwMEJcXHUyMDBCXFx1MjAwQlxcdTIwMEInO1xuXG4vKipcbiAqIENvbnZlcnRzIGFuIGVsZW1lbnQgdG8gYSByZWFkYWJsZSBzdHJpbmc7IGFsbCBvdGhlciB0eXBlcyBhcmUgdW5jaGFuZ2VkLlxuICogVE9ETyhyY2VidWxrbyk6IFVuaWZ5IHdpdGggbG9nLmpzXG4gKiBAcGFyYW0geyp9IHZhbFxuICogQHJldHVybiB7Kn1cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGVsZW1lbnRTdHJpbmdPclBhc3NUaHJ1KHZhbCkge1xuICAvLyBEbyBjaGVjayBlcXVpdmFsZW50IHRvIGB2YWwgaW5zdGFuY2VvZiBFbGVtZW50YCB3aXRob3V0IGNyb3NzLXdpbmRvdyBidWdcbiAgaWYgKGlzRWxlbWVudCh2YWwpKSB7XG4gICAgdmFsID0gLyoqIEB0eXBlIHtFbGVtZW50fSAqLyAodmFsKTtcbiAgICByZXR1cm4gdmFsLnRhZ05hbWUudG9Mb3dlckNhc2UoKSArICh2YWwuaWQgPyBgIyR7dmFsLmlkfWAgOiAnJyk7XG4gIH1cbiAgcmV0dXJuIHZhbDtcbn1cblxuLyoqXG4gKiBUZXN0cyBpZiBhbiBlcnJvciBtZXNzYWdlIGNvbnRhaW5zIHRoZSB1c2VyIHNlbnRpbmVsLlxuICogQHBhcmFtIHtzdHJpbmd9IG1lc3NhZ2VcbiAqIEByZXR1cm4ge2Jvb2xlYW59IFdoZXRoZXIgdGhpcyBtZXNzYWdlIHdhcyBhIHVzZXIgZXJyb3IuXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBpc1VzZXJFcnJvck1lc3NhZ2UobWVzc2FnZSkge1xuICByZXR1cm4gbWVzc2FnZS5pbmRleE9mKFVTRVJfRVJST1JfU0VOVElORUwpID49IDA7XG59XG5cbi8qKlxuICogQHBhcmFtIHtzdHJpbmd9IG1lc3NhZ2VcbiAqIEByZXR1cm4ge2Jvb2xlYW59IFdoZXRoZXIgdGhpcyBtZXNzYWdlIHdhcyBhIGEgdXNlciBlcnJvciBmcm9tIGFuIGlmcmFtZSBlbWJlZC5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGlzVXNlckVycm9yRW1iZWRNZXNzYWdlKG1lc3NhZ2UpIHtcbiAgcmV0dXJuIG1lc3NhZ2UuaW5kZXhPZihVU0VSX0VSUk9SX0VNQkVEX1NFTlRJTkVMKSA+PSAwO1xufVxuXG4vKipcbiAqIFN0cmlwcyB0aGUgdXNlciBlcnJvciBzZW50aW5lbCBmcm9tIGFuIGVycm9yIG1lc3NhZ2UuXG4gKiBAcGFyYW0ge3N0cmluZ30gbWVzc2FnZVxuICogQHJldHVybiB7c3RyaW5nfSBUaGUgbmV3IG1lc3NhZ2Ugd2l0aG91dCBVU0VSX0VSUk9SX1NFTlRJTkVMXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBzdHJpcFVzZXJFcnJvcihtZXNzYWdlKSB7XG4gIHJldHVybiBtZXNzYWdlLnJlcGxhY2UoVVNFUl9FUlJPUl9TRU5USU5FTCwgJycpO1xufVxuIl19
+// /Users/mszylkowski/src/amphtml/src/core/error/message-helpers.js

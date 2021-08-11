@@ -1,0 +1,66 @@
+/**
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @param {number=} opt_base Exponential base. Defaults to 2.
+ * @return {function(function()): number} Function that when invoked will
+ *     call the passed in function. On every invocation the next
+ *     invocation of the passed in function will be exponentially
+ *     later. Returned function returns timeout id.
+ */
+export function exponentialBackoff(opt_base) {
+  var getTimeout = exponentialBackoffClock(opt_base);
+  return function (work) {
+    return setTimeout(work, getTimeout());
+  };
+}
+
+/**
+ * @param {number=} opt_base Exponential base. Defaults to 2.
+ * @return {function(): number} Function that when invoked will return
+ *    a number that exponentially grows per invocation.
+ */
+export function exponentialBackoffClock(opt_base) {
+  var base = opt_base || 2;
+  var count = 0;
+  return function () {
+    var wait = Math.pow(base, count++);
+    wait += getJitter(wait);
+    return wait * 1000;
+  };
+}
+
+/**
+ * Add jitter to avoid the thundering herd. This can e.g. happen when
+ * we poll a backend and it fails for everyone at the same time.
+ * We add up to 30% (default) longer or shorter than the given time.
+ *
+ * @param {number} wait the amount if base milliseconds
+ * @param {number=} opt_perc the min/max percentage to add or sutract
+ * @return {number}
+ */
+export function getJitter(wait, opt_perc) {
+  opt_perc = opt_perc || 0.3;
+  var jitter = wait * opt_perc * Math.random();
+
+  if (Math.random() > 0.5) {
+    jitter *= -1;
+  }
+
+  return jitter;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImV4cG9uZW50aWFsLWJhY2tvZmYuanMiXSwibmFtZXMiOlsiZXhwb25lbnRpYWxCYWNrb2ZmIiwib3B0X2Jhc2UiLCJnZXRUaW1lb3V0IiwiZXhwb25lbnRpYWxCYWNrb2ZmQ2xvY2siLCJ3b3JrIiwic2V0VGltZW91dCIsImJhc2UiLCJjb3VudCIsIndhaXQiLCJNYXRoIiwicG93IiwiZ2V0Sml0dGVyIiwib3B0X3BlcmMiLCJqaXR0ZXIiLCJyYW5kb20iXSwibWFwcGluZ3MiOiJBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0Esa0JBQVQsQ0FBNEJDLFFBQTVCLEVBQXNDO0FBQzNDLE1BQU1DLFVBQVUsR0FBR0MsdUJBQXVCLENBQUNGLFFBQUQsQ0FBMUM7QUFDQSxTQUFPLFVBQUNHLElBQUQsRUFBVTtBQUNmLFdBQU9DLFVBQVUsQ0FBQ0QsSUFBRCxFQUFPRixVQUFVLEVBQWpCLENBQWpCO0FBQ0QsR0FGRDtBQUdEOztBQUVEO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVNDLHVCQUFULENBQWlDRixRQUFqQyxFQUEyQztBQUNoRCxNQUFNSyxJQUFJLEdBQUdMLFFBQVEsSUFBSSxDQUF6QjtBQUNBLE1BQUlNLEtBQUssR0FBRyxDQUFaO0FBQ0EsU0FBTyxZQUFNO0FBQ1gsUUFBSUMsSUFBSSxHQUFHQyxJQUFJLENBQUNDLEdBQUwsQ0FBU0osSUFBVCxFQUFlQyxLQUFLLEVBQXBCLENBQVg7QUFDQUMsSUFBQUEsSUFBSSxJQUFJRyxTQUFTLENBQUNILElBQUQsQ0FBakI7QUFDQSxXQUFPQSxJQUFJLEdBQUcsSUFBZDtBQUNELEdBSkQ7QUFLRDs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVNHLFNBQVQsQ0FBbUJILElBQW5CLEVBQXlCSSxRQUF6QixFQUFtQztBQUN4Q0EsRUFBQUEsUUFBUSxHQUFHQSxRQUFRLElBQUksR0FBdkI7QUFDQSxNQUFJQyxNQUFNLEdBQUdMLElBQUksR0FBR0ksUUFBUCxHQUFrQkgsSUFBSSxDQUFDSyxNQUFMLEVBQS9COztBQUNBLE1BQUlMLElBQUksQ0FBQ0ssTUFBTCxLQUFnQixHQUFwQixFQUF5QjtBQUN2QkQsSUFBQUEsTUFBTSxJQUFJLENBQUMsQ0FBWDtBQUNEOztBQUNELFNBQU9BLE1BQVA7QUFDRCIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ29weXJpZ2h0IDIwMTUgVGhlIEFNUCBIVE1MIEF1dGhvcnMuIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlIFwiTGljZW5zZVwiKTtcbiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS5cbiAqIFlvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdFxuICpcbiAqICAgICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wXG4gKlxuICogVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZVxuICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gXCJBUy1JU1wiIEJBU0lTLFxuICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuXG4gKiBTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZSBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kXG4gKiBsaW1pdGF0aW9ucyB1bmRlciB0aGUgTGljZW5zZS5cbiAqL1xuXG4vKipcbiAqIEBwYXJhbSB7bnVtYmVyPX0gb3B0X2Jhc2UgRXhwb25lbnRpYWwgYmFzZS4gRGVmYXVsdHMgdG8gMi5cbiAqIEByZXR1cm4ge2Z1bmN0aW9uKGZ1bmN0aW9uKCkpOiBudW1iZXJ9IEZ1bmN0aW9uIHRoYXQgd2hlbiBpbnZva2VkIHdpbGxcbiAqICAgICBjYWxsIHRoZSBwYXNzZWQgaW4gZnVuY3Rpb24uIE9uIGV2ZXJ5IGludm9jYXRpb24gdGhlIG5leHRcbiAqICAgICBpbnZvY2F0aW9uIG9mIHRoZSBwYXNzZWQgaW4gZnVuY3Rpb24gd2lsbCBiZSBleHBvbmVudGlhbGx5XG4gKiAgICAgbGF0ZXIuIFJldHVybmVkIGZ1bmN0aW9uIHJldHVybnMgdGltZW91dCBpZC5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGV4cG9uZW50aWFsQmFja29mZihvcHRfYmFzZSkge1xuICBjb25zdCBnZXRUaW1lb3V0ID0gZXhwb25lbnRpYWxCYWNrb2ZmQ2xvY2sob3B0X2Jhc2UpO1xuICByZXR1cm4gKHdvcmspID0+IHtcbiAgICByZXR1cm4gc2V0VGltZW91dCh3b3JrLCBnZXRUaW1lb3V0KCkpO1xuICB9O1xufVxuXG4vKipcbiAqIEBwYXJhbSB7bnVtYmVyPX0gb3B0X2Jhc2UgRXhwb25lbnRpYWwgYmFzZS4gRGVmYXVsdHMgdG8gMi5cbiAqIEByZXR1cm4ge2Z1bmN0aW9uKCk6IG51bWJlcn0gRnVuY3Rpb24gdGhhdCB3aGVuIGludm9rZWQgd2lsbCByZXR1cm5cbiAqICAgIGEgbnVtYmVyIHRoYXQgZXhwb25lbnRpYWxseSBncm93cyBwZXIgaW52b2NhdGlvbi5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGV4cG9uZW50aWFsQmFja29mZkNsb2NrKG9wdF9iYXNlKSB7XG4gIGNvbnN0IGJhc2UgPSBvcHRfYmFzZSB8fCAyO1xuICBsZXQgY291bnQgPSAwO1xuICByZXR1cm4gKCkgPT4ge1xuICAgIGxldCB3YWl0ID0gTWF0aC5wb3coYmFzZSwgY291bnQrKyk7XG4gICAgd2FpdCArPSBnZXRKaXR0ZXIod2FpdCk7XG4gICAgcmV0dXJuIHdhaXQgKiAxMDAwO1xuICB9O1xufVxuXG4vKipcbiAqIEFkZCBqaXR0ZXIgdG8gYXZvaWQgdGhlIHRodW5kZXJpbmcgaGVyZC4gVGhpcyBjYW4gZS5nLiBoYXBwZW4gd2hlblxuICogd2UgcG9sbCBhIGJhY2tlbmQgYW5kIGl0IGZhaWxzIGZvciBldmVyeW9uZSBhdCB0aGUgc2FtZSB0aW1lLlxuICogV2UgYWRkIHVwIHRvIDMwJSAoZGVmYXVsdCkgbG9uZ2VyIG9yIHNob3J0ZXIgdGhhbiB0aGUgZ2l2ZW4gdGltZS5cbiAqXG4gKiBAcGFyYW0ge251bWJlcn0gd2FpdCB0aGUgYW1vdW50IGlmIGJhc2UgbWlsbGlzZWNvbmRzXG4gKiBAcGFyYW0ge251bWJlcj19IG9wdF9wZXJjIHRoZSBtaW4vbWF4IHBlcmNlbnRhZ2UgdG8gYWRkIG9yIHN1dHJhY3RcbiAqIEByZXR1cm4ge251bWJlcn1cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGdldEppdHRlcih3YWl0LCBvcHRfcGVyYykge1xuICBvcHRfcGVyYyA9IG9wdF9wZXJjIHx8IDAuMztcbiAgbGV0IGppdHRlciA9IHdhaXQgKiBvcHRfcGVyYyAqIE1hdGgucmFuZG9tKCk7XG4gIGlmIChNYXRoLnJhbmRvbSgpID4gMC41KSB7XG4gICAgaml0dGVyICo9IC0xO1xuICB9XG4gIHJldHVybiBqaXR0ZXI7XG59XG4iXX0=
+// /Users/mszylkowski/src/amphtml/src/core/types/function/exponential-backoff.js

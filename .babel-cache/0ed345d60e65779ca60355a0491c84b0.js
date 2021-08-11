@@ -1,0 +1,194 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import * as dom from "./core/dom";
+import { userAssert } from "./log";
+import { getAmpdoc, getService, getServiceForDocOrNull, getServicePromise, getServicePromiseForDoc, getServicePromiseOrNull, getServicePromiseOrNullForDoc } from "./service-helpers";
+import { extensionScriptInNode } from "./service/extension-script";
+
+/**
+ * Same as getElementService but produces null if the given element is not
+ * actually available on the current page.
+ * @param {!Window} win
+ * @param {string} id of the service.
+ * @param {string} extension Name of the custom extension that provides the
+ *     implementation of this service.
+ * @param {string} version The extension version.
+ * @param {boolean=} opt_element Whether this service is provided by an
+ *     element, not the extension.
+ * @return {!Promise<?Object>}
+ */
+export function getElementServiceIfAvailable(win, id, extension, version, opt_element) {
+  var s = getServicePromiseOrNull(win, id);
+
+  if (s) {
+    return (
+      /** @type {!Promise<?Object>} */
+      s
+    );
+  }
+
+  return getElementServicePromiseOrNull(win, id, extension, version, opt_element);
+}
+
+/**
+ * Returns a promise for a service for the given id and window. Also expects an
+ * element that has the actual implementation. The promise resolves when the
+ * implementation loaded. Users should typically wrap this as a special purpose
+ * function (e.g. Services.viewportForDoc(...)) for type safety and because the
+ * factory should not be passed around.
+ * @param {!Element|!ShadowRoot} element
+ * @param {string} id of the service.
+ * @param {string} extension Name of the custom extension that provides the
+ *     implementation of this service.
+ * @param {boolean=} opt_element Whether this service is provided by an element,
+ *     not the extension.
+ * @return {!Promise<*>}
+ */
+export function getElementServiceForDoc(element, id, extension, opt_element) {
+  return getElementServiceIfAvailableForDoc(element, id, extension, opt_element).then(function (service) {
+    return assertService(service, id, extension);
+  });
+}
+
+/**
+ * Same as getElementService but produces null if the given element is not
+ * actually available on the current page.
+ * @param {!Element|!ShadowRoot} element
+ * @param {string} id of the service.
+ * @param {string} extension Name of the custom extension that provides the
+ *     implementation of this service.
+ * @param {boolean=} opt_element Whether this service is provided by an
+ *     element, not the extension.
+ * @return {!Promise<?Object>}
+ */
+export function getElementServiceIfAvailableForDoc(element, id, extension, opt_element) {
+  var s = getServicePromiseOrNullForDoc(element, id);
+
+  if (s) {
+    return (
+      /** @type {!Promise<?Object>} */
+      s
+    );
+  }
+
+  var ampdoc = getAmpdoc(element);
+  return ampdoc.whenExtensionsKnown().then(function () {
+    var version = ampdoc.getExtensionVersion(extension);
+
+    if (!version) {
+      return null;
+    }
+
+    var extensions = getService(ampdoc.win, 'extensions');
+    return extensions.waitForExtension(extension, version);
+  }).then(function (ext) {
+    if (!ext) {
+      return null;
+    }
+
+    // If this service is provided by an element, then we can't depend on
+    // the service (they may not use the element).
+    if (opt_element) {
+      return getServicePromiseOrNullForDoc(element, id);
+    }
+
+    return getServicePromiseForDoc(element, id);
+  });
+}
+
+/**
+ * Returns a promise for service for the given id in the embed scope of
+ * a given element, if it exists. Falls back to ampdoc scope if the element
+ * is not embedded.
+ *
+ * @param {!Element|!ShadowRoot} element
+ * @param {string} id of the service.
+ * @param {string} extension Name of the custom element that provides
+ *     the implementation of this service.
+ * @return {!Promise<?Object>}
+ */
+export function getElementServiceIfAvailableForDocInEmbedScope(element, id, extension) {
+  var s = getServiceForDocOrNull(element, id);
+
+  if (s) {
+    return (
+      /** @type {!Promise<?Object>} */
+      Promise.resolve(s)
+    );
+  }
+
+  return getElementServiceIfAvailableForDoc(element, id, extension);
+}
+
+/**
+ * Throws user error if `service` is null.
+ * @param {Object} service
+ * @param {string} id
+ * @param {string} extension
+ * @return {!Object}
+ * @private
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+function assertService(service, id, extension) {
+  return (
+    /** @type {!Object} */
+    userAssert(service, 'Service %s was requested to be provided through %s, ' + 'but %s is not loaded in the current page. To fix this ' + 'problem load the JavaScript file for %s in this page.', id, extension, extension, extension)
+  );
+}
+
+/**
+ * Returns the promise for service with `id` on the given window if available.
+ * Otherwise, resolves with null (service was not registered).
+ * @param {!Window} win
+ * @param {string} id
+ * @param {string} extension
+ * @param {string} version
+ * @param {boolean=} opt_element
+ * @return {!Promise<Object>}
+ * @private
+ */
+function getElementServicePromiseOrNull(win, id, extension, version, opt_element) {
+  return dom.waitForBodyOpenPromise(win.document).then(function () {
+    // If there is an extension script wait for it to load before trying
+    // to get the service. Prevents a race condition when everything but
+    // the extensions is in cache. If there is no script then it's either
+    // not present, or the service was defined by a test. In those cases
+    // we don't wait around for an extension that does not exist.
+    var extensions = getService(win, 'extensions');
+
+    // TODO(jpettitt) investigate registerExtension to short circuit
+    // the dom call in extensionScriptsInNode()
+    if (!extensionScriptInNode(extensions.win, extension, version)) {
+      return null;
+    }
+
+    return extensions.waitForExtension(extension, version);
+  }).then(function (ext) {
+    if (!ext) {
+      return null;
+    }
+
+    // If this service is provided by an element, then we can't depend on
+    // the service (they may not use the element).
+    if (opt_element) {
+      return getServicePromiseOrNull(win, id);
+    }
+
+    return getServicePromise(win, id);
+  });
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImVsZW1lbnQtc2VydmljZS5qcyJdLCJuYW1lcyI6WyJkb20iLCJ1c2VyQXNzZXJ0IiwiZ2V0QW1wZG9jIiwiZ2V0U2VydmljZSIsImdldFNlcnZpY2VGb3JEb2NPck51bGwiLCJnZXRTZXJ2aWNlUHJvbWlzZSIsImdldFNlcnZpY2VQcm9taXNlRm9yRG9jIiwiZ2V0U2VydmljZVByb21pc2VPck51bGwiLCJnZXRTZXJ2aWNlUHJvbWlzZU9yTnVsbEZvckRvYyIsImV4dGVuc2lvblNjcmlwdEluTm9kZSIsImdldEVsZW1lbnRTZXJ2aWNlSWZBdmFpbGFibGUiLCJ3aW4iLCJpZCIsImV4dGVuc2lvbiIsInZlcnNpb24iLCJvcHRfZWxlbWVudCIsInMiLCJnZXRFbGVtZW50U2VydmljZVByb21pc2VPck51bGwiLCJnZXRFbGVtZW50U2VydmljZUZvckRvYyIsImVsZW1lbnQiLCJnZXRFbGVtZW50U2VydmljZUlmQXZhaWxhYmxlRm9yRG9jIiwidGhlbiIsInNlcnZpY2UiLCJhc3NlcnRTZXJ2aWNlIiwiYW1wZG9jIiwid2hlbkV4dGVuc2lvbnNLbm93biIsImdldEV4dGVuc2lvblZlcnNpb24iLCJleHRlbnNpb25zIiwid2FpdEZvckV4dGVuc2lvbiIsImV4dCIsImdldEVsZW1lbnRTZXJ2aWNlSWZBdmFpbGFibGVGb3JEb2NJbkVtYmVkU2NvcGUiLCJQcm9taXNlIiwicmVzb2x2ZSIsIndhaXRGb3JCb2R5T3BlblByb21pc2UiLCJkb2N1bWVudCJdLCJtYXBwaW5ncyI6IkFBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBRUEsT0FBTyxLQUFLQSxHQUFaO0FBQ0EsU0FBUUMsVUFBUjtBQUNBLFNBQ0VDLFNBREYsRUFFRUMsVUFGRixFQUdFQyxzQkFIRixFQUlFQyxpQkFKRixFQUtFQyx1QkFMRixFQU1FQyx1QkFORixFQU9FQyw2QkFQRjtBQVNBLFNBQVFDLHFCQUFSOztB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QixDQUFDTSxHQUFELEVBQU1DLEVBQU4sQ0FBeEI7QUFDRCxHQTNCSSxDQUFQO0FBNEJEIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb3B5cmlnaHQgMjAxNiBUaGUgQU1QIEhUTUwgQXV0aG9ycy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTLUlTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbmltcG9ydCAqIGFzIGRvbSBmcm9tICcuL2NvcmUvZG9tJztcbmltcG9ydCB7dXNlckFzc2VydH0gZnJvbSAnLi9sb2cnO1xuaW1wb3J0IHtcbiAgZ2V0QW1wZG9jLFxuICBnZXRTZXJ2aWNlLFxuICBnZXRTZXJ2aWNlRm9yRG9jT3JOdWxsLFxuICBnZXRTZXJ2aWNlUHJvbWlzZSxcbiAgZ2V0U2VydmljZVByb21pc2VGb3JEb2MsXG4gIGdldFNlcnZpY2VQcm9taXNlT3JOdWxsLFxuICBnZXRTZXJ2aWNlUHJvbWlzZU9yTnVsbEZvckRvYyxcbn0gZnJvbSAnLi9zZXJ2aWNlLWhlbHBlcnMnO1xuaW1wb3J0IHtleHRlbnNpb25TY3JpcHRJbk5vZGV9IGZyb20gJy4vc2VydmljZS9leHRlbnNpb24tc2NyaXB0JztcblxuLyoqXG4gKiBTYW1lIGFzIGdldEVsZW1lbnRTZXJ2aWNlIGJ1dCBwcm9kdWNlcyBudWxsIGlmIHRoZSBnaXZlbiBlbGVtZW50IGlzIG5vdFxuICogYWN0dWFsbHkgYXZhaWxhYmxlIG9uIHRoZSBjdXJyZW50IHBhZ2UuXG4gKiBAcGFyYW0geyFXaW5kb3d9IHdpblxuICogQHBhcmFtIHtzdHJpbmd9IGlkIG9mIHRoZSBzZXJ2aWNlLlxuICogQHBhcmFtIHtzdHJpbmd9IGV4dGVuc2lvbiBOYW1lIG9mIHRoZSBjdXN0b20gZXh0ZW5zaW9uIHRoYXQgcHJvdmlkZXMgdGhlXG4gKiAgICAgaW1wbGVtZW50YXRpb24gb2YgdGhpcyBzZXJ2aWNlLlxuICogQHBhcmFtIHtzdHJpbmd9IHZlcnNpb24gVGhlIGV4dGVuc2lvbiB2ZXJzaW9uLlxuICogQHBhcmFtIHtib29sZWFuPX0gb3B0X2VsZW1lbnQgV2hldGhlciB0aGlzIHNlcnZpY2UgaXMgcHJvdmlkZWQgYnkgYW5cbiAqICAgICBlbGVtZW50LCBub3QgdGhlIGV4dGVuc2lvbi5cbiAqIEByZXR1cm4geyFQcm9taXNlPD9PYmplY3Q+fVxuICovXG5leHBvcnQgZnVuY3Rpb24gZ2V0RWxlbWVudFNlcnZpY2VJZkF2YWlsYWJsZShcbiAgd2luLFxuICBpZCxcbiAgZXh0ZW5zaW9uLFxuICB2ZXJzaW9uLFxuICBvcHRfZWxlbWVudFxuKSB7XG4gIGNvbnN0IHMgPSBnZXRTZXJ2aWNlUHJvbWlzZU9yTnVsbCh3aW4sIGlkKTtcbiAgaWYgKHMpIHtcbiAgICByZXR1cm4gLyoqIEB0eXBlIHshUHJvbWlzZTw/T2JqZWN0Pn0gKi8gKHMpO1xuICB9XG4gIHJldHVybiBnZXRFbGVtZW50U2VydmljZVByb21pc2VPck51bGwoXG4gICAgd2luLFxuICAgIGlkLFxuICAgIGV4dGVuc2lvbixcbiAgICB2ZXJzaW9uLFxuICAgIG9wdF9lbGVtZW50XG4gICk7XG59XG5cbi8qKlxuICogUmV0dXJucyBhIHByb21pc2UgZm9yIGEgc2VydmljZSBmb3IgdGhlIGdpdmVuIGlkIGFuZCB3aW5kb3cuIEFsc28gZXhwZWN0cyBhblxuICogZWxlbWVudCB0aGF0IGhhcyB0aGUgYWN0dWFsIGltcGxlbWVudGF0aW9uLiBUaGUgcHJvbWlzZSByZXNvbHZlcyB3aGVuIHRoZVxuICogaW1wbGVtZW50YXRpb24gbG9hZGVkLiBVc2VycyBzaG91bGQgdHlwaWNhbGx5IHdyYXAgdGhpcyBhcyBhIHNwZWNpYWwgcHVycG9zZVxuICogZnVuY3Rpb24gKGUuZy4gU2VydmljZXMudmlld3BvcnRGb3JEb2MoLi4uKSkgZm9yIHR5cGUgc2FmZXR5IGFuZCBiZWNhdXNlIHRoZVxuICogZmFjdG9yeSBzaG91bGQgbm90IGJlIHBhc3NlZCBhcm91bmQuXG4gKiBAcGFyYW0geyFFbGVtZW50fCFTaGFkb3dSb290fSBlbGVtZW50XG4gKiBAcGFyYW0ge3N0cmluZ30gaWQgb2YgdGhlIHNlcnZpY2UuXG4gKiBAcGFyYW0ge3N0cmluZ30gZXh0ZW5zaW9uIE5hbWUgb2YgdGhlIGN1c3RvbSBleHRlbnNpb24gdGhhdCBwcm92aWRlcyB0aGVcbiAqICAgICBpbXBsZW1lbnRhdGlvbiBvZiB0aGlzIHNlcnZpY2UuXG4gKiBAcGFyYW0ge2Jvb2xlYW49fSBvcHRfZWxlbWVudCBXaGV0aGVyIHRoaXMgc2VydmljZSBpcyBwcm92aWRlZCBieSBhbiBlbGVtZW50LFxuICogICAgIG5vdCB0aGUgZXh0ZW5zaW9uLlxuICogQHJldHVybiB7IVByb21pc2U8Kj59XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBnZXRFbGVtZW50U2VydmljZUZvckRvYyhlbGVtZW50LCBpZCwgZXh0ZW5zaW9uLCBvcHRfZWxlbWVudCkge1xuICByZXR1cm4gZ2V0RWxlbWVudFNlcnZpY2VJZkF2YWlsYWJsZUZvckRvYyhcbiAgICBlbGVtZW50LFxuICAgIGlkLFxuICAgIGV4dGVuc2lvbixcbiAgICBvcHRfZWxlbWVudFxuICApLnRoZW4oKHNlcnZpY2UpID0+IGFzc2VydFNlcnZpY2Uoc2VydmljZSwgaWQsIGV4dGVuc2lvbikpO1xufVxuXG4vKipcbiAqIFNhbWUgYXMgZ2V0RWxlbWVudFNlcnZpY2UgYnV0IHByb2R1Y2VzIG51bGwgaWYgdGhlIGdpdmVuIGVsZW1lbnQgaXMgbm90XG4gKiBhY3R1YWxseSBhdmFpbGFibGUgb24gdGhlIGN1cnJlbnQgcGFnZS5cbiAqIEBwYXJhbSB7IUVsZW1lbnR8IVNoYWRvd1Jvb3R9IGVsZW1lbnRcbiAqIEBwYXJhbSB7c3RyaW5nfSBpZCBvZiB0aGUgc2VydmljZS5cbiAqIEBwYXJhbSB7c3RyaW5nfSBleHRlbnNpb24gTmFtZSBvZiB0aGUgY3VzdG9tIGV4dGVuc2lvbiB0aGF0IHByb3ZpZGVzIHRoZVxuICogICAgIGltcGxlbWVudGF0aW9uIG9mIHRoaXMgc2VydmljZS5cbiAqIEBwYXJhbSB7Ym9vbGVhbj19IG9wdF9lbGVtZW50IFdoZXRoZXIgdGhpcyBzZXJ2aWNlIGlzIHByb3ZpZGVkIGJ5IGFuXG4gKiAgICAgZWxlbWVudCwgbm90IHRoZSBleHRlbnNpb24uXG4gKiBAcmV0dXJuIHshUHJvbWlzZTw/T2JqZWN0Pn1cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGdldEVsZW1lbnRTZXJ2aWNlSWZBdmFpbGFibGVGb3JEb2MoXG4gIGVsZW1lbnQsXG4gIGlkLFxuICBleHRlbnNpb24sXG4gIG9wdF9lbGVtZW50XG4pIHtcbiAgY29uc3QgcyA9IGdldFNlcnZpY2VQcm9taXNlT3JOdWxsRm9yRG9jKGVsZW1lbnQsIGlkKTtcbiAgaWYgKHMpIHtcbiAgICByZXR1cm4gLyoqIEB0eXBlIHshUHJvbWlzZTw/T2JqZWN0Pn0gKi8gKHMpO1xuICB9XG4gIGNvbnN0IGFtcGRvYyA9IGdldEFtcGRvYyhlbGVtZW50KTtcbiAgcmV0dXJuIGFtcGRvY1xuICAgIC53aGVuRXh0ZW5zaW9uc0tub3duKClcbiAgICAudGhlbigoKSA9PiB7XG4gICAgICBjb25zdCB2ZXJzaW9uID0gYW1wZG9jLmdldEV4dGVuc2lvblZlcnNpb24oZXh0ZW5zaW9uKTtcbiAgICAgIGlmICghdmVyc2lvbikge1xuICAgICAgICByZXR1cm4gbnVsbDtcbiAgICAgIH1cbiAgICAgIGNvbnN0IGV4dGVuc2lvbnMgPSBnZXRTZXJ2aWNlKGFtcGRvYy53aW4sICdleHRlbnNpb25zJyk7XG4gICAgICByZXR1cm4gZXh0ZW5zaW9ucy53YWl0Rm9yRXh0ZW5zaW9uKGV4dGVuc2lvbiwgdmVyc2lvbik7XG4gICAgfSlcbiAgICAudGhlbigoZXh0KSA9PiB7XG4gICAgICBpZiAoIWV4dCkge1xuICAgICAgICByZXR1cm4gbnVsbDtcbiAgICAgIH1cbiAgICAgIC8vIElmIHRoaXMgc2VydmljZSBpcyBwcm92aWRlZCBieSBhbiBlbGVtZW50LCB0aGVuIHdlIGNhbid0IGRlcGVuZCBvblxuICAgICAgLy8gdGhlIHNlcnZpY2UgKHRoZXkgbWF5IG5vdCB1c2UgdGhlIGVsZW1lbnQpLlxuICAgICAgaWYgKG9wdF9lbGVtZW50KSB7XG4gICAgICAgIHJldHVybiBnZXRTZXJ2aWNlUHJvbWlzZU9yTnVsbEZvckRvYyhlbGVtZW50LCBpZCk7XG4gICAgICB9XG4gICAgICByZXR1cm4gZ2V0U2VydmljZVByb21pc2VGb3JEb2MoZWxlbWVudCwgaWQpO1xuICAgIH0pO1xufVxuXG4vKipcbiAqIFJldHVybnMgYSBwcm9taXNlIGZvciBzZXJ2aWNlIGZvciB0aGUgZ2l2ZW4gaWQgaW4gdGhlIGVtYmVkIHNjb3BlIG9mXG4gKiBhIGdpdmVuIGVsZW1lbnQsIGlmIGl0IGV4aXN0cy4gRmFsbHMgYmFjayB0byBhbXBkb2Mgc2NvcGUgaWYgdGhlIGVsZW1lbnRcbiAqIGlzIG5vdCBlbWJlZGRlZC5cbiAqXG4gKiBAcGFyYW0geyFFbGVtZW50fCFTaGFkb3dSb290fSBlbGVtZW50XG4gKiBAcGFyYW0ge3N0cmluZ30gaWQgb2YgdGhlIHNlcnZpY2UuXG4gKiBAcGFyYW0ge3N0cmluZ30gZXh0ZW5zaW9uIE5hbWUgb2YgdGhlIGN1c3RvbSBlbGVtZW50IHRoYXQgcHJvdmlkZXNcbiAqICAgICB0aGUgaW1wbGVtZW50YXRpb24gb2YgdGhpcyBzZXJ2aWNlLlxuICogQHJldHVybiB7IVByb21pc2U8P09iamVjdD59XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBnZXRFbGVtZW50U2VydmljZUlmQXZhaWxhYmxlRm9yRG9jSW5FbWJlZFNjb3BlKFxuICBlbGVtZW50LFxuICBpZCxcbiAgZXh0ZW5zaW9uXG4pIHtcbiAgY29uc3QgcyA9IGdldFNlcnZpY2VGb3JEb2NPck51bGwoZWxlbWVudCwgaWQpO1xuICBpZiAocykge1xuICAgIHJldHVybiAvKiogQHR5cGUgeyFQcm9taXNlPD9PYmplY3Q+fSAqLyAoUHJvbWlzZS5yZXNvbHZlKHMpKTtcbiAgfVxuICByZXR1cm4gZ2V0RWxlbWVudFNlcnZpY2VJZkF2YWlsYWJsZUZvckRvYyhlbGVtZW50LCBpZCwgZXh0ZW5zaW9uKTtcbn1cblxuLyoqXG4gKiBUaHJvd3MgdXNlciBlcnJvciBpZiBgc2VydmljZWAgaXMgbnVsbC5cbiAqIEBwYXJhbSB7T2JqZWN0fSBzZXJ2aWNlXG4gKiBAcGFyYW0ge3N0cmluZ30gaWRcbiAqIEBwYXJhbSB7c3RyaW5nfSBleHRlbnNpb25cbiAqIEByZXR1cm4geyFPYmplY3R9XG4gKiBAcHJpdmF0ZVxuICogQGNsb3N1cmVQcmltaXRpdmUge2Fzc2VydHMubWF0Y2hlc1JldHVybn1cbiAqL1xuZnVuY3Rpb24gYXNzZXJ0U2VydmljZShzZXJ2aWNlLCBpZCwgZXh0ZW5zaW9uKSB7XG4gIHJldHVybiAvKiogQHR5cGUgeyFPYmplY3R9ICovIChcbiAgICB1c2VyQXNzZXJ0KFxuICAgICAgc2VydmljZSxcbiAgICAgICdTZXJ2aWNlICVzIHdhcyByZXF1ZXN0ZWQgdG8gYmUgcHJvdmlkZWQgdGhyb3VnaCAlcywgJyArXG4gICAgICAgICdidXQgJXMgaXMgbm90IGxvYWRlZCBpbiB0aGUgY3VycmVudCBwYWdlLiBUbyBmaXggdGhpcyAnICtcbiAgICAgICAgJ3Byb2JsZW0gbG9hZCB0aGUgSmF2YVNjcmlwdCBmaWxlIGZvciAlcyBpbiB0aGlzIHBhZ2UuJyxcbiAgICAgIGlkLFxuICAgICAgZXh0ZW5zaW9uLFxuICAgICAgZXh0ZW5zaW9uLFxuICAgICAgZXh0ZW5zaW9uXG4gICAgKVxuICApO1xufVxuXG4vKipcbiAqIFJldHVybnMgdGhlIHByb21pc2UgZm9yIHNlcnZpY2Ugd2l0aCBgaWRgIG9uIHRoZSBnaXZlbiB3aW5kb3cgaWYgYXZhaWxhYmxlLlxuICogT3RoZXJ3aXNlLCByZXNvbHZlcyB3aXRoIG51bGwgKHNlcnZpY2Ugd2FzIG5vdCByZWdpc3RlcmVkKS5cbiAqIEBwYXJhbSB7IVdpbmRvd30gd2luXG4gKiBAcGFyYW0ge3N0cmluZ30gaWRcbiAqIEBwYXJhbSB7c3RyaW5nfSBleHRlbnNpb25cbiAqIEBwYXJhbSB7c3RyaW5nfSB2ZXJzaW9uXG4gKiBAcGFyYW0ge2Jvb2xlYW49fSBvcHRfZWxlbWVudFxuICogQHJldHVybiB7IVByb21pc2U8T2JqZWN0Pn1cbiAqIEBwcml2YXRlXG4gKi9cbmZ1bmN0aW9uIGdldEVsZW1lbnRTZXJ2aWNlUHJvbWlzZU9yTnVsbChcbiAgd2luLFxuICBpZCxcbiAgZXh0ZW5zaW9uLFxuICB2ZXJzaW9uLFxuICBvcHRfZWxlbWVudFxuKSB7XG4gIHJldHVybiBkb21cbiAgICAud2FpdEZvckJvZHlPcGVuUHJvbWlzZSh3aW4uZG9jdW1lbnQpXG4gICAgLnRoZW4oKCkgPT4ge1xuICAgICAgLy8gSWYgdGhlcmUgaXMgYW4gZXh0ZW5zaW9uIHNjcmlwdCB3YWl0IGZvciBpdCB0byBsb2FkIGJlZm9yZSB0cnlpbmdcbiAgICAgIC8vIHRvIGdldCB0aGUgc2VydmljZS4gUHJldmVudHMgYSByYWNlIGNvbmRpdGlvbiB3aGVuIGV2ZXJ5dGhpbmcgYnV0XG4gICAgICAvLyB0aGUgZXh0ZW5zaW9ucyBpcyBpbiBjYWNoZS4gSWYgdGhlcmUgaXMgbm8gc2NyaXB0IHRoZW4gaXQncyBlaXRoZXJcbiAgICAgIC8vIG5vdCBwcmVzZW50LCBvciB0aGUgc2VydmljZSB3YXMgZGVmaW5lZCBieSBhIHRlc3QuIEluIHRob3NlIGNhc2VzXG4gICAgICAvLyB3ZSBkb24ndCB3YWl0IGFyb3VuZCBmb3IgYW4gZXh0ZW5zaW9uIHRoYXQgZG9lcyBub3QgZXhpc3QuXG4gICAgICBjb25zdCBleHRlbnNpb25zID0gZ2V0U2VydmljZSh3aW4sICdleHRlbnNpb25zJyk7XG5cbiAgICAgIC8vIFRPRE8oanBldHRpdHQpIGludmVzdGlnYXRlIHJlZ2lzdGVyRXh0ZW5zaW9uIHRvIHNob3J0IGNpcmN1aXRcbiAgICAgIC8vIHRoZSBkb20gY2FsbCBpbiBleHRlbnNpb25TY3JpcHRzSW5Ob2RlKClcbiAgICAgIGlmICghZXh0ZW5zaW9uU2NyaXB0SW5Ob2RlKGV4dGVuc2lvbnMud2luLCBleHRlbnNpb24sIHZlcnNpb24pKSB7XG4gICAgICAgIHJldHVybiBudWxsO1xuICAgICAgfVxuICAgICAgcmV0dXJuIGV4dGVuc2lvbnMud2FpdEZvckV4dGVuc2lvbihleHRlbnNpb24sIHZlcnNpb24pO1xuICAgIH0pXG4gICAgLnRoZW4oKGV4dCkgPT4ge1xuICAgICAgaWYgKCFleHQpIHtcbiAgICAgICAgcmV0dXJuIG51bGw7XG4gICAgICB9XG4gICAgICAvLyBJZiB0aGlzIHNlcnZpY2UgaXMgcHJvdmlkZWQgYnkgYW4gZWxlbWVudCwgdGhlbiB3ZSBjYW4ndCBkZXBlbmQgb25cbiAgICAgIC8vIHRoZSBzZXJ2aWNlICh0aGV5IG1heSBub3QgdXNlIHRoZSBlbGVtZW50KS5cbiAgICAgIGlmIChvcHRfZWxlbWVudCkge1xuICAgICAgICByZXR1cm4gZ2V0U2VydmljZVByb21pc2VPck51bGwod2luLCBpZCk7XG4gICAgICB9XG4gICAgICByZXR1cm4gZ2V0U2VydmljZVByb21pc2Uod2luLCBpZCk7XG4gICAgfSk7XG59XG4iXX0=
+// /Users/mszylkowski/src/amphtml/src/element-service.js

@@ -1,0 +1,1 @@
+export const CSS = "amp-lightbox-gallery[hidden]{display:none!important}amp-lightbox-gallery{width:100%;height:100%;position:fixed;box-sizing:border-box;background-color:rgba(0,0,0,0.9);color:#fff;visibility:hidden}\n/*# sourceURL=/extensions/amp-lightbox-gallery/1.0/amp-lightbox-gallery.css*/";

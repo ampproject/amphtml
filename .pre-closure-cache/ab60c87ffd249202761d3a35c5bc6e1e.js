@@ -1,0 +1,1 @@
+export const CSS = ".i-amphtml-onetap-google-iframe{z-index:2147483647;border:none;position:fixed}.i-amphtml-onetap-google-ui-card{width:391px;right:20px;top:20px}.i-amphtml-onetap-google-ui-bottom_sheet{right:auto;left:0;top:auto;bottom:0;width:100%}\n/*# sourceURL=/extensions/amp-onetap-google/0.1/amp-onetap-google.css*/";

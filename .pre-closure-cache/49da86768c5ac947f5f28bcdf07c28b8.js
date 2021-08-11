@@ -1,0 +1,1 @@
+export const CSS = "amp-inline-gallery-pagination[inset]{display:block!important;height:20px;width:100%;position:absolute;bottom:0}\n/*# sourceURL=/extensions/amp-inline-gallery/1.0/amp-inline-gallery-pagination.css*/";

@@ -1,0 +1,60 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { Deferred } from "../../../src/core/data-structures/promise";
+import { Services } from "../../../src/service";
+
+/** @type {!WeakMap<!../../../src/service/ampdoc-impl.AmpDoc, !Promise>} */
+var polyfillPromiseMap = new WeakMap();
+
+/**
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {Promise<void>}
+ */
+export function installWebAnimationsIfNecessary(ampdoc) {
+  if (polyfillPromiseMap.has(ampdoc)) {
+    return polyfillPromiseMap.get(ampdoc);
+  }
+
+  var _Deferred = new Deferred(),
+      promise = _Deferred.promise,
+      resolve = _Deferred.resolve;
+
+  polyfillPromiseMap.set(ampdoc, promise);
+  var win = ampdoc.win;
+  var platform = Services.platformFor(win);
+
+  if (platform.isSafari() && platform.getMajorVersion() < 14) {
+    /*
+      Force Web Animations polyfill on Safari versions before 14.
+      Native Web Animations on WebKit did not respect easing for individual
+      keyframes and break overall timing. See https://go.amp.dev/issue/27762 and
+      https://bugs.webkit.org/show_bug.cgi?id=210526
+      */
+    // Using string access syntax to bypass typecheck.
+    win.Element.prototype['animate'] = null;
+  }
+
+  if (win.Element.prototype['animate']) {
+    // Native Support exists, there is no reason to load the polyfill.
+    resolve();
+    return promise;
+  }
+
+  resolve(Services.extensionsFor(win).installExtensionForDoc(ampdoc, 'amp-animation-polyfill'));
+  return promise;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImluc3RhbGwtcG9seWZpbGwuanMiXSwibmFtZXMiOlsiRGVmZXJyZWQiLCJTZXJ2aWNlcyIsInBvbHlmaWxsUHJvbWlzZU1hcCIsIldlYWtNYXAiLCJpbnN0YWxsV2ViQW5pbWF0aW9uc0lmTmVjZXNzYXJ5IiwiYW1wZG9jIiwiaGFzIiwiZ2V0IiwicHJvbWlzZSIsInJlc29sdmUiLCJzZXQiLCJ3aW4iLCJwbGF0Zm9ybSIsInBsYXRmb3JtRm9yIiwiaXNTYWZhcmkiLCJnZXRNYWpvclZlcnNpb24iLCJFbGVtZW50IiwicHJvdG90eXBlIiwiZXh0ZW5zaW9uc0ZvciIsImluc3RhbGxFeHRlbnNpb25Gb3JEb2MiXSwibWFwcGluZ3MiOiJBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLFNBQVFBLFFBQVI7QUFDQSxTQUFRQyxRQUFSOztBQUVBO0FBQ0EsSUFBTUMsa0JBQWtCLEdBQUcsSUFBSUMsT0FBSixFQUEzQjs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0MsK0JBQVQsQ0FBeUNDLE1BQXpDLEVBQWlEO0FBQ3RELE1BQUlILGtCQUFrQixDQUFDSSxHQUFuQixDQUF1QkQsTUFBdkIsQ0FBSixFQUFvQztBQUNsQyxXQUFPSCxrQkFBa0IsQ0FBQ0ssR0FBbkIsQ0FBdUJGLE1BQXZCLENBQVA7QUFDRDs7QUFFRCxrQkFBMkIsSUFBSUwsUUFBSixFQUEzQjtBQUFBLE1BQU9RLE9BQVAsYUFBT0EsT0FBUDtBQUFBLE1BQWdCQyxPQUFoQixhQUFnQkEsT0FBaEI7O0FBQ0FQLEVBQUFBLGtCQUFrQixDQUFDUSxHQUFuQixDQUF1QkwsTUFBdkIsRUFBK0JHLE9BQS9CO0FBRUEsTUFBT0csR0FBUCxHQUFjTixNQUFkLENBQU9NLEdBQVA7QUFDQSxNQUFNQyxRQUFRLEdBQUdYLFFBQVEsQ0FBQ1ksV0FBVCxDQUFxQkYsR0FBckIsQ0FBakI7O0FBQ0EsTUFBSUMsUUFBUSxDQUFDRSxRQUFULE1BQXVCRixRQUFRLENBQUNHLGVBQVQsS0FBNkIsRUFBeEQsRUFBNEQ7QUFDMUQ7QUFDSjtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0k7QUFDQUosSUFBQUEsR0FBRyxDQUFDSyxPQUFKLENBQVlDLFNBQVosQ0FBc0IsU0FBdEIsSUFBbUMsSUFBbkM7QUFDRDs7QUFFRCxNQUFJTixHQUFHLENBQUNLLE9BQUosQ0FBWUMsU0FBWixDQUFzQixTQUF0QixDQUFKLEVBQXNDO0FBQ3BDO0FBQ0FSLElBQUFBLE9BQU87QUFDUCxXQUFPRCxPQUFQO0FBQ0Q7O0FBRURDLEVBQUFBLE9BQU8sQ0FDTFIsUUFBUSxDQUFDaUIsYUFBVCxDQUF1QlAsR0FBdkIsRUFBNEJRLHNCQUE1QixDQUNFZCxNQURGLEVBRUUsd0JBRkYsQ0FESyxDQUFQO0FBT0EsU0FBT0csT0FBUDtBQUNEIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb3B5cmlnaHQgMjAxNiBUaGUgQU1QIEhUTUwgQXV0aG9ycy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTLUlTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5pbXBvcnQge0RlZmVycmVkfSBmcm9tICcjY29yZS9kYXRhLXN0cnVjdHVyZXMvcHJvbWlzZSc7XG5pbXBvcnQge1NlcnZpY2VzfSBmcm9tICcjc2VydmljZSc7XG5cbi8qKiBAdHlwZSB7IVdlYWtNYXA8IS4uLy4uLy4uL3NyYy9zZXJ2aWNlL2FtcGRvYy1pbXBsLkFtcERvYywgIVByb21pc2U+fSAqL1xuY29uc3QgcG9seWZpbGxQcm9taXNlTWFwID0gbmV3IFdlYWtNYXAoKTtcblxuLyoqXG4gKiBAcGFyYW0geyEuLi8uLi8uLi9zcmMvc2VydmljZS9hbXBkb2MtaW1wbC5BbXBEb2N9IGFtcGRvY1xuICogQHJldHVybiB7UHJvbWlzZTx2b2lkPn1cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGluc3RhbGxXZWJBbmltYXRpb25zSWZOZWNlc3NhcnkoYW1wZG9jKSB7XG4gIGlmIChwb2x5ZmlsbFByb21pc2VNYXAuaGFzKGFtcGRvYykpIHtcbiAgICByZXR1cm4gcG9seWZpbGxQcm9taXNlTWFwLmdldChhbXBkb2MpO1xuICB9XG5cbiAgY29uc3Qge3Byb21pc2UsIHJlc29sdmV9ID0gbmV3IERlZmVycmVkKCk7XG4gIHBvbHlmaWxsUHJvbWlzZU1hcC5zZXQoYW1wZG9jLCBwcm9taXNlKTtcblxuICBjb25zdCB7d2lufSA9IGFtcGRvYztcbiAgY29uc3QgcGxhdGZvcm0gPSBTZXJ2aWNlcy5wbGF0Zm9ybUZvcih3aW4pO1xuICBpZiAocGxhdGZvcm0uaXNTYWZhcmkoKSAmJiBwbGF0Zm9ybS5nZXRNYWpvclZlcnNpb24oKSA8IDE0KSB7XG4gICAgLypcbiAgICAgIEZvcmNlIFdlYiBBbmltYXRpb25zIHBvbHlmaWxsIG9uIFNhZmFyaSB2ZXJzaW9ucyBiZWZvcmUgMTQuXG4gICAgICBOYXRpdmUgV2ViIEFuaW1hdGlvbnMgb24gV2ViS2l0IGRpZCBub3QgcmVzcGVjdCBlYXNpbmcgZm9yIGluZGl2aWR1YWxcbiAgICAgIGtleWZyYW1lcyBhbmQgYnJlYWsgb3ZlcmFsbCB0aW1pbmcuIFNlZSBodHRwczovL2dvLmFtcC5kZXYvaXNzdWUvMjc3NjIgYW5kXG4gICAgICBodHRwczovL2J1Z3Mud2Via2l0Lm9yZy9zaG93X2J1Zy5jZ2k/aWQ9MjEwNTI2XG4gICAgICAqL1xuICAgIC8vIFVzaW5nIHN0cmluZyBhY2Nlc3Mgc3ludGF4IHRvIGJ5cGFzcyB0eXBlY2hlY2suXG4gICAgd2luLkVsZW1lbnQucHJvdG90eXBlWydhbmltYXRlJ10gPSBudWxsO1xuICB9XG5cbiAgaWYgKHdpbi5FbGVtZW50LnByb3RvdHlwZVsnYW5pbWF0ZSddKSB7XG4gICAgLy8gTmF0aXZlIFN1cHBvcnQgZXhpc3RzLCB0aGVyZSBpcyBubyByZWFzb24gdG8gbG9hZCB0aGUgcG9seWZpbGwuXG4gICAgcmVzb2x2ZSgpO1xuICAgIHJldHVybiBwcm9taXNlO1xuICB9XG5cbiAgcmVzb2x2ZShcbiAgICBTZXJ2aWNlcy5leHRlbnNpb25zRm9yKHdpbikuaW5zdGFsbEV4dGVuc2lvbkZvckRvYyhcbiAgICAgIGFtcGRvYyxcbiAgICAgICdhbXAtYW5pbWF0aW9uLXBvbHlmaWxsJ1xuICAgIClcbiAgKTtcblxuICByZXR1cm4gcHJvbWlzZTtcbn1cbiJdfQ==
+// /Users/mszylkowski/src/amphtml/extensions/amp-animation/0.1/install-polyfill.js

@@ -1,0 +1,1 @@
+export const CSS = "amp-vimeo{display:block;overflow:hidden;position:relative}amp-vimeo:not(.i-amphtml-built)>:not([placeholder]):not(.i-amphtml-svc){display:none;content-visibility:hidden}\n/*# sourceURL=/extensions/amp-vimeo/1.0/amp-vimeo.css*/";

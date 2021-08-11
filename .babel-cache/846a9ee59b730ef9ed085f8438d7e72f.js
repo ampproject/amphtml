@@ -1,0 +1,260 @@
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;} /**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { assertHttpsUrl } from "../../../src/url";
+import { CSS as attributionCSS } from "../../../build/amp-story-auto-ads-attribution-0.1.css";
+import { createElementWithAttributes, iterateCursor } from "../../../src/core/dom";
+import { createShadowRootWithStyle } from "../../amp-story/1.0/utils";
+import { CSS as ctaButtonCSS } from "../../../build/amp-story-auto-ads-cta-button-0.1.css";
+import { dev, user } from "../../../src/log";
+import { dict, map } from "../../../src/core/types/object";
+import { openWindowDialog } from "../../../src/open-window-dialog";
+
+/**
+ * @typedef {{
+ *  cta-type: ?string,
+ *  cta-url: ?string,
+ *  cta-landing-page-type: ?string,
+ *  attribution-icon: ?string,
+ *  attribution-url: ?string,
+ * }}
+ */
+export var StoryAdUIMetadata;
+
+/** @const {string} */
+var TAG = 'amp-story-auto-ads:ui';
+
+/** @const {string} */
+var CTA_META_PREFIX = 'amp-cta-';
+
+/** @const {string} */
+var A4A_VARS_META_PREFIX = 'amp4ads-vars-';
+
+export var START_CTA_ANIMATION_ATTR = 'cta-active';
+
+/** @enum {string} */
+export var A4AVarNames = {
+  ATTRIBUTION_ICON: 'attribution-icon',
+  ATTRIBUTION_URL: 'attribution-url',
+  CTA_TYPE: 'cta-type',
+  CTA_URL: 'cta-url' };
+
+
+/** @enum {string} */
+var DataAttrs = {
+  CTA_TYPE: 'data-vars-ctatype',
+  CTA_URL: 'data-vars-ctaurl' };
+
+
+/**
+ * Finds all meta tags starting with `amp4ads-vars-` or `amp-cta`.
+ * @param {Document} doc
+ * @return {!IArrayLike}
+ */
+export function getStoryAdMetaTags(doc) {
+  var selector = 'meta[name^=amp4ads-vars-],meta[name^=amp-cta-]';
+  return doc.querySelectorAll(selector);
+}
+
+/**
+ * Creates object containing information extracted from the creative
+ * that is needed to render story ad ui e.g. cta, attribution, etc.
+ * @param {!Document} doc
+ * @return {StoryAdUIMetadata}
+ */
+export function getStoryAdMetadataFromDoc(doc) {
+  var storyMetaTags = getStoryAdMetaTags(doc);
+  var vars = map();
+  iterateCursor(storyMetaTags, function (tag) {
+    var content = tag.content,name = tag.name;
+    if (name.startsWith(CTA_META_PREFIX)) {
+      var key = name.split('amp-')[1];
+      vars[key] = content;
+    } else if (name.startsWith(A4A_VARS_META_PREFIX)) {
+      var _key = name.split(A4A_VARS_META_PREFIX)[1];
+      vars[_key] = content;
+    }
+  });
+  return vars;
+}
+
+/**
+ * Gets story ad UI metadata from the <amp-ad> element.
+ * @param {!Element} adElement
+ * @return {!Object}
+ */
+export function getStoryAdMetadataFromElement(adElement) {var _ref;
+  var ctaUrl = adElement.getAttribute(DataAttrs.CTA_URL);
+  var ctaType = adElement.getAttribute(DataAttrs.CTA_TYPE);
+  return _ref = {}, _defineProperty(_ref,
+  A4AVarNames.CTA_TYPE, ctaType), _defineProperty(_ref,
+  A4AVarNames.CTA_URL, ctaUrl), _ref;
+
+}
+
+/**
+ * Returns a boolean indicating if there is sufficent metadata to render CTA.
+ * @param {!StoryAdUIMetadata} metadata
+ * @param {boolean=} opt_inabox
+ * @return {boolean}
+ */
+export function validateCtaMetadata(metadata, opt_inabox) {
+  // If making a CTA layer we need a button name & outlink url.
+  if (!metadata[A4AVarNames.CTA_TYPE] || !metadata[A4AVarNames.CTA_URL]) {
+    // Don't polute inabox logs, as we don't know when this is intended to
+    // be a story ad.
+    !opt_inabox &&
+    user().error(TAG, 'Both CTA Type & CTA Url are required in ad response.');
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Creates ad attribution UI if sufficent metadata. Returns element if
+ * successfully created.
+ * @param {!Window} win
+ * @param {!StoryAdUIMetadata} metadata
+ * @param {!Element} container
+ * @return {?Element}
+ */
+export function maybeCreateAttribution(win, metadata, container) {
+  var doc = win.document;
+
+  try {
+    var href = metadata[A4AVarNames.ATTRIBUTION_URL];
+    var src = metadata[A4AVarNames.ATTRIBUTION_ICON];
+
+    // Ad attribution is optional, but need both to render.
+    if (!href || !src) {
+      return null;
+    }
+
+    assertHttpsUrl(
+    href, /** @type {!Element} */(
+    container),
+    'amp-story-auto-ads attribution url');
+
+
+    assertHttpsUrl(
+    src, /** @type {!Element} */(
+    container),
+    'amp-story-auto-ads attribution icon');
+
+
+    var root = createElementWithAttributes(
+    doc,
+    'div',
+    dict({
+      'role': 'button',
+      'class': 'i-amphtml-attribution-host' }));
+
+
+
+    var adChoicesIcon = createElementWithAttributes(
+    doc,
+    'img',
+    dict({
+      'class': 'i-amphtml-story-ad-attribution',
+      'src': src }));
+
+
+
+    adChoicesIcon.addEventListener('click', function (unusedEvent) {return (
+        handleAttributionClick(win, href));});
+
+
+    createShadowRootWithStyle(root, adChoicesIcon, attributionCSS);
+    container.appendChild(root);
+
+    return adChoicesIcon;
+  } catch (e) {
+    // If something goes wrong creating the attribution, we still want to
+    // show the ad.
+    return null;
+  }
+}
+
+/**
+ * Opens attribution click in new window.
+ * @param {!Window} win
+ * @param {string} href
+ */
+export function handleAttributionClick(win, href) {
+  openWindowDialog(win, href, '_blank');
+}
+
+/**
+ * @param {!Document} doc
+ * @param {!./story-ad-button-text-fitter.ButtonTextFitter} buttonFitter
+ * @param {!Element} container
+ * @param {!StoryAdUIMetadata} uiMetadata
+ * @return {!Promise<?Element>} If anchor was successfully created.
+ */
+export function createCta(doc, buttonFitter, container, uiMetadata) {
+  var ctaUrl = uiMetadata[A4AVarNames.CTA_URL];
+  var ctaText = uiMetadata[A4AVarNames.CTA_TYPE];
+
+  var a = createElementWithAttributes(
+  doc,
+  'a',
+  dict({
+    'class': 'i-amphtml-story-ad-link',
+    'target': '_blank',
+    'href': ctaUrl }));
+
+
+
+  var fitPromise = buttonFitter.fit( /** @type {!Element} */(
+  container),
+  a, // Container
+  ctaText // Content
+  );
+
+  return fitPromise.then(function (success) {
+    if (!success) {
+      user().warn(TAG, 'CTA button text is too long. Ad was discarded.');
+      return null;
+    }
+
+    a.href = ctaUrl;
+    a.textContent = ctaText;
+
+    if (a.protocol !== 'https:' && a.protocol !== 'http:') {
+      user().warn(TAG, 'CTA url is not valid. Ad was discarded');
+      return null;
+    }
+
+    var ctaLayer = doc.createElement('amp-story-cta-layer');
+    ctaLayer.className = 'i-amphtml-cta-container';
+
+    var linkRoot = createElementWithAttributes(
+    doc,
+    'div',
+    dict({
+      'class': 'i-amphtml-story-ad-link-root',
+      'role': 'button' }));
+
+
+
+    createShadowRootWithStyle(linkRoot, a, ctaButtonCSS);
+
+    ctaLayer.appendChild(linkRoot);
+    container.appendChild(ctaLayer);
+    return a;
+  });
+}
+// /Users/mszylkowski/src/amphtml/extensions/amp-story-auto-ads/0.1/story-ad-ui.js

@@ -1,0 +1,178 @@
+/**
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { endsWith } from "../../../../src/core/types/string";
+import { toWin } from "../../../../src/core/window";
+
+/**
+ * Finds and extracts keyframes definition for Web Animations from CSS styles.
+ * @param {!Document|!ShadowRoot} rootNode
+ * @param {string} name
+ * @return {?../web-animation-types.WebKeyframesDef}
+ */
+export function extractKeyframes(rootNode, name) {
+  var styleSheets = rootNode.styleSheets;
+
+  if (!styleSheets) {
+    return null;
+  }
+
+  var win = toWin((rootNode.ownerDocument || rootNode).defaultView);
+
+  // Go from the last to first since the last rule wins in CSS.
+  for (var i = styleSheets.length - 1; i >= 0; i--) {
+    var keyframes = scanStyle(win,
+    /** @type {!CSSStyleSheet} */
+    styleSheets[i], name);
+
+    if (keyframes) {
+      return keyframes;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * @param {!Window} win
+ * @param {!CSSStyleSheet} styleSheet
+ * @param {string} name
+ * @return {?../web-animation-types.WebKeyframesDef}
+ */
+function scanStyle(win, styleSheet, name) {
+  // No rules, e.g. a font.
+  if (!styleSheet.cssRules) {
+    return null;
+  }
+
+  var styleNode = styleSheet.ownerNode;
+
+  if (!styleNode) {
+    return null;
+  }
+
+  // Exlcude AMP's own styles.
+  if (!styleNode.hasAttribute('amp-custom') && !styleNode.hasAttribute('amp-keyframes')) {
+    return null;
+  }
+
+  return scanRules(win, styleSheet.cssRules, name);
+}
+
+/**
+ * @param {!Window} win
+ * @param {!CSSRuleList} rules
+ * @param {string} name
+ * @return {?../web-animation-types.WebKeyframesDef}
+ */
+function scanRules(win, rules, name) {
+  // Go backwards since in CSS the last one wins.
+  for (var i = rules.length - 1; i >= 0; i--) {
+    var rule = rules[i];
+
+    if (rule.type ==
+    /* CSSKeyframesRule */
+    7) {
+      var keyframesRule =
+      /** @type {!CSSKeyframesRule} */
+      rule;
+
+      if (rule.name == name && isEnabled(win, rule)) {
+        return buildKeyframes(keyframesRule);
+      }
+    } else if (rule.type ==
+    /* CSSMediaRule */
+    4 || rule.type ==
+    /* CSSSupportsRule */
+    12) {
+      // Go recursively inside. The media/supports match will be checked only
+      // when the corresponding @keyframes have been found.
+      var found = scanRules(win, rule.cssRules, name);
+
+      if (found) {
+        return found;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * @param {!Window} win
+ * @param {!CSSRule} rule
+ * @return {boolean}
+ */
+function isEnabled(win, rule) {
+  // Try rule itself.
+  if (rule.media && rule.media.mediaText) {
+    var enabled = win.matchMedia(rule.media.mediaText).matches;
+
+    if (!enabled) {
+      return false;
+    }
+  }
+
+  if (rule.type ==
+  /* CSSSupportsRule */
+  12) {
+    if (!win.CSS || !win.CSS.supports || !win.CSS.supports(
+    /** @type {!CSSSupportsRule} */
+    rule.conditionText)) {
+      return false;
+    }
+  }
+
+  // Check the parents.
+  if (rule.parentRule) {
+    return isEnabled(win, rule.parentRule);
+  }
+
+  return true;
+}
+
+/**
+ * @param {!CSSKeyframesRule} keyframesRule
+ * @return {!../web-animation-types.WebKeyframesDef}
+ */
+function buildKeyframes(keyframesRule) {
+  var array = [];
+
+  for (var i = 0; i < keyframesRule.cssRules.length; i++) {
+    var keyframeRule =
+    /** @type {!CSSKeyframeRule} */
+    keyframesRule.cssRules[i];
+    var keyframe = {};
+    keyframe['offset'] = keyframeRule.keyText == 'from' ? 0 : keyframeRule.keyText == 'to' ? 1 : parseFloat(keyframeRule.keyText) / 100;
+    var style = keyframeRule.style;
+
+    for (var j = 0; j < style.length; j++) {
+      var styleName = style[j];
+      var propName = styleName;
+
+      if (endsWith(styleName, 'animation-timing-function')) {
+        propName = 'easing';
+      }
+
+      keyframe[propName] = style[styleName];
+    }
+
+    array.push(keyframe);
+  }
+
+  return array;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImtleWZyYW1lcy1leHRyYWN0b3IuanMiXSwibmFtZXMiOlsiZW5kc1dpdGgiLCJ0b1dpbiIsImV4dHJhY3RLZXlmcmFtZXMiLCJyb290Tm9kZSIsIm5hbWUiLCJzdHlsZVNoZWV0cyIsIndpbiIsIm93bmVyRG9jdW1lbnQiLCJkZWZhdWx0VmlldyIsImkiLCJsZW5ndGgiLCJrZXlmcmFtZXMiLCJzY2FuU3R5bGUiLCJzdHlsZVNoZWV0IiwiY3NzUnVsZXMiLCJzdHlsZU5vZGUiLCJvd25lck5vZGUiLCJoYXNBdHRyaWJ1dGUiLCJzY2FuUnVsZXMiLCJydWxlcyIsInJ1bGUiLCJ0eXBlIiwia2V5ZnJhbWVzUnVsZSIsImlzRW5hYmxlZCIsImJ1aWxkS2V5ZnJhbWVzIiwiZm91bmQiLCJtZWRpYSIsIm1lZGlhVGV4dCIsImVuYWJsZWQiLCJtYXRjaE1lZGlhIiwibWF0Y2hlcyIsIkNTUyIsInN1cHBvcnRzIiwiY29uZGl0aW9uVGV4dCIsInBhcmVudFJ1bGUiLCJhcnJheSIsImtleWZyYW1lUnVsZSIsImtleWZyYW1lIiwia2V5VGV4dCIsInBhcnNlRmxvYXQiLCJzdHlsZSIsImoiLCJzdHlsZU5hbWUiLCJwcm9wTmFtZSIsInB1c2giXSwibWFwcGluZ3MiOiJBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUVBLFNBQVFBLFFBQVI7QUFDQSxTQUFRQyxLQUFSOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0MsZ0JBQVQsQ0FBMEJDLFFBQTFCLEVBQW9DQyxJQUFwQyxFQUEwQztBQUMvQyxNQUFPQyxXQUFQLEdBQXNCRixRQUF0QixDQUFPRSxXQUFQOztBQUNBLE1BQUksQ0FBQ0EsV0FBTCxFQUFrQjtBQUNoQixXQUFPLElBQVA7QUFDRDs7QUFDRCxNQUFNQyxHQUFHLEdBQUdMLEtBQUssQ0FBQyxDQUFDRSxRQUFRLENBQUNJLGFBQVQs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QyxFQUFuQyxFQUF1QztBQUNyQyxVQUFNQyxTQUFTLEdBQUdGLEtBQUssQ0FBQ0MsQ0FBRCxDQUF2QjtBQUNBLFVBQUlFLFFBQVEsR0FBR0QsU0FBZjs7QUFDQSxVQUFJMUMsUUFBUSxDQUFDMEMsU0FBRCxFQUFZLDJCQUFaLENBQVosRUFBc0Q7QUFDcERDLFFBQUFBLFFBQVEsR0FBRyxRQUFYO0FBQ0Q7O0FBQ0ROLE1BQUFBLFFBQVEsQ0FBQ00sUUFBRCxDQUFSLEdBQXFCSCxLQUFLLENBQUNFLFNBQUQsQ0FBMUI7QUFDRDs7QUFDRFAsSUFBQUEsS0FBSyxDQUFDUyxJQUFOLENBQVdQLFFBQVg7QUFDRDs7QUFDRCxTQUFPRixLQUFQO0FBQ0QiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIENvcHlyaWdodCAyMDE3IFRoZSBBTVAgSFRNTCBBdXRob3JzLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIExpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmVcbiAqIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuIFwiQVMtSVNcIiBCQVNJUyxcbiAqIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLlxuICogU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZFxuICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHtlbmRzV2l0aH0gZnJvbSAnI2NvcmUvdHlwZXMvc3RyaW5nJztcbmltcG9ydCB7dG9XaW59IGZyb20gJyNjb3JlL3dpbmRvdyc7XG5cbi8qKlxuICogRmluZHMgYW5kIGV4dHJhY3RzIGtleWZyYW1lcyBkZWZpbml0aW9uIGZvciBXZWIgQW5pbWF0aW9ucyBmcm9tIENTUyBzdHlsZXMuXG4gKiBAcGFyYW0geyFEb2N1bWVudHwhU2hhZG93Um9vdH0gcm9vdE5vZGVcbiAqIEBwYXJhbSB7c3RyaW5nfSBuYW1lXG4gKiBAcmV0dXJuIHs/Li4vd2ViLWFuaW1hdGlvbi10eXBlcy5XZWJLZXlmcmFtZXNEZWZ9XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBleHRyYWN0S2V5ZnJhbWVzKHJvb3ROb2RlLCBuYW1lKSB7XG4gIGNvbnN0IHtzdHlsZVNoZWV0c30gPSByb290Tm9kZTtcbiAgaWYgKCFzdHlsZVNoZWV0cykge1xuICAgIHJldHVybiBudWxsO1xuICB9XG4gIGNvbnN0IHdpbiA9IHRvV2luKChyb290Tm9kZS5vd25lckRvY3VtZW50IHx8IHJvb3ROb2RlKS5kZWZhdWx0Vmlldyk7XG4gIC8vIEdvIGZyb20gdGhlIGxhc3QgdG8gZmlyc3Qgc2luY2UgdGhlIGxhc3QgcnVsZSB3aW5zIGluIENTUy5cbiAgZm9yIChsZXQgaSA9IHN0eWxlU2hlZXRzLmxlbmd0aCAtIDE7IGkgPj0gMDsgaS0tKSB7XG4gICAgY29uc3Qga2V5ZnJhbWVzID0gc2NhblN0eWxlKFxuICAgICAgd2luLFxuICAgICAgLyoqIEB0eXBlIHshQ1NTU3R5bGVTaGVldH0gKi8gKHN0eWxlU2hlZXRzW2ldKSxcbiAgICAgIG5hbWVcbiAgICApO1xuICAgIGlmIChrZXlmcmFtZXMpIHtcbiAgICAgIHJldHVybiBrZXlmcmFtZXM7XG4gICAgfVxuICB9XG4gIHJldHVybiBudWxsO1xufVxuXG4vKipcbiAqIEBwYXJhbSB7IVdpbmRvd30gd2luXG4gKiBAcGFyYW0geyFDU1NTdHlsZVNoZWV0fSBzdHlsZVNoZWV0XG4gKiBAcGFyYW0ge3N0cmluZ30gbmFtZVxuICogQHJldHVybiB7Py4uL3dlYi1hbmltYXRpb24tdHlwZXMuV2ViS2V5ZnJhbWVzRGVmfVxuICovXG5mdW5jdGlvbiBzY2FuU3R5bGUod2luLCBzdHlsZVNoZWV0LCBuYW1lKSB7XG4gIC8vIE5vIHJ1bGVzLCBlLmcuIGEgZm9udC5cbiAgaWYgKCFzdHlsZVNoZWV0LmNzc1J1bGVzKSB7XG4gICAgcmV0dXJuIG51bGw7XG4gIH1cblxuICBjb25zdCBzdHlsZU5vZGUgPSBzdHlsZVNoZWV0Lm93bmVyTm9kZTtcbiAgaWYgKCFzdHlsZU5vZGUpIHtcbiAgICByZXR1cm4gbnVsbDtcbiAgfVxuICAvLyBFeGxjdWRlIEFNUCdzIG93biBzdHlsZXMuXG4gIGlmIChcbiAgICAhc3R5bGVOb2RlLmhhc0F0dHJpYnV0ZSgnYW1wLWN1c3RvbScpICYmXG4gICAgIXN0eWxlTm9kZS5oYXNBdHRyaWJ1dGUoJ2FtcC1rZXlmcmFtZXMnKVxuICApIHtcbiAgICByZXR1cm4gbnVsbDtcbiAgfVxuXG4gIHJldHVybiBzY2FuUnVsZXMod2luLCBzdHlsZVNoZWV0LmNzc1J1bGVzLCBuYW1lKTtcbn1cblxuLyoqXG4gKiBAcGFyYW0geyFXaW5kb3d9IHdpblxuICogQHBhcmFtIHshQ1NTUnVsZUxpc3R9IHJ1bGVzXG4gKiBAcGFyYW0ge3N0cmluZ30gbmFtZVxuICogQHJldHVybiB7Py4uL3dlYi1hbmltYXRpb24tdHlwZXMuV2ViS2V5ZnJhbWVzRGVmfVxuICovXG5mdW5jdGlvbiBzY2FuUnVsZXMod2luLCBydWxlcywgbmFtZSkge1xuICAvLyBHbyBiYWNrd2FyZHMgc2luY2UgaW4gQ1NTIHRoZSBsYXN0IG9uZSB3aW5zLlxuICBmb3IgKGxldCBpID0gcnVsZXMubGVuZ3RoIC0gMTsgaSA+PSAwOyBpLS0pIHtcbiAgICBjb25zdCBydWxlID0gcnVsZXNbaV07XG4gICAgaWYgKHJ1bGUudHlwZSA9PSAvKiBDU1NLZXlmcmFtZXNSdWxlICovIDcpIHtcbiAgICAgIGNvbnN0IGtleWZyYW1lc1J1bGUgPSAvKiogQHR5cGUgeyFDU1NLZXlmcmFtZXNSdWxlfSAqLyAocnVsZSk7XG4gICAgICBpZiAocnVsZS5uYW1lID09IG5hbWUgJiYgaXNFbmFibGVkKHdpbiwgcnVsZSkpIHtcbiAgICAgICAgcmV0dXJuIGJ1aWxkS2V5ZnJhbWVzKGtleWZyYW1lc1J1bGUpO1xuICAgICAgfVxuICAgIH0gZWxzZSBpZiAoXG4gICAgICBydWxlLnR5cGUgPT0gLyogQ1NTTWVkaWFSdWxlICovIDQgfHxcbiAgICAgIHJ1bGUudHlwZSA9PSAvKiBDU1NTdXBwb3J0c1J1bGUgKi8gMTJcbiAgICApIHtcbiAgICAgIC8vIEdvIHJlY3Vyc2l2ZWx5IGluc2lkZS4gVGhlIG1lZGlhL3N1cHBvcnRzIG1hdGNoIHdpbGwgYmUgY2hlY2tlZCBvbmx5XG4gICAgICAvLyB3aGVuIHRoZSBjb3JyZXNwb25kaW5nIEBrZXlmcmFtZXMgaGF2ZSBiZWVuIGZvdW5kLlxuICAgICAgY29uc3QgZm91bmQgPSBzY2FuUnVsZXMod2luLCBydWxlLmNzc1J1bGVzLCBuYW1lKTtcbiAgICAgIGlmIChmb3VuZCkge1xuICAgICAgICByZXR1cm4gZm91bmQ7XG4gICAgICB9XG4gICAgfVxuICB9XG4gIHJldHVybiBudWxsO1xufVxuXG4vKipcbiAqIEBwYXJhbSB7IVdpbmRvd30gd2luXG4gKiBAcGFyYW0geyFDU1NSdWxlfSBydWxlXG4gKiBAcmV0dXJuIHtib29sZWFufVxuICovXG5mdW5jdGlvbiBpc0VuYWJsZWQod2luLCBydWxlKSB7XG4gIC8vIFRyeSBydWxlIGl0c2VsZi5cbiAgaWYgKHJ1bGUubWVkaWEgJiYgcnVsZS5tZWRpYS5tZWRpYVRleHQpIHtcbiAgICBjb25zdCBlbmFibGVkID0gd2luLm1hdGNoTWVkaWEocnVsZS5tZWRpYS5tZWRpYVRleHQpLm1hdGNoZXM7XG4gICAgaWYgKCFlbmFibGVkKSB7XG4gICAgICByZXR1cm4gZmFsc2U7XG4gICAgfVxuICB9XG4gIGlmIChydWxlLnR5cGUgPT0gLyogQ1NTU3VwcG9ydHNSdWxlICovIDEyKSB7XG4gICAgaWYgKFxuICAgICAgIXdpbi5DU1MgfHxcbiAgICAgICF3aW4uQ1NTLnN1cHBvcnRzIHx8XG4gICAgICAhd2luLkNTUy5zdXBwb3J0cygvKiogQHR5cGUgeyFDU1NTdXBwb3J0c1J1bGV9ICovIChydWxlKS5jb25kaXRpb25UZXh0KVxuICAgICkge1xuICAgICAgcmV0dXJuIGZhbHNlO1xuICAgIH1cbiAgfVxuXG4gIC8vIENoZWNrIHRoZSBwYXJlbnRzLlxuICBpZiAocnVsZS5wYXJlbnRSdWxlKSB7XG4gICAgcmV0dXJuIGlzRW5hYmxlZCh3aW4sIHJ1bGUucGFyZW50UnVsZSk7XG4gIH1cbiAgcmV0dXJuIHRydWU7XG59XG5cbi8qKlxuICogQHBhcmFtIHshQ1NTS2V5ZnJhbWVzUnVsZX0ga2V5ZnJhbWVzUnVsZVxuICogQHJldHVybiB7IS4uL3dlYi1hbmltYXRpb24tdHlwZXMuV2ViS2V5ZnJhbWVzRGVmfVxuICovXG5mdW5jdGlvbiBidWlsZEtleWZyYW1lcyhrZXlmcmFtZXNSdWxlKSB7XG4gIGNvbnN0IGFycmF5ID0gW107XG4gIGZvciAobGV0IGkgPSAwOyBpIDwga2V5ZnJhbWVzUnVsZS5jc3NSdWxlcy5sZW5ndGg7IGkrKykge1xuICAgIGNvbnN0IGtleWZyYW1lUnVsZSA9IC8qKiBAdHlwZSB7IUNTU0tleWZyYW1lUnVsZX0gKi8gKFxuICAgICAga2V5ZnJhbWVzUnVsZS5jc3NSdWxlc1tpXVxuICAgICk7XG4gICAgY29uc3Qga2V5ZnJhbWUgPSB7fTtcbiAgICBrZXlmcmFtZVsnb2Zmc2V0J10gPVxuICAgICAga2V5ZnJhbWVSdWxlLmtleVRleHQgPT0gJ2Zyb20nXG4gICAgICAgID8gMFxuICAgICAgICA6IGtleWZyYW1lUnVsZS5rZXlUZXh0ID09ICd0bydcbiAgICAgICAgPyAxXG4gICAgICAgIDogcGFyc2VGbG9hdChrZXlmcmFtZVJ1bGUua2V5VGV4dCkgLyAxMDA7XG4gICAgY29uc3Qge3N0eWxlfSA9IGtleWZyYW1lUnVsZTtcbiAgICBmb3IgKGxldCBqID0gMDsgaiA8IHN0eWxlLmxlbmd0aDsgaisrKSB7XG4gICAgICBjb25zdCBzdHlsZU5hbWUgPSBzdHlsZVtqXTtcbiAgICAgIGxldCBwcm9wTmFtZSA9IHN0eWxlTmFtZTtcbiAgICAgIGlmIChlbmRzV2l0aChzdHlsZU5hbWUsICdhbmltYXRpb24tdGltaW5nLWZ1bmN0aW9uJykpIHtcbiAgICAgICAgcHJvcE5hbWUgPSAnZWFzaW5nJztcbiAgICAgIH1cbiAgICAgIGtleWZyYW1lW3Byb3BOYW1lXSA9IHN0eWxlW3N0eWxlTmFtZV07XG4gICAgfVxuICAgIGFycmF5LnB1c2goa2V5ZnJhbWUpO1xuICB9XG4gIHJldHVybiBhcnJheTtcbn1cbiJdfQ==
+// /Users/mszylkowski/src/amphtml/extensions/amp-animation/0.1/parsers/keyframes-extractor.js

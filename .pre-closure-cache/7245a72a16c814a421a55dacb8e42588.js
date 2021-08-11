@@ -1,0 +1,1 @@
+export const CSS = "amp-timeago{display:block;overflow:hidden;position:relative}amp-timeago:not(.i-amphtml-built){color:transparent!important}amp-timeago:not(.i-amphtml-built)>:not([placeholder]):not(.i-amphtml-svc){display:none;content-visibility:hidden}\n/*# sourceURL=/extensions/amp-timeago/1.0/amp-timeago.css*/";

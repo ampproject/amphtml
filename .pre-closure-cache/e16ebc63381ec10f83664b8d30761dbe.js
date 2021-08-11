@@ -1,0 +1,1 @@
+export const CSS = "amp-stream-gallery{display:block;overflow:hidden;position:relative}amp-stream-gallery:not(.i-amphtml-built)>:not([placeholder]):not(.i-amphtml-svc){display:none;content-visibility:hidden}\n/*# sourceURL=/extensions/amp-stream-gallery/1.0/amp-stream-gallery.css*/";

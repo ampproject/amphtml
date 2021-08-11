@@ -1,0 +1,131 @@
+/**
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import * as coreMode from "./core/mode";
+import { parseQueryString } from "./core/types/string/url";
+
+/**
+ * @typedef {{
+ *   localDev: boolean,
+ *   development: boolean,
+ *   test: boolean,
+ *   log: (string|undefined),
+ *   version: string,
+ *   rtvVersion: string,
+ *   runtime: (null|string|undefined),
+ *   a4aId: (null|string|undefined),
+ *   esm: (boolean|undefined),
+ * }}
+ */
+export var ModeDef;
+
+/**
+ * `rtvVersion` is the prefixed version we serve off of the cdn.
+ * The prefix denotes canary(00) or prod(01) or an experiment version ( > 01).
+ * @type {string}
+ */
+var rtvVersion = '';
+
+/**
+ * Provides info about the current app.
+ * @param {?Window=} opt_win
+ * @return {!ModeDef}
+ */
+export function getMode(opt_win) {
+  var win = opt_win || self;
+
+  if (win.__AMP_MODE) {
+    return win.__AMP_MODE;
+  }
+
+  return win.__AMP_MODE = getMode_(win);
+}
+
+/**
+ * Provides info about the current app.
+ * @param {!Window} win
+ * @return {!ModeDef}
+ */
+function getMode_(win) {
+  var hashQuery = parseQueryString( // location.originalHash is set by the viewer when it removes the fragment
+  // from the URL.
+  win.location['originalHash'] || win.location.hash);
+  // The `minified`, `test` and `localDev` properties are replaced
+  // as boolean literals when we run `amp dist` without the `--fortesting`
+  // flags. This improved DCE on the production file we deploy as the code
+  // paths for localhost/testing/development are eliminated.
+  return {
+    localDev: coreMode.isLocalDev(win),
+    development: isModeDevelopment(win),
+    esm: false,
+    // amp-geo override
+    geoOverride: hashQuery['amp-geo'],
+    test: coreMode.isTest(win),
+    log: parseInt(hashQuery['log'], 10),
+    version: coreMode.version(),
+    rtvVersion: getRtvVersion(win)
+  };
+}
+
+/**
+ * Retrieve the `rtvVersion` which will have a numeric prefix
+ * denoting canary/prod/experiment (unless `isLocalDev` is true).
+ *
+ * @param {!Window} win
+ * @return {string}
+ */
+function getRtvVersion(win) {
+  // Ignore memoized copy during testing to allow override.
+  if (!rtvVersion || coreMode.isTest(win)) {
+    var _win$AMP_CONFIG;
+
+    // Currently `internalRuntimeVersion` and thus `mode.version` contain only
+    // major version. The full version however must also carry the minor version.
+    // We will default to production default `01` minor version for now.
+    // TODO(erwinmombay): decide whether internalRuntimeVersion should contain
+    // minor version.
+    rtvVersion = ((_win$AMP_CONFIG = win.AMP_CONFIG) == null ? void 0 : _win$AMP_CONFIG.v) || "01" + coreMode.version();
+  }
+
+  return rtvVersion;
+}
+
+/**
+ * Triggers validation or enable pub level logging. Validation can be
+ * bypassed via #validate=0.
+ * Note that AMP_DEV_MODE flag is used for testing purposes.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function isModeDevelopment(win) {
+  var hashQuery = parseQueryString(win.location['originalHash'] || win.location.hash);
+  return !!(['1', 'actions', 'amp', 'amp4ads', 'amp4email'].includes(hashQuery['development']) || win.AMP_DEV_MODE);
+}
+
+/**
+ * @param {!Window} win
+ * @return {string}
+ * @visibleForTesting
+ */
+export function getRtvVersionForTesting(win) {
+  return getRtvVersion(win);
+}
+
+/** @visibleForTesting */
+export function resetRtvVersionForTesting() {
+  rtvVersion = '';
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm1vZGUuanMiXSwibmFtZXMiOlsiY29yZU1vZGUiLCJwYXJzZVF1ZXJ5U3RyaW5nIiwiTW9kZURlZiIsInJ0dlZlcnNpb24iLCJnZXRNb2RlIiwib3B0X3dpbiIsIndpbiIsInNlbGYiLCJfX0FNUF9NT0RFIiwiZ2V0TW9kZV8iLCJoYXNoUXVlcnkiLCJsb2NhdGlvbiIsImhhc2giLCJsb2NhbERldiIsImlzTG9jYWxEZXYiLCJkZXZlbG9wbWVudCIsImlzTW9kZURldmVsb3BtZW50IiwiZXNtIiwiZ2VvT3ZlcnJpZGUiLCJ0ZXN0IiwiaXNUZXN0IiwibG9nIiwicGFyc2VJbnQiLCJ2ZXJzaW9uIiwiZ2V0UnR2VmVyc2lvbiIsIkFNUF9DT05GSUciLCJ2IiwiaW5jbHVkZXMiLCJBTVBfREVWX01PREUiLCJnZXRSdHZWZXJzaW9uRm9yVGVzdGluZyIsInJlc2V0UnR2VmVyc2lvbkZvclRlc3RpbmciXSwibWFwcGluZ3MiOiJBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUVBLE9BQU8sS0FBS0EsUUFBWjtBQUNBLFNBQVFDLGdCQUFSOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxJQUFJQyxPQUFKOztBQUVQO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxJQUFJQyxVQUFVLEdBQUcsRUFBakI7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0MsT0FBVCxDQUFpQkMsT0FBakIsRUFBMEI7QUFDL0IsTUFBTUMsR0FBRyxHQUFHRCxPQUFPLElBQUlFLElBQXZCOztBQUNBLE1BQUlELEdBQUcsQ0FBQ0UsVUFBUixFQUFvQjtBQUNsQixXQUFPRixHQUFHLENBQUNFLFVBQVg7QUFDRDs7QUFDRCxTQUFRRixHQUFHLENBQUNFLFVBQUosR0FBaUJDLFFBQVEsQ0FBQ0gsR0FBRCxDQUFqQztBQUNEOztBQUVEO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxTQUFTRyxRQUFULENBQWtCSCxHQUFsQixFQUF1QjtBQUNyQixNQUFNSSxTQUFTLEdBQUdULGdCQUFnQixFQUNoQztBQUNBO0FBQ0FLLEVBQUFBLEdBQUcsQ0FBQ0ssUUFBSixDQUFhLGNBQWIsS0FBZ0NMLEdBQUcsQ0FBQ0ssUUFBSixDQUFhQyxJQUhiLENBQWxDO0FBTUE7QUFDQTtBQUNBO0FBQ0E7QUFDQSxTQUFPO0FBQ0xDLElBQUFBLFFBQVEsRUFBRWIsUUFBUSxDQUFDYyxVQUFULENBQW9CUixHQUFwQixDQURMO0FBRUxTLElBQUFBLFdBQVcsRUFBRUMsaUJBQWlCLENBQUNWLEdBQUQsQ0FGekI7QUFHTFcsSUFBQUEsR0FBRyxPQUhFO0FBSUw7QUFDQUMsSUFBQUEsV0FBVyxFQUFFUixTQUFTLENBQUMsU0FBRCxDQUxqQjtBQU1MUyxJQUFBQSxJQUFJLEVBQUVuQixRQUFRLENBQUNvQixNQUFULENBQWdCZCxHQUFoQixDQU5EO0FBT0xlLElBQUFBLEdBQUcsRUFBRUMsUUFBUSxDQUFDWixTQUFTLENBQUMsS0FBRCxDQUFWLEVBQW1CLEVBQW5CLENBUFI7QUFRTGEsSUFBQUEsT0FBTyxFQUFFdkIsUUFBUSxDQUFDdUIsT0FBVCxFQVJKO0FBU0xwQixJQUFBQSxVQUFVLEVBQUVxQixhQUFhLENBQUNsQixHQUFEO0FBVHBCLEdBQVA7QUFXRDs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLFNBQVNrQixhQUFULENBQXVCbEIsR0FBdkIsRUFBNEI7QUFDMUI7QUFDQSxNQUFJLENBQUNILFVBQUQsSUFBZUgsUUFBUSxDQUFDb0IsTUFBVCxDQUFnQmQsR0FBaEIsQ0FBbkIsRUFBeUM7QUFBQTs7QUFDdkM7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBSCxJQUFBQSxVQUFVLEdBQUcsb0JBQUFHLEdBQUcsQ0FBQ21CLFVBQUoscUNBQWdCQyxDQUFoQixZQUEwQjFCLFFBQVEsQ0FBQ3VCLE9BQVQsRUFBdkM7QUFDRDs7QUFDRCxTQUFPcEIsVUFBUDtBQUNEOztBQUVEO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTYSxpQkFBVCxDQUEyQlYsR0FBM0IsRUFBZ0M7QUFDckMsTUFBTUksU0FBUyxHQUFHVCxnQkFBZ0IsQ0FDaENLLEdBQUcsQ0FBQ0ssUUFBSixDQUFhLGNBQWIsS0FBZ0NMLEdBQUcsQ0FBQ0ssUUFBSixDQUFhQyxJQURiLENBQWxDO0FBR0EsU0FBTyxDQUFDLEVBQ04sQ0FBQyxHQUFELEVBQU0sU0FBTixFQUFpQixLQUFqQixFQUF3QixTQUF4QixFQUFtQyxXQUFuQyxFQUFnRGUsUUFBaEQsQ0FDRWpCLFNBQVMsQ0FBQyxhQUFELENBRFgsS0FFS0osR0FBRyxDQUFDc0IsWUFISCxDQUFSO0FBS0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0MsdUJBQVQsQ0FBaUN2QixHQUFqQyxFQUFzQztBQUMzQyxTQUFPa0IsYUFBYSxDQUFDbEIsR0FBRCxDQUFwQjtBQUNEOztBQUVEO0FBQ0EsT0FBTyxTQUFTd0IseUJBQVQsR0FBcUM7QUFDMUMzQixFQUFBQSxVQUFVLEdBQUcsRUFBYjtBQUNEIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb3B5cmlnaHQgMjAxNSBUaGUgQU1QIEhUTUwgQXV0aG9ycy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTLUlTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbmltcG9ydCAqIGFzIGNvcmVNb2RlIGZyb20gJy4vY29yZS9tb2RlJztcbmltcG9ydCB7cGFyc2VRdWVyeVN0cmluZ30gZnJvbSAnLi9jb3JlL3R5cGVzL3N0cmluZy91cmwnO1xuXG4vKipcbiAqIEB0eXBlZGVmIHt7XG4gKiAgIGxvY2FsRGV2OiBib29sZWFuLFxuICogICBkZXZlbG9wbWVudDogYm9vbGVhbixcbiAqICAgdGVzdDogYm9vbGVhbixcbiAqICAgbG9nOiAoc3RyaW5nfHVuZGVmaW5lZCksXG4gKiAgIHZlcnNpb246IHN0cmluZyxcbiAqICAgcnR2VmVyc2lvbjogc3RyaW5nLFxuICogICBydW50aW1lOiAobnVsbHxzdHJpbmd8dW5kZWZpbmVkKSxcbiAqICAgYTRhSWQ6IChudWxsfHN0cmluZ3x1bmRlZmluZWQpLFxuICogICBlc206IChib29sZWFufHVuZGVmaW5lZCksXG4gKiB9fVxuICovXG5leHBvcnQgbGV0IE1vZGVEZWY7XG5cbi8qKlxuICogYHJ0dlZlcnNpb25gIGlzIHRoZSBwcmVmaXhlZCB2ZXJzaW9uIHdlIHNlcnZlIG9mZiBvZiB0aGUgY2RuLlxuICogVGhlIHByZWZpeCBkZW5vdGVzIGNhbmFyeSgwMCkgb3IgcHJvZCgwMSkgb3IgYW4gZXhwZXJpbWVudCB2ZXJzaW9uICggPiAwMSkuXG4gKiBAdHlwZSB7c3RyaW5nfVxuICovXG5sZXQgcnR2VmVyc2lvbiA9ICcnO1xuXG4vKipcbiAqIFByb3ZpZGVzIGluZm8gYWJvdXQgdGhlIGN1cnJlbnQgYXBwLlxuICogQHBhcmFtIHs/V2luZG93PX0gb3B0X3dpblxuICogQHJldHVybiB7IU1vZGVEZWZ9XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBnZXRNb2RlKG9wdF93aW4pIHtcbiAgY29uc3Qgd2luID0gb3B0X3dpbiB8fCBzZWxmO1xuICBpZiAod2luLl9fQU1QX01PREUpIHtcbiAgICByZXR1cm4gd2luLl9fQU1QX01PREU7XG4gIH1cbiAgcmV0dXJuICh3aW4uX19BTVBfTU9ERSA9IGdldE1vZGVfKHdpbikpO1xufVxuXG4vKipcbiAqIFByb3ZpZGVzIGluZm8gYWJvdXQgdGhlIGN1cnJlbnQgYXBwLlxuICogQHBhcmFtIHshV2luZG93fSB3aW5cbiAqIEByZXR1cm4geyFNb2RlRGVmfVxuICovXG5mdW5jdGlvbiBnZXRNb2RlXyh3aW4pIHtcbiAgY29uc3QgaGFzaFF1ZXJ5ID0gcGFyc2VRdWVyeVN0cmluZyhcbiAgICAvLyBsb2NhdGlvbi5vcmlnaW5hbEhhc2ggaXMgc2V0IGJ5IHRoZSB2aWV3ZXIgd2hlbiBpdCByZW1vdmVzIHRoZSBmcmFnbWVudFxuICAgIC8vIGZyb20gdGhlIFVSTC5cbiAgICB3aW4ubG9jYXRpb25bJ29yaWdpbmFsSGFzaCddIHx8IHdpbi5sb2NhdGlvbi5oYXNoXG4gICk7XG5cbiAgLy8gVGhlIGBtaW5pZmllZGAsIGB0ZXN0YCBhbmQgYGxvY2FsRGV2YCBwcm9wZXJ0aWVzIGFyZSByZXBsYWNlZFxuICAvLyBhcyBib29sZWFuIGxpdGVyYWxzIHdoZW4gd2UgcnVuIGBhbXAgZGlzdGAgd2l0aG91dCB0aGUgYC0tZm9ydGVzdGluZ2BcbiAgLy8gZmxhZ3MuIFRoaXMgaW1wcm92ZWQgRENFIG9uIHRoZSBwcm9kdWN0aW9uIGZpbGUgd2UgZGVwbG95IGFzIHRoZSBjb2RlXG4gIC8vIHBhdGhzIGZvciBsb2NhbGhvc3QvdGVzdGluZy9kZXZlbG9wbWVudCBhcmUgZWxpbWluYXRlZC5cbiAgcmV0dXJuIHtcbiAgICBsb2NhbERldjogY29yZU1vZGUuaXNMb2NhbERldih3aW4pLFxuICAgIGRldmVsb3BtZW50OiBpc01vZGVEZXZlbG9wbWVudCh3aW4pLFxuICAgIGVzbTogSVNfRVNNLFxuICAgIC8vIGFtcC1nZW8gb3ZlcnJpZGVcbiAgICBnZW9PdmVycmlkZTogaGFzaFF1ZXJ5WydhbXAtZ2VvJ10sXG4gICAgdGVzdDogY29yZU1vZGUuaXNUZXN0KHdpbiksXG4gICAgbG9nOiBwYXJzZUludChoYXNoUXVlcnlbJ2xvZyddLCAxMCksXG4gICAgdmVyc2lvbjogY29yZU1vZGUudmVyc2lvbigpLFxuICAgIHJ0dlZlcnNpb246IGdldFJ0dlZlcnNpb24od2luKSxcbiAgfTtcbn1cblxuLyoqXG4gKiBSZXRyaWV2ZSB0aGUgYHJ0dlZlcnNpb25gIHdoaWNoIHdpbGwgaGF2ZSBhIG51bWVyaWMgcHJlZml4XG4gKiBkZW5vdGluZyBjYW5hcnkvcHJvZC9leHBlcmltZW50ICh1bmxlc3MgYGlzTG9jYWxEZXZgIGlzIHRydWUpLlxuICpcbiAqIEBwYXJhbSB7IVdpbmRvd30gd2luXG4gKiBAcmV0dXJuIHtzdHJpbmd9XG4gKi9cbmZ1bmN0aW9uIGdldFJ0dlZlcnNpb24od2luKSB7XG4gIC8vIElnbm9yZSBtZW1vaXplZCBjb3B5IGR1cmluZyB0ZXN0aW5nIHRvIGFsbG93IG92ZXJyaWRlLlxuICBpZiAoIXJ0dlZlcnNpb24gfHwgY29yZU1vZGUuaXNUZXN0KHdpbikpIHtcbiAgICAvLyBDdXJyZW50bHkgYGludGVybmFsUnVudGltZVZlcnNpb25gIGFuZCB0aHVzIGBtb2RlLnZlcnNpb25gIGNvbnRhaW4gb25seVxuICAgIC8vIG1ham9yIHZlcnNpb24uIFRoZSBmdWxsIHZlcnNpb24gaG93ZXZlciBtdXN0IGFsc28gY2FycnkgdGhlIG1pbm9yIHZlcnNpb24uXG4gICAgLy8gV2Ugd2lsbCBkZWZhdWx0IHRvIHByb2R1Y3Rpb24gZGVmYXVsdCBgMDFgIG1pbm9yIHZlcnNpb24gZm9yIG5vdy5cbiAgICAvLyBUT0RPKGVyd2lubW9tYmF5KTogZGVjaWRlIHdoZXRoZXIgaW50ZXJuYWxSdW50aW1lVmVyc2lvbiBzaG91bGQgY29udGFpblxuICAgIC8vIG1pbm9yIHZlcnNpb24uXG4gICAgcnR2VmVyc2lvbiA9IHdpbi5BTVBfQ09ORklHPy52IHx8IGAwMSR7Y29yZU1vZGUudmVyc2lvbigpfWA7XG4gIH1cbiAgcmV0dXJuIHJ0dlZlcnNpb247XG59XG5cbi8qKlxuICogVHJpZ2dlcnMgdmFsaWRhdGlvbiBvciBlbmFibGUgcHViIGxldmVsIGxvZ2dpbmcuIFZhbGlkYXRpb24gY2FuIGJlXG4gKiBieXBhc3NlZCB2aWEgI3ZhbGlkYXRlPTAuXG4gKiBOb3RlIHRoYXQgQU1QX0RFVl9NT0RFIGZsYWcgaXMgdXNlZCBmb3IgdGVzdGluZyBwdXJwb3Nlcy5cbiAqIEBwYXJhbSB7IVdpbmRvd30gd2luXG4gKiBAcmV0dXJuIHtib29sZWFufVxuICovXG5leHBvcnQgZnVuY3Rpb24gaXNNb2RlRGV2ZWxvcG1lbnQod2luKSB7XG4gIGNvbnN0IGhhc2hRdWVyeSA9IHBhcnNlUXVlcnlTdHJpbmcoXG4gICAgd2luLmxvY2F0aW9uWydvcmlnaW5hbEhhc2gnXSB8fCB3aW4ubG9jYXRpb24uaGFzaFxuICApO1xuICByZXR1cm4gISEoXG4gICAgWycxJywgJ2FjdGlvbnMnLCAnYW1wJywgJ2FtcDRhZHMnLCAnYW1wNGVtYWlsJ10uaW5jbHVkZXMoXG4gICAgICBoYXNoUXVlcnlbJ2RldmVsb3BtZW50J11cbiAgICApIHx8IHdpbi5BTVBfREVWX01PREVcbiAgKTtcbn1cblxuLyoqXG4gKiBAcGFyYW0geyFXaW5kb3d9IHdpblxuICogQHJldHVybiB7c3RyaW5nfVxuICogQHZpc2libGVGb3JUZXN0aW5nXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBnZXRSdHZWZXJzaW9uRm9yVGVzdGluZyh3aW4pIHtcbiAgcmV0dXJuIGdldFJ0dlZlcnNpb24od2luKTtcbn1cblxuLyoqIEB2aXNpYmxlRm9yVGVzdGluZyAqL1xuZXhwb3J0IGZ1bmN0aW9uIHJlc2V0UnR2VmVyc2lvbkZvclRlc3RpbmcoKSB7XG4gIHJ0dlZlcnNpb24gPSAnJztcbn1cbiJdfQ==
+// /Users/mszylkowski/src/amphtml/src/mode.js

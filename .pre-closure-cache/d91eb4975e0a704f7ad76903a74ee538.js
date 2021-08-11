@@ -1,0 +1,1 @@
+export const CSS = "amp-video-iframe{display:block;overflow:hidden;position:relative}amp-video-iframe:not(.i-amphtml-built)>:not([placeholder]):not(.i-amphtml-svc){display:none;content-visibility:hidden}\n/*# sourceURL=/extensions/amp-video-iframe/1.0/amp-video-iframe.css*/";

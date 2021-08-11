@@ -171,8 +171,6 @@ The following markup is a decent starting point or boilerplate. Copy this and sa
           <h1>The End</h1>
         </amp-story-grid-layer>
       </amp-story-page>
-      <amp-story-bookend src="bookendv1.json" layout="nodisplay">
-      </amp-story-bookend>
     </amp-story>
   </body>
 </html>
@@ -496,38 +494,11 @@ Example:
 </a>
 ```
 
-#### Integration with sidebar for stories
-
-`amp-story` supports the use of `amp-sidebar` with a few limitations and caveats. See the [Sidebar for Stories documentation](https://amp.dev/documentation/components/amp-sidebar?format=websites#sidebar-for-stories) for more details.
-
-By using branching and `amp-sidebar`, you can create stories that have a table of contents. To do this, make use of URL fragment parameter.
-
-The following example demonstrates a table of contents inside of an `amp-sidebar`. The table of contents has a link to a specific story page, and and out-link to a different website.
-
-```html
-<amp-story id="story" standalone>
-  <amp-sidebar id="sidebar1" layout="nodisplay">
-    <ul>
-      <li><a href="#page=bacon-page"> Bacon page </a></li>
-      <li><a href="https://www.amp.dev"> External Link </a></li>
-    </ul>
-  </amp-sidebar>
-
-  <amp-story-page id="bacon-page">
-    <amp-story-grid-layer>
-      <p>Bacon, of course!</p>
-    </amp-story-grid-layer>
-  </amp-story-page>
-  ...
-</amp-story>
-```
-
 #### Other components usable in AMP stories
 
 The following are other components usable in AMP stories that require some story-specific caveats.
 
 -   [amp-consent](https://amp.dev/documentation/components/amp-consent#prompt-ui-for-stories)
--   [amp-sidebar](https://amp.dev/documentation/components/amp-sidebar#sidebar-for-stories)
 -   [amp-twitter](https://amp.dev/documentation/components/amp-twitter)
 
 For more generally usable components see the [list of allowed children](https://amp.dev/documentation/components/amp-story#children).

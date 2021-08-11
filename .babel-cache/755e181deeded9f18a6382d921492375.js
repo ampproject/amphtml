@@ -1,0 +1,38 @@
+/**
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Common AMP events.
+ * @enum {string}
+ */
+export var AmpEvents = {
+  DOM_UPDATE: 'amp:dom-update',
+  FORM_DIRTINESS_CHANGE: 'amp:form-dirtiness-change',
+  FORM_VALUE_CHANGE: 'amp:form-value-change',
+  VISIBILITY_CHANGE: 'amp:visibilitychange',
+  // https://github.com/ampproject/amphtml/blob/main/ads/README.md#page-visibility
+  // The following codes are only used for testing.
+  // TODO(choumx): Move these to a separate enum so they can be DCE'd.
+  ATTACHED: 'amp:attached',
+  STUBBED: 'amp:stubbed',
+  LOAD_START: 'amp:load-start',
+  LOAD_END: 'amp:load-end',
+  ERROR: 'amp:error',
+  SIZE_CHANGED: 'amp:size-changed',
+  UNLOAD: 'amp:unload'
+};
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFtcC1ldmVudHMuanMiXSwibmFtZXMiOlsiQW1wRXZlbnRzIiwiRE9NX1VQREFURSIsIkZPUk1fRElSVElORVNTX0NIQU5HRSIsIkZPUk1fVkFMVUVfQ0hBTkdFIiwiVklTSUJJTElUWV9DSEFOR0UiLCJBVFRBQ0hFRCIsIlNUVUJCRUQiLCJMT0FEX1NUQVJUIiwiTE9BRF9FTkQiLCJFUlJPUiIsIlNJWkVfQ0hBTkdFRCIsIlVOTE9BRCJdLCJtYXBwaW5ncyI6IkFBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxJQUFNQSxTQUFTLEdBQUc7QUFDdkJDLEVBQUFBLFVBQVUsRUFBRSxnQkFEVztBQUV2QkMsRUFBQUEscUJBQXFCLEVBQUUsMkJBRkE7QUFHdkJDLEVBQUFBLGlCQUFpQixFQUFFLHVCQUhJO0FBSXZCQyxFQUFBQSxpQkFBaUIsRUFBRSxzQkFKSTtBQUlvQjtBQUMzQztBQUNBO0FBQ0FDLEVBQUFBLFFBQVEsRUFBRSxjQVBhO0FBUXZCQyxFQUFBQSxPQUFPLEVBQUUsYUFSYztBQVN2QkMsRUFBQUEsVUFBVSxFQUFFLGdCQVRXO0FBVXZCQyxFQUFBQSxRQUFRLEVBQUUsY0FWYTtBQVd2QkMsRUFBQUEsS0FBSyxFQUFFLFdBWGdCO0FBWXZCQyxFQUFBQSxZQUFZLEVBQUUsa0JBWlM7QUFhdkJDLEVBQUFBLE1BQU0sRUFBRTtBQWJlLENBQWxCIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb3B5cmlnaHQgMjAxNyBUaGUgQU1QIEhUTUwgQXV0aG9ycy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTLUlTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbi8qKlxuICogQ29tbW9uIEFNUCBldmVudHMuXG4gKiBAZW51bSB7c3RyaW5nfVxuICovXG5leHBvcnQgY29uc3QgQW1wRXZlbnRzID0ge1xuICBET01fVVBEQVRFOiAnYW1wOmRvbS11cGRhdGUnLFxuICBGT1JNX0RJUlRJTkVTU19DSEFOR0U6ICdhbXA6Zm9ybS1kaXJ0aW5lc3MtY2hhbmdlJyxcbiAgRk9STV9WQUxVRV9DSEFOR0U6ICdhbXA6Zm9ybS12YWx1ZS1jaGFuZ2UnLFxuICBWSVNJQklMSVRZX0NIQU5HRTogJ2FtcDp2aXNpYmlsaXR5Y2hhbmdlJywgLy8gaHR0cHM6Ly9naXRodWIuY29tL2FtcHByb2plY3QvYW1waHRtbC9ibG9iL21haW4vYWRzL1JFQURNRS5tZCNwYWdlLXZpc2liaWxpdHlcbiAgLy8gVGhlIGZvbGxvd2luZyBjb2RlcyBhcmUgb25seSB1c2VkIGZvciB0ZXN0aW5nLlxuICAvLyBUT0RPKGNob3VteCk6IE1vdmUgdGhlc2UgdG8gYSBzZXBhcmF0ZSBlbnVtIHNvIHRoZXkgY2FuIGJlIERDRSdkLlxuICBBVFRBQ0hFRDogJ2FtcDphdHRhY2hlZCcsXG4gIFNUVUJCRUQ6ICdhbXA6c3R1YmJlZCcsXG4gIExPQURfU1RBUlQ6ICdhbXA6bG9hZC1zdGFydCcsXG4gIExPQURfRU5EOiAnYW1wOmxvYWQtZW5kJyxcbiAgRVJST1I6ICdhbXA6ZXJyb3InLFxuICBTSVpFX0NIQU5HRUQ6ICdhbXA6c2l6ZS1jaGFuZ2VkJyxcbiAgVU5MT0FEOiAnYW1wOnVubG9hZCcsXG59O1xuIl19
+// /Users/mszylkowski/src/amphtml/src/core/constants/amp-events.js

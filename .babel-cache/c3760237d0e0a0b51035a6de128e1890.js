@@ -1,0 +1,152 @@
+/**
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { USER_ERROR_SENTINEL } from "../error/message-helpers";
+import * as assertions from "./base";
+
+/**
+ * @fileoverview This file provides the entrypoint for user assertions. It's
+ * designed so all functions are pure function calls to improve inlining.
+ */
+
+/**
+ * Throws a user error if the first argument isn't trueish. Mirrors userAssert
+ * in src/log.js.
+ * @param {T} shouldBeTruthy
+ * @param {string} opt_message
+ * @param {*=} opt_1 Optional argument (var arg as individual params for better
+ * @param {*=} opt_2 Optional argument inlining)
+ * @param {*=} opt_3 Optional argument
+ * @param {*=} opt_4 Optional argument
+ * @param {*=} opt_5 Optional argument
+ * @param {*=} opt_6 Optional argument
+ * @param {*=} opt_7 Optional argument
+ * @param {*=} opt_8 Optional argument
+ * @param {*=} opt_9 Optional argument
+ * @return {T}
+ * @template T
+ * @throws {UserError} when shouldBeTruthy is not truthy.
+ * @closurePrimitive {asserts.truthy}
+ */
+export function userAssert(shouldBeTruthy, opt_message, opt_1, opt_2, opt_3, opt_4, opt_5, opt_6, opt_7, opt_8, opt_9) {
+  return assertions.assert(USER_ERROR_SENTINEL, shouldBeTruthy, opt_message, opt_1, opt_2, opt_3, opt_4, opt_5, opt_6, opt_7, opt_8, opt_9);
+}
+
+/**
+ * Throws an error if the first argument isn't an Element.
+ *
+ * For more details see `assert`.
+ *
+ * @param {*} shouldBeElement
+ * @param {!Array<*>|string=} opt_message The assertion message
+ * @return {!Element} The value of shouldBeTrueish.
+ * @throws {Error} when shouldBeElement is not an Element
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function userAssertElement(shouldBeElement, opt_message) {
+  return assertions.assertElement(
+  /** @type {!assertions.AssertionFunctionDef} */
+  userAssert, shouldBeElement, opt_message);
+}
+
+/**
+ * Throws an error if the first argument isn't a string. The string can
+ * be empty.
+ *
+ * For more details see `assert`.
+ *
+ * @param {*} shouldBeString
+ * @param {!Array<*>|string=} opt_message The assertion message
+ * @return {string} The string value. Can be an empty string.
+ * @throws {Error} when shouldBeString is not an String
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function userAssertString(shouldBeString, opt_message) {
+  return assertions.assertString(
+  /** @type {!assertions.AssertionFunctionDef} */
+  userAssert, shouldBeString, opt_message);
+}
+
+/**
+ * Throws an error if the first argument isn't a number. The allowed values
+ * include `0` and `NaN`.
+ *
+ * For more details see `assert`.
+ *
+ * @param {*} shouldBeNumber
+ * @param {!Array<*>|string=} opt_message The assertion message
+ * @return {number} The number value. The allowed values include `0`
+ *   and `NaN`.
+ * @throws {Error} when shouldBeNumber is not an Number
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function userAssertNumber(shouldBeNumber, opt_message) {
+  return assertions.assertNumber(
+  /** @type {!assertions.AssertionFunctionDef} */
+  userAssert, shouldBeNumber, opt_message);
+}
+
+/**
+ * Throws an error if the first argument is not an array.
+ * The array can be empty.
+ *
+ * For more details see `assert`.
+ *
+ * @param {*} shouldBeArray
+ * @param {!Array<*>|string=} opt_message The assertion message
+ * @return {!Array} The array value
+ * @throws {Error} when shouldBeArray is not an Array
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function userAssertArray(shouldBeArray, opt_message) {
+  return assertions.assertArray(
+  /** @type {!assertions.AssertionFunctionDef} */
+  userAssert, shouldBeArray, opt_message);
+}
+
+/**
+ * Throws an error if the first argument isn't a boolean.
+ *
+ * For more details see `assert`.
+ *
+ * @param {*} shouldBeBoolean
+ * @param {!Array<*>|string=} opt_message The assertion message
+ * @return {boolean} The boolean value.
+ * @throws {Error} when shouldBeBoolean is not an Boolean
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function userAssertBoolean(shouldBeBoolean, opt_message) {
+  return assertions.assertBoolean(
+  /** @type {!assertions.AssertionFunctionDef} */
+  userAssert, shouldBeBoolean, opt_message);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInVzZXIuanMiXSwibmFtZXMiOlsiVVNFUl9FUlJPUl9TRU5USU5FTCIsImFzc2VydGlvbnMiLCJ1c2VyQXNzZXJ0Iiwic2hvdWxkQmVUcnV0aHkiLCJvcHRfbWVzc2FnZSIsIm9wdF8xIiwib3B0XzIiLCJvcHRfMyIsIm9wdF80Iiwib3B0XzUiLCJvcHRfNiIsIm9wdF83Iiwib3B0XzgiLCJvcHRfOSIsImFzc2VydCIsInVzZXJBc3NlcnRFbGVtZW50Iiwic2hvdWxkQmVFbGVtZW50IiwiYXNzZXJ0RWxlbWVudCIsInVzZXJBc3NlcnRTdHJpbmciLCJzaG91bGRCZVN0cmluZyIsImFzc2VydFN0cmluZyIsInVzZXJBc3NlcnROdW1iZXIiLCJzaG91bGRCZU51bWJlciIsImFzc2VydE51bWJlciIsInVzZXJBc3NlcnRBcnJheSIsInNob3VsZEJlQXJyYXkiLCJhc3NlcnRBcnJheSIsInVzZXJBc3NlcnRCb29sZWFuIiwic2hvdWxkQmVCb29sZWFuIiwiYXNzZXJ0Qm9vbGVhbiJdLCJtYXBwaW5ncyI6IkFBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBOztBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUVBLFNBQVFBLG1CQUFSO0FBRUEsT0FBTyxLQUFLQyxVQUFaOztBQUVBO0FBQ0E7QUFDQTtBQUNBOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTQyxVQUFULENBQ0xDLGNBREssRUFFTEMsV0FGSyxFQUdMQyxLQUhLLEVBSUxDLEtBSkssRUFLTEMsS0FMSyxFQU1MQyxLQU5LLEVBT0xDLEtBUEssRUFRTEMsS0FSSyxFQVNMQyxLQVRLLEVBVUxDLEtBVkssRUFXTEMsS0FYSyxFQVlMO0FBQ0EsU0FBT1osVUFBVSxDQUFDYSxNQUFYLENBQ0xkLG1CQURLLEVBRUxHLGNBRkssRUFHTEMsV0FISyxFQUlMQyxLQUpLLEVBS0xDLEtBTEssRUFNTEMsS0FOSyxFQU9MQyxLQVBLLEVBUUxDLEtBUkssRUFTTEMsS0FUSyxFQVVMQyxLQVZLLEVBV0xDLEtBWEssRUFZTEMsS0FaSyxDQUFQO0FBY0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0UsaUJBQVQsQ0FBMkJDLGVBQTNCLEVBQTRDWixXQUE1QyxFQUF5RDtBQUM5RCxTQUFPSCxVQUFVLENBQUNnQixhQUFYO0FBQ0w7QUFBaURmLEVBQUFBLFVBRDVDLEVBRUxjLGVBRkssRUFHTFosV0FISyxDQUFQO0FBS0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTYyxnQkFBVCxDQUEwQkMsY0FBMUIsRUFBMENmLFdBQTFDLEVBQXVEO0FBQzVELFNBQU9ILFVBQVUsQ0FBQ21CLFlBQVg7QUFDTDtBQUFpRGxCLEVBQUFBLFVBRDVDLEVBRUxpQixjQUZLLEVBR0xmLFdBSEssQ0FBUDtBQUtEOztBQUVEO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTaUIsZ0JBQVQsQ0FBMEJDLGNBQTFCLEVBQTBDbEIsV0FBMUMsRUFBdUQ7QUFDNUQsU0FBT0gsVUFBVSxDQUFDc0IsWUFBWDtBQUNMO0FBQWlEckIsRUFBQUEsVUFENUMsRUFFTG9CLGNBRkssRUFHTGxCLFdBSEssQ0FBUDtBQUtEOztBQUVEO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU29CLGVBQVQsQ0FBeUJDLGFBQXpCLEVBQXdDckIsV0FBeEMsRUFBcUQ7QUFDMUQsU0FBT0gsVUFBVSxDQUFDeUIsV0FBWDtBQUNMO0FBQWlEeEIsRUFBQUEsVUFENUMsRUFFTHVCLGFBRkssRUFHTHJCLFdBSEssQ0FBUDtBQUtEOztBQUVEO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVN1QixpQkFBVCxDQUEyQkMsZUFBM0IsRUFBNEN4QixXQUE1QyxFQUF5RDtBQUM5RCxTQUFPSCxVQUFVLENBQUM0QixhQUFYO0FBQ0w7QUFBaUQzQixFQUFBQSxVQUQ1QyxFQUVMMEIsZUFGSyxFQUdMeEIsV0FISyxDQUFQO0FBS0QiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIENvcHlyaWdodCAyMDIxIFRoZSBBTVAgSFRNTCBBdXRob3JzLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIExpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmVcbiAqIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuIFwiQVMtSVNcIiBCQVNJUyxcbiAqIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLlxuICogU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZFxuICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cbi8qKlxuICogQ29weXJpZ2h0IDIwMjEgVGhlIEFNUCBIVE1MIEF1dGhvcnMuIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlIFwiTGljZW5zZVwiKTtcbiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS5cbiAqIFlvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdFxuICpcbiAqICAgICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wXG4gKlxuICogVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZVxuICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gXCJBUy1JU1wiIEJBU0lTLFxuICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuXG4gKiBTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZSBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kXG4gKiBsaW1pdGF0aW9ucyB1bmRlciB0aGUgTGljZW5zZS5cbiAqL1xuXG5pbXBvcnQge1VTRVJfRVJST1JfU0VOVElORUx9IGZyb20gJyNjb3JlL2Vycm9yL21lc3NhZ2UtaGVscGVycyc7XG5cbmltcG9ydCAqIGFzIGFzc2VydGlvbnMgZnJvbSAnLi9iYXNlJztcblxuLyoqXG4gKiBAZmlsZW92ZXJ2aWV3IFRoaXMgZmlsZSBwcm92aWRlcyB0aGUgZW50cnlwb2ludCBmb3IgdXNlciBhc3NlcnRpb25zLiBJdCdzXG4gKiBkZXNpZ25lZCBzbyBhbGwgZnVuY3Rpb25zIGFyZSBwdXJlIGZ1bmN0aW9uIGNhbGxzIHRvIGltcHJvdmUgaW5saW5pbmcuXG4gKi9cblxuLyoqXG4gKiBUaHJvd3MgYSB1c2VyIGVycm9yIGlmIHRoZSBmaXJzdCBhcmd1bWVudCBpc24ndCB0cnVlaXNoLiBNaXJyb3JzIHVzZXJBc3NlcnRcbiAqIGluIHNyYy9sb2cuanMuXG4gKiBAcGFyYW0ge1R9IHNob3VsZEJlVHJ1dGh5XG4gKiBAcGFyYW0ge3N0cmluZ30gb3B0X21lc3NhZ2VcbiAqIEBwYXJhbSB7Kj19IG9wdF8xIE9wdGlvbmFsIGFyZ3VtZW50ICh2YXIgYXJnIGFzIGluZGl2aWR1YWwgcGFyYW1zIGZvciBiZXR0ZXJcbiAqIEBwYXJhbSB7Kj19IG9wdF8yIE9wdGlvbmFsIGFyZ3VtZW50IGlubGluaW5nKVxuICogQHBhcmFtIHsqPX0gb3B0XzMgT3B0aW9uYWwgYXJndW1lbnRcbiAqIEBwYXJhbSB7Kj19IG9wdF80IE9wdGlvbmFsIGFyZ3VtZW50XG4gKiBAcGFyYW0geyo9fSBvcHRfNSBPcHRpb25hbCBhcmd1bWVudFxuICogQHBhcmFtIHsqPX0gb3B0XzYgT3B0aW9uYWwgYXJndW1lbnRcbiAqIEBwYXJhbSB7Kj19IG9wdF83IE9wdGlvbmFsIGFyZ3VtZW50XG4gKiBAcGFyYW0geyo9fSBvcHRfOCBPcHRpb25hbCBhcmd1bWVudFxuICogQHBhcmFtIHsqPX0gb3B0XzkgT3B0aW9uYWwgYXJndW1lbnRcbiAqIEByZXR1cm4ge1R9XG4gKiBAdGVtcGxhdGUgVFxuICogQHRocm93cyB7VXNlckVycm9yfSB3aGVuIHNob3VsZEJlVHJ1dGh5IGlzIG5vdCB0cnV0aHkuXG4gKiBAY2xvc3VyZVByaW1pdGl2ZSB7YXNzZXJ0cy50cnV0aHl9XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiB1c2VyQXNzZXJ0KFxuICBzaG91bGRCZVRydXRoeSxcbiAgb3B0X21lc3NhZ2UsXG4gIG9wdF8xLFxuICBvcHRfMixcbiAgb3B0XzMsXG4gIG9wdF80LFxuICBvcHRfNSxcbiAgb3B0XzYsXG4gIG9wdF83LFxuICBvcHRfOCxcbiAgb3B0Xzlcbikge1xuICByZXR1cm4gYXNzZXJ0aW9ucy5hc3NlcnQoXG4gICAgVVNFUl9FUlJPUl9TRU5USU5FTCxcbiAgICBzaG91bGRCZVRydXRoeSxcbiAgICBvcHRfbWVzc2FnZSxcbiAgICBvcHRfMSxcbiAgICBvcHRfMixcbiAgICBvcHRfMyxcbiAgICBvcHRfNCxcbiAgICBvcHRfNSxcbiAgICBvcHRfNixcbiAgICBvcHRfNyxcbiAgICBvcHRfOCxcbiAgICBvcHRfOVxuICApO1xufVxuXG4vKipcbiAqIFRocm93cyBhbiBlcnJvciBpZiB0aGUgZmlyc3QgYXJndW1lbnQgaXNuJ3QgYW4gRWxlbWVudC5cbiAqXG4gKiBGb3IgbW9yZSBkZXRhaWxzIHNlZSBgYXNzZXJ0YC5cbiAqXG4gKiBAcGFyYW0geyp9IHNob3VsZEJlRWxlbWVudFxuICogQHBhcmFtIHshQXJyYXk8Kj58c3RyaW5nPX0gb3B0X21lc3NhZ2UgVGhlIGFzc2VydGlvbiBtZXNzYWdlXG4gKiBAcmV0dXJuIHshRWxlbWVudH0gVGhlIHZhbHVlIG9mIHNob3VsZEJlVHJ1ZWlzaC5cbiAqIEB0aHJvd3Mge0Vycm9yfSB3aGVuIHNob3VsZEJlRWxlbWVudCBpcyBub3QgYW4gRWxlbWVudFxuICogQGNsb3N1cmVQcmltaXRpdmUge2Fzc2VydHMubWF0Y2hlc1JldHVybn1cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHVzZXJBc3NlcnRFbGVtZW50KHNob3VsZEJlRWxlbWVudCwgb3B0X21lc3NhZ2UpIHtcbiAgcmV0dXJuIGFzc2VydGlvbnMuYXNzZXJ0RWxlbWVudChcbiAgICAvKiogQHR5cGUgeyFhc3NlcnRpb25zLkFzc2VydGlvbkZ1bmN0aW9uRGVmfSAqLyAodXNlckFzc2VydCksXG4gICAgc2hvdWxkQmVFbGVtZW50LFxuICAgIG9wdF9tZXNzYWdlXG4gICk7XG59XG5cbi8qKlxuICogVGhyb3dzIGFuIGVycm9yIGlmIHRoZSBmaXJzdCBhcmd1bWVudCBpc24ndCBhIHN0cmluZy4gVGhlIHN0cmluZyBjYW5cbiAqIGJlIGVtcHR5LlxuICpcbiAqIEZvciBtb3JlIGRldGFpbHMgc2VlIGBhc3NlcnRgLlxuICpcbiAqIEBwYXJhbSB7Kn0gc2hvdWxkQmVTdHJpbmdcbiAqIEBwYXJhbSB7IUFycmF5PCo+fHN0cmluZz19IG9wdF9tZXNzYWdlIFRoZSBhc3NlcnRpb24gbWVzc2FnZVxuICogQHJldHVybiB7c3RyaW5nfSBUaGUgc3RyaW5nIHZhbHVlLiBDYW4gYmUgYW4gZW1wdHkgc3RyaW5nLlxuICogQHRocm93cyB7RXJyb3J9IHdoZW4gc2hvdWxkQmVTdHJpbmcgaXMgbm90IGFuIFN0cmluZ1xuICogQGNsb3N1cmVQcmltaXRpdmUge2Fzc2VydHMubWF0Y2hlc1JldHVybn1cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHVzZXJBc3NlcnRTdHJpbmcoc2hvdWxkQmVTdHJpbmcsIG9wdF9tZXNzYWdlKSB7XG4gIHJldHVybiBhc3NlcnRpb25zLmFzc2VydFN0cmluZyhcbiAgICAvKiogQHR5cGUgeyFhc3NlcnRpb25zLkFzc2VydGlvbkZ1bmN0aW9uRGVmfSAqLyAodXNlckFzc2VydCksXG4gICAgc2hvdWxkQmVTdHJpbmcsXG4gICAgb3B0X21lc3NhZ2VcbiAgKTtcbn1cblxuLyoqXG4gKiBUaHJvd3MgYW4gZXJyb3IgaWYgdGhlIGZpcnN0IGFyZ3VtZW50IGlzbid0IGEgbnVtYmVyLiBUaGUgYWxsb3dlZCB2YWx1ZXNcbiAqIGluY2x1ZGUgYDBgIGFuZCBgTmFOYC5cbiAqXG4gKiBGb3IgbW9yZSBkZXRhaWxzIHNlZSBgYXNzZXJ0YC5cbiAqXG4gKiBAcGFyYW0geyp9IHNob3VsZEJlTnVtYmVyXG4gKiBAcGFyYW0geyFBcnJheTwqPnxzdHJpbmc9fSBvcHRfbWVzc2FnZSBUaGUgYXNzZXJ0aW9uIG1lc3NhZ2VcbiAqIEByZXR1cm4ge251bWJlcn0gVGhlIG51bWJlciB2YWx1ZS4gVGhlIGFsbG93ZWQgdmFsdWVzIGluY2x1ZGUgYDBgXG4gKiAgIGFuZCBgTmFOYC5cbiAqIEB0aHJvd3Mge0Vycm9yfSB3aGVuIHNob3VsZEJlTnVtYmVyIGlzIG5vdCBhbiBOdW1iZXJcbiAqIEBjbG9zdXJlUHJpbWl0aXZlIHthc3NlcnRzLm1hdGNoZXNSZXR1cm59XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiB1c2VyQXNzZXJ0TnVtYmVyKHNob3VsZEJlTnVtYmVyLCBvcHRfbWVzc2FnZSkge1xuICByZXR1cm4gYXNzZXJ0aW9ucy5hc3NlcnROdW1iZXIoXG4gICAgLyoqIEB0eXBlIHshYXNzZXJ0aW9ucy5Bc3NlcnRpb25GdW5jdGlvbkRlZn0gKi8gKHVzZXJBc3NlcnQpLFxuICAgIHNob3VsZEJlTnVtYmVyLFxuICAgIG9wdF9tZXNzYWdlXG4gICk7XG59XG5cbi8qKlxuICogVGhyb3dzIGFuIGVycm9yIGlmIHRoZSBmaXJzdCBhcmd1bWVudCBpcyBub3QgYW4gYXJyYXkuXG4gKiBUaGUgYXJyYXkgY2FuIGJlIGVtcHR5LlxuICpcbiAqIEZvciBtb3JlIGRldGFpbHMgc2VlIGBhc3NlcnRgLlxuICpcbiAqIEBwYXJhbSB7Kn0gc2hvdWxkQmVBcnJheVxuICogQHBhcmFtIHshQXJyYXk8Kj58c3RyaW5nPX0gb3B0X21lc3NhZ2UgVGhlIGFzc2VydGlvbiBtZXNzYWdlXG4gKiBAcmV0dXJuIHshQXJyYXl9IFRoZSBhcnJheSB2YWx1ZVxuICogQHRocm93cyB7RXJyb3J9IHdoZW4gc2hvdWxkQmVBcnJheSBpcyBub3QgYW4gQXJyYXlcbiAqIEBjbG9zdXJlUHJpbWl0aXZlIHthc3NlcnRzLm1hdGNoZXNSZXR1cm59XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiB1c2VyQXNzZXJ0QXJyYXkoc2hvdWxkQmVBcnJheSwgb3B0X21lc3NhZ2UpIHtcbiAgcmV0dXJuIGFzc2VydGlvbnMuYXNzZXJ0QXJyYXkoXG4gICAgLyoqIEB0eXBlIHshYXNzZXJ0aW9ucy5Bc3NlcnRpb25GdW5jdGlvbkRlZn0gKi8gKHVzZXJBc3NlcnQpLFxuICAgIHNob3VsZEJlQXJyYXksXG4gICAgb3B0X21lc3NhZ2VcbiAgKTtcbn1cblxuLyoqXG4gKiBUaHJvd3MgYW4gZXJyb3IgaWYgdGhlIGZpcnN0IGFyZ3VtZW50IGlzbid0IGEgYm9vbGVhbi5cbiAqXG4gKiBGb3IgbW9yZSBkZXRhaWxzIHNlZSBgYXNzZXJ0YC5cbiAqXG4gKiBAcGFyYW0geyp9IHNob3VsZEJlQm9vbGVhblxuICogQHBhcmFtIHshQXJyYXk8Kj58c3RyaW5nPX0gb3B0X21lc3NhZ2UgVGhlIGFzc2VydGlvbiBtZXNzYWdlXG4gKiBAcmV0dXJuIHtib29sZWFufSBUaGUgYm9vbGVhbiB2YWx1ZS5cbiAqIEB0aHJvd3Mge0Vycm9yfSB3aGVuIHNob3VsZEJlQm9vbGVhbiBpcyBub3QgYW4gQm9vbGVhblxuICogQGNsb3N1cmVQcmltaXRpdmUge2Fzc2VydHMubWF0Y2hlc1JldHVybn1cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHVzZXJBc3NlcnRCb29sZWFuKHNob3VsZEJlQm9vbGVhbiwgb3B0X21lc3NhZ2UpIHtcbiAgcmV0dXJuIGFzc2VydGlvbnMuYXNzZXJ0Qm9vbGVhbihcbiAgICAvKiogQHR5cGUgeyFhc3NlcnRpb25zLkFzc2VydGlvbkZ1bmN0aW9uRGVmfSAqLyAodXNlckFzc2VydCksXG4gICAgc2hvdWxkQmVCb29sZWFuLFxuICAgIG9wdF9tZXNzYWdlXG4gICk7XG59XG4iXX0=
+// /Users/mszylkowski/src/amphtml/src/core/assert/user.js

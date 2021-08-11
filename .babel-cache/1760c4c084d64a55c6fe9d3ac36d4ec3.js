@@ -1,0 +1,2 @@
+export var CSS = ".i-amphtml-story-ad-link-root{all:initial!important;color:initial!important;display:-ms-flexbox!important;display:flex!important;-ms-flex-direction:column!important;flex-direction:column!important;-ms-flex-align:center!important;align-items:center!important}\n/*# sourceURL=/extensions/amp-story-auto-ads/0.1/amp-story-auto-ads-shared.css*/";
+// /Users/mszylkowski/src/amphtml/build/amp-story-auto-ads-shared-0.1.css.js

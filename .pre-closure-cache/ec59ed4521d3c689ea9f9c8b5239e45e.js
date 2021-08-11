@@ -1,0 +1,1 @@
+export const CSS = "amp-brightcove{display:block;overflow:hidden;position:relative}amp-brightcove:not(.i-amphtml-built)>:not([placeholder]):not(.i-amphtml-svc){display:none;content-visibility:hidden}\n/*# sourceURL=/extensions/amp-brightcove/1.0/amp-brightcove.css*/";

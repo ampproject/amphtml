@@ -1,0 +1,30 @@
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { Services } from "../../../src/service";
+import { installWebAnimations } from 'web-animations-js/web-animations.install';
+
+/**
+ * Tries to find an existing amp-lightbox-gallery, if there is none, it adds a
+ * default one.
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {!Promise<undefined>}
+ */
+export function install(ampdoc) {
+  installWebAnimations(ampdoc.win);
+}
+Services.extensionsFor(AMP.win).addDocFactory(install);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFtcC1hbmltYXRpb24tcG9seWZpbGwuanMiXSwibmFtZXMiOlsiU2VydmljZXMiLCJpbnN0YWxsV2ViQW5pbWF0aW9ucyIsImluc3RhbGwiLCJhbXBkb2MiLCJ3aW4iLCJleHRlbnNpb25zRm9yIiwiQU1QIiwiYWRkRG9jRmFjdG9yeSJdLCJtYXBwaW5ncyI6IkFBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBRUEsU0FBUUEsUUFBUjtBQUNBLFNBQVFDLG9CQUFSLFFBQW1DLDBDQUFuQzs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVNDLE9BQVQsQ0FBaUJDLE1BQWpCLEVBQXlCO0FBQzlCRixFQUFBQSxvQkFBb0IsQ0FBQ0UsTUFBTSxDQUFDQyxHQUFSLENBQXBCO0FBQ0Q7QUFDREosUUFBUSxDQUFDSyxhQUFULENBQXVCQyxHQUFHLENBQUNGLEdBQTNCLEVBQWdDRyxhQUFoQyxDQUE4Q0wsT0FBOUMiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIENvcHlyaWdodCAyMDIwIFRoZSBBTVAgSFRNTCBBdXRob3JzLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIExpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmVcbiAqIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuIFwiQVMtSVNcIiBCQVNJUyxcbiAqIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLlxuICogU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZFxuICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHtTZXJ2aWNlc30gZnJvbSAnI3NlcnZpY2UnO1xuaW1wb3J0IHtpbnN0YWxsV2ViQW5pbWF0aW9uc30gZnJvbSAnd2ViLWFuaW1hdGlvbnMtanMvd2ViLWFuaW1hdGlvbnMuaW5zdGFsbCc7XG5cbi8qKlxuICogVHJpZXMgdG8gZmluZCBhbiBleGlzdGluZyBhbXAtbGlnaHRib3gtZ2FsbGVyeSwgaWYgdGhlcmUgaXMgbm9uZSwgaXQgYWRkcyBhXG4gKiBkZWZhdWx0IG9uZS5cbiAqIEBwYXJhbSB7IS4uLy4uLy4uL3NyYy9zZXJ2aWNlL2FtcGRvYy1pbXBsLkFtcERvY30gYW1wZG9jXG4gKiBAcmV0dXJuIHshUHJvbWlzZTx1bmRlZmluZWQ+fVxuICovXG5leHBvcnQgZnVuY3Rpb24gaW5zdGFsbChhbXBkb2MpIHtcbiAgaW5zdGFsbFdlYkFuaW1hdGlvbnMoYW1wZG9jLndpbik7XG59XG5TZXJ2aWNlcy5leHRlbnNpb25zRm9yKEFNUC53aW4pLmFkZERvY0ZhY3RvcnkoaW5zdGFsbCk7XG4iXX0=
+// /Users/mszylkowski/src/amphtml/extensions/amp-animation-polyfill/0.1/amp-animation-polyfill.js

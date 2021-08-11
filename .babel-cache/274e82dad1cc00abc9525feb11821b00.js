@@ -1,0 +1,73 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Polyfill for `DOMTokenList.prototype.toggle(token, opt_force)` method. This
+ * is specially important because IE does not support `opt_force` attribute. See
+ * https://goo.gl/hgKNYY for details.
+ * @param {string} token
+ * @param {boolean=} opt_force
+ * @this {DOMTokenList}
+ * @return {boolean}
+ */
+function domTokenListTogglePolyfill(token, opt_force) {
+  // eslint-disable-next-line local/no-invalid-this
+  var remove = opt_force === undefined ? this.contains(token) : !opt_force;
+
+  if (remove) {
+    // eslint-disable-next-line local/no-invalid-this
+    this.remove(token);
+    return false;
+  } else {
+    // eslint-disable-next-line local/no-invalid-this
+    this.add(token);
+    return true;
+  }
+}
+
+/**
+ * Polyfills `DOMTokenList.prototype.toggle` API and makes `.add` accepts N
+ * classes in IE.
+ * @param {!Window} win
+ */
+export function install(win) {
+  if (isIe(win) && win.DOMTokenList) {
+    win.Object.defineProperty(win.DOMTokenList.prototype, 'toggle', {
+      enumerable: false,
+      configurable: true,
+      writable: true,
+      value: domTokenListTogglePolyfill
+    });
+    var add = win.DOMTokenList.prototype.add;
+
+    win.DOMTokenList.prototype.add = function () {
+      for (var i = 0; i < arguments.length; i++) {
+        add.call(this, arguments[i]);
+      }
+    };
+  }
+}
+
+/**
+ * Whether the current browser is a IE browser.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function isIe(win) {
+  return /Trident|MSIE|IEMobile/i.test(win.navigator.userAgent);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImRvbXRva2VubGlzdC5qcyJdLCJuYW1lcyI6WyJkb21Ub2tlbkxpc3RUb2dnbGVQb2x5ZmlsbCIsInRva2VuIiwib3B0X2ZvcmNlIiwicmVtb3ZlIiwidW5kZWZpbmVkIiwiY29udGFpbnMiLCJhZGQiLCJpbnN0YWxsIiwid2luIiwiaXNJZSIsIkRPTVRva2VuTGlzdCIsIk9iamVjdCIsImRlZmluZVByb3BlcnR5IiwicHJvdG90eXBlIiwiZW51bWVyYWJsZSIsImNvbmZpZ3VyYWJsZSIsIndyaXRhYmxlIiwidmFsdWUiLCJpIiwiYXJndW1lbnRzIiwibGVuZ3RoIiwiY2FsbCIsInRlc3QiLCJuYXZpZ2F0b3IiLCJ1c2VyQWdlbnQiXSwibWFwcGluZ3MiOiJBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxTQUFTQSwwQkFBVCxDQUFvQ0MsS0FBcEMsRUFBMkNDLFNBQTNDLEVBQXNEO0FBQ3BEO0FBQ0EsTUFBTUMsTUFBTSxHQUFHRCxTQUFTLEtBQUtFLFNBQWQsR0FBMEIsS0FBS0MsUUFBTCxDQUFjSixLQUFkLENBQTFCLEdBQWlELENBQUNDLFNBQWpFOztBQUNBLE1BQUlDLE1BQUosRUFBWTtBQUNWO0FBQ0EsU0FBS0EsTUFBTCxDQUFZRixLQUFaO0FBQ0EsV0FBTyxLQUFQO0FBQ0QsR0FKRCxNQUlPO0FBQ0w7QUFDQSxTQUFLSyxHQUFMLENBQVNMLEtBQVQ7QUFDQSxXQUFPLElBQVA7QUFDRDtBQUNGOztBQUVEO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVNNLE9BQVQsQ0FBaUJDLEdBQWpCLEVBQXNCO0FBQzNCLE1BQUlDLElBQUksQ0FBQ0QsR0FBRCxDQUFKLElBQWFBLEdBQUcsQ0FBQ0UsWUFBckIsRUFBbUM7QUFDakNGLElBQUFBLEdBQUcsQ0FBQ0csTUFBSixDQUFXQyxjQUFYLENBQTBCSixHQUFHLENBQUNFLFlBQUosQ0FBaUJHLFNBQTNDLEVBQXNELFFBQXRELEVBQWdFO0FBQzlEQyxNQUFBQSxVQUFVLEVBQUUsS0FEa0Q7QUFFOURDLE1BQUFBLFlBQVksRUFBRSxJQUZnRDtBQUc5REMsTUFBQUEsUUFBUSxFQUFFLElBSG9EO0FBSTlEQyxNQUFBQSxLQUFLLEVBQUVqQjtBQUp1RCxLQUFoRTtBQU9BLFFBQU9NLEdBQVAsR0FBY0UsR0FBRyxDQUFDRSxZQUFKLENBQWlCRyxTQUEvQixDQUFPUCxHQUFQOztBQUNBRSxJQUFBQSxHQUFHLENBQUNFLFlBQUosQ0FBaUJHLFNBQWpCLENBQTJCUCxHQUEzQixHQUFpQyxZQUFZO0FBQzNDLFdBQUssSUFBSVksQ0FBQyxHQUFHLENBQWIsRUFBZ0JBLENBQUMsR0FBR0MsU0FBUyxDQUFDQyxNQUE5QixFQUFzQ0YsQ0FBQyxFQUF2QyxFQUEyQztBQUN6Q1osUUFBQUEsR0FBRyxDQUFDZSxJQUFKLENBQVMsSUFBVCxFQUFlRixTQUFTLENBQUNELENBQUQsQ0FBeEI7QUFDRDtBQUNGLEtBSkQ7QUFLRDtBQUNGOztBQUVEO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxTQUFTVCxJQUFULENBQWNELEdBQWQsRUFBbUI7QUFDakIsU0FBTyx5QkFBeUJjLElBQXpCLENBQThCZCxHQUFHLENBQUNlLFNBQUosQ0FBY0MsU0FBNUMsQ0FBUDtBQUNEIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb3B5cmlnaHQgMjAxNiBUaGUgQU1QIEhUTUwgQXV0aG9ycy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTLUlTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbi8qKlxuICogUG9seWZpbGwgZm9yIGBET01Ub2tlbkxpc3QucHJvdG90eXBlLnRvZ2dsZSh0b2tlbiwgb3B0X2ZvcmNlKWAgbWV0aG9kLiBUaGlzXG4gKiBpcyBzcGVjaWFsbHkgaW1wb3J0YW50IGJlY2F1c2UgSUUgZG9lcyBub3Qgc3VwcG9ydCBgb3B0X2ZvcmNlYCBhdHRyaWJ1dGUuIFNlZVxuICogaHR0cHM6Ly9nb28uZ2wvaGdLTllZIGZvciBkZXRhaWxzLlxuICogQHBhcmFtIHtzdHJpbmd9IHRva2VuXG4gKiBAcGFyYW0ge2Jvb2xlYW49fSBvcHRfZm9yY2VcbiAqIEB0aGlzIHtET01Ub2tlbkxpc3R9XG4gKiBAcmV0dXJuIHtib29sZWFufVxuICovXG5mdW5jdGlvbiBkb21Ub2tlbkxpc3RUb2dnbGVQb2x5ZmlsbCh0b2tlbiwgb3B0X2ZvcmNlKSB7XG4gIC8vIGVzbGludC1kaXNhYmxlLW5leHQtbGluZSBsb2NhbC9uby1pbnZhbGlkLXRoaXNcbiAgY29uc3QgcmVtb3ZlID0gb3B0X2ZvcmNlID09PSB1bmRlZmluZWQgPyB0aGlzLmNvbnRhaW5zKHRva2VuKSA6ICFvcHRfZm9yY2U7XG4gIGlmIChyZW1vdmUpIHtcbiAgICAvLyBlc2xpbnQtZGlzYWJsZS1uZXh0LWxpbmUgbG9jYWwvbm8taW52YWxpZC10aGlzXG4gICAgdGhpcy5yZW1vdmUodG9rZW4pO1xuICAgIHJldHVybiBmYWxzZTtcbiAgfSBlbHNlIHtcbiAgICAvLyBlc2xpbnQtZGlzYWJsZS1uZXh0LWxpbmUgbG9jYWwvbm8taW52YWxpZC10aGlzXG4gICAgdGhpcy5hZGQodG9rZW4pO1xuICAgIHJldHVybiB0cnVlO1xuICB9XG59XG5cbi8qKlxuICogUG9seWZpbGxzIGBET01Ub2tlbkxpc3QucHJvdG90eXBlLnRvZ2dsZWAgQVBJIGFuZCBtYWtlcyBgLmFkZGAgYWNjZXB0cyBOXG4gKiBjbGFzc2VzIGluIElFLlxuICogQHBhcmFtIHshV2luZG93fSB3aW5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGluc3RhbGwod2luKSB7XG4gIGlmIChpc0llKHdpbikgJiYgd2luLkRPTVRva2VuTGlzdCkge1xuICAgIHdpbi5PYmplY3QuZGVmaW5lUHJvcGVydHkod2luLkRPTVRva2VuTGlzdC5wcm90b3R5cGUsICd0b2dnbGUnLCB7XG4gICAgICBlbnVtZXJhYmxlOiBmYWxzZSxcbiAgICAgIGNvbmZpZ3VyYWJsZTogdHJ1ZSxcbiAgICAgIHdyaXRhYmxlOiB0cnVlLFxuICAgICAgdmFsdWU6IGRvbVRva2VuTGlzdFRvZ2dsZVBvbHlmaWxsLFxuICAgIH0pO1xuXG4gICAgY29uc3Qge2FkZH0gPSB3aW4uRE9NVG9rZW5MaXN0LnByb3RvdHlwZTtcbiAgICB3aW4uRE9NVG9rZW5MaXN0LnByb3RvdHlwZS5hZGQgPSBmdW5jdGlvbiAoKSB7XG4gICAgICBmb3IgKGxldCBpID0gMDsgaSA8IGFyZ3VtZW50cy5sZW5ndGg7IGkrKykge1xuICAgICAgICBhZGQuY2FsbCh0aGlzLCBhcmd1bWVudHNbaV0pO1xuICAgICAgfVxuICAgIH07XG4gIH1cbn1cblxuLyoqXG4gKiBXaGV0aGVyIHRoZSBjdXJyZW50IGJyb3dzZXIgaXMgYSBJRSBicm93c2VyLlxuICogQHBhcmFtIHshV2luZG93fSB3aW5cbiAqIEByZXR1cm4ge2Jvb2xlYW59XG4gKi9cbmZ1bmN0aW9uIGlzSWUod2luKSB7XG4gIHJldHVybiAvVHJpZGVudHxNU0lFfElFTW9iaWxlL2kudGVzdCh3aW4ubmF2aWdhdG9yLnVzZXJBZ2VudCk7XG59XG4iXX0=
+// /Users/mszylkowski/src/amphtml/src/polyfills/domtokenlist.js

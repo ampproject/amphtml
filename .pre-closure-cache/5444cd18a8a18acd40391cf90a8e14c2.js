@@ -1,0 +1,1 @@
+export const CSS = "amp-script{opacity:0.7}amp-script.i-amphtml-hydrated{opacity:1}\n/*# sourceURL=/extensions/amp-script/0.1/amp-script.css*/";

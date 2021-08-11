@@ -1,0 +1,1 @@
+export const CSS = "amp-mathml[inline]{display:inline-block;vertical-align:middle}\n/*# sourceURL=/extensions/amp-mathml/0.1/amp-mathml.css*/";

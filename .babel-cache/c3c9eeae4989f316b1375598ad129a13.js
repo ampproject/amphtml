@@ -1,0 +1,170 @@
+/**
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { urls } from "./config";
+import { parseSrcset } from "./core/dom/srcset";
+import { user } from "./log";
+import { checkCorsUrl, getSourceUrl, isProxyOrigin, parseUrlDeprecated, resolveRelativeUrl } from "./url";
+var TAG = 'URL-REWRITE';
+
+/** @private @const {string} */
+var ORIGINAL_TARGET_VALUE = '__AMP_ORIGINAL_TARGET_VALUE_';
+
+/**
+ * The same as rewriteAttributeValue() but actually updates the element and
+ * modifies other related attribute(s) for special cases, i.e. `target` for <a>.
+ * @param {!Element} element
+ * @param {string} attrName
+ * @param {string} attrValue
+ * @param {!Location=} opt_location
+ * @param {boolean=} opt_updateProperty
+ * @return {string}
+ */
+export function rewriteAttributesForElement(element, attrName, attrValue, opt_location, opt_updateProperty) {
+  var tag = element.tagName.toLowerCase();
+  var attr = attrName.toLowerCase();
+  var rewrittenValue = rewriteAttributeValue(tag, attr, attrValue);
+  // When served from proxy (CDN), changing an <a> tag from a hash link to a
+  // non-hash link requires updating `target` attribute per cache modification
+  // rules. @see amp-cache-modifications.md#url-rewrites
+  var isProxy = isProxyOrigin(opt_location || self.location);
+
+  if (isProxy && tag === 'a' && attr === 'href') {
+    var oldValue = element.getAttribute(attr);
+    var newValueIsHash = rewrittenValue[0] === '#';
+    var oldValueIsHash = oldValue && oldValue[0] === '#';
+
+    if (newValueIsHash && !oldValueIsHash) {
+      // Save the original value of `target` so it can be restored (if needed).
+      if (!element[ORIGINAL_TARGET_VALUE]) {
+        element[ORIGINAL_TARGET_VALUE] = element.getAttribute('target');
+      }
+
+      element.removeAttribute('target');
+    } else if (oldValueIsHash && !newValueIsHash) {
+      // Restore the original value of `target` or default to `_top`.
+      element.setAttribute('target', element[ORIGINAL_TARGET_VALUE] || '_top');
+    }
+  }
+
+  if (opt_updateProperty) {
+    // Must be done first for <input> elements to correctly update the UI for
+    // the first change on Safari and Chrome.
+    element[attr] = rewrittenValue;
+  }
+
+  element.setAttribute(attr, rewrittenValue);
+  return rewrittenValue;
+}
+
+/**
+ * If (tagName, attrName) is a CDN-rewritable URL attribute, returns the
+ * rewritten URL value. Otherwise, returns the unchanged `attrValue`.
+ * See resolveUrlAttr() for rewriting rules.
+ * @param {string} tagName Lowercase tag name.
+ * @param {string} attrName Lowercase attribute name.
+ * @param {string} attrValue
+ * @return {string}
+ * @visibleForTesting
+ */
+export function rewriteAttributeValue(tagName, attrName, attrValue) {
+  if (isUrlAttribute(attrName)) {
+    return resolveUrlAttr(tagName, attrName, attrValue, self.location);
+  }
+
+  return attrValue;
+}
+
+/**
+ * @param {string} attrName Lowercase attribute name.
+ * @return {boolean}
+ */
+export function isUrlAttribute(attrName) {
+  return attrName == 'src' || attrName == 'href' || attrName == 'xlink:href' || attrName == 'srcset';
+}
+
+/**
+ * Rewrites the URL attribute values. URLs are rewritten as following:
+ * - If URL is absolute, it is not rewritten
+ * - If URL is relative, it's rewritten as absolute against the source origin
+ * - If resulting URL is a `http:` URL and it's for image, the URL is rewritten
+ *   again to be served with AMP Cache (cdn.ampproject.org).
+ *
+ * @param {string} tagName Lowercase tag name.
+ * @param {string} attrName Lowercase attribute name.
+ * @param {string} attrValue
+ * @param {!Location} windowLocation
+ * @return {string}
+ * @private
+ * @visibleForTesting
+ */
+export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
+  checkCorsUrl(attrValue);
+  var isProxyHost = isProxyOrigin(windowLocation);
+  var baseUrl = parseUrlDeprecated(getSourceUrl(windowLocation));
+
+  if (attrName == 'href' && !attrValue.startsWith('#')) {
+    return resolveRelativeUrl(attrValue, baseUrl);
+  }
+
+  if (attrName == 'src') {
+    if (tagName == 'amp-img') {
+      return resolveImageUrlAttr(attrValue, baseUrl, isProxyHost);
+    }
+
+    return resolveRelativeUrl(attrValue, baseUrl);
+  }
+
+  if (attrName == 'srcset') {
+    var srcset;
+
+    try {
+      srcset = parseSrcset(attrValue);
+    } catch (e) {
+      // Do not fail the whole template just because one srcset is broken.
+      // An AMP element will pick it up and report properly.
+      user().error(TAG, 'Failed to parse srcset: ', e);
+      return attrValue;
+    }
+
+    return srcset.stringify(function (url) {
+      return resolveImageUrlAttr(url, baseUrl, isProxyHost);
+    });
+  }
+
+  return attrValue;
+}
+
+/**
+ * Non-HTTPs image URLs are rewritten via proxy.
+ * @param {string} attrValue
+ * @param {!Location} baseUrl
+ * @param {boolean} isProxyHost
+ * @return {string}
+ */
+function resolveImageUrlAttr(attrValue, baseUrl, isProxyHost) {
+  var src = parseUrlDeprecated(resolveRelativeUrl(attrValue, baseUrl));
+
+  // URLs such as `data:` or proxy URLs are returned as is. Unsafe protocols
+  // do not arrive here - already stripped by the sanitizer.
+  if (src.protocol == 'data:' || isProxyOrigin(src) || !isProxyHost) {
+    return src.href;
+  }
+
+  // Rewrite as a proxy URL.
+  return urls.cdn + "/i/" + (src.protocol == 'https:' ? 's/' : '') + encodeURIComponent(src.host) + src.pathname + (src.search || '') + (src.hash || '');
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInVybC1yZXdyaXRlLmpzIl0sIm5hbWVzIjpbInVybHMiLCJwYXJzZVNyY3NldCIsInVzZXIiLCJjaGVja0NvcnNVcmwiLCJnZXRTb3VyY2VVcmwiLCJpc1Byb3h5T3JpZ2luIiwicGFyc2VVcmxEZXByZWNhdGVkIiwicmVzb2x2ZVJlbGF0aXZlVXJsIiwiVEFHIiwiT1JJR0lOQUxfVEFSR0VUX1ZBTFVFIiwicmV3cml0ZUF0dHJpYnV0ZXNGb3JFbGVtZW50IiwiZWxlbWVudCIsImF0dHJOYW1lIiwiYXR0clZhbHVlIiwib3B0X2xvY2F0aW9uIiwib3B0X3VwZGF0ZVByb3BlcnR5IiwidGFnIiwidGFnTmFtZSIsInRvTG93ZXJDYXNlIiwiYXR0ciIsInJld3JpdHRlblZhbHVlIiwicmV3cml0ZUF0dHJpYnV0ZVZhbHVlIiwiaXNQcm94eSIsInNlbGYiLCJsb2NhdGlvbiIsIm9sZFZhbHVlIiwiZ2V0QXR0cmlidXRlIiwibmV3VmFsdWVJc0hhc2giLCJvbGRWYWx1ZUlzSGFzaCIsInJlbW92ZUF0dHJpYnV0ZSIsInNldEF0dHJpYnV0ZSIsImlzVXJsQXR0cmlidXRlIiwicmVzb2x2ZVVybEF0dHIiLCJ3aW5kb3dMb2NhdGlvbiIsImlzUHJveHlIb3N0IiwiYmFzZVVybCIsInN0YXJ0c1dpdGgiLCJyZXNvbHZlSW1hZ2VVcmxBdHRyIiwic3Jjc2V0IiwiZSIsImVycm9yIiwic3RyaW5naWZ5IiwidXJsIiwic3JjIiwicHJvdG9jb2wiLCJocmVmIiwiY2RuIiwiZW5jb2RlVVJJQ29tcG9uZW50IiwiaG9zdCIsInBhdGhuYW1lIiwic2VhcmNoIiwiaGFzaCJdLCJtYXBwaW5ncyI6IkFBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBRUEsU0FBUUEsSUFBUjtBQUNBLFNBQVFDLFdBQVI7QUFDQSxTQUFRQyxJQUFSO0FBQ0EsU0FDRUMsWUFERixFQUVFQyxZQUZGLEVBR0VDLGFB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O0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLFNBQVN3QixtQkFBVCxDQUE2QnhCLFNBQTdCLEVBQXdDc0IsT0FBeEMsRUFBaURELFdBQWpELEVBQThEO0FBQzVELE1BQU1TLEdBQUcsR0FBR3JDLGtCQUFrQixDQUFDQyxrQkFBa0IsQ0FBQ00sU0FBRCxFQUFZc0IsT0FBWixDQUFuQixDQUE5Qjs7QUFFQTtBQUNBO0FBQ0EsTUFBSVEsR0FBRyxDQUFDQyxRQUFKLElBQWdCLE9BQWhCLElBQTJCdkMsYUFBYSxDQUFDc0MsR0FBRCxDQUF4QyxJQUFpRCxDQUFDVCxXQUF0RCxFQUFtRTtBQUNqRSxXQUFPUyxHQUFHLENBQUNFLElBQVg7QUFDRDs7QUFFRDtBQUNBLFNBQ0s3QyxJQUFJLENBQUM4QyxHQUFSLFlBQ0NILEdBQUcsQ0FBQ0MsUUFBSixJQUFnQixRQUFoQixHQUEyQixJQUEzQixHQUFrQyxFQURuQyxJQUVBRyxrQkFBa0IsQ0FBQ0osR0FBRyxDQUFDSyxJQUFMLENBRmxCLEdBR0FMLEdBQUcsQ0FBQ00sUUFISixJQUlDTixHQUFHLENBQUNPLE1BQUosSUFBYyxFQUpmLEtBS0NQLEdBQUcsQ0FBQ1EsSUFBSixJQUFZLEVBTGIsQ0FERjtBQVFEIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb3B5cmlnaHQgMjAxOSBUaGUgQU1QIEhUTUwgQXV0aG9ycy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTLUlTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbmltcG9ydCB7dXJsc30gZnJvbSAnLi9jb25maWcnO1xuaW1wb3J0IHtwYXJzZVNyY3NldH0gZnJvbSAnLi9jb3JlL2RvbS9zcmNzZXQnO1xuaW1wb3J0IHt1c2VyfSBmcm9tICcuL2xvZyc7XG5pbXBvcnQge1xuICBjaGVja0NvcnNVcmwsXG4gIGdldFNvdXJjZVVybCxcbiAgaXNQcm94eU9yaWdpbixcbiAgcGFyc2VVcmxEZXByZWNhdGVkLFxuICByZXNvbHZlUmVsYXRpdmVVcmwsXG59IGZyb20gJy4vdXJsJztcblxuY29uc3QgVEFHID0gJ1VSTC1SRVdSSVRFJztcblxuLyoqIEBwcml2YXRlIEBjb25zdCB7c3RyaW5nfSAqL1xuY29uc3QgT1JJR0lOQUxfVEFSR0VUX1ZBTFVFID0gJ19fQU1QX09SSUdJTkFMX1RBUkdFVF9WQUxVRV8nO1xuXG4vKipcbiAqIFRoZSBzYW1lIGFzIHJld3JpdGVBdHRyaWJ1dGVWYWx1ZSgpIGJ1dCBhY3R1YWxseSB1cGRhdGVzIHRoZSBlbGVtZW50IGFuZFxuICogbW9kaWZpZXMgb3RoZXIgcmVsYXRlZCBhdHRyaWJ1dGUocykgZm9yIHNwZWNpYWwgY2FzZXMsIGkuZS4gYHRhcmdldGAgZm9yIDxhPi5cbiAqIEBwYXJhbSB7IUVsZW1lbnR9IGVsZW1lbnRcbiAqIEBwYXJhbSB7c3RyaW5nfSBhdHRyTmFtZVxuICogQHBhcmFtIHtzdHJpbmd9IGF0dHJWYWx1ZVxuICogQHBhcmFtIHshTG9jYXRpb249fSBvcHRfbG9jYXRpb25cbiAqIEBwYXJhbSB7Ym9vbGVhbj19IG9wdF91cGRhdGVQcm9wZXJ0eVxuICogQHJldHVybiB7c3RyaW5nfVxuICovXG5leHBvcnQgZnVuY3Rpb24gcmV3cml0ZUF0dHJpYnV0ZXNGb3JFbGVtZW50KFxuICBlbGVtZW50LFxuICBhdHRyTmFtZSxcbiAgYXR0clZhbHVlLFxuICBvcHRfbG9jYXRpb24sXG4gIG9wdF91cGRhdGVQcm9wZXJ0eVxuKSB7XG4gIGNvbnN0IHRhZyA9IGVsZW1lbnQudGFnTmFtZS50b0xvd2VyQ2FzZSgpO1xuICBjb25zdCBhdHRyID0gYXR0ck5hbWUudG9Mb3dlckNhc2UoKTtcbiAgY29uc3QgcmV3cml0dGVuVmFsdWUgPSByZXdyaXRlQXR0cmlidXRlVmFsdWUodGFnLCBhdHRyLCBhdHRyVmFsdWUpO1xuICAvLyBXaGVuIHNlcnZlZCBmcm9tIHByb3h5IChDRE4pLCBjaGFuZ2luZyBhbiA8YT4gdGFnIGZyb20gYSBoYXNoIGxpbmsgdG8gYVxuICAvLyBub24taGFzaCBsaW5rIHJlcXVpcmVzIHVwZGF0aW5nIGB0YXJnZXRgIGF0dHJpYnV0ZSBwZXIgY2FjaGUgbW9kaWZpY2F0aW9uXG4gIC8vIHJ1bGVzLiBAc2VlIGFtcC1jYWNoZS1tb2RpZmljYXRpb25zLm1kI3VybC1yZXdyaXRlc1xuICBjb25zdCBpc1Byb3h5ID0gaXNQcm94eU9yaWdpbihvcHRfbG9jYXRpb24gfHwgc2VsZi5sb2NhdGlvbik7XG4gIGlmIChpc1Byb3h5ICYmIHRhZyA9PT0gJ2EnICYmIGF0dHIgPT09ICdocmVmJykge1xuICAgIGNvbnN0IG9sZFZhbHVlID0gZWxlbWVudC5nZXRBdHRyaWJ1dGUoYXR0cik7XG4gICAgY29uc3QgbmV3VmFsdWVJc0hhc2ggPSByZXdyaXR0ZW5WYWx1ZVswXSA9PT0gJyMnO1xuICAgIGNvbnN0IG9sZFZhbHVlSXNIYXNoID0gb2xkVmFsdWUgJiYgb2xkVmFsdWVbMF0gPT09ICcjJztcblxuICAgIGlmIChuZXdWYWx1ZUlzSGFzaCAmJiAhb2xkVmFsdWVJc0hhc2gpIHtcbiAgICAgIC8vIFNhdmUgdGhlIG9yaWdpbmFsIHZhbHVlIG9mIGB0YXJnZXRgIHNvIGl0IGNhbiBiZSByZXN0b3JlZCAoaWYgbmVlZGVkKS5cbiAgICAgIGlmICghZWxlbWVudFtPUklHSU5BTF9UQVJHRVRfVkFMVUVdKSB7XG4gICAgICAgIGVsZW1lbnRbT1JJR0lOQUxfVEFSR0VUX1ZBTFVFXSA9IGVsZW1lbnQuZ2V0QXR0cmlidXRlKCd0YXJnZXQnKTtcbiAgICAgIH1cbiAgICAgIGVsZW1lbnQucmVtb3ZlQXR0cmlidXRlKCd0YXJnZXQnKTtcbiAgICB9IGVsc2UgaWYgKG9sZFZhbHVlSXNIYXNoICYmICFuZXdWYWx1ZUlzSGFzaCkge1xuICAgICAgLy8gUmVzdG9yZSB0aGUgb3JpZ2luYWwgdmFsdWUgb2YgYHRhcmdldGAgb3IgZGVmYXVsdCB0byBgX3RvcGAuXG4gICAgICBlbGVtZW50LnNldEF0dHJpYnV0ZSgndGFyZ2V0JywgZWxlbWVudFtPUklHSU5BTF9UQVJHRVRfVkFMVUVdIHx8ICdfdG9wJyk7XG4gICAgfVxuICB9XG4gIGlmIChvcHRfdXBkYXRlUHJvcGVydHkpIHtcbiAgICAvLyBNdXN0IGJlIGRvbmUgZmlyc3QgZm9yIDxpbnB1dD4gZWxlbWVudHMgdG8gY29ycmVjdGx5IHVwZGF0ZSB0aGUgVUkgZm9yXG4gICAgLy8gdGhlIGZpcnN0IGNoYW5nZSBvbiBTYWZhcmkgYW5kIENocm9tZS5cbiAgICBlbGVtZW50W2F0dHJdID0gcmV3cml0dGVuVmFsdWU7XG4gIH1cbiAgZWxlbWVudC5zZXRBdHRyaWJ1dGUoYXR0ciwgcmV3cml0dGVuVmFsdWUpO1xuICByZXR1cm4gcmV3cml0dGVuVmFsdWU7XG59XG5cbi8qKlxuICogSWYgKHRhZ05hbWUsIGF0dHJOYW1lKSBpcyBhIENETi1yZXdyaXRhYmxlIFVSTCBhdHRyaWJ1dGUsIHJldHVybnMgdGhlXG4gKiByZXdyaXR0ZW4gVVJMIHZhbHVlLiBPdGhlcndpc2UsIHJldHVybnMgdGhlIHVuY2hhbmdlZCBgYXR0clZhbHVlYC5cbiAqIFNlZSByZXNvbHZlVXJsQXR0cigpIGZvciByZXdyaXRpbmcgcnVsZXMuXG4gKiBAcGFyYW0ge3N0cmluZ30gdGFnTmFtZSBMb3dlcmNhc2UgdGFnIG5hbWUuXG4gKiBAcGFyYW0ge3N0cmluZ30gYXR0ck5hbWUgTG93ZXJjYXNlIGF0dHJpYnV0ZSBuYW1lLlxuICogQHBhcmFtIHtzdHJpbmd9IGF0dHJWYWx1ZVxuICogQHJldHVybiB7c3RyaW5nfVxuICogQHZpc2libGVGb3JUZXN0aW5nXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiByZXdyaXRlQXR0cmlidXRlVmFsdWUodGFnTmFtZSwgYXR0ck5hbWUsIGF0dHJWYWx1ZSkge1xuICBpZiAoaXNVcmxBdHRyaWJ1dGUoYXR0ck5hbWUpKSB7XG4gICAgcmV0dXJuIHJlc29sdmVVcmxBdHRyKHRhZ05hbWUsIGF0dHJOYW1lLCBhdHRyVmFsdWUsIHNlbGYubG9jYXRpb24pO1xuICB9XG4gIHJldHVybiBhdHRyVmFsdWU7XG59XG5cbi8qKlxuICogQHBhcmFtIHtzdHJpbmd9IGF0dHJOYW1lIExvd2VyY2FzZSBhdHRyaWJ1dGUgbmFtZS5cbiAqIEByZXR1cm4ge2Jvb2xlYW59XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBpc1VybEF0dHJpYnV0ZShhdHRyTmFtZSkge1xuICByZXR1cm4gKFxuICAgIGF0dHJOYW1lID09ICdzcmMnIHx8XG4gICAgYXR0ck5hbWUgPT0gJ2hyZWYnIHx8XG4gICAgYXR0ck5hbWUgPT0gJ3hsaW5rOmhyZWYnIHx8XG4gICAgYXR0ck5hbWUgPT0gJ3NyY3NldCdcbiAgKTtcbn1cblxuLyoqXG4gKiBSZXdyaXRlcyB0aGUgVVJMIGF0dHJpYnV0ZSB2YWx1ZXMuIFVSTHMgYXJlIHJld3JpdHRlbiBhcyBmb2xsb3dpbmc6XG4gKiAtIElmIFVSTCBpcyBhYnNvbHV0ZSwgaXQgaXMgbm90IHJld3JpdHRlblxuICogLSBJZiBVUkwgaXMgcmVsYXRpdmUsIGl0J3MgcmV3cml0dGVuIGFzIGFic29sdXRlIGFnYWluc3QgdGhlIHNvdXJjZSBvcmlnaW5cbiAqIC0gSWYgcmVzdWx0aW5nIFVSTCBpcyBhIGBodHRwOmAgVVJMIGFuZCBpdCdzIGZvciBpbWFnZSwgdGhlIFVSTCBpcyByZXdyaXR0ZW5cbiAqICAgYWdhaW4gdG8gYmUgc2VydmVkIHdpdGggQU1QIENhY2hlIChjZG4uYW1wcHJvamVjdC5vcmcpLlxuICpcbiAqIEBwYXJhbSB7c3RyaW5nfSB0YWdOYW1lIExvd2VyY2FzZSB0YWcgbmFtZS5cbiAqIEBwYXJhbSB7c3RyaW5nfSBhdHRyTmFtZSBMb3dlcmNhc2UgYXR0cmlidXRlIG5hbWUuXG4gKiBAcGFyYW0ge3N0cmluZ30gYXR0clZhbHVlXG4gKiBAcGFyYW0geyFMb2NhdGlvbn0gd2luZG93TG9jYXRpb25cbiAqIEByZXR1cm4ge3N0cmluZ31cbiAqIEBwcml2YXRlXG4gKiBAdmlzaWJsZUZvclRlc3RpbmdcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHJlc29sdmVVcmxBdHRyKHRhZ05hbWUsIGF0dHJOYW1lLCBhdHRyVmFsdWUsIHdpbmRvd0xvY2F0aW9uKSB7XG4gIGNoZWNrQ29yc1VybChhdHRyVmFsdWUpO1xuICBjb25zdCBpc1Byb3h5SG9zdCA9IGlzUHJveHlPcmlnaW4od2luZG93TG9jYXRpb24pO1xuICBjb25zdCBiYXNlVXJsID0gcGFyc2VVcmxEZXByZWNhdGVkKGdldFNvdXJjZVVybCh3aW5kb3dMb2NhdGlvbikpO1xuXG4gIGlmIChhdHRyTmFtZSA9PSAnaHJlZicgJiYgIWF0dHJWYWx1ZS5zdGFydHNXaXRoKCcjJykpIHtcbiAgICByZXR1cm4gcmVzb2x2ZVJlbGF0aXZlVXJsKGF0dHJWYWx1ZSwgYmFzZVVybCk7XG4gIH1cblxuICBpZiAoYXR0ck5hbWUgPT0gJ3NyYycpIHtcbiAgICBpZiAodGFnTmFtZSA9PSAnYW1wLWltZycpIHtcbiAgICAgIHJldHVybiByZXNvbHZlSW1hZ2VVcmxBdHRyKGF0dHJWYWx1ZSwgYmFzZVVybCwgaXNQcm94eUhvc3QpO1xuICAgIH1cbiAgICByZXR1cm4gcmVzb2x2ZVJlbGF0aXZlVXJsKGF0dHJWYWx1ZSwgYmFzZVVybCk7XG4gIH1cblxuICBpZiAoYXR0ck5hbWUgPT0gJ3NyY3NldCcpIHtcbiAgICBsZXQgc3Jjc2V0O1xuICAgIHRyeSB7XG4gICAgICBzcmNzZXQgPSBwYXJzZVNyY3NldChhdHRyVmFsdWUpO1xuICAgIH0gY2F0Y2ggKGUpIHtcbiAgICAgIC8vIERvIG5vdCBmYWlsIHRoZSB3aG9sZSB0ZW1wbGF0ZSBqdXN0IGJlY2F1c2Ugb25lIHNyY3NldCBpcyBicm9rZW4uXG4gICAgICAvLyBBbiBBTVAgZWxlbWVudCB3aWxsIHBpY2sgaXQgdXAgYW5kIHJlcG9ydCBwcm9wZXJseS5cbiAgICAgIHVzZXIoKS5lcnJvcihUQUcsICdGYWlsZWQgdG8gcGFyc2Ugc3Jjc2V0OiAnLCBlKTtcbiAgICAgIHJldHVybiBhdHRyVmFsdWU7XG4gICAgfVxuICAgIHJldHVybiBzcmNzZXQuc3RyaW5naWZ5KCh1cmwpID0+XG4gICAgICByZXNvbHZlSW1hZ2VVcmxBdHRyKHVybCwgYmFzZVVybCwgaXNQcm94eUhvc3QpXG4gICAgKTtcbiAgfVxuXG4gIHJldHVybiBhdHRyVmFsdWU7XG59XG5cbi8qKlxuICogTm9uLUhUVFBzIGltYWdlIFVSTHMgYXJlIHJld3JpdHRlbiB2aWEgcHJveHkuXG4gKiBAcGFyYW0ge3N0cmluZ30gYXR0clZhbHVlXG4gKiBAcGFyYW0geyFMb2NhdGlvbn0gYmFzZVVybFxuICogQHBhcmFtIHtib29sZWFufSBpc1Byb3h5SG9zdFxuICogQHJldHVybiB7c3RyaW5nfVxuICovXG5mdW5jdGlvbiByZXNvbHZlSW1hZ2VVcmxBdHRyKGF0dHJWYWx1ZSwgYmFzZVVybCwgaXNQcm94eUhvc3QpIHtcbiAgY29uc3Qgc3JjID0gcGFyc2VVcmxEZXByZWNhdGVkKHJlc29sdmVSZWxhdGl2ZVVybChhdHRyVmFsdWUsIGJhc2VVcmwpKTtcblxuICAvLyBVUkxzIHN1Y2ggYXMgYGRhdGE6YCBvciBwcm94eSBVUkxzIGFyZSByZXR1cm5lZCBhcyBpcy4gVW5zYWZlIHByb3RvY29sc1xuICAvLyBkbyBub3QgYXJyaXZlIGhlcmUgLSBhbHJlYWR5IHN0cmlwcGVkIGJ5IHRoZSBzYW5pdGl6ZXIuXG4gIGlmIChzcmMucHJvdG9jb2wgPT0gJ2RhdGE6JyB8fCBpc1Byb3h5T3JpZ2luKHNyYykgfHwgIWlzUHJveHlIb3N0KSB7XG4gICAgcmV0dXJuIHNyYy5ocmVmO1xuICB9XG5cbiAgLy8gUmV3cml0ZSBhcyBhIHByb3h5IFVSTC5cbiAgcmV0dXJuIChcbiAgICBgJHt1cmxzLmNkbn0vaS9gICtcbiAgICAoc3JjLnByb3RvY29sID09ICdodHRwczonID8gJ3MvJyA6ICcnKSArXG4gICAgZW5jb2RlVVJJQ29tcG9uZW50KHNyYy5ob3N0KSArXG4gICAgc3JjLnBhdGhuYW1lICtcbiAgICAoc3JjLnNlYXJjaCB8fCAnJykgK1xuICAgIChzcmMuaGFzaCB8fCAnJylcbiAgKTtcbn1cbiJdfQ==
+// /Users/mszylkowski/src/amphtml/src/url-rewrite.js

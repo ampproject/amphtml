@@ -1,0 +1,1 @@
+export const CSS = ".i-amphtml-image-viewer-image{position:absolute;-o-object-fit:contain;object-fit:contain}.i-amphtml-image-viewer{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;transform:translateZ(0)}.i-amphtml-image-viewer>amp-img{min-width:1px;min-height:1px}\n/*# sourceURL=/extensions/amp-image-viewer/0.1/amp-image-viewer.css*/";

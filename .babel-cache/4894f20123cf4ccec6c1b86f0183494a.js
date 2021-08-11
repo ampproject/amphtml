@@ -1,0 +1,69 @@
+/**
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { createCustomEvent } from "../../../src/event-helper";
+
+/** @const {!Object<string, string>} */
+export var EventType = {
+  // Triggered when the user mutes the story
+  MUTE: 'ampstory:mute',
+  // Triggered when the user unmutes the story
+  UNMUTE: 'ampstory:unmute',
+  // Triggered when the story should switch to a specified page
+  SWITCH_PAGE: 'ampstory:switchpage',
+  // Triggered when the story should switch to the previous page
+  PREVIOUS_PAGE: 'ampstory:previouspage',
+  // Triggered when the story should switch to the next page
+  NEXT_PAGE: 'ampstory:nextpage',
+  // Triggered when a page updates its progress
+  PAGE_PROGRESS: 'ampstory:pageprogress',
+  // Triggered when the story should be replayed
+  REPLAY: 'ampstory:replay',
+  // DEVELOPMENT MODE ONLY: Triggered when a story page has log entries (e.g.
+  // warnings or errors).
+  DEV_LOG_ENTRIES_AVAILABLE: 'ampstory:devlogentriesavailable',
+  // Triggered when user clicks on end 75% of the last page
+  NO_NEXT_PAGE: 'ampstory:nonextpage',
+  // Triggered when user clicks on start 25% of the first page
+  NO_PREVIOUS_PAGE: 'ampstory:nopreviouspage',
+  // Triggered when a story has loaded at least its initial set of pages.
+  STORY_LOADED: 'ampstory:load',
+  // Triggered when a page has loaded at least one frame of all of its media.
+  PAGE_LOADED: 'ampstory:pageload',
+  // Dispatches an action to the amp-story store service. Only works under test.
+  DISPATCH_ACTION: 'ampstory:dispatchaction'
+};
+
+/**
+ * @param {!Window} win
+ * @param {!EventTarget} source
+ * @param {string} eventName
+ * @param {!JsonObject=} payload
+ * @param {!CustomEventInit=} eventInit
+ */
+export function dispatch(win, source, eventName, payload, eventInit) {
+  if (payload === void 0) {
+    payload = undefined;
+  }
+
+  if (eventInit === void 0) {
+    eventInit = undefined;
+  }
+
+  var event = createCustomEvent(win, eventName, payload, eventInit);
+  source.dispatchEvent(event);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImV2ZW50cy5qcyJdLCJuYW1lcyI6WyJjcmVhdGVDdXN0b21FdmVudCIsIkV2ZW50VHlwZSIsIk1VVEUiLCJVTk1VVEUiLCJTV0lUQ0hfUEFHRSIsIlBSRVZJT1VTX1BBR0UiLCJORVhUX1BBR0UiLCJQQUdFX1BST0dSRVNTIiwiUkVQTEFZIiwiREVWX0xPR19FTlRSSUVTX0FWQUlMQUJMRSIsIk5PX05FWFRfUEFHRSIsIk5PX1BSRVZJT1VTX1BBR0UiLCJTVE9SWV9MT0FERUQiLCJQQUdFX0xPQURFRCIsIkRJU1BBVENIX0FDVElPTiIsImRpc3BhdGNoIiwid2luIiwic291cmNlIiwiZXZlbnROYW1lIiwicGF5bG9hZCIsImV2ZW50SW5pdCIsInVuZGVmaW5lZCIsImV2ZW50IiwiZGlzcGF0Y2hFdmVudCJdLCJtYXBwaW5ncyI6IkFBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBRUEsU0FBUUEsaUJBQVI7O0FBRUE7QUFDQSxPQUFPLElBQU1DLFNBQVMsR0FBRztBQUN2QjtBQUNBQyxFQUFBQSxJQUFJLEVBQUUsZUFGaUI7QUFJdkI7QUFDQUMsRUFBQUEsTUFBTSxFQUFFLGlCQUxlO0FBT3ZCO0FBQ0FDLEVBQUFBLFdBQVcsRUFBRSxxQkFSVTtBQVV2QjtBQUNBQyxFQUFBQSxhQUFhLEVBQUUsdUJBWFE7QUFhdkI7QUFDQUMsRUFBQUEsU0FBUyxFQUFFLG1CQWRZO0FBZ0J2QjtBQUNBQyxFQUFBQSxhQUFhLEVBQUUsdUJBakJRO0FBbUJ2QjtBQUNBQyxFQUFBQSxNQUFNLEVBQUUsaUJBcEJlO0FBc0J2QjtBQUNBO0FBQ0FDLEVBQUFBLHlCQUF5QixFQUFFLGlDQXhCSjtBQTBCdkI7QUFDQUMsRUFBQUEsWUFBWSxFQUFFLHFCQTNCUztBQTZCdkI7QUFDQUMsRUFBQUEsZ0JBQWdCLEVBQUUseUJBOUJLO0FBZ0N2QjtBQUNBQyxFQUFBQSxZQUFZLEVBQUUsZUFqQ1M7QUFtQ3ZCO0FBQ0FDLEVBQUFBLFdBQVcsRUFBRSxtQkFwQ1U7QUFzQ3ZCO0FBQ0FDLEVBQUFBLGVBQWUsRUFBRTtBQXZDTSxDQUFsQjs7QUEwQ1A7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVNDLFFBQVQsQ0FDTEMsR0FESyxFQUVMQyxNQUZLLEVBR0xDLFNBSEssRUFJTEMsT0FKSyxFQUtMQyxTQUxLLEVBTUw7QUFBQSxNQUZBRCxPQUVBO0FBRkFBLElBQUFBLE9BRUEsR0FGVUUsU0FFVjtBQUFBOztBQUFBLE1BREFELFNBQ0E7QUFEQUEsSUFBQUEsU0FDQSxHQURZQyxTQUNaO0FBQUE7O0FBQ0EsTUFBTUMsS0FBSyxHQUFHdEIsaUJBQWlCLENBQUNnQixHQUFELEVBQU1FLFNBQU4sRUFBaUJDLE9BQWpCLEVBQTBCQyxTQUExQixDQUEvQjtBQUNBSCxFQUFBQSxNQUFNLENBQUNNLGFBQVAsQ0FBcUJELEtBQXJCO0FBQ0QiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIENvcHlyaWdodCAyMDE3IFRoZSBBTVAgSFRNTCBBdXRob3JzLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIExpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmVcbiAqIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuIFwiQVMtSVNcIiBCQVNJUyxcbiAqIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLlxuICogU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZFxuICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHtjcmVhdGVDdXN0b21FdmVudH0gZnJvbSAnLi4vLi4vLi4vc3JjL2V2ZW50LWhlbHBlcic7XG5cbi8qKiBAY29uc3QgeyFPYmplY3Q8c3RyaW5nLCBzdHJpbmc+fSAqL1xuZXhwb3J0IGNvbnN0IEV2ZW50VHlwZSA9IHtcbiAgLy8gVHJpZ2dlcmVkIHdoZW4gdGhlIHVzZXIgbXV0ZXMgdGhlIHN0b3J5XG4gIE1VVEU6ICdhbXBzdG9yeTptdXRlJyxcblxuICAvLyBUcmlnZ2VyZWQgd2hlbiB0aGUgdXNlciB1bm11dGVzIHRoZSBzdG9yeVxuICBVTk1VVEU6ICdhbXBzdG9yeTp1bm11dGUnLFxuXG4gIC8vIFRyaWdnZXJlZCB3aGVuIHRoZSBzdG9yeSBzaG91bGQgc3dpdGNoIHRvIGEgc3BlY2lmaWVkIHBhZ2VcbiAgU1dJVENIX1BBR0U6ICdhbXBzdG9yeTpzd2l0Y2hwYWdlJyxcblxuICAvLyBUcmlnZ2VyZWQgd2hlbiB0aGUgc3Rvcnkgc2hvdWxkIHN3aXRjaCB0byB0aGUgcHJldmlvdXMgcGFnZVxuICBQUkVWSU9VU19QQUdFOiAnYW1wc3Rvcnk6cHJldmlvdXNwYWdlJyxcblxuICAvLyBUcmlnZ2VyZWQgd2hlbiB0aGUgc3Rvcnkgc2hvdWxkIHN3aXRjaCB0byB0aGUgbmV4dCBwYWdlXG4gIE5FWFRfUEFHRTogJ2FtcHN0b3J5Om5leHRwYWdlJyxcblxuICAvLyBUcmlnZ2VyZWQgd2hlbiBhIHBhZ2UgdXBkYXRlcyBpdHMgcHJvZ3Jlc3NcbiAgUEFHRV9QUk9HUkVTUzogJ2FtcHN0b3J5OnBhZ2Vwcm9ncmVzcycsXG5cbiAgLy8gVHJpZ2dlcmVkIHdoZW4gdGhlIHN0b3J5IHNob3VsZCBiZSByZXBsYXllZFxuICBSRVBMQVk6ICdhbXBzdG9yeTpyZXBsYXknLFxuXG4gIC8vIERFVkVMT1BNRU5UIE1PREUgT05MWTogVHJpZ2dlcmVkIHdoZW4gYSBzdG9yeSBwYWdlIGhhcyBsb2cgZW50cmllcyAoZS5nLlxuICAvLyB3YXJuaW5ncyBvciBlcnJvcnMpLlxuICBERVZfTE9HX0VOVFJJRVNfQVZBSUxBQkxFOiAnYW1wc3Rvcnk6ZGV2bG9nZW50cmllc2F2YWlsYWJsZScsXG5cbiAgLy8gVHJpZ2dlcmVkIHdoZW4gdXNlciBjbGlja3Mgb24gZW5kIDc1JSBvZiB0aGUgbGFzdCBwYWdlXG4gIE5PX05FWFRfUEFHRTogJ2FtcHN0b3J5Om5vbmV4dHBhZ2UnLFxuXG4gIC8vIFRyaWdnZXJlZCB3aGVuIHVzZXIgY2xpY2tzIG9uIHN0YXJ0IDI1JSBvZiB0aGUgZmlyc3QgcGFnZVxuICBOT19QUkVWSU9VU19QQUdFOiAnYW1wc3Rvcnk6bm9wcmV2aW91c3BhZ2UnLFxuXG4gIC8vIFRyaWdnZXJlZCB3aGVuIGEgc3RvcnkgaGFzIGxvYWRlZCBhdCBsZWFzdCBpdHMgaW5pdGlhbCBzZXQgb2YgcGFnZXMuXG4gIFNUT1JZX0xPQURFRDogJ2FtcHN0b3J5OmxvYWQnLFxuXG4gIC8vIFRyaWdnZXJlZCB3aGVuIGEgcGFnZSBoYXMgbG9hZGVkIGF0IGxlYXN0IG9uZSBmcmFtZSBvZiBhbGwgb2YgaXRzIG1lZGlhLlxuICBQQUdFX0xPQURFRDogJ2FtcHN0b3J5OnBhZ2Vsb2FkJyxcblxuICAvLyBEaXNwYXRjaGVzIGFuIGFjdGlvbiB0byB0aGUgYW1wLXN0b3J5IHN0b3JlIHNlcnZpY2UuIE9ubHkgd29ya3MgdW5kZXIgdGVzdC5cbiAgRElTUEFUQ0hfQUNUSU9OOiAnYW1wc3Rvcnk6ZGlzcGF0Y2hhY3Rpb24nLFxufTtcblxuLyoqXG4gKiBAcGFyYW0geyFXaW5kb3d9IHdpblxuICogQHBhcmFtIHshRXZlbnRUYXJnZXR9IHNvdXJjZVxuICogQHBhcmFtIHtzdHJpbmd9IGV2ZW50TmFtZVxuICogQHBhcmFtIHshSnNvbk9iamVjdD19IHBheWxvYWRcbiAqIEBwYXJhbSB7IUN1c3RvbUV2ZW50SW5pdD19IGV2ZW50SW5pdFxuICovXG5leHBvcnQgZnVuY3Rpb24gZGlzcGF0Y2goXG4gIHdpbixcbiAgc291cmNlLFxuICBldmVudE5hbWUsXG4gIHBheWxvYWQgPSB1bmRlZmluZWQsXG4gIGV2ZW50SW5pdCA9IHVuZGVmaW5lZFxuKSB7XG4gIGNvbnN0IGV2ZW50ID0gY3JlYXRlQ3VzdG9tRXZlbnQod2luLCBldmVudE5hbWUsIHBheWxvYWQsIGV2ZW50SW5pdCk7XG4gIHNvdXJjZS5kaXNwYXRjaEV2ZW50KGV2ZW50KTtcbn1cbiJdfQ==
+// /Users/mszylkowski/src/amphtml/extensions/amp-story/1.0/events.js

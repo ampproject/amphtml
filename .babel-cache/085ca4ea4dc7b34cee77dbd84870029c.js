@@ -1,0 +1,68 @@
+/**
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { removeElement } from "../dom";
+import { setStyles } from "../dom/style";
+
+/**
+ * @param {!Window} win
+ * @param {string} text
+ * @return {boolean}
+ */
+export function copyTextToClipboard(win, text) {
+  var copySuccessful = false;
+  var doc = win.document;
+  var textarea =
+  /** @type {!HTMLTextAreaElement} */
+  doc.createElement('textarea');
+  setStyles(textarea, {
+    'position': 'fixed',
+    'top': 0,
+    'left': 0,
+    'width': '50px',
+    'height': '50px',
+    'padding': 0,
+    'border': 'none',
+    'outline': 'none',
+    'background': 'transparent'
+  });
+  textarea.value = text;
+  textarea.readOnly = true;
+  textarea.contentEditable = true;
+  doc.body.appendChild(textarea);
+  win.getSelection().removeAllRanges();
+  textarea.
+  /*OK*/
+  focus();
+  textarea.setSelectionRange(0, text.length);
+
+  try {
+    copySuccessful = doc.execCommand('copy');
+  } catch (e) {// 🤷
+  }
+
+  removeElement(textarea);
+  return copySuccessful;
+}
+
+/**
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+export function isCopyingToClipboardSupported(doc) {
+  return doc.queryCommandSupported('copy');
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImNsaXBib2FyZC5qcyJdLCJuYW1lcyI6WyJyZW1vdmVFbGVtZW50Iiwic2V0U3R5bGVzIiwiY29weVRleHRUb0NsaXBib2FyZCIsIndpbiIsInRleHQiLCJjb3B5U3VjY2Vzc2Z1bCIsImRvYyIsImRvY3VtZW50IiwidGV4dGFyZWEiLCJjcmVhdGVFbGVtZW50IiwidmFsdWUiLCJyZWFkT25seSIsImNvbnRlbnRFZGl0YWJsZSIsImJvZHkiLCJhcHBlbmRDaGlsZCIsImdldFNlbGVjdGlvbiIsInJlbW92ZUFsbFJhbmdlcyIsImZvY3VzIiwic2V0U2VsZWN0aW9uUmFuZ2UiLCJsZW5ndGgiLCJleGVjQ29tbWFuZCIsImUiLCJpc0NvcHlpbmdUb0NsaXBib2FyZFN1cHBvcnRlZCIsInF1ZXJ5Q29tbWFuZFN1cHBvcnRlZCJdLCJtYXBwaW5ncyI6IkFBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsU0FBUUEsYUFBUjtBQUNBLFNBQVFDLFNBQVI7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0MsbUJBQVQsQ0FBNkJDLEdBQTdCLEVBQWtDQyxJQUFsQyxFQUF3QztBQUM3QyxNQUFJQyxjQUFjLEdBQUcsS0FBckI7QUFDQSxNQUFNQyxHQUFHLEdBQUdILEdBQUcsQ0FBQ0ksUUFBaEI7QUFFQSxNQUFNQyxRQUFRO0FBQ1o7QUFDQ0YsRUFBQUEsR0FBRyxDQUFDRyxhQUFKLENBQWtCLFVBQWxCLENBRkg7QUFJQVIsRUFBQUEsU0FBUyxDQUFDTyxRQUFELEVBQVc7QUFDbEIsZ0JBQVksT0FETTtBQUVsQixXQUFPLENBRlc7QUFHbEIsWUFBUSxDQUhVO0FBSWxCLGFBQVMsTUFKUztBQUtsQixjQUFVLE1BTFE7QUFNbEIsZUFBVyxDQU5PO0FBT2xCLGNBQVUsTUFQUTtBQVFsQixlQUFXLE1BUk87QUFTbEIsa0JBQWM7QUFUSSxHQUFYLENBQVQ7QUFZQUEsRUFBQUEsUUFBUSxDQUFDRSxLQUFULEdBQWlCTixJQUFqQjtBQUNBSSxFQUFBQSxRQUFRLENBQUNHLFFBQVQsR0FBb0IsSUFBcEI7QUFDQUgsRUFBQUEsUUFBUSxDQUFDSSxlQUFULEdBQTJCLElBQTNCO0FBRUFOLEVBQUFBLEdBQUcsQ0FBQ08sSUFBSixDQUFTQyxXQUFULENBQXFCTixRQUFyQjtBQUNBTCxFQUFBQSxHQUFHLENBQUNZLFlBQUosR0FBbUJDLGVBQW5CO0FBRUFSLEVBQUFBLFFBQVE7QUFBQztBQUFPUyxFQUFBQSxLQUFoQjtBQUNBVCxFQUFBQSxRQUFRLENBQUNVLGlCQUFULENBQTJCLENBQTNCLEVBQThCZCxJQUFJLENBQUNlLE1BQW5DOztBQUVBLE1BQUk7QUFDRmQsSUFBQUEsY0FBYyxHQUFHQyxHQUFHLENBQUNjLFdBQUosQ0FBZ0IsTUFBaEIsQ0FBakI7QUFDRCxHQUZELENBRUUsT0FBT0MsQ0FBUCxFQUFVLENBQ1Y7QUFDRDs7QUFFRHJCLEVBQUFBLGFBQWEsQ0FBQ1EsUUFBRCxDQUFiO0FBRUEsU0FBT0gsY0FBUDtBQUNEOztBQUVEO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTaUIsNkJBQVQsQ0FBdUNoQixHQUF2QyxFQUE0QztBQUNqRCxTQUFPQSxHQUFHLENBQUNpQixxQkFBSixDQUEwQixNQUExQixDQUFQO0FBQ0QiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIENvcHlyaWdodCAyMDE3IFRoZSBBTVAgSFRNTCBBdXRob3JzLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIExpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmVcbiAqIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuIFwiQVMtSVNcIiBCQVNJUyxcbiAqIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLlxuICogU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZFxuICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cbmltcG9ydCB7cmVtb3ZlRWxlbWVudH0gZnJvbSAnI2NvcmUvZG9tJztcbmltcG9ydCB7c2V0U3R5bGVzfSBmcm9tICcjY29yZS9kb20vc3R5bGUnO1xuXG4vKipcbiAqIEBwYXJhbSB7IVdpbmRvd30gd2luXG4gKiBAcGFyYW0ge3N0cmluZ30gdGV4dFxuICogQHJldHVybiB7Ym9vbGVhbn1cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGNvcHlUZXh0VG9DbGlwYm9hcmQod2luLCB0ZXh0KSB7XG4gIGxldCBjb3B5U3VjY2Vzc2Z1bCA9IGZhbHNlO1xuICBjb25zdCBkb2MgPSB3aW4uZG9jdW1lbnQ7XG5cbiAgY29uc3QgdGV4dGFyZWEgPVxuICAgIC8qKiBAdHlwZSB7IUhUTUxUZXh0QXJlYUVsZW1lbnR9ICovXG4gICAgKGRvYy5jcmVhdGVFbGVtZW50KCd0ZXh0YXJlYScpKTtcblxuICBzZXRTdHlsZXModGV4dGFyZWEsIHtcbiAgICAncG9zaXRpb24nOiAnZml4ZWQnLFxuICAgICd0b3AnOiAwLFxuICAgICdsZWZ0JzogMCxcbiAgICAnd2lkdGgnOiAnNTBweCcsXG4gICAgJ2hlaWdodCc6ICc1MHB4JyxcbiAgICAncGFkZGluZyc6IDAsXG4gICAgJ2JvcmRlcic6ICdub25lJyxcbiAgICAnb3V0bGluZSc6ICdub25lJyxcbiAgICAnYmFja2dyb3VuZCc6ICd0cmFuc3BhcmVudCcsXG4gIH0pO1xuXG4gIHRleHRhcmVhLnZhbHVlID0gdGV4dDtcbiAgdGV4dGFyZWEucmVhZE9ubHkgPSB0cnVlO1xuICB0ZXh0YXJlYS5jb250ZW50RWRpdGFibGUgPSB0cnVlO1xuXG4gIGRvYy5ib2R5LmFwcGVuZENoaWxkKHRleHRhcmVhKTtcbiAgd2luLmdldFNlbGVjdGlvbigpLnJlbW92ZUFsbFJhbmdlcygpO1xuXG4gIHRleHRhcmVhLi8qT0sqLyBmb2N1cygpO1xuICB0ZXh0YXJlYS5zZXRTZWxlY3Rpb25SYW5nZSgwLCB0ZXh0Lmxlbmd0aCk7XG5cbiAgdHJ5IHtcbiAgICBjb3B5U3VjY2Vzc2Z1bCA9IGRvYy5leGVjQ29tbWFuZCgnY29weScpO1xuICB9IGNhdGNoIChlKSB7XG4gICAgLy8g8J+kt1xuICB9XG5cbiAgcmVtb3ZlRWxlbWVudCh0ZXh0YXJlYSk7XG5cbiAgcmV0dXJuIGNvcHlTdWNjZXNzZnVsO1xufVxuXG4vKipcbiAqIEBwYXJhbSB7IURvY3VtZW50fSBkb2NcbiAqIEByZXR1cm4ge2Jvb2xlYW59XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBpc0NvcHlpbmdUb0NsaXBib2FyZFN1cHBvcnRlZChkb2MpIHtcbiAgcmV0dXJuIGRvYy5xdWVyeUNvbW1hbmRTdXBwb3J0ZWQoJ2NvcHknKTtcbn1cbiJdfQ==
+// /Users/mszylkowski/src/amphtml/src/core/window/clipboard.js

@@ -1,0 +1,63 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+/**
+ * Copies values of all enumerable own properties from one or more source
+ * objects (provided as extended arguments to the function) to a target object.
+ *
+ * @param {!Object} target
+ * @param {...Object} var_args
+ * @return {!Object}
+ */
+export function assign(target, var_args) {
+  if (target == null) {
+    throw new TypeError('Cannot convert undefined or null to object');
+  }
+
+  var output = Object(target);
+
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i];
+
+    if (source != null) {
+      for (var key in source) {
+        if (hasOwnProperty.call(source, key)) {
+          output[key] = source[key];
+        }
+      }
+    }
+  }
+
+  return output;
+}
+
+/**
+ * Sets the Object.assign polyfill if it does not exist.
+ * @param {!Window} win
+ */
+export function install(win) {
+  if (!win.Object.assign) {
+    win.Object.defineProperty(win.Object, 'assign', {
+      enumerable: false,
+      configurable: true,
+      writable: true,
+      value: assign
+    });
+  }
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm9iamVjdC1hc3NpZ24uanMiXSwibmFtZXMiOlsiaGFzT3duUHJvcGVydHkiLCJPYmplY3QiLCJwcm90b3R5cGUiLCJhc3NpZ24iLCJ0YXJnZXQiLCJ2YXJfYXJncyIsIlR5cGVFcnJvciIsIm91dHB1dCIsImkiLCJhcmd1bWVudHMiLCJsZW5ndGgiLCJzb3VyY2UiLCJrZXkiLCJjYWxsIiwiaW5zdGFsbCIsIndpbiIsImRlZmluZVByb3BlcnR5IiwiZW51bWVyYWJsZSIsImNvbmZpZ3VyYWJsZSIsIndyaXRhYmxlIiwidmFsdWUiXSwibWFwcGluZ3MiOiJBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUVBLElBQU9BLGNBQVAsR0FBeUJDLE1BQU0sQ0FBQ0MsU0FBaEMsQ0FBT0YsY0FBUDs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTRyxNQUFULENBQWdCQyxNQUFoQixFQUF3QkMsUUFBeEIsRUFBa0M7QUFDdkMsTUFBSUQsTUFBTSxJQUFJLElBQWQsRUFBb0I7QUFDbEIsVUFBTSxJQUFJRSxTQUFKLENBQWMsNENBQWQsQ0FBTjtBQUNEOztBQUVELE1BQU1DLE1BQU0sR0FBR04sTUFBTSxDQUFDRyxNQUFELENBQXJCOztBQUNBLE9BQUssSUFBSUksQ0FBQyxHQUFHLENBQWIsRUFBZ0JBLENBQUMsR0FBR0MsU0FBUyxDQUFDQyxNQUE5QixFQUFzQ0YsQ0FBQyxFQUF2QyxFQUEyQztBQUN6QyxRQUFNRyxNQUFNLEdBQUdGLFNBQVMsQ0FBQ0QsQ0FBRCxDQUF4Qjs7QUFDQSxRQUFJRyxNQUFNLElBQUksSUFBZCxFQUFvQjtBQUNsQixXQUFLLElBQU1DLEdBQVgsSUFBa0JELE1BQWxCLEVBQTBCO0FBQ3hCLFlBQUlYLGNBQWMsQ0FBQ2EsSUFBZixDQUFvQkYsTUFBcEIsRUFBNEJDLEdBQTVCLENBQUosRUFBc0M7QUFDcENMLFVBQUFBLE1BQU0sQ0FBQ0ssR0FBRCxDQUFOLEdBQWNELE1BQU0sQ0FBQ0MsR0FBRCxDQUFwQjtBQUNEO0FBQ0Y7QUFDRjtBQUNGOztBQUNELFNBQU9MLE1BQVA7QUFDRDs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU08sT0FBVCxDQUFpQkMsR0FBakIsRUFBc0I7QUFDM0IsTUFBSSxDQUFDQSxHQUFHLENBQUNkLE1BQUosQ0FBV0UsTUFBaEIsRUFBd0I7QUFDdEJZLElBQUFBLEdBQUcsQ0FBQ2QsTUFBSixDQUFXZSxjQUFYLENBQTBCRCxHQUFHLENBQUNkLE1BQTlCLEVBQXNDLFFBQXRDLEVBQWdEO0FBQzlDZ0IsTUFBQUEsVUFBVSxFQUFFLEtBRGtDO0FBRTlDQyxNQUFBQSxZQUFZLEVBQUUsSUFGZ0M7QUFHOUNDLE1BQUFBLFFBQVEsRUFBRSxJQUhvQztBQUk5Q0MsTUFBQUEsS0FBSyxFQUFFakI7QUFKdUMsS0FBaEQ7QUFNRDtBQUNGIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb3B5cmlnaHQgMjAxNiBUaGUgQU1QIEhUTUwgQXV0aG9ycy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTLUlTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbmNvbnN0IHtoYXNPd25Qcm9wZXJ0eX0gPSBPYmplY3QucHJvdG90eXBlO1xuXG4vKipcbiAqIENvcGllcyB2YWx1ZXMgb2YgYWxsIGVudW1lcmFibGUgb3duIHByb3BlcnRpZXMgZnJvbSBvbmUgb3IgbW9yZSBzb3VyY2VcbiAqIG9iamVjdHMgKHByb3ZpZGVkIGFzIGV4dGVuZGVkIGFyZ3VtZW50cyB0byB0aGUgZnVuY3Rpb24pIHRvIGEgdGFyZ2V0IG9iamVjdC5cbiAqXG4gKiBAcGFyYW0geyFPYmplY3R9IHRhcmdldFxuICogQHBhcmFtIHsuLi5PYmplY3R9IHZhcl9hcmdzXG4gKiBAcmV0dXJuIHshT2JqZWN0fVxuICovXG5leHBvcnQgZnVuY3Rpb24gYXNzaWduKHRhcmdldCwgdmFyX2FyZ3MpIHtcbiAgaWYgKHRhcmdldCA9PSBudWxsKSB7XG4gICAgdGhyb3cgbmV3IFR5cGVFcnJvcignQ2Fubm90IGNvbnZlcnQgdW5kZWZpbmVkIG9yIG51bGwgdG8gb2JqZWN0Jyk7XG4gIH1cblxuICBjb25zdCBvdXRwdXQgPSBPYmplY3QodGFyZ2V0KTtcbiAgZm9yIChsZXQgaSA9IDE7IGkgPCBhcmd1bWVudHMubGVuZ3RoOyBpKyspIHtcbiAgICBjb25zdCBzb3VyY2UgPSBhcmd1bWVudHNbaV07XG4gICAgaWYgKHNvdXJjZSAhPSBudWxsKSB7XG4gICAgICBmb3IgKGNvbnN0IGtleSBpbiBzb3VyY2UpIHtcbiAgICAgICAgaWYgKGhhc093blByb3BlcnR5LmNhbGwoc291cmNlLCBrZXkpKSB7XG4gICAgICAgICAgb3V0cHV0W2tleV0gPSBzb3VyY2Vba2V5XTtcbiAgICAgICAgfVxuICAgICAgfVxuICAgIH1cbiAgfVxuICByZXR1cm4gb3V0cHV0O1xufVxuXG4vKipcbiAqIFNldHMgdGhlIE9iamVjdC5hc3NpZ24gcG9seWZpbGwgaWYgaXQgZG9lcyBub3QgZXhpc3QuXG4gKiBAcGFyYW0geyFXaW5kb3d9IHdpblxuICovXG5leHBvcnQgZnVuY3Rpb24gaW5zdGFsbCh3aW4pIHtcbiAgaWYgKCF3aW4uT2JqZWN0LmFzc2lnbikge1xuICAgIHdpbi5PYmplY3QuZGVmaW5lUHJvcGVydHkod2luLk9iamVjdCwgJ2Fzc2lnbicsIHtcbiAgICAgIGVudW1lcmFibGU6IGZhbHNlLFxuICAgICAgY29uZmlndXJhYmxlOiB0cnVlLFxuICAgICAgd3JpdGFibGU6IHRydWUsXG4gICAgICB2YWx1ZTogYXNzaWduLFxuICAgIH0pO1xuICB9XG59XG4iXX0=
+// /Users/mszylkowski/src/amphtml/src/polyfills/object-assign.js

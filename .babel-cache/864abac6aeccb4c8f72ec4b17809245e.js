@@ -1,0 +1,77 @@
+/**
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { urls } from "./config";
+import { parseQueryString } from "./core/types/string/url";
+import { loadPromise } from "./event-helper";
+import { isModeDevelopment } from "./mode";
+
+/**
+ * Triggers validation for the current document if there is a script in the
+ * page that has a "development" attribute and the bypass validation via
+ * #validate=0 is absent.
+ *
+ * @param {!Window} win Destination window for the new element.
+ */
+export function maybeValidate(win) {
+  var filename = win.location.href;
+
+  if (filename.startsWith('about:')) {
+    // Should only happen in tests.
+    return;
+  }
+
+  var validator = false;
+
+  if (isModeDevelopment(win)) {
+    var hash = parseQueryString(win.location['originalHash'] || win.location.hash);
+    validator = hash['validate'] !== '0';
+  }
+
+  if (validator) {
+    loadScript(win.document, urls.cdn + "/v0/validator_wasm.js").then(function () {
+      /* global amp: false */
+      amp.validator.validateUrlAndLog(filename, win.document);
+    });
+  }
+}
+
+/**
+ * Loads script
+ *
+ * @param {Document} doc
+ * @param {string} url
+ * @return {!Promise}
+ */
+export function loadScript(doc, url) {
+  var script =
+  /** @type {!HTMLScriptElement} */
+  doc.createElement('script');
+  script.src = url;
+  // Propagate nonce to all generated script tags.
+  var currentScript = doc.head.querySelector('script[nonce]');
+
+  if (currentScript) {
+    script.setAttribute('nonce', currentScript.getAttribute('nonce'));
+  }
+
+  var promise = loadPromise(script).then(function () {
+    doc.head.removeChild(script);
+  }, function () {});
+  doc.head.appendChild(script);
+  return promise;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInZhbGlkYXRvci1pbnRlZ3JhdGlvbi5qcyJdLCJuYW1lcyI6WyJ1cmxzIiwicGFyc2VRdWVyeVN0cmluZyIsImxvYWRQcm9taXNlIiwiaXNNb2RlRGV2ZWxvcG1lbnQiLCJtYXliZVZhbGlkYXRlIiwid2luIiwiZmlsZW5hbWUiLCJsb2NhdGlvbiIsImhyZWYiLCJzdGFydHNXaXRoIiwidmFsaWRhdG9yIiwiaGFzaCIsImxvYWRTY3JpcHQiLCJkb2N1bWVudCIsImNkbiIsInRoZW4iLCJhbXAiLCJ2YWxpZGF0ZVVybEFuZExvZyIsImRvYyIsInVybCIsInNjcmlwdCIsImNyZWF0ZUVsZW1lbnQiLCJzcmMiLCJjdXJyZW50U2NyaXB0IiwiaGVhZCIsInF1ZXJ5U2VsZWN0b3IiLCJzZXRBdHRyaWJ1dGUiLCJnZXRBdHRyaWJ1dGUiLCJwcm9taXNlIiwicmVtb3ZlQ2hpbGQiLCJhcHBlbmRDaGlsZCJdLCJtYXBwaW5ncyI6IkFBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBRUEsU0FBUUEsSUFBUjtBQUNBLFNBQVFDLGdCQUFSO0FBQ0EsU0FBUUMsV0FBUjtBQUNBLFNBQVFDLGlCQUFSOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTQyxhQUFULENBQXVCQyxHQUF2QixFQUE0QjtBQUNqQyxNQUFNQyxRQUFRLEdBQUdELEdBQUcsQ0FBQ0UsUUFBSixDQUFhQyxJQUE5Qjs7QUFDQSxNQUFJRixRQUFRLENBQUNHLFVBQVQsQ0FBb0IsUUFBcEIsQ0FBSixFQUFtQztBQUNqQztBQUNBO0FBQ0Q7O0FBQ0QsTUFBSUMsU0FBUyxHQUFHLEtBQWhCOztBQUNBLE1BQUlQLGlCQUFpQixDQUFDRSxHQUFELENBQXJCLEVBQTRCO0FBQzFCLFFBQU1NLElBQUksR0FBR1YsZ0JBQWdCLENBQzNCSSxHQUFHLENBQUNFLFFBQUosQ0FBYSxjQUFiLEtBQWdDRixHQUFHLENBQUNFLFFBQUosQ0FBYUksSUFEbEIsQ0FBN0I7QUFHQUQsSUFBQUEsU0FBUyxHQUFHQyxJQUFJLENBQUMsVUFBRCxDQUFKLEtBQXFCLEdBQWpDO0FBQ0Q7O0FBRUQsTUFBSUQsU0FBSixFQUFlO0FBQ2JFLElBQUFBLFVBQVUsQ0FBQ1AsR0FBRyxDQUFDUSxRQUFMLEVBQWtCYixJQUFJLENBQUNjLEdBQXZCLDJCQUFWLENBQTZEQyxJQUE3RCxDQUFrRSxZQUFNO0FBQ3RFO0FBQ0FDLE1BQUFBLEdBQUcsQ0FBQ04sU0FBSixDQUFjTyxpQkFBZCxDQUFnQ1gsUUFBaEMsRUFBMENELEdBQUcsQ0FBQ1EsUUFBOUM7QUFDRCxLQUhEO0FBSUQ7QUFDRjs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0QsVUFBVCxDQUFvQk0sR0FBcEIsRUFBeUJDLEdBQXpCLEVBQThCO0FBQ25DLE1BQU1DLE1BQU07QUFBRztBQUNiRixFQUFBQSxHQUFHLENBQUNHLGFBQUosQ0FBa0IsUUFBbEIsQ0FERjtBQUdBRCxFQUFBQSxNQUFNLENBQUNFLEdBQVAsR0FBYUgsR0FBYjtBQUVBO0FBQ0EsTUFBTUksYUFBYSxHQUFHTCxHQUFHLENBQUNNLElBQUosQ0FBU0MsYUFBVCxDQUF1QixlQUF2QixDQUF0Qjs7QUFDQSxNQUFJRixhQUFKLEVBQW1CO0FBQ2pCSCxJQUFBQSxNQUFNLENBQUNNLFlBQVAsQ0FBb0IsT0FBcEIsRUFBNkJILGFBQWEsQ0FBQ0ksWUFBZCxDQUEyQixPQUEzQixDQUE3QjtBQUNEOztBQUVELE1BQU1DLE9BQU8sR0FBRzFCLFdBQVcsQ0FBQ2tCLE1BQUQsQ0FBWCxDQUFvQkwsSUFBcEIsQ0FDZCxZQUFNO0FBQ0pHLElBQUFBLEdBQUcsQ0FBQ00sSUFBSixDQUFTSyxXQUFULENBQXFCVCxNQUFyQjtBQUNELEdBSGEsRUFJZCxZQUFNLENBQUUsQ0FKTSxDQUFoQjtBQU1BRixFQUFBQSxHQUFHLENBQUNNLElBQUosQ0FBU00sV0FBVCxDQUFxQlYsTUFBckI7QUFDQSxTQUFPUSxPQUFQO0FBQ0QiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIENvcHlyaWdodCAyMDE1IFRoZSBBTVAgSFRNTCBBdXRob3JzLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIExpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmVcbiAqIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuIFwiQVMtSVNcIiBCQVNJUyxcbiAqIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLlxuICogU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZFxuICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHt1cmxzfSBmcm9tICcuL2NvbmZpZyc7XG5pbXBvcnQge3BhcnNlUXVlcnlTdHJpbmd9IGZyb20gJy4vY29yZS90eXBlcy9zdHJpbmcvdXJsJztcbmltcG9ydCB7bG9hZFByb21pc2V9IGZyb20gJy4vZXZlbnQtaGVscGVyJztcbmltcG9ydCB7aXNNb2RlRGV2ZWxvcG1lbnR9IGZyb20gJy4vbW9kZSc7XG5cbi8qKlxuICogVHJpZ2dlcnMgdmFsaWRhdGlvbiBmb3IgdGhlIGN1cnJlbnQgZG9jdW1lbnQgaWYgdGhlcmUgaXMgYSBzY3JpcHQgaW4gdGhlXG4gKiBwYWdlIHRoYXQgaGFzIGEgXCJkZXZlbG9wbWVudFwiIGF0dHJpYnV0ZSBhbmQgdGhlIGJ5cGFzcyB2YWxpZGF0aW9uIHZpYVxuICogI3ZhbGlkYXRlPTAgaXMgYWJzZW50LlxuICpcbiAqIEBwYXJhbSB7IVdpbmRvd30gd2luIERlc3RpbmF0aW9uIHdpbmRvdyBmb3IgdGhlIG5ldyBlbGVtZW50LlxuICovXG5leHBvcnQgZnVuY3Rpb24gbWF5YmVWYWxpZGF0ZSh3aW4pIHtcbiAgY29uc3QgZmlsZW5hbWUgPSB3aW4ubG9jYXRpb24uaHJlZjtcbiAgaWYgKGZpbGVuYW1lLnN0YXJ0c1dpdGgoJ2Fib3V0OicpKSB7XG4gICAgLy8gU2hvdWxkIG9ubHkgaGFwcGVuIGluIHRlc3RzLlxuICAgIHJldHVybjtcbiAgfVxuICBsZXQgdmFsaWRhdG9yID0gZmFsc2U7XG4gIGlmIChpc01vZGVEZXZlbG9wbWVudCh3aW4pKSB7XG4gICAgY29uc3QgaGFzaCA9IHBhcnNlUXVlcnlTdHJpbmcoXG4gICAgICB3aW4ubG9jYXRpb25bJ29yaWdpbmFsSGFzaCddIHx8IHdpbi5sb2NhdGlvbi5oYXNoXG4gICAgKTtcbiAgICB2YWxpZGF0b3IgPSBoYXNoWyd2YWxpZGF0ZSddICE9PSAnMCc7XG4gIH1cblxuICBpZiAodmFsaWRhdG9yKSB7XG4gICAgbG9hZFNjcmlwdCh3aW4uZG9jdW1lbnQsIGAke3VybHMuY2RufS92MC92YWxpZGF0b3Jfd2FzbS5qc2ApLnRoZW4oKCkgPT4ge1xuICAgICAgLyogZ2xvYmFsIGFtcDogZmFsc2UgKi9cbiAgICAgIGFtcC52YWxpZGF0b3IudmFsaWRhdGVVcmxBbmRMb2coZmlsZW5hbWUsIHdpbi5kb2N1bWVudCk7XG4gICAgfSk7XG4gIH1cbn1cblxuLyoqXG4gKiBMb2FkcyBzY3JpcHRcbiAqXG4gKiBAcGFyYW0ge0RvY3VtZW50fSBkb2NcbiAqIEBwYXJhbSB7c3RyaW5nfSB1cmxcbiAqIEByZXR1cm4geyFQcm9taXNlfVxuICovXG5leHBvcnQgZnVuY3Rpb24gbG9hZFNjcmlwdChkb2MsIHVybCkge1xuICBjb25zdCBzY3JpcHQgPSAvKiogQHR5cGUgeyFIVE1MU2NyaXB0RWxlbWVudH0gKi8gKFxuICAgIGRvYy5jcmVhdGVFbGVtZW50KCdzY3JpcHQnKVxuICApO1xuICBzY3JpcHQuc3JjID0gdXJsO1xuXG4gIC8vIFByb3BhZ2F0ZSBub25jZSB0byBhbGwgZ2VuZXJhdGVkIHNjcmlwdCB0YWdzLlxuICBjb25zdCBjdXJyZW50U2NyaXB0ID0gZG9jLmhlYWQucXVlcnlTZWxlY3Rvcignc2NyaXB0W25vbmNlXScpO1xuICBpZiAoY3VycmVudFNjcmlwdCkge1xuICAgIHNjcmlwdC5zZXRBdHRyaWJ1dGUoJ25vbmNlJywgY3VycmVudFNjcmlwdC5nZXRBdHRyaWJ1dGUoJ25vbmNlJykpO1xuICB9XG5cbiAgY29uc3QgcHJvbWlzZSA9IGxvYWRQcm9taXNlKHNjcmlwdCkudGhlbihcbiAgICAoKSA9PiB7XG4gICAgICBkb2MuaGVhZC5yZW1vdmVDaGlsZChzY3JpcHQpO1xuICAgIH0sXG4gICAgKCkgPT4ge31cbiAgKTtcbiAgZG9jLmhlYWQuYXBwZW5kQ2hpbGQoc2NyaXB0KTtcbiAgcmV0dXJuIHByb21pc2U7XG59XG4iXX0=
+// /Users/mszylkowski/src/amphtml/src/validator-integration.js

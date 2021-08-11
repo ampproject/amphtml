@@ -1,0 +1,117 @@
+var _templateObject, _templateObject2, _templateObject3;
+
+function _taggedTemplateLiteralLoose(strings, raw) { if (!raw) { raw = strings.slice(0); } strings.raw = raw; return strings; }
+
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @fileoverview
+ * Interactive components support a disclaimer bubble that tells users where their data is being sent to.
+ * Disclaimers will retrieve the information from the lookup dictionary in disclaimer-backends-list.json.
+ * In order to add a "Learn more" link or entity name ("Your response will be sent to <Organization>"),
+ * submit a PR with a new entry on the DisclaimerBackendList and tag @ampproject/wg-stories to review it.
+ */
+import { LocalizedStringId } from "../../../src/service/localization/strings";
+import { htmlFor, htmlRefs } from "../../../src/core/dom/static-template";
+var DisclaimerBackendsList = JSON.parse("{\"webstoriesinteractivity-beta.web.app\":{\"learnMoreUrl\":\"https://amp.dev/stories\",\"entityName\":\"AMP Disclaimer Testing Site\"}}", function (key, val) {
+  if (typeof val === 'object') Object.freeze(val);
+  return val;
+});
+// lgtm[js/syntax-error]
+import { createShadowRootWithStyle } from "../../amp-story/1.0/utils";
+import { CSS } from "../../../build/amp-story-interactive-disclaimer-0.1.css";
+import { addAttributesToElement } from "../../../src/core/dom";
+
+/**
+ * Creates a disclaimer icon and dialog.
+ * @param {!Element} element
+ * @return {!Element}
+ */
+function buildDisclaimerLayout(element) {
+  var html = htmlFor(element);
+  return html(_templateObject || (_templateObject = _taggedTemplateLiteralLoose(["<div\n    class=\"i-amphtml-story-interactive-disclaimer-dialog\"\n    role=\"alertdialog\"\n  >\n    <div\n      class=\"i-amphtml-story-interactive-disclaimer-description\"\n      ref=\"descriptionEl\"\n    >\n      <span class=\"i-amphtml-story-interactive-disclaimer-note\" ref=\"noteEl\"\n        >Your response will be sent to\n      </span>\n      <span\n        class=\"i-amphtml-story-interactive-disclaimer-entity\"\n        ref=\"entityEl\"\n      ></span>\n      <div class=\"i-amphtml-story-interactive-disclaimer-url\" ref=\"urlEl\"></div>\n    </div>\n    <a\n      target=\"_blank\"\n      class=\"i-amphtml-story-interactive-disclaimer-link\"\n      ref=\"linkEl\"\n      >Learn more</a\n    >\n    <button\n      class=\"i-amphtml-story-interactive-disclaimer-close\"\n      aria-label=\"Close disclaimer\"\n    ></button>\n  </div>"])));
+}
+
+/**
+ * Creates a disclaimer dialog from the interactive element passed in.
+ * @param {!AmpStoryInteractive} interactive the interactive element.
+ * @param {JsonObject<string, string>=} attrs optional attributes for the disclaimer.
+ * @return {!Element} the container for the shadow root that has the disclaimer.
+ */
+export function buildInteractiveDisclaimer(interactive, attrs) {
+  if (attrs === void 0) {
+    attrs = {};
+  }
+
+  var disclaimer = buildDisclaimerLayout(interactive.element);
+  addAttributesToElement(disclaimer, attrs);
+
+  // Fill information
+  var _htmlRefs = htmlRefs(disclaimer),
+      descriptionEl = _htmlRefs.descriptionEl,
+      entityEl = _htmlRefs.entityEl,
+      linkEl = _htmlRefs.linkEl,
+      noteEl = _htmlRefs.noteEl,
+      urlEl = _htmlRefs.urlEl;
+
+  var backendUrl = interactive.element.getAttribute('endpoint').replace('https://', '');
+  var backendSpecs = getBackendSpecs(backendUrl, DisclaimerBackendsList);
+
+  if (backendSpecs) {
+    entityEl.textContent = backendSpecs[1].entityName;
+    urlEl.textContent = backendSpecs[0];
+    backendSpecs[1].learnMoreUrl ? linkEl.href = backendSpecs[1].learnMoreUrl : linkEl.remove();
+  } else {
+    entityEl.remove();
+    urlEl.textContent = backendUrl;
+    linkEl.remove();
+  }
+
+  noteEl.textContent = interactive.localizationService.getLocalizedString(LocalizedStringId.AMP_STORY_INTERACTIVE_DISCLAIMER_NOTE);
+  // Set the described-by for a11y.
+  var disclaimerDescriptionId = "i-amphtml-story-disclaimer-" + interactive.element.id + "-description";
+  descriptionEl.id = disclaimerDescriptionId;
+  disclaimer.setAttribute('aria-describedby', disclaimerDescriptionId);
+  // Create container and return.
+  var disclaimerContainer = htmlFor(interactive.element)(_templateObject2 || (_templateObject2 = _taggedTemplateLiteralLoose(["<div class=\"i-amphtml-story-interactive-disclaimer-dialog-container\"></div>"])));
+  createShadowRootWithStyle(disclaimerContainer, disclaimer, CSS);
+  return disclaimerContainer;
+}
+
+/**
+ * Creates a disclaimer icon from the interactive element passed in.
+ * @param {!AmpStoryInteractive} interactive the interactive element.
+ * @return {!Element} the icon with the dialog that should be added to the shadowRoot.
+ */
+export function buildInteractiveDisclaimerIcon(interactive) {
+  var html = htmlFor(interactive.element);
+  return html(_templateObject3 || (_templateObject3 = _taggedTemplateLiteralLoose(["<button\n    class=\"i-amphtml-story-interactive-disclaimer-icon\"\n    aria-label=\"Open disclaimer\"\n  ></button>"])));
+}
+
+/**
+ * Returns the corresponding backend specs (as an array of url and specs), or undefined.
+ * @param {string} backendUrl
+ * @param {!Object<string, !Object<string, string>>} backendsList
+ * @return {?Array<string|Object<string, string>>} array that contains: base url of backend, {learnMoreUrl, entity}.
+ */
+export function getBackendSpecs(backendUrl, backendsList) {
+  return Object.entries(backendsList).find(function (element) {
+    return element[0] === backendUrl.substring(0, element[0].length);
+  });
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImludGVyYWN0aXZlLWRpc2NsYWltZXIuanMiXSwibmFtZXMiOlsiTG9jYWxpemVkU3RyaW5nSWQiLCJodG1sRm9yIiwiaHRtbFJlZnMiLCJEaXNjbGFpbWVyQmFja2VuZHNMaXN0IiwiY3JlYXRlU2hhZG93Um9vdFdpdGhTdHlsZSIsIkNTUyIsImFkZEF0dHJpYnV0ZXNUb0VsZW1lbnQiLCJidWlsZERpc2NsYWltZXJMYXlvdXQiLCJlbGVtZW50IiwiaHRtbCIsImJ1aWxkSW50ZXJhY3RpdmVEaXNjbGFpbWVyIiwiaW50ZXJhY3RpdmUiLCJhdHRycyIsImRpc2NsYWltZXIiLCJkZXNjcmlwdGlvbkVsIiwiZW50aXR5RWwiLCJsaW5rRWwiLCJub3RlRWwiLCJ1cmxFbCIsImJhY2tlbmRVcmwiLCJnZXRBdHRyaWJ1dGUiLCJyZXBsYWNlIiwiYmFja2VuZFNwZWNzIiwiZ2V0QmFja2VuZFNwZWNzIiwidGV4dENvbnRlbnQiLCJlbnRpdHlOYW1lIiwibGVhcm5Nb3JlVXJsIiwiaHJlZiIsInJlbW92ZSIsImxvY2FsaXphdGlvblNlcnZpY2UiLCJnZXRMb2NhbGl6ZWRTdHJpbmciLCJBTVBfU1RPUllfSU5URVJBQ1RJVkVfRElTQ0xBSU1FUl9OT1RFIiwiZGlzY2xhaW1lckRlc2NyaXB0aW9uSWQiLCJpZCIsInNldEF0dHJpYnV0ZSIsImRpc2NsYWltZXJDb250YWluZXIiLCJidWlsZEludGVyYWN0aXZlRGlzY2xhaW1lckljb24iLCJiYWNrZW5kc0xpc3QiLCJPYmplY3QiLCJlbnRyaWVzIiwiZmluZCIsInN1YnN0cmluZyIsImxlbmd0aCJdLCJtYXBwaW5ncyI6Ijs7OztBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUVBLFNBQVFBLGlCQUFSO0FBQ0EsU0FBUUMsT0FBUixFQUFpQkMsUUFBakI7SUFDT0Ms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U2MsZUFBVCxDQUF5QkosVUFBekIsRUFBcUNrQixZQUFyQyxFQUFtRDtBQUN4RCxTQUFPQyxNQUFNLENBQUNDLE9BQVAsQ0FBZUYsWUFBZixFQUE2QkcsSUFBN0IsQ0FBa0MsVUFBQ2hDLE9BQUQsRUFBYTtBQUNwRCxXQUFPQSxPQUFPLENBQUMsQ0FBRCxDQUFQLEtBQWVXLFVBQVUsQ0FBQ3NCLFNBQVgsQ0FBcUIsQ0FBckIsRUFBd0JqQyxPQUFPLENBQUMsQ0FBRCxDQUFQLENBQVdrQyxNQUFuQyxDQUF0QjtBQUNELEdBRk0sQ0FBUDtBQUdEIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb3B5cmlnaHQgMjAyMCBUaGUgQU1QIEhUTUwgQXV0aG9ycy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTLUlTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbi8qKlxuICogQGZpbGVvdmVydmlld1xuICogSW50ZXJhY3RpdmUgY29tcG9uZW50cyBzdXBwb3J0IGEgZGlzY2xhaW1lciBidWJibGUgdGhhdCB0ZWxscyB1c2VycyB3aGVyZSB0aGVpciBkYXRhIGlzIGJlaW5nIHNlbnQgdG8uXG4gKiBEaXNjbGFpbWVycyB3aWxsIHJldHJpZXZlIHRoZSBpbmZvcm1hdGlvbiBmcm9tIHRoZSBsb29rdXAgZGljdGlvbmFyeSBpbiBkaXNjbGFpbWVyLWJhY2tlbmRzLWxpc3QuanNvbi5cbiAqIEluIG9yZGVyIHRvIGFkZCBhIFwiTGVhcm4gbW9yZVwiIGxpbmsgb3IgZW50aXR5IG5hbWUgKFwiWW91ciByZXNwb25zZSB3aWxsIGJlIHNlbnQgdG8gPE9yZ2FuaXphdGlvbj5cIiksXG4gKiBzdWJtaXQgYSBQUiB3aXRoIGEgbmV3IGVudHJ5IG9uIHRoZSBEaXNjbGFpbWVyQmFja2VuZExpc3QgYW5kIHRhZyBAYW1wcHJvamVjdC93Zy1zdG9yaWVzIHRvIHJldmlldyBpdC5cbiAqL1xuXG5pbXBvcnQge0xvY2FsaXplZFN0cmluZ0lkfSBmcm9tICcjc2VydmljZS9sb2NhbGl6YXRpb24vc3RyaW5ncyc7XG5pbXBvcnQge2h0bWxGb3IsIGh0bWxSZWZzfSBmcm9tICcjY29yZS9kb20vc3RhdGljLXRlbXBsYXRlJztcbmltcG9ydCBEaXNjbGFpbWVyQmFja2VuZHNMaXN0IGZyb20gJy4vZGlzY2xhaW1lci1iYWNrZW5kcy1saXN0Lmpzb24nIGFzc2VydCB7dHlwZTogJ2pzb24nfTsgLy8gbGd0bVtqcy9zeW50YXgtZXJyb3JdXG5pbXBvcnQge2NyZWF0ZVNoYWRvd1Jvb3RXaXRoU3R5bGV9IGZyb20gJ2V4dGVuc2lvbnMvYW1wLXN0b3J5LzEuMC91dGlscyc7XG5pbXBvcnQge0NTU30gZnJvbSAnLi4vLi4vLi4vYnVpbGQvYW1wLXN0b3J5LWludGVyYWN0aXZlLWRpc2NsYWltZXItMC4xLmNzcyc7XG5pbXBvcnQge2FkZEF0dHJpYnV0ZXNUb0VsZW1lbnR9IGZyb20gJyNjb3JlL2RvbSc7XG5cbi8qKlxuICogQ3JlYXRlcyBhIGRpc2NsYWltZXIgaWNvbiBhbmQgZGlhbG9nLlxuICogQHBhcmFtIHshRWxlbWVudH0gZWxlbWVudFxuICogQHJldHVybiB7IUVsZW1lbnR9XG4gKi9cbmZ1bmN0aW9uIGJ1aWxkRGlzY2xhaW1lckxheW91dChlbGVtZW50KSB7XG4gIGNvbnN0IGh0bWwgPSBodG1sRm9yKGVsZW1lbnQpO1xuICByZXR1cm4gaHRtbGA8ZGl2XG4gICAgY2xhc3M9XCJpLWFtcGh0bWwtc3RvcnktaW50ZXJhY3RpdmUtZGlzY2xhaW1lci1kaWFsb2dcIlxuICAgIHJvbGU9XCJhbGVydGRpYWxvZ1wiXG4gID5cbiAgICA8ZGl2XG4gICAgICBjbGFzcz1cImktYW1waHRtbC1zdG9yeS1pbnRlcmFjdGl2ZS1kaXNjbGFpbWVyLWRlc2NyaXB0aW9uXCJcbiAgICAgIHJlZj1cImRlc2NyaXB0aW9uRWxcIlxuICAgID5cbiAgICAgIDxzcGFuIGNsYXNzPVwiaS1hbXBodG1sLXN0b3J5LWludGVyYWN0aXZlLWRpc2NsYWltZXItbm90ZVwiIHJlZj1cIm5vdGVFbFwiXG4gICAgICAgID5Zb3VyIHJlc3BvbnNlIHdpbGwgYmUgc2VudCB0b1xuICAgICAgPC9zcGFuPlxuICAgICAgPHNwYW5cbiAgICAgICAgY2xhc3M9XCJpLWFtcGh0bWwtc3RvcnktaW50ZXJhY3RpdmUtZGlzY2xhaW1lci1lbnRpdHlcIlxuICAgICAgICByZWY9XCJlbnRpdHlFbFwiXG4gICAgICA+PC9zcGFuPlxuICAgICAgPGRpdiBjbGFzcz1cImktYW1waHRtbC1zdG9yeS1pbnRlcmFjdGl2ZS1kaXNjbGFpbWVyLXVybFwiIHJlZj1cInVybEVsXCI+PC9kaXY+XG4gICAgPC9kaXY+XG4gICAgPGFcbiAgICAgIHRhcmdldD1cIl9ibGFua1wiXG4gICAgICBjbGFzcz1cImktYW1waHRtbC1zdG9yeS1pbnRlcmFjdGl2ZS1kaXNjbGFpbWVyLWxpbmtcIlxuICAgICAgcmVmPVwibGlua0VsXCJcbiAgICAgID5MZWFybiBtb3JlPC9hXG4gICAgPlxuICAgIDxidXR0b25cbiAgICAgIGNsYXNzPVwiaS1hbXBodG1sLXN0b3J5LWludGVyYWN0aXZlLWRpc2NsYWltZXItY2xvc2VcIlxuICAgICAgYXJpYS1sYWJlbD1cIkNsb3NlIGRpc2NsYWltZXJcIlxuICAgID48L2J1dHRvbj5cbiAgPC9kaXY+YDtcbn1cblxuLyoqXG4gKiBDcmVhdGVzIGEgZGlzY2xhaW1lciBkaWFsb2cgZnJvbSB0aGUgaW50ZXJhY3RpdmUgZWxlbWVudCBwYXNzZWQgaW4uXG4gKiBAcGFyYW0geyFBbXBTdG9yeUludGVyYWN0aXZlfSBpbnRlcmFjdGl2ZSB0aGUgaW50ZXJhY3RpdmUgZWxlbWVudC5cbiAqIEBwYXJhbSB7SnNvbk9iamVjdDxzdHJpbmcsIHN0cmluZz49fSBhdHRycyBvcHRpb25hbCBhdHRyaWJ1dGVzIGZvciB0aGUgZGlzY2xhaW1lci5cbiAqIEByZXR1cm4geyFFbGVtZW50fSB0aGUgY29udGFpbmVyIGZvciB0aGUgc2hhZG93IHJvb3QgdGhhdCBoYXMgdGhlIGRpc2NsYWltZXIuXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBidWlsZEludGVyYWN0aXZlRGlzY2xhaW1lcihpbnRlcmFjdGl2ZSwgYXR0cnMgPSB7fSkge1xuICBjb25zdCBkaXNjbGFpbWVyID0gYnVpbGREaXNjbGFpbWVyTGF5b3V0KGludGVyYWN0aXZlLmVsZW1lbnQpO1xuICBhZGRBdHRyaWJ1dGVzVG9FbGVtZW50KGRpc2NsYWltZXIsIGF0dHJzKTtcblxuICAvLyBGaWxsIGluZm9ybWF0aW9uXG4gIGNvbnN0IHtkZXNjcmlwdGlvbkVsLCBlbnRpdHlFbCwgbGlua0VsLCBub3RlRWwsIHVybEVsfSA9IGh0bWxSZWZzKGRpc2NsYWltZXIpO1xuICBjb25zdCBiYWNrZW5kVXJsID0gaW50ZXJhY3RpdmUuZWxlbWVudFxuICAgIC5nZXRBdHRyaWJ1dGUoJ2VuZHBvaW50JylcbiAgICAucmVwbGFjZSgnaHR0cHM6Ly8nLCAnJyk7XG4gIGNvbnN0IGJhY2tlbmRTcGVjcyA9IGdldEJhY2tlbmRTcGVjcyhiYWNrZW5kVXJsLCBEaXNjbGFpbWVyQmFja2VuZHNMaXN0KTtcbiAgaWYgKGJhY2tlbmRTcGVjcykge1xuICAgIGVudGl0eUVsLnRleHRDb250ZW50ID0gYmFja2VuZFNwZWNzWzFdLmVudGl0eU5hbWU7XG4gICAgdXJsRWwudGV4dENvbnRlbnQgPSBiYWNrZW5kU3BlY3NbMF07XG4gICAgYmFja2VuZFNwZWNzWzFdLmxlYXJuTW9yZVVybFxuICAgICAgPyAobGlua0VsLmhyZWYgPSBiYWNrZW5kU3BlY3NbMV0ubGVhcm5Nb3JlVXJsKVxuICAgICAgOiBsaW5rRWwucmVtb3ZlKCk7XG4gIH0gZWxzZSB7XG4gICAgZW50aXR5RWwucmVtb3ZlKCk7XG4gICAgdXJsRWwudGV4dENvbnRlbnQgPSBiYWNrZW5kVXJsO1xuICAgIGxpbmtFbC5yZW1vdmUoKTtcbiAgfVxuICBub3RlRWwudGV4dENvbnRlbnQgPSBpbnRlcmFjdGl2ZS5sb2NhbGl6YXRpb25TZXJ2aWNlLmdldExvY2FsaXplZFN0cmluZyhcbiAgICBMb2NhbGl6ZWRTdHJpbmdJZC5BTVBfU1RPUllfSU5URVJBQ1RJVkVfRElTQ0xBSU1FUl9OT1RFXG4gICk7XG5cbiAgLy8gU2V0IHRoZSBkZXNjcmliZWQtYnkgZm9yIGExMXkuXG4gIGNvbnN0IGRpc2NsYWltZXJEZXNjcmlwdGlvbklkID0gYGktYW1waHRtbC1zdG9yeS1kaXNjbGFpbWVyLSR7aW50ZXJhY3RpdmUuZWxlbWVudC5pZH0tZGVzY3JpcHRpb25gO1xuICBkZXNjcmlwdGlvbkVsLmlkID0gZGlzY2xhaW1lckRlc2NyaXB0aW9uSWQ7XG4gIGRpc2NsYWltZXIuc2V0QXR0cmlidXRlKCdhcmlhLWRlc2NyaWJlZGJ5JywgZGlzY2xhaW1lckRlc2NyaXB0aW9uSWQpO1xuXG4gIC8vIENyZWF0ZSBjb250YWluZXIgYW5kIHJldHVybi5cbiAgY29uc3QgZGlzY2xhaW1lckNvbnRhaW5lciA9IGh0bWxGb3IoXG4gICAgaW50ZXJhY3RpdmUuZWxlbWVudFxuICApYDxkaXYgY2xhc3M9XCJpLWFtcGh0bWwtc3RvcnktaW50ZXJhY3RpdmUtZGlzY2xhaW1lci1kaWFsb2ctY29udGFpbmVyXCI+PC9kaXY+YDtcbiAgY3JlYXRlU2hhZG93Um9vdFdpdGhTdHlsZShkaXNjbGFpbWVyQ29udGFpbmVyLCBkaXNjbGFpbWVyLCBDU1MpO1xuICByZXR1cm4gZGlzY2xhaW1lckNvbnRhaW5lcjtcbn1cblxuLyoqXG4gKiBDcmVhdGVzIGEgZGlzY2xhaW1lciBpY29uIGZyb20gdGhlIGludGVyYWN0aXZlIGVsZW1lbnQgcGFzc2VkIGluLlxuICogQHBhcmFtIHshQW1wU3RvcnlJbnRlcmFjdGl2ZX0gaW50ZXJhY3RpdmUgdGhlIGludGVyYWN0aXZlIGVsZW1lbnQuXG4gKiBAcmV0dXJuIHshRWxlbWVudH0gdGhlIGljb24gd2l0aCB0aGUgZGlhbG9nIHRoYXQgc2hvdWxkIGJlIGFkZGVkIHRvIHRoZSBzaGFkb3dSb290LlxuICovXG5leHBvcnQgZnVuY3Rpb24gYnVpbGRJbnRlcmFjdGl2ZURpc2NsYWltZXJJY29uKGludGVyYWN0aXZlKSB7XG4gIGNvbnN0IGh0bWwgPSBodG1sRm9yKGludGVyYWN0aXZlLmVsZW1lbnQpO1xuICByZXR1cm4gaHRtbGA8YnV0dG9uXG4gICAgY2xhc3M9XCJpLWFtcGh0bWwtc3RvcnktaW50ZXJhY3RpdmUtZGlzY2xhaW1lci1pY29uXCJcbiAgICBhcmlhLWxhYmVsPVwiT3BlbiBkaXNjbGFpbWVyXCJcbiAgPjwvYnV0dG9uPmA7XG59XG5cbi8qKlxuICogUmV0dXJucyB0aGUgY29ycmVzcG9uZGluZyBiYWNrZW5kIHNwZWNzIChhcyBhbiBhcnJheSBvZiB1cmwgYW5kIHNwZWNzKSwgb3IgdW5kZWZpbmVkLlxuICogQHBhcmFtIHtzdHJpbmd9IGJhY2tlbmRVcmxcbiAqIEBwYXJhbSB7IU9iamVjdDxzdHJpbmcsICFPYmplY3Q8c3RyaW5nLCBzdHJpbmc+Pn0gYmFja2VuZHNMaXN0XG4gKiBAcmV0dXJuIHs/QXJyYXk8c3RyaW5nfE9iamVjdDxzdHJpbmcsIHN0cmluZz4+fSBhcnJheSB0aGF0IGNvbnRhaW5zOiBiYXNlIHVybCBvZiBiYWNrZW5kLCB7bGVhcm5Nb3JlVXJsLCBlbnRpdHl9LlxuICovXG5leHBvcnQgZnVuY3Rpb24gZ2V0QmFja2VuZFNwZWNzKGJhY2tlbmRVcmwsIGJhY2tlbmRzTGlzdCkge1xuICByZXR1cm4gT2JqZWN0LmVudHJpZXMoYmFja2VuZHNMaXN0KS5maW5kKChlbGVtZW50KSA9PiB7XG4gICAgcmV0dXJuIGVsZW1lbnRbMF0gPT09IGJhY2tlbmRVcmwuc3Vic3RyaW5nKDAsIGVsZW1lbnRbMF0ubGVuZ3RoKTtcbiAgfSk7XG59XG4iXX0=
+// /Users/mszylkowski/src/amphtml/extensions/amp-story-interactive/0.1/interactive-disclaimer.js
