@@ -184,17 +184,18 @@ export class Log {
    * @private
    */
   defaultLevel_() {
+    const {win} = this;
     // No console - can't enable logging.
     if (
-      !this.win.console?.log ||
+      !win.console?.log ||
       // Logging has been explicitly disabled.
-      logHashParam() == 0
+      logHashParam(win) == 0
     ) {
       return LogLevel.OFF;
     }
 
     // Logging is enabled for tests directly.
-    if (getMode().test && this.win.ENABLE_LOG) {
+    if (getMode().test && win.ENABLE_LOG) {
       return LogLevel.FINE;
     }
 
@@ -203,16 +204,17 @@ export class Log {
       return LogLevel.INFO;
     }
 
-    return this.defaultLevelWithFunc_();
+    return this.defaultLevelWithFunc_(win);
   }
 
   /**
+   * @param {!Window} win
    * @return {!LogLevel}
    * @private
    */
-  defaultLevelWithFunc_() {
+  defaultLevelWithFunc_(win) {
     // Delegate to the specific resolver.
-    return this.levelFunc_(logHashParam(), getMode().development);
+    return this.levelFunc_(logHashParam(win), getMode().development);
   }
 
   /**
