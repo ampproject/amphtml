@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
+import {devError} from '#core/error';
 
-import {dev} from '../log';
+import {Services} from '#service';
 
 const TAG = 'ie-media-bug';
 
@@ -47,7 +47,7 @@ export function ieMediaCheckAndFix(win, opt_platform) {
         win.clearInterval(interval);
         resolve();
         if (!matches) {
-          dev().error(TAG, 'IE media never resolved');
+          devError(TAG, 'IE media never resolved');
         }
       }
     }, 10);
@@ -70,7 +70,7 @@ function matchMediaIeQuite(win) {
   try {
     return win.matchMedia(q).matches;
   } catch (e) {
-    dev().error(TAG, 'IE matchMedia failed: ', e);
+    devError(TAG, 'IE matchMedia failed: ', e);
     // Return `true` to avoid polling on a broken API.
     return true;
   }

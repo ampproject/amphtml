@@ -26,6 +26,7 @@ import {
   setStyles,
   toggle,
 } from '#core/dom/style';
+import {devError} from '#core/error';
 import {remove} from '#core/types/array';
 import {endsWith} from '#core/types/string';
 
@@ -182,7 +183,7 @@ export class FixedLayer {
       const stylesheet = stylesheets[i];
       // Rare but may happen if the document is being concurrently disposed.
       if (!stylesheet) {
-        dev().error(TAG, 'Aborting setup due to null stylesheet.');
+        devError(TAG, 'Aborting setup due to null stylesheet.');
         return true;
       }
       const {disabled, ownerNode} = stylesheet;
@@ -566,7 +567,7 @@ export class FixedLayer {
       )
       .catch((error) => {
         // Fail silently.
-        dev().error(TAG, 'Failed to mutate fixed elements:', error);
+        devError(TAG, 'Failed to mutate fixed elements:', error);
       });
   }
 
@@ -583,7 +584,7 @@ export class FixedLayer {
       this.setupSelectors_(root, opt_lightboxMode);
     } catch (e) {
       // Fail quietly.
-      dev().error(TAG, 'Failed to setup fixed elements:', e);
+      devError(TAG, 'Failed to setup fixed elements:', e);
     }
   }
 
@@ -1169,7 +1170,7 @@ class TransferLayerBody {
       return matches(element, selector);
     } catch (e) {
       // Fail silently.
-      dev().error(TAG, 'Failed to test query match:', e);
+      devError(TAG, 'Failed to test query match:', e);
       return false;
     }
   }

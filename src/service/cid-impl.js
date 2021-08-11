@@ -24,7 +24,7 @@
 
 import {tryResolve} from '#core/data-structures/promise';
 import {isIframed} from '#core/dom';
-import {rethrowAsync} from '#core/error';
+import {devExpectedError, rethrowAsync} from '#core/error';
 import {dict} from '#core/types/object';
 import {parseJson, tryParseJson} from '#core/types/object/json';
 import {base64UrlEncodeFromBytes} from '#core/types/string/base64';
@@ -39,7 +39,7 @@ import {GoogleCidApi, TokenStatus} from './cid-api';
 import {ViewerCidApi} from './viewer-cid-api';
 
 import {getCookie, setCookie} from '../cookies';
-import {dev, user, userAssert} from '../log';
+import {user, userAssert} from '../log';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
@@ -612,12 +612,12 @@ export function viewerBaseCid(ampdoc, opt_data) {
       return undefined;
     }
     // TODO(lannka, #11060): clean up when all Viewers get migrated
-    dev().expectedError('CID', 'Viewer does not provide cap=cid');
+    devExpectedError('CID', 'Viewer does not provide cap=cid');
     return viewer.sendMessageAwaitResponse('cid', opt_data).then((data) => {
       // For backward compatibility: #4029
       if (data && !tryParseJson(data)) {
         // TODO(lannka, #11060): clean up when all Viewers get migrated
-        dev().expectedError('CID', 'invalid cid format');
+        devExpectedError('CID', 'invalid cid format');
         return JSON.stringify(
           dict({
             'time': Date.now(), // CID returned from old API is always fresh

@@ -24,6 +24,7 @@ import {
   rectsOverlap,
 } from '#core/dom/layout/rect';
 import {computedStyle, toggle} from '#core/dom/style';
+import {devError, devExpectedError} from '#core/error';
 import {toWin} from '#core/window';
 
 import {Services} from '#service';
@@ -362,7 +363,7 @@ export class Resource {
    */
   maybeReportErrorOnBuildFailure(reason) {
     if (!isBlockedByConsent(reason)) {
-      dev().error(TAG, 'failed to build:', this.debugid, reason);
+      devError(TAG, 'failed to build:', this.debugid, reason);
     }
   }
 
@@ -925,7 +926,7 @@ export class Resource {
       // the layout completed, we want to remain in the unlayout state.
       const err = dev().createError('layoutComplete race');
       err.associatedElement = this.element;
-      dev().expectedError(TAG, err);
+      devExpectedError(TAG, err);
       throw cancellation();
     }
     if (this.loadPromiseResolve_) {

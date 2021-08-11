@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+import {devError} from '#core/error';
 import {base64UrlEncodeFromBytes} from '#core/types/string/base64';
 import {stringToBytes, utf8Encode} from '#core/types/string/bytes';
 
 import {Services} from '#service';
 
-import {dev, devAssert, user} from '../log';
+import {devAssert, user} from '../log';
 import {getService, registerServiceBuilder} from '../service-helpers';
 
 /** @const {string} */
@@ -108,7 +109,7 @@ export class Crypto {
           )
       );
     } catch (e) {
-      dev().error(TAG, 'SubtleCrypto failed, fallback to closure lib.', e);
+      devError(TAG, 'SubtleCrypto failed, fallback to closure lib.', e);
       return this.loadPolyfill_().then(() => this.sha384(input));
     }
   }

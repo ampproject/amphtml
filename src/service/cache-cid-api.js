@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {devError, devExpectedError} from '#core/error';
 import {dict} from '#core/types/object';
 
 import {Services} from '#service';
@@ -135,14 +136,14 @@ export class CacheCidApi {
       .catch((e) => {
         if (e && e.response) {
           e.response.json().then((res) => {
-            dev().error(TAG_, JSON.stringify(res));
+            devError(TAG_, JSON.stringify(res));
           });
         } else {
           const isTimeout = e && e.message == timeoutMessage;
           if (isTimeout) {
-            dev().expectedError(TAG_, e);
+            devExpectedError(TAG_, e);
           } else {
-            dev().error(TAG_, e);
+            devError(TAG_, e);
           }
         }
         return null;

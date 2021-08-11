@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {devError} from '#core/error';
 import {includes} from '#core/types/string';
-
-import {dev} from './log';
 
 /**
  * This method wraps around window's open method. It first tries to execute
@@ -38,7 +37,7 @@ export function openWindowDialog(win, url, target, opt_features) {
   try {
     res = win.open(url, target, opt_features);
   } catch (e) {
-    dev().error('DOM', 'Failed to open url on target: ', target, e);
+    devError('DOM', 'Failed to open url on target: ', target, e);
   }
 
   // Then try with `_top` target.

@@ -18,6 +18,7 @@ import {PriorityQueue} from '#core/data-structures/priority-queue';
 import {isIframed, tryFocus} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {closestAncestorElementBySelector} from '#core/dom/query';
+import {devError} from '#core/error';
 import {dict} from '#core/types/object';
 import {toWin} from '#core/window';
 
@@ -587,7 +588,7 @@ export class Navigation {
         dev().info(TAG, 'Restored iframe URL with query string:', original);
         win.history.replaceState(null, '', original);
       } else {
-        dev().error(TAG, 'Unexpected iframe URL change:', currentHref, noQuery);
+        devError(TAG, 'Unexpected iframe URL change:', currentHref, noQuery);
       }
     };
 

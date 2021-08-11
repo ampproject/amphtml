@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {devError} from '#core/error';
 import {debounce} from '#core/types/function';
 
 import {Services} from '#service';
@@ -23,7 +24,6 @@ import {
   PositionObserverWorker,
 } from './position-observer-worker';
 
-import {dev} from '../../log';
 import {registerServiceBuilderForDoc} from '../../service-helpers';
 
 /** @const @private */
@@ -116,7 +116,7 @@ export class PositionObserver {
         return;
       }
     }
-    dev().error(TAG, 'cannot unobserve unobserved element');
+    devError(TAG, 'cannot unobserve unobserved element');
   }
 
   /**

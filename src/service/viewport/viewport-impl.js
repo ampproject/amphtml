@@ -25,6 +25,7 @@ import {
 } from '#core/dom/layout/rect';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {computedStyle, setStyle} from '#core/dom/style';
+import {devError} from '#core/error';
 import {clamp} from '#core/math';
 import {dict} from '#core/types/object';
 
@@ -347,7 +348,7 @@ export class ViewportImpl {
         visibilityState == VisibilityState.VISIBLE
       ) {
         if (Math.random() < 0.01) {
-          dev().error(TAG_, 'viewport has zero dimensions');
+          devError(TAG_, 'viewport has zero dimensions');
         }
       }
     }

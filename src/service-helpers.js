@@ -21,9 +21,10 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
+import {devError} from '#core/error';
 import {toWin} from '#core/window';
 
-import {dev, devAssert} from './log';
+import {devAssert} from './log';
 
 /**
  * Holds info about a service.
@@ -571,7 +572,7 @@ function disposeServiceInternal(id, service) {
   } catch (e) {
     // Ensure that a failure to dispose a service does not disrupt other
     // services.
-    dev().error('SERVICE', 'failed to dispose service', id, e);
+    devError('SERVICE', 'failed to dispose service', id, e);
   }
 }
 

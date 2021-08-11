@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from './log';
+import {devError} from '#core/error';
 
 const TAG = 'AMP.require';
 
@@ -30,7 +30,7 @@ export function requireExternal(module) {
   if (required) {
     return required;
   } else {
-    dev().error(
+    devError(
       TAG,
       'Could not require external module %s.' +
         ' Did you import the bundle in the extension?',

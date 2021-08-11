@@ -17,6 +17,7 @@
 import {areMarginsChanged} from '#core/dom/layout/rect';
 import {closest} from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
+import {devError} from '#core/error';
 
 import {isExperimentOn} from '#experiments';
 
@@ -399,7 +400,7 @@ export class MutatorImpl {
         newWidth === undefined &&
         marginChange === undefined
       ) {
-        dev().error(
+        devError(
           TAG_,
           'attempting to change size with undefined dimensions',
           resource.debugid

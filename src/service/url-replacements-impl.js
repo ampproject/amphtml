@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {devError} from '#core/error';
 import * as mode from '#core/mode';
 import {hasOwn} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
@@ -353,11 +354,7 @@ export class GlobalVariableSource extends VariableSource {
               } else {
                 // TODO(@jridgewell, #11120): remove once #11120 is figured out.
                 // Do not log the CID directly, that's PII.
-                dev().error(
-                  TAG,
-                  'non-string cid, what is it?',
-                  Object.keys(cid)
-                );
+                devError(TAG, 'non-string cid, what is it?', Object.keys(cid));
               }
             }
 

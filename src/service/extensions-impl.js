@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
-import {rethrowAsync} from '#core/error';
+import {devError, rethrowAsync} from '#core/error';
 import {map} from '#core/types/object';
 
 import {Services} from '#service';
@@ -573,7 +573,7 @@ export class Extensions {
    */
   getCurrentExtensionHolder_(opt_forName) {
     if (!this.currentExtensionId_ && !getMode(this.win).test) {
-      dev().error(TAG, 'unknown extension for ', opt_forName);
+      devError(TAG, 'unknown extension for ', opt_forName);
     }
     return this.getExtensionHolder_(
       this.currentExtensionId_ || UNKNOWN_EXTENSION,

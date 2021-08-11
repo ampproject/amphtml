@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {devExpectedError} from '#core/error';
 import {dict, recreateNonProtoObject} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
@@ -139,7 +140,7 @@ export class Storage {
         .loadBlob(this.origin_)
         .then((blob) => (blob ? parseJson(atob(blob)) : {}))
         .catch((reason) => {
-          dev().expectedError(TAG, 'Failed to load store: ', reason);
+          devExpectedError(TAG, 'Failed to load store: ', reason);
           return {};
         })
         .then((obj) => new Store(obj));
@@ -339,7 +340,7 @@ export class LocalStorageBinding {
 
     if (!this.isLocalStorageSupported_) {
       const error = new Error('localStorage not supported.');
-      dev().expectedError(TAG, error);
+      devExpectedError(TAG, error);
     }
   }
 

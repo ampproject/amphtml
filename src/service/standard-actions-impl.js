@@ -18,6 +18,7 @@ import {ActionTrust} from '#core/constants/action-constants';
 import {tryFocus} from '#core/dom';
 import {Layout, getLayoutClass} from '#core/dom/layout';
 import {computedStyle, toggle} from '#core/dom/style';
+import {devError} from '#core/error';
 import {isFiniteNumber} from '#core/types';
 import {toWin} from '#core/window';
 
@@ -168,7 +169,7 @@ export class StandardActions {
         return Services.cidForDoc(this.ampdoc)
           .then((cid) => cid.optOut())
           .catch((reason) => {
-            dev().error(TAG, 'Failed to opt out of CID', reason);
+            devError(TAG, 'Failed to opt out of CID', reason);
           });
     }
     throw user().createError('Unknown AMP action ', method);

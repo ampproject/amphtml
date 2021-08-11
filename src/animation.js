@@ -16,6 +16,7 @@
 
 import {NormTimeDef, getCurve} from '#core/data-structures/curve';
 import {Deferred} from '#core/data-structures/promise';
+import {devError} from '#core/error';
 import {TimestampDef} from '#core/types/date';
 
 import {Services} from '#service';
@@ -277,7 +278,7 @@ class AnimationPlayer {
           }
         }
       } catch (e) {
-        dev().error(TAG_, 'completion failed: ' + e, e);
+        devError(TAG_, 'completion failed: ' + e, e);
         success = false;
       }
     }
@@ -349,7 +350,7 @@ class AnimationPlayer {
         try {
           normTime = segment.curve(normLinearTime);
         } catch (e) {
-          dev().error(TAG_, 'step curve failed: ' + e, e);
+          devError(TAG_, 'step curve failed: ' + e, e);
           this.complete_(/* success */ false, /* dir */ 0);
           return;
         }
@@ -364,7 +365,7 @@ class AnimationPlayer {
     try {
       segment.func(normTime, segment.completed);
     } catch (e) {
-      dev().error(TAG_, 'step mutate failed: ' + e, e);
+      devError(TAG_, 'step mutate failed: ' + e, e);
       this.complete_(/* success */ false, /* dir */ 0);
       return;
     }

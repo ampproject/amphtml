@@ -22,6 +22,7 @@ import {
 } from '#core/constants/action-constants';
 import {Keys} from '#core/constants/key-codes';
 import {isEnabled} from '#core/dom';
+import {devError} from '#core/error';
 import {isFiniteNumber} from '#core/types';
 import {isArray, toArray} from '#core/types/array';
 import {debounce, throttle} from '#core/types/function';
@@ -220,7 +221,7 @@ export class ActionInvocation {
   satisfiesTrust(minimumTrust) {
     // Sanity check.
     if (!isFiniteNumber(this.trust)) {
-      dev().error(TAG_, `Invalid trust for '${this.method}': ${this.trust}`);
+      devError(TAG_, `Invalid trust for '${this.method}': ${this.trust}`);
       return false;
     }
     if (this.trust < minimumTrust) {
@@ -473,7 +474,7 @@ export class ActionService {
     );
 
     if (target[ACTION_HANDLER_]) {
-      dev().error(TAG_, `Action handler already installed for ${target}`);
+      devError(TAG_, `Action handler already installed for ${target}`);
       return;
     }
     target[ACTION_HANDLER_] = handler;
@@ -488,7 +489,7 @@ export class ActionService {
           try {
             handler(invocation);
           } catch (e) {
-            dev().error(TAG_, 'Action execution failed:', invocation, e);
+            devError(TAG_, 'Action execution failed:', invocation, e);
           }
         });
         target[ACTION_QUEUE_].length = 0;

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {devError} from '#core/error';
+
 import {Services} from '#service';
 import {registerElement} from '#service/custom-element-registry';
 
@@ -77,7 +79,7 @@ export class AmpPixel extends BaseElement {
   trigger_() {
     if (this.triggerPromise_) {
       // TODO(dvoytenko, #8780): monitor, confirm if there's a bug and remove.
-      dev().error(TAG, 'duplicate pixel');
+      devError(TAG, 'duplicate pixel');
       return this.triggerPromise_;
     }
     // Delay(1) provides a rudimentary "idle" signal.

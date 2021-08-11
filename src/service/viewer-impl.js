@@ -18,7 +18,11 @@ import {VisibilityState} from '#core/constants/visibility-state';
 import {Observable} from '#core/data-structures/observable';
 import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {isIframed} from '#core/dom';
-import {duplicateErrorIfNecessary} from '#core/error';
+import {
+  devError,
+  devExpectedError,
+  duplicateErrorIfNecessary,
+} from '#core/error';
 import {stripUserError} from '#core/error/message-helpers';
 import {isEnumValue} from '#core/types';
 import {findIndex} from '#core/types/array';
@@ -209,7 +213,7 @@ export class ViewerImpl {
           } else {
             resolve(this.win.document.referrer);
             if (this.unconfirmedReferrerUrl_ != this.win.document.referrer) {
-              dev().expectedError(
+              devExpectedError(
                 TAG_,
                 'Untrusted viewer referrer override: ' +
                   this.unconfirmedReferrerUrl_ +
@@ -239,7 +243,7 @@ export class ViewerImpl {
           if (isTrusted) {
             this.resolvedViewerUrl_ = devAssert(viewerUrlOverride);
           } else {
-            dev().expectedError(
+            devExpectedError(
               TAG_,
               'Untrusted viewer url override: ' +
                 viewerUrlOverride +
@@ -897,7 +901,7 @@ export class ViewerImpl {
         dev().fine(TAG_, 'replace url:' + replaceUrl.href);
       }
     } catch (e) {
-      dev().error(TAG_, 'replaceUrl failed', e);
+      devError(TAG_, 'replaceUrl failed', e);
     }
   }
 
@@ -915,7 +919,7 @@ export class ViewerImpl {
     const makeVisible = () => {
       this.setVisibilityState_(VisibilityState.VISIBLE);
       doUnlisten();
-      dev().expectedError(TAG_, 'Received user action in non-visible doc');
+      devExpectedError(TAG_, 'Received user action in non-visible doc');
     };
     const options = {
       capture: true,

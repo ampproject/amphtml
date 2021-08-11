@@ -22,6 +22,7 @@
  */
 
 import './web-worker-polyfills';
+import {devError} from '#core/error';
 import {exponentialBackoff} from '#core/types/function/exponential-backoff';
 
 import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
@@ -69,7 +70,7 @@ self.addEventListener('message', function (event) {
 
   // TODO(choumx): Remove this fallback when we confirm there are no errors.
   if (method !== 'bind.init' && !evaluators_[scope]) {
-    dev().error(TAG, 'Missing evaluator for scope: %s', scope);
+    devError(TAG, 'Missing evaluator for scope: %s', scope);
     evaluators_[scope] = new BindEvaluator(/* allowUrlProperties */ true);
   }
   const evaluator = evaluators_[scope];
@@ -100,7 +101,7 @@ self.addEventListener('message', function (event) {
       returnValue = evaluator.evaluateExpression.apply(evaluator, args);
       break;
     default:
-      dev().error(TAG, 'Unrecognized method: %s', method);
+      devError(TAG, 'Unrecognized method: %s', method);
   }
 
   const message = /** @type {FromWorkerMessageDef} */ ({

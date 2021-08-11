@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {devError} from '#core/error';
 import {dict} from '#core/types/object';
 import {WindowInterface} from '#core/window/interface';
 
@@ -126,10 +127,10 @@ export class GoogleCidApi {
             this.persistToken_(TokenStatus.ERROR, TIMEOUT);
             if (e && e.response) {
               e.response.json().then((res) => {
-                dev().error(TAG, JSON.stringify(res));
+                devError(TAG, JSON.stringify(res));
               });
             } else {
-              dev().error(TAG, e);
+              devError(TAG, e);
             }
             return null;
           });

@@ -15,6 +15,7 @@
  */
 
 import {devAssert} from '#core/assert';
+import {devError} from '#core/error';
 
 import {Services} from '#service';
 import {calculateEntryPointScriptUrl} from '#service/extension-script';
@@ -184,7 +185,7 @@ class AmpWorker {
 
     const message = this.messages_[id];
     if (!message) {
-      dev().error(
+      devError(
         TAG,
         `Received unexpected message (${method}, ${id}) from worker.`
       );

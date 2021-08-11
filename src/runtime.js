@@ -16,6 +16,7 @@
 
 import {waitForBodyOpenPromise} from '#core/dom';
 import {setStyle} from '#core/dom/style';
+import {devError} from '#core/error';
 import * as mode from '#core/mode';
 
 import {isExperimentOn, toggleExperiment} from '#experiments';
@@ -40,7 +41,6 @@ import {config} from './config';
 import {reportErrorForWin} from './error-reporting';
 import {
   LogLevel, // eslint-disable-line no-unused-vars
-  dev,
   initLogConstructor,
   overrideLogLevel,
   setReportError,
@@ -215,7 +215,7 @@ function adoptShared(global, callback) {
       } catch (e) {
         // Throw errors outside of loop in its own micro task to
         // avoid on error stopping other extensions from loading.
-        dev().error(TAG, 'Extension failed: ', e, fnOrStruct.n);
+        devError(TAG, 'Extension failed: ', e, fnOrStruct.n);
       }
       // We handled the entry. Remove from set for future execution.
       preregisteredExtensions.splice(i--, 1);
@@ -244,7 +244,7 @@ function adoptShared(global, callback) {
       } catch (e) {
         // Throw errors outside of loop in its own micro task to
         // avoid on error stopping other extensions from loading.
-        dev().error(TAG, 'Extension failed: ', e, fnOrStruct.n);
+        devError(TAG, 'Extension failed: ', e, fnOrStruct.n);
       }
     }
     // Make sure we empty the array of preregistered extensions.

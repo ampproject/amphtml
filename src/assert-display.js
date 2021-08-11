@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev} from './log';
+
+import {devError} from '#core/error';
 
 /**
  * Asserts that the style is not the `display` style.
@@ -27,10 +28,7 @@ import {dev} from './log';
  */
 export function assertNotDisplay(style) {
   if (style === 'display') {
-    dev().error(
-      'STYLE',
-      '`display` style detected. You must use toggle instead.'
-    );
+    devError('STYLE', '`display` style detected. You must use toggle instead.');
   }
   return style;
 }
@@ -48,7 +46,7 @@ export function assertNotDisplay(style) {
  */
 export function assertDoesNotContainDisplay(styles) {
   if ('display' in styles) {
-    dev().error(
+    devError(
       'STYLE',
       '`display` style detected in styles. You must use toggle instead.'
     );

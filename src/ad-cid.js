@@ -16,6 +16,8 @@
 
 import {adConfig} from '#ads/_config';
 
+import {devError} from '#core/error';
+
 import {Services} from '#service';
 
 import {dev} from './log';
@@ -68,7 +70,7 @@ export function getOrCreateAdCid(
       )
       .catch((error) => {
         // Not getting a CID is not fatal.
-        dev().error('AD-CID', error);
+        devError('AD-CID', error);
         return undefined;
       });
   });

@@ -15,6 +15,7 @@
  */
 
 import {Deferred, tryResolve} from '#core/data-structures/promise';
+import {devError} from '#core/error';
 import {dict, map} from '#core/types/object';
 import {getHistoryState} from '#core/window/history';
 
@@ -282,11 +283,11 @@ export class History {
           task.resolve(result);
         },
         (reason) => {
-          dev().error(TAG_, 'failed to execute a task:', reason);
+          devError(TAG_, 'failed to execute a task:', reason);
           // TODO(dvoytenko, #8785): cleanup after tracing.
           if (task.trace) {
             task.trace.message += reason;
-            dev().error(TAG_, task.trace);
+            devError(TAG_, task.trace);
           }
           task.reject(reason);
         }
@@ -472,7 +473,7 @@ export class HistoryBindingNatural_ {
         this.historyState_(this.stackIndex_, /* replace */ true)
       );
     } catch (e) {
-      dev().error(TAG_, 'Initial replaceState failed: ' + e.message);
+      devError(TAG_, 'Initial replaceState failed: ' + e.message);
     }
 
     history.pushState = this.historyPushState_.bind(this);

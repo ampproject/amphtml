@@ -20,7 +20,7 @@ import {
   isDocumentHidden,
   removeDocumentVisibilityChangeListener,
 } from '#core/document-visibility';
-import {rethrowAsync} from '#core/error';
+import {devError, rethrowAsync} from '#core/error';
 
 import {Services} from '#service';
 
@@ -470,7 +470,7 @@ function callTask_(callback, state) {
   try {
     const ret = callback(state);
     if (ret !== undefined) {
-      dev().error(
+      devError(
         'VSYNC',
         'callback returned a value but vsync cannot propogate it: %s',
         callback.toString()
