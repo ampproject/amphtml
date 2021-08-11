@@ -98,8 +98,7 @@ function getRtvVersion(win) {
  * bypassed via #validate=0.
  * Note that AMP_DEV_MODE flag is used for testing purposes.
  * @param {!Window} win
- * @param hashParams
- * @param opt_hashParams
+ * @param {!JsonObject=} opt_hashParams
  * @return {boolean}
  */
 export function isModeDevelopment(win, opt_hashParams) {

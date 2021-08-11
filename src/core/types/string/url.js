@@ -65,9 +65,7 @@ export function parseQueryString(queryString) {
  */
 export function getHashParams(opt_win) {
   const {location} = opt_win || self;
-  return parseQueryString(
-    // location.originalHash is set by the viewer when it removes the fragment
-    // from the URL.
-    win.location['originalHash'] || win.location.hash
-  );
+  // location.originalHash is set by the viewer when it removes the fragment
+  // from the URL.
+  return parseQueryString(location['originalHash'] || location.hash);
 }

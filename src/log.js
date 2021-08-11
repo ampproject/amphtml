@@ -113,7 +113,8 @@ const messageArgToEncodedComponent = (arg) =>
  * @param {!Window=} opt_win
  * @return {number}
  */
-const logHashParam = (opt_win) => parseInt(getHashParams(opt_win)['log'], 10);
+export const logHashParam = (opt_win) =>
+  parseInt(getHashParams(opt_win)['log'], 10);
 
 /**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev
