@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {getMode} from './mode';
 import * as mode from '#core/mode';
+
+import {getMode} from './mode';
 
 /**
  * Provides info about the current app. This return value may be cached and
@@ -30,7 +31,6 @@ export function getModeObject(opt_win) {
     esm: IS_ESM,
     test: getMode(opt_win).test,
     log: getMode(opt_win).log,
-    version: mode.version()
     rtvVersion: getMode(opt_win).rtvVersion,
   };
 }
