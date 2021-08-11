@@ -63,7 +63,8 @@ describes.realWin('Audio preact component v1.0', {}, (env) => {
       >
         <source src="audio.mp3" type="audio/mpeg" />
         <source src="audio.ogg" type="audio/ogg" />
-      </Audio>
+      </Audio>,
+      {attachTo: env.win.document.body}
     );
 
     const component = wrapper.find(Audio.displayName).find('audio');
