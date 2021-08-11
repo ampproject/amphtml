@@ -90,10 +90,14 @@ function md5(...args) {
 }
 
 /**
+ * @typedef {{hash: string, contents: string}} ReadResult
+ */
+
+/**
  * Used to cache file reads, since some (esbuild) will have multiple "loads" per
  * file. This batches consecutive reads into a single, and then clears its cache
  * item for the next load.
- * @private @const {!Map<string, Promise<{hash: string, contents: string}>>}
+ * @private @const {!Map<string, Promise<ReadResult>>}
  */
 const readCache = new Map();
 
@@ -104,7 +108,7 @@ const readCache = new Map();
  *
  * @param {string} path
  * @param {string=} optionsHash
- * @return {{contents: string, hash: string}}
+ * @return {Promise<ReadResult>}
  */
 function batchedRead(path, optionsHash) {
   let read = readCache.get(path);

@@ -337,6 +337,13 @@ module.exports = function ({template, types: t}) {
           );
         }
 
+        // This codepath is used when generating CSS files for npm distribution, separate from
+        // AMP-mode compilation.
+        if (this.opts.css) {
+          this.opts.css = transformCssSync(sheet.toString()).css;
+          return;
+        }
+
         // Create the classes var.
         // This is required for compatibility when a useStyles() result is
         // passed around.
