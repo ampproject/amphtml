@@ -17,7 +17,6 @@
 import {Services} from '#service';
 import {dict} from '#core/types/object';
 import {findSentences, markTextRangeList} from './findtext';
-import {isExperimentOn} from '#experiments';
 import {listenOnce} from '../../../src/event-helper';
 import {moveLayoutRect} from '#core/dom/layout/rect';
 import {once} from '#core/types/function';
@@ -157,10 +156,15 @@ export class HighlightHandler {
     /** @private {?Array<!Element>} */
     this.highlightedNodes_ = null;
 
-    if (
-      'fragmentDirective' in document &&
-      isExperimentOn(ampdoc.win, 'use-text-fragments-for-highlights')
-    ) {
+    const platform =
+      /* @type {!./service/platform-impl.Platform} */ Services.platformFor(
+        this.ampdoc_.win
+      );
+
+    // Chrome 81 added support for text fragment proposal which does not support it across iframes.
+    // However, Chrome 81-92 report `'fragmentDirective' in document` = true for feature detection.
+    // Chrome 93 supports the proposal that works across iframes, hence this version check.
+    if (platform.isChrome() && platform.getMajorVersion() >= 93) {
       ampdoc
         .whenFirstVisible()
         .then(() => this.highlightUsingTextFragments_(highlightInfo));
