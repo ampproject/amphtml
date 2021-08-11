@@ -17,7 +17,7 @@
 import {areMarginsChanged} from '#core/dom/layout/rect';
 import {closest} from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
-import {devError} from '#core/error';
+import {createExpectedError, devError} from '#core/error';
 
 import {isExperimentOn} from '#experiments';
 
@@ -27,7 +27,6 @@ import {MutatorInterface} from './mutator-interface';
 import {Resource} from './resource';
 
 import {FocusHistory} from '../focus-history';
-import {dev} from '../log';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 
 const FOUR_FRAME_DELAY_ = 70;
@@ -122,7 +121,7 @@ export class MutatorImpl {
             resource.completeCollapse();
             resolve();
           } else {
-            reject(dev().createExpectedError('collapse attempt denied'));
+            reject(createExpectedError('collapse attempt denied'));
           }
         }
       );

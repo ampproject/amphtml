@@ -24,7 +24,7 @@ import {
   rectsOverlap,
 } from '#core/dom/layout/rect';
 import {computedStyle, toggle} from '#core/dom/style';
-import {devError, devExpectedError} from '#core/error';
+import {createError, devError, devExpectedError} from '#core/error';
 import {toWin} from '#core/window';
 
 import {Services} from '#service';
@@ -866,7 +866,7 @@ export class Resource {
     devAssert(this.isDisplayed(), 'Not displayed for layout: %s', this.debugid);
 
     if (this.state_ != ResourceState.LAYOUT_SCHEDULED) {
-      const err = dev().createError(
+      const err = createError(
         'startLayout called but not LAYOUT_SCHEDULED',
         'currently: ',
         this.state_
@@ -924,7 +924,7 @@ export class Resource {
       // We hit a race condition, where `layoutCallback` -> `unlayoutCallback`
       // was called in quick succession. Since the unlayout was called before
       // the layout completed, we want to remain in the unlayout state.
-      const err = dev().createError('layoutComplete race');
+      const err = createError('layoutComplete race');
       err.associatedElement = this.element;
       devExpectedError(TAG, err);
       throw cancellation();

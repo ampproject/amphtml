@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 import {devAssert} from '#core/assert';
+import {createExpectedError} from '#core/error';
 import {isArray, isObject} from '#core/types';
 import {hasOwn, map} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {utf8Encode} from '#core/types/string/bytes';
 
-import {dev, user} from '../log';
+import {user} from '../log';
 
 /** @enum {number} Allowed fetch responses. */
 const allowedFetchTypes = {
@@ -116,7 +117,7 @@ function createXhrRequest(method, url) {
   if ('withCredentials' in xhr) {
     xhr.open(method, url, true);
   } else {
-    throw dev().createExpectedError('CORS is not supported');
+    throw createExpectedError('CORS is not supported');
   }
   return xhr;
 }

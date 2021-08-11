@@ -19,6 +19,7 @@ import {Observable} from '#core/data-structures/observable';
 import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {isIframed} from '#core/dom';
 import {
+  createExpectedError,
   devError,
   devExpectedError,
   duplicateErrorIfNecessary,
@@ -328,7 +329,7 @@ export class ViewerImpl {
           /** @type {!Error|string|undefined} */ (reason)
         );
         if (error && endsWith(error.message, timeoutMessage)) {
-          error = dev().createExpectedError(error);
+          error = createExpectedError(error);
         }
         reportError(error);
         throw error;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {devExpectedError} from '#core/error';
+import {createExpectedError, devExpectedError} from '#core/error';
 import {dict, recreateNonProtoObject} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
@@ -429,11 +429,7 @@ export class ViewerStorageBinding {
           dict({'origin': origin, 'blob': blob})
         )
         .catch((reason) => {
-          throw dev().createExpectedError(
-            TAG,
-            'Failed to save store: ',
-            reason
-          );
+          throw createExpectedError(TAG, 'Failed to save store: ', reason);
         })
     );
   }

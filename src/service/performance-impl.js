@@ -20,6 +20,7 @@ import {Signals} from '#core/data-structures/signals';
 import {whenDocumentComplete, whenDocumentReady} from '#core/document-ready';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {computedStyle} from '#core/dom/style';
+import {createExpectedError} from '#core/error';
 import {throttle} from '#core/types/function';
 import {dict, map} from '#core/types/object';
 
@@ -121,7 +122,7 @@ export class Performance {
     if (!supportedEntryTypes.includes('paint')) {
       this.metrics_.rejectSignal(
         TickLabel.FIRST_CONTENTFUL_PAINT,
-        dev().createExpectedError('First Contentful Paint not supported')
+        createExpectedError('First Contentful Paint not supported')
       );
     }
 
@@ -136,7 +137,7 @@ export class Performance {
     if (!this.supportsLayoutShift_) {
       this.metrics_.rejectSignal(
         TickLabel.CUMULATIVE_LAYOUT_SHIFT,
-        dev().createExpectedError('Cumulative Layout Shift not supported')
+        createExpectedError('Cumulative Layout Shift not supported')
       );
     }
 
@@ -151,7 +152,7 @@ export class Performance {
     if (!this.supportsEventTiming_) {
       this.metrics_.rejectSignal(
         TickLabel.FIRST_INPUT_DELAY,
-        dev().createExpectedError('First Input Delay not supported')
+        createExpectedError('First Input Delay not supported')
       );
     }
 
@@ -167,7 +168,7 @@ export class Performance {
     if (!this.supportsLargestContentfulPaint_) {
       this.metrics_.rejectSignal(
         TickLabel.LARGEST_CONTENTFUL_PAINT,
-        dev().createExpectedError('Largest Contentful Paint not supported')
+        createExpectedError('Largest Contentful Paint not supported')
       );
     }
 

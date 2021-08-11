@@ -25,6 +25,7 @@ import {
   removeDocumentVisibilityChangeListener,
 } from '#core/document-visibility';
 import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '#core/dom';
+import {createError} from '#core/error';
 import {isEnumValue} from '#core/types';
 import {map} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
@@ -189,7 +190,7 @@ export class AmpDocService {
   getAmpDoc(node) {
     const ampdoc = this.getAmpDocIfAvailable(node);
     if (!ampdoc) {
-      throw dev().createError('No ampdoc found for', node);
+      throw createError('No ampdoc found for', node);
     }
     return ampdoc;
   }
