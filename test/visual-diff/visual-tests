@@ -253,8 +253,8 @@
       "url": "examples/visual-tests/amp-story/amp-story-ad.html",
       "name": "AMP Story Ad",
       "viewport": {
-        "width": 400,
-        "height": 600
+        "width": 1920,
+        "height": 1080
       },
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-ad.js",
        "loading_complete_selectors": [
