@@ -22,7 +22,6 @@ import {getHashParams} from '#core/types/string/url';
  *   localDev: boolean,
  *   development: boolean,
  *   test: boolean,
- *   log: (string|undefined),
  *   rtvVersion: string,
  *   runtime: (null|string|undefined),
  *   a4aId: (null|string|undefined),
