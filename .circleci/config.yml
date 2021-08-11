@@ -62,19 +62,26 @@ executors:
 
 commands:
   checkout_repo:
+    parameters:
+      save-git-cache:
+        type: boolean
+        default: false
     steps:
       - restore_cache:
           name: 'Restore Git Cache'
           keys:
-            - git-cache-{{ arch }}-{{ .Branch }}-{{ .Revision }}
-            - git-cache-{{ arch }}-{{ .Branch }}-
-            - git-cache-{{ arch }}-
+            - git-cache-{{ arch }}-v2-{{ .Branch }}-{{ .Revision }}
+            - git-cache-{{ arch }}-v2-{{ .Branch }}-
+            - git-cache-{{ arch }}-v2-
       - checkout
-      - save_cache:
-          name: 'Save Git Cache'
-          key: git-cache-{{ arch }}-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - .git
+      - when:
+          condition: << parameters.save-git-cache >>
+          steps:
+            - save_cache:
+                name: 'Save Git Cache'
+                key: git-cache-{{ arch }}-v2-{{ .Branch }}-{{ .Revision }}
+                paths:
+                  - .git
   setup_node_environment:
     steps:
       - node/install:
@@ -147,7 +154,8 @@ jobs:
     executor:
       name: base-docker-small
     steps:
-      - checkout_repo
+      - checkout_repo:
+          save-git-cache: true
       - run:
           name: 'Initialize Repository'
           command: ./.circleci/initialize_repo.sh
