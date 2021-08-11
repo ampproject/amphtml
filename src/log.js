@@ -271,7 +271,7 @@ export class Log {
    * Reports an error message. If the logging is disabled, the error is rethrown
    * asynchronously.
    * @param {string} tag
-   * @param expected
+   * @param {boolean} expected
    * @param {...*} args
    * @return {!Error|undefined}
    * @private
@@ -289,7 +289,11 @@ export class Log {
    * @param {...*} args
    */
   error(tag, ...args) {
-    this.error_(tag, false, args);
+    if (!this.msg_(tag, LogLevel.ERROR, args)) {
+      const error = this.createError.apply(this, args);
+      error.name = tag || error.name;
+      self.__AMP_REPORT_ERROR?.(error);
+    }
   }
 
   /**
@@ -299,7 +303,9 @@ export class Log {
    * @param {...*} args
    */
   expectedError(tag, ...args) {
-    this.error_(tag, true, args);
+    if (!this.msg_(tag, LogLevel.ERROR, args)) {
+      self.__AMP_REPORT_ERROR?.(this.createExpectedError.apply(this, args));
+    }
   }
 
   /**
