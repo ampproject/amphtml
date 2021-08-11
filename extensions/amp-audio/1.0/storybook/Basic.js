@@ -32,8 +32,7 @@ export const _default = () => {
       title="Snow Fight"
       album="Jan Morgenstern"
       artist="Sintel"
-      height="75"
-      width="auto"
+      style={{height: '75px', width: 'auto'}}
       controls
     ></Audio>
   );
