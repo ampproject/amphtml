@@ -23,13 +23,30 @@ import {
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '#service';
 import {dict} from '#core/types/object';
+import * as GetService from '../../../../src/service-helpers';
+import {consentStateManager} from '../consent-state-manager'
+import {getConsentStateManagerForTesting} from '../amp-consent'
+import {createConsentElement} from '../test/test-amp-consent'
+import {ACTION_TYPE, AmpConsent} from '../amp-consent';
+import {getRandomString64} from '#service/cid-impl';
+import {ConsentStateManager} from '../consent-state-manager';
+import {getConsentCID} from '../consent-config'
+import * as CID from '../consent-config';
+import {
+  cidServiceForDocForTesting,
+  getProxySourceOrigin,
+  isOptedOutOfCid,
+  optOutOfCid,
+} from '#service/cid-impl';
 
 describes.realWin('ConsentConfig', {amp: 1}, (env) => {
   let doc;
+  let win;
   let element;
   let defaultConfig;
   beforeEach(() => {
     doc = env.win.document;
+    win = env.win;
     element = doc.createElement('div');
     defaultConfig = dict({
       'consentInstanceId': 'ABC',
@@ -556,26 +573,53 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
           // RANDOM is not allowed
           'r=RANDOM'
       );
+
       expect(url).to.match(
         /cid=amp-.{22}&pid=[0-9]+&pid64=.{22}&sourceurl=about%3Asrcdoc&r=RANDOM/
       );
     });
 
-    it('override CLIENT_ID scope', async () => {
-      const u1 = await expandConsentEndpointUrl(
-        doc.body,
-        'https://example.test?cid=CLIENT_ID'
-      );
-      const u2 = await expandConsentEndpointUrl(
-        doc.body,
+    it.only('override CLIENT_ID scope', async () => {
+
+      const config = dict({
+        'consentInstanceId': 'test',
+        'checkConsentHref': '/override',
+        'consentRequired': true,
+        'clientConfig': {
+          'test': 'ABC',
+        },
+        'postPromptUI': 'test',
+      });
+      const consentElement = createConsentElement(doc, config);
+      doc.body.appendChild(consentElement);
+      const consent = new AmpConsent(consentElement);
+      const fakeConsentStateManager = new ConsentStateManager;
+      fakeConsentStateManager.ampdoc_ = doc.body;
+
+      const stubGetServicePromiseForDoc = env.sandbox.stub(
+        GetService,
+        'getServicePromiseForDoc'
+      ).resolves(fakeConsentStateManager);
+
+      const cid = 'amp-WB02GhpVXeV7iwqqEpmkYw';
+
+      // it is not being stubbed
+      const stubCID = env.sandbox.stub(CID, 'getConsentCID').resolves(cid)
+
+      const u1 = expandConsentEndpointUrl(
+         consentElement,
+        'https://example.test?cid=CLIENT_ID')
+
+      const u2 = expandConsentEndpointUrl(
+        consentElement,
         'https://example.test?cid=CLIENT_ID()'
       );
-      const u3 = await expandConsentEndpointUrl(
-        doc.body,
+      const u3 = expandConsentEndpointUrl(
+        consentElement,
         'https://example.test?cid=CLIENT_ID(123)'
       );
-      const u4 = await expandConsentEndpointUrl(
-        doc.body,
+      const u4 = expandConsentEndpointUrl(
+        consentElement,
         'https://example.test?cid=CLIENT_ID(abc)'
       );
       expect(u1).to.equal(u2).to.equal(u3).to.equal(u4);
