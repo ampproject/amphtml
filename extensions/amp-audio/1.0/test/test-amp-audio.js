@@ -37,7 +37,6 @@ describes.realWin(
     beforeEach(async () => {
       win = env.win;
       doc = win.document;
-      // html = htmlFor(doc);
       toggleExperiment(win, 'bento-audio', true, true);
     });
 
@@ -55,6 +54,12 @@ describes.realWin(
       await loadPromise;
     };
 
+    /**
+     * Create `<amp-audio>` with provided attributes
+     * @param {*} attributes Attributes to be add
+     * @param {*} opt_childNodesAttrs Child nodes to be add
+     * @returns Return `<amp-audio>` with given parameters
+     */
     function getAmpAudio(attributes, opt_childNodesAttrs) {
       ampAudio = createElementWithAttributes(doc, 'amp-audio', attributes);
       if (opt_childNodesAttrs) {
@@ -76,23 +81,23 @@ describes.realWin(
       return ampAudio;
     }
 
+    /**
+     * Creates `<amp-audio>`
+     * @param {`*`} attributes Attributes to be add
+     * @param {*} opt_childNodesAttrs Child nodes to be add
+     * @returns Returns `<amp-audio>` with given parameters
+     */
     function attachAndRun(attributes, opt_childNodesAttrs) {
       naturalDimensions_['AMP-AUDIO'] = {width: '300px', height: '30px'};
       const ampAudio = getAmpAudio(attributes, opt_childNodesAttrs);
       return ampAudio;
-      //   .buildInternal()
-      //   .then(() => ampAudio.layoutCallback())
-      //   .then(() => ampAudio)
-      //   .catch((error) => {
-      //     // Ignore failed to load errors since sources are fake.
-      //     if (error.toString().indexOf('Failed to load') > -1) {
-      //       return ampAudio;
-      //     } else {
-      //       throw error;
-      //     }
-      //   });
     }
 
+    /**
+     * Creates `<amp-story>` and add `<amp-audio>` as child
+     * @param {*} attributes Attributes to be add
+     * @returns Returns `<amp-story>` with `<amp-audio>` as child
+     */
     function attachToAmpStoryAndRun(attributes) {
       naturalDimensions_['AMP-AUDIO'] = {width: '300px', height: '30px'};
       const ampAudio = doc.createElement('amp-audio');
@@ -104,17 +109,6 @@ describes.realWin(
       doc.body.appendChild(ampStory);
 
       return ampAudio;
-      // .buildInternal()
-      // .then(() => ampAudio.layoutCallback())
-      // .then(() => ampAudio)
-      // .catch((error) => {
-      //   // Ignore failed to load errors since sources are fake.
-      //   if (error.toString().indexOf('Failed to load') > -1) {
-      //     return ampAudio;
-      //   } else {
-      //     throw error;
-      //   }
-      // });
     }
 
     it('should load audio through attribute', async () => {
@@ -125,7 +119,7 @@ describes.realWin(
       // Wait till rendering is finished
       await waitForRender();
 
-      // Retrive
+      // Retrieve
       const {shadowRoot} = element;
       const audio = shadowRoot.querySelector('audio');
 

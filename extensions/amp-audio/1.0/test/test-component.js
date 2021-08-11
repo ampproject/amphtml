@@ -31,7 +31,10 @@ describes.realWin('Audio preact component v1.0', {}, (env) => {
     expect(component.prop('src')).to.equal('audio.mp3');
     expect(component.prop('controls')).to.be.true;
 
-    expect(component.prop('style')).to.deep.equal({width: '300px', height: '30px'});
+    expect(component.prop('style')).to.deep.equal({
+      width: '300px',
+      height: '30px',
+    });
   });
   it('should not preload audio', () => {
     const wrapper = mount(<Audio src="audio.mp3" preload="none" />);
@@ -73,7 +76,7 @@ describes.realWin('Audio preact component v1.0', {}, (env) => {
     expect(component.getDOMNode().offsetHeight).to.be.greaterThan(1);
     expect(component.prop('controls')).to.be.true;
 
-   const audio = component.find('audio');
+    const audio = component.find('audio');
     expect(audio.prop('autoplay')).to.be.true;
     expect(audio.prop('muted')).to.be.true;
     expect(audio.getDOMNode().muted).to.be.true;

@@ -41,7 +41,6 @@ export const _default = () => {
 export const LoadAudioThroughSources = () => {
   return (
     <Audio
-      // src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
       artwork="https://storage.googleapis.com/media-session/sintel/artwork-512.png"
       title="Snow Fight"
       album="Jan Morgenstern"

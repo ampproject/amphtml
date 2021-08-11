@@ -5,7 +5,6 @@ experimental: true
 formats:
   - websites
   - stories
-  - ads
 teaser:
   text: Replaces the HTML5 audio tag.
 ---
