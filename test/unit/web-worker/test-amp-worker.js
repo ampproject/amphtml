@@ -17,7 +17,7 @@
 import {Services} from '#service';
 import {installXhrService} from '#service/xhr-impl';
 
-import {dev} from '../../../src/log';
+import {dev, setReportError} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {
   ampWorkerForTesting,
@@ -196,12 +196,15 @@ describes.sandboxed('invokeWebWorker', {}, (env) => {
   });
 
   it('should log error when unexpected message is received', () => {
-    const errorStub = env.sandbox.stub(dev(), 'error');
+    let reportedError;
+    setReportError((e) => {
+      reportedError = e;
+    });
 
     invokeWebWorker(fakeWin, 'foo');
 
     return workerReadyPromise.then(() => {
-      expect(errorStub.callCount).to.equal(0);
+      expect(reportedError).to.be.undefined;
 
       // Unexpected `id` value.
       fakeWorker.onmessage({
@@ -211,8 +214,8 @@ describes.sandboxed('invokeWebWorker', {}, (env) => {
           id: 3,
         },
       });
-      expect(errorStub.callCount).to.equal(1);
-      expect(errorStub).to.have.been.calledWith('web-worker');
+      expect(reportedError.name).to.equal('web-worker');
+      expect(reportedError.message).to.contain('Received unexpected message');
 
       // Unexpected method at valid `id`.
       allowConsoleError(() => {

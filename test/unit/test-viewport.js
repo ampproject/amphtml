@@ -37,7 +37,7 @@ import {
 import {installVsyncService} from '#service/vsync-impl';
 
 import {loadPromise} from '../../src/event-helper';
-import {dev} from '../../src/log';
+import {setReportError} from '../../src/log';
 import {getMode} from '../../src/mode';
 import {setParentWindow} from '../../src/service-helpers';
 
@@ -289,20 +289,24 @@ describes.fakeWin('Viewport', {}, (env) => {
   });
 
   describe('zero dimensions', () => {
-    let errorStub;
     let randomValue;
+    let reportedError;
 
     beforeEach(() => {
       viewport.size_ = null;
-      errorStub = env.sandbox.stub(dev(), 'error');
       randomValue = 0.009;
       env.sandbox.stub(Math, 'random').callsFake(() => randomValue);
+
+      reportedError = undefined;
+      setReportError((e) => {
+        reportedError = e;
+      });
     });
 
     it('should be ok with non-zero dimensions', () => {
       expect(viewport.getSize().width).to.equal(111);
       expect(viewport.getSize().height).to.equal(222);
-      expect(errorStub).to.not.be.called;
+      expect(reportedError).to.be.undefined;
     });
 
     it('should report zero width', () => {
@@ -311,11 +315,8 @@ describes.fakeWin('Viewport', {}, (env) => {
       };
       expect(viewport.getSize().width).to.equal(0);
       expect(viewport.getSize().height).to.equal(222);
-      expect(errorStub).to.be.calledOnce;
-      expect(errorStub).to.be.calledWith(
-        'Viewport',
-        'viewport has zero dimensions'
-      );
+      expect(reportedError.name).to.equal('Viewport');
+      expect(reportedError.message).to.equal('viewport has zero dimensions');
     });
 
     it('should report zero height', () => {
@@ -324,11 +325,8 @@ describes.fakeWin('Viewport', {}, (env) => {
       };
       expect(viewport.getSize().width).to.equal(111);
       expect(viewport.getSize().height).to.equal(0);
-      expect(errorStub).to.be.calledOnce;
-      expect(errorStub).to.be.calledWith(
-        'Viewport',
-        'viewport has zero dimensions'
-      );
+      expect(reportedError.name).to.equal('Viewport');
+      expect(reportedError.message).to.equal('viewport has zero dimensions');
     });
 
     it('should report both zero width and height', () => {
@@ -337,11 +335,8 @@ describes.fakeWin('Viewport', {}, (env) => {
       };
       expect(viewport.getSize().width).to.equal(0);
       expect(viewport.getSize().height).to.equal(0);
-      expect(errorStub).to.be.calledOnce;
-      expect(errorStub).to.be.calledWith(
-        'Viewport',
-        'viewport has zero dimensions'
-      );
+      expect(reportedError.name).to.equal('Viewport');
+      expect(reportedError.message).to.equal('viewport has zero dimensions');
     });
 
     it('should report only 1% of the time', () => {
@@ -351,7 +346,7 @@ describes.fakeWin('Viewport', {}, (env) => {
       randomValue = 0.011;
       expect(viewport.getSize().width).to.equal(0);
       expect(viewport.getSize().height).to.equal(0);
-      expect(errorStub).to.not.be.called;
+      expect(reportedError).to.be.undefined;
     });
 
     it('should report in prerender state', () => {
@@ -361,11 +356,8 @@ describes.fakeWin('Viewport', {}, (env) => {
       };
       expect(viewport.getSize().width).to.equal(0);
       expect(viewport.getSize().height).to.equal(0);
-      expect(errorStub).to.be.calledOnce;
-      expect(errorStub).to.be.calledWith(
-        'Viewport',
-        'viewport has zero dimensions'
-      );
+      expect(reportedError.name).to.equal('Viewport');
+      expect(reportedError.message).to.equal('viewport has zero dimensions');
     });
 
     it('should NOT report in hidden state', () => {
@@ -375,7 +367,7 @@ describes.fakeWin('Viewport', {}, (env) => {
       };
       expect(viewport.getSize().width).to.equal(0);
       expect(viewport.getSize().height).to.equal(0);
-      expect(errorStub).to.not.be.called;
+      expect(reportedError).to.be.undefined;
     });
 
     it('should NOT report in inactive state', () => {
@@ -385,7 +377,7 @@ describes.fakeWin('Viewport', {}, (env) => {
       };
       expect(viewport.getSize().width).to.equal(0);
       expect(viewport.getSize().height).to.equal(0);
-      expect(errorStub).to.not.be.called;
+      expect(reportedError).to.be.undefined;
     });
   });
 
