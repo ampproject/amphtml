@@ -32,6 +32,7 @@ BaseElement['props'] = {
   artist: {attr: 'artist', type: 'string', default: EMPTY_METADATA.artist},
   artwork: {attr: 'artwork', type: 'string', default: EMPTY_METADATA.artwork},
   autoplay: {attr: 'autoplay', type: 'boolean', default: false},
+  'children': {passthroughNonEmpty: true},
   controlsList: {attr: 'controlsList'},
   loop: {attr: 'loop', type: 'boolean', default: false},
   muted: {attr: 'muted', type: 'boolean', default: false},
