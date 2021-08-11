@@ -179,14 +179,14 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/30291',
   },
   {
-    id: 'tcf-post-message-proxy-api',
-    name: 'Proxy for TCF PostMessageAPI to send TCData to 3p iframes',
-    spec: 'https://github.com/ampproject/amphtml/issues/30385',
-  },
-  {
     id: 'dfp-render-on-idle-cwv-exp',
     name: 'To measure the CWV impact of ads idle rendering',
     spec: 'https://github.com/ampproject/amphtml/issues/31436',
+  },
+  {
+    id: 'amp-story-desktop-one-panel',
+    name: 'New desktop one-panel UI with background blur for stories.',
+    spec: 'https://github.com/ampproject/amphtml/projects/128',
   },
   {
     id: 'amp-story-page-attachment-ui-v2',

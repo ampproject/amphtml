@@ -15,8 +15,12 @@
  */
 
 import {DomFingerprint} from '#core/dom/fingerprint';
-import {Services} from '#service';
 import {WindowInterface} from '#core/window/interface';
+
+import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+
 import {
   addDataAndJsonAttributes_,
   applySandbox,
@@ -32,7 +36,6 @@ import {
   deserializeMessage,
   serializeMessage,
 } from '../../../src/3p-frame-messaging';
-import {toggleExperiment} from '#experiments';
 
 describes.realWin('3p-frame', {amp: true}, (env) => {
   let window, document;

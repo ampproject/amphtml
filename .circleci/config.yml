@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   browser-tools: circleci/browser-tools@1.1.3
-  node: circleci/node@4.5.1
+  node: circleci/node@4.7.0
 
 push_and_pr_builds: &push_and_pr_builds
   filters:
@@ -17,6 +17,14 @@ push_builds_only: &push_builds_only
         - main
         - /^amp-release-.*$/
 
+pr_builds_only: &pr_builds_only
+  filters:
+    branches:
+      ignore:
+        - main
+        - /^amp-release-.*$/
+        - nightly
+
 experiment_job: &experiment_job
   parameters:
     exp:
@@ -27,28 +35,52 @@ experiment_job: &experiment_job
     EXP: << parameters.exp >>
 
 executors:
-  amphtml-small-executor:
+  base-docker-small:
     docker:
       - image: cimg/base:stable
     resource_class: small
-  amphtml-medium-executor:
+  node-docker-medium:
     docker:
       - image: cimg/node:lts-browsers
     resource_class: medium
-  amphtml-large-executor:
+  node-docker-large:
     docker:
       - image: cimg/node:lts-browsers
     resource_class: large
-  amphtml-xlarge-executor:
+  node-docker-xlarge:
     docker:
       - image: cimg/node:lts-browsers
     resource_class: xlarge
-  validator-xlarge-executor:
+  jdk-docker-xlarge:
     docker:
       - image: cimg/openjdk:16.0-node
     resource_class: xlarge
+  macos-medium:
+    macos:
+      xcode: 12.4.0
+    resource_class: medium
 
 commands:
+  checkout_repo:
+    steps:
+      - restore_cache:
+          name: 'Restore Git Cache'
+          keys:
+            - git-cache-{{ arch }}-{{ .Branch }}-{{ .Revision }}
+            - git-cache-{{ arch }}-{{ .Branch }}-
+            - git-cache-{{ arch }}-
+      - checkout
+      - save_cache:
+          name: 'Save Git Cache'
+          key: git-cache-{{ arch }}-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - .git
+  setup_node_environment:
+    steps:
+      - node/install:
+          lts: true
+          install-npm: false
+      - node/install-packages
   setup_vm:
     steps:
       - attach_workspace:
@@ -61,12 +93,7 @@ commands:
       - run:
           name: 'Maybe Gracefully Halt'
           command: /tmp/restored-workspace/maybe_gracefully_halt.sh
-      - restore_cache:
-          keys:
-            - source-v1-{{ .Branch }}-{{ .Revision }}
-            - source-v1-{{ .Branch }}-
-            - source-v1-
-      - checkout
+      - checkout_repo
       - run:
           name: 'Configure Development Environment'
           command: |
@@ -74,9 +101,7 @@ commands:
             ./.circleci/check_config.sh
             ./.circleci/restore_build_output.sh
             cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
-      # TODO(danielrozenberg): consolidate the extra steps.
-      - node/install-packages:
-          override-ci-command: npm config set prefix $HOME && npm ci
+      - setup_node_environment
   teardown_vm:
     steps:
       - persist_to_workspace:
@@ -88,6 +113,14 @@ commands:
       - browser-tools/install-chrome:
           replace-existing: true
       - browser-tools/install-chromedriver
+  enable_safari_automation:
+    steps:
+      - run:
+          name: 'Enable Safari Automation'
+          command: |
+            defaults write com.apple.Safari AllowRemoteAutomation 1
+            defaults write com.apple.Safari IncludeDevelopMenu 1
+            sudo safaridriver --enable
   store_test_output:
     steps:
       - store_artifacts:
@@ -103,24 +136,15 @@ commands:
               value: << pipeline.git.branch >>
           steps:
             - run:
-                name: 'Skip Local Unit Test on Push Builds'
+                name: 'Skip Job on Push Builds'
                 command: circleci-agent step halt
 
 jobs:
   'Initialize Repository':
     executor:
-      name: amphtml-small-executor
+      name: base-docker-small
     steps:
-      - restore_cache:
-          keys:
-            - source-v1-{{ .Branch }}-{{ .Revision }}
-            - source-v1-{{ .Branch }}-
-            - source-v1-
-      - checkout
-      - save_cache:
-          key: source-v1-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - .git
+      - checkout_repo
       - run:
           name: 'Initialize Repository'
           command: ./.circleci/initialize_repo.sh
@@ -130,135 +154,141 @@ jobs:
       - teardown_vm
   'Checks':
     executor:
-      name: amphtml-medium-executor
+      name: node-docker-medium
     steps:
       - setup_vm
       - install_chrome
       - run:
-          name: 'Checks'
+          name: '⭐ Checks ⭐'
           command: node build-system/pr-check/checks.js
       - teardown_vm
   'Unminified Build':
     executor:
-      name: amphtml-xlarge-executor
+      name: node-docker-xlarge
     steps:
       - setup_vm
       - run:
-          name: 'Unminified Build'
+          name: '⭐ Unminified Build ⭐'
           command: node build-system/pr-check/unminified-build.js
       - teardown_vm
   'Nomodule Build - Test':
     executor:
-      name: amphtml-xlarge-executor
+      name: node-docker-xlarge
     steps:
       - setup_vm
       - run:
-          name: 'Create Artifacts Directory'
-          command: mkdir -p /tmp/artifacts
-      - run:
-          name: 'Nomodule Build'
+          name: '⭐ Nomodule Build ⭐'
           command: node build-system/pr-check/nomodule-build.js
-      - store_artifacts:
-          path: /tmp/artifacts/amp_nomodule_build.tar.gz
       - teardown_vm
   'Module Build - Test':
     executor:
-      name: amphtml-xlarge-executor
+      name: node-docker-xlarge
     steps:
       - setup_vm
       - run:
-          name: 'Module Build'
+          name: '⭐ Module Build ⭐'
           command: node build-system/pr-check/module-build.js
       - teardown_vm
   'Nomodule Build - Prod':
     executor:
-      name: amphtml-xlarge-executor
+      name: node-docker-xlarge
     steps:
       - setup_vm
       - run:
-          name: 'Nomodule Build'
+          name: '⭐ Nomodule Build ⭐'
           command: node build-system/pr-check/bundle-size-nomodule-build.js
       - teardown_vm
   'Module Build - Prod':
     executor:
-      name: amphtml-xlarge-executor
+      name: node-docker-xlarge
     steps:
       - setup_vm
       - run:
-          name: 'Module Build'
+          name: '⭐ Module Build ⭐'
           command: node build-system/pr-check/bundle-size-module-build.js
+      - teardown_vm
+  'PR Deploy':
+    executor:
+      name: node-docker-medium
+    steps:
+      - setup_vm
+      - run:
+          name: '⭐ PR Deploy ⭐'
+          command: node build-system/pr-check/pr-deploy.js
+      - store_artifacts:
+          path: /tmp/artifacts/amp_nomodule_build.tar.gz
       - teardown_vm
   'Bundle Size':
     executor:
-      name: amphtml-medium-executor
+      name: node-docker-medium
     steps:
       - setup_vm
       - run:
-          name: 'Bundle Size'
+          name: '⭐ Bundle Size ⭐'
           command: node build-system/pr-check/bundle-size.js
       - teardown_vm
   'Validator Tests':
     executor:
-      name: validator-xlarge-executor
+      name: jdk-docker-xlarge
     steps:
       - setup_vm
       - run:
           name: 'Install Validator Dependencies'
           command: ./.circleci/install_validator_dependencies.sh
       - run:
-          name: 'Validator Tests'
+          name: '⭐ Validator Tests ⭐'
           command: node build-system/pr-check/validator-tests.js
       - store_test_output
       - teardown_vm
   'Visual Diff Tests':
     executor:
-      name: amphtml-large-executor
+      name: node-docker-large
     steps:
       - setup_vm
       - install_chrome
       - run:
-          name: 'Visual Diff Tests'
+          name: '⭐ Visual Diff Tests ⭐'
           command: node build-system/pr-check/visual-diff-tests.js
       - store_test_output
       - teardown_vm
   'Local Unit Tests':
     executor:
-      name: amphtml-large-executor
+      name: node-docker-large
     steps:
       - skip_on_push_builds
       - setup_vm
       - install_chrome
       - run:
-          name: 'Local Unit Tests'
+          name: '⭐ Local Unit Tests ⭐'
           command: node build-system/pr-check/unit-tests-local.js
       - store_test_output
       - teardown_vm
   'All Unit Tests':
     executor:
-      name: amphtml-medium-executor
+      name: node-docker-medium
     parallelism: 6
     steps:
       - setup_vm
       - install_chrome
       - run:
-          name: 'All Unit Tests'
+          name: '⭐ All Unit Tests ⭐'
           command: node build-system/pr-check/unit-tests.js
       - store_test_output
       - teardown_vm
   'Unminified Tests':
     executor:
-      name: amphtml-large-executor
+      name: node-docker-large
     steps:
       - setup_vm
       - install_chrome
       - run:
-          name: 'Unminified Tests'
+          name: '⭐ Unminified Tests ⭐'
           command: node build-system/pr-check/unminified-tests.js
       - store_test_output
       - teardown_vm
   'Nomodule Tests':
     executor:
-      name: amphtml-large-executor
+      name: node-docker-large
     parameters:
       config:
         description: 'Which config file to use'
@@ -268,13 +298,13 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: 'Nomodule Tests (<< parameters.config >>)'
+          name: '⭐ Nomodule Tests (<< parameters.config >>) ⭐'
           command: node build-system/pr-check/nomodule-tests.js --config=<< parameters.config >>
       - store_test_output
       - teardown_vm
   'Module Tests':
     executor:
-      name: amphtml-large-executor
+      name: node-docker-large
     parameters:
       config:
         description: 'Which config file to use'
@@ -284,65 +314,76 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: 'Module Tests (<< parameters.config >>)'
+          name: '⭐ Module Tests (<< parameters.config >>) ⭐'
           command: node build-system/pr-check/module-tests.js --config=<< parameters.config >>
       - store_test_output
       - teardown_vm
   'End-to-End Tests':
     executor:
-      name: amphtml-medium-executor
+      name: node-docker-medium
     parallelism: 6
     steps:
       - setup_vm
       - install_chrome
       - run:
-          name: 'End-to-End Tests'
+          name: '⭐ End-to-End Tests ⭐'
           command: node build-system/pr-check/e2e-tests.js
+      - store_test_output
+      - teardown_vm
+  'Safari Tests':
+    executor:
+      name: macos-medium
+    steps:
+      - setup_vm
+      - enable_safari_automation
+      - run:
+          name: '⭐ Safari Tests ⭐'
+          command: node build-system/pr-check/safari-tests.js
       - store_test_output
       - teardown_vm
   'Performance Tests':
     executor:
-      name: amphtml-xlarge-executor
+      name: node-docker-xlarge
     steps:
       - setup_vm
       - install_chrome
       - run:
-          name: 'Performance Tests'
+          name: '⭐ Performance Tests ⭐'
           command: node build-system/pr-check/performance-tests.js
       - store_test_output
       - teardown_vm
   'Experiment Build':
     executor:
-      name: amphtml-xlarge-executor
+      name: node-docker-xlarge
     <<: *experiment_job
     steps:
       - setup_vm
       - run:
-          name: 'Experiment << parameters.exp >> Build'
+          name: '⭐ Experiment << parameters.exp >> Build ⭐'
           command: node build-system/pr-check/experiment-build.js --experiment=experiment<< parameters.exp >>
       - teardown_vm
   'Experiment Integration Tests':
     executor:
-      name: amphtml-large-executor
+      name: node-docker-large
     <<: *experiment_job
     steps:
       - setup_vm
       - install_chrome
       - run:
-          name: 'Experiment << parameters.exp >> Integration Tests'
+          name: '⭐ Experiment << parameters.exp >> Integration Tests ⭐'
           command: node build-system/pr-check/experiment-integration-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
       - teardown_vm
   'Experiment End-to-End Tests':
     executor:
-      name: amphtml-large-executor
+      name: node-docker-large
     <<: *experiment_job
     parallelism: 6
     steps:
       - setup_vm
       - install_chrome
       - run:
-          name: 'Experiment << parameters.exp >> End-to-End Tests'
+          name: '⭐ Experiment << parameters.exp >> End-to-End Tests ⭐'
           command: node build-system/pr-check/experiment-e2e-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
       - teardown_vm
@@ -381,6 +422,10 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
+      - 'PR Deploy':
+          <<: *pr_builds_only
+          requires:
+            - 'Nomodule Build (Test)'
       - 'Bundle Size':
           <<: *push_and_pr_builds
           requires:
@@ -426,6 +471,11 @@ workflows:
             - 'Module Build (Test)'
       - 'End-to-End Tests':
           name: '⛓️ End-to-End Tests'
+          <<: *push_and_pr_builds
+          requires:
+            - 'Nomodule Build (Test)'
+      - 'Safari Tests':
+          name: 'Safari Tests'
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build (Test)'
