@@ -694,6 +694,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
         });
       });
     });
+  });
 
   describe('#mergeExperimentIds', () => {
     it('should merge a single id to itself', () => {
