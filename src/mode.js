@@ -76,7 +76,6 @@ function getMode_(win) {
     geoOverride: hashQuery['amp-geo'],
     test: coreMode.isTest(win),
     log: parseInt(hashQuery['log'], 10),
-    version: coreMode.version(),
     rtvVersion: getRtvVersion(win),
   };
 }
