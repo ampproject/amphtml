@@ -22,6 +22,7 @@ import {
   StateProperty,
   UIType,
 } from '../amp-story-store-service';
+import {ActionTrust} from '#core/constants/action-constants';
 import {AdvancementMode} from '../story-analytics';
 import {AmpStory} from '../amp-story';
 import {AmpStoryConsent} from '../amp-story-consent';
@@ -829,6 +830,70 @@ describes.realWin(
             true
           );
         });
+      });
+
+      describe('amp-story custom sidebar', () => {
+        it('should show the sidebar control if a sidebar exists', async () => {
+          await createStoryWithPages(2, ['cover', 'page-1']);
+
+          const sidebar = win.document.createElement('amp-sidebar');
+          story.element.appendChild(sidebar);
+
+          await story.layoutCallback();
+          expect(story.storeService_.get(StateProperty.HAS_SIDEBAR_STATE)).to.be
+            .true;
+        });
+      });
+
+      it('should open the sidebar on button click', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+
+        const sidebar = win.document.createElement('amp-sidebar');
+        story.element.appendChild(sidebar);
+
+        const executeSpy = env.sandbox.spy();
+        env.sandbox.stub(Services, 'actionServiceForDoc').returns({
+          setAllowlist: () => {},
+          trigger: () => {},
+          execute: executeSpy,
+        });
+
+        story.buildCallback();
+        await story.layoutCallback();
+        story.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
+        expect(executeSpy).to.have.been.calledWith(
+          story.sidebar_,
+          'open',
+          null,
+          null,
+          null,
+          null,
+          ActionTrust.HIGH
+        );
+      });
+
+      it('should unpause the story when the sidebar is closed', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+
+        const sidebar = win.document.createElement('amp-sidebar');
+        story.element.appendChild(sidebar);
+
+        env.sandbox.stub(Services, 'actionServiceForDoc').returns({
+          setAllowlist: () => {},
+          trigger: () => {},
+          execute: () => {
+            sidebar.setAttribute('open', '');
+          },
+        });
+
+        story.buildCallback();
+        await story.layoutCallback();
+        story.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
+        await Promise.resolve();
+        story.sidebar_.removeAttribute('open');
+        await Promise.resolve();
+        expect(story.storeService_.get(StateProperty.SIDEBAR_STATE)).to.be
+          .false;
       });
 
       describe('desktop attributes', () => {
