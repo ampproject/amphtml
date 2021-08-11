@@ -96,7 +96,7 @@ The `amp-story-interactive-img-quiz` element provides a guessing experience with
 
 Display different categories based on percentage of correct user answers by pairing `amp-story-interactive-img-quiz` with `amp-story-interactive-results`. Add a prompt for extra context.
 
-<amp-img alt="Example of an interactive image quiz: Which of these structures is oldest?, with various options; the correct answer, the Statue of Liberty has a green tick next to it. compared to the wrong answers which have a red cross; all answers show a percentage of how many people picked that particular answer" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/img-quiz-raw.png" layout="intrinsic" width="400" height="581">
+<amp-img alt="Example of an interactive image quiz: Which of these structures is oldest?, with various options; the correct answer, the Statue of Liberty has a green tick next to it, compared to the wrong answers which have a red cross; all answers show a percentage of how many people picked that particular answer" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/img-quiz-raw.png" layout="intrinsic" width="400" height="581">
 
 [sourcecode:html]
 <amp-story-interactive-img-quiz
