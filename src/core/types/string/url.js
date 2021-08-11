@@ -58,7 +58,13 @@ export function parseQueryString(queryString) {
   return params;
 }
 
-export function getHashParams() {
+/**
+ * Parses the query # params.
+ * @param {!Window=} win
+ * @return {!JsonObject}
+ */
+export function getHashParams(win) {
+  const {location} = win;
   return parseQueryString(
     // location.originalHash is set by the viewer when it removes the fragment
     // from the URL.
