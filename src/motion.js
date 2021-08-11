@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {Deferred} from './utils/promise';
-import {Services} from './services';
+import {Deferred} from '#core/data-structures/promise';
+
+import {Services} from '#service';
 
 /** @const {function()} */
 const NOOP_CALLBACK_ = function () {};

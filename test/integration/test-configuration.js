@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../src/amp-events';
-import {createFixtureIframe} from '../../testing/iframe.js';
+import {AmpEvents} from '#core/constants/amp-events';
 
-describe('Configuration', function () {
+import {createFixtureIframe} from '#testing/iframe';
+
+describes.sandboxed('Configuration', {}, function () {
   let fixture;
   beforeEach(() => {
     return createFixtureIframe('test/fixtures/configuration.html', 500).then(

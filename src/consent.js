@@ -16,9 +16,10 @@
 
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-} from './consent-state';
-import {Services} from './services';
-import {dict} from './utils/object';
+} from '#core/constants/consent-state';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
 
 /**
  * Returns a promise that resolve when all consent state the policy wait
@@ -118,13 +119,15 @@ export function getConsentDataToForward(element, opt_policyId) {
     if (!policy) {
       return gettersOrNull;
     }
-    return /** @type {!JsonObject} */ (Promise.all(
-      Object.keys(gettersOrNull).map((key) =>
-        gettersOrNull[key]
-          .call(policy, opt_policyId || 'default')
-          .then((value) => ({[key]: value}))
-      )
-    ).then((objs) => Object.assign.apply({}, objs)));
+    return /** @type {!JsonObject} */ (
+      Promise.all(
+        Object.keys(gettersOrNull).map((key) =>
+          gettersOrNull[key]
+            .call(policy, opt_policyId || 'default')
+            .then((value) => ({[key]: value}))
+        )
+      ).then((objs) => Object.assign.apply({}, objs))
+    );
   });
 }
 

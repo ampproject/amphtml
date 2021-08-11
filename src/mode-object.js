@@ -27,8 +27,6 @@ export function getModeObject(opt_win) {
     localDev: getMode(opt_win).localDev,
     development: getMode(opt_win).development,
     esm: IS_ESM,
-    minified: getMode(opt_win).minified,
-    lite: getMode(opt_win).lite,
     test: getMode(opt_win).test,
     log: getMode(opt_win).log,
     version: getMode(opt_win).version,

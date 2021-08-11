@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {pureUserAssert as userAssert} from '../src/core/assert';
 import {writeScript} from './3p';
+
+import {userAssert} from '../src/log';
 
 /**
  * Get the correct script for the gist.

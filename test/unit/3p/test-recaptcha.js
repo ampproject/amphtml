@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import {
-  doesOriginDomainMatchIframeSrc,
-  initRecaptcha,
-} from '../../../3p/recaptcha';
-import {parseUrlDeprecated} from '../../../src/url';
-import {urls} from '../../../src/config';
+import {doesOriginDomainMatchIframeSrc, initRecaptcha} from '#3p/recaptcha';
 
-describe('3p recaptcha.js', () => {
+import {urls} from '../../../src/config';
+import {parseUrlDeprecated} from '../../../src/url';
+
+describes.sandboxed('3p recaptcha.js', {}, () => {
   it('should require a window.name', () => {
     window.name = undefined;
     expect(initRecaptcha).to.throw('window');

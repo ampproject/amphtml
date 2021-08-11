@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-import {WindowInterface} from '../src/window-interface';
+import {getStyle} from '#core/dom/style';
+import {WindowInterface} from '#core/window/interface';
+
+import {poll} from './iframe';
+
 import {
   getService,
   getServiceForDoc,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
-} from '../src/service';
-import {getStyle} from '../src/style';
-import {poll} from './iframe';
+} from '../src/service-helpers';
 
 export function stubService(sandbox, win, serviceId, method) {
   // Register if not already registered.

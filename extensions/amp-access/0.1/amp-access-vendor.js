@@ -15,7 +15,7 @@
  */
 
 import './access-vendor';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '#core/data-structures/promise';
 import {dev, userAssert} from '../../../src/log';
 
 /** @const {string} */

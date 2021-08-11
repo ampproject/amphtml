@@ -19,12 +19,12 @@ const path = require('path');
 const {clean} = require('./clean');
 const {doBuild} = require('./build');
 const {doDist} = require('./dist');
-const {green} = require('kleur/colors');
+const {green} = require('../common/colors');
 const {log} = require('../common/logging');
 
 /**
  * @param {string} dest
- * @return {string[]}
+ * @return {Promise<string[]>}
  */
 async function walk(dest) {
   const filelist = [];
@@ -120,11 +120,10 @@ module.exports = {
   firebase,
 };
 
-firebase.description = 'Generates firebase folder for deployment';
+firebase.description = 'Generate build artificats for deployment to firebase';
 firebase.flags = {
-  'file': '  File to deploy to firebase as index.html',
-  'compiled': '  Deploy from minified files',
-  'nobuild': '  Skips the gulp build|dist step.',
-  'fortesting':
-    '  Expects an env var AMP_TESTING_HOST and writes this to AMP_CONFIG',
+  'file': 'File to deploy to firebase as index.html',
+  'compiled': 'Deploy from minified files',
+  'nobuild': 'Skip the amp build|dist step.',
+  'fortesting': 'Read the AMP_TESTING_HOST env var and write it to AMP_CONFIG',
 };

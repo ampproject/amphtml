@@ -20,32 +20,32 @@
  */
 
 const {
-  printSkipMessage,
+  skipDependentJobs,
+  storeUnminifiedBuildToWorkspace,
   timedExecOrDie,
-  uploadUnminifiedOutput,
 } = require('./utils');
-const {buildTargetsInclude, Targets} = require('./build-targets');
 const {runCiJob} = require('./ci-job');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'unminified-build.js';
 
 /**
- * @return {void}
+ * Steps to run during push builds.
  */
 function pushBuildWorkflow() {
-  timedExecOrDie('gulp build --fortesting');
-  uploadUnminifiedOutput();
+  timedExecOrDie('amp build --fortesting');
+  storeUnminifiedBuildToWorkspace();
 }
 
 /**
- * @return {void}
+ * Steps to run during PR builds.
  */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
-    timedExecOrDie('gulp build --fortesting');
-    uploadUnminifiedOutput();
+    timedExecOrDie('amp build --fortesting');
+    storeUnminifiedBuildToWorkspace();
   } else {
-    printSkipMessage(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or integration tests'
     );

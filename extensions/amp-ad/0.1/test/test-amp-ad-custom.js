@@ -15,9 +15,9 @@
  */
 
 import {AmpAdCustom} from '../amp-ad-custom';
-import {LayoutPriority} from '../../../../src/layout';
-import {Services} from '../../../../src/services';
-import {createElementWithAttributes, removeChildren} from '../../../../src/dom';
+import {LayoutPriority} from '#core/dom/layout';
+import {Services} from '#service';
+import {createElementWithAttributes, removeChildren} from '#core/dom';
 
 describes.realWin('Amp custom ad', {amp: true}, (env) => {
   let win;
@@ -189,7 +189,7 @@ describes.realWin('Amp custom ad', {amp: true}, (env) => {
 });
 
 // TODO(wg-monetization, #25726): This test fails when run by itself.
-describe.skip('#getLayoutPriority', () => {
+describes.sandboxed.skip('#getLayoutPriority', {}, () => {
   const url = '/examples/custom.ad.example.json';
   const slot = 'myslot';
 

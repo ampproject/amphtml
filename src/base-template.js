@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
+import {isElement} from '#core/types';
+
+import {Services} from '#service';
+
 import {dev} from './log';
 
 /**
@@ -87,7 +90,7 @@ export class BaseTemplate {
         }
       } else if (n.nodeType == /* COMMENT */ 8) {
         // Ignore comments.
-      } else if (n.nodeType == /* ELEMENT */ 1) {
+      } else if (isElement(n)) {
         callback(dev().assertElement(n));
       }
     }

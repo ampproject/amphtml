@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {userAssert} from '../../../src/log';
 
 class AmpVine extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -24,6 +25,9 @@ class AmpVine extends AMP.BaseElement {
     super(element);
     /** @private {?Element} */
     this.iframe_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -63,12 +67,25 @@ class AmpVine extends AMP.BaseElement {
     iframe.src =
       'https://vine.co/v/' + encodeURIComponent(vineid) + '/embed/simple';
 
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.element.appendChild(iframe);
 
     this.iframe_ = iframe;
 
+    this.pauseHelper_.updatePlaying(true);
+
     return this.loadPromise(iframe);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    this.pauseHelper_.updatePlaying(false);
+    return true;
   }
 
   /** @override */

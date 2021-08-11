@@ -45,7 +45,7 @@ Mustache is a logic-less template syntax. See [Mustache specification](http://mu
 ## Usage
 
 The `amp-mustache` template has to be defined and used according to the
-[AMP Template Spec](../../spec/amp-html-templates.md).
+[AMP Template Spec](../../docs/spec/amp-html-templates.md).
 
 First, the `amp-mustache` has to be declared/loaded like this:
 
@@ -189,4 +189,4 @@ Workarounds include replacing strings like {% raw %}`{{`{% endraw %} with differ
 
 ## Validation
 
-See [amp-mustache rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mustache/validator-amp-mustache.protoascii) in the AMP validator specification.
+See [amp-mustache rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-mustache/validator-amp-mustache.protoascii) in the AMP validator specification.

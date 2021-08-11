@@ -15,10 +15,11 @@
  */
 
 import '../amp-3q-player';
-import * as dom from '../../../../src/dom';
-import {Services} from '../../../../src/services';
+import * as fullscreen from '#core/dom/fullscreen';
+import {Services} from '#service';
 import {VideoEvents} from '../../../../src/video-interface';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '#core/dom';
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {listenOncePromise} from '../../../../src/event-helper';
 
 describes.realWin(
@@ -32,11 +33,13 @@ describes.realWin(
     let win;
     let doc;
     let timer;
+    let resizeObserverStub;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
       timer = Services.timerFor(win);
+      resizeObserverStub = installResizeObserverStub(env.sandbox, win);
     });
 
     async function get3QElement(playoutId) {
@@ -58,6 +61,45 @@ describes.realWin(
       });
       return player;
     }
+
+    describe('pause', () => {
+      let player, impl, iframe;
+      let postMessageSpy;
+
+      beforeEach(async () => {
+        player = await get3QElement('c8dbe7f4-7f7f-11e6-a407-0cc47a188158');
+        impl = await player.getImpl();
+        iframe = player.querySelector('iframe');
+        postMessageSpy = env.sandbox.spy(impl, 'sdnPostMessage_');
+      });
+
+      it('should auto-pause when playing and no size', async () => {
+        sendFakeMessage(impl, iframe, 'playing');
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+        });
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
+        });
+        expect(postMessageSpy).to.be.calledWith('pause');
+      });
+
+      it('should NOT auto-pause when not playing', async () => {
+        sendFakeMessage(impl, iframe, 'playing');
+        sendFakeMessage(impl, iframe, 'paused');
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+        });
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
+        });
+        expect(postMessageSpy).to.not.be.calledWith('pause');
+      });
+    });
 
     describe('rendering', async () => {
       it('renders', async () => {
@@ -166,13 +208,13 @@ describes.realWin(
       });
 
       it('can enter fullscreen', () => {
-        const spy = env.sandbox.spy(dom, 'fullscreenEnter');
+        const spy = env.sandbox.spy(fullscreen, 'fullscreenEnter');
         impl.fullscreenEnter();
         expect(spy).calledWith(impl.iframe_);
       });
 
       it('can exit fullscreen', () => {
-        const spy = env.sandbox.spy(dom, 'fullscreenExit');
+        const spy = env.sandbox.spy(fullscreen, 'fullscreenExit');
         impl.fullscreenExit();
         expect(spy).calledWith(impl.iframe_);
         expect(impl.isFullscreen()).to.be.false;

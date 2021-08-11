@@ -33,7 +33,7 @@ For details on the configuration semantics, please contact [Mediavine](http://ww
 
 ## User Consent Integration
 
-When [user consent](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#blocking-behaviors) is required. Mediavine approaches user consent in the following ways:
+When [user consent](https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/amp-consent.md#blocking-behaviors) is required. Mediavine approaches user consent in the following ways:
 
 -   `CONSENT_POLICY_STATE.SUFFICIENT`: Personalized Ads.
 -   `CONSENT_POLICY_STATE.INSUFFICIENT`: Non-Personalized Ads.

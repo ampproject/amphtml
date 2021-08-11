@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
+import {Services} from '#service';
 import {
   AnalyticsPercentageTracker,
   PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS,
   PERCENTAGE_INTERVAL,
-} from '../../src/service/video-manager-impl';
-import {PlayingStates, VideoEvents} from '../../src/video-interface';
-import {Services} from '../../src/services';
+} from '#service/video-manager-impl';
+
 import {createCustomEvent} from '../../src/event-helper';
+import {PlayingStates, VideoEvents} from '../../src/video-interface';
 
 describes.fakeWin(
   'video-manager-impl#AnalyticsPercentageTracker',
@@ -77,7 +78,7 @@ describes.fakeWin(
     }
 
     beforeEach(() => {
-      const {win, sandbox} = env;
+      const {sandbox, win} = env;
 
       mockTimer = {
         delay: sandbox.stub().callsFake((fn) => {

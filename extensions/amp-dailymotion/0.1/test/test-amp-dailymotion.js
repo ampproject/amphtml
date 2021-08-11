@@ -31,7 +31,12 @@ describes.realWin(
       doc = win.document;
     });
 
-    async function getDailymotion(videoId, optResponsive, optCustomSettings) {
+    async function getDailymotion(
+      videoId,
+      optResponsive,
+      optCustomSettings,
+      optAutoplay
+    ) {
       const dailymotion = doc.createElement('amp-dailymotion');
       dailymotion.setAttribute('data-videoid', videoId);
       dailymotion.setAttribute('width', '111');
@@ -42,6 +47,9 @@ describes.realWin(
       if (optCustomSettings) {
         dailymotion.setAttribute('data-start', 123);
         dailymotion.setAttribute('data-param-origin', 'example&.org');
+      }
+      if (optAutoplay) {
+        dailymotion.setAttribute('autoplay', true);
       }
       doc.body.appendChild(dailymotion);
       await dailymotion.buildInternal();
@@ -76,12 +84,42 @@ describes.realWin(
       );
     });
 
+    it('renders already muted when autoplay is enabled', async () => {
+      const dailymotion = await getDailymotion('x2m8jpp', false, false, true);
+      const iframe = dailymotion.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).to.equal(
+        'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp&mute=1'
+      );
+    });
+
+    it('renders without mute when autoplay and mute are not explicitly added', async () => {
+      const dailymotion = await getDailymotion('x2m8jpp', false, false);
+      const iframe = dailymotion.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).to.equal(
+        'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp'
+      );
+    });
+
     it('requires data-videoid', () => {
       return allowConsoleError(() => {
         return getDailymotion('').should.eventually.be.rejectedWith(
           /The data-videoid attribute is required for/
         );
       });
+    });
+
+    it('unlayout and relayout', async () => {
+      const dailymotion = await getDailymotion('x2m8jpp');
+      expect(dailymotion.querySelector('iframe')).to.exist;
+
+      const unlayoutResult = dailymotion.unlayoutCallback();
+      expect(unlayoutResult).to.be.true;
+      expect(dailymotion.querySelector('iframe')).to.not.exist;
+
+      await dailymotion.layoutCallback();
+      expect(dailymotion.querySelector('iframe')).to.exist;
     });
   }
 );

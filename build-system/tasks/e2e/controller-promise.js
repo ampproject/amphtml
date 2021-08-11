@@ -22,14 +22,19 @@
  * the new values that come from the browser.
  *
  * @template TYPE
- * @extends {Promise}
+ * @extends {Promise<?TYPE>}
  */
-class ControllerPromise {
+class ControllerPromise extends Promise {
   /**
-   * @param {function(function(?TYPE):void, function(*):void):void|!Promise<TYPE>} executorOrPromise
-   * @param {function(TYPE,function(TYPE): ?TYPE): !Promise=} opt_waitForValue
+   * @param {Promise<TYPE|null>|function(function(?TYPE):void, function(*):void):void} executorOrPromise
+   * @param {undefined|function(TYPE,function(TYPE): ?TYPE): Promise<TYPE>} opt_waitForValue
    */
   constructor(executorOrPromise, opt_waitForValue) {
+    if (executorOrPromise instanceof Promise) {
+      super(executorOrPromise.then);
+    } else {
+      super(executorOrPromise);
+    }
     this.promise_ =
       typeof executorOrPromise == 'function'
         ? new Promise(executorOrPromise)
@@ -62,9 +67,8 @@ class ControllerPromise {
 
   /** @override */
   then(opt_onFulfilled, opt_onRejected) {
-    opt_onFulfilled = opt_onFulfilled || ((x) => x);
     // Allow this and future `then`s to update the wait value.
-    let wrappedWait = null;
+    let wrappedWait;
     if (this.waitForValue) {
       wrappedWait = wrapWait(this.waitForValue, opt_onFulfilled);
     }
@@ -80,14 +84,18 @@ class ControllerPromise {
  * Wrap the given wait function with the given mutation function,
  * while still allowing it to be mutated again in the future by
  * the inner opt_mutate function.
- * @param {function(TYPE,function(TYPE): ?TYPE): !Promise=} wait
- * @param {function(TYPE): TYPE} mutate
- * @return {!Promise}
- * @template TYPE
+ * @param {function(CONDITION, function(VALUE): ?DERIVED): Promise<RES>} wait
+ * @param {function(VALUE): MUTANT} mutate
+ * @return {function(CONDITION, function(MUTANT): ?DERIVED): Promise<RES>}
+ * @template CONDITION
+ * @template MUTANT
+ * @template DERIVED
+ * @template VALUE
+ * @template RES
  */
 function wrapWait(wait, mutate) {
   return (condition, opt_mutate) => {
-    opt_mutate = opt_mutate || ((x) => x);
+    opt_mutate = opt_mutate || ((x) => /** @type {*} */ (x));
     return wait(condition, (value) => opt_mutate(mutate(value)));
   };
 }

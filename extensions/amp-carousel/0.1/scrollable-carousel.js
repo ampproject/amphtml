@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
-import {Keys} from '../../../src/utils/key-codes';
-import {Services} from '../../../src/services';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
 import {dev} from '../../../src/log';
-import {isLayoutSizeFixed} from '../../../src/layout';
+import {isLayoutSizeFixed} from '#core/dom/layout';
 import {listen} from '../../../src/event-helper';
 import {numeric} from '../../../src/transition';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
+} from '#core/dom/layout/viewport-observer';
+import {realChildElements} from '#core/dom/query';
 
 /** @const {string} */
 const TAG = 'amp-scrollable-carousel';
@@ -59,7 +60,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   buildCarousel() {
-    this.cells_ = this.getRealChildren();
+    this.cells_ = realChildElements(this.element);
 
     this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.classList.add('i-amphtml-scrollable-carousel-container');
@@ -255,29 +256,29 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   waitForScroll_(startingScrollLeft) {
-    this.scrollTimerId_ = /** @type {number} */ (Services.timerFor(
-      this.win
-    ).delay(() => {
-      // TODO(yuxichen): test out the threshold for identifying fast scrolling
-      if (Math.abs(startingScrollLeft - this.pos_) < 30) {
-        dev().fine(
-          TAG,
-          'slow scrolling: %s - %s',
-          startingScrollLeft,
-          this.pos_
-        );
-        this.scrollTimerId_ = null;
-        this.commitSwitch_(this.pos_);
-      } else {
-        dev().fine(
-          TAG,
-          'fast scrolling: %s - %s',
-          startingScrollLeft,
-          this.pos_
-        );
-        this.waitForScroll_(this.pos_);
-      }
-    }, 100));
+    this.scrollTimerId_ = /** @type {number} */ (
+      Services.timerFor(this.win).delay(() => {
+        // TODO(yuxichen): test out the threshold for identifying fast scrolling
+        if (Math.abs(startingScrollLeft - this.pos_) < 30) {
+          dev().fine(
+            TAG,
+            'slow scrolling: %s - %s',
+            startingScrollLeft,
+            this.pos_
+          );
+          this.scrollTimerId_ = null;
+          this.commitSwitch_(this.pos_);
+        } else {
+          dev().fine(
+            TAG,
+            'fast scrolling: %s - %s',
+            startingScrollLeft,
+            this.pos_
+          );
+          this.waitForScroll_(this.pos_);
+        }
+      }, 100)
+    );
   }
 
   /**

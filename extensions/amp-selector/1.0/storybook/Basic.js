@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {Option, Selector} from '../component';
 import {select, withKnobs} from '@storybook/addon-knobs';
-import {useState} from '../../../../src/preact';
-import {withA11y} from '@storybook/addon-a11y';
+import {useState} from '#preact';
 export default {
   title: 'Selector',
   component: Selector,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 const imgStyle = {

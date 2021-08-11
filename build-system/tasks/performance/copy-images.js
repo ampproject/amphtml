@@ -22,8 +22,9 @@ const {JSDOM} = require('jsdom');
  * Lookup URL from cache. Inspect tags that could use images.
  *
  * @param {string} url
+ * @return {Promise<void>}
  */
-function copyImagesFromTags(url) {
+async function copyImagesFromTags(url) {
   const cachePath = urlToCachePath(url, CONTROL);
   const document = fs.readFileSync(cachePath);
   const dom = new JSDOM(document);
@@ -36,7 +37,7 @@ function copyImagesFromTags(url) {
  * Copy locally stored images found in the amp-img tags
  * from src and srcset to cache.
  *
- * @param {url} url
+ * @param {string} url
  * @param {JSDOM} dom
  */
 function copyImagesFromAmpImg(url, dom) {
@@ -60,7 +61,7 @@ function copyImagesFromAmpImg(url, dom) {
  * Copy locally stored images found in the amp-video tags
  * from artwork to cache.
  *
- * @param {url} url
+ * @param {string} url
  * @param {JSDOM} dom
  */
 function copyImagesFromAmpVideo(url, dom) {
@@ -79,9 +80,10 @@ function copyImagesFromAmpVideo(url, dom) {
  * Copy locally stored images found in the markup to cache.
  *
  * @param {!Array<string>} urls
+ * @return {Promise<void>}
  */
-function copyLocalImages(urls) {
-  urls.forEach(copyImagesFromTags);
+async function copyLocalImages(urls) {
+  await Promise.all(urls.map(copyImagesFromTags));
 }
 
 module.exports = copyLocalImages;

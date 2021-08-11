@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 const path = require('path');
+const {getRelativeAliasMap} = require('../../../babel-config/import-resolver');
+const {webpackConfigNoChunkTilde} = require('../env-utils');
+
+const rootDir = path.join(__dirname, '../../../..');
 
 module.exports = ({config}) => {
   config.resolveLoader = {
     modules: [
       path.join(__dirname, '../node_modules'),
-      path.join(__dirname, '../../../../node_modules'),
+      path.join(rootDir, 'node_modules'),
     ],
   };
   config.resolve = {
     modules: [
       path.join(__dirname, '../node_modules'),
-      path.join(__dirname, '../../../../node_modules'),
+      path.join(rootDir, 'node_modules'),
     ],
+    alias: getRelativeAliasMap(rootDir),
   };
   config.module = {
     rules: [
@@ -56,5 +61,6 @@ module.exports = ({config}) => {
       },
     ],
   };
-  return config;
+
+  return webpackConfigNoChunkTilde(config);
 };

@@ -19,23 +19,31 @@
  * @fileoverview Script that runs the unit tests during CI.
  */
 
-const {buildTargetsInclude, Targets} = require('./build-targets');
-const {printSkipMessage, timedExecOrDie, timedExecOrThrow} = require('./utils');
+const {
+  TEST_FILES_LIST_FILE_NAME,
+  generateCircleCiShardTestFileList,
+  skipDependentJobs,
+  timedExecOrDie,
+  timedExecOrThrow,
+} = require('./utils');
 const {runCiJob} = require('./ci-job');
+const {Targets, buildTargetsInclude} = require('./build-targets');
+const {unitTestPaths} = require('../test-configs/config');
 
 const jobName = 'unit-tests.js';
 
 /**
- * @return {void}
+ * Steps to run during push builds.
  */
 function pushBuildWorkflow() {
   try {
+    generateCircleCiShardTestFileList(unitTestPaths);
     timedExecOrThrow(
-      'gulp unit --headless --coverage --report',
+      `amp unit --headless --coverage --report --filelist ${TEST_FILES_LIST_FILE_NAME}`,
       'Unit tests failed!'
     );
     timedExecOrThrow(
-      'gulp codecov-upload',
+      'amp codecov-upload',
       'Failed to upload code coverage to Codecov!'
     );
   } catch (e) {
@@ -43,20 +51,22 @@ function pushBuildWorkflow() {
       process.exitCode = e.status;
     }
   } finally {
-    timedExecOrDie('gulp test-report-upload');
+    timedExecOrDie('amp test-report-upload');
   }
 }
 
 /**
- * @return {void}
+ * Steps to run during PR builds.
  */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
-    timedExecOrDie('gulp unit --headless --local_changes');
-    timedExecOrDie('gulp unit --headless --coverage');
-    timedExecOrDie('gulp codecov-upload');
+    generateCircleCiShardTestFileList(unitTestPaths);
+    timedExecOrDie(
+      `amp unit --headless --coverage --filelist ${TEST_FILES_LIST_FILE_NAME}`
+    );
+    timedExecOrDie('amp codecov-upload');
   } else {
-    printSkipMessage(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or unit tests'
     );

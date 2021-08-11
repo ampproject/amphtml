@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import * as CID from '../../src/service/cid-impl';
+import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
+import * as CID from '#service/cid-impl';
+import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
 
-import {Services} from '../../src/services';
-import {createIframePromise} from '../../testing/iframe';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
+import {createIframePromise} from '#testing/iframe';
 
-describe
+describes.sandboxed
   .configure()
   .skipFirefox()
-  .run('document-info', () => {
+  .run('document-info', {}, (env) => {
     beforeEach(() => {
-      window.sandbox.stub(CID, 'getRandomString64').returns('abcdef');
+      env.sandbox.stub(CID, 'getRandomString64').returns('abcdef');
     });
 
     function getWin(links, metas) {
@@ -55,7 +55,7 @@ describe
         }
         const {win} = iframe;
         installDocService(win, /* isSingleDoc */ true);
-        window.sandbox.stub(win.Math, 'random').callsFake(() => 0.123456789);
+        env.sandbox.stub(win.Math, 'random').callsFake(() => 0.123456789);
         win.__AMP_SERVICES.documentInfo = null;
         installDocumentInfoServiceForDoc(win.document);
         return iframe.win;

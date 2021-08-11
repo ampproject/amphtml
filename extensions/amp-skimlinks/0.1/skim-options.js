@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {getChildJsonConfig} from '../../../src/json';
+import {getChildJsonConfig} from '#core/dom';
 import {getNormalizedHostnameFromUrl} from './utils';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 import {
   DEFAULT_CONFIG,

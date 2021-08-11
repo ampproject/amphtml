@@ -63,6 +63,7 @@ The `<amp-ad>` requires width and height values to be specified according to the
   width="300"
   height="250"
   type="industrybrains"
+  sticky="bottom"
   data-width="300"
   data-height="250"
   data-cid="19626-3798936394"
@@ -96,6 +97,8 @@ Optionally, `amp-ad` supports a child element with the `placeholder` attribute. 
 ### No ad available
 
 If no ad is available for the slot, AMP attempts to collapse the `amp-ad` element (that is, set to `display: none`). AMP determines that this operation can be performed without affecting the user's scroll position. If the ad is in the current viewport, the ad will not be collapsed because it affects the user's scroll position; however, if the ad is outside of the current viewport, it will be collapsed.
+
+If this is a sticky ad unit (`sticky` attribute is set), the entire sticky ad will not be displayed without regards to `fallback` attribute.
 
 In the case that the attempt to collapse fails. The `amp-ad` component supports a child element with the `fallback` attribute. If there is a fallback element in presence, the customized fallback element is shown. Otherwise AMP will apply a default fallback.
 
@@ -133,7 +136,7 @@ To enable this, copy the file [remote.html](../../3p/remote.html) to your web se
 />
 ```
 
-The `content` attribute of the meta tag is the absolute URL to your copy of the remote.html file on your web server. This URL must use a "https" schema. It cannot reside on the same origin as your AMP files. For example, if you host AMP files on `www.example.com`, this URL must not be on `www.example.com` but `something-else.example.com` is OK. See ["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md) for further details on allowed origins for iframes.
+The `content` attribute of the meta tag is the absolute URL to your copy of the remote.html file on your web server. This URL must use a "https" schema. It cannot reside on the same origin as your AMP files. For example, if you host AMP files on `www.example.com`, this URL must not be on `www.example.com` but `something-else.example.com` is OK. See ["Iframe origin policy"](../../docs/spec/amp-iframe-origin-policy.md) for further details on allowed origins for iframes.
 
 #### Security
 
@@ -152,7 +155,7 @@ Enforcing origins can be done with the 3rd argument to `draw3p` and must additio
 
 This is completely optional: It is sometimes desired to enhance the ad request before making the ad request to the ad server.
 
-If your ad network supports [fast fetch](https://amp.dev/documentation/guides-and-tutorials/contribute/adnetwork_integration#creating-an-amp-ad-implementation), then please use [Real Time Config](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-documentation.md) (RTC). (e.g. DoubleClick and AdSense integrations both support fast fetch and RTC)
+If your ad network supports [fast fetch](https://amp.dev/documentation/guides-and-tutorials/contribute/adnetwork_integration#creating-an-amp-ad-implementation), then please use [Real Time Config](https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/rtc-documentation.md) (RTC). (e.g. DoubleClick and AdSense integrations both support fast fetch and RTC)
 
 If your ad network uses delayed fetch, you can pass a callback to the `draw3p` function call in the [remote.html](../../3p/remote.html) file. The callback receives the incoming configuration as first argument and then receives another callback as second argument (Called `done` in the example below). This callback must be called with the updated config in order for ad rendering to proceed.
 
@@ -177,6 +180,14 @@ Specifies an identifier for the
 [ad network](#supported-ad-networks).
 The `type` attribute selects the template to use for the ad tag.
 
+### `sticky` (optional)
+
+Use to denote that this is a sticky ad unit and specify the position of this unit. Its value must be one of:
+
+-   top
+-   bottom
+-   bottom-right
+
 ### `data-foo-bar`
 
 Most ad networks require further configuration, which can be passed to the
@@ -190,7 +201,7 @@ on which attributes can be used.
 ### `data-vars-foo-bar`
 
 Attributes starting with `data-vars–` are reserved for
-[`amp-analytics` vars](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute).
+[`amp-analytics` vars](https://github.com/ampproject/amphtml/blob/main/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute).
 
 ### `src` (optional)
 
@@ -249,7 +260,7 @@ to AMP components.
 
 ## Styling
 
-`<amp-ad>` elements may not themselves have or be placed in containers that have CSS `position: fixed` set (with the exception of `amp-lightbox`).
+`<amp-ad>` elements may not themselves have or be placed in containers that have CSS `position: fixed` set (with the exception of `amp-lightbox` and sticky ad unit).
 This is due to the UX implications of full page overlay ads. It may be considered to allow similar ad formats in the future inside of AMP controlled containers that maintain certain UX invariants.
 
 ## Validation
@@ -325,6 +336,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Content.ad](../../ads/vendors/contentad.md)
 -   [Criteo](../../ads/vendors/criteo.md)
 -   [CSA](../../ads/vendors/csa.md)
+-   [Digiteka](../../ads/vendors/digiteka.md)
 -   [Directadvert](../../ads/vendors/directadvert.md)
 -   [DistroScale](../../ads/vendors/distroscale.md)
 -   [Dot and Media](../../ads/vendors/dotandads.md)
@@ -332,6 +344,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [DynAd](../../ads/vendors/dynad.md)
 -   [eADV](../../ads/vendors/eadv.md)
 -   [E-Planning](../../ads/vendors/eplanning.md)
+-   [EXCO](../../ads/vendors/exco.md)
 -   [Empower](../../ads/vendors/empower.md)
 -   [Ezoic](../../ads/vendors/ezoic.md)
 -   [FeedAd](../../ads/vendors/feedad.md)
@@ -351,7 +364,6 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [GumGum](../../ads/vendors/gumgum.md)
 -   [Holder](../../ads/vendors/holder.md)
 -   [iBillboard](../../ads/vendors/ibillboard.md)
--   [Idealmedia](../../ads/vendors/idealmedia.md)
 -   [I-Mobile](../../ads/vendors/imobile.md)
 -   [Imonomy](../../ads/vendors/imonomy.md)
 -   [Imedia](../../ads/vendors/imedia.md)
@@ -363,12 +375,12 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Innity](../../ads/vendors/innity.md)
 -   [Invibes](../../ads/vendors/invibes.md)
 -   [Iprom](../../ads/vendors/iprom.md)
+-   [Jixie](../../ads/vendors/jixie.md)
 -   [Kargo](../../ads/vendors/kargo.md)
 -   [Ketshwa](../../ads/vendors/ketshwa.md)
 -   [Kiosked](../../ads/vendors/kiosked.md)
 -   [Kixer](../../ads/vendors/kixer.md)
 -   [Kuadio](../../ads/vendors/kuadio.md)
--   [Lentainform](../../ads/vendors/lentainform.md)
 -   [Ligatus](../../ads/vendors/ligatus.md)
 -   [LockerDome](../../ads/vendors/lockerdome.md)
 -   [LOGLY](../../ads/vendors/logly.md)
@@ -383,7 +395,6 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Mediavine](../../ads/vendors/mediavine.md)
 -   [Medyanet](../../ads/vendors/medyanet.md)
 -   [Meg](../../ads/vendors/meg.md)
--   [Mgid](../../ads/vendors/mgid.md)
 -   [MicroAd](../../ads/vendors/microad.md)
 -   [MixiMedia](../../ads/vendors/miximedia.md)
 -   [Mixpo](../../ads/vendors/mixpo.md)
@@ -426,6 +437,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Rakuten Unified Ads](../../ads/vendors/rakutenunifiedads.md)
 -   [Rambler&Co](../../ads/vendors/capirs.md)
 -   [RbInfoxSg](../../ads/vendors/rbinfox.md)
+-   [Rcmwidget](../../ads/vendors/rcmwidget.md)
 -   [Realclick](../../ads/vendors/realclick.md)
 -   [recomAD](../../ads/vendors/recomad.md)
 -   [recreativ](../../ads/vendors/recreativ.md)
@@ -458,6 +470,8 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Sulvo](../../ads/vendors/sulvo.md)
 -   [SunMedia](../../ads/vendors/sunmedia.md)
 -   [Swoop](../../ads/vendors/swoop.md)
+-   [Tagon](../../ads/vendors/tagon.md)
+-   [Tail](../../ads/vendors/tail.md)
 -   [TcsEmotion](../../ads/vendors/tcsemotion.md)
 -   [Teads](../../ads/vendors/teads.md)
 -   [torimochi](../../ads/vendors/torimochi.md)
@@ -478,6 +492,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Widespace](../../ads/vendors/widespace.md)
 -   [Wisteria](../../ads/vendors/wisteria.md)
 -   [WPMedia](../../ads/vendors/wpmedia.md)
+-   [Wunderkind](../../ads/vendors/wunderkind.md)
 -   [Xlift](../../ads/vendors/xlift.md)
 -   [Yahoo](../../ads/vendors/yahoo.md)
 -   [YahooJP](../../ads/vendors/yahoojp.md)
@@ -500,8 +515,12 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Dable](../../ads/vendors/dable.md)
 -   [Engageya](../../ads/vendors/engageya.md)
 -   [Epeex](../../ads/vendors/epeex.md)
+-   [Gecko](../../ads/vendors/gecko.md)
+-   [Idealmedia](../../ads/vendors/idealmedia.md)
 -   [Insticator](../../ads/vendors/insticator.md)
 -   [Jubna](../../ads/vendors/jubna.md)
+-   [Lentainform](../../ads/vendors/lentainform.md)
+-   [Mgid](../../ads/vendors/mgid.md)
 -   [Outbrain](../../ads/vendors/outbrain.md)
 -   [Postquare](../../ads/vendors/postquare.md)
 -   [PubExchange](../../ads/vendors/pubexchange.md)

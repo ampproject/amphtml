@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from './services';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {user} from './log';
 import {
   assertSuccess,
   getViewerInterceptResponse,
@@ -21,8 +25,6 @@ import {
   setupInit,
   setupInput,
 } from './utils/xhr-utils';
-import {dict} from './utils/object';
-import {user} from './log';
 
 /**
  *

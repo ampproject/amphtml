@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
+import {ADS_INITIAL_INTERSECTION_EXP} from '#experiments/ads-initial-intersection-exp';
 import {Renderer} from './amp-ad-type-defs';
-import {createElementWithAttributes} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
+import {createElementWithAttributes} from '#core/dom';
+import {dict} from '#core/types/object';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
-import {getExperimentBranch} from '../../../src/experiments';
+import {getExperimentBranch} from '#experiments';
 import {
   intersectionEntryToJson,
   measureIntersection,
-} from '../../../src/utils/intersection';
-import {utf8Decode} from '../../../src/utils/bytes';
+} from '#core/dom/layout/intersection';
+import {utf8Decode} from '#core/types/string/bytes';
 
 /**
  * Render a non-AMP creative into a NameFrame.
@@ -33,7 +33,9 @@ import {utf8Decode} from '../../../src/utils/bytes';
 export class NameFrameRenderer extends Renderer {
   /** @override */
   render(context, element, crossDomainData) {
-    crossDomainData = /** @type {!./amp-ad-type-defs.CrossDomainDataDef} */ (crossDomainData);
+    crossDomainData = /** @type {!./amp-ad-type-defs.CrossDomainDataDef} */ (
+      crossDomainData
+    );
 
     if (!crossDomainData.creative && !crossDomainData.rawCreativeBytes) {
       // No creative, nothing to do.
@@ -66,9 +68,8 @@ export class NameFrameRenderer extends Renderer {
       ? measureIntersection(element)
       : Promise.resolve(element.getIntersectionChangeEntry());
     return intersectionPromise.then((intersection) => {
-      contextMetadata['_context'][
-        'initialIntersection'
-      ] = intersectionEntryToJson(intersection);
+      contextMetadata['_context']['initialIntersection'] =
+        intersectionEntryToJson(intersection);
       const attributes = dict({
         'src': srcPath,
         'name': JSON.stringify(contextMetadata),

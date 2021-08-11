@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
-import {dict} from './utils/object';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
 
 /**
  * Helper method to trigger analytics event if amp-analytics is available.

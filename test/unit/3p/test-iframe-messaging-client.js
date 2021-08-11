@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {IframeMessagingClient} from '../../../3p/iframe-messaging-client';
+import {IframeMessagingClient} from '#3p/iframe-messaging-client';
+
 import {serializeMessage} from '../../../src/3p-frame-messaging';
 
 describes.realWin('iframe-messaging-client', {}, (env) => {

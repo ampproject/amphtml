@@ -20,24 +20,26 @@
  */
 
 const {
-  downloadNomoduleOutput,
-  printSkipMessage,
+  TEST_FILES_LIST_FILE_NAME,
+  generateCircleCiShardTestFileList,
+  skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
-const {buildTargetsInclude, Targets} = require('./build-targets');
+const {e2eTestPaths} = require('../test-configs/config');
 const {runCiJob} = require('./ci-job');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'e2e-tests.js';
 
 /**
- * @return {void}
+ * Steps to run during push builds.
  */
 function pushBuildWorkflow() {
-  downloadNomoduleOutput();
   try {
+    generateCircleCiShardTestFileList(e2eTestPaths);
     timedExecOrThrow(
-      'gulp e2e --nobuild --headless --compiled --report',
+      `amp e2e --nobuild --headless --compiled --report --filelist ${TEST_FILES_LIST_FILE_NAME}`,
       'End-to-end tests failed!'
     );
   } catch (e) {
@@ -45,19 +47,21 @@ function pushBuildWorkflow() {
       process.exitCode = e.status;
     }
   } finally {
-    timedExecOrDie('gulp test-report-upload');
+    timedExecOrDie('amp test-report-upload');
   }
 }
 
 /**
- * @return {void}
+ * Steps to run during PR builds.
  */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.E2E_TEST)) {
-    downloadNomoduleOutput();
-    timedExecOrDie('gulp e2e --nobuild --headless --compiled');
+    generateCircleCiShardTestFileList(e2eTestPaths);
+    timedExecOrDie(
+      `amp e2e --nobuild --headless --compiled --filelist ${TEST_FILES_LIST_FILE_NAME}`
+    );
   } else {
-    printSkipMessage(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or end-to-end tests'
     );

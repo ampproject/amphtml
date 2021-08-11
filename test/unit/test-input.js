@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import {Input} from '../../src/input';
-import {installTimerService} from '../../src/service/timer-impl.js';
-import {stubService} from '../../testing/test-helper';
+import {installTimerService} from '#service/timer-impl';
 
-describe('Input', () => {
+import {stubService} from '#testing/test-helper';
+
+import {Input} from '../../src/input';
+
+describes.sandboxed('Input', {}, (env) => {
   let clock;
   let input;
   let eventListeners;
@@ -26,7 +28,7 @@ describe('Input', () => {
   let documentApi;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
 
     eventListeners = {};
 

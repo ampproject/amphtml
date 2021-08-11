@@ -21,8 +21,8 @@
 import '../../../amp-ad/0.1/amp-ad';
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {SafeframeHostApi, removeSafeframeListener} from '../safeframe-host';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {utf8Encode} from '../../../../src/utils/bytes';
+import {createElementWithAttributes} from '#core/dom';
+import {utf8Encode} from '#core/types/string/bytes';
 
 /**
  * We're allowing external resources because otherwise using realWin causes
@@ -188,6 +188,9 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, (env) => {
   });
 
   it('should contain sz=320x50 in ad request by default', () => {
+    impl.uiHandler = {
+      isStickyAd: () => false,
+    };
     impl.initiateAdRequest();
     return impl.adPromise_.then(() => {
       expect(impl.adUrl_).to.be.ok;
@@ -196,6 +199,9 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, (env) => {
   });
 
   it('should contain mulitple sizes in ad request', () => {
+    multiSizeImpl.uiHandler = {
+      isStickyAd: () => false,
+    };
     multiSizeImpl.initiateAdRequest();
     return multiSizeImpl.adPromise_.then(() => {
       expect(multiSizeImpl.adUrl_).to.be.ok;

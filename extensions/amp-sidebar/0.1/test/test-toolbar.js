@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {Services} from '../../../../src/services';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {Services} from '#service';
 import {Toolbar} from '../toolbar';
 import {adopt} from '../../../../src/runtime';
-import {createIframePromise} from '../../../../testing/iframe';
-import {toArray} from '../../../../src/types';
+import {createIframePromise} from '#testing/iframe';
+import {toArray} from '#core/types/array';
 
 adopt(window);
 
-describe('amp-sidebar - toolbar', () => {
+describes.sandboxed('amp-sidebar - toolbar', {}, (env) => {
   let timer;
 
   function getToolbars(options) {
@@ -43,7 +43,7 @@ describe('amp-sidebar - toolbar', () => {
         },
       };
 
-      window.sandbox.stub(timer, 'delay').callsFake(function (callback) {
+      env.sandbox.stub(timer, 'delay').callsFake(function (callback) {
         callback();
       });
 

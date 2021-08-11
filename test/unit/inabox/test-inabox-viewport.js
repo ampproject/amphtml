@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-import * as iframeHelper from '../../../src/iframe-helper';
-import {FrameOverlayManager} from '../../../ads/inabox/frame-overlay-manager';
-import {Observable} from '../../../src/observable';
-import {PositionObserver} from '../../../ads/inabox/position-observer';
-import {Services} from '../../../src/services';
+import {FrameOverlayManager} from '#ads/inabox/frame-overlay-manager';
+import {PositionObserver} from '#ads/inabox/position-observer';
+
+import {Observable} from '#core/data-structures/observable';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+
+import {installIframeMessagingClient} from '#inabox/inabox-iframe-messaging-client';
 import {
   ViewportBindingInabox,
   prepareBodyForOverlay,
   resetBodyForOverlay,
-} from '../../../src/inabox/inabox-viewport';
-import {installIframeMessagingClient} from '../../../src/inabox/inabox-iframe-messaging-client';
-import {installPlatformService} from '../../../src/service/platform-impl';
-import {layoutRectLtwh} from '../../../src/layout-rect';
+} from '#inabox/inabox-viewport';
+
+import {Services} from '#service';
+import {installPlatformService} from '#service/platform-impl';
+
+import * as iframeHelper from '../../../src/iframe-helper';
 
 const NOOP = () => {};
 

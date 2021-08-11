@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import {BrowserController, RequestBank} from '../../testing/test-helper';
-import {parseQueryString} from '../../src/url';
+import {parseQueryString} from '#core/types/string/url';
+
+import {BrowserController, RequestBank} from '#testing/test-helper';
 
 // TODO(wg-analytics): These tests time out on Firefox and Safari.
-describe
+describes.sandboxed
   .configure()
   .skipSafari()
   .skipFirefox()
-  .run('amp-analytics', function () {
+  .run('amp-analytics', {}, function () {
     describes.integration(
       'basic pageview',
       {

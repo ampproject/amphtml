@@ -15,9 +15,15 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {Services} from '../../src/services';
-import {WindowInterface} from '../../src/window-interface';
-import {dev, user} from '../../src/log';
+
+import {WindowInterface} from '#core/window/interface';
+
+import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+
+import {macroTask} from '#testing/yield';
+
 import {
   getExtraParamsUrl,
   getTrackImpressionPromise,
@@ -26,8 +32,7 @@ import {
   resetTrackImpressionPromiseForTesting,
   shouldAppendExtraParams,
 } from '../../src/impression';
-import {macroTask} from '../../testing/yield';
-import {toggleExperiment} from '../../src/experiments';
+import {dev, user} from '../../src/log';
 
 describes.realWin('impression', {amp: true}, (env) => {
   let window, document;

@@ -27,11 +27,12 @@
  * </amp-soundcloud>
  */
 
-import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {dict} from '#core/types/object';
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 class AmpSoundcloud extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -40,6 +41,9 @@ class AmpSoundcloud extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.iframe_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -103,13 +107,36 @@ class AmpSoundcloud extends AMP.BaseElement {
 
     iframe.src = src;
 
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     iframe.height = height;
     this.element.appendChild(iframe);
 
     this.iframe_ = iframe;
 
+    this.pauseHelper_.updatePlaying(true);
+
     return this.loadPromise(iframe);
+  }
+
+  /**@override*/
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    this.pauseHelper_.updatePlaying(false);
+    return true;
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    return true;
   }
 
   /** @override */

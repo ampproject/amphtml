@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-import {Services} from '../../src/services';
-import {VisibilityState} from '../../src/visibility-state';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {getVendorJsPropertyName} from '#core/dom/style';
+
+import {Services} from '#service';
+
+import {whenUpgradedToCustomElement} from '../../src/amp-element-helpers';
 import {createCustomEvent} from '../../src/event-helper';
-import {getVendorJsPropertyName} from '../../src/style';
-import {whenUpgradedToCustomElement} from '../../src/dom';
 
-const t = describe.configure().skipIfPropertiesObfuscated().ifChrome();
+const t = describes.sandboxed
+  .configure()
+  .skipIfPropertiesObfuscated()
+  .ifChrome();
 
-t.run('Viewer Visibility State', () => {
+t.run('Viewer Visibility State', {}, () => {
   function noop() {}
 
   describes.integration(
@@ -42,7 +47,6 @@ t.run('Viewer Visibility State', () => {
       let resumeCallback;
       let docHidden;
       let docVisibilityState;
-      //let unselect;
       let prerenderAllowed;
 
       function visChangeEventName() {
@@ -70,11 +74,7 @@ t.run('Viewer Visibility State', () => {
 
       let shouldPass = false;
       let doPass_;
-      let intersect_;
       let notifyPass = noop;
-
-      let intersected;
-      let notifyIntersected;
 
       function doPass() {
         if (shouldPass) {
@@ -84,25 +84,14 @@ t.run('Viewer Visibility State', () => {
         }
       }
 
-      function intersect() {
-        intersect_.apply(this, arguments);
-        notifyIntersected();
-      }
-
       function waitForNextPass() {
         return new Promise((resolve) => {
           notifyPass = resolve;
-
-          if (resources.isIntersectionExperimentOn()) {
-            // Element lifecycle callbacks depend on the observer taking its
-            // initial measurements, so wait for an intersection first.
-            return intersected.then(() => {
-              shouldPass = true;
-              resources.schedulePass();
-            });
-          } else {
-            shouldPass = true;
-            resources.schedulePass();
+          shouldPass = true;
+          resources.schedulePass();
+        }).then(() => {
+          if (R1_IMG_DEFERRED_BUILD) {
+            return new Promise((resolve) => setTimeout(resolve, 20));
           }
         });
       }
@@ -118,9 +107,6 @@ t.run('Viewer Visibility State', () => {
         win = env.win;
         notifyPass = noop;
         shouldPass = false;
-        intersected = new Promise((resolve) => {
-          notifyIntersected = resolve;
-        });
 
         const vsync = Services.vsyncFor(win);
         env.sandbox.stub(vsync, 'mutate').callsFake((mutator) => {
@@ -140,26 +126,35 @@ t.run('Viewer Visibility State', () => {
 
             resources = Services.resourcesForDoc(win.document);
             doPass_ = resources.doPass;
-            intersect_ = resources.intersect;
             env.sandbox.stub(resources, 'doPass').callsFake(doPass);
-            env.sandbox.stub(resources, 'intersect').callsFake(intersect);
 
             const img = win.document.createElement('amp-img');
             img.setAttribute('width', 100);
             img.setAttribute('height', 100);
             img.setAttribute('layout', 'fixed');
-            win.document.body.appendChild(img);
+            // TODO(#31915): Cleanup when R1_IMG_DEFERRED_BUILD is complete.
+            if (!R1_IMG_DEFERRED_BUILD) {
+              win.document.body.appendChild(img);
+            }
 
             return whenUpgradedToCustomElement(img);
           })
           .then((img) => {
             prerenderAllowed = env.sandbox.stub(img, 'prerenderAllowed');
             prerenderAllowed.returns(false);
+
+            if (R1_IMG_DEFERRED_BUILD) {
+              win.document.body.appendChild(img);
+            }
             return img.getImpl(false);
           })
           .then((impl) => {
-            layoutCallback = env.sandbox.stub(impl, 'layoutCallback');
-            unlayoutCallback = env.sandbox.stub(impl, 'unlayoutCallback');
+            layoutCallback = R1_IMG_DEFERRED_BUILD
+              ? env.sandbox.stub(impl, 'mountCallback')
+              : env.sandbox.stub(impl, 'layoutCallback');
+            unlayoutCallback = R1_IMG_DEFERRED_BUILD
+              ? env.sandbox.stub(impl, 'unmountCallback')
+              : env.sandbox.stub(impl, 'unlayoutCallback');
             pauseCallback = env.sandbox.stub(impl, 'pauseCallback');
             resumeCallback = env.sandbox.stub(impl, 'resumeCallback');
             env.sandbox.stub(impl, 'isRelayoutNeeded').callsFake(() => true);
@@ -177,42 +172,43 @@ t.run('Viewer Visibility State', () => {
             setupSpys();
           });
 
-          it('does layout when going to PRERENDER', () => {
-            return waitForNextPass().then(() => {
-              expect(layoutCallback).to.have.been.called;
-              expect(unlayoutCallback).not.to.have.been.called;
-              expect(pauseCallback).not.to.have.been.called;
-              expect(resumeCallback).not.to.have.been.called;
+          it('does layout when going to PRERENDER', async () => {
+            viewer.receiveMessage('visibilitychange', {
+              state: VisibilityState.PAUSED,
             });
+            viewer.receiveMessage('visibilitychange', {
+              state: VisibilityState.PRERENDER,
+            });
+            await waitForNextPass();
+            expect(layoutCallback).to.have.been.called;
+            expect(unlayoutCallback).not.to.have.been.called;
+            expect(pauseCallback).not.to.have.been.called;
+            expect(resumeCallback).not.to.have.been.called;
           });
 
-          it('calls layout when going to VISIBLE', () => {
+          it('calls layout when going to VISIBLE', async () => {
             viewer.receiveMessage('visibilitychange', {
               state: VisibilityState.VISIBLE,
             });
-            return waitForNextPass().then(() => {
-              expect(layoutCallback).to.have.been.called;
-              expect(unlayoutCallback).not.to.have.been.called;
-              expect(pauseCallback).not.to.have.been.called;
-              expect(resumeCallback).not.to.have.been.called;
-            });
+            await waitForNextPass();
+            expect(layoutCallback).to.have.been.called;
+            expect(unlayoutCallback).not.to.have.been.called;
+            expect(pauseCallback).not.to.have.been.called;
+            expect(resumeCallback).not.to.have.been.called;
           });
 
-          it('does not call callbacks when going to HIDDEN', () => {
+          it('calls callbacks when going to HIDDEN', async () => {
             viewer.receiveMessage('visibilitychange', {
               state: VisibilityState.VISIBLE,
             });
             changeVisibility('hidden');
-            return waitForNextPass().then(() => {
-              expect(layoutCallback).not.to.have.been.called;
-              expect(unlayoutCallback).not.to.have.been.called;
-              expect(pauseCallback).not.to.have.been.called;
-              expect(resumeCallback).not.to.have.been.called;
-            });
+            await waitForNextPass();
+            expect(unlayoutCallback).not.to.have.been.called;
+            expect(pauseCallback).not.to.have.been.called;
+            expect(resumeCallback).not.to.have.been.called;
           });
 
-          // TODO(aghassemi): Investigate failure. #10974.
-          it.skip('does not call callbacks when going to INACTIVE', () => {
+          it('does not call callbacks when going to INACTIVE', () => {
             viewer.receiveMessage('visibilitychange', {
               state: VisibilityState.INACTIVE,
             });
@@ -263,21 +259,24 @@ t.run('Viewer Visibility State', () => {
             });
           });
 
-          it('does not call callbacks when going to HIDDEN', () => {
+          it('calls callbacks when going to HIDDEN', () => {
             viewer.receiveMessage('visibilitychange', {
               state: VisibilityState.VISIBLE,
             });
             changeVisibility('hidden');
             return waitForNextPass().then(() => {
-              expect(layoutCallback).not.to.have.been.called;
+              if (R1_IMG_DEFERRED_BUILD) {
+                expect(layoutCallback).to.have.been.called;
+              } else {
+                expect(layoutCallback).not.to.have.been.called;
+              }
               expect(unlayoutCallback).not.to.have.been.called;
               expect(pauseCallback).not.to.have.been.called;
               expect(resumeCallback).not.to.have.been.called;
             });
           });
 
-          // TODO(aghassemi): Investigate failure. #10974.
-          it.skip('does not call callbacks when going to INACTIVE', () => {
+          it('does not call callbacks when going to INACTIVE', () => {
             viewer.receiveMessage('visibilitychange', {
               state: VisibilityState.INACTIVE,
             });
@@ -335,7 +334,6 @@ t.run('Viewer Visibility State', () => {
             state: VisibilityState.INACTIVE,
           });
           return waitForNextPass().then(() => {
-            expect(layoutCallback).not.to.have.been.called;
             expect(unlayoutCallback).to.have.been.called;
             expect(pauseCallback).to.have.been.called;
             expect(resumeCallback).not.to.have.been.called;
@@ -446,20 +444,14 @@ t.run('Viewer Visibility State', () => {
           });
           changeVisibility('hidden');
           return waitForNextPass().then(() => {
-            expect(layoutCallback).not.to.have.been.called;
+            if (R1_IMG_DEFERRED_BUILD) {
+              expect(layoutCallback).to.have.been.called;
+            } else {
+              expect(layoutCallback).not.to.have.been.called;
+            }
             expect(unlayoutCallback).not.to.have.been.called;
             expect(pauseCallback).not.to.have.been.called;
             expect(resumeCallback).to.have.been.called;
-          });
-        });
-
-        // TODO(aghassemi): Investigate failure. #10974.
-        it.skip('does not call callbacks when going to INACTIVE', () => {
-          return waitForNextPass().then(() => {
-            expect(layoutCallback).not.to.have.been.called;
-            expect(unlayoutCallback).not.to.have.been.called;
-            expect(pauseCallback).not.to.have.been.called;
-            expect(resumeCallback).not.to.have.been.called;
           });
         });
 
@@ -520,7 +512,7 @@ t.run('Viewer Visibility State', () => {
           return waitForNextPass().then(() => {
             expect(layoutCallback).not.to.have.been.called;
             expect(unlayoutCallback).to.have.been.called;
-            expect(pauseCallback).not.to.have.been.called;
+            expect(pauseCallback).to.have.been.called;
             expect(resumeCallback).not.to.have.been.called;
           });
         });

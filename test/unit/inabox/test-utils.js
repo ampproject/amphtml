@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
+import {Deferred} from '#core/data-structures/promise';
+import {createElementWithAttributes} from '#core/dom';
+
+import {getA4AId, registerIniLoadListener} from '#inabox/utils';
+
+import {Services} from '#service';
+
 import * as IniLoad from '../../../src/ini-load';
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {createElementWithAttributes} from '../../../src/dom.js';
-import {getA4AId, registerIniLoadListener} from '../../../src/inabox/utils';
 
 describes.realWin('inabox-utils', {}, (env) => {
   let dispatchEventStub;
@@ -41,7 +44,7 @@ describes.realWin('inabox-utils', {}, (env) => {
     iniLoadDeferred = new Deferred();
 
     env.sandbox
-      .stub(IniLoad, 'whenContentIniLoad')
+      .stub(IniLoad, 'whenContentIniLoadMeasure')
       .returns(iniLoadDeferred.promise);
     env.sandbox
       .stub(Services, 'viewportForDoc')

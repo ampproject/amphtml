@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// @ts-nocheck
 
 const ESCAPE_REGEX = /\${|\\|`/g;
 
@@ -37,7 +38,6 @@ module.exports = function ({types: t}) {
   /**
    * @param {CompilerNode} leftPath
    * @param {CompilerNode} rightPath
-   * @return {void}
    */
   function joinTemplateLiterals(leftPath, rightPath) {
     const {node: leftNode} = leftPath;
@@ -59,7 +59,6 @@ module.exports = function ({types: t}) {
 
   /**
    * @param {BabelPath} path
-   * @return {void}
    */
   function joinMaybeTemplateLiteral(path) {
     const left = path.get('left');
@@ -111,7 +110,6 @@ module.exports = function ({types: t}) {
 
       /**
        * @param {BabelPath} path
-       * @return {void}
        */
       TemplateLiteral(path) {
         // Convert any items inside a template literal that are static literals.

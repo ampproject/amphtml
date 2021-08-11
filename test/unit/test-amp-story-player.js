@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
+import {Messaging} from '@ampproject/viewer-messaging';
+import {expect} from 'chai';
+
+import {macroTask} from '#testing/yield';
+
 import {AmpStoryComponentManager} from '../../src/amp-story-player/amp-story-component-manager';
 import {AmpStoryPlayer} from '../../src/amp-story-player/amp-story-player-impl';
-import {Messaging} from '@ampproject/viewer-messaging';
 import {PageScroller} from '../../src/amp-story-player/page-scroller';
+import {createCustomEvent, listenOncePromise} from '../../src/event-helper';
 
 describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let win;
@@ -1364,6 +1369,56 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       });
     });
 
+    it('should dispatch amp-story-muted-state when story is unmuted', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 1);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      const spy = env.sandbox.spy();
+      playerEl.addEventListener('amp-story-muted-state', spy);
+
+      const fakeData = {state: 'MUTED_STATE', value: false};
+      fireHandler['documentStateUpdate']('documentStateUpdate', fakeData);
+
+      await nextTick();
+
+      expect(spy).to.have.been.calledWithMatch({
+        type: 'amp-story-muted-state',
+        detail: {
+          muted: false,
+        },
+      });
+    });
+
+    it('should dispatch amp-story-muted-state when story is muted', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 1);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      const spy = env.sandbox.spy();
+      playerEl.addEventListener('amp-story-muted-state', spy);
+
+      const fakeData = {state: 'MUTED_STATE', value: true};
+      fireHandler['documentStateUpdate']('documentStateUpdate', fakeData);
+
+      await nextTick();
+
+      expect(spy).to.have.been.calledWithMatch({
+        type: 'amp-story-muted-state',
+        detail: {
+          muted: true,
+        },
+      });
+    });
+
     it('should react to CURRENT_PAGE_ID events', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       attachPlayerWithStories(playerEl, 1);
@@ -1388,6 +1443,109 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
           pageId: 'page-2',
           progress: 0.12,
         },
+      });
+    });
+
+    it('supress navigation animation if called go with options.animate = false', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 2);
+      playerEl.appendChild(buildCircularWrappingConfig());
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      player.go(1, 0, {animate: false});
+
+      expect(
+        player
+          .getElement()
+          .querySelector('.i-amphtml-story-player-main-container')
+          .classList.contains('i-amphtml-story-player-no-navigation-transition')
+      ).to.be.true;
+    });
+
+    it('not supress navigation animation if called go with options.animate = true', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 2);
+      playerEl.appendChild(buildCircularWrappingConfig());
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      player.go(1, 0, {animate: true});
+
+      expect(
+        player
+          .getElement()
+          .querySelector('.i-amphtml-story-player-main-container')
+          .classList.contains('i-amphtml-story-player-no-navigation-transition')
+      ).to.be.false;
+    });
+
+    it('revert navigation animation after transition ends', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 2);
+      playerEl.appendChild(buildCircularWrappingConfig());
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      player.go(1, 0, {animate: false});
+
+      const rootEl = player
+        .getElement()
+        .querySelector('.i-amphtml-story-player-main-container');
+
+      // Wait for event dispatched to be listened
+      await listenOncePromise(playerEl, 'transitionend');
+      await macroTask();
+
+      expect(
+        rootEl.classList.contains(
+          'i-amphtml-story-player-no-navigation-transition'
+        )
+      ).to.be.false;
+    });
+
+    it('should create previous and next story buttons when desktop panel story player experiment is on', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+
+      attachPlayerWithStories(playerEl, 5);
+      win.DESKTOP_PANEL_STORY_PLAYER_EXP_ON = true;
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      expect(
+        playerEl.querySelector('.i-amphtml-story-player-desktop-panel-prev')
+      ).to.exist;
+      expect(
+        playerEl.querySelector('.i-amphtml-story-player-desktop-panel-next')
+      ).to.exist;
+    });
+
+    it('Should get UI state on resize', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+
+      attachPlayerWithStories(playerEl, 5);
+      win.DESKTOP_PANEL_STORY_PLAYER_EXP_ON = true;
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+
+      win.dispatchEvent(createCustomEvent(win, 'resize', null));
+      await nextTick();
+
+      expect(sendRequestSpy).to.have.been.calledWith('onDocumentState', {
+        'state': 'UI_STATE',
       });
     });
   });

@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import {AmpDocService} from '../../src/service/ampdoc-impl';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+
+import {AmpDocService} from '#service/ampdoc-impl';
+import {installHiddenObserverForDoc} from '#service/hidden-observer-impl';
+
 import {
   IntersectionObserver3pHost,
   getIntersectionChangeEntry,
   intersectionRatio,
 } from '../../src/utils/intersection-observer-3p-host';
-import {installHiddenObserverForDoc} from '../../src/service/hidden-observer-impl';
-import {layoutRectLtwh} from '../../src/layout-rect';
 
 const fakeAmpDoc = {
   getRootNode: () => {
@@ -167,7 +169,7 @@ describes.sandboxed('getIntersectionChangeEntry', {}, (env) => {
   });
 });
 
-describe('intersectionRatio', () => {
+describes.sandboxed('intersectionRatio', {}, () => {
   let smallRectMock;
   let largeRectMock;
   beforeEach(() => {

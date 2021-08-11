@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+import {Observable} from '#core/data-structures/observable';
+import {
+  detectEvtListenerOptsSupport,
+  resetEvtListenerOptsSupportForTesting,
+  resetPassiveSupportedForTesting,
+  supportsPassiveEventListener,
+} from '#core/dom/event-helper-listen';
+
 import {
   MEDIA_LOAD_FAILURE_SRC_PROPERTY,
   createCustomEvent,
@@ -23,15 +31,8 @@ import {
   listenOncePromise,
   loadPromise,
 } from '../../src/event-helper';
-import {Observable} from '../../src/observable';
-import {
-  detectEvtListenerOptsSupport,
-  resetEvtListenerOptsSupportForTesting,
-  resetPassiveSupportedForTesting,
-  supportsPassiveEventListener,
-} from '../../src/event-helper-listen';
 
-describe('EventHelper', () => {
+describes.sandboxed('EventHelper', {}, (env) => {
   function getEvent(name, target) {
     const event = document.createEvent('Event');
     event.initEvent(name, true, true);
@@ -295,7 +296,7 @@ describe('EventHelper', () => {
     expect(native.type).to.equal('foo');
     expect(native.detail).to.deep.equal({bar: 123});
 
-    const initCustomEventSpy = window.sandbox.spy();
+    const initCustomEventSpy = env.sandbox.spy();
     const win = {};
     win.CustomEvent = {};
     win.document = {};
@@ -318,11 +319,11 @@ describe('EventHelper', () => {
       }
     };
     // Simulate an addEventListener that accepts options
-    addEventListenerStub = window.sandbox
+    addEventListenerStub = env.sandbox
       .stub(self, 'addEventListener')
       .callsFake(eventListenerStubAcceptOpts);
     // Simulate a removeEventListener that accepts options
-    removeEventListenerStub = window.sandbox
+    removeEventListenerStub = env.sandbox
       .stub(self, 'removeEventListener')
       .callsFake(eventListenerStubAcceptOpts);
     resetEvtListenerOptsSupportForTesting();
@@ -350,11 +351,11 @@ describe('EventHelper', () => {
       }
     };
     // Simulate an addEventListener that does not accept options
-    addEventListenerStub = window.sandbox
+    addEventListenerStub = env.sandbox
       .stub(self, 'addEventListener')
       .callsFake(eventListenerStubRejectOpts);
     // Simulate a removeEventListener that does not accept options
-    removeEventListenerStub = window.sandbox
+    removeEventListenerStub = env.sandbox
       .stub(self, 'removeEventListener')
       .callsFake(eventListenerStubRejectOpts);
     resetEvtListenerOptsSupportForTesting();

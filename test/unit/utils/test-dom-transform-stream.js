@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import {macroTask} from '#testing/yield';
+
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
-import {macroTask} from '../../../testing/yield';
 
 describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
   async function flush() {
@@ -117,6 +118,28 @@ describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
 
       expect(body.querySelector('child-one')).to.exist;
       expect(body.querySelector('child-two')).to.exist;
+    });
+
+    it('should transfer <body> attributes to target body element', async () => {
+      const {body} = win.document;
+      detachedDoc.write(`
+        <!doctype html>
+          <html ⚡>
+          <head>
+            <script async src="https://cdn.ampproject.org/v0.js"></script>
+          </head>
+          <body marginwidth="0" marginheight="0" class="amp-cats" style="opacity: 1;">
+            <child-one></child-one>
+            <child-two></child-two>
+     `);
+      transformer.onChunk(detachedDoc);
+      transformer.transferBody(body /* targetBody */);
+      await flush();
+
+      expect(body.getAttribute('marginwidth')).to.equal('0');
+      expect(body.getAttribute('marginheight')).to.equal('0');
+      expect(body.getAttribute('style')).to.equal('opacity: 1;');
+      expect(body).to.have.class('amp-cats');
     });
 
     it('should keep transferring new chunks after call', async () => {

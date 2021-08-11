@@ -15,19 +15,29 @@
  */
 'use strict';
 
-const log = require('fancy-log');
-const {bold, yellow} = require('kleur/colors');
+const {bold, gray, yellow} = require('./colors');
 const {isCiBuild} = require('./ci');
 
 /**
- * Used by tests to wrap progress dots.
+ * Used by tests to wrap progress dots. Attempts to match the terminal width
+ * during local development and defaults to 150 if it couldn't be determined.
  */
-const dotWrappingWidth = 150;
+const dotWrappingWidth = isCiBuild() ? 150 : process.stdout.columns ?? 150;
 
 /**
  * Used by CI job scripts to print a prefix before top-level logging lines.
  */
 let loggingPrefix = '';
+
+/**
+ * Logs messages with a timestamp. The timezone suffix is dropped.
+ * @param  {...string} messages
+ */
+function log(...messages) {
+  const timestamp = new Date().toTimeString().split(' ')[0];
+  const prefix = `[${gray(timestamp)}]`;
+  console.log(prefix, ...messages);
+}
 
 /**
  * Sets the logging prefix for the ongoing PR check job
@@ -79,7 +89,7 @@ function logOnSameLineLocalDev(...messages) {
 }
 
 /**
- * Logs messages without the fancy-log timestamp
+ * Logs messages without a timestamp
  * @param {...string} messages
  */
 function logWithoutTimestamp(...messages) {
@@ -87,7 +97,7 @@ function logWithoutTimestamp(...messages) {
 }
 
 /**
- * Logs messages without the fancy-log timestamp only during local development
+ * Logs messages without a timestamp only during local development
  * @param {...string} messages
  */
 function logWithoutTimestampLocalDev(...messages) {

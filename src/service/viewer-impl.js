@@ -14,34 +14,34 @@
  * limitations under the License.
  */
 
-import {Deferred, tryResolve} from '../utils/promise';
-import {Observable} from '../observable';
-import {Services} from '../services';
-import {VisibilityState} from '../visibility-state';
-import {
-  dev,
-  devAssert,
-  duplicateErrorIfNecessary,
-  stripUserError,
-} from '../log';
-import {endsWith} from '../string';
-import {findIndex} from '../utils/array';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {Observable} from '#core/data-structures/observable';
+import {Deferred, tryResolve} from '#core/data-structures/promise';
+import {isIframed} from '#core/dom';
+import {duplicateErrorIfNecessary} from '#core/error';
+import {stripUserError} from '#core/error/message-helpers';
+import {isEnumValue} from '#core/types';
+import {findIndex} from '#core/types/array';
+import {map} from '#core/types/object';
+import {endsWith} from '#core/types/string';
+import {parseQueryString} from '#core/types/string/url';
+
+import {Services} from '#service';
+
+import {ViewerInterface} from './viewer-interface';
+
+import {urls} from '../config';
+import {reportError} from '../error-reporting';
+import {listen} from '../event-helper';
+import {dev, devAssert} from '../log';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 import {
   getSourceOrigin,
   isProxyOrigin,
-  parseQueryString,
   parseUrlDeprecated,
   removeFragment,
   serializeQueryString,
 } from '../url';
-import {isIframed} from '../dom';
-import {listen} from '../event-helper';
-import {map} from '../utils/object';
-import {registerServiceBuilderForDoc} from '../service';
-import {reportError} from '../error';
-import {urls} from '../config';
-
-import {ViewerInterface} from './viewer-interface';
 
 const TAG_ = 'Viewer';
 
@@ -69,7 +69,8 @@ const VIEWER_ORIGIN_TIMEOUT_ = 1000;
  * @const
  * @private {!RegExp}
  */
-const TRIM_ORIGIN_PATTERN_ = /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp|m)\.)+/i;
+const TRIM_ORIGIN_PATTERN_ =
+  /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp|m)\.)+/i;
 
 /**
  * An AMP representation of the Viewer. This class doesn't do any work itself
@@ -260,8 +261,8 @@ export class ViewerImpl {
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
         // Persist the hash that we removed has location.originalHash.
         // This is currently used by mode.js to infer development mode.
-        if (!this.win.location.originalHash) {
-          this.win.location.originalHash = this.win.location.hash;
+        if (!this.win.location['originalHash']) {
+          this.win.location['originalHash'] = this.win.location.hash;
         }
         this.win.history.replaceState({}, '', newUrl);
         delete this.hashParams_['click'];
@@ -532,7 +533,8 @@ export class ViewerImpl {
     if (!state) {
       return;
     }
-    state = dev().assertEnumValue(VisibilityState, state, 'VisibilityState');
+
+    devAssert(isEnumValue(VisibilityState, state));
 
     // The viewer is informing us we are not currently active because we are
     // being pre-rendered, or the user swiped to another doc (or closed the
@@ -796,14 +798,15 @@ export class ViewerImpl {
       // Certain message deliverers return fake "Promise" instances called
       // "Thenables". Convert from these values into trusted Promise instances,
       // assimilating with the resolved (or rejected) internal value.
-      return /** @type {!Promise<?JsonObject|string|undefined>} */ (tryResolve(
-        () =>
+      return /** @type {!Promise<?JsonObject|string|undefined>} */ (
+        tryResolve(() =>
           this.messageDeliverer_(
             eventType,
             /** @type {?JsonObject|string|undefined} */ (data),
             awaitResponse
           )
-      ));
+        )
+      );
     }
 
     if (!this.messagingReadyPromise_) {
@@ -890,7 +893,7 @@ export class ViewerImpl {
         getSourceOrigin(url) == getSourceOrigin(replaceUrl)
       ) {
         this.win.history.replaceState({}, '', replaceUrl.href);
-        this.win.location.originalHref = url.href;
+        this.win.location['originalHref'] = url.href;
         dev().fine(TAG_, 'replace url:' + replaceUrl.href);
       }
     } catch (e) {

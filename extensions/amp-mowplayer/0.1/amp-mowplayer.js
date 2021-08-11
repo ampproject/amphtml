@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
 import {
   createFrameFor,
@@ -26,17 +27,16 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '#core/types/object';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {
-  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '#core/dom/fullscreen';
 import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 
 const TAG = 'amp-mowplayer';
 
@@ -83,6 +83,9 @@ class AmpMowplayer extends AMP.BaseElement {
      * @private @const {string}
      */
     this.baseUrl_ = 'https://mowplayer.com/watch/';
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -145,6 +148,9 @@ class AmpMowplayer extends AMP.BaseElement {
       dispatchCustomEvent(this.element, VideoEvents.LOAD);
     });
     this.playerReadyResolver_(loaded);
+
+    this.pauseHelper_.updatePlaying(true);
+
     return loaded;
   }
 
@@ -160,6 +166,9 @@ class AmpMowplayer extends AMP.BaseElement {
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
+
+    this.pauseHelper_.updatePlaying(false);
+
     return true; // Call layoutCallback again.
   }
 
@@ -291,6 +300,11 @@ class AmpMowplayer extends AMP.BaseElement {
   /** @override */
   pause() {
     this.sendCommand_('pauseVideo');
+    // The player doesn't appear to respect "pauseVideo" message.
+    const iframe = this.iframe_;
+    if (iframe) {
+      iframe.src = iframe.src;
+    }
   }
 
   /** @override */

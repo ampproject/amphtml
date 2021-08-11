@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {WindowInterface} from '../window-interface';
-import {dev} from '../log';
-import {dict} from '../utils/object';
+import {dict} from '#core/types/object';
+import {WindowInterface} from '#core/window/interface';
+
+import {Services} from '#service';
+
 import {getCookie, setCookie} from '../cookies';
+import {dev} from '../log';
 import {isProxyOrigin, parseUrlDeprecated} from '../url';
 
 const GOOGLE_API_URL =

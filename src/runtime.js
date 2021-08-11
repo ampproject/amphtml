@@ -14,7 +14,30 @@
  * limitations under the License.
  */
 
+import {waitForBodyOpenPromise} from '#core/dom';
+import {setStyle} from '#core/dom/style';
+import * as mode from '#core/mode';
+
+import {isExperimentOn, toggleExperiment} from '#experiments';
+
+import {shouldLoadPolyfill as shouldLoadInObPolyfill} from '#polyfills/stubs/intersection-observer-stub';
+import {shouldLoadPolyfill as shouldLoadResObPolyfill} from '#polyfills/stubs/resize-observer-stub';
+
+import {Services} from '#service';
+import {
+  installAmpdocServices,
+  installRuntimeServices,
+} from '#service/core-services';
+import {stubElementsForDoc} from '#service/custom-element-registry';
+import {
+  installExtensionsService,
+  stubLegacyElements,
+} from '#service/extensions-impl';
+
 import {BaseElement} from './base-element';
+import {startupChunk} from './chunk';
+import {config} from './config';
+import {reportErrorForWin} from './error-reporting';
 import {
   LogLevel, // eslint-disable-line no-unused-vars
   dev,
@@ -22,30 +45,12 @@ import {
   overrideLogLevel,
   setReportError,
 } from './log';
+import {getMode} from './mode';
 import {MultidocManager} from './multidoc-manager';
-import {Services} from './services';
+import {hasRenderDelayingServices} from './render-delaying-services';
+
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
-import {config} from './config';
-import {getMode} from './mode';
-import {hasRenderDelayingServices} from './render-delaying-services';
-import {
-  installAmpdocServices,
-  installRuntimeServices,
-} from './service/core-services';
-import {
-  installExtensionsService,
-  stubLegacyElements,
-} from './service/extensions-impl';
-import {internalRuntimeVersion} from './internal-version';
-import {isExperimentOn, toggleExperiment} from './experiments';
-import {reportErrorForWin} from './error';
-import {scheduleUpgradeIfNeeded as scheduleInObUpgradeIfNeeded} from './polyfillstub/intersection-observer-stub';
-import {scheduleUpgradeIfNeeded as scheduleResObUpgradeIfNeeded} from './polyfillstub/resize-observer-stub';
-import {setStyle} from './style';
-import {startupChunk} from './chunk';
-import {stubElementsForDoc} from './service/custom-element-registry';
-import {waitForBodyOpenPromise} from './dom';
 
 initLogConstructor();
 setReportError(reportErrorForWin.bind(null, self));
@@ -105,7 +110,7 @@ function adoptShared(global, callback) {
   // `AMP.extension()` function is only installed in a non-minified mode.
   // This function is meant to play the same role for development and testing
   // as `AMP.push()` in production.
-  if (!getMode().minified) {
+  if (!mode.isMinified()) {
     /**
      * @param {string} unusedName
      * @param {string} unusedVersion
@@ -250,9 +255,10 @@ function adoptShared(global, callback) {
   // If the closure passed to maybePumpEarlyFrame didn't execute
   // immediately we need to keep pushing onto preregisteredExtensions
   if (!global.AMP.push) {
-    global.AMP.push = /** @type {function((ExtensionPayload|function(!Object, !Object): ?))} */ (preregisteredExtensions.push.bind(
-      preregisteredExtensions
-    ));
+    global.AMP.push =
+      /** @type {function((ExtensionPayload|function(!Object, !Object): ?))} */ (
+        preregisteredExtensions.push.bind(preregisteredExtensions)
+      );
   }
 
   // For iOS we need to set `cursor:pointer` to ensure that click events are
@@ -262,8 +268,13 @@ function adoptShared(global, callback) {
   }
 
   // Some deferred polyfills.
-  scheduleInObUpgradeIfNeeded(global);
-  scheduleResObUpgradeIfNeeded(global);
+  const extensionsFor = Services.extensionsFor(global);
+  if (shouldLoadResObPolyfill(global)) {
+    extensionsFor.preloadExtension('amp-resize-observer-polyfill');
+  }
+  if (shouldLoadInObPolyfill(global)) {
+    extensionsFor.preloadExtension('amp-intersection-observer-polyfill');
+  }
 
   return iniPromise;
 }
@@ -409,9 +420,8 @@ export function adoptShadowMode(global) {
      * @param {!Object<string, string>=} opt_initParams
      * @return {!Object}
      */
-    global.AMP.attachShadowDocAsStream = manager.attachShadowDocAsStream.bind(
-      manager
-    );
+    global.AMP.attachShadowDocAsStream =
+      manager.attachShadowDocAsStream.bind(manager);
 
     return waitForBodyOpenPromise(global.document);
   });
@@ -454,7 +464,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   // This is non-obvious, but we only care about the release version,
   // not about the full rtv version, because these only differ
   // in the config that is fully determined by the primary binary.
-  if (internalRuntimeVersion() == v) {
+  if (mode.version() == v) {
     return false;
   }
   Services.extensionsFor(win).reloadExtension(

@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-import {dict} from '../../src/utils/object';
-import {listenParent, nonSensitiveDataPostMessage} from '../messaging';
-import {loadScript} from '../3p';
-import {parseJson} from '../../src/json';
-import {user} from '../../src/log';
+/* eslint-disable import/no-deprecated */
+
+import {loadScript} from '#3p/3p';
+import {listenParent, nonSensitiveDataPostMessage} from '#3p/messaging';
+
+import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
 
 import GltfViewer from './viewer';
+
+import {user} from '../../src/log';
 
 const seq = (taskA, taskB) => (cb) => taskA(() => taskB(cb));
 const parallel = (taskA, taskB) => (cb) => {

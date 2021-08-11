@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
@@ -25,6 +25,7 @@ import '../../../amp-ad/0.1/amp-ad';
 import * as analytics from '../../../../src/analytics';
 import * as analyticsExtension from '../../../../src/extension-analytics';
 import * as mode from '../../../../src/mode';
+import * as secureFrame from '../secure-frame';
 import {AMP_SIGNATURE_HEADER, VerificationStatus} from '../signature-verifier';
 import {
   AmpA4A,
@@ -37,31 +38,31 @@ import {
   assignAdUrlToError,
   protectFunctionWrapper,
 } from '../amp-a4a';
-import {AmpAdXOriginIframeHandler} from '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {AmpDoc, installDocService} from '../../../../src/service/ampdoc-impl';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {Extensions} from '../../../../src/service/extensions-impl';
+import {AmpAdXOriginIframeHandler} from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {AmpDoc, installDocService} from '#service/ampdoc-impl';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {Extensions} from '#service/extensions-impl';
 import {FetchMock, networkFailure} from './fetch-mock';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
-import {LayoutPriority} from '../../../../src/layout';
+import {LayoutPriority} from '#core/dom/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
-import {Services} from '../../../../src/services';
-import {Signals} from '../../../../src/utils/signals';
-import {cancellation} from '../../../../src/error';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {createIframePromise} from '../../../../testing/iframe';
+import {Services} from '#service';
+import {Signals} from '#core/data-structures/signals';
+import {cancellation} from '../../../../src/error-reporting';
+import {createElementWithAttributes} from '#core/dom';
+import {createIframePromise} from '#testing/iframe';
 import {dev, user} from '../../../../src/log';
 import {
   incrementLoadingAds,
   is3pThrottled,
 } from '../../../amp-ad/0.1/concurrent-load';
-import {installRealTimeConfigServiceForDoc} from '../../../../src/service/real-time-config/real-time-config-impl';
-import {layoutRectLtwh, layoutSizeFromRect} from '../../../../src/layout-rect';
-import {macroTask} from '../../../../testing/yield';
-import {resetScheduledElementForTesting} from '../../../../src/service/custom-element-registry';
+import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
+import {layoutRectLtwh, layoutSizeFromRect} from '#core/dom/layout/rect';
+import {macroTask} from '#testing/yield';
+import {resetScheduledElementForTesting} from '#service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
-import {toggleExperiment} from '../../../../src/experiments';
+import {toggleExperiment} from '#experiments';
 import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
 
 describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
@@ -944,6 +945,30 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
         expect(a4a.iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
       });
+
+      it('should set feature policy for attribution-reporting when supported', async () => {
+        env.sandbox
+          .stub(secureFrame, 'isAttributionReportingSupported')
+          .returns(true);
+        a4a.sandboxHTMLCreativeFrame = () => true;
+        a4a.onLayoutMeasure();
+        await a4a.layoutCallback();
+        verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
+        expect(a4a.iframe.getAttribute('allow')).to.equal(
+          "sync-xhr 'none';attribution-reporting 'src';"
+        );
+      });
+
+      it('should not set feature policy for attribution-reporting when not supported', async () => {
+        env.sandbox
+          .stub(secureFrame, 'isAttributionReportingSupported')
+          .returns(false);
+        a4a.sandboxHTMLCreativeFrame = () => true;
+        a4a.onLayoutMeasure();
+        await a4a.layoutCallback();
+        verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
+        expect(a4a.iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
+      });
     });
 
     describe('illegal render mode value', () => {
@@ -1031,6 +1056,30 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         await a4a.layoutCallback();
         verifyNameFrameRender(a4aElement, false /* shouldSandbox */);
         expect(fetchMock.called('ad')).to.be.true;
+      });
+
+      it('should set feature policy for attribution-reporting when supported', async () => {
+        env.sandbox
+          .stub(secureFrame, 'isAttributionReportingSupported')
+          .returns(true);
+        a4a.sandboxHTMLCreativeFrame = () => false;
+        a4a.onLayoutMeasure();
+        await a4a.layoutCallback();
+        verifyNameFrameRender(a4aElement, false /* shouldSandbox */);
+        expect(a4a.iframe.getAttribute('allow')).to.equal(
+          "sync-xhr 'none';attribution-reporting 'src';"
+        );
+      });
+
+      it('should not set feature policy for attribution-reporting when not supported', async () => {
+        env.sandbox
+          .stub(secureFrame, 'isAttributionReportingSupported')
+          .returns(false);
+        a4a.sandboxHTMLCreativeFrame = () => false;
+        a4a.onLayoutMeasure();
+        await a4a.layoutCallback();
+        verifyNameFrameRender(a4aElement, false /* shouldSandbox */);
+        expect(a4a.iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
       });
 
       ['', 'client_cache', 'safeframe', 'some_random_thing'].forEach(
@@ -1141,6 +1190,38 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           false /* shouldSandbox */
         );
         expect(fetchMock.called('ad')).to.be.true;
+      });
+
+      it('should set feature policy for attribution-reporting when supported', async () => {
+        env.sandbox
+          .stub(secureFrame, 'isAttributionReportingSupported')
+          .returns(true);
+        a4a.sandboxHTMLCreativeFrame = () => false;
+        a4a.onLayoutMeasure();
+        await a4a.layoutCallback();
+        verifySafeFrameRender(
+          a4aElement,
+          DEFAULT_SAFEFRAME_VERSION,
+          false /* shouldSandbox */
+        );
+        expect(a4a.iframe.getAttribute('allow')).to.equal(
+          "sync-xhr 'none';attribution-reporting 'src';"
+        );
+      });
+
+      it('should not set feature policy for attribution-reporting when not supported', async () => {
+        env.sandbox
+          .stub(secureFrame, 'isAttributionReportingSupported')
+          .returns(false);
+        a4a.sandboxHTMLCreativeFrame = () => false;
+        a4a.onLayoutMeasure();
+        await a4a.layoutCallback();
+        verifySafeFrameRender(
+          a4aElement,
+          DEFAULT_SAFEFRAME_VERSION,
+          false /* shouldSandbox */
+        );
+        expect(a4a.iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
       });
 
       ['', 'client_cache', 'nameframe', 'some_random_thing'].forEach(
@@ -1527,6 +1608,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentState: null,
             consentString: null,
             gdprApplies: null,
+            consentStringType: null,
             additionalConsent: null,
           },
           rtcResponse
@@ -1701,12 +1783,13 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
       env.sandbox
         .stub(a4a, 'maybeValidateAmpCreative')
         .returns(Promise.resolve());
-      a4a.onLayoutMeasure();
       a4a.uiHandler = {
         getScrollPromiseForStickyAd: () => Promise.resolve(null),
         isStickyAd: () => false,
         maybeInitStickyAd: () => {},
       };
+      a4a.onLayoutMeasure();
+      await a4a.buildCallback();
       await a4a.layoutCallback();
       expect(
         renderNonAmpCreativeSpy.calledOnce,
@@ -1779,6 +1862,9 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
       doc.head.appendChild(s);
       a4aElement.className = 'fixed';
       const a4a = new MockA4AImpl(a4aElement);
+      a4a.uiHandler = {
+        isStickyAd: () => false,
+      };
       a4a.onLayoutMeasure();
       expect(a4a.adPromise_).to.not.be.ok;
     });
@@ -2139,6 +2225,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             unlayoutUISpy();
           },
           getScrollPromiseForStickyAd: () => Promise.resolve(null),
+          isStickyAd: () => false,
           maybeInitStickyAd: () => {},
           cleanup: () => {},
         };
@@ -2778,6 +2865,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentState: CONSENT_POLICY_STATE.SUFFICIENT,
             consentString,
             gdprApplies,
+            consentStringType: consentMetadata['consentStringType'],
             additionalConsent: consentMetadata['additionalConsent'],
           })
         ).calledOnce;
@@ -2831,6 +2919,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentState: CONSENT_POLICY_STATE.SUFFICIENT,
             consentString,
             gdprApplies,
+            consentStringType: consentMetadata['consentStringType'],
             additionalConsent: consentMetadata['additionalConsent'],
           })
         ).calledOnce;
@@ -2875,6 +2964,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           getAdUrlSpy.withArgs({
             consentState: CONSENT_POLICY_STATE.UNKNOWN,
             consentString: null,
+            consentStringType: null,
             gdprApplies: null,
             additionalConsent: null,
           })
@@ -3466,7 +3556,7 @@ describes.realWin('AmpA4a-RTC', {amp: true}, (env) => {
       {type: 'otherNetwork', prefVal: true},
     ].forEach((test) =>
       it(JSON.stringify(test), () => {
-        const {type, prefVal, expected} = test;
+        const {expected, prefVal, type} = test;
         if (type) {
           a4a.element.setAttribute('type', type);
         }

@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
-import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
+import {DomFingerprint} from '#core/dom/fingerprint';
+import {WindowInterface} from '#core/window/interface';
+
+import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+
 import {
   addDataAndJsonAttributes_,
   applySandbox,
@@ -33,7 +37,6 @@ import {
   serializeMessage,
 } from '../../../src/3p-frame-messaging';
 import {dev} from '../../../src/log';
-import {toggleExperiment} from '../../../src/experiments';
 
 describes.realWin('3p-frame', {amp: true}, (env) => {
   let window, document;
@@ -85,7 +88,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
           return Services.ampdoc(window.document);
         };
 
-        const {innerWidth: width, innerHeight: height} = window;
+        const {innerHeight: height, innerWidth: width} = window;
         div.getIntersectionChangeEntry = function () {
           return {
             time: 1234567888,
@@ -150,7 +153,6 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
         mockMode({
           localDev: true,
           development: false,
-          minified: false,
           test: false,
           version: '$internalRuntimeVersion$',
         });
@@ -225,7 +227,6 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
             'mode': {
               'localDev': true,
               'development': false,
-              'minified': false,
               'test': false,
               'version': '$internalRuntimeVersion$',
               'esm': false,
@@ -372,14 +373,16 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
 
       it('should return different values for different file names', () => {
         mockMode({});
-        let match = /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame\.html$/.exec(
-          getDefaultBootstrapBaseUrl(window)
-        );
+        let match =
+          /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame\.html$/.exec(
+            getDefaultBootstrapBaseUrl(window)
+          );
         const domain = match && match[1];
         expect(domain).to.be.ok;
-        match = /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame2\.html$/.exec(
-          getDefaultBootstrapBaseUrl(window, 'frame2')
-        );
+        match =
+          /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame2\.html$/.exec(
+            getDefaultBootstrapBaseUrl(window, 'frame2')
+          );
         expect(match && match[1]).to.equal(domain);
       });
 
@@ -418,7 +421,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       it('should prefetch bootstrap frame and JS', () => {
         mockMode({});
         const ampdoc = Services.ampdoc(window.document);
-        preloadBootstrap(window, ampdoc, preconnect);
+        preloadBootstrap(window, 'avendor', ampdoc, preconnect);
         // Wait for visible promise.
         return ampdoc.whenFirstVisible().then(() => {
           const fetches = document.querySelectorAll('link[rel=preload]');
@@ -428,7 +431,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
           );
           expect(fetches[1]).to.have.property(
             'href',
-            'https://3p.ampproject.net/$internalRuntimeVersion$/f.js'
+            'https://3p.ampproject.net/$internalRuntimeVersion$/vendor/avendor.js'
           );
         });
       });

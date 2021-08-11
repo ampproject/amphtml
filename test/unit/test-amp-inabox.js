@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import * as Service from '../../src/service';
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {installAmpdocServices} from '../../src/service/core-services';
-import {installAmpdocServicesForInabox} from '../../src/inabox/inabox-services';
-import {removeItem} from '../../src/utils/array';
+import {removeItem} from '#core/types/array';
 
-describe('amp-inabox', () => {
+import {installAmpdocServicesForInabox} from '#inabox/inabox-services';
+
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {installAmpdocServices} from '#service/core-services';
+
+import * as Service from '../../src/service-helpers';
+
+describes.sandboxed('amp-inabox', {}, () => {
   describes.realWin('installAmpdocServicesForInabox', {amp: false}, (env) => {
     it('should install same services for inabox', () => {
       let installedServices = [];

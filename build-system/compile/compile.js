@@ -22,7 +22,7 @@ const path = require('path');
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {cpus} = require('os');
-const {green, cyan} = require('kleur/colors');
+const {cyan, green} = require('../common/colors');
 const {log, logLocalDev} = require('../common/logging');
 const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel} = require('./pre-closure-babel');
@@ -49,6 +49,10 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS =
  *  verboseLogging?: boolean,
  *  typeCheckOnly?: boolean,
  *  skipUnknownDepsCheck?: boolean,
+ *  warningLevel?: boolean,
+ *  noAddDeps?: boolean,
+ *  continueOnError?: boolean,
+ *  errored?: boolean,
  * }}
  */
 let OptionsDef;
@@ -58,11 +62,11 @@ let OptionsDef;
  * production use. During development we intend to continue using
  * babel, as it has much faster incremental compilation.
  *
- * @param {string} entryModuleFilename
+ * @param {string|string[]} entryModuleFilename
  * @param {string} outputDir
  * @param {string} outputFilename
  * @param {!OptionsDef} options
- * @param {{startTime?: number}} timeInfo
+ * @param {{startTime?: number}=} timeInfo
  * @return {Promise<void>}
  */
 async function closureCompile(
@@ -70,13 +74,13 @@ async function closureCompile(
   outputDir,
   outputFilename,
   options,
-  timeInfo
+  timeInfo = {}
 ) {
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
   return new Promise(function (resolve, reject) {
     /**
-     * @return {void}
+     * Kicks off the first closure invocation.
      */
     function start() {
       inProgress++;
@@ -95,8 +99,9 @@ async function closureCompile(
         (reason) => reject(reason)
       );
     }
+
     /**
-     * @return {void}
+     * Keeps track of the invocation count.
      */
     function next() {
       if (!queue.length) {
@@ -112,7 +117,7 @@ async function closureCompile(
 }
 
 /**
- * @return {void}
+ * Cleans up the placeholder directories for fake build modules.
  */
 function cleanupBuildDir() {
   del.sync('build/fake-module');
@@ -127,13 +132,11 @@ function cleanupBuildDir() {
  * Generates a list of source files based on various factors.
  * TODO(wg-infra, wg-performance): Clean up unnecessary files.
  *
- * @param {string[]|string} entryModuleFilenames
- * @param {string} outputDir
- * @param {string} outputFilename
+ * @param {string[]} entryModuleFilenames
  * @param {!OptionsDef} options
  * @return {!Array<string>}
  */
-function getSrcs(entryModuleFilenames, outputDir, outputFilename, options) {
+function getSrcs(entryModuleFilenames, options) {
   const unneededFiles = [
     'build/fake-module/third_party/babel/custom-babel-helpers.js',
   ];
@@ -161,13 +164,13 @@ function getSrcs(entryModuleFilenames, outputDir, outputFilename, options) {
   // this works fine.
   if (options.includePolyfills) {
     srcs.push(
-      '!build/fake-module/src/polyfills.js',
+      '!build/fake-module/src/polyfills/index.js',
       '!build/fake-module/src/polyfills/**/*.js',
       '!build/fake-polyfills/**/*.js'
     );
   } else {
-    srcs.push('!src/polyfills.js', '!build/fake-polyfills/**/*.js');
-    unneededFiles.push('build/fake-module/src/polyfills.js');
+    srcs.push('!src/polyfills/index.js', '!build/fake-polyfills/**/*.js');
+    unneededFiles.push('build/fake-module/src/polyfills/index.js');
   }
   // Negative globstars must come at the end.
   srcs.push(
@@ -195,23 +198,24 @@ function getSrcs(entryModuleFilenames, outputDir, outputFilename, options) {
  * Generates the set of options with which to invoke Closure compiler.
  * TODO(wg-infra,wg-performance): Clean up unnecessary options.
  *
- * @param {string} outputDir
  * @param {string} outputFilename
  * @param {!OptionsDef} options
  * @return {!Object}
  */
-function generateCompilerOptions(outputDir, outputFilename, options) {
-  const baseExterns = [
-    'build-system/externs/amp.extern.js',
-    'build-system/externs/dompurify.extern.js',
-    'build-system/externs/layout-jank.extern.js',
-    'build-system/externs/performance-observer.extern.js',
-    'third_party/web-animations-externs/web_animations.js',
-    'third_party/moment/moment.extern.js',
-    'third_party/react-externs/externs.js',
-    'build-system/externs/preact.extern.js',
-    'build-system/externs/weakref.extern.js',
-  ];
+function generateCompilerOptions(outputFilename, options) {
+  // Determine externs
+  let externs = options.externs || [];
+  if (!options.noAddDeps) {
+    externs = [
+      'third_party/web-animations-externs/web_animations.js',
+      'third_party/react-externs/externs.js',
+      'third_party/moment/moment.extern.js',
+      ...globby.sync('src/core{,/**}/*.extern.js'),
+      ...globby.sync('build-system/externs/*.extern.js'),
+      ...externs,
+    ];
+  }
+
   const hideWarningsFor = [
     'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
@@ -220,9 +224,9 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     'third_party/inputmask/',
     'third_party/mustache/',
     'third_party/react-dates/',
+    'third_party/resize-observer-polyfill/',
     'third_party/set-dom/',
     'third_party/subscriptions-project/',
-    'third_party/vega/',
     'third_party/webcomponentsjs/',
     'node_modules/',
     'build/patched-module/',
@@ -235,11 +239,6 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     ? options.wrapper.replace('<%= contents %>', '%output%')
     : `(function(){%output%})();`;
   wrapper = `${wrapper}\n\n//# sourceMappingURL=${outputFilename}.map`;
-  let externs = baseExterns;
-  if (options.externs) {
-    externs = externs.concat(options.externs);
-  }
-  externs.push('build-system/externs/amp.multipass.extern.js');
 
   /**
    * TODO(#28387) write a type for this.
@@ -256,7 +255,7 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     language_out: argv.esm || argv.sxg ? 'NO_TRANSPILE' : 'ECMASCRIPT5_STRICT',
     // We do not use the polyfills provided by closure compiler.
     // If you need a polyfill. Manually include them in the
-    // respective top level polyfills.js files.
+    // respective top level polyfills/*.js files.
     rewrite_polyfills: false,
     externs,
     js_module_root: [
@@ -269,9 +268,9 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     module_resolution: 'NODE',
     package_json_entry_names: 'module,main',
     process_common_js_modules: true,
-    // This strips all files from the input set that aren't explicitly
+    // PRUNE strips all files from the input set that aren't explicitly
     // required.
-    dependency_mode: 'PRUNE',
+    dependency_mode: options.noAddDeps ? 'SORT_ONLY' : 'PRUNE',
     output_wrapper: wrapper,
     source_map_include_content: !!argv.full_sourcemaps,
     // These arrays are filled in below.
@@ -280,14 +279,15 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     jscomp_off: [],
     define,
     hide_warnings_for: hideWarningsFor,
-    // TODO(amphtml): Change 'QUIET' to 'DEFAULT' after #32875 is merged.
-    warning_level: argv.warning_level || 'QUIET',
+    // TODO(amphtml): Change 'QUIET' to 'DEFAULT'.
+    warning_level: argv.warning_level ?? options.warningLevel ?? 'QUIET',
+    extra_annotation_name: ['visibleForTesting', 'restricted'],
   };
   if (argv.pseudo_names) {
     // Some optimizations get turned off when pseudo_names is on.
     // This causes some errors caused by the babel transformations
     // that we apply like unreachable code because we turn a conditional
-    // falsey. (ex. is IS_DEV transformation which causes some conditionals
+    // falsey. (ex. is IS_PROD transformation which causes some conditionals
     // to be unreachable/suspicious code since the whole expression is
     // falsey)
     compilerOptions.jscomp_off.push('uselessCode', 'externsValidation');
@@ -415,17 +415,10 @@ async function compile(
   }
   const destFile = `${outputDir}/${outputFilename}`;
   const sourcemapFile = `${destFile}.map`;
-  const compilerOptions = generateCompilerOptions(
-    outputDir,
-    outputFilename,
-    options
-  );
-  const srcs = getSrcs(
-    entryModuleFilenames,
-    outputDir,
-    outputFilename,
-    options
-  );
+  const compilerOptions = generateCompilerOptions(outputFilename, options);
+  const srcs = options.noAddDeps
+    ? entryModuleFilenames.concat(options.extraGlobs || [])
+    : getSrcs(entryModuleFilenames, options);
   const transformedSrcFiles = await Promise.all(
     globby
       .sync(srcs)
@@ -456,7 +449,7 @@ async function compile(
 }
 
 /**
- * @return {void}
+ * Indicates the current closure concurrency and how to override it.
  */
 function printClosureConcurrency() {
   log(

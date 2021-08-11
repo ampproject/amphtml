@@ -128,4 +128,4 @@ This element includes [common attributes](https://amp.dev/documentation/guides-a
 
 ## Validation
 
-See [amp-youtube rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/validator-amp-youtube.protoascii) in the AMP validator specification.
+See [amp-youtube rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-youtube/validator-amp-youtube.protoascii) in the AMP validator specification.

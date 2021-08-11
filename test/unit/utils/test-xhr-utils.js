@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
 import {
   getViewerInterceptResponse,
   setupAMPCors,

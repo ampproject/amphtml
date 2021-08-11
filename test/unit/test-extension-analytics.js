@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
+import {Services} from '#service';
+import {registerElement} from '#service/custom-element-registry';
+
+import {macroTask} from '#testing/yield';
+
 import {BaseElement} from '../../src/base-element';
 import {
   CustomEventReporterBuilder,
   insertAnalyticsElement,
   useAnalyticsInSandbox,
 } from '../../src/extension-analytics';
-import {Services} from '../../src/services';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
-} from '../../src/service';
-import {macroTask} from '../../testing/yield';
-import {registerElement} from '../../src/service/custom-element-registry';
+} from '../../src/service-helpers';
 
 /* eslint-disable react-hooks/rules-of-hooks */
 
@@ -86,9 +88,8 @@ describes.realWin(
               )
             ).to.be.ok;
             return timer.promise(50).then(() => {
-              const analyticsEle = baseEle.element.querySelector(
-                'amp-analytics'
-              );
+              const analyticsEle =
+                baseEle.element.querySelector('amp-analytics');
               expect(analyticsEle).to.not.be.null;
               expect(analyticsEle.getAttribute('sandbox')).to.equal('true');
               expect(analyticsEle.getAttribute('trigger')).to.equal(

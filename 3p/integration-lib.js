@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
+import * as mode from '#core/mode';
+import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
+import {endsWith} from '#core/types/string';
+
+import {run, setExperimentToggles} from './3p';
 import {IntegrationAmpContext} from './ampcontext-integration';
-import {dict} from '../src/utils/object.js';
-import {endsWith} from '../src/string';
+import {installEmbedStateListener, manageWin} from './environment';
 import {getAmpConfig, getEmbedType, getLocation} from './frame-metadata';
-import {getSourceUrl, isProxyOrigin, parseUrlDeprecated} from '../src/url';
+
+import {urls} from '../src/config';
 import {
   initLogConstructor,
   isUserErrorMessage,
   setReportError,
   userAssert,
 } from '../src/log';
-import {installEmbedStateListener, manageWin} from './environment';
-import {internalRuntimeVersion} from '../src/internal-version';
-import {parseJson} from '../src/json';
-import {run, setExperimentToggles} from './3p';
-import {urls} from '../src/config';
+import {getSourceUrl, isProxyOrigin, parseUrlDeprecated} from '../src/url';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -47,6 +49,7 @@ const AMP_EMBED_ALLOWED = {
   epeex: true,
   firstimpression: true,
   forkmedia: true,
+  gecko: true,
   glomex: true,
   idealmedia: true,
   insticator: true,
@@ -67,6 +70,7 @@ const AMP_EMBED_ALLOWED = {
   pubexchange: true,
   pulse: true,
   rbinfox: true,
+  rcmwidget: true,
   readmo: true,
   recreativ: true,
   runative: true,
@@ -276,8 +280,9 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
     // If we are on the cache domain, parse the source hostname from
     // the referrer. The referrer is used because it should be
     // trustable.
-    hostname = parseUrlDeprecated(getSourceUrl(window.document.referrer))
-      .hostname;
+    hostname = parseUrlDeprecated(
+      getSourceUrl(window.document.referrer)
+    ).hostname;
   }
   for (let i = 0; i < allowedHostnames.length; i++) {
     // Either the hostname is allowed
@@ -355,7 +360,7 @@ function lightweightErrorReport(e, isCanary) {
   new Image().src =
     urls.errorReporting +
     '?3p=1&v=' +
-    encodeURIComponent(internalRuntimeVersion()) +
+    encodeURIComponent(mode.version()) +
     '&m=' +
     encodeURIComponent(e.message) +
     '&ca=' +

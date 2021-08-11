@@ -29,16 +29,16 @@ limitations under the License.
 The `<amp-story-page>` component represents the content to display on a single page of a story.
 
 <figure class="centered-fig">
-  <amp-anim alt="Page 1 example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/pages-page-1.gif">
+  <amp-anim alt="Page 1 example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/pages-page-1.gif">
   <noscript>
-    <img alt="Page 1 example" width="200" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/pages-page-1.gif" />
+    <img alt="Page 1 example" width="200" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/pages-page-1.gif" />
   </noscript>
   </amp-anim>
 </figure>
 <figure class="centered-fig">
-  <amp-anim alt="Page 2 example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/pages-page-2.gif">
+  <amp-anim alt="Page 2 example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/pages-page-2.gif">
   <noscript>
-    <img alt="Page 2 example" width="200" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/pages-page-2.gif" />
+    <img alt="Page 2 example" width="200" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/pages-page-2.gif" />
   </noscript>
   </amp-anim>
 </figure>
@@ -123,3 +123,7 @@ For example:
   background-audio="./media/switzerland.mp3"
 ></amp-story-page>
 ```
+
+## Related resources
+
+-   [animations](https://amp.dev/documentation/components/amp-story/?format=stories#animations)

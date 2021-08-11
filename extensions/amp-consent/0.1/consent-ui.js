@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {Services} from '#service';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {
-  elementByTag,
-  insertAtStart,
-  isAmpElement,
-  removeElement,
-  tryFocus,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
+import {dict} from '#core/types/object';
+import {elementByTag} from '#core/dom/query';
 import {expandConsentEndpointUrl} from './consent-config';
 import {getConsentStateValue} from './consent-info';
 import {getData} from '../../../src/event-helper';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
-import {setImportantStyles, setStyles, toggle} from '../../../src/style';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
+import {htmlFor} from '#core/dom/static-template';
+import {insertAtStart, removeElement, tryFocus} from '#core/dom';
+import {
+  isAmpElement,
+  whenUpgradedToCustomElement,
+} from '../../../src/amp-element-helpers';
+import {setImportantStyles, setStyles, toggle} from '#core/dom/style';
 
 const TAG = 'amp-consent-ui';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
@@ -182,11 +179,6 @@ export class ConsentUI {
 
     /** @private {?Promise<string>} */
     this.promptUISrcPromise_ = null;
-
-    this.isGranularConsentExperimentOn_ = isExperimentOn(
-      this.win_,
-      'amp-consent-granular-consent'
-    );
 
     this.init_(config, opt_postPromptUI);
   }
@@ -534,15 +526,15 @@ export class ConsentUI {
    * @return {!Promise<JsonObject>}
    */
   getClientInfoPromise_() {
-    const consentStatePromise = getServicePromiseForDoc(
+    const consentStateManagerPromise = getServicePromiseForDoc(
       this.ampdoc_,
       CONSENT_STATE_MANAGER
     );
-    return consentStatePromise.then((consentStateManager) => {
+    return consentStateManagerPromise.then((consentStateManager) => {
       return consentStateManager
         .getLastConsentInstanceInfo()
         .then((consentInfo) => {
-          const returnValue = dict({
+          return dict({
             'clientConfig': this.clientConfig_,
             // consentState to be deprecated
             'consentState': getConsentStateValue(consentInfo['consentState']),
@@ -553,11 +545,8 @@ export class ConsentUI {
             'consentString': consentInfo['consentString'],
             'promptTrigger': this.isActionPromptTrigger_ ? 'action' : 'load',
             'isDirty': !!consentInfo['isDirty'],
+            'purposeConsents': consentInfo['purposeConsents'],
           });
-          if (this.isGranularConsentExperimentOn_) {
-            returnValue['purposeConsents'] = consentInfo['purposeConsents'];
-          }
-          return returnValue;
         });
     });
   }

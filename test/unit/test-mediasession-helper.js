@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Services} from '../../src/services';
-import {isProtocolValid} from '../../src/url';
+import {Services} from '#service';
+
 import {
   parseFavicon,
   parseOgImage,
@@ -23,6 +23,7 @@ import {
   setMediaSession,
   validateMediaMetadata,
 } from '../../src/mediasession-helper';
+import {isProtocolValid} from '../../src/url';
 
 const schemaTemplate = `
 {

@@ -19,9 +19,10 @@ import {
   extensionsHasElement,
   getAmpAdMetadata,
   getExtensionsFromMetadata,
+  mergeExtensionsMetadata,
 } from '../amp-ad-utils';
 
-describe('getAmpAdMetadata', () => {
+describes.sandboxed('getAmpAdMetadata', {}, () => {
   it('should parse metadata successfully', () => {
     const creativeMetadata = getAmpAdMetadata(data.reserialized);
     expect(creativeMetadata).to.be.ok;
@@ -61,7 +62,40 @@ describe('getAmpAdMetadata', () => {
   });
 });
 
-describe('extensionsHasElement', () => {
+describes.sandboxed('mergeExtensionsMetadata', {}, () => {
+  it('should add els that exist in customElementExtensions but not extensions', () => {
+    const customElementExtensions = ['amp-analytics'];
+    const extensions = [];
+    mergeExtensionsMetadata(extensions, customElementExtensions);
+    expect(extensions).to.have.lengthOf(1);
+    expect(extensions).to.deep.include({
+      'custom-element': 'amp-analytics',
+      'src': 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js',
+    });
+  });
+
+  it('should ignore elements that already exist in extensions', () => {
+    const customElementExtensions = ['amp-analytics', 'amp-foo'];
+    const extensions = [
+      {
+        'custom-element': 'amp-analytics',
+        'src': 'https://cdn.ampproject.org/v0/amp-analytics-latest.js',
+      },
+    ];
+    mergeExtensionsMetadata(extensions, customElementExtensions);
+    expect(extensions).to.have.lengthOf(2);
+    expect(extensions).to.deep.include({
+      'custom-element': 'amp-analytics',
+      'src': 'https://cdn.ampproject.org/v0/amp-analytics-latest.js',
+    });
+    expect(extensions).to.deep.include({
+      'custom-element': 'amp-foo',
+      'src': 'https://cdn.ampproject.org/v0/amp-foo-0.1.js',
+    });
+  });
+});
+
+describes.sandboxed('extensionsHasElement', {}, () => {
   it('should return true if containing extension', () => {
     const extensions = [
       {
@@ -88,7 +122,7 @@ describe('extensionsHasElement', () => {
   });
 });
 
-describe('getExtensionsFromMetadata', () => {
+describes.sandboxed('getExtensionsFromMetadata', {}, () => {
   it('should return extension name and version', () => {
     const metadata = {
       extensions: [

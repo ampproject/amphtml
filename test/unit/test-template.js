@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {BaseTemplate} from '../../src/base-template';
-import {Services} from '../../src/services';
-import {getServiceForDoc} from '../../src/service';
+import {Services} from '#service';
 import {
   installTemplatesServiceForDoc,
   registerExtendedTemplateForDoc,
-} from '../../src/service/template-impl';
+} from '#service/template-impl';
+
+import {BaseTemplate} from '../../src/base-template';
+import {getServiceForDoc} from '../../src/service-helpers';
 
 describes.realWin('Template', {amp: true}, (env) => {
   let templates;

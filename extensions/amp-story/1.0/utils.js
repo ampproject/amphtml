@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {
-  closestAncestorElementBySelector,
-  scopedQuerySelectorAll,
-} from '../../../src/dom';
-import {createShadowRoot} from '../../../src/shadow-embed';
-import {getMode} from '../../../src/mode';
-import {
+  assertHttpsUrl,
   getSourceOrigin,
   isProxyOrigin,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {setStyle, toggle} from '../../../src/style';
-import {user, userAssert} from '../../../src/log';
+import {
+  closestAncestorElementBySelector,
+  scopedQuerySelectorAll,
+} from '#core/dom/query';
+import {createShadowRoot} from '../../../src/shadow-embed';
+import {dev, user, userAssert} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+
+import {setStyle, toggle} from '#core/dom/style';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)
@@ -69,7 +71,7 @@ export function hasTapAction(el) {
  * @return {!ClientRect}
  */
 export function unscaledClientRect(el) {
-  const {width, height, left, top} = el./*OK*/ getBoundingClientRect();
+  const {height, left, top, width} = el./*OK*/ getBoundingClientRect();
 
   const scaleFactorX = width == 0 ? 1 : width / el./*OK*/ offsetWidth;
   const scaleFactorY = height == 0 ? 1 : height / el./*OK*/ offsetHeight;
@@ -148,7 +150,7 @@ export function getRGBFromCssColorValue(cssValue) {
  * @return {string} '#fff' or '#000'
  */
 export function getTextColorForRGB(rgb) {
-  const {r, g, b} = rgb;
+  const {b, g, r} = rgb;
   // Calculates the relative luminance L.
   // https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
   const getLinearRGBValue = (x) => {
@@ -258,6 +260,28 @@ export function shouldShowStoryUrlInfo(viewer) {
 }
 
 /**
+ * Retrieves an attribute src from the <amp-story> element.
+ * @param {!Element} element
+ * @param {string} attribute
+ * @param {string=} warn
+ * @return {?string}
+ */
+export function getStoryAttributeSrc(element, attribute, warn = false) {
+  const storyEl = dev().assertElement(
+    closestAncestorElementBySelector(element, 'AMP-STORY')
+  );
+  const attrSrc = storyEl && storyEl.getAttribute(attribute);
+
+  if (attrSrc) {
+    assertHttpsUrl(attrSrc, storyEl, attribute);
+  } else if (warn) {
+    user().warn('AMP-STORY', `Expected ${attribute} attribute on <amp-story>`);
+  }
+
+  return attrSrc;
+}
+
+/**
  * The attribute name for text background color
  * @private @const {string}
  */
@@ -299,3 +323,22 @@ export function triggerClickFromLightDom(anchorElement, domElement) {
   outerAnchor.click();
   outerAnchor.remove();
 }
+
+/**
+ * Makes a proxy URL if document is served from a proxy origin. No-op otherwise.
+ * @param {string} url
+ * @param {!AmpDoc} ampDoc
+ * @return {string}
+ */
+export const maybeMakeProxyUrl = (url, ampDoc) => {
+  const urlService = Services.urlForDoc(ampDoc);
+  const loc = ampDoc.win.location;
+  if (!urlService.isProxyOrigin(loc.origin) || urlService.isProxyOrigin(url)) {
+    return url;
+  }
+  const resolvedRelativeUrl = urlService.resolveRelativeUrl(
+    url,
+    urlService.getSourceOrigin(loc.href)
+  );
+  return loc.origin + '/i/s/' + resolvedRelativeUrl.replace(/https?:\/\//, '');
+};

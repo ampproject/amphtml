@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import {
-  createFixtureIframe,
-  expectBodyToBecomeVisible,
-} from '../../testing/iframe';
-import {getStyle} from '../../src/style';
-import {isAnimationNone} from '../../testing/test-helper';
+import {getStyle} from '#core/dom/style';
+
+import {createFixtureIframe, expectBodyToBecomeVisible} from '#testing/iframe';
+import {isAnimationNone} from '#testing/test-helper';
 
 const timeout = window.ampTestRuntimeConfig.mochaTimeout;
 
-describe('Old Opacity Boilerplate', () => {
+describes.sandboxed('Old Opacity Boilerplate', {}, () => {
   let fixture;
   beforeEach(() => {
     return createFixtureIframe(
@@ -41,7 +39,7 @@ describe('Old Opacity Boilerplate', () => {
   });
 });
 
-describe('New Visibility Boilerplate', () => {
+describes.sandboxed('New Visibility Boilerplate', {}, () => {
   let fixture;
   beforeEach(() => {
     return createFixtureIframe(

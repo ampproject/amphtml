@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-import * as rds from '../../src/render-delaying-services';
-import * as styles from '../../src/style-installer';
-import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {Services} from '../../src/services';
-import {createShadowRoot} from '../../src/shadow-embed';
-import {getStyle} from '../../src/style';
-import {installPerformanceService} from '../../src/service/performance-impl';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {isAnimationNone} from '../../testing/test-helper';
-import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
+import {getStyle} from '#core/dom/style';
+import {setShadowDomSupportedVersionForTesting} from '#core/dom/web-components';
 
-describe('Styles', () => {
+import {Services} from '#service';
+import {AmpDocShadow, AmpDocSingle} from '#service/ampdoc-impl';
+import {installPerformanceService} from '#service/performance-impl';
+import {installPlatformService} from '#service/platform-impl';
+
+import {isAnimationNone} from '#testing/test-helper';
+
+import * as rds from '../../src/render-delaying-services';
+import {createShadowRoot} from '../../src/shadow-embed';
+import * as styles from '../../src/style-installer';
+
+describes.sandboxed('Styles', {}, () => {
   describes.realWin('makeBodyVisible', {amp: true}, (env) => {
     let win, doc, ampdoc;
     let resources;

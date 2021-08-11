@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
+import {BASE_CID_MAX_AGE_MILLIS} from '#service/cid-impl';
 import {ChunkPriority, chunk} from '../../../src/chunk';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '#core/data-structures/promise';
 import {SameSite, setCookie} from '../../../src/cookies';
-import {Services} from '../../../src/services';
-import {hasOwn} from '../../../src/utils/object';
+import {Services} from '#service';
+import {hasOwn} from '#core/types/object';
 import {isCookieAllowed} from './cookie-reader';
-import {isObject} from '../../../src/types';
+import {isObject} from '#core/types';
 import {user} from '../../../src/log';
 import {variableServiceForDoc} from './variables';
 

@@ -15,7 +15,7 @@
  */
 
 import {FxType} from '../fx-type'; // eslint-disable-line no-unused-vars
-import {PositionObserverFidelity} from '../../../../src/service/position-observer/position-observer-worker';
+import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
 import {Presets} from './amp-fx-presets';
 import {
   ScrollToggleDispatch,
@@ -26,12 +26,9 @@ import {
   installScrollToggleStyles,
   scrollToggleFloatIn,
 } from '../scroll-toggle';
-import {Services} from '../../../../src/services';
-import {
-  assertDoesNotContainDisplay,
-  computedStyle,
-  setStyles,
-} from '../../../../src/style';
+import {Services} from '#service';
+import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
+import {computedStyle, setStyles} from '#core/dom/style';
 import {
   convertEasingKeyword,
   defaultDurationValues,
@@ -41,12 +38,12 @@ import {
   installStyles,
   resolvePercentageToNumber,
 } from './amp-fx-presets-utils';
-import {pureDevAssert as devAssert} from '../../../../src/core/assert';
+import {devAssert} from '../../../../src/log';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
-} from '../../../../src/service';
-import {installPositionObserverServiceForDoc} from '../../../../src/service/position-observer/position-observer-impl';
+} from '../../../../src/service-helpers';
+import {installPositionObserverServiceForDoc} from '#service/position-observer/position-observer-impl';
 
 /**
  * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc

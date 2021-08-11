@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from './action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
+
+import {Services} from '#service';
+
+import {dev, user, userAssert} from './log';
 import {
   SOURCE_ORIGIN_PARAM,
   assertHttpsUrl,
   checkCorsUrl,
   isProxyOrigin,
 } from './url';
-import {Services} from './services';
-import {dev, user, userAssert} from './log';
 
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc

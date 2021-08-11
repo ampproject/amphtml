@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import {AmpDocShadow} from '../../src/service/ampdoc-impl';
-import {DomWriterBulk, DomWriterStreamer} from '../../src/utils/dom-writer';
 import {
   ShadowDomVersion,
   setShadowCssSupportedForTesting,
   setShadowDomSupportedVersionForTesting,
-} from '../../src/web-components';
+} from '#core/dom/web-components';
+import {toArray} from '#core/types/array';
+
+import {AmpDocShadow} from '#service/ampdoc-impl';
+
 import {
   createShadowDomWriter,
   createShadowRoot,
@@ -31,9 +33,9 @@ import {
   setShadowDomStreamingSupportedForTesting,
 } from '../../src/shadow-embed';
 import {installStylesForDoc} from '../../src/style-installer';
-import {toArray} from '../../src/types';
+import {DomWriterBulk, DomWriterStreamer} from '../../src/utils/dom-writer';
 
-describes.sandboxed('shadow-embed', {}, () => {
+describes.sandboxed('shadow-embed', {}, (env) => {
   afterEach(() => {
     setShadowDomSupportedVersionForTesting(undefined);
   });
@@ -354,7 +356,7 @@ describes.sandboxed('shadow-embed', {}, () => {
     let isFirefox;
 
     beforeEach(() => {
-      createHTMLDocumentSpy = window.sandbox.spy();
+      createHTMLDocumentSpy = env.sandbox.spy();
       isFirefox = false;
       const platform = {
         isFirefox: () => isFirefox,

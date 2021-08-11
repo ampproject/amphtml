@@ -17,9 +17,12 @@
 // src/polyfills.js must be the first import.
 import './polyfills';
 
-import ampToolboxCacheUrl from '../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
+import {dict, hasOwn} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
 
+import {loadScript} from './3p';
 import {IframeMessagingClient} from './iframe-messaging-client';
+
 import {
   dev,
   devAssert,
@@ -27,10 +30,8 @@ import {
   setReportError,
   user,
 } from '../src/log';
-import {dict, hasOwn} from '../src/utils/object';
 import {isProxyOrigin, parseUrlDeprecated} from '../src/url';
-import {loadScript} from './3p';
-import {parseJson} from '../src/json';
+import ampToolboxCacheUrl from '../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
 /**
  * @fileoverview

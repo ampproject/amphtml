@@ -19,9 +19,9 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
-import * as experiments from '../../../../src/experiments';
+import * as experiments from '#experiments';
 import {AD_SIZE_OPTIMIZATION_EXP} from '../responsive-state';
-import {AmpA4A, MODULE_NOMODULE_PARAMS_EXP} from '../../../amp-a4a/0.1/amp-a4a';
+import {AmpA4A} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
@@ -30,18 +30,15 @@ import {
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {Services} from '../../../../src/services';
 import {
-  addAttributesToElement,
-  createElementWithAttributes,
-} from '../../../../src/dom';
-import {
-  forceExperimentBranch,
-  toggleExperiment,
-} from '../../../../src/experiments';
-import {toWin} from '../../../../src/types';
-import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '#core/constants/consent-state';
+import {Services} from '#service';
+import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
+import {forceExperimentBranch, toggleExperiment} from '#experiments';
+import {toWin} from '#core/window';
+import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';
@@ -350,9 +347,8 @@ describes.realWin(
                 '1';
             }
             impl.onCreativeRender(false);
-            const ampAnalyticsElement = impl.element.querySelector(
-              'amp-analytics'
-            );
+            const ampAnalyticsElement =
+              impl.element.querySelector('amp-analytics');
             expect(ampAnalyticsElement).to.be.ok;
             expect(ampAnalyticsElement.CONFIG).jsonEqual(
               impl.ampAnalyticsConfig_
@@ -812,11 +808,12 @@ describes.realWin(
 
       it('should include identity', () => {
         // Force get identity result by overloading window variable.
-        const token = /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({
-          token: 'abcdef',
-          jar: 'some_jar',
-          pucrd: 'some_pucrd',
-        });
+        const token =
+          /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({
+            token: 'abcdef',
+            jar: 'some_jar',
+            pucrd: 'some_pucrd',
+          });
         impl.win['goog_identity_prom'] = Promise.resolve(token);
         impl.buildCallback();
         return impl.getAdUrl().then((url) => {
@@ -921,6 +918,36 @@ describes.realWin(
           expect(url).to.not.match(/(\?|&)addtl_consent=(&|$)/);
         }));
 
+      it('should include us_privacy, if consentStringType matches', () =>
+        impl
+          .getAdUrl({
+            consentStringType: CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+            consentString: 'usPrivacyString',
+          })
+          .then((url) => {
+            expect(url).to.match(/(\?|&)us_privacy=usPrivacyString(&|$)/);
+            expect(url).to.not.match(/(\?|&)gdpr_consent=/);
+          }));
+
+      it('should include gdpr_consent, if consentStringType is not US_PRIVACY_STRING', () =>
+        impl
+          .getAdUrl({
+            consentStringType: CONSENT_STRING_TYPE.TCF_V2,
+            consentString: 'gdprString',
+          })
+          .then((url) => {
+            expect(url).to.match(/(\?|&)gdpr_consent=gdprString(&|$)/);
+            expect(url).to.not.match(/(\?|&)us_privacy=/);
+          }));
+
+      it('should include gdpr_consent, if consentStringType is undefined', () =>
+        impl
+          .getAdUrl({consentStringType: undefined, consentString: 'gdprString'})
+          .then((url) => {
+            expect(url).to.match(/(\?|&)gdpr_consent=gdprString(&|$)/);
+            expect(url).to.not.match(/(\?|&)us_privacy=/);
+          }));
+
       it('should have spsa and size 1x1 when single page story ad', () => {
         impl.isSinglePageStoryAd = true;
         return impl.getAdUrl().then((url) => {
@@ -931,44 +958,10 @@ describes.realWin(
         });
       });
 
-      describe('module/nomodule', () => {
-        it('should have module nomodule experiment id in url when runtime type is 2', () => {
-          env.sandbox
-            .stub(ampdoc, 'getMetaByName')
-            .withArgs('runtime-type')
-            .returns('2');
-          return impl.buildCallback().then(() => {
-            impl.getAdUrl().then((url) => {
-              expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
-            });
-          });
-        });
-
-        it('should have module nomodule experiment id in url when runtime type is 10', () => {
-          env.sandbox
-            .stub(ampdoc, 'getMetaByName')
-            .withArgs('runtime-type')
-            .returns('10');
-          return impl.buildCallback().then(() => {
-            impl.getAdUrl().then((url) => {
-              expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.CONTROL);
-            });
-          });
-        });
-
-        // 2, 4, and 10 should the only one that triggers this experiment diversion.
-        it('should not have module nomodule experiment id in url when runtime type is 0', () => {
-          env.sandbox
-            .stub(ampdoc, 'getMetaByName')
-            .withArgs('runtime-type')
-            .returns('0');
-          impl.buildCallback();
-          return impl.getAdUrl().then((url) => {
-            expect(url).to.not.have.string(MODULE_NOMODULE_PARAMS_EXP.CONTROL);
-            expect(url).to.not.have.string(
-              MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT
-            );
-          });
+      it('should set spsa param to amp-ad element layout box', () => {
+        impl.isSinglePageStoryAd = true;
+        return impl.getAdUrl().then((url) => {
+          expect(url).to.match(/spsa=320x50/);
         });
       });
 
@@ -1530,7 +1523,8 @@ describes.realWin(
         });
         ampStickyAd.appendChild(element);
         doc.body.appendChild(ampStickyAd);
-        const letCreativeTriggerRenderStart = impl.letCreativeTriggerRenderStart();
+        const letCreativeTriggerRenderStart =
+          impl.letCreativeTriggerRenderStart();
         expect(letCreativeTriggerRenderStart).to.equal(true);
       });
 
@@ -1568,7 +1562,8 @@ describes.realWin(
         );
         ampStickyAd.appendChild(element);
         doc.body.appendChild(ampStickyAd);
-        const letCreativeTriggerRenderStart = impl.letCreativeTriggerRenderStart();
+        const letCreativeTriggerRenderStart =
+          impl.letCreativeTriggerRenderStart();
         expect(letCreativeTriggerRenderStart).to.equal(false);
       });
     });

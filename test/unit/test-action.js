@@ -15,22 +15,25 @@
  */
 
 import {
+  ActionTrust,
+  DEFAULT_ACTION,
+  RAW_OBJECT_ARGS_KEY,
+} from '#core/constants/action-constants';
+import {Keys} from '#core/constants/key-codes';
+import {htmlFor} from '#core/dom/static-template';
+
+import {
   ActionInvocation,
   ActionService,
   DeferredEvent,
   dereferenceArgsVariables,
   parseActionMap,
-} from '../../src/service/action-impl';
-import {
-  ActionTrust,
-  DEFAULT_ACTION,
-  RAW_OBJECT_ARGS_KEY,
-} from '../../src/action-constants';
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {Keys} from '../../src/utils/key-codes';
+} from '#service/action-impl';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+
+import {whenCalled} from '#testing/test-helper';
+
 import {createCustomEvent} from '../../src/event-helper';
-import {htmlFor} from '../../src/static-template';
-import {whenCalled} from '../../testing/test-helper.js';
 
 /**
  * @return {!ActionService}
@@ -83,7 +86,7 @@ function assertInvocation(
   }
 }
 
-describe('ActionService parseAction', () => {
+describes.sandboxed('ActionService parseAction', {}, () => {
   function parseMultipleActions(s) {
     const actionMap = parseActionMap(s);
     if (actionMap == null) {
@@ -470,7 +473,7 @@ describe('ActionService parseAction', () => {
   });
 });
 
-describe('ActionService setActions', () => {
+describes.sandboxed('ActionService setActions', {}, () => {
   it('should set actions', () => {
     const action = actionService();
     const element = document.createElement('div');
@@ -491,7 +494,7 @@ describe('ActionService setActions', () => {
   });
 });
 
-describe('Action parseActionMap', () => {
+describes.sandboxed('Action parseActionMap', {}, () => {
   it('should parse with a single action', () => {
     const m = parseActionMap('event1:action1');
     expect(m['event1'][0].target).to.equal('action1');
@@ -844,11 +847,11 @@ describes.sandboxed('Action method', {}, (env) => {
         const {
           actionEventType,
           args,
+          caller,
+          event,
           method,
           node,
           source,
-          caller,
-          event,
           tagOrTarget,
           trust,
         } = invocation;
@@ -1483,7 +1486,7 @@ describes.fakeWin('Core events', {amp: true}, (env) => {
       element,
       'change',
       env.sandbox.match((e) => {
-        const {min, max, value, valueAsNumber} = e.detail;
+        const {max, min, value, valueAsNumber} = e.detail;
         return (
           min === '0' && max === '10' && value === '5' && valueAsNumber === 5
         );

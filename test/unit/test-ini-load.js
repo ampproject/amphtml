@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../src/utils/promise';
-import {Services} from '../../src/services';
-import {removeItem} from '../../src/utils/array';
+import {Deferred} from '#core/data-structures/promise';
+import {removeItem} from '#core/types/array';
+
+import {Services} from '#service';
+
 import {
   whenContentIniLoadInOb,
   whenContentIniLoadMeasure,

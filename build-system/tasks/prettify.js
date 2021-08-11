@@ -15,9 +15,9 @@
  */
 
 /**
- * @fileoverview This file implements the `gulp prettify` task, which uses
+ * @fileoverview This file implements the `amp prettify` task, which uses
  * prettier to check (and optionally fix) the formatting in a variety of
- * non-JS files in the repo. (JS files are separately checked by `gulp lint`,
+ * non-JS files in the repo. (JS files are separately checked by `amp lint`,
  * which uses eslint.)
  */
 'use strict';
@@ -34,10 +34,9 @@ const {
   logOnSameLineLocalDev,
   logWithoutTimestamp,
 } = require('../common/logging');
+const {cyan, green, red, yellow} = require('../common/colors');
 const {exec} = require('../common/exec');
 const {getFilesToCheck} = require('../common/utils');
-const {green, cyan, red, yellow} = require('kleur/colors');
-const {maybeUpdatePackages} = require('./update-packages');
 const {prettifyGlobs} = require('../test-configs/config');
 
 const rootDir = path.dirname(path.dirname(__dirname));
@@ -45,10 +44,15 @@ const tempDir = tempy.directory();
 
 /**
  * Checks files for formatting (and optionally fixes them) with Prettier.
+ * Explicitly makes sure the API doesn't check files in `.prettierignore`.
+ * @return {Promise<void>}
  */
 async function prettify() {
-  maybeUpdatePackages();
-  const filesToCheck = getFilesToCheck(prettifyGlobs, {dot: true});
+  const filesToCheck = getFilesToCheck(
+    prettifyGlobs,
+    {dot: true},
+    '.prettierignore'
+  );
   if (filesToCheck.length == 0) {
     return;
   }
@@ -58,7 +62,7 @@ async function prettify() {
 /**
  * Resolves the prettier config for the given file
  * @param {string} file
- * @return {Object}
+ * @return {Promise<Object>}
  */
 async function getOptions(file) {
   const config = await prettier.resolveConfig(file);
@@ -70,6 +74,7 @@ async function getOptions(file) {
  * formatting errors.
  *
  * @param {string} file
+ * @return {Promise<void>}
  */
 async function printErrorWithSuggestedFixes(file) {
   logWithoutTimestamp('\n');
@@ -96,7 +101,7 @@ function printFixMessages() {
   log(
     yellow('NOTE 2:'),
     'If you are using the git command-line workflow, run',
-    cyan('gulp prettify --local_changes --fix'),
+    cyan('amp prettify --local_changes --fix'),
     'from your local branch.'
   );
   log(
@@ -108,7 +113,7 @@ function printFixMessages() {
     yellow('NOTE 4:'),
     'For more information, read',
     cyan(
-      'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#code-quality-and-style\n'
+      'https://github.com/ampproject/amphtml/blob/main/docs/getting-started-e2e.md#code-quality-and-style\n'
     )
   );
 }
@@ -116,6 +121,7 @@ function printFixMessages() {
 /**
  * Prettifies on the given list of files.
  * @param {!Array<string>} filesToCheck
+ * @return {Promise<void>}
  */
 async function runPrettify(filesToCheck) {
   logLocalDev(green('Starting checks...'));
@@ -157,9 +163,9 @@ module.exports = {
 };
 
 prettify.description =
-  'Checks several non-JS files in the repo for formatting using prettier';
+  'Check several non-JS files in the repo for formatting using prettier';
 prettify.flags = {
-  'files': '  Checks only the specified files',
-  'local_changes': '  Checks just the files changed in the local branch',
-  'fix': '  Fixes formatting errors',
+  'files': 'Check only the specified files',
+  'local_changes': 'Check just the files changed in the local branch',
+  'fix': 'Fix all auto-fixable formatting errors',
 };

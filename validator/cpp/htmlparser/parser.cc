@@ -21,13 +21,13 @@
 #include <iostream>  // For DumpDocument
 #endif               // DUMP_NODES
 
-#include "glog/logging.h"
 #include "absl/flags/flag.h"
 #include "atomutil.h"
 #include "comparators.h"
 #include "defer.h"
 #include "doctype.h"
 #include "foreign.h"
+#include "logging.h"
 #include "parser.h"
 #include "strings.h"
 
@@ -65,7 +65,8 @@ std::unique_ptr<Document> Parse(std::string_view html) {
       ParseOptions{.scripting = true,
                    .frameset_ok = true,
                    .record_node_offsets = true,
-                   .record_attribute_offsets = true});
+                   .record_attribute_offsets = true,
+                   .count_num_terms_in_text_node = true});
   return parser->Parse();
 }
 
@@ -99,6 +100,11 @@ std::unique_ptr<Document> ParseFragmentWithOptions(std::string_view html,
   }
 
   auto doc = parser->Parse();
+
+  // doc could be nullptr when, for example, the stack depth >
+  // htmlparser_max_nodes_depth_count).
+  if (doc == nullptr) return nullptr;
+
   Node* parent = fragment_parent ? root : doc->root_node_;
   for (Node* c = parent->FirstChild(); c;) {
     Node* next = c->NextSibling();
@@ -117,7 +123,8 @@ std::unique_ptr<Document> ParseFragment(std::string_view html,
   ParseOptions options = {.scripting = true,
                           .frameset_ok = true,
                           .record_node_offsets = true,
-                          .record_attribute_offsets = true};
+                          .record_attribute_offsets = true,
+                          .count_num_terms_in_text_node = true};
   return ParseFragmentWithOptions(html, options, fragment_parent);
 }
 
@@ -133,8 +140,10 @@ Parser::Parser(std::string_view html, const ParseOptions& options,
       frameset_ok_(options.frameset_ok),
       record_node_offsets_(options.record_node_offsets),
       record_attribute_offsets_(options.record_attribute_offsets),
+      count_num_terms_in_text_node_(options.count_num_terms_in_text_node),
       fragment_(fragment_parent != nullptr),
       context_node_(fragment_parent) {
+  document_->metadata_.html_src_bytes = html.size();
   insertion_mode_ = std::bind(&Parser::InitialIM, this);
 }
 
@@ -143,10 +152,7 @@ std::unique_ptr<Document> Parser::Parse() {
   while (!eof) {
     if (open_elements_stack_.size() >
         ::absl::GetFlag(FLAGS_htmlparser_max_nodes_depth_count)) {
-      LOG(WARNING) << "Skipped parsing. Document too complex: "
-                   << open_elements_stack_.size() << " vs. Max allowed: ("
-                   << ::absl::GetFlag(FLAGS_htmlparser_max_nodes_depth_count)
-                   << ")";
+      // Skipping parsing. Document too complex.
       delete document_.release();
       return nullptr;
     }
@@ -171,6 +177,7 @@ std::unique_ptr<Document> Parser::Parse() {
   DumpDocument(document_.get());
 #endif
 
+  document_->metadata_.document_end_location = tokenizer_->CurrentPosition();
   return std::move(document_);
 }  // End Parser::Parse.
 
@@ -226,7 +233,7 @@ int Parser::IndexOfElementInScope(Scope scope,
           }
           break;
         default:
-          CHECK(false) << "HTML Parser reached unreachable scope";
+          CHECK(false, "HTML Parser reached unreachable scope");
       }
     }
 
@@ -283,7 +290,7 @@ void Parser::ClearStackToContext(Scope scope) {
         }
         break;
       default:
-        CHECK(false) << "HTML Parser reached unreachable scope";
+        CHECK(false, "HTML Parser reached unreachable scope");
     }
   }
 }  // Parser::ClearStackToContext.
@@ -386,7 +393,7 @@ void Parser::FosterParent(Node* node) {
 
   if (prev && prev->node_type_ == NodeType::TEXT_NODE &&
       node->node_type_ == NodeType::TEXT_NODE) {
-    prev->data_ += node->data_;
+    prev->data_.append(node->data_);
     return;
   }
 
@@ -397,10 +404,12 @@ void Parser::AddText(const std::string& text) {
   if (text.empty()) return;
 
   auto text_node = document_->NewNode(NodeType::TEXT_NODE);
+  if (record_node_offsets_) {
+    text_node->line_col_in_html_src_ = token_.line_col_in_html_src;
+  }
 
   if (ShouldFosterParent()) {
     text_node->data_.assign(text, 0, text.size());
-    text_node->position_in_html_src_ = token_.position_in_html_src;
     FosterParent(text_node);
     return;
   }
@@ -413,8 +422,15 @@ void Parser::AddText(const std::string& text) {
   }
 
   text_node->data_.assign(text, 0, text.size());
-  text_node->position_in_html_src_ = token_.position_in_html_src;
   AddChild(text_node);
+  // Count number of terms in ths text node, except if this is <script>,
+  // <textarea> or a comment node.
+  if (count_num_terms_in_text_node_ && text_node->Parent() &&
+      text_node->Parent()->DataAtom() != Atom::SCRIPT &&
+      text_node->Parent()->Type() != NodeType::COMMENT_NODE &&
+      text_node->Parent()->DataAtom() != Atom::TEXTAREA) {
+    text_node->num_terms_ = Strings::CountTerms(text);
+  }
 }  // Parser::AddText.
 
 void Parser::AddElement() {
@@ -423,25 +439,25 @@ void Parser::AddElement() {
     element_node->data_ = token_.data;
   }
 
+  if (record_node_offsets_) {
+    element_node->line_col_in_html_src_ = token_.line_col_in_html_src;
+  }
+
   switch (token_.atom) {
     case Atom::HTML: {
-      element_node->SetManufactured(accounting_.has_manufactured_html);
+      element_node->SetManufactured(document_->metadata_.has_manufactured_html);
       break;
     }
     case Atom::HEAD: {
-      element_node->SetManufactured(accounting_.has_manufactured_head);
+      element_node->SetManufactured(document_->metadata_.has_manufactured_head);
       break;
     }
     case Atom::BODY: {
-      element_node->SetManufactured(accounting_.has_manufactured_body);
+      element_node->SetManufactured(document_->metadata_.has_manufactured_body);
       break;
     }
     default:
       break;
-  }
-
-  if (record_node_offsets_) {
-    element_node->position_in_html_src_ = token_.position_in_html_src;
   }
 
   std::copy(token_.attributes.begin(), token_.attributes.end(),
@@ -452,7 +468,7 @@ void Parser::AddElement() {
     std::transform(
         element_node->attributes_.begin(), element_node->attributes_.end(),
         element_node->attributes_.begin(), [](Attribute attr) -> Attribute {
-          attr.position_in_html_src = std::nullopt;
+          attr.line_col_in_html_src = std::nullopt;
           return attr;
         });
   }
@@ -548,8 +564,8 @@ void Parser::AcknowledgeSelfClosingTag() {
 
 // Section 12.2.4.1, "using the rules for".
 void Parser::SetOriginalIM() {
-  CHECK(!original_insertion_mode_)
-       << "html: bad parser state: original_insertion_mode was set twice";
+  CHECK(!original_insertion_mode_,
+        "html: bad parser state: original_insertion_mode was set twice");
   original_insertion_mode_ = insertion_mode_;
 }  // Parser::SetOriginalIM.
 
@@ -657,7 +673,7 @@ bool Parser::InitialIM() {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->data_ = std::move(token_.data);
       if (record_node_offsets_) {
-        node->position_in_html_src_ = token_.position_in_html_src;
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
       }
       node->SetManufactured(token_.is_manufactured);
       document_->root_node_->AppendChild(node);
@@ -667,10 +683,10 @@ bool Parser::InitialIM() {
       auto doctype_node = document_->NewNode(NodeType::DOCTYPE_NODE);
       bool quirks_mode = ParseDoctype(token_.data, doctype_node);
       if (record_node_offsets_) {
-        doctype_node->position_in_html_src_ = token_.position_in_html_src;
+        doctype_node->line_col_in_html_src_ = token_.line_col_in_html_src;
       }
       document_->root_node_->AppendChild(doctype_node);
-      accounting_.quirks_mode = quirks_mode;
+      document_->metadata_.quirks_mode = quirks_mode;
       insertion_mode_ = std::bind(&Parser::BeforeHTMLIM, this);
 
       if (on_node_callback_) {
@@ -683,7 +699,7 @@ bool Parser::InitialIM() {
       break;
   }
 
-  accounting_.quirks_mode = true;
+  document_->metadata_.quirks_mode = true;
   insertion_mode_ = std::bind(&Parser::BeforeHTMLIM, this);
   return false;
 }  // Parser::InitialIM.
@@ -730,7 +746,9 @@ bool Parser::BeforeHTMLIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+      }
       node->data_ = std::move(token_.data);
       document_->root_node_->AppendChild(node);
       return true;
@@ -787,7 +805,9 @@ bool Parser::BeforeHeadIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+      }
       node->data_ = std::move(token_.data);
       AddChild(node);
       return true;
@@ -834,6 +854,15 @@ bool Parser::InHeadIM() {
           AddElement();
           open_elements_stack_.Pop();
           AcknowledgeSelfClosingTag();
+          if (!top() || !top()->LastChild()) return true;
+          // Record some extra document url related info.
+          if (token_.atom == Atom::BASE) {
+            auto base_node = top()->LastChild();
+            RecordBaseURLMetadata(base_node);
+          } else if (token_.atom == Atom::LINK) {
+            auto link_node = top()->LastChild();
+            RecordLinkRelCanonical(link_node);
+          }
           return true;
         }
         case Atom::NOSCRIPT: {
@@ -919,7 +948,9 @@ bool Parser::InHeadIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+      }
       node->data_ = std::move(token_.data);
       AddChild(node);
       return true;
@@ -1001,8 +1032,8 @@ bool Parser::InHeadNoscriptIM() {
       break;
   }
   open_elements_stack_.Pop();
-  CHECK(top()->atom_ == Atom::HEAD)
-       << "html: the new current node will be a head element.";
+  CHECK(top()->atom_ == Atom::HEAD,
+        "html: the new current node will be a head element.");
 
   insertion_mode_ = std::bind(&Parser::InHeadIM, this);
   if (token_.atom == Atom::NOSCRIPT) {
@@ -1083,7 +1114,9 @@ bool Parser::AfterHeadIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+      }
       node->data_ = std::move(token_.data);
       AddChild(node);
       return true;
@@ -1147,10 +1180,11 @@ bool Parser::InBodyIM() {
             return true;
           }
           CopyAttributes(open_elements_stack_.at(0), token_);
-          if (!accounting_.has_manufactured_html || num_html_tags_ > 1) {
-            accounting_.duplicate_html_elements = true;
-            accounting_.duplicate_html_element_location =
-                token_.position_in_html_src;
+          if (!document_->metadata_.has_manufactured_html ||
+              num_html_tags_ > 1) {
+            document_->metadata_.duplicate_html_elements = true;
+            document_->metadata_.duplicate_html_element_location =
+                token_.line_col_in_html_src;
           }
           break;
         }
@@ -1177,10 +1211,11 @@ bool Parser::InBodyIM() {
                 body->atom_ == Atom::BODY) {
               frameset_ok_ = false;
               CopyAttributes(body, token_);
-              if (!accounting_.has_manufactured_body || num_body_tags_ > 1) {
-                accounting_.duplicate_body_elements = true;
-                accounting_.duplicate_body_element_location =
-                    token_.position_in_html_src;
+              if (!document_->metadata_.has_manufactured_body ||
+                  num_body_tags_ > 1) {
+                document_->metadata_.duplicate_body_elements = true;
+                document_->metadata_.duplicate_body_element_location =
+                    token_.line_col_in_html_src;
               }
             }
           }
@@ -1386,7 +1421,7 @@ bool Parser::InBodyIM() {
           break;
         }
         case Atom::TABLE: {
-          if (!accounting_.quirks_mode) {
+          if (!document_->metadata_.quirks_mode) {
             PopUntil(Scope::ButtonScope, Atom::P);
           }
           AddElement();
@@ -1687,7 +1722,9 @@ bool Parser::InBodyIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+      }
       node->data_ = token_.data;
       AddChild(node);
       break;
@@ -2112,7 +2149,9 @@ bool Parser::InTableIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+      }
       node->data_ = token_.data;
       AddChild(node);
       return true;
@@ -2226,7 +2265,9 @@ bool Parser::InColumnGroupIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+      }
       node->data_ = token_.data;
       AddChild(node);
       return true;
@@ -2363,7 +2404,9 @@ bool Parser::InTableBodyIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+      }
       node->data_ = token_.data;
       AddChild(node);
       return true;
@@ -2654,7 +2697,9 @@ bool Parser::InSelectIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+      }
       node->data_ = token_.data;
       AddChild(node);
       break;
@@ -2838,13 +2883,15 @@ bool Parser::AfterBodyIM() {
       break;
     case TokenType::COMMENT_TOKEN: {
       // The comment is attached to the <html> element.
-      CHECK((open_elements_stack_.size() > 0 &&
-             open_elements_stack_.at(0)->atom_ == Atom::HTML))
-            << "html: bad parser state: <html> element not found, in the "
-               "after-body insertion mode";
+      CHECK(open_elements_stack_.size() > 0 &&
+                open_elements_stack_.at(0)->atom_ == Atom::HTML,
+            "html: bad parser state: <html> element not found, in the "
+            "after-body insertion mode");
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+      }
       node->data_ = token_.data;
       open_elements_stack_.at(0)->AppendChild(node);
       return true;
@@ -2863,7 +2910,9 @@ bool Parser::InFramesetIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+      }
       node->data_ = token_.data;
       AddChild(node);
       break;
@@ -2919,7 +2968,9 @@ bool Parser::AfterFramesetIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+      }
       node->data_ = token_.data;
       AddChild(node);
       break;
@@ -2976,7 +3027,9 @@ bool Parser::AfterAfterBodyIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+      }
       node->data_ = token_.data;
       document_->root_node_->AppendChild(node);
       return true;
@@ -2997,7 +3050,9 @@ bool Parser::AfterAfterFramesetIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+      }
       node->data_ = token_.data;
       document_->root_node_->AppendChild(node);
       break;
@@ -3051,6 +3106,9 @@ bool Parser::ParseForeignContent() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+      }
       node->data_ = token_.data;
       AddChild(node);
       break;
@@ -3094,8 +3152,7 @@ bool Parser::ParseForeignContent() {
         }
         AdjustSVGAttributeNames(&token_.attributes);
       } else {
-        throw std::runtime_error(
-             "html: bad parser state: unexpected namespace");
+        CHECK(false, "html: bad parser state: unexpected namespace");
       }
 
       AdjustForeignAttributes(&token_.attributes);
@@ -3189,7 +3246,7 @@ void Parser::ParseImpliedToken(TokenType token_type, Atom atom,
   Token real_token = {.token_type = token_.token_type,
                       .atom = token_.atom,
                       .data = token_.data,
-                      .position_in_html_src = token_.position_in_html_src,
+                      .line_col_in_html_src = token_.line_col_in_html_src,
                       .attributes = token_.attributes};
   bool self_closing = has_self_closing_token_;
   // Create implied tokens.
@@ -3198,7 +3255,7 @@ void Parser::ParseImpliedToken(TokenType token_type, Atom atom,
             .data = data,
             // For reporting purposes implied tokens are assumed to be parsed at
             // the current tag location.
-            .position_in_html_src = token_.position_in_html_src,
+            .line_col_in_html_src = token_.line_col_in_html_src,
             .attributes = {}};
   has_self_closing_token_ = false;
 
@@ -3206,13 +3263,13 @@ void Parser::ParseImpliedToken(TokenType token_type, Atom atom,
   if (token_type == TokenType::START_TAG_TOKEN) {
     switch (atom) {
       case Atom::HTML:
-        accounting_.has_manufactured_html = true;
+        document_->metadata_.has_manufactured_html = true;
         break;
       case Atom::HEAD:
-        accounting_.has_manufactured_head = true;
+        document_->metadata_.has_manufactured_head = true;
         break;
       case Atom::BODY:
-        accounting_.has_manufactured_body = true;
+        document_->metadata_.has_manufactured_body = true;
         break;
       default:
         break;
@@ -3224,7 +3281,7 @@ void Parser::ParseImpliedToken(TokenType token_type, Atom atom,
   token_ = {.token_type = real_token.token_type,
             .atom = real_token.atom,
             .data = real_token.data,
-            .position_in_html_src = token_.position_in_html_src,
+            .line_col_in_html_src = token_.line_col_in_html_src,
             .attributes = real_token.attributes};
   has_self_closing_token_ = self_closing;
 }  // Parser::ParseImpliedToken.
@@ -3264,6 +3321,38 @@ void Parser::CopyAttributes(Node* node, Token token) const {
     }
   }
 }  // Parser::CopyAttributes.
+
+void Parser::RecordBaseURLMetadata(Node* base_node) {
+  if (base_node->Type() != NodeType::ELEMENT_NODE ||
+      base_node->DataAtom() != Atom::BASE) return;
+
+  for (auto& attr : base_node->Attributes()) {
+    if (Strings::EqualFold(attr.key, "href")) {
+      document_->metadata_.base_url.first = attr.value;
+    } else if (Strings::EqualFold(attr.key, "target")) {
+      document_->metadata_.base_url.second = attr.value;
+    }
+  }
+}
+
+void Parser::RecordLinkRelCanonical(Node* link_node) {
+  if (link_node->Type() != NodeType::ELEMENT_NODE ||
+      link_node->DataAtom() != Atom::LINK) return;
+
+  bool canonical;
+  std::string canonical_url;
+  for (auto& attr : link_node->Attributes()) {
+    if (Strings::EqualFold(attr.key, "rel") &&
+        Strings::EqualFold(attr.value, "canonical")) {
+      canonical = true;
+    } else if (Strings::EqualFold(attr.key, "href")) {
+      canonical_url = attr.value;
+    }
+  }
+  if (canonical && !canonical_url.empty()) {
+    document_->metadata_.canonical_url = canonical_url;
+  }
+}
 
 namespace {
 // Returns only whitespace characters in s.

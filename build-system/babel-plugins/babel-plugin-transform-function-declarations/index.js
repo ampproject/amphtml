@@ -13,9 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// @ts-nocheck
 
-// Attempt to convert simple single ReturnStatement FunctionDeclarations to ArrowFunctionExpressions.
-// See BAIL_OUT_CONDITIONS for reasons why FunctionDeclarations would not be modified.
+/**
+ * Attempt to convert simple single ReturnStatement FunctionDeclarations to ArrowFunctionExpressions.
+ * See BAIL_OUT_CONDITIONS for reasons why FunctionDeclarations would not be modified.
+ * @interface {babel.PluginPass}
+ * @param {babel} babel
+ * @return {babel.PluginObj}
+ */
 module.exports = function ({types: t}) {
   /**
    * This transform is targetted toward these types only.
@@ -103,7 +109,7 @@ module.exports = function ({types: t}) {
    * @return {ReturnType<t['arrowFunctionExpression']>}
    */
   function createArrowFunctionExpression(node) {
-    const {params, body, async} = t.cloneNode(node);
+    const {async, body, params} = t.cloneNode(node);
     return t.arrowFunctionExpression(params, body.body[0].argument, async);
   }
 

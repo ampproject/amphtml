@@ -142,7 +142,7 @@ function maybeCopyImageToCache(configUrl, src) {
 
   touchDirs();
 
-  const filename = src.split('/').pop();
+  const filename = src.split('/').pop() ?? '';
   const destPath = path.join(IMG_CACHE_PATH, filename);
 
   if (!fs.existsSync(destPath)) {
@@ -172,7 +172,7 @@ function getLocalVendorConfig(vendor) {
  * @return {!Promise<string>} Resolves with relative path to file
  */
 async function getFileFromAbsolutePath(filePath) {
-  return fs.readFileSync(filePath);
+  return fs.readFileSync(filePath, 'utf-8');
 }
 
 /**

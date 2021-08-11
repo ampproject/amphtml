@@ -16,6 +16,8 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const {BUILD_CONSTANTS} = require('../compile/build-constants');
+const {getImportResolverPlugin} = require('./import-resolver');
 const {getReplacePlugin} = require('./helpers');
 
 /**
@@ -25,11 +27,22 @@ const {getReplacePlugin} = require('./helpers');
  */
 function getMinifiedConfig() {
   const replacePlugin = getReplacePlugin();
+  const reactJsxPlugin = [
+    '@babel/plugin-transform-react-jsx',
+    {
+      pragma: 'Preact.createElement',
+      pragmaFrag: 'Preact.Fragment',
+      useSpread: true,
+    },
+  ];
+
   const plugins = [
     'optimize-objstr',
+    getImportResolverPlugin(),
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
     '@babel/plugin-transform-react-constant-elements',
+    reactJsxPlugin,
     argv.esm
       ? './build-system/babel-plugins/babel-plugin-transform-dev-methods'
       : null,
@@ -42,10 +55,8 @@ function getMinifiedConfig() {
       './build-system/babel-plugins/babel-plugin-transform-json-import',
       {freeze: false},
     ],
-    './build-system/babel-plugins/babel-plugin-is_minified-constant-transformer',
     './build-system/babel-plugins/babel-plugin-transform-html-template',
     './build-system/babel-plugins/babel-plugin-transform-jss',
-    './build-system/babel-plugins/babel-plugin-transform-version-call',
     './build-system/babel-plugins/babel-plugin-transform-simple-array-destructure',
     './build-system/babel-plugins/babel-plugin-transform-default-assignment',
     replacePlugin,
@@ -61,25 +72,21 @@ function getMinifiedConfig() {
       ? null
       : [
           './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
-          {isEsmBuild: !!argv.esm},
+          BUILD_CONSTANTS,
         ],
-    argv.fortesting
-      ? null
-      : './build-system/babel-plugins/babel-plugin-is_dev-constant-transformer',
   ].filter(Boolean);
   const presetEnv = [
     '@babel/preset-env',
     {
       bugfixes: true,
       modules: false,
-      targets: {esmodules: true},
+      targets: argv.esm ? {esmodules: true} : {ie: 11, chrome: 41},
     },
   ];
-  const presets = argv.esm ? [presetEnv] : [];
   return {
     compact: false,
     plugins,
-    presets,
+    presets: [presetEnv],
     retainLines: true,
   };
 }

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 import {FormEvents} from './form-events';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {ValidationBubble} from './validation-bubble';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
-import {iterateCursor} from '../../../src/dom';
-import {toWin} from '../../../src/types';
+import {iterateCursor} from '#core/dom';
+import {toWin} from '#core/window';
 
 /** @const @private {string} */
 const VALIDATION_CACHE_PREFIX = '__AMP_VALIDATION_';
@@ -93,7 +93,7 @@ export class FormValidator {
 
     /**
      * Tribool indicating last known validity of form.
-     * @private {boolean|null}
+     * @private {?boolean}
      */
     this.formValidity_ = null;
   }

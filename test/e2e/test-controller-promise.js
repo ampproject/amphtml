@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {ControllerPromise} from '../../build-system/tasks/e2e/controller-promise';
 import sinon from /*OK*/ 'sinon';
+
+import {ControllerPromise} from '../../build-system/tasks/e2e/controller-promise';
 
 /**
  * This is a unit test that is located with the E2E tests because it
@@ -280,8 +281,7 @@ describe('ControllerPromise', () => {
         opt_mutate = opt_mutate || ((x) => x);
         return new Promise((resolve, reject) => {
           /**
-           * Poll for the new value. This simulates behavior in the concrete
-           * implementations of the `FunctionalTestController` implementations.
+           * Poll for the new value.
            * See {@link ../../build-system/tasks/e2e/selenium-webdriver-controller.js#getWaitFn_}
            */
           const id = setInterval(async () => {

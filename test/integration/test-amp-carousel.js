@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../src/common-signals';
-import {whenUpgradedToCustomElement} from '../../src/dom';
+import {CommonSignals} from '#core/constants/common-signals';
 
-const t = describe.configure().ifChrome();
+import {whenUpgradedToCustomElement} from '../../src/amp-element-helpers';
 
-t.run('amp-carousel', function () {
+const t = describes.sandboxed.configure().ifChrome();
+
+t.run('amp-carousel', {}, function () {
   this.timeout(10000);
   let document;
 

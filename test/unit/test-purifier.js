@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-import * as urlRewrite from '../../src/url-rewrite';
-import {Purifier} from '../../src/purifier/purifier';
+import {Purifier} from '#purifier';
 
-describe
+import * as urlRewrite from '../../src/url-rewrite';
+
+describes.sandboxed
   .configure()
   .skipFirefox()
-  .run('DOMPurify-based', () => {
+  .run('DOMPurify-based', {}, (env) => {
     let purify;
     let purifyTripleMustache;
     let rewriteAttributeValueSpy;
 
     beforeEach(() => {
-      rewriteAttributeValueSpy = window.sandbox.spy(
+      rewriteAttributeValueSpy = env.sandbox.spy(
         urlRewrite,
         'rewriteAttributeValue'
       );
@@ -766,10 +767,10 @@ describe
     });
   });
 
-describe
+describes.sandboxed
   .configure()
   .skipFirefox()
-  .run('DOMPurify-based, custom html', () => {
+  .run('DOMPurify-based, custom html', {}, () => {
     let html;
     let purify;
 
@@ -868,7 +869,7 @@ describe
     });
   });
 
-describe('validateAttributeChange', () => {
+describes.sandboxed('validateAttributeChange', {}, () => {
   let purifier;
   let vac;
 
@@ -933,7 +934,7 @@ describe('validateAttributeChange', () => {
   });
 });
 
-describe('getAllowedTags', () => {
+describes.sandboxed('getAllowedTags', {}, () => {
   let allowedTags;
 
   beforeEach(() => {

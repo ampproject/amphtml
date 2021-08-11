@@ -15,13 +15,13 @@
  */
 
 import {CMP_CONFIG} from './cmps';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
-import {Services} from '../../../src/services';
-import {childElementByTag} from '../../../src/dom';
-import {deepMerge, hasOwn, map} from '../../../src/utils/object';
+import {Services} from '#service';
+import {childElementByTag} from '#core/dom/query';
+import {deepMerge, hasOwn, map} from '#core/types/object';
 import {devAssert, user, userAssert} from '../../../src/log';
-import {getChildJsonConfig} from '../../../src/json';
+import {getChildJsonConfig} from '#core/dom';
 
 const TAG = 'amp-consent/consent-config';
 const AMP_STORY_CONSENT_TAG = 'amp-story-consent';
@@ -39,6 +39,7 @@ const CONSENT_VARS_ALLOWED_LIST = {
   'CLIENT_ID': true,
   'PAGE_VIEW_ID': true,
   'PAGE_VIEW_ID_64': true,
+  'SOURCE_URL': true,
 };
 
 /** @const @type {string} */
@@ -128,19 +129,16 @@ export class ConsentConfig {
    */
   validateAndParseConfig_() {
     const inlineConfig = this.convertInlineConfigFormat_(
-      /** @type {!JsonObject} */ (userAssert(
-        this.getInlineConfig_(),
-        '%s: Inline config not found'
-      ))
+      /** @type {!JsonObject} */ (
+        userAssert(this.getInlineConfig_(), '%s: Inline config not found')
+      )
     );
 
     const cmpConfig = this.getCMPConfig_();
 
-    const config = /** @type {!JsonObject} */ (deepMerge(
-      cmpConfig || {},
-      inlineConfig || {},
-      1
-    ));
+    const config = /** @type {!JsonObject} */ (
+      deepMerge(cmpConfig || {}, inlineConfig || {}, 1)
+    );
 
     userAssert(
       config['consentInstanceId'],

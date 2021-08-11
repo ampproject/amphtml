@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '#core/data-structures/promise';
+import {removeItem} from '#core/types/array';
+
 import {
   measureDisplay,
   observeDisplay,
@@ -22,7 +24,6 @@ import {
   unobserveDisplay,
   unregisterContainer,
 } from '../../../src/utils/display-observer';
-import {removeItem} from '../../../src/utils/array';
 
 describes.realWin('display-observer', {amp: true}, (env) => {
   let win, doc, ampdoc;

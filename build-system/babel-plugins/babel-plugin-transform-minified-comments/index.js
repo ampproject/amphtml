@@ -13,29 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// @ts-nocheck
 
-// Ensure comments in minified build output is minimal.
+/**
+ * Ensure comments in minified build output is minimal.
+ *
+ * @interface {babel.PluginPass}
+ * @return {babel.PluginObj}
+ */
 module.exports = function () {
   return {
     visitor: {
       Statement(path) {
         const {node} = path;
         const {trailingComments} = node;
-        if (!trailingComments || trailingComments.length <= 0) {
-          return;
+        if (trailingComments?.length) {
+          node.trailingComments = trailingComments.map((comment) => ({
+            ...comment,
+            value: comment.value.replace(/\s+/g, ' '),
+          }));
+          const next = path.getNextSibling();
+          if (next?.node) {
+            next.node.leadingComments = null;
+          }
         }
-
-        const next = path.getNextSibling();
-        if (!next) {
-          return;
-        }
-
-        node.trailingComments = null;
-        const formattedComments = (trailingComments || []).map((comment) => ({
-          ...comment,
-          value: comment.value.replace(/\n +/g, `\n`),
-        }));
-        next.addComments('leading', formattedComments);
       },
     },
   };

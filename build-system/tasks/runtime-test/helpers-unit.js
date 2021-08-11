@@ -21,13 +21,12 @@ const listImportsExports = require('list-imports-exports');
 const minimatch = require('minimatch');
 const path = require('path');
 const testConfig = require('../../test-configs/config');
+const {cyan, green} = require('../../common/colors');
 const {execOrDie} = require('../../common/exec');
 const {extensions, maybeInitializeExtensions} = require('../extension-helpers');
-const {gitDiffNameOnlyMaster} = require('../../common/git');
-const {green, cyan} = require('kleur/colors');
+const {gitDiffNameOnlyMain} = require('../../common/git');
 const {isCiBuild} = require('../../common/ci');
 const {log, logLocalDev} = require('../../common/logging');
-const {reportTestSkipped} = require('../report-test-status');
 
 const LARGE_REFACTOR_THRESHOLD = 50;
 const TEST_FILE_COUNT_THRESHOLD = 20;
@@ -40,7 +39,7 @@ let testsToRun = null;
  * @return {boolean}
  */
 function isLargeRefactor() {
-  const filesChanged = gitDiffNameOnlyMaster();
+  const filesChanged = gitDiffNameOnlyMain();
   return filesChanged.length >= LARGE_REFACTOR_THRESHOLD;
 }
 
@@ -51,8 +50,9 @@ function isLargeRefactor() {
  * @return {!Object<string, string>}
  */
 function extractCssJsFileMap() {
-  execOrDie('gulp css', {'stdio': 'ignore'});
+  execOrDie('amp css', {'stdio': 'ignore'});
   maybeInitializeExtensions(extensions);
+  /** @type {Object<string, string>} */
   const cssJsFileMap = {};
 
   /**
@@ -61,7 +61,6 @@ function extractCssJsFileMap() {
    * @param {Object} cssData
    * @param {string} cssBinaryName
    * @param {Object} cssJsFileMap
-   * @return {void}
    */
   function addCssJsEntry(cssData, cssBinaryName, cssJsFileMap) {
     const cssFilePath =
@@ -135,9 +134,9 @@ function getJsFilesFor(cssFile, cssJsFileMap) {
 
 /**
  * Computes the list of unit tests to run under difference scenarios
- * @return {Array<string>|undefined}
+ * @return {Array<string>|void}
  */
-async function getUnitTestsToRun() {
+function getUnitTestsToRun() {
   log(green('INFO:'), 'Determining which unit tests to run...');
 
   if (isLargeRefactor()) {
@@ -145,7 +144,6 @@ async function getUnitTestsToRun() {
       green('INFO:'),
       'Skipping tests on local changes because this is a large refactor.'
     );
-    await reportTestSkipped();
     return;
   }
 
@@ -155,7 +153,6 @@ async function getUnitTestsToRun() {
       green('INFO:'),
       'No unit tests were directly affected by local changes.'
     );
-    await reportTestSkipped();
     return;
   }
   if (isCiBuild() && tests.length > TEST_FILE_COUNT_THRESHOLD) {
@@ -163,7 +160,6 @@ async function getUnitTestsToRun() {
       green('INFO:'),
       'Several tests were affected by local changes. Running all tests below.'
     );
-    await reportTestSkipped();
     return;
   }
 
@@ -186,7 +182,7 @@ function unitTestsToRun() {
     return testsToRun;
   }
   const cssJsFileMap = extractCssJsFileMap();
-  const filesChanged = gitDiffNameOnlyMaster();
+  const filesChanged = gitDiffNameOnlyMain();
   const {unitTestPaths} = testConfig;
   testsToRun = [];
   let srcFiles = [];

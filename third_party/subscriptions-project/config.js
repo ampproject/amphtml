@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.151 */
+/** Version: 0.1.22.178 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -174,9 +174,11 @@ class GlobalDoc {
   constructor(winOrDoc) {
     const isWin = !!winOrDoc.document;
     /** @private @const {!Window} */
-    this.win_ = /** @type {!Window} */ (isWin
-      ? /** @type {!Window} */ (winOrDoc)
-      : /** @type {!Document} */ (winOrDoc).defaultView);
+    this.win_ = /** @type {!Window} */ (
+      isWin
+        ? /** @type {!Window} */ (winOrDoc)
+        : /** @type {!Document} */ (winOrDoc).defaultView
+    );
     /** @private @const {!Document} */
     this.doc_ = isWin
       ? /** @type {!Window} */ (winOrDoc).document
@@ -239,6 +241,211 @@ function resolveDoc(input) {
     return new GlobalDoc(/** @type {!Window} */ (input));
   }
   return /** @type {!Doc} */ (input);
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ */
+class PageConfig {
+  /**
+   * @param {string} productOrPublicationId
+   * @param {boolean} locked
+   */
+  constructor(productOrPublicationId, locked) {
+    let publicationId, productId, label;
+    const div = productOrPublicationId.indexOf(':');
+    if (div != -1) {
+      // The argument is a product id.
+      productId = productOrPublicationId;
+      publicationId = productId.substring(0, div);
+      label = productId.substring(div + 1);
+    } else {
+      // The argument is a publication id.
+      publicationId = productOrPublicationId;
+      productId = null;
+      label = null;
+    }
+
+    /** @private @const {string} */
+    this.publicationId_ = publicationId;
+    /** @private @const {?string} */
+    this.productId_ = productId;
+    /** @private @const {?string} */
+    this.label_ = label;
+    /** @private @const {boolean} */
+    this.locked_ = locked;
+  }
+
+  /**
+   * @return {string}
+   */
+  getPublicationId() {
+    return this.publicationId_;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getProductId() {
+    return this.productId_;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getLabel() {
+    return this.label_;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isLocked() {
+    return this.locked_;
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Debug logger, only log message if #swg.log=1
+ * @param {...*} var_args [decription]
+ */
+
+/* eslint-disable */
+
+function debugLog(var_args) {
+  if (/swg.debug=1/.test(self.location.hash)) {
+    const logArgs = Array.prototype.slice.call(arguments, 0);
+    logArgs.unshift('[Subscriptions]');
+    log.apply(log, logArgs);
+  }
+}
+
+/**
+ * @param  {...*} var_args [description]
+ */
+function log(var_args) {
+  console.log.apply(console, arguments);
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Whether the element have a next node in the document order.
+ * This means either:
+ *  a. The element itself has a nextSibling.
+ *  b. Any of the element ancestors has a nextSibling.
+ * @param {!Element} element
+ * @param {?Node=} stopNode
+ * @return {boolean}
+ */
+function hasNextNodeInDocumentOrder(element, stopNode) {
+  let currentElement = element;
+  do {
+    if (currentElement.nextSibling) {
+      return true;
+    }
+  } while (
+    (currentElement = currentElement.parentNode) &&
+    currentElement != stopNode
+  );
+  return false;
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @fileoverview This module declares JSON types as defined in the
+ * {@link http://json.org/}.
+ */
+
+/**
+ * Simple wrapper around JSON.parse that casts the return value
+ * to JsonObject.
+ * Create a new wrapper if an array return value is desired.
+ * @param {*} json JSON string to parse
+ * @return {?JsonObject|undefined} May be extend to parse arrays.
+ */
+function parseJson(json) {
+  return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */ (json)));
+}
+
+/**
+ * Parses the given `json` string without throwing an exception if not valid.
+ * Returns `undefined` if parsing fails.
+ * Returns the `Object` corresponding to the JSON string when parsing succeeds.
+ * @param {*} json JSON string to parse
+ * @param {function(!Error)=} onFailed Optional function that will be called
+ *     with the error if parsing fails.
+ * @return {?JsonObject|undefined} May be extend to parse arrays.
+ */
+function tryParseJson(json, onFailed) {
+  try {
+    return parseJson(json);
+  } catch (e) {
+    if (onFailed) {
+      onFailed(e);
+    }
+    return undefined;
+  }
 }
 
 /**
@@ -404,296 +611,9 @@ class ErrorLogger {
 const userLogger = new ErrorLogger(
   self.__AMP_TOP ? AMP_USER_ERROR_SENTINEL : ''
 );
+new ErrorLogger();
 
 const user = () => userLogger;
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- */
-class PageConfig {
-  /**
-   * @param {string} productOrPublicationId
-   * @param {boolean} locked
-   */
-  constructor(productOrPublicationId, locked) {
-    let publicationId, productId, label;
-    const div = productOrPublicationId.indexOf(':');
-    if (div != -1) {
-      // The argument is a product id.
-      productId = productOrPublicationId;
-      publicationId = productId.substring(0, div);
-      label = productId.substring(div + 1);
-      if (label == '*') {
-        user().expectedError('wildcard disallowed');
-      }
-    } else {
-      // The argument is a publication id.
-      publicationId = productOrPublicationId;
-      productId = null;
-      label = null;
-    }
-
-    /** @private @const {string} */
-    this.publicationId_ = publicationId;
-    /** @private @const {?string} */
-    this.productId_ = productId;
-    /** @private @const {?string} */
-    this.label_ = label;
-    /** @private @const {boolean} */
-    this.locked_ = locked;
-  }
-
-  /**
-   * @return {string}
-   */
-  getPublicationId() {
-    return this.publicationId_;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getProductId() {
-    return this.productId_;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getLabel() {
-    return this.label_;
-  }
-
-  /**
-   * @return {boolean}
-   */
-  isLocked() {
-    return this.locked_;
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Debug logger, only log message if #swg.log=1
- * @param {...*} var_args [decription]
- */
-
-/* eslint-disable */
-
-function debugLog(var_args) {
-  if (/swg.debug=1/.test(self.location.hash)) {
-    const logArgs = Array.prototype.slice.call(arguments, 0);
-    logArgs.unshift('[Subscriptions]');
-    log.apply(log, logArgs);
-  }
-}
-
-/**
- * @param  {...*} var_args [description]
- */
-function log(var_args) {
-  console.log.apply(console, arguments);
-}
-
-/**
- * @param  {...*} var_args [description]
- */
-function warn(var_args) {
-  console.warn.apply(console, arguments);
-}
-
-/**
- * Throws an error if the first argument isn't trueish.
- *
- * Supports argument substitution into the message via %s placeholders.
- *
- * Throws an error object that has two extra properties:
- * - associatedElement: This is the first element provided in the var args.
- *   It can be used for improved display of error messages.
- * - messageArray: The elements of the substituted message as non-stringified
- *   elements in an array. When e.g. passed to console.error this yields
- *   native displays of things like HTML elements.
- *
- * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
- *     not evaluate to true.
- * @param {string=} message The assertion message
- * @param {...*} var_args Arguments substituted into %s in the message.
- * @return {T} The value of shouldBeTrueish.
- * @template T
- */
-function assert(shouldBeTrueish, message, var_args) {
-  let firstElement;
-  if (!shouldBeTrueish) {
-    message = message || 'Assertion failed';
-    const splitMessage = message.split('%s');
-    const first = splitMessage.shift();
-    let formatted = first;
-    const messageArray = [];
-    pushIfNonEmpty(messageArray, first);
-    for (let i = 2; i < arguments.length; i++) {
-      const val = arguments[i];
-      if (val && val.tagName) {
-        firstElement = val;
-      }
-      const nextConstant = splitMessage.shift();
-      messageArray.push(val);
-      pushIfNonEmpty(messageArray, nextConstant.trim());
-      formatted += toString(val) + nextConstant;
-    }
-    const e = new Error(formatted);
-    e.fromAssert = true;
-    e.associatedElement = firstElement;
-    e.messageArray = messageArray;
-    throw e;
-  }
-  return shouldBeTrueish;
-}
-
-/**
- * @param {!Array} array
- * @param {*} val
- */
-function pushIfNonEmpty(array, val) {
-  if (val != '') {
-    array.push(val);
-  }
-}
-
-function toString(val) {
-  // Do check equivalent to `val instanceof Element` without cross-window bug
-  if (val && val.nodeType == 1) {
-    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
-  }
-  return /** @type {string} */ (val);
-}
-
-var log_1 = {
-  assert,
-  debugLog,
-  warn,
-  log
-};
-var log_3 = log_1.debugLog;
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Whether the element have a next node in the document order.
- * This means either:
- *  a. The element itself has a nextSibling.
- *  b. Any of the element ancestors has a nextSibling.
- * @param {!Element} element
- * @param {?Node=} stopNode
- * @return {boolean}
- */
-function hasNextNodeInDocumentOrder(element, stopNode) {
-  let currentElement = element;
-  do {
-    if (currentElement.nextSibling) {
-      return true;
-    }
-  } while (
-    (currentElement = currentElement.parentNode) &&
-    currentElement != stopNode
-  );
-  return false;
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @fileoverview This module declares JSON types as defined in the
- * {@link http://json.org/}.
- */
-
-/**
- * Simple wrapper around JSON.parse that casts the return value
- * to JsonObject.
- * Create a new wrapper if an array return value is desired.
- * @param {*} json JSON string to parse
- * @return {?JsonObject|undefined} May be extend to parse arrays.
- */
-function parseJson(json) {
-  return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */ (json)));
-}
-
-/**
- * Parses the given `json` string without throwing an exception if not valid.
- * Returns `undefined` if parsing fails.
- * Returns the `Object` corresponding to the JSON string when parsing succeeds.
- * @param {*} json JSON string to parse
- * @param {function(!Error)=} onFailed Optional function that will be called
- *     with the error if parsing fails.
- * @return {?JsonObject|undefined} May be extend to parse arrays.
- */
-function tryParseJson(json, onFailed) {
-  try {
-    return parseJson(json);
-  } catch (e) {
-    if (onFailed) {
-      onFailed(e);
-    }
-    return undefined;
-  }
-}
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -792,7 +712,7 @@ class PageConfigResolver {
       );
       this.configResolver_ = null;
     }
-    log_3(config);
+    debugLog(config);
     return config;
   }
 }
@@ -885,9 +805,9 @@ class MetaParser {
       this.doc_.getRootNode(),
       'subscriptions-accessible-for-free'
     );
-    const locked =
-      (accessibleForFree && accessibleForFree.toLowerCase() == 'false') ||
-      false;
+    const locked = !!(
+      accessibleForFree && accessibleForFree.toLowerCase() === 'false'
+    );
 
     return new PageConfig(productId, locked);
   }
@@ -955,20 +875,21 @@ class JsonLdParser {
       possibleConfigs = [possibleConfigs];
     }
 
-    for (let i = 0; i < possibleConfigs.length; i++) {
-      const possibleConfig = possibleConfigs[i];
+    const configs = /** @type {!Array<!JsonObject>} */ (possibleConfigs);
+    for (let i = 0; i < configs.length; i++) {
+      const config = configs[i];
 
       // Must be an ALLOWED_TYPE
-      if (!this.checkType_.checkValue(possibleConfig['@type'], ALLOWED_TYPES)) {
+      if (!this.checkType_.checkValue(config['@type'], ALLOWED_TYPES)) {
         continue;
       }
 
       // Must have a isPartOf[@type=Product].
       let productId = null;
-      const partOfArray = this.valueArray_(possibleConfig, 'isPartOf');
+      const partOfArray = this.valueArray_(config, 'isPartOf');
       if (partOfArray) {
-        for (let i = 0; i < partOfArray.length; i++) {
-          productId = this.discoverProductId_(partOfArray[i]);
+        for (let j = 0; j < partOfArray.length; j++) {
+          productId = this.discoverProductId_(partOfArray[j]);
           if (productId) {
             break;
           }
@@ -980,7 +901,7 @@ class JsonLdParser {
 
       // Found product id, just check for the access flag.
       const isAccessibleForFree = this.bool_(
-        this.singleValue_(possibleConfig, 'isAccessibleForFree'),
+        this.singleValue_(config, 'isAccessibleForFree'),
         /* default */ true
       );
 

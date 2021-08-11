@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// @ts-nocheck
 
 // Global typedef map typedefName: typedef comment
 const TYPEDEFS = new Map();
@@ -43,7 +44,7 @@ module.exports = function (babel) {
   let shouldEmitTypedefs;
   return {
     pre() {
-      const {writeToFile = false, emitTypedefs = false} = this.opts;
+      const {emitTypedefs = false, writeToFile = false} = this.opts;
       shouldWriteToFile = writeToFile;
       shouldEmitTypedefs = emitTypedefs;
     },

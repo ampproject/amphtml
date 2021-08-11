@@ -19,10 +19,7 @@
  * See https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver
  */
 
-import {
-  installStub,
-  shouldLoadPolyfill,
-} from '../polyfillstub/resize-observer-stub';
+import {installStub, shouldLoadPolyfill} from './stubs/resize-observer-stub';
 
 /**
  * Installs the ResizeObserver polyfill. There are a few different modes of

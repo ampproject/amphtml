@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import {Observable} from './observable';
-import {Services} from './services';
+import {Observable} from '#core/data-structures/observable';
+import {isElement} from '#core/types';
+
+import {Services} from '#service';
+
 import {dev} from './log';
 
 /**
@@ -46,7 +49,7 @@ export class FocusHistory {
      */
     this.captureFocus_ = (e) => {
       // Hack (#15079) due to Firefox firing focus events on the entire page
-      if (e.target && e.target.nodeType == 1) {
+      if (isElement(e.target)) {
         this.pushFocus_(dev().assertElement(e.target));
       }
     };

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// @ts-nocheck
 
 /**
  * Takes a .jss.js file and transforms the `useStyles` export to remove side effects
@@ -49,7 +50,7 @@ const hash = require('./create-hash');
 const {addNamed} = require('@babel/helper-module-imports');
 const {create} = require('jss');
 const {default: preset} = require('jss-preset-default');
-const {relative, join} = require('path');
+const {join, relative} = require('path');
 const {transformCssSync} = require('../../tasks/css/jsify-css-sync');
 
 module.exports = function ({template, types: t}) {
@@ -61,6 +62,10 @@ module.exports = function ({template, types: t}) {
     return filename.endsWith('.jss.js');
   }
 
+  /**
+   * @param {string} name
+   * @return {string}
+   */
   function classnameId(name) {
     return `\$${name}`;
   }
@@ -211,9 +216,8 @@ module.exports = function ({template, types: t}) {
     ) {
       return false;
     }
-    const {referencePaths} = variableDeclarator.scope.bindings[
-      variableDeclarator.node.id.name
-    ];
+    const {referencePaths} =
+      variableDeclarator.scope.bindings[variableDeclarator.node.id.name];
     const replacedReferenceCount = referencePaths.reduce(
       (count, identifier) =>
         replaceExpression(importDeclaration, identifier) ? count + 1 : count,
@@ -239,6 +243,11 @@ module.exports = function ({template, types: t}) {
     );
   }
 
+  /**
+   * @param {Path} importDeclaration
+   * @param {string} name
+   * @return {string}
+   */
   function getImportIdentifier(importDeclaration, name) {
     return addNamed(
       importDeclaration,

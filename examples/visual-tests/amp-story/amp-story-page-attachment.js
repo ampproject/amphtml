@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,179 @@
  */
 'use strict';
 
+const {
+  verifySelectorsVisible,
+} = require('../../../build-system/tasks/visual-diff/helpers');
+
 module.exports = {
-  'open attachment UI element': async (page, unusedName) => {
-    await page.waitForTimeout(1600);
+  'custom text - inline CTA pre-tap UI should display': async (page, name) => {
+    const pageID = 'inline-custom-text';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-open-attachment[active]',
+    ]);
   },
 
-  'open attachment': async (page, unusedName) => {
-    await page.tap('.i-amphtml-story-page-open-attachment-label');
-    await page.waitForTimeout(410);
+  'dark theme - inline CTA pre-tap UI should display': async (page, name) => {
+    const pageID = 'inline-dark-theme';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-open-attachment[active]',
+    ]);
   },
-  /**
-   * TODO(@ampproject/wg-stories): fix flaky test:
-   * https://percy.io/ampproject/amphtml/builds-next/8331061/changed/473805330
-   *
-   * 'open attachment UI element with link': async (page, unusedName) => {
-   *   const screen = page.touchscreen;
-   *   await screen.tap(200, 240);
-   *   await page.waitForSelector('amp-story-page#page-2[active]');
-   * },
-   */
+
+  '1 img - dark theme - inline CTA pre-tap UI should display': async (
+    page,
+    name
+  ) => {
+    const pageID = 'inline-dark-theme-1-image';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-open-attachment[active]',
+    ]);
+  },
+
+  '2 imgs - dark theme - inline CTA pre-tap UI should display': async (
+    page,
+    name
+  ) => {
+    const pageID = 'inline-dark-theme-2-images';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-open-attachment[active]',
+    ]);
+  },
+
+  '2 imgs - light theme - inline CTA pre-tap UI should display': async (
+    page,
+    name
+  ) => {
+    const pageID = 'inline-light-theme-2-images';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-open-attachment[active]',
+    ]);
+  },
+
+  'outlink CTA pre-tap UI should display': async (page, name) => {
+    const pageID = 'outlink-default';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-open-attachment[active]',
+    ]);
+  },
+
+  'custom text - outlink CTA pre-tap UI should display': async (page, name) => {
+    const pageID = 'outlink-custom-text';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-open-attachment[active]',
+    ]);
+  },
+
+  'no img - outlink CTA pre-tap UI should display': async (page, name) => {
+    const pageID = 'outlink-no-image';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-open-attachment[active]',
+    ]);
+  },
+
+  'custom img - outlink CTA pre-tap UI should display': async (page, name) => {
+    const pageID = 'outlink-custom-image';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-open-attachment[active]',
+    ]);
+  },
+
+  'dark theme - outlink CTA pre-tap UI should display': async (page, name) => {
+    const pageID = 'outlink-dark-theme';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-open-attachment[active]',
+    ]);
+  },
+
+  'pink background - outlink CTA pre-tap UI should display': async (
+    page,
+    name
+  ) => {
+    const pageID = 'outlink-custom-background-color';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-open-attachment[active]',
+    ]);
+  },
+
+  'pink text - outlink CTA pre-tap UI should display': async (page, name) => {
+    const url = await page.url();
+    const pageID = 'outlink-custom-text-color';
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-open-attachment[active]',
+    ]);
+  },
+
+  'Legacy amp-story-page-attachment with href should display': async (
+    page,
+    name
+  ) => {
+    const url = await page.url();
+    const pageID = 'outlink-legacy';
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-open-attachment[active]',
+    ]);
+  },
 };

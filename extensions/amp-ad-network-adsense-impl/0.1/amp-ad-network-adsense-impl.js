@@ -20,12 +20,15 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
-import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
+import {ADS_INITIAL_INTERSECTION_EXP} from '#experiments/ads-initial-intersection-exp';
 import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {Navigation} from '../../../src/service/navigation';
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '#core/constants/consent-state';
+import {Navigation} from '#service/navigation';
 import {
   QQID_HEADER,
   SANDBOX_HEADER,
@@ -42,27 +45,33 @@ import {
   isCdnProxy,
   isReportingEnabled,
   maybeAppendErrorParameter,
-} from '../../../ads/google/a4a/utils';
+  maybeInsertOriginTrialToken,
+} from '#ads/google/a4a/utils';
 import {ResponsiveState} from './responsive-state';
-import {STICKY_AD_TRANSITION_EXP} from '../../../ads/google/a4a/sticky-ad-transition-exp';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
+import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
+import {StoryAdPlacements} from '#experiments/story-ad-placements';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 import {
   addAmpExperimentIdToElement,
   addExperimentIdToElement,
   isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
-import {computedStyle, setStyles} from '../../../src/style';
+} from '#ads/google/a4a/traffic-experiments';
+import {computedStyle, setStyles} from '#core/dom/style';
 import {dev, devAssert, user} from '../../../src/log';
-import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {domFingerprintPlain} from '#core/dom/fingerprint';
 import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load';
 import {getData} from '../../../src/event-helper';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
+import {
+  getExperimentBranch,
+  randomlySelectUnsetExperiments,
+} from '#experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {randomlySelectUnsetExperiments} from '../../../src/experiments';
-import {removeElement} from '../../../src/dom';
-import {stringHash32} from '../../../src/string';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {removeElement} from '#core/dom';
+import {stringHash32} from '#core/types/string';
+import {utf8Decode} from '#core/types/string/bytes';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
@@ -175,6 +184,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   */
   buildCallback() {
     super.buildCallback();
+    maybeInsertOriginTrialToken(this.win);
     this.identityTokenPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() =>
@@ -224,24 +234,17 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * @visibleForTesting
    */
   divertExperiments() {
-    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
-      {
-        experimentId: STICKY_AD_TRANSITION_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          STICKY_AD_TRANSITION_EXP.control,
-          STICKY_AD_TRANSITION_EXP.experiment,
-        ],
-      },
-      {
-        experimentId: ADS_INITIAL_INTERSECTION_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          ADS_INITIAL_INTERSECTION_EXP.control,
-          ADS_INITIAL_INTERSECTION_EXP.experiment,
-        ],
-      },
-    ]);
+    const experimentInfoList =
+      /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+        {
+          experimentId: ADS_INITIAL_INTERSECTION_EXP.id,
+          isTrafficEligible: () => true,
+          branches: [
+            ADS_INITIAL_INTERSECTION_EXP.control,
+            ADS_INITIAL_INTERSECTION_EXP.experiment,
+          ],
+        },
+      ]);
     const setExps = randomlySelectUnsetExperiments(
       this.win,
       experimentInfoList
@@ -249,14 +252,34 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     Object.keys(setExps).forEach((expName) =>
       addExperimentIdToElement(setExps[expName], this.element)
     );
-    const moduleNomoduleExpId = this.getModuleNomoduleExpIds_();
-    if (moduleNomoduleExpId) {
-      addExperimentIdToElement(moduleNomoduleExpId, this.element);
-    }
 
     const ssrExpIds = this.getSsrExpIds_();
     for (let i = 0; i < ssrExpIds.length; i++) {
       addAmpExperimentIdToElement(ssrExpIds[i], this.element);
+    }
+
+    const storyAdPlacementsExpId = getExperimentBranch(
+      this.win,
+      StoryAdPlacements.ID
+    );
+    if (storyAdPlacementsExpId) {
+      addExperimentIdToElement(storyAdPlacementsExpId, this.element);
+    }
+
+    const autoAdvanceExpBranch = getExperimentBranch(
+      this.win,
+      StoryAdAutoAdvance.ID
+    );
+    if (autoAdvanceExpBranch) {
+      addExperimentIdToElement(autoAdvanceExpBranch, this.element);
+    }
+
+    const storyAdSegmentBranch = getExperimentBranch(
+      this.win,
+      StoryAdSegmentExp.ID
+    );
+    if (storyAdSegmentBranch) {
+      addExperimentIdToElement(storyAdSegmentBranch, this.element);
     }
   }
 
@@ -280,11 +303,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     let consentString = undefined;
     let gdprApplies = undefined;
     let additionalConsent = undefined;
+    let consentStringType = undefined;
     if (consentTuple) {
       consentState = consentTuple.consentState;
       consentString = consentTuple.consentString;
       gdprApplies = consentTuple.gdprApplies;
       additionalConsent = consentTuple.additionalConsent;
+      consentStringType = consentTuple.consentStringType;
     }
     if (
       consentState == CONSENT_POLICY_STATE.UNKNOWN &&
@@ -378,8 +403,15 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           ? this.responsiveState_.getRafmtParam()
           : null,
       'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
-      'gdpr_consent': consentString,
+      'gdpr_consent':
+        consentStringType != CONSENT_STRING_TYPE.US_PRIVACY_STRING
+          ? consentString
+          : null,
       'addtl_consent': additionalConsent,
+      'us_privacy':
+        consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING
+          ? consentString
+          : null,
       'pfx': pfx ? '1' : '0',
       'aanf': /^(true|false)$/i.test(this.element.getAttribute('data-no-fill'))
         ? this.element.getAttribute('data-no-fill')
@@ -392,7 +424,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // create ad.
       'pwprc': this.element.getAttribute('data-package'),
       'spsa': this.isSinglePageStoryAd
-        ? `${viewportSize.width}x${viewportSize.height}`
+        ? `${this.size_.width}x${this.size_.height}`
         : null,
     };
 

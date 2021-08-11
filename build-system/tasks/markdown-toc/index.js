@@ -17,8 +17,8 @@ const globby = require('globby');
 const path = require('path');
 const prettier = require('prettier');
 const toc = require('markdown-toc');
-const {getStdout} = require('../../common/exec');
-const {green} = require('kleur/colors');
+const {getStdout} = require('../../common/process');
+const {green} = require('../../common/colors');
 const {logOnSameLineLocalDev} = require('../../common/logging');
 const {readFile} = require('fs-extra');
 const {writeDiffOrFail} = require('../../common/diff');
@@ -29,7 +29,7 @@ const header = `<!--
   (Do not remove or edit this comment.)
 
   This table-of-contents is automatically generated. To generate it, run:
-    gulp markdown-toc --fix
+    amp markdown-toc --fix
 -->`;
 
 // Case-insensitive, allows multiple newlines and arbitrary indentation.
@@ -61,7 +61,7 @@ function getFrontmatter(content) {
 }
 
 /**
- * @param {string} maybeComment
+ * @param {?string} maybeComment
  * @return {?Object}
  */
 function isolateCommentJson(maybeComment) {
@@ -84,12 +84,12 @@ function isolateCommentJson(maybeComment) {
 
 /**
  * @param {string} content
- * @return {string}
+ * @return {Promise<?string>}
  */
 async function overrideToc(content) {
   const headerMatch = content.match(headerRegexp);
 
-  if (!headerMatch) {
+  if (!headerMatch || !headerMatch.length || headerMatch.index === undefined) {
     return null;
   }
 
@@ -133,7 +133,7 @@ async function overrideToc(content) {
 
 /**
  * @param {string} cwd
- * @return {Object<string, ?string>}
+ * @return {Promise<Object<string, ?string>>}
  */
 async function overrideTocGlob(cwd) {
   const glob = [
@@ -147,6 +147,7 @@ async function overrideTocGlob(cwd) {
     .trim()
     .split('\n');
 
+  /** @type {Object<string, ?string>} */
   const result = {};
 
   for (const filename of filesIncludingString) {
@@ -163,6 +164,10 @@ async function overrideTocGlob(cwd) {
   return result;
 }
 
+/**
+ * Entry point for the `amp markdown-toc` task.
+ * @return {Promise<void>}
+ */
 async function markdownToc() {
   const result = await overrideTocGlob('.');
   let errored = false;
@@ -194,8 +199,8 @@ module.exports = {
 };
 
 markdownToc.description =
-  'Finds Markdown files that contain table of contents and updates them.';
+  'Update all markdown files that contain a table of contents';
 
 markdownToc.flags = {
-  'fix': '  Write to file',
+  'fix': 'Update the list and write results to file',
 };

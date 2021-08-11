@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {adConfig} from '../../ads/_config';
-import {hasOwn} from '../../src/utils/object';
+import {adConfig} from '#ads/_config';
 
-describe('test-ads-config', () => {
+import {hasOwn} from '#core/types/object';
+
+describes.sandboxed('test-ads-config', {}, () => {
   it('should have all ad networks configured', () => {
     window.ampTestRuntimeConfig.adTypes.forEach((adType) => {
       expect(adConfig, `Missing config for [${adType}]`).to.contain.key(adType);

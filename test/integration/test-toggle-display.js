@@ -14,51 +14,53 @@
  * limitations under the License.
  */
 
-import {BrowserController} from '../../testing/test-helper';
-import {setInitialDisplay, toggle} from '../../src/style';
+import {setInitialDisplay, toggle} from '#core/dom/style';
 
-describes.integration(
-  'toggle display helper',
-  {
-    enableIe: true,
-    body:
-      '<amp-img src="/examples/img/hero@1x.jpg" width="289" height="216"></amp-img>',
-  },
-  (env) => {
-    let browser, doc;
-    let img;
+import {BrowserController} from '#testing/test-helper';
 
-    beforeEach(async () => {
-      const {win} = env;
-      doc = win.document;
-      browser = new BrowserController(win);
+describes.integration
+  .configure()
+  .enableIe()
+  .run(
+    'toggle display helper',
+    {
+      body: '<amp-img src="/examples/img/hero@1x.jpg" width="289" height="216"></amp-img>',
+    },
+    (env) => {
+      let browser, doc;
+      let img;
 
-      await browser.waitForElementLayout('amp-img');
-      img = doc.querySelector('amp-img');
-    });
+      beforeEach(async () => {
+        const {win} = env;
+        doc = win.document;
+        browser = new BrowserController(win);
 
-    function expectToggleDisplay(el) {
-      toggle(el, false);
-      expect(el).to.have.display('none');
-      toggle(el, true);
-      expect(el).to.not.have.display('none');
+        await browser.waitForElementLayout('amp-img');
+        img = doc.querySelector('amp-img');
+      });
+
+      function expectToggleDisplay(el) {
+        toggle(el, false);
+        expect(el).to.have.display('none');
+        toggle(el, true);
+        expect(el).to.not.have.display('none');
+      }
+
+      it('toggles regular display', () => {
+        expectToggleDisplay(img);
+      });
+
+      it('toggles initial display style', () => {
+        setInitialDisplay(img, 'inline-block');
+        expectToggleDisplay(img);
+      });
+
+      it('toggles stylesheet display style', () => {
+        const style = doc.createElement('style');
+        style.innerText = 'amp-img { display: inline-block !important; }';
+        doc.head.appendChild(style);
+
+        expectToggleDisplay(img);
+      });
     }
-
-    it('toggles regular display', () => {
-      expectToggleDisplay(img);
-    });
-
-    it('toggles initial display style', () => {
-      setInitialDisplay(img, 'inline-block');
-      expectToggleDisplay(img);
-    });
-
-    it('toggles stylesheet display style', () => {
-      const style = doc.createElement('style');
-      style.innerText = 'amp-img { display: inline-block !important; }';
-      doc.head.appendChild(style);
-
-      expectToggleDisplay(img);
-    });
-  }
-);
+  );

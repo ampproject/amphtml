@@ -18,7 +18,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const path = require('path');
 const tempy = require('tempy');
-const {cyan, red} = require('kleur/colors');
+const {cyan, red} = require('../common/colors');
 const {log} = require('../common/logging');
 
 const logFile = path.resolve(process.cwd(), 'dist', 'debug-compilation.log');
@@ -30,6 +30,7 @@ const pad = (value, length) =>
 
 const LIFECYCLES = {
   'pre-babel': 'pre-babel',
+  'post-babel': 'post-babel',
   'pre-closure': 'pre-closure',
   'closured-pre-babel': 'closured-pre-babel',
   'closured-pre-terser': 'closured-pre-terser',
@@ -41,8 +42,8 @@ const LIFECYCLES = {
  *
  * @param {string} lifecycle
  * @param {string} fullpath
- * @param {Buffer} content
- * @param {Object} sourcemap
+ * @param {?string=} content
+ * @param {Object=} sourcemap
  */
 function debug(lifecycle, fullpath, content, sourcemap) {
   if (argv.debug && Object.keys(LIFECYCLES).includes(lifecycle)) {
@@ -62,17 +63,13 @@ function debug(lifecycle, fullpath, content, sourcemap) {
     }
     fs.appendFileSync(
       logFile,
-      `${pad(lifecycle, 20)}: ${pad(
-        path.basename(fullpath),
-        30
-      )} ${contentsPath}\n`
+      `${pad(lifecycle, 20)}: ${pad(fullpath, 100)} ${contentsPath}\n`
     );
   }
 }
 
 /**
  * Logs debug information.
- * @return {void}
  */
 function displayLifecycleDebugging() {
   if (argv.debug) {

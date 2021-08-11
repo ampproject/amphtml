@@ -111,7 +111,7 @@ Example with FIXED layout - fixed width and height.
        <li>Multiple videos on the same page can be docked.</li>
      </ul>
      In order to use this attribute, the amp-video-docking extension script must be present:
-     <script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"></script>
+     <code>&lt;script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"&gt;&lt;/script&gt;</code>
 </p>
     </td>
   </tr>
@@ -120,4 +120,4 @@ Example with FIXED layout - fixed width and height.
 
 ## Validation
 
-See [amp-minute-media-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-minute-media-player/validator-amp-minute-media-player.protoascii) in the AMP validator specification.
+See [amp-minute-media-player rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-minute-media-player/validator-amp-minute-media-player.protoascii) in the AMP validator specification.

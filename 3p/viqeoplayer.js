@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {getData} from '../src/event-helper';
+import {tryDecodeUriComponent} from '#core/types/string/url';
+
 import {loadScript} from './3p';
-import {tryDecodeUriComponent} from '../src/url';
+
+import {getData} from '../src/event-helper';
 
 /**
  * @param {Window} global

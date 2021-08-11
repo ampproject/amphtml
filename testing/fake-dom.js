@@ -296,8 +296,8 @@ class EventListeners {
     target.eventListeners = new EventListeners();
     const {
       addEventListener: originalAdd,
-      removeEventListener: originalRemove,
       postMessage: originalPostMessage,
+      removeEventListener: originalRemove,
     } = target;
     target.addEventListener = function (type, handler, captureOrOpts) {
       target.eventListeners.add(type, handler, captureOrOpts);
@@ -669,8 +669,6 @@ export class FakeStorage {
     delete this.values[name];
   }
 
-  /**
-   */
   clear() {
     Object.keys(this.values).forEach((name) => {
       delete this.values[name];

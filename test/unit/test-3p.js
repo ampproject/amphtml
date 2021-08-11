@@ -21,13 +21,13 @@ import {
   validateData,
   validateSrcContains,
   validateSrcPrefix,
-} from '../../3p/3p';
+} from '#3p/3p';
 
-describe('3p', () => {
+describes.sandboxed('3p', {}, (env) => {
   let clock;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
   });
 
   afterEach(() => {
@@ -294,7 +294,7 @@ describe('3p', () => {
     it('should handle onSuccess callback', (done) => {
       loadScript(
         window,
-        'http://localhost:9876/test/unit/test-3p.js',
+        'http://localhost:9876/examples/amp-ad/sticky.js',
         () => {
           done();
         },

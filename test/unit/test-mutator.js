@@ -15,17 +15,20 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {LayoutPriority} from '../../src/layout';
-import {MutatorImpl} from '../../src/service/mutator-impl';
-import {Resource, ResourceState} from '../../src/service/resource';
-import {ResourcesImpl} from '../../src/service/resources-impl';
-import {Services} from '../../src/services';
-import {Signals} from '../../src/utils/signals';
-import {VisibilityState} from '../../src/visibility-state';
+
+import {VisibilityState} from '#core/constants/visibility-state';
+import {Signals} from '#core/data-structures/signals';
+import {LayoutPriority} from '#core/dom/layout';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+
+import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {MutatorImpl} from '#service/mutator-impl';
+import {installPlatformService} from '#service/platform-impl';
+import {Resource, ResourceState} from '#service/resource';
+import {ResourcesImpl} from '#service/resources-impl';
+
 import {installInputService} from '../../src/input';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {layoutRectLtwh} from '../../src/layout-rect';
 
 /** @type {?Event|undefined} */
 const NO_EVENT = undefined;
@@ -98,8 +101,8 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
       unlayoutCallback: () => true,
-      pauseCallback: () => {},
-      unlayoutOnPause: () => true,
+      pause: () => {},
+      unmount: () => {},
       isRelayoutNeeded: () => true,
       /* eslint-disable google-camelcase/google-camelcase */
       contains: (unused_otherElement) => false,
@@ -197,7 +200,7 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
     );
     expect(resources.requestsChangeSize_.length).to.equal(2);
     resource1.state_ = ResourceState.LAYOUT_SCHEDULED;
-    resource1.unload();
+    resource1.unlayout();
     resources.cleanupTasks_(resource1);
     expect(resources.requestsChangeSize_.length).to.equal(1);
     expect(resources.requestsChangeSize_[0].resource).to.equal(resource2);
@@ -1404,9 +1407,9 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
     element.prerenderAllowed = () => true;
     element.renderOutsideViewport = () => true;
     element.isRelayoutNeeded = () => true;
-    element.pauseCallback = () => {};
+    element.pause = () => {};
+    element.unmount = () => {};
     element.unlayoutCallback = () => true;
-    element.unlayoutOnPause = () => true;
     element.togglePlaceholder = () => env.sandbox.spy();
 
     env.win.document.body.appendChild(element);

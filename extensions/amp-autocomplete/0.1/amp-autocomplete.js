@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {AutocompleteBindingDef} from './autocomplete-binding-def';
 import {AutocompleteBindingInline} from './autocomplete-binding-inline';
 import {AutocompleteBindingSingle} from './autocomplete-binding-single';
 import {CSS} from '../../../build/amp-autocomplete-0.1.css';
-import {Keys} from '../../../src/utils/key-codes';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {Keys} from '#core/constants/key-codes';
+import {Layout} from '#core/dom/layout';
+import {Services} from '#service';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   UrlReplacementPolicy,
@@ -31,21 +31,28 @@ import {
 import {addParamToUrl} from '../../../src/url';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict, hasOwn, map, ownProperty} from '../../../src/utils/object';
-import {getValueForExpr, tryParseJson} from '../../../src/json';
-import {includes} from '../../../src/string';
-import {isAmp4Email} from '../../../src/format';
-import {isArray, isEnumValue} from '../../../src/types';
-import {mod} from '../../../src/utils/math';
-import {once} from '../../../src/utils/function';
-import {removeChildren, tryFocus} from '../../../src/dom';
+import {
+  dict,
+  getValueForExpr,
+  hasOwn,
+  map,
+  ownProperty,
+} from '#core/types/object';
+
+import {includes} from '#core/types/string';
+import {isArray, isEnumValue} from '#core/types';
+import {tryParseJson} from '#core/types/object/json';
+
+import {mod} from '#core/math';
+import {once} from '#core/types/function';
+import {removeChildren, tryFocus} from '#core/dom';
 import {
   setupAMPCors,
   setupInput,
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
-import {toggle} from '../../../src/style';
-import fuzzysearch from '../../../third_party/fuzzysearch/index';
+import {toggle} from '#core/dom/style';
+import fuzzysearch from '#third_party/fuzzysearch';
 
 /**
  * @typedef {{
@@ -237,15 +244,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.templates_ = Services.templatesForDoc(this.element);
-
-    const doc = this.element.ownerDocument;
-    const isEmail = doc && isAmp4Email(doc);
-    userAssert(
-      !isEmail ||
-        doc.documentElement.hasAttribute('data-amp-autocomplete-opt-in'),
-      '<amp-autocomplete> is not currently available in AMP4Email.'
-    );
-
     this.action_ = Services.actionServiceForDoc(this.element);
     this.viewport_ = Services.viewportForDoc(this.element);
 
@@ -614,9 +612,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
   inputHandler_() {
     if (
       this.binding_.shouldAutocomplete(
-        /** @type {!HTMLInputElement} */ (dev().assertElement(
-          this.inputElement_
-        ))
+        /** @type {!HTMLInputElement} */ (
+          dev().assertElement(this.inputElement_)
+        )
       )
     ) {
       return this.maybeFetchAndAutocomplete_();
@@ -682,9 +680,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
   selectHandler_(event) {
     const element = dev().assertElement(event.target);
     const selectedElement = this.getItemElement_(element);
-    const {selectedObject, selectedText} = this.updateAndGetElementSelections_(
-      selectedElement
-    );
+    const {selectedObject, selectedText} =
+      this.updateAndGetElementSelections_(selectedElement);
     return this.mutateElement(() => {
       this.selectItem_(selectedText, selectedObject);
     });
@@ -1212,9 +1209,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const newValue = newActiveElement.getAttribute('data-value');
 
     this.binding_.displayActiveItemInInput(
-      /** @type {!HTMLInputElement} */ (dev().assertElement(
-        this.inputElement_
-      )),
+      /** @type {!HTMLInputElement} */ (
+        dev().assertElement(this.inputElement_)
+      ),
       newValue,
       this.userInput_
     );
@@ -1224,11 +1221,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     return this.measureMutateElement(
       () => {
-        const {offsetTop: itemTop, offsetHeight: itemHeight} = newActiveElement;
-        const {
-          scrollTop: resultTop,
-          offsetHeight: resultHeight,
-        } = this.container_;
+        const {offsetHeight: itemHeight, offsetTop: itemTop} = newActiveElement;
+        const {offsetHeight: resultHeight, scrollTop: resultTop} =
+          this.container_;
         shouldScroll =
           resultTop > itemTop ||
           resultTop + resultHeight < itemTop + itemHeight;
@@ -1351,10 +1346,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
         this.binding_.removeSelectionHighlighting(this.inputElement_);
         if (this.areResultsDisplayed_() && this.activeElement_) {
-          const {
-            selectedObject,
-            selectedText,
-          } = this.updateAndGetElementSelections_(this.activeElement_);
+          const {selectedObject, selectedText} =
+            this.updateAndGetElementSelections_(this.activeElement_);
           return this.mutateElement(() => {
             this.selectItem_(selectedText, selectedObject);
             this.resetActiveElement_();
@@ -1375,10 +1368,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
       case Keys.TAB:
         if (this.areResultsDisplayed_() && this.activeElement_) {
           event.preventDefault();
-          const {
-            selectedObject,
-            selectedText,
-          } = this.updateAndGetElementSelections_(this.activeElement_);
+          const {selectedObject, selectedText} =
+            this.updateAndGetElementSelections_(this.activeElement_);
           return this.mutateElement(() => {
             this.selectItem_(selectedText, selectedObject);
           });

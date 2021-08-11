@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {dev} from '../../../src/log';
-import {isArray, isObject} from '../../../src/types';
+import {isArray, isObject} from '#core/types';
+
 import {isSecureUrlDeprecated} from '../../../src/url';
-import {parseExtensionUrl} from '../../../src/service/extension-script';
-import {parseJson} from '../../../src/json';
+import {parseExtensionUrl} from '#service/extension-script';
+import {parseJson} from '#core/types/object/json';
+import {urls} from '../../../src/config';
 
 const TAG = 'amp-ad-util';
 
@@ -159,6 +161,26 @@ export function getAmpAdMetadata(creative) {
       creative.slice(metadataStart + metadataString.length, metadataEnd)
     );
     return null;
+  }
+}
+
+/**
+ * Merges any elements from customElementExtensions array into extensions array if
+ * the element is not present.
+ * @param {!Array<{custom-element: string, 'src': string}>} extensions
+ * @param {!Array<string>} customElementExtensions
+ */
+export function mergeExtensionsMetadata(extensions, customElementExtensions) {
+  for (let i = 0; i < customElementExtensions.length; i++) {
+    const extensionId = customElementExtensions[i];
+    if (!extensionsHasElement(extensions, extensionId)) {
+      extensions.push({
+        'custom-element': extensionId,
+        // The default version is 0.1. To specify a specific version,
+        // use metadata['extensions'] field instead.
+        src: `${urls.cdn}/v0/${extensionId}-0.1.js`,
+      });
+    }
   }
 }
 

@@ -16,7 +16,7 @@
 'use strict';
 
 const test = require('ava');
-const {getZindexSelectors, getZindexChainsInJs, createTable} = require('.');
+const {createTable, getZindexChainsInJs, getZindexSelectors} = require('.');
 
 const cssResult = {
   'test.css': {

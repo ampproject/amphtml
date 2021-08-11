@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 import {CSS} from '../../../build/amp-delight-player-0.1.css';
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {
   createFrameFor,
   objOrParseJson,
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dict} from '../../../src/utils/object';
-import {dispatchCustomEvent, removeElement} from '../../../src/dom';
+import {dict} from '#core/types/object';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
@@ -32,15 +34,14 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getData, listen, listenOncePromise} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/static-template';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {htmlFor} from '#core/dom/static-template';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
-import {setStyle} from '../../../src/style';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+} from '#core/dom/layout/viewport-observer';
+import {setStyle} from '#core/dom/style';
+import {userAssert} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-delight-player';
@@ -141,6 +142,9 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
     /** @private {HTMLElement} */
     this.placeholderEl_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -217,6 +221,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
     this.unregisterEventHandlers_();
     unobserveWithSharedInOb(this.element);
+    this.pauseHelper_.updatePlaying(false);
 
     return true;
   }
@@ -230,12 +235,13 @@ class AmpDelightPlayer extends AMP.BaseElement {
   createPlaceholderCallback() {
     const html = htmlFor(this.element);
     const placeholder = html`
-      <div placeholder><amp-img layout="fill"></amp-img></div>
+      <img placeholder referrerpolicy="origin" loading="lazy" />
     `;
 
-    const src = `${this.baseURL_}/poster/${this.contentID_}`;
+    applyFillContent(placeholder);
 
-    placeholder.firstElementChild.setAttribute('src', src);
+    const src = `${this.baseURL_}/poster/${this.contentID_}`;
+    placeholder.setAttribute('src', src);
 
     this.placeholderEl_ = /** @type {HTMLElement} */ (placeholder);
 
@@ -284,6 +290,16 @@ class AmpDelightPlayer extends AMP.BaseElement {
     }
 
     const {element} = this;
+
+    switch (data['type']) {
+      case DelightEvent.PLAYING:
+        this.pauseHelper_.updatePlaying(true);
+        break;
+      case DelightEvent.PAUSED:
+      case DelightEvent.ENDED:
+        this.pauseHelper_.updatePlaying(false);
+        break;
+    }
 
     const redispatched = redispatch(element, data['type'], {
       [DelightEvent.PLAYING]: VideoEvents.PLAYING,

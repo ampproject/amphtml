@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {BaseElement} from '../../src/base-element';
-import {ElementStub} from '../../src/element-stub';
-import {Services} from '../../src/services';
+import {createElementWithAttributes} from '#core/dom';
+
+import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   copyElementToChildWindow,
   getElementClassForTesting,
@@ -26,9 +26,11 @@ import {
   stubElementIfNotKnown,
   stubElementsForDoc,
   upgradeOrRegisterElement,
-} from '../../src/service/custom-element-registry';
-import {createElementWithAttributes} from '../../src/dom';
+} from '#service/custom-element-registry';
+
+import {BaseElement} from '../../src/base-element';
 import {getImplSyncForTesting} from '../../src/custom-element';
+import {ElementStub} from '../../src/element-stub';
 
 describes.realWin('CustomElement register', {amp: true}, (env) => {
   class ConcreteElement extends BaseElement {}

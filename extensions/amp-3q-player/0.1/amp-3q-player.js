@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamToUrl} from '../../../src/url';
 import {
@@ -28,11 +29,11 @@ import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '#core/dom/fullscreen';
 import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {removeElement} from '#core/dom';
 
 const TAG = 'amp-3q-player';
 
@@ -55,6 +56,9 @@ class Amp3QPlayer extends AMP.BaseElement {
     this.playerReadyResolver_ = null;
 
     this.dataId = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -152,6 +156,8 @@ class Amp3QPlayer extends AMP.BaseElement {
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
 
+    this.pauseHelper_.updatePlaying(false);
+
     return true;
   }
 
@@ -162,9 +168,7 @@ class Amp3QPlayer extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
-    if (this.iframe_) {
-      this.pause();
-    }
+    this.pause();
   }
 
   /**
@@ -186,14 +190,24 @@ class Amp3QPlayer extends AMP.BaseElement {
 
     const eventType = data['data'];
 
-    if (eventType == 'ready') {
-      this.playerReadyResolver_();
+    switch (eventType) {
+      case 'ready':
+        this.playerReadyResolver_();
+        break;
+      case 'playing':
+        this.pauseHelper_.updatePlaying(true);
+        break;
+      case 'paused':
+      case 'complete':
+        this.pauseHelper_.updatePlaying(false);
+        break;
     }
 
     redispatch(this.element, eventType, {
       'ready': VideoEvents.LOAD,
       'playing': VideoEvents.PLAYING,
       'paused': VideoEvents.PAUSE,
+      'complete': VideoEvents.ENDED,
       'muted': VideoEvents.MUTED,
       'unmuted': VideoEvents.UNMUTED,
     });
@@ -220,6 +234,9 @@ class Amp3QPlayer extends AMP.BaseElement {
 
   /** @override */
   pause() {
+    if (!this.iframe_) {
+      return;
+    }
     this.sdnPostMessage_('pause');
   }
 

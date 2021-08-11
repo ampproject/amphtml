@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-import {endsWith} from './string';
-import {
-  getSourceOrigin,
-  isProxyOrigin,
-  parseUrlDeprecated,
-  tryDecodeUriComponent,
-} from './url';
+import {endsWith} from '#core/types/string';
+import {tryDecodeUriComponent} from '#core/types/string/url';
+
 import {urls} from './config';
-import {pureUserAssert as userAssert} from './core/assert';
+import {userAssert} from './log';
+import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from './url';
 
 const TEST_COOKIE_NAME = '-test-amp-cookie-tmp';
 

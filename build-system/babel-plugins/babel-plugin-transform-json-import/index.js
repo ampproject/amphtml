@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// @ts-nocheck
 
+const {dirname, join, relative, resolve} = require('path');
 const {readFileSync} = require('fs');
-const {resolve, dirname, join, relative} = require('path');
 
 // Transforms JSON imports into a `JSON.parse` call:
 //
@@ -28,7 +29,7 @@ const {resolve, dirname, join, relative} = require('path');
 // ```
 // const key = JSON.parse('{"imported": "json"}');
 // ```
-module.exports = function ({types: t, template}, options) {
+module.exports = function ({template, types: t}, options) {
   const {freeze = true} = options;
 
   return {
@@ -38,7 +39,7 @@ module.exports = function ({types: t, template}, options) {
 
     visitor: {
       ImportDeclaration(path) {
-        const {specifiers, assertions, source} = path.node;
+        const {assertions, source, specifiers} = path.node;
         if (!assertions || assertions.length === 0) {
           return;
         }

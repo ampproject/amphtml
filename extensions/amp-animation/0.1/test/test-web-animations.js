@@ -15,12 +15,13 @@
  */
 import {Builder} from '../web-animations';
 import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 import {WebAnimationPlayState} from '../web-animation-types';
-import {closestAncestorElementBySelector} from '../../../../src/dom';
-import {htmlFor, htmlRefs} from '../../../../src/static-template';
-import {isArray, isObject} from '../../../../src/types';
-import {poll} from '../../../../testing/iframe';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {isArray, isObject} from '#core/types';
+
+import {poll} from '#testing/iframe';
 import {user} from '../../../../src/log';
 
 describes.realWin('MeasureScanner', {amp: 1}, (env) => {
@@ -250,7 +251,7 @@ describes.realWin('MeasureScanner', {amp: 1}, (env) => {
     );
     allowConsoleError(() => {
       expect(() => scanTiming({direction: 'invalid'})).to.throw(
-        /Unknown direction value/
+        /Unknown direction/
       );
     });
   });
@@ -262,9 +263,7 @@ describes.realWin('MeasureScanner', {amp: 1}, (env) => {
       'backwards'
     );
     allowConsoleError(() => {
-      expect(() => scanTiming({fill: 'invalid'})).to.throw(
-        /Unknown fill value/
-      );
+      expect(() => scanTiming({fill: 'invalid'})).to.throw(/Unknown fill/);
     });
   });
 

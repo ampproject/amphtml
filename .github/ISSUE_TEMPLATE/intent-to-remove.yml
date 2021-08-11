@@ -1,0 +1,55 @@
+---
+name: Intent-to-Remove (I2R)
+description: Propose a rollout plan for the removal of a deprecated feature.
+labels: INTENT TO REMOVE
+body:
+  - type: markdown
+    id: header
+    attributes:
+      value: |
+        Thanks for creating this Intent-to-Remove (I2R) issue.
+        - See AMP's [versioning and deprecations policy](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-versioning-policy.md) for instructions on how to fill out this I2R template and how to get help.
+        - This I2R issue should be created after the Intent-to-Deprecate (I2D) issue for the feature was approved.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: A brief description of the feature being removed.
+      placeholder: Provide a brief description of the feature you are planning on removing.
+    validations:
+      required: true
+  - type: textarea
+    id: i2d_issue
+    attributes:
+      label: Intent-to-Deprecate (I2D) Issue
+      description: A link to the I2D issue.
+      placeholder: Provide a link to the I2D issue you filed to deprecate this feature.
+    validations:
+      required: true
+  - type: textarea
+    id: rollout_plan
+    attributes:
+      label: Rollout Plan
+      description: Steps to remove the feature.
+      placeholder: Provide details for the steps you will use to remove this previously deprecated feature.
+    validations:
+      required: true
+  - type: textarea
+    id: alternative_implementation
+    attributes:
+      label: Alternative Implementation
+      description: Alternative implementation suggestions for developers using AMP.
+      placeholder: Explain how developers using AMP can achieve similar functionality after the feature you are deprecating is removed.
+    validations:
+      required: true
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context
+      description: Any other relevant context.
+  - type: textarea
+    id: notifications
+    attributes:
+      label: Notifications
+      description: Add working groups or individuals you want to notify about this I2I.
+      value: /cc @ampproject/wg-approvers

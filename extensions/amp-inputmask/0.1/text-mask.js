@@ -16,9 +16,9 @@
 
 import {Mask} from './mask-impl';
 import {OutputMode} from './constants';
-import {Services} from '../../../src/services';
-import {iterateCursor, removeElement} from '../../../src/dom';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {Services} from '#service';
+import {iterateCursor, removeElement} from '#core/dom';
+import {userAssert} from '../../../src/log';
 
 const ELEMENT_MASK_PROPERTY = '__amp_inputmask_masked';
 const ELEMENT_MASK_OUTPUT_PROPERTY = '__amp_inputmask_hidden';

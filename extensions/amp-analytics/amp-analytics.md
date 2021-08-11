@@ -127,7 +127,7 @@ documentation.
 
 If the analytics vendor hasn’t integrated with AMP, reach out to the vendor to
 ask for their support. We also encourage you to let us know by
-[filing an issue](../../CONTRIBUTING.md#report-a-bug)
+[filing an issue](../../docs/contributing.md#report-a-bug)
 requesting that the vendor be added. See also
 [Integrating your analytics tools in AMP HTML](integrating-analytics.md).
 Alternatively, work with your vendor to send the data to their specified URL.
@@ -194,10 +194,10 @@ etc.) see
 To load a remote configuration, in the `<amp-analytics>` element, specify the
 `config` attribute and the URL for the configuration data. The URL specified
 should use the HTTPS scheme. The URL may include
-[AMP URL vars](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md).
+[AMP URL vars](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-var-substitutions.md).
 To access cookies, see the [`data-credentials`](#data-credentials) attribute.
 The response must follow the
-[AMP CORS security guidelines](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md).
+[AMP CORS security guidelines](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-cors-requests.md).
 
 In this example, we specify the `config` attribute to load the configuration
 data from the specified URL.
@@ -251,7 +251,7 @@ Analytics providers need to create a new `varGroups` object inside of the
 `configRewriter` configuration to enable this feature. Publishers can then
 include any named analytic provider created `varGroups` they wish to enable in
 their analytics configuration. All of the variables supported by
-[AMP HTML Substitutions Guide](../../spec/amp-var-substitutions.md)
+[AMP HTML Substitutions Guide](../../docs/spec/amp-var-substitutions.md)
 can be used. _Important note:_ the `${varName}` variants will not work.
 
 For example we may have a vendor whose configuration looks like this:
@@ -473,7 +473,7 @@ The `amp-analytics` component defines many basic variables that can be used in
 requests. A list of all such variables is available in the
 [`amp-analytics` Variables Guide](analytics-vars.md).
 In addition, all of the variables supported by
-[AMP HTML Substitutions Guide](../../spec/amp-var-substitutions.md)
+[AMP HTML Substitutions Guide](../../docs/spec/amp-var-substitutions.md)
 are also supported.
 
 Variables are resolved asynchronously and can delay the request until they are
@@ -562,7 +562,7 @@ The selector properties are:
 ##### Available triggers <a name="available-triggers"></a>
 
 The `on` trigger provides an event to listen for. Valid values are
-`render-start`, `ini-load`, `click`, `scroll`, `timer`, `visible`, `hidden`,
+`render-start`, `ini-load`, `blur`, `change`, `click`, `scroll`, `timer`, `visible`, `hidden`,
 `user-error`, `access-*`, and
 `video-*`.
 
@@ -637,6 +637,46 @@ configured as:
   "iniLoad": {
     "on": "ini-load",
     "request": "request"
+  }
+}
+```
+
+###### `"on": "blur"` trigger
+
+The on blur is part of the browser events that are supported by the Browser Event Tracker.
+Use the blur trigger (`"on": "blur"`) to fire a request when a specified
+element is no longer in focus. Use [`selector`](#element-selector) to control which
+elements will cause this request to fire. The trigger will fire for all elements
+matched by the specified selector. The selector can either be a single CSS query selector or an array of selectors.
+
+```json
+"triggers": {
+  "inputFieldBlurred": {
+    "on": "blur",
+    "request": "event",
+    "selector": ["inputField-A", "inputField-B"]
+    "vars": {
+      "eventId": "${id}"
+    }
+  }
+}
+```
+
+###### `"on": "change"` trigger
+
+Similar to the blur trigger, the change trigger is part of the Browser Events.
+Use the change trigger (`"on": "change"`) to fire a request when a specified
+element undergoes a state change. The state change may vary for different elements. Use [`selector`](#element-selector) to control which elements will cause this request to fire. The selector can either be a single CSS query selector or an array of selectors. The trigger will fire for all elements matched by the specified selector.
+
+```json
+"triggers": {
+  "selectChange": {
+    "on": "change",
+    "request": "event",
+    "selector":["dropdownA", "dropdownB"],
+    "vars": {
+      "eventId": "${id}"
+    }
   }
 }
 ```
@@ -923,6 +963,8 @@ reports errors from A4A iframe embeds, which are irrelevant to the page.
     (`"on": "video-*"`) that publishers can use to track different events
     occurring during a video's lifecycle. More details are available in
     [AMP Video Analytics](amp-video-analytics.md).
+-   Browser Event Trackers: AMP provides the ability to track a custom set of browser events. The set of browser events that are supported are listed in the allow-list.
+    Currently, events (`"on": "change"`) and (`"on": "blur"`) are supported.
 
 ###### `request` trigger
 
@@ -974,7 +1016,7 @@ used to generate a hash and a threshold that the hash must meet.
 ###### `videoSpec` trigger
 
 This configuration is used in conjunction with the
-[`video-*`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-video-analytics.md)
+[`video-*`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-analytics/amp-video-analytics.md)
 triggers. Used when `on` is set to `video-*`.
 
 #### Transport
@@ -1273,7 +1315,7 @@ created is illustrated in
 ### Cookies
 
 The `cookies` feature supports writing cookies to the origin domain by
-extracting [`QUERY_PARAM`](../../spec/amp-var-substitutions.md#query-parameter)
+extracting [`QUERY_PARAM`](../../docs/spec/amp-var-substitutions.md#query-parameter)
 and [`LINKER_PARAM`](linker-id-receiving.md#linker-param)
 information from the document url. It can be used along with `linkers` features
 to perform ID syncing from the AMP proxied domain to AMP pages on a publisher's
@@ -1301,9 +1343,9 @@ Specifies the type of vendor. For details, see the list of
 This is an optional attribute that can be used to load a configuration from a
 specified remote URL. The URL specified should use the HTTPS scheme. See also
 the `data-include-credentials` attribute below. The URL may include
-[AMP URL vars](../../spec/amp-var-substitutions.md).
+[AMP URL vars](../../docs/spec/amp-var-substitutions.md).
 The response must follow the
-[AMP CORS security guidelines](../../spec/amp-cors-requests.md).
+[AMP CORS security guidelines](../../docs/spec/amp-cors-requests.md).
 
 ```html
 <amp-analytics

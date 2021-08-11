@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 import '../amp-lightbox';
-import {ActionInvocation} from '../../../../src/service/action-impl';
-import {ActionTrust, DEFAULT_ACTION} from '../../../../src/action-constants';
-import {htmlFor} from '../../../../src/static-template';
-import {poll} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
+import {ActionInvocation} from '#service/action-impl';
+import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
+import {htmlFor} from '#core/dom/static-template';
+import {poll} from '#testing/iframe';
+import {toggleExperiment} from '#experiments';
+import {whenCalled} from '#testing/test-helper';
+import {Services} from '#service/';
 
 describes.realWin(
   'amp-lightbox:1.0',
@@ -31,6 +33,8 @@ describes.realWin(
     let win;
     let html;
     let element;
+    let historyPopSpy;
+    let historyPushSpy;
 
     async function waitForOpen(el, open) {
       const isOpenOrNot = () => el.hasAttribute('open') === open;
@@ -47,7 +51,21 @@ describes.realWin(
     beforeEach(async () => {
       win = env.win;
       html = htmlFor(win.document);
-      toggleExperiment(win, 'bento-selector', true, true);
+      toggleExperiment(win, 'bento-lightbox', true, true);
+
+      historyPopSpy = env.sandbox.spy();
+      historyPushSpy = env.sandbox.spy();
+      env.sandbox.stub(Services, 'historyForDoc').returns({
+        push() {
+          historyPushSpy();
+          return Promise.resolve(11);
+        },
+        pop() {
+          historyPopSpy();
+          return Promise.resolve(11);
+        },
+      });
+
       element = html`
         <amp-lightbox layout="nodisplay">
           <p>Hello World</p>
@@ -87,6 +105,9 @@ describes.realWin(
       }
 
       it('should open with default action', async () => {
+        env.sandbox.stub(element, 'setAsContainerInternal');
+        env.sandbox.stub(element, 'removeAsContainerInternal');
+
         expect(element.hasAttribute('open')).to.be.false;
         expect(element.hasAttribute('hidden')).to.be.true;
 
@@ -105,9 +126,21 @@ describes.realWin(
         expect(contentEls[0].textContent).to.equal('Hello World');
 
         expect(eventSpy).to.be.calledOnce;
+
+        await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
+
+        const scroller = element.shadowRoot.querySelector('[part=scroller]');
+        expect(scroller).to.exist;
+        expect(element.setAsContainerInternal).to.be.calledWith(scroller);
+        expect(element.removeAsContainerInternal).to.not.be.called;
       });
 
       it('should open and close', async () => {
+        env.sandbox.stub(element, 'setAsContainerInternal');
+        env.sandbox.stub(element, 'removeAsContainerInternal');
+
         expect(element.hasAttribute('open')).to.be.false;
         expect(element.hasAttribute('hidden')).to.be.true;
 
@@ -139,6 +172,8 @@ describes.realWin(
 
         expect(openSpy).to.be.calledOnce;
         expect(closeSpy).to.be.calledOnce;
+        expect(element.setAsContainerInternal).to.not.be.called;
+        expect(element.removeAsContainerInternal).to.be.calledOnce;
       });
     });
   }

@@ -15,7 +15,7 @@
  */
 const argv = require('minimist')(process.argv.slice(2));
 const tempy = require('tempy');
-const {blue, bold, cyan, red} = require('kleur/colors');
+const {blue, bold, cyan, red} = require('./colors');
 const {getStdout} = require('./process');
 const {log, logWithoutTimestamp} = require('./logging');
 const {writeFile} = require('fs-extra');
@@ -49,6 +49,7 @@ const diffTentative = (filepath, content, gitDiffFlags = ['-U1']) =>
  * @param {string} filepath
  * @param {string} tentative
  * @param {Array<string>=} opt_gitDiffFlags
+ * @return {Promise<void>}
  */
 async function writeDiffOrFail(
   callerTask,
@@ -68,7 +69,7 @@ async function writeDiffOrFail(
 
   if (!argv.fix) {
     log(red('ERROR:'), cyan(filepath), 'is missing the changes above.');
-    log('⤷ To automatically apply them, run', cyan(`gulp ${callerTask} --fix`));
+    log('⤷ To automatically apply them, run', cyan(`amp ${callerTask} --fix`));
     throw new Error(`${filepath} is outdated`);
   }
 

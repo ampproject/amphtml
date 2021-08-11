@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-import {AmpDocService, AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {RAW_OBJECT_ARGS_KEY} from '../../src/action-constants';
-import {Services} from '../../src/services';
+import {RAW_OBJECT_ARGS_KEY} from '#core/constants/action-constants';
+import {htmlFor} from '#core/dom/static-template';
+import {toggle} from '#core/dom/style';
+
+import {Services} from '#service';
+import {AmpDocService, AmpDocSingle} from '#service/ampdoc-impl';
+import {cidServiceForDocForTesting} from '#service/cid-impl';
+import {installHistoryServiceForDoc} from '#service/history-impl';
 import {
   StandardActions,
   getAutofocusElementForShowAction,
-} from '../../src/service/standard-actions-impl';
-import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
-import {htmlFor} from '../../src/static-template';
-import {installHistoryServiceForDoc} from '../../src/service/history-impl';
-import {macroTask} from '../../testing/yield';
-import {toggle} from '../../src/style';
+} from '#service/standard-actions-impl';
+
+import {macroTask} from '#testing/yield';
+
 import {user} from '../../src/log';
 
 describes.sandboxed('StandardActions', {}, (env) => {
@@ -698,7 +701,10 @@ describes.sandboxed('StandardActions', {}, (env) => {
           });
         yield standardActions.handleAmpTarget_(invocation);
         expect(navigator.navigateTo).to.be.calledTwice;
-        expect(userError).to.be.calledWith('STANDARD-ACTIONS', 'Fake error.');
+        expect(userError).to.be.calledWith(
+          'STANDARD-ACTIONS',
+          env.sandbox.match((arg) => arg.message === 'Fake error.')
+        );
       });
     });
 

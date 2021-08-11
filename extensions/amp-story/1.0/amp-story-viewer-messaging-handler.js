@@ -21,7 +21,7 @@ import {
 } from './amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from './variable-service';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '#core/types/object';
 
 /** @type {string} */
 const TAG = 'amp-story-viewer-messaging-handler';
@@ -57,6 +57,10 @@ const GET_STATE_CONFIGURATIONS = {
   'PAGE_ATTACHMENT_STATE': {
     dataSource: DataSources.STORE_SERVICE,
     property: StateProperty.PAGE_ATTACHMENT_STATE,
+  },
+  'UI_STATE': {
+    dataSource: DataSources.STORE_SERVICE,
+    property: StateProperty.UI_STATE,
   },
   'STORY_PROGRESS': {
     dataSource: DataSources.VARIABLE_SERVICE,

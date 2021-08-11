@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-import * as _3p from '../../../3p/3p';
-import {createIframePromise} from '../../../testing/iframe';
+import * as _3p from '#3p/3p';
+
 import {
   handlePosition,
+  handlePositionResponsive,
   keyBy,
   runWhenFetchingSettled,
   sizeAgainstWindow,
   ssp,
-} from '../../../ads/vendors/ssp';
+} from '#ads/vendors/ssp';
 
-describes.fakeWin('amp-ad-ssp', {}, () => {
+import {createIframePromise} from '#testing/iframe';
+
+describes.fakeWin('amp-ad-ssp', {}, (env) => {
   let sandbox;
   let win;
   let commonData;
@@ -34,7 +37,7 @@ describes.fakeWin('amp-ad-ssp', {}, () => {
    * Set up our test environment.
    */
   beforeEach(() => {
-    sandbox = window.sandbox;
+    sandbox = env.sandbox;
 
     commonData = {
       width: '200',
@@ -291,6 +294,30 @@ describes.fakeWin('amp-ad-ssp', {}, () => {
     expect(divStyles).to.eql({
       width: '100%',
       height: '100%',
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      maxWidth: '100%',
+    });
+  });
+
+  it('handlePositionResponsive() should center element', () => {
+    const div = win.document.createElement('div');
+    win.document.body.appendChild(div);
+    const e = {data: JSON.stringify({height: 200})};
+    handlePositionResponsive(e, div);
+
+    const divStyles = {
+      height: div.style.height,
+      position: div.style.position,
+      top: div.style.top,
+      left: div.style.left,
+      transform: div.style.transform,
+      maxWidth: div.style.maxWidth,
+    };
+    expect(divStyles).to.eql({
+      height: '200px',
       position: 'absolute',
       top: '50%',
       left: '50%',

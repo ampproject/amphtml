@@ -19,6 +19,15 @@ module.exports = {
   'rules': {
     'local/no-global': 2,
 
+    // These rules should apply to all AMP code. For now, they apply only to src
+    'import/newline-after-import': 2,
+    'import/no-dynamic-require': 2,
+    'import/no-unused-modules': 2,
+    'import/no-commonjs': 2,
+    'import/no-amd': 2,
+    'import/no-nodejs-modules': 2,
+    'import/no-import-module-exports': 2,
+
     'import/no-restricted-paths': [
       'error',
       {
@@ -33,14 +42,13 @@ module.exports = {
             // Disallow importing AMP dependencies into preact/Bento
             'target': 'src/preact',
             'from': 'src',
-            'except': ['./core', './context', './preact'],
+            'except': ['./core', './preact'],
           },
           {
-            // Disallow importing AMP dependencies into context module
-            // TODO(rcebulko): Try to migrate src/context into src/preact
-            'target': 'src/context',
+            // Disallow importing non-core dependencies into polyfills
+            'target': 'src/polyfills',
             'from': 'src',
-            'except': ['./core', './context'],
+            'except': ['./core', './polyfills'],
           },
         ],
       },
@@ -52,16 +60,30 @@ module.exports = {
     {
       'files': [
         './preact/base-element.js',
-        './core/contextprops.js',
-        './context/component-hooks.js',
-        './context/component-install.js',
-        './context/component.js',
-        './context/node.js',
-        './context/prop.js',
-        './context/scheduler.js',
-        './context/values.js',
+        './polyfills/fetch.js',
+        // TEMPORARY, follow tracking issue #33631
+        './preact/component/3p-frame.js',
       ],
       'rules': {'import/no-restricted-paths': isCiBuild() ? 0 : 1},
+    },
+    {
+      'files': [
+        './core/window/window.extern.js',
+        './polyfills/custom-elements.extern.js',
+        './experiments/experiments.extern.js',
+        './experiments/shame.extern.js',
+      ],
+      'rules': {'local/no-global': 0},
+    },
+    {
+      'files': ['./base-element.js'],
+      'rules': {
+        'local/no-private-props': 2,
+      },
+    },
+    {
+      'files': ['**/storybook/*.js', '**/rollup.config.js'],
+      'rules': {'import/no-nodejs-modules': 0},
     },
   ],
 };

@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import {BrowserController, RequestBank} from '../../testing/test-helper';
-import {Deferred} from '../../src/utils/promise';
-import {poll} from '../../testing/iframe';
+import {Deferred} from '#core/data-structures/promise';
+
+import {poll} from '#testing/iframe';
+import {BrowserController, RequestBank} from '#testing/test-helper';
 
 // TODO(wg-components): These tests are broken on Firefox (as of v77). They
 // also fail on Safari.
-describe
+describes.sandboxed
   .configure()
   .skipFirefox()
   .skipSafari()
-  .run('amp-recaptcha-input', function () {
+  .run('amp-recaptcha-input', {}, function () {
     describes.integration(
       'with form and amp-mustache',
       {

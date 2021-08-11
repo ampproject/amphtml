@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {AmpDocShadow, installDocService} from '../../src/service/ampdoc-impl';
-import {Services} from '../../src/services';
-import {Vsync} from '../../src/service/vsync-impl';
-import {installTimerService} from '../../src/service/timer-impl';
+import {Services} from '#service';
+import {AmpDocShadow, installDocService} from '#service/ampdoc-impl';
+import {installTimerService} from '#service/timer-impl';
+import {Vsync} from '#service/vsync-impl';
 
 describes.fakeWin('vsync', {}, (env) => {
   let win, doc;
@@ -445,10 +445,10 @@ describes.fakeWin('vsync', {}, (env) => {
       vsync.raf_ = (handler) => (rafHandler = handler);
       isVisibleStub.returns(false);
 
-      let result = '';
+      let result = ''; // eslint-disable-line no-unused-vars
       const res = vsync.runAnim(contextNode, {
         mutate: () => {
-          result += 'mu1'; // eslint-disable-line no-unused-vars
+          result += 'mu1';
         },
       });
 
@@ -462,10 +462,10 @@ describes.fakeWin('vsync', {}, (env) => {
       vsync.raf_ = (handler) => (rafHandler = handler);
       isVisibleStub.returns(false);
 
-      let result = '';
+      let result = ''; // eslint-disable-line no-unused-vars
       const task = vsync.createAnimTask(contextNode, {
         mutate: () => {
-          result += 'mu1'; // eslint-disable-line no-unused-vars
+          result += 'mu1';
         },
       });
       const res = task();
@@ -725,10 +725,10 @@ describes.fakeWin('vsync', {}, (env) => {
       vsync.raf_ = (handler) => (rafHandler = handler);
       doc.visibilityState = 'hidden';
 
-      let result = '';
+      let result = ''; // eslint-disable-line no-unused-vars
       const res = vsync.runAnim(contextNode, {
         mutate: () => {
-          result += 'mu1'; // eslint-disable-line no-unused-vars
+          result += 'mu1';
         },
       });
 
@@ -742,10 +742,10 @@ describes.fakeWin('vsync', {}, (env) => {
       vsync.raf_ = (handler) => (rafHandler = handler);
       doc.visibilityState = 'hidden';
 
-      let result = '';
+      let result = ''; // eslint-disable-line no-unused-vars
       const task = vsync.createAnimTask(contextNode, {
         mutate: () => {
-          result += 'mu1'; // eslint-disable-line no-unused-vars
+          result += 'mu1';
         },
       });
       const res = task();

@@ -19,37 +19,28 @@
  * @fileoverview Script that runs the visual diff tests during CI.
  */
 
-const atob = require('atob');
-const {
-  downloadNomoduleOutput,
-  printSkipMessage,
-  timedExecOrDie,
-} = require('./utils');
-const {buildTargetsInclude, Targets} = require('./build-targets');
 const {runCiJob} = require('./ci-job');
+const {skipDependentJobs, timedExecOrDie} = require('./utils');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'visual-diff-tests.js';
 
 /**
- * @return {void}
+ * Steps to run during push builds.
  */
 function pushBuildWorkflow() {
-  downloadNomoduleOutput();
-  process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-  timedExecOrDie('gulp visual-diff --nobuild --master');
+  timedExecOrDie('amp visual-diff --nobuild --main');
 }
 
 /**
- * @return {void}
+ * Steps to run during PR builds.
  */
 function prBuildWorkflow() {
-  process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VISUAL_DIFF)) {
-    downloadNomoduleOutput();
-    timedExecOrDie('gulp visual-diff --nobuild');
+    timedExecOrDie('amp visual-diff --nobuild');
   } else {
-    timedExecOrDie('gulp visual-diff --empty');
-    printSkipMessage(
+    timedExecOrDie('amp visual-diff --empty');
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or visual diff tests'
     );

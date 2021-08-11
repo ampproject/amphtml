@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../src/amp-events.js';
-import {computedStyle} from '../../src/style.js';
-import {
-  createFixtureIframe,
-  expectBodyToBecomeVisible,
-} from '../../testing/iframe.js';
+import {AmpEvents} from '#core/constants/amp-events';
+import {computedStyle} from '#core/dom/style';
 
-describe.configure().run('CSS', () => {
+import {createFixtureIframe, expectBodyToBecomeVisible} from '#testing/iframe';
+
+describes.sandboxed.configure().run('CSS', {}, () => {
   it('should include height of [overflow] child in size before build', async () => {
     const fixture = await createFixtureIframe(
       'test/fixtures/overflow.html',

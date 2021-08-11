@@ -19,12 +19,13 @@ import {
   extensionsHasElement,
   getAmpAdMetadata,
   getExtensionsFromMetadata,
+  mergeExtensionsMetadata,
 } from './amp-ad-utils';
 import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
 import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '#core/types/object/json';
 import {urls} from '../../../src/config';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {utf8Decode} from '#core/types/string/bytes';
 
 /** @const {string} */
 export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-Ad-Template-Extension';
@@ -38,9 +39,10 @@ export class TemplateValidator extends Validator {
   /** @override */
   validate(context, containerElement, unvalidatedBytes, headers) {
     const body = utf8Decode(/** @type {!ArrayBuffer} */ (unvalidatedBytes));
-    const parsedResponseBody = /** @type {./amp-ad-type-defs.AmpTemplateCreativeDef} */ (tryParseJson(
-      body
-    ));
+    const parsedResponseBody =
+      /** @type {./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
+        tryParseJson(body)
+      );
 
     // If we're missing the relevant header, or headers altogether, we cannot
     // proceed. In this case, we return a NON_AMP response, since we cannot
@@ -71,6 +73,10 @@ export class TemplateValidator extends Validator {
         const creativeMetadata = getAmpAdMetadata(template);
         creativeMetadata['extensions'] = creativeMetadata['extensions'] || [];
         const extensions = creativeMetadata['extensions'];
+        mergeExtensionsMetadata(
+          extensions,
+          creativeMetadata['customElementExtensions']
+        );
         if (
           parsedResponseBody.analytics &&
           !extensionsHasElement(extensions, 'amp-analytics')

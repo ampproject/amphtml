@@ -16,24 +16,25 @@
 
 /**
  * Must be served over https for permissions API to work.
- * For local development, run gulp --host="192.168.44.47" --https --extensions=amp-story-360
+ * For local development, run amp --host="192.168.44.47" --https --extensions=amp-story-360
  */
 
 import {
   Action,
   StateProperty,
-} from '../../../extensions/amp-story/1.0/amp-story-store-service';
+} from '../../amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-360-0.1.css';
-import {CommonSignals} from '../../../src/common-signals';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
-import {Services} from '../../../src/services';
-import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
+import {CommonSignals} from '#core/constants/common-signals';
+import {LocalizedStringId} from '#service/localization/strings';
+import {Matrix, Renderer} from '#third_party/zuho/zuho';
+import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {closest} from '#core/dom/query';
 import {dev, user, userAssert} from '../../../src/log';
-import {htmlFor} from '../../../src/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {htmlFor} from '#core/dom/static-template';
 import {listenOncePromise} from '../../../src/event-helper';
-import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
+import {timeStrToMillis} from '../../amp-story/1.0/utils';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_360';
@@ -111,9 +112,7 @@ const buildActivateButtonTemplate = (element) => htmlFor(element)`
 const buildDiscoveryTemplate = (element) => htmlFor(element)`
     <div class="i-amphtml-story-360-discovery" aria-live="polite">
       <div class="i-amphtml-story-360-discovery-animation"></div>
-      <span class="i-amphtml-story-360-discovery-text" aria-hidden="true">
-        Move device to explore
-      </span>
+      <span class="i-amphtml-story-360-discovery-text"></span>
     </div>
   `;
 
@@ -355,7 +354,7 @@ export class AmpStory360 extends AMP.BaseElement {
     this.canvas_ = this.element.ownerDocument.createElement('canvas');
     this.element.appendChild(container);
     container.appendChild(this.canvas_);
-    this.applyFillContent(container, /* replacedContent */ true);
+    applyFillContent(container, /* replacedContent */ true);
 
     // Mutation observer for distance attribute
     const config = {attributes: true, attributeFilter: ['distance']};
@@ -562,6 +561,14 @@ export class AmpStory360 extends AMP.BaseElement {
     ) {
       const page = this.getPage_();
       const discoveryTemplate = page && buildDiscoveryTemplate(page);
+      // Support translation of discovery dialogue text.
+      this.mutateElement(() => {
+        discoveryTemplate.querySelector(
+          '.i-amphtml-story-360-discovery-text'
+        ).textContent = this.localizationService_.getLocalizedString(
+          LocalizedStringId.AMP_STORY_DISCOVERY_DIALOG_TEXT
+        );
+      });
       this.mutateElement(() => page.appendChild(discoveryTemplate));
     }
   }

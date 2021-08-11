@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {READY_SCAN_SIGNAL} from './service/resources-interface';
-import {Services} from './services';
-import {isIframed} from './dom';
+import {isIframed} from '#core/dom';
+
+import {Services} from '#service';
+import {READY_SCAN_SIGNAL} from '#service/resources-interface';
 
 /** @const {!Array<string>} */
 const EXCLUDE_INI_LOAD = [
@@ -54,14 +55,13 @@ export function whenContentIniLoad(
 
 /**
  * A legacy way using direct measurement.
+ * Used by inabox runtime, and will be moved there after #31915.
  *
  * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {!Window} hostWin
  * @param {!./layout-rect.LayoutRectDef} rect
  * @param {boolean=} opt_prerenderableOnly signifies if we are in prerender mode.
  * @return {!Promise}
- * @visibleForTesting
- * TODO(#31915): remove, once launched.
  */
 export function whenContentIniLoadMeasure(
   elementOrAmpDoc,
@@ -132,7 +132,7 @@ export function whenContentIniLoadInOb(elementOrAmpDoc, opt_prerenderableOnly) {
           io.disconnect();
           const intersecting = [];
           for (let i = 0; i < entries.length; i++) {
-            const {target, isIntersecting} = entries[i];
+            const {isIntersecting, target} = entries[i];
             if (isIntersecting) {
               intersecting.push(target);
             }
@@ -143,7 +143,7 @@ export function whenContentIniLoadInOb(elementOrAmpDoc, opt_prerenderableOnly) {
           // We generally always want `root: document` here. However, in
           // many browsers this is still polyfilled and `{root: null}` is
           // a lot faster.
-          root: isIframed(win) ? win.document : null,
+          root: isIframed(win) ? /** @type {?} */ (win.document) : null,
           threshold: 0.01,
         }
       );

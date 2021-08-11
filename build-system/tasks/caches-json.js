@@ -16,14 +16,15 @@
 'use strict';
 
 const path = require('path');
+const {cyan, green, red} = require('../common/colors');
 const {log, logLocalDev} = require('../common/logging');
-const {red, green, cyan} = require('kleur/colors');
 
 const expectedCaches = ['google', 'bing'];
 const cachesJsonPath = '../global-configs/caches.json';
 
 /**
- * Entry point for gulp caches-jason.
+ * Entry point for amp caches-jason.
+ * @return {Promise<void>}
  */
 async function cachesJson() {
   const filename = path.basename(cachesJsonPath);
@@ -53,4 +54,4 @@ module.exports = {
   cachesJson,
 };
 
-cachesJson.description = 'Check that caches.json contains all expected caches.';
+cachesJson.description = 'Check that caches.json contains all expected caches';

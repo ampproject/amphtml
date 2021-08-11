@@ -15,9 +15,12 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {Services} from '../../src/services';
-import {adConfig} from '../../ads/_config';
-import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
+
+import {adConfig} from '#ads/_config';
+
+import {Services} from '#service';
+import {cidServiceForDocForTesting} from '#service/cid-impl';
+
 import {getAdCid} from '../../src/ad-cid';
 
 describes.realWin('ad-cid', {amp: true}, (env) => {

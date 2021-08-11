@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {Observable} from './observable';
+import {Observable} from '#core/data-structures/observable';
+import {supportsPassiveEventListener} from '#core/dom/event-helper-listen';
+import {findIndex} from '#core/types/array';
+import {toWin} from '#core/window';
+
+import {devAssert} from './log';
 import {Pass} from './pass';
-import {pureDevAssert as devAssert} from './core/assert';
-import {findIndex} from './utils/array';
-import {supportsPassiveEventListener} from './event-helper-listen';
-import {toWin} from './types';
 
 const PROP_ = '__AMP_Gestures';
 

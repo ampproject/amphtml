@@ -27,11 +27,11 @@ import {
 import {
   AsyncInputAttributes,
   AsyncInputClasses,
-} from '../../../src/async-input';
+} from '#core/constants/async-input';
 import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
-import {Layout} from '../../../src/layout';
-import {setStyles, toggle} from '../../../src/style';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {Layout} from '#core/dom/layout';
+import {setStyles, toggle} from '#core/dom/style';
+import {userAssert} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-recaptcha-input';

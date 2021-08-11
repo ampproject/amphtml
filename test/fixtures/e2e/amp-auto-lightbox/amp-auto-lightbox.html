@@ -43,6 +43,18 @@
       layout="responsive"
       sizes="(min-width: 500px) 450px, 100vw"
     ></amp-img>
+    <img
+      data-should-be-lightboxed
+      src="./960x540.gif"
+      srcset="
+        ./960x540.gif 960w,
+        ./480x270.gif 480w,
+        ./240x135.gif 240w"
+      width="960"
+      height="540"
+      layout="responsive"
+      sizes="(min-width: 500px) 450px, 100vw"
+    ></img>
     <!-- Not lightboxable: too small -->
     <amp-img
       src="./100x100.gif"

@@ -44,6 +44,7 @@ const blockRegExp = (name) =>
 
 /**
  * Checks or updates analytics vendors list.
+ * @return {Promise<void>}
  */
 async function checkAnalyticsVendorsList() {
   const vendors = globby
@@ -80,7 +81,9 @@ async function checkAnalyticsVendorsList() {
   const anyVendorRegExp = new RegExp(blockRegExp('(.+)').source, 'gm');
   while ((match = anyVendorRegExp.exec(tentative)) !== null) {
     const fullMatch = match[0];
-    const name = match[2]
+    /** @type {string} */
+    const nameMatch = /** @type {*} */ (match[2]);
+    const name = nameMatch
       .split(/[,\s]+/)
       .shift()
       .replace(/[`"']/g, '');
@@ -96,8 +99,9 @@ module.exports = {
   checkAnalyticsVendorsList,
 };
 
-checkAnalyticsVendorsList.description = `Checks or updates list on ${filepath}`;
+checkAnalyticsVendorsList.description =
+  'Check the list of vendors in analytics-vendors-list.md';
 
 checkAnalyticsVendorsList.flags = {
-  'fix': '  Write to file',
+  'fix': 'Update the list and write results to file',
 };

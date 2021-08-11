@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Services} from '../../../src/services';
-import {clamp, sum} from '../../../src/utils/math';
+import {ActionTrust} from '#core/constants/action-constants';
+import {Services} from '#service';
+import {clamp, sum} from '#core/math';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/utils/object';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dict} from '#core/types/object';
+import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-orientation-observer';
 /**
@@ -142,7 +142,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
       const {screen} = this.win;
 
       const {alpha} = event;
-      let {gamma, beta} = event;
+      let {beta, gamma} = event;
 
       // Detect the implementation of orientation angle
       const angle =
@@ -178,9 +178,9 @@ export class AmpOrientationObserver extends AMP.BaseElement {
               /** @type {number} */ (currentValue[axis])
             );
           } else {
-            this.computedValue_[axis] = /** @type {number} */ (currentValue[
-              axis
-            ]);
+            this.computedValue_[axis] = /** @type {number} */ (
+              currentValue[axis]
+            );
           }
           this.triggerEvent_(
             axis,

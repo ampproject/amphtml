@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {VideoEvents} from '../../../src/video-interface';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
-import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
 import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
-import {dispatchCustomEvent} from '../../../src/dom';
-import {forwardRef} from '../../../src/preact/compat';
+import {dict} from '#core/types/object';
+import {dispatchCustomEvent} from '#core/dom';
+import {forwardRef} from '#preact/compat';
 import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';
-import {useRef} from '../../../src/preact';
+import {useRef} from '#preact';
 
 // Correct PlayerStates taken from
 // https://developers.google.com/youtube/iframe_api_reference#Playback_status
@@ -47,6 +46,7 @@ const PlayerStates = {
 const methods = {
   'play': 'playVideo',
   'pause': 'pauseVideo',
+  'mute': 'mute',
   'unmute': 'unMute',
 };
 
@@ -59,7 +59,7 @@ const PlayerFlags = {
   HIDE_ANNOTATION: 3,
 };
 
-/** @const {!../../../src/dom.CustomEventOptionsDef} */
+/** @const {!../../../src/core/dom.CustomEventOptionsDef} */
 const VIDEO_EVENT_OPTIONS = {bubbles: false, cancelable: false};
 
 /**
@@ -76,7 +76,7 @@ function createDefaultInfo() {
 
 /**
  * @param {!YoutubeProps} props
- * @param {{current: (T|null)}} ref
+ * @param {{current: ?T}} ref
  * @return {PreactDef.Renderable}
  * @template T
  */
@@ -132,7 +132,7 @@ function YoutubeWithRef(
     playerStateRef.current = createDefaultInfo();
   }
 
-  const onMessage = ({data, currentTarget}) => {
+  const onMessage = ({currentTarget, data}) => {
     const parsedData = objOrParseJson(data);
     if (!parsedData) {
       return;
@@ -181,10 +181,9 @@ function YoutubeWithRef(
   };
 
   return (
-    <VideoWrapper
+    <VideoIframe
       ref={ref}
       {...rest}
-      component={VideoIframe}
       autoplay={autoplay}
       src={src}
       onMessage={onMessage}
@@ -203,7 +202,7 @@ function YoutubeWithRef(
       }}
       sandbox="allow-scripts allow-same-origin allow-presentation"
       playerStateRef={playerStateRef}
-    ></VideoWrapper>
+    />
   );
 }
 

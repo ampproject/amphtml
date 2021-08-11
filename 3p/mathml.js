@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {setStyle} from '../src/style';
-import {pureUserAssert as userAssert} from '../src/core/assert';
+import {setStyle} from '#core/dom/style';
+
 import {writeScript} from './3p';
+
+import {userAssert} from '../src/log';
 
 /**
  * Get the correct script for the mathml formula.

@@ -18,17 +18,20 @@
 const fs = require('fs');
 const globby = require('globby');
 const path = require('path');
-const postcss = require('postcss');
+const Postcss = require('postcss');
 const prettier = require('prettier');
 const textTable = require('text-table');
 const {
-  jscodeshiftAsync,
   getJscodeshiftReport,
+  jscodeshiftAsync,
 } = require('../../test-configs/jscodeshift');
 const {getStdout} = require('../../common/process');
-const {gray, magenta} = require('kleur/colors');
-const {logOnSameLineLocalDev, logLocalDev} = require('../../common/logging');
+const {gray, magenta} = require('../../common/colors');
+const {logLocalDev, logOnSameLineLocalDev} = require('../../common/logging');
 const {writeDiffOrFail} = require('../../common/diff');
+
+/** @type {Postcss.default} */
+const postcss = /** @type {*} */ (Postcss);
 
 const tableHeaders = [
   ['context', 'z-index', 'file'],
@@ -41,7 +44,7 @@ const tableOptions = {
 };
 
 const preamble = `
-**Run \`gulp get-zindex --fix\` to generate this file.**
+**Run \`amp get-zindex --fix\` to generate this file.**
 
 <!-- markdown-link-check-disable -->
 `.trim();
@@ -52,28 +55,29 @@ const logChecking = (filename) =>
 const sortedByEntryKey = (a, b) => a[0].localeCompare(b[0]);
 
 /**
- * @param {!Object<string, !Array<number>} acc accumulator object for selectors
- * @param {!Rules} css post css rules object
+ * @param {!Object<string, string>} acc accumulator object for selectors
+ * @param {!Postcss.Rule} css post css rules object
  */
 function zIndexCollector(acc, css) {
   css.walkRules((rule) => {
     rule.walkDecls((decl) => {
       // Split out multi selector rules
-      let selectorNames = rule.selector.replace('\n', '');
-      selectorNames = selectorNames.split(',');
       if (decl.prop == 'z-index') {
-        selectorNames.forEach((selector) => {
-          // If multiple redeclaration of a selector and z index
-          // are done in a single file, this will get overridden.
-          acc[selector] = decl.value;
-        });
+        rule.selector
+          .replace('\n', '')
+          .split(',')
+          .forEach((selector) => {
+            // If multiple redeclaration of a selector and z index
+            // are done in a single file, this will get overridden.
+            acc[selector.trim()] = decl.value;
+          });
       }
     });
   });
 }
 
 /**
- * @param {!Object<string, !Object<string, !Array<number>} filesData
+ * @param {!Object<string, !Object<string, !Array<number>>>} filesData
  *    accumulation of files and the rules and z index values.
  * @return {!Array<!Array<string>>}
  */
@@ -87,6 +91,7 @@ function createTable(filesData) {
     const entry = Array.isArray(filesData[filename])
       ? filesData[filename]
       : Object.entries(filesData[filename]).sort(sortedByEntryKey);
+    // @ts-ignore
     for (const [context, zIndex] of entry) {
       rows.push([`\`${context}\``, zIndex, `[${filename}](/${filename})`]);
     }
@@ -116,7 +121,7 @@ function createTable(filesData) {
  * the given working directory
  * @param {string|Array<string>} glob
  * @param {string=} cwd
- * @return {Object}
+ * @return {Promise<Object>}
  */
 async function getZindexSelectors(glob, cwd = '.') {
   const filesData = Object.create(null);
@@ -151,12 +156,23 @@ function getZindexChainsInJs(glob, cwd = '.') {
 
     const result = {};
 
-    const {stdout, stderr} = jscodeshiftAsync([
+    let resultCountInverse = filesIncludingString.length;
+
+    if (resultCountInverse === 0) {
+      // We don't expect this fileset to be empty since it's unlikely that we
+      // never change the z-index from JS, but we add this just in case to
+      // prevent hanging infinitely.
+      resolve(result);
+      return;
+    }
+
+    const process = jscodeshiftAsync([
       '--dry',
       '--no-babel',
       `--transform=${__dirname}/jscodeshift/collect-zindex.js`,
       ...filesIncludingString,
     ]);
+    const {stderr, stdout} = process;
 
     stderr.on('data', (data) => {
       throw new Error(data.toString());
@@ -176,21 +192,20 @@ function getZindexChainsInJs(glob, cwd = '.') {
 
       try {
         const reportParsed = JSON.parse(report);
-
         if (reportParsed.length) {
           result[relative] = reportParsed.sort(sortedByEntryKey);
         }
+        if (--resultCountInverse === 0) {
+          resolve(result);
+        }
       } catch (_) {}
-    });
-
-    stdout.on('close', () => {
-      resolve(result);
     });
   });
 }
 
 /**
- * Entry point for gulp get-zindex
+ * Entry point for amp get-zindex
+ * @return {Promise<void>}
  */
 async function getZindex() {
   logLocalDev('...');
@@ -201,6 +216,7 @@ async function getZindex() {
       getZindexSelectors('{css,src,extensions}/**/*.css'),
       getZindexChainsInJs([
         '{3p,src,extensions}/**/*.js',
+        '!**/dist/**/*.js',
         '!extensions/**/test/**/*.js',
         '!extensions/**/storybook/**/*.js',
       ]),
@@ -233,7 +249,7 @@ async function getZindex() {
 /**
  * @param {string} filename
  * @param {string} output
- * @return {string}
+ * @return {Promise<string>}
  */
 async function prettierFormat(filename, output) {
   return prettier.format(output, {
@@ -250,8 +266,8 @@ module.exports = {
 };
 
 getZindex.description =
-  'Runs through all css files of project to gather z-index values';
+  'Run through all css files in the repo to gather z-index values';
 
 getZindex.flags = {
-  'fix': '  Write to file',
+  'fix': 'Write the results to file',
 };

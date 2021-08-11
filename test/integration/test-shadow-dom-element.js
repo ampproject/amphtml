@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import {createFixtureIframe} from '../../testing/iframe';
-import {toggleExperiment} from '../../src/experiments';
-import {whenUpgradedToCustomElement} from '../../src/dom';
+import {toggleExperiment} from '#experiments';
 
-describe
+import {createFixtureIframe} from '#testing/iframe';
+
+import {whenUpgradedToCustomElement} from '../../src/amp-element-helpers';
+
+describes.sandboxed
   .configure()
   .enableIe()
-  .run('Render a shadow-dom based element', () => {
+  .run('Render a shadow-dom based element', {}, () => {
     let fixture;
 
     beforeEach(async () => {
@@ -56,9 +58,9 @@ describe
     });
   });
 
-describe
+describes.sandboxed
   .configure()
-  .run('Render a shadow-dom based element, force polyfill', () => {
+  .run('Render a shadow-dom based element, force polyfill', {}, () => {
     let fixture;
 
     beforeEach(async () => {

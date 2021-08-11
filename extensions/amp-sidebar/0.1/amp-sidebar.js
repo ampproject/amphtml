@@ -14,34 +14,35 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
+import {ActionTrust} from '#core/constants/action-constants';
+import {AmpEvents} from '#core/constants/amp-events';
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {Direction, Orientation, SwipeToDismiss} from './swipe-to-dismiss';
 import {Gestures} from '../../../src/gesture';
-import {Keys} from '../../../src/utils/key-codes';
-import {Services} from '../../../src/services';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
 import {SwipeDef, SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {Toolbar} from './toolbar';
 import {
   closestAncestorElementBySelector,
-  isRTL,
-  tryFocus,
-} from '../../../src/dom';
+  realChildElements,
+} from '#core/dom/query';
 import {createCustomEvent} from '../../../src/event-helper';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce} from '#core/types/function';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '#core/types/object';
 import {handleAutoscroll} from './autoscroll';
+import {isRTL, tryFocus} from '#core/dom';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
+} from '#core/dom/layout/size-observer';
 import {removeFragment} from '../../../src/url';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
-import {setStyles, toggle} from '../../../src/style';
-import {toArray} from '../../../src/types';
+import {setStyles, toggle} from '#core/dom/style';
+import {toArray} from '#core/types/array';
+import {unmountAll} from '#core/dom/resource-container-helper';
 
 /** @private @const {string} */
 const TAG = 'amp-sidebar toolbar';
@@ -241,14 +242,14 @@ export class AmpSidebar extends AMP.BaseElement {
     element.appendChild(this.createScreenReaderCloseButton());
 
     this.registerDefaultAction((invocation) => {
-      const {trust, caller} = invocation;
+      const {caller, trust} = invocation;
       this.open_(trust, caller);
     }, 'open');
     this.registerAction('close', (invocation) => {
       this.close_(invocation.trust);
     });
     this.registerAction('toggle', (invocation) => {
-      const {trust, caller} = invocation;
+      const {caller, trust} = invocation;
       if (this.opened_) {
         this.close_(trust);
       } else {
@@ -454,7 +455,7 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   updateForOpened_(trust) {
     // On open sidebar
-    const children = this.getRealChildren();
+    const children = realChildElements(this.element);
     const owners = Services.ownersForDoc(this.element);
     owners.scheduleLayout(this.element, children);
     owners.scheduleResume(this.element, children);
@@ -469,6 +470,9 @@ export class AmpSidebar extends AMP.BaseElement {
     this.triggerEvent_(SidebarEvents.OPEN, trust);
     this.element.setAttribute('i-amphtml-sidebar-opened', '');
     this.getMaskElement_().setAttribute('i-amphtml-sidebar-opened', '');
+
+    // Set as a container for scheduler to load children elements.
+    this.setAsContainer();
   }
 
   /**
@@ -501,9 +505,16 @@ export class AmpSidebar extends AMP.BaseElement {
     toggle(this.getMaskElement_(), /* display */ false);
     Services.ownersForDoc(this.element).schedulePause(
       this.element,
-      this.getRealChildren()
+      realChildElements(this.element)
     );
     this.triggerEvent_(SidebarEvents.CLOSE, trust);
+
+    // Undo `setAsContainer`.
+    this.removeAsContainer();
+
+    // Unmount all children when the sidebar is closed. They will automatically
+    // remount when the sidebar is opened again.
+    unmountAll(this.element, /* includeSelf */ false);
   }
 
   /**

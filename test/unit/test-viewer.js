@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import {Services} from '../../src/services';
-import {ViewerImpl} from '../../src/service/viewer-impl';
+import {parseQueryString} from '#core/types/string/url';
+
+import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
+import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
+import {installPlatformService} from '#service/platform-impl';
+import {installTimerService} from '#service/timer-impl';
+import {ViewerImpl} from '#service/viewer-impl';
+
 import {dev} from '../../src/log';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installTimerService} from '../../src/service/timer-impl';
-import {
-  parseQueryString,
-  parseUrlDeprecated,
-  removeFragment,
-} from '../../src/url';
+import {parseUrlDeprecated, removeFragment} from '../../src/url';
 
 describes.sandboxed('Viewer', {}, (env) => {
   let windowMock;
@@ -535,7 +534,7 @@ describes.sandboxed('Viewer', {}, (env) => {
           viewer.receiveMessage('visibilitychange', {
             state: 'what is this',
           });
-        }).to.throw('Unknown VisibilityState value');
+        }).to.throw('Assertion failed');
       });
       expect(ampdoc.getVisibilityState()).to.equal('paused');
     });
