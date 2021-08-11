@@ -70,7 +70,7 @@ attr_lists: {
   attrs: {
     name: "loop"
     # Media query / boolean pairs
-    value_regex: "([^,]+\\s+(true|false),\\s*)*(true|false)"
+    value_regex: "([^,]+\\s+(true|false),\\s*)*(true|false|^$)"
   }
   attrs: {
     name: "mixed-length"

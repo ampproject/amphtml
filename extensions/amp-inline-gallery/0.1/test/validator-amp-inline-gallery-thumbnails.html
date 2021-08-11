@@ -51,9 +51,9 @@
     <amp-inline-gallery-thumbnails layout="fixed-height" height="96" aspect-ratio-height="0.00" aspect-ratio-width="3">
     </amp-inline-gallery-thumbnails>
   </amp-inline-gallery>
-  <!-- Invalid: Loop attribute without value -->
+  <!-- Invalid: Snap attribute without value -->
   <amp-inline-gallery layout="container">
-    <amp-inline-gallery-thumbnails layout="fixed-height" height="96" loop>
+    <amp-inline-gallery-thumbnails layout="fixed-height" height="96" snap>
     </amp-inline-gallery-thumbnails>
   </amp-inline-gallery>
   <!-- Valid: Wrapped with a parent div -->
@@ -71,6 +71,11 @@
   <!-- Valid: Loop attribute specified -->
   <amp-inline-gallery layout="container">
     <amp-inline-gallery-thumbnails layout="fixed-height" height="96" loop="true">
+    </amp-inline-gallery-thumbnails>
+  </amp-inline-gallery>
+  <!-- Valid: Loop attribute specified with no value -->
+  <amp-inline-gallery layout="container">
+    <amp-inline-gallery-thumbnails layout="fixed-height" height="96" loop>
     </amp-inline-gallery-thumbnails>
   </amp-inline-gallery>
 </body>
