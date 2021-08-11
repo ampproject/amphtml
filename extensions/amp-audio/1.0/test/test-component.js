@@ -21,7 +21,7 @@ import {mount} from 'enzyme';
 describes.realWin('Audio preact component v1.0', {}, (env) => {
   it('should load audio through attribute', () => {
     const wrapper = mount(
-      <Audio src="audio.mp3" style="height: 30px; width: 300px" />
+      <Audio src="audio.mp3" style={{height: '30px', width: '300px'}} />
     );
 
     const component = wrapper.find('audio');
@@ -31,11 +31,7 @@ describes.realWin('Audio preact component v1.0', {}, (env) => {
     expect(component.prop('src')).to.equal('audio.mp3');
     expect(component.prop('controls')).to.be.true;
 
-    /**
-     * Please verify the following assertion code.
-     */
-    expect(component.prop('style')).to.contain('width: 300px');
-    expect(component.prop('style')).to.contain('height: 30px');
+    expect(component.prop('style')).to.deep.equal({width: '300px', height: '30px'});
   });
   it('should not preload audio', () => {
     const wrapper = mount(<Audio src="audio.mp3" preload="none" />);
