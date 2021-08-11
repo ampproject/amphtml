@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import * as mode from '#core/mode';
-
 import {getMode} from './mode';
 
 /**
