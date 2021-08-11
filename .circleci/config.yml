@@ -66,13 +66,15 @@ commands:
       - restore_cache:
           name: 'Restore Git Cache'
           keys:
-            - git-cache-{{ arch }}-{{ .Branch }}-{{ .Revision }}
-            - git-cache-{{ arch }}-{{ .Branch }}-
-            - git-cache-{{ arch }}-
+            - git-{{ arch }}-{{ .Branch }}-{{ .Revision }}
+            - git-{{ arch }}-{{ .Branch }}-
+            - git-{{ arch }}-
       - checkout
+  cache_repo:
+    steps:
       - save_cache:
           name: 'Save Git Cache'
-          key: git-cache-{{ arch }}-{{ .Branch }}-{{ .Revision }}
+          key: git-{{ arch }}-{{ .Branch }}-{{ .Revision }}
           paths:
             - .git
   setup_node_environment:
@@ -148,6 +150,7 @@ jobs:
       name: base-docker-small
     steps:
       - checkout_repo
+      - cache_repo
       - run:
           name: 'Initialize Repository'
           command: ./.circleci/initialize_repo.sh
