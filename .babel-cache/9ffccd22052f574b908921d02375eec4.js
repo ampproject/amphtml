@@ -1,0 +1,36 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { getMode } from "./mode";
+
+/**
+ * Provides info about the current app. This return value may be cached and
+ * passed around as it will always be DCE'd.
+ * @param {?Window=} opt_win
+ * @return {!./mode.ModeDef}
+ */
+export function getModeObject(opt_win) {
+  return {
+    localDev: getMode(opt_win).localDev,
+    development: getMode(opt_win).development,
+    esm: false,
+    test: getMode(opt_win).test,
+    log: getMode(opt_win).log,
+    version: getMode(opt_win).version,
+    rtvVersion: getMode(opt_win).rtvVersion
+  };
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm1vZGUtb2JqZWN0LmpzIl0sIm5hbWVzIjpbImdldE1vZGUiLCJnZXRNb2RlT2JqZWN0Iiwib3B0X3dpbiIsImxvY2FsRGV2IiwiZGV2ZWxvcG1lbnQiLCJlc20iLCJ0ZXN0IiwibG9nIiwidmVyc2lvbiIsInJ0dlZlcnNpb24iXSwibWFwcGluZ3MiOiJBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUVBLFNBQVFBLE9BQVI7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTQyxhQUFULENBQXVCQyxPQUF2QixFQUFnQztBQUNyQyxTQUFPO0FBQ0xDLElBQUFBLFFBQVEsRUFBRUgsT0FBTyxDQUFDRSxPQUFELENBQVAsQ0FBaUJDLFFBRHRCO0FBRUxDLElBQUFBLFdBQVcsRUFBRUosT0FBTyxDQUFDRSxPQUFELENBQVAsQ0FBaUJFLFdBRnpCO0FBR0xDLElBQUFBLEdBQUcsT0FIRTtBQUlMQyxJQUFBQSxJQUFJLEVBQUVOLE9BQU8sQ0FBQ0UsT0FBRCxDQUFQLENBQWlCSSxJQUpsQjtBQUtMQyxJQUFBQSxHQUFHLEVBQUVQLE9BQU8sQ0FBQ0UsT0FBRCxDQUFQLENBQWlCSyxHQUxqQjtBQU1MQyxJQUFBQSxPQUFPLEVBQUVSLE9BQU8sQ0FBQ0UsT0FBRCxDQUFQLENBQWlCTSxPQU5yQjtBQU9MQyxJQUFBQSxVQUFVLEVBQUVULE9BQU8sQ0FBQ0UsT0FBRCxDQUFQLENBQWlCTztBQVB4QixHQUFQO0FBU0QiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIENvcHlyaWdodCAyMDE2IFRoZSBBTVAgSFRNTCBBdXRob3JzLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIExpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmVcbiAqIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuIFwiQVMtSVNcIiBCQVNJUyxcbiAqIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLlxuICogU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZFxuICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHtnZXRNb2RlfSBmcm9tICcuL21vZGUnO1xuXG4vKipcbiAqIFByb3ZpZGVzIGluZm8gYWJvdXQgdGhlIGN1cnJlbnQgYXBwLiBUaGlzIHJldHVybiB2YWx1ZSBtYXkgYmUgY2FjaGVkIGFuZFxuICogcGFzc2VkIGFyb3VuZCBhcyBpdCB3aWxsIGFsd2F5cyBiZSBEQ0UnZC5cbiAqIEBwYXJhbSB7P1dpbmRvdz19IG9wdF93aW5cbiAqIEByZXR1cm4geyEuL21vZGUuTW9kZURlZn1cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGdldE1vZGVPYmplY3Qob3B0X3dpbikge1xuICByZXR1cm4ge1xuICAgIGxvY2FsRGV2OiBnZXRNb2RlKG9wdF93aW4pLmxvY2FsRGV2LFxuICAgIGRldmVsb3BtZW50OiBnZXRNb2RlKG9wdF93aW4pLmRldmVsb3BtZW50LFxuICAgIGVzbTogSVNfRVNNLFxuICAgIHRlc3Q6IGdldE1vZGUob3B0X3dpbikudGVzdCxcbiAgICBsb2c6IGdldE1vZGUob3B0X3dpbikubG9nLFxuICAgIHZlcnNpb246IGdldE1vZGUob3B0X3dpbikudmVyc2lvbixcbiAgICBydHZWZXJzaW9uOiBnZXRNb2RlKG9wdF93aW4pLnJ0dlZlcnNpb24sXG4gIH07XG59XG4iXX0=
+// /Users/mszylkowski/src/amphtml/src/mode-object.js

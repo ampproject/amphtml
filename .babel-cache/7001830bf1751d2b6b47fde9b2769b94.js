@@ -1,0 +1,205 @@
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { layoutRectLtwh, moveLayoutRect, rectIntersection } from "../core/dom/layout/rect";
+import { dict } from "../core/types/object";
+import { MessageType } from "../3p-frame-messaging";
+import { SubscriptionApi } from "../iframe-helper";
+
+/**
+ * The structure that defines the rectangle used in intersection observers.
+ *
+ * @typedef {{
+ *   top: number,
+ *   bottom: number,
+ *   left: number,
+ *   right: number,
+ *   width: number,
+ *   height: number,
+ *   x: number,
+ *   y: number,
+ * }}
+ */
+export var DOMRect;
+export var DEFAULT_THRESHOLD = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
+
+/** @typedef {{
+ *    element: !Element,
+ *    currentThresholdSlot: number,
+ *  }}
+ */
+var ElementIntersectionStateDef;
+
+/** @const @private */
+var INIT_TIME = Date.now();
+
+/**
+ * A function to get the element's current IntersectionObserverEntry
+ * regardless of the intersetion ratio. Only available when element is not
+ * nested in a container iframe.
+ * @param {!../layout-rect.LayoutRectDef} element element's rect
+ * @param {?../layout-rect.LayoutRectDef} owner element's owner rect
+ * @param {!../layout-rect.LayoutRectDef} hostViewport hostViewport's rect
+ * @return {!IntersectionObserverEntry} A change entry.
+ */
+export function getIntersectionChangeEntry(element, owner, hostViewport) {
+  var intersection = rectIntersection(element, owner, hostViewport) || layoutRectLtwh(0, 0, 0, 0);
+  var ratio = intersectionRatio(intersection, element);
+  return calculateChangeEntry(element, hostViewport, intersection, ratio);
+}
+
+/**
+ * A class to help amp-iframe and amp-ad nested iframe listen to intersection
+ * change.
+ */
+export var IntersectionObserver3pHost = /*#__PURE__*/function () {
+  /**
+   * @param {!AMP.BaseElement} baseElement
+   * @param {!Element} iframe
+   */
+  function IntersectionObserver3pHost(baseElement, iframe) {
+    var _this = this;
+
+    _classCallCheck(this, IntersectionObserver3pHost);
+
+    /** @private @const {!AMP.BaseElement} */
+    this.baseElement_ = baseElement;
+
+    /** @private {?IntersectionObserver} */
+    this.intersectionObserver_ = null;
+
+    /** @private {?SubscriptionApi} */
+    this.subscriptionApi_ = new SubscriptionApi(iframe, MessageType.SEND_INTERSECTIONS, false, // is3P
+    function () {
+      _this.startSendingIntersection_();
+    });
+    this.intersectionObserver_ = new IntersectionObserver(function (entries) {
+      _this.subscriptionApi_.send(MessageType.INTERSECTION, dict({
+        'changes': entries.map(cloneEntryForCrossOrigin)
+      }));
+    }, {
+      threshold: DEFAULT_THRESHOLD
+    });
+  }
+
+  /**
+   * Function to start listening to viewport event. and observer intersection
+   * change on the element.
+   */
+  _createClass(IntersectionObserver3pHost, [{
+    key: "startSendingIntersection_",
+    value: function startSendingIntersection_() {
+      this.intersectionObserver_.observe(this.baseElement_.element);
+    }
+    /**
+     * Clean all listenrs
+     */
+
+  }, {
+    key: "destroy",
+    value: function destroy() {
+      this.intersectionObserver_.disconnect();
+      this.intersectionObserver_ = null;
+      this.subscriptionApi_.destroy();
+      this.subscriptionApi_ = null;
+    }
+  }]);
+
+  return IntersectionObserver3pHost;
+}();
+
+/**
+ * Returns the ratio of the smaller box's area to the larger box's area.
+ * @param {!../layout-rect.LayoutRectDef} smaller
+ * @param {!../layout-rect.LayoutRectDef} larger
+ * @return {number}
+ * @visibleForTesting
+ */
+export function intersectionRatio(smaller, larger) {
+  var smallerBoxArea = smaller.width * smaller.height;
+  var largerBoxArea = larger.width * larger.height;
+  // Check for a divide by zero
+  return largerBoxArea === 0 ? 0 : smallerBoxArea / largerBoxArea;
+}
+
+/**
+ * Helper function to calculate the IntersectionObserver change entry.
+ * @param {!../layout-rect.LayoutRectDef} element element's rect
+ * @param {?../layout-rect.LayoutRectDef} hostViewport hostViewport's rect
+ * @param {!../layout-rect.LayoutRectDef} intersection
+ * @param {number} ratio
+ * @return {!IntersectionObserverEntry}}
+ */
+function calculateChangeEntry(element, hostViewport, intersection, ratio) {
+  // If element not in an iframe.
+  // adjust all LayoutRect to hostViewport Origin.
+  var boundingClientRect = element;
+  var rootBounds = hostViewport;
+
+  // If no hostViewport is provided, element is inside an non-scrollable iframe.
+  // Every Layoutrect has already adjust their origin according to iframe
+  // rect origin. LayoutRect position is relative to iframe origin,
+  // thus relative to iframe's viewport origin because the viewport is at the
+  // iframe origin. No need to adjust position here.
+  if (hostViewport) {
+    // If element not in an iframe.
+    // adjust all LayoutRect to hostViewport Origin.
+    rootBounds =
+    /** @type {!../layout-rect.LayoutRectDef} */
+    rootBounds;
+    intersection = moveLayoutRect(intersection, -hostViewport.left, -hostViewport.top);
+    // The element is relative to (0, 0), while the viewport moves. So, we must
+    // adjust.
+    boundingClientRect = moveLayoutRect(boundingClientRect, -hostViewport.left, -hostViewport.top);
+    // Now, move the viewport to (0, 0)
+    rootBounds = moveLayoutRect(rootBounds, -hostViewport.left, -hostViewport.top);
+  }
+
+  return (
+    /** @type {!IntersectionObserverEntry} */
+    {
+      time: typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now() - INIT_TIME,
+      rootBounds: rootBounds,
+      boundingClientRect: boundingClientRect,
+      intersectionRect: intersection,
+      intersectionRatio: ratio
+    }
+  );
+}
+
+/**
+ * @param {!IntersectionObserverEntry} entry
+ * @return {!IntersectionObserverEntry}
+ */
+function cloneEntryForCrossOrigin(entry) {
+  return (
+    /** @type {!IntersectionObserverEntry} */
+    {
+      'time': entry.time,
+      'rootBounds': entry.rootBounds,
+      'boundingClientRect': entry.boundingClientRect,
+      'intersectionRect': entry.intersectionRect,
+      'intersectionRatio': entry.intersectionRatio
+    }
+  );
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImludGVyc2VjdGlvbi1vYnNlcnZlci0zcC1ob3N0LmpzIl0sIm5hbWVzIjpbImxheW91dFJlY3RMdHdoIiwibW92ZUxheW91dFJlY3QiLCJyZWN0SW50ZXJzZWN0aW9uIiwiZGljdCIsIk1lc3NhZ2VUeXBlIiwiU3Vic2NyaXB0aW9uQXBpIiwiRE9NUmVjdCIsIkRFRkFVTFRfVEhSRVNIT0xEIiwiRWxlbWVudEludGVyc2VjdGlvblN0YXRlRGVmIiwiSU5JVF9USU1FIiwiRGF0ZSIsIm5vdyIsImdldEludGVyc2VjdGlvbkNoYW5nZUVudHJ5IiwiZWxlbWVudCIsIm93bmVyIiwiaG9zdFZpZXdwb3J0IiwiaW50ZXJzZWN0aW9uIiwicmF0aW8iLCJpbnRlcnNlY3Rpb25SYXRpbyIsImNhbGN1bGF0ZUNoYW5nZUVudHJ5IiwiSW50ZXJzZWN0aW9uT2JzZXJ2ZXIzcEhvc3QiLCJiYXNlRWxlbWVudCIsImlmcmFtZSIsImJhc2VFbGVtZW50XyIsImludGVyc2VjdGlvbk9ic2VydmVyXyIsInN1YnNjcmlwdGlvbkFwaV8iLCJTRU5EX0lOVEVSU0VDVElPTlMiLCJzdGFydFNlbmRpbmdJbnRlcnNlY3Rpb25fIiwiSW50ZXJzZWN0aW9uT2JzZXJ2ZXIiLCJlbnRyaWVzIiwic2VuZCIsIklOVEVSU0VDVElPTiIsIm1hcCIsImNsb25lRW50cnlGb3JDcm9zc09yaWdpbiIsInRocmVzaG9sZCIsIm9ic2VydmUiLCJkaXNjb25uZWN0IiwiZGVzdHJveSIsInNtYWxsZXIiLCJsYXJnZXIiLCJzbWFsbGVyQm94QXJlYSIsIndpZHRoIiwiaGVpZ2h0IiwibGFyZ2VyQm94QXJlYSIsImJvdW5kaW5nQ2xpZW50UmVjdCIsInJvb3RCb3VuZHMiLCJsZWZ0IiwidG9wIiwidGltZSIsInBlcmZvcm1hbmNlIiwiaW50ZXJzZWN0aW9uUmVjdCIsImVudHJ5Il0sIm1hcHBpbmdzIjoiOzs7Ozs7QUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtB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WUFBWSxDQUFDK0IsSUFGVyxFQUd6QixDQUFDL0IsWUFBWSxDQUFDZ0MsR0FIVyxDQUEzQjtBQUtEOztBQUVEO0FBQU87QUFBMkM7QUFDaERDLE1BQUFBLElBQUksRUFDRixPQUFPQyxXQUFQLEtBQXVCLFdBQXZCLElBQXNDQSxXQUFXLENBQUN0QyxHQUFsRCxHQUNJc0MsV0FBVyxDQUFDdEMsR0FBWixFQURKLEdBRUlELElBQUksQ0FBQ0MsR0FBTCxLQUFhRixTQUo2QjtBQUtoRG9DLE1BQUFBLFVBQVUsRUFBVkEsVUFMZ0Q7QUFNaERELE1BQUFBLGtCQUFrQixFQUFsQkEsa0JBTmdEO0FBT2hETSxNQUFBQSxnQkFBZ0IsRUFBRWxDLFlBUDhCO0FBUWhERSxNQUFBQSxpQkFBaUIsRUFBRUQ7QUFSNkI7QUFBbEQ7QUFVRDs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBLFNBQVNnQix3QkFBVCxDQUFrQ2tCLEtBQWxDLEVBQXlDO0FBQ3ZDO0FBQU87QUFBMkM7QUFDaEQsY0FBUUEsS0FBSyxDQUFDSCxJQURrQztBQUVoRCxvQkFBY0csS0FBSyxDQUFDTixVQUY0QjtBQUdoRCw0QkFBc0JNLEtBQUssQ0FBQ1Asa0JBSG9CO0FBSWhELDBCQUFvQk8sS0FBSyxDQUFDRCxnQkFKc0I7QUFLaEQsMkJBQXFCQyxLQUFLLENBQUNqQztBQUxxQjtBQUFsRDtBQU9EIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb3B5cmlnaHQgMjAxNiBUaGUgQU1QIEhUTUwgQXV0aG9ycy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTLUlTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbmltcG9ydCB7XG4gIGxheW91dFJlY3RMdHdoLFxuICBtb3ZlTGF5b3V0UmVjdCxcbiAgcmVjdEludGVyc2VjdGlvbixcbn0gZnJvbSAnI2NvcmUvZG9tL2xheW91dC9yZWN0JztcbmltcG9ydCB7ZGljdH0gZnJvbSAnI2NvcmUvdHlwZXMvb2JqZWN0JztcblxuaW1wb3J0IHtNZXNzYWdlVHlwZX0gZnJvbSAnLi4vM3AtZnJhbWUtbWVzc2FnaW5nJztcbmltcG9ydCB7U3Vic2NyaXB0aW9uQXBpfSBmcm9tICcuLi9pZnJhbWUtaGVscGVyJztcblxuLyoqXG4gKiBUaGUgc3RydWN0dXJlIHRoYXQgZGVmaW5lcyB0aGUgcmVjdGFuZ2xlIHVzZWQgaW4gaW50ZXJzZWN0aW9uIG9ic2VydmVycy5cbiAqXG4gKiBAdHlwZWRlZiB7e1xuICogICB0b3A6IG51bWJlcixcbiAqICAgYm90dG9tOiBudW1iZXIsXG4gKiAgIGxlZnQ6IG51bWJlcixcbiAqICAgcmlnaHQ6IG51bWJlcixcbiAqICAgd2lkdGg6IG51bWJlcixcbiAqICAgaGVpZ2h0OiBudW1iZXIsXG4gKiAgIHg6IG51bWJlcixcbiAqICAgeTogbnVtYmVyLFxuICogfX1cbiAqL1xuZXhwb3J0IGxldCBET01SZWN0O1xuXG5leHBvcnQgY29uc3QgREVGQVVMVF9USFJFU0hPTEQgPSBbXG4gIDAsIDAuMDUsIDAuMSwgMC4xNSwgMC4yLCAwLjI1LCAwLjMsIDAuMzUsIDAuNCwgMC40NSwgMC41LCAwLjU1LCAwLjYsIDAuNjUsXG4gIDAuNywgMC43NSwgMC44LCAwLjg1LCAwLjksIDAuOTUsIDEsXG5dO1xuXG4vKiogQHR5cGVkZWYge3tcbiAqICAgIGVsZW1lbnQ6ICFFbGVtZW50LFxuICogICAgY3VycmVudFRocmVzaG9sZFNsb3Q6IG51bWJlcixcbiAqICB9fVxuICovXG5sZXQgRWxlbWVudEludGVyc2VjdGlvblN0YXRlRGVmO1xuXG4vKiogQGNvbnN0IEBwcml2YXRlICovXG5jb25zdCBJTklUX1RJTUUgPSBEYXRlLm5vdygpO1xuXG4vKipcbiAqIEEgZnVuY3Rpb24gdG8gZ2V0IHRoZSBlbGVtZW50J3MgY3VycmVudCBJbnRlcnNlY3Rpb25PYnNlcnZlckVudHJ5XG4gKiByZWdhcmRsZXNzIG9mIHRoZSBpbnRlcnNldGlvbiByYXRpby4gT25seSBhdmFpbGFibGUgd2hlbiBlbGVtZW50IGlzIG5vdFxuICogbmVzdGVkIGluIGEgY29udGFpbmVyIGlmcmFtZS5cbiAqIEBwYXJhbSB7IS4uL2xheW91dC1yZWN0LkxheW91dFJlY3REZWZ9IGVsZW1lbnQgZWxlbWVudCdzIHJlY3RcbiAqIEBwYXJhbSB7Py4uL2xheW91dC1yZWN0LkxheW91dFJlY3REZWZ9IG93bmVyIGVsZW1lbnQncyBvd25lciByZWN0XG4gKiBAcGFyYW0geyEuLi9sYXlvdXQtcmVjdC5MYXlvdXRSZWN0RGVmfSBob3N0Vmlld3BvcnQgaG9zdFZpZXdwb3J0J3MgcmVjdFxuICogQHJldHVybiB7IUludGVyc2VjdGlvbk9ic2VydmVyRW50cnl9IEEgY2hhbmdlIGVudHJ5LlxuICovXG5leHBvcnQgZnVuY3Rpb24gZ2V0SW50ZXJzZWN0aW9uQ2hhbmdlRW50cnkoZWxlbWVudCwgb3duZXIsIGhvc3RWaWV3cG9ydCkge1xuICBjb25zdCBpbnRlcnNlY3Rpb24gPVxuICAgIHJlY3RJbnRlcnNlY3Rpb24oZWxlbWVudCwgb3duZXIsIGhvc3RWaWV3cG9ydCkgfHxcbiAgICBsYXlvdXRSZWN0THR3aCgwLCAwLCAwLCAwKTtcbiAgY29uc3QgcmF0aW8gPSBpbnRlcnNlY3Rpb25SYXRpbyhpbnRlcnNlY3Rpb24sIGVsZW1lbnQpO1xuICByZXR1cm4gY2FsY3VsYXRlQ2hhbmdlRW50cnkoZWxlbWVudCwgaG9zdFZpZXdwb3J0LCBpbnRlcnNlY3Rpb24sIHJhdGlvKTtcbn1cblxuLyoqXG4gKiBBIGNsYXNzIHRvIGhlbHAgYW1wLWlmcmFtZSBhbmQgYW1wLWFkIG5lc3RlZCBpZnJhbWUgbGlzdGVuIHRvIGludGVyc2VjdGlvblxuICogY2hhbmdlLlxuICovXG5leHBvcnQgY2xhc3MgSW50ZXJzZWN0aW9uT2JzZXJ2ZXIzcEhvc3Qge1xuICAvKipcbiAgICogQHBhcmFtIHshQU1QLkJhc2VFbGVtZW50fSBiYXNlRWxlbWVudFxuICAgKiBAcGFyYW0geyFFbGVtZW50fSBpZnJhbWVcbiAgICovXG4gIGNvbnN0cnVjdG9yKGJhc2VFbGVtZW50LCBpZnJhbWUpIHtcbiAgICAvKiogQHByaXZhdGUgQGNvbnN0IHshQU1QLkJhc2VFbGVtZW50fSAqL1xuICAgIHRoaXMuYmFzZUVsZW1lbnRfID0gYmFzZUVsZW1lbnQ7XG5cbiAgICAvKiogQHByaXZhdGUgez9JbnRlcnNlY3Rpb25PYnNlcnZlcn0gKi9cbiAgICB0aGlzLmludGVyc2VjdGlvbk9ic2VydmVyXyA9IG51bGw7XG5cbiAgICAvKiogQHByaXZhdGUgez9TdWJzY3JpcHRpb25BcGl9ICovXG4gICAgdGhpcy5zdWJzY3JpcHRpb25BcGlfID0gbmV3IFN1YnNjcmlwdGlvbkFwaShcbiAgICAgIGlmcmFtZSxcbiAgICAgIE1lc3NhZ2VUeXBlLlNFTkRfSU5URVJTRUNUSU9OUyxcbiAgICAgIGZhbHNlLCAvLyBpczNQXG4gICAgICAoKSA9PiB7XG4gICAgICAgIHRoaXMuc3RhcnRTZW5kaW5nSW50ZXJzZWN0aW9uXygpO1xuICAgICAgfVxuICAgICk7XG5cbiAgICB0aGlzLmludGVyc2VjdGlvbk9ic2VydmVyXyA9IG5ldyBJbnRlcnNlY3Rpb25PYnNlcnZlcihcbiAgICAgIChlbnRyaWVzKSA9PiB7XG4gICAgICAgIHRoaXMuc3Vic2NyaXB0aW9uQXBpXy5zZW5kKFxuICAgICAgICAgIE1lc3NhZ2VUeXBlLklOVEVSU0VDVElPTixcbiAgICAgICAgICBkaWN0KHsnY2hhbmdlcyc6IGVudHJpZXMubWFwKGNsb25lRW50cnlGb3JDcm9zc09yaWdpbil9KVxuICAgICAgICApO1xuICAgICAgfSxcbiAgICAgIHt0aHJlc2hvbGQ6IERFRkFVTFRfVEhSRVNIT0xEfVxuICAgICk7XG4gIH1cblxuICAvKipcbiAgICogRnVuY3Rpb24gdG8gc3RhcnQgbGlzdGVuaW5nIHRvIHZpZXdwb3J0IGV2ZW50LiBhbmQgb2JzZXJ2ZXIgaW50ZXJzZWN0aW9uXG4gICAqIGNoYW5nZSBvbiB0aGUgZWxlbWVudC5cbiAgICovXG4gIHN0YXJ0U2VuZGluZ0ludGVyc2VjdGlvbl8oKSB7XG4gICAgdGhpcy5pbnRlcnNlY3Rpb25PYnNlcnZlcl8ub2JzZXJ2ZSh0aGlzLmJhc2VFbGVtZW50Xy5lbGVtZW50KTtcbiAgfVxuXG4gIC8qKlxuICAgKiBDbGVhbiBhbGwgbGlzdGVucnNcbiAgICovXG4gIGRlc3Ryb3koKSB7XG4gICAgdGhpcy5pbnRlcnNlY3Rpb25PYnNlcnZlcl8uZGlzY29ubmVjdCgpO1xuICAgIHRoaXMuaW50ZXJzZWN0aW9uT2JzZXJ2ZXJfID0gbnVsbDtcbiAgICB0aGlzLnN1YnNjcmlwdGlvbkFwaV8uZGVzdHJveSgpO1xuICAgIHRoaXMuc3Vic2NyaXB0aW9uQXBpXyA9IG51bGw7XG4gIH1cbn1cblxuLyoqXG4gKiBSZXR1cm5zIHRoZSByYXRpbyBvZiB0aGUgc21hbGxlciBib3gncyBhcmVhIHRvIHRoZSBsYXJnZXIgYm94J3MgYXJlYS5cbiAqIEBwYXJhbSB7IS4uL2xheW91dC1yZWN0LkxheW91dFJlY3REZWZ9IHNtYWxsZXJcbiAqIEBwYXJhbSB7IS4uL2xheW91dC1yZWN0LkxheW91dFJlY3REZWZ9IGxhcmdlclxuICogQHJldHVybiB7bnVtYmVyfVxuICogQHZpc2libGVGb3JUZXN0aW5nXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBpbnRlcnNlY3Rpb25SYXRpbyhzbWFsbGVyLCBsYXJnZXIpIHtcbiAgY29uc3Qgc21hbGxlckJveEFyZWEgPSBzbWFsbGVyLndpZHRoICogc21hbGxlci5oZWlnaHQ7XG4gIGNvbnN0IGxhcmdlckJveEFyZWEgPSBsYXJnZXIud2lkdGggKiBsYXJnZXIuaGVpZ2h0O1xuXG4gIC8vIENoZWNrIGZvciBhIGRpdmlkZSBieSB6ZXJvXG4gIHJldHVybiBsYXJnZXJCb3hBcmVhID09PSAwID8gMCA6IHNtYWxsZXJCb3hBcmVhIC8gbGFyZ2VyQm94QXJlYTtcbn1cblxuLyoqXG4gKiBIZWxwZXIgZnVuY3Rpb24gdG8gY2FsY3VsYXRlIHRoZSBJbnRlcnNlY3Rpb25PYnNlcnZlciBjaGFuZ2UgZW50cnkuXG4gKiBAcGFyYW0geyEuLi9sYXlvdXQtcmVjdC5MYXlvdXRSZWN0RGVmfSBlbGVtZW50IGVsZW1lbnQncyByZWN0XG4gKiBAcGFyYW0gez8uLi9sYXlvdXQtcmVjdC5MYXlvdXRSZWN0RGVmfSBob3N0Vmlld3BvcnQgaG9zdFZpZXdwb3J0J3MgcmVjdFxuICogQHBhcmFtIHshLi4vbGF5b3V0LXJlY3QuTGF5b3V0UmVjdERlZn0gaW50ZXJzZWN0aW9uXG4gKiBAcGFyYW0ge251bWJlcn0gcmF0aW9cbiAqIEByZXR1cm4geyFJbnRlcnNlY3Rpb25PYnNlcnZlckVudHJ5fX1cbiAqL1xuZnVuY3Rpb24gY2FsY3VsYXRlQ2hhbmdlRW50cnkoZWxlbWVudCwgaG9zdFZpZXdwb3J0LCBpbnRlcnNlY3Rpb24sIHJhdGlvKSB7XG4gIC8vIElmIGVsZW1lbnQgbm90IGluIGFuIGlmcmFtZS5cbiAgLy8gYWRqdXN0IGFsbCBMYXlvdXRSZWN0IHRvIGhvc3RWaWV3cG9ydCBPcmlnaW4uXG4gIGxldCBib3VuZGluZ0NsaWVudFJlY3QgPSBlbGVtZW50O1xuICBsZXQgcm9vdEJvdW5kcyA9IGhvc3RWaWV3cG9ydDtcbiAgLy8gSWYgbm8gaG9zdFZpZXdwb3J0IGlzIHByb3ZpZGVkLCBlbGVtZW50IGlzIGluc2lkZSBhbiBub24tc2Nyb2xsYWJsZSBpZnJhbWUuXG4gIC8vIEV2ZXJ5IExheW91dHJlY3QgaGFzIGFscmVhZHkgYWRqdXN0IHRoZWlyIG9yaWdpbiBhY2NvcmRpbmcgdG8gaWZyYW1lXG4gIC8vIHJlY3Qgb3JpZ2luLiBMYXlvdXRSZWN0IHBvc2l0aW9uIGlzIHJlbGF0aXZlIHRvIGlmcmFtZSBvcmlnaW4sXG4gIC8vIHRodXMgcmVsYXRpdmUgdG8gaWZyYW1lJ3Mgdmlld3BvcnQgb3JpZ2luIGJlY2F1c2UgdGhlIHZpZXdwb3J0IGlzIGF0IHRoZVxuICAvLyBpZnJhbWUgb3JpZ2luLiBObyBuZWVkIHRvIGFkanVzdCBwb3NpdGlvbiBoZXJlLlxuXG4gIGlmIChob3N0Vmlld3BvcnQpIHtcbiAgICAvLyBJZiBlbGVtZW50IG5vdCBpbiBhbiBpZnJhbWUuXG4gICAgLy8gYWRqdXN0IGFsbCBMYXlvdXRSZWN0IHRvIGhvc3RWaWV3cG9ydCBPcmlnaW4uXG4gICAgcm9vdEJvdW5kcyA9IC8qKiBAdHlwZSB7IS4uL2xheW91dC1yZWN0LkxheW91dFJlY3REZWZ9ICovIChyb290Qm91bmRzKTtcbiAgICBpbnRlcnNlY3Rpb24gPSBtb3ZlTGF5b3V0UmVjdChcbiAgICAgIGludGVyc2VjdGlvbixcbiAgICAgIC1ob3N0Vmlld3BvcnQubGVmdCxcbiAgICAgIC1ob3N0Vmlld3BvcnQudG9wXG4gICAgKTtcbiAgICAvLyBUaGUgZWxlbWVudCBpcyByZWxhdGl2ZSB0byAoMCwgMCksIHdoaWxlIHRoZSB2aWV3cG9ydCBtb3Zlcy4gU28sIHdlIG11c3RcbiAgICAvLyBhZGp1c3QuXG4gICAgYm91bmRpbmdDbGllbnRSZWN0ID0gbW92ZUxheW91dFJlY3QoXG4gICAgICBib3VuZGluZ0NsaWVudFJlY3QsXG4gICAgICAtaG9zdFZpZXdwb3J0LmxlZnQsXG4gICAgICAtaG9zdFZpZXdwb3J0LnRvcFxuICAgICk7XG4gICAgLy8gTm93LCBtb3ZlIHRoZSB2aWV3cG9ydCB0byAoMCwgMClcbiAgICByb290Qm91bmRzID0gbW92ZUxheW91dFJlY3QoXG4gICAgICByb290Qm91bmRzLFxuICAgICAgLWhvc3RWaWV3cG9ydC5sZWZ0LFxuICAgICAgLWhvc3RWaWV3cG9ydC50b3BcbiAgICApO1xuICB9XG5cbiAgcmV0dXJuIC8qKiBAdHlwZSB7IUludGVyc2VjdGlvbk9ic2VydmVyRW50cnl9ICovICh7XG4gICAgdGltZTpcbiAgICAgIHR5cGVvZiBwZXJmb3JtYW5jZSAhPT0gJ3VuZGVmaW5lZCcgJiYgcGVyZm9ybWFuY2Uubm93XG4gICAgICAgID8gcGVyZm9ybWFuY2Uubm93KClcbiAgICAgICAgOiBEYXRlLm5vdygpIC0gSU5JVF9USU1FLFxuICAgIHJvb3RCb3VuZHMsXG4gICAgYm91bmRpbmdDbGllbnRSZWN0LFxuICAgIGludGVyc2VjdGlvblJlY3Q6IGludGVyc2VjdGlvbixcbiAgICBpbnRlcnNlY3Rpb25SYXRpbzogcmF0aW8sXG4gIH0pO1xufVxuXG4vKipcbiAqIEBwYXJhbSB7IUludGVyc2VjdGlvbk9ic2VydmVyRW50cnl9IGVudHJ5XG4gKiBAcmV0dXJuIHshSW50ZXJzZWN0aW9uT2JzZXJ2ZXJFbnRyeX1cbiAqL1xuZnVuY3Rpb24gY2xvbmVFbnRyeUZvckNyb3NzT3JpZ2luKGVudHJ5KSB7XG4gIHJldHVybiAvKiogQHR5cGUgeyFJbnRlcnNlY3Rpb25PYnNlcnZlckVudHJ5fSAqLyAoe1xuICAgICd0aW1lJzogZW50cnkudGltZSxcbiAgICAncm9vdEJvdW5kcyc6IGVudHJ5LnJvb3RCb3VuZHMsXG4gICAgJ2JvdW5kaW5nQ2xpZW50UmVjdCc6IGVudHJ5LmJvdW5kaW5nQ2xpZW50UmVjdCxcbiAgICAnaW50ZXJzZWN0aW9uUmVjdCc6IGVudHJ5LmludGVyc2VjdGlvblJlY3QsXG4gICAgJ2ludGVyc2VjdGlvblJhdGlvJzogZW50cnkuaW50ZXJzZWN0aW9uUmF0aW8sXG4gIH0pO1xufVxuIl19
+// /Users/mszylkowski/src/amphtml/src/utils/intersection-observer-3p-host.js

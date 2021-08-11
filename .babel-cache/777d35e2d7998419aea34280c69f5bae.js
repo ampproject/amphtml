@@ -1,0 +1,40 @@
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { LocalizationService } from "../../../src/service/localization";
+import { Services } from "../../../src/service";
+import { registerServiceBuilderForDoc } from "../../../src/service-helpers";
+
+/**
+ * Util function to retrieve the localization service. Ensures we can retrieve
+ * the service synchronously from the amp-story codebase without running into
+ * race conditions.
+ * @param {!Element} element
+ * @return {!../../../src/service/localization.LocalizationService}
+ */
+export var getLocalizationService = function getLocalizationService(element) {
+  var localizationService = Services.localizationForDoc(element);
+
+  if (!localizationService) {
+    localizationService = new LocalizationService(element);
+    registerServiceBuilderForDoc(element, 'localization', function () {
+      return localizationService;
+    });
+  }
+
+  return localizationService;
+};
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFtcC1zdG9yeS1sb2NhbGl6YXRpb24tc2VydmljZS5qcyJdLCJuYW1lcyI6WyJMb2NhbGl6YXRpb25TZXJ2aWNlIiwiU2VydmljZXMiLCJyZWdpc3RlclNlcnZpY2VCdWlsZGVyRm9yRG9jIiwiZ2V0TG9jYWxpemF0aW9uU2VydmljZSIsImVsZW1lbnQiLCJsb2NhbGl6YXRpb25TZXJ2aWNlIiwibG9jYWxpemF0aW9uRm9yRG9jIl0sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFFQSxTQUFRQSxtQkFBUjtBQUNBLFNBQVFDLFFBQVI7QUFDQSxTQUFRQyw0QkFBUjs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sSUFBTUMsc0JBQXNCLEdBQUcsU0FBekJBLHNCQUF5QixDQUFDQyxPQUFELEVBQWE7QUFDakQsTUFBSUMsbUJBQW1CLEdBQUdKLFFBQVEsQ0FBQ0ssa0JBQVQsQ0FBNEJGLE9BQTVCLENBQTFCOztBQUVBLE1BQUksQ0FBQ0MsbUJBQUwsRUFBMEI7QUFDeEJBLElBQUFBLG1CQUFtQixHQUFHLElBQUlMLG1CQUFKLENBQXdCSSxPQUF4QixDQUF0QjtBQUNBRixJQUFBQSw0QkFBNEIsQ0FBQ0UsT0FBRCxFQUFVLGNBQVYsRUFBMEIsWUFBWTtBQUNoRSxhQUFPQyxtQkFBUDtBQUNELEtBRjJCLENBQTVCO0FBR0Q7O0FBRUQsU0FBT0EsbUJBQVA7QUFDRCxDQVhNIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb3B5cmlnaHQgMjAyMCBUaGUgQU1QIEhUTUwgQXV0aG9ycy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTLUlTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbmltcG9ydCB7TG9jYWxpemF0aW9uU2VydmljZX0gZnJvbSAnI3NlcnZpY2UvbG9jYWxpemF0aW9uJztcbmltcG9ydCB7U2VydmljZXN9IGZyb20gJyNzZXJ2aWNlJztcbmltcG9ydCB7cmVnaXN0ZXJTZXJ2aWNlQnVpbGRlckZvckRvY30gZnJvbSAnLi4vLi4vLi4vc3JjL3NlcnZpY2UtaGVscGVycyc7XG5cbi8qKlxuICogVXRpbCBmdW5jdGlvbiB0byByZXRyaWV2ZSB0aGUgbG9jYWxpemF0aW9uIHNlcnZpY2UuIEVuc3VyZXMgd2UgY2FuIHJldHJpZXZlXG4gKiB0aGUgc2VydmljZSBzeW5jaHJvbm91c2x5IGZyb20gdGhlIGFtcC1zdG9yeSBjb2RlYmFzZSB3aXRob3V0IHJ1bm5pbmcgaW50b1xuICogcmFjZSBjb25kaXRpb25zLlxuICogQHBhcmFtIHshRWxlbWVudH0gZWxlbWVudFxuICogQHJldHVybiB7IS4uLy4uLy4uL3NyYy9zZXJ2aWNlL2xvY2FsaXphdGlvbi5Mb2NhbGl6YXRpb25TZXJ2aWNlfVxuICovXG5leHBvcnQgY29uc3QgZ2V0TG9jYWxpemF0aW9uU2VydmljZSA9IChlbGVtZW50KSA9PiB7XG4gIGxldCBsb2NhbGl6YXRpb25TZXJ2aWNlID0gU2VydmljZXMubG9jYWxpemF0aW9uRm9yRG9jKGVsZW1lbnQpO1xuXG4gIGlmICghbG9jYWxpemF0aW9uU2VydmljZSkge1xuICAgIGxvY2FsaXphdGlvblNlcnZpY2UgPSBuZXcgTG9jYWxpemF0aW9uU2VydmljZShlbGVtZW50KTtcbiAgICByZWdpc3RlclNlcnZpY2VCdWlsZGVyRm9yRG9jKGVsZW1lbnQsICdsb2NhbGl6YXRpb24nLCBmdW5jdGlvbiAoKSB7XG4gICAgICByZXR1cm4gbG9jYWxpemF0aW9uU2VydmljZTtcbiAgICB9KTtcbiAgfVxuXG4gIHJldHVybiBsb2NhbGl6YXRpb25TZXJ2aWNlO1xufTtcbiJdfQ==
+// /Users/mszylkowski/src/amphtml/extensions/amp-story/1.0/amp-story-localization-service.js

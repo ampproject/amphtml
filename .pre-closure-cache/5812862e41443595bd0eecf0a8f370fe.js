@@ -1,0 +1,1 @@
+export const CSS = ".i-amphtml-story-interactive-img-option{--i-amphtml-interactive-option-post-color:var(\n    --interactive-accent-color\n  )!important}\n/*# sourceURL=/extensions/amp-story-interactive/0.1/amp-story-interactive-img-poll.css*/";

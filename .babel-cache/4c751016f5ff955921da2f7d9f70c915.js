@@ -1,0 +1,102 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Allows for runtime configuration. Internally, the runtime should
+ * use the src/config.js module for various constants. We can use the
+ * AMP_CONFIG global to translate user-defined configurations to this
+ * module.
+ * @type {!Object<string, string>}
+ */
+var env = self.AMP_CONFIG || {};
+var thirdPartyFrameRegex = (typeof env['thirdPartyFrameRegex'] == 'string' ? new RegExp(env['thirdPartyFrameRegex']) : env['thirdPartyFrameRegex']) || /^d-\d+\.ampproject\.net$/;
+var cdnProxyRegex = (typeof env['cdnProxyRegex'] == 'string' ? new RegExp(env['cdnProxyRegex']) : env['cdnProxyRegex']) || /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org$/;
+
+/**
+ * Check for a custom URL definition in special <meta> tags. Note that this does
+ * not allow for distinct custom URLs in AmpDocShadow instances. The shell is
+ * allowed to define one set of custom URLs via AMP_CONFIG (recommended) or by
+ * including <meta> tags in the shell <head>. Those custom URLs then apply to
+ * all AMP documents loaded in the shell.
+ * @param {string} name
+ * @return {?string}
+ * @private
+ */
+function getMetaUrl(name) {
+  // Avoid exceptions in unit tests
+  if (!self.document || !self.document.head) {
+    return null;
+  }
+
+  // Disallow on proxy origins
+  if (self.location && cdnProxyRegex.test(self.location.origin)) {
+    return null;
+  }
+
+  var metaEl = self.document.head.
+  /*OK*/
+  querySelector("meta[name=\"" + name + "\"]");
+  return metaEl && metaEl.getAttribute('content') || null;
+}
+
+/**
+ * @typedef {{
+ *   thirdParty: string,
+ *   thirdPartyFrameHost: string,
+ *   thirdPartyFrameRegex: !RegExp,
+ *   cdn: string,
+ *   cdnProxyRegex: !RegExp,
+ *   localhostRegex: !RegExp,
+ *   errorReporting: string,
+ *   betaErrorReporting: string,
+ *   localDev: boolean,
+ *   trustedViewerHosts: !Array<!RegExp>,
+ *   geoApi: ?string,
+ * }}
+ */
+export var urls = {
+  thirdParty: env['thirdPartyUrl'] || 'https://3p.ampproject.net',
+  thirdPartyFrameHost: env['thirdPartyFrameHost'] || 'ampproject.net',
+  thirdPartyFrameRegex: thirdPartyFrameRegex,
+  cdn: env['cdnUrl'] || getMetaUrl('runtime-host') || 'https://cdn.ampproject.org',
+
+  /* Note that cdnProxyRegex is only ever checked against origins
+   * (proto://host[:port]) so does not need to consider path
+   */
+  cdnProxyRegex: cdnProxyRegex,
+  localhostRegex: /^https?:\/\/localhost(:\d+)?$/,
+  errorReporting: env['errorReportingUrl'] || 'https://us-central1-amp-error-reporting.cloudfunctions.net/r',
+  betaErrorReporting: env['betaErrorReportingUrl'] || 'https://us-central1-amp-error-reporting.cloudfunctions.net/r-beta',
+  localDev: env['localDev'] || false,
+
+  /**
+   * These domains are trusted with more sensitive viewer operations such as
+   * propagating the referrer. If you believe your domain should be here,
+   * file the issue on GitHub to discuss. The process will be similar
+   * (but somewhat more stringent) to the one described in the [3p/README.md](
+   * https://github.com/ampproject/amphtml/blob/main/3p/README.md)
+   *
+   * {!Array<!RegExp>}
+   */
+  trustedViewerHosts: [/(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/, /(^|\.)gmail\.(com|dev)$/],
+  // Optional fallback API if amp-geo is left unpatched
+  geoApi: env['geoApiUrl'] || getMetaUrl('amp-geo-api')
+};
+export var config = {
+  urls: urls
+};
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImNvbmZpZy5qcyJdLCJuYW1lcyI6WyJlbnYiLCJzZWxmIiwiQU1QX0NPTkZJRyIsInRoaXJkUGFydHlGcmFtZVJlZ2V4IiwiUmVnRXhwIiwiY2RuUHJveHlSZWdleCIsImdldE1ldGFVcmwiLCJuYW1lIiwiZG9jdW1lbnQiLCJoZWFkIiwibG9jYXRpb24iLCJ0ZXN0Iiwib3JpZ2luIiwibWV0YUVsIiwicXVlcnlTZWxlY3RvciIsImdldEF0dHJpYnV0ZSIsInVybHMiLCJ0aGlyZFBhcnR5IiwidGhpcmRQYXJ0eUZyYW1lSG9zdCIsImNkbiIsImxvY2FsaG9zdFJlZ2V4IiwiZXJyb3JSZXBvcnRpbmciLCJiZXRhRXJyb3JSZXBvcnRpbmciLCJsb2NhbERldiIsInRydXN0ZWRWaWV3ZXJIb3N0cyIsImdlb0FwaSIsImNvbmZpZyJdLCJtYXBwaW5ncyI6IkFBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsSUFBTUEsR0FBRyxHQUFHQyxJQUFJLENBQUNDLFVBQUwsSUFBbUIsRUFBL0I7QUFFQSxJQUFNQyxvQkFBb0IsR0FDeEIsQ0FBQyxPQUFPSCxHQUFHLENBQUMsc0JBQUQsQ0FBVixJQUFzQyxRQUF0QyxHQUNHLElBQUlJLE1BQUosQ0FBV0osR0FBRyxDQUFDLHNCQUFELENBQWQsQ0FESCxHQUVHQSxHQUFHLENBQUMsc0JBQUQsQ0FGUCxLQUVvQywwQkFIdEM7QUFLQSxJQUFNSyxhQUFhLEdBQ2pCLENBQUMsT0FBT0wsR0FBRyxDQUFDLGVBQUQsQ0FBVixJQUErQixRQUEvQixHQUNHLElBQUlJLE1BQUosQ0FBV0osR0FBRyxDQUFDLGVBQUQsQ0FBZCxDQURILEdBRUdBLEdBQUcsQ0FBQyxlQUFELENBRlAsS0FHQSxxREFKRjs7QUFNQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLFNBQVNNLFVBQVQsQ0FBb0JDLElBQXBCLEVBQTBCO0FBQ3hCO0FBQ0EsTUFBSSxDQUFDTixJQUFJLENBQUNPLFFBQU4sSUFBa0IsQ0FBQ1AsSUFBSSxDQUFDTyxRQUFMLENBQWNDLElBQXJDLEVBQTJDO0FBQ3pDLFdBQU8sSUFBUDtBQUNEOztBQUVEO0FBQ0EsTUFBSVIsSUFBSSxDQUFDUyxRQUFMLElBQWlCTCxhQUFhLENBQUNNLElBQWQsQ0FBbUJWLElBQUksQ0FBQ1MsUUFBTCxDQUFjRSxNQUFqQyxDQUFyQixFQUErRDtBQUM3RCxXQUFPLElBQVA7QUFDRDs7QUFFRCxNQUFNQyxNQUFNLEdBQUdaLElBQUksQ0FBQ08sUUFBTCxDQUFjQyxJQUFkO0FBQW1CO0FBQU9LLEVBQUFBLGFBQTFCLGtCQUNDUCxJQURELFNBQWY7QUFHQSxTQUFRTSxNQUFNLElBQUlBLE1BQU0sQ0FBQ0UsWUFBUCxDQUFvQixTQUFwQixDQUFYLElBQThDLElBQXJEO0FBQ0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxJQUFNQyxJQUFJLEdBQUc7QUFDbEJDLEVBQUFBLFVBQVUsRUFBRWpCLEdBQUcsQ0FBQyxlQUFELENBQUgsSUFBd0IsMkJBRGxCO0FBRWxCa0IsRUFBQUEsbUJBQW1CLEVBQUVsQixHQUFHLENBQUMscUJBQUQsQ0FBSCxJQUE4QixnQkFGakM7QUFHbEJHLEVBQUFBLG9CQUFvQixFQUFwQkEsb0JBSGtCO0FBSWxCZ0IsRUFBQUEsR0FBRyxFQUNEbkIsR0FBRyxDQUFDLFFBQUQsQ0FBSCxJQUFpQk0sVUFBVSxDQUFDLGNBQUQsQ0FBM0IsSUFBK0MsNEJBTC9COztBQU1sQjtBQUNGO0FBQ0E7QUFDRUQsRUFBQUEsYUFBYSxFQUFiQSxhQVRrQjtBQVVsQmUsRUFBQUEsY0FBYyxFQUFFLCtCQVZFO0FBV2xCQyxFQUFBQSxjQUFjLEVBQ1pyQixHQUFHLENBQUMsbUJBQUQsQ0FBSCxJQUNBLDhEQWJnQjtBQWNsQnNCLEVBQUFBLGtCQUFrQixFQUNoQnRCLEdBQUcsQ0FBQyx1QkFBRCxDQUFILElBQ0EsbUVBaEJnQjtBQWlCbEJ1QixFQUFBQSxRQUFRLEVBQUV2QixHQUFHLENBQUMsVUFBRCxDQUFILElBQW1CLEtBakJYOztBQWtCbEI7QUFDRjtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0V3QixFQUFBQSxrQkFBa0IsRUFBRSxDQUNsQixtREFEa0IsRUFFbEIseUJBRmtCLENBM0JGO0FBK0JsQjtBQUNBQyxFQUFBQSxNQUFNLEVBQUV6QixHQUFHLENBQUMsV0FBRCxDQUFILElBQW9CTSxVQUFVLENBQUMsYUFBRDtBQWhDcEIsQ0FBYjtBQW1DUCxPQUFPLElBQU1vQixNQUFNLEdBQUc7QUFDcEJWLEVBQUFBLElBQUksRUFBSkE7QUFEb0IsQ0FBZiIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ29weXJpZ2h0IDIwMTYgVGhlIEFNUCBIVE1MIEF1dGhvcnMuIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlIFwiTGljZW5zZVwiKTtcbiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS5cbiAqIFlvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdFxuICpcbiAqICAgICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wXG4gKlxuICogVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZVxuICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gXCJBUy1JU1wiIEJBU0lTLFxuICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuXG4gKiBTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZSBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kXG4gKiBsaW1pdGF0aW9ucyB1bmRlciB0aGUgTGljZW5zZS5cbiAqL1xuXG4vKipcbiAqIEFsbG93cyBmb3IgcnVudGltZSBjb25maWd1cmF0aW9uLiBJbnRlcm5hbGx5LCB0aGUgcnVudGltZSBzaG91bGRcbiAqIHVzZSB0aGUgc3JjL2NvbmZpZy5qcyBtb2R1bGUgZm9yIHZhcmlvdXMgY29uc3RhbnRzLiBXZSBjYW4gdXNlIHRoZVxuICogQU1QX0NPTkZJRyBnbG9iYWwgdG8gdHJhbnNsYXRlIHVzZXItZGVmaW5lZCBjb25maWd1cmF0aW9ucyB0byB0aGlzXG4gKiBtb2R1bGUuXG4gKiBAdHlwZSB7IU9iamVjdDxzdHJpbmcsIHN0cmluZz59XG4gKi9cbmNvbnN0IGVudiA9IHNlbGYuQU1QX0NPTkZJRyB8fCB7fTtcblxuY29uc3QgdGhpcmRQYXJ0eUZyYW1lUmVnZXggPVxuICAodHlwZW9mIGVudlsndGhpcmRQYXJ0eUZyYW1lUmVnZXgnXSA9PSAnc3RyaW5nJ1xuICAgID8gbmV3IFJlZ0V4cChlbnZbJ3RoaXJkUGFydHlGcmFtZVJlZ2V4J10pXG4gICAgOiBlbnZbJ3RoaXJkUGFydHlGcmFtZVJlZ2V4J10pIHx8IC9eZC1cXGQrXFwuYW1wcHJvamVjdFxcLm5ldCQvO1xuXG5jb25zdCBjZG5Qcm94eVJlZ2V4ID1cbiAgKHR5cGVvZiBlbnZbJ2NkblByb3h5UmVnZXgnXSA9PSAnc3RyaW5nJ1xuICAgID8gbmV3IFJlZ0V4cChlbnZbJ2NkblByb3h5UmVnZXgnXSlcbiAgICA6IGVudlsnY2RuUHJveHlSZWdleCddKSB8fFxuICAvXmh0dHBzOlxcL1xcLyhbYS16QS1aMC05Xy1dK1xcLik/Y2RuXFwuYW1wcHJvamVjdFxcLm9yZyQvO1xuXG4vKipcbiAqIENoZWNrIGZvciBhIGN1c3RvbSBVUkwgZGVmaW5pdGlvbiBpbiBzcGVjaWFsIDxtZXRhPiB0YWdzLiBOb3RlIHRoYXQgdGhpcyBkb2VzXG4gKiBub3QgYWxsb3cgZm9yIGRpc3RpbmN0IGN1c3RvbSBVUkxzIGluIEFtcERvY1NoYWRvdyBpbnN0YW5jZXMuIFRoZSBzaGVsbCBpc1xuICogYWxsb3dlZCB0byBkZWZpbmUgb25lIHNldCBvZiBjdXN0b20gVVJMcyB2aWEgQU1QX0NPTkZJRyAocmVjb21tZW5kZWQpIG9yIGJ5XG4gKiBpbmNsdWRpbmcgPG1ldGE+IHRhZ3MgaW4gdGhlIHNoZWxsIDxoZWFkPi4gVGhvc2UgY3VzdG9tIFVSTHMgdGhlbiBhcHBseSB0b1xuICogYWxsIEFNUCBkb2N1bWVudHMgbG9hZGVkIGluIHRoZSBzaGVsbC5cbiAqIEBwYXJhbSB7c3RyaW5nfSBuYW1lXG4gKiBAcmV0dXJuIHs/c3RyaW5nfVxuICogQHByaXZhdGVcbiAqL1xuZnVuY3Rpb24gZ2V0TWV0YVVybChuYW1lKSB7XG4gIC8vIEF2b2lkIGV4Y2VwdGlvbnMgaW4gdW5pdCB0ZXN0c1xuICBpZiAoIXNlbGYuZG9jdW1lbnQgfHwgIXNlbGYuZG9jdW1lbnQuaGVhZCkge1xuICAgIHJldHVybiBudWxsO1xuICB9XG5cbiAgLy8gRGlzYWxsb3cgb24gcHJveHkgb3JpZ2luc1xuICBpZiAoc2VsZi5sb2NhdGlvbiAmJiBjZG5Qcm94eVJlZ2V4LnRlc3Qoc2VsZi5sb2NhdGlvbi5vcmlnaW4pKSB7XG4gICAgcmV0dXJuIG51bGw7XG4gIH1cblxuICBjb25zdCBtZXRhRWwgPSBzZWxmLmRvY3VtZW50LmhlYWQuLypPSyovIHF1ZXJ5U2VsZWN0b3IoXG4gICAgYG1ldGFbbmFtZT1cIiR7bmFtZX1cIl1gXG4gICk7XG4gIHJldHVybiAobWV0YUVsICYmIG1ldGFFbC5nZXRBdHRyaWJ1dGUoJ2NvbnRlbnQnKSkgfHwgbnVsbDtcbn1cblxuLyoqXG4gKiBAdHlwZWRlZiB7e1xuICogICB0aGlyZFBhcnR5OiBzdHJpbmcsXG4gKiAgIHRoaXJkUGFydHlGcmFtZUhvc3Q6IHN0cmluZyxcbiAqICAgdGhpcmRQYXJ0eUZyYW1lUmVnZXg6ICFSZWdFeHAsXG4gKiAgIGNkbjogc3RyaW5nLFxuICogICBjZG5Qcm94eVJlZ2V4OiAhUmVnRXhwLFxuICogICBsb2NhbGhvc3RSZWdleDogIVJlZ0V4cCxcbiAqICAgZXJyb3JSZXBvcnRpbmc6IHN0cmluZyxcbiAqICAgYmV0YUVycm9yUmVwb3J0aW5nOiBzdHJpbmcsXG4gKiAgIGxvY2FsRGV2OiBib29sZWFuLFxuICogICB0cnVzdGVkVmlld2VySG9zdHM6ICFBcnJheTwhUmVnRXhwPixcbiAqICAgZ2VvQXBpOiA/c3RyaW5nLFxuICogfX1cbiAqL1xuZXhwb3J0IGNvbnN0IHVybHMgPSB7XG4gIHRoaXJkUGFydHk6IGVudlsndGhpcmRQYXJ0eVVybCddIHx8ICdodHRwczovLzNwLmFtcHByb2plY3QubmV0JyxcbiAgdGhpcmRQYXJ0eUZyYW1lSG9zdDogZW52Wyd0aGlyZFBhcnR5RnJhbWVIb3N0J10gfHwgJ2FtcHByb2plY3QubmV0JyxcbiAgdGhpcmRQYXJ0eUZyYW1lUmVnZXgsXG4gIGNkbjpcbiAgICBlbnZbJ2NkblVybCddIHx8IGdldE1ldGFVcmwoJ3J1bnRpbWUtaG9zdCcpIHx8ICdodHRwczovL2Nkbi5hbXBwcm9qZWN0Lm9yZycsXG4gIC8qIE5vdGUgdGhhdCBjZG5Qcm94eVJlZ2V4IGlzIG9ubHkgZXZlciBjaGVja2VkIGFnYWluc3Qgb3JpZ2luc1xuICAgKiAocHJvdG86Ly9ob3N0Wzpwb3J0XSkgc28gZG9lcyBub3QgbmVlZCB0byBjb25zaWRlciBwYXRoXG4gICAqL1xuICBjZG5Qcm94eVJlZ2V4LFxuICBsb2NhbGhvc3RSZWdleDogL15odHRwcz86XFwvXFwvbG9jYWxob3N0KDpcXGQrKT8kLyxcbiAgZXJyb3JSZXBvcnRpbmc6XG4gICAgZW52WydlcnJvclJlcG9ydGluZ1VybCddIHx8XG4gICAgJ2h0dHBzOi8vdXMtY2VudHJhbDEtYW1wLWVycm9yLXJlcG9ydGluZy5jbG91ZGZ1bmN0aW9ucy5uZXQvcicsXG4gIGJldGFFcnJvclJlcG9ydGluZzpcbiAgICBlbnZbJ2JldGFFcnJvclJlcG9ydGluZ1VybCddIHx8XG4gICAgJ2h0dHBzOi8vdXMtY2VudHJhbDEtYW1wLWVycm9yLXJlcG9ydGluZy5jbG91ZGZ1bmN0aW9ucy5uZXQvci1iZXRhJyxcbiAgbG9jYWxEZXY6IGVudlsnbG9jYWxEZXYnXSB8fCBmYWxzZSxcbiAgLyoqXG4gICAqIFRoZXNlIGRvbWFpbnMgYXJlIHRydXN0ZWQgd2l0aCBtb3JlIHNlbnNpdGl2ZSB2aWV3ZXIgb3BlcmF0aW9ucyBzdWNoIGFzXG4gICAqIHByb3BhZ2F0aW5nIHRoZSByZWZlcnJlci4gSWYgeW91IGJlbGlldmUgeW91ciBkb21haW4gc2hvdWxkIGJlIGhlcmUsXG4gICAqIGZpbGUgdGhlIGlzc3VlIG9uIEdpdEh1YiB0byBkaXNjdXNzLiBUaGUgcHJvY2VzcyB3aWxsIGJlIHNpbWlsYXJcbiAgICogKGJ1dCBzb21ld2hhdCBtb3JlIHN0cmluZ2VudCkgdG8gdGhlIG9uZSBkZXNjcmliZWQgaW4gdGhlIFszcC9SRUFETUUubWRdKFxuICAgKiBodHRwczovL2dpdGh1Yi5jb20vYW1wcHJvamVjdC9hbXBodG1sL2Jsb2IvbWFpbi8zcC9SRUFETUUubWQpXG4gICAqXG4gICAqIHshQXJyYXk8IVJlZ0V4cD59XG4gICAqL1xuICB0cnVzdGVkVmlld2VySG9zdHM6IFtcbiAgICAvKF58XFwuKWdvb2dsZVxcLihjb20/fFthLXpdezJ9fGNvbT9cXC5bYS16XXsyfXxjYXQpJC8sXG4gICAgLyhefFxcLilnbWFpbFxcLihjb218ZGV2KSQvLFxuICBdLFxuICAvLyBPcHRpb25hbCBmYWxsYmFjayBBUEkgaWYgYW1wLWdlbyBpcyBsZWZ0IHVucGF0Y2hlZFxuICBnZW9BcGk6IGVudlsnZ2VvQXBpVXJsJ10gfHwgZ2V0TWV0YVVybCgnYW1wLWdlby1hcGknKSxcbn07XG5cbmV4cG9ydCBjb25zdCBjb25maWcgPSB7XG4gIHVybHMsXG59O1xuIl19
+// /Users/mszylkowski/src/amphtml/src/config.js

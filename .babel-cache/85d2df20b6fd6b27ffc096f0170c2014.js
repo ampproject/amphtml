@@ -1,0 +1,89 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @fileoverview
+ * IE 10 throws "Unspecified error" when calling getBoundingClientRect() on a
+ * disconnected node.
+ * @see https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/106812/
+ */
+import { isConnectedNode } from "../core/dom";
+import { LayoutRectDef, layoutRectLtwh } from "../core/dom/layout/rect";
+
+/**
+ * Stores the native getBoundingClientRect before we patch it, so that the
+ * patch may call the native implementation.
+ */
+var nativeClientRect;
+
+/**
+ * Polyfill for Node.getBoundingClientRect API.
+ * @this {!Element}
+ * @return {!ClientRect|!LayoutRectDef}
+ * @suppress {suspiciousCode} due to IS_ESM inlining
+ */
+function getBoundingClientRect() {
+  // eslint-disable-next-line local/no-invalid-this
+  if (false || isConnectedNode(this)) {
+    return nativeClientRect.call(this);
+  }
+
+  return layoutRectLtwh(0, 0, 0, 0);
+}
+
+/**
+ * Determines if this polyfill should be installed.
+ * @param {!Window} win
+ * @return {boolean}
+ * @suppress {uselessCode} due to IS_ESM inlining
+ */
+function shouldInstall(win) {
+  if (false) {
+    return false;
+  }
+
+  // Don't install in no-DOM environments e.g. worker.
+  if (!win.document) {
+    return false;
+  }
+
+  try {
+    var div = win.document.createElement('div');
+    var rect = div.
+    /*OK*/
+    getBoundingClientRect();
+    return rect.top !== 0;
+  } catch (e) {
+    // IE 10 or less
+    return true;
+  }
+}
+
+/**
+ * Sets the getBoundingClientRect polyfill if using IE 10 or an
+ * earlier version.
+ * @param {!Window} win
+ */
+export function install(win) {
+  if (shouldInstall(win)) {
+    nativeClientRect = Element.prototype.getBoundingClientRect;
+    win.Object.defineProperty(win.Element.prototype, 'getBoundingClientRect', {
+      value: getBoundingClientRect
+    });
+  }
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImdldC1ib3VuZGluZy1jbGllbnQtcmVjdC5qcyJdLCJuYW1lcyI6WyJpc0Nvbm5lY3RlZE5vZGUiLCJMYXlvdXRSZWN0RGVmIiwibGF5b3V0UmVjdEx0d2giLCJuYXRpdmVDbGllbnRSZWN0IiwiZ2V0Qm91bmRpbmdDbGllbnRSZWN0IiwiY2FsbCIsInNob3VsZEluc3RhbGwiLCJ3aW4iLCJkb2N1bWVudCIsImRpdiIsImNyZWF0ZUVsZW1lbnQiLCJyZWN0IiwidG9wIiwiZSIsImluc3RhbGwiLCJFbGVtZW50IiwicHJvdG90eXBlIiwiT2JqZWN0IiwiZGVmaW5lUHJvcGVydHkiLCJ2YWx1ZSJdLCJtYXBwaW5ncyI6IkFBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUVBLFNBQVFBLGVBQVI7QUFDQSxTQUFRQyxhQUFSLEVBQXVCQyxjQUF2Qjs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLElBQUlDLGdCQUFKOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLFNBQVNDLHFCQUFULEdBQWlDO0FBQy9CO0FBQ0EsTUFBSSxTQUFVSixlQUFlLENBQUMsSUFBRCxDQUE3QixFQUFxQztBQUNuQyxXQUFPRyxnQkFBZ0IsQ0FBQ0UsSUFBakIsQ0FBc0IsSUFBdEIsQ0FBUDtBQUNEOztBQUVELFNBQU9ILGNBQWMsQ0FBQyxDQUFELEVBQUksQ0FBSixFQUFPLENBQVAsRUFBVSxDQUFWLENBQXJCO0FBQ0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsU0FBU0ksYUFBVCxDQUF1QkMsR0FBdkIsRUFBNEI7QUFDMUIsYUFBWTtBQUNWLFdBQU8sS0FBUDtBQUNEOztBQUVEO0FBQ0EsTUFBSSxDQUFDQSxHQUFHLENBQUNDLFFBQVQsRUFBbUI7QUFDakIsV0FBTyxLQUFQO0FBQ0Q7O0FBRUQsTUFBSTtBQUNGLFFBQU1DLEdBQUcsR0FBR0YsR0FBRyxDQUFDQyxRQUFKLENBQWFFLGFBQWIsQ0FBMkIsS0FBM0IsQ0FBWjtBQUNBLFFBQU1DLElBQUksR0FBR0YsR0FBRztBQUFDO0FBQU9MLElBQUFBLHFCQUFYLEVBQWI7QUFDQSxXQUFPTyxJQUFJLENBQUNDLEdBQUwsS0FBYSxDQUFwQjtBQUNELEdBSkQsQ0FJRSxPQUFPQyxDQUFQLEVBQVU7QUFDVjtBQUNBLFdBQU8sSUFBUDtBQUNEO0FBQ0Y7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0MsT0FBVCxDQUFpQlAsR0FBakIsRUFBc0I7QUFDM0IsTUFBSUQsYUFBYSxDQUFDQyxHQUFELENBQWpCLEVBQXdCO0FBQ3RCSixJQUFBQSxnQkFBZ0IsR0FBR1ksT0FBTyxDQUFDQyxTQUFSLENBQWtCWixxQkFBckM7QUFDQUcsSUFBQUEsR0FBRyxDQUFDVSxNQUFKLENBQVdDLGNBQVgsQ0FBMEJYLEdBQUcsQ0FBQ1EsT0FBSixDQUFZQyxTQUF0QyxFQUFpRCx1QkFBakQsRUFBMEU7QUFDeEVHLE1BQUFBLEtBQUssRUFBRWY7QUFEaUUsS0FBMUU7QUFHRDtBQUNGIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb3B5cmlnaHQgMjAxNiBUaGUgQU1QIEhUTUwgQXV0aG9ycy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTLUlTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbi8qKlxuICogQGZpbGVvdmVydmlld1xuICogSUUgMTAgdGhyb3dzIFwiVW5zcGVjaWZpZWQgZXJyb3JcIiB3aGVuIGNhbGxpbmcgZ2V0Qm91bmRpbmdDbGllbnRSZWN0KCkgb24gYVxuICogZGlzY29ubmVjdGVkIG5vZGUuXG4gKiBAc2VlIGh0dHBzOi8vZGV2ZWxvcGVyLm1pY3Jvc29mdC5jb20vZW4tdXMvbWljcm9zb2Z0LWVkZ2UvcGxhdGZvcm0vaXNzdWVzLzEwNjgxMi9cbiAqL1xuXG5pbXBvcnQge2lzQ29ubmVjdGVkTm9kZX0gZnJvbSAnI2NvcmUvZG9tJztcbmltcG9ydCB7TGF5b3V0UmVjdERlZiwgbGF5b3V0UmVjdEx0d2h9IGZyb20gJyNjb3JlL2RvbS9sYXlvdXQvcmVjdCc7XG5cbi8qKlxuICogU3RvcmVzIHRoZSBuYXRpdmUgZ2V0Qm91bmRpbmdDbGllbnRSZWN0IGJlZm9yZSB3ZSBwYXRjaCBpdCwgc28gdGhhdCB0aGVcbiAqIHBhdGNoIG1heSBjYWxsIHRoZSBuYXRpdmUgaW1wbGVtZW50YXRpb24uXG4gKi9cbmxldCBuYXRpdmVDbGllbnRSZWN0O1xuXG4vKipcbiAqIFBvbHlmaWxsIGZvciBOb2RlLmdldEJvdW5kaW5nQ2xpZW50UmVjdCBBUEkuXG4gKiBAdGhpcyB7IUVsZW1lbnR9XG4gKiBAcmV0dXJuIHshQ2xpZW50UmVjdHwhTGF5b3V0UmVjdERlZn1cbiAqIEBzdXBwcmVzcyB7c3VzcGljaW91c0NvZGV9IGR1ZSB0byBJU19FU00gaW5saW5pbmdcbiAqL1xuZnVuY3Rpb24gZ2V0Qm91bmRpbmdDbGllbnRSZWN0KCkge1xuICAvLyBlc2xpbnQtZGlzYWJsZS1uZXh0LWxpbmUgbG9jYWwvbm8taW52YWxpZC10aGlzXG4gIGlmIChJU19FU00gfHwgaXNDb25uZWN0ZWROb2RlKHRoaXMpKSB7XG4gICAgcmV0dXJuIG5hdGl2ZUNsaWVudFJlY3QuY2FsbCh0aGlzKTtcbiAgfVxuXG4gIHJldHVybiBsYXlvdXRSZWN0THR3aCgwLCAwLCAwLCAwKTtcbn1cblxuLyoqXG4gKiBEZXRlcm1pbmVzIGlmIHRoaXMgcG9seWZpbGwgc2hvdWxkIGJlIGluc3RhbGxlZC5cbiAqIEBwYXJhbSB7IVdpbmRvd30gd2luXG4gKiBAcmV0dXJuIHtib29sZWFufVxuICogQHN1cHByZXNzIHt1c2VsZXNzQ29kZX0gZHVlIHRvIElTX0VTTSBpbmxpbmluZ1xuICovXG5mdW5jdGlvbiBzaG91bGRJbnN0YWxsKHdpbikge1xuICBpZiAoSVNfRVNNKSB7XG4gICAgcmV0dXJuIGZhbHNlO1xuICB9XG5cbiAgLy8gRG9uJ3QgaW5zdGFsbCBpbiBuby1ET00gZW52aXJvbm1lbnRzIGUuZy4gd29ya2VyLlxuICBpZiAoIXdpbi5kb2N1bWVudCkge1xuICAgIHJldHVybiBmYWxzZTtcbiAgfVxuXG4gIHRyeSB7XG4gICAgY29uc3QgZGl2ID0gd2luLmRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2RpdicpO1xuICAgIGNvbnN0IHJlY3QgPSBkaXYuLypPSyovIGdldEJvdW5kaW5nQ2xpZW50UmVjdCgpO1xuICAgIHJldHVybiByZWN0LnRvcCAhPT0gMDtcbiAgfSBjYXRjaCAoZSkge1xuICAgIC8vIElFIDEwIG9yIGxlc3NcbiAgICByZXR1cm4gdHJ1ZTtcbiAgfVxufVxuXG4vKipcbiAqIFNldHMgdGhlIGdldEJvdW5kaW5nQ2xpZW50UmVjdCBwb2x5ZmlsbCBpZiB1c2luZyBJRSAxMCBvciBhblxuICogZWFybGllciB2ZXJzaW9uLlxuICogQHBhcmFtIHshV2luZG93fSB3aW5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGluc3RhbGwod2luKSB7XG4gIGlmIChzaG91bGRJbnN0YWxsKHdpbikpIHtcbiAgICBuYXRpdmVDbGllbnRSZWN0ID0gRWxlbWVudC5wcm90b3R5cGUuZ2V0Qm91bmRpbmdDbGllbnRSZWN0O1xuICAgIHdpbi5PYmplY3QuZGVmaW5lUHJvcGVydHkod2luLkVsZW1lbnQucHJvdG90eXBlLCAnZ2V0Qm91bmRpbmdDbGllbnRSZWN0Jywge1xuICAgICAgdmFsdWU6IGdldEJvdW5kaW5nQ2xpZW50UmVjdCxcbiAgICB9KTtcbiAgfVxufVxuIl19
+// /Users/mszylkowski/src/amphtml/src/polyfills/get-bounding-client-rect.js

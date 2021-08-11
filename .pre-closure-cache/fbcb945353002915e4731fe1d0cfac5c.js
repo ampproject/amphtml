@@ -1,0 +1,1 @@
+export const CSS = "\n/*# sourceURL=/extensions/amp-story-interactive/0.1/amp-story-interactive-results-detailed.css*/";

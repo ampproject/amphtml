@@ -1,0 +1,54 @@
+/**
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { waitForChildPromise } from "../core/dom";
+import { closestAncestorElementBySelector } from "../core/dom/query";
+import { Services } from "../service";
+
+/**
+ * Checks if an element descends from `amp-story` in order to configure
+ * story-specific behavior.
+ *
+ * This utility has a tree-scanning cost.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function descendsFromStory(element) {
+  return !!closestAncestorElementBySelector(element, 'amp-story');
+}
+
+/**
+ * Returns true if the document is an amp-story.
+ * Times out after `timeout` ms (default is 2000).
+ *
+ * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {!Promise<boolean>}
+ */
+export function isStoryDocument(ampdoc) {
+  return ampdoc.waitForBodyOpen().then(function () {
+    var body = ampdoc.getBody();
+    var childPromise = waitForChildPromise(body, function () {
+      return !!body.firstElementChild;
+    });
+    // 2s timeout for edge case where body has no element children.
+    return Services.timerFor(ampdoc.win).timeoutPromise(2000, childPromise).then(function () {
+      return body.firstElementChild.tagName === 'AMP-STORY';
+    }, function () {
+      return false;
+    });
+  });
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInN0b3J5LmpzIl0sIm5hbWVzIjpbIndhaXRGb3JDaGlsZFByb21pc2UiLCJjbG9zZXN0QW5jZXN0b3JFbGVtZW50QnlTZWxlY3RvciIsIlNlcnZpY2VzIiwiZGVzY2VuZHNGcm9tU3RvcnkiLCJlbGVtZW50IiwiaXNTdG9yeURvY3VtZW50IiwiYW1wZG9jIiwid2FpdEZvckJvZHlPcGVuIiwidGhlbiIsImJvZHkiLCJnZXRCb2R5IiwiY2hpbGRQcm9taXNlIiwiZmlyc3RFbGVtZW50Q2hpbGQiLCJ0aW1lckZvciIsIndpbiIsInRpbWVvdXRQcm9taXNlIiwidGFnTmFtZSJdLCJtYXBwaW5ncyI6IkFBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBRUEsU0FBUUEsbUJBQVI7QUFDQSxTQUFRQyxnQ0FBUjtBQUVBLFNBQVFDLFFBQVI7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0MsaUJBQVQsQ0FBMkJDLE9BQTNCLEVBQW9DO0FBQ3pDLFNBQU8sQ0FBQyxDQUFDSCxnQ0FBZ0MsQ0FBQ0csT0FBRCxFQUFVLFdBQVYsQ0FBekM7QUFDRDs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0MsZUFBVCxDQUF5QkMsTUFBekIsRUFBaUM7QUFDdEMsU0FBT0EsTUFBTSxDQUFDQyxlQUFQLEdBQXlCQyxJQUF6QixDQUE4QixZQUFNO0FBQ3pDLFFBQU1DLElBQUksR0FBR0gsTUFBTSxDQUFDSSxPQUFQLEVBQWI7QUFDQSxRQUFNQyxZQUFZLEdBQUdYLG1CQUFtQixDQUN0Q1MsSUFEc0MsRUFFdEM7QUFBQSxhQUFNLENBQUMsQ0FBQ0EsSUFBSSxDQUFDRyxpQkFBYjtBQUFBLEtBRnNDLENBQXhDO0FBSUE7QUFDQSxXQUFPVixRQUFRLENBQUNXLFFBQVQsQ0FBa0JQLE1BQU0sQ0FBQ1EsR0FBekIsRUFDSkMsY0FESSxDQUNXLElBRFgsRUFDaUJKLFlBRGpCLEVBRUpILElBRkksQ0FHSDtBQUFBLGFBQU1DLElBQUksQ0FBQ0csaUJBQUwsQ0FBdUJJLE9BQXZCLEtBQW1DLFdBQXpDO0FBQUEsS0FIRyxFQUlIO0FBQUEsYUFBTSxLQUFOO0FBQUEsS0FKRyxDQUFQO0FBTUQsR0FiTSxDQUFQO0FBY0QiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIENvcHlyaWdodCAyMDE4IFRoZSBBTVAgSFRNTCBBdXRob3JzLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIExpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmVcbiAqIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuIFwiQVMtSVNcIiBCQVNJUyxcbiAqIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLlxuICogU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZFxuICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHt3YWl0Rm9yQ2hpbGRQcm9taXNlfSBmcm9tICcjY29yZS9kb20nO1xuaW1wb3J0IHtjbG9zZXN0QW5jZXN0b3JFbGVtZW50QnlTZWxlY3Rvcn0gZnJvbSAnI2NvcmUvZG9tL3F1ZXJ5JztcblxuaW1wb3J0IHtTZXJ2aWNlc30gZnJvbSAnI3NlcnZpY2UnO1xuXG4vKipcbiAqIENoZWNrcyBpZiBhbiBlbGVtZW50IGRlc2NlbmRzIGZyb20gYGFtcC1zdG9yeWAgaW4gb3JkZXIgdG8gY29uZmlndXJlXG4gKiBzdG9yeS1zcGVjaWZpYyBiZWhhdmlvci5cbiAqXG4gKiBUaGlzIHV0aWxpdHkgaGFzIGEgdHJlZS1zY2FubmluZyBjb3N0LlxuICogQHBhcmFtIHshRWxlbWVudH0gZWxlbWVudFxuICogQHJldHVybiB7Ym9vbGVhbn1cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGRlc2NlbmRzRnJvbVN0b3J5KGVsZW1lbnQpIHtcbiAgcmV0dXJuICEhY2xvc2VzdEFuY2VzdG9yRWxlbWVudEJ5U2VsZWN0b3IoZWxlbWVudCwgJ2FtcC1zdG9yeScpO1xufVxuXG4vKipcbiAqIFJldHVybnMgdHJ1ZSBpZiB0aGUgZG9jdW1lbnQgaXMgYW4gYW1wLXN0b3J5LlxuICogVGltZXMgb3V0IGFmdGVyIGB0aW1lb3V0YCBtcyAoZGVmYXVsdCBpcyAyMDAwKS5cbiAqXG4gKiBAcGFyYW0geyEuLi9zZXJ2aWNlL2FtcGRvYy1pbXBsLkFtcERvY30gYW1wZG9jXG4gKiBAcmV0dXJuIHshUHJvbWlzZTxib29sZWFuPn1cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGlzU3RvcnlEb2N1bWVudChhbXBkb2MpIHtcbiAgcmV0dXJuIGFtcGRvYy53YWl0Rm9yQm9keU9wZW4oKS50aGVuKCgpID0+IHtcbiAgICBjb25zdCBib2R5ID0gYW1wZG9jLmdldEJvZHkoKTtcbiAgICBjb25zdCBjaGlsZFByb21pc2UgPSB3YWl0Rm9yQ2hpbGRQcm9taXNlKFxuICAgICAgYm9keSxcbiAgICAgICgpID0+ICEhYm9keS5maXJzdEVsZW1lbnRDaGlsZFxuICAgICk7XG4gICAgLy8gMnMgdGltZW91dCBmb3IgZWRnZSBjYXNlIHdoZXJlIGJvZHkgaGFzIG5vIGVsZW1lbnQgY2hpbGRyZW4uXG4gICAgcmV0dXJuIFNlcnZpY2VzLnRpbWVyRm9yKGFtcGRvYy53aW4pXG4gICAgICAudGltZW91dFByb21pc2UoMjAwMCwgY2hpbGRQcm9taXNlKVxuICAgICAgLnRoZW4oXG4gICAgICAgICgpID0+IGJvZHkuZmlyc3RFbGVtZW50Q2hpbGQudGFnTmFtZSA9PT0gJ0FNUC1TVE9SWScsXG4gICAgICAgICgpID0+IGZhbHNlXG4gICAgICApO1xuICB9KTtcbn1cbiJdfQ==
+// /Users/mszylkowski/src/amphtml/src/utils/story.js

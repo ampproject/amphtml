@@ -1,0 +1,176 @@
+/**
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {
+AmpStoryEventTracker,
+AnalyticsEvent,
+AnalyticsEventType,
+CustomEventTracker,
+getTrackerKeyName } from "./events";
+
+import { AmpdocAnalyticsRoot, EmbedAnalyticsRoot } from "./analytics-root";
+import { AnalyticsGroup } from "./analytics-group";
+import { Services } from "../../../src/service";
+import { dict } from "../../../src/core/types/object";
+import { getFriendlyIframeEmbedOptional } from "../../../src/iframe-helper";
+import {
+getParentWindowFrameElement,
+getServiceForDoc,
+getServicePromiseForDoc,
+registerServiceBuilderForDoc } from "../../../src/service-helpers";
+
+
+const PROP = '__AMP_AN_ROOT';
+
+/**
+ * @implements {../../../src/service.Disposable}
+ * @package
+ * @visibleForTesting
+ */
+export class InstrumentationService {
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    /** @const */
+    this.ampdoc = ampdoc;
+
+    /** @const */
+    this.root_ = this.findRoot_(ampdoc.getRootNode());
+  }
+
+  /** @override */
+  dispose() {
+    this.root_.dispose();
+  }
+
+  /**
+   * @param {!Node} context
+   * @return {!./analytics-root.AnalyticsRoot}
+   */
+  getAnalyticsRoot(context) {
+    return this.findRoot_(context);
+  }
+
+  /**
+   * @param {!Element} analyticsElement
+   * @return {!AnalyticsGroup}
+   */
+  createAnalyticsGroup(analyticsElement) {
+    const root = this.findRoot_(analyticsElement);
+    return new AnalyticsGroup(root, analyticsElement);
+  }
+
+  /**
+   * @param {string} trackerName
+   * @private
+   */
+  getTrackerClass_(trackerName) {
+    switch (trackerName) {
+      case AnalyticsEventType.STORY:
+        return AmpStoryEventTracker;
+      default:
+        return CustomEventTracker;}
+
+  }
+
+  /**
+   * Triggers the analytics event with the specified type.
+   *
+   * @param {!Element} target
+   * @param {string} eventType
+   * @param {!JsonObject} vars A map of vars and their values.
+   * @param {boolean} enableDataVars A boolean to indicate if data-vars-*
+   * attribute value from target element should be included.
+   */
+  triggerEventForTarget(
+  target,
+  eventType,
+  vars = dict(),
+  enableDataVars = true)
+  {let _vars = vars,_enableDataVars = enableDataVars;
+    const event = new AnalyticsEvent(target, eventType, _vars, _enableDataVars);
+    const root = this.findRoot_(target);
+    const trackerName = getTrackerKeyName(eventType);
+    const tracker = /** @type {!CustomEventTracker|!AmpStoryEventTracker} */(
+    root.getTracker(trackerName, this.getTrackerClass_(trackerName)));
+
+    tracker.trigger(event);
+  }
+
+  /**
+   * @param {!Node} context
+   * @return {!./analytics-root.AnalyticsRoot}
+   */
+  findRoot_(context) {
+    // TODO(#22733): cleanup when ampdoc-fie is launched. Just use
+    // `ampdoc.getParent()`.
+    const ampdoc = Services.ampdoc(context);
+    const frame = getParentWindowFrameElement(context);
+    const embed = frame && getFriendlyIframeEmbedOptional(frame);
+    if (ampdoc == this.ampdoc && !embed && this.root_) {
+      // Main root already exists.
+      return this.root_;
+    }
+    return this.getOrCreateRoot_(embed || ampdoc, () => {
+      if (embed) {
+        return new EmbedAnalyticsRoot(ampdoc, embed);
+      }
+      return new AmpdocAnalyticsRoot(ampdoc);
+    });
+  }
+
+  /**
+   * @param {!Object} holder
+   * @param {function():!./analytics-root.AnalyticsRoot} factory
+   * @return {!./analytics-root.AnalyticsRoot}
+   */
+  getOrCreateRoot_(holder, factory) {
+    let root = /** @type {?./analytics-root.AnalyticsRoot} */(holder[PROP]);
+    if (!root) {
+      root = factory();
+      holder[PROP] = root;
+    }
+    return root;
+  }}
+
+
+/**
+ * It's important to resolve instrumentation asynchronously in elements that
+ * depends on it in multi-doc scope. Otherwise an element life-cycle could
+ * resolve way before we have the service available.
+ *
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @return {!Promise<InstrumentationService>}
+ */
+export function instrumentationServicePromiseForDoc(elementOrAmpDoc) {
+  return (/** @type {!Promise<InstrumentationService>} */(
+    getServicePromiseForDoc(elementOrAmpDoc, 'amp-analytics-instrumentation')));
+
+}
+
+/**
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @return {!InstrumentationService}
+ */
+export function instrumentationServiceForDocForTesting(elementOrAmpDoc) {
+  registerServiceBuilderForDoc(
+  elementOrAmpDoc,
+  'amp-analytics-instrumentation',
+  InstrumentationService);
+
+  return getServiceForDoc(elementOrAmpDoc, 'amp-analytics-instrumentation');
+}

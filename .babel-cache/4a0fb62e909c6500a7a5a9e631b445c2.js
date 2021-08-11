@@ -1,0 +1,98 @@
+/**
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { ChunkPriority, chunk } from "./chunk";
+import { isAmphtml } from "./format";
+import { dev } from "./log";
+import { Services } from "./service";
+import { isStoryDocument } from "./utils/story";
+
+/** @const @enum {string} */
+export var AutoLightboxEvents = {
+  // Triggered when the lightbox attribute is newly set on an item in order to
+  // process by the renderer extension (e.g. amp-lightbox-gallery).
+  NEWLY_SET: 'amp-auto-lightbox:newly-set' };
+
+
+/**
+ * Installs the amp-auto-lightbox extension.
+ *
+ * This extension conditionally loads amp-lightbox-gallery for images and videos
+ * that fulfill a set criteria on certain documents.
+ *
+ * Further information on spec/auto-lightbox.md and the amp-auto-lightbox extension
+ * code.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ */
+export function installAutoLightboxExtension(ampdoc) {
+  var win = ampdoc.win;
+  // Only enabled on single documents tagged as <html amp> or <html ⚡>.
+  if (!isAmphtml(win.document) || !ampdoc.isSingleDoc()) {
+    return;
+  }
+  chunk(
+  ampdoc,
+  function () {
+    isStoryDocument(ampdoc).then(function (isStory) {
+      // Do not enable on amp-story documents.
+      if (isStory) {
+        return;
+      }
+      Services.extensionsFor(win).installExtensionForDoc(
+      ampdoc,
+      'amp-auto-lightbox');
+
+    });
+  },
+  ChunkPriority.LOW);
+
+}
+
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isActionableByTap(element) {
+  if (element.tagName.toLowerCase() == 'a' && element.hasAttribute('href')) {
+    return true;
+  }
+  if (element.querySelector('a[href]')) {
+    return true;
+  }
+  var action = Services.actionServiceForDoc(element);
+  var hasTapAction = action.hasResolvableAction(
+  element,
+  'tap', /** @type {!Element} */(
+  element.parentElement));
+
+  if (hasTapAction) {
+    return true;
+  }
+  var actionables = element.querySelectorAll('[on]');
+  for (var i = 0; i < actionables.length; i++) {
+    var actionable = actionables[i];
+    var _hasTapAction = action.hasResolvableAction(
+    actionable,
+    'tap', /** @type {!Element} */(
+    actionable.parentElement));
+
+    if (_hasTapAction) {
+      return true;
+    }
+  }
+  return false;
+}
+// /Users/mszylkowski/src/amphtml/src/auto-lightbox.js

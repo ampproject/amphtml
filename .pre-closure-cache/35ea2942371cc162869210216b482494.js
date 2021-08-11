@@ -1,0 +1,1 @@
+export const CSS = "\n/*# sourceURL=/extensions/amp-access/0.1/amp-access.css*/";

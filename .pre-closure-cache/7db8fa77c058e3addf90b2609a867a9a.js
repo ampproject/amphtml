@@ -1,0 +1,1 @@
+export const CSS = "amp-fit-text{display:block;overflow:hidden;position:relative}amp-fit-text:not(.i-amphtml-built){color:transparent!important}amp-fit-text:not(.i-amphtml-built)>:not([placeholder]):not(.i-amphtml-svc){display:none;content-visibility:hidden}\n/*# sourceURL=/extensions/amp-fit-text/1.0/amp-fit-text.css*/";

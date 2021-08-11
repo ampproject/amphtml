@@ -1,0 +1,125 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { devAssert } from "../../assert";
+
+/**
+ * Interpret a byte array as a UTF-8 string.
+ * @param {!BufferSource} bytes
+ * @return {string}
+ */
+export function utf8Decode(bytes) {
+  if (typeof TextDecoder !== 'undefined') {
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+
+  var asciiString = bytesToString(new Uint8Array(bytes.buffer || bytes));
+  return decodeURIComponent(escape(asciiString));
+}
+
+/**
+ * Turn a string into UTF-8 bytes.
+ * @param {string} string
+ * @return {!Uint8Array}
+ */
+export function utf8Encode(string) {
+  if (typeof TextEncoder !== 'undefined') {
+    return new TextEncoder('utf-8').encode(string);
+  }
+
+  return stringToBytes(unescape(encodeURIComponent(string)));
+}
+
+/**
+ * Converts a string which holds 8-bit code points, such as the result of atob,
+ * into a Uint8Array with the corresponding bytes.
+ * If you have a string of characters, you probably want to be using utf8Encode.
+ * @param {string} str
+ * @return {!Uint8Array}
+ */
+export function stringToBytes(str) {
+  var bytes = new Uint8Array(str.length);
+
+  for (var i = 0; i < str.length; i++) {
+    var charCode = str.charCodeAt(i);
+    devAssert(charCode <= 255, 'Characters must be in range [0,255]');
+    bytes[i] = charCode;
+  }
+
+  return bytes;
+}
+
+/**
+ * Converts a 8-bit bytes array into a string
+ * @param {!Uint8Array} bytes
+ * @return {string}
+ */
+export function bytesToString(bytes) {
+  // Intentionally avoids String.fromCharCode.apply so we don't suffer a
+  // stack overflow. #10495, https://jsperf.com/bytesToString-2
+  var array = new Array(bytes.length);
+
+  for (var i = 0; i < bytes.length; i++) {
+    array[i] = String.fromCharCode(bytes[i]);
+  }
+
+  return array.join('');
+}
+
+/**
+ * Converts a 4-item byte array to an unsigned integer.
+ * Assumes bytes are big endian.
+ * @param {!Uint8Array} bytes
+ * @return {number}
+ */
+export function bytesToUInt32(bytes) {
+  if (bytes.length != 4) {
+    throw new Error('Received byte array with length != 4');
+  }
+
+  var val = (bytes[0] & 0xff) << 24 | (bytes[1] & 0xff) << 16 | (bytes[2] & 0xff) << 8 | bytes[3] & 0xff;
+  // Convert to unsigned.
+  return val >>> 0;
+}
+
+/**
+ * Generate a random bytes array with specific length using
+ * win.crypto.getRandomValues. Return null if it is not available.
+ * @param {!Window} win
+ * @param {number} length
+ * @return {?Uint8Array}
+ */
+export function getCryptoRandomBytesArray(win, length) {
+  var crypto = win.crypto;
+
+  // Support IE 11
+  if (!false) {
+    crypto =
+    /** @type {!webCrypto.Crypto|undefined} */
+    crypto || win.msCrypto;
+
+    if (!crypto || !crypto.getRandomValues) {
+      return null;
+    }
+  }
+
+  // Widely available in browsers we support:
+  // http://caniuse.com/#search=getRandomValues
+  var uint8array = new Uint8Array(length);
+  crypto.getRandomValues(uint8array);
+  return uint8array;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImJ5dGVzLmpzIl0sIm5hbWVzIjpbImRldkFzc2VydCIsInV0ZjhEZWNvZGUiLCJieXRlcyIsIlRleHREZWNvZGVyIiwiZGVjb2RlIiwiYXNjaWlTdHJpbmciLCJieXRlc1RvU3RyaW5nIiwiVWludDhBcnJheSIsImJ1ZmZlciIsImRlY29kZVVSSUNvbXBvbmVudCIsImVzY2FwZSIsInV0ZjhFbmNvZGUiLCJzdHJpbmciLCJUZXh0RW5jb2RlciIsImVuY29kZSIsInN0cmluZ1RvQnl0ZXMiLCJ1bmVzY2FwZSIsImVuY29kZVVSSUNvbXBvbmVudCIsInN0ciIsImxlbmd0aCIsImkiLCJjaGFyQ29kZSIsImNoYXJDb2RlQXQiLCJhcnJheSIsIkFycmF5IiwiU3RyaW5nIiwiZnJvbUNoYXJDb2RlIiwiam9pbiIsImJ5dGVzVG9VSW50MzIiLCJFcnJvciIsInZhbCIsImdldENyeXB0b1JhbmRvbUJ5dGVzQXJyYXkiLCJ3aW4iLCJjcnlwdG8iLCJtc0NyeXB0byIsImdldFJhbmRvbVZhbHVlcyIsInVpbnQ4YXJyYXkiXSwibWFwcGluZ3MiOiJBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUVBLFNBQVFBLFNBQVI7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0MsVUFBVCxDQUFvQkMsS0FBcEIsRUFBMkI7QUFDaEMsTUFBSSxPQUFPQyxXQUFQLEtBQXVCLFdBQTNCLEVBQXdDO0FBQ3RDLFdBQU8sSUFBSUEsV0FBSixDQUFnQixPQUFoQixFQUF5QkMsTUFBekIsQ0FBZ0NGLEtBQWhDLENBQVA7QUFDRDs7QUFDRCxNQUFNRyxXQUFXLEdBQUdDLGFBQWEsQ0FBQyxJQUFJQyxVQUFKLENBQWVMLEtBQUssQ0FBQ00sTUFBTixJQUFnQk4sS0FBL0IsQ0FBRCxDQUFqQztBQUNBLFNBQU9PLGtCQUFrQixDQUFDQyxNQUFNLENBQUNMLFdBQUQsQ0FBUCxDQUF6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QixVQUFKLENBQWVZLE1BQWYsQ0FBbkI7QUFDQWMsRUFBQUEsTUFBTSxDQUFDRSxlQUFQLENBQXVCQyxVQUF2QjtBQUNBLFNBQU9BLFVBQVA7QUFDRCIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ29weXJpZ2h0IDIwMTYgVGhlIEFNUCBIVE1MIEF1dGhvcnMuIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlIFwiTGljZW5zZVwiKTtcbiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS5cbiAqIFlvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdFxuICpcbiAqICAgICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wXG4gKlxuICogVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZVxuICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gXCJBUy1JU1wiIEJBU0lTLFxuICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuXG4gKiBTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZSBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kXG4gKiBsaW1pdGF0aW9ucyB1bmRlciB0aGUgTGljZW5zZS5cbiAqL1xuXG5pbXBvcnQge2RldkFzc2VydH0gZnJvbSAnI2NvcmUvYXNzZXJ0JztcblxuLyoqXG4gKiBJbnRlcnByZXQgYSBieXRlIGFycmF5IGFzIGEgVVRGLTggc3RyaW5nLlxuICogQHBhcmFtIHshQnVmZmVyU291cmNlfSBieXRlc1xuICogQHJldHVybiB7c3RyaW5nfVxuICovXG5leHBvcnQgZnVuY3Rpb24gdXRmOERlY29kZShieXRlcykge1xuICBpZiAodHlwZW9mIFRleHREZWNvZGVyICE9PSAndW5kZWZpbmVkJykge1xuICAgIHJldHVybiBuZXcgVGV4dERlY29kZXIoJ3V0Zi04JykuZGVjb2RlKGJ5dGVzKTtcbiAgfVxuICBjb25zdCBhc2NpaVN0cmluZyA9IGJ5dGVzVG9TdHJpbmcobmV3IFVpbnQ4QXJyYXkoYnl0ZXMuYnVmZmVyIHx8IGJ5dGVzKSk7XG4gIHJldHVybiBkZWNvZGVVUklDb21wb25lbnQoZXNjYXBlKGFzY2lpU3RyaW5nKSk7XG59XG5cbi8qKlxuICogVHVybiBhIHN0cmluZyBpbnRvIFVURi04IGJ5dGVzLlxuICogQHBhcmFtIHtzdHJpbmd9IHN0cmluZ1xuICogQHJldHVybiB7IVVpbnQ4QXJyYXl9XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiB1dGY4RW5jb2RlKHN0cmluZykge1xuICBpZiAodHlwZW9mIFRleHRFbmNvZGVyICE9PSAndW5kZWZpbmVkJykge1xuICAgIHJldHVybiBuZXcgVGV4dEVuY29kZXIoJ3V0Zi04JykuZW5jb2RlKHN0cmluZyk7XG4gIH1cbiAgcmV0dXJuIHN0cmluZ1RvQnl0ZXModW5lc2NhcGUoZW5jb2RlVVJJQ29tcG9uZW50KHN0cmluZykpKTtcbn1cblxuLyoqXG4gKiBDb252ZXJ0cyBhIHN0cmluZyB3aGljaCBob2xkcyA4LWJpdCBjb2RlIHBvaW50cywgc3VjaCBhcyB0aGUgcmVzdWx0IG9mIGF0b2IsXG4gKiBpbnRvIGEgVWludDhBcnJheSB3aXRoIHRoZSBjb3JyZXNwb25kaW5nIGJ5dGVzLlxuICogSWYgeW91IGhhdmUgYSBzdHJpbmcgb2YgY2hhcmFjdGVycywgeW91IHByb2JhYmx5IHdhbnQgdG8gYmUgdXNpbmcgdXRmOEVuY29kZS5cbiAqIEBwYXJhbSB7c3RyaW5nfSBzdHJcbiAqIEByZXR1cm4geyFVaW50OEFycmF5fVxuICovXG5leHBvcnQgZnVuY3Rpb24gc3RyaW5nVG9CeXRlcyhzdHIpIHtcbiAgY29uc3QgYnl0ZXMgPSBuZXcgVWludDhBcnJheShzdHIubGVuZ3RoKTtcbiAgZm9yIChsZXQgaSA9IDA7IGkgPCBzdHIubGVuZ3RoOyBpKyspIHtcbiAgICBjb25zdCBjaGFyQ29kZSA9IHN0ci5jaGFyQ29kZUF0KGkpO1xuICAgIGRldkFzc2VydChjaGFyQ29kZSA8PSAyNTUsICdDaGFyYWN0ZXJzIG11c3QgYmUgaW4gcmFuZ2UgWzAsMjU1XScpO1xuICAgIGJ5dGVzW2ldID0gY2hhckNvZGU7XG4gIH1cbiAgcmV0dXJuIGJ5dGVzO1xufVxuXG4vKipcbiAqIENvbnZlcnRzIGEgOC1iaXQgYnl0ZXMgYXJyYXkgaW50byBhIHN0cmluZ1xuICogQHBhcmFtIHshVWludDhBcnJheX0gYnl0ZXNcbiAqIEByZXR1cm4ge3N0cmluZ31cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGJ5dGVzVG9TdHJpbmcoYnl0ZXMpIHtcbiAgLy8gSW50ZW50aW9uYWxseSBhdm9pZHMgU3RyaW5nLmZyb21DaGFyQ29kZS5hcHBseSBzbyB3ZSBkb24ndCBzdWZmZXIgYVxuICAvLyBzdGFjayBvdmVyZmxvdy4gIzEwNDk1LCBodHRwczovL2pzcGVyZi5jb20vYnl0ZXNUb1N0cmluZy0yXG4gIGNvbnN0IGFycmF5ID0gbmV3IEFycmF5KGJ5dGVzLmxlbmd0aCk7XG4gIGZvciAobGV0IGkgPSAwOyBpIDwgYnl0ZXMubGVuZ3RoOyBpKyspIHtcbiAgICBhcnJheVtpXSA9IFN0cmluZy5mcm9tQ2hhckNvZGUoYnl0ZXNbaV0pO1xuICB9XG4gIHJldHVybiBhcnJheS5qb2luKCcnKTtcbn1cblxuLyoqXG4gKiBDb252ZXJ0cyBhIDQtaXRlbSBieXRlIGFycmF5IHRvIGFuIHVuc2lnbmVkIGludGVnZXIuXG4gKiBBc3N1bWVzIGJ5dGVzIGFyZSBiaWcgZW5kaWFuLlxuICogQHBhcmFtIHshVWludDhBcnJheX0gYnl0ZXNcbiAqIEByZXR1cm4ge251bWJlcn1cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGJ5dGVzVG9VSW50MzIoYnl0ZXMpIHtcbiAgaWYgKGJ5dGVzLmxlbmd0aCAhPSA0KSB7XG4gICAgdGhyb3cgbmV3IEVycm9yKCdSZWNlaXZlZCBieXRlIGFycmF5IHdpdGggbGVuZ3RoICE9IDQnKTtcbiAgfVxuICBjb25zdCB2YWwgPVxuICAgICgoYnl0ZXNbMF0gJiAweGZmKSA8PCAyNCkgfFxuICAgICgoYnl0ZXNbMV0gJiAweGZmKSA8PCAxNikgfFxuICAgICgoYnl0ZXNbMl0gJiAweGZmKSA8PCA4KSB8XG4gICAgKGJ5dGVzWzNdICYgMHhmZik7XG4gIC8vIENvbnZlcnQgdG8gdW5zaWduZWQuXG4gIHJldHVybiB2YWwgPj4+IDA7XG59XG5cbi8qKlxuICogR2VuZXJhdGUgYSByYW5kb20gYnl0ZXMgYXJyYXkgd2l0aCBzcGVjaWZpYyBsZW5ndGggdXNpbmdcbiAqIHdpbi5jcnlwdG8uZ2V0UmFuZG9tVmFsdWVzLiBSZXR1cm4gbnVsbCBpZiBpdCBpcyBub3QgYXZhaWxhYmxlLlxuICogQHBhcmFtIHshV2luZG93fSB3aW5cbiAqIEBwYXJhbSB7bnVtYmVyfSBsZW5ndGhcbiAqIEByZXR1cm4gez9VaW50OEFycmF5fVxuICovXG5leHBvcnQgZnVuY3Rpb24gZ2V0Q3J5cHRvUmFuZG9tQnl0ZXNBcnJheSh3aW4sIGxlbmd0aCkge1xuICBsZXQge2NyeXB0b30gPSB3aW47XG5cbiAgLy8gU3VwcG9ydCBJRSAxMVxuICBpZiAoIUlTX0VTTSkge1xuICAgIGNyeXB0byA9IC8qKiBAdHlwZSB7IXdlYkNyeXB0by5DcnlwdG98dW5kZWZpbmVkfSAqLyAoXG4gICAgICBjcnlwdG8gfHwgd2luLm1zQ3J5cHRvXG4gICAgKTtcbiAgICBpZiAoIWNyeXB0byB8fCAhY3J5cHRvLmdldFJhbmRvbVZhbHVlcykge1xuICAgICAgcmV0dXJuIG51bGw7XG4gICAgfVxuICB9XG5cbiAgLy8gV2lkZWx5IGF2YWlsYWJsZSBpbiBicm93c2VycyB3ZSBzdXBwb3J0OlxuICAvLyBodHRwOi8vY2FuaXVzZS5jb20vI3NlYXJjaD1nZXRSYW5kb21WYWx1ZXNcbiAgY29uc3QgdWludDhhcnJheSA9IG5ldyBVaW50OEFycmF5KGxlbmd0aCk7XG4gIGNyeXB0by5nZXRSYW5kb21WYWx1ZXModWludDhhcnJheSk7XG4gIHJldHVybiB1aW50OGFycmF5O1xufVxuIl19
+// /Users/mszylkowski/src/amphtml/src/core/types/string/bytes.js

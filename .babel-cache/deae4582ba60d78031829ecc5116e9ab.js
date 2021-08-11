@@ -1,0 +1,158 @@
+/**
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Whether addEventListener supports options or only takes capture as a boolean
+ * @type {boolean|undefined}
+ * @visibleForTesting
+ */
+var optsSupported;
+
+/**
+ * Whether addEventListener supports options or only takes passive as a boolean
+ * @type {boolean|undefined}
+ */
+var passiveSupported;
+
+/**
+ * Options supported by addEventListener
+ * @typedef AddEventListenerOptsDef
+ * @property {undefined|boolean} [capture]
+ * @property {undefined|boolean} [once]
+ * @property {undefined|boolean} [passive]
+ * @property {undefined|!AbortSignal} [signal]
+ * }}
+ */
+var AddEventListenerOptsDef;
+
+/**
+ * Listens for the specified event on the element.
+ *
+ * Do not use this directly. This method is implemented as a shared
+ * dependency. Use `listen()` in either `event-helper` or `3p-frame-messaging`,
+ * depending on your use case.
+ *
+ * @param {!EventTarget} element
+ * @param {string} eventType
+ * @param {function(!Event)} listener
+ * @param {!AddEventListenerOptsDef=} opt_evtListenerOpts
+ * @return {!UnlistenDef}
+ */
+export function internalListenImplementation(element, eventType, listener, opt_evtListenerOpts) {
+  var localElement = element;
+  var localListener = listener;
+
+  /** @type {?function(!Event)} */
+  var wrapped = function wrapped(event) {
+    try {
+      return localListener(event);
+    } catch (e) {
+      // __AMP_REPORT_ERROR is installed globally per window in the entry point.
+      self.__AMP_REPORT_ERROR == null ? void 0 : self.__AMP_REPORT_ERROR(e);
+      throw e;
+    }
+  };
+
+  var optsSupported = detectEvtListenerOptsSupport();
+  var capture = !!(opt_evtListenerOpts != null && opt_evtListenerOpts.capture);
+  localElement.addEventListener(eventType, wrapped, optsSupported ? opt_evtListenerOpts : capture);
+  return function () {
+    var _localElement;
+
+    (_localElement = localElement) == null ? void 0 : _localElement.removeEventListener(eventType, wrapped, optsSupported ? opt_evtListenerOpts : capture);
+    // Ensure these are GC'd
+    localListener = null;
+    localElement = null;
+    wrapped = null;
+  };
+}
+
+/**
+ * Tests whether the browser supports options as an argument of addEventListener
+ * or not.
+ *
+ * @return {boolean}
+ */
+export function detectEvtListenerOptsSupport() {
+  // Only run the test once
+  if (optsSupported !== undefined) {
+    return optsSupported;
+  }
+
+  optsSupported = false;
+
+  try {
+    // Test whether browser supports EventListenerOptions or not
+    var options = {
+      get capture() {
+        optsSupported = true;
+      }
+
+    };
+    self.addEventListener('test-options', null, options);
+    self.removeEventListener('test-options', null, options);
+  } catch (err) {// EventListenerOptions are not supported
+  }
+
+  return optsSupported;
+}
+
+/**
+ * Resets the test for whether addEventListener supports options or not.
+ */
+export function resetEvtListenerOptsSupportForTesting() {
+  optsSupported = undefined;
+}
+
+/**
+ * Return boolean. if listener option is supported, return `true`.
+ * if not supported, return `false`
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function supportsPassiveEventListener(win) {
+  if (passiveSupported !== undefined) {
+    return passiveSupported;
+  }
+
+  passiveSupported = false;
+
+  try {
+    var options = {
+      get passive() {
+        // This function will be called when the browser
+        // attempts to access the passive property.
+        passiveSupported = true;
+        return false;
+      }
+
+    };
+    win.addEventListener('test-options', null, options);
+    win.removeEventListener('test-options', null, options);
+  } catch (err) {// EventListenerOptions are not supported
+  }
+
+  return passiveSupported;
+}
+
+/**
+ * Resets the test for whether addEventListener supports passive options or not.
+ */
+export function resetPassiveSupportedForTesting() {
+  passiveSupported = undefined;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImV2ZW50LWhlbHBlci1saXN0ZW4uanMiXSwibmFtZXMiOlsib3B0c1N1cHBvcnRlZCIsInBhc3NpdmVTdXBwb3J0ZWQiLCJBZGRFdmVudExpc3RlbmVyT3B0c0RlZiIsImludGVybmFsTGlzdGVuSW1wbGVtZW50YXRpb24iLCJlbGVtZW50IiwiZXZlbnRUeXBlIiwibGlzdGVuZXIiLCJvcHRfZXZ0TGlzdGVuZXJPcHRzIiwibG9jYWxFbGVtZW50IiwibG9jYWxMaXN0ZW5lciIsIndyYXBwZWQiLCJldmVudCIsImUiLCJzZWxmIiwiX19BTVBfUkVQT1JUX0VSUk9SIiwiZGV0ZWN0RXZ0TGlzdGVuZXJPcHRzU3VwcG9ydCIsImNhcHR1cmUiLCJhZGRFdmVudExpc3RlbmVyIiwicmVtb3ZlRXZlbnRMaXN0ZW5lciIsInVuZGVmaW5lZCIsIm9wdGlvbnMiLCJlcnIiLCJyZXNldEV2dExpc3RlbmVyT3B0c1N1cHBvcnRGb3JUZXN0aW5nIiwic3VwcG9ydHNQYXNzaXZlRXZlbnRMaXN0ZW5lciIsIndpbiIsInBhc3NpdmUiLCJyZXNldFBhc3NpdmVTdXBwb3J0ZWRGb3JUZXN0aW5nIl0sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLElBQUlBLGFBQUo7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQSxJQUFJQyxnQkFBSjs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxJQUFJQyx1QkFBSjs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0MsNEJBQVQsQ0FDTEMsT0FESyxFQUVMQyxTQUZLLEVBR0xDLFFBSEssRUFJTEMsbUJBSkssRUFLTDtBQUNBLE1BQUlDLFlB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WyIvKipcbiAqIENvcHlyaWdodCAyMDE3IFRoZSBBTVAgSFRNTCBBdXRob3JzLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIExpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmVcbiAqIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuIFwiQVMtSVNcIiBCQVNJUyxcbiAqIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLlxuICogU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZFxuICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuLyoqXG4gKiBXaGV0aGVyIGFkZEV2ZW50TGlzdGVuZXIgc3VwcG9ydHMgb3B0aW9ucyBvciBvbmx5IHRha2VzIGNhcHR1cmUgYXMgYSBib29sZWFuXG4gKiBAdHlwZSB7Ym9vbGVhbnx1bmRlZmluZWR9XG4gKiBAdmlzaWJsZUZvclRlc3RpbmdcbiAqL1xubGV0IG9wdHNTdXBwb3J0ZWQ7XG5cbi8qKlxuICogV2hldGhlciBhZGRFdmVudExpc3RlbmVyIHN1cHBvcnRzIG9wdGlvbnMgb3Igb25seSB0YWtlcyBwYXNzaXZlIGFzIGEgYm9vbGVhblxuICogQHR5cGUge2Jvb2xlYW58dW5kZWZpbmVkfVxuICovXG5sZXQgcGFzc2l2ZVN1cHBvcnRlZDtcblxuLyoqXG4gKiBPcHRpb25zIHN1cHBvcnRlZCBieSBhZGRFdmVudExpc3RlbmVyXG4gKiBAdHlwZWRlZiBBZGRFdmVudExpc3RlbmVyT3B0c0RlZlxuICogQHByb3BlcnR5IHt1bmRlZmluZWR8Ym9vbGVhbn0gW2NhcHR1cmVdXG4gKiBAcHJvcGVydHkge3VuZGVmaW5lZHxib29sZWFufSBbb25jZV1cbiAqIEBwcm9wZXJ0eSB7dW5kZWZpbmVkfGJvb2xlYW59IFtwYXNzaXZlXVxuICogQHByb3BlcnR5IHt1bmRlZmluZWR8IUFib3J0U2lnbmFsfSBbc2lnbmFsXVxuICogfX1cbiAqL1xubGV0IEFkZEV2ZW50TGlzdGVuZXJPcHRzRGVmO1xuXG4vKipcbiAqIExpc3RlbnMgZm9yIHRoZSBzcGVjaWZpZWQgZXZlbnQgb24gdGhlIGVsZW1lbnQuXG4gKlxuICogRG8gbm90IHVzZSB0aGlzIGRpcmVjdGx5LiBUaGlzIG1ldGhvZCBpcyBpbXBsZW1lbnRlZCBhcyBhIHNoYXJlZFxuICogZGVwZW5kZW5jeS4gVXNlIGBsaXN0ZW4oKWAgaW4gZWl0aGVyIGBldmVudC1oZWxwZXJgIG9yIGAzcC1mcmFtZS1tZXNzYWdpbmdgLFxuICogZGVwZW5kaW5nIG9uIHlvdXIgdXNlIGNhc2UuXG4gKlxuICogQHBhcmFtIHshRXZlbnRUYXJnZXR9IGVsZW1lbnRcbiAqIEBwYXJhbSB7c3RyaW5nfSBldmVudFR5cGVcbiAqIEBwYXJhbSB7ZnVuY3Rpb24oIUV2ZW50KX0gbGlzdGVuZXJcbiAqIEBwYXJhbSB7IUFkZEV2ZW50TGlzdGVuZXJPcHRzRGVmPX0gb3B0X2V2dExpc3RlbmVyT3B0c1xuICogQHJldHVybiB7IVVubGlzdGVuRGVmfVxuICovXG5leHBvcnQgZnVuY3Rpb24gaW50ZXJuYWxMaXN0ZW5JbXBsZW1lbnRhdGlvbihcbiAgZWxlbWVudCxcbiAgZXZlbnRUeXBlLFxuICBsaXN0ZW5lcixcbiAgb3B0X2V2dExpc3RlbmVyT3B0c1xuKSB7XG4gIGxldCBsb2NhbEVsZW1lbnQgPSBlbGVtZW50O1xuICBsZXQgbG9jYWxMaXN0ZW5lciA9IGxpc3RlbmVyO1xuICAvKiogQHR5cGUgez9mdW5jdGlvbighRXZlbnQpfSAqL1xuICBsZXQgd3JhcHBlZCA9IChldmVudCkgPT4ge1xuICAgIHRyeSB7XG4gICAgICByZXR1cm4gbG9jYWxMaXN0ZW5lcihldmVudCk7XG4gICAgfSBjYXRjaCAoZSkge1xuICAgICAgLy8gX19BTVBfUkVQT1JUX0VSUk9SIGlzIGluc3RhbGxlZCBnbG9iYWxseSBwZXIgd2luZG93IGluIHRoZSBlbnRyeSBwb2ludC5cbiAgICAgIHNlbGYuX19BTVBfUkVQT1JUX0VSUk9SPy4oZSk7XG4gICAgICB0aHJvdyBlO1xuICAgIH1cbiAgfTtcbiAgY29uc3Qgb3B0c1N1cHBvcnRlZCA9IGRldGVjdEV2dExpc3RlbmVyT3B0c1N1cHBvcnQoKTtcbiAgY29uc3QgY2FwdHVyZSA9ICEhb3B0X2V2dExpc3RlbmVyT3B0cz8uY2FwdHVyZTtcblxuICBsb2NhbEVsZW1lbnQuYWRkRXZlbnRMaXN0ZW5lcihcbiAgICBldmVudFR5cGUsXG4gICAgd3JhcHBlZCxcbiAgICBvcHRzU3VwcG9ydGVkID8gb3B0X2V2dExpc3RlbmVyT3B0cyA6IGNhcHR1cmVcbiAgKTtcbiAgcmV0dXJuICgpID0+IHtcbiAgICBsb2NhbEVsZW1lbnQ/LnJlbW92ZUV2ZW50TGlzdGVuZXIoXG4gICAgICBldmVudFR5cGUsXG4gICAgICB3cmFwcGVkLFxuICAgICAgb3B0c1N1cHBvcnRlZCA/IG9wdF9ldnRMaXN0ZW5lck9wdHMgOiBjYXB0dXJlXG4gICAgKTtcbiAgICAvLyBFbnN1cmUgdGhlc2UgYXJlIEdDJ2RcbiAgICBsb2NhbExpc3RlbmVyID0gbnVsbDtcbiAgICBsb2NhbEVsZW1lbnQgPSBudWxsO1xuICAgIHdyYXBwZWQgPSBudWxsO1xuICB9O1xufVxuXG4vKipcbiAqIFRlc3RzIHdoZXRoZXIgdGhlIGJyb3dzZXIgc3VwcG9ydHMgb3B0aW9ucyBhcyBhbiBhcmd1bWVudCBvZiBhZGRFdmVudExpc3RlbmVyXG4gKiBvciBub3QuXG4gKlxuICogQHJldHVybiB7Ym9vbGVhbn1cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGRldGVjdEV2dExpc3RlbmVyT3B0c1N1cHBvcnQoKSB7XG4gIC8vIE9ubHkgcnVuIHRoZSB0ZXN0IG9uY2VcbiAgaWYgKG9wdHNTdXBwb3J0ZWQgIT09IHVuZGVmaW5lZCkge1xuICAgIHJldHVybiBvcHRzU3VwcG9ydGVkO1xuICB9XG5cbiAgb3B0c1N1cHBvcnRlZCA9IGZhbHNlO1xuICB0cnkge1xuICAgIC8vIFRlc3Qgd2hldGhlciBicm93c2VyIHN1cHBvcnRzIEV2ZW50TGlzdGVuZXJPcHRpb25zIG9yIG5vdFxuICAgIGNvbnN0IG9wdGlvbnMgPSB7XG4gICAgICBnZXQgY2FwdHVyZSgpIHtcbiAgICAgICAgb3B0c1N1cHBvcnRlZCA9IHRydWU7XG4gICAgICB9LFxuICAgIH07XG4gICAgc2VsZi5hZGRFdmVudExpc3RlbmVyKCd0ZXN0LW9wdGlvbnMnLCBudWxsLCBvcHRpb25zKTtcbiAgICBzZWxmLnJlbW92ZUV2ZW50TGlzdGVuZXIoJ3Rlc3Qtb3B0aW9ucycsIG51bGwsIG9wdGlvbnMpO1xuICB9IGNhdGNoIChlcnIpIHtcbiAgICAvLyBFdmVudExpc3RlbmVyT3B0aW9ucyBhcmUgbm90IHN1cHBvcnRlZFxuICB9XG4gIHJldHVybiBvcHRzU3VwcG9ydGVkO1xufVxuXG4vKipcbiAqIFJlc2V0cyB0aGUgdGVzdCBmb3Igd2hldGhlciBhZGRFdmVudExpc3RlbmVyIHN1cHBvcnRzIG9wdGlvbnMgb3Igbm90LlxuICovXG5leHBvcnQgZnVuY3Rpb24gcmVzZXRFdnRMaXN0ZW5lck9wdHNTdXBwb3J0Rm9yVGVzdGluZygpIHtcbiAgb3B0c1N1cHBvcnRlZCA9IHVuZGVmaW5lZDtcbn1cblxuLyoqXG4gKiBSZXR1cm4gYm9vbGVhbi4gaWYgbGlzdGVuZXIgb3B0aW9uIGlzIHN1cHBvcnRlZCwgcmV0dXJuIGB0cnVlYC5cbiAqIGlmIG5vdCBzdXBwb3J0ZWQsIHJldHVybiBgZmFsc2VgXG4gKiBAcGFyYW0geyFXaW5kb3d9IHdpblxuICogQHJldHVybiB7Ym9vbGVhbn1cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHN1cHBvcnRzUGFzc2l2ZUV2ZW50TGlzdGVuZXIod2luKSB7XG4gIGlmIChwYXNzaXZlU3VwcG9ydGVkICE9PSB1bmRlZmluZWQpIHtcbiAgICByZXR1cm4gcGFzc2l2ZVN1cHBvcnRlZDtcbiAgfVxuXG4gIHBhc3NpdmVTdXBwb3J0ZWQgPSBmYWxzZTtcbiAgdHJ5IHtcbiAgICBjb25zdCBvcHRpb25zID0ge1xuICAgICAgZ2V0IHBhc3NpdmUoKSB7XG4gICAgICAgIC8vIFRoaXMgZnVuY3Rpb24gd2lsbCBiZSBjYWxsZWQgd2hlbiB0aGUgYnJvd3NlclxuICAgICAgICAvLyBhdHRlbXB0cyB0byBhY2Nlc3MgdGhlIHBhc3NpdmUgcHJvcGVydHkuXG4gICAgICAgIHBhc3NpdmVTdXBwb3J0ZWQgPSB0cnVlO1xuICAgICAgICByZXR1cm4gZmFsc2U7XG4gICAgICB9LFxuICAgIH07XG5cbiAgICB3aW4uYWRkRXZlbnRMaXN0ZW5lcigndGVzdC1vcHRpb25zJywgbnVsbCwgb3B0aW9ucyk7XG4gICAgd2luLnJlbW92ZUV2ZW50TGlzdGVuZXIoJ3Rlc3Qtb3B0aW9ucycsIG51bGwsIG9wdGlvbnMpO1xuICB9IGNhdGNoIChlcnIpIHtcbiAgICAvLyBFdmVudExpc3RlbmVyT3B0aW9ucyBhcmUgbm90IHN1cHBvcnRlZFxuICB9XG4gIHJldHVybiBwYXNzaXZlU3VwcG9ydGVkO1xufVxuXG4vKipcbiAqIFJlc2V0cyB0aGUgdGVzdCBmb3Igd2hldGhlciBhZGRFdmVudExpc3RlbmVyIHN1cHBvcnRzIHBhc3NpdmUgb3B0aW9ucyBvciBub3QuXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiByZXNldFBhc3NpdmVTdXBwb3J0ZWRGb3JUZXN0aW5nKCkge1xuICBwYXNzaXZlU3VwcG9ydGVkID0gdW5kZWZpbmVkO1xufVxuIl19
+// /Users/mszylkowski/src/amphtml/src/core/dom/event-helper-listen.js

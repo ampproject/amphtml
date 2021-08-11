@@ -1,0 +1,131 @@
+/**
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { devAssert } from "../assert";
+import { map } from "../types/object";
+var htmlContainer;
+var svgContainer;
+
+/**
+ * Creates the html helper for the doc.
+ *
+ * @param {!Element|!Document} nodeOrDoc
+ * @return {function(!Array<string>):!Element}
+ */
+export function htmlFor(nodeOrDoc) {
+  var doc = nodeOrDoc.ownerDocument || nodeOrDoc;
+
+  if (!htmlContainer || htmlContainer.ownerDocument !== doc) {
+    htmlContainer = doc.createElement('div');
+  }
+
+  return html;
+}
+
+/**
+ * Creates the svg helper for the doc.
+ *
+ * @param {!Element|!Document} nodeOrDoc
+ * @return {function(!Array<string>):!Element}
+ */
+export function svgFor(nodeOrDoc) {
+  var doc = nodeOrDoc.ownerDocument || nodeOrDoc;
+
+  if (!svgContainer || svgContainer.ownerDocument !== svgContainer) {
+    svgContainer = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  }
+
+  return svg;
+}
+
+/**
+ * A tagged template literal helper to generate static SVG trees.
+ * This must be used as a tagged template, ie
+ *
+ * ```
+ * const circle = svg`<circle cx="60" cy="60" r="22"></circle>`;
+ * ```
+ *
+ * Only the root element and its subtree will be returned. DO NOT use this to
+ * render subtree's with dynamic content, it WILL result in an error!
+ *
+ * @param {!Array<string>} strings
+ * @return {!Element}
+ */
+function svg(strings) {
+  return createNode(svgContainer, strings);
+}
+
+/**
+ * A tagged template literal helper to generate static DOM trees.
+ * This must be used as a tagged template, ie
+ *
+ * ```
+ * const div = html`<div><span></span></div>`;
+ * ```
+ *
+ * Only the root element and its subtree will be returned. DO NOT use this to
+ * render subtree's with dynamic content, it WILL result in an error!
+ *
+ * @param {!Array<string>} strings
+ * @return {!Element}
+ */
+function html(strings) {
+  return createNode(htmlContainer, strings);
+}
+
+/**
+ * Helper used by html and svg string literal functions.
+ * @param {!Element} container
+ * @param {!Array<string>} strings
+ * @return {!Element}
+ */
+function createNode(container, strings) {
+  devAssert(strings.length === 1, 'Improper html template tag usage.');
+  container.
+  /*OK*/
+  innerHTML = strings[0];
+  var el = container.firstElementChild;
+  devAssert(el, 'No elements in template');
+  devAssert(!el.nextElementSibling, 'Too many root elements in template');
+  // Clear to free memory.
+  container.removeChild(el);
+  return el;
+}
+
+/**
+ * Queries an element for all elements with a "ref" attribute, removing
+ * the attribute afterwards.
+ * Returns a named map of all ref elements.
+ *
+ * @param {!Element} root
+ * @return {!Object<string, !Element>}
+ */
+export function htmlRefs(root) {
+  var elements = root.querySelectorAll('[ref]');
+  var refs = map();
+
+  for (var i = 0; i < elements.length; i++) {
+    var element = elements[i];
+    var ref = devAssert(element.getAttribute('ref'), 'Empty ref attr');
+    element.removeAttribute('ref');
+    devAssert(refs[ref] === undefined, 'Duplicate ref');
+    refs[ref] = element;
+  }
+
+  return refs;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInN0YXRpYy10ZW1wbGF0ZS5qcyJdLCJuYW1lcyI6WyJkZXZBc3NlcnQiLCJtYXAiLCJodG1sQ29udGFpbmVyIiwic3ZnQ29udGFpbmVyIiwiaHRtbEZvciIsIm5vZGVPckRvYyIsImRvYyIsIm93bmVyRG9jdW1lbnQiLCJjcmVhdGVFbGVtZW50IiwiaHRtbCIsInN2Z0ZvciIsImNyZWF0ZUVsZW1lbnROUyIsInN2ZyIsInN0cmluZ3MiLCJjcmVhdGVOb2RlIiwiY29udGFpbmVyIiwibGVuZ3RoIiwiaW5uZXJIVE1MIiwiZWwiLCJmaXJzdEVsZW1lbnRDaGlsZCIsIm5leHRFbGVtZW50U2libGluZyIsInJlbW92ZUNoaWxkIiwiaHRtbFJlZnMiLCJyb290IiwiZWxlbWVudHMiLCJxdWVyeVNlbGVjdG9yQWxsIiwicmVmcyIsImkiLCJlbGVtZW50IiwicmVmIiwiZ2V0QXR0cmlidXRlIiwicmVtb3ZlQXR0cmlidXRlIiwidW5kZWZpbmVkIl0sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFFQSxTQUFRQSxTQUFSO0FBQ0EsU0FBUUMsR0FBUjtBQUVBLElBQUlDLGFBQUo7QUFDQSxJQUFJQyxZQUFKOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0MsT0FBVCxDQUFpQkMsU0FBakIsRUFBNEI7QUFDakMsTUFBTUMsR0FBRyxHQUFHRCxTQUFTLENBQUNFLGFBQVYsSUFBMkJGLFNBQXZDOztBQUNBLE1BQUksQ0FBQ0gsYUFBRCxJQUFrQkEsYUFBYSxDQUFDSyxhQUFkLEtBQWdDRCxHQUF0RCxFQUEyRDtBQUN6REosSUFBQUEsYUFBYSxHQUFHSSxHQUFHLENBQUNFLGFBQUosQ0FBa0IsS0FBbEIsQ0FBaEI7QUFDRDs7QUFFRCxTQUFPQyxJQUFQO0FBQ0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTQyxNQUFULENBQWdCTCxTQUFoQixFQUEyQjtBQUNoQyxNQUFNQyxHQUFHLEdBQUdELFNBQVMsQ0FBQ0UsYUFBVixJQUEyQkYsU0FBdkM7O0FBQ0EsTUFBSSxDQUFDRixZQUFELElBQWlCQSxZQUFZLENBQUNJLGFBQWIsS0FBK0JKLFlBQXBELEVBQWtFO0FBQ2hFQSxJQUFBQSxZQUFZLEdBQUdHLEdBQUcsQ0FBQ0ssZUFBSixDQUFvQiw0QkFBcEIsRUFBa0QsS0FBbEQsQ0FBZjtBQUNEOztBQUVELFNBQU9DLEdBQVA7QUFDRDs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsU0FBU0EsR0FBVCxDQUFhQyxPQUFiLEVBQXNCO0FBQ3BCLFNBQU9DLFVBQVUsQ0FBQ1gsWUFBRCxFQUFlVSxPQUFmLENBQWpCO0FBQ0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLFNBQVNKLElBQVQsQ0FBY0ksT0FBZCxFQUF1QjtBQUNyQixTQUFPQyxVQUFVLENBQUNaLGFBQUQsRUFBZ0JXLE9BQWhCLENBQWpCO0FBQ0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsU0FBU0MsVUFBVCxDQUFvQkMsU0FBcEIsRUFBK0JGLE9BQS9CLEVBQXdDO0FBQ3RDYixFQUFBQSxTQUFTLENBQUNhLE9BQU8sQ0FBQ0csTUFBUixLQUFtQixDQUFwQixFQUF1QixtQ0FBdkIsQ0FBVDtBQUNBRCxFQUFBQSxTQUFTO0FBQUM7QUFBT0UsRUFBQUEsU0FBakIsR0FBNkJKLE9BQU8sQ0FBQyxDQUFELENBQXBDO0FBRUEsTUFBTUssRUFBRSxHQUFHSCxTQUFTLENBQUNJLGlCQUFyQjtBQUNBbkIsRUFBQUEsU0FBUyxDQUFDa0IsRUFBRCxFQUFLLHlCQUFMLENBQVQ7QUFDQWxCLEVBQUFBLFNBQVMsQ0FBQyxDQUFDa0IsRUFBRSxDQUFDRSxrQkFBTCxFQUF5QixvQ0FBekIsQ0FBVDtBQUVBO0FBQ0FMLEVBQUFBLFNBQVMsQ0FBQ00sV0FBVixDQUFzQkgsRUFBdEI7QUFFQSxTQUFPQSxFQUFQO0FBQ0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0ksUUFBVCxDQUFrQkMsSUFBbEIsRUFBd0I7QUFDN0IsTUFBTUMsUUFBUSxHQUFHRCxJQUFJLENBQUNFLGdCQUFMLENBQXNCLE9BQXRCLENBQWpCO0FBQ0EsTUFBTUMsSUFBSSxHQUFHekIsR0FBRyxFQUFoQjs7QUFFQSxPQUFLLElBQUkwQixDQUFDLEdBQUcsQ0FBYixFQUFnQkEsQ0FBQyxHQUFHSCxRQUFRLENBQUNSLE1BQTdCLEVBQXFDVyxDQUFDLEVBQXRDLEVBQTBDO0FBQ3hDLFFBQU1DLE9BQU8sR0FBR0osUUFBUSxDQUFDRyxDQUFELENBQXhCO0FBQ0EsUUFBTUUsR0FBRyxHQUFHN0IsU0FBUyxDQUFDNEIsT0FBTyxDQUFDRSxZQUFSLENBQXFCLEtBQXJCLENBQUQsRUFBOEIsZ0JBQTlCLENBQXJCO0FBQ0FGLElBQUFBLE9BQU8sQ0FBQ0csZUFBUixDQUF3QixLQUF4QjtBQUNBL0IsSUFBQUEsU0FBUyxDQUFDMEIsSUFBSSxDQUFDRyxHQUFELENBQUosS0FBY0csU0FBZixFQUEwQixlQUExQixDQUFUO0FBQ0FOLElBQUFBLElBQUksQ0FBQ0csR0FBRCxDQUFKLEdBQVlELE9BQVo7QUFDRDs7QUFFRCxTQUFPRixJQUFQO0FBQ0QiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIENvcHlyaWdodCAyMDE4IFRoZSBBTVAgSFRNTCBBdXRob3JzLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIExpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmVcbiAqIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuIFwiQVMtSVNcIiBCQVNJUyxcbiAqIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLlxuICogU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZFxuICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHtkZXZBc3NlcnR9IGZyb20gJyNjb3JlL2Fzc2VydCc7XG5pbXBvcnQge21hcH0gZnJvbSAnI2NvcmUvdHlwZXMvb2JqZWN0JztcblxubGV0IGh0bWxDb250YWluZXI7XG5sZXQgc3ZnQ29udGFpbmVyO1xuXG4vKipcbiAqIENyZWF0ZXMgdGhlIGh0bWwgaGVscGVyIGZvciB0aGUgZG9jLlxuICpcbiAqIEBwYXJhbSB7IUVsZW1lbnR8IURvY3VtZW50fSBub2RlT3JEb2NcbiAqIEByZXR1cm4ge2Z1bmN0aW9uKCFBcnJheTxzdHJpbmc+KTohRWxlbWVudH1cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGh0bWxGb3Iobm9kZU9yRG9jKSB7XG4gIGNvbnN0IGRvYyA9IG5vZGVPckRvYy5vd25lckRvY3VtZW50IHx8IG5vZGVPckRvYztcbiAgaWYgKCFodG1sQ29udGFpbmVyIHx8IGh0bWxDb250YWluZXIub3duZXJEb2N1bWVudCAhPT0gZG9jKSB7XG4gICAgaHRtbENvbnRhaW5lciA9IGRvYy5jcmVhdGVFbGVtZW50KCdkaXYnKTtcbiAgfVxuXG4gIHJldHVybiBodG1sO1xufVxuXG4vKipcbiAqIENyZWF0ZXMgdGhlIHN2ZyBoZWxwZXIgZm9yIHRoZSBkb2MuXG4gKlxuICogQHBhcmFtIHshRWxlbWVudHwhRG9jdW1lbnR9IG5vZGVPckRvY1xuICogQHJldHVybiB7ZnVuY3Rpb24oIUFycmF5PHN0cmluZz4pOiFFbGVtZW50fVxuICovXG5leHBvcnQgZnVuY3Rpb24gc3ZnRm9yKG5vZGVPckRvYykge1xuICBjb25zdCBkb2MgPSBub2RlT3JEb2Mub3duZXJEb2N1bWVudCB8fCBub2RlT3JEb2M7XG4gIGlmICghc3ZnQ29udGFpbmVyIHx8IHN2Z0NvbnRhaW5lci5vd25lckRvY3VtZW50ICE9PSBzdmdDb250YWluZXIpIHtcbiAgICBzdmdDb250YWluZXIgPSBkb2MuY3JlYXRlRWxlbWVudE5TKCdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZycsICdzdmcnKTtcbiAgfVxuXG4gIHJldHVybiBzdmc7XG59XG5cbi8qKlxuICogQSB0YWdnZWQgdGVtcGxhdGUgbGl0ZXJhbCBoZWxwZXIgdG8gZ2VuZXJhdGUgc3RhdGljIFNWRyB0cmVlcy5cbiAqIFRoaXMgbXVzdCBiZSB1c2VkIGFzIGEgdGFnZ2VkIHRlbXBsYXRlLCBpZVxuICpcbiAqIGBgYFxuICogY29uc3QgY2lyY2xlID0gc3ZnYDxjaXJjbGUgY3g9XCI2MFwiIGN5PVwiNjBcIiByPVwiMjJcIj48L2NpcmNsZT5gO1xuICogYGBgXG4gKlxuICogT25seSB0aGUgcm9vdCBlbGVtZW50IGFuZCBpdHMgc3VidHJlZSB3aWxsIGJlIHJldHVybmVkLiBETyBOT1QgdXNlIHRoaXMgdG9cbiAqIHJlbmRlciBzdWJ0cmVlJ3Mgd2l0aCBkeW5hbWljIGNvbnRlbnQsIGl0IFdJTEwgcmVzdWx0IGluIGFuIGVycm9yIVxuICpcbiAqIEBwYXJhbSB7IUFycmF5PHN0cmluZz59IHN0cmluZ3NcbiAqIEByZXR1cm4geyFFbGVtZW50fVxuICovXG5mdW5jdGlvbiBzdmcoc3RyaW5ncykge1xuICByZXR1cm4gY3JlYXRlTm9kZShzdmdDb250YWluZXIsIHN0cmluZ3MpO1xufVxuXG4vKipcbiAqIEEgdGFnZ2VkIHRlbXBsYXRlIGxpdGVyYWwgaGVscGVyIHRvIGdlbmVyYXRlIHN0YXRpYyBET00gdHJlZXMuXG4gKiBUaGlzIG11c3QgYmUgdXNlZCBhcyBhIHRhZ2dlZCB0ZW1wbGF0ZSwgaWVcbiAqXG4gKiBgYGBcbiAqIGNvbnN0IGRpdiA9IGh0bWxgPGRpdj48c3Bhbj48L3NwYW4+PC9kaXY+YDtcbiAqIGBgYFxuICpcbiAqIE9ubHkgdGhlIHJvb3QgZWxlbWVudCBhbmQgaXRzIHN1YnRyZWUgd2lsbCBiZSByZXR1cm5lZC4gRE8gTk9UIHVzZSB0aGlzIHRvXG4gKiByZW5kZXIgc3VidHJlZSdzIHdpdGggZHluYW1pYyBjb250ZW50LCBpdCBXSUxMIHJlc3VsdCBpbiBhbiBlcnJvciFcbiAqXG4gKiBAcGFyYW0geyFBcnJheTxzdHJpbmc+fSBzdHJpbmdzXG4gKiBAcmV0dXJuIHshRWxlbWVudH1cbiAqL1xuZnVuY3Rpb24gaHRtbChzdHJpbmdzKSB7XG4gIHJldHVybiBjcmVhdGVOb2RlKGh0bWxDb250YWluZXIsIHN0cmluZ3MpO1xufVxuXG4vKipcbiAqIEhlbHBlciB1c2VkIGJ5IGh0bWwgYW5kIHN2ZyBzdHJpbmcgbGl0ZXJhbCBmdW5jdGlvbnMuXG4gKiBAcGFyYW0geyFFbGVtZW50fSBjb250YWluZXJcbiAqIEBwYXJhbSB7IUFycmF5PHN0cmluZz59IHN0cmluZ3NcbiAqIEByZXR1cm4geyFFbGVtZW50fVxuICovXG5mdW5jdGlvbiBjcmVhdGVOb2RlKGNvbnRhaW5lciwgc3RyaW5ncykge1xuICBkZXZBc3NlcnQoc3RyaW5ncy5sZW5ndGggPT09IDEsICdJbXByb3BlciBodG1sIHRlbXBsYXRlIHRhZyB1c2FnZS4nKTtcbiAgY29udGFpbmVyLi8qT0sqLyBpbm5lckhUTUwgPSBzdHJpbmdzWzBdO1xuXG4gIGNvbnN0IGVsID0gY29udGFpbmVyLmZpcnN0RWxlbWVudENoaWxkO1xuICBkZXZBc3NlcnQoZWwsICdObyBlbGVtZW50cyBpbiB0ZW1wbGF0ZScpO1xuICBkZXZBc3NlcnQoIWVsLm5leHRFbGVtZW50U2libGluZywgJ1RvbyBtYW55IHJvb3QgZWxlbWVudHMgaW4gdGVtcGxhdGUnKTtcblxuICAvLyBDbGVhciB0byBmcmVlIG1lbW9yeS5cbiAgY29udGFpbmVyLnJlbW92ZUNoaWxkKGVsKTtcblxuICByZXR1cm4gZWw7XG59XG5cbi8qKlxuICogUXVlcmllcyBhbiBlbGVtZW50IGZvciBhbGwgZWxlbWVudHMgd2l0aCBhIFwicmVmXCIgYXR0cmlidXRlLCByZW1vdmluZ1xuICogdGhlIGF0dHJpYnV0ZSBhZnRlcndhcmRzLlxuICogUmV0dXJucyBhIG5hbWVkIG1hcCBvZiBhbGwgcmVmIGVsZW1lbnRzLlxuICpcbiAqIEBwYXJhbSB7IUVsZW1lbnR9IHJvb3RcbiAqIEByZXR1cm4geyFPYmplY3Q8c3RyaW5nLCAhRWxlbWVudD59XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBodG1sUmVmcyhyb290KSB7XG4gIGNvbnN0IGVsZW1lbnRzID0gcm9vdC5xdWVyeVNlbGVjdG9yQWxsKCdbcmVmXScpO1xuICBjb25zdCByZWZzID0gbWFwKCk7XG5cbiAgZm9yIChsZXQgaSA9IDA7IGkgPCBlbGVtZW50cy5sZW5ndGg7IGkrKykge1xuICAgIGNvbnN0IGVsZW1lbnQgPSBlbGVtZW50c1tpXTtcbiAgICBjb25zdCByZWYgPSBkZXZBc3NlcnQoZWxlbWVudC5nZXRBdHRyaWJ1dGUoJ3JlZicpLCAnRW1wdHkgcmVmIGF0dHInKTtcbiAgICBlbGVtZW50LnJlbW92ZUF0dHJpYnV0ZSgncmVmJyk7XG4gICAgZGV2QXNzZXJ0KHJlZnNbcmVmXSA9PT0gdW5kZWZpbmVkLCAnRHVwbGljYXRlIHJlZicpO1xuICAgIHJlZnNbcmVmXSA9IGVsZW1lbnQ7XG4gIH1cblxuICByZXR1cm4gcmVmcztcbn1cbiJdfQ==
+// /Users/mszylkowski/src/amphtml/src/core/dom/static-template.js

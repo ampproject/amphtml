@@ -1,0 +1,44 @@
+/**
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Implements `Object.values` API.
+ * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_objects/Object/values.
+ *
+ * @param {!Object} target
+ * @return {!Array<*>}
+ */
+export function values(target) {
+  return Object.keys(target).map(function (k) {
+    return target[k];
+  });
+}
+
+/**
+ * Sets the Object.values polyfill if it does not exist.
+ * @param {!Window} win
+ */
+export function install(win) {
+  if (!win.Object.values) {
+    win.Object.defineProperty(win.Object, 'values', {
+      configurable: true,
+      writable: true,
+      value: values
+    });
+  }
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm9iamVjdC12YWx1ZXMuanMiXSwibmFtZXMiOlsidmFsdWVzIiwidGFyZ2V0IiwiT2JqZWN0Iiwia2V5cyIsIm1hcCIsImsiLCJpbnN0YWxsIiwid2luIiwiZGVmaW5lUHJvcGVydHkiLCJjb25maWd1cmFibGUiLCJ3cml0YWJsZSIsInZhbHVlIl0sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVNBLE1BQVQsQ0FBZ0JDLE1BQWhCLEVBQXdCO0FBQzdCLFNBQU9DLE1BQU0sQ0FBQ0MsSUFBUCxDQUFZRixNQUFaLEVBQW9CRyxHQUFwQixDQUF3QixVQUFDQyxDQUFEO0FBQUEsV0FBT0osTUFBTSxDQUFDSSxDQUFELENBQWI7QUFBQSxHQUF4QixDQUFQO0FBQ0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVNDLE9BQVQsQ0FBaUJDLEdBQWpCLEVBQXNCO0FBQzNCLE1BQUksQ0FBQ0EsR0FBRyxDQUFDTCxNQUFKLENBQVdGLE1BQWhCLEVBQXdCO0FBQ3RCTyxJQUFBQSxHQUFHLENBQUNMLE1BQUosQ0FBV00sY0FBWCxDQUEwQkQsR0FBRyxDQUFDTCxNQUE5QixFQUFzQyxRQUF0QyxFQUFnRDtBQUM5Q08sTUFBQUEsWUFBWSxFQUFFLElBRGdDO0FBRTlDQyxNQUFBQSxRQUFRLEVBQUUsSUFGb0M7QUFHOUNDLE1BQUFBLEtBQUssRUFBRVg7QUFIdUMsS0FBaEQ7QUFLRDtBQUNGIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb3B5cmlnaHQgMjAxOCBUaGUgQU1QIEhUTUwgQXV0aG9ycy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTLUlTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbi8qKlxuICogSW1wbGVtZW50cyBgT2JqZWN0LnZhbHVlc2AgQVBJLlxuICogU2VlIGh0dHBzOi8vZGV2ZWxvcGVyLm1vemlsbGEub3JnL2VuLVVTL2RvY3MvV2ViL0phdmFTY3JpcHQvUmVmZXJlbmNlL0dsb2JhbF9vYmplY3RzL09iamVjdC92YWx1ZXMuXG4gKlxuICogQHBhcmFtIHshT2JqZWN0fSB0YXJnZXRcbiAqIEByZXR1cm4geyFBcnJheTwqPn1cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHZhbHVlcyh0YXJnZXQpIHtcbiAgcmV0dXJuIE9iamVjdC5rZXlzKHRhcmdldCkubWFwKChrKSA9PiB0YXJnZXRba10pO1xufVxuXG4vKipcbiAqIFNldHMgdGhlIE9iamVjdC52YWx1ZXMgcG9seWZpbGwgaWYgaXQgZG9lcyBub3QgZXhpc3QuXG4gKiBAcGFyYW0geyFXaW5kb3d9IHdpblxuICovXG5leHBvcnQgZnVuY3Rpb24gaW5zdGFsbCh3aW4pIHtcbiAgaWYgKCF3aW4uT2JqZWN0LnZhbHVlcykge1xuICAgIHdpbi5PYmplY3QuZGVmaW5lUHJvcGVydHkod2luLk9iamVjdCwgJ3ZhbHVlcycsIHtcbiAgICAgIGNvbmZpZ3VyYWJsZTogdHJ1ZSxcbiAgICAgIHdyaXRhYmxlOiB0cnVlLFxuICAgICAgdmFsdWU6IHZhbHVlcyxcbiAgICB9KTtcbiAgfVxufVxuIl19
+// /Users/mszylkowski/src/amphtml/src/polyfills/object-values.js

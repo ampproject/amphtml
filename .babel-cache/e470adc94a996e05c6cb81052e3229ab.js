@@ -1,0 +1,198 @@
+/**
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { isIframed } from "./core/dom";
+import { Services } from "./service";
+import { READY_SCAN_SIGNAL } from "./service/resources-interface";
+
+/** @const {!Array<string>} */
+var EXCLUDE_INI_LOAD = [
+'AMP-AD',
+'AMP-ANALYTICS',
+'AMP-PIXEL',
+'AMP-AD-EXIT'];
+
+
+/**
+ * Returns the promise that will be resolved when all content elements
+ * have been loaded in the initially visible set.
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!Window} hostWin
+ * @param {!./layout-rect.LayoutRectDef} rect
+ * @param {boolean=} opt_prerenderableOnly signifies if we are in prerender mode.
+ * @return {!Promise}
+ */
+export function whenContentIniLoad(
+elementOrAmpDoc,
+hostWin,
+rect,
+opt_prerenderableOnly)
+{
+  if (true) {
+    return whenContentIniLoadInOb(elementOrAmpDoc, opt_prerenderableOnly);
+  }
+  return whenContentIniLoadMeasure(
+  elementOrAmpDoc,
+  hostWin,
+  rect,
+  opt_prerenderableOnly);
+
+}
+
+/**
+ * A legacy way using direct measurement.
+ * Used by inabox runtime, and will be moved there after #31915.
+ *
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!Window} hostWin
+ * @param {!./layout-rect.LayoutRectDef} rect
+ * @param {boolean=} opt_prerenderableOnly signifies if we are in prerender mode.
+ * @return {!Promise}
+ */
+export function whenContentIniLoadMeasure(
+elementOrAmpDoc,
+hostWin,
+rect,
+opt_prerenderableOnly)
+{
+  var ampdoc = Services.ampdoc(elementOrAmpDoc);
+  return getMeasuredResources(ampdoc, hostWin, function (r) {
+    // TODO(jridgewell): Remove isFixed check here once the position
+    // is calculted correctly in a separate layer for embeds.
+    if (
+    !r.isDisplayed() || (
+    !r.overlaps(rect) && !r.isFixed()) || (
+    opt_prerenderableOnly && !r.prerenderAllowed()))
+    {
+      return false;
+    }
+    return true;
+  }).then(function (resources) {
+    var promises = [];
+    resources.forEach(function (r) {
+      if (!EXCLUDE_INI_LOAD.includes(r.element.tagName)) {
+        promises.push(r.loadedOnce());
+      }
+    });
+    return Promise.all(promises);
+  });
+}
+
+/**
+ * A new way using direct measurement.
+ *
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {boolean=} opt_prerenderableOnly signifies if we are in prerender mode.
+ * @return {!Promise}
+ * @visibleForTesting
+ * TODO(#31915): remove visibility
+ */
+export function whenContentIniLoadInOb(elementOrAmpDoc, opt_prerenderableOnly) {
+  var ampdoc = Services.ampdoc(elementOrAmpDoc);
+  // First, wait for the `ready-scan` signal. Waiting for each element
+  // individually is too expensive and `ready-scan` will cover most of
+  // the initially parsed elements.
+  var whenReady = ampdoc.signals().whenSignal(READY_SCAN_SIGNAL);
+  return whenReady.then(function () {
+    // Filter elements.
+    var resources = Services.resourcesForDoc(ampdoc);
+    var elements = resources.
+    get().
+    filter(function (r) {
+      if (opt_prerenderableOnly && !r.prerenderAllowed()) {
+        return false;
+      }
+      return !EXCLUDE_INI_LOAD.includes(r.element.tagName);
+    }).
+    map(function (r) {return r.element;});
+
+    if (elements.length === 0) {
+      return Promise.resolve([]);
+    }
+
+    // Find intersecting elements.
+    return new Promise(function (resolve) {
+      var win = ampdoc.win;
+      var io = new win.IntersectionObserver(
+      function (entries) {
+        io.disconnect();
+        var intersecting = [];
+        for (var i = 0; i < entries.length; i++) {
+          var _entries$i = entries[i],isIntersecting = _entries$i.isIntersecting,target = _entries$i.target;
+          if (isIntersecting) {
+            intersecting.push(target);
+          }
+        }
+        resolve(intersecting);
+      },
+      {
+        // We generally always want `root: document` here. However, in
+        // many browsers this is still polyfilled and `{root: null}` is
+        // a lot faster.
+        root: isIframed(win) ? /** @type {?} */(win.document) : null,
+        threshold: 0.01 });
+
+
+      // Limit check to the first 100 elements.
+      for (var i = 0; i < Math.min(elements.length, 100); i++) {
+        io.observe(elements[i]);
+      }
+    }).then(function (elements) {
+      return Promise.all(elements.map(function (element) {return element.whenLoaded();}));
+    });
+  });
+}
+
+/**
+ * Returns a subset of resources which are (1) belong to the specified host
+ * window, and (2) meet the filterFn given.
+ *
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Window} hostWin
+ * @param {function(!./service/resource.Resource):boolean} filterFn
+ * @return {!Promise<!Array<!./service/resource.Resource>>}
+ */
+export function getMeasuredResources(ampdoc, hostWin, filterFn) {
+  // First, wait for the `ready-scan` signal. Waiting for each element
+  // individually is too expensive and `ready-scan` will cover most of
+  // the initially parsed elements.
+  return ampdoc.
+  signals().
+  whenSignal(READY_SCAN_SIGNAL).
+  then(function () {
+    // Second, wait for any left-over elements to complete measuring.
+    var measurePromiseArray = [];
+    var resources = Services.resourcesForDoc(ampdoc);
+    resources.get().forEach(function (r) {
+      if (!r.hasBeenMeasured() && r.hostWin == hostWin && !r.hasOwner()) {
+        measurePromiseArray.push(r.ensureMeasured());
+      }
+    });
+    return Promise.all(measurePromiseArray);
+  }).
+  then(function () {
+    var resources = Services.resourcesForDoc(ampdoc);
+    return resources.get().filter(function (r) {
+      return (
+      r.hostWin == hostWin &&
+      !r.hasOwner() &&
+      r.hasBeenMeasured() &&
+      filterFn(r));
+
+    });
+  });
+}
+// /Users/mszylkowski/src/amphtml/src/ini-load.js

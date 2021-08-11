@@ -1,0 +1,65 @@
+/**
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { isElement } from "../types";
+
+/**
+ * Triple zero width space.
+ *
+ * This is added to user error messages, so that we can later identify
+ * them, when the only thing that we have is the message. This is the
+ * case in many browsers when the global exception handler is invoked.
+ *
+ * @const {string}
+ */
+export var USER_ERROR_SENTINEL = "\u200B\u200B\u200B";
+
+/**
+ * Converts an element to a readable string; all other types are unchanged.
+ * TODO(rcebulko): Unify with log.js
+ * @param {*} val
+ * @return {*}
+ */
+export function elementStringOrPassThru(val) {
+  // Do check equivalent to `val instanceof Element` without cross-window bug
+  if (isElement(val)) {
+    val =
+    /** @type {Element} */
+    val;
+    return val.tagName.toLowerCase() + (val.id ? "#" + val.id : '');
+  }
+
+  return val;
+}
+
+/**
+ * Tests if an error message contains the user sentinel.
+ * @param {string} message
+ * @return {boolean} Whether this message was a user error.
+ */
+export function isUserErrorMessage(message) {
+  return message.indexOf(USER_ERROR_SENTINEL) >= 0;
+}
+
+/**
+ * Strips the user error sentinel from an error message.
+ * @param {string} message
+ * @return {string} The new message without USER_ERROR_SENTINEL
+ */
+export function stripUserError(message) {
+  return message.replace(USER_ERROR_SENTINEL, '');
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm1lc3NhZ2UtaGVscGVycy5qcyJdLCJuYW1lcyI6WyJpc0VsZW1lbnQiLCJVU0VSX0VSUk9SX1NFTlRJTkVMIiwiZWxlbWVudFN0cmluZ09yUGFzc1RocnUiLCJ2YWwiLCJ0YWdOYW1lIiwidG9Mb3dlckNhc2UiLCJpZCIsImlzVXNlckVycm9yTWVzc2FnZSIsIm1lc3NhZ2UiLCJpbmRleE9mIiwic3RyaXBVc2VyRXJyb3IiLCJyZXBsYWNlIl0sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFFQSxTQUFRQSxTQUFSOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sSUFBTUMsbUJBQW1CLEdBQUcsb0JBQTVCOztBQUVQO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0MsdUJBQVQsQ0FBaUNDLEdBQWpDLEVBQXNDO0FBQzNDO0FBQ0EsTUFBSUgsU0FBUyxDQUFDRyxHQUFELENBQWIsRUFBb0I7QUFDbEJBLElBQUFBLEdBQUc7QUFBRztBQUF3QkEsSUFBQUEsR0FBOUI7QUFDQSxXQUFPQSxHQUFHLENBQUNDLE9BQUosQ0FBWUMsV0FBWixNQUE2QkYsR0FBRyxDQUFDRyxFQUFKLFNBQWFILEdBQUcsQ0FBQ0csRUFBakIsR0FBd0IsRUFBckQsQ0FBUDtBQUNEOztBQUNELFNBQU9ILEdBQVA7QUFDRDs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTSSxrQkFBVCxDQUE0QkMsT0FBNUIsRUFBcUM7QUFDMUMsU0FBT0EsT0FBTyxDQUFDQyxPQUFSLENBQWdCUixtQkFBaEIsS0FBd0MsQ0FBL0M7QUFDRDs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTUyxjQUFULENBQXdCRixPQUF4QixFQUFpQztBQUN0QyxTQUFPQSxPQUFPLENBQUNHLE9BQVIsQ0FBZ0JWLG1CQUFoQixFQUFxQyxFQUFyQyxDQUFQO0FBQ0QiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIENvcHlyaWdodCAyMDIxIFRoZSBBTVAgSFRNTCBBdXRob3JzLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIExpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmVcbiAqIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuIFwiQVMtSVNcIiBCQVNJUyxcbiAqIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLlxuICogU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZFxuICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHtpc0VsZW1lbnR9IGZyb20gJyNjb3JlL3R5cGVzJztcblxuLyoqXG4gKiBUcmlwbGUgemVybyB3aWR0aCBzcGFjZS5cbiAqXG4gKiBUaGlzIGlzIGFkZGVkIHRvIHVzZXIgZXJyb3IgbWVzc2FnZXMsIHNvIHRoYXQgd2UgY2FuIGxhdGVyIGlkZW50aWZ5XG4gKiB0aGVtLCB3aGVuIHRoZSBvbmx5IHRoaW5nIHRoYXQgd2UgaGF2ZSBpcyB0aGUgbWVzc2FnZS4gVGhpcyBpcyB0aGVcbiAqIGNhc2UgaW4gbWFueSBicm93c2VycyB3aGVuIHRoZSBnbG9iYWwgZXhjZXB0aW9uIGhhbmRsZXIgaXMgaW52b2tlZC5cbiAqXG4gKiBAY29uc3Qge3N0cmluZ31cbiAqL1xuZXhwb3J0IGNvbnN0IFVTRVJfRVJST1JfU0VOVElORUwgPSAnXFx1MjAwQlxcdTIwMEJcXHUyMDBCJztcblxuLyoqXG4gKiBDb252ZXJ0cyBhbiBlbGVtZW50IHRvIGEgcmVhZGFibGUgc3RyaW5nOyBhbGwgb3RoZXIgdHlwZXMgYXJlIHVuY2hhbmdlZC5cbiAqIFRPRE8ocmNlYnVsa28pOiBVbmlmeSB3aXRoIGxvZy5qc1xuICogQHBhcmFtIHsqfSB2YWxcbiAqIEByZXR1cm4geyp9XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBlbGVtZW50U3RyaW5nT3JQYXNzVGhydSh2YWwpIHtcbiAgLy8gRG8gY2hlY2sgZXF1aXZhbGVudCB0byBgdmFsIGluc3RhbmNlb2YgRWxlbWVudGAgd2l0aG91dCBjcm9zcy13aW5kb3cgYnVnXG4gIGlmIChpc0VsZW1lbnQodmFsKSkge1xuICAgIHZhbCA9IC8qKiBAdHlwZSB7RWxlbWVudH0gKi8gKHZhbCk7XG4gICAgcmV0dXJuIHZhbC50YWdOYW1lLnRvTG93ZXJDYXNlKCkgKyAodmFsLmlkID8gYCMke3ZhbC5pZH1gIDogJycpO1xuICB9XG4gIHJldHVybiB2YWw7XG59XG5cbi8qKlxuICogVGVzdHMgaWYgYW4gZXJyb3IgbWVzc2FnZSBjb250YWlucyB0aGUgdXNlciBzZW50aW5lbC5cbiAqIEBwYXJhbSB7c3RyaW5nfSBtZXNzYWdlXG4gKiBAcmV0dXJuIHtib29sZWFufSBXaGV0aGVyIHRoaXMgbWVzc2FnZSB3YXMgYSB1c2VyIGVycm9yLlxuICovXG5leHBvcnQgZnVuY3Rpb24gaXNVc2VyRXJyb3JNZXNzYWdlKG1lc3NhZ2UpIHtcbiAgcmV0dXJuIG1lc3NhZ2UuaW5kZXhPZihVU0VSX0VSUk9SX1NFTlRJTkVMKSA+PSAwO1xufVxuXG4vKipcbiAqIFN0cmlwcyB0aGUgdXNlciBlcnJvciBzZW50aW5lbCBmcm9tIGFuIGVycm9yIG1lc3NhZ2UuXG4gKiBAcGFyYW0ge3N0cmluZ30gbWVzc2FnZVxuICogQHJldHVybiB7c3RyaW5nfSBUaGUgbmV3IG1lc3NhZ2Ugd2l0aG91dCBVU0VSX0VSUk9SX1NFTlRJTkVMXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBzdHJpcFVzZXJFcnJvcihtZXNzYWdlKSB7XG4gIHJldHVybiBtZXNzYWdlLnJlcGxhY2UoVVNFUl9FUlJPUl9TRU5USU5FTCwgJycpO1xufVxuIl19
+// /Users/mszylkowski/src/amphtml/src/core/error/message-helpers.js

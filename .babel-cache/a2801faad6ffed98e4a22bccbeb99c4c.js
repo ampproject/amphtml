@@ -1,0 +1,46 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { dict } from "./core/types/object";
+import { Services } from "./service";
+
+/**
+ * Helper method to trigger analytics event if amp-analytics is available.
+ * TODO: Do not expose this function
+ * @param {!Element} target
+ * @param {string} eventType
+ * @param {!JsonObject} vars A map of vars and their values.
+ * @param {boolean} enableDataVars A boolean to indicate if data-vars-*
+ * attribute value from target element should be included.
+ */
+export function triggerAnalyticsEvent(target, eventType, vars, enableDataVars) {
+  if (vars === void 0) {
+    vars = dict();
+  }
+
+  if (enableDataVars === void 0) {
+    enableDataVars = true;
+  }
+
+  Services.analyticsForDocOrNull(target).then(function (analytics) {
+    if (!analytics) {
+      return;
+    }
+
+    analytics.triggerEventForTarget(target, eventType, vars, enableDataVars);
+  });
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFuYWx5dGljcy5qcyJdLCJuYW1lcyI6WyJkaWN0IiwiU2VydmljZXMiLCJ0cmlnZ2VyQW5hbHl0aWNzRXZlbnQiLCJ0YXJnZXQiLCJldmVudFR5cGUiLCJ2YXJzIiwiZW5hYmxlRGF0YVZhcnMiLCJhbmFseXRpY3NGb3JEb2NPck51bGwiLCJ0aGVuIiwiYW5hbHl0aWNzIiwidHJpZ2dlckV2ZW50Rm9yVGFyZ2V0Il0sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFFQSxTQUFRQSxJQUFSO0FBQ0EsU0FBUUMsUUFBUjs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVNDLHFCQUFULENBQ0xDLE1BREssRUFFTEMsU0FGSyxFQUdMQyxJQUhLLEVBSUxDLGNBSkssRUFLTDtBQUFBLE1BRkFELElBRUE7QUFGQUEsSUFBQUEsSUFFQSxHQUZPTCxJQUFJLEVBRVg7QUFBQTs7QUFBQSxNQURBTSxjQUNBO0FBREFBLElBQUFBLGNBQ0EsR0FEaUIsSUFDakI7QUFBQTs7QUFDQUwsRUFBQUEsUUFBUSxDQUFDTSxxQkFBVCxDQUErQkosTUFBL0IsRUFBdUNLLElBQXZDLENBQTRDLFVBQUNDLFNBQUQsRUFBZTtBQUN6RCxRQUFJLENBQUNBLFNBQUwsRUFBZ0I7QUFDZDtBQUNEOztBQUNEQSxJQUFBQSxTQUFTLENBQUNDLHFCQUFWLENBQWdDUCxNQUFoQyxFQUF3Q0MsU0FBeEMsRUFBbURDLElBQW5ELEVBQXlEQyxjQUF6RDtBQUNELEdBTEQ7QUFNRCIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ29weXJpZ2h0IDIwMTYgVGhlIEFNUCBIVE1MIEF1dGhvcnMuIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlIFwiTGljZW5zZVwiKTtcbiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS5cbiAqIFlvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdFxuICpcbiAqICAgICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wXG4gKlxuICogVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZVxuICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gXCJBUy1JU1wiIEJBU0lTLFxuICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuXG4gKiBTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZSBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kXG4gKiBsaW1pdGF0aW9ucyB1bmRlciB0aGUgTGljZW5zZS5cbiAqL1xuXG5pbXBvcnQge2RpY3R9IGZyb20gJy4vY29yZS90eXBlcy9vYmplY3QnO1xuaW1wb3J0IHtTZXJ2aWNlc30gZnJvbSAnLi9zZXJ2aWNlJztcblxuLyoqXG4gKiBIZWxwZXIgbWV0aG9kIHRvIHRyaWdnZXIgYW5hbHl0aWNzIGV2ZW50IGlmIGFtcC1hbmFseXRpY3MgaXMgYXZhaWxhYmxlLlxuICogVE9ETzogRG8gbm90IGV4cG9zZSB0aGlzIGZ1bmN0aW9uXG4gKiBAcGFyYW0geyFFbGVtZW50fSB0YXJnZXRcbiAqIEBwYXJhbSB7c3RyaW5nfSBldmVudFR5cGVcbiAqIEBwYXJhbSB7IUpzb25PYmplY3R9IHZhcnMgQSBtYXAgb2YgdmFycyBhbmQgdGhlaXIgdmFsdWVzLlxuICogQHBhcmFtIHtib29sZWFufSBlbmFibGVEYXRhVmFycyBBIGJvb2xlYW4gdG8gaW5kaWNhdGUgaWYgZGF0YS12YXJzLSpcbiAqIGF0dHJpYnV0ZSB2YWx1ZSBmcm9tIHRhcmdldCBlbGVtZW50IHNob3VsZCBiZSBpbmNsdWRlZC5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHRyaWdnZXJBbmFseXRpY3NFdmVudChcbiAgdGFyZ2V0LFxuICBldmVudFR5cGUsXG4gIHZhcnMgPSBkaWN0KCksXG4gIGVuYWJsZURhdGFWYXJzID0gdHJ1ZVxuKSB7XG4gIFNlcnZpY2VzLmFuYWx5dGljc0ZvckRvY09yTnVsbCh0YXJnZXQpLnRoZW4oKGFuYWx5dGljcykgPT4ge1xuICAgIGlmICghYW5hbHl0aWNzKSB7XG4gICAgICByZXR1cm47XG4gICAgfVxuICAgIGFuYWx5dGljcy50cmlnZ2VyRXZlbnRGb3JUYXJnZXQodGFyZ2V0LCBldmVudFR5cGUsIHZhcnMsIGVuYWJsZURhdGFWYXJzKTtcbiAgfSk7XG59XG4iXX0=
+// /Users/mszylkowski/src/amphtml/src/analytics.js

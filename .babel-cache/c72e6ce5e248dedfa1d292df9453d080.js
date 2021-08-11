@@ -1,0 +1,77 @@
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @fileoverview
+ * See https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver.
+ */
+import { installStub, shouldLoadPolyfill } from "./stubs/intersection-observer-stub";
+
+/**
+ * Installs the IntersectionObserver polyfill. There are a few different modes of operation.
+ * - No native support: immediately register a Stub and upgrade lazily once the full polyfill loads.
+ * - Partial InOb support: choose between the lazily upgrading Stub and the native InOb on a per-instance basis.
+ * - Full InOb support: Don't install anything.
+ *
+ * @param {!Window} win
+ */
+export function install(win) {
+  if (shouldLoadPolyfill(win)) {
+    installStub(win);
+  }
+
+  fixEntry(win);
+}
+
+/**
+ * @param {!Window} parentWin
+ * @param {!Window} childWin
+ */
+export function installForChildWin(parentWin, childWin) {
+  if (shouldLoadPolyfill(childWin)) {
+    Object.defineProperties(childWin, {
+      IntersectionObserver: {
+        get: function get() {
+          return parentWin.IntersectionObserver;
+        }
+      },
+      IntersectionObserverEntry: {
+        get: function get() {
+          return parentWin.IntersectionObserverEntry;
+        }
+      }
+    });
+  } else {
+    fixEntry(childWin);
+  }
+}
+
+/** @param {!Window} win */
+function fixEntry(win) {
+  // Minimal polyfill for Edge 15's lack of `isIntersecting`
+  // See: https://github.com/w3c/IntersectionObserver/issues/211
+  if (win.IntersectionObserverEntry && !('isIntersecting' in win.IntersectionObserverEntry.prototype)) {
+    Object.defineProperty(win.IntersectionObserverEntry.prototype, 'isIntersecting', {
+      enumerable: true,
+      configurable: true,
+      get: function get() {
+        return this.intersectionRatio > 0;
+      }
+    });
+  }
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImludGVyc2VjdGlvbi1vYnNlcnZlci5qcyJdLCJuYW1lcyI6WyJpbnN0YWxsU3R1YiIsInNob3VsZExvYWRQb2x5ZmlsbCIsImluc3RhbGwiLCJ3aW4iLCJmaXhFbnRyeSIsImluc3RhbGxGb3JDaGlsZFdpbiIsInBhcmVudFdpbiIsImNoaWxkV2luIiwiT2JqZWN0IiwiZGVmaW5lUHJvcGVydGllcyIsIkludGVyc2VjdGlvbk9ic2VydmVyIiwiZ2V0IiwiSW50ZXJzZWN0aW9uT2JzZXJ2ZXJFbnRyeSIsInByb3RvdHlwZSIsImRlZmluZVByb3BlcnR5IiwiZW51bWVyYWJsZSIsImNvbmZpZ3VyYWJsZSIsImludGVyc2VjdGlvblJhdGlvIl0sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFFQSxTQUNFQSxXQURGLEVBRUVDLGtCQUZGOztBQUtBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVNDLE9BQVQsQ0FBaUJDLEdBQWpCLEVBQXNCO0FBQzNCLE1BQUlGLGtCQUFrQixDQUFDRSxHQUFELENBQXRCLEVBQTZCO0FBQzNCSCxJQUFBQSxXQUFXLENBQUNHLEdBQUQsQ0FBWDtBQUNEOztBQUNEQyxFQUFBQSxRQUFRLENBQUNELEdBQUQsQ0FBUjtBQUNEOztBQUVEO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTRSxrQkFBVCxDQUE0QkMsU0FBNUIsRUFBdUNDLFFBQXZDLEVBQWlEO0FBQ3RELE1BQUlOLGtCQUFrQixDQUFDTSxRQUFELENBQXRCLEVBQWtDO0FBQ2hDQyxJQUFBQSxNQUFNLENBQUNDLGdCQUFQLENBQXdCRixRQUF4QixFQUFrQztBQUNoQ0csTUFBQUEsb0JBQW9CLEVBQUU7QUFBQ0MsUUFBQUEsR0FBRyxFQUFFO0FBQUEsaUJBQU1MLFNBQVMsQ0FBQ0ksb0JBQWhCO0FBQUE7QUFBTixPQURVO0FBRWhDRSxNQUFBQSx5QkFBeUIsRUFBRTtBQUN6QkQsUUFBQUEsR0FBRyxFQUFFO0FBQUEsaUJBQU1MLFNBQVMsQ0FBQ00seUJBQWhCO0FBQUE7QUFEb0I7QUFGSyxLQUFsQztBQU1ELEdBUEQsTUFPTztBQUNMUixJQUFBQSxRQUFRLENBQUNHLFFBQUQsQ0FBUjtBQUNEO0FBQ0Y7O0FBRUQ7QUFDQSxTQUFTSCxRQUFULENBQWtCRCxHQUFsQixFQUF1QjtBQUNyQjtBQUNBO0FBQ0EsTUFDRUEsR0FBRyxDQUFDUyx5QkFBSixJQUNBLEVBQUUsb0JBQW9CVCxHQUFHLENBQUNTLHlCQUFKLENBQThCQyxTQUFwRCxDQUZGLEVBR0U7QUFDQUwsSUFBQUEsTUFBTSxDQUFDTSxjQUFQLENBQ0VYLEdBQUcsQ0FBQ1MseUJBQUosQ0FBOEJDLFNBRGhDLEVBRUUsZ0JBRkYsRUFHRTtBQUNFRSxNQUFBQSxVQUFVLEVBQUUsSUFEZDtBQUVFQyxNQUFBQSxZQUFZLEVBQUUsSUFGaEI7QUFHRUwsTUFBQUEsR0FIRixpQkFHUTtBQUNKLGVBQU8sS0FBS00saUJBQUwsR0FBeUIsQ0FBaEM7QUFDRDtBQUxILEtBSEY7QUFXRDtBQUNGIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb3B5cmlnaHQgMjAyMCBUaGUgQU1QIEhUTUwgQXV0aG9ycy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTLUlTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbi8qKlxuICogQGZpbGVvdmVydmlld1xuICogU2VlIGh0dHBzOi8vZGV2ZWxvcGVyLm1vemlsbGEub3JnL2VuLVVTL2RvY3MvV2ViL0FQSS9JbnRlcnNlY3Rpb25PYnNlcnZlci5cbiAqL1xuXG5pbXBvcnQge1xuICBpbnN0YWxsU3R1YixcbiAgc2hvdWxkTG9hZFBvbHlmaWxsLFxufSBmcm9tICcuL3N0dWJzL2ludGVyc2VjdGlvbi1vYnNlcnZlci1zdHViJztcblxuLyoqXG4gKiBJbnN0YWxscyB0aGUgSW50ZXJzZWN0aW9uT2JzZXJ2ZXIgcG9seWZpbGwuIFRoZXJlIGFyZSBhIGZldyBkaWZmZXJlbnQgbW9kZXMgb2Ygb3BlcmF0aW9uLlxuICogLSBObyBuYXRpdmUgc3VwcG9ydDogaW1tZWRpYXRlbHkgcmVnaXN0ZXIgYSBTdHViIGFuZCB1cGdyYWRlIGxhemlseSBvbmNlIHRoZSBmdWxsIHBvbHlmaWxsIGxvYWRzLlxuICogLSBQYXJ0aWFsIEluT2Igc3VwcG9ydDogY2hvb3NlIGJldHdlZW4gdGhlIGxhemlseSB1cGdyYWRpbmcgU3R1YiBhbmQgdGhlIG5hdGl2ZSBJbk9iIG9uIGEgcGVyLWluc3RhbmNlIGJhc2lzLlxuICogLSBGdWxsIEluT2Igc3VwcG9ydDogRG9uJ3QgaW5zdGFsbCBhbnl0aGluZy5cbiAqXG4gKiBAcGFyYW0geyFXaW5kb3d9IHdpblxuICovXG5leHBvcnQgZnVuY3Rpb24gaW5zdGFsbCh3aW4pIHtcbiAgaWYgKHNob3VsZExvYWRQb2x5ZmlsbCh3aW4pKSB7XG4gICAgaW5zdGFsbFN0dWIod2luKTtcbiAgfVxuICBmaXhFbnRyeSh3aW4pO1xufVxuXG4vKipcbiAqIEBwYXJhbSB7IVdpbmRvd30gcGFyZW50V2luXG4gKiBAcGFyYW0geyFXaW5kb3d9IGNoaWxkV2luXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBpbnN0YWxsRm9yQ2hpbGRXaW4ocGFyZW50V2luLCBjaGlsZFdpbikge1xuICBpZiAoc2hvdWxkTG9hZFBvbHlmaWxsKGNoaWxkV2luKSkge1xuICAgIE9iamVjdC5kZWZpbmVQcm9wZXJ0aWVzKGNoaWxkV2luLCB7XG4gICAgICBJbnRlcnNlY3Rpb25PYnNlcnZlcjoge2dldDogKCkgPT4gcGFyZW50V2luLkludGVyc2VjdGlvbk9ic2VydmVyfSxcbiAgICAgIEludGVyc2VjdGlvbk9ic2VydmVyRW50cnk6IHtcbiAgICAgICAgZ2V0OiAoKSA9PiBwYXJlbnRXaW4uSW50ZXJzZWN0aW9uT2JzZXJ2ZXJFbnRyeSxcbiAgICAgIH0sXG4gICAgfSk7XG4gIH0gZWxzZSB7XG4gICAgZml4RW50cnkoY2hpbGRXaW4pO1xuICB9XG59XG5cbi8qKiBAcGFyYW0geyFXaW5kb3d9IHdpbiAqL1xuZnVuY3Rpb24gZml4RW50cnkod2luKSB7XG4gIC8vIE1pbmltYWwgcG9seWZpbGwgZm9yIEVkZ2UgMTUncyBsYWNrIG9mIGBpc0ludGVyc2VjdGluZ2BcbiAgLy8gU2VlOiBodHRwczovL2dpdGh1Yi5jb20vdzNjL0ludGVyc2VjdGlvbk9ic2VydmVyL2lzc3Vlcy8yMTFcbiAgaWYgKFxuICAgIHdpbi5JbnRlcnNlY3Rpb25PYnNlcnZlckVudHJ5ICYmXG4gICAgISgnaXNJbnRlcnNlY3RpbmcnIGluIHdpbi5JbnRlcnNlY3Rpb25PYnNlcnZlckVudHJ5LnByb3RvdHlwZSlcbiAgKSB7XG4gICAgT2JqZWN0LmRlZmluZVByb3BlcnR5KFxuICAgICAgd2luLkludGVyc2VjdGlvbk9ic2VydmVyRW50cnkucHJvdG90eXBlLFxuICAgICAgJ2lzSW50ZXJzZWN0aW5nJyxcbiAgICAgIHtcbiAgICAgICAgZW51bWVyYWJsZTogdHJ1ZSxcbiAgICAgICAgY29uZmlndXJhYmxlOiB0cnVlLFxuICAgICAgICBnZXQoKSB7XG4gICAgICAgICAgcmV0dXJuIHRoaXMuaW50ZXJzZWN0aW9uUmF0aW8gPiAwO1xuICAgICAgICB9LFxuICAgICAgfVxuICAgICk7XG4gIH1cbn1cbiJdfQ==
+// /Users/mszylkowski/src/amphtml/src/polyfills/intersection-observer.js

@@ -1,0 +1,172 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Machinery for doing "traffic-level" experiments.  That is, rather than
+ * a single user choosing to opt-in to an experimental version of a module,
+ * this framework allows you to do randomized, controlled experiments on all
+ * AMP page loads to, for example, test relative performance or look for
+ * impacts on click-throughs.
+ */
+import { AMP_EXPERIMENT_ATTRIBUTE, EXPERIMENT_ATTRIBUTE, mergeExperimentIds } from "./utils";
+import { Services } from "../../../src/service";
+import { parseQueryString } from "../../../src/core/types/string/url";
+
+/** @typedef {{
+ *    control: string,
+ *    experiment: string
+ *  }} */
+export var A4aExperimentBranches;
+
+/** @type {string} @private */
+export var MANUAL_EXPERIMENT_ID = '117152632';
+
+/**
+ * @param {!Window} win
+ * @param {!Element} element Ad tag Element.
+ * @return {?string} experiment extracted from page url.
+ */
+export function extractUrlExperimentId(win, element) {
+  var expParam = Services.ampdoc(element).getParam('exp') || parseQueryString(win.location.search)['exp'];
+
+  if (!expParam) {
+    return null;
+  }
+
+  // Allow for per type experiment control with Doubleclick key set for 'da'
+  // and AdSense using 'aa'.  Fallback to 'a4a' if type specific is missing.
+  var expKeys = [(element.getAttribute('type') || '').toLowerCase() == 'doubleclick' ? 'da' : 'aa', 'a4a'];
+  var arg;
+  var match;
+  expKeys.forEach(function (key) {
+    return arg = arg || (match = new RegExp("(?:^|,)" + key + ":(-?\\d+)").exec(expParam)) && match[1];
+  });
+  return arg || null;
+}
+
+/**
+ * Sets of experiment IDs can be attached to Elements via attributes.  In
+ * that case, we encode them as a string containing a comma-separated list
+ * of experiment IDs.  This parses a comma-separated list from a string into
+ * a list of ID strings.  If the input string is empty or null, this returns
+ * the empty list.  This does no validity checking on the ID formats -- for
+ * that, use validateExperimentIds.
+ *
+ * @param {?string} idString  String to parse.
+ * @return {!Array<string>}  List of experiment IDs (possibly empty).
+ * @see validateExperimentIds
+ */
+export function parseExperimentIds(idString) {
+  if (idString) {
+    return idString.split(',');
+  }
+
+  return [];
+}
+
+/**
+ * Checks whether the given element is a member of the given experiment branch.
+ * I.e., whether the element's data-experiment-id attribute contains the id
+ * value (possibly because the host page URL contains a 'exp=a4a:X' parameter
+ * and #maybeSetExperimentFromUrl has added the appropriate EID).
+ *
+ * @param {!Element} element Element to check for membership in a specific
+ *   experiment.
+ * @param {?string} id Experiment ID to check for on `element`.
+ * @return {boolean}
+ */
+export function isInExperiment(element, id) {
+  return parseExperimentIds(element.getAttribute(EXPERIMENT_ATTRIBUTE)).some(function (x) {
+    return x === id;
+  });
+}
+
+/**
+ * Checks whether the given element is a member of the 'manually triggered
+ * "experiment" branch'.  I.e., whether the element's data-experiment-id
+ * attribute contains the MANUAL_EXPERIMENT_ID value (hopefully because the
+ * user has manually specified 'exp=a4a:-1' in the host page URL and
+ * #maybeSetExperimentFromUrl has added it).
+ *
+ * @param {!Element} element  Element to check for manual experiment membership.
+ * @return {boolean}
+ */
+export function isInManualExperiment(element) {
+  return isInExperiment(element, MANUAL_EXPERIMENT_ID);
+}
+
+/**
+ * Checks that all string experiment IDs in a list are syntactically valid
+ * (integer base 10).
+ *
+ * @param {!Array<string>} idList  List of experiment IDs.  Can be empty.
+ * @return {boolean} Whether all list elements are valid experiment IDs.
+ */
+export function validateExperimentIds(idList) {
+  return idList.every(function (id) {
+    return !isNaN(parseInt(id, 10));
+  });
+}
+
+/**
+ * Adds a single experimentID to an element iff it's a valid experiment ID.
+ * No-ops if the experimentId is undefined.
+ *
+ * @param {string|undefined} experimentId  ID to add to the element.
+ * @param {Element} element to add the experiment ID to.
+ * @param {string} attr the attribute name that holds the experiments
+ */
+function addExpIdToElement(experimentId, element, attr) {
+  if (!experimentId) {
+    return;
+  }
+
+  var currentEids = element.getAttribute(attr);
+
+  if (currentEids && validateExperimentIds(parseExperimentIds(currentEids))) {
+    element.setAttribute(attr, mergeExperimentIds([experimentId], currentEids));
+  } else {
+    element.setAttribute(attr, experimentId);
+  }
+}
+
+/**
+ * Adds a single experimentID to an element iff it's a valid experiment ID.
+ * No-ops if the experimentId is undefined.
+ *
+ * @param {string|undefined} experimentId  ID to add to the element.
+ * @param {Element} element to add the experiment ID to.
+ */
+export function addExperimentIdToElement(experimentId, element) {
+  addExpIdToElement(experimentId, element, EXPERIMENT_ATTRIBUTE);
+}
+
+/**
+ * Adds a single AMP experimentID to an element iff it's a valid experiment ID.
+ * No-ops if the experimentId is undefined.
+ *
+ * Note that AMP experiment brances do not have their own unique IDs. Instead,
+ * we generate a pseudo ID for them by concatenating the id with the
+ * experiment's value.
+ *
+ * @param {string|undefined} experimentId  ID to add to the element.
+ * @param {Element} element to add the experiment ID to.
+ */
+export function addAmpExperimentIdToElement(experimentId, element) {
+  addExpIdToElement(experimentId, element, AMP_EXPERIMENT_ATTRIBUTE);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInRyYWZmaWMtZXhwZXJpbWVudHMuanMiXSwibmFtZXMiOlsiQU1QX0VYUEVSSU1FTlRfQVRUUklCVVRFIiwiRVhQRVJJTUVOVF9BVFRSSUJVVEUiLCJtZXJnZUV4cGVyaW1lbnRJZHMiLCJTZXJ2aWNlcyIsInBhcnNlUXVlcnlTdHJpbmciLCJBNGFFeHBlcmltZW50QnJhbmNoZXMiLCJNQU5VQUxfRVhQRVJJTUVOVF9JRCIsImV4dHJhY3RVcmxFeHBlcmltZW50SWQiLCJ3aW4iLCJlbGVtZW50IiwiZXhwUGFyYW0iLCJhbXBkb2MiLCJnZXRQYXJhbSIsImxvY2F0aW9uIiwic2VhcmNoIiwiZXhwS2V5cyIsImdldEF0dHJpYnV0ZSIsInRvTG93ZXJDYXNlIiwiYXJnIiwibWF0Y2giLCJmb3JFYWNoIiwia2V5IiwiUmVnRXhwIiwiZXhlYyIsInBhcnNlRXhwZXJpbWVudElkcyIsImlkU3RyaW5nIiwic3BsaXQiLCJpc0luRXhwZXJpbWVudCIsImlkIiwic29tZSIsIngiLCJpc0luTWFudWFsRXhwZXJpbWVudCIsInZhbGlkYXRlRXhwZXJpbWVudElkcyIsImlkTGlzdCIsImV2ZXJ5IiwiaXNOYU4iLCJwYXJzZUludCIsImFkZEV4cElkVG9FbGVtZW50IiwiZXhwZXJpbWVudElkIiwiYXR0ciIsImN1cnJlbnRFaWRzIiwic2V0QXR0cmlidXRlIiwiYWRkRXhwZXJpbWVudElkVG9FbGVtZW50IiwiYWRkQW1wRXhwZXJpbWVudElkVG9FbGVtZW50Il0sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFFQSxTQUNFQSx3QkFERixFQUVFQyxvQkFGRixFQUdFQyxrQkFIRjtBQUtBLFNBQVFDLFFBQVI7QUFDQSxTQUFRQyxnQkFBUjs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sSUFB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Q3pFL0IsSUFBQUEsT0FBTyxDQUFDZ0MsWUFBUixDQUFxQkYsSUFBckIsRUFBMkJyQyxrQkFBa0IsQ0FBQyxDQUFDb0MsWUFBRCxDQUFELEVBQWlCRSxXQUFqQixDQUE3QztBQUNELEdBRkQsTUFFTztBQUNML0IsSUFBQUEsT0FBTyxDQUFDZ0MsWUFBUixDQUFxQkYsSUFBckIsRUFBMkJELFlBQTNCO0FBQ0Q7QUFDRjs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0ksd0JBQVQsQ0FBa0NKLFlBQWxDLEVBQWdEN0IsT0FBaEQsRUFBeUQ7QUFDOUQ0QixFQUFBQSxpQkFBaUIsQ0FBQ0MsWUFBRCxFQUFlN0IsT0FBZixFQUF3QlIsb0JBQXhCLENBQWpCO0FBQ0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBUzBDLDJCQUFULENBQXFDTCxZQUFyQyxFQUFtRDdCLE9BQW5ELEVBQTREO0FBQ2pFNEIsRUFBQUEsaUJBQWlCLENBQUNDLFlBQUQsRUFBZTdCLE9BQWYsRUFBd0JULHdCQUF4QixDQUFqQjtBQUNEIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb3B5cmlnaHQgMjAxNiBUaGUgQU1QIEhUTUwgQXV0aG9ycy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTLUlTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbi8qKlxuICogTWFjaGluZXJ5IGZvciBkb2luZyBcInRyYWZmaWMtbGV2ZWxcIiBleHBlcmltZW50cy4gIFRoYXQgaXMsIHJhdGhlciB0aGFuXG4gKiBhIHNpbmdsZSB1c2VyIGNob29zaW5nIHRvIG9wdC1pbiB0byBhbiBleHBlcmltZW50YWwgdmVyc2lvbiBvZiBhIG1vZHVsZSxcbiAqIHRoaXMgZnJhbWV3b3JrIGFsbG93cyB5b3UgdG8gZG8gcmFuZG9taXplZCwgY29udHJvbGxlZCBleHBlcmltZW50cyBvbiBhbGxcbiAqIEFNUCBwYWdlIGxvYWRzIHRvLCBmb3IgZXhhbXBsZSwgdGVzdCByZWxhdGl2ZSBwZXJmb3JtYW5jZSBvciBsb29rIGZvclxuICogaW1wYWN0cyBvbiBjbGljay10aHJvdWdocy5cbiAqL1xuXG5pbXBvcnQge1xuICBBTVBfRVhQRVJJTUVOVF9BVFRSSUJVVEUsXG4gIEVYUEVSSU1FTlRfQVRUUklCVVRFLFxuICBtZXJnZUV4cGVyaW1lbnRJZHMsXG59IGZyb20gJy4vdXRpbHMnO1xuaW1wb3J0IHtTZXJ2aWNlc30gZnJvbSAnI3NlcnZpY2UnO1xuaW1wb3J0IHtwYXJzZVF1ZXJ5U3RyaW5nfSBmcm9tICcjY29yZS90eXBlcy9zdHJpbmcvdXJsJztcblxuLyoqIEB0eXBlZGVmIHt7XG4gKiAgICBjb250cm9sOiBzdHJpbmcsXG4gKiAgICBleHBlcmltZW50OiBzdHJpbmdcbiAqICB9fSAqL1xuZXhwb3J0IGxldCBBNGFFeHBlcmltZW50QnJhbmNoZXM7XG5cbi8qKiBAdHlwZSB7c3RyaW5nfSBAcHJpdmF0ZSAqL1xuZXhwb3J0IGNvbnN0IE1BTlVBTF9FWFBFUklNRU5UX0lEID0gJzExNzE1MjYzMic7XG5cbi8qKlxuICogQHBhcmFtIHshV2luZG93fSB3aW5cbiAqIEBwYXJhbSB7IUVsZW1lbnR9IGVsZW1lbnQgQWQgdGFnIEVsZW1lbnQuXG4gKiBAcmV0dXJuIHs/c3RyaW5nfSBleHBlcmltZW50IGV4dHJhY3RlZCBmcm9tIHBhZ2UgdXJsLlxuICovXG5leHBvcnQgZnVuY3Rpb24gZXh0cmFjdFVybEV4cGVyaW1lbnRJZCh3aW4sIGVsZW1lbnQpIHtcbiAgY29uc3QgZXhwUGFyYW0gPVxuICAgIFNlcnZpY2VzLmFtcGRvYyhlbGVtZW50KS5nZXRQYXJhbSgnZXhwJykgfHxcbiAgICBwYXJzZVF1ZXJ5U3RyaW5nKHdpbi5sb2NhdGlvbi5zZWFyY2gpWydleHAnXTtcbiAgaWYgKCFleHBQYXJhbSkge1xuICAgIHJldHVybiBudWxsO1xuICB9XG4gIC8vIEFsbG93IGZvciBwZXIgdHlwZSBleHBlcmltZW50IGNvbnRyb2wgd2l0aCBEb3VibGVjbGljayBrZXkgc2V0IGZvciAnZGEnXG4gIC8vIGFuZCBBZFNlbnNlIHVzaW5nICdhYScuICBGYWxsYmFjayB0byAnYTRhJyBpZiB0eXBlIHNwZWNpZmljIGlzIG1pc3NpbmcuXG4gIGNvbnN0IGV4cEtleXMgPSBbXG4gICAgKGVsZW1lbnQuZ2V0QXR0cmlidXRlKCd0eXBlJykgfHwgJycpLnRvTG93ZXJDYXNlKCkgPT0gJ2RvdWJsZWNsaWNrJ1xuICAgICAgPyAnZGEnXG4gICAgICA6ICdhYScsXG4gICAgJ2E0YScsXG4gIF07XG4gIGxldCBhcmc7XG4gIGxldCBtYXRjaDtcbiAgZXhwS2V5cy5mb3JFYWNoKFxuICAgIChrZXkpID0+XG4gICAgICAoYXJnID1cbiAgICAgICAgYXJnIHx8XG4gICAgICAgICgobWF0Y2ggPSBuZXcgUmVnRXhwKGAoPzpefCwpJHtrZXl9OigtP1xcXFxkKylgKS5leGVjKGV4cFBhcmFtKSkgJiZcbiAgICAgICAgICBtYXRjaFsxXSkpXG4gICk7XG4gIHJldHVybiBhcmcgfHwgbnVsbDtcbn1cblxuLyoqXG4gKiBTZXRzIG9mIGV4cGVyaW1lbnQgSURzIGNhbiBiZSBhdHRhY2hlZCB0byBFbGVtZW50cyB2aWEgYXR0cmlidXRlcy4gIEluXG4gKiB0aGF0IGNhc2UsIHdlIGVuY29kZSB0aGVtIGFzIGEgc3RyaW5nIGNvbnRhaW5pbmcgYSBjb21tYS1zZXBhcmF0ZWQgbGlzdFxuICogb2YgZXhwZXJpbWVudCBJRHMuICBUaGlzIHBhcnNlcyBhIGNvbW1hLXNlcGFyYXRlZCBsaXN0IGZyb20gYSBzdHJpbmcgaW50b1xuICogYSBsaXN0IG9mIElEIHN0cmluZ3MuICBJZiB0aGUgaW5wdXQgc3RyaW5nIGlzIGVtcHR5IG9yIG51bGwsIHRoaXMgcmV0dXJuc1xuICogdGhlIGVtcHR5IGxpc3QuICBUaGlzIGRvZXMgbm8gdmFsaWRpdHkgY2hlY2tpbmcgb24gdGhlIElEIGZvcm1hdHMgLS0gZm9yXG4gKiB0aGF0LCB1c2UgdmFsaWRhdGVFeHBlcmltZW50SWRzLlxuICpcbiAqIEBwYXJhbSB7P3N0cmluZ30gaWRTdHJpbmcgIFN0cmluZyB0byBwYXJzZS5cbiAqIEByZXR1cm4geyFBcnJheTxzdHJpbmc+fSAgTGlzdCBvZiBleHBlcmltZW50IElEcyAocG9zc2libHkgZW1wdHkpLlxuICogQHNlZSB2YWxpZGF0ZUV4cGVyaW1lbnRJZHNcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHBhcnNlRXhwZXJpbWVudElkcyhpZFN0cmluZykge1xuICBpZiAoaWRTdHJpbmcpIHtcbiAgICByZXR1cm4gaWRTdHJpbmcuc3BsaXQoJywnKTtcbiAgfVxuICByZXR1cm4gW107XG59XG5cbi8qKlxuICogQ2hlY2tzIHdoZXRoZXIgdGhlIGdpdmVuIGVsZW1lbnQgaXMgYSBtZW1iZXIgb2YgdGhlIGdpdmVuIGV4cGVyaW1lbnQgYnJhbmNoLlxuICogSS5lLiwgd2hldGhlciB0aGUgZWxlbWVudCdzIGRhdGEtZXhwZXJpbWVudC1pZCBhdHRyaWJ1dGUgY29udGFpbnMgdGhlIGlkXG4gKiB2YWx1ZSAocG9zc2libHkgYmVjYXVzZSB0aGUgaG9zdCBwYWdlIFVSTCBjb250YWlucyBhICdleHA9YTRhOlgnIHBhcmFtZXRlclxuICogYW5kICNtYXliZVNldEV4cGVyaW1lbnRGcm9tVXJsIGhhcyBhZGRlZCB0aGUgYXBwcm9wcmlhdGUgRUlEKS5cbiAqXG4gKiBAcGFyYW0geyFFbGVtZW50fSBlbGVtZW50IEVsZW1lbnQgdG8gY2hlY2sgZm9yIG1lbWJlcnNoaXAgaW4gYSBzcGVjaWZpY1xuICogICBleHBlcmltZW50LlxuICogQHBhcmFtIHs/c3RyaW5nfSBpZCBFeHBlcmltZW50IElEIHRvIGNoZWNrIGZvciBvbiBgZWxlbWVudGAuXG4gKiBAcmV0dXJuIHtib29sZWFufVxuICovXG5leHBvcnQgZnVuY3Rpb24gaXNJbkV4cGVyaW1lbnQoZWxlbWVudCwgaWQpIHtcbiAgcmV0dXJuIHBhcnNlRXhwZXJpbWVudElkcyhlbGVtZW50LmdldEF0dHJpYnV0ZShFWFBFUklNRU5UX0FUVFJJQlVURSkpLnNvbWUoXG4gICAgKHgpID0+IHtcbiAgICAgIHJldHVybiB4ID09PSBpZDtcbiAgICB9XG4gICk7XG59XG5cbi8qKlxuICogQ2hlY2tzIHdoZXRoZXIgdGhlIGdpdmVuIGVsZW1lbnQgaXMgYSBtZW1iZXIgb2YgdGhlICdtYW51YWxseSB0cmlnZ2VyZWRcbiAqIFwiZXhwZXJpbWVudFwiIGJyYW5jaCcuICBJLmUuLCB3aGV0aGVyIHRoZSBlbGVtZW50J3MgZGF0YS1leHBlcmltZW50LWlkXG4gKiBhdHRyaWJ1dGUgY29udGFpbnMgdGhlIE1BTlVBTF9FWFBFUklNRU5UX0lEIHZhbHVlIChob3BlZnVsbHkgYmVjYXVzZSB0aGVcbiAqIHVzZXIgaGFzIG1hbnVhbGx5IHNwZWNpZmllZCAnZXhwPWE0YTotMScgaW4gdGhlIGhvc3QgcGFnZSBVUkwgYW5kXG4gKiAjbWF5YmVTZXRFeHBlcmltZW50RnJvbVVybCBoYXMgYWRkZWQgaXQpLlxuICpcbiAqIEBwYXJhbSB7IUVsZW1lbnR9IGVsZW1lbnQgIEVsZW1lbnQgdG8gY2hlY2sgZm9yIG1hbnVhbCBleHBlcmltZW50IG1lbWJlcnNoaXAuXG4gKiBAcmV0dXJuIHtib29sZWFufVxuICovXG5leHBvcnQgZnVuY3Rpb24gaXNJbk1hbnVhbEV4cGVyaW1lbnQoZWxlbWVudCkge1xuICByZXR1cm4gaXNJbkV4cGVyaW1lbnQoZWxlbWVudCwgTUFOVUFMX0VYUEVSSU1FTlRfSUQpO1xufVxuXG4vKipcbiAqIENoZWNrcyB0aGF0IGFsbCBzdHJpbmcgZXhwZXJpbWVudCBJRHMgaW4gYSBsaXN0IGFyZSBzeW50YWN0aWNhbGx5IHZhbGlkXG4gKiAoaW50ZWdlciBiYXNlIDEwKS5cbiAqXG4gKiBAcGFyYW0geyFBcnJheTxzdHJpbmc+fSBpZExpc3QgIExpc3Qgb2YgZXhwZXJpbWVudCBJRHMuICBDYW4gYmUgZW1wdHkuXG4gKiBAcmV0dXJuIHtib29sZWFufSBXaGV0aGVyIGFsbCBsaXN0IGVsZW1lbnRzIGFyZSB2YWxpZCBleHBlcmltZW50IElEcy5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHZhbGlkYXRlRXhwZXJpbWVudElkcyhpZExpc3QpIHtcbiAgcmV0dXJuIGlkTGlzdC5ldmVyeSgoaWQpID0+IHtcbiAgICByZXR1cm4gIWlzTmFOKHBhcnNlSW50KGlkLCAxMCkpO1xuICB9KTtcbn1cblxuLyoqXG4gKiBBZGRzIGEgc2luZ2xlIGV4cGVyaW1lbnRJRCB0byBhbiBlbGVtZW50IGlmZiBpdCdzIGEgdmFsaWQgZXhwZXJpbWVudCBJRC5cbiAqIE5vLW9wcyBpZiB0aGUgZXhwZXJpbWVudElkIGlzIHVuZGVmaW5lZC5cbiAqXG4gKiBAcGFyYW0ge3N0cmluZ3x1bmRlZmluZWR9IGV4cGVyaW1lbnRJZCAgSUQgdG8gYWRkIHRvIHRoZSBlbGVtZW50LlxuICogQHBhcmFtIHtFbGVtZW50fSBlbGVtZW50IHRvIGFkZCB0aGUgZXhwZXJpbWVudCBJRCB0by5cbiAqIEBwYXJhbSB7c3RyaW5nfSBhdHRyIHRoZSBhdHRyaWJ1dGUgbmFtZSB0aGF0IGhvbGRzIHRoZSBleHBlcmltZW50c1xuICovXG5mdW5jdGlvbiBhZGRFeHBJZFRvRWxlbWVudChleHBlcmltZW50SWQsIGVsZW1lbnQsIGF0dHIpIHtcbiAgaWYgKCFleHBlcmltZW50SWQpIHtcbiAgICByZXR1cm47XG4gIH1cbiAgY29uc3QgY3VycmVudEVpZHMgPSBlbGVtZW50LmdldEF0dHJpYnV0ZShhdHRyKTtcbiAgaWYgKGN1cnJlbnRFaWRzICYmIHZhbGlkYXRlRXhwZXJpbWVudElkcyhwYXJzZUV4cGVyaW1lbnRJZHMoY3VycmVudEVpZHMpKSkge1xuICAgIGVsZW1lbnQuc2V0QXR0cmlidXRlKGF0dHIsIG1lcmdlRXhwZXJpbWVudElkcyhbZXhwZXJpbWVudElkXSwgY3VycmVudEVpZHMpKTtcbiAgfSBlbHNlIHtcbiAgICBlbGVtZW50LnNldEF0dHJpYnV0ZShhdHRyLCBleHBlcmltZW50SWQpO1xuICB9XG59XG5cbi8qKlxuICogQWRkcyBhIHNpbmdsZSBleHBlcmltZW50SUQgdG8gYW4gZWxlbWVudCBpZmYgaXQncyBhIHZhbGlkIGV4cGVyaW1lbnQgSUQuXG4gKiBOby1vcHMgaWYgdGhlIGV4cGVyaW1lbnRJZCBpcyB1bmRlZmluZWQuXG4gKlxuICogQHBhcmFtIHtzdHJpbmd8dW5kZWZpbmVkfSBleHBlcmltZW50SWQgIElEIHRvIGFkZCB0byB0aGUgZWxlbWVudC5cbiAqIEBwYXJhbSB7RWxlbWVudH0gZWxlbWVudCB0byBhZGQgdGhlIGV4cGVyaW1lbnQgSUQgdG8uXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBhZGRFeHBlcmltZW50SWRUb0VsZW1lbnQoZXhwZXJpbWVudElkLCBlbGVtZW50KSB7XG4gIGFkZEV4cElkVG9FbGVtZW50KGV4cGVyaW1lbnRJZCwgZWxlbWVudCwgRVhQRVJJTUVOVF9BVFRSSUJVVEUpO1xufVxuXG4vKipcbiAqIEFkZHMgYSBzaW5nbGUgQU1QIGV4cGVyaW1lbnRJRCB0byBhbiBlbGVtZW50IGlmZiBpdCdzIGEgdmFsaWQgZXhwZXJpbWVudCBJRC5cbiAqIE5vLW9wcyBpZiB0aGUgZXhwZXJpbWVudElkIGlzIHVuZGVmaW5lZC5cbiAqXG4gKiBOb3RlIHRoYXQgQU1QIGV4cGVyaW1lbnQgYnJhbmNlcyBkbyBub3QgaGF2ZSB0aGVpciBvd24gdW5pcXVlIElEcy4gSW5zdGVhZCxcbiAqIHdlIGdlbmVyYXRlIGEgcHNldWRvIElEIGZvciB0aGVtIGJ5IGNvbmNhdGVuYXRpbmcgdGhlIGlkIHdpdGggdGhlXG4gKiBleHBlcmltZW50J3MgdmFsdWUuXG4gKlxuICogQHBhcmFtIHtzdHJpbmd8dW5kZWZpbmVkfSBleHBlcmltZW50SWQgIElEIHRvIGFkZCB0byB0aGUgZWxlbWVudC5cbiAqIEBwYXJhbSB7RWxlbWVudH0gZWxlbWVudCB0byBhZGQgdGhlIGV4cGVyaW1lbnQgSUQgdG8uXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBhZGRBbXBFeHBlcmltZW50SWRUb0VsZW1lbnQoZXhwZXJpbWVudElkLCBlbGVtZW50KSB7XG4gIGFkZEV4cElkVG9FbGVtZW50KGV4cGVyaW1lbnRJZCwgZWxlbWVudCwgQU1QX0VYUEVSSU1FTlRfQVRUUklCVVRFKTtcbn1cbiJdfQ==
+// /Users/mszylkowski/src/amphtml/ads/google/a4a/traffic-experiments.js

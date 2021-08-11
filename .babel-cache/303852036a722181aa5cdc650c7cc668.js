@@ -1,0 +1,272 @@
+/**
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { urls } from "./config";
+import { endsWith } from "./core/types/string";
+import { tryDecodeUriComponent } from "./core/types/string/url";
+import { userAssert } from "./log";
+import { getSourceOrigin, isProxyOrigin, parseUrlDeprecated } from "./url";
+var TEST_COOKIE_NAME = '-test-amp-cookie-tmp';
+
+/** @enum {string} */
+export var SameSite = {
+  LAX: 'Lax',
+  STRICT: 'Strict',
+  NONE: 'None'
+};
+
+/**
+ * Returns the value of the cookie. The cookie access is restricted and must
+ * go through the privacy review. Before using this method please file a
+ * GitHub issue with "Privacy Review" label.
+ *
+ * Returns the cookie's value or `null`.
+ *
+ * @param {!Window} win
+ * @param {string} name
+ * @return {?string}
+ */
+export function getCookie(win, name) {
+  var cookieString = tryGetDocumentCookie_(win);
+
+  if (!cookieString) {
+    return null;
+  }
+
+  var cookies = cookieString.split(';');
+
+  for (var i = 0; i < cookies.length; i++) {
+    var cookie = cookies[i].trim();
+    var eq = cookie.indexOf('=');
+
+    if (eq == -1) {
+      continue;
+    }
+
+    if (tryDecodeUriComponent(cookie.substring(0, eq).trim()) == name) {
+      var value = cookie.substring(eq + 1).trim();
+      return tryDecodeUriComponent(value, value);
+    }
+  }
+
+  return null;
+}
+
+/**
+ * This method should not be inlined to prevent TryCatch deoptimization.
+ * @param {!Window} win
+ * @return {string}
+ */
+function tryGetDocumentCookie_(win) {
+  try {
+    return win.document.cookie;
+  } catch (e) {
+    // Act as if no cookie is available. Exceptions can be thrown when
+    // AMP docs are opened on origins that do not allow setting
+    // cookies such as null origins.
+    return '';
+  }
+}
+
+/**
+ * Sets the value of the cookie. The cookie access is restricted and must
+ * go through the privacy review. Before using this method please file a
+ * GitHub issue with "Privacy Review" label.
+ *
+ * @param {!Window} win
+ * @param {string} name
+ * @param {string} value
+ * @param {time} expirationTime
+ * @param {{
+ *   highestAvailableDomain:(boolean|undefined),
+ *   domain:(string|undefined),
+ *   sameSite: (!SameSite|undefined),
+ *   secure: (boolean|undefined),
+ * }=} options
+ *     - highestAvailableDomain: If true, set the cookie at the widest domain
+ *       scope allowed by the browser. E.g. on example.com if we are currently
+ *       on www.example.com.
+ *     - domain: Explicit domain to set. domain overrides HigestAvailableDomain
+ *     - allowOnProxyOrigin: Allow setting a cookie on the AMP Cache.
+ *     - sameSite: The SameSite value to use when setting the cookie.
+ *     - secure: Whether the cookie should contain Secure (only sent over https).
+ */
+export function setCookie(win, name, value, expirationTime, options) {
+  if (options === void 0) {
+    options = {};
+  }
+
+  checkOriginForSettingCookie(win, options, name);
+  var domain = undefined;
+
+  // Respect explicitly set domain over higestAvailabeDomain
+  if (options.domain) {
+    domain = options.domain;
+  } else if (options.highestAvailableDomain) {
+    domain =
+    /** @type {string} */
+    getHighestAvailableDomain(win);
+  }
+
+  trySetCookie(win, name, value, expirationTime, domain, options.sameSite, options.secure);
+}
+
+/**
+ * Attemp to find the HighestAvailableDomain on
+ * @param {!Window} win
+ * @return {?string}
+ */
+export function getHighestAvailableDomain(win) {
+  // <meta name='amp-cookie-scope'>. Need to respect the meta first.
+  // Note: The same logic applies to shadow docs. Where all shadow docs are
+  // considered to be in the same origin. And only the <meta> from
+  // shell will be respected. (Header from shadow doc will be removed)
+  var metaTag = win.document.head && win.document.head.querySelector("meta[name='amp-cookie-scope']");
+
+  if (metaTag) {
+    // The content value could be an empty string. Return null instead
+    var cookieScope = metaTag.getAttribute('content') || '';
+    // Verify the validness of the amp-cookie-scope meta value
+    var sourceOrigin = getSourceOrigin(win.location.href);
+
+    // Verify the meta tag content value is valid
+    if (endsWith(sourceOrigin, '.' + cookieScope)) {
+      return cookieScope;
+    } else {
+      // When the amp-cookie-scope value is invalid, fallback to the exact origin
+      // the document is contained in.
+      // sourceOrigin in the format of 'https://xxx or http://xxx'
+      return sourceOrigin.split('://')[1];
+    }
+  }
+
+  if (!isProxyOrigin(win.location.href)) {
+    var parts = win.location.hostname.split('.');
+    var domain = parts[parts.length - 1];
+    var testCookieName = getTempCookieName(win);
+
+    for (var i = parts.length - 2; i >= 0; i--) {
+      domain = parts[i] + '.' + domain;
+      // Try set a cookie for testing only, expire after 1 sec
+      trySetCookie(win, testCookieName, 'delete', Date.now() + 1000, domain);
+
+      if (getCookie(win, testCookieName) == 'delete') {
+        // Remove the cookie for testing
+        trySetCookie(win, testCookieName, 'delete', Date.now() - 1000, domain);
+        return domain;
+      }
+    }
+  }
+
+  // Proxy origin w/o <meta name='amp-cookie-scope>
+  // We cannot calculate the etld+1 without the public suffix list.
+  // Return null instead.
+  // Note: This should not affect cookie writing because we don't allow writing
+  // cookie to highestAvailableDomain on proxy origin
+  // In the case of link decoration on proxy origin,
+  // we expect the correct meta tag to be
+  // set by publisher or cache order for AMP runtime to find all subdomains.
+  return null;
+}
+
+/**
+ * Attempt to set a cookie with the given params.
+ *
+ * @param {!Window} win
+ * @param {string} name
+ * @param {string} value
+ * @param {time} expirationTime
+ * @param {string|undefined} domain
+ * @param {!SameSite=} sameSite
+ * @param {boolean|undefined=} secure
+ */
+function trySetCookie(win, name, value, expirationTime, domain, sameSite, secure) {
+  // We do not allow setting cookies on the domain that contains both
+  // the cdn. and www. hosts.
+  // Note: we need to allow cdn.ampproject.org in order to optin to experiments
+  if (domain == 'ampproject.org') {
+    // Actively delete them.
+    value = 'delete';
+    expirationTime = 0;
+  }
+
+  var cookie = encodeURIComponent(name) + '=' + encodeURIComponent(value) + '; path=/' + (domain ? '; domain=' + domain : '') + '; expires=' + new Date(expirationTime).toUTCString() + getSameSiteString(win, sameSite) + (secure ? '; Secure' : '');
+
+  try {
+    win.document.cookie = cookie;
+  } catch (ignore) {// Do not throw if setting the cookie failed Exceptions can be thrown
+    // when AMP docs are opened on origins that do not allow setting
+    // cookies such as null origins.
+  }
+}
+
+/**
+ * Gets the cookie string to use for SameSite. This only sets the SameSite
+ * value if specified, falling back to the browser default. The default value
+ * is equivalent to SameSite.NONE, but is planned to be set to SameSite.LAX in
+ * Chrome 80.
+ *
+ * Note: In Safari 12, if the value is set to SameSite.NONE, it is treated by
+ * the browser as SameSite.STRICT.
+ * @param {Window} win
+ * @param {!SameSite|undefined} sameSite
+ * @return {string} The string to use when setting the cookie.
+ */
+function getSameSiteString(win, sameSite) {
+  if (!sameSite) {
+    return '';
+  }
+
+  return "; SameSite=" + sameSite;
+}
+
+/**
+ * Throws if a given cookie should not be set on the given origin.
+ * This is a defense-in-depth. Callers should never run into this.
+ *
+ * @param {!Window} win
+ * @param {!Object} options
+ * @param {string} name For the error message.
+ */
+function checkOriginForSettingCookie(win, options, name) {
+  if (options.allowOnProxyOrigin) {
+    userAssert(!options.highestAvailableDomain, 'Could not support highestAvailable Domain on proxy origin, ' + 'specify domain explicitly');
+    return;
+  }
+
+  userAssert(!isProxyOrigin(win.location.href), "Should never attempt to set cookie on proxy origin: " + name);
+  var current = parseUrlDeprecated(win.location.href).hostname.toLowerCase();
+  var proxy = parseUrlDeprecated(urls.cdn).hostname.toLowerCase();
+  userAssert(!(current == proxy || endsWith(current, '.' + proxy)), 'Should never attempt to set cookie on proxy origin. (in depth check): ' + name);
+}
+
+/**
+ * Return a temporary cookie name for testing only
+ * @param {!Window} win
+ * @return {string}
+ */
+function getTempCookieName(win) {
+  var testCookieName = TEST_COOKIE_NAME;
+  var counter = 0;
+
+  while (getCookie(win, testCookieName)) {
+    // test cookie name conflict, append counter to test cookie name
+    testCookieName = TEST_COOKIE_NAME + counter;
+  }
+
+  return testCookieName;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImNvb2tpZXMuanMiXSwibmFtZXMiOlsidXJscyIsImVuZHNXaXRoIiwidHJ5RGVjb2RlVXJpQ29tcG9uZW50IiwidXNlckFzc2VydCIsImdldFNvdXJjZU9yaWdpbiIsImlzUHJveHlPcmlnaW4iLCJwYXJzZVVybERlcHJlY2F0ZWQiLCJURVNUX0NPT0tJRV9OQU1FIiwiU2FtZVNpdGUiLCJMQVgiLCJTVFJJQ1QiLCJOT05FIiwiZ2V0Q29va2llIiwid2luIiwibmFtZSIsImNvb2tpZVN0cmluZyIsInRyeUdldERvY3VtZW50Q29va2llXyIsImNvb2tpZXMiLCJzcGxpdCIsImkiLCJsZW5ndGgiLCJjb29raWUiLCJ0cmltIiwiZXEiLCJpbmRleE9mIiwic3Vic3RyaW5nIiwidmFsdWUiLCJkb2N1bWVudCIsImUiLCJzZXRDb29raWUiLCJleHBpcmF0aW9uVGltZSIsIm9wdGlvbnMiLCJjaGVja09yaWdpbkZvclNldHRpbmdDb29raWUiLCJkb21haW4iLCJ1bmRlZmluZWQiLCJoaWdoZXN0QXZhaWxhYmxlRG9tYWluIiwiZ2V0SGlnaGVzdEF2YWlsYWJsZURvbWFpbiIsInRyeVNldENvb2tpZSIsInNhbWVTaXRlIiwic2VjdXJlIiwibWV0YVRhZyIsImhlYWQiLCJxdWVyeVNlbGVjdG9yIiwiY29va2llU2NvcGUiLCJnZXRBdHRyaWJ1dGUiLCJzb3VyY2VPcmlnaW4iLCJsb2NhdGlvbiIsImhyZWYiLCJwYXJ0cyIsImhvc3RuYW1lIiwidGVzdENvb2tpZU5hbWUiLCJnZXRUZW1wQ29va2llTmFtZSIsIkRhdGUiLCJub3ciLCJlbmNvZGVVUklDb21wb25lbnQiLCJ0b1VUQ1N0cmluZyIsImdldFNhbWVTaXRlU3RyaW5nIiwiaWdub3JlIiwiYWxsb3dPblByb3h5T3JpZ2luIiwiY3VycmVudCIsInRvTG93ZXJDYXNlIiwicHJveHkiLCJjZG4iLCJjb3VudGVyIl0sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FB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QUcsQ0FBQ2lDLFFBQUosQ0FBYUMsSUFBZCxDQUFsQixDQUFzQ0UsUUFBdEMsQ0FBK0NXLFdBQS9DLEVBQWhCO0FBQ0EsTUFBTUMsS0FBSyxHQUFHdkQsa0JBQWtCLENBQUNOLElBQUksQ0FBQzhELEdBQU4sQ0FBbEIsQ0FBNkJiLFFBQTdCLENBQXNDVyxXQUF0QyxFQUFkO0FBQ0F6RCxFQUFBQSxVQUFVLENBQ1IsRUFBRXdELE9BQU8sSUFBSUUsS0FBWCxJQUFvQjVELFFBQVEsQ0FBQzBELE9BQUQsRUFBVSxNQUFNRSxLQUFoQixDQUE5QixDQURRLEVBRVIsMkVBQ0UvQyxJQUhNLENBQVY7QUFLRDs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsU0FBU3FDLGlCQUFULENBQTJCdEMsR0FBM0IsRUFBZ0M7QUFDOUIsTUFBSXFDLGNBQWMsR0FBRzNDLGdCQUFyQjtBQUNBLE1BQU13RCxPQUFPLEdBQUcsQ0FBaEI7O0FBQ0EsU0FBT25ELFNBQVMsQ0FBQ0MsR0FBRCxFQUFNcUMsY0FBTixDQUFoQixFQUF1QztBQUNyQztBQUNBQSxJQUFBQSxjQUFjLEdBQUczQyxnQkFBZ0IsR0FBR3dELE9BQXBDO0FBQ0Q7O0FBQ0QsU0FBT2IsY0FBUDtBQUNEIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb3B5cmlnaHQgMjAxNSBUaGUgQU1QIEhUTUwgQXV0aG9ycy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTLUlTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbmltcG9ydCB7dXJsc30gZnJvbSAnLi9jb25maWcnO1xuaW1wb3J0IHtlbmRzV2l0aH0gZnJvbSAnLi9jb3JlL3R5cGVzL3N0cmluZyc7XG5pbXBvcnQge3RyeURlY29kZVVyaUNvbXBvbmVudH0gZnJvbSAnLi9jb3JlL3R5cGVzL3N0cmluZy91cmwnO1xuaW1wb3J0IHt1c2VyQXNzZXJ0fSBmcm9tICcuL2xvZyc7XG5pbXBvcnQge2dldFNvdXJjZU9yaWdpbiwgaXNQcm94eU9yaWdpbiwgcGFyc2VVcmxEZXByZWNhdGVkfSBmcm9tICcuL3VybCc7XG5cbmNvbnN0IFRFU1RfQ09PS0lFX05BTUUgPSAnLXRlc3QtYW1wLWNvb2tpZS10bXAnO1xuXG4vKiogQGVudW0ge3N0cmluZ30gKi9cbmV4cG9ydCBjb25zdCBTYW1lU2l0ZSA9IHtcbiAgTEFYOiAnTGF4JyxcbiAgU1RSSUNUOiAnU3RyaWN0JyxcbiAgTk9ORTogJ05vbmUnLFxufTtcblxuLyoqXG4gKiBSZXR1cm5zIHRoZSB2YWx1ZSBvZiB0aGUgY29va2llLiBUaGUgY29va2llIGFjY2VzcyBpcyByZXN0cmljdGVkIGFuZCBtdXN0XG4gKiBnbyB0aHJvdWdoIHRoZSBwcml2YWN5IHJldmlldy4gQmVmb3JlIHVzaW5nIHRoaXMgbWV0aG9kIHBsZWFzZSBmaWxlIGFcbiAqIEdpdEh1YiBpc3N1ZSB3aXRoIFwiUHJpdmFjeSBSZXZpZXdcIiBsYWJlbC5cbiAqXG4gKiBSZXR1cm5zIHRoZSBjb29raWUncyB2YWx1ZSBvciBgbnVsbGAuXG4gKlxuICogQHBhcmFtIHshV2luZG93fSB3aW5cbiAqIEBwYXJhbSB7c3RyaW5nfSBuYW1lXG4gKiBAcmV0dXJuIHs/c3RyaW5nfVxuICovXG5leHBvcnQgZnVuY3Rpb24gZ2V0Q29va2llKHdpbiwgbmFtZSkge1xuICBjb25zdCBjb29raWVTdHJpbmcgPSB0cnlHZXREb2N1bWVudENvb2tpZV8od2luKTtcbiAgaWYgKCFjb29raWVTdHJpbmcpIHtcbiAgICByZXR1cm4gbnVsbDtcbiAgfVxuICBjb25zdCBjb29raWVzID0gY29va2llU3RyaW5nLnNwbGl0KCc7Jyk7XG4gIGZvciAobGV0IGkgPSAwOyBpIDwgY29va2llcy5sZW5ndGg7IGkrKykge1xuICAgIGNvbnN0IGNvb2tpZSA9IGNvb2tpZXNbaV0udHJpbSgpO1xuICAgIGNvbnN0IGVxID0gY29va2llLmluZGV4T2YoJz0nKTtcbiAgICBpZiAoZXEgPT0gLTEpIHtcbiAgICAgIGNvbnRpbnVlO1xuICAgIH1cbiAgICBpZiAodHJ5RGVjb2RlVXJpQ29tcG9uZW50KGNvb2tpZS5zdWJzdHJpbmcoMCwgZXEpLnRyaW0oKSkgPT0gbmFtZSkge1xuICAgICAgY29uc3QgdmFsdWUgPSBjb29raWUuc3Vic3RyaW5nKGVxICsgMSkudHJpbSgpO1xuICAgICAgcmV0dXJuIHRyeURlY29kZVVyaUNvbXBvbmVudCh2YWx1ZSwgdmFsdWUpO1xuICAgIH1cbiAgfVxuICByZXR1cm4gbnVsbDtcbn1cblxuLyoqXG4gKiBUaGlzIG1ldGhvZCBzaG91bGQgbm90IGJlIGlubGluZWQgdG8gcHJldmVudCBUcnlDYXRjaCBkZW9wdGltaXphdGlvbi5cbiAqIEBwYXJhbSB7IVdpbmRvd30gd2luXG4gKiBAcmV0dXJuIHtzdHJpbmd9XG4gKi9cbmZ1bmN0aW9uIHRyeUdldERvY3VtZW50Q29va2llXyh3aW4pIHtcbiAgdHJ5IHtcbiAgICByZXR1cm4gd2luLmRvY3VtZW50LmNvb2tpZTtcbiAgfSBjYXRjaCAoZSkge1xuICAgIC8vIEFjdCBhcyBpZiBubyBjb29raWUgaXMgYXZhaWxhYmxlLiBFeGNlcHRpb25zIGNhbiBiZSB0aHJvd24gd2hlblxuICAgIC8vIEFNUCBkb2NzIGFyZSBvcGVuZWQgb24gb3JpZ2lucyB0aGF0IGRvIG5vdCBhbGxvdyBzZXR0aW5nXG4gICAgLy8gY29va2llcyBzdWNoIGFzIG51bGwgb3JpZ2lucy5cbiAgICByZXR1cm4gJyc7XG4gIH1cbn1cblxuLyoqXG4gKiBTZXRzIHRoZSB2YWx1ZSBvZiB0aGUgY29va2llLiBUaGUgY29va2llIGFjY2VzcyBpcyByZXN0cmljdGVkIGFuZCBtdXN0XG4gKiBnbyB0aHJvdWdoIHRoZSBwcml2YWN5IHJldmlldy4gQmVmb3JlIHVzaW5nIHRoaXMgbWV0aG9kIHBsZWFzZSBmaWxlIGFcbiAqIEdpdEh1YiBpc3N1ZSB3aXRoIFwiUHJpdmFjeSBSZXZpZXdcIiBsYWJlbC5cbiAqXG4gKiBAcGFyYW0geyFXaW5kb3d9IHdpblxuICogQHBhcmFtIHtzdHJpbmd9IG5hbWVcbiAqIEBwYXJhbSB7c3RyaW5nfSB2YWx1ZVxuICogQHBhcmFtIHt0aW1lfSBleHBpcmF0aW9uVGltZVxuICogQHBhcmFtIHt7XG4gKiAgIGhpZ2hlc3RBdmFpbGFibGVEb21haW46KGJvb2xlYW58dW5kZWZpbmVkKSxcbiAqICAgZG9tYWluOihzdHJpbmd8dW5kZWZpbmVkKSxcbiAqICAgc2FtZVNpdGU6ICghU2FtZVNpdGV8dW5kZWZpbmVkKSxcbiAqICAgc2VjdXJlOiAoYm9vbGVhbnx1bmRlZmluZWQpLFxuICogfT19IG9wdGlvbnNcbiAqICAgICAtIGhpZ2hlc3RBdmFpbGFibGVEb21haW46IElmIHRydWUsIHNldCB0aGUgY29va2llIGF0IHRoZSB3aWRlc3QgZG9tYWluXG4gKiAgICAgICBzY29wZSBhbGxvd2VkIGJ5IHRoZSBicm93c2VyLiBFLmcuIG9uIGV4YW1wbGUuY29tIGlmIHdlIGFyZSBjdXJyZW50bHlcbiAqICAgICAgIG9uIHd3dy5leGFtcGxlLmNvbS5cbiAqICAgICAtIGRvbWFpbjogRXhwbGljaXQgZG9tYWluIHRvIHNldC4gZG9tYWluIG92ZXJyaWRlcyBIaWdlc3RBdmFpbGFibGVEb21haW5cbiAqICAgICAtIGFsbG93T25Qcm94eU9yaWdpbjogQWxsb3cgc2V0dGluZyBhIGNvb2tpZSBvbiB0aGUgQU1QIENhY2hlLlxuICogICAgIC0gc2FtZVNpdGU6IFRoZSBTYW1lU2l0ZSB2YWx1ZSB0byB1c2Ugd2hlbiBzZXR0aW5nIHRoZSBjb29raWUuXG4gKiAgICAgLSBzZWN1cmU6IFdoZXRoZXIgdGhlIGNvb2tpZSBzaG91bGQgY29udGFpbiBTZWN1cmUgKG9ubHkgc2VudCBvdmVyIGh0dHBzKS5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHNldENvb2tpZSh3aW4sIG5hbWUsIHZhbHVlLCBleHBpcmF0aW9uVGltZSwgb3B0aW9ucyA9IHt9KSB7XG4gIGNoZWNrT3JpZ2luRm9yU2V0dGluZ0Nvb2tpZSh3aW4sIG9wdGlvbnMsIG5hbWUpO1xuICBsZXQgZG9tYWluID0gdW5kZWZpbmVkO1xuICAvLyBSZXNwZWN0IGV4cGxpY2l0bHkgc2V0IGRvbWFpbiBvdmVyIGhpZ2VzdEF2YWlsYWJlRG9tYWluXG4gIGlmIChvcHRpb25zLmRvbWFpbikge1xuICAgIGRvbWFpbiA9IG9wdGlvbnMuZG9tYWluO1xuICB9IGVsc2UgaWYgKG9wdGlvbnMuaGlnaGVzdEF2YWlsYWJsZURvbWFpbikge1xuICAgIGRvbWFpbiA9IC8qKiBAdHlwZSB7c3RyaW5nfSAqLyAoZ2V0SGlnaGVzdEF2YWlsYWJsZURvbWFpbih3aW4pKTtcbiAgfVxuICB0cnlTZXRDb29raWUoXG4gICAgd2luLFxuICAgIG5hbWUsXG4gICAgdmFsdWUsXG4gICAgZXhwaXJhdGlvblRpbWUsXG4gICAgZG9tYWluLFxuICAgIG9wdGlvbnMuc2FtZVNpdGUsXG4gICAgb3B0aW9ucy5zZWN1cmVcbiAgKTtcbn1cblxuLyoqXG4gKiBBdHRlbXAgdG8gZmluZCB0aGUgSGlnaGVzdEF2YWlsYWJsZURvbWFpbiBvblxuICogQHBhcmFtIHshV2luZG93fSB3aW5cbiAqIEByZXR1cm4gez9zdHJpbmd9XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBnZXRIaWdoZXN0QXZhaWxhYmxlRG9tYWluKHdpbikge1xuICAvLyA8bWV0YSBuYW1lPSdhbXAtY29va2llLXNjb3BlJz4uIE5lZWQgdG8gcmVzcGVjdCB0aGUgbWV0YSBmaXJzdC5cblxuICAvLyBOb3RlOiBUaGUgc2FtZSBsb2dpYyBhcHBsaWVzIHRvIHNoYWRvdyBkb2NzLiBXaGVyZSBhbGwgc2hhZG93IGRvY3MgYXJlXG4gIC8vIGNvbnNpZGVyZWQgdG8gYmUgaW4gdGhlIHNhbWUgb3JpZ2luLiBBbmQgb25seSB0aGUgPG1ldGE+IGZyb21cbiAgLy8gc2hlbGwgd2lsbCBiZSByZXNwZWN0ZWQuIChIZWFkZXIgZnJvbSBzaGFkb3cgZG9jIHdpbGwgYmUgcmVtb3ZlZClcbiAgY29uc3QgbWV0YVRhZyA9XG4gICAgd2luLmRvY3VtZW50LmhlYWQgJiZcbiAgICB3aW4uZG9jdW1lbnQuaGVhZC5xdWVyeVNlbGVjdG9yKFwibWV0YVtuYW1lPSdhbXAtY29va2llLXNjb3BlJ11cIik7XG5cbiAgaWYgKG1ldGFUYWcpIHtcbiAgICAvLyBUaGUgY29udGVudCB2YWx1ZSBjb3VsZCBiZSBhbiBlbXB0eSBzdHJpbmcuIFJldHVybiBudWxsIGluc3RlYWRcbiAgICBjb25zdCBjb29raWVTY29wZSA9IG1ldGFUYWcuZ2V0QXR0cmlidXRlKCdjb250ZW50JykgfHwgJyc7XG4gICAgLy8gVmVyaWZ5IHRoZSB2YWxpZG5lc3Mgb2YgdGhlIGFtcC1jb29raWUtc2NvcGUgbWV0YSB2YWx1ZVxuICAgIGNvbnN0IHNvdXJjZU9yaWdpbiA9IGdldFNvdXJjZU9yaWdpbih3aW4ubG9jYXRpb24uaHJlZik7XG4gICAgLy8gVmVyaWZ5IHRoZSBtZXRhIHRhZyBjb250ZW50IHZhbHVlIGlzIHZhbGlkXG4gICAgaWYgKGVuZHNXaXRoKHNvdXJjZU9yaWdpbiwgJy4nICsgY29va2llU2NvcGUpKSB7XG4gICAgICByZXR1cm4gY29va2llU2NvcGU7XG4gICAgfSBlbHNlIHtcbiAgICAgIC8vIFdoZW4gdGhlIGFtcC1jb29raWUtc2NvcGUgdmFsdWUgaXMgaW52YWxpZCwgZmFsbGJhY2sgdG8gdGhlIGV4YWN0IG9yaWdpblxuICAgICAgLy8gdGhlIGRvY3VtZW50IGlzIGNvbnRhaW5lZCBpbi5cbiAgICAgIC8vIHNvdXJjZU9yaWdpbiBpbiB0aGUgZm9ybWF0IG9mICdodHRwczovL3h4eCBvciBodHRwOi8veHh4J1xuICAgICAgcmV0dXJuIHNvdXJjZU9yaWdpbi5zcGxpdCgnOi8vJylbMV07XG4gICAgfVxuICB9XG5cbiAgaWYgKCFpc1Byb3h5T3JpZ2luKHdpbi5sb2NhdGlvbi5ocmVmKSkge1xuICAgIGNvbnN0IHBhcnRzID0gd2luLmxvY2F0aW9uLmhvc3RuYW1lLnNwbGl0KCcuJyk7XG4gICAgbGV0IGRvbWFpbiA9IHBhcnRzW3BhcnRzLmxlbmd0aCAtIDFdO1xuICAgIGNvbnN0IHRlc3RDb29raWVOYW1lID0gZ2V0VGVtcENvb2tpZU5hbWUod2luKTtcbiAgICBmb3IgKGxldCBpID0gcGFydHMubGVuZ3RoIC0gMjsgaSA+PSAwOyBpLS0pIHtcbiAgICAgIGRvbWFpbiA9IHBhcnRzW2ldICsgJy4nICsgZG9tYWluO1xuICAgICAgLy8gVHJ5IHNldCBhIGNvb2tpZSBmb3IgdGVzdGluZyBvbmx5LCBleHBpcmUgYWZ0ZXIgMSBzZWNcbiAgICAgIHRyeVNldENvb2tpZSh3aW4sIHRlc3RDb29raWVOYW1lLCAnZGVsZXRlJywgRGF0ZS5ub3coKSArIDEwMDAsIGRvbWFpbik7XG4gICAgICBpZiAoZ2V0Q29va2llKHdpbiwgdGVzdENvb2tpZU5hbWUpID09ICdkZWxldGUnKSB7XG4gICAgICAgIC8vIFJlbW92ZSB0aGUgY29va2llIGZvciB0ZXN0aW5nXG4gICAgICAgIHRyeVNldENvb2tpZSh3aW4sIHRlc3RDb29raWVOYW1lLCAnZGVsZXRlJywgRGF0ZS5ub3coKSAtIDEwMDAsIGRvbWFpbik7XG4gICAgICAgIHJldHVybiBkb21haW47XG4gICAgICB9XG4gICAgfVxuICB9XG5cbiAgLy8gUHJveHkgb3JpZ2luIHcvbyA8bWV0YSBuYW1lPSdhbXAtY29va2llLXNjb3BlPlxuICAvLyBXZSBjYW5ub3QgY2FsY3VsYXRlIHRoZSBldGxkKzEgd2l0aG91dCB0aGUgcHVibGljIHN1ZmZpeCBsaXN0LlxuICAvLyBSZXR1cm4gbnVsbCBpbnN0ZWFkLlxuICAvLyBOb3RlOiBUaGlzIHNob3VsZCBub3QgYWZmZWN0IGNvb2tpZSB3cml0aW5nIGJlY2F1c2Ugd2UgZG9uJ3QgYWxsb3cgd3JpdGluZ1xuICAvLyBjb29raWUgdG8gaGlnaGVzdEF2YWlsYWJsZURvbWFpbiBvbiBwcm94eSBvcmlnaW5cbiAgLy8gSW4gdGhlIGNhc2Ugb2YgbGluayBkZWNvcmF0aW9uIG9uIHByb3h5IG9yaWdpbixcbiAgLy8gd2UgZXhwZWN0IHRoZSBjb3JyZWN0IG1ldGEgdGFnIHRvIGJlXG4gIC8vIHNldCBieSBwdWJsaXNoZXIgb3IgY2FjaGUgb3JkZXIgZm9yIEFNUCBydW50aW1lIHRvIGZpbmQgYWxsIHN1YmRvbWFpbnMuXG4gIHJldHVybiBudWxsO1xufVxuXG4vKipcbiAqIEF0dGVtcHQgdG8gc2V0IGEgY29va2llIHdpdGggdGhlIGdpdmVuIHBhcmFtcy5cbiAqXG4gKiBAcGFyYW0geyFXaW5kb3d9IHdpblxuICogQHBhcmFtIHtzdHJpbmd9IG5hbWVcbiAqIEBwYXJhbSB7c3RyaW5nfSB2YWx1ZVxuICogQHBhcmFtIHt0aW1lfSBleHBpcmF0aW9uVGltZVxuICogQHBhcmFtIHtzdHJpbmd8dW5kZWZpbmVkfSBkb21haW5cbiAqIEBwYXJhbSB7IVNhbWVTaXRlPX0gc2FtZVNpdGVcbiAqIEBwYXJhbSB7Ym9vbGVhbnx1bmRlZmluZWQ9fSBzZWN1cmVcbiAqL1xuZnVuY3Rpb24gdHJ5U2V0Q29va2llKFxuICB3aW4sXG4gIG5hbWUsXG4gIHZhbHVlLFxuICBleHBpcmF0aW9uVGltZSxcbiAgZG9tYWluLFxuICBzYW1lU2l0ZSxcbiAgc2VjdXJlXG4pIHtcbiAgLy8gV2UgZG8gbm90IGFsbG93IHNldHRpbmcgY29va2llcyBvbiB0aGUgZG9tYWluIHRoYXQgY29udGFpbnMgYm90aFxuICAvLyB0aGUgY2RuLiBhbmQgd3d3LiBob3N0cy5cbiAgLy8gTm90ZTogd2UgbmVlZCB0byBhbGxvdyBjZG4uYW1wcHJvamVjdC5vcmcgaW4gb3JkZXIgdG8gb3B0aW4gdG8gZXhwZXJpbWVudHNcbiAgaWYgKGRvbWFpbiA9PSAnYW1wcHJvamVjdC5vcmcnKSB7XG4gICAgLy8gQWN0aXZlbHkgZGVsZXRlIHRoZW0uXG4gICAgdmFsdWUgPSAnZGVsZXRlJztcbiAgICBleHBpcmF0aW9uVGltZSA9IDA7XG4gIH1cbiAgY29uc3QgY29va2llID1cbiAgICBlbmNvZGVVUklDb21wb25lbnQobmFtZSkgK1xuICAgICc9JyArXG4gICAgZW5jb2RlVVJJQ29tcG9uZW50KHZhbHVlKSArXG4gICAgJzsgcGF0aD0vJyArXG4gICAgKGRvbWFpbiA/ICc7IGRvbWFpbj0nICsgZG9tYWluIDogJycpICtcbiAgICAnOyBleHBpcmVzPScgK1xuICAgIG5ldyBEYXRlKGV4cGlyYXRpb25UaW1lKS50b1VUQ1N0cmluZygpICtcbiAgICBnZXRTYW1lU2l0ZVN0cmluZyh3aW4sIHNhbWVTaXRlKSArXG4gICAgKHNlY3VyZSA/ICc7IFNlY3VyZScgOiAnJyk7XG4gIHRyeSB7XG4gICAgd2luLmRvY3VtZW50LmNvb2tpZSA9IGNvb2tpZTtcbiAgfSBjYXRjaCAoaWdub3JlKSB7XG4gICAgLy8gRG8gbm90IHRocm93IGlmIHNldHRpbmcgdGhlIGNvb2tpZSBmYWlsZWQgRXhjZXB0aW9ucyBjYW4gYmUgdGhyb3duXG4gICAgLy8gd2hlbiBBTVAgZG9jcyBhcmUgb3BlbmVkIG9uIG9yaWdpbnMgdGhhdCBkbyBub3QgYWxsb3cgc2V0dGluZ1xuICAgIC8vIGNvb2tpZXMgc3VjaCBhcyBudWxsIG9yaWdpbnMuXG4gIH1cbn1cblxuLyoqXG4gKiBHZXRzIHRoZSBjb29raWUgc3RyaW5nIHRvIHVzZSBmb3IgU2FtZVNpdGUuIFRoaXMgb25seSBzZXRzIHRoZSBTYW1lU2l0ZVxuICogdmFsdWUgaWYgc3BlY2lmaWVkLCBmYWxsaW5nIGJhY2sgdG8gdGhlIGJyb3dzZXIgZGVmYXVsdC4gVGhlIGRlZmF1bHQgdmFsdWVcbiAqIGlzIGVxdWl2YWxlbnQgdG8gU2FtZVNpdGUuTk9ORSwgYnV0IGlzIHBsYW5uZWQgdG8gYmUgc2V0IHRvIFNhbWVTaXRlLkxBWCBpblxuICogQ2hyb21lIDgwLlxuICpcbiAqIE5vdGU6IEluIFNhZmFyaSAxMiwgaWYgdGhlIHZhbHVlIGlzIHNldCB0byBTYW1lU2l0ZS5OT05FLCBpdCBpcyB0cmVhdGVkIGJ5XG4gKiB0aGUgYnJvd3NlciBhcyBTYW1lU2l0ZS5TVFJJQ1QuXG4gKiBAcGFyYW0ge1dpbmRvd30gd2luXG4gKiBAcGFyYW0geyFTYW1lU2l0ZXx1bmRlZmluZWR9IHNhbWVTaXRlXG4gKiBAcmV0dXJuIHtzdHJpbmd9IFRoZSBzdHJpbmcgdG8gdXNlIHdoZW4gc2V0dGluZyB0aGUgY29va2llLlxuICovXG5mdW5jdGlvbiBnZXRTYW1lU2l0ZVN0cmluZyh3aW4sIHNhbWVTaXRlKSB7XG4gIGlmICghc2FtZVNpdGUpIHtcbiAgICByZXR1cm4gJyc7XG4gIH1cblxuICByZXR1cm4gYDsgU2FtZVNpdGU9JHtzYW1lU2l0ZX1gO1xufVxuXG4vKipcbiAqIFRocm93cyBpZiBhIGdpdmVuIGNvb2tpZSBzaG91bGQgbm90IGJlIHNldCBvbiB0aGUgZ2l2ZW4gb3JpZ2luLlxuICogVGhpcyBpcyBhIGRlZmVuc2UtaW4tZGVwdGguIENhbGxlcnMgc2hvdWxkIG5ldmVyIHJ1biBpbnRvIHRoaXMuXG4gKlxuICogQHBhcmFtIHshV2luZG93fSB3aW5cbiAqIEBwYXJhbSB7IU9iamVjdH0gb3B0aW9uc1xuICogQHBhcmFtIHtzdHJpbmd9IG5hbWUgRm9yIHRoZSBlcnJvciBtZXNzYWdlLlxuICovXG5mdW5jdGlvbiBjaGVja09yaWdpbkZvclNldHRpbmdDb29raWUod2luLCBvcHRpb25zLCBuYW1lKSB7XG4gIGlmIChvcHRpb25zLmFsbG93T25Qcm94eU9yaWdpbikge1xuICAgIHVzZXJBc3NlcnQoXG4gICAgICAhb3B0aW9ucy5oaWdoZXN0QXZhaWxhYmxlRG9tYWluLFxuICAgICAgJ0NvdWxkIG5vdCBzdXBwb3J0IGhpZ2hlc3RBdmFpbGFibGUgRG9tYWluIG9uIHByb3h5IG9yaWdpbiwgJyArXG4gICAgICAgICdzcGVjaWZ5IGRvbWFpbiBleHBsaWNpdGx5J1xuICAgICk7XG4gICAgcmV0dXJuO1xuICB9XG4gIHVzZXJBc3NlcnQoXG4gICAgIWlzUHJveHlPcmlnaW4od2luLmxvY2F0aW9uLmhyZWYpLFxuICAgIGBTaG91bGQgbmV2ZXIgYXR0ZW1wdCB0byBzZXQgY29va2llIG9uIHByb3h5IG9yaWdpbjogJHtuYW1lfWBcbiAgKTtcbiAgY29uc3QgY3VycmVudCA9IHBhcnNlVXJsRGVwcmVjYXRlZCh3aW4ubG9jYXRpb24uaHJlZikuaG9zdG5hbWUudG9Mb3dlckNhc2UoKTtcbiAgY29uc3QgcHJveHkgPSBwYXJzZVVybERlcHJlY2F0ZWQodXJscy5jZG4pLmhvc3RuYW1lLnRvTG93ZXJDYXNlKCk7XG4gIHVzZXJBc3NlcnQoXG4gICAgIShjdXJyZW50ID09IHByb3h5IHx8IGVuZHNXaXRoKGN1cnJlbnQsICcuJyArIHByb3h5KSksXG4gICAgJ1Nob3VsZCBuZXZlciBhdHRlbXB0IHRvIHNldCBjb29raWUgb24gcHJveHkgb3JpZ2luLiAoaW4gZGVwdGggY2hlY2spOiAnICtcbiAgICAgIG5hbWVcbiAgKTtcbn1cblxuLyoqXG4gKiBSZXR1cm4gYSB0ZW1wb3JhcnkgY29va2llIG5hbWUgZm9yIHRlc3Rpbmcgb25seVxuICogQHBhcmFtIHshV2luZG93fSB3aW5cbiAqIEByZXR1cm4ge3N0cmluZ31cbiAqL1xuZnVuY3Rpb24gZ2V0VGVtcENvb2tpZU5hbWUod2luKSB7XG4gIGxldCB0ZXN0Q29va2llTmFtZSA9IFRFU1RfQ09PS0lFX05BTUU7XG4gIGNvbnN0IGNvdW50ZXIgPSAwO1xuICB3aGlsZSAoZ2V0Q29va2llKHdpbiwgdGVzdENvb2tpZU5hbWUpKSB7XG4gICAgLy8gdGVzdCBjb29raWUgbmFtZSBjb25mbGljdCwgYXBwZW5kIGNvdW50ZXIgdG8gdGVzdCBjb29raWUgbmFtZVxuICAgIHRlc3RDb29raWVOYW1lID0gVEVTVF9DT09LSUVfTkFNRSArIGNvdW50ZXI7XG4gIH1cbiAgcmV0dXJuIHRlc3RDb29raWVOYW1lO1xufVxuIl19
+// /Users/mszylkowski/src/amphtml/src/cookies.js

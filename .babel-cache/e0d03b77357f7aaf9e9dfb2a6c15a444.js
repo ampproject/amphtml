@@ -1,0 +1,44 @@
+/**
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { ChunkPriority, chunk } from "./chunk";
+import { isAmphtml } from "./format";
+import { Services } from "./service";
+
+/**
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ */
+export function installStandaloneExtension(ampdoc) {
+  var win = ampdoc.win;
+
+  // Only enabled when the document is tagged as <html amp> or <html ⚡>.
+  if (!isAmphtml(win.document)) {
+    return;
+  }
+
+  if (!Services.platformFor(ampdoc.win).isStandalone()) {
+    return;
+  }
+
+  chunk(ampdoc, function () {
+    Services.extensionsFor(win).installExtensionForDoc(ampdoc, 'amp-standalone').then(function () {
+      return Services.standaloneServiceForDoc(ampdoc.getBody());
+    }).then(function (standaloneService) {
+      return standaloneService.initialize();
+    });
+  }, ChunkPriority.LOW);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInN0YW5kYWxvbmUuanMiXSwibmFtZXMiOlsiQ2h1bmtQcmlvcml0eSIsImNodW5rIiwiaXNBbXBodG1sIiwiU2VydmljZXMiLCJpbnN0YWxsU3RhbmRhbG9uZUV4dGVuc2lvbiIsImFtcGRvYyIsIndpbiIsImRvY3VtZW50IiwicGxhdGZvcm1Gb3IiLCJpc1N0YW5kYWxvbmUiLCJleHRlbnNpb25zRm9yIiwiaW5zdGFsbEV4dGVuc2lvbkZvckRvYyIsInRoZW4iLCJzdGFuZGFsb25lU2VydmljZUZvckRvYyIsImdldEJvZHkiLCJzdGFuZGFsb25lU2VydmljZSIsImluaXRpYWxpemUiLCJMT1ciXSwibWFwcGluZ3MiOiJBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUVBLFNBQVFBLGFBQVIsRUFBdUJDLEtBQXZCO0FBQ0EsU0FBUUMsU0FBUjtBQUNBLFNBQVFDLFFBQVI7O0FBRUE7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTQywwQkFBVCxDQUFvQ0MsTUFBcEMsRUFBNEM7QUFDakQsTUFBT0MsR0FBUCxHQUFjRCxNQUFkLENBQU9DLEdBQVA7O0FBQ0E7QUFDQSxNQUFJLENBQUNKLFNBQVMsQ0FBQ0ksR0FBRyxDQUFDQyxRQUFMLENBQWQsRUFBOEI7QUFDNUI7QUFDRDs7QUFFRCxNQUFJLENBQUNKLFFBQVEsQ0FBQ0ssV0FBVCxDQUFxQkgsTUFBTSxDQUFDQyxHQUE1QixFQUFpQ0csWUFBakMsRUFBTCxFQUFzRDtBQUNwRDtBQUNEOztBQUVEUixFQUFBQSxLQUFLLENBQ0hJLE1BREcsRUFFSCxZQUFNO0FBQ0pGLElBQUFBLFFBQVEsQ0FBQ08sYUFBVCxDQUF1QkosR0FBdkIsRUFDR0ssc0JBREgsQ0FDMEJOLE1BRDFCLEVBQ2tDLGdCQURsQyxFQUVHTyxJQUZILENBRVE7QUFBQSxhQUFNVCxRQUFRLENBQUNVLHVCQUFULENBQWlDUixNQUFNLENBQUNTLE9BQVAsRUFBakMsQ0FBTjtBQUFBLEtBRlIsRUFHR0YsSUFISCxDQUdRLFVBQUNHLGlCQUFEO0FBQUEsYUFBdUJBLGlCQUFpQixDQUFDQyxVQUFsQixFQUF2QjtBQUFBLEtBSFI7QUFJRCxHQVBFLEVBUUhoQixhQUFhLENBQUNpQixHQVJYLENBQUw7QUFVRCIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ29weXJpZ2h0IDIwMTUgVGhlIEFNUCBIVE1MIEF1dGhvcnMuIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlIFwiTGljZW5zZVwiKTtcbiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS5cbiAqIFlvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdFxuICpcbiAqICAgICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wXG4gKlxuICogVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZVxuICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gXCJBUy1JU1wiIEJBU0lTLFxuICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuXG4gKiBTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZSBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kXG4gKiBsaW1pdGF0aW9ucyB1bmRlciB0aGUgTGljZW5zZS5cbiAqL1xuXG5pbXBvcnQge0NodW5rUHJpb3JpdHksIGNodW5rfSBmcm9tICcuL2NodW5rJztcbmltcG9ydCB7aXNBbXBodG1sfSBmcm9tICcuL2Zvcm1hdCc7XG5pbXBvcnQge1NlcnZpY2VzfSBmcm9tICcuL3NlcnZpY2UnO1xuXG4vKipcbiAqIEBwYXJhbSB7IS4vc2VydmljZS9hbXBkb2MtaW1wbC5BbXBEb2N9IGFtcGRvY1xuICovXG5leHBvcnQgZnVuY3Rpb24gaW5zdGFsbFN0YW5kYWxvbmVFeHRlbnNpb24oYW1wZG9jKSB7XG4gIGNvbnN0IHt3aW59ID0gYW1wZG9jO1xuICAvLyBPbmx5IGVuYWJsZWQgd2hlbiB0aGUgZG9jdW1lbnQgaXMgdGFnZ2VkIGFzIDxodG1sIGFtcD4gb3IgPGh0bWwg4pqhPi5cbiAgaWYgKCFpc0FtcGh0bWwod2luLmRvY3VtZW50KSkge1xuICAgIHJldHVybjtcbiAgfVxuXG4gIGlmICghU2VydmljZXMucGxhdGZvcm1Gb3IoYW1wZG9jLndpbikuaXNTdGFuZGFsb25lKCkpIHtcbiAgICByZXR1cm47XG4gIH1cblxuICBjaHVuayhcbiAgICBhbXBkb2MsXG4gICAgKCkgPT4ge1xuICAgICAgU2VydmljZXMuZXh0ZW5zaW9uc0Zvcih3aW4pXG4gICAgICAgIC5pbnN0YWxsRXh0ZW5zaW9uRm9yRG9jKGFtcGRvYywgJ2FtcC1zdGFuZGFsb25lJylcbiAgICAgICAgLnRoZW4oKCkgPT4gU2VydmljZXMuc3RhbmRhbG9uZVNlcnZpY2VGb3JEb2MoYW1wZG9jLmdldEJvZHkoKSkpXG4gICAgICAgIC50aGVuKChzdGFuZGFsb25lU2VydmljZSkgPT4gc3RhbmRhbG9uZVNlcnZpY2UuaW5pdGlhbGl6ZSgpKTtcbiAgICB9LFxuICAgIENodW5rUHJpb3JpdHkuTE9XXG4gICk7XG59XG4iXX0=
+// /Users/mszylkowski/src/amphtml/src/standalone.js

@@ -1,0 +1,45 @@
+/**
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+// This file will be imported by 3P scripts.
+
+/**
+ * Possible consent policy state to proceed with.
+ * @enum {number}
+ */
+export var CONSENT_POLICY_STATE = {
+  // Enum value has external dependency. Please do not change existing value.
+  // If new values are added, please notify the AMP for Ads team to assure
+  // correct Real Time Config behavior is maintained for Fast Fetch.
+  SUFFICIENT: 1,
+  INSUFFICIENT: 2,
+  UNKNOWN_NOT_REQUIRED: 3,
+  UNKNOWN: 4
+};
+
+/**
+ * Defines valid consent string types passed
+ * in by consent iframe metadata.
+ * @enum {number}
+ */
+export var CONSENT_STRING_TYPE = {
+  // Enum value has external dependency for metadata collection.
+  // It is up to the vendor to interpret an undefined CONSENT_STRING_TYPE.
+  TCF_V1: 1,
+  TCF_V2: 2,
+  US_PRIVACY_STRING: 3
+};
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImNvbnNlbnQtc3RhdGUuanMiXSwibmFtZXMiOlsiQ09OU0VOVF9QT0xJQ1lfU1RBVEUiLCJTVUZGSUNJRU5UIiwiSU5TVUZGSUNJRU5UIiwiVU5LTk9XTl9OT1RfUkVRVUlSRUQiLCJVTktOT1dOIiwiQ09OU0VOVF9TVFJJTkdfVFlQRSIsIlRDRl9WMSIsIlRDRl9WMiIsIlVTX1BSSVZBQ1lfU1RSSU5HIl0sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFFQTs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sSUFBTUEsb0JBQW9CLEdBQUc7QUFDbEM7QUFDQTtBQUNBO0FBQ0FDLEVBQUFBLFVBQVUsRUFBRSxDQUpzQjtBQUtsQ0MsRUFBQUEsWUFBWSxFQUFFLENBTG9CO0FBTWxDQyxFQUFBQSxvQkFBb0IsRUFBRSxDQU5ZO0FBT2xDQyxFQUFBQSxPQUFPLEVBQUU7QUFQeUIsQ0FBN0I7O0FBVVA7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sSUFBTUMsbUJBQW1CLEdBQUc7QUFDakM7QUFDQTtBQUNBQyxFQUFBQSxNQUFNLEVBQUUsQ0FIeUI7QUFJakNDLEVBQUFBLE1BQU0sRUFBRSxDQUp5QjtBQUtqQ0MsRUFBQUEsaUJBQWlCLEVBQUU7QUFMYyxDQUE1QiIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ29weXJpZ2h0IDIwMTggVGhlIEFNUCBIVE1MIEF1dGhvcnMuIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlIFwiTGljZW5zZVwiKTtcbiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS5cbiAqIFlvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdFxuICpcbiAqICAgICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wXG4gKlxuICogVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZVxuICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gXCJBUy1JU1wiIEJBU0lTLFxuICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuXG4gKiBTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZSBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kXG4gKiBsaW1pdGF0aW9ucyB1bmRlciB0aGUgTGljZW5zZS5cbiAqL1xuXG4vLyBUaGlzIGZpbGUgd2lsbCBiZSBpbXBvcnRlZCBieSAzUCBzY3JpcHRzLlxuXG4vKipcbiAqIFBvc3NpYmxlIGNvbnNlbnQgcG9saWN5IHN0YXRlIHRvIHByb2NlZWQgd2l0aC5cbiAqIEBlbnVtIHtudW1iZXJ9XG4gKi9cbmV4cG9ydCBjb25zdCBDT05TRU5UX1BPTElDWV9TVEFURSA9IHtcbiAgLy8gRW51bSB2YWx1ZSBoYXMgZXh0ZXJuYWwgZGVwZW5kZW5jeS4gUGxlYXNlIGRvIG5vdCBjaGFuZ2UgZXhpc3RpbmcgdmFsdWUuXG4gIC8vIElmIG5ldyB2YWx1ZXMgYXJlIGFkZGVkLCBwbGVhc2Ugbm90aWZ5IHRoZSBBTVAgZm9yIEFkcyB0ZWFtIHRvIGFzc3VyZVxuICAvLyBjb3JyZWN0IFJlYWwgVGltZSBDb25maWcgYmVoYXZpb3IgaXMgbWFpbnRhaW5lZCBmb3IgRmFzdCBGZXRjaC5cbiAgU1VGRklDSUVOVDogMSxcbiAgSU5TVUZGSUNJRU5UOiAyLFxuICBVTktOT1dOX05PVF9SRVFVSVJFRDogMyxcbiAgVU5LTk9XTjogNCxcbn07XG5cbi8qKlxuICogRGVmaW5lcyB2YWxpZCBjb25zZW50IHN0cmluZyB0eXBlcyBwYXNzZWRcbiAqIGluIGJ5IGNvbnNlbnQgaWZyYW1lIG1ldGFkYXRhLlxuICogQGVudW0ge251bWJlcn1cbiAqL1xuZXhwb3J0IGNvbnN0IENPTlNFTlRfU1RSSU5HX1RZUEUgPSB7XG4gIC8vIEVudW0gdmFsdWUgaGFzIGV4dGVybmFsIGRlcGVuZGVuY3kgZm9yIG1ldGFkYXRhIGNvbGxlY3Rpb24uXG4gIC8vIEl0IGlzIHVwIHRvIHRoZSB2ZW5kb3IgdG8gaW50ZXJwcmV0IGFuIHVuZGVmaW5lZCBDT05TRU5UX1NUUklOR19UWVBFLlxuICBUQ0ZfVjE6IDEsXG4gIFRDRl9WMjogMixcbiAgVVNfUFJJVkFDWV9TVFJJTkc6IDMsXG59O1xuIl19
+// /Users/mszylkowski/src/amphtml/src/core/constants/consent-state.js

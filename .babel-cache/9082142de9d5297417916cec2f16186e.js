@@ -1,0 +1,27 @@
+/**
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { isExperimentOn } from "../../../src/experiments";
+
+/**
+ * Returns true if new inline attachment UI is enabled.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export var isPageAttachmentUiV2ExperimentOn = function isPageAttachmentUiV2ExperimentOn(win) {
+  return isExperimentOn(win, 'amp-story-page-attachment-ui-v2');
+};
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFtcC1zdG9yeS1wYWdlLWF0dGFjaG1lbnQtdWktdjIuanMiXSwibmFtZXMiOlsiaXNFeHBlcmltZW50T24iLCJpc1BhZ2VBdHRhY2htZW50VWlWMkV4cGVyaW1lbnRPbiIsIndpbiJdLCJtYXBwaW5ncyI6IkFBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBRUEsU0FBUUEsY0FBUjs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxJQUFNQyxnQ0FBZ0MsR0FBRyxTQUFuQ0EsZ0NBQW1DLENBQUNDLEdBQUQsRUFBUztBQUN2RCxTQUFPRixjQUFjLENBQUNFLEdBQUQsRUFBTSxpQ0FBTixDQUFyQjtBQUNELENBRk0iLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIENvcHlyaWdodCAyMDIxIFRoZSBBTVAgSFRNTCBBdXRob3JzLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIExpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmVcbiAqIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuIFwiQVMtSVNcIiBCQVNJUyxcbiAqIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLlxuICogU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZFxuICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHtpc0V4cGVyaW1lbnRPbn0gZnJvbSAnI2V4cGVyaW1lbnRzJztcblxuLyoqXG4gKiBSZXR1cm5zIHRydWUgaWYgbmV3IGlubGluZSBhdHRhY2htZW50IFVJIGlzIGVuYWJsZWQuXG4gKiBAcGFyYW0geyFXaW5kb3d9IHdpblxuICogQHJldHVybiB7Ym9vbGVhbn1cbiAqL1xuZXhwb3J0IGNvbnN0IGlzUGFnZUF0dGFjaG1lbnRVaVYyRXhwZXJpbWVudE9uID0gKHdpbikgPT4ge1xuICByZXR1cm4gaXNFeHBlcmltZW50T24od2luLCAnYW1wLXN0b3J5LXBhZ2UtYXR0YWNobWVudC11aS12MicpO1xufTtcbiJdfQ==
+// /Users/mszylkowski/src/amphtml/extensions/amp-story/1.0/amp-story-page-attachment-ui-v2.js

@@ -1,0 +1,164 @@
+/**
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { DomAncestorVisitor, VisitorCallbackTypeDef } from "../../../src/utils/dom-ancestor-visitor";
+import { Layout } from "../../../src/core/dom/layout";
+import { Services } from "../../../src/service";
+import { dev } from "../../../src/log";
+
+/** @const @enum {number} */
+var FULL_WIDTH_SIGNALS = {
+  OVERFLOW_HIDDEN: 4,
+  ELEMENT_HIDDEN: 128
+};
+
+/**
+ * Returns a visitor callback that gets the maximum width the given element may
+ * occupy.
+ * @param {function(?number): undefined} setWidth Callback to set the value of
+ *   the width.
+ * @return {!VisitorCallbackTypeDef} Visitor callback.
+ */
+function getElementWidthVisitor(setWidth) {
+  return function (element, style) {
+    var layout = element.getAttribute('layout');
+
+    switch (layout) {
+      case Layout.FIXED:
+        setWidth(parseInt(element.getAttribute('width'), 10) || 0);
+        return true;
+
+      case Layout.RESPONSIVE:
+      case Layout.FILL:
+      case Layout.FIXED_HEIGHT:
+      case Layout.FLUID:
+        // The above layouts determine the width of the element by the
+        // containing element, or by CSS max-width property.
+        var maxWidth = parseInt(style.maxWidth, 10);
+
+        if (maxWidth || maxWidth == 0) {
+          setWidth(maxWidth);
+          return true;
+        }
+
+        break;
+
+      case Layout.CONTAINER:
+        // Container layout allows the container's size to be determined by
+        // the children within it, so in principle we can grow as large as the
+        // viewport.
+        var viewport = Services.viewportForDoc(dev().assertElement(element));
+        setWidth(viewport.getSize().width);
+        return true;
+
+      case Layout.NODISPLAY:
+      case Layout.FLEX_ITEM:
+        setWidth(0);
+        return true;
+
+      default:
+        // If no layout is provided, we must use getComputedStyle. Padding and
+        // border is not included in the overall computed width, so we must
+        // manually include them.
+        var paddingLeft = parseInt(style.paddingLeft, 10) || 0;
+        var paddingRight = parseInt(style.paddingRight, 10) || 0;
+        var totalPadding = paddingLeft + paddingRight;
+        var borderLeft = parseInt(style.borderLeftWidth, 10) || 0;
+        var borderRight = parseInt(style.borderRightWidth, 10) || 0;
+        var totalBorder = borderLeft + borderRight;
+        setWidth((parseInt(style.width, 10) || 0) + totalPadding + totalBorder);
+        return true;
+    }
+  };
+}
+
+/**
+ * Returns a Dom visitor callback that will compute the 'fws' request
+ * parameter.
+ * @param {function(!FULL_WIDTH_SIGNALS): undefined} setSignal Callback to set
+ *   the 'fws' value.
+ * @return {!VisitorCallbackTypeDef}
+ */
+function getFullWidthSignalVisitor(setSignal) {
+  return function (element, style) {
+    if (style.overflowY && style.overflowY != 'visible') {
+      setSignal(FULL_WIDTH_SIGNALS.OVERFLOW_HIDDEN);
+      return true;
+    }
+
+    if (style.display == 'none') {
+      setSignal(FULL_WIDTH_SIGNALS.ELEMENT_HIDDEN);
+      return true;
+    }
+  };
+}
+
+/** @typedef {{
+ *    fwSignal: number,
+ *    slotWidth: number,
+ *    parentWidth: number,
+ *    parentStyle: ?Object<string, string>,
+ * }}
+ */
+export var FlexibleAdSlotDataTypeDef;
+
+/**
+ * Returns the fixed size of the given element, or the fixed size of its nearest
+ * ancestor that has a fixed size, if the given element has none.
+ * @param {!Window} win
+ * @param {?Element} element
+ * @return {!FlexibleAdSlotDataTypeDef} A record containing data needed for
+ *   generating flex ad slot ad requests, and for adjusting the slot
+ *   post-response. See type def for more details.
+ */
+export function getFlexibleAdSlotData(win, element) {
+  var fwSignal = 0;
+  var slotWidth = -1;
+  var parentWidth = -1;
+  var parentStyle = null;
+
+  var setFws = function setFws(val) {
+    return fwSignal = val;
+  };
+
+  var setMsz = function setMsz(val) {
+    return slotWidth = val;
+  };
+
+  var setPsz = function setPsz(val) {
+    return parentWidth = val;
+  };
+
+  new DomAncestorVisitor(win).addVisitor(getElementWidthVisitor(setMsz), 1
+  /* maxDepth */
+  ).addVisitor(getElementWidthVisitor(setPsz), 100
+  /* maxDepth */
+  ).addVisitor(getFullWidthSignalVisitor(setFws), 100
+  /* maxDepth */
+  ) // Used to acquire the parentStyle object so as to not recompute it later
+  .addVisitor(function (el, style) {
+    return parentStyle = style;
+  }, 1
+  /* maxDepth */
+  ).visitAncestorsStartingFrom(element);
+  return {
+    fwSignal: fwSignal,
+    slotWidth: slotWidth,
+    parentWidth: parentWidth,
+    parentStyle: parentStyle
+  };
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImZsZXhpYmxlLWFkLXNsb3QtdXRpbHMuanMiXSwibmFtZXMiOlsiRG9tQW5jZXN0b3JWaXNpdG9yIiwiVmlzaXRvckNhbGxiYWNrVHlwZURlZiIsIkxheW91dCIsIlNlcnZpY2VzIiwiZGV2IiwiRlVMTF9XSURUSF9TSUdOQUxTIiwiT1ZFUkZMT1dfSElEREVOIiwiRUxFTUVOVF9ISURERU4iLCJnZXRFbGVtZW50V2lkdGhWaXNpdG9yIiwic2V0V2lkdGgiLCJlbGVtZW50Iiwic3R5bGUiLCJsYXlvdXQiLCJnZXRBdHRyaWJ1dGUiLCJGSVhFRCIsInBhcnNlSW50IiwiUkVTUE9OU0lWRSIsIkZJTEwiLCJGSVhFRF9IRUlHSFQiLCJGTFVJRCIsIm1heFdpZHRoIiwiQ09OVEFJTkVSIiwidmlld3BvcnQiLCJ2aWV3cG9ydEZvckRvYyIsImFzc2VydEVsZW1lbnQiLCJnZXRTaXplIiwid2lkdGgiLCJOT0RJU1BMQVkiLCJGTEVYX0lURU0iLCJwYWRkaW5nTGVmdCIsInBhZGRpbmdSaWdodCIsInRvdGFsUGFkZGluZyIsImJvcmRlckxlZnQiLCJib3JkZXJMZWZ0V2lkdGgiLCJib3JkZXJSaWdodCIsImJvcmRlclJpZ2h0V2lkdGgiLCJ0b3RhbEJvcmRlciIsImdldEZ1bGxXaWR0aFNpZ25hbFZpc2l0b3IiLCJzZXRTaWduYWwiLCJvdmVyZmxvd1kiLCJkaXNwbGF5IiwiRmxleGlibGVBZFNsb3REYXRhVHlwZURlZiIsImdldEZsZXhpYmxlQWRTbG90RGF0YSIsIndpbiIsImZ3U2lnbmFsIiwic2xvdFdpZHRoIiwicGFyZW50V2lkdGgiLCJwYXJlbnRTdHlsZSIsInNldEZ3cyIsInZhbCIsInNldE1zeiIsInNldFBzeiIsImFkZFZpc2l0b3IiLCJlbCIsInZpc2l0QW5jZXN0b3JzU3RhcnRpbmdGcm9tIl0sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7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c0IsQ0FBQzJDLE1BQUQsQ0FGcEMsRUFFOEM7QUFBSTtBQUZsRCxJQUdHQyxVQUhILENBR2NmLHlCQUF5QixDQUFDVyxNQUFELENBSHZDLEVBR2lEO0FBQUk7QUFIckQsSUFJRTtBQUpGLEdBS0dJLFVBTEgsQ0FLYyxVQUFDQyxFQUFELEVBQUsxQyxLQUFMO0FBQUEsV0FBZ0JvQyxXQUFXLEdBQUdwQyxLQUE5QjtBQUFBLEdBTGQsRUFLb0Q7QUFBRTtBQUx0RCxJQU1HMkMsMEJBTkgsQ0FNOEI1QyxPQU45QjtBQU9BLFNBQU87QUFBQ2tDLElBQUFBLFFBQVEsRUFBUkEsUUFBRDtBQUFXQyxJQUFBQSxTQUFTLEVBQVRBLFNBQVg7QUFBc0JDLElBQUFBLFdBQVcsRUFBWEEsV0FBdEI7QUFBbUNDLElBQUFBLFdBQVcsRUFBWEE7QUFBbkMsR0FBUDtBQUNEIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb3B5cmlnaHQgMjAxOSBUaGUgQU1QIEhUTUwgQXV0aG9ycy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTLUlTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5pbXBvcnQge1xuICBEb21BbmNlc3RvclZpc2l0b3IsXG4gIFZpc2l0b3JDYWxsYmFja1R5cGVEZWYsXG59IGZyb20gJy4uLy4uLy4uL3NyYy91dGlscy9kb20tYW5jZXN0b3ItdmlzaXRvcic7XG5pbXBvcnQge0xheW91dH0gZnJvbSAnI2NvcmUvZG9tL2xheW91dCc7XG5pbXBvcnQge1NlcnZpY2VzfSBmcm9tICcjc2VydmljZSc7XG5pbXBvcnQge2Rldn0gZnJvbSAnLi4vLi4vLi4vc3JjL2xvZyc7XG5cbi8qKiBAY29uc3QgQGVudW0ge251bWJlcn0gKi9cbmNvbnN0IEZVTExfV0lEVEhfU0lHTkFMUyA9IHtcbiAgT1ZFUkZMT1dfSElEREVOOiA0LFxuICBFTEVNRU5UX0hJRERFTjogMTI4LFxufTtcblxuLyoqXG4gKiBSZXR1cm5zIGEgdmlzaXRvciBjYWxsYmFjayB0aGF0IGdldHMgdGhlIG1heGltdW0gd2lkdGggdGhlIGdpdmVuIGVsZW1lbnQgbWF5XG4gKiBvY2N1cHkuXG4gKiBAcGFyYW0ge2Z1bmN0aW9uKD9udW1iZXIpOiB1bmRlZmluZWR9IHNldFdpZHRoIENhbGxiYWNrIHRvIHNldCB0aGUgdmFsdWUgb2ZcbiAqICAgdGhlIHdpZHRoLlxuICogQHJldHVybiB7IVZpc2l0b3JDYWxsYmFja1R5cGVEZWZ9IFZpc2l0b3IgY2FsbGJhY2suXG4gKi9cbmZ1bmN0aW9uIGdldEVsZW1lbnRXaWR0aFZpc2l0b3Ioc2V0V2lkdGgpIHtcbiAgcmV0dXJuIChlbGVtZW50LCBzdHlsZSkgPT4ge1xuICAgIGNvbnN0IGxheW91dCA9IGVsZW1lbnQuZ2V0QXR0cmlidXRlKCdsYXlvdXQnKTtcbiAgICBzd2l0Y2ggKGxheW91dCkge1xuICAgICAgY2FzZSBMYXlvdXQuRklYRUQ6XG4gICAgICAgIHNldFdpZHRoKHBhcnNlSW50KGVsZW1lbnQuZ2V0QXR0cmlidXRlKCd3aWR0aCcpLCAxMCkgfHwgMCk7XG4gICAgICAgIHJldHVybiB0cnVlO1xuICAgICAgY2FzZSBMYXlvdXQuUkVTUE9OU0lWRTpcbiAgICAgIGNhc2UgTGF5b3V0LkZJTEw6XG4gICAgICBjYXNlIExheW91dC5GSVhFRF9IRUlHSFQ6XG4gICAgICBjYXNlIExheW91dC5GTFVJRDpcbiAgICAgICAgLy8gVGhlIGFib3ZlIGxheW91dHMgZGV0ZXJtaW5lIHRoZSB3aWR0aCBvZiB0aGUgZWxlbWVudCBieSB0aGVcbiAgICAgICAgLy8gY29udGFpbmluZyBlbGVtZW50LCBvciBieSBDU1MgbWF4LXdpZHRoIHByb3BlcnR5LlxuICAgICAgICBjb25zdCBtYXhXaWR0aCA9IHBhcnNlSW50KHN0eWxlLm1heFdpZHRoLCAxMCk7XG4gICAgICAgIGlmIChtYXhXaWR0aCB8fCBtYXhXaWR0aCA9PSAwKSB7XG4gICAgICAgICAgc2V0V2lkdGgobWF4V2lkdGgpO1xuICAgICAgICAgIHJldHVybiB0cnVlO1xuICAgICAgICB9XG4gICAgICAgIGJyZWFrO1xuICAgICAgY2FzZSBMYXlvdXQuQ09OVEFJTkVSOlxuICAgICAgICAvLyBDb250YWluZXIgbGF5b3V0IGFsbG93cyB0aGUgY29udGFpbmVyJ3Mgc2l6ZSB0byBiZSBkZXRlcm1pbmVkIGJ5XG4gICAgICAgIC8vIHRoZSBjaGlsZHJlbiB3aXRoaW4gaXQsIHNvIGluIHByaW5jaXBsZSB3ZSBjYW4gZ3JvdyBhcyBsYXJnZSBhcyB0aGVcbiAgICAgICAgLy8gdmlld3BvcnQuXG4gICAgICAgIGNvbnN0IHZpZXdwb3J0ID0gU2VydmljZXMudmlld3BvcnRGb3JEb2MoZGV2KCkuYXNzZXJ0RWxlbWVudChlbGVtZW50KSk7XG4gICAgICAgIHNldFdpZHRoKHZpZXdwb3J0LmdldFNpemUoKS53aWR0aCk7XG4gICAgICAgIHJldHVybiB0cnVlO1xuICAgICAgY2FzZSBMYXlvdXQuTk9ESVNQTEFZOlxuICAgICAgY2FzZSBMYXlvdXQuRkxFWF9JVEVNOlxuICAgICAgICBzZXRXaWR0aCgwKTtcbiAgICAgICAgcmV0dXJuIHRydWU7XG4gICAgICBkZWZhdWx0OlxuICAgICAgICAvLyBJZiBubyBsYXlvdXQgaXMgcHJvdmlkZWQsIHdlIG11c3QgdXNlIGdldENvbXB1dGVkU3R5bGUuIFBhZGRpbmcgYW5kXG4gICAgICAgIC8vIGJvcmRlciBpcyBub3QgaW5jbHVkZWQgaW4gdGhlIG92ZXJhbGwgY29tcHV0ZWQgd2lkdGgsIHNvIHdlIG11c3RcbiAgICAgICAgLy8gbWFudWFsbHkgaW5jbHVkZSB0aGVtLlxuICAgICAgICBjb25zdCBwYWRkaW5nTGVmdCA9IHBhcnNlSW50KHN0eWxlLnBhZGRpbmdMZWZ0LCAxMCkgfHwgMDtcbiAgICAgICAgY29uc3QgcGFkZGluZ1JpZ2h0ID0gcGFyc2VJbnQoc3R5bGUucGFkZGluZ1JpZ2h0LCAxMCkgfHwgMDtcbiAgICAgICAgY29uc3QgdG90YWxQYWRkaW5nID0gcGFkZGluZ0xlZnQgKyBwYWRkaW5nUmlnaHQ7XG4gICAgICAgIGNvbnN0IGJvcmRlckxlZnQgPSBwYXJzZUludChzdHlsZS5ib3JkZXJMZWZ0V2lkdGgsIDEwKSB8fCAwO1xuICAgICAgICBjb25zdCBib3JkZXJSaWdodCA9IHBhcnNlSW50KHN0eWxlLmJvcmRlclJpZ2h0V2lkdGgsIDEwKSB8fCAwO1xuICAgICAgICBjb25zdCB0b3RhbEJvcmRlciA9IGJvcmRlckxlZnQgKyBib3JkZXJSaWdodDtcbiAgICAgICAgc2V0V2lkdGgoKHBhcnNlSW50KHN0eWxlLndpZHRoLCAxMCkgfHwgMCkgKyB0b3RhbFBhZGRpbmcgKyB0b3RhbEJvcmRlcik7XG4gICAgICAgIHJldHVybiB0cnVlO1xuICAgIH1cbiAgfTtcbn1cblxuLyoqXG4gKiBSZXR1cm5zIGEgRG9tIHZpc2l0b3IgY2FsbGJhY2sgdGhhdCB3aWxsIGNvbXB1dGUgdGhlICdmd3MnIHJlcXVlc3RcbiAqIHBhcmFtZXRlci5cbiAqIEBwYXJhbSB7ZnVuY3Rpb24oIUZVTExfV0lEVEhfU0lHTkFMUyk6IHVuZGVmaW5lZH0gc2V0U2lnbmFsIENhbGxiYWNrIHRvIHNldFxuICogICB0aGUgJ2Z3cycgdmFsdWUuXG4gKiBAcmV0dXJuIHshVmlzaXRvckNhbGxiYWNrVHlwZURlZn1cbiAqL1xuZnVuY3Rpb24gZ2V0RnVsbFdpZHRoU2lnbmFsVmlzaXRvcihzZXRTaWduYWwpIHtcbiAgcmV0dXJuIChlbGVtZW50LCBzdHlsZSkgPT4ge1xuICAgIGlmIChzdHlsZS5vdmVyZmxvd1kgJiYgc3R5bGUub3ZlcmZsb3dZICE9ICd2aXNpYmxlJykge1xuICAgICAgc2V0U2lnbmFsKEZVTExfV0lEVEhfU0lHTkFMUy5PVkVSRkxPV19ISURERU4pO1xuICAgICAgcmV0dXJuIHRydWU7XG4gICAgfVxuICAgIGlmIChzdHlsZS5kaXNwbGF5ID09ICdub25lJykge1xuICAgICAgc2V0U2lnbmFsKEZVTExfV0lEVEhfU0lHTkFMUy5FTEVNRU5UX0hJRERFTik7XG4gICAgICByZXR1cm4gdHJ1ZTtcbiAgICB9XG4gIH07XG59XG5cbi8qKiBAdHlwZWRlZiB7e1xuICogICAgZndTaWduYWw6IG51bWJlcixcbiAqICAgIHNsb3RXaWR0aDogbnVtYmVyLFxuICogICAgcGFyZW50V2lkdGg6IG51bWJlcixcbiAqICAgIHBhcmVudFN0eWxlOiA/T2JqZWN0PHN0cmluZywgc3RyaW5nPixcbiAqIH19XG4gKi9cbmV4cG9ydCBsZXQgRmxleGlibGVBZFNsb3REYXRhVHlwZURlZjtcblxuLyoqXG4gKiBSZXR1cm5zIHRoZSBmaXhlZCBzaXplIG9mIHRoZSBnaXZlbiBlbGVtZW50LCBvciB0aGUgZml4ZWQgc2l6ZSBvZiBpdHMgbmVhcmVzdFxuICogYW5jZXN0b3IgdGhhdCBoYXMgYSBmaXhlZCBzaXplLCBpZiB0aGUgZ2l2ZW4gZWxlbWVudCBoYXMgbm9uZS5cbiAqIEBwYXJhbSB7IVdpbmRvd30gd2luXG4gKiBAcGFyYW0gez9FbGVtZW50fSBlbGVtZW50XG4gKiBAcmV0dXJuIHshRmxleGlibGVBZFNsb3REYXRhVHlwZURlZn0gQSByZWNvcmQgY29udGFpbmluZyBkYXRhIG5lZWRlZCBmb3JcbiAqICAgZ2VuZXJhdGluZyBmbGV4IGFkIHNsb3QgYWQgcmVxdWVzdHMsIGFuZCBmb3IgYWRqdXN0aW5nIHRoZSBzbG90XG4gKiAgIHBvc3QtcmVzcG9uc2UuIFNlZSB0eXBlIGRlZiBmb3IgbW9yZSBkZXRhaWxzLlxuICovXG5leHBvcnQgZnVuY3Rpb24gZ2V0RmxleGlibGVBZFNsb3REYXRhKHdpbiwgZWxlbWVudCkge1xuICBsZXQgZndTaWduYWwgPSAwO1xuICBsZXQgc2xvdFdpZHRoID0gLTE7XG4gIGxldCBwYXJlbnRXaWR0aCA9IC0xO1xuICBsZXQgcGFyZW50U3R5bGUgPSBudWxsO1xuICBjb25zdCBzZXRGd3MgPSAodmFsKSA9PiAoZndTaWduYWwgPSB2YWwpO1xuICBjb25zdCBzZXRNc3ogPSAodmFsKSA9PiAoc2xvdFdpZHRoID0gdmFsKTtcbiAgY29uc3Qgc2V0UHN6ID0gKHZhbCkgPT4gKHBhcmVudFdpZHRoID0gdmFsKTtcbiAgbmV3IERvbUFuY2VzdG9yVmlzaXRvcih3aW4pXG4gICAgLmFkZFZpc2l0b3IoZ2V0RWxlbWVudFdpZHRoVmlzaXRvcihzZXRNc3opLCAxIC8qIG1heERlcHRoICovKVxuICAgIC5hZGRWaXNpdG9yKGdldEVsZW1lbnRXaWR0aFZpc2l0b3Ioc2V0UHN6KSwgMTAwIC8qIG1heERlcHRoICovKVxuICAgIC5hZGRWaXNpdG9yKGdldEZ1bGxXaWR0aFNpZ25hbFZpc2l0b3Ioc2V0RndzKSwgMTAwIC8qIG1heERlcHRoICovKVxuICAgIC8vIFVzZWQgdG8gYWNxdWlyZSB0aGUgcGFyZW50U3R5bGUgb2JqZWN0IHNvIGFzIHRvIG5vdCByZWNvbXB1dGUgaXQgbGF0ZXJcbiAgICAuYWRkVmlzaXRvcigoZWwsIHN0eWxlKSA9PiAocGFyZW50U3R5bGUgPSBzdHlsZSksIDEgLyogbWF4RGVwdGggKi8pXG4gICAgLnZpc2l0QW5jZXN0b3JzU3RhcnRpbmdGcm9tKGVsZW1lbnQpO1xuICByZXR1cm4ge2Z3U2lnbmFsLCBzbG90V2lkdGgsIHBhcmVudFdpZHRoLCBwYXJlbnRTdHlsZX07XG59XG4iXX0=
+// /Users/mszylkowski/src/amphtml/extensions/amp-ad-network-doubleclick-impl/0.1/flexible-ad-slot-utils.js

@@ -1,0 +1,1 @@
+export const cssText = "amp-story-entry-point{position:relative;display:block}\n/*# sourceURL=/css/amp-story-entry-point.css*/";

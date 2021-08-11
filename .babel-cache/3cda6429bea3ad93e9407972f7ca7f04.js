@@ -1,0 +1,128 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { computedStyle } from "./core/dom/style";
+import { dev } from "./log";
+import { getParentWindowFrameElement } from "./service-helpers";
+var AD_CONTAINER_PROP = '__AMP__AD_CONTAINER';
+
+/**
+ * Tags that are allowed to have fixed positioning
+ * @const {!Object<string, boolean>}
+ */
+var CONTAINERS = {
+  'AMP-FX-FLYING-CARPET': true,
+  'AMP-LIGHTBOX': true,
+  'AMP-STICKY-AD': true,
+  'AMP-LIGHTBOX-GALLERY': true
+};
+
+/**
+ * Determines if an element is fixed-positioned.
+ * OK to use, because it's only called from onLayoutMeasure
+ * @param {!Element} el
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function isPositionFixed(el, win) {
+  var _computedStyle = computedStyle(win, el),
+      position = _computedStyle.position;
+
+  // We consider sticky positions as fixed, since they can be fixed.
+  return position == 'fixed' || position == 'sticky';
+}
+
+/**
+ * @param {!Element} element
+ * @param {!Window} win
+ * @return {boolean} whether the element position is allowed. If the element
+ * belongs to CONTAINERS, it is allowed to be position fixed.
+ * If the element has a position fixed ancestor, it is not allowed.
+ * This should only be called when a layout on the page was just forced
+ * anyway.
+ */
+export function isAdPositionAllowed(element, win) {
+  var hasFixedAncestor = false;
+  var containers = 0;
+  var el = element;
+
+  do {
+    if (CONTAINERS[el.tagName]) {
+      // The containers must not themselves be contained in a fixed-position
+      // element. Continue the search.
+      containers++;
+      hasFixedAncestor = false;
+    } else if (isPositionFixed(dev().assertElement(el), win)) {
+      // Because certain blessed elements may contain a position fixed
+      // container (which contain an ad), we continue to search the
+      // ancestry tree.
+      hasFixedAncestor = true;
+    }
+
+    el = el.parentElement;
+  } while (el && el.tagName != 'BODY');
+
+  return !hasFixedAncestor && containers <= 1;
+}
+
+/**
+ * Returns the blessed container element tagName if the ad is contained by one.
+ * This is called during layout measure.
+ * @param {!Element} element
+ * @return {?string}
+ */
+export function getAdContainer(element) {
+  if (element[AD_CONTAINER_PROP] === undefined) {
+    var el = element.parentElement;
+
+    while (el && el.tagName != 'BODY') {
+      if (CONTAINERS[el.tagName]) {
+        return element[AD_CONTAINER_PROP] = el.tagName;
+      }
+
+      el = el.parentElement;
+    }
+
+    element[AD_CONTAINER_PROP] = null;
+  }
+
+  return element[AD_CONTAINER_PROP];
+}
+
+/**
+ * Gets the resource ID of the amp-ad element containing the passed node.
+ * If there is no containing amp-ad tag, then null will be returned.
+ * TODO(jonkeller): Investigate whether non-A4A use case is needed. Issue 11436
+ * @param {!Element} node
+ * @param {!Window} topWin
+ * @return {?string}
+ */
+export function getAmpAdResourceId(node, topWin) {
+  try {
+    var frameParent = getParentWindowFrameElement(node, topWin).parentElement;
+
+    if (frameParent.nodeName == 'AMP-AD') {
+      return String(frameParent.getResourceId());
+    }
+  } catch (e) {}
+
+  // Whether we entered the catch above (e.g. due to attempt to access
+  // across xdomain boundary), or failed to enter the if further above, the
+  // node is not within a friendly amp-ad tag. So, there is no amp-ad
+  // resource ID. How to handle that is up to the caller, but see TODO above.
+  return null;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFkLWhlbHBlci5qcyJdLCJuYW1lcyI6WyJjb21wdXRlZFN0eWxlIiwiZGV2IiwiZ2V0UGFyZW50V2luZG93RnJhbWVFbGVtZW50IiwiQURfQ09OVEFJTkVSX1BST1AiLCJDT05UQUlORVJTIiwiaXNQb3NpdGlvbkZpeGVkIiwiZWwiLCJ3aW4iLCJwb3NpdGlvbiIsImlzQWRQb3NpdGlvbkFsbG93ZWQiLCJlbGVtZW50IiwiaGFzRml4ZWRBbmNlc3RvciIsImNvbnRhaW5lcnMiLCJ0YWdOYW1lIiwiYXNzZXJ0RWxlbWVudCIsInBhcmVudEVsZW1lbnQiLCJnZXRBZENvbnRhaW5lciIsInVuZGVmaW5lZCIsImdldEFtcEFkUmVzb3VyY2VJZCIsIm5vZGUiLCJ0b3BXaW4iLCJmcmFtZVBhcmVudCIsIm5vZGVOYW1lIiwiU3RyaW5nIiwiZ2V0UmVzb3VyY2VJZCIsImUiXSwibWFwcGluZ3MiOiJBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUVBLFNBQVFBLGFBQVI7QUFDQSxTQUFRQyxHQUFSO0FBQ0EsU0FBUUMsMkJBQVI7QUFFQSxJQUFNQyxpQkFBaUIsR0FBRyxxQkFBMUI7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQSxJQUFNQyxVQUFVLEdBQUc7QUFDakIsMEJBQXdCLElBRFA7QUFFakIsa0JBQWdCLElBRkM7QUFHakIsbUJBQWlCLElBSEE7QUFJakIsMEJBQXdCO0FBSlAsQ0FBbkI7O0FBT0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxTQUFTQyxlQUFULENBQXlCQyxFQUF6QixFQUE2QkMsR0FBN0IsRUFBa0M7QUFDaEMsdUJBQW1CUCxhQUFhLENBQUNPLEdBQUQsRUFBTUQsRUFBTixDQUFoQztBQUFBLE1BQU9FLFFBQVAsa0JBQU9BLFFBQVA7O0FBQ0E7QUFDQSxTQUFPQSxRQUFRLElBQUksT0FBWixJQUF1QkEsUUFBUSxJQUFJLFFBQTFDO0FBQ0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTQyxtQkFBVCxDQUE2QkMsT0FBN0IsRUFBc0NILEdBQXRDLEVBQTJDO0FBQ2hELE1BQUlJLGdCQUFnQixHQUFHLEtBQXZCO0FBQ0EsTUFBSUMsVUFBVSxHQUFHLENBQWpCO0FBQ0EsTUFBSU4sRUFBRSxHQUFHSSxPQUFUOztBQUNBLEtBQUc7QUFDRCxRQUFJTixVQUFVLENBQUNFLEVBQUUsQ0FBQ08sT0FBSixDQUFkLEVBQTRCO0FBQzFCO0FBQ0E7QUFDQUQsTUFBQUEsVUFBVTtBQUNWRCxNQUFBQSxnQkFBZ0IsR0FBRyxLQUFuQjtBQUNELEtBTEQsTUFLTyxJQUFJTixlQUFlLENBQUNKLEdBQUcsR0FBR2EsYUFBTixDQUFvQlIsRUFBcEIsQ0FBRCxFQUEwQkMsR0FBMUIsQ0FBbkIsRUFBbUQ7QUFDeEQ7QUFDQTtBQUNBO0FBQ0FJLE1BQUFBLGdCQUFnQixHQUFHLElBQW5CO0FBQ0Q7O0FBQ0RMLElBQUFBLEVBQUUsR0FBR0EsRUFBRSxDQUFDUyxhQUFSO0FBQ0QsR0FiRCxRQWFTVCxFQUFFLElBQUlBLEVBQUUsQ0FBQ08sT0FBSCxJQUFjLE1BYjdCOztBQWNBLFNBQU8sQ0FBQ0YsZ0JBQUQsSUFBcUJDLFVBQVUsSUFBSSxDQUExQztBQUNEOztBQUVEO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0ksY0FBVCxDQUF3Qk4sT0FBeEIsRUFBaUM7QUFDdEMsTUFBSUEsT0FBTyxDQUFDUCxpQkFBRCxDQUFQLEtBQStCYyxTQUFuQyxFQUE4QztBQUM1QyxRQUFJWCxFQUFFLEdBQUdJLE9BQU8sQ0FBQ0ssYUFBakI7O0FBQ0EsV0FBT1QsRUFBRSxJQUFJQSxFQUFFLENBQUNPLE9BQUgsSUFBYyxNQUEzQixFQUFtQztBQUNqQyxVQUFJVCxVQUFVLENBQUNFLEVBQUUsQ0FBQ08sT0FBSixDQUFkLEVBQTRCO0FBQzFCLGVBQVFILE9BQU8sQ0FBQ1AsaUJBQUQsQ0FBUCxHQUE2QkcsRUFBRSxDQUFDTyxPQUF4QztBQUNEOztBQUNEUCxNQUFBQSxFQUFFLEdBQUdBLEVBQUUsQ0FBQ1MsYUFBUjtBQUNEOztBQUNETCxJQUFBQSxPQUFPLENBQUNQLGlCQUFELENBQVAsR0FBNkIsSUFBN0I7QUFDRDs7QUFDRCxTQUFPTyxPQUFPLENBQUNQLGlCQUFELENBQWQ7QUFDRDs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTZSxrQkFBVCxDQUE0QkMsSUFBNUIsRUFBa0NDLE1BQWxDLEVBQTBDO0FBQy9DLE1BQUk7QUFDRixRQUFNQyxXQUFXLEdBQUduQiwyQkFBMkIsQ0FBQ2lCLElBQUQsRUFBT0MsTUFBUCxDQUEzQixDQUEwQ0wsYUFBOUQ7O0FBQ0EsUUFBSU0sV0FBVyxDQUFDQyxRQUFaLElBQXdCLFFBQTVCLEVBQXNDO0FBQ3BDLGFBQU9DLE1BQU0sQ0FBQ0YsV0FBVyxDQUFDRyxhQUFaLEVBQUQsQ0FBYjtBQUNEO0FBQ0YsR0FMRCxDQUtFLE9BQU9DLENBQVAsRUFBVSxDQUFFOztBQUNkO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsU0FBTyxJQUFQO0FBQ0QiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIENvcHlyaWdodCAyMDE2IFRoZSBBTVAgSFRNTCBBdXRob3JzLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIExpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmVcbiAqIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuIFwiQVMtSVNcIiBCQVNJUyxcbiAqIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLlxuICogU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZFxuICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHtjb21wdXRlZFN0eWxlfSBmcm9tICcuL2NvcmUvZG9tL3N0eWxlJztcbmltcG9ydCB7ZGV2fSBmcm9tICcuL2xvZyc7XG5pbXBvcnQge2dldFBhcmVudFdpbmRvd0ZyYW1lRWxlbWVudH0gZnJvbSAnLi9zZXJ2aWNlLWhlbHBlcnMnO1xuXG5jb25zdCBBRF9DT05UQUlORVJfUFJPUCA9ICdfX0FNUF9fQURfQ09OVEFJTkVSJztcblxuLyoqXG4gKiBUYWdzIHRoYXQgYXJlIGFsbG93ZWQgdG8gaGF2ZSBmaXhlZCBwb3NpdGlvbmluZ1xuICogQGNvbnN0IHshT2JqZWN0PHN0cmluZywgYm9vbGVhbj59XG4gKi9cbmNvbnN0IENPTlRBSU5FUlMgPSB7XG4gICdBTVAtRlgtRkxZSU5HLUNBUlBFVCc6IHRydWUsXG4gICdBTVAtTElHSFRCT1gnOiB0cnVlLFxuICAnQU1QLVNUSUNLWS1BRCc6IHRydWUsXG4gICdBTVAtTElHSFRCT1gtR0FMTEVSWSc6IHRydWUsXG59O1xuXG4vKipcbiAqIERldGVybWluZXMgaWYgYW4gZWxlbWVudCBpcyBmaXhlZC1wb3NpdGlvbmVkLlxuICogT0sgdG8gdXNlLCBiZWNhdXNlIGl0J3Mgb25seSBjYWxsZWQgZnJvbSBvbkxheW91dE1lYXN1cmVcbiAqIEBwYXJhbSB7IUVsZW1lbnR9IGVsXG4gKiBAcGFyYW0geyFXaW5kb3d9IHdpblxuICogQHJldHVybiB7Ym9vbGVhbn1cbiAqL1xuZnVuY3Rpb24gaXNQb3NpdGlvbkZpeGVkKGVsLCB3aW4pIHtcbiAgY29uc3Qge3Bvc2l0aW9ufSA9IGNvbXB1dGVkU3R5bGUod2luLCBlbCk7XG4gIC8vIFdlIGNvbnNpZGVyIHN0aWNreSBwb3NpdGlvbnMgYXMgZml4ZWQsIHNpbmNlIHRoZXkgY2FuIGJlIGZpeGVkLlxuICByZXR1cm4gcG9zaXRpb24gPT0gJ2ZpeGVkJyB8fCBwb3NpdGlvbiA9PSAnc3RpY2t5Jztcbn1cblxuLyoqXG4gKiBAcGFyYW0geyFFbGVtZW50fSBlbGVtZW50XG4gKiBAcGFyYW0geyFXaW5kb3d9IHdpblxuICogQHJldHVybiB7Ym9vbGVhbn0gd2hldGhlciB0aGUgZWxlbWVudCBwb3NpdGlvbiBpcyBhbGxvd2VkLiBJZiB0aGUgZWxlbWVudFxuICogYmVsb25ncyB0byBDT05UQUlORVJTLCBpdCBpcyBhbGxvd2VkIHRvIGJlIHBvc2l0aW9uIGZpeGVkLlxuICogSWYgdGhlIGVsZW1lbnQgaGFzIGEgcG9zaXRpb24gZml4ZWQgYW5jZXN0b3IsIGl0IGlzIG5vdCBhbGxvd2VkLlxuICogVGhpcyBzaG91bGQgb25seSBiZSBjYWxsZWQgd2hlbiBhIGxheW91dCBvbiB0aGUgcGFnZSB3YXMganVzdCBmb3JjZWRcbiAqIGFueXdheS5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGlzQWRQb3NpdGlvbkFsbG93ZWQoZWxlbWVudCwgd2luKSB7XG4gIGxldCBoYXNGaXhlZEFuY2VzdG9yID0gZmFsc2U7XG4gIGxldCBjb250YWluZXJzID0gMDtcbiAgbGV0IGVsID0gZWxlbWVudDtcbiAgZG8ge1xuICAgIGlmIChDT05UQUlORVJTW2VsLnRhZ05hbWVdKSB7XG4gICAgICAvLyBUaGUgY29udGFpbmVycyBtdXN0IG5vdCB0aGVtc2VsdmVzIGJlIGNvbnRhaW5lZCBpbiBhIGZpeGVkLXBvc2l0aW9uXG4gICAgICAvLyBlbGVtZW50LiBDb250aW51ZSB0aGUgc2VhcmNoLlxuICAgICAgY29udGFpbmVycysrO1xuICAgICAgaGFzRml4ZWRBbmNlc3RvciA9IGZhbHNlO1xuICAgIH0gZWxzZSBpZiAoaXNQb3NpdGlvbkZpeGVkKGRldigpLmFzc2VydEVsZW1lbnQoZWwpLCB3aW4pKSB7XG4gICAgICAvLyBCZWNhdXNlIGNlcnRhaW4gYmxlc3NlZCBlbGVtZW50cyBtYXkgY29udGFpbiBhIHBvc2l0aW9uIGZpeGVkXG4gICAgICAvLyBjb250YWluZXIgKHdoaWNoIGNvbnRhaW4gYW4gYWQpLCB3ZSBjb250aW51ZSB0byBzZWFyY2ggdGhlXG4gICAgICAvLyBhbmNlc3RyeSB0cmVlLlxuICAgICAgaGFzRml4ZWRBbmNlc3RvciA9IHRydWU7XG4gICAgfVxuICAgIGVsID0gZWwucGFyZW50RWxlbWVudDtcbiAgfSB3aGlsZSAoZWwgJiYgZWwudGFnTmFtZSAhPSAnQk9EWScpO1xuICByZXR1cm4gIWhhc0ZpeGVkQW5jZXN0b3IgJiYgY29udGFpbmVycyA8PSAxO1xufVxuXG4vKipcbiAqIFJldHVybnMgdGhlIGJsZXNzZWQgY29udGFpbmVyIGVsZW1lbnQgdGFnTmFtZSBpZiB0aGUgYWQgaXMgY29udGFpbmVkIGJ5IG9uZS5cbiAqIFRoaXMgaXMgY2FsbGVkIGR1cmluZyBsYXlvdXQgbWVhc3VyZS5cbiAqIEBwYXJhbSB7IUVsZW1lbnR9IGVsZW1lbnRcbiAqIEByZXR1cm4gez9zdHJpbmd9XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBnZXRBZENvbnRhaW5lcihlbGVtZW50KSB7XG4gIGlmIChlbGVtZW50W0FEX0NPTlRBSU5FUl9QUk9QXSA9PT0gdW5kZWZpbmVkKSB7XG4gICAgbGV0IGVsID0gZWxlbWVudC5wYXJlbnRFbGVtZW50O1xuICAgIHdoaWxlIChlbCAmJiBlbC50YWdOYW1lICE9ICdCT0RZJykge1xuICAgICAgaWYgKENPTlRBSU5FUlNbZWwudGFnTmFtZV0pIHtcbiAgICAgICAgcmV0dXJuIChlbGVtZW50W0FEX0NPTlRBSU5FUl9QUk9QXSA9IGVsLnRhZ05hbWUpO1xuICAgICAgfVxuICAgICAgZWwgPSBlbC5wYXJlbnRFbGVtZW50O1xuICAgIH1cbiAgICBlbGVtZW50W0FEX0NPTlRBSU5FUl9QUk9QXSA9IG51bGw7XG4gIH1cbiAgcmV0dXJuIGVsZW1lbnRbQURfQ09OVEFJTkVSX1BST1BdO1xufVxuXG4vKipcbiAqIEdldHMgdGhlIHJlc291cmNlIElEIG9mIHRoZSBhbXAtYWQgZWxlbWVudCBjb250YWluaW5nIHRoZSBwYXNzZWQgbm9kZS5cbiAqIElmIHRoZXJlIGlzIG5vIGNvbnRhaW5pbmcgYW1wLWFkIHRhZywgdGhlbiBudWxsIHdpbGwgYmUgcmV0dXJuZWQuXG4gKiBUT0RPKGpvbmtlbGxlcik6IEludmVzdGlnYXRlIHdoZXRoZXIgbm9uLUE0QSB1c2UgY2FzZSBpcyBuZWVkZWQuIElzc3VlIDExNDM2XG4gKiBAcGFyYW0geyFFbGVtZW50fSBub2RlXG4gKiBAcGFyYW0geyFXaW5kb3d9IHRvcFdpblxuICogQHJldHVybiB7P3N0cmluZ31cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGdldEFtcEFkUmVzb3VyY2VJZChub2RlLCB0b3BXaW4pIHtcbiAgdHJ5IHtcbiAgICBjb25zdCBmcmFtZVBhcmVudCA9IGdldFBhcmVudFdpbmRvd0ZyYW1lRWxlbWVudChub2RlLCB0b3BXaW4pLnBhcmVudEVsZW1lbnQ7XG4gICAgaWYgKGZyYW1lUGFyZW50Lm5vZGVOYW1lID09ICdBTVAtQUQnKSB7XG4gICAgICByZXR1cm4gU3RyaW5nKGZyYW1lUGFyZW50LmdldFJlc291cmNlSWQoKSk7XG4gICAgfVxuICB9IGNhdGNoIChlKSB7fVxuICAvLyBXaGV0aGVyIHdlIGVudGVyZWQgdGhlIGNhdGNoIGFib3ZlIChlLmcuIGR1ZSB0byBhdHRlbXB0IHRvIGFjY2Vzc1xuICAvLyBhY3Jvc3MgeGRvbWFpbiBib3VuZGFyeSksIG9yIGZhaWxlZCB0byBlbnRlciB0aGUgaWYgZnVydGhlciBhYm92ZSwgdGhlXG4gIC8vIG5vZGUgaXMgbm90IHdpdGhpbiBhIGZyaWVuZGx5IGFtcC1hZCB0YWcuIFNvLCB0aGVyZSBpcyBubyBhbXAtYWRcbiAgLy8gcmVzb3VyY2UgSUQuIEhvdyB0byBoYW5kbGUgdGhhdCBpcyB1cCB0byB0aGUgY2FsbGVyLCBidXQgc2VlIFRPRE8gYWJvdmUuXG4gIHJldHVybiBudWxsO1xufVxuIl19
+// /Users/mszylkowski/src/amphtml/src/ad-helper.js

@@ -1,0 +1,1 @@
+export const CSS = "amp-delight-player [placeholder]{transition:opacity 0.5s ease-out}amp-delight-player [placeholder].i-amphtml-delight-player-faded{opacity:0;pointer-events:none}\n/*# sourceURL=/extensions/amp-delight-player/0.1/amp-delight-player.css*/";

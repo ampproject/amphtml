@@ -1,0 +1,104 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { bytesToString, stringToBytes, utf8Decode, utf8Encode } from "./bytes";
+
+/**
+ * Character mapping from base64url to base64.
+ * @const {!Object<string, string>}
+ */
+var base64UrlDecodeSubs = {
+  '-': '+',
+  '_': '/',
+  '.': '='
+};
+
+/**
+ * Character mapping from base64 to base64url.
+ * @const {!Object<string, string>}
+ */
+var base64UrlEncodeSubs = {
+  '+': '-',
+  '/': '_',
+  '=': '.'
+};
+
+/**
+ * Converts a string which is in base64url encoding into a Uint8Array
+ * containing the decoded value.
+ * @param {string} str
+ * @return {!Uint8Array}
+ */
+export function base64UrlDecodeToBytes(str) {
+  var encoded = atob(str.replace(/[-_.]/g, function (ch) {
+    return base64UrlDecodeSubs[ch];
+  }));
+  return stringToBytes(encoded);
+}
+
+/**
+ * Converts a string which is in base64 encoding into a Uint8Array
+ * containing the decoded value.
+ * @param {string} str
+ * @return {!Uint8Array}
+ */
+export function base64DecodeToBytes(str) {
+  return stringToBytes(atob(str));
+}
+
+/**
+ * Converts a bytes array into base64url encoded string.
+ * base64url is defined in RFC 4648. It is sometimes referred to as "web safe".
+ * @param {!Uint8Array} bytes
+ * @return {string}
+ */
+export function base64UrlEncodeFromBytes(bytes) {
+  var str = bytesToString(bytes);
+  return btoa(str).replace(/[+/=]/g, function (ch) {
+    return base64UrlEncodeSubs[ch];
+  });
+}
+
+/**
+ * Converts a string into base64url encoded string.
+ * base64url is defined in RFC 4648. It is sometimes referred to as "web safe".
+ * @param {string} str
+ * @return {string}
+ */
+export function base64UrlEncodeFromString(str) {
+  var bytes = utf8Encode(str);
+  return base64UrlEncodeFromBytes(bytes);
+}
+
+/**
+ * Decode a base64url encoded string by `base64UrlEncodeFromString`
+ * @param {string} str
+ * @return {string}
+ */
+export function base64UrlDecodeFromString(str) {
+  var bytes = base64UrlDecodeToBytes(str);
+  return utf8Decode(bytes);
+}
+
+/**
+ * Converts a bytes array into base64 encoded string.
+ * @param {!Uint8Array} bytes
+ * @return {string}
+ */
+export function base64EncodeFromBytes(bytes) {
+  return btoa(bytesToString(bytes));
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImJhc2U2NC5qcyJdLCJuYW1lcyI6WyJieXRlc1RvU3RyaW5nIiwic3RyaW5nVG9CeXRlcyIsInV0ZjhEZWNvZGUiLCJ1dGY4RW5jb2RlIiwiYmFzZTY0VXJsRGVjb2RlU3VicyIsImJhc2U2NFVybEVuY29kZVN1YnMiLCJiYXNlNjRVcmxEZWNvZGVUb0J5dGVzIiwic3RyIiwiZW5jb2RlZCIsImF0b2IiLCJyZXBsYWNlIiwiY2giLCJiYXNlNjREZWNvZGVUb0J5dGVzIiwiYmFzZTY0VXJsRW5jb2RlRnJvbUJ5dGVzIiwiYnl0ZXMiLCJidG9hIiwiYmFzZTY0VXJsRW5jb2RlRnJvbVN0cmluZyIsImJhc2U2NFVybERlY29kZUZyb21TdHJpbmciLCJiYXNlNjRFbmNvZGVGcm9tQnl0ZXMiXSwibWFwcGluZ3MiOiJBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUVBLFNBQVFBLGFBQVIsRUFBdUJDLGFBQXZCLEVBQXNDQyxVQUF0QyxFQUFrREMsVUFBbEQ7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQSxJQUFNQyxtQkFBbUIsR0FBRztBQUFDLE9BQUssR0FBTjtBQUFXLE9BQUssR0FBaEI7QUFBcUIsT0FBSztBQUExQixDQUE1Qjs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLElBQU1DLG1CQUFtQixHQUFHO0FBQUMsT0FBSyxHQUFOO0FBQVcsT0FBSyxHQUFoQjtBQUFxQixPQUFLO0FBQTFCLENBQTVCOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0Msc0JBQVQsQ0FBZ0NDLEdBQWhDLEVBQXFDO0FBQzFDLE1BQU1DLE9BQU8sR0FBR0MsSUFBSSxDQUFDRixHQUFHLENBQUNHLE9BQUosQ0FBWSxRQUFaLEVBQXNCLFVBQUNDLEVBQUQ7QUFBQSxXQUFRUCxtQkFBbUIsQ0FBQ08sRUFBRCxDQUEzQjtBQUFBLEdBQXRCLENBQUQsQ0FBcEI7QUFDQSxTQUFPVixhQUFhLENBQUNPLE9BQUQsQ0FBcEI7QUFDRDs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVNJLG1CQUFULENBQTZCTCxHQUE3QixFQUFrQztBQUN2QyxTQUFPTixhQUFhLENBQUNRLElBQUksQ0FBQ0YsR0FBRCxDQUFMLENBQXBCO0FBQ0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTTSx3QkFBVCxDQUFrQ0MsS0FBbEMsRUFBeUM7QUFDOUMsTUFBTVAsR0FBRyxHQUFHUCxhQUFhLENBQUNjLEtBQUQsQ0FBekI7QUFDQSxTQUFPQyxJQUFJLENBQUNSLEdBQUQsQ0FBSixDQUFVRyxPQUFWLENBQWtCLFFBQWxCLEVBQTRCLFVBQUNDLEVBQUQ7QUFBQSxXQUFRTixtQkFBbUIsQ0FBQ00sRUFBRCxDQUEzQjtBQUFBLEdBQTVCLENBQVA7QUFDRDs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVNLLHlCQUFULENBQW1DVCxHQUFuQyxFQUF3QztBQUM3QyxNQUFNTyxLQUFLLEdBQUdYLFVBQVUsQ0FBQ0ksR0FBRCxDQUF4QjtBQUNBLFNBQU9NLHdCQUF3QixDQUFDQyxLQUFELENBQS9CO0FBQ0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0cseUJBQVQsQ0FBbUNWLEdBQW5DLEVBQXdDO0FBQzdDLE1BQU1PLEtBQUssR0FBR1Isc0JBQXNCLENBQUNDLEdBQUQsQ0FBcEM7QUFDQSxTQUFPTCxVQUFVLENBQUNZLEtBQUQsQ0FBakI7QUFDRDs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTSSxxQkFBVCxDQUErQkosS0FBL0IsRUFBc0M7QUFDM0MsU0FBT0MsSUFBSSxDQUFDZixhQUFhLENBQUNjLEtBQUQsQ0FBZCxDQUFYO0FBQ0QiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIENvcHlyaWdodCAyMDE2IFRoZSBBTVAgSFRNTCBBdXRob3JzLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIExpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmVcbiAqIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuIFwiQVMtSVNcIiBCQVNJUyxcbiAqIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLlxuICogU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZFxuICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHtieXRlc1RvU3RyaW5nLCBzdHJpbmdUb0J5dGVzLCB1dGY4RGVjb2RlLCB1dGY4RW5jb2RlfSBmcm9tICcuL2J5dGVzJztcblxuLyoqXG4gKiBDaGFyYWN0ZXIgbWFwcGluZyBmcm9tIGJhc2U2NHVybCB0byBiYXNlNjQuXG4gKiBAY29uc3QgeyFPYmplY3Q8c3RyaW5nLCBzdHJpbmc+fVxuICovXG5jb25zdCBiYXNlNjRVcmxEZWNvZGVTdWJzID0geyctJzogJysnLCAnXyc6ICcvJywgJy4nOiAnPSd9O1xuXG4vKipcbiAqIENoYXJhY3RlciBtYXBwaW5nIGZyb20gYmFzZTY0IHRvIGJhc2U2NHVybC5cbiAqIEBjb25zdCB7IU9iamVjdDxzdHJpbmcsIHN0cmluZz59XG4gKi9cbmNvbnN0IGJhc2U2NFVybEVuY29kZVN1YnMgPSB7JysnOiAnLScsICcvJzogJ18nLCAnPSc6ICcuJ307XG5cbi8qKlxuICogQ29udmVydHMgYSBzdHJpbmcgd2hpY2ggaXMgaW4gYmFzZTY0dXJsIGVuY29kaW5nIGludG8gYSBVaW50OEFycmF5XG4gKiBjb250YWluaW5nIHRoZSBkZWNvZGVkIHZhbHVlLlxuICogQHBhcmFtIHtzdHJpbmd9IHN0clxuICogQHJldHVybiB7IVVpbnQ4QXJyYXl9XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBiYXNlNjRVcmxEZWNvZGVUb0J5dGVzKHN0cikge1xuICBjb25zdCBlbmNvZGVkID0gYXRvYihzdHIucmVwbGFjZSgvWy1fLl0vZywgKGNoKSA9PiBiYXNlNjRVcmxEZWNvZGVTdWJzW2NoXSkpO1xuICByZXR1cm4gc3RyaW5nVG9CeXRlcyhlbmNvZGVkKTtcbn1cblxuLyoqXG4gKiBDb252ZXJ0cyBhIHN0cmluZyB3aGljaCBpcyBpbiBiYXNlNjQgZW5jb2RpbmcgaW50byBhIFVpbnQ4QXJyYXlcbiAqIGNvbnRhaW5pbmcgdGhlIGRlY29kZWQgdmFsdWUuXG4gKiBAcGFyYW0ge3N0cmluZ30gc3RyXG4gKiBAcmV0dXJuIHshVWludDhBcnJheX1cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGJhc2U2NERlY29kZVRvQnl0ZXMoc3RyKSB7XG4gIHJldHVybiBzdHJpbmdUb0J5dGVzKGF0b2Ioc3RyKSk7XG59XG5cbi8qKlxuICogQ29udmVydHMgYSBieXRlcyBhcnJheSBpbnRvIGJhc2U2NHVybCBlbmNvZGVkIHN0cmluZy5cbiAqIGJhc2U2NHVybCBpcyBkZWZpbmVkIGluIFJGQyA0NjQ4LiBJdCBpcyBzb21ldGltZXMgcmVmZXJyZWQgdG8gYXMgXCJ3ZWIgc2FmZVwiLlxuICogQHBhcmFtIHshVWludDhBcnJheX0gYnl0ZXNcbiAqIEByZXR1cm4ge3N0cmluZ31cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGJhc2U2NFVybEVuY29kZUZyb21CeXRlcyhieXRlcykge1xuICBjb25zdCBzdHIgPSBieXRlc1RvU3RyaW5nKGJ5dGVzKTtcbiAgcmV0dXJuIGJ0b2Eoc3RyKS5yZXBsYWNlKC9bKy89XS9nLCAoY2gpID0+IGJhc2U2NFVybEVuY29kZVN1YnNbY2hdKTtcbn1cblxuLyoqXG4gKiBDb252ZXJ0cyBhIHN0cmluZyBpbnRvIGJhc2U2NHVybCBlbmNvZGVkIHN0cmluZy5cbiAqIGJhc2U2NHVybCBpcyBkZWZpbmVkIGluIFJGQyA0NjQ4LiBJdCBpcyBzb21ldGltZXMgcmVmZXJyZWQgdG8gYXMgXCJ3ZWIgc2FmZVwiLlxuICogQHBhcmFtIHtzdHJpbmd9IHN0clxuICogQHJldHVybiB7c3RyaW5nfVxuICovXG5leHBvcnQgZnVuY3Rpb24gYmFzZTY0VXJsRW5jb2RlRnJvbVN0cmluZyhzdHIpIHtcbiAgY29uc3QgYnl0ZXMgPSB1dGY4RW5jb2RlKHN0cik7XG4gIHJldHVybiBiYXNlNjRVcmxFbmNvZGVGcm9tQnl0ZXMoYnl0ZXMpO1xufVxuXG4vKipcbiAqIERlY29kZSBhIGJhc2U2NHVybCBlbmNvZGVkIHN0cmluZyBieSBgYmFzZTY0VXJsRW5jb2RlRnJvbVN0cmluZ2BcbiAqIEBwYXJhbSB7c3RyaW5nfSBzdHJcbiAqIEByZXR1cm4ge3N0cmluZ31cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGJhc2U2NFVybERlY29kZUZyb21TdHJpbmcoc3RyKSB7XG4gIGNvbnN0IGJ5dGVzID0gYmFzZTY0VXJsRGVjb2RlVG9CeXRlcyhzdHIpO1xuICByZXR1cm4gdXRmOERlY29kZShieXRlcyk7XG59XG5cbi8qKlxuICogQ29udmVydHMgYSBieXRlcyBhcnJheSBpbnRvIGJhc2U2NCBlbmNvZGVkIHN0cmluZy5cbiAqIEBwYXJhbSB7IVVpbnQ4QXJyYXl9IGJ5dGVzXG4gKiBAcmV0dXJuIHtzdHJpbmd9XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBiYXNlNjRFbmNvZGVGcm9tQnl0ZXMoYnl0ZXMpIHtcbiAgcmV0dXJuIGJ0b2EoYnl0ZXNUb1N0cmluZyhieXRlcykpO1xufVxuIl19
+// /Users/mszylkowski/src/amphtml/src/core/types/string/base64.js

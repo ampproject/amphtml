@@ -1,0 +1,56 @@
+/**
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Sets the img src to the first url in the srcset if srcset is defined but
+ * src is not for browsers that do not support srcset.
+ * @param {!Element} img
+ */
+export function guaranteeSrcForSrcsetUnsupportedBrowsers(img) {
+  // The <img> tag does not have a src and does not support srcset
+  if (!img.hasAttribute('src') && 'srcset' in img == false) {
+    var srcset = img.getAttribute('srcset');
+    var matches = /\S+/.exec(srcset);
+
+    if (matches == null) {
+      return;
+    }
+
+    var srcseturl = matches[0];
+    img.setAttribute('src', srcseturl);
+  }
+}
+
+/**
+ * Generates a transparent PNG of a given width/height.
+ *
+ * @param {!Document} doc
+ * @param {number} width
+ * @param {number} height
+ * @return {string}
+ */
+export function transparentPng(doc, width, height) {
+  var canvas =
+  /** @type {!HTMLCanvasElement} */
+  doc.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  // Canvases are fully transparent by default, so we don't actually need to
+  // draw anything.
+  return canvas.toDataURL();
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImltZy5qcyJdLCJuYW1lcyI6WyJndWFyYW50ZWVTcmNGb3JTcmNzZXRVbnN1cHBvcnRlZEJyb3dzZXJzIiwiaW1nIiwiaGFzQXR0cmlidXRlIiwic3Jjc2V0IiwiZ2V0QXR0cmlidXRlIiwibWF0Y2hlcyIsImV4ZWMiLCJzcmNzZXR1cmwiLCJzZXRBdHRyaWJ1dGUiLCJ0cmFuc3BhcmVudFBuZyIsImRvYyIsIndpZHRoIiwiaGVpZ2h0IiwiY2FudmFzIiwiY3JlYXRlRWxlbWVudCIsInRvRGF0YVVSTCJdLCJtYXBwaW5ncyI6IkFBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVNBLHdDQUFULENBQWtEQyxHQUFsRCxFQUF1RDtBQUM1RDtBQUNBLE1BQUksQ0FBQ0EsR0FBRyxDQUFDQyxZQUFKLENBQWlCLEtBQWpCLENBQUQsSUFBNEIsWUFBWUQsR0FBWixJQUFtQixLQUFuRCxFQUEwRDtBQUN4RCxRQUFNRSxNQUFNLEdBQUdGLEdBQUcsQ0FBQ0csWUFBSixDQUFpQixRQUFqQixDQUFmO0FBQ0EsUUFBTUMsT0FBTyxHQUFHLE1BQU1DLElBQU4sQ0FBV0gsTUFBWCxDQUFoQjs7QUFDQSxRQUFJRSxPQUFPLElBQUksSUFBZixFQUFxQjtBQUNuQjtBQUNEOztBQUNELFFBQU1FLFNBQVMsR0FBR0YsT0FBTyxDQUFDLENBQUQsQ0FBekI7QUFDQUosSUFBQUEsR0FBRyxDQUFDTyxZQUFKLENBQWlCLEtBQWpCLEVBQXdCRCxTQUF4QjtBQUNEO0FBQ0Y7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0UsY0FBVCxDQUF3QkMsR0FBeEIsRUFBNkJDLEtBQTdCLEVBQW9DQyxNQUFwQyxFQUE0QztBQUNqRCxNQUFNQyxNQUFNO0FBQUc7QUFDYkgsRUFBQUEsR0FBRyxDQUFDSSxhQUFKLENBQWtCLFFBQWxCLENBREY7QUFHQUQsRUFBQUEsTUFBTSxDQUFDRixLQUFQLEdBQWVBLEtBQWY7QUFDQUUsRUFBQUEsTUFBTSxDQUFDRCxNQUFQLEdBQWdCQSxNQUFoQjtBQUVBO0FBQ0E7QUFFQSxTQUFPQyxNQUFNLENBQUNFLFNBQVAsRUFBUDtBQUNEIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb3B5cmlnaHQgMjAxOCBUaGUgQU1QIEhUTUwgQXV0aG9ycy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTLUlTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbi8qKlxuICogU2V0cyB0aGUgaW1nIHNyYyB0byB0aGUgZmlyc3QgdXJsIGluIHRoZSBzcmNzZXQgaWYgc3Jjc2V0IGlzIGRlZmluZWQgYnV0XG4gKiBzcmMgaXMgbm90IGZvciBicm93c2VycyB0aGF0IGRvIG5vdCBzdXBwb3J0IHNyY3NldC5cbiAqIEBwYXJhbSB7IUVsZW1lbnR9IGltZ1xuICovXG5leHBvcnQgZnVuY3Rpb24gZ3VhcmFudGVlU3JjRm9yU3Jjc2V0VW5zdXBwb3J0ZWRCcm93c2VycyhpbWcpIHtcbiAgLy8gVGhlIDxpbWc+IHRhZyBkb2VzIG5vdCBoYXZlIGEgc3JjIGFuZCBkb2VzIG5vdCBzdXBwb3J0IHNyY3NldFxuICBpZiAoIWltZy5oYXNBdHRyaWJ1dGUoJ3NyYycpICYmICdzcmNzZXQnIGluIGltZyA9PSBmYWxzZSkge1xuICAgIGNvbnN0IHNyY3NldCA9IGltZy5nZXRBdHRyaWJ1dGUoJ3NyY3NldCcpO1xuICAgIGNvbnN0IG1hdGNoZXMgPSAvXFxTKy8uZXhlYyhzcmNzZXQpO1xuICAgIGlmIChtYXRjaGVzID09IG51bGwpIHtcbiAgICAgIHJldHVybjtcbiAgICB9XG4gICAgY29uc3Qgc3Jjc2V0dXJsID0gbWF0Y2hlc1swXTtcbiAgICBpbWcuc2V0QXR0cmlidXRlKCdzcmMnLCBzcmNzZXR1cmwpO1xuICB9XG59XG5cbi8qKlxuICogR2VuZXJhdGVzIGEgdHJhbnNwYXJlbnQgUE5HIG9mIGEgZ2l2ZW4gd2lkdGgvaGVpZ2h0LlxuICpcbiAqIEBwYXJhbSB7IURvY3VtZW50fSBkb2NcbiAqIEBwYXJhbSB7bnVtYmVyfSB3aWR0aFxuICogQHBhcmFtIHtudW1iZXJ9IGhlaWdodFxuICogQHJldHVybiB7c3RyaW5nfVxuICovXG5leHBvcnQgZnVuY3Rpb24gdHJhbnNwYXJlbnRQbmcoZG9jLCB3aWR0aCwgaGVpZ2h0KSB7XG4gIGNvbnN0IGNhbnZhcyA9IC8qKiBAdHlwZSB7IUhUTUxDYW52YXNFbGVtZW50fSAqLyAoXG4gICAgZG9jLmNyZWF0ZUVsZW1lbnQoJ2NhbnZhcycpXG4gICk7XG4gIGNhbnZhcy53aWR0aCA9IHdpZHRoO1xuICBjYW52YXMuaGVpZ2h0ID0gaGVpZ2h0O1xuXG4gIC8vIENhbnZhc2VzIGFyZSBmdWxseSB0cmFuc3BhcmVudCBieSBkZWZhdWx0LCBzbyB3ZSBkb24ndCBhY3R1YWxseSBuZWVkIHRvXG4gIC8vIGRyYXcgYW55dGhpbmcuXG5cbiAgcmV0dXJuIGNhbnZhcy50b0RhdGFVUkwoKTtcbn1cbiJdfQ==
+// /Users/mszylkowski/src/amphtml/src/core/dom/img.js

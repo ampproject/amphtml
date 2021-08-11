@@ -1,0 +1,1 @@
+export const CSS = "amp-instagram{display:block;overflow:hidden;position:relative}amp-instagram:not(.i-amphtml-built)>:not([placeholder]):not(.i-amphtml-svc){display:none;content-visibility:hidden}\n/*# sourceURL=/extensions/amp-instagram/1.0/amp-instagram.css*/";

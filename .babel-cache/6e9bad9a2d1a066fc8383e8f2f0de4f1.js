@@ -1,0 +1,52 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Polyfill for `document.contains()` method. Notice that according to spec
+ * `document.contains` is inclusionary.
+ * See https://developer.mozilla.org/en-US/docs/Web/API/Node/contains
+ * @param {?Node} node
+ * @return {boolean}
+ * @this {Document}
+ */
+function documentContainsPolyfill(node) {
+  // Per spec, "contains" method is inclusionary
+  // i.e. `node.contains(node) == true`. However, we still need to test
+  // equality to the document itself.
+  // eslint-disable-next-line local/no-invalid-this
+  return node == this || this.documentElement.contains(node);
+}
+
+/**
+ * Polyfills `HTMLDocument.contains` API.
+ * @param {!Window} win
+ */
+export function install(win) {
+  // HTMLDocument is undefined in Internet Explorer 10, but it has Document,
+  // so we use that as a fallback.
+  var documentClass = win.HTMLDocument || win.Document;
+
+  if (documentClass && !documentClass.prototype.contains) {
+    win.Object.defineProperty(documentClass.prototype, 'contains', {
+      enumerable: false,
+      configurable: true,
+      writable: true,
+      value: documentContainsPolyfill
+    });
+  }
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImRvY3VtZW50LWNvbnRhaW5zLmpzIl0sIm5hbWVzIjpbImRvY3VtZW50Q29udGFpbnNQb2x5ZmlsbCIsIm5vZGUiLCJkb2N1bWVudEVsZW1lbnQiLCJjb250YWlucyIsImluc3RhbGwiLCJ3aW4iLCJkb2N1bWVudENsYXNzIiwiSFRNTERvY3VtZW50IiwiRG9jdW1lbnQiLCJwcm90b3R5cGUiLCJPYmplY3QiLCJkZWZpbmVQcm9wZXJ0eSIsImVudW1lcmFibGUiLCJjb25maWd1cmFibGUiLCJ3cml0YWJsZSIsInZhbHVlIl0sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLFNBQVNBLHdCQUFULENBQWtDQyxJQUFsQyxFQUF3QztBQUN0QztBQUNBO0FBQ0E7QUFDQTtBQUNBLFNBQU9BLElBQUksSUFBSSxJQUFSLElBQWdCLEtBQUtDLGVBQUwsQ0FBcUJDLFFBQXJCLENBQThCRixJQUE5QixDQUF2QjtBQUNEOztBQUVEO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTRyxPQUFULENBQWlCQyxHQUFqQixFQUFzQjtBQUMzQjtBQUNBO0FBQ0EsTUFBTUMsYUFBYSxHQUFHRCxHQUFHLENBQUNFLFlBQUosSUFBb0JGLEdBQUcsQ0FBQ0csUUFBOUM7O0FBQ0EsTUFBSUYsYUFBYSxJQUFJLENBQUNBLGFBQWEsQ0FBQ0csU0FBZCxDQUF3Qk4sUUFBOUMsRUFBd0Q7QUFDdERFLElBQUFBLEdBQUcsQ0FBQ0ssTUFBSixDQUFXQyxjQUFYLENBQTBCTCxhQUFhLENBQUNHLFNBQXhDLEVBQW1ELFVBQW5ELEVBQStEO0FBQzdERyxNQUFBQSxVQUFVLEVBQUUsS0FEaUQ7QUFFN0RDLE1BQUFBLFlBQVksRUFBRSxJQUYrQztBQUc3REMsTUFBQUEsUUFBUSxFQUFFLElBSG1EO0FBSTdEQyxNQUFBQSxLQUFLLEVBQUVmO0FBSnNELEtBQS9EO0FBTUQ7QUFDRiIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ29weXJpZ2h0IDIwMTYgVGhlIEFNUCBIVE1MIEF1dGhvcnMuIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlIFwiTGljZW5zZVwiKTtcbiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS5cbiAqIFlvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdFxuICpcbiAqICAgICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wXG4gKlxuICogVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZVxuICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gXCJBUy1JU1wiIEJBU0lTLFxuICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuXG4gKiBTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZSBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kXG4gKiBsaW1pdGF0aW9ucyB1bmRlciB0aGUgTGljZW5zZS5cbiAqL1xuXG4vKipcbiAqIFBvbHlmaWxsIGZvciBgZG9jdW1lbnQuY29udGFpbnMoKWAgbWV0aG9kLiBOb3RpY2UgdGhhdCBhY2NvcmRpbmcgdG8gc3BlY1xuICogYGRvY3VtZW50LmNvbnRhaW5zYCBpcyBpbmNsdXNpb25hcnkuXG4gKiBTZWUgaHR0cHM6Ly9kZXZlbG9wZXIubW96aWxsYS5vcmcvZW4tVVMvZG9jcy9XZWIvQVBJL05vZGUvY29udGFpbnNcbiAqIEBwYXJhbSB7P05vZGV9IG5vZGVcbiAqIEByZXR1cm4ge2Jvb2xlYW59XG4gKiBAdGhpcyB7RG9jdW1lbnR9XG4gKi9cbmZ1bmN0aW9uIGRvY3VtZW50Q29udGFpbnNQb2x5ZmlsbChub2RlKSB7XG4gIC8vIFBlciBzcGVjLCBcImNvbnRhaW5zXCIgbWV0aG9kIGlzIGluY2x1c2lvbmFyeVxuICAvLyBpLmUuIGBub2RlLmNvbnRhaW5zKG5vZGUpID09IHRydWVgLiBIb3dldmVyLCB3ZSBzdGlsbCBuZWVkIHRvIHRlc3RcbiAgLy8gZXF1YWxpdHkgdG8gdGhlIGRvY3VtZW50IGl0c2VsZi5cbiAgLy8gZXNsaW50LWRpc2FibGUtbmV4dC1saW5lIGxvY2FsL25vLWludmFsaWQtdGhpc1xuICByZXR1cm4gbm9kZSA9PSB0aGlzIHx8IHRoaXMuZG9jdW1lbnRFbGVtZW50LmNvbnRhaW5zKG5vZGUpO1xufVxuXG4vKipcbiAqIFBvbHlmaWxscyBgSFRNTERvY3VtZW50LmNvbnRhaW5zYCBBUEkuXG4gKiBAcGFyYW0geyFXaW5kb3d9IHdpblxuICovXG5leHBvcnQgZnVuY3Rpb24gaW5zdGFsbCh3aW4pIHtcbiAgLy8gSFRNTERvY3VtZW50IGlzIHVuZGVmaW5lZCBpbiBJbnRlcm5ldCBFeHBsb3JlciAxMCwgYnV0IGl0IGhhcyBEb2N1bWVudCxcbiAgLy8gc28gd2UgdXNlIHRoYXQgYXMgYSBmYWxsYmFjay5cbiAgY29uc3QgZG9jdW1lbnRDbGFzcyA9IHdpbi5IVE1MRG9jdW1lbnQgfHwgd2luLkRvY3VtZW50O1xuICBpZiAoZG9jdW1lbnRDbGFzcyAmJiAhZG9jdW1lbnRDbGFzcy5wcm90b3R5cGUuY29udGFpbnMpIHtcbiAgICB3aW4uT2JqZWN0LmRlZmluZVByb3BlcnR5KGRvY3VtZW50Q2xhc3MucHJvdG90eXBlLCAnY29udGFpbnMnLCB7XG4gICAgICBlbnVtZXJhYmxlOiBmYWxzZSxcbiAgICAgIGNvbmZpZ3VyYWJsZTogdHJ1ZSxcbiAgICAgIHdyaXRhYmxlOiB0cnVlLFxuICAgICAgdmFsdWU6IGRvY3VtZW50Q29udGFpbnNQb2x5ZmlsbCxcbiAgICB9KTtcbiAgfVxufVxuIl19
+// /Users/mszylkowski/src/amphtml/src/polyfills/document-contains.js

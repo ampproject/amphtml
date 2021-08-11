@@ -1,0 +1,116 @@
+var _templateObject, _templateObject2;
+
+function _taggedTemplateLiteralLoose(strings, raw) { if (!raw) { raw = strings.slice(0); } strings.raw = raw; return strings; }
+
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { Services } from "../../../src/service";
+import { htmlFor } from "../../../src/core/dom/static-template";
+import { setStyles } from "../../../src/core/dom/style";
+
+/**
+ * Generates the template for the confetti wrapper.
+ *
+ * @param {!Element} element
+ * @return {!Element}
+ */
+var buildConfettiWrapperTemplate = function buildConfettiWrapperTemplate(element) {
+  var html = htmlFor(element);
+  return html(_templateObject || (_templateObject = _taggedTemplateLiteralLoose(["\n    <div\n      class=\"i-amphtml-story-interactive-confetti-wrapper\"\n      aria-hidden=\"true\"\n    ></div>\n  "])));
+};
+
+/**
+ * Generates a template for a confetti.
+ *
+ * @param {!Element} element
+ * @return {!Element}
+ */
+var buildconfettiTemplate = function buildconfettiTemplate(element) {
+  var html = htmlFor(element);
+  return html(_templateObject2 || (_templateObject2 = _taggedTemplateLiteralLoose([" <div class=\"i-amphtml-story-interactive-confetti\"></div> "])));
+};
+
+/**
+ * Creates a radial burst of emoji.
+ * The burst begins from the center of the parent element and
+ * animates to the edges of the parent element.
+ * Nodes are removed from the dom at the end of the animation.
+ *
+ * @param {!Element} rootEl
+ * @param {!Window} win
+ * @param {string} confettiEmoji
+ * @return {void}
+ */
+export function emojiConfetti(rootEl, win, confettiEmoji) {
+  var confettiCount = 5;
+  var angleSlice = Math.PI * 2 / confettiCount;
+  var angleRandomness = angleSlice * 0.2;
+  var fontSizeRandomRange = [30, 50];
+  var rotationRandomness = 20;
+  var additionalDistance = 5;
+  var animationTime = 300;
+  var animationOutDelay = 1000;
+  // To calculate confetti transform distance.
+  var rootElRect = rootEl.
+  /*OK*/
+  getBoundingClientRect();
+
+  /** @private @const {!../../../src/service/timer-impl.Timer} */
+  var timer = Services.timerFor(win);
+  var confettiWrapper = buildConfettiWrapperTemplate(rootEl);
+  rootEl.appendChild(confettiWrapper);
+  timer.delay(function () {
+    // Generate confetti. Set their ending position, size and rotation.
+    for (var i = 0; i < confettiCount; i++) {
+      var confetti = buildconfettiTemplate(rootEl);
+      confettiWrapper.appendChild(confetti);
+      confetti.textContent = confettiEmoji;
+      var fontSize = randomInRange(fontSizeRandomRange[0], fontSizeRandomRange[1]) + 'px';
+      var angle = angleSlice * i + randomInRange(-angleRandomness, angleRandomness);
+      var x = Math.sin(angle) * (rootElRect.width / 2 + additionalDistance);
+      var y = Math.cos(angle) * (rootElRect.height / 2 + additionalDistance);
+      var rotation = randomInRange(-rotationRandomness, rotationRandomness);
+      setStyles(confetti, {
+        fontSize: fontSize,
+        transform: "translate(" + x + "px, " + y + "px) rotate(" + rotation + "deg)"
+      });
+    }
+
+    // Scale up confetti container.
+    confettiWrapper.classList.add('i-amphtml-story-interactive-confetti-wrapper-animate-in');
+    // Animate out the wrapper
+    timer.delay(function () {
+      confettiWrapper.classList.add('i-amphtml-story-interactive-confetti-wrapper-animate-out');
+      // Remove the wrapper from the dom.
+      timer.delay(function () {
+        return rootEl.removeChild(confettiWrapper);
+      }, animationTime);
+    }, animationOutDelay);
+  }, animationTime);
+}
+
+/**
+ * Returns a random number between the min and max values.
+ *
+ * @param {number} min
+ * @param {number} max
+ * @return {number}
+ */
+function randomInRange(min, max) {
+  return Math.random() * (max - min) + min;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImludGVyYWN0aXZlLWNvbmZldHRpLmpzIl0sIm5hbWVzIjpbIlNlcnZpY2VzIiwiaHRtbEZvciIsInNldFN0eWxlcyIsImJ1aWxkQ29uZmV0dGlXcmFwcGVyVGVtcGxhdGUiLCJlbGVtZW50IiwiaHRtbCIsImJ1aWxkY29uZmV0dGlUZW1wbGF0ZSIsImVtb2ppQ29uZmV0dGkiLCJyb290RWwiLCJ3aW4iLCJjb25mZXR0aUVtb2ppIiwiY29uZmV0dGlDb3VudCIsImFuZ2xlU2xpY2UiLCJNYXRoIiwiUEkiLCJhbmdsZVJhbmRvbW5lc3MiLCJmb250U2l6ZVJhbmRvbVJhbmdlIiwicm90YXRpb25SYW5kb21uZXNzIiwiYWRkaXRpb25hbERpc3RhbmNlIiwiYW5pbWF0aW9uVGltZSIsImFuaW1hdGlvbk91dERlbGF5Iiwicm9vdEVsUmVjdCIsImdldEJvdW5kaW5nQ2xpZW50UmVjdCIsInRpbWVyIiwidGltZXJGb3IiLCJjb25mZXR0aVdyYXBwZXIiLCJhcHBlbmRDaGlsZCIsImRlbGF5IiwiaSIsImNvbmZldHRpIiwidGV4dENvbnRlbnQiLCJmb250U2l6ZSIsInJhbmRvbUluUmFuZ2UiLCJhbmdsZSIsIngiLCJzaW4iLCJ3aWR0aCIsInkiLCJjb3MiLCJoZWlnaHQiLCJyb3RhdGlvbiIsInRyYW5zZm9ybSIsImNsYXNzTGlzdCIsImFkZCIsInJlbW92ZUNoaWxkIiwibWluIiwibWF4IiwicmFuZG9tIl0sIm1hcHBpbmdzIjoiOzs7O0FBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBRUEsU0FBUUEsUUFBUjtBQUNBLFNBQVFDLE9BQVI7QUFDQSxTQUFRQyxTQUFSOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLElBQU1DLDRCQUE0QixHQUFHLFNBQS9CQSw0QkFBK0IsQ0FBQ0MsT0FBRCxFQUFhO0FBQ2hELE1BQU1DLElBQUksR0FBR0osT0FBTyxDQUFD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Q2hCRixNQUFBQSxlQUFlLENBQUNpQixTQUFoQixDQUEwQkMsR0FBMUIsQ0FDRSwwREFERjtBQUdBO0FBQ0FwQixNQUFBQSxLQUFLLENBQUNJLEtBQU4sQ0FBWTtBQUFBLGVBQU1uQixNQUFNLENBQUNvQyxXQUFQLENBQW1CbkIsZUFBbkIsQ0FBTjtBQUFBLE9BQVosRUFBdUROLGFBQXZEO0FBQ0QsS0FORCxFQU1HQyxpQkFOSDtBQU9ELEdBaENELEVBZ0NHRCxhQWhDSDtBQWlDRDs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLFNBQVNhLGFBQVQsQ0FBdUJhLEdBQXZCLEVBQTRCQyxHQUE1QixFQUFpQztBQUMvQixTQUFPakMsSUFBSSxDQUFDa0MsTUFBTCxNQUFpQkQsR0FBRyxHQUFHRCxHQUF2QixJQUE4QkEsR0FBckM7QUFDRCIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ29weXJpZ2h0IDIwMjAgVGhlIEFNUCBIVE1MIEF1dGhvcnMuIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlIFwiTGljZW5zZVwiKTtcbiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS5cbiAqIFlvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdFxuICpcbiAqICAgICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wXG4gKlxuICogVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZVxuICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gXCJBUy1JU1wiIEJBU0lTLFxuICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuXG4gKiBTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZSBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kXG4gKiBsaW1pdGF0aW9ucyB1bmRlciB0aGUgTGljZW5zZS5cbiAqL1xuXG5pbXBvcnQge1NlcnZpY2VzfSBmcm9tICcjc2VydmljZSc7XG5pbXBvcnQge2h0bWxGb3J9IGZyb20gJyNjb3JlL2RvbS9zdGF0aWMtdGVtcGxhdGUnO1xuaW1wb3J0IHtzZXRTdHlsZXN9IGZyb20gJyNjb3JlL2RvbS9zdHlsZSc7XG5cbi8qKlxuICogR2VuZXJhdGVzIHRoZSB0ZW1wbGF0ZSBmb3IgdGhlIGNvbmZldHRpIHdyYXBwZXIuXG4gKlxuICogQHBhcmFtIHshRWxlbWVudH0gZWxlbWVudFxuICogQHJldHVybiB7IUVsZW1lbnR9XG4gKi9cbmNvbnN0IGJ1aWxkQ29uZmV0dGlXcmFwcGVyVGVtcGxhdGUgPSAoZWxlbWVudCkgPT4ge1xuICBjb25zdCBodG1sID0gaHRtbEZvcihlbGVtZW50KTtcbiAgcmV0dXJuIGh0bWxgXG4gICAgPGRpdlxuICAgICAgY2xhc3M9XCJpLWFtcGh0bWwtc3RvcnktaW50ZXJhY3RpdmUtY29uZmV0dGktd3JhcHBlclwiXG4gICAgICBhcmlhLWhpZGRlbj1cInRydWVcIlxuICAgID48L2Rpdj5cbiAgYDtcbn07XG5cbi8qKlxuICogR2VuZXJhdGVzIGEgdGVtcGxhdGUgZm9yIGEgY29uZmV0dGkuXG4gKlxuICogQHBhcmFtIHshRWxlbWVudH0gZWxlbWVudFxuICogQHJldHVybiB7IUVsZW1lbnR9XG4gKi9cbmNvbnN0IGJ1aWxkY29uZmV0dGlUZW1wbGF0ZSA9IChlbGVtZW50KSA9PiB7XG4gIGNvbnN0IGh0bWwgPSBodG1sRm9yKGVsZW1lbnQpO1xuICByZXR1cm4gaHRtbGAgPGRpdiBjbGFzcz1cImktYW1waHRtbC1zdG9yeS1pbnRlcmFjdGl2ZS1jb25mZXR0aVwiPjwvZGl2PiBgO1xufTtcblxuLyoqXG4gKiBDcmVhdGVzIGEgcmFkaWFsIGJ1cnN0IG9mIGVtb2ppLlxuICogVGhlIGJ1cnN0IGJlZ2lucyBmcm9tIHRoZSBjZW50ZXIgb2YgdGhlIHBhcmVudCBlbGVtZW50IGFuZFxuICogYW5pbWF0ZXMgdG8gdGhlIGVkZ2VzIG9mIHRoZSBwYXJlbnQgZWxlbWVudC5cbiAqIE5vZGVzIGFyZSByZW1vdmVkIGZyb20gdGhlIGRvbSBhdCB0aGUgZW5kIG9mIHRoZSBhbmltYXRpb24uXG4gKlxuICogQHBhcmFtIHshRWxlbWVudH0gcm9vdEVsXG4gKiBAcGFyYW0geyFXaW5kb3d9IHdpblxuICogQHBhcmFtIHtzdHJpbmd9IGNvbmZldHRpRW1vamlcbiAqIEByZXR1cm4ge3ZvaWR9XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBlbW9qaUNvbmZldHRpKHJvb3RFbCwgd2luLCBjb25mZXR0aUVtb2ppKSB7XG4gIGNvbnN0IGNvbmZldHRpQ291bnQgPSA1O1xuICBjb25zdCBhbmdsZVNsaWNlID0gKE1hdGguUEkgKiAyKSAvIGNvbmZldHRpQ291bnQ7XG5cbiAgY29uc3QgYW5nbGVSYW5kb21uZXNzID0gYW5nbGVTbGljZSAqIDAuMjtcbiAgY29uc3QgZm9udFNpemVSYW5kb21SYW5nZSA9IFszMCwgNTBdO1xuICBjb25zdCByb3RhdGlvblJhbmRvbW5lc3MgPSAyMDtcbiAgY29uc3QgYWRkaXRpb25hbERpc3RhbmNlID0gNTtcblxuICBjb25zdCBhbmltYXRpb25UaW1lID0gMzAwO1xuICBjb25zdCBhbmltYXRpb25PdXREZWxheSA9IDEwMDA7XG5cbiAgLy8gVG8gY2FsY3VsYXRlIGNvbmZldHRpIHRyYW5zZm9ybSBkaXN0YW5jZS5cbiAgY29uc3Qgcm9vdEVsUmVjdCA9IHJvb3RFbC4vKk9LKi8gZ2V0Qm91bmRpbmdDbGllbnRSZWN0KCk7XG5cbiAgLyoqIEBwcml2YXRlIEBjb25zdCB7IS4uLy4uLy4uL3NyYy9zZXJ2aWNlL3RpbWVyLWltcGwuVGltZXJ9ICovXG4gIGNvbnN0IHRpbWVyID0gU2VydmljZXMudGltZXJGb3Iod2luKTtcblxuICBjb25zdCBjb25mZXR0aVdyYXBwZXIgPSBidWlsZENvbmZldHRpV3JhcHBlclRlbXBsYXRlKHJvb3RFbCk7XG4gIHJvb3RFbC5hcHBlbmRDaGlsZChjb25mZXR0aVdyYXBwZXIpO1xuXG4gIHRpbWVyLmRlbGF5KCgpID0+IHtcbiAgICAvLyBHZW5lcmF0ZSBjb25mZXR0aS4gU2V0IHRoZWlyIGVuZGluZyBwb3NpdGlvbiwgc2l6ZSBhbmQgcm90YXRpb24uXG4gICAgZm9yIChsZXQgaSA9IDA7IGkgPCBjb25mZXR0aUNvdW50OyBpKyspIHtcbiAgICAgIGNvbnN0IGNvbmZldHRpID0gYnVpbGRjb25mZXR0aVRlbXBsYXRlKHJvb3RFbCk7XG4gICAgICBjb25mZXR0aVdyYXBwZXIuYXBwZW5kQ2hpbGQoY29uZmV0dGkpO1xuICAgICAgY29uZmV0dGkudGV4dENvbnRlbnQgPSBjb25mZXR0aUVtb2ppO1xuXG4gICAgICBjb25zdCBmb250U2l6ZSA9XG4gICAgICAgIHJhbmRvbUluUmFuZ2UoZm9udFNpemVSYW5kb21SYW5nZVswXSwgZm9udFNpemVSYW5kb21SYW5nZVsxXSkgKyAncHgnO1xuICAgICAgY29uc3QgYW5nbGUgPVxuICAgICAgICBhbmdsZVNsaWNlICogaSArIHJhbmRvbUluUmFuZ2UoLWFuZ2xlUmFuZG9tbmVzcywgYW5nbGVSYW5kb21uZXNzKTtcbiAgICAgIGNvbnN0IHggPSBNYXRoLnNpbihhbmdsZSkgKiAocm9vdEVsUmVjdC53aWR0aCAvIDIgKyBhZGRpdGlvbmFsRGlzdGFuY2UpO1xuICAgICAgY29uc3QgeSA9IE1hdGguY29zKGFuZ2xlKSAqIChyb290RWxSZWN0LmhlaWdodCAvIDIgKyBhZGRpdGlvbmFsRGlzdGFuY2UpO1xuICAgICAgY29uc3Qgcm90YXRpb24gPSByYW5kb21JblJhbmdlKC1yb3RhdGlvblJhbmRvbW5lc3MsIHJvdGF0aW9uUmFuZG9tbmVzcyk7XG4gICAgICBzZXRTdHlsZXMoY29uZmV0dGksIHtcbiAgICAgICAgZm9udFNpemUsXG4gICAgICAgIHRyYW5zZm9ybTogYHRyYW5zbGF0ZSgke3h9cHgsICR7eX1weCkgcm90YXRlKCR7cm90YXRpb259ZGVnKWAsXG4gICAgICB9KTtcbiAgICB9XG4gICAgLy8gU2NhbGUgdXAgY29uZmV0dGkgY29udGFpbmVyLlxuICAgIGNvbmZldHRpV3JhcHBlci5jbGFzc0xpc3QuYWRkKFxuICAgICAgJ2ktYW1waHRtbC1zdG9yeS1pbnRlcmFjdGl2ZS1jb25mZXR0aS13cmFwcGVyLWFuaW1hdGUtaW4nXG4gICAgKTtcblxuICAgIC8vIEFuaW1hdGUgb3V0IHRoZSB3cmFwcGVyXG4gICAgdGltZXIuZGVsYXkoKCkgPT4ge1xuICAgICAgY29uZmV0dGlXcmFwcGVyLmNsYXNzTGlzdC5hZGQoXG4gICAgICAgICdpLWFtcGh0bWwtc3RvcnktaW50ZXJhY3RpdmUtY29uZmV0dGktd3JhcHBlci1hbmltYXRlLW91dCdcbiAgICAgICk7XG4gICAgICAvLyBSZW1vdmUgdGhlIHdyYXBwZXIgZnJvbSB0aGUgZG9tLlxuICAgICAgdGltZXIuZGVsYXkoKCkgPT4gcm9vdEVsLnJlbW92ZUNoaWxkKGNvbmZldHRpV3JhcHBlciksIGFuaW1hdGlvblRpbWUpO1xuICAgIH0sIGFuaW1hdGlvbk91dERlbGF5KTtcbiAgfSwgYW5pbWF0aW9uVGltZSk7XG59XG5cbi8qKlxuICogUmV0dXJucyBhIHJhbmRvbSBudW1iZXIgYmV0d2VlbiB0aGUgbWluIGFuZCBtYXggdmFsdWVzLlxuICpcbiAqIEBwYXJhbSB7bnVtYmVyfSBtaW5cbiAqIEBwYXJhbSB7bnVtYmVyfSBtYXhcbiAqIEByZXR1cm4ge251bWJlcn1cbiAqL1xuZnVuY3Rpb24gcmFuZG9tSW5SYW5nZShtaW4sIG1heCkge1xuICByZXR1cm4gTWF0aC5yYW5kb20oKSAqIChtYXggLSBtaW4pICsgbWluO1xufVxuIl19
+// /Users/mszylkowski/src/amphtml/extensions/amp-story-interactive/0.1/interactive-confetti.js

@@ -1,0 +1,1 @@
+export const CSS = "amp-base-carousel{display:block;overflow:hidden;position:relative}amp-base-carousel:not(.i-amphtml-built)>:not([placeholder]):not(.i-amphtml-svc){display:none;content-visibility:hidden}\n/*# sourceURL=/extensions/amp-base-carousel/1.0/amp-base-carousel.css*/";

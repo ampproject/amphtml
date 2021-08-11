@@ -1,0 +1,41 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import Promise from 'promise-pjs';
+
+/**
+ * Sets the Promise polyfill if it does not exist.
+ * @param {!Window} win
+ */
+export function install(win) {
+  if (!win.Promise) {
+    win.Promise = Promise;
+
+    // In babel the * export is an Object with a default property.
+    // In closure compiler it is the Promise function itself.
+    if (Promise.default) {
+      win.Promise = Promise.default;
+    }
+
+    // We copy the individual static methods, because closure
+    // compiler flattens the polyfill namespace.
+    win.Promise.resolve = Promise.resolve;
+    win.Promise.reject = Promise.reject;
+    win.Promise.all = Promise.all;
+    win.Promise.race = Promise.race;
+  }
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInByb21pc2UuanMiXSwibmFtZXMiOlsiUHJvbWlzZSIsImluc3RhbGwiLCJ3aW4iLCJkZWZhdWx0IiwicmVzb2x2ZSIsInJlamVjdCIsImFsbCIsInJhY2UiXSwibWFwcGluZ3MiOiJBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUVBLE9BQU9BLE9BQVAsTUFBb0IsYUFBcEI7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVNDLE9BQVQsQ0FBaUJDLEdBQWpCLEVBQXNCO0FBQzNCLE1BQUksQ0FBQ0EsR0FBRyxDQUFDRixPQUFULEVBQWtCO0FBQ2hCRSxJQUFBQSxHQUFHLENBQUNGLE9BQUosR0FBY0EsT0FBZDs7QUFDQTtBQUNBO0FBQ0EsUUFBSUEsT0FBTyxDQUFDRyxPQUFaLEVBQXFCO0FBQ25CRCxNQUFBQSxHQUFHLENBQUNGLE9BQUosR0FBY0EsT0FBTyxDQUFDRyxPQUF0QjtBQUNEOztBQUNEO0FBQ0E7QUFDQUQsSUFBQUEsR0FBRyxDQUFDRixPQUFKLENBQVlJLE9BQVosR0FBc0JKLE9BQU8sQ0FBQ0ksT0FBOUI7QUFDQUYsSUFBQUEsR0FBRyxDQUFDRixPQUFKLENBQVlLLE1BQVosR0FBcUJMLE9BQU8sQ0FBQ0ssTUFBN0I7QUFDQUgsSUFBQUEsR0FBRyxDQUFDRixPQUFKLENBQVlNLEdBQVosR0FBa0JOLE9BQU8sQ0FBQ00sR0FBMUI7QUFDQUosSUFBQUEsR0FBRyxDQUFDRixPQUFKLENBQVlPLElBQVosR0FBbUJQLE9BQU8sQ0FBQ08sSUFBM0I7QUFDRDtBQUNGIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb3B5cmlnaHQgMjAxNiBUaGUgQU1QIEhUTUwgQXV0aG9ycy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTLUlTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbmltcG9ydCBQcm9taXNlIGZyb20gJ3Byb21pc2UtcGpzJztcblxuLyoqXG4gKiBTZXRzIHRoZSBQcm9taXNlIHBvbHlmaWxsIGlmIGl0IGRvZXMgbm90IGV4aXN0LlxuICogQHBhcmFtIHshV2luZG93fSB3aW5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGluc3RhbGwod2luKSB7XG4gIGlmICghd2luLlByb21pc2UpIHtcbiAgICB3aW4uUHJvbWlzZSA9IFByb21pc2U7XG4gICAgLy8gSW4gYmFiZWwgdGhlICogZXhwb3J0IGlzIGFuIE9iamVjdCB3aXRoIGEgZGVmYXVsdCBwcm9wZXJ0eS5cbiAgICAvLyBJbiBjbG9zdXJlIGNvbXBpbGVyIGl0IGlzIHRoZSBQcm9taXNlIGZ1bmN0aW9uIGl0c2VsZi5cbiAgICBpZiAoUHJvbWlzZS5kZWZhdWx0KSB7XG4gICAgICB3aW4uUHJvbWlzZSA9IFByb21pc2UuZGVmYXVsdDtcbiAgICB9XG4gICAgLy8gV2UgY29weSB0aGUgaW5kaXZpZHVhbCBzdGF0aWMgbWV0aG9kcywgYmVjYXVzZSBjbG9zdXJlXG4gICAgLy8gY29tcGlsZXIgZmxhdHRlbnMgdGhlIHBvbHlmaWxsIG5hbWVzcGFjZS5cbiAgICB3aW4uUHJvbWlzZS5yZXNvbHZlID0gUHJvbWlzZS5yZXNvbHZlO1xuICAgIHdpbi5Qcm9taXNlLnJlamVjdCA9IFByb21pc2UucmVqZWN0O1xuICAgIHdpbi5Qcm9taXNlLmFsbCA9IFByb21pc2UuYWxsO1xuICAgIHdpbi5Qcm9taXNlLnJhY2UgPSBQcm9taXNlLnJhY2U7XG4gIH1cbn1cbiJdfQ==
+// /Users/mszylkowski/src/amphtml/src/polyfills/promise.js

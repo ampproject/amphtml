@@ -1,0 +1,98 @@
+import { resolvedPromise as _resolvedPromise } from "./../../../src/core/data-structures/promise";
+
+/* Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { Deferred } from "../../../src/core/data-structures/promise";
+import { Services } from "../../../src/service";
+import { user, userAssert } from "../../../src/log";
+
+/**
+ * Store loading ads info within window to ensure it can be properly stored
+ * across separately compiled binaries that share load throttling.
+ * @const ID of window variable used to track 3p ads waiting to load.
+ */
+var LOADING_ADS_WIN_ID_ = '3pla';
+
+/** @private {?Promise} resolves when no 3p throttle */
+var throttlePromise_ = null;
+
+/** @private {?Function} resolver for throttle promise */
+var throttlePromiseResolver_ = null;
+
+/**
+ * @param {!Window} win
+ * @return {boolean} Whether 3p is currently throttled.
+ */
+export function is3pThrottled(win) {
+  return !!win[LOADING_ADS_WIN_ID_];
+}
+
+/** @return {!Promise} resolves when no 3p throttle */
+export function waitFor3pThrottle() {
+  return throttlePromise_ || _resolvedPromise();
+}
+
+/**
+ * @param {!Element} element
+ * @return {?number} number if explicit value should be used otherwise super
+ *    default should be used.
+ */
+export function getAmpAdRenderOutsideViewport(element) {
+  var rawValue = element.getAttribute('data-loading-strategy');
+
+  if (rawValue == null) {
+    return null;
+  }
+
+  // Ad opts into lazier loading strategy where we only load ads that are
+  // at closer given number of viewports away.
+  if (rawValue == 'prefer-viewability-over-views' || rawValue == '') {
+    return 1.25;
+  }
+
+  var errorMessage = 'Value of data-loading-strategy should be a float number in range ' + 'of [0, 3], but got ' + rawValue;
+  var viewportNumber = user().assertNumber(parseFloat(rawValue), errorMessage);
+  userAssert(viewportNumber >= 0 && viewportNumber <= 3, errorMessage);
+  return viewportNumber;
+}
+
+/**
+ * Increments loading ads count for throttling.
+ * @param {!Window} win
+ * @param {!Promise=} opt_loadingPromise
+ */
+export function incrementLoadingAds(win, opt_loadingPromise) {
+  if (win[LOADING_ADS_WIN_ID_] === undefined) {
+    win[LOADING_ADS_WIN_ID_] = 0;
+  }
+
+  win[LOADING_ADS_WIN_ID_]++;
+
+  if (!throttlePromise_) {
+    var deferred = new Deferred();
+    throttlePromise_ = deferred.promise;
+    throttlePromiseResolver_ = deferred.resolve;
+  }
+
+  Services.timerFor(win).timeoutPromise(1000, opt_loadingPromise).catch(function () {}).then(function () {
+    if (! --win[LOADING_ADS_WIN_ID_]) {
+      throttlePromiseResolver_();
+      throttlePromise_ = null;
+      throttlePromiseResolver_ = null;
+    }
+  });
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImNvbmN1cnJlbnQtbG9hZC5qcyJdLCJuYW1lcyI6WyJEZWZlcnJlZCIsIlNlcnZpY2VzIiwidXNlciIsInVzZXJBc3NlcnQiLCJMT0FESU5HX0FEU19XSU5fSURfIiwidGhyb3R0bGVQcm9taXNlXyIsInRocm90dGxlUHJvbWlzZVJlc29sdmVyXyIsImlzM3BUaHJvdHRsZWQiLCJ3aW4iLCJ3YWl0Rm9yM3BUaHJvdHRsZSIsImdldEFtcEFkUmVuZGVyT3V0c2lkZVZpZXdwb3J0IiwiZWxlbWVudCIsInJhd1ZhbHVlIiwiZ2V0QXR0cmlidXRlIiwiZXJyb3JNZXNzYWdlIiwidmlld3BvcnROdW1iZXIiLCJhc3NlcnROdW1iZXIiLCJwYXJzZUZsb2F0IiwiaW5jcmVtZW50TG9hZGluZ0FkcyIsIm9wdF9sb2FkaW5nUHJvbWlzZSIsInVuZGVmaW5lZCIsImRlZmVycmVkIiwicHJvbWlzZSIsInJlc29sdmUiLCJ0aW1lckZvciIsInRpbWVvdXRQcm9taXNlIiwiY2F0Y2giLCJ0aGVuIl0sIm1hcHBpbmdzIjoiOztBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFFQSxTQUFRQSxRQUFSO0FBQ0EsU0FBUUMsUUFBUjtBQUNBLFNBQVFDLElBQVIsRUFBY0MsVUFBZDs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsSUFBTUMsbUJBQW1CLEdBQUcsTUFBNUI7O0FBRUE7QUFDQSxJQUFJQyxnQkFBZ0IsR0FBRyxJQUF2Qjs7QUFDQTtBQUNBLElBQUlDLHdCQUF3QixHQUFHLElBQS9COztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTQyxhQUFULENBQXVCQyxHQUF2QixFQUE0QjtBQUNqQyxTQUFPLENBQUMsQ0FBQ0EsR0FBRyxDQUFDSixtQkFBRCxDQUFaO0FBQ0Q7O0FBRUQ7QUFDQSxPQUFPLFNBQVNLLGlCQUFULEdBQTZCO0FBQ2xDLFNBQU9KLGdCQUFnQixJQUFJLGtCQUEzQjtBQUNEOztBQUVEO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVNLLDZCQUFULENBQXVDQyxPQUF2QyxFQUFnRDtBQUNyRCxNQUFNQyxRQUFRLEdBQUdELE9BQU8sQ0FBQ0UsWUFBUixDQUFxQix1QkFBckIsQ0FBakI7O0FBQ0EsTUFBSUQsUUFBUSxJQUFJLElBQWhCLEVBQXNCO0FBQ3BCLFdBQU8sSUFBUDtBQUNEOztBQUNEO0FBQ0E7QUFDQSxNQUFJQSxRQUFRLElBQUksK0JBQVosSUFBK0NBLFFBQVEsSUFBSSxFQUEvRCxFQUFtRTtBQUNqRSxXQUFPLElBQVA7QUFDRDs7QUFDRCxNQUFNRSxZQUFZLEdBQ2hCLHNFQUNBLHFCQURBLEdBRUFGLFFBSEY7QUFJQSxNQUFNRyxjQUFjLEdBQUdiLElBQUksR0FBR2MsWUFBUCxDQUNyQkMsVUFBVSxDQUFDTCxRQUFELENBRFcsRUFFckJFLFlBRnFCLENBQXZCO0FBSUFYLEVBQUFBLFVBQVUsQ0FBQ1ksY0FBYyxJQUFJLENBQWxCLElBQXVCQSxjQUFjLElBQUksQ0FBMUMsRUFBNkNELFlBQTdDLENBQVY7QUFDQSxTQUFPQyxjQUFQO0FBQ0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0csbUJBQVQsQ0FBNkJWLEdBQTdCLEVBQWtDVyxrQkFBbEMsRUFBc0Q7QUFDM0QsTUFBSVgsR0FBRyxDQUFDSixtQkFBRCxDQUFILEtBQTZCZ0IsU0FBakMsRUFBNEM7QUFDMUNaLElBQUFBLEdBQUcsQ0FBQ0osbUJBQUQsQ0FBSCxHQUEyQixDQUEzQjtBQUNEOztBQUNESSxFQUFBQSxHQUFHLENBQUNKLG1CQUFELENBQUg7O0FBRUEsTUFBSSxDQUFDQyxnQkFBTCxFQUF1QjtBQUNyQixRQUFNZ0IsUUFBUSxHQUFHLElBQUlyQixRQUFKLEVBQWpCO0FBQ0FLLElBQUFBLGdCQUFnQixHQUFHZ0IsUUFBUSxDQUFDQyxPQUE1QjtBQUNBaEIsSUFBQUEsd0JBQXdCLEdBQUdlLFFBQVEsQ0FBQ0UsT0FBcEM7QUFDRDs7QUFFRHRCLEVBQUFBLFFBQVEsQ0FBQ3VCLFFBQVQsQ0FBa0JoQixHQUFsQixFQUNHaUIsY0FESCxDQUNrQixJQURsQixFQUN3Qk4sa0JBRHhCLEVBRUdPLEtBRkgsQ0FFUyxZQUFNLENBQUUsQ0FGakIsRUFHR0MsSUFISCxDQUdRLFlBQU07QUFDVixRQUFJLENBQUMsR0FBRW5CLEdBQUcsQ0FBQ0osbUJBQUQsQ0FBVixFQUFpQztBQUMvQkUsTUFBQUEsd0JBQXdCO0FBQ3hCRCxNQUFBQSxnQkFBZ0IsR0FBRyxJQUFuQjtBQUNBQyxNQUFBQSx3QkFBd0IsR0FBRyxJQUEzQjtBQUNEO0FBQ0YsR0FUSDtBQVVEIiwic291cmNlc0NvbnRlbnQiOlsiLyogQ29weXJpZ2h0IDIwMTYgVGhlIEFNUCBIVE1MIEF1dGhvcnMuIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlIFwiTGljZW5zZVwiKTtcbiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS5cbiAqIFlvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdFxuICpcbiAqICAgICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wXG4gKlxuICogVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZVxuICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gXCJBUy1JU1wiIEJBU0lTLFxuICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuXG4gKiBTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZSBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kXG4gKiBsaW1pdGF0aW9ucyB1bmRlciB0aGUgTGljZW5zZS5cbiAqL1xuXG5pbXBvcnQge0RlZmVycmVkfSBmcm9tICcjY29yZS9kYXRhLXN0cnVjdHVyZXMvcHJvbWlzZSc7XG5pbXBvcnQge1NlcnZpY2VzfSBmcm9tICcjc2VydmljZSc7XG5pbXBvcnQge3VzZXIsIHVzZXJBc3NlcnR9IGZyb20gJy4uLy4uLy4uL3NyYy9sb2cnO1xuXG4vKipcbiAqIFN0b3JlIGxvYWRpbmcgYWRzIGluZm8gd2l0aGluIHdpbmRvdyB0byBlbnN1cmUgaXQgY2FuIGJlIHByb3Blcmx5IHN0b3JlZFxuICogYWNyb3NzIHNlcGFyYXRlbHkgY29tcGlsZWQgYmluYXJpZXMgdGhhdCBzaGFyZSBsb2FkIHRocm90dGxpbmcuXG4gKiBAY29uc3QgSUQgb2Ygd2luZG93IHZhcmlhYmxlIHVzZWQgdG8gdHJhY2sgM3AgYWRzIHdhaXRpbmcgdG8gbG9hZC5cbiAqL1xuY29uc3QgTE9BRElOR19BRFNfV0lOX0lEXyA9ICczcGxhJztcblxuLyoqIEBwcml2YXRlIHs/UHJvbWlzZX0gcmVzb2x2ZXMgd2hlbiBubyAzcCB0aHJvdHRsZSAqL1xubGV0IHRocm90dGxlUHJvbWlzZV8gPSBudWxsO1xuLyoqIEBwcml2YXRlIHs/RnVuY3Rpb259IHJlc29sdmVyIGZvciB0aHJvdHRsZSBwcm9taXNlICovXG5sZXQgdGhyb3R0bGVQcm9taXNlUmVzb2x2ZXJfID0gbnVsbDtcblxuLyoqXG4gKiBAcGFyYW0geyFXaW5kb3d9IHdpblxuICogQHJldHVybiB7Ym9vbGVhbn0gV2hldGhlciAzcCBpcyBjdXJyZW50bHkgdGhyb3R0bGVkLlxuICovXG5leHBvcnQgZnVuY3Rpb24gaXMzcFRocm90dGxlZCh3aW4pIHtcbiAgcmV0dXJuICEhd2luW0xPQURJTkdfQURTX1dJTl9JRF9dO1xufVxuXG4vKiogQHJldHVybiB7IVByb21pc2V9IHJlc29sdmVzIHdoZW4gbm8gM3AgdGhyb3R0bGUgKi9cbmV4cG9ydCBmdW5jdGlvbiB3YWl0Rm9yM3BUaHJvdHRsZSgpIHtcbiAgcmV0dXJuIHRocm90dGxlUHJvbWlzZV8gfHwgUHJvbWlzZS5yZXNvbHZlKCk7XG59XG5cbi8qKlxuICogQHBhcmFtIHshRWxlbWVudH0gZWxlbWVudFxuICogQHJldHVybiB7P251bWJlcn0gbnVtYmVyIGlmIGV4cGxpY2l0IHZhbHVlIHNob3VsZCBiZSB1c2VkIG90aGVyd2lzZSBzdXBlclxuICogICAgZGVmYXVsdCBzaG91bGQgYmUgdXNlZC5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGdldEFtcEFkUmVuZGVyT3V0c2lkZVZpZXdwb3J0KGVsZW1lbnQpIHtcbiAgY29uc3QgcmF3VmFsdWUgPSBlbGVtZW50LmdldEF0dHJpYnV0ZSgnZGF0YS1sb2FkaW5nLXN0cmF0ZWd5Jyk7XG4gIGlmIChyYXdWYWx1ZSA9PSBudWxsKSB7XG4gICAgcmV0dXJuIG51bGw7XG4gIH1cbiAgLy8gQWQgb3B0cyBpbnRvIGxhemllciBsb2FkaW5nIHN0cmF0ZWd5IHdoZXJlIHdlIG9ubHkgbG9hZCBhZHMgdGhhdCBhcmVcbiAgLy8gYXQgY2xvc2VyIGdpdmVuIG51bWJlciBvZiB2aWV3cG9ydHMgYXdheS5cbiAgaWYgKHJhd1ZhbHVlID09ICdwcmVmZXItdmlld2FiaWxpdHktb3Zlci12aWV3cycgfHwgcmF3VmFsdWUgPT0gJycpIHtcbiAgICByZXR1cm4gMS4yNTtcbiAgfVxuICBjb25zdCBlcnJvck1lc3NhZ2UgPVxuICAgICdWYWx1ZSBvZiBkYXRhLWxvYWRpbmctc3RyYXRlZ3kgc2hvdWxkIGJlIGEgZmxvYXQgbnVtYmVyIGluIHJhbmdlICcgK1xuICAgICdvZiBbMCwgM10sIGJ1dCBnb3QgJyArXG4gICAgcmF3VmFsdWU7XG4gIGNvbnN0IHZpZXdwb3J0TnVtYmVyID0gdXNlcigpLmFzc2VydE51bWJlcihcbiAgICBwYXJzZUZsb2F0KHJhd1ZhbHVlKSxcbiAgICBlcnJvck1lc3NhZ2VcbiAgKTtcbiAgdXNlckFzc2VydCh2aWV3cG9ydE51bWJlciA+PSAwICYmIHZpZXdwb3J0TnVtYmVyIDw9IDMsIGVycm9yTWVzc2FnZSk7XG4gIHJldHVybiB2aWV3cG9ydE51bWJlcjtcbn1cblxuLyoqXG4gKiBJbmNyZW1lbnRzIGxvYWRpbmcgYWRzIGNvdW50IGZvciB0aHJvdHRsaW5nLlxuICogQHBhcmFtIHshV2luZG93fSB3aW5cbiAqIEBwYXJhbSB7IVByb21pc2U9fSBvcHRfbG9hZGluZ1Byb21pc2VcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGluY3JlbWVudExvYWRpbmdBZHMod2luLCBvcHRfbG9hZGluZ1Byb21pc2UpIHtcbiAgaWYgKHdpbltMT0FESU5HX0FEU19XSU5fSURfXSA9PT0gdW5kZWZpbmVkKSB7XG4gICAgd2luW0xPQURJTkdfQURTX1dJTl9JRF9dID0gMDtcbiAgfVxuICB3aW5bTE9BRElOR19BRFNfV0lOX0lEX10rKztcblxuICBpZiAoIXRocm90dGxlUHJvbWlzZV8pIHtcbiAgICBjb25zdCBkZWZlcnJlZCA9IG5ldyBEZWZlcnJlZCgpO1xuICAgIHRocm90dGxlUHJvbWlzZV8gPSBkZWZlcnJlZC5wcm9taXNlO1xuICAgIHRocm90dGxlUHJvbWlzZVJlc29sdmVyXyA9IGRlZmVycmVkLnJlc29sdmU7XG4gIH1cblxuICBTZXJ2aWNlcy50aW1lckZvcih3aW4pXG4gICAgLnRpbWVvdXRQcm9taXNlKDEwMDAsIG9wdF9sb2FkaW5nUHJvbWlzZSlcbiAgICAuY2F0Y2goKCkgPT4ge30pXG4gICAgLnRoZW4oKCkgPT4ge1xuICAgICAgaWYgKCEtLXdpbltMT0FESU5HX0FEU19XSU5fSURfXSkge1xuICAgICAgICB0aHJvdHRsZVByb21pc2VSZXNvbHZlcl8oKTtcbiAgICAgICAgdGhyb3R0bGVQcm9taXNlXyA9IG51bGw7XG4gICAgICAgIHRocm90dGxlUHJvbWlzZVJlc29sdmVyXyA9IG51bGw7XG4gICAgICB9XG4gICAgfSk7XG59XG4iXX0=
+// /Users/mszylkowski/src/amphtml/extensions/amp-ad/0.1/concurrent-load.js

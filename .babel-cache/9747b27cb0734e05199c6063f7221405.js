@@ -1,0 +1,93 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Whether the document is ready.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+export function isDocumentReady(doc) {
+  return doc.readyState != 'loading' && doc.readyState != 'uninitialized';
+}
+
+/**
+ * Whether the document has loaded all the css and sub-resources.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+function isDocumentComplete(doc) {
+  return doc.readyState == 'complete';
+}
+
+/**
+ * Calls the callback when document is ready.
+ * @param {!Document} doc
+ * @param {function(!Document)} callback
+ */
+export function onDocumentReady(doc, callback) {
+  onDocumentState(doc, isDocumentReady, callback);
+}
+
+/**
+ * Calls the callback when document's state satisfies the stateFn.
+ * @param {!Document} doc
+ * @param {function(!Document):boolean} stateFn
+ * @param {function(!Document)} callback
+ */
+function onDocumentState(doc, stateFn, callback) {
+  var ready = stateFn(doc);
+
+  if (ready) {
+    callback(doc);
+  } else {
+    var readyListener = function readyListener() {
+      if (stateFn(doc)) {
+        if (!ready) {
+          ready = true;
+          callback(doc);
+        }
+
+        doc.removeEventListener('readystatechange', readyListener);
+      }
+    };
+
+    doc.addEventListener('readystatechange', readyListener);
+  }
+}
+
+/**
+ * Returns a promise that is resolved when document is ready.
+ * @param {!Document} doc
+ * @return {!Promise<!Document>}
+ */
+export function whenDocumentReady(doc) {
+  return new Promise(function (resolve) {
+    onDocumentReady(doc, resolve);
+  });
+}
+
+/**
+ * Returns a promise that is resolved when document is complete.
+ * @param {!Document} doc
+ * @return {!Promise<!Document>}
+ */
+export function whenDocumentComplete(doc) {
+  return new Promise(function (resolve) {
+    onDocumentState(doc, isDocumentComplete, resolve);
+  });
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImRvY3VtZW50LXJlYWR5LmpzIl0sIm5hbWVzIjpbImlzRG9jdW1lbnRSZWFkeSIsImRvYyIsInJlYWR5U3RhdGUiLCJpc0RvY3VtZW50Q29tcGxldGUiLCJvbkRvY3VtZW50UmVhZHkiLCJjYWxsYmFjayIsIm9uRG9jdW1lbnRTdGF0ZSIsInN0YXRlRm4iLCJyZWFkeSIsInJlYWR5TGlzdGVuZXIiLCJyZW1vdmVFdmVudExpc3RlbmVyIiwiYWRkRXZlbnRMaXN0ZW5lciIsIndoZW5Eb2N1bWVudFJlYWR5IiwiUHJvbWlzZSIsInJlc29sdmUiLCJ3aGVuRG9jdW1lbnRDb21wbGV0ZSJdLCJtYXBwaW5ncyI6IkFBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVNBLGVBQVQsQ0FBeUJDLEdBQXpCLEVBQThCO0FBQ25DLFNBQU9BLEdBQUcsQ0FBQ0MsVUFBSixJQUFrQixTQUFsQixJQUErQkQsR0FBRyxDQUFDQyxVQUFKLElBQWtCLGVBQXhEO0FBQ0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLFNBQVNDLGtCQUFULENBQTRCRixHQUE1QixFQUFpQztBQUMvQixTQUFPQSxHQUFHLENBQUNDLFVBQUosSUFBa0IsVUFBekI7QUFDRDs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTRSxlQUFULENBQXlCSCxHQUF6QixFQUE4QkksUUFBOUIsRUFBd0M7QUFDN0NDLEVBQUFBLGVBQWUsQ0FBQ0wsR0FBRCxFQUFNRCxlQUFOLEVBQXVCSyxRQUF2QixDQUFmO0FBQ0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsU0FBU0MsZUFBVCxDQUF5QkwsR0FBekIsRUFBOEJNLE9BQTlCLEVBQXVDRixRQUF2QyxFQUFpRDtBQUMvQyxNQUFJRyxLQUFLLEdBQUdELE9BQU8sQ0FBQ04sR0FBRCxDQUFuQjs7QUFDQSxNQUFJTyxLQUFKLEVBQVc7QUFDVEgsSUFBQUEsUUFBUSxDQUFDSixHQUFELENBQVI7QUFDRCxHQUZELE1BRU87QUFDTCxRQUFNUSxhQUFhLEdBQUcsU0FBaEJBLGFBQWdCLEdBQU07QUFDMUIsVUFBSUYsT0FBTyxDQUFDTixHQUFELENBQVgsRUFBa0I7QUFDaEIsWUFBSSxDQUFDTyxLQUFMLEVBQVk7QUFDVkEsVUFBQUEsS0FBSyxHQUFHLElBQVI7QUFDQUgsVUFBQUEsUUFBUSxDQUFDSixHQUFELENBQVI7QUFDRDs7QUFDREEsUUFBQUEsR0FBRyxDQUFDUyxtQkFBSixDQUF3QixrQkFBeEIsRUFBNENELGFBQTVDO0FBQ0Q7QUFDRixLQVJEOztBQVNBUixJQUFBQSxHQUFHLENBQUNVLGdCQUFKLENBQXFCLGtCQUFyQixFQUF5Q0YsYUFBekM7QUFDRDtBQUNGOztBQUVEO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVNHLGlCQUFULENBQTJCWCxHQUEzQixFQUFnQztBQUNyQyxTQUFPLElBQUlZLE9BQUosQ0FBWSxVQUFDQyxPQUFELEVBQWE7QUFDOUJWLElBQUFBLGVBQWUsQ0FBQ0gsR0FBRCxFQUFNYSxPQUFOLENBQWY7QUFDRCxHQUZNLENBQVA7QUFHRDs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTQyxvQkFBVCxDQUE4QmQsR0FBOUIsRUFBbUM7QUFDeEMsU0FBTyxJQUFJWSxPQUFKLENBQVksVUFBQ0MsT0FBRCxFQUFhO0FBQzlCUixJQUFBQSxlQUFlLENBQUNMLEdBQUQsRUFBTUUsa0JBQU4sRUFBMEJXLE9BQTFCLENBQWY7QUFDRCxHQUZNLENBQVA7QUFHRCIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ29weXJpZ2h0IDIwMTYgVGhlIEFNUCBIVE1MIEF1dGhvcnMuIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlIFwiTGljZW5zZVwiKTtcbiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS5cbiAqIFlvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdFxuICpcbiAqICAgICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wXG4gKlxuICogVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZVxuICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gXCJBUy1JU1wiIEJBU0lTLFxuICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuXG4gKiBTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZSBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kXG4gKiBsaW1pdGF0aW9ucyB1bmRlciB0aGUgTGljZW5zZS5cbiAqL1xuXG4vKipcbiAqIFdoZXRoZXIgdGhlIGRvY3VtZW50IGlzIHJlYWR5LlxuICogQHBhcmFtIHshRG9jdW1lbnR9IGRvY1xuICogQHJldHVybiB7Ym9vbGVhbn1cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGlzRG9jdW1lbnRSZWFkeShkb2MpIHtcbiAgcmV0dXJuIGRvYy5yZWFkeVN0YXRlICE9ICdsb2FkaW5nJyAmJiBkb2MucmVhZHlTdGF0ZSAhPSAndW5pbml0aWFsaXplZCc7XG59XG5cbi8qKlxuICogV2hldGhlciB0aGUgZG9jdW1lbnQgaGFzIGxvYWRlZCBhbGwgdGhlIGNzcyBhbmQgc3ViLXJlc291cmNlcy5cbiAqIEBwYXJhbSB7IURvY3VtZW50fSBkb2NcbiAqIEByZXR1cm4ge2Jvb2xlYW59XG4gKi9cbmZ1bmN0aW9uIGlzRG9jdW1lbnRDb21wbGV0ZShkb2MpIHtcbiAgcmV0dXJuIGRvYy5yZWFkeVN0YXRlID09ICdjb21wbGV0ZSc7XG59XG5cbi8qKlxuICogQ2FsbHMgdGhlIGNhbGxiYWNrIHdoZW4gZG9jdW1lbnQgaXMgcmVhZHkuXG4gKiBAcGFyYW0geyFEb2N1bWVudH0gZG9jXG4gKiBAcGFyYW0ge2Z1bmN0aW9uKCFEb2N1bWVudCl9IGNhbGxiYWNrXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBvbkRvY3VtZW50UmVhZHkoZG9jLCBjYWxsYmFjaykge1xuICBvbkRvY3VtZW50U3RhdGUoZG9jLCBpc0RvY3VtZW50UmVhZHksIGNhbGxiYWNrKTtcbn1cblxuLyoqXG4gKiBDYWxscyB0aGUgY2FsbGJhY2sgd2hlbiBkb2N1bWVudCdzIHN0YXRlIHNhdGlzZmllcyB0aGUgc3RhdGVGbi5cbiAqIEBwYXJhbSB7IURvY3VtZW50fSBkb2NcbiAqIEBwYXJhbSB7ZnVuY3Rpb24oIURvY3VtZW50KTpib29sZWFufSBzdGF0ZUZuXG4gKiBAcGFyYW0ge2Z1bmN0aW9uKCFEb2N1bWVudCl9IGNhbGxiYWNrXG4gKi9cbmZ1bmN0aW9uIG9uRG9jdW1lbnRTdGF0ZShkb2MsIHN0YXRlRm4sIGNhbGxiYWNrKSB7XG4gIGxldCByZWFkeSA9IHN0YXRlRm4oZG9jKTtcbiAgaWYgKHJlYWR5KSB7XG4gICAgY2FsbGJhY2soZG9jKTtcbiAgfSBlbHNlIHtcbiAgICBjb25zdCByZWFkeUxpc3RlbmVyID0gKCkgPT4ge1xuICAgICAgaWYgKHN0YXRlRm4oZG9jKSkge1xuICAgICAgICBpZiAoIXJlYWR5KSB7XG4gICAgICAgICAgcmVhZHkgPSB0cnVlO1xuICAgICAgICAgIGNhbGxiYWNrKGRvYyk7XG4gICAgICAgIH1cbiAgICAgICAgZG9jLnJlbW92ZUV2ZW50TGlzdGVuZXIoJ3JlYWR5c3RhdGVjaGFuZ2UnLCByZWFkeUxpc3RlbmVyKTtcbiAgICAgIH1cbiAgICB9O1xuICAgIGRvYy5hZGRFdmVudExpc3RlbmVyKCdyZWFkeXN0YXRlY2hhbmdlJywgcmVhZHlMaXN0ZW5lcik7XG4gIH1cbn1cblxuLyoqXG4gKiBSZXR1cm5zIGEgcHJvbWlzZSB0aGF0IGlzIHJlc29sdmVkIHdoZW4gZG9jdW1lbnQgaXMgcmVhZHkuXG4gKiBAcGFyYW0geyFEb2N1bWVudH0gZG9jXG4gKiBAcmV0dXJuIHshUHJvbWlzZTwhRG9jdW1lbnQ+fVxuICovXG5leHBvcnQgZnVuY3Rpb24gd2hlbkRvY3VtZW50UmVhZHkoZG9jKSB7XG4gIHJldHVybiBuZXcgUHJvbWlzZSgocmVzb2x2ZSkgPT4ge1xuICAgIG9uRG9jdW1lbnRSZWFkeShkb2MsIHJlc29sdmUpO1xuICB9KTtcbn1cblxuLyoqXG4gKiBSZXR1cm5zIGEgcHJvbWlzZSB0aGF0IGlzIHJlc29sdmVkIHdoZW4gZG9jdW1lbnQgaXMgY29tcGxldGUuXG4gKiBAcGFyYW0geyFEb2N1bWVudH0gZG9jXG4gKiBAcmV0dXJuIHshUHJvbWlzZTwhRG9jdW1lbnQ+fVxuICovXG5leHBvcnQgZnVuY3Rpb24gd2hlbkRvY3VtZW50Q29tcGxldGUoZG9jKSB7XG4gIHJldHVybiBuZXcgUHJvbWlzZSgocmVzb2x2ZSkgPT4ge1xuICAgIG9uRG9jdW1lbnRTdGF0ZShkb2MsIGlzRG9jdW1lbnRDb21wbGV0ZSwgcmVzb2x2ZSk7XG4gIH0pO1xufVxuIl19
+// /Users/mszylkowski/src/amphtml/src/core/document-ready.js

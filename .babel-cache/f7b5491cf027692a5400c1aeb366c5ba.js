@@ -1,0 +1,83 @@
+var _template = ["<button aria-label=\"Unmute video\" class=\"i-amphtml-video-mask i-amphtml-fill-content\" tabindex=0></button>"],_template2 = ["<i-amphtml-video-icon class=amp-video-eq><div class=amp-video-eq-col><div class=amp-video-eq-filler></div><div class=amp-video-eq-filler></div></div></i-amphtml-video-icon>"]; /**
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { removeElement } from "../../core/dom";
+import { htmlFor } from "../../core/dom/static-template";
+
+import { dev } from "../../log";
+
+/**
+ * @param {!Element} node
+ * @return {!Element}
+ */
+function cloneDeep(node) {
+  return (/** @type {!Element} */(node.cloneNode( /* deep */true)));
+}
+
+/**
+ * @param {!Element|!Document} elOrDoc
+ * @param {?{title: (string|undefined)}=} metadata
+ * @return {!Element}
+ */
+export function renderInteractionOverlay(elOrDoc, metadata) {
+  var html = htmlFor(elOrDoc);
+  var element = html(_template);
+
+
+
+
+
+
+  if (metadata && metadata.title) {
+    element.setAttribute('aria-label', metadata.title);
+  }
+  return element;
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Element|!Document} elOrDoc
+ * @return {!Element}
+ */
+export function renderIcon(win, elOrDoc) {
+  var html = htmlFor(elOrDoc);
+  var icon = html(_template2);
+
+
+
+
+
+
+
+
+  // Copy equalizer column 4x and annotate filler positions for animation.
+  var firstCol = /** @type {!Element} */(icon.firstElementChild);
+  for (var i = 0; i < 4; i++) {
+    var col = cloneDeep(firstCol);
+    var fillers = col.children;
+    for (var j = 0; j < fillers.length; j++) {
+      var filler = fillers[j];
+      filler.classList.add("amp-video-eq-".concat(i + 1, "-").concat(j + 1));
+    }
+    icon.appendChild(col);
+  }
+
+  // Remove seed column.
+  removeElement(firstCol);
+
+  return icon;
+}
+// /Users/mszylkowski/src/amphtml/src/service/video/autoplay.js

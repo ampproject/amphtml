@@ -1,0 +1,1 @@
+export const CSS = "amp-story-cta-layer{display:block!important;position:absolute!important;top:80%!important;right:0!important;bottom:0!important;left:0!important;margin:0!important;z-index:3!important}\n/*# sourceURL=/extensions/amp-story-auto-ads/0.1/amp-story-auto-ads-inabox.css*/";

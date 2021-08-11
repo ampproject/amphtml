@@ -1,0 +1,1 @@
+export const CSS = "amp-lightbox[hidden]{display:none!important}amp-lightbox{width:100%;height:100%;position:fixed;box-sizing:border-box;background-color:rgba(0,0,0,0.9);color:#fff;visibility:hidden}amp-lightbox::part(lightbox){background:inherit;color:inherit}\n/*# sourceURL=/extensions/amp-lightbox/1.0/amp-lightbox.css*/";

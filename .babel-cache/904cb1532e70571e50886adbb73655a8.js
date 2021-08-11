@@ -1,0 +1,96 @@
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { Deferred } from "../../data-structures/promise";
+import { createViewportObserver } from "./viewport-observer";
+import { toWin } from "../../window";
+
+/**
+ * @fileoverview
+ * This utility is similar to the `./intersection`, but it doesn't
+ * require the `rootBounds` and thus can use a simpler version of the
+ * intersection observer that's supported natively on more platforms.
+ *
+ * TODO(#33678): Dedupe intersection measurement utils once the native
+ * support is better.
+ */
+
+/** @type {WeakMap<!Element, !Deferred<!IntersectionObserverEntry>>} */
+var intersectionDeferreds;
+
+/** @type {WeakMap<!Window, !IntersectionObserver>} */
+var intersectionObservers;
+
+/**
+ * @param {!Window} win
+ * @return {!IntersectionObserver}
+ */
+function getInOb(win) {
+  if (!intersectionDeferreds) {
+    intersectionDeferreds = new WeakMap();
+    intersectionObservers = new WeakMap();
+  }
+
+  var observer = intersectionObservers.get(win);
+
+  if (!observer) {
+    observer = createViewportObserver(function (entries) {
+      var seen = new Set();
+
+      for (var i = entries.length - 1; i >= 0; i--) {
+        var target = entries[i].target;
+
+        if (seen.has(target)) {
+          continue;
+        }
+
+        seen.add(target);
+        observer.unobserve(target);
+        intersectionDeferreds.get(target).resolve(entries[i]);
+        intersectionDeferreds.delete(target);
+      }
+    }, win, {
+      needsRootBounds: false
+    });
+    intersectionObservers.set(win, observer);
+  }
+
+  return observer;
+}
+
+/**
+ * Returns a promise that resolves with the intersection entry for the given element.
+ *
+ * If multiple measures for the same element occur very quickly, they will
+ * dedupe to the same promise.
+ *
+ * @param {!Element} el
+ * @return {!Promise<!IntersectionObserverEntry>}
+ */
+export function measureIntersectionNoRoot(el) {
+  var _intersectionDeferred;
+
+  if ((_intersectionDeferred = intersectionDeferreds) != null && _intersectionDeferred.has(el)) {
+    return intersectionDeferreds.get(el).promise;
+  }
+
+  var inOb = getInOb(toWin(el.ownerDocument.defaultView));
+  inOb.observe(el);
+  var deferred = new Deferred();
+  intersectionDeferreds.set(el, deferred);
+  return deferred.promise;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImludGVyc2VjdGlvbi1uby1yb290LmpzIl0sIm5hbWVzIjpbIkRlZmVycmVkIiwiY3JlYXRlVmlld3BvcnRPYnNlcnZlciIsInRvV2luIiwiaW50ZXJzZWN0aW9uRGVmZXJyZWRzIiwiaW50ZXJzZWN0aW9uT2JzZXJ2ZXJzIiwiZ2V0SW5PYiIsIndpbiIsIldlYWtNYXAiLCJvYnNlcnZlciIsImdldCIsImVudHJpZXMiLCJzZWVuIiwiU2V0IiwiaSIsImxlbmd0aCIsInRhcmdldCIsImhhcyIsImFkZCIsInVub2JzZXJ2ZSIsInJlc29sdmUiLCJkZWxldGUiLCJuZWVkc1Jvb3RCb3VuZHMiLCJzZXQiLCJtZWFzdXJlSW50ZXJzZWN0aW9uTm9Sb290IiwiZWwiLCJwcm9taXNlIiwiaW5PYiIsIm93bmVyRG9jdW1lbnQiLCJkZWZhdWx0VmlldyIsIm9ic2VydmUiLCJkZWZlcnJlZCJdLCJtYXBwaW5ncyI6IkFBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsU0FBUUEsUUFBUjtBQUNBLFNBQVFDLHNCQUFSO0FBQ0EsU0FBUUMsS0FBUjs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7O0FBRUE7QUFDQSxJQUFJQyxxQkFBSjs7QUFFQTtBQUNBLElBQUlDLHFCQUFKOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsU0FBU0MsT0FBVCxDQUFpQkMsR0FBakIsRUFBc0I7QUFDcEIsTUFBSSxDQUFDSCxxQkFBTCxFQUE0QjtBQUMxQkEsSUFBQUEscUJBQXFCLEdBQUcsSUFBSUksT0FBSixFQUF4QjtBQUNBSCxJQUFBQSxxQkFBcUIsR0FBRyxJQUFJRyxPQUFKLEVBQXhCO0FBQ0Q7O0FBRUQsTUFBSUMsUUFBUSxHQUFHSixxQkFBcUIsQ0FBQ0ssR0FBdEIsQ0FBMEJILEdBQTFCLENBQWY7O0FBQ0EsTUFBSSxDQUFDRSxRQUFMLEVBQWU7QUFDYkEsSUFBQUEsUUFBUSxHQUFHUCxzQkFBc0IsQ0FDL0IsVUFBQ1MsT0FBRCxFQUFhO0FBQ1gsVUFBTUMsSUFBSSxHQUFHLElBQUlDLEdBQUosRUFBYjs7QUFDQSxXQUFLLElBQUlDLENBQUMsR0FBR0gsT0FBTyxDQUFDSSxNQUFSLEdBQWlCLENBQTlCLEVBQWlDRCxDQUFDLElBQUksQ0FBdEMsRUFBeUNBLENBQUMsRUFBMUMsRUFBOEM7QUFDNUMsWUFBT0UsTUFBUCxHQUFpQkwsT0FBTyxDQUFDRyxDQUFELENBQXhCLENBQU9FLE1BQVA7O0FBQ0EsWUFBSUosSUFBSSxDQUFDSyxHQUFMLENBQVNELE1BQVQsQ0FBSixFQUFzQjtBQUNwQjtBQUNEOztBQUNESixRQUFBQSxJQUFJLENBQUNNLEdBQUwsQ0FBU0YsTUFBVDtBQUVBUCxRQUFBQSxRQUFRLENBQUNVLFNBQVQsQ0FBbUJILE1BQW5CO0FBQ0FaLFFBQUFBLHFCQUFxQixDQUFDTSxHQUF0QixDQUEwQk0sTUFBMUIsRUFBa0NJLE9BQWxDLENBQTBDVCxPQUFPLENBQUNHLENBQUQsQ0FBakQ7QUFDQVYsUUFBQUEscUJBQXFCLENBQUNpQixNQUF0QixDQUE2QkwsTUFBN0I7QUFDRDtBQUNGLEtBZDhCLEVBZS9CVCxHQWYrQixFQWdCL0I7QUFBQ2UsTUFBQUEsZUFBZSxFQUFFO0FBQWxCLEtBaEIrQixDQUFqQztBQWtCQWpCLElBQUFBLHFCQUFxQixDQUFDa0IsR0FBdEIsQ0FBMEJoQixHQUExQixFQUErQkUsUUFBL0I7QUFDRDs7QUFDRCxTQUFPQSxRQUFQO0FBQ0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTZSx5QkFBVCxDQUFtQ0MsRUFBbkMsRUFBdUM7QUFBQTs7QUFDNUMsK0JBQUlyQixxQkFBSixhQUFJLHNCQUF1QmEsR0FBdkIsQ0FBMkJRLEVBQTNCLENBQUosRUFBb0M7QUFDbEMsV0FBT3JCLHFCQUFxQixDQUFDTSxHQUF0QixDQUEwQmUsRUFBMUIsRUFBOEJDLE9BQXJDO0FBQ0Q7O0FBRUQsTUFBTUMsSUFBSSxHQUFHckIsT0FBTyxDQUFDSCxLQUFLLENBQUNzQixFQUFFLENBQUNHLGFBQUgsQ0FBaUJDLFdBQWxCLENBQU4sQ0FBcEI7QUFDQUYsRUFBQUEsSUFBSSxDQUFDRyxPQUFMLENBQWFMLEVBQWI7QUFFQSxNQUFNTSxRQUFRLEdBQUcsSUFBSTlCLFFBQUosRUFBakI7QUFDQUcsRUFBQUEscUJBQXFCLENBQUNtQixHQUF0QixDQUEwQkUsRUFBMUIsRUFBOEJNLFFBQTlCO0FBQ0EsU0FBT0EsUUFBUSxDQUFDTCxPQUFoQjtBQUNEIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb3B5cmlnaHQgMjAyMCBUaGUgQU1QIEhUTUwgQXV0aG9ycy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTLUlTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5pbXBvcnQge0RlZmVycmVkfSBmcm9tICcjY29yZS9kYXRhLXN0cnVjdHVyZXMvcHJvbWlzZSc7XG5pbXBvcnQge2NyZWF0ZVZpZXdwb3J0T2JzZXJ2ZXJ9IGZyb20gJyNjb3JlL2RvbS9sYXlvdXQvdmlld3BvcnQtb2JzZXJ2ZXInO1xuaW1wb3J0IHt0b1dpbn0gZnJvbSAnI2NvcmUvd2luZG93JztcblxuLyoqXG4gKiBAZmlsZW92ZXJ2aWV3XG4gKiBUaGlzIHV0aWxpdHkgaXMgc2ltaWxhciB0byB0aGUgYC4vaW50ZXJzZWN0aW9uYCwgYnV0IGl0IGRvZXNuJ3RcbiAqIHJlcXVpcmUgdGhlIGByb290Qm91bmRzYCBhbmQgdGh1cyBjYW4gdXNlIGEgc2ltcGxlciB2ZXJzaW9uIG9mIHRoZVxuICogaW50ZXJzZWN0aW9uIG9ic2VydmVyIHRoYXQncyBzdXBwb3J0ZWQgbmF0aXZlbHkgb24gbW9yZSBwbGF0Zm9ybXMuXG4gKlxuICogVE9ETygjMzM2NzgpOiBEZWR1cGUgaW50ZXJzZWN0aW9uIG1lYXN1cmVtZW50IHV0aWxzIG9uY2UgdGhlIG5hdGl2ZVxuICogc3VwcG9ydCBpcyBiZXR0ZXIuXG4gKi9cblxuLyoqIEB0eXBlIHtXZWFrTWFwPCFFbGVtZW50LCAhRGVmZXJyZWQ8IUludGVyc2VjdGlvbk9ic2VydmVyRW50cnk+Pn0gKi9cbmxldCBpbnRlcnNlY3Rpb25EZWZlcnJlZHM7XG5cbi8qKiBAdHlwZSB7V2Vha01hcDwhV2luZG93LCAhSW50ZXJzZWN0aW9uT2JzZXJ2ZXI+fSAqL1xubGV0IGludGVyc2VjdGlvbk9ic2VydmVycztcblxuLyoqXG4gKiBAcGFyYW0geyFXaW5kb3d9IHdpblxuICogQHJldHVybiB7IUludGVyc2VjdGlvbk9ic2VydmVyfVxuICovXG5mdW5jdGlvbiBnZXRJbk9iKHdpbikge1xuICBpZiAoIWludGVyc2VjdGlvbkRlZmVycmVkcykge1xuICAgIGludGVyc2VjdGlvbkRlZmVycmVkcyA9IG5ldyBXZWFrTWFwKCk7XG4gICAgaW50ZXJzZWN0aW9uT2JzZXJ2ZXJzID0gbmV3IFdlYWtNYXAoKTtcbiAgfVxuXG4gIGxldCBvYnNlcnZlciA9IGludGVyc2VjdGlvbk9ic2VydmVycy5nZXQod2luKTtcbiAgaWYgKCFvYnNlcnZlcikge1xuICAgIG9ic2VydmVyID0gY3JlYXRlVmlld3BvcnRPYnNlcnZlcihcbiAgICAgIChlbnRyaWVzKSA9PiB7XG4gICAgICAgIGNvbnN0IHNlZW4gPSBuZXcgU2V0KCk7XG4gICAgICAgIGZvciAobGV0IGkgPSBlbnRyaWVzLmxlbmd0aCAtIDE7IGkgPj0gMDsgaS0tKSB7XG4gICAgICAgICAgY29uc3Qge3RhcmdldH0gPSBlbnRyaWVzW2ldO1xuICAgICAgICAgIGlmIChzZWVuLmhhcyh0YXJnZXQpKSB7XG4gICAgICAgICAgICBjb250aW51ZTtcbiAgICAgICAgICB9XG4gICAgICAgICAgc2Vlbi5hZGQodGFyZ2V0KTtcblxuICAgICAgICAgIG9ic2VydmVyLnVub2JzZXJ2ZSh0YXJnZXQpO1xuICAgICAgICAgIGludGVyc2VjdGlvbkRlZmVycmVkcy5nZXQodGFyZ2V0KS5yZXNvbHZlKGVudHJpZXNbaV0pO1xuICAgICAgICAgIGludGVyc2VjdGlvbkRlZmVycmVkcy5kZWxldGUodGFyZ2V0KTtcbiAgICAgICAgfVxuICAgICAgfSxcbiAgICAgIHdpbixcbiAgICAgIHtuZWVkc1Jvb3RCb3VuZHM6IGZhbHNlfVxuICAgICk7XG4gICAgaW50ZXJzZWN0aW9uT2JzZXJ2ZXJzLnNldCh3aW4sIG9ic2VydmVyKTtcbiAgfVxuICByZXR1cm4gb2JzZXJ2ZXI7XG59XG5cbi8qKlxuICogUmV0dXJucyBhIHByb21pc2UgdGhhdCByZXNvbHZlcyB3aXRoIHRoZSBpbnRlcnNlY3Rpb24gZW50cnkgZm9yIHRoZSBnaXZlbiBlbGVtZW50LlxuICpcbiAqIElmIG11bHRpcGxlIG1lYXN1cmVzIGZvciB0aGUgc2FtZSBlbGVtZW50IG9jY3VyIHZlcnkgcXVpY2tseSwgdGhleSB3aWxsXG4gKiBkZWR1cGUgdG8gdGhlIHNhbWUgcHJvbWlzZS5cbiAqXG4gKiBAcGFyYW0geyFFbGVtZW50fSBlbFxuICogQHJldHVybiB7IVByb21pc2U8IUludGVyc2VjdGlvbk9ic2VydmVyRW50cnk+fVxuICovXG5leHBvcnQgZnVuY3Rpb24gbWVhc3VyZUludGVyc2VjdGlvbk5vUm9vdChlbCkge1xuICBpZiAoaW50ZXJzZWN0aW9uRGVmZXJyZWRzPy5oYXMoZWwpKSB7XG4gICAgcmV0dXJuIGludGVyc2VjdGlvbkRlZmVycmVkcy5nZXQoZWwpLnByb21pc2U7XG4gIH1cblxuICBjb25zdCBpbk9iID0gZ2V0SW5PYih0b1dpbihlbC5vd25lckRvY3VtZW50LmRlZmF1bHRWaWV3KSk7XG4gIGluT2Iub2JzZXJ2ZShlbCk7XG5cbiAgY29uc3QgZGVmZXJyZWQgPSBuZXcgRGVmZXJyZWQoKTtcbiAgaW50ZXJzZWN0aW9uRGVmZXJyZWRzLnNldChlbCwgZGVmZXJyZWQpO1xuICByZXR1cm4gZGVmZXJyZWQucHJvbWlzZTtcbn1cbiJdfQ==
+// /Users/mszylkowski/src/amphtml/src/core/dom/layout/intersection-no-root.js

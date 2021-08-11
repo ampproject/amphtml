@@ -1,0 +1,47 @@
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Return true if string begins with the characters of the specified string.
+ * Polyfill copied from MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string/startsWith
+ *
+ * @param {string} search
+ * @param {number=} rawPos
+ * @return {boolean}
+ * @this {string}
+ */
+function startsWith(search, rawPos) {
+  var pos = rawPos > 0 ? rawPos | 0 : 0;
+  // eslint-disable-next-line local/no-invalid-this
+  return this.substr(pos, search.length) === search;
+}
+
+/**
+ * Sets the String.startsWith polyfill if it does not exist.
+ * @param {!Window} win
+ */
+export function install(win) {
+  if (!win.String.prototype.startsWith) {
+    win.Object.defineProperty(win.String.prototype, 'startsWith', {
+      enumerable: false,
+      configurable: true,
+      writable: true,
+      value: startsWith
+    });
+  }
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInN0cmluZy1zdGFydHMtd2l0aC5qcyJdLCJuYW1lcyI6WyJzdGFydHNXaXRoIiwic2VhcmNoIiwicmF3UG9zIiwicG9zIiwic3Vic3RyIiwibGVuZ3RoIiwiaW5zdGFsbCIsIndpbiIsIlN0cmluZyIsInByb3RvdHlwZSIsIk9iamVjdCIsImRlZmluZVByb3BlcnR5IiwiZW51bWVyYWJsZSIsImNvbmZpZ3VyYWJsZSIsIndyaXRhYmxlIiwidmFsdWUiXSwibWFwcGluZ3MiOiJBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxTQUFTQSxVQUFULENBQW9CQyxNQUFwQixFQUE0QkMsTUFBNUIsRUFBb0M7QUFDbEMsTUFBTUMsR0FBRyxHQUFHRCxNQUFNLEdBQUcsQ0FBVCxHQUFhQSxNQUFNLEdBQUcsQ0FBdEIsR0FBMEIsQ0FBdEM7QUFDQTtBQUNBLFNBQU8sS0FBS0UsTUFBTCxDQUFZRCxHQUFaLEVBQWlCRixNQUFNLENBQUNJLE1BQXhCLE1BQW9DSixNQUEzQztBQUNEOztBQUVEO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsT0FBTyxTQUFTSyxPQUFULENBQWlCQyxHQUFqQixFQUFzQjtBQUMzQixNQUFJLENBQUNBLEdBQUcsQ0FBQ0MsTUFBSixDQUFXQyxTQUFYLENBQXFCVCxVQUExQixFQUFzQztBQUNwQ08sSUFBQUEsR0FBRyxDQUFDRyxNQUFKLENBQVdDLGNBQVgsQ0FBMEJKLEdBQUcsQ0FBQ0MsTUFBSixDQUFXQyxTQUFyQyxFQUFnRCxZQUFoRCxFQUE4RDtBQUM1REcsTUFBQUEsVUFBVSxFQUFFLEtBRGdEO0FBRTVEQyxNQUFBQSxZQUFZLEVBQUUsSUFGOEM7QUFHNURDLE1BQUFBLFFBQVEsRUFBRSxJQUhrRDtBQUk1REMsTUFBQUEsS0FBSyxFQUFFZjtBQUpxRCxLQUE5RDtBQU1EO0FBQ0YiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIENvcHlyaWdodCAyMDIwIFRoZSBBTVAgSFRNTCBBdXRob3JzLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIExpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmVcbiAqIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuIFwiQVMtSVNcIiBCQVNJUyxcbiAqIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLlxuICogU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZFxuICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuLyoqXG4gKiBSZXR1cm4gdHJ1ZSBpZiBzdHJpbmcgYmVnaW5zIHdpdGggdGhlIGNoYXJhY3RlcnMgb2YgdGhlIHNwZWNpZmllZCBzdHJpbmcuXG4gKiBQb2x5ZmlsbCBjb3BpZWQgZnJvbSBNRE46IGh0dHBzOi8vZGV2ZWxvcGVyLm1vemlsbGEub3JnL2VuLVVTL2RvY3MvV2ViL0phdmFTY3JpcHQvUmVmZXJlbmNlL0dsb2JhbF9PYmplY3RzL3N0cmluZy9zdGFydHNXaXRoXG4gKlxuICogQHBhcmFtIHtzdHJpbmd9IHNlYXJjaFxuICogQHBhcmFtIHtudW1iZXI9fSByYXdQb3NcbiAqIEByZXR1cm4ge2Jvb2xlYW59XG4gKiBAdGhpcyB7c3RyaW5nfVxuICovXG5mdW5jdGlvbiBzdGFydHNXaXRoKHNlYXJjaCwgcmF3UG9zKSB7XG4gIGNvbnN0IHBvcyA9IHJhd1BvcyA+IDAgPyByYXdQb3MgfCAwIDogMDtcbiAgLy8gZXNsaW50LWRpc2FibGUtbmV4dC1saW5lIGxvY2FsL25vLWludmFsaWQtdGhpc1xuICByZXR1cm4gdGhpcy5zdWJzdHIocG9zLCBzZWFyY2gubGVuZ3RoKSA9PT0gc2VhcmNoO1xufVxuXG4vKipcbiAqIFNldHMgdGhlIFN0cmluZy5zdGFydHNXaXRoIHBvbHlmaWxsIGlmIGl0IGRvZXMgbm90IGV4aXN0LlxuICogQHBhcmFtIHshV2luZG93fSB3aW5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGluc3RhbGwod2luKSB7XG4gIGlmICghd2luLlN0cmluZy5wcm90b3R5cGUuc3RhcnRzV2l0aCkge1xuICAgIHdpbi5PYmplY3QuZGVmaW5lUHJvcGVydHkod2luLlN0cmluZy5wcm90b3R5cGUsICdzdGFydHNXaXRoJywge1xuICAgICAgZW51bWVyYWJsZTogZmFsc2UsXG4gICAgICBjb25maWd1cmFibGU6IHRydWUsXG4gICAgICB3cml0YWJsZTogdHJ1ZSxcbiAgICAgIHZhbHVlOiBzdGFydHNXaXRoLFxuICAgIH0pO1xuICB9XG59XG4iXX0=
+// /Users/mszylkowski/src/amphtml/src/polyfills/string-starts-with.js

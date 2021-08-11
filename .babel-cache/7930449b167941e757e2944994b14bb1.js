@@ -1,0 +1,218 @@
+/**
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { elementStringOrPassThru } from "../error/message-helpers";
+import { isArray, isElement, isString } from "../types";
+import { remove } from "../types/array";
+
+/**
+ * @fileoverview This file provides the base implementation for assertion
+ * functions. Most files should never import from this; instead, import from
+ * `dev` or `user`. It is also used by the Log class for its assertions.
+ */
+
+/**
+ * A base assertion function, provided to various assertion helpers.
+ * @typedef {function(?, string=, ...*):?|function(?, !Array<*>)}
+ */
+export var AssertionFunctionDef;
+
+/**
+ * Throws an error if the second argument isn't trueish.
+ *
+ * Supports argument substitution into the message via %s placeholders.
+ *
+ * Throws an error object that has two extra properties:
+ * - messageArray: The elements of the substituted message as non-stringified
+ *   elements in an array. When e.g. passed to console.error this yields
+ *   native displays of things like HTML elements.
+ * @param {?string} sentinel
+ * @param {T} shouldBeTruthy
+ * @param {string} opt_message
+ * @param {...*} var_args Arguments substituted into %s in the message
+ * @return {T}
+ * @template T
+ * @throws {Error} when shouldBeTruthy is not truthy.
+ */
+export function assert(sentinel, shouldBeTruthy, opt_message, var_args) {
+  if (opt_message === void 0) {
+    opt_message = 'Assertion failed';
+  }
+
+  if (shouldBeTruthy) {
+    return shouldBeTruthy;
+  }
+
+  // Include the sentinel string if provided and not already present
+  if (sentinel && opt_message.indexOf(sentinel) == -1) {
+    opt_message += sentinel;
+  }
+
+  // Skip the first 3 arguments to isolate format params
+  // const messageArgs = Array.prototype.slice.call(arguments, 3);
+  // Index at which message args start
+  var i = 3;
+  // Substitute provided values into format string in message
+  var splitMessage = opt_message.split('%s');
+  var message = splitMessage.shift();
+  var messageArray = [message];
+
+  while (splitMessage.length) {
+    var subValue = arguments[i++];
+    var nextConstant = splitMessage.shift();
+    message += elementStringOrPassThru(subValue) + nextConstant;
+    messageArray.push(subValue, nextConstant.trim());
+  }
+
+  var error = new Error(message);
+  error.messageArray = remove(messageArray, function (x) {
+    return x !== '';
+  });
+  // __AMP_REPORT_ERROR is installed globally per window in the entry point in
+  // AMP documents. It may not be present for Bento/Preact elements on non-AMP
+  // pages.
+  self.__AMP_REPORT_ERROR == null ? void 0 : self.__AMP_REPORT_ERROR(error);
+  throw error;
+}
+
+/**
+ * Asserts types, backbone of `assertNumber`, `assertString`, etc.
+ *
+ * It understands array-based "id"-contracted messages.
+ *
+ * Otherwise creates a sprintf syntax string containing the optional message or the
+ * default. The `subject` of the assertion is added at the end.
+ *
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
+ * @param {T} subject
+ * @param {*} shouldBeTruthy
+ * @param {string} defaultMessage
+ * @param {!Array<*>|string=} opt_message
+ * @return {T}
+ * @template T
+ * @private
+ */
+function assertType_(assertFn, subject, shouldBeTruthy, defaultMessage, opt_message) {
+  if (isArray(opt_message)) {
+    assertFn(shouldBeTruthy,
+    /** @type {!Array} */
+    opt_message.concat([subject]));
+  } else {
+    assertFn(shouldBeTruthy, (opt_message || defaultMessage) + ": %s", subject);
+  }
+
+  return subject;
+}
+
+/**
+ * Throws an error if the first argument isn't an Element.
+ *
+ * For more details see `assert`.
+ *
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
+ * @param {*} shouldBeElement
+ * @param {!Array<*>|string=} opt_message The assertion message
+ * @return {!Element} The value of shouldBeTrueish.
+ * @throws {Error} when shouldBeElement is not an Element
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function assertElement(assertFn, shouldBeElement, opt_message) {
+  return (
+    /** @type {!Element} */
+    assertType_(assertFn, shouldBeElement, isElement(shouldBeElement), 'Element expected', opt_message)
+  );
+}
+
+/**
+ * Throws an error if the first argument isn't a string. The string can
+ * be empty.
+ *
+ * For more details see `assert`.
+ *
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
+ * @param {*} shouldBeString
+ * @param {!Array<*>|string=} opt_message The assertion message
+ * @return {string} The string value. Can be an empty string.
+ * @throws {Error} when shouldBeString is not an String
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function assertString(assertFn, shouldBeString, opt_message) {
+  return (
+    /** @type {string} */
+    assertType_(assertFn, shouldBeString, isString(shouldBeString), 'String expected', opt_message)
+  );
+}
+
+/**
+ * Throws an error if the first argument isn't a number. The allowed values
+ * include `0` and `NaN`.
+ *
+ * For more details see `assert`.
+ *
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
+ * @param {*} shouldBeNumber
+ * @param {!Array<*>|string=} opt_message The assertion message
+ * @return {number} The number value. The allowed values include `0`
+ *   and `NaN`.
+ * @throws {Error} when shouldBeNumber is not an Number
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function assertNumber(assertFn, shouldBeNumber, opt_message) {
+  return (
+    /** @type {number} */
+    assertType_(assertFn, shouldBeNumber, typeof shouldBeNumber == 'number', 'Number expected', opt_message)
+  );
+}
+
+/**
+ * Throws an error if the first argument is not an array.
+ * The array can be empty.
+ *
+ * For more details see `assert`.
+ *
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
+ * @param {*} shouldBeArray
+ * @param {!Array<*>|string=} opt_message The assertion message
+ * @return {!Array} The array value
+ * @throws {Error} when shouldBeArray is not an Array
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function assertArray(assertFn, shouldBeArray, opt_message) {
+  return (
+    /** @type {!Array} */
+    assertType_(assertFn, shouldBeArray, isArray(shouldBeArray), 'Array expected', opt_message)
+  );
+}
+
+/**
+ * Throws an error if the first argument isn't a boolean.
+ *
+ * For more details see `assert`.
+ *
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
+ * @param {*} shouldBeBoolean
+ * @param {!Array<*>|string=} opt_message The assertion message
+ * @return {boolean} The boolean value.
+ * @throws {Error} when shouldBeBoolean is not an Boolean
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function assertBoolean(assertFn, shouldBeBoolean, opt_message) {
+  return (
+    /** @type {boolean} */
+    assertType_(assertFn, shouldBeBoolean, !!shouldBeBoolean === shouldBeBoolean, 'Boolean expected', opt_message)
+  );
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImJhc2UuanMiXSwibmFtZXMiOlsiZWxlbWVudFN0cmluZ09yUGFzc1RocnUiLCJpc0FycmF5IiwiaXNFbGVtZW50IiwiaXNTdHJpbmciLCJyZW1vdmUiLCJBc3NlcnRpb25GdW5jdGlvbkRlZiIsImFzc2VydCIsInNlbnRpbmVsIiwic2hvdWxkQmVUcnV0aHkiLCJvcHRfbWVzc2FnZSIsInZhcl9hcmdzIiwiaW5kZXhPZiIsImkiLCJzcGxpdE1lc3NhZ2UiLCJzcGxpdCIsIm1lc3NhZ2UiLCJzaGlmdCIsIm1lc3NhZ2VBcnJheSIsImxlbmd0aCIsInN1YlZhbHVlIiwiYXJndW1lbnRzIiwibmV4dENvbnN0YW50IiwicHVzaCIsInRyaW0iLCJlcnJvciIsIkVycm9yIiwieCIsInNlbGYiLCJfX0FNUF9SRVBPUlRfRVJST1IiLCJhc3NlcnRUeXBlXyIsImFzc2VydEZuIiwic3ViamVjdCIsImRlZmF1bHRNZXNzYWdlIiwiY29uY2F0IiwiYXNzZXJ0RWxlbWVudCIsInNob3VsZEJlRWxlbWVudCIsImFzc2VydFN0cmluZyIsInNob3VsZEJlU3RyaW5nIiwiYXNzZXJ0TnVtYmVyIiwic2hvdWxkQmVOdW1iZXIiLCJhc3NlcnRBcnJheSIsInNob3VsZEJlQXJyYXkiLCJhc3NlcnRCb29sZWFuIiwic2hvdWxkQmVCb29sZWFuIl0sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFFQSxTQUFRQSx1QkFBUjtBQUNBLFNBQVFDLE9BQVIsRUFBaUJDLFNBQWpCLEVBQTRCQyxRQUE1QjtBQUNBLFNBQVFDLE1BQVI7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sSUFBSUMsb0JBQUo7O0FBRVA7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU0MsTUFBVCxDQUNMQyxRQURLLEVBRUxDLGNBRkssRUFHTEMsV0FISyxFQUlMQyxRQUpLLEVBS0w7QUFBQSxNQUZBRCxXQUVBO0FBRkFBLElBQUFBLFdBRUEsR0FGYyxrQkFFZDtBQUFBOztBQUNBLE1BQUlELGNBQUosRUFBb0I7QUFDbEIsV0FBT0EsY0FBUDtBQUNEOztBQUVEO0FBQ0EsTUFBSUQsUUFBUSxJQUFJRSxXQUFXLENBQUNFLE9BQVosQ0FBb0JKLFFBQXBCLEtBQWlDLENBQUMsQ0FBbEQsRUFBcUQ7QUFDbkRFLElBQUFBLFdBQVcsSUFBSUYsUUFBZjtBQUNEOztBQUVEO0FBQ0E7QUFDQTtBQUNBLE1BQUlLLENBQUMsR0FBRyxDQUFSO0FBRUE7QUFDQSxNQUFNQyxZQUFZLEdBQUdKLFdBQVcsQ0FBQ0ssS0FBWixDQUFrQixJQUFsQixDQUFyQjtBQUNBLE1BQUlDLE9BQU8sR0FBR0YsWUFBWSxDQUFDRyxLQUFiLEVBQWQ7QUFDQSxNQUFNQyxZQUFZLEdBQUcsQ0FBQ0YsT0FBRCxDQUFyQjs7QUFFQSxTQUFPRixZQUFZLENBQUNLLE1BQXBCLEVBQTRCO0FBQzFCLFFBQU1DLFFBQVEsR0FBR0MsU0FBUyxDQUFDUixDQUFDLEVBQUYsQ0FBMUI7QUFDQSxRQUFNUyxZQUFZLEdBQUdSLFlBQVksQ0FBQ0csS0FBYixFQUFyQjtBQUVBRCxJQUFBQSxPQUFPLElBQUlmLHVCQUF1QixDQUFDbUIsUUFBRCxDQUF2QixHQUFvQ0UsWUFBL0M7QUFDQUosSUFBQUEsWUFBWSxDQUFDSyxJQUFiLENBQWtCSCxRQUFsQixFQUE0QkUsWUFBWSxDQUFDRSxJQUFiLEVBQTVCO0FBQ0Q7O0FBRUQsTUFBTUMsS0FBSyxHQUFHLElBQUlDLEtBQUosQ0FBVVYsT0FBVixDQUFkO0FBQ0FTLEVBQUFBLEtBQUssQ0FBQ1AsWUFBTixHQUFxQmIsTUFBTSxDQUFDYSxZQUFELEVBQWUsVUFBQ1MsQ0FBRDtBQUFBLFdBQU9BLENBQUMsS0FBSyxFQUFiO0FBQUEsR0FBZixDQUEzQjtBQUNBO0FBQ0E7QUFDQTtBQUNBQyxFQUFBQSxJQUFJLENBQUNDLGtCQUFMLG9CQUFBRCxJQUFJLENBQUNDLGtCQUFMLENBQTBCSixLQUExQjtBQUNBLFFBQU1BLEtBQU47QUFDRDs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsU0FBU0ssV0FBVCxDQUNFQyxRQURGLEVBRUVDLE9BRkYsRUFHRXZCLGNBSEYsRUFJRXdCLGNBSkYsRUFLRXZCLFdBTEYsRUFNRTtBQUNBLE1BQUlSLE9BQU8sQ0FBQ1EsV0FBRCxDQUFYLEVBQTBCO0FBQ3hCcUIsSUFBQUEsUUFBUSxDQUNOdEIsY0FETTtBQUVOO0FBQXVCQyxJQUFBQSxXQUFELENBQWN3QixNQUFkLENBQXFCLENBQUNGLE9BQUQsQ0FBckIsQ0FGaEIsQ0FBUjtBQUlELEdBTEQsTUFLTztBQUNMRCxJQUFBQSxRQUFRLENBQUN0QixjQUFELEdBQW9CQyxXQUFXLElBQUl1QixjQUFuQyxZQUF5REQsT0FBekQsQ0FBUjtBQUNEOztBQUVELFNBQU9BLE9BQVA7QUFDRDs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVNHLGFBQVQsQ0FBdUJKLFFBQXZCLEVBQWlDSyxlQUFqQyxFQUFrRDFCLFdBQWxELEVBQStEO0FBQ3BFO0FBQU87QUFDTG9CLElBQUFBLFdBQVcsQ0FDVEMsUUFEUyxFQUVUSyxlQUZTLEVBR1RqQyxTQUFTLENBQUNpQyxlQUFELENBSEEsRUFJVCxrQkFKUyxFQUtUMUIsV0FMUztBQURiO0FBU0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVMyQixZQUFULENBQXNCTixRQUF0QixFQUFnQ08sY0FBaEMsRUFBZ0Q1QixXQUFoRCxFQUE2RDtBQUNsRTtBQUFPO0FBQ0xvQixJQUFBQSxXQUFXLENBQ1RDLFFBRFMsRUFFVE8sY0FGUyxFQUdUbEMsUUFBUSxDQUFDa0MsY0FBRCxDQUhDLEVBSVQsaUJBSlMsRUFLVDVCLFdBTFM7QUFEYjtBQVNEOztBQUVEO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVM2QixZQUFULENBQXNCUixRQUF0QixFQUFnQ1MsY0FBaEMsRUFBZ0Q5QixXQUFoRCxFQUE2RDtBQUNsRTtBQUFPO0FBQ0xvQixJQUFBQSxXQUFXLENBQ1RDLFFBRFMsRUFFVFMsY0FGUyxFQUdULE9BQU9BLGNBQVAsSUFBeUIsUUFIaEIsRUFJVCxpQkFKUyxFQUtUOUIsV0FMUztBQURiO0FBU0Q7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxPQUFPLFNBQVMrQixXQUFULENBQXFCVixRQUFyQixFQUErQlcsYUFBL0IsRUFBOENoQyxXQUE5QyxFQUEyRDtBQUNoRTtBQUFPO0FBQ0xvQixJQUFBQSxXQUFXLENBQ1RDLFFBRFMsRUFFVFcsYUFGUyxFQUdUeEMsT0FBTyxDQUFDd0MsYUFBRCxDQUhFLEVBSVQsZ0JBSlMsRUFLVGhDLFdBTFM7QUFEYjtBQVNEOztBQUVEO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE9BQU8sU0FBU2lDLGFBQVQsQ0FBdUJaLFFBQXZCLEVBQWlDYSxlQUFqQyxFQUFrRGxDLFdBQWxELEVBQStEO0FBQ3BFO0FBQU87QUFDTG9CLElBQUFBLFdBQVcsQ0FDVEMsUUFEUyxFQUVUYSxlQUZTLEVBR1QsQ0FBQyxDQUFDQSxlQUFGLEtBQXNCQSxlQUhiLEVBSVQsa0JBSlMsRUFLVGxDLFdBTFM7QUFEYjtBQVNEIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb3B5cmlnaHQgMjAyMSBUaGUgQU1QIEhUTUwgQXV0aG9ycy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTLUlTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbmltcG9ydCB7ZWxlbWVudFN0cmluZ09yUGFzc1RocnV9IGZyb20gJyNjb3JlL2Vycm9yL21lc3NhZ2UtaGVscGVycyc7XG5pbXBvcnQge2lzQXJyYXksIGlzRWxlbWVudCwgaXNTdHJpbmd9IGZyb20gJyNjb3JlL3R5cGVzJztcbmltcG9ydCB7cmVtb3ZlfSBmcm9tICcjY29yZS90eXBlcy9hcnJheSc7XG5cbi8qKlxuICogQGZpbGVvdmVydmlldyBUaGlzIGZpbGUgcHJvdmlkZXMgdGhlIGJhc2UgaW1wbGVtZW50YXRpb24gZm9yIGFzc2VydGlvblxuICogZnVuY3Rpb25zLiBNb3N0IGZpbGVzIHNob3VsZCBuZXZlciBpbXBvcnQgZnJvbSB0aGlzOyBpbnN0ZWFkLCBpbXBvcnQgZnJvbVxuICogYGRldmAgb3IgYHVzZXJgLiBJdCBpcyBhbHNvIHVzZWQgYnkgdGhlIExvZyBjbGFzcyBmb3IgaXRzIGFzc2VydGlvbnMuXG4gKi9cblxuLyoqXG4gKiBBIGJhc2UgYXNzZXJ0aW9uIGZ1bmN0aW9uLCBwcm92aWRlZCB0byB2YXJpb3VzIGFzc2VydGlvbiBoZWxwZXJzLlxuICogQHR5cGVkZWYge2Z1bmN0aW9uKD8sIHN0cmluZz0sIC4uLiopOj98ZnVuY3Rpb24oPywgIUFycmF5PCo+KX1cbiAqL1xuZXhwb3J0IGxldCBBc3NlcnRpb25GdW5jdGlvbkRlZjtcblxuLyoqXG4gKiBUaHJvd3MgYW4gZXJyb3IgaWYgdGhlIHNlY29uZCBhcmd1bWVudCBpc24ndCB0cnVlaXNoLlxuICpcbiAqIFN1cHBvcnRzIGFyZ3VtZW50IHN1YnN0aXR1dGlvbiBpbnRvIHRoZSBtZXNzYWdlIHZpYSAlcyBwbGFjZWhvbGRlcnMuXG4gKlxuICogVGhyb3dzIGFuIGVycm9yIG9iamVjdCB0aGF0IGhhcyB0d28gZXh0cmEgcHJvcGVydGllczpcbiAqIC0gbWVzc2FnZUFycmF5OiBUaGUgZWxlbWVudHMgb2YgdGhlIHN1YnN0aXR1dGVkIG1lc3NhZ2UgYXMgbm9uLXN0cmluZ2lmaWVkXG4gKiAgIGVsZW1lbnRzIGluIGFuIGFycmF5LiBXaGVuIGUuZy4gcGFzc2VkIHRvIGNvbnNvbGUuZXJyb3IgdGhpcyB5aWVsZHNcbiAqICAgbmF0aXZlIGRpc3BsYXlzIG9mIHRoaW5ncyBsaWtlIEhUTUwgZWxlbWVudHMuXG4gKiBAcGFyYW0gez9zdHJpbmd9IHNlbnRpbmVsXG4gKiBAcGFyYW0ge1R9IHNob3VsZEJlVHJ1dGh5XG4gKiBAcGFyYW0ge3N0cmluZ30gb3B0X21lc3NhZ2VcbiAqIEBwYXJhbSB7Li4uKn0gdmFyX2FyZ3MgQXJndW1lbnRzIHN1YnN0aXR1dGVkIGludG8gJXMgaW4gdGhlIG1lc3NhZ2VcbiAqIEByZXR1cm4ge1R9XG4gKiBAdGVtcGxhdGUgVFxuICogQHRocm93cyB7RXJyb3J9IHdoZW4gc2hvdWxkQmVUcnV0aHkgaXMgbm90IHRydXRoeS5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGFzc2VydChcbiAgc2VudGluZWwsXG4gIHNob3VsZEJlVHJ1dGh5LFxuICBvcHRfbWVzc2FnZSA9ICdBc3NlcnRpb24gZmFpbGVkJyxcbiAgdmFyX2FyZ3Ncbikge1xuICBpZiAoc2hvdWxkQmVUcnV0aHkpIHtcbiAgICByZXR1cm4gc2hvdWxkQmVUcnV0aHk7XG4gIH1cblxuICAvLyBJbmNsdWRlIHRoZSBzZW50aW5lbCBzdHJpbmcgaWYgcHJvdmlkZWQgYW5kIG5vdCBhbHJlYWR5IHByZXNlbnRcbiAgaWYgKHNlbnRpbmVsICYmIG9wdF9tZXNzYWdlLmluZGV4T2Yoc2VudGluZWwpID09IC0xKSB7XG4gICAgb3B0X21lc3NhZ2UgKz0gc2VudGluZWw7XG4gIH1cblxuICAvLyBTa2lwIHRoZSBmaXJzdCAzIGFyZ3VtZW50cyB0byBpc29sYXRlIGZvcm1hdCBwYXJhbXNcbiAgLy8gY29uc3QgbWVzc2FnZUFyZ3MgPSBBcnJheS5wcm90b3R5cGUuc2xpY2UuY2FsbChhcmd1bWVudHMsIDMpO1xuICAvLyBJbmRleCBhdCB3aGljaCBtZXNzYWdlIGFyZ3Mgc3RhcnRcbiAgbGV0IGkgPSAzO1xuXG4gIC8vIFN1YnN0aXR1dGUgcHJvdmlkZWQgdmFsdWVzIGludG8gZm9ybWF0IHN0cmluZyBpbiBtZXNzYWdlXG4gIGNvbnN0IHNwbGl0TWVzc2FnZSA9IG9wdF9tZXNzYWdlLnNwbGl0KCclcycpO1xuICBsZXQgbWVzc2FnZSA9IHNwbGl0TWVzc2FnZS5zaGlmdCgpO1xuICBjb25zdCBtZXNzYWdlQXJyYXkgPSBbbWVzc2FnZV07XG5cbiAgd2hpbGUgKHNwbGl0TWVzc2FnZS5sZW5ndGgpIHtcbiAgICBjb25zdCBzdWJWYWx1ZSA9IGFyZ3VtZW50c1tpKytdO1xuICAgIGNvbnN0IG5leHRDb25zdGFudCA9IHNwbGl0TWVzc2FnZS5zaGlmdCgpO1xuXG4gICAgbWVzc2FnZSArPSBlbGVtZW50U3RyaW5nT3JQYXNzVGhydShzdWJWYWx1ZSkgKyBuZXh0Q29uc3RhbnQ7XG4gICAgbWVzc2FnZUFycmF5LnB1c2goc3ViVmFsdWUsIG5leHRDb25zdGFudC50cmltKCkpO1xuICB9XG5cbiAgY29uc3QgZXJyb3IgPSBuZXcgRXJyb3IobWVzc2FnZSk7XG4gIGVycm9yLm1lc3NhZ2VBcnJheSA9IHJlbW92ZShtZXNzYWdlQXJyYXksICh4KSA9PiB4ICE9PSAnJyk7XG4gIC8vIF9fQU1QX1JFUE9SVF9FUlJPUiBpcyBpbnN0YWxsZWQgZ2xvYmFsbHkgcGVyIHdpbmRvdyBpbiB0aGUgZW50cnkgcG9pbnQgaW5cbiAgLy8gQU1QIGRvY3VtZW50cy4gSXQgbWF5IG5vdCBiZSBwcmVzZW50IGZvciBCZW50by9QcmVhY3QgZWxlbWVudHMgb24gbm9uLUFNUFxuICAvLyBwYWdlcy5cbiAgc2VsZi5fX0FNUF9SRVBPUlRfRVJST1I/LihlcnJvcik7XG4gIHRocm93IGVycm9yO1xufVxuXG4vKipcbiAqIEFzc2VydHMgdHlwZXMsIGJhY2tib25lIG9mIGBhc3NlcnROdW1iZXJgLCBgYXNzZXJ0U3RyaW5nYCwgZXRjLlxuICpcbiAqIEl0IHVuZGVyc3RhbmRzIGFycmF5LWJhc2VkIFwiaWRcIi1jb250cmFjdGVkIG1lc3NhZ2VzLlxuICpcbiAqIE90aGVyd2lzZSBjcmVhdGVzIGEgc3ByaW50ZiBzeW50YXggc3RyaW5nIGNvbnRhaW5pbmcgdGhlIG9wdGlvbmFsIG1lc3NhZ2Ugb3IgdGhlXG4gKiBkZWZhdWx0LiBUaGUgYHN1YmplY3RgIG9mIHRoZSBhc3NlcnRpb24gaXMgYWRkZWQgYXQgdGhlIGVuZC5cbiAqXG4gKiBAcGFyYW0geyFBc3NlcnRpb25GdW5jdGlvbkRlZn0gYXNzZXJ0Rm4gdW5kZXJseWluZyBhc3NlcnRpb24gZnVuY3Rpb24gdG8gY2FsbFxuICogQHBhcmFtIHtUfSBzdWJqZWN0XG4gKiBAcGFyYW0geyp9IHNob3VsZEJlVHJ1dGh5XG4gKiBAcGFyYW0ge3N0cmluZ30gZGVmYXVsdE1lc3NhZ2VcbiAqIEBwYXJhbSB7IUFycmF5PCo+fHN0cmluZz19IG9wdF9tZXNzYWdlXG4gKiBAcmV0dXJuIHtUfVxuICogQHRlbXBsYXRlIFRcbiAqIEBwcml2YXRlXG4gKi9cbmZ1bmN0aW9uIGFzc2VydFR5cGVfKFxuICBhc3NlcnRGbixcbiAgc3ViamVjdCxcbiAgc2hvdWxkQmVUcnV0aHksXG4gIGRlZmF1bHRNZXNzYWdlLFxuICBvcHRfbWVzc2FnZVxuKSB7XG4gIGlmIChpc0FycmF5KG9wdF9tZXNzYWdlKSkge1xuICAgIGFzc2VydEZuKFxuICAgICAgc2hvdWxkQmVUcnV0aHksXG4gICAgICAvKiogQHR5cGUgeyFBcnJheX0gKi8gKG9wdF9tZXNzYWdlKS5jb25jYXQoW3N1YmplY3RdKVxuICAgICk7XG4gIH0gZWxzZSB7XG4gICAgYXNzZXJ0Rm4oc2hvdWxkQmVUcnV0aHksIGAke29wdF9tZXNzYWdlIHx8IGRlZmF1bHRNZXNzYWdlfTogJXNgLCBzdWJqZWN0KTtcbiAgfVxuXG4gIHJldHVybiBzdWJqZWN0O1xufVxuXG4vKipcbiAqIFRocm93cyBhbiBlcnJvciBpZiB0aGUgZmlyc3QgYXJndW1lbnQgaXNuJ3QgYW4gRWxlbWVudC5cbiAqXG4gKiBGb3IgbW9yZSBkZXRhaWxzIHNlZSBgYXNzZXJ0YC5cbiAqXG4gKiBAcGFyYW0geyFBc3NlcnRpb25GdW5jdGlvbkRlZn0gYXNzZXJ0Rm4gdW5kZXJseWluZyBhc3NlcnRpb24gZnVuY3Rpb24gdG8gY2FsbFxuICogQHBhcmFtIHsqfSBzaG91bGRCZUVsZW1lbnRcbiAqIEBwYXJhbSB7IUFycmF5PCo+fHN0cmluZz19IG9wdF9tZXNzYWdlIFRoZSBhc3NlcnRpb24gbWVzc2FnZVxuICogQHJldHVybiB7IUVsZW1lbnR9IFRoZSB2YWx1ZSBvZiBzaG91bGRCZVRydWVpc2guXG4gKiBAdGhyb3dzIHtFcnJvcn0gd2hlbiBzaG91bGRCZUVsZW1lbnQgaXMgbm90IGFuIEVsZW1lbnRcbiAqIEBjbG9zdXJlUHJpbWl0aXZlIHthc3NlcnRzLm1hdGNoZXNSZXR1cm59XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBhc3NlcnRFbGVtZW50KGFzc2VydEZuLCBzaG91bGRCZUVsZW1lbnQsIG9wdF9tZXNzYWdlKSB7XG4gIHJldHVybiAvKiogQHR5cGUgeyFFbGVtZW50fSAqLyAoXG4gICAgYXNzZXJ0VHlwZV8oXG4gICAgICBhc3NlcnRGbixcbiAgICAgIHNob3VsZEJlRWxlbWVudCxcbiAgICAgIGlzRWxlbWVudChzaG91bGRCZUVsZW1lbnQpLFxuICAgICAgJ0VsZW1lbnQgZXhwZWN0ZWQnLFxuICAgICAgb3B0X21lc3NhZ2VcbiAgICApXG4gICk7XG59XG5cbi8qKlxuICogVGhyb3dzIGFuIGVycm9yIGlmIHRoZSBmaXJzdCBhcmd1bWVudCBpc24ndCBhIHN0cmluZy4gVGhlIHN0cmluZyBjYW5cbiAqIGJlIGVtcHR5LlxuICpcbiAqIEZvciBtb3JlIGRldGFpbHMgc2VlIGBhc3NlcnRgLlxuICpcbiAqIEBwYXJhbSB7IUFzc2VydGlvbkZ1bmN0aW9uRGVmfSBhc3NlcnRGbiB1bmRlcmx5aW5nIGFzc2VydGlvbiBmdW5jdGlvbiB0byBjYWxsXG4gKiBAcGFyYW0geyp9IHNob3VsZEJlU3RyaW5nXG4gKiBAcGFyYW0geyFBcnJheTwqPnxzdHJpbmc9fSBvcHRfbWVzc2FnZSBUaGUgYXNzZXJ0aW9uIG1lc3NhZ2VcbiAqIEByZXR1cm4ge3N0cmluZ30gVGhlIHN0cmluZyB2YWx1ZS4gQ2FuIGJlIGFuIGVtcHR5IHN0cmluZy5cbiAqIEB0aHJvd3Mge0Vycm9yfSB3aGVuIHNob3VsZEJlU3RyaW5nIGlzIG5vdCBhbiBTdHJpbmdcbiAqIEBjbG9zdXJlUHJpbWl0aXZlIHthc3NlcnRzLm1hdGNoZXNSZXR1cm59XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBhc3NlcnRTdHJpbmcoYXNzZXJ0Rm4sIHNob3VsZEJlU3RyaW5nLCBvcHRfbWVzc2FnZSkge1xuICByZXR1cm4gLyoqIEB0eXBlIHtzdHJpbmd9ICovIChcbiAgICBhc3NlcnRUeXBlXyhcbiAgICAgIGFzc2VydEZuLFxuICAgICAgc2hvdWxkQmVTdHJpbmcsXG4gICAgICBpc1N0cmluZyhzaG91bGRCZVN0cmluZyksXG4gICAgICAnU3RyaW5nIGV4cGVjdGVkJyxcbiAgICAgIG9wdF9tZXNzYWdlXG4gICAgKVxuICApO1xufVxuXG4vKipcbiAqIFRocm93cyBhbiBlcnJvciBpZiB0aGUgZmlyc3QgYXJndW1lbnQgaXNuJ3QgYSBudW1iZXIuIFRoZSBhbGxvd2VkIHZhbHVlc1xuICogaW5jbHVkZSBgMGAgYW5kIGBOYU5gLlxuICpcbiAqIEZvciBtb3JlIGRldGFpbHMgc2VlIGBhc3NlcnRgLlxuICpcbiAqIEBwYXJhbSB7IUFzc2VydGlvbkZ1bmN0aW9uRGVmfSBhc3NlcnRGbiB1bmRlcmx5aW5nIGFzc2VydGlvbiBmdW5jdGlvbiB0byBjYWxsXG4gKiBAcGFyYW0geyp9IHNob3VsZEJlTnVtYmVyXG4gKiBAcGFyYW0geyFBcnJheTwqPnxzdHJpbmc9fSBvcHRfbWVzc2FnZSBUaGUgYXNzZXJ0aW9uIG1lc3NhZ2VcbiAqIEByZXR1cm4ge251bWJlcn0gVGhlIG51bWJlciB2YWx1ZS4gVGhlIGFsbG93ZWQgdmFsdWVzIGluY2x1ZGUgYDBgXG4gKiAgIGFuZCBgTmFOYC5cbiAqIEB0aHJvd3Mge0Vycm9yfSB3aGVuIHNob3VsZEJlTnVtYmVyIGlzIG5vdCBhbiBOdW1iZXJcbiAqIEBjbG9zdXJlUHJpbWl0aXZlIHthc3NlcnRzLm1hdGNoZXNSZXR1cm59XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBhc3NlcnROdW1iZXIoYXNzZXJ0Rm4sIHNob3VsZEJlTnVtYmVyLCBvcHRfbWVzc2FnZSkge1xuICByZXR1cm4gLyoqIEB0eXBlIHtudW1iZXJ9ICovIChcbiAgICBhc3NlcnRUeXBlXyhcbiAgICAgIGFzc2VydEZuLFxuICAgICAgc2hvdWxkQmVOdW1iZXIsXG4gICAgICB0eXBlb2Ygc2hvdWxkQmVOdW1iZXIgPT0gJ251bWJlcicsXG4gICAgICAnTnVtYmVyIGV4cGVjdGVkJyxcbiAgICAgIG9wdF9tZXNzYWdlXG4gICAgKVxuICApO1xufVxuXG4vKipcbiAqIFRocm93cyBhbiBlcnJvciBpZiB0aGUgZmlyc3QgYXJndW1lbnQgaXMgbm90IGFuIGFycmF5LlxuICogVGhlIGFycmF5IGNhbiBiZSBlbXB0eS5cbiAqXG4gKiBGb3IgbW9yZSBkZXRhaWxzIHNlZSBgYXNzZXJ0YC5cbiAqXG4gKiBAcGFyYW0geyFBc3NlcnRpb25GdW5jdGlvbkRlZn0gYXNzZXJ0Rm4gdW5kZXJseWluZyBhc3NlcnRpb24gZnVuY3Rpb24gdG8gY2FsbFxuICogQHBhcmFtIHsqfSBzaG91bGRCZUFycmF5XG4gKiBAcGFyYW0geyFBcnJheTwqPnxzdHJpbmc9fSBvcHRfbWVzc2FnZSBUaGUgYXNzZXJ0aW9uIG1lc3NhZ2VcbiAqIEByZXR1cm4geyFBcnJheX0gVGhlIGFycmF5IHZhbHVlXG4gKiBAdGhyb3dzIHtFcnJvcn0gd2hlbiBzaG91bGRCZUFycmF5IGlzIG5vdCBhbiBBcnJheVxuICogQGNsb3N1cmVQcmltaXRpdmUge2Fzc2VydHMubWF0Y2hlc1JldHVybn1cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGFzc2VydEFycmF5KGFzc2VydEZuLCBzaG91bGRCZUFycmF5LCBvcHRfbWVzc2FnZSkge1xuICByZXR1cm4gLyoqIEB0eXBlIHshQXJyYXl9ICovIChcbiAgICBhc3NlcnRUeXBlXyhcbiAgICAgIGFzc2VydEZuLFxuICAgICAgc2hvdWxkQmVBcnJheSxcbiAgICAgIGlzQXJyYXkoc2hvdWxkQmVBcnJheSksXG4gICAgICAnQXJyYXkgZXhwZWN0ZWQnLFxuICAgICAgb3B0X21lc3NhZ2VcbiAgICApXG4gICk7XG59XG5cbi8qKlxuICogVGhyb3dzIGFuIGVycm9yIGlmIHRoZSBmaXJzdCBhcmd1bWVudCBpc24ndCBhIGJvb2xlYW4uXG4gKlxuICogRm9yIG1vcmUgZGV0YWlscyBzZWUgYGFzc2VydGAuXG4gKlxuICogQHBhcmFtIHshQXNzZXJ0aW9uRnVuY3Rpb25EZWZ9IGFzc2VydEZuIHVuZGVybHlpbmcgYXNzZXJ0aW9uIGZ1bmN0aW9uIHRvIGNhbGxcbiAqIEBwYXJhbSB7Kn0gc2hvdWxkQmVCb29sZWFuXG4gKiBAcGFyYW0geyFBcnJheTwqPnxzdHJpbmc9fSBvcHRfbWVzc2FnZSBUaGUgYXNzZXJ0aW9uIG1lc3NhZ2VcbiAqIEByZXR1cm4ge2Jvb2xlYW59IFRoZSBib29sZWFuIHZhbHVlLlxuICogQHRocm93cyB7RXJyb3J9IHdoZW4gc2hvdWxkQmVCb29sZWFuIGlzIG5vdCBhbiBCb29sZWFuXG4gKiBAY2xvc3VyZVByaW1pdGl2ZSB7YXNzZXJ0cy5tYXRjaGVzUmV0dXJufVxuICovXG5leHBvcnQgZnVuY3Rpb24gYXNzZXJ0Qm9vbGVhbihhc3NlcnRGbiwgc2hvdWxkQmVCb29sZWFuLCBvcHRfbWVzc2FnZSkge1xuICByZXR1cm4gLyoqIEB0eXBlIHtib29sZWFufSAqLyAoXG4gICAgYXNzZXJ0VHlwZV8oXG4gICAgICBhc3NlcnRGbixcbiAgICAgIHNob3VsZEJlQm9vbGVhbixcbiAgICAgICEhc2hvdWxkQmVCb29sZWFuID09PSBzaG91bGRCZUJvb2xlYW4sXG4gICAgICAnQm9vbGVhbiBleHBlY3RlZCcsXG4gICAgICBvcHRfbWVzc2FnZVxuICAgIClcbiAgKTtcbn1cbiJdfQ==
+// /Users/mszylkowski/src/amphtml/src/core/assert/base.js

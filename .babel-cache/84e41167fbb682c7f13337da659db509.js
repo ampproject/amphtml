@@ -1,0 +1,3 @@
+export var CSS = "\n/*# sourceURL=/extensions/amp-story-interactive/0.1/amp-story-interactive-results-detailed.css*/";
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFtcC1zdG9yeS1pbnRlcmFjdGl2ZS1yZXN1bHRzLWRldGFpbGVkLTAuMS5jc3MuanMiXSwibmFtZXMiOlsiQ1NTIl0sIm1hcHBpbmdzIjoiQUFBQSxPQUFPLElBQU1BLEdBQUcsR0FBRyxvR0FBWiIsInNvdXJjZXNDb250ZW50IjpbImV4cG9ydCBjb25zdCBDU1MgPSBcIlxcbi8qIyBzb3VyY2VVUkw9L2V4dGVuc2lvbnMvYW1wLXN0b3J5LWludGVyYWN0aXZlLzAuMS9hbXAtc3RvcnktaW50ZXJhY3RpdmUtcmVzdWx0cy1kZXRhaWxlZC5jc3MqL1wiO1xuIl19
+// /Users/mszylkowski/src/amphtml/build/amp-story-interactive-results-detailed-0.1.css.js
