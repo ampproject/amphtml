@@ -129,11 +129,11 @@ Results can feed its state from quizzes if all categories also specify `option-{
 
 ### amp-story-interactive-slider
 
-The `amp-story-interactive-slider` element provides a voting experience with 101 options. The options take the form of values along a horizontal line, where all options are valid. When selected, an average indicator and the average response is displayed.
+The `amp-story-interactive-slider` element provides a voting experience with 101 options. The options take the form of values along a horizontal line, where all options are valid. When selected, an average indicator and the average response are displayed.
 
-Display different categories based on user poll answers by pairing `amp-story-interactive-slider` with `amp-story-interactive-results`. Add a prompt for extra context.
+Does not support pairing with `amp-story-interactive-results`, and can optionally have a prompt.
 
-<amp-img alt="An example of an interactive poll: 'Pick a season' with options for each season, and their respective percentage votes" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/poll-raw.png" layout="intrinsic" width="400" height="450">
+<amp-img alt="An example of an interactive slider: 'How much do you like this product?' with a percentage slider with a custom accent color" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/slider-raw.png" layout="intrinsic" width="400" height="450">
 
 [sourcecode:html]
 <amp-story-interactive-slider
