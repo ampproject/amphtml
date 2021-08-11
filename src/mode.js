@@ -101,12 +101,13 @@ function getRtvVersion(win) {
  * Note that AMP_DEV_MODE flag is used for testing purposes.
  * @param {!Window} win
  * @param hashParams
+ * @param opt_hashParams
  * @return {boolean}
  */
-export function isModeDevelopment(win, hashParams) {
+export function isModeDevelopment(win, opt_hashParams) {
   return !!(
     ['1', 'actions', 'amp', 'amp4ads', 'amp4email'].includes(
-      hashParams['development']
+      (opt_hashParams || getHashParams(win))['development']
     ) || win.AMP_DEV_MODE
   );
 }
