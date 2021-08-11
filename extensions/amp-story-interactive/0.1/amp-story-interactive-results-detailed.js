@@ -162,6 +162,7 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
       setImportantStyles(this.resultEls_[e.interactiveId].element, {
         'background-image': 'url(' + e.option.image + ')',
       });
+      this.resultEls_[e.interactiveId].element.children[0].textContent = '';
     } else {
       this.resultEls_[e.interactiveId].element.children[0].textContent =
         e.option.text;
