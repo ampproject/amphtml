@@ -15,12 +15,13 @@
  */
 
 import {Services} from '#service';
+
+import {triggerAnalyticsEvent} from '../../src/analytics';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../src/service-helpers';
-import {triggerAnalyticsEvent} from '../../src/analytics';
 
 describes.realWin(
   'analytics',

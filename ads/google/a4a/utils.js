@@ -1176,6 +1176,7 @@ export function getServeNpaPromise(element) {
     return false;
   });
 }
+<<<<<<< HEAD
 
 /**
  * This method retrieves the high-entropy portions of the user agent

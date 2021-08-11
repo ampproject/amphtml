@@ -685,7 +685,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           const promise = googleAdUrl(impl, '', Date.now(), [], []).then(
             (url) => {
               expect(url).to.not.match(
-                /[&?]uap=Windows&uapv=10&uaa=x86&uam=Pixel&uafv=3.14159[&$]/
+                /[&?]uap=Windows&uapv=10&uaa=x86&uam=Pixel&uafv=3.14159&uab=42[&$]/
               );
             }
           );
@@ -694,7 +694,6 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
         });
       });
     });
-  });
 
   describe('#mergeExperimentIds', () => {
     it('should merge a single id to itself', () => {
