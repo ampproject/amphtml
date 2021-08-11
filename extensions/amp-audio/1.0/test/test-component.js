@@ -77,16 +77,13 @@ describes.realWin('Audio preact component v1.0', {}, (env) => {
     expect(component.getDOMNode().offsetHeight).to.be.greaterThan(1);
     expect(component.prop('controls')).to.be.true;
 
-    /**
-     * Following remains false.
-     * May be due to removal of propagateAttributes?
-     */
-    expect(component.prop('autoplay')).to.be.true;
-    expect(component.prop('muted')).to.be.true;
-    expect(component.muted).to.be.true;
-    expect(component.prop('preload')).to.be.true;
-    expect(component.prop('loop')).to.be.true;
-    expect(component.prop('src')).to.be.false;
+   const audio = component.find('audio');
+    expect(audio.prop('autoplay')).to.be.true;
+    expect(audio.prop('muted')).to.be.true;
+    expect(audio.getDOMNode().muted).to.be.true;
+    expect(audio.prop('preload')).to.be.true;
+    expect(audio.prop('loop')).to.be.true;
+    expect(audio.prop('src')).to.be.undefined;
 
     expect(component.childAt(0).name()).to.equal('source');
     expect(component.childAt(0).prop('src')).to.equal('audio.mp3');
