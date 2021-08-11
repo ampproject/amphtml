@@ -22,7 +22,6 @@ import {
   StateProperty,
   UIType,
 } from '../amp-story-store-service';
-import {ActionTrust} from '#core/constants/action-constants';
 import {AdvancementMode} from '../story-analytics';
 import {AmpStory} from '../amp-story';
 import {AmpStoryConsent} from '../amp-story-consent';
