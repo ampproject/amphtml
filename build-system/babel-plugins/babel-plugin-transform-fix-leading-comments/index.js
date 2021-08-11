@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// @ts-nocheck
 
 /**
  * Reassigns the trailing comments of a statement to be leading comment of its
@@ -33,13 +32,16 @@ module.exports = function () {
           return;
         }
 
-        const next = path.getNextSibling();
+        // Babel NodePath definition is missing getNextSibling
+        const next = /** @type {babel.NodePath}*/ (
+          /** @type {*} */ (path).getNextSibling()
+        );
         if (!next) {
           return;
         }
 
         node.trailingComments = null;
-        next.addComments('leading', trailingComments);
+        next.addComments('leading', /** @type {*} */ (trailingComments));
       },
     },
   };
