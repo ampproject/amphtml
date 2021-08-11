@@ -199,7 +199,7 @@ module.exports = {
     await page.waitForSelector(
       `amp-story-page#${pageID}[active][distance="0"]`
     );
-    
+
     // Open the page attachment.
     await page.waitForSelector(
       `amp-story-page#${pageID} .i-amphtml-story-inline-page-attachment-chip`
@@ -223,7 +223,7 @@ module.exports = {
     await page.waitForSelector(
       `amp-story-page#${pageID}[active][distance="0"]`
     );
-    
+
     // Open the page attachment.
     await page.waitForSelector(
       `amp-story-page#${pageID} .i-amphtml-story-inline-page-attachment-chip`
