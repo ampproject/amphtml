@@ -260,7 +260,9 @@
        "loading_complete_selectors": [
         "amp-story[ad-showing]",
       ],
-      "enable_percy_javascript": true
+      "enable_percy_javascript": true,
+      // for page navigation
+      "loading_complete_delay_ms": 500
     },
     {
       // TODO(#32685, @ampproject/wg-stories): see https://percy.io/ampproject/amphtml/builds/8876280/changed/503548953
