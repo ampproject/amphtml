@@ -16,6 +16,7 @@
 'use strict';
 
 const {
+  verifySelectorsInvisible,
   verifySelectorsVisible,
 } = require('../../../build-system/tasks/visual-diff/helpers');
 
@@ -188,6 +189,54 @@ module.exports = {
     );
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-page-open-attachment[active]',
+    ]);
+  },
+
+  'form presence - the domain label should display': async (page, name) => {
+    const url = await page.url();
+    const pageID = 'attachment-with-form';
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+    
+    // Open the page attachment.
+    await page.waitForSelector(
+      `amp-story-page#${pageID} .i-amphtml-story-inline-page-attachment-chip`
+    );
+    await page.tap(
+      `amp-story-page#${pageID} .i-amphtml-story-inline-page-attachment-chip`
+    );
+
+    // Ensure domain label presence.
+    await page.waitForSelector('.i-amphtml-story-draggable-drawer-open');
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-draggable-drawer-open ' +
+        '.i-amphtml-story-page-attachment-domain-label',
+    ]);
+  },
+
+  'form absence - the domain label should not display': async (page, name) => {
+    const url = await page.url();
+    const pageID = 'inline-default';
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+    
+    // Open the page attachment.
+    await page.waitForSelector(
+      `amp-story-page#${pageID} .i-amphtml-story-inline-page-attachment-chip`
+    );
+    await page.tap(
+      `amp-story-page#${pageID} .i-amphtml-story-inline-page-attachment-chip`
+    );
+
+    // Ensure domain label absence.
+    await page.waitForSelector('.i-amphtml-story-draggable-drawer-open');
+    await verifySelectorsInvisible(page, name, [
+      '.i-amphtml-story-draggable-drawer-open ' +
+        '.i-amphtml-story-page-attachment-domain-label',
     ]);
   },
 };
