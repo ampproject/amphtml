@@ -21,7 +21,7 @@ import {
   MessageType,
   deserializeMessage,
   listen,
-} from '../../../src/3p-frame-messaging';
+} from '#core/3p-frame-messaging';
 import {Services} from '#service';
 import {TransportMode, assertConfig, assertVendor} from './config';
 import {createFilter} from './filters/factory';

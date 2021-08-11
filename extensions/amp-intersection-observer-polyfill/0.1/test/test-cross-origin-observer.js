@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {MessageType} from '../../../../src/3p-frame-messaging';
+import {MessageType} from '#core/3p-frame-messaging';
 import {WindowInterface} from '#core/window/interface';
 import {
   calculateIntersectionRect,

@@ -15,7 +15,7 @@
  */
 
 import {getData} from '../../../src/event-helper';
-import {listen} from '../../../src/3p-frame-messaging';
+import {listen} from '#core/3p-frame-messaging';
 
 /**
  * Provides cross-frame postMessage for scroll frames.

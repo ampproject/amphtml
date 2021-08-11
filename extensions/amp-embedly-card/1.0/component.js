@@ -17,7 +17,7 @@
 import * as Preact from '#preact';
 import {EmbedlyContext} from './embedly-context';
 import {MessageType, ProxyIframeEmbed} from '#preact/component/3p-frame';
-import {deserializeMessage} from '../../../src/3p-frame-messaging';
+import {deserializeMessage} from '#core/3p-frame-messaging';
 import {forwardRef} from '#preact/compat';
 import {useCallback, useContext, useState} from '#preact';
 
