@@ -75,30 +75,6 @@ describes.realWin(
         });
     }
 
-    function attachToAmpStoryAndRun(attributes) {
-      naturalDimensions_['AMP-AUDIO'] = {width: '300px', height: '30px'};
-      const ampAudio = doc.createElement('amp-audio');
-      const ampStory = doc.createElement('amp-story');
-      for (const key in attributes) {
-        ampAudio.setAttribute(key, attributes[key]);
-      }
-      ampStory.appendChild(ampAudio);
-      doc.body.appendChild(ampStory);
-
-      return ampAudio
-        .buildInternal()
-        .then(() => ampAudio.layoutCallback())
-        .then(() => ampAudio)
-        .catch((error) => {
-          // Ignore failed to load errors since sources are fake.
-          if (error.toString().indexOf('Failed to load') > -1) {
-            return ampAudio;
-          } else {
-            throw error;
-          }
-        });
-    }
-
     it('should load audio through attribute', () => {
       return attachAndRun({
         src: 'audio.mp3',
@@ -264,23 +240,5 @@ describes.realWin(
       impl.executeAction({method: 'pause', satisfiesTrust: () => true});
       expect(impl.isPlaying).to.be.false;
     });
-
-    it(
-      'should not play/pause when `amp-audio` is a direct descendant ' +
-        'of `amp-story`',
-      async () => {
-        const ampAudio = await attachToAmpStoryAndRun({
-          'width': '500',
-          src: 'audio.mp3',
-        });
-        const impl = await ampAudio.getImpl();
-
-        impl.executeAction({method: 'play', satisfiesTrust: () => true});
-        expect(impl.isPlaying).to.be.false;
-
-        impl.executeAction({method: 'pause', satisfiesTrust: () => true});
-        expect(impl.isPlaying).to.be.false;
-      }
-    );
   }
 );
