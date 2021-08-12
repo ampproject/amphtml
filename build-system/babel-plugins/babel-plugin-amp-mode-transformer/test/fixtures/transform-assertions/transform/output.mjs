@@ -19,7 +19,6 @@ const test = false;
 const localDev = false;
 const minified = true;
 const development = false;
-const version = "$internalRuntimeVersion$";
 const namespaceVersion = "$internalRuntimeVersion$";
 
 function foo() {

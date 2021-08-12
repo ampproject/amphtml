@@ -29,7 +29,7 @@ import {createShadowRootWithStyle} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '#core/dom/static-template';
-import {isAmpElement} from '../../../src/amp-element-helpers';
+import {isAmpElement} from '#core/dom/amp-element-helpers';
 import {listen} from '../../../src/event-helper';
 import {resetStyles, setImportantStyles, toggle} from '#core/dom/style';
 

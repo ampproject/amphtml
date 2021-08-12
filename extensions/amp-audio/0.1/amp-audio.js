@@ -24,11 +24,8 @@ import {
 } from '../../../src/mediasession-helper';
 import {Layout, applyFillContent, isLayoutSizeFixed} from '#core/dom/layout';
 import {assertHttpsUrl} from '../../../src/url';
-import {
-  closestAncestorElementBySelector,
-  realChildNodes,
-} from '#core/dom/query';
-import {dev, user} from '../../../src/log';
+import {realChildNodes} from '#core/dom/query';
+import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
@@ -231,18 +228,8 @@ export class AmpAudio extends AMP.BaseElement {
    * @return {boolean}
    */
   isInvocationValid_() {
-    if (!this.audio_) {
-      return false;
-    }
-    if (this.isStoryDescendant_()) {
-      user().warn(
-        TAG,
-        '<amp-story> elements do not support actions on ' +
-          '<amp-audio> elements'
-      );
-      return false;
-    }
-    return true;
+    // Don't execute actions if too early, or if the audio element was removed.
+    return !!this.audio_;
   }
 
   /**
@@ -276,15 +263,6 @@ export class AmpAudio extends AMP.BaseElement {
     if (getMode().test) {
       this.isPlaying = isPlaying;
     }
-  }
-
-  /**
-   * Returns whether `<amp-audio>` has an `<amp-story>` for an ancestor.
-   * @return {?Element}
-   * @private
-   */
-  isStoryDescendant_() {
-    return closestAncestorElementBySelector(this.element, 'AMP-STORY');
   }
 
   /** @private */
