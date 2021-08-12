@@ -70,7 +70,7 @@ module.exports = function (context) {
         if (key.type !== 'Identifier') {
           context.report({
             node: key,
-            message: 'unknown key prop key type',
+            message: 'unknown property key type',
           });
           return;
         }
