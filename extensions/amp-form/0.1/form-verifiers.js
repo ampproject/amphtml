@@ -15,7 +15,7 @@
  */
 
 import {LastAddedResolver} from '#core/data-structures/promise';
-import {isFieldDefault} from '../../../src/form';
+import {isFieldDefault} from '#core/dom/form';
 import {iterateCursor} from '#core/dom';
 import {user} from '../../../src/log';
 

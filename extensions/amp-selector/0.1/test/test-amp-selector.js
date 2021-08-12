@@ -21,7 +21,7 @@ import {AmpSelector} from '../amp-selector';
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
-import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 describes.realWin(
   'amp-selector',

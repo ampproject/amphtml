@@ -18,7 +18,7 @@ import {CommonSignals} from '#core/constants/common-signals';
 import {scopedQuerySelectorAll} from '#core/dom/query';
 import {setImportantStyles} from '#core/dom/style';
 import {user} from '../../../src/log';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 /** @const {number} */
 const CANVAS_SIZE = 3;

@@ -21,9 +21,9 @@ import {ActionTrust} from '#core/constants/action-constants';
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {assertScreenReaderElement} from '#testing/test-helper';
-import {clearModalStack, getModalStackLength} from '../../../../src/modal';
+import {clearModalStack, getModalStackLength} from '#core/dom/modal';
 import {createElementWithAttributes} from '#core/dom';
-import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 // Represents the correct value of KeyboardEvent.which for the Escape key
 const KEYBOARD_EVENT_WHICH_ESCAPE = 27;

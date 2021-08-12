@@ -26,7 +26,7 @@ import {ActionTrust} from '#core/constants/action-constants';
 import {Services} from '#service';
 import {htmlFor} from '#core/dom/static-template';
 import {waitFor} from '#testing/test-helper';
-import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 describes.realWin(
   'amp-render-v1.0',

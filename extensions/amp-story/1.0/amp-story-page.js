@@ -78,7 +78,7 @@ import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {px, toggle} from '#core/dom/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 import {toArray} from '#core/types/array';
 import {upgradeBackgroundAudio} from './audio';

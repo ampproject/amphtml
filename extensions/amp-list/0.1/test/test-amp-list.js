@@ -24,7 +24,7 @@ import {Deferred} from '#core/data-structures/promise';
 import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {resetExperimentTogglesForTesting, toggleExperiment} from '#experiments';
-import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 describes.repeated(
   'amp-list',

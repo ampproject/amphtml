@@ -124,7 +124,6 @@ exports.rules = [
       // somewhere else at some point
       'ads/google/a4a/**->src/ad-cid.js',
       'ads/google/a4a/**->src/consent.js',
-      'ads/google/a4a/**->src/amp-element-helpers.js',
       'ads/google/a4a/**->src/experiments/index.js',
       'ads/google/a4a/**->src/service/index.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',

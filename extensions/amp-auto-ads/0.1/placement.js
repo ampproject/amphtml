@@ -28,7 +28,7 @@ import {createElementWithAttributes} from '#core/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {measurePageLayoutBox} from './measure-page-layout-box';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 /** @const */
 const TAG = 'amp-auto-ads';
