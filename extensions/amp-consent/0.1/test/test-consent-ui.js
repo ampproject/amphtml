@@ -325,7 +325,8 @@ describes.realWin(
 
       it('should expand the promptUISrc', async () => {
         const config = dict({
-          'promptUISrc': 'https://example.test/?cid=CLIENT_ID&r=RANDOM',
+          'promptUISrc':
+            'https://example.test/?cid=CLIENT_ID&r=RANDOM&clientconfig=CONSENT_INFO(clientConfig)&cpid=CONSENT_PAGE_VIEW_ID_64',
           'clientConfig': {
             'test': 'ABC',
           },
@@ -333,7 +334,9 @@ describes.realWin(
         consentUI = new ConsentUI(mockInstance, config);
         consentUI.show(false);
         await macroTask();
-        expect(consentUI.ui_.src).to.match(/cid=amp-.{22}&r=RANDOM/);
+        expect(consentUI.ui_.src).to.match(
+          /cid=amp-.{22}&r=RANDOM&clientconfig=.{28}&cpid=/
+        );
       });
 
       it("should pass info into iframe's name", async () => {

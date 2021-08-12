@@ -128,9 +128,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.purposeConsentRequired_ = null;
 
     /** @private {?string} */
-    this.getConsentPageViewID64_ = once(() =>
-      getRandomString64(this.ampdoc.win)
-    );
+    this.consentPageViewID64_ = once(() => getRandomString64(this.ampdoc.win));
   }
 
   /** @override */

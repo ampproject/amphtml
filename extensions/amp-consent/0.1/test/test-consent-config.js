@@ -24,29 +24,16 @@ import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '#service';
 import {dict} from '#core/types/object';
 import * as GetService from '../../../../src/service-helpers';
-import {consentStateManager} from '../consent-state-manager'
-import {getConsentStateManagerForTesting} from '../amp-consent'
-import {createConsentElement} from '../test/test-amp-consent'
-import {ACTION_TYPE, AmpConsent} from '../amp-consent';
-import {getRandomString64} from '#service/cid-impl';
 import {ConsentStateManager} from '../consent-state-manager';
-import {getConsentCID} from '../consent-config'
-import * as CID from '../consent-config';
-import {
-  cidServiceForDocForTesting,
-  getProxySourceOrigin,
-  isOptedOutOfCid,
-  optOutOfCid,
-} from '#service/cid-impl';
+import {createConsentElement} from './test-amp-consent';
+import {macroTask} from '#testing/yield';
 
 describes.realWin('ConsentConfig', {amp: 1}, (env) => {
   let doc;
-  let win;
   let element;
   let defaultConfig;
   beforeEach(() => {
     doc = env.win.document;
-    win = env.win;
     element = doc.createElement('div');
     defaultConfig = dict({
       'consentInstanceId': 'ABC',
@@ -559,6 +546,30 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
 
   describe('expandConsentEndpointUrl', () => {
     it('support expansion in allowed list', async () => {
+      const config = dict({
+        'consentInstanceId': 'test',
+        'checkConsentHref': '/override',
+        'consentRequired': true,
+        'clientConfig': {
+          'test': 'ABC',
+        },
+        'postPromptUI': 'test',
+      });
+      const consentElement = createConsentElement(doc, config);
+      doc.body.appendChild(consentElement);
+      const fakeConsentStateManager = new ConsentStateManager();
+      fakeConsentStateManager.ampdoc_ = doc.body;
+
+      const stubGetServicePromiseForDoc = env.sandbox.stub(
+        GetService,
+        'getServicePromiseForDoc'
+      );
+
+      stubGetServicePromiseForDoc
+        .withArgs(env.sandbox.match.any, 'consentStateManager')
+        .resolves(fakeConsentStateManager);
+
+      stubGetServicePromiseForDoc.callThrough();
       const url = await expandConsentEndpointUrl(
         doc.body,
         'https://example.test?' +
@@ -579,8 +590,7 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
       );
     });
 
-    it.only('override CLIENT_ID scope', async () => {
-
+    it('override CLIENT_ID scope', async () => {
       const config = dict({
         'consentInstanceId': 'test',
         'checkConsentHref': '/override',
@@ -592,36 +602,50 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
       });
       const consentElement = createConsentElement(doc, config);
       doc.body.appendChild(consentElement);
-      const consent = new AmpConsent(consentElement);
-      const fakeConsentStateManager = new ConsentStateManager;
+      const fakeConsentStateManager = new ConsentStateManager();
       fakeConsentStateManager.ampdoc_ = doc.body;
 
       const stubGetServicePromiseForDoc = env.sandbox.stub(
         GetService,
         'getServicePromiseForDoc'
-      ).resolves(fakeConsentStateManager);
-
-      const cid = 'amp-WB02GhpVXeV7iwqqEpmkYw';
-
-      // it is not being stubbed
-      const stubCID = env.sandbox.stub(CID, 'getConsentCID').resolves(cid)
-
-      const u1 = expandConsentEndpointUrl(
-         consentElement,
-        'https://example.test?cid=CLIENT_ID')
-
-      const u2 = expandConsentEndpointUrl(
-        consentElement,
-        'https://example.test?cid=CLIENT_ID()'
       );
-      const u3 = expandConsentEndpointUrl(
-        consentElement,
-        'https://example.test?cid=CLIENT_ID(123)'
-      );
-      const u4 = expandConsentEndpointUrl(
-        consentElement,
-        'https://example.test?cid=CLIENT_ID(abc)'
-      );
+
+      stubGetServicePromiseForDoc
+        .withArgs(env.sandbox.match.any, 'consentStateManager')
+        .resolves(fakeConsentStateManager);
+
+      stubGetServicePromiseForDoc.callThrough();
+
+      let u1 = expandConsentEndpointUrl(
+        doc.body,
+        'https://example.test?cid=CLIENT_ID&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
+      ).then(function (resolved) {
+        return (u1 = resolved);
+      });
+
+      let u2 = expandConsentEndpointUrl(
+        doc.body,
+        'https://example.test?cid=CLIENT_ID()&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
+      ).then(function (resolved) {
+        return (u2 = resolved);
+      });
+
+      let u3 = expandConsentEndpointUrl(
+        doc.body,
+        'https://example.test?cid=CLIENT_ID(123)&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
+      ).then(function (resolved) {
+        return (u3 = resolved);
+      });
+
+      let u4 = expandConsentEndpointUrl(
+        doc.body,
+        'https://example.test?cid=CLIENT_ID(abc)&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
+      ).then(function (resolved) {
+        return (u4 = resolved);
+      });
+      await macroTask();
+      await macroTask();
+
       expect(u1).to.equal(u2).to.equal(u3).to.equal(u4);
     });
   });
