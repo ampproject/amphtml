@@ -117,13 +117,20 @@ function buildLinkShareItemTemplate(el) {
  */
 function buildProviderParams(opt_params) {
   const attrs = dict();
-
+  
   if (opt_params) {
     Object.keys(opt_params).forEach((field) => {
       if (field === 'provider') {
         return;
       }
-      attrs[`data-param-${field}`] = opt_params[field];
+
+      /**
+       * based on amp-social-share accepted attributes
+       * https://amp.dev/documentation/components/amp-social-share/#attributes
+       */
+      if (['data-target', 'data-share-endpoint', 'aria-label'].includes(field) || /^data-param-/.test(field)) {
+        attrs[field] = opt_params[field];
+      }
     });
   }
 
