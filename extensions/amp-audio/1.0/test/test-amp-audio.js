@@ -162,10 +162,7 @@ describes.realWin(
       expect(audio.getAttribute('preload')).to.be.equal('metadata');
     });
 
-    it(
-      'should attach `<audio>` element and execute relevant actions for ' +
-        'layout="nodisplay"',
-      async () => {
+    it('should attach `<audio>` element and execute relevant actions for layout="nodisplay"', async () => {
         element = await attachAndRun({
           src: 'audio.mp3',
           preload: 'none',

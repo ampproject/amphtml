@@ -67,14 +67,12 @@ export function AudioWithRef(
   /**
    * Prepares Media Metadata
    */
-  const metaData = useMemo(() => {
-    return {
-      title,
-      artist,
-      album,
-      artwork: [{src: artwork}],
-    };
-  }, [title, artist, album, artwork]);
+  const metadata = useMemo(() => ({
+    title,
+    artist,
+    album,
+    artwork: [{src: artwork}],
+  }), [title, artist, album, artwork]);
 
   /**
    * Plays audio callback
@@ -106,11 +104,6 @@ export function AudioWithRef(
     setMediaSession(win, metaData, play, pause);
   }, [metaData, validateMediaMetadata, play, pause]);
 
-  useEffect(() => {
-    if (!audioRef.current.play) {
-      return;
-    }
-  }, []);
 
   /** Audio Component - API Functions */
   useImperativeHandle(
