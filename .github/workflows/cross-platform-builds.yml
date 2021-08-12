@@ -1,9 +1,6 @@
-name: GitHub Actions
+name: Cross-Platform Builds
 on:
   push:
-    branches:
-      - main
-  pull_request:
     branches:
       - main
 
@@ -12,7 +9,7 @@ jobs:
     if: github.repository == 'ampproject/amphtml'
     strategy:
       matrix:
-        platform: [windows-latest]
+        platform: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout Repo
@@ -21,5 +18,5 @@ jobs:
           fetch-depth: 0
       - name: Install Dependencies
         run: bash ./.github/workflows/install_dependencies.sh
-      - name: Build and Test
-        run: node build-system/pr-check/cross-browser-tests.js
+      - name: Build
+        run: node build-system/pr-check/cross-platform-builds.js

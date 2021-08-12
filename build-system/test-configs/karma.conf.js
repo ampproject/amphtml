@@ -15,21 +15,10 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
 const {dotWrappingWidth} = require('../common/logging');
 const {isCiBuild} = require('../common/ci');
 
 const TEST_SERVER_PORT = 8081;
-const COMMON_CHROME_FLAGS = [
-  // Dramatically speeds up iframe creation time.
-  '--disable-extensions',
-  // Allows simulating user actions (e.g unmute) which otherwise will be denied.
-  '--autoplay-policy=no-user-gesture-required',
-];
-// Makes debugging easy by auto-opening devtools.
-if (argv.debug) {
-  COMMON_CHROME_FLAGS.push('--auto-open-devtools-for-tabs');
-}
 
 module.exports = {
   frameworks: ['fixture', 'mocha', 'source-map-support'],
@@ -96,29 +85,6 @@ module.exports = {
   logLevel: 'ERROR',
 
   autoWatch: true,
-
-  customLaunchers: {
-    /* eslint "google-camelcase/google-camelcase": 0*/
-    Chrome_ci: {
-      base: 'Chrome',
-      flags: ['--no-sandbox'].concat(COMMON_CHROME_FLAGS),
-    },
-    Chrome_no_extensions: {
-      base: 'Chrome',
-      flags: COMMON_CHROME_FLAGS,
-    },
-    Chrome_no_extensions_headless: {
-      base: 'ChromeHeadless',
-      flags: [
-        // https://developers.google.com/web/updates/2017/04/headless-chrome#frontend
-        '--no-sandbox',
-        '--remote-debugging-port=9222',
-        // https://github.com/karma-runner/karma-chrome-launcher/issues/175
-        "--proxy-server='direct://'",
-        '--proxy-bypass-list=*',
-      ].concat(COMMON_CHROME_FLAGS),
-    },
-  },
 
   client: {
     mocha: {
