@@ -146,6 +146,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       // domain above the attachment's contents. This enables users to gauge
       // the trustworthiness of publishers before sending data to them.
       this.headerEl.after(this.createDomainLabelElement_());
+      // this.headerEl.shadowRoot.insertBefore(this.createDomainLabelElement_(), null);
     }
 
     const closeButtonEl = htmlFor(this.element)`
@@ -490,7 +491,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   doesContainFormElement_() {
-    return Boolean(this.element.querySelector('form'));
+    return true;//Boolean(this.element.querySelector('form'));
   }
 
   /**
