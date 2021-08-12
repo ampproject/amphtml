@@ -19,7 +19,9 @@
   --i-amphtml-interactive-img-option-gap: 1em !important;
   --i-amphtml-interactive-img-transform: scale(0.95) !important;
 
-  border-radius: 3.75em 3.75em 4.375em 4.375em !important;
+  /* 4.5em used instead of 4.375em to fix bug that renders pixels
+  from container around the bottom-left and bottom-right corners */
+  border-radius: 3.75em 3.75em 4.5em 4.5em !important;
 }
 
 .i-amphtml-story-interactive-img-option-container {
