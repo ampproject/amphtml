@@ -15,10 +15,13 @@
  */
 
 import {AmpImg} from '#builtins/amp-img/amp-img';
-import {BaseElement} from '../../../src/base-element';
-import {Layout, LayoutPriority} from '#core/dom/layout';
+
 import {createElementWithAttributes, dispatchCustomEvent} from '#core/dom';
+import {Layout, LayoutPriority} from '#core/dom/layout';
+
 import {testElementR1} from '#testing/element-v1';
+
+import {BaseElement} from '../../../src/base-element';
 
 describes.realWin('amp-img R1', {amp: true}, (env) => {
   let win, doc;

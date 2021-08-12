@@ -43,13 +43,13 @@ const UNMINIFIED_CONTAINER_DIRECTORY = 'unminified';
 const NOMODULE_CONTAINER_DIRECTORY = 'nomodule';
 const MODULE_CONTAINER_DIRECTORY = 'module';
 
-const ARTIFACT_FILE_NAME = '/tmp/artifacts/amp_nomodule_build.tar.gz';
+const ARTIFACT_DIRECTORY = '/tmp/artifacts/';
+const ARTIFACT_FILE_NAME = `${ARTIFACT_DIRECTORY}/amp_nomodule_build.tar.gz`;
 const TEST_FILES_LIST_FILE_NAME = '/tmp/testfiles.txt';
 
-const BUILD_OUTPUT_DIRS = ['build', 'dist', 'dist.3p'];
+const BUILD_OUTPUT_DIRS = ['build', 'dist', 'dist.3p', 'dist.tools'];
 const APP_SERVING_DIRS = [
   ...BUILD_OUTPUT_DIRS,
-  'dist.tools',
   'examples',
   'test/manual',
   'test/fixtures/e2e',
@@ -251,10 +251,13 @@ function storeBuildToWorkspace_(containerDirectory) {
   if (isCircleciBuild()) {
     fs.ensureDirSync(`/tmp/workspace/builds/${containerDirectory}`);
     for (const outputDir of BUILD_OUTPUT_DIRS) {
-      fs.moveSync(
-        `${outputDir}/`,
-        `/tmp/workspace/builds/${containerDirectory}/${outputDir}`
-      );
+      const outputPath = `${outputDir}/`;
+      if (fs.existsSync(outputPath)) {
+        fs.moveSync(
+          outputPath,
+          `/tmp/workspace/builds/${containerDirectory}/${outputDir}`
+        );
+      }
     }
     // Bento components are compiled inside the extension source file.
     for (const componentFile of globby.sync('extensions/*/?.?/dist/*.js')) {
@@ -321,6 +324,7 @@ async function processAndStoreBuildToArtifacts() {
       cyan(ARTIFACT_FILE_NAME) +
       '...'
   );
+  await fs.ensureDir(ARTIFACT_DIRECTORY);
   execOrDie(`tar -czf ${ARTIFACT_FILE_NAME} ${APP_SERVING_DIRS.join('/ ')}/`);
   execOrDie(`du -sh ${ARTIFACT_FILE_NAME}`);
 }

@@ -15,7 +15,7 @@
  */
 
 import * as _3p from '#3p/3p';
-import {createIframePromise} from '#testing/iframe';
+
 import {
   handlePosition,
   handlePositionResponsive,
@@ -24,6 +24,8 @@ import {
   sizeAgainstWindow,
   ssp,
 } from '#ads/vendors/ssp';
+
+import {createIframePromise} from '#testing/iframe';
 
 describes.fakeWin('amp-ad-ssp', {}, (env) => {
   let sandbox;

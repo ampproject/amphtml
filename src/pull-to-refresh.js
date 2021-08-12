@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from './service';
+import {Services} from '#service';
 
 /**
  * Installs "pull-to-refresh" (P2R) blocker if viewer has requested. P2R can
