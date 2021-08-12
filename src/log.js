@@ -204,17 +204,17 @@ export class Log {
       return LogLevel.INFO;
     }
 
-    return this.defaultLevelWithFunc_(win);
+    return this.defaultLevelWithFunc_();
   }
 
   /**
-   * @param {!Window} win
+   * @param {!Window=} opt_win provided for testing
    * @return {!LogLevel}
    * @private
    */
-  defaultLevelWithFunc_(win) {
+  defaultLevelWithFunc_(opt_win) {
     // Delegate to the specific resolver.
-    return this.levelFunc_(logHashParam(win), getMode().development);
+    return this.levelFunc_(logHashParam(opt_win), getMode().development);
   }
 
   /**
