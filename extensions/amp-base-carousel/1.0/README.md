@@ -272,7 +272,7 @@ addition, when changing `visible-slides`, you likely want to change
 ##### Media Queries
 
 The attributes for `<bento-base-carousel>` can be configured to use different
-options based on a [media query](./../../docs/spec/amp-html-responsive-attributes.md).
+options based on a [media query](./../../../docs/spec/amp-html-responsive-attributes.md).
 
 ##### Number of Visible Slides
 
