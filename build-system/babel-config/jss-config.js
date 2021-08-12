@@ -13,22 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
+
+// Babel cannot directly return a valid css file.
+// Therefore we provide and export this options object to allow extraction
+// of the created css file via side effect from running babel.transfrorm().
+const jssOptions = {css: 'REPLACED_BY_BABEL'};
 
 /**
- * @fileoverview Externs for extra properties expected on errors.
- * @externs
+ * Gets the config for transforming a JSS file to CSS
+ * Only used to generate CSS files for Bento components.
+ *
+ * @return {!Object}
  */
+function getJssConfig() {
+  return {
+    plugins: [
+      ['./build-system/babel-plugins/babel-plugin-transform-jss', jssOptions],
+    ],
+  };
+}
 
-/**
- * Array of strings and values used to construct an error message, so that when
- * it's logged to the console the output can be inspected.
- * @type {undefined|Array<*>}
- */
-Error.prototype.messageArray;
-
-/**
- * Flag to mark "expected" failure cases (ex. an operation failing due to a
- * known browser setting blocking access to `localStorage`).
- * @type {undefined|boolean}
- */
-Error.prototype.expected;
+module.exports = {
+  getJssConfig,
+  jssOptions,
+};

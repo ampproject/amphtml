@@ -15,7 +15,11 @@
  */
 
 import * as assertions from '#core/assert/base';
-import {createErrorVargs, duplicateErrorIfNecessary} from '#core/error';
+import {
+  createError,
+  createExpectedError,
+  duplicateErrorIfNecessary,
+} from '#core/error';
 import {
   USER_ERROR_EMBED_SENTINEL,
   USER_ERROR_SENTINEL,
@@ -264,46 +268,27 @@ export class Log {
   }
 
   /**
-   * Reports an error message. If the logging is disabled, the error is rethrown
-   * asynchronously.
-   * @param {string} tag
-   * @param {...*} args
-   * @return {!Error|undefined}
-   * @private
-   */
-  error_(tag, ...args) {
-    if (!this.msg_(tag, LogLevel.ERROR, args)) {
-      return this.createError.apply(this, args);
-    }
-  }
-
-  /**
    * Reports an error message.
    * @param {string} tag
-   * @param {...*} var_args
+   * @param {...*} args
    */
-  error(tag, var_args) {
-    const error = this.error_.apply(this, arguments);
-    if (error) {
-      // TODO(rcebulko): Determine if/how this Error#name property is used.
+  error(tag, ...args) {
+    if (!this.msg_(tag, LogLevel.ERROR, args)) {
+      const error = this.createError.apply(this, args);
       error.name = tag || error.name;
-      // __AMP_REPORT_ERROR is installed globally per window in the entry point.
-      self.__AMP_REPORT_ERROR(error);
+      self.__AMP_REPORT_ERROR?.(error);
     }
   }
 
   /**
    * Reports an error message and marks with an expected property. If the
    * logging is disabled, the error is rethrown asynchronously.
-   * @param {string} unusedTag
-   * @param {...*} var_args
+   * @param {string} tag
+   * @param {...*} args
    */
-  expectedError(unusedTag, var_args) {
-    const error = this.error_.apply(this, arguments);
-    if (error) {
-      error.expected = true;
-      // __AMP_REPORT_ERROR is installed globally per window in the entry point.
-      self.__AMP_REPORT_ERROR(error);
+  expectedError(tag, ...args) {
+    if (!this.msg_(tag, LogLevel.ERROR, args)) {
+      self.__AMP_REPORT_ERROR?.(this.createExpectedError.apply(this, args));
     }
   }
 
@@ -313,9 +298,7 @@ export class Log {
    * @return {!Error}
    */
   createError(var_args) {
-    const error = createErrorVargs.apply(null, arguments);
-    this.prepareError_(error);
-    return error;
+    return this.setErrorSuffix_(createError.apply(null, arguments));
   }
 
   /**
@@ -324,17 +307,15 @@ export class Log {
    * @return {!Error}
    */
   createExpectedError(var_args) {
-    const error = createErrorVargs.apply(null, arguments);
-    this.prepareError_(error);
-    error.expected = true;
-    return error;
+    return this.setErrorSuffix_(createExpectedError.apply(null, arguments));
   }
 
   /**
    * @param {!Error} error
+   * @return {!Error}
    * @private
    */
-  prepareError_(error) {
+  setErrorSuffix_(error) {
     error = duplicateErrorIfNecessary(error);
 
     if (this.suffix_) {
@@ -346,6 +327,8 @@ export class Log {
     } else if (isUserErrorMessage(error.message)) {
       error.message = stripUserError(error.message);
     }
+
+    return error;
   }
 
   /**
