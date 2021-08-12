@@ -267,7 +267,6 @@
         ".i-amphtml-built",
         ".i-amphtml-layout",
         "amp-story[ad-showing]",
-        "amp-story-page#page-3[active]"
       ],
       // for page navigation
       "loading_complete_delay_ms": 19500
