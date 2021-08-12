@@ -20,7 +20,7 @@ const {
 } = require('../../../build-system/tasks/visual-diff/helpers');
 
 module.exports = {
-  'Test ad property correctness': async (page, name) => {
+  'Test story ad system layer property correctness': async (page, name) => {
     await verifySelectorsVisible(page, name, ['.i-amphtml-story-ad-badge']);
   },
 };
