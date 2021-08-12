@@ -259,10 +259,12 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-ad.js",
        "loading_complete_selectors": [
         ".i-amphtml-fill-content",
+        ".i-amphtml-glass-pane",
+        ".i-amphtml-story-page-loaded",
         "amp-story[ad-showing]",
       ],
       // for page navigation
-      "loading_complete_delay_ms": 5000
+      "loading_complete_delay_ms": 500
     },
     {
       // TODO(#32685, @ampproject/wg-stories): see https://percy.io/ampproject/amphtml/builds/8876280/changed/503548953
