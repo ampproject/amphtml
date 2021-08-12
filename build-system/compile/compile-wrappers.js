@@ -101,6 +101,12 @@ function extensionPayload(name, version, latest, isModule, loadPriority) {
 
 /**
  * Anonymous function to load a Bento extension's payload (p).
+ *
+ * The provided AMP.registerElement function has the same signature as
+ * `Extensions.addElement` on extensions-impl.js. In order:
+ * - `name` (n): the name of the custom element tag
+ * - `Ctor` (c): the constructor function (class) for the custom element
+ * - `style` (s): optional string to install CSS for the custom element
  * @see {@link bento}
  * TODO(alanorozco): It would be cleaner if we used a "bento-foo" literal for
  * the tag name instead of replacing the prefix in "amp-foo".

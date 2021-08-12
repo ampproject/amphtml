@@ -39,10 +39,8 @@
     <script>
       (async () => {
         // Wait for our element to be defined, then we can get its API.
-        const element = document.body.firstElementChild;
-        const tagName = element.tagName.toLowerCase();
-
-        await window.customElements.whenDefined(tagName);
+        const element = document.querySelector('bento-video');
+        await window.customElements.whenDefined(element.localName);
 
         // We follow the `data-method` attribute in this example, but that's not
         // necessary. Otherwise, we would call a method like api.play() directly.
