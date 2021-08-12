@@ -17,8 +17,6 @@
 import {waitForChildPromise} from '#core/dom';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 
-import {Services} from '#service';
-
 /**
  * Checks if an element descends from `amp-story` in order to configure
  * story-specific behavior.

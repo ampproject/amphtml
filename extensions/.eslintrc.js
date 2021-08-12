@@ -41,7 +41,6 @@ const EXCLUDED_EXTENSIONS = [
   'amp-link',
   'amp-minute-media-player',
   'amp-mustache',
-  'amp-nexxtv-player',
   'amp-recaptcha-input',
   'amp-render',
   'amp-sidebar',
