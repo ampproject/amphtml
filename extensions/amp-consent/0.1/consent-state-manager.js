@@ -73,9 +73,6 @@ export class ConsentStateManager {
 
     /** @private {!Promise} */
     this.hasAllPurposeConsentsPromise_ = allPurposeConsentsDeferred.promise;
-
-    /** @private {?string} */
-    this.consentPageViewID64_ = once(() => getRandomString64(ampdoc.win));
   }
 
   /**

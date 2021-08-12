@@ -333,8 +333,9 @@ export function expandConsentEndpointUrl(element, url, opt_vars) {
         {
           'CLIENT_ID': getConsentCID(element),
           'CONSENT_PAGE_VIEW_ID_64': consentStateManager.consentPageViewID64_,
+          ...opt_vars,
         },
-        CONSENT_VARS_ALLOWED_LIST
+        {...opt_vars, ...CONSENT_VARS_ALLOWED_LIST}
       );
     }
   );

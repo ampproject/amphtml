@@ -616,33 +616,26 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
 
       stubGetServicePromiseForDoc.callThrough();
 
-      let u1 = expandConsentEndpointUrl(
+      let u1 = await expandConsentEndpointUrl(
         doc.body,
         'https://example.test?cid=CLIENT_ID&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
-      ).then(function (resolved) {
-        return (u1 = resolved);
-      });
+      )
 
-      let u2 = expandConsentEndpointUrl(
+      let u2 = await expandConsentEndpointUrl(
         doc.body,
         'https://example.test?cid=CLIENT_ID()&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
-      ).then(function (resolved) {
-        return (u2 = resolved);
-      });
+      )
 
-      let u3 = expandConsentEndpointUrl(
+      let u3 = await expandConsentEndpointUrl(
         doc.body,
         'https://example.test?cid=CLIENT_ID(123)&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
-      ).then(function (resolved) {
-        return (u3 = resolved);
-      });
+      )
 
-      let u4 = expandConsentEndpointUrl(
+      let u4 = await expandConsentEndpointUrl(
         doc.body,
         'https://example.test?cid=CLIENT_ID(abc)&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
-      ).then(function (resolved) {
-        return (u4 = resolved);
-      });
+      )
+
       await macroTask();
       await macroTask();
 
