@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {dev, devAssert} from './log';
-import {dict} from './core/types/object';
-import {internalListenImplementation} from './core/dom/event-helper-listen';
-import {tryParseJson} from './core/types/object/json';
+import {devAssert} from '#core/assert';
+import {internalListenImplementation} from '#core/dom/event-helper-listen';
+import {rethrowAsync} from '#core/error';
+import {dict} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
 
 /** @const */
 const AMP_MESSAGE_PREFIX = 'amp-';
@@ -120,9 +121,11 @@ export function deserializeMessage(message) {
   }
   const startPos = message.indexOf('{');
   devAssert(startPos != -1, 'JSON missing in %s', message);
-  return tryParseJson(message.substr(startPos), (e) =>
-    dev().error('MESSAGING', 'Failed to parse message: ' + message, e)
-  );
+  return tryParseJson(message.substr(startPos), (e) => {
+    rethrowAsync(
+      new Error(`MESSAGING: Failed to parse message: ${message}\n${e.message}`)
+    );
+  });
 }
 
 /**

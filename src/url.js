@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import * as mode from './core/mode';
-import {LruCache} from './core/data-structures/lru-cache';
-import {arrayOrSingleItemToArray} from './core/types/array';
-import {dict, hasOwn} from './core/types/object';
-import {endsWith} from './core/types/string';
-import {parseQueryString} from './core/types/string/url';
+import {LruCache} from '#core/data-structures/lru-cache';
+import * as mode from '#core/mode';
+import {arrayOrSingleItemToArray} from '#core/types/array';
+import {dict, hasOwn} from '#core/types/object';
+import {endsWith} from '#core/types/string';
+import {parseQueryString} from '#core/types/string/url';
+
 import {urls} from './config';
 import {userAssert} from './log';
 

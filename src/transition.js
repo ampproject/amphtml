@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import * as st from './core/dom/style';
+import {getCurve} from '#core/data-structures/curve';
+import * as st from '#core/dom/style';
+import {setStyle} from '#core/dom/style';
+
 import {assertNotDisplay} from './assert-display';
-import {getCurve} from './core/data-structures/curve';
-import {setStyle} from './core/dom/style';
 
 export const NOOP = function (unusedTime) {
   return null;

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {Services} from './service';
+import {Services} from '#service';
+
 import {devAssert} from './log';
 import {getServicePromise} from './service-helpers';
 

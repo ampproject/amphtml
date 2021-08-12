@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
+import {Messaging} from '@ampproject/viewer-messaging';
+import {expect} from 'chai';
+
+import {macroTask} from '#testing/yield';
+
 import {AmpStoryComponentManager} from '../../src/amp-story-player/amp-story-component-manager';
 import {AmpStoryPlayer} from '../../src/amp-story-player/amp-story-player-impl';
-import {Messaging} from '@ampproject/viewer-messaging';
 import {PageScroller} from '../../src/amp-story-player/page-scroller';
-import {expect} from 'chai';
-import {listenOncePromise} from '../../src/event-helper';
-import {macroTask} from '#testing/yield';
+import {createCustomEvent, listenOncePromise} from '../../src/event-helper';
 
 describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let win;
@@ -1509,6 +1511,42 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
           'i-amphtml-story-player-no-navigation-transition'
         )
       ).to.be.false;
+    });
+
+    it('should create previous and next story buttons when desktop panel story player experiment is on', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+
+      attachPlayerWithStories(playerEl, 5);
+      win.DESKTOP_PANEL_STORY_PLAYER_EXP_ON = true;
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      expect(
+        playerEl.querySelector('.i-amphtml-story-player-desktop-panel-prev')
+      ).to.exist;
+      expect(
+        playerEl.querySelector('.i-amphtml-story-player-desktop-panel-next')
+      ).to.exist;
+    });
+
+    it('Should get UI state on resize', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+
+      attachPlayerWithStories(playerEl, 5);
+      win.DESKTOP_PANEL_STORY_PLAYER_EXP_ON = true;
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+
+      win.dispatchEvent(createCustomEvent(win, 'resize', null));
+      await nextTick();
+
+      expect(sendRequestSpy).to.have.been.calledWith('onDocumentState', {
+        'state': 'UI_STATE',
+      });
     });
   });
 });

@@ -35,6 +35,6 @@ PASS
 |        height=657
 |        layout="responsive"
 |        data-href="http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html">
-|    </amp-facebook>
+|    </amp-facebook-comments>
 |  </body>
 |  </html>

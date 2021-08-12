@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const debounce = require('debounce');
+const debounce = require('../../common/debounce');
 const fs = require('fs-extra');
 const globby = require('globby');
 const path = require('path');
@@ -69,10 +69,10 @@ const cssEntryPoints = [
     append: false,
   },
   {
-    // Internal CSS used for the iframes inside `src/amp-story-player/amp-story-player.js`.
-    path: 'amp-story-player-iframe.css',
-    outJs: 'amp-story-player-iframe.css.js',
-    outCss: 'amp-story-player-iframe-v0.css',
+    // Internal CSS used for the shadow dom inside `src/amp-story-player/amp-story-player.js`.
+    path: 'amp-story-player-shadow.css',
+    outJs: 'amp-story-player-shadow.css.js',
+    outCss: 'amp-story-player-shadow-v0.css',
     append: false,
   },
   {

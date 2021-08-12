@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import {PriorityQueue} from './core/data-structures/priority-queue';
-import {Services} from './service';
-import {dev} from './log';
+import {PriorityQueue} from '#core/data-structures/priority-queue';
+
+import {Services} from '#service';
+
 import {getData} from './event-helper';
+import {dev} from './log';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,

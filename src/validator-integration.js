@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {isModeDevelopment} from './mode';
-import {loadPromise} from './event-helper';
-import {parseQueryString} from './core/types/string/url';
+import {parseQueryString} from '#core/types/string/url';
+
 import {urls} from './config';
+import {loadPromise} from './event-helper';
+import {isModeDevelopment} from './mode';
 
 /**
  * Triggers validation for the current document if there is a script in the

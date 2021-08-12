@@ -19,9 +19,10 @@
 #include <algorithm>
 #include <functional>
 #include <sstream>
-#include "glog/logging.h"
+
 #include "atomutil.h"
 #include "elements.h"
+#include "logging.h"
 
 namespace htmlparser {
 
@@ -41,13 +42,20 @@ void Node::SortAttributes(bool remove_duplicates) {
             [](const Attribute& left, const Attribute& right) -> bool {
               return left.KeyPart() < right.KeyPart();
             });
-  if (remove_duplicates) {
-    attributes_.erase(
-        std::unique(attributes_.begin(), attributes_.end(),
-                    [](const Attribute& left, const Attribute& right) -> bool {
-                      return left.KeyPart() == right.KeyPart();
-                    }), attributes_.end());
-  }
+  if (remove_duplicates) DropDuplicateAttributes();
+}
+
+void Node::DropDuplicateAttributes() {
+  auto remove_attributes = [&](auto first, auto last) {
+    for (; first != last; ++first) {
+      last = std::remove_if(std::next(first), last, [first](const auto& attr) {
+        return first->KeyPart() == attr.KeyPart();
+      });
+    }
+    return last;
+  };
+  attributes_.erase(remove_attributes(attributes_.begin(), attributes_.end()),
+                    attributes_.end());
 }
 
 bool Node::IsSpecialElement() const {
@@ -110,10 +118,9 @@ bool Node::InsertBefore(Node* new_child, Node* old_child) {
 }
 
 bool Node::AppendChild(Node* new_child) {
-  CHECK(!(new_child->Parent() ||
-          new_child->PrevSibling() ||
-          new_child->NextSibling()))
-        << "html: AppendChild called for an attached child Node";
+  CHECK(!(new_child->Parent() || new_child->PrevSibling() ||
+          new_child->NextSibling()),
+        "html: AppendChild called for an attached child Node.");
 
   Node* last = LastChild();
   if (last) {
@@ -130,8 +137,7 @@ bool Node::AppendChild(Node* new_child) {
 
 Node* Node::RemoveChild(Node* c) {
   // Remove child called for a non-child node.
-  CHECK(c->parent_ == this)
-      << "html: RemoveChild called for a non-child Node";
+  CHECK(c->parent_ == this, "html: RemoveChild called for a non-child Node");
 
   if (first_child_ == c) {
     first_child_ = c->next_sibling_;

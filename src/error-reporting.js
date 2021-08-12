@@ -14,25 +14,31 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from './core/constants/amp-events';
-import {Services} from './service';
+import {AmpEvents} from '#core/constants/amp-events';
+import {duplicateErrorIfNecessary} from '#core/error';
 import {
   USER_ERROR_SENTINEL,
-  dev,
-  isUserErrorEmbed,
+  isUserErrorEmbedMessage,
   isUserErrorMessage,
-} from './log';
-import {dict} from './core/types/object';
-import {duplicateErrorIfNecessary} from './core/error';
-import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
-import {exponentialBackoff} from './core/types/function/exponential-backoff';
-import {findIndex} from './core/types/array';
-import {getMode} from './mode';
-import {isLoadErrorMessage} from './event-helper';
-import {isProxyOrigin} from './url';
-import {makeBodyVisibleRecovery} from './style-installer';
+} from '#core/error/message-helpers';
+import * as mode from '#core/mode';
+import {findIndex} from '#core/types/array';
+import {exponentialBackoff} from '#core/types/function/exponential-backoff';
+import {dict} from '#core/types/object';
+
+import {experimentTogglesOrNull, getBinaryType, isCanary} from '#experiments';
+
+import {Services} from '#service';
+
 import {triggerAnalyticsEvent} from './analytics';
 import {urls} from './config';
+import {isLoadErrorMessage} from './event-helper';
+import {dev, setReportError} from './log';
+import {getMode} from './mode';
+import {makeBodyVisibleRecovery} from './style-installer';
+import {isProxyOrigin} from './url';
+
+export {setReportError};
 
 /**
  * @const {string}
@@ -129,7 +135,7 @@ export function reportErrorForWin(win, error, opt_associatedElement) {
     error &&
     !!win &&
     isUserErrorMessage(error.message) &&
-    !isUserErrorEmbed(error.message)
+    !isUserErrorEmbedMessage(error.message)
   ) {
     reportErrorToAnalytics(/** @type {!Error} */ (error), win);
   }
@@ -209,7 +215,7 @@ export function reportError(error, opt_associatedElement) {
       } else {
         if (element) {
           output.call(console, error.message, element);
-        } else if (!getMode().minified) {
+        } else if (!mode.isMinified()) {
           output.call(console, error.stack);
         } else {
           output.call(console, error.message);

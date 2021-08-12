@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import {Services} from '#service';
+
 import {ChunkPriority, chunk} from './chunk';
-import {Services} from './service';
-import {dev} from './log';
 import {isAmphtml} from './format';
+import {dev} from './log';
 import {isStoryDocument} from './utils/story';
 
 /** @const @enum {string} */

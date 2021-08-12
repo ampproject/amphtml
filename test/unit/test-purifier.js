@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import * as urlRewrite from '../../src/url-rewrite';
 import {Purifier} from '#purifier';
+
+import * as urlRewrite from '../../src/url-rewrite';
 
 describes.sandboxed
   .configure()

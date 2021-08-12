@@ -35,10 +35,9 @@ const {createKarmaServer, getAdTypes} = require('./helpers');
 const {cyan, green, red, yellow} = require('../../common/colors');
 const {dotWrappingWidth} = require('../../common/logging');
 const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel');
-const {getFilesFromArgv} = require('../../common/utils');
+const {getFilesFromArgv, getFilesFromFileList} = require('../../common/utils');
 const {isCiBuild, isCircleciBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
-const {reportTestStarted} = require('../report-test-status');
 const {SERVER_TRANSFORM_PATH} = require('../../server/typescript-compile');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
@@ -134,7 +133,7 @@ class RuntimeTestConfig {
         browsers: ['Firefox_flags'],
         customLaunchers: {
           // eslint-disable-next-line
-        Firefox_flags: {
+          Firefox_flags: {
             base: 'Firefox',
             flags: argv.headless ? ['-headless'] : [],
           },
@@ -175,7 +174,7 @@ class RuntimeTestConfig {
         browsers: ['Chrome_flags'],
         customLaunchers: {
           // eslint-disable-next-line
-        Chrome_flags: {
+          Chrome_flags: {
             base: 'Chrome',
             flags: chromeFlags,
           },
@@ -234,8 +233,10 @@ class RuntimeTestConfig {
   updateFiles() {
     switch (this.testType) {
       case 'unit':
-        if (argv.files) {
-          this.files = commonUnitTestPaths.concat(getFilesFromArgv());
+        if (argv.files || argv.filelist) {
+          this.files = commonUnitTestPaths
+            .concat(getFilesFromArgv())
+            .concat(getFilesFromFileList());
           return;
         }
         if (argv.firefox || argv.safari || argv.edge) {
@@ -400,7 +401,6 @@ class RuntimeTestRunner {
    * @return {Promise<void>}
    */
   async run() {
-    await reportTestStarted();
     this.exitCode = await createKarmaServer(this.config);
   }
 

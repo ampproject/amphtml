@@ -7,10 +7,6 @@ declare global {
     right: CompilerNode;
   }
 
-  interface BabelPath {
-    node: CompilerNode;
-  }
-
   interface EslintContext {
     report: Function;
   }
@@ -37,7 +33,7 @@ declare global {
     value: number;
   }
   interface Error {
-    status?: string;
+    status?: string | number;
   }
 
   namespace Mocha {

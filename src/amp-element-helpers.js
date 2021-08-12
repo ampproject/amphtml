@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Deferred} from './core/data-structures/promise';
-import {devAssert} from './core/assert';
+import {devAssert} from '#core/assert';
+import {Deferred} from '#core/data-structures/promise';
 
 /** @const {string} */
 export const UPGRADE_TO_CUSTOMELEMENT_PROMISE = '__AMP_UPG_PRM';

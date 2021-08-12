@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import {Services} from '#service';
+
 import {ChunkPriority, chunk} from './chunk';
-import {Services} from './service';
 import {isAmphtml} from './format';
 
 /**

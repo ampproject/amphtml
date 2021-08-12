@@ -18,6 +18,7 @@ import {
   Action,
   AmpStoryStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   AmpStoryInteractiveResults,
   decideStrategy,
@@ -27,20 +28,8 @@ import {
 import {InteractiveType} from '../amp-story-interactive-abstract';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
-import {addConfigToInteractive} from './test-amp-story-interactive';
+import {addConfigToInteractive, addThresholdsToInteractive} from './helpers';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-
-const addThresholdsToInteractive = (interactive, thresholdList) => {
-  addConfigToInteractive(interactive, thresholdList.length, null, [
-    'results-category',
-  ]);
-  thresholdList.forEach((threshold, index) => {
-    interactive.element.setAttribute(
-      `option-${index + 1}-results-threshold`,
-      threshold
-    );
-  });
-};
 
 describes.realWin(
   'amp-story-interactive-results',
@@ -59,6 +48,7 @@ describes.realWin(
       const ampStoryResultsEl = win.document.createElement(
         'amp-story-interactive-results'
       );
+      ampStoryResultsEl.getAmpDoc = () => new AmpDocSingle(win);
       ampStoryResultsEl.getResources = () => win.__AMP_SERVICES.resources.obj;
 
       storeService = new AmpStoryStoreService(win);

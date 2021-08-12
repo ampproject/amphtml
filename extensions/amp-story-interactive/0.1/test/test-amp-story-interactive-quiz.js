@@ -14,41 +14,20 @@
  * limitations under the License.
  */
 
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryInteractiveQuiz} from '../amp-story-interactive-quiz';
 import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
 import {
-  addConfigToInteractive,
   getMockIncompleteData,
   getMockInteractiveData,
   getMockOutOfBoundsData,
   getMockScrambledData,
-} from './test-amp-story-interactive';
+  populateQuiz,
+} from './helpers';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-
-/**
- * Populates the quiz with some number of prompts and some number of options.
- *
- * @param {Window} win
- * @param {AmpStoryInteractive} quiz
- * @param {=number} numOptions
- * @param {?string} prompt
- * @param {=number} correctOption
- */
-export const populateQuiz = (
-  quiz,
-  numOptions = 4,
-  prompt = undefined,
-  correctOption = 1
-) => {
-  if (prompt) {
-    quiz.element.setAttribute('prompt-text', prompt);
-  }
-  addConfigToInteractive(quiz, numOptions, correctOption);
-  quiz.element.setAttribute('id', 'TEST_quizId');
-};
 
 describes.realWin(
   'amp-story-interactive-quiz',
@@ -71,6 +50,7 @@ describes.realWin(
       const ampStoryQuizEl = win.document.createElement(
         'amp-story-interactive-quiz'
       );
+      ampStoryQuizEl.getAmpDoc = () => new AmpDocSingle(win);
       ampStoryQuizEl.getResources = () => win.__AMP_SERVICES.resources.obj;
       requestService = new AmpStoryRequestService(win);
       registerServiceBuilder(win, 'story-request', function () {

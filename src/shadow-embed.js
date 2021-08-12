@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-import {DomWriterBulk, DomWriterStreamer} from './utils/dom-writer';
-import {Services} from './service';
-import {ShadowCSS} from '#third_party/webcomponentsjs/ShadowCSS';
+import {iterateCursor} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {setInitialDisplay, setStyle} from '#core/dom/style';
 import {
   ShadowDomVersion,
   getShadowDomSupportedVersion,
   isShadowCssSupported,
-} from './core/dom/web-components';
+} from '#core/dom/web-components';
+import {toArray} from '#core/types/array';
+import {toWin} from '#core/window';
+
+import {Services} from '#service';
+
+import {ShadowCSS} from '#third_party/webcomponentsjs/ShadowCSS';
+
 import {dev, devAssert} from './log';
-import {escapeCssSelectorIdent} from './core/dom/css-selectors';
 import {installCssTransformer} from './style-installer';
-import {iterateCursor} from './core/dom';
-import {setInitialDisplay, setStyle} from './core/dom/style';
-import {toArray} from './core/types/array';
-import {toWin} from './core/window';
+import {DomWriterBulk, DomWriterStreamer} from './utils/dom-writer';
 
 /** @const {!RegExp} */
 const CSS_SELECTOR_BEG_REGEX = /[^\.\-\_0-9a-zA-Z]/;

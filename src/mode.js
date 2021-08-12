@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import * as coreMode from './core/mode';
-import {internalRuntimeVersion} from './internal-version';
-import {parseQueryString} from './core/types/string/url';
+import * as coreMode from '#core/mode';
+import {parseQueryString} from '#core/types/string/url';
 
 /**
  * @typedef {{
  *   localDev: boolean,
  *   development: boolean,
- *   minified: boolean,
  *   test: boolean,
  *   log: (string|undefined),
  *   version: string,
@@ -76,10 +74,9 @@ function getMode_(win) {
     esm: IS_ESM,
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
-    minified: coreMode.isMinified(),
     test: coreMode.isTest(win),
-    log: hashQuery['log'],
-    version: internalRuntimeVersion(),
+    log: parseInt(hashQuery['log'], 10),
+    version: coreMode.version(),
     rtvVersion: getRtvVersion(win),
   };
 }
@@ -99,7 +96,7 @@ function getRtvVersion(win) {
     // We will default to production default `01` minor version for now.
     // TODO(erwinmombay): decide whether internalRuntimeVersion should contain
     // minor version.
-    rtvVersion = win.AMP_CONFIG?.v || `01${internalRuntimeVersion()}`;
+    rtvVersion = win.AMP_CONFIG?.v || `01${coreMode.version()}`;
   }
   return rtvVersion;
 }

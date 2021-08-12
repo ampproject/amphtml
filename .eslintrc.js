@@ -72,6 +72,9 @@ module.exports = {
     ...getExperimentGlobals(),
     'IS_ESM': 'readonly',
     'IS_SXG': 'readonly',
+    'IS_MINIFIED': 'readonly',
+    'IS_PROD': 'readonly',
+    'INTERNAL_RUNTIME_VERSION': 'readonly',
     'AMP': 'readonly',
     'context': 'readonly',
     'global': 'readonly',
@@ -476,6 +479,10 @@ module.exports = {
           'rollup-plugin-cleanup',
         ],
       },
+    },
+    {
+      'files': ['3p/**/*.js', 'src/**/*.js', 'test/**/*.js', 'testing/**/*.js'],
+      'rules': {'import/order': 2},
     },
   ],
 };

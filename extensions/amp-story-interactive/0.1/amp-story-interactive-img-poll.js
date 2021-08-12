@@ -37,7 +37,11 @@ const buildOptionTemplate = (option) => {
       class="i-amphtml-story-interactive-img-option i-amphtml-story-interactive-option"
       aria-live="polite"
     >
-      <div class="i-amphtml-story-interactive-img-option-img"></div>
+      <div class="i-amphtml-story-interactive-img-option-img">
+        <span
+          class="i-amphtml-story-interactive-img-option-percentage-text"
+        ></span>
+      </div>
     </button>
   `;
 };
@@ -93,7 +97,6 @@ export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
     convertedOption.optionIndex_ = option['optionIndex'];
 
     // Extract and structure the option information
-    // TODO: Rewrite image URL (https://github.com/ampproject/amphtml/pull/35043#discussion_r660874389)
     setImportantStyles(
       convertedOption.querySelector(
         '.i-amphtml-story-interactive-img-option-img'
@@ -104,5 +107,29 @@ export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
     convertedOption.setAttribute('aria-label', option['imagealt']);
 
     return convertedOption;
+  }
+
+  /**
+   * @override
+   */
+  displayOptionsData(optionsData) {
+    if (!optionsData) {
+      return;
+    }
+
+    const percentages = this.preprocessPercentages_(optionsData);
+
+    this.getOptionElements().forEach((el, index) => {
+      if (optionsData[index].selected) {
+        el.setAttribute(
+          'aria-label',
+          'selected ' + this.options_[index]['imagealt']
+        );
+      }
+      el.querySelector(
+        '.i-amphtml-story-interactive-img-option-percentage-text'
+      ).textContent = `${percentages[index]}%`;
+      setImportantStyles(el, {'--option-percentage': percentages[index] / 100});
+    });
   }
 }

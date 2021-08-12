@@ -1,7 +1,8 @@
+import {isConnectedNode, rootNodeFor} from '#core/dom';
+import {isElement} from '#core/types';
+import {toArray} from '#core/types/array';
+
 import {devAssert} from './log';
-import {isConnectedNode, rootNodeFor} from './core/dom';
-import {isElement} from './core/types';
-import {toArray} from './core/types/array';
 
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.

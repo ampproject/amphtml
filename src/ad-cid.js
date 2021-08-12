@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from './service';
 import {adConfig} from '#ads/_config';
+
+import {Services} from '#service';
+
 import {dev} from './log';
 
 /**
