@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {InaboxMutator} from '#inabox/inabox-mutator';
+
 import {Services} from '#service';
 
 describes.realWin('inabox-mutator', {amp: true}, (env) => {

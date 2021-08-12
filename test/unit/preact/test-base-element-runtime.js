@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {CanRender} from '#preact/contextprops';
-import {PreactBaseElement, whenUpgraded} from '#preact/base-element';
-import {Slot} from '#preact/slot';
-import {forwardRef} from '#preact/compat';
-import {getSchedulerForDoc} from '#service/scheduler';
-import {htmlFor} from '#core/dom/static-template';
-import {installResizeObserverStub} from '#testing/resize-observer-stub';
-import {removeElement} from '#core/dom';
 import {subscribe} from '#core/context';
-import {upgradeOrRegisterElement} from '#service/custom-element-registry';
+import {removeElement} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+
+import * as Preact from '#preact';
+import {PreactBaseElement, whenUpgraded} from '#preact/base-element';
+import {forwardRef} from '#preact/compat';
 import {useAmpContext, useLoading} from '#preact/context';
+import {CanRender} from '#preact/contextprops';
+import {Slot} from '#preact/slot';
+
+import {upgradeOrRegisterElement} from '#service/custom-element-registry';
+import {getSchedulerForDoc} from '#service/scheduler';
+
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {waitFor} from '#testing/test-helper';
 
 describes.realWin('PreactBaseElement', {amp: true}, (env) => {

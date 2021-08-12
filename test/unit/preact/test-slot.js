@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {CanPlay, CanRender, LoadingProp} from '#preact/contextprops';
-import {Slot, createSlot, useSlotContext} from '#preact/slot';
-import {WithAmpContext} from '#preact/context';
+import {mount} from 'enzyme';
+
+import {setIsRoot, subscribe} from '#core/context';
 import {createElementWithAttributes} from '#core/dom';
+
+import * as Preact from '#preact';
 import {createRef, useLayoutEffect, useRef} from '#preact';
 import {forwardRef} from '#preact/compat';
-import {mount} from 'enzyme';
-import {setIsRoot, subscribe} from '#core/context';
+import {WithAmpContext} from '#preact/context';
+import {CanPlay, CanRender, LoadingProp} from '#preact/contextprops';
+import {Slot, createSlot, useSlotContext} from '#preact/slot';
 
 describes.sandboxed('Slot', {}, () => {
   let wrapper;
