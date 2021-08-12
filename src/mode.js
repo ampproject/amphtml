@@ -102,11 +102,9 @@ function getRtvVersion(win) {
  * @return {boolean}
  */
 export function isModeDevelopment(win, opt_hashParams) {
-  return !!(
-    ['1', 'actions', 'amp', 'amp4ads', 'amp4email'].includes(
-      (opt_hashParams || getHashParams(win))['development']
-    ) || win.AMP_DEV_MODE
-  );
+  const devModes = ['1', 'actions', 'amp', 'amp4ads', 'amp4email'];
+  const devParam = opt_hashParams || getHashParams(win);
+  return devModes.includes(devParam['development']) || !!win.AMP_DEV_MODE;
 }
 
 /**
