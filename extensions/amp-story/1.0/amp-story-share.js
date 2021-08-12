@@ -146,11 +146,11 @@ function buildProviderParams(opt_params) {
  * @return {!Node}
  */
 function buildProvider(doc, shareType, opt_params) {
-  const shareProviderLocalizedStringId = devAssert(
-    SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType],
-    `No localized string to display name for share type ${shareType}.`
+  const shareProviderString = devAssert(
+    SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType] || opt_params?.['aria-label'],
+    `No string to display name for share type ${shareType}.`
   );
-
+  
   return renderSimpleTemplate(
     doc,
     /** @type {!Array<!./simple-template.ElementDef>} */ ([
@@ -171,7 +171,8 @@ function buildProvider(doc, shareType, opt_params) {
           {
             tag: 'span',
             attrs: dict({'class': 'i-amphtml-story-share-label'}),
-            localizedStringId: shareProviderLocalizedStringId,
+            localizedStringId: SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType],
+            ...(opt_params?.['aria-label'] && { unlocalizedString: opt_params?.['aria-label'] })
           },
         ],
       },
