@@ -22,6 +22,7 @@ import {childElementByTag} from '#core/dom/query';
 import {deepMerge, hasOwn, map} from '#core/types/object';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '#core/dom';
+import {getServicePromiseForDoc} from 'src/service-helpers';
 
 const TAG = 'amp-consent/consent-config';
 const AMP_STORY_CONSENT_TAG = 'amp-story-consent';
@@ -323,12 +324,17 @@ export class ConsentConfig {
  * @return {!Promise<string>}
  */
 export function expandConsentEndpointUrl(element, url) {
-  return Services.urlReplacementsForDoc(element).expandUrlAsync(
-    url,
-    {
-      'CLIENT_ID': getConsentCID(element),
-    },
-    CONSENT_VARS_ALLOWED_LIST
+  return getServicePromiseForDoc(element, 'consentStateManager').then(
+    (consentStateManager) => {
+      Services.urlReplacementsForDoc(element).expandUrlAsync(
+        url,
+        {
+          'CLIENT_ID': getConsentCID(element),
+          'CONSENT_PAGE_VIEW_ID_64': consentStateManager.consentPageViewId64_,
+        },
+        CONSENT_VARS_ALLOWED_LIST
+      );
+    }
   );
 }
 

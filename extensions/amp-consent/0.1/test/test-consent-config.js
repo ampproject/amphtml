@@ -23,6 +23,7 @@ import {
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '#service';
 import {dict} from '#core/types/object';
+import * as ServiceHelpers from '../../../../src/service-helpers';
 
 describes.realWin('ConsentConfig', {amp: 1}, (env) => {
   let doc;
@@ -561,7 +562,17 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
       );
     });
 
-    it('override CLIENT_ID scope', async () => {
+    it.only('override CLIENT_ID scope', async () => {
+      const stubGetServicePromiseForDoc = env.sandbox.stub(
+        ServiceHelpers,
+        'getServicePromiseForDoc'
+      );
+      stubGetServicePromiseForDoc
+        .withArgs(env.sandbox.match.any, 'consentStateManager')
+        .resolves({foo: 'bar'}); // TODO
+
+      stubGetServicePromiseForDoc.callThrough();
+
       const u1 = await expandConsentEndpointUrl(
         doc.body,
         'https://example.test?cid=CLIENT_ID'
