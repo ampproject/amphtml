@@ -129,7 +129,7 @@ Results can feed its state from quizzes if all categories also specify `option-{
 
 ### amp-story-interactive-slider
 
-The `amp-story-interactive-slider` element provides a voting experience based on a range. The options take the form of values along a horizontal line, where all options are valid. When selected, an average indicator and the average response are displayed.
+The `amp-story-interactive-slider` element provides a voting experience based on a range. The options take the form of values along a horizontal line, that can be selected by sliding a thumb. When selected, an average indicator and the average response are displayed.
 
 Does not support pairing with `amp-story-interactive-results`, and can optionally have a prompt.
 
@@ -204,7 +204,7 @@ Controls the color of the chips and text. Can be `light` (default), `dark`.
 ### chip-style (optional for poll, quiz, results, slider)
 
 Controls the style of the component. Can be `flat` (default), `shadow`, or `transparent`.
-Results and binary-poll elements don't support shadow.
+Results, sliders, and binary-poll elements don't support shadow.
 
 ### prompt-text (optional)
 
