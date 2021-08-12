@@ -16,7 +16,7 @@
 
 import * as mode from '#core/mode';
 import {hasOwn} from '#core/types/object';
-import {parseQueryString} from '#core/types/string/url';
+import {getHashParams, parseQueryString} from '#core/types/string/url';
 import {WindowInterface} from '#core/window/interface';
 
 import {Services} from '#service';
@@ -751,8 +751,7 @@ export class GlobalVariableSource extends VariableSource {
         'param is required'
     );
     userAssert(typeof param == 'string', 'param should be a string');
-    const hash = this.ampdoc.win.location['originalHash'];
-    const params = parseQueryString(hash);
+    const params = getHashParams(this.ampdoc.win);
     return params[param] === undefined ? defaultValue : params[param];
   }
 

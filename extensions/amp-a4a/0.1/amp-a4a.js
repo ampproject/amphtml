@@ -42,7 +42,7 @@ import {
   createSecureFrame,
   isAttributionReportingSupported,
 } from './secure-frame';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, logHashParam, user, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {duplicateErrorIfNecessary} from '#core/error';
 import {
@@ -1323,7 +1323,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Additional arguments.
     assignAdUrlToError(/** @type {!Error} */ (error), this.adUrl_);
 
-    if (getMode().development || getMode().localDev || getMode().log) {
+    if (getMode().development || getMode().localDev || logHashParam()) {
       user().error(TAG, error);
     } else {
       user().warn(TAG, error);

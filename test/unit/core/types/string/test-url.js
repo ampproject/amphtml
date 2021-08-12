@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {parseQueryString} from '#core/types/string/url';
+import {getHashParams, parseQueryString} from '#core/types/string/url';
 
 describes.sandboxed('type helpers - strings - urls', {}, () => {
   describe('parseQueryString', () => {
@@ -65,6 +65,33 @@ describes.sandboxed('type helpers - strings - urls', {}, () => {
       expect(parseQueryString('a=1&b=2&a=3')).to.deep.equal({
         'a': '3',
         'b': '2',
+      });
+    });
+  });
+
+  describe('getHashParams', () => {
+    it('parses the `originalHash`', () => {
+      const params = getHashParams({
+        location: {
+          originalHash: '#development=1&original',
+          hash: '#development=1&missingOriginal',
+        },
+      });
+
+      expect(params).to.deep.equal({
+        'development': '1',
+        'original': '',
+      });
+    });
+
+    it('parses the hash if `originalHash` is unset', () => {
+      const params = getHashParams({
+        location: {hash: '#development=1&missingOriginal'},
+      });
+
+      expect(params).to.deep.equal({
+        'development': '1',
+        'missingOriginal': '',
       });
     });
   });

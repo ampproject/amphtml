@@ -28,7 +28,6 @@ export function getModeObject(opt_win) {
     development: getMode(opt_win).development,
     esm: IS_ESM,
     test: getMode(opt_win).test,
-    log: getMode(opt_win).log,
     rtvVersion: getMode(opt_win).rtvVersion,
   };
 }
