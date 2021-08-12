@@ -269,7 +269,7 @@
         "amp-story[ad-showing]",
       ],
       // for page navigation
-      "loading_complete_delay_ms": 19500
+      "loading_complete_delay_ms": 500
     },
     {
       // TODO(#32685, @ampproject/wg-stories): see https://percy.io/ampproject/amphtml/builds/8876280/changed/503548953
