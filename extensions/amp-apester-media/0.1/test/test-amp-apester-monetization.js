@@ -35,6 +35,8 @@ describes.realWin(
     let docInfo;
     const queryAmpAdBladeSelector = (myDoc) =>
       myDoc.querySelector('amp-ad[type=blade]');
+    const queryAmpAdAniviewSelector = (myDoc) =>
+      myDoc.querySelector('amp-ad[type=aniview]');
     const queryAmpAdDisplaySelector = (myDoc) =>
       myDoc.querySelector('amp-ad[type=doubleclick]');
 
@@ -100,6 +102,28 @@ describes.realWin(
       expect(srAboveAd).to.exist;
       expect(baseElement.previousSibling).to.be.equal(srAboveAd);
     });
+    it('Should show an Aniview companion ad below', async () => {
+      const media = createCampaignData({
+        display: false,
+        avAbove: false,
+        avBelow: true,
+      });
+      await handleCompanionAds(media, baseElement);
+      const avAdBelow = queryAmpAdAniviewSelector(doc);
+      expect(avAdBelow).to.exist;
+      expect(baseElement.nextSibling).to.be.equal(avAdBelow);
+    });
+    it('Should show an Aniview companion ad above', async () => {
+      const media = createCampaignData({
+        display: false,
+        avAbove: true,
+        avBelow: false,
+      });
+      await handleCompanionAds(media, baseElement);
+      const avAboveAd = queryAmpAdAniviewSelector(doc);
+      //expect(avAboveAd).to.exist;
+      //expect(baseElement.previousSibling).to.be.equal(avAboveAd);
+    });
     it('Should show an SR companion above with display companion', async () => {
       const media = createCampaignData({
         display: true,
@@ -141,6 +165,8 @@ describes.realWin(
 );
 
 function createCampaignData({
+  avAbove,
+  avBelow,
   bottomAd,
   disabledAmpCompanionAds,
   display,
@@ -161,6 +187,9 @@ function createCampaignData({
       },
       'enabled': false,
       'video': {
+        'playerOptions': {
+          'aniviewChannelId': '5fad4ac42cd6d91dcb6e50e9',
+        },
         'videoTag': '5d14c0ded1fb9900016a3118',
         'enabled': false,
         'floating': {
@@ -199,10 +228,22 @@ function createCampaignData({
   }
   if (srAbove) {
     campaignData.companionOptions.video.enabled = true;
+    campaignData.companionOptions.video.provider = 'sr';
     campaignData.companionOptions.video.companion.enabled = true;
   }
   if (srBelow) {
     campaignData.companionOptions.video.enabled = true;
+    campaignData.companionOptions.video.provider = 'sr';
+    campaignData.companionOptions.video.companion_below.enabled = true;
+  }
+  if (avAbove) {
+    campaignData.companionOptions.video.enabled = true;
+    campaignData.companionOptions.video.provider = 'aniview';
+    campaignData.companionOptions.video.companion.enabled = true;
+  }
+  if (avBelow) {
+    campaignData.companionOptions.video.enabled = true;
+    campaignData.companionOptions.video.provider = 'aniview';
     campaignData.companionOptions.video.companion_below.enabled = true;
   }
   if (disabledAmpCompanionAds) {
