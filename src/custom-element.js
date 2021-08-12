@@ -20,6 +20,10 @@ import {ReadyState} from '#core/constants/ready-state';
 import {tryResolve} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
 import * as dom from '#core/dom';
+import {
+  UPGRADE_TO_CUSTOMELEMENT_PROMISE,
+  UPGRADE_TO_CUSTOMELEMENT_RESOLVER,
+} from '#core/dom/amp-element-helpers';
 import {Layout, LayoutPriority, isLoadingAllowed} from '#core/dom/layout';
 import {MediaQueryProps} from '#core/dom/media-query-props';
 import * as query from '#core/dom/query';
@@ -31,10 +35,6 @@ import {Services} from '#service';
 import {ResourceState} from '#service/resource';
 import {getSchedulerForDoc} from '#service/scheduler';
 
-import {
-  UPGRADE_TO_CUSTOMELEMENT_PROMISE,
-  UPGRADE_TO_CUSTOMELEMENT_RESOLVER,
-} from './amp-element-helpers';
 import {startupChunk} from './chunk';
 import {shouldBlockOnConsentByMeta} from './consent';
 import {ElementStub} from './element-stub';

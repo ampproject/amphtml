@@ -289,9 +289,9 @@ export class AmpScript extends AMP.BaseElement {
       const folder = mode.isMinified() ? 'current-min' : 'current';
       iframeUrl = `/dist.3p/${folder}/amp-script-proxy-iframe.html`;
     } else {
-      iframeUrl = `${urls.thirdParty}/${
-        getMode().version
-      }/amp-script-proxy-iframe.html`;
+      iframeUrl = `${
+        urls.thirdParty
+      }/${mode.version()}/amp-script-proxy-iframe.html`;
     }
 
     // @see src/main-thread/configuration.WorkerDOMConfiguration in worker-dom.
