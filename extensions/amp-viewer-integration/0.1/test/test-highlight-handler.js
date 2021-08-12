@@ -20,7 +20,6 @@ import {Messaging, WindowPortEmulator} from '../messaging/messaging';
 import {Services} from '#service';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {toggleExperiment} from '#experiments';
 
 describes.fakeWin(
   'getHighlightParam',
@@ -424,13 +423,14 @@ describes.realWin(
       expect(setScrollTopStub.firstCall.args[0]).to.equal(350);
     });
 
-    // TODO(dmanek): remove `ifChrome` once other major browsers support
-    // text fragments (i.e. 'fragmentDirective' in document = true)
+    // TODO(dmanek): remove `ifChrome` once we remove Chrome version detection
     it.configure()
       .ifChrome()
-      .run('should highlight using text fragments', async () => {
-        toggleExperiment(env.win, 'use-text-fragments-for-highlights', true);
+      .run('should highlight using text fragments for Chrome 93', async () => {
         const {ampdoc} = env;
+        const platform = Services.platformFor(ampdoc.win);
+        env.sandbox.stub(platform, 'isChrome').returns(true);
+        env.sandbox.stub(platform, 'getMajorVersion').returns(93);
         let whenFirstVisiblePromiseResolve;
         const whenFirstVisiblePromise = new Promise((resolve) => {
           whenFirstVisiblePromiseResolve = resolve;
@@ -456,15 +456,49 @@ describes.realWin(
         );
       });
 
-    // TODO(dmanek): remove `ifChrome` once other major browsers support
-    // text fragments (i.e. 'fragmentDirective' in document = true)
+    // TODO(dmanek): remove `ifChrome` once we remove Chrome version detection
+    it.configure()
+      .ifChrome()
+      .run(
+        'should not highlight using text fragments for Chrome 92',
+        async () => {
+          const {ampdoc} = env;
+          const platform = Services.platformFor(ampdoc.win);
+          env.sandbox.stub(platform, 'isChrome').returns(true);
+          env.sandbox.stub(platform, 'getMajorVersion').returns(92);
+          let whenFirstVisiblePromiseResolve;
+          const whenFirstVisiblePromise = new Promise((resolve) => {
+            whenFirstVisiblePromiseResolve = resolve;
+          });
+          env.sandbox
+            .stub(ampdoc, 'whenFirstVisible')
+            .returns(whenFirstVisiblePromise);
+
+          const highlightHandler = new HighlightHandler(ampdoc, {
+            sentences: ['amp', 'highlight'],
+          });
+
+          const updateUrlWithTextFragmentSpy = env.sandbox.spy();
+          highlightHandler.updateUrlWithTextFragment_ =
+            updateUrlWithTextFragmentSpy;
+
+          whenFirstVisiblePromiseResolve();
+          await whenFirstVisiblePromise;
+
+          expect(updateUrlWithTextFragmentSpy).not.to.be.called;
+        }
+      );
+
+    // TODO(dmanek): remove `ifChrome` once we remove Chrome version detection
     it.configure()
       .ifChrome()
       .run(
         'should not highlight if highlightInfo.sentences is empty',
         async () => {
-          toggleExperiment(env.win, 'use-text-fragments-for-highlights', true);
           const {ampdoc} = env;
+          const platform = Services.platformFor(ampdoc.win);
+          env.sandbox.stub(platform, 'isChrome').returns(true);
+          env.sandbox.stub(platform, 'getMajorVersion').returns(93);
           let whenFirstVisiblePromiseResolve;
           const whenFirstVisiblePromise = new Promise((resolve) => {
             whenFirstVisiblePromiseResolve = resolve;

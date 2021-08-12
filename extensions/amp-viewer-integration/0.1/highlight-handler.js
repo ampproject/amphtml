@@ -17,7 +17,6 @@
 import {Services} from '#service';
 import {dict} from '#core/types/object';
 import {findSentences, markTextRangeList} from './findtext';
-import {isExperimentOn} from '#experiments';
 import {listenOnce} from '../../../src/event-helper';
 import {moveLayoutRect} from '#core/dom/layout/rect';
 import {once} from '#core/types/function';
@@ -157,9 +156,22 @@ export class HighlightHandler {
     /** @private {?Array<!Element>} */
     this.highlightedNodes_ = null;
 
+    const platform =
+      /* @type {!./service/platform-impl.Platform} */ Services.platformFor(
+        this.ampdoc_.win
+      );
+
+    // Chrome 81 added support for text fragment proposal. However, it is
+    // not supported across iframes but Chrome 81 thru 92 report
+    // `'fragmentDirective' in document = true` which breaks feature detection.
+    // Chrome 93 supports the proposal that works across iframes, hence this
+    // version check.
+    // TODO(dmanek): remove `ifChrome()` from unit tests when we remove
+    // Chrome version detection below
     if (
       'fragmentDirective' in document &&
-      isExperimentOn(ampdoc.win, 'use-text-fragments-for-highlights')
+      platform.isChrome() &&
+      platform.getMajorVersion() >= 93
     ) {
       ampdoc
         .whenFirstVisible()
