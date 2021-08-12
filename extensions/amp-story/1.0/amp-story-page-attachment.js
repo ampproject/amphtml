@@ -25,6 +25,7 @@ import {closest} from '#core/dom/query';
 import {dev, devAssert} from '../../../src/log';
 import {getHistoryState} from '#core/window/history';
 import {getLocalizationService} from './amp-story-localization-service';
+import {getSourceOrigin} from '../../../src/url';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {removeElement} from '#core/dom';
 import {setImportantStyles, toggle} from '#core/dom/style';
@@ -75,6 +76,12 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   constructor(element) {
     super(element);
 
+    /**
+     * The label containing the publisher domain.
+     * @protected {?Element}
+     */
+    this.domainLabelEl = null;
+
     /** @private @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win, this.element);
 
@@ -91,11 +98,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   buildCallback() {
     super.buildCallback();
 
-    const theme = this.element.getAttribute('theme')?.toLowerCase();
-    if (theme && AttachmentTheme.DARK === theme) {
-      this.headerEl.setAttribute('theme', theme);
-      this.element.setAttribute('theme', theme);
-    }
+    this.maybeSetDarkThemeForElement_(this.headerEl);
+    this.maybeSetDarkThemeForElement_(this.element);
 
     // Outlinks can be an amp-story-page-outlink or the legacy version,
     // an amp-story-page-attachment with an href.
@@ -137,6 +141,13 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildInline_() {
+    if (this.doesContainFormElement_()) {
+      // Page attachments that contain forms must display the page's publisher
+      // domain above the attachment's contents. This enables users to gauge
+      // the trustworthiness of publishers before sending data to them.
+      this.headerEl.parentNode.append(this.createDomainLabelElement_());
+    }
+
     const closeButtonEl = htmlFor(this.element)`
           <button class="i-amphtml-story-page-attachment-close-button" aria-label="close"
               role="button">
@@ -444,5 +455,51 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         isActive
       );
     });
+  }
+
+  /**
+   * Updates the given element with the appropriate class or attribute, if the
+   * page attachment's theme is 'dark'.
+   * @param {!Element} element The element upon which to set the dark theme.
+   * @private
+   */
+  maybeSetDarkThemeForElement_(element) {
+    const theme = this.element.getAttribute('theme')?.toLowerCase();
+    if (theme && AttachmentTheme.DARK === theme) {
+      element.setAttribute('theme', theme);
+    }
+  }
+
+  /**
+   * Create the domain label element to be displayed at the top of the page
+   * attachment.
+   * @return {!Element} element The domain label element.
+   * @private
+   */
+  createDomainLabelElement_() {
+    const domainLabelEl = this.win.document.createElement('div');
+    domainLabelEl.classList.add('i-amphtml-story-page-attachment-domain-label');
+    domainLabelEl.textContent = this.getPublisherOrigin_();
+    return domainLabelEl;
+  }
+
+  /**
+   * Returns whether a form element exists within this page attachment.
+   * @return {boolean} True, only if a form element exists as a descendant of
+   *     this page attachment.
+   * @private
+   */
+  doesContainFormElement_() {
+    return Boolean(this.element.querySelector('form'));
+  }
+
+  /**
+   * Returns the publisher origin URL string (e.g., "stories.example.com").
+   * @return {string} The domain of the publisher.
+   * @private
+   */
+  getPublisherOrigin_() {
+    const publisherOrigin = getSourceOrigin(this.getAmpDoc().getUrl());
+    return publisherOrigin.replace(/https?:\/\//, '');
   }
 }
