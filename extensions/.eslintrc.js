@@ -16,43 +16,7 @@
 
 // These extensions have been modified in the last 2 weeks, so we're not
 // including them yet to minimize disruption to devs actively working on them.
-const EXCLUDED_EXTENSIONS = [
-  'amp-ad-network-valueimpression-impl',
-  'amp-ad',
-  'amp-addthis',
-  'amp-analytics',
-  'amp-anim',
-  'amp-apester-media',
-  'amp-autocomplete',
-  'amp-base-carousel',
-  'amp-brightcove',
-  'amp-carousel',
-  'amp-connatix-player',
-  'amp-consent',
-  'amp-dailymotion',
-  'amp-facebook-comments',
-  'amp-facebook-like',
-  'amp-facebook-page',
-  'amp-facebook',
-  'amp-fit-text',
-  'amp-iframe',
-  'amp-inline-gallery',
-  'amp-lightbox',
-  'amp-link-rewriter',
-  'amp-minute-media-player',
-  'amp-mustache',
-  'amp-recaptcha-input',
-  'amp-render',
-  'amp-sidebar',
-  'amp-story-auto-ads',
-  'amp-story-interactive',
-  'amp-story',
-  'amp-stream-gallery',
-  'amp-subscriptions',
-  'amp-tiktok',
-  'amp-twitter',
-  'amp-video',
-];
+const EXCLUDED_EXTENSIONS = require('./import-order-excluded.json');
 
 module.exports = {
   'overrides': [
