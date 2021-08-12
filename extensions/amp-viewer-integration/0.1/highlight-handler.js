@@ -166,6 +166,8 @@ export class HighlightHandler {
     // `'fragmentDirective' in document = true` which breaks feature detection.
     // Chrome 93 supports the proposal that works across iframes, hence this
     // version check.
+    // TODO(dmanek): remove `ifChrome()` from unit tests when we remove
+    // Chrome version detection below
     if (
       'fragmentDirective' in document &&
       platform.isChrome() &&

@@ -423,7 +423,7 @@ describes.realWin(
       expect(setScrollTopStub.firstCall.args[0]).to.equal(350);
     });
 
-    // TODO(dmanek): remove `ifChrome` once other major browsers support text fragments
+    // TODO(dmanek): remove `ifChrome` once we remove Chrome version detection
     it.configure()
       .ifChrome()
       .run('should highlight using text fragments for Chrome 93', async () => {
@@ -456,7 +456,7 @@ describes.realWin(
         );
       });
 
-    // TODO(dmanek): remove `ifChrome` once other major browsers support text fragments
+    // TODO(dmanek): remove `ifChrome` once we remove Chrome version detection
     it.configure()
       .ifChrome()
       .run(
@@ -489,7 +489,7 @@ describes.realWin(
         }
       );
 
-    // TODO(dmanek): remove `ifChrome` once other major browsers support text fragments
+    // TODO(dmanek): remove `ifChrome` once we remove Chrome version detection
     it.configure()
       .ifChrome()
       .run(
