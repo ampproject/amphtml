@@ -123,6 +123,11 @@ commands:
   install_firefox:
     steps:
       - browser-tools/install-firefox
+  install_edge:
+    steps:
+      - run:
+          name: 'Install Microsoft Edge'
+          command: ./.circleci/install_microsoft_edge.sh
   enable_safari_automation:
     steps:
       - run:
@@ -349,7 +354,7 @@ jobs:
       - enable_safari_automation
       - run:
           name: '⭐ Browser Tests (Safari) ⭐'
-          command: node build-system/pr-check/safari-tests.js
+          command: node build-system/pr-check/browser-tests.js --browser=safari
       - store_test_output
       - teardown_vm
   browser_tests_firefox:
@@ -360,7 +365,18 @@ jobs:
       - install_firefox
       - run:
           name: '⭐ Browser Tests (Firefox) ⭐'
-          command: node build-system/pr-check/firefox-tests.js
+          command: node build-system/pr-check/browser-tests.js --browser=firefox
+      - store_test_output
+      - teardown_vm
+  browser_tests_edge:
+    executor:
+      name: node-docker-medium
+    steps:
+      - setup_vm
+      - install_edge
+      - run:
+          name: '⭐ Browser Tests (Edge) ⭐'
+          command: node build-system/pr-check/browser-tests.js --browser=edge
       - store_test_output
       - teardown_vm
   performance_tests:
@@ -511,6 +527,11 @@ workflows:
             - 'Nomodule Build (Test)'
       - browser_tests_firefox:
           name: 'Browser Tests (Firefox)'
+          <<: *push_and_pr_builds
+          requires:
+            - 'Nomodule Build (Test)'
+      - browser_tests_edge:
+          name: 'Browser Tests (Edge)'
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build (Test)'

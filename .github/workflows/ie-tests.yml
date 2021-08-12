@@ -1,0 +1,22 @@
+name: IE 11
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build_and_test:
+    if: github.repository == 'ampproject/amphtml'
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Install Dependencies
+        run: bash ./.github/workflows/install_dependencies.sh
+      - name: Build and Test
+        run: node build-system/pr-check/ie-tests.js
