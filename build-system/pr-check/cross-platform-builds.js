@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-import { getMode } from '../../../../../../../src/mode';
+/**
+ * @fileoverview Script that builds every commit on Linux, macOS, and Windows.
+ */
 
-const test = getMode().test;
-const localDev = getMode().localDev;
-const minified = getMode().minified;
-const development = getMode().development;
+const {runCiJob} = require('./ci-job');
+const {timedExecOrDie} = require('./utils');
 
-function foo() {
-  if (getMode().development == false) {
-    return false;
-  }
+const jobName = 'cross-platform-builds.js';
+
+/**
+ * Steps to run during push builds.
+ */
+function pushBuildWorkflow() {
+  timedExecOrDie('amp build');
+  timedExecOrDie('amp dist');
 }
+
+runCiJob(jobName, pushBuildWorkflow, () => {});
