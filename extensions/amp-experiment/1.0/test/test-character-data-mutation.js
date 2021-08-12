@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {CharacterDataMutation} from '../mutation/character-data-mutation';
 import {toggleExperiment} from '#experiments';
+
+import {CharacterDataMutation} from '../mutation/character-data-mutation';
 
 const TEST_VALUE = 'TEST_VALUE';
 

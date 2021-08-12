@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpAnimation} from '../amp-animation';
 import {DEFAULT_ACTION} from '#core/constants/action-constants';
+
+import {AmpAnimation} from '../amp-animation';
 import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
 import {WebAnimationPlayState} from '../web-animation-types';
 

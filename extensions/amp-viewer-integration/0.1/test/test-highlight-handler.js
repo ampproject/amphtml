@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import {VisibilityState} from '#core/constants/visibility-state';
 import * as docready from '#core/document-ready';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+
+import {Services} from '#service';
+
 import {HighlightHandler, getHighlightParam} from '../highlight-handler';
 import {Messaging, WindowPortEmulator} from '../messaging/messaging';
-import {Services} from '#service';
-import {VisibilityState} from '#core/constants/visibility-state';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 describes.fakeWin(
   'getHighlightParam',

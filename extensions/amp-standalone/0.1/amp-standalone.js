@@ -15,9 +15,10 @@
  */
 
 import {Services} from '#service';
+
+import {listen} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {getWinOrigin} from '../../../src/url';
-import {listen} from '../../../src/event-helper';
 
 /**
  * Safari and Chrome PWAs have undesirable behaviors in standalone mode,

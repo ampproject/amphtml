@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import {AmpDocService} from '#service/ampdoc-impl';
-import {AmpList} from '../amp-list';
 import {Services} from '#service';
+import {AmpDocService} from '#service/ampdoc-impl';
+
 import {
   measureElementStub,
   measureMutateElementStub,
   mutateElementStub,
 } from '#testing/test-helper';
+
+import {AmpList} from '../amp-list';
 
 describes.realWin(
   'amp-list layout container',

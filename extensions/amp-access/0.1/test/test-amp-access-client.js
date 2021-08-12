@@ -15,6 +15,7 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
+
 import * as mode from '../../../../src/mode';
 import {AccessClientAdapter} from '../amp-access-client';
 

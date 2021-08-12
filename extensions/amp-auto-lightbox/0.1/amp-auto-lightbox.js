@@ -23,17 +23,19 @@
  */
 
 import {AmpEvents} from '#core/constants/amp-events';
-import {AutoLightboxEvents} from '../../../src/auto-lightbox';
 import {CommonSignals} from '#core/constants/common-signals';
-import {Services} from '#service';
-import {closestAncestorElementBySelector} from '#core/dom/query';
-import {dev} from '../../../src/log';
 import {dispatchCustomEvent} from '#core/dom';
-import {loadPromise} from '../../../src/event-helper';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {measureIntersectionNoRoot} from '#core/dom/layout/intersection-no-root';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {toArray} from '#core/types/array';
 import {tryParseJson} from '#core/types/object/json';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+
+import {Services} from '#service';
+
+import {AutoLightboxEvents} from '../../../src/auto-lightbox';
+import {loadPromise} from '../../../src/event-helper';
+import {dev} from '../../../src/log';
 
 const TAG = 'amp-auto-lightbox';
 

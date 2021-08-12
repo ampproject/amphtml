@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import {toggleExperiment} from '#experiments';
+
 import {
   assertAttributeMutationFormat,
   assertCharacterDataMutationFormat,
 } from '../mutation/mutation';
-import {toggleExperiment} from '#experiments';
 
 describes.realWin(
   'amp-experiment mutation',

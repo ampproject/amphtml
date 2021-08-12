@@ -15,16 +15,20 @@
  */
 
 import '../amp-lightbox-gallery';
-import {ActionInvocation} from '#service/action-impl';
 import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
 import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
-import {installLightboxGallery} from '../amp-lightbox-gallery';
-import * as analytics from '../../../../src/analytics';
-import {poll} from '#testing/iframe';
+
 import {toggleExperiment} from '#experiments';
-import {waitFor, whenCalled} from '#testing/test-helper';
+
 import {Services} from '#service/';
+import {ActionInvocation} from '#service/action-impl';
+
+import {poll} from '#testing/iframe';
+import {waitFor, whenCalled} from '#testing/test-helper';
+
+import * as analytics from '../../../../src/analytics';
+import {installLightboxGallery} from '../amp-lightbox-gallery';
 
 const TAG = 'amp-lightbox-gallery';
 

@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 import '../amp-next-page';
-import {HostPage, PageState} from '../page';
-import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
-import {Services} from '#service';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
+
+import {Services} from '#service';
+
+import {HostPage, PageState} from '../page';
+import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
 
 const MOCK_NEXT_PAGE = `<header>Header</header>
     <div style="height:1000px"></div>

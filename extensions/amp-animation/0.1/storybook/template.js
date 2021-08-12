@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
 import {button, number, select, text} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
 
 const FILL_OPTIONS = {
   none: 'none',

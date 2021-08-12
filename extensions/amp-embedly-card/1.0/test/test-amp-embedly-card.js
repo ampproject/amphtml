@@ -15,10 +15,12 @@
  */
 
 import '../amp-embedly-card';
-import {computedStyle} from '#core/dom/style';
 import {createElementWithAttributes} from '#core/dom';
-import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
+import {computedStyle} from '#core/dom/style';
+
 import {toggleExperiment} from '#experiments';
+
+import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 import {waitFor} from '#testing/test-helper';
 
 describes.realWin(

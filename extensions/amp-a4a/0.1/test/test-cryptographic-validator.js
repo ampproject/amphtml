@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
+import {utf8Encode} from '#core/types/string/bytes';
+
+import {data} from './testdata/valid_css_at_rules_amp.reserialized';
+
+import {user} from '../../../../src/log';
 import {AdResponseType, ValidatorResult} from '../amp-ad-type-defs';
 import {
   CryptographicValidator,
   SIGNATURE_VERIFIER_PROPERTY_NAME,
 } from '../cryptographic-validator';
 import {VerificationStatus} from '../signature-verifier';
-import {data} from './testdata/valid_css_at_rules_amp.reserialized';
-import {user} from '../../../../src/log';
-import {utf8Encode} from '#core/types/string/bytes';
 
 const realWinConfig = {
   amp: {},

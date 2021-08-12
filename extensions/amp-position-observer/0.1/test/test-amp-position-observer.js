@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpVisibilityObserver} from '../amp-position-observer';
 import {RelativePositions, layoutRectLtwh} from '#core/dom/layout/rect';
+
+import {AmpVisibilityObserver} from '../amp-position-observer';
 
 /**
  * Functional tests that create:

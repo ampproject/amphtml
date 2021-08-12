@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-truncate-text-0.1.css';
-import {Services} from '#service';
-import {CSS as ShadowCSS} from '../../../build/amp-truncate-text-shadow-0.1.css';
+import {iterateCursor} from '#core/dom';
 import {
   closestAncestorElementBySelector,
   realChildNodes,
 } from '#core/dom/query';
-import {createShadowRoot} from './shadow-utils';
-import {dev} from '../../../src/log';
 import {htmlFor} from '#core/dom/static-template';
-import {isExperimentOn} from '#experiments';
-import {iterateCursor} from '#core/dom';
 import {toArray} from '#core/types/array';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {createShadowRoot} from './shadow-utils';
 import {truncateText} from './truncate-text';
+
+import {CSS} from '../../../build/amp-truncate-text-0.1.css';
+import {CSS as ShadowCSS} from '../../../build/amp-truncate-text-shadow-0.1.css';
+import {dev} from '../../../src/log';
 
 /**
  * TODO(sparhami) List of stuff to do / consider:

@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
+import {isIframed} from '#core/dom';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
 import {FixedLayer} from '#service/fixed-layer';
+
 import {FocusHandler} from './focus-handler';
 import {
   HighlightHandler,
@@ -27,14 +32,12 @@ import {
   WindowPortEmulator,
   parseMessage,
 } from './messaging/messaging';
-import {Services} from '#service';
 import {TouchHandler} from './touch-handler';
-import {dev} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {getAmpdoc} from '../../../src/service-helpers';
+
 import {getData, listen, listenOnce} from '../../../src/event-helper';
+import {dev} from '../../../src/log';
+import {getAmpdoc} from '../../../src/service-helpers';
 import {getSourceUrl} from '../../../src/url';
-import {isIframed} from '#core/dom';
 
 const TAG = 'amp-viewer-integration';
 const APP = '__AMPHTML__';

@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Builder} from '../web-animations';
-import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
-import {Services} from '#service';
-import {WebAnimationPlayState} from '../web-animation-types';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {isArray, isObject} from '#core/types';
 
+import {Services} from '#service';
+
 import {poll} from '#testing/iframe';
+
 import {user} from '../../../../src/log';
+import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
+import {WebAnimationPlayState} from '../web-animation-types';
+import {Builder} from '../web-animations';
 
 describes.realWin('MeasureScanner', {amp: 1}, (env) => {
   let win, doc;

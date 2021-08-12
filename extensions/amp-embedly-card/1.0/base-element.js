@@ -15,9 +15,10 @@
  */
 
 import * as Preact from '#preact';
+import {PreactBaseElement} from '#preact/base-element';
+
 import {EmbedlyCard} from './component';
 import {EmbedlyContext} from './embedly-context';
-import {PreactBaseElement} from '#preact/base-element';
 
 export class BaseElement extends PreactBaseElement {}
 

@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-app-banner-0.1.css';
-import {Services} from '#service';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {openWindowDialog} from '../../../src/open-window-dialog';
 import {removeElement} from '#core/dom';
 import {rethrowAsync} from '#core/error';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {CSS} from '../../../build/amp-app-banner-0.1.css';
+import {dev, user, userAssert} from '../../../src/log';
+import {openWindowDialog} from '../../../src/open-window-dialog';
 
 const TAG = 'amp-app-banner';
 const OPEN_LINK_TIMEOUT = 1500;

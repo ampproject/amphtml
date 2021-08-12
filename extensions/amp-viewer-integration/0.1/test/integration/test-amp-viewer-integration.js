@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import {done} from 'fetch-mock';
+
+import {getSourceUrl} from '../../../../../src/url';
 import {AmpViewerIntegration} from '../../amp-viewer-integration';
 import {
   Messaging,
@@ -21,8 +24,6 @@ import {
   parseMessage,
 } from '../../messaging/messaging';
 import {ViewerForTesting} from '../../viewer-for-testing';
-import {done} from 'fetch-mock';
-import {getSourceUrl} from '../../../../../src/url';
 
 describes.sandboxed('amp-viewer-integration', {}, () => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpA4A} from '../amp-a4a';
 import {dict} from '#core/types/object';
+
+import {AmpA4A} from '../amp-a4a';
 
 /** @type {string} @private */
 export const TEST_URL =

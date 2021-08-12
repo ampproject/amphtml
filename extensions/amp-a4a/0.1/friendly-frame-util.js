@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import {A4AVariableSource} from './a4a-variable-source';
 import {createElementWithAttributes} from '#core/dom';
-import {dict} from '#core/types/object';
-import {getExtensionsFromMetadata} from './amp-ad-utils';
-import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
-import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
 import {setStyle} from '#core/dom/style';
+import {dict} from '#core/types/object';
+
+import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
+
+import {A4AVariableSource} from './a4a-variable-source';
+import {getExtensionsFromMetadata} from './amp-ad-utils';
+
+import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
 
 /**
  * Renders a creative into a friendly iframe.

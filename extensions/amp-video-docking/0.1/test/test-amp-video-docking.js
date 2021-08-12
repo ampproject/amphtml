@@ -13,6 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Deferred, tryResolve} from '#core/data-structures/promise';
+import {createElementWithAttributes} from '#core/dom';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {htmlFor} from '#core/dom/static-template';
+
+import {Services} from '#service';
+
+import {PlayingStates} from '../../../../src/video-interface';
 import {
   Actions,
   BASE_CLASS_NAME,
@@ -26,13 +34,7 @@ import {
   VideoDocking,
   getPosterImageSrc,
 } from '../amp-video-docking';
-import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {DirectionX, DirectionY} from '../def';
-import {PlayingStates} from '../../../../src/video-interface';
-import {Services} from '#service';
-import {createElementWithAttributes} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 const slotId = 'my-slot-element';
 

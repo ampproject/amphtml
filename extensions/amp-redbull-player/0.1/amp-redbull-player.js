@@ -14,26 +14,28 @@
  * limitations under the License.
  */
 import {
+  dispatchCustomEvent,
+  getDataParamsFromAttributes,
+  removeElement,
+} from '#core/dom';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen} from '../../../src/event-helper';
+import {disableScrollingOnIframe} from '../../../src/iframe-helper';
+import {
   SandboxOptions,
   createFrameFor,
   isJsonOrObj,
   objOrParseJson,
   originMatches,
 } from '../../../src/iframe-video';
-import {Services} from '#service';
-import {VideoEvents} from '../../../src/video-interface';
-import {addParamsToUrl} from '../../../src/url';
-import {dict} from '#core/types/object';
-import {disableScrollingOnIframe} from '../../../src/iframe-helper';
-import {
-  dispatchCustomEvent,
-  getDataParamsFromAttributes,
-  removeElement,
-} from '#core/dom';
-import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '#service/video-manager-impl';
-import {isLayoutSizeDefined} from '#core/dom/layout';
 import {userAssert} from '../../../src/log';
+import {addParamsToUrl} from '../../../src/url';
+import {VideoEvents} from '../../../src/video-interface';
 
 /** @private @const */
 const TAG = 'amp-redbull-player';

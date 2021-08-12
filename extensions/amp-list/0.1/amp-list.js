@@ -16,14 +16,8 @@
 
 import {ActionTrust} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
-import {CSS} from '../../../build/amp-list-0.1.css';
-import {
-  DIFFABLE_AMP_ELEMENTS,
-  DIFF_IGNORE,
-  DIFF_KEY,
-  markElementForDiffing,
-} from '#purifier/sanitation';
 import {Deferred} from '#core/data-structures/promise';
+import {removeChildren, tryFocus} from '#core/dom';
 import {
   Layout,
   applyFillContent,
@@ -31,32 +25,43 @@ import {
   isLayoutSizeDefined,
   parseLayout,
 } from '#core/dom/layout';
-import {LoadMoreService} from './service/load-more-service';
-import {Pass} from '../../../src/pass';
-import {Services} from '#service';
-import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
-import {
-  UrlReplacementPolicy,
-  batchFetchJsonFor,
-  requestForBatchFetch,
-} from '../../../src/batched-json';
 import {
   childElementByAttr,
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
-import {createCustomEvent, listen} from '../../../src/event-helper';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, getValueForExpr} from '#core/types/object';
-import {getMode} from '../../../src/mode';
-import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
-import {removeChildren, tryFocus} from '#core/dom';
-
-import {isAmp4Email} from '../../../src/format';
-import {isArray, toArray} from '#core/types/array';
-import {isExperimentOn} from '#experiments';
 import {px, setImportantStyles, setStyles, toggle} from '#core/dom/style';
+import {isArray, toArray} from '#core/types/array';
+import {dict, getValueForExpr} from '#core/types/object';
+
+import {isExperimentOn} from '#experiments';
+
+import {
+  DIFFABLE_AMP_ELEMENTS,
+  DIFF_IGNORE,
+  DIFF_KEY,
+  markElementForDiffing,
+} from '#purifier/sanitation';
+
+import {Services} from '#service';
+
 import {setDOM} from '#third_party/set-dom/set-dom';
+
+import {LoadMoreService} from './service/load-more-service';
+
+import {CSS} from '../../../build/amp-list-0.1.css';
+import {
+  UrlReplacementPolicy,
+  batchFetchJsonFor,
+  requestForBatchFetch,
+} from '../../../src/batched-json';
+import {createCustomEvent, listen} from '../../../src/event-helper';
+import {isAmp4Email} from '../../../src/format';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {Pass} from '../../../src/pass';
+import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
+import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
 import {
   setupAMPCors,
   setupInput,

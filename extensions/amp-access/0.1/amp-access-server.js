@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-import {AccessClientAdapter} from './amp-access-client';
-import {Services} from '#service';
-import {dev, devAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {fetchDocument} from '../../../src/document-fetcher';
-import {isExperimentOn} from '#experiments';
-import {isProxyOrigin, removeFragment} from '../../../src/url';
+import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {AccessClientAdapter} from './amp-access-client';
+
+import {fetchDocument} from '../../../src/document-fetcher';
+import {dev, devAssert} from '../../../src/log';
+import {isProxyOrigin, removeFragment} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-access-server';

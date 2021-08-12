@@ -15,6 +15,7 @@
  */
 import '../amp-timeago';
 import {toggleExperiment} from '#experiments';
+
 import {waitFor} from '#testing/test-helper';
 
 describes.realWin(

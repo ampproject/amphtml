@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import {Mask} from './mask-impl';
-import {OutputMode} from './constants';
-import {Services} from '#service';
 import {iterateCursor, removeElement} from '#core/dom';
+
+import {Services} from '#service';
+
+import {OutputMode} from './constants';
+import {Mask} from './mask-impl';
+
 import {userAssert} from '../../../src/log';
 
 const ELEMENT_MASK_PROPERTY = '__amp_inputmask_masked';

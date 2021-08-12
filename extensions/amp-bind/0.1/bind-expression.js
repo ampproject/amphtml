@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import {AstNodeType} from './bind-expr-defines';
-import {devAssert, user} from '../../../src/log';
-import {dict, hasOwn, map} from '#core/types/object';
-import {getMode} from '../../../src/mode';
-import {isArray, isObject} from '#core/types';
-
 import {bindParser as parser} from '#build/parsers/bind-expr-impl';
+
+import {isArray, isObject} from '#core/types';
+import {dict, hasOwn, map} from '#core/types/object';
+
+import {AstNodeType} from './bind-expr-defines';
+
+import {devAssert, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 
 const TAG = 'amp-bind';
 

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import {remove} from '#core/types/array';
+
 import {BindExpression} from './bind-expression';
 import {BindMacro} from './bind-macro';
 import {BindValidator} from './bind-validator';
-import {remove} from '#core/types/array';
 
 /**
  * Asynchronously evaluates a set of Bind expressions.

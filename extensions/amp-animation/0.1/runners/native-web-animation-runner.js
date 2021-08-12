@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-import {AnimationRunner} from './animation-runner';
 import {Observable} from '#core/data-structures/observable';
+import {setStyles} from '#core/dom/style';
+
+import {AnimationRunner} from './animation-runner';
+import {getTotalDuration} from './utils';
+
+import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
+import {devAssert} from '../../../../src/log';
 import {
   WebAnimationDef,
   WebAnimationPlayState,
@@ -28,10 +34,6 @@ import {
   WebMultiAnimationDef,
   WebSwitchAnimationDef,
 } from '../web-animation-types';
-import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
-import {devAssert} from '../../../../src/log';
-import {getTotalDuration} from './utils';
-import {setStyles} from '#core/dom/style';
 
 /**
  */

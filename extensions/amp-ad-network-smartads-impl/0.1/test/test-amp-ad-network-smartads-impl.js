@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {AmpAdNetworkSmartAdsImpl} from '../amp-ad-network-smartads-impl';
+import {createElementWithAttributes} from '#core/dom';
+
 import {
   AmpAdUIHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-ui';
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {createElementWithAttributes} from '#core/dom';
+import {AmpAdNetworkSmartAdsImpl} from '../amp-ad-network-smartads-impl';
 import {smartAdsIsA4AEnabled} from '../smartads-a4a-config';
 
 describes.realWin('smartads-a4a-config', {amp: false}, (env) => {

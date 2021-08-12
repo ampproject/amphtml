@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {Instagram} from './component';
 import {PreactBaseElement} from '#preact/base-element';
+
+import {Instagram} from './component';
 
 export class BaseElement extends PreactBaseElement {}
 

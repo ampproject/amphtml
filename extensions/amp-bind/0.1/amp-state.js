@@ -16,19 +16,21 @@
 
 import {ActionTrust} from '#core/constants/action-constants';
 import {Deferred} from '#core/data-structures/promise';
+import {isJsonScriptTag} from '#core/dom';
 import {LayoutPriority} from '#core/dom/layout';
+import {toggle} from '#core/dom/style';
+import {dict, map} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
+
 import {Services} from '#service';
+
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict, map} from '#core/types/object';
 import {getSourceOrigin} from '../../../src/url';
-import {isJsonScriptTag} from '#core/dom';
-import {toggle} from '#core/dom/style';
-import {tryParseJson} from '#core/types/object/json';
 
 export class AmpState extends AMP.BaseElement {
   /**

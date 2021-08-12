@@ -15,11 +15,13 @@
  */
 
 import {AmpEvents} from '#core/constants/amp-events';
-import {MASK_SEPARATOR_CHAR, MaskChars, NamedMasks} from './constants';
-import {MaskInterface} from './mask-interface';
 import {dict} from '#core/types/object';
+
+import {MASK_SEPARATOR_CHAR, MaskChars, NamedMasks} from './constants';
 import {factory as inputmaskCustomAliasFactory} from './inputmask-custom-alias';
 import {factory as inputmaskPaymentCardAliasFactory} from './inputmask-payment-card-alias';
+import {MaskInterface} from './mask-interface';
+
 import {requireExternal} from '../../../src/module';
 
 const NamedMasksToInputmask = dict({

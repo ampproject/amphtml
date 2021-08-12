@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
+import {tryResolve} from '#core/data-structures/promise';
+import {tryParseJson} from '#core/types/object/json';
+import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
+
+import {dev, devAssert} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {
   AmpA4A,
   CreativeMetaDataDef,
   NO_CONTENT_RESPONSE,
 } from '../../amp-a4a/0.1/amp-a4a';
-import {AmpTemplateCreativeDef} from '../../amp-a4a/0.1/amp-ad-type-defs';
-import {dev, devAssert} from '../../../src/log';
 import {getAmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
-import {getMode} from '../../../src/mode';
+import {AmpTemplateCreativeDef} from '../../amp-a4a/0.1/amp-ad-type-defs';
 import {mergeExtensionsMetadata} from '../../amp-a4a/0.1/amp-ad-utils';
-import {tryParseJson} from '#core/types/object/json';
-import {tryResolve} from '#core/data-structures/promise';
-import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-adzerk-impl';

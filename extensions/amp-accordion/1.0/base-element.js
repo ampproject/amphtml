@@ -14,23 +14,26 @@
  * limitations under the License.
  */
 
+import {toggleAttribute} from '#core/dom';
+import {childElementsByTag} from '#core/dom/query';
+import {toArray} from '#core/types/array';
+import {dict, memo} from '#core/types/object';
+
 import * as Preact from '#preact';
+import {useLayoutEffect, useRef} from '#preact';
+import {PreactBaseElement} from '#preact/base-element';
+import {forwardRef} from '#preact/compat';
+import {useDOMHandle} from '#preact/component';
+import {useSlotContext} from '#preact/slot';
+
 import {
   Accordion,
   AccordionContent,
   AccordionHeader,
   AccordionSection,
 } from './component';
-import {PreactBaseElement} from '#preact/base-element';
-import {childElementsByTag} from '#core/dom/query';
+
 import {devAssert} from '../../../src/log';
-import {dict, memo} from '#core/types/object';
-import {forwardRef} from '#preact/compat';
-import {toArray} from '#core/types/array';
-import {toggleAttribute} from '#core/dom';
-import {useDOMHandle} from '#preact/component';
-import {useLayoutEffect, useRef} from '#preact';
-import {useSlotContext} from '#preact/slot';
 
 const SECTION_SHIM_PROP = '__AMP_S_SHIM';
 const HEADER_SHIM_PROP = '__AMP_H_SHIM';

@@ -15,10 +15,11 @@
  */
 
 import '../amp-nexxtv-player';
-import * as consent from '../../../../src/consent';
-import {VideoEvents} from '../../../../src/video-interface';
 import {createElementWithAttributes} from '#core/dom';
+
+import * as consent from '../../../../src/consent';
 import {listenOncePromise} from '../../../../src/event-helper';
+import {VideoEvents} from '../../../../src/video-interface';
 
 describes.realWin(
   'amp-nexxtv-player',

@@ -14,25 +14,28 @@
  * limitations under the License.
  */
 
-import {HtmlLiteralTagDef} from './html';
-import {PlayingStates, VideoEvents} from '../../../src/video-interface';
-import {Services} from '#service';
-import {Timeout} from './timeout';
-import {VideoDockingEvents, pointerCoords} from './events';
-import {applyBreakpointClassname} from './breakpoints';
-import {closestAncestorElementBySelector} from '#core/dom/query';
-import {createCustomEvent, listen} from '../../../src/event-helper';
-import {dev, devAssert} from '../../../src/log';
-import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {iterateCursor} from '#core/dom';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {once} from '#core/types/function';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {
   resetStyles,
   setImportantStyles,
   toggle,
   translate,
 } from '#core/dom/style';
+import {once} from '#core/types/function';
+
+import {Services} from '#service';
+
+import {applyBreakpointClassname} from './breakpoints';
+import {VideoDockingEvents, pointerCoords} from './events';
+import {HtmlLiteralTagDef} from './html';
+import {Timeout} from './timeout';
+
+import {createCustomEvent, listen} from '../../../src/event-helper';
+import {dev, devAssert} from '../../../src/log';
+import {PlayingStates, VideoEvents} from '../../../src/video-interface';
 
 /**
  * A single controls set can be displayed at a time on the controls layer.

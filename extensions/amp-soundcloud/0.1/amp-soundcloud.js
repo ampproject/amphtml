@@ -27,12 +27,14 @@
  * </amp-soundcloud>
  */
 
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {PauseHelper} from '#core/dom/video/pause-helper';
 import {dict} from '#core/types/object';
-import {setIsMediaComponent} from '../../../src/video-interface';
+
+import {Services} from '#service';
+
 import {userAssert} from '../../../src/log';
+import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpSoundcloud extends AMP.BaseElement {
   /** @param {!AmpElement} element */

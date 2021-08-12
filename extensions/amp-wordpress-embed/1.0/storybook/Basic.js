@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {WordPressEmbed} from '../component';
 import {number, text, withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
+
+import {WordPressEmbed} from '../component';
 
 export default {
   title: 'WordPressEmbed',

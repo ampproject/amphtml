@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {Keys} from '#core/constants/key-codes';
-import {Option, Selector} from '../component';
 import {mount} from 'enzyme';
+
+import {Keys} from '#core/constants/key-codes';
+
+import * as Preact from '#preact';
+
+import {Option, Selector} from '../component';
 
 describes.sandboxed('Selector preact component', {}, () => {
   describe('standalone option', () => {

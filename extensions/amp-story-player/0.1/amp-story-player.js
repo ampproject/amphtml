@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {AmpStoryPlayer} from '../../../src/amp-story-player/amp-story-player-impl';
-import {cssText} from '../../../build/amp-story-player.css';
 import {isLayoutSizeDefined} from '#core/dom/layout';
+
+import {cssText} from '../../../build/amp-story-player.css';
+import {AmpStoryPlayer} from '../../../src/amp-story-player/amp-story-player-impl';
 
 class AmpStoryPlayerWrapper extends AMP.BaseElement {
   /** @override @nocollapse */

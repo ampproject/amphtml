@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-import {AmpInstallServiceWorker} from '../amp-install-serviceworker';
 import {Services} from '#service';
+
+import {loadPromise} from '../../../../src/event-helper';
+import {
+  registerServiceBuilderForDoc,
+  resetServiceForTesting,
+} from '../../../../src/service-helpers';
 import {
   assertHttpsUrl,
   getSourceOrigin,
@@ -23,11 +28,7 @@ import {
   isSecureUrlDeprecated,
   parseUrlDeprecated,
 } from '../../../../src/url';
-import {loadPromise} from '../../../../src/event-helper';
-import {
-  registerServiceBuilderForDoc,
-  resetServiceForTesting,
-} from '../../../../src/service-helpers';
+import {AmpInstallServiceWorker} from '../amp-install-serviceworker';
 
 function stubUrlService(sandbox) {
   sandbox.stub(Services, 'urlForDoc').returns({

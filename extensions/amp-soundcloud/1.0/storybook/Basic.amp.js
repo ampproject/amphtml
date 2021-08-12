@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {boolean, color, text, withKnobs} from '@storybook/addon-knobs';
-import {rgba2hex} from './converter';
 import {withAmp} from '@ampproject/storybook-addon';
+import {boolean, color, text, withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
+
+import {rgba2hex} from './converter';
 
 export default {
   title: 'amp-soundcloud-1_0',

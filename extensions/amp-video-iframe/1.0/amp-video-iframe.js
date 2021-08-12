@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {BUBBLE_MESSAGE_EVENTS} from '../amp-video-iframe-api';
-import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-video-iframe-1.0.css';
-import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '#core/types/object';
-import {isExperimentOn} from '#experiments';
 import {measureIntersection} from '#core/dom/layout/intersection';
+import {dict} from '#core/types/object';
+
+import {isExperimentOn} from '#experiments';
+
+import {BaseElement} from './base-element';
+
+import {CSS} from '../../../build/amp-video-iframe-1.0.css';
+import {createCustomEvent} from '../../../src/event-helper';
 import {postMessageWhenAvailable} from '../../../src/iframe-video';
 import {userAssert} from '../../../src/log';
+import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
+import {BUBBLE_MESSAGE_EVENTS} from '../amp-video-iframe-api';
 
 /** @const {string} */
 const TAG = 'amp-video-iframe';

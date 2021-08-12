@@ -16,11 +16,15 @@
 
 import '../../../amp-ad/0.1/amp-ad';
 import '../amp-auto-ads';
-import {BaseElement} from '../../../../src/base-element';
-import {Services} from '#service';
 import {getA4ARegistry} from '#ads/_a4a-config';
-import {toggleExperiment} from '#experiments';
+
 import {waitForChild} from '#core/dom';
+
+import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+
+import {BaseElement} from '../../../../src/base-element';
 
 class FakeA4A extends BaseElement {
   isLayoutSupported(unusedLayout) {

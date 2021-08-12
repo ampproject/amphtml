@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
 import {isExperimentOn} from '#experiments';
+
+import {BaseElement} from './base-element';
+
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */

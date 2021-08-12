@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import {AmpDocService} from '#service/ampdoc-impl';
-import {AmpList} from '../amp-list';
+import {toggleExperiment} from '#experiments';
+
 import {Services} from '#service';
+import {AmpDocService} from '#service/ampdoc-impl';
+
 import {
   measureElementStub,
   measureMutateElementStub,
   mutateElementStub,
 } from '#testing/test-helper';
-import {toggleExperiment} from '#experiments';
+
+import {AmpList} from '../amp-list';
 
 const HAS_MORE_ITEMS_PAYLOAD = {
   'items': ['1', '2'],

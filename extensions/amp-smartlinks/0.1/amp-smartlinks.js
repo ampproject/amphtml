@@ -15,15 +15,17 @@
  */
 
 import {CommonSignals} from '#core/constants/common-signals';
-import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
-import {Services} from '#service';
 import {dict} from '#core/types/object';
-import {getData} from '../../../src/event-helper';
+
+import {Services} from '#service';
 
 import {ENDPOINTS} from './constants';
-import {LinkRewriterManager} from '../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
 import {Linkmate} from './linkmate';
 import {getConfigOptions} from './linkmate-options';
+
+import {getData} from '../../../src/event-helper';
+import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
+import {LinkRewriterManager} from '../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
 
 const TAG = 'amp-smartlinks';
 

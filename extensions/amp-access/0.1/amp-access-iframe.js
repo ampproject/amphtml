@@ -15,15 +15,18 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
-import {Messenger} from './iframe-api/messenger';
-import {Services} from '#service';
-import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
-import {dev, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {getMode} from '../../../src/mode';
-import {isArray} from '#core/types';
-import {parseJson} from '#core/types/object/json';
 import {toggle} from '#core/dom/style';
+import {isArray} from '#core/types';
+import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {Messenger} from './iframe-api/messenger';
+
+import {dev, userAssert} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
 
 const AUTHORIZATION_TIMEOUT = 3000;
 const EXPIRATION_TIMEOUT = 1000 * 60 * 60 * 24 * 7; // 7 days

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 import {Observable} from '#core/data-structures/observable';
-import {Services} from '#service';
-import {devAssert, user} from '../../../src/log';
-import {once} from '#core/types/function';
 import {px, setImportantStyles} from '#core/dom/style';
+import {once} from '#core/types/function';
+
+import {Services} from '#service';
+
+import {devAssert, user} from '../../../src/log';
 
 const TAG = 'amp-fx';
 

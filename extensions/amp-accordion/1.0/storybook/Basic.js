@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
+import {boolean, withKnobs} from '@storybook/addon-knobs';
+
 import * as Preact from '#preact';
+
 import {
   Accordion,
   AccordionContent,
   AccordionHeader,
   AccordionSection,
 } from '../component';
-import {boolean, withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'Accordion',

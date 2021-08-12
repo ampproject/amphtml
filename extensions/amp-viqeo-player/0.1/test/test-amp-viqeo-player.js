@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {PlayingStates, VideoEvents} from '../../../../src/video-interface';
 import {Services} from '#service';
+
 import {listenOncePromise} from '../../../../src/event-helper';
+import {PlayingStates, VideoEvents} from '../../../../src/video-interface';
 import AmpViqeoPlayer from '../amp-viqeo-player';
 
 describes.realWin(

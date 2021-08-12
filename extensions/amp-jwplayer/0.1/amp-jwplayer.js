@@ -15,10 +15,23 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '#core/dom/fullscreen';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {PauseHelper} from '#core/dom/video/pause-helper';
+import {once} from '#core/types/function';
+import {dict} from '#core/types/object';
+
 import {Services} from '#service';
-import {VideoEvents} from '../../../src/video-interface';
-import {addParamsToUrl} from '../../../src/url';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen} from '../../../src/event-helper';
+import {disableScrollingOnIframe} from '../../../src/iframe-helper';
 import {
   addUnsafeAllowAutoplay,
   createFrameFor,
@@ -27,21 +40,10 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {disableScrollingOnIframe} from '../../../src/iframe-helper';
-import {dispatchCustomEvent, removeElement} from '#core/dom';
-import {
-  fullscreenEnter,
-  fullscreenExit,
-  isFullscreenElement,
-} from '#core/dom/fullscreen';
-import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
-import {installVideoManagerForDoc} from '#service/video-manager-impl';
-import {once} from '#core/types/function';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {addParamsToUrl} from '../../../src/url';
+import {VideoEvents} from '../../../src/video-interface';
 
 const JWPLAYER_EVENTS = {
   'ready': VideoEvents.LOAD,

@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import {AccessClientAdapter} from '../amp-access-client';
-import {AccessService} from '../amp-access';
 import {AmpEvents} from '#core/constants/amp-events';
 import {Observable} from '#core/data-structures/observable';
+
+import {toggleExperiment} from '#experiments';
+
 import {Services} from '#service';
 import {cidServiceForDocForTesting} from '#service/cid-impl';
 import {installPerformanceService} from '#service/performance-impl';
 import {installPlatformService} from '#service/platform-impl';
-import {toggleExperiment} from '#experiments';
+
+import {AccessService} from '../amp-access';
+import {AccessClientAdapter} from '../amp-access-client';
 
 describes.fakeWin(
   'AccessService',

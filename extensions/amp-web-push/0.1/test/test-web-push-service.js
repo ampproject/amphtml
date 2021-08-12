@@ -15,11 +15,11 @@
  */
 
 import * as mode from '../../../../src/mode';
-import {AmpWebPushHelperFrame} from '../amp-web-push-helper-frame';
-import {NotificationPermission} from '../vars';
 import {WebPushConfigAttributes} from '../amp-web-push-config';
-import {WebPushService} from '../web-push-service';
+import {AmpWebPushHelperFrame} from '../amp-web-push-helper-frame';
 import {WebPushWidgetVisibilities} from '../amp-web-push-widget';
+import {NotificationPermission} from '../vars';
+import {WebPushService} from '../web-push-service';
 import {WindowMessenger} from '../window-messenger';
 
 const FAKE_IFRAME_URL =

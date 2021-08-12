@@ -14,35 +14,37 @@
  * limitations under the License.
  */
 
-import * as dom from '#core/dom';
-import * as query from '#core/dom/query';
-import * as st from '#core/dom/style';
-import * as tr from '../../../src/transition';
-import {Animation} from '../../../src/animation';
-import {CSS} from '../../../build/amp-image-lightbox-0.1.css';
-import {
-  DoubletapRecognizer,
-  SwipeXYRecognizer,
-  TapRecognizer,
-  TapzoomRecognizer,
-} from '../../../src/gesture-recognizers';
-import {Gestures} from '../../../src/gesture';
 import {Keys} from '#core/constants/key-codes';
-import {Services} from '#service';
-import {WindowInterface} from '#core/window/interface';
 import {bezierCurve} from '#core/data-structures/curve';
-import {boundValue, clamp, distance, magnitude} from '#core/math';
-import {continueMotion} from '../../../src/motion';
-import {dev, userAssert} from '../../../src/log';
-import {isLoaded} from '../../../src/event-helper';
+import * as dom from '#core/dom';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
 } from '#core/dom/layout/rect';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {setStyles, toggle} from '#core/dom/style';
+import * as query from '#core/dom/query';
 import {srcsetFromElement} from '#core/dom/srcset';
+import {setStyles, toggle} from '#core/dom/style';
+import * as st from '#core/dom/style';
+import {boundValue, clamp, distance, magnitude} from '#core/math';
+import {WindowInterface} from '#core/window/interface';
+
+import {Services} from '#service';
+
+import {CSS} from '../../../build/amp-image-lightbox-0.1.css';
+import {Animation} from '../../../src/animation';
+import {isLoaded} from '../../../src/event-helper';
+import {Gestures} from '../../../src/gesture';
+import {
+  DoubletapRecognizer,
+  SwipeXYRecognizer,
+  TapRecognizer,
+  TapzoomRecognizer,
+} from '../../../src/gesture-recognizers';
+import {dev, userAssert} from '../../../src/log';
+import {continueMotion} from '../../../src/motion';
+import * as tr from '../../../src/transition';
 
 const TAG = 'amp-image-lightbox';
 

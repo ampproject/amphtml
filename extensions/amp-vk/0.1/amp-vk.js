@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import {Layout, applyFillContent} from '#core/dom/layout';
-import {Services} from '#service';
-import {addParamsToUrl, appendEncodedParamStringToUrl} from '../../../src/url';
-import {dict} from '#core/types/object';
-import {getData, listen} from '../../../src/event-helper';
-import {isEnumValue} from '#core/types';
 import {removeElement} from '#core/dom';
+import {Layout, applyFillContent} from '#core/dom/layout';
+import {isEnumValue} from '#core/types';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {getData, listen} from '../../../src/event-helper';
 import {userAssert} from '../../../src/log';
+import {addParamsToUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 
 /**
  * @enum {string}

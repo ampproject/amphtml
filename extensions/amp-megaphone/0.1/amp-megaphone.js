@@ -27,17 +27,19 @@
  * </amp-megaphone>
  */
 
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
-import {addParamsToUrl} from '../../../src/url';
-import {applyFillContent, isLayoutSizeFixed} from '#core/dom/layout';
-import {dict} from '#core/types/object';
-import {getData, listen} from '../../../src/event-helper';
-import {isObject} from '#core/types';
 import {removeElement} from '#core/dom';
-import {setIsMediaComponent} from '../../../src/video-interface';
+import {applyFillContent, isLayoutSizeFixed} from '#core/dom/layout';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {isObject} from '#core/types';
+import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {getData, listen} from '../../../src/event-helper';
 import {userAssert} from '../../../src/log';
+import {addParamsToUrl} from '../../../src/url';
+import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpMegaphone extends AMP.BaseElement {
   /** @param {!AmpElement} element */

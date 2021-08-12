@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {Services} from '#service';
+
 import {
   DATA_ATTR_NAME,
   DATA_MANAGER_ID_NAME,
@@ -21,7 +23,6 @@ import {
   RefreshManager,
   getPublisherSpecifiedRefreshInterval,
 } from '../refresh-manager';
-import {Services} from '#service';
 
 describes.sandboxed('refresh', {}, (env) => {
   let mockA4a;

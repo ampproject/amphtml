@@ -15,10 +15,12 @@
  */
 
 import {ActionTrust} from '#core/constants/action-constants';
-import {Services} from '#service';
 import {clamp, sum} from '#core/math';
-import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {createCustomEvent} from '../../../src/event-helper';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-orientation-observer';

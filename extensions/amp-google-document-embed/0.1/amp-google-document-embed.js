@@ -27,12 +27,14 @@
  * </code>
  */
 
-import {Services} from '#service';
-import {addParamToUrl} from '../../../src/url';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {dev, userAssert} from '../../../src/log';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {removeElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+
+import {Services} from '#service';
+
+import {dev, userAssert} from '../../../src/log';
+import {addParamToUrl} from '../../../src/url';
 
 export const TAG = 'amp-google-document-embed';
 

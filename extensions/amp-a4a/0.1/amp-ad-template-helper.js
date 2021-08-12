@@ -15,18 +15,20 @@
  */
 
 import {LruCache} from '#core/data-structures/lru-cache';
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
-import {devAssert} from '../../../src/log';
+import {isArray} from '#core/types';
 import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {urls} from '../../../src/config';
+import {devAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service-helpers';
-import {isArray} from '#core/types';
 import {parseUrlDeprecated} from '../../../src/url';
-import {urls} from '../../../src/config';
 
 /** @private {!Object<string, string|boolean>} */
 const TEMPLATE_CORS_CONFIG = {

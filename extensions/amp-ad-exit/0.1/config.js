@@ -15,8 +15,9 @@
  */
 
 import {FilterType} from './filters/filter';
-import {IFRAME_TRANSPORTS} from '../../amp-analytics/0.1/iframe-transport-vendors';
+
 import {user, userAssert} from '../../../src/log';
+import {IFRAME_TRANSPORTS} from '../../amp-analytics/0.1/iframe-transport-vendors';
 
 /**
  * @typedef {{

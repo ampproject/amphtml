@@ -15,10 +15,12 @@
  */
 
 import {AmpEvents} from '#core/constants/amp-events';
-import {DIRTINESS_INDICATOR_CLASS, FormDirtiness} from '../form-dirtiness';
-import {Services} from '#service';
 import {closestAncestorElementBySelector} from '#core/dom/query';
+
+import {Services} from '#service';
+
 import {createCustomEvent, getDetail} from '../../../../src/event-helper';
+import {DIRTINESS_INDICATOR_CLASS, FormDirtiness} from '../form-dirtiness';
 
 function getForm(doc) {
   const form = doc.createElement('form');

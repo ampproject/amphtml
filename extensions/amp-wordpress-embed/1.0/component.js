@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {IframeEmbed} from '#preact/component/iframe';
-import {addParamToUrl} from '../../../src/url';
 import {dict} from '#core/types/object';
+
+import * as Preact from '#preact';
 import {forwardRef} from '#preact/compat';
+import {IframeEmbed} from '#preact/component/iframe';
+
 import {getData} from '../../../src/event-helper';
+import {addParamToUrl} from '../../../src/url';
 
 const {useCallback, useEffect, useMemo, useRef, useState} = Preact;
 

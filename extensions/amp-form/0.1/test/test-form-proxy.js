@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 import {Services} from '#service';
+
+import {parseUrlDeprecated} from '../../../../src/url';
 import {
   installFormProxy,
   setDenylistedPropertiesForTesting,
 } from '../form-proxy';
-import {parseUrlDeprecated} from '../../../../src/url';
 
 const PROPS = [
   'id',

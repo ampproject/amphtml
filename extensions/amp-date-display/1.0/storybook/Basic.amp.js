@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {date, select, withKnobs} from '@storybook/addon-knobs';
 import {withAmp} from '@ampproject/storybook-addon';
+import {date, select, withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
 
 const DISPLAY_IN_OPTIONS = ['utc', 'local'];
 const LOCALES = ['en-US', 'en-GB', 'fr', 'ru', 'ar', 'he', 'ja'];

@@ -13,13 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {BUBBLE_MESSAGE_EVENTS} from '../amp-video-iframe-api';
 import {Deferred} from '#core/data-structures/promise';
 import {
-  MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
-  VideoEvents,
-} from '../../../src/video-interface';
+  dispatchCustomEvent,
+  getDataParamsFromAttributes,
+  removeElement,
+} from '#core/dom';
+import {isFullscreenElement} from '#core/dom/fullscreen';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {measureIntersection} from '#core/dom/layout/intersection';
 import {PauseHelper} from '#core/dom/video/pause-helper';
+import {once} from '#core/types/function';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getConsentDataToForward} from '../../../src/consent';
+import {getData, listen} from '../../../src/event-helper';
+import {
+  disableScrollingOnIframe,
+  looksLikeTrackingIframe,
+} from '../../../src/iframe-helper';
 import {
   SandboxOptions,
   createFrameFor,
@@ -27,26 +42,13 @@ import {
   objOrParseJson,
   originMatches,
 } from '../../../src/iframe-video';
-import {Services} from '#service';
-import {addParamsToUrl} from '../../../src/url';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
+import {addParamsToUrl} from '../../../src/url';
 import {
-  disableScrollingOnIframe,
-  looksLikeTrackingIframe,
-} from '../../../src/iframe-helper';
-import {
-  dispatchCustomEvent,
-  getDataParamsFromAttributes,
-  removeElement,
-} from '#core/dom';
-import {getConsentDataToForward} from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '#service/video-manager-impl';
-import {isFullscreenElement} from '#core/dom/fullscreen';
-import {measureIntersection} from '#core/dom/layout/intersection';
-import {once} from '#core/types/function';
+  MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
+  VideoEvents,
+} from '../../../src/video-interface';
+import {BUBBLE_MESSAGE_EVENTS} from '../amp-video-iframe-api';
 
 /** @private @const */
 const TAG = 'amp-video-iframe';

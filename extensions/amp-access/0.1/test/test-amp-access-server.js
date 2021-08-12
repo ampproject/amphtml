@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import * as DocumentFetcher from '../../../../src/document-fetcher';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {AccessServerAdapter} from '../amp-access-server';
+
+import * as DocumentFetcher from '../../../../src/document-fetcher';
 import {removeFragment} from '../../../../src/url';
+import {AccessServerAdapter} from '../amp-access-server';
 
 describes.realWin('AccessServerAdapter', {amp: true}, (env) => {
   let win;

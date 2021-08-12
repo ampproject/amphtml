@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {ScrollComponent} from './scroll-component';
-import {dict, hasOwn} from '#core/types/object';
 import {toggle} from '#core/dom/style';
+import {dict, hasOwn} from '#core/types/object';
+
+import {ScrollComponent} from './scroll-component';
 
 /** Provides iframe for the Scroll Audio Player. */
 export class Sheet extends ScrollComponent {

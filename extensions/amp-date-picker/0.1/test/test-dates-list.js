@@ -15,8 +15,8 @@
  */
 
 import '#third_party/react-dates/bundle';
-import {DatesList} from '../dates-list';
 import {requireExternal} from '../../../../src/module';
+import {DatesList} from '../dates-list';
 
 describes.sandboxed('DatesList', {}, () => {
   const moment = requireExternal('moment');

@@ -16,10 +16,25 @@
 
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {Deferred} from '#core/data-structures/promise';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '#core/dom/fullscreen';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {htmlFor} from '#core/dom/static-template';
 import {PauseHelper} from '#core/dom/video/pause-helper';
+
 import {Services} from '#service';
-import {VideoEvents} from '../../../src/video-interface';
-import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {
+  getConsentPolicyInfo,
+  getConsentPolicyState,
+} from '../../../src/consent';
+import {getData, listen} from '../../../src/event-helper';
 import {
   createFrameFor,
   mutedOrUnmutedEvent,
@@ -27,22 +42,8 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {dispatchCustomEvent, removeElement} from '#core/dom';
-import {
-  fullscreenEnter,
-  fullscreenExit,
-  isFullscreenElement,
-} from '#core/dom/fullscreen';
-
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {
-  getConsentPolicyInfo,
-  getConsentPolicyState,
-} from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
-import {htmlFor} from '#core/dom/static-template';
-import {installVideoManagerForDoc} from '#service/video-manager-impl';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {VideoEvents} from '../../../src/video-interface';
 
 const TAG = 'amp-brid-player';
 

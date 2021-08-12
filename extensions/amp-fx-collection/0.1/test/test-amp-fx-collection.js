@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpFxCollection} from '../amp-fx-collection';
 import {createElementWithAttributes} from '#core/dom';
+
+import {AmpFxCollection} from '../amp-fx-collection';
 
 describes.fakeWin(
   'amp-fx-collection',

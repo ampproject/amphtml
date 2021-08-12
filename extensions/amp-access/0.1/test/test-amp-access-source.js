@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+import {toggleExperiment} from '#experiments';
+
+import {cidServiceForDocForTesting} from '#service/cid-impl';
+import {installPerformanceService} from '#service/performance-impl';
+import {installPlatformService} from '#service/platform-impl';
+
 import {AccessClientAdapter} from '../amp-access-client';
 import {AccessIframeAdapter} from '../amp-access-iframe';
 import {AccessOtherAdapter} from '../amp-access-other';
@@ -21,10 +27,6 @@ import {AccessServerAdapter} from '../amp-access-server';
 import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
 import {AccessSource} from '../amp-access-source';
 import {AccessVendorAdapter} from '../amp-access-vendor';
-import {cidServiceForDocForTesting} from '#service/cid-impl';
-import {installPerformanceService} from '#service/performance-impl';
-import {installPlatformService} from '#service/platform-impl';
-import {toggleExperiment} from '#experiments';
 
 describes.fakeWin(
   'AccessSource',

@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
-import {processHead} from '../head-validation';
 import {rootNodeFor} from '#core/dom';
+
+import {Services} from '#service';
+
+import {processHead} from '../head-validation';
 
 describes.realWin('head validation', {amp: true}, (env) => {
   let adElement;

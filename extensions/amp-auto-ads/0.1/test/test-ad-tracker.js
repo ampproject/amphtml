@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import * as MeasurePageLayoutBox from '../measure-page-layout-box';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+
+import {Services} from '#service';
+
 import {
   AdTracker,
   getAdConstraintsFromConfigObj,
   getExistingAds,
 } from '../ad-tracker';
-import {Services} from '#service';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
+import * as MeasurePageLayoutBox from '../measure-page-layout-box';
 
 describes.realWin('ad-tracker', {amp: true}, (env) => {
   let win, doc;

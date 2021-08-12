@@ -15,10 +15,12 @@
  */
 
 import {Layout} from '#core/dom/layout';
+import {parseJson} from '#core/types/object/json';
+
 import {Variants, allocateVariant} from './variant';
+
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {parseJson} from '#core/types/object/json';
 
 const TAG = 'amp-experiment';
 const ATTR_PREFIX = 'amp-x-';

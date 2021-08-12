@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {AnimationTemplate} from './template';
-import {select, text, withKnobs} from '@storybook/addon-knobs';
 import {withAmp} from '@ampproject/storybook-addon';
+import {select, text, withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
+
+import {AnimationTemplate} from './template';
 
 const KEYFRAMES_OPTIONS = {
   'rotate': {

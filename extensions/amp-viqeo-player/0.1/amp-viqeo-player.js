@@ -16,21 +16,23 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
-import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {Services} from '#service';
-import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
-import {dev, userAssert} from '../../../src/log';
+import {removeElement} from '#core/dom';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
 } from '#core/dom/fullscreen';
-import {getData, listen} from '../../../src/event-helper';
-import {getIframe} from '../../../src/3p-frame';
-import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getIframe} from '../../../src/3p-frame';
+import {getData, listen} from '../../../src/event-helper';
 import {redispatch} from '../../../src/iframe-video';
-import {removeElement} from '#core/dom';
+import {dev, userAssert} from '../../../src/log';
+import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 
 const TAG = 'amp-viqeo-player';
 

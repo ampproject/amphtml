@@ -16,7 +16,9 @@
 
 import '../amp-soundcloud';
 import {htmlFor} from '#core/dom/static-template';
+
 import {toggleExperiment} from '#experiments';
+
 import {waitFor} from '#testing/test-helper';
 
 describes.realWin(

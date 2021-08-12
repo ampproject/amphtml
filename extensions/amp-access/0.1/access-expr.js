@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {hasOwn, map} from '#core/types/object';
 import {accessParser as parser} from '#build/parsers/access-expr-impl';
+
+import {hasOwn, map} from '#core/types/object';
 
 /**
  * Evaluates access expressions.

@@ -14,11 +14,13 @@
  * the License.
  */
 
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {parseQueryString, tryDecodeUriComponent} from '#core/types/string/url';
+
 import {NotificationPermission, StorageKeys} from './vars';
 import {WindowMessenger} from './window-messenger';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+
 import {getMode} from '../../../src/mode';
-import {parseQueryString, tryDecodeUriComponent} from '#core/types/string/url';
 import {parseUrlDeprecated} from '../../../src/url';
 
 /** @typedef {{

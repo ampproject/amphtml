@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import * as variant from '../variant';
-import {AmpExperiment} from '../amp-experiment';
-import {Services} from '#service';
 import {hasOwn} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {AmpExperiment} from '../amp-experiment';
+import * as variant from '../variant';
 
 describes.realWin(
   'amp-experiment',

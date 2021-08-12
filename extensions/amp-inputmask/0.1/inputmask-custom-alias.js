@@ -15,6 +15,7 @@
  */
 
 import {dict} from '#core/types/object';
+
 import {user} from '../../../src/log';
 
 /**

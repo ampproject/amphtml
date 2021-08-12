@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {VideoElementWithActions} from '../../../amp-video/1.0/storybook/_helpers';
-import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
 import {withAmp} from '@ampproject/storybook-addon';
+import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
+
+import {VideoElementWithActions} from '../../../amp-video/1.0/storybook/_helpers';
 
 export default {
   title: 'amp-youtube-1_0',

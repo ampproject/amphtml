@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
-import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {devAssert, user, userAssert} from '../../../src/log';
 
 /**
  * - visibilePercentageMin: The percentage of pixels that need to be on screen

@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
-import {loadScript} from '../../../src/validator-integration';
+
+import {Services} from '#service';
+
 import {urls} from '../../../src/config';
 import {user, userAssert} from '../../../src/log';
+import {loadScript} from '../../../src/validator-integration';
 
 /**
  * Creates a tab content, will be deleted when the tabs get implemented.

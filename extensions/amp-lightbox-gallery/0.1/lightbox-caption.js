@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
 import {htmlFor} from '#core/dom/static-template';
+
+import {dev} from '../../../src/log';
 
 /**
  * @enum {string}

@@ -15,9 +15,11 @@
  */
 
 import {ActionTrust} from '#core/constants/action-constants';
-import {Services} from '#service';
-import {isLayoutSizeDefined} from '#core/dom/layout';
 import {removeChildren} from '#core/dom';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+
+import {Services} from '#service';
+
 import {user, userAssert} from '../../../src/log';
 
 /** @const {string} */

@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Layout} from '#core/dom/layout';
-import {Services} from '#service';
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
+
+import {Layout} from '#core/dom/layout';
 import {dict} from '#core/types/object';
+
+import {Services} from '#service';
 
 /**
  * @implements {./ad-network-config.AdNetworkConfigDef}

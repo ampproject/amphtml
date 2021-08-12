@@ -15,10 +15,12 @@
  */
 
 import * as DocumentReady from '#core/document-ready';
-import * as LinkmateOptions from '../linkmate-options';
-import {AmpSmartlinks} from '../amp-smartlinks';
-import {LinkRewriterManager} from '../../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
+
 import {Services} from '#service';
+
+import {LinkRewriterManager} from '../../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
+import {AmpSmartlinks} from '../amp-smartlinks';
+import * as LinkmateOptions from '../linkmate-options';
 
 const helpersFactory = (env) => {
   return {

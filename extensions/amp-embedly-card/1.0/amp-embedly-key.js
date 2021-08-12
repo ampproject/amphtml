@@ -15,8 +15,11 @@
  */
 
 import {Layout} from '#core/dom/layout';
-import {PreactBaseElement} from '#preact/base-element';
+
 import {isExperimentOn} from '#experiments';
+
+import {PreactBaseElement} from '#preact/base-element';
+
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */

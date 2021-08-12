@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {Deferred} from '#core/data-structures/promise';
+
 import {Services} from '#service';
 
 /** @type {!WeakMap<!../../../src/service/ampdoc-impl.AmpDoc, !Promise>} */

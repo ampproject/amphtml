@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {DirectionX, RectDef} from './def';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {mapRange} from '#core/math';
+
+import {DirectionX, RectDef} from './def';
 
 /**
  * @param {number} containerWidth

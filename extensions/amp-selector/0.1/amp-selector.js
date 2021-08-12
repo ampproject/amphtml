@@ -16,17 +16,19 @@
 
 import {ActionTrust} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
-import {CSS} from '../../../build/amp-selector-0.1.css';
 import {Keys} from '#core/constants/key-codes';
-import {Services} from '#service';
-import {areEqualOrdered, toArray} from '#core/types/array';
+import {isRTL, tryFocus} from '#core/dom';
 import {closestAncestorElementBySelector} from '#core/dom/query';
+import {mod} from '#core/math';
+import {isEnumValue} from '#core/types';
+import {areEqualOrdered, toArray} from '#core/types/array';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {CSS} from '../../../build/amp-selector-0.1.css';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {isEnumValue} from '#core/types';
-import {isRTL, tryFocus} from '#core/dom';
-import {mod} from '#core/math';
 
 const TAG = 'amp-selector';
 

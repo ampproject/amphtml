@@ -15,9 +15,11 @@
  */
 
 import '../amp-call-tracking';
-import {Services} from '#service';
-import {clearResponseCacheForTesting} from '../amp-call-tracking';
 import {realChildElements} from '#core/dom/query';
+
+import {Services} from '#service';
+
+import {clearResponseCacheForTesting} from '../amp-call-tracking';
 
 describes.realWin(
   'amp-call-tracking',

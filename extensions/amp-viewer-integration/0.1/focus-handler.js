@@ -15,6 +15,7 @@
  */
 
 import {dict} from '#core/types/object';
+
 import {listen} from '../../../src/event-helper';
 
 /**

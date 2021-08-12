@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import path from 'path';
 import babel from 'rollup-plugin-babel';
 import cleanup from 'rollup-plugin-cleanup';
-import path from 'path';
 
 export default {
   input: './amp-iframe-api-export.js',

@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-social-share-1.0.css';
-import {Layout} from '#core/dom/layout';
-import {Services} from '#service';
-import {addParamsToUrl} from '../../../src/url';
-import {dict} from '#core/types/object';
 import {getDataParamsFromAttributes} from '#core/dom';
-import {getSocialConfig} from './social-share-config';
-import {isExperimentOn} from '#experiments';
+import {Layout} from '#core/dom/layout';
+import {toggle} from '#core/dom/style';
+import {dict} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
 import {toWin} from '#core/window';
-import {toggle} from '#core/dom/style';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {BaseElement} from './base-element';
+import {getSocialConfig} from './social-share-config';
+
+import {CSS} from '../../../build/amp-social-share-1.0.css';
 import {userAssert} from '../../../src/log';
+import {addParamsToUrl} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-social-share';

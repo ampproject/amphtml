@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import {tryParseJson} from '#core/types/object/json';
+import {utf8Decode} from '#core/types/string/bytes';
+
+import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
 import {AdResponseType, Validator, ValidatorResult} from './amp-ad-type-defs';
 import {
   extensionsHasElement,
@@ -21,11 +25,9 @@ import {
   getExtensionsFromMetadata,
   mergeExtensionsMetadata,
 } from './amp-ad-utils';
-import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
-import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
-import {tryParseJson} from '#core/types/object/json';
+
 import {urls} from '../../../src/config';
-import {utf8Decode} from '#core/types/string/bytes';
+import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
 
 /** @const {string} */
 export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-Ad-Template-Extension';

@@ -19,11 +19,13 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
-import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
-import {RTC_ERROR_ENUM} from '#service/real-time-config/real-time-config-impl';
-import {RTC_VENDORS} from '#service/real-time-config/callout-vendors';
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
+
+import {Services} from '#service';
+import {RTC_VENDORS} from '#service/real-time-config/callout-vendors';
+import {RTC_ERROR_ENUM} from '#service/real-time-config/real-time-config-impl';
+
+import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 
 describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, (env) => {
   let impl;

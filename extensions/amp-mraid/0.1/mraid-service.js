@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+
 import {
   ExitInterface,
   FullscreenInterface,
   VisibilityDataDef,
   VisibilityInterface,
 } from '#inabox/host-services';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 /**
  * Translates between the AMP HostServices APIs and MRAID.
