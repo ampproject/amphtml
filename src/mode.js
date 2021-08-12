@@ -23,7 +23,6 @@ import {parseQueryString} from '#core/types/string/url';
  *   development: boolean,
  *   test: boolean,
  *   log: (string|undefined),
- *   version: string,
  *   rtvVersion: string,
  *   runtime: (null|string|undefined),
  *   a4aId: (null|string|undefined),
@@ -76,7 +75,6 @@ function getMode_(win) {
     geoOverride: hashQuery['amp-geo'],
     test: coreMode.isTest(win),
     log: parseInt(hashQuery['log'], 10),
-    version: coreMode.version(),
     rtvVersion: getRtvVersion(win),
   };
 }
