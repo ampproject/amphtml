@@ -15,16 +15,19 @@
  */
 
 import '../amp-image-lightbox';
-import * as dom from '#core/dom';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {ActionService} from '#service/action-impl';
+
 import {ActionTrust} from '#core/constants/action-constants';
-import {ImageViewer} from '../amp-image-lightbox';
 import {Keys} from '#core/constants/key-codes';
-import {Services} from '#service';
-import {WindowInterface} from '#core/window/interface';
-import {parseSrcset} from '#core/dom/srcset';
+import * as dom from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {parseSrcset} from '#core/dom/srcset';
+import {WindowInterface} from '#core/window/interface';
+
+import {Services} from '#service';
+import {ActionService} from '#service/action-impl';
+
+import {ImageViewer} from '../amp-image-lightbox';
 
 describes.realWin(
   'amp-image-lightbox component',

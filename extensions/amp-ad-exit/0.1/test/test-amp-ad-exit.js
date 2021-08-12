@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import {AmpAdExit, getAttributionReportingStatus} from '../amp-ad-exit';
-import {FilterType} from '../filters/filter';
-import {IFRAME_TRANSPORTS} from '../../../amp-analytics/0.1/iframe-transport-vendors';
+import {toggleExperiment} from '#experiments';
+
 import {installPlatformService} from '#service/platform-impl';
 import {installTimerService} from '#service/timer-impl';
+
 import {setParentWindow} from '../../../../src/service-helpers';
-import {toggleExperiment} from '#experiments';
+import {IFRAME_TRANSPORTS} from '../../../amp-analytics/0.1/iframe-transport-vendors';
+import {AmpAdExit, getAttributionReportingStatus} from '../amp-ad-exit';
+import {FilterType} from '../filters/filter';
 
 const TEST_3P_VENDOR = '3p-vendor';
 

@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {toWin} from '#core/window';
+
 import {Services} from '#service';
+
 import {Util} from './util';
+
 import {dev, userAssert} from '../../../src/log';
 import {openWindowDialog} from '../../../src/open-window-dialog';
-
-import {toWin} from '#core/window';
 
 // Popup options
 const POP =

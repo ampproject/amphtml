@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpSkimlinks} from '../amp-skimlinks';
-import {CustomEventReporterBuilder} from '../../../../src/extension-analytics';
-import {DEFAULT_SKIM_OPTIONS} from './constants';
 import {Services} from '#service';
+
+import {DEFAULT_SKIM_OPTIONS} from './constants';
+
+import {CustomEventReporterBuilder} from '../../../../src/extension-analytics';
+import {AmpSkimlinks} from '../amp-skimlinks';
 import {Tracking} from '../tracking';
 
 const helpersFactory = (env) => {

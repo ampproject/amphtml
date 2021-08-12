@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {IframeEmbed} from '#preact/component/iframe';
 import {dict} from '#core/types/object';
+
+import * as Preact from '#preact';
 import {useEffect, useRef} from '#preact';
+import {IframeEmbed} from '#preact/component/iframe';
 
 /**
  * @param {!SoundcloudDef.Props} props
