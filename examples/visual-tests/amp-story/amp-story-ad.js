@@ -22,12 +22,6 @@ const {
 module.exports = {
   'Test ad property correctness': async (page, name) => {
     await verifySelectorsVisible(page, name, ['.i-amphtml-story-ad-badge']);
-    await verifySelectorsVisible(page, name, ['.i-amphtml-fill-content']);
-    await verifySelectorsVisible(page, name, ['.i-amphtml-glass-pane']);
-    await verifySelectorsVisible(page, name, ['.i-amphtml-story-page-loaded']);
-    await verifySelectorsVisible(page, name, ['.i-amphtml-element']);
-    await verifySelectorsVisible(page, name, ['.i-amphtml-layout-container']);
-    await verifySelectorsVisible(page, name, ['.i-amphtml-built']);
-    await verifySelectorsVisible(page, name, ['.i-amphtml-layout']);
+    await verifySelectorsVisible(page, name, ['.i-amphtml-story-ad-link']);
   },
 };
