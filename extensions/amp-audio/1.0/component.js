@@ -67,12 +67,15 @@ export function AudioWithRef(
   /**
    * Prepares Media Metadata
    */
-  const metadata = useMemo(() => ({
-    title,
-    artist,
-    album,
-    artwork: [{src: artwork}],
-  }), [title, artist, album, artwork]);
+  const metadata = useMemo(
+    () => ({
+      title,
+      artist,
+      album,
+      artwork: [{src: artwork}],
+    }),
+    [title, artist, album, artwork]
+  );
 
   /**
    * Plays audio callback
@@ -95,15 +98,14 @@ export function AudioWithRef(
   /**
    * Updates media session for current window/tab
    */
-  const audioPlaying = useCallback(() => {
+  const onPlaying = useCallback(() => {
     const win = audioRef.current?.ownerDocument?.defaultView;
     const element = audioRef.current;
 
-    validateMediaMetadata?.(element, metaData);
+    validateMediaMetadata?.(element, metadata);
 
-    setMediaSession(win, metaData, play, pause);
-  }, [metaData, validateMediaMetadata, play, pause]);
-
+    setMediaSession(win, metadata, play, pause);
+  }, [metadata, validateMediaMetadata, play, pause]);
 
   /** Audio Component - API Functions */
   useImperativeHandle(
@@ -129,7 +131,7 @@ export function AudioWithRef(
         controlsList={controlsList}
         loop={loop}
         muted={muted}
-        onPlaying={() => audioPlaying()}
+        onPlaying={() => onPlaying()}
         preload={preload}
         src={src}
       >
