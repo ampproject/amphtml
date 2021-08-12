@@ -33,7 +33,7 @@ import {loadPromise} from '../../../src/event-helper';
 import {measureIntersectionNoRoot} from '#core/dom/layout/intersection-no-root';
 import {toArray} from '#core/types/array';
 import {tryParseJson} from '#core/types/object/json';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 const TAG = 'amp-auto-lightbox';
 

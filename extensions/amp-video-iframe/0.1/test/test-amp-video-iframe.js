@@ -21,7 +21,7 @@ import {createElementWithAttributes} from '#core/dom';
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {macroTask} from '#testing/yield';
-import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 describes.realWin(
   'amp-video-iframe',

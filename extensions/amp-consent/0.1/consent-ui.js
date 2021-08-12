@@ -29,7 +29,7 @@ import {insertAtStart, removeElement, tryFocus} from '#core/dom';
 import {
   isAmpElement,
   whenUpgradedToCustomElement,
-} from '../../../src/amp-element-helpers';
+} from '#core/dom/amp-element-helpers';
 import {setImportantStyles, setStyles, toggle} from '#core/dom/style';
 
 const TAG = 'amp-consent-ui';

@@ -1,9 +1,3 @@
-import {isConnectedNode, rootNodeFor} from '#core/dom';
-import {isElement} from '#core/types';
-import {toArray} from '#core/types/array';
-
-import {devAssert} from './log';
-
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
@@ -19,6 +13,11 @@ import {devAssert} from './log';
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {devAssert} from '#core/assert';
+import {isConnectedNode, rootNodeFor} from '#core/dom';
+import {isElement} from '#core/types';
+import {toArray} from '#core/types/array';
 
 /**
  * @fileoverview Contains logic for implementing a11y and focus handling for
@@ -71,7 +70,7 @@ export function getElementsToAriaHide(element) {
       continue;
     }
 
-    toArray(cur.parentNode.children)
+    toArray(/** @type {!HTMLDocument|!HTMLElement} */ (cur.parentNode).children)
       .filter((c) => c != cur)
       .forEach((c) => arr.push(c));
   }
@@ -96,7 +95,7 @@ function getAncestors(element) {
 }
 
 /**
- * Gets the potentially focusable elements, relative to a given element. Not
+ * Gets the potentially focusable elements, relative to a given element. Note
  * that we do not need to go into ShadowRoots, giving their host
  * `tabindex="-1"` is sufficient.
  *
@@ -136,7 +135,7 @@ function getPotentiallyFocusableElements(element) {
     );
     Array.prototype.push.apply(arr, potentiallyFocusable);
 
-    cur = root.host;
+    cur = /** @type {!ShadowRoot|?} */ (root).host;
   }
 
   return arr;
@@ -186,12 +185,10 @@ export function setModalAsOpen(element) {
   const focusableExternalElements = focusableElements.filter((e) => {
     return !element.contains(e) && e[SAVED_TAB_INDEX] === undefined;
   });
-  const hiddenElementInfos = elements.concat(ancestry).map((element) => {
-    return {
-      element,
-      prevValue: element.getAttribute('aria-hidden'),
-    };
-  });
+  const hiddenElementInfos = elements.concat(ancestry).map((element) => ({
+    element,
+    prevValue: element.getAttribute('aria-hidden'),
+  }));
 
   // Unhide the ancestry, in case it was hidden from another modal.
   ancestry.forEach((e) => e.removeAttribute('aria-hidden'));
@@ -234,14 +231,11 @@ export function setModalAsClosed(element) {
   devAssert(topModalElement === element);
 
   // Put aria-hidden back to how it was before the call.
-  hiddenElementInfos.forEach((hiddenElementInfo) => {
-    const {element, prevValue} = hiddenElementInfo;
-    restoreAttributeValue(element, 'aria-hidden', prevValue);
-  });
+  hiddenElementInfos.forEach(({element, prevValue}) =>
+    restoreAttributeValue(element, 'aria-hidden', prevValue)
+  );
   // Re-hide any internal elements that should be hidden.
-  focusableInternalElements.forEach((e) => {
-    e.setAttribute('tabindex', '-1');
-  });
+  focusableInternalElements.forEach((e) => e.setAttribute('tabindex', '-1'));
   // Re-show any external elements that were hidden, and clear the saved
   // tabindex.
   focusableExternalElements.forEach((e) => {

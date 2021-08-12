@@ -15,11 +15,11 @@
  */
 
 import {VisibilityState} from '#core/constants/visibility-state';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {getVendorJsPropertyName} from '#core/dom/style';
 
 import {Services} from '#service';
 
-import {whenUpgradedToCustomElement} from '../../src/amp-element-helpers';
 import {createCustomEvent} from '../../src/event-helper';
 
 const t = describes.sandboxed

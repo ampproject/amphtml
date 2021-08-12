@@ -24,7 +24,7 @@ import {createElementWithAttributes} from '#core/dom';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {macroTask} from '#testing/yield';
 import {parseUrlDeprecated} from '../../../../src/url';
-import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 describes.realWin(
   'amp-brightcove',

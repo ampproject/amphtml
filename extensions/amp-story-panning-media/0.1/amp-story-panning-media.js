@@ -28,7 +28,7 @@ import {deepEquals} from '#core/types/object/json';
 import {dev, user} from '../../../src/log';
 import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {setImportantStyles} from '#core/dom/style';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_PANNING_MEDIA';

@@ -28,7 +28,7 @@ import {
 import {dev, userAssert} from '../../../src/log';
 import {isConnectedNode, isRTL, tryFocus} from '#core/dom';
 import {mod} from '#core/math';
-import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
+import {setModalAsClosed, setModalAsOpen} from '#core/dom/modal';
 import {toArray} from '#core/types/array';
 
 /** @const {string} */

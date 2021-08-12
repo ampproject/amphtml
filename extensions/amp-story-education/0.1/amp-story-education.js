@@ -29,7 +29,7 @@ import {dict} from '#core/types/object';
 import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service';
 import {htmlFor} from '#core/dom/static-template';
 import {removeChildren} from '#core/dom';
-import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
+import {setModalAsClosed, setModalAsOpen} from '#core/dom/modal';
 import {toggle} from '#core/dom/style';
 
 /** @type {string} */

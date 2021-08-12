@@ -19,7 +19,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {dev} from '../../../src/log';
 import {dict, map} from '#core/types/object';
-import {isDisabled, isFieldDefault, isFieldEmpty} from '../../../src/form';
+import {isDisabled, isFieldDefault, isFieldEmpty} from '#core/dom/form';
 
 export const DIRTINESS_INDICATOR_CLASS = 'amp-form-dirty';
 

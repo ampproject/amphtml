@@ -20,7 +20,7 @@ import {ActionTrust} from '#core/constants/action-constants';
 import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {user} from '../../../../src/log';
-import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 describes.realWin(
   'test-scrollable-carousel',
   {

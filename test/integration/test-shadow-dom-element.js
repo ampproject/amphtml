@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+
 import {toggleExperiment} from '#experiments';
 
 import {createFixtureIframe} from '#testing/iframe';
-
-import {whenUpgradedToCustomElement} from '../../src/amp-element-helpers';
 
 describes.sandboxed
   .configure()
