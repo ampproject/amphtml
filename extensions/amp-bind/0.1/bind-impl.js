@@ -32,7 +32,7 @@ import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {findIndex, isArray, remove, toArray} from '#core/types/array';
 import {getMode} from '../../../src/mode';
 import {iterateCursor} from '#core/dom';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isAmp4Email} from '../../../src/format';

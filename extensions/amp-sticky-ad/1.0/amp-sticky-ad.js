@@ -28,7 +28,7 @@ import {dev, user, userAssert} from '../../../src/log';
 import {isExperimentOn} from '#experiments';
 import {realChildElements} from '#core/dom/query';
 import {removeElement} from '#core/dom';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */

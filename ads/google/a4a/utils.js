@@ -30,7 +30,7 @@ import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {getTimingDataSync} from '#service/variable-source';
 import * as mode from '#core/mode';
 import {parseJson} from '#core/types/object/json';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {createElementWithAttributes} from '#core/dom';
 
 /** @type {string}  */
@@ -373,6 +373,7 @@ export function googlePageParameters(a4a, startTime) {
       'uaa': uaDataValues?.architecture,
       'uam': uaDataValues?.model,
       'uafv': uaDataValues?.uaFullVersion,
+      'uab': uaDataValues?.bitness,
     };
   });
 }
@@ -1198,5 +1199,6 @@ function getUserAgentClientHintParameters(win) {
     'architecture',
     'model',
     'uaFullVersion',
+    'bitness',
   ]);
 }
