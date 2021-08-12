@@ -31,8 +31,7 @@ const {
   SeleniumWebDriverController,
 } = require('./selenium-webdriver-controller');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
-/* eslint-disable-next-line module-resolver/use-alias */
-const {configHelpers} = require('../../../testing/helpers');
+const {configureHelpers} = require('../../../testing/helpers');
 const {HOST, PORT} = require('../serve');
 const {installRepl, uninstallRepl} = require('./repl');
 const {isCiBuild} = require('../../common/ci');
@@ -475,7 +474,7 @@ function describeEnv(factory) {
       this.timeout(TEST_TIMEOUT);
       beforeEach(async function () {
         this.timeout(SETUP_TIMEOUT);
-        configHelpers(env);
+        configureHelpers(env);
         await fixture.setup(env, browserName, SETUP_RETRIES);
 
         // don't install for CI

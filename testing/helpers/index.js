@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
+/**
+ * A private encapsulation of the test env variable.
+ */
 let env_;
 
-export function configHelpers(env) {
+/**
+ * Sets up the helper environment.
+ * @param {*} env
+ */
+export function configureHelpers(env) {
   env_ = env;
 }
 
