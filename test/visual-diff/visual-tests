@@ -258,6 +258,7 @@
       },
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-ad.js",
        "loading_complete_selectors": [
+        ".i-amphtml-story-ad-badge",
         ".i-amphtml-fill-content",
         ".i-amphtml-glass-pane",
         ".i-amphtml-story-page-loaded",
@@ -266,6 +267,7 @@
         ".i-amphtml-built",
         ".i-amphtml-layout",
         "amp-story[ad-showing]",
+        "amp-story-page#page-3[active]"
       ],
       // for page navigation
       "loading_complete_delay_ms": 19500
