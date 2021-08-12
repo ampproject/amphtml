@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import {parseSrcset} from '#core/dom/srcset';
+
 import {urls} from './config';
-import {parseSrcset} from './core/dom/srcset';
 import {user} from './log';
 import {
   checkCorsUrl,

@@ -307,6 +307,13 @@ export function googlePageParameters(a4a, startTime) {
       dev().expectedError('AMP-A4A', 'Referrer timeout!');
       return '';
     });
+  // Collect user agent hints info
+  const uaHintsPromise = Services.timerFor(win)
+    .timeoutPromise(1000, getUserAgentClientHintParameters(win))
+    .catch(() => {
+      dev().expectedError('AMP-A4A', 'UACH timeout!');
+      return {};
+    });
   // Set dom loading time to first visible if page started in prerender state
   // determined by truthy value for visibilityState param.
   const domLoading = a4a.getAmpDoc().getParam('visibilityState')
@@ -315,9 +322,11 @@ export function googlePageParameters(a4a, startTime) {
   return Promise.all([
     getOrCreateAdCid(ampDoc, 'AMP_ECID_GOOGLE', '_ga'),
     referrerPromise,
+    uaHintsPromise,
   ]).then((promiseResults) => {
     const clientId = promiseResults[0];
     const referrer = promiseResults[1];
+    const uaDataValues = promiseResults[2];
     const {canonicalUrl, pageViewId} = Services.documentInfoForDoc(ampDoc);
     // Read by GPT for GA/GPT integration.
     win.gaGlobal = win.gaGlobal || {cid: clientId, hid: pageViewId};
@@ -359,6 +368,11 @@ export function googlePageParameters(a4a, startTime) {
       'loc': win.location.href == canonicalUrl ? null : win.location.href,
       'ref': referrer || null,
       'bdt': domLoading ? startTime - domLoading : null,
+      'uap': uaDataValues?.platform,
+      'uapv': uaDataValues?.platformVersion,
+      'uaa': uaDataValues?.architecture,
+      'uam': uaDataValues?.model,
+      'uafv': uaDataValues?.uaFullVersion,
     };
   });
 }
@@ -1160,4 +1174,29 @@ export function getServeNpaPromise(element) {
     // Not in any of the defined geo groups.
     return false;
   });
+}
+
+/**
+ * This method retrieves the high-entropy portions of the user agent
+ * information.
+ * See https://wicg.github.io/ua-client-hints/#getHighEntropyValues
+ * @param {!Window} win
+ * @return {!Promise<!UADataValues|undefined>}
+ */
+function getUserAgentClientHintParameters(win) {
+  if (
+    !win.navigator ||
+    !win.navigator.userAgentData ||
+    typeof win.navigator.userAgentData.getHighEntropyValues !== 'function'
+  ) {
+    return Promise.resolve();
+  }
+
+  return win.navigator.userAgentData.getHighEntropyValues([
+    'platform',
+    'platformVersion',
+    'architecture',
+    'model',
+    'uaFullVersion',
+  ]);
 }

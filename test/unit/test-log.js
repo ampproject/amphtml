@@ -15,13 +15,16 @@
  */
 
 import {
+  USER_ERROR_SENTINEL,
+  isUserErrorEmbedMessage,
+  isUserErrorMessage,
+} from '#core/error/message-helpers';
+
+import {
   Log,
   LogLevel,
-  USER_ERROR_SENTINEL,
   dev,
   devAssert,
-  isUserErrorEmbed,
-  isUserErrorMessage,
   setReportError,
   user,
   userAssert,
@@ -58,6 +61,8 @@ describes.sandboxed('Logging', {}, (env) => {
 
   afterEach(() => {
     window.__AMP_MODE = undefined;
+    delete window.__AMP_LOG.user;
+    delete window.__AMP_LOG.dev;
   });
 
   describe('Level', () => {
@@ -261,17 +266,17 @@ describes.sandboxed('Logging', {}, (env) => {
     });
 
     it('should NOT be enabled with log=1', () => {
-      mode.log = '1';
+      mode.log = 1;
       expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.OFF);
     });
 
     it('should be enabled as INFO with log=2', () => {
-      mode.log = '2';
+      mode.log = 2;
       expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.INFO);
     });
 
     it('should be enabled as FINE with log=3', () => {
-      mode.log = '3';
+      mode.log = 3;
       expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
     });
 
@@ -609,7 +614,7 @@ describes.sandboxed('Logging', {}, (env) => {
 
     it('should return logger for user-error', () => {
       const error = user().createError();
-      expect(isUserErrorEmbed(error.message)).to.be.false;
+      expect(isUserErrorEmbedMessage(error.message)).to.be.false;
       expect(isUserErrorMessage(error.message)).to.be.true;
     });
 
@@ -617,7 +622,7 @@ describes.sandboxed('Logging', {}, (env) => {
       element = document.createElement('embed');
       iframe.contentWindow.document.body.appendChild(element);
       const error = user(element).createError();
-      expect(isUserErrorEmbed(error.message)).to.be.true;
+      expect(isUserErrorEmbedMessage(error.message)).to.be.true;
     });
 
     it('should not create extra identical loggers', () => {

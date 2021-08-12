@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import {Deferred} from './core/data-structures/promise';
-import {parseQueryString} from './core/types/string/url';
-import {WindowInterface} from './core/window/interface';
-import {isExperimentOn} from './experiments';
+import {Deferred} from '#core/data-structures/promise';
+import {parseQueryString} from '#core/types/string/url';
+import {WindowInterface} from '#core/window/interface';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
 import {dev, user, userAssert} from './log';
 import {getMode} from './mode';
-import {Services} from './service';
 import {addParamsToUrl, isProxyOrigin, parseUrlDeprecated} from './url';
 
 const TIMEOUT_VALUE = 8000;

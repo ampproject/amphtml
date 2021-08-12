@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import {LruCache} from '#core/data-structures/lru-cache';
+import * as mode from '#core/mode';
+import {arrayOrSingleItemToArray} from '#core/types/array';
+import {dict, hasOwn} from '#core/types/object';
+import {endsWith} from '#core/types/string';
+import {parseQueryString} from '#core/types/string/url';
+
 import {urls} from './config';
-import {LruCache} from './core/data-structures/lru-cache';
-import * as mode from './core/mode';
-import {arrayOrSingleItemToArray} from './core/types/array';
-import {dict, hasOwn} from './core/types/object';
-import {endsWith} from './core/types/string';
-import {parseQueryString} from './core/types/string/url';
 import {userAssert} from './log';
 
 const SERVING_TYPE_PREFIX = new Set([
