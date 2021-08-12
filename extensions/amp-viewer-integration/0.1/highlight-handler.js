@@ -166,7 +166,11 @@ export class HighlightHandler {
     // `'fragmentDirective' in document = true` which breaks feature detection.
     // Chrome 93 supports the proposal that works across iframes, hence this
     // version check.
-    if (platform.isChrome() && platform.getMajorVersion() >= 93) {
+    if (
+      'fragmentDirective' in document &&
+      platform.isChrome() &&
+      platform.getMajorVersion() >= 93
+    ) {
       ampdoc
         .whenFirstVisible()
         .then(() => this.highlightUsingTextFragments_(highlightInfo));
