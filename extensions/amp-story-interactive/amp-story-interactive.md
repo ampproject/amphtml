@@ -261,7 +261,7 @@ Path to an image that represents a numbered option, for anywhere between 2 to 4 
 
 The `amp-story-interactive-result` element uses this path as a visual category description.
 
-Large, high quality images assets are unnecessary since they are displayed in small containers, so it's best to keep image assets small (around 100 x 100 pixels) to enhance performance.
+Large, high quality images assets are unnecessary since they are displayed in small containers, so it's best to keep image assets small to enhance performance. A minimum of 170 x 170 pixels is recommended, and up to 250 x 250 pixels if the results component is being used.
 
 ### option-{1/2/3/4}-image-alt (required for img-poll, img-quiz)
 
