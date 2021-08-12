@@ -178,6 +178,24 @@ Results can feed its state from quizzes if all categories also specify `option-{
 </amp-story-interactive-results>
 [/sourcecode]
 
+### amp-story-interactive-slider
+
+The `amp-story-interactive-slider` element provides a voting experience for values along a range. Users interact with the slider by dragging the thumb across the track, and release to vote. When selected, the average response is displayed.
+
+Does not support pairing with `amp-story-interactive-results`, and can optionally have a prompt.
+
+<amp-img alt="An example of an interactive slider: 'How much do you like this product?' with a percentage slider with a custom accent color" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/slider-raw.png" layout="intrinsic" width="400" height="450">
+
+[sourcecode:html]
+<amp-story-interactive-slider
+    style="--interactive-accent-color: #651ffe"
+    prompt-text="How much do you like this product?"
+    align-self="center"
+    justify-self="center"
+    endpoint="https://backend.com/v1/interactives">
+</amp-story-interactive-slider>
+[/sourcecode]
+
 ### Store and display user selection
 
 All selectable interactive elements (`amp-story-interactive-binary-poll`, `amp-story-interactive-img-poll`, `amp-story-interactive-img-quiz`, `amp-story-interactive-poll`, `amp-story-interactive-quiz`) show the percentage of users that selected each option. The backend specified with the `endpoint` attribute will store the aggregate data for the interaction following the API described below.
