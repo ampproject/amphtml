@@ -145,7 +145,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       // Page attachments that contain forms must display the page's publisher
       // domain above the attachment's contents. This enables users to gauge
       // the trustworthiness of publishers before sending data to them.
-      this.headerEl.after(this.createDomainLabelElement_());
+      this.headerEl.parentNode.append(this.createDomainLabelElement_());
     }
 
     const closeButtonEl = htmlFor(this.element)`
@@ -490,7 +490,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   doesContainFormElement_() {
-    return true;
+    return Boolean(this.element.querySelector('form'));
   }
 
   /**
