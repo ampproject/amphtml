@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import helpersMaker from './test-helpers';
-
-import {getConfigOpts} from '../config-options';
 import {LinkRewriter} from '../link-rewriter';
+import {getConfigOpts} from '../config-options';
 import {getScopeElements} from '../scope';
+import helpersMaker from './test-helpers';
 
 describes.fakeWin(
   'amp-link-rewriter',

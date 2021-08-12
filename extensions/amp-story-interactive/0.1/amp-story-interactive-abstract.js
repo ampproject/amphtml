@@ -14,45 +14,41 @@
  * limitations under the License.
  */
 
-import {closest} from '#core/dom/query';
-import {setImportantStyles} from '#core/dom/style';
-import {clamp} from '#core/math';
-import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
-import {base64UrlEncodeFromString} from '#core/types/string/base64';
-
-import {isExperimentOn} from '#experiments/';
-
-import {Services} from '#service';
-
-import {emojiConfetti} from './interactive-confetti';
 import {
-  buildInteractiveDisclaimer,
-  buildInteractiveDisclaimerIcon,
-} from './interactive-disclaimer';
-import {deduplicateInteractiveIds} from './utils';
-
+  ANALYTICS_TAG_NAME,
+  StoryAnalyticsEvent,
+} from '../../amp-story/1.0/story-analytics';
+import {clamp} from '#core/math';
+import {
+  Action,
+  StateProperty,
+} from '../../amp-story/1.0/amp-story-store-service';
+import {AnalyticsVariable} from '../../amp-story/1.0/variable-service';
 import {CSS} from '../../../build/amp-story-interactive-0.1.css';
-import {assertDoesNotContainDisplay} from '../../../src/assert-display';
-import {dev, devAssert} from '../../../src/log';
+import {Services} from '#service';
 import {
   addParamsToUrl,
   appendPathToUrl,
   assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
+import {base64UrlEncodeFromString} from '#core/types/string/base64';
+import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {
-  Action,
-  StateProperty,
-} from '../../amp-story/1.0/amp-story-store-service';
-import {
-  ANALYTICS_TAG_NAME,
-  StoryAnalyticsEvent,
-} from '../../amp-story/1.0/story-analytics';
+  buildInteractiveDisclaimer,
+  buildInteractiveDisclaimerIcon,
+} from './interactive-disclaimer';
+import {closest} from '#core/dom/query';
 import {
   createShadowRootWithStyle,
   maybeMakeProxyUrl,
 } from '../../amp-story/1.0/utils';
-import {AnalyticsVariable} from '../../amp-story/1.0/variable-service';
+import {deduplicateInteractiveIds} from './utils';
+import {dev, devAssert} from '../../../src/log';
+import {dict} from '#core/types/object';
+import {emojiConfetti} from './interactive-confetti';
+import {toArray} from '#core/types/array';
+import {setImportantStyles} from '#core/dom/style';
+import {isExperimentOn} from '#experiments/';
 
 /** @const {string} */
 const TAG = 'amp-story-interactive';

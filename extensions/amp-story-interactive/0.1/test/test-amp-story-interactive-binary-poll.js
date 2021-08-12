@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
-import {LocalizationService} from '#service/localization';
-
-import {measureMutateElementStub} from '#testing/test-helper';
-
-import {addConfigToInteractive, getMockInteractiveData} from './helpers';
-
-import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {AmpStoryInteractiveBinaryPoll} from '../amp-story-interactive-binary-poll';
 import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
-import {AmpStoryInteractiveBinaryPoll} from '../amp-story-interactive-binary-poll';
+import {LocalizationService} from '#service/localization';
+import {Services} from '#service';
+import {addConfigToInteractive, getMockInteractiveData} from './helpers';
+import {measureMutateElementStub} from '#testing/test-helper';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(
   'amp-story-interactive-binary-poll',

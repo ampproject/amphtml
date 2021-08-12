@@ -14,26 +14,22 @@
  * limitations under the License.
  */
 
-import objstr from 'obj-str';
-
-import {htmlFor} from '#core/dom/static-template';
-import {computedStyle, setImportantStyles} from '#core/dom/style';
-
-import {LocalizedStringId} from '#service/localization/strings';
-
 import {
   AmpStoryInteractive,
   InteractiveType,
 } from './amp-story-interactive-abstract';
-import {buildImgTemplate} from './utils';
-
-import {CSS as ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
 import {CSS} from '../../../build/amp-story-interactive-img-quiz-0.1.css';
+import {CSS as ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
+import {LocalizedStringId} from '#service/localization/strings';
+import {buildImgTemplate} from './utils';
 import {dev} from '../../../src/log';
 import {
   getRGBFromCssColorValue,
   getTextColorForRGB,
 } from '../../amp-story/1.0/utils';
+import {htmlFor} from '#core/dom/static-template';
+import {computedStyle, setImportantStyles} from '#core/dom/style';
+import objstr from 'obj-str';
 
 /**
  * Generates the template for each option.

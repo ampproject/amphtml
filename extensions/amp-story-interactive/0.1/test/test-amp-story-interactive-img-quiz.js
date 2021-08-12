@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
+import {AmpStoryInteractiveImgQuiz} from '../amp-story-interactive-img-quiz';
+import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
+import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {LocalizationService} from '#service/localization';
-
+import {Services} from '#service';
 import {
   getMockIncompleteData,
   getMockInteractiveData,
@@ -25,11 +27,7 @@ import {
   getMockScrambledData,
   populateQuiz,
 } from './helpers';
-
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
-import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
-import {AmpStoryInteractiveImgQuiz} from '../amp-story-interactive-img-quiz';
 
 describes.realWin(
   'amp-story-interactive-img-quiz',

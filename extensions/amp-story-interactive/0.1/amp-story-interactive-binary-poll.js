@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import {htmlFor} from '#core/dom/static-template';
-import {computedStyle, setStyle} from '#core/dom/style';
-import {toArray} from '#core/types/array';
-
 import {
   AmpStoryInteractive,
   InteractiveType,
 } from './amp-story-interactive-abstract';
-
 import {CSS} from '../../../build/amp-story-interactive-binary-poll-0.1.css';
+import {computedStyle, setStyle} from '#core/dom/style';
 import {dev} from '../../../src/log';
+import {htmlFor} from '#core/dom/static-template';
+import {toArray} from '#core/types/array';
 
 /** @const @enum {number} */
 export const FontSize = {

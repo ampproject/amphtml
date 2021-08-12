@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {iterateCursor} from '#core/dom';
 import {closestAncestorElementBySelector} from '#core/dom/query';
+import {iterateCursor} from '#core/dom';
 
 /**
  *
