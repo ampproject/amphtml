@@ -16,9 +16,11 @@
 
 import '../amp-youtube';
 import {Services} from '#service';
-import {VideoEvents} from '../../../../src/video-interface';
+
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
+
 import {listenOncePromise} from '../../../../src/event-helper';
+import {VideoEvents} from '../../../../src/video-interface';
 
 const EXAMPLE_VIDEOID = 'mGENRKrdoGY';
 const EXAMPLE_LIVE_CHANNELID = 'UCB8Kb4pxYzsDsHxzBfnid4Q';

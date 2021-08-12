@@ -16,6 +16,7 @@
 
 import '../amp-vk';
 import {Layout} from '#core/dom/layout';
+
 import {Resource} from '#service/resource';
 
 const POST_PARAMS = {

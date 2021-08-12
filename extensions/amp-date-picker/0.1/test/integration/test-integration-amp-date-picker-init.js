@@ -15,6 +15,7 @@
  */
 
 import {AmpEvents} from '#core/constants/amp-events';
+
 import {createFixtureIframe} from '#testing/iframe';
 
 function checkElementUpgrade(element) {

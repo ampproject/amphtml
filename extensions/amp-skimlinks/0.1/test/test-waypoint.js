@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import {DEFAULT_SKIM_OPTIONS, pubcode} from './constants';
-import {Waypoint} from '../waypoint';
-import {XCUST_ATTRIBUTE_NAME} from '../constants';
 import {parseQueryString} from '#core/types/string/url';
-import {parseUrlDeprecated} from '../../../../src/url';
+
+import {DEFAULT_SKIM_OPTIONS, pubcode} from './constants';
 import helpersFactory from './helpers';
+
+import {parseUrlDeprecated} from '../../../../src/url';
+import {XCUST_ATTRIBUTE_NAME} from '../constants';
+import {Waypoint} from '../waypoint';
 
 describes.fakeWin(
   'Waypoint',

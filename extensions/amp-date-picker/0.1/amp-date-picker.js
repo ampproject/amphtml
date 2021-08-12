@@ -16,30 +16,33 @@
 
 import {ActionTrust} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
-import {CSS} from '../../../build/amp-date-picker-0.1.css';
-import {DEFAULT_FORMAT, DEFAULT_LOCALE, FORMAT_STRINGS} from './constants';
-import {DatesList} from './dates-list';
-import {Deferred} from '#core/data-structures/promise';
-import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
 import {Keys} from '#core/constants/key-codes';
+import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
+import {Deferred} from '#core/data-structures/promise';
+import {isRTL, iterateCursor, tryFocus} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
-import {Services} from '#service';
-import {batchFetchJsonFor} from '../../../src/batched-json';
 import {
   closestAncestorElementBySelector,
   scopedQuerySelector,
 } from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
-import {createCustomEvent, listen} from '../../../src/event-helper';
+import {once} from '#core/types/function';
+import {dict, map} from '#core/types/object';
+import {dashToCamelCase} from '#core/types/string';
+
+import {Services} from '#service';
+
+import {DEFAULT_FORMAT, DEFAULT_LOCALE, FORMAT_STRINGS} from './constants';
 import {createDateRangePicker} from './date-range-picker';
+import {DatesList} from './dates-list';
 import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
-import {dashToCamelCase} from '#core/types/string';
+
+import {CSS} from '../../../build/amp-date-picker-0.1.css';
+import {batchFetchJsonFor} from '../../../src/batched-json';
+import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, map} from '#core/types/object';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {isRTL, iterateCursor, tryFocus} from '#core/dom';
-import {once} from '#core/types/function';
 import {requireExternal} from '../../../src/module';
 
 /**

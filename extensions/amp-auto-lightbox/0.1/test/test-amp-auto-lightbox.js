@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
 import {CommonSignals} from '#core/constants/common-signals';
+import {tryResolve} from '#core/data-structures/promise';
+import {Signals} from '#core/data-structures/signals';
+import {createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {isArray} from '#core/types';
+
+import {Services} from '#service';
+
+import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
 import {
   Criteria,
   DocMetaAnnotations,
@@ -32,12 +40,6 @@ import {
   runCandidates,
   scan,
 } from '../amp-auto-lightbox';
-import {Services} from '#service';
-import {Signals} from '#core/data-structures/signals';
-import {createElementWithAttributes} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
-import {isArray} from '#core/types';
-import {tryResolve} from '#core/data-structures/promise';
 
 const TAG = 'amp-auto-lightbox';
 

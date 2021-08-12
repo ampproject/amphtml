@@ -15,14 +15,17 @@
  */
 
 import '../amp-onetap-google';
-import {ACTIONS, SENTINEL} from '../amp-onetap-google';
-import {AmpDoc} from '#service/ampdoc-impl';
-import {BaseElement} from '../../../../src/base-element';
-import {Services} from '#service';
 import {createElementWithAttributes, waitForChild} from '#core/dom';
-import {loadPromise} from '../../../../src/event-helper';
+
+import {Services} from '#service';
+import {AmpDoc} from '#service/ampdoc-impl';
+
 import {macroTask} from '#testing/yield';
+
+import {BaseElement} from '../../../../src/base-element';
+import {loadPromise} from '../../../../src/event-helper';
 import {user} from '../../../../src/log';
+import {ACTIONS, SENTINEL} from '../amp-onetap-google';
 
 const TAG = 'amp-onetap-google';
 

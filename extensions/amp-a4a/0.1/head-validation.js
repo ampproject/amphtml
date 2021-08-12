@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
-import {getMode} from '../../../src/mode';
-import {includes} from '#core/types/string';
-import {map} from '#core/types/object';
-import {parseExtensionUrl} from '#service/extension-script';
-import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
 import {removeElement, rootNodeFor} from '#core/dom';
+import {map} from '#core/types/object';
+import {includes} from '#core/types/string';
+
+import {Services} from '#service';
+import {parseExtensionUrl} from '#service/extension-script';
+
 import {urls} from '../../../src/config';
+import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
+import {getMode} from '../../../src/mode';
 
 /**
  * @typedef {{

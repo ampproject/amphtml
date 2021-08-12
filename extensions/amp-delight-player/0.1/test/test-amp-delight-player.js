@@ -15,8 +15,8 @@
  */
 
 import '../amp-delight-player';
-import {VideoEvents} from '../../../../src/video-interface';
 import {listenOncePromise} from '../../../../src/event-helper';
+import {VideoEvents} from '../../../../src/video-interface';
 
 describes.realWin(
   'amp-delight-player',

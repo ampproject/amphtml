@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
+
 import * as Preact from '#preact';
+
 import {
   Accordion,
   AccordionContent,
@@ -22,7 +25,6 @@ import {
   AccordionSection,
 } from '../../../amp-accordion/1.0/component';
 import {Instagram} from '../component';
-import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'Instagram',

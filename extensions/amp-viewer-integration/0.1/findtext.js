@@ -15,6 +15,7 @@
  */
 
 import {computedStyle} from '#core/dom/style';
+
 import {devAssert} from '../../../src/log';
 
 /**

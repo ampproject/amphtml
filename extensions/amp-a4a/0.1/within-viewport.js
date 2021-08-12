@@ -15,10 +15,11 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
-import {getMode} from '../../../src/mode';
 import {isIframed} from '#core/dom';
 import {memo} from '#core/types/object';
 import {toWin} from '#core/window';
+
+import {getMode} from '../../../src/mode';
 
 const OBSERVERS_MAP_PROP = '__AMP_A4A_VP_MAP';
 

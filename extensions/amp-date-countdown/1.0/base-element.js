@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {DateCountdown} from './component';
-import {PreactBaseElement} from '#preact/base-element';
 import {parseDateAttrs as parseDateAttrsBase} from '#core/dom/parse-date-attributes';
+
+import {PreactBaseElement} from '#preact/base-element';
+
+import {DateCountdown} from './component';
 
 export class BaseElement extends PreactBaseElement {}
 

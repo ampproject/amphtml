@@ -20,15 +20,11 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
-import {ADS_INITIAL_INTERSECTION_EXP} from '#experiments/ads-initial-intersection-exp';
-import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
-import {AdsenseSharedState} from './adsense-shared-state';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
-  CONSENT_POLICY_STATE,
-  CONSENT_STRING_TYPE,
-} from '#core/constants/consent-state';
-import {Navigation} from '#service/navigation';
+  addAmpExperimentIdToElement,
+  addExperimentIdToElement,
+  isInManualExperiment,
+} from '#ads/google/a4a/traffic-experiments';
 import {
   QQID_HEADER,
   SANDBOX_HEADER,
@@ -47,31 +43,40 @@ import {
   maybeAppendErrorParameter,
   maybeInsertOriginTrialToken,
 } from '#ads/google/a4a/utils';
-import {ResponsiveState} from './responsive-state';
-import {Services} from '#service';
-import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
-import {StoryAdPlacements} from '#experiments/story-ad-placements';
-import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
+
 import {
-  addAmpExperimentIdToElement,
-  addExperimentIdToElement,
-  isInManualExperiment,
-} from '#ads/google/a4a/traffic-experiments';
-import {computedStyle, setStyles} from '#core/dom/style';
-import {dev, devAssert, user} from '../../../src/log';
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '#core/constants/consent-state';
+import {removeElement} from '#core/dom';
 import {domFingerprintPlain} from '#core/dom/fingerprint';
-import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load';
-import {getData} from '../../../src/event-helper';
-import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
+import {computedStyle, setStyles} from '#core/dom/style';
+import {stringHash32} from '#core/types/string';
+import {utf8Decode} from '#core/types/string/bytes';
+
 import {
   getExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '#experiments';
-import {getMode} from '../../../src/mode';
+import {ADS_INITIAL_INTERSECTION_EXP} from '#experiments/ads-initial-intersection-exp';
+import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
+import {StoryAdPlacements} from '#experiments/story-ad-placements';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
+
+import {Services} from '#service';
+import {Navigation} from '#service/navigation';
+
+import {AdsenseSharedState} from './adsense-shared-state';
+import {ResponsiveState} from './responsive-state';
+
+import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
+import {getData} from '../../../src/event-helper';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {removeElement} from '#core/dom';
-import {stringHash32} from '#core/types/string';
-import {utf8Decode} from '#core/types/string/bytes';
+import {dev, devAssert, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
+import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';

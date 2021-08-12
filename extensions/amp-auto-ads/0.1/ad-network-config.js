@@ -22,6 +22,7 @@ import {FirstImpressionIoConfig} from './firstimpression.io-network-config';
 import {PingNetworkConfig} from './ping-network-config';
 import {PremiumadsNetworkConfig} from './premiumads-network-config';
 import {WunderkindNetworkConfig} from './wunderkind-network-config';
+
 import {getMode} from '../../../src/mode';
 
 /** @typedef {{width: (number|undefined), height: (number|undefined)}} */

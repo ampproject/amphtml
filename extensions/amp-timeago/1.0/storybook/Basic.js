@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {Timeago} from '../component';
 import {date, number, select, text, withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
+
+import {Timeago} from '../component';
 
 export default {
   title: 'Timeago',

@@ -18,6 +18,7 @@ import {
   ResizeObserverStub,
   installStub,
 } from '#polyfills/stubs/resize-observer-stub';
+
 import {upgradeResizeObserverPolyfill} from '../amp-resize-observer-polyfill';
 
 describes.realWin('amp-resize-observer-polyfill', {amp: false}, (env) => {

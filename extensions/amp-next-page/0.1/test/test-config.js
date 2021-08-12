@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 import {Services} from '#service';
-import {assertConfig} from '../config';
+
 import {parseUrlDeprecated} from '../../../../src/url';
+import {assertConfig} from '../config';
 
 describes.sandboxed('amp-next-page assertConfig', {}, (env) => {
   const documentUrl = 'https://example.com/parent';

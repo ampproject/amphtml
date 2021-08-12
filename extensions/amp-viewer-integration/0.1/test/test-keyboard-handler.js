@@ -15,6 +15,7 @@
  */
 
 import {KeyCodes, Keys} from '#core/constants/key-codes';
+
 import {KeyboardHandler} from '../keyboard-handler';
 import {Messaging} from '../messaging/messaging';
 

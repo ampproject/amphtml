@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {devAssert, userAssert} from '../../../src/log';
 import {removeElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+
+import {Services} from '#service';
+
+import {devAssert, userAssert} from '../../../src/log';
 import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpHulu extends AMP.BaseElement {

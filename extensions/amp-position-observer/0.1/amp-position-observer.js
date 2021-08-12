@@ -15,23 +15,25 @@
  */
 
 import {ActionTrust} from '#core/constants/action-constants';
-import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
-import {
-  RelativePositions,
-  layoutRectLtwh,
-  layoutRectsRelativePos,
-} from '#core/dom/layout/rect';
-import {Services} from '#service';
 import {
   assertLength,
   getLengthNumeral,
   getLengthUnits,
   parseLength,
 } from '#core/dom/layout';
+import {
+  RelativePositions,
+  layoutRectLtwh,
+  layoutRectsRelativePos,
+} from '#core/dom/layout/rect';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+import {installPositionObserverServiceForDoc} from '#service/position-observer/position-observer-impl';
+import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
+
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {installPositionObserverServiceForDoc} from '#service/position-observer/position-observer-impl';
 
 const TAG = 'amp-position-observer';
 

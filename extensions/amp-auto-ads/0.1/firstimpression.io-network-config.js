@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
+
 import {dict} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
+
+import {Services} from '#service';
 
 /**
  * @implements {./ad-network-config.AdNetworkConfigDef}

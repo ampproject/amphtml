@@ -32,16 +32,18 @@
  * </code>
  */
 
-import {CSS} from '../../../build/amp-byside-content-0.1.css';
-import {Services} from '#service';
-import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {createElementWithAttributes, removeElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {setStyles} from '#core/dom/style';
 import {debounce} from '#core/types/function';
 import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {CSS} from '../../../build/amp-byside-content-0.1.css';
 import {listenFor} from '../../../src/iframe-helper';
-import {setStyles} from '#core/dom/style';
 import {user, userAssert} from '../../../src/log';
+import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
 
 /** @const {string} */
 const TAG_ = 'amp-byside-content';

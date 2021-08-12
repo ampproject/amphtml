@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
-import {VideoEvents} from '../../../src/video-interface';
-import {addParamsToUrl} from '../../../src/url';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {dev, userAssert} from '../../../src/log';
 import {
   dispatchCustomEvent,
   getDataParamsFromAttributes,
   removeElement,
 } from '#core/dom';
-import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen} from '../../../src/event-helper';
+import {dev, userAssert} from '../../../src/log';
+import {addParamsToUrl} from '../../../src/url';
+import {VideoEvents} from '../../../src/video-interface';
 
 const TAG = 'amp-gfycat';
 

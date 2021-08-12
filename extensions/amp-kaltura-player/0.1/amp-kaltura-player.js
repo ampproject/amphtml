@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
-import {addParamsToUrl} from '../../../src/url';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {dict} from '#core/types/object';
 import {getDataParamsFromAttributes} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {setIsMediaComponent} from '../../../src/video-interface';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
 import {userAssert} from '../../../src/log';
+import {addParamsToUrl} from '../../../src/url';
+import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpKaltura extends AMP.BaseElement {
   /** @param {!AmpElement} element */

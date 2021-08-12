@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import {dict} from '#core/types/object';
+
 import {ScrollComponent} from './scroll-component';
 import {buildUrl, connectHostname} from './scroll-url';
-import {dict} from '#core/types/object';
 
 /**
  * UI for Scroll users.

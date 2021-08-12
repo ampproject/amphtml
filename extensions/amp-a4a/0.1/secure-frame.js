@@ -16,6 +16,7 @@
 
 import {createElementWithAttributes, escapeHtml} from '#core/dom';
 import {dict} from '#core/types/object';
+
 import {getFieSafeScriptSrcs} from '../../../src/friendly-iframe-embed';
 
 // If making changes also change ALLOWED_FONT_REGEX in head-validation.js

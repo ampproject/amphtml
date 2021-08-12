@@ -14,21 +14,12 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
+import {prepareImageAnimation} from '@ampproject/animations';
+
 import {CommonSignals} from '#core/constants/common-signals';
-import {
-  ELIGIBLE_TAP_TAGS,
-  LightboxManager,
-  LightboxThumbnailDataDef,
-  VIDEO_TAGS,
-} from './service/lightbox-manager-impl';
-import {Gestures} from '../../../src/gesture';
 import {Keys} from '#core/constants/key-codes';
-import {LightboxCaption, OverflowState} from './lightbox-caption';
-import {LightboxControls, LightboxControlsAction} from './lightbox-controls';
-import {Services} from '#service';
-import {SwipeDef, SwipeYRecognizer} from '../../../src/gesture-recognizers';
-import {SwipeToDismiss} from './swipe-to-dismiss';
+import {getVerticalScrollbarWidth, toggleAttribute} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {
   childElementByTag,
   closest,
@@ -36,23 +27,37 @@ import {
   elementByTag,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyle, setStyles, toggle} from '#core/dom/style';
 import {clamp} from '#core/math';
+import {toArray} from '#core/types/array';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {LightboxCaption, OverflowState} from './lightbox-caption';
+import {LightboxControls, LightboxControlsAction} from './lightbox-controls';
+import {
+  ELIGIBLE_TAP_TAGS,
+  LightboxManager,
+  LightboxThumbnailDataDef,
+  VIDEO_TAGS,
+} from './service/lightbox-manager-impl';
+import {SwipeToDismiss} from './swipe-to-dismiss';
 import {
   delayAfterDeferringToEventLoop,
   secondsToTimestampString,
 } from './utils';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
-import {getElementServiceForDoc} from '../../../src/element-service';
-import {getVerticalScrollbarWidth, toggleAttribute} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
-import {isExperimentOn} from '#experiments';
-import {prepareImageAnimation} from '@ampproject/animations';
-import {reportError} from '../../../src/error-reporting';
-import {setStyle, setStyles, toggle} from '#core/dom/style';
-import {toArray} from '#core/types/array';
+
+import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {getElementServiceForDoc} from '../../../src/element-service';
+import {reportError} from '../../../src/error-reporting';
+import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
+import {Gestures} from '../../../src/gesture';
+import {SwipeDef, SwipeYRecognizer} from '../../../src/gesture-recognizers';
+import {dev, devAssert, userAssert} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-lightbox-gallery';

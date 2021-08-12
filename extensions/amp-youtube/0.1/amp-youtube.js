@@ -15,22 +15,6 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
-import {VideoEvents} from '../../../src/video-interface';
-import {addParamsToUrl} from '../../../src/url';
-import {
-  addUnsafeAllowAutoplay,
-  createFrameFor,
-  isJsonOrObj,
-  mutedOrUnmutedEvent,
-  objOrParseJson,
-  originMatches,
-  redispatch,
-} from '../../../src/iframe-video';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {dev, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
 import {
   dispatchCustomEvent,
   getDataParamsFromAttributes,
@@ -41,11 +25,29 @@ import {
   fullscreenExit,
   isFullscreenElement,
 } from '#core/dom/fullscreen';
-import {getData, listen} from '../../../src/event-helper';
-import {htmlFor} from '#core/dom/static-template';
-import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {htmlFor} from '#core/dom/static-template';
 import {setStyles} from '#core/dom/style';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen} from '../../../src/event-helper';
+import {
+  addUnsafeAllowAutoplay,
+  createFrameFor,
+  isJsonOrObj,
+  mutedOrUnmutedEvent,
+  objOrParseJson,
+  originMatches,
+  redispatch,
+} from '../../../src/iframe-video';
+import {dev, userAssert} from '../../../src/log';
+import {addParamsToUrl} from '../../../src/url';
+import {VideoEvents} from '../../../src/video-interface';
 
 const TAG = 'amp-youtube';
 

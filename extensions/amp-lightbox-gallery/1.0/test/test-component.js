@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import {mount} from 'enzyme';
+
 import * as Preact from '#preact';
+
 import {BaseCarousel} from '../../../amp-base-carousel/1.0/component';
 import {LightboxGalleryProvider, WithLightbox} from '../component';
-import {mount} from 'enzyme';
 import {useStyles} from '../component.jss';
 
 describes.sandboxed('LightboxGallery preact component', {}, () => {

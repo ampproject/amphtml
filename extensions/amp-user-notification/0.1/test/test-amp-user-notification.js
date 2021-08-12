@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-import {
-  AmpUserNotification,
-  UserNotificationManager,
-} from '../amp-user-notification';
-import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '#service';
+
 import {macroTask} from '#testing/yield';
+
 import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service-helpers';
+import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
+import {
+  AmpUserNotification,
+  UserNotificationManager,
+} from '../amp-user-notification';
 
 describes.realWin(
   'amp-user-notification',

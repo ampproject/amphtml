@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import {sequentialIdGenerator} from '#core/data-structures/id-generator';
+
 import * as Preact from '#preact';
-import {LightboxGalleryContext} from './context';
 import {
   cloneElement,
   useCallback,
@@ -24,8 +25,9 @@ import {
   useMemo,
   useState,
 } from '#preact';
-import {sequentialIdGenerator} from '#core/data-structures/id-generator';
 import {toChildArray} from '#preact/compat';
+
+import {LightboxGalleryContext} from './context';
 
 const generateLightboxItemKey = sequentialIdGenerator();
 

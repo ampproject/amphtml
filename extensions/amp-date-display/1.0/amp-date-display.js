@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
-import {Services} from '#service';
-import {dev, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
+
 import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {BaseElement} from './base-element';
+
+import {dev, userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-date-display';

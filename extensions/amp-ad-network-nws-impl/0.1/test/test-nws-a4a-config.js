@@ -17,9 +17,11 @@
 // These two are required for reasons internal to AMP
 import '../../../amp-ad/0.1/amp-ad-ui';
 import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {AmpAdNetworkNwsImpl} from '../amp-ad-network-nws-impl';
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
+
+import {Services} from '#service';
+
+import {AmpAdNetworkNwsImpl} from '../amp-ad-network-nws-impl';
 
 describes.fakeWin('amp-ad-network-nws-impl', {amp: true}, (env) => {
   let win, doc, element, impl, preloadExtensionSpy;

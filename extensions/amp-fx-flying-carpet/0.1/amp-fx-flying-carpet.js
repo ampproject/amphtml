@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
 import {CommonSignals} from '#core/constants/common-signals';
 import {Layout} from '#core/dom/layout';
-import {Services} from '#service';
-import {dev, userAssert} from '../../../src/log';
 import {realChildElements, realChildNodes} from '#core/dom/query';
 import {setStyle} from '#core/dom/style';
+
+import {Services} from '#service';
+
+import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
+import {dev, userAssert} from '../../../src/log';
 
 const TAG = 'amp-fx-flying-carpet';
 

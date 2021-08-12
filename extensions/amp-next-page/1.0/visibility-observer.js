@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-import {
-  PositionInViewportEntryDef,
-  PositionObserverFidelity,
-} from '#service/position-observer/position-observer-worker';
+import {RelativePositions} from '#core/dom/layout/rect';
+import {throttle} from '#core/types/function';
+
+import {Services} from '#service';
 import {
   PositionObserver, // eslint-disable-line no-unused-vars
   installPositionObserverServiceForDoc,
 } from '#service/position-observer/position-observer-impl';
-import {RelativePositions} from '#core/dom/layout/rect';
-import {Services} from '#service';
+import {
+  PositionInViewportEntryDef,
+  PositionObserverFidelity,
+} from '#service/position-observer/position-observer-worker';
+
 import {devAssert} from '../../../src/log';
-import {throttle} from '#core/types/function';
 
 /** @enum {number} */
 export const ViewportRelativePos = {

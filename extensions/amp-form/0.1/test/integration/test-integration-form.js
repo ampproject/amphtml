@@ -15,14 +15,17 @@
  */
 
 import {AmpEvents} from '#core/constants/amp-events';
-import {AmpForm, AmpFormService} from '../../amp-form';
-import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
+
 import {Services} from '#service';
+import {stubElementsForDoc} from '#service/custom-element-registry';
+import {registerExtendedTemplateForDoc} from '#service/template-impl';
+
+import {poll} from '#testing/iframe';
+
 import {installGlobalSubmitListenerForDoc} from '../../../../../src/document-submit';
 import {listenOncePromise} from '../../../../../src/event-helper';
-import {poll} from '#testing/iframe';
-import {registerExtendedTemplateForDoc} from '#service/template-impl';
-import {stubElementsForDoc} from '#service/custom-element-registry';
+import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
+import {AmpForm, AmpFormService} from '../../amp-form';
 
 /** @const {number} */
 const RENDER_TIMEOUT = 15000;

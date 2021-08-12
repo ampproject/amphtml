@@ -16,10 +16,12 @@
 
 import '../../../amp-ad/0.1/amp-ad';
 import '../amp-sticky-ad';
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
-import {macroTask} from '#testing/yield';
+
+import {Services} from '#service';
+
 import {poll} from '#testing/iframe';
+import {macroTask} from '#testing/yield';
 
 describes.realWin(
   'amp-sticky-ad 1.0 version',

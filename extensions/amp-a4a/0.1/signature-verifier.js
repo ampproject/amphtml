@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
-import {base64DecodeToBytes} from '#core/types/string/base64';
-import {dev, devAssert, user} from '../../../src/log';
 import {isArray} from '#core/types';
+import {base64DecodeToBytes} from '#core/types/string/base64';
+
+import {Services} from '#service';
+
+import {dev, devAssert, user} from '../../../src/log';
 
 /** @visibleForTesting */
 export const AMP_SIGNATURE_HEADER = 'AMP-Fast-Fetch-Signature';

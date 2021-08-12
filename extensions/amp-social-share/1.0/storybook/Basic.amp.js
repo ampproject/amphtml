@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {select, text, withKnobs} from '@storybook/addon-knobs';
 import {withAmp} from '@ampproject/storybook-addon';
+import {select, text, withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
 
 export default {
   title: 'amp-social-share-1_0',

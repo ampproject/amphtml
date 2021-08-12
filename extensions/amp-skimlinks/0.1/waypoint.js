@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
-import {Services} from '#service';
-import {addParamsToUrl} from '../../../src/url';
 import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
+
+import {addParamsToUrl} from '../../../src/url';
 
 /**
  * The waypoint class is responsible for building the URL to

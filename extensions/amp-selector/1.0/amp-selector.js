@@ -15,13 +15,17 @@
  */
 
 import {ActionTrust} from '#core/constants/action-constants';
-import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-selector-1.0.css';
-import {Services} from '#service';
-import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '#core/types/object';
-import {isExperimentOn} from '#experiments';
 import {toWin} from '#core/window';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {BaseElement} from './base-element';
+
+import {CSS} from '../../../build/amp-selector-1.0.css';
+import {createCustomEvent} from '../../../src/event-helper';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */

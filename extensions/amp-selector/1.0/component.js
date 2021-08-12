@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import objstr from 'obj-str';
+
 import {Keys} from '#core/constants/key-codes';
-import {forwardRef} from '#preact/compat';
-import {mod} from '#core/math';
 import {tryFocus} from '#core/dom';
+import {mod} from '#core/math';
+
+import * as Preact from '#preact';
 import {
   useCallback,
   useContext,
@@ -29,8 +31,9 @@ import {
   useRef,
   useState,
 } from '#preact';
+import {forwardRef} from '#preact/compat';
+
 import {useStyles} from './component.jss';
-import objstr from 'obj-str';
 
 const SelectorContext = Preact.createContext(
   /** @type {SelectorDef.ContextProps} */ ({selected: []})

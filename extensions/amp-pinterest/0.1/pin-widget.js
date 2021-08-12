@@ -15,13 +15,16 @@
  */
 
 import {Keys} from '#core/constants/key-codes';
-import {Services} from '#service';
-import {Util} from './util';
-import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {measureIntersection} from '#core/dom/layout/intersection';
-import {openWindowDialog} from '../../../src/open-window-dialog';
 import {toWin} from '#core/window';
+
+import {Services} from '#service';
+
+import {Util} from './util';
+
 import {user, userAssert} from '../../../src/log';
+import {openWindowDialog} from '../../../src/open-window-dialog';
+import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 
 // Popup options
 const POP =

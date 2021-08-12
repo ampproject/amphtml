@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import {user, userAssert} from '../../../src/log';
 import {
   getSourceOrigin,
   getSourceUrl,
   parseUrlDeprecated,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {user, userAssert} from '../../../src/log';
 
 /**
  * @param {string} url

@@ -19,18 +19,32 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
-import * as bytesUtils from '#core/types/string/bytes';
 import {AMP_EXPERIMENT_ATTRIBUTE, QQID_HEADER} from '#ads/google/a4a/utils';
+
 import {
-  AMP_SIGNATURE_HEADER,
-  VerificationStatus,
-} from '../../../amp-a4a/0.1/signature-verifier';
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '#core/constants/consent-state';
+import {Deferred} from '#core/data-structures/promise';
+import {createElementWithAttributes} from '#core/dom';
+import {Layout} from '#core/dom/layout';
+import * as bytesUtils from '#core/types/string/bytes';
+
+import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+
+import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {
   AmpA4A,
   CREATIVE_SIZE_HEADER,
   XORIGIN_MODE,
   signatureVerifierFor,
 } from '../../../amp-a4a/0.1/amp-a4a';
+import {
+  AMP_SIGNATURE_HEADER,
+  VerificationStatus,
+} from '../../../amp-a4a/0.1/signature-verifier';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
@@ -39,17 +53,7 @@ import {
   resetLocationQueryParametersForTesting,
   resetTokensToInstancesMap,
 } from '../amp-ad-network-doubleclick-impl';
-import {
-  CONSENT_POLICY_STATE,
-  CONSENT_STRING_TYPE,
-} from '#core/constants/consent-state';
-import {Deferred} from '#core/data-structures/promise';
-import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
-import {Layout} from '#core/dom/layout';
 import {SafeframeHostApi} from '../safeframe-host';
-import {Services} from '#service';
-import {createElementWithAttributes} from '#core/dom';
-import {toggleExperiment} from '#experiments';
 
 /**
  * We're allowing external resources because otherwise using realWin causes

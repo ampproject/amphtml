@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-import {AmpEmbedlyKey, TAG as KEY_TAG} from './amp-embedly-key';
-import {BaseElement} from './base-element';
 import {Layout} from '#core/dom/layout';
 import {dict} from '#core/types/object';
+
 import {isExperimentOn} from '#experiments';
+
+import {AmpEmbedlyKey, TAG as KEY_TAG} from './amp-embedly-key';
+import {BaseElement} from './base-element';
+
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */

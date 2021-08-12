@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
-import {assertHttpsUrl} from '../../../src/url';
-import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {assertHttpsUrl} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-access-client';

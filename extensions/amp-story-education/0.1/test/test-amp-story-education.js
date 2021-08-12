@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
+import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {LocalizationService} from '#service/localization';
+
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
   Action,
   AmpStoryStoreService,
   StateProperty,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryEducation, State} from '../amp-story-education';
-import {LocalizationService} from '#service/localization';
-import {Services} from '#service';
-import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin('amp-story-education', {amp: true}, (env) => {
   let ampdoc;

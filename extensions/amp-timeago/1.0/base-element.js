@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {PreactBaseElement} from '#preact/base-element';
-import {Timeago} from './component';
 import {parseDateAttrs as parseDateAttrsBase} from '#core/dom/parse-date-attributes';
+
+import {PreactBaseElement} from '#preact/base-element';
+
+import {Timeago} from './component';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */

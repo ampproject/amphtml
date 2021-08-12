@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
+import {utf8Encode} from '#core/types/string/bytes';
+
+import {data} from './testdata/valid_css_at_rules_amp.reserialized';
+
+import {getAmpAdTemplateHelper} from '../amp-ad-template-helper';
+import {AdResponseType, ValidatorResult} from '../amp-ad-type-defs';
 import {
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   DEPRECATED_AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   TemplateValidator,
 } from '../template-validator';
-import {AdResponseType, ValidatorResult} from '../amp-ad-type-defs';
-import {data} from './testdata/valid_css_at_rules_amp.reserialized';
-import {getAmpAdTemplateHelper} from '../amp-ad-template-helper';
-import {utf8Encode} from '#core/types/string/bytes';
 
 const realWinConfig = {
   amp: {},

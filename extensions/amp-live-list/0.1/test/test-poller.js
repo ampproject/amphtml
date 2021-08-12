@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {Poller} from '../poller';
 import {Services} from '#service';
+
+import {Poller} from '../poller';
 
 describes.sandboxed('Poller', {}, (env) => {
   let clock;

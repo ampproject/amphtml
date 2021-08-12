@@ -27,16 +27,18 @@
  */
 
 import {ActionTrust} from '#core/constants/action-constants';
-import {CSS} from '../../../build/amp-onetap-google-0.1.css';
-import {Layout} from '#core/dom/layout';
-import {Services} from '#service';
-import {assertHttpsUrl} from '../../../src/url';
-import {dev, devAssert, user} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {getData, listen} from '../../../src/event-helper';
-import {isObject} from '#core/types';
-import {px, setStyle, toggle} from '#core/dom/style';
 import {removeElement} from '#core/dom';
+import {Layout} from '#core/dom/layout';
+import {px, setStyle, toggle} from '#core/dom/style';
+import {isObject} from '#core/types';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {CSS} from '../../../build/amp-onetap-google-0.1.css';
+import {getData, listen} from '../../../src/event-helper';
+import {dev, devAssert, user} from '../../../src/log';
+import {assertHttpsUrl} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-onetap-google';

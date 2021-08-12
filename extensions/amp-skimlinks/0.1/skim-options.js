@@ -15,8 +15,6 @@
  */
 
 import {getChildJsonConfig} from '#core/dom';
-import {getNormalizedHostnameFromUrl} from './utils';
-import {userAssert} from '../../../src/log';
 
 import {
   DEFAULT_CONFIG,
@@ -24,6 +22,9 @@ import {
   OPTIONS_ERRORS,
   WAYPOINT_BASE_URL,
 } from './constants';
+import {getNormalizedHostnameFromUrl} from './utils';
+
+import {userAssert} from '../../../src/log';
 
 /**
  *

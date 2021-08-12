@@ -15,28 +15,31 @@
  */
 
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {CSS} from '../../../build/amp-next-page-0.1.css';
+import {isJsonScriptTag, removeElement} from '#core/dom';
 import {Layout} from '#core/dom/layout';
-import {NextPageService} from './next-page-service';
-import {Services} from '#service';
-import {
-  UrlReplacementPolicy,
-  batchFetchJsonFor,
-} from '../../../src/batched-json';
-import {assertConfig} from './config';
 import {
   childElementsByAttr,
   childElementsByTag,
   elementByTag,
 } from '#core/dom/query';
-import {dev, user, userAssert} from '../../../src/log';
-
-import {fetchDocument} from '../../../src/document-fetcher';
-import {getConsentPolicyState} from '../../../src/consent';
-import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {isExperimentOn} from '#experiments';
-import {isJsonScriptTag, removeElement} from '#core/dom';
 import {parseJson, tryParseJson} from '#core/types/object/json';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {assertConfig} from './config';
+import {NextPageService} from './next-page-service';
+
+import {CSS} from '../../../build/amp-next-page-0.1.css';
+import {
+  UrlReplacementPolicy,
+  batchFetchJsonFor,
+} from '../../../src/batched-json';
+import {getConsentPolicyState} from '../../../src/consent';
+import {fetchDocument} from '../../../src/document-fetcher';
+import {dev, user, userAssert} from '../../../src/log';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 
 const TAG = 'amp-next-page';
 

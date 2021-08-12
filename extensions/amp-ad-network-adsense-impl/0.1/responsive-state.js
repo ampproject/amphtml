@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
+import {addExperimentIdToElement} from '#ads/google/a4a/traffic-experiments';
 import {
   ADSENSE_MCRSPV_TAG,
   ADSENSE_RSPV_ALLOWED_HEIGHT,
   ADSENSE_RSPV_TAG,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
 } from '#ads/google/utils';
-import {Services} from '#service';
-import {addExperimentIdToElement} from '#ads/google/a4a/traffic-experiments';
-import {clamp} from '#core/math';
+
 import {computedStyle, getStyle, setStyle} from '#core/dom/style';
-import {dev, devAssert, user} from '../../../src/log';
-import {getData} from '../../../src/event-helper';
+import {clamp} from '#core/math';
 import {hasOwn} from '#core/types/object';
-import {randomlySelectUnsetExperiments} from '#experiments';
-import {toWin} from '#core/window';
 import {tryParseJson} from '#core/types/object/json';
+import {toWin} from '#core/window';
+
+import {randomlySelectUnsetExperiments} from '#experiments';
+
+import {Services} from '#service';
+
+import {getData} from '../../../src/event-helper';
+import {dev, devAssert, user} from '../../../src/log';
 
 const TAG = 'amp-ad-network-adsense-impl';
 

@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
-import {dict} from '#core/types/object';
-import {findSentences, markTextRangeList} from './findtext';
-import {listenOnce} from '../../../src/event-helper';
+import {whenDocumentReady} from '#core/document-ready';
 import {moveLayoutRect} from '#core/dom/layout/rect';
+import {resetStyles, setInitialDisplay, setStyles} from '#core/dom/style';
 import {once} from '#core/types/function';
+import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {parseQueryString} from '#core/types/string/url';
-import {resetStyles, setInitialDisplay, setStyles} from '#core/dom/style';
-import {whenDocumentReady} from '#core/document-ready';
+
+import {Services} from '#service';
+
+import {findSentences, markTextRangeList} from './findtext';
+
+import {listenOnce} from '../../../src/event-helper';
 
 /**
  * The message name sent by viewers to dismiss highlights.

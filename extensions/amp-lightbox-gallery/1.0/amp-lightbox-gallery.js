@@ -15,14 +15,18 @@
  */
 
 import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
-import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-lightbox-gallery-1.0.css';
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {elementByTag} from '#core/dom/query';
+
 import {isExperimentOn} from '#experiments';
-import {userAssert} from '../../../src/log';
+
+import {Services} from '#service';
+
+import {BaseElement} from './base-element';
+
+import {CSS} from '../../../build/amp-lightbox-gallery-1.0.css';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-lightbox-gallery';

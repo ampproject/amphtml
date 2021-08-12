@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-social-share-0.1.css';
 import {Keys} from '#core/constants/key-codes';
-import {Services} from '#service';
-import {addParamsToUrl} from '../../../src/url';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
 import {getDataParamsFromAttributes} from '#core/dom';
-import {getSocialConfig} from './amp-social-share-config';
-import {openWindowDialog} from '../../../src/open-window-dialog';
-import {parseQueryString} from '#core/types/string/url';
 import {toggle} from '#core/dom/style';
+import {dict} from '#core/types/object';
+import {parseQueryString} from '#core/types/string/url';
+
+import {Services} from '#service';
+
+import {getSocialConfig} from './amp-social-share-config';
+
+import {CSS} from '../../../build/amp-social-share-0.1.css';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {openWindowDialog} from '../../../src/open-window-dialog';
+import {addParamsToUrl} from '../../../src/url';
 
 const TAG = 'amp-social-share';
 

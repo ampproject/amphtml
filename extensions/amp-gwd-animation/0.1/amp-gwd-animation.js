@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 import {ActionTrust} from '#core/constants/action-constants';
+
+import {Services} from '#service';
+
 import {
   AmpGwdRuntimeService,
   GWD_SERVICE_NAME,
   GWD_TIMELINE_EVENT,
 } from './amp-gwd-animation-impl';
+
 import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
-import {Services} from '#service';
 import {getDetail} from '../../../src/event-helper';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
+import {userAssert} from '../../../src/log';
 import {
   getParentWindowFrameElement,
   getServiceForDocOrNull,
 } from '../../../src/service-helpers';
-import {userAssert} from '../../../src/log';
 
 /**
  * Returns a value at any level in an object structure addressed by dot-notation

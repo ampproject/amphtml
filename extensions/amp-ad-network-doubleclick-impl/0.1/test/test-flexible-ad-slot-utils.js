@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
+
+import {Services} from '#service';
+
 import {getFlexibleAdSlotData} from '../flexible-ad-slot-utils';
 
 describes.realWin('#getFlexibleAdSlotData', {amp: true}, (env) => {

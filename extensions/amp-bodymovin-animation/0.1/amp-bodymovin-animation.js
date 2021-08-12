@@ -16,19 +16,20 @@
 
 import {ActionTrust} from '#core/constants/action-constants';
 import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {assertHttpsUrl} from '../../../src/url';
-import {batchFetchJsonFor} from '../../../src/batched-json';
-import {clamp} from '#core/math';
-import {dict} from '#core/types/object';
-import {getData, listen} from '../../../src/event-helper';
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isFiniteNumber, isObject} from '#core/types';
-
-import {parseJson} from '#core/types/object/json';
 import {removeElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {clamp} from '#core/math';
+import {isFiniteNumber, isObject} from '#core/types';
+import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {batchFetchJsonFor} from '../../../src/batched-json';
+import {getData, listen} from '../../../src/event-helper';
 import {userAssert} from '../../../src/log';
+import {assertHttpsUrl} from '../../../src/url';
 
 const TAG = 'amp-bodymovin-animation';
 const TYPE = 'bodymovinanimation';

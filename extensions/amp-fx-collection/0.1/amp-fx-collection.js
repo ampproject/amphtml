@@ -15,20 +15,22 @@
  */
 
 import {AmpEvents} from '#core/constants/amp-events';
+import {iterateCursor} from '#core/dom';
+import {tryCallback} from '#core/error';
+
 import {
   FxBindings,
   FxObservesSignal,
   FxType, // eslint-disable-line no-unused-vars
   getFxTypes,
 } from './fx-type';
-import {devAssert} from '../../../src/log';
 import {
   installPositionBoundFx,
   installScrollToggledFx,
 } from './providers/fx-provider';
-import {iterateCursor} from '#core/dom';
+
 import {listen} from '../../../src/event-helper';
-import {tryCallback} from '#core/error';
+import {devAssert} from '../../../src/log';
 
 const TAG = 'amp-fx-collection';
 

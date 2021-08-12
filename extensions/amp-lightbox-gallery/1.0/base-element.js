@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/component.jss';
-import {CSS as COMPONENT_CSS} from './component.jss';
-import {CSS as LIGHTBOX_CSS} from '../../amp-lightbox/1.0/component.jss';
-import {LightboxGalleryProvider, WithLightbox} from './component';
-import {PreactBaseElement} from '#preact/base-element';
-import {dict} from '#core/types/object';
-import {srcsetFromElement} from '#core/dom/srcset';
-import {toArray} from '#core/types/array';
-import {toggle} from '#core/dom/style';
 import {toggleAttribute} from '#core/dom';
 import {
   childElement,
   closestAncestorElementBySelector,
   elementByTag,
 } from '#core/dom/query';
+import {srcsetFromElement} from '#core/dom/srcset';
+import {toggle} from '#core/dom/style';
+import {toArray} from '#core/types/array';
+import {dict} from '#core/types/object';
+
+import * as Preact from '#preact';
+import {PreactBaseElement} from '#preact/base-element';
+
+import {LightboxGalleryProvider, WithLightbox} from './component';
+import {CSS as COMPONENT_CSS} from './component.jss';
+
+import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/component.jss';
+import {CSS as LIGHTBOX_CSS} from '../../amp-lightbox/1.0/component.jss';
 
 /** @const {!Array<string>} */
 const LIGHTBOX_ELIGIBLE_TAGS = ['AMP-IMG', 'IMG'];

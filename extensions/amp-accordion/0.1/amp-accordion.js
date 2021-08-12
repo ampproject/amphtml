@@ -15,25 +15,27 @@
  */
 
 import {ActionTrust} from '#core/constants/action-constants';
-import {Animation} from '../../../src/animation';
-import {CSS} from '../../../build/amp-accordion-0.1.css';
 import {Keys} from '#core/constants/key-codes';
-import {Layout} from '#core/dom/layout';
-import {Services} from '#service';
 import {bezierCurve} from '#core/data-structures/curve';
-import {clamp} from '#core/math';
+import {dispatchCustomEvent, tryFocus} from '#core/dom';
+import {Layout} from '#core/dom/layout';
 import {closest, realChildElements} from '#core/dom/query';
+import {getStyle, setImportantStyles, setStyles} from '#core/dom/style';
+import {clamp} from '#core/math';
+import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {CSS} from '../../../build/amp-accordion-0.1.css';
+import {Animation} from '../../../src/animation';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {dispatchCustomEvent, tryFocus} from '#core/dom';
-import {getStyle, setImportantStyles, setStyles} from '#core/dom/style';
 import {
   numeric,
   px,
   setStyles as setStylesTransition,
 } from '../../../src/transition';
-import {parseJson} from '#core/types/object/json';
 import {removeFragment} from '../../../src/url';
 
 const TAG = 'amp-accordion';

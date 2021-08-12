@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
+import {Deferred} from '#core/data-structures/promise';
+import {isEnumValue, isObject} from '#core/types';
+import {dict, getValueForExpr} from '#core/types/object';
+import {parseQueryString} from '#core/types/string/url';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
 import {AccessClientAdapter} from './amp-access-client';
 import {AccessIframeAdapter} from './amp-access-iframe';
 import {AccessOtherAdapter} from './amp-access-other';
 import {AccessServerAdapter} from './amp-access-server';
 import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {AccessVendorAdapter} from './amp-access-vendor';
-import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
-import {assertHttpsUrl} from '../../../src/url';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict, getValueForExpr} from '#core/types/object';
 import {getLoginUrl, openLoginDialog} from './login-dialog';
-import {isEnumValue, isObject} from '#core/types';
-import {isExperimentOn} from '#experiments';
-import {parseQueryString} from '#core/types/string/url';
+
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {dev, user, userAssert} from '../../../src/log';
+import {assertHttpsUrl} from '../../../src/url';
 
 /** @const */
 const TAG = 'amp-access';

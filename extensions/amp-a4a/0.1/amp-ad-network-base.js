@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import {FailureType, RecoveryModeType} from './amp-ad-type-defs';
-import {dev, devAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {map} from '#core/types/object';
+
+import {FailureType, RecoveryModeType} from './amp-ad-type-defs';
 import {sendXhrRequest} from './amp-ad-utils';
+
+import {dev, devAssert} from '../../../src/log';
 
 const TAG = 'amp-ad-network-base';
 

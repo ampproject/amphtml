@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {PlacementState} from './placement';
-import {SizeInfoDef} from './ad-network-config';
 import {tryResolve} from '#core/data-structures/promise';
+
+import {SizeInfoDef} from './ad-network-config';
+import {PlacementState} from './placement';
+
 import {user} from '../../../src/log';
 
 /** @const */

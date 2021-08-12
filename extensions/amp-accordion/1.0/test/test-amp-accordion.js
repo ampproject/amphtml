@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 import '../amp-accordion';
-import {ActionInvocation} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';
-import {CanRender} from '#preact/contextprops';
-import {htmlFor} from '#core/dom/static-template';
 import {subscribe, unsubscribe} from '#core/context';
+import {htmlFor} from '#core/dom/static-template';
+
 import {toggleExperiment} from '#experiments';
+
+import {CanRender} from '#preact/contextprops';
+
+import {ActionInvocation} from '#service/action-impl';
+
 import {waitFor} from '#testing/test-helper';
 
 describes.realWin(

@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
-import {dict, hasOwn} from '#core/types/object';
+import {waitForChild} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {scopedQuerySelector} from '#core/dom/query';
 import {toArray} from '#core/types/array';
-import {waitForChild} from '#core/dom';
+import {dict, hasOwn} from '#core/types/object';
+
+import {createCustomEvent} from '../../../src/event-helper';
+import {dev, user} from '../../../src/log';
 
 /**
  * CSS class used to deactivate animations.

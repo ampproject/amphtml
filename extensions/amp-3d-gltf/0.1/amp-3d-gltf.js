@@ -15,13 +15,8 @@
  */
 import {ActionTrust} from '#core/constants/action-constants';
 import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
+import {removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
-import {dev, devAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {
   observeContentSize,
   unobserveContentSize,
@@ -30,7 +25,14 @@ import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '#core/dom/layout/viewport-observer';
-import {removeElement} from '#core/dom';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {listenFor, postMessage} from '../../../src/iframe-helper';
+import {dev, devAssert} from '../../../src/log';
+import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 
 const TAG = 'amp-3d-gltf';
 const TYPE = '3d-gltf';

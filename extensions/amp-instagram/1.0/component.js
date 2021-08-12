@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {IframeEmbed} from '#preact/component/iframe';
 import {dict} from '#core/types/object';
-import {forwardRef} from '#preact/compat';
-import {getData} from '../../../src/event-helper';
 import {parseJson} from '#core/types/object/json';
+
+import * as Preact from '#preact';
 import {useCallback, useState} from '#preact';
+import {forwardRef} from '#preact/compat';
+import {IframeEmbed} from '#preact/component/iframe';
+
+import {getData} from '../../../src/event-helper';
 
 const NO_HEIGHT_STYLE = dict();
 const MATCHES_MESSAGING_ORIGIN = (origin) =>

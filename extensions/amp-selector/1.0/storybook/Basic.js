@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {Option, Selector} from '../component';
 import {select, withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
 import {useState} from '#preact';
+
+import {Option, Selector} from '../component';
 export default {
   title: 'Selector',
   component: Selector,
