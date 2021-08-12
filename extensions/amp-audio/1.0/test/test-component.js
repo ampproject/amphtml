@@ -31,7 +31,7 @@ describes.realWin('Audio preact component v1.0', {}, (env) => {
     expect(component.prop('src')).to.equal('audio.mp3');
     expect(component.prop('controls')).to.be.true;
 
-    expect(component.prop('style')).to.deep.equal({
+    expect(wrapper.prop('style')).to.deep.equal({
       width: '300px',
       height: '30px',
     });
@@ -66,22 +66,22 @@ describes.realWin('Audio preact component v1.0', {}, (env) => {
       {attachTo: env.win.document.body}
     );
 
-    const component = wrapper.find(Audio.displayName).find('audio');
+    const component = wrapper.find('audio');
     expect(component).to.have.lengthOf(1);
 
     expect(component.name()).to.equal('audio');
-    expect(component.prop('width')).to.equal('503px');
-    expect(component.prop('height')).to.equal('53px');
+    expect(wrapper.prop('width')).to.equal('503px');
+    expect(wrapper.prop('height')).to.equal('53px');
     expect(component.getDOMNode().offsetWidth).to.be.greaterThan(1);
     expect(component.getDOMNode().offsetHeight).to.be.greaterThan(1);
     expect(component.prop('controls')).to.be.true;
 
     const audio = component.find('audio');
-    expect(audio.prop('autoplay')).to.be.true;
-    expect(audio.prop('muted')).to.be.true;
-    expect(audio.getDOMNode().muted).to.be.true;
-    expect(audio.prop('preload')).to.be.true;
-    expect(audio.prop('loop')).to.be.true;
+    expect(audio.prop('autoplay')).not.to.be.undefined;
+    expect(audio.prop('muted')).not.to.be.undefined;
+    expect(audio.getDOMNode().muted).not.to.be.undefined;
+    expect(audio.prop('preload')).not.to.be.undefined;
+    expect(audio.prop('loop')).not.to.be.undefined;
     expect(audio.prop('src')).to.be.undefined;
 
     expect(component.childAt(0).name()).to.equal('source');
