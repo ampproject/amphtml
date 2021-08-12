@@ -479,8 +479,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   createDomainLabelElement_() {
     const domainLabelEl = this.win.document.createElement('div');
     domainLabelEl.classList.add('i-amphtml-story-page-attachment-domain-label');
-    this.maybeSetDarkThemeForElement_(domainLabelEl);
-    domainLabelEl.textContent = this.getPublisherDomain_();
+    domainLabelEl.textContent = this.getPublisherOrigin_();
     return domainLabelEl;
   }
 
@@ -495,12 +494,12 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   }
 
   /**
-   * Returns the publisher domain URL string (e.g., "stories.example.com").
+   * Returns the publisher origin URL string (e.g., "stories.example.com").
    * @return {string} The domain of the publisher.
    * @private
    */
-  getPublisherDomain_() {
-    const publisherDomain = getSourceOrigin(this.getAmpDoc().getUrl());
-    return publisherDomain.replace(/https?:\/\//, '');
+  getPublisherOrigin_() {
+    const publisherOrigin = getSourceOrigin(this.getAmpDoc().getUrl());
+    return publisherOrigin.replace(/https?:\/\//, '');
   }
 }
