@@ -129,7 +129,7 @@ Results can feed its state from quizzes if all categories also specify `option-{
 
 ### amp-story-interactive-slider
 
-The `amp-story-interactive-slider` element provides a voting experience based on a range. The options take the form of values along a horizontal line, that can be selected by sliding a thumb. When selected, an average indicator and the average response are displayed.
+The `amp-story-interactive-slider` element provides a voting experience for values along a range. Users interact with the slider by dragging the thumb across the track, and release to vote. When selected, the average response is displayed.
 
 Does not support pairing with `amp-story-interactive-results`, and can optionally have a prompt.
 
