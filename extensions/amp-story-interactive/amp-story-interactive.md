@@ -182,7 +182,7 @@ Results can feed its state from quizzes if all categories also specify `option-{
 
 The `amp-story-interactive-slider` element provides a voting experience for values along a range. Users interact with the slider by dragging the thumb across the track, and release to vote. When selected, the average response is displayed.
 
-Does not support pairing with `amp-story-interactive-results`, and can optionally have a prompt.
+Displays the percentage selected, or an emoji via the attribute `option-1-text`. Does not support pairing with `amp-story-interactive-results`, and can optionally have a prompt.
 
 <amp-img alt="An example of an interactive slider: 'How much do you like this product?' with a percentage slider with a custom accent color" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/slider-raw.png" layout="intrinsic" width="400" height="450">
 
@@ -240,11 +240,11 @@ Backends need to be specified on the necessary components (binary-poll, poll, qu
 
 The interactive experience elements from `amp-story-interactive` share an API language for customizing options.
 
-### id (required for binary-poll, img-poll, img-quiz, poll, quiz)
+### id (required for binary-poll, img-poll, img-quiz, poll, quiz, slider)
 
 Element ID that identifies the interactive component in the story. Used to compose the [`interactiveId`](#interactiveId) sent to the backend. Should be unique for each component in the story.
 
-### endpoint (required for binary-poll, img-poll, img-quiz, poll, quiz)
+### endpoint (required for binary-poll, img-poll, img-quiz, poll, quiz. slider)
 
 Complete URL of backend. Stores interactive element votes.
 
@@ -252,16 +252,16 @@ Complete URL of backend. Stores interactive element votes.
 
 Controls the color of the chips and text. Can be `light` (default), `dark`.
 
-### chip-style (optional for img-poll, img-quiz, poll, quiz, results)
+### chip-style (optional for img-poll, img-quiz, poll, quiz, results, slider)
 
 Controls the style of the component. Can be `flat` (default), `shadow`, or `transparent`.
-Results, binary-poll, img-poll, and img-quiz elements don't support shadow.
+Results, binary-poll, sliders, img-poll, and img-quiz elements don't support shadow.
 
 ### prompt-text (optional)
 
 Adds a prompt to the top of the component. Use `prompt-text` to write the poll/quiz question, or as a prefix to the category in the `amp-story-interactive-result` element.
 
-### prompt-size (optional for binary-poll, img-poll, img-quiz, poll, quiz)
+### prompt-size (optional for binary-poll, img-poll, img-quiz, poll, quiz, slider)
 
 Controls the `font-size` of prompt text. Can be `small`, `medium` (default), `large`. Large prompts will hold up to 3 lines of text, other sizes will hold up to 4 lines of text.
 
@@ -269,7 +269,7 @@ This attribute does not apply styling to `amp-story-interactive-result` category
 
 ### option-{1/2/3/4}-text (required for binary-poll, poll, quiz, results)
 
-String that represents a numbered option. Binary polls require 2 options. Polls and quizzes may include between 2 and 4 options.
+String that represents a numbered option. Binary polls require 2 options. Polls and quizzes may include between 2 and 4 options. Sliders may include 1 option for an optional emoji.
 
 The `amp-story-interactive-result` element uses this string value as category description.
 
