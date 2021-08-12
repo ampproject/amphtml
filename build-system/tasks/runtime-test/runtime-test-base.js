@@ -121,17 +121,16 @@ class RuntimeTestConfig {
    * Defaults to Chrome.
    */
   updateBrowsers() {
-    if (argv.edge) {
-      Object.assign(this, {browsers: ['EdgeCustom'], customLaunchers});
-    } else if (argv.firefox) {
-      Object.assign(this, {browsers: ['FirefoxCustom'], customLaunchers});
-    } else if (argv.ie) {
-      Object.assign(this, {browsers: ['IECustom'], customLaunchers});
-    } else if (argv.safari) {
-      Object.assign(this, {browsers: ['SafariCustom'], customLaunchers});
-    } else {
-      Object.assign(this, {browsers: ['ChromeCustom'], customLaunchers});
-    }
+    const browser = argv.edge
+      ? 'EdgeCustom'
+      : argv.firefox
+      ? 'FirefoxCustom'
+      : argv.ie
+      ? 'IECustom'
+      : argv.safari
+      ? 'SafariCustom'
+      : 'ChromeCustom';
+    Object.assign(this, {browsers: [browser], customLaunchers});
   }
 
   /**
