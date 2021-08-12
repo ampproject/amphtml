@@ -188,7 +188,7 @@ describes.realWin(
       });
     });
 
-    it.only('should allow hash to override geo in test', () => {
+    it('should allow hash to override geo in test', () => {
       setGeoOverrideHash('nz');
       addConfigElement('script');
       geo.buildCallback();
