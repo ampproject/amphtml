@@ -253,13 +253,12 @@
       "url": "examples/visual-tests/amp-story/amp-story-ad.html",
       "name": "AMP Story Ad System Layer",
       "viewport": {
-        "width": 375,
-        "height": 812
+        "width": 400,
+        "height": 600
       },
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-ad.js",
        "loading_complete_selectors": [
         ".i-amphtml-story-ad-badge",
-        ".i-amphtml-story-ad-link",
         "amp-story[ad-showing]",
       ],
     },
