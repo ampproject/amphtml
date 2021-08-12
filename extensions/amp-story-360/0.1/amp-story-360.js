@@ -34,7 +34,7 @@ import {dev, user, userAssert} from '../../../src/log';
 import {htmlFor} from '#core/dom/static-template';
 import {listenOncePromise} from '../../../src/event-helper';
 import {timeStrToMillis} from '../../amp-story/1.0/utils';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_360';
