@@ -121,8 +121,8 @@ describes.realWin(
       });
       await handleCompanionAds(media, baseElement);
       const avAboveAd = queryAmpAdAniviewSelector(doc);
-      //expect(avAboveAd).to.exist;
-      //expect(baseElement.previousSibling).to.be.equal(avAboveAd);
+      expect(avAboveAd).to.exist;
+      expect(baseElement.previousSibling).to.be.equal(avAboveAd);
     });
     it('Should show an SR companion above with display companion', async () => {
       const media = createCampaignData({
