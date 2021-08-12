@@ -20,7 +20,7 @@ import {ActionTrust} from '#core/constants/action-constants';
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {assertScreenReaderElement} from '#testing/test-helper';
-import {clearModalStack, getModalStackLength} from '../../../../src/modal';
+import {clearModalStack, getModalStackLength} from '#core/dom/modal';
 import {createElementWithAttributes} from '#core/dom';
 import {toggleExperiment} from '#experiments';
 
