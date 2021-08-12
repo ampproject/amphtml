@@ -19,6 +19,7 @@
 const EXCLUDED_EXTENSIONS = require('./import-order-excluded.json');
 
 module.exports = {
+  'rules': {'import/order': 2},
   'overrides': [
     {
       'files': EXCLUDED_EXTENSIONS.map((ext) => `./${ext}/**/*.js`),
