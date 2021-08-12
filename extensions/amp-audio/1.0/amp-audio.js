@@ -15,47 +15,24 @@
  */
 
 import {BaseElement} from './base-element';
-import {closestAncestorElementBySelector} from '#core/dom/query';
 import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
 import {Layout} from '#core/dom/layout';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {user, userAssert} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 import {validateMediaMetadata} from '../../../src/mediasession-helper';
 
 /** @const {string} */
 const TAG = 'amp-audio';
-const STORY_TAG = 'AMP-STORY';
-
-/**
- * Check for element's action invocation validity
- * @param {*} element Element to be check for validity
- * @return {boolean} Returns true on valid invocation otherwise false
- */
-function isInvocationValid(element) {
-  // Actions won't work with `<amp-story>` element
-  if (closestAncestorElementBySelector(element, STORY_TAG)) {
-    user().warn(
-      TAG,
-      '<amp-story> elements do not support actions on <amp-audio> elements'
-    );
-    return false;
-  }
-  return true;
-}
 
 class AmpAudio extends BaseElement {
   /** @override */
   init() {
     this.registerApiAction('play', (api) => {
-      if (isInvocationValid(this.element)) {
-        api.play();
-      }
+      api.play();
     });
     this.registerApiAction('pause', (api) => {
-      if (isInvocationValid(this.element)) {
-        api.pause();
-      }
+      api.pause();
     });
     this.registerApiAction('isPlaying', (api) => api.isPlaying());
 
