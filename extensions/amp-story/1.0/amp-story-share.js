@@ -130,6 +130,8 @@ function buildProviderParams(opt_params) {
        */
       if (['data-target', 'data-share-endpoint', 'aria-label'].includes(field) || /^data-param-/.test(field)) {
         attrs[field] = opt_params[field];
+      } else {
+        attrs[`data-param-${field}`] = opt_params[field];
       }
     });
   }
