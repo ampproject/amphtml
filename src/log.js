@@ -30,6 +30,7 @@ import {
 import * as mode from '#core/mode';
 import {isArray, isString} from '#core/types';
 import {once} from '#core/types/function';
+import {getHashParams} from '#core/types/string/url';
 
 import {urls} from './config';
 import {getMode} from './mode';
@@ -109,6 +110,13 @@ const messageArgToEncodedComponent = (arg) =>
   encodeURIComponent(String(elementStringOrPassThru(arg)));
 
 /**
+ * @param {!Window=} opt_win
+ * @return {number}
+ */
+export const logHashParam = (opt_win) =>
+  parseInt(getHashParams(opt_win)['log'], 10);
+
+/**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev
  * errors because errors could be rethrown by some native code as a new error,
  * and only a message would survive. Also, some browser don’t support a 5th
@@ -176,17 +184,18 @@ export class Log {
    * @private
    */
   defaultLevel_() {
+    const {win} = this;
     // No console - can't enable logging.
     if (
-      !this.win.console?.log ||
+      !win.console?.log ||
       // Logging has been explicitly disabled.
-      getMode().log == 0
+      logHashParam(win) == 0
     ) {
       return LogLevel.OFF;
     }
 
     // Logging is enabled for tests directly.
-    if (getMode().test && this.win.ENABLE_LOG) {
+    if (getMode().test && win.ENABLE_LOG) {
       return LogLevel.FINE;
     }
 
@@ -199,12 +208,13 @@ export class Log {
   }
 
   /**
+   * @param {!Window=} opt_win provided for testing
    * @return {!LogLevel}
    * @private
    */
-  defaultLevelWithFunc_() {
+  defaultLevelWithFunc_(opt_win) {
     // Delegate to the specific resolver.
-    return this.levelFunc_(getMode().log, getMode().development);
+    return this.levelFunc_(logHashParam(opt_win), getMode().development);
   }
 
   /**
