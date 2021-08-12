@@ -259,8 +259,6 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-ad.js",
        "loading_complete_selectors": [
         ".i-amphtml-story-ad-badge",
-        ".i-amphtml-story-ad-link",
-        "[cta-active].i-amphtml-story-ad-link",
         "amp-story[ad-showing]",
       ],
       // for page navigation

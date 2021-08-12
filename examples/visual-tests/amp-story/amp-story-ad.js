@@ -22,6 +22,5 @@ const {
 module.exports = {
   'Test ad property correctness': async (page, name) => {
     await verifySelectorsVisible(page, name, ['.i-amphtml-story-ad-badge']);
-    await verifySelectorsVisible(page, name, ['.i-amphtml-story-ad-link']);
   },
 };
