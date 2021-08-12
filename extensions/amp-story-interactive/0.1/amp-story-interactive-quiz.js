@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
+import objstr from 'obj-str';
+
+import {htmlFor} from '#core/dom/static-template';
+import {setStyle} from '#core/dom/style';
+
+import {LocalizedStringId} from '#service/localization/strings';
+
 import {
   AmpStoryInteractive,
   InteractiveType,
 } from './amp-story-interactive-abstract';
+
 import {CSS} from '../../../build/amp-story-interactive-quiz-0.1.css';
-import {LocalizedStringId} from '#service/localization/strings';
-import {htmlFor} from '#core/dom/static-template';
-import {setStyle} from '#core/dom/style';
-import objstr from 'obj-str';
 
 /**
  * Generates the template for the quiz.

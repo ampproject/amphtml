@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
+import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {LocalizationService} from '#service/localization';
+
+import {addConfigToInteractive, addThresholdsToInteractive} from './helpers';
+
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
   Action,
   AmpStoryStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {AmpDocSingle} from '#service/ampdoc-impl';
-import {AmpStoryInteractiveResultsDetailed} from '../amp-story-interactive-results-detailed';
 import {InteractiveType} from '../amp-story-interactive-abstract';
-import {LocalizationService} from '#service/localization';
-import {Services} from '#service';
-import {addConfigToInteractive, addThresholdsToInteractive} from './helpers';
-import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {AmpStoryInteractiveResultsDetailed} from '../amp-story-interactive-results-detailed';
 
 describes.realWin(
   'amp-story-interactive-results-detailed',

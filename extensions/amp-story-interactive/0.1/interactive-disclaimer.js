@@ -22,12 +22,16 @@
  * submit a PR with a new entry on the DisclaimerBackendList and tag @ampproject/wg-stories to review it.
  */
 
-import {LocalizedStringId} from '#service/localization/strings';
-import {htmlFor, htmlRefs} from '#core/dom/static-template';
-import DisclaimerBackendsList from './disclaimer-backends-list.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import {createShadowRootWithStyle} from 'extensions/amp-story/1.0/utils';
-import {CSS} from '../../../build/amp-story-interactive-disclaimer-0.1.css';
 import {addAttributesToElement} from '#core/dom';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
+
+import {LocalizedStringId} from '#service/localization/strings';
+
+import {createShadowRootWithStyle} from 'extensions/amp-story/1.0/utils';
+
+import DisclaimerBackendsList from './disclaimer-backends-list.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+
+import {CSS} from '../../../build/amp-story-interactive-disclaimer-0.1.css';
 
 /**
  * Creates a disclaimer icon and dialog.

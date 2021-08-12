@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import {ActionService} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
-import {AmpSelector} from '../amp-selector';
 import {Keys} from '#core/constants/key-codes';
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+
+import {Services} from '#service';
+import {ActionService} from '#service/action-impl';
+
+import {AmpSelector} from '../amp-selector';
 
 describes.realWin(
   'amp-selector',

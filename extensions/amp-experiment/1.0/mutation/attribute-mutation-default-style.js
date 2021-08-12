@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import {assertAttributeMutationFormat} from './mutation';
-import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
-import {dev, user} from '../../../../src/log';
-import {dict, hasOwn} from '#core/types/object';
 import {isAmpElement} from '#core/dom/amp-element-helpers';
 import {setStyles} from '#core/dom/style';
+import {dict, hasOwn} from '#core/types/object';
+
+import {assertAttributeMutationFormat} from './mutation';
+
+import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
+import {dev, user} from '../../../../src/log';
 
 /** @const {RegExp} */
 const NON_SPACE_REGEX = /\S/;

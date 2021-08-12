@@ -15,15 +15,17 @@
  */
 
 import '../amp-accordion';
-import {ActionService} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';
 import {Keys} from '#core/constants/key-codes';
-import {Services} from '#service';
-import {computedStyle} from '#core/dom/style';
 import {createElementWithAttributes, tryFocus} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
-import {poll} from '#testing/iframe';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {htmlFor} from '#core/dom/static-template';
+import {computedStyle} from '#core/dom/style';
+
+import {Services} from '#service';
+import {ActionService} from '#service/action-impl';
+
+import {poll} from '#testing/iframe';
 
 describes.realWin(
   'amp-accordion',

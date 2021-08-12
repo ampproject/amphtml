@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
-import {getConfigOpts} from './config-options';
 import {getDataParamsFromAttributes} from '#core/dom';
+
+import {Services} from '#service';
+
+import {getConfigOpts} from './config-options';
 import {getScopeElements, isElementInScope} from './scope';
 
 const WL_ANCHOR_ATTR = ['href', 'id', 'rel', 'rev'];

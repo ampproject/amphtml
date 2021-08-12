@@ -16,6 +16,7 @@
 
 import {htmlFor} from '#core/dom/static-template';
 import {map} from '#core/types/object';
+
 import {user} from '../../../src/log';
 
 /** @private Whether ids are deduplicated or not */

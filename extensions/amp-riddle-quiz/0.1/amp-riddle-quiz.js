@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {getData, listen} from '../../../src/event-helper';
-import {isFiniteNumber, isObject} from '#core/types';
 import {removeElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {isFiniteNumber, isObject} from '#core/types';
+
+import {getData, listen} from '../../../src/event-helper';
 import {userAssert} from '../../../src/log';
 
 export class AmpRiddleQuiz extends AMP.BaseElement {

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '#service/ampdoc-impl';
-import {AmpStoryInteractiveImgPoll} from '../amp-story-interactive-img-poll';
-import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
-import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
-import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {LocalizationService} from '#service/localization';
+
+import {measureMutateElementStub} from '#testing/test-helper';
+
 import {
   addConfigToInteractive,
   getMockIncompleteData,
@@ -27,8 +27,11 @@ import {
   getMockOutOfBoundsData,
   getMockScrambledData,
 } from './helpers';
-import {measureMutateElementStub} from '#testing/test-helper';
+
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
+import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
+import {AmpStoryInteractiveImgPoll} from '../amp-story-interactive-img-poll';
 
 describes.realWin(
   'amp-story-interactive-img-poll',

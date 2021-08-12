@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
+import {htmlFor} from '#core/dom/static-template';
+import {setImportantStyles} from '#core/dom/style';
+
 import {
   AmpStoryInteractive,
   InteractiveType,
 } from './amp-story-interactive-abstract';
-import {CSS} from '../../../build/amp-story-interactive-img-poll-0.1.css';
-import {CSS as ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
 import {buildImgTemplate} from './utils';
-import {htmlFor} from '#core/dom/static-template';
-import {setImportantStyles} from '#core/dom/style';
+
+import {CSS as ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
+import {CSS} from '../../../build/amp-story-interactive-img-poll-0.1.css';
 
 /**
  * Generates the template for each option.
