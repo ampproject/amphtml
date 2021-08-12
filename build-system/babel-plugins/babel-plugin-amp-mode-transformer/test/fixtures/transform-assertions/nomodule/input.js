@@ -20,7 +20,6 @@ const test = getMode().test;
 const localDev = getMode().localDev;
 const minified = getMode().minified;
 const development = getMode().development;
-const version = getMode().version;
 
 function foo() {
   if (getMode().development == false) {
