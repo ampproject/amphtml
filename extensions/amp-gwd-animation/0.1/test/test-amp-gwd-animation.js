@@ -13,6 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Services} from '#service';
+
+import {createCustomEvent} from '../../../../src/event-helper';
+import {getServiceForDocOrNull} from '../../../../src/service-helpers';
+import {GWD_PAGEDECK_ID, TAG, addAction} from '../amp-gwd-animation';
 import {
   ANIMATIONS_DISABLED_CLASS,
   CURRENT_LABEL_ANIMATION_ATTR,
@@ -22,10 +27,6 @@ import {
   GWD_TIMELINE_EVENT,
   PlaybackCssClass,
 } from '../amp-gwd-animation-impl';
-import {GWD_PAGEDECK_ID, TAG, addAction} from '../amp-gwd-animation';
-import {Services} from '#service';
-import {createCustomEvent} from '../../../../src/event-helper';
-import {getServiceForDocOrNull} from '../../../../src/service-helpers';
 
 describes.sandboxed('AMP GWD Animation', {}, (env) => {
   /**

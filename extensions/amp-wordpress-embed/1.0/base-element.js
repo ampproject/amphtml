@@ -15,6 +15,7 @@
  */
 
 import {PreactBaseElement} from '#preact/base-element';
+
 import {WordPressEmbed} from './component';
 
 export class BaseElement extends PreactBaseElement {}

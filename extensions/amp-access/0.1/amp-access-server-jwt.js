@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {isArray} from '#core/types';
+import {dict} from '#core/types/object';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
 import {AccessClientAdapter} from './amp-access-client';
 import {JwtHelper} from './jwt';
-import {Services} from '#service';
+
+import {fetchDocument} from '../../../src/document-fetcher';
+import {dev, user, userAssert} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {
   assertHttpsUrl,
   isProxyOrigin,
   removeFragment,
   serializeQueryString,
 } from '../../../src/url';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {fetchDocument} from '../../../src/document-fetcher';
-import {getMode} from '../../../src/mode';
-import {isArray} from '#core/types';
-import {isExperimentOn} from '#experiments';
 
 /** @const {string} */
 const TAG = 'amp-access-server-jwt';

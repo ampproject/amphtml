@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
-import {buildGtagConfig} from './auto-analytics-configs';
-import {devAssert} from '../../../src/log';
 import {htmlFor} from '#core/dom/static-template';
+
+import {Services} from '#service';
+
+import {buildGtagConfig} from './auto-analytics-configs';
+
+import {devAssert} from '../../../src/log';
 
 const buildAutoAnalyticsTemplate = (element) => {
   const html = htmlFor(element);

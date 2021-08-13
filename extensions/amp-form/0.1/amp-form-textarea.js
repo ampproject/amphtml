@@ -15,13 +15,15 @@
  */
 
 import {AmpEvents} from '#core/constants/amp-events';
-import {Services} from '#service';
-import {computedStyle, px, setStyle} from '#core/dom/style';
-import {dev, devAssert, user} from '../../../src/log';
 import {iterateCursor, removeElement} from '#core/dom';
-import {listen, listenOncePromise} from '../../../src/event-helper';
-import {throttle} from '#core/types/function';
+import {computedStyle, px, setStyle} from '#core/dom/style';
 import {toArray} from '#core/types/array';
+import {throttle} from '#core/types/function';
+
+import {Services} from '#service';
+
+import {listen, listenOncePromise} from '../../../src/event-helper';
+import {dev, devAssert, user} from '../../../src/log';
 
 const AMP_FORM_TEXTAREA_EXPAND_ATTR = 'autoexpand';
 

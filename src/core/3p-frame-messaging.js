@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {internalListenImplementation} from './core/dom/event-helper-listen';
-import {dict} from './core/types/object';
-import {tryParseJson} from './core/types/object/json';
-import {dev, devAssert} from './log';
+import {devAssert, devAssertString} from '#core/assert';
+import {internalListenImplementation} from '#core/dom/event-helper-listen';
+import {rethrowAsync} from '#core/error';
+import {dict} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
 
 /** @const */
 const AMP_MESSAGE_PREFIX = 'amp-';
@@ -118,11 +119,13 @@ export function deserializeMessage(message) {
   if (!isAmpMessage(message)) {
     return null;
   }
-  const startPos = message.indexOf('{');
+  const startPos = devAssertString(message).indexOf('{');
   devAssert(startPos != -1, 'JSON missing in %s', message);
-  return tryParseJson(message.substr(startPos), (e) =>
-    dev().error('MESSAGING', 'Failed to parse message: ' + message, e)
-  );
+  return tryParseJson(devAssertString(message).substr(startPos), (e) => {
+    rethrowAsync(
+      new Error(`MESSAGING: Failed to parse message: ${message}\n${e.message}`)
+    );
+  });
 }
 
 /**
@@ -133,22 +136,22 @@ export function deserializeMessage(message) {
 export function isAmpMessage(message) {
   return (
     typeof message == 'string' &&
-    message.indexOf(AMP_MESSAGE_PREFIX) == 0 &&
+    message.startsWith(AMP_MESSAGE_PREFIX) &&
     message.indexOf('{') != -1
   );
 }
 
 /** @typedef {{creativeId: string, message: string}} */
-export let IframeTransportEvent;
+export let IframeTransportEventDef;
 // An event, and the transport ID of the amp-analytics tags that
 // generated it. For instance if the creative with transport
-// ID 2 sends "hi", then an IframeTransportEvent would look like:
+// ID 2 sends "hi", then an IframeTransportEventDef would look like:
 // { creativeId: "2", message: "hi" }
 // If the creative with transport ID 2 sent that, and also sent "hello",
 // and the creative with transport ID 3 sends "goodbye" then an *array* of 3
-// AmpAnalyticsIframeTransportEvent would be sent to the 3p frame like so:
+// IframeTransportEventDef would be sent to the 3p frame like so:
 // [
-//   { creativeId: "2", message: "hi" }, // An AmpAnalyticsIframeTransportEvent
+//   { creativeId: "2", message: "hi" }, // An IframeTransportEventDef
 //   { creativeId: "2", message: "hello" }, // Another
 //   { creativeId: "3", message: "goodbye" } // And another
 // ]

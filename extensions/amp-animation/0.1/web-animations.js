@@ -14,7 +14,27 @@
  * limitations under the License.
  */
 
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {
+  closestAncestorElementBySelector,
+  matches,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '#core/dom/query';
+import {computedStyle, getVendorJsPropertyName} from '#core/dom/style';
+import {isEnumValue, isObject} from '#core/types';
+import {isArray, toArray} from '#core/types/array';
+import {map} from '#core/types/object';
+import {dashToCamelCase} from '#core/types/string';
+
+import {isExperimentOn} from '#experiments';
+
+import {parseCss} from './parsers/css-expr';
 import {CssNumberNode, CssTimeNode, isVarCss} from './parsers/css-expr-ast';
+import {extractKeyframes} from './parsers/keyframes-extractor';
+import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
+import {ScrollTimelineWorkletRunner} from './runners/scrolltimeline-worklet-runner';
 import {
   InternalWebAnimationRequestDef,
   WebAnimationDef,
@@ -30,29 +50,11 @@ import {
   WebSwitchAnimationDef,
   isAllowlistedProp,
 } from './web-animation-types';
-import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
-import {ScrollTimelineWorkletRunner} from './runners/scrolltimeline-worklet-runner';
-import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
-import {
-  closestAncestorElementBySelector,
-  matches,
-  scopedQuerySelector,
-  scopedQuerySelectorAll,
-} from '#core/dom/query';
-import {computedStyle, getVendorJsPropertyName} from '#core/dom/style';
-import {dashToCamelCase} from '#core/types/string';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {extractKeyframes} from './parsers/keyframes-extractor';
-import {getMode} from '../../../src/mode';
-import {isArray, toArray} from '#core/types/array';
-import {isEnumValue, isObject} from '#core/types';
-import {isExperimentOn} from '#experiments';
-import {isInFie} from '../../../src/iframe-helper';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {map} from '#core/types/object';
 
-import {parseCss} from './parsers/css-expr';
+import {isInFie} from '../../../src/iframe-helper';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-animation';

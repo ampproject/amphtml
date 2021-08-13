@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import {TAG as KEY_TAG} from './amp-embedly-key';
+import {removeElement} from '#core/dom';
 import {Layout, applyFillContent} from '#core/dom/layout';
+
 import {Services} from '#service';
+
+import {TAG as KEY_TAG} from './amp-embedly-key';
+
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '#core/dom';
 import {userAssert} from '../../../src/log';
 
 /**

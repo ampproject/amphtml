@@ -38,7 +38,7 @@ The `<amp-inline-gallery>` component uses an `<amp-base-carousel>` to display sl
     width="3.6"
     height="2"
     snap-align="center"
-    loop="true"
+    loop
     visible-count="1.2"
     lightbox
   >
@@ -133,7 +133,7 @@ The example below demonstrates a gallery with thumbnails visible at larger resol
       width="3"
       height="2"
       snap-align="center"
-      loop="true"
+      loop
     >
       <amp-img
         class="slide"
