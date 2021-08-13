@@ -30,9 +30,6 @@ function getPostClosureConfig() {
     argv.esm || argv.sxg
       ? './build-system/babel-plugins/babel-plugin-transform-remove-directives'
       : null,
-    argv.esm || argv.sxg
-      ? './build-system/babel-plugins/babel-plugin-transform-stringish-literals'
-      : null,
     './build-system/babel-plugins/babel-plugin-transform-minified-comments',
   ].filter(Boolean);
 
