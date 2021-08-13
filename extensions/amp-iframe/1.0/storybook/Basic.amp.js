@@ -59,7 +59,7 @@ export const WithResizableIframe = () => {
       height="100"
       sandbox="allow-scripts allow-same-origin"
       resizable
-      src="/examples/amp-iframe-storybook.html"
+      src="/examples/bento/amp-iframe-resizing-example.html"
     >
       <div placeholder>Placeholder</div>
     </amp-iframe>
