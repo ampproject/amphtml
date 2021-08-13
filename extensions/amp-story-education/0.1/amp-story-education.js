@@ -14,23 +14,25 @@
  * limitations under the License.
  */
 
+import {removeChildren} from '#core/dom';
+import {Layout} from '#core/dom/layout';
+import {setModalAsClosed, setModalAsOpen} from '#core/dom/modal';
+import {htmlFor} from '#core/dom/static-template';
+import {toggle} from '#core/dom/style';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+import {LocalizedStringId} from '#service/localization/strings';
+
+import {CSS} from '../../../build/amp-story-education-0.1.css';
+import {dev} from '../../../src/log';
+import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service';
 import {
   Action,
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {CSS} from '../../../build/amp-story-education-0.1.css';
-import {Layout} from '#core/dom/layout';
-import {LocalizedStringId} from '#service/localization/strings';
-import {Services} from '#service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
-import {dev} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service';
-import {htmlFor} from '#core/dom/static-template';
-import {removeChildren} from '#core/dom';
-import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
-import {toggle} from '#core/dom/style';
 
 /** @type {string} */
 const TAG = 'amp-story-education';

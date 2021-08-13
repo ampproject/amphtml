@@ -15,10 +15,12 @@
  */
 
 import {MessageType} from '#core/3p-frame-messaging';
-import {WindowInterface} from '#core/window/interface';
-import {getMode} from '../../../src/mode';
-import {iframeMessagingClientFor} from '#inabox/inabox-iframe-messaging-client';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {WindowInterface} from '#core/window/interface';
+
+import {iframeMessagingClientFor} from '#inabox/inabox-iframe-messaging-client';
+
+import {getMode} from '../../../src/mode';
 
 /**
  * Setup cross-origin iframe polyfill for AMP iframes, such as inabox.

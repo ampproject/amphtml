@@ -15,19 +15,6 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
-import {VideoEvents} from '../../../src/video-interface';
-import {addParamsToUrl} from '../../../src/url';
-import {
-  createFrameFor,
-  isJsonOrObj,
-  mutedOrUnmutedEvent,
-  objOrParseJson,
-  redispatch,
-} from '../../../src/iframe-video';
-import {dev, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
 import {
   dispatchCustomEvent,
   getDataParamsFromAttributes,
@@ -38,9 +25,24 @@ import {
   fullscreenExit,
   isFullscreenElement,
 } from '#core/dom/fullscreen';
-import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {isLayoutSizeDefined} from '#core/dom/layout';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen} from '../../../src/event-helper';
+import {
+  createFrameFor,
+  isJsonOrObj,
+  mutedOrUnmutedEvent,
+  objOrParseJson,
+  redispatch,
+} from '../../../src/iframe-video';
+import {dev, userAssert} from '../../../src/log';
+import {addParamsToUrl} from '../../../src/url';
+import {VideoEvents} from '../../../src/video-interface';
 
 /** @private @const {string} */
 const TAG = 'amp-powr-player';

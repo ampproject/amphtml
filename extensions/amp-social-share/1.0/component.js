@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
 import {Keys} from '#core/constants/key-codes';
-import {SocialShareIcon} from './social-share-svgs';
-import {Wrapper} from '#preact/component';
-import {addParamsToUrl} from '../../../src/url';
 import {dict} from '#core/types/object';
-import {getSocialConfig} from './social-share-config';
-import {openWindowDialog} from '../../../src/open-window-dialog';
 import {parseQueryString} from '#core/types/string/url';
+
+import * as Preact from '#preact';
+import {Wrapper} from '#preact/component';
 import {useResourcesNotify} from '#preact/utils';
+
 import {useStyles} from './component.jss';
+import {getSocialConfig} from './social-share-config';
+import {SocialShareIcon} from './social-share-svgs';
+
+import {openWindowDialog} from '../../../src/open-window-dialog';
+import {addParamsToUrl} from '../../../src/url';
 
 const NAME = 'SocialShare';
 const DEFAULT_WIDTH = 60;

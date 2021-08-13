@@ -19,16 +19,20 @@ import {
   ADSENSE_RSPV_ALLOWED_HEIGHT,
   ADSENSE_RSPV_TAG,
 } from '#ads/google/utils';
+
+import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {toWin} from '#core/window';
+
+import {forceExperimentBranch} from '#experiments';
+
+import {Services} from '#service';
+
 import {
   AD_SIZE_OPTIMIZATION_EXP,
   MAX_HEIGHT_EXP,
   ResponsiveState,
 } from '../responsive-state';
-import {Services} from '#service';
-import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
-import {forceExperimentBranch} from '#experiments';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {toWin} from '#core/window';
 
 const AD_CLIENT_ID = 'ca-pub-123';
 

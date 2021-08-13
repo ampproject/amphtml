@@ -224,7 +224,6 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
               'localDev': true,
               'development': false,
               'test': false,
-              'version': '$internalRuntimeVersion$',
               'esm': false,
             },
             'canary': false,
