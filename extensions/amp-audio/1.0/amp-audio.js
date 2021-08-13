@@ -23,7 +23,6 @@ import {BaseElement} from './base-element';
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {userAssert} from '../../../src/log';
-import {validateMediaMetadata} from '../../../src/mediasession-helper';
 
 /** @const {string} */
 const TAG = 'amp-audio';
@@ -39,10 +38,12 @@ class AmpAudio extends BaseElement {
     });
     this.registerApiAction('isPlaying', (api) => api.isPlaying());
 
+    /**
+     * TODO(AnuragVasanwala):
+     * Add "validateMediaMetadata(element, metadata)" to dictionary
+     * once validation step for video components on Bento are included
+     */
     return dict({
-      'validateMediaMetadata': (element, metaData) => {
-        validateMediaMetadata(element, metaData);
-      },
       'onLoad': () => {
         this.toggleFallback(false);
       },

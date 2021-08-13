@@ -48,7 +48,6 @@ export function AudioWithRef(
     sources,
     src,
     title = EMPTY_METADATA.title,
-    validateMediaMetadata,
     ...rest
   },
   ref
@@ -95,12 +94,15 @@ export function AudioWithRef(
    */
   const onPlaying = useCallback(() => {
     const win = audioRef.current?.ownerDocument?.defaultView;
-    const element = audioRef.current;
 
-    validateMediaMetadata?.(element, metadata);
+    /**
+     * TODO(AnuragVasanwala):
+     * Add "validateMediaMetadata?.(element, metadata)"
+     * once validation step for video components on Bento are included
+     */
 
     setMediaSession(win, metadata, play, pause);
-  }, [metadata, validateMediaMetadata, play, pause]);
+  }, [metadata, play, pause]);
 
   /** Audio Component - API Functions */
   useImperativeHandle(
