@@ -23,9 +23,9 @@ const path = require('path');
 const wrappers = require('../compile/compile-wrappers');
 const {
   compileJs,
-  compileJsWithEsbuild,
   doBuildJs,
   endBuildStep,
+  esbuildCompile,
   maybeToEsmName,
   maybeToNpmEsmName,
   mkdirSync,
@@ -674,19 +674,15 @@ function buildBinaries(extDir, binaries, options) {
     const {entryPoint, external, outfile, remap} = binary;
     const {name} = pathParse(outfile);
     const esm = argv.esm || argv.sxg || false;
-    return compileJsWithEsbuild(
-      extDir + '/',
-      entryPoint,
-      `${extDir}/dist`,
-      Object.assign(options, {
-        toName: maybeToNpmEsmName(`${name}.max.js`),
-        minifiedName: maybeToNpmEsmName(`${name}.js`),
-        latestName: '',
-        outputFormat: esm ? 'esm' : 'cjs',
-        externalDependencies: external,
-        remapDependencies: remap,
-      })
-    );
+    return esbuildCompile(extDir + '/', entryPoint, `${extDir}/dist`, {
+      ...options,
+      toName: maybeToNpmEsmName(`${name}.max.js`),
+      minifiedName: maybeToNpmEsmName(`${name}.js`),
+      latestName: '',
+      outputFormat: esm ? 'esm' : 'cjs',
+      externalDependencies: external,
+      remapDependencies: remap,
+    });
   });
   return Promise.all(promises);
 }
@@ -720,17 +716,13 @@ async function buildExtensionJs(extDir, name, version, latestVersion, options) {
       ? wrapperOrFn(name, version, latest, argv.esm, options.loadPriority)
       : wrapperOrFn;
 
-  await compileJs(
-    extDir + '/',
-    filename,
-    './dist/v0',
-    Object.assign(options, {
-      toName: `${name}-${version}.max.js`,
-      minifiedName: `${name}-${version}.js`,
-      latestName: latest ? `${name}-latest.js` : '',
-      wrapper,
-    })
-  );
+  await compileJs(extDir + '/', filename, './dist/v0', {
+    ...options,
+    toName: `${name}-${version}.max.js`,
+    minifiedName: `${name}-${version}.js`,
+    latestName: latest ? `${name}-latest.js` : '',
+    wrapper,
+  });
 
   // If an incremental watch build fails, simply return.
   if (options.errored) {
