@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// @ts-nocheck
 
 /** Metadata for static template functions `htmlFor` and `svgFor`. */
 
@@ -28,7 +27,7 @@ exports.staticTemplateFactories = {
 
 /**
  * Names of tags, like `html` and `svg`.
- * @type {Array<string>}
+ * @type {Set<string>}
  */
 exports.staticTemplateTags = new Set(
   Object.values(exports.staticTemplateFactories)
@@ -36,7 +35,7 @@ exports.staticTemplateTags = new Set(
 
 /**
  * Names of tag factory functions, like `htmlFor` and `svgFor`.
- * @type {Array<string>}
+ * @type {Set<string>}
  */
 exports.staticTemplateFactoryFns = new Set(
   Object.keys(exports.staticTemplateFactories)
