@@ -27,7 +27,7 @@ describes.endtoend(
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
   },
-  async (env) => {
+  (env) => {
     let controller;
 
     function prop(el, name) {
@@ -39,7 +39,7 @@ describes.endtoend(
       await expect(prop(spacers[1], 'offsetWidth')).to.equal(width);
     }
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 
