@@ -202,7 +202,7 @@ export function addDataAndJsonAttributes_(element, attributes) {
  */
 export function getBootstrapUrl(type) {
   const extension = IS_ESM ? '.mjs' : '.js';
-  if (mode.isLocalDev() || mode.isTest()) {
+  if (mode.isLocalDev()) {
     const filename = mode.isMinified()
       ? `./vendor/${type}`
       : `./vendor/${type}.max`;
@@ -268,7 +268,7 @@ export function resetBootstrapBaseUrlForTesting(win) {
  */
 export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
   const srcFileBasename = opt_srcFileBasename || 'frame';
-  if (mode.isLocalDev() || mode.isTest()) {
+  if (mode.isLocalDev()) {
     return getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename);
   }
   // Ensure same sub-domain is used despite potentially different file.
