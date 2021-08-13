@@ -244,7 +244,7 @@ The interactive experience elements from `amp-story-interactive` share an API la
 
 Element ID that identifies the interactive component in the story. Used to compose the [`interactiveId`](#interactiveId) sent to the backend. Should be unique for each component in the story.
 
-### endpoint (required for binary-poll, img-poll, img-quiz, poll, quiz. slider)
+### endpoint (required for binary-poll, img-poll, img-quiz, poll, quiz, slider)
 
 Complete URL of backend. Stores interactive element votes.
 
