@@ -77,7 +77,6 @@ module.exports = function (babel) {
         joinTemplateLiterals(left, right);
         return;
       }
-      left;
 
       const e = right.evaluate();
       if (e.confident) {
