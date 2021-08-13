@@ -4,7 +4,7 @@ const babel = require('@babel/core');
 const fs = require('fs-extra');
 const path = require('path');
 const Remapping = require('@ampproject/remapping');
-const terser = require('terser');
+const swc = require('@swc/core');
 const {CompilationLifecycles, debug} = require('./debug-compilation-lifecycle');
 
 /** @type {Remapping.default} */
@@ -23,15 +23,15 @@ async function terserMinify(code) {
       defaults: false,
       unused: true,
     },
-    output: {
-      beautify: !!argv.pretty_print,
-      comments: /\/*/,
-      // eslint-disable-next-line google-camelcase/google-camelcase
-      keep_quoted_props: true,
-    },
+    // output: {
+    //   beautify: !!argv.pretty_print,
+    //   comments: /\/*/,
+    //   // eslint-disable-next-line google-camelcase/google-camelcase
+    //   keep_quoted_props: true,
+    // },
     sourceMap: true,
   };
-  const minified = await terser.minify(code, options);
+  const minified = await swc.minify(code, options);
 
   return {
     compressed: minified.code,

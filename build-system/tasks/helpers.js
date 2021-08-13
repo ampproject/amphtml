@@ -8,7 +8,7 @@ const magicstring = require('magic-string');
 const open = require('open');
 const path = require('path');
 const Remapping = require('@ampproject/remapping');
-const terser = require('terser');
+const swc = require('@swc/core');
 const wrappers = require('../compile/compile-wrappers');
 const {
   VERSION: internalRuntimeVersion,
@@ -545,20 +545,17 @@ async function minify(code, map) {
       // effect on minification quality.
       passes: 3,
     },
-    output: {
-      beautify: !!argv.pretty_print,
-      // eslint-disable-next-line google-camelcase/google-camelcase
-      keep_quoted_props: true,
-    },
+    // output: {
+    //   beautify: !!argv.pretty_print,
+    //   // eslint-disable-next-line google-camelcase/google-camelcase
+    //   keep_quoted_props: true,
+    // },
     sourceMap: {content: map},
     module: !!argv.esm,
     nameCache,
   };
-  // Remove the local variable name cache which should not be reused between binaries.
-  // See https://github.com/ampproject/amphtml/issues/36476
-  /** @type {any}*/ (nameCache).vars = {};
 
-  const minified = await terser.minify(code, terserOptions);
+  const minified = await swc.minify(code, terserOptions);
   return {code: minified.code ?? '', map: minified.map};
 }
 
