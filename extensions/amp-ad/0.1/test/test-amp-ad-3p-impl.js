@@ -18,6 +18,7 @@ import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
 import '../amp-ad';
 import * as adCid from '../../../../src/ad-cid';
 import * as consent from '../../../../src/consent';
+import * as mode from '#core/mode';
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {AmpAdUIHandler} from '../amp-ad-ui';
@@ -69,8 +70,12 @@ describes.realWin(
     let registryBackup;
     const whenFirstVisible = Promise.resolve();
 
-    function mockMode(mode) {
-      env.sandbox.stub(win.parent, '__AMP_MODE').value(mode);
+    function mockMode(options) {
+      env.sandbox
+        .stub(mode, 'isLocalDev')
+        .returns(!!options.localDev || !!options.test);
+      env.sandbox.stub(mode, 'isTest').returns(!!options.test);
+      env.sandbox.stub(mode, 'isProd').returns(!!options.isProd);
     }
 
     beforeEach(() => {
@@ -331,7 +336,7 @@ describes.realWin(
 
     describe('preconnectCallback', () => {
       it('should add preconnect and prefetch to DOM header', () => {
-        mockMode({});
+        mockMode({isProd: true});
         ad3p.buildCallback();
         ad3p.preconnectCallback();
         return whenFirstVisible.then(() => {
