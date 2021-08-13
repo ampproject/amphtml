@@ -14,7 +14,7 @@
     },
     {
       "name": "story-load-inactive-outside-viewport",
-      "percentage": 0.1
+      "percentage": 0.5
     }
   ]
 }
