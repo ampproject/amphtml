@@ -66,8 +66,6 @@ function getMode_(win) {
     localDev: coreMode.isLocalDev(win),
     development: isModeDevelopment(win, hashParams),
     esm: IS_ESM,
-    // amp-geo override
-    geoOverride: hashParams['amp-geo'],
     test: coreMode.isTest(win),
     rtvVersion: getRtvVersion(win),
   };
