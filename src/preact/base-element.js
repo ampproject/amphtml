@@ -160,8 +160,12 @@ export class PreactBaseElement extends BaseElement {
     /** @private {!JsonObject} */
     this.defaultProps_ = dict({
       'loading': Loading.AUTO,
-      'onReadyState': () => this.onReadyState_(),
-      'onPlayingState': () => this.updateIsPlaying_(),
+      'onReadyState': (state, opt_failure) => {
+        this.onReadyState_(state, opt_failure);
+      },
+      'onPlayingState': (isPlaying) => {
+        this.updateIsPlaying_(isPlaying);
+      },
     });
 
     /** @private {!AmpContextDef.ContextType} */
