@@ -21,7 +21,7 @@ import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {user} from '../../../../src/log';
-import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 describes.realWin(
   'SlideScroll',
@@ -915,7 +915,7 @@ describes.realWin(
         const ampSlideScroll = await getAmpSlideScroll(false, 3, true, true, 2);
         const impl = await ampSlideScroll.getImpl();
 
-        const removeAutoplaySpy = env.sandbox.spy(impl, 'removeAutoplay');
+        const removeAutoplaySpy = env.sandbox.spy(impl, 'removeAutoplay_');
         impl.showSlide_(1);
         impl.showSlide_(2);
         expect(impl.loopsMade_).to.equal(1);

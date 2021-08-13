@@ -15,6 +15,7 @@
  */
 
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
+
 import {urls} from '../../../src/config';
 
 export class AmpCacheUrlService {

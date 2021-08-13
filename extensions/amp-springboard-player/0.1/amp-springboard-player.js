@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {setIsMediaComponent} from '../../../src/video-interface';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+
+import {Services} from '#service';
+
 import {userAssert} from '../../../src/log';
+import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpSpringboardPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */

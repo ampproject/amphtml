@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
 import {dict} from '#core/types/object';
-import {generatePageImpressionId, isExcludedAnchorUrl} from './utils';
 
 import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
+import {generatePageImpressionId, isExcludedAnchorUrl} from './utils';
+
+import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
 
 const PAGE_IMPRESSIONS = 'page-impressions';
 const LINK_IMPRESSIONS = 'link-impressions';

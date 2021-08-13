@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
-import {createCustomEvent} from '../../../src/event-helper';
-import {devAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
 import {htmlFor} from '#core/dom/static-template';
 import {toArray} from '#core/types/array';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {createCustomEvent} from '../../../src/event-helper';
+import {devAssert} from '../../../src/log';
 
 /**
  * @enum {string}
