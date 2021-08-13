@@ -186,32 +186,36 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
    */
   positionResultEls_() {
     const results = Object.values(this.resultEls_);
+    // Size of the section each result will be placed in
     const slice = (2 * Math.PI) / results.length;
+    // Randomly rotate slice alignment
     const offset = Math.random() * slice;
 
     results.forEach(({element}, index) => {
+      // Distance from center of central category image to center of result; [MIN_DIST, MAX_DIST)
       const dist = Math.random() * (MAX_DIST - MIN_DIST) + MIN_DIST;
+      // Size of the result at this distance if expanded to fill up the whole slice (only works when more than 1 slice)
+      const sliceSize = 2 * (dist * Math.sin(slice / 2) - BORDER_BUFFER);
       const adjustedMaxSize =
-        results.length === 1
-          ? MAX_SIZE
-          : Math.min(
-              MAX_SIZE,
-              2 * (dist * Math.sin(slice / 2) - BORDER_BUFFER)
-            );
+        results.length === 1 ? MAX_SIZE : Math.min(MAX_SIZE, sliceSize);
+      // Diameter of the result element; [MIN_SIZE, adjustedMaxSize)
       const size = Math.random() * (adjustedMaxSize - MIN_SIZE) + MIN_SIZE;
+      // If the result gets too close to the edge of the slice, it will overlap onto the
+      // next slice, so the angleBuffer sets a region to avoid placing the image in
       const angleBuffer = Math.asin((size / 2 + BORDER_BUFFER) / dist);
-      const angle =
-        Math.random() * (slice - 2 * angleBuffer) +
-        slice * index +
-        angleBuffer +
-        offset;
-      const top = CENTER + Math.cos(angle) * dist - size / 2;
-      const left = CENTER + Math.sin(angle) * dist - size / 2;
+      // Angle to place the result at relative to its slice; [angleBuffer, slice - angleBuffer)
+      const sliceRelAngle =
+        Math.random() * (slice - 2 * angleBuffer) + angleBuffer;
+      const angle = slice * index + sliceRelAngle + offset;
+
+      // Transform the angle and distance (polar coordinates) of the result
+      // into Cartesian coordinates to be used in CSS
+      const transform = (trig) => CENTER + trig(angle) * dist - size / 2 + 'em';
 
       setImportantStyles(element, {
         '--size': size + 'em',
-        'top': top + 'em',
-        'left': left + 'em',
+        'top': transform(Math.cos),
+        'left': transform(Math.sin),
       });
     });
   }
