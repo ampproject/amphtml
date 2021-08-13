@@ -48,6 +48,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
     env.sandbox
       .stub(mode, 'isLocalDev')
       .returns(!!options.localDev || !!options.test);
+    env.sandbox.stub(mode, 'isTest').returns(!!options.test);
     env.sandbox.stub(mode, 'isProd').returns(!!options.isProd);
   }
 
