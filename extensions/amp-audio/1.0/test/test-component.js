@@ -61,10 +61,13 @@ describes.realWin('Audio preact component v1.0', {}, (env) => {
         loop=""
         width="503px"
         height="53px"
-      >
-        <source src="audio.mp3" type="audio/mpeg" />
-        <source src="audio.ogg" type="audio/ogg" />
-      </Audio>,
+        sources={
+          <>
+            <source src="audio.mp3" type="audio/mpeg" />
+            <source src="audio.ogg" type="audio/ogg" />
+          </>
+        }
+      ></Audio>,
       {attachTo: env.win.document.body}
     );
 
@@ -86,10 +89,14 @@ describes.realWin('Audio preact component v1.0', {}, (env) => {
     expect(audio.prop('loop')).not.to.be.undefined;
     expect(audio.prop('src')).to.be.undefined;
 
-    expect(component.childAt(0).name()).to.equal('source');
-    expect(component.childAt(0).prop('src')).to.equal('audio.mp3');
-    expect(component.childAt(1).name()).to.equal('source');
-    expect(component.childAt(1).prop('src')).to.equal('audio.ogg');
+    /**
+     * Here, first  childAt(0) = <> ... </>
+     *       second childAt(N) = <source> ... </source>
+     */
+    expect(component.childAt(0).childAt(0).name()).to.equal('source');
+    expect(component.childAt(0).childAt(0).prop('src')).to.equal('audio.mp3');
+    expect(component.childAt(0).childAt(1).name()).to.equal('source');
+    expect(component.childAt(0).childAt(1).prop('src')).to.equal('audio.ogg');
   });
   it('should propagate ARIA attributes', () => {
     const wrapper = mount(

@@ -38,7 +38,6 @@ export function AudioWithRef(
     artist = EMPTY_METADATA.artist,
     artwork = EMPTY_METADATA.artwork,
     autoplay = false,
-    children,
     controlsList,
     loading = 'lazy',
     loop = false,
@@ -132,7 +131,7 @@ export function AudioWithRef(
         preload={preload}
         src={src}
       >
-        {sources ?? children}
+        {sources}
       </audio>
     </ContainWrapper>
   );

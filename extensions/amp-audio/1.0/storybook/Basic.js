@@ -50,11 +50,12 @@ export const LoadAudioThroughSources = () => {
       height="75"
       width="auto"
       controls
-    >
-      <source
-        src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
-        type="audio/mpeg"
-      />
-    </Audio>
+      sources={
+        <source
+          src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
+          type="audio/mpeg"
+        />
+      }
+    ></Audio>
   );
 };
