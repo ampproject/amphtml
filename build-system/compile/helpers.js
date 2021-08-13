@@ -73,5 +73,6 @@ async function writeSourcemaps(sourcemapsFile, options) {
 }
 
 module.exports = {
+  getSourceMapBase,
   writeSourcemaps,
 };

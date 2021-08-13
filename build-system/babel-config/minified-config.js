@@ -26,7 +26,8 @@ const {getReplacePlugin} = require('./helpers');
  * @return {!Object}
  */
 function getMinifiedConfig() {
-  const replacePlugin = getReplacePlugin();
+  const isProd = argv._.includes('dist') && !argv.fortesting;
+
   const reactJsxPlugin = [
     '@babel/plugin-transform-react-jsx',
     {
@@ -35,44 +36,43 @@ function getMinifiedConfig() {
       useSpread: true,
     },
   ];
+  const replacePlugin = getReplacePlugin();
 
   const plugins = [
     'optimize-objstr',
     getImportResolverPlugin(),
+    argv.coverage ? 'babel-plugin-istanbul' : null,
+    './build-system/babel-plugins/babel-plugin-imported-helpers',
+    './build-system/babel-plugins/babel-plugin-transform-inline-isenumvalue',
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
     '@babel/plugin-transform-react-constant-elements',
     reactJsxPlugin,
-    argv.esm
-      ? './build-system/babel-plugins/babel-plugin-transform-dev-methods'
-      : null,
+    argv.esm &&
+      './build-system/babel-plugins/babel-plugin-transform-dev-methods',
+    // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
     [
       './build-system/babel-plugins/babel-plugin-transform-log-methods',
       {replaceCallArguments: false},
     ],
-    './build-system/babel-plugins/babel-plugin-transform-parenthesize-expression',
     [
       './build-system/babel-plugins/babel-plugin-transform-json-import',
       {freeze: false},
     ],
+    './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
     './build-system/babel-plugins/babel-plugin-transform-html-template',
     './build-system/babel-plugins/babel-plugin-transform-jss',
-    './build-system/babel-plugins/babel-plugin-transform-default-assignment',
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-amp-asserts',
     // TODO(erwinm, #28698): fix this in fixit week
     // argv.esm
     //? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
     //: null,
-    argv.fortesting
-      ? null
-      : './build-system/babel-plugins/babel-plugin-transform-json-configuration',
-    argv.fortesting
-      ? null
-      : [
-          './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
-          BUILD_CONSTANTS,
-        ],
+    './build-system/babel-plugins/babel-plugin-transform-json-configuration',
+    isProd && [
+      './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
+      BUILD_CONSTANTS,
+    ],
   ].filter(Boolean);
   const presetEnv = [
     '@babel/preset-env',
@@ -82,9 +82,11 @@ function getMinifiedConfig() {
       targets: argv.esm ? {esmodules: true} : {ie: 11, chrome: 41},
     },
   ];
+
   return {
     compact: false,
     plugins,
+    sourceMaps: 'inline',
     presets: [presetEnv],
     retainLines: true,
   };

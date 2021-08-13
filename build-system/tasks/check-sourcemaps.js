@@ -21,6 +21,7 @@ const {cyan, green, red} = require('../common/colors');
 const {decode} = require('sourcemap-codec');
 const {execOrDie} = require('../common/exec');
 const {log} = require('../common/logging');
+const {shouldUseClosure} = require('./helpers');
 
 // Compile related constants
 const distWithSourcemapsCmd = 'amp dist --core_runtime_only --full_sourcemaps';
@@ -33,9 +34,14 @@ const v0MjsMap = 'dist/v0.mjs.map';
 const sourcemapUrlMatcher =
   'https://raw.githubusercontent.com/ampproject/amphtml/\\d{13}/';
 
-// Mapping related constants
-const expectedFirstLineFile = 'src/polyfills/abort-controller.js'; // First file that is compiled into v0.js.
-const expectedFirstLineCode = 'class AbortController {'; // First line of code in that file.
+const expectedFirstLineFileMjs = 'src/polyfills/abort-controller.js'; // First file that is compiled into v0.mjs.
+const expectedFirstLineCodeMjs = 'class AbortController {'; // First line of code in that file.
+const expectedFirstLineFileJs = shouldUseClosure()
+  ? expectedFirstLineFileMjs
+  : 'node_modules/@babel/runtime/helpers/esm/classCallCheck.js'; // First file that is compiled into v0.js.
+const expectedFirstLineCodeJs = shouldUseClosure()
+  ? expectedFirstLineCodeMjs
+  : 'function _classCallCheck(instance, Constructor) {'; // First line of code in that file.
 
 /**
  * Build runtime with sourcemaps if needed.
@@ -144,6 +150,13 @@ function checkSourcemapMappings(sourcemapJson, map) {
     'If this change is intentional, update the mapping related constants in ' +
     cyan('build-system/tasks/check-sourcemaps.js') +
     '.';
+
+  const expectedFirstLineFile = map.includes('mjs')
+    ? expectedFirstLineFileMjs
+    : expectedFirstLineFileJs;
+  const expectedFirstLineCode = map.includes('mjs')
+    ? expectedFirstLineCodeMjs
+    : expectedFirstLineCodeJs;
   if (firstLineFile != expectedFirstLineFile) {
     log(red('ERROR:'), 'Found mapping for incorrect file.');
     log('Actual:', cyan(firstLineFile));
