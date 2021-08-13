@@ -6,6 +6,7 @@ const {cyan, green, red} = require('../common/colors');
 const {decode} = require('sourcemap-codec');
 const {execOrDie} = require('../common/exec');
 const {log} = require('../common/logging');
+const {shouldUseClosure} = require('./helpers');
 
 // Compile related constants
 const distWithSourcemapsCmd = 'amp dist --core_runtime_only --full_sourcemaps';
@@ -127,9 +128,22 @@ function checkSourcemapMappings(sourcemapJson, map) {
     '.';
 
   // Mapping related constants
-  const expectedFirstLine = map.includes('mjs')
-    ? {file: 'src/core/mode/version.js', code: 'function version() {'}
-    : {file: 'src/core/mode/prod.js', code: 'export function isProd() {'};
+  let expectedFirstLine = map.includes('mjs')
+    ? {
+        file: 'src/polyfills/abort-controller.js',
+        code: 'class AbortController {',
+      }
+    : {
+        file: 'node_modules/@babel/runtime/helpers/esm/classCallCheck.js',
+        code: 'function _classCallCheck(instance, Constructor) {',
+      };
+
+  // TODO(samouri): remove branching once we decide for or against closure
+  if (shouldUseClosure()) {
+    expectedFirstLine = map.includes('mjs')
+      ? {file: 'src/core/mode/version.js', code: 'function version() {'}
+      : {file: 'src/core/mode/prod.js', code: 'export function isProd() {'};
+  }
 
   if (firstLineFile != expectedFirstLine.file) {
     log(red('ERROR:'), 'Found mapping for incorrect file.');

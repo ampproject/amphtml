@@ -811,7 +811,7 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
   }
 
   if (argv.nobuild) {
-    const isInTestMode = /AMP_CONFIG=\{(?:.+,)?"test":true\b/.test(
+    const isInTestMode = /AMP_CONFIG=\{(?:.+,)?"test":(true|!0)\b/.test(
       fs.readFileSync('dist/v0.js', 'utf8')
     );
     if (!isInTestMode) {

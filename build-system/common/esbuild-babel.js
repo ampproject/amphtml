@@ -46,9 +46,9 @@ function getEsbuildBabelPlugin(
     const promise = babel
       .transformAsync(contents, babelOptions)
       .then((result) => {
-        const {code, map} = result || {};
-        debug('post-babel', filename, code, map);
-        return code + `\n// ${filename}`;
+        const {code} = result || {};
+        debug('post-babel', filename, code);
+        return code;
       });
 
     if (enableCache) {

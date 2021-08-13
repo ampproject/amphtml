@@ -17,6 +17,7 @@ const {applyConfig, removeConfig} = require('./prepend-global');
 const {closureCompile} = require('../compile/compile');
 const {cyan, green, red} = require('../common/colors');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
+const {getSourceMapBase} = require('../compile/helpers');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
@@ -269,6 +270,10 @@ function toEsmName(name) {
  * @return {string}
  */
 function maybeToEsmName(name) {
+  // Npm esm names occur at an earlier stage.
+  if (name.includes('.module')) {
+    return name;
+  }
   return argv.esm ? toEsmName(name) : name;
 }
 
@@ -376,8 +381,9 @@ async function finishBundle(
     if (!options.minify) {
       latestName = latestName.replace(/\.js$/, '.max.js');
     }
+    latestName = maybeToEsmName(latestName);
     fs.copySync(
-      path.join(destDir, options.toName),
+      path.join(destDir, destFilename),
       path.join(destDir, latestName)
     );
     endBuildStep(logPrefix, `${destFilename} → ${latestName}`, startTime);
@@ -413,10 +419,10 @@ async function finishBundle(
 async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const startTime = Date.now();
   const entryPoint = path.join(srcDir, srcFilename);
-  const fileName = options.minify
+  const filename = options.minify
     ? options.minifiedName
     : options.toName ?? srcFilename;
-  const destFilename = options.npm ? fileName : maybeToEsmName(fileName);
+  const destFilename = maybeToEsmName(filename);
   const destFile = path.join(destDir, destFilename);
 
   if (watchedTargets.has(entryPoint)) {
@@ -481,6 +487,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
 
     if (options.minify) {
       ({code, map} = await minify(code, map));
+      map = await massageSourcemaps(map, options);
     }
 
     await Promise.all([
@@ -556,6 +563,7 @@ async function minify(code, map) {
       beautify: !!argv.pretty_print,
       // eslint-disable-next-line google-camelcase/google-camelcase
       keep_quoted_props: true,
+      // TODO: only add preamble for mainBundles!
       preamble: ';',
     },
     sourceMap: {content: map},
@@ -609,9 +617,10 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
    * @return {Promise<void>}
    */
   async function doCompileJs(options) {
-    const buildResult = options.minify
-      ? compileMinifiedJs(srcDir, srcFilename, destDir, options)
-      : esbuildCompile(srcDir, srcFilename, destDir, options);
+    const buildResult =
+      options.minify && shouldUseClosure()
+        ? compileMinifiedJs(srcDir, srcFilename, destDir, options)
+        : esbuildCompile(srcDir, srcFilename, destDir, options);
     if (options.onWatchBuild) {
       options.onWatchBuild(buildResult);
     }
@@ -802,6 +811,44 @@ async function getDependencies(entryPoint, options) {
   return Object.keys(result.metafile?.inputs ?? {});
 }
 
+/**
+ * @param {*} sourcemapsFile
+ * @param {*} options
+ * @return {*}
+ */
+function massageSourcemaps(sourcemapsFile, options) {
+  const sourcemaps = JSON.parse(sourcemapsFile);
+  sourcemaps.sources = sourcemaps.sources.map((source) => {
+    if (!source.startsWith('../')) {
+      return source;
+    }
+    return source.slice('../'.length);
+  });
+  if (sourcemaps.file) {
+    sourcemaps.file = path.basename(sourcemaps.file);
+  }
+
+  const extra = {
+    sourceRoot: getSourceMapBase(options),
+    includeContent: !!argv.full_sourcemaps,
+  };
+  return JSON.stringify({...sourcemaps, ...extra});
+}
+
+/**
+ * Returns whether or not we should compile with Closure Compiler.
+ * @return {boolean}
+ */
+function shouldUseClosure() {
+  // Normally setting this server-side experiment flag would be handled by
+  // the release process automatically. Since this experiment is actually on the build system
+  // itself instead of runtime, it is never run through babel (where the replacements usually happen).
+  // Therefore we must compute this one by hand.
+
+  // TODO: remove the && false once all is green.
+  return argv.define_experiment_constant !== 'EsbuildCompilation' && false;
+}
+
 module.exports = {
   MINIFIED_TARGETS,
   applyAmpConfig,
@@ -819,4 +866,5 @@ module.exports = {
   printConfigHelp,
   printNobuildHelp,
   watchDebounceDelay,
+  shouldUseClosure,
 };
