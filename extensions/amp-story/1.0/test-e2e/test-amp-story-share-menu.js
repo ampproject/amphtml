@@ -24,7 +24,7 @@ describes.endtoend(
     environments: ['single'],
     deviceName: 'iPhone X',
   },
-  async (env) => {
+  (env) => {
     /** @type {SeleniumWebDriverController} */
     let controller;
 

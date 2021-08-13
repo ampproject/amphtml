@@ -28,7 +28,7 @@ describes.endtoend(
     environments: ['single'],
     initialRect: {width: pageWidth, height: pageHeight},
   },
-  async (env) => {
+  (env) => {
     let controller;
     let nextArrow;
     let prevArrow;

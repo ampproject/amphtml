@@ -24,7 +24,7 @@ describes.endtoend(
     experiments: ['bento-sidebar'],
     environments: ['single', 'viewer-demo'],
   },
-  async (env) => {
+  (env) => {
     let controller;
 
     beforeEach(() => {

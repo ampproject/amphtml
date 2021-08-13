@@ -20,7 +20,7 @@ describes.endtoend(
     fixture: 'amp-carousel/0.1/document-height.html',
     environments: ['viewer-demo'],
   },
-  async (env) => {
+  (env) => {
     it('should send documentHeight once amp has completed init', async () => {
       const messages = env.receivedMessages;
       const documentHeightMessages = messages.filter(

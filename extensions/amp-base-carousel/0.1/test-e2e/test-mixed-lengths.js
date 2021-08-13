@@ -27,7 +27,7 @@ describes.endtoend(
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
   },
-  async (env) => {
+  (env) => {
     let controller;
 
     function prop(el, name) {
@@ -39,7 +39,7 @@ describes.endtoend(
       await expect(prop(spacers[1], 'offsetWidth')).to.equal(width);
     }
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 
@@ -69,20 +69,17 @@ describes.endtoend(
           await assertSpacerWidth(1, slideTwoWidth);
         });
 
-      //TODO(sparhami): fails on shadow demo
-      it.configure()
-        .skipShadowDemo()
-        // TODO(#35241): flaky test disabled in #35176
-        .skip('should snap on the center point', async () => {
-          const el = await getScrollingElement(controller);
-          const slides = await getSlides(controller);
-          const scrollAmount = 1 + slideOneWidth / 2;
+      // TODO(#35241): flaky test disabled in #35176
+      it.skip('should snap on the center point', async () => {
+        const el = await getScrollingElement(controller);
+        const slides = await getSlides(controller);
+        const scrollAmount = 1 + slideOneWidth / 2;
 
-          await controller.scrollBy(el, {left: scrollAmount});
-          await expect(controller.getElementRect(slides[1])).to.include({
-            x: (pageWidth - slideTwoWidth) / 2,
-          });
+        await controller.scrollBy(el, {left: scrollAmount});
+        await expect(controller.getElementRect(slides[1])).to.include({
+          x: (pageWidth - slideTwoWidth) / 2,
         });
+      });
     });
   }
 );

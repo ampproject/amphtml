@@ -26,7 +26,7 @@ describes.endtoend(
   async function (env) {
     let controller;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 

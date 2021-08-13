@@ -20,7 +20,7 @@ describes.endtoend(
     fixture: 'amp-carousel/0.2/amp-lightbox-carousel-selector.amp.html',
     environments: ['single'],
   },
-  async (env) => {
+  (env) => {
     let controller;
     let nextArrow;
     let prevArrow;
@@ -37,7 +37,7 @@ describes.endtoend(
       );
     }
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 

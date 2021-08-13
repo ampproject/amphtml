@@ -21,7 +21,7 @@ describes.endtoend(
     fixture: 'amp-lightbox/amp-lightbox-autocomplete.html',
     environments: 'ampdoc-preset',
   },
-  async (env) => {
+  (env) => {
     let controller;
 
     beforeEach(() => {

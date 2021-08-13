@@ -20,7 +20,7 @@ describes.endtoend(
     fixture: 'amp4email/viewport-size-race.html',
     environments: ['email-demo'],
   },
-  async (env) => {
+  (env) => {
     it('Should call amp-img layoutCallback', async () => {
       const {controller} = env;
       const imgEl = await controller.findElement('img');
@@ -35,7 +35,7 @@ describes.endtoend(
     fixture: 'amp4email/element-size-race.html',
     environments: ['email-demo'],
   },
-  async (env) => {
+  (env) => {
     it('Should call amp-list layoutCallback', async () => {
       const {controller} = env;
       const ampListChild = await controller.findElement('.fruit');

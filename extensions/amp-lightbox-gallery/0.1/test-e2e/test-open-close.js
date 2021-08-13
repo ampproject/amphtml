@@ -25,7 +25,7 @@ describes.endtoend(
     // TODO(sparhami) Get this working in other environments.
     environments: ['single'],
   },
-  async (env) => {
+  (env) => {
     let controller;
 
     function css(handle, name) {
@@ -36,7 +36,7 @@ describes.endtoend(
       return controller.getElementProperty(el, name);
     }
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 

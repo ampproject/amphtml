@@ -43,7 +43,7 @@ describes.endtoend(
       }, opt_selector);
     }
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 

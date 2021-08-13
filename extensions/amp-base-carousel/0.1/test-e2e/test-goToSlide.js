@@ -22,12 +22,12 @@ describes.endtoend(
     fixture: 'amp-base-carousel/arrows-in-lightbox.amp.html',
     environments: ['single'],
   },
-  async (env) => {
+  (env) => {
     let controller;
     let slides;
     let prevArrow;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 
