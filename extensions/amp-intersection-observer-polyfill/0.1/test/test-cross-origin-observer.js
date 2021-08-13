@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import {MessageType} from '#core/3p-frame-messaging';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {WindowInterface} from '#core/window/interface';
 
-import {MessageType} from '../../../../src/3p-frame-messaging';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
   calculateIntersectionRect,
