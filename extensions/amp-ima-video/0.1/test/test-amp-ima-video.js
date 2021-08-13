@@ -15,9 +15,10 @@
  */
 
 import '../amp-ima-video';
-import {htmlFor} from '#core/dom/static-template';
-import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {waitForChildPromise} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
 
 describes.realWin(
   'amp-ima-video',

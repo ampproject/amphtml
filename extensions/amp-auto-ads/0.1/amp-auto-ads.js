@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+import {dict} from '#core/types/object';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {getAdNetworkConfig} from './ad-network-config';
 import {AdStrategy} from './ad-strategy';
 import {
   AdTracker,
@@ -22,11 +29,8 @@ import {
 } from './ad-tracker';
 import {AnchorAdStrategy} from './anchor-ad-strategy';
 import {Attributes, getAttributesFromConfigObj} from './attributes';
-import {Services} from '#service';
-import {dict} from '#core/types/object';
-import {getAdNetworkConfig} from './ad-network-config';
 import {getPlacementsFromConfigObj} from './placement';
-import {isExperimentOn} from '#experiments';
+
 import {userAssert} from '../../../src/log';
 
 /** @const */

@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from '#core/constants/common-signals';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {Layout} from '#core/dom/layout';
+import {prefersReducedMotion} from '#core/dom/media-query-props';
+import {closest} from '#core/dom/query';
+import {setImportantStyles} from '#core/dom/style';
+import {deepEquals} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
+import {dev, user} from '../../../src/log';
 import {
   Action,
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
-import {CommonSignals} from '#core/constants/common-signals';
-import {Layout} from '#core/dom/layout';
-import {Services} from '#service';
-import {closest} from '#core/dom/query';
-import {deepEquals} from '#core/types/object/json';
-import {dev, user} from '../../../src/log';
-import {prefersReducedMotion} from '#core/dom/media-query-props';
-import {setImportantStyles} from '#core/dom/style';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_PANNING_MEDIA';

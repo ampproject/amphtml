@@ -57,3 +57,15 @@ export function parseQueryString(queryString) {
   }
   return params;
 }
+
+/**
+ * Parses the query # params.
+ * @param {!Window=} opt_win
+ * @return {!JsonObject}
+ */
+export function getHashParams(opt_win) {
+  const {location} = opt_win || self;
+  // location.originalHash is set by the viewer when it removes the fragment
+  // from the URL.
+  return parseQueryString(location['originalHash'] || location.hash);
+}

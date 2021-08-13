@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {addParamsToUrl} from '../../../src/url';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {createElementWithAttributes, removeElement} from '#core/dom';
-import {getData, listen} from '../../../src/event-helper';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {measureIntersection} from '#core/dom/layout/intersection';
-import {omit} from '#core/types/object';
 import {setStyle} from '#core/dom/style';
+import {omit} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
+
+import {getData, listen} from '../../../src/event-helper';
 import {userAssert} from '../../../src/log';
+import {addParamsToUrl} from '../../../src/url';
 
 /** @const {string} */
 export const TAG = 'amp-iframely';
