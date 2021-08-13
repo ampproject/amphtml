@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-vimeo-1.0.css';
 import {isExperimentOn} from '#experiments';
+
+import {BaseElement} from './base-element';
+
+import {CSS} from '../../../build/amp-vimeo-1.0.css';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */

@@ -35,7 +35,7 @@ let rethrowAsyncSandbox;
 function stubAsyncErrorThrows() {
   rethrowAsyncSandbox = sinon.createSandbox();
   rethrowAsyncSandbox.stub(coreError, 'rethrowAsync').callsFake((...args) => {
-    const error = coreError.createErrorVargs.apply(null, args);
+    const error = coreError.createError.apply(null, args);
     const index = indexOfExpectedMessage(error.message);
     if (index != -1) {
       expectedAsyncErrors.splice(index, 1);

@@ -15,8 +15,9 @@
  */
 
 import {LastAddedResolver} from '#core/data-structures/promise';
-import {isFieldDefault} from '../../../src/form';
 import {iterateCursor} from '#core/dom';
+import {isFieldDefault} from '#core/dom/form';
+
 import {user} from '../../../src/log';
 
 export const FORM_VERIFY_PARAM = '__amp_form_verify';

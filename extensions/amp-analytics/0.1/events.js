@@ -26,7 +26,7 @@ import {deepMerge, dict, hasOwn} from '#core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '#core/dom';
-import {isAmpElement} from '../../../src/amp-element-helpers';
+import {isAmpElement} from '#core/dom/amp-element-helpers';
 import {isArray, isEnumValue, isFiniteNumber} from '#core/types';
 import {debounce} from '#core/types/function';
 import {isExperimentOn} from '#experiments';

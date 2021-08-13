@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {AmpGeo} from '../amp-geo';
-import {GEO_IN_GROUP} from '../amp-geo-in-group';
 import {Services} from '#service';
+import {vsyncForTesting} from '#service/vsync-impl';
+
 import {urls} from '../../../../src/config';
 import {user} from '../../../../src/log';
-import {vsyncForTesting} from '#service/vsync-impl';
+import {AmpGeo} from '../amp-geo';
+import {GEO_IN_GROUP} from '../amp-geo-in-group';
 
 describes.realWin(
   'amp-geo',
