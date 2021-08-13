@@ -70,14 +70,6 @@ describes.realWin(
     let registryBackup;
     const whenFirstVisible = Promise.resolve();
 
-    function mockMode(options) {
-      env.sandbox
-        .stub(mode, 'isLocalDev')
-        .returns(!!options.localDev || !!options.test);
-      env.sandbox.stub(mode, 'isTest').returns(!!options.test);
-      env.sandbox.stub(mode, 'isProd').returns(!!options.isProd);
-    }
-
     beforeEach(() => {
       registryBackup = Object.create(null);
       Object.keys(adConfig).forEach((k) => {
@@ -336,7 +328,7 @@ describes.realWin(
 
     describe('preconnectCallback', () => {
       it('should add preconnect and prefetch to DOM header', () => {
-        mockMode({isProd: true});
+        env.sandbox.stub(mode, 'isProd').returns(true);
         ad3p.buildCallback();
         ad3p.preconnectCallback();
         return whenFirstVisible.then(() => {
