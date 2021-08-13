@@ -619,22 +619,22 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
       let u1 = await expandConsentEndpointUrl(
         doc.body,
         'https://example.test?cid=CLIENT_ID&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
-      )
+      );
 
       let u2 = await expandConsentEndpointUrl(
         doc.body,
         'https://example.test?cid=CLIENT_ID()&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
-      )
+      );
 
       let u3 = await expandConsentEndpointUrl(
         doc.body,
         'https://example.test?cid=CLIENT_ID(123)&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
-      )
+      );
 
       let u4 = await expandConsentEndpointUrl(
         doc.body,
         'https://example.test?cid=CLIENT_ID(abc)&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
-      )
+      );
 
       await macroTask();
       await macroTask();
