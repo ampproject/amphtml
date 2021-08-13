@@ -18,7 +18,7 @@ import {parseQueryString} from '#core/types/string/url';
 
 import {BrowserController, RequestBank} from '#testing/test-helper';
 
-// TODO(wg-analytics): These tests time out on Firefox and Safari.
+// TODO(wg-components): These tests time out on Firefox and Safari.
 describes.sandboxed
   .configure()
   .skipSafari()
