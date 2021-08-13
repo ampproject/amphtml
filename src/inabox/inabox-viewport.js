@@ -17,6 +17,7 @@
 import {getFrameOverlayManager} from '#ads/inabox/frame-overlay-manager';
 import {getPositionObserver} from '#ads/inabox/position-observer';
 
+import {MessageType} from '#core/3p-frame-messaging';
 import {devAssert, devAssertElement} from '#core/assert';
 import {Observable} from '#core/data-structures/observable';
 import {isIframed} from '#core/dom';
@@ -34,7 +35,6 @@ import {ViewportInterface} from '#service/viewport/viewport-interface';
 
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 
-import {MessageType} from '../3p-frame-messaging';
 import {canInspectWindow} from '../iframe-helper';
 import {dev} from '../log';
 import {registerServiceBuilderForDoc} from '../service-helpers';

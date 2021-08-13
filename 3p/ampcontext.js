@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {MessageType} from '#core/3p-frame-messaging';
 import {AmpEvents} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';
 import {isObject} from '#core/types';
@@ -21,7 +22,6 @@ import {tryParseJson} from '#core/types/object/json';
 
 import {IframeMessagingClient} from './iframe-messaging-client';
 
-import {MessageType} from '../src/3p-frame-messaging';
 import {dev, devAssert} from '../src/log';
 import {parseUrlDeprecated} from '../src/url';
 

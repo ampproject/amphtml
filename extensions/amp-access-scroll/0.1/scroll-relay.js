@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {listen} from '../../../src/3p-frame-messaging';
+import {listen} from '#core/3p-frame-messaging';
+
 import {getData} from '../../../src/event-helper';
 
 /**

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {MessageType} from '../../../src/3p-frame-messaging';
+import {IframeTransportEventDef, MessageType} from '#core/3p-frame-messaging';
 import {SubscriptionApi} from '../../../src/iframe-helper';
 import {dev, devAssert} from '../../../src/log';
 
@@ -41,10 +41,7 @@ export class IframeTransportMessageQueue {
     /** @private {boolean} */
     this.isReady_ = false;
 
-    /**
-     * @private
-     * {!Array<!../../../src/3p-frame-messaging.IframeTransportEvent>}
-     */
+    /** @private {!Array<!IframeTransportEventDef>} */
     this.pendingEvents_ = [];
 
     /** @private {!../../../src/iframe-helper.SubscriptionApi} */
@@ -88,7 +85,7 @@ export class IframeTransportMessageQueue {
 
   /**
    * Enqueues an event to be sent to a cross-domain iframe.
-   * @param {!../../../src/3p-frame-messaging.IframeTransportEvent} event
+   * @param {!IframeTransportEventDef} event
    * Identifies the event and which Transport instance (essentially which
    * creative) is sending it.
    */

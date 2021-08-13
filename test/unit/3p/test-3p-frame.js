@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {deserializeMessage, serializeMessage} from '#core/3p-frame-messaging';
 import {DomFingerprint} from '#core/dom/fingerprint';
 import {WindowInterface} from '#core/window/interface';
 
@@ -32,10 +33,6 @@ import {
   resetBootstrapBaseUrlForTesting,
   resetCountForTesting,
 } from '../../../src/3p-frame';
-import {
-  deserializeMessage,
-  serializeMessage,
-} from '../../../src/3p-frame-messaging';
 
 describes.realWin('3p-frame', {amp: true}, (env) => {
   let window, document;

@@ -15,9 +15,9 @@
  */
 import {AmpContext} from '#3p/ampcontext';
 
-import {Platform} from '#service/platform-impl';
+import {MessageType, serializeMessage} from '#core/3p-frame-messaging';
 
-import {MessageType, serializeMessage} from '../../src/3p-frame-messaging';
+import {Platform} from '#service/platform-impl';
 
 const NOOP = () => {};
 

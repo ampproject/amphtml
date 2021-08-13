@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CONSTANTS, MessageType} from '../../../src/3p-frame-messaging';
+import {CONSTANTS, MessageType} from '#core/3p-frame-messaging';
 import {CommonSignals} from '#core/constants/common-signals';
 import {Deferred} from '#core/data-structures/promise';
 import {LegacyAdIntersectionObserverHost} from './legacy-ad-intersection-observer-host';

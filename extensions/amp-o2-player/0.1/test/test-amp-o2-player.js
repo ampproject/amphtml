@@ -15,9 +15,9 @@
  */
 
 import '../amp-o2-player';
+import {MessageType} from '#core/3p-frame-messaging';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 
-import {MessageType} from '../../../../src/3p-frame-messaging';
 import * as iframeHelper from '../../../../src/iframe-helper';
 
 describes.realWin(
