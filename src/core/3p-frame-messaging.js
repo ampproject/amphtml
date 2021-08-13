@@ -136,7 +136,7 @@ export function deserializeMessage(message) {
 export function isAmpMessage(message) {
   return (
     typeof message == 'string' &&
-    message.indexOf(AMP_MESSAGE_PREFIX) == 0 &&
+    message.startsWith(AMP_MESSAGE_PREFIX) &&
     message.indexOf('{') != -1
   );
 }
