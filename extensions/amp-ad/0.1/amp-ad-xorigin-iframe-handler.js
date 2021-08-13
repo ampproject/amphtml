@@ -70,7 +70,8 @@ export class AmpAdXOriginIframeHandler {
     /* This variable keeps keeps track when an invalid resize request is made, and
      * is associated with each iframe. If the request is invalid, then a new request
      * cannot be made until a certain amount of time has passed, 500 ms by default
-     * (see MSEC_REPEATED_REQUEST_DELAY). Once the timer has cooled down, a new request can be made.
+     * (see MSEC_REPEATED_REQUEST_DELAY). Once the timer has cooled down,
+     * a new request can be made.
      */
     /** @private {number} */
     this.lastRejectedResizeTime_ = 0;
