@@ -105,7 +105,6 @@ commands:
           name: 'Configure Development Environment'
           command: |
             ./.circleci/fetch_merge_commit.sh
-            ./.circleci/check_config.sh
             ./.circleci/restore_build_output.sh
             cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
       - setup_node_environment
@@ -164,6 +163,9 @@ jobs:
       - run:
           name: 'Initialize Repository'
           command: ./.circleci/initialize_repo.sh
+      - run:
+          name: 'Check Config'
+          command: ./.circleci/check_config.sh
       - run:
           name: 'Initialize Workspace'
           command: cp .circleci/maybe_gracefully_halt.sh /tmp/workspace

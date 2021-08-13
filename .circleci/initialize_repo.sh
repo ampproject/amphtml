@@ -38,8 +38,8 @@ if [[ -z "${PR_NUMBER}" ]]; then
   exit 0
 fi
 
-echo "$(GREEN "Fetching all branches to update") $(CYAN ".git") $(GREEN "cache.")"
-git fetch
+echo "$(GREEN "Fetching") $(CYAN "main") $(GREEN "branch to update") $(CYAN ".git") $(GREEN "cache.")"
+git fetch origin main:main
 
 # GitHub provides refs/pull/<PR_NUMBER>/merge, an up-to-date merge branch for
 # every PR branch that can be cleanly merged to the main branch. For more
