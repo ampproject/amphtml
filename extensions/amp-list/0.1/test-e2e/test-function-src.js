@@ -20,10 +20,10 @@ describes.endtoend(
     fixture: 'amp-list/amp-list-function-src.html',
     environments: ['single'],
   },
-  async (env) => {
+  (env) => {
     let controller;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 
@@ -44,10 +44,10 @@ describes.endtoend(
     fixture: 'amp-list/amp-list-function-load-more.html',
     environments: ['single'],
   },
-  async (env) => {
+  (env) => {
     let controller;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 

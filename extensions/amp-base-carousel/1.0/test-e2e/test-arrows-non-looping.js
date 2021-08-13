@@ -36,7 +36,7 @@ describes.endtoend(
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single', 'viewer-demo'],
   },
-  async (env) => {
+  (env) => {
     const styles = useStyles();
     let controller;
     let prevArrow;

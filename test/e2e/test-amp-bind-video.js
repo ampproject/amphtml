@@ -20,10 +20,10 @@ describes.endtoend(
     fixture: 'amp-bind/bind-video.html',
     environments: 'ampdoc-amp4ads-preset',
   },
-  async (env) => {
+  (env) => {
     let controller;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 

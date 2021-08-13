@@ -29,7 +29,7 @@ describes.endtoend(
     //TODO(spaharmi): fails on viewer and shadow demo
     environments: ['single'],
   },
-  async (env) => {
+  (env) => {
     let controller;
 
     function prop(el, name) {
@@ -41,7 +41,7 @@ describes.endtoend(
       await expect(prop(spacers[1], 'offsetWidth')).to.equal(width);
     }
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 

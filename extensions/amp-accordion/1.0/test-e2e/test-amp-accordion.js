@@ -22,7 +22,7 @@ describes.endtoend(
     experiments: ['bento-accordion'],
     environments: ['single', 'viewer-demo'],
   },
-  async (env) => {
+  (env) => {
     let controller;
 
     let header1;

@@ -22,10 +22,10 @@ describes.endtoend(
     environments: ['single'],
     browsers: ['chrome', 'safari'],
   },
-  async (env) => {
+  (env) => {
     let controller;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 

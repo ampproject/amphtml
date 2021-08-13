@@ -36,7 +36,7 @@ describes.endtoend(
     //TODO(spaharmi): fails on shadow demo
     environments: ['single', 'viewer-demo'],
   },
-  async (env) => {
+  (env) => {
     /** The total number of slides in the carousel */
     const SLIDE_COUNT = 7;
     let controller;

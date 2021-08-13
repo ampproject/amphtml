@@ -30,7 +30,7 @@ describes.endtoend(
       return controller.getElementRect(el);
     }
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 

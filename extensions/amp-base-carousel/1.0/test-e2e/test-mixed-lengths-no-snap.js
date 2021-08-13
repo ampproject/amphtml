@@ -29,7 +29,7 @@ describes.endtoend(
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single', 'viewer-demo'],
   },
-  async (env) => {
+  (env) => {
     let controller;
     const styles = useStyles();
 

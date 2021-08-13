@@ -20,7 +20,7 @@ describes.endtoend(
     fixture: 'amp-sidebar/amp-sidebar-toolbar.html',
     environments: ['single', 'viewer-demo'],
   },
-  async (env) => {
+  (env) => {
     let controller;
 
     beforeEach(() => {

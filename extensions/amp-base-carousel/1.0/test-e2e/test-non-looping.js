@@ -29,7 +29,7 @@ describes.endtoend(
     environments: ['single', 'viewer-demo'],
     initialRect: {width: pageWidth, height: pageHeight},
   },
-  async (env) => {
+  (env) => {
     /** The total number of slides in the carousel */
     const SLIDE_COUNT = 4;
     const styles = useStyles();

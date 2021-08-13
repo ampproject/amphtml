@@ -22,10 +22,10 @@ describes.endtoend(
     fixture: 'amp-date-picker/blocked-dates.html',
     environments: ['single', 'viewer-demo'],
   },
-  async (env) => {
+  (env) => {
     let controller;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 

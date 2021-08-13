@@ -27,7 +27,7 @@ describes.endtoend(
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
   },
-  async (env) => {
+  (env) => {
     const slideWidth = pageWidth / 2;
     let controller;
 
