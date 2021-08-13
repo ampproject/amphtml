@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {MessageType} from '#core/3p-frame-messaging';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {WindowInterface} from '#core/window/interface';
 
 import {iframeMessagingClientFor} from '#inabox/inabox-iframe-messaging-client';
 
-import {MessageType} from '../../../src/3p-frame-messaging';
 import {getMode} from '../../../src/mode';
 
 /**

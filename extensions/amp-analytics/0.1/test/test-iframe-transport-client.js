@@ -18,7 +18,7 @@ import {
   IframeTransportClient,
   IframeTransportContext,
 } from '#3p/iframe-transport-client';
-import {MessageType} from '../../../../src/3p-frame-messaging';
+import {MessageType} from '#core/3p-frame-messaging';
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);

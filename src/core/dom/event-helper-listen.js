@@ -42,8 +42,8 @@ let AddEventListenerOptsDef;
  * Listens for the specified event on the element.
  *
  * Do not use this directly. This method is implemented as a shared
- * dependency. Use `listen()` in either `event-helper` or `3p-frame-messaging`,
- * depending on your use case.
+ * dependency. Use `listen()` in either `event-helper` or
+ * `#core/3p-frame-messaging`, depending on your use case.
  *
  * @param {!EventTarget} element
  * @param {string} eventType

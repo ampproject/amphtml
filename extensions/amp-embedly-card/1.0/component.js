@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import {deserializeMessage} from '#core/3p-frame-messaging';
+
 import * as Preact from '#preact';
 import {useCallback, useContext, useState} from '#preact';
 import {forwardRef} from '#preact/compat';
 import {MessageType, ProxyIframeEmbed} from '#preact/component/3p-frame';
 
 import {EmbedlyContext} from './embedly-context';
-
-import {deserializeMessage} from '../../../src/3p-frame-messaging';
 
 /**
  * Attribute name used to set api key with name
