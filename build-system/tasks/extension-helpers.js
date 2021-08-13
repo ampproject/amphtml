@@ -23,9 +23,9 @@ const path = require('path');
 const wrappers = require('../compile/compile-wrappers');
 const {
   compileJs,
-  compileJsWithEsbuild,
   doBuildJs,
   endBuildStep,
+  esbuildCompile,
   maybeToEsmName,
   maybeToNpmEsmName,
   mkdirSync,
@@ -674,7 +674,7 @@ function buildBinaries(extDir, binaries, options) {
     const {entryPoint, external, outfile, remap} = binary;
     const {name} = pathParse(outfile);
     const esm = argv.esm || argv.sxg || false;
-    return compileJsWithEsbuild(
+    return esbuildCompile(
       extDir + '/',
       entryPoint,
       `${extDir}/dist`,

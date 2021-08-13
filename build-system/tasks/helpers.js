@@ -824,7 +824,7 @@ module.exports = {
   compileAllJs,
   compileCoreRuntime,
   compileJs,
-  compileJsWithEsbuild: esbuildCompile,
+  esbuildCompile,
   doBuildJs,
   endBuildStep,
   maybePrintCoverageMessage,
