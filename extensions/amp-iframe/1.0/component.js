@@ -64,7 +64,8 @@ export function Iframe({
       }
     });
 
-    const handleEmbedSizePostMessage = (event) => {
+    const handlePostMessage = (event) => {
+      // Currently we're only handling `embed-size` post messages
       if (event.data?.type !== MessageType.EMBED_SIZE) {
         return;
       }
@@ -72,11 +73,11 @@ export function Iframe({
       io.observe(iframe);
     };
 
-    window.addEventListener('message', handleEmbedSizePostMessage);
+    window.addEventListener('message', handlePostMessage);
 
     return () => {
       io.unobserve(iframe);
-      window.removeEventListener('message', handleEmbedSizePostMessage);
+      window.removeEventListener('message', handlePostMessage);
     };
   }, [requestResize]);
 

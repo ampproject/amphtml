@@ -46,17 +46,18 @@ class AmpIframe extends BaseElement {
   }
 
   /**
-   * @return {!Promise<!IntersectionObserverEntry>}
+   * Callback for onload event of iframe. Checks if the component has a placeholder
+   * element and hides it if it does. Also checks the position of the iframe on the
+   * document.
    */
   handleOnLoad_() {
-    const hasPlaceholder = Boolean(this.getPlaceholder());
-    if (hasPlaceholder) {
+    if (this.getPlaceholder()) {
       this.togglePlaceholder(false);
       return;
     }
     // TODO(dmanek): Extract this to a common function & share
     // between 0.1 and 1.0 versions.
-    return measureIntersection(this.element).then((intersectionEntry) => {
+    measureIntersection(this.element).then((intersectionEntry) => {
       const {top} = intersectionEntry.boundingClientRect;
       const viewportHeight = intersectionEntry.rootBounds.height;
       const minTop = Math.min(600, viewportHeight * 0.75);
