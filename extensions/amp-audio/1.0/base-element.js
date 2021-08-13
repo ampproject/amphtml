@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {Audio} from './component';
-import {EMPTY_METADATA} from '../../../src/mediasession-helper';
 import {PreactBaseElement} from '#preact/base-element';
+
+import {Audio} from './component';
+
+import {EMPTY_METADATA} from '../../../src/mediasession-helper';
 
 export class BaseElement extends PreactBaseElement {}
 

@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {Audio} from '../component';
 import {mount} from 'enzyme';
+
+import * as Preact from '#preact';
+
+import {Audio} from '../component';
 
 describes.realWin('Audio preact component v1.0', {}, (env) => {
   it('should load audio through attribute', () => {

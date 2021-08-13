@@ -15,19 +15,14 @@
  */
 
 import * as Preact from '#preact';
-import {ContainWrapper} from '#preact/component';
+import {useCallback, useImperativeHandle, useMemo, useRef} from '#preact';
 import {forwardRef} from '#preact/compat';
+import {ContainWrapper} from '#preact/component';
+
 import {
   EMPTY_METADATA,
   setMediaSession,
 } from '../../../src/mediasession-helper';
-import {
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-} from '#preact';
 
 /**
  * @param {!AudioDef.Props} props

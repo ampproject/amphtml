@@ -16,9 +16,12 @@
 
 import '../amp-audio';
 import {createElementWithAttributes} from '#core/dom';
-import {naturalDimensions_} from '../../../../src/static-layout';
+
 import {toggleExperiment} from '#experiments';
+
 import {waitFor} from '#testing/test-helper';
+
+import {naturalDimensions_} from '../../../../src/static-layout';
 
 describes.realWin(
   'amp-audio-v1.0',
@@ -163,33 +166,32 @@ describes.realWin(
     });
 
     it('should attach `<audio>` element and execute relevant actions for layout="nodisplay"', async () => {
-        element = await attachAndRun({
-          src: 'audio.mp3',
-          preload: 'none',
-          layout: 'nodisplay',
-        });
+      element = await attachAndRun({
+        src: 'audio.mp3',
+        preload: 'none',
+        layout: 'nodisplay',
+      });
 
-        // Wait till rendering is finished
-        await waitForRender();
+      // Wait till rendering is finished
+      await waitForRender();
 
-        // Fetch audio element from shadowRoot
-        const {shadowRoot} = element;
-        const audio = shadowRoot.querySelector('audio');
+      // Fetch audio element from shadowRoot
+      const {shadowRoot} = element;
+      const audio = shadowRoot.querySelector('audio');
 
-        expect(audio).to.not.be.null;
+      expect(audio).to.not.be.null;
 
-        const impl = await element.getImpl();
-        impl.executeAction({method: 'play', satisfiesTrust: () => true});
-        expect(
-          impl.executeAction({method: 'isPlaying', satisfiesTrust: () => true})
-        ).to.be.true;
+      const impl = await element.getImpl();
+      impl.executeAction({method: 'play', satisfiesTrust: () => true});
+      expect(
+        impl.executeAction({method: 'isPlaying', satisfiesTrust: () => true})
+      ).to.be.true;
 
-        impl.executeAction({method: 'pause', satisfiesTrust: () => true});
-        expect(
-          impl.executeAction({method: 'isPlaying', satisfiesTrust: () => true})
-        ).to.be.false;
-      }
-    );
+      impl.executeAction({method: 'pause', satisfiesTrust: () => true});
+      expect(
+        impl.executeAction({method: 'isPlaying', satisfiesTrust: () => true})
+      ).to.be.false;
+    });
 
     it('should load audio through sources', async () => {
       element = attachAndRun(

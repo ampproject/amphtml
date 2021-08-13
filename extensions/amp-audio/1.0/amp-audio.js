@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
-import {dict} from '#core/types/object';
-import {isExperimentOn} from '#experiments';
 import {Layout} from '#core/dom/layout';
+import {dict} from '#core/types/object';
+
+import {isExperimentOn} from '#experiments';
+
+import {BaseElement} from './base-element';
+
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {userAssert} from '../../../src/log';
 import {validateMediaMetadata} from '../../../src/mediasession-helper';
