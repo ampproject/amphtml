@@ -171,8 +171,7 @@ Specifies the key to the data array within the JSON response. Nested keys can be
 
 [filter formats="websites"]
 
-  <pre lang="html">
-
+```html
       <amp-autocomplete filter="prefix">
           <input type="text">
           <script type=application/json>
@@ -180,45 +179,37 @@ Specifies the key to the data array within the JSON response. Nested keys can be
            </script>
 
       </amp-autocomplete>
-
-  </pre>
-  <pre lang="html">
-
-      <amp-autocomplete filter="prefix" items="fruit">
-        <input type="text">
-        <script type=application/json>
-          { "fruit" : ["kiwis", "oranges", "watermelons"]  }
-          </script>
-      </amp-autocomplete>
-
-  </pre>
+```
+```html
+<amp-autocomplete filter="prefix" items="fruit">
+  <input type="text">
+  <script type=application/json>
+    { "fruit" : ["kiwis", "oranges", "watermelons"]  }
+    </script>
+</amp-autocomplete>
+```
 [/filter] <!-- formats="websites" -->
 
 [filter formats="email"]
 
 Note that the following data is returned by the remote `src`:
 
-  <pre lang="json">
-    { 
-      "items" : ["apples", "bananas", "pears"], 
-      "fruit" : ["kiwis", "oranges", "watermelons"] 
-    }
-  </pre>
-
-  <pre lang="html">
-
-      <amp-autocomplete src="{{server_for_email}}/static/samples/json/amp-autocomplete-fruit-items.json">
-        <input type="text">
-      </amp-autocomplete>
-
-  </pre>
-  <pre lang="html">
-
-      <amp-autocomplete src="{{server_for_email}}/static/samples/json/amp-autocomplete-fruit-items.json" items="fruit">
-        <input type="text">
-      </amp-autocomplete>
-
-  </pre>
+```json
+{ 
+  "items" : ["apples", "bananas", "pears"], 
+  "fruit" : ["kiwis", "oranges", "watermelons"] 
+}
+```
+```html
+<amp-autocomplete src="{{server_for_email}}/static/samples/json/amp-autocomplete-fruit-items.json">
+  <input type="text">
+</amp-autocomplete>
+```
+```html
+<amp-autocomplete src="{{server_for_email}}/static/samples/json/amp-autocomplete-fruit-items.json" items="fruit">
+  <input type="text">
+</amp-autocomplete>
+```
 
 [/filter] <!-- formats="email" -->
 
