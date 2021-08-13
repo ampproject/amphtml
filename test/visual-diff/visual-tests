@@ -254,7 +254,7 @@
       "name": "AMP Story Ad System Layer",
       "viewport": {
         "width": 400,
-        "height": 600
+        "height": 800
       },
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-ad.js",
        "loading_complete_selectors": [
