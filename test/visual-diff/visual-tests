@@ -250,6 +250,19 @@
       "enable_percy_javascript": true
     },
     {
+      "url": "examples/visual-tests/amp-story/amp-story-ad.html",
+      "name": "AMP Story Ad System Layer",
+      "viewport": {
+        "width": 400,
+        "height": 600
+      },
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-ad.js",
+       "loading_complete_selectors": [
+        ".i-amphtml-story-ad-badge",
+        "amp-story[ad-showing]",
+      ],
+    },
+    {
       // TODO(#32685, @ampproject/wg-stories): see https://percy.io/ampproject/amphtml/builds/8876280/changed/503548953
       "flaky": true,
       "url": "examples/visual-tests/amp-story/basic.html",
