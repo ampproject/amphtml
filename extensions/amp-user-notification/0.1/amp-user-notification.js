@@ -14,23 +14,25 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {Deferred} from '#core/data-structures/promise';
-import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
+import {toggle} from '#core/dom/style';
+import {rethrowAsync} from '#core/error';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
 } from '#service/notification-ui-manager';
-import {Services} from '#service';
-import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
+
+import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service-helpers';
-import {rethrowAsync} from '#core/error';
-import {toggle} from '#core/dom/style';
+import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 
 const TAG = 'amp-user-notification';
 const SERVICE_ID = 'userNotificationManager';

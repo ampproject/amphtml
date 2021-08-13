@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {MessageType} from '../../../../src/3p-frame-messaging';
+import {MessageType} from '#core/3p-frame-messaging';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {WindowInterface} from '#core/window/interface';
+
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
   calculateIntersectionRect,
   maybeSetupCrossOriginObserver,
 } from '../cross-origin-observer';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.sandboxed('calculateIntersectionRect', {}, () => {
   it('when on screen', () => {

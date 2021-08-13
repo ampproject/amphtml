@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {Wrapper, useRenderer} from '#preact/component';
 import {getDate} from '#core/types/date';
+
+import * as Preact from '#preact';
 import {useMemo} from '#preact';
+import {Wrapper, useRenderer} from '#preact/component';
 import {useResourcesNotify} from '#preact/utils';
+
 import {user} from '../../../src/log';
 
 /** @const {string} */

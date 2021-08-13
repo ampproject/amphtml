@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-loader-0.1.css';
-import {Services} from '#service';
-import {htmlFor} from '#core/dom/static-template';
-import {installStylesForDoc} from '../../../src/style-installer';
 import {isIframeVideoPlayerComponent} from '#core/dom/layout';
+import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles, setStyle} from '#core/dom/style';
+
+import {Services} from '#service';
+
+import {CSS} from '../../../build/amp-loader-0.1.css';
+import {installStylesForDoc} from '../../../src/style-installer';
 
 /**
  * @fileoverview This file implements the new AMP loader as an extension. This

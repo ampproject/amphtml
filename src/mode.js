@@ -15,15 +15,13 @@
  */
 
 import * as coreMode from '#core/mode';
-import {parseQueryString} from '#core/types/string/url';
+import {getHashParams} from '#core/types/string/url';
 
 /**
  * @typedef {{
  *   localDev: boolean,
  *   development: boolean,
  *   test: boolean,
- *   log: (string|undefined),
- *   version: string,
  *   rtvVersion: string,
  *   runtime: (null|string|undefined),
  *   a4aId: (null|string|undefined),
@@ -58,11 +56,7 @@ export function getMode(opt_win) {
  * @return {!ModeDef}
  */
 function getMode_(win) {
-  const hashQuery = parseQueryString(
-    // location.originalHash is set by the viewer when it removes the fragment
-    // from the URL.
-    win.location['originalHash'] || win.location.hash
-  );
+  const hashParams = getHashParams(win);
 
   // The `minified`, `test` and `localDev` properties are replaced
   // as boolean literals when we run `amp dist` without the `--fortesting`
@@ -70,13 +64,11 @@ function getMode_(win) {
   // paths for localhost/testing/development are eliminated.
   return {
     localDev: coreMode.isLocalDev(win),
-    development: isModeDevelopment(win),
+    development: isModeDevelopment(win, hashParams),
     esm: IS_ESM,
     // amp-geo override
-    geoOverride: hashQuery['amp-geo'],
+    geoOverride: hashParams['amp-geo'],
     test: coreMode.isTest(win),
-    log: parseInt(hashQuery['log'], 10),
-    version: coreMode.version(),
     rtvVersion: getRtvVersion(win),
   };
 }
@@ -106,17 +98,13 @@ function getRtvVersion(win) {
  * bypassed via #validate=0.
  * Note that AMP_DEV_MODE flag is used for testing purposes.
  * @param {!Window} win
+ * @param {!JsonObject=} opt_hashParams
  * @return {boolean}
  */
-export function isModeDevelopment(win) {
-  const hashQuery = parseQueryString(
-    win.location['originalHash'] || win.location.hash
-  );
-  return !!(
-    ['1', 'actions', 'amp', 'amp4ads', 'amp4email'].includes(
-      hashQuery['development']
-    ) || win.AMP_DEV_MODE
-  );
+export function isModeDevelopment(win, opt_hashParams) {
+  const devModes = ['1', 'actions', 'amp', 'amp4ads', 'amp4email'];
+  const devParam = opt_hashParams || getHashParams(win);
+  return devModes.includes(devParam['development']) || !!win.AMP_DEV_MODE;
 }
 
 /**

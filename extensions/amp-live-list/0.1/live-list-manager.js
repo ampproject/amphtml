@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import {Poller} from './poller';
 import {Services} from '#service';
-import {addParamToUrl} from '../../../src/url';
 import {extensionScriptsInNode} from '#service/extension-script';
+
+import {Poller} from './poller';
+
 import {fetchDocument} from '../../../src/document-fetcher';
+import {userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {userAssert} from '../../../src/log';
+import {addParamToUrl} from '../../../src/url';
 
 /** @const {string} */
 export const SERVICE_ID = 'liveListManager';

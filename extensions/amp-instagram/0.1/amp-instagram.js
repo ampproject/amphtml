@@ -35,14 +35,16 @@
  * style without changing the layout/size.
  */
 
-import {CSS} from '../../../build/amp-instagram-0.1.css';
-import {Services} from '#service';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {getData, listen} from '../../../src/event-helper';
-import {isObject} from '#core/types';
 import {removeElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {setStyle} from '#core/dom/style';
+import {isObject} from '#core/types';
 import {tryParseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {CSS} from '../../../build/amp-instagram-0.1.css';
+import {getData, listen} from '../../../src/event-helper';
 import {userAssert} from '../../../src/log';
 
 export class AmpInstagram extends AMP.BaseElement {

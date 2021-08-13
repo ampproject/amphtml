@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {Instagram} from '../component';
-import {WithAmpContext} from '#preact/context';
-import {createRef} from '#preact';
 import {mount} from 'enzyme';
+
+import * as Preact from '#preact';
+import {createRef} from '#preact';
+import {WithAmpContext} from '#preact/context';
+
 import {waitFor} from '#testing/test-helper';
+
+import {Instagram} from '../component';
 
 describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
   it('Normal render', () => {

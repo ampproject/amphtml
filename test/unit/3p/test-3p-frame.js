@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {deserializeMessage, serializeMessage} from '#core/3p-frame-messaging';
 import {DomFingerprint} from '#core/dom/fingerprint';
 import {WindowInterface} from '#core/window/interface';
 
@@ -32,11 +33,6 @@ import {
   resetBootstrapBaseUrlForTesting,
   resetCountForTesting,
 } from '../../../src/3p-frame';
-import {
-  deserializeMessage,
-  serializeMessage,
-} from '../../../src/3p-frame-messaging';
-import {dev} from '../../../src/log';
 
 describes.realWin('3p-frame', {amp: true}, (env) => {
   let window, document;
@@ -228,7 +224,6 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
               'localDev': true,
               'development': false,
               'test': false,
-              'version': '$internalRuntimeVersion$',
               'esm': false,
             },
             'canary': false,
@@ -605,23 +600,18 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
         });
 
         it('should return null if the input is not a json', () => {
-          const errorStub = env.sandbox.stub(dev(), 'error');
           expect(deserializeMessage('amp-other')).to.be.null;
-          expect(errorStub).to.not.be.called;
         });
 
         it('should return null if failed to parse the input', () => {
-          const errorStub = env.sandbox.stub(dev(), 'error');
+          expectAsyncConsoleError(/MESSAGING: Failed to parse message/i, 2);
           expect(deserializeMessage('amp-{"type","sentinel":"msgsentinel"}')).to
             .be.null;
-          expect(errorStub).to.be.calledOnce;
-
           expect(
             deserializeMessage(
               'amp-{"type":"msgtype"|"sentinel":"msgsentinel"}'
             )
           ).to.be.null;
-          expect(errorStub).to.be.calledTwice;
         });
       });
     });

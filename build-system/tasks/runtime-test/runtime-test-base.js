@@ -32,6 +32,7 @@ const {
 } = require('../../common/ctrlcHandler');
 const {app} = require('../../server/test-server');
 const {createKarmaServer, getAdTypes} = require('./helpers');
+const {customLaunchers} = require('./custom-launchers');
 const {cyan, green, red, yellow} = require('../../common/colors');
 const {dotWrappingWidth} = require('../../common/logging');
 const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel');
@@ -116,82 +117,20 @@ class RuntimeTestConfig {
   }
 
   /**
-   * Updates the browsers based off of the test type
-   * being run (unit, integration, a4a) and test settings.
-   * Defaults to Chrome if no matching settings are found.
+   * Picks a browser config based on the the test type and command line flags.
+   * Defaults to Chrome.
    */
   updateBrowsers() {
-    if (argv.edge) {
-      Object.assign(this, {
-        browsers: [argv.headless ? 'EdgeHeadless' : 'Edge'],
-      });
-      return;
-    }
-
-    if (argv.firefox) {
-      Object.assign(this, {
-        browsers: ['Firefox_flags'],
-        customLaunchers: {
-          // eslint-disable-next-line
-          Firefox_flags: {
-            base: 'Firefox',
-            flags: argv.headless ? ['-headless'] : [],
-          },
-        },
-      });
-      return;
-    }
-
-    if (argv.ie) {
-      Object.assign(this, {
-        browsers: ['IE'],
-        customLaunchers: {
-          IeNoAddOns: {
-            base: 'IE',
-            flags: ['-extoff'],
-          },
-        },
-      });
-      return;
-    }
-
-    if (argv.safari) {
-      Object.assign(this, {browsers: ['SafariNative']});
-      return;
-    }
-
-    if (argv.chrome_canary) {
-      Object.assign(this, {browsers: ['ChromeCanary']});
-      return;
-    }
-
-    if (argv.chrome_flags) {
-      const chromeFlags = [];
-      argv.chrome_flags.split(',').forEach((flag) => {
-        chromeFlags.push('--'.concat(flag));
-      });
-      Object.assign(this, {
-        browsers: ['Chrome_flags'],
-        customLaunchers: {
-          // eslint-disable-next-line
-          Chrome_flags: {
-            base: 'Chrome',
-            flags: chromeFlags,
-          },
-        },
-      });
-      return;
-    }
-
-    if (argv.headless) {
-      Object.assign(this, {browsers: ['Chrome_no_extensions_headless']});
-      return;
-    }
-
-    // Default to Chrome.
-    Object.assign(this, {
-      browsers: [isCiBuild() ? 'Chrome_ci' : 'Chrome_no_extensions'],
-    });
+    const browser = argv.edge
+      ? 'EdgeCustom'
+      : argv.firefox
+      ? 'FirefoxCustom'
+      : argv.ie
+      ? 'IECustom'
+      : argv.safari
+      ? 'SafariCustom'
+      : 'ChromeCustom';
+    Object.assign(this, {browsers: [browser], customLaunchers});
   }
 
   /**

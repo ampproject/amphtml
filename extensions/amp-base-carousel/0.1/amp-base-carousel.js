@@ -137,7 +137,7 @@ class AmpCarousel extends AMP.BaseElement {
         this.carousel_.updateHorizontal(newValue === 'true');
       },
       'loop': (newValue) => {
-        this.carousel_.updateLoop(newValue === 'true');
+        this.carousel_.updateLoop(newValue === 'true' || newValue === '');
       },
       'mixed-length': (newValue) => {
         this.carousel_.updateMixedLength(newValue === 'true');

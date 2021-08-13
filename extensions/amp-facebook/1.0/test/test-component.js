@@ -19,7 +19,7 @@ import {Facebook} from '../component';
 import {WithAmpContext} from '#preact/context';
 import {createRef} from '#preact';
 import {mount} from 'enzyme';
-import {serializeMessage} from '../../../../src/3p-frame-messaging';
+import {serializeMessage} from '#core/3p-frame-messaging';
 import {waitFor} from '#testing/test-helper';
 
 describes.sandboxed('Facebook preact component', {}, (env) => {

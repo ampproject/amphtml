@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import * as DocumentReady from '#core/document-ready';
-import * as SkimOptionsModule from '../skim-options';
-import * as chunkModule from '../../../../src/chunk';
 import {Deferred} from '#core/data-structures/promise';
-import {LinkRewriterManager} from '../link-rewriter/link-rewriter-manager';
+import * as DocumentReady from '#core/document-ready';
+
+import helpersFactory from './helpers';
+
+import * as chunkModule from '../../../../src/chunk';
 import {SKIMLINKS_REWRITER_ID} from '../constants';
 import {EVENTS as linkRewriterEvents} from '../link-rewriter/constants';
-import helpersFactory from './helpers';
+import {LinkRewriterManager} from '../link-rewriter/link-rewriter-manager';
+import * as SkimOptionsModule from '../skim-options';
 
 describes.fakeWin(
   'amp-skimlinks',

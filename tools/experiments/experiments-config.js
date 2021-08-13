@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -187,11 +187,6 @@ export const EXPERIMENTS = [
     id: 'amp-story-desktop-one-panel',
     name: 'New desktop one-panel UI with background blur for stories.',
     spec: 'https://github.com/ampproject/amphtml/projects/128',
-  },
-  {
-    id: 'amp-story-page-attachment-ui-v2',
-    name: 'New UI for all new page attachments in stories format',
-    spec: 'https://github.com/ampproject/amphtml/projects/123',
   },
   {
     id: 'flexible-bitrate',

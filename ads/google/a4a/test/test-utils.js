@@ -649,13 +649,14 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
                 architecture: 'x86',
                 model: 'Pixel',
                 uaFullVersion: 3.14159,
+                bitness: 42,
               }),
           },
         });
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', Date.now(), [], []).then((url) => {
             expect(url).to.match(
-              /[&?]uap=Windows&uapv=10&uaa=x86&uam=Pixel&uafv=3.14159[&$]/
+              /[&?]uap=Windows&uapv=10&uaa=x86&uam=Pixel&uafv=3.14159&uab=42[&$]/
             );
           });
         });
@@ -684,7 +685,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           const promise = googleAdUrl(impl, '', Date.now(), [], []).then(
             (url) => {
               expect(url).to.not.match(
-                /[&?]uap=Windows&uapv=10&uaa=x86&uam=Pixel&uafv=3.14159[&$]/
+                /[&?]uap=Windows&uapv=10&uaa=x86&uam=Pixel&uafv=3.14159&uab=42[&$]/
               );
             }
           );
