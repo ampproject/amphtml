@@ -99,6 +99,8 @@ function ProxyIframeEmbedWithRef(
   }, [type]);
 
   const [{name, src}, setNameAndSrc] = useState({name: nameProp, src: srcProp});
+  const sentinelRef = useRef(null);
+
   useLayoutEffect(() => {
     const win = contentRef.current?.ownerDocument?.defaultView;
     const src =
@@ -110,14 +112,16 @@ function ProxyIframeEmbedWithRef(
     if (!win) {
       return;
     }
+    if (!sentinelRef.current) {
+      sentinelRef.current = generateSentinel(win);
+    }
     const context = Object.assign(
       dict({
         'location': {
           'href': win.location.href,
         },
-        'sentinel': generateSentinel(win),
-      }),
-      contextOptions
+        'sentinel': sentinelRef.current,
+      })
     );
     const attrs = Object.assign(
       dict({
