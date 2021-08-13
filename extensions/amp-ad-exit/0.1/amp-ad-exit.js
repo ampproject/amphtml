@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import {
+  MessageType,
+  deserializeMessage,
+  listen,
+} from '#core/3p-frame-messaging';
 import {ActionTrust} from '#core/constants/action-constants';
 import {isJsonScriptTag} from '#core/dom';
 import {isObject} from '#core/types';
@@ -29,11 +34,6 @@ import {createFilter} from './filters/factory';
 import {FilterType} from './filters/filter';
 import {makeInactiveElementSpec} from './filters/inactive-element';
 
-import {
-  MessageType,
-  deserializeMessage,
-  listen,
-} from '../../../src/3p-frame-messaging';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getData} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';

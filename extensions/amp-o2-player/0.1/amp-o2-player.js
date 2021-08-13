@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {MessageType} from '#core/3p-frame-messaging';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {PauseHelper} from '#core/dom/video/pause-helper';
@@ -21,7 +22,6 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {MessageType} from '../../../src/3p-frame-messaging';
 import {
   getConsentPolicyInfo,
   getConsentPolicyState,
