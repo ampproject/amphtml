@@ -523,6 +523,15 @@
     }
   },
   {
+    "name": "amp-image-slider",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "wrapper": "bento"
+    }
+  },
+  {
     "name": "amp-image-viewer",
     "version": "0.1",
     "latestVersion": "0.1",
