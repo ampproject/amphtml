@@ -92,6 +92,7 @@ function getMinifiedConfig() {
   return {
     compact: false,
     plugins,
+    sourceMaps: 'inline',
     presets: [presetEnv],
     retainLines: true,
     'assumptions': {

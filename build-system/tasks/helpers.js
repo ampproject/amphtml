@@ -35,6 +35,7 @@ const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
+const {massageSourcemaps} = require('../compile/helpers');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {watch} = require('chokidar');
 
@@ -459,6 +460,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
 
     if (options.minify) {
       ({code, map} = await minify(code, map));
+      map = massageSourcemaps(map, options);
     }
 
     await Promise.all([
