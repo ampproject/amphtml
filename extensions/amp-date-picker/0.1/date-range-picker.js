@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import {DayPickerPhrases} from './defaultPhrases';
 import {dict} from '#core/types/object';
-import {requireExternal} from '../../../src/module';
+
 import {withDatePickerCommon} from './date-picker-common';
+import {DayPickerPhrases} from './defaultPhrases';
 import {wrap as withMaximumNights} from './wrappers/maximum-nights';
+
+import {requireExternal} from '../../../src/module';
 
 /**
  * Create a DateRangePicker React component

@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {Soundcloud} from '../component';
 import {boolean, color, text, withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
+
 import {rgba2hex} from './converter';
+
+import {Soundcloud} from '../component';
 
 export default {
   title: 'Soundcloud',

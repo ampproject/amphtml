@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import {text, withKnobs} from '@storybook/addon-knobs';
+
 import * as Preact from '#preact';
+
 import {EmbedlyCard} from '../component';
 import {EmbedlyContext} from '../embedly-context';
-import {text, withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'EmbedlyCard',

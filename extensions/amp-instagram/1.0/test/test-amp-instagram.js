@@ -16,8 +16,10 @@
 
 import '../amp-instagram';
 import {createElementWithAttributes} from '#core/dom';
-import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
+
 import {toggleExperiment} from '#experiments';
+
+import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 import {waitFor} from '#testing/test-helper';
 
 describes.realWin(

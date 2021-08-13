@@ -16,10 +16,11 @@
 
 // TODO(@jridgewell, #11081): fix linter to allow fixing weird indentation
 
-import {SignatureVerifier, VerificationStatus} from '../signature-verifier';
 import {base64EncodeFromBytes} from '#core/types/string/base64';
-import {dev, user} from '../../../../src/log';
 import {utf8Encode} from '#core/types/string/bytes';
+
+import {dev, user} from '../../../../src/log';
+import {SignatureVerifier, VerificationStatus} from '../signature-verifier';
 
 const networkFailure = {throws: new TypeError('Failed to fetch')};
 

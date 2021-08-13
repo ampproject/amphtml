@@ -36,6 +36,12 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
+import {isJsonScriptTag} from '#core/dom';
+import {isArray, isObject} from '#core/types';
+import {tryParseJson} from '#core/types/object/json';
+
+import {isCanary} from '#experiments';
+
 import {Services} from '#service';
 
 /**
@@ -45,17 +51,12 @@ import {Services} from '#service';
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
+import {GEO_IN_GROUP} from './amp-geo-in-group';
 import {US_CA_CODE, ampGeoPresets} from './amp-geo-presets';
 
-import {GEO_IN_GROUP} from './amp-geo-in-group';
+import {urls} from '../../../src/config';
 import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {isArray, isObject} from '#core/types';
-import {isCanary} from '#experiments';
-import {isJsonScriptTag} from '#core/dom';
-
-import {tryParseJson} from '#core/types/object/json';
-import {urls} from '../../../src/config';
 
 /** @const */
 const TAG = 'amp-geo';

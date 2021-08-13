@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
+import {Services} from '#service';
+
+import {DEFAULT_SKIM_OPTIONS, pubcode} from './constants';
+import helpersFactory from './helpers';
+
 import {
   AFFILIATE_STATUS,
   AffiliateLinkResolver,
 } from '../affiliate-link-resolver';
 import {DEFAULT_CONFIG} from '../constants';
-import {DEFAULT_SKIM_OPTIONS, pubcode} from './constants';
-import {Services} from '#service';
 import {Waypoint} from '../waypoint';
-import helpersFactory from './helpers';
 
 const DOMAIN_RESOLVER_API_URL = DEFAULT_CONFIG.beaconUrl;
 

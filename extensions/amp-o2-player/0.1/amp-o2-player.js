@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
+import {MessageType} from '#core/3p-frame-messaging';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {MessageType} from '../../../src/3p-frame-messaging';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {PauseHelper} from '#core/dom/video/pause-helper';
 import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
 import {
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {listenFor} from '../../../src/iframe-helper';
-import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
+import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpO2Player extends AMP.BaseElement {
   /** @param {!AmpElement} element */
