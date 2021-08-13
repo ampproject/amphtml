@@ -69,8 +69,6 @@ const DEFAULT_SANDBOX =
 function ProxyIframeEmbedWithRef(
   {
     allow = BLOCK_SYNC_XHR,
-    bootstrap,
-    contextOptions,
     excludeSandbox,
     name: nameProp,
     messageHandler,
@@ -135,7 +133,7 @@ function ProxyIframeEmbedWithRef(
       name: JSON.stringify(
         dict({
           'host': parseUrlDeprecated(src).hostname,
-          'bootstrap': bootstrap ?? getBootstrapUrl(type),
+          'bootstrap': getBootstrapUrl(type),
           'type': type,
           // "name" must be unique across iframes, so we add a count.
           // See: https://github.com/ampproject/amphtml/pull/2955
@@ -145,16 +143,7 @@ function ProxyIframeEmbedWithRef(
       ),
       src,
     });
-  }, [
-    bootstrap,
-    contextOptions,
-    count,
-    nameProp,
-    options,
-    srcProp,
-    title,
-    type,
-  ]);
+  }, [count, nameProp, options, srcProp, title, type]);
 
   useEffect(() => {
     const iframe = iframeRef.current?.node;
