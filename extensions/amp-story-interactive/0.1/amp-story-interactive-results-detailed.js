@@ -208,8 +208,13 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
         Math.random() * (slice - 2 * angleBuffer) + angleBuffer;
       const angle = slice * index + sliceRelAngle + offset;
 
-      // Transform the angle and distance (polar coordinates) of the result
-      // into Cartesian coordinates to be used in CSS
+      /**
+       * Transform the angle and distance (polar coordinates) of the result
+       * into Cartesian coordinates to be used in CSS.
+       *
+       * @param {function} trig Math.cos (y-axis coordinate) or Math.sin (x-axis coordinate)
+       * @return {string} CSS positioning value
+       */
       const transform = (trig) => CENTER + trig(angle) * dist - size / 2 + 'em';
 
       setImportantStyles(element, {
