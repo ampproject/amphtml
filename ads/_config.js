@@ -1114,12 +1114,6 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://smart-ads.biz/amp.js',
   },
 
-  'smartadserver': {
-    prefetch: 'https://ec-ns.sascdn.com/diff/js/amp.v0.js',
-    preconnect: 'https://static.sascdn.com',
-    renderStartImplemented: true,
-  },
-
   'smartclip': {
     prefetch: 'https://cdn.smartclip.net/amp/amp.v0.js',
     preconnect: 'https://des.smartclip.net',

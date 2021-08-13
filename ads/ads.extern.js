@@ -634,10 +634,6 @@ data.pkey;
 // sklik.js
 data.elm;
 
-// smartadserver.js
-var sas;
-sas.callAmpAd;
-
 // smartclip.js
 data.plc;
 data.sz;
