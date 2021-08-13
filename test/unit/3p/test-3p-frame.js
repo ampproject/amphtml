@@ -16,6 +16,7 @@
 
 import {deserializeMessage, serializeMessage} from '#core/3p-frame-messaging';
 import {DomFingerprint} from '#core/dom/fingerprint';
+import * as mode from '#core/mode';
 import {WindowInterface} from '#core/window/interface';
 
 import {toggleExperiment} from '#experiments';
@@ -42,8 +43,11 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
     document = window.document;
   });
 
-  function mockMode(mode) {
-    env.sandbox.stub(window.parent, '__AMP_MODE').value(mode);
+  function mockMode(options) {
+    env.sandbox.stub(window.parent, '__AMP_MODE').value(options);
+    env.sandbox.stub(mode, 'isLocalDev').returns(!!options.localDev);
+    env.sandbox.stub(mode, 'isTest').returns(!!options.test);
+    env.sandbox.stub(mode, 'isProd').returns(!options);
   }
 
   describe
