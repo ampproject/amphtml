@@ -335,7 +335,9 @@ describes.realWin(
         consentUI.show(false);
         await macroTask();
         await macroTask();
-        expect(consentUI.ui_.src).to.match(/cid=amp-.{22}&r=RANDOM&clientconfig=.{28}&cpid=/);
+        expect(consentUI.ui_.src).to.match(
+          /cid=amp-.{22}&r=RANDOM&clientconfig=.{28}&cpid=/
+        );
       });
 
       it("should pass info into iframe's name", async () => {

@@ -51,9 +51,6 @@ import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {isArray, isEnumValue, isObject} from '#core/types';
 import {realChildElements} from '#core/dom/query';
-import {once} from '#core/types/function';
-import {getRandomString64} from '#service/cid-impl';
-
 import {toggle} from '#core/dom/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
@@ -126,9 +123,6 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {?Promise<?Array>} */
     this.purposeConsentRequired_ = null;
-
-    /** @private {?string} */
-    this.consentPageViewID64_ = once(() => getRandomString64(this.ampdoc.win));
   }
 
   /** @override */

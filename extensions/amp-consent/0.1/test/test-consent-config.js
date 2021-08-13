@@ -616,22 +616,22 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
 
       stubGetServicePromiseForDoc.callThrough();
 
-      let u1 = await expandConsentEndpointUrl(
+      const u1 = await expandConsentEndpointUrl(
         doc.body,
         'https://example.test?cid=CLIENT_ID&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
       );
 
-      let u2 = await expandConsentEndpointUrl(
+      const u2 = await expandConsentEndpointUrl(
         doc.body,
         'https://example.test?cid=CLIENT_ID()&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
       );
 
-      let u3 = await expandConsentEndpointUrl(
+      const u3 = await expandConsentEndpointUrl(
         doc.body,
         'https://example.test?cid=CLIENT_ID(123)&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
       );
 
-      let u4 = await expandConsentEndpointUrl(
+      const u4 = await expandConsentEndpointUrl(
         doc.body,
         'https://example.test?cid=CLIENT_ID(abc)&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
       );

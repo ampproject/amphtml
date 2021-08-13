@@ -34,8 +34,6 @@ import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert} from '../../../src/log';
 import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
 import {hasOwn} from '#core/types/object';
-import {once} from '#core/types/function';
-import {getRandomString64} from '#service/cid-impl';
 
 const TAG = 'CONSENT-STATE-MANAGER';
 
