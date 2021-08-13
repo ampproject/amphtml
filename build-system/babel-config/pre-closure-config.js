@@ -89,6 +89,7 @@ function getPreClosureConfig() {
   ];
   const preClosurePresets = argv.esm || argv.sxg ? [presetEnv] : [];
   const preClosureConfig = {
+    comments: false,
     compact: false,
     plugins: preClosurePlugins,
     presets: preClosurePresets,
