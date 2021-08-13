@@ -47,7 +47,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
     env.sandbox.stub(window.parent, '__AMP_MODE').value(options);
     env.sandbox.stub(mode, 'isLocalDev').returns(!!options.localDev);
     env.sandbox.stub(mode, 'isTest').returns(!!options.test);
-    env.sandbox.stub(mode, 'isProd').returns(!options);
+    env.sandbox.stub(mode, 'isProd').returns(!!options.isProd);
   }
 
   describe
@@ -340,7 +340,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       });
 
       it('should pick the right bootstrap unique url (prod)', () => {
-        mockMode({});
+        mockMode({isProd: true});
         const ampdoc = Services.ampdoc(window.document);
         expect(getBootstrapBaseUrl(window, ampdoc)).to.match(
           /^https:\/\/d-\d+\.ampproject\.net\/\$\internal\w+\$\/frame\.html$/
@@ -348,7 +348,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       });
 
       it('should return a stable URL in getBootstrapBaseUrl', () => {
-        mockMode({});
+        mockMode({isProd: true});
         const ampdoc = Services.ampdoc(window.document);
         expect(getBootstrapBaseUrl(window, ampdoc)).to.equal(
           getBootstrapBaseUrl(window, ampdoc)
@@ -356,7 +356,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       });
 
       it('should return a stable URL in getDefaultBootstrapBaseUrl', () => {
-        mockMode({});
+        mockMode({isProd: true});
         expect(getDefaultBootstrapBaseUrl(window)).to.equal(
           getDefaultBootstrapBaseUrl(window)
         );
@@ -371,7 +371,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       });
 
       it('should return different values for different file names', () => {
-        mockMode({});
+        mockMode({isProd: true});
         let match =
           /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame\.html$/.exec(
             getDefaultBootstrapBaseUrl(window)
@@ -418,7 +418,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       });
 
       it('should prefetch bootstrap frame and JS', () => {
-        mockMode({});
+        mockMode({isProd: true});
         const ampdoc = Services.ampdoc(window.document);
         preloadBootstrap(window, 'avendor', ampdoc, preconnect);
         // Wait for visible promise.
@@ -479,7 +479,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
           .returns('http://acme.org/')
           .twice();
 
-        mockMode({});
+        mockMode({isProd: true});
         const link = document.createElement('link');
         link.setAttribute('rel', 'canonical');
         link.setAttribute('href', 'https://foo.bar/baz');
