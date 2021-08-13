@@ -180,6 +180,7 @@ Specifies the key to the data array within the JSON response. Nested keys can be
 
       </amp-autocomplete>
 ```
+
 ```html
 <amp-autocomplete filter="prefix" items="fruit">
   <input type="text">
@@ -188,6 +189,7 @@ Specifies the key to the data array within the JSON response. Nested keys can be
     </script>
 </amp-autocomplete>
 ```
+
 [/filter] <!-- formats="websites" -->
 
 [filter formats="email"]
@@ -195,16 +197,18 @@ Specifies the key to the data array within the JSON response. Nested keys can be
 Note that the following data is returned by the remote `src`:
 
 ```json
-{ 
-  "items" : ["apples", "bananas", "pears"], 
-  "fruit" : ["kiwis", "oranges", "watermelons"] 
+{
+  "items" : ["apples", "bananas", "pears"],
+  "fruit" : ["kiwis", "oranges", "watermelons"]
 }
 ```
+
 ```html
 <amp-autocomplete src="{{server_for_email}}/static/samples/json/amp-autocomplete-fruit-items.json">
   <input type="text">
 </amp-autocomplete>
 ```
+
 ```html
 <amp-autocomplete src="{{server_for_email}}/static/samples/json/amp-autocomplete-fruit-items.json" items="fruit">
   <input type="text">
