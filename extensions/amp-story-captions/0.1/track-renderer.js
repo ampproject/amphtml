@@ -19,11 +19,11 @@ import {removeChildren, removeElement} from '#core/dom';
 import {setStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 
-// Class used for sections of text that is in the future (for ASR-style captions).
+// Class used for sections of text in the future (for ASR-style captions).
 const FUTURE_CUE_SECTION_CLASS = 'amp-story-captions-future';
 
 /**
- * Parses a WebVTT timestamp and returns the time in seconds from the start of the video.
+ * Parses a WebVTT timestamp and returns the time in seconds from video start.
  * https://www.w3.org/TR/webvtt1/#webvtt-timestamp
  * @param {string} timestamp
  * @return {?number}
@@ -70,7 +70,9 @@ export class TrackRenderer {
     });
   }
 
-  /** Cleans up listeners and DOM elements. */
+  /**
+   * Cleans up listeners and DOM elements.
+   */
   dispose() {
     this.cueChangeUnlistener_();
     this.timeUpdateUnlistener_();
@@ -104,7 +106,8 @@ export class TrackRenderer {
           const timestamp = parseTimestamp(node.data);
           if (timestamp !== null) {
             timestamps.push(timestamp);
-            // Create a new section after each timestamp, so the style can easily be updated based on time.
+            // Create a new section after each timestamp, so the style can
+            // easily be updated based on time.
             section = this.element_.ownerDocument.createElement('span');
             cueElement.appendChild(section);
           }
@@ -127,7 +130,8 @@ export class TrackRenderer {
     const videoTime = this.video_.currentTime;
     toArray(this.element_.childNodes).forEach((cue, i) => {
       toArray(cue.childNodes).forEach((section, j) => {
-        // The first section always has implicit timestamp 0, so it's never in the future.
+        // The first section always has implicit timestamp 0, so it's never in
+        // the future.
         if (j > 0) {
           section.classList.toggle(
             FUTURE_CUE_SECTION_CLASS,
