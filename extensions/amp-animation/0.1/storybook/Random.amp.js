@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {AnimationTemplate} from './template';
 import {withAmp} from '@ampproject/storybook-addon';
 import {withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
+
+import {AnimationTemplate} from './template';
 
 const CONTAINER_STYLE = {
   position: 'absolute',

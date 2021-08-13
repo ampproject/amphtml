@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {loadPromise} from '../../src/event-helper';
 import {
   adoptServiceFactoryForEmbedDoc,
   adoptServiceForEmbedDoc,
@@ -37,7 +38,6 @@ import {
   resetServiceForTesting,
   setParentWindow,
 } from '../../src/service-helpers';
-import {loadPromise} from '../../src/event-helper';
 
 describes.sandboxed('service', {}, (env) => {
   describe('disposable interface', () => {

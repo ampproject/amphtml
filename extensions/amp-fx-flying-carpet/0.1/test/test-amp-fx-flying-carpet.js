@@ -15,8 +15,8 @@
  */
 
 import '../amp-fx-flying-carpet';
-import {Resource} from '#service/resource';
 import {Services} from '#service';
+import {Resource} from '#service/resource';
 
 describes.realWin(
   'amp-fx-flying-carpet',

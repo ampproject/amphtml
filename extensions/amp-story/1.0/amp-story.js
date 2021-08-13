@@ -108,7 +108,7 @@ import {
   shouldShowStoryUrlInfo,
 } from './utils';
 import {upgradeBackgroundAudio} from './audio';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsDe from './_locales/de.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsDefault from './_locales/default.json' assert {type: 'json'}; // lgtm[js/syntax-error]
@@ -965,7 +965,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     const lockOrientation =
-      screen.orientation.lock ||
+      screen.orientation?.lock ||
       screen.lockOrientation ||
       screen.mozLockOrientation ||
       screen.msLockOrientation ||

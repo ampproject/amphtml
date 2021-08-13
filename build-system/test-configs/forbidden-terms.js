@@ -548,10 +548,10 @@ const forbiddenTermsGlobal = {
   },
   'internalListenImplementation': {
     message:
-      'Use `listen()` in either `event-helper` or `3p-frame-messaging`' +
+      'Use `listen()` in either `event-helper` or `#core/3p-frame-messaging`' +
       ', depending on your use case.',
     allowlist: [
-      'src/3p-frame-messaging.js',
+      'src/core/3p-frame-messaging.js',
       'src/event-helper.js',
       'src/core/dom/event-helper-listen.js',
     ],

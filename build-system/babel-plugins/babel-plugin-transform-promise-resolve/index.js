@@ -13,21 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// @ts-nocheck
 
 const pathmodule = require('path');
 const {addNamed} = require('@babel/helper-module-imports');
 
 /**
- * @param {*} babel
- * @param {{
- *  importFrom?: string,
- * }=} options
- * @return {{
- *   visitor: {
- *     CallExpression: {Funcion(path: string): void}
- *  }
- * }}
+ * @interface {babel.PluginPass}
+ * @param {babel} babel
+ * @param {*} options
+ * @return {babel.PluginObj}
  */
 module.exports = function (babel, options = {}) {
   const {types: t} = babel;
@@ -38,9 +32,13 @@ module.exports = function (babel, options = {}) {
     visitor: {
       CallExpression(path) {
         const {node} = path;
+        const {filename} = this.file.opts;
 
         if (node.arguments.length > 0) {
           return;
+        }
+        if (!filename) {
+          throw new Error('Cannot use plugin without providing a filename');
         }
 
         const callee = path.get('callee');
@@ -48,7 +46,6 @@ module.exports = function (babel, options = {}) {
           return;
         }
 
-        const {filename} = this.file.opts;
         // Ensure the source is relative to the current file by prepending.
         // Relative will return "foo" instead of "./foo". And if it returned
         // a "../foo", making it "./../foo" doesn't hurt.

@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Preact from '#preact';
-import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
-import {Lightbox} from '../../amp-lightbox/1.0/component';
-import {LightboxGalleryContext} from './context';
-import {PADDING_ALLOWANCE, useStyles} from './component.jss';
-import {forwardRef} from '#preact/compat';
+import objstr from 'obj-str';
+
 import {mod} from '#core/math';
+
+import * as Preact from '#preact';
 import {
   useCallback,
   useImperativeHandle,
@@ -27,7 +25,13 @@ import {
   useRef,
   useState,
 } from '#preact';
-import objstr from 'obj-str';
+import {forwardRef} from '#preact/compat';
+
+import {PADDING_ALLOWANCE, useStyles} from './component.jss';
+import {LightboxGalleryContext} from './context';
+
+import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
+import {Lightbox} from '../../amp-lightbox/1.0/component';
 
 /** @const {string} */
 const DEFAULT_GROUP = 'default';

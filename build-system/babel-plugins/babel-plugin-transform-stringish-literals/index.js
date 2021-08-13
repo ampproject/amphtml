@@ -13,18 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// @ts-nocheck
 
 const ESCAPE_REGEX = /\${|\\|`/g;
 
-module.exports = function ({types: t}) {
+/**
+ * @interface {babel.PluginPass}
+ * @param {babel} babel
+ * @return {babel.PluginObj}
+ */
+module.exports = function (babel) {
+  const {types: t} = babel;
   const cloneNodes = (nodes) => nodes.map((node) => t.cloneNode(node));
   const escapeValue = (value) => String(value).replace(ESCAPE_REGEX, '\\$&');
 
   /**
-   * @param {CompilerNode} clonedQuasis
+   * @param {babel.types.TemplateElement[]} clonedQuasis
    * @param {number} index
-   * @return {number|undefined}
+   * @return {number}
    */
   function whichCloneQuasi(clonedQuasis, index) {
     for (let i = index; i >= 0; i--) {
@@ -33,11 +38,12 @@ module.exports = function ({types: t}) {
         return index;
       }
     }
+    throw new Error(`whichCloseQuasi should must always find the index`);
   }
 
   /**
-   * @param {CompilerNode} leftPath
-   * @param {CompilerNode} rightPath
+   * @param {babel.NodePath<babel.types.TemplateLiteral>} leftPath
+   * @param {babel.NodePath<babel.types.TemplateLiteral>} rightPath
    */
   function joinTemplateLiterals(leftPath, rightPath) {
     const {node: leftNode} = leftPath;
@@ -47,7 +53,9 @@ module.exports = function ({types: t}) {
     const fromQuasi = rightNode.quasis[0];
     const toQuasi = leftNode.quasis[leftNode.quasis.length - 1];
     toQuasi.value.raw += fromQuasi.value.raw;
-    toQuasi.value.cooked += fromQuasi.value.cooked;
+    if (fromQuasi.value.cooked) {
+      toQuasi.value.cooked += fromQuasi.value.cooked;
+    }
 
     // Merge the right remaining quasis and expressions to ensure merged left is valid.
     leftNode.quasis.push(...rightNode.quasis.slice(1));
@@ -58,11 +66,11 @@ module.exports = function ({types: t}) {
   }
 
   /**
-   * @param {BabelPath} path
+   * @param {babel.NodePath<babel.types.Expression>} path
    */
   function joinMaybeTemplateLiteral(path) {
-    const left = path.get('left');
-    const right = path.get('right');
+    const left = /** @type {babel.NodePath} */ (path.get('left'));
+    const right = /** @type {babel.NodePath} */ (path.get('right'));
     if (left.isTemplateLiteral()) {
       if (right.isTemplateLiteral()) {
         // When both sides are template literals, bypass `babel.evaluate` since it cannot handle this condition.
@@ -109,7 +117,7 @@ module.exports = function ({types: t}) {
       },
 
       /**
-       * @param {BabelPath} path
+       * @param {babel.NodePath<babel.types.TemplateLiteral>} path
        */
       TemplateLiteral(path) {
         // Convert any items inside a template literal that are static literals.

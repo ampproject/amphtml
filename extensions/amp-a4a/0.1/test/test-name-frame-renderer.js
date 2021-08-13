@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {NameFrameRenderer} from '../name-frame-renderer';
 import {parseJson} from '#core/types/object/json';
 import {utf8Encode} from '#core/types/string/bytes';
+
+import {NameFrameRenderer} from '../name-frame-renderer';
 
 const realWinConfig = {
   amp: {},

@@ -15,6 +15,7 @@
  */
 
 import {Services} from '#service';
+
 import {getAdNetworkConfig} from '../ad-network-config';
 
 describes.realWin(

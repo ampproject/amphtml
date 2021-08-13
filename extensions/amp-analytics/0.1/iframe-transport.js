@@ -22,6 +22,7 @@ import {hasOwn} from '#core/types/object';
 import * as mode from '#core/mode';
 import {toggle} from '#core/dom/style';
 import {urls} from '../../../src/config';
+import {IframeTransportEventDef} from '#core/3p-frame-messaging';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics/iframe-transport';
@@ -290,9 +291,7 @@ export class IframeTransport {
         this.creativeId_
     );
     frameData.queue.enqueue(
-      /**
-       * @type {!../../../src/3p-frame-messaging.IframeTransportEvent}
-       */
+      /** @type {!IframeTransportEventDef} */
       ({creativeId: this.creativeId_, message: event})
     );
   }

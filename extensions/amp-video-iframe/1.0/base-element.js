@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
 import {VideoIframe} from './component';
+
+import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
 
 export class BaseElement extends VideoBaseElement {}
 
