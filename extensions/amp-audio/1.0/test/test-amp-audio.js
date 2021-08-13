@@ -96,24 +96,6 @@ describes.realWin(
       return ampAudio;
     }
 
-    /**
-     * Creates `<amp-story>` and add `<amp-audio>` as child
-     * @param {*} attributes Attributes to be add
-     * @returns Returns `<amp-story>` with `<amp-audio>` as child
-     */
-    function attachToAmpStoryAndRun(attributes) {
-      naturalDimensions_['AMP-AUDIO'] = {width: '300px', height: '30px'};
-      const ampAudio = doc.createElement('amp-audio');
-      const ampStory = doc.createElement('amp-story');
-      for (const key in attributes) {
-        ampAudio.setAttribute(key, attributes[key]);
-      }
-      ampStory.appendChild(ampAudio);
-      doc.body.appendChild(ampStory);
-
-      return ampAudio;
-    }
-
     it('should load audio through attribute', async () => {
       element = attachAndRun({
         src: 'audio.mp3',
