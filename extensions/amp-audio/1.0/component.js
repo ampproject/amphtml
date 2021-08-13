@@ -40,6 +40,7 @@ export function AudioWithRef(
     autoplay = false,
     children,
     controlsList,
+    loading = 'lazy',
     loop = false,
     muted = false,
     onPause,
@@ -124,6 +125,7 @@ export function AudioWithRef(
         autoplay={autoplay}
         controls // Force controls otherwise there is no player UI.
         controlsList={controlsList}
+        loading={loading}
         loop={loop}
         muted={muted}
         onPlaying={() => onPlaying()}
