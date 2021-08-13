@@ -66,6 +66,7 @@ export const EmbedMode = {
    * This differs from the NOT_EMBEDDED embed mode in the following ways:
    * - Removes share icon from system layer
    * - Removes audio icon from system layer
+   * - Removes Story URL info from system layer
    */
   NO_SHARING_NOR_AUDIO_UI: 4,
 };
