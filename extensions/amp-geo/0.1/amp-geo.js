@@ -39,6 +39,7 @@ import {Deferred} from '#core/data-structures/promise';
 import {isJsonScriptTag} from '#core/dom';
 import {isArray, isObject} from '#core/types';
 import {tryParseJson} from '#core/types/object/json';
+import {getHashParams} from '#core/types/string/url';
 
 import {isCanary} from '#experiments';
 
@@ -189,20 +190,18 @@ export class AmpGeo extends AMP.BaseElement {
     const trimmedGeoMatch = GEO_HOTPATCH_STR_REGEX.exec(COUNTRY);
 
     // default country is 'unknown' which is also the zero length case
-    if (
-      getMode(this.win).geoOverride &&
-      (isCanary(this.win) || getMode(this.win).localDev)
-    ) {
+    const geoOverride = getHashParams(this.win)['amp-geo'];
+    if (geoOverride && (isCanary(this.win) || getMode(this.win).localDev)) {
       // debug override case, only works in canary or localdev
       // match to \w characters only to prevent xss vector
       const overrideGeoMatch = GEO_HOTPATCH_STR_REGEX.exec(
-        getMode(this.win).geoOverride.toLowerCase()
+        geoOverride.toLowerCase()
       );
       if (overrideGeoMatch[1]) {
-        this.country_ = overrideGeoMatch[1].toLowerCase();
+        this.country_ = overrideGeoMatch[1];
         if (overrideGeoMatch[2]) {
           // Allow subdivision_ to be customized for testing, not checking us-ca
-          this.subdivision_ = overrideGeoMatch[2].toLowerCase();
+          this.subdivision_ = overrideGeoMatch[2];
         }
         this.mode_ = mode.GEO_OVERRIDE;
       }
