@@ -342,36 +342,11 @@ describes.realWin(
       ).to.be.false;
     });
 
-    it(
-      'should not play/pause when `amp-audio` is a direct descendant ' +
-        'of `amp-story`',
-      async () => {
-        element = await attachToAmpStoryAndRun({
-          'width': '500',
-          src: 'audio.mp3',
-        });
-
-        // Wait till rendering is finished
-        await waitForRender();
-
-        // Fetch audio element from shadowRoot
-        const {shadowRoot} = element;
-        const audio = shadowRoot.querySelector('audio');
-
-        expect(audio).to.not.be.null;
-
-        const impl = await element.getImpl();
-
-        impl.executeAction({method: 'play', satisfiesTrust: () => true});
-        expect(
-          impl.executeAction({method: 'isPlaying', satisfiesTrust: () => true})
-        ).to.be.false;
-
-        impl.executeAction({method: 'pause', satisfiesTrust: () => true});
-        expect(
-          impl.executeAction({method: 'isPlaying', satisfiesTrust: () => true})
-        ).to.be.false;
-      }
-    );
+    /**
+     * Following TestCase is no longer needed:
+     * 'should not play/pause when `amp-audio` is a direct descendant of `amp-story`'
+     *
+     * Refer: https://github.com/ampproject/amphtml/pull/35643
+     */
   }
 );
