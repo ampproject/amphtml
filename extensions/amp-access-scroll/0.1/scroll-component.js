@@ -110,6 +110,20 @@ export class ScrollComponent {
   }
 
   /**
+   * Action toggleCheckboxState.
+   * @param {string} className
+   * @param {boolean} condition
+   * @protected
+   */
+  toggleCheckboxState(condition) {
+    if (condition) {
+      checked = true;
+    } else {
+      checked = false;
+    }
+  }
+
+  /**
    * @param {Object} updates
    * @return {boolean} true if changed
    * @protected
