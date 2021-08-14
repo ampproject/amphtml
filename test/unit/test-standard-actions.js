@@ -558,7 +558,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
   describe('"toggleCheckboxState" action', () => {
 
     it('should set checked state to false when state is true', () => {
-      const element = createElement('input');
+      const element = createElement();
       element.type = 'checkbox';
       element.checked = true;
       const invocation = {
@@ -570,7 +570,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
     });
 
     it('should set checked state to true when state is false', () => {
-      const element = createElement('input');
+      const element = createElement();
       element.type = 'checkbox';
       element.checked = false;
       const invocation = {
@@ -582,7 +582,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
     });
 
     it('should set checked state to true when force=true', () => {
-      const element = createElement('input');
+      const element = createElement();
       element.type = 'checkbox';
       const invocation = {
         node: element,
@@ -596,7 +596,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
     });
 
     it('should set checked state to false when force=false', () => {
-      const element = createElement('input');
+      const element = createElement();
       element.type = 'checkbox';
       const invocation = {
         node: element,
