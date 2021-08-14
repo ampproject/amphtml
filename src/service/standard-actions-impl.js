@@ -455,15 +455,19 @@ export class StandardActions {
     );
 
     this.mutator_.mutateElement(target, () => {
-      if (args['force'] !== undefined) {
+      if (args['state'] !== undefined) {
         // must be boolean, won't do type conversion
         const shouldForce = user().assertBoolean(
-          args['force'],
-          "Optional argument 'force' must be a boolean."
+          args['state'],
+          "Optional argument 'state' must be a boolean."
         );
-        target.checked = checkboxState (shouldForce);
-      } else {
         target.checked = checkboxState;
+      } else {
+        if (target.checked = true) {
+          target.checked = false;
+        } else {
+          target.checked = true;
+        }
       }
     });
 
