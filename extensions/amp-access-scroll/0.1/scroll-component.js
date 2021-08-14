@@ -95,7 +95,7 @@ export class ScrollComponent {
   }
 
   /**
-   *
+   * Action toggleClass.
    * @param {string} className
    * @param {boolean} condition
    * @protected
