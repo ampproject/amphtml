@@ -111,6 +111,11 @@ export class StandardActions {
       'toggleClass',
       this.handleToggleClass_.bind(this)
     );
+
+    actionService.addGlobalMethodHandler(
+      'toggleCheckboxState',
+      this.handleToggleCheckboxState_.bind(this)
+    );
   }
 
   /**
@@ -428,6 +433,37 @@ export class StandardActions {
         target.classList.toggle(className, shouldForce);
       } else {
         target.classList.toggle(className);
+      }
+    });
+
+    return null;
+  }
+}
+
+  /**
+   * Handles "toggleCheckboxState" action.
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @return {?Promise}
+   * @private Visible to tests only.
+   */
+  handleToggleCheckboxState_(invocation) {
+    const target = dev().assertElement(invocation.node);
+    const {args} = invocation;
+    const checkboxState = user().assertString(
+      args['state'],
+      "Argument 'state' must be a boolean."
+    );
+
+    this.mutator_.mutateElement(target, () => {
+      if (args['force'] !== undefined) {
+        // must be boolean, won't do type conversion
+        const shouldForce = user().assertBoolean(
+          args['force'],
+          "Optional argument 'force' must be a boolean."
+        );
+        target.checked = checkboxState (shouldForce);
+      } else {
+        target.checked = checkboxState;
       }
     });
 
