@@ -116,10 +116,11 @@ export class ScrollComponent {
    * @protected
    */
   toggleCheckboxState(condition) {
+    const input = devAssert(this.root_);
     if (condition) {
-      checked = true;
+      input.checked = true;
     } else {
-      checked = false;
+      input.checked = false;
     }
   }
 
