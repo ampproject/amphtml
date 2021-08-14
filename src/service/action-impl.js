@@ -65,6 +65,7 @@ const DEFAULT_EMAIL_ALLOWLIST = [
   {tagOrTarget: '*', method: 'focus'},
   {tagOrTarget: '*', method: 'hide'},
   {tagOrTarget: '*', method: 'show'},
+  {tagOrTarget: '*', method: 'toggleCheckboxState'},
   {tagOrTarget: '*', method: 'toggleClass'},
   {tagOrTarget: '*', method: 'toggleVisibility'},
 ];
