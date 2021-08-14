@@ -459,7 +459,7 @@ export class StandardActions {
         );
         target.checked = shouldForce;
       } else {
-        if (target.checked = true) {
+        if (target.checked === true) {
           target.checked = false;
         } else {
           target.checked = true;
