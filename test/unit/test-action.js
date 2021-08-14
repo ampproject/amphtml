@@ -1807,6 +1807,12 @@ describes.realWin(
         expect(spy).to.be.calledWithExactly(i);
       });
 
+      it('should supply default actions allowlist', () => {
+        const i = getActionInvocation(target, 'toggleCheckboxState', 'AMP');
+        action.invoke_(i);
+        expect(spy).to.be.calledWithExactly(i);
+      });
+
       it('should not allow non-default actions', () => {
         const i = getActionInvocation(target, 'print', 'AMP');
         env.sandbox.stub(action, 'error_');
