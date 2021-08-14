@@ -362,6 +362,10 @@ event.response</pre></td>
     <td>Toggles class of the target element. <code>force</code> is optional, and if defined, it ensures that class would only be added but not removed if set to <code>true</code>, and only removed but not added if set to <code>false</code>.</td>
   </tr>
   <tr>
+    <td><code>toggleCheckboxState(state=BOOLEAN)</code></td>
+    <td>Toggles state of the target checkbox element. <code>state</code> is optional, and if defined, it ensures that the resulting state would be as defined.</td>
+  </tr>
+  <tr>
     <td><code>focus</code></td>
     <td>Makes the target element gain focus. To lose focus, <code>focus</code>
     on another element (usually parent element). We strongly advise against
