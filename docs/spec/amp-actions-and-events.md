@@ -391,6 +391,10 @@ event.response</pre></td>
     <td>Toggles class of the target element. <code>force</code> is optional, and if defined, it ensures that class would only be added but not removed if set to <code>true</code>, and only removed but not added if set to <code>false</code>.</td>
   </tr>
   <tr>
+    <td><code>toggleCheckboxState(state=BOOLEAN)</code></td>
+    <td>Toggles state of the target checkbox element. <code>state</code> is optional, and if defined, it ensures that the resulting state would be as defined.</td>
+  </tr>
+  <tr>
     <td><code>scrollTo(duration=INTEGER, position=STRING)</code></td>
     <td>Scrolls an element into view with a smooth animation.<br>
     <code>duration</code> is optional. Specifies the length of the animation in milliseconds. If unspecified, an amount relative to scroll difference
