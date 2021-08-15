@@ -95,7 +95,7 @@ describes.realWin(
       resetServiceForTesting(win, 'consentStateManager');
       registerServiceBuilder(win, 'consentStateManager', function () {
         return Promise.resolve({
-          consentPageViewID64: () => 'IF_sLhxPvk0-JaagInsH8A',
+          consentPageViewId64: () => 'consent_page_view_id_64',
           getLastConsentInstanceInfo: () => {
             return Promise.resolve(
               constructConsentInfo(
@@ -337,7 +337,7 @@ describes.realWin(
         await macroTask();
         await macroTask();
         expect(consentUI.ui_.src).to.match(
-          /cid=amp-.{22}&r=RANDOM&clientconfig=.{28}&cpid=IF_sLhxPvk0-JaagInsH8A/
+          /cid=amp-.{22}&r=RANDOM&clientconfig=.{28}&cpid=consent_page_view_id_64/
         );
       });
 

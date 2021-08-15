@@ -557,14 +557,15 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
       });
       const consentElement = createConsentElement(doc, config);
       doc.body.appendChild(consentElement);
-      const fakeConsentStateManager = new ConsentStateManager();
-      fakeConsentStateManager.ampdoc_ = doc.body;
+      const fakeConsentStateManager = new ConsentStateManager(doc.body);
 
       const stubGetServicePromiseForDoc = env.sandbox.stub(
         GetService,
         'getServicePromiseForDoc'
       );
 
+      //Stubbing getServicePromiseForDoc to retrieve the consentManager. In other calls
+      // call the underlying implementation instead.
       stubGetServicePromiseForDoc
         .withArgs(env.sandbox.match.any, 'consentStateManager')
         .resolves(fakeConsentStateManager);
@@ -636,7 +637,6 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
         'https://example.test?cid=CLIENT_ID(abc)&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
       );
 
-      await macroTask();
       await macroTask();
 
       expect(u1).to.equal(u2).to.equal(u3).to.equal(u4);

@@ -325,18 +325,18 @@ export class ConsentConfig {
  * @param {Object<string, *>=} opt_vars
  * @return {!Promise<string>}
  */
-export function expandConsentEndpointUrl(element, url, opt_vars) {
+export function expandConsentEndpointUrl(element, url, vars = {}) {
   return Services.urlReplacementsForDoc(element).expandUrlAsync(
     url,
     {
       'CLIENT_ID': getConsentCID(element),
       'CONSENT_PAGE_VIEW_ID_64': () =>
         getServicePromiseForDoc(element, 'consentStateManager').then(
-          (consentStateManager) => consentStateManager.consentPageViewID64()
+          (consentStateManager) => consentStateManager.consentPageViewId64()
         ),
-      ...opt_vars,
+      ...vars,
     },
-    {...opt_vars, ...CONSENT_VARS_ALLOWED_LIST}
+    {...vars, ...CONSENT_VARS_ALLOWED_LIST}
   );
 }
 
