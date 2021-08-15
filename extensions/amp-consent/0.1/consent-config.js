@@ -322,7 +322,7 @@ export class ConsentConfig {
  * Expand consent endpoint url
  * @param {!Element|!ShadowRoot} element
  * @param {string} url
- * @param {Object<string, *>=} opt_vars
+ * @param {Object<string, *>=} vars
  * @return {!Promise<string>}
  */
 export function expandConsentEndpointUrl(element, url, vars = {}) {
