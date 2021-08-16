@@ -19,22 +19,22 @@ import * as tr from '../../src/transition';
 describes.sandboxed('Transition', {}, (env) => {
   describe('concat', () => {
     it('should concat two string transitions', () => {
-      const t1 = tr.translateX(tr.numeric(0, 10));
+      const t1 = tr.translate(tr.numeric(0, 10), tr.numeric(20, 30));
       const t2 = tr.scale(tr.numeric(0, 10));
       const concat = tr.concat([t1, t2]);
 
-      expect(concat(0, false)).to.equal('translateX(0px) scale(0)');
-      expect(concat(0.5, false)).to.equal('translateX(5px) scale(5)');
-      expect(concat(1, true)).to.equal('translateX(10px) scale(10)');
+      expect(concat(0, false)).to.equal('translate(0px,20px) scale(0)');
+      expect(concat(0.5, false)).to.equal('translate(5px,25px) scale(5)');
+      expect(concat(1, true)).to.equal('translate(10px,30px) scale(10)');
     });
 
     it('should handle single transitions', () => {
-      const t1 = tr.translateX(tr.numeric(0, 10));
+      const t1 = tr.translate(tr.numeric(0, 10), tr.numeric(20, 30));
       const concat = tr.concat([t1]);
 
-      expect(concat(0, false)).to.equal('translateX(0px)');
-      expect(concat(0.5, false)).to.equal('translateX(5px)');
-      expect(concat(1, true)).to.equal('translateX(10px)');
+      expect(concat(0, false)).to.equal('translate(0px,20px)');
+      expect(concat(0.5, false)).to.equal('translate(5px,25px)');
+      expect(concat(1, true)).to.equal('translate(10px,30px)');
     });
 
     it('should handle empty input', () => {
@@ -46,13 +46,13 @@ describes.sandboxed('Transition', {}, (env) => {
     });
 
     it('should ignore non-string transitions', () => {
-      const t1 = tr.translateX(tr.numeric(0, 10));
+      const t1 = tr.translate(tr.numeric(0, 10), tr.numeric(20, 30));
       const t2 = tr.numeric(0, 10);
       const concat = tr.concat([t1, t2]);
 
-      expect(concat(0, false)).to.equal('translateX(0px)');
-      expect(concat(0.5, false)).to.equal('translateX(5px)');
-      expect(concat(1, true)).to.equal('translateX(10px)');
+      expect(concat(0, false)).to.equal('translate(0px,20px)');
+      expect(concat(0.5, false)).to.equal('translate(5px,25px)');
+      expect(concat(1, true)).to.equal('translate(10px,30px)');
     });
 
     it('should support other delimeters', () => {
@@ -117,20 +117,6 @@ describes.sandboxed('Transition', {}, (env) => {
     expect(func(0.6)).to.equal('6px');
     expect(func(0.9)).to.equal('9px');
     expect(func(1)).to.equal('10px');
-  });
-
-  it('translateX', () => {
-    let func = tr.translateX(tr.numeric(0, 10));
-    expect(func(0)).to.equal('translateX(0px)');
-    expect(func(0.3)).to.equal('translateX(3px)');
-    expect(func(0.6)).to.equal('translateX(6px)');
-    expect(func(0.9)).to.equal('translateX(9px)');
-    expect(func(1)).to.equal('translateX(10px)');
-
-    func = tr.translateX(() => {
-      return '101vw';
-    });
-    expect(func(0)).to.equal('translateX(101vw)');
   });
 
   it('should translate with X and Y', () => {

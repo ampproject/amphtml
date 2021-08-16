@@ -88,39 +88,6 @@ export function px(transition) {
 }
 
 /**
- * A transition for "translate_" of CSS "transform" property.
- * @param {!TransitionDef<number|string>} transition
- * @param {string} axis X or Y
- * @return {!TransitionDef<string>}
- */
-function translateBase(transition, axis) {
-  return (time) => {
-    const res = transition(time);
-    return typeof res == 'string'
-      ? `translate${axis}(${res})`
-      : `translate${axis}(${res}px)`;
-  };
-}
-
-/**
- * A transition for "translateX" of CSS "transform" property.
- * @param {!TransitionDef<number|string>} transition
- * @return {!TransitionDef<string>}
- */
-export function translateX(transition) {
-  return translateBase(transition, 'X');
-}
-
-/**
- * A transition for "translateY" of CSS "transform" property.
- * @param {!TransitionDef<number|string>} transition
- * @return {!TransitionDef<string>}
- */
-export function translateY(transition) {
-  return translateBase(transition, 'Y');
-}
-
-/**
  * A transition for "translate(x, y)" of CSS "transform" property.
  * @param {!TransitionDef<number|string>} transitionX
  * @param {!TransitionDef<number|string>|undefined} opt_transitionY
