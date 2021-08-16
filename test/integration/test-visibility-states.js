@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {AmpImg} from '#builtins/amp-img/amp-img';
+
 import {VisibilityState} from '#core/constants/visibility-state';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {getVendorJsPropertyName} from '#core/dom/style';
@@ -90,7 +92,7 @@ t.run('Viewer Visibility State', {}, () => {
           shouldPass = true;
           resources.schedulePass();
         }).then(() => {
-          if (R1_IMG_DEFERRED_BUILD) {
+          if (AmpImg.R1()) {
             return new Promise((resolve) => setTimeout(resolve, 20));
           }
         });
@@ -133,7 +135,7 @@ t.run('Viewer Visibility State', {}, () => {
             img.setAttribute('height', 100);
             img.setAttribute('layout', 'fixed');
             // TODO(#31915): Cleanup when R1_IMG_DEFERRED_BUILD is complete.
-            if (!R1_IMG_DEFERRED_BUILD) {
+            if (!AmpImg.R1()) {
               win.document.body.appendChild(img);
             }
 
@@ -143,16 +145,16 @@ t.run('Viewer Visibility State', {}, () => {
             prerenderAllowed = env.sandbox.stub(img, 'prerenderAllowed');
             prerenderAllowed.returns(false);
 
-            if (R1_IMG_DEFERRED_BUILD) {
+            if (AmpImg.R1()) {
               win.document.body.appendChild(img);
             }
             return img.getImpl(false);
           })
           .then((impl) => {
-            layoutCallback = R1_IMG_DEFERRED_BUILD
+            layoutCallback = AmpImg.R1()
               ? env.sandbox.stub(impl, 'mountCallback')
               : env.sandbox.stub(impl, 'layoutCallback');
-            unlayoutCallback = R1_IMG_DEFERRED_BUILD
+            unlayoutCallback = AmpImg.R1()
               ? env.sandbox.stub(impl, 'unmountCallback')
               : env.sandbox.stub(impl, 'unlayoutCallback');
             pauseCallback = env.sandbox.stub(impl, 'pauseCallback');
@@ -265,7 +267,7 @@ t.run('Viewer Visibility State', {}, () => {
             });
             changeVisibility('hidden');
             return waitForNextPass().then(() => {
-              if (R1_IMG_DEFERRED_BUILD) {
+              if (AmpImg.R1()) {
                 expect(layoutCallback).to.have.been.called;
               } else {
                 expect(layoutCallback).not.to.have.been.called;
@@ -444,7 +446,7 @@ t.run('Viewer Visibility State', {}, () => {
           });
           changeVisibility('hidden');
           return waitForNextPass().then(() => {
-            if (R1_IMG_DEFERRED_BUILD) {
+            if (AmpImg.R1()) {
               expect(layoutCallback).to.have.been.called;
             } else {
               expect(layoutCallback).not.to.have.been.called;

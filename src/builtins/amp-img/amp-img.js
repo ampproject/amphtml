@@ -52,7 +52,7 @@ export const ATTRIBUTES_TO_PROPAGATE = [
 export class AmpImg extends BaseElement {
   /** @override @nocollapse */
   static R1() {
-    return R1_IMG_DEFERRED_BUILD;
+    return false;
   }
 
   /** @override @nocollapse */
@@ -243,7 +243,7 @@ export class AmpImg extends BaseElement {
    * @private
    */
   maybeGenerateSizes_(sync) {
-    if (R1_IMG_DEFERRED_BUILD) {
+    if (AmpImg.R1()) {
       // The `getLayoutSize()` is not available for a R1 element. Skip this
       // codepath. Also: is this feature at all useful? E.g. it doesn't even
       // execute in the `i-amphtml-ssr` mode.
