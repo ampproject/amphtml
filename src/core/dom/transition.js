@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {CurveDef, getCurve} from '#core/data-structures/curve';
 import {isString} from '#core/types';
 
 import {

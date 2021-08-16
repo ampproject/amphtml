@@ -14,63 +14,68 @@
  * limitations under the License.
  */
 
-import * as tr from '../../src/transition';
+import {
+  concat,
+  numeric,
+  px,
+  scale,
+  setStyles,
+  translate,
+} from '#core/dom/transition';
 
-describes.sandboxed('Transition', {}, (env) => {
+describes.sandboxed('DOM - transition helpers', {}, () => {
+  const numericLow = numeric(0, 10);
+  const numericHigh = numeric(20, 30);
+  const scaling = scale(numericLow);
+  const translation = translate(numericLow, numericHigh);
+
   describe('concat', () => {
     it('should concat two string transitions', () => {
-      const t1 = tr.translate(tr.numeric(0, 10), tr.numeric(20, 30));
-      const t2 = tr.scale(tr.numeric(0, 10));
-      const concat = tr.concat([t1, t2]);
+      const func = concat([translation, scaling]);
 
-      expect(concat(0, false)).to.equal('translate(0px, 20px) scale(0)');
-      expect(concat(0.5, false)).to.equal('translate(5px, 25px) scale(5)');
-      expect(concat(1, true)).to.equal('translate(10px, 30px) scale(10)');
+      expect(func(0, false)).to.equal('translate(0px, 20px) scale(0)');
+      expect(func(0.5, false)).to.equal('translate(5px, 25px) scale(5)');
+      expect(func(1, true)).to.equal('translate(10px, 30px) scale(10)');
     });
 
     it('should handle single transitions', () => {
-      const t1 = tr.translate(tr.numeric(0, 10), tr.numeric(20, 30));
-      const concat = tr.concat([t1]);
+      const func = concat([translation]);
 
-      expect(concat(0, false)).to.equal('translate(0px, 20px)');
-      expect(concat(0.5, false)).to.equal('translate(5px, 25px)');
-      expect(concat(1, true)).to.equal('translate(10px, 30px)');
+      expect(func(0, false)).to.equal('translate(0px, 20px)');
+      expect(func(0.5, false)).to.equal('translate(5px, 25px)');
+      expect(func(1, true)).to.equal('translate(10px, 30px)');
     });
 
     it('should handle empty input', () => {
-      const concat = tr.concat([]);
+      const func = concat([]);
 
-      expect(concat(0, false)).to.equal('');
-      expect(concat(0.5, false)).to.equal('');
-      expect(concat(1, true)).to.equal('');
+      expect(func(0, false)).to.equal('');
+      expect(func(0.5, false)).to.equal('');
+      expect(func(1, true)).to.equal('');
     });
 
     it('should ignore non-string transitions', () => {
-      const t1 = tr.translate(tr.numeric(0, 10), tr.numeric(20, 30));
-      const t2 = tr.numeric(0, 10);
-      const concat = tr.concat([t1, t2]);
+      const func = concat([translation, numericLow]);
 
-      expect(concat(0, false)).to.equal('translate(0px, 20px)');
-      expect(concat(0.5, false)).to.equal('translate(5px, 25px)');
-      expect(concat(1, true)).to.equal('translate(10px, 30px)');
+      expect(func(0, false)).to.equal('translate(0px, 20px)');
+      expect(func(0.5, false)).to.equal('translate(5px, 25px)');
+      expect(func(1, true)).to.equal('translate(10px, 30px)');
     });
 
     it('should support other delimeters', () => {
-      const t1 = tr.px(tr.numeric(0, 10));
-      const t2 = tr.px(tr.numeric(0, 20));
-      const concat = tr.concat([t1, t2], ', ');
+      const func = concat([px(numericLow), px(numericHigh)], ', ');
 
-      expect(concat(0, false)).to.equal('0px, 0px');
-      expect(concat(0.5, false)).to.equal('5px, 10px');
-      expect(concat(1, true)).to.equal('10px, 20px');
+      expect(func(0, false)).to.equal('0px, 20px');
+      expect(func(0.5, false)).to.equal('5px, 25px');
+      expect(func(1, true)).to.equal('10px, 30px');
     });
   });
 
   it('setStyles', () => {
     const element = document.createElement('div');
-    const func = tr.setStyles(element, {
-      width: tr.px((n) => n * 100 + 1),
-      height: tr.px((n) => n * 100 + 2),
+    const func = setStyles(element, {
+      width: px((n) => n * 100 + 1),
+      height: px((n) => n * 100 + 2),
     });
 
     func(0);
@@ -91,14 +96,14 @@ describes.sandboxed('Transition', {}, (env) => {
   });
 
   it('numeric', () => {
-    let func = tr.numeric(2, 10);
+    let func = numeric(2, 10);
     expect(func(0)).to.equal(2);
     expect(func(0.3)).to.be.closeTo(4.4, 1e-3);
     expect(func(0.6)).to.be.closeTo(6.8, 1e-3);
     expect(func(0.9)).to.be.closeTo(9.2, 1e-3);
     expect(func(1)).to.equal(10);
 
-    func = tr.numeric(2, -10);
+    func = numeric(2, -10);
     expect(func(0)).to.equal(2);
     expect(func(0.3)).to.be.closeTo(-1.6, 1e-3);
     expect(func(0.6)).to.be.closeTo(-5.2, 1e-3);
@@ -107,7 +112,7 @@ describes.sandboxed('Transition', {}, (env) => {
   });
 
   it('px', () => {
-    const func = tr.px(tr.numeric(0, 10));
+    const func = px(numericLow);
     expect(func(0)).to.equal('0px');
     expect(func(0.3)).to.equal('3px');
     expect(func(0.6)).to.equal('6px');
@@ -116,14 +121,14 @@ describes.sandboxed('Transition', {}, (env) => {
   });
 
   it('should translate with X and Y', () => {
-    let func = tr.translate(tr.numeric(0, 10), tr.numeric(20, 30));
+    let func = translate(numericLow, numericHigh);
     expect(func(0)).to.equal('translate(0px, 20px)');
     expect(func(0.3)).to.equal('translate(3px, 23px)');
     expect(func(0.6)).to.equal('translate(6px, 26px)');
     expect(func(0.9)).to.equal('translate(9px, 29px)');
     expect(func(1)).to.equal('translate(10px, 30px)');
 
-    func = tr.translate(
+    func = translate(
       () => '101vw',
       () => '201em'
     );
@@ -131,14 +136,14 @@ describes.sandboxed('Transition', {}, (env) => {
   });
 
   it('should translate with only X', () => {
-    let func = tr.translate(tr.numeric(0, 10));
+    let func = translate(numericLow);
     expect(func(0)).to.equal('translate(0px)');
     expect(func(0.3)).to.equal('translate(3px)');
     expect(func(0.6)).to.equal('translate(6px)');
     expect(func(0.9)).to.equal('translate(9px)');
     expect(func(1)).to.equal('translate(10px)');
 
-    func = tr.translate(() => '101vw');
+    func = translate(() => '101vw');
     expect(func(0)).to.equal('translate(101vw)');
   });
 });
