@@ -43,21 +43,10 @@ export function sleep(ms) {
  * @param {Window=} win
  * @return {Promise<void>}
  */
-export function afterRenderPromise(win = env_?.win) {
-  return /** @type {Promise<void>} */ (
-    new Promise((resolve) => {
-      const requestAnimationFrame = win
-        ? win.requestAnimationFrame
-        : async (cb) => {
-            await sleep(1);
-            cb();
-          };
-
-      requestAnimationFrame(() => {
-        setTimeout(resolve);
-      });
-    })
-  );
+export async function afterRenderPromise(win = env_?.win) {
+  const requestAnimationFrame = 
+    win?.requestAnimationFrame ?? (cb) => sleep(1).then(cb);
+  await new Promise(requestAnimationFrame).then(setTimeout);
 }
 
 /**
