@@ -24,6 +24,7 @@ import {macroTask} from '#testing/helpers';
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
 
 import {listenOncePromise} from '../../../../src/event-helper';
+import {VideoEvents} from '../../../../src/video-interface';
 
 describes.realWin(
   'amp-video-iframe',
