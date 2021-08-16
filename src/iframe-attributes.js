@@ -1,7 +1,6 @@
 import {DomFingerprint} from '#core/dom/fingerprint';
 import {getLengthNumeral} from '#core/dom/layout';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
-import * as mode from '#core/mode';
 import {dict} from '#core/types/object';
 
 import {experimentToggles, isCanary} from '#experiments';
@@ -71,13 +70,7 @@ export function getContextMetadata(
     },
     'startTime': startTime,
     'tagName': element.tagName,
-    'mode': /** @type {!./mode.ModeDef} */ ({
-      'localDev': mode.isLocalDev(),
-      'development': getMode().development,
-      'esm': IS_ESM,
-      'test': mode.isTest(),
-      'rtvVersion': getMode().rtvVersion,
-    }),
+    'mode': getMode(),
     'canary': isCanary(parentWindow),
     'hidden': !ampdoc.isVisible(),
     'initialLayoutRect': layoutRect
