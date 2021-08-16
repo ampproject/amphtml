@@ -66,17 +66,6 @@ describes.sandboxed('Transition', {}, (env) => {
     });
   });
 
-  it('withCurve', () => {
-    const func1 = (time, complete) => `${time * 2};${complete}`;
-    const curve = (unusedTime) => 0.2;
-    const curved = tr.withCurve(func1, curve);
-
-    expect(curved(0, false)).to.equal('0.4;false');
-    expect(curved(0.5, false)).to.equal('0.4;false');
-    expect(curved(1, false)).to.equal('0.4;false');
-    expect(curved(1, true)).to.equal('2;true');
-  });
-
   it('setStyles', () => {
     const element = document.createElement('div');
     const func = tr.setStyles(element, {

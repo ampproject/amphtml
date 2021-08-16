@@ -48,19 +48,6 @@ export function concat(transitions, opt_delimiter = ' ') {
 }
 
 /**
- * Returns the specified transition with the time curved via specified curve
- * function.
- * @param {!TransitionDef<RESULT>} transition
- * @param {!CurveDef|string} curve
- * @return {!TransitionDef<RESULT>}
- * @template RESULT
- */
-export function withCurve(transition, curve) {
-  const curveFn = getCurve(curve);
-  return (time, complete) => transition(complete ? 1 : curveFn(time), complete);
-}
-
-/**
  * A transition that sets the CSS style of the specified element. The styles
  * a specified as a map from CSS property names to transition functions for
  * each of these properties.
