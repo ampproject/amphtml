@@ -33,7 +33,7 @@ const path = require('path');
 // otherName()
 
 const imports = {
-  'src/assert-display': ['assertDoesNotContainDisplay', 'assertNotDisplay'],
+  'src/core/dom/style': ['assertDoesNotContainDisplay', 'assertNotDisplay'],
   'src/core/types/object': ['dict'],
   'src/core/dom/css': ['escapeCssSelectorIdent', 'escapeCssSelectorNth'],
   'src/core/dom/query': ['scopedQuerySelector', 'scopedQuerySelectorAll'],
