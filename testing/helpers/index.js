@@ -75,12 +75,9 @@ export async function awaitNFrames(n) {
  * @param {number} ms
  * @return {Promise<void>}
  */
-export function awaitFrameAfter(ms) {
-  return new Promise(async (resolve) => {
-    const start = Date.now();
-    while (Date.now() - start < ms) {
-      await afterRenderPromise();
-    }
-    resolve();
-  });
+export async function awaitFrameAfter(ms) {
+  const start = Date.now();
+  while (Date.now() - start < ms) {
+    await afterRenderPromise();
+  }
 }
