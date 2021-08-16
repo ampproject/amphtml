@@ -25,6 +25,9 @@ let propertyNameCache;
 /** @const {!Array<string>} */
 const vendorPrefixes = ['Webkit', 'webkit', 'Moz', 'moz', 'ms', 'O', 'o'];
 
+const DISPLAY_STYLE_MESSAGE =
+  '`display` style detected. You must use toggle instead.';
+
 const EMPTY_CSS_DECLARATION = /** @type {!CSSStyleDeclaration} */ ({
   'getPropertyPriority': () => '',
   'getPropertyValue': () => '',
@@ -351,8 +354,11 @@ function isVar(property) {
  * @return {string}
  */
 export function assertNotDisplay(style) {
+  // TODO(rcebulko): This calls itself an assert, but doesn't throw an error.
+  // Should it throw sync? If so, this/below can reduce to
+  // `return devAssert(style == 'display', DISPLAY_STYLE_MESSAGE);`
   if (style === 'display') {
-    devError('STYLE', '`display` style detected. You must use toggle instead.');
+    devError('STYLE', DISPLAY_STYLE_MESSAGE);
   }
   return style;
 }
@@ -370,10 +376,7 @@ export function assertNotDisplay(style) {
  */
 export function assertDoesNotContainDisplay(styles) {
   if ('display' in styles) {
-    devError(
-      'STYLE',
-      '`display` style detected in styles. You must use toggle instead.'
-    );
+    devError('STYLE', DISPLAY_STYLE_MESSAGE);
   }
   return styles;
 }
