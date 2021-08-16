@@ -236,29 +236,23 @@ export function deg(value) {
  * @return {string}
  */
 export function translateX(value) {
-  if (typeof value == 'string') {
-    return `translateX(${value})`;
-  }
-  return `translateX(${px(value)})`;
+  return `translateX(${isString(value) ? value : px(value)})`;
 }
 
 /**
  * Returns a "translateX" for CSS "transform" property.
  * @param {number|string} x
- * @param {(number|string)=} opt_y
+ * @param {(number|string|null)=} opt_y
  * @return {string}
  */
 export function translate(x, opt_y) {
   if (typeof x == 'number') {
     x = px(x);
   }
-  if (opt_y === undefined) {
+  if (opt_y === undefined || opt_y === null) {
     return `translate(${x})`;
   }
-  if (typeof opt_y == 'number') {
-    opt_y = px(opt_y);
-  }
-  return `translate(${x}, ${opt_y})`;
+  return `translate(${x}, ${typeof opt_y == 'number' ? px(opt_y) : opt_y})`;
 }
 
 /**
@@ -276,10 +270,7 @@ export function scale(value) {
  * @return {string}
  */
 export function rotate(value) {
-  if (typeof value == 'number') {
-    value = deg(value);
-  }
-  return `rotate(${value})`;
+  return `rotate(${typeof value == 'number' ? deg(value) : value})`;
 }
 
 /**

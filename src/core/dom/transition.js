@@ -15,14 +15,15 @@
  */
 
 import {CurveDef, getCurve} from '#core/data-structures/curve';
-=======
+import {isString} from '#core/types';
+
 import {
   assertNotDisplay,
   setStyle,
   px as stylePx,
   scale as styleScale,
+  translate as styleTranslate,
 } from './style';
-import {isString} from '#core/types';
 
 /**
  * TransitionDef function that accepts normtime, typically between 0 and 1 and
@@ -84,7 +85,7 @@ export function numeric(start, end) {
  * @return {!TransitionDef<string>}
  */
 export function px(transition) {
-  return (time) => `${transition(time)}px`;
+  return (time) => stylePx(transition(time));
 }
 
 /**
@@ -94,23 +95,7 @@ export function px(transition) {
  * @return {!TransitionDef<string>}
  */
 export function translate(transitionX, opt_transitionY) {
-  return (time) => {
-    let x = transitionX(time);
-    if (typeof x == 'number') {
-      x = stylePx(x);
-    }
-
-    if (!opt_transitionY) {
-      return `translate(${x})`;
-    }
-
-    let y = opt_transitionY(time);
-    if (typeof y == 'number') {
-      y = stylePx(y);
-    }
-
-    return `translate(${x},${y})`;
-  };
+  return (time) => styleTranslate(transitionX(time), opt_transitionY?.(time));
 }
 
 /**
