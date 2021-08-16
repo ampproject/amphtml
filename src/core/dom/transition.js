@@ -14,11 +14,20 @@
  * limitations under the License.
  */
 
-import {getCurve} from '#core/data-structures/curve';
-import * as st from '#core/dom/style';
-import {setStyle} from '#core/dom/style';
+import {CurveDef, getCurve} from '#core/data-structures/curve';
+import {isString} from '#core/types/string';
 
-import {assertNotDisplay} from './assert-display';
+import {assertNotDisplay, px as pixels, setStyle} from './style';
+
+/**
+ * TransitionDef function that accepts normtime, typically between 0 and 1 and
+ * performs an arbitrary animation action. Notice that sometimes normtime can
+ * dip above 1 or below 0. This is an acceptable case for some curves. The
+ * second argument is a boolean value that equals "true" for the completed
+ * transition and "false" for ongoing.
+ * @typedef {function(number, boolean):?|function(number):?}
+ */
+let TransitionDef;
 
 export const NOOP = function (unusedTime) {
   return null;
@@ -31,12 +40,7 @@ export const NOOP = function (unusedTime) {
  * @return {!TransitionDef<void>}
  */
 export function all(transitions) {
-  return (time, complete) => {
-    for (let i = 0; i < transitions.length; i++) {
-      const tr = transitions[i];
-      tr(time, complete);
-    }
-  };
+  return (time, complete) => transitions.map((tr) => tr(time, complete));
 }
 
 /**
@@ -47,33 +51,21 @@ export function all(transitions) {
  * @return {!TransitionDef<string>}
  */
 export function concat(transitions, opt_delimiter = ' ') {
-  return (time, complete) => {
-    const results = [];
-    for (let i = 0; i < transitions.length; i++) {
-      const tr = transitions[i];
-      const result = tr(time, complete);
-      if (typeof result == 'string') {
-        results.push(result);
-      }
-    }
-    return results.join(opt_delimiter);
-  };
+  return (time, complete) =>
+    all(transitions)(time, complete).filter(isString).join(opt_delimiter);
 }
 
 /**
  * Returns the specified transition with the time curved via specified curve
  * function.
  * @param {!TransitionDef<RESULT>} transition
- * @param {!./core/data-structures/curve.CurveDef|string} curve
+ * @param {!CurveDef|string} curve
  * @return {!TransitionDef<RESULT>}
  * @template RESULT
  */
 export function withCurve(transition, curve) {
-  /** @const {?./core/data-structures/curve.CurveDef} */
   const curveFn = getCurve(curve);
-  return (time, complete) => {
-    return transition(complete ? 1 : curveFn(time), complete);
-  };
+  return (time, complete) => transition(complete ? 1 : curveFn(time), complete);
 }
 
 /**
@@ -99,9 +91,7 @@ export function setStyles(element, styles) {
  * @return {!TransitionDef<number>}
  */
 export function numeric(start, end) {
-  return (time) => {
-    return start + (end - start) * time;
-  };
+  return (time) => start + (end - start) * time;
 }
 
 /**
@@ -114,16 +104,12 @@ export function numeric(start, end) {
  */
 export function spring(start, end, extended, threshold) {
   if (end == extended) {
-    return (time) => {
-      return numeric(start, end)(time);
-    };
+    return numeric(start, end);
   }
-  return (time) => {
-    if (time < threshold) {
-      return start + (extended - start) * (time / threshold);
-    }
-    return extended + (end - extended) * ((time - threshold) / (1 - threshold));
-  };
+  return (time) =>
+    time < threshold
+      ? start + (extended - start) * (time / threshold)
+      : extended + (end - extended) * ((time - threshold) / (1 - threshold));
 }
 
 /**
@@ -132,8 +118,21 @@ export function spring(start, end, extended, threshold) {
  * @return {!TransitionDef<string>}
  */
 export function px(transition) {
+  return (time) => `${transition(time)}px`;
+}
+
+/**
+ * A transition for "translate_" of CSS "transform" property.
+ * @param {!TransitionDef<number|string>} transition
+ * @param {string} axis X or Y
+ * @return {!TransitionDef<string>}
+ */
+function translateBase(transition, axis) {
   return (time) => {
-    return transition(time) + 'px';
+    const res = transition(time);
+    return typeof res == 'string'
+      ? `translate${axis}(${res})`
+      : `translate${axis}(${res}px)`;
   };
 }
 
@@ -143,13 +142,7 @@ export function px(transition) {
  * @return {!TransitionDef<string>}
  */
 export function translateX(transition) {
-  return (time) => {
-    const res = transition(time);
-    if (typeof res == 'string') {
-      return `translateX(${res})`;
-    }
-    return `translateX(${res}px)`;
-  };
+  return translateBase(transition, 'X');
 }
 
 /**
@@ -158,13 +151,7 @@ export function translateX(transition) {
  * @return {!TransitionDef<string>}
  */
 export function translateY(transition) {
-  return (time) => {
-    const res = transition(time);
-    if (typeof res == 'string') {
-      return `translateY(${res})`;
-    }
-    return `translateY(${res}px)`;
-  };
+  return translateBase(transition, 'Y');
 }
 
 /**
@@ -177,16 +164,18 @@ export function translate(transitionX, opt_transitionY) {
   return (time) => {
     let x = transitionX(time);
     if (typeof x == 'number') {
-      x = st.px(x);
+      x = pixels(x);
     }
+
     if (!opt_transitionY) {
       return `translate(${x})`;
     }
 
     let y = opt_transitionY(time);
     if (typeof y == 'number') {
-      y = st.px(y);
+      y = pixels(y);
     }
+
     return `translate(${x},${y})`;
   };
 }
@@ -197,7 +186,5 @@ export function translate(transitionX, opt_transitionY) {
  * @return {!TransitionDef<string>}
  */
 export function scale(transition) {
-  return (time) => {
-    return `scale(${transition(time)})`;
-  };
+  return (time) => `scale(${transition(time)})`;
 }
