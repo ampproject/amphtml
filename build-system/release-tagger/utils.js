@@ -156,19 +156,49 @@ async function getPullRequests(shas) {
 
 /**
  * Get pull requests between two commits
- * @param {string} commit
- * @param {string} previousCommit
+ * @param {string} head
+ * @param {string} base
  * @return {Promise<Array<GraphQlQueryResponseData>>}
  */
-async function getPullRequestsBetweenCommits(commit, previousCommit) {
-  const {commits} = await compareCommits(previousCommit, commit);
+async function getPullRequestsBetweenCommits(head, base) {
+  const {commits} = await compareCommits(base, head);
   const shas = commits.map((commit) => commit.sha);
   return await getPullRequests(shas);
 }
 
+/**
+ * Get label
+ * @param {string} name
+ * @return {Promise<Object>}
+ */
+async function getLabel(name) {
+  return await octokit.rest.issues.getLabel({owner, repo, name});
+}
+
+/**
+ * Label pull requests
+ * @param {Array<Object>} prs
+ * @param {string} labelId
+ * @return {Promise<Array<GraphQlQueryResponseData>>}
+ */
+async function labelPullRequests(prs, labelId) {
+  const mutations = [];
+  for (const [i, pr] of prs.entries()) {
+    mutations.push(
+      dedent`\
+      pr${i}: addLabelsToLabelable(input:{labelIds:"${labelId}",\
+      labelableId:"${pr.id}", clientMutationId:"${pr.id}"})\
+      {clientMutationId}`
+    );
+  }
+  return await _runQueryInBatches('mutation', mutations);
+}
+
 module.exports = {
-  getPullRequestsBetweenCommits,
   createRelease,
+  getLabel,
+  getPullRequestsBetweenCommits,
   getRelease,
+  labelPullRequests,
   updateRelease,
 };
