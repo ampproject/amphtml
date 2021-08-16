@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+import {Layout, applyFillContent, isLayoutSizeFixed} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {realChildNodes} from '#core/dom/query';
+
+import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {listen} from '../../../src/event-helper';
+import {dev} from '../../../src/log';
 import {
   EMPTY_METADATA,
   parseFavicon,
@@ -22,15 +29,9 @@ import {
   setMediaSession,
   validateMediaMetadata,
 } from '../../../src/mediasession-helper';
-import {Layout, applyFillContent, isLayoutSizeFixed} from '#core/dom/layout';
-import {assertHttpsUrl} from '../../../src/url';
-import {realChildNodes} from '#core/dom/query';
-import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {listen} from '../../../src/event-helper';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {assertHttpsUrl} from '../../../src/url';
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 const TAG = 'amp-audio';
 

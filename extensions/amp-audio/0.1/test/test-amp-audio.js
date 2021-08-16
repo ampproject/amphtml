@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {AmpAudio} from '../amp-audio';
-import {naturalDimensions_} from '../../../../src/static-layout';
 import {htmlFor} from '#core/dom/static-template';
+
+import {naturalDimensions_} from '../../../../src/static-layout';
+import {AmpAudio} from '../amp-audio';
 
 describes.realWin(
   'amp-audio',

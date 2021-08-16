@@ -14,28 +14,32 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '#core/constants/action-constants';
-import {FilterType} from './filters/filter';
-import {HostServices} from '#inabox/host-services';
 import {
   MessageType,
   deserializeMessage,
   listen,
-} from '../../../src/3p-frame-messaging';
-import {Services} from '#service';
-import {TransportMode, assertConfig, assertVendor} from './config';
-import {createFilter} from './filters/factory';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {getAmpAdResourceId} from '../../../src/ad-helper';
-import {getData} from '../../../src/event-helper';
-import {getMode} from '../../../src/mode';
-import {getTopWindow} from '../../../src/service-helpers';
+} from '#core/3p-frame-messaging';
+import {ActionTrust} from '#core/constants/action-constants';
 import {isJsonScriptTag} from '#core/dom';
 import {isObject} from '#core/types';
-import {makeClickDelaySpec} from './filters/click-delay';
-import {makeInactiveElementSpec} from './filters/inactive-element';
-import {openWindowDialog} from '../../../src/open-window-dialog';
 import {parseJson} from '#core/types/object/json';
+
+import {HostServices} from '#inabox/host-services';
+
+import {Services} from '#service';
+
+import {TransportMode, assertConfig, assertVendor} from './config';
+import {makeClickDelaySpec} from './filters/click-delay';
+import {createFilter} from './filters/factory';
+import {FilterType} from './filters/filter';
+import {makeInactiveElementSpec} from './filters/inactive-element';
+
+import {getAmpAdResourceId} from '../../../src/ad-helper';
+import {getData} from '../../../src/event-helper';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {openWindowDialog} from '../../../src/open-window-dialog';
+import {getTopWindow} from '../../../src/service-helpers';
 import {parseUrlDeprecated} from '../../../src/url';
 
 const TAG = 'amp-ad-exit';

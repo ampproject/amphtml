@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-import {ActionService} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';
-import {AmpDocService} from '#service/ampdoc-impl';
 import {AmpEvents} from '#core/constants/amp-events';
-import {AmpList} from '../amp-list';
-import {AmpScriptService} from '../../../amp-script/0.1/amp-script';
 import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
-import {resetExperimentTogglesForTesting, toggleExperiment} from '#experiments';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+
+import {resetExperimentTogglesForTesting, toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+import {ActionService} from '#service/action-impl';
+import {AmpDocService} from '#service/ampdoc-impl';
+
+import {AmpScriptService} from '../../../amp-script/0.1/amp-script';
+import {AmpList} from '../amp-list';
 
 describes.repeated(
   'amp-list',

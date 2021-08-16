@@ -13,15 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as DocFetcher from '../../../../src/document-fetcher';
-import {AmpNextPage} from '../amp-next-page';
-import {Services} from '#service';
 import {VisibilityState} from '#core/constants/visibility-state';
-import {getServicePromiseForDoc} from '../../../../src/service-helpers';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {macroTask} from '#testing/yield';
 import {setStyle} from '#core/dom/style';
+
 import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+
+import {macroTask} from '#testing/yield';
+
+import * as DocFetcher from '../../../../src/document-fetcher';
+import {getServicePromiseForDoc} from '../../../../src/service-helpers';
+import {AmpNextPage} from '../amp-next-page';
 
 const EXAMPLE_PAGE = `
     <header>Header</header>

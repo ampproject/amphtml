@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {Youtube} from '../component';
-import {createRef} from '#preact';
-import {dispatchCustomEvent} from '#core/dom';
 import {mount} from 'enzyme';
+
+import {dispatchCustomEvent} from '#core/dom';
+
+import * as Preact from '#preact';
+import {createRef} from '#preact';
+
 import {useStyles} from 'extensions/amp-video/1.0/component.jss';
+
+import {Youtube} from '../component';
 
 describes.realWin('YouTube preact component v1.0', {}, (env) => {
   let window, document;
