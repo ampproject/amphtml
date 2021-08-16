@@ -44,8 +44,8 @@ export function sleep(ms) {
  * @return {Promise<void>}
  */
 export async function afterRenderPromise(win = env_?.win) {
-  const requestAnimationFrame = 
-    win?.requestAnimationFrame ?? (cb) => sleep(1).then(cb);
+  const requestAnimationFrame =
+    win?.requestAnimationFrame ?? ((cb) => sleep(1).then(cb));
   await new Promise(requestAnimationFrame).then(setTimeout);
 }
 
@@ -64,9 +64,6 @@ export async function awaitNFrames(n) {
  * @param {number} ms
  * @return {Promise<void>}
  */
-export async function awaitFrameAfter(ms) {
-  const start = Date.now();
-  while (Date.now() - start < ms) {
-    await afterRenderPromise();
-  }
+export function awaitFrameAfter(ms) {
+  return sleep(ms).then(afterRenderPromise);
 }
