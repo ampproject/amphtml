@@ -17,33 +17,6 @@
 import * as tr from '../../src/transition';
 
 describes.sandboxed('Transition', {}, (env) => {
-  it('all', () => {
-    const func1 = env.sandbox.spy();
-    const func2 = env.sandbox.spy();
-    const all = tr.all([func1, func2]);
-
-    expect(func1).to.have.not.been.called;
-    expect(func2).to.have.not.been.called;
-
-    all(0, false);
-    expect(func1).to.be.calledOnce;
-    expect(func1).to.be.calledWithExactly(0, false);
-    expect(func2).to.be.calledOnce;
-    expect(func2).to.be.calledWithExactly(0, false);
-
-    all(0.5, false);
-    expect(func1).to.have.callCount(2);
-    expect(func1).to.be.calledWithExactly(0.5, false);
-    expect(func2).to.have.callCount(2);
-    expect(func2).to.be.calledWithExactly(0.5, false);
-
-    all(1, true);
-    expect(func1).to.have.callCount(3);
-    expect(func1).to.be.calledWithExactly(1, true);
-    expect(func2).to.have.callCount(3);
-    expect(func2).to.be.calledWithExactly(1, true);
-  });
-
   describe('concat', () => {
     it('should concat two string transitions', () => {
       const t1 = tr.translateX(tr.numeric(0, 10));

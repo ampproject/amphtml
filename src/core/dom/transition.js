@@ -15,7 +15,7 @@
  */
 
 import {CurveDef, getCurve} from '#core/data-structures/curve';
-import {isString} from '#core/types/string';
+import {isString} from '#core/types';
 
 import {assertNotDisplay, px as pixels, setStyle} from './style';
 
@@ -29,19 +29,8 @@ import {assertNotDisplay, px as pixels, setStyle} from './style';
  */
 let TransitionDef;
 
-export const NOOP = function (unusedTime) {
-  return null;
-};
-
-/**
- * Returns a transition that combines a number of other transitions and
- * invokes them all in parallel.
- * @param {!Array<!TransitionDef>} transitions
- * @return {!TransitionDef<void>}
- */
-export function all(transitions) {
-  return (time, complete) => transitions.map((tr) => tr(time, complete));
-}
+/** @type {!TransitionDef<null>} */
+export const NOOP = (unusedTime) => null;
 
 /**
  * Returns a transition that combines the string result of other string-based
@@ -52,7 +41,10 @@ export function all(transitions) {
  */
 export function concat(transitions, opt_delimiter = ' ') {
   return (time, complete) =>
-    all(transitions)(time, complete).filter(isString).join(opt_delimiter);
+    transitions
+      .map((tr) => tr(time, complete))
+      .filter(isString)
+      .join(opt_delimiter);
 }
 
 /**
