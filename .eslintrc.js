@@ -294,6 +294,7 @@ module.exports = {
     'radix': 2,
     'react/jsx-uses-react': 2,
     'react/jsx-uses-vars': 2,
+    'react/no-unknown-property': 2,
     'react-hooks/rules-of-hooks': 2,
     'react-hooks/exhaustive-deps': 2,
     'require-jsdoc': [
