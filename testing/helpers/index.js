@@ -39,6 +39,15 @@ export function sleep(ms) {
 }
 
 /**
+ * A convenient method so you can flush the event queue by doing
+ * `yield macroTask()` in your test.
+ * @return {Promise<void>}
+ */
+export function macroTask() {
+  return sleep(1);
+}
+
+/**
  * Returns a Promise that resolves after the next browser frame has been rendered.
  * @param {Window=} win
  * @return {Promise<void>}

@@ -17,7 +17,7 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 
 import {createIframePromise} from '#testing/iframe';
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
 
 import {
   hasRenderDelayingServices,
