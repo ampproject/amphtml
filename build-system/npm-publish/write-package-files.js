@@ -20,6 +20,7 @@
  */
 
 const [extension, ampVersion, extensionVersion] = process.argv.slice(2);
+const {getSemver} = require('./utils');
 const {log} = require('../common/logging');
 const {stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
@@ -43,16 +44,8 @@ async function shouldSkip() {
  * @return {Promise<void>}
  */
 async function writePackageJson() {
-  const extensionVersionArr = extensionVersion.split('.', 2);
-  const major = extensionVersionArr[0];
-  const minor = ampVersion.slice(0, 10);
-  const patch = Number(ampVersion.slice(-3)); // npm trims leading zeroes in patch number, so mimic this in package.json
-  const version = `${major}.${minor}.${patch}`;
-  if (
-    !valid(version) ||
-    ampVersion.length != 13 ||
-    extensionVersionArr[1] !== '0'
-  ) {
+  const version = getSemver(extensionVersion, ampVersion);
+  if (!valid(version) || ampVersion.length != 13) {
     log(
       'Invalid semver version',
       version,
