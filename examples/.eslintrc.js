@@ -24,7 +24,6 @@ module.exports = {
     'jsdoc/require-param': 0,
     'jsdoc/require-returns-type': 0,
     'jsdoc/require-returns': 0,
-    'local/no-array-destructuring': 0,
     'local/no-bigint': 0,
     'local/no-deep-destructuring': 0,
     'local/no-dynamic-import': 0,
