@@ -55,43 +55,5 @@ describes.realWin(
       expect(element.parentNode).to.equal(doc.body);
       expect(element.getAttribute('src')).to.equal('https://www.wikipedia.org');
     });
-
-    // it('should listen for resize events', async () => {
-    //   // const ampIframe = createAmpIframe(env, {
-    //   //   src: iframeSrc,
-    //   //   sandbox: 'allow-scripts allow-same-origin',
-    //   //   width: 100,
-    //   //   height: 100,
-    //   //   resizable: '',
-    //   // });
-    //   const iframeSrc =
-    //     'http://iframe.localhost:' +
-    //     location.port +
-    //     '/test/fixtures/served/iframe.html';
-    //   element = html`<amp-iframe src="https://www.wikipedia.org"></amp-iframe>`;
-
-    //   // await waitForAmpIframeLayoutPromise(doc, ampIframe);
-    //   await waitRendered();
-
-    //   const impl = await element.getImpl(false);
-    //   return new Promise((resolve, unusedReject) => {
-    //     impl.updateSize_ = (height, width) => {
-    //       resolve({height, width});
-    //     };
-    //     const iframe = element.querySelector('iframe');
-    //     iframe.contentWindow.postMessage(
-    //       {
-    //         sentinel: 'amp-test',
-    //         type: 'embed-size',
-    //         height: 217,
-    //         width: 113,
-    //       },
-    //       '*'
-    //     );
-    //   }).then((res) => {
-    //     expect(res.height).to.equal(217);
-    //     expect(res.width).to.equal(113);
-    //   });
-    // });
   }
 );
