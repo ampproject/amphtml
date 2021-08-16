@@ -47,7 +47,7 @@ describes.sandboxed('Transition', {}, (env) => {
 
     it('should ignore non-string transitions', () => {
       const t1 = tr.translateX(tr.numeric(0, 10));
-      const t2 = tr.spring(2, 10, 12, 0.8);
+      const t2 = tr.numeric(0, 10);
       const concat = tr.concat([t1, t2]);
 
       expect(concat(0, false)).to.equal('translateX(0px)');
@@ -107,24 +107,6 @@ describes.sandboxed('Transition', {}, (env) => {
     expect(func(0.3)).to.be.closeTo(-1.6, 1e-3);
     expect(func(0.6)).to.be.closeTo(-5.2, 1e-3);
     expect(func(0.9)).to.be.closeTo(-8.8, 1e-3);
-    expect(func(1)).to.equal(-10);
-  });
-
-  it('springAds.js', () => {
-    let func = tr.spring(2, 10, 12, 0.8);
-    expect(func(0)).to.equal(2);
-    expect(func(0.3)).to.be.closeTo(5.75, 1e-3);
-    expect(func(0.6)).to.be.closeTo(9.5, 1e-3);
-    expect(func(0.8)).to.be.closeTo(12, 1e-3); // Summit.
-    expect(func(0.9)).to.be.closeTo(11, 1e-3);
-    expect(func(1)).to.equal(10);
-
-    func = tr.spring(-2, -10, -12, 0.8);
-    expect(func(0)).to.equal(-2);
-    expect(func(0.3)).to.be.closeTo(-5.75, 1e-3);
-    expect(func(0.6)).to.be.closeTo(-9.5, 1e-3);
-    expect(func(0.8)).to.be.closeTo(-12, 1e-3); // Summit.
-    expect(func(0.9)).to.be.closeTo(-11, 1e-3);
     expect(func(1)).to.equal(-10);
   });
 

@@ -15,9 +15,14 @@
  */
 
 import {CurveDef, getCurve} from '#core/data-structures/curve';
+=======
+import {
+  assertNotDisplay,
+  setStyle,
+  px as stylePx,
+  scale as styleScale,
+} from './style';
 import {isString} from '#core/types';
-
-import {assertNotDisplay, px as pixels, setStyle} from './style';
 
 /**
  * TransitionDef function that accepts normtime, typically between 0 and 1 and
@@ -74,24 +79,6 @@ export function numeric(start, end) {
 }
 
 /**
- * Spring numeric interpolation.
- * @param {number} start
- * @param {number} end
- * @param {number} extended
- * @param {number} threshold
- * @return {!TransitionDef<number>}
- */
-export function spring(start, end, extended, threshold) {
-  if (end == extended) {
-    return numeric(start, end);
-  }
-  return (time) =>
-    time < threshold
-      ? start + (extended - start) * (time / threshold)
-      : extended + (end - extended) * ((time - threshold) / (1 - threshold));
-}
-
-/**
  * Adds "px" units.
  * @param {!TransitionDef<number>} transition
  * @return {!TransitionDef<string>}
@@ -143,7 +130,7 @@ export function translate(transitionX, opt_transitionY) {
   return (time) => {
     let x = transitionX(time);
     if (typeof x == 'number') {
-      x = pixels(x);
+      x = stylePx(x);
     }
 
     if (!opt_transitionY) {
@@ -152,7 +139,7 @@ export function translate(transitionX, opt_transitionY) {
 
     let y = opt_transitionY(time);
     if (typeof y == 'number') {
-      y = pixels(y);
+      y = stylePx(y);
     }
 
     return `translate(${x},${y})`;
@@ -165,5 +152,5 @@ export function translate(transitionX, opt_transitionY) {
  * @return {!TransitionDef<string>}
  */
 export function scale(transition) {
-  return (time) => `scale(${transition(time)})`;
+  return (time) => styleScale(transition(time));
 }
