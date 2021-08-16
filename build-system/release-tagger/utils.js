@@ -55,9 +55,11 @@ const config = {
 async function _runQueryInBatches(queryType, queries) {
   const responses = [];
   for (let i = 0; i < queries.length; i += config.batchSize) {
-    const join = queries.slice(i, config.batchSize).join(' ');
+    const join = queries
+      .slice(i, i + Math.min(queries.length, config.batchSize))
+      .join(' ');
     const query = `${queryType} {${join}}`;
-    const data = await graphqlWithAuth(query);
+    const data = await graphqlWithAuth({query});
     responses.push(...Object.values(data));
   }
   return responses;
@@ -172,7 +174,8 @@ async function getPullRequestsBetweenCommits(head, base) {
  * @return {Promise<Object>}
  */
 async function getLabel(name) {
-  return await octokit.rest.issues.getLabel({owner, repo, name});
+  const {data} = await octokit.rest.issues.getLabel({owner, repo, name});
+  return data;
 }
 
 /**
@@ -186,7 +189,7 @@ async function labelPullRequests(prs, labelId) {
   for (const [i, pr] of prs.entries()) {
     mutations.push(
       dedent`\
-      pr${i}: addLabelsToLabelable(input:{labelIds:"${labelId}",\
+      pr${i}: addLabelsToLabelable(input:{labelIds:"${labelId}", \
       labelableId:"${pr.id}", clientMutationId:"${pr.id}"})\
       {clientMutationId}`
     );

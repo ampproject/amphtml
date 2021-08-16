@@ -18,9 +18,9 @@
  * @fileoverview
  * Label pull request functions for the release tagger.
  * Parameters
- * 1. tag (or AMP version)
- * 2. previous tag
- * 3. channel
+ * 1. head tag (amp version)
+ * 2. base tag (amp version)
+ * 3. channel (beta|lts|stable)
  */
 
 const argv = require('minimist')(process.argv.slice(2));
@@ -31,17 +31,23 @@ const {
   labelPullRequests,
 } = require('./utils');
 
+const labelConfig = {
+  beta: 'PR Use: In Beta / Experimental',
+  lts: 'PR Use: In LTS',
+  stable: 'PR Use: In Stable',
+};
+
 /**
  * Main function
- * @param {string} head
- * @param {string} base
- * @param {string} label
+ * @param {string} head tag
+ * @param {string} base tag
+ * @param {string} channel (beta|stable|lts)
  * @return {Promise<Object>}
  */
-async function main(head, base, label) {
-  const labelId = await getLabel(label)['node_id'];
-  const headSha = await getRelease(head)['target_commitish'];
-  const baseSha = await getRelease(base)['target_commitish'];
+async function main(head, base, channel) {
+  const labelId = (await getLabel(labelConfig[channel]))['node_id'];
+  const headSha = (await getRelease(head))['target_commitish'];
+  const baseSha = (await getRelease(base))['target_commitish'];
   const prs = await getPullRequestsBetweenCommits(headSha, baseSha);
   return await labelPullRequests(prs, labelId);
 }
