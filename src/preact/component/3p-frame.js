@@ -98,6 +98,7 @@ function ProxyIframeEmbedWithRef(
     return countGenerators[type]();
   }, [type]);
 
+  // eslint-disable-next-line local/no-deep-destructuring
   const [{name, src}, setNameAndSrc] = useState({name: nameProp, src: srcProp});
   useLayoutEffect(() => {
     const win = contentRef.current?.ownerDocument?.defaultView;
