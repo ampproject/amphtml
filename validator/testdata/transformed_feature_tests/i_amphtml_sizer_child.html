@@ -56,5 +56,45 @@
      <amp-img src="/img/canoe_900x600_blur.jpg" alt="A blurry image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
      <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
    </amp-image-slider>
+
+  <!-- Valid: amp-image-slider > i-amphtml-sizer[slot="i-amphtml-svc"] -->
+  <amp-image-slider width="300" height="200" layout="responsive" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive">
+    <i-amphtml-sizer slot="i-amphtml-svc" style="display:block;padding-top:66.6667%;"></i-amphtml-sizer>
+    <amp-img src="/img/canoe_900x600_blur.jpg" alt="A blurry image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+    <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+  </amp-image-slider>
+
+  <!-- Valid: amp-video-iframe > i-amphtml-sizer[slot="i-amphtml-svc"] -->
+  <amp-video-iframe id="myVideo" src="/amp-video-iframe-videojs.html" width="720" height="405" layout="responsive" autoplay="" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive">
+    <i-amphtml-sizer slot="i-amphtml-svc" style="display:block;padding-top:56.2500%;"></i-amphtml-sizer>
+    <amp-img placeholder="" src="/img/amp-video-iframe-sample-placeholder.jpg" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+  </amp-video-iframe>
+
+  <!-- Invalid: amp-image-slider > i-amphtml-sizer[slot!="i-amphtml-svc"] -->
+  <amp-image-slider width="300" height="200" layout="responsive" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive">
+    <i-amphtml-sizer slot="foo" style="display:block;padding-top:66.6667%;"></i-amphtml-sizer>
+    <amp-img src="/img/canoe_900x600_blur.jpg" alt="A blurry image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+    <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+  </amp-image-slider>
+
+  <!-- Invalid: amp-video-iframe > i-amphtml-sizer[slot!="i-amphtml-svc"] -->
+  <amp-video-iframe id="myVideo" src="/amp-video-iframe-videojs.html" width="720" height="405" layout="responsive" autoplay="" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive">
+    <i-amphtml-sizer slot="foo" style="display:block;padding-top:56.2500%;"></i-amphtml-sizer>
+    <amp-img placeholder="" src="/img/amp-video-iframe-sample-placeholder.jpg" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+  </amp-video-iframe>
+
+
+  <!-- Invalid: amp-image-slider > i-amphtml-sizer[slot] -->
+  <amp-image-slider width="300" height="200" layout="responsive" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive">
+    <i-amphtml-sizer slot style="display:block;padding-top:66.6667%;"></i-amphtml-sizer>
+    <amp-img src="/img/canoe_900x600_blur.jpg" alt="A blurry image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+    <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+  </amp-image-slider>
+
+  <!-- Invalid: amp-video-iframe > i-amphtml-sizer[slot] -->
+  <amp-video-iframe id="myVideo" src="/amp-video-iframe-videojs.html" width="720" height="405" layout="responsive" autoplay="" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive">
+    <i-amphtml-sizer slot style="display:block;padding-top:56.2500%;"></i-amphtml-sizer>
+    <amp-img placeholder="" src="/img/amp-video-iframe-sample-placeholder.jpg" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+  </amp-video-iframe>
 </body>
 </html>
