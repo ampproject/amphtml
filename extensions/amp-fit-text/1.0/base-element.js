@@ -15,13 +15,13 @@
  */
 
 import {CSS} from './component.jss';
-import {FitText} from './component';
+import {BentoFitText} from './component';
 import {PreactBaseElement} from '#preact/base-element';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = FitText;
+BaseElement['Component'] = BentoFitText;
 
 /** @override */
 BaseElement['props'] = {
