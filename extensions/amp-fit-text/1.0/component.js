@@ -22,10 +22,10 @@ import {toWin} from '#core/window';
 import {useCallback, useLayoutEffect, useRef} from '#preact';
 
 /**
- * @param {!FitTextProps} props
+ * @param {!BentoFitTextDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function FitText({
+export function BentoFitText({
   children,
   maxFontSize = 72,
   minFontSize = 6,

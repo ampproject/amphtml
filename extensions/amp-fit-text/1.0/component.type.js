@@ -16,6 +16,9 @@
 
 /** @externs */
 
+/** @const */
+var BentoFitTextDef = {};
+
 /**
  * @typedef {{
  *   minFontSize: (number|undefined),
@@ -23,4 +26,4 @@
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-var FitTextProps;
+BentoFitTextDef.Props;
