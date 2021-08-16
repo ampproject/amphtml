@@ -29,7 +29,18 @@ const {
   getPullRequestsBetweenCommits,
   getRelease,
 } = require('./utils');
+const {getExtensions, getSemver} = require('../npm-publish/utils');
 const {GraphQlQueryResponseData} = require('@octokit/graphql'); //eslint-disable-line no-unused-vars
+
+/**
+ * @typedef {{
+ *  [major: string]: {
+ *    packages: {
+ *      [extension: string]: Set
+ *    }
+ *    unchanged: Set,
+ *  }}} PackageMetadata
+ */
 
 /**
  * Format pull request line
@@ -37,11 +48,49 @@ const {GraphQlQueryResponseData} = require('@octokit/graphql'); //eslint-disable
  * @return {string}
  */
 function _formatPullRequestLine(pr) {
-  const {mergeCommit, number, title, url} = pr;
+  const {mergeCommit, title} = pr;
   const {abbreviatedOid, commitUrl} = mergeCommit;
   return dedent`\
-  <a href="${commitUrl}"><code>${abbreviatedOid}</code></a> ${title} \
-  (<a href="${url}">#${number}</a>)`;
+   <a href="${commitUrl}"><code>${abbreviatedOid}</code></a> - ${title}`;
+}
+
+/**
+ * Organize bento changes into sections
+ * @param {Array<GraphQlQueryResponseData>} prs
+ * @return {PackageMetadata}
+ */
+function _createPackageSections(prs) {
+  const bundles = getExtensions();
+  const majors = [...new Set(bundles.map((b) => b.version))];
+  /** @type PackageMetadata */
+  const metadata = {};
+  for (const major of majors) {
+    metadata[major] = {
+      packages: {},
+      unchanged: new Set(),
+    };
+    bundles
+      .filter((b) => b.version == major)
+      .map((b) => metadata[major].unchanged.add(b.extension));
+  }
+
+  for (const pr of prs) {
+    for (const node of pr.files.nodes) {
+      for (const {extension, version} of bundles) {
+        if (node.path.startsWith(`extensions/${extension}/${version}`)) {
+          if (!Object.keys(metadata[version].packages).includes(extension)) {
+            metadata[version].packages[extension] = new Set();
+            metadata[version].unchanged.delete(extension);
+          }
+          metadata[version].packages[extension].add(
+            `<li>${_formatPullRequestLine(pr)}</li>`
+          );
+        }
+      }
+    }
+  }
+
+  return metadata;
 }
 
 /**
@@ -49,7 +98,7 @@ function _formatPullRequestLine(pr) {
  * @param {Array<GraphQlQueryResponseData>} prs
  * @return {Array<string>}
  */
-function _createSections(prs) {
+function _createComponentSections(prs) {
   const sections = {
     'ads': [],
     'build-system': [],
@@ -78,23 +127,23 @@ function _createSections(prs) {
       if (node.path.startsWith('extensions/')) {
         const component = node.path.split('/')[1];
         if (!Object.keys(sections).includes(component)) {
-          sections[component] = [];
+          sections[component] = new Set();
         }
-        sections[component].push(_formatPullRequestLine(pr));
+        sections[component].add(_formatPullRequestLine(pr));
       }
     }
   }
 
   const sectionsMarkdown = [];
   for (const key of Object.keys(sections).sort()) {
-    const orderedPrs = sections[key].sort();
+    const orderedPrs = [...sections[key]].sort();
     const template = dedent`
-      <details>\
-        <summary>\
-          ${key} (${orderedPrs.length})\
-        </summary>\
-        ${orderedPrs.join('<br />')}\
-      </details>`;
+       <details>\
+         <summary>\
+           ${key} (${orderedPrs.length})\
+         </summary>\
+         ${orderedPrs.join('<br />')}\
+       </details>`;
     sectionsMarkdown.push(template);
   }
 
@@ -103,23 +152,40 @@ function _createSections(prs) {
 
 /**
  * Create body for GitHub release
+ * @param {string} head
  * @param {string} base
  * @param {Array<GraphQlQueryResponseData>} prs
  * @return {string}
  */
-function _createBody(base, prs) {
-  const rawNotes = prs.map(_formatPullRequestLine);
-  const sections = _createSections(prs);
+function _createBody(head, base, prs) {
+  const bento = _createPackageSections(prs);
+  const components = _createComponentSections(prs);
   const template = dedent`\
-      #### *Baseline release: [${base}]\
-      (https://github.com/ampproject/amphtml/releases/${base})*
-
-      #### Raw notes
-      ${rawNotes.join('\n')}
-
-      #### Breakdown by component
-      ${sections.join('')}\
-  `;
+     <h2>Changelog</h2>
+     <p>
+     <a href="https://github.com/ampproject/amphtml/compare/${base}...${head}">
+     <code>${base}...${head}</code>
+     </a>
+     </p>
+ 
+     ${Object.entries(bento)
+       .map(
+         ([major, {packages, unchanged}]) => dedent`\
+         <h2>npm packages @ ${getSemver(major, head)}</h2>
+         ${Object.entries(packages)
+           .map(
+             ([extension, prs]) =>
+               `<b>${extension}</b>\n<ul>${[...prs].join('\n')}</ul>`
+           )
+           .join('\n')}
+   
+         <b>Packages not changed:</b> <i>${[...unchanged].join(', ')}</i>`
+       )
+       .join('\n')}
+ 
+     <h2>Changes by component</h2>
+     ${components.join('')}\
+   `;
   return template;
 }
 
@@ -133,7 +199,7 @@ async function main(tag, previousTag) {
   const {'target_commitish': commit} = await getRelease(tag);
   const {'target_commitish': previousCommit} = await getRelease(previousTag);
   const prs = await getPullRequestsBetweenCommits(commit, previousCommit);
-  const body = _createBody(previousTag, prs);
+  const body = _createBody(tag, previousTag, prs);
   return await createRelease(tag, commit, body);
 }
 
