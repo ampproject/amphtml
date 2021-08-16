@@ -9,7 +9,7 @@ import {experimentToggles, isCanary} from '#experiments';
 import {Services} from '#service';
 
 import {urls} from './config';
-import {getModeObject} from './mode-object';
+import {getMode} from './mode';
 
 /**
  * Produces the attributes for the ad template.
@@ -71,7 +71,13 @@ export function getContextMetadata(
     },
     'startTime': startTime,
     'tagName': element.tagName,
-    'mode': getModeObject(),
+    'mode': /** @type {!./mode.ModeDef} */ ({
+      'localDev': mode.isLocalDev(),
+      'development': getMode().development,
+      'esm': IS_ESM,
+      'test': mode.isTest(),
+      'rtvVersion': getMode().rtvVersion,
+    }),
     'canary': isCanary(parentWindow),
     'hidden': !ampdoc.isVisible(),
     'initialLayoutRect': layoutRect

@@ -11,9 +11,9 @@ const privateServiceFactory =
 const shouldNeverBeUsed =
   'Usage of this API is not allowed - only for internal purposes.';
 
-const realiasGetMode =
-  'Do not re-alias getMode or its return so it can be ' +
-  'DCE\'d. Use explicitly like "getMode().localDev" instead.';
+const backwardCompat =
+  'This method must not be called. It is only retained ' +
+  'for backward compatibility during rollout.';
 
 /**
  * @typedef {{
@@ -131,10 +131,6 @@ const forbiddenTermsGlobal = {
       'validator/js/engine/validator.js',
     ],
     checkInTestFolder: true,
-  },
-  '\\bgetModeObject\\(': {
-    message: realiasGetMode,
-    allowlist: ['src/mode-object.js', 'src/iframe-attributes.js'],
   },
   'INTERNAL_RUNTIME_VERSION|IS_(PROD|MINIFIED|ESM)': {
     message:
