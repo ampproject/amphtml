@@ -23,8 +23,9 @@ import {isTest} from './test';
  * @return {boolean}
  */
 export function isEsm() {
-  if (isTest() && self?.__AMP_MODE?.esm !== undefined) {
-    return self.__AMP_MODE.esm;
+  if (!isTest()) {
+    return IS_ESM;
   }
-  return IS_ESM;
+
+  return self?.__AMP_MODE?.esm !== undefined ? self.__AMP_MODE.esm : IS_ESM;
 }
