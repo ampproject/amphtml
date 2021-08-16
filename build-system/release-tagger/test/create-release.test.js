@@ -16,6 +16,7 @@
 
 const nock = require('nock');
 const test = require('ava');
+const {getExtensions} = require('../../npm-publish/utils');
 const {main: createRelease} = require('../create-release');
 
 test.before(() => nock.disableNetConnect());
@@ -27,16 +28,15 @@ test.after(() => {
 test('create', async (t) => {
   const pr1 =
     '<a href="https://github.com/ampproject/amphtml/commit/1abcdef">' +
-    '<code>1abc</code></a> Bunch of changes ' +
-    '(<a href="https://github.com/ampproject/amphtml/pull/1">#1</a>)';
+    '<code>1abc</code></a> - Bunch of changes';
   const pr2 =
     '<a href="https://github.com/ampproject/amphtml/commit/2abcdef">' +
-    '<code>2abc</code></a> `README` updates ' +
-    '(<a href="https://github.com/ampproject/amphtml/pull/2">#2</a>)';
+    '<code>2abc</code></a> - `README` updates';
   const pr3 =
     '<a href="https://github.com/ampproject/amphtml/commit/3abcdef">' +
-    '<code>3abc</code></a> Update packages ' +
-    '(<a href="https://github.com/ampproject/amphtml/pull/3">#3</a>)';
+    '<code>3abc</code></a> - Update packages';
+
+  const packages = getExtensions().map((e) => e.extension);
 
   const rest = nock('https://api.github.com')
     // https://docs.github.com/en/rest/reference/repos#get-a-release-by-tag-name
@@ -63,13 +63,15 @@ test('create', async (t) => {
       'target_commitish': '3abcdef',
       prerelease: true,
       body:
-        '#### *Baseline release: [2107210123000]' +
-        '(https://github.com/ampproject/amphtml/releases/2107210123000)*\n\n' +
-        '#### Raw notes\n' +
-        `${pr1}\n${pr2}\n${pr3}\n\n` +
-        '#### Breakdown by component\n' +
+        '<h2>Changelog</h2>\n<p>\n' +
+        '<a href="https://github.com/ampproject/amphtml/compare/' +
+        '2107210123000...2107280123000">\n' +
+        '<code>2107210123000...2107280123000</code>\n</a>\n</p>\n\n' +
+        '<h2>npm packages @ 1.2107280123.0</h2>\n\n\n' +
+        `<b>Packages not changed:</b> <i>${packages.join(', ')}</i>\n\n` +
+        '<h2>Changes by component</h2>\n' +
         `<details><summary>ads (1)</summary>${pr1}</details>` +
-        `<details><summary>amp-bind (1)</summary>${pr1}</details>` +
+        `<details><summary>amp-test1 (1)</summary>${pr1}</details>` +
         `<details><summary>build-system (1)</summary>${pr2}</details>` +
         `<details><summary>package updates (1)</summary>${pr3}</details>` +
         `<details><summary>src (1)</summary>${pr1}</details>` +
@@ -111,7 +113,7 @@ test('create', async (t) => {
                     'path': 'ads/readme.md',
                   },
                   {
-                    'path': 'extensions/amp-bind/readme.md',
+                    'path': 'extensions/amp-test1/readme.md',
                   },
                   {
                     'path': 'src/readme.md',
@@ -171,10 +173,10 @@ test('create', async (t) => {
               files: {
                 nodes: [
                   {
-                    'path': 'extensions/amp-bind/readme.md',
+                    'path': 'extensions/amp-test1/readme.md',
                   },
                   {
-                    'path': 'extensions/amp-story/readme.md',
+                    'path': 'extensions/amp-test2/readme.md',
                   },
                 ],
               },

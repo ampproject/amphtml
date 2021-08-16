@@ -16,15 +16,9 @@
 
 /**
  * @fileoverview
- * Gets Bento components to publish.
+ * Logs Bento components to publish.
  */
 
-const bundles = require('../compile/bundles.config.extensions.json');
-const extensions = bundles
-  .filter((bundle) => bundle.options?.npm)
-  .map((bundle) => ({
-    'extension': bundle.name,
-    'version': bundle.version,
-  }));
+const {getExtensions} = require('./utils');
 console /*OK*/
-  .log(JSON.stringify(extensions));
+  .log(JSON.stringify(getExtensions()));
