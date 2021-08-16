@@ -31,6 +31,7 @@ function getExtensions() {
 
 /**
  * Get semver from extension version and amp version
+ * See build-system/compile/internal-version.js for versioning description
  * @param {string} extensionVersion
  * @param {string} ampVersion
  * @return {string}

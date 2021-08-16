@@ -33,6 +33,16 @@ const {getExtensions, getSemver} = require('../npm-publish/utils');
 const {GraphQlQueryResponseData} = require('@octokit/graphql'); //eslint-disable-line no-unused-vars
 
 /**
+ * @typedef {{
+ *  [major: string]: {
+ *    packages: {
+ *      [extension: string]: Set
+ *    }
+ *    unchanged: Set,
+ *  }}} PackageMetadata
+ */
+
+/**
  * Format pull request line
  * @param {GraphQlQueryResponseData} pr
  * @return {string}
@@ -46,20 +56,13 @@ function _formatPullRequestLine(pr) {
 
 /**
  * Organize bento changes into sections
- * @typedef {{
- *  [major: string]: {
- *    packages: {
- *      [extension: string]: Set
- *    }
- *    unchanged: Set,
- *  }}} Metadata
  * @param {Array<GraphQlQueryResponseData>} prs
- * @return {Metadata}
+ * @return {PackageMetadata}
  */
 function _createPackageSections(prs) {
   const bundles = getExtensions();
   const majors = [...new Set(bundles.map((b) => b.version))];
-  /** @type Metadata */
+  /** @type PackageMetadata */
   const metadata = {};
   for (const major of majors) {
     metadata[major] = {
@@ -172,11 +175,11 @@ function _createBody(head, base, prs) {
          ${Object.entries(packages)
            .map(
              ([extension, prs]) =>
-               `${extension}\n<ul>${[...prs].join('\n')}</ul>`
+               `<b>${extension}</b>\n<ul>${[...prs].join('\n')}</ul>`
            )
            .join('\n')}
    
-         Packages not changed: <i>${[...unchanged].join(', ')}</i>`
+         <b>Packages not changed:</b> <i>${[...unchanged].join(', ')}</i>`
        )
        .join('\n')}
  

@@ -68,7 +68,7 @@ test('create', async (t) => {
         '2107210123000...2107280123000">\n' +
         '<code>2107210123000...2107280123000</code>\n</a>\n</p>\n\n' +
         '<h2>npm packages @ 1.2107280123.0</h2>\n\n\n' +
-        `Packages not changed: <i>${packages.join(', ')}</i>\n\n` +
+        `<b>Packages not changed:</b> <i>${packages.join(', ')}</i>\n\n` +
         '<h2>Changes by component</h2>\n' +
         `<details><summary>ads (1)</summary>${pr1}</details>` +
         `<details><summary>amp-test1 (1)</summary>${pr1}</details>` +
