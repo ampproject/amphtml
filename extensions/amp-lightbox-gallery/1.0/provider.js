@@ -305,8 +305,8 @@ function CloseButtonIcon(props) {
       <path
         d="M6.4 6.4 L17.6 17.6 Z M17.6 6.4 L6.4 17.6 Z"
         stroke="#fff"
-        stroke-width="2"
-        stroke-linejoin="round"
+        strokeWidth="2"
+        strokeLinejoin="round"
       />
     </svg>
   );
@@ -334,9 +334,9 @@ function NavButtonIcon({by, ...rest}) {
         d={by < 0 ? 'M14,7.4 L9.4,12 L14,16.6' : 'M10,7.4 L14.6,12 L10,16.6'}
         fill="none"
         stroke="#fff"
-        stroke-width="2"
-        stroke-linejoin="round"
-        stroke-linecap="round"
+        strokeWidth="2"
+        strokeLinejoin="round"
+        strokeLinecap="round"
       />
     </svg>
   );
@@ -378,7 +378,7 @@ function ToggleViewIcon({showCarousel, ...rest}) {
             width="16"
             height="16"
             rx="1"
-            stroke-width="2"
+            strokeWidth="2"
             stroke="#fff"
             fill="none"
           />

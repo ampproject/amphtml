@@ -128,7 +128,7 @@ export const InvalidTweet = () => {
       data-tweetid="1111111111111641653602164060160"
       data-cards="hidden"
     >
-      <blockquote placeholder class="twitter-tweet" data-lang="en">
+      <blockquote placeholder className="twitter-tweet" data-lang="en">
         <p>
           This placeholder should never change because given tweet-id is
           invalid.

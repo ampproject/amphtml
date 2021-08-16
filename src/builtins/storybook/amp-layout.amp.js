@@ -70,14 +70,14 @@ export const intrinsic = () => {
           }
         `}
       </style>
-      <div class="container">
+      <div className="container">
         <amp-layout
           layout="intrinsic"
           width={width}
           height={height}
           style={{maxWidth}}
         >
-          <div class="content">
+          <div className="content">
             {width}:{height}
           </div>
         </amp-layout>

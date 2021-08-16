@@ -66,9 +66,9 @@ describes.sandboxed('StreamGallery preact component', {}, () => {
   it('should not loop by default', () => {
     const wrapper = mount(
       <StreamGallery>
-        <div class="my-slide">slide 1</div>
-        <div class="my-slide">slide 2</div>
-        <div class="my-slide">slide 3</div>
+        <div className="my-slide">slide 1</div>
+        <div className="my-slide">slide 2</div>
+        <div className="my-slide">slide 3</div>
       </StreamGallery>
     );
     const slides = wrapper.find('[data-slide]');
@@ -84,9 +84,9 @@ describes.sandboxed('StreamGallery preact component', {}, () => {
   it('should render in preparation for looping with loop prop', () => {
     const wrapper = mount(
       <StreamGallery loop>
-        <div class="my-slide">slide 1</div>
-        <div class="my-slide">slide 2</div>
-        <div class="my-slide">slide 3</div>
+        <div className="my-slide">slide 1</div>
+        <div className="my-slide">slide 2</div>
+        <div className="my-slide">slide 3</div>
       </StreamGallery>
     );
     const slides = wrapper.find('[data-slide]');

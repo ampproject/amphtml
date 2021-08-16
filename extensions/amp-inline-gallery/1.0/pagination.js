@@ -36,20 +36,20 @@ export function Pagination({inset, ...rest}) {
       {...rest}
     >
       <div
-        class={`${Comp == Dots ? classes.dots : classes.numbers} ${
+        className={`${Comp == Dots ? classes.dots : classes.numbers} ${
           inset ? classes.inset : ''
         }`}
       >
         {inset && (
           <>
             <div
-              class={`${classes.insetBaseStyle} ${classes.insetFrosting}`}
+              className={`${classes.insetBaseStyle} ${classes.insetFrosting}`}
             ></div>
             <div
-              class={`${classes.insetBaseStyle} ${classes.insetBackdrop}`}
+              className={`${classes.insetBaseStyle} ${classes.insetBackdrop}`}
             ></div>
             <div
-              class={`${classes.insetBaseStyle} ${classes.insetBackground}`}
+              className={`${classes.insetBaseStyle} ${classes.insetBackground}`}
             ></div>
           </>
         )}
@@ -75,14 +75,14 @@ function Dots({currentSlide, goTo, inset, slideCount}) {
     dotList.push(
       <div
         key={i}
-        class={`${classes.dotWrapper} ${inset ? classes.inset : ''}`}
+        className={`${classes.dotWrapper} ${inset ? classes.inset : ''}`}
       >
-        <div class={`${classes.dot} ${inset ? classes.inset : ''}`}>
+        <div className={`${classes.dot} ${inset ? classes.inset : ''}`}>
           <div
             role="button"
             aria-selected={String(i === currentSlide)}
             onClick={() => goTo(i)}
-            class={`${classes.dotProgress} ${inset ? classes.inset : ''}`}
+            className={`${classes.dotProgress} ${inset ? classes.inset : ''}`}
             style={{opacity: i === currentSlide ? 1 : 0}}
           ></div>
         </div>
@@ -99,7 +99,7 @@ function Dots({currentSlide, goTo, inset, slideCount}) {
 function Numbers({currentSlide, inset, slideCount}) {
   const classes = useStyles();
   return (
-    <div class={`${classes.numbersWrapper} ${inset ? classes.inset : ''}`}>
+    <div className={`${classes.numbersWrapper} ${inset ? classes.inset : ''}`}>
       <span>{currentSlide + 1}</span>
       <span> / </span>
       <span>{slideCount}</span>

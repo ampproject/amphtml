@@ -170,8 +170,8 @@ function VideoIframeInternalWithRef(
     <iframe
       {...rest}
       ref={iframeRef}
-      allowfullscreen
-      frameborder="0"
+      allowFullScreen
+      frameBorder="0"
       sandbox={sandbox}
       loading={loading}
       onCanPlay={() => {

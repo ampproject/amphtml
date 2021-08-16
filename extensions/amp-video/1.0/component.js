@@ -378,7 +378,7 @@ function Autoplay({
       {displayOverlay && (
         <button
           aria-label={(metadata && metadata.title) || 'Unmute video'}
-          tabindex="0"
+          tabIndex="0"
           className={objstr({
             [autoplayClasses.autoplayMaskButton]: true,
             [classes.fillContentOverlay]: true,

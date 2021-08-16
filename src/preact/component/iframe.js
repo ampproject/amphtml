@@ -158,7 +158,7 @@ export function IframeEmbedWithRef(
           allow={allow}
           allowFullScreen={allowFullScreen}
           allowTransparency={allowTransparency}
-          frameborder="0"
+          frameBorder="0"
           loading={loading}
           name={name}
           onLoad={() => setLoaded(true)}

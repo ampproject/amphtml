@@ -80,9 +80,9 @@ export const responsiveHeightBound = () => {
           }
         `}
       </style>
-      <div class="container">
+      <div className="container">
         <amp-layout layout="responsive" width={width} height={height}>
-          <div class="content">
+          <div className="content">
             {width}:{height}
           </div>
         </amp-layout>

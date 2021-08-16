@@ -90,9 +90,9 @@ function DefaultArrow({by, className, ...rest}) {
               by < 0 ? 'M14,7.4 L9.4,12 L14,16.6' : 'M10,7.4 L14.6,12 L10,16.6'
             }
             fill="none"
-            stroke-width="2px"
-            stroke-linejoin="round"
-            stroke-linecap="round"
+            strokeWidth="2px"
+            strokeLinejoin="round"
+            strokeLinecap="round"
           />
         </svg>
       </button>

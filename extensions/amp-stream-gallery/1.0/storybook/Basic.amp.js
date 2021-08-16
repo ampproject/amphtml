@@ -81,7 +81,7 @@ export const Default = () => {
         })}
       </amp-stream-gallery>
 
-      <div class="buttons" style={{marginTop: 8}}>
+      <div className="buttons" style={{marginTop: 8}}>
         <button on="tap:carousel.goToSlide(index=3)">goToSlide(index=3)</button>
         <button on="tap:carousel.next">Next</button>
         <button on="tap:carousel.prev">Prev</button>

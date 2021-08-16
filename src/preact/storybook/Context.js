@@ -49,7 +49,7 @@ export const _default = () => {
  */
 function Composite() {
   return (
-    <div class="composite">
+    <div className="composite">
       <Info title="Default" />
       <WithAmpContext renderable={false}>
         <Info title="Context: non-renderable" />

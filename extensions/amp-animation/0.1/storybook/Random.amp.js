@@ -75,13 +75,13 @@ export const Random = () => {
   return (
     <AnimationTemplate spec={spec}>
       <div style={CONTAINER_STYLE}>
-        <div class="drop" style={DROP_STYLE}></div>
-        <div class="drop" style={DROP_STYLE}></div>
-        <div class="drop antigrav" style={DROP_STYLE}></div>
-        <div class="drop" style={DROP_STYLE}></div>
-        <div class="drop" style={DROP_STYLE}></div>
-        <div class="drop" style={DROP_STYLE}></div>
-        <div class="drop" style={DROP_STYLE}></div>
+        <div className="drop" style={DROP_STYLE}></div>
+        <div className="drop" style={DROP_STYLE}></div>
+        <div className="drop antigrav" style={DROP_STYLE}></div>
+        <div className="drop" style={DROP_STYLE}></div>
+        <div className="drop" style={DROP_STYLE}></div>
+        <div className="drop" style={DROP_STYLE}></div>
+        <div className="drop" style={DROP_STYLE}></div>
       </div>
     </AnimationTemplate>
   );

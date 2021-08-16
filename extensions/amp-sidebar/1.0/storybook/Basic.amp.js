@@ -71,7 +71,7 @@ export const _default = () => {
           <button on="tap:sidebar.close()">close</button>
         </div>
       </amp-sidebar>
-      <div class="buttons" style={{margin: 8}}>
+      <div className="buttons" style={{margin: 8}}>
         <button on="tap:sidebar.toggle()">toggle</button>
         <button on="tap:sidebar.open()">open</button>
         <button on="tap:sidebar.close()">close</button>
@@ -121,7 +121,7 @@ export const toolbar = () => {
         <button on="tap:sidebar.open()">open</button>
         <button on="tap:sidebar.close()">close</button>
       </amp-sidebar>
-      <div class="buttons" style={{margin: 8}}>
+      <div className="buttons" style={{margin: 8}}>
         <button on="tap:sidebar.toggle()">toggle</button>
         <button on="tap:sidebar.open()">open</button>
         <button on="tap:sidebar.close()">close</button>
@@ -187,7 +187,7 @@ export const styles = () => {
           <button on="tap:sidebar.close()">close</button>
         </div>
       </amp-sidebar>
-      <div class="buttons" style={{margin: 8}}>
+      <div className="buttons" style={{margin: 8}}>
         <button on="tap:sidebar.toggle()">toggle</button>
         <button on="tap:sidebar.open()">open</button>
         <button on="tap:sidebar.close()">close</button>
@@ -365,7 +365,7 @@ export const scroll = () => {
           )}
         </div>
       </amp-sidebar>
-      <div class="buttons" style={{margin: 8}}>
+      <div className="buttons" style={{margin: 8}}>
         <button on="tap:sidebar.toggle()">toggle</button>
         <button on="tap:sidebar.open()">open</button>
         <button on="tap:sidebar.close()">close</button>

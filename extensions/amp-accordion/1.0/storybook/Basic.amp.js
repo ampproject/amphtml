@@ -53,7 +53,7 @@ export const _default = () => {
         </section>
       </amp-accordion>
 
-      <div class="buttons" style={{marginTop: 8}}>
+      <div className="buttons" style={{marginTop: 8}}>
         <button on="tap:accordion.toggle(section='section1')">
           toggle(section1)
         </button>
@@ -98,7 +98,7 @@ export const events = () => {
         </section>
       </amp-accordion>
 
-      <div class="buttons" style={{marginTop: 8}}>
+      <div className="buttons" style={{marginTop: 8}}>
         <button on="tap:accordion.expand(section='section2')">
           expand(section2)
         </button>

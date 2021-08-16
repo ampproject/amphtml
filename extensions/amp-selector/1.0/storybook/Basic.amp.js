@@ -52,7 +52,7 @@ export const WithAmpImg = () => {
         option="2"
         style={imgStyle}
       ></amp-img>
-      <div class="divider inline-block mx1"></div>
+      <div className="divider inline-block mx1"></div>
       <amp-img
         src="https://amp.dev/static/samples/img/landscape_ship_300x200.jpg"
         width="90"

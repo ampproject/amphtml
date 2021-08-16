@@ -55,7 +55,7 @@ export const withAmpBind = () => {
         </section>
       </amp-accordion>
 
-      <div class="buttons" style={{marginTop: 8}}>
+      <div className="buttons" style={{marginTop: 8}}>
         <button on="tap:AMP.setState({section1: true})">
           Expand Section 1
         </button>

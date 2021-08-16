@@ -36,13 +36,13 @@ export function Iframe({
   return (
     <iframe
       src={src}
-      srcdoc={srcdoc}
+      srcDoc={srcdoc}
       sandbox={sandbox}
-      allowfullscreen={allowFullScreen}
+      allowFullScreen={allowFullScreen}
       allowpaymentrequest={allowPaymentRequest}
       allowtransparency={allowTransparency}
       referrerpolicy={referrerPolicy}
-      onload={onLoadCallback}
+      onLoad={onLoadCallback}
       {...rest}
     ></iframe>
   );

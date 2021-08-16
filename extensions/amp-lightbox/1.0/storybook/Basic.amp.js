@@ -48,7 +48,7 @@ export const Default = () => {
           <p>Test</p>
           <button slot="close-button">Close</button>
         </amp-lightbox>
-        <div class="buttons">
+        <div className="buttons">
           <button on="tap:lightbox">Open</button>
         </div>
       </div>
@@ -209,7 +209,7 @@ export const overflowAuto = () => {
             Close
           </button>
         </amp-lightbox>
-        <div class="buttons">
+        <div className="buttons">
           <button on="tap:lightbox">Open</button>
         </div>
         <p>

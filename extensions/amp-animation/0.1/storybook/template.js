@@ -80,7 +80,7 @@ export function AnimationTemplate(props) {
         />
       </amp-animation>
 
-      <div class="buttons" style={{marginBottom: '8px'}}>
+      <div className="buttons" style={{marginBottom: '8px'}}>
         <button on="tap:anim1.start">Start</button>
         <button on="tap:anim1.restart">Restart</button>
         <button on="tap:anim1.togglePause">Toggle Pause</button>

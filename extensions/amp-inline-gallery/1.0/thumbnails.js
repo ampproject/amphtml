@@ -94,7 +94,7 @@ export function Thumbnails({
                 height: px(height),
                 width: aspectRatio ? px(aspectRatio * height) : '',
               }}
-              tabindex="0"
+              tabIndex="0"
             />
           );
         })}
