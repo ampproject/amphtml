@@ -66,15 +66,10 @@ export function afterRenderPromise(win = env_?.win) {
  * Returns a Promise that resolves after n frames have been rendered.
  * @param {number} n
  */
-export function awaitNFrames(n) {
-  return /** @type {Promise<void>} */ (
-    new Promise(async (resolve) => {
-      for (let i = 0; i < n; i++) {
-        await afterRenderPromise();
-      }
-      resolve();
-    })
-  );
+export async function awaitNFrames(n) {
+  for (let i = 0; i < n; i++) {
+    await afterRenderPromise();
+  }
 }
 
 /**
