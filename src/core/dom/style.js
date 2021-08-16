@@ -231,12 +231,22 @@ export function deg(value) {
 }
 
 /**
+ * Coerces a number into a string with units.
+ * @param {number|string} value
+ * @param {function(number):string} fn
+ * @return {string}
+ */
+function units(value, fn) {
+  return typeof value == 'number' ? fn(value) : value;
+}
+
+/**
  * Returns a "translateX" for CSS "transform" property.
  * @param {number|string} value
  * @return {string}
  */
 export function translateX(value) {
-  return `translateX(${isString(value) ? value : px(value)})`;
+  return `translateX(${units(value, px)})`;
 }
 
 /**
@@ -246,13 +256,9 @@ export function translateX(value) {
  * @return {string}
  */
 export function translate(x, opt_y) {
-  if (typeof x == 'number') {
-    x = px(x);
-  }
-  if (opt_y === undefined || opt_y === null) {
-    return `translate(${x})`;
-  }
-  return `translate(${x}, ${typeof opt_y == 'number' ? px(opt_y) : opt_y})`;
+  return opt_y === undefined || opt_y === null
+    ? `translate(${units(x, px)})`
+    : `translate(${units(x, px)}, ${units(opt_y, px)})`;
 }
 
 /**
@@ -270,7 +276,7 @@ export function scale(value) {
  * @return {string}
  */
 export function rotate(value) {
-  return `rotate(${typeof value == 'number' ? deg(value) : value})`;
+  return `rotate(${units(value, deg)})`;
 }
 
 /**
