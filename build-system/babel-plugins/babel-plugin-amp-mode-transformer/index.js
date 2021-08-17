@@ -67,9 +67,13 @@ module.exports = function ({types: t}) {
         }
       },
       CallExpression(path) {
-        const {INTERNAL_RUNTIME_VERSION: version} = this.opts;
+        const {INTERNAL_RUNTIME_VERSION: version, IS_ESM: isEsm} = this.opts;
         if (path.get('callee').referencesImport('#core/mode', 'version')) {
           path.replaceWith(t.stringLiteral(version));
+        }
+
+        if (path.get('callee').referencesImport('#core/mode', 'isEsm')) {
+          path.replaceWith(t.booleanLiteral(isEsm));
         }
       },
     },

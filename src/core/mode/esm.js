@@ -27,5 +27,5 @@ export function isEsm() {
     return IS_ESM;
   }
 
-  return self?.__AMP_MODE?.esm !== undefined ? self.__AMP_MODE.esm : IS_ESM;
+  return self?.__AMP_MODE?.esm ?? IS_ESM;
 }

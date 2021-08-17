@@ -20,6 +20,7 @@ const localDev = false;
 const minified = true;
 const development = false;
 const namespaceVersion = "$internalRuntimeVersion$";
+const isEsm = true;
 
 function foo() {
   if (false == false) {
