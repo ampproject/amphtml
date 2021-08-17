@@ -15,6 +15,7 @@
  */
 
 import {LocalizedStringId} from '#service/localization/strings';
+
 import localesObjs from '../_locales';
 
 describes.fakeWin('amp-story-ad-localization-strings', {amp: true}, () => {
