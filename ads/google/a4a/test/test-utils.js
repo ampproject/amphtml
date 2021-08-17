@@ -390,6 +390,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         return fixture.addElement(elem).then(() =>
           googleAdUrl(impl, '', 0, [], []).then((url1) => {
@@ -411,6 +412,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         const getRect = () => {
           return {'width': 100, 'height': 200};
@@ -443,6 +445,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           [AMP_EXPERIMENT_ATTRIBUTE]: '111,222',
         });
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, {}, ['789', '098']).then((url1) => {
@@ -464,6 +467,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         impl.win.AMP_CONFIG = {type: 'production'};
         impl.win.location.hash = 'foo,deid=123456,654321,bar';
@@ -486,6 +490,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         impl.win.gaGlobal = {cid: 'foo', hid: 'bar'};
         return fixture.addElement(elem).then(() => {
@@ -508,6 +513,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         const createElementStub = env.sandbox.stub(
           impl.win.document,
@@ -537,6 +543,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         const createElementStub = env.sandbox.stub(
           impl.win.document,
@@ -564,6 +571,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         impl.win.SVGElement = undefined;
         const createElementStub = env.sandbox.stub(
@@ -594,6 +602,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         env.sandbox
           .stub(Services.viewerForDoc(impl.getAmpDoc()), 'getReferrerUrl')
@@ -623,6 +632,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
         doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {});
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', Date.now(), [], []).then((url) => {
@@ -639,6 +649,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
         doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {});
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         Object.defineProperty(impl.win.navigator, 'userAgentData', {
           'value': {
@@ -673,6 +684,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
         doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {});
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         Object.defineProperty(impl.win.navigator, 'userAgentData', {
           'value': {

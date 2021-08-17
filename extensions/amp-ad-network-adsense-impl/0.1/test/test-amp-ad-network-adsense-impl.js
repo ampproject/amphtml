@@ -569,6 +569,7 @@ describes.realWin(
     describe('#getAdUrl', () => {
       beforeEach(() => {
         resetSharedState();
+        impl.uiHandler = {isStickyAd: () => false};
       });
 
       afterEach(() => {
@@ -783,6 +784,10 @@ describes.realWin(
         const impl1 = new AmpAdNetworkAdsenseImpl(elem1);
         const impl2 = new AmpAdNetworkAdsenseImpl(elem2);
         const impl3 = new AmpAdNetworkAdsenseImpl(elem3);
+
+        impl1.uiHandler = {isStickyAd: () => false};
+        impl2.uiHandler = {isStickyAd: () => false};
+        impl3.uiHandler = {isStickyAd: () => false};
         return impl1.getAdUrl().then((adUrl1) => {
           expect(adUrl1).to.match(/pv=2/);
           expect(adUrl1).to.not.match(/prev_fmts/);
