@@ -36,7 +36,6 @@ module.exports = {
   },
   'rules': {
     'import/no-unresolved': 0,
-    'local/no-array-destructuring': 0,
     'local/no-bigint': 0,
     'local/no-dynamic-import': 0,
     'local/no-export-side-effect': 0,
