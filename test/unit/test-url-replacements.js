@@ -210,7 +210,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           // Restrict the number of replacement params to globalVariableSource
           // Please consider adding the logic to amp-analytics instead.
           // Please contact @lannka or @zhouyx if the test fail.
-          expect(variables.length).to.equal(59);
+          expect(variables.length).to.equal(60);
         });
       });
 
@@ -999,6 +999,12 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
       it('should replace BROWSER_LANGUAGE', () => {
         return expandUrlAsync('?sh=BROWSER_LANGUAGE').then((res) => {
           expect(res).to.match(/sh=\w+/);
+        });
+      });
+
+      it('should replace UACH', () => {
+        return expandUrlAsync('?sh=UACH(platform)').then((res) => {
+          expect(res).to.match(/sh=\w?/);
         });
       });
 

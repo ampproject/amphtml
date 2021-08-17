@@ -92,6 +92,7 @@ const defaultConfig = jsonConfiguration({
     'timezoneCode': 'TIMEZONE_CODE',
     'title': 'TITLE',
     'totalEngagedTime': 'TOTAL_ENGAGED_TIME',
+    'uach': 'UACH',
     'userAgent': 'USER_AGENT',
     'viewer': 'VIEWER',
     'viewportHeight': 'VIEWPORT_HEIGHT',

@@ -473,6 +473,15 @@ export class GlobalVariableSource extends VariableSource {
       return win.navigator.userAgent;
     });
 
+    // Returns the user agent client hint.
+    this.setAsync(
+      'UACH',
+      (variable) =>
+        win.navigator?.userAgentData
+          ?.getHighEntropyValues([variable])
+          ?.then((values) => values[variable]) || Promise.resolve('')
+    );
+
     // Returns the time it took to load the whole page. (excludes amp-* elements
     // that are not rendered by the system yet.)
     this.setTimingResolver_(
