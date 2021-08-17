@@ -43,6 +43,7 @@ function readJsconfigPaths() {
     const aliasPaths = tsConfig.compilerOptions.paths;
 
     const stripSuffix = (s) => s.replace(/\/\*$/, '');
+    // eslint-disable-next-line local/no-deep-destructuring
     const aliases = Object.entries(aliasPaths).map(([alias, [dest]]) => [
       stripSuffix(alias),
       stripSuffix(dest),
