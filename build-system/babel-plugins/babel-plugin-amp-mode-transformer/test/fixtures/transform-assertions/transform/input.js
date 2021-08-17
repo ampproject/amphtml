@@ -22,7 +22,6 @@ const localDev = getMode().localDev;
 const minified = getMode().minified;
 const development = getMode().development;
 const namespaceVersion = mode.version();
-const isEsm = mode.isEsm();
 
 function foo() {
   if (getMode().development == false) {
