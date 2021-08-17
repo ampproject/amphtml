@@ -196,9 +196,9 @@ async function compileAllJs(options) {
 }
 
 /**
- * Allows pending inside the compile wrapper to the already compiled, minified JS file.
+ * Allows pending inside the compile wrapper to the already minified JS file.
  * @param {string} srcFilename Name of the JS source file
- * @param {string} destFilePath File path to the compiled JS file
+ * @param {string} destFilePath File path to the minified JS file
  * @param {?Object} options
  */
 function combineWithCompiledFile(srcFilename, destFilePath, options) {

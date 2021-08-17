@@ -96,7 +96,7 @@ export function createFixtureIframe(
     if (!html) {
       throw new Error('Cannot find fixture: ' + fixture);
     }
-    html = maybeSwitchToCompiledJs(html);
+    html = maybeSwitchToMinifiedJs(html);
     window.ENABLE_LOG = true;
     // This global function will be called by the iframe immediately when it
     // starts loading. This appears to be the only way to get the correct
@@ -625,14 +625,13 @@ function onInsert(win) {
 }
 
 /**
- * Takes a HTML document that is pointing to unminified JS and HTML
- * binaries and massages the URLs to pointed to compiled binaries
- * instead.
+ * Takes a HTML document that is pointing to unminified JS and HTML binaries and
+ * massages the URLs to pointed to minified binaries instead.
  * @param {string} html
  * @return {string}
  */
-export function maybeSwitchToCompiledJs(html) {
-  if (window.ampTestRuntimeConfig.useCompiledJs) {
+export function maybeSwitchToMinifiedJs(html) {
+  if (window.ampTestRuntimeConfig.useMinifiedJs) {
     return (
       html
         // Main JS

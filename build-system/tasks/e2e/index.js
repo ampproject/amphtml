@@ -70,7 +70,7 @@ async function setUpTesting_() {
   return startServer(
     {host: HOST, port: PORT},
     {quiet: !argv.debug},
-    {compiled: argv.compiled}
+    {minified: argv.minified}
   );
 }
 
@@ -239,7 +239,7 @@ e2e.flags = {
     'Transform tests with the EXPERIMENT constant set to true',
   'experiment': 'Experiment being tested (used for status reporting)',
   'extensions': 'Build only the listed extensions.',
-  'compiled': 'Run tests against minified JS',
+  'minified': 'Run tests against minified JS',
   'files': 'Run tests found in a specific path (ex: **/test-e2e/*.js)',
   'testnames': 'List the name of each test being run',
   'watch': 'Watch for changes in files, runs corresponding test(s)',

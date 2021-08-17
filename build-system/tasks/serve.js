@@ -259,7 +259,7 @@ serve.flags = {
   quiet: "Run in quiet mode and don't log HTTP requests",
   cache: 'Make local resources cacheable by the browser',
   no_caching_extensions: 'Disable caching for extensions',
-  compiled: 'Serve minified JS',
+  minified: 'Serve minified JS',
   esm: 'Serve ESM JS (uses the new typescript server transforms)',
   cdn: 'Serve current prod JS',
   rtv: 'Serve JS from the RTV provided',

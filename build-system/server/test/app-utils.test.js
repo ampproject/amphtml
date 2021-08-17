@@ -17,8 +17,8 @@
 const test = require('ava');
 const {replaceUrls, toInaboxDocument} = require('../app-utils');
 
-test('replaceUrls("compiled", ...)', async (t) => {
-  const mode = 'compiled';
+test('replaceUrls("minified", ...)', async (t) => {
+  const mode = 'minified';
   t.is(
     replaceUrls(
       mode,
@@ -75,8 +75,8 @@ test('replaceUrls("compiled", ...)', async (t) => {
   );
 });
 
-test('replaceUrls("compiled", ..., hostName)', async (t) => {
-  const mode = 'compiled';
+test('replaceUrls("minified", ..., hostName)', async (t) => {
+  const mode = 'minified';
   const hostName = 'https://foo.bar';
   t.is(
     replaceUrls(
@@ -340,8 +340,8 @@ test('toInaboxDocument(...)', async (t) => {
   );
 });
 
-test('replaceUrls("compiled", toInaboxDocument(...))', async (t) => {
-  const mode = 'compiled';
+test('replaceUrls("minified", toInaboxDocument(...))', async (t) => {
+  const mode = 'minified';
   const hostName = '';
   t.is(
     replaceUrls(

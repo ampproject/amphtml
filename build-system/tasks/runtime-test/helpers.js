@@ -97,7 +97,7 @@ function maybePrintArgvMessages() {
     local_changes:
       'Running unit tests directly affected by the files' +
       ' changed in the local branch.',
-    compiled: 'Running tests in compiled mode.',
+    minified: 'Running tests in minified mode.',
     stable: 'Running tests only on stable browsers.',
     beta: 'Running tests only on beta browsers.',
   };
@@ -135,7 +135,7 @@ function maybePrintArgvMessages() {
       green('to run tests in a headless Chrome window.')
     );
   }
-  if (argv.compiled) {
+  if (argv.minified) {
     log(green('Running tests against minified code.'));
   } else {
     log(green('Running tests against unminified code.'));

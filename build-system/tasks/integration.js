@@ -62,7 +62,7 @@ integration.description = 'Run integration tests';
 integration.flags = {
   'chrome_canary': 'Run tests on Chrome Canary',
   'chrome_flags': 'Use the given flags to launch Chrome',
-  'compiled': 'Run tests against minified JS',
+  'minified': 'Run tests against minified JS',
   'config':
     'Set the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'coverage': 'Run tests in code coverage mode',

@@ -267,7 +267,7 @@ class RuntimeTestConfig {
     this.client.verboseLogging = !!argv.verbose;
     this.client.captureConsole = !!argv.verbose || !!argv.files;
     this.client.amp = {
-      useCompiledJs: !!argv.compiled,
+      useMinifiedJs: !!argv.minified,
       adTypes: getAdTypes(),
       mochaTimeout: this.client.mocha.timeout,
       testServerPort: this.client.testServerPort,

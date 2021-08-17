@@ -26,7 +26,7 @@ const jsModes = [
     changes.`,
   },
   {
-    value: 'compiled',
+    value: 'minified',
     description: html`
       Minified AMP JavaScript is served from the local server. This is only
       available after running <code>amp dist --fortesting</code>
