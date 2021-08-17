@@ -59,6 +59,7 @@ export function Iframe({
     if (!iframe) {
       return;
     }
+    // TODO(dmanek): Validate height & width
     const {height, width} = dataRef.current;
     if (requestResize) {
       requestResize(width, height);
@@ -111,6 +112,7 @@ export function Iframe({
       allowtransparency={allowTransparency}
       referrerpolicy={referrerPolicy}
       onload={onLoad}
+      frameBorder={0}
       {...rest}
     ></iframe>
   );
