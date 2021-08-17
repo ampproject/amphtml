@@ -318,6 +318,7 @@ async function populateOrgCdn_(flavorType, rtvPrefixes, tempDir, outputDir) {
   if (flavorType == 'base') {
     rtvCopyingPromises.push(
       ...Object.entries(experimentsConfig)
+        // eslint-disable-next-line local/no-deep-destructuring
         .filter(([, {environment}]) => environment == 'INABOX')
         .map(
           ([experimentFlavor]) =>

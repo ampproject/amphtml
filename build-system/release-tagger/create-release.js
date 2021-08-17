@@ -170,6 +170,7 @@ function _createBody(head, base, prs) {
  
      ${Object.entries(bento)
        .map(
+         // eslint-disable-next-line local/no-deep-destructuring
          ([major, {packages, unchanged}]) => dedent`\
          <h2>npm packages @ ${getSemver(major, head)}</h2>
          ${Object.entries(packages)
