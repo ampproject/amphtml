@@ -51,13 +51,11 @@ export const _default = () => {
   return (
     <Facebook
       allowFullScreen={allowFullScreen}
-      bootstrap="./vendor/facebook.max.js"
       embedAs={embedAs}
       href={href}
       includeCommentParent={includeCommentParent}
       locale={locale}
       showText={showText}
-      src="http://ads.localhost:9001/dist.3p/current/frame.max.html"
       style={{width: '400px', height: '400px'}}
     >
       This text is inside.
@@ -75,13 +73,11 @@ export const Comments = () => {
   const locale = boolean('french locale') ? 'fr_FR' : undefined;
   return (
     <Facebook
-      bootstrap="./vendor/facebook.max.js"
       embedAs="comments"
       href={href}
       locale={locale}
       numPosts={numPosts}
       orderBy={orderBy}
-      src="http://ads.localhost:9001/dist.3p/current/frame.max.html"
       style={{width: '400px', height: '400px'}}
     ></Facebook>
   );
@@ -108,7 +104,6 @@ export const Like = () => {
   const size = select('size (small by default)', ['large', 'small'], undefined);
   return (
     <Facebook
-      bootstrap="./vendor/facebook.max.js"
       embedAs="like"
       href={href}
       locale={locale}
@@ -119,7 +114,6 @@ export const Like = () => {
       refLabel={refLabel}
       share={share}
       size={size}
-      src="http://ads.localhost:9001/dist.3p/current/frame.max.html"
       style={{width: '800px', height: '400px'}}
     ></Facebook>
   );
@@ -142,7 +136,6 @@ export const Page = () => {
 
   return (
     <Facebook
-      bootstrap="./vendor/facebook.max.js"
       embedAs="page"
       href={href}
       locale={locale}
@@ -151,7 +144,6 @@ export const Page = () => {
       smallHeader={smallHeader}
       showFacepile={showFacepile}
       tabs={tabs}
-      src="http://ads.localhost:9001/dist.3p/current/frame.max.html"
       style={{width: '400px', height: '400px'}}
     ></Facebook>
   );
