@@ -346,7 +346,7 @@ describes.realWin(
               `clientconfig=${encodeURIComponent(
                 JSON.stringify(config.clientConfig)
               )}&` +
-              'cpid=consent_page_view_id_64&' +
+              'cpid=foo_consent_page_view_id_64_123&' +
               'r=RANDOM'
           )
         );
