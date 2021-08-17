@@ -31,6 +31,9 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
       </BaseCarousel>
     );
     expect(wrapper.find('Arrow')).to.have.lengthOf(2);
+    expect(wrapper.find('Arrow').first().prop('rtl')).to.equal('false');
+    expect(wrapper.find('Arrow').last().prop('rtl')).to.equal('false');
+    expect(wrapper.find('Scroller').prop('group')).to.be.undefined;
 
     const slides = wrapper.find('[data-slide]');
     expect(slides).to.have.lengthOf(3);
