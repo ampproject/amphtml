@@ -17,6 +17,7 @@
 import * as Preact from '#preact';
 import {forwardRef} from '#preact/compat';
 import {useMemo} from '#preact';
+import {VideoEvents} from '../../../src/video-interface';
 import {dispatchCustomEvent} from '#core/dom';
 import {
   DailymotionEvents,
@@ -53,6 +54,18 @@ function onMessage({currentTarget, data}) {
   const event = parsedData?.['event'];
   if (event === DailymotionEvents.API_READY) {
     dispatchCustomEvent(currentTarget, 'canplay');
+    return;
+  }
+  if (event === DailymotionEvents.END) {
+    dispatchCustomEvent(currentTarget, [VideoEvents.ENDED, VideoEvents.PAUSE]);
+    return;
+  }
+  if (event === DailymotionEvents.PAUSE) {
+    dispatchCustomEvent(currentTarget, VideoEvents.PAUSE);
+    return;
+  }
+  if (event === DailymotionEvents.PLAY) {
+    dispatchCustomEvent(currentTarget, VideoEvents.PLAY);
     return;
   }
   if (DailymotionEvents[event]) {

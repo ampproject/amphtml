@@ -32,3 +32,13 @@ export const _default = () => {
     ></Dailymotion>
   );
 };
+
+export const _autoplay = () => {
+  return (
+    <Dailymotion
+      style={{width: 300, height: 200}}
+      videoId="x3rdtfy"
+      autoplay
+    ></Dailymotion>
+  );
+};
