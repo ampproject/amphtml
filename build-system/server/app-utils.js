@@ -40,8 +40,8 @@ function setServeMode(modeOptions) {
     modeOptions = minimist(process.argv.slice(2), {string: ['rtv']});
   }
 
-  if (modeOptions.compiled) {
-    serveMode = 'compiled';
+  if (modeOptions.minified) {
+    serveMode = 'minified';
   } else if (modeOptions.esm) {
     serveMode = 'esm';
   } else if (modeOptions.cdn) {
@@ -61,7 +61,7 @@ function setServeMode(modeOptions) {
  */
 function logServeMode() {
   const serveMode = getServeMode();
-  if (serveMode == 'compiled') {
+  if (serveMode == 'minified') {
     log(green('Serving'), cyan('minified'), green('JS'));
   } else if (serveMode == 'esm') {
     log(green('Serving'), cyan('ESM'), green('JS'));
@@ -151,7 +151,7 @@ function replaceUrls(mode, html, hostName = '') {
   // If you need to add URL mapping logic, please don't do it in this function.
   // Instead, do so in the `cdn.ts` module required by `replaceCdnJsUrls()`
 
-  const useMaxNames = mode !== 'compiled';
+  const useMaxNames = mode !== 'minified';
   if (!useMaxNames) {
     // TODO(alanorozco): This should be handled in new-server as well.
     html = html.replace(

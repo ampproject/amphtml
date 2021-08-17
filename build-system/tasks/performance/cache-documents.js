@@ -28,7 +28,7 @@ const PORT = 8000;
  * @param {!Array<string>} urls
  */
 async function cacheDocuments(urls) {
-  await startServer({host: HOST, port: PORT}, {quiet: true}, {compiled: true});
+  await startServer({host: HOST, port: PORT}, {quiet: true}, {minified: true});
 
   await Promise.all(
     urls.flatMap((url) => [
