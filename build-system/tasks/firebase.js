@@ -95,7 +95,7 @@ async function replaceUrls(filePath) {
     /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
     '/dist/amp.js'
   );
-  if (argv.compiled) {
+  if (argv.minified) {
     result = result.replace(
       /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
       '/dist/v0/$1.js'
@@ -116,7 +116,7 @@ module.exports = {
 firebase.description = 'Generate build artificats for deployment to firebase';
 firebase.flags = {
   'file': 'File to deploy to firebase as index.html',
-  'compiled': 'Deploy from minified files',
+  'minified': 'Deploy from minified files',
   'nobuild': 'Skip the amp build|dist step.',
   'fortesting': 'Read the AMP_TESTING_HOST env var and write it to AMP_CONFIG',
 };
