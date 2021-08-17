@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Layout} from '#core/dom/layout';
+
+import {Services} from '#service';
+
+import {dev} from '../../../src/log';
 import {
   DomAncestorVisitor,
   VisitorCallbackTypeDef,
 } from '../../../src/utils/dom-ancestor-visitor';
-import {Layout} from '#core/dom/layout';
-import {Services} from '#service';
-import {dev} from '../../../src/log';
 
 /** @const @enum {number} */
 const FULL_WIDTH_SIGNALS = {
