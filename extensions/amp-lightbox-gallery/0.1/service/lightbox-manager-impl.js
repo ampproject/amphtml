@@ -15,29 +15,31 @@
  */
 
 import {AmpEvents} from '#core/constants/amp-events';
-import {
-  AutoLightboxEvents,
-  isActionableByTap,
-} from '../../../../src/auto-lightbox';
 import {CommonSignals} from '#core/constants/common-signals';
-import {
-  LIGHTBOX_THUMBNAIL_AD,
-  LIGHTBOX_THUMBNAIL_UNKNOWN,
-  LIGHTBOX_THUMBNAIL_VIDEO,
-} from './lightbox-placeholders';
-import {Services} from '#service';
+import {iterateCursor} from '#core/dom';
 import {
   childElement,
   childElementByAttr,
   closestAncestorElementBySelector,
   elementByTag,
 } from '#core/dom/query';
-import {dev, devAssert, userAssert} from '../../../../src/log';
-
-import {iterateCursor} from '#core/dom';
-import {map} from '#core/types/object';
 import {srcsetFromElement, srcsetFromSrc} from '#core/dom/srcset';
 import {toArray} from '#core/types/array';
+import {map} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {
+  LIGHTBOX_THUMBNAIL_AD,
+  LIGHTBOX_THUMBNAIL_UNKNOWN,
+  LIGHTBOX_THUMBNAIL_VIDEO,
+} from './lightbox-placeholders';
+
+import {
+  AutoLightboxEvents,
+  isActionableByTap,
+} from '../../../../src/auto-lightbox';
+import {dev, devAssert, userAssert} from '../../../../src/log';
 
 const LIGHTBOX_ELIGIBLE_TAGS = new Set(['AMP-IMG', 'IMG']);
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-{
-  const [, second] = document;
-  const [x, , z] = document;
-}
+// These extensions have been modified in the last 2 weeks, so we're not
+// including them yet to minimize disruption to devs actively working on them.
+const EXCLUDED_EXTENSIONS = require('./import-order-excluded.json');
 
-{
-  const [, second] = document();
-  const [x, , z] = document();
-}
+module.exports = {
+  'rules': {'import/order': 2},
+  'overrides': [
+    {
+      'files': EXCLUDED_EXTENSIONS.map((ext) => `./${ext}/**/*.js`),
+      'rules': {'import/order': 0},
+    },
+  ],
+};

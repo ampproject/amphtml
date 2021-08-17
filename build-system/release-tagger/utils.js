@@ -55,9 +55,11 @@ const config = {
 async function _runQueryInBatches(queryType, queries) {
   const responses = [];
   for (let i = 0; i < queries.length; i += config.batchSize) {
-    const join = queries.slice(i, config.batchSize).join(' ');
+    const join = queries
+      .slice(i, i + Math.min(queries.length, config.batchSize))
+      .join(' ');
     const query = `${queryType} {${join}}`;
-    const data = await graphqlWithAuth(query);
+    const data = await graphqlWithAuth({query});
     responses.push(...Object.values(data));
   }
   return responses;
@@ -109,11 +111,11 @@ async function updateRelease(id, changes) {
 
 /**
  * Get a list of commits between two commits
- * @param {string} base
  * @param {string} head
+ * @param {string} base
  * @return {Promise<Object>}
  */
-async function compareCommits(base, head) {
+async function compareCommits(head, base) {
   const {data} = await octokit.rest.repos.compareCommits({
     owner,
     repo,
@@ -156,19 +158,50 @@ async function getPullRequests(shas) {
 
 /**
  * Get pull requests between two commits
- * @param {string} commit
- * @param {string} previousCommit
+ * @param {string} head
+ * @param {string} base
  * @return {Promise<Array<GraphQlQueryResponseData>>}
  */
-async function getPullRequestsBetweenCommits(commit, previousCommit) {
-  const {commits} = await compareCommits(previousCommit, commit);
+async function getPullRequestsBetweenCommits(head, base) {
+  const {commits} = await compareCommits(head, base);
   const shas = commits.map((commit) => commit.sha);
   return await getPullRequests(shas);
 }
 
+/**
+ * Get label
+ * @param {string} name
+ * @return {Promise<Object>}
+ */
+async function getLabel(name) {
+  const {data} = await octokit.rest.issues.getLabel({owner, repo, name});
+  return data;
+}
+
+/**
+ * Label pull requests
+ * @param {Array<Object>} prs
+ * @param {string} labelId
+ * @return {Promise<Array<GraphQlQueryResponseData>>}
+ */
+async function labelPullRequests(prs, labelId) {
+  const mutations = [];
+  for (const [i, pr] of prs.entries()) {
+    mutations.push(
+      dedent`\
+      pr${i}: addLabelsToLabelable(input:{labelIds:"${labelId}", \
+      labelableId:"${pr.id}", clientMutationId:"${pr.id}"})\
+      {clientMutationId}`
+    );
+  }
+  return await _runQueryInBatches('mutation', mutations);
+}
+
 module.exports = {
-  getPullRequestsBetweenCommits,
   createRelease,
+  getLabel,
+  getPullRequestsBetweenCommits,
   getRelease,
+  labelPullRequests,
   updateRelease,
 };

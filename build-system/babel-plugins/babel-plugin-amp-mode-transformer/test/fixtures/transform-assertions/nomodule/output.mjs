@@ -17,11 +17,10 @@ import { getMode } from '../../../../../../../src/mode';
 const test = false;
 const localDev = false;
 const minified = true;
-const development = false;
-const version = "$internalRuntimeVersion$";
+const development = getMode().development;
 
 function foo() {
-  if (false == false) {
+  if (getMode().development == false) {
     return false;
   }
 }

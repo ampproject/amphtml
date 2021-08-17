@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {MessageType} from '#core/3p-frame-messaging';
 import {
   layoutRectLtwh,
   moveLayoutRect,
@@ -21,7 +22,6 @@ import {
 } from '#core/dom/layout/rect';
 import {dict} from '#core/types/object';
 
-import {MessageType} from '../3p-frame-messaging';
 import {SubscriptionApi} from '../iframe-helper';
 
 /**
