@@ -48,7 +48,7 @@ describes.realWin(
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-        'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp'
+        'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp&mute=0'
       );
     });
 
@@ -64,7 +64,7 @@ describes.realWin(
       const iframe = dailymotion.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
-        'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp&start=123&origin=example%26.org'
+        'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp&mute=0&start=123&origin=example%26.org'
       );
     });
 
@@ -82,7 +82,7 @@ describes.realWin(
       const iframe = dailymotion.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
-        'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp'
+        'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp&mute=0'
       );
     });
 
