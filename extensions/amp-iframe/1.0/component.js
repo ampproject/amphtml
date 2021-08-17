@@ -15,8 +15,9 @@
  */
 
 import * as Preact from '#preact';
-import {useEffect, useRef} from '#preact';
+import {useCallback, useEffect, useRef} from '#preact';
 import {MessageType} from '#preact/component/3p-frame';
+import {toWin} from '#core/window';
 
 const NOOP = () => {};
 const FULL_HEIGHT = '100%';
@@ -29,7 +30,7 @@ export function Iframe({
   allowFullScreen,
   allowPaymentRequest,
   allowTransparency,
-  onLoadCallback = NOOP,
+  onLoad = NOOP,
   referrerPolicy,
   requestResize,
   sandbox,
@@ -38,48 +39,66 @@ export function Iframe({
   ...rest
 }) {
   const ref = useRef();
+  const dataRef = useRef(null);
+  const isIntersectingRef = useRef(false);
+
+  const handlePostMessage = useCallback(
+    (event) => {
+      // Currently we're only handling `embed-size` post messages
+      if (event.data?.type !== MessageType.EMBED_SIZE) {
+        return;
+      }
+      dataRef.current = event.data;
+      attemptResize();
+    },
+    [attemptResize]
+  );
+
+  const attemptResize = useCallback(() => {
+    const iframe = ref.current;
+    if (!iframe) {
+      return;
+    }
+    const {height, width} = dataRef.current;
+    if (requestResize) {
+      requestResize(width, height);
+      iframe.height = FULL_HEIGHT;
+      iframe.width = FULL_HEIGHT;
+    } else if (!isIntersectingRef.current) {
+      if (width) {
+        iframe.width = width;
+      }
+      if (height) {
+        iframe.height = height;
+      }
+    }
+  }, [requestResize]);
 
   useEffect(() => {
     const iframe = ref.current;
     if (!iframe) {
       return;
     }
-    let data;
-    const io = new IntersectionObserver((entries) => {
-      if (!entries[0].isIntersecting || !data) {
+    const win = iframe && toWin(iframe.ownerDocument.defaultView);
+    if (!win) {
+      return;
+    }
+    const io = new win.IntersectionObserver((entries) => {
+      const last = entries[entries.length - 1];
+      isIntersectingRef.current = last.isIntersecting;
+      if (last.isIntersecting || !dataRef.current || !win) {
         return;
       }
-
-      if (requestResize) {
-        requestResize(data.width, data.height);
-        iframe.height = FULL_HEIGHT;
-        iframe.width = FULL_HEIGHT;
-      } else {
-        if (data.width) {
-          iframe.width = data.width;
-        }
-        if (data.height) {
-          iframe.height = data.height;
-        }
-      }
+      attemptResize();
     });
-
-    const handlePostMessage = (event) => {
-      // Currently we're only handling `embed-size` post messages
-      if (event.data?.type !== MessageType.EMBED_SIZE) {
-        return;
-      }
-      data = event.data;
-      io.observe(iframe);
-    };
-
-    window.addEventListener('message', handlePostMessage);
+    io.observe(iframe);
+    win.addEventListener('message', handlePostMessage);
 
     return () => {
       io.unobserve(iframe);
-      window.removeEventListener('message', handlePostMessage);
+      win.removeEventListener('message', handlePostMessage);
     };
-  }, [requestResize]);
+  }, [attemptResize, handlePostMessage]);
 
   return (
     <iframe
@@ -91,7 +110,7 @@ export function Iframe({
       allowpaymentrequest={allowPaymentRequest}
       allowtransparency={allowTransparency}
       referrerpolicy={referrerPolicy}
-      onload={onLoadCallback}
+      onload={onLoad}
       {...rest}
     ></iframe>
   );

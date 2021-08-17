@@ -24,17 +24,6 @@ import {measureIntersection} from '#core/dom/layout/intersection';
 const TAG = 'amp-iframe';
 
 class AmpIframe extends BaseElement {
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-
-    /**
-     * Keep track if we've already errored on `embed-size` request to resize the iframe.
-     * @private {boolean}
-     */
-    this.hasErroredEmbedSize_ = false;
-  }
-
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
@@ -79,21 +68,17 @@ class AmpIframe extends BaseElement {
   /**
    * Updates the element's dimensions to accommodate the iframe's
    * requested dimensions.
-   * @param {number|undefined} height
-   * @param {number|undefined} width
+   * @param {number} height
+   * @param {number} width
    * @private
    */
   updateSize_(height, width) {
-    if (!this.element.hasAttribute('resizable')) {
-      if (!this.hasErroredEmbedSize_) {
-        this.user().error(
-          TAG,
-          'Ignoring embed-size request because this iframe is not resizable',
-          this.element
-        );
-        this.hasErroredEmbedSize_ = true;
-      }
-      return;
+    if (!height && !width) {
+      this.user().error(
+        TAG,
+        'Ignoring embed-size request because width and height value is invalid',
+        this.element
+      );
     }
 
     if (height < 100) {
@@ -108,47 +93,14 @@ class AmpIframe extends BaseElement {
     }
 
     // TODO(dmanek): Calculate width and height of the container to include padding.
-    let newHeight, newWidth;
-    height = parseInt(height, 10);
-    if (!isNaN(height)) {
-      newHeight = height;
-    }
-    width = parseInt(width, 10);
-    if (!isNaN(width)) {
-      newWidth = width;
-    }
 
-    if (newHeight !== undefined || newWidth !== undefined) {
-      this.attemptChangeSize(newHeight, newWidth).then(
-        () => {
-          if (newHeight !== undefined) {
-            this.element.setAttribute('height', newHeight);
-          }
-          if (newWidth !== undefined) {
-            this.element.setAttribute('width', newWidth);
-          }
-          this.element.overflowCallback(
-            /* overflown */ false,
-            newHeight,
-            newWidth
-          );
-        },
-        () => {}
-      );
-    } else {
-      this.user().error(
-        TAG,
-        'Ignoring embed-size request because ' +
-          'no width or height value is provided',
-        this.element
-      );
-    }
+    this.attemptChangeSize(height, width);
   }
 
   /** @override */
   init() {
     return dict({
-      'onLoadCallback': () => {
+      'onLoad': () => {
         this.handleOnLoad_();
       },
       'requestResize': (height, width) => {
