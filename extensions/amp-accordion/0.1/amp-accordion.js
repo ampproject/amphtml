@@ -21,6 +21,11 @@ import {dispatchCustomEvent, tryFocus} from '#core/dom';
 import {Layout} from '#core/dom/layout';
 import {closest, realChildElements} from '#core/dom/query';
 import {getStyle, setImportantStyles, setStyles} from '#core/dom/style';
+import {
+  numeric,
+  px,
+  setStyles as setStylesTransition,
+} from '#core/dom/transition';
 import {clamp} from '#core/math';
 import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
@@ -31,11 +36,6 @@ import {CSS} from '../../../build/amp-accordion-0.1.css';
 import {Animation} from '../../../src/animation';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {
-  numeric,
-  px,
-  setStyles as setStylesTransition,
-} from '../../../src/transition';
 import {removeFragment} from '../../../src/url';
 
 const TAG = 'amp-accordion';

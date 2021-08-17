@@ -15,8 +15,7 @@
  */
 
 import {Side} from './sidebar-config';
-import {assertDoesNotContainDisplay} from '../../../src/assert-display';
-import {setStyles} from '#core/dom/style';
+import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
 import {useLayoutEffect, useRef} from '#preact';
 import {useValueRef} from '#preact/component';
 

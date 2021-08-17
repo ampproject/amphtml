@@ -22,7 +22,7 @@ import {Services} from '#service';
 import {dev} from '../../../src/log';
 import {isLayoutSizeFixed} from '#core/dom/layout';
 import {listen} from '../../../src/event-helper';
-import {numeric} from '../../../src/transition';
+import {numeric} from '#core/dom/transition';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,

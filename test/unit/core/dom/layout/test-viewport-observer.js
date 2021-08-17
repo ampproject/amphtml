@@ -20,7 +20,7 @@ import {
   unobserveWithSharedInOb,
 } from '#core/dom/layout/viewport-observer';
 
-describes.sandboxed('Viewport Observer', {}, (env) => {
+describes.sandboxed('DOM - layout - Viewport Observer', {}, (env) => {
   describe('createViewportObserver', () => {
     let win;
     let ctorSpy;

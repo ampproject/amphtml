@@ -16,7 +16,7 @@
 
 import * as lr from '#core/dom/layout/rect';
 
-describes.sandboxed('math - LayoutRect', {}, () => {
+describes.sandboxed('DOM - layout - LayoutRect', {}, () => {
   it('layoutRectLtwh', () => {
     const rect = lr.layoutRectLtwh(1, 2, 3, 4);
     expect(rect.left).to.equal(1);

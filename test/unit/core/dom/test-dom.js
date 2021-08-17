@@ -21,7 +21,7 @@ import {setShadowDomSupportedVersionForTesting} from '#core/dom/web-components';
 
 import {loadPromise} from '../../../../src/event-helper';
 
-describes.sandboxed('DOM', {}, (env) => {
+describes.sandboxed('DOM helpers', {}, (env) => {
   afterEach(() => {
     setScopeSelectorSupportedForTesting(undefined);
     setShadowDomSupportedVersionForTesting(undefined);

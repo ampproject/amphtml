@@ -15,12 +15,11 @@
  */
 
 import {Observable} from '#core/data-structures/observable';
-import {setStyles} from '#core/dom/style';
+import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
 
 import {AnimationRunner} from './animation-runner';
 import {getTotalDuration} from './utils';
 
-import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
 import {devAssert} from '../../../../src/log';
 import {
   WebAnimationDef,

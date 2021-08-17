@@ -36,6 +36,7 @@ import {
 import {srcsetFromElement} from '#core/dom/srcset';
 import {setStyles} from '#core/dom/style';
 import * as st from '#core/dom/style';
+import * as tr from '#core/dom/transition';
 import {boundValue, distance, magnitude} from '#core/math';
 import {WindowInterface} from '#core/window/interface';
 
@@ -54,7 +55,6 @@ import {
 } from '../../../src/gesture-recognizers';
 import {dev, userAssert} from '../../../src/log';
 import {continueMotion} from '../../../src/motion';
-import * as tr from '../../../src/transition';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-image-viewer';

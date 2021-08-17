@@ -25,7 +25,7 @@ import {
 } from '#core/dom/layout/size-observer';
 import {removeItem} from '#core/types/array';
 
-describes.realWin('DOM - size-observer', {}, (env) => {
+describes.realWin('DOM - layout - size-observer', {}, (env) => {
   let win, doc;
   let observer;
   let element;
