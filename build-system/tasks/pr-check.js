@@ -125,7 +125,7 @@ async function prCheck() {
       runCheck('amp clean');
       runCheck('amp dist --fortesting');
     }
-    runCheck('amp integration --nobuild --compiled --headless');
+    runCheck('amp integration --nobuild --minified --headless');
   }
 
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VALIDATOR)) {

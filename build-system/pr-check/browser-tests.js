@@ -37,11 +37,11 @@ function pushBuildWorkflow() {
   try {
     timedExecOrThrow(`amp unit --report --${browser}`, 'Unit tests failed!');
     timedExecOrThrow(
-      `amp integration --report --nobuild --compiled --${browser}`,
+      `amp integration --report --nobuild --minified --${browser}`,
       'Integration tests failed!'
     );
     timedExecOrThrow(
-      `amp e2e --report --nobuild --compiled --browsers=${browser}`,
+      `amp e2e --report --nobuild --minified --browsers=${browser}`,
       'End-to-end tests failed!'
     );
   } catch (e) {
@@ -75,13 +75,13 @@ function prBuildWorkflow() {
     timedExecOrDie(`amp unit --${browser}`);
   }
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
-    timedExecOrDie(`amp integration --nobuild --compiled --${browser}`);
+    timedExecOrDie(`amp integration --nobuild --minified --${browser}`);
   }
   if (
     buildTargetsInclude(Targets.RUNTIME, Targets.E2E_TEST) &&
     ['safari', 'firefox'].includes(browser) // E2E tests can't be run on Edge.
   ) {
-    timedExecOrDie(`amp e2e --nobuild --compiled --browsers=${browser}`);
+    timedExecOrDie(`amp e2e --nobuild --minified --browsers=${browser}`);
   }
 }
 

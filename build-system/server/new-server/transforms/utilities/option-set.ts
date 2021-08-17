@@ -20,7 +20,7 @@
  * options.json, then add the field to this interface.
  */
 export interface OptionSet {
-  compiled?: boolean;
+  minified?: boolean;
   esm?: boolean;
   port?: number;
   fortesting?: boolean;

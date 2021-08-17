@@ -50,7 +50,7 @@ function pushBuildWorkflow() {
   prependConfig();
   try {
     timedExecOrThrow(
-      `amp integration --nobuild --headless --compiled --report --config=${argv.config}`,
+      `amp integration --nobuild --headless --minified --report --config=${argv.config}`,
       'Integration tests failed!'
     );
   } catch (e) {
@@ -69,7 +69,7 @@ function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     prependConfig();
     timedExecOrDie(
-      `amp integration --nobuild --compiled --headless --config=${argv.config}`
+      `amp integration --nobuild --minified --headless --config=${argv.config}`
     );
   } else {
     skipDependentJobs(

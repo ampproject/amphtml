@@ -45,7 +45,7 @@ function prependConfig() {
  */
 function pushBuildWorkflow() {
   prependConfig();
-  timedExecOrDie('amp integration --nobuild --compiled --headless --esm');
+  timedExecOrDie('amp integration --nobuild --minified --headless --esm');
 }
 
 /**
@@ -55,7 +55,7 @@ function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     prependConfig();
     timedExecOrDie(
-      `amp integration --nobuild --compiled --headless --esm --config=${argv.config}`
+      `amp integration --nobuild --minified --headless --esm --config=${argv.config}`
     );
   } else {
     skipDependentJobs(

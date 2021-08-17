@@ -31,7 +31,7 @@ const defaultTransformConfig = {
   esm: ESM,
   port: PORT,
   fortesting: FOR_TESTING,
-  useMaxNames: !argv.compiled,
+  useMaxNames: !argv.minified,
 };
 
 const transforms = [
