@@ -19,7 +19,7 @@ import {
   measureIntersection,
 } from '#core/dom/layout/intersection';
 
-describes.fakeWin('utils/intersection', {}, (env) => {
+describes.fakeWin('DOM - layout - intersection observer', {}, (env) => {
   function getInObConstructorStub() {
     const ctor = (cb) => {
       if (ctor.callback) {

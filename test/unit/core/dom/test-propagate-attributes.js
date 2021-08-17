@@ -35,7 +35,7 @@ class FakeElement {
   }
 }
 
-describes.sandboxed('Propagate Attributes', {}, () => {
+describes.sandboxed('DOM - propagate attributes', {}, () => {
   let sourceElement;
 
   beforeEach(() => {

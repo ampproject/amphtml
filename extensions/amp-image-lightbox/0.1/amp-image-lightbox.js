@@ -27,6 +27,7 @@ import * as query from '#core/dom/query';
 import {srcsetFromElement} from '#core/dom/srcset';
 import {setStyles, toggle} from '#core/dom/style';
 import * as st from '#core/dom/style';
+import * as tr from '#core/dom/transition';
 import {boundValue, clamp, distance, magnitude} from '#core/math';
 import {WindowInterface} from '#core/window/interface';
 
@@ -44,7 +45,6 @@ import {
 } from '../../../src/gesture-recognizers';
 import {dev, userAssert} from '../../../src/log';
 import {continueMotion} from '../../../src/motion';
-import * as tr from '../../../src/transition';
 
 const TAG = 'amp-image-lightbox';
 

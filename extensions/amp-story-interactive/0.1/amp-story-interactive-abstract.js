@@ -32,7 +32,7 @@ import {
   assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
 import {base64UrlEncodeFromString} from '#core/types/string/base64';
-import {assertDoesNotContainDisplay} from '../../../src/assert-display';
+import {assertDoesNotContainDisplay, setImportantStyles} from '#core/dom/style';
 import {
   buildInteractiveDisclaimer,
   buildInteractiveDisclaimerIcon,
@@ -47,7 +47,6 @@ import {dev, devAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {emojiConfetti} from './interactive-confetti';
 import {toArray} from '#core/types/array';
-import {setImportantStyles} from '#core/dom/style';
 import {isExperimentOn} from '#experiments/';
 
 /** @const {string} */

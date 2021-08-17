@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {computedStyle, setStyles} from '#core/dom/style';
+import {
+  assertDoesNotContainDisplay,
+  computedStyle,
+  setStyles,
+} from '#core/dom/style';
 
 import {Services} from '#service';
 import {installPositionObserverServiceForDoc} from '#service/position-observer/position-observer-impl';
@@ -31,7 +35,6 @@ import {
   resolvePercentageToNumber,
 } from './amp-fx-presets-utils';
 
-import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
 import {devAssert} from '../../../../src/log';
 import {
   getServiceForDoc,

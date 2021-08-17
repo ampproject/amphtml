@@ -17,6 +17,7 @@
 import {domOrderComparator} from '#core/dom';
 import {closest, matches} from '#core/dom/query';
 import {
+  assertDoesNotContainDisplay,
   computedStyle,
   getStyle,
   getVendorJsPropertyName,
@@ -32,7 +33,6 @@ import {endsWith} from '#core/types/string';
 import {Services} from '#service';
 
 import {Animation} from '../animation';
-import {assertDoesNotContainDisplay} from '../assert-display';
 import {dev, user} from '../log';
 import {getMode} from '../mode';
 import {Pass} from '../pass';

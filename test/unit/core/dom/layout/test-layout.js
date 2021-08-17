@@ -32,7 +32,7 @@ import {
   resetShouldUseAspectRatioCssForTesting,
 } from '../../../../../src/static-layout';
 
-describes.sandboxed('Layout', {}, () => {
+describes.sandboxed('DOM - layout', {}, () => {
   let div;
   let aspectRatioEnabled;
 

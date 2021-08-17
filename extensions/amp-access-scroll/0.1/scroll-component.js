@@ -15,12 +15,11 @@
  */
 
 import {createElementWithAttributes} from '#core/dom';
-import {px, setStyles} from '#core/dom/style';
+import {assertDoesNotContainDisplay, px, setStyles} from '#core/dom/style';
 import {hasOwn} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {devAssert} from '../../../src/log';
 
 /** @abstract */

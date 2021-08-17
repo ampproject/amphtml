@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-import {computedStyle, setStyles} from '#core/dom/style';
+import {
+  assertDoesNotContainDisplay,
+  computedStyle,
+  setStyles,
+} from '#core/dom/style';
 
 import {Services} from '#service';
 
-import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
 import {dev, devAssert, userAssert} from '../../../../src/log';
 import {FxType} from '../fx-type';
 

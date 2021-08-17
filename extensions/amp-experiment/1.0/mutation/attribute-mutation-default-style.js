@@ -15,12 +15,11 @@
  */
 
 import {isAmpElement} from '#core/dom/amp-element-helpers';
-import {setStyles} from '#core/dom/style';
+import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
 import {dict, hasOwn} from '#core/types/object';
 
 import {assertAttributeMutationFormat} from './mutation';
 
-import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
 import {dev, user} from '../../../../src/log';
 
 /** @const {RegExp} */

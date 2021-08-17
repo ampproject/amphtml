@@ -16,6 +16,7 @@
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 import {devAssert} from '#core/assert';
+import {devError} from '#core/error';
 import {map} from '#core/types/object';
 
 /** @type {Object<string, string>} */
@@ -23,6 +24,9 @@ let propertyNameCache;
 
 /** @const {!Array<string>} */
 const vendorPrefixes = ['Webkit', 'webkit', 'Moz', 'moz', 'ms', 'O', 'o'];
+
+const DISPLAY_STYLE_MESSAGE =
+  '`display` style detected. You must use toggle instead.';
 
 const EMPTY_CSS_DECLARATION = /** @type {!CSSStyleDeclaration} */ ({
   'getPropertyPriority': () => '',
@@ -227,34 +231,34 @@ export function deg(value) {
 }
 
 /**
+ * Coerces a number into a string with units.
+ * @param {number|string} value
+ * @param {function(number):string} fn
+ * @return {string}
+ */
+function units(value, fn) {
+  return typeof value == 'number' ? fn(value) : value;
+}
+
+/**
  * Returns a "translateX" for CSS "transform" property.
  * @param {number|string} value
  * @return {string}
  */
 export function translateX(value) {
-  if (typeof value == 'string') {
-    return `translateX(${value})`;
-  }
-  return `translateX(${px(value)})`;
+  return `translateX(${units(value, px)})`;
 }
 
 /**
  * Returns a "translateX" for CSS "transform" property.
  * @param {number|string} x
- * @param {(number|string)=} opt_y
+ * @param {(number|string|null)=} opt_y
  * @return {string}
  */
 export function translate(x, opt_y) {
-  if (typeof x == 'number') {
-    x = px(x);
-  }
-  if (opt_y === undefined) {
-    return `translate(${x})`;
-  }
-  if (typeof opt_y == 'number') {
-    opt_y = px(opt_y);
-  }
-  return `translate(${x}, ${opt_y})`;
+  return opt_y === undefined || opt_y === null
+    ? `translate(${units(x, px)})`
+    : `translate(${units(x, px)}, ${units(opt_y, px)})`;
 }
 
 /**
@@ -272,10 +276,7 @@ export function scale(value) {
  * @return {string}
  */
 export function rotate(value) {
-  if (typeof value == 'number') {
-    value = deg(value);
-  }
-  return `rotate(${value})`;
+  return `rotate(${units(value, deg)})`;
 }
 
 /**
@@ -337,4 +338,42 @@ export function propagateObjectFitStyles(fromEl, toEl) {
  */
 function isVar(property) {
   return property.startsWith('--');
+}
+
+/**
+ * Asserts that the style is not the `display` style.
+ * This is the only possible way to pass a dynamic style to setStyle.
+ *
+ * If you wish to set `display`, use the `toggle` helper instead. This is so
+ * changes to display can trigger necessary updates. See #17475.
+ *
+ * @param {string} style
+ * @return {string}
+ */
+export function assertNotDisplay(style) {
+  // TODO(rcebulko): This calls itself an assert, but doesn't throw an error.
+  // Should it throw sync? If so, this/below can reduce to
+  // `return devAssert(style == 'display', DISPLAY_STYLE_MESSAGE);`
+  if (style === 'display') {
+    devError('STYLE', DISPLAY_STYLE_MESSAGE);
+  }
+  return style;
+}
+
+/**
+ * Asserts that the styles does not contain the `display` style.
+ * This is the only possible way to pass a dynamic styles object to setStyles
+ * and setImportantStyles.
+ *
+ * If you wish to set `display`, use the `toggle` helper instead. This is so
+ * changes to display can trigger necessary updates. See #17475.
+ *
+ * @param {!Object<string, *>} styles
+ * @return {!Object<string, *>}
+ */
+export function assertDoesNotContainDisplay(styles) {
+  if ('display' in styles) {
+    devError('STYLE', DISPLAY_STYLE_MESSAGE);
+  }
+  return styles;
 }

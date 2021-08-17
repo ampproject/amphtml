@@ -25,6 +25,7 @@ import {
 } from '#core/dom/layout/rect';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {computedStyle, setStyle} from '#core/dom/style';
+import {numeric} from '#core/dom/transition';
 import {clamp} from '#core/math';
 import {dict} from '#core/types/object';
 
@@ -45,7 +46,6 @@ import {
   getParentWindowFrameElement,
   registerServiceBuilderForDoc,
 } from '../../service-helpers';
-import {numeric} from '../../transition';
 
 const TAG_ = 'Viewport';
 const SCROLL_POS_TO_BLOCK = {
