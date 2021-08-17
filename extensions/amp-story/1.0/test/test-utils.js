@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {StateProperty} from '../amp-story-store-service';
 import {
   getRGBFromCssColorValue,
   getTextColorForRGB,
@@ -21,7 +22,7 @@ import {
   timeStrToMillis,
 } from '../utils';
 
-describes.fakeWin('amp-story utils', {}, () => {
+describes.fakeWin('amp-story utils', {}, (env) => {
   describe('timeStrToMillis', () => {
     it('should return millis for a milliseconds string', () => {
       const millis = timeStrToMillis('100ms');
@@ -109,7 +110,8 @@ describes.fakeWin('amp-story utils', {}, () => {
         getParam: () => null,
         isEmbedded: () => true,
       };
-      expect(shouldShowStoryUrlInfo(fakeViewer)).to.be.true;
+      const fakeStoreService = {get: () => true};
+      expect(shouldShowStoryUrlInfo(fakeViewer, fakeStoreService)).to.be.true;
     });
 
     it('should be forced to false when isEmbedded', () => {
@@ -117,7 +119,8 @@ describes.fakeWin('amp-story utils', {}, () => {
         getParam: () => '0',
         isEmbedded: () => true,
       };
-      expect(shouldShowStoryUrlInfo(fakeViewer)).to.be.false;
+      const fakeStoreService = {get: () => true};
+      expect(shouldShowStoryUrlInfo(fakeViewer, fakeStoreService)).to.be.false;
     });
 
     it('should be false when !isEmbedded', () => {
@@ -125,7 +128,8 @@ describes.fakeWin('amp-story utils', {}, () => {
         getParam: () => null,
         isEmbedded: () => false,
       };
-      expect(shouldShowStoryUrlInfo(fakeViewer)).to.be.false;
+      const fakeStoreService = {get: () => true};
+      expect(shouldShowStoryUrlInfo(fakeViewer, fakeStoreService)).to.be.false;
     });
 
     it('should be forced to true when !isEmbedded', () => {
@@ -133,7 +137,34 @@ describes.fakeWin('amp-story utils', {}, () => {
         getParam: () => '1',
         isEmbedded: () => false,
       };
-      expect(shouldShowStoryUrlInfo(fakeViewer)).to.be.true;
+      const fakeStoreService = {get: () => true};
+      expect(shouldShowStoryUrlInfo(fakeViewer, fakeStoreService)).to.be.true;
+    });
+
+    it('should be false when CAN_SHOW_STORY_URL_INFO is false', () => {
+      const fakeViewer = {
+        getParam: () => null,
+        isEmbedded: () => true,
+      };
+      const fakeStoreService = {get: () => {}};
+      const getStub = env.sandbox.stub(fakeStoreService, 'get').returns(false);
+      expect(shouldShowStoryUrlInfo(fakeViewer, fakeStoreService)).to.be.false;
+      expect(getStub).to.be.calledOnceWithExactly(
+        StateProperty.CAN_SHOW_STORY_URL_INFO
+      );
+    });
+
+    it('should be true when CAN_SHOW_STORY_URL_INFO is true', () => {
+      const fakeViewer = {
+        getParam: () => null,
+        isEmbedded: () => true,
+      };
+      const fakeStoreService = {get: () => {}};
+      const getStub = env.sandbox.stub(fakeStoreService, 'get').returns(true);
+      expect(shouldShowStoryUrlInfo(fakeViewer, fakeStoreService)).to.be.true;
+      expect(getStub).to.be.calledOnceWithExactly(
+        StateProperty.CAN_SHOW_STORY_URL_INFO
+      );
     });
   });
 });
