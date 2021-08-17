@@ -15,9 +15,10 @@
  */
 
 import {childElementByAttr} from '#core/dom/query';
-import {dev} from '../../../../src/log';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyles} from '#core/dom/style';
+
+import {dev} from '../../../../src/log';
 
 export class LoadMoreService {
   /**

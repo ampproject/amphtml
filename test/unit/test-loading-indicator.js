@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {LoadingIndicatorImpl} from '#service/loading-indicator';
-import {Services} from '#service';
 import {pushIfNotExist, removeItem} from '#core/types/array';
+
+import {Services} from '#service';
+import {LoadingIndicatorImpl} from '#service/loading-indicator';
 
 describes.realWin('LoadingIndicatorImpl', {amp: true}, (env) => {
   let ampdoc;

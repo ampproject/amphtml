@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Messaging} from '../../messaging/messaging';
 import {getWinOrigin, serializeQueryString} from '../../../../../src/url';
+import {Messaging} from '../../messaging/messaging';
 
 describes.sandboxed('AmpViewerMessagingIntegration', {}, (env) => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';

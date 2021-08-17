@@ -47,7 +47,7 @@ async function defaultTask() {
   printConfigHelp('amp');
   printDefaultTaskHelp();
   parseExtensionFlags(/* preBuild */ true);
-  if (argv.compiled) {
+  if (argv.minified) {
     await runPreDistSteps(/* watch */ true);
   } else {
     await runPreBuildSteps(/* watch */ true);
@@ -65,11 +65,11 @@ module.exports = {
 defaultTask.description =
   'Start the dev server, lazily build JS when requested, and watch for changes';
 defaultTask.flags = {
-  compiled: 'Compile and serve minified binaries',
+  minified: 'Compile and serve minified binaries',
   pseudo_names:
     'Compile with readable names (useful while profiling / debugging production code)',
   pretty_print:
-    'Output compiled code with whitespace (useful while profiling / debugging production code)',
+    'Output code with whitespace (useful while profiling / debugging production code)',
   fortesting: 'Compile production binaries for local testing',
   noconfig: 'Compile production binaries without applying AMP_CONFIG',
   config: 'Set the runtime\'s AMP_CONFIG to one of "prod" or "canary"',

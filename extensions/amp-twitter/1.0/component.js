@@ -16,9 +16,9 @@
 
 import * as Preact from '#preact';
 import {MessageType, ProxyIframeEmbed} from '#preact/component/3p-frame';
-import {deserializeMessage} from '../../../src/3p-frame-messaging';
+import {deserializeMessage} from '#core/3p-frame-messaging';
 import {forwardRef} from '#preact/compat';
-import {useCallback, useState} from '#preact';
+import {useCallback, useMemo, useState} from '#preact';
 
 /** @const {string} */
 const TYPE = 'twitter';
@@ -31,7 +31,22 @@ const MATCHES_MESSAGING_ORIGIN = () => true;
  * @return {PreactDef.Renderable}
  */
 function TwitterWithRef(
-  {momentid, options, requestResize, style, title, tweetid, ...rest},
+  {
+    cards,
+    conversation,
+    limit,
+    momentid,
+    options: optionsProps,
+    requestResize,
+    style,
+    timelineScreenName,
+    timelineSourceType,
+    timelineUserId,
+    title,
+    tweetLimit,
+    tweetid,
+    ...rest
+  },
   ref
 ) {
   const [height, setHeight] = useState(null);
@@ -50,6 +65,32 @@ function TwitterWithRef(
     },
     [requestResize]
   );
+  const options = useMemo(
+    () => ({
+      cards,
+      conversation,
+      limit,
+      momentid,
+      timelineScreenName,
+      timelineSourceType,
+      timelineUserId,
+      tweetLimit,
+      tweetid,
+      ...optionsProps,
+    }),
+    [
+      cards,
+      conversation,
+      limit,
+      momentid,
+      optionsProps,
+      timelineScreenName,
+      timelineSourceType,
+      timelineUserId,
+      tweetLimit,
+      tweetid,
+    ]
+  );
 
   return (
     <ProxyIframeEmbed
@@ -60,7 +101,7 @@ function TwitterWithRef(
       // non-overridable props
       matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
       messageHandler={messageHandler}
-      options={{tweetid, momentid, ...options}}
+      options={options}
       type={TYPE}
       style={height ? {...style, height} : style}
     />

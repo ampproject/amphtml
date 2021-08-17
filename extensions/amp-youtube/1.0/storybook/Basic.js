@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
+import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
+
 import * as Preact from '#preact';
+import {useRef, useState} from '#preact';
+
 import {
   Accordion,
   AccordionContent,
@@ -22,8 +26,6 @@ import {
   AccordionSection,
 } from '../../../amp-accordion/1.0/component';
 import {Youtube} from '../component';
-import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
-import {useRef, useState} from '#preact';
 
 export default {
   title: 'YouTube',
