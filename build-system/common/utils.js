@@ -21,8 +21,7 @@ const globby = require('globby');
 const {clean} = require('../tasks/clean');
 const {cyan, green, red, yellow} = require('./colors');
 const {default: ignore} = require('ignore');
-const {doBuild} = require('../tasks/build');
-const {doDist} = require('../tasks/dist');
+const {execOrDie} = require('./exec');
 const {gitDiffNameOnlyMain} = require('./git');
 const {log, logLocalDev} = require('./logging');
 
@@ -38,9 +37,9 @@ const {log, logLocalDev} = require('./logging');
 async function buildRuntime(opt_compiled = false) {
   await clean();
   if (argv.compiled || opt_compiled === true) {
-    await doDist({fortesting: true});
+    execOrDie(`amp dist --fortesting`);
   } else {
-    await doBuild({fortesting: true});
+    execOrDie(`amp build --fortesting`);
   }
 }
 
