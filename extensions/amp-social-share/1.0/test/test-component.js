@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {expect} from 'chai';
 import {mount} from 'enzyme';
 
 import {dict} from '#core/types/object';
@@ -35,7 +36,7 @@ describes.sandboxed('SocialShare 1.0 preact component', {}, () => {
       const mockedWarn = (output) => consoleOutput.push(output);
       console.warn = mockedWarn;
 
-      const jsx = <SocialShare {...dict({'type': 'not-configured-type'})} />;
+      const jsx = <SocialShare type="not-configured-type" />;
       const wrapper = mount(jsx);
 
       expect(wrapper.exists('div')).to.equal(false);
@@ -47,10 +48,32 @@ describes.sandboxed('SocialShare 1.0 preact component', {}, () => {
   );
 
   it('should include the button class for focus styling', () => {
-    const jsx = <SocialShare {...dict({'type': 'email'})} />;
+    const jsx = <SocialShare type="email" />;
     const wrapper = mount(jsx);
 
     const button = wrapper.getDOMNode();
     expect(button.className.includes('button')).to.be.true;
+  });
+
+  it('should render expected svg attributes with kebab-case for type="whatsapp"', () => {
+    const jsx = <SocialShare type="whatsapp" />;
+    const wrapper = mount(jsx);
+
+    const svgPath = wrapper.find('path').getDOMNode();
+    expect(svgPath.getAttribute('clip-rule')).to.equal('evenodd');
+    expect(svgPath.getAttribute('fill-rule')).to.equal('evenodd');
+    expect(svgPath.hasAttribute('clipRule')).to.be.false;
+    expect(svgPath.hasAttribute('fillRule')).to.be.false;
+  });
+
+  it('should render expected svg attributes with kebab-case for type="line"', () => {
+    const jsx = <SocialShare type="line" />;
+    const wrapper = mount(jsx);
+
+    const svgPath = wrapper.find('path').getDOMNode();
+    expect(svgPath.getAttribute('clip-rule')).to.equal('evenodd');
+    expect(svgPath.getAttribute('fill-rule')).to.equal('evenodd');
+    expect(svgPath.hasAttribute('clipRule')).to.be.false;
+    expect(svgPath.hasAttribute('fillRule')).to.be.false;
   });
 });

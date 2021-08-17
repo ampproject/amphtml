@@ -138,6 +138,35 @@ describes.sandboxed('LightboxGallery preact component', {}, () => {
       expect(carousel.prop('arrowPrevAs').name).to.equal('NavButtonIcon');
       expect(carousel.prop('arrowNextAs').name).to.equal('NavButtonIcon');
       expect(carousel.find('img')).to.have.lengthOf(2);
+
+      // Icon svg attributes expressed in kebab-case
+      const closeButtonPath = wrapper
+        .find('CloseButtonIcon')
+        .find('path')
+        .getDOMNode();
+      expect(closeButtonPath.getAttribute('stroke-width')).to.equal('2');
+      expect(closeButtonPath.getAttribute('stroke-linejoin')).to.equal('round');
+      expect(closeButtonPath.hasAttribute('strokeWidth')).to.be.false;
+      expect(closeButtonPath.hasAttribute('strokeLinejoin')).to.be.false;
+
+      const arrows = carousel.find('Arrow');
+      expect(arrows).to.have.lengthOf(2);
+
+      const firstPath = arrows.first().find('path').getDOMNode();
+      expect(firstPath.getAttribute('stroke-width')).to.equal('2');
+      expect(firstPath.getAttribute('stroke-linejoin')).to.equal('round');
+      expect(firstPath.getAttribute('stroke-linecap')).to.equal('round');
+      expect(firstPath.hasAttribute('strokeWidth')).to.be.false;
+      expect(firstPath.hasAttribute('strokeLinejoin')).to.be.false;
+      expect(firstPath.hasAttribute('strokeLinecap')).to.be.false;
+
+      const secondPath = arrows.last().find('path').getDOMNode();
+      expect(secondPath.getAttribute('stroke-width')).to.equal('2');
+      expect(secondPath.getAttribute('stroke-linejoin')).to.equal('round');
+      expect(secondPath.getAttribute('stroke-linecap')).to.equal('round');
+      expect(secondPath.hasAttribute('strokeWidth')).to.be.false;
+      expect(secondPath.hasAttribute('strokeLinejoin')).to.be.false;
+      expect(secondPath.hasAttribute('strokeLinecap')).to.be.false;
     });
 
     it('opens with rendered when given', () => {

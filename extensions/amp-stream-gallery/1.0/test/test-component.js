@@ -17,6 +17,7 @@
 import * as Preact from '#preact';
 import {StreamGallery} from '../component';
 import {mount} from 'enzyme';
+import {expect} from 'chai';
 
 describes.sandboxed('StreamGallery preact component', {}, () => {
   it('should render BaseCarousel', () => {
@@ -37,6 +38,37 @@ describes.sandboxed('StreamGallery preact component', {}, () => {
     expect(slides.first().text()).to.equal('slide 1');
     expect(slides.at(1).text()).to.equal('slide 2');
     expect(slides.last().text()).to.equal('slide 3');
+  });
+
+  it('should render expected svg attributes with kebab-case for default arrows', () => {
+    const wrapper = mount(
+      <StreamGallery>
+        <div>slide 1</div>
+        <div>slide 2</div>
+        <div>slide 3</div>
+      </StreamGallery>
+    );
+    const carousel = wrapper.find('BaseCarousel');
+    expect(carousel).to.have.lengthOf(1);
+
+    const arrows = wrapper.find('Arrow');
+    expect(arrows).to.have.lengthOf(2);
+
+    const firstPath = arrows.first().find('path').getDOMNode();
+    expect(firstPath.getAttribute('stroke-width')).to.equal('2');
+    expect(firstPath.getAttribute('stroke-linejoin')).to.equal('round');
+    expect(firstPath.getAttribute('stroke-linecap')).to.equal('round');
+    expect(firstPath.hasAttribute('strokeWidth')).to.be.false;
+    expect(firstPath.hasAttribute('strokeLinejoin')).to.be.false;
+    expect(firstPath.hasAttribute('strokeLinecap')).to.be.false;
+
+    const secondPath = arrows.last().find('path').getDOMNode();
+    expect(secondPath.getAttribute('stroke-width')).to.equal('2');
+    expect(secondPath.getAttribute('stroke-linejoin')).to.equal('round');
+    expect(secondPath.getAttribute('stroke-linecap')).to.equal('round');
+    expect(secondPath.hasAttribute('strokeWidth')).to.be.false;
+    expect(secondPath.hasAttribute('strokeLinejoin')).to.be.false;
+    expect(secondPath.hasAttribute('strokeLinecap')).to.be.false;
   });
 
   it('should render custom Arrows when given', () => {

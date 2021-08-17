@@ -40,6 +40,34 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
     expect(slides.last().text()).to.equal('slide 3');
   });
 
+  it('should render expected svg attributes with kebab-case for default arrows', () => {
+    const wrapper = mount(
+      <BaseCarousel>
+        <div>slide 1</div>
+        <div>slide 2</div>
+        <div>slide 3</div>
+      </BaseCarousel>
+    );
+    const arrows = wrapper.find('Arrow');
+    expect(arrows).to.have.lengthOf(2);
+
+    const firstPath = arrows.first().find('path').getDOMNode();
+    expect(firstPath.getAttribute('stroke-width')).to.equal('2px');
+    expect(firstPath.getAttribute('stroke-linejoin')).to.equal('round');
+    expect(firstPath.getAttribute('stroke-linecap')).to.equal('round');
+    expect(firstPath.hasAttribute('strokeWidth')).to.be.false;
+    expect(firstPath.hasAttribute('strokeLinejoin')).to.be.false;
+    expect(firstPath.hasAttribute('strokeLinecap')).to.be.false;
+
+    const secondPath = arrows.last().find('path').getDOMNode();
+    expect(secondPath.getAttribute('stroke-width')).to.equal('2px');
+    expect(secondPath.getAttribute('stroke-linejoin')).to.equal('round');
+    expect(secondPath.getAttribute('stroke-linecap')).to.equal('round');
+    expect(secondPath.hasAttribute('strokeWidth')).to.be.false;
+    expect(secondPath.hasAttribute('strokeLinejoin')).to.be.false;
+    expect(secondPath.hasAttribute('strokeLinecap')).to.be.false;
+  });
+
   it('should render custom Arrows when given', () => {
     const arrowPrev = (props) => (
       <div {...props} className="my-custom-arrow-prev">
