@@ -95,7 +95,7 @@ describes.realWin(
       resetServiceForTesting(win, 'consentStateManager');
       registerServiceBuilder(win, 'consentStateManager', function () {
         return Promise.resolve({
-          consentPageViewId64: () => 'consent_page_view_id_64',
+          consentPageViewId64: () => 'foo_consent_page_view_id_64_123',
           getLastConsentInstanceInfo: () => {
             return Promise.resolve(
               constructConsentInfo(
@@ -327,7 +327,11 @@ describes.realWin(
       it('should expand the promptUISrc', async () => {
         const config = dict({
           'promptUISrc':
-            'https://example.test/?cid=CLIENT_ID&r=RANDOM&clientconfig=CONSENT_INFO(clientConfig)&cpid=CONSENT_PAGE_VIEW_ID_64',
+            'https://example.test/?' +
+            'cid=CLIENT_ID&' +
+            'clientconfig=CONSENT_INFO(clientConfig)&' +
+            'cpid=CONSENT_PAGE_VIEW_ID_64&' +
+            'r=RANDOM',
           'clientConfig': {
             'test': 'ABC',
           },
@@ -337,7 +341,14 @@ describes.realWin(
         await macroTask();
         await macroTask();
         expect(consentUI.ui_.src).to.match(
-          /cid=amp-.{22}&r=RANDOM&clientconfig=.{28}&cpid=consent_page_view_id_64/
+          new RegExp(
+            'cid=amp-.{22}&' +
+              `clientconfig=${encodeURIComponent(
+                JSON.stringify(config.clientConfig)
+              )}&` +
+              'cpid=consent_page_view_id_64&' +
+              'r=RANDOM'
+          )
         );
       });
 

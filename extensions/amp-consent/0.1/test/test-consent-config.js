@@ -23,9 +23,7 @@ import {
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '#service';
 import {dict} from '#core/types/object';
-import * as GetService from '../../../../src/service-helpers';
-import {ConsentStateManager} from '../consent-state-manager';
-import {createConsentElement} from './test-amp-consent';
+import {getConsentStateManager} from '../consent-state-manager';
 import {macroTask} from '#testing/yield';
 
 describes.realWin('ConsentConfig', {amp: 1}, (env) => {
@@ -546,31 +544,8 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
 
   describe('expandConsentEndpointUrl', () => {
     it('support expansion in allowed list', async () => {
-      const config = dict({
-        'consentInstanceId': 'test',
-        'checkConsentHref': '/override',
-        'consentRequired': true,
-        'clientConfig': {
-          'test': 'ABC',
-        },
-        'postPromptUI': 'test',
-      });
-      const consentElement = createConsentElement(doc, config);
-      doc.body.appendChild(consentElement);
-      const fakeConsentStateManager = new ConsentStateManager(doc.body);
+      getConsentStateManager(doc);
 
-      const stubGetServicePromiseForDoc = env.sandbox.stub(
-        GetService,
-        'getServicePromiseForDoc'
-      );
-
-      //Stubbing getServicePromiseForDoc to retrieve the consentManager. In other calls
-      // call the underlying implementation instead.
-      stubGetServicePromiseForDoc
-        .withArgs(env.sandbox.match.any, 'consentStateManager')
-        .resolves(fakeConsentStateManager);
-
-      stubGetServicePromiseForDoc.callThrough();
       const url = await expandConsentEndpointUrl(
         doc.body,
         'https://example.test?' +
@@ -592,30 +567,7 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
     });
 
     it('override CLIENT_ID scope', async () => {
-      const config = dict({
-        'consentInstanceId': 'test',
-        'checkConsentHref': '/override',
-        'consentRequired': true,
-        'clientConfig': {
-          'test': 'ABC',
-        },
-        'postPromptUI': 'test',
-      });
-      const consentElement = createConsentElement(doc, config);
-      doc.body.appendChild(consentElement);
-      const fakeConsentStateManager = new ConsentStateManager();
-      fakeConsentStateManager.ampdoc_ = doc.body;
-
-      const stubGetServicePromiseForDoc = env.sandbox.stub(
-        GetService,
-        'getServicePromiseForDoc'
-      );
-
-      stubGetServicePromiseForDoc
-        .withArgs(env.sandbox.match.any, 'consentStateManager')
-        .resolves(fakeConsentStateManager);
-
-      stubGetServicePromiseForDoc.callThrough();
+      getConsentStateManager(doc);
 
       const u1 = await expandConsentEndpointUrl(
         doc.body,

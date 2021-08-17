@@ -36,8 +36,22 @@ import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
 import {hasOwn} from '#core/types/object';
 import {once} from '#core/types/function';
 import {getRandomString64} from '#service/cid-impl';
+import {getAmpdoc, getServicePromise} from '../../../src/service-helpers';
 
 const TAG = 'CONSENT-STATE-MANAGER';
+
+/**
+ * Returns a promise for a service for the given id and ampdoc. Also expects
+ * a service that has the actual implementation. The promise resolves when
+ * the implementation loaded.
+ * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} element
+ * @return {!Promise<!Object>}
+ */
+export function getConsentStateManager(element) {
+  const ampdoc = getAmpdoc(element);
+  const isSingleDoc = ampdoc.isSingleDoc() ? ampdoc.win : ampdoc;
+  return getServicePromise(isSingleDoc, 'consentStateManager');
+}
 
 export class ConsentStateManager {
   /**

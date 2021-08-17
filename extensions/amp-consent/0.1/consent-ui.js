@@ -23,7 +23,7 @@ import {elementByTag} from '#core/dom/query';
 import {expandConsentEndpointUrl} from './consent-config';
 import {getConsentStateValue} from './consent-info';
 import {getData} from '../../../src/event-helper';
-import {getServicePromiseForDoc} from '../../../src/service-helpers';
+import {getConsentStateManager} from './consent-state-manager';
 import {htmlFor} from '#core/dom/static-template';
 import {insertAtStart, removeElement, tryFocus} from '#core/dom';
 import {
@@ -33,7 +33,6 @@ import {
 import {setImportantStyles, setStyles, toggle} from '#core/dom/style';
 
 const TAG = 'amp-consent-ui';
-const CONSENT_STATE_MANAGER = 'consentStateManager';
 const MINIMUM_INITIAL_HEIGHT = 10;
 const DEFAULT_INITIAL_HEIGHT = 30;
 const MODAL_HEIGHT_ENABLED = 60;
@@ -523,10 +522,7 @@ export class ConsentUI {
    * @return {!Promise<JsonObject>}
    */
   getClientInfoPromise_() {
-    const consentStateManagerPromise = getServicePromiseForDoc(
-      this.ampdoc_,
-      CONSENT_STATE_MANAGER
-    );
+    const consentStateManagerPromise = getConsentStateManager(this.ampdoc_);
     return consentStateManagerPromise.then((consentStateManager) => {
       return consentStateManager
         .getLastConsentInstanceInfo()
@@ -567,7 +563,7 @@ export class ConsentUI {
       return expandConsentEndpointUrl(
         this.parent_,
         this.config_['promptUISrc'],
-        {CONSENT_INFO: (property) => JSON.stringify(clientInfo[property])}
+        {'CONSENT_INFO': (property) => JSON.stringify(clientInfo[property])}
       ).then((expandedSrc) => {
         this.ui_.src = expandedSrc;
         this.ui_.setAttribute('name', JSON.stringify(clientInfo));
