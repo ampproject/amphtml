@@ -23,8 +23,8 @@ import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {applyFillContent} from '#core/dom/layout';
-import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {
+  assertDoesNotContainDisplay,
   computedStyle,
   px,
   resetStyles,

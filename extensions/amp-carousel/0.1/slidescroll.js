@@ -31,7 +31,7 @@ import {getStyle, setStyle} from '#core/dom/style';
 import {isExperimentOn} from '#experiments';
 import {isFiniteNumber} from '#core/types';
 import {isLayoutSizeDefined} from '#core/dom/layout';
-import {numeric} from '../../../src/transition';
+import {numeric} from '#core/dom/transition';
 import {
   observeContentSize,
   unobserveContentSize,
