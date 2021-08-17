@@ -7,17 +7,27 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <title>Boilerplate test</title>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <script async custom-element="amp-story" src ="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+  <!-- <link rel="stylesheet" href="https://cdn.ampproject.org/v0/amp-story-1.0.css"> -->
+  <link rel="stylesheet" href="http://localhost:3000/">
 
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-  <style amp-story-boilerplate>
-    body{animation:none}
+  <!-- <style>
+    html.i-amphtml-singledoc.i-amphtml-standalone body, body,
+    html.i-amphtml-singledoc.i-amphtml-standalone, html {
+      animation:none !important;
+      height: 100% !important;
+      width: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
 
-    amp-story {
+    html {
       --story-page-vmax: 1vh;
       --story-page-vmin: 1vw;
       --story-page-vh: 1vh;
@@ -26,9 +36,9 @@
       font-size: calc(var(--story-page-vmax, 8px)*2.5);
     }
 
-    amp-story-page:first-of-type,
+    amp-story[standalone], amp-story-page:first-of-type,
     amp-story-page:first-of-type amp-story-grid-layer {
-      position: absolute;
+      position: absolute !important;
       top: 0;
       left: 0;
       height: 100%;
@@ -40,28 +50,35 @@
       position: absolute;
       top: 9000vh;
     }
-     
     amp-story-grid-layer {
       padding: 68px 32px 32px;
       box-sizing: border-box;
       display: grid;
     }
-     
     amp-story-grid-layer[template="fill"] > * {
-      bottom: 0;
-      height: auto;
-      left: 0;
-      position: absolute;
-      right: 0;
       top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: auto;
+      position: absolute;
       width: auto;
     }
-     
     amp-story-grid-layer[template="vertical"] {
       grid-auto-flow: row;
       grid-template-columns: 100%;
+      grid-gap: 16px;
     }
-  </style>
+    amp-story-grid-layer * {
+      box-sizing: border-box;
+      margin: 0;
+    }
+
+    amp-story:not(.i-amphtml-layout) [animate-in] {
+      opacity: 0.001;
+    }
+  </style> -->
+  
   <style amp-custom>
     amp-story-page {
       font-family: 'Poppins', sans-serif;
@@ -88,6 +105,12 @@
       background: #ffffff33;
       border-radius: 1vh;
     }
+    body {
+      background: red;
+    }
+    html {
+      background: blue;
+    }
   </style>
 </head>
   <body>
@@ -108,7 +131,7 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical" class="bottom">
           <div class="shade"></div>
-          <p class="bold">Boilerplate LCP</p>
+          <p class="bold" animate-in="fade-in">Boilerplate LCP</p>
           <p class="byline">Adds the boilerplate LCP to render story without <code>amp-story.js</code></p>
         </amp-story-grid-layer>
       </amp-story-page>
