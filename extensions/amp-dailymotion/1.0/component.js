@@ -84,7 +84,7 @@ export function DailymotionWithRef(
   const src = useMemo(
     () =>
       getDailymotionIframeSrc(
-        ref?.current?.ownerDocument?.defaultView,
+        window,
         videoId,
         autoplay,
         endscreenEnable,
@@ -96,7 +96,6 @@ export function DailymotionWithRef(
         uiLog
       ),
     [
-      ref,
       videoId,
       autoplay,
       endscreenEnable,
