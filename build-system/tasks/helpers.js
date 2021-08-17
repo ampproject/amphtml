@@ -501,7 +501,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     let map = result.outputFiles.find(({path}) => path.endsWith('.map')).text;
 
     if (options.minify) {
-      ({code, map} = await minify(code, map));
+      ({code, map} = await minify(code, map, {mangle: options.mangle}));
       map = await massageSourcemaps(map, options);
     }
 
@@ -564,9 +564,10 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
  *
  * @param {string} code
  * @param {string} map
+ * @param {{mangle: boolean}} options
  * @return {!Promise<{code: string, map: *, error?: Error}>}
  */
-async function minify(code, map) {
+async function minify(code, map, {mangle} = {mangle: false}) {
   const terserOptions = {
     mangle: {},
     compress: {
@@ -584,6 +585,16 @@ async function minify(code, map) {
     sourceMap: {content: map},
     module: !!argv.esm,
   };
+
+  // Enabling property mangling requires disabling two other optimization.
+  // - Should not mangle properties with names in quotes (usually used for cross-binary purposes)
+  // - The above only works if we don't convert computed properties into dot notation property. Disabling this
+  //   is done by setting compress.properties=false.
+  if (mangle) {
+    // eslint-disable-next-line google-camelcase/google-camelcase
+    terserOptions.mangle.properties = {keep_quoted: true, regex: /_$/};
+    terserOptions.compress.properties = false;
+  }
 
   const minified = await terser.minify(code, terserOptions);
   if (!minified.code) {
