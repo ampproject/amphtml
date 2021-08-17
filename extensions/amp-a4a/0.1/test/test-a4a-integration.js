@@ -20,19 +20,23 @@
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
-import {FetchMock, networkFailure} from './fetch-mock';
-import {MockA4AImpl, TEST_URL} from './utils';
-import {createIframePromise} from '#testing/iframe';
 import {getA4ARegistry, signingServerURLs} from '#ads/_a4a-config';
-import {installCryptoService} from '#service/crypto-impl';
+
 import {installDocService} from '#service/ampdoc-impl';
-import {loadPromise} from '../../../../src/event-helper';
+import {installCryptoService} from '#service/crypto-impl';
 import {
   resetScheduledElementForTesting,
   upgradeOrRegisterElement,
 } from '#service/custom-element-registry';
+
+import {createIframePromise} from '#testing/iframe';
+
+import {FetchMock, networkFailure} from './fetch-mock';
 import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
+import {MockA4AImpl, TEST_URL} from './utils';
+
+import {loadPromise} from '../../../../src/event-helper';
+import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
 
 // Integration tests for A4A.  These stub out accesses to the outside world
 // (e.g., XHR requests and interfaces to ad network-specific code), but

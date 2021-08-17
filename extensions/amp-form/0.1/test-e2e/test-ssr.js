@@ -20,10 +20,10 @@ describes.endtoend(
     fixture: 'amp-form/amp-form.html',
     environments: ['single'],
   },
-  async (env) => {
+  (env) => {
     let controller;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 
@@ -53,10 +53,10 @@ describes.endtoend(
     fixture: 'amp-form/amp-form.html',
     environments: ['viewer-demo'],
   },
-  async (env) => {
+  (env) => {
     let controller;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 

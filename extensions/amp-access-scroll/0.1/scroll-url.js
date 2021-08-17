@@ -15,6 +15,7 @@
  */
 
 import {PROTOCOL_VERSION} from './scroll-protocol';
+
 import {getMode} from '../../../src/mode';
 
 /**

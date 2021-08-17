@@ -22,7 +22,7 @@ describes.endtoend(
     fixture: 'amp-sidebar/amp-sidebar.html',
     environments: ['single', 'viewer-demo'],
   },
-  async (env) => {
+  (env) => {
     let controller;
 
     beforeEach(() => {

@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import * as applyExperiment from '../apply-experiment';
 import {createElementWithAttributes} from '#core/dom';
+
 import {toggleExperiment} from '#experiments';
+
+import * as applyExperiment from '../apply-experiment';
 
 const TEST_ELEMENT_CLASS = 'experiment-test-element';
 

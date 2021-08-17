@@ -33,7 +33,7 @@ describes.endtoend(
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single'],
   },
-  async (env) => {
+  (env) => {
     let controller, btnPrev, btnNext;
 
     const styles = useStyles();

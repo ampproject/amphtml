@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-const runner = require('@babel/helper-plugin-test-runner').default;
+/**
+ * @fileoverview Script that builds every commit on Linux, macOS, and Windows.
+ */
 
-runner(__dirname);
+const {runCiJob} = require('./ci-job');
+const {timedExecOrDie} = require('./utils');
+
+const jobName = 'cross-platform-builds.js';
+
+/**
+ * Steps to run during push builds.
+ */
+function pushBuildWorkflow() {
+  timedExecOrDie('amp build');
+  timedExecOrDie('amp dist');
+}
+
+runCiJob(jobName, pushBuildWorkflow, () => {});
