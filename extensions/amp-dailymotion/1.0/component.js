@@ -25,7 +25,6 @@ import {
 } from '../dailymotion-api';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {parseQueryString} from '#core/types/string/url';
-import {toWin} from '#core/window';
 
 /**
  * @param {string} method
@@ -112,6 +111,7 @@ export function DailymotionWithRef(
 
   return (
     <VideoIframe
+      autoplay={autoplay}
       controls={true}
       ref={ref}
       {...rest}

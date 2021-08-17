@@ -65,4 +65,34 @@ describes.sandboxed('Dailymotion preact component v1.0', {}, (env) => {
     // info attr
     expect(iframe.prop('src')).to.contain('info=false');
   });
+
+  it('Pass mute param to iframe src', () => {
+    const wrapper = mount(
+      <Dailymotion
+        style={{width: 300, height: 200}}
+        videoId="x3rdtfy"
+        mute="false"
+      ></Dailymotion>
+    );
+
+    const iframe = wrapper.find('iframe');
+
+    // Mute Attr
+    expect(iframe.prop('src')).to.contain('mute=false');
+  });
+
+  it('Renders with iframe already muted when autoplay is passed', () => {
+    const wrapper = mount(
+      <Dailymotion
+        style={{width: 300, height: 200}}
+        videoId="x3rdtfy"
+        autoplay
+      ></Dailymotion>
+    );
+
+    const iframe = wrapper.find('iframe');
+
+    // Mute Attr
+    expect(iframe.prop('src')).to.contain('mute=1');
+  });
 });

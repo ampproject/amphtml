@@ -20,16 +20,16 @@ import {isAutoplaySupported} from '#core/dom/video';
 
 /**
  *
- * @param win
+ * @param {!Window} win
  * @param {string} videoId
+ * @param {boolean} autoplay
  * @param {string} endscreenEnable
  * @param {string} info
- * @param {string} mute
+ * @param {boolean} mute
  * @param {string} sharingEnable
  * @param {string} start
  * @param {string} uiHighlight
  * @param {string} uiLogo
- * @param {boolean} autoplay
  * @param {!JsonObject} implicitParams
  * @return {string}
  */
@@ -56,8 +56,7 @@ export function getDailymotionIframeSrc(
         'info': info,
         // In order to support autoplay the video needs to be muted on load so we
         // dont receive an unmute event which prevents the video from autoplay.
-        'mute':
-          mute || (autoplay && isAutoplaySupported(win)) ? true : undefined,
+        'mute': Number(mute || (autoplay && isAutoplaySupported(win))),
         'sharing-enable': sharingEnable,
         'start': start,
         'ui-highlight': uiHighlight,

@@ -89,7 +89,7 @@ describes.realWin(
       const iframe = dailymotion.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
-        'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp&mute=true'
+        'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp&mute=1'
       );
     });
 
