@@ -1,266 +1,200 @@
 {
-  "2": {
-    "string": "পরবর্তী-তে আলতো চাপুন",
-    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
-  },
-  "3": {
-    "string": "পিছনে আলতো চাপুন",
-    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
-  },
-  "4": {
-    "string": "ক্লিপবোর্ডে লিঙ্কটি কপি করা যায়নি :(",
-    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
-  },
-  "5": {
-    "string": "লিঙ্ক কপি করা হয়েছে!",
-    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
-  },
-  "6": {
-    "string": "ইমেইল",
-    "description": "Button label for the share target that shares a link via email."
-  },
-  "7": {
-    "string": "ফেসবুক",
-    "description": "Button label for the share target that shares a link via Facebook."
-  },
-  "8": {
-    "string": "গুগল+",
-    "description": "Button label for the share target that shares a link via Google+."
-  },
-  "9": {
-    "string": "লিংক অর্জন করুন",
-    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
-  },
-  "10": {
-    "string": "লিঙ্কডইন",
-    "description": "Button label for the share target that shares a link via LinkedIn."
-  },
-  "11": {
-    "string": "পিন্টারেস্ট",
-    "description": "Button label for the share target that shares a link via Pinterest."
-  },
-  "12": {
-    "string": "খুদেবার্তা",
-    "description": "Button label for the share target that shares a link via SMS."
-  },
-  "13": {
-    "string": "আরও",
-    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
-  },
-  "14": {
-    "string": "টাম্বলার",
-    "description": "Button label for the share target that shares a link via Tumblr."
-  },
-  "15": {
-    "string": "টুইটার",
-    "description": "Button label for the share target that shares a link via Twitter."
-  },
-  "16": {
-    "string": "হোয়াটসঅ্যাপ",
-    "description": "Button label for the share target that shares a link via WhatsApp."
-  },
-  "18": {
-    "string": "এই অভিজ্ঞতার জন্য আপনার উইন্ডো'র উচ্চতা এবং প্রস্থ উভয়ই বাড়িয়ে নিন",
-    "description": "Text for a warning screen that informs the user that stories are only supported in larger browser windows."
-  },
-  "19": {
-    "string": "এই কনটেন্ট দেখতে আপনাকে অবশ্যই amp-story পরীক্ষা সক্রিয় করতে হবে।",
-    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
-  },
-  "20": {
-    "string": "পৃষ্ঠাটি পোর্ট্রেইট মোডে সবচেয়ে ভালোভাবে দেখা যায়",
-    "description": "Text for a warning screen that informs the user that stories are only supported in portrait orientation."
-  },
-  "21": {
-    "string": "আমরা দুঃখিত, মনে হচ্ছে আপনার ব্রাউজার এই অভিজ্ঞতা সমর্থন করে না",
-    "description": "Text for a warning screen that informs the user that their browser does not support stories."
-  },
-  "22": {
-    "string": "গ্রহণ করুন",
-    "description": "Label for a button that allows the user to consent to providing their cookie access."
-  },
-  "23": {
-    "string": "প্রত্যাখ্যান করুন",
-    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
-  },
-  "25": {
-    "string": "মূল ডোমেইনে দেখুন:",
-    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
-  },
-  "26": {
-    "string": "AMP ফলাফল সম্পর্কে আরও",
-    "description": "Label for a link to documentation on how AMP links are handled."
-  },
-  "27": {
-    "string": "যাই হোক না কেন অব্যাহত রাখুন",
-    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
-  },
-  "31": {
-    "string": "শব্দ বন্ধ",
-    "description": "Text that informs users that the sound is off after they click the mute button"
-  },
-  "32": {
-    "string": "শব্দ চালু",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
-  },
-  "33": {
-    "string": "এই পৃষ্ঠার কোনো শব্দ নেই",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
-  },
-  "34": {
-    "string": "ভিডিও চালু করুন",
-    "description": "Label for a button to play the video visible on the page."
-  },
-  "35": {
-    "string": "উপরে সোয়াইপ করুন",
-    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
-  },
-  "36": {
-    "string": "টুইট সম্প্রসারণ করুন",
-    "description": "Label in the tooltip text for when a Twitter embed is expandable."
-  },
-  "37": {
-    "string": "এই অভিজ্ঞতার জন্য আপনার উইন্ডো'র উচ্চতা বাড়িয়ে নিন",
-    "description": "Text for a warning screen that informs the user that stories are only supported in taller browser windows."
-  },
-  "38": {
-    "string": "এই অভিজ্ঞতার জন্য আপনার উইন্ডো'র প্রস্থ বাড়িয়ে নিন",
-    "description": "Text for a warning screen that informs the user that stories are only supported in wider browser windows."
-  },
-  "62": {
-    "string": "এই পৃষ্ঠা থেকে শুরু শেয়ার করুন",
-    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
-  },
-  "63": {
-    "string": "লাইন",
-    "description": "Button label for the share target that shares a link via Line."
-  },
-  "64": {
-    "string": "হালনাগাদ হয়েছে",
-    "description": "Label that indicates that additional content has been added to a story"
-  },
-  "65": {
-    "string": "ভিডিওটি চালানো সম্ভব হলো না।",
-    "description": "Label indicating that the video visible on the page failed to play."
-  },
-  "66": {
-    "string": "স্টোরি মিউট করুন",
-    "description": "Label for the mute button that turns off the sound in the story"
-  },
-  "67": {
-    "string": "স্টোরি আনমিউট করুন",
-    "description": "Label for the unmute button that turns the sound in the story back on"
-  },
-  "68": {
-    "string": "স্টোরির তথ্য",
-    "description": "Label for the information button that pulls up relevant information about the story content"
-  },
-  "69": {
-    "string": "স্টোরি শেয়ার করুন",
-    "description": "Label for the share button that pulls up a panel of options for sharing the story"
-  },
-  "70": {
-    "string": "স্টোরির মেনু চালু করুন",
-    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
-  },
-  "71": {
-    "string": "A",
-    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
-  },
-  "72": {
-    "string": "B",
-    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
-  },
-  "73": {
-    "string": "C",
-    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
-  },
-  "74": {
-    "string": "D",
-    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
-  },
-  "75": {
-    "string": "পরামর্শ 2 এর 1",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "76": {
-    "string": "পরবর্তী স্ক্রিনে যেতে আলতো চাপুন",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "77": {
-    "string": "পরবর্তী",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "78": {
-    "string": "পরামর্শ 2 এর 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "79": {
-    "string": "পরবর্তী গল্পে যেতে সোয়াইপ করুন",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "80": {
-    "string": "বুঝেছি",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "81": {
-    "string": "পরামর্শ",
-    "description": "Label for a hint in the context of an onboarding user education tutorial."
-  },
-  "82": {
-    "string": "পূর্ববর্তী পৃষ্ঠা",
-    "description": "Label indicating that users can navigate to the previous page."
-  },
-  "83": {
-    "string": "সক্রিয় করুন",
-    "description": "Label for the activate button to ask for device orientation permission"
-  },
-  "84": {
-    "string": "স্কোর:",
-    "description": "Label for the results component preceding the score in percentages"
-  },
-  "85": {
-    "string": "স্টোরিতে বিরতি নিন",
-    "description": "Label for a button that pauses the media content on the story"
-  },
-  "86": {
-    "string": "স্টোরি চালু করুন",
-    "description": "Label for a button that plays the media content on the story"
-  },
-  "87": {
-    "string": "বন্ধ করুন",
-    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
-  },
-  "88": {
-    "string": "এড়িয়ে পরবর্তীতে যান",
-    "description": "Label for a button that advances to the next element in the carousel"
-  },
-  "89": {
-    "string": "আপনার প্রতিক্রিয়া এখানে পাঠানো হবে",
-    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
-  },
-  "90": {
-    "string": "পরবর্তী স্টোরি",
-    "description": "Label for a button that advances to the next element in the carousel."
-  },
-  "91": {
-    "string": "পরবর্তী পৃষ্ঠা",
-    "description": "Label for a button that advances to the next page of the story."
-  },
-  "92": {
-    "string": "আবার চালু করুন",
-    "description": "Label for a button that replays the story."
-  },
-  "93": {
-    "string": "পূর্ববর্তী পৃষ্ঠা",
-    "description": "Label for a button that returns the user to the previous page of the story."
-  },
-  "96": {
-    "string": "অন্বেষণ করতে ডিভাইস সরান",
-    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
-  },
-  "97": {
-    "string": "খোলা হচ্ছে",
-    "description": "Text displayed to users on tap of outlink button."
-  }
+    "10": {
+        "string": "লিঙ্কডইন"
+    },
+    "11": {
+        "string": "পিন্টারেস্ট"
+    },
+    "12": {
+        "string": "খুদেবার্তা"
+    },
+    "13": {
+        "string": "আরও"
+    },
+    "14": {
+        "string": "টাম্বলার"
+    },
+    "15": {
+        "string": "টুইটার"
+    },
+    "16": {
+        "string": "হোয়াটসঅ্যাপ"
+    },
+    "18": {
+        "string": "এই অভিজ্ঞতার জন্য আপনার উইন্ডো'র উচ্চতা এবং প্রস্থ উভয়ই বাড়িয়ে নিন"
+    },
+    "19": {
+        "string": "এই কনটেন্ট দেখতে আপনাকে অবশ্যই amp-story পরীক্ষা সক্রিয় করতে হবে।"
+    },
+    "2": {
+        "string": "পরবর্তী-তে আলতো চাপুন"
+    },
+    "20": {
+        "string": "পৃষ্ঠাটি পোর্ট্রেইট মোডে সবচেয়ে ভালোভাবে দেখা যায়"
+    },
+    "21": {
+        "string": "আমরা দুঃখিত, মনে হচ্ছে আপনার ব্রাউজার এই অভিজ্ঞতা সমর্থন করে না"
+    },
+    "22": {
+        "string": "গ্রহণ করুন"
+    },
+    "23": {
+        "string": "প্রত্যাখ্যান করুন"
+    },
+    "25": {
+        "string": "মূল ডোমেইনে দেখুন:"
+    },
+    "26": {
+        "string": "AMP ফলাফল সম্পর্কে আরও"
+    },
+    "27": {
+        "string": "যাই হোক না কেন অব্যাহত রাখুন"
+    },
+    "3": {
+        "string": "পিছনে আলতো চাপুন"
+    },
+    "31": {
+        "string": "শব্দ বন্ধ"
+    },
+    "32": {
+        "string": "শব্দ চালু"
+    },
+    "33": {
+        "string": "এই পৃষ্ঠার কোনো শব্দ নেই"
+    },
+    "34": {
+        "string": "ভিডিও চালু করুন"
+    },
+    "35": {
+        "string": "উপরে সোয়াইপ করুন"
+    },
+    "36": {
+        "string": "টুইট সম্প্রসারণ করুন"
+    },
+    "37": {
+        "string": "এই অভিজ্ঞতার জন্য আপনার উইন্ডো'র উচ্চতা বাড়িয়ে নিন"
+    },
+    "38": {
+        "string": "এই অভিজ্ঞতার জন্য আপনার উইন্ডো'র প্রস্থ বাড়িয়ে নিন"
+    },
+    "4": {
+        "string": "ক্লিপবোর্ডে লিঙ্কটি কপি করা যায়নি :("
+    },
+    "5": {
+        "string": "লিঙ্ক কপি করা হয়েছে!"
+    },
+    "6": {
+        "string": "ইমেইল"
+    },
+    "62": {
+        "string": "এই পৃষ্ঠা থেকে শুরু শেয়ার করুন"
+    },
+    "63": {
+        "string": "লাইন"
+    },
+    "64": {
+        "string": "হালনাগাদ হয়েছে"
+    },
+    "65": {
+        "string": "ভিডিওটি চালানো সম্ভব হলো না।"
+    },
+    "66": {
+        "string": "স্টোরি মিউট করুন"
+    },
+    "67": {
+        "string": "স্টোরি আনমিউট করুন"
+    },
+    "68": {
+        "string": "স্টোরির তথ্য"
+    },
+    "69": {
+        "string": "স্টোরি শেয়ার করুন"
+    },
+    "7": {
+        "string": "ফেসবুক"
+    },
+    "70": {
+        "string": "স্টোরির মেনু চালু করুন"
+    },
+    "71": {
+        "string": "A"
+    },
+    "72": {
+        "string": "B"
+    },
+    "73": {
+        "string": "C"
+    },
+    "74": {
+        "string": "D"
+    },
+    "75": {
+        "string": "পরামর্শ 2 এর 1"
+    },
+    "76": {
+        "string": "পরবর্তী স্ক্রিনে যেতে আলতো চাপুন"
+    },
+    "77": {
+        "string": "পরবর্তী"
+    },
+    "78": {
+        "string": "পরামর্শ 2 এর 2"
+    },
+    "79": {
+        "string": "পরবর্তী গল্পে যেতে সোয়াইপ করুন"
+    },
+    "8": {
+        "string": "গুগল+"
+    },
+    "80": {
+        "string": "বুঝেছি"
+    },
+    "81": {
+        "string": "পরামর্শ"
+    },
+    "82": {
+        "string": "পূর্ববর্তী পৃষ্ঠা"
+    },
+    "83": {
+        "string": "সক্রিয় করুন"
+    },
+    "84": {
+        "string": "স্কোর:"
+    },
+    "85": {
+        "string": "স্টোরিতে বিরতি নিন"
+    },
+    "86": {
+        "string": "স্টোরি চালু করুন"
+    },
+    "87": {
+        "string": "বন্ধ করুন"
+    },
+    "88": {
+        "string": "এড়িয়ে পরবর্তীতে যান"
+    },
+    "89": {
+        "string": "আপনার প্রতিক্রিয়া এখানে পাঠানো হবে"
+    },
+    "9": {
+        "string": "লিংক অর্জন করুন"
+    },
+    "90": {
+        "string": "পরবর্তী স্টোরি"
+    },
+    "91": {
+        "string": "পরবর্তী পৃষ্ঠা"
+    },
+    "92": {
+        "string": "আবার চালু করুন"
+    },
+    "93": {
+        "string": "পূর্ববর্তী পৃষ্ঠা"
+    },
+    "96": {
+        "string": "অন্বেষণ করতে ডিভাইস সরান"
+    },
+    "97": {
+        "string": "খোলা হচ্ছে"
+    }
 }

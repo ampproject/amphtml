@@ -1,266 +1,200 @@
 {
-  "2": {
-    "string": "ቀጣይ የሚለውን ጠቅ ያድርጉ",
-    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
-  },
-  "3": {
-    "string": "ወደኋላ የሚለውን ጠቅ ያድርጉ",
-    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
-  },
-  "4": {
-    "string": "ማስፈንጠሪያውን ወደ ቅንጥብ ሰሌዳ መገልበጥ አልተቻለም ፡(",
-    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
-  },
-  "5": {
-    "string": "ማስፈንጠሪያው ተቀድቷል!",
-    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
-  },
-  "6": {
-    "string": "ኢሜይል",
-    "description": "Button label for the share target that shares a link via email."
-  },
-  "7": {
-    "string": "ፌስቡክ",
-    "description": "Button label for the share target that shares a link via Facebook."
-  },
-  "8": {
-    "string": "Google+",
-    "description": "Button label for the share target that shares a link via Google+."
-  },
-  "9": {
-    "string": "ማስፈንጠሪያውን ያግኙ",
-    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
-  },
-  "10": {
-    "string": "LinkedIn",
-    "description": "Button label for the share target that shares a link via LinkedIn."
-  },
-  "11": {
-    "string": "Pinterest",
-    "description": "Button label for the share target that shares a link via Pinterest."
-  },
-  "12": {
-    "string": "SMS",
-    "description": "Button label for the share target that shares a link via SMS."
-  },
-  "13": {
-    "string": "ተጨማሪ",
-    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
-  },
-  "14": {
-    "string": "Tumblr",
-    "description": "Button label for the share target that shares a link via Tumblr."
-  },
-  "15": {
-    "string": "ትዊተር",
-    "description": "Button label for the share target that shares a link via Twitter."
-  },
-  "16": {
-    "string": "ዋትስአፕ",
-    "description": "Button label for the share target that shares a link via WhatsApp."
-  },
-  "18": {
-    "string": "ይህንን ተሞክሮ ለመመልከት የመስኮትዎን ቁመት እና ስፋት ይዘርጉ",
-    "description": "Text for a warning screen that informs the user that stories are only supported in larger browser windows."
-  },
-  "19": {
-    "string": "ይህንን ይዘት ለማየት የamp-story ተሞክሮ ማንቃት አለብዎት።",
-    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
-  },
-  "20": {
-    "string": "ገፁ በተሻለ ሁኔታ የሚታየው በቁም አቀማመጥ መልክ ነው",
-    "description": "Text for a warning screen that informs the user that stories are only supported in portrait orientation."
-  },
-  "21": {
-    "string": "እናዝናለን፣ አሳሽዎ ይህንን ተሞክሮ የማይደግፍ ይመስላል",
-    "description": "Text for a warning screen that informs the user that their browser does not support stories."
-  },
-  "22": {
-    "string": "እቀበላለሁ",
-    "description": "Label for a button that allows the user to consent to providing their cookie access."
-  },
-  "23": {
-    "string": "አልቀበልም",
-    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
-  },
-  "25": {
-    "string": "በመጀመሪያው ጎራ ላይ ይመልከቱ፡",
-    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
-  },
-  "26": {
-    "string": "ስለ AMP ውጤቶች ተጨማሪ መረጃ",
-    "description": "Label for a link to documentation on how AMP links are handled."
-  },
-  "27": {
-    "string": "ለማንኛውም ቀጥል",
-    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
-  },
-  "31": {
-    "string": "ድምፅ ጠፍቷል",
-    "description": "Text that informs users that the sound is off after they click the mute button"
-  },
-  "32": {
-    "string": "ድምፅ አልጠፋም",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
-  },
-  "33": {
-    "string": "ይህ ገጽ ድምፅ የለውም",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
-  },
-  "34": {
-    "string": "ቪዲዮ አጫውት",
-    "description": "Label for a button to play the video visible on the page."
-  },
-  "35": {
-    "string": "ወደ ላይ ያንሸራቱ",
-    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
-  },
-  "36": {
-    "string": "ትዊትን ዘርጋ",
-    "description": "Label in the tooltip text for when a Twitter embed is expandable."
-  },
-  "37": {
-    "string": "ይህንን ተሞክሮ ለመመልከት የመስኮትዎን ቁመት ይዘርጉ",
-    "description": "Text for a warning screen that informs the user that stories are only supported in taller browser windows."
-  },
-  "38": {
-    "string": "ይህንን ተሞክሮ ለመመልከት የመስኮትዎን ስፋት ይዘርጉ",
-    "description": "Text for a warning screen that informs the user that stories are only supported in wider browser windows."
-  },
-  "62": {
-    "string": "ከዚህ ገጽ ጀምሮ ያጋሩ",
-    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
-  },
-  "63": {
-    "string": "Line",
-    "description": "Button label for the share target that shares a link via Line."
-  },
-  "64": {
-    "string": "ዘምኗል",
-    "description": "Label that indicates that additional content has been added to a story"
-  },
-  "65": {
-    "string": "ቪዲዮ መጫወት አልተሳካም",
-    "description": "Label indicating that the video visible on the page failed to play."
-  },
-  "66": {
-    "string": "ታሪክን ድምጸ-ከል አድርግ",
-    "description": "Label for the mute button that turns off the sound in the story"
-  },
-  "67": {
-    "string": "የታሪክን ድምጸ-ከል አጥፋ",
-    "description": "Label for the unmute button that turns the sound in the story back on"
-  },
-  "68": {
-    "string": "የታሪክ መረጃ",
-    "description": "Label for the information button that pulls up relevant information about the story content"
-  },
-  "69": {
-    "string": "ታሪክ ያጋሩ",
-    "description": "Label for the share button that pulls up a panel of options for sharing the story"
-  },
-  "70": {
-    "string": "የታሪክ ምናሌን ይቀያይሩ",
-    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
-  },
-  "71": {
-    "string": "ሀ",
-    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
-  },
-  "72": {
-    "string": "ለ",
-    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
-  },
-  "73": {
-    "string": "ሐ",
-    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
-  },
-  "74": {
-    "string": "መ",
-    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
-  },
-  "75": {
-    "string": "ጠቃሚ ምክር 1 ከ 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "76": {
-    "string": "ወደ ቀጣዩ ማያ ገጽ ለመሄድ ጠቅ ያድርጉ",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "77": {
-    "string": "ቀጣይ",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "78": {
-    "string": "ጠቃሚ ምክር 2 ከ 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "79": {
-    "string": "ወደ ቀጣዩ ታሪክ ለመሄድ ያንሸራቱ",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "80": {
-    "string": "ገባኝ",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "81": {
-    "string": "ጠቃሚ ምክር",
-    "description": "Label for a hint in the context of an onboarding user education tutorial."
-  },
-  "82": {
-    "string": "የቀደመው ገጽ",
-    "description": "Label indicating that users can navigate to the previous page."
-  },
-  "83": {
-    "string": "አግብር",
-    "description": "Label for the activate button to ask for device orientation permission"
-  },
-  "84": {
-    "string": "ውጤት፡",
-    "description": "Label for the results component preceding the score in percentages"
-  },
-  "85": {
-    "string": "ታሪክን ለአፍታ አቁም",
-    "description": "Label for a button that pauses the media content on the story"
-  },
-  "86": {
-    "string": "ታሪክን አጫውት",
-    "description": "Label for a button that plays the media content on the story"
-  },
-  "87": {
-    "string": "ዝጋ",
-    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
-  },
-  "88": {
-    "string": "ወደ ቀጣዩ ዝለል",
-    "description": "Label for a button that advances to the next element in the carousel"
-  },
-  "89": {
-    "string": "የእርስዎ ምላሽ የሚላከው ወደ",
-    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
-  },
-  "90": {
-    "string": "ቀጣይ ታሪክ",
-    "description": "Label for a button that advances to the next element in the carousel."
-  },
-  "91": {
-    "string": "ቀጣይ ገጽ",
-    "description": "Label for a button that advances to the next page of the story."
-  },
-  "92": {
-    "string": "ድጋሚ አጫውት",
-    "description": "Label for a button that replays the story."
-  },
-  "93": {
-    "string": "የቀደመው ገጽ",
-    "description": "Label for a button that returns the user to the previous page of the story."
-  },
-  "96": {
-    "string": "ለማሰስ መሣሪያን ያንቀሳቅሱ",
-    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
-  },
-  "97": {
-    "string": "በመክፈት ላይ",
-    "description": "Text displayed to users on tap of outlink button."
-  }
+    "10": {
+        "string": "LinkedIn"
+    },
+    "11": {
+        "string": "Pinterest"
+    },
+    "12": {
+        "string": "SMS"
+    },
+    "13": {
+        "string": "ተጨማሪ"
+    },
+    "14": {
+        "string": "Tumblr"
+    },
+    "15": {
+        "string": "ትዊተር"
+    },
+    "16": {
+        "string": "ዋትስአፕ"
+    },
+    "18": {
+        "string": "ይህንን ተሞክሮ ለመመልከት የመስኮትዎን ቁመት እና ስፋት ይዘርጉ"
+    },
+    "19": {
+        "string": "ይህንን ይዘት ለማየት የamp-story ተሞክሮ ማንቃት አለብዎት።"
+    },
+    "2": {
+        "string": "ቀጣይ የሚለውን ጠቅ ያድርጉ"
+    },
+    "20": {
+        "string": "ገፁ በተሻለ ሁኔታ የሚታየው በቁም አቀማመጥ መልክ ነው"
+    },
+    "21": {
+        "string": "እናዝናለን፣ አሳሽዎ ይህንን ተሞክሮ የማይደግፍ ይመስላል"
+    },
+    "22": {
+        "string": "እቀበላለሁ"
+    },
+    "23": {
+        "string": "አልቀበልም"
+    },
+    "25": {
+        "string": "በመጀመሪያው ጎራ ላይ ይመልከቱ፡"
+    },
+    "26": {
+        "string": "ስለ AMP ውጤቶች ተጨማሪ መረጃ"
+    },
+    "27": {
+        "string": "ለማንኛውም ቀጥል"
+    },
+    "3": {
+        "string": "ወደኋላ የሚለውን ጠቅ ያድርጉ"
+    },
+    "31": {
+        "string": "ድምፅ ጠፍቷል"
+    },
+    "32": {
+        "string": "ድምፅ አልጠፋም"
+    },
+    "33": {
+        "string": "ይህ ገጽ ድምፅ የለውም"
+    },
+    "34": {
+        "string": "ቪዲዮ አጫውት"
+    },
+    "35": {
+        "string": "ወደ ላይ ያንሸራቱ"
+    },
+    "36": {
+        "string": "ትዊትን ዘርጋ"
+    },
+    "37": {
+        "string": "ይህንን ተሞክሮ ለመመልከት የመስኮትዎን ቁመት ይዘርጉ"
+    },
+    "38": {
+        "string": "ይህንን ተሞክሮ ለመመልከት የመስኮትዎን ስፋት ይዘርጉ"
+    },
+    "4": {
+        "string": "ማስፈንጠሪያውን ወደ ቅንጥብ ሰሌዳ መገልበጥ አልተቻለም ፡("
+    },
+    "5": {
+        "string": "ማስፈንጠሪያው ተቀድቷል!"
+    },
+    "6": {
+        "string": "ኢሜይል"
+    },
+    "62": {
+        "string": "ከዚህ ገጽ ጀምሮ ያጋሩ"
+    },
+    "63": {
+        "string": "Line"
+    },
+    "64": {
+        "string": "ዘምኗል"
+    },
+    "65": {
+        "string": "ቪዲዮ መጫወት አልተሳካም"
+    },
+    "66": {
+        "string": "ታሪክን ድምጸ-ከል አድርግ"
+    },
+    "67": {
+        "string": "የታሪክን ድምጸ-ከል አጥፋ"
+    },
+    "68": {
+        "string": "የታሪክ መረጃ"
+    },
+    "69": {
+        "string": "ታሪክ ያጋሩ"
+    },
+    "7": {
+        "string": "ፌስቡክ"
+    },
+    "70": {
+        "string": "የታሪክ ምናሌን ይቀያይሩ"
+    },
+    "71": {
+        "string": "ሀ"
+    },
+    "72": {
+        "string": "ለ"
+    },
+    "73": {
+        "string": "ሐ"
+    },
+    "74": {
+        "string": "መ"
+    },
+    "75": {
+        "string": "ጠቃሚ ምክር 1 ከ 2"
+    },
+    "76": {
+        "string": "ወደ ቀጣዩ ማያ ገጽ ለመሄድ ጠቅ ያድርጉ"
+    },
+    "77": {
+        "string": "ቀጣይ"
+    },
+    "78": {
+        "string": "ጠቃሚ ምክር 2 ከ 2"
+    },
+    "79": {
+        "string": "ወደ ቀጣዩ ታሪክ ለመሄድ ያንሸራቱ"
+    },
+    "8": {
+        "string": "Google+"
+    },
+    "80": {
+        "string": "ገባኝ"
+    },
+    "81": {
+        "string": "ጠቃሚ ምክር"
+    },
+    "82": {
+        "string": "የቀደመው ገጽ"
+    },
+    "83": {
+        "string": "አግብር"
+    },
+    "84": {
+        "string": "ውጤት፡"
+    },
+    "85": {
+        "string": "ታሪክን ለአፍታ አቁም"
+    },
+    "86": {
+        "string": "ታሪክን አጫውት"
+    },
+    "87": {
+        "string": "ዝጋ"
+    },
+    "88": {
+        "string": "ወደ ቀጣዩ ዝለል"
+    },
+    "89": {
+        "string": "የእርስዎ ምላሽ የሚላከው ወደ"
+    },
+    "9": {
+        "string": "ማስፈንጠሪያውን ያግኙ"
+    },
+    "90": {
+        "string": "ቀጣይ ታሪክ"
+    },
+    "91": {
+        "string": "ቀጣይ ገጽ"
+    },
+    "92": {
+        "string": "ድጋሚ አጫውት"
+    },
+    "93": {
+        "string": "የቀደመው ገጽ"
+    },
+    "96": {
+        "string": "ለማሰስ መሣሪያን ያንቀሳቅሱ"
+    },
+    "97": {
+        "string": "በመክፈት ላይ"
+    }
 }

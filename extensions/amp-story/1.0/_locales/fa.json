@@ -1,266 +1,200 @@
 {
-  "2": {
-    "string": "روی بعدی ضربه بزنید",
-    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
-  },
-  "3": {
-    "string": "روی قبلی ضربه بزنید",
-    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
-  },
-  "4": {
-    "string": "پیوند در کلیپ‌بورد کپی نشد :(",
-    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
-  },
-  "5": {
-    "string": "پیوند کپی شد!",
-    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
-  },
-  "6": {
-    "string": "ایمیل",
-    "description": "Button label for the share target that shares a link via email."
-  },
-  "7": {
-    "string": "فیس‌بوک",
-    "description": "Button label for the share target that shares a link via Facebook."
-  },
-  "8": {
-    "string": "گوگل پلاس",
-    "description": "Button label for the share target that shares a link via Google+."
-  },
-  "9": {
-    "string": "دریافت پیوند",
-    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
-  },
-  "10": {
-    "string": "لینکدین",
-    "description": "Button label for the share target that shares a link via LinkedIn."
-  },
-  "11": {
-    "string": "پینترست",
-    "description": "Button label for the share target that shares a link via Pinterest."
-  },
-  "12": {
-    "string": "پیامک",
-    "description": "Button label for the share target that shares a link via SMS."
-  },
-  "13": {
-    "string": "بیشتر",
-    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
-  },
-  "14": {
-    "string": "تامبلر",
-    "description": "Button label for the share target that shares a link via Tumblr."
-  },
-  "15": {
-    "string": "توییتر",
-    "description": "Button label for the share target that shares a link via Twitter."
-  },
-  "16": {
-    "string": "واتساپ",
-    "description": "Button label for the share target that shares a link via WhatsApp."
-  },
-  "18": {
-    "string": "برای مشاهده این تجربه، هم ارتفاع و هم عرض پنجره خود را گسترش دهید",
-    "description": "Text for a warning screen that informs the user that stories are only supported in larger browser windows."
-  },
-  "19": {
-    "string": "برای مشاهده این محتوا باید تجربه استوری amp را فعال کنید.",
-    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
-  },
-  "20": {
-    "string": "صفحه به بهترین شکل در حالت عمودی نمایش داده می‌شود",
-    "description": "Text for a warning screen that informs the user that stories are only supported in portrait orientation."
-  },
-  "21": {
-    "string": "متأسفیم، به نظر می‌رسد مرورگرتان از این تجربه پشتیبانی نمی‌کند",
-    "description": "Text for a warning screen that informs the user that their browser does not support stories."
-  },
-  "22": {
-    "string": "تایید",
-    "description": "Label for a button that allows the user to consent to providing their cookie access."
-  },
-  "23": {
-    "string": "رد",
-    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
-  },
-  "25": {
-    "string": "مشاهده در دامنه اصلی:",
-    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
-  },
-  "26": {
-    "string": "اطلاعات بیشتر درباره نتایج AMP",
-    "description": "Label for a link to documentation on how AMP links are handled."
-  },
-  "27": {
-    "string": "به‌هرحال ادامه یابد",
-    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
-  },
-  "31": {
-    "string": "قطع صدا",
-    "description": "Text that informs users that the sound is off after they click the mute button"
-  },
-  "32": {
-    "string": "وصل صدا",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
-  },
-  "33": {
-    "string": "این صفحه صدا ندارد",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
-  },
-  "34": {
-    "string": "پخش ویدیو",
-    "description": "Label for a button to play the video visible on the page."
-  },
-  "35": {
-    "string": "کشیدن به بالا",
-    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
-  },
-  "36": {
-    "string": "گسترش توییت",
-    "description": "Label in the tooltip text for when a Twitter embed is expandable."
-  },
-  "37": {
-    "string": "برای مشاهده این تجربه، ارتفاع پنجره خود را گسترش دهید",
-    "description": "Text for a warning screen that informs the user that stories are only supported in taller browser windows."
-  },
-  "38": {
-    "string": "برای مشاهده این تجربه، عرض پنجره خود را گسترش دهید",
-    "description": "Text for a warning screen that informs the user that stories are only supported in wider browser windows."
-  },
-  "62": {
-    "string": "اشتراک‌گذاری را از این صفحه شروع کنید",
-    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
-  },
-  "63": {
-    "string": "لاین",
-    "description": "Button label for the share target that shares a link via Line."
-  },
-  "64": {
-    "string": "به‌روز",
-    "description": "Label that indicates that additional content has been added to a story"
-  },
-  "65": {
-    "string": "ویدیو پخش نشد",
-    "description": "Label indicating that the video visible on the page failed to play."
-  },
-  "66": {
-    "string": "قطع صدای استوری",
-    "description": "Label for the mute button that turns off the sound in the story"
-  },
-  "67": {
-    "string": "وصل صدای استوری",
-    "description": "Label for the unmute button that turns the sound in the story back on"
-  },
-  "68": {
-    "string": "اطلاعات استوری",
-    "description": "Label for the information button that pulls up relevant information about the story content"
-  },
-  "69": {
-    "string": "اشتراک‌گذاری استوری",
-    "description": "Label for the share button that pulls up a panel of options for sharing the story"
-  },
-  "70": {
-    "string": "تغییر منوی استوری",
-    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
-  },
-  "71": {
-    "string": "آ",
-    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
-  },
-  "72": {
-    "string": "ب",
-    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
-  },
-  "73": {
-    "string": "ج",
-    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
-  },
-  "74": {
-    "string": "د",
-    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
-  },
-  "75": {
-    "string": "نکته 1 از 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "76": {
-    "string": "برای رفتن به صفحه بعدی، ضربه بزنید",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "77": {
-    "string": "بعدی",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "78": {
-    "string": "نکته 2 از 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "79": {
-    "string": "برای رفتن به استوری بعدی، انگشت خود را روی صفحه بکشید",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "80": {
-    "string": "فهمیدم",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "81": {
-    "string": "نکته",
-    "description": "Label for a hint in the context of an onboarding user education tutorial."
-  },
-  "82": {
-    "string": "صفحه قبلی",
-    "description": "Label indicating that users can navigate to the previous page."
-  },
-  "83": {
-    "string": "فعال کردن",
-    "description": "Label for the activate button to ask for device orientation permission"
-  },
-  "84": {
-    "string": "امتیاز:",
-    "description": "Label for the results component preceding the score in percentages"
-  },
-  "85": {
-    "string": "توقف استوری",
-    "description": "Label for a button that pauses the media content on the story"
-  },
-  "86": {
-    "string": "پخش استوری",
-    "description": "Label for a button that plays the media content on the story"
-  },
-  "87": {
-    "string": "بستن",
-    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
-  },
-  "88": {
-    "string": "رد کردن بعدی",
-    "description": "Label for a button that advances to the next element in the carousel"
-  },
-  "89": {
-    "string": "پاسخ شما ارسال خواهد شد به",
-    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
-  },
-  "90": {
-    "string": "استوری بعد",
-    "description": "Label for a button that advances to the next element in the carousel."
-  },
-  "91": {
-    "string": "صفحه بعد",
-    "description": "Label for a button that advances to the next page of the story."
-  },
-  "92": {
-    "string": "بازپخش",
-    "description": "Label for a button that replays the story."
-  },
-  "93": {
-    "string": "صفحه قبل",
-    "description": "Label for a button that returns the user to the previous page of the story."
-  },
-  "96": {
-    "string": "برای کاوش، دستگاه را حرکت دهید",
-    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
-  },
-  "97": {
-    "string": "باز کردن",
-    "description": "Text displayed to users on tap of outlink button."
-  }
+    "10": {
+        "string": "لینکدین"
+    },
+    "11": {
+        "string": "پینترست"
+    },
+    "12": {
+        "string": "پیامک"
+    },
+    "13": {
+        "string": "بیشتر"
+    },
+    "14": {
+        "string": "تامبلر"
+    },
+    "15": {
+        "string": "توییتر"
+    },
+    "16": {
+        "string": "واتساپ"
+    },
+    "18": {
+        "string": "برای مشاهده این تجربه، هم ارتفاع و هم عرض پنجره خود را گسترش دهید"
+    },
+    "19": {
+        "string": "برای مشاهده این محتوا باید تجربه استوری amp را فعال کنید."
+    },
+    "2": {
+        "string": "روی بعدی ضربه بزنید"
+    },
+    "20": {
+        "string": "صفحه به بهترین شکل در حالت عمودی نمایش داده می‌شود"
+    },
+    "21": {
+        "string": "متأسفیم، به نظر می‌رسد مرورگرتان از این تجربه پشتیبانی نمی‌کند"
+    },
+    "22": {
+        "string": "تایید"
+    },
+    "23": {
+        "string": "رد"
+    },
+    "25": {
+        "string": "مشاهده در دامنه اصلی:"
+    },
+    "26": {
+        "string": "اطلاعات بیشتر درباره نتایج AMP"
+    },
+    "27": {
+        "string": "به‌هرحال ادامه یابد"
+    },
+    "3": {
+        "string": "روی قبلی ضربه بزنید"
+    },
+    "31": {
+        "string": "قطع صدا"
+    },
+    "32": {
+        "string": "وصل صدا"
+    },
+    "33": {
+        "string": "این صفحه صدا ندارد"
+    },
+    "34": {
+        "string": "پخش ویدیو"
+    },
+    "35": {
+        "string": "کشیدن به بالا"
+    },
+    "36": {
+        "string": "گسترش توییت"
+    },
+    "37": {
+        "string": "برای مشاهده این تجربه، ارتفاع پنجره خود را گسترش دهید"
+    },
+    "38": {
+        "string": "برای مشاهده این تجربه، عرض پنجره خود را گسترش دهید"
+    },
+    "4": {
+        "string": "پیوند در کلیپ‌بورد کپی نشد :("
+    },
+    "5": {
+        "string": "پیوند کپی شد!"
+    },
+    "6": {
+        "string": "ایمیل"
+    },
+    "62": {
+        "string": "اشتراک‌گذاری را از این صفحه شروع کنید"
+    },
+    "63": {
+        "string": "لاین"
+    },
+    "64": {
+        "string": "به‌روز"
+    },
+    "65": {
+        "string": "ویدیو پخش نشد"
+    },
+    "66": {
+        "string": "قطع صدای استوری"
+    },
+    "67": {
+        "string": "وصل صدای استوری"
+    },
+    "68": {
+        "string": "اطلاعات استوری"
+    },
+    "69": {
+        "string": "اشتراک‌گذاری استوری"
+    },
+    "7": {
+        "string": "فیس‌بوک"
+    },
+    "70": {
+        "string": "تغییر منوی استوری"
+    },
+    "71": {
+        "string": "آ"
+    },
+    "72": {
+        "string": "ب"
+    },
+    "73": {
+        "string": "ج"
+    },
+    "74": {
+        "string": "د"
+    },
+    "75": {
+        "string": "نکته 1 از 2"
+    },
+    "76": {
+        "string": "برای رفتن به صفحه بعدی، ضربه بزنید"
+    },
+    "77": {
+        "string": "بعدی"
+    },
+    "78": {
+        "string": "نکته 2 از 2"
+    },
+    "79": {
+        "string": "برای رفتن به استوری بعدی، انگشت خود را روی صفحه بکشید"
+    },
+    "8": {
+        "string": "گوگل پلاس"
+    },
+    "80": {
+        "string": "فهمیدم"
+    },
+    "81": {
+        "string": "نکته"
+    },
+    "82": {
+        "string": "صفحه قبلی"
+    },
+    "83": {
+        "string": "فعال کردن"
+    },
+    "84": {
+        "string": "امتیاز:"
+    },
+    "85": {
+        "string": "توقف استوری"
+    },
+    "86": {
+        "string": "پخش استوری"
+    },
+    "87": {
+        "string": "بستن"
+    },
+    "88": {
+        "string": "رد کردن بعدی"
+    },
+    "89": {
+        "string": "پاسخ شما ارسال خواهد شد به"
+    },
+    "9": {
+        "string": "دریافت پیوند"
+    },
+    "90": {
+        "string": "استوری بعد"
+    },
+    "91": {
+        "string": "صفحه بعد"
+    },
+    "92": {
+        "string": "بازپخش"
+    },
+    "93": {
+        "string": "صفحه قبل"
+    },
+    "96": {
+        "string": "برای کاوش، دستگاه را حرکت دهید"
+    },
+    "97": {
+        "string": "باز کردن"
+    }
 }

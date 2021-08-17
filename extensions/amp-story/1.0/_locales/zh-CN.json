@@ -1,266 +1,200 @@
 {
-  "2": {
-    "string": "点按“下一页”",
-    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
-  },
-  "3": {
-    "string": "点按“返回”",
-    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
-  },
-  "4": {
-    "string": "无法将链接复制到剪贴板 :(",
-    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
-  },
-  "5": {
-    "string": "链接已复制！",
-    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
-  },
-  "6": {
-    "string": "电子邮件",
-    "description": "Button label for the share target that shares a link via email."
-  },
-  "7": {
-    "string": "Facebook",
-    "description": "Button label for the share target that shares a link via Facebook."
-  },
-  "8": {
-    "string": "Google+",
-    "description": "Button label for the share target that shares a link via Google+."
-  },
-  "9": {
-    "string": "获取链接",
-    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
-  },
-  "10": {
-    "string": "LinkedIn",
-    "description": "Button label for the share target that shares a link via LinkedIn."
-  },
-  "11": {
-    "string": "Pinterest",
-    "description": "Button label for the share target that shares a link via Pinterest."
-  },
-  "12": {
-    "string": "短信",
-    "description": "Button label for the share target that shares a link via SMS."
-  },
-  "13": {
-    "string": "更多",
-    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
-  },
-  "14": {
-    "string": "Tumblr",
-    "description": "Button label for the share target that shares a link via Tumblr."
-  },
-  "15": {
-    "string": "Twitter",
-    "description": "Button label for the share target that shares a link via Twitter."
-  },
-  "16": {
-    "string": "WhatsApp",
-    "description": "Button label for the share target that shares a link via WhatsApp."
-  },
-  "18": {
-    "string": "扩展窗口的高度和宽度以查看此体验",
-    "description": "Text for a warning screen that informs the user that stories are only supported in larger browser windows."
-  },
-  "19": {
-    "string": "您必须启用 amp-story 实验才能查看此内容。",
-    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
-  },
-  "20": {
-    "string": "该网页在纵向模式下查看时体验最好",
-    "description": "Text for a warning screen that informs the user that stories are only supported in portrait orientation."
-  },
-  "21": {
-    "string": "很抱歉，您的浏览器似乎不支持此体验",
-    "description": "Text for a warning screen that informs the user that their browser does not support stories."
-  },
-  "22": {
-    "string": "接受",
-    "description": "Label for a button that allows the user to consent to providing their cookie access."
-  },
-  "23": {
-    "string": "拒绝",
-    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
-  },
-  "25": {
-    "string": "在原始网域上查看：",
-    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
-  },
-  "26": {
-    "string": "详细了解 AMP 结果",
-    "description": "Label for a link to documentation on how AMP links are handled."
-  },
-  "27": {
-    "string": "仍然继续",
-    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
-  },
-  "31": {
-    "string": "关闭声音",
-    "description": "Text that informs users that the sound is off after they click the mute button"
-  },
-  "32": {
-    "string": "开启声音",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
-  },
-  "33": {
-    "string": "此网页没有声音",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
-  },
-  "34": {
-    "string": "播放视频",
-    "description": "Label for a button to play the video visible on the page."
-  },
-  "35": {
-    "string": "向上滑动",
-    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
-  },
-  "36": {
-    "string": "展开推文",
-    "description": "Label in the tooltip text for when a Twitter embed is expandable."
-  },
-  "37": {
-    "string": "扩展您的窗口的高度以查看此体验",
-    "description": "Text for a warning screen that informs the user that stories are only supported in taller browser windows."
-  },
-  "38": {
-    "string": "扩展您的窗口的宽度以查看此体验",
-    "description": "Text for a warning screen that informs the user that stories are only supported in wider browser windows."
-  },
-  "62": {
-    "string": "从此网页开始分享",
-    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
-  },
-  "63": {
-    "string": "Line",
-    "description": "Button label for the share target that shares a link via Line."
-  },
-  "64": {
-    "string": "已更新",
-    "description": "Label that indicates that additional content has been added to a story"
-  },
-  "65": {
-    "string": "视频无法播放",
-    "description": "Label indicating that the video visible on the page failed to play."
-  },
-  "66": {
-    "string": "将故事静音",
-    "description": "Label for the mute button that turns off the sound in the story"
-  },
-  "67": {
-    "string": "将故事取消静音",
-    "description": "Label for the unmute button that turns the sound in the story back on"
-  },
-  "68": {
-    "string": "故事信息",
-    "description": "Label for the information button that pulls up relevant information about the story content"
-  },
-  "69": {
-    "string": "分享故事",
-    "description": "Label for the share button that pulls up a panel of options for sharing the story"
-  },
-  "70": {
-    "string": "切换故事菜单",
-    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
-  },
-  "71": {
-    "string": "A",
-    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
-  },
-  "72": {
-    "string": "B",
-    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
-  },
-  "73": {
-    "string": "C",
-    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
-  },
-  "74": {
-    "string": "D",
-    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
-  },
-  "75": {
-    "string": "提示 1/2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "76": {
-    "string": "点按以转到下一个屏幕",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "77": {
-    "string": "下一步",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "78": {
-    "string": "提示 2/2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "79": {
-    "string": "滑动以转到下一个故事",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "80": {
-    "string": "知道了",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "81": {
-    "string": "提示",
-    "description": "Label for a hint in the context of an onboarding user education tutorial."
-  },
-  "82": {
-    "string": "上一页",
-    "description": "Label indicating that users can navigate to the previous page."
-  },
-  "83": {
-    "string": "激活",
-    "description": "Label for the activate button to ask for device orientation permission"
-  },
-  "84": {
-    "string": "分数：",
-    "description": "Label for the results component preceding the score in percentages"
-  },
-  "85": {
-    "string": "暂停故事",
-    "description": "Label for a button that pauses the media content on the story"
-  },
-  "86": {
-    "string": "播放故事",
-    "description": "Label for a button that plays the media content on the story"
-  },
-  "87": {
-    "string": "关闭",
-    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
-  },
-  "88": {
-    "string": "跳到下一个",
-    "description": "Label for a button that advances to the next element in the carousel"
-  },
-  "89": {
-    "string": "您的回复将发送至",
-    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
-  },
-  "90": {
-    "string": "下一个故事",
-    "description": "Label for a button that advances to the next element in the carousel."
-  },
-  "91": {
-    "string": "下一页",
-    "description": "Label for a button that advances to the next page of the story."
-  },
-  "92": {
-    "string": "重播",
-    "description": "Label for a button that replays the story."
-  },
-  "93": {
-    "string": "上一页",
-    "description": "Label for a button that returns the user to the previous page of the story."
-  },
-  "96": {
-    "string": "移动设备以探索",
-    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
-  },
-  "97": {
-    "string": "正在打开",
-    "description": "Text displayed to users on tap of outlink button."
-  }
+    "10": {
+        "string": "LinkedIn"
+    },
+    "11": {
+        "string": "Pinterest"
+    },
+    "12": {
+        "string": "短信"
+    },
+    "13": {
+        "string": "更多"
+    },
+    "14": {
+        "string": "Tumblr"
+    },
+    "15": {
+        "string": "Twitter"
+    },
+    "16": {
+        "string": "WhatsApp"
+    },
+    "18": {
+        "string": "扩展窗口的高度和宽度以查看此体验"
+    },
+    "19": {
+        "string": "您必须启用 amp-story 实验才能查看此内容。"
+    },
+    "2": {
+        "string": "点按“下一页”"
+    },
+    "20": {
+        "string": "该网页在纵向模式下查看时体验最好"
+    },
+    "21": {
+        "string": "很抱歉，您的浏览器似乎不支持此体验"
+    },
+    "22": {
+        "string": "接受"
+    },
+    "23": {
+        "string": "拒绝"
+    },
+    "25": {
+        "string": "在原始网域上查看："
+    },
+    "26": {
+        "string": "详细了解 AMP 结果"
+    },
+    "27": {
+        "string": "仍然继续"
+    },
+    "3": {
+        "string": "点按“返回”"
+    },
+    "31": {
+        "string": "关闭声音"
+    },
+    "32": {
+        "string": "开启声音"
+    },
+    "33": {
+        "string": "此网页没有声音"
+    },
+    "34": {
+        "string": "播放视频"
+    },
+    "35": {
+        "string": "向上滑动"
+    },
+    "36": {
+        "string": "展开推文"
+    },
+    "37": {
+        "string": "扩展您的窗口的高度以查看此体验"
+    },
+    "38": {
+        "string": "扩展您的窗口的宽度以查看此体验"
+    },
+    "4": {
+        "string": "无法将链接复制到剪贴板 :("
+    },
+    "5": {
+        "string": "链接已复制！"
+    },
+    "6": {
+        "string": "电子邮件"
+    },
+    "62": {
+        "string": "从此网页开始分享"
+    },
+    "63": {
+        "string": "Line"
+    },
+    "64": {
+        "string": "已更新"
+    },
+    "65": {
+        "string": "视频无法播放"
+    },
+    "66": {
+        "string": "将故事静音"
+    },
+    "67": {
+        "string": "将故事取消静音"
+    },
+    "68": {
+        "string": "故事信息"
+    },
+    "69": {
+        "string": "分享故事"
+    },
+    "7": {
+        "string": "Facebook"
+    },
+    "70": {
+        "string": "切换故事菜单"
+    },
+    "71": {
+        "string": "A"
+    },
+    "72": {
+        "string": "B"
+    },
+    "73": {
+        "string": "C"
+    },
+    "74": {
+        "string": "D"
+    },
+    "75": {
+        "string": "提示 1/2"
+    },
+    "76": {
+        "string": "点按以转到下一个屏幕"
+    },
+    "77": {
+        "string": "下一步"
+    },
+    "78": {
+        "string": "提示 2/2"
+    },
+    "79": {
+        "string": "滑动以转到下一个故事"
+    },
+    "8": {
+        "string": "Google+"
+    },
+    "80": {
+        "string": "知道了"
+    },
+    "81": {
+        "string": "提示"
+    },
+    "82": {
+        "string": "上一页"
+    },
+    "83": {
+        "string": "激活"
+    },
+    "84": {
+        "string": "分数："
+    },
+    "85": {
+        "string": "暂停故事"
+    },
+    "86": {
+        "string": "播放故事"
+    },
+    "87": {
+        "string": "关闭"
+    },
+    "88": {
+        "string": "跳到下一个"
+    },
+    "89": {
+        "string": "您的回复将发送至"
+    },
+    "9": {
+        "string": "获取链接"
+    },
+    "90": {
+        "string": "下一个故事"
+    },
+    "91": {
+        "string": "下一页"
+    },
+    "92": {
+        "string": "重播"
+    },
+    "93": {
+        "string": "上一页"
+    },
+    "96": {
+        "string": "移动设备以探索"
+    },
+    "97": {
+        "string": "正在打开"
+    }
 }

@@ -1,266 +1,200 @@
 {
-  "2": {
-    "string": "ਅੱਗੇ ’ਤੇ ਟੈਪ ਕਰੋ",
-    "description": "ਲੇਬਲ ਜੋ ਇਹ ਸੰਕੇਤ ਦਿੰਦਾ ਹੈ ਕਿ ਵਰਤੋਂਕਾਰ, amp-ਕਹਾਣੀ ਹਿੰਟ UI ਵਿੱਚ, ਆਵਾਗੌਣ ਕਰਕੇ ਅਗਲੇ ਪੰਨੇ ’ਤੇ ਜਾ ਸਕਦੇ ਹਨ।"
-  },
-  "3": {
-    "string": "ਪਿੱਛੇ ’ਤੇ ਟੈਪ ਕਰੋ",
-    "description": "ਲੇਬਲ ਜੋ ਇਹ ਸੰਕੇਤ ਦਿੰਦਾ ਹੈ ਕਿ ਵਰਤੋਂਕਾਰ, amp-ਕਹਾਣੀ ਹਿੰਟ UI ਵਿੱਚ, ਆਵਾਗੌਣ ਕਰਕੇ ਪਿਛਲੇ ਪੰਨੇ ’ਤੇ ਜਾ ਸਕਦੇ ਹਨ।"
-  },
-  "4": {
-    "string": "ਲਿੰਕ ਨੂੰ ਕਲਿੱਪਬੋਰਡ ’ਤੇ ਕਾਪੀ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ :(",
-    "description": "ਵਰਤੋਂਕਾਰ ਨੂੰ ਸੂਚਿਤ ਕਰਨ ਵਾਸਤੇ, ਅਸਫਲਤਾ ਬਾਬਤ ਸੰਦੇਸ਼ ਵਿੱਚ ਦਿਖਾਈ ਜਾਂਦੀ ਇੱਕ ਸਤਰ ਕਿ ਇੱਕ ਲਿੰਕ ਸਫਲਤਾਪੂਰਵਕ ਉਹਨਾਂ ਦੇ ਕਲਿੱਪਬੋਰਡ ਉੱਤੇ ਕਾਪੀ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ।"
-  },
-  "5": {
-    "string": "ਲਿੰਕ ਕਾਪੀ ਹੋ ਗਿਆ!",
-    "description": "ਪੁਸ਼ਟੀਕਰਨ ਸੰਦੇਸ਼ ਵਿੱਚ ਵਰਤੋਂਕਾਰ ਨੂੰ ਇਸ ਬਾਰੇ ਸੂਚਿਤ ਕਰਨ ਲਈ ਦਿਖਾਈ ਜਾਂਦੀ ਇੱਕ ਸਤਰ ਕਿ ਇੱਕ ਲਿੰਕ ਸਫਲਤਾਪੂਰਵਕ ਕਲਿੱਪਬੋਰਡ ’ਤੇ ਕਾਪੀ ਕਰ ਦਿੱਤਾ ਗਿਆ ਸੀ।"
-  },
-  "6": {
-    "string": "ਈਮੇਲ",
-    "description": "ਸ਼ੇਅਰ ਟਾਰਗੈੱਟ ਵਾਸਤੇ ਬਟਨ ਲੇਬਲ ਜੋ ਈਮੇਲ ਰਾਹੀਂ ਇੱਕ ਲਿੰਕ ਸਾਂਝਾ ਕਰਦਾ ਹੈ।"
-  },
-  "7": {
-    "string": "Facebook",
-    "description": "ਸ਼ੇਅਰ ਟਾਰਗੈੱਟ ਵਾਸਤੇ ਬਟਨ ਲੇਬਲ ਜੋ Facebook ਰਾਹੀਂ ਇੱਕ ਲਿੰਕ ਸਾਂਝਾ ਕਰਦਾ ਹੈ।"
-  },
-  "8": {
-    "string": "Google+",
-    "description": "ਸ਼ੇਅਰ ਟਾਰਗੈੱਟ ਵਾਸਤੇ ਬਟਨ ਲੇਬਲ ਜੋ Google+ ਰਾਹੀਂ ਇੱਕ ਲਿੰਕ ਸਾਂਝਾ ਕਰਦਾ ਹੈ।"
-  },
-  "9": {
-    "string": "ਲਿੰਕ ਪ੍ਰਾਪਤ ਕਰੋ",
-    "description": "ਸ਼ੇਅਰ ਟਾਰਗੈੱਟ ਵਾਸਤੇ ਬਟਨ ਲੇਬਲ ਜੋ ਕਿਸੇ ਲਿੰਕ ਨੂੰ ਵਰਤੋਂਕਾਰ ਦੇ ਕਲਿੱਪਬੋਰਡ ’ਤੇ ਕਾਪੀ ਕਰਨ ਦੁਆਰਾ ਇਸ ਨੂੰ ਸਾਂਝਾ ਕਰਦਾ ਹੈ।"
-  },
-  "10": {
-    "string": "LinkedIn",
-    "description": "ਸ਼ੇਅਰ ਟਾਰਗੈੱਟ ਵਾਸਤੇ ਬਟਨ ਲੇਬਲ ਜੋ LinkedIn ਰਾਹੀਂ ਇੱਕ ਲਿੰਕ ਸਾਂਝਾ ਕਰਦਾ ਹੈ।"
-  },
-  "11": {
-    "string": "Pinterest",
-    "description": "ਸ਼ੇਅਰ ਟਾਰਗੈੱਟ ਵਾਸਤੇ ਬਟਨ ਲੇਬਲ ਜੋ Pinterest ਰਾਹੀਂ ਇੱਕ ਲਿੰਕ ਸਾਂਝਾ ਕਰਦਾ ਹੈ।"
-  },
-  "12": {
-    "string": "SMS",
-    "description": "ਸ਼ੇਅਰ ਟਾਰਗੈੱਟ ਵਾਸਤੇ ਬਟਨ ਲੇਬਲ ਜੋ SMS ਰਾਹੀਂ ਇੱਕ ਲਿੰਕ ਸਾਂਝਾ ਕਰਦਾ ਹੈ।"
-  },
-  "13": {
-    "string": "ਹੋਰ",
-    "description": "ਸ਼ੇਅਰ ਟਾਰਗੈੱਟ ਵਾਸਤੇ ਬਟਨ ਲੇਬਲ ਜੋ ਆਪਰੇਟਿੰਗ ਸਿਸਟਮ ਦੇ ਜੱਦੀ ਸ਼ੇਅਰਿੰਗ ਹੈਂਡਲਰ ਨੂੰ ਸਥਗਿਤੀ ਰਾਹੀਂ ਇੱਕ ਲਿੰਕ ਸਾਂਝਾ ਕਰਦਾ ਹੈ।"
-  },
-  "14": {
-    "string": "Tumblr",
-    "description": "ਸ਼ੇਅਰ ਟਾਰਗੈੱਟ ਵਾਸਤੇ ਬਟਨ ਲੇਬਲ ਜੋ Tumblr ਰਾਹੀਂ ਇੱਕ ਲਿੰਕ ਸਾਂਝਾ ਕਰਦਾ ਹੈ।"
-  },
-  "15": {
-    "string": "Twitter",
-    "description": "ਸ਼ੇਅਰ ਟਾਰਗੈੱਟ ਵਾਸਤੇ ਬਟਨ ਲੇਬਲ ਜੋ Twitter ਰਾਹੀਂ ਇੱਕ ਲਿੰਕ ਸਾਂਝਾ ਕਰਦਾ ਹੈ।"
-  },
-  "16": {
-    "string": "WhatsApp",
-    "description": "ਸ਼ੇਅਰ ਟਾਰਗੈੱਟ ਵਾਸਤੇ ਬਟਨ ਲੇਬਲ ਜੋ WhatsApp ਰਾਹੀਂ ਇੱਕ ਲਿੰਕ ਸਾਂਝਾ ਕਰਦਾ ਹੈ।"
-  },
-  "18": {
-    "string": "ਇਹ ਅਨੁਭਵ ਦੇਖਣ ਲਈ ਆਪਣੀ ਵਿੰਡੋ ਦੀ ਲੰਬਾਈ ਅਤੇ ਚੌੜਾਈ ਦੋਵੇਂ ਵਧਾਓ",
-    "description": "ਇੱਕ ਚੇਤਾਵਨੀ ਸਕ੍ਰੀਨ ਵਾਸਤੇ ਲਿਖਤ ਜੋ ਵਰਤੋਂਕਾਰ ਨੂੰ ਸੂਚਿਤ ਕਰਦੀ ਹੈ ਕਿ ਕਹਾਣੀਆਂ ਨੂੰ ਸਿਰਫ਼ ਮੁਕਾਬਲਤਨ ਵੱਡੀਆਂ ਬ੍ਰਾਊਜ਼ਰ ਵਿੰਡੋਜ਼ ਵਿੱਚ ਸਮਰਥਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।"
-  },
-  "19": {
-    "string": "ਇਹ ਸਮੱਗਰੀ ਦੇਖਣ ਲਈ ਤੁਹਾਡੇ ਵਾਸਤੇ amp-ਕਹਾਣੀ ਪ੍ਰਯੋਗ ਚਾਲੂ ਕਰਨਾ ਲਾਜ਼ਮੀ ਹੈ।",
-    "description": "ਇੱਕ ਚੇਤਾਵਨੀ ਸਕ੍ਰੀਨ ਵਾਸਤੇ ਲਿਖਤ ਜੋ ਵਰਤੋਂਕਾਰ ਨੂੰ ਸੂਚਿਤ ਕਰਦੀ ਹੈ ਕਿ ਕਹਾਣੀਆਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਲਈ ਉਹਨਾਂ ਵਾਸਤੇ ਇੱਕ ਪ੍ਰਯੋਗ ਨੂੰ ਚਾਲੂ ਕਰਨਾ ਲਾਜ਼ਮੀ ਹੈ।"
-  },
-  "20": {
-    "string": "ਪੰਨਾ ਸਭ ਤੋਂ ਵਧੀਆ ਪੋਰਟਰੇਟ ਮੋਡ ਵਿੱਚ ਦਿਖਾਈ ਦਿੰਦਾ ਹੈ",
-    "description": "ਇੱਕ ਚੇਤਾਵਨੀ ਸਕ੍ਰੀਨ ਵਾਸਤੇ ਲਿਖਤ ਜੋ ਵਰਤੋਂਕਾਰ ਨੂੰ ਸੂਚਿਤ ਕਰਦੀ ਹੈ ਕਿ ਕਹਾਣੀਆਂ ਨੂੰ ਸਿਰਫ਼ ਪੋਰਟਰੇਟ ਸਥਿਤੀ ਵਿੱਚ ਹੀ ਸਮਰਥਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।"
-  },
-  "21": {
-    "string": "ਸਾਨੂੰ ਅਫ਼ਸੋਸ ਹੈ, ਇੰਝ ਲੱਗਦਾ ਹੈ ਕਿ ਤੁਹਾਡਾ ਬ੍ਰਾਊਜ਼ਰ ਇਸ ਅਨੁਭਵ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦਾ",
-    "description": "ਇੱਕ ਚੇਤਾਵਨੀ ਸਕ੍ਰੀਨ ਵਾਸਤੇ ਲਿਖਤ ਜੋ ਵਰਤੋਂਕਾਰ ਨੂੰ ਸੂਚਿਤ ਕਰਦੀ ਹੈ ਕਿ ਉਹਨਾਂ ਦਾ ਬ੍ਰਾਊਜ਼ਰ ਕਹਾਣੀਆਂ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦਾ।"
-  },
-  "22": {
-    "string": "ਸਵੀਕਾਰ ਕਰੋ",
-    "description": "ਇੱਕ ਬਟਨ ਵਾਸਤੇ ਲੇਬਲ ਜੋ ਵਰਤੋਂਕਾਰ ਨੂੰ ਆਪਣੀ ਕੁੱਕੀ ਪਹੁੰਚ ਪ੍ਰਦਾਨ ਕਰਨ ਲਈ ਸਹਿਮਤੀ ਦੇਣ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ।"
-  },
-  "23": {
-    "string": "ਅਸਵੀਕਾਰ ਕਰੋ",
-    "description": "ਇੱਕ ਬਟਨ ਵਾਸਤੇ ਲੇਬਲ ਜੋ ਵਰਤੋਂਕਾਰ ਨੂੰ ਆਪਣੀ ਕੁੱਕੀ ਪਹੁੰਚ ਪ੍ਰਦਾਨ ਕਰਨ ਲਈ ਸਹਿਮਤੀ ਹਟਾਉਣ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ।"
-  },
-  "25": {
-    "string": "ਅਸਲ ਡੋਮੇਨ ’ਤੇ ਦੇਖੋ:",
-    "description": "ਇੱਕ ਡਾਇਲਾਗ ਦੇ ਸਿਰਲੇਖ ਵਾਸਤੇ ਲੇਬਲ ਜੋ ਵਰਤੋਂਕਾਰ ਨੂੰ ਉਹ ਡੋਮੇਨ ਦਿਖਾਉਂਦਾ ਹੈ ਜਿੱਥੋਂ ਕਹਾਣੀ ਚਲਾਈ ਜਾਂਦੀ ਹੈ।"
-  },
-  "26": {
-    "string": "AMP ਨਤੀਜਿਆਂ ਬਾਰੇ ਹੋਰ ਜਾਣਕਾਰੀ",
-    "description": "AMP ਲਿੰਕਾਂ ਨੂੰ ਹੈਂਡਲ ਕਰਨ ਦੇ ਤਰੀਕੇ ਬਾਰੇ ਦੱਸਦੇ ਇੱਕ ਦਸਤਾਵੇਜ਼ ਲਈ ਲਿੰਕ ਵਾਸਤੇ ਲੇਬਲ।"
-  },
-  "27": {
-    "string": "ਫੇਰ ਵੀ ਜਾਰੀ ਰੱਖੋ",
-    "description": "ਵਰਤੋਂਕਾਰ ਨੂੰ ਜਾਰੀ ਰੱਖਣ ਦੇ ਯੋਗ ਬਣਾਉਣ ਲਈ ਬਟਨ ਲੇਬਲ ਚਾਹੇ ਉਹ ਕਿਸੇ ਸਮਰਥਿਤ ਬ੍ਰਾਊਜ਼ਰ ਦੀ ਵਰਤੋਂ ਨਾ ਵੀ ਕਰ ਰਿਹਾ ਹੋਵੇ।"
-  },
-  "31": {
-    "string": "ਸਾਊਂਡ ਬੰਦ",
-    "description": "ਉਹ ਲਿਖਤ ਜੋ ਵਰਤੋਂਕਾਰਾਂ ਵੱਲੋਂ ਮਿਊਟ ਬਟਨ ’ਤੇ ਕਲਿੱਕ ਕਰਨ ਦੇ ਬਾਅਦ ਉਹਨਾਂ ਨੂੰ ਸੂਚਿਤ ਕਰਦੀ ਹੈ ਕਿ ਸਾਊਂਡ ਬੰਦ ਹੈ"
-  },
-  "32": {
-    "string": "ਸਾਊਂਡ ਚਾਲੂ",
-    "description": "ਉਹ ਲਿਖਤ ਜੋ ਵਰਤੋਂਕਾਰਾਂ ਵੱਲੋਂ ਕਿਸੇ ਸਾਊਂਡ ਵਾਲੇ ਪੰਨੇ ਉੱਤੇ ਅਣਮਿਊਟ ਬਟਨ ’ਤੇ ਕਲਿੱਕ ਕਰਨ ਦੇ ਬਾਅਦ ਉਹਨਾਂ ਨੂੰ ਸੂਚਿਤ ਕਰਦੀ ਹੈ ਕਿ ਸਾਊਂਡ ਚਾਲੂ ਹੈ"
-  },
-  "33": {
-    "string": "ਇਸ ਪੰਨੇ ਵਿੱਚ ਕੋਈ ਸਾਊਂਡ ਨਹੀਂ ਹੈ",
-    "description": "ਉਹ ਲਿਖਤ ਜੋ ਵਰਤੋਂਕਾਰਾਂ ਵੱਲੋਂ ਕਿਸੇ ਬਿਨਾਂ ਸਾਊਂਡ ਵਾਲੇ ਪੰਨੇ ਉੱਤੇ ਅਣਮਿਊਟ ਬਟਨ ’ਤੇ ਕਲਿੱਕ ਕਰਨ ਦੇ ਬਾਅਦ ਉਹਨਾਂ ਨੂੰ ਸੂਚਿਤ ਕਰਦੀ ਹੈ ਕਿ ਸਾਊਂਡ ਚਾਲੂ ਹੈ"
-  },
-  "34": {
-    "string": "ਵੀਡੀਓ ਚਲਾਓ",
-    "description": "ਪੰਨੇ ਉੱਤੇ ਦਿਖਾਈ ਦੇ ਰਹੇ ਵੀਡੀਓ ਨੂੰ ਚਲਾਉਣ ਲਈ ਬਟਨ ਵਾਸਤੇ ਲੇਬਲ।"
-  },
-  "35": {
-    "string": "ਉੱਪਰ ਸਵਾਈਪ ਕਰੋ",
-    "description": "“ਸਵਾਈਪ ਅੱਪ” ਵਰਤੋਂਕਾਰ ਸੈਨਤ ਰਾਹੀਂ ਵਾਧੂ ਸਮੱਗਰੀ ਵਾਲੇ ਇੱਕ ਡ੍ਰਾਅਰ ਨੂੰ ਖੋਲ੍ਹਣ ਲਈ ਬਟਨ ਵਾਸਤੇ ਲੇਬਲ।"
-  },
-  "36": {
-    "string": "ਟਵੀਟ ਦਾ ਵਿਸਤਾਰ ਕਰੋ",
-    "description": "ਜਦ ਕੋਈ Twitter ਐਮਬੈੱਡ ਵਿਸਤਾਰਯੋਗ ਹੁੰਦਾ ਹੈ ਤਾਂ ਉਸ ਲਈ ਟੂਲਟਿਪ ਲਿਖਤ ਵਿਚਲਾ ਲੇਬਲ।"
-  },
-  "37": {
-    "string": "ਇਹ ਅਨੁਭਵ ਦੇਖਣ ਲਈ ਆਪਣੀ ਵਿੰਡੋ ਦੀ ਲੰਬਾਈ ਵਧਾਓ",
-    "description": "ਇੱਕ ਚੇਤਾਵਨੀ ਸਕ੍ਰੀਨ ਵਾਸਤੇ ਲਿਖਤ ਜੋ ਵਰਤੋਂਕਾਰ ਨੂੰ ਸੂਚਿਤ ਕਰਦੀ ਹੈ ਕਿ ਕਹਾਣੀਆਂ ਨੂੰ ਸਿਰਫ਼ ਮੁਕਾਬਲਤਨ ਲੰਬੀਆਂ ਬ੍ਰਾਊਜ਼ਰ ਵਿੰਡੋਜ਼ ਵਿੱਚ ਸਮਰਥਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।"
-  },
-  "38": {
-    "string": "ਇਹ ਅਨੁਭਵ ਦੇਖਣ ਲਈ ਆਪਣੀ ਵਿੰਡੋ ਦੀ ਚੌੜਾਈ ਵਧਾਓ",
-    "description": "ਇੱਕ ਚੇਤਾਵਨੀ ਸਕ੍ਰੀਨ ਵਾਸਤੇ ਲਿਖਤ ਜੋ ਵਰਤੋਂਕਾਰ ਨੂੰ ਸੂਚਿਤ ਕਰਦੀ ਹੈ ਕਿ ਕਹਾਣੀਆਂ ਨੂੰ ਸਿਰਫ਼ ਮੁਕਾਬਲਤਨ ਚੌੜੀਆਂ ਬ੍ਰਾਊਜ਼ਰ ਵਿੰਡੋਜ਼ ਵਿੱਚ ਸਮਰਥਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।"
-  },
-  "62": {
-    "string": "ਇਸ ਪੰਨੇ ਤੋਂ ਸ਼ੁਰੂ ਕਰਦੇ ਹੋਏ ਸਾਂਝਾ ਕਰੋ",
-    "description": "ਚੈੱਕਬਾਕਸ ਲੇਬਲ ਜਦ ਬ੍ਰਾਂਚਿੰਗ ਪ੍ਰਯੋਗ ਚਾਲੂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਅਤੇ ਕਹਾਣੀ ਲੈਂਡਸਕੇਪ ਮੋਡ ਵਿੱਚ ਹੁੰਦੀ ਹੈ; ਚੈੱਕਬਾਕਸ ਵਿੱਚ ਸਹੀ ਦਾ ਨਿਸ਼ਾਨ ਲਾਉਣਾ ਵਰਤੋਂਕਾਰ ਨੂੰ ਵਰਤਮਾਨ ਪੰਨੇ ਤੋਂ ਕਹਾਣੀ ਸਾਂਝੀ ਕਰਨ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ।"
-  },
-  "63": {
-    "string": "Line",
-    "description": "ਸ਼ੇਅਰ ਟਾਰਗੈੱਟ ਵਾਸਤੇ ਬਟਨ ਲੇਬਲ ਜੋ Line ਰਾਹੀਂ ਇੱਕ ਲਿੰਕ ਸਾਂਝਾ ਕਰਦਾ ਹੈ।"
-  },
-  "64": {
-    "string": "ਅੱਪਡੇਟ ਕੀਤਾ ਗਿਆ",
-    "description": "Label that indicates that additional content has been added to a story"
-  },
-  "65": {
-    "string": "ਵੀਡੀਓ ਚੱਲਣ ਵਿੱਚ ਅਸਫ਼ਲ ਰਿਹਾ",
-    "description": "Label indicating that the video visible on the page failed to play."
-  },
-  "66": {
-    "string": "ਕਹਾਣੀ ਨੂੰ ਮਿਊਟ ਕਰੋ",
-    "description": "Label for the mute button that turns off the sound in the story"
-  },
-  "67": {
-    "string": "ਕਹਾਣੀ ਨੂੰ ਅਣਮਿਊਟ ਕਰੋ",
-    "description": "Label for the unmute button that turns the sound in the story back on"
-  },
-  "68": {
-    "string": "ਕਹਾਣੀ ਬਾਰੇ ਜਾਣਕਾਰੀ",
-    "description": "Label for the information button that pulls up relevant information about the story content"
-  },
-  "69": {
-    "string": "ਕਹਾਣੀ ਸਾਂਝੀ ਕਰੋ",
-    "description": "Label for the share button that pulls up a panel of options for sharing the story"
-  },
-  "70": {
-    "string": "ਸਟੋਰੀ ਮੀਨੂ ਟੌਗਲ ਕਰੋ",
-    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
-  },
-  "71": {
-    "string": "A",
-    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
-  },
-  "72": {
-    "string": "B",
-    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
-  },
-  "73": {
-    "string": "C",
-    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
-  },
-  "74": {
-    "string": "D",
-    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
-  },
-  "75": {
-    "string": "ਨੁਕਤਾ 1 ਕੁੱਲ 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "76": {
-    "string": "ਅਗਲੀ ਸਕਰੀਨ ’ਤੇ ਜਾਣ ਲਈ ਟੈਪ ਕਰੋ",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "77": {
-    "string": "ਅੱਗੇ",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "78": {
-    "string": "ਨੁਕਤਾ 2 ਕੁੱਲ 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "79": {
-    "string": "ਅਗਲੀ ਕਹਾਣੀ ’ਤੇ ਜਾਣ ਲਈ ਸਵਾਈਪ ਕਰੋ",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "80": {
-    "string": "ਸਮਝ ਗਏ",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "81": {
-    "string": "ਨੁਕਤਾ",
-    "description": "Label for a hint in the context of an onboarding user education tutorial."
-  },
-  "82": {
-    "string": "ਪਿਛਲਾ ਪੰਨਾ",
-    "description": "Label indicating that users can navigate to the previous page."
-  },
-  "83": {
-    "string": "ਕਿਰਿਆਸ਼ੀਲ ਕਰੋ",
-    "description": "Label for the activate button to ask for device orientation permission"
-  },
-  "84": {
-    "string": "ਸਕੋਰ:",
-    "description": "Label for the results component preceding the score in percentages"
-  },
-  "85": {
-    "string": "ਸਟੋਰੀ ਨੂੰ ਵਿਰਾਮ ਦਿਓ",
-    "description": "Label for a button that pauses the media content on the story"
-  },
-  "86": {
-    "string": "ਸਟੋਰੀ ਚਲਾਓ",
-    "description": "Label for a button that plays the media content on the story"
-  },
-  "87": {
-    "string": "ਬੰਦ ਕਰੋ",
-    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
-  },
-  "88": {
-    "string": "ਇਸ ਨੂੰ ਛੱਡਕੇ ਅਗਲੇ ਉੱਤੇ ਜਾਓ",
-    "description": "Label for a button that advances to the next element in the carousel"
-  },
-  "89": {
-    "string": "ਤੁਹਾਡਾ ਜਵਾਬ ਇਹਨਾਂ ਨੂੰ ਭੇਜਿਆ ਜਾਵੇਗਾ",
-    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
-  },
-  "90": {
-    "string": "ਅਗਲੀ ਕਹਾਣੀ",
-    "description": "Label for a button that advances to the next element in the carousel."
-  },
-  "91": {
-    "string": "ਅਗਲਾ ਪੰਨਾ",
-    "description": "Label for a button that advances to the next page of the story."
-  },
-  "92": {
-    "string": "ਦੁਬਾਰਾ ਚਲਾਓ",
-    "description": "Label for a button that replays the story."
-  },
-  "93": {
-    "string": "ਪਿਛਲਾ ਪੰਨਾ",
-    "description": "Label for a button that returns the user to the previous page of the story."
-  },
-  "96": {
-    "string": "ਪੜਚੋਲ ਕਰਨ ਲਈ ਡੀਵਾਈਸ ਦੀ ਹਿਲਜੁੱਲ ਕਰਾਓ",
-    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
-  },
-  "97": {
-    "string": "ਖੁੱਲ੍ਹ ਰਿਹਾ ਹੈ",
-    "description": "Text displayed to users on tap of outlink button."
-  }
+    "10": {
+        "string": "LinkedIn"
+    },
+    "11": {
+        "string": "Pinterest"
+    },
+    "12": {
+        "string": "SMS"
+    },
+    "13": {
+        "string": "ਹੋਰ"
+    },
+    "14": {
+        "string": "Tumblr"
+    },
+    "15": {
+        "string": "Twitter"
+    },
+    "16": {
+        "string": "WhatsApp"
+    },
+    "18": {
+        "string": "ਇਹ ਅਨੁਭਵ ਦੇਖਣ ਲਈ ਆਪਣੀ ਵਿੰਡੋ ਦੀ ਲੰਬਾਈ ਅਤੇ ਚੌੜਾਈ ਦੋਵੇਂ ਵਧਾਓ"
+    },
+    "19": {
+        "string": "ਇਹ ਸਮੱਗਰੀ ਦੇਖਣ ਲਈ ਤੁਹਾਡੇ ਵਾਸਤੇ amp-ਕਹਾਣੀ ਪ੍ਰਯੋਗ ਚਾਲੂ ਕਰਨਾ ਲਾਜ਼ਮੀ ਹੈ।"
+    },
+    "2": {
+        "string": "ਅੱਗੇ ’ਤੇ ਟੈਪ ਕਰੋ"
+    },
+    "20": {
+        "string": "ਪੰਨਾ ਸਭ ਤੋਂ ਵਧੀਆ ਪੋਰਟਰੇਟ ਮੋਡ ਵਿੱਚ ਦਿਖਾਈ ਦਿੰਦਾ ਹੈ"
+    },
+    "21": {
+        "string": "ਸਾਨੂੰ ਅਫ਼ਸੋਸ ਹੈ, ਇੰਝ ਲੱਗਦਾ ਹੈ ਕਿ ਤੁਹਾਡਾ ਬ੍ਰਾਊਜ਼ਰ ਇਸ ਅਨੁਭਵ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦਾ"
+    },
+    "22": {
+        "string": "ਸਵੀਕਾਰ ਕਰੋ"
+    },
+    "23": {
+        "string": "ਅਸਵੀਕਾਰ ਕਰੋ"
+    },
+    "25": {
+        "string": "ਅਸਲ ਡੋਮੇਨ ’ਤੇ ਦੇਖੋ:"
+    },
+    "26": {
+        "string": "AMP ਨਤੀਜਿਆਂ ਬਾਰੇ ਹੋਰ ਜਾਣਕਾਰੀ"
+    },
+    "27": {
+        "string": "ਫੇਰ ਵੀ ਜਾਰੀ ਰੱਖੋ"
+    },
+    "3": {
+        "string": "ਪਿੱਛੇ ’ਤੇ ਟੈਪ ਕਰੋ"
+    },
+    "31": {
+        "string": "ਸਾਊਂਡ ਬੰਦ"
+    },
+    "32": {
+        "string": "ਸਾਊਂਡ ਚਾਲੂ"
+    },
+    "33": {
+        "string": "ਇਸ ਪੰਨੇ ਵਿੱਚ ਕੋਈ ਸਾਊਂਡ ਨਹੀਂ ਹੈ"
+    },
+    "34": {
+        "string": "ਵੀਡੀਓ ਚਲਾਓ"
+    },
+    "35": {
+        "string": "ਉੱਪਰ ਸਵਾਈਪ ਕਰੋ"
+    },
+    "36": {
+        "string": "ਟਵੀਟ ਦਾ ਵਿਸਤਾਰ ਕਰੋ"
+    },
+    "37": {
+        "string": "ਇਹ ਅਨੁਭਵ ਦੇਖਣ ਲਈ ਆਪਣੀ ਵਿੰਡੋ ਦੀ ਲੰਬਾਈ ਵਧਾਓ"
+    },
+    "38": {
+        "string": "ਇਹ ਅਨੁਭਵ ਦੇਖਣ ਲਈ ਆਪਣੀ ਵਿੰਡੋ ਦੀ ਚੌੜਾਈ ਵਧਾਓ"
+    },
+    "4": {
+        "string": "ਲਿੰਕ ਨੂੰ ਕਲਿੱਪਬੋਰਡ ’ਤੇ ਕਾਪੀ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ :("
+    },
+    "5": {
+        "string": "ਲਿੰਕ ਕਾਪੀ ਹੋ ਗਿਆ!"
+    },
+    "6": {
+        "string": "ਈਮੇਲ"
+    },
+    "62": {
+        "string": "ਇਸ ਪੰਨੇ ਤੋਂ ਸ਼ੁਰੂ ਕਰਦੇ ਹੋਏ ਸਾਂਝਾ ਕਰੋ"
+    },
+    "63": {
+        "string": "Line"
+    },
+    "64": {
+        "string": "ਅੱਪਡੇਟ ਕੀਤਾ ਗਿਆ"
+    },
+    "65": {
+        "string": "ਵੀਡੀਓ ਚੱਲਣ ਵਿੱਚ ਅਸਫ਼ਲ ਰਿਹਾ"
+    },
+    "66": {
+        "string": "ਕਹਾਣੀ ਨੂੰ ਮਿਊਟ ਕਰੋ"
+    },
+    "67": {
+        "string": "ਕਹਾਣੀ ਨੂੰ ਅਣਮਿਊਟ ਕਰੋ"
+    },
+    "68": {
+        "string": "ਕਹਾਣੀ ਬਾਰੇ ਜਾਣਕਾਰੀ"
+    },
+    "69": {
+        "string": "ਕਹਾਣੀ ਸਾਂਝੀ ਕਰੋ"
+    },
+    "7": {
+        "string": "Facebook"
+    },
+    "70": {
+        "string": "ਸਟੋਰੀ ਮੀਨੂ ਟੌਗਲ ਕਰੋ"
+    },
+    "71": {
+        "string": "A"
+    },
+    "72": {
+        "string": "B"
+    },
+    "73": {
+        "string": "C"
+    },
+    "74": {
+        "string": "D"
+    },
+    "75": {
+        "string": "ਨੁਕਤਾ 1 ਕੁੱਲ 2"
+    },
+    "76": {
+        "string": "ਅਗਲੀ ਸਕਰੀਨ ’ਤੇ ਜਾਣ ਲਈ ਟੈਪ ਕਰੋ"
+    },
+    "77": {
+        "string": "ਅੱਗੇ"
+    },
+    "78": {
+        "string": "ਨੁਕਤਾ 2 ਕੁੱਲ 2"
+    },
+    "79": {
+        "string": "ਅਗਲੀ ਕਹਾਣੀ ’ਤੇ ਜਾਣ ਲਈ ਸਵਾਈਪ ਕਰੋ"
+    },
+    "8": {
+        "string": "Google+"
+    },
+    "80": {
+        "string": "ਸਮਝ ਗਏ"
+    },
+    "81": {
+        "string": "ਨੁਕਤਾ"
+    },
+    "82": {
+        "string": "ਪਿਛਲਾ ਪੰਨਾ"
+    },
+    "83": {
+        "string": "ਕਿਰਿਆਸ਼ੀਲ ਕਰੋ"
+    },
+    "84": {
+        "string": "ਸਕੋਰ:"
+    },
+    "85": {
+        "string": "ਸਟੋਰੀ ਨੂੰ ਵਿਰਾਮ ਦਿਓ"
+    },
+    "86": {
+        "string": "ਸਟੋਰੀ ਚਲਾਓ"
+    },
+    "87": {
+        "string": "ਬੰਦ ਕਰੋ"
+    },
+    "88": {
+        "string": "ਇਸ ਨੂੰ ਛੱਡਕੇ ਅਗਲੇ ਉੱਤੇ ਜਾਓ"
+    },
+    "89": {
+        "string": "ਤੁਹਾਡਾ ਜਵਾਬ ਇਹਨਾਂ ਨੂੰ ਭੇਜਿਆ ਜਾਵੇਗਾ"
+    },
+    "9": {
+        "string": "ਲਿੰਕ ਪ੍ਰਾਪਤ ਕਰੋ"
+    },
+    "90": {
+        "string": "ਅਗਲੀ ਕਹਾਣੀ"
+    },
+    "91": {
+        "string": "ਅਗਲਾ ਪੰਨਾ"
+    },
+    "92": {
+        "string": "ਦੁਬਾਰਾ ਚਲਾਓ"
+    },
+    "93": {
+        "string": "ਪਿਛਲਾ ਪੰਨਾ"
+    },
+    "96": {
+        "string": "ਪੜਚੋਲ ਕਰਨ ਲਈ ਡੀਵਾਈਸ ਦੀ ਹਿਲਜੁੱਲ ਕਰਾਓ"
+    },
+    "97": {
+        "string": "ਖੁੱਲ੍ਹ ਰਿਹਾ ਹੈ"
+    }
 }

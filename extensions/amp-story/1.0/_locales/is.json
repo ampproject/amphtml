@@ -1,266 +1,200 @@
 {
-  "2": {
-    "string": "Ýttu á Næst",
-    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
-  },
-  "3": {
-    "string": "Ýttu á Til baka",
-    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
-  },
-  "4": {
-    "string": "Ekki tókst að afrita tengil á klippiborð :(",
-    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
-  },
-  "5": {
-    "string": "Tengill afritaður!",
-    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
-  },
-  "6": {
-    "string": "Tölvupóstur",
-    "description": "Button label for the share target that shares a link via email."
-  },
-  "7": {
-    "string": "Facebook",
-    "description": "Button label for the share target that shares a link via Facebook."
-  },
-  "8": {
-    "string": "Google+",
-    "description": "Button label for the share target that shares a link via Google+."
-  },
-  "9": {
-    "string": "Fá tengil",
-    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
-  },
-  "10": {
-    "string": "LinkedIn",
-    "description": "Button label for the share target that shares a link via LinkedIn."
-  },
-  "11": {
-    "string": "Pinterest",
-    "description": "Button label for the share target that shares a link via Pinterest."
-  },
-  "12": {
-    "string": "SMS",
-    "description": "Button label for the share target that shares a link via SMS."
-  },
-  "13": {
-    "string": "Meira",
-    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
-  },
-  "14": {
-    "string": "Tumblr",
-    "description": "Button label for the share target that shares a link via Tumblr."
-  },
-  "15": {
-    "string": "Twitter",
-    "description": "Button label for the share target that shares a link via Twitter."
-  },
-  "16": {
-    "string": "WhatsApp",
-    "description": "Button label for the share target that shares a link via WhatsApp."
-  },
-  "18": {
-    "string": "Lengdu og breikkaðu gluggann til að skoða þetta efni",
-    "description": "Text for a warning screen that informs the user that stories are only supported in larger browser windows."
-  },
-  "19": {
-    "string": "Þú verður að virkja amp-story tilraunina til að skoða þetta efni.",
-    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
-  },
-  "20": {
-    "string": "Best er að skoða þessa síðu í skammsniði",
-    "description": "Text for a warning screen that informs the user that stories are only supported in portrait orientation."
-  },
-  "21": {
-    "string": "Því miður virðist vafrinn þinn ekki styðja þetta efni",
-    "description": "Text for a warning screen that informs the user that their browser does not support stories."
-  },
-  "22": {
-    "string": "Samþykkja",
-    "description": "Label for a button that allows the user to consent to providing their cookie access."
-  },
-  "23": {
-    "string": "Hafna",
-    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
-  },
-  "25": {
-    "string": "Skoða á upprunalega léninu:",
-    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
-  },
-  "26": {
-    "string": "Meira um AMP niðurstöður",
-    "description": "Label for a link to documentation on how AMP links are handled."
-  },
-  "27": {
-    "string": "Halda samt áfram",
-    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
-  },
-  "31": {
-    "string": "Slökkt á hljóði",
-    "description": "Text that informs users that the sound is off after they click the mute button"
-  },
-  "32": {
-    "string": "Kveikt á hljóði",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
-  },
-  "33": {
-    "string": "Þessi síða hefur ekkert hljóð",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
-  },
-  "34": {
-    "string": "Spila myndskeið",
-    "description": "Label for a button to play the video visible on the page."
-  },
-  "35": {
-    "string": "Strjúktu upp",
-    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
-  },
-  "36": {
-    "string": "Stækka tíst",
-    "description": "Label in the tooltip text for when a Twitter embed is expandable."
-  },
-  "37": {
-    "string": "Lengdu gluggann til að skoða þessa upplifun",
-    "description": "Text for a warning screen that informs the user that stories are only supported in taller browser windows."
-  },
-  "38": {
-    "string": "Breikkaðu gluggann til að skoða þetta efni",
-    "description": "Text for a warning screen that informs the user that stories are only supported in wider browser windows."
-  },
-  "62": {
-    "string": "Deila frá og með þessari síðu",
-    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
-  },
-  "63": {
-    "string": "Line",
-    "description": "Button label for the share target that shares a link via Line."
-  },
-  "64": {
-    "string": "Uppfært",
-    "description": "Label that indicates that additional content has been added to a story"
-  },
-  "65": {
-    "string": "Ekki tókst að spila myndskeið",
-    "description": "Label indicating that the video visible on the page failed to play."
-  },
-  "66": {
-    "string": "Slökkva á hljóði í sögu",
-    "description": "Label for the mute button that turns off the sound in the story"
-  },
-  "67": {
-    "string": "Kveikja á hljóði í sögu",
-    "description": "Label for the unmute button that turns the sound in the story back on"
-  },
-  "68": {
-    "string": "Söguupplýsingar",
-    "description": "Label for the information button that pulls up relevant information about the story content"
-  },
-  "69": {
-    "string": "Deila sögu",
-    "description": "Label for the share button that pulls up a panel of options for sharing the story"
-  },
-  "70": {
-    "string": "Sýna/fela söguvalmynd",
-    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
-  },
-  "71": {
-    "string": "A",
-    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
-  },
-  "72": {
-    "string": "B",
-    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
-  },
-  "73": {
-    "string": "C",
-    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
-  },
-  "74": {
-    "string": "D",
-    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
-  },
-  "75": {
-    "string": "Ráð 1 af 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "76": {
-    "string": "Ýttu til að fara í næsta skjá",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "77": {
-    "string": "Næst",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "78": {
-    "string": "Ráð 2 af 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "79": {
-    "string": "Strjúktu til að fara í næstu sögu",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "80": {
-    "string": "Skilið",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "81": {
-    "string": "Ráð",
-    "description": "Label for a hint in the context of an onboarding user education tutorial."
-  },
-  "82": {
-    "string": "Fyrri síða",
-    "description": "Label indicating that users can navigate to the previous page."
-  },
-  "83": {
-    "string": "Virkja",
-    "description": "Label for the activate button to ask for device orientation permission"
-  },
-  "84": {
-    "string": "STIG:",
-    "description": "Label for the results component preceding the score in percentages"
-  },
-  "85": {
-    "string": "Gera hlé á sögu",
-    "description": "Label for a button that pauses the media content on the story"
-  },
-  "86": {
-    "string": "Spila sögu",
-    "description": "Label for a button that plays the media content on the story"
-  },
-  "87": {
-    "string": "Loka",
-    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
-  },
-  "88": {
-    "string": "Sleppa næsta",
-    "description": "Label for a button that advances to the next element in the carousel"
-  },
-  "89": {
-    "string": "Svar þitt verður sent til",
-    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
-  },
-  "90": {
-    "string": "Næsta saga",
-    "description": "Label for a button that advances to the next element in the carousel."
-  },
-  "91": {
-    "string": "Næsta síða",
-    "description": "Label for a button that advances to the next page of the story."
-  },
-  "92": {
-    "string": "Spila aftur",
-    "description": "Label for a button that replays the story."
-  },
-  "93": {
-    "string": "Fyrri síða",
-    "description": "Label for a button that returns the user to the previous page of the story."
-  },
-  "96": {
-    "string": "Færðu tækið til að skoða",
-    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
-  },
-  "97": {
-    "string": "Opnast",
-    "description": "Text displayed to users on tap of outlink button."
-  }
+    "10": {
+        "string": "LinkedIn"
+    },
+    "11": {
+        "string": "Pinterest"
+    },
+    "12": {
+        "string": "SMS"
+    },
+    "13": {
+        "string": "Meira"
+    },
+    "14": {
+        "string": "Tumblr"
+    },
+    "15": {
+        "string": "Twitter"
+    },
+    "16": {
+        "string": "WhatsApp"
+    },
+    "18": {
+        "string": "Lengdu og breikkaðu gluggann til að skoða þetta efni"
+    },
+    "19": {
+        "string": "Þú verður að virkja amp-story tilraunina til að skoða þetta efni."
+    },
+    "2": {
+        "string": "Ýttu á Næst"
+    },
+    "20": {
+        "string": "Best er að skoða þessa síðu í skammsniði"
+    },
+    "21": {
+        "string": "Því miður virðist vafrinn þinn ekki styðja þetta efni"
+    },
+    "22": {
+        "string": "Samþykkja"
+    },
+    "23": {
+        "string": "Hafna"
+    },
+    "25": {
+        "string": "Skoða á upprunalega léninu:"
+    },
+    "26": {
+        "string": "Meira um AMP niðurstöður"
+    },
+    "27": {
+        "string": "Halda samt áfram"
+    },
+    "3": {
+        "string": "Ýttu á Til baka"
+    },
+    "31": {
+        "string": "Slökkt á hljóði"
+    },
+    "32": {
+        "string": "Kveikt á hljóði"
+    },
+    "33": {
+        "string": "Þessi síða hefur ekkert hljóð"
+    },
+    "34": {
+        "string": "Spila myndskeið"
+    },
+    "35": {
+        "string": "Strjúktu upp"
+    },
+    "36": {
+        "string": "Stækka tíst"
+    },
+    "37": {
+        "string": "Lengdu gluggann til að skoða þessa upplifun"
+    },
+    "38": {
+        "string": "Breikkaðu gluggann til að skoða þetta efni"
+    },
+    "4": {
+        "string": "Ekki tókst að afrita tengil á klippiborð :("
+    },
+    "5": {
+        "string": "Tengill afritaður!"
+    },
+    "6": {
+        "string": "Tölvupóstur"
+    },
+    "62": {
+        "string": "Deila frá og með þessari síðu"
+    },
+    "63": {
+        "string": "Line"
+    },
+    "64": {
+        "string": "Uppfært"
+    },
+    "65": {
+        "string": "Ekki tókst að spila myndskeið"
+    },
+    "66": {
+        "string": "Slökkva á hljóði í sögu"
+    },
+    "67": {
+        "string": "Kveikja á hljóði í sögu"
+    },
+    "68": {
+        "string": "Söguupplýsingar"
+    },
+    "69": {
+        "string": "Deila sögu"
+    },
+    "7": {
+        "string": "Facebook"
+    },
+    "70": {
+        "string": "Sýna/fela söguvalmynd"
+    },
+    "71": {
+        "string": "A"
+    },
+    "72": {
+        "string": "B"
+    },
+    "73": {
+        "string": "C"
+    },
+    "74": {
+        "string": "D"
+    },
+    "75": {
+        "string": "Ráð 1 af 2"
+    },
+    "76": {
+        "string": "Ýttu til að fara í næsta skjá"
+    },
+    "77": {
+        "string": "Næst"
+    },
+    "78": {
+        "string": "Ráð 2 af 2"
+    },
+    "79": {
+        "string": "Strjúktu til að fara í næstu sögu"
+    },
+    "8": {
+        "string": "Google+"
+    },
+    "80": {
+        "string": "Skilið"
+    },
+    "81": {
+        "string": "Ráð"
+    },
+    "82": {
+        "string": "Fyrri síða"
+    },
+    "83": {
+        "string": "Virkja"
+    },
+    "84": {
+        "string": "STIG:"
+    },
+    "85": {
+        "string": "Gera hlé á sögu"
+    },
+    "86": {
+        "string": "Spila sögu"
+    },
+    "87": {
+        "string": "Loka"
+    },
+    "88": {
+        "string": "Sleppa næsta"
+    },
+    "89": {
+        "string": "Svar þitt verður sent til"
+    },
+    "9": {
+        "string": "Fá tengil"
+    },
+    "90": {
+        "string": "Næsta saga"
+    },
+    "91": {
+        "string": "Næsta síða"
+    },
+    "92": {
+        "string": "Spila aftur"
+    },
+    "93": {
+        "string": "Fyrri síða"
+    },
+    "96": {
+        "string": "Færðu tækið til að skoða"
+    },
+    "97": {
+        "string": "Opnast"
+    }
 }

@@ -1,266 +1,200 @@
 {
-  "2": {
-    "string": "Tryck på Nästa",
-    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
-  },
-  "3": {
-    "string": "Tryck på Tillbaka",
-    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
-  },
-  "4": {
-    "string": "Det gick inte att kopiera länken till Urklipp :(",
-    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
-  },
-  "5": {
-    "string": "Länken kopierad!",
-    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
-  },
-  "6": {
-    "string": "E-post",
-    "description": "Button label for the share target that shares a link via email."
-  },
-  "7": {
-    "string": "Facebook",
-    "description": "Button label for the share target that shares a link via Facebook."
-  },
-  "8": {
-    "string": "Google+",
-    "description": "Button label for the share target that shares a link via Google+."
-  },
-  "9": {
-    "string": "Få länk",
-    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
-  },
-  "10": {
-    "string": "LinkedIn",
-    "description": "Button label for the share target that shares a link via LinkedIn."
-  },
-  "11": {
-    "string": "Pinterest",
-    "description": "Button label for the share target that shares a link via Pinterest."
-  },
-  "12": {
-    "string": "SMS",
-    "description": "Button label for the share target that shares a link via SMS."
-  },
-  "13": {
-    "string": "Fler",
-    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
-  },
-  "14": {
-    "string": "Tumblr",
-    "description": "Button label for the share target that shares a link via Tumblr."
-  },
-  "15": {
-    "string": "Twitter",
-    "description": "Button label for the share target that shares a link via Twitter."
-  },
-  "16": {
-    "string": "WhatsApp",
-    "description": "Button label for the share target that shares a link via WhatsApp."
-  },
-  "18": {
-    "string": "Expandera både höjd och bredd på ditt fönster för att visa den här upplevelsen",
-    "description": "Text for a warning screen that informs the user that stories are only supported in larger browser windows."
-  },
-  "19": {
-    "string": "Du måste aktivera amp-story-experimentet för att visa det här innehållet.",
-    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
-  },
-  "20": {
-    "string": "Sidan visas bäst i porträttläge",
-    "description": "Text for a warning screen that informs the user that stories are only supported in portrait orientation."
-  },
-  "21": {
-    "string": "Det verkar dessvärre som om din webbläsare inte stöder den här upplevelsen",
-    "description": "Text for a warning screen that informs the user that their browser does not support stories."
-  },
-  "22": {
-    "string": "Godkänn",
-    "description": "Label for a button that allows the user to consent to providing their cookie access."
-  },
-  "23": {
-    "string": "Avvisa",
-    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
-  },
-  "25": {
-    "string": "Visa på originaldomänen:",
-    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
-  },
-  "26": {
-    "string": "Mer om AMP-resultat",
-    "description": "Label for a link to documentation on how AMP links are handled."
-  },
-  "27": {
-    "string": "Fortsätt ändå",
-    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
-  },
-  "31": {
-    "string": "Ljud av",
-    "description": "Text that informs users that the sound is off after they click the mute button"
-  },
-  "32": {
-    "string": "Ljud på",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
-  },
-  "33": {
-    "string": "Den här sidan saknar ljud",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
-  },
-  "34": {
-    "string": "Spela video",
-    "description": "Label for a button to play the video visible on the page."
-  },
-  "35": {
-    "string": "Svep upp",
-    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
-  },
-  "36": {
-    "string": "Expandera tweet",
-    "description": "Label in the tooltip text for when a Twitter embed is expandable."
-  },
-  "37": {
-    "string": "Expandera höjden på ditt fönster för att visa den här upplevelsen",
-    "description": "Text for a warning screen that informs the user that stories are only supported in taller browser windows."
-  },
-  "38": {
-    "string": "Expandera bredden på ditt fönster för att visa den här upplevelsen",
-    "description": "Text for a warning screen that informs the user that stories are only supported in wider browser windows."
-  },
-  "62": {
-    "string": "Dela med start från den här sidan",
-    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
-  },
-  "63": {
-    "string": "Line",
-    "description": "Button label for the share target that shares a link via Line."
-  },
-  "64": {
-    "string": "Uppdaterad",
-    "description": "Label that indicates that additional content has been added to a story"
-  },
-  "65": {
-    "string": "Videon kunde inte spelas",
-    "description": "Label indicating that the video visible on the page failed to play."
-  },
-  "66": {
-    "string": "Stäng av ljudet på story",
-    "description": "Label for the mute button that turns off the sound in the story"
-  },
-  "67": {
-    "string": "Slå på ljudet på storyn",
-    "description": "Label for the unmute button that turns the sound in the story back on"
-  },
-  "68": {
-    "string": "Storyinformation",
-    "description": "Label for the information button that pulls up relevant information about the story content"
-  },
-  "69": {
-    "string": "Dela story",
-    "description": "Label for the share button that pulls up a panel of options for sharing the story"
-  },
-  "70": {
-    "string": "Öppna/stäng storymeny",
-    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
-  },
-  "71": {
-    "string": "A",
-    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
-  },
-  "72": {
-    "string": "B",
-    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
-  },
-  "73": {
-    "string": "C",
-    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
-  },
-  "74": {
-    "string": "D",
-    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
-  },
-  "75": {
-    "string": "Tips 1 av 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "76": {
-    "string": "Tryck för att gå till nästa skärm",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "77": {
-    "string": "Nästa",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "78": {
-    "string": "Tips 2 av 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "79": {
-    "string": "Svep för att gå till nästa story",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "80": {
-    "string": "Jag förstår",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "81": {
-    "string": "Tips",
-    "description": "Label for a hint in the context of an onboarding user education tutorial."
-  },
-  "82": {
-    "string": "Föregående sida",
-    "description": "Label indicating that users can navigate to the previous page."
-  },
-  "83": {
-    "string": "Aktivera",
-    "description": "Label for the activate button to ask for device orientation permission"
-  },
-  "84": {
-    "string": "POÄNG:",
-    "description": "Label for the results component preceding the score in percentages"
-  },
-  "85": {
-    "string": "Pausa story",
-    "description": "Label for a button that pauses the media content on the story"
-  },
-  "86": {
-    "string": "Spela story",
-    "description": "Label for a button that plays the media content on the story"
-  },
-  "87": {
-    "string": "Stäng",
-    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
-  },
-  "88": {
-    "string": "Hoppa över nästa",
-    "description": "Label for a button that advances to the next element in the carousel"
-  },
-  "89": {
-    "string": "Ditt svar skickas till",
-    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
-  },
-  "90": {
-    "string": "Nästa story",
-    "description": "Label for a button that advances to the next element in the carousel."
-  },
-  "91": {
-    "string": "Nästa sida",
-    "description": "Label for a button that advances to the next page of the story."
-  },
-  "92": {
-    "string": "Spela igen",
-    "description": "Label for a button that replays the story."
-  },
-  "93": {
-    "string": "Föregående sida",
-    "description": "Label for a button that returns the user to the previous page of the story."
-  },
-  "96": {
-    "string": "Flytta enheten för att utforska",
-    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
-  },
-  "97": {
-    "string": "Öppnar",
-    "description": "Text displayed to users on tap of outlink button."
-  }
+    "10": {
+        "string": "LinkedIn"
+    },
+    "11": {
+        "string": "Pinterest"
+    },
+    "12": {
+        "string": "SMS"
+    },
+    "13": {
+        "string": "Fler"
+    },
+    "14": {
+        "string": "Tumblr"
+    },
+    "15": {
+        "string": "Twitter"
+    },
+    "16": {
+        "string": "WhatsApp"
+    },
+    "18": {
+        "string": "Expandera både höjd och bredd på ditt fönster för att visa den här upplevelsen"
+    },
+    "19": {
+        "string": "Du måste aktivera amp-story-experimentet för att visa det här innehållet."
+    },
+    "2": {
+        "string": "Tryck på Nästa"
+    },
+    "20": {
+        "string": "Sidan visas bäst i porträttläge"
+    },
+    "21": {
+        "string": "Det verkar dessvärre som om din webbläsare inte stöder den här upplevelsen"
+    },
+    "22": {
+        "string": "Godkänn"
+    },
+    "23": {
+        "string": "Avvisa"
+    },
+    "25": {
+        "string": "Visa på originaldomänen:"
+    },
+    "26": {
+        "string": "Mer om AMP-resultat"
+    },
+    "27": {
+        "string": "Fortsätt ändå"
+    },
+    "3": {
+        "string": "Tryck på Tillbaka"
+    },
+    "31": {
+        "string": "Ljud av"
+    },
+    "32": {
+        "string": "Ljud på"
+    },
+    "33": {
+        "string": "Den här sidan saknar ljud"
+    },
+    "34": {
+        "string": "Spela video"
+    },
+    "35": {
+        "string": "Svep upp"
+    },
+    "36": {
+        "string": "Expandera tweet"
+    },
+    "37": {
+        "string": "Expandera höjden på ditt fönster för att visa den här upplevelsen"
+    },
+    "38": {
+        "string": "Expandera bredden på ditt fönster för att visa den här upplevelsen"
+    },
+    "4": {
+        "string": "Det gick inte att kopiera länken till Urklipp :("
+    },
+    "5": {
+        "string": "Länken kopierad!"
+    },
+    "6": {
+        "string": "E-post"
+    },
+    "62": {
+        "string": "Dela med start från den här sidan"
+    },
+    "63": {
+        "string": "Line"
+    },
+    "64": {
+        "string": "Uppdaterad"
+    },
+    "65": {
+        "string": "Videon kunde inte spelas"
+    },
+    "66": {
+        "string": "Stäng av ljudet på story"
+    },
+    "67": {
+        "string": "Slå på ljudet på storyn"
+    },
+    "68": {
+        "string": "Storyinformation"
+    },
+    "69": {
+        "string": "Dela story"
+    },
+    "7": {
+        "string": "Facebook"
+    },
+    "70": {
+        "string": "Öppna/stäng storymeny"
+    },
+    "71": {
+        "string": "A"
+    },
+    "72": {
+        "string": "B"
+    },
+    "73": {
+        "string": "C"
+    },
+    "74": {
+        "string": "D"
+    },
+    "75": {
+        "string": "Tips 1 av 2"
+    },
+    "76": {
+        "string": "Tryck för att gå till nästa skärm"
+    },
+    "77": {
+        "string": "Nästa"
+    },
+    "78": {
+        "string": "Tips 2 av 2"
+    },
+    "79": {
+        "string": "Svep för att gå till nästa story"
+    },
+    "8": {
+        "string": "Google+"
+    },
+    "80": {
+        "string": "Jag förstår"
+    },
+    "81": {
+        "string": "Tips"
+    },
+    "82": {
+        "string": "Föregående sida"
+    },
+    "83": {
+        "string": "Aktivera"
+    },
+    "84": {
+        "string": "POÄNG:"
+    },
+    "85": {
+        "string": "Pausa story"
+    },
+    "86": {
+        "string": "Spela story"
+    },
+    "87": {
+        "string": "Stäng"
+    },
+    "88": {
+        "string": "Hoppa över nästa"
+    },
+    "89": {
+        "string": "Ditt svar skickas till"
+    },
+    "9": {
+        "string": "Få länk"
+    },
+    "90": {
+        "string": "Nästa story"
+    },
+    "91": {
+        "string": "Nästa sida"
+    },
+    "92": {
+        "string": "Spela igen"
+    },
+    "93": {
+        "string": "Föregående sida"
+    },
+    "96": {
+        "string": "Flytta enheten för att utforska"
+    },
+    "97": {
+        "string": "Öppnar"
+    }
 }

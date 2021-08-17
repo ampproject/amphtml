@@ -1,266 +1,200 @@
 {
-  "2": {
-    "string": "Trykk på «Neste»",
-    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
-  },
-  "3": {
-    "string": "Trykk på «Tilbake»",
-    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
-  },
-  "4": {
-    "string": "Kunne ikke kopiere til utklippstavlen :(",
-    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
-  },
-  "5": {
-    "string": "Lenke kopiert!",
-    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
-  },
-  "6": {
-    "string": "E-post",
-    "description": "Button label for the share target that shares a link via email."
-  },
-  "7": {
-    "string": "Facebook",
-    "description": "Button label for the share target that shares a link via Facebook."
-  },
-  "8": {
-    "string": "Google+",
-    "description": "Button label for the share target that shares a link via Google+."
-  },
-  "9": {
-    "string": "Hent lenke",
-    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
-  },
-  "10": {
-    "string": "LinkedIn",
-    "description": "Button label for the share target that shares a link via LinkedIn."
-  },
-  "11": {
-    "string": "Pinterest",
-    "description": "Button label for the share target that shares a link via Pinterest."
-  },
-  "12": {
-    "string": "SMS",
-    "description": "Button label for the share target that shares a link via SMS."
-  },
-  "13": {
-    "string": "Mer",
-    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
-  },
-  "14": {
-    "string": "Tumblr",
-    "description": "Button label for the share target that shares a link via Tumblr."
-  },
-  "15": {
-    "string": "Twitter",
-    "description": "Button label for the share target that shares a link via Twitter."
-  },
-  "16": {
-    "string": "WhatsApp",
-    "description": "Button label for the share target that shares a link via WhatsApp."
-  },
-  "18": {
-    "string": "Utvid både høyden og bredden på vinduet for å se denne opplevelsen",
-    "description": "Text for a warning screen that informs the user that stories are only supported in larger browser windows."
-  },
-  "19": {
-    "string": "Du må aktivere amp-story-eksperimentet for å se innholdet.",
-    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
-  },
-  "20": {
-    "string": "Siden vises best i stående modus",
-    "description": "Text for a warning screen that informs the user that stories are only supported in portrait orientation."
-  },
-  "21": {
-    "string": "Vi beklager! Det virker som om nettleseren din ikke støtter denne opplevelsen",
-    "description": "Text for a warning screen that informs the user that their browser does not support stories."
-  },
-  "22": {
-    "string": "Godta",
-    "description": "Label for a button that allows the user to consent to providing their cookie access."
-  },
-  "23": {
-    "string": "Avslå",
-    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
-  },
-  "25": {
-    "string": "Vis på opprinnelig domene:",
-    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
-  },
-  "26": {
-    "string": "Mer om AMP-resultater",
-    "description": "Label for a link to documentation on how AMP links are handled."
-  },
-  "27": {
-    "string": "Fortsett likevel",
-    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
-  },
-  "31": {
-    "string": "Lyd av",
-    "description": "Text that informs users that the sound is off after they click the mute button"
-  },
-  "32": {
-    "string": "Lyd på",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
-  },
-  "33": {
-    "string": "Denne siden har ingen lyd",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
-  },
-  "34": {
-    "string": "Spill av video",
-    "description": "Label for a button to play the video visible on the page."
-  },
-  "35": {
-    "string": "Sveip opp",
-    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
-  },
-  "36": {
-    "string": "Utvid Tweet",
-    "description": "Label in the tooltip text for when a Twitter embed is expandable."
-  },
-  "37": {
-    "string": "Utvid høyden på vinduet for å se denne opplevelsen",
-    "description": "Text for a warning screen that informs the user that stories are only supported in taller browser windows."
-  },
-  "38": {
-    "string": "Utvid bredden på vinduet for å se denne opplevelsen",
-    "description": "Text for a warning screen that informs the user that stories are only supported in wider browser windows."
-  },
-  "62": {
-    "string": "Del med start fra denne siden",
-    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
-  },
-  "63": {
-    "string": "Linje",
-    "description": "Button label for the share target that shares a link via Line."
-  },
-  "64": {
-    "string": "Oppdatert",
-    "description": "Label that indicates that additional content has been added to a story"
-  },
-  "65": {
-    "string": "Kunne ikke avspille video",
-    "description": "Label indicating that the video visible on the page failed to play."
-  },
-  "66": {
-    "string": "Slå av lyd i historie",
-    "description": "Label for the mute button that turns off the sound in the story"
-  },
-  "67": {
-    "string": "Slå på lyd i historie",
-    "description": "Label for the unmute button that turns the sound in the story back on"
-  },
-  "68": {
-    "string": "Historieinformasjon",
-    "description": "Label for the information button that pulls up relevant information about the story content"
-  },
-  "69": {
-    "string": "Del historie",
-    "description": "Label for the share button that pulls up a panel of options for sharing the story"
-  },
-  "70": {
-    "string": "Slå på/av historiemeny",
-    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
-  },
-  "71": {
-    "string": "A",
-    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
-  },
-  "72": {
-    "string": "B",
-    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
-  },
-  "73": {
-    "string": "C",
-    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
-  },
-  "74": {
-    "string": "D",
-    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
-  },
-  "75": {
-    "string": "Tips én av to",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "76": {
-    "string": "Trykk for å gå til neste skjerm",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "77": {
-    "string": "Neste",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "78": {
-    "string": "Tips to av to",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "79": {
-    "string": "Sveip for å gå til neste historie",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "80": {
-    "string": "Jeg forstår",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "81": {
-    "string": "Tips",
-    "description": "Label for a hint in the context of an onboarding user education tutorial."
-  },
-  "82": {
-    "string": "Forrige side",
-    "description": "Label indicating that users can navigate to the previous page."
-  },
-  "83": {
-    "string": "Aktiver",
-    "description": "Label for the activate button to ask for device orientation permission"
-  },
-  "84": {
-    "string": "RESULTAT:",
-    "description": "Label for the results component preceding the score in percentages"
-  },
-  "85": {
-    "string": "Sett historie på pause",
-    "description": "Label for a button that pauses the media content on the story"
-  },
-  "86": {
-    "string": "Spill av historie",
-    "description": "Label for a button that plays the media content on the story"
-  },
-  "87": {
-    "string": "Lukk",
-    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
-  },
-  "88": {
-    "string": "Gå til neste",
-    "description": "Label for a button that advances to the next element in the carousel"
-  },
-  "89": {
-    "string": "Svaret ditt sendes til",
-    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
-  },
-  "90": {
-    "string": "Neste historie",
-    "description": "Label for a button that advances to the next element in the carousel."
-  },
-  "91": {
-    "string": "Neste side",
-    "description": "Label for a button that advances to the next page of the story."
-  },
-  "92": {
-    "string": "Spill på nytt",
-    "description": "Label for a button that replays the story."
-  },
-  "93": {
-    "string": "Forrige side",
-    "description": "Label for a button that returns the user to the previous page of the story."
-  },
-  "96": {
-    "string": "Beveg på enheten for å utforske",
-    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
-  },
-  "97": {
-    "string": "Åpner",
-    "description": "Text displayed to users on tap of outlink button."
-  }
+    "10": {
+        "string": "LinkedIn"
+    },
+    "11": {
+        "string": "Pinterest"
+    },
+    "12": {
+        "string": "SMS"
+    },
+    "13": {
+        "string": "Mer"
+    },
+    "14": {
+        "string": "Tumblr"
+    },
+    "15": {
+        "string": "Twitter"
+    },
+    "16": {
+        "string": "WhatsApp"
+    },
+    "18": {
+        "string": "Utvid både høyden og bredden på vinduet for å se denne opplevelsen"
+    },
+    "19": {
+        "string": "Du må aktivere amp-story-eksperimentet for å se innholdet."
+    },
+    "2": {
+        "string": "Trykk på «Neste»"
+    },
+    "20": {
+        "string": "Siden vises best i stående modus"
+    },
+    "21": {
+        "string": "Vi beklager! Det virker som om nettleseren din ikke støtter denne opplevelsen"
+    },
+    "22": {
+        "string": "Godta"
+    },
+    "23": {
+        "string": "Avslå"
+    },
+    "25": {
+        "string": "Vis på opprinnelig domene:"
+    },
+    "26": {
+        "string": "Mer om AMP-resultater"
+    },
+    "27": {
+        "string": "Fortsett likevel"
+    },
+    "3": {
+        "string": "Trykk på «Tilbake»"
+    },
+    "31": {
+        "string": "Lyd av"
+    },
+    "32": {
+        "string": "Lyd på"
+    },
+    "33": {
+        "string": "Denne siden har ingen lyd"
+    },
+    "34": {
+        "string": "Spill av video"
+    },
+    "35": {
+        "string": "Sveip opp"
+    },
+    "36": {
+        "string": "Utvid Tweet"
+    },
+    "37": {
+        "string": "Utvid høyden på vinduet for å se denne opplevelsen"
+    },
+    "38": {
+        "string": "Utvid bredden på vinduet for å se denne opplevelsen"
+    },
+    "4": {
+        "string": "Kunne ikke kopiere til utklippstavlen :("
+    },
+    "5": {
+        "string": "Lenke kopiert!"
+    },
+    "6": {
+        "string": "E-post"
+    },
+    "62": {
+        "string": "Del med start fra denne siden"
+    },
+    "63": {
+        "string": "Linje"
+    },
+    "64": {
+        "string": "Oppdatert"
+    },
+    "65": {
+        "string": "Kunne ikke avspille video"
+    },
+    "66": {
+        "string": "Slå av lyd i historie"
+    },
+    "67": {
+        "string": "Slå på lyd i historie"
+    },
+    "68": {
+        "string": "Historieinformasjon"
+    },
+    "69": {
+        "string": "Del historie"
+    },
+    "7": {
+        "string": "Facebook"
+    },
+    "70": {
+        "string": "Slå på/av historiemeny"
+    },
+    "71": {
+        "string": "A"
+    },
+    "72": {
+        "string": "B"
+    },
+    "73": {
+        "string": "C"
+    },
+    "74": {
+        "string": "D"
+    },
+    "75": {
+        "string": "Tips én av to"
+    },
+    "76": {
+        "string": "Trykk for å gå til neste skjerm"
+    },
+    "77": {
+        "string": "Neste"
+    },
+    "78": {
+        "string": "Tips to av to"
+    },
+    "79": {
+        "string": "Sveip for å gå til neste historie"
+    },
+    "8": {
+        "string": "Google+"
+    },
+    "80": {
+        "string": "Jeg forstår"
+    },
+    "81": {
+        "string": "Tips"
+    },
+    "82": {
+        "string": "Forrige side"
+    },
+    "83": {
+        "string": "Aktiver"
+    },
+    "84": {
+        "string": "RESULTAT:"
+    },
+    "85": {
+        "string": "Sett historie på pause"
+    },
+    "86": {
+        "string": "Spill av historie"
+    },
+    "87": {
+        "string": "Lukk"
+    },
+    "88": {
+        "string": "Gå til neste"
+    },
+    "89": {
+        "string": "Svaret ditt sendes til"
+    },
+    "9": {
+        "string": "Hent lenke"
+    },
+    "90": {
+        "string": "Neste historie"
+    },
+    "91": {
+        "string": "Neste side"
+    },
+    "92": {
+        "string": "Spill på nytt"
+    },
+    "93": {
+        "string": "Forrige side"
+    },
+    "96": {
+        "string": "Beveg på enheten for å utforske"
+    },
+    "97": {
+        "string": "Åpner"
+    }
 }

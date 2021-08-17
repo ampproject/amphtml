@@ -1,266 +1,200 @@
 {
-  "2": {
-    "string": "Докоснете „Напред“",
-    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
-  },
-  "3": {
-    "string": "Докоснете „Назад“",
-    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
-  },
-  "4": {
-    "string": "Неуспешно копиране на връзката в буферната памет :(",
-    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
-  },
-  "5": {
-    "string": "Връзката е копирана!",
-    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
-  },
-  "6": {
-    "string": "Имейл",
-    "description": "Button label for the share target that shares a link via email."
-  },
-  "7": {
-    "string": "Facebook",
-    "description": "Button label for the share target that shares a link via Facebook."
-  },
-  "8": {
-    "string": "Google+",
-    "description": "Button label for the share target that shares a link via Google+."
-  },
-  "9": {
-    "string": "Получаване на връзка",
-    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
-  },
-  "10": {
-    "string": "LinkedIn",
-    "description": "Button label for the share target that shares a link via LinkedIn."
-  },
-  "11": {
-    "string": "Pinterest",
-    "description": "Button label for the share target that shares a link via Pinterest."
-  },
-  "12": {
-    "string": "SMS",
-    "description": "Button label for the share target that shares a link via SMS."
-  },
-  "13": {
-    "string": "Още",
-    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
-  },
-  "14": {
-    "string": "Tumblr",
-    "description": "Button label for the share target that shares a link via Tumblr."
-  },
-  "15": {
-    "string": "Twitter",
-    "description": "Button label for the share target that shares a link via Twitter."
-  },
-  "16": {
-    "string": "WhatsApp",
-    "description": "Button label for the share target that shares a link via WhatsApp."
-  },
-  "18": {
-    "string": "Разгънете както височината, така и ширината на прозореца си, за да прегледате тази история",
-    "description": "Text for a warning screen that informs the user that stories are only supported in larger browser windows."
-  },
-  "19": {
-    "string": "За преглед на това съдържание трябва да активирате експеримента за amp-story.",
-    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
-  },
-  "20": {
-    "string": "Най-добрият начин за преглед на страницата е във вертикален режим",
-    "description": "Text for a warning screen that informs the user that stories are only supported in portrait orientation."
-  },
-  "21": {
-    "string": "За съжаление, изглежда, че браузърът ви не поддържа тази история",
-    "description": "Text for a warning screen that informs the user that their browser does not support stories."
-  },
-  "22": {
-    "string": "Приемане",
-    "description": "Label for a button that allows the user to consent to providing their cookie access."
-  },
-  "23": {
-    "string": "Отхвърляне",
-    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
-  },
-  "25": {
-    "string": "Преглед в първоначалния домейн:",
-    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
-  },
-  "26": {
-    "string": "Още за резултатите с AMP",
-    "description": "Label for a link to documentation on how AMP links are handled."
-  },
-  "27": {
-    "string": "Продължаване въпреки това",
-    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
-  },
-  "31": {
-    "string": "Звукът е изключен",
-    "description": "Text that informs users that the sound is off after they click the mute button"
-  },
-  "32": {
-    "string": "Звукът е включен",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
-  },
-  "33": {
-    "string": "На тази страница няма звук",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
-  },
-  "34": {
-    "string": "Пускане на видеоклипа",
-    "description": "Label for a button to play the video visible on the page."
-  },
-  "35": {
-    "string": "Плъзнете нагоре",
-    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
-  },
-  "36": {
-    "string": "Разгъване на съобщението в Twitter",
-    "description": "Label in the tooltip text for when a Twitter embed is expandable."
-  },
-  "37": {
-    "string": "Разгънете височината на прозореца си, за да прегледате тази история",
-    "description": "Text for a warning screen that informs the user that stories are only supported in taller browser windows."
-  },
-  "38": {
-    "string": "Разгънете ширината на прозореца си, за да прегледате тази история",
-    "description": "Text for a warning screen that informs the user that stories are only supported in wider browser windows."
-  },
-  "62": {
-    "string": "Споделете, започвайки от тази страница",
-    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
-  },
-  "63": {
-    "string": "Line",
-    "description": "Button label for the share target that shares a link via Line."
-  },
-  "64": {
-    "string": "Актуализирана",
-    "description": "Label that indicates that additional content has been added to a story"
-  },
-  "65": {
-    "string": "Неуспешно възпроизвеждане на видеоклипа",
-    "description": "Label indicating that the video visible on the page failed to play."
-  },
-  "66": {
-    "string": "Изключване на звука на историята",
-    "description": "Label for the mute button that turns off the sound in the story"
-  },
-  "67": {
-    "string": "Включване на звука на историята",
-    "description": "Label for the unmute button that turns the sound in the story back on"
-  },
-  "68": {
-    "string": "Информация за историята",
-    "description": "Label for the information button that pulls up relevant information about the story content"
-  },
-  "69": {
-    "string": "Споделяне на историята",
-    "description": "Label for the share button that pulls up a panel of options for sharing the story"
-  },
-  "70": {
-    "string": "Превключване на менюто на историята",
-    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
-  },
-  "71": {
-    "string": "A",
-    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
-  },
-  "72": {
-    "string": "Б",
-    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
-  },
-  "73": {
-    "string": "В",
-    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
-  },
-  "74": {
-    "string": "Г",
-    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
-  },
-  "75": {
-    "string": "Съвет 1 от 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "76": {
-    "string": "Докоснете, за да преминете към следващия екран",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "77": {
-    "string": "Напред",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "78": {
-    "string": "Съвет 2 от 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "79": {
-    "string": "Плъзнете, за да преминете към следващата история",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "80": {
-    "string": "Разбрах",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "81": {
-    "string": "Съвет",
-    "description": "Label for a hint in the context of an onboarding user education tutorial."
-  },
-  "82": {
-    "string": "Предишна страница",
-    "description": "Label indicating that users can navigate to the previous page."
-  },
-  "83": {
-    "string": "Активиране",
-    "description": "Label for the activate button to ask for device orientation permission"
-  },
-  "84": {
-    "string": "РЕЗУЛТАТ:",
-    "description": "Label for the results component preceding the score in percentages"
-  },
-  "85": {
-    "string": "Пауза на историята",
-    "description": "Label for a button that pauses the media content on the story"
-  },
-  "86": {
-    "string": "Пускане на историята",
-    "description": "Label for a button that plays the media content on the story"
-  },
-  "87": {
-    "string": "Затваряне",
-    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
-  },
-  "88": {
-    "string": "Прескачане към следващата",
-    "description": "Label for a button that advances to the next element in the carousel"
-  },
-  "89": {
-    "string": "Вашият отговор ще бъде изпратен на",
-    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
-  },
-  "90": {
-    "string": "Следваща история",
-    "description": "Label for a button that advances to the next element in the carousel."
-  },
-  "91": {
-    "string": "Следваща страница",
-    "description": "Label for a button that advances to the next page of the story."
-  },
-  "92": {
-    "string": "Повторение",
-    "description": "Label for a button that replays the story."
-  },
-  "93": {
-    "string": "Предишна страница",
-    "description": "Label for a button that returns the user to the previous page of the story."
-  },
-  "96": {
-    "string": "Движете устройството, за да изследвате",
-    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
-  },
-  "97": {
-    "string": "Отваряне",
-    "description": "Text displayed to users on tap of outlink button."
-  }
+    "10": {
+        "string": "LinkedIn"
+    },
+    "11": {
+        "string": "Pinterest"
+    },
+    "12": {
+        "string": "SMS"
+    },
+    "13": {
+        "string": "Още"
+    },
+    "14": {
+        "string": "Tumblr"
+    },
+    "15": {
+        "string": "Twitter"
+    },
+    "16": {
+        "string": "WhatsApp"
+    },
+    "18": {
+        "string": "Разгънете както височината, така и ширината на прозореца си, за да прегледате тази история"
+    },
+    "19": {
+        "string": "За преглед на това съдържание трябва да активирате експеримента за amp-story."
+    },
+    "2": {
+        "string": "Докоснете „Напред“"
+    },
+    "20": {
+        "string": "Най-добрият начин за преглед на страницата е във вертикален режим"
+    },
+    "21": {
+        "string": "За съжаление, изглежда, че браузърът ви не поддържа тази история"
+    },
+    "22": {
+        "string": "Приемане"
+    },
+    "23": {
+        "string": "Отхвърляне"
+    },
+    "25": {
+        "string": "Преглед в първоначалния домейн:"
+    },
+    "26": {
+        "string": "Още за резултатите с AMP"
+    },
+    "27": {
+        "string": "Продължаване въпреки това"
+    },
+    "3": {
+        "string": "Докоснете „Назад“"
+    },
+    "31": {
+        "string": "Звукът е изключен"
+    },
+    "32": {
+        "string": "Звукът е включен"
+    },
+    "33": {
+        "string": "На тази страница няма звук"
+    },
+    "34": {
+        "string": "Пускане на видеоклипа"
+    },
+    "35": {
+        "string": "Плъзнете нагоре"
+    },
+    "36": {
+        "string": "Разгъване на съобщението в Twitter"
+    },
+    "37": {
+        "string": "Разгънете височината на прозореца си, за да прегледате тази история"
+    },
+    "38": {
+        "string": "Разгънете ширината на прозореца си, за да прегледате тази история"
+    },
+    "4": {
+        "string": "Неуспешно копиране на връзката в буферната памет :("
+    },
+    "5": {
+        "string": "Връзката е копирана!"
+    },
+    "6": {
+        "string": "Имейл"
+    },
+    "62": {
+        "string": "Споделете, започвайки от тази страница"
+    },
+    "63": {
+        "string": "Line"
+    },
+    "64": {
+        "string": "Актуализирана"
+    },
+    "65": {
+        "string": "Неуспешно възпроизвеждане на видеоклипа"
+    },
+    "66": {
+        "string": "Изключване на звука на историята"
+    },
+    "67": {
+        "string": "Включване на звука на историята"
+    },
+    "68": {
+        "string": "Информация за историята"
+    },
+    "69": {
+        "string": "Споделяне на историята"
+    },
+    "7": {
+        "string": "Facebook"
+    },
+    "70": {
+        "string": "Превключване на менюто на историята"
+    },
+    "71": {
+        "string": "A"
+    },
+    "72": {
+        "string": "Б"
+    },
+    "73": {
+        "string": "В"
+    },
+    "74": {
+        "string": "Г"
+    },
+    "75": {
+        "string": "Съвет 1 от 2"
+    },
+    "76": {
+        "string": "Докоснете, за да преминете към следващия екран"
+    },
+    "77": {
+        "string": "Напред"
+    },
+    "78": {
+        "string": "Съвет 2 от 2"
+    },
+    "79": {
+        "string": "Плъзнете, за да преминете към следващата история"
+    },
+    "8": {
+        "string": "Google+"
+    },
+    "80": {
+        "string": "Разбрах"
+    },
+    "81": {
+        "string": "Съвет"
+    },
+    "82": {
+        "string": "Предишна страница"
+    },
+    "83": {
+        "string": "Активиране"
+    },
+    "84": {
+        "string": "РЕЗУЛТАТ:"
+    },
+    "85": {
+        "string": "Пауза на историята"
+    },
+    "86": {
+        "string": "Пускане на историята"
+    },
+    "87": {
+        "string": "Затваряне"
+    },
+    "88": {
+        "string": "Прескачане към следващата"
+    },
+    "89": {
+        "string": "Вашият отговор ще бъде изпратен на"
+    },
+    "9": {
+        "string": "Получаване на връзка"
+    },
+    "90": {
+        "string": "Следваща история"
+    },
+    "91": {
+        "string": "Следваща страница"
+    },
+    "92": {
+        "string": "Повторение"
+    },
+    "93": {
+        "string": "Предишна страница"
+    },
+    "96": {
+        "string": "Движете устройството, за да изследвате"
+    },
+    "97": {
+        "string": "Отваряне"
+    }
 }

@@ -1,266 +1,200 @@
 {
-  "2": {
-    "string": "’அடுத்து’ தட்டு",
-    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
-  },
-  "3": {
-    "string": "’பின்செல்’ தட்டு",
-    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
-  },
-  "4": {
-    "string": "இணைப்பை கிளிப்போர்டுக்கு நகலெடுக்க முடியவில்லை :(",
-    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
-  },
-  "5": {
-    "string": "இணைப்பு நகலானது!",
-    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
-  },
-  "6": {
-    "string": "ஈமெயில்",
-    "description": "Button label for the share target that shares a link via email."
-  },
-  "7": {
-    "string": "Facebook",
-    "description": "Button label for the share target that shares a link via Facebook."
-  },
-  "8": {
-    "string": "Google+",
-    "description": "Button label for the share target that shares a link via Google+."
-  },
-  "9": {
-    "string": "இணைப்பைப் பெறுக",
-    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
-  },
-  "10": {
-    "string": "LinkedIn",
-    "description": "Button label for the share target that shares a link via LinkedIn."
-  },
-  "11": {
-    "string": "Pinterest",
-    "description": "Button label for the share target that shares a link via Pinterest."
-  },
-  "12": {
-    "string": "SMS",
-    "description": "Button label for the share target that shares a link via SMS."
-  },
-  "13": {
-    "string": "மேலும்",
-    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
-  },
-  "14": {
-    "string": "Tumblr",
-    "description": "Button label for the share target that shares a link via Tumblr."
-  },
-  "15": {
-    "string": "Twitter",
-    "description": "Button label for the share target that shares a link via Twitter."
-  },
-  "16": {
-    "string": "WhatsApp",
-    "description": "Button label for the share target that shares a link via WhatsApp."
-  },
-  "18": {
-    "string": "இதைப் பார்க்க, உங்கள் விண்டோவின் உயரம் மற்றும் அகலம் இரண்டையுமே விரிவுபடுத்தவும்",
-    "description": "Text for a warning screen that informs the user that stories are only supported in larger browser windows."
-  },
-  "19": {
-    "string": "இந்த உள்ளடக்கத்தைப் பார்க்க amp-story சோதனையை நீங்கள் செயல்படுத்த வேண்டும்.",
-    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
-  },
-  "20": {
-    "string": "இந்தப் பக்கத்தை போர்ட்ரெய்ட் மோடில் நன்றாகப் பார்க்க முடியும்",
-    "description": "Text for a warning screen that informs the user that stories are only supported in portrait orientation."
-  },
-  "21": {
-    "string": "மன்னிக்கவும், உங்கள் பிரவுசர் இதை ஆதரிக்கவில்லை போல் தோன்றுகிறது",
-    "description": "Text for a warning screen that informs the user that their browser does not support stories."
-  },
-  "22": {
-    "string": "ஏற்கிறேன்",
-    "description": "Label for a button that allows the user to consent to providing their cookie access."
-  },
-  "23": {
-    "string": "ஏற்கவில்லை",
-    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
-  },
-  "25": {
-    "string": "அசல் செயற்களத்தில் காட்டவும்:",
-    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
-  },
-  "26": {
-    "string": "AMP முடிவுகள் பற்றிய கூடுதல் விவரங்கள்",
-    "description": "Label for a link to documentation on how AMP links are handled."
-  },
-  "27": {
-    "string": "இருந்தாலும் தொடர்க",
-    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
-  },
-  "31": {
-    "string": "ஒலியை அணைக்கவும்",
-    "description": "Text that informs users that the sound is off after they click the mute button"
-  },
-  "32": {
-    "string": "ஒலியை இயக்கவும்",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
-  },
-  "33": {
-    "string": "இந்தப் பக்கத்தில் ஒலி இல்லை",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
-  },
-  "34": {
-    "string": "வீடியோவை இயக்கவும்",
-    "description": "Label for a button to play the video visible on the page."
-  },
-  "35": {
-    "string": "மேலே ஸ்வைப் செய்",
-    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
-  },
-  "36": {
-    "string": "ட்வீட்டை விரிவுபடுத்துக",
-    "description": "Label in the tooltip text for when a Twitter embed is expandable."
-  },
-  "37": {
-    "string": "இதைப் பார்க்க உங்கள் விண்டோவின் உயரத்தை விரிவுபடுத்துக",
-    "description": "Text for a warning screen that informs the user that stories are only supported in taller browser windows."
-  },
-  "38": {
-    "string": "இதைப் பார்க்க உங்கள் விண்டோவின் அகலத்தை விரிவுபடுத்துக",
-    "description": "Text for a warning screen that informs the user that stories are only supported in wider browser windows."
-  },
-  "62": {
-    "string": "இந்தப் பக்கத்திலிருந்து பகிரத் தொடங்குக",
-    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
-  },
-  "63": {
-    "string": "Line",
-    "description": "Button label for the share target that shares a link via Line."
-  },
-  "64": {
-    "string": "புதுப்பித்தது",
-    "description": "Label that indicates that additional content has been added to a story"
-  },
-  "65": {
-    "string": "வீடியோ இயங்கத் தோல்வியுற்றது",
-    "description": "Label indicating that the video visible on the page failed to play."
-  },
-  "66": {
-    "string": "கதையை மியூட் செய்க",
-    "description": "Label for the mute button that turns off the sound in the story"
-  },
-  "67": {
-    "string": "கதையை அன்மியூட் செய்க",
-    "description": "Label for the unmute button that turns the sound in the story back on"
-  },
-  "68": {
-    "string": "கதைத் தகவல்",
-    "description": "Label for the information button that pulls up relevant information about the story content"
-  },
-  "69": {
-    "string": "கதையைப் பகிர்க",
-    "description": "Label for the share button that pulls up a panel of options for sharing the story"
-  },
-  "70": {
-    "string": "கதை மெனுவை மாற்றுக",
-    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
-  },
-  "71": {
-    "string": "A",
-    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
-  },
-  "72": {
-    "string": "B",
-    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
-  },
-  "73": {
-    "string": "C",
-    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
-  },
-  "74": {
-    "string": "D",
-    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
-  },
-  "75": {
-    "string": "குறிப்பு 1 / 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "76": {
-    "string": "அடுத்த திரைக்குச் செல்ல தட்டுக",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "77": {
-    "string": "அடுத்து",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "78": {
-    "string": "குறிப்பு 2 / 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "79": {
-    "string": "அடுத்த கதைக்குச் செல்ல ஸ்வைப் செய்க",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "80": {
-    "string": "புரிந்தது",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "81": {
-    "string": "குறிப்பு",
-    "description": "Label for a hint in the context of an onboarding user education tutorial."
-  },
-  "82": {
-    "string": "முந்தைய பக்கம்",
-    "description": "Label indicating that users can navigate to the previous page."
-  },
-  "83": {
-    "string": "செயல்படுத்துக",
-    "description": "Label for the activate button to ask for device orientation permission"
-  },
-  "84": {
-    "string": "மதிப்பெண்:",
-    "description": "Label for the results component preceding the score in percentages"
-  },
-  "85": {
-    "string": "கதையை இடைநிறுத்துக",
-    "description": "Label for a button that pauses the media content on the story"
-  },
-  "86": {
-    "string": "கதையை இயக்குக",
-    "description": "Label for a button that plays the media content on the story"
-  },
-  "87": {
-    "string": "மூடுக",
-    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
-  },
-  "88": {
-    "string": "அடுத்தற்குச் செல்க",
-    "description": "Label for a button that advances to the next element in the carousel"
-  },
-  "89": {
-    "string": "உங்கள் பதில் இதற்கு அனுப்பப்படும்",
-    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
-  },
-  "90": {
-    "string": "அடுத்த கதை",
-    "description": "Label for a button that advances to the next element in the carousel."
-  },
-  "91": {
-    "string": "அடுத்த பக்கம்",
-    "description": "Label for a button that advances to the next page of the story."
-  },
-  "92": {
-    "string": "மீளியக்கு",
-    "description": "Label for a button that replays the story."
-  },
-  "93": {
-    "string": "முந்தைய பக்கம்",
-    "description": "Label for a button that returns the user to the previous page of the story."
-  },
-  "96": {
-    "string": "ஆராய்வதற்கு சாதனத்தை நகர்த்துக",
-    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
-  },
-  "97": {
-    "string": "தொடக்கம்",
-    "description": "Text displayed to users on tap of outlink button."
-  }
+    "10": {
+        "string": "LinkedIn"
+    },
+    "11": {
+        "string": "Pinterest"
+    },
+    "12": {
+        "string": "SMS"
+    },
+    "13": {
+        "string": "மேலும்"
+    },
+    "14": {
+        "string": "Tumblr"
+    },
+    "15": {
+        "string": "Twitter"
+    },
+    "16": {
+        "string": "WhatsApp"
+    },
+    "18": {
+        "string": "இதைப் பார்க்க, உங்கள் விண்டோவின் உயரம் மற்றும் அகலம் இரண்டையுமே விரிவுபடுத்தவும்"
+    },
+    "19": {
+        "string": "இந்த உள்ளடக்கத்தைப் பார்க்க amp-story சோதனையை நீங்கள் செயல்படுத்த வேண்டும்."
+    },
+    "2": {
+        "string": "’அடுத்து’ தட்டு"
+    },
+    "20": {
+        "string": "இந்தப் பக்கத்தை போர்ட்ரெய்ட் மோடில் நன்றாகப் பார்க்க முடியும்"
+    },
+    "21": {
+        "string": "மன்னிக்கவும், உங்கள் பிரவுசர் இதை ஆதரிக்கவில்லை போல் தோன்றுகிறது"
+    },
+    "22": {
+        "string": "ஏற்கிறேன்"
+    },
+    "23": {
+        "string": "ஏற்கவில்லை"
+    },
+    "25": {
+        "string": "அசல் செயற்களத்தில் காட்டவும்:"
+    },
+    "26": {
+        "string": "AMP முடிவுகள் பற்றிய கூடுதல் விவரங்கள்"
+    },
+    "27": {
+        "string": "இருந்தாலும் தொடர்க"
+    },
+    "3": {
+        "string": "’பின்செல்’ தட்டு"
+    },
+    "31": {
+        "string": "ஒலியை அணைக்கவும்"
+    },
+    "32": {
+        "string": "ஒலியை இயக்கவும்"
+    },
+    "33": {
+        "string": "இந்தப் பக்கத்தில் ஒலி இல்லை"
+    },
+    "34": {
+        "string": "வீடியோவை இயக்கவும்"
+    },
+    "35": {
+        "string": "மேலே ஸ்வைப் செய்"
+    },
+    "36": {
+        "string": "ட்வீட்டை விரிவுபடுத்துக"
+    },
+    "37": {
+        "string": "இதைப் பார்க்க உங்கள் விண்டோவின் உயரத்தை விரிவுபடுத்துக"
+    },
+    "38": {
+        "string": "இதைப் பார்க்க உங்கள் விண்டோவின் அகலத்தை விரிவுபடுத்துக"
+    },
+    "4": {
+        "string": "இணைப்பை கிளிப்போர்டுக்கு நகலெடுக்க முடியவில்லை :("
+    },
+    "5": {
+        "string": "இணைப்பு நகலானது!"
+    },
+    "6": {
+        "string": "ஈமெயில்"
+    },
+    "62": {
+        "string": "இந்தப் பக்கத்திலிருந்து பகிரத் தொடங்குக"
+    },
+    "63": {
+        "string": "Line"
+    },
+    "64": {
+        "string": "புதுப்பித்தது"
+    },
+    "65": {
+        "string": "வீடியோ இயங்கத் தோல்வியுற்றது"
+    },
+    "66": {
+        "string": "கதையை மியூட் செய்க"
+    },
+    "67": {
+        "string": "கதையை அன்மியூட் செய்க"
+    },
+    "68": {
+        "string": "கதைத் தகவல்"
+    },
+    "69": {
+        "string": "கதையைப் பகிர்க"
+    },
+    "7": {
+        "string": "Facebook"
+    },
+    "70": {
+        "string": "கதை மெனுவை மாற்றுக"
+    },
+    "71": {
+        "string": "A"
+    },
+    "72": {
+        "string": "B"
+    },
+    "73": {
+        "string": "C"
+    },
+    "74": {
+        "string": "D"
+    },
+    "75": {
+        "string": "குறிப்பு 1 / 2"
+    },
+    "76": {
+        "string": "அடுத்த திரைக்குச் செல்ல தட்டுக"
+    },
+    "77": {
+        "string": "அடுத்து"
+    },
+    "78": {
+        "string": "குறிப்பு 2 / 2"
+    },
+    "79": {
+        "string": "அடுத்த கதைக்குச் செல்ல ஸ்வைப் செய்க"
+    },
+    "8": {
+        "string": "Google+"
+    },
+    "80": {
+        "string": "புரிந்தது"
+    },
+    "81": {
+        "string": "குறிப்பு"
+    },
+    "82": {
+        "string": "முந்தைய பக்கம்"
+    },
+    "83": {
+        "string": "செயல்படுத்துக"
+    },
+    "84": {
+        "string": "மதிப்பெண்:"
+    },
+    "85": {
+        "string": "கதையை இடைநிறுத்துக"
+    },
+    "86": {
+        "string": "கதையை இயக்குக"
+    },
+    "87": {
+        "string": "மூடுக"
+    },
+    "88": {
+        "string": "அடுத்தற்குச் செல்க"
+    },
+    "89": {
+        "string": "உங்கள் பதில் இதற்கு அனுப்பப்படும்"
+    },
+    "9": {
+        "string": "இணைப்பைப் பெறுக"
+    },
+    "90": {
+        "string": "அடுத்த கதை"
+    },
+    "91": {
+        "string": "அடுத்த பக்கம்"
+    },
+    "92": {
+        "string": "மீளியக்கு"
+    },
+    "93": {
+        "string": "முந்தைய பக்கம்"
+    },
+    "96": {
+        "string": "ஆராய்வதற்கு சாதனத்தை நகர்த்துக"
+    },
+    "97": {
+        "string": "தொடக்கம்"
+    }
 }

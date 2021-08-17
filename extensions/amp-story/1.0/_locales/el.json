@@ -1,266 +1,200 @@
 {
-  "2": {
-    "string": "Πατήστε Επόμενο",
-    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
-  },
-  "3": {
-    "string": "Πατήστε Πίσω",
-    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
-  },
-  "4": {
-    "string": "Δεν ήταν δυνατή η αντιγραφή του συνδέσμου στο πρόχειρο :(",
-    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
-  },
-  "5": {
-    "string": "Ο σύνδεσμος αντιγράφηκε!",
-    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
-  },
-  "6": {
-    "string": "Email",
-    "description": "Button label for the share target that shares a link via email."
-  },
-  "7": {
-    "string": "Facebook",
-    "description": "Button label for the share target that shares a link via Facebook."
-  },
-  "8": {
-    "string": "Google+",
-    "description": "Button label for the share target that shares a link via Google+."
-  },
-  "9": {
-    "string": "Λήψη συνδέσμου",
-    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
-  },
-  "10": {
-    "string": "LinkedIn",
-    "description": "Button label for the share target that shares a link via LinkedIn."
-  },
-  "11": {
-    "string": "Pinterest",
-    "description": "Button label for the share target that shares a link via Pinterest."
-  },
-  "12": {
-    "string": "SMS",
-    "description": "Button label for the share target that shares a link via SMS."
-  },
-  "13": {
-    "string": "Περισσότερα",
-    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
-  },
-  "14": {
-    "string": "Tumblr",
-    "description": "Button label for the share target that shares a link via Tumblr."
-  },
-  "15": {
-    "string": "Twitter",
-    "description": "Button label for the share target that shares a link via Twitter."
-  },
-  "16": {
-    "string": "WhatsApp",
-    "description": "Button label for the share target that shares a link via WhatsApp."
-  },
-  "18": {
-    "string": "Μεγαλώστε το ύψος και το πλάτος του παραθύρου σας για να δείτε αυτήν την εμπειρία",
-    "description": "Text for a warning screen that informs the user that stories are only supported in larger browser windows."
-  },
-  "19": {
-    "string": "Πρέπει να ενεργοποιήσετε το πείραμα amp-story για να δείτε αυτό το περιεχόμενο.",
-    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
-  },
-  "20": {
-    "string": "Η σελίδα προβάλλεται καλύτερα κατακόρυφα",
-    "description": "Text for a warning screen that informs the user that stories are only supported in portrait orientation."
-  },
-  "21": {
-    "string": "Λυπούμαστε, φαίνεται ότι το πρόγραμμα περιήγησής σας δεν υποστηρίζει αυτήν την εμπειρία",
-    "description": "Text for a warning screen that informs the user that their browser does not support stories."
-  },
-  "22": {
-    "string": "Αποδοχή",
-    "description": "Label for a button that allows the user to consent to providing their cookie access."
-  },
-  "23": {
-    "string": "Απόρριψη",
-    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
-  },
-  "25": {
-    "string": "Προβολή στον αρχικό τομέα:",
-    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
-  },
-  "26": {
-    "string": "Περισσότερα σχετικά με τα αποτελέσματα AMP",
-    "description": "Label for a link to documentation on how AMP links are handled."
-  },
-  "27": {
-    "string": "Συνέχεια παρά ταύτα",
-    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
-  },
-  "31": {
-    "string": "Χωρίς ήχο",
-    "description": "Text that informs users that the sound is off after they click the mute button"
-  },
-  "32": {
-    "string": "Με ήχο",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
-  },
-  "33": {
-    "string": "Αυτή η σελίδα δεν έχει ήχο",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
-  },
-  "34": {
-    "string": "Αναπαραγωγή βίντεο",
-    "description": "Label for a button to play the video visible on the page."
-  },
-  "35": {
-    "string": "Σύρετε προς τα πάνω",
-    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
-  },
-  "36": {
-    "string": "Ανάπτυξη Tweet",
-    "description": "Label in the tooltip text for when a Twitter embed is expandable."
-  },
-  "37": {
-    "string": "Μεγαλώστε το ύψος του παραθύρου σας για να δείτε αυτήν την εμπειρία",
-    "description": "Text for a warning screen that informs the user that stories are only supported in taller browser windows."
-  },
-  "38": {
-    "string": "Μεγαλώστε το πλάτος του παραθύρου σας για να δείτε αυτήν την εμπειρία",
-    "description": "Text for a warning screen that informs the user that stories are only supported in wider browser windows."
-  },
-  "62": {
-    "string": "Κοινοποίηση ξεκινώντας από αυτήν τη σελίδα",
-    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
-  },
-  "63": {
-    "string": "Line",
-    "description": "Button label for the share target that shares a link via Line."
-  },
-  "64": {
-    "string": "Ενημερώθηκε",
-    "description": "Label that indicates that additional content has been added to a story"
-  },
-  "65": {
-    "string": "Η αναπαραγωγή του βίντεο απέτυχε",
-    "description": "Label indicating that the video visible on the page failed to play."
-  },
-  "66": {
-    "string": "Σίγαση ιστορίας",
-    "description": "Label for the mute button that turns off the sound in the story"
-  },
-  "67": {
-    "string": "Άρση σίγασης ιστορίας",
-    "description": "Label for the unmute button that turns the sound in the story back on"
-  },
-  "68": {
-    "string": "Πληροφορίες ιστορίας",
-    "description": "Label for the information button that pulls up relevant information about the story content"
-  },
-  "69": {
-    "string": "Κοινοποίηση ιστορίας",
-    "description": "Label for the share button that pulls up a panel of options for sharing the story"
-  },
-  "70": {
-    "string": "Ενεργοποίηση μενού ιστοριών",
-    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
-  },
-  "71": {
-    "string": "A",
-    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
-  },
-  "72": {
-    "string": "B",
-    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
-  },
-  "73": {
-    "string": "Γ",
-    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
-  },
-  "74": {
-    "string": "Δ",
-    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
-  },
-  "75": {
-    "string": "Συμβουλή 1 από 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "76": {
-    "string": "Πατήστε για μετάβαση στην επόμενη οθόνη",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "77": {
-    "string": "Επόμενο",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "78": {
-    "string": "Συμβουλή 2 από 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "79": {
-    "string": "Σύρετε για μετάβαση στην επόμενη ιστορία",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "80": {
-    "string": "Το κατάλαβα",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "81": {
-    "string": "Συμβουλή",
-    "description": "Label for a hint in the context of an onboarding user education tutorial."
-  },
-  "82": {
-    "string": "Προηγούμενη σελίδα",
-    "description": "Label indicating that users can navigate to the previous page."
-  },
-  "83": {
-    "string": "Ενεργοποίηση",
-    "description": "Label for the activate button to ask for device orientation permission"
-  },
-  "84": {
-    "string": "ΣΚΟΡ:",
-    "description": "Label for the results component preceding the score in percentages"
-  },
-  "85": {
-    "string": "Παύση ιστορίας",
-    "description": "Label for a button that pauses the media content on the story"
-  },
-  "86": {
-    "string": "Αναπαραγωγή ιστορίας",
-    "description": "Label for a button that plays the media content on the story"
-  },
-  "87": {
-    "string": "Κλείσιμο",
-    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
-  },
-  "88": {
-    "string": "Μετάβαση στο επόμενο",
-    "description": "Label for a button that advances to the next element in the carousel"
-  },
-  "89": {
-    "string": "Η απάντησή σας θα σταλεί στη διεύθυνση",
-    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
-  },
-  "90": {
-    "string": "Επόμενη ιστορία",
-    "description": "Label for a button that advances to the next element in the carousel."
-  },
-  "91": {
-    "string": "Επόμενη σελίδα",
-    "description": "Label for a button that advances to the next page of the story."
-  },
-  "92": {
-    "string": "Επανάληψη",
-    "description": "Label for a button that replays the story."
-  },
-  "93": {
-    "string": "Προηγούμενη σελίδα",
-    "description": "Label for a button that returns the user to the previous page of the story."
-  },
-  "96": {
-    "string": "Μετακινήστε τη συσκευή για εξερεύνηση",
-    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
-  },
-  "97": {
-    "string": "Άνοιγμα",
-    "description": "Text displayed to users on tap of outlink button."
-  }
+    "10": {
+        "string": "LinkedIn"
+    },
+    "11": {
+        "string": "Pinterest"
+    },
+    "12": {
+        "string": "SMS"
+    },
+    "13": {
+        "string": "Περισσότερα"
+    },
+    "14": {
+        "string": "Tumblr"
+    },
+    "15": {
+        "string": "Twitter"
+    },
+    "16": {
+        "string": "WhatsApp"
+    },
+    "18": {
+        "string": "Μεγαλώστε το ύψος και το πλάτος του παραθύρου σας για να δείτε αυτήν την εμπειρία"
+    },
+    "19": {
+        "string": "Πρέπει να ενεργοποιήσετε το πείραμα amp-story για να δείτε αυτό το περιεχόμενο."
+    },
+    "2": {
+        "string": "Πατήστε Επόμενο"
+    },
+    "20": {
+        "string": "Η σελίδα προβάλλεται καλύτερα κατακόρυφα"
+    },
+    "21": {
+        "string": "Λυπούμαστε, φαίνεται ότι το πρόγραμμα περιήγησής σας δεν υποστηρίζει αυτήν την εμπειρία"
+    },
+    "22": {
+        "string": "Αποδοχή"
+    },
+    "23": {
+        "string": "Απόρριψη"
+    },
+    "25": {
+        "string": "Προβολή στον αρχικό τομέα:"
+    },
+    "26": {
+        "string": "Περισσότερα σχετικά με τα αποτελέσματα AMP"
+    },
+    "27": {
+        "string": "Συνέχεια παρά ταύτα"
+    },
+    "3": {
+        "string": "Πατήστε Πίσω"
+    },
+    "31": {
+        "string": "Χωρίς ήχο"
+    },
+    "32": {
+        "string": "Με ήχο"
+    },
+    "33": {
+        "string": "Αυτή η σελίδα δεν έχει ήχο"
+    },
+    "34": {
+        "string": "Αναπαραγωγή βίντεο"
+    },
+    "35": {
+        "string": "Σύρετε προς τα πάνω"
+    },
+    "36": {
+        "string": "Ανάπτυξη Tweet"
+    },
+    "37": {
+        "string": "Μεγαλώστε το ύψος του παραθύρου σας για να δείτε αυτήν την εμπειρία"
+    },
+    "38": {
+        "string": "Μεγαλώστε το πλάτος του παραθύρου σας για να δείτε αυτήν την εμπειρία"
+    },
+    "4": {
+        "string": "Δεν ήταν δυνατή η αντιγραφή του συνδέσμου στο πρόχειρο :("
+    },
+    "5": {
+        "string": "Ο σύνδεσμος αντιγράφηκε!"
+    },
+    "6": {
+        "string": "Email"
+    },
+    "62": {
+        "string": "Κοινοποίηση ξεκινώντας από αυτήν τη σελίδα"
+    },
+    "63": {
+        "string": "Line"
+    },
+    "64": {
+        "string": "Ενημερώθηκε"
+    },
+    "65": {
+        "string": "Η αναπαραγωγή του βίντεο απέτυχε"
+    },
+    "66": {
+        "string": "Σίγαση ιστορίας"
+    },
+    "67": {
+        "string": "Άρση σίγασης ιστορίας"
+    },
+    "68": {
+        "string": "Πληροφορίες ιστορίας"
+    },
+    "69": {
+        "string": "Κοινοποίηση ιστορίας"
+    },
+    "7": {
+        "string": "Facebook"
+    },
+    "70": {
+        "string": "Ενεργοποίηση μενού ιστοριών"
+    },
+    "71": {
+        "string": "A"
+    },
+    "72": {
+        "string": "B"
+    },
+    "73": {
+        "string": "Γ"
+    },
+    "74": {
+        "string": "Δ"
+    },
+    "75": {
+        "string": "Συμβουλή 1 από 2"
+    },
+    "76": {
+        "string": "Πατήστε για μετάβαση στην επόμενη οθόνη"
+    },
+    "77": {
+        "string": "Επόμενο"
+    },
+    "78": {
+        "string": "Συμβουλή 2 από 2"
+    },
+    "79": {
+        "string": "Σύρετε για μετάβαση στην επόμενη ιστορία"
+    },
+    "8": {
+        "string": "Google+"
+    },
+    "80": {
+        "string": "Το κατάλαβα"
+    },
+    "81": {
+        "string": "Συμβουλή"
+    },
+    "82": {
+        "string": "Προηγούμενη σελίδα"
+    },
+    "83": {
+        "string": "Ενεργοποίηση"
+    },
+    "84": {
+        "string": "ΣΚΟΡ:"
+    },
+    "85": {
+        "string": "Παύση ιστορίας"
+    },
+    "86": {
+        "string": "Αναπαραγωγή ιστορίας"
+    },
+    "87": {
+        "string": "Κλείσιμο"
+    },
+    "88": {
+        "string": "Μετάβαση στο επόμενο"
+    },
+    "89": {
+        "string": "Η απάντησή σας θα σταλεί στη διεύθυνση"
+    },
+    "9": {
+        "string": "Λήψη συνδέσμου"
+    },
+    "90": {
+        "string": "Επόμενη ιστορία"
+    },
+    "91": {
+        "string": "Επόμενη σελίδα"
+    },
+    "92": {
+        "string": "Επανάληψη"
+    },
+    "93": {
+        "string": "Προηγούμενη σελίδα"
+    },
+    "96": {
+        "string": "Μετακινήστε τη συσκευή για εξερεύνηση"
+    },
+    "97": {
+        "string": "Άνοιγμα"
+    }
 }

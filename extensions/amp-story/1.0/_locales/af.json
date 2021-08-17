@@ -1,266 +1,200 @@
 {
-  "2": {
-    "string": "Tik Volgende",
-    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
-  },
-  "3": {
-    "string": "Tik Terug",
-    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
-  },
-  "4": {
-    "string": "Kon nie die skakel na die knipbord kopieer nie :(",
-    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
-  },
-  "5": {
-    "string": "Skakel gekopieer!",
-    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
-  },
-  "6": {
-    "string": "E-pos",
-    "description": "Button label for the share target that shares a link via email."
-  },
-  "7": {
-    "string": "Facebook",
-    "description": "Button label for the share target that shares a link via Facebook."
-  },
-  "8": {
-    "string": "Google+",
-    "description": "Button label for the share target that shares a link via Google+."
-  },
-  "9": {
-    "string": "Kry skakel",
-    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
-  },
-  "10": {
-    "string": "LinkedIn",
-    "description": "Button label for the share target that shares a link via LinkedIn."
-  },
-  "11": {
-    "string": "Pinterest",
-    "description": "Button label for the share target that shares a link via Pinterest."
-  },
-  "12": {
-    "string": "SMS",
-    "description": "Button label for the share target that shares a link via SMS."
-  },
-  "13": {
-    "string": "Meer",
-    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
-  },
-  "14": {
-    "string": "Tumblr",
-    "description": "Button label for the share target that shares a link via Tumblr."
-  },
-  "15": {
-    "string": "Twitter",
-    "description": "Button label for the share target that shares a link via Twitter."
-  },
-  "16": {
-    "string": "WhatsApp",
-    "description": "Button label for the share target that shares a link via WhatsApp."
-  },
-  "18": {
-    "string": "Maak sowel die hoogte as breedte van jou venster groter om hierdie ervaring te bekyk",
-    "description": "Text for a warning screen that informs the user that stories are only supported in larger browser windows."
-  },
-  "19": {
-    "string": "Jy moet die amp-story-eksperiment aktiveer om hierdie inhoud te bekyk.",
-    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
-  },
-  "20": {
-    "string": "Die bladsy kan die beste in portretmodus bekyk word",
-    "description": "Text for a warning screen that informs the user that stories are only supported in portrait orientation."
-  },
-  "21": {
-    "string": "Ons is jammer, maar dit lyk of jou blaaier nie hierdie ervaring steun nie",
-    "description": "Text for a warning screen that informs the user that their browser does not support stories."
-  },
-  "22": {
-    "string": "Aanvaar",
-    "description": "Label for a button that allows the user to consent to providing their cookie access."
-  },
-  "23": {
-    "string": "Wys af",
-    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
-  },
-  "25": {
-    "string": "Bekyk op oorspronklike domein:",
-    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
-  },
-  "26": {
-    "string": "Meer oor AMP-resultate",
-    "description": "Label for a link to documentation on how AMP links are handled."
-  },
-  "27": {
-    "string": "Gaan in elk geval voort",
-    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
-  },
-  "31": {
-    "string": "Klank af",
-    "description": "Text that informs users that the sound is off after they click the mute button"
-  },
-  "32": {
-    "string": "Klank aan",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
-  },
-  "33": {
-    "string": "Hierdie bladsy het geen klank nie",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
-  },
-  "34": {
-    "string": "Speel video",
-    "description": "Label for a button to play the video visible on the page."
-  },
-  "35": {
-    "string": "Vee opwaarts",
-    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
-  },
-  "36": {
-    "string": "Vou twiet uit",
-    "description": "Label in the tooltip text for when a Twitter embed is expandable."
-  },
-  "37": {
-    "string": "Maak jou venster se hoogte groter om hierdie ervaring te bekyk",
-    "description": "Text for a warning screen that informs the user that stories are only supported in taller browser windows."
-  },
-  "38": {
-    "string": "Maak jou venster se breedte groter om hierdie ervaring te bekyk",
-    "description": "Text for a warning screen that informs the user that stories are only supported in wider browser windows."
-  },
-  "62": {
-    "string": "Deel vanaf hierdie bladsy",
-    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
-  },
-  "63": {
-    "string": "LINE",
-    "description": "Button label for the share target that shares a link via Line."
-  },
-  "64": {
-    "string": "Bygewerk",
-    "description": "Label that indicates that additional content has been added to a story"
-  },
-  "65": {
-    "string": "Kon nie video speel nie",
-    "description": "Label indicating that the video visible on the page failed to play."
-  },
-  "66": {
-    "string": "Doof storie",
-    "description": "Label for the mute button that turns off the sound in the story"
-  },
-  "67": {
-    "string": "Ontdoof storie",
-    "description": "Label for the unmute button that turns the sound in the story back on"
-  },
-  "68": {
-    "string": "Storie-inligting",
-    "description": "Label for the information button that pulls up relevant information about the story content"
-  },
-  "69": {
-    "string": "Deel storie",
-    "description": "Label for the share button that pulls up a panel of options for sharing the story"
-  },
-  "70": {
-    "string": "Wissel storiekieslys",
-    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
-  },
-  "71": {
-    "string": "A",
-    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
-  },
-  "72": {
-    "string": "B",
-    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
-  },
-  "73": {
-    "string": "C",
-    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
-  },
-  "74": {
-    "string": "D",
-    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
-  },
-  "75": {
-    "string": "Wenk 1 van 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "76": {
-    "string": "Tik om na die volgende skerm te gaan",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "77": {
-    "string": "Volgende",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "78": {
-    "string": "Wenk 2 van 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
-  },
-  "79": {
-    "string": "Vee om na die volgende storie te gaan",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
-  },
-  "80": {
-    "string": "Ek verstaan",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
-  },
-  "81": {
-    "string": "Wenk",
-    "description": "Label for a hint in the context of an onboarding user education tutorial."
-  },
-  "82": {
-    "string": "Vorige bladsy",
-    "description": "Label indicating that users can navigate to the previous page."
-  },
-  "83": {
-    "string": "Aktiveer",
-    "description": "Label for the activate button to ask for device orientation permission"
-  },
-  "84": {
-    "string": "TELLING:",
-    "description": "Label for the results component preceding the score in percentages"
-  },
-  "85": {
-    "string": "Laat wag storie",
-    "description": "Label for a button that pauses the media content on the story"
-  },
-  "86": {
-    "string": "Speel storie",
-    "description": "Label for a button that plays the media content on the story"
-  },
-  "87": {
-    "string": "Maak toe",
-    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
-  },
-  "88": {
-    "string": "Slaan volgende oor",
-    "description": "Label for a button that advances to the next element in the carousel"
-  },
-  "89": {
-    "string": "Jou antwoord sal gestuur word na",
-    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
-  },
-  "90": {
-    "string": "Volgende storie",
-    "description": "Label for a button that advances to the next element in the carousel."
-  },
-  "91": {
-    "string": "Volgende bladsy",
-    "description": "Label for a button that advances to the next page of the story."
-  },
-  "92": {
-    "string": "Speel weer",
-    "description": "Label for a button that replays the story."
-  },
-  "93": {
-    "string": "Vorige bladsy",
-    "description": "Label for a button that returns the user to the previous page of the story."
-  },
-  "96": {
-    "string": "Skuif die toestel om te verken",
-    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
-  },
-  "97": {
-    "string": "Wird geöffnet",
-    "description": "Text displayed to users on tap of outlink button."
-  }
+    "10": {
+        "string": "LinkedIn"
+    },
+    "11": {
+        "string": "Pinterest"
+    },
+    "12": {
+        "string": "SMS"
+    },
+    "13": {
+        "string": "Meer"
+    },
+    "14": {
+        "string": "Tumblr"
+    },
+    "15": {
+        "string": "Twitter"
+    },
+    "16": {
+        "string": "WhatsApp"
+    },
+    "18": {
+        "string": "Maak sowel die hoogte as breedte van jou venster groter om hierdie ervaring te bekyk"
+    },
+    "19": {
+        "string": "Jy moet die amp-story-eksperiment aktiveer om hierdie inhoud te bekyk."
+    },
+    "2": {
+        "string": "Tik Volgende"
+    },
+    "20": {
+        "string": "Die bladsy kan die beste in portretmodus bekyk word"
+    },
+    "21": {
+        "string": "Ons is jammer, maar dit lyk of jou blaaier nie hierdie ervaring steun nie"
+    },
+    "22": {
+        "string": "Aanvaar"
+    },
+    "23": {
+        "string": "Wys af"
+    },
+    "25": {
+        "string": "Bekyk op oorspronklike domein:"
+    },
+    "26": {
+        "string": "Meer oor AMP-resultate"
+    },
+    "27": {
+        "string": "Gaan in elk geval voort"
+    },
+    "3": {
+        "string": "Tik Terug"
+    },
+    "31": {
+        "string": "Klank af"
+    },
+    "32": {
+        "string": "Klank aan"
+    },
+    "33": {
+        "string": "Hierdie bladsy het geen klank nie"
+    },
+    "34": {
+        "string": "Speel video"
+    },
+    "35": {
+        "string": "Vee opwaarts"
+    },
+    "36": {
+        "string": "Vou twiet uit"
+    },
+    "37": {
+        "string": "Maak jou venster se hoogte groter om hierdie ervaring te bekyk"
+    },
+    "38": {
+        "string": "Maak jou venster se breedte groter om hierdie ervaring te bekyk"
+    },
+    "4": {
+        "string": "Kon nie die skakel na die knipbord kopieer nie :("
+    },
+    "5": {
+        "string": "Skakel gekopieer!"
+    },
+    "6": {
+        "string": "E-pos"
+    },
+    "62": {
+        "string": "Deel vanaf hierdie bladsy"
+    },
+    "63": {
+        "string": "LINE"
+    },
+    "64": {
+        "string": "Bygewerk"
+    },
+    "65": {
+        "string": "Kon nie video speel nie"
+    },
+    "66": {
+        "string": "Doof storie"
+    },
+    "67": {
+        "string": "Ontdoof storie"
+    },
+    "68": {
+        "string": "Storie-inligting"
+    },
+    "69": {
+        "string": "Deel storie"
+    },
+    "7": {
+        "string": "Facebook"
+    },
+    "70": {
+        "string": "Wissel storiekieslys"
+    },
+    "71": {
+        "string": "A"
+    },
+    "72": {
+        "string": "B"
+    },
+    "73": {
+        "string": "C"
+    },
+    "74": {
+        "string": "D"
+    },
+    "75": {
+        "string": "Wenk 1 van 2"
+    },
+    "76": {
+        "string": "Tik om na die volgende skerm te gaan"
+    },
+    "77": {
+        "string": "Volgende"
+    },
+    "78": {
+        "string": "Wenk 2 van 2"
+    },
+    "79": {
+        "string": "Vee om na die volgende storie te gaan"
+    },
+    "8": {
+        "string": "Google+"
+    },
+    "80": {
+        "string": "Ek verstaan"
+    },
+    "81": {
+        "string": "Wenk"
+    },
+    "82": {
+        "string": "Vorige bladsy"
+    },
+    "83": {
+        "string": "Aktiveer"
+    },
+    "84": {
+        "string": "TELLING:"
+    },
+    "85": {
+        "string": "Laat wag storie"
+    },
+    "86": {
+        "string": "Speel storie"
+    },
+    "87": {
+        "string": "Maak toe"
+    },
+    "88": {
+        "string": "Slaan volgende oor"
+    },
+    "89": {
+        "string": "Jou antwoord sal gestuur word na"
+    },
+    "9": {
+        "string": "Kry skakel"
+    },
+    "90": {
+        "string": "Volgende storie"
+    },
+    "91": {
+        "string": "Volgende bladsy"
+    },
+    "92": {
+        "string": "Speel weer"
+    },
+    "93": {
+        "string": "Vorige bladsy"
+    },
+    "96": {
+        "string": "Skuif die toestel om te verken"
+    },
+    "97": {
+        "string": "Wird geöffnet"
+    }
 }
