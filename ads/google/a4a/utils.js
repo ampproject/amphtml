@@ -219,6 +219,12 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
   const slotRect = getPageLayoutBoxBlocking(adElement);
   const iframeDepth = iframeNestingDepth(win);
   const enclosingContainers = getEnclosingContainerTypes(adElement);
+  if (
+    a4a.uiHandler.isStickyAd() &&
+    !enclosingContainers.includes(ValidAdContainerTypes['AMP-STICKY-AD'])
+  ) {
+    enclosingContainers.push(ValidAdContainerTypes['AMP-STICKY-AD']);
+  }
   let eids = adElement.getAttribute(EXPERIMENT_ATTRIBUTE);
   if (opt_experimentIds) {
     eids = mergeExperimentIds(opt_experimentIds, eids);
