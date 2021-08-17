@@ -15,24 +15,26 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
-import {VideoEvents} from '../../../src/video-interface';
-import {
-  createFrameFor,
-  objOrParseJson,
-  redispatch,
-} from '../../../src/iframe-video';
-import {dev, userAssert} from '../../../src/log';
 import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
 } from '#core/dom/fullscreen';
-import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {isLayoutSizeDefined} from '#core/dom/layout';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen} from '../../../src/event-helper';
+import {
+  createFrameFor,
+  objOrParseJson,
+  redispatch,
+} from '../../../src/iframe-video';
+import {dev, userAssert} from '../../../src/log';
+import {VideoEvents} from '../../../src/video-interface';
 
 const TAG = 'amp-ooyala-player';
 

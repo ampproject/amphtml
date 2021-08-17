@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import {ChunkPriority, chunk} from '../../../../src/chunk';
+import {Observable} from '#core/data-structures/observable';
+
 import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
 import {LinkReplacementCache} from './link-replacement-cache';
-import {Observable} from '#core/data-structures/observable';
 import {TwoStepsResponse} from './two-steps-response';
+
+import {ChunkPriority, chunk} from '../../../../src/chunk';
 import {userAssert} from '../../../../src/log';
 
 /** @typedef {!Array<{anchor: !HTMLElement, replacementUrl: ?string}>}} */

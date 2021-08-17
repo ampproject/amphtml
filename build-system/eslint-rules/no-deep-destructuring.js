@@ -20,17 +20,29 @@
  *
  * Bad:
  *   const { x: { y } } = obj.prop;
+ *   const {x: [y]} = obj;
+ *   const [[x], y] = arr;
+ *   const [{x}] = arr;
  * Good:
  *   const { y } = obj.prop.x;
+ *   const [x, y] = arr;
+ *
  * @return {!Object}
  */
 module.exports = function (context) {
+  const isPatternOrProperty = (node) =>
+    node.type === 'Property' || node.type === 'ArrayPattern';
+
   return {
     ObjectPattern: function (node) {
-      if (node.parent.type !== 'Property') {
-        return;
+      if (isPatternOrProperty(node.parent)) {
+        context.report({node, message: 'No deep destructuring allowed.'});
       }
-      context.report({node, message: 'No deep object destructuring allowed.'});
+    },
+    ArrayPattern: function (node) {
+      if (isPatternOrProperty(node.parent)) {
+        context.report({node, message: 'No deep destructuring allowed.'});
+      }
     },
   };
 };

@@ -16,7 +16,7 @@
 'use strict';
 
 /**
- * @fileoverview Script that runs tests on Safari during CI.
+ * @fileoverview Script that runs tests on Safari / Firefox / Edge during CI.
  */
 
 const {
@@ -24,23 +24,24 @@ const {
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
+const {browser} = require('minimist')(process.argv.slice(2));
 const {runCiJob} = require('./ci-job');
 const {Targets, buildTargetsInclude} = require('./build-targets');
 
-const jobName = 'safari-tests.js';
+const jobName = 'browser-tests.js';
 
 /**
  * Steps to run during push builds.
  */
 function pushBuildWorkflow() {
   try {
-    timedExecOrThrow('amp unit --report --safari', 'Unit tests failed!');
+    timedExecOrThrow(`amp unit --report --${browser}`, 'Unit tests failed!');
     timedExecOrThrow(
-      'amp integration --report --nobuild --compiled --safari',
+      `amp integration --report --nobuild --minified --${browser}`,
       'Integration tests failed!'
     );
     timedExecOrThrow(
-      'amp e2e --report --nobuild --compiled --browsers=safari',
+      `amp e2e --report --nobuild --minified --browsers=${browser}`,
       'End-to-end tests failed!'
     );
   } catch (e) {
@@ -71,13 +72,16 @@ function prBuildWorkflow() {
     return;
   }
   if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
-    timedExecOrDie('amp unit --safari');
+    timedExecOrDie(`amp unit --${browser}`);
   }
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
-    timedExecOrDie('amp integration --nobuild --compiled --safari');
+    timedExecOrDie(`amp integration --nobuild --minified --${browser}`);
   }
-  if (buildTargetsInclude(Targets.RUNTIME, Targets.E2E_TEST)) {
-    timedExecOrDie('amp e2e --nobuild --compiled --browsers=safari');
+  if (
+    buildTargetsInclude(Targets.RUNTIME, Targets.E2E_TEST) &&
+    ['safari', 'firefox'].includes(browser) // E2E tests can't be run on Edge.
+  ) {
+    timedExecOrDie(`amp e2e --nobuild --minified --browsers=${browser}`);
   }
 }
 

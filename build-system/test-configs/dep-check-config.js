@@ -96,7 +96,6 @@ exports.rules = [
       '3p/**->src/url.js',
       '3p/**->src/config.js',
       '3p/**->src/mode.js',
-      '3p/**->src/3p-frame-messaging.js',
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
@@ -124,7 +123,6 @@ exports.rules = [
       // somewhere else at some point
       'ads/google/a4a/**->src/ad-cid.js',
       'ads/google/a4a/**->src/consent.js',
-      'ads/google/a4a/**->src/amp-element-helpers.js',
       'ads/google/a4a/**->src/experiments/index.js',
       'ads/google/a4a/**->src/service/index.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',

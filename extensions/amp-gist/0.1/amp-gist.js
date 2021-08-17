@@ -27,11 +27,13 @@
  * </code>
  */
 
+import {removeElement} from '#core/dom';
 import {Layout, applyFillContent} from '#core/dom/layout';
+
 import {Services} from '#service';
+
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '#core/dom';
 
 export class AmpGist extends AMP.BaseElement {
   /** @param {!AmpElement} element */

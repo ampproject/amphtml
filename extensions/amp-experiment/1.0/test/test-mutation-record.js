@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '#core/dom';
+
+import {toggleExperiment} from '#experiments';
+
 import {
   assertMutationRecordFormat,
   getElementsFromMutationRecordSelector,
 } from '../mutation-record';
-import {createElementWithAttributes} from '#core/dom';
-import {toggleExperiment} from '#experiments';
 
 const TEST_ELEMENT_CLASS = 'experiment-test-element';
 

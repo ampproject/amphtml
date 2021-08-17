@@ -30,7 +30,7 @@ import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {getTimingDataSync} from '#service/variable-source';
 import * as mode from '#core/mode';
 import {parseJson} from '#core/types/object/json';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {createElementWithAttributes} from '#core/dom';
 
 /** @type {string}  */
@@ -219,6 +219,12 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
   const slotRect = getPageLayoutBoxBlocking(adElement);
   const iframeDepth = iframeNestingDepth(win);
   const enclosingContainers = getEnclosingContainerTypes(adElement);
+  if (
+    a4a.uiHandler.isStickyAd() &&
+    !enclosingContainers.includes(ValidAdContainerTypes['AMP-STICKY-AD'])
+  ) {
+    enclosingContainers.push(ValidAdContainerTypes['AMP-STICKY-AD']);
+  }
   let eids = adElement.getAttribute(EXPERIMENT_ATTRIBUTE);
   if (opt_experimentIds) {
     eids = mergeExperimentIds(opt_experimentIds, eids);
@@ -373,6 +379,7 @@ export function googlePageParameters(a4a, startTime) {
       'uaa': uaDataValues?.architecture,
       'uam': uaDataValues?.model,
       'uafv': uaDataValues?.uaFullVersion,
+      'uab': uaDataValues?.bitness,
     };
   });
 }
@@ -1198,5 +1205,6 @@ function getUserAgentClientHintParameters(win) {
     'architecture',
     'model',
     'uaFullVersion',
+    'bitness',
   ]);
 }

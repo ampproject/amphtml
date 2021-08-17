@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
-import {dev, devAssert, user} from '../../../src/log';
-import {dict, hasOwn} from '#core/types/object';
-import {getData} from '../../../src/event-helper';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {getStyle, setStyles} from '#core/dom/style';
-import {parseUrlDeprecated} from '../../../src/url';
 import {throttle} from '#core/types/function';
+import {dict, hasOwn} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {getData} from '../../../src/event-helper';
+import {dev, devAssert, user} from '../../../src/log';
+import {parseUrlDeprecated} from '../../../src/url';
 
 /**
  * Used to manage messages for different Safeframe ad slots.

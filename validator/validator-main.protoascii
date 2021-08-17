@@ -3778,6 +3778,10 @@ tags: {
     name: "i-amphtml-disable-ar"
     value: ""
   }
+  attrs: {
+    name: "slot"
+    value: "i-amphtml-svc"
+  }
 }
 
 tags: {
@@ -3795,6 +3799,10 @@ tags: {
   attrs: {
     name: "i-amphtml-disable-ar"
     value: ""
+  }
+  attrs: {
+    name: "slot"
+    value: "i-amphtml-svc"
   }
 }
 

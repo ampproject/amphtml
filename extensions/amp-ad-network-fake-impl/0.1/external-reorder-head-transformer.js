@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {endsWith} from '#core/types/string';
+
 import {urls} from '../../../src/config';
 
 export class ExternalReorderHeadTransformer {

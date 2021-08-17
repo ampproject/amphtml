@@ -19,10 +19,12 @@
  * presets.
  */
 
-import {FxType} from '../fx-type';
-import {Services} from '#service';
 import {mapRange} from '#core/math';
+
+import {Services} from '#service';
+
 import {userAssert} from '../../../../src/log';
+import {FxType} from '../fx-type';
 
 const MAX_MOBILE_WIDTH = 480;
 const MAX_TABLET_WIDTH = 1000;
