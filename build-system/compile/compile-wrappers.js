@@ -110,12 +110,15 @@ function extensionPayload(name, version, latest, isModule, loadPriority) {
  * @see {@link bento}
  * TODO(alanorozco): It would be cleaner if we used a "bento-foo" literal for
  * the tag name instead of replacing the prefix in "amp-foo".
+ * TODO(alanorozco): `/amp.js` is relevant only for unminified builds. We add
+ * this only so that tests can pass during CI. Eventually, we'll create separate
+ * binaries and the script check should not be present at all.
  */
 const bentoLoaderFn = removeWhitespace(`
 function (payload) {
   self.AMP
     ? self.AMP.push(payload)
-    : document.head.querySelector('script[src$="v0.js"],script[src$="v0.mjs"]')
+    : document.head.querySelector('script[src$="v0.js"],script[src$="v0.mjs"],script[src$="/amp.mjs"],script[src$="/amp.js"]')
     ? (self.AMP = [payload])
     : payload.f({
         registerElement: function (n, b, s) {
