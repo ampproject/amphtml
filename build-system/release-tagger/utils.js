@@ -111,11 +111,11 @@ async function updateRelease(id, changes) {
 
 /**
  * Get a list of commits between two commits
- * @param {string} base
  * @param {string} head
+ * @param {string} base
  * @return {Promise<Object>}
  */
-async function compareCommits(base, head) {
+async function compareCommits(head, base) {
   const {data} = await octokit.rest.repos.compareCommits({
     owner,
     repo,
@@ -163,7 +163,7 @@ async function getPullRequests(shas) {
  * @return {Promise<Array<GraphQlQueryResponseData>>}
  */
 async function getPullRequestsBetweenCommits(head, base) {
-  const {commits} = await compareCommits(base, head);
+  const {commits} = await compareCommits(head, base);
   const shas = commits.map((commit) => commit.sha);
   return await getPullRequests(shas);
 }

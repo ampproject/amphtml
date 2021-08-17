@@ -45,11 +45,16 @@ const labelConfig = {
  * @return {Promise<Object>}
  */
 async function main(head, base, channel) {
-  const labelId = (await getLabel(labelConfig[channel]))['node_id'];
-  const headSha = (await getRelease(head))['target_commitish'];
-  const baseSha = (await getRelease(base))['target_commitish'];
-  const prs = await getPullRequestsBetweenCommits(headSha, baseSha);
-  return await labelPullRequests(prs, labelId);
+  const [label, headRelease, baseRelease] = await Promise.all([
+    await getLabel(labelConfig[channel]),
+    await getRelease(head),
+    await getRelease(base),
+  ]);
+  const prs = await getPullRequestsBetweenCommits(
+    headRelease['target_commitish'],
+    baseRelease['target_commitish']
+  );
+  return await labelPullRequests(prs, label['node_id']);
 }
 
 main(argv.head, argv.base, argv.label);
