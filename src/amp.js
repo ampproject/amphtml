@@ -21,27 +21,29 @@
 // src/polyfills.js must be the first import.
 import './polyfills';
 
-import {installAutoLightboxExtension} from './auto-lightbox';
-import {startupChunk} from './chunk';
-import {TickLabel} from './core/constants/enums';
-import {installErrorReporting} from './error-reporting';
-import {fontStylesheetTimeout} from './font-stylesheet-timeout';
-import {maybeTrackImpression} from './impression';
-import {internalRuntimeVersion} from './internal-version';
-import {getMode} from './mode';
-import {preconnectToOrigin} from './preconnect';
-import {installPullToRefreshBlocker} from './pull-to-refresh';
-import {adoptWithMultidocDeps} from './runtime';
-import {Services} from './service';
-import {installDocService} from './service/ampdoc-impl';
+import {TickLabel} from '#core/constants/enums';
+import * as mode from '#core/mode';
+
+import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
 import {
   installAmpdocServices,
   installBuiltinElements,
   installRuntimeServices,
-} from './service/core-services';
-import {stubElementsForDoc} from './service/custom-element-registry';
-import {installPerformanceService} from './service/performance-impl';
-import {installPlatformService} from './service/platform-impl';
+} from '#service/core-services';
+import {stubElementsForDoc} from '#service/custom-element-registry';
+import {installPerformanceService} from '#service/performance-impl';
+import {installPlatformService} from '#service/platform-impl';
+
+import {installAutoLightboxExtension} from './auto-lightbox';
+import {startupChunk} from './chunk';
+import {installErrorReporting} from './error-reporting';
+import {fontStylesheetTimeout} from './font-stylesheet-timeout';
+import {maybeTrackImpression} from './impression';
+import {getMode} from './mode';
+import {preconnectToOrigin} from './preconnect';
+import {installPullToRefreshBlocker} from './pull-to-refresh';
+import {adoptWithMultidocDeps} from './runtime';
 import {installStandaloneExtension} from './standalone';
 import {
   installStylesForDoc,
@@ -164,7 +166,7 @@ startupChunk(self.document, function initial() {
 if (self.console) {
   (console.info || console.log).call(
     console,
-    `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
+    `Powered by AMP ⚡ HTML – Version ${mode.version()}`,
     self.location.href
   );
 }
@@ -172,7 +174,4 @@ if (self.console) {
 if (getMode().localDev) {
   self.document.documentElement.setAttribute('esm', IS_ESM ? 1 : 0);
 }
-self.document.documentElement.setAttribute(
-  'amp-version',
-  internalRuntimeVersion()
-);
+self.document.documentElement.setAttribute('amp-version', mode.version());

@@ -18,11 +18,12 @@ import {
   deserializeMessage,
   listen,
   serializeMessage,
-} from '../src/3p-frame-messaging';
+} from '#core/3p-frame-messaging';
 import {Observable} from '#core/data-structures/observable';
-import {dev} from '../src/log';
 import {dict, map} from '#core/types/object';
+
 import {getData} from '../src/event-helper';
+import {dev} from '../src/log';
 import {getMode} from '../src/mode';
 
 export class IframeMessagingClient {

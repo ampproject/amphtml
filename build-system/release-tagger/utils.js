@@ -21,16 +21,68 @@
  * TODO: error handling
  */
 
-// setup
+const dedent = require('dedent');
+const {GraphQlQueryResponseData, graphql} = require('@octokit/graphql'); //eslint-disable-line no-unused-vars
 const {Octokit} = require('@octokit/rest');
+
+// setup
 const octokit = new Octokit({
-  auth: '',
+  auth: process.env.GITHUB_TOKEN,
   userAgent: 'amp release tagger',
-  previews: ['groot-preview'], // to list pull requests by commit
   timeZone: 'America/New_York',
+});
+
+const graphqlWithAuth = graphql.defaults({
+  headers: {
+    authorization: `token ${process.env.GITHUB_TOKEN}`,
+  },
 });
 const owner = 'ampproject';
 const repo = 'amphtml';
+
+const config = {
+  singleNodeQueryLimit: 100,
+  totalNodeQueryLimit: 500000,
+  batchSize: 20,
+};
+
+/**
+ * Queries the GitHub GraphQL API in batches.
+ * @param {string} queryType
+ * @param {Array<string>} queries
+ * @return {Promise<Array<GraphQlQueryResponseData>>}
+ */
+async function _runQueryInBatches(queryType, queries) {
+  const responses = [];
+  for (let i = 0; i < queries.length; i += config.batchSize) {
+    const join = queries
+      .slice(i, i + Math.min(queries.length, config.batchSize))
+      .join(' ');
+    const query = `${queryType} {${join}}`;
+    const data = await graphqlWithAuth({query});
+    responses.push(...Object.values(data));
+  }
+  return responses;
+}
+
+/**
+ * Create a GitHub release
+ * @param {string} tag
+ * @param {string} commit
+ * @param {string} body
+ * @return {Promise<Object>}
+ */
+async function createRelease(tag, commit, body) {
+  return await octokit.rest.repos.createRelease({
+    owner,
+    repo,
+    name: tag,
+    'tag_name': tag,
+    'target_commitish': commit,
+    body,
+    prerelease: true,
+  });
+}
 
 /**
  * Get a GitHub release by tag name
@@ -57,7 +109,68 @@ async function updateRelease(id, changes) {
   });
 }
 
+/**
+ * Get a list of commits between two commits
+ * @param {string} base
+ * @param {string} head
+ * @return {Promise<Object>}
+ */
+async function compareCommits(base, head) {
+  const {data} = await octokit.rest.repos.compareCommits({
+    owner,
+    repo,
+    base,
+    head,
+  });
+  return data;
+}
+
+/**
+ * Get pull requests associated with a list of commits
+ * @param {Array<string>} shas
+ * @return {Promise<Array<GraphQlQueryResponseData>>}
+ */
+async function getPullRequests(shas) {
+  const queries = [];
+  for (const [i, sha] of shas.entries()) {
+    queries.push(
+      dedent`\
+      pr${i}: search(query:"repo:${owner}/${repo} sha:${sha}", type:ISSUE \
+      first:${config.singleNodeQueryLimit}){\
+      nodes { ... on PullRequest { id title number url author { login } \
+      files(first:${config.singleNodeQueryLimit}) { nodes { path }} \
+      mergeCommit { commitUrl oid abbreviatedOid }}}}`
+    );
+  }
+  const nodesLists = await _runQueryInBatches('query', queries);
+
+  // Only return pull requests with the merge commit shas
+  const prs = [];
+  for (const nodesList of nodesLists) {
+    for (const node of nodesList.nodes) {
+      if (node.mergeCommit && shas.includes(node.mergeCommit.oid)) {
+        prs.push(node);
+      }
+    }
+  }
+  return prs;
+}
+
+/**
+ * Get pull requests between two commits
+ * @param {string} commit
+ * @param {string} previousCommit
+ * @return {Promise<Array<GraphQlQueryResponseData>>}
+ */
+async function getPullRequestsBetweenCommits(commit, previousCommit) {
+  const {commits} = await compareCommits(previousCommit, commit);
+  const shas = commits.map((commit) => commit.sha);
+  return await getPullRequests(shas);
+}
+
 module.exports = {
+  getPullRequestsBetweenCommits,
+  createRelease,
   getRelease,
   updateRelease,
 };

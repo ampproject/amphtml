@@ -14,21 +14,25 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
-import {CommonSignals} from '#core/constants/common-signals';
-import {Services} from '#service';
 import {addExperimentIdToElement} from '#ads/google/a4a/traffic-experiments';
+
+import {CommonSignals} from '#core/constants/common-signals';
+import {removeElement} from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {realChildElements} from '#core/dom/query';
 import {
   computedStyle,
   removeAlphaFromColor,
   setStyle,
   toggle,
 } from '#core/dom/style';
-import {dev, user, userAssert} from '../../../src/log';
+
 import {isExperimentOn} from '#experiments';
-import {realChildElements} from '#core/dom/query';
-import {removeElement} from '#core/dom';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+
+import {Services} from '#service';
+
+import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
+import {dev, user, userAssert} from '../../../src/log';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -135,7 +139,10 @@ class AmpStickyAd extends AMP.BaseElement {
     }
 
     if (!enableConversion) {
-      return null;
+      // Wait for the amp-ad extension to be loaded for a fairer comparison
+      return Services.extensionsFor(this.win)
+        .loadElementClass('amp-ad', '0.1')
+        .then(() => null);
     }
 
     ad.setAttribute('sticky', 'bottom');

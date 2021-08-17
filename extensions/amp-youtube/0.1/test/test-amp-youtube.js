@@ -16,9 +16,11 @@
 
 import '../amp-youtube';
 import {Services} from '#service';
-import {VideoEvents} from '../../../../src/video-interface';
+
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
+
 import {listenOncePromise} from '../../../../src/event-helper';
+import {VideoEvents} from '../../../../src/video-interface';
 
 const EXAMPLE_VIDEOID = 'mGENRKrdoGY';
 const EXAMPLE_LIVE_CHANNELID = 'UCB8Kb4pxYzsDsHxzBfnid4Q';
@@ -111,9 +113,9 @@ describes.realWin(
         });
         const iframe = yt.querySelector('iframe');
         expect(iframe.src).to.contain('myParam=hello%20world');
-        // data-param-autoplay is black listed in favor of just autoplay
+        // data-param-autoplay is disallowed in favor of just autoplay
         expect(iframe.src).to.not.contain('autoplay=1');
-        // data-param-loop is black listed in favor of just loop for single videos
+        // data-param-loop is disallowed in favor of just loop for single videos
         expect(iframe.src).to.not.contain('loop=1');
         // playsinline should default to 1 if not provided.
         expect(iframe.src).to.contain('playsinline=1');

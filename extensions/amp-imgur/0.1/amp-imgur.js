@@ -28,12 +28,14 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {createElementWithAttributes, removeElement} from '#core/dom';
-import {getData, listen} from '../../../src/event-helper';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {isObject} from '#core/types';
 import {tryParseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {getData, listen} from '../../../src/event-helper';
 import {user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-imgur';

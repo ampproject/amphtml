@@ -418,16 +418,20 @@ async function finishBundle(
 /**
  * Transforms a given JavaScript file entry point with esbuild and babel, and
  * watches it for changes (if required).
+ *
  * @param {string} srcDir
  * @param {string} srcFilename
  * @param {string} destDir
  * @param {?Object} options
  * @return {!Promise}
  */
-async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
+async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const startTime = Date.now();
   const entryPoint = path.join(srcDir, srcFilename);
-  const destFilename = options.toName || srcFilename;
+  const fileName = options.minify
+    ? options.minifiedName
+    : options.toName ?? srcFilename;
+  const destFilename = options.npm ? fileName : maybeToEsmName(fileName);
   const destFile = path.join(destDir, destFilename);
 
   if (watchedTargets.has(entryPoint)) {
@@ -447,74 +451,7 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       footer: {js: wrapper.slice(start + sentinel.length)},
     };
   }
-
   const {banner, footer} = splitWrapper();
-  const babelPlugin = getEsbuildBabelPlugin(
-    'unminified',
-    /* enableCache */ true
-  );
-
-  const buildResult = await esbuild
-    .build({
-      entryPoints: [entryPoint],
-      bundle: true,
-      sourcemap: true,
-      define: experimentDefines,
-      outfile: destFile,
-      plugins: [babelPlugin],
-      banner,
-      footer,
-      incremental: !!options.watch,
-      logLevel: 'silent',
-    })
-    .then((result) => {
-      finishBundle(srcFilename, destDir, destFilename, options, startTime);
-      return result;
-    })
-    .catch((err) => handleBundleError(err, !!options.watch, destFilename));
-
-  if (options.watch) {
-    watchedTargets.set(entryPoint, {
-      rebuild: async () => {
-        const time = Date.now();
-        const {rebuild} = /** @type {Required<esbuild.BuildResult>} */ (
-          buildResult
-        );
-
-        const buildPromise = rebuild()
-          .then(() =>
-            finishBundle(srcFilename, destDir, destFilename, options, time)
-          )
-          .catch((err) =>
-            handleBundleError(err, /* continueOnError */ true, destFilename)
-          );
-        options?.onWatchBuild(buildPromise);
-        await buildPromise;
-      },
-    });
-  }
-}
-
-/**
- * Transforms a given JavaScript file entry point with esbuild and babel, and
- * watches it for changes (if required).
- * Used by 3p iframe vendors.
- * @param {string} srcDir
- * @param {string} srcFilename
- * @param {string} destDir
- * @param {?Object} options
- * @return {!Promise}
- */
-async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
-  const startTime = Date.now();
-  const entryPoint = path.join(srcDir, srcFilename);
-  const fileName = options.minify ? options.minifiedName : options.toName;
-  const destFilename = options.npm ? fileName : maybeToEsmName(fileName);
-  const destFile = path.join(destDir, destFilename);
-
-  if (watchedTargets.has(entryPoint)) {
-    return watchedTargets.get(entryPoint).rebuild();
-  }
 
   const babelPlugin = getEsbuildBabelPlugin(
     options.minify ? 'minified' : 'unminified',
@@ -529,29 +466,45 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
   let result = null;
 
   /**
-   * @param {number} time
+   * @param {number} startTime
    * @return {Promise<void>}
    */
-  async function build(time) {
+  async function build(startTime) {
     if (!result) {
       result = await esbuild.build({
         entryPoints: [entryPoint],
         bundle: true,
         sourcemap: true,
         outfile: destFile,
+        define: experimentDefines,
         plugins,
-        minify: options.minify,
-        format: options.outputFormat || undefined,
+        format: options.outputFormat,
+        banner,
+        footer,
+        // For es5 builds, ensure esbuild-injected code is transpiled.
         target: argv.esm ? 'es6' : 'es5',
         incremental: !!options.watch,
         logLevel: 'silent',
         external: options.externalDependencies,
+        write: false,
       });
     } else {
       result = await result.rebuild();
     }
-    await minifyWithTerser(destDir, destFilename, options);
-    await finishBundle(srcFilename, destDir, destFilename, options, time);
+    let code = result.outputFiles.find(({path}) => !path.endsWith('.map')).text;
+    let map = result.outputFiles.find(({path}) => path.endsWith('.map')).text;
+
+    if (options.minify) {
+      ({code, map} = await minify(code, map));
+    }
+
+    await Promise.all([
+      fs.outputFile(destFile, code),
+      fs.outputFile(`${destFile}.map`, map),
+    ]);
+
+    // TODO: finishBundle should operate in-mem instead of reading/writing from FS.
+    await finishBundle(srcFilename, destDir, destFilename, options, startTime);
   }
 
   /**
@@ -586,8 +539,8 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
   if (options.watch) {
     watchedTargets.set(entryPoint, {
       rebuild: async () => {
-        const time = Date.now();
-        const buildPromise = build(time).catch((err) =>
+        const startTime = Date.now();
+        const buildPromise = build(startTime).catch((err) =>
           handleBundleError(err, !!options.watch, destFilename)
         );
         if (options.onWatchBuild) {
@@ -602,39 +555,36 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
 /**
  * Minify the code with Terser. Only used by the ESBuild.
  *
- * @param {string} destDir
- * @param {string} destFilename
- * @param {?Object} options
- * @return {!Promise}
+ * @param {string} code
+ * @param {string} map
+ * @return {!Promise<{code: string, map: *, error?: Error}>}
  */
-async function minifyWithTerser(destDir, destFilename, options) {
-  if (!options.minify) {
-    return;
-  }
-
-  const filename = path.join(destDir, destFilename);
+async function minify(code, map) {
   const terserOptions = {
-    mangle: true,
-    compress: true,
+    mangle: {},
+    compress: {
+      // Settled on this count by incrementing number until there was no more
+      // effect on minification quality.
+      passes: 3,
+    },
     output: {
       beautify: !!argv.pretty_print,
-      comments: /\/*/,
       // eslint-disable-next-line google-camelcase/google-camelcase
       keep_quoted_props: true,
+      preamble: ';',
     },
-    sourceMap: true,
+    sourceMap: {content: map},
+    module: !!argv.esm,
   };
-  const minified = await terser.minify(
-    fs.readFileSync(filename, 'utf8'),
-    terserOptions
-  );
-  const remapped = remapping(
-    [minified.map, fs.readFileSync(`${filename}.map`, 'utf8')],
-    () => null,
-    !argv.full_sourcemaps
-  );
-  fs.writeFileSync(filename, minified.code);
-  fs.writeFileSync(`${filename}.map`, remapped.toString());
+
+  const minified = await terser.minify(code, terserOptions);
+  if (!minified.code) {
+    throw new Error(
+      `Minification resulted in an empty bundle. This should never happen.`
+    );
+  }
+
+  return {code: minified.code, map: minified.map};
 }
 
 /**
@@ -676,7 +626,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
   async function doCompileJs(options) {
     const buildResult = options.minify
       ? compileMinifiedJs(srcDir, srcFilename, destDir, options)
-      : compileUnminifiedJs(srcDir, srcFilename, destDir, options);
+      : esbuildCompile(srcDir, srcFilename, destDir, options);
     if (options.onWatchBuild) {
       options.onWatchBuild(buildResult);
     }
@@ -874,10 +824,9 @@ module.exports = {
   compileAllJs,
   compileCoreRuntime,
   compileJs,
-  compileJsWithEsbuild,
+  esbuildCompile,
   doBuildJs,
   endBuildStep,
-  compileUnminifiedJs,
   maybePrintCoverageMessage,
   maybeToEsmName,
   maybeToNpmEsmName,

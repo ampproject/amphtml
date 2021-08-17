@@ -14,23 +14,27 @@
  * limitations under the License.
  */
 
+import {deserializeMessage, isAmpMessage} from '#core/3p-frame-messaging';
 import {AmpEvents} from '#core/constants/amp-events';
-import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
-import {FakeLocation} from './fake-dom';
-import {FormEvents} from '../extensions/amp-form/0.1/form-events';
+
+import {install as installCustomElements} from '#polyfills/custom-elements';
+
 import {Services} from '#service';
-import {cssText as ampDocCss} from '../build/ampdoc.css';
-import {cssText as ampSharedCss} from '../build/ampshared.css';
-import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
-import {dev} from '../src/log';
+import {installDocService} from '#service/ampdoc-impl';
 import {
   installAmpdocServices,
   installRuntimeServices,
 } from '#service/core-services';
-import {install as installCustomElements} from '#polyfills/custom-elements';
-import {installDocService} from '#service/ampdoc-impl';
 import {installExtensionsService} from '#service/extensions-impl';
+
+import {FakeLocation} from './fake-dom';
+
+import {cssText as ampDocCss} from '../build/ampdoc.css';
+import {cssText as ampSharedCss} from '../build/ampshared.css';
+import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
+import {FormEvents} from '../extensions/amp-form/0.1/form-events';
 import {parseIfNeeded} from '../src/iframe-helper';
+import {dev} from '../src/log';
 
 let iframeCount = 0;
 

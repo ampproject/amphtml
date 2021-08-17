@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-import {AmpStoryPlayer} from '../../../src/amp-story-player/amp-story-player-impl';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {observeContentSize} from '#core/dom/layout/size-observer';
+import {closest} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyles} from '#core/dom/style';
+
 import {
   addAttributeAfterTimeout,
   removeAfterTimeout,
   updateHash,
 } from './utils';
-import {closest} from '#core/dom/query';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {htmlFor} from '#core/dom/static-template';
-import {observeContentSize} from '#core/dom/layout/size-observer';
-import {setStyles} from '#core/dom/style';
+
+import {AmpStoryPlayer} from '../../../src/amp-story-player/amp-story-player-impl';
 
 /**
  * Creates a tab content, will be deleted when the tabs get implemented.

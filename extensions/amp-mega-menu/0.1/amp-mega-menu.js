@@ -15,21 +15,23 @@
  */
 
 import {AmpEvents} from '#core/constants/amp-events';
-import {CSS} from '../../../build/amp-mega-menu-0.1.css';
 import {Keys} from '#core/constants/key-codes';
+import {isConnectedNode, isRTL, tryFocus} from '#core/dom';
 import {Layout} from '#core/dom/layout';
-import {Services} from '#service';
+import {setModalAsClosed, setModalAsOpen} from '#core/dom/modal';
 import {
   closest,
   closestAncestorElementBySelector,
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
-import {dev, userAssert} from '../../../src/log';
-import {isConnectedNode, isRTL, tryFocus} from '#core/dom';
 import {mod} from '#core/math';
-import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {toArray} from '#core/types/array';
+
+import {Services} from '#service';
+
+import {CSS} from '../../../build/amp-mega-menu-0.1.css';
+import {dev, userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-mega-menu';

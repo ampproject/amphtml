@@ -26,7 +26,7 @@ import {ActionTrust} from '#core/constants/action-constants';
 import {Services} from '#service';
 import {htmlFor} from '#core/dom/static-template';
 import {waitFor} from '#testing/test-helper';
-import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 describes.realWin(
   'amp-render-v1.0',
@@ -963,6 +963,48 @@ describes.realWin(
       element.enqueAction(invocation('resizeToContents'));
       await getRenderedData();
       expect(fakeMutator.forceChangeSize).to.be.calledOnce;
+    });
+
+    it('should preserve the wrapper element for template tag', async () => {
+      env.sandbox.stub(BatchedJsonModule, 'batchFetchJsonFor').resolves({
+        'menu': '<li>Item 2</li><li>Item 3</li>',
+      });
+
+      // prettier-ignore
+      element = html`
+        <amp-render
+          binding="never"
+          src="https://example.com/data.json"
+          width="auto"
+          height="300"
+          layout="fixed-height">
+          <template type="amp-mustache"><ul><li>Item 1</li>{{{menu}}}</ul></template></amp-render>`;
+      doc.body.appendChild(element);
+
+      const wrapper = await waitRendered();
+      expect(wrapper.innerHTML).to.equal(
+        '<ul><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul>'
+      );
+    });
+
+    it('should preserve the wrapper element for script template tag', async () => {
+      env.sandbox.stub(BatchedJsonModule, 'batchFetchJsonFor').resolves({
+        'menu': '<p>Hello</p>',
+      });
+
+      // prettier-ignore
+      element = html`
+        <amp-render
+          binding="never"
+          src="https://example.com/data.json"
+          width="auto"
+          height="300"
+          layout="fixed-height">
+          <script type="text/plain" template="amp-mustache">{{{menu}}}</script></amp-render>`;
+      doc.body.appendChild(element);
+
+      const wrapper = await waitRendered();
+      expect(wrapper.innerHTML).to.equal('<p>Hello</p>');
     });
   }
 );

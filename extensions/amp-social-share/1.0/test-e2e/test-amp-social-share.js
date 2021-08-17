@@ -24,7 +24,7 @@ describes.endtoend(
     experiments: ['bento-social-share'],
     environments: ['single', 'viewer-demo'],
   },
-  async (env) => {
+  (env) => {
     let controller;
 
     beforeEach(() => {

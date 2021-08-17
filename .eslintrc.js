@@ -189,7 +189,6 @@ module.exports = {
     'local/is-experiment-on': 2,
     'local/json-configuration': 2,
     'local/jss-animation-name': 2,
-    'local/no-array-destructuring': 2,
     'local/no-arrow-on-register-functions': 2,
     'local/no-bigint': 2,
     'local/no-deep-destructuring': 2,
@@ -460,6 +459,10 @@ module.exports = {
           'rollup-plugin-cleanup',
         ],
       },
+    },
+    {
+      'files': ['3p/**/*.js', 'src/**/*.js', 'test/**/*.js', 'testing/**/*.js'],
+      'rules': {'import/order': 2},
     },
   ],
 };
