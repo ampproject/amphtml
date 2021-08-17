@@ -116,20 +116,10 @@ async function runPreDistSteps(options) {
  * @return {Promise<void>}
  */
 async function dist() {
-  await doDist();
-}
-
-/**
- * Performs a minified build with the given extra args.
- *
- * @param {Object=} extraArgs
- * @return {Promise<void>}
- */
-async function doDist(extraArgs = {}) {
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
   const options = {
-    fortesting: extraArgs.fortesting || argv.fortesting,
+    fortesting: argv.fortesting,
     minify: true,
     watch: argv.watch,
   };
@@ -382,7 +372,6 @@ async function preBuildLoginDoneVersion(version) {
 
 module.exports = {
   dist,
-  doDist,
   runPreDistSteps,
 };
 
