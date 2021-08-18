@@ -127,11 +127,19 @@ export {StreamGallery};
  * @param {!StreamGalleryDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-function DefaultArrow({by, className, outsetArrows, ...rest}) {
+function DefaultArrow({
+  'aria-disabled': ariaDisabled,
+  by,
+  className,
+  disabled,
+  onClick,
+  outsetArrows,
+}) {
   const classes = useStyles();
   return (
     <div className={className}>
       <button
+        aria-disabled={ariaDisabled}
         aria-hidden="true"
         className={objstr({
           [classes.arrow]: true,
@@ -140,7 +148,8 @@ function DefaultArrow({by, className, outsetArrows, ...rest}) {
           [classes.outsetArrow]: outsetArrows,
           [classes.insetArrow]: !outsetArrows,
         })}
-        {...rest}
+        disabled={disabled}
+        onClick={onClick}
       >
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path

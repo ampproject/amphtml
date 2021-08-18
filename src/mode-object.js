@@ -10,7 +10,7 @@ export function getModeObject(opt_win) {
   return {
     localDev: getMode(opt_win).localDev,
     development: getMode(opt_win).development,
-    esm: IS_ESM,
+    esm: getMode(opt_win).esm,
     test: getMode(opt_win).test,
     rtvVersion: getMode(opt_win).rtvVersion,
   };

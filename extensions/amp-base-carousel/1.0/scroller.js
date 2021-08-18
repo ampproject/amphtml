@@ -47,12 +47,12 @@ function ScrollerWithRef(
     lightboxGroup,
     loop,
     mixedLength,
+    onClick,
     restingIndex,
     setRestingIndex,
     snap,
     snapBy = 1,
     visibleCount,
-    ...rest
   },
   ref
 ) {
@@ -253,12 +253,12 @@ function ScrollerWithRef(
   return (
     <div
       ref={containerRef}
+      onClick={onClick}
       onScroll={handleScroll}
       class={`${classes.scrollContainer} ${classes.hideScrollbar} ${
         axis === Axis.X ? classes.horizontalScroll : classes.verticalScroll
       }`}
       tabindex={0}
-      {...rest}
     >
       {slides}
     </div>

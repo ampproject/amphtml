@@ -5,6 +5,7 @@ import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {scopedQuerySelector} from '#core/dom/query';
 import {propagateObjectFitStyles, setImportantStyles} from '#core/dom/style';
+import * as mode from '#core/mode';
 
 import {Services} from '#service';
 import {registerElement} from '#service/custom-element-registry';
@@ -126,7 +127,7 @@ export class AmpImg extends BaseElement {
       );
       this.propagateDataset(this.img_);
 
-      if (!IS_ESM) {
+      if (!mode.isEsm()) {
         guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
       }
 
@@ -207,7 +208,7 @@ export class AmpImg extends BaseElement {
     this.maybeGenerateSizes_(/* sync setAttribute */ true);
     propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.element, this.img_);
     this.propagateDataset(this.img_);
-    if (!IS_ESM) {
+    if (!mode.isEsm()) {
       guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
     }
     applyFillContent(this.img_, true);

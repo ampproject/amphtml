@@ -5,11 +5,11 @@ import {getHashParams} from '#core/types/string/url';
  * @typedef {{
  *   localDev: boolean,
  *   development: boolean,
+ *   esm: boolean,
  *   test: boolean,
  *   rtvVersion: string,
  *   runtime: (null|string|undefined),
- *   a4aId: (null|string|undefined),
- *   esm: (boolean|undefined),
+ *   a4aId: (null|string|undefined)
  * }}
  */
 export let ModeDef;
@@ -49,7 +49,7 @@ function getMode_(win) {
   return {
     localDev: coreMode.isLocalDev(win),
     development: isModeDevelopment(win, hashParams),
-    esm: IS_ESM,
+    esm: coreMode.isEsm(),
     test: coreMode.isTest(win),
     rtvVersion: getRtvVersion(win),
   };

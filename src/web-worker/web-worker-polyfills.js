@@ -3,13 +3,15 @@
  *     can be used in top-level scope in module dependencies.
  */
 
+import * as mode from '#core/mode';
+
 import {install as installArrayIncludes} from '#polyfills/array-includes';
 import {install as installMathSign} from '#polyfills/math-sign';
 import {install as installObjectAssign} from '#polyfills/object-assign';
 import {install as installObjectValues} from '#polyfills/object-values';
 import {install as installStringStartsWith} from '#polyfills/string-starts-with';
 
-if (!IS_ESM) {
+if (!mode.isEsm()) {
   installArrayIncludes(self);
   installObjectAssign(self);
   installObjectValues(self);

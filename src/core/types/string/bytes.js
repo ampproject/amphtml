@@ -1,4 +1,5 @@
 import {devAssert} from '#core/assert';
+import * as mode from '#core/mode';
 
 /**
  * Interpret a byte array as a UTF-8 string.
@@ -87,7 +88,7 @@ export function getCryptoRandomBytesArray(win, length) {
   let {crypto} = win;
 
   // Support IE 11
-  if (!IS_ESM) {
+  if (!mode.isEsm()) {
     crypto = /** @type {!webCrypto.Crypto|undefined} */ (
       crypto || win.msCrypto
     );

@@ -1,3 +1,4 @@
+import * as mode from '#core/mode';
 import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {toWin} from '#core/window';
@@ -31,7 +32,6 @@ const DEFAULT_CUSTOM_EVENT_OPTIONS = {bubbles: true, cancelable: true};
  * @param {!Element} parent
  * @param {function(!Element):boolean} checkFunc
  * @param {function()} callback
- * @suppress {suspiciousCode} due to IS_ESM
  */
 export function waitForChild(parent, checkFunc, callback) {
   if (checkFunc(parent)) {
@@ -39,7 +39,7 @@ export function waitForChild(parent, checkFunc, callback) {
     return;
   }
   const win = toWin(parent.ownerDocument.defaultView);
-  if (IS_ESM || win.MutationObserver) {
+  if (mode.isEsm() || win.MutationObserver) {
     const observer = new win.MutationObserver(() => {
       if (checkFunc(parent)) {
         observer.disconnect();

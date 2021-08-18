@@ -357,7 +357,7 @@ function adoptServicesAndResources(global) {
  */
 function adoptMultiDocDeps(global) {
   global.AMP.installAmpdocServices = installAmpdocServices.bind(null);
-  if (IS_ESM) {
+  if (mode.isEsm()) {
     const style = global.document.querySelector('style[amp-runtime]');
     global.AMP.combinedCss = style ? style.textContent : '';
   } else {
@@ -430,7 +430,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
     return false;
   }
 
-  if (IS_ESM) {
+  if (mode.isEsm()) {
     // If we're in a module runtime, trying to execute a nomodule extension
     // simply remove the nomodule extension so that it is not executed.
     if (!fnOrStruct.m) {

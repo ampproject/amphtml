@@ -1,5 +1,7 @@
 /** @fileoverview Installs polyfills depending on build environment. */
 
+import * as mode from '#core/mode';
+
 import {install as installAbortController} from './abort-controller';
 import {install as installArrayIncludes} from './array-includes';
 import {install as installCustomElements} from './custom-elements';
@@ -18,7 +20,7 @@ import {install as installSet} from './set';
 import {install as installStringStartsWith} from './string-starts-with';
 import {install as installWeakMapSet} from './weakmap-set';
 
-if (!IS_ESM) {
+if (!mode.isEsm()) {
   installFetch(self);
   installMathSign(self);
   installObjectAssign(self);
@@ -33,7 +35,7 @@ if (!IS_ESM) {
 
 // Polyfills that depend on DOM availability
 if (self.document) {
-  if (!IS_ESM) {
+  if (!mode.isEsm()) {
     installDOMTokenList(self);
     installDocContains(self);
     installGetBoundingClientRect(self);

@@ -1,4 +1,5 @@
 import {LruCache} from '#core/data-structures/lru-cache';
+import * as mode from '#core/mode';
 
 import {urls} from '../config';
 import {registerServiceBuilderForDoc} from '../service-helpers';
@@ -30,7 +31,7 @@ export class Url {
     this.anchor_ = /** @type {!HTMLAnchorElement} */ (doc.createElement('a'));
 
     /** @private @const {?LruCache} */
-    this.cache_ = IS_ESM ? null : new LruCache(100);
+    this.cache_ = mode.isEsm() ? null : new LruCache(100);
   }
 
   /**
@@ -45,7 +46,7 @@ export class Url {
     return parseUrlWithA(
       this.anchor_,
       url,
-      IS_ESM || opt_nocache ? null : this.cache_
+      mode.isEsm() || opt_nocache ? null : this.cache_
     );
   }
 

@@ -18,10 +18,6 @@ const v0MjsMap = 'dist/v0.mjs.map';
 const sourcemapUrlMatcher =
   'https://raw.githubusercontent.com/ampproject/amphtml/\\d{13}/';
 
-// Mapping related constants
-const expectedFirstLineFile = 'src/polyfills/abort-controller.js'; // First file that is compiled into v0.js.
-const expectedFirstLineCode = 'class AbortController {'; // First line of code in that file.
-
 /**
  * Build runtime with sourcemaps if needed.
  */
@@ -129,17 +125,23 @@ function checkSourcemapMappings(sourcemapJson, map) {
     'If this change is intentional, update the mapping related constants in ' +
     cyan('build-system/tasks/check-sourcemaps.js') +
     '.';
-  if (firstLineFile != expectedFirstLineFile) {
+
+  // Mapping related constants
+  const expectedFirstLine = map.includes('mjs')
+    ? {file: 'src/core/mode/version.js', code: 'function version() {'}
+    : {file: 'src/core/mode/prod.js', code: 'export function isProd() {'};
+
+  if (firstLineFile != expectedFirstLine.file) {
     log(red('ERROR:'), 'Found mapping for incorrect file.');
     log('Actual:', cyan(firstLineFile));
-    log('Expected:', cyan(expectedFirstLineFile));
+    log('Expected:', cyan(expectedFirstLine.file));
     log(helpMessage);
     throw new Error('Found mapping for incorrect file');
   }
-  if (firstLineCode != expectedFirstLineCode) {
+  if (firstLineCode != expectedFirstLine.code) {
     log(red('ERROR:'), 'Found mapping for incorrect code.');
     log('Actual:', cyan(firstLineCode));
-    log('Expected:', cyan(expectedFirstLineCode));
+    log('Expected:', cyan(expectedFirstLine.code));
     log(helpMessage);
     throw new Error('Found mapping for incorrect code');
   }

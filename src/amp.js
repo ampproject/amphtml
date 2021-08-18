@@ -118,12 +118,12 @@ startupChunk(self.document, function initial() {
   installPerformanceService(self);
   /** @const {!./service/performance-impl.Performance} */
   const perf = Services.performanceFor(self);
-  if (IS_ESM) {
+  if (mode.isEsm()) {
     perf.addEnabledExperiment('esm');
   }
   fontStylesheetTimeout(self);
   perf.tick(TickLabel.INSTALL_STYLES);
-  if (IS_ESM) {
+  if (mode.isEsm()) {
     bootstrap(ampdoc, perf);
     return;
   }
@@ -156,6 +156,6 @@ if (self.console) {
 }
 // This code is eleminated in prod build through a babel transformer.
 if (getMode().localDev) {
-  self.document.documentElement.setAttribute('esm', IS_ESM ? 1 : 0);
+  self.document.documentElement.setAttribute('esm', mode.isEsm() ? 1 : 0);
 }
 self.document.documentElement.setAttribute('amp-version', mode.version());

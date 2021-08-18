@@ -1,3 +1,5 @@
+import * as mode from '#core/mode';
+
 import {registerServiceBuilder} from '../service-helpers';
 
 /**
@@ -84,7 +86,7 @@ export class Platform {
    * @return {boolean}
    */
   isIe() {
-    if (IS_ESM) {
+    if (mode.isEsm()) {
       return false;
     }
     return /Trident|MSIE|IEMobile/i.test(this.navigator_.userAgent);
