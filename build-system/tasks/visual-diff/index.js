@@ -231,7 +231,7 @@ async function launchWebServer() {
   await startServer(
     {host: HOST, port: PORT},
     {quiet: !argv.webserver_debug},
-    {compiled: true}
+    {minified: true}
   );
 }
 

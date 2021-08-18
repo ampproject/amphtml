@@ -31,7 +31,7 @@ function sxgTransform(node: posthtml.Node, options: OptionSet = {}): posthtml.No
     return node;
   }
 
-  if (options.compiled) {
+  if (options.minified) {
     const src = node.attrs.src;
     node.attrs.src = src.replace('.js', '.sxg.js');
   } else {
