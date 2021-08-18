@@ -36,24 +36,9 @@ export function RedditWithRef({embedtype, src, ...rest}, ref) {
     // console.log(e);
   }, []);
 
-  // Examples of state and hooks
-  // DO NOT SUBMIT: This is example code only.
-  const [exampleValue, setExampleValue] = useState(0);
-  const exampleRef = useRef(null);
-  useCallback(() => {
-    /* Do things */
-  }, []);
-  useEffect(() => {
-    /* Do things */
-  }, []);
-  useLayoutEffect(() => {
-    /* Do things */
-  }, []);
-  useMemo(() => {
-    /* Do things */
-  }, []);
+  const options = useMemo(() => ({src}), [src]);
 
-  return <ProxyIframeEmbed ref={ref} src={src} type="reddit" {...rest} />;
+  return <ProxyIframeEmbed ref={ref} options={options} type="reddit" {...rest} />;
 }
 
 const Reddit = forwardRef(RedditWithRef);

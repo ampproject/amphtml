@@ -28,12 +28,12 @@ export const _default = () => {
   return (
     <Reddit
       style={{width: 300, height: 200}}
-      options={{"src":"https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed"}}
+      src=
+          'https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed'
     ></Reddit>
   );
 };
-      // src=
-      //     'https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed'
+      // options={{"src":"https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed"}}
 
 // <Reddit
 //   style={{width: 300, height: 200}}
