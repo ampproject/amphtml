@@ -93,14 +93,6 @@ export class AnalyticsRoot {
   getRoot() {}
 
   /**
-   * The viewer of analytics root
-   * @return {!../../../src/service/viewer-interface.ViewerInterface}
-   */
-  getViewer() {
-    return Services.viewerForDoc(this.ampdoc);
-  }
-
-  /**
    * The root element within the analytics root.
    *
    * @return {!Element}
