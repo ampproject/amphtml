@@ -199,7 +199,14 @@ function CloseButton({onClick, as: Comp = ScreenReaderCloseButton}) {
  * @param {!LightboxDef.CloseButtonProps} props
  * @return {PreactDef.Renderable}
  */
-function ScreenReaderCloseButton(props) {
+function ScreenReaderCloseButton({'aria-label': ariaLabel, onClick}) {
   const classes = useStyles();
-  return <button {...props} tabIndex={-1} className={classes.closeButton} />;
+  return (
+    <button
+      aria-label={ariaLabel}
+      className={classes.closeButton}
+      onClick={onClick}
+      tabIndex={-1}
+    />
+  );
 }
