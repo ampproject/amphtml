@@ -566,9 +566,6 @@ async function minify(code, map, {mangle} = {mangle: false}) {
       // Settled on this count by incrementing number until there was no more
       // effect on minification quality.
       passes: 3,
-      // Disables converting computed properties (a['hello']) into regular prop access (a.hello).
-      // This was an assumption baked into closure.
-      properties: false,
     },
     output: {
       beautify: !!argv.pretty_print,
@@ -588,6 +585,10 @@ async function minify(code, map, {mangle} = {mangle: false}) {
     // eslint-disable-next-line google-camelcase/google-camelcase
     terserOptions.mangle.properties = {keep_quoted: true, regex: '_$'};
     terserOptions.nameCache = nameCache;
+
+    // Disables converting computed properties (a['hello']) into regular prop access (a.hello).
+    // This was an assumption baked into closure.
+    terserOptions.compress.properties = false;
   }
 
   const minified = await terser.minify(code, terserOptions);
@@ -867,8 +868,6 @@ function shouldUseClosure() {
   // the release process automatically. Since this experiment is actually on the build system
   // itself instead of runtime, it is never run through babel (where the replacements usually happen).
   // Therefore we must compute this one by hand.
-
-  // TODO: remove the && false once all is green.
   return argv.define_experiment_constant !== 'EsbuildCompilation';
 }
 
