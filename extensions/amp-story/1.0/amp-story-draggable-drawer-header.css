@@ -30,7 +30,15 @@
   --i-amphtml-draggable-drawer-background-color: #fff !important;
   --i-amphtml-draggable-drawer-text-color: #202125 !important;
   --i-amphtml-draggable-drawer-handle-color: rgba(0, 0, 0, .2) !important;
+  --i-amphtml-draggable-drawer-header-font-family: 'Roboto', sans-serif !important;
+  --i-amphtml-draggable-drawer-header-font-size: 14px !important;
+  --i-amphtml-draggable-drawer-header-title-height: 44px !important;
   background: var(--i-amphtml-draggable-drawer-background-color) !important;
+}
+
+.i-amphtml-story-draggable-drawer-header.i-amphtml-story-page-attachment-with-form {
+  /* Additional space upon which the domain label can appear in an absolute position. */
+  padding-bottom: 50px !important;
 }
 
 /* Draggable handle UI */
@@ -78,18 +86,19 @@
   background: var(--i-amphtml-draggable-drawer-background-color) !important;
   color: var(--i-amphtml-draggable-drawer-text-color) !important;
   display: block !important;
-  font-family: 'Roboto', sans-serif !important;
-  font-size: 14px !important;
+  font-family: var(--i-amphtml-draggable-drawer-header-font-family) !important;
+  font-size: var(--i-amphtml-draggable-drawer-header-font-size) !important;
   overflow: hidden !important;
-  padding: 10px 20px !important;
+  position: absolute !important;
   text-align: center !important;
   text-overflow: ellipsis !important;
+  top: var(--i-amphtml-draggable-drawer-header-title-height) !important;
   white-space: nowrap !important;
 }
 
 .i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close {
   opacity: 1 !important;
-  height: 44px !important;
+  height: var(--i-amphtml-draggable-drawer-header-title-height) !important;
   width: 100% !important;
   display: flex !important;
   align-items: center !important;
@@ -113,10 +122,10 @@
 
 .i-amphtml-story-page-attachment-title {
   position: absolute !important;
-  font-family: 'Roboto', sans-serif !important;
+  font-family: var(--i-amphtml-draggable-drawer-header-font-family) !important;
   width: calc(100% - 80px) !important;
   color: var(--i-amphtml-draggable-drawer-text-color) !important;
-  font-size: 14px !important;
+  font-size: var(--i-amphtml-draggable-drawer-header-font-size) !important;
   line-height: 40px !important;
   overflow: hidden !important;
   text-align: center !important;
