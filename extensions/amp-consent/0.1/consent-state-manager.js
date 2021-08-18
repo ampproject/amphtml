@@ -36,7 +36,7 @@ import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
 import {hasOwn} from '#core/types/object';
 import {once} from '#core/types/function';
 import {getRandomString64} from '#service/cid-impl';
-import {getAmpdoc, getServicePromise} from '../../../src/service-helpers';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 
 const TAG = 'CONSENT-STATE-MANAGER';
 
@@ -48,9 +48,7 @@ const TAG = 'CONSENT-STATE-MANAGER';
  * @return {!Promise<!Object>}
  */
 export function getConsentStateManager(element) {
-  const ampdoc = getAmpdoc(element);
-  const isSingleDoc = ampdoc.isSingleDoc() ? ampdoc.win : ampdoc;
-  return getServicePromise(isSingleDoc, 'consentStateManager');
+  return getServicePromiseForDoc(element, 'consentStateManager');
 }
 
 export class ConsentStateManager {
@@ -88,7 +86,7 @@ export class ConsentStateManager {
     /** @private {!Promise} */
     this.hasAllPurposeConsentsPromise_ = allPurposeConsentsDeferred.promise;
 
-    /** @public {?string} */
+    /** @public @const {function():string} */
     this.consentPageViewId64 = once(() => getRandomString64(this.ampdoc_.win));
   }
 

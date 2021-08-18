@@ -37,8 +37,6 @@ const ALLOWED_DEPR_CONSENTINSTANCE_ATTRS = {
 
 /** @const @type {!Object<string, boolean>} */
 const CONSENT_VARS_ALLOWED_LIST = {
-  'CLIENT_ID': true,
-  'CONSENT_PAGE_VIEW_ID_64': true,
   'PAGE_VIEW_ID': true,
   'PAGE_VIEW_ID_64': true,
   'SOURCE_URL': true,

@@ -95,7 +95,8 @@ describes.realWin(
       resetServiceForTesting(win, 'consentStateManager');
       registerServiceBuilder(win, 'consentStateManager', function () {
         return Promise.resolve({
-          consentPageViewId64: () => 'foo_consent_page_view_id_64_123',
+          consentPageViewId64: () =>
+            Promise.resolve('foo_consent_page_view_id_64_123'),
           getLastConsentInstanceInfo: () => {
             return Promise.resolve(
               constructConsentInfo(

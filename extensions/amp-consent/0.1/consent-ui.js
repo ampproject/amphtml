@@ -176,7 +176,7 @@ export class ConsentUI {
     /** @private @const {!Function} */
     this.boundHandleIframeMessages_ = this.handleIframeMessages_.bind(this);
 
-    /** @private {?Object} */
+    /** @private @const {!JsonObject} */
     this.config_ = config;
 
     this.init_(config, opt_postPromptUI);
@@ -563,7 +563,9 @@ export class ConsentUI {
       return expandConsentEndpointUrl(
         this.parent_,
         this.config_['promptUISrc'],
-        {'CONSENT_INFO': (property) => JSON.stringify(clientInfo[property])}
+        {
+          'CONSENT_INFO': (property) => JSON.stringify(clientInfo[property]),
+        }
       ).then((expandedSrc) => {
         this.ui_.src = expandedSrc;
         this.ui_.setAttribute('name', JSON.stringify(clientInfo));

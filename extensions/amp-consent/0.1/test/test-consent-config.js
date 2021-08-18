@@ -23,7 +23,6 @@ import {
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '#service';
 import {dict} from '#core/types/object';
-import {getConsentStateManager} from '../consent-state-manager';
 import {macroTask} from '#testing/yield';
 
 describes.realWin('ConsentConfig', {amp: 1}, (env) => {
@@ -544,8 +543,6 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
 
   describe('expandConsentEndpointUrl', () => {
     it('support expansion in allowed list', async () => {
-      getConsentStateManager(doc);
-
       const url = await expandConsentEndpointUrl(
         doc.body,
         'https://example.test?' +
@@ -567,8 +564,6 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
     });
 
     it('override CLIENT_ID scope', async () => {
-      getConsentStateManager(doc);
-
       const u1 = await expandConsentEndpointUrl(
         doc.body,
         'https://example.test?cid=CLIENT_ID&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
