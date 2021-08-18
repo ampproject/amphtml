@@ -604,7 +604,7 @@ async function minify(code, map, {mangle} = {mangle: false}) {
   // - Should not mangle computed properties (often used for cross-binary purposes)
   if (mangle) {
     // eslint-disable-next-line google-camelcase/google-camelcase
-    terserOptions.mangle.properties = {keep_quoted: true, regex: '_$'};
+    terserOptions.mangle.properties = {keep_quoted: true, regex: '_$', debug: true};
   }
 
   const minified = await terser.minify(code, terserOptions);
