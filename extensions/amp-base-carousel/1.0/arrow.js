@@ -15,6 +15,7 @@
  */
 
 import * as Preact from '#preact';
+import {useCallback} from '#preact';
 import {useStyles} from './component.jss';
 import objstr from 'obj-str';
 
@@ -29,14 +30,13 @@ export function Arrow({
   disabled,
   outsetArrows,
   rtl,
-  ...rest
 }) {
   const classes = useStyles();
-  const onClick = () => {
+  const onClick = useCallback(() => {
     if (!disabled) {
       advance();
     }
-  };
+  }, [advance, disabled]);
   return (
     <Comp
       aria-disabled={String(!!disabled)}
@@ -55,7 +55,6 @@ export function Arrow({
       onClick={onClick}
       outsetArrows={outsetArrows}
       rtl={rtl}
-      {...rest}
     />
   );
 }
@@ -64,16 +63,24 @@ export function Arrow({
  * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-function DefaultArrow({by, className, ...rest}) {
+function DefaultArrow({
+  'aria-disabled': ariaDisabled,
+  by,
+  className,
+  disabled,
+  onClick,
+}) {
   const classes = useStyles();
   return (
     <div className={className}>
       <button
+        aria-disabled={ariaDisabled}
         aria-label={
           by < 0 ? 'Previous item in carousel' : 'Next item in carousel'
         }
         className={classes.defaultArrowButton}
-        {...rest}
+        disabled={disabled}
+        onClick={onClick}
       >
         <div
           className={`${classes.arrowBaseStyle} ${classes.arrowFrosting}`}
