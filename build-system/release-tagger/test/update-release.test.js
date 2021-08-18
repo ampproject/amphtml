@@ -1,6 +1,6 @@
 const nock = require('nock');
 const test = require('ava');
-const {main: updateRelease} = require('../update-release');
+const {publishRelease, rollbackRelease} = require('../update-release');
 
 test.before(() => nock.disableNetConnect());
 test.after(() => {
@@ -18,7 +18,7 @@ test('publish', async (t) => {
     .patch('/repos/ampproject/amphtml/releases/1', {prerelease: false})
     .reply(200, {id: 1});
 
-  await updateRelease('2107210123000', 'publish');
+  await publishRelease('2107210123000');
   t.true(scope.isDone());
 });
 
@@ -38,6 +38,6 @@ test('rollback', async (t) => {
     })
     .reply(200, {id: 1});
 
-  await updateRelease('2107210123000', 'rollback');
+  await rollbackRelease('2107210123000');
   t.true(scope.isDone());
 });

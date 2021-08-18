@@ -1,14 +1,8 @@
 /**
  * @fileoverview
- * Label pull request functions for the release tagger.
- * Parameters
- * 1. head tag (amp version)
- * 2. base tag (amp version)
- * 3. channel (beta|lts|stable)
- * 4. rollback
+ * Update labels on pull requests for the release tagger.
  */
 
-const argv = require('minimist')(process.argv.slice(2));
 const {
   getLabel,
   getPullRequestsBetweenCommits,
@@ -24,14 +18,13 @@ const labelConfig = {
 };
 
 /**
- * Main function
- * @param {string} head tag
- * @param {string} base tag
- * @param {string} channel (beta|stable|lts)
- * @param {boolean} rollback
+ * Get PRs and label
+ * @param {string} head
+ * @param {string} base
+ * @param {string} channel
  * @return {Promise<Object>}
  */
-async function main(head, base, channel, rollback = false) {
+async function _setup(head, base, channel) {
   const [label, headRelease, baseRelease] = await Promise.all([
     await getLabel(labelConfig[channel]),
     await getRelease(head),
@@ -41,13 +34,31 @@ async function main(head, base, channel, rollback = false) {
     headRelease['target_commitish'],
     baseRelease['target_commitish']
   );
-
-  if (rollback) {
-    return await unlabelPullRequests(prs, label['node_id']);
-  }
-
-  return await labelPullRequests(prs, label['node_id']);
+  return {prs, labelId: label['node_id']};
 }
 
-main(argv.head, argv.base, argv.label, argv.rollback);
-module.exports = {main};
+/**
+ * Add label to PRs
+ * @param {string} head
+ * @param {string} base
+ * @param {string} channel
+ * @return {Promise<void>}
+ */
+async function addLabels(head, base, channel) {
+  const {labelId, prs} = await _setup(head, base, channel);
+  await labelPullRequests(prs, labelId);
+}
+
+/**
+ * Remove label from PRs
+ * @param {string} head
+ * @param {string} base
+ * @param {string} channel
+ * @return {Promise<void>}
+ */
+async function removeLabels(head, base, channel) {
+  const {labelId, prs} = await _setup(head, base, channel);
+  await unlabelPullRequests(prs, labelId);
+}
+
+module.exports = {addLabels, removeLabels};

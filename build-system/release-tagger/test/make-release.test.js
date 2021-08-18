@@ -1,7 +1,7 @@
 const nock = require('nock');
 const test = require('ava');
 const {getExtensions} = require('../../npm-publish/utils');
-const {main: createRelease} = require('../create-release');
+const {makeRelease} = require('../make-release');
 
 test.before(() => nock.disableNetConnect());
 test.after(() => {
@@ -176,7 +176,7 @@ test('create', async (t) => {
       },
     });
 
-  await createRelease('2107280123000', '2107210123000', 'beta');
+  await makeRelease('2107280123000', '2107210123000', 'beta');
   t.true(rest.isDone());
   t.true(graphql.isDone());
 });
@@ -272,7 +272,7 @@ test('cherry-pick', async (t) => {
       },
     });
 
-  await createRelease('2107280123001', '2107280123000', 'stable');
+  await makeRelease('2107280123001', '2107280123000', 'stable');
   t.true(rest.isDone());
   t.true(graphql.isDone());
 });
