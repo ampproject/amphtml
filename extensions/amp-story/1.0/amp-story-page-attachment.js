@@ -76,12 +76,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   constructor(element) {
     super(element);
 
-    /**
-     * The label containing the publisher domain.
-     * @protected {?Element}
-     */
-    this.domainLabelEl = null;
-
     /** @private @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win, this.element);
 
@@ -145,7 +139,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       // Page attachments that contain forms must display the page's publisher
       // domain above the attachment's contents. This enables users to gauge
       // the trustworthiness of publishers before sending data to them.
-      this.headerEl.parentNode.append(this.createDomainLabelElement_());
+      this.headerEl.append(this.createDomainLabelElement_());
+      this.headerEl.classList.add('i-amphtml-story-page-attachment-with-form');
     }
 
     const closeButtonEl = htmlFor(this.element)`
