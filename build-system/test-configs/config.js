@@ -128,9 +128,8 @@ const lintGlobs = [
 ];
 
 /**
- * This should not include .js files, since those are handled by eslint:
- *  - required terms: notice/notice
- *  - forbidden terms: local/no-forbidden-terms
+ * This should not include .js files, since those are handled by eslint via the
+ * local/no-forbidden-terms rule.
  */
 const presubmitGlobs = [
   '**/*.{css,go,md}',

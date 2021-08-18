@@ -19,6 +19,7 @@ import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
 import {Deferred} from '#core/data-structures/promise';
 import {hasNextNodeInDocumentOrder} from '#core/dom';
 import {expandLayoutRect} from '#core/dom/layout/rect';
+import * as mode from '#core/mode';
 import {remove} from '#core/types/array';
 import {throttle} from '#core/types/function';
 import {dict} from '#core/types/object';
@@ -253,7 +254,7 @@ export class ResourcesImpl {
       const input = Services.inputFor(this.win);
       input.setupInputModeClasses(this.ampdoc);
 
-      if (IS_ESM) {
+      if (mode.isEsm()) {
         return;
       }
 
