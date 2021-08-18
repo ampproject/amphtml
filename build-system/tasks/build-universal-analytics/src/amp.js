@@ -1,10 +1,6 @@
-import ampDoc from './ampdoc-impl';
 import {Log, initLogConstructor, user} from '../../../../src/log';
 import {registerServiceBuilderForDoc} from './service-helpers';
 import ampdocImpl from './ampdoc-impl';
-
-// Straight up:
-import '../../../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
 
 initLogConstructor();
 
@@ -77,7 +73,7 @@ class BaseElement {
   collapse() {
     this.element.setAttribute('hidden', '');
   }
-};
+}
 
 AMP.BaseElement = BaseElement;
 

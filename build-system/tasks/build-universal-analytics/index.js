@@ -5,6 +5,17 @@ const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel');
 const cwd = process.cwd();
 const injectedSrcDir = `${__dirname}/src/`;
 
+const entryPoints = ['extensions/amp-analytics/0.1/amp-analytics.js'];
+const outfile = 'dist/universal-analytics.js';
+
+const inject = [
+  // Equivalent implementation of the AMP global, including BaseElement.
+  `${injectedSrcDir}/amp.js`,
+
+  // Bundle amp-crypto-polyfill instead of expecting a separate script.
+  'extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill.js',
+];
+
 const aliasPatterns = [
   // Inject our own implementation of service-helpers to scope them to a global
   // window, and collapse the concept of extension services (they're all global).
@@ -46,11 +57,11 @@ const alias = {
 
 (async () => {
   await esbuild.build({
-    entryPoints: ['extensions/amp-analytics/0.1/amp-analytics.js'],
+    entryPoints,
     bundle: true,
     minifySyntax: true,
-    inject: [`${injectedSrcDir}/amp.js`],
-    outfile: 'dist/universal-analytics.js',
+    inject,
+    outfile,
     define: Object.fromEntries(
       Object.entries(BUILD_CONSTANTS).map(([k, v]) => [k, v.toString()])
     ),
