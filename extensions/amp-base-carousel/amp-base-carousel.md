@@ -42,148 +42,13 @@ arrow buttons.
 
 ### Standalone use outside valid AMP documents
 
-Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
-
-#### Example
-
-The example below demonstrates `amp-base-carousel` component in standalone use.
-
-[example preview="top-frame" playground="false"]
-
-```html
-<head>
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-base-carousel-1.0.css">
-  <script async custom-element="amp-base-carousel" src="https://cdn.ampproject.org/v0/amp-base-carousel-1.0.js"></script>
-  <style>
-    amp-base-carousel, amp-base-carousel > div {
-      aspect-ratio: 4/1;
-    }
-    .red-gradient {
-      background: brown;
-      background: linear-gradient(90deg, brown 50%, lightsalmon 90%, wheat 100%);
-    }
-    .blue-gradient {
-      background: steelblue;
-      background: linear-gradient(90deg, steelblue 50%, plum 90%, lavender 100%);
-    }
-    .green-gradient {
-      background: seagreen;
-      background: linear-gradient(90deg, seagreen 50%, mediumturquoise 90%, turquoise 100%);
-    }
-  </style>
-</head>
-<amp-base-carousel id="my-carousel">
-  <div class="red-gradient"></div>
-  <div class="blue-gradient"></div>
-  <div class="green-gradient"></div>
-</amp-base-carousel>
-<div class="buttons" style="margin-top: 8px;">
-  <button id='prev-button'>Go to previous slide</button>
-  <button id='next-button'>Go to next slide</button>
-  <button id='go-to-button'>Go to slide with green gradient</button>
-</div>
-
-<script>
-  (async () => {
-    const carousel = document.querySelector('#my-carousel');
-    await customElements.whenDefined('amp-base-carousel');
-    const api = await carousel.getApi();
-
-    // programatically advance to next slide
-    api.next();
-
-    // set up button actions
-    document.querySelector('#prev-button').onclick = () => api.prev();
-    document.querySelector('#next-button').onclick = () => api.next();
-    document.querySelector('#go-to-button').onclick = () => api.goToSlide(2);
-  })();
-</script>
-```
-
-[/example]
-
-#### Interactivity and API usage
-
-Bento enabled components in standalone use are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
-
-The `amp-base-carousel` component API is accessible by including the following script tag in your document:
-
-```
-await customElements.whenDefined('amp-base-carousel');
-const api = await carousel.getApi();
-```
-
-##### Actions
-
-The `amp-base-carousel` API allows you to perform the following actions:
-
-**next()**
-Moves the carousel forwards by `advance-count` slides.
-
-```
-api.next();
-```
-
-**prev()**
-Moves the carousel backwards by `advance-count` slides.
-
-```
-api.prev();
-```
-
-**goToSlide(index: number)**
-Moves the carousel to the slide specified by the `index` argument.
-Note: `index` will be normalized to a number greater than or equal to `0` and less than the number of slides given.
-
-```
-api.goToSlide(0); // Advance to first slide.
-api.goToSlide(length - 1); // Advance to last slide.
-```
-
-##### Events
-
-The `amp-base-carousel` API allows you to register and respond to the following events:
-
-**slideChange**
-
-This event is triggered when the index displayed by the carousel has changed.
-The new index is available via `event.data.index`.
-
-```
-carousel.addEventListener('slideChange', (e) => console.log(e.data.index))
-```
-
-#### Layout and style
-
-Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
-
-```
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-base-carousel-1.0.css">
-```
-
-Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible.
-
-**Container type**
-
-The `amp-base-carousel` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties):
-
-```css
-amp-base-carousel {
-  height: 100px;
-  width: 100%;
-}
-
-amp-base-carousel > * {
-  aspect-ratio: 4/1
-}
-```
+Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/). To find the standalone version of `amp-base-carousel`, see [`bento-base-carousel`](./1.0/README.md).
 
 ### Behavior users should be aware of
 
-#### RTL
+#### Right-to-left slide change
 
-`<amp-base-carousel>` currently requires that you let it know when it is in an
+`<amp-base-carousel>` requires that you define when it is in an
 right-to-left (rtl) context (e.g. Arabic, Hebrew pages). While the carousel will
 generally work without this, there may be a few bugs. You can let the carousel
 know that it should operate as `rtl` as follows:
@@ -216,7 +81,7 @@ vertically centered within the carousel.
 If you want to horizontally center your slide content, you will want to create a
 wrapping element, and use that to center the content.
 
-#### Number of Visible Slides
+#### Number of visible slides
 
 When changing the number of visible slides using `visible-slides`, in response
 to a media query, you will likely want to change the aspect ratio of the
