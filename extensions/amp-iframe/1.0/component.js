@@ -38,24 +38,12 @@ export function Iframe({
   srcdoc,
   ...rest
 }) {
-  const ref = useRef();
+  const iframeRef = useRef();
   const dataRef = useRef(null);
   const isIntersectingRef = useRef(false);
 
-  const handlePostMessage = useCallback(
-    (event) => {
-      // Currently we're only handling `embed-size` post messages
-      if (event.data?.type !== MessageType.EMBED_SIZE) {
-        return;
-      }
-      dataRef.current = event.data;
-      attemptResize();
-    },
-    [attemptResize]
-  );
-
   const attemptResize = useCallback(() => {
-    const iframe = ref.current;
+    const iframe = iframeRef.current;
     if (!iframe) {
       return;
     }
@@ -78,8 +66,20 @@ export function Iframe({
     }
   }, [requestResize]);
 
+  const handlePostMessage = useCallback(
+    (event) => {
+      // Currently we're only handling `embed-size` post messages
+      if (event.data?.type !== MessageType.EMBED_SIZE) {
+        return;
+      }
+      dataRef.current = event.data;
+      attemptResize();
+    },
+    [attemptResize]
+  );
+
   useEffect(() => {
-    const iframe = ref.current;
+    const iframe = iframeRef.current;
     if (!iframe) {
       return;
     }
@@ -106,7 +106,7 @@ export function Iframe({
 
   return (
     <iframe
-      ref={ref}
+      ref={iframeRef}
       src={src}
       srcdoc={srcdoc}
       sandbox={sandbox}
