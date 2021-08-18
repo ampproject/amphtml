@@ -1,4 +1,3 @@
-
 const falsey = false;
 
 /** @type {boolean} */

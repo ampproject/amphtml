@@ -1,5 +1,3 @@
-
-
 function test(param = 1) {
   param;
 }

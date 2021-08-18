@@ -1,4 +1,3 @@
-
 userAssert(1 + 1);
 userAssert(dev().assert(2 + 2));
 userAssert();

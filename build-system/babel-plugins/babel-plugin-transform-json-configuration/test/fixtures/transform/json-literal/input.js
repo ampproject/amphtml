@@ -1,5 +1,3 @@
-
-
 const inner = jsonLiteral({
   inner: true,
 });

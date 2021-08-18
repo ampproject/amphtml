@@ -1,4 +1,3 @@
-
 const x = function(thing) {
   return console.log(thing + 1);
 }

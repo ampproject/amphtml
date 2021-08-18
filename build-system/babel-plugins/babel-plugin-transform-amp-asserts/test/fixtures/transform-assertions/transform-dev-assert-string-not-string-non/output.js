@@ -1,4 +1,2 @@
-
-
 /** @type {string} */
 (null);

@@ -1,4 +1,3 @@
-
 class Foo {
   foo() {
     function testInFooClass() {

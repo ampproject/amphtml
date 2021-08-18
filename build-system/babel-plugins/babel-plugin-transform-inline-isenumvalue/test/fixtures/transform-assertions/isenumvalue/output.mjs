@@ -1,4 +1,3 @@
-
 import { exportedEnum } from './exported.mjs';
 subject === "A" || subject === "B" || subject === "C";
 const enumInFile = {

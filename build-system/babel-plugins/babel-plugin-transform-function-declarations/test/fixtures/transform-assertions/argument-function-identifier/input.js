@@ -1,4 +1,3 @@
-
 function Foo(a) {
   return a + 1;
 }

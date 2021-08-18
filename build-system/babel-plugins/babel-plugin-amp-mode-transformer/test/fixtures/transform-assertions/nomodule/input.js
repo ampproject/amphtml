@@ -1,5 +1,3 @@
-
-
 import { getMode } from '../../../../../../../src/mode';
 
 const test = getMode().test;

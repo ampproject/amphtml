@@ -1,5 +1,3 @@
-
-
 import {useStyles} from '../foo.jss';
 import {useStyles as useSomeOtherNameWithStyles} from './something.jss';
 

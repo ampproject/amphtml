@@ -1,5 +1,3 @@
-
-
 let foo = true;
 let bar = 1;
 let baz = NaN;

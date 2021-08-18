@@ -1,4 +1,3 @@
-
 /** @type {x} */ (dev().assertElement(dev()));
 
 function hello() {

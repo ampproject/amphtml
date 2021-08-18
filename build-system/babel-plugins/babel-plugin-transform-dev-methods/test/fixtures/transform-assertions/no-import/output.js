@@ -1,4 +1,3 @@
-
 dev().info(TAG, 'Removing iframe query string before navigation:', fromLocation.search);
 dev().info;
 dev().fine(TAG, 'fine');

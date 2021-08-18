@@ -1,4 +1,3 @@
-
 import { getMode } from '../../../../../../../src/mode';
 const test = false;
 const localDev = false;

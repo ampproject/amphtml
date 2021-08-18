@@ -1,4 +1,3 @@
-
 (function (AMP) {
   AMP.registerTemplate(TAG, AmpMustache);
 })(self.AMP);

@@ -1,4 +1,3 @@
-
 import { dev } from '../../../../../../../src/log';
 dev().info;
 dev().fine;

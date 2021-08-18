@@ -1,4 +1,3 @@
-
 const Gd = {
   PRERENDER: "prerender",
   VISIBLE: "visible",

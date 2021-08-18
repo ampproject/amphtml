@@ -1,5 +1,3 @@
-
-
 let add = `/rtv` + `/bar`;
 let multipleAdd = `/rtv` + `/bar` + `/`;
 let subtract = `/rtv` - `r`;

@@ -1,2 +1,1 @@
-
 function test(a, b) {}

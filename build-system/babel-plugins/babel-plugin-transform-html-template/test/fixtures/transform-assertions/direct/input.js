@@ -1,5 +1,3 @@
-
-
 console.log(html`html usage`);
 console.log(html`html usage
 multiline`);

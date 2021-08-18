@@ -1,4 +1,2 @@
-
-
 function test({x} = {}) {
 }

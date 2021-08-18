@@ -1,4 +1,3 @@
-
 // No message, stays the same.
 user().assert(1 + 1);
 const result1 = user().assert(1 + 1);

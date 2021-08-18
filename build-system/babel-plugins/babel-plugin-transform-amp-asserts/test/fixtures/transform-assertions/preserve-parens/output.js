@@ -1,5 +1,3 @@
-
-
 /** @type {x} */
 
 /** @type {!Element} */

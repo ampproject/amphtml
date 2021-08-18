@@ -1,5 +1,3 @@
-
-
 console.log(html`html ${foo}`);
 console.log(html`html ${foo} another`);
 console.log(html`html ${foo} another ${bar} thing`);

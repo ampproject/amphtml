@@ -1,4 +1,3 @@
-
 import { user } from '../../../../../../../src/log';
 user().fine;
 user().error('Should not be removed');

@@ -1,4 +1,2 @@
-
-
 /** @type {boolean} */
 (null);

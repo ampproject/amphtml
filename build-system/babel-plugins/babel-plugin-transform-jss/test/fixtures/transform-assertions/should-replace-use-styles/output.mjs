@@ -5,8 +5,6 @@ import { $x as _$x2 } from "../foo.jss";
 import { $foo as _$foo } from "./something.jss";
 import { $x as _$x } from "../foo.jss";
 import { $b as _$b } from "../foo.jss";
-
-
 import { useStyles } from '../foo.jss';
 import { useStyles as useSomeOtherNameWithStyles } from './something.jss';
 console.log(_$b);

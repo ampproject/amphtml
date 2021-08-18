@@ -1,4 +1,3 @@
-
 let str = 'foo';
 dev().assertString(str);
 dev().assertString('hello');

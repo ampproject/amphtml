@@ -1,4 +1,3 @@
-
 function isNewed(a, b) {
   return a + b;
 }

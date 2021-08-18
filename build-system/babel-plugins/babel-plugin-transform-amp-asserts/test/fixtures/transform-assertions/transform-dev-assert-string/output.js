@@ -1,4 +1,3 @@
-
 let str = 'foo';
 
 /** @type {string} */

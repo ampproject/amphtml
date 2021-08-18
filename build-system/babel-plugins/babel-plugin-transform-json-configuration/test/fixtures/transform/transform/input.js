@@ -1,5 +1,3 @@
-
-
 jsonConfiguration({});
 
 jsonConfiguration({a: 1});

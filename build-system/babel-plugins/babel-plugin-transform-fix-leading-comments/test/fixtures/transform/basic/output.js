@@ -1,5 +1,3 @@
-
-
 /**
  * @protected {?Object<string, !ChildDef>}
  */

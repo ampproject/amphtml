@@ -1,4 +1,3 @@
-
 // One argument in variadic method, should be indirected unless the message
 // argument itself is variable or the string is small enough that indirection
 // would increase file size.

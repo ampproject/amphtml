@@ -1,5 +1,3 @@
-
-
 const foo = true;
 const bar = 1;
 const baz = NaN;

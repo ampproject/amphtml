@@ -1,5 +1,3 @@
-
-
 const {a, b, ...c} = foo;
 const {d, e, ...f} = bar;
 

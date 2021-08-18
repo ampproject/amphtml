@@ -1,5 +1,3 @@
-
-
 jsonLiteral({
   'dblquote': 'a[href$=".pdf"]',
   'interpolate': '${foo}',

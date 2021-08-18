@@ -1,4 +1,3 @@
-
 let num = 5;
 dev().assertNumber(num);
 dev().assertNumber(1 + 1);

@@ -1,4 +1,3 @@
-
 function test(param = 1) {
   let _param = param;
   _param;

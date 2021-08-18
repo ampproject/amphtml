@@ -1,4 +1,3 @@
-
 registerServiceBuilder(win, 'story-analytics', function() {
   return new StoryAnalyticsService();
 });

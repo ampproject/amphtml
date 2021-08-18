@@ -1,4 +1,3 @@
-
 var foo = true;
 var bar = 1;
 var baz = NaN;

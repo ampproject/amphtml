@@ -1,5 +1,3 @@
-
-
 function without() {}
 
 'use strict';

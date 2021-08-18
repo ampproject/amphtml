@@ -1,4 +1,2 @@
-
-
 /** @type {number} */
 (null);

@@ -1,5 +1,3 @@
-
-
 import {useStyles} from 'foo';
 
 const direct = useStyles();

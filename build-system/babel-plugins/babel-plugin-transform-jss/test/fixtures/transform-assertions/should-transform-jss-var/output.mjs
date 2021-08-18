@@ -2,8 +2,6 @@
 var _classes = {
   button: "button-21aa4a8"
 };
-
-
 const JSS = {
   button: {
     fontSize: 12

@@ -5,8 +5,6 @@ const _template = ["html usage"],
       _template5 = ["<div>fifth sibling</div>"],
       _template6 = ["<svg>sixth sibling</svg>"],
       _template7 = ["<svg>seventh sibling</svg>"];
-
-
 console.log(html(["html usage"]));
 console.log(html(["html usage multiline"]));
 console.log(html(["<p active=true>Attribute Quote Removal</p>"]));

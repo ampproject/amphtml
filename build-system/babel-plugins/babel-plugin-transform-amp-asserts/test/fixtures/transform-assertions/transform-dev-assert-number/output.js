@@ -1,4 +1,3 @@
-
 let num = 5;
 
 /** @type {number} */

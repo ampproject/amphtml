@@ -1,5 +1,3 @@
-
-
 /** @type {!Element} */
 (element);
 let result =

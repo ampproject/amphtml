@@ -1,5 +1,3 @@
-
-
 import {exportedEnum} from './exported.mjs';
 
 isEnumValue(exportedEnum, subject);

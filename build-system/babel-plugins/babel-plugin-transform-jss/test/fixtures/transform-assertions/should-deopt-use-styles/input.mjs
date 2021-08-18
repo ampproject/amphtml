@@ -1,5 +1,3 @@
-
-
 // useStyles() references that don't belong to a MemberExpression should be 
 // preserve the classname object.
 

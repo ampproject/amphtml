@@ -1,4 +1,3 @@
-
 JSON.parse(`{}`);
 JSON.parse(`{"a":1}`);
 JSON.parse(`{"b":["test"]}`);

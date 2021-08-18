@@ -1,5 +1,3 @@
-
-
 AMP.extension('amp-mustache', '0.2', function(AMP) {
   AMP.registerTemplate(TAG, AmpMustache);
 });

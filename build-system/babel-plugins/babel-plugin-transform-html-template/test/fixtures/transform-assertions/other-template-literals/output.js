@@ -1,4 +1,3 @@
-
 console.log(`template literal`);
 const stringReplacement = 'yo';
 console.log(`template (${stringReplacement}) literal`);
