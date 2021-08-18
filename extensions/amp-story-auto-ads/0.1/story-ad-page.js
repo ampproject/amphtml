@@ -19,14 +19,12 @@ import {
   isJsonScriptTag,
   toggleAttribute,
 } from '#core/dom';
-import {dict, map} from '#core/types/object';
 import {elementByTag} from '#core/dom/query';
+import {setStyle} from '#core/dom/style';
+import {dict, map} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
 
 import {getExperimentBranch} from '#experiments';
-import {getFrameDoc, localizeCtaText} from './utils';
-import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {parseJson} from '#core/types/object/json';
-import {setStyle} from '#core/dom/style';
 import {
   AdvanceExpToTime,
   StoryAdAutoAdvance,
@@ -35,6 +33,7 @@ import {
   BranchToTimeValues,
   StoryAdSegmentExp,
 } from '#experiments/story-ad-progress-segment';
+
 import {
   AnalyticsEvents,
   AnalyticsVars,
@@ -49,10 +48,13 @@ import {
   maybeCreateAttribution,
   validateCtaMetadata,
 } from './story-ad-ui';
+import {getFrameDoc, localizeCtaText} from './utils';
+
 import {getData, listen} from '../../../src/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {dev, devAssert, userAssert} from '../../../src/log';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {
   StateProperty,

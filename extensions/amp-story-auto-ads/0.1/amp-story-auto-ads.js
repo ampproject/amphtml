@@ -41,28 +41,21 @@ import {
   STORY_AD_ANALYTICS,
   StoryAdAnalytics,
 } from './story-ad-analytics';
+import {StoryAdConfig} from './story-ad-config';
+import {StoryAdPageManager} from './story-ad-page-manager';
+
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
-import {EventType, dispatch} from '../../amp-story/1.0/events';
-
-
+import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
+import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
+import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
+import {dev, devAssert, userAssert} from '../../../src/log';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
-
-import {StoryAdConfig} from './story-ad-config';
-import {StoryAdPageManager} from './story-ad-page-manager';
-
-
-import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
+import {EventType, dispatch} from '../../amp-story/1.0/events';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
-import {dev, devAssert, userAssert} from '../../../src/log';
-
-
-
-import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
-import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads';
