@@ -70,9 +70,10 @@ async function _runQueryInBatches(queryType, queries) {
  * @param {string} tag
  * @param {string} commit
  * @param {string} body
+ * @param {boolean} prerelease
  * @return {Promise<Object>}
  */
-async function createRelease(tag, commit, body) {
+async function createRelease(tag, commit, body, prerelease) {
   return await octokit.rest.repos.createRelease({
     owner,
     repo,
@@ -80,7 +81,7 @@ async function createRelease(tag, commit, body) {
     'tag_name': tag,
     'target_commitish': commit,
     body,
-    prerelease: true,
+    prerelease,
   });
 }
 
