@@ -19,10 +19,10 @@ describes.endtoend(
   {
     fixture: 'amp-bind/bind-form.html',
   },
-  async (env) => {
+  (env) => {
     let controller;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {macroTask} from '#testing/yield';
+
+import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 
 describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
   async function flush() {

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// @ts-nocheck
 
 /**
  * Takes a .jss.js file and transforms the `useStyles` export to remove side effects
@@ -334,6 +335,13 @@ module.exports = function ({template, types: t}) {
           throw path.buildCodeFrameError(
             'Cannot have class named CSS in your JSS object.'
           );
+        }
+
+        // This codepath is used when generating CSS files for npm distribution, separate from
+        // AMP-mode compilation.
+        if (this.opts.css) {
+          this.opts.css = transformCssSync(sheet.toString()).css;
+          return;
         }
 
         // Create the classes var.

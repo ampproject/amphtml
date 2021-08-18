@@ -32,7 +32,7 @@ import {
   assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
 import {base64UrlEncodeFromString} from '#core/types/string/base64';
-import {assertDoesNotContainDisplay} from '../../../src/assert-display';
+import {assertDoesNotContainDisplay, setImportantStyles} from '#core/dom/style';
 import {
   buildInteractiveDisclaimer,
   buildInteractiveDisclaimerIcon,
@@ -47,11 +47,16 @@ import {dev, devAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {emojiConfetti} from './interactive-confetti';
 import {toArray} from '#core/types/array';
-import {setImportantStyles} from '#core/dom/style';
 import {isExperimentOn} from '#experiments/';
 
 /** @const {string} */
 const TAG = 'amp-story-interactive';
+
+/** @const {string} */
+export const MID_SELECTION_CLASS = 'i-amphtml-story-interactive-mid-selection';
+/** @const {string} */
+export const POST_SELECTION_CLASS =
+  'i-amphtml-story-interactive-post-selection';
 
 /**
  * @const @enum {number}
@@ -60,6 +65,7 @@ export const InteractiveType = {
   QUIZ: 0,
   POLL: 1,
   RESULTS: 2,
+  SLIDER: 3,
 };
 
 /** @const {string} */
@@ -236,10 +242,10 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   }
 
   /**
-   * @private
+   * @protected
    * @return {Element} the page element
    */
-  getPageEl_() {
+  getPageEl() {
     if (this.pageEl_ == null) {
       this.pageEl_ = closest(dev().assertElement(this.element), (el) => {
         return el.tagName.toLowerCase() === 'amp-story-page';
@@ -478,7 +484,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       StateProperty.CURRENT_PAGE_ID,
       (currPageId) => {
         this.mutateElement(() => {
-          const toggle = currPageId === this.getPageEl_().getAttribute('id');
+          const toggle = currPageId === this.getPageEl().getAttribute('id');
           this.rootEl_.classList.toggle(INTERACTIVE_ACTIVE_CLASS, toggle);
           this.toggleTabbableElements_(toggle);
         });
@@ -515,7 +521,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     if (optionEl) {
       this.updateStoryStoreState_(optionEl.optionIndex_);
-      this.handleOptionSelection_(optionEl);
+      this.handleOptionSelection_(optionEl.optionIndex_, optionEl);
       const confettiEmoji = this.options_[optionEl.optionIndex_].confetti;
       if (confettiEmoji) {
         emojiConfetti(
@@ -531,17 +537,17 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   /**
    * Triggers the analytics event for quiz response.
    *
-   * @param {!Element} optionEl
+   * @param {number} optionIndex
    * @private
    */
-  triggerAnalytics_(optionEl) {
+  triggerAnalytics_(optionIndex) {
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.STORY_INTERACTIVE_ID,
       this.element.getAttribute('id')
     );
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.STORY_INTERACTIVE_RESPONSE,
-      optionEl.optionIndex_
+      optionIndex
     );
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.STORY_INTERACTIVE_TYPE,
@@ -651,22 +657,23 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   /**
    * Triggers changes to component state on response interactive.
    *
-   * @param {!Element} optionEl
+   * @param {number} optionIndex
+   * @param {?Element} optionEl
    * @private
    */
-  handleOptionSelection_(optionEl) {
+  handleOptionSelection_(optionIndex, optionEl) {
     this.backendDataPromise_
       .then(() => {
         if (this.hasUserSelection_) {
           return;
         }
 
-        this.triggerAnalytics_(optionEl);
+        this.triggerAnalytics_(optionIndex);
         this.hasUserSelection_ = true;
 
         if (this.optionsData_) {
-          this.optionsData_[optionEl.optionIndex_]['count']++;
-          this.optionsData_[optionEl.optionIndex_]['selected'] = true;
+          this.optionsData_[optionIndex]['count']++;
+          this.optionsData_[optionIndex]['selected'] = true;
         }
 
         this.mutateElement(() => {
@@ -674,12 +681,12 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         });
 
         if (this.element.hasAttribute('endpoint')) {
-          this.executeInteractiveRequest_('POST', optionEl.optionIndex_);
+          this.executeInteractiveRequest_('POST', optionIndex);
         }
       })
       .catch(() => {
         // If backend is not properly connected, still update state.
-        this.triggerAnalytics_(optionEl);
+        this.triggerAnalytics_(optionIndex);
         this.hasUserSelection_ = true;
         this.mutateElement(() => {
           this.updateToPostSelectionState_(optionEl);
@@ -695,9 +702,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    */
   retrieveInteractiveData_() {
     return this.executeInteractiveRequest_('GET').then((response) => {
-      this.handleSuccessfulDataRetrieval_(
-        /** @type {InteractiveResponseType} */ (response)
-      );
+      this.onDataRetrieved_(/** @type {InteractiveResponseType} */ (response));
     });
   }
 
@@ -754,7 +759,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @param {InteractiveResponseType|undefined} response
    * @private
    */
-  handleSuccessfulDataRetrieval_(response) {
+  onDataRetrieved_(response) {
     if (!(response && response['options'])) {
       devAssert(
         response && 'options' in response,
@@ -766,21 +771,17 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       );
       return;
     }
-    const numOptions = this.rootEl_.querySelectorAll(
-      '.i-amphtml-story-interactive-option'
-    ).length;
+    const numOptions = this.getNumberOfOptions();
     // Only keep the visible options to ensure visible percentages add up to 100.
-    this.updateComponentOnDataRetrieval_(
-      response['options'].slice(0, numOptions)
-    );
+    this.updateComponentWithData(response['options'].slice(0, numOptions));
   }
 
   /**
    * Updates the quiz to reflect the state of the remote data.
    * @param {!Array<InteractiveOptionType>} data
-   * @private
+   * @protected
    */
-  updateComponentOnDataRetrieval_(data) {
+  updateComponentWithData(data) {
     const options = this.rootEl_.querySelectorAll(
       '.i-amphtml-story-interactive-option'
     );
@@ -803,7 +804,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @protected
    */
   updateToPostSelectionState_(selectedOption) {
-    this.rootEl_.classList.add('i-amphtml-story-interactive-post-selection');
+    this.rootEl_.classList.add(POST_SELECTION_CLASS);
     if (selectedOption != null) {
       selectedOption.classList.add(
         'i-amphtml-story-interactive-option-selected'
@@ -851,6 +852,16 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   }
 
   /**
+   * Returns the number of options.
+   *
+   * @protected
+   * @return {number}
+   */
+  getNumberOfOptions() {
+    return this.getOptionElements().length;
+  }
+
+  /**
    * Reorders options data to account for scrambled or incomplete data.
    *
    * @private
@@ -858,7 +869,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @return {!Array<!InteractiveOptionType>}
    */
   orderData_(optionsData) {
-    const numOptionElements = this.getOptionElements().length;
+    const numOptionElements = this.getNumberOfOptions();
     const orderedData = new Array(numOptionElements);
     optionsData.forEach((option) => {
       const {index} = option;
@@ -896,7 +907,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       () => {
         // Get rects and calculate position from icon.
         const interactiveRect = this.element./*OK*/ getBoundingClientRect();
-        const pageRect = this.getPageEl_()./*OK*/ getBoundingClientRect();
+        const pageRect = this.getPageEl()./*OK*/ getBoundingClientRect();
         const iconRect = this.disclaimerIcon_./*OK*/ getBoundingClientRect();
         const bottomFraction =
           1 - (iconRect.y + iconRect.height - pageRect.y) / pageRect.height;
@@ -928,7 +939,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
           this.disclaimerEl_,
           assertDoesNotContainDisplay(styles)
         );
-        this.getPageEl_().appendChild(this.disclaimerEl_);
+        this.getPageEl().appendChild(this.disclaimerEl_);
         this.disclaimerIcon_.setAttribute('hide', '');
         // Add click listener through the shadow dom using e.path.
         this.disclaimerEl_.addEventListener('click', (e) => {

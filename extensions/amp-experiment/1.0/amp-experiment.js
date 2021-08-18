@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-import {ATTR_PREFIX, Variants, allocateVariant} from './variant';
 import {Layout} from '#core/dom/layout';
-import {Services} from '#service';
-import {applyExperimentToVariant} from './apply-experiment';
-import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
-import {getServicePromiseForDoc} from '../../../src/service-helpers';
+import {parseJson} from '#core/types/object/json';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
 import {
   installOriginExperimentsForDoc,
   originExperimentsForDoc,
 } from '#service/origin-experiments-impl';
-import {isExperimentOn} from '#experiments';
-import {parseJson} from '#core/types/object/json';
+
+import {applyExperimentToVariant} from './apply-experiment';
+import {ATTR_PREFIX, Variants, allocateVariant} from './variant';
+
+import {devAssert, user, userAssert} from '../../../src/log';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 
 const TAG = 'amp-experiment';
 

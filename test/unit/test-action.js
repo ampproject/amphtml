@@ -15,22 +15,25 @@
  */
 
 import {
+  ActionTrust,
+  DEFAULT_ACTION,
+  RAW_OBJECT_ARGS_KEY,
+} from '#core/constants/action-constants';
+import {Keys} from '#core/constants/key-codes';
+import {htmlFor} from '#core/dom/static-template';
+
+import {
   ActionInvocation,
   ActionService,
   DeferredEvent,
   dereferenceArgsVariables,
   parseActionMap,
 } from '#service/action-impl';
-import {
-  ActionTrust,
-  DEFAULT_ACTION,
-  RAW_OBJECT_ARGS_KEY,
-} from '#core/constants/action-constants';
 import {AmpDocSingle} from '#service/ampdoc-impl';
-import {Keys} from '#core/constants/key-codes';
-import {createCustomEvent} from '../../src/event-helper';
-import {htmlFor} from '#core/dom/static-template';
+
 import {whenCalled} from '#testing/test-helper';
+
+import {createCustomEvent} from '../../src/event-helper';
 
 /**
  * @return {!ActionService}

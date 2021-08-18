@@ -25,7 +25,7 @@ describes.endtoend(
     fixture: 'amp-form/custom-validation-reporting.html',
     environments: ['single'],
   },
-  async (env) => {
+  (env) => {
     let controller;
     let fullnameInput;
     let submitButton;

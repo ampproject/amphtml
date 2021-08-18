@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {CustomEventReporterBuilder} from '../../../../src/extension-analytics';
 import {pubcode} from './constants';
 import helpersFactory from './helpers';
 
+import {CustomEventReporterBuilder} from '../../../../src/extension-analytics';
 import {
   DEFAULT_CONFIG,
   PLATFORM_NAME,

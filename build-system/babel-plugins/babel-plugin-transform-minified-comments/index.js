@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-// Ensure comments in minified build output is minimal.
+/**
+ * Ensure comments in minified build output is minimal.
+ *
+ * @interface {babel.PluginPass}
+ * @return {babel.PluginObj}
+ */
 module.exports = function () {
   return {
     visitor: {
@@ -26,7 +31,8 @@ module.exports = function () {
             ...comment,
             value: comment.value.replace(/\s+/g, ' '),
           }));
-          const next = path.getNextSibling();
+
+          const next = /** @type {*} */ (path).getNextSibling();
           if (next?.node) {
             next.node.leadingComments = null;
           }

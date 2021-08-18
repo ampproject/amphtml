@@ -15,7 +15,7 @@
  */
 
 import {CommonSignals} from '#core/constants/common-signals';
-import {whenUpgradedToCustomElement} from '../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 const t = describes.sandboxed.configure().ifChrome();
 

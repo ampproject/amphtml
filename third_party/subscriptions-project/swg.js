@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.177 */
+/** Version: 0.1.22.179 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -2021,6 +2021,21 @@ function acceptPortResultData(
  */
 
 /**
+ * Debug logger, only log message if #swg.log=1
+ * @param {...*} var_args [decription]
+ */
+
+/* eslint-disable */
+
+function debugLog(var_args) {
+  if (/swg.debug=1/.test(self.location.hash)) {
+    const logArgs = Array.prototype.slice.call(arguments, 0);
+    logArgs.unshift('[Subscriptions]');
+    log.apply(log, logArgs);
+  }
+}
+
+/**
  * @param  {...*} var_args [description]
  */
 function log(var_args) {
@@ -3588,13 +3603,25 @@ class Entitlement {
     if (!product) {
       return false;
     }
-    // Wildcard allows this product.
     const eq = product.indexOf(':');
-    if (
-      eq != -1 &&
-      this.products.includes(product.substring(0, eq + 1) + '*')
-    ) {
-      return true;
+    // Handle wildcards
+    if (eq != -1) {
+      // Wildcard product (publication:*) unlocks on any entitlement matching publication
+      const publication = product.substring(0, eq + 1);
+      if(
+        publication + '*' == product &&
+        this.products.find((candidate) => candidate.substring(0, eq + 1) == publication)
+      ) {
+        debugLog('enabled with wildcard productId');
+        return true;
+      }
+      // Wildcard entitlement allows any product matching this publication
+      if (
+        this.products.includes(publication + '*')
+      ) {
+        debugLog('enabled with wildcard entitlement');
+        return true;
+      }
     }
     return this.products.includes(product);
   }
@@ -4563,7 +4590,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.177',
+    '_client': 'SwG 0.1.22.179',
   });
 }
 
@@ -4905,6 +4932,7 @@ class PayCompleteFlow {
         productType: args.productType,
         publicationId: args.publicationId,
         offerId: this.sku_,
+        origin: parseUrl(this.win_.location.href).origin,
       });
     } else {
       confirmFeUrl = feUrl('/payconfirmiframe');
@@ -5805,7 +5833,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.177',
+        '_client': 'SwG 0.1.22.179',
         'supportsEventManager': true,
       },
       args || {}
@@ -6651,7 +6679,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.177');
+    context.setClientVersion('SwG 0.1.22.179');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -17261,7 +17289,10 @@ class ConfiguredRuntime {
       !entitlement ||
       !isSecure(this.win().location) ||
       !wasReferredByGoogle(parseUrl(this.win().document.referrer)) ||
-      !queryStringHasFreshGaaParams(this.win().location.search)
+      !queryStringHasFreshGaaParams(
+        this.win().location.search,
+        /*allowAllAccessTypes=*/ true
+      )
     ) {
       return Promise.resolve();
     }

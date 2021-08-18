@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
+import {Services} from '#service';
+
+import {devAssert} from '../../../src/log';
+import {addParamToUrl} from '../../../src/url';
+import {AmpAdNetworkBase} from '../../amp-a4a/0.1/amp-ad-network-base';
 import {
   AdResponseType,
   ValidatorResult,
 } from '../../amp-a4a/0.1/amp-ad-type-defs';
-import {AmpAdNetworkBase} from '../../amp-a4a/0.1/amp-ad-network-base';
 import {NameFrameRenderer} from '../../amp-a4a/0.1/name-frame-renderer';
-import {Services} from '#service';
 import {TemplateRenderer} from '../../amp-a4a/0.1/template-renderer';
 import {TemplateValidator} from '../../amp-a4a/0.1/template-validator';
-import {addParamToUrl} from '../../../src/url';
-import {devAssert} from '../../../src/log';
 
 // These have no side-effects, and so may be reused between all instances.
 const validator = new TemplateValidator();

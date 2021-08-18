@@ -14,25 +14,28 @@
  * limitations under the License.
  */
 
-import {AccessSource, AccessType} from './amp-access-source';
-import {AccessVars} from './access-vars';
 import {ActionTrust} from '#core/constants/action-constants';
-import {AmpAccessEvaluator} from './access-expr';
 import {AmpEvents} from '#core/constants/amp-events';
-import {CSS} from '../../../build/amp-access-0.1.css';
-import {Observable} from '#core/data-structures/observable';
-import {Services} from '#service';
 import {TickLabel} from '#core/constants/enums';
-import {cancellation} from '../../../src/error-reporting';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict, getValueForExpr} from '#core/types/object';
-import {getSourceOrigin} from '../../../src/url';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {isArray} from '#core/types';
+import {Observable} from '#core/data-structures/observable';
 import {isJsonScriptTag} from '#core/dom';
-import {listenOnce} from '../../../src/event-helper';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {isArray} from '#core/types';
+import {dict, getValueForExpr} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {AmpAccessEvaluator} from './access-expr';
+import {AccessVars} from './access-vars';
+import {AccessSource, AccessType} from './amp-access-source';
+
+import {CSS} from '../../../build/amp-access-0.1.css';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {cancellation} from '../../../src/error-reporting';
+import {listenOnce} from '../../../src/event-helper';
+import {dev, user, userAssert} from '../../../src/log';
+import {installStylesForDoc} from '../../../src/style-installer';
+import {getSourceOrigin} from '../../../src/url';
 
 /** @const */
 const TAG = 'amp-access';

@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {VideoEvents} from '../../src/video-interface';
-import {addParamsToUrl} from '../../src/url';
 import {dict} from '#core/types/object';
+
 import {postMessageWhenAvailable} from '../../src/iframe-video';
+import {addParamsToUrl} from '../../src/url';
+import {VideoEvents} from '../../src/video-interface';
 
 /**
  * @fileoverview

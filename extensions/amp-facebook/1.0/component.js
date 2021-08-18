@@ -17,10 +17,10 @@
 import * as Preact from '#preact';
 import {MessageType, ProxyIframeEmbed} from '#preact/component/3p-frame';
 import {dashToUnderline} from '#core/types/string';
-import {deserializeMessage} from '../../../src/3p-frame-messaging';
+import {deserializeMessage} from '#core/3p-frame-messaging';
 import {forwardRef} from '#preact/compat';
 import {tryParseJson} from '#core/types/object/json';
-import {useCallback, useLayoutEffect, useState} from '#preact';
+import {useCallback, useLayoutEffect, useMemo, useState} from '#preact';
 
 /** @const {string} */
 const TYPE = 'facebook';
@@ -95,29 +95,54 @@ function FacebookWithRef(
     setLocale(dashToUnderline(win.navigator.language));
   }, [localeProp, ref]);
 
+  const options = useMemo(
+    () => ({
+      action,
+      colorscheme,
+      embedAs,
+      hideCover,
+      hideCta,
+      href,
+      includeCommentParent,
+      'kd_site': kdSite,
+      layout,
+      locale,
+      numPosts,
+      orderBy,
+      ref: refLabel,
+      share,
+      showFacepile,
+      showText,
+      size,
+      smallHeader,
+      tabs,
+    }),
+    [
+      action,
+      colorscheme,
+      embedAs,
+      hideCover,
+      hideCta,
+      href,
+      includeCommentParent,
+      kdSite,
+      layout,
+      locale,
+      numPosts,
+      orderBy,
+      refLabel,
+      share,
+      showFacepile,
+      showText,
+      size,
+      smallHeader,
+      tabs,
+    ]
+  );
+
   return (
     <ProxyIframeEmbed
-      options={{
-        action,
-        colorscheme,
-        embedAs,
-        hideCover,
-        hideCta,
-        href,
-        includeCommentParent,
-        'kd_site': kdSite,
-        layout,
-        locale,
-        numPosts,
-        orderBy,
-        ref: refLabel,
-        share,
-        showFacepile,
-        showText,
-        size,
-        smallHeader,
-        tabs,
-      }}
+      options={options}
       ref={ref}
       title={title}
       {...rest}

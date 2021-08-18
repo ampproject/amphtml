@@ -18,7 +18,7 @@ import {CommonSignals} from '#core/constants/common-signals';
 import {scopedQuerySelectorAll} from '#core/dom/query';
 import {setImportantStyles} from '#core/dom/style';
 import {user} from '../../../src/log';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 /** @const {number} */
 const CANVAS_SIZE = 3;
@@ -46,6 +46,9 @@ export class BackgroundBlur {
 
     /** @private @const {!Element} */
     this.element_ = element;
+
+    /** @private @const {!Array<Element>} */
+    this.mediaElements_ = null;
 
     /** @private @const {!Element} */
     this.canvas_ = null;
@@ -86,58 +89,130 @@ export class BackgroundBlur {
   }
 
   /**
-   * Update the background to the specified page's background.
+   * Update the media elements and call the first iteration of media element to blur.
    * @param {!Element} pageElement
    */
   update(pageElement) {
-    const mediaEl = this.getBiggestMediaEl_(pageElement);
-    if (!mediaEl) {
-      user().info(CLASS_NAME, 'No amp-img or amp-video found.');
-      this.animate_();
-      return;
-    }
-
-    // Ensure element is loaded before calling animate.
-    whenUpgradedToCustomElement(mediaEl)
-      .then(() => mediaEl.signals().whenSignal(CommonSignals.LOAD_END))
-      .then(
-        () => {
-          // If image, render it.
-          if (mediaEl.tagName === 'AMP-IMG') {
-            this.animate_(mediaEl.querySelector('img'));
-            return;
-          }
-
-          // If video, render first frame or poster image.
-          const innerVideoEl = mediaEl.querySelector('video');
-          const alreadyHasData = innerVideoEl.readyState >= HAVE_CURRENT_DATA;
-          if (alreadyHasData) {
-            this.animate_(innerVideoEl);
-            return;
-          }
-          // If video doesnt have data, render from the poster image.
-          const posterSrc = mediaEl.getAttribute('poster');
-          if (!posterSrc) {
-            this.animate_();
-            user().info(CLASS_NAME, 'No "poster" attribute on amp-video.');
-            return;
-          }
-          const img = new Image();
-          img.onload = () => this.animate_(img);
-          img.src = posterSrc;
-        },
-        () => {
-          user().error(CLASS_NAME, 'Failed to load the amp-img or amp-video.');
-        }
-      );
+    this.mediaElements_ = this.getBiggestMediaElements_(pageElement);
+    this.findAndBlurMediaEl_(this.mediaElements_[0]);
   }
 
   /**
-   * Animated background transition.
+   * Ensures element exists, is loaded and is not a transparent png or gif.
+   * Recursive if the mediaEl is png or gif with transparent pixels.
+   * @private
+   * @param {?Element} mediaEl
+   */
+  findAndBlurMediaEl_(mediaEl) {
+    if (!mediaEl) {
+      user().info(CLASS_NAME, 'No amp-img or amp-video found.');
+      this.animateBlur_();
+      return;
+    }
+
+    this.ensureMediaLoaded_(mediaEl).then((loadedMediaEl) => {
+      // If image:
+      if (loadedMediaEl.tagName === 'AMP-IMG') {
+        // First check if it has transparent pixels.
+        if (this.isTransparentGifOrPng_(loadedMediaEl)) {
+          // If transparent, try again with the next element in the array.
+          this.findAndBlurMediaEl_(this.getNextMediaEl_(loadedMediaEl));
+          return;
+        }
+        this.animateBlur_(loadedMediaEl.querySelector('img'));
+        return;
+      }
+
+      // If video, render first frame or poster image.
+      const innerVideoEl = loadedMediaEl.querySelector('video');
+      const alreadyHasData = innerVideoEl.readyState >= HAVE_CURRENT_DATA;
+      if (alreadyHasData) {
+        this.animateBlur_(innerVideoEl);
+        return;
+      }
+      // If video doesnt have data, render from the poster image.
+      const posterSrc = loadedMediaEl.getAttribute('poster');
+      if (!posterSrc) {
+        this.animateBlur_();
+        user().info(CLASS_NAME, 'No "poster" attribute on amp-video.');
+        return;
+      }
+      const img = new Image();
+      img.onload = () => this.animateBlur_(img);
+      img.src = posterSrc;
+    });
+  }
+
+  /**
+   * @private
+   * @param {?Element} mediaEl
+   * @return {boolean}
+   */
+  isTransparentGifOrPng_(mediaEl) {
+    if (!this.isGifOrPng_(mediaEl)) {
+      return false;
+    }
+    const imgEl = mediaEl.querySelector('img');
+    const canvas = this.win_.document.createElement('canvas');
+    canvas.width = canvas.height = CANVAS_SIZE;
+    const context = canvas.getContext('2d');
+    context.drawImage(imgEl, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    const imgData = context.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE).data;
+    // Image data pixel values are in sets of 4: r, g, b, a.
+    // For this reason we increment in 4.
+    for (let i = 0; i < imgData.length; i += 4) {
+      const pixelAlphaVal = imgData[i + 3];
+      if (pixelAlphaVal < 255) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * @private
+   * @param {?Element} mediaEl
+   * @return {boolean}
+   */
+  isGifOrPng_(mediaEl) {
+    const src = mediaEl.getAttribute('src').toLowerCase();
+    return src.includes('.png') || src.includes('.gif');
+  }
+
+  /**
+   * @private
+   * @param {?Element} mediaEl
+   * @return {?Element}
+   */
+  getNextMediaEl_(mediaEl) {
+    const currentMediaElIdx = this.mediaElements_.indexOf(mediaEl);
+    return this.mediaElements_[currentMediaElIdx + 1];
+  }
+
+  /**
+   * @private
+   * @param {?Element} mediaEl
+   * @return {Promise}
+   */
+  ensureMediaLoaded_(mediaEl) {
+    return new Promise((resolve) => {
+      whenUpgradedToCustomElement(mediaEl)
+        .then(() => mediaEl.signals().whenSignal(CommonSignals.LOAD_END))
+        .then(() => {
+          resolve(mediaEl);
+        })
+        .catch(() => {
+          user().error(CLASS_NAME, 'Failed to load the amp-img or amp-video.');
+        });
+    });
+  }
+
+  /**
+   * Animate background transition.
    * @private
    * @param {?Element} fillElement
    */
-  animate_(fillElement) {
+  animateBlur_(fillElement) {
     this.drawOffscreenCanvas_(fillElement);
     // Do not animate on first load.
     if (this.firstLoad_) {
@@ -197,12 +272,13 @@ export class BackgroundBlur {
   }
 
   /**
-   * Get active page's biggest amp-img or amp-video element.
+   * Gets a list of the active page's amp-img or amp-video elements
+   * sorted by size (possibly empty).
    * @private
    * @param {!Element} pageElement
-   * @return {?Element} An amp-img, amp-video or null.
+   * @return {!Array<Element>}
    */
-  getBiggestMediaEl_(pageElement) {
+  getBiggestMediaElements_(pageElement) {
     const getSize = (el) => {
       if (!el) {
         return false;
@@ -215,6 +291,6 @@ export class BackgroundBlur {
         pageElement,
         'amp-story-grid-layer amp-img, amp-story-grid-layer amp-video'
       )
-    ).sort((firstEl, secondEl) => getSize(secondEl) - getSize(firstEl))[0];
+    ).sort((firstEl, secondEl) => getSize(secondEl) - getSize(firstEl));
   }
 }

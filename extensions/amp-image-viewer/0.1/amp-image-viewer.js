@@ -14,32 +14,9 @@
  * limitations under the License.
  */
 
-import * as st from '#core/dom/style';
-import * as tr from '../../../src/transition';
-import {Animation} from '../../../src/animation';
-import {CSS} from '../../../build/amp-image-viewer-0.1.css';
 import {CommonSignals} from '#core/constants/common-signals';
-import {
-  DoubletapRecognizer,
-  PinchRecognizer,
-  SwipeXYRecognizer,
-  TapRecognizer,
-  TapzoomRecognizer,
-} from '../../../src/gesture-recognizers';
-import {Gestures} from '../../../src/gesture';
-import {Layout} from '#core/dom/layout';
-import {Services} from '#service';
-import {WindowInterface} from '#core/window/interface';
 import {bezierCurve} from '#core/data-structures/curve';
-import {boundValue, distance, magnitude} from '#core/math';
-import {
-  closestAncestorElementBySelector,
-  elementByTag,
-  realChildElements,
-} from '#core/dom/query';
-import {continueMotion} from '../../../src/motion';
-import {createCustomEvent, loadPromise} from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
+import {Layout} from '#core/dom/layout';
 import {
   expandLayoutRect,
   layoutRectFromDomRect,
@@ -51,8 +28,33 @@ import {
   unobserveContentSize,
 } from '#core/dom/layout/size-observer';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {setStyles} from '#core/dom/style';
+import {
+  closestAncestorElementBySelector,
+  elementByTag,
+  realChildElements,
+} from '#core/dom/query';
 import {srcsetFromElement} from '#core/dom/srcset';
+import {setStyles} from '#core/dom/style';
+import * as st from '#core/dom/style';
+import * as tr from '#core/dom/transition';
+import {boundValue, distance, magnitude} from '#core/math';
+import {WindowInterface} from '#core/window/interface';
+
+import {Services} from '#service';
+
+import {CSS} from '../../../build/amp-image-viewer-0.1.css';
+import {Animation} from '../../../src/animation';
+import {createCustomEvent, loadPromise} from '../../../src/event-helper';
+import {Gestures} from '../../../src/gesture';
+import {
+  DoubletapRecognizer,
+  PinchRecognizer,
+  SwipeXYRecognizer,
+  TapRecognizer,
+  TapzoomRecognizer,
+} from '../../../src/gesture-recognizers';
+import {dev, userAssert} from '../../../src/log';
+import {continueMotion} from '../../../src/motion';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-image-viewer';
