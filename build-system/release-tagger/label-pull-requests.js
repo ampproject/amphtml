@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview
- * Manage labels on pull requests for the release tagger.
+ * Update labels on pull requests for the release tagger.
  */
 
 const {
@@ -24,6 +24,7 @@ const {
   getPullRequestsBetweenCommits,
   getRelease,
   labelPullRequests,
+  unlabelPullRequests,
 } = require('./utils');
 
 const labelConfig = {
@@ -37,9 +38,15 @@ const labelConfig = {
  * @param {string} head tag
  * @param {string} base tag
  * @param {string} channel (beta|stable|lts)
+ * @param {boolean} rollback
  * @return {Promise<Object>}
  */
-async function updateLabelsOnPullRequests(head, base, channel) {
+async function updateLabelsOnPullRequests(
+  head,
+  base,
+  channel,
+  rollback = false
+) {
   const [label, headRelease, baseRelease] = await Promise.all([
     await getLabel(labelConfig[channel]),
     await getRelease(head),
@@ -49,6 +56,11 @@ async function updateLabelsOnPullRequests(head, base, channel) {
     headRelease['target_commitish'],
     baseRelease['target_commitish']
   );
+
+  if (rollback) {
+    return await unlabelPullRequests(prs, label['node_id']);
+  }
+
   return await labelPullRequests(prs, label['node_id']);
 }
 
