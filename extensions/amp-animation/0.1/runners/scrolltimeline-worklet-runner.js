@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import {px, setStyles} from '#core/dom/style';
+import {assertDoesNotContainDisplay, px, setStyles} from '#core/dom/style';
 
 import {Services} from '#service';
 
 import {AnimationRunner} from './animation-runner';
 import {getTotalDuration} from './utils';
 
-import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
 import {dev} from '../../../../src/log';
 
 const moduleName = 'amp-animation-worklet';

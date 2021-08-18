@@ -30,7 +30,7 @@ const jobName = 'ie-tests.js';
  */
 function pushBuildWorkflow() {
   timedExecOrDie('amp dist --fortesting');
-  timedExecOrDie('amp integration --nobuild --compiled --ie');
+  timedExecOrDie('amp integration --nobuild --minified --ie');
 }
 
 /**

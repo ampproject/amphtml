@@ -31,8 +31,8 @@ import {installPlatformService} from '#service/platform-impl';
 import {installTimerService} from '#service/timer-impl';
 import {installViewerServiceForDoc} from '#service/viewer-impl';
 
+import {macroTask} from '#testing/helpers';
 import {stubServiceForDoc} from '#testing/test-helper';
-import {macroTask} from '#testing/yield';
 
 import {installCryptoPolyfill} from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
 import {getCookie, setCookie} from '../../src/cookies';

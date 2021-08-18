@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
 
 import {getServiceForDoc} from '../../../../src/service-helpers';
 import {AmpStory} from '../../../amp-story/1.0/amp-story';
