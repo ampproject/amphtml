@@ -1,14 +1,14 @@
 import ampDoc from './ampdoc-impl';
 
-const key = '__BENTO_ANALYTICS_SERVICES';
-
-self[key] = Object.create(null);
-
 // For now, we don't care:
 // - All services are sync/bundled
 // - All services are instantiated on register
 // - The only window is the top window
 // - No friendly iframes
+
+const key = '__BENTO_ANALYTICS_SERVICES';
+
+self[key] = Object.create(null);
 
 /**
  * @param {!Window} win
