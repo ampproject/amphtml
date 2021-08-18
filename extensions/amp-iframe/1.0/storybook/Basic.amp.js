@@ -82,14 +82,11 @@ export const WithContentBelow = () => {
         src="https://preview.amp.dev/static/samples/files/resizable-iframe.html"
       >
         <div placeholder>Placeholder</div>
-        <div overflow tabindex="0" role="button" aria-label="Read more">
-          Read more!
-        </div>
       </amp-iframe>
       <h3>
-        The above iframe should be 100x100 px and should not resize on page
-        load. On clicking the "Resize" button, it will toggle size between
-        200x200 px and 300x300 px.
+        The above iframe should be 100x100 px and should not resize on page load
+        due to this content. On clicking the "Resize" button, it will toggle
+        size between 200x200 px and 300x300 px.
       </h3>
     </div>
   );
@@ -101,18 +98,15 @@ export const WithOverflowButton = () => {
   return (
     <div>
       <amp-iframe
-        style="border:2px solid #000"
         title="Resizable iframe example"
         width="100"
         height="100"
         sandbox="allow-scripts allow-same-origin"
         resizable
-        src="/examples/bento/amp-iframe-resizing-example.html"
+        src="https://preview.amp.dev/static/samples/files/resizable-iframe.html"
       >
         <div placeholder>Placeholder</div>
-        <button overflow aria-label="Show more">
-          Show more
-        </button>
+        <button overflow>Show More</button>
       </amp-iframe>
       <h3>Click the "Show More" button to resize the iframe to 300x300 px</h3>
     </div>

@@ -26,7 +26,7 @@ var IframeDef = {};
  *   allowTransparency: (boolean),
  *   onLoad: (function():undefined),
  *   referrerPolicy: (string),
- *   requestResize: (function():undefined|undefined),
+ *   requestResize: (function(number,number):undefined|undefined),
  *   sandbox: (string),
  *   src: (!string),
  *   srcdoc: (string),
