@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
 
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 

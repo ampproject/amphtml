@@ -23,7 +23,7 @@ import {Services} from '#service';
 import {PositionObserver} from '#service/position-observer/position-observer-impl';
 import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
 
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
 
 describes.realWin('PositionObserver', {amp: 1}, (env) => {
   let win;
