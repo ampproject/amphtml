@@ -589,7 +589,7 @@ async function minify(code, map, {mangle} = {mangle: false}) {
       beautify: !!argv.pretty_print,
       // eslint-disable-next-line google-camelcase/google-camelcase
       keep_quoted_props: true,
-      // TODO: only add preamble for mainBundles?
+      // // TODO: only add preamble for mainBundles?
       preamble: ';',
     },
     sourceMap: {content: map},
@@ -599,7 +599,8 @@ async function minify(code, map, {mangle} = {mangle: false}) {
   // Enabling property mangling requires disabling two other optimization.
   // - Should not mangle computed properties (often used for cross-binary purposes)
   // - Should not convert computed properties into regular property access (compress.properties = false)
-  if (mangle) {
+  // TODO: fix this.
+  if (mangle && false) {
     // eslint-disable-next-line google-camelcase/google-camelcase
     terserOptions.mangle.properties = {keep_quoted: true, regex: '_$'};
     terserOptions.nameCache = nameCache;
