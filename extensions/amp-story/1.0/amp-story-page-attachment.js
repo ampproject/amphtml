@@ -140,6 +140,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       // domain above the attachment's contents. This enables users to gauge
       // the trustworthiness of publishers before sending data to them.
       this.headerEl.append(this.createDomainLabelElement_());
+      this.headerEl.classList.add('i-amphtml-story-page-attachment-with-form');
     }
 
     const closeButtonEl = htmlFor(this.element)`

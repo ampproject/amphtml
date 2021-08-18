@@ -23,8 +23,6 @@
 .i-amphtml-story-draggable-drawer-header {
   display: flex !important;
   justify-content: center !important;
-  /* Additional space upon which the domain label can appear in an absolute position. */
-  padding-bottom: 50px !important;
   position: sticky !important;
   top: 0 !important;
   border-radius: inherit !important;
@@ -36,6 +34,11 @@
   --i-amphtml-draggable-drawer-header-font-size: 14px !important;
   --i-amphtml-draggable-drawer-header-title-height: 44px !important;
   background: var(--i-amphtml-draggable-drawer-background-color) !important;
+}
+
+.i-amphtml-story-draggable-drawer-header.i-amphtml-story-page-attachment-with-form {
+  /* Additional space upon which the domain label can appear in an absolute position. */
+  padding-bottom: 50px !important;
 }
 
 /* Draggable handle UI */
