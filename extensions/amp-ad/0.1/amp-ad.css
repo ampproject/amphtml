@@ -173,19 +173,30 @@ amp-ad[sticky='bottom-right'] {
   right: 0;
 }
 
-amp-ad[sticky='left'] {
-  position: fixed;
-  top: 100px;
-  left: 20px;
-}
-
-amp-ad[sticky='right'] {
-  position: fixed;
-  top: 100px;
-  right: 20px;
-}
-
 amp-ad[sticky='sidebar'] {
   position: sticky;
   top: 10px;
+}
+
+@media only screen and (min-width: 1024px) {
+  amp-ad[sticky='left'] {
+    position: fixed;
+    top: 100px;
+    left: 20px;
+  }
+  amp-ad[sticky='right'] {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+  }
+}
+
+
+@media only screen and (max-width: 1023px) {
+  amp-ad[sticky='left'] {
+    display: none;
+  }
+  amp-ad[sticky='right'] {
+    display: none;
+  }
 }
