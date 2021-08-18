@@ -1,23 +1,8 @@
 FAIL
 |  <!--
-|    Copyright 2021 The AMP HTML Authors. All Rights Reserved.
-|
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|
-|        http://www.apache.org/licenses/LICENSE-2.0
-|
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    Tests that multiline attribute values are parsed and validated correctly.
-|    TODO(amaltas): Currenlty this is broken. The first span should not pass
+|    TODO(amaltas): Currently this is broken. The first span should not pass
 |    validation.
 |  -->
 |  <!doctype html>
@@ -40,9 +25,9 @@ FAIL
 |    <!-- no newline, parsed and validated correctly.-->
 |    <span on="tap:AMP.setState({foo: 'bar'})">
 >>   ^~~~~~~~~
-feature_tests/newline_attributes.html:40:2 The attribute 'role' in tag 'span' is missing or incorrect, but required by attribute 'on'.
+feature_tests/newline_attributes.html:25:2 The attribute 'role' in tag 'span' is missing or incorrect, but required by attribute 'on'.
 >>   ^~~~~~~~~
-feature_tests/newline_attributes.html:40:2 The attribute 'tabindex' in tag 'span' is missing or incorrect, but required by attribute 'on'.
+feature_tests/newline_attributes.html:25:2 The attribute 'tabindex' in tag 'span' is missing or incorrect, but required by attribute 'on'.
 |      Hello, World!
 |    </span>
 |  </body>
