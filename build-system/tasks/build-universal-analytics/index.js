@@ -63,10 +63,10 @@ const alias = {
 
 /**
  * @param {string} file
- * @return {string}
+ * @return {number}
  */
 function getBrotliSize(file) {
-  return getStdout(`cat ${file} | brotli -c | wc -c`).trim();
+  return parseInt(getStdout(`cat ${file} | brotli -c | wc -c`), 10);
 }
 
 (async () => {
