@@ -23,6 +23,7 @@
 
 import {isConnectedNode} from '#core/dom';
 import {LayoutRectDef, layoutRectLtwh} from '#core/dom/layout/rect';
+import * as mode from '#core/mode';
 
 /**
  * Stores the native getBoundingClientRect before we patch it, so that the
@@ -34,11 +35,10 @@ let nativeClientRect;
  * Polyfill for Node.getBoundingClientRect API.
  * @this {!Element}
  * @return {!ClientRect|!LayoutRectDef}
- * @suppress {suspiciousCode} due to IS_ESM inlining
  */
 function getBoundingClientRect() {
   // eslint-disable-next-line local/no-invalid-this
-  if (IS_ESM || isConnectedNode(this)) {
+  if (mode.isEsm() || isConnectedNode(this)) {
     return nativeClientRect.call(this);
   }
 
@@ -49,10 +49,9 @@ function getBoundingClientRect() {
  * Determines if this polyfill should be installed.
  * @param {!Window} win
  * @return {boolean}
- * @suppress {uselessCode} due to IS_ESM inlining
  */
 function shouldInstall(win) {
-  if (IS_ESM) {
+  if (mode.isEsm()) {
     return false;
   }
 

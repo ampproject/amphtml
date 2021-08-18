@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
-export {isProd} from './prod';
-export {isLocalDev} from './local-dev';
-export {isMinified} from './minified';
-export {isTest} from './test';
-export {version} from './version';
-export {isEsm} from './esm';
+import {isProd} from './prod';
+
+/**
+ * Returns true when compiling an esm binary.
+ * This is a magic constant that is replaced by babel.
+ *
+ * @return {boolean}
+ */
+export function isEsm() {
+  if (isProd()) {
+    return IS_ESM;
+  }
+
+  return self?.__AMP_MODE?.esm ?? IS_ESM;
+}

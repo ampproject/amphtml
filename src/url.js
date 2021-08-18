@@ -84,7 +84,7 @@ export function getWinOrigin(win) {
  * that are built around this polyfill. Once we can drop IE11 support and just
  * use the URL constructor, we can clear out all of parseWithA, all the URL
  * cache logic (incl. additional caches in other call-sites). Most is guarded by
- * IS_ESM and is only included in nomodule builds, but still.
+ * isEsm() and is only included in nomodule builds, but still.
  * @param {string} url
  * @param {boolean=} opt_nocache
  *   Cache is always ignored on ESM builds, see https://go.amp.dev/pr/31594
@@ -95,7 +95,7 @@ export function parseUrlDeprecated(url, opt_nocache) {
     cachedAnchorEl = /** @type {!HTMLAnchorElement} */ (
       self.document.createElement('a')
     );
-    urlCache = IS_ESM
+    urlCache = mode.isEsm()
       ? null
       : self.__AMP_URL_CACHE || (self.__AMP_URL_CACHE = new LruCache(100));
   }
@@ -103,7 +103,7 @@ export function parseUrlDeprecated(url, opt_nocache) {
   return parseUrlWithA(
     cachedAnchorEl,
     url,
-    IS_ESM || opt_nocache ? null : urlCache
+    mode.isEsm() || opt_nocache ? null : urlCache
   );
 }
 
@@ -120,7 +120,7 @@ export function parseUrlDeprecated(url, opt_nocache) {
  * @restricted
  */
 export function parseUrlWithA(anchorEl, url, opt_cache) {
-  if (IS_ESM) {
+  if (mode.isEsm()) {
     // Doing this causes the <a> to auto-set its own href to the resolved path,
     // which would be the baseUrl for the URL constructor.
     anchorEl.href = '';
@@ -559,7 +559,7 @@ export function getSourceOrigin(url) {
  */
 export function resolveRelativeUrl(relativeUrlString, baseUrl) {
   baseUrl = urlAsLocation(baseUrl);
-  if (IS_ESM || typeof URL == 'function') {
+  if (mode.isEsm() || typeof URL == 'function') {
     return new URL(relativeUrlString, baseUrl.href).toString();
   }
   return resolveRelativeUrlFallback_(relativeUrlString, baseUrl);

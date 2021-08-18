@@ -149,6 +149,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
 
       it('should create an iframe', () => {
         mockMode({
+          esm: false,
           localDev: true,
           development: false,
           test: false,

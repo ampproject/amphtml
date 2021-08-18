@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as mode from '#core/mode';
+
 import {urls} from '../config';
 import {getMode} from '../mode';
 
@@ -55,7 +57,7 @@ export function calculateExtensionScriptUrl(
   version,
   opt_isLocalDev
 ) {
-  const fileExtension = getMode().esm ? '.mjs' : '.js';
+  const fileExtension = mode.isEsm() ? '.mjs' : '.js';
   const base = calculateScriptBaseUrl(location, opt_isLocalDev);
   const rtv = getMode().rtvVersion;
   const extensionVersion = version ? '-' + version : '';
@@ -77,7 +79,7 @@ export function calculateEntryPointScriptUrl(
   isLocalDev,
   opt_rtv
 ) {
-  const fileExtension = getMode().esm ? '.mjs' : '.js';
+  const fileExtension = mode.isEsm() ? '.mjs' : '.js';
   const base = calculateScriptBaseUrl(location, isLocalDev);
   if (isLocalDev) {
     return `${base}/${entryPoint}${fileExtension}`;
@@ -131,7 +133,7 @@ export function createExtensionScript(win, extensionId, version) {
   }
   scriptElement.setAttribute('data-script', extensionId);
   scriptElement.setAttribute('i-amphtml-inserted', '');
-  if (getMode().esm) {
+  if (mode.isEsm()) {
     scriptElement.setAttribute('type', 'module');
   }
 

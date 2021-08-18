@@ -15,6 +15,7 @@
  */
 
 import {devAssert, devAssertElement} from '#core/assert';
+import * as mode from '#core/mode';
 
 import {isScopeSelectorSupported, prependSelectorsWith} from './css-selectors';
 
@@ -62,7 +63,7 @@ function scopedQuerySelectionFallback(root, selector) {
  * @suppress {suspiciousCode}
  */
 export function scopedQuerySelector(root, selector) {
-  if (IS_ESM || isScopeSelectorSupported(root)) {
+  if (mode.isEsm() || isScopeSelectorSupported(root)) {
     return root./*OK*/ querySelector(prependSelectorsWith(selector, ':scope'));
   }
 
@@ -81,7 +82,7 @@ export function scopedQuerySelector(root, selector) {
  * @suppress {suspiciousCode}
  */
 export function scopedQuerySelectorAll(root, selector) {
-  if (IS_ESM || isScopeSelectorSupported(root)) {
+  if (mode.isEsm() || isScopeSelectorSupported(root)) {
     return root./*OK*/ querySelectorAll(
       prependSelectorsWith(selector, ':scope')
     );
