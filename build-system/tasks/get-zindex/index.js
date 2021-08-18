@@ -125,7 +125,7 @@ function createTable(filesData) {
  */
 async function getZindexSelectors(glob, cwd = '.') {
   const filesData = Object.create(null);
-  const files = globby.sync(glob, {cwd});
+  const files = await globby(glob, {cwd});
   for (const file of files) {
     const contents = await fs.promises.readFile(path.join(cwd, file), 'utf-8');
     const selectors = Object.create(null);

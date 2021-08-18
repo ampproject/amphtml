@@ -43,7 +43,7 @@ const imports = new Map([
  * @return {!Promise}
  */
 async function compileJison(searchDir = jisonPath) {
-  const jisonFiles = globby.sync(searchDir);
+  const jisonFiles = await globby(searchDir);
   await Promise.all(
     jisonFiles.map((jisonFile) => {
       const jsFile = path.basename(jisonFile, '.jison');

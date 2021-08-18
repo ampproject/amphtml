@@ -140,7 +140,7 @@ async function overrideTocGlob(cwd) {
     '**/*.md',
     '!**/{node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
   ];
-  const files = globby.sync(glob, {cwd}).map((file) => path.join(cwd, file));
+  const files = (await globby(glob, {cwd})).map((file) => path.join(cwd, file));
   const filesIncludingString = getStdout(
     [`grep -irl "${task}"`, ...files].join(' ')
   )

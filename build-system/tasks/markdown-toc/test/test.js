@@ -38,7 +38,7 @@ test('README.md includes correct header', async (t) => {
 });
 
 test('overrideToc ./all-are-complete', async (t) => {
-  for (const filename of globby.sync(`${dirname}/all-are-complete/**/*.md`)) {
+  for (const filename of await globby(`${dirname}/all-are-complete/**/*.md`)) {
     const content = await readFile(filename, 'utf-8');
     t.deepEqual(await overrideToc(content), content);
   }
