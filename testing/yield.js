@@ -26,15 +26,6 @@ export function installYieldIt(realIt) {
   it.skip = realIt.skip;
 }
 
-/**
- * A convenient method so you can flush the event queue by doing
- * `yield macroTask()` in your test.
- * @return {Promise}
- */
-export function macroTask() {
-  return new Promise(setTimeout);
-}
-
 function enableYield(fn, message, runnable) {
   if (
     !runnable ||

@@ -15,7 +15,7 @@
  */
 
 import {TcfApiCommandManager} from '../tcf-api-command-manager';
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
 import {mockWindowInterface} from '#testing/test-helper';
 import {user} from '../../../../src/log';
 

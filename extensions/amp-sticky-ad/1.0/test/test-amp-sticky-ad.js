@@ -20,8 +20,8 @@ import {createElementWithAttributes} from '#core/dom';
 
 import {Services} from '#service';
 
+import {macroTask} from '#testing/helpers';
 import {poll} from '#testing/iframe';
-import {macroTask} from '#testing/yield';
 
 describes.realWin(
   'amp-sticky-ad 1.0 version',

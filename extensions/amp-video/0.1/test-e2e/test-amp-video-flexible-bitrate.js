@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {afterRenderPromise} from '#testing/helpers';
+
 const VIEWPORT = {
   HEIGHT: 768,
   WIDTH: 1024,
@@ -76,7 +78,7 @@ describes.endtoend(
       });
 
       it('keeps playing the video at the same time when a video downgrades', async () => {
-        await sleep(100);
+        await afterRenderPromise();
 
         await forceEventOnVideo(VIDEO_EVENTS.UNLOAD, 1);
         await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
@@ -256,7 +258,7 @@ describes.endtoend(
 
         await controller.findElement('amp-story-page#page-4[active]');
 
-        await sleep(100);
+        await afterRenderPromise();
 
         const video4El = await controller.findElement(
           '#video4 video.i-amphtml-pool-video'
@@ -268,13 +270,9 @@ describes.endtoend(
       });
     });
 
-    function sleep(ms) {
-      return new Promise((res) => setTimeout(res, ms));
-    }
-
-    async function forceEventOnVideo(videoEvent, videoId, delayMs = 50) {
+    async function forceEventOnVideo(videoEvent, videoId) {
       await controller.type(debugField, videoId + videoEvent);
-      await sleep(delayMs);
+      await afterRenderPromise();
     }
   }
 );
