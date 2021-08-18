@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Universal Analytics</title>
+    <script async src="/dist/universal-analytics.js"></script>
+    <style>
+      body {
+        font-family: sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        padding: 0;
+        margin: 0;
+        color: #444;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      button,
+      textarea {
+        color: inherit;
+      }
+      h1 {
+        margin: 0 0 10px;
+        font-size: 24px;
+        font-weight: normal;
+      }
+      h2 {
+        font-size: 18px;
+        display: inline-block;
+        margin: 20px 0 0;
+        border-bottom: 2px solid #ddd;
+      }
+      p {
+        margin: 10px 0;
+      }
+      button {
+        font: inherit;
+        font-weight: bold;
+        background: white;
+        padding: 6px 8px;
+        margin: 0 2px;
+        border: 1px solid #888;
+        box-shadow: 4px 4px 0 #eaeaea;
+        transform: translate(1px, -1px);
+      }
+      button:active {
+        transform: translate(3px, 1px);
+        box-shadow: none;
+      }
+      textarea {
+        width: 100vw;
+        height: 450px;
+        resize: vertical;
+        border: 1px solid #aaa;
+        padding: 10px;
+        margin: 0 0 10px;
+        font-size: 13px;
+      }
+      textarea:focus {
+        outline: 1px solid #675cff;
+        border-color: #675cff;
+      }
+      .track-click {
+        margin: 20px 0 0;
+        text-align: center;
+      }
+      .configurable {
+        flex: 1;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        margin: 10px 0;
+      }
+      code {
+        font-size: 13px;
+        background: #eaeaea;
+        box-shadow: 0 0 0 3px #eaeaea;
+        margin: 0 2px;
+      }
+      a {
+        text-decoration: none;
+        color: #4c3fff;
+        font-weight: bold;
+      }
+      main {
+        max-width: 900px;
+        padding: 20px;
+        margin: 0 auto;
+      }
+      @media (max-width: 767px) {
+        textarea {
+          margin: 0 0 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Universal Analytics</h1>
+      <p>
+        Partial implementation of <code>amp-analytics</code> for documents
+        without the AMP runtime.
+      </p>
+      <h2>Track click</h2>
+      <p>
+        These buttons are selected by <code>.track-click button</code> on the
+        default configuration.
+      </p>
+      <p>
+        They have a <code>data-vars-button-name</code> attribute
+        <a
+          href="https://github.com/ampproject/amphtml/blob/main/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute"
+          target="_blank"
+          >that can be propagated as a variable</a
+        >, included in request configuration as <code>${buttonName}</code>.
+      </p>
+      <section class="track-click">
+        <button data-vars-button-name="one">Click One</button>
+        <button data-vars-button-name="two">Click Two</button>
+        <button data-vars-button-name="three">Click Three</button>
+      </section>
+      <h2>Configuration</h2>
+      <form class="configurable">
+        <textarea spellcheck="false"></textarea>
+        <button type="submit">Use configuration</button>
+      </form>
+    </main>
+    <amp-analytics>
+      <script type="application/json">
+        {
+          "transport": {
+            "beacon": true,
+            "xhrpost": false,
+            "image": false
+          },
+          "requests": {
+            "pageview": "https://example.com/?pageview&RANDOM",
+            "click": "https://example.com/?click&n=${buttonName}&RANDOM"
+          },
+          "triggers": {
+            "trackPageview": {
+              "on": "visible",
+              "request": "pageview"
+            },
+            "trackClick": {
+              "selector": ".track-click button",
+              "on": "click",
+              "request": "click"
+            }
+          }
+        }
+      </script>
+    </amp-analytics>
+    <script>
+      // Populate <textarea> with existing configuration
+      const configScript = document.querySelector('amp-analytics > script');
+      const config = JSON.parse(configScript.textContent);
+
+      const form = document.querySelector('.configurable');
+      const textarea = form.querySelector('textarea');
+
+      textarea.value = JSON.stringify(config, null, 2);
+
+      // Reload configuration by detaching the existing <amp-analytics> and
+      // create a new element to take its place.
+      function reloadConfig() {
+        const element = document.createElement('amp-analytics');
+        element.innerHTML =
+          '<script type="application/json">' +
+          textarea.value +
+          '</' +
+          'script>';
+        document.querySelector('amp-analytics').remove();
+        document.body.appendChild(element);
+      }
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        reloadConfig();
+      });
+    </script>
+  </body>
+</html>

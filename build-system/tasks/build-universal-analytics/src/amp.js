@@ -1,0 +1,130 @@
+/**
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import ampDoc from './ampdoc-impl';
+import {Log, initLogConstructor, user} from '../../../../src/log';
+import {registerServiceBuilderForDoc} from './service-helpers';
+import ampdocImpl from './ampdoc-impl';
+
+// Straight up:
+import '../../../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
+
+initLogConstructor();
+
+export const AMP = new (class {
+  /**
+   * @param {Window} win
+   */
+  constructor(win) {
+    /** @private @const {!Object<string, function(*)>} */
+    this.services_ = Object.create(null);
+
+    this.win = win;
+  }
+
+  /**
+   * @param {string} unusedTag
+   * @param {string} unusedVersion
+   * @param {function(typeof this)} callback
+   */
+  extension(unusedTag, unusedVersion, callback) {
+    callback(this);
+  }
+
+  /**
+   * @param {string} name
+   * @param {AMP.BaseElement} ctor
+   */
+  registerElement(name, ctor) {
+    customElements.define(name, getCustomElement(ctor));
+  }
+
+  /**
+   * @param {string} name
+   * @param {function(*)} ctor
+   */
+  registerServiceForDoc(name, ctor) {
+    registerServiceBuilderForDoc(this.element, name, ctor);
+  }
+})(self);
+
+// TODO: Too similar to bento-ce.js
+
+class BaseElement {
+  /**
+   * @param {!Element} element
+   */
+  constructor(element) {
+    /** @const {!Window} */
+    this.win = self;
+
+    /** @const {!Element} */
+    this.element = element;
+  }
+
+  /**
+   * @return {!typeof ampdocImpl}
+   */
+  getAmpDoc() {
+    return this.element.getAmpDoc();
+  }
+
+  /**
+   * @return {Log}
+   */
+  user() {
+    return user();
+  }
+
+  /** */
+  collapse() {
+    this.element.setAttribute('hidden', '');
+  }
+};
+
+AMP.BaseElement = BaseElement;
+
+/**
+ * @param {typeof BaseElement} Ctor
+ * @return {!CustomElementConstructor}
+ */
+function getCustomElement(Ctor) {
+  return class extends HTMLElement {
+    /** */
+    constructor() {
+      super();
+
+      /** @const {!BaseElement} */
+      this.implementation = new Ctor(this);
+    }
+
+    /** */
+    connectedCallback() {
+      this.implementation.buildCallback();
+      this.implementation.layoutCallback();
+    }
+
+    /** */
+    disconnectedCallback() {
+      this.implementation.detachedCallback();
+    }
+
+    /** @return {typeof ampdocImpl} */
+    getAmpDoc() {
+      return ampdocImpl;
+    }
+  };
+}
