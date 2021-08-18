@@ -36,7 +36,6 @@ module.exports = {
   },
   'rules': {
     'import/no-unresolved': 0,
-    'local/no-array-destructuring': 0,
     'local/no-bigint': 0,
     'local/no-dynamic-import': 0,
     'local/no-export-side-effect': 0,
@@ -48,5 +47,6 @@ module.exports = {
     'local/no-module-exports': 0,
     'local/no-rest': 0,
     'local/no-spread': 0,
+    'module-resolver/use-alias': 0,
   },
 };

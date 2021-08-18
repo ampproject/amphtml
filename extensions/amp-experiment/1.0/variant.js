@@ -15,10 +15,12 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
-import {dev, userAssert} from '../../../src/log';
-import {hasOwn} from '#core/types/object';
 import {isArray, isObject} from '#core/types';
+import {hasOwn} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {dev, userAssert} from '../../../src/log';
 
 export const ATTR_PREFIX = 'amp-x-';
 const nameValidator = /^[\w-]+$/;

@@ -17,10 +17,10 @@
 import {
   findElements,
   resetAllElements,
-  sleep,
   verifyElementsBuilt,
   verifyPromptsHidden,
 } from './common';
+import {afterRenderPromise} from '#testing/helpers';
 
 describes.endtoend(
   'amp-consent',
@@ -36,7 +36,8 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('should work with client side decision', async () => {
+    it('should work with client side decision', async function () {
+      this.timeout(5000);
       resetAllElements();
       const currentUrl = await controller.getCurrentUrl();
 
@@ -97,7 +98,7 @@ describes.endtoend(
 
       // Check the analytics request consentState. Wait for 1 second for the
       // request to arrive to avoid flaky test.
-      await sleep(3000);
+      await afterRenderPromise();
       await expect(
         'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking?consentState=sufficient'
       ).to.have.been.sent;

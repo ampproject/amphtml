@@ -27,21 +27,22 @@ describes.endtoend(
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
   },
-  async (env) => {
+  (env) => {
     let controller;
 
     function rect(el) {
       return controller.getElementRect(el);
     }
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 
     // TODO(sparhami): fails on shadow demo
     it.configure()
       .skipShadowDemo()
-      .run('should move forwards', async () => {
+      .run('should move forwards', async function () {
+        this.timeout(10000);
         const slides = await getSlides(controller);
 
         await expect(rect(slides[1])).to.include({x: 0});

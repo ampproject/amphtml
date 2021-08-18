@@ -29,7 +29,20 @@ const TAG = 'amp-lightbox';
 /** @extends {PreactBaseElement<LightboxDef.Api>} */
 class AmpLightbox extends BaseElement {
   /** @override */
+  constructor(element) {
+    super(element);
+
+    /** @private {!../../../src/service/history-impl.History} */
+    this.history_ = null;
+
+    /** @private {number|null} */
+    this.historyId_ = null;
+  }
+
+  /** @override */
   init() {
+    this.history_ = Services.historyForDoc(this.getAmpDoc());
+
     this.registerApiAction(
       DEFAULT_ACTION,
       (api) => api.open(),
@@ -66,6 +79,33 @@ class AmpLightbox extends BaseElement {
       'expected global "bento" or specific "bento-lightbox" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
+  }
+
+  /** @override */
+  afterOpen() {
+    super.afterOpen();
+    const scroller = this.element.shadowRoot.querySelector('[part=scroller]');
+    this.setAsContainer?.(scroller);
+
+    this.history_
+      .push(() => this.api().close())
+      .then((historyId) => (this.historyId_ = historyId));
+  }
+
+  /** @override */
+  afterClose() {
+    super.afterClose();
+    this.removeAsContainer?.();
+
+    if (this.historyId_ != null) {
+      this.history_.pop(this.historyId_);
+      this.historyId_ = null;
+    }
+  }
+
+  /** @override */
+  unmountCallback() {
+    this.removeAsContainer?.();
   }
 }
 

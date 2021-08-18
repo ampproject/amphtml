@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LocalizedStringId} from '../../../src/localized-strings';
+import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {Toast} from './toast';
 import {
   copyTextToClipboard,
   isCopyingToClipboardSupported,
-} from '../../../src/clipboard';
+} from '#core/window/clipboard';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '#core/types/object';
 import {getLocalizationService} from './amp-story-localization-service';

@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
+import {addExperimentIdToElement} from '#ads/google/a4a/traffic-experiments';
+
 import {CommonSignals} from '#core/constants/common-signals';
-import {Services} from '#service';
+import {removeElement} from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {realChildElements} from '#core/dom/query';
 import {
   computedStyle,
   removeAlphaFromColor,
   setStyle,
   toggle,
 } from '#core/dom/style';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
 import {dev, user, userAssert} from '../../../src/log';
-import {realChildElements} from '#core/dom/query';
-import {removeElement} from '#core/dom';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -57,6 +63,12 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    userAssert(
+      this.win.document.querySelectorAll(
+        'amp-sticky-ad.i-amphtml-built, amp-ad[sticky].i-amphtml-built'
+      ).length <= 1,
+      'At most one sticky ad can be loaded per page'
+    );
     this.viewport_ = this.getViewport();
     this.element.classList.add('i-amphtml-sticky-ad-layout');
 
@@ -104,6 +116,40 @@ class AmpStickyAd extends AMP.BaseElement {
       owners.scheduleLayout(this.element, dev().assertElement(this.ad_));
     }
     return Promise.resolve();
+  }
+
+  /** @override */
+  upgradeCallback() {
+    if (!isExperimentOn(this.win, 'amp-sticky-ad-to-amp-ad')) {
+      return null;
+    }
+
+    const children = realChildElements(this.element);
+    userAssert(
+      children.length == 1 && children[0].tagName == 'AMP-AD',
+      'amp-sticky-ad must have a single amp-ad child'
+    );
+
+    const ad = children[0];
+    const enableConversion = Math.random() < 0.5;
+
+    const adType = (ad.getAttribute('type') || '').toLowerCase();
+    if (adType == 'doubleclick' || adType == 'adsense') {
+      addExperimentIdToElement(enableConversion ? '31061856' : '31061855', ad);
+    }
+
+    if (!enableConversion) {
+      // Wait for the amp-ad extension to be loaded for a fairer comparison
+      return Services.extensionsFor(this.win)
+        .loadElementClass('amp-ad', '0.1')
+        .then(() => null);
+    }
+
+    ad.setAttribute('sticky', 'bottom');
+    this.element.parentElement.replaceChild(ad, this.element);
+    return Services.extensionsFor(this.win)
+      .loadElementClass('amp-ad', '0.1')
+      .then((AmpAd) => new AmpAd(ad));
   }
 
   /** @override */

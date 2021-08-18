@@ -16,7 +16,7 @@
 'use strict';
 
 const connect = require('gulp-connect');
-const debounce = require('debounce');
+const debounce = require('../common/debounce');
 const globby = require('globby');
 const header = require('connect-header');
 const minimist = require('minimist');
@@ -106,6 +106,7 @@ function getMiddleware() {
  * @param {?Object} connectOptions
  * @param {?Object} serverOptions
  * @param {?Object} modeOptions
+ * @return {Promise<void>}
  */
 async function startServer(
   connectOptions = {},
@@ -179,6 +180,7 @@ function resetServerFiles() {
 
 /**
  * Stops the currently running server
+ * @return {Promise<void>}
  */
 async function stopServer() {
   if (url) {
@@ -190,6 +192,7 @@ async function stopServer() {
 
 /**
  * Closes the existing server and restarts it
+ * @return {Promise<void>}
  */
 async function restartServer() {
   stopServer();
@@ -205,6 +208,7 @@ async function restartServer() {
 
 /**
  * Performs pre-build steps requested via command line args.
+ * @return {Promise<void>}
  */
 async function performPreBuildSteps() {
   await preBuildRuntimeFiles();
@@ -213,6 +217,7 @@ async function performPreBuildSteps() {
 
 /**
  * Entry point of the `amp serve` task.
+ * @return {Promise<void>}
  */
 async function serve() {
   await doServe();
@@ -221,6 +226,7 @@ async function serve() {
 /**
  * Starts a webserver at the repository root to serve built files.
  * @param {boolean=} lazyBuild
+ * @return {Promise<void>}
  */
 async function doServe(lazyBuild = false) {
   createCtrlcHandler('serve');
@@ -253,7 +259,7 @@ serve.flags = {
   quiet: "Run in quiet mode and don't log HTTP requests",
   cache: 'Make local resources cacheable by the browser',
   no_caching_extensions: 'Disable caching for extensions',
-  compiled: 'Serve minified JS',
+  minified: 'Serve minified JS',
   esm: 'Serve ESM JS (uses the new typescript server transforms)',
   cdn: 'Serve current prod JS',
   rtv: 'Serve JS from the RTV provided',

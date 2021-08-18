@@ -15,9 +15,11 @@
  */
 
 import '../amp-social-share';
-import {toggleExperiment} from '#experiments';
-import {waitFor, whenCalled} from '#testing/test-helper';
 import {waitForChildPromise} from '#core/dom';
+
+import {toggleExperiment} from '#experiments';
+
+import {waitFor, whenCalled} from '#testing/test-helper';
 
 const BUTTON_SELECTOR = 'div[role="button"]';
 const WINDOW_FEATURES = 'resizable,scrollbars,width=640,height=480';
@@ -47,7 +49,8 @@ describes.realWin(
     // Waits for the type change to propagate to within the shadowDOM
     const waitForTypeChange = async (el, type) => {
       await waitFor(
-        () => el.shadowRoot.querySelector('svg').getAttribute('type') === type,
+        () =>
+          el.shadowRoot.querySelector('svg').getAttribute('data-type') === type,
         'type attribute is updated'
       );
     };

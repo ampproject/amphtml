@@ -212,6 +212,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     userAssert(this.config, `Type "${this.type_}" is not supported in amp-ad`);
 
     this.uiHandler = new AmpAdUIHandler(this);
+    this.uiHandler.validateStickyAd();
 
     this.isFullWidthRequested_ = this.shouldRequestFullWidth_();
 
@@ -382,6 +383,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     const sharedDataPromise = consentPolicyId
       ? getConsentPolicySharedData(this.element, consentPolicyId)
       : Promise.resolve(null);
+    const pageViewId64Promise = Services.documentInfoForDoc(
+      this.element
+    ).pageViewId64;
 
     // For sticky ad only: must wait for scrolling event before loading the ad
     const scrollPromise = this.uiHandler.getScrollPromiseForStickyAd();
@@ -393,6 +397,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       consentStringPromise,
       consentMetadataPromise,
       scrollPromise,
+      pageViewId64Promise,
     ])
       .then((consents) => {
         this.uiHandler.maybeInitStickyAd();
@@ -412,6 +417,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
           'consentSharedData': consents[2],
           'initialConsentValue': consents[3],
           'initialConsentMetadata': consents[4],
+          'pageViewId64': consents[6],
         });
 
         // In this path, the request and render start events are entangled,

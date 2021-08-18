@@ -76,6 +76,7 @@ async function getBrotliBundleSizes() {
  * success messages if not.
  * @param {!Response} response
  * @param {...string} successMessages
+ * @return {Promise<void>}
  */
 async function checkResponse(response, ...successMessages) {
   if (!response.ok) {
@@ -110,6 +111,7 @@ async function postJson(url, body, options) {
 /**
  * Store the bundle sizes for a commit hash in the build artifacts storage
  * repository to the passed value.
+ * @return {Promise<void>}
  */
 async function storeBundleSize() {
   if (!isPushBuild() || ciPushBranch() !== 'main') {
@@ -155,6 +157,7 @@ async function storeBundleSize() {
 
 /**
  * Mark a pull request as skipped, via the AMP bundle-size GitHub App.
+ * @return {Promise<void>}
  */
 async function skipBundleSize() {
   if (isPullRequestBuild()) {
@@ -190,6 +193,7 @@ async function skipBundleSize() {
 
 /**
  * Report the size to the bundle-size GitHub App, to determine size changes.
+ * @return {Promise<void>}
  */
 async function reportBundleSize() {
   if (isPullRequestBuild()) {
@@ -237,7 +241,7 @@ async function reportBundleSize() {
  * @return {Promise<void>}
  */
 async function getLocalBundleSize() {
-  if (globby.sync(fileGlobs).length === 0) {
+  if ((await globby(fileGlobs)).length === 0) {
     log('Could not find runtime files.');
     log('Run', cyan('amp dist --noextensions'), 'and re-run this task.');
     process.exitCode = 1;

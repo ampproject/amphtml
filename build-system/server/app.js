@@ -124,7 +124,7 @@ app.use((req, res, next) => {
  */
 function isValidServeMode(serveMode) {
   return (
-    ['default', 'compiled', 'cdn', 'esm'].includes(serveMode) ||
+    ['default', 'minified', 'cdn', 'esm'].includes(serveMode) ||
     isRtvMode(serveMode)
   );
 }
@@ -149,7 +149,7 @@ app.get('/serve_mode=:mode', (req, res) => {
 });
 
 if (argv._.includes('integration') && !argv.nobuild) {
-  setServeMode('compiled');
+  setServeMode('minified');
 }
 
 if (!(argv._.includes('unit') || argv._.includes('integration'))) {
@@ -158,7 +158,7 @@ if (!(argv._.includes('unit') || argv._.includes('integration'))) {
 }
 
 // Changes the current serve mode via query param
-// e.g. /serve_mode_change?mode=(default|compiled|cdn|<RTV_NUMBER>)
+// e.g. /serve_mode_change?mode=(default|minified|cdn|<RTV_NUMBER>)
 // (See ./app-index/settings.js)
 app.get('/serve_mode_change', (req, res) => {
   const {mode} = req.query;
@@ -522,6 +522,7 @@ app.use('/form/verify-search-json/post', (req, res) => {
  * @param {express.Request} req
  * @param {express.Response} res
  * @param {string} mode
+ * @return {Promise<void>}
  */
 async function proxyToAmpProxy(req, res, mode) {
   const url =
@@ -578,7 +579,7 @@ const liveListDocs = Object.create(null);
 app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
   const mode = SERVE_MODE;
   let liveListDoc = liveListDocs[req.baseUrl];
-  if (mode != 'compiled' && mode != 'default') {
+  if (mode != 'minified' && mode != 'default') {
     // Only handle compile(prev min)/default (prev max) mode
     next();
     return;
@@ -1442,7 +1443,7 @@ window.addEventListener('beforeunload', (evt) => {
 }
 
 app.get('/dist/ww.(m?js)', async (req, res, next) => {
-  // Special case for entry point script url. Use compiled for testing
+  // Special case for entry point script url. Use minified for testing
   const mode = SERVE_MODE;
   const fileName = path.basename(req.path);
   if (await passthroughServeModeCdn(res, fileName)) {
@@ -1559,7 +1560,7 @@ function generateInfo(filePath) {
     '<h3></h3>' +
     '<h3><a href = /serve_mode=default>' +
     'Change to DEFAULT mode (unminified JS)</a></h3>' +
-    '<h3><a href = /serve_mode=compiled>' +
+    '<h3><a href = /serve_mode=minified>' +
     'Change to COMPILED mode (minified JS)</a></h3>' +
     '<h3><a href = /serve_mode=cdn>' +
     'Change to CDN mode (prod JS)</a></h3>'

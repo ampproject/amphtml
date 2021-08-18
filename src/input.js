@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import {Observable} from './core/data-structures/observable';
-import {Services} from './service';
-import {dev} from './log';
+import {Observable} from '#core/data-structures/observable';
+
+import {Services} from '#service';
+
 import {listenOnce, listenOncePromise} from './event-helper';
+import {dev} from './log';
 import {registerServiceBuilder} from './service-helpers';
 
 const TAG_ = 'Input';

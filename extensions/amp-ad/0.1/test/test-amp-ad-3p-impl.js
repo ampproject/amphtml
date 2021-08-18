@@ -18,6 +18,7 @@ import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
 import '../amp-ad';
 import * as adCid from '../../../../src/ad-cid';
 import * as consent from '../../../../src/consent';
+import * as mode from '#core/mode';
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {AmpAdUIHandler} from '../amp-ad-ui';
@@ -26,7 +27,8 @@ import {LayoutPriority} from '#core/dom/layout';
 import {Services} from '#service';
 import {adConfig} from '#ads/_config';
 import {createElementWithAttributes} from '#core/dom';
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
+import {stubServiceForDoc} from '#testing/test-helper';
 
 function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
   const ampAdElement = createElementWithAttributes(win.document, 'amp-ad', {
@@ -67,10 +69,6 @@ describes.realWin(
     let win;
     let registryBackup;
     const whenFirstVisible = Promise.resolve();
-
-    function mockMode(mode) {
-      env.sandbox.stub(win.parent, '__AMP_MODE').value(mode);
-    }
 
     beforeEach(() => {
       registryBackup = Object.create(null);
@@ -129,7 +127,7 @@ describes.realWin(
         expect(newLayout).to.not.equal(secondLayout);
       });
 
-      it('should propagete CID to ad iframe', () => {
+      it('should propagate CID to ad iframe', () => {
         env.sandbox.stub(adCid, 'getAdCid').resolves('sentinel123');
 
         return ad3p.layoutCallback().then(() => {
@@ -191,6 +189,28 @@ describes.realWin(
           expect(data).to.be.ok;
           expect(data._context).to.be.ok;
           expect(data._context.initialConsentState).to.be.null;
+        });
+      });
+
+      it('should propagate pageViewId64 to ad iframe', () => {
+        stubServiceForDoc(
+          env.sandbox,
+          env.ampdoc,
+          'documentInfo',
+          'get'
+        ).returns({
+          get pageViewId64() {
+            return Promise.resolve('pageViewId64Stub');
+          },
+        });
+
+        return ad3p.layoutCallback().then(() => {
+          const frame = ad3p.element.querySelector('iframe[src]');
+          expect(frame).to.be.ok;
+          const data = JSON.parse(frame.name).attributes;
+          expect(data).to.be.ok;
+          expect(data._context).to.be.ok;
+          expect(data._context.pageViewId64).to.equal('pageViewId64Stub');
         });
       });
 
@@ -308,7 +328,7 @@ describes.realWin(
 
     describe('preconnectCallback', () => {
       it('should add preconnect and prefetch to DOM header', () => {
-        mockMode({});
+        env.sandbox.stub(mode, 'isProd').returns(true);
         ad3p.buildCallback();
         ad3p.preconnectCallback();
         return whenFirstVisible.then(() => {
@@ -319,7 +339,7 @@ describes.realWin(
           );
           expect(fetches[1]).to.have.property(
             'href',
-            'https://3p.ampproject.net/$internalRuntimeVersion$/f.js'
+            'https://3p.ampproject.net/$internalRuntimeVersion$/vendor/_ping_.js'
           );
 
           const preconnects = win.document.querySelectorAll(

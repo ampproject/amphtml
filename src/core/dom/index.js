@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import * as mode from '#core/mode';
 import {dict} from '#core/types/object';
-import {matches} from './query';
+import {parseJson} from '#core/types/object/json';
 import {toWin} from '#core/window';
+
+import {childElementsByTag, matches} from './query';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',
@@ -45,7 +48,6 @@ const DEFAULT_CUSTOM_EVENT_OPTIONS = {bubbles: true, cancelable: true};
  * @param {!Element} parent
  * @param {function(!Element):boolean} checkFunc
  * @param {function()} callback
- * @suppress {suspiciousCode} due to IS_ESM
  */
 export function waitForChild(parent, checkFunc, callback) {
   if (checkFunc(parent)) {
@@ -53,7 +55,7 @@ export function waitForChild(parent, checkFunc, callback) {
     return;
   }
   const win = toWin(parent.ownerDocument.defaultView);
-  if (IS_ESM || win.MutationObserver) {
+  if (mode.isEsm() || win.MutationObserver) {
     const observer = new win.MutationObserver(() => {
       if (checkFunc(parent)) {
         observer.disconnect();
@@ -535,4 +537,30 @@ export function dispatchCustomEvent(node, name, opt_data, opt_options) {
  */
 export function containsNotSelf(parent, child) {
   return child !== parent && parent.contains(child);
+}
+
+/**
+ * Helper method to get the json config from an element <script> tag
+ * @param {!Element} element
+ * @return {?JsonObject}
+ * @throws {!Error} If element does not have exactly one <script> child
+ * with type="application/json", or if the <script> contents are not valid JSON.
+ */
+export function getChildJsonConfig(element) {
+  const scripts = childElementsByTag(element, 'script');
+  const {length} = scripts;
+  if (length !== 1) {
+    throw new Error(`Found ${length} <script> children. Expected 1.`);
+  }
+
+  const script = scripts[0];
+  if (!isJsonScriptTag(script)) {
+    throw new Error('<script> child must have type="application/json"');
+  }
+
+  try {
+    return parseJson(script.textContent);
+  } catch {
+    throw new Error('Failed to parse <script> contents. Is it valid JSON?');
+  }
 }

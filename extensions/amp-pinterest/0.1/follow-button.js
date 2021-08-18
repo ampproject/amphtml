@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {Util} from './util';
-import {assertHttpsUrl} from '../../../src/url';
-import {openWindowDialog} from '../../../src/open-window-dialog';
 import {tryResolve} from '#core/data-structures/promise';
 
+import {Util} from './util';
+
 import {userAssert} from '../../../src/log';
+import {openWindowDialog} from '../../../src/open-window-dialog';
+import {assertHttpsUrl} from '../../../src/url';
 
 // Popup options
 const POP_FOLLOW = `status=no,resizable=yes,scrollbars=yes,

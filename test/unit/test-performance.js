@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-import * as IniLoad from '../../src/ini-load';
 import * as fakeTimers from '@sinonjs/fake-timers';
+
+import {VisibilityState} from '#core/constants/visibility-state';
+
+import {Services} from '#service';
+import {installRuntimeServices} from '#service/core-services';
 import {
   Performance,
   installPerformanceService,
 } from '#service/performance-impl';
-import {Services} from '#service';
-import {VisibilityState} from '#core/constants/visibility-state';
-import {getMode} from '../../src/mode';
 import {installPlatformService} from '#service/platform-impl';
-import {installRuntimeServices} from '#service/core-services';
+
+import * as IniLoad from '../../src/ini-load';
+import {getMode} from '../../src/mode';
 
 describes.realWin('performance', {amp: false}, (env) => {
   it('should be resilient to unsupported PerformanceObserver entry types', () => {
@@ -316,19 +319,20 @@ describes.realWin('performance', {amp: true}, (env) => {
           env.sandbox
             .stub(ampdoc, 'getFirstVisibleTime')
             .callsFake(() => firstVisibleTime);
+          perf.coreServicesAvailable();
+          perf.viewer_ = {isEmbedded: () => true};
         });
 
-        it('should always be zero before viewer is set', () => {
+        it('should not offset by visible time when viewer is not set', () => {
+          perf.viewer_ = {isEmbedded: () => false};
           clock.tick(10);
           perf.tickSinceVisible('test');
 
           expect(tickDeltaStub).to.have.been.calledOnce;
-          expect(tickDeltaStub.firstCall.args[1]).to.equal(0);
+          expect(tickDeltaStub.firstCall.args[1]).to.equal(10);
         });
 
         it('should always be zero before visible', () => {
-          perf.coreServicesAvailable();
-
           clock.tick(10);
           perf.tickSinceVisible('test');
 
@@ -337,7 +341,6 @@ describes.realWin('performance', {amp: true}, (env) => {
         });
 
         it('should calculate after visible', () => {
-          perf.coreServicesAvailable();
           firstVisibleTime = timeOrigin + 5;
 
           clock.tick(10);
@@ -348,7 +351,6 @@ describes.realWin('performance', {amp: true}, (env) => {
         });
 
         it('should be zero after visible but for earlier event', () => {
-          perf.coreServicesAvailable();
           firstVisibleTime = timeOrigin + 5;
 
           // An earlier event, since event time (4) is less than visible time (5).
@@ -1025,29 +1027,31 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       perf.coreServicesAvailable();
       expect(perf.events_.length).to.equal(0);
 
-      // Fake a largest-contentful-paint entry specifying a loadTime,
-      // simulating an image on a different origin without a proper
-      // Timing-Allow-Origin header.
+      // Fake a largest-contentful-paint entry specifying a renderTime/startTime,
+      // simulating an image on the same origin or with a Timing-Allow-Origin header.
       performanceObserver.triggerCallback({
         getEntries() {
           return [
             {
               entryType: 'largest-contentful-paint',
               loadTime: 10,
+              renderTime: 12,
+              startTime: 12,
             },
           ];
         },
       });
 
-      // Fake a largest-contentful-paint entry specifying a renderTime,
-      // simulating an image on the same origin or with a proper
-      // Timing-Allow-Origin header.
+      // Fake a largest-contentful-paint entry with a loadTime/startTime
+      // simulating an image on a different origin without a Timing-Allow-Origin header.
       performanceObserver.triggerCallback({
         getEntries() {
           return [
             {
               entryType: 'largest-contentful-paint',
-              renderTime: 23,
+              loadTime: 23,
+              renderTime: undefined,
+              startTime: 23,
             },
           ];
         },
@@ -1056,16 +1060,12 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       // The document has become hidden, e.g. via the user switching tabs.
       toggleVisibility(perf, false);
 
-      const lcpEvents = perf.events_.filter((evt) =>
-        evt.label.startsWith('lcp')
+      const lcpEvents = perf.events_.filter(({label}) =>
+        label.startsWith('lcp')
       );
-      expect(lcpEvents.length).to.equal(3);
-      expect(perf.events_).deep.include({
-        label: 'lcpl',
-        delta: 10,
-      });
-      expect(perf.events_).deep.include({
-        label: 'lcpr',
+      expect(lcpEvents.length).to.equal(2);
+      expect(lcpEvents).deep.include({
+        label: 'lcp',
         delta: 23,
       });
     });

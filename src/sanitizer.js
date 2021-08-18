@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {dict} from '#core/types/object';
+
 import {
   ALLOWLISTED_ATTRS,
   ALLOWLISTED_ATTRS_BY_TAGS,
@@ -23,12 +25,13 @@ import {
   EMAIL_ALLOWLISTED_AMP_TAGS,
   TRIPLE_MUSTACHE_ALLOWLISTED_TAGS,
   isValidAttr,
-} from './purifier/sanitation';
-import {dict} from './core/types/object';
+} from '#purifier/sanitation';
+
 import {htmlSanitizer} from '#third_party/caja/html-sanitizer';
+
 import {isAmp4Email} from './format';
-import {rewriteAttributeValue} from './url-rewrite';
 import {user} from './log';
+import {rewriteAttributeValue} from './url-rewrite';
 
 /** @private @const {string} */
 const TAG = 'sanitizer';

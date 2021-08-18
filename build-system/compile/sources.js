@@ -24,7 +24,6 @@ const COMMON_GLOBS = [
   'third_party/amp-toolbox-cache-url/**/*.js',
   'third_party/caja/html-sanitizer.js',
   'third_party/closure-library/sha384-generated.js',
-  'third_party/closure-responding-channel/closure-bundle.js',
   'third_party/css-escape/css-escape.js',
   'third_party/d3/**/*.js',
   'third_party/fuzzysearch/index.js',
@@ -56,6 +55,8 @@ const COMMON_GLOBS = [
   'node_modules/web-activities/activity-ports.js',
   'node_modules/@ampproject/animations/package.json',
   'node_modules/@ampproject/animations/dist/animations.mjs',
+  'node_modules/@ampproject/bento-compiler/package.json',
+  'node_modules/@ampproject/bento-compiler/dist/index.js',
   'node_modules/@ampproject/toolbox-cache-url/package.json',
   'node_modules/@ampproject/toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js',
   'node_modules/@ampproject/viewer-messaging/package.json',
@@ -114,6 +115,8 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-animation/**/*.js',
   // Needed for amp-carousel 0.2, amp-inline-gallery, amp-stream-gallery
   'extensions/amp-base-carousel/**/*.js',
+  // amp-brightcove 0.1 and 1.0 share this file.
+  'extensions/amp-brightcove/brightcove-api.js',
   // Needed for carousel autolightbox
   'extensions/amp-lightbox-gallery/1.0/*.js',
   // Needed for amp-lightbox-gallery using amp-lightbox

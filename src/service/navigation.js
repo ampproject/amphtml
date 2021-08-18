@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
-import {closestAncestorElementBySelector} from '#core/dom/query';
-import {dev, user, userAssert} from '../log';
-import {dict} from '#core/types/object';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
-import {getMode} from '../mode';
+import {PriorityQueue} from '#core/data-structures/priority-queue';
 import {isIframed, tryFocus} from '#core/dom';
-import {isLocalhostOrigin} from '../url';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+import * as mode from '#core/mode';
+import {dict} from '#core/types/object';
+import {toWin} from '#core/window';
+
+import {Services} from '#service';
+
+import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
+import {dev, user, userAssert} from '../log';
+import {getMode} from '../mode';
 import {openWindowDialog} from '../open-window-dialog';
 import {registerServiceBuilderForDoc} from '../service-helpers';
-import {toWin} from '#core/window';
-import PriorityQueue from '#core/data-structures/priority-queue';
+import {isLocalhostOrigin} from '../url';
 
 const TAG = 'navigation';
 
@@ -616,7 +619,7 @@ export class Navigation {
     // confusing behavior e.g. when pressing "tab" button.
     // @see https://humanwhocodes.com/blog/2013/01/15/fixing-skip-to-content-links/
     // @see https://github.com/ampproject/amphtml/issues/18671
-    if (!IS_ESM && Services.platformFor(this.ampdoc.win).isIe()) {
+    if (!mode.isEsm() && Services.platformFor(this.ampdoc.win).isIe()) {
       const id = toLocation.hash.substring(1);
       const elementWithId = this.ampdoc.getElementById(id);
       if (elementWithId) {

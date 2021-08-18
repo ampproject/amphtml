@@ -23,8 +23,8 @@ import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {applyFillContent} from '#core/dom/layout';
-import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {
+  assertDoesNotContainDisplay,
   computedStyle,
   px,
   resetStyles,
@@ -43,7 +43,7 @@ import {isInFie} from '../../../src/iframe-helper';
 import {realChildElements} from '#core/dom/query';
 import {toArray} from '#core/types/array';
 import {tryFocus} from '#core/dom';
-import {unmountAll} from '../../../src/utils/resource-container-helper';
+import {unmountAll} from '#core/dom/resource-container-helper';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';

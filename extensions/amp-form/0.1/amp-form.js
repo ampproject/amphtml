@@ -16,62 +16,65 @@
 
 import {ActionTrust} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
-import {AmpFormTextarea} from './amp-form-textarea';
 import {
   AsyncInputAttributes,
   AsyncInputClasses,
-} from '../../../src/async-input';
-import {CSS} from '../../../build/amp-form-0.1.css';
-import {Deferred, tryResolve} from '#core/data-structures/promise';
-import {
-  FORM_VERIFY_OPTOUT,
-  FORM_VERIFY_PARAM,
-  getFormVerifier,
-} from './form-verifiers';
-import {FormDirtiness} from './form-dirtiness';
-import {FormEvents} from './form-events';
-import {FormSubmitService} from './form-submit-service';
+} from '#core/constants/async-input';
 import {Keys} from '#core/constants/key-codes';
-import {
-  SOURCE_ORIGIN_PARAM,
-  addParamsToUrl,
-  isProxyOrigin,
-  serializeQueryString,
-} from '../../../src/url';
-import {Services} from '#service';
-import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
-import {ancestorElementsByTag, childElementByAttr} from '#core/dom/query';
-import {createCustomEvent} from '../../../src/event-helper';
+import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {
   createElementWithAttributes,
   iterateCursor,
   removeElement,
   tryFocus,
 } from '#core/dom';
-import {createFormDataWrapper} from '../../../src/form-data-wrapper';
-import {deepMerge, dict} from '#core/types/object';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {
   formOrNullForElement,
   getFormAsObject,
   setFormForElement,
-} from '../../../src/form';
-import {getFormValidator, isCheckValiditySupported} from './form-validators';
-import {getMode} from '../../../src/mode';
-import {installFormProxy} from './form-proxy';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {isAmp4Email} from '../../../src/format';
+} from '#core/dom/form';
+import {ancestorElementsByTag, childElementByAttr} from '#core/dom/query';
 import {isArray, toArray} from '#core/types/array';
+import {deepMerge, dict} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
 import {parseQueryString} from '#core/types/string/url';
+import {toWin} from '#core/window';
+
+import {Services} from '#service';
+
+import {AmpFormTextarea} from './amp-form-textarea';
+import {FormDirtiness} from './form-dirtiness';
+import {FormEvents} from './form-events';
+import {installFormProxy} from './form-proxy';
+import {FormSubmitService} from './form-submit-service';
+import {getFormValidator, isCheckValiditySupported} from './form-validators';
+import {
+  FORM_VERIFY_OPTOUT,
+  FORM_VERIFY_PARAM,
+  getFormVerifier,
+} from './form-verifiers';
+
+import {CSS} from '../../../build/amp-form-0.1.css';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {createCustomEvent} from '../../../src/event-helper';
+import {createFormDataWrapper} from '../../../src/form-data-wrapper';
+import {isAmp4Email} from '../../../src/format';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
+import {installStylesForDoc} from '../../../src/style-installer';
+import {
+  SOURCE_ORIGIN_PARAM,
+  addParamsToUrl,
+  isProxyOrigin,
+  serializeQueryString,
+} from '../../../src/url';
 import {
   setupAMPCors,
   setupInit,
   setupInput,
 } from '../../../src/utils/xhr-utils';
-import {toWin} from '#core/window';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryParseJson} from '#core/types/object/json';
 
 /** @const {string} */
 const TAG = 'amp-form';

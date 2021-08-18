@@ -582,7 +582,7 @@ To do so, specify an array of selectors that are comma separated and individuall
 ##### Available triggers <a name="available-triggers"></a>
 
 The `on` trigger provides an event to listen for. Valid values are
-`render-start`, `ini-load`, `click`, `scroll`, `timer`, `visible`, `hidden`,
+`render-start`, `ini-load`, `blur`, `change`, `click`, `scroll`, `timer`, `visible`, `hidden`,
 `user-error`, `access-*`, and
 `video-*`.
 
@@ -657,6 +657,46 @@ configured as:
   "iniLoad": {
     "on": "ini-load",
     "request": "request"
+  }
+}
+```
+
+###### `"on": "blur"` trigger
+
+The on blur is part of the browser events that are supported by the Browser Event Tracker.
+Use the blur trigger (`"on": "blur"`) to fire a request when a specified
+element is no longer in focus. Use [`selector`](#element-selector) to control which
+elements will cause this request to fire. The trigger will fire for all elements
+matched by the specified selector. The selector can either be a single CSS query selector or an array of selectors.
+
+```json
+"triggers": {
+  "inputFieldBlurred": {
+    "on": "blur",
+    "request": "event",
+    "selector": ["inputField-A", "inputField-B"]
+    "vars": {
+      "eventId": "${id}"
+    }
+  }
+}
+```
+
+###### `"on": "change"` trigger
+
+Similar to the blur trigger, the change trigger is part of the Browser Events.
+Use the change trigger (`"on": "change"`) to fire a request when a specified
+element undergoes a state change. The state change may vary for different elements. Use [`selector`](#element-selector) to control which elements will cause this request to fire. The selector can either be a single CSS query selector or an array of selectors. The trigger will fire for all elements matched by the specified selector.
+
+```json
+"triggers": {
+  "selectChange": {
+    "on": "change",
+    "request": "event",
+    "selector":["dropdownA", "dropdownB"],
+    "vars": {
+      "eventId": "${id}"
+    }
   }
 }
 ```
@@ -943,6 +983,8 @@ reports errors from A4A iframe embeds, which are irrelevant to the page.
     (`"on": "video-*"`) that publishers can use to track different events
     occurring during a video's lifecycle. More details are available in
     [AMP Video Analytics](amp-video-analytics.md).
+-   Browser Event Trackers: AMP provides the ability to track a custom set of browser events. The set of browser events that are supported are listed in the allow-list.
+    Currently, events (`"on": "change"`) and (`"on": "blur"`) are supported.
 
 ###### `request` trigger
 

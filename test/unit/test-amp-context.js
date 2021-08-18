@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 import {AmpContext} from '#3p/ampcontext';
-import {MessageType, serializeMessage} from '../../src/3p-frame-messaging';
+
+import {MessageType, serializeMessage} from '#core/3p-frame-messaging';
+
 import {Platform} from '#service/platform-impl';
 
 const NOOP = () => {};
@@ -132,6 +134,7 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
     });
     expect(context.canonicalUrl).to.equal('https://bar.com');
     expect(context.pageViewId).to.equal('1');
+    expect(context.pageViewId64).to.equal('abcdef');
     expect(context.sentinel).to.equal('1-291921');
     expect(context.startTime).to.equal(0);
     expect(context.referrer).to.equal('baz.net');
@@ -418,6 +421,7 @@ function generateAttributes(opt_sentinel) {
     },
     canonicalUrl: 'https://bar.com',
     pageViewId: '1',
+    pageViewId64: 'abcdef',
     sentinel,
     startTime: 0,
     referrer: 'baz.net',

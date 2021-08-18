@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import {RequestBank} from '#testing/test-helper';
-import {maybeSwitchToCompiledJs} from '#testing/iframe';
 import {parseQueryString} from '#core/types/string/url';
+
 import {xhrServiceForTesting} from '#service/xhr-impl';
+
+import {maybeSwitchToMinifiedJs} from '#testing/iframe';
+import {RequestBank} from '#testing/test-helper';
 
 // TODO(wg-monetization, #29112): Unskip on Safari.
 const t = describes.sandboxed.configure().skipSafari();
@@ -284,7 +286,7 @@ t.skip('A more real AMPHTML image ad', () => {
   // The image ad as seen in examples/inabox.gpt.html,
   // with visibility pings being placeholders that's substituted with calls to
   // the request bank.
-  const adBody = maybeSwitchToCompiledJs(
+  const adBody = maybeSwitchToMinifiedJs(
     // eslint-disable-next-line no-undef
     __html__['test/fixtures/amp-cupcake-ad.html']
   )

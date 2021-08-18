@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from './core/constants/common-signals';
-import {Services} from './service';
-import {createElementWithAttributes, removeElement} from './core/dom';
-import {devAssert} from './log';
-import {dict} from './core/types/object';
-import {isArray} from './core/types';
-import {toWin} from './core/window';
+import {CommonSignals} from '#core/constants/common-signals';
+import {createElementWithAttributes, removeElement} from '#core/dom';
+import {isArray} from '#core/types';
+import {dict} from '#core/types/object';
+import {toWin} from '#core/window';
+
+import {Services} from '#service';
+
 import {triggerAnalyticsEvent} from './analytics';
+import {devAssert} from './log';
 
 /**
  * Method to create scoped analytics element for any element.

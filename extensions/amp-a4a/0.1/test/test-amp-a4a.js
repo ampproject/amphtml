@@ -22,10 +22,40 @@ import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import '../../../amp-ad/0.1/amp-ad';
 // The following namespaces are imported so that we can stub and spy on certain
 // methods in tests.
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {Signals} from '#core/data-structures/signals';
+import {createElementWithAttributes} from '#core/dom';
+import {LayoutPriority} from '#core/dom/layout';
+import {layoutRectLtwh, layoutSizeFromRect} from '#core/dom/layout/rect';
+
+import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+import {AmpDoc, installDocService} from '#service/ampdoc-impl';
+import {resetScheduledElementForTesting} from '#service/custom-element-registry';
+import {Extensions} from '#service/extensions-impl';
+import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
+
+import {macroTask} from '#testing/helpers';
+import {createIframePromise} from '#testing/iframe';
+
+import {FetchMock, networkFailure} from './fetch-mock';
+import {data as testFragments} from './testdata/test_fragments';
+import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
+import {MockA4AImpl, TEST_URL} from './utils';
+
 import * as analytics from '../../../../src/analytics';
+import {cancellation} from '../../../../src/error-reporting';
 import * as analyticsExtension from '../../../../src/extension-analytics';
+import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
+import {dev, user} from '../../../../src/log';
 import * as mode from '../../../../src/mode';
-import {AMP_SIGNATURE_HEADER, VerificationStatus} from '../signature-verifier';
+import {AmpAdXOriginIframeHandler} from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {
+  incrementLoadingAds,
+  is3pThrottled,
+} from '../../../amp-ad/0.1/concurrent-load';
+import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {
   AmpA4A,
   CREATIVE_SIZE_HEADER,
@@ -37,32 +67,8 @@ import {
   assignAdUrlToError,
   protectFunctionWrapper,
 } from '../amp-a4a';
-import {AmpAdXOriginIframeHandler} from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {AmpDoc, installDocService} from '#service/ampdoc-impl';
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {Extensions} from '#service/extensions-impl';
-import {FetchMock, networkFailure} from './fetch-mock';
-import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
-import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
-import {LayoutPriority} from '#core/dom/layout';
-import {MockA4AImpl, TEST_URL} from './utils';
-import {Services} from '#service';
-import {Signals} from '#core/data-structures/signals';
-import {cancellation} from '../../../../src/error-reporting';
-import {createElementWithAttributes} from '#core/dom';
-import {createIframePromise} from '#testing/iframe';
-import {dev, user} from '../../../../src/log';
-import {
-  incrementLoadingAds,
-  is3pThrottled,
-} from '../../../amp-ad/0.1/concurrent-load';
-import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
-import {layoutRectLtwh, layoutSizeFromRect} from '#core/dom/layout/rect';
-import {macroTask} from '#testing/yield';
-import {resetScheduledElementForTesting} from '#service/custom-element-registry';
-import {data as testFragments} from './testdata/test_fragments';
-import {toggleExperiment} from '#experiments';
-import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
+import * as secureFrame from '../secure-frame';
+import {AMP_SIGNATURE_HEADER, VerificationStatus} from '../signature-verifier';
 
 describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
   let doc;
@@ -944,6 +950,30 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
         expect(a4a.iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
       });
+
+      it('should set feature policy for attribution-reporting when supported', async () => {
+        env.sandbox
+          .stub(secureFrame, 'isAttributionReportingSupported')
+          .returns(true);
+        a4a.sandboxHTMLCreativeFrame = () => true;
+        a4a.onLayoutMeasure();
+        await a4a.layoutCallback();
+        verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
+        expect(a4a.iframe.getAttribute('allow')).to.equal(
+          "sync-xhr 'none';attribution-reporting 'src';"
+        );
+      });
+
+      it('should not set feature policy for attribution-reporting when not supported', async () => {
+        env.sandbox
+          .stub(secureFrame, 'isAttributionReportingSupported')
+          .returns(false);
+        a4a.sandboxHTMLCreativeFrame = () => true;
+        a4a.onLayoutMeasure();
+        await a4a.layoutCallback();
+        verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
+        expect(a4a.iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
+      });
     });
 
     describe('illegal render mode value', () => {
@@ -1031,6 +1061,30 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         await a4a.layoutCallback();
         verifyNameFrameRender(a4aElement, false /* shouldSandbox */);
         expect(fetchMock.called('ad')).to.be.true;
+      });
+
+      it('should set feature policy for attribution-reporting when supported', async () => {
+        env.sandbox
+          .stub(secureFrame, 'isAttributionReportingSupported')
+          .returns(true);
+        a4a.sandboxHTMLCreativeFrame = () => false;
+        a4a.onLayoutMeasure();
+        await a4a.layoutCallback();
+        verifyNameFrameRender(a4aElement, false /* shouldSandbox */);
+        expect(a4a.iframe.getAttribute('allow')).to.equal(
+          "sync-xhr 'none';attribution-reporting 'src';"
+        );
+      });
+
+      it('should not set feature policy for attribution-reporting when not supported', async () => {
+        env.sandbox
+          .stub(secureFrame, 'isAttributionReportingSupported')
+          .returns(false);
+        a4a.sandboxHTMLCreativeFrame = () => false;
+        a4a.onLayoutMeasure();
+        await a4a.layoutCallback();
+        verifyNameFrameRender(a4aElement, false /* shouldSandbox */);
+        expect(a4a.iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
       });
 
       ['', 'client_cache', 'safeframe', 'some_random_thing'].forEach(
@@ -1141,6 +1195,38 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           false /* shouldSandbox */
         );
         expect(fetchMock.called('ad')).to.be.true;
+      });
+
+      it('should set feature policy for attribution-reporting when supported', async () => {
+        env.sandbox
+          .stub(secureFrame, 'isAttributionReportingSupported')
+          .returns(true);
+        a4a.sandboxHTMLCreativeFrame = () => false;
+        a4a.onLayoutMeasure();
+        await a4a.layoutCallback();
+        verifySafeFrameRender(
+          a4aElement,
+          DEFAULT_SAFEFRAME_VERSION,
+          false /* shouldSandbox */
+        );
+        expect(a4a.iframe.getAttribute('allow')).to.equal(
+          "sync-xhr 'none';attribution-reporting 'src';"
+        );
+      });
+
+      it('should not set feature policy for attribution-reporting when not supported', async () => {
+        env.sandbox
+          .stub(secureFrame, 'isAttributionReportingSupported')
+          .returns(false);
+        a4a.sandboxHTMLCreativeFrame = () => false;
+        a4a.onLayoutMeasure();
+        await a4a.layoutCallback();
+        verifySafeFrameRender(
+          a4aElement,
+          DEFAULT_SAFEFRAME_VERSION,
+          false /* shouldSandbox */
+        );
+        expect(a4a.iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
       });
 
       ['', 'client_cache', 'nameframe', 'some_random_thing'].forEach(
@@ -1702,12 +1788,12 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
       env.sandbox
         .stub(a4a, 'maybeValidateAmpCreative')
         .returns(Promise.resolve());
-      a4a.onLayoutMeasure();
       a4a.uiHandler = {
         getScrollPromiseForStickyAd: () => Promise.resolve(null),
         isStickyAd: () => false,
         maybeInitStickyAd: () => {},
       };
+      a4a.onLayoutMeasure();
       await a4a.buildCallback();
       await a4a.layoutCallback();
       expect(
@@ -1781,6 +1867,9 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
       doc.head.appendChild(s);
       a4aElement.className = 'fixed';
       const a4a = new MockA4AImpl(a4aElement);
+      a4a.uiHandler = {
+        isStickyAd: () => false,
+      };
       a4a.onLayoutMeasure();
       expect(a4a.adPromise_).to.not.be.ok;
     });
@@ -2141,6 +2230,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             unlayoutUISpy();
           },
           getScrollPromiseForStickyAd: () => Promise.resolve(null),
+          isStickyAd: () => false,
           maybeInitStickyAd: () => {},
           cleanup: () => {},
         };

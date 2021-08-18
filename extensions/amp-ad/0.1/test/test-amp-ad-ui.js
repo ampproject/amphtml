@@ -19,7 +19,7 @@ import * as domQuery from '#core/dom/query';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
 import {createElementWithAttributes} from '#core/dom';
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
 import {setStyles} from '#core/dom/style';
 
 describes.realWin(
@@ -326,23 +326,33 @@ describes.realWin(
     });
 
     describe('sticky ads', () => {
-      it('should render close buttons on render once', () => {
+      it('should render close buttons', () => {
         expect(uiHandler.unlisteners_).to.be.empty;
         uiHandler.stickyAdPosition_ = 'bottom';
-        uiHandler.onResizeSuccess();
-        expect(uiHandler.closeButtonRendered_).to.be.true;
-        expect(uiHandler.unlisteners_.length).to.equal(2);
+        uiHandler.maybeInitStickyAd();
+        expect(uiHandler.unlisteners_.length).to.equal(1);
         expect(uiHandler.element_.querySelector('.amp-ad-close-button')).to.be
           .not.null;
-
-        uiHandler.onResizeSuccess();
-        expect(uiHandler.unlisteners_.length).to.equal(2);
       });
 
       it('onResizeSuccess top sticky ads shall cause padding top adjustment', () => {
         uiHandler.stickyAdPosition_ = 'top';
         uiHandler.onResizeSuccess();
         expect(uiHandler.topStickyAdScrollListener_).to.not.be.undefined;
+      });
+
+      it('should refuse to load the second sticky ads', () => {
+        for (let i = 0; i < 2; i++) {
+          const adElement = env.win.document.createElement('amp-ad');
+          adElement.setAttribute('sticky', 'top');
+          adElement.setAttribute('class', 'i-amphtml-built');
+          env.win.document.body.insertBefore(adElement, null);
+        }
+        allowConsoleError(() => {
+          expect(() => {
+            uiHandler.validateStickyAd();
+          }).to.throw();
+        });
       });
     });
   }

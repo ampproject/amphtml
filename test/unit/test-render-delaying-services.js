@@ -15,13 +15,15 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import * as service from '../../src/service-helpers';
+
+import {macroTask} from '#testing/helpers';
 import {createIframePromise} from '#testing/iframe';
+
 import {
   hasRenderDelayingServices,
   waitForServices,
 } from '../../src/render-delaying-services';
-import {macroTask} from '#testing/yield';
+import * as service from '../../src/service-helpers';
 
 describes.sandboxed('waitForServices', {}, (env) => {
   let win;

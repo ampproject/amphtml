@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import * as dom from './core/dom';
-import {extensionScriptInNode} from './service/extension-script';
+import * as dom from '#core/dom';
+
+import {extensionScriptInNode} from '#service/extension-script';
+
+import {userAssert} from './log';
 import {
   getAmpdoc,
   getService,
@@ -25,7 +28,6 @@ import {
   getServicePromiseOrNull,
   getServicePromiseOrNullForDoc,
 } from './service-helpers';
-import {userAssert} from './log';
 
 /**
  * Same as getElementService but produces null if the given element is not

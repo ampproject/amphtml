@@ -26,11 +26,12 @@ describes.endtoend(
   async function (env) {
     let controller;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 
-    it('should set snap property on spacers', async () => {
+    // TODO(#35241): flaky test disabled in #35176
+    it.skip('should set snap property on spacers', async () => {
       const spacers = await getSpacers(controller);
       for (let i = 0; i < spacers.length; i++) {
         const spacer = spacers[i];

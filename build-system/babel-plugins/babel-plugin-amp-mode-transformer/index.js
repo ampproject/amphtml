@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// @ts-nocheck
 
 /**
  * Changes the values of getMode().test, getMode().localDev to false
@@ -21,18 +22,10 @@
  */
 const {dirname, join, relative, resolve} = require('path').posix;
 
-let shouldResolveDevelopmentMode = true;
-
-// This plugin is not executed when AMP is building resources in isForTesting mode.
+// This plugin is only executed when bundling for production builds (minified).
 module.exports = function ({types: t}) {
   let getModeFound = false;
   return {
-    pre() {
-      const {isEsmBuild = true} = this.opts;
-      // Only apply the development resolution when building module output.
-      // This is due to the module output only applying to AMP Caches.
-      shouldResolveDevelopmentMode = isEsmBuild;
-    },
     visitor: {
       ImportDeclaration({node}, state) {
         const {source, specifiers} = node;
@@ -59,16 +52,24 @@ module.exports = function ({types: t}) {
         const {node} = path;
         const {object: obj, property} = node;
         const {callee} = obj;
+        const {INTERNAL_RUNTIME_VERSION: version, IS_ESM} = this.opts;
+
         if (callee && callee.name === 'getMode') {
           if (property.name === 'test' || property.name === 'localDev') {
             path.replaceWith(t.booleanLiteral(false));
-          }
-          if (shouldResolveDevelopmentMode && property.name === 'development') {
+          } else if (property.name === 'development' && IS_ESM) {
             path.replaceWith(t.booleanLiteral(false));
-          }
-          if (property.name === 'minified') {
+          } else if (property.name === 'minified') {
             path.replaceWith(t.booleanLiteral(true));
+          } else if (property.name === 'version') {
+            path.replaceWith(t.stringLiteral(version));
           }
+        }
+      },
+      CallExpression(path) {
+        const {INTERNAL_RUNTIME_VERSION: version} = this.opts;
+        if (path.get('callee').referencesImport('#core/mode', 'version')) {
+          path.replaceWith(t.stringLiteral(version));
         }
       },
     },

@@ -20,7 +20,7 @@ import {PreactBaseElement} from '#preact/base-element';
 import {dict} from '#core/types/object';
 import {toggle} from '#core/dom/style';
 import {toggleAttribute} from '#core/dom';
-import {unmountAll} from '../../../src/utils/resource-container-helper';
+import {unmountAll} from '#core/dom/resource-container-helper';
 
 export class BaseElement extends PreactBaseElement {
   /** @param {!AmpElement} element */
@@ -34,39 +34,29 @@ export class BaseElement extends PreactBaseElement {
   /** @override */
   init() {
     return dict({
-      'onBeforeOpen': () => this.beforeOpen_(),
-      'onAfterOpen': () => this.afterOpen_(),
-      'onAfterClose': () => this.afterClose_(),
+      'onBeforeOpen': () => this.beforeOpen(),
+      'onAfterOpen': () => this.afterOpen(),
+      'onAfterClose': () => this.afterClose(),
     });
   }
 
-  /** @override */
-  unmountCallback() {
-    this.removeAsContainer();
-  }
-
-  /** @private */
-  beforeOpen_() {
+  /** @protected */
+  beforeOpen() {
     this.open_ = true;
     toggleAttribute(this.element, 'open', true);
     toggle(this.element, true);
     this.triggerEvent(this.element, 'open');
   }
 
-  /** @private */
-  afterOpen_() {
-    const scroller = this.element.shadowRoot.querySelector('[part=scroller]');
-    this.setAsContainer(scroller);
-  }
+  /** @protected */
+  afterOpen() {}
 
-  /** @private */
-  afterClose_() {
+  /** @protected */
+  afterClose() {
     this.open_ = false;
     toggleAttribute(this.element, 'open', false);
     toggle(this.element, false);
     this.triggerEvent(this.element, 'close');
-
-    this.removeAsContainer();
 
     // Unmount all children when the lightbox is closed. They will automatically
     // remount when the lightbox is opened again.

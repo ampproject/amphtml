@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import {toggleExperiment} from '#experiments';
+
 import {AttributeMutationDefaultClass} from '../mutation/attribute-mutation-default-class';
 import {AttributeMutationDefaultStyle} from '../mutation/attribute-mutation-default-style';
 import {AttributeMutationDefaultUrl} from '../mutation/attribute-mutation-default-url';
-import {toggleExperiment} from '#experiments';
 
 describes.realWin(
   'amp-experiment attribute-mutation-*',

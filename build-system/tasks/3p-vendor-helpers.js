@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-const debounce = require('debounce');
+const debounce = require('../common/debounce');
 const globby = require('globby');
-const {compileJsWithEsbuild} = require('./helpers');
 const {cyan, red} = require('../common/colors');
 const {endBuildStep} = require('./helpers');
+const {esbuildCompile} = require('./helpers');
 const {VERSION} = require('../compile/internal-version');
 const {watchDebounceDelay} = require('./helpers');
 const {watch} = require('chokidar');
@@ -50,7 +50,7 @@ async function buildVendorConfigs(options) {
 
   await Promise.all(
     Object.values(bundles).map((bundle) =>
-      compileJsWithEsbuild(
+      esbuildCompile(
         bundle.srcDir,
         bundle.srcFilename,
         options.minify ? bundle.minifiedDestDir : bundle.destDir,
@@ -78,7 +78,7 @@ async function buildVendorConfigs(options) {
 async function doBuild3pVendor(jsBundles, name, options) {
   const target = jsBundles[name];
   if (target) {
-    return compileJsWithEsbuild(
+    return esbuildCompile(
       target.srcDir,
       target.srcFilename,
       options.minify ? target.minifiedDestDir : target.destDir,

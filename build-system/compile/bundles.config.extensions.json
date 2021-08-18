@@ -228,6 +228,15 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-brightcove",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "wrapper": "bento"
+    }
+  },
+  {
     "name": "amp-byside-content",
     "version": "0.1",
     "latestVersion": "0.1",
@@ -334,6 +343,15 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-embedly-card",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "npm": true,
+      "wrappers": "bento"
+    }
+  },
+  {
     "name": "amp-experiment",
     "version": [
       "0.1",
@@ -362,40 +380,14 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-facebook-comments",
-    "version": "1.0",
-    "latestVersion": "0.1",
-    "options": {
-      "wrapper": "bento"
-    }
-  },
-  {
     "name": "amp-facebook-like",
     "version": "0.1",
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-facebook-like",
-    "version": "1.0",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true,
-      "wrapper": "bento"
-    }
-  },
-  {
     "name": "amp-facebook-page",
     "version": "0.1",
     "latestVersion": "0.1"
-  },
-  {
-    "name": "amp-facebook-page",
-    "version": "1.0",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true,
-      "wrapper": "bento"
-    }
   },
   {
     "name": "amp-fit-text",
@@ -457,14 +449,6 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-google-assistant-assistjs",
-    "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
-  },
-  {
     "name": "amp-google-document-embed",
     "version": "0.1",
     "latestVersion": "0.1"
@@ -486,6 +470,14 @@
     "name": "amp-iframe",
     "version": "0.1",
     "latestVersion": "0.1"
+  },
+  {
+    "name": "amp-iframe",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "wrapper": "bento"
+    }
   },
   {
     "name": "amp-iframely",
@@ -626,6 +618,16 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
+    }
+  },
+  {
+    "name": "amp-lightbox-gallery",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "wrapper": "bento"
     }
   },
   {
@@ -1024,7 +1026,9 @@
         "amp-story-interactive-poll",
         "amp-story-interactive-quiz",
         "amp-story-interactive-results",
-        "amp-story-interactive-slider"
+        "amp-story-interactive-results-detailed",
+        "amp-story-interactive-slider",
+        "amp-story-interactive-disclaimer"
       ]
     }
   },
@@ -1096,6 +1100,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
+      "hasCss": true,
       "npm": true,
       "wrapper": "bento"
     }
@@ -1122,6 +1127,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
+      "hasCss": true,
       "npm": true,
       "wrapper": "bento"
     }
@@ -1225,6 +1231,15 @@
     "name": "amp-wistia-player",
     "version": "0.1",
     "latestVersion": "0.1"
+  },
+  {
+    "name": "amp-wordpress-embed",
+    "version": "1.0",
+    "latestVersion": "1.0",
+    "options": {
+      "npm": true,
+      "wrappers": "bento"
+    }
   },
   {
     "name": "amp-yotpo",

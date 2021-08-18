@@ -25,6 +25,10 @@
     "host": "https://api.amplitude.com?api_key=!apiKey&device_id=_client_id(amplitude_amp_id)_&library=amp%2F_amp_version_&time=_timestamp_&language=_browser_language_&user_agent=_user_agent_",
     "event": "https://api.amplitude.com/amp/event?api_key=!apiKey&device_id=_client_id(amplitude_amp_id)_&library=amp%2F_amp_version_&time=_timestamp_&language=_browser_language_&user_agent=_user_agent_"
   },
+  "appsflyer": {
+    "onelink": "https://amp.onelink.me/amp/v1/onelink?webAppId=!webAppId&afWebUserId=_cookie(afUserId)_&amp-afUserId=_client_id(amp-afUserId)_&amp-afRefUserId=_cookie(amp-afRefUserId)_",
+    "event": "https://amp.appsflyer.com/amp/v1/events?webAppId=!webAppId&afWebUserId=_cookie(afUserId)_&amp-afUserId=_client_id(amp-afUserId)_&amp-afRefUserId=_cookie(amp-afRefUserId)_"
+  },
   "atinternet": {
     "base": "https://!log.xiti.com/hit.xiti?s=!site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_",
     "suffix": "&medium=amp&&ref=_document_referrer_",
@@ -48,7 +52,7 @@
   "bluetriangle": {
     "host": "https://d.btttag.com",
     "endpoint": "https://d.btttag.com/btt.gif",
-    "pageview": "https://d.btttag.com/btt.gif?gID=_client_id(bluetriangle_guid)_&sID=_client_id(bluetriangle_sessionid)_&siteID=!siteID&pageName=!pageName&txnName=!trafficSegment&thisURL=_canonical_url_&RefURL=_document_referrer_&dom=_nav_timing(domLoading%2CdomComplete)_&domContentLoadedEnd=_nav_timing(domContentLoadedEventEnd)_&domContentLoadedStart=_nav_timing(domContentLoadedEventStart)_&domInteractive=_nav_timing(domInteractive)_&domLoading=_nav_timing(domLoading)_&domainLookupStart=_nav_timing(domainLookupStart)_&elementCount=0&fByte=_nav_timing(requestStart%2CresponseStart)_&fCPnt=FIRST_CONTENTFUL_PAINT&fetchStart=_nav_timing(fetchStart)_&firstPaint=0&fmp=0&fps=0&fps_tti=0&loadEventStart=_nav_timing(loadEventStart)_&lt_tti=0&nst=_nav_timing(navigationStart)_&orderTND=0&pSz=0&pWSz=0&pageValue=&pgTm=_nav_timing(navigationStart%2CloadEventStart)_&redirectCount=_nav_redirect_count_&redirectStart=_nav_timing(redirectStart)_&requestStart=_nav_timing(requestStart)_&responseStart=_nav_timing(responseStart)_&secureConnectionStart=_nav_timing(secureConnectionStart)_&ssl=_nav_timing(secureConnectionStart%2CresponseStart)_&tcp=_nav_timing(connectStart%2CconnectEnd)_&top=0&totRD=0&tti=0&tul=0&unloadEventStart=_nav_timing(unloadEventStart)_&largestContentfulPaint=LARGEST_CONTENTFUL_PAINT&cumulativeLayoutShift=CUMULATIVE_LAYOUT_SHIFT&firstInputDelay=FIRST_INPUT_DELAY&wcd=0&eT=1&navigationType=1"
+    "pageview": "https://d.btttag.com/btt.gif?gID=_client_id(bluetriangle_guid)_&sID=_client_id(bluetriangle_sessionid)_&siteID=!siteID&pageName=!pageName&txnName=!trafficSegment&thisURL=_canonical_url_&RefURL=_document_referrer_&dom=_nav_timing(domLoading%2CdomComplete)_&domContentLoadedEnd=_nav_timing(domContentLoadedEventEnd)_&domContentLoadedStart=_nav_timing(domContentLoadedEventStart)_&domInteractive=_nav_timing(domInteractive)_&domLoading=_nav_timing(domLoading)_&domainLookupStart=_nav_timing(domainLookupStart)_&elementCount=0&fByte=_nav_timing(requestStart%2CresponseStart)_&fCPnt=FIRST_CONTENTFUL_PAINT&fetchStart=_nav_timing(fetchStart)_&firstPaint=0&fmp=0&fps=0&fps_tti=0&loadEventStart=_nav_timing(loadEventStart)_&lt_tti=0&nst=_nav_timing(navigationStart)_&orderTND=0&pSz=0&pWSz=0&pageValue=&pgTm=_nav_timing(navigationStart%2CloadEventStart)_&redirectCount=_nav_redirect_count_&redirectStart=_nav_timing(redirectStart)_&requestStart=_nav_timing(requestStart)_&responseStart=_nav_timing(responseStart)_&secureConnectionStart=_nav_timing(secureConnectionStart)_&ssl=_nav_timing(secureConnectionStart%2CconnectEnd)_&tcp=_nav_timing(connectStart%2CconnectEnd)_&top=0&totRD=0&tti=0&tul=0&unloadEventStart=_nav_timing(unloadEventStart)_&largestContentfulPaint=LARGEST_CONTENTFUL_PAINT&cumulativeLayoutShift=CUMULATIVE_LAYOUT_SHIFT&firstInputDelay=FIRST_INPUT_DELAY&wcd=0&eT=1&navigationType=1"
   },
   "browsi": {
     "host": "https://events.browsiprod.com/events/amp",
@@ -88,7 +92,8 @@
   "colanalytics": {
     "host": "https://ase.clmbtech.com",
     "base": "https://ase.clmbtech.com/message",
-    "pageview": "https://ase.clmbtech.com/message?cid=!id&val_101=!id&val_101=_canonical_path_&ch=_canonical_host_&uuid=!uid&au=!authors&zo=!zone&sn=!sponsorName&ct=!contentType&st=_scroll_top_&sh=_scroll_height_&dct=!decayTime&tet=_total_engaged_time_&dr=_document_referrer_&plt=_page_load_time_&val_108=_title_&val_120=3"
+    "pageview": "https://ase.clmbtech.com/message?cid=!id&val_101=!id&val_101=int%3A_canonical_path_&ch=_canonical_host_&val_108=_title_&val_120=3&val_102=_source_url_&val_124=_external_referrer_&uuid=!uid",
+    "event": "https://ase.clmbtech.com/message?cid=!id&val_101=!id&val_101=int%3A_canonical_path_&val_101=tet%3A_total_engaged_time_&val_102=clk%3Apg%3A_source_url_"
   },
   "comscore": {
     "host": "https://sb.scorecardresearch.com",

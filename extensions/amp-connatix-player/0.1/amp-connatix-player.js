@@ -83,7 +83,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     this.mediaId_ = '';
 
     /** @private {string} */
-    this.iframeDomain_ = 'https://cdm.connatix.com';
+    this.iframeDomain_ = null;
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -254,7 +254,13 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
     // Media id is optional
     this.mediaId_ = element.getAttribute('data-media-id') || '';
-
+    const elementsPlayer =
+      element.getAttribute('data-elements-player') || false;
+    if (elementsPlayer) {
+      this.iframeDomain_ = 'https://cdm.elements.video';
+    } else {
+      this.iframeDomain_ = 'https://cdm.connatix.com';
+    }
     // will be used by sendCommand in order to send only after the player is rendered
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;

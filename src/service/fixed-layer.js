@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import {Animation} from '../animation';
-import {Pass} from '../pass';
-import {Services} from '#service';
-import {assertDoesNotContainDisplay} from '../assert-display';
+import {domOrderComparator} from '#core/dom';
 import {closest, matches} from '#core/dom/query';
 import {
+  assertDoesNotContainDisplay,
   computedStyle,
   getStyle,
   getVendorJsPropertyName,
@@ -29,11 +27,15 @@ import {
   setStyles,
   toggle,
 } from '#core/dom/style';
-import {dev, user} from '../log';
-import {domOrderComparator} from '#core/dom';
-import {endsWith} from '#core/types/string';
-import {getMode} from '../mode';
 import {remove} from '#core/types/array';
+import {endsWith} from '#core/types/string';
+
+import {Services} from '#service';
+
+import {Animation} from '../animation';
+import {dev, user} from '../log';
+import {getMode} from '../mode';
+import {Pass} from '../pass';
 
 const TAG = 'FixedLayer';
 

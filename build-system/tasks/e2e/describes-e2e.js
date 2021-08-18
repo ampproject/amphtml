@@ -31,6 +31,7 @@ const {
   SeleniumWebDriverController,
 } = require('./selenium-webdriver-controller');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
+const {configureHelpers} = require('../../../testing/helpers');
 const {HOST, PORT} = require('../serve');
 const {installRepl, uninstallRepl} = require('./repl');
 const {isCiBuild} = require('../../common/ci');
@@ -38,8 +39,10 @@ const {Builder, Capabilities, logging} = selenium;
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
-const TEST_TIMEOUT = 40000;
-const SETUP_TIMEOUT = 30000;
+const TEST_TIMEOUT = 3000;
+// This can be much lower when the OSX container can be sped up allowing tests
+// in extensions/amp-script/0.1/test-e2e/test-amp-script.js to run faster
+const SETUP_TIMEOUT = 10000;
 const SETUP_RETRIES = 3;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
 const COV_REPORT_PATH = '/coverage/client';
@@ -471,6 +474,7 @@ function describeEnv(factory) {
       this.timeout(TEST_TIMEOUT);
       beforeEach(async function () {
         this.timeout(SETUP_TIMEOUT);
+        configureHelpers(env);
         await fixture.setup(env, browserName, SETUP_RETRIES);
 
         // don't install for CI
@@ -578,6 +582,7 @@ class EndToEndFixture {
    * @param {!Object} env
    * @param {string} browserName
    * @param {number} retries
+   * @return {Promise<void>}
    */
   async setup(env, browserName, retries = 0) {
     const config = getConfig();

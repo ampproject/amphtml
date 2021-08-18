@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {isModeDevelopment} from './mode';
-import {loadPromise} from './event-helper';
-import {parseQueryString} from './core/types/string/url';
+import {getHashParams} from '#core/types/string/url';
+
 import {urls} from './config';
+import {loadPromise} from './event-helper';
+import {isModeDevelopment} from './mode';
 
 /**
  * Triggers validation for the current document if there is a script in the
@@ -33,11 +34,9 @@ export function maybeValidate(win) {
     return;
   }
   let validator = false;
-  if (isModeDevelopment(win)) {
-    const hash = parseQueryString(
-      win.location['originalHash'] || win.location.hash
-    );
-    validator = hash['validate'] !== '0';
+  const params = getHashParams(win);
+  if (isModeDevelopment(win, params)) {
+    validator = params['validate'] !== '0';
   }
 
   if (validator) {

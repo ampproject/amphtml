@@ -34,10 +34,9 @@ export const _default = () => {
   const conversation = boolean('show conversation', false) ? undefined : 'none';
   return (
     <Twitter
-      bootstrap="https://3p.ampproject.net/2104170104001/f.js"
-      options={{cards, conversation}}
+      cards={cards}
+      conversation={conversation}
       tweetid={tweetId}
-      src="https://d-41929527682976137678.ampproject.net/2104170104001/frame.html"
       style={{width: '300px', height: '200px'}}
     />
   );
@@ -47,10 +46,8 @@ export const moments = () => {
   const limit = number('limit to', 2);
   return (
     <Twitter
-      bootstrap="https://3p.ampproject.net/2104170104001/f.js"
-      options={{limit}}
+      limit={limit}
       momentid="1009149991452135424"
-      src="https://d-41929527682976137678.ampproject.net/2104170104001/frame.html"
       style={{width: '300px', height: '200px'}}
     />
   );
@@ -67,14 +64,10 @@ export const timelines = () => {
   const timelineUserId = '3450662892';
   return (
     <Twitter
-      bootstrap="https://3p.ampproject.net/2104170104001/f.js"
-      options={{
-        tweetLimit,
-        timelineSourceType,
-        timelineScreenName,
-        timelineUserId,
-      }}
-      src="https://d-41929527682976137678.ampproject.net/2104170104001/frame.html"
+      tweetLimit={tweetLimit}
+      timelineSourceType={timelineSourceType}
+      timelineScreenName={timelineScreenName}
+      timelineUserId={timelineUserId}
       style={{width: '300px', height: '200px'}}
     />
   );

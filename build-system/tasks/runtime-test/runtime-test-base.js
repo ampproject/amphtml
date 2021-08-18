@@ -32,13 +32,13 @@ const {
 } = require('../../common/ctrlcHandler');
 const {app} = require('../../server/test-server');
 const {createKarmaServer, getAdTypes} = require('./helpers');
+const {customLaunchers} = require('./custom-launchers');
 const {cyan, green, red, yellow} = require('../../common/colors');
 const {dotWrappingWidth} = require('../../common/logging');
 const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel');
-const {getFilesFromArgv} = require('../../common/utils');
+const {getFilesFromArgv, getFilesFromFileList} = require('../../common/utils');
 const {isCiBuild, isCircleciBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
-const {reportTestStarted} = require('../report-test-status');
 const {SERVER_TRANSFORM_PATH} = require('../../server/typescript-compile');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
@@ -117,82 +117,20 @@ class RuntimeTestConfig {
   }
 
   /**
-   * Updates the browsers based off of the test type
-   * being run (unit, integration, a4a) and test settings.
-   * Defaults to Chrome if no matching settings are found.
+   * Picks a browser config based on the the test type and command line flags.
+   * Defaults to Chrome.
    */
   updateBrowsers() {
-    if (argv.edge) {
-      Object.assign(this, {
-        browsers: [argv.headless ? 'EdgeHeadless' : 'Edge'],
-      });
-      return;
-    }
-
-    if (argv.firefox) {
-      Object.assign(this, {
-        browsers: ['Firefox_flags'],
-        customLaunchers: {
-          // eslint-disable-next-line
-        Firefox_flags: {
-            base: 'Firefox',
-            flags: argv.headless ? ['-headless'] : [],
-          },
-        },
-      });
-      return;
-    }
-
-    if (argv.ie) {
-      Object.assign(this, {
-        browsers: ['IE'],
-        customLaunchers: {
-          IeNoAddOns: {
-            base: 'IE',
-            flags: ['-extoff'],
-          },
-        },
-      });
-      return;
-    }
-
-    if (argv.safari) {
-      Object.assign(this, {browsers: ['SafariNative']});
-      return;
-    }
-
-    if (argv.chrome_canary) {
-      Object.assign(this, {browsers: ['ChromeCanary']});
-      return;
-    }
-
-    if (argv.chrome_flags) {
-      const chromeFlags = [];
-      argv.chrome_flags.split(',').forEach((flag) => {
-        chromeFlags.push('--'.concat(flag));
-      });
-      Object.assign(this, {
-        browsers: ['Chrome_flags'],
-        customLaunchers: {
-          // eslint-disable-next-line
-        Chrome_flags: {
-            base: 'Chrome',
-            flags: chromeFlags,
-          },
-        },
-      });
-      return;
-    }
-
-    if (argv.headless) {
-      Object.assign(this, {browsers: ['Chrome_no_extensions_headless']});
-      return;
-    }
-
-    // Default to Chrome.
-    Object.assign(this, {
-      browsers: [isCiBuild() ? 'Chrome_ci' : 'Chrome_no_extensions'],
-    });
+    const browser = argv.edge
+      ? 'EdgeCustom'
+      : argv.firefox
+      ? 'FirefoxCustom'
+      : argv.ie
+      ? 'IECustom'
+      : argv.safari
+      ? 'SafariCustom'
+      : 'ChromeCustom';
+    Object.assign(this, {browsers: [browser], customLaunchers});
   }
 
   /**
@@ -234,8 +172,10 @@ class RuntimeTestConfig {
   updateFiles() {
     switch (this.testType) {
       case 'unit':
-        if (argv.files) {
-          this.files = commonUnitTestPaths.concat(getFilesFromArgv());
+        if (argv.files || argv.filelist) {
+          this.files = commonUnitTestPaths
+            .concat(getFilesFromArgv())
+            .concat(getFilesFromFileList());
           return;
         }
         if (argv.firefox || argv.safari || argv.edge) {
@@ -327,7 +267,7 @@ class RuntimeTestConfig {
     this.client.verboseLogging = !!argv.verbose;
     this.client.captureConsole = !!argv.verbose || !!argv.files;
     this.client.amp = {
-      useCompiledJs: !!argv.compiled,
+      useMinifiedJs: !!argv.minified,
       adTypes: getAdTypes(),
       mochaTimeout: this.client.mocha.timeout,
       testServerPort: this.client.testServerPort,
@@ -400,7 +340,6 @@ class RuntimeTestRunner {
    * @return {Promise<void>}
    */
   async run() {
-    await reportTestStarted();
     this.exitCode = await createKarmaServer(this.config);
   }
 

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {dev} from './log';
-import {whenUpgradedToCustomElement} from './amp-element-helpers';
+import {devAssertElement} from '#core/assert';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 export const MIN_VISIBILITY_RATIO_FOR_AUTOPLAY = 0.5;
 
@@ -590,7 +590,7 @@ export const VideoServiceSignals = {
 
 /** @param {!AmpElement|!VideoOrBaseElementDef} video */
 export function delegateAutoplay(video) {
-  whenUpgradedToCustomElement(dev().assertElement(video)).then((el) => {
+  whenUpgradedToCustomElement(devAssertElement(video)).then((el) => {
     el.signals().signal(VideoServiceSignals.PLAYBACK_DELEGATED);
   });
 }

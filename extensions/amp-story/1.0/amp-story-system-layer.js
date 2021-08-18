@@ -26,7 +26,7 @@ import {
   DevelopmentModeLog,
   DevelopmentModeLogButtonSet,
 } from './development-ui';
-import {LocalizedStringId} from '../../../src/localized-strings';
+import {LocalizedStringId} from '#service/localization/strings';
 import {ProgressBar} from './progress-bar';
 import {Services} from '#service';
 import {closest, matches, scopedQuerySelector} from '#core/dom/query';
@@ -462,7 +462,7 @@ export class SystemLayer {
       ? new AmpStoryViewerMessagingHandler(this.win_, this.viewer_)
       : null;
 
-    if (shouldShowStoryUrlInfo(this.viewer_)) {
+    if (shouldShowStoryUrlInfo(this.viewer_, this.storeService_)) {
       this.systemLayerEl_.classList.add('i-amphtml-embedded');
       this.getShadowRoot().setAttribute(HAS_INFO_BUTTON_ATTRIBUTE, '');
     } else {

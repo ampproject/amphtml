@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {LightboxGalleryProvider, WithLightbox} from '../component';
 import {mount} from 'enzyme';
+
+import * as Preact from '#preact';
+
+import {BaseCarousel} from '../../../amp-base-carousel/1.0/component';
+import {LightboxGalleryProvider, WithLightbox} from '../component';
 import {useStyles} from '../component.jss';
 
 describes.sandboxed('LightboxGallery preact component', {}, () => {
@@ -201,12 +204,14 @@ describes.sandboxed('LightboxGallery preact component', {}, () => {
       expect(carousel.prop('arrowNextAs').name).to.equal('NavButtonIcon');
 
       // Children are given to carousel
-      const imgs = carousel.find('img');
-      expect(imgs).to.have.lengthOf(4);
-      expect(imgs.at(0).hasClass('rendered-img')).to.be.false;
-      expect(imgs.at(1).hasClass('rendered-img')).to.be.true;
-      expect(imgs.at(2).hasClass('rendered-img')).to.be.false;
-      expect(imgs.at(3).hasClass('rendered-img')).to.be.true;
+      expect(carousel.find('[data-slide=0] img').hasClass('rendered-img')).to.be
+        .false;
+      expect(carousel.find('[data-slide=1] img').hasClass('rendered-img')).to.be
+        .true;
+      expect(carousel.find('[data-slide=2] img').hasClass('rendered-img')).to.be
+        .false;
+      expect(carousel.find('[data-slide=3] img').hasClass('rendered-img')).to.be
+        .true;
     });
 
     it('toggles to grid view', () => {
@@ -265,12 +270,15 @@ describes.sandboxed('LightboxGallery preact component', {}, () => {
       const carousel = wrapper.find('BaseCarousel');
       expect(carousel).to.have.lengthOf(1);
       expect(carousel.prop('hidden')).to.be.true;
-      const imgs = carousel.find('img');
-      expect(imgs).to.have.lengthOf(4);
-      expect(imgs.at(0).hasClass('rendered-img')).to.be.false;
-      expect(imgs.at(1).hasClass('rendered-img')).to.be.true;
-      expect(imgs.at(2).hasClass('rendered-img')).to.be.false;
-      expect(imgs.at(3).hasClass('rendered-img')).to.be.true;
+      // Children are given to carousel
+      expect(carousel.find('[data-slide=0] img').hasClass('rendered-img')).to.be
+        .false;
+      expect(carousel.find('[data-slide=1] img').hasClass('rendered-img')).to.be
+        .true;
+      expect(carousel.find('[data-slide=2] img').hasClass('rendered-img')).to.be
+        .false;
+      expect(carousel.find('[data-slide=3] img').hasClass('rendered-img')).to.be
+        .true;
     });
 
     it('toggles to grid view and back to carousel', () => {
@@ -553,12 +561,14 @@ describes.sandboxed('LightboxGallery preact component', {}, () => {
       expect(carousel.prop('arrowNextAs').name).to.equal('NavButtonIcon');
 
       // Children are given to carousel
-      const imgs = carousel.find('img');
-      expect(imgs).to.have.lengthOf(4);
-      expect(imgs.at(0).hasClass('rendered-img')).to.be.false;
-      expect(imgs.at(1).hasClass('rendered-img')).to.be.true;
-      expect(imgs.at(2).hasClass('rendered-img')).to.be.false;
-      expect(imgs.at(3).hasClass('rendered-img')).to.be.true;
+      expect(carousel.find('[data-slide=0] img').hasClass('rendered-img')).to.be
+        .false;
+      expect(carousel.find('[data-slide=1] img').hasClass('rendered-img')).to.be
+        .true;
+      expect(carousel.find('[data-slide=2] img').hasClass('rendered-img')).to.be
+        .false;
+      expect(carousel.find('[data-slide=3] img').hasClass('rendered-img')).to.be
+        .true;
     });
 
     it('toggles to grid view', () => {
@@ -616,12 +626,14 @@ describes.sandboxed('LightboxGallery preact component', {}, () => {
       const carousel = wrapper.find('BaseCarousel');
       expect(carousel).to.have.lengthOf(1);
       expect(carousel.prop('hidden')).to.be.true;
-      const imgs = carousel.find('img');
-      expect(imgs).to.have.lengthOf(4);
-      expect(imgs.at(0).hasClass('rendered-img')).to.be.false;
-      expect(imgs.at(1).hasClass('rendered-img')).to.be.true;
-      expect(imgs.at(2).hasClass('rendered-img')).to.be.false;
-      expect(imgs.at(3).hasClass('rendered-img')).to.be.true;
+      expect(carousel.find('[data-slide=0] img').hasClass('rendered-img')).to.be
+        .false;
+      expect(carousel.find('[data-slide=1] img').hasClass('rendered-img')).to.be
+        .true;
+      expect(carousel.find('[data-slide=2] img').hasClass('rendered-img')).to.be
+        .false;
+      expect(carousel.find('[data-slide=3] img').hasClass('rendered-img')).to.be
+        .true;
     });
 
     it('toggles to grid view and back to carousel', () => {
@@ -722,6 +734,309 @@ describes.sandboxed('LightboxGallery preact component', {}, () => {
       wrapper.update();
       expect(wrapper.find(`.${classes.grid}`)).to.have.lengthOf(0);
       expect(wrapper.find('BaseCarousel').prop('hidden')).to.be.false;
+    });
+  });
+
+  describe('Grouping', () => {
+    it('renders with WithLightbox', () => {
+      const wrapper = mount(
+        <LightboxGalleryProvider>
+          <WithLightbox key="1" id="standard">
+            <img />
+          </WithLightbox>
+          <img key="2" id="no-lightbox" />
+          <div key="3">
+            <div>
+              <WithLightbox id="deeply-nested">
+                <img />
+              </WithLightbox>
+            </div>
+          </div>
+          <BaseCarousel lightbox>
+            <img key="4"></img>
+            <img key="5"></img>
+            <img key="6"></img>
+          </BaseCarousel>
+        </LightboxGalleryProvider>
+      );
+
+      // Children are rendered inside provider.
+      const providers = wrapper.find('Provider');
+      // One from Lightbox, three for each carousel slide.
+      expect(providers).to.have.lengthOf(4);
+      const provider = providers.first();
+      expect(provider.children()).to.have.lengthOf(4);
+
+      // Elements are not rendered inside lightbox (closed).
+      const lightbox = wrapper.find('Lightbox');
+      expect(lightbox).to.have.lengthOf(1);
+      expect(lightbox.children()).to.have.lengthOf(0);
+    });
+
+    it('opens with clones when clicking on a lightboxed element in default group', () => {
+      const classes = useStyles();
+      const wrapper = mount(
+        <LightboxGalleryProvider>
+          <WithLightbox key="1" id="standard">
+            <img />
+          </WithLightbox>
+          <img key="2" id="no-lightbox" />
+          <div key="3">
+            <div>
+              <WithLightbox id="deeply-nested">
+                <img />
+              </WithLightbox>
+            </div>
+          </div>
+          <BaseCarousel lightbox>
+            <img key="4"></img>
+            <img key="5"></img>
+            <img key="6"></img>
+          </BaseCarousel>
+        </LightboxGalleryProvider>
+      );
+
+      // Children are rendered inside provider.
+      const providers = wrapper.find('Provider');
+      // One from Lightbox, three for each carousel slide.
+      expect(providers).to.have.lengthOf(4);
+      const provider = providers.first();
+      expect(provider.children()).to.have.lengthOf(4);
+
+      // Elements are not rendered inside lightbox (closed).
+      let lightbox = wrapper.find('Lightbox');
+      expect(lightbox).to.have.lengthOf(1);
+      expect(lightbox.children()).to.have.lengthOf(0);
+
+      // Note: We would normally click the first `img` element,
+      // not its generated `div` wrapper. However, enzyme's
+      // shallow renderer does not support event propagation as
+      // we would expect in a real environment.
+      wrapper.find('div').first().simulate('click');
+      wrapper.update();
+
+      // Render provided children in the "default" (non-carousel) group
+      lightbox = wrapper.find('Lightbox');
+      expect(lightbox).to.have.lengthOf(1);
+      expect(lightbox.prop('closeButtonAs').name).to.equal('CloseButtonIcon');
+      expect(lightbox.children()).to.have.lengthOf(1);
+
+      // Toggle control is rendered
+      const toggleViewIcon = wrapper.find('ToggleViewIcon');
+      expect(toggleViewIcon).to.have.lengthOf(1);
+      expect(toggleViewIcon.prop('showCarousel')).to.be.true;
+
+      // Grid UI not rendered
+      expect(wrapper.find(`.${classes.grid}`)).to.have.lengthOf(0);
+
+      // Carousel UI
+      const carousel = lightbox.find('BaseCarousel');
+      expect(carousel).to.have.lengthOf(1);
+      expect(carousel.prop('arrowPrevAs').name).to.equal('NavButtonIcon');
+      expect(carousel.prop('arrowNextAs').name).to.equal('NavButtonIcon');
+      expect(carousel.find('img')).to.have.lengthOf(2);
+    });
+
+    it('opens with clones when clicking on a lightboxed element in carousel group', () => {
+      const classes = useStyles();
+      const wrapper = mount(
+        <LightboxGalleryProvider>
+          <WithLightbox key="1" id="standard">
+            <img />
+          </WithLightbox>
+          <img key="2" id="no-lightbox" />
+          <div key="3">
+            <div>
+              <WithLightbox id="deeply-nested">
+                <img />
+              </WithLightbox>
+            </div>
+          </div>
+          <BaseCarousel lightbox>
+            <img key="4"></img>
+            <img key="5"></img>
+            <img key="6"></img>
+          </BaseCarousel>
+        </LightboxGalleryProvider>
+      );
+
+      // Children are rendered inside provider.
+      const providers = wrapper.find('Provider');
+      // One from Lightbox, three for each carousel slide.
+      expect(providers).to.have.lengthOf(4);
+      const provider = providers.first();
+      expect(provider.children()).to.have.lengthOf(4);
+
+      // Elements are not rendered inside lightbox (closed).
+      let lightbox = wrapper.find('Lightbox');
+      expect(lightbox).to.have.lengthOf(1);
+      expect(lightbox.children()).to.have.lengthOf(0);
+
+      // Note: We would normally click the first `img` element,
+      // not its generated `div` wrapper. However, enzyme's
+      // shallow renderer does not support event propagation as
+      // we would expect in a real environment.
+      wrapper.find('div[part="slide"]').first().simulate('click');
+      wrapper.update();
+
+      // Render provided children in the carousel group
+      lightbox = wrapper.find('Lightbox');
+      expect(lightbox).to.have.lengthOf(1);
+      expect(lightbox.prop('closeButtonAs').name).to.equal('CloseButtonIcon');
+      expect(lightbox.children()).to.have.lengthOf(1);
+
+      // Toggle control is rendered
+      const toggleViewIcon = wrapper.find('ToggleViewIcon');
+      expect(toggleViewIcon).to.have.lengthOf(1);
+      expect(toggleViewIcon.prop('showCarousel')).to.be.true;
+
+      // Grid UI not rendered
+      expect(wrapper.find(`.${classes.grid}`)).to.have.lengthOf(0);
+
+      // Carousel UI
+      const carousel = lightbox.find('BaseCarousel');
+      expect(carousel).to.have.lengthOf(1);
+      expect(carousel.prop('arrowPrevAs').name).to.equal('NavButtonIcon');
+      expect(carousel.prop('arrowNextAs').name).to.equal('NavButtonIcon');
+      expect(carousel.find('img')).to.have.lengthOf(3);
+    });
+  });
+
+  describe('Captions', () => {
+    it('should render with captions from caption, alt, and aria-label props', () => {
+      const wrapper = mount(
+        <LightboxGalleryProvider>
+          <WithLightbox caption="First img">
+            <img />
+          </WithLightbox>
+          <WithLightbox as="img" alt="Second img" />
+          <WithLightbox
+            as="section"
+            aria-label="Third and fourth img group"
+            render={() => <img />}
+          >
+            <img />
+            <img />
+          </WithLightbox>
+        </LightboxGalleryProvider>
+      );
+
+      // Open lightbox
+      wrapper.find('div').first().simulate('click');
+      wrapper.update();
+
+      // Render provided children in the "default" (non-carousel) group
+      const lightbox = wrapper.find('Lightbox');
+      expect(lightbox).to.have.lengthOf(1);
+      expect(lightbox.children()).to.have.lengthOf(1);
+
+      // Rendered elements
+      expect(lightbox.find('img')).to.have.lengthOf(3);
+      const caption = wrapper.find(`.amp-lightbox-gallery-caption`);
+      expect(caption).to.have.lengthOf(1);
+      expect(caption.text()).to.equal('First img');
+    });
+
+    it('should prefer caption to alt and aria-label props', () => {
+      const wrapper = mount(
+        <LightboxGalleryProvider>
+          <WithLightbox caption="First img" alt="ignored" aria-label="ignored">
+            <img />
+          </WithLightbox>
+        </LightboxGalleryProvider>
+      );
+
+      // Open lightbox
+      wrapper.find('div').first().simulate('click');
+      wrapper.update();
+
+      // Render provided children in the "default" (non-carousel) group
+      const lightbox = wrapper.find('Lightbox');
+      expect(lightbox).to.have.lengthOf(1);
+      expect(lightbox.children()).to.have.lengthOf(1);
+
+      // Rendered elements
+      expect(lightbox.find('img')).to.have.lengthOf(1);
+      const caption = wrapper.find(`.amp-lightbox-gallery-caption`);
+      expect(caption).to.have.lengthOf(1);
+      expect(caption.text()).to.equal('First img');
+    });
+
+    it('should prefer alt to aria-label prop', () => {
+      const wrapper = mount(
+        <LightboxGalleryProvider>
+          <WithLightbox alt="First img" aria-label="ignored">
+            <img />
+          </WithLightbox>
+        </LightboxGalleryProvider>
+      );
+
+      // Open lightbox
+      wrapper.find('div').first().simulate('click');
+      wrapper.update();
+
+      // Render provided children in the "default" (non-carousel) group
+      const lightbox = wrapper.find('Lightbox');
+      expect(lightbox).to.have.lengthOf(1);
+      expect(lightbox.children()).to.have.lengthOf(1);
+
+      // Rendered elements
+      expect(lightbox.find('img')).to.have.lengthOf(1);
+      const caption = wrapper.find(`.amp-lightbox-gallery-caption`);
+      expect(caption).to.have.lengthOf(1);
+      expect(caption.text()).to.equal('First img');
+    });
+
+    it('should take alt prop from carousel direct children', () => {
+      const wrapper = mount(
+        <LightboxGalleryProvider>
+          <BaseCarousel lightbox>
+            <img alt="First img" />
+          </BaseCarousel>
+        </LightboxGalleryProvider>
+      );
+
+      // Open lightbox
+      wrapper.find('div[part="slide"]').first().simulate('click');
+      wrapper.update();
+
+      // Render provided children in the "default" (non-carousel) group
+      const lightbox = wrapper.find('Lightbox');
+      expect(lightbox).to.have.lengthOf(1);
+      expect(lightbox.children()).to.have.lengthOf(1);
+
+      // Rendered elements
+      expect(lightbox.find('img')).to.have.lengthOf(1);
+      const caption = wrapper.find(`.amp-lightbox-gallery-caption`);
+      expect(caption).to.have.lengthOf(1);
+      expect(caption.text()).to.equal('First img');
+    });
+
+    it('should take aria-label prop from carousel direct children', () => {
+      const wrapper = mount(
+        <LightboxGalleryProvider>
+          <BaseCarousel lightbox>
+            <div role="img" aria-label="First img">
+              <img />
+            </div>
+          </BaseCarousel>
+        </LightboxGalleryProvider>
+      );
+
+      // Open lightbox
+      wrapper.find('div[part="slide"]').first().simulate('click');
+      wrapper.update();
+
+      // Render provided children in the "default" (non-carousel) group
+      const lightbox = wrapper.find('Lightbox');
+      expect(lightbox).to.have.lengthOf(1);
+      expect(lightbox.children()).to.have.lengthOf(1);
+
+      // Rendered elements
+      expect(lightbox.find('img')).to.have.lengthOf(1);
+      const caption = wrapper.find(`.amp-lightbox-gallery-caption`);
+      expect(caption).to.have.lengthOf(1);
+      expect(caption.text()).to.equal('First img');
     });
   });
 });

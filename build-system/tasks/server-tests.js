@@ -172,6 +172,7 @@ function reportResult() {
  * Runs the test in a single input file
  *
  * @param {string} inputFile
+ * @return {Promise<void>}
  */
 async function runTest(inputFile) {
   const testName = getTestName(inputFile);
@@ -194,10 +195,11 @@ async function runTest(inputFile) {
 
 /**
  * Tests for AMP server custom transforms. Entry point for `amp server-tests`.
+ * @return {Promise<void>}
  */
 async function serverTests() {
   await buildNewServer();
-  const inputFiles = globby.sync(inputPaths);
+  const inputFiles = await globby(inputPaths);
   for (const inputFile of inputFiles) {
     await runTest(inputFile);
   }

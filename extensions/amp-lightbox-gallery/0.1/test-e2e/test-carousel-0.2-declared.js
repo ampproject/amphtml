@@ -24,7 +24,7 @@ describes.endtoend(
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single'],
   },
-  async (env) => {
+  (env) => {
     let controller;
 
     function css(handle, name) {
@@ -35,7 +35,7 @@ describes.endtoend(
       return controller.getElementProperty(el, name);
     }
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 

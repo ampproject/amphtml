@@ -29,12 +29,6 @@ limitations under the License.
 
 The `amp-autocomplete` extension should be used for suggesting completed items based on user input to help users carry out their task more quickly.
 
-[filter formats="email"]
-
-Warning: This component is currently experimental in the AMP for Email format as email clients add support for the feature. Until the component is publicly available in the format, you will notice the component is in some cases valid and sendable in emails but may be only functioning in its fallback behavior capacity across email clients as well as in their respective playgrounds. The fallback for the component does not display autocomplete suggestions, and will behave as the unenhanced `input` or `textarea` field it is given.
-
-[/filter] <!-- formats="email" -->
-
 This can be used to power search experiences, in cases where the user may not know the full range of potential inputs, or in forms to help ensure inputs where there may be multiple ways to express the same intent (using a state abbreviation instead of its full name, for example) yield more predictable results.
 
 Example:
@@ -155,7 +149,11 @@ The max specified number of items to suggest at once based on a user input, disp
 
 ### `suggest-first`
 
-Suggest the first entry in the list of results by marking it active; only possible if <code>filter==prefix</code> (does nothing otherwise)
+Suggest the first entry in the list of results by marking it active.
+
+[filter formats="websites"]
+This is only possible if <code>filter==prefix</code> (does nothing otherwise).
+[/filter] <!-- formats="websites" -->
 
 ### `submit-on-enter`
 
@@ -171,8 +169,9 @@ If present, exposes the <code>autocomplete-partial</code> class on the substring
 
 Specifies the key to the data array within the JSON response. Nested keys can be expressed with a dot-notated value such as <code>field1.field2.</code> The default value is <code>"items"</code>. The following are examples with and without usage:
 
-  <pre lang="html">
+[filter formats="websites"]
 
+```html
       <amp-autocomplete filter="prefix">
           <input type="text">
           <script type=application/json>
@@ -180,19 +179,45 @@ Specifies the key to the data array within the JSON response. Nested keys can be
            </script>
 
       </amp-autocomplete>
+```
 
-  </pre>
-  <pre lang="html">
+```html
+<amp-autocomplete filter="prefix" items="fruit">
+  <input type="text">
+  <script type=application/json>
+    { "fruit" : ["kiwis", "oranges", "watermelons"]  }
+    </script>
+</amp-autocomplete>
+```
 
-      <amp-autocomplete filter="prefix" items="fruit">
-        <input type="text">
-        <script type=application/json>
-          { "fruit" : ["apples", "bananas", "pears"] }
-          </script>
-      </amp-autocomplete>
+[/filter] <!-- formats="websites" -->
 
-  </pre>
-      In the first example, the JSON payload is queued by the "items" key, and thus no component attribute is needed because the default value corresponds. In the second example, the JSON payload is queued by the "fruit" key, so the <code>items</code> attribute is given the value <code>"fruit"</code> so as to accurately etrieve the intended datasource. In both examples, the end user interaction is the same.
+[filter formats="email"]
+
+Note that the following data is returned by the remote `src`:
+
+```json
+{
+  "items" : ["apples", "bananas", "pears"],
+  "fruit" : ["kiwis", "oranges", "watermelons"]
+}
+```
+
+```html
+<amp-autocomplete src="{{server_for_email}}/static/samples/json/amp-autocomplete-fruit-items.json">
+  <input type="text">
+</amp-autocomplete>
+```
+
+```html
+<amp-autocomplete src="{{server_for_email}}/static/samples/json/amp-autocomplete-fruit-items.json" items="fruit">
+  <input type="text">
+</amp-autocomplete>
+```
+
+[/filter] <!-- formats="email" -->
+
+In the first example, the JSON payload is queued by the "items" key, and thus no component attribute is needed because the default value corresponds. In the second example, the JSON payload is queued by the "fruit" key, so the <code>items</code> attribute is given the value <code>"fruit"</code> so as to accurately retrieve the intended datasource. In both examples, the end user interaction is the same.
 
 ### `inline`
 
@@ -219,6 +244,7 @@ representation of the corresponding object, which is then made available in
 the `valueAsObject` field of the `event`.
 
 Example:
+[filter formats="websites"]
 
 ```html
 <amp-autocomplete
@@ -245,6 +271,28 @@ Example:
   No fruit selected
 </p>
 ```
+
+[/filter] <!-- formats="websites" -->
+
+[filter formats="email"]
+
+```html
+<amp-autocomplete
+  id="myAutocomplete"
+  on="select:AMP.setState({chosenFruit: event.value})"
+  src="{{server_for_email}}/static/samples/json/amp-autocomplete-fruit.json"
+>
+  <input />
+  <template type="amp-mustache">
+    <div data-value="{{name}}">{{name}}</div>
+  </template>
+</amp-autocomplete>
+<p [text]="'Your fruit: ' + chosenFruit">
+  No fruit selected
+</p>
+```
+
+[/filter] <!-- formats="email" -->
 
 ## Validation
 

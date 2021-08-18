@@ -13,72 +13,186 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import objstr from 'obj-str';
+
+import {mod} from '#core/math';
+
 import * as Preact from '#preact';
+import {
+  useCallback,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from '#preact';
+import {forwardRef} from '#preact/compat';
+
+import {PADDING_ALLOWANCE, useStyles} from './component.jss';
+import {LightboxGalleryContext} from './context';
+
 import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
 import {Lightbox} from '../../amp-lightbox/1.0/component';
-import {LightboxGalleryContext} from './context';
-import {mod} from '#core/math';
-import {useCallback, useLayoutEffect, useRef, useState} from '#preact';
-import {useStyles} from './component.jss';
-import objstr from 'obj-str';
+
+/** @const {string} */
+const DEFAULT_GROUP = 'default';
+
+/** @const {string} */
+const EXPOSED_CAPTION_CLASS = 'amp-lightbox-gallery-caption';
+
+/** @enum {string}  */
+const CaptionState = {
+  AUTO: 'auto',
+  CLIP: 'clip',
+  EXPAND: 'expanded',
+};
+
+/** @const {!JsonObject<string, string>} */
+const CAPTION_PROPS = {
+  'aria-label': 'Toggle caption expanded state.',
+  'role': 'button',
+};
 
 /**
  * @param {!LightboxGalleryDef.Props} props
+ * @param {{current: ?LightboxDef.LightboxApi}} ref
  * @return {PreactDef.Renderable}
  */
-export function LightboxGalleryProvider({children, render}) {
+export function LightboxGalleryProviderWithRef(
+  {
+    children,
+    onAfterClose,
+    onAfterOpen,
+    onBeforeOpen,
+    onToggleCaption,
+    onViewGrid,
+    render,
+  },
+  ref
+) {
   const classes = useStyles();
   const lightboxRef = useRef(null);
   const carouselRef = useRef(null);
   const [index, setIndex] = useState(0);
-  const renderers = useRef([]);
+  const renderers = useRef({});
+  const captions = useRef({});
 
-  // Prefer counting elements over retrieving array length because
+  // Prefer counting elements over retrieving array lengths because
   // array can contain empty values that have been deregistered.
-  const count = useRef(0);
-  const carouselElements = useRef([]);
-  const gridElements = useRef([]);
-  const register = (key, render) => {
-    // Given key is 1-indexed.
-    renderers.current[key - 1] = render;
-  };
-  const deregister = (key) => {
-    // Given key is 1-indexed.
-    delete renderers.current[key - 1];
-  };
-  const context = {
-    deregister,
-    register,
-    open: (index) => {
-      setShowCarousel(true);
-      setIndex(index);
-      lightboxRef.current.open();
-    },
-  };
-
-  useLayoutEffect(() => {
-    carouselRef.current?.goToSlide(mod(index, count.current));
-  }, [index]);
+  const count = useRef({});
+  const carouselElements = useRef({});
+  const gridElements = useRef({});
 
   const [showCarousel, setShowCarousel] = useState(true);
   const [showControls, setShowControls] = useState(true);
-  const renderElements = useCallback(() => {
-    renderers.current.forEach((render, index) => {
-      if (!carouselElements.current[index]) {
-        carouselElements.current[index] = render();
-        gridElements.current[index] = (
+  const [group, setGroup] = useState(null);
+  const renderElements = useCallback((opt_group) => {
+    const group = opt_group ?? Object.keys(renderers.current)[0];
+    if (!group) {
+      return;
+    }
+    if (!carouselElements.current[group]) {
+      carouselElements.current[group] = [];
+      gridElements.current[group] = [];
+      count.current[group] = 0;
+    }
+    renderers.current[group].forEach((render, index) => {
+      if (!carouselElements.current[group][index]) {
+        const absoluteIndex = count.current[group];
+        carouselElements.current[group][index] = render();
+        gridElements.current[group][index] = (
           <Thumbnail
             onClick={() => {
               setShowCarousel(true);
-              setIndex(index);
+              setIndex(absoluteIndex);
             }}
             render={render}
           />
         );
-        count.current += 1;
+        count.current[group] += 1;
       }
     });
+    setGroup(group);
   }, []);
+
+  const register = useCallback(
+    (key, group = DEFAULT_GROUP, render, caption) => {
+      // Given key is 1-indexed.
+      if (!renderers.current[group]) {
+        renderers.current[group] = [];
+        captions.current[group] = [];
+      }
+      renderers.current[group][key - 1] = render;
+      captions.current[group][key - 1] = caption;
+    },
+    []
+  );
+
+  const deregister = useCallback((key, group = DEFAULT_GROUP) => {
+    // Given key is 1-indexed.
+    delete renderers.current[group][key - 1];
+    delete captions.current[group][key - 1];
+    delete carouselElements.current[group][key - 1];
+    count.current[group]--;
+  }, []);
+
+  const open = useCallback(
+    (opt_index, opt_group) => {
+      renderElements(opt_group);
+      setShowControls(true);
+      setShowCarousel(true);
+      if (opt_index != null) {
+        setIndex(opt_index);
+      }
+      lightboxRef.current?.open();
+    },
+    [renderElements]
+  );
+
+  const context = {
+    deregister,
+    register,
+    open,
+  };
+
+  const captionRef = useRef(undefined);
+  const [caption, setCaption] = useState(null);
+  const [captionState, setCaptionState] = useState(CaptionState.AUTO);
+  useLayoutEffect(() => {
+    carouselRef.current?.goToSlide(index);
+    if (group) {
+      // This is the index to target accounting for existing empty
+      // entries in our render sets. Prefer to account for empty
+      // entries over filtering them out to respect the index the nodes
+      // were originally registered with by the user.
+      const inflatedIndex =
+        // Registered element entries, including empty.
+        renderers.current[group].length -
+        // Registered element entries rendered.
+        count.current[group] +
+        // Normalized carousel index.
+        mod(index, count.current[group]);
+      setCaption(captions.current[group][inflatedIndex]);
+      setCaptionState(CaptionState.AUTO);
+    }
+  }, [group, index]);
+
+  useLayoutEffect(() => {
+    const {offsetHeight, scrollHeight} = captionRef.current ?? {};
+    if (scrollHeight > offsetHeight + PADDING_ALLOWANCE) {
+      setCaptionState(CaptionState.CLIP);
+    }
+  }, [caption]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      open,
+      close: () => {
+        lightboxRef.current?.close();
+      },
+    }),
+    [open]
+  );
 
   return (
     <>
@@ -89,13 +203,19 @@ export function LightboxGalleryProvider({children, render}) {
           [classes.hideControls]: !showControls,
         })}
         closeButtonAs={CloseButtonIcon}
-        onBeforeOpen={() => renderElements()}
-        onAfterOpen={() => setShowControls(true)}
+        onBeforeOpen={onBeforeOpen}
+        onAfterOpen={onAfterOpen}
+        onAfterClose={onAfterClose}
         ref={lightboxRef}
       >
         <div className={classes.controlsPanel}>
           <ToggleViewIcon
-            onClick={() => setShowCarousel(!showCarousel)}
+            onClick={() => {
+              if (showCarousel) {
+                onViewGrid?.();
+              }
+              setShowCarousel(!showCarousel);
+            }}
             showCarousel={showCarousel}
           />
         </div>
@@ -103,19 +223,52 @@ export function LightboxGalleryProvider({children, render}) {
           arrowPrevAs={NavButtonIcon}
           arrowNextAs={NavButtonIcon}
           className={classes.gallery}
-          defaultSlide={index}
+          defaultSlide={mod(index, count.current[group]) || 0}
           hidden={!showCarousel}
           loop
           onClick={() => setShowControls(!showControls)}
+          onSlideChange={(i) => setIndex(i)}
           ref={carouselRef}
         >
-          {carouselElements.current}
+          {carouselElements.current[group]}
         </BaseCarousel>
+        <div
+          hidden={!showCarousel}
+          className={objstr({
+            [classes.caption]: true,
+            [classes.control]: true,
+            [classes[captionState]]: true,
+          })}
+          ref={captionRef}
+          {...(captionState === CaptionState.AUTO
+            ? null
+            : {
+                onClick: () => {
+                  onToggleCaption?.();
+                  if (captionState === CaptionState.CLIP) {
+                    setCaptionState(CaptionState.EXPAND);
+                  } else {
+                    setCaptionState(CaptionState.CLIP);
+                  }
+                },
+                ...CAPTION_PROPS,
+              })}
+        >
+          <div
+            className={objstr({
+              [classes.captionText]: true,
+              [EXPOSED_CAPTION_CLASS]: true,
+            })}
+            part="caption"
+          >
+            {caption}
+          </div>
+        </div>
         {!showCarousel && (
           <div
             className={objstr({[classes.gallery]: true, [classes.grid]: true})}
           >
-            {gridElements.current}
+            {gridElements.current[group]}
           </div>
         )}
       </Lightbox>
@@ -126,21 +279,24 @@ export function LightboxGalleryProvider({children, render}) {
   );
 }
 
+const LightboxGalleryProvider = forwardRef(LightboxGalleryProviderWithRef);
+LightboxGalleryProvider.displayName = 'LightboxGalleryProvider';
+export {LightboxGalleryProvider};
 /**
  * @param {!LightboxDef.CloseButtonProps} props
  * @return {PreactDef.Renderable}
  */
-function CloseButtonIcon(props) {
+function CloseButtonIcon({onClick}) {
   const classes = useStyles();
   return (
     <svg
-      {...props}
       aria-label="Close the lightbox"
       className={objstr({
         [classes.control]: true,
         [classes.topControl]: true,
         [classes.closeButton]: true,
       })}
+      onClick={onClick}
       role="button"
       tabIndex="0"
       viewBox="0 0 24 24"
@@ -160,17 +316,21 @@ function CloseButtonIcon(props) {
  * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-function NavButtonIcon({by, ...rest}) {
+function NavButtonIcon({'aria-disabled': ariaDisabled, by, disabled, onClick}) {
   const classes = useStyles();
   return (
     <svg
-      {...rest}
+      aria-disabled={ariaDisabled}
       className={objstr({
         [classes.arrow]: true,
         [classes.control]: true,
         [classes.prevArrow]: by < 0,
         [classes.nextArrow]: by > 0,
       })}
+      disabled={disabled}
+      onClick={onClick}
+      role="button"
+      tabIndex="0"
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -190,7 +350,7 @@ function NavButtonIcon({by, ...rest}) {
  * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-function ToggleViewIcon({showCarousel, ...rest}) {
+function ToggleViewIcon({onClick, showCarousel}) {
   const classes = useStyles();
   return (
     <svg
@@ -201,11 +361,11 @@ function ToggleViewIcon({showCarousel, ...rest}) {
         [classes.control]: true,
         [classes.topControl]: true,
       })}
+      onClick={onClick}
       role="button"
       tabIndex="0"
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      {...rest}
     >
       {showCarousel ? (
         <g fill="#fff">
@@ -249,6 +409,7 @@ function Thumbnail({onClick, render}) {
       className={classes.thumbnail}
       onClick={onClick}
       role="button"
+      tabIndex="0"
     >
       {render()}
     </div>

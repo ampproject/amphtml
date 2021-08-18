@@ -128,9 +128,8 @@ const lintGlobs = [
 ];
 
 /**
- * This should not include .js files, since those are handled by eslint:
- *  - required terms: notice/notice
- *  - forbidden terms: local/no-forbidden-terms
+ * This should not include .js files, since those are handled by eslint via the
+ * local/no-forbidden-terms rule.
  */
 const presubmitGlobs = [
   '**/*.{css,go,md}',
@@ -244,7 +243,6 @@ const htmlFixtureGlobs = [
   '!examples/amp-consent/diy-3p-iframe-tcf-postmessage.html',
   '!examples/amp-consent/diy-consent.html',
   '!examples/amp-form.ssr.html',
-  '!examples/amp-google-assistant-assistjs.amp.html',
   '!examples/amp-layout-intrinsic.amp.html',
   '!examples/amp-lightbox.amp.html',
   '!examples/amp-list-layout-container.amp.html',
@@ -385,6 +383,7 @@ const htmlFixtureGlobs = [
   '!examples/xhr-intercept.html',
   '!test/fixtures/e2e/amp-accordion/amp-accordion.html',
   '!test/fixtures/e2e/amp-accordion/single-expand.html',
+  '!test/fixtures/e2e/amp-analytics/browser-events.html',
   '!test/fixtures/e2e/amp-auto-lightbox/amp-auto-lightbox.html',
   '!test/fixtures/e2e/amp-autocomplete/amp-autocomplete-inline.amp.html',
   '!test/fixtures/e2e/amp-autocomplete/amp-autocomplete.amp.html',

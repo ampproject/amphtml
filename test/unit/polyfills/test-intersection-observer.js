@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {install, installForChildWin} from '#polyfills/intersection-observer';
 import {
   IntersectionObserverStub,
   installStub,
@@ -21,8 +22,8 @@ import {
   shouldLoadPolyfill,
   upgradePolyfill,
 } from '#polyfills/stubs/intersection-observer-stub';
+
 import {Services} from '#service';
-import {install, installForChildWin} from '#polyfills/intersection-observer';
 
 class NativeIntersectionObserver {
   constructor(callback, options) {

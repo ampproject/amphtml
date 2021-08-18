@@ -15,6 +15,13 @@
  */
 
 import {
+  devAssert,
+  devAssertNumber,
+  devAssertString,
+  userAssert,
+} from '#core/assert';
+import {transparentPng} from '#core/dom/img';
+import {
   Layout,
   getLayoutClass,
   getLengthNumeral,
@@ -22,18 +29,13 @@ import {
   isLayoutSizeDefined,
   parseLayout,
   parseLength,
-} from './core/dom/layout';
-import {
-  devAssert,
-  devAssertNumber,
-  devAssertString,
-  userAssert,
-} from './core/assert';
-import {htmlFor} from './core/dom/static-template';
-import {isExperimentOn} from './experiments';
-import {setStyle, setStyles, toggle} from './core/dom/style';
-import {toWin} from './core/window';
-import {transparentPng} from './core/dom/img';
+} from '#core/dom/layout';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyle, setStyles, toggle} from '#core/dom/style';
+import * as mode from '#core/mode';
+import {toWin} from '#core/window';
+
+import {isExperimentOn} from '#experiments';
 
 /**
  * Whether aspect-ratio CSS can be used to implement responsive layouts.
@@ -173,7 +175,126 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
   // If the layout was already done by server-side rendering (SSR), then the
   // code below will not run. Any changes below will necessitate a change to SSR
   // and must be coordinated with caches that implement SSR. See bit.ly/amp-ssr.
+  const {height, layout, width} = getEffectiveLayoutInternal(element);
 
+  // Apply UI.
+  element.classList.add(getLayoutClass(layout));
+  if (isLayoutSizeDefined(layout)) {
+    element.classList.add('i-amphtml-layout-size-defined');
+  }
+  if (layout == Layout.NODISPLAY) {
+    // CSS defines layout=nodisplay automatically with `display:none`. Thus
+    // no additional styling is needed.
+    toggle(element, false);
+    // TODO(jridgewell): Temporary hack while SSR still adds an inline
+    // `display: none`
+    element['style']['display'] = '';
+  } else if (layout == Layout.FIXED) {
+    setStyles(element, {
+      width: devAssertString(width),
+      height: devAssertString(height),
+    });
+  } else if (layout == Layout.FIXED_HEIGHT) {
+    setStyle(element, 'height', devAssertString(height));
+  } else if (layout == Layout.RESPONSIVE) {
+    if (shouldUseAspectRatioCss(toWin(element.ownerDocument.defaultView))) {
+      setStyle(
+        element,
+        'aspect-ratio',
+        `${getLengthNumeral(width)}/${getLengthNumeral(height)}`
+      );
+    } else {
+      const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
+      sizer.setAttribute('slot', 'i-amphtml-svc');
+      setStyles(sizer, {
+        paddingTop:
+          (getLengthNumeral(height) / getLengthNumeral(width)) * 100 + '%',
+      });
+      element.insertBefore(sizer, element.firstChild);
+      element.sizerElement = sizer;
+    }
+  } else if (layout == Layout.INTRINSIC) {
+    // Intrinsic uses an svg inside the sizer element rather than the padding
+    // trick Note a naked svg won't work becasue other thing expect the
+    // i-amphtml-sizer element
+    const sizer = htmlFor(element)`
+      <i-amphtml-sizer class="i-amphtml-sizer" slot="i-amphtml-svc">
+        <img alt="" role="presentation" aria-hidden="true"
+             class="i-amphtml-intrinsic-sizer" />
+      </i-amphtml-sizer>`;
+    const intrinsicSizer = sizer.firstElementChild;
+    intrinsicSizer.setAttribute(
+      'src',
+      !mode.isEsm() && fixIeIntrinsic && element.ownerDocument
+        ? transparentPng(
+            element.ownerDocument,
+            devAssertNumber(getLengthNumeral(width)),
+            devAssertNumber(getLengthNumeral(height))
+          )
+        : `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`
+    );
+    element.insertBefore(sizer, element.firstChild);
+    element.sizerElement = sizer;
+  } else if (layout == Layout.FILL) {
+    // Do nothing.
+  } else if (layout == Layout.CONTAINER) {
+    // Do nothing. Elements themselves will check whether the supplied
+    // layout value is acceptable. In particular container is only OK
+    // sometimes.
+  } else if (layout == Layout.FLEX_ITEM) {
+    // Set height and width to a flex item if they exist.
+    // The size set to a flex item could be overridden by `display: flex` later.
+    if (width) {
+      setStyle(element, 'width', width);
+    }
+    if (height) {
+      setStyle(element, 'height', height);
+    }
+  } else if (layout == Layout.FLUID) {
+    element.classList.add('i-amphtml-layout-awaiting-size');
+    if (width) {
+      setStyle(element, 'width', width);
+    }
+    setStyle(element, 'height', 0);
+  }
+  // Mark the element as having completed static layout, in case it is cloned
+  // in the future.
+  element.setAttribute('i-amphtml-layout', layout);
+  return layout;
+}
+
+/**
+ * Gets the effective layout for an element.
+ *
+ * @param {!Element} element
+ * @return {!Layout}
+ */
+export function getEffectiveLayout(element) {
+  // Return the pre-existing value if layout has already been applied.
+  const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
+  if (completedLayoutAttr) {
+    return parseLayout(completedLayoutAttr);
+  }
+
+  return getEffectiveLayoutInternal(element).layout;
+}
+
+/**
+ * @typedef {
+ *   {layout: !Layout, height: number, width: number} | {layout: !Layout}
+ * } InternalEffectiveLayout
+ */
+
+/**
+ * Gets the effective layout for an element.
+ *
+ * If class 'i-amphtml-layout' is present, then directly use its value.
+ * Else calculate layout based on element attributes and return the width/height.
+ *
+ * @param {!Element} element
+ * @return {InternalEffectiveLayout}
+ */
+function getEffectiveLayoutInternal(element) {
   // Parse layout from the element.
   const layoutAttr = element.getAttribute('layout');
   const widthAttr = element.getAttribute('width');
@@ -249,7 +370,6 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
     layout = Layout.FIXED;
   }
 
-  // Verify layout attributes.
   if (
     layout == Layout.FIXED ||
     layout == Layout.FIXED_HEIGHT ||
@@ -293,88 +413,5 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
     );
   }
 
-  // Apply UI.
-  element.classList.add(getLayoutClass(layout));
-  if (isLayoutSizeDefined(layout)) {
-    element.classList.add('i-amphtml-layout-size-defined');
-  }
-  if (layout == Layout.NODISPLAY) {
-    // CSS defines layout=nodisplay automatically with `display:none`. Thus
-    // no additional styling is needed.
-    toggle(element, false);
-    // TODO(jridgewell): Temporary hack while SSR still adds an inline
-    // `display: none`
-    element['style']['display'] = '';
-  } else if (layout == Layout.FIXED) {
-    setStyles(element, {
-      width: devAssertString(width),
-      height: devAssertString(height),
-    });
-  } else if (layout == Layout.FIXED_HEIGHT) {
-    setStyle(element, 'height', devAssertString(height));
-  } else if (layout == Layout.RESPONSIVE) {
-    if (shouldUseAspectRatioCss(toWin(element.ownerDocument.defaultView))) {
-      setStyle(
-        element,
-        'aspect-ratio',
-        `${getLengthNumeral(width)}/${getLengthNumeral(height)}`
-      );
-    } else {
-      const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
-      sizer.setAttribute('slot', 'i-amphtml-svc');
-      setStyles(sizer, {
-        paddingTop:
-          (getLengthNumeral(height) / getLengthNumeral(width)) * 100 + '%',
-      });
-      element.insertBefore(sizer, element.firstChild);
-      element.sizerElement = sizer;
-    }
-  } else if (layout == Layout.INTRINSIC) {
-    // Intrinsic uses an svg inside the sizer element rather than the padding
-    // trick Note a naked svg won't work becasue other thing expect the
-    // i-amphtml-sizer element
-    const sizer = htmlFor(element)`
-      <i-amphtml-sizer class="i-amphtml-sizer" slot="i-amphtml-svc">
-        <img alt="" role="presentation" aria-hidden="true"
-             class="i-amphtml-intrinsic-sizer" />
-      </i-amphtml-sizer>`;
-    const intrinsicSizer = sizer.firstElementChild;
-    intrinsicSizer.setAttribute(
-      'src',
-      !IS_ESM && fixIeIntrinsic && element.ownerDocument
-        ? transparentPng(
-            element.ownerDocument,
-            devAssertNumber(getLengthNumeral(width)),
-            devAssertNumber(getLengthNumeral(height))
-          )
-        : `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`
-    );
-    element.insertBefore(sizer, element.firstChild);
-    element.sizerElement = sizer;
-  } else if (layout == Layout.FILL) {
-    // Do nothing.
-  } else if (layout == Layout.CONTAINER) {
-    // Do nothing. Elements themselves will check whether the supplied
-    // layout value is acceptable. In particular container is only OK
-    // sometimes.
-  } else if (layout == Layout.FLEX_ITEM) {
-    // Set height and width to a flex item if they exist.
-    // The size set to a flex item could be overridden by `display: flex` later.
-    if (width) {
-      setStyle(element, 'width', width);
-    }
-    if (height) {
-      setStyle(element, 'height', height);
-    }
-  } else if (layout == Layout.FLUID) {
-    element.classList.add('i-amphtml-layout-awaiting-size');
-    if (width) {
-      setStyle(element, 'width', width);
-    }
-    setStyle(element, 'height', 0);
-  }
-  // Mark the element as having completed static layout, in case it is cloned
-  // in the future.
-  element.setAttribute('i-amphtml-layout', layout);
-  return layout;
+  return {layout, width, height};
 }

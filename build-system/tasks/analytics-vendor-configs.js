@@ -16,7 +16,7 @@
 
 const minimist = require('minimist');
 const argv = minimist(process.argv.slice(2));
-const debounce = require('debounce');
+const debounce = require('../common/debounce');
 const fs = require('fs-extra');
 const globby = require('globby');
 const jsonminify = require('jsonminify');
@@ -53,7 +53,7 @@ async function analyticsVendorConfigs(opt_options) {
 
   const startTime = Date.now();
 
-  const srcFiles = globby.sync(srcPath);
+  const srcFiles = await globby(srcPath);
   await fs.ensureDir(destPath);
   for (const srcFile of srcFiles) {
     let destFile = join(destPath, basename(srcFile));
@@ -79,7 +79,7 @@ async function analyticsVendorConfigs(opt_options) {
     }
     await fs.writeFile(destFile, contents, 'utf-8');
   }
-  if (globby.sync(srcPath).length > 0) {
+  if ((await globby(srcPath)).length > 0) {
     endBuildStep(
       'Compiled all analytics vendor configs into',
       destPath,

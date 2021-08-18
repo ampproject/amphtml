@@ -22,14 +22,15 @@ describes.endtoend(
     environments: ['single'],
     browsers: ['chrome', 'safari'],
   },
-  async (env) => {
+  (env) => {
     let controller;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 
-    it('should support local scripts', async () => {
+    it('should support local scripts', async function () {
+      this.timeout(10000);
       const element = await controller.findElement('amp-script#local');
       await expect(controller.getElementAttribute(element, 'class')).to.contain(
         'i-amphtml-hydrated'

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {WithAmpContext} from '#preact/context';
-import {animateCollapse, animateExpand} from './animations';
-import {forwardRef} from '#preact/compat';
-import {omit} from '#core/types/object';
+import objstr from 'obj-str';
+
 import {
   randomIdGenerator,
   sequentialIdGenerator,
-} from '#core/math/id-generator';
+} from '#core/data-structures/id-generator';
+import {omit} from '#core/types/object';
+
+import * as Preact from '#preact';
 import {
   useCallback,
   useContext,
@@ -33,8 +33,11 @@ import {
   useRef,
   useState,
 } from '#preact';
+import {forwardRef} from '#preact/compat';
+import {WithAmpContext} from '#preact/context';
+
+import {animateCollapse, animateExpand} from './animations';
 import {useStyles} from './component.jss';
-import objstr from 'obj-str';
 
 const AccordionContext = Preact.createContext(
   /** @type {AccordionDef.AccordionContext} */ ({})

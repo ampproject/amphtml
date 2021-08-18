@@ -14,30 +14,31 @@
  * limitations under the License.
  */
 
-import * as trackPromise from '../../src/impression';
+import {Observable} from '#core/data-structures/observable';
 
-import {
-  extractClientIdFromGaCookie,
-  installUrlReplacementsServiceForDoc,
-} from '#service/url-replacements-impl';
+import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
+import {cidServiceForDocForTesting} from '#service/cid-impl';
+import {installCryptoService} from '#service/crypto-impl';
 import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
 } from '#service/custom-element-registry';
+import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
+import {
+  extractClientIdFromGaCookie,
+  installUrlReplacementsServiceForDoc,
+} from '#service/url-replacements-impl';
+
+import {createIframePromise} from '#testing/iframe';
 import {mockWindowInterface, stubServiceForDoc} from '#testing/test-helper';
 
-import {Observable} from '#core/data-structures/observable';
-import {Services} from '#service';
-import {cidServiceForDocForTesting} from '#service/cid-impl';
-import {createIframePromise} from '#testing/iframe';
 import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
-import {installCryptoService} from '#service/crypto-impl';
-import {installDocService} from '#service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
-import {parseUrlDeprecated} from '../../src/url';
-import {registerServiceBuilder} from '../../src/service-helpers';
 import {setCookie} from '../../src/cookies';
+import * as trackPromise from '../../src/impression';
 import {user} from '../../src/log';
+import {registerServiceBuilder} from '../../src/service-helpers';
+import {parseUrlDeprecated} from '../../src/url';
 
 describes.sandboxed('UrlReplacements', {}, (env) => {
   let canonical;
@@ -209,7 +210,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           // Restrict the number of replacement params to globalVariableSource
           // Please consider adding the logic to amp-analytics instead.
           // Please contact @lannka or @zhouyx if the test fail.
-          expect(variables.length).to.equal(59);
+          expect(variables.length).to.equal(60);
         });
       });
 
@@ -1001,6 +1002,12 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         });
       });
 
+      it('should replace UACH', () => {
+        return expandUrlAsync('?sh=UACH(platform)').then((res) => {
+          expect(res).to.match(/sh=\w?/);
+        });
+      });
+
       it('should replace USER_AGENT', () => {
         return expandUrlAsync('?sh=USER_AGENT').then((res) => {
           expect(res).to.match(/sh=\w+/);
@@ -1065,7 +1072,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           });
       });
 
-      it('should replace AMP_GEO(ISOCountry) and AMP_GEO', () => {
+      it('should async replace AMP_GEO(ISOCountry) and AMP_GEO', () => {
         env.sandbox.stub(Services, 'geoForDocOrNull').returns(
           Promise.resolve({
             'ISOCountry': 'unknown',
@@ -1079,6 +1086,46 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           (res) => {
             expect(res).to.equal('?geo=nafta%2Cwaldo,country=unknown');
           }
+        );
+      });
+
+      it('should sync replace AMP_GEO(ISOCountry) and AMP_GEO', () => {
+        env.sandbox.stub(Services, 'geoForDocOrNull').returns(
+          Promise.resolve({
+            'ISOCountry': 'unknown',
+            'ISOCountryGroups': ['nafta', 'waldo'],
+            'nafta': true,
+            'waldo': true,
+            'matchedISOCountryGroups': ['nafta', 'waldo'],
+          })
+        );
+        getReplacements().then((replacements) =>
+          expect(
+            replacements.expandUrlSync(
+              '?geo=AMP_GEO,country=AMP_GEO(ISOCountry)'
+            )
+          ).to.equal('?geo=nafta%2Cwaldo,country=unknown')
+        );
+      });
+
+      it('should sync replace AMP_GEO(ISOCountry) and AMP_GEO with unknown when geo is not available', () => {
+        env.sandbox.stub(Services, 'geoForDocOrNull').returns(null);
+        getReplacements().then((replacements) =>
+          expect(
+            replacements.expandUrlSync(
+              '?geo=AMP_GEO,country=AMP_GEO(ISOCountry)'
+            )
+          ).to.equal('?geo=unknown,country=unknown')
+        );
+      });
+
+      it('should sync replace AMP_GEO(ISOCountry) and AMP_GEO with unknown when geo is unknown', () => {
+        getReplacements().then((replacements) =>
+          expect(
+            replacements.expandUrlSync(
+              '?geo=AMP_GEO,country=AMP_GEO(ISOCountry)'
+            )
+          ).to.equal('?geo=unknown,country=unknown')
         );
       });
 

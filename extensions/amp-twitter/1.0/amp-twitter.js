@@ -60,7 +60,7 @@ class AmpTwitter extends BaseElement {
       // Base URL for 3p bootstrap iframes
       getBootstrapBaseUrl(win, ampdoc),
       // Script URL for iframe
-      getBootstrapUrl(TYPE, win),
+      getBootstrapUrl(TYPE),
       // Hosts the script that renders tweets.
       'https://platform.twitter.com/widgets.js',
       // This domain serves the actual tweets as JSONP.
@@ -74,7 +74,7 @@ class AmpTwitter extends BaseElement {
   /** @override */
   init() {
     return dict({
-      'requestResize': (height) => this.forceChangeHeight(height),
+      'requestResize': (height) => this.attemptChangeHeight(height),
     });
   }
 

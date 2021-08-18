@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
+import {rethrowAsync} from '#core/error';
 import {dict} from '#core/types/object';
-import {getData} from '../../../src/event-helper';
 import {parseJson} from '#core/types/object/json';
+
+import {getData} from '../../../src/event-helper';
 import {
   parseUrlDeprecated,
   removeFragment,
   serializeQueryString,
 } from '../../../src/url';
-import {rethrowAsync} from '#core/error';
 
 /**
  * Returns a function, that, as long as it continues to be invoked, will not

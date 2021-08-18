@@ -21,25 +21,23 @@ const globby = require('globby');
 const {clean} = require('../tasks/clean');
 const {cyan, green, red, yellow} = require('./colors');
 const {default: ignore} = require('ignore');
-const {doBuild} = require('../tasks/build');
-const {doDist} = require('../tasks/dist');
+const {execOrDie} = require('./exec');
 const {gitDiffNameOnlyMain} = require('./git');
 const {log, logLocalDev} = require('./logging');
 
 /**
  * Performs a clean build of the AMP runtime in testing mode.
- * Used by `amp e2e|integration|visual_diff`.
+ * Used by `amp e2e|integration|visual-diff`.
  *
- * @param {boolean} opt_compiled pass true to build the compiled runtime
- *   (`amp dist` instead of `amp build`). Otherwise uses the value of
- *   --compiled to determine which build to generate.
+ * @param {boolean} opt_minified builds the minified runtime
+ * @return {Promise<void>}
  */
-async function buildRuntime(opt_compiled = false) {
+async function buildRuntime(opt_minified = false) {
   await clean();
-  if (argv.compiled || opt_compiled === true) {
-    await doDist({fortesting: true});
+  if (argv.minified || opt_minified === true) {
+    execOrDie(`amp dist --fortesting`);
   } else {
-    await doBuild({fortesting: true});
+    execOrDie(`amp build --fortesting`);
   }
 }
 
@@ -56,14 +54,6 @@ function getExperimentConfig(experiment) {
     config?.expiration_date_utc &&
     new Number(new Date(config.expiration_date_utc)) >= Date.now();
   return valid ? config : null;
-}
-
-/**
- * Returns the names of all valid experiments.
- * @return {!Array<string>}
- */
-function getValidExperiments() {
-  return Object.keys(experimentsConfig).filter(getExperimentConfig);
 }
 
 /**
@@ -118,6 +108,18 @@ function getFilesFromArgv() {
     allFiles.push(...files);
   }
   return allFiles;
+}
+
+/**
+ * Returns list of files in the comma-separated file named at --filelist.
+ *
+ * @return {Array<string>}
+ */
+function getFilesFromFileList() {
+  if (!argv.filelist) {
+    return [];
+  }
+  return fs.readFileSync(argv.filelist, {encoding: 'utf8'}).trim().split(',');
 }
 
 /**
@@ -181,8 +183,8 @@ function usesFilesOrLocalChanges(taskName) {
 module.exports = {
   buildRuntime,
   getExperimentConfig,
-  getValidExperiments,
   getFilesFromArgv,
+  getFilesFromFileList,
   getFilesToCheck,
   usesFilesOrLocalChanges,
 };

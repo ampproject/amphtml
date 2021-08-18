@@ -16,6 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const atob = require('atob');
 const fs = require('fs');
 const JSON5 = require('json5');
 const path = require('path');
@@ -136,6 +137,15 @@ let TestErrorDef;
 let WebpageDef;
 
 /**
+ * Decode the write-only Percy token during CI builds.
+ */
+function decodePercyTokenForCi() {
+  if (isCiBuild()) {
+    process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED || '');
+  }
+}
+
+/**
  * Override PERCY_* environment variables if passed via amp task parameters.
  */
 function maybeOverridePercyEnvironmentVariables() {
@@ -215,12 +225,13 @@ async function launchPercyAgent(browserFetcher) {
 
 /**
  * Launches an AMP webserver for minified js.
+ * @return {Promise<void>}
  */
 async function launchWebServer() {
   await startServer(
     {host: HOST, port: PORT},
     {quiet: !argv.webserver_debug},
-    {compiled: true}
+    {minified: true}
   );
 }
 
@@ -308,6 +319,7 @@ async function newPage(browser, viewport = null) {
  * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
  * @param {?{height: number, width: number}} viewport optional viewport size
  *     object with numeric fields `width` and `height`.
+ * @return {Promise<void>}
  */
 async function resetPage(page, viewport = null) {
   const width = viewport ? viewport.width : VIEWPORT_WIDTH;
@@ -376,6 +388,7 @@ function logTestError(testError) {
  *
  * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
  * @param {!Array<WebpageDef>} webpages details about the pages to snapshot.
+ * @return {Promise<void>}
  */
 async function runVisualTests(browser, webpages) {
   const numUnfilteredPages = webpages.length;
@@ -722,6 +735,7 @@ function setDebuggingLevel() {
  * build for every PR.
  *
  * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
+ * @return {Promise<void>}
  */
 async function createEmptyBuild(browser) {
   log('info', 'Skipping visual diff tests and generating a blank Percy build');
@@ -748,6 +762,7 @@ async function visualDiff() {
   const handlerProcess = createCtrlcHandler('visual-diff');
   await ensureOrBuildAmpRuntimeInTestMode_();
   const browserFetcher = await loadBrowserFetcher_();
+  decodePercyTokenForCi();
   maybeOverridePercyEnvironmentVariables();
   setPercyBranch();
   setPercyTargetCommit();
@@ -775,6 +790,7 @@ async function visualDiff() {
  *
  * @param {!puppeteer.BrowserFetcher} browserFetcher Puppeteer browser binaries
  *     manager.
+ * @return {Promise<void>}
  */
 async function performVisualTests(browserFetcher) {
   setDebuggingLevel();

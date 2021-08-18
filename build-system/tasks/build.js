@@ -45,21 +45,13 @@ async function runPreBuildSteps(options) {
 
 /**
  * Unminified build. Entry point for `amp build`.
+ * @return {Promise<void>}
  */
 async function build() {
-  await doBuild();
-}
-
-/**
- * Performs an unminified build with the given extra args.
- *
- * @param {Object=} extraArgs
- */
-async function doBuild(extraArgs = {}) {
   const handlerProcess = createCtrlcHandler('build');
   process.env.NODE_ENV = 'development';
   const options = {
-    fortesting: extraArgs.fortesting || argv.fortesting,
+    fortesting: argv.fortesting,
     minify: false,
     watch: argv.watch,
   };
@@ -84,7 +76,6 @@ async function doBuild(extraArgs = {}) {
 
 module.exports = {
   build,
-  doBuild,
   runPreBuildSteps,
 };
 

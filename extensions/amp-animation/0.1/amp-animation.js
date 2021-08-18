@@ -15,18 +15,21 @@
  */
 
 import {ActionTrust} from '#core/constants/action-constants';
-import {Builder} from './web-animations';
-import {Pass} from '../../../src/pass';
-import {Services} from '#service';
-import {WebAnimationPlayState} from './web-animation-types';
-import {WebAnimationService} from './web-animation-service';
-import {clamp} from '#core/math';
-import {dev, userAssert} from '../../../src/log';
-import {getChildJsonConfig} from '../../../src/json';
-import {getDetail, listen} from '../../../src/event-helper';
-import {installWebAnimationsIfNecessary} from './install-polyfill';
-import {isFiniteNumber} from '#core/types';
+import {getChildJsonConfig} from '#core/dom';
 import {setInitialDisplay, setStyles, toggle} from '#core/dom/style';
+import {clamp} from '#core/math';
+import {isFiniteNumber} from '#core/types';
+
+import {Services} from '#service';
+
+import {installWebAnimationsIfNecessary} from './install-polyfill';
+import {WebAnimationService} from './web-animation-service';
+import {WebAnimationPlayState} from './web-animation-types';
+import {Builder} from './web-animations';
+
+import {getDetail, listen} from '../../../src/event-helper';
+import {dev, userAssert} from '../../../src/log';
+import {Pass} from '../../../src/pass';
 
 const TAG = 'amp-animation';
 

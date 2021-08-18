@@ -26,6 +26,7 @@ import {computedStyle, setStyles} from '#core/dom/style';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
+import {toArray} from '#core/types/array';
 
 /** @const {string} */
 const TAG = 'amp-render';
@@ -50,15 +51,13 @@ const isAmpStateSrc = (src) => src && src.startsWith(AMP_STATE_URI_SCHEME);
 
 /**
  * Gets the json from an "amp-state:" uri. For example, src="amp-state:json.path".
- *
  * TODO: this is similar to the implementation in amp-list. Move it
  * to a common file and import it.
- *
  * @param {!AmpElement} element
  * @param {string} src
  * @return {Promise<!JsonObject>}
  */
-const getAmpStateJson = (element, src) => {
+function getAmpStateJson(element, src) {
   return Services.bindForDocOrNull(element)
     .then((bind) => {
       userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
@@ -79,7 +78,7 @@ const getAmpStateJson = (element, src) => {
       );
       return json;
     });
-};
+}
 
 /**
  * @param {string} bindingValue
@@ -97,6 +96,37 @@ function getUpdateValue(bindingValue, isFirstMutation) {
     return true;
   }
   return false;
+}
+
+/**
+ * Returns the non-empty node count in a template (defined as a `template`
+ * or `script` element). This is required to establish if the template content has
+ * a single wrapper element and if so we need to include it while rendering the
+ * template. For more info, see https://github.com/ampproject/amphtml/issues/35401.
+ * TODO(dmanek): Observe rewrapping at a lower level in BaseTemplate.
+ * @param {!Document} doc
+ * @param {?Element} template
+ * @return {number} count of non-empty child nodes
+ */
+function getTemplateNonEmptyNodeCount(doc, template) {
+  let childNodes = [];
+  if (template.tagName === 'SCRIPT') {
+    const div = doc.createElement('div');
+    div./*OK*/ innerHTML = template./*OK*/ innerHTML;
+    childNodes = div.childNodes;
+  } else if (template.tagName == 'TEMPLATE') {
+    childNodes = template.content.childNodes;
+  }
+  return toArray(childNodes).reduce(
+    (count, node) =>
+      count +
+      Number(
+        node.nodeType === Node.TEXT_NODE
+          ? node.textContent.trim().length > 0
+          : node.nodeType !== Node.COMMENT_NODE
+      ),
+    0
+  );
 }
 
 export class AmpRender extends BaseElement {
@@ -190,7 +220,44 @@ export class AmpRender extends BaseElement {
         'placeholder required with layout="container"'
       );
     }
-    return super.isLayoutSupported(layout);
+    return true;
+  }
+
+  /** @private */
+  handleResizeToContentsAction_() {
+    let currentHeight, targetHeight;
+    this.measureMutateElement(
+      () => {
+        currentHeight = this.element./*OK*/ offsetHeight;
+        targetHeight = this.element./*OK*/ scrollHeight;
+        if (targetHeight < currentHeight) {
+          // targetHeight is smaller than currentHeight, we need to shrink the height.
+          const container = this.element.querySelector(
+            'div[i-amphtml-rendered]'
+          );
+          targetHeight = container./*OK*/ scrollHeight;
+          // Check if the first child has any margin-top and add it to the target height
+          if (container.firstElementChild) {
+            const marginTop = computedStyle(
+              this.getAmpDoc().win,
+              container.firstElementChild
+            ).getPropertyValue('margin-top');
+            targetHeight += parseInt(marginTop, 10);
+          }
+          // Check if the last child has any margin-bottom and add it to the target height
+          if (container.lastElementChild) {
+            const marginBottom = computedStyle(
+              this.getAmpDoc().win,
+              container.lastElementChild
+            ).getPropertyValue('margin-bottom');
+            targetHeight += parseInt(marginBottom, 10);
+          }
+        }
+      },
+      () => {
+        this.forceChangeHeight(targetHeight);
+      }
+    );
   }
 
   /** @override */
@@ -213,6 +280,10 @@ export class AmpRender extends BaseElement {
         return;
       }
       api.refresh();
+    });
+
+    this.registerAction('resizeToContents', () => {
+      this.handleResizeToContentsAction_();
     });
 
     return dict({
@@ -328,6 +399,10 @@ export class AmpRender extends BaseElement {
               if (!bind) {
                 return this.renderTemplateAsString_(data);
               }
+              const nonEmptyNodeCount = getTemplateNonEmptyNodeCount(
+                this.element.ownerDocument,
+                template
+              );
               return templates
                 .renderTemplate(dev().assertElement(template), data)
                 .then((element) => {
@@ -341,7 +416,17 @@ export class AmpRender extends BaseElement {
                         bind.signals().get('FIRST_MUTATE') === null
                       ),
                     })
-                    .then(() => dict({'__html': element./* OK */ innerHTML}));
+                    .then(() =>
+                      dict({
+                        // We should use innerHTML when the template lacks a wrapper
+                        // element, outerHTML otherwise in order to include the wrapper
+                        // element itself.
+                        '__html':
+                          nonEmptyNodeCount === 1
+                            ? element./* OK */ outerHTML
+                            : element./* OK */ innerHTML,
+                      })
+                    );
                 });
             });
           },
@@ -353,7 +438,6 @@ export class AmpRender extends BaseElement {
   /**
    * TODO: this implementation is identical to one in amp-date-display &
    * amp-date-countdown. Move it to a common file and import it.
-   *
    * @override
    */
   isReady(props) {
@@ -361,6 +445,12 @@ export class AmpRender extends BaseElement {
     return !this.template_ || 'render' in props;
   }
 }
+
+/**
+ * This is disabled to remove the fill content style in the AMP layer.
+ * @override
+ */
+AmpRender['layoutSizeDefined'] = false;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpRender);

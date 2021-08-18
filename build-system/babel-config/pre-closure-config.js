@@ -16,6 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const {BUILD_CONSTANTS} = require('../compile/build-constants');
 const {getImportResolverPlugin} = require('./import-resolver');
 const {getReplacePlugin} = require('./helpers');
 
@@ -26,9 +27,7 @@ const {getReplacePlugin} = require('./helpers');
  */
 function getPreClosureConfig() {
   const isCheckTypes = argv._.includes('check-types');
-  const testTasks = ['e2e', 'integration', 'visual-diff'];
-  const isTestTask = testTasks.some((task) => argv._.includes(task));
-  const isFortesting = argv.fortesting || isTestTask;
+  const isProd = argv._.includes('dist') && !argv.fortesting;
 
   const reactJsxPlugin = [
     '@babel/plugin-transform-react-jsx',
@@ -62,12 +61,9 @@ function getPreClosureConfig() {
       './build-system/babel-plugins/babel-plugin-transform-json-import',
       {freeze: false},
     ],
-    './build-system/babel-plugins/babel-plugin-is_minified-constant-transformer',
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
     './build-system/babel-plugins/babel-plugin-transform-html-template',
     './build-system/babel-plugins/babel-plugin-transform-jss',
-    './build-system/babel-plugins/babel-plugin-transform-version-call',
-    './build-system/babel-plugins/babel-plugin-transform-simple-array-destructure',
     './build-system/babel-plugins/babel-plugin-transform-default-assignment',
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-amp-asserts',
@@ -75,18 +71,12 @@ function getPreClosureConfig() {
     // argv.esm
     //? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
     //: null,
-    !isCheckTypes
-      ? './build-system/babel-plugins/babel-plugin-transform-json-configuration'
-      : null,
-    !(isFortesting || isCheckTypes)
-      ? [
-          './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
-          {isEsmBuild: !!argv.esm},
-        ]
-      : null,
-    !(isFortesting || isCheckTypes)
-      ? './build-system/babel-plugins/babel-plugin-is_fortesting-constant-transformer'
-      : null,
+    !isCheckTypes &&
+      './build-system/babel-plugins/babel-plugin-transform-json-configuration',
+    isProd && [
+      './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
+      BUILD_CONSTANTS,
+    ],
   ].filter(Boolean);
   const presetEnv = [
     '@babel/preset-env',

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const debounce = require('debounce');
+const debounce = require('../../common/debounce');
 const fs = require('fs-extra');
 const globby = require('globby');
 const path = require('path');
@@ -25,6 +25,7 @@ const {watch} = require('chokidar');
 
 /**
  * Entry point for 'amp css'
+ * @return {Promise<void>}
  */
 async function css() {
   await compileCss();
@@ -68,10 +69,10 @@ const cssEntryPoints = [
     append: false,
   },
   {
-    // Internal CSS used for the iframes inside `src/amp-story-player/amp-story-player.js`.
-    path: 'amp-story-player-iframe.css',
-    outJs: 'amp-story-player-iframe.css.js',
-    outCss: 'amp-story-player-iframe-v0.css',
+    // Internal CSS used for the shadow dom inside `src/amp-story-player/amp-story-player.js`.
+    path: 'amp-story-player-shadow.css',
+    outJs: 'amp-story-player-shadow.css.js',
+    outCss: 'amp-story-player-shadow-v0.css',
     append: false,
   },
   {
@@ -84,6 +85,7 @@ const cssEntryPoints = [
 
 /**
  * Copies the css from the build folder to the dist folder
+ * @return {Promise<void>}
  */
 async function copyCss() {
   const startTime = Date.now();
@@ -91,7 +93,7 @@ async function copyCss() {
   for (const {outCss} of cssEntryPoints) {
     await fs.copy(`build/css/${outCss}`, `dist/${outCss}`);
   }
-  const cssFiles = globby.sync('build/css/amp-*.css');
+  const cssFiles = await globby('build/css/amp-*.css');
   await Promise.all(
     cssFiles.map((cssFile) => {
       return fs.copy(cssFile, `dist/v0/${path.basename(cssFile)}`);
@@ -107,6 +109,7 @@ async function copyCss() {
  * @param {string} jsFilename
  * @param {string} cssFilename
  * @param {boolean} append append CSS to existing file
+ * @return {Promise<void>}
  */
 async function writeCss(css, jsFilename, cssFilename, append) {
   await fs.ensureDir('build/css');
@@ -124,6 +127,7 @@ async function writeCss(css, jsFilename, cssFilename, append) {
  * @param {string} outJs
  * @param {string} outCss
  * @param {boolean} append
+ * @return {Promise<void>}
  */
 async function writeCssEntryPoint(path, outJs, outCss, append) {
   const css = await jsifyCssAsync(`css/${path}`);
@@ -134,7 +138,7 @@ async function writeCssEntryPoint(path, outJs, outCss, append) {
  * Compile all the css and drop in the build folder
  *
  * @param {Object=} options
- * @return {!Promise}
+ * @return {!Promise<void>}
  */
 async function compileCss(options = {}) {
   if (options.watch) {

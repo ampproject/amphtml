@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import {cssEscape} from '#third_party/css-escape/css-escape';
 import {devAssert} from '#core/assert';
+import * as mode from '#core/mode';
+
+import {cssEscape} from '#third_party/css-escape/css-escape';
 
 /**
  * @type {boolean|undefined}
@@ -96,7 +98,7 @@ export function prependSelectorsWith(selector, distribute) {
 export function escapeCssSelectorIdent(ident) {
   // This gets rewritten to true/false during compilation. It will trigger an
   // JSC_UNREACHABLE_CODE warning, but that's intentional for DCE.
-  if (IS_ESM) {
+  if (mode.isEsm()) {
     return CSS.escape(ident);
   }
   return cssEscape(ident);

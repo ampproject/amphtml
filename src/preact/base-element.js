@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import {devAssert} from '#core/assert';
 import {ActionTrust} from '#core/constants/action-constants';
-import {AmpElementPropDef, collectProps} from './parse-props';
 import {AmpEvents} from '#core/constants/amp-events';
-import {CanPlay, CanRender, LoadingProp} from './contextprops';
-import {Deferred} from '#core/data-structures/promise';
-import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {Loading} from '#core/loading-instructions';
-import {MediaQueryProps} from '#core/dom/media-query-props';
-import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Loading} from '#core/constants/loading-instructions';
 import {ReadyState} from '#core/constants/ready-state';
-import {WithAmpContext} from './context';
 import {
   addGroup,
   discover,
@@ -33,14 +26,24 @@ import {
   setParent,
   subscribe,
 } from '#core/context';
-import {childElementByAttr, childElementByTag} from '#core/dom/query';
+import {Deferred} from '#core/data-structures/promise';
 import {createElementWithAttributes, dispatchCustomEvent} from '#core/dom';
-import {devAssert} from '#core/assert';
-import {dict, hasOwn, map} from '#core/types/object';
-import {getMode} from '../mode';
-import {hydrate, render} from '#preact';
-import {installShadowStyle} from '../shadow-embed';
+import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {MediaQueryProps} from '#core/dom/media-query-props';
+import {childElementByAttr, childElementByTag} from '#core/dom/query';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import * as mode from '#core/mode';
 import {isElement} from '#core/types';
+import {dict, hasOwn, map} from '#core/types/object';
+
+import {hydrate, render} from '#preact';
+import * as Preact from '#preact';
+
+import {WithAmpContext} from './context';
+import {CanPlay, CanRender, LoadingProp} from './contextprops';
+import {AmpElementPropDef, collectProps} from './parse-props';
+
+import {installShadowStyle} from '../shadow-embed';
 
 /** @const {!MutationObserverInit} */
 const CHILDREN_MUTATION_INIT = {
@@ -377,6 +380,19 @@ export class PreactBaseElement extends AMP.BaseElement {
     if (this.container_) {
       this.scheduleRender_();
     }
+  }
+
+  /** @override */
+  attemptChangeHeight(newHeight) {
+    return super.attemptChangeHeight(newHeight).catch((e) => {
+      if (this.getOverflowElement && !this.getOverflowElement()) {
+        console./* OK */ warn(
+          '[overflow] element not found. Provide one to enable resizing to full contents.',
+          this.element
+        );
+      }
+      throw e;
+    });
   }
 
   /**
@@ -724,7 +740,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    * @private
    */
   checkApiWrapper_(current) {
-    if (!getMode().localDev) {
+    if (!mode.isLocalDev()) {
       return;
     }
     // Hack around https://github.com/preactjs/preact/issues/3084
@@ -842,7 +858,7 @@ PreactBaseElement['staticProps'] = undefined;
 /**
  * @protected {!Array<!ContextProp>}
  */
-PreactBaseElement['useContexts'] = getMode().localDev ? Object.freeze([]) : [];
+PreactBaseElement['useContexts'] = mode.isLocalDev() ? Object.freeze([]) : [];
 
 /**
  * Whether the component implements a loading protocol.

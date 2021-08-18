@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import {sequentialIdGenerator} from '#core/data-structures/id-generator';
+
 import * as Preact from '#preact';
-import {LightboxGalleryContext} from './context';
 import {
   cloneElement,
   useCallback,
@@ -24,55 +25,86 @@ import {
   useMemo,
   useState,
 } from '#preact';
-import {sequentialIdGenerator} from '#core/math/id-generator';
 import {toChildArray} from '#preact/compat';
+
+import {LightboxGalleryContext} from './context';
 
 const generateLightboxItemKey = sequentialIdGenerator();
 
+/** @const {string} */
 const DEFAULT_ARIA_LABEL = 'Open content in a lightbox view.';
+
+/** @const {!Object<string, *>} */
 const DEFAULT_ACTIVATION_PROPS = {
   'aria-label': DEFAULT_ARIA_LABEL,
   role: 'button',
-  tabIndex: '0',
+  tabIndex: 0,
 };
+
+/**
+ *
+ * @param {!PreactDef.Renderable} child
+ * @return {!PreactDef.Renderable}
+ */
+const CLONE_CHILD = (child) => cloneElement(child);
 
 /**
  * @param {!LightboxGalleryDef.WithLightboxProps} props
  * @return {PreactDef.Renderable}
  */
 export function WithLightbox({
+  alt,
+  'aria-label': ariaLabel,
   as: Comp = 'div',
+  caption: captionProp,
   children,
   enableActivation = true,
+  group,
+  onMount,
   render: renderProp,
+  srcset,
   ...rest
 }) {
   const [genKey] = useState(generateLightboxItemKey);
   const {deregister, open, register} = useContext(LightboxGalleryContext);
-  const render = useCallback(
-    () =>
-      renderProp
-        ? renderProp()
-        : toChildArray(children).map((child) => cloneElement(child)),
-    [children, renderProp]
+  const render = useCallback(() => {
+    if (renderProp) {
+      return renderProp();
+    }
+    if (children) {
+      return toChildArray(children).map(CLONE_CHILD);
+    }
+    return <Comp srcset={srcset} />;
+  }, [children, renderProp, srcset]);
+
+  const caption = useMemo(
+    () => captionProp || alt || ariaLabel,
+    [alt, ariaLabel, captionProp]
   );
 
   useLayoutEffect(() => {
-    register(genKey, render);
-    return () => deregister(genKey);
-  }, [genKey, deregister, register, render]);
+    register(genKey, group, render, caption);
+    return () => deregister(genKey, group);
+  }, [caption, genKey, group, deregister, register, render]);
+
+  useLayoutEffect(() => {
+    return onMount?.(Number(genKey) - 1);
+  }, [genKey, onMount]);
 
   const activationProps = useMemo(
     () =>
       enableActivation && {
         ...DEFAULT_ACTIVATION_PROPS,
         /* genKey is 1-indexed, gallery is 0-indexed */
-        onClick: () => open(Number(genKey) - 1),
+        onClick: () => {
+          open(Number(genKey) - 1, group);
+        },
       },
-    [enableActivation, genKey, open]
+    [enableActivation, genKey, group, open]
   );
+
   return (
-    <Comp {...activationProps} {...rest}>
+    <Comp {...activationProps} srcset={srcset} {...rest}>
       {children}
     </Comp>
   );

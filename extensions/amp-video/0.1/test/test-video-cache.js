@@ -18,6 +18,7 @@ import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
 import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {fetchCachedSources} from '../video-cache';
+import {installPerformanceService} from '#service/performance-impl';
 import {xhrServiceForTesting} from '#service/xhr-impl';
 
 describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
@@ -42,6 +43,8 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       sourceUrl: 'https://example.com',
       canonicalUrl: 'https://canonical.com',
     });
+
+    installPerformanceService(env.win);
   });
 
   describe('select sources', () => {
@@ -117,6 +120,17 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
 
       expect(xhrSpy).to.have.been.calledWith(
         'https://example-com.cdn.ampproject.org/mbv/s/example.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+      );
+    });
+
+    it('should send the request to the correct address if the video has a .gif extension', async () => {
+      const videoEl = createVideo([{'src': 'https://website.com/video.gif'}]);
+      const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
+
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      expect(xhrSpy).to.have.been.calledWith(
+        'https://website-com.cdn.ampproject.org/mbv/s/website.com/video.gif?amp_video_host_url=https%3A%2F%2Fcanonical.com'
       );
     });
   });
@@ -231,11 +245,43 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
 
       expect(videoEl.querySelector('source[data-bitrate]')).to.not.be.null;
     });
-    it('should not create the sources if there is amp-orig-src attribute', async () => {
-      const videoEl = createVideo([{'src': 'video.mp4', 'amp-orig-src': ''}]);
+
+    it('should set an attribute on cached video sources', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            sources: [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          }),
+      });
+
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+
       await fetchCachedSources(videoEl, env.ampdoc);
 
-      expect(videoEl.querySelector('source[data-bitrate]')).to.be.null;
+      const source = videoEl.querySelector('source[data-bitrate]');
+      expect(source).to.exist;
+      expect(source).to.have.attribute('i-amphtml-video-cached-source');
+    });
+
+    it('should not set an attribute on non cached video sources', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            sources: [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          }),
+      });
+
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      const source = videoEl.querySelector('source:not(source[data-bitrate])');
+      expect(source).to.exist;
+      expect(source).to.not.have.attribute('i-amphtml-video-cached-source');
     });
   });
 

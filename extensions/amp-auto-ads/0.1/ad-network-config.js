@@ -21,6 +21,8 @@ import {DoubleclickNetworkConfig} from './doubleclick-network-config';
 import {FirstImpressionIoConfig} from './firstimpression.io-network-config';
 import {PingNetworkConfig} from './ping-network-config';
 import {PremiumadsNetworkConfig} from './premiumads-network-config';
+import {WunderkindNetworkConfig} from './wunderkind-network-config';
+
 import {getMode} from '../../../src/mode';
 
 /** @typedef {{width: (number|undefined), height: (number|undefined)}} */
@@ -97,6 +99,9 @@ export function getAdNetworkConfig(type, autoAmpAdsElement) {
   }
   if (type == 'premiumads') {
     return new PremiumadsNetworkConfig(autoAmpAdsElement);
+  }
+  if (type == 'wunderkind') {
+    return new WunderkindNetworkConfig(autoAmpAdsElement);
   }
   return null;
 }

@@ -16,6 +16,7 @@
 
 import {createElementWithAttributes, escapeHtml} from '#core/dom';
 import {dict} from '#core/types/object';
+
 import {getFieSafeScriptSrcs} from '../../../src/friendly-iframe-embed';
 
 // If making changes also change ALLOWED_FONT_REGEX in head-validation.js
@@ -100,9 +101,18 @@ export function createSecureFrame(win, title, height, width) {
     )
   );
 
-  if (document.featurePolicy?.features().includes('attribution-reporting')) {
+  if (isAttributionReportingSupported(document)) {
     iframe.setAttribute('allow', `attribution-reporting 'src'`);
   }
 
   return iframe;
+}
+
+/**
+ * Determine if `attribution-reporting` API is available in browser.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+export function isAttributionReportingSupported(doc) {
+  return doc.featurePolicy?.features().includes('attribution-reporting');
 }
