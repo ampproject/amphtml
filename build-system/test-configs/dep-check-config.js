@@ -222,6 +222,9 @@ exports.rules = [
       'extensions/amp-stream-gallery/1.0/base-element.js->extensions/amp-base-carousel/1.0/component.jss.js',
       'extensions/amp-stream-gallery/1.0/component.js->extensions/amp-base-carousel/1.0/component.js',
 
+      // <amp-dailymotion> versions share this message API definition.
+      'extensions/amp-dailymotion/**->extensions/amp-dailymotion/dailymotion-api.js',
+
       // Autolightboxing dependencies
       'extensions/amp-base-carousel/1.0/scroller.js->extensions/amp-lightbox-gallery/1.0/component.js',
       'extensions/amp-lightbox-gallery/1.0/provider.js->extensions/amp-lightbox/1.0/component.js',
