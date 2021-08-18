@@ -103,8 +103,8 @@ class AmpIframe extends BaseElement {
       'onLoad': () => {
         this.handleOnLoad_();
       },
-      'requestResize': (height, width, isIntersecting) => {
-        this.updateSize_(height, width, isIntersecting);
+      'requestResize': (height, width) => {
+        this.updateSize_(height, width);
       },
     });
   }
