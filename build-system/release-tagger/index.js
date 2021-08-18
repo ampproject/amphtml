@@ -53,7 +53,7 @@ async function _rollback() {
     await rollbackRelease(head);
   } catch (e) {}
 
-  //  await updateLabelsOnPullRequests(head, base, channel, true);
+  await updateLabelsOnPullRequests(head, base, channel, true);
 }
 
 /**
