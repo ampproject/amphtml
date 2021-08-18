@@ -19,26 +19,29 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
-import * as experiments from '#experiments';
-import {AD_SIZE_OPTIMIZATION_EXP} from '../responsive-state';
-import {AmpA4A} from '../../../amp-a4a/0.1/amp-a4a';
-import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
-import {
-  AmpAdNetworkAdsenseImpl,
-  resetSharedState,
-} from '../amp-ad-network-adsense-impl';
-import {
-  AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
-} from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
 } from '#core/constants/consent-state';
-import {Services} from '#service';
 import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
-import {forceExperimentBranch, toggleExperiment} from '#experiments';
-import {toWin} from '#core/window';
 import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
+import {toWin} from '#core/window';
+
+import {forceExperimentBranch, toggleExperiment} from '#experiments';
+import * as experiments from '#experiments';
+
+import {Services} from '#service';
+
+import {AmpA4A} from '../../../amp-a4a/0.1/amp-a4a';
+import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
+import {
+  AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
+} from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {
+  AmpAdNetworkAdsenseImpl,
+  resetSharedState,
+} from '../amp-ad-network-adsense-impl';
+import {AD_SIZE_OPTIMIZATION_EXP} from '../responsive-state';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';
@@ -566,6 +569,7 @@ describes.realWin(
     describe('#getAdUrl', () => {
       beforeEach(() => {
         resetSharedState();
+        impl.uiHandler = {isStickyAd: () => false};
       });
 
       afterEach(() => {
@@ -780,6 +784,10 @@ describes.realWin(
         const impl1 = new AmpAdNetworkAdsenseImpl(elem1);
         const impl2 = new AmpAdNetworkAdsenseImpl(elem2);
         const impl3 = new AmpAdNetworkAdsenseImpl(elem3);
+
+        impl1.uiHandler = {isStickyAd: () => false};
+        impl2.uiHandler = {isStickyAd: () => false};
+        impl3.uiHandler = {isStickyAd: () => false};
         return impl1.getAdUrl().then((adUrl1) => {
           expect(adUrl1).to.match(/pv=2/);
           expect(adUrl1).to.not.match(/prev_fmts/);

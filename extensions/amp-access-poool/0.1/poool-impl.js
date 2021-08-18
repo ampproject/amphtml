@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '#service';
-import {addParamToUrl, addParamsToUrl} from '../../../src/url';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {getMode} from '../../../src/mode';
-import {listenFor} from '../../../src/iframe-helper';
 import {resetStyles, setStyle, setStyles} from '#core/dom/style';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {listenFor} from '../../../src/iframe-helper';
+import {dev, user, userAssert} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {addParamToUrl, addParamsToUrl} from '../../../src/url';
 
 const TAG = 'amp-access-poool';
 

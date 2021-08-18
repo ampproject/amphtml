@@ -65,6 +65,57 @@ Does not support pairing with `amp-story-interactive-results`, and can optionall
 </amp-story-interactive-binary-poll>
 ```
 
+### amp-story-interactive-img-poll
+
+The `amp-story-interactive-img-poll` element provides a voting experience with 2-4 options displayed in a grid, where all options are valid, selectable images. When selected, each option displays the total percentage of votes.
+
+Display different categories based on user poll answers by pairing `amp-story-interactive-img-poll` with `amp-story-interactive-results`. Add a prompt for extra context.
+
+<amp-img alt="An example of an interactive image poll: 'Where would you travel?' with options of Lake Tahoe, Hong Kong, Hawaii, and the Grand Canyon, and their respective percentage votes" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/img-poll-raw.png" layout="intrinsic" width="400" height="554">
+
+[sourcecode:html]
+<amp-story-interactive-img-poll
+    id="travel-poll"
+    prompt-text="Where would you travel?"
+    prompt-size="large"
+    endpoint="https://backend.com/v1/interactives"
+    option-1-image="tahoe.png"
+    option-1-image-alt="Lake Tahoe"
+    option-2-image="hk.png"
+    option-2-image-alt="Hong Kong"
+    option-3-image="hawaii.png"
+    option-3-image-alt="Hawaii"
+    option-4-image="grand-canyon.png"
+    option-4-image-alt="Grand Canyon">
+</amp-story-interactive-img-poll>
+[/sourcecode]
+
+### amp-story-interactive-img-quiz
+
+The `amp-story-interactive-img-quiz` element provides a guessing experience with 2-4 image options, one of which is correct. It displays the voting percentages after the user makes a selection. The user selection is green if correct and red if incorrect.
+
+Display different categories based on percentage of correct user answers by pairing `amp-story-interactive-img-quiz` with `amp-story-interactive-results`. Add a prompt for extra context.
+
+<amp-img alt="Example of an interactive image quiz: Which of these structures is oldest?, with various options; the correct answer, the Statue of Liberty has a green tick next to it, compared to the wrong answers which have a red cross; all answers show a percentage of how many people picked that particular answer" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/img-quiz-raw.png" layout="intrinsic" width="400" height="581">
+
+[sourcecode:html]
+<amp-story-interactive-img-quiz
+    id="structure-quiz"
+    prompt-text="Which of these structures is oldest?"
+    prompt-size="large"
+    endpoint="https://backend.com/v1/interactives"
+    option-1-image="liberty.png"
+    option-1-image-alt="Statue of Liberty"
+    option-1-correct
+    option-2-image="golden-gate.png"
+    option-2-image-alt="Golden Gate Bridge"
+    option-3-image="redeemer.png"
+    option-3-image-alt="Christ the Redeemer"
+    option-4-image="eiffel.png"
+    option-4-image-alt="Eiffel Tower">
+</amp-story-interactive-img-quiz>
+[/sourcecode]
+
 ### amp-story-interactive-poll
 
 The `amp-story-interactive-poll` element provides a voting experience with 2-4 options displayed vertically, where all options are valid. When selected, each option displays the total percentage of votes.
@@ -127,9 +178,27 @@ Results can feed its state from quizzes if all categories also specify `option-{
 </amp-story-interactive-results>
 [/sourcecode]
 
+### amp-story-interactive-slider
+
+The `amp-story-interactive-slider` element provides a voting experience for values along a range. Users interact with the slider by dragging the thumb across the track, and release to vote. When selected, the average response is displayed.
+
+Displays the percentage selected, or an emoji via the attribute `option-1-text`. Does not support pairing with `amp-story-interactive-results`, and can optionally have a prompt.
+
+<amp-img alt="An example of an interactive slider: 'How much do you like this product?' with a percentage slider with a custom accent color" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/slider-raw.png" layout="intrinsic" width="400" height="450">
+
+[sourcecode:html]
+<amp-story-interactive-slider
+    style="--interactive-accent-color: #651ffe"
+    prompt-text="How much do you like this product?"
+    align-self="center"
+    justify-self="center"
+    endpoint="https://backend.com/v1/interactives">
+</amp-story-interactive-slider>
+[/sourcecode]
+
 ### Store and display user selection
 
-All selectable interactive elements (`amp-story-interactive-binary-poll`, `amp-story-interactive-poll`, `amp-story-interactive-quiz`) show the percentage of users that selected each option. The backend specified with the `endpoint` attribute will store the aggregate data for the interaction following the API described below.
+All selectable interactive elements (`amp-story-interactive-binary-poll`, `amp-story-interactive-img-poll`, `amp-story-interactive-img-quiz`, `amp-story-interactive-poll`, `amp-story-interactive-quiz`) show the percentage of users that selected each option. The backend specified with the `endpoint` attribute will store the aggregate data for the interaction following the API described below.
 To fetch the data for an interactive element, the necessary fields are:
 
 -   <div id="interactiveId"></div> `interactiveId`: the `base64encode(CANONICAL_URL) + "+" + element.id`
@@ -171,11 +240,11 @@ Backends need to be specified on the necessary components (binary-poll, poll, qu
 
 The interactive experience elements from `amp-story-interactive` share an API language for customizing options.
 
-### id (required for binary-poll, poll, quiz)
+### id (required for binary-poll, img-poll, img-quiz, poll, quiz, slider)
 
 Element ID that identifies the interactive component in the story. Used to compose the [`interactiveId`](#interactiveId) sent to the backend. Should be unique for each component in the story.
 
-### endpoint (required for binary-poll, poll, quiz)
+### endpoint (required for binary-poll, img-poll, img-quiz, poll, quiz, slider)
 
 Complete URL of backend. Stores interactive element votes.
 
@@ -183,32 +252,44 @@ Complete URL of backend. Stores interactive element votes.
 
 Controls the color of the chips and text. Can be `light` (default), `dark`.
 
-### chip-style (optional for poll, quiz, results)
+### chip-style (optional for img-poll, img-quiz, poll, quiz, results, slider)
 
 Controls the style of the component. Can be `flat` (default), `shadow`, or `transparent`.
-Results and binary-poll elements don't support shadow.
+Results, binary-poll, sliders, img-poll, and img-quiz elements don't support shadow.
 
 ### prompt-text (optional)
 
 Adds a prompt to the top of the component. Use `prompt-text` to write the poll/quiz question, or as a prefix to the category in the `amp-story-interactive-result` element.
 
-### prompt-size (optional for binary-poll, poll, quiz)
+### prompt-size (optional for binary-poll, img-poll, img-quiz, poll, quiz, slider)
 
 Controls the `font-size` of prompt text. Can be `small`, `medium` (default), `large`. Large prompts will hold up to 3 lines of text, other sizes will hold up to 4 lines of text.
 
 This attribute does not apply styling to `amp-story-interactive-result` category prefix text.
 
-### option-{1/2/3/4}-text (required)
+### option-{1/2/3/4}-text (required for binary-poll, poll, quiz, results)
 
-String that represents a numbered option. Binary polls require 2 options. Polls and quizzes may include between 2 and 4 options.
+String that represents a numbered option. Binary polls require 2 options. Polls and quizzes may include between 2 and 4 options. Sliders may include 1 option for an optional emoji.
 
 The `amp-story-interactive-result` element uses this string value as category description.
 
-### option-{1/2/3/4}-confetti (optional for binary-poll, poll, quiz)
+### option-{1/2/3/4}-image (required for img-poll, img-quiz, optional for results)
+
+Path to an image that represents a numbered option, for anywhere between 2 to 4 options.
+
+The `amp-story-interactive-result` element uses this path as a visual category description.
+
+Large, high quality images assets are unnecessary since they are displayed in small containers, so it's best to keep image assets small to enhance performance. A minimum of 170 x 170 pixels is recommended, and up to 250 x 250 pixels if the results component is being used.
+
+### option-{1/2/3/4}-image-alt (required for img-poll, img-quiz)
+
+Text description of the image for the corresponding option used for accessibility.
+
+### option-{1/2/3/4}-confetti (optional for binary-poll, img-poll, img-quiz, poll, quiz)
 
 Emoji that bursts in an explosion animation when selecting an options. On quizzes, only the correct option should have a confetti.
 
-### option-{1/2/3/4}-results-category (optional for poll, required for results)
+### option-{1/2/3/4}-results-category (optional for img-poll and poll, required for results)
 
 The name of the category on the `amp-story-interactive-results` element. Shows in large text after the `prompt-text` and before the category description. It displays category with the most options selected in polls from the entire story if `option-{1/2/3/4}-results-threshold` is not defined.
 
@@ -282,7 +363,7 @@ All `amp-story-interactive` elements use the [container](https://amp.dev/documen
 
 The default `font-size` is `3*var(--story-page-vmin)` so that elements take 75% of the width of portrait stories, independently of the screen size.
 
-The `amp-story-interactive-poll` and `amp-story-interactive-quiz` elements have a `min-width: 14em` and `max-width: 25em`. The `amp-story-interactive-binary-poll` and `amp-story-interactive-results` have a `min-width: 14em` and `max-width: 18em`.
+The `amp-story-interactive-poll` and `amp-story-interactive-quiz` elements have a `min-width: 14em` and `max-width: 25em`. The `amp-story-interactive-binary-poll`, `amp-story-interactive-img-poll`, `amp-story-interactive-img-quiz`, and `amp-story-interactive-results` elements have a `min-width: 14em` and `max-width: 18em`.
 
 #### Sizing within amp-story-grid-layer[aspect-ratio]
 

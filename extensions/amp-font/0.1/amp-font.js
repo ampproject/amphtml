@@ -33,9 +33,12 @@
  * the amp-font element's layout type is nodisplay.
  */
 
-import {FontLoader} from './fontloader';
-import {Services} from '#service';
 import {isFiniteNumber} from '#core/types';
+
+import {Services} from '#service';
+
+import {FontLoader} from './fontloader';
+
 import {user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-font';

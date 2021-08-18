@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {deserializeMessage, isAmpMessage} from '#core/3p-frame-messaging';
 import {AmpEvents} from '#core/constants/amp-events';
 
 import {install as installCustomElements} from '#polyfills/custom-elements';
@@ -32,7 +33,6 @@ import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
 import {FormEvents} from '../extensions/amp-form/0.1/form-events';
-import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
 import {parseIfNeeded} from '../src/iframe-helper';
 import {dev} from '../src/log';
 
@@ -96,7 +96,7 @@ export function createFixtureIframe(
     if (!html) {
       throw new Error('Cannot find fixture: ' + fixture);
     }
-    html = maybeSwitchToCompiledJs(html);
+    html = maybeSwitchToMinifiedJs(html);
     window.ENABLE_LOG = true;
     // This global function will be called by the iframe immediately when it
     // starts loading. This appears to be the only way to get the correct
@@ -625,14 +625,13 @@ function onInsert(win) {
 }
 
 /**
- * Takes a HTML document that is pointing to unminified JS and HTML
- * binaries and massages the URLs to pointed to compiled binaries
- * instead.
+ * Takes a HTML document that is pointing to unminified JS and HTML binaries and
+ * massages the URLs to pointed to minified binaries instead.
  * @param {string} html
  * @return {string}
  */
-export function maybeSwitchToCompiledJs(html) {
-  if (window.ampTestRuntimeConfig.useCompiledJs) {
+export function maybeSwitchToMinifiedJs(html) {
+  if (window.ampTestRuntimeConfig.useMinifiedJs) {
     return (
       html
         // Main JS

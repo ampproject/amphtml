@@ -60,7 +60,7 @@ function getBaseUrl() {
 async function replace(filePath) {
   const data = await fs.readFile(filePath, 'utf8');
   const hostName = getBaseUrl();
-  const result = replaceUrlsAppUtil('compiled', data, hostName);
+  const result = replaceUrlsAppUtil('minified', data, hostName);
 
   await fs.writeFile(filePath, result, 'utf8');
 }

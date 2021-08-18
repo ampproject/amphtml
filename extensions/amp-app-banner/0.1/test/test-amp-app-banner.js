@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import {Services} from '#service';
+
 import {
   AbstractAppBanner,
   AmpAndroidAppBanner,
   AmpAppBanner,
   AmpIosAppBanner,
 } from '../amp-app-banner';
-import {Services} from '#service';
 
 describes.realWin(
   'amp-app-banner',

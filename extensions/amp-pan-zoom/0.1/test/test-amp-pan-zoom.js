@@ -15,11 +15,14 @@
  */
 
 import '../amp-pan-zoom';
-import {Services} from '#service';
-import {createPointerEvent} from '#testing/test-helper';
 import {htmlFor} from '#core/dom/static-template';
-import {listenOncePromise} from '../../../../src/event-helper';
 import {setStyles} from '#core/dom/style';
+
+import {Services} from '#service';
+
+import {createPointerEvent} from '#testing/test-helper';
+
+import {listenOncePromise} from '../../../../src/event-helper';
 
 describes.realWin(
   'amp-pan-zoom',

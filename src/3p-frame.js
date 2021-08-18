@@ -23,7 +23,6 @@ import {tryParseJson} from '#core/types/object/json';
 import {urls} from './config';
 import {getContextMetadata} from './iframe-attributes';
 import {dev, devAssert, user, userAssert} from './log';
-import {getMode} from './mode';
 import {assertHttpsUrl, parseUrlDeprecated} from './url';
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
@@ -203,13 +202,13 @@ export function addDataAndJsonAttributes_(element, attributes) {
  */
 export function getBootstrapUrl(type) {
   const extension = IS_ESM ? '.mjs' : '.js';
-  if (getMode().localDev || getMode().test) {
-    const filename = mode.isMinified()
-      ? `./vendor/${type}`
-      : `./vendor/${type}.max`;
-    return filename + extension;
+  if (mode.isProd()) {
+    return `${urls.thirdParty}/${mode.version()}/vendor/${type}${extension}`;
   }
-  return `${urls.thirdParty}/${mode.version()}/vendor/${type}${extension}`;
+  const filename = mode.isMinified()
+    ? `./vendor/${type}`
+    : `./vendor/${type}.max`;
+  return filename + extension;
 }
 
 /**
@@ -269,7 +268,7 @@ export function resetBootstrapBaseUrlForTesting(win) {
  */
 export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
   const srcFileBasename = opt_srcFileBasename || 'frame';
-  if (getMode().localDev || getMode().test) {
+  if (!mode.isProd()) {
     return getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename);
   }
   // Ensure same sub-domain is used despite potentially different file.

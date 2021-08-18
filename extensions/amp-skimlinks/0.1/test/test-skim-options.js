@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import helpersFactory from './helpers';
+
 import {WAYPOINT_BASE_URL} from '../constants';
 import {getAmpSkimlinksOptions} from '../skim-options';
-import helpersFactory from './helpers';
 
 describes.fakeWin(
   'Skim Options',

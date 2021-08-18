@@ -17,7 +17,7 @@
 import {BaseElement} from '../../../../src/base-element';
 import {LegacyAdIntersectionObserverHost} from '../legacy-ad-intersection-observer-host';
 import {createAmpElementForTesting} from '../../../../src/custom-element';
-import {deserializeMessage} from '../../../../src/3p-frame-messaging';
+import {deserializeMessage} from '#core/3p-frame-messaging';
 import {getIntersectionChangeEntry} from '../../../../src/utils/intersection-observer-3p-host';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 
