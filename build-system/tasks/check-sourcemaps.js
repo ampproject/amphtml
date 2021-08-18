@@ -134,8 +134,8 @@ function checkSourcemapMappings(sourcemapJson, map) {
         code: 'class AbortController {',
       }
     : {
-        file: 'node_modules/@babel/runtime/helpers/esm/classCallCheck.js',
-        code: 'function _classCallCheck(instance, Constructor) {',
+        file: 'node_modules/@babel/runtime/helpers/esm/createClass.js',
+        code: 'function _defineProperties(target, props) {',
       };
 
   // TODO(samouri): remove branching once we decide for or against closure
