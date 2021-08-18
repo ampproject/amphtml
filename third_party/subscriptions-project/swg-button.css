@@ -303,7 +303,7 @@
   border: 1px solid #dadce0;
 }
 
-.swg-button-v2-light:disabled {
+.swg-button-v2-light[disabled] {
   pointer-events: none;
   color: rgba(60, 64, 67, 0.38);
   border: 1px solid rgba(60, 64, 67, 0.12);
@@ -345,7 +345,7 @@
   background-color: #3c4043;
 }
 
-.swg-button-v2-dark:disabled {
+.swg-button-v2-dark[disabled] {
   color: rgba(255, 255, 255, 0.38);
   pointer-events: none;
 }
@@ -376,8 +376,8 @@
   background-image: url('https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg');
 }
 
-.swg-button-v2-light:disabled .swg-button-v2-icon-light {
-  background-image: url("https://fonts.gstatic.com/s/i/googlematerialicons/google/v20/gm_grey-24dp/2x/gm_google_gm_grey_24dp.png");
+.swg-button-v2-light[disabled] .swg-button-v2-icon-light {
+  background-image: url('https://fonts.gstatic.com/s/i/googlematerialicons/google/v20/gm_grey-24dp/2x/gm_google_gm_grey_24dp.png');
   opacity: 0.38;
 }
 
@@ -385,6 +385,6 @@
   background-image: url('https://fonts.gstatic.com/s/i/googlematerialicons/google/v13/white-24dp/2x/gm_google_white_24dp.png');
 }
 
-.swg-button-v2-dark:disabled .swg-button-v2-icon-dark {
-  background-image: url("https://fonts.gstatic.com/s/i/googlematerialicons/google/v20/gm_grey-24dp/2x/gm_google_gm_grey_24dp.png");
+.swg-button-v2-dark[disabled] .swg-button-v2-icon-dark {
+  background-image: url('https://fonts.gstatic.com/s/i/googlematerialicons/google/v20/gm_grey-24dp/2x/gm_google_gm_grey_24dp.png');
 }
