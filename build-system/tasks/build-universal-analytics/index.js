@@ -27,14 +27,17 @@ const aliasPatterns = [
   ['.+/linker-manager', `${injectedSrcDir}/linker-manager.js`],
 
   // #service(/index.js) is special in that we inject our own service getters.
-  // Anything else under `#service/` is handled by the companion alias below.
+  // Anything else under `#service/` is handled by a standard alias below.
   ['#service', `${injectedSrcDir}/service.js`],
 
   // Standard aliases:
-  ['#core(/.+)?', `${cwd}/src/core$1`],
-  ['#experiments(/.+)?', `${cwd}/src/experiments$1`],
-  ['#service(/.+)?', `${cwd}/src/service$1`],
-  ['#third_party(/.+)?', `${cwd}/third_party$1`],
+  ...Object.entries(require(`${cwd}/tsconfig.json`).compilerOptions.paths).map(
+    ([pattern, paths]) => [
+      pattern.replace(/\/\*$/, '(/.+)?'),
+      // Our aliases only define one path, using that ([0] index)
+      paths[0].replace(/^\.\//, `${cwd}/`).replace(/\/\*$/, '$1'),
+    ]
+  ),
 ];
 
 const alias = {
