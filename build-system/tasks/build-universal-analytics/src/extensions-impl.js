@@ -8,7 +8,7 @@ export default new (class {
   preloadExtension(name) {
     /* eslint-enable local/no-forbidden-terms */
     // We know for sure that we try to load `amp-crypto-polyfill`.
-    // In its place, we install it synchronously in the same bundle from amp.js
+    // In its place, we inject it in the bundle to install it synchronously
     if (name !== 'amp-crypto-polyfill') {
       throw new Error(name);
     }
