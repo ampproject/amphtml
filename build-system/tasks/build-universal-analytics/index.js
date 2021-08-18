@@ -2,7 +2,6 @@ const argv = require('minimist')(process.argv.slice(2));
 const esbuild = require('esbuild');
 const terser = require('terser');
 const {BUILD_CONSTANTS} = require('../../compile/build-constants');
-const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel');
 const {getStdout} = require('../../common/process');
 const {readFile, writeFile} = require('fs').promises;
 
@@ -79,10 +78,7 @@ function getBrotliSize(file) {
     define: Object.fromEntries(
       Object.entries(BUILD_CONSTANTS).map(([k, v]) => [k, v.toString()])
     ),
-    plugins: [
-      alias,
-      getEsbuildBabelPlugin('build-universal-analytics', /* cache */ false),
-    ],
+    plugins: [alias],
   });
   console.log('Unminified Size:\n', getBrotliSize(outfile));
   // Not a full-fledged minification config, but good enough to keep track of
