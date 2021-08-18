@@ -48,3 +48,9 @@ window.__AMP_WEAKREF_ID;
  * @type {!AmpConfigDef|undefined}
  */
 window.AMP_CONFIG;
+
+/**
+ * AMP Mode, used to force an override in tests.
+ * @type {{esm: boolean}}
+ */
+window.__AMP_MODE;

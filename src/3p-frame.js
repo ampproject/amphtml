@@ -201,7 +201,7 @@ export function addDataAndJsonAttributes_(element, attributes) {
  * @return {string}
  */
 export function getBootstrapUrl(type) {
-  const extension = IS_ESM ? '.mjs' : '.js';
+  const extension = mode.isEsm() ? '.mjs' : '.js';
   if (mode.isProd()) {
     return `${urls.thirdParty}/${mode.version()}/vendor/${type}${extension}`;
   }
