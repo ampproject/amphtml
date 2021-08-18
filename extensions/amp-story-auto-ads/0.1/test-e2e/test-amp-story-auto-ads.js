@@ -86,7 +86,7 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    // TODO(#35241): flaky test disabled in #.....
+    // TODO(#35241): flaky test disabled in #35732
     it.skip('should render correctly', async () => {
       await clickThroughPages(controller, /* numPages */ 7);
       const activePage = await controller.findElement('[active]');
