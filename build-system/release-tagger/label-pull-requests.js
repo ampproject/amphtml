@@ -16,14 +16,9 @@
 
 /**
  * @fileoverview
- * Label pull request functions for the release tagger.
- * Parameters
- * 1. head tag (amp version)
- * 2. base tag (amp version)
- * 3. channel (beta|lts|stable)
+ * Manage labels on pull requests for the release tagger.
  */
 
-const argv = require('minimist')(process.argv.slice(2));
 const {
   getLabel,
   getPullRequestsBetweenCommits,
@@ -44,7 +39,7 @@ const labelConfig = {
  * @param {string} channel (beta|stable|lts)
  * @return {Promise<Object>}
  */
-async function main(head, base, channel) {
+async function updateLabelsOnPullRequests(head, base, channel) {
   const [label, headRelease, baseRelease] = await Promise.all([
     await getLabel(labelConfig[channel]),
     await getRelease(head),
@@ -57,5 +52,4 @@ async function main(head, base, channel) {
   return await labelPullRequests(prs, label['node_id']);
 }
 
-main(argv.head, argv.base, argv.label);
-module.exports = {main};
+module.exports = {updateLabelsOnPullRequests};

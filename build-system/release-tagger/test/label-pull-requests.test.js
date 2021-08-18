@@ -16,7 +16,7 @@
 
 const nock = require('nock');
 const test = require('ava');
-const {main: labelPullRequests} = require('../label-pull-requests');
+const {updateLabelsOnPullRequests} = require('../label-pull-requests');
 
 test.before(() => nock.disableNetConnect());
 test.after(() => {
@@ -136,7 +136,7 @@ test('label', async (t) => {
     )
     .reply(200, {data: {}});
 
-  await labelPullRequests('2107280123000', '2107210123000', 'stable');
+  await updateLabelsOnPullRequests('2107280123000', '2107210123000', 'stable');
   t.true(rest.isDone());
   t.true(graphql.isDone());
 });
