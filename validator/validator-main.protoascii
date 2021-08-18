@@ -1413,6 +1413,11 @@ tags: {
     implicit: true
   }
   attrs: {
+    name: "show-tooltip"
+    value: "auto"
+    value: "true"
+  }
+  attrs: {
     name: "tabindex"
     implicit: true
   }
@@ -1427,13 +1432,9 @@ tags: {
     value_casei: "text/html"
     value_casei: "application/rss+xml"
   }
-  attrs: {
-    name: "show-tooltip"
-    value: "auto"
-    value: "true"
-  }
   attr_lists: "click-attributions"
   attr_lists: "name-attr"
+  attr_lists: "private-click-measurement-attributes"
   # <amp-bind>
   attrs: { name: "[href]" }
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links"
@@ -1490,6 +1491,20 @@ tags: {
     name: "type"
     value_casei: "text/html"
   }
+}
+# Private Click Measurement attributes for anchor tags.
+# See https://github.com/ampproject/amphtml/issues/35067
+attr_lists {
+  name: "private-click-measurement-attributes"
+  attrs: { name: "attributiondestination" }
+  attrs: { name: "attributionexpiry" }
+  attrs: { name: "attributionreportto" }
+  attrs: { name: "attributionsourceeventid" }
+  attrs: { name: "attributionsourceid" }
+  attrs: { name: "conversiondestination" }
+  attrs: { name: "impressiondata" }
+  attrs: { name: "impressionexpiry" }
+  attrs: { name: "reportingorigin" }
 }
 
 # 4.5.2 The em element
