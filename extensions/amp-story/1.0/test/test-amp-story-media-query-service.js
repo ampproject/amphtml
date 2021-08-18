@@ -16,6 +16,7 @@
 
 import {AmpStoryMediaQueryService} from '../amp-story-media-query-service';
 import {poll} from '#testing/iframe';
+import {afterRenderPromise} from '#testing/helpers';
 
 describes.realWin('amp-story-media-query-service', {amp: true}, (env) => {
   let mediaQueryService;
@@ -44,7 +45,7 @@ describes.realWin('amp-story-media-query-service', {amp: true}, (env) => {
     );
   }
 
-  beforeEach(() => {
+  beforeEach(async () => {
     win = env.win;
 
     storyEl = win.document.createElement('amp-story');
@@ -55,12 +56,8 @@ describes.realWin('amp-story-media-query-service', {amp: true}, (env) => {
     setMatcherSize(200, 100);
     storyEl.appendChild(styleEl);
 
-    return new Promise((resolve) => {
-      requestAnimationFrame(() => {
-        mediaQueryService = new AmpStoryMediaQueryService(win);
-        resolve();
-      });
-    });
+    await afterRenderPromise();
+    mediaQueryService = new AmpStoryMediaQueryService(win);
   });
 
   afterEach(() => {
