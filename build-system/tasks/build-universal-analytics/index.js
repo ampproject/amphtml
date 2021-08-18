@@ -1,6 +1,10 @@
+const argv = require('minimist')(process.argv.slice(2));
 const esbuild = require('esbuild');
+const terser = require('terser');
 const {BUILD_CONSTANTS} = require('../../compile/build-constants');
 const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel');
+const {getStdout} = require('../../common/process');
+const {readFile, writeFile} = require('fs').promises;
 
 const cwd = process.cwd();
 const injectedSrcDir = `${__dirname}/src/`;
@@ -58,11 +62,18 @@ const alias = {
   },
 };
 
+/**
+ * @param {string} file
+ * @return {string}
+ */
+function getBrotliSize(file) {
+  return getStdout(`cat ${file} | brotli -c | wc -c`).trim();
+}
+
 (async () => {
   await esbuild.build({
     entryPoints,
     bundle: true,
-    minifySyntax: true,
     inject,
     outfile,
     define: Object.fromEntries(
@@ -73,5 +84,15 @@ const alias = {
       getEsbuildBabelPlugin('build-universal-analytics', /* cache */ false),
     ],
   });
+  console.log('Unminified Size:\n', getBrotliSize(outfile));
+  // Not a full-fledged minification config, but good enough to keep track of
+  // how the bundle grows.
+  if (argv.minified) {
+    const result = await terser.minify(await readFile(outfile, 'utf8'), {
+      mangle: {properties: {regex: /_$/}},
+    });
+    await writeFile(outfile, result.code);
+    console.log('Minified Size:\n', getBrotliSize(outfile));
+  }
   console.log('==========\n' + new Date().toLocaleTimeString());
 })();
