@@ -1,5 +1,3 @@
-
-
 import {user} from '../../../src/log';
 
 /**

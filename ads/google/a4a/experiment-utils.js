@@ -1,5 +1,3 @@
-
-
 import {addExperimentIdToElement} from './traffic-experiments';
 import {
   forceExperimentBranch,

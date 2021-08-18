@@ -1,5 +1,3 @@
-
-
 import {install, installForChildWin} from '#polyfills/intersection-observer';
 import {
   IntersectionObserverStub,

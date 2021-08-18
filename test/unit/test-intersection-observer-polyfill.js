@@ -1,5 +1,3 @@
-
-
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 import {AmpDocService} from '#service/ampdoc-impl';

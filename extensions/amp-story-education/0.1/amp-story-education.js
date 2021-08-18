@@ -1,5 +1,3 @@
-
-
 import {removeChildren} from '#core/dom';
 import {Layout} from '#core/dom/layout';
 import {setModalAsClosed, setModalAsOpen} from '#core/dom/modal';

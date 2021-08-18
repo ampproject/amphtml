@@ -1,5 +1,3 @@
-
-
 import '../amp-nested-menu';
 import * as fakeTimers from '@sinonjs/fake-timers';
 

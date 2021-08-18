@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview This file implements the `amp prettify` task, which uses
  * prettier to check (and optionally fix) the formatting in a variety of

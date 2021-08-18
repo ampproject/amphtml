@@ -1,4 +1,3 @@
-
 import {AccessSource} from '../../../amp-access/0.1/amp-access-source';
 import {ReadDepthTracker} from '../read-depth-tracker';
 

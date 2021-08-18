@@ -1,5 +1,3 @@
-
-
 import * as IniLoad from '../../../../src/ini-load';
 import {AmpDocShadow} from '#service/ampdoc-impl';
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from '../analytics-root';

@@ -1,5 +1,3 @@
-
-
 import {Services} from '#service';
 
 import {FakeMutationObserver} from '#testing/fake-dom';

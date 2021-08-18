@@ -1,4 +1,3 @@
-
 import {buildDom as ampLayoutClassic} from '#builtins/amp-layout/amp-layout';
 
 import {buildDom as ampFitTextClassic} from '../../extensions/amp-fit-text/0.1/amp-fit-text';

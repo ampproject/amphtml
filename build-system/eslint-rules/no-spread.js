@@ -1,4 +1,3 @@
-
 'use strict';
 
 // Forbids use of Spread elements when they require an iterator polyfill

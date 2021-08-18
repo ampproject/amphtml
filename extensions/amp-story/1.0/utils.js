@@ -1,5 +1,3 @@
-
-
 import {Services} from '#service';
 import {StateProperty} from './amp-story-store-service';
 import {

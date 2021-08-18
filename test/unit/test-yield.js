@@ -1,4 +1,3 @@
-
 import * as fakeTimers from '@sinonjs/fake-timers';
 
 import {macroTask} from '#testing/yield';

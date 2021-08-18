@@ -1,4 +1,3 @@
-
 import {RE_ALPHA} from '../constants';
 
 const CHAR_Z_LOWER = 122;

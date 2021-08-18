@@ -1,5 +1,3 @@
-
-
 import {createCustomEvent} from '../../../src/event-helper';
 
 /** @const {!Object<string, string>} */

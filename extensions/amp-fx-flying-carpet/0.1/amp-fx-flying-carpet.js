@@ -1,5 +1,3 @@
-
-
 import {CommonSignals} from '#core/constants/common-signals';
 import {Layout} from '#core/dom/layout';
 import {realChildElements, realChildNodes} from '#core/dom/query';

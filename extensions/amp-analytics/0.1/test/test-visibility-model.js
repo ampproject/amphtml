@@ -1,5 +1,3 @@
-
-
 import {VisibilityModel} from '../visibility-model';
 
 const NO_SPEC = {};

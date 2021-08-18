@@ -1,5 +1,3 @@
-
-
 import {ActionTrust} from '#core/constants/action-constants';
 import {bezierCurve} from '#core/data-structures/curve';
 import {dispatchCustomEvent} from '#core/dom';

@@ -1,5 +1,3 @@
-
-
 import {getNextArrow, getPrevArrow, getSlide} from './helpers';
 
 const pageWidth = 800;

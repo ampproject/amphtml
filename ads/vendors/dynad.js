@@ -1,5 +1,3 @@
-
-
 import {
   validateData,
   validateSrcContains,

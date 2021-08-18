@@ -1,5 +1,3 @@
-
-
 import * as fakeTimers from '@sinonjs/fake-timers';
 import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';

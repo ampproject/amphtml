@@ -1,5 +1,3 @@
-
-
 describes.endtoend(
   'amp-analytics iframe transport',
   {

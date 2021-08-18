@@ -1,5 +1,3 @@
-
-
 import {Entitlement, GrantReason} from '../entitlement';
 
 describes.realWin('EntitlementClass', {}, () => {

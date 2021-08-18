@@ -1,5 +1,3 @@
-
-
 /** @externs */
 
 // HACK. Define application types used in default AMP externs

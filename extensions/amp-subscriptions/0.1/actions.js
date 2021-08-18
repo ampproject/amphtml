@@ -1,5 +1,3 @@
-
-
 import {ActionStatus} from './analytics';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';

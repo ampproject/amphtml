@@ -1,5 +1,3 @@
-
-
 import * as Preact from '#preact';
 import {StreamGallery} from '../component';
 import {mount} from 'enzyme';

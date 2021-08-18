@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview This file is executed via Puppeteer's page.evaluate on a
  * document to remove all <script> tags that import AMP pages. This makes for

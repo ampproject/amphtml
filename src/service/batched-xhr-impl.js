@@ -1,5 +1,3 @@
-
-
 import {map} from '#core/types/object';
 
 import {Xhr} from './xhr-impl';

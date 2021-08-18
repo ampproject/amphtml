@@ -1,5 +1,3 @@
-
-
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,

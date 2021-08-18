@@ -1,4 +1,3 @@
-
 import {Deferred} from '#core/data-structures/promise';
 import {createViewportObserver} from '#core/dom/layout/viewport-observer';
 import {toWin} from '#core/window';

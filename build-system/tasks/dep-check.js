@@ -1,4 +1,3 @@
-
 'use strict';
 
 const depCheckConfig = require('../test-configs/dep-check-config');

@@ -1,5 +1,3 @@
-
-
 import '../amp-carousel';
 import {ActionService} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';

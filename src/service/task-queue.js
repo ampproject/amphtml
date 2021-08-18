@@ -1,5 +1,3 @@
-
-
 import {devAssert} from '../log';
 
 /**

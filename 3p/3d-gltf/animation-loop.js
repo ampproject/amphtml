@@ -1,5 +1,3 @@
-
-
 export default class AnimationLoop {
   /**
    * Creates an instance of AnimationLoop.

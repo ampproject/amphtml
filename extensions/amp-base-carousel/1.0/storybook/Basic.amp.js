@@ -1,5 +1,3 @@
-
-
 import * as Preact from '#preact';
 import {boolean, number, select, text, withKnobs} from '@storybook/addon-knobs';
 import {withAmp} from '@ampproject/storybook-addon';

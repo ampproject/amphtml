@@ -1,5 +1,3 @@
-
-
 const FINAL_URL_RE = /^(data|https)\:/i;
 const DEG_TO_RAD = (2 * Math.PI) / 360;
 const GRAD_TO_RAD = Math.PI / 200;

@@ -1,5 +1,3 @@
-
-
 import {VisibilityState} from './constants/visibility-state';
 import {getVendorJsPropertyName} from './dom/style';
 

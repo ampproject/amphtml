@@ -1,5 +1,3 @@
-
-
 import {toggleExperiment} from '#experiments';
 
 import {installPlatformService} from '#service/platform-impl';

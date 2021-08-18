@@ -1,5 +1,3 @@
-
-
 import {adConfig} from '#ads/_config';
 
 import {Services} from '#service';

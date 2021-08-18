@@ -1,4 +1,3 @@
-
 'use strict';
 
 const INVALID_PROPS = [

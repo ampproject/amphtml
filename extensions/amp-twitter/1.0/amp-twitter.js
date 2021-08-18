@@ -1,5 +1,3 @@
-
-
 import {BaseElement} from './base-element';
 import {dict} from '#core/types/object';
 import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';

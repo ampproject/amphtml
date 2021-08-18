@@ -1,5 +1,3 @@
-
-
 import {poll} from '#testing/iframe';
 
 //TODO(aghassemi,#10878): Run in all platforms.

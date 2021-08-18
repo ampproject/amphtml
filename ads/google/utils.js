@@ -1,5 +1,3 @@
-
-
 import {
   ExternalCorePubVars,
   MIN_PUB_CONTROL_WIDTH_OF_DESKTOP,

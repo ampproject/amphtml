@@ -1,5 +1,3 @@
-
-
 import {Entitlement, GrantReason} from '../entitlement';
 
 import {PlatformStore} from '../platform-store';

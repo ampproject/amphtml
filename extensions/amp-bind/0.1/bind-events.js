@@ -1,5 +1,3 @@
-
-
 /**
  * TODO(choumx, #19657): Remove/replace with DOM polling in integration tests.
  * @enum {string}

@@ -1,5 +1,3 @@
-
-
 import * as Preact from '#preact';
 import {MessageType, ProxyIframeEmbed} from '#preact/component/3p-frame';
 import {dashToUnderline} from '#core/types/string';

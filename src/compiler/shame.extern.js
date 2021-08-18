@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview The junk-drawer of externs that haven't yet been sorted well.
  * Shame! Shame! Shame! Avoid adding to this.

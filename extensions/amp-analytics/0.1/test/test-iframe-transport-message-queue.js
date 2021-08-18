@@ -1,5 +1,3 @@
-
-
 import {IframeTransportMessageQueue} from '../iframe-transport-message-queue';
 import {createElementWithAttributes} from '#core/dom';
 

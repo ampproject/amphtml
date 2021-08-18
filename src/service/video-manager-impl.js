@@ -1,5 +1,3 @@
-
-
 import {ActionTrust} from '#core/constants/action-constants';
 import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {measureIntersection} from '#core/dom/layout/intersection';

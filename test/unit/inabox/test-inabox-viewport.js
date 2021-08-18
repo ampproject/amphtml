@@ -1,5 +1,3 @@
-
-
 import {FrameOverlayManager} from '#ads/inabox/frame-overlay-manager';
 import {PositionObserver} from '#ads/inabox/position-observer';
 

@@ -1,5 +1,3 @@
-
-
 import {getWinOrigin, serializeQueryString} from '../../../../../src/url';
 import {Messaging} from '../../messaging/messaging';
 

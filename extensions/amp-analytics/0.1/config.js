@@ -1,5 +1,3 @@
-
-
 import {DEFAULT_CONFIG} from './default-config';
 import {Services} from '#service';
 import {assertHttpsUrl} from '../../../src/url';

@@ -1,5 +1,3 @@
-
-
 import '../amp-connatix-player';
 
 describes.realWin(

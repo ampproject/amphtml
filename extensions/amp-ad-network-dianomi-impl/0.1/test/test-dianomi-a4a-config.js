@@ -1,5 +1,3 @@
-
-
 // These two are required for reasons internal to AMP
 import '../../../amp-ad/0.1/amp-ad-ui';
 import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';

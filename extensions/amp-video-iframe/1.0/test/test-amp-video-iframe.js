@@ -1,5 +1,3 @@
-
-
 import '../amp-video-iframe';
 import {dispatchCustomEvent} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';

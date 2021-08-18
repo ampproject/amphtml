@@ -1,5 +1,3 @@
-
-
 import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {realChildNodes} from '#core/dom/query';
 

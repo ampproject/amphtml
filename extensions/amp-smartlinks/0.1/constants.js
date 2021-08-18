@@ -1,5 +1,3 @@
-
-
 const BASE_API_URL = 'https://api.narrativ.com/api';
 /** @const @enum {string} */
 export const ENDPOINTS = {

@@ -1,5 +1,3 @@
-
-
 /**
  * Parses the number x and returns its sign. For positive x returns 1, for
  * negative, -1. For 0 and -0, returns 0 and -0 respectively. For any number

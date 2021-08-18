@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview This file is executed via Puppeteer's page.evaluate on a
  * document to wrap it with an <iframe>, so that we can perform

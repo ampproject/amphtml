@@ -1,5 +1,3 @@
-
-
 import {getScrollingElement, getSlide, waitForCarouselImg} from './helpers';
 
 const pageWidth = 800;

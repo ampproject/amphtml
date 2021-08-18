@@ -1,5 +1,3 @@
-
-
 import '../amp-google-document-embed';
 
 describes.realWin(

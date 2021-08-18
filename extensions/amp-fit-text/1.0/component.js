@@ -1,5 +1,3 @@
-
-
 import * as Preact from '#preact';
 import {ContainWrapper} from '#preact/component';
 import {LINE_HEIGHT_EM_, useStyles} from './component.jss';

@@ -1,5 +1,3 @@
-
-
 import {BrowserController} from '#testing/test-helper';
 
 const TIMEOUT = 15000;

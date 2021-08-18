@@ -1,5 +1,3 @@
-
-
 import {applyBreakpointClassname} from '../breakpoints';
 
 describes.realWin('Synthetic Breakpoints', {amp: false}, (env) => {

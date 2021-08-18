@@ -1,5 +1,3 @@
-
-
 import {rot13Array} from '../../addthis-utils/rot13';
 
 describes.sandboxed('rot13', {}, () => {

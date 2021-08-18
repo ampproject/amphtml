@@ -1,5 +1,3 @@
-
-
 import * as Preact from '#preact';
 import {VideoWrapper} from '../component';
 import {WithAmpContext} from '#preact/context';

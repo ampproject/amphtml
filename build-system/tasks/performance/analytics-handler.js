@@ -1,5 +1,3 @@
-
-
 const puppeteer = require('puppeteer'); // eslint-disable-line no-unused-vars
 
 /**

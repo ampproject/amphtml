@@ -1,5 +1,3 @@
-
-
 /**
  * Stores a list of anchors and their associated replacement URL.
  * This class could easily be replaced by a Map but Map is not allowed

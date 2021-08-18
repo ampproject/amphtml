@@ -1,5 +1,3 @@
-
-
 const READY_MESSAGE = 'e2e repl ready';
 const CONTINUE_MESSAGE = 'cleaning up repl';
 

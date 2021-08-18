@@ -1,5 +1,3 @@
-
-
 /**
  * Get locale strings or undefined.
  * @param {string} locale

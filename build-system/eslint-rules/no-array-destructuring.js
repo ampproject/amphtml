@@ -1,4 +1,3 @@
-
 'use strict';
 
 // Only allow array destructuring on preact functions that are known to return

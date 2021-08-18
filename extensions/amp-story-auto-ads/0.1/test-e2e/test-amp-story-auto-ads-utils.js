@@ -1,5 +1,3 @@
-
-
 export async function clickThroughPages(controller, numPages) {
   for (let i = 0; i < numPages; i++) {
     const page = await controller.findElement('[active]');

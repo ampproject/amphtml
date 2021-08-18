@@ -1,5 +1,3 @@
-
-
 import {removeItem} from '#core/types/array';
 
 import {installAmpdocServicesForInabox} from '#inabox/inabox-services';

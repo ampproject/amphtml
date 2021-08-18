@@ -1,5 +1,3 @@
-
-
 import {installActionServiceForDoc} from '#service/action-impl';
 import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
 import {installHiddenObserverForDoc} from '#service/hidden-observer-impl';

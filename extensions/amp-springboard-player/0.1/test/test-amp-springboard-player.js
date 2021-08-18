@@ -1,5 +1,3 @@
-
-
 import '../amp-springboard-player';
 
 describes.realWin(

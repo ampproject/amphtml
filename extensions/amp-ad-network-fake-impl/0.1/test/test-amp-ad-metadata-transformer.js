@@ -1,5 +1,3 @@
-
-
 import {AmpAdMetadataTransformer} from '../amp-ad-metadata-transformer';
 
 const ampRuntimeScript = `<script async src=https://cdn.ampproject.org/amp4ads-v0.js></script>`;

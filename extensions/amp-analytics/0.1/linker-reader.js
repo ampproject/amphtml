@@ -1,5 +1,3 @@
-
-
 import {getService, registerServiceBuilder} from '../../../src/service-helpers';
 import {hasOwn} from '#core/types/object';
 import {parseLinker} from './linker';

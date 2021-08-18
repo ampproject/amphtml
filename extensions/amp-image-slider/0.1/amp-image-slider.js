@@ -1,5 +1,3 @@
-
-
 import {ActionTrust} from '#core/constants/action-constants';
 import {CommonSignals} from '#core/constants/common-signals';
 import {isLayoutSizeDefined} from '#core/dom/layout';

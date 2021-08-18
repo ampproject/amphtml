@@ -1,5 +1,3 @@
-
-
 import '../amp-stream-gallery';
 import {CarouselEvents} from '../../../amp-base-carousel/0.1/carousel-events';
 import {getDetail, listenOncePromise} from '../../../../src/event-helper';

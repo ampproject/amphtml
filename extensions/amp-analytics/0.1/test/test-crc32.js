@@ -1,5 +1,3 @@
-
-
 import {crc32} from '../crc32';
 
 const testVectors = [

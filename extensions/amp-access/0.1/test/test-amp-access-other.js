@@ -1,5 +1,3 @@
-
-
 import {AccessOtherAdapter} from '../amp-access-other';
 
 describes.realWin('AccessOtherAdapter', {amp: true}, (env) => {

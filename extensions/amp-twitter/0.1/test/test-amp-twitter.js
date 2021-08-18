@@ -1,5 +1,3 @@
-
-
 import '../amp-twitter';
 import {cleanupTweetId_, twitter} from '#3p/twitter';
 

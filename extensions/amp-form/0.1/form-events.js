@@ -1,5 +1,3 @@
-
-
 /** @enum {string} */
 export const FormEvents = {
   INVALID: 'invalid',

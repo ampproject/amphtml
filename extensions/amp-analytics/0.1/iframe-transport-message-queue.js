@@ -1,5 +1,3 @@
-
-
 import {IframeTransportEventDef, MessageType} from '#core/3p-frame-messaging';
 import {SubscriptionApi} from '../../../src/iframe-helper';
 import {dev, devAssert} from '../../../src/log';

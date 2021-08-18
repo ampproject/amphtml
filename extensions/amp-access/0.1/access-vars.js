@@ -1,5 +1,3 @@
-
-
 /**
  * Exports the substitution variables for access services.
  *

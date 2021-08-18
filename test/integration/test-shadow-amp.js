@@ -1,4 +1,3 @@
-
 import {BrowserController} from '#testing/test-helper';
 
 describes.integration(

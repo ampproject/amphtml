@@ -1,5 +1,3 @@
-
-
 import {AmpEvents} from '#core/constants/amp-events';
 import {computedStyle} from '#core/dom/style';
 

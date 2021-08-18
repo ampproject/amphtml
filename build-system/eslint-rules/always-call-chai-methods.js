@@ -1,4 +1,3 @@
-
 'use strict';
 
 // We need a full database of possible Chai assertions to figure out what to

@@ -1,5 +1,3 @@
-
-
 import * as Listen from '../../../../src/event-helper';
 import {
   SESSION_MAX_AGE_MILLIS,

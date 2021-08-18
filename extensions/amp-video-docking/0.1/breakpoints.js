@@ -1,5 +1,3 @@
-
-
 /** @typedef {{className: string, minWidth: number}} */
 export let SyntheticBreakpointDef;
 

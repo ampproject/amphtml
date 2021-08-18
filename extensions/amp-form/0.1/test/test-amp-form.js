@@ -1,5 +1,3 @@
-
-
 import '../../../amp-mustache/0.1/amp-mustache';
 import {ActionTrust} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';

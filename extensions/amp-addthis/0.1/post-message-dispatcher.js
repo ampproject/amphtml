@@ -1,5 +1,3 @@
-
-
 import {CONFIGURATION_EVENT, ORIGIN, SHARE_EVENT} from './constants';
 import {getData} from '../../../src/event-helper';
 import {isObject} from '#core/types';

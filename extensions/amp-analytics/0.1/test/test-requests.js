@@ -1,5 +1,3 @@
-
-
 import * as ResourceTiming from '../resource-timing';
 import * as fakeTimers from '@sinonjs/fake-timers';
 import * as log from '../../../../src/log';

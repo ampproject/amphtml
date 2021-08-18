@@ -1,5 +1,3 @@
-
-
 import {iterateCursor, removeElement} from '#core/dom';
 
 import {Services} from '#service';

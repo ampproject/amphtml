@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview This file is executed via Puppeteer's page.evaluate on a
  * document to copy the current image data of the canvas to an attribute so that

@@ -1,5 +1,3 @@
-
-
 import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
 import '../amp-ad';
 import * as adCid from '../../../../src/ad-cid';

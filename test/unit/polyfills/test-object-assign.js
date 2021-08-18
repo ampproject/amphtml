@@ -1,5 +1,3 @@
-
-
 import {assign} from '#polyfills/object-assign';
 
 describes.sandboxed('Object.assign', {}, () => {

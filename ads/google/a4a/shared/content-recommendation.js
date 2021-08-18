@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview CoRe responsive functions that are shared with Google tag code.
  * This file must not depend on any AMP-specific libraries, e.g. log. If

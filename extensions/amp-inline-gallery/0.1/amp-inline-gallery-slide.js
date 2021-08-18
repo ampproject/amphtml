@@ -1,5 +1,3 @@
-
-
 import {Layout} from '#core/dom/layout';
 import {Services} from '#service';
 import {htmlFor} from '#core/dom/static-template';

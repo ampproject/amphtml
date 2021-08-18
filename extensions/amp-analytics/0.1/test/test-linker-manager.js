@@ -1,5 +1,3 @@
-
-
 import * as Cookies from '../../../../src/cookies';
 import {
   LinkerManager,

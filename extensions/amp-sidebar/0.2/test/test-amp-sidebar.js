@@ -1,5 +1,3 @@
-
-
 import '../amp-sidebar';
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {ActionTrust} from '#core/constants/action-constants';

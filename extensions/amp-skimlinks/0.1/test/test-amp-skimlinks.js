@@ -1,5 +1,3 @@
-
-
 import {Deferred} from '#core/data-structures/promise';
 import * as DocumentReady from '#core/document-ready';
 

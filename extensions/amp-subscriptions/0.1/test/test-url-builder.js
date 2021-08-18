@@ -1,5 +1,3 @@
-
-
 import {UrlBuilder} from '../url-builder';
 
 describes.fakeWin('UrlBuilder', {amp: true}, (env) => {

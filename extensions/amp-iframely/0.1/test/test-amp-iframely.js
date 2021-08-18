@@ -1,5 +1,3 @@
-
-
 import '../amp-iframely';
 
 describes.realWin(

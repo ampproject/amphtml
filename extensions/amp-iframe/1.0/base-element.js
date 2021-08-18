@@ -1,5 +1,3 @@
-
-
 import {Iframe} from './component';
 import {PreactBaseElement} from '#preact/base-element';
 

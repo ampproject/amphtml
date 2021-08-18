@@ -1,5 +1,3 @@
-
-
 import {Services} from '#service';
 import {installDocService} from '#service/ampdoc-impl';
 

@@ -1,5 +1,3 @@
-
-
 import {Facebook} from './component';
 import {PreactBaseElement} from '#preact/base-element';
 import {dashToUnderline} from '#core/types/string';

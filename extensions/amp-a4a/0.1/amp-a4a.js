@@ -1,5 +1,3 @@
-
-
 import {signingServerURLs} from '#ads/_a4a-config';
 
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';

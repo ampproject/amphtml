@@ -1,5 +1,3 @@
-
-
 const TAG_NAME = 'amp-carousel';
 const SCROLLABLE_SLIDE = 'amp-scrollable-carousel-slide';
 const NEXT_ARROW_SELECTOR = `.amp-carousel-button.amp-carousel-button-next`;

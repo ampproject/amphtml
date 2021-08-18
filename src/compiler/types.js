@@ -1,5 +1,3 @@
-
-
 /**
  * AMP Components must implement this "buildDom" function in order to be server-rendered.
  *

@@ -1,5 +1,3 @@
-
-
 /**
  * Whether the document is ready.
  * @param {!Document} doc

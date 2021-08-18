@@ -1,5 +1,3 @@
-
-
 import {toggleExperiment} from '#experiments';
 
 import {CharacterDataMutation} from '../mutation/character-data-mutation';

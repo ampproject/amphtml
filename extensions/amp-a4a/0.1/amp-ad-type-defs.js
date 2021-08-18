@@ -1,5 +1,3 @@
-
-
 /** @typedef {{
       width: string,
       height: string,

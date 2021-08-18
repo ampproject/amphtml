@@ -1,5 +1,3 @@
-
-
 import {Action} from '../analytics';
 import {CSS} from '../../../../build/amp-subscriptions-0.1.css';
 import {Renderer} from '../renderer';

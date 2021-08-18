@@ -1,5 +1,3 @@
-
-
 import '../amp-vk';
 import {Layout} from '#core/dom/layout';
 

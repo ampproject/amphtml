@@ -1,5 +1,3 @@
-
-
 import {computedStyle} from '#core/dom/style';
 
 import {createIframePromise} from '#testing/iframe';

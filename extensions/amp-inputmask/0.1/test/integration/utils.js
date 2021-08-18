@@ -1,5 +1,3 @@
-
-
 import {listenOncePromise} from '../../../../../src/event-helper';
 
 export function simulateKeyboardInteraction(win, input, key) {

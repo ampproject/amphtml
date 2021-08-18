@@ -1,5 +1,3 @@
-
-
 import {installWebAnimations} from 'web-animations-js/web-animations.install';
 
 import {Services} from '#service';

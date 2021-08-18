@@ -1,4 +1,3 @@
-
 import {PooolVendor} from '../poool-impl';
 
 describes.fakeWin(

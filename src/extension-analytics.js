@@ -1,5 +1,3 @@
-
-
 import {CommonSignals} from '#core/constants/common-signals';
 import {createElementWithAttributes, removeElement} from '#core/dom';
 import {isArray} from '#core/types';

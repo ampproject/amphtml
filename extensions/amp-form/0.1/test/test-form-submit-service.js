@@ -1,5 +1,3 @@
-
-
 import {FormSubmitService} from '../form-submit-service';
 
 describes.sandboxed('form-submit-service', {}, (env) => {

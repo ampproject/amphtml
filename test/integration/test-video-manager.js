@@ -1,5 +1,3 @@
-
-
 import {dispatchCustomEvent, waitForChildPromise} from '#core/dom';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {isAutoplaySupported, resetIsAutoplaySupported} from '#core/dom/video';

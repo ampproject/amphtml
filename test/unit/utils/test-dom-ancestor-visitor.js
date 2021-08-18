@@ -1,4 +1,3 @@
-
 import {DomAncestorVisitor} from '../../../src/utils/dom-ancestor-visitor';
 
 describes.realWin('#DomAncestorVisitor', {amp: true}, (env) => {

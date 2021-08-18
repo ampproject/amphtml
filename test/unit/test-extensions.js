@@ -1,5 +1,3 @@
-
-
 import {dispatchCustomEvent} from '#core/dom';
 
 import {Services} from '#service';

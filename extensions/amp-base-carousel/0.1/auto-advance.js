@@ -1,5 +1,3 @@
-
-
 import {ActionSource} from './action-source';
 import {CarouselEvents} from './carousel-events';
 import {debounce} from '#core/types/function';

@@ -1,4 +1,3 @@
-
 import '../amp-selector';
 import {ActionTrust} from '#core/constants/action-constants';
 import {htmlFor} from '#core/dom/static-template';

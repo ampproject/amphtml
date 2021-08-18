@@ -1,5 +1,3 @@
-
-
 import {
   PositionObserver,
   getPositionObserver,

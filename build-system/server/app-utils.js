@@ -1,5 +1,3 @@
-
-
 const minimist = require('minimist');
 const {cyan, green} = require('../common/colors');
 const {log} = require('../common/logging');

@@ -1,4 +1,3 @@
-
 import {LoadingSpinner} from '../loading-spinner';
 
 describes.realWin('loading-spinner', {}, (env) => {

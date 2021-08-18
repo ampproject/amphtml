@@ -1,4 +1,3 @@
-
 import {CSS} from './component.jss';
 import {CSS as CSS_AUTOPLAY} from './autoplay.jss';
 import {PreactBaseElement} from '#preact/base-element';

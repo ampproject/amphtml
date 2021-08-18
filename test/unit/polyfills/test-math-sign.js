@@ -1,5 +1,3 @@
-
-
 import {sign} from '#polyfills/math-sign';
 
 describes.sandboxed('Math.sign', {}, () => {

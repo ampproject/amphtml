@@ -1,5 +1,3 @@
-
-
 /** @enum {string} */
 export const CarouselEvents = {
   OFFSET_CHANGE: 'amp-carousel:offsetchange',

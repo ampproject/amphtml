@@ -1,5 +1,3 @@
-
-
 import '../amp-imgur';
 import {createElementWithAttributes, waitForChildPromise} from '#core/dom';
 

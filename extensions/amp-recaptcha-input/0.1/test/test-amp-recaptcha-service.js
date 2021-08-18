@@ -1,5 +1,3 @@
-
-
 import '../amp-recaptcha-input';
 import {AmpRecaptchaService} from '../amp-recaptcha-service';
 

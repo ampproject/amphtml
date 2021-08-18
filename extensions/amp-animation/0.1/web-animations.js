@@ -1,5 +1,3 @@
-
-
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {

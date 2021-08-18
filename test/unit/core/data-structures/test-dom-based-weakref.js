@@ -1,4 +1,3 @@
-
 import {DomBasedWeakRef} from '#core/data-structures/dom-based-weakref';
 
 describes.realWin('data structures - DOM-based weakref', {}, (env) => {

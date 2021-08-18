@@ -1,5 +1,3 @@
-
-
 import {toArray} from '#core/types/array';
 import {validateData, writeScript} from '#3p/3p';
 

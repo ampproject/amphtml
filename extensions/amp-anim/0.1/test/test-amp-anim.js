@@ -1,5 +1,3 @@
-
-
 import {AmpAnim, SRC_PLACEHOLDER} from '../amp-anim';
 
 const EXAMPLE_SRCSET = `https://media.giphy.com/media/yFQ0ywscgobJK/giphy.gif 1282w,

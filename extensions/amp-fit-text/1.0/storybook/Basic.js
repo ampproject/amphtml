@@ -1,5 +1,3 @@
-
-
 import * as Preact from '#preact';
 import {BentoFitText} from '../component';
 import {number, text, withKnobs} from '@storybook/addon-knobs';

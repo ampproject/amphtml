@@ -1,5 +1,3 @@
-
-
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {isArray} from '#core/types';
 import {dict} from '#core/types/object';

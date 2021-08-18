@@ -1,5 +1,3 @@
-
-
 const pathmodule = require('path');
 const {addNamed} = require('@babel/helper-module-imports');
 

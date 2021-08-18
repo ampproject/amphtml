@@ -1,5 +1,3 @@
-
-
 describes.endtoend(
   'amp-list "amp-script:" uri',
   {

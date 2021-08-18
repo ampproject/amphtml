@@ -1,5 +1,3 @@
-
-
 const {CONTROL, EXPERIMENT, downloadToDisk} = require('./helpers');
 const {startServer, stopServer} = require('../serve');
 const HOST = 'localhost';

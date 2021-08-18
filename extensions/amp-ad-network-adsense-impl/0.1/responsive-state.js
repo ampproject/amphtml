@@ -1,5 +1,3 @@
-
-
 import {addExperimentIdToElement} from '#ads/google/a4a/traffic-experiments';
 import {
   ADSENSE_MCRSPV_TAG,

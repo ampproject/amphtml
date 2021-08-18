@@ -1,5 +1,3 @@
-
-
 import {Services} from '#service';
 import {computedStyle} from '#core/dom/style';
 import {scopedQuerySelector} from '#core/dom/query';

@@ -1,5 +1,3 @@
-
-
 import {ImaPlayerData} from '#ads/google/ima/ima-player-data';
 
 import {Deferred} from '#core/data-structures/promise';

@@ -1,5 +1,3 @@
-
-
 import '../amp-byside-content';
 import {mockServiceForDoc} from '#testing/test-helper';
 

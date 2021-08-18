@@ -1,4 +1,3 @@
-
 import {resetStyles, setStyle, setStyles} from '#core/dom/style';
 import {dict} from '#core/types/object';
 

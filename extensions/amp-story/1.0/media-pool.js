@@ -1,5 +1,3 @@
-
-
 import {
   BlessTask,
   ELEMENT_BLESSED_PROPERTY_NAME,

@@ -1,5 +1,3 @@
-
-
 import {Attributes, getAttributesFromConfigObj} from '../attributes';
 
 describes.sandboxed('attributes', {}, () => {

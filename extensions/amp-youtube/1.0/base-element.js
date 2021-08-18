@@ -1,4 +1,3 @@
-
 import {Youtube} from './component';
 
 import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';

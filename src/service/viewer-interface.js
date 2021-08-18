@@ -1,5 +1,3 @@
-
-
 /**
  * @typedef {function(!JsonObject):(!Promise|undefined)}
  */

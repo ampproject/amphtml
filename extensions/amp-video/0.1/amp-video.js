@@ -1,5 +1,3 @@
-
-
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';

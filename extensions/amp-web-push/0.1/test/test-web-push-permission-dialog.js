@@ -1,5 +1,3 @@
-
-
 import {parseUrlDeprecated} from '../../../../src/url';
 import {WebPushConfigAttributes} from '../amp-web-push-config';
 import {AmpWebPushPermissionDialog} from '../amp-web-push-permission-dialog';

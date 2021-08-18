@@ -1,4 +1,3 @@
-
 // Fake mraid.js that lets us pretend to be in a mobile app environment.
 window.mraid = {};
 console.log('initiate marid object');

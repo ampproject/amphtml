@@ -1,5 +1,3 @@
-
-
 import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
 
 import {createIframePromise} from '#testing/iframe';

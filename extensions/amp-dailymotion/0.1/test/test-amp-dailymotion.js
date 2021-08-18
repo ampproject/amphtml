@@ -1,5 +1,3 @@
-
-
 import '../amp-dailymotion';
 
 describes.realWin(

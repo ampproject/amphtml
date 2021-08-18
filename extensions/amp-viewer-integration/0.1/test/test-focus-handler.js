@@ -1,5 +1,3 @@
-
-
 import {FocusHandler} from '../focus-handler';
 import {Messaging} from '../messaging/messaging';
 

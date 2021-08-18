@@ -1,5 +1,3 @@
-
-
 import {install} from '#polyfills/abort-controller';
 
 describes.realWin('AbortController', {}, (env) => {

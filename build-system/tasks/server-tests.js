@@ -1,5 +1,3 @@
-
-
 const assert = require('assert');
 const fs = require('fs');
 const globby = require('globby');

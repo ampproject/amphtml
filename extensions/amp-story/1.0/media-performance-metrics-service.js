@@ -1,5 +1,3 @@
-
-
 import {
   MEDIA_LOAD_FAILURE_SRC_PROPERTY,
   listen,

@@ -1,5 +1,3 @@
-
-
 const posthtml = require('posthtml');
 
 function getElementChildren(content) {

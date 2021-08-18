@@ -1,5 +1,3 @@
-
-
 import {WindowInterface} from '#core/window/interface';
 
 import {toggleExperiment} from '#experiments';

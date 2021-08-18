@@ -1,5 +1,3 @@
-
-
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {getStyle, setStyles} from '#core/dom/style';
 import {throttle} from '#core/types/function';

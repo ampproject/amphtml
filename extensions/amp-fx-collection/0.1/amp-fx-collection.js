@@ -1,5 +1,3 @@
-
-
 import {AmpEvents} from '#core/constants/amp-events';
 import {iterateCursor} from '#core/dom';
 import {tryCallback} from '#core/error';

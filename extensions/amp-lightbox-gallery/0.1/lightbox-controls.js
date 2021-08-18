@@ -1,5 +1,3 @@
-
-
 import {htmlFor} from '#core/dom/static-template';
 import {toArray} from '#core/types/array';
 import {dict} from '#core/types/object';

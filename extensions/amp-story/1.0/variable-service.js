@@ -1,4 +1,3 @@
-
 import {Services} from '#service';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {dict} from '#core/types/object';

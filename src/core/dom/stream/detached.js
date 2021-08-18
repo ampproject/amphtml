@@ -1,5 +1,3 @@
-
-
 import {devAssert} from '#core/assert';
 
 export class DetachedDomStream {

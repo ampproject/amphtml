@@ -1,5 +1,3 @@
-
-
 import * as preact from /*OK*/ 'preact';
 // The preactDOM name is explicit, so we can remap to react-dom.
 import * as preactDOM from /*OK*/ 'preact/dom';

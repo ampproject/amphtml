@@ -1,5 +1,3 @@
-
-
 import '../amp-fx-flying-carpet';
 import {Services} from '#service';
 import {Resource} from '#service/resource';

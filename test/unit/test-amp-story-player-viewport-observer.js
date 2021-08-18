@@ -1,5 +1,3 @@
-
-
 import {AmpStoryPlayerViewportObserver} from '../../src/amp-story-player/amp-story-player-viewport-observer';
 
 describes.realWin('AmpStoryPlayerViewportObserver', {amp: false}, (env) => {

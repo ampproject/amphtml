@@ -1,5 +1,3 @@
-
-
 const JsonReporter = require('./mocha-custom-json-reporter');
 const mocha = require('mocha');
 const MochaDotsReporter = require('./mocha-dots-reporter');

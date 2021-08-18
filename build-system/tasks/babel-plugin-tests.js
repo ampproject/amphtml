@@ -1,4 +1,3 @@
-
 'use strict';
 
 const jest = require('@jest/core');

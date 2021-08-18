@@ -1,5 +1,3 @@
-
-
 import {whenDocumentReady} from '#core/document-ready';
 import {moveLayoutRect} from '#core/dom/layout/rect';
 import {resetStyles, setInitialDisplay, setStyles} from '#core/dom/style';

@@ -1,5 +1,3 @@
-
-
 import {Action, getStoreService} from './amp-story-store-service';
 import {CommonSignals} from '#core/constants/common-signals';
 import {Services} from '#service';

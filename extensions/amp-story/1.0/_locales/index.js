@@ -1,5 +1,3 @@
-
-
 import LocalizedStringaf from './af.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringam from './am.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringar from './ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]

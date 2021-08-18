@@ -1,5 +1,3 @@
-
-
 import {StandaloneService} from '../amp-standalone';
 
 describes.sandboxed('amp-standalone', {}, (env) => {

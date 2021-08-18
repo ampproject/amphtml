@@ -1,5 +1,3 @@
-
-
 import {createIframeWithMessageStub, expectPostMessage} from '#testing/iframe';
 
 describes.sandboxed

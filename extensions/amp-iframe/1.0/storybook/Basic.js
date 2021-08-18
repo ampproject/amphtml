@@ -1,5 +1,3 @@
-
-
 import * as Preact from '#preact';
 import {Iframe} from '../component';
 import {withKnobs} from '@storybook/addon-knobs';

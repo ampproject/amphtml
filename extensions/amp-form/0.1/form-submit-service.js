@@ -1,5 +1,3 @@
-
-
 import {Observable} from '#core/data-structures/observable';
 
 /**

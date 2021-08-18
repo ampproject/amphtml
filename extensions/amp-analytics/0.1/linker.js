@@ -1,5 +1,3 @@
-
-
 import {WindowInterface} from '#core/window/interface';
 import {
   base64UrlDecodeFromString,

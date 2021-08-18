@@ -1,5 +1,3 @@
-
-
 /**
  * Expects an object with pubId, widgetId, & productCode keys with string values
  *

@@ -1,5 +1,3 @@
-
-
 import {CSS} from './component.jss';
 import {BentoFitText} from './component';
 import {PreactBaseElement} from '#preact/base-element';

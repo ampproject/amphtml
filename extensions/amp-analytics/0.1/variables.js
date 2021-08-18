@@ -1,5 +1,3 @@
-
-
 import {SESSION_VALUES, sessionServicePromiseForDoc} from './session-manager';
 import {Services} from '#service';
 import {TickLabel} from '#core/constants/enums';

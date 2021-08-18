@@ -1,5 +1,3 @@
-
-
 import {upgradePolyfill} from '#polyfills/stubs/resize-observer-stub';
 
 import {registerServiceBuilder} from '../../../src/service-helpers';

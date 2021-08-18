@@ -1,5 +1,3 @@
-
-
 import {CSS as inaboxCSS} from '../../build/amp-story-auto-ads-inabox-0.1.css';
 import {CSS as sharedCSS} from '../../build/amp-story-auto-ads-shared-0.1.css';
 import {ButtonTextFitter} from '../../extensions/amp-story-auto-ads/0.1/story-ad-button-text-fitter';

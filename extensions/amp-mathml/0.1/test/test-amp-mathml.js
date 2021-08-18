@@ -1,5 +1,3 @@
-
-
 import '../amp-mathml';
 
 describes.realWin(

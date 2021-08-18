@@ -1,5 +1,3 @@
-
-
 import {parseUrlDeprecated, resolveRelativeUrl} from '../src/url';
 
 /**

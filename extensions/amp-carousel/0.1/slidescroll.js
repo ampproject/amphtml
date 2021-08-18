@@ -1,5 +1,3 @@
-
-
 import {ActionTrust} from '#core/constants/action-constants';
 import {Animation} from '../../../src/animation';
 import {dev, user, userAssert} from '../../../src/log';

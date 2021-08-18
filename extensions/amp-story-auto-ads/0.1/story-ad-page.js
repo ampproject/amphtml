@@ -1,4 +1,3 @@
-
 import {
   A4AVarNames,
   START_CTA_ANIMATION_ATTR,

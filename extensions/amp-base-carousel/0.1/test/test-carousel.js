@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Some unit tests of the internal carousel implementation.
  */

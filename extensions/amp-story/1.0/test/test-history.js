@@ -1,5 +1,3 @@
-
-
 import {LOCAL_STORAGE_KEY, getHistoryState, setHistoryState} from '../history';
 import {loadPromise} from '../../../../src/event-helper';
 import {removeElement} from '#core/dom';

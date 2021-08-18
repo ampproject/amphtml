@@ -1,5 +1,3 @@
-
-
 import {BindExpression} from './bind-expression';
 
 /**

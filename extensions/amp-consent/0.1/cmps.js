@@ -1,5 +1,3 @@
-
-
 import {getMode} from '../../../src/mode';
 
 /**

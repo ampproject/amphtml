@@ -1,5 +1,3 @@
-
-
 import '../amp-iframe';
 import {htmlFor} from '#core/dom/static-template';
 import {toggleExperiment} from '#experiments';

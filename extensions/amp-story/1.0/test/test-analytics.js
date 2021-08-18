@@ -1,4 +1,3 @@
-
 import {Action, getStoreService} from '../amp-story-store-service';
 import {getAnalyticsService} from '../story-analytics';
 import {installDocService} from '#service/ampdoc-impl';

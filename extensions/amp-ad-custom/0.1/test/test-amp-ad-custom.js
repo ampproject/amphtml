@@ -1,5 +1,3 @@
-
-
 import '../../../amp-mustache/0.2/amp-mustache';
 import {tryParseJson} from '#core/types/object/json';
 import {utf8Encode} from '#core/types/string/bytes';

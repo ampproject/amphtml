@@ -1,5 +1,3 @@
-
-
 describes.endtoend(
   'amp-video with video analytics',
   {

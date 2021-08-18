@@ -1,5 +1,3 @@
-
-
 import '../amp-beopinion';
 import {beopinion} from '#3p/beopinion';
 

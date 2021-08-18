@@ -1,4 +1,3 @@
-
 import {LocalizedStringId} from '#service/localization/strings'; // eslint-disable-line no-unused-vars
 import {createElementWithAttributes} from '#core/dom';
 import {devAssert} from '../../../src/log';

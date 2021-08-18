@@ -1,5 +1,3 @@
-
-
 import {transparentPng} from '#core/dom/img';
 import {getLengthNumeral} from '#core/dom/layout';
 import {closestAncestorElementBySelector} from '#core/dom/query';

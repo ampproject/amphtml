@@ -1,5 +1,3 @@
-
-
 import '../amp-embedly-card';
 
 describes.realWin(

@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview Embeds a single page in a story
  *

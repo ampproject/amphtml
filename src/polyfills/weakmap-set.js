@@ -1,5 +1,3 @@
-
-
 /**
  * Forces the return value from WeakMap.prototype.set to always be the map
  * instance. IE11 returns undefined.

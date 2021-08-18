@@ -1,5 +1,3 @@
-
-
 describes.sandboxed.skip('alt nameframe', {}, function () {
   describes.sandboxed('alt nameframe', {}, () => {
     describes.realWin('nameframe', {allowExternalResources: true}, (env) => {

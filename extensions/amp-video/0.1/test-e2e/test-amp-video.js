@@ -1,5 +1,3 @@
-
-
 describes.endtoend(
   'amp-video autoplay with control',
   {

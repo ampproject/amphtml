@@ -1,5 +1,3 @@
-
-
 /**
  * Returns true if the element is in the array and false otherwise.
  *

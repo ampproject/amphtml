@@ -1,5 +1,3 @@
-
-
 /**
  * AutocompleteBindingDef is an interface that provides the specific
  * implementation of amp-autocomplete user input interaction behavior.

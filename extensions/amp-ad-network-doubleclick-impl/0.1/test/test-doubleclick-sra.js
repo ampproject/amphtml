@@ -1,4 +1,3 @@
-
 import '../../../amp-ad/0.1/amp-ad';
 import {MANUAL_EXPERIMENT_ID} from '#ads/google/a4a/traffic-experiments';
 import {EXPERIMENT_ATTRIBUTE} from '#ads/google/a4a/utils';

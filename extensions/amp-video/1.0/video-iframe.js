@@ -1,5 +1,3 @@
-
-
 import * as Preact from '#preact';
 import {Deferred} from '#core/data-structures/promise';
 import {VideoWrapper} from './component';

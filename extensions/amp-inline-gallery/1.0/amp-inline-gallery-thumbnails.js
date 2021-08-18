@@ -1,5 +1,3 @@
-
-
 import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/component.jss';
 import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
 import {PreactBaseElement} from '#preact/base-element';

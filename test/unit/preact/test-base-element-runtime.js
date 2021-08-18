@@ -1,5 +1,3 @@
-
-
 import {subscribe} from '#core/context';
 import {removeElement} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';

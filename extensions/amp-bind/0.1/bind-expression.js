@@ -1,5 +1,3 @@
-
-
 import {bindParser as parser} from '#build/parsers/bind-expr-impl';
 
 import {isArray, isObject} from '#core/types';

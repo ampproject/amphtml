@@ -1,4 +1,3 @@
-
 import {isArray, isObject} from '#core/types';
 import {tryParseJson} from '#core/types/object/json';
 

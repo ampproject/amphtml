@@ -1,5 +1,3 @@
-
-
 import {removeElement} from '#core/dom';
 import {Layout, applyFillContent} from '#core/dom/layout';
 import {isEnumValue} from '#core/types';

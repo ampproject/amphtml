@@ -1,4 +1,3 @@
-
 import {loadScript, validateData, validateSrcPrefix} from '#3p/3p';
 
 const jsnPrefix = 'https://rb.infox.sg/';

@@ -1,5 +1,3 @@
-
-
 import {ActionTrust} from '#core/constants/action-constants';
 import {getChildJsonConfig} from '#core/dom';
 import {setInitialDisplay, setStyles, toggle} from '#core/dom/style';

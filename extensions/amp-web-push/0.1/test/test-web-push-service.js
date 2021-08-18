@@ -1,5 +1,3 @@
-
-
 import * as mode from '../../../../src/mode';
 import {WebPushConfigAttributes} from '../amp-web-push-config';
 import {AmpWebPushHelperFrame} from '../amp-web-push-helper-frame';

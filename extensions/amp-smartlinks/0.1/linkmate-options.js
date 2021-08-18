@@ -1,5 +1,3 @@
-
-
 /**
  * Get the config values from the tag on the amp page
  * @param {!Element} element

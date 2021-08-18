@@ -1,4 +1,3 @@
-
 import {Services} from '#service';
 import {createElementWithAttributes, removeElement} from '#core/dom';
 import {toWin} from '#core/window';

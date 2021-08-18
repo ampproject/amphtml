@@ -1,5 +1,3 @@
-
-
 /**
  * This is a somewhat arbitrary time just intended to allow the browser to
  * render a new frame. A more robust approach would be to refactor the test

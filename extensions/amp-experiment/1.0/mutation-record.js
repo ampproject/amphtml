@@ -1,5 +1,3 @@
-
-
 import {isObject} from '#core/types';
 import {toArray} from '#core/types/array';
 

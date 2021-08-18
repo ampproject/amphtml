@@ -1,5 +1,3 @@
-
-
 import {handleClick, warmupDynamic, warmupStatic} from '#ads/alp/handler';
 
 import {parseUrlDeprecated} from '../../src/url';

@@ -1,5 +1,3 @@
-
-
 /** @fileoverview Shared constants. */
 
 /**

@@ -1,5 +1,3 @@
-
-
 describes.endtoend(
   'amp-script e2e',
   {

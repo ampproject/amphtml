@@ -1,5 +1,3 @@
-
-
 import {setStyle} from '#core/dom/style';
 import {validateData, writeScript} from '#3p/3p';
 /**

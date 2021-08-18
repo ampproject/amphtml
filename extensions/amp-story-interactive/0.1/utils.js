@@ -1,5 +1,3 @@
-
-
 import {htmlFor} from '#core/dom/static-template';
 import {map} from '#core/types/object';
 import {user} from '../../../src/log';

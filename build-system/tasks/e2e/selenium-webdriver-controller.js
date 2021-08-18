@@ -1,5 +1,3 @@
-
-
 const fs = require('fs');
 const selenium = require('selenium-webdriver');
 const {

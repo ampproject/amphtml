@@ -1,5 +1,3 @@
-
-
 describes.endtoend(
   'AMP carousel 0.1 buttons with hidden controls',
   {

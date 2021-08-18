@@ -1,5 +1,3 @@
-
-
 import {devAssertElement} from '#core/assert';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 

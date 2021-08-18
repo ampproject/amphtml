@@ -1,4 +1,3 @@
-
 import {Deferred} from '#core/data-structures/promise';
 import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';

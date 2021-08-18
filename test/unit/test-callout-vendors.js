@@ -1,5 +1,3 @@
-
-
 import {RTC_VENDORS} from '#service/real-time-config/callout-vendors';
 
 import {isSecureUrlDeprecated} from '../../src/url';

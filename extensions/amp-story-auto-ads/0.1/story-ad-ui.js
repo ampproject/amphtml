@@ -1,5 +1,3 @@
-
-
 import {assertHttpsUrl} from '../../../src/url';
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {createElementWithAttributes, iterateCursor} from '#core/dom';

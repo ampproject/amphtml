@@ -1,5 +1,3 @@
-
-
 import {shouldBlockOnConsentByMeta} from '../../src/consent';
 
 describes.fakeWin('consent', {amp: true}, (env) => {

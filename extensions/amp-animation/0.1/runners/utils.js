@@ -1,5 +1,3 @@
-
-
 import {userAssert} from '../../../../src/log';
 
 /**

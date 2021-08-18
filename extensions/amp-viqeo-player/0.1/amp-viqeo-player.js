@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars */
 
-
 import {Deferred} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';
 import {

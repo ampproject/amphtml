@@ -1,5 +1,3 @@
-
-
 import '../amp-story-360';
 import {createElementWithAttributes} from '#core/dom';
 

@@ -1,5 +1,3 @@
-
-
 import {validateData, writeScript} from '#3p/3p';
 
 const oblivkiFields = ['id'];

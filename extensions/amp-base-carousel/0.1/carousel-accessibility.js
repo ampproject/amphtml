@@ -1,5 +1,3 @@
-
-
 import {CarouselEvents} from './carousel-events';
 import {getDetail} from '../../../src/event-helper';
 

@@ -1,5 +1,3 @@
-
-
 /**
  * Get the average of an array
  *

@@ -1,5 +1,3 @@
-
-
 import {ExpansionOptions, variableServiceForDoc} from './variables';
 import {findIndex} from '#core/types/array';
 import {isObject} from '#core/types';

@@ -1,5 +1,3 @@
-
-
 const posthtml = require('posthtml');
 const test = require('ava');
 const {

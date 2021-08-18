@@ -1,5 +1,3 @@
-
-
 import '../../../amp-mustache/0.2/amp-mustache';
 import '../amp-date-countdown';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';

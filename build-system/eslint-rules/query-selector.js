@@ -1,4 +1,3 @@
-
 'use strict';
 
 const cssWhat = require('css-what');

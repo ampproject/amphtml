@@ -1,5 +1,3 @@
-
-
 import {Services} from '#service';
 import {getChildJsonConfig} from '#core/dom';
 import {isProtocolValid} from '../../../src/url';

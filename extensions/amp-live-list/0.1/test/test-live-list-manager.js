@@ -1,5 +1,3 @@
-
-
 import {
   AMP_LIVE_LIST_CUSTOM_SLOT_ID,
   LiveListManager,

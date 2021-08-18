@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview Affiliate link component that expands when clicked.
  */

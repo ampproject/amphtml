@@ -1,5 +1,3 @@
-
-
 import '../amp-minute-media-player';
 import * as fullscreen from '#core/dom/fullscreen';
 

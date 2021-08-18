@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview Service for recaptcha components
  * interacting with the 3p recaptcha bootstrap iframe

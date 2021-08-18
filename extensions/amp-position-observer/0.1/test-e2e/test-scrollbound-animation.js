@@ -1,5 +1,3 @@
-
-
 describes.endtoend(
   'amp-position-observer in AMPHTML ad',
   {

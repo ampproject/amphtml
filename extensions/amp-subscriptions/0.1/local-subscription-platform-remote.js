@@ -1,5 +1,3 @@
-
-
 import {Entitlement} from './entitlement';
 import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base';
 import {Services} from '#service';

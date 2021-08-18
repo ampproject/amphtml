@@ -1,5 +1,3 @@
-
-
 import '../amp-izlesene';
 
 describes.realWin(

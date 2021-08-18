@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview This is a layer that allows a call to action in a story page.
  * With this, a user could link to an external site from inside a story using

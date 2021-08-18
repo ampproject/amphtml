@@ -1,5 +1,3 @@
-
-
 import {Services} from '#service';
 
 import {listenOncePromise} from '../../../../src/event-helper';

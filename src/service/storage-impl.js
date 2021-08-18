@@ -1,5 +1,3 @@
-
-
 import {dict, recreateNonProtoObject} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 

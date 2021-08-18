@@ -1,5 +1,3 @@
-
-
 import '../amp-redbull-player';
 
 describes.realWin(

@@ -1,5 +1,3 @@
-
-
 import {removeElement} from '#core/dom';
 import {createViewportObserver} from '#core/dom/layout/viewport-observer';
 import {htmlFor} from '#core/dom/static-template';

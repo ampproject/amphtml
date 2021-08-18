@@ -1,5 +1,3 @@
-
-
 import {Keys} from '#core/constants/key-codes';
 import {getDataParamsFromAttributes} from '#core/dom';
 import {toggle} from '#core/dom/style';

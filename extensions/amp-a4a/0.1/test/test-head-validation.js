@@ -1,5 +1,3 @@
-
-
 import {rootNodeFor} from '#core/dom';
 
 import {Services} from '#service';

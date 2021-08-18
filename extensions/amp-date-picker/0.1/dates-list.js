@@ -1,5 +1,3 @@
-
-
 import * as rrule from '../../../node_modules/rrule/dist/es5/rrule';
 import {requireExternal} from '../../../src/module';
 

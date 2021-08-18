@@ -1,5 +1,3 @@
-
-
 import {adplugg} from '#ads/vendors/adplugg';
 
 import {createIframePromise} from '#testing/iframe';

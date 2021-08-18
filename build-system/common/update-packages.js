@@ -1,4 +1,3 @@
-
 'use strict';
 
 const checkDependencies = require('check-dependencies');

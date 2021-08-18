@@ -1,5 +1,3 @@
-
-
 import '../amp-story-panning-media';
 import {createElementWithAttributes} from '#core/dom';
 

@@ -1,5 +1,3 @@
-
-
 import {AmpEvents} from '#core/constants/amp-events';
 import {isDisabled, isFieldDefault, isFieldEmpty} from '#core/dom/form';
 import {dict, map} from '#core/types/object';

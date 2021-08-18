@@ -1,5 +1,3 @@
-
-
 import {Messaging} from '../messaging/messaging';
 
 /**

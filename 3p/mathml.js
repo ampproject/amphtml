@@ -1,4 +1,3 @@
-
 import {setStyle} from '#core/dom/style';
 
 import {writeScript} from './3p';

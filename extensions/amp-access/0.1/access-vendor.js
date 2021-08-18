@@ -1,5 +1,3 @@
-
-
 /**
  * This interface is intended to be implemented by AMP Access vendors to
  * provide authorization and pingback.

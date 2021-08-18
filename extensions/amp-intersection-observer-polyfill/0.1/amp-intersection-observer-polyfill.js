@@ -1,5 +1,3 @@
-
-
 import {installIntersectionObserver} from 'intersection-observer/intersection-observer.install';
 
 import {upgradePolyfill} from '#polyfills/stubs/intersection-observer-stub';

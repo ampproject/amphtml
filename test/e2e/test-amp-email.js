@@ -1,5 +1,3 @@
-
-
 describes.endtoend(
   'layoutCallback depends on updated viewport size after documentHeight change.',
   {

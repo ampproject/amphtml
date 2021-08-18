@@ -1,5 +1,3 @@
-
-
 import '../amp-wistia-player';
 import * as fullscreen from '#core/dom/fullscreen';
 

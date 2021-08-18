@@ -1,5 +1,3 @@
-
-
 import {map} from '#core/types/object';
 
 const QUERY_STRING_REGEX = /(?:^[#?]?|&)([^=&]+)(?:=([^&]*))?/g;

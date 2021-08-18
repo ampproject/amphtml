@@ -1,5 +1,3 @@
-
-
 import * as Preact from '#preact';
 import {ContainWrapper, useValueRef} from '#preact/component';
 import {Keys} from '#core/constants/key-codes';

@@ -1,4 +1,3 @@
-
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {isArray, isObject} from '#core/types';

@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview Detects <amp-img> elements to set the `lightbox` attribute
  * automatically.

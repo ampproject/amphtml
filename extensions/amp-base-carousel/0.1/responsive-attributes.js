@@ -1,5 +1,3 @@
-
-
 /**
  * @typedef {{
  *   mediaQueryList: MediaQueryList,

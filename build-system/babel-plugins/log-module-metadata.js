@@ -1,5 +1,3 @@
-
-
 /** @fileoverview Definitions of logging methods for transforms and linting. */
 
 /**

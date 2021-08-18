@@ -1,5 +1,3 @@
-
-
 /** @enum {string} */
 export const FilterType = {
   CLICK_DELAY: 'clickDelay',

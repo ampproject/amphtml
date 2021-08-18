@@ -1,5 +1,3 @@
-
-
 import {mount} from 'enzyme';
 
 import {Keys} from '#core/constants/key-codes';

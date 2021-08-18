@@ -1,5 +1,3 @@
-
-
 import {dict} from '#core/types/object';
 
 const calendarLabel = 'Calendar';

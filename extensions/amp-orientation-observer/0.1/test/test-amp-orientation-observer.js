@@ -1,5 +1,3 @@
-
-
 import {AmpOrientationObserver} from '../amp-orientation-observer';
 
 describes.realWin(

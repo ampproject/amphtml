@@ -1,5 +1,3 @@
-
-
 const appendQueryParamsToUrl = (url, params) =>
   url +
   '?' +

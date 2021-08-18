@@ -1,5 +1,3 @@
-
-
 import {Disposable} from '../../service-helpers';
 
 /**

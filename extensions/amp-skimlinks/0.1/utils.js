@@ -1,5 +1,3 @@
-
-
 import {parseUrlDeprecated} from '../../../src/url';
 
 /**

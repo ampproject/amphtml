@@ -1,5 +1,3 @@
-
-
 /**
  * Machinery for doing "traffic-level" experiments.  That is, rather than
  * a single user choosing to opt-in to an experimental version of a module,

@@ -1,5 +1,3 @@
-
-
 import {userAssert} from '../../../src/log';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 

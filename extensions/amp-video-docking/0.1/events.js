@@ -1,5 +1,3 @@
-
-
 import {dev} from '../../../src/log';
 
 /** @enum {string} */

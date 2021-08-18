@@ -1,5 +1,3 @@
-
-
 const babel = require('@babel/core');
 const path = require('path');
 const runner = require('@babel/helper-plugin-test-runner').default;

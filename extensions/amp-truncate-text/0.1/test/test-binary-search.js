@@ -4,8 +4,6 @@ import {
   binarySearch,
 } from '../binary-search';
 
-
-
 describes.sandboxed('binarySearch', {}, () => {
   const {NEXT, PREV} = BinarySearchPreference;
   const {LEFT, RIGHT} = BinarySearchStop;

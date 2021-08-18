@@ -1,5 +1,3 @@
-
-
 import {ValidationBubble} from '../validation-bubble';
 
 describes.realWin('validation-bubble', {amp: true}, (env) => {

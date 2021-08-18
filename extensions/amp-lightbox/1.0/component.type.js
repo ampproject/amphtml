@@ -1,5 +1,3 @@
-
-
 /** @externs */
 
 var LightboxDef = {};

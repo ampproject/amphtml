@@ -1,5 +1,3 @@
-
-
 import {parseUrlDeprecated, serializeQueryString} from '../../../src/url';
 
 const APP = '__AMPHTML__';

@@ -1,4 +1,3 @@
-
 import {Services} from '#service';
 import {AutoFullscreenManager} from '#service/video-manager-impl';
 

@@ -1,5 +1,3 @@
-
-
 import * as Preact from '#preact';
 import {VideoElementWithActions} from './_helpers';
 import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';

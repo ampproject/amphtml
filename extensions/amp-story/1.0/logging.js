@@ -1,4 +1,3 @@
-
 import {LogLevel, devAssert} from '../../../src/log';
 import {scopedQuerySelectorAll} from '#core/dom/query';
 import {tryResolve} from '#core/data-structures/promise';

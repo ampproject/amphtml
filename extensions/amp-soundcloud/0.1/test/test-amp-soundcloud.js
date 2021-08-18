@@ -1,5 +1,3 @@
-
-
 import '../amp-soundcloud';
 
 describes.realWin(

@@ -1,5 +1,3 @@
-
-
 import {Services} from '#service';
 import {StoryAdConfig} from '../story-ad-config';
 import {createStoryAdElementAndConfig} from './story-mock';

@@ -1,5 +1,3 @@
-
-
 const fs = require('fs');
 const {CONTROL, maybeCopyImageToCache, urlToCachePath} = require('./helpers');
 const {JSDOM} = require('jsdom');

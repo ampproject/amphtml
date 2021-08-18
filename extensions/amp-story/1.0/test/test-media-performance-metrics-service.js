@@ -1,5 +1,3 @@
-
-
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '../../../../src/event-helper';
 import {MediaPerformanceMetricsService} from '../media-performance-metrics-service';

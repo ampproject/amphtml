@@ -1,5 +1,3 @@
-
-
 /**
  * @interface {babel.PluginPass}
  * @param {babel} babel

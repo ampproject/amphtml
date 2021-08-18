@@ -1,5 +1,3 @@
-
-
 /**
  * Creates a ShadowRoot for a given Element with some style text. This also
  * tags the first sizer element found with a slot, which is placed at the top

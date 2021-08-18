@@ -1,5 +1,3 @@
-
-
 /** @const {string} */
 export const READY_SCAN_SIGNAL = 'ready-scan';
 

@@ -1,5 +1,3 @@
-
-
 import {iterateCursor} from '#core/dom';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {closestAncestorElementBySelector} from '#core/dom/query';

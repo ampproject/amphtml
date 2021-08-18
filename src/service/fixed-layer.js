@@ -1,5 +1,3 @@
-
-
 import {domOrderComparator} from '#core/dom';
 import {closest, matches} from '#core/dom/query';
 import {

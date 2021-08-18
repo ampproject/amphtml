@@ -1,5 +1,3 @@
-
-
 import {LinkRewriter} from '../link-rewriter';
 import {getConfigOpts} from '../config-options';
 import {getScopeElements} from '../scope';

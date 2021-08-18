@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview
  * @deprecated Do not use this in new code. Use env.fetchMock instead. Its API

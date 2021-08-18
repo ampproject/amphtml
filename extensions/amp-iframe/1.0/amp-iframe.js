@@ -1,5 +1,3 @@
-
-
 import {BaseElement} from './base-element';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';

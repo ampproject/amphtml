@@ -1,5 +1,3 @@
-
-
 import {createElementWithAttributes} from '#core/dom';
 import {setStyle} from '#core/dom/style';
 import {dict} from '#core/types/object';

@@ -1,5 +1,3 @@
-
-
 import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-lightbox-1.0.css';

@@ -1,5 +1,3 @@
-
-
 import {htmlFor} from '#core/dom/static-template';
 
 import {

@@ -1,4 +1,3 @@
-
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {mapRange} from '#core/math';
 

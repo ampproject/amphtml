@@ -1,5 +1,3 @@
-
-
 import {Services} from '#service';
 import {vsyncForTesting} from '#service/vsync-impl';
 

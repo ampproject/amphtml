@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview
  * Checks that custom properties set on the window are prefixed with '__AMP_'.

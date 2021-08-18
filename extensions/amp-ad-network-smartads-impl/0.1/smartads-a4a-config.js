@@ -1,5 +1,3 @@
-
-
 /** @const @private {string} */
 const SRC_PREFIX_ = 'https://smart-ads.biz/_amp';
 

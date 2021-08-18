@@ -1,5 +1,3 @@
-
-
 /**
  * Common AMP events.
  * @enum {string}

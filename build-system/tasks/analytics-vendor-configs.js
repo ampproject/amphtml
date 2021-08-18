@@ -1,5 +1,3 @@
-
-
 const minimist = require('minimist');
 const argv = minimist(process.argv.slice(2));
 const debounce = require('../common/debounce');

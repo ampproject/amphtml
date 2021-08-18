@@ -1,5 +1,3 @@
-
-
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-sidebar-1.0.css';
 import {isExperimentOn} from '#experiments';

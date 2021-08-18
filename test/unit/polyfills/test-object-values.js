@@ -1,5 +1,3 @@
-
-
 import {values} from '#polyfills/object-values';
 
 describes.sandboxed('Object.values', {}, () => {

@@ -1,5 +1,3 @@
-
-
 import {extractTextContent} from '../semantic-render';
 
 describes.fakeWin('amp-story semantic-render', {}, () => {

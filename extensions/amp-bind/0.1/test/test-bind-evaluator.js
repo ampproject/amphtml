@@ -1,5 +1,3 @@
-
-
 import {BindEvaluator} from '../bind-evaluator';
 import {BindExpression} from '../bind-expression';
 

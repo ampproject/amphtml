@@ -1,4 +1,3 @@
-
 import {ActionTrust} from '#core/constants/action-constants';
 import {isRTL, removeElement} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';

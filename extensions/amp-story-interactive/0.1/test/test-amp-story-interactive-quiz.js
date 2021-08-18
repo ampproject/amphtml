@@ -1,5 +1,3 @@
-
-
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryInteractiveQuiz} from '../amp-story-interactive-quiz';
 import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';

@@ -1,5 +1,3 @@
-
-
 import * as storyEvents from '../../../amp-story/1.0/events';
 import {
   Action,

@@ -1,5 +1,3 @@
-
-
 import {isInManualExperiment} from '#ads/google/a4a/traffic-experiments';
 import {getEnclosingContainerTypes} from '#ads/google/a4a/utils';
 

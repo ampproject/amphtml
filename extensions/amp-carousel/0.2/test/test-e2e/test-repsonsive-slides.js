@@ -1,5 +1,3 @@
-
-
 import {getNextArrow, getSlides, sleep} from './helpers';
 
 describes.endtoend(

@@ -1,5 +1,3 @@
-
-
 import {ResponsiveAttributes} from '../responsive-attributes';
 
 describes.sandboxed('ResponsiveAttributes', {}, (env) => {

@@ -1,5 +1,3 @@
-
-
 /*
  * @fileoverview
  * Initial DOM must contain a button#hello. Other elemenst are optional.

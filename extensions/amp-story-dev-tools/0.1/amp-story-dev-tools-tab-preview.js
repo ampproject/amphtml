@@ -1,5 +1,3 @@
-
-
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {observeContentSize} from '#core/dom/layout/size-observer';
 import {closest} from '#core/dom/query';

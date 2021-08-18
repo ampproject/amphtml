@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview Embeds an AddThis widget.
  * The data-pub-id and data-widget-id can be found easily in the AddThis

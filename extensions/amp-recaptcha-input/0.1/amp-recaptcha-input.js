@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview Async Input Element that uses the
  * amp-recaptcha-service to dispatch actions, and return

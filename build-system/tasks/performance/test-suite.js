@@ -1,5 +1,3 @@
-
-
 const argv = require('minimist')(process.argv.slice(2));
 const loadConfig = require('./load-config');
 const {expect} = require('chai');

@@ -1,5 +1,3 @@
-
-
 import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
 import {Entitlement, GrantReason} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';

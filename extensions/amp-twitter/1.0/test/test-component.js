@@ -1,5 +1,3 @@
-
-
 import * as Preact from '#preact';
 import {Twitter} from '../component';
 import {WithAmpContext} from '#preact/context';

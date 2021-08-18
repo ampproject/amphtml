@@ -1,5 +1,3 @@
-
-
 import '../amp-hulu';
 
 describes.realWin(

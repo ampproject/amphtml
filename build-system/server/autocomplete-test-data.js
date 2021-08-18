@@ -1,5 +1,3 @@
-
-
 const mentionEmails = [
   'harrypotter@hogwarts.edu',
   'albusdumbledore@hogwarts.edu',

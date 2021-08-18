@@ -1,5 +1,3 @@
-
-
 import {CommonSignals} from '#core/constants/common-signals';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {Layout} from '#core/dom/layout';

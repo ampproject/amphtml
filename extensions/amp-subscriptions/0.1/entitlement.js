@@ -1,4 +1,3 @@
-
 import {dict} from '#core/types/object';
 
 /** @enum {string} */

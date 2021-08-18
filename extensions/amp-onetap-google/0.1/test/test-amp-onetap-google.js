@@ -1,5 +1,3 @@
-
-
 import '../amp-onetap-google';
 import {createElementWithAttributes, waitForChild} from '#core/dom';
 

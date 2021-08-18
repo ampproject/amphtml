@@ -1,5 +1,3 @@
-
-
 import '../amp-autocomplete';
 import {AmpAutocomplete} from '../amp-autocomplete';
 import {Keys} from '#core/constants/key-codes';

@@ -1,5 +1,3 @@
-
-
 import {AdStrategy} from '../ad-strategy';
 import {AdTracker} from '../ad-tracker';
 import {PlacementState, getPlacementsFromConfigObj} from '../placement';

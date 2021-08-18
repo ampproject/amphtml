@@ -1,5 +1,3 @@
-
-
 // Source for this constant is css/amp-story-entry-point.css
 import {cssText} from '../../../build/amp-story-entry-point.css';
 

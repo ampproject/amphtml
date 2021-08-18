@@ -1,5 +1,3 @@
-
-
 /* eslint-disable local/html-template */
 
 'use strict';

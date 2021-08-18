@@ -1,5 +1,3 @@
-
-
 import {Action, SubscriptionAnalytics} from '../analytics';
 import {Dialog} from '../dialog';
 import {ENTITLEMENTS_REQUEST_TIMEOUT} from '../constants';

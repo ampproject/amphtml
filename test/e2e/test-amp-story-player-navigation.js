@@ -1,5 +1,3 @@
-
-
 const VIEWPORT = {
   HEIGHT: 768,
   WIDTH: 1024,

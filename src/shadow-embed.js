@@ -1,5 +1,3 @@
-
-
 import {iterateCursor} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {setInitialDisplay, setStyle} from '#core/dom/style';

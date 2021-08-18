@@ -1,5 +1,3 @@
-
-
 import {tryResolve} from '#core/data-structures/promise';
 
 import {SizeInfoDef} from './ad-network-config';

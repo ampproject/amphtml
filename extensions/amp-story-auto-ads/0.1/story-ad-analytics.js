@@ -1,5 +1,3 @@
-
-
 import {dict} from '#core/types/object';
 import {getUniqueId} from './utils';
 import {triggerAnalyticsEvent} from '../../../src/analytics';

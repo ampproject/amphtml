@@ -1,5 +1,3 @@
-
-
 import '../amp-video';
 import {dispatchCustomEvent} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';

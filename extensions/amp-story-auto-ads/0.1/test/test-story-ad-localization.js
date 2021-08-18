@@ -1,5 +1,3 @@
-
-
 import {CtaTypes, StoryAdLocalization} from '../story-ad-localization';
 
 describes.realWin('amp-story-auto-ads:localization', {amp: true}, (env) => {

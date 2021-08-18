@@ -1,5 +1,3 @@
-
-
 import {trimEnd} from '#core/types/string';
 
 import {

@@ -1,5 +1,3 @@
-
-
 /**
  * Install "YieldIt" support to Mocha tests.
  * "YieldIt" allows you to wait for a promise to resolve before resuming your

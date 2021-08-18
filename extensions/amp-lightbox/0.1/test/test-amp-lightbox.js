@@ -1,5 +1,3 @@
-
-
 import '../amp-lightbox';
 import * as dom from '#core/dom';
 import {ActionService} from '#service/action-impl';

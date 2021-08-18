@@ -1,5 +1,3 @@
-
-
 import {AmpViewerIntegration} from '../../amp-viewer-integration';
 import {WebviewViewerForTesting} from '../../webview-viewer-for-testing';
 

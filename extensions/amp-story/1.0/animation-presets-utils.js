@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview Common animations utility functions used in the animation
  * presets.

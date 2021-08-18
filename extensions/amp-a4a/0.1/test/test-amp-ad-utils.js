@@ -1,5 +1,3 @@
-
-
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
 
 import {

@@ -1,5 +1,3 @@
-
-
 import {writeScript} from '#3p/3p';
 
 /**

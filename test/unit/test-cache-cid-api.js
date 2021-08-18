@@ -1,5 +1,3 @@
-
-
 import * as fakeTimers from '@sinonjs/fake-timers';
 
 import {CacheCidApi} from '#service/cache-cid-api';

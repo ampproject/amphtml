@@ -1,5 +1,3 @@
-
-
 import {parseUrlDeprecated} from '../../src/url';
 import {setStyles} from '#core/dom/style';
 import {validateData} from '#3p/3p';

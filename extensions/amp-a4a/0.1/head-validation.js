@@ -1,5 +1,3 @@
-
-
 import {removeElement, rootNodeFor} from '#core/dom';
 import {map} from '#core/types/object';
 import {includes} from '#core/types/string';

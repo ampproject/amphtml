@@ -1,5 +1,3 @@
-
-
 import {InlineGalleryEvents} from './inline-gallery-events';
 import {Layout} from '#core/dom/layout';
 import {createCustomEvent} from '../../../src/event-helper';

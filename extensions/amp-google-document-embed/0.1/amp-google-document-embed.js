@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview Embeds the Google Docs viewer
  *

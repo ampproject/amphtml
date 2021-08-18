@@ -1,5 +1,3 @@
-
-
 import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
 
 describes.sandboxed('data structures - Finite State Machine', {}, (env) => {

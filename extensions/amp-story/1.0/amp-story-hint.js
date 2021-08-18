@@ -1,5 +1,3 @@
-
-
 import {CSS} from '../../../build/amp-story-hint-1.0.css';
 import {
   EmbeddedComponentState,

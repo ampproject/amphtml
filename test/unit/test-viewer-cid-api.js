@@ -1,5 +1,3 @@
-
-
 import {dict} from '#core/types/object';
 
 import {ViewerCidApi} from '#service/viewer-cid-api';

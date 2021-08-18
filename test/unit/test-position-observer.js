@@ -1,5 +1,3 @@
-
-
 import * as fakeTimers from '@sinonjs/fake-timers';
 
 import {layoutRectLtwh} from '#core/dom/layout/rect';

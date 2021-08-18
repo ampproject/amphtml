@@ -1,5 +1,3 @@
-
-
 import {
   getAliasDefinition,
   getMaskPrefix,

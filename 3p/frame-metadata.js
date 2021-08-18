@@ -1,5 +1,3 @@
-
-
 import {once} from '#core/types/function';
 import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';

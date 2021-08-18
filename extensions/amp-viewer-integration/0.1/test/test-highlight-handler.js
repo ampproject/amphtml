@@ -1,5 +1,3 @@
-
-
 import {VisibilityState} from '#core/constants/visibility-state';
 import * as docready from '#core/document-ready';
 import {layoutRectLtwh} from '#core/dom/layout/rect';

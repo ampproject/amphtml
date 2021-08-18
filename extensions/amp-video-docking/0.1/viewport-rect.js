@@ -1,4 +1,3 @@
-
 import {LayoutRectDef, layoutRectLtwh} from '#core/dom/layout/rect';
 
 /**

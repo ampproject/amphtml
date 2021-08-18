@@ -1,5 +1,3 @@
-
-
 import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {Sources} from './sources';
 import {isConnectedNode} from '#core/dom';

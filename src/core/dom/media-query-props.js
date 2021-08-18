@@ -1,5 +1,3 @@
-
-
 /** @typedef {!Array<{query: ?MediaQueryList, value: string}>} */
 let ExprDef;
 

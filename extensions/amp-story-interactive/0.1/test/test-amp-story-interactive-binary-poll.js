@@ -1,5 +1,3 @@
-
-
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryInteractiveBinaryPoll} from '../amp-story-interactive-binary-poll';
 import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';

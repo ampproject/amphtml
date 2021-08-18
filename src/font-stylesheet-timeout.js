@@ -1,5 +1,3 @@
-
-
 import {onDocumentReady} from '#core/document-ready';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 

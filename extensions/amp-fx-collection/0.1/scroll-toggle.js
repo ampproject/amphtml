@@ -1,4 +1,3 @@
-
 import {Observable} from '#core/data-structures/observable';
 import {px, setImportantStyles} from '#core/dom/style';
 import {once} from '#core/types/function';

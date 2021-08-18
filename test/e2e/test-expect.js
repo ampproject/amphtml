@@ -1,5 +1,3 @@
-
-
 import {ControllerPromise} from '../../build-system/tasks/e2e/controller-promise';
 
 describe('e2e expect', () => {

@@ -1,5 +1,3 @@
-
-
 import {computeInMasterFrame, loadScript, validateData} from '#3p/3p';
 
 /**

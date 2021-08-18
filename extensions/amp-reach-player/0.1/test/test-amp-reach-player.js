@@ -1,5 +1,3 @@
-
-
 import '../amp-reach-player';
 
 describes.realWin(

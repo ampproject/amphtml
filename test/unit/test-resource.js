@@ -1,5 +1,3 @@
-
-
 import {LayoutPriority} from '#core/dom/layout';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 

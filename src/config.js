@@ -1,5 +1,3 @@
-
-
 /**
  * Allows for runtime configuration. Internally, the runtime should
  * use the src/config.js module for various constants. We can use the

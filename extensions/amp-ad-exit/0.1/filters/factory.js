@@ -1,5 +1,3 @@
-
-
 import {ClickDelayFilter} from './click-delay';
 import {ClickLocationFilter} from './click-location';
 import {FilterType} from './filter';

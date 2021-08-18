@@ -1,5 +1,3 @@
-
-
 import * as Preact from '#preact';
 import {Sidebar, SidebarToolbar} from '../component';
 import {boolean, color, select, text, withKnobs} from '@storybook/addon-knobs';

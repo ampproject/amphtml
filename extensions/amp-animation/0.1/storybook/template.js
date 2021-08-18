@@ -1,5 +1,3 @@
-
-
 import {button, number, select, text} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';

@@ -1,5 +1,3 @@
-
-
 /**
  * The entry point for AMP Runtime (v0.js) when AMP Runtime may support
  * multiple AMP Docs in Shadow DOM.

@@ -1,5 +1,3 @@
-
-
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,

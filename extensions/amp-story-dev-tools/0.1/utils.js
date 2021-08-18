@@ -1,5 +1,3 @@
-
-
 import {parseQueryString} from '#core/types/string/url';
 
 /**

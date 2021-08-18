@@ -1,4 +1,3 @@
-
 import {NotificationUiManager} from '#service/notification-ui-manager';
 
 import {macroTask} from '#testing/yield';

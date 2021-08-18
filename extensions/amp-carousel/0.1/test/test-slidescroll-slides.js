@@ -1,5 +1,3 @@
-
-
 import {AmpSlideScroll} from '../slidescroll';
 
 describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {

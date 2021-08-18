@@ -1,5 +1,3 @@
-
-
 import {Deferred} from '#core/data-structures/promise';
 import {toggle} from '#core/dom/style';
 import {isArray} from '#core/types';

@@ -1,5 +1,3 @@
-
-
 /* global THREE */
 
 import {setStyle} from '#core/dom/style';

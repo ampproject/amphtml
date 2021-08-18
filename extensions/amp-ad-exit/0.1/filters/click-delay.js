@@ -1,5 +1,3 @@
-
-
 import {Filter, FilterType} from './filter';
 
 import {dev, userAssert} from '../../../../src/log';

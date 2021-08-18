@@ -1,5 +1,3 @@
-
-
 import {ActionSource} from './action-source';
 import {
   Alignment,

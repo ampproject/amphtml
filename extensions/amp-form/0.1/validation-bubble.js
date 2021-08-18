@@ -1,5 +1,3 @@
-
-
 import {removeChildren} from '#core/dom';
 import {setStyles, toggle} from '#core/dom/style';
 

@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview This file implements the `amp check-owners` task, which checks
  * all OWNERS files in the repo for correctness, as determined by the parsing

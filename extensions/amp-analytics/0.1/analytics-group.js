@@ -1,5 +1,3 @@
-
-
 import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Deferred} from '#core/data-structures/promise';
 import {dev, userAssert} from '../../../src/log';

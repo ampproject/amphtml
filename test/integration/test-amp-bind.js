@@ -1,4 +1,3 @@
-
 import {poll as classicPoll} from '#testing/iframe';
 import {BrowserController} from '#testing/test-helper';
 

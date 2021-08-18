@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview
  * Interactive components support a disclaimer bubble that tells users where their data is being sent to.

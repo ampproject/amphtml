@@ -1,5 +1,3 @@
-
-
 const fs = require('fs');
 const {
   CDN_URL,

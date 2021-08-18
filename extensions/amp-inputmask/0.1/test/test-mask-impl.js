@@ -1,5 +1,3 @@
-
-
 import {Mask} from '../mask-impl';
 
 describes.sandboxed('amp-inputmask mask-impl', {}, (env) => {

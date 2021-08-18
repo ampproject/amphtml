@@ -1,4 +1,3 @@
-
 import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {createElementWithAttributes} from '#core/dom';
 import {layoutRectLtwh} from '#core/dom/layout/rect';

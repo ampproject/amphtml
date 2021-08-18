@@ -1,5 +1,3 @@
-
-
 const test = require('ava');
 const {html, joinFragments} = require('../html');
 

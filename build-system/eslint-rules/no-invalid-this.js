@@ -1,4 +1,3 @@
-
 'use strict';
 
 // Disables use of the `this` value when we suspect that it is using the

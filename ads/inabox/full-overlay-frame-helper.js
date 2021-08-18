@@ -1,4 +1,3 @@
-
 import {px, resetStyles, setStyles, translate} from '#core/dom/style';
 
 /**

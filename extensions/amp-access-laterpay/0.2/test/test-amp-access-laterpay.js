@@ -1,5 +1,3 @@
-
-
 import {LaterpayVendor} from '../laterpay-impl';
 
 const TAG = 'amp-access-laterpay';

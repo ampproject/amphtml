@@ -1,5 +1,3 @@
-
-
 const {hasOwnProperty} = Object.prototype;
 
 /**

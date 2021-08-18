@@ -1,5 +1,3 @@
-
-
 import {BrowserController, RequestBank} from '#testing/test-helper';
 
 // TODO(zhouyx, #11459): Unskip the test on Safari and Firefox.

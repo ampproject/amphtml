@@ -1,5 +1,3 @@
-
-
 import {BrowserController, RequestBank} from '#testing/test-helper';
 
 const t = describes.sandboxed.configure().skipSafari().skipEdge();

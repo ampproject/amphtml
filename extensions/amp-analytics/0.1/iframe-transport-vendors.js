@@ -1,5 +1,3 @@
-
-
 /**
  * Vendors who have IAB viewability certification may use iframe transport
  * (see ../amp-analytics.md and ../integrating-analytics.md). In this case,

@@ -1,5 +1,3 @@
-
-
 import {getScrollingElement, getSlides, getSpacersForSlide} from './helpers';
 
 const pageWidth = 800;

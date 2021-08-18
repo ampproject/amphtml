@@ -1,5 +1,3 @@
-
-
 import * as analyticsApi from '../../../../src/analytics';
 import {
   Action,

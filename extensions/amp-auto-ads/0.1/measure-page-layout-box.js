@@ -1,4 +1,3 @@
-
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {toWin} from '#core/window';
 

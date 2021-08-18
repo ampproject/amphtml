@@ -1,7 +1,5 @@
 import {LinkRewriter} from '../link-rewriter';
 
-
-
 const helpersMaker = () => {
   return {
     createLinkRewriterElement(config) {

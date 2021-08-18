@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview Connects AMP Host Services to MRAID to allow invoking native
  * APIs from mobile app ad webviews.

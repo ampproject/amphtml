@@ -1,5 +1,3 @@
-
-
 const pageWidth = 800;
 const pageHeight = 600;
 

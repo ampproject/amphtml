@@ -1,5 +1,3 @@
-
-
 import {Layout} from '#core/dom/layout';
 import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';

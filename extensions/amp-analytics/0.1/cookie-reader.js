@@ -1,5 +1,3 @@
-
-
 import {getCookie} from '../../../src/cookies';
 import {getMode} from '../../../src/mode';
 import {isInFie} from '../../../src/iframe-helper';

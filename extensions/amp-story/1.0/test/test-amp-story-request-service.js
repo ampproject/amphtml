@@ -1,5 +1,3 @@
-
-
 import {
   AmpStoryRequestService,
   CONFIG_SRC_ATTRIBUTE_NAME,

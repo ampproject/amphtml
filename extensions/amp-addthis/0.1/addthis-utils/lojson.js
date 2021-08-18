@@ -1,4 +1,3 @@
-
 import {API_SERVER} from '../constants';
 import {callPixelEndpoint} from './pixel';
 

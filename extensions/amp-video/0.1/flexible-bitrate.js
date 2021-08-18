@@ -1,5 +1,3 @@
-
-
 import {DomBasedWeakRef} from '#core/data-structures/dom-based-weakref';
 import {Services} from '#service';
 import {childElement, childElementsByTag} from '#core/dom/query';

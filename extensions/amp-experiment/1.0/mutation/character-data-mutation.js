@@ -1,5 +1,3 @@
-
-
 import {assertCharacterDataMutationFormat} from './mutation';
 
 /**

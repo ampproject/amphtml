@@ -1,5 +1,3 @@
-
-
 import {ScrollManager} from './scroll-manager';
 import {Services} from '#service';
 import {

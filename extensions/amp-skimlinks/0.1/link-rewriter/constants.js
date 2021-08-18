@@ -1,5 +1,3 @@
-
-
 export const EVENTS = {
   PAGE_SCANNED: 'PAGE_SCANNED',
   CLICK: 'CLICK',

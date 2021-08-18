@@ -1,5 +1,3 @@
-
-
 /**
  * In practice this would be *.ampproject.org and the publishers
  * origin. Please see AMP CORS docs for more details:

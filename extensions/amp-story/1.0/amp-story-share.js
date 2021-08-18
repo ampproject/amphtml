@@ -1,4 +1,3 @@
-
 import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {Toast} from './toast';

@@ -1,5 +1,3 @@
-
-
 import {TaskQueue} from '#service/task-queue';
 
 describes.sandboxed('TaskQueue', {}, (env) => {

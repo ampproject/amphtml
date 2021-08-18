@@ -1,4 +1,3 @@
-
 import {Action} from '../analytics';
 import {Dialog} from '../dialog';
 import {Entitlement} from '../entitlement';

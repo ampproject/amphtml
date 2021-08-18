@@ -1,4 +1,3 @@
-
 import {Services} from '#service';
 
 import {installWebAnimationsIfNecessary} from './install-polyfill';

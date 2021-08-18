@@ -1,5 +1,3 @@
-
-
 import {getCarousel, getScrollingElement, getSlide} from './helpers';
 import {useStyles} from '../component.jss';
 

@@ -1,5 +1,3 @@
-
-
 import {AmpAnalytics} from '../amp-analytics';
 import {AnalyticsConfig} from '../config';
 import {ExpansionOptions, variableServiceForDoc} from '../variables';

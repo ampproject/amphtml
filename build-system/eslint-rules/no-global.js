@@ -1,4 +1,3 @@
-
 'use strict';
 
 const astUtils = require('eslint/lib/rules/utils/ast-utils');

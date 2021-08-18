@@ -1,5 +1,3 @@
-
-
 import {toArray} from '#core/types/array';
 
 import {install} from '#polyfills/domtokenlist';

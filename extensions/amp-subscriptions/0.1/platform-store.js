@@ -1,5 +1,3 @@
-
-
 import {DEFAULT_SCORE_CONFIG, SubscriptionsScoreFactor} from './constants';
 import {Deferred} from '#core/data-structures/promise';
 import {Entitlement} from './entitlement';

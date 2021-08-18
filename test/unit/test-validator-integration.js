@@ -2,7 +2,6 @@
  * @fileoverview Description of this file.
  */
 
-
 import * as eventHelper from '../../src/event-helper';
 import * as mode from '../../src/mode';
 import {loadScript, maybeValidate} from '../../src/validator-integration';

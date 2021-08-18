@@ -1,5 +1,3 @@
-
-
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {
   ConsentConfig,

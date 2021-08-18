@@ -1,4 +1,3 @@
-
 import {jsonConfiguration} from '#core/types/object/json';
 
 import {getMode} from '../../mode';

@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview Web worker entry point. Currently only used by a single
  *   extension (amp-bind), so dependencies are directly imported.

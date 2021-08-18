@@ -1,7 +1,5 @@
 import {computedStyle} from '#core/dom/style';
 
-
-
 /**
  * ViewportBindingDef is an interface that defines an underlying technology
  * behind the {@link ViewportInterface}.

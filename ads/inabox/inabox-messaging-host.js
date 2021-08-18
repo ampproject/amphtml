@@ -1,5 +1,3 @@
-
-
 import {
   MessageType,
   deserializeMessage,

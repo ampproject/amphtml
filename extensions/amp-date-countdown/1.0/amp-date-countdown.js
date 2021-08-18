@@ -1,5 +1,3 @@
-
-
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {dict} from '#core/types/object';
 

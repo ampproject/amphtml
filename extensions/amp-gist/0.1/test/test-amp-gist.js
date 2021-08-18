@@ -1,5 +1,3 @@
-
-
 import '../amp-gist';
 
 describes.realWin(

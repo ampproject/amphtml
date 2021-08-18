@@ -1,4 +1,3 @@
-
 window.onload = function () {
   var iframe = document.querySelector('#creative');
 

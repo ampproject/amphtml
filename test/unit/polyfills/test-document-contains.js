@@ -1,5 +1,3 @@
-
-
 import {install} from '#polyfills/document-contains';
 
 describes.sandboxed('HTMLDocument.contains', {}, () => {

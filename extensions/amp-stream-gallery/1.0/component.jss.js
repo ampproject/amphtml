@@ -1,5 +1,3 @@
-
-
 import {createUseStyles} from 'react-jss';
 
 const gallery = {

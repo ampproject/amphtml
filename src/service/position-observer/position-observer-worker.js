@@ -1,5 +1,3 @@
-
-
 import {
   layoutRectEquals,
   layoutRectLtwh,

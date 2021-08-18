@@ -1,4 +1,3 @@
-
 import {DEFAULT_CONFIG, WAYPOINT_BASE_URL} from '../constants';
 
 export const pubcode = 'pubXcode';

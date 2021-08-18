@@ -1,5 +1,3 @@
-
-
 /**
  * An interface to interact with browser window object.
  * Mainly used to mock out read only APIs in test.

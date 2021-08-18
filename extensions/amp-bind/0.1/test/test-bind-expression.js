@@ -1,5 +1,3 @@
-
-
 import {BindExpression} from '../bind-expression';
 import {BindMacro} from '../bind-macro';
 

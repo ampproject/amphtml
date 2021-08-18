@@ -1,5 +1,3 @@
-
-
 import * as Preact from '#preact';
 import {Lightbox} from '../component';
 import {boolean, select, text, withKnobs} from '@storybook/addon-knobs';

@@ -1,5 +1,3 @@
-
-
 import {GRID_LAYER_TEMPLATE_CLASS_NAMES} from './amp-story-grid-layer';
 import {StoryAnimationPresetDef} from './animation-types';
 import {

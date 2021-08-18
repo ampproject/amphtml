@@ -1,5 +1,3 @@
-
-
 import {Messaging} from '@ampproject/viewer-messaging';
 import {expect} from 'chai';
 

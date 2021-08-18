@@ -1,5 +1,3 @@
-
-
 import {Deferred} from '#core/data-structures/promise';
 import {Entitlement} from './entitlement';
 import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base';

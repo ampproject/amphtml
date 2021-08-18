@@ -1,5 +1,3 @@
-
-
 // TODO(@jridgewell, #11081): fix linter to allow fixing weird indentation
 
 import {base64EncodeFromBytes} from '#core/types/string/base64';

@@ -1,5 +1,3 @@
-
-
 import {doesOriginDomainMatchIframeSrc, initRecaptcha} from '#3p/recaptcha';
 
 import {urls} from '../../../src/config';

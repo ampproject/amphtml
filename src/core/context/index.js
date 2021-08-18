@@ -1,5 +1,3 @@
-
-
 import {ContextNode} from './node';
 import {ContextPropDef} from './prop.type';
 

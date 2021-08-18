@@ -1,5 +1,3 @@
-
-
 import '../amp-megaphone';
 
 describes.realWin(

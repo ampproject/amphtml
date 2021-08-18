@@ -1,5 +1,3 @@
-
-
 import {Deferred} from '#core/data-structures/promise';
 import {isObject} from '#core/types';
 import {hasOwn} from '#core/types/object';

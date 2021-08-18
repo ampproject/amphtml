@@ -1,5 +1,3 @@
-
-
 import {withAmp} from '@ampproject/storybook-addon';
 import {date, select, withKnobs} from '@storybook/addon-knobs';
 

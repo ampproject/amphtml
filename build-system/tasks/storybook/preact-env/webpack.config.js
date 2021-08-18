@@ -1,4 +1,3 @@
-
 const path = require('path');
 const {BUILD_CONSTANTS} = require('../../../compile/build-constants');
 const {DefinePlugin} = require('webpack');

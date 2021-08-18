@@ -1,5 +1,3 @@
-
-
 import {Messenger} from '../iframe-api/messenger';
 
 describes.fakeWin('Messenger', {}, (env) => {

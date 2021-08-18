@@ -1,5 +1,3 @@
-
-
 import {AmpEmbedlyCard, TAG} from './amp-embedly-card-impl';
 import {AmpEmbedlyKey, TAG as KEY_TAG} from './amp-embedly-key';
 

@@ -1,5 +1,3 @@
-
-
 import {AmpEvents} from '#core/constants/amp-events';
 import {Keys} from '#core/constants/key-codes';
 import {isConnectedNode, isRTL, tryFocus} from '#core/dom';

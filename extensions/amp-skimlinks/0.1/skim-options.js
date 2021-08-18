@@ -1,5 +1,3 @@
-
-
 import {getChildJsonConfig} from '#core/dom';
 
 import {

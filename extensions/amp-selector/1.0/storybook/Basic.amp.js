@@ -1,5 +1,3 @@
-
-
 import {withAmp} from '@ampproject/storybook-addon';
 import {select, withKnobs} from '@storybook/addon-knobs';
 

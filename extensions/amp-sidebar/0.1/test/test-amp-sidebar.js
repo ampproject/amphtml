@@ -1,5 +1,3 @@
-
-
 import '../amp-sidebar';
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {ActionService} from '#service/action-impl';

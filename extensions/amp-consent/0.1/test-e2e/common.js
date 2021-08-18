@@ -1,5 +1,3 @@
-
-
 let ui1;
 let ui2;
 let postPromptUi;

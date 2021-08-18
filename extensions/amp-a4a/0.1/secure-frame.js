@@ -1,5 +1,3 @@
-
-
 import {createElementWithAttributes, escapeHtml} from '#core/dom';
 import {dict} from '#core/types/object';
 

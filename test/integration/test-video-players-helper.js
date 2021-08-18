@@ -1,5 +1,3 @@
-
-
 import {removeElement} from '#core/dom';
 import {detectIsAutoplaySupported} from '#core/dom/video';
 

@@ -1,5 +1,3 @@
-
-
 const identity = (a) => a;
 
 /**

@@ -1,4 +1,3 @@
-
 const RE_CUID = /^[0-9a-f]{16}$/;
 const MAX_HEX = 0xffffffff;
 const CUID_SESSION_TIME = Date.now();

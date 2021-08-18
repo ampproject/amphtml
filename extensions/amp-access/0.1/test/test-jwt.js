@@ -1,5 +1,3 @@
-
-
 import {JwtHelper, pemToBytes} from '../jwt';
 
 describes.sandboxed('JwtHelper', {}, (env) => {

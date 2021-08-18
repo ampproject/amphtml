@@ -1,5 +1,3 @@
-
-
 import {poll} from '#testing/iframe';
 import {BrowserController} from '#testing/test-helper';
 

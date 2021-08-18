@@ -1,5 +1,3 @@
-
-
 import {
   addParamToUrl,
   isLocalhostOrigin,

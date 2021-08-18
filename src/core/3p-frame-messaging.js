@@ -1,5 +1,3 @@
-
-
 import {devAssert, devAssertString} from '#core/assert';
 import {internalListenImplementation} from '#core/dom/event-helper-listen';
 import {rethrowAsync} from '#core/error';

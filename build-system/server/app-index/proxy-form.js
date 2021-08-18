@@ -1,4 +1,3 @@
-
 /* eslint-disable local/html-template */
 
 const {htmlEnvelopePrefixKey} = require('./settings');

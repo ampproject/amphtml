@@ -1,8 +1,6 @@
 import {Observable} from '#core/data-structures/observable';
 import {ViewerTracker} from '../viewer-tracker';
 
-
-
 describes.realWin('ViewerTracker', {amp: true}, (env) => {
   let ampdoc;
   let viewTracker;

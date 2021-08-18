@@ -1,5 +1,3 @@
-
-
 import '../flexible-bitrate';
 import {BitrateManager} from '../flexible-bitrate';
 import {childElementsByTag} from '#core/dom/query';

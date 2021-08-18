@@ -1,5 +1,3 @@
-
-
 import {listen} from '#core/3p-frame-messaging';
 
 import {getData} from '../../../src/event-helper';

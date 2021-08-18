@@ -1,5 +1,3 @@
-
-
 import * as Preact from '#preact';
 import {Sidebar, SidebarToolbar} from '../component';
 import {htmlFor} from '#core/dom/static-template';

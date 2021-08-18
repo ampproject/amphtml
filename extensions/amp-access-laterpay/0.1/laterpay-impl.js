@@ -1,5 +1,3 @@
-
-
 import {removeChildren} from '#core/dom';
 import {dict} from '#core/types/object';
 

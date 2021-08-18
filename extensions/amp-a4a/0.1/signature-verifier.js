@@ -1,5 +1,3 @@
-
-
 import {isArray} from '#core/types';
 import {base64DecodeToBytes} from '#core/types/string/base64';
 

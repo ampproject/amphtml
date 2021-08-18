@@ -1,5 +1,3 @@
-
-
 import '#polyfills';
 import '#service/timer-impl';
 import {Deferred} from '#core/data-structures/promise';

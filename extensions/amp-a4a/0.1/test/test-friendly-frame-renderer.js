@@ -1,5 +1,3 @@
-
-
 import {FriendlyFrameRenderer} from '../friendly-frame-renderer';
 
 const realWinConfig = {

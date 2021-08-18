@@ -1,5 +1,3 @@
-
-
 import '../amp-nexxtv-player';
 import {createElementWithAttributes} from '#core/dom';
 

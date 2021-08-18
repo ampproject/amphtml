@@ -1,5 +1,3 @@
-
-
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {CommonSignals} from '#core/constants/common-signals';
 import {LayoutPriority, isLayoutSizeDefined} from '#core/dom/layout';

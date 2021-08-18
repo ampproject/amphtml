@@ -1,5 +1,3 @@
-
-
 const fs = require('fs');
 const {urlToCachePath} = require('./helpers');
 

@@ -1,5 +1,3 @@
-
-
 let cumulativeLayoutShift, largestContentfulPaint, longTasks;
 let measureStarted; // eslint-disable-line no-unused-vars
 

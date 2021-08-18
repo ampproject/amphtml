@@ -1,5 +1,3 @@
-
-
 import {computedStyle} from '#core/dom/style';
 
 /**

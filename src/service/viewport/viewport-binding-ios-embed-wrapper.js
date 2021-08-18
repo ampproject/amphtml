@@ -1,5 +1,3 @@
-
-
 import {Observable} from '#core/data-structures/observable';
 import {whenDocumentReady} from '#core/document-ready';
 import {waitForBodyOpen} from '#core/dom';

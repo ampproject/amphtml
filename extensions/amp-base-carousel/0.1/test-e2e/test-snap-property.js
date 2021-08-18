@@ -1,5 +1,3 @@
-
-
 import {getSlides, getSpacers} from './helpers';
 
 describes.endtoend(

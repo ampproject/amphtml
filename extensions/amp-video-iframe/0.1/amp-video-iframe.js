@@ -1,4 +1,3 @@
-
 import {Deferred} from '#core/data-structures/promise';
 import {
   dispatchCustomEvent,

@@ -1,5 +1,3 @@
-
-
 const argv = require('minimist')(process.argv.slice(2));
 const {buildRuntime} = require('../../common/utils');
 const {EXPERIMENT, urlToCachePath} = require('./helpers');

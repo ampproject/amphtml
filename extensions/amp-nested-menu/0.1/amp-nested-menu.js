@@ -1,5 +1,3 @@
-
-
 import {Keys} from '#core/constants/key-codes';
 import {isRTL, tryFocus} from '#core/dom';
 import {Layout} from '#core/dom/layout';

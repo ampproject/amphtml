@@ -1,5 +1,3 @@
-
-
 import {macroTask} from '#testing/yield';
 
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';

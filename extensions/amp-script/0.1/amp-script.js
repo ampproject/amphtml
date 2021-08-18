@@ -1,5 +1,3 @@
-
-
 import * as WorkerDOM from '@ampproject/worker-dom/dist/amp-production/main.mjs';
 
 import {Deferred} from '#core/data-structures/promise';

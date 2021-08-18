@@ -1,5 +1,3 @@
-
-
 import {
   base64DecodeToBytes,
   base64EncodeFromBytes,

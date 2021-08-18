@@ -1,5 +1,3 @@
-
-
 import {Services} from '#service';
 import {registerElement} from '#service/custom-element-registry';
 

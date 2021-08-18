@@ -1,5 +1,3 @@
-
-
 import * as Preact from '#preact';
 import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
 import {forwardRef} from '#preact/compat';

@@ -1,5 +1,3 @@
-
-
 const TEST_ID_PROPERTY = 'iAmphtmlXpathTestId';
 
 const TEST_ID_ATTRIBUTE = 'data-i-amphtml-xpath-test-id';

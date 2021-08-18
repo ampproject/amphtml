@@ -1,5 +1,3 @@
-
-
 import {copyProperties, install} from '#polyfills/custom-elements';
 
 describes.realWin(

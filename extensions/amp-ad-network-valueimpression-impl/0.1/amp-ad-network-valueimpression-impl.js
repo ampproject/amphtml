@@ -1,5 +1,3 @@
-
-
 import '#service/real-time-config/real-time-config-impl';
 import {Deferred} from '#core/data-structures/promise';
 import {domFingerprintPlain} from '#core/dom/fingerprint';

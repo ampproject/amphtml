@@ -1,5 +1,3 @@
-
-
 import {parseSrcset} from '#core/dom/srcset';
 import {hasOwn, ownProperty} from '#core/types/object';
 

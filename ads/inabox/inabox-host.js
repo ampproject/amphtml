@@ -1,5 +1,3 @@
-
-
 /**
  * Inabox host script is installed on a non-AMP host page to provide APIs for
  * its embed AMP content (such as an ad created in AMP).

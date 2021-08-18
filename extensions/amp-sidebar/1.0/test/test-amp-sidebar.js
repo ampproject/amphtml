@@ -1,4 +1,3 @@
-
 import '../amp-sidebar';
 import {ActionInvocation} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';

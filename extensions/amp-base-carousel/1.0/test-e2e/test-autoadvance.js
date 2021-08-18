@@ -1,5 +1,3 @@
-
-
 import {getCarousel, getSlides, sleep} from './helpers';
 import {useStyles} from '../component.jss';
 

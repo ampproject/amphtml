@@ -1,5 +1,3 @@
-
-
 import {matches} from '#core/dom/query';
 
 import {Filter, FilterType} from './filter';

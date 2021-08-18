@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview Export of IFrame API.
  */

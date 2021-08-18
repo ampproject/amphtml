@@ -1,5 +1,3 @@
-
-
 import * as Preact from '#preact';
 import {ContainWrapper, useValueRef} from '#preact/component';
 import {Deferred} from '#core/data-structures/promise';

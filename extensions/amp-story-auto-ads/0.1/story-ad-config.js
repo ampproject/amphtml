@@ -1,5 +1,3 @@
-
-
 import {Services} from '#service';
 import {isJsonScriptTag} from '#core/dom';
 import {isObject} from '#core/types';

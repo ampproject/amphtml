@@ -1,4 +1,3 @@
-
 import {endsWith} from '#core/types/string';
 
 import {urls} from '../../../src/config';

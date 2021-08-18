@@ -1,5 +1,3 @@
-
-
 import {useLayoutEffect, useState} from '#preact';
 
 /**

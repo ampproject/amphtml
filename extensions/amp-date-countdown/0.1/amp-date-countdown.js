@@ -1,5 +1,3 @@
-
-
 import {ActionTrust} from '#core/constants/action-constants';
 import {removeChildren} from '#core/dom';
 import {isLayoutSizeDefined} from '#core/dom/layout';

@@ -1,5 +1,3 @@
-
-
 import {DomWriterBulk, DomWriterStreamer} from '../../../src/utils/dom-writer';
 
 describes.fakeWin('DomWriterStreamer', {amp: true}, (env) => {

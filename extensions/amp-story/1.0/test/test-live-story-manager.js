@@ -1,5 +1,3 @@
-
-
 import {Action} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';

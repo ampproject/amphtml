@@ -1,5 +1,3 @@
-
-
 describes.sandboxed
   .configure()
   .skipEdge()

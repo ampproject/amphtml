@@ -1,5 +1,3 @@
-
-
 /** Polyfill for the public AbortController. */
 class AbortController {
   /** Constructor. */

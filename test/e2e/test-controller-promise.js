@@ -1,5 +1,3 @@
-
-
 import sinon from /*OK*/ 'sinon';
 
 import {ControllerPromise} from '../../build-system/tasks/e2e/controller-promise';

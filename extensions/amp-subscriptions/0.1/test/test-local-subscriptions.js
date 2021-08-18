@@ -1,5 +1,3 @@
-
-
 import {Action, SubscriptionAnalytics} from '../analytics';
 import {Dialog} from '../dialog';
 import {Entitlement, GrantReason} from '../entitlement';

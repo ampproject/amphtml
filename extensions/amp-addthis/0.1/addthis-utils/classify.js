@@ -1,4 +1,3 @@
-
 import {RE_NONALPHA, RE_WHITESPACE} from '../constants';
 import {getDetailsForMeta} from './meta';
 import {rot13Array} from './rot13';

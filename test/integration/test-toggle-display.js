@@ -1,5 +1,3 @@
-
-
 import {setInitialDisplay, toggle} from '#core/dom/style';
 
 import {BrowserController} from '#testing/test-helper';

@@ -1,5 +1,3 @@
-
-
 import {AmpStoryConsent} from '../amp-story-consent';
 import {AmpStoryStoreService, StateProperty} from '../amp-story-store-service';
 import {LocalizationService} from '#service/localization';

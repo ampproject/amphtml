@@ -1,5 +1,3 @@
-
-
 // Test `fetch-mock` integration in describes.
 describes.sandboxed('fetch-mock', {}, () => {
   /** @param {!Object} env */

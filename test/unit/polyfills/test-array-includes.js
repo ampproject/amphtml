@@ -1,5 +1,3 @@
-
-
 import {install} from '#polyfills/array-includes';
 
 describes.fakeWin('Array.includes', {}, (env) => {

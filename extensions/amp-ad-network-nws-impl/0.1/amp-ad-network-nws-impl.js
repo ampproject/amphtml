@@ -1,5 +1,3 @@
-
-
 import {removeElement} from '#core/dom';
 import {parseJson} from '#core/types/object/json';
 

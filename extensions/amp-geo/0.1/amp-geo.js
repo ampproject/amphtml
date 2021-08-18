@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview Sets location specific CSS, bind variables, and attributes on
  * AMP pages

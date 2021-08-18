@@ -1,5 +1,3 @@
-
-
 import * as openWindowDialog from '../../../../src/open-window-dialog';
 import * as service from '../../../../src/service-helpers';
 import {

@@ -1,5 +1,3 @@
-
-
 import * as Preact from '#preact';
 import {Lightbox} from '../component';
 import {mount} from 'enzyme';

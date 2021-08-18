@@ -1,4 +1,3 @@
-
 import {waitForChild} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {scopedQuerySelector} from '#core/dom/query';

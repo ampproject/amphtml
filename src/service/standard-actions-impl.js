@@ -1,5 +1,3 @@
-
-
 import {ActionTrust} from '#core/constants/action-constants';
 import {tryFocus} from '#core/dom';
 import {Layout, getLayoutClass} from '#core/dom/layout';

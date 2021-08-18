@@ -1,5 +1,3 @@
-
-
 import {fontStylesheetTimeout} from '../../src/font-stylesheet-timeout';
 
 describes.realWin(

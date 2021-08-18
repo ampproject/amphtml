@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview Definitions for the Layout Jank API.
  *

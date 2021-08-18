@@ -1,5 +1,3 @@
-
-
 /**
  * Injects alias identifiers for values with default assignments.
  * Closure can't correctly type-narrow the defaulted value to exclude `undefined`,

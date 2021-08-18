@@ -1,5 +1,3 @@
-
-
 import {dict} from '#core/types/object';
 
 import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';

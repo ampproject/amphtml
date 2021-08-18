@@ -1,5 +1,3 @@
-
-
 import {writeScript} from './3p';
 
 import {userAssert} from '../src/log';

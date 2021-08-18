@@ -1,5 +1,3 @@
-
-
 import {getDataParamsFromAttributes} from '#core/dom';
 import {Layout} from '#core/dom/layout';
 import {toggle} from '#core/dom/style';

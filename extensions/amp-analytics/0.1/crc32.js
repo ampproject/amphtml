@@ -1,5 +1,3 @@
-
-
 import {utf8Encode} from '#core/types/string/bytes';
 
 /**

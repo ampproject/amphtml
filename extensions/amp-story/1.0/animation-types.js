@@ -1,5 +1,3 @@
-
-
 import {
   WebAnimationBuilderOptionsDef,
   WebAnimationDef,

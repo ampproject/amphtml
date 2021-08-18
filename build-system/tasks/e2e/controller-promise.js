@@ -1,5 +1,3 @@
-
-
 /**
  * Allow expectations to await the expected value. Duck-type a real Promise.
  * This class, and its waitForValue member function, are necessary because

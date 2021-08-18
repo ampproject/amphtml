@@ -1,5 +1,3 @@
-
-
 /** @fileoverview Helpers to wrap functions. */
 
 /**

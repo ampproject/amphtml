@@ -1,5 +1,3 @@
-
-
 import {AnalyticsEventType} from './events';
 import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
 import {ExpansionOptions, variableServiceForDoc} from './variables';

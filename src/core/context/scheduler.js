@@ -1,5 +1,3 @@
-
-
 /** @typedef {function(function())} */
 let SchedulerDef;
 /**

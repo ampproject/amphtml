@@ -1,5 +1,3 @@
-
-
 import {removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 

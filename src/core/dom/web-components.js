@@ -1,5 +1,3 @@
-
-
 /**
  * Possible versions of Shadow DOM spec
  * @enum {string}

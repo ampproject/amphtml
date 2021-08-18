@@ -1,5 +1,3 @@
-
-
 import {parseJson} from '#core/types/object/json';
 import {bytesToString, stringToBytes} from '#core/types/string/bytes';
 

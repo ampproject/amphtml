@@ -1,4 +1,3 @@
-
 import {poll} from '#testing/iframe';
 
 const RENDER_TIMEOUT = 15000;

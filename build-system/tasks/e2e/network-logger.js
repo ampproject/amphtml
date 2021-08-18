@@ -1,4 +1,3 @@
-
 import selenium from 'selenium-webdriver';
 
 const {logging} = selenium;

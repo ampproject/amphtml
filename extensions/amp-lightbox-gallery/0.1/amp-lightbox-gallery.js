@@ -1,5 +1,3 @@
-
-
 import {prepareImageAnimation} from '@ampproject/animations';
 
 import {CommonSignals} from '#core/constants/common-signals';

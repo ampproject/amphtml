@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview Displays BySide placeholder content.
  * The client settings and placeholder content label should be added as

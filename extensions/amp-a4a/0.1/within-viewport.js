@@ -1,5 +1,3 @@
-
-
 import {Deferred} from '#core/data-structures/promise';
 import {isIframed} from '#core/dom';
 import {memo} from '#core/types/object';

@@ -1,5 +1,3 @@
-
-
 const {dirname, join, relative, resolve} = require('path').posix;
 
 /**

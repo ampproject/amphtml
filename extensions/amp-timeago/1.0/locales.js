@@ -1,5 +1,3 @@
-
-
 /**
  * This file registers all necessary locales supported by amp-timeago.
  */

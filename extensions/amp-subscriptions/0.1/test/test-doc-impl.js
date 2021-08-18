@@ -1,5 +1,3 @@
-
-
 import {DocImpl} from '../doc-impl';
 
 describes.realWin('DocImpl', {amp: true}, (env) => {

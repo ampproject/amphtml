@@ -1,5 +1,3 @@
-
-
 const router = require('express').Router();
 const {log} = require('../amp4test');
 

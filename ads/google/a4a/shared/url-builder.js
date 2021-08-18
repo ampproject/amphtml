@@ -1,5 +1,3 @@
-
-
 /** @typedef {{name: string, value: (string|number|null)}} */
 export let QueryParameterDef;
 

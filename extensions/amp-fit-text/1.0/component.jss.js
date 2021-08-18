@@ -1,5 +1,3 @@
-
-
 import {createUseStyles} from 'react-jss';
 
 export const LINE_HEIGHT_EM_ = 1.15;

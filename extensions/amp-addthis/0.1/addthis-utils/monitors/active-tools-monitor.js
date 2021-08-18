@@ -1,4 +1,3 @@
-
 import {RE_ALPHA} from '../../constants';
 
 const RE_NUMDASH = /[0-9\-].*/;

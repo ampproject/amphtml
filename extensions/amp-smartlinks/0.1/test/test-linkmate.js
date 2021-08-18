@@ -1,5 +1,3 @@
-
-
 import * as DocumentReady from '#core/document-ready';
 
 import {Services} from '#service';

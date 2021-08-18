@@ -1,5 +1,3 @@
-
-
 import {Services} from '#service';
 
 export class ScrollMonitor {

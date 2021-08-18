@@ -1,5 +1,3 @@
-
-
 import {
   CONSENT_ITEM_STATE,
   ConsentInfoDef,

@@ -1,5 +1,3 @@
-
-
 import {RelativePositions, layoutRectLtwh} from '#core/dom/layout/rect';
 
 import {AmpVisibilityObserver} from '../amp-position-observer';

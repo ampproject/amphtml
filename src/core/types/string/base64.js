@@ -1,5 +1,3 @@
-
-
 import {bytesToString, stringToBytes, utf8Decode, utf8Encode} from './bytes';
 
 /**

@@ -1,4 +1,3 @@
-
 /* eslint-disable local/html-template */
 
 const {html} = require('./app-index/html');

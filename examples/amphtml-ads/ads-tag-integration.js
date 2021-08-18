@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview This is a sample bootstrap script for AMP in-a-box host.
  */

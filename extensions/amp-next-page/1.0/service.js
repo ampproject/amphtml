@@ -1,5 +1,3 @@
-
-
 import {VisibilityState} from '#core/constants/visibility-state';
 import {
   insertAtStart,

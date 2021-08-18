@@ -1,5 +1,3 @@
-
-
 const debounce = require('../../common/debounce');
 const fs = require('fs-extra');
 const globby = require('globby');

@@ -1,5 +1,3 @@
-
-
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
 import {registerServiceBuilderForDoc} from '../../../src/service-helpers';

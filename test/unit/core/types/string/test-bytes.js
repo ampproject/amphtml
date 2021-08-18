@@ -1,5 +1,3 @@
-
-
 import {
   bytesToString,
   bytesToUInt32,

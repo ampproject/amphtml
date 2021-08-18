@@ -1,5 +1,3 @@
-
-
 import {dict} from '#core/types/object';
 import {deepEquals} from '#core/types/object/json';
 

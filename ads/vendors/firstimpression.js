@@ -1,5 +1,3 @@
-
-
 import {parseQueryString} from '#core/types/string/url';
 import {validateData, writeScript} from '#3p/3p';
 

@@ -1,5 +1,3 @@
-
-
 import '../../../amp-ad/0.1/amp-ad';
 import {Services} from '#service';
 

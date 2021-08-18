@@ -1,4 +1,3 @@
-
 'use strict';
 
 // This rule asserts that we only grab properties from getMode(), and never

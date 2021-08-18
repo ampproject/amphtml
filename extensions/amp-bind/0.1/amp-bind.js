@@ -1,5 +1,3 @@
-
-
 import {AmpBindMacro} from './amp-bind-macro';
 import {AmpState} from './amp-state';
 import {Bind} from './bind-impl';

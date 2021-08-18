@@ -1,5 +1,3 @@
-
-
 import * as Preact from '#preact';
 import {BentoFitText, calculateFontSize, setOverflowStyle} from '../component';
 import {computedStyle} from '#core/dom/style';

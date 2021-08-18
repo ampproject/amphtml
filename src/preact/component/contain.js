@@ -1,5 +1,3 @@
-
-
 import * as Preact from '#preact';
 import {forwardRef} from '#preact/compat';
 

@@ -1,5 +1,3 @@
-
-
 import {
   IframeTransport,
   getIframeTransportScriptUrlForTesting,

@@ -1,5 +1,3 @@
-
-
 import {date, number, select, text, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';

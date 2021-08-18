@@ -1,5 +1,3 @@
-
-
 import {TransportSerializers} from '../transport-serializer';
 import {dict} from '#core/types/object';
 import {isArray} from '#core/types';

@@ -1,5 +1,3 @@
-
-
 import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {dict, getValueForExpr} from '#core/types/object';

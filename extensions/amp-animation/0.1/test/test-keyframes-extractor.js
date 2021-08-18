@@ -1,5 +1,3 @@
-
-
 import {poll} from '#testing/iframe';
 
 import {extractKeyframes} from '../parsers/keyframes-extractor';

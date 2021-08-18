@@ -1,5 +1,3 @@
-
-
 import {RAW_OBJECT_ARGS_KEY} from '#core/constants/action-constants';
 import {htmlFor} from '#core/dom/static-template';
 import {toggle} from '#core/dom/style';

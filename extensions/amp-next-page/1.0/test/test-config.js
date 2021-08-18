@@ -1,4 +1,3 @@
-
 import {Page} from '../page';
 import {validatePage} from '../utils';
 

@@ -1,4 +1,3 @@
-
 /* eslint-disable require-jsdoc */
 import {validateData} from '#3p/3p';
 

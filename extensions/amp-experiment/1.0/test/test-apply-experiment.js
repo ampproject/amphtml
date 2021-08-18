@@ -1,5 +1,3 @@
-
-
 import {createElementWithAttributes} from '#core/dom';
 
 import {toggleExperiment} from '#experiments';

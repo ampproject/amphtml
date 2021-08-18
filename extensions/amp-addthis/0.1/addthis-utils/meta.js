@@ -1,5 +1,3 @@
-
-
 /**
  * Returns a NodeList of Meta Elements (not an Array)
  * @param {Document} doc

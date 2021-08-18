@@ -1,5 +1,3 @@
-
-
 import {ActionTrust} from '#core/constants/action-constants';
 import {dict} from '#core/types/object';
 import {toWin} from '#core/window';

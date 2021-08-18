@@ -1,5 +1,3 @@
-
-
 describes.realWin(
   'amp-image-slider component',
   {

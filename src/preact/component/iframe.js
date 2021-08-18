@@ -1,5 +1,3 @@
-
-
 import {Loading} from '#core/constants/loading-instructions';
 import {ReadyState} from '#core/constants/ready-state';
 

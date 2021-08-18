@@ -1,5 +1,3 @@
-
-
 import {devAssert, userAssert} from '#core/assert';
 import {TimestampDef, parseDate} from '#core/types/date';
 

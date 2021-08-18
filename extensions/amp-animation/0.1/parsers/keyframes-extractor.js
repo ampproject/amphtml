@@ -1,5 +1,3 @@
-
-
 import {endsWith} from '#core/types/string';
 import {toWin} from '#core/window';
 

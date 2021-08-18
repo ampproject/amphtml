@@ -1,5 +1,3 @@
-
-
 import {
   Loading,
   reducer as loadingReducer,

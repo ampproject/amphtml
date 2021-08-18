@@ -1,5 +1,3 @@
-
-
 const ESCAPE_REGEX = /\${|\\|`/g;
 
 /**

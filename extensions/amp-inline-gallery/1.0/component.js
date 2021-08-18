@@ -1,4 +1,3 @@
-
 import * as Preact from '#preact';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
 import {ContainWrapper} from '#preact/component';

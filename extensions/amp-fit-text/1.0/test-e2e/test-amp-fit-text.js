@@ -1,5 +1,3 @@
-
-
 /**
  * TODO: The timeout is increased for cross-light/shadow DOM traversal.
  * This should be removed, but currently without it the tests are flaky.

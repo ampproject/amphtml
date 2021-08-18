@@ -1,4 +1,3 @@
-
 import {whenDocumentComplete} from '#core/document-ready';
 import {isFiniteNumber} from '#core/types';
 

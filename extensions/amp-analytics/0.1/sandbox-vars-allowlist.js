@@ -1,5 +1,3 @@
-
-
 /**
  * Used for inserted scoped analytics element.
  * @const {!Object<string, boolean>}

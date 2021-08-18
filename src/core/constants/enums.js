@@ -1,5 +1,3 @@
-
-
 /**
  * Registred singleton on AMP doc.
  * @enum {number}

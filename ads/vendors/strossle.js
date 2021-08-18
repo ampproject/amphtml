@@ -1,5 +1,3 @@
-
-
 import {loadScript, validateData} from '#3p/3p';
 
 const renderTo = 'strossle-widget';

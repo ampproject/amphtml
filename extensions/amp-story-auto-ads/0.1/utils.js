@@ -1,5 +1,3 @@
-
-
 import {CtaTypes} from './story-ad-localization';
 import {getCryptoRandomBytesArray} from '#core/types/string/bytes';
 

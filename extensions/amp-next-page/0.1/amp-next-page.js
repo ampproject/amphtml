@@ -1,5 +1,3 @@
-
-
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {isJsonScriptTag, removeElement} from '#core/dom';
 import {Layout} from '#core/dom/layout';

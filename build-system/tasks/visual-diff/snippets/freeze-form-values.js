@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview This file is executed via Puppeteer's page.evaluate on a
  * document to copy the values of forms into their attributes, so that they will

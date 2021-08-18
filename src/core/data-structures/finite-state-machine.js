@@ -1,5 +1,3 @@
-
-
 import {devAssert} from '#core/assert';
 import {map} from '#core/types/object';
 

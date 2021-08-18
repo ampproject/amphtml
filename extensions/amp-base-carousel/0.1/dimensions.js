@@ -1,5 +1,3 @@
-
-
 import {mod} from '#core/math';
 import {setImportantStyles, setStyle} from '#core/dom/style';
 

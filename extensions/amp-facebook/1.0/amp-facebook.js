@@ -1,5 +1,3 @@
-
-
 import {BaseElement} from './base-element';
 import {createLoaderLogo} from '../0.1/facebook-loader';
 import {dashToUnderline} from '#core/types/string';

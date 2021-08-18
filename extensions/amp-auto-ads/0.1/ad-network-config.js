@@ -1,5 +1,3 @@
-
-
 import {AdSenseNetworkConfig} from './adsense-network-config';
 import {AlrightNetworkConfig} from './alright-network-config';
 import {DenakopNetworkConfig} from './denakop-network-config';

@@ -1,4 +1,3 @@
-
 import {AFFILIATE_LINK_SELECTOR} from './amp-story-affiliate-link';
 import {
   Action,

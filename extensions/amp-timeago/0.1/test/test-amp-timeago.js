@@ -1,4 +1,3 @@
-
 import '../amp-timeago';
 
 describes.realWin(

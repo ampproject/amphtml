@@ -1,5 +1,3 @@
-
-
 import '../amp-pan-zoom';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyles} from '#core/dom/style';

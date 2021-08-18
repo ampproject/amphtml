@@ -1,5 +1,3 @@
-
-
 /**
  * Runs the video manager integration test suite against a video player that
  * implements the video interface (@see ../../src/video-interface.js)

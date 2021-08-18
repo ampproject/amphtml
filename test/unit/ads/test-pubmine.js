@@ -1,5 +1,3 @@
-
-
 import {pubmine} from '#ads/vendors/pubmine';
 
 describes.fakeWin('pubmine', {}, (env) => {

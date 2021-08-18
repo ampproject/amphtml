@@ -1,5 +1,3 @@
-
-
 const TAG = 'amp-viewer-messaging';
 const CHANNEL_OPEN_MSG = 'channelOpen';
 const HANDSHAKE_POLL_MSG = 'handshake-poll';

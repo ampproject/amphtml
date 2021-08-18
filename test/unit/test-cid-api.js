@@ -1,5 +1,3 @@
-
-
 import {GoogleCidApi} from '#service/cid-api';
 
 import {mockWindowInterface, stubService} from '#testing/test-helper';

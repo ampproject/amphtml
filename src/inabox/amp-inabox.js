@@ -1,5 +1,3 @@
-
-
 /**
  * The entry point for AMP inabox runtime (inabox-v0.js).
  */

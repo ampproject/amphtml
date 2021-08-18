@@ -1,4 +1,3 @@
-
 'use strict';
 
 // Enforces imports statements from a module are not duplicated

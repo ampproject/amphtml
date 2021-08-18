@@ -1,4 +1,3 @@
-
 import {tryDecodeUriComponent} from '#core/types/string/url';
 
 import {loadScript} from './3p';

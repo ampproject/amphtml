@@ -1,4 +1,3 @@
-
 import {getConsentData} from './consent-util';
 import {handleCompanionBottomAd} from './companion/bottomAd';
 import {handleCompanionDisplay} from './companion/display';

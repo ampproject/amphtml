@@ -1,5 +1,3 @@
-
-
 import {htmlFor} from '#core/dom/static-template';
 import {toggle} from '#core/dom/style';
 import {parseQueryString} from '#core/types/string/url';

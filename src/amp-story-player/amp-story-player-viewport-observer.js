@@ -1,5 +1,3 @@
-
-
 import {throttle} from '#core/types/function';
 
 /** @const {number} */

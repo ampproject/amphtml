@@ -1,5 +1,3 @@
-
-
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {iterateCursor} from '#core/dom';
 

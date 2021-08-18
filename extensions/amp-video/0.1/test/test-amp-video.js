@@ -1,5 +1,3 @@
-
-
 import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
 import {AmpVideo, isCachedByCdn} from '../amp-video';
 import {Services} from '#service';

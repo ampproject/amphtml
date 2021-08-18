@@ -1,5 +1,3 @@
-
-
 import {VisibilityState} from '#core/constants/visibility-state';
 import {containsNotSelf} from '#core/dom';
 import {rethrowAsync} from '#core/error';

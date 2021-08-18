@@ -1,5 +1,3 @@
-
-
 import {Services} from '#service';
 
 import {CSS} from '../../../../build/amp-form-0.1.css';

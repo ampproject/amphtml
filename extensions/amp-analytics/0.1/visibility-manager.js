@@ -1,5 +1,3 @@
-
-
 import {Services} from '#service';
 import {VisibilityModel} from './visibility-model';
 import {dev, user} from '../../../src/log';

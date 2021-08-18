@@ -1,5 +1,3 @@
-
-
 import {Services} from '#service';
 
 /** Timeout that can be postponed, repeated or cancelled. */

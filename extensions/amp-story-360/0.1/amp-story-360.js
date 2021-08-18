@@ -1,5 +1,3 @@
-
-
 /**
  * Must be served over https for permissions API to work.
  * For local development, run amp --host="192.168.44.47" --https --extensions=amp-story-360

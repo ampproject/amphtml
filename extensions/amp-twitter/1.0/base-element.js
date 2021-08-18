@@ -1,5 +1,3 @@
-
-
 import {PreactBaseElement} from '#preact/base-element';
 import {Twitter} from './component';
 

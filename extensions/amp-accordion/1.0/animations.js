@@ -1,5 +1,3 @@
-
-
 import {getStyle, setStyles} from '#core/dom/style';
 
 const MAX_TRANSITION_DURATION = 500; // ms

@@ -1,5 +1,3 @@
-
-
 import {getNextArrow, getPrevArrow, getSlide} from './helpers';
 
 /** The total number of slides in the carousel */

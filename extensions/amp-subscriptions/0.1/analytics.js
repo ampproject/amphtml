@@ -1,5 +1,3 @@
-
-
 import {dict} from '#core/types/object';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {user} from '../../../src/log';

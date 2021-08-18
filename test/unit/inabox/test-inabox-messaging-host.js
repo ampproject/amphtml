@@ -1,5 +1,3 @@
-
-
 import {InaboxMessagingHost} from '#ads/inabox/inabox-messaging-host';
 
 import {deserializeMessage} from '#core/3p-frame-messaging';

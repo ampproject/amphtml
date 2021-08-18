@@ -1,5 +1,3 @@
-
-
 import {install, installForChildWin} from '#polyfills/resize-observer';
 import {
   ResizeObserverStub,

@@ -1,5 +1,3 @@
-
-
 import {ExternalReorderHeadTransformer} from '../external-reorder-head-transformer';
 
 const title = `<title>Hello, world.</title>`;

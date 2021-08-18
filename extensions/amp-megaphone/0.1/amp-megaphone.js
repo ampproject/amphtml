@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview Embeds a Megaphone podcast
  *

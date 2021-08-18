@@ -1,5 +1,3 @@
-
-
 import {done} from 'fetch-mock';
 
 import {getSourceUrl} from '../../../../../src/url';

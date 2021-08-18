@@ -1,5 +1,3 @@
-
-
 import {getStyle} from '#core/dom/style';
 import {WindowInterface} from '#core/window/interface';
 

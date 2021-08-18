@@ -1,5 +1,3 @@
-
-
 import {ActionTrust} from '#core/constants/action-constants';
 import {Deferred} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';

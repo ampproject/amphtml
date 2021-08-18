@@ -1,5 +1,3 @@
-
-
 import {ActionTrust} from '#core/constants/action-constants';
 import {Keys} from '#core/constants/key-codes';
 import {bezierCurve} from '#core/data-structures/curve';

@@ -1,5 +1,3 @@
-
-
 import {setStyle, setStyles} from '#core/dom/style';
 
 import {delayAfterDeferringToEventLoop} from './utils';

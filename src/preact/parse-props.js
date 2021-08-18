@@ -1,5 +1,3 @@
-
-
 import {devAssert} from '#core/assert';
 import {Loading} from '#core/constants/loading-instructions';
 import {sequentialIdGenerator} from '#core/data-structures/id-generator';

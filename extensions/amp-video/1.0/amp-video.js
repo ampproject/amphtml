@@ -1,5 +1,3 @@
-
-
 import {CSS} from '../../../build/amp-video-1.0.css';
 import {VideoBaseElement} from './video-base-element';
 import {isExperimentOn} from '#experiments';

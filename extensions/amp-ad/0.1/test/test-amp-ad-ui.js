@@ -1,5 +1,3 @@
-
-
 import * as adHelper from '../../../../src/ad-helper';
 import * as domQuery from '#core/dom/query';
 import {AmpAdUIHandler} from '../amp-ad-ui';

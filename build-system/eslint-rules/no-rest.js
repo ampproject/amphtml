@@ -1,4 +1,3 @@
-
 'use strict';
 
 // Forbids use of Rest elements when they require an iterator polyfill, or

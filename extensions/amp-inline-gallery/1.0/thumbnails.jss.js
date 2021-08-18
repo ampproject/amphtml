@@ -1,5 +1,3 @@
-
-
 import {createUseStyles} from 'react-jss';
 
 // Default height. Can be overridden by user style.

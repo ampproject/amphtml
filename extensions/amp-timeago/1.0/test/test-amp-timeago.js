@@ -1,4 +1,3 @@
-
 import '../amp-timeago';
 import {toggleExperiment} from '#experiments';
 

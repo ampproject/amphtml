@@ -1,5 +1,3 @@
-
-
 import * as AmpAnalytics from '../../../../src/analytics';
 import {
   ActionStatus,

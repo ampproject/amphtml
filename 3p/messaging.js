@@ -1,5 +1,3 @@
-
-
 import {parseJson} from '#core/types/object/json';
 
 import {getData} from '../src/event-helper';

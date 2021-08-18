@@ -1,5 +1,3 @@
-
-
 import {Layout} from '#core/dom/layout';
 import {LinkRewriter} from './link-rewriter';
 import {Priority} from '#service/navigation';

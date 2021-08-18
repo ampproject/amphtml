@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview Directly imported into web-worker.js entry point so polyfills
  *     can be used in top-level scope in module dependencies.

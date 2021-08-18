@@ -1,5 +1,3 @@
-
-
 import {
   AdvancementConfig,
   ManualAdvancement,

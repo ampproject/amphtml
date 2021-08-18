@@ -1,5 +1,3 @@
-
-
 import {removeElement} from '#core/dom';
 import {rethrowAsync} from '#core/error';
 import {dict} from '#core/types/object';

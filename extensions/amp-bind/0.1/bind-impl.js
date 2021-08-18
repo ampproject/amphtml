@@ -1,5 +1,3 @@
-
-
 import {RAW_OBJECT_ARGS_KEY} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';

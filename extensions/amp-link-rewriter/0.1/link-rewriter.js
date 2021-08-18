@@ -1,5 +1,3 @@
-
-
 import {Services} from '#service';
 import {getConfigOpts} from './config-options';
 import {getDataParamsFromAttributes} from '#core/dom';

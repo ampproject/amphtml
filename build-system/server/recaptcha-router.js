@@ -1,5 +1,3 @@
-
-
 const argv = require('minimist')(process.argv.slice(2));
 const cors = require('./amp-cors');
 const pc = process;

@@ -1,4 +1,3 @@
-
 import '../amp-next-page';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {htmlFor} from '#core/dom/static-template';

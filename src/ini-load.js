@@ -1,5 +1,3 @@
-
-
 import {isIframed} from '#core/dom';
 
 import {Services} from '#service';

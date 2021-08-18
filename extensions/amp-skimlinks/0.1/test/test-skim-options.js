@@ -1,5 +1,3 @@
-
-
 import helpersFactory from './helpers';
 
 import {WAYPOINT_BASE_URL} from '../constants';

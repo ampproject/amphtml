@@ -1,5 +1,3 @@
-
-
 import {Deferred} from '#core/data-structures/promise';
 import {
   PRESET_OPTION_ATTRIBUTES,

@@ -1,5 +1,3 @@
-
-
 /**
  * Whether addEventListener supports options or only takes capture as a boolean
  * @type {boolean|undefined}

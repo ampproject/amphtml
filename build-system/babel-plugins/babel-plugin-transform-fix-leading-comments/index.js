@@ -1,5 +1,3 @@
-
-
 /**
  * Reassigns the trailing comments of a statement to be leading comment of its
  * next sibling. This is because JSDoc comments (which should be on the next

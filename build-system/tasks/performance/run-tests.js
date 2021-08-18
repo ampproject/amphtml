@@ -1,5 +1,3 @@
-
-
 const Mocha = require('mocha');
 const path = require('path');
 const TEST_SUITE_PATH = 'build-system/tasks/performance/test-suite.js';

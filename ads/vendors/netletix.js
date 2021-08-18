@@ -1,5 +1,3 @@
-
-
 import {addParamsToUrl, assertHttpsUrl} from '../../src/url';
 import {dev} from '../../src/log';
 import {dict} from '#core/types/object';

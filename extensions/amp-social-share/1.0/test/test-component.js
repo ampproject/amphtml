@@ -1,5 +1,3 @@
-
-
 import {mount} from 'enzyme';
 
 import {dict} from '#core/types/object';

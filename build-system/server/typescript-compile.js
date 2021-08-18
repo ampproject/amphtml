@@ -1,4 +1,3 @@
-
 const esbuild = require('esbuild');
 const globby = require('globby');
 const path = require('path');

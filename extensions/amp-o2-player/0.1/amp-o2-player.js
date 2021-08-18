@@ -1,5 +1,3 @@
-
-
 import {MessageType} from '#core/3p-frame-messaging';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';

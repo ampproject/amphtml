@@ -1,4 +1,3 @@
-
 import {getChildJsonConfig} from '#core/dom';
 import {hasOwn} from '#core/types/object';
 import {user, userAssert} from '../../../src/log';

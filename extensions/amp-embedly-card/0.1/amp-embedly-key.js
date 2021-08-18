@@ -1,5 +1,3 @@
-
-
 import {Layout} from '#core/dom/layout';
 
 import {userAssert} from '../../../src/log';

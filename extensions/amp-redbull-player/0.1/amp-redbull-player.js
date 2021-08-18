@@ -1,4 +1,3 @@
-
 import {
   dispatchCustomEvent,
   getDataParamsFromAttributes,

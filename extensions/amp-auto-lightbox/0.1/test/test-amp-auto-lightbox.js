@@ -1,5 +1,3 @@
-
-
 import {CommonSignals} from '#core/constants/common-signals';
 import {tryResolve} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';

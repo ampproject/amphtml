@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview The iframe API for access.
  *

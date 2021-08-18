@@ -1,5 +1,3 @@
-
-
 import {
   ADSENSE_MCRSPV_TAG,
   getMatchedContentResponsiveHeightAndUpdatePubParams,

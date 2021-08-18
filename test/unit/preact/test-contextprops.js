@@ -1,5 +1,3 @@
-
-
 import {CanPlay, CanRender, LoadingProp} from '#preact/contextprops';
 
 describes.sandboxed('contextprops - common props', {}, () => {

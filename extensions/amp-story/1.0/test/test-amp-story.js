@@ -1,5 +1,3 @@
-
-
 import * as consent from '../../../../src/consent';
 import * as utils from '../utils';
 import {

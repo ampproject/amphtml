@@ -1,4 +1,3 @@
-
 import {devAssert, user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-fx-collection';

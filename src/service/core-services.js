@@ -1,5 +1,3 @@
-
-
 import {installImg} from '#builtins/amp-img/amp-img';
 import {installLayout} from '#builtins/amp-layout/amp-layout';
 import {installPixel} from '#builtins/amp-pixel/amp-pixel';

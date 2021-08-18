@@ -1,5 +1,3 @@
-
-
 require('babel-regenerator-runtime');
 const describes = require('./describes-e2e');
 const {expect} = require('./expect');

@@ -1,5 +1,3 @@
-
-
 import '../amp-yotpo';
 import {yotpo} from '#3p/yotpo';
 

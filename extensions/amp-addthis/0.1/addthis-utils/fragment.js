@@ -1,4 +1,3 @@
-
 import {isValidCUID} from './cuid';
 
 const RE_ADDTHIS_FRAGMENT = /^\.[a-z0-9\-_]{11}(\.[a-z0-9_]+)?$/i;

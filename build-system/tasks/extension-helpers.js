@@ -1,5 +1,3 @@
-
-
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
 const debounce = require('../common/debounce');

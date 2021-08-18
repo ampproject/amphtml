@@ -1,5 +1,3 @@
-
-
 import {Action, getStoreService} from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-unsupported-browser-layer-1.0.css';
 import {LocalizedStringId} from '#service/localization/strings';

@@ -1,5 +1,3 @@
-
-
 import {measureIntersectionNoRoot} from '#core/dom/layout/intersection-no-root';
 
 describes.fakeWin(

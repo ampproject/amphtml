@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview Base layer from which other layers in a story page extend from.
  */

@@ -1,5 +1,3 @@
-
-
 import {CMP_CONFIG} from './cmps';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';

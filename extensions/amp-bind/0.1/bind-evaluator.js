@@ -1,5 +1,3 @@
-
-
 import {remove} from '#core/types/array';
 
 import {BindExpression} from './bind-expression';

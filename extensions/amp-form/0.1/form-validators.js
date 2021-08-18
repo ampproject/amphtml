@@ -1,4 +1,3 @@
-
 import {iterateCursor} from '#core/dom';
 import {toWin} from '#core/window';
 

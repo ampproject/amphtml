@@ -1,5 +1,3 @@
-
-
 import '../amp-carousel';
 import * as Listen from '../../../../src/event-helper';
 import {ActionTrust} from '#core/constants/action-constants';

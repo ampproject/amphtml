@@ -1,5 +1,3 @@
-
-
 import {AmpEvents} from '#core/constants/amp-events';
 import {iterateCursor, removeElement} from '#core/dom';
 import {computedStyle, px, setStyle} from '#core/dom/style';

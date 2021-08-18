@@ -1,4 +1,3 @@
-
 import {measureIntersection} from '#core/dom/layout/intersection';
 import {dict} from '#core/types/object';
 

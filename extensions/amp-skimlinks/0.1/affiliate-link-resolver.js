@@ -1,5 +1,3 @@
-
-
 import {dict} from '#core/types/object';
 
 import {TwoStepsResponse} from './link-rewriter/two-steps-response';

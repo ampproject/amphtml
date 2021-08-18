@@ -1,5 +1,3 @@
-
-
 import {CSS as AmpInlineGalleryCSS} from '../../../build/amp-inline-gallery-0.1.css';
 import {AmpInlineGalleryCaptions} from './amp-inline-gallery-captions';
 import {CSS as AmpInlineGalleryCaptionsCSS} from '../../../build/amp-inline-gallery-captions-0.1.css';

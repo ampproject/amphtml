@@ -1,5 +1,3 @@
-
-
 import {LocalSubscriptionIframePlatform} from './local-subscription-platform-iframe';
 import {LocalSubscriptionRemotePlatform} from './local-subscription-platform-remote';
 

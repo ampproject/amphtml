@@ -1,5 +1,3 @@
-
-
 import {
   addDocumentVisibilityChangeListener,
   getDocumentVisibilityState,

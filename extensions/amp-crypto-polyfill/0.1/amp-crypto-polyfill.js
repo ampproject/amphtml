@@ -1,5 +1,3 @@
-
-
 import {sha384} from '#third_party/closure-library/sha384-generated';
 
 import {registerServiceBuilder} from '../../../src/service-helpers';

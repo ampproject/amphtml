@@ -1,5 +1,3 @@
-
-
 import {dev, devAssert} from '../../../src/log';
 import {isProxyOrigin} from '../../../src/url';
 

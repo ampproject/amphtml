@@ -1,5 +1,3 @@
-
-
 describes.endtoend(
   'amp-sidebar with toolbar',
   {

@@ -1,5 +1,3 @@
-
-
 /** @enum {string} */
 const AmpdocEnvironment = {
   SINGLE: 'single',

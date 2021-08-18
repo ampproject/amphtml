@@ -1,5 +1,3 @@
-
-
 import {IframeMessagingClient} from '#3p/iframe-messaging-client';
 
 import {serializeMessage} from '#core/3p-frame-messaging';

@@ -1,4 +1,3 @@
-
 import '../amp-lightbox';
 import {ActionInvocation} from '#service/action-impl';
 import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';

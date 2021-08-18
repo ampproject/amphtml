@@ -1,5 +1,3 @@
-
-
 import {LocalizedStringId} from '#service/localization/strings';
 import localesObjs from '../_locales';
 

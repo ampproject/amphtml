@@ -1,4 +1,3 @@
-
 import {MessageType} from '#core/3p-frame-messaging';
 import {AmpEvents} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';

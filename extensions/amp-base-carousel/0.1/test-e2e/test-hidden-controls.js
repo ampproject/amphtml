@@ -1,5 +1,3 @@
-
-
 import {getNextArrow} from './helpers';
 
 describes.endtoend(

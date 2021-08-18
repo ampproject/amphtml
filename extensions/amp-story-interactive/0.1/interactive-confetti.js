@@ -1,5 +1,3 @@
-
-
 import {Services} from '#service';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyles} from '#core/dom/style';

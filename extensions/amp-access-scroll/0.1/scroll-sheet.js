@@ -1,5 +1,3 @@
-
-
 import {toggle} from '#core/dom/style';
 import {dict, hasOwn} from '#core/types/object';
 

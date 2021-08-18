@@ -1,5 +1,3 @@
-
-
 // src/polyfills.js must be the first import.
 import './polyfills';
 

@@ -1,5 +1,3 @@
-
-
 import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {
   AnalyticsEvent,

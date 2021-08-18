@@ -1,5 +1,3 @@
-
-
 import {Deferred} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
 import {layoutRectLtwh} from '#core/dom/layout/rect';

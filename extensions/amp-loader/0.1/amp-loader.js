@@ -1,5 +1,3 @@
-
-
 import {isIframeVideoPlayerComponent} from '#core/dom/layout';
 import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles, setStyle} from '#core/dom/style';

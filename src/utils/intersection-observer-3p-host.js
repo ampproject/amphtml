@@ -1,5 +1,3 @@
-
-
 import {MessageType} from '#core/3p-frame-messaging';
 import {
   layoutRectLtwh,

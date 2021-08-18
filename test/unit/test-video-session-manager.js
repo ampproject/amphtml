@@ -1,5 +1,3 @@
-
-
 import {VideoSessionManager} from '#service/video-session-manager';
 
 describes.sandboxed('VideoSessionManager', {}, (env) => {

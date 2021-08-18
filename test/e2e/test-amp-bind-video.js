@@ -1,5 +1,3 @@
-
-
 describes.endtoend(
   'amp-bind with <amp-video>',
   {

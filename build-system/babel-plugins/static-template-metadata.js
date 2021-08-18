@@ -1,5 +1,3 @@
-
-
 /** Metadata for static template functions `htmlFor` and `svgFor`. */
 
 /**

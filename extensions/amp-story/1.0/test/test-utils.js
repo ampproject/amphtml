@@ -1,5 +1,3 @@
-
-
 import {StateProperty} from '../amp-story-store-service';
 import {
   getRGBFromCssColorValue,

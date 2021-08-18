@@ -1,5 +1,3 @@
-
-
 const config = describes.sandboxed.configure().ifChrome();
 config.run('amp-fx-collection', {}, function () {
   const css = `

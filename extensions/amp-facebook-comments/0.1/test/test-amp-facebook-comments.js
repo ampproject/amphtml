@@ -1,5 +1,3 @@
-
-
 import '../amp-facebook-comments';
 import {createElementWithAttributes} from '#core/dom';
 import {doNotLoadExternalResourcesInTest} from '#testing/iframe';

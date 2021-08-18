@@ -1,5 +1,3 @@
-
-
 import {AmpPixel} from '#builtins/amp-pixel/amp-pixel';
 
 import {createElementWithAttributes} from '#core/dom';

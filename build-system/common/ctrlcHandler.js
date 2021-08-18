@@ -1,5 +1,3 @@
-
-
 const colors = require('./colors');
 const {exec, execScriptAsync} = require('./exec');
 const {logLocalDev} = require('./logging');

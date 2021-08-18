@@ -1,5 +1,3 @@
-
-
 import '../amp-facebook';
 import {createElementWithAttributes} from '#core/dom';
 import {doNotLoadExternalResourcesInTest} from 'testing/iframe';

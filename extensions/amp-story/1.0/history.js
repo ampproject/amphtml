@@ -1,5 +1,3 @@
-
-
 import {dict} from '#core/types/object';
 import {getHistoryState as getWindowHistoryState} from '#core/window/history';
 import {parseJson} from '#core/types/object/json';

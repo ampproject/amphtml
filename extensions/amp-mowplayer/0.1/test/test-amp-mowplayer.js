@@ -1,5 +1,3 @@
-
-
 import '../amp-mowplayer';
 import {createElementWithAttributes} from '#core/dom';
 

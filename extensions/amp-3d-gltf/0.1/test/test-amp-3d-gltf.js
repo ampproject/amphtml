@@ -1,5 +1,3 @@
-
-
 import '../amp-3d-gltf';
 import {createIframeWithMessageStub} from '#testing/iframe';
 

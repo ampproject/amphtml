@@ -1,5 +1,3 @@
-
-
 import {Deferred} from '#core/data-structures/promise';
 import {Observable} from '#core/data-structures/observable';
 import {devAssert} from '../../../src/log';

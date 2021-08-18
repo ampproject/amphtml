@@ -1,5 +1,3 @@
-
-
 /**
  * Describes the contract for an inputmask UX controller.
  * @interface

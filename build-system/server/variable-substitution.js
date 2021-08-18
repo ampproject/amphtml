@@ -1,5 +1,3 @@
-
-
 let url;
 let variableSubstitution;
 let variables;

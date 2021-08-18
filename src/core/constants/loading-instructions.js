@@ -1,5 +1,3 @@
-
-
 /**
  * An expanded set of loading instructions based on
  * https://developer.mozilla.org/en-US/docs/Web/Performance/Lazy_loading.

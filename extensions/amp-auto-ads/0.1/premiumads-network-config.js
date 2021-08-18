@@ -1,4 +1,3 @@
-
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
 import {Layout} from '#core/dom/layout';

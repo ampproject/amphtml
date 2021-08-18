@@ -1,5 +1,3 @@
-
-
 /**
  * Checks that the document is of an AMP format type.
  * @param {!Array<string>} formats

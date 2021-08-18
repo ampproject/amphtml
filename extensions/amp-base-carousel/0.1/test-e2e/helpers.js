@@ -1,5 +1,3 @@
-
-
 const TAG_NAME = 'amp-base-carousel';
 const SLOTTED_CLASS = 'i-amphtml-carousel-slotted';
 const SPACER_CLASS = 'i-amphtml-carousel-spacer';

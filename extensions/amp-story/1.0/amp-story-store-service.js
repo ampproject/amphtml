@@ -1,5 +1,3 @@
-
-
 import {EmbedMode, parseEmbedMode} from './embed-mode';
 import {Observable} from '#core/data-structures/observable';
 import {Services} from '#service';

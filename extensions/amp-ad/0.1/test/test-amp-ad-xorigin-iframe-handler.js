@@ -1,5 +1,3 @@
-
-
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from '../amp-ad-xorigin-iframe-handler';
 import {BaseElement} from '../../../../src/base-element';

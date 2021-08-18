@@ -1,5 +1,3 @@
-
-
 import {
   CONSENT_ITEM_STATE,
   METADATA_STORAGE_KEY,

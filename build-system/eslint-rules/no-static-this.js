@@ -1,4 +1,3 @@
-
 'use strict';
 
 // Forbids use of `this` inside static class methods

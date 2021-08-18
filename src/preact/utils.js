@@ -1,5 +1,3 @@
-
-
 import {useLayoutEffect} from '#preact';
 
 import {useAmpContext} from './context';

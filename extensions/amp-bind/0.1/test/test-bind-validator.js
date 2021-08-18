@@ -1,5 +1,3 @@
-
-
 import {BindValidator} from '../bind-validator';
 
 describes.sandboxed('BindValidator (allowUrlProperties=true)', {}, () => {

@@ -1,5 +1,3 @@
-
-
 import {AmpEvents} from '#core/constants/amp-events';
 import {Layout} from '#core/dom/layout';
 import {childElementByAttr} from '#core/dom/query';

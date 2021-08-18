@@ -1,5 +1,3 @@
-
-
 import {ALT_TEXT, CONFIGURATION_EVENT, ICON_SIZE, ORIGIN} from '../constants';
 import {ConfigManager} from '../config-manager';
 

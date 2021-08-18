@@ -1,5 +1,3 @@
-
-
 /* eslint-disable no-undef */
 chrome.browserAction.setBadgeText({
   text: 'ON',

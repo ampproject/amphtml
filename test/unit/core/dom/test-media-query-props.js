@@ -1,5 +1,3 @@
-
-
 import {MediaQueryProps} from '#core/dom/media-query-props';
 
 import {waitFor} from '#testing/test-helper';

@@ -1,5 +1,3 @@
-
-
 import '../amp-social-share';
 import {waitForChildPromise} from '#core/dom';
 

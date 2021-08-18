@@ -1,5 +1,3 @@
-
-
 import {toWin} from '#core/window';
 
 import {Services} from '#service';

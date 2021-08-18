@@ -1,6 +1,5 @@
 /* eslint-disable require-jsdoc */
 
-
 import {loadScript, validateData} from '#3p/3p';
 
 /**

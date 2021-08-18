@@ -1,5 +1,3 @@
-
-
 import {LruCache} from '#core/data-structures/lru-cache';
 import {createElementWithAttributes} from '#core/dom';
 import {isArray} from '#core/types';

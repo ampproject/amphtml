@@ -1,5 +1,3 @@
-
-
 import {dev, user, userAssert} from '../../../src/log';
 import {handleAutoscroll} from './autoscroll';
 import {toggle} from '#core/dom/style';

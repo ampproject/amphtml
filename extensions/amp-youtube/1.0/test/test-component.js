@@ -1,5 +1,3 @@
-
-
 import {mount} from 'enzyme';
 
 import {dispatchCustomEvent} from '#core/dom';

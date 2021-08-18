@@ -1,5 +1,3 @@
-
-
 /**
  * Performs the `closest()` scan through context nodes to find the one that
  * matches the predicate with an optional argument.

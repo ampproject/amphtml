@@ -1,5 +1,3 @@
-
-
 const cacheDocuments = require('./cache-documents');
 const compileScripts = require('./compile-scripts');
 const copyLocalImages = require('./copy-images');

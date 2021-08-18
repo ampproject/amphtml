@@ -1,5 +1,3 @@
-
-
 import {jsonConfiguration} from '#core/types/object/json';
 
 /**

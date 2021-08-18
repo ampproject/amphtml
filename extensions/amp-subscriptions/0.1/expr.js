@@ -1,5 +1,3 @@
-
-
 import {evaluateAccessExpr} from '../../amp-access/0.1/access-expr';
 
 /**

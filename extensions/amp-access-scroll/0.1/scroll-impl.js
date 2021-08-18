@@ -1,5 +1,3 @@
-
-
 import {createElementWithAttributes} from '#core/dom';
 import {dict} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';

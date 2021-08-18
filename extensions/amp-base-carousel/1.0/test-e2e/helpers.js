@@ -1,5 +1,3 @@
-
-
 const TAG_NAME = 'amp-base-carousel';
 const SLIDE_CLASS = 'slideElement';
 const SCROLLER_CLASS = 'hideScrollbar';

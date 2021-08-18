@@ -1,4 +1,3 @@
-
 'use strict';
 
 // This warns when using Object.assign where an object spread is better. Note

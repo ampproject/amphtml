@@ -1,5 +1,3 @@
-
-
 import {Action, getStoreService} from '../amp-story-store-service';
 import {AdvancementMode} from '../story-analytics';
 import {AnalyticsVariable, getVariableService} from '../variable-service';

@@ -1,5 +1,3 @@
-
-
 export class DwellMonitor {
   /**
    * Creates an instance of DwellMonitor.

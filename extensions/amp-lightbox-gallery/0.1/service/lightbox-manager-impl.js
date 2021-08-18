@@ -1,5 +1,3 @@
-
-
 import {AmpEvents} from '#core/constants/amp-events';
 import {CommonSignals} from '#core/constants/common-signals';
 import {iterateCursor} from '#core/dom';

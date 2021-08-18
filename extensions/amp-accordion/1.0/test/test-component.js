@@ -1,5 +1,3 @@
-
-
 import {mount} from 'enzyme';
 
 import * as Preact from '#preact';

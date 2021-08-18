@@ -1,4 +1,3 @@
-
 import '../amp-date-countdown';
 //import {Services} from '../../../../src/service';
 

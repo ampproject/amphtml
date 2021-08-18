@@ -1,5 +1,3 @@
-
-
 import {doubleclick} from '#ads/google/doubleclick';
 import {hasOwn} from '#core/types/object';
 import {loadScript, writeScript} from '#3p/3p';

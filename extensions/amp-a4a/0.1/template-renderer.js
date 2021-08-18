@@ -1,5 +1,3 @@
-
-
 import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
 import {Renderer} from './amp-ad-type-defs';
 import {renderCreativeIntoFriendlyFrame} from './friendly-frame-util';

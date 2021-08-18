@@ -1,4 +1,3 @@
-
 import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/amp-story-player-impl';
 import {
   Action,

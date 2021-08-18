@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview This file contains all the globs required for babel
  * transformation and for closure compilation. Try and maintain the glob

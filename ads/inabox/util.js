@@ -1,5 +1,3 @@
-
-
 /**
  * Executes a "restricted" read/write vsync cycle.
  * This function exists mainly since the vsync service is not available for the

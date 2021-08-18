@@ -1,5 +1,3 @@
-
-
 import * as ast from '../parsers/css-expr-ast';
 
 describes.sandboxed('CSS resolve clip-path', {}, (env) => {

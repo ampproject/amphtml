@@ -1,5 +1,3 @@
-
-
 import {toggle} from '#core/dom/style';
 import {endsWith} from '#core/types/string';
 

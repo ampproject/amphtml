@@ -1,5 +1,3 @@
-
-
 import {VisibilityState} from '#core/constants/visibility-state';
 import {Observable} from '#core/data-structures/observable';
 import {Deferred} from '#core/data-structures/promise';

@@ -1,5 +1,3 @@
-
-
 import {FIE_EMBED_PROP} from '../../../../src/iframe-helper';
 import {Services} from '#service';
 import {

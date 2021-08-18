@@ -1,5 +1,3 @@
-
-
 import {AccessController} from '../iframe-api/access-controller';
 import {AmpAccessIframeApi} from '../iframe-api/iframe-api';
 

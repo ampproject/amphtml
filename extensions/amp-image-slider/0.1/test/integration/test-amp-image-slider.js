@@ -1,5 +1,3 @@
-
-
 import {createPointerEvent} from '#testing/test-helper';
 
 const t = describes.sandboxed.configure().ifChrome();

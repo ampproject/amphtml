@@ -1,4 +1,3 @@
-
 import '../../../amp-base-carousel/1.0/amp-base-carousel';
 import '../amp-inline-gallery';
 import {ActionInvocation} from '#service/action-impl';

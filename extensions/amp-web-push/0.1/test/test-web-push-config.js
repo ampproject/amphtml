@@ -1,5 +1,3 @@
-
-
 import '../amp-web-push';
 import {WebPushConfigAttributes} from '../amp-web-push-config';
 import {CONFIG_TAG, TAG} from '../vars';

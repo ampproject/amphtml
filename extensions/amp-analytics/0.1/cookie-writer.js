@@ -1,5 +1,3 @@
-
-
 import {BASE_CID_MAX_AGE_MILLIS} from '#service/cid-impl';
 import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Deferred} from '#core/data-structures/promise';

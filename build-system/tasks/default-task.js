@@ -1,5 +1,3 @@
-
-
 const argv = require('minimist')(process.argv.slice(2));
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green} = require('../common/colors');

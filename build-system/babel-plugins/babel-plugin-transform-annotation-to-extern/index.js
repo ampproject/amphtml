@@ -1,5 +1,3 @@
-
-
 // Global typedef map typedefName: typedef comment
 const TYPEDEFS = new Map();
 

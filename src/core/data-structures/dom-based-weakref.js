@@ -1,5 +1,3 @@
-
-
 /**
  * A `WeakRef` polyfill that works for DOM Elements only.
  *

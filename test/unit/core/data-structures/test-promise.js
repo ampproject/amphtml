@@ -1,5 +1,3 @@
-
-
 import {Deferred, LastAddedResolver} from '#core/data-structures/promise';
 
 describes.sandboxed('data structures - PromiseUtils', {}, () => {

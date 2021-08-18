@@ -1,5 +1,3 @@
-
-
 import '../amp-call-tracking';
 import {realChildElements} from '#core/dom/query';
 

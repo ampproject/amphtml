@@ -1,5 +1,3 @@
-
-
 /** @const @private {string} */
 const OBLIVKI_SRC_PREFIX_ = 'https://oblivki.biz/amp/';
 

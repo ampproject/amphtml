@@ -1,4 +1,3 @@
-
 // import to install chromedriver and geckodriver
 require('chromedriver');
 require('geckodriver');

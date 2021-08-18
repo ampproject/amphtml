@@ -1,4 +1,3 @@
-
 import {dev} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {renderAsElement} from './simple-template';

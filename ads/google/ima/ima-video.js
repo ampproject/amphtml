@@ -1,5 +1,3 @@
-
-
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {ImaPlayerData} from './ima-player-data';
 import {camelCaseToTitleCase, setStyle, toggle} from '#core/dom/style';

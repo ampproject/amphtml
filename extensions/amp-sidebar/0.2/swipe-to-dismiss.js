@@ -1,5 +1,3 @@
-
-
 import {SwipeDef} from '../../../src/gesture-recognizers';
 import {delayAfterDeferringToEventLoop} from './utils';
 import {dev} from '../../../src/log';

@@ -1,5 +1,3 @@
-
-
 import {LocalizationService} from '#service/localization';
 import {
   LocalizedStringId,

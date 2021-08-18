@@ -1,5 +1,3 @@
-
-
 /**
  * A priority queue backed with sorted array.
  * @template T

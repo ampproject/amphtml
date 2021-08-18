@@ -1,5 +1,3 @@
-
-
 /**
  * Polyfill for `DOMTokenList.prototype.toggle(token, opt_force)` method. This
  * is specially important because IE does not support `opt_force` attribute. See

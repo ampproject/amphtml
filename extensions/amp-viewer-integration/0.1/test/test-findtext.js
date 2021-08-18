@@ -1,5 +1,3 @@
-
-
 import {
   CircularBuffer,
   TextScanner,

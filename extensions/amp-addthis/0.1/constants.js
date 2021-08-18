@@ -1,5 +1,3 @@
-
-
 export const CONFIGURATION_EVENT = 'addthis.amp.configuration';
 export const SHARE_EVENT = 'addthis.share';
 export const ORIGIN = 'https://s7.addthis.com';

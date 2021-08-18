@@ -1,5 +1,3 @@
-
-
 import {ieMediaCheckAndFix} from '#service/ie-media-bug';
 
 import {dev} from '../../src/log';

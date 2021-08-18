@@ -1,4 +1,3 @@
-
 /* eslint-disable local/html-template */
 const documentModes = require('./document-modes');
 const {AmpState, ampStateKey} = require('./amphtml-helpers');

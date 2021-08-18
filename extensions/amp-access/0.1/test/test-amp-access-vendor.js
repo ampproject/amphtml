@@ -1,5 +1,3 @@
-
-
 import {AccessVendor} from '../access-vendor';
 import {AccessVendorAdapter} from '../amp-access-vendor';
 

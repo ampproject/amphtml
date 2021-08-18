@@ -1,5 +1,3 @@
-
-
 /**
  * These are interchangeable.
  * @typedef {!ClientRect|!../../../src/layout-rect.LayoutRectDef}

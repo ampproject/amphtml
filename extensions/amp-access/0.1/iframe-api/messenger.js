@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview The messaging protocol is intentionally kept close to
  * Web Activities (https://github.com/google/web-activities). We may switch

@@ -1,5 +1,3 @@
-
-
 import {pubcode} from './constants';
 import helpersFactory from './helpers';
 

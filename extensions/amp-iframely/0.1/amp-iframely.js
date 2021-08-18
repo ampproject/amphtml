@@ -1,4 +1,3 @@
-
 import {createElementWithAttributes, removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {measureIntersection} from '#core/dom/layout/intersection';

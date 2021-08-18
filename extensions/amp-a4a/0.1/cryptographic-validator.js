@@ -1,5 +1,3 @@
-
-
 import {signingServerURLs} from '#ads/_a4a-config';
 
 import {utf8Decode} from '#core/types/string/bytes';

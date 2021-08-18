@@ -1,5 +1,3 @@
-
-
 export const MaskChars = {
   ALPHANUMERIC_REQUIRED: 'A',
   ALPHANUMERIC_OPTIONAL: 'a',

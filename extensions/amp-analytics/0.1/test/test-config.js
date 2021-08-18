@@ -1,5 +1,3 @@
-
-
 import {AnalyticsConfig, expandConfigRequest, mergeObjects} from '../config';
 import {Services} from '#service';
 import {installDocService} from '#service/ampdoc-impl';

@@ -1,5 +1,3 @@
-
-
 import * as dom from '#core/dom';
 
 import {extensionScriptInNode} from '#service/extension-script';

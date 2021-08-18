@@ -1,4 +1,3 @@
-
 'use strict';
 
 // Disallows using an object spread on an inline object expression. Instead,

@@ -1,4 +1,3 @@
-
 import {createElementWithAttributes} from '#core/dom';
 import {dict} from '#core/types/object';
 

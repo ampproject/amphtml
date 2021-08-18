@@ -1,5 +1,3 @@
-
-
 describes.endtoend(
   'amp-lightbox with amp-autocomplete',
   {

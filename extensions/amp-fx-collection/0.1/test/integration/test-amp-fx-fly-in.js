@@ -1,5 +1,3 @@
-
-
 import {isExperimentOn, toggleExperiment} from '#experiments';
 
 describes.sandboxed.skip('amp-fx-collection', {}, function () {

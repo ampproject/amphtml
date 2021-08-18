@@ -1,5 +1,3 @@
-
-
 import {areMarginsChanged} from '#core/dom/layout/rect';
 import {closest} from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';

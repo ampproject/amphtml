@@ -1,5 +1,3 @@
-
-
 import {getAdNetworkConfig} from '../ad-network-config';
 
 describes.realWin(

@@ -1,5 +1,3 @@
-
-
 const crypto = require('crypto');
 
 // This is in its own file in order to make it easy to stub in tests.

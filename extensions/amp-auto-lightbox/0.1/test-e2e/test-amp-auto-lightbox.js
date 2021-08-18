@@ -1,5 +1,3 @@
-
-
 describes.endtoend(
   'amp-auto-lightbox e2e',
   {

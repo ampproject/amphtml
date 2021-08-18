@@ -1,5 +1,3 @@
-
-
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   AmpStoryInteractive,

@@ -1,5 +1,3 @@
-
-
 import '../amp-bind';
 import {ActionTrust} from '#core/constants/action-constants';
 

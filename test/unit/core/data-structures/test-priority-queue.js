@@ -1,5 +1,3 @@
-
-
 import {PriorityQueue} from '#core/data-structures/priority-queue';
 
 describes.sandboxed('data structures - PriorityQueue', {}, (env) => {

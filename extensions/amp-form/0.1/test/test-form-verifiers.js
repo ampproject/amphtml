@@ -1,5 +1,3 @@
-
-
 import {
   AsyncVerifier,
   DefaultVerifier,

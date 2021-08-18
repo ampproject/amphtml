@@ -1,4 +1,3 @@
-
 import {AmpContext} from '#3p/ampcontext';
 
 import {MessageType, serializeMessage} from '#core/3p-frame-messaging';

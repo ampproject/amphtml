@@ -1,5 +1,3 @@
-
-
 import {PageConfig as PageConfigInterface} from '#third_party/subscriptions-project/config';
 
 export class ServiceAdapter {

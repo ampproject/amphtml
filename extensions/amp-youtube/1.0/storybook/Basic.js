@@ -1,5 +1,3 @@
-
-
 import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';

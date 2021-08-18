@@ -1,5 +1,3 @@
-
-
 import {Observable} from '#core/data-structures/observable';
 
 import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';

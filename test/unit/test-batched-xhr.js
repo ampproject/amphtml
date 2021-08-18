@@ -1,5 +1,3 @@
-
-
 import {Services} from '#service';
 import {batchedXhrServiceForTesting} from '#service/batched-xhr-impl';
 

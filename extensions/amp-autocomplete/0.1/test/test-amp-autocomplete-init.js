@@ -1,5 +1,3 @@
-
-
 import '../amp-autocomplete';
 
 describes.realWin(

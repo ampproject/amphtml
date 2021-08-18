@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview This file implements the `amp check-renovate-config` task,
  * which validates the Renovate configuration file using Renovate's provided

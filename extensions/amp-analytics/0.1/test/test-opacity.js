@@ -1,5 +1,3 @@
-
-
 import {getMinOpacity} from '../opacity';
 
 describes.realWin('getMinOpacity', {amp: true}, (env) => {

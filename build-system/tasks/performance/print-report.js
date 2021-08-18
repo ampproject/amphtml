@@ -1,5 +1,3 @@
-
-
 const fs = require('fs');
 const {CONTROL, EXPERIMENT, RESULTS_PATH} = require('./helpers');
 const {cyan} = require('../../common/colors');

@@ -1,5 +1,3 @@
-
-
 import {CarouselContext} from './carousel-context';
 import {contextProp} from '#core/context';
 

@@ -1,5 +1,3 @@
-
-
 const cors = require('../amp-cors');
 const router = require('express').Router();
 

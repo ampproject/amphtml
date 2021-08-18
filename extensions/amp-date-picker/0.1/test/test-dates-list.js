@@ -1,5 +1,3 @@
-
-
 import '#third_party/react-dates/bundle';
 import {requireExternal} from '../../../../src/module';
 import {DatesList} from '../dates-list';

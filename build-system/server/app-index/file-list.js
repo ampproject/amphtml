@@ -1,5 +1,3 @@
-
-
 /* eslint-disable local/html-template */
 const {html, joinFragments} = require('./html');
 const {htmlEnvelopePrefixKey} = require('./settings');

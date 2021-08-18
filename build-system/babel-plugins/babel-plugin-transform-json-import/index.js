@@ -1,5 +1,3 @@
-
-
 const {dirname, join, relative, resolve} = require('path');
 const {readFileSync} = require('fs');
 

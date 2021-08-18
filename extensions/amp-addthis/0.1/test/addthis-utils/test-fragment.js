@@ -1,5 +1,3 @@
-
-
 import {clearOurFragment} from '../../addthis-utils/fragment';
 
 describes.sandboxed('fragment', {}, () => {

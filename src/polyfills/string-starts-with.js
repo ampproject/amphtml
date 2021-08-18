@@ -1,5 +1,3 @@
-
-
 /**
  * Return true if string begins with the characters of the specified string.
  * Polyfill copied from MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string/startsWith

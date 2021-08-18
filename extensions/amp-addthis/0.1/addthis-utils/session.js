@@ -1,4 +1,3 @@
-
 import {createCUID} from './cuid';
 
 const sessionId = createCUID();

@@ -1,5 +1,3 @@
-
-
 import {IframeTransportEventDef, MessageType} from '#core/3p-frame-messaging';
 import {tryParseJson} from '#core/types/object/json';
 

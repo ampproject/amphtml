@@ -1,5 +1,3 @@
-
-
 import {isElement} from '#core/types';
 import {stringHash32} from '#core/types/string';
 

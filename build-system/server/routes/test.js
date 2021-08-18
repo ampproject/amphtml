@@ -1,5 +1,3 @@
-
-
 const router = require('express').Router();
 
 router.use('/form/post/success', function (req, res) {

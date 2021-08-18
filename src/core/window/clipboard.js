@@ -1,4 +1,3 @@
-
 import {removeElement} from '#core/dom';
 import {setStyles} from '#core/dom/style';
 

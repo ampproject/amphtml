@@ -1,5 +1,3 @@
-
-
 const pageWidth = 800;
 const pageHeight = 420; // unusually small to force a scrollbar
 

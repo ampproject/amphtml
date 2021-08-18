@@ -1,4 +1,3 @@
-
 import {devAssert, devAssertElement} from '#core/assert';
 import {computedStyle} from '#core/dom/style';
 

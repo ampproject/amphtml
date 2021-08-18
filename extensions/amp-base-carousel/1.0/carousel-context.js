@@ -1,4 +1,3 @@
-
 import {createContext} from '#preact';
 
 const CarouselContext = createContext(

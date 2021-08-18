@@ -1,5 +1,3 @@
-
-
 /**
  *
  * @param {RegExp} regex

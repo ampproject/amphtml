@@ -1,5 +1,3 @@
-
-
 import {CONSTANTS, MessageType} from '#core/3p-frame-messaging';
 import {CommonSignals} from '#core/constants/common-signals';
 import {Deferred} from '#core/data-structures/promise';

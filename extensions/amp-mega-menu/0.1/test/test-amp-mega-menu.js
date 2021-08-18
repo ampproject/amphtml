@@ -1,5 +1,3 @@
-
-
 import '../amp-mega-menu';
 import {Keys} from '#core/constants/key-codes';
 import {tryFocus} from '#core/dom';

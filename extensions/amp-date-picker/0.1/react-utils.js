@@ -1,5 +1,3 @@
-
-
 import {requireExternal} from '../../../src/module';
 
 /**

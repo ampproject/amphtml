@@ -1,5 +1,3 @@
-
-
 import {Services} from '#service';
 import {ancestorElementsByTag} from '#core/dom/query';
 import {createElementWithAttributes, removeElement} from '#core/dom';

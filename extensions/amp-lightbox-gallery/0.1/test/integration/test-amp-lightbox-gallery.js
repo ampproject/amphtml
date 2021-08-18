@@ -1,5 +1,3 @@
-
-
 import {poll} from '#testing/iframe';
 
 import * as analytics from '../../../../../src/analytics';

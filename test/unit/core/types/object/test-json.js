@@ -1,5 +1,3 @@
-
-
 import {deepEquals, tryParseJson} from '#core/types/object/json';
 
 describes.sandboxed('type helpers - objects - json', {}, () => {

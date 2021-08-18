@@ -1,5 +1,3 @@
-
-
 import '../amp-date-display';
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {expect} from 'chai';

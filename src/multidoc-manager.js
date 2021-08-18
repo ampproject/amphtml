@@ -1,5 +1,3 @@
-
-
 import {CommonSignals} from '#core/constants/common-signals';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {isConnectedNode} from '#core/dom';

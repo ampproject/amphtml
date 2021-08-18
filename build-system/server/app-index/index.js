@@ -1,4 +1,3 @@
-
 'use strict';
 
 const basepathMappings = require('./basepath-mappings');

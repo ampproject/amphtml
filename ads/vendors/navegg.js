@@ -1,5 +1,3 @@
-
-
 import {doubleclick} from '#ads/google/doubleclick';
 import {loadScript, validateData} from '#3p/3p';
 

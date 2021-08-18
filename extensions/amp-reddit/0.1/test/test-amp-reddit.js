@@ -1,5 +1,3 @@
-
-
 import '../amp-reddit';
 import {reddit} from '#3p/reddit';
 

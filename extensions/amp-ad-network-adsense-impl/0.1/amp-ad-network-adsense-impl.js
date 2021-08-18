@@ -1,5 +1,3 @@
-
-
 // Because AdSense and DoubleClick are both operated by Google and their A4A
 // implementations share some behavior in common, part of the logic for this
 // implementation is located in the ads/google/a4a directory rather than here.

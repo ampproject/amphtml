@@ -1,5 +1,3 @@
-
-
 import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
 import {ActionTrust} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';

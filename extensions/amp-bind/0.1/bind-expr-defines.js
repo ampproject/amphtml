@@ -1,5 +1,3 @@
-
-
 /**
  * A single node in the AST of a `BindExpression`.
  * @struct

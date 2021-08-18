@@ -1,5 +1,3 @@
-
-
 import {AmpStoryComponentManager} from '../amp-story-component-manager';
 
 self.onload = () => {

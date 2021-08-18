@@ -1,5 +1,3 @@
-
-
 import {assertAttributeMutationFormat} from './mutation';
 
 /**

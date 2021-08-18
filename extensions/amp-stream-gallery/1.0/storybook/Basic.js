@@ -1,5 +1,3 @@
-
-
 import * as Preact from '#preact';
 import {StreamGallery} from '../component';
 import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';

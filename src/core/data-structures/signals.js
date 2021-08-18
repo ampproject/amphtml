@@ -1,5 +1,3 @@
-
-
 import {TimestampDef} from '#core/types/date';
 import {map} from '#core/types/object';
 

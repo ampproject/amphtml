@@ -1,5 +1,3 @@
-
-
 import {CommonSignals} from '#core/constants/common-signals';
 import {bezierCurve} from '#core/data-structures/curve';
 import {Layout} from '#core/dom/layout';

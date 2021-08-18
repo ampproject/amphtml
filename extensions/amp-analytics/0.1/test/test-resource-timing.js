@@ -1,5 +1,3 @@
-
-
 import {getResourceTiming} from '../resource-timing';
 import {installLinkerReaderService} from '../linker-reader';
 import {installSessionServiceForTesting} from '../session-manager';

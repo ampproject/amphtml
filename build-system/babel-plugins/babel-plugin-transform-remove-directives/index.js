@@ -1,5 +1,3 @@
-
-
 /**
  * @interface {babel.PluginPass}
  * @return {babel.PluginObj}

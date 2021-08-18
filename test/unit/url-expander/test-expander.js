@@ -1,5 +1,3 @@
-
-
 import {Expander} from '#service/url-expander/expander';
 import {GlobalVariableSource} from '#service/url-replacements-impl';
 

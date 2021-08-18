@@ -1,5 +1,3 @@
-
-
 /**
  * Polyfill for `document.contains()` method. Notice that according to spec
  * `document.contains` is inclusionary.

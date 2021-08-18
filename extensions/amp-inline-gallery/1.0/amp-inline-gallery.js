@@ -1,5 +1,3 @@
-
-
 import {
   AmpInlineGalleryPagination,
   TAG as PAGINATION_TAG,

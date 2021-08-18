@@ -1,5 +1,3 @@
-
-
 import {isExperimentOn} from '#experiments';
 
 import {BaseElement} from './base-element';

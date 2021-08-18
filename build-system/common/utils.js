@@ -1,5 +1,3 @@
-
-
 const argv = require('minimist')(process.argv.slice(2));
 const experimentsConfig = require('../global-configs/experiments-config.json');
 const fs = require('fs-extra');

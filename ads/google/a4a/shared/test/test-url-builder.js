@@ -1,5 +1,3 @@
-
-
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
 describes.sandboxed('buildUrl', {}, () => {

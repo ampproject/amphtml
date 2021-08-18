@@ -1,5 +1,3 @@
-
-
 import * as utilsStory from '../../../../src/utils/story';
 import {Entitlement, GrantReason} from '../entitlement';
 import {LocalSubscriptionIframePlatform} from '../local-subscription-platform-iframe';

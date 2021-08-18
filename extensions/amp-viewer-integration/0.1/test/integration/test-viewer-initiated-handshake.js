@@ -1,5 +1,3 @@
-
-
 import {WebviewViewerForTesting} from '../../viewer-initiated-handshake-viewer-for-testing';
 
 describes.sandboxed('AmpWebviewViewerIntegration', {}, (env) => {

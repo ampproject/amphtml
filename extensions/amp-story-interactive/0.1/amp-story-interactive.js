@@ -1,5 +1,3 @@
-
-
 import {AmpStoryInteractiveBinaryPoll} from './amp-story-interactive-binary-poll';
 import {AmpStoryInteractiveImgPoll} from './amp-story-interactive-img-poll';
 import {AmpStoryInteractiveImgQuiz} from './amp-story-interactive-img-quiz';

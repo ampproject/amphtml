@@ -1,5 +1,3 @@
-
-
 import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 import {omit} from '#core/types/object';

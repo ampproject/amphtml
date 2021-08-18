@@ -1,5 +1,3 @@
-
-
 import {debounce, throttle} from '#core/types/function';
 
 describes.sandboxed('type helpers - functions', {}, (env) => {

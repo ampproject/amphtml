@@ -1,5 +1,3 @@
-
-
 import {getNextArrow, getPrevArrow, getSlides, sleep} from './helpers';
 
 const pageWidth = 500;

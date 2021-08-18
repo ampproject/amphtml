@@ -1,4 +1,3 @@
-
 'use strict';
 
 const compiler = require('@ampproject/google-closure-compiler');

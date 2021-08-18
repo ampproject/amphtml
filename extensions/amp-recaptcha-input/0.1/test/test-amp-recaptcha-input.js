@@ -1,5 +1,3 @@
-
-
 import '../amp-recaptcha-input';
 import {createElementWithAttributes} from '#core/dom';
 

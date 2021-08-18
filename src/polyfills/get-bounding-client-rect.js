@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview
  * IE 10 throws "Unspecified error" when calling getBoundingClientRect() on a

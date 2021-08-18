@@ -1,5 +1,3 @@
-
-
 import {CryptoHandler} from '../crypto-handler';
 import {decryptAesGcm} from '#third_party/subscriptions-project/aes_gcm';
 

@@ -1,5 +1,3 @@
-
-
 /* eslint-disable import/no-deprecated */
 
 import {listenParent} from './messaging';

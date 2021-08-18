@@ -1,5 +1,3 @@
-
-
 describes.endtoend(
   'AMP carousel 0.1 slideChange on type="slide" with autoplay',
   {

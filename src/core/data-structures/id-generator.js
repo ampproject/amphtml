@@ -1,5 +1,3 @@
-
-
 /**
  * Returns the "next" function that generates a new sequential ID on each call.
  * @return {function():string}

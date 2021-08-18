@@ -1,5 +1,3 @@
-
-
 import {getDataParamsFromAttributes} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {PauseHelper} from '#core/dom/video/pause-helper';

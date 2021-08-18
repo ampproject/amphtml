@@ -1,5 +1,3 @@
-
-
 import {listen} from '../../../../../src/event-helper';
 
 export class ClickMonitor {

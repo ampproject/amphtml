@@ -1,5 +1,3 @@
-
-
 import {AmpStoryCtaLayer} from '../amp-story-cta-layer';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 

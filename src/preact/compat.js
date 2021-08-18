@@ -1,5 +1,3 @@
-
-
 import * as compat from /*OK*/ 'preact/compat';
 
 /**

@@ -1,5 +1,3 @@
-
-
 import * as cookie from '../../../../src/cookies';
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {CookieWriter} from '../cookie-writer';

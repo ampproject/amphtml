@@ -1,5 +1,3 @@
-
-
 import '../../../amp-ad/0.1/amp-ad';
 import '../amp-auto-ads';
 import {getA4ARegistry} from '#ads/_a4a-config';

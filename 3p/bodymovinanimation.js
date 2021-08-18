@@ -1,5 +1,3 @@
-
-
 import {setStyles} from '#core/dom/style';
 import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';

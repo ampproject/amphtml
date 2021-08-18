@@ -1,5 +1,3 @@
-
-
 /**
  * Commonly used signals across different elements and documents.
  * @enum {string}

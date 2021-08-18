@@ -1,5 +1,3 @@
-
-
 import {user, userAssert} from '../../../src/log';
 import {
   getSourceOrigin,

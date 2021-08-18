@@ -1,5 +1,3 @@
-
-
 import {getSlide} from './helpers';
 
 const pageWidth = 600;

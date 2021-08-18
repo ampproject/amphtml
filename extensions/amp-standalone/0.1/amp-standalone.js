@@ -1,5 +1,3 @@
-
-
 import {Services} from '#service';
 
 import {listen} from '../../../src/event-helper';

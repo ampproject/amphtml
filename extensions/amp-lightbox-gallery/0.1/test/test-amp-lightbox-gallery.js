@@ -1,5 +1,3 @@
-
-
 import {installLightboxGallery} from '../amp-lightbox-gallery';
 
 const TAG = 'amp-lightbox-gallery';

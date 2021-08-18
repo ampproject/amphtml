@@ -1,5 +1,3 @@
-
-
 import {VisibilityState} from '#core/constants/visibility-state';
 import {removeElement} from '#core/dom';
 import {layoutRectLtwh} from '#core/dom/layout/rect';

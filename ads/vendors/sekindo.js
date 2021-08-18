@@ -1,5 +1,3 @@
-
-
 import {hasOwn} from '#core/types/object';
 import {loadScript, validateData} from '#3p/3p';
 

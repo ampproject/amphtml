@@ -1,5 +1,3 @@
-
-
 import '../amp-jwplayer';
 import * as fullscreen from '#core/dom/fullscreen';
 import {htmlFor} from '#core/dom/static-template';

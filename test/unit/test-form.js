@@ -1,5 +1,3 @@
-
-
 import {
   getFormAsObject,
   isDisabled,

@@ -1,5 +1,3 @@
-
-
 import {
   stubCollapseFrameForTesting,
   stubExpandFrameForTesting,

@@ -1,5 +1,3 @@
-
-
 import {Deferred} from '#core/data-structures/promise';
 import {isEnumValue, isObject} from '#core/types';
 import {dict, getValueForExpr} from '#core/types/object';

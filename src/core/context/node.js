@@ -1,5 +1,3 @@
-
-
 import {devAssert, devAssertElement} from '#core/assert';
 import * as mode from '#core/mode';
 import {pushIfNotExist, removeItem} from '#core/types/array';

@@ -1,5 +1,3 @@
-
-
 /**
  * Ensure comments in minified build output is minimal.
  *

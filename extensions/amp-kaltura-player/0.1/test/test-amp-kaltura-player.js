@@ -1,5 +1,3 @@
-
-
 import '../amp-kaltura-player';
 
 describes.realWin(

@@ -1,5 +1,3 @@
-
-
 import '../amp-autocomplete';
 import {AutocompleteBindingInline} from '../autocomplete-binding-inline';
 import {AutocompleteBindingSingle} from '../autocomplete-binding-single';

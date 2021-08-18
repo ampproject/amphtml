@@ -1,5 +1,3 @@
-
-
 import {getDate} from '#core/types/date';
 import {dict} from '#core/types/object';
 

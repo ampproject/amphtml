@@ -1,5 +1,3 @@
-
-
 import {assertDoesNotContainDisplay, px, setStyles} from '#core/dom/style';
 
 import {Services} from '#service';

@@ -1,5 +1,3 @@
-
-
 import {createUseStyles} from 'react-jss';
 
 // TODO(alanorozco): Share these across components.

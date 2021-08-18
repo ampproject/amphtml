@@ -1,4 +1,3 @@
-
 import {CONFIGURATION_EVENT, ORIGIN} from './constants';
 import {getAddThisMode} from './addthis-utils/mode';
 

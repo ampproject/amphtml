@@ -1,5 +1,3 @@
-
-
 import {Deferred} from '#core/data-structures/promise';
 import {rootNodeFor} from '#core/dom';
 import {scopedQuerySelector} from '#core/dom/query';

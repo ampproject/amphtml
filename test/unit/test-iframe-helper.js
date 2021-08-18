@@ -1,4 +1,3 @@
-
 import {createIframePromise} from '#testing/iframe';
 
 import {generateSentinel} from '../../src/3p-frame';

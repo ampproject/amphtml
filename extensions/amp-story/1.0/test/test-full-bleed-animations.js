@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview Tests full-bleed animations like panning and zooming.
  */

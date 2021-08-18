@@ -1,5 +1,3 @@
-
-
 import {collapseFrame, expandFrame} from './frame-overlay-helper';
 
 /** @const */

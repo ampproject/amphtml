@@ -1,5 +1,3 @@
-
-
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryGridLayer} from '../amp-story-grid-layer';

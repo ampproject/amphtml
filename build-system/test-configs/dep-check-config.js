@@ -1,4 +1,3 @@
-
 'use strict';
 
 /*eslint "max-len": 0*/

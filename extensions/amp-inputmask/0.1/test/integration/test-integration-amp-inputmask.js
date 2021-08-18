@@ -1,5 +1,3 @@
-
-
 import {poll} from '#testing/iframe';
 
 import {simulateKeyboardInteraction} from './utils';

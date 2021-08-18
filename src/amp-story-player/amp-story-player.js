@@ -1,5 +1,3 @@
-
-
 import {onDocumentReady} from '#core/document-ready';
 
 import {AmpStoryComponentManager} from './amp-story-component-manager';
