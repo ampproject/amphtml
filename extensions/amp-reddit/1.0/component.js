@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import * as Preact from '#preact';
 import {forwardRef} from '#preact/compat';
 import {ProxyIframeEmbed} from '#preact/component/3p-frame';
@@ -27,13 +26,14 @@ import {
 } from '#preact';
 /**
  * @param {!RedditDef.Props} props
+ * @param ref
  * @return {PreactDef.Renderable}
  */
-export function RedditWithRef({src, embedtype , ...rest}, ref) {
-    
-  const onMessage = useCallback((e) => {
-    console.log(e);
-
+export function RedditWithRef({embedtype, src, ...rest}, ref) {
+  const onMessage = useCallback((event) => {
+    console.log(event);
+    const data = deserializeMessage(event.data);
+    // console.log(e);
   }, []);
 
   // Examples of state and hooks
@@ -53,14 +53,7 @@ export function RedditWithRef({src, embedtype , ...rest}, ref) {
     /* Do things */
   }, []);
 
-  return (
-    <ProxyIframeEmbed
-      ref={ref}
-      src={src}
-      type='reddit'
-      {...rest}
-      />
-  );
+  return <ProxyIframeEmbed ref={ref} src={src} type="reddit" {...rest} />;
 }
 
 const Reddit = forwardRef(RedditWithRef);

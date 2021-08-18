@@ -38,13 +38,8 @@ export const Default = () => {
     <amp-reddit
       width="300"
       height="200"
-      example-property="example string property value"
-    >
-      This text is inside.
-    </amp-reddit>
+      data-src={redditSrc}
+      data-embedType={embedType}
+    ></amp-reddit>
   );
-};
-
-ExampleUseCase.story = {
-  name: 'Example use case story',
 };

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-_;
 import {Reddit} from './component';
 import {PreactBaseElement} from '#preact/base-element';
 
