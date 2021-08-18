@@ -1,4 +1,4 @@
-import {once} from './once';
+import {once} from '#core/types/function';
 import {Crypto} from '#service/crypto-impl';
 import timerImpl from './timer-impl';
 import ampdocImpl from './ampdoc-impl';
