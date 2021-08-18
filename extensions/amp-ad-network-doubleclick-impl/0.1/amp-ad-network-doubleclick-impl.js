@@ -65,7 +65,11 @@ import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {domFingerprintPlain} from '#core/dom/fingerprint';
 import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
-import {setImportantStyles, setStyles} from '#core/dom/style';
+import {
+  assertDoesNotContainDisplay,
+  setImportantStyles,
+  setStyles,
+} from '#core/dom/style';
 import {isArray} from '#core/types';
 import {deepMerge, dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
@@ -101,7 +105,6 @@ import {
 } from './sra-utils';
 
 import {getOrCreateAdCid} from '../../../src/ad-cid';
-import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {isCancellation} from '../../../src/error-reporting';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {dev, devAssert, user} from '../../../src/log';

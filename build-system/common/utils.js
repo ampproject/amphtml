@@ -27,16 +27,14 @@ const {log, logLocalDev} = require('./logging');
 
 /**
  * Performs a clean build of the AMP runtime in testing mode.
- * Used by `amp e2e|integration|visual_diff`.
+ * Used by `amp e2e|integration|visual-diff`.
  *
- * @param {boolean} opt_compiled pass true to build the compiled runtime
- *   (`amp dist` instead of `amp build`). Otherwise uses the value of
- *   --compiled to determine which build to generate.
+ * @param {boolean} opt_minified builds the minified runtime
  * @return {Promise<void>}
  */
-async function buildRuntime(opt_compiled = false) {
+async function buildRuntime(opt_minified = false) {
   await clean();
-  if (argv.compiled || opt_compiled === true) {
+  if (argv.minified || opt_minified === true) {
     execOrDie(`amp dist --fortesting`);
   } else {
     execOrDie(`amp build --fortesting`);
