@@ -198,11 +198,31 @@ async function labelPullRequests(prs, labelId) {
   return await _runQueryInBatches('mutation', mutations);
 }
 
+/**
+ * Unlabel pull requests
+ * @param {Array<Object>} prs
+ * @param {string} labelId
+ * @return {Promise<Array<GraphQlQueryResponseData>>}
+ */
+async function unlabelPullRequests(prs, labelId) {
+  const mutations = [];
+  for (const [i, pr] of prs.entries()) {
+    mutations.push(
+      dedent`\
+      pr${i}: removeLabelsFromLabelable(input:{labelIds:"${labelId}", \
+      labelableId:"${pr.id}", clientMutationId:"${pr.id}"})\
+      {clientMutationId}`
+    );
+  }
+  return await _runQueryInBatches('mutation', mutations);
+}
+
 module.exports = {
   createRelease,
   getLabel,
   getPullRequestsBetweenCommits,
   getRelease,
   labelPullRequests,
+  unlabelPullRequests,
   updateRelease,
 };
