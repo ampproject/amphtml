@@ -1,18 +1,4 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 export const LIGHTBOX_THUMBNAIL_UNKNOWN =
   'data:image/svg+xml;charset=utf-8,<svg width="128" height="128" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path d="M9 20.5a1.5 1.5 0 0 1-3 0c0-6.488 5-8.53 5-13.5a4 4 0 1 0-8 0 1.5 1.5 0 0 1-3 0 7 7 0 1 1 14 0c0 5.483-5 7.485-5 13.5z" id="a"/><circle id="b" cx="7.5" cy="29.5" r="1.5"/></defs><g fill="none" fill-rule="evenodd"><path fill="#1E3B63" d="M0 0h128v128H0z"/><path d="M33 24.5h62a4 4 0 0 1 4 4v54.952L78.081 104.5H33a4 4 0 0 1-4-4v-72a4 4 0 0 1 4-4z" fill="#D1E5FF"/><g transform="translate(57 48)"><use fill="#225CAC" xlink:href="#a"/><path stroke="#225CAC" d="M9.5 20.5a2 2 0 1 1-4 0c0-2.85.756-4.755 2.58-7.59l.385-.595c.152-.236.265-.412.373-.584C10.006 9.873 10.5 8.601 10.5 7a3.5 3.5 0 1 0-7 0 2 2 0 1 1-4 0 7.5 7.5 0 0 1 15 0c0 2.273-.642 3.81-2.314 6.409l-.266.412C10.133 16.592 9.5 18.103 9.5 20.5z"/></g><g transform="translate(57 48)"><use fill="#225CAC" xlink:href="#b"/><circle stroke="#225CAC" cx="7.5" cy="29.5" r="2"/></g><path d="M82 83.5h17l-21 21v-17a4 4 0 0 1 4-4z" fill="#ACC8F0"/></g></svg>';
 export const LIGHTBOX_THUMBNAIL_AD =
