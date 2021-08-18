@@ -1,0 +1,36 @@
+name: Release tagger
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'tagger action (promote | rollback)'
+        required: true
+      head:
+        description: 'head AMP version'
+        required: true
+      base:
+        description: 'base AMP version'
+        required: true
+      channel:
+        description: 'release channel (beta | stable | lts)'
+        required: true
+jobs:
+  tagger:
+    if: contains(['beta', 'stable', 'lts'], github.event.channel)
+    environment: release_tagger
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v2
+        with:
+          node-version: lts/*
+      - uses: actions/checkout@v2
+      - name: Run tagger
+        run: |
+          npm ci
+          node ./build-system/release-tagger/index.js \
+            ${{ github.event.inputs.action }} \
+            ${{ github.event.inputs.head }} \
+            ${{ github.event.inputs.base }} \
+            ${{ github.event.inputs.channel }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}

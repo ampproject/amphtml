@@ -16,14 +16,9 @@
 
 /**
  * @fileoverview
- * Create release functions for the release tagger.
- * Parameters
- * 1. head tag
- * 2. base tag
- * 3. channel (beta|stable|lts)
+ * Make release for the release tagger.
  */
 
-const argv = require('minimist')(process.argv.slice(2));
 const dedent = require('dedent');
 const {
   createRelease,
@@ -213,7 +208,7 @@ function _createBody(head, base, prs) {
  * @param {string} channel
  * @return {Promise<Object>}
  */
-async function main(head, base, channel) {
+async function makeRelease(head, base, channel) {
   const {'target_commitish': headCommit} = await getRelease(head);
   const {'target_commitish': baseCommit} = await getRelease(base);
   const prs = await getPullRequestsBetweenCommits(headCommit, baseCommit);
@@ -222,5 +217,4 @@ async function main(head, base, channel) {
   return await createRelease(head, headCommit, body, prerelease);
 }
 
-main(argv.head, argv.base, argv.channel);
-module.exports = {main};
+module.exports = {makeRelease};
