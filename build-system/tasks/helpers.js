@@ -545,6 +545,13 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
 }
 
 /**
+ * Name cache to help terser perform cross-binary property mangling.
+ *
+ * TODO: ensure this is actually necessary.
+ */
+const nameCache = {};
+
+/**
  * Minify the code with Terser. Only used by the ESBuild.
  *
  * @param {string} code
@@ -559,12 +566,15 @@ async function minify(code, map, {mangle} = {mangle: false}) {
       // Settled on this count by incrementing number until there was no more
       // effect on minification quality.
       passes: 3,
+      // Disables converting computed properties (a['hello']) into regular prop access (a.hello).
+      // This was an assumption baked into closure.
+      properties: false,
     },
     output: {
       beautify: !!argv.pretty_print,
       // eslint-disable-next-line google-camelcase/google-camelcase
       keep_quoted_props: true,
-      // TODO: only add preamble for mainBundles!
+      // TODO: only add preamble for mainBundles?
       preamble: ';',
     },
     sourceMap: {content: map},
@@ -572,13 +582,12 @@ async function minify(code, map, {mangle} = {mangle: false}) {
   };
 
   // Enabling property mangling requires disabling two other optimization.
-  // - Should not mangle properties with names in quotes (usually used for cross-binary purposes)
-  // - The above only works if we don't convert computed properties into dot notation property. Disabling this
-  //   is done by setting compress.properties=false.
+  // - Should not mangle computed properties (often used for cross-binary purposes)
+  // - Should not convert computed properties into regular property access (compress.properties = false)
   if (mangle) {
     // eslint-disable-next-line google-camelcase/google-camelcase
-    terserOptions.mangle.properties = {keep_quoted: true, regex: /_$/};
-    terserOptions.compress.properties = false;
+    terserOptions.mangle.properties = {keep_quoted: true, regex: '_$'};
+    terserOptions.nameCache = nameCache;
   }
 
   const minified = await terser.minify(code, terserOptions);
@@ -631,7 +640,10 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
     const buildResult =
       options.minify && shouldUseClosure()
         ? compileMinifiedJs(srcDir, srcFilename, destDir, options)
-        : esbuildCompile(srcDir, srcFilename, destDir, options);
+        : esbuildCompile(srcDir, srcFilename, destDir, {
+            ...options,
+            mangle: true,
+          });
     if (options.onWatchBuild) {
       options.onWatchBuild(buildResult);
     }
