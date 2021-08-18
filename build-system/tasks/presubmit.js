@@ -112,7 +112,7 @@ function isMissingTerms(srcFile) {
 async function presubmit() {
   let forbiddenFound = false;
   let missingRequirements = false;
-  const srcFiles = globby.sync(srcGlobs);
+  const srcFiles = await globby(srcGlobs);
   for (const srcFile of srcFiles) {
     forbiddenFound = hasForbiddenTerms(srcFile) || forbiddenFound;
     missingRequirements = isMissingTerms(srcFile) || missingRequirements;
