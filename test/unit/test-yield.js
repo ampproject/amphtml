@@ -1,6 +1,6 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
 
 describes.realWin('yield', {}, (env) => {
   let win;

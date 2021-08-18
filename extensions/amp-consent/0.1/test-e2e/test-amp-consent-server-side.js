@@ -1,10 +1,10 @@
 import {
   findElements,
   resetAllElements,
-  sleep,
   verifyElementsBuilt,
   verifyPromptsHidden,
 } from './common';
+import {awaitFrameAfter} from '#testing/helpers';
 
 describes.endtoend(
   'amp-consent',
@@ -65,7 +65,7 @@ describes.endtoend(
 
       // Check the analytics request consentState. Wait for 1 second for the
       // request to arrive to avoid flaky test.
-      await sleep(3000);
+      await awaitFrameAfter(500);
       await expect(
         'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking?consentState=insufficient'
       ).to.have.been.sent;

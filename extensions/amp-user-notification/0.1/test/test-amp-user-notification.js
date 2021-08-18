@@ -1,6 +1,6 @@
 import {Services} from '#service';
 
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
 
 import {
   registerServiceBuilder,

@@ -183,7 +183,7 @@ async function runTest(inputFile) {
  */
 async function serverTests() {
   await buildNewServer();
-  const inputFiles = globby.sync(inputPaths);
+  const inputFiles = await globby(inputPaths);
   for (const inputFile of inputFiles) {
     await runTest(inputFile);
   }

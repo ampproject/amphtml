@@ -30,7 +30,7 @@ async function buildNewServer() {
     green('at'),
     cyan(outdir) + green('...')
   );
-  const entryPoints = globby.sync(`${SERVER_TRANSFORM_PATH}/**/*.ts`);
+  const entryPoints = await globby(`${SERVER_TRANSFORM_PATH}/**/*.ts`);
   const startTime = Date.now();
   await esbuild.build({
     ...esbuildOptions,

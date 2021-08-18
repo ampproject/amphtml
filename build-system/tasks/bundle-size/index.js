@@ -226,7 +226,7 @@ async function reportBundleSize() {
  * @return {Promise<void>}
  */
 async function getLocalBundleSize() {
-  if (globby.sync(fileGlobs).length === 0) {
+  if ((await globby(fileGlobs)).length === 0) {
     log('Could not find runtime files.');
     log('Run', cyan('amp dist --noextensions'), 'and re-run this task.');
     process.exitCode = 1;

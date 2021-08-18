@@ -36,7 +36,6 @@ module.exports = {
     'jsdoc',
     'local',
     'module-resolver',
-    'notice',
     'prettier',
     'react',
     'react-hooks',

@@ -474,7 +474,7 @@ async function buildExtension(
     }
   }
 
-  await compileJison(path.join(extDir, '**', '*.jison'));
+  await compileJison(`${extDir}/**/*.jison`);
   if (name === 'amp-bind') {
     await doBuildJs(jsBundles, 'ww.max.js', options);
   }

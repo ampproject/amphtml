@@ -4,8 +4,8 @@ import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 import {Services} from '#service';
 
+import {macroTask} from '#testing/helpers';
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
-import {macroTask} from '#testing/yield';
 
 import {listenOncePromise} from '../../../../src/event-helper';
 import {VideoEvents} from '../../../../src/video-interface';

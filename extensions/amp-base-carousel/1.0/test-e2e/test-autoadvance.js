@@ -1,4 +1,5 @@
-import {getCarousel, getSlides, sleep} from './helpers';
+import {getCarousel, getSlides} from './helpers';
+import {afterRenderPromise, sleep} from '#testing/helpers';
 import {useStyles} from '../component.jss';
 
 const pageWidth = 800;
@@ -70,7 +71,7 @@ describes.endtoend(
       // if autoadvancing, it should have done so by now,
       // so we can be confident that the slide did not transition,
       // as expected due to auto-advance-loops="2"
-      await sleep(1001);
+      await afterRenderPromise();
       await expect(rect(slides[1])).to.include({x: 0});
     });
   }

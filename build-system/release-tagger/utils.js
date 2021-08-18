@@ -54,9 +54,10 @@ async function _runQueryInBatches(queryType, queries) {
  * @param {string} tag
  * @param {string} commit
  * @param {string} body
+ * @param {boolean} prerelease
  * @return {Promise<Object>}
  */
-async function createRelease(tag, commit, body) {
+async function createRelease(tag, commit, body, prerelease) {
   return await octokit.rest.repos.createRelease({
     owner,
     repo,
@@ -64,7 +65,7 @@ async function createRelease(tag, commit, body) {
     'tag_name': tag,
     'target_commitish': commit,
     body,
-    prerelease: true,
+    prerelease,
   });
 }
 
@@ -181,11 +182,31 @@ async function labelPullRequests(prs, labelId) {
   return await _runQueryInBatches('mutation', mutations);
 }
 
+/**
+ * Unlabel pull requests
+ * @param {Array<Object>} prs
+ * @param {string} labelId
+ * @return {Promise<Array<GraphQlQueryResponseData>>}
+ */
+async function unlabelPullRequests(prs, labelId) {
+  const mutations = [];
+  for (const [i, pr] of prs.entries()) {
+    mutations.push(
+      dedent`\
+      pr${i}: removeLabelsFromLabelable(input:{labelIds:"${labelId}", \
+      labelableId:"${pr.id}", clientMutationId:"${pr.id}"})\
+      {clientMutationId}`
+    );
+  }
+  return await _runQueryInBatches('mutation', mutations);
+}
+
 module.exports = {
   createRelease,
   getLabel,
   getPullRequestsBetweenCommits,
   getRelease,
   labelPullRequests,
+  unlabelPullRequests,
   updateRelease,
 };

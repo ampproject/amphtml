@@ -1,4 +1,4 @@
-import {Key} from '../../../../build-system/tasks/e2e/e2e-types';
+import {Key} from '#testing/helpers/types';
 
 describes.endtoend(
   'amp-social-share',

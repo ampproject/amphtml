@@ -15,20 +15,6 @@ const {log} = require('../common/logging');
  * build-system/test-configs/forbidden-terms.js
  */
 
-const dedicatedCopyrightNoteSources = /(\.css|\.go)$/;
-
-// Terms that must appear in a source file.
-const requiredTerms = {
-  'Copyright 20(15|16|17|18|19|2\\d) The AMP HTML Authors\\.':
-    dedicatedCopyrightNoteSources,
-  'Licensed under the Apache License, Version 2\\.0':
-    dedicatedCopyrightNoteSources,
-  'http\\://www\\.apache\\.org/licenses/LICENSE-2\\.0':
-    dedicatedCopyrightNoteSources,
-};
-// Exclude extension generator templates
-const requiredTermsExcluded = new RegExp('/make-extension(/.+)?/template/');
-
 /**
  * Test if a file's contents match any of the forbidden terms
  * @param {string} srcFile
@@ -56,66 +42,21 @@ function hasForbiddenTerms(srcFile) {
 }
 
 /**
- * Test if a file's contents fail to match any of the required terms and log
- * any missing terms
- *
- * @param {string} srcFile
- * @return {boolean} true if any of the terms are not matched in the file
- *  content, false otherwise
- */
-function isMissingTerms(srcFile) {
-  const contents = fs.readFileSync(srcFile, 'utf-8');
-  return Object.keys(requiredTerms)
-    .map(function (term) {
-      const filter = requiredTerms[term];
-      if (!filter.test(srcFile) || requiredTermsExcluded.test(srcFile)) {
-        return false;
-      }
-
-      const matches = contents.match(new RegExp(term));
-      if (!matches) {
-        log(
-          red('ERROR:'),
-          'Did not find required',
-          cyan(`"${term}"`),
-          'in',
-          cyan(srcFile)
-        );
-        return true;
-      }
-      return false;
-    })
-    .some(function (hasMissingTerm) {
-      return hasMissingTerm;
-    });
-}
-
-/**
  * Entry point for amp presubmit.
  * @return {Promise<void>}
  */
 async function presubmit() {
   let forbiddenFound = false;
-  let missingRequirements = false;
-  const srcFiles = globby.sync(srcGlobs);
+  const srcFiles = await globby(srcGlobs);
   for (const srcFile of srcFiles) {
     forbiddenFound = hasForbiddenTerms(srcFile) || forbiddenFound;
-    missingRequirements = isMissingTerms(srcFile) || missingRequirements;
   }
   if (forbiddenFound) {
     log(
       yellow('NOTE:'),
-      'Please remove these usages or consult with the AMP team.'
+      'Please remove these terms or consult with the AMP team.'
     );
-  }
-  if (missingRequirements) {
-    log(
-      yellow('NOTE:'),
-      'Please add these terms (e.g. a required LICENSE) to the files.'
-    );
-  }
-  if (forbiddenFound || missingRequirements) {
-    process.exitCode = 1;
+    throw new Error('Found forbidden terms');
   }
 }
 
@@ -123,4 +64,4 @@ module.exports = {
   presubmit,
 };
 
-presubmit.description = 'Check source files for forbidden and required terms';
+presubmit.description = 'Check source files for forbidden terms';

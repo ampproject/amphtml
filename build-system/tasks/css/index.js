@@ -77,7 +77,7 @@ async function copyCss() {
   for (const {outCss} of cssEntryPoints) {
     await fs.copy(`build/css/${outCss}`, `dist/${outCss}`);
   }
-  const cssFiles = globby.sync('build/css/amp-*.css');
+  const cssFiles = await globby('build/css/amp-*.css');
   await Promise.all(
     cssFiles.map((cssFile) => {
       return fs.copy(cssFile, `dist/v0/${path.basename(cssFile)}`);

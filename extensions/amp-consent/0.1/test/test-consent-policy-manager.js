@@ -15,7 +15,7 @@ import {
 } from '../consent-policy-manager';
 import {dict} from '#core/types/object';
 import {expandPolicyConfig} from '../consent-config';
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
 
 import {
   registerServiceBuilder,

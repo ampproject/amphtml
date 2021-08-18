@@ -4,7 +4,7 @@ import {createElementWithAttributes, waitForChild} from '#core/dom';
 import {Services} from '#service';
 import {AmpDoc} from '#service/ampdoc-impl';
 
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
 
 import {BaseElement} from '../../../../src/base-element';
 import {loadPromise} from '../../../../src/event-helper';

@@ -35,7 +35,10 @@ function check(file) {
  * @return {!Promise}
  */
 async function checkExactVersions() {
-  const packageJsonFiles = globby.sync(['**/package.json', '!**/node_modules']);
+  const packageJsonFiles = await globby([
+    '**/package.json',
+    '!**/node_modules',
+  ]);
   packageJsonFiles.forEach((file) => {
     if (check(file)) {
       logLocalDev(

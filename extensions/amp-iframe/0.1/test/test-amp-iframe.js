@@ -8,7 +8,7 @@ import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {isAdLike} from '../../../../src/iframe-helper';
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
 import {poll} from '#testing/iframe';
 import {toggleExperiment} from '#experiments';
 import {user} from '../../../../src/log';

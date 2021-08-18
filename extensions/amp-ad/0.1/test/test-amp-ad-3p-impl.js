@@ -11,7 +11,7 @@ import {LayoutPriority} from '#core/dom/layout';
 import {Services} from '#service';
 import {adConfig} from '#ads/_config';
 import {createElementWithAttributes} from '#core/dom';
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
 import {stubServiceForDoc} from '#testing/test-helper';
 
 function createAmpAd(win, attachToAmpdoc = false, ampdoc) {

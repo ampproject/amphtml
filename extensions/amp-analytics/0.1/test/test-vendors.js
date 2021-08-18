@@ -5,7 +5,7 @@ import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors';
 import {ImagePixelVerifier, mockWindowInterface} from '#testing/test-helper';
 import {Services} from '#service';
 import {hasOwn} from '#core/types/object';
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
 import VENDOR_REQUESTS from './vendor-requests.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 
 describes.realWin(

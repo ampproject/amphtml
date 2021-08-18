@@ -28,16 +28,16 @@ const imports = new Map([
  * @return {!Promise}
  */
 async function compileJison(searchDir = jisonPath) {
-  fs.mkdirSync('build/parsers', {recursive: true});
-
-  const promises = globby.sync(searchDir).map((jisonFile) => {
-    const jsFile = path.basename(jisonFile, '.jison');
-    const extension = jsFile.replace('-expr-impl', '');
-    const parser = extension + 'Parser';
-    const newFilePath = `build/parsers/${jsFile}.js`;
-    return compileExpr(jisonFile, parser, newFilePath);
-  });
-  return Promise.all(promises);
+  const jisonFiles = await globby(searchDir);
+  await Promise.all(
+    jisonFiles.map((jisonFile) => {
+      const jsFile = path.basename(jisonFile, '.jison');
+      const extension = jsFile.replace('-expr-impl', '');
+      const parser = extension + 'Parser';
+      const newFilePath = `build/parsers/${jsFile}.js`;
+      return compileExpr(jisonFile, parser, newFilePath);
+    })
+  );
 }
 
 /**
@@ -69,7 +69,7 @@ async function compileExpr(jisonFilePath, parserName, newFilePath) {
       // adversely affect lexer performance.
       // See https://github.com/ampproject/amphtml/pull/18574#discussion_r223506153.
       .replace(/[ \t]*_token_stack:[ \t]*/, '') + '\n';
-  return fs.writeFile(newFilePath, out);
+  await fs.outputFile(newFilePath, out);
 }
 
 module.exports = {

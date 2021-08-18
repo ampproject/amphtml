@@ -1,4 +1,5 @@
-import {Key} from '../../../../build-system/tasks/e2e/e2e-types';
+import {Key} from '#testing/helpers/types';
+import {sleep} from '#testing/helpers';
 
 describes.endtoend(
   'amp story share menu',
@@ -11,10 +12,6 @@ describes.endtoend(
   (env) => {
     /** @type {SeleniumWebDriverController} */
     let controller;
-
-    function sleep(ms) {
-      return new Promise((res) => setTimeout(res, ms));
-    }
 
     beforeEach(() => {
       controller = env.controller;

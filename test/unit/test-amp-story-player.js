@@ -1,7 +1,7 @@
 import {Messaging} from '@ampproject/viewer-messaging';
 import {expect} from 'chai';
 
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
 
 import {AmpStoryComponentManager} from '../../src/amp-story-player/amp-story-component-manager';
 import {AmpStoryPlayer} from '../../src/amp-story-player/amp-story-player-impl';

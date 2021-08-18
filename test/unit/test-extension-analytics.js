@@ -1,7 +1,7 @@
 import {Services} from '#service';
 import {registerElement} from '#service/custom-element-registry';
 
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
 
 import {BaseElement} from '../../src/base-element';
 import {
