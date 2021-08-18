@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {getNextArrow, getPrevArrow, getSlides, sleep} from './helpers';
+import {getNextArrow, getPrevArrow, getSlides} from './helpers';
+import {awaitFrameAfter} from '#testing/helpers';
 
 describes.endtoend(
   'amp-base-carousel - advancing with multiple visible slides',
@@ -48,7 +49,7 @@ describes.endtoend(
       for (let i = 0; i < slideCount - slidesInView; i++) {
         await controller.click(nextArrow);
         // Need to sleep due to amp-base-carousel buffering clicks
-        await sleep(1000);
+        await awaitFrameAfter(500);
       }
 
       let slideRect = await rect(slides[slideCount - slidesInView]);
@@ -65,7 +66,7 @@ describes.endtoend(
       // Click `prev` the correct number of times to take us back to first slide.
       for (let i = 0; i < slideCount - slidesInView; i++) {
         await controller.click(prevArrow);
-        await sleep(1000);
+        await awaitFrameAfter(500);
       }
 
       slideRect = await rect(slides[0]);

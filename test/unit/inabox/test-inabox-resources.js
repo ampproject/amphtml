@@ -21,7 +21,7 @@ import {InaboxResources} from '#inabox/inabox-resources';
 
 import {ResourceState} from '#service/resource';
 
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
 
 describes.realWin('inabox-resources', {amp: true}, (env) => {
   let win;

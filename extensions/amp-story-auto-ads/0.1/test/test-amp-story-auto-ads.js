@@ -34,7 +34,7 @@ import {Services} from '#service';
 import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
 import {StoryAdPage} from '../story-ad-page';
 import {forceExperimentBranch, toggleExperiment} from '#experiments';
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 const NOOP = () => {};

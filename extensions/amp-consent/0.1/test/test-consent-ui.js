@@ -26,7 +26,7 @@ import {ConsentUI, consentUiClasses} from '../consent-ui';
 import {Services} from '#service';
 import {dict} from '#core/types/object';
 import {elementByTag} from '#core/dom/query';
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
 import {
   registerServiceBuilder,
   resetServiceForTesting,

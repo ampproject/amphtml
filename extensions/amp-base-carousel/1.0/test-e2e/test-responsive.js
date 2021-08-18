@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {getCarousel, getScrollingElement, getSlide, sleep} from './helpers';
+import {sleep} from '#testing/helpers';
+import {getCarousel, getScrollingElement, getSlide} from './helpers';
 import {useStyles} from '../component.jss';
 
 const pageWidth = 1000;
