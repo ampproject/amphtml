@@ -21,7 +21,7 @@ import {waitFor} from '#testing/test-helper';
 import {dereferenceArgsVariables} from '#service/action-impl';
 import {expect} from 'chai';
 
-describes.sandboxed('Dailymotion preact component v1.0', {}, (env) => {
+describes.sandboxed('Dailymotion preact component v1.0', {}, () => {
   it('Renders', () => {
     const wrapper = mount(
       <Dailymotion
