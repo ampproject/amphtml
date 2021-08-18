@@ -58,6 +58,7 @@ function getMinifiedConfig() {
       './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
       BUILD_CONSTANTS,
     ],
+    ['@babel/plugin-transform-for-of', {loose: true, allowArrayLike: true}],
   ].filter(Boolean);
   const presetEnv = [
     '@babel/preset-env',
