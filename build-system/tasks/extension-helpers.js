@@ -722,6 +722,7 @@ async function buildExtensionJs(extDir, name, version, latestVersion, options) {
     minifiedName: `${name}-${version}.js`,
     latestName: latest ? `${name}-latest.js` : '',
     wrapper,
+    mangle: true,
   });
 
   // If an incremental watch build fails, simply return.

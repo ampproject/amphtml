@@ -168,6 +168,7 @@ async function compileAllJs(options) {
   const {minify} = options;
   if (minify) {
     log('Minifying multi-pass JS with', cyan('closure-compiler') + '...');
+    options = {...options, mangle: true};
   } else {
     log('Compiling JS with', cyan('esbuild'), 'and', cyan('babel') + '...');
   }
@@ -581,7 +582,7 @@ async function minify(code, map, {mangle} = {mangle: false}) {
       // Settled on this count by incrementing number until there was no more
       // effect on minification quality.
       passes: 3,
-      // Disables converting computed properties (a['hello']) into regular prop access (a.hello).
+      // Disables converting computed properties (a['hello']) into regular prop access (a.hello)
       // This was an assumption baked into closure.
       properties: false,
     },
@@ -594,16 +595,16 @@ async function minify(code, map, {mangle} = {mangle: false}) {
     },
     sourceMap: {content: map},
     module: !!argv.esm,
+    nameCache,
   };
 
   // Enabling property mangling requires disabling two other optimization.
+  // - Should not transform computed property access into regular
+  //   property access (via compress.properties = false).
   // - Should not mangle computed properties (often used for cross-binary purposes)
-  // - Should not convert computed properties into regular property access (compress.properties = false)
-  // TODO: fix this.
-  if (mangle && false) {
+  if (mangle) {
     // eslint-disable-next-line google-camelcase/google-camelcase
     terserOptions.mangle.properties = {keep_quoted: true, regex: '_$'};
-    terserOptions.nameCache = nameCache;
   }
 
   const minified = await terser.minify(code, terserOptions);
@@ -656,10 +657,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
     const buildResult =
       options.minify && shouldUseClosure()
         ? compileMinifiedJs(srcDir, srcFilename, destDir, options)
-        : esbuildCompile(srcDir, srcFilename, destDir, {
-            ...options,
-            mangle: true,
-          });
+        : esbuildCompile(srcDir, srcFilename, destDir, options);
     if (options.onWatchBuild) {
       options.onWatchBuild(buildResult);
     }
