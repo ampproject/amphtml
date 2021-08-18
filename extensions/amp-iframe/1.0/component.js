@@ -59,10 +59,13 @@ export function Iframe({
     if (!iframe) {
       return;
     }
-    // TODO(dmanek): Validate height & width
-    const {height, width} = dataRef.current;
+    const height = Number(dataRef.current.height);
+    const width = Number(dataRef.current.width);
+    if (!height && !width) {
+      return;
+    }
     if (requestResize) {
-      requestResize(width, height);
+      requestResize(height, width);
       iframe.height = FULL_HEIGHT;
       iframe.width = FULL_HEIGHT;
     } else if (!isIntersectingRef.current) {
