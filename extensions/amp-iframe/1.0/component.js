@@ -53,6 +53,10 @@ export function Iframe({
       return;
     }
     if (requestResize) {
+      // Currently `requestResize` is called twice:
+      // 1. when the message is received in viewport
+      // 2. when exiting viewport
+      // This could be optimized by reducing to one call by assessing when to call.
       requestResize(height, width);
       iframe.height = FULL_HEIGHT;
       iframe.width = FULL_HEIGHT;
