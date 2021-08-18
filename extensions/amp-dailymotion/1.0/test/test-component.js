@@ -19,7 +19,7 @@ import {Dailymotion} from '../component';
 import {mount} from 'enzyme';
 import {expect} from 'chai';
 
-describes.sandboxed('Dailymotion preact component v1.0', {}, (env) => {
+describes.sandboxed('Dailymotion preact component v1.0', {}, () => {
   it('Renders', () => {
     const wrapper = mount(
       <Dailymotion

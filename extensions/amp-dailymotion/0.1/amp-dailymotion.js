@@ -37,7 +37,6 @@ import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {parseQueryString} from '#core/types/string/url';
-import {isAutoplaySupported} from '#core/dom/video';
 
 const TAG = 'amp-dailymotion';
 
