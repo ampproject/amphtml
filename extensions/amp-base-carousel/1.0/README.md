@@ -26,8 +26,7 @@ limitations under the License.
 
 ## Usage
 
-A generic carousel for displaying multiple similar pieces of content along a
-horizontal or vertical axis.
+A generic carousel for displaying multiple similar pieces of content along a horizontal or vertical axis. Use Bento Carousel as a web component [`<bento-base-carousel>`](#web-component), or a Preact/React functional component [`<BentoBaseCarousel>`](#preact/react-Component).
 
 Each of the Bento Carousel component’s immediate children is considered an
 item in the carousel. Each of these nodes may also have arbitrary children.
@@ -38,11 +37,9 @@ navigational arrows to go forward or backwards a single item.
 The carousel advances between items if the user swipes or uses the customizable
 arrow buttons.
 
-This document covers both the web component `<bento-base-carousel>` and the Preact and React functional components `<BentoBaseCarousel>`.
-
 ### Web Component
 
-The examples below demonstrate the `<bento-base-carousel>` component in standalone use.
+The examples below demonstrate use of the `<bento-base-carousel>` web component.
 
 #### Example: Import via npm
 
@@ -127,7 +124,7 @@ import '@ampproject/bento-base-carousel';
 
 #### Interactivity and API usage
 
-Bento enabled components in standalone use are highly interactive through their API. The `bento-base-carousel` component API is accessible by including the following script tag in your document:
+Bento enabled components used as a standalone web component are highly interactive through their API. The `bento-base-carousel` component API is accessible by including the following script tag in your document:
 
 ```javascript
 await customElements.whenDefined('bento-base-carousel');
@@ -209,11 +206,9 @@ bento-base-carousel > * {
 }
 ```
 
-#### Behavior users should be aware of
+#### Right-to-left slide change
 
-##### RTL
-
-`<bento-base-carousel>` currently requires that you let it know when it is in an
+`<bento-base-carousel>` requires that you define when it is in an
 right-to-left (rtl) context (e.g. Arabic, Hebrew pages). While the carousel will
 generally work without this, there may be a few bugs. You can let the carousel
 know that it should operate as `rtl` as follows:
@@ -245,7 +240,7 @@ the slide will be vertically centered within the carousel.
 If you want to horizontally center your slide content, you will want to create a
 wrapping element, and use that to center the content.
 
-##### Number of Visible Slides
+#### Number of visible slides
 
 When changing the number of visible slides using `visible-slides`, in response
 to a media query, you will likely want to change the aspect ratio of the
@@ -274,7 +269,7 @@ addition, when changing `visible-slides`, you likely want to change
 The attributes for `<bento-base-carousel>` can be configured to use different
 options based on a [media query](./../../../docs/spec/amp-html-responsive-attributes.md).
 
-##### Number of Visible Slides
+##### Number of visible slides
 
 ###### mixed-length
 
@@ -294,7 +289,7 @@ A number, defaults to `1`. Determines how many slides the carousel will advance
 when advancing using the previous or next arrows. This is useful when specifying
 the `visible-count` attribute.
 
-##### Auto Advance
+##### Auto advance
 
 ###### auto-advance
 
@@ -368,7 +363,7 @@ Either `horizontal` or `vertical`, defaults to `horizontal`. When `horizontal` t
 You may use the `bento-base-carousel` element selector to style the carousel
 freely.
 
-##### Customizing Arrow Buttons
+##### Customizing arrow buttons
 
 Arrow buttons can be customized by passing in your own custom markup. For
 example, you can recreate the default styling with the following HTML and CSS:
@@ -409,7 +404,7 @@ example, you can recreate the default styling with the following HTML and CSS:
 
 ### Preact/React Component
 
-The examples below demonstrate the `<BentoBaseCarousel>` functional component in standalone use.
+The examples below demonstrate use of the `<BentoBaseCarousel>` as a functional component usable with the Preact or React libraries.
 
 #### Example: Import via npm
 
@@ -536,11 +531,9 @@ Or via `className`:
 }
 ```
 
-#### Behavior users should be aware of
+#### Right-to-left slide change
 
-##### RTL
-
-`<BentoBaseCarousel>` currently requires that you let it know when it is in an
+`<BentoBaseCarousel>` requires that you define when it is in an
 right-to-left (rtl) context (e.g. Arabic, Hebrew pages). While the carousel will
 generally work without this, there may be a few bugs. You can let the carousel
 know that it should operate as `rtl` as follows:
@@ -572,7 +565,7 @@ the slide will be vertically centered within the carousel.
 If you want to horizontally center your slide content, you will want to create a
 wrapping element, and use that to center the content.
 
-##### Number of Visible Slides
+#### Number of visible slides
 
 When changing the number of visible slides using `visibleSlides`, in response
 to a media query, you will likely want to change the aspect ratio of the
@@ -597,7 +590,7 @@ const count = window.matchMedia('(max-width: 600px)').matches ? 4 : 3;
 
 #### Props
 
-##### Number of Visible Slides
+##### Number of visible slides
 
 ###### mixedLength
 
@@ -617,7 +610,7 @@ A number, defaults to `1`. Determines how many slides the carousel will advance
 when advancing using the previous or next arrows. This is useful when specifying
 the `visibleCount` attribute.
 
-##### Auto Advance
+##### Auto advance
 
 ###### autoAdvance
 
@@ -688,7 +681,7 @@ Either `horizontal` or `vertical`, defaults to `horizontal`. When `horizontal` t
 
 You may use the `BentoBaseCarousel` element selector to style the carousel freely.
 
-##### Customizing Arrow Buttons
+##### Customizing arrow buttons
 
 Arrow buttons can be customized by passing in your own custom markup. For example, you can recreate the default styling with the following HTML and CSS:
 

@@ -46,9 +46,9 @@ Bento AMP allows you to use AMP components in non-AMP pages without needing to c
 
 ### Behavior users should be aware of
 
-#### RTL
+#### Right-to-left slide change
 
-`<amp-base-carousel>` currently requires that you let it know when it is in an
+`<amp-base-carousel>` requires that you define when it is in an
 right-to-left (rtl) context (e.g. Arabic, Hebrew pages). While the carousel will
 generally work without this, there may be a few bugs. You can let the carousel
 know that it should operate as `rtl` as follows:
@@ -81,7 +81,7 @@ vertically centered within the carousel.
 If you want to horizontally center your slide content, you will want to create a
 wrapping element, and use that to center the content.
 
-#### Number of Visible Slides
+#### Number of visible slides
 
 When changing the number of visible slides using `visible-slides`, in response
 to a media query, you will likely want to change the aspect ratio of the
