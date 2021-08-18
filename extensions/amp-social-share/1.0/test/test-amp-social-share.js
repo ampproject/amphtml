@@ -49,7 +49,8 @@ describes.realWin(
     // Waits for the type change to propagate to within the shadowDOM
     const waitForTypeChange = async (el, type) => {
       await waitFor(
-        () => el.shadowRoot.querySelector('svg').getAttribute('type') === type,
+        () =>
+          el.shadowRoot.querySelector('svg').getAttribute('data-type') === type,
         'type attribute is updated'
       );
     };
