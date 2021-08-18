@@ -869,7 +869,7 @@ function shouldUseClosure() {
   // Therefore we must compute this one by hand.
 
   // TODO: remove the && false once all is green.
-  return argv.define_experiment_constant !== 'EsbuildCompilation' && false;
+  return argv.define_experiment_constant !== 'EsbuildCompilation';
 }
 
 module.exports = {
