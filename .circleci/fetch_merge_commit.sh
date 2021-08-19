@@ -24,6 +24,12 @@ GREEN() { echo -e "\033[0;32m$1\033[0m"; }
 RED() { echo -e "\033[0;31m$1\033[0m"; }
 CYAN() { echo -e "\033[0;36m$1\033[0m"; }
 
+echo "$(GREEN "Fetching") $(CYAN "main") $(GREEN "branch to update") $(CYAN ".git") $(GREEN "cache.")"
+git fetch origin main:main
+
+echo "$(GREEN "Fetching other branches to update") $(CYAN ".git") $(GREEN "cache.")"
+git fetch
+
 # Try to determine the PR number.
 ./.circleci/get_pr_number.sh
 if [[ -f "${BASH_ENV}" ]]; then
@@ -40,9 +46,6 @@ fi
 if [[ ! -f /tmp/restored-workspace/.CIRCLECI_MERGE_COMMIT ]]; then
   exit 0
 fi
-
-echo "$(GREEN "Fetching all branches to update") $(CYAN ".git") $(GREEN "cache.")"
-git fetch
 
 # Extract the merge commit for this workflow and make it visible to other steps.
 CIRCLECI_MERGE_COMMIT="$(cat /tmp/restored-workspace/.CIRCLECI_MERGE_COMMIT)"
