@@ -1,29 +1,8 @@
 /**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview
- * Create release functions for the release tagger.
- * Parameters
- * 1. head tag
- * 2. base tag
- * 3. channel (beta|stable|lts)
+ * Make release for the release tagger.
  */
 
-const argv = require('minimist')(process.argv.slice(2));
 const dedent = require('dedent');
 const {
   createRelease,
@@ -213,7 +192,7 @@ function _createBody(head, base, prs) {
  * @param {string} channel
  * @return {Promise<Object>}
  */
-async function main(head, base, channel) {
+async function makeRelease(head, base, channel) {
   const {'target_commitish': headCommit} = await getRelease(head);
   const {'target_commitish': baseCommit} = await getRelease(base);
   const prs = await getPullRequestsBetweenCommits(headCommit, baseCommit);
@@ -222,5 +201,4 @@ async function main(head, base, channel) {
   return await createRelease(head, headCommit, body, prerelease);
 }
 
-main(argv.head, argv.base, argv.channel);
-module.exports = {main};
+module.exports = {makeRelease};
