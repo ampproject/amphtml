@@ -16,7 +16,7 @@
 
 const nock = require('nock');
 const test = require('ava');
-const {updateReleaseFunction} = require('../update-release');
+const {publishRelease, rollbackRelease} = require('../update-release');
 
 test.before(() => nock.disableNetConnect());
 test.after(() => {
@@ -27,21 +27,21 @@ test.after(() => {
 test('publish', async (t) => {
   const scope = nock('https://api.github.com')
     // https://docs.github.com/en/rest/reference/repos#get-a-release-by-tag-name
-    .get('/repos/ampproject/amphtml/releases/tags/2007210123000')
+    .get('/repos/ampproject/amphtml/releases/tags/2107210123000')
     .reply(200, {id: 1})
 
     // https://docs.github.com/en/rest/reference/repos#update-a-release
     .patch('/repos/ampproject/amphtml/releases/1', {prerelease: false})
     .reply(200, {id: 1});
 
-  await updateReleaseFunction('2007210123000', 'publish');
+  await publishRelease('2107210123000');
   t.true(scope.isDone());
 });
 
 test('rollback', async (t) => {
   const scope = nock('https://api.github.com')
     // https://docs.github.com/en/rest/reference/repos#get-a-release-by-tag-name
-    .get('/repos/ampproject/amphtml/releases/tags/2007210123000')
+    .get('/repos/ampproject/amphtml/releases/tags/2107210123000')
     .reply(200, {
       id: 1,
       body: 'This is a test release body',
@@ -54,6 +54,6 @@ test('rollback', async (t) => {
     })
     .reply(200, {id: 1});
 
-  await updateReleaseFunction('2007210123000', 'rollback');
+  await rollbackRelease('2107210123000');
   t.true(scope.isDone());
 });

@@ -15,15 +15,20 @@
  */
 
 import '../amp-lightbox-gallery';
-import {ActionInvocation} from '#service/action-impl';
 import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
 import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
-import {installLightboxGallery} from '../amp-lightbox-gallery';
-import * as analytics from '../../../../src/analytics';
-import {poll} from '#testing/iframe';
+
 import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service/';
+import {ActionInvocation} from '#service/action-impl';
+
+import {poll} from '#testing/iframe';
 import {waitFor, whenCalled} from '#testing/test-helper';
+
+import * as analytics from '../../../../src/analytics';
+import {installLightboxGallery} from '../amp-lightbox-gallery';
 
 const TAG = 'amp-lightbox-gallery';
 
@@ -39,6 +44,8 @@ describes.realWin(
     let doc;
     let html;
     let element;
+    let historyPopSpy;
+    let historyPushSpy;
 
     async function waitForOpen(el, open) {
       const isOpenOrNot = () => el.hasAttribute('open') === open;
@@ -67,6 +74,19 @@ describes.realWin(
       doc = win.document;
       html = htmlFor(doc);
       toggleExperiment(win, 'bento-lightbox-gallery', true, true);
+
+      historyPopSpy = env.sandbox.spy();
+      historyPushSpy = env.sandbox.spy();
+      env.sandbox.stub(Services, 'historyForDoc').returns({
+        push() {
+          historyPushSpy();
+          return Promise.resolve(11);
+        },
+        pop() {
+          historyPopSpy();
+          return Promise.resolve(11);
+        },
+      });
     });
 
     afterEach(() => {
@@ -168,6 +188,8 @@ describes.realWin(
         expect(renderedImgs[0].srcset).to.equal('img.jpg 1x');
 
         await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
         expect(triggerAnalyticsStub).to.have.been.calledOnceWithExactly(
           element,
           'lightboxOpened'
@@ -200,6 +222,9 @@ describes.realWin(
         expect(renderedImgs[0].srcset).to.equal('img.jpg 1x');
 
         await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
+
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
         expect(scroller).not.to.be.null;
         expect(element.setAsContainerInternal).to.be.calledOnce;
@@ -218,6 +243,8 @@ describes.realWin(
 
         expect(element.setAsContainerInternal).to.be.calledOnce;
         expect(element.removeAsContainerInternal).to.be.calledOnce;
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.be.calledOnce;
       });
     });
 
@@ -255,6 +282,8 @@ describes.realWin(
         expect(renderedImgs[0].srcset).to.equal('img.jpg 1x');
 
         await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
         expect(triggerAnalyticsStub).to.have.been.calledOnceWithExactly(
           element,
           'lightboxOpened'
@@ -289,6 +318,8 @@ describes.realWin(
         expect(renderedImgs[0].srcset).to.equal('img.jpg 1x');
 
         await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
         expect(triggerAnalyticsStub).to.have.been.calledOnceWithExactly(
           element,
           'lightboxOpened'
@@ -372,6 +403,9 @@ describes.realWin(
         expect(renderedImgs[0].srcset).to.equal('img.jpg 1x');
 
         await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
+
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
         expect(scroller).not.to.be.null;
         expect(element.setAsContainerInternal).to.be.calledWith(scroller);
@@ -403,6 +437,9 @@ describes.realWin(
         expect(renderedImgs[2].srcset).to.equal('img3.jpg 1x');
 
         await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
+
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
         expect(scroller).not.to.be.null;
         expect(element.setAsContainerInternal).to.be.calledWith(scroller);
@@ -434,6 +471,9 @@ describes.realWin(
         expect(renderedImgs[2].srcset).to.equal('img7.jpg 1x');
 
         await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
+
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
         expect(scroller).not.to.be.null;
         expect(element.setAsContainerInternal).to.be.calledWith(scroller);
@@ -461,6 +501,9 @@ describes.realWin(
         expect(renderedImgs[0].srcset).to.equal('img4.jpg 1x');
 
         await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
+
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
         expect(scroller).not.to.be.null;
         expect(element.setAsContainerInternal).to.be.calledWith(scroller);

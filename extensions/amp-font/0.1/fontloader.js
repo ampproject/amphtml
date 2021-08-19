@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
 import {removeElement} from '#core/dom';
 import {setStyles} from '#core/dom/style';
+
+import {Services} from '#service';
 
 /**
  * @typedef {{

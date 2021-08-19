@@ -22,9 +22,9 @@ import {CommonSignals} from '#core/constants/common-signals';
 import {VideoEvents} from '../../../../src/video-interface';
 import {createElementWithAttributes} from '#core/dom';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
 import {parseUrlDeprecated} from '../../../../src/url';
-import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 describes.realWin(
   'amp-brightcove',

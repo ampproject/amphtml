@@ -16,6 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const atob = require('atob');
 const fs = require('fs');
 const JSON5 = require('json5');
 const path = require('path');
@@ -136,6 +137,15 @@ let TestErrorDef;
 let WebpageDef;
 
 /**
+ * Decode the write-only Percy token during CI builds.
+ */
+function decodePercyTokenForCi() {
+  if (isCiBuild()) {
+    process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED || '');
+  }
+}
+
+/**
  * Override PERCY_* environment variables if passed via amp task parameters.
  */
 function maybeOverridePercyEnvironmentVariables() {
@@ -221,7 +231,7 @@ async function launchWebServer() {
   await startServer(
     {host: HOST, port: PORT},
     {quiet: !argv.webserver_debug},
-    {compiled: true}
+    {minified: true}
   );
 }
 
@@ -752,6 +762,7 @@ async function visualDiff() {
   const handlerProcess = createCtrlcHandler('visual-diff');
   await ensureOrBuildAmpRuntimeInTestMode_();
   const browserFetcher = await loadBrowserFetcher_();
+  decodePercyTokenForCi();
   maybeOverridePercyEnvironmentVariables();
   setPercyBranch();
   setPercyTargetCommit();

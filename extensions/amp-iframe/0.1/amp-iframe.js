@@ -22,7 +22,7 @@ import {
   applyFillContent,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
-import {MessageType} from '../../../src/3p-frame-messaging';
+import {MessageType} from '#core/3p-frame-messaging';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
 import {base64EncodeFromBytes} from '#core/types/string/base64';
@@ -78,7 +78,7 @@ export class AmpIframe extends AMP.BaseElement {
     this.placeholder_ = null;
 
     /** @private {boolean} */
-    this.isClickToPlay_ = false;
+    this.hasPlaceholder_ = false;
 
     /** @private {boolean} */
     this.isAdLike_ = false;
@@ -296,7 +296,7 @@ export class AmpIframe extends AMP.BaseElement {
     );
 
     this.placeholder_ = this.getPlaceholder();
-    this.isClickToPlay_ = !!this.placeholder_;
+    this.hasPlaceholder_ = !!this.placeholder_;
 
     this.isResizable_ = this.element.hasAttribute('resizable');
     if (this.isResizable_) {
@@ -374,7 +374,7 @@ export class AmpIframe extends AMP.BaseElement {
         'displaying fixed ad. Please use amp-sticky-ad and amp-ad instead.'
     );
 
-    if (!this.isClickToPlay_) {
+    if (!this.hasPlaceholder_) {
       this.assertPosition_();
     }
 
@@ -415,7 +415,7 @@ export class AmpIframe extends AMP.BaseElement {
     applyFillContent(iframe);
     iframe.name = 'amp_iframe' + count++;
 
-    if (this.isClickToPlay_) {
+    if (this.hasPlaceholder_) {
       setStyle(iframe, 'zIndex', -1);
     }
 
@@ -477,7 +477,7 @@ export class AmpIframe extends AMP.BaseElement {
       return this.listenForPymMessage_(/** @type {!MessageEvent} */ (event));
     });
 
-    if (this.isClickToPlay_) {
+    if (this.hasPlaceholder_) {
       listenFor(iframe, 'embed-ready', this.activateIframe_.bind(this));
     }
 

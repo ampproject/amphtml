@@ -52,7 +52,6 @@ module.exports = {
     'jsdoc',
     'local',
     'module-resolver',
-    'notice',
     'prettier',
     'react',
     'react-hooks',
@@ -189,7 +188,6 @@ module.exports = {
     'local/is-experiment-on': 2,
     'local/json-configuration': 2,
     'local/jss-animation-name': 2,
-    'local/no-array-destructuring': 2,
     'local/no-arrow-on-register-functions': 2,
     'local/no-bigint': 2,
     'local/no-deep-destructuring': 2,
@@ -272,16 +270,6 @@ module.exports = {
     'no-useless-concat': 2,
     'no-undef': 2,
     'no-var': 2,
-    'notice/notice': [
-      2,
-      {
-        'mustMatch': 'Copyright 20\\d{2} The AMP HTML Authors\\.',
-        'templateFile': 'build-system/common/LICENSE-TEMPLATE.txt',
-        'messages': {
-          'whenFailedToMatch': 'Missing or incorrect license header',
-        },
-      },
-    ],
     'object-shorthand': [
       2,
       'properties',
@@ -460,6 +448,10 @@ module.exports = {
           'rollup-plugin-cleanup',
         ],
       },
+    },
+    {
+      'files': ['3p/**/*.js', 'src/**/*.js', 'test/**/*.js', 'testing/**/*.js'],
+      'rules': {'import/order': 2},
     },
   ],
 };

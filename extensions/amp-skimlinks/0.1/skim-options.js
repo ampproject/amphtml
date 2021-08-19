@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {getChildJsonConfig} from '../../../src/json';
-import {getNormalizedHostnameFromUrl} from './utils';
-import {userAssert} from '../../../src/log';
+import {getChildJsonConfig} from '#core/dom';
 
 import {
   DEFAULT_CONFIG,
@@ -24,6 +22,9 @@ import {
   OPTIONS_ERRORS,
   WAYPOINT_BASE_URL,
 } from './constants';
+import {getNormalizedHostnameFromUrl} from './utils';
+
+import {userAssert} from '../../../src/log';
 
 /**
  *

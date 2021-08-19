@@ -28,9 +28,9 @@ import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {getTimingDataSync} from '#service/variable-source';
-import {internalRuntimeVersion} from '../../../src/internal-version';
+import * as mode from '#core/mode';
 import {parseJson} from '#core/types/object/json';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {createElementWithAttributes} from '#core/dom';
 
 /** @type {string}  */
@@ -124,7 +124,7 @@ const TOKEN_VALUE =
  * @param {!Window} win
  */
 export function maybeInsertOriginTrialToken(win) {
-  if (win.document.querySelector(`meta[content='${TOKEN_VALUE}']`)) {
+  if (win.document.head.querySelector(`meta[content='${TOKEN_VALUE}']`)) {
     return;
   }
   const metaEl = createElementWithAttributes(win.document, 'meta', {
@@ -219,6 +219,12 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
   const slotRect = getPageLayoutBoxBlocking(adElement);
   const iframeDepth = iframeNestingDepth(win);
   const enclosingContainers = getEnclosingContainerTypes(adElement);
+  if (
+    a4a.uiHandler.isStickyAd() &&
+    !enclosingContainers.includes(ValidAdContainerTypes['AMP-STICKY-AD'])
+  ) {
+    enclosingContainers.push(ValidAdContainerTypes['AMP-STICKY-AD']);
+  }
   let eids = adElement.getAttribute(EXPERIMENT_ATTRIBUTE);
   if (opt_experimentIds) {
     eids = mergeExperimentIds(opt_experimentIds, eids);
@@ -307,6 +313,13 @@ export function googlePageParameters(a4a, startTime) {
       dev().expectedError('AMP-A4A', 'Referrer timeout!');
       return '';
     });
+  // Collect user agent hints info
+  const uaHintsPromise = Services.timerFor(win)
+    .timeoutPromise(1000, getUserAgentClientHintParameters(win))
+    .catch(() => {
+      dev().expectedError('AMP-A4A', 'UACH timeout!');
+      return {};
+    });
   // Set dom loading time to first visible if page started in prerender state
   // determined by truthy value for visibilityState param.
   const domLoading = a4a.getAmpDoc().getParam('visibilityState')
@@ -315,9 +328,11 @@ export function googlePageParameters(a4a, startTime) {
   return Promise.all([
     getOrCreateAdCid(ampDoc, 'AMP_ECID_GOOGLE', '_ga'),
     referrerPromise,
+    uaHintsPromise,
   ]).then((promiseResults) => {
     const clientId = promiseResults[0];
     const referrer = promiseResults[1];
+    const uaDataValues = promiseResults[2];
     const {canonicalUrl, pageViewId} = Services.documentInfoForDoc(ampDoc);
     // Read by GPT for GA/GPT integration.
     win.gaGlobal = win.gaGlobal || {cid: clientId, hid: pageViewId};
@@ -330,7 +345,7 @@ export function googlePageParameters(a4a, startTime) {
       'is_amp': a4a.isXhrAllowed()
         ? AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP
         : AmpAdImplementation.AMP_AD_IFRAME_GET,
-      'amp_v': internalRuntimeVersion(),
+      'amp_v': mode.version(),
       'd_imp': '1',
       'c': getCorrelator(win, ampDoc, clientId),
       'ga_cid': win.gaGlobal.cid || null,
@@ -359,6 +374,12 @@ export function googlePageParameters(a4a, startTime) {
       'loc': win.location.href == canonicalUrl ? null : win.location.href,
       'ref': referrer || null,
       'bdt': domLoading ? startTime - domLoading : null,
+      'uap': uaDataValues?.platform,
+      'uapv': uaDataValues?.platformVersion,
+      'uaa': uaDataValues?.architecture,
+      'uam': uaDataValues?.model,
+      'uafv': uaDataValues?.uaFullVersion,
+      'uab': uaDataValues?.bitness,
     };
   });
 }
@@ -834,7 +855,7 @@ export function addCsiSignalsToAmpAnalyticsConfig(
     `&dt=${initTime}` +
     (eids != 'null' ? `&e.${slotId}=${eids}` : '') +
     (aexp ? `&aexp=${aexp}` : '') +
-    `&rls=${internalRuntimeVersion()}&adt.${slotId}=${adType}`;
+    `&rls=${mode.version()}&adt.${slotId}=${adType}`;
   const isAmpSuffix = isVerifiedAmpCreative ? 'Friendly' : 'CrossDomain';
   config['triggers']['continuousVisibleIniLoad'] = {
     'on': 'ini-load',
@@ -1160,4 +1181,30 @@ export function getServeNpaPromise(element) {
     // Not in any of the defined geo groups.
     return false;
   });
+}
+
+/**
+ * This method retrieves the high-entropy portions of the user agent
+ * information.
+ * See https://wicg.github.io/ua-client-hints/#getHighEntropyValues
+ * @param {!Window} win
+ * @return {!Promise<!UADataValues|undefined>}
+ */
+function getUserAgentClientHintParameters(win) {
+  if (
+    !win.navigator ||
+    !win.navigator.userAgentData ||
+    typeof win.navigator.userAgentData.getHighEntropyValues !== 'function'
+  ) {
+    return Promise.resolve();
+  }
+
+  return win.navigator.userAgentData.getHighEntropyValues([
+    'platform',
+    'platformVersion',
+    'architecture',
+    'model',
+    'uaFullVersion',
+    'bitness',
+  ]);
 }

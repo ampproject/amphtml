@@ -26,12 +26,11 @@ import {ConsentUI, consentUiClasses} from '../consent-ui';
 import {Services} from '#service';
 import {dict} from '#core/types/object';
 import {elementByTag} from '#core/dom/query';
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service-helpers';
-import {toggleExperiment} from '#experiments';
 import {user} from '../../../../src/log';
 import {whenCalled} from '#testing/test-helper';
 
@@ -298,86 +297,46 @@ describes.realWin(
     });
 
     describe('CMP Iframe', () => {
-      it(
-        'should load the iframe, ' +
-          'then show it with correct state CSS classes',
-        () => {
-          const config = dict({
-            'promptUISrc': 'https://promptUISrc',
-          });
-          consentUI = new ConsentUI(mockInstance, config);
-          expect(parent.classList.contains('amp-active')).to.be.false;
-          expect(parent.classList.contains('amp-hidden')).to.be.false;
-
-          const showIframeSpy = env.sandbox.spy(consentUI, 'showIframe_');
-          const applyInitialStylesSpy = env.sandbox.spy(
-            consentUI,
-            'applyInitialStyles_'
-          );
-
-          consentUI.show(false);
-          expect(parent.classList.contains('amp-active')).to.be.true;
-          expect(parent.classList.contains(consentUiClasses.loading)).to.be
-            .true;
-          expect(parent).to.not.have.display('none');
-
-          // Resolve the iframe ready
-          consentUI.iframeReady_.resolve();
-
-          return whenCalled(showIframeSpy).then(() => {
-            expect(parent.classList.contains(consentUiClasses.iframeActive)).to
-              .be.true;
-
-            return whenCalled(applyInitialStylesSpy);
-          });
-        }
-      );
-
-      it('should expand the promptUISrc', function* () {
+      it('should load the iframe, then show it with correct state CSS classes', async () => {
         const config = dict({
-          'promptUISrc': 'https://example.test?cid=CLIENT_ID&r=RANDOM',
+          'promptUISrc': 'https://promptUISrc',
+        });
+        consentUI = new ConsentUI(mockInstance, config);
+        expect(parent).to.not.have.class('amp-active');
+        expect(parent).to.not.have.class('amp-hidden');
+
+        const showIframeSpy = env.sandbox.spy(consentUI, 'showIframe_');
+        const applyInitialStylesSpy = env.sandbox.spy(
+          consentUI,
+          'applyInitialStyles_'
+        );
+
+        consentUI.show(false);
+        expect(parent).to.have.class('amp-active');
+        expect(parent).to.have.class(consentUiClasses.loading);
+        expect(parent).to.not.have.display('none');
+
+        consentUI.iframeReady_.resolve();
+
+        await whenCalled(showIframeSpy);
+        expect(parent).to.have.class(consentUiClasses.iframeActive);
+        await whenCalled(applyInitialStylesSpy);
+      });
+
+      it('should expand the promptUISrc', async () => {
+        const config = dict({
+          'promptUISrc': 'https://example.test/?cid=CLIENT_ID&r=RANDOM',
           'clientConfig': {
             'test': 'ABC',
           },
         });
         consentUI = new ConsentUI(mockInstance, config);
         consentUI.show(false);
-        yield macroTask();
+        await macroTask();
         expect(consentUI.ui_.src).to.match(/cid=amp-.{22}&r=RANDOM/);
       });
 
-      it('should pass the info to the iframe', function* () {
-        const config = dict({
-          'promptUISrc': 'https://promptUISrc',
-          'clientConfig': {
-            'test': 'ABC',
-          },
-        });
-        consentUI = new ConsentUI(mockInstance, config);
-        consentUI.show(false);
-        yield macroTask();
-
-        expect(consentUI.ui_.getAttribute('name')).to.deep.equal(
-          JSON.stringify({
-            'clientConfig': {
-              'test': 'ABC',
-            },
-            'consentState': 'accepted',
-            'consentStateValue': 'accepted',
-            'consentMetadata': constructMetadata(
-              CONSENT_STRING_TYPE.TCF_V2,
-              '1~1.10.12.103'
-            ),
-            'consentString': 'test',
-            'promptTrigger': 'load',
-            'isDirty': false,
-          })
-        );
-      });
-
-      // TODO(micajuineho): consolidate w/ test above after exp done
-      it('should pass purpose consents to the iframe', async () => {
-        toggleExperiment(win, 'amp-consent-granular-consent', true);
+      it("should pass info into iframe's name", async () => {
         const config = dict({
           'promptUISrc': 'https://promptUISrc',
           'clientConfig': {
@@ -388,7 +347,7 @@ describes.realWin(
         consentUI.show(false);
         await macroTask();
 
-        expect(consentUI.ui_.getAttribute('name')).to.deep.equal(
+        expect(consentUI.ui_.getAttribute('name')).to.equal(
           JSON.stringify({
             'clientConfig': {
               'test': 'ABC',
@@ -405,7 +364,6 @@ describes.realWin(
             'purposeConsents': {'abc': 1},
           })
         );
-        toggleExperiment(win, 'amp-consent-granular-consent', false);
       });
 
       it('should pass the promptTrigger reason to the iframe', function* () {

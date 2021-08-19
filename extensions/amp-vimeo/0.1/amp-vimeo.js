@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {dispatchCustomEvent, removeElement} from '#core/dom';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {isAutoplaySupported} from '#core/dom/video';
 import {PauseHelper} from '#core/dom/video/pause-helper';
+import {once} from '#core/types/function';
+
 import {Services} from '#service';
-import {
-  VIMEO_EVENTS,
-  getVimeoIframeSrc,
-  getVimeoOriginRegExp,
-  listenToVimeoEvents,
-  makeVimeoMessage,
-} from '../vimeo-api';
-import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen} from '../../../src/event-helper';
 import {
   createFrameFor,
   isJsonOrObj,
@@ -32,13 +32,15 @@ import {
   postMessageWhenAvailable,
   redispatch,
 } from '../../../src/iframe-video';
-import {dispatchCustomEvent, removeElement} from '#core/dom';
-import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '#service/video-manager-impl';
-import {isAutoplaySupported} from '#core/dom/video';
-import {isLayoutSizeDefined} from '#core/dom/layout';
-import {once} from '#core/types/function';
 import {userAssert} from '../../../src/log';
+import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
+import {
+  VIMEO_EVENTS,
+  getVimeoIframeSrc,
+  getVimeoOriginRegExp,
+  listenToVimeoEvents,
+  makeVimeoMessage,
+} from '../vimeo-api';
 
 const TAG = 'amp-vimeo';
 

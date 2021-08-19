@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
+import {Services} from '#service';
+
+import {CSS} from '../../../../build/amp-form-0.1.css';
 import * as eventHelper from '../../../../src/event-helper';
+import {installStylesForDoc} from '../../../../src/style-installer';
 import {
   AmpFormTextarea,
   getHasOverflow,
   handleInitialOverflowElements,
   maybeResizeTextarea,
 } from '../amp-form-textarea';
-import {CSS} from '../../../../build/amp-form-0.1.css';
-import {Services} from '#service';
-import {installStylesForDoc} from '../../../../src/style-installer';
 
 describes.realWin(
   'amp-form textarea[autoexpand]',

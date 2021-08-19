@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {install} from '#polyfills/domtokenlist';
 import {toArray} from '#core/types/array';
+
+import {install} from '#polyfills/domtokenlist';
 
 describes.fakeWin(
   'DOMTokenList.toggle/add on non-IE',

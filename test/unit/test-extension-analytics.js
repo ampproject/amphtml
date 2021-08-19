@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
+import {Services} from '#service';
+import {registerElement} from '#service/custom-element-registry';
+
+import {macroTask} from '#testing/helpers';
+
 import {BaseElement} from '../../src/base-element';
 import {
   CustomEventReporterBuilder,
   insertAnalyticsElement,
   useAnalyticsInSandbox,
 } from '../../src/extension-analytics';
-import {Services} from '#service';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../src/service-helpers';
-import {macroTask} from '#testing/yield';
-import {registerElement} from '#service/custom-element-registry';
 
 /* eslint-disable react-hooks/rules-of-hooks */
 

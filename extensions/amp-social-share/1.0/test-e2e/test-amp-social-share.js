@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Key} from '../../../../build-system/tasks/e2e/e2e-types';
+import {Key} from '#testing/helpers/types';
 
 describes.endtoend(
   'amp-social-share',
@@ -24,7 +24,7 @@ describes.endtoend(
     experiments: ['bento-social-share'],
     environments: ['single', 'viewer-demo'],
   },
-  async (env) => {
+  (env) => {
     let controller;
 
     beforeEach(() => {

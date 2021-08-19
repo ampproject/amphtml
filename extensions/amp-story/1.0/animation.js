@@ -32,10 +32,10 @@ import {
   WebKeyframesCreateFnDef,
   WebKeyframesDef,
 } from './animation-types';
-import {assertDoesNotContainDisplay} from '../../../src/assert-display';
+import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getChildJsonConfig} from '../../../src/json';
+import {getChildJsonConfig} from '#core/dom';
 import {map, omit} from '#core/types/object';
 import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {
@@ -43,7 +43,6 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
-import {setStyles} from '#core/dom/style';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 import {isExperimentOn} from '#experiments';
 

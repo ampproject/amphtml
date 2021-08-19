@@ -22,7 +22,7 @@ import {
   getElementsToAriaHide,
   setModalAsClosed,
   setModalAsOpen,
-} from '../../src/modal';
+} from '#core/dom/modal';
 import {htmlFor} from '#core/dom/static-template';
 import {toArray} from '#core/types/array';
 

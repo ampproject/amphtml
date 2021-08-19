@@ -14,32 +14,36 @@
  * limitations under the License.
  */
 
-import {
-  Action,
-  ActionStatus,
-  SubscriptionAnalytics,
-} from '../../../amp-subscriptions/0.1/analytics';
-import {
-  AmpFetcher,
-  GoogleSubscriptionsPlatform,
-} from '../amp-subscriptions-google';
+import {WindowInterface} from '#core/window/interface';
+
+import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+
+import {PageConfig} from '#third_party/subscriptions-project/config';
 import {
   ConfiguredRuntime,
   Entitlements,
   SubscribeResponse,
   Entitlement as SwgEntitlement,
 } from '#third_party/subscriptions-project/swg';
+import {GaaMeteringRegwall} from '#third_party/subscriptions-project/swg-gaa';
+
+import {
+  Action,
+  ActionStatus,
+  SubscriptionAnalytics,
+} from '../../../amp-subscriptions/0.1/analytics';
+import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/constants';
 import {
   Entitlement,
   GrantReason,
 } from '../../../amp-subscriptions/0.1/entitlement';
-import {GaaMeteringRegwall} from '#third_party/subscriptions-project/swg-gaa';
-import {PageConfig} from '#third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
-import {Services} from '#service';
-import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/constants';
-import {WindowInterface} from '#core/window/interface';
-import {toggleExperiment} from '#experiments';
+import {
+  AmpFetcher,
+  GoogleSubscriptionsPlatform,
+} from '../amp-subscriptions-google';
 
 const PLATFORM_ID = 'subscribe.google.com';
 const AMP_URL = 'myAMPurl.amp';

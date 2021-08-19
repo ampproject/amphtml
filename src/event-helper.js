@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import {internalListenImplementation} from './core/dom/event-helper-listen';
-import {lastChildElement} from './core/dom/query';
+import {internalListenImplementation} from '#core/dom/event-helper-listen';
+import {lastChildElement} from '#core/dom/query';
+import * as mode from '#core/mode';
+
 import {user} from './log';
 
 /** @const {string}  */
@@ -37,7 +39,7 @@ export function createCustomEvent(win, type, detail, opt_eventInit) {
   Object.assign(eventInit, opt_eventInit);
   // win.CustomEvent is a function on Edge, Chrome, FF, Safari but
   // is an object on IE 11.
-  if (IS_ESM || typeof win.CustomEvent == 'function') {
+  if (mode.isEsm() || typeof win.CustomEvent == 'function') {
     return new win.CustomEvent(type, eventInit);
   } else {
     // Deprecated fallback for IE.

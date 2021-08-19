@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {getNextArrow, getPrevArrow, getSlides, sleep} from './helpers';
+import {getNextArrow, getPrevArrow, getSlides} from './helpers';
+import {sleep} from '#testing/helpers';
 
 const pageWidth = 500;
 const pageHeight = 800;
@@ -28,7 +29,7 @@ describes.endtoend(
     environments: ['single'],
     initialRect: {width: pageWidth, height: pageHeight},
   },
-  async (env) => {
+  (env) => {
     let controller;
     let nextArrow;
     let prevArrow;

@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import {htmlFor} from '#core/dom/static-template';
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {scopedQuerySelectorAll} from '#core/dom/query';
-import {toggleExperiment} from '#experiments';
+import {afterRenderPromise} from '#testing/helpers';
 
 const extensions = ['amp-story:1.0', 'amp-audio'];
 
@@ -190,7 +190,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
-      .then((mediaPool) => {
+      .then(async (mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock.expects('register').withExactArgs(videoEl).once();
 
@@ -207,10 +207,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         // `setState` runs code that creates subtasks (Promise callbacks).
         // Waits for the next frame to make sure all the subtasks are
         // already executed when we run the assertions.
-        win.requestAnimationFrame(() => {
-          mediaPoolMock.verify();
-          done();
-        });
+        await afterRenderPromise();
+        mediaPoolMock.verify();
+        done();
       });
   });
 
@@ -229,7 +228,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
-      .then((mediaPool) => {
+      .then(async (mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock.expects('preload').resolves();
         mediaPoolMock.expects('play').resolves();
@@ -237,10 +236,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
         page.setState(PageState.PLAYING);
 
-        win.requestAnimationFrame(() => {
-          mediaPoolMock.verify();
-          done();
-        });
+        await afterRenderPromise();
+        mediaPoolMock.verify();
+        done();
       });
   });
 
@@ -263,7 +261,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       page
         .layoutCallback()
         .then(() => page.mediaPoolPromise_)
-        .then((mediaPool) => {
+        .then(async (mediaPool) => {
           mediaPoolMock = env.sandbox.mock(mediaPool);
           mediaPoolMock.expects('register').withExactArgs(videoEl).once();
 
@@ -280,10 +278,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
           // `setState` runs code that creates subtasks (Promise callbacks).
           // Waits for the next frame to make sure all the subtasks are
           // already executed when we run the assertions.
-          win.requestAnimationFrame(() => {
-            mediaPoolMock.verify();
-            done();
-          });
+          await afterRenderPromise();
+          mediaPoolMock.verify();
+          done();
         });
     });
   });
@@ -481,7 +478,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
-      .then((mediaPool) => {
+      .then(async (mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock
           .expects('pause')
@@ -493,10 +490,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         // `setState` runs code that creates subtasks (Promise callbacks).
         // Waits for the next frame to make sure all the subtasks are
         // already executed when we run the assertions.
-        win.requestAnimationFrame(() => {
-          mediaPoolMock.verify();
-          done();
-        });
+        await afterRenderPromise();
+        mediaPoolMock.verify();
+        done();
       });
   });
 
@@ -513,16 +509,15 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
-      .then((mediaPool) => {
+      .then(async (mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock.expects('mute').withExactArgs(videoEl).once();
 
         page.setState(PageState.NOT_ACTIVE);
 
-        win.requestAnimationFrame(() => {
-          mediaPoolMock.verify();
-          done();
-        });
+        await afterRenderPromise();
+        mediaPoolMock.verify();
+        done();
       });
   });
 
@@ -546,7 +541,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
-      .then((mediaPool) => {
+      .then(async (mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock
           .expects('pause')
@@ -558,10 +553,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         // `setState` runs code that creates subtasks (Promise callbacks).
         // Waits for the next frame to make sure all the subtasks are
         // already executed when we run the assertions.
-        win.requestAnimationFrame(() => {
-          mediaPoolMock.verify();
-          done();
-        });
+        await afterRenderPromise();
+        mediaPoolMock.verify();
+        done();
       });
   });
 
@@ -670,11 +664,12 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(openAttachmentEl).to.exist;
   });
 
-  it('should build the open attachment UI with target="_top" to navigate in top window. For viewers, this ensures the link will open in the parent window.', async () => {
+  it('should build the legacy outlinking amp-story-page-attachment UI with target="_top" to navigate in top window. For viewers, this ensures the link will open in the parent window.', async () => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
     attachmentEl.setAttribute('layout', 'nodisplay');
+    attachmentEl.setAttribute('href', 'google.com');
     element.appendChild(attachmentEl);
 
     page.buildCallback();
@@ -688,15 +683,12 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(openAttachmentEl.getAttribute('target')).to.eql('_top');
   });
 
-  it('should build the new outlink page attachment UI with target="_top" to navigate in top level browsing context. For viewers, this ensures the link will open in the parent window.', async () => {
-    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
-
-    const attachmentEl = win.document.createElement(
-      'amp-story-page-attachment'
-    );
-    attachmentEl.setAttribute('layout', 'nodisplay');
-    attachmentEl.setAttribute('href', 'google.com');
-    element.appendChild(attachmentEl);
+  it('should build amp-story-page-outlink UI with target="_top" to navigate in top level browsing context. For viewers, this ensures the link will open in the parent window.', async () => {
+    const outlinkEl = win.document.createElement('amp-story-page-outlink');
+    outlinkEl.setAttribute('layout', 'nodisplay');
+    element.appendChild(outlinkEl);
+    const anchorEl = win.document.createElement('a');
+    outlinkEl.appendChild(anchorEl);
 
     page.buildCallback();
     await page.layoutCallback();
@@ -724,9 +716,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(openoutlinkEl).to.exist;
   });
 
-  it('should build the inline page attachment UI with one image', async () => {
-    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
-
+  it('should build the amp-story-page-attachment UI with one image', async () => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
@@ -750,13 +740,10 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     ).to.exist;
   });
 
-  it('should build the inline page attachment UI with two images', async () => {
-    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
-
+  it('should build the amp-story-page-attachment UI with two images', async () => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
-
     attachmentEl.setAttribute('layout', 'nodisplay');
     attachmentEl.setAttribute('cta-image', 'nodisplay');
     attachmentEl.setAttribute('cta-image-2', 'nodisplay');
@@ -777,9 +764,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     ).to.equal(2);
   });
 
-  it('should NOT rewrite the attachment UI images to a proxy URL', async () => {
-    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
-
+  it('should NOT rewrite the amp-story-page-attachment UI images to a proxy URL', async () => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
@@ -803,45 +788,12 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(imgEl.getAttribute('style')).to.contain(src);
   });
 
-  it('should build the new default outlink page attachment UI', async () => {
-    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
-
-    const attachmentEl = createElementWithAttributes(
-      win.document,
-      'amp-story-page-attachment',
-      {'layout': 'nodisplay', 'href': 'www.google.com'}
+  it('should build the amp-story-page-attachment with href (legacy) UI', async () => {
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
     );
-    element.appendChild(attachmentEl);
-
-    await page.buildCallback();
-    await page.layoutCallback();
-    page.setState(PageState.PLAYING);
-
-    const openAttachmentEl = element.querySelector(
-      '.i-amphtml-story-page-open-attachment'
-    );
-
-    expect(
-      openAttachmentEl.querySelector(
-        '.i-amphtml-story-outlink-page-attachment-outlink-chip'
-      )
-    ).to.exist;
-  });
-
-  it('should build the new outlink page attachment UI with icon', async () => {
-    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
-
-    const attachmentEl = createElementWithAttributes(
-      win.document,
-      'amp-story-page-attachment',
-      {
-        'layout': 'nodisplay',
-        'href': 'www.google.com',
-        'theme': 'custom',
-        'cta-accent-color': 'pink',
-        'cta-accent-element': 'text',
-      }
-    );
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    attachmentEl.setAttribute('href', 'www.google.com');
     element.appendChild(attachmentEl);
 
     await page.buildCallback();
@@ -859,12 +811,34 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     ).to.exist;
   });
 
-  it('should build the open attachment UI with custom CTA label', async () => {
+  it('should build the amp-story-page-outlink UI', async () => {
+    const outlinkEl = win.document.createElement('amp-story-page-outlink');
+    outlinkEl.setAttribute('layout', 'nodisplay');
+    element.appendChild(outlinkEl);
+    const anchorChild = win.document.createElement('a');
+    outlinkEl.appendChild(anchorChild);
+
+    await page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    expect(
+      openAttachmentEl.querySelector(
+        '.i-amphtml-story-page-open-attachment-link-icon'
+      )
+    ).to.exist;
+  });
+
+  it('should build the open attachment UI with custom text', async () => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
     attachmentEl.setAttribute('layout', 'nodisplay');
-    attachmentEl.setAttribute('cta-text', 'Custom label');
+    attachmentEl.setAttribute('cta-text', 'Custom text');
     element.appendChild(attachmentEl);
 
     page.buildCallback();
@@ -872,9 +846,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.setState(PageState.PLAYING);
 
     const openAttachmentLabelEl = element.querySelector(
-      '.i-amphtml-story-page-open-attachment-label'
+      '.i-amphtml-story-page-attachment-label'
     );
-    expect(openAttachmentLabelEl.textContent).to.equal('Custom label');
+    expect(openAttachmentLabelEl.textContent).to.equal('Custom text');
   });
 
   it('should use cta-text attribute when data-cta-text also exist', async () => {
@@ -891,16 +865,14 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.setState(PageState.PLAYING);
 
     const openAttachmentLabelEl = element.querySelector(
-      '.i-amphtml-story-page-open-attachment-label'
+      '.i-amphtml-story-page-attachment-label'
     );
 
     expect(openAttachmentLabelEl.textContent).to.equal('CTA text');
   });
 
   it('should propogate the amp-story-page-attachment title attribute to the cta button', async () => {
-    const attachmentEl = win.document.createElement(
-      'amp-story-page-attachment'
-    );
+    const attachmentEl = win.document.createElement('amp-story-page-outlink');
     attachmentEl.setAttribute('layout', 'nodisplay');
     attachmentEl.setAttribute('title', 'cta title');
     element.appendChild(attachmentEl);
@@ -917,15 +889,14 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   });
 
   it('should propogate the amp-story-page-outlink title attribute to the cta button', async () => {
-    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
-    const attachmentEl = win.document.createElement('amp-story-page-outlink');
-    attachmentEl.setAttribute('layout', 'nodisplay');
-    element.appendChild(attachmentEl);
+    const outlinkEl = win.document.createElement('amp-story-page-outlink');
+    outlinkEl.setAttribute('layout', 'nodisplay');
+    element.appendChild(outlinkEl);
 
     const anchorChild = win.document.createElement('a');
     anchorChild.setAttribute('href', 'google.com');
     anchorChild.setAttribute('title', 'cta title');
-    attachmentEl.appendChild(anchorChild);
+    outlinkEl.appendChild(anchorChild);
 
     page.buildCallback();
     await page.layoutCallback();

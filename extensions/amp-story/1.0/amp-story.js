@@ -108,7 +108,7 @@ import {
   shouldShowStoryUrlInfo,
 } from './utils';
 import {upgradeBackgroundAudio} from './audio';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsDe from './_locales/de.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsDefault from './_locales/default.json' assert {type: 'json'}; // lgtm[js/syntax-error]
@@ -965,6 +965,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     const lockOrientation =
+      screen.orientation?.lock ||
       screen.lockOrientation ||
       screen.mozLockOrientation ||
       screen.msLockOrientation ||
@@ -1036,7 +1037,10 @@ export class AmpStory extends AMP.BaseElement {
         // Preloads and prerenders the share menu.
         this.shareMenu_.build();
 
-        const infoDialog = shouldShowStoryUrlInfo(devAssert(this.viewer_))
+        const infoDialog = shouldShowStoryUrlInfo(
+          devAssert(this.viewer_),
+          this.storeService_
+        )
           ? new InfoDialog(this.win, this.element)
           : null;
         if (infoDialog) {
@@ -2115,7 +2119,7 @@ export class AmpStory extends AMP.BaseElement {
     const fallbackEl = this.getFallback();
     if (isBrowserSupported) {
       // Removes the default unsupported browser layer or throws an error
-      // if the publisher has provided their own fallback
+      // if the publisher has provided their own fallback.
       if (fallbackEl) {
         dev().error(
           TAG,

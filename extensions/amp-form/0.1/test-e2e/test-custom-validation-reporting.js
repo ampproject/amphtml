@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Key} from '../../../../build-system/tasks/e2e/e2e-types';
+import {Key} from '#testing/helpers/types';
 
 const expectedSubmitUrl =
   'https://example.com/submit?__amp_source_origin=http%3A%2F%2Flocalhost%3A8000';
@@ -25,7 +25,7 @@ describes.endtoend(
     fixture: 'amp-form/custom-validation-reporting.html',
     environments: ['single'],
   },
-  async (env) => {
+  (env) => {
     let controller;
     let fullnameInput;
     let submitButton;

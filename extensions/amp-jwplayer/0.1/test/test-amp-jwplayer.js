@@ -17,9 +17,10 @@
 import '../amp-jwplayer';
 import * as consent from '../../../../src/consent';
 import * as fullscreen from '#core/dom/fullscreen';
-import {VideoEvents} from '../../../../src/video-interface';
 import {htmlFor} from '#core/dom/static-template';
 import {parseUrlDeprecated} from '../../../../src/url';
+
+import {VideoEvents} from '../../../../src/video-interface';
 
 describes.realWin(
   'amp-jwplayer',

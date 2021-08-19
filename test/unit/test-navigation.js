@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import * as Impression from '../../src/impression';
-import {Services} from '#service';
-import {addParamToUrl} from '../../src/url';
 import {createElementWithAttributes} from '#core/dom';
-import {installUrlReplacementsServiceForDoc} from '#service/url-replacements-impl';
-import {macroTask} from '#testing/yield';
+
+import {Services} from '#service';
 import {maybeExpandUrlParamsForTesting} from '#service/navigation';
+import {installUrlReplacementsServiceForDoc} from '#service/url-replacements-impl';
+
+import {macroTask} from '#testing/helpers';
+
+import * as Impression from '../../src/impression';
+import {addParamToUrl} from '../../src/url';
 
 describes.sandboxed('Navigation', {}, () => {
   let event;

@@ -19,29 +19,15 @@ import {
   unobserveBorderBoxSize,
 } from '#core/dom/layout/size-observer';
 
-import {PausableInterface} from './pausable-interface';
-
-/**
- * TODO(rcebulko, #34096): Remove this once a proper AMPElement type is
- * available, and declare that it @implements PausableInterface. For now, this
- * provides the necessary type strictness.
- * @extends Element
- * @implements {PausableInterface}
- */
-class PausableElementDef {
-  /** @function */
-  pause() {}
-}
-
 export class PauseHelper {
   /**
-   * @param {!PausableElementDef} element
+   * @param {!AmpElement} element
    */
   constructor(element) {
     /**
      * @private
      * @const
-     * @type {!PausableElementDef}
+     * @type {!AmpElement}
      */
     this.element_ = element;
 
@@ -84,7 +70,7 @@ export class PauseHelper {
     }
     this.hasSize_ = hasSize;
 
-    /** @implements {PausableInterface} */
+    /** @type {!PausableInterface} */
     const element = this.element_;
     if (!hasSize) {
       element.pause();
