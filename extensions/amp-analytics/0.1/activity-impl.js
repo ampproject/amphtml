@@ -250,13 +250,9 @@ export class Activity {
     );
 
     this.unlistenFuncs_.push(
-      this.ampdoc.onVisibilityChanged(this.boundHandleVisibilityChange_)
+      this.ampdoc.onVisibilityChanged(this.boundHandleVisibilityChange_),
+      this.viewport_.onScroll(this.boundHandleActivity_)
     );
-
-    // Viewport.onScroll does not return an unlisten function.
-    // TODO(britice): If Viewport is updated to return an unlisten function,
-    // update this to capture the unlisten function.
-    this.viewport_.onScroll(this.boundHandleActivity_);
   }
 
   /**
