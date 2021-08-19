@@ -1,9 +1,3 @@
-<<<<<<<
-=======
-# AMP HTML ⚡ Validator
-
-A validator for the
->>>>>>>
 # AMP HTML ⚡ Validator
 
 A validator for the
