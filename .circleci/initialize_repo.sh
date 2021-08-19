@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 
-# This script establishes the merge commit at the start of a CircleCI build so
-# all stages use the same commit.
+# This script updates the .git cache and then establishes the merge commit at
+# the start of a CircleCI build so all stages use the same commit.
 
 set -e
 err=0

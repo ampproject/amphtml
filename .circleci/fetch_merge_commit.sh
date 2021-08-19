@@ -14,8 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 
-# This script fetches the merge commit of a PR branch with the main branch to
-# make sure PRs are tested against all the latest changes on CircleCI.
+# This script updates the .git cache and fetches the merge commit of a PR branch
+# with the main branch to make sure PRs are tested against all the latest
+# changes on CircleCI.
 
 set -e
 err=0
