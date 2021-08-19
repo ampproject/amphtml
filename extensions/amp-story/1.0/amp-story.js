@@ -1,20 +1,4 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Embeds a story
  *
  * Example:
@@ -108,7 +92,7 @@ import {
   shouldShowStoryUrlInfo,
 } from './utils';
 import {upgradeBackgroundAudio} from './audio';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsDe from './_locales/de.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsDefault from './_locales/default.json' assert {type: 'json'}; // lgtm[js/syntax-error]
@@ -965,7 +949,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     const lockOrientation =
-      screen.orientation.lock ||
+      screen.orientation?.lock ||
       screen.lockOrientation ||
       screen.mozLockOrientation ||
       screen.msLockOrientation ||
@@ -1037,7 +1021,10 @@ export class AmpStory extends AMP.BaseElement {
         // Preloads and prerenders the share menu.
         this.shareMenu_.build();
 
-        const infoDialog = shouldShowStoryUrlInfo(devAssert(this.viewer_))
+        const infoDialog = shouldShowStoryUrlInfo(
+          devAssert(this.viewer_),
+          this.storeService_
+        )
           ? new InfoDialog(this.win, this.element)
           : null;
         if (infoDialog) {

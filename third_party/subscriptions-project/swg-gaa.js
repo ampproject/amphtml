@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.177 */
+/** Version: 0.1.22.180 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -272,6 +272,29 @@ const EventOriginator = {
  */
 
 /**
+ * @param  {...*} var_args [description]
+ */
+function warn(var_args) {
+  console.warn.apply(console, arguments);
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * Returns a map-like object.
  * If initial is provided, copies its own properties into the
  * newly created object.
@@ -341,29 +364,6 @@ function findInArray(array, predicate) {
  */
 function parseJson(json) {
   return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */ (json)));
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @param  {...*} var_args [description]
- */
-function warn(var_args) {
-  console.warn.apply(console, arguments);
 }
 
 /**
@@ -870,6 +870,9 @@ const POST_MESSAGE_COMMAND_USER = 'user';
 /** Error command for post messages. */
 const POST_MESSAGE_COMMAND_ERROR = 'error';
 
+/** Button click command for post messages. */
+const POST_MESSAGE_COMMAND_BUTTON_CLICK = 'button-click';
+
 /** ID for the Google Sign-In iframe element. */
 const GOOGLE_SIGN_IN_IFRAME_ID = 'swg-google-sign-in-iframe';
 
@@ -1214,10 +1217,14 @@ class GaaMeteringRegwall {
       return Promise.reject(errorMessage);
     }
 
-    logEvent(ShowcaseEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL);
+    logEvent({
+      showcaseEvent: ShowcaseEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL,
+      isFromUserAction: false,
+    });
 
     GaaMeteringRegwall.render_({iframeUrl, caslUrl});
     GaaMeteringRegwall.sendIntroMessageToGsiIframe_({iframeUrl});
+    GaaMeteringRegwall.logButtonClickEvents_();
     return GaaMeteringRegwall.getGaaUser_()
       .then((gaaUser) => {
         GaaMeteringRegwall.remove();
@@ -1443,6 +1450,12 @@ class GaaMeteringRegwall {
       .addEventListener('click', (e) => {
         e.preventDefault();
 
+        logEvent({
+          analyticsEvent:
+            AnalyticsEvent.ACTION_SHOWCASE_REGWALL_EXISTING_ACCOUNT_CLICK,
+          isFromUserAction: true,
+        });
+
         callSwg((swg) => swg.triggerLoginRequest({linkRequested: false}));
       });
   }
@@ -1469,6 +1482,27 @@ class GaaMeteringRegwall {
           }
         }
       });
+    });
+  }
+
+  /**
+   * Logs button click events.
+   * @private
+   * @nocollapse
+   */
+  static logButtonClickEvents_() {
+    // Listen for button event messages.
+    self.addEventListener('message', (e) => {
+      if (
+        e.data.stamp === POST_MESSAGE_STAMP &&
+        e.data.command === POST_MESSAGE_COMMAND_BUTTON_CLICK
+      ) {
+        // Log button click event.
+        logEvent({
+          analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_GSI_CLICK,
+          isFromUserAction: true,
+        });
+      }
     });
   }
 
@@ -1582,6 +1616,17 @@ class GaaGoogleSignInButton {
               'scope': 'profile email',
               'theme': 'dark',
             });
+
+            // Track button clicks.
+            buttonEl.addEventListener('click', () => {
+              // Tell parent frame about button click.
+              sendMessageToParentFnPromise.then((sendMessageToParent) => {
+                sendMessageToParent({
+                  stamp: POST_MESSAGE_STAMP,
+                  command: POST_MESSAGE_COMMAND_BUTTON_CLICK,
+                });
+              });
+            });
           })
       )
       .then((googleUser) => {
@@ -1658,21 +1703,27 @@ function callSwg(callback) {
 
 /**
  * Logs Showcase events.
- * @param {!ShowcaseEvent} showcaseEvent
+ * @param {{
+ *   analyticsEvent: (AnalyticsEvent|undefined),
+ *   showcaseEvent: (ShowcaseEvent|undefined),
+ *   isFromUserAction: boolean,
+ * }} params
  */
-function logEvent(showcaseEvent) {
+function logEvent({analyticsEvent, showcaseEvent, isFromUserAction} = {}) {
   callSwg((swg) => {
     // Get reference to event manager.
     swg.getEventManager().then((eventManager) => {
-      // Get individual analytics events from Showcase event.
-      const eventTypes = showcaseEventToAnalyticsEvents(showcaseEvent);
+      // Get list of analytics events.
+      const eventTypes = showcaseEvent
+        ? showcaseEventToAnalyticsEvents(showcaseEvent)
+        : [analyticsEvent];
 
       // Log each analytics event.
       eventTypes.forEach((eventType) => {
         eventManager.logEvent({
           eventType,
           eventOriginator: EventOriginator.SWG_CLIENT,
-          isFromUserAction: null,
+          isFromUserAction,
           additionalParameters: null,
         });
       });

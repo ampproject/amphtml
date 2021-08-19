@@ -1,19 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const argv = require('minimist')(process.argv.slice(2));
 const debounce = require('../common/debounce');
 const esbuild = require('esbuild');
@@ -196,9 +180,9 @@ async function compileAllJs(options) {
 }
 
 /**
- * Allows pending inside the compile wrapper to the already compiled, minified JS file.
+ * Allows pending inside the compile wrapper to the already minified JS file.
  * @param {string} srcFilename Name of the JS source file
- * @param {string} destFilePath File path to the compiled JS file
+ * @param {string} destFilePath File path to the minified JS file
  * @param {?Object} options
  */
 function combineWithCompiledFile(srcFilename, destFilePath, options) {
@@ -418,16 +402,20 @@ async function finishBundle(
 /**
  * Transforms a given JavaScript file entry point with esbuild and babel, and
  * watches it for changes (if required).
+ *
  * @param {string} srcDir
  * @param {string} srcFilename
  * @param {string} destDir
  * @param {?Object} options
  * @return {!Promise}
  */
-async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
+async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const startTime = Date.now();
   const entryPoint = path.join(srcDir, srcFilename);
-  const destFilename = options.toName || srcFilename;
+  const fileName = options.minify
+    ? options.minifiedName
+    : options.toName ?? srcFilename;
+  const destFilename = options.npm ? fileName : maybeToEsmName(fileName);
   const destFile = path.join(destDir, destFilename);
 
   if (watchedTargets.has(entryPoint)) {
@@ -447,74 +435,7 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       footer: {js: wrapper.slice(start + sentinel.length)},
     };
   }
-
   const {banner, footer} = splitWrapper();
-  const babelPlugin = getEsbuildBabelPlugin(
-    'unminified',
-    /* enableCache */ true
-  );
-
-  const buildResult = await esbuild
-    .build({
-      entryPoints: [entryPoint],
-      bundle: true,
-      sourcemap: true,
-      define: experimentDefines,
-      outfile: destFile,
-      plugins: [babelPlugin],
-      banner,
-      footer,
-      incremental: !!options.watch,
-      logLevel: 'silent',
-    })
-    .then((result) => {
-      finishBundle(srcFilename, destDir, destFilename, options, startTime);
-      return result;
-    })
-    .catch((err) => handleBundleError(err, !!options.watch, destFilename));
-
-  if (options.watch) {
-    watchedTargets.set(entryPoint, {
-      rebuild: async () => {
-        const time = Date.now();
-        const {rebuild} = /** @type {Required<esbuild.BuildResult>} */ (
-          buildResult
-        );
-
-        const buildPromise = rebuild()
-          .then(() =>
-            finishBundle(srcFilename, destDir, destFilename, options, time)
-          )
-          .catch((err) =>
-            handleBundleError(err, /* continueOnError */ true, destFilename)
-          );
-        options?.onWatchBuild(buildPromise);
-        await buildPromise;
-      },
-    });
-  }
-}
-
-/**
- * Transforms a given JavaScript file entry point with esbuild and babel, and
- * watches it for changes (if required).
- * Used by 3p iframe vendors.
- * @param {string} srcDir
- * @param {string} srcFilename
- * @param {string} destDir
- * @param {?Object} options
- * @return {!Promise}
- */
-async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
-  const startTime = Date.now();
-  const entryPoint = path.join(srcDir, srcFilename);
-  const fileName = options.minify ? options.minifiedName : options.toName;
-  const destFilename = options.npm ? fileName : maybeToEsmName(fileName);
-  const destFile = path.join(destDir, destFilename);
-
-  if (watchedTargets.has(entryPoint)) {
-    return watchedTargets.get(entryPoint).rebuild();
-  }
 
   const babelPlugin = getEsbuildBabelPlugin(
     options.minify ? 'minified' : 'unminified',
@@ -539,8 +460,11 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
         bundle: true,
         sourcemap: true,
         outfile: destFile,
+        define: experimentDefines,
         plugins,
-        format: options.outputFormat || undefined,
+        format: options.outputFormat,
+        banner,
+        footer,
         // For es5 builds, ensure esbuild-injected code is transpiled.
         target: argv.esm ? 'es6' : 'es5',
         incremental: !!options.watch,
@@ -686,7 +610,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
   async function doCompileJs(options) {
     const buildResult = options.minify
       ? compileMinifiedJs(srcDir, srcFilename, destDir, options)
-      : compileUnminifiedJs(srcDir, srcFilename, destDir, options);
+      : esbuildCompile(srcDir, srcFilename, destDir, options);
     if (options.onWatchBuild) {
       options.onWatchBuild(buildResult);
     }
@@ -884,10 +808,9 @@ module.exports = {
   compileAllJs,
   compileCoreRuntime,
   compileJs,
-  compileJsWithEsbuild,
+  esbuildCompile,
   doBuildJs,
   endBuildStep,
-  compileUnminifiedJs,
   maybePrintCoverageMessage,
   maybeToEsmName,
   maybeToNpmEsmName,

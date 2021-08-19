@@ -1,19 +1,3 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
@@ -22,11 +6,40 @@ import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import '../../../amp-ad/0.1/amp-ad';
 // The following namespaces are imported so that we can stub and spy on certain
 // methods in tests.
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {Signals} from '#core/data-structures/signals';
+import {createElementWithAttributes} from '#core/dom';
+import {LayoutPriority} from '#core/dom/layout';
+import {layoutRectLtwh, layoutSizeFromRect} from '#core/dom/layout/rect';
+
+import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+import {AmpDoc, installDocService} from '#service/ampdoc-impl';
+import {resetScheduledElementForTesting} from '#service/custom-element-registry';
+import {Extensions} from '#service/extensions-impl';
+import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
+
+import {macroTask} from '#testing/helpers';
+import {createIframePromise} from '#testing/iframe';
+
+import {FetchMock, networkFailure} from './fetch-mock';
+import {data as testFragments} from './testdata/test_fragments';
+import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
+import {MockA4AImpl, TEST_URL} from './utils';
+
 import * as analytics from '../../../../src/analytics';
+import {cancellation} from '../../../../src/error-reporting';
 import * as analyticsExtension from '../../../../src/extension-analytics';
+import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
+import {dev, user} from '../../../../src/log';
 import * as mode from '../../../../src/mode';
-import * as secureFrame from '../secure-frame';
-import {AMP_SIGNATURE_HEADER, VerificationStatus} from '../signature-verifier';
+import {AmpAdXOriginIframeHandler} from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {
+  incrementLoadingAds,
+  is3pThrottled,
+} from '../../../amp-ad/0.1/concurrent-load';
+import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {
   AmpA4A,
   CREATIVE_SIZE_HEADER,
@@ -38,32 +51,8 @@ import {
   assignAdUrlToError,
   protectFunctionWrapper,
 } from '../amp-a4a';
-import {AmpAdXOriginIframeHandler} from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {AmpDoc, installDocService} from '#service/ampdoc-impl';
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {Extensions} from '#service/extensions-impl';
-import {FetchMock, networkFailure} from './fetch-mock';
-import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
-import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
-import {LayoutPriority} from '#core/dom/layout';
-import {MockA4AImpl, TEST_URL} from './utils';
-import {Services} from '#service';
-import {Signals} from '#core/data-structures/signals';
-import {cancellation} from '../../../../src/error-reporting';
-import {createElementWithAttributes} from '#core/dom';
-import {createIframePromise} from '#testing/iframe';
-import {dev, user} from '../../../../src/log';
-import {
-  incrementLoadingAds,
-  is3pThrottled,
-} from '../../../amp-ad/0.1/concurrent-load';
-import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
-import {layoutRectLtwh, layoutSizeFromRect} from '#core/dom/layout/rect';
-import {macroTask} from '#testing/yield';
-import {resetScheduledElementForTesting} from '#service/custom-element-registry';
-import {data as testFragments} from './testdata/test_fragments';
-import {toggleExperiment} from '#experiments';
-import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
+import * as secureFrame from '../secure-frame';
+import {AMP_SIGNATURE_HEADER, VerificationStatus} from '../signature-verifier';
 
 describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
   let doc;

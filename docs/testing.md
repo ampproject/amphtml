@@ -1,19 +1,3 @@
-<!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # Testing in AMP HTML
 
 This document provides details for testing and building your AMP code.
@@ -61,7 +45,7 @@ Before running these commands, make sure you have Node.js installed. For instruc
 | **`amp`**                                                | Starts the dev server, lazily builds JS files and extensions when requested, and watches them for changes. **Use this for development.**                                                                                                               |
 | `amp --extensions=amp-foo,amp-bar`                       | Same as `amp`. Pre-builds the listed extensions, and lazily builds other files when requested.                                                                                                                                                         |
 | `amp --extensions_from=examples/foo.amp.html`            | Same as `amp`. Pre-builds the extensions in the given example file, and lazily builds other files when requested.                                                                                                                                      |
-| `amp --compiled`                                         | Same as `amp`. Compiles and serves minified binaries. Can be used with `--extensions` and `--extensions_from`.                                                                                                                                         |
+| `amp --minified`                                         | Same as `amp`. Compiles and serves minified binaries. Can be used with `--extensions` and `--extensions_from`.                                                                                                                                         |
 | `amp --version_override=<version_override>`              | Runs "watch" and "serve". Overrides the version written to the AMP_CONFIG.                                                                                                                                                                             |
 | `amp dist`                                               | Builds minified AMP binaries and applies AMP_CONFIG to runtime files.                                                                                                                                                                                  |
 | `amp dist --watch`                                       | Builds minified AMP binaries and watches them for changes.                                                                                                                                                                                             |
@@ -101,7 +85,7 @@ Before running these commands, make sure you have Node.js installed. For instruc
 | `amp unit`                                               | Runs the unit tests in Chrome (doesn't require the AMP library to be built).                                                                                                                                                                           |
 | `amp unit --local_changes`                               | Runs the unit tests directly affected by the files changed in the local branch in Chrome.                                                                                                                                                              |
 | `amp integration`                                        | Runs the integration tests in Chrome after building the unminified runtime with the `prod` version of `AMP_CONFIG`.                                                                                                                                    |
-| `amp integration --compiled`                             | Same as above, but builds the minified runtime.                                                                                                                                                                                                        |
+| `amp integration --minified`                             | Same as above, but builds the minified runtime.                                                                                                                                                                                                        |
 | `amp integration --config=<config>`                      | Same as above, but `config` can be `prod` or `canary`. (Defaults to `prod`.)                                                                                                                                                                           |
 | `amp integration --nobuild`                              | Same as above, but skips building the runtime.                                                                                                                                                                                                         |
 | `amp [unit\|integration] --verbose`                      | Runs tests in Chrome with logging enabled.                                                                                                                                                                                                             |
@@ -115,7 +99,7 @@ Before running these commands, make sure you have Node.js installed. For instruc
 | `amp [unit\|integration] --files=<test-files-path-glob>` | Runs specific test files.                                                                                                                                                                                                                              |
 | `amp [unit\|integration] --testnames`                    | Lists the name of each test being run, and prints a summary at the end.                                                                                                                                                                                |
 | `amp serve`                                              | Serves content from the repository root at http://localhost:8000/. Examples live in http://localhost:8000/examples/. Serves unminified binaries by default.                                                                                            |
-| `amp serve --compiled`                                   | Same as `serve`, but serves minified binaries.                                                                                                                                                                                                         |
+| `amp serve --minified`                                   | Same as `serve`, but serves minified binaries.                                                                                                                                                                                                         |
 | `amp serve --cdn`                                        | Same as `serve`, but serves CDN binaries.                                                                                                                                                                                                              |
 | `amp serve --rtv <rtv_number>`                           | Same as `serve`, but serves binaries with the given 15 digit RTV.                                                                                                                                                                                      |
 | `amp serve --esm`                                        | Same as `serve`, but serves esm (module) binaries. Uses the new Typescript based transforms. _Still under active development._                                                                                                                         |
@@ -134,10 +118,10 @@ Before running these commands, make sure you have Node.js installed. For instruc
 | `amp visual-diff --grep=<regular-expression-pattern>`    | Same as above, but executes only those tests whose name matches the regular expression pattern.                                                                                                                                                        |
 | `amp firebase`                                           | Generates a folder `firebase` and copies over all files from `examples` and `test/manual` for firebase deployment.                                                                                                                                     |
 | `amp firebase --file path/to/file`                       | Same as above, but copies over the file specified as `firebase/index.html`.                                                                                                                                                                            |
-| `amp firebase --compiled`                                | Same as `amp firebase`, but uses minified files of the form `/dist/v0/amp-component-name.js` instead of unminified files of the form `/dist/v0/amp-component-name.max.js`.                                                                             |
+| `amp firebase --minified`                                | Same as `amp firebase`, but uses minified files of the form `/dist/v0/amp-component-name.js` instead of unminified files of the form `/dist/v0/amp-component-name.max.js`.                                                                             |
 | `amp firebase --nobuild`                                 | Same as `amp firebase`, but skips building the runtime.                                                                                                                                                                                                |
 | `amp e2e`                                                | Runs all end-to-end tests on Chrome after building the unminified runtime with the `prod` version of `AMP_CONFIG`..                                                                                                                                    |
-| `amp e2e --compiled`                                     | Same as above, but builds the minified runtime. .                                                                                                                                                                                                      |
+| `amp e2e --minified`                                     | Same as above, but builds the minified runtime. .                                                                                                                                                                                                      |
 | `amp e2e --config=<config>`                              | Same as above, but `config` can be `prod` or `canary`. (Defaults to `prod`.)                                                                                                                                                                           |
 | `amp e2e --nobuild`                                      | Same as above, but skips building the runtime.                                                                                                                                                                                                         |
 | `amp e2e --files=<test-files-path-glob>`                 | Runs end-to-end tests from the specified files on the latest Chrome browser.                                                                                                                                                                           |
@@ -164,7 +148,7 @@ For manual testing build AMP and start the Node.js server by running `amp`.
 There are 5 serving modes:
 
 -   DEFAULT mode serves unminified AMP. Use this during normal development by simply running `amp`.
--   COMPILED mode serves minified AMP. This is closer to what is served in production on the stable channel. Serve this mode by running `amp --compiled`.
+-   MINIFIED mode serves minified AMP. This is closer to what is served in production on the stable channel. Serve this mode by running `amp --minified`.
 -   CDN mode serves stable channel binaries. Local changes are not served in this mode. Serve CDN mode by running `amp serve --cdn`.
 -   RTV mode serves the bundle from the given RTV number (a 15 digit number). E.g. `001907161745080`. Serve RTV mode by running `amp serve --rtv <rtv_number>`
 -   ESM mode serves the esm (module) binaries. First run `amp dist --fortesting --esm` and then serve esm mode by running `amp serve --esm`. _This mode is new, and under active development._
@@ -310,7 +294,7 @@ Now, verify your test by executing it:
     ```sh
     amp dist --fortesting
     ```
-    -   You can verify that your page looks as intented by running `amp serve --compiled` and opening it in a browser
+    -   You can verify that your page looks as intented by running `amp serve --minified` and opening it in a browser
 -   Execute the visual diff tests:
     ```sh
     amp visual-diff --nobuild

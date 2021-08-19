@@ -1,32 +1,19 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {CSS} from '../../../build/amp-delight-player-0.1.css';
 import {Deferred} from '#core/data-structures/promise';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
-import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {
-  createFrameFor,
-  objOrParseJson,
-  originMatches,
-  redispatch,
-} from '../../../src/iframe-video';
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '#core/dom/layout/viewport-observer';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyle} from '#core/dom/style';
+import {PauseHelper} from '#core/dom/video/pause-helper';
 import {dict} from '#core/types/object';
-import {dispatchCustomEvent, removeElement} from '#core/dom';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {CSS} from '../../../build/amp-delight-player-0.1.css';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
@@ -34,14 +21,14 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getData, listen, listenOncePromise} from '../../../src/event-helper';
-import {htmlFor} from '#core/dom/static-template';
-import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
-import {setStyle} from '#core/dom/style';
+  createFrameFor,
+  objOrParseJson,
+  originMatches,
+  redispatch,
+} from '../../../src/iframe-video';
 import {userAssert} from '../../../src/log';
+import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 
 /** @const */
 const TAG = 'amp-delight-player';

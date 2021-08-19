@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from '../amp-ad-xorigin-iframe-handler';
 import {BaseElement} from '../../../../src/base-element';
@@ -30,6 +14,7 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
   let renderStartedSpy;
   let iframeHandler;
   let iframe;
+  let clock;
   let testIndex = 0;
 
   beforeEach(() => {
@@ -336,6 +321,105 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
             sentinel: 'amp3ptest' + testIndex,
           });
         });
+    });
+
+    describe('request valid and invalid ad resize useing embed-size API', async () => {
+      beforeEach(async () => {
+        clock = env.sandbox.useFakeTimers();
+        const updateSizeWrapper = env.sandbox.stub(
+          adImpl.uiHandler,
+          'updateSize'
+        );
+
+        updateSizeWrapper.resolves({
+          success: false,
+          newWidth: 114,
+          newHeight: 217,
+        });
+
+        // expect to fail, first call invalid request
+        iframe.postMessageToParent({
+          width: 114,
+          height: 217,
+          type: 'embed-size',
+          sentinel: 'amp3ptest' + testIndex,
+        });
+
+        const data = await iframe.expectMessageFromParent('embed-size-denied');
+
+        expect(data).to.jsonEqual({
+          requestedWidth: 114,
+          requestedHeight: 217,
+          type: 'embed-size-denied',
+          sentinel: 'amp3ptest' + testIndex,
+        });
+
+        updateSizeWrapper.resolves({
+          success: true,
+          newWidth: 114,
+          newHeight: 217,
+        });
+
+        // expect to fail invalid request right before 500ms
+        iframe.postMessageToParent({
+          width: 120,
+          height: 217,
+          type: 'embed-size',
+          sentinel: 'amp3ptest' + testIndex,
+        });
+
+        const data2 = await iframe.expectMessageFromParent('embed-size-denied');
+
+        expect(data2).to.jsonEqual({
+          requestedWidth: 120,
+          requestedHeight: 217,
+          type: 'embed-size-denied',
+          sentinel: 'amp3ptest' + testIndex,
+        });
+      });
+
+      it('should be able to use embed-size API, change size deny repeated attempts, but then denies valid attempt before 500ms delay', async () => {
+        // expect to fail, valid request, but called before 500ms
+        clock.tick(250);
+
+        iframe.postMessageToParent({
+          width: 114,
+          height: 217,
+          type: 'embed-size',
+          sentinel: 'amp3ptest' + testIndex,
+        });
+
+        const data3 = await iframe.expectMessageFromParent('embed-size-denied');
+        expect(data3).to.jsonEqual({
+          requestedWidth: 114,
+          requestedHeight: 217,
+          type: 'embed-size-denied',
+          sentinel: 'amp3ptest' + testIndex,
+        });
+      });
+
+      it('should be able to use embed-size API, change size deny repeated attempts, but then works after 500ms delay', async () => {
+        // expect to succeed: valid request right after 500ms
+        clock.tick(500);
+
+        iframe.postMessageToParent({
+          width: 114,
+          height: 217,
+          type: 'embed-size',
+          sentinel: 'amp3ptest' + testIndex,
+        });
+
+        const data3 = await iframe.expectMessageFromParent(
+          'embed-size-changed'
+        );
+
+        expect(data3).to.jsonEqual({
+          requestedWidth: 114,
+          requestedHeight: 217,
+          type: 'embed-size-changed',
+          sentinel: 'amp3ptest' + testIndex,
+        });
+      });
     });
 
     it('should be able to use embed-size API, change size succeed', () => {

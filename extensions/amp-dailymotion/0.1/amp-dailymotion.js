@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {Deferred} from '#core/data-structures/promise';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
@@ -37,6 +21,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {parseQueryString} from '#core/types/string/url';
+import {isAutoplaySupported} from '#core/dom/video';
 
 const TAG = 'amp-dailymotion';
 
@@ -302,6 +287,14 @@ class AmpDailymotion extends AMP.BaseElement {
     const implicitParams = getDataParamsFromAttributes(this.element);
     iframeSrc = addParamsToUrl(iframeSrc, implicitParams);
 
+    // In order to support autoplay the video needs to be muted on load so we
+    // dont receive an unmute event which prevents the video from autoplay.
+    if (
+      this.element.hasAttribute('autoplay') &&
+      isAutoplaySupported(this.win)
+    ) {
+      iframeSrc = addParamsToUrl(iframeSrc, {'mute': 1});
+    }
     return iframeSrc;
   }
 

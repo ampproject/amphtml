@@ -1,20 +1,4 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Registers all known ad network factories and then executes
  * one of them.
  *
@@ -129,6 +113,7 @@ import {empower} from '#ads/vendors/empower';
 import {engageya} from '#ads/vendors/engageya';
 import {epeex} from '#ads/vendors/epeex';
 import {eplanning} from '#ads/vendors/eplanning';
+import {exco} from '#ads/vendors/exco';
 import {ezoic} from '#ads/vendors/ezoic';
 import {f1e} from '#ads/vendors/f1e';
 import {f1h} from '#ads/vendors/f1h';
@@ -412,6 +397,7 @@ register('empower', empower);
 register('engageya', engageya);
 register('epeex', epeex);
 register('eplanning', eplanning);
+register('exco', exco);
 register('ezoic', ezoic);
 register('f1e', f1e);
 register('f1h', f1h);

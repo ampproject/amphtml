@@ -1,38 +1,25 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {HtmlLiteralTagDef} from './html';
-import {PlayingStates, VideoEvents} from '../../../src/video-interface';
-import {Services} from '#service';
-import {Timeout} from './timeout';
-import {VideoDockingEvents, pointerCoords} from './events';
-import {applyBreakpointClassname} from './breakpoints';
-import {closestAncestorElementBySelector} from '#core/dom/query';
-import {createCustomEvent, listen} from '../../../src/event-helper';
-import {dev, devAssert} from '../../../src/log';
-import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {iterateCursor} from '#core/dom';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {once} from '#core/types/function';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {
   resetStyles,
   setImportantStyles,
   toggle,
   translate,
 } from '#core/dom/style';
+import {once} from '#core/types/function';
+
+import {Services} from '#service';
+
+import {applyBreakpointClassname} from './breakpoints';
+import {VideoDockingEvents, pointerCoords} from './events';
+import {HtmlLiteralTagDef} from './html';
+import {Timeout} from './timeout';
+
+import {createCustomEvent, listen} from '../../../src/event-helper';
+import {dev, devAssert} from '../../../src/log';
+import {PlayingStates, VideoEvents} from '../../../src/video-interface';
 
 /**
  * A single controls set can be displayed at a time on the controls layer.

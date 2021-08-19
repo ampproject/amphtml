@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 
-# This script establishes the merge commit at the start of a CircleCI build so
-# all stages use the same commit.
+# This script updates the .git cache and then establishes the merge commit at
+# the start of a CircleCI build so all stages use the same commit.
 
 set -e
 err=0
@@ -23,6 +23,12 @@ err=0
 GREEN() { echo -e "\033[0;32m$1\033[0m"; }
 RED() { echo -e "\033[0;31m$1\033[0m"; }
 CYAN() { echo -e "\033[0;36m$1\033[0m"; }
+
+echo "$(GREEN "Fetching") $(CYAN "main") $(GREEN "branch to update") $(CYAN ".git") $(GREEN "cache.")"
+git fetch origin main:main
+
+echo "$(GREEN "Fetching other branches to update") $(CYAN ".git") $(GREEN "cache.")"
+git fetch
 
 # Ensure the CircleCI workspace directory exists.
 mkdir -p /tmp/workspace
@@ -37,9 +43,6 @@ fi
 if [[ -z "${PR_NUMBER}" ]]; then
   exit 0
 fi
-
-echo "$(GREEN "Fetching all branches to update") $(CYAN ".git") $(GREEN "cache.")"
-git fetch
 
 # GitHub provides refs/pull/<PR_NUMBER>/merge, an up-to-date merge branch for
 # every PR branch that can be cleanly merged to the main branch. For more

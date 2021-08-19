@@ -1,27 +1,13 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as DocumentReady from '#core/document-ready';
-import * as SkimOptionsModule from '../skim-options';
-import * as chunkModule from '../../../../src/chunk';
 import {Deferred} from '#core/data-structures/promise';
-import {LinkRewriterManager} from '../link-rewriter/link-rewriter-manager';
+import * as DocumentReady from '#core/document-ready';
+
+import helpersFactory from './helpers';
+
+import * as chunkModule from '../../../../src/chunk';
 import {SKIMLINKS_REWRITER_ID} from '../constants';
 import {EVENTS as linkRewriterEvents} from '../link-rewriter/constants';
-import helpersFactory from './helpers';
+import {LinkRewriterManager} from '../link-rewriter/link-rewriter-manager';
+import * as SkimOptionsModule from '../skim-options';
 
 describes.fakeWin(
   'amp-skimlinks',

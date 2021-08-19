@@ -1,19 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   CONSENT_ITEM_STATE,
   ConsentMetadataDef,
@@ -51,8 +35,6 @@ import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {isArray, isEnumValue, isObject} from '#core/types';
 import {realChildElements} from '#core/dom/query';
-
-import {isExperimentOn} from '#experiments';
 
 import {toggle} from '#core/dom/style';
 
@@ -124,19 +106,8 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {?string} */
     this.matchedGeoGroup_ = null;
 
-    /** @private {?boolean} */
-    this.isTcfPostMessageProxyExperimentOn_ = isExperimentOn(
-      this.win,
-      'tcf-post-message-proxy-api'
-    );
-
     /** @private {?Promise<?Array>} */
     this.purposeConsentRequired_ = null;
-
-    /** @private @const {?Function} */
-    this.boundHandleIframeMessages_ = this.isTcfPostMessageProxyExperimentOn_
-      ? this.handleIframeMessages_.bind(this)
-      : null;
   }
 
   /** @override */
@@ -972,27 +943,25 @@ export class AmpConsent extends AMP.BaseElement {
    * that the document supports the tcfPostMessage API.
    */
   maybeSetUpTcfPostMessageProxy_() {
-    if (
-      !this.isTcfPostMessageProxyExperimentOn_ ||
-      !this.consentConfig_['exposesTcfApi']
-    ) {
+    if (!this.consentConfig_['exposesTcfApi']) {
       return;
     }
-    // Check if __tcfApiLocator API already exists (dirty AMP)
-    if (!this.win.frames[TCF_API_LOCATOR]) {
-      this.tcfApiCommandManager_ = new TcfApiCommandManager(
-        this.consentPolicyManager_
-      );
-      // Add window listener for 3p iframe PostMessages
-      this.win.addEventListener('message', this.boundHandleIframeMessages_);
-
-      // Set up the __tcfApiLocator window to singal PostMessage support
-      const iframe = this.element.ownerDocument.createElement('iframe');
-      iframe.setAttribute('name', TCF_API_LOCATOR);
-      toggle(iframe, false);
-      iframe.setAttribute('aria-hidden', true);
-      this.element.appendChild(dev().assertElement(iframe));
+    // Bail if __tcfApiLocator API already exists (dirty AMP)
+    if (this.win.frames[TCF_API_LOCATOR]) {
+      return;
     }
+    this.tcfApiCommandManager_ = new TcfApiCommandManager(
+      this.consentPolicyManager_
+    );
+    // Add window listener for 3p iframe postMessages
+    this.win.addEventListener('message', (e) => this.handleTcfMessage_(e));
+
+    // Set up the __tcfApiLocator window to signal postMessage support
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    iframe.setAttribute('name', TCF_API_LOCATOR);
+    iframe.setAttribute('aria-hidden', 'true');
+    toggle(iframe, false);
+    this.element.appendChild(dev().assertElement(iframe));
   }
 
   /**
@@ -1011,7 +980,7 @@ export class AmpConsent extends AMP.BaseElement {
    *
    * @param {!Event} event
    */
-  handleIframeMessages_(event) {
+  handleTcfMessage_(event) {
     const data = getData(event);
 
     if (!data || !data['__tcfapiCall']) {
