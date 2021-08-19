@@ -16,9 +16,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
 const path = require('path');
-const {clean} = require('./clean');
-const {doBuild} = require('./build');
-const {doDist} = require('./dist');
+const {buildRuntime} = require('../common/utils');
 const {green} = require('../common/colors');
 const {log} = require('../common/logging');
 
@@ -61,12 +59,7 @@ async function copyAndReplaceUrls(src, dest) {
  */
 async function firebase() {
   if (!argv.nobuild) {
-    await clean();
-    if (argv.compiled) {
-      await doDist({fortesting: argv.fortesting});
-    } else {
-      await doBuild({fortesting: argv.fortesting});
-    }
+    await buildRuntime();
   }
   await fs.mkdirp('firebase');
   if (argv.file) {
@@ -102,7 +95,7 @@ async function replaceUrls(filePath) {
     /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
     '/dist/amp.js'
   );
-  if (argv.compiled) {
+  if (argv.minified) {
     result = result.replace(
       /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
       '/dist/v0/$1.js'
@@ -123,7 +116,7 @@ module.exports = {
 firebase.description = 'Generate build artificats for deployment to firebase';
 firebase.flags = {
   'file': 'File to deploy to firebase as index.html',
-  'compiled': 'Deploy from minified files',
+  'minified': 'Deploy from minified files',
   'nobuild': 'Skip the amp build|dist step.',
   'fortesting': 'Read the AMP_TESTING_HOST env var and write it to AMP_CONFIG',
 };

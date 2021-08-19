@@ -26,6 +26,7 @@ import {
 import {realChildElements} from '#core/dom/query';
 import {htmlFor} from '#core/dom/static-template';
 import {px, scale, setStyles, translate} from '#core/dom/style';
+import {numeric} from '#core/dom/transition';
 import {boundValue, distance, magnitude} from '#core/math';
 import {dict} from '#core/types/object';
 
@@ -43,7 +44,6 @@ import {
 } from '../../../src/gesture-recognizers';
 import {dev, userAssert} from '../../../src/log';
 import {continueMotion} from '../../../src/motion';
-import {numeric} from '../../../src/transition';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-pan-zoom';

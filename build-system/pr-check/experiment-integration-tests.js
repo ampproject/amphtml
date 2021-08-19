@@ -42,7 +42,7 @@ function runExperimentTests(config) {
     const experimentFlag = `--experiment ${experiment}`;
     const reportFlag = isPushBuild() ? '--report' : '';
     timedExecOrThrow(
-      `amp integration --nobuild --compiled --headless ${experimentFlag} ${defineFlag} ${reportFlag}`
+      `amp integration --nobuild --minified --headless ${experimentFlag} ${defineFlag} ${reportFlag}`
     );
   } catch (e) {
     if (e.status) {

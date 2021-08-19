@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,28 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
+import {
+  DOMRectDef,
+  ElementHandle,
+  Key,
+  ScrollToOptionsDef,
+  WindowRectDef,
+} from '../../build-system/tasks/e2e/e2e-types';
 
-// Forbids use of Rest elements when they require an iterator polyfill, or
-// there's no clear benefit.
-//
-// Good:
-// ```
-// function foo(...args) {}
-// const {...rest} = {foo: 1};
-// ```
-//
-// Bad:
-// ```
-// const [...rest] = [1, 2, 3];
-// ```
-module.exports = function (context) {
-  return {
-    'ArrayPattern > RestElement': function (node) {
-      context.report({
-        node,
-        message: 'Collecting elements using a rest element is not allowed.',
-      });
-    },
-  };
-};
+export {ElementHandle, Key, WindowRectDef, DOMRectDef, ScrollToOptionsDef};

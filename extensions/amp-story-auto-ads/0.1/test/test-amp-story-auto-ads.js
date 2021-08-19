@@ -14,28 +14,33 @@
  * limitations under the License.
  */
 
-import * as storyEvents from '../../../amp-story/1.0/events';
+import {CommonSignals} from '#core/constants/common-signals';
+
+import {forceExperimentBranch, toggleExperiment} from '#experiments';
+import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
+
+import {Services} from '#service';
+
+import {macroTask} from '#testing/helpers';
+
+import {
+  MockStoryImpl,
+  addStoryAutoAdsConfig,
+  addStoryPages,
+} from './story-mock';
+
+import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {AmpStory} from '../../../amp-story/1.0/amp-story';
+import {NavigationDirection} from '../../../amp-story/1.0/amp-story-page';
 import {
   Action,
   StateProperty,
   UIType,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {AmpStory} from '../../../amp-story/1.0/amp-story';
+import * as storyEvents from '../../../amp-story/1.0/events';
 import {AmpStoryAutoAds, Attributes} from '../amp-story-auto-ads';
-import {CommonSignals} from '#core/constants/common-signals';
-import {
-  MockStoryImpl,
-  addStoryAutoAdsConfig,
-  addStoryPages,
-} from './story-mock';
-import {NavigationDirection} from '../../../amp-story/1.0/amp-story-page';
-import {Services} from '#service';
-import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
 import {StoryAdPage} from '../story-ad-page';
-import {forceExperimentBranch, toggleExperiment} from '#experiments';
-import {macroTask} from '#testing/yield';
-import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 const NOOP = () => {};
 

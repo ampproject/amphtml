@@ -96,7 +96,7 @@ Example with source url:
 
 ```html
 <amp-tiktok
-  width="325 "
+  width="325"
   height="575"
   data-src="https://www.tiktok.com/@scout2015/video/6948210747285441798"
 ></amp-tiktok>

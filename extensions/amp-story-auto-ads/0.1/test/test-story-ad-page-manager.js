@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {Action, UIType} from '../../../amp-story/1.0/amp-story-store-service';
-import {AmpStory} from '../../../amp-story/1.0/amp-story';
-import {InsertionState, StoryAdPageManager} from '../story-ad-page-manager';
-import {StoryAdPage} from '../story-ad-page';
+import {macroTask} from '#testing/helpers';
+
 import {getServiceForDoc} from '../../../../src/service-helpers';
-import {macroTask} from '#testing/yield';
+import {AmpStory} from '../../../amp-story/1.0/amp-story';
+import {Action, UIType} from '../../../amp-story/1.0/amp-story-store-service';
+import {StoryAdPage} from '../story-ad-page';
+import {InsertionState, StoryAdPageManager} from '../story-ad-page-manager';
 
 // TODO(ccordry): add tests for analytics events.
 describes.realWin('StoryAdPageManager', {amp: true}, (env) => {

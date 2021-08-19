@@ -29,6 +29,7 @@ import {
   setStyles,
 } from '#core/dom/style';
 import {rethrowAsync} from '#core/error';
+import * as mode from '#core/mode';
 import {toWin} from '#core/window';
 
 import {install as installAbortController} from '#polyfills/abort-controller';
@@ -699,7 +700,7 @@ export class FriendlyIframeEmbed {
  * @param {!Window} childWin
  */
 function installPolyfillsInChildWindow(parentWin, childWin) {
-  if (!IS_ESM) {
+  if (!mode.isEsm()) {
     installDocContains(childWin);
     installDOMTokenList(childWin);
   }
@@ -750,7 +751,7 @@ export class Installers {
       })
       .then(getDelayPromise)
       .then(() => {
-        if (IS_ESM) {
+        if (mode.isEsm()) {
           // TODO: This is combined (ampdoc + shared), not just shared
           // const css = parentWin.document.querySelector('style[amp-runtime]')
           // .textContent;
