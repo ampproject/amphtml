@@ -546,9 +546,7 @@ each relevant trigger for more details.
 The selector properties are:
 
 -   `selector` This property is used to find an element or a collection of
-    elements using CSS/DOM query.
-
--   The semantics of how the element is matched
+    elements using CSS/DOM query. The semantics of how the element is matched
     can be changed using `selectionMethod`. The value of this property can be
     one of:
 
