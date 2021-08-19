@@ -261,7 +261,7 @@ function VideoWrapperWithRef(
   return (
     <ContainWrapper
       contentRef={wrapperRef}
-      className={className}
+      class={className}
       style={style}
       size
       layout
@@ -294,7 +294,7 @@ function VideoWrapperWithRef(
             setReadyState(ReadyState.ERROR, e);
             readyDeferred.reject(e);
           }}
-          className={classes.fillStretch}
+          class={classes.fillStretch}
           src={src}
           poster={poster}
         >
@@ -366,7 +366,7 @@ function Autoplay({
     <>
       {displayIcon && (
         <div
-          className={objstr({
+          class={objstr({
             [autoplayClasses.eq]: true,
             [autoplayClasses.eqPlaying]: playing,
           })}
@@ -378,8 +378,8 @@ function Autoplay({
       {displayOverlay && (
         <button
           aria-label={(metadata && metadata.title) || 'Unmute video'}
-          tabindex="0"
-          className={objstr({
+          tabIndex="0"
+          class={objstr({
             [autoplayClasses.autoplayMaskButton]: true,
             [classes.fillContentOverlay]: true,
           })}
@@ -393,9 +393,7 @@ function Autoplay({
 const AutoplayIconContent = /** @type {function():!PreactDef.Renderable} */ (
   once(() => {
     const classes = useAutoplayStyles();
-    return [1, 2, 3, 4].map((i) => (
-      <div className={classes.eqCol} key={i}></div>
-    ));
+    return [1, 2, 3, 4].map((i) => <div class={classes.eqCol} key={i}></div>);
   })
 );
 

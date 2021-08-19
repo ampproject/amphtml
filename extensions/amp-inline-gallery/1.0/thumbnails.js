@@ -69,7 +69,7 @@ export function Thumbnails({
 
   return (
     <BaseCarousel
-      className={`${className} ${classes.thumbnails}`}
+      class={`${className} ${classes.thumbnails}`}
       mixedLength={true}
       snap={false}
       snapAlign={loop ? 'center' : 'start'}
@@ -85,7 +85,7 @@ export function Thumbnails({
           const {thumbnailSrc} = slide.props;
           return (
             <img
-              className={classes.slide}
+              class={classes.slide}
               onClick={() => setCurrentSlide(i)}
               loading="lazy"
               role="button"
@@ -94,7 +94,7 @@ export function Thumbnails({
                 height: px(height),
                 width: aspectRatio ? px(aspectRatio * height) : '',
               }}
-              tabindex="0"
+              tabIndex="0"
             />
           );
         })}

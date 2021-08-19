@@ -119,7 +119,7 @@ function StreamGalleryWithRef(props, ref) {
       advanceCount={Math.floor(visibleCount)}
       arrowPrevAs={arrowPrevAs}
       arrowNextAs={arrowNextAs}
-      className={objstr({
+      class={objstr({
         [className]: !!className,
         [classes.gallery]: true,
         [classes.extraSpace]: extraSpace === 'around',
@@ -153,11 +153,11 @@ function DefaultArrow({
 }) {
   const classes = useStyles();
   return (
-    <div className={className}>
+    <div class={className}>
       <button
         aria-disabled={ariaDisabled}
         aria-hidden="true"
-        className={objstr({
+        class={objstr({
           [classes.arrow]: true,
           [classes.arrowPrev]: by < 0,
           [classes.arrowNext]: by > 0,

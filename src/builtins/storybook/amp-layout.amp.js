@@ -42,7 +42,7 @@ export const responsive = () => {
         `}
       </style>
       <amp-layout layout="responsive" width={width} height={height}>
-        <div className="content">
+        <div class="content">
           {width}:{height}
         </div>
       </amp-layout>

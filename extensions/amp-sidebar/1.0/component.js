@@ -137,7 +137,7 @@ function SidebarWithRef(
   }, [opened, close]);
 
   return (
-    <div className={objstr({[classes.unmounted]: !mounted})} part="wrapper">
+    <div class={objstr({[classes.unmounted]: !mounted})} part="wrapper">
       <ContainWrapper
         as={Comp}
         ref={sidebarRef}
@@ -152,7 +152,7 @@ function SidebarWithRef(
           [classes.right]: side !== Side.LEFT,
         })}
         role="menu"
-        tabindex="-1"
+        tabIndex="-1"
         hidden={!side}
         {...rest}
       >
@@ -163,14 +163,14 @@ function SidebarWithRef(
         onClick={() => close()}
         part="backdrop"
         style={backdropStyle}
-        className={objstr({
+        class={objstr({
           [classes.backdrop]: true,
           [classes.defaultBackdropStyles]: true,
           [backdropClassName]: backdropClassName,
         })}
         hidden={!side}
       >
-        <div className={classes.backdropOverscrollBlocker}></div>
+        <div class={classes.backdropOverscrollBlocker}></div>
       </div>
     </div>
   );

@@ -34,7 +34,7 @@ export const wrapper = () => {
   return (
     <Wrapper
       as={asProp}
-      className={className}
+      class={className}
       style={style}
       wrapperClassName={wrapperClassName}
       wrapperStyle={wrapperStyle}
@@ -60,7 +60,7 @@ export const containWrapper = () => {
   return (
     <ContainWrapper
       as={asProp}
-      className={className}
+      class={className}
       style={style}
       wrapperClassName={wrapperClassName}
       wrapperStyle={wrapperStyle}
