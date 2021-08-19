@@ -602,6 +602,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.storeService.dispatch(Action.TOGGLE_PAUSED, false);
 
     this.mutateElement(() => {
+      this.unfocusChildElements_();
       this.element.setAttribute('aria-hidden', true);
       resetStyles(this.element, ['transform', 'transition']);
 
@@ -617,5 +618,14 @@ export class DraggableDrawer extends AMP.BaseElement {
       const owners = Services.ownersForDoc(this.element);
       owners.schedulePause(this.element, this.ampComponents_);
     });
+  }
+
+
+  /**
+   * Removes focus from ......
+   */
+  unfocusChildElements_() {
+    const focusedEl = this.element.querySelector(':focus');
+    focusedEl?.blur();
   }
 }
