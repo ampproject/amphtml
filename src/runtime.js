@@ -1,19 +1,3 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {waitForBodyOpenPromise} from '#core/dom';
 import {setStyle} from '#core/dom/style';
 import * as mode from '#core/mode';
@@ -373,7 +357,7 @@ function adoptServicesAndResources(global) {
  */
 function adoptMultiDocDeps(global) {
   global.AMP.installAmpdocServices = installAmpdocServices.bind(null);
-  if (IS_ESM) {
+  if (mode.isEsm()) {
     const style = global.document.querySelector('style[amp-runtime]');
     global.AMP.combinedCss = style ? style.textContent : '';
   } else {
@@ -446,7 +430,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
     return false;
   }
 
-  if (IS_ESM) {
+  if (mode.isEsm()) {
     // If we're in a module runtime, trying to execute a nomodule extension
     // simply remove the nomodule extension so that it is not executed.
     if (!fnOrStruct.m) {

@@ -1,21 +1,6 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {AmpStoryMediaQueryService} from '../amp-story-media-query-service';
 import {poll} from '#testing/iframe';
+import {afterRenderPromise} from '#testing/helpers';
 
 describes.realWin('amp-story-media-query-service', {amp: true}, (env) => {
   let mediaQueryService;
@@ -44,7 +29,7 @@ describes.realWin('amp-story-media-query-service', {amp: true}, (env) => {
     );
   }
 
-  beforeEach(() => {
+  beforeEach(async () => {
     win = env.win;
 
     storyEl = win.document.createElement('amp-story');
@@ -55,12 +40,8 @@ describes.realWin('amp-story-media-query-service', {amp: true}, (env) => {
     setMatcherSize(200, 100);
     storyEl.appendChild(styleEl);
 
-    return new Promise((resolve) => {
-      requestAnimationFrame(() => {
-        mediaQueryService = new AmpStoryMediaQueryService(win);
-        resolve();
-      });
-    });
+    await afterRenderPromise();
+    mediaQueryService = new AmpStoryMediaQueryService(win);
   });
 
   afterEach(() => {
