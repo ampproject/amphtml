@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/** @externs */
-
 /** @const */
 var DailymotionDef = {};
 
