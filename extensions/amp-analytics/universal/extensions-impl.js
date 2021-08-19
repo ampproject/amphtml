@@ -1,5 +1,3 @@
-import {urls} from 'src/config';
-
 const loaded = Object.create(null);
 
 /**
@@ -9,14 +7,13 @@ const loaded = Object.create(null);
  * @return {!Promise<*>}
  */
 function loadExtensionScript(win, name, version = '0.1') {
-  const scriptElement = win.document.createElement('script');
-  scriptElement.async = true;
-  scriptElement.src =
-    urls.cdn +
-    // eslint-disable-next-line local/no-forbidden-terms
-    `/rtv/${INTERNAL_RUNTIME_VERSION}` +
-    `/v0/${name}${version}${IS_ESM ? '.mjs' : '.js'}`;
   return new Promise((resolve, reject) => {
+    const scriptElement = win.document.createElement('script');
+    scriptElement.async = true;
+    scriptElement.src =
+      // eslint-disable-next-line local/no-forbidden-terms
+      `https://cdn.ampproject.org` +
+      `/v0/${name}${version}${IS_ESM ? '.mjs' : '.js'}`;
     scriptElement.onload = resolve;
     scriptElement.onerror = reject;
     self.document.head.appendChild(scriptElement);

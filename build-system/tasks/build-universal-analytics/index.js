@@ -74,12 +74,17 @@ function getBrotliSize(file) {
 async function buildUniversalAnalytics() {
   await esbuild.build({
     entryPoints,
+    minifySyntax: argv.minified,
     bundle: true,
     inject,
     outfile,
-    define: Object.fromEntries(
-      Object.entries(BUILD_CONSTANTS).map(([k, v]) => [k, v.toString()])
-    ),
+    define: {
+      ...Object.fromEntries(
+        Object.entries(BUILD_CONSTANTS).map(([k, v]) => [k, v.toString()])
+      ),
+      // Force for now.
+      IS_ESM: 'true',
+    },
     plugins: [alias],
   });
   log(`Unminified Size: ${getBrotliSize(outfile)}`);
