@@ -1,26 +1,15 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import '../amp-accordion';
-import {ActionInvocation} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
-import {CanRender} from '../../../../src/core/contextprops';
-import {htmlFor} from '../../../../src/static-template';
-import {subscribe, unsubscribe} from '../../../../src/context';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {ActionTrust} from '#core/constants/action-constants';
+import {subscribe, unsubscribe} from '#core/context';
+import {htmlFor} from '#core/dom/static-template';
+
+import {toggleExperiment} from '#experiments';
+
+import {CanRender} from '#preact/contextprops';
+
+import {ActionInvocation} from '#service/action-impl';
+
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-accordion:1.0',
@@ -110,18 +99,12 @@ describes.realWin(
 
     it('should have amp specific classes for CSS', () => {
       const sections = element.children;
-      const {
-        firstElementChild: header0,
-        lastElementChild: content0,
-      } = sections[0];
-      const {
-        firstElementChild: header1,
-        lastElementChild: content1,
-      } = sections[1];
-      const {
-        firstElementChild: header2,
-        lastElementChild: content2,
-      } = sections[2];
+      const {firstElementChild: header0, lastElementChild: content0} =
+        sections[0];
+      const {firstElementChild: header1, lastElementChild: content1} =
+        sections[1];
+      const {firstElementChild: header2, lastElementChild: content2} =
+        sections[2];
 
       // Check classes
       expect(header0.className).to.include('i-amphtml-accordion-header');
@@ -242,18 +225,12 @@ describes.realWin(
     it('should include a11y related attributes', async () => {
       const sections = element.children;
 
-      const {
-        firstElementChild: header0,
-        lastElementChild: content0,
-      } = sections[0];
-      const {
-        firstElementChild: header1,
-        lastElementChild: content1,
-      } = sections[1];
-      const {
-        firstElementChild: header2,
-        lastElementChild: content2,
-      } = sections[2];
+      const {firstElementChild: header0, lastElementChild: content0} =
+        sections[0];
+      const {firstElementChild: header1, lastElementChild: content1} =
+        sections[1];
+      const {firstElementChild: header2, lastElementChild: content2} =
+        sections[2];
 
       expect(header0).to.have.attribute('tabindex');
       expect(header0).to.have.attribute('aria-controls');
@@ -325,18 +302,12 @@ describes.realWin(
       await element.buildInternal();
 
       const sections = element.children;
-      const {
-        firstElementChild: header0,
-        lastElementChild: content0,
-      } = sections[0];
-      const {
-        firstElementChild: header1,
-        lastElementChild: content1,
-      } = sections[1];
-      const {
-        firstElementChild: header2,
-        lastElementChild: content2,
-      } = sections[2];
+      const {firstElementChild: header0, lastElementChild: content0} =
+        sections[0];
+      const {firstElementChild: header1, lastElementChild: content1} =
+        sections[1];
+      const {firstElementChild: header2, lastElementChild: content2} =
+        sections[2];
 
       expect(header0.getAttribute('id')).to.equal('h1');
       expect(content0.getAttribute('id')).to.equal('c1');
@@ -381,14 +352,10 @@ describes.realWin(
       await element.buildInternal();
 
       const sections = element.children;
-      const {
-        firstElementChild: header0,
-        lastElementChild: content0,
-      } = sections[0];
-      const {
-        firstElementChild: header1,
-        lastElementChild: content1,
-      } = sections[1];
+      const {firstElementChild: header0, lastElementChild: content0} =
+        sections[0];
+      const {firstElementChild: header1, lastElementChild: content1} =
+        sections[1];
 
       expect(header0).to.have.attribute('role');
       expect(header0.getAttribute('role')).to.equal('cat');

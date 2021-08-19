@@ -1,24 +1,8 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {PauseHelper} from '../../../src/utils/pause-helper';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
-import {addParamToUrl, addParamsToUrl} from '../../../src/url';
+import {BRIGHTCOVE_EVENTS, getBrightcoveIframeSrc} from '../brightcove-api';
 import {
   createFrameFor,
   isJsonOrObj,
@@ -27,23 +11,25 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {
   dispatchCustomEvent,
+  getDataParamsFromAttributes,
+  removeElement,
+} from '#core/dom';
+import {
   fullscreenEnter,
   fullscreenExit,
-  getDataParamsFromAttributes,
   isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '#core/dom/fullscreen';
 import {
   getConsentPolicyInfo,
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 
 /** @private @const {string} */
 const TAG = 'amp-brightcove';
@@ -128,21 +114,20 @@ class AmpBrightcove extends AMP.BaseElement {
     this.playerReadyResolver_ = deferred.resolve;
 
     // Warn if the player does not have video interface support
-    this.readyTimeout_ = /** @type {number} */ (Services.timerFor(window).delay(
-      () => {
+    this.readyTimeout_ = /** @type {number} */ (
+      Services.timerFor(window).delay(() => {
         user().warn(
           TAG,
           'Did not receive ready callback from player %s.' +
             ' Ensure it has the videojs-amp-support plugin.',
           this.playerId_
         );
-      },
-      3000
-    ));
+      }, 3000)
+    );
   }
 
   /**
-   * @return {Promise[]}
+   * @return {Promise}
    */
   getConsents_() {
     const consentPolicy = super.getConsentPolicy();
@@ -260,12 +245,7 @@ class AmpBrightcove extends AMP.BaseElement {
     if (
       redispatch(element, eventType, {
         'ready': VideoEvents.LOAD,
-        'playing': VideoEvents.PLAYING,
-        'pause': VideoEvents.PAUSE,
-        'ended': VideoEvents.ENDED,
-        'ads-ad-started': VideoEvents.AD_START,
-        'ads-ad-ended': VideoEvents.AD_END,
-        'loadedmetadata': VideoEvents.LOADEDMETADATA,
+        ...BRIGHTCOVE_EVENTS,
       })
     ) {
       return;
@@ -314,60 +294,49 @@ class AmpBrightcove extends AMP.BaseElement {
    */
   getIframeSrc_() {
     const {element: el} = this;
-
     const account = userAssert(
       el.getAttribute('data-account'),
       'The data-account attribute is required for <amp-brightcove> %s',
       el
     );
-
-    const embed = el.getAttribute('data-embed') || 'default';
-
     this.playerId_ =
       el.getAttribute('data-player') ||
       el.getAttribute('data-player-id') ||
       'default';
 
-    let src =
-      `https://players.brightcove.net/${encodeURIComponent(account)}` +
-      `/${encodeURIComponent(this.playerId_)}` +
-      `_${encodeURIComponent(embed)}/index.html` +
-      '?amp=1&autoplay=false' +
-      // These are encodeURIComponent'd in encodeId_().
-      (el.getAttribute('data-playlist-id')
-        ? '&playlistId=' + this.encodeId_(el.getAttribute('data-playlist-id'))
-        : el.getAttribute('data-video-id')
-        ? '&videoId=' + this.encodeId_(el.getAttribute('data-video-id'))
-        : '');
-
-    const customReferrer = el.getAttribute('data-referrer');
-
-    if (customReferrer) {
-      src = addParamToUrl(
-        src,
-        'referrer',
-        this.urlReplacements_.expandUrlSync(customReferrer)
-      );
-    }
-
+    const urlParams = {};
     if (this.consentState_) {
-      src = addParamToUrl(src, 'ampInitialConsentState', this.consentState_);
+      urlParams['ampInitialConsentState'] = this.consentState_;
     }
     if (this.consentSharedData_) {
-      src = addParamToUrl(
-        src,
-        'ampConsentSharedData',
-        JSON.stringify(this.consentSharedData_)
+      urlParams['ampConsentSharedData'] = JSON.stringify(
+        this.consentSharedData_
       );
     }
     if (this.consentString_) {
-      src = addParamToUrl(src, 'ampInitialConsentValue', this.consentString_);
+      urlParams['ampInitialConsentValue'] = this.consentString_;
     }
 
     el.setAttribute('data-param-playsinline', 'true');
+    el.removeAttribute('data-param-autoplay');
 
-    // Pass through data-param-* attributes as params for plugin use
-    return addParamsToUrl(src, getDataParamsFromAttributes(el));
+    const {
+      'embed': embed = 'default',
+      'playlistId': playlistId,
+      'referrer': referrer,
+      'videoId': videoId,
+    } = el.dataset;
+    return getBrightcoveIframeSrc(
+      account,
+      this.playerId_,
+      embed,
+      playlistId,
+      videoId,
+      referrer != null
+        ? this.urlReplacements_.expandUrlSync(referrer)
+        : referrer,
+      {...urlParams, ...getDataParamsFromAttributes(el)}
+    );
   }
 
   /** @override */
@@ -388,21 +357,6 @@ class AmpBrightcove extends AMP.BaseElement {
         this.iframe_.src = this.getIframeSrc_();
       }
     }
-  }
-
-  /**
-   * @param {string} id
-   * @return {string}
-   * @private
-   */
-  encodeId_(id) {
-    /* id is either a Brightcove-assigned id, or a customer-generated
-       reference id. reference ids are prefixed 'ref:' and the colon
-       must be preserved unencoded */
-    if (id.substring(0, 4) === 'ref:') {
-      return `ref:${encodeURIComponent(id.substring(4))}`;
-    }
-    return encodeURIComponent(id);
   }
 
   /** @override */
@@ -456,8 +410,8 @@ class AmpBrightcove extends AMP.BaseElement {
   }
 
   /** @override */
-  play(unusedIsAutoplay) {
-    this.sendCommand_('play');
+  play(isAutoplay) {
+    this.sendCommand_('play', isAutoplay);
   }
 
   /** @override */

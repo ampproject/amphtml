@@ -1,20 +1,4 @@
 /**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * See IframeWorker within `worker-dom` for the iframe proxy contract.
  */
 
@@ -22,7 +6,8 @@
  * @enum {string}
  */
 const MESSAGE_TYPE = {
-  ready: 'iframe-ready',
+  iframeReady: 'iframe-ready',
+  workerReady: 'worker-ready',
   init: 'init-worker',
   onmessage: 'onmessage',
   onerror: 'onerror',
@@ -37,7 +22,7 @@ let parentOrigin = '*';
  * @param {*} message
  */
 function send(type, message) {
-  if (type !== MESSAGE_TYPE.ready && parentOrigin === '*') {
+  if (type !== MESSAGE_TYPE.iframeReady && parentOrigin === '*') {
     throw new Error('Broadcast banned except for iframe-ready message.');
   }
   parent./*OK*/ postMessage({type, message}, parentOrigin);
@@ -62,7 +47,7 @@ function listen(type, handler) {
 }
 
 // Send initialization.
-send(MESSAGE_TYPE.ready);
+send(MESSAGE_TYPE.iframeReady);
 
 let worker = null;
 // Listen for Worker Init.
@@ -87,4 +72,6 @@ listen(MESSAGE_TYPE.init, ({code}) => {
   listen(MESSAGE_TYPE./*OK*/ postMessage, ({message}) =>
     worker./*OK*/ postMessage(message)
   );
+
+  send(MESSAGE_TYPE.workerReady);
 });

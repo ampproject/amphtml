@@ -18,7 +18,7 @@
   Tests for the amp-inline-gallery-thumbnails tag. See the inline comments.
 -->
 <!doctype html>
-<html ⚡>
+<html ⚡ lang="en">
 <head>
   <meta charset="utf-8">
   <link rel="canonical" href="./regular-html-version.html">
@@ -38,6 +38,11 @@
   <!-- Valid: Loop attribute specified -->
   <amp-inline-gallery layout="container">
     <amp-inline-gallery-thumbnails layout="fixed-height" height="96" loop="true">
+    </amp-inline-gallery-thumbnails>
+  </amp-inline-gallery>
+  <!-- Valid: Loop attribute specified with no value -->
+  <amp-inline-gallery layout="container">
+    <amp-inline-gallery-thumbnails layout="fixed-height" height="96" loop>
     </amp-inline-gallery-thumbnails>
   </amp-inline-gallery>
   <!-- Valid: Aspect ratio -->
@@ -68,9 +73,9 @@
     <amp-inline-gallery-thumbnails layout="fixed-height" height="96" aspect-ratio-height="0.00">
     </amp-inline-gallery-thumbnails>
   </amp-inline-gallery>
-  <!-- Invalid: Loop attribute without value -->
+  <!-- Invalid: Snap attribute without value -->
   <amp-inline-gallery layout="container">
-    <amp-inline-gallery-thumbnails layout="fixed-height" height="96" loop>
+    <amp-inline-gallery-thumbnails layout="fixed-height" height="96" snap>
     </amp-inline-gallery-thumbnails>
   </amp-inline-gallery>
 </body>

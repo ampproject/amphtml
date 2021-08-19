@@ -1,31 +1,30 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {BaseElement} from './base-element';
-import {Services} from '../../../src/services';
-import {batchFetchJsonFor} from '../../../src/batched-json';
+import {
+  BatchFetchOptionsDef,
+  UrlReplacementPolicy,
+  batchFetchJsonFor,
+} from '../../../src/batched-json';
+import {Layout} from '#core/dom/layout';
+import {Services} from '#service';
+import {computedStyle, setStyles} from '#core/dom/style';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {isExperimentOn} from '../../../src/experiments';
+import {dict} from '#core/types/object';
+import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
+import {toArray} from '#core/types/array';
 
 /** @const {string} */
 const TAG = 'amp-render';
 
+/** @const {string} */
 const AMP_STATE_URI_SCHEME = 'amp-state:';
-const AMP_SCRIPT_URI_SCHEME = 'amp-script:';
+
+/** @enum {string}  */
+const Binding = {
+  ALWAYS: 'always',
+  REFRESH: 'refresh',
+  NEVER: 'never',
+  NO: 'no',
+};
 
 /**
  * Returns true if element's src points to amp-state.
@@ -35,23 +34,14 @@ const AMP_SCRIPT_URI_SCHEME = 'amp-script:';
 const isAmpStateSrc = (src) => src && src.startsWith(AMP_STATE_URI_SCHEME);
 
 /**
- * Returns true if element's src points to an amp-script function.
- * @param {?string} src
- * @return {boolean}
- */
-const isAmpScriptSrc = (src) => src && src.startsWith(AMP_SCRIPT_URI_SCHEME);
-
-/**
  * Gets the json from an "amp-state:" uri. For example, src="amp-state:json.path".
- *
  * TODO: this is similar to the implementation in amp-list. Move it
  * to a common file and import it.
- *
  * @param {!AmpElement} element
  * @param {string} src
  * @return {Promise<!JsonObject>}
  */
-const getAmpStateJson = (element, src) => {
+function getAmpStateJson(element, src) {
   return Services.bindForDocOrNull(element)
     .then((bind) => {
       userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
@@ -72,68 +62,56 @@ const getAmpStateJson = (element, src) => {
       );
       return json;
     });
-};
-
-/**
- * Gets the json from an amp-script uri.
- * TODO: this is similar to the implementation in amp-list. Move it
- * to a common file and import it.
- *
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @param {string} src
- * @return {Promise<!JsonObject>}
- */
-function getAmpScriptJson(ampdoc, src) {
-  return Promise.resolve()
-    .then(() => {
-      const args = src.slice('amp-script:'.length).split('.');
-      userAssert(
-        args.length === 2 && args[0].length > 0 && args[1].length > 0,
-        '[amp-render]: "amp-script" URIs must be of the format "scriptId.functionIdentifier".'
-      );
-
-      const ampScriptId = args[0];
-      const fnIdentifier = args[1];
-      const ampScriptEl = ampdoc.getElementById(ampScriptId);
-      userAssert(
-        ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
-        `[amp-render]: could not find <amp-script> with script set to ${ampScriptId}`
-      );
-
-      return ampScriptEl.getImpl().then((impl) => {
-        return impl.callFunction(fnIdentifier);
-      });
-    })
-    .then((json) => {
-      userAssert(
-        json !== undefined,
-        `[amp-render] ${src} must return json, but instead returned: ${typeof json}`
-      );
-      return json;
-    });
 }
 
 /**
- * Returns a function to fetch json from remote url, amp-state or
- * amp-script.
- *
- * @param {!AmpElement} element
- * @return {Function}
+ * @param {string} bindingValue
+ * @param {boolean} isFirstMutation
+ * @return {boolean} Whether bind should evaluate and apply changes.
  */
-export const getJsonFn = (element) => {
-  const src = element.getAttribute('src');
-  if (!src) {
-    // TODO(dmanek): assert that src is provided instead of silently failing below.
-    return () => {};
+function getUpdateValue(bindingValue, isFirstMutation) {
+  if (!bindingValue || bindingValue === Binding.REFRESH) {
+    // default is 'refresh', so check that its not the first mutation
+    return !isFirstMutation;
   }
-  if (isAmpStateSrc(src)) {
-    return (src) => getAmpStateJson(element, src);
+  if (bindingValue === Binding.ALWAYS) {
+    // TODO(dmanek): add link to amp-render docs that elaborates on performance implications of "always"
+    user().warn(TAG, 'binding="always" has performance implications.');
+    return true;
   }
-  if (isAmpScriptSrc(src)) {
-    return (src) => getAmpScriptJson(element.getAmpDoc(), src);
+  return false;
+}
+
+/**
+ * Returns the non-empty node count in a template (defined as a `template`
+ * or `script` element). This is required to establish if the template content has
+ * a single wrapper element and if so we need to include it while rendering the
+ * template. For more info, see https://github.com/ampproject/amphtml/issues/35401.
+ * TODO(dmanek): Observe rewrapping at a lower level in BaseTemplate.
+ * @param {!Document} doc
+ * @param {?Element} template
+ * @return {number} count of non-empty child nodes
+ */
+function getTemplateNonEmptyNodeCount(doc, template) {
+  let childNodes = [];
+  if (template.tagName === 'SCRIPT') {
+    const div = doc.createElement('div');
+    div./*OK*/ innerHTML = template./*OK*/ innerHTML;
+    childNodes = div.childNodes;
+  } else if (template.tagName == 'TEMPLATE') {
+    childNodes = template.content.childNodes;
   }
-  return () => batchFetchJsonFor(element.getAmpDoc(), element);
-};
+  return toArray(childNodes).reduce(
+    (count, node) =>
+      count +
+      Number(
+        node.nodeType === Node.TEXT_NODE
+          ? node.textContent.trim().length > 0
+          : node.nodeType !== Node.COMMENT_NODE
+      ),
+    0
+  );
+}
 
 export class AmpRender extends BaseElement {
   /** @param {!AmpElement} element */
@@ -145,42 +123,235 @@ export class AmpRender extends BaseElement {
 
     /** @private {?Element} */
     this.template_ = null;
+
+    /** @private {?string} */
+    this.initialSrc_ = null;
+
+    /** @private {?string} */
+    this.src_ = null;
+  }
+
+  /**
+   * @return {!UrlReplacementPolicy}
+   * @private
+   */
+  getPolicy_() {
+    const src = this.element.getAttribute('src');
+    // Require opt-in for URL variable replacements on CORS fetches triggered
+    // by [src] mutation. @see spec/amp-var-substitutions.md
+    // TODO(dmanek): Update spec/amp-var-substitutions.md with this information
+    // and add a `Substitution` sections in this component's markdown file.
+    let policy = UrlReplacementPolicy.OPT_IN;
+    if (
+      src == this.initialSrc_ ||
+      getSourceOrigin(src) == getSourceOrigin(this.getAmpDoc().win.location)
+    ) {
+      policy = UrlReplacementPolicy.ALL;
+    }
+    return policy;
+  }
+
+  /**
+   * @param {boolean} shouldRefresh true to force refresh of browser cache.
+   * @return {!BatchFetchOptionsDef} options object to pass to `batchFetchJsonFor` method.
+   * @private
+   */
+  buildOptionsObject_(shouldRefresh = false) {
+    return {
+      xssiPrefix: this.element.getAttribute('xssi-prefix'),
+      expr: this.element.getAttribute('key') ?? '.',
+      refresh: shouldRefresh,
+      urlReplacement: this.getPolicy_(),
+    };
+  }
+
+  /**
+   * Returns a function to fetch json from remote url, amp-state or
+   * amp-script.
+   *
+   * @return {Function}
+   */
+  getFetchJsonFn() {
+    const {element} = this;
+    const src = element.getAttribute('src');
+    if (!src) {
+      // TODO(dmanek): assert that src is provided instead of silently failing below.
+      return () => {};
+    }
+    if (isAmpStateSrc(src)) {
+      return (src) => getAmpStateJson(element, src);
+    }
+    if (isAmpScriptUri(src)) {
+      return (src) =>
+        Services.scriptForDocOrNull(element).then((ampScriptService) => {
+          userAssert(ampScriptService, 'AMP-SCRIPT is not installed');
+          return ampScriptService.fetch(src);
+        });
+    }
+    return (unusedSrc, shouldRefresh = false) =>
+      batchFetchJsonFor(
+        element.getAmpDoc(),
+        element,
+        this.buildOptionsObject_(shouldRefresh)
+      );
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'amp-render'),
-      'Experiment "amp-render" is not turned on.'
+    if (layout === Layout.CONTAINER) {
+      userAssert(
+        this.getPlaceholder(),
+        'placeholder required with layout="container"'
+      );
+    }
+    return true;
+  }
+
+  /** @private */
+  handleResizeToContentsAction_() {
+    let currentHeight, targetHeight;
+    this.measureMutateElement(
+      () => {
+        currentHeight = this.element./*OK*/ offsetHeight;
+        targetHeight = this.element./*OK*/ scrollHeight;
+        if (targetHeight < currentHeight) {
+          // targetHeight is smaller than currentHeight, we need to shrink the height.
+          const container = this.element.querySelector(
+            'div[i-amphtml-rendered]'
+          );
+          targetHeight = container./*OK*/ scrollHeight;
+          // Check if the first child has any margin-top and add it to the target height
+          if (container.firstElementChild) {
+            const marginTop = computedStyle(
+              this.getAmpDoc().win,
+              container.firstElementChild
+            ).getPropertyValue('margin-top');
+            targetHeight += parseInt(marginTop, 10);
+          }
+          // Check if the last child has any margin-bottom and add it to the target height
+          if (container.lastElementChild) {
+            const marginBottom = computedStyle(
+              this.getAmpDoc().win,
+              container.lastElementChild
+            ).getPropertyValue('margin-bottom');
+            targetHeight += parseInt(marginBottom, 10);
+          }
+        }
+      },
+      () => {
+        this.forceChangeHeight(targetHeight);
+      }
     );
-    return super.isLayoutSupported(layout);
   }
 
   /** @override */
   init() {
+    this.initialSrc_ = this.element.getAttribute('src');
+    this.src_ = this.initialSrc_;
+
+    const hasAriaLive = this.element.hasAttribute('aria-live');
+    if (!hasAriaLive) {
+      this.element.setAttribute('aria-live', 'polite');
+    }
+
     this.registerApiAction('refresh', (api) => {
       const src = this.element.getAttribute('src');
       // There is an alternative way to do this using `mutationObserverCallback` while using a boolean
       // variable `canRefresh`. See https://github.com/ampproject/amphtml/pull/33776#discussion_r614087734
       // for more context. This approach may be better if src does not mutate often. But the alternative might
       // be better if src mutatates often and component user does not use `refresh` action.
-      if (!src?.length || isAmpStateSrc(src) || isAmpScriptSrc(src)) {
+      if (!src || isAmpStateSrc(src) || isAmpScriptUri(src)) {
         return;
       }
       api.refresh();
     });
 
+    this.registerAction('resizeToContents', () => {
+      this.handleResizeToContentsAction_();
+    });
+
     return dict({
-      'getJson': getJsonFn(this.element),
+      'ariaLiveValue': hasAriaLive
+        ? this.element.getAttribute('aria-live')
+        : 'polite',
+      'getJson': this.getFetchJsonFn(),
+      'onLoading': () => {
+        this.toggleLoading(true);
+      },
+      'onReady': () => {
+        this.toggleLoading(false);
+        if (this.element.getAttribute('layout') !== Layout.CONTAINER) {
+          this.togglePlaceholder(false);
+          return;
+        }
+
+        let componentHeight, contentHeight;
+        // TODO(dmanek): Look into using measureIntersection instead
+        this.measureMutateElement(
+          () => {
+            componentHeight = computedStyle(
+              this.getAmpDoc().win,
+              this.element
+            ).getPropertyValue('height');
+            contentHeight = this.element.querySelector(
+              '[i-amphtml-rendered]'
+            )./*OK*/ scrollHeight;
+          },
+          () => {
+            setStyles(this.element, {
+              'overflow': 'hidden',
+              'height': componentHeight,
+            });
+          }
+        ).then(() => {
+          return this.attemptChangeHeight(contentHeight)
+            .then(() => {
+              this.togglePlaceholder(false);
+              setStyles(this.element, {
+                'overflow': '',
+              });
+            })
+            .catch(() => {
+              this.togglePlaceholder(false);
+            });
+        });
+      },
+      'onError': () => {
+        this.toggleLoading(false);
+        // If the content fails to load and there's a fallback element, display the fallback.
+        // Otherwise, continue displaying the placeholder.
+        if (this.getFallback()) {
+          this.togglePlaceholder(false);
+          this.toggleFallback(true);
+        } else {
+          this.togglePlaceholder(true);
+        }
+      },
     });
   }
 
+  /** @override */
+  mutationObserverCallback() {
+    const src = this.element.getAttribute('src');
+    if (src === this.src_) {
+      return;
+    }
+    this.src_ = src;
+    this.mutateProps(dict({'getJson': this.getFetchJsonFn()}));
+  }
+
   /**
-   * TODO: this implementation is identical to one in amp-date-display &
-   * amp-date-countdown. Move it to a common file and import it.
-   *
-   * @override
+   * @param {!JsonObject} data
+   * @return {!Promise<!Element>}
+   * @private
    */
+  renderTemplateAsString_(data) {
+    return this.templates_
+      .renderTemplateAsString(dev().assertElement(this.template_), data)
+      .then((html) => dict({'__html': html}));
+  }
+
+  /** @override */
   checkPropsPostMutations() {
     const templates =
       this.templates_ ||
@@ -194,6 +365,7 @@ export class AmpRender extends BaseElement {
       this.mutateProps(dict({'render': null}));
       return;
     }
+
     // Only overwrite `render` when template is ready to minimize FOUC.
     templates.whenReady(template).then(() => {
       if (template != this.template_) {
@@ -203,9 +375,44 @@ export class AmpRender extends BaseElement {
       this.mutateProps(
         dict({
           'render': (data) => {
-            return templates
-              .renderTemplateAsString(dev().assertElement(template), data)
-              .then((html) => dict({'__html': html}));
+            const bindingValue = this.element.getAttribute('binding');
+            if (bindingValue === Binding.NEVER || bindingValue === Binding.NO) {
+              return this.renderTemplateAsString_(data);
+            }
+            return Services.bindForDocOrNull(this.element).then((bind) => {
+              if (!bind) {
+                return this.renderTemplateAsString_(data);
+              }
+              const nonEmptyNodeCount = getTemplateNonEmptyNodeCount(
+                this.element.ownerDocument,
+                template
+              );
+              return templates
+                .renderTemplate(dev().assertElement(template), data)
+                .then((element) => {
+                  return bind
+                    .rescan([element], [], {
+                      'fast': true,
+                      'update': getUpdateValue(
+                        bindingValue,
+                        // bind.signals().get('FIRST_MUTATE') returns timestamp (in ms) when first
+                        // mutation occured, which is null for the initial render
+                        bind.signals().get('FIRST_MUTATE') === null
+                      ),
+                    })
+                    .then(() =>
+                      dict({
+                        // We should use innerHTML when the template lacks a wrapper
+                        // element, outerHTML otherwise in order to include the wrapper
+                        // element itself.
+                        '__html':
+                          nonEmptyNodeCount === 1
+                            ? element./* OK */ outerHTML
+                            : element./* OK */ innerHTML,
+                      })
+                    );
+                });
+            });
           },
         })
       );
@@ -215,7 +422,6 @@ export class AmpRender extends BaseElement {
   /**
    * TODO: this implementation is identical to one in amp-date-display &
    * amp-date-countdown. Move it to a common file and import it.
-   *
    * @override
    */
   isReady(props) {
@@ -224,10 +430,11 @@ export class AmpRender extends BaseElement {
   }
 }
 
-AmpRender['props'] = {
-  ...BaseElement['props'],
-  'getJson': {attrs: ['src'], parseAttrs: getJsonFn},
-};
+/**
+ * This is disabled to remove the fill content style in the AMP layer.
+ * @override
+ */
+AmpRender['layoutSizeDefined'] = false;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpRender);

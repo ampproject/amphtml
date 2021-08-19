@@ -1,22 +1,9 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../../src/preact';
-import {DateDisplay} from '../component';
 import {mount} from 'enzyme';
+
+import * as Preact from '#preact';
+
+import {user} from '../../../../src/log';
+import {DateDisplay} from '../component';
 
 describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
   let sandbox;
@@ -206,5 +193,58 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
     expect(data.monthNameShort).to.equal('úno');
     expect(data.dayName).to.equal('sobota');
     expect(data.dayNameShort).to.equal('so');
+  });
+
+  it('shows custom locale string when localeOptions is passed', () => {
+    const props = {
+      render,
+      datetime: Date.parse('2001-02-03T04:05:06.007Z'),
+      displayIn: 'UTC',
+      locale: 'zh-TW',
+      localeOptions: {timeStyle: 'short'},
+    };
+    const jsx = <DateDisplay {...props} />;
+
+    const wrapper = mount(jsx);
+    const data = JSON.parse(wrapper.text());
+
+    expect(data.localeString).to.equal('上午4:05');
+  });
+
+  describe('invalid data-options-* settings', () => {
+    it('throws error when invalid localeOptions is passed', () => {
+      const spy = env.sandbox.stub(user(), 'error');
+      const props = {
+        render,
+        datetime: Date.parse('2001-02-03T04:05:06.007Z'),
+        displayIn: 'UTC',
+        locale: 'zh-TW',
+        localeOptions: {timeStyle: 'invalid'},
+      };
+      const jsx = <DateDisplay {...props} />;
+
+      const wrapper = mount(jsx);
+      const data = JSON.parse(wrapper.text());
+
+      expect(spy.args[0][1]).to.equal('localeOptions');
+      expect(spy.args[0][2]).to.match(/RangeError/);
+      expect(data.localeString).to.be.undefined;
+    });
+
+    it('ignores the attr when invalid data-options-attr is provided', () => {
+      const props = {
+        render,
+        datetime: Date.parse('2001-02-03T04:05:06.007Z'),
+        displayIn: 'UTC',
+        locale: 'zh-TW',
+        localeOptions: {invalid: 'invalid'},
+      };
+      const jsx = <DateDisplay {...props} />;
+
+      const wrapper = mount(jsx);
+      const data = JSON.parse(wrapper.text());
+
+      expect(data.localeString).to.equal('2001/2/3 上午4:05:06');
+    });
   });
 });

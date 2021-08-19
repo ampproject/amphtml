@@ -1,31 +1,19 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {AMPDOC_SINGLETON_NAME} from '../../../src/core/constants/enums';
-import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {AMPDOC_SINGLETON_NAME} from '#core/constants/enums';
+import {ActionTrust} from '#core/constants/action-constants';
 import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
-import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
-import {MessageType} from '../../../src/3p-frame-messaging';
-import {PauseHelper} from '../../../src/utils/pause-helper';
-import {Services} from '../../../src/services';
-import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
+import {
+  LayoutPriority,
+  applyFillContent,
+  isLayoutSizeDefined,
+} from '#core/dom/layout';
+import {MessageType} from '#core/3p-frame-messaging';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
+import {base64EncodeFromBytes} from '#core/types/string/base64';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {endsWith} from '../../../src/core/types/string';
+import {dict} from '#core/types/object';
+import {endsWith} from '#core/types/string';
 import {getConsentDataToForward} from '../../../src/consent';
 import {
   isAdLike,
@@ -33,14 +21,15 @@ import {
   looksLikeTrackingIframe,
 } from '../../../src/iframe-helper';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {isExperimentOn} from '../../../src/experiments';
-import {moveLayoutRect} from '../../../src/layout-rect';
-import {parseJson} from '../../../src/json';
-import {removeElement} from '../../../src/dom';
+import {isExperimentOn} from '#experiments';
+import {moveLayoutRect} from '#core/dom/layout/rect';
+import {parseJson} from '#core/types/object/json';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {removeElement} from '#core/dom';
 import {removeFragment} from '../../../src/url';
-import {setStyle} from '../../../src/style';
+import {setStyle} from '#core/dom/style';
 import {urls} from '../../../src/config';
-import {utf8Encode} from '../../../src/utils/bytes.js';
+import {utf8Encode} from '#core/types/string/bytes';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';
@@ -73,7 +62,7 @@ export class AmpIframe extends AMP.BaseElement {
     this.placeholder_ = null;
 
     /** @private {boolean} */
-    this.isClickToPlay_ = false;
+    this.hasPlaceholder_ = false;
 
     /** @private {boolean} */
     this.isAdLike_ = false;
@@ -148,7 +137,7 @@ export class AmpIframe extends AMP.BaseElement {
     const {element} = this;
     const urlService = Services.urlForDoc(element);
     const url = urlService.parse(src);
-    const {hostname, protocol, origin} = url;
+    const {hostname, origin, protocol} = url;
     // Some of these can be easily circumvented with redirects.
     // Checks are mostly there to prevent people easily do something
     // they did not mean to.
@@ -163,7 +152,7 @@ export class AmpIframe extends AMP.BaseElement {
         (origin != containerUrl.origin && protocol != 'data:'),
       'Origin of <amp-iframe> must not be equal to container %s' +
         ' if allow-same-origin is set. See https://github.com/ampproject/' +
-        'amphtml/blob/main/spec/amp-iframe-origin-policy.md for details.',
+        'amphtml/blob/main/docs/spec/amp-iframe-origin-policy.md for details.',
       element
     );
     userAssert(
@@ -218,7 +207,7 @@ export class AmpIframe extends AMP.BaseElement {
     if (!src) {
       return;
     }
-    const {protocol, hash} = Services.urlForDoc(this.element).parse(src);
+    const {hash, protocol} = Services.urlForDoc(this.element).parse(src);
     // data-URLs are not modified.
     if (protocol == 'data:') {
       return src;
@@ -277,13 +266,13 @@ export class AmpIframe extends AMP.BaseElement {
   buildCallback() {
     this.sandbox_ = this.element.getAttribute('sandbox');
 
-    const iframeSrc = /** @type {string} */ (this.transformSrc_(
-      this.element.getAttribute('src')
-    ) ||
-      this.transformSrcDoc_(
-        this.element.getAttribute('srcdoc'),
-        this.sandbox_
-      ));
+    const iframeSrc = /** @type {string} */ (
+      this.transformSrc_(this.element.getAttribute('src')) ||
+        this.transformSrcDoc_(
+          this.element.getAttribute('srcdoc'),
+          this.sandbox_
+        )
+    );
     this.iframeSrc = this.assertSource_(
       iframeSrc,
       window.location.href,
@@ -291,7 +280,7 @@ export class AmpIframe extends AMP.BaseElement {
     );
 
     this.placeholder_ = this.getPlaceholder();
-    this.isClickToPlay_ = !!this.placeholder_;
+    this.hasPlaceholder_ = !!this.placeholder_;
 
     this.isResizable_ = this.element.hasAttribute('resizable');
     if (this.isResizable_) {
@@ -355,9 +344,9 @@ export class AmpIframe extends AMP.BaseElement {
       this.measureIframeLayoutBox_();
     }
 
-    const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */ (devAssert(
-      this.iframeLayoutBox_
-    ));
+    const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */ (
+      devAssert(this.iframeLayoutBox_)
+    );
     return moveLayoutRect(iframe, box.left, box.top);
   }
 
@@ -369,7 +358,7 @@ export class AmpIframe extends AMP.BaseElement {
         'displaying fixed ad. Please use amp-sticky-ad and amp-ad instead.'
     );
 
-    if (!this.isClickToPlay_) {
+    if (!this.hasPlaceholder_) {
       this.assertPosition_();
     }
 
@@ -397,7 +386,7 @@ export class AmpIframe extends AMP.BaseElement {
             'Only 1 analytics/tracking iframe allowed per ' +
               'page. Please use amp-analytics instead or file a GitHub issue ' +
               'for your use case: ' +
-              'https://github.com/ampproject/amphtml/issues/new'
+              'https://github.com/ampproject/amphtml/issues/new/choose'
           );
         return Promise.resolve();
       }
@@ -407,14 +396,14 @@ export class AmpIframe extends AMP.BaseElement {
 
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     iframe.name = 'amp_iframe' + count++;
 
-    if (this.isClickToPlay_) {
+    if (this.hasPlaceholder_) {
       setStyle(iframe, 'zIndex', -1);
     }
 
-    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, iframe);
+    propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.element, iframe);
 
     // TEMPORARY: disable `allow=autoplay`
     // This is a workaround for M72-M74 user-activation breakage.
@@ -472,7 +461,7 @@ export class AmpIframe extends AMP.BaseElement {
       return this.listenForPymMessage_(/** @type {!MessageEvent} */ (event));
     });
 
-    if (this.isClickToPlay_) {
+    if (this.hasPlaceholder_) {
       listenFor(iframe, 'embed-ready', this.activateIframe_.bind(this));
     }
 
@@ -619,7 +608,7 @@ export class AmpIframe extends AMP.BaseElement {
     }
     if (this.iframe_ && mutations['title']) {
       // only propagating title because propagating all causes e2e error:
-      this.propagateAttributes(['title'], this.iframe_);
+      propagateAttributes(['title'], this.element, this.iframe_);
     }
   }
 

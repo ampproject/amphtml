@@ -1,43 +1,53 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from './index';
-import {CanPlay, CanRender, LoadingProp} from '../core/contextprops';
-import {Loading} from '../core/loading-instructions';
-import {pureDevAssert as devAssert} from '../core/assert';
+import {devAssert} from '#core/assert';
+import {Loading} from '#core/constants/loading-instructions';
+import {rediscoverChildren, removeProp, setProp} from '#core/context';
 import {
   loadAll,
   pauseAll,
   unmountAll,
-} from '../utils/resource-container-helper';
-import {rediscoverChildren, removeProp, setProp} from '../context';
+} from '#core/dom/resource-container-helper';
+import {isElement} from '#core/types';
+import {objectsEqualShallow} from '#core/types/object';
+
+import * as Preact from '#preact';
+import {useEffect, useLayoutEffect, useRef} from '#preact';
+
 import {useAmpContext} from './context';
-import {useEffect, useLayoutEffect, useRef} from './index';
+import {CanPlay, CanRender, LoadingProp} from './contextprops';
 
 const EMPTY = {};
+
+/** @const {WeakMap<Element, {oldDefauls: (!Object|undefined), component: Component}>} */
+const cache = new WeakMap();
 
 /**
  * @param {!Element} element
  * @param {string} name
- * @param {!Object|undefined} props
- * @return {!PreactDef.VNode}
+ * @param {!Object|undefined} defaultProps
+ * @param {boolean|undefined} as
+ * @return {!PreactDef.VNode|!PreactDef.FunctionalComponent}
  */
-export function createSlot(element, name, props) {
+export function createSlot(element, name, defaultProps, as = false) {
   element.setAttribute('slot', name);
-  return <Slot {...(props || EMPTY)} name={name} />;
+  if (!as) {
+    return <Slot {...(defaultProps || EMPTY)} name={name} />;
+  }
+
+  const cached = cache.get(element);
+  if (cached && objectsEqualShallow(cached.oldProps, defaultProps)) {
+    return cached.component;
+  }
+
+  /**
+   * @param {!Object|undefined} props
+   * @return {!PreactDef.VNode}
+   */
+  function SlotWithProps(props) {
+    return <Slot {...(defaultProps || EMPTY)} name={name} {...props} />;
+  }
+  cache.set(element, {oldProps: defaultProps, component: SlotWithProps});
+
+  return SlotWithProps;
 }
 
 /**
@@ -72,7 +82,7 @@ export function useSlotContext(ref, opt_props) {
   // Context changes.
   useLayoutEffect(() => {
     const slot = ref.current;
-    devAssert(slot?.nodeType == 1, 'Element expected');
+    devAssert(isElement(slot), 'Element expected');
 
     setProp(slot, CanRender, Slot, context.renderable);
     setProp(slot, CanPlay, Slot, context.playable);
@@ -80,7 +90,9 @@ export function useSlotContext(ref, opt_props) {
       slot,
       LoadingProp,
       Slot,
-      /** @type {!./core/loading-instructions.Loading} */ (context.loading)
+      /** @type {!./core/constants/loading-instructions.Loading} */ (
+        context.loading
+      )
     );
 
     if (!context.playable) {
@@ -101,7 +113,7 @@ export function useSlotContext(ref, opt_props) {
   // before the browser undistributes them.
   useLayoutEffect(() => {
     const slot = ref.current;
-    devAssert(slot?.nodeType == 1, 'Element expected');
+    devAssert(isElement(slot), 'Element expected');
 
     // Mount children, unless lazy loading requested. If so the element should
     // use `BaseElement.setAsContainer`.
@@ -118,7 +130,7 @@ export function useSlotContext(ref, opt_props) {
 
 /**
  * @param {!Element} slot
- * @param {function(!AmpElement|!Array<!AmpElement>)} action
+ * @param {function(!AmpElement):void|function(!Array<!AmpElement>):void} action
  */
 function execute(slot, action) {
   const assignedElements = slot.assignedElements

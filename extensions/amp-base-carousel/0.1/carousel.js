@@ -1,19 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {ActionSource} from './action-source';
 import {
   Alignment,
@@ -25,23 +9,23 @@ import {
   setTransformTranslateStyle,
   updateLengthStyle,
   updateScrollPosition,
-} from './dimensions.js';
+} from './dimensions';
 import {AutoAdvance} from './auto-advance';
 import {CarouselAccessibility} from './carousel-accessibility';
 import {CarouselEvents} from './carousel-events';
 import {backwardWrappingDistance, forwardWrappingDistance} from './array-util';
-import {clamp, mod} from '../../../src/utils/math';
+import {clamp, mod} from '#core/math';
 import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce} from '#core/types/function';
 import {dev} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {
   getStyle,
   setImportantStyles,
   setStyle,
   setStyles,
-} from '../../../src/style';
-import {iterateCursor} from '../../../src/dom';
+} from '#core/dom/style';
+import {iterateCursor} from '#core/dom';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last
@@ -155,7 +139,7 @@ export class Carousel {
    * }} config
    */
   constructor(config) {
-    const {win, element, scrollContainer, runMutate, initialIndex} = config;
+    const {element, initialIndex, runMutate, scrollContainer, win} = config;
     /** @private @const */
     this.win_ = win;
 
@@ -395,7 +379,7 @@ export class Carousel {
    * }=} options
    */
   advance(delta, options = {}) {
-    const {slides_, currentIndex_, requestedIndex_} = this;
+    const {currentIndex_, requestedIndex_, slides_} = this;
     const {actionSource, allowWrap = false} = options;
 
     // If we have a requested index, use that as the reference point. The
@@ -486,7 +470,7 @@ export class Carousel {
    * }=} options
    */
   goToSlide(index, options = {}) {
-    const {smoothScroll = true, actionSource} = options;
+    const {actionSource, smoothScroll = true} = options;
     if (index < 0 || index > this.slides_.length - 1 || isNaN(index)) {
       return;
     }
@@ -1113,8 +1097,8 @@ export class Carousel {
    */
   updateCurrent_() {
     const {
-      allSpacers_,
       alignment_,
+      allSpacers_,
       axis_,
       currentIndex_,
       scrollContainer_,

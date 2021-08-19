@@ -1,34 +1,17 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust} from '#core/constants/action-constants';
+import {AmpEvents} from '#core/constants/amp-events';
+import {Deferred} from '#core/data-structures/promise';
+import {createElementWithAttributes} from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
-import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
-import {AmpDocService} from '../../../../src/service/ampdoc-impl';
-import {AmpEvents} from '../../../../src/core/constants/amp-events';
+import {resetExperimentTogglesForTesting, toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+import {ActionService} from '#service/action-impl';
+import {AmpDocService} from '#service/ampdoc-impl';
+
+import {AmpScriptService} from '../../../amp-script/0.1/amp-script';
 import {AmpList} from '../amp-list';
-import {Deferred} from '../../../../src/core/data-structures/promise';
-import {Services} from '../../../../src/services';
-import {
-  createElementWithAttributes,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
-import {
-  resetExperimentTogglesForTesting,
-  toggleExperiment,
-} from '../../../../src/experiments';
 
 describes.repeated(
   'amp-list',
@@ -332,7 +315,8 @@ describes.repeated(
                   }
                 });
 
-                it('should unlock height for layout=container with successful attemptChangeHeight', () => {
+                // TODO(#35361): disabled in #35360
+                it.skip('should unlock height for layout=container with successful attemptChangeHeight', () => {
                   expect(list.isLayoutSupported('container')).to.be.true;
                   expect(list.enableManagedResizing_).to.be.true;
                   expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
@@ -348,7 +332,8 @@ describes.repeated(
                   return list.layoutCallback();
                 });
 
-                it('should not unlock height for layout=container for unsuccessful attemptChangeHeight', () => {
+                // TODO(#35361): disabled in #35379
+                it.skip('should not unlock height for layout=container for unsuccessful attemptChangeHeight', () => {
                   expect(list.isLayoutSupported('container')).to.be.true;
                   expect(list.enableManagedResizing_).to.be.true;
                   expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
@@ -364,7 +349,8 @@ describes.repeated(
                   return list.layoutCallback();
                 });
 
-                it('should not unlock height for layout=container for null return', () => {
+                // TODO(#35361): disabled in #35360
+                it.skip('should not unlock height for layout=container for null return', () => {
                   expect(list.isLayoutSupported('container')).to.be.true;
                   expect(list.enableManagedResizing_).to.be.true;
                   expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
@@ -383,7 +369,8 @@ describes.repeated(
             );
           });
 
-          it('should attemptChangeHeight rendered contents', () => {
+          // TODO(#35361): disabled in #35360
+          it.skip('should attemptChangeHeight rendered contents', () => {
             const itemElement = doc.createElement('div');
             itemElement.style.height = '1337px';
 
@@ -766,10 +753,11 @@ describes.repeated(
               expect(list.container_.contains(newImg)).to.be.true;
             });
 
-            it('should attemptChangeHeight initial content', async () => {
+            // TODO(#35361): disabled in #35360
+            it.skip('should attemptChangeHeight initial content', async () => {
               const initialContent = doc.createElement('div');
               initialContent.setAttribute('role', 'list');
-              initialContent.style.height = '1337px';
+              initialContent.setAttribute('style', 'height: 123px');
 
               // Initial content must be set before buildCallback(), so use
               // a new test AmpList instance.
@@ -784,11 +772,12 @@ describes.repeated(
               // content, once to resize to rendered contents.
               listMock
                 .expects('attemptChangeHeight')
-                .withExactArgs(1337)
+                .withExactArgs(123)
                 .returns(Promise.resolve())
                 .twice();
 
               const itemElement = doc.createElement('div');
+              itemElement.setAttribute('style', 'height: 123px');
               expectFetchAndRender(DEFAULT_FETCHED_DATA, [itemElement]);
               await list.layoutCallback();
             });
@@ -1013,7 +1002,9 @@ describes.repeated(
             beforeEach(() => {
               resetExperimentTogglesForTesting(win);
 
-              env.sandbox.stub(Services, 'scriptForDocOrNull');
+              env.sandbox
+                .stub(Services, 'scriptForDocOrNull')
+                .returns(Promise.resolve(new AmpScriptService(env.ampdoc)));
               ampScriptEl = document.createElement('amp-script');
               ampScriptEl.setAttribute('id', 'example');
               doc.body.appendChild(ampScriptEl);
@@ -1413,6 +1404,50 @@ describes.repeated(
                 }
               );
             });
+
+            describe('rescan vs. diff race', () => {
+              async function rescanVsDiffTest() {
+                env.sandbox.spy(list, 'diff_');
+                env.sandbox.spy(list, 'render_');
+
+                // Diffing is skipped if there's no existing children to diff against.
+                const oldChild = doc.createElement('p');
+                oldChild.textContent = 'foo';
+                list.container_.appendChild(oldChild);
+
+                const newChild = doc.createElement('p');
+                newChild.textContent = 'bar';
+                // New children must have at least one binding to trigger rescan.
+                newChild.setAttribute('i-amphtml-binding', '');
+                const rendered = expectFetchAndRender(DEFAULT_FETCHED_DATA, [
+                  newChild,
+                ]);
+                await list.layoutCallback().then(() => rendered);
+              }
+
+              it('without diffing, should rescan _before_ render', async () => {
+                await rescanVsDiffTest();
+
+                expect(list.diff_).to.not.have.been.called;
+                expect(bind.rescan).to.have.been.calledOnce;
+
+                // Without diffable, rescan should happen before rendering the new children.
+                expect(bind.rescan).calledBefore(list.render_);
+              });
+
+              it('with diffing, should rescan _after_ render/diff', async () => {
+                element.setAttribute('diffable', '');
+
+                await rescanVsDiffTest();
+
+                expect(list.diff_).to.have.been.calledOnce;
+                expect(bind.rescan).to.have.been.calledOnce;
+
+                // With diffable, rescanning must happen after rendering (diffing) the new children.
+                expect(bind.rescan).calledAfter(list.render_);
+                expect(bind.rescan).calledAfter(list.diff_);
+              });
+            });
           });
 
           describe('binding="no"', () => {
@@ -1479,7 +1514,7 @@ describes.repeated(
             });
 
             it('should render a list using async data', async () => {
-              const {resolve, promise} = new Deferred();
+              const {promise, resolve} = new Deferred();
               bind.getStateAsync = () => promise;
 
               const ampStateEl = doc.createElement('amp-state');

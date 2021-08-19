@@ -1,44 +1,28 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
-import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-stream-gallery-0.1.css';
-import {Carousel} from '../../amp-base-carousel/0.1/carousel.js';
+import {Carousel} from '../../amp-base-carousel/0.1/carousel';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager';
 import {
   ResponsiveAttributes,
   getResponsiveAttributeValue,
 } from '../../amp-base-carousel/0.1/responsive-attributes';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {
   dispatchCustomEvent,
   isRTL,
   iterateCursor,
   toggleAttribute,
-} from '../../../src/dom';
-import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyle} from '../../../src/style';
-import {toArray} from '../../../src/core/types/array';
+} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {isExperimentOn} from '#experiments';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {setStyle} from '#core/dom/style';
+import {toArray} from '#core/types/array';
 
 /** @enum {number} */
 const InsetArrowVisibility = {
@@ -585,8 +569,8 @@ class AmpStreamGallery extends AMP.BaseElement {
   updateVisibleCount_() {
     const {
       maxItemWidth_,
-      minItemWidth_,
       maxVisibleCount_,
+      minItemWidth_,
       minVisibleCount_,
       slides_,
     } = this;

@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const assert = require('assert');
 const fs = require('fs');
 const globby = require('globby');
@@ -25,7 +9,7 @@ const {
   logWithoutTimestampLocalDev,
 } = require('../common/logging');
 const {buildNewServer} = require('../server/typescript-compile');
-const {cyan, green, red} = require('kleur/colors');
+const {cyan, green, red} = require('../common/colors');
 
 const transformsDir = path.resolve('build-system/server/new-server/transforms');
 const inputPaths = [`${transformsDir}/**/input.html`];
@@ -119,7 +103,7 @@ async function getTransform(inputFile, extraOptions) {
  * @return {Promise<string>}
  */
 async function getOutput(transform, input) {
-  return (await posthtml(transform).process(input)).html;
+  return (await posthtml(/** @type {*} */ (transform)).process(input)).html;
 }
 
 /**
@@ -172,6 +156,7 @@ function reportResult() {
  * Runs the test in a single input file
  *
  * @param {string} inputFile
+ * @return {Promise<void>}
  */
 async function runTest(inputFile) {
   const testName = getTestName(inputFile);
@@ -194,10 +179,11 @@ async function runTest(inputFile) {
 
 /**
  * Tests for AMP server custom transforms. Entry point for `amp server-tests`.
+ * @return {Promise<void>}
  */
 async function serverTests() {
   await buildNewServer();
-  const inputFiles = globby.sync(inputPaths);
+  const inputFiles = await globby(inputPaths);
   for (const inputFile of inputFiles) {
     await runTest(inputFile);
   }
@@ -208,4 +194,4 @@ module.exports = {
   serverTests,
 };
 
-serverTests.description = "Runs tests for the AMP server's custom transforms";
+serverTests.description = "Run tests for the AMP server's custom transforms";

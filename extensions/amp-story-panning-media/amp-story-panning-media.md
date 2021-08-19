@@ -33,22 +33,6 @@ layouts:
   - Fill
 ---
 
-<!---
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 <figure class="centered-fig">
   <amp-anim alt="amp-story-panning-media example" width="304" height="548" layout="fixed" src="https://raw.githubusercontent.com/processprocess/amphtml/panning-media-docs/extensions/amp-story-panning-media/img/amp-story-panning-media.gif">
     <noscript>
@@ -68,7 +52,7 @@ Use the `amp-story-panning-media` to transition an image between pages. The comp
 Add the following script tag to the head of your Web Story:
 
 ```html
-<script async custom-element="amp-story-panning-media" src="https://cdn.ampproject.org/v0/amp-story-panning-media-0.1.js"><script>
+<script async custom-element="amp-story-panning-media" src="https://cdn.ampproject.org/v0/amp-story-panning-media-0.1.js"></script>
 ```
 
 #### Configuration
@@ -97,13 +81,13 @@ The `amp-story-panning-media` component accepts 1 descendant. This descendant mu
 
 The [Northern Sky Constellations Web Story](https://philipbell-panning-media.web.app/examples/amp-story/northern-sky-constellations.html) uses a single star chart for the entire story. It highlights different constellations by panning and zooming. A parallax transition effect is also achieved by layering two png star images with transparency.
 
-<amp-img alt="image of Northern Sky Constellations Web Story example" layout="responsive" src="https://raw.githubusercontent.com/processprocess/amphtml/panning-media-docs/extensions/amp-story-panning-media/img/constellations-screenshot.jpg" width="690" height="1009"></amp-img>
+<amp-img alt="image of Northern Sky Constellations Web Story example" layout="fixed" src="https://raw.githubusercontent.com/processprocess/amphtml/panning-media-docs/extensions/amp-story-panning-media/img/constellations-screenshot.jpg" width="690" height="1009"></amp-img>
 
 ### Web Story creation tool integration example
 
 The [Web Story creation tool integration example](https://philipbell-panning-media.web.app/examples/amp-story/controls.html) demos how to modify the component with sliders.
 
-<amp-img alt="image of Web Story tool example" layout="responsive" src="https://philipbell-panning-media.web.app/examples/amp-story/controls.html" width="690" height="1009"></amp-img>
+<amp-img alt="image of Web Story tool example" layout="fixed" src="https://raw.githubusercontent.com/processprocess/amphtml/panning-media-docs/extensions/amp-story-panning-media/img/controls.jpg" width="690" height="1009"></amp-img>
 
 ## Attributes
 

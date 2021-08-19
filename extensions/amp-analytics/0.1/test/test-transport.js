@@ -1,28 +1,11 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {
-  ImagePixelVerifier,
-  mockWindowInterface,
-} from '../../../../testing/test-helper';
+import {AmpScriptService} from '../../../amp-script/0.1/amp-script';
+import {ImagePixelVerifier, mockWindowInterface} from '#testing/test-helper';
+import {Services} from '#service';
 import {Transport} from '../transport';
 import {getMode} from '../../../../src/mode';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
-import {installTimerService} from '../../../../src/service/timer-impl';
+import {installDocService} from '#service/ampdoc-impl';
+import {installTimerService} from '#service/timer-impl';
 import {loadPromise} from '../../../../src/event-helper';
 
 describes.realWin(
@@ -384,27 +367,27 @@ describes.realWin(
     });
 
     describe('amp-script transport', () => {
+      beforeEach(() => {
+        env.sandbox
+          .stub(Services, 'scriptForDocOrNull')
+          .returns(Promise.resolve(new AmpScriptService(env.ampdoc)));
+      });
+
       it('should throw if the url does not begin with amp-script scheme', () => {
-        allowConsoleError(() => {
-          expect(() =>
-            Transport.forwardRequestToAmpScript(env.ampdoc, {
-              url: 'receiver.functionId',
-            })
-          ).throws(/URL must begin with/);
+        const req = Transport.forwardRequestToAmpScript(env.ampdoc, {
+          url: 'receiver.functionId',
         });
+        expect(req).rejectedWith(/URL must begin with/);
       });
 
       it('should throw if the amp-script cannot be found', () => {
-        allowConsoleError(() => {
-          expect(() =>
-            Transport.forwardRequestToAmpScript(env.ampdoc, {
-              url: 'amp-script:nonexistent.functionId',
-            })
-          ).throws(/could not find/);
+        const req = Transport.forwardRequestToAmpScript(env.ampdoc, {
+          url: 'amp-script:nonexistent.functionId',
         });
+        expect(req).rejectedWith(/could not find/);
       });
 
-      it('should forward the payload to the specifed amp-script element', () => {
+      it('should forward the payload to the specifed amp-script element', async () => {
         const callFunctionSpy = env.sandbox.spy();
         const ampScript = doc.createElement('amp-script');
         ampScript.id = 'receiver';
@@ -414,7 +397,7 @@ describes.realWin(
         doc.body.appendChild(ampScript);
 
         const payload = '{}';
-        Transport.forwardRequestToAmpScript(env.ampdoc, {
+        await Transport.forwardRequestToAmpScript(env.ampdoc, {
           url: 'amp-script:receiver.functionId',
           payload,
         });
@@ -451,9 +434,8 @@ describes.realWin(
           '<amp-analytics type="bg"></amp-analytics>'
         );
         frame.contentWindow.__AMP_TOP = win;
-        const ampAnalyticsEl = frame.contentWindow.document.querySelector(
-          'amp-analytics'
-        );
+        const ampAnalyticsEl =
+          frame.contentWindow.document.querySelector('amp-analytics');
 
         transport.maybeInitIframeTransport(ampAnalyticsEl);
         expect(transport.iframeTransport_).to.be.ok;
@@ -477,9 +459,8 @@ describes.realWin(
           '<amp-analytics type="bg"></amp-analytics>'
         );
         frame.contentWindow.__AMP_TOP = win;
-        const ampAnalyticsEl = frame.contentWindow.document.querySelector(
-          'amp-analytics'
-        );
+        const ampAnalyticsEl =
+          frame.contentWindow.document.querySelector('amp-analytics');
 
         transport.maybeInitIframeTransport(ampAnalyticsEl);
         expect(transport.iframeTransport_).to.be.ok;

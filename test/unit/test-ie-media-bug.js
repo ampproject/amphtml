@@ -1,23 +1,8 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ieMediaCheckAndFix} from '#service/ie-media-bug';
 
 import {dev} from '../../src/log';
-import {ieMediaCheckAndFix} from '../../src/service/ie-media-bug';
 
-describe('ie-media-bug', () => {
+describes.sandboxed('ie-media-bug', {}, (env) => {
   let clock;
   let windowApi, windowMock;
   let platform;
@@ -25,12 +10,12 @@ describe('ie-media-bug', () => {
   let devErrorStub;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     platform = {
       isIe: () => false,
     };
-    platformMock = window.sandbox.mock(platform);
-    devErrorStub = window.sandbox.stub(dev(), 'error');
+    platformMock = env.sandbox.mock(platform);
+    devErrorStub = env.sandbox.stub(dev(), 'error');
 
     windowApi = {
       innerWidth: 320,
@@ -38,7 +23,7 @@ describe('ie-media-bug', () => {
       clearInterval: () => {},
       matchMedia: () => {},
     };
-    windowMock = window.sandbox.mock(windowApi);
+    windowMock = env.sandbox.mock(windowApi);
   });
 
   afterEach(() => {
@@ -82,7 +67,7 @@ describe('ie-media-bug', () => {
     windowMock
       .expects('setInterval')
       .withExactArgs(
-        window.sandbox.match((arg) => {
+        env.sandbox.match((arg) => {
           intervalCallback = arg;
           return true;
         }),
@@ -100,7 +85,7 @@ describe('ie-media-bug', () => {
 
     // Second pass.
     clock.tick(10);
-    windowMock = window.sandbox.mock(windowApi);
+    windowMock = env.sandbox.mock(windowApi);
     windowMock
       .expects('matchMedia')
       .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
@@ -114,7 +99,7 @@ describe('ie-media-bug', () => {
 
     // Third pass - succeed.
     clock.tick(10);
-    windowMock = window.sandbox.mock(windowApi);
+    windowMock = env.sandbox.mock(windowApi);
     windowMock
       .expects('matchMedia')
       .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
@@ -144,7 +129,7 @@ describe('ie-media-bug', () => {
     windowMock
       .expects('setInterval')
       .withExactArgs(
-        window.sandbox.match((arg) => {
+        env.sandbox.match((arg) => {
           intervalCallback = arg;
           return true;
         }),

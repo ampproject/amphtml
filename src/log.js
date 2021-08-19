@@ -1,65 +1,37 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import * as assertions from '#core/assert/base';
 import {
+  createError,
+  createExpectedError,
+  duplicateErrorIfNecessary,
+} from '#core/error';
+import {
+  USER_ERROR_EMBED_SENTINEL,
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
-} from './core/error-message-helpers';
-import {createErrorVargs, duplicateErrorIfNecessary} from './core/error';
-import {findIndex, isArray} from './core/types/array';
-import {getMode} from './mode';
-import {internalRuntimeVersion} from './internal-version';
-import {isEnumValue} from './core/types';
-import {once} from './utils/function';
-import {pureDevAssert, pureUserAssert} from './core/assert';
+  isUserErrorMessage,
+  stripUserError,
+} from '#core/error/message-helpers';
+import * as mode from '#core/mode';
+import {isArray, isString} from '#core/types';
+import {once} from '#core/types/function';
+import {getHashParams} from '#core/types/string/url';
+
 import {urls} from './config';
+import {getMode} from './mode';
 
 const noop = () => {};
 
-export {USER_ERROR_SENTINEL};
+// These are exported here despite being defined elswhere to avoid updating
+// imports across many files for now.
+export {USER_ERROR_SENTINEL, isUserErrorMessage};
 
 /**
- * Four zero width space.
- *
- * @const {string}
+ * Sets reportError function. Called from error-reporting.js to break cyclic
+ * dependency.
+ * @param {function(this:Window, Error, (?Element)=): ?|undefined} fn
  */
-export const USER_ERROR_EMBED_SENTINEL = '\u200B\u200B\u200B\u200B';
-
-/**
- * @param {string} message
- * @return {boolean} Whether this message was a user error.
- */
-export function isUserErrorMessage(message) {
-  return message.indexOf(USER_ERROR_SENTINEL) >= 0;
-}
-
-/**
- * @param {string} message
- * @return {string} The new message without USER_ERROR_SENTINEL
- */
-export function stripUserError(message) {
-  return message.replace(USER_ERROR_SENTINEL, '');
-}
-
-/**
- * @param {string} message
- * @return {boolean} Whether this message was a a user error from an iframe embed.
- */
-export function isUserErrorEmbed(message) {
-  return message.indexOf(USER_ERROR_EMBED_SENTINEL) >= 0;
+export function setReportError(fn) {
+  self.__AMP_REPORT_ERROR = fn;
 }
 
 /**
@@ -72,15 +44,6 @@ export const LogLevel = {
   INFO: 3,
   FINE: 4,
 };
-
-/**
- * Sets reportError function. Called from error.js to break cyclic
- * dependency.
- * @param {function(*, !Element=)|undefined} fn
- */
-export function setReportError(fn) {
-  self.__AMP_REPORT_ERROR = fn;
-}
 
 /**
  * @type {!LogLevel|undefined}
@@ -101,7 +64,7 @@ export function overrideLogLevel(level) {
  * (Specific channel is irrelevant: message tables are invariant on internal version.)
  * @return {string}
  */
-const messageUrlRtv = () => `01${internalRuntimeVersion()}`;
+const messageUrlRtv = () => `01${mode.version()}`;
 
 /**
  * Gets a URL to display a message on amp.dev.
@@ -129,6 +92,13 @@ const externalMessagesSimpleTableUrl = () =>
  */
 const messageArgToEncodedComponent = (arg) =>
   encodeURIComponent(String(elementStringOrPassThru(arg)));
+
+/**
+ * @param {!Window=} opt_win
+ * @return {number}
+ */
+export const logHashParam = (opt_win) =>
+  parseInt(getHashParams(opt_win)['log'], 10);
 
 /**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev
@@ -182,14 +152,15 @@ export class Log {
           }
         });
     });
-  }
 
-  /**
-   * @return {!LogLevel}
-   * @private
-   */
-  getLevel_() {
-    return levelOverride_ !== undefined ? levelOverride_ : this.level_;
+    // This bound assertion function is capable of handling the format used when
+    // error/assertion messages are extracted. This logic hasn't yet been
+    // migrated to an AMP-independent form for use in core. This binding allows
+    // Log assertion helpers to maintain message-extraction capabilities until
+    // that logic can be moved to core.
+    this.boundAssertFn_ = /** @type {!assertions.AssertionFunctionDef} */ (
+      this.assert.bind(this)
+    );
   }
 
   /**
@@ -197,23 +168,23 @@ export class Log {
    * @private
    */
   defaultLevel_() {
+    const {win} = this;
     // No console - can't enable logging.
-    if (!this.win.console || !this.win.console.log) {
-      return LogLevel.OFF;
-    }
-
-    // Logging has been explicitly disabled.
-    if (getMode().log == '0') {
+    if (
+      !win.console?.log ||
+      // Logging has been explicitly disabled.
+      logHashParam(win) == 0
+    ) {
       return LogLevel.OFF;
     }
 
     // Logging is enabled for tests directly.
-    if (getMode().test && this.win.ENABLE_LOG) {
+    if (getMode().test && win.ENABLE_LOG) {
       return LogLevel.FINE;
     }
 
     // LocalDev by default allows INFO level, unless overriden by `#log`.
-    if (getMode().localDev && !getMode().log) {
+    if (getMode().localDev) {
       return LogLevel.INFO;
     }
 
@@ -221,130 +192,97 @@ export class Log {
   }
 
   /**
+   * @param {!Window=} opt_win provided for testing
    * @return {!LogLevel}
    * @private
    */
-  defaultLevelWithFunc_() {
+  defaultLevelWithFunc_(opt_win) {
     // Delegate to the specific resolver.
-    return this.levelFunc_(parseInt(getMode().log, 10), getMode().development);
+    return this.levelFunc_(logHashParam(opt_win), getMode().development);
   }
 
   /**
    * @param {string} tag
-   * @param {string} level
+   * @param {!LogLevel} level
    * @param {!Array} messages
+   * @return {boolean} true if a the message was logged
    */
   msg_(tag, level, messages) {
-    if (this.getLevel_() != LogLevel.OFF) {
-      let fn = this.win.console.log;
-      if (level == 'ERROR') {
-        fn = this.win.console.error || fn;
-      } else if (level == 'INFO') {
-        fn = this.win.console.info || fn;
-      } else if (level == 'WARN') {
-        fn = this.win.console.warn || fn;
-      }
-      const args = this.maybeExpandMessageArgs_(messages);
-      // Prefix console message with "[tag]".
-      const prefix = `[${tag}]`;
-      if (typeof args[0] === 'string') {
-        // Prepend string to avoid breaking string substitutions e.g. %s.
-        args[0] = prefix + ' ' + args[0];
-      } else {
-        args.unshift(prefix);
-      }
-      fn.apply(this.win.console, args);
+    if (level > (levelOverride_ ?? this.level_)) {
+      return false;
     }
-  }
 
-  /**
-   * Whether the logging is enabled.
-   * @return {boolean}
-   */
-  isEnabled() {
-    return this.getLevel_() != LogLevel.OFF;
+    const cs = this.win.console;
+    const fn =
+      {
+        [LogLevel.ERROR]: cs.error,
+        [LogLevel.INFO]: cs.info,
+        [LogLevel.WARN]: cs.warn,
+      }[level] ?? cs.log;
+
+    const args = this.maybeExpandMessageArgs_(messages);
+    // Prefix console message with "[tag]".
+    const prefix = `[${tag}]`;
+    if (isString(args[0])) {
+      // Prepend string to avoid breaking string substitutions e.g. %s.
+      args[0] = prefix + ' ' + args[0];
+    } else {
+      args.unshift(prefix);
+    }
+    fn.apply(cs, args);
+
+    return true;
   }
 
   /**
    * Reports a fine-grained message.
    * @param {string} tag
-   * @param {...*} var_args
+   * @param {...*} args
    */
-  fine(tag, var_args) {
-    if (this.getLevel_() >= LogLevel.FINE) {
-      this.msg_(tag, 'FINE', Array.prototype.slice.call(arguments, 1));
-    }
+  fine(tag, ...args) {
+    this.msg_(tag, LogLevel.FINE, args);
   }
 
   /**
    * Reports a informational message.
    * @param {string} tag
-   * @param {...*} var_args
+   * @param {...*} args
    */
-  info(tag, var_args) {
-    if (this.getLevel_() >= LogLevel.INFO) {
-      this.msg_(tag, 'INFO', Array.prototype.slice.call(arguments, 1));
-    }
+  info(tag, ...args) {
+    this.msg_(tag, LogLevel.INFO, args);
   }
 
   /**
    * Reports a warning message.
    * @param {string} tag
-   * @param {...*} var_args
+   * @param {...*} args
    */
-  warn(tag, var_args) {
-    if (this.getLevel_() >= LogLevel.WARN) {
-      this.msg_(tag, 'WARN', Array.prototype.slice.call(arguments, 1));
-    }
-  }
-
-  /**
-   * Reports an error message. If the logging is disabled, the error is rethrown
-   * asynchronously.
-   * @param {string} tag
-   * @param {...*} var_args
-   * @return {!Error|undefined}
-   * @private
-   */
-  error_(tag, var_args) {
-    if (this.getLevel_() >= LogLevel.ERROR) {
-      this.msg_(tag, 'ERROR', Array.prototype.slice.call(arguments, 1));
-    } else {
-      const error = createErrorVargs.apply(
-        null,
-        Array.prototype.slice.call(arguments, 1)
-      );
-      this.prepareError_(error);
-      return error;
-    }
+  warn(tag, ...args) {
+    this.msg_(tag, LogLevel.WARN, args);
   }
 
   /**
    * Reports an error message.
    * @param {string} tag
-   * @param {...*} var_args
+   * @param {...*} args
    */
-  error(tag, var_args) {
-    const error = this.error_.apply(this, arguments);
-    if (error) {
+  error(tag, ...args) {
+    if (!this.msg_(tag, LogLevel.ERROR, args)) {
+      const error = this.createError.apply(this, args);
       error.name = tag || error.name;
-      // __AMP_REPORT_ERROR is installed globally per window in the entry point.
-      self.__AMP_REPORT_ERROR(error);
+      self.__AMP_REPORT_ERROR?.(error);
     }
   }
 
   /**
    * Reports an error message and marks with an expected property. If the
    * logging is disabled, the error is rethrown asynchronously.
-   * @param {string} unusedTag
-   * @param {...*} var_args
+   * @param {string} tag
+   * @param {...*} args
    */
-  expectedError(unusedTag, var_args) {
-    const error = this.error_.apply(this, arguments);
-    if (error) {
-      error.expected = true;
-      // __AMP_REPORT_ERROR is installed globally per window in the entry point.
-      self.__AMP_REPORT_ERROR(error);
+  expectedError(tag, ...args) {
+    if (!this.msg_(tag, LogLevel.ERROR, args)) {
+      self.__AMP_REPORT_ERROR?.(this.createExpectedError.apply(this, args));
     }
   }
 
@@ -354,9 +292,7 @@ export class Log {
    * @return {!Error}
    */
   createError(var_args) {
-    const error = createErrorVargs.apply(null, arguments);
-    this.prepareError_(error);
-    return error;
+    return this.setErrorSuffix_(createError.apply(null, arguments));
   }
 
   /**
@@ -365,10 +301,67 @@ export class Log {
    * @return {!Error}
    */
   createExpectedError(var_args) {
-    const error = createErrorVargs.apply(null, arguments);
-    this.prepareError_(error);
-    error.expected = true;
+    return this.setErrorSuffix_(createExpectedError.apply(null, arguments));
+  }
+
+  /**
+   * @param {!Error} error
+   * @return {!Error}
+   * @private
+   */
+  setErrorSuffix_(error) {
+    error = duplicateErrorIfNecessary(error);
+
+    if (this.suffix_) {
+      if (!error.message) {
+        error.message = this.suffix_;
+      } else if (error.message.indexOf(this.suffix_) == -1) {
+        error.message += this.suffix_;
+      }
+    } else if (isUserErrorMessage(error.message)) {
+      error.message = stripUserError(error.message);
+    }
+
     return error;
+  }
+
+  /**
+   * @param {!Array} args
+   * @return {!Array}
+   * @private
+   */
+  maybeExpandMessageArgs_(args) {
+    return isArray(args[0])
+      ? this.expandMessageArgs_(/** @type {!Array} */ (args[0]))
+      : args;
+  }
+
+  /**
+   * Either redirects a pair of (errorId, ...args) to a URL where the full
+   * message is displayed, or displays it from a fetched table.
+   *
+   * This method is used by the output of the `transform-log-methods` babel
+   * plugin. It should not be used directly. Use the (*error|assert*|info|warn)
+   * methods instead.
+   *
+   * @param {!Array} parts
+   * @return {!Array}
+   * @private
+   */
+  expandMessageArgs_(parts) {
+    // First value should exist.
+    const id = parts.shift();
+    // Best effort fetch of message template table.
+    // Since this is async, the first few logs might be indirected to a URL even
+    // if in development mode. Message table is ~small so this should be a short
+    // gap.
+    if (getMode(this.win).development) {
+      this.fetchExternalMessagesOnce_();
+    }
+
+    return this.messages_?.[id]
+      ? [this.messages_[id]].concat(parts)
+      : [`More info at ${externalMessageUrl(id, parts)}`];
   }
 
   /**
@@ -402,15 +395,10 @@ export class Log {
       );
     }
 
-    try {
-      const assertion = this == logs.user ? pureUserAssert : pureDevAssert;
-      return assertion.apply(null, arguments);
-    } catch (e) {
-      this.prepareError_(e);
-      // __AMP_REPORT_ERROR is installed globally per window in the entry point.
-      self.__AMP_REPORT_ERROR(e);
-      throw e;
-    }
+    return assertions.assert.apply(
+      null,
+      [this.suffix_].concat(Array.prototype.slice.call(arguments))
+    );
   }
 
   /**
@@ -421,18 +409,14 @@ export class Log {
    * @param {*} shouldBeElement
    * @param {!Array|string=} opt_message The assertion message
    * @return {!Element} The value of shouldBeTrueish.
-   * @template T
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertElement(shouldBeElement, opt_message) {
-    const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
-    this.assertType_(
+    return assertions.assertElement(
+      this.boundAssertFn_,
       shouldBeElement,
-      shouldBeTrueish,
-      'Element expected',
       opt_message
     );
-    return /** @type {!Element} */ (shouldBeElement);
   }
 
   /**
@@ -447,13 +431,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertString(shouldBeString, opt_message) {
-    this.assertType_(
+    return assertions.assertString(
+      this.boundAssertFn_,
       shouldBeString,
-      typeof shouldBeString == 'string',
-      'String expected',
       opt_message
     );
-    return /** @type {string} */ (shouldBeString);
   }
 
   /**
@@ -469,13 +451,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertNumber(shouldBeNumber, opt_message) {
-    this.assertType_(
+    return assertions.assertNumber(
+      this.boundAssertFn_,
       shouldBeNumber,
-      typeof shouldBeNumber == 'number',
-      'Number expected',
       opt_message
     );
-    return /** @type {number} */ (shouldBeNumber);
   }
 
   /**
@@ -488,13 +468,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertArray(shouldBeArray, opt_message) {
-    this.assertType_(
+    return assertions.assertArray(
+      this.boundAssertFn_,
       shouldBeArray,
-      isArray(shouldBeArray),
-      'Array expected',
       opt_message
     );
-    return /** @type {!Array} */ (shouldBeArray);
   }
 
   /**
@@ -508,119 +486,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertBoolean(shouldBeBoolean, opt_message) {
-    this.assertType_(
+    return assertions.assertBoolean(
+      this.boundAssertFn_,
       shouldBeBoolean,
-      !!shouldBeBoolean === shouldBeBoolean,
-      'Boolean expected',
       opt_message
     );
-    return /** @type {boolean} */ (shouldBeBoolean);
-  }
-
-  /**
-   * Asserts and returns the enum value. If the enum doesn't contain such a
-   * value, the error is thrown.
-   *
-   * @param {!Object<T>} enumObj
-   * @param {string} s
-   * @param {string=} opt_enumName
-   * @return {T}
-   * @template T
-   * @closurePrimitive {asserts.matchesReturn}
-   */
-  assertEnumValue(enumObj, s, opt_enumName) {
-    if (isEnumValue(enumObj, s)) {
-      return s;
-    }
-    this.assert(false, 'Unknown %s value: "%s"', opt_enumName || 'enum', s);
-  }
-
-  /**
-   * @param {!Error} error
-   * @private
-   */
-  prepareError_(error) {
-    error = duplicateErrorIfNecessary(error);
-
-    // `associatedElement` is used to add the i-amphtml-error class; in
-    // `#development=1` mode, it also adds `i-amphtml-element-error` to the
-    // element and sets the `error-message` attribute.
-    if (error.messageArray) {
-      const elIndex = findIndex(error.messageArray, (item) => item?.tagName);
-      if (elIndex > -1) {
-        error.associatedElement = error.messageArray[elIndex];
-      }
-    }
-    if (this.suffix_) {
-      if (!error.message) {
-        error.message = this.suffix_;
-      } else if (error.message.indexOf(this.suffix_) == -1) {
-        error.message += this.suffix_;
-      }
-    } else if (isUserErrorMessage(error.message)) {
-      error.message = error.message.replace(USER_ERROR_SENTINEL, '');
-    }
-  }
-
-  /**
-   * @param {!Array} args
-   * @return {!Array}
-   * @private
-   */
-  maybeExpandMessageArgs_(args) {
-    if (isArray(args[0])) {
-      return this.expandMessageArgs_(/** @type {!Array} */ (args[0]));
-    }
-    return args;
-  }
-
-  /**
-   * Either redirects a pair of (errorId, ...args) to a URL where the full
-   * message is displayed, or displays it from a fetched table.
-   *
-   * This method is used by the output of the `transform-log-methods` babel
-   * plugin. It should not be used directly. Use the (*error|assert*|info|warn)
-   * methods instead.
-   *
-   * @param {!Array} parts
-   * @return {!Array}
-   * @private
-   */
-  expandMessageArgs_(parts) {
-    // First value should exist.
-    const id = parts.shift();
-    // Best effort fetch of message template table.
-    // Since this is async, the first few logs might be indirected to a URL even
-    // if in development mode. Message table is ~small so this should be a short
-    // gap.
-    if (getMode(this.win).development) {
-      this.fetchExternalMessagesOnce_();
-    }
-    if (this.messages_ && id in this.messages_) {
-      return [this.messages_[id]].concat(parts);
-    }
-    return [`More info at ${externalMessageUrl(id, parts)}`];
-  }
-
-  /**
-   * Asserts types, backbone of `assertNumber`, `assertString`, etc.
-   *
-   * It understands array-based "id"-contracted messages.
-   *
-   * Otherwise creates a sprintf syntax string containing the optional message or the
-   * default. An interpolation token is added at the end to include the `subject`.
-   * @param {*} subject
-   * @param {*} assertion
-   * @param {string} defaultMessage
-   * @param {!Array|string=} opt_message
-   * @private
-   */
-  assertType_(subject, assertion, defaultMessage, opt_message) {
-    if (isArray(opt_message)) {
-      this.assert(assertion, opt_message.concat(subject));
-    } else {
-      this.assert(assertion, `${opt_message || defaultMessage}: %s`, subject);
-    }
   }
 }
 
@@ -670,6 +540,19 @@ export function resetLogConstructorForTesting() {
 }
 
 /**
+ * Calls the log constructor with a given level function and suffix.
+ * @param {function(number, boolean):!LogLevel} levelFunc
+ * @param {string=} opt_suffix
+ * @return {!Log}
+ */
+function callLogConstructor(levelFunc, opt_suffix) {
+  if (!logConstructor) {
+    throw new Error('failed to call initLogConstructor');
+  }
+  return new logConstructor(self, levelFunc, opt_suffix);
+}
+
+/**
  * Publisher level log.
  *
  * Enabled in the following conditions:
@@ -682,17 +565,18 @@ export function resetLogConstructorForTesting() {
  * @return {!Log}
  */
 export function user(opt_element) {
+  // logs.user must exist first to perform the logs.user.win check below
   if (!logs.user) {
     logs.user = getUserLogger(USER_ERROR_SENTINEL);
   }
-  if (!isFromEmbed(logs.user.win, opt_element)) {
-    return logs.user;
-  } else {
-    if (logs.userForEmbed) {
-      return logs.userForEmbed;
-    }
-    return (logs.userForEmbed = getUserLogger(USER_ERROR_EMBED_SENTINEL));
+
+  if (isFromEmbed(logs.user.win, opt_element)) {
+    return (
+      logs.userForEmbed ||
+      (logs.userForEmbed = getUserLogger(USER_ERROR_EMBED_SENTINEL))
+    );
   }
+  return logs.user;
 }
 
 /**
@@ -701,17 +585,9 @@ export function user(opt_element) {
  * @return {!Log}
  */
 function getUserLogger(suffix) {
-  if (!logConstructor) {
-    throw new Error('failed to call initLogConstructor');
-  }
-  return new logConstructor(
-    self,
-    (logNum, development) => {
-      if (development || logNum >= 1) {
-        return LogLevel.FINE;
-      }
-      return LogLevel.WARN;
-    },
+  return callLogConstructor(
+    (logNum, development) =>
+      development || logNum >= 1 ? LogLevel.FINE : LogLevel.WARN,
     suffix
   );
 }
@@ -729,21 +605,12 @@ function getUserLogger(suffix) {
  * @return {!Log}
  */
 export function dev() {
-  if (logs.dev) {
-    return logs.dev;
-  }
-  if (!logConstructor) {
-    throw new Error('failed to call initLogConstructor');
-  }
-  return (logs.dev = new logConstructor(self, (logNum) => {
-    if (logNum >= 3) {
-      return LogLevel.FINE;
-    }
-    if (logNum >= 2) {
-      return LogLevel.INFO;
-    }
-    return LogLevel.OFF;
-  }));
+  return (
+    logs.dev ||
+    (logs.dev = callLogConstructor((logNum) =>
+      logNum >= 3 ? LogLevel.FINE : logNum >= 2 ? LogLevel.INFO : LogLevel.OFF
+    ))
+  );
 }
 
 /**
@@ -751,11 +618,8 @@ export function dev() {
  * @param {!Element=} opt_element
  * @return {boolean} isEmbed
  */
-export function isFromEmbed(win, opt_element) {
-  if (!opt_element) {
-    return false;
-  }
-  return opt_element.ownerDocument.defaultView != win;
+function isFromEmbed(win, opt_element) {
+  return opt_element && opt_element.ownerDocument.defaultView != win;
 }
 
 /**
@@ -800,7 +664,7 @@ export function devAssert(
   opt_8,
   opt_9
 ) {
-  if (getMode().minified) {
+  if (mode.isMinified()) {
     return shouldBeTrueish;
   }
   if (self.__AMP_ASSERTION_CHECK) {

@@ -1,20 +1,7 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {computedStyle} from '../style';
-import {dev, devAssert} from '../log';
+import {devAssert, devAssertElement} from '#core/assert';
+import {computedStyle} from '#core/dom/style';
+
+import {dev} from '../log';
 
 /** @typedef {
  *    function(!Element, !Object<string, string>): *
@@ -26,7 +13,7 @@ export let VisitorCallbackTypeDef;
  * Utility class that will visit every ancestor of a given element, and call
  * the provided callback functions on each element, passing in the element and
  * its computed styles as arguments to the callbacks. Callbacks may cease
- * visiting further nodes by returning a value, which may later be retrived by
+ * visiting further nodes by returning a value, which may later be retrieved by
  * calling 'getValueFor(visitorName)'. Once all visitors have returned or hit
  * their maximum nodes to visit, no more nodes will be visited.
  *
@@ -79,7 +66,7 @@ export class DomAncestorVisitor {
     while (el && (visitors = this.getActiveVisitors_()).length) {
       const style = computedStyle(this.win_, el);
       visitors.forEach((visitor) =>
-        visitor.callback(dev().assertElement(el), style)
+        visitor.callback(devAssertElement(el), style)
       );
       el = el.parentElement;
     }

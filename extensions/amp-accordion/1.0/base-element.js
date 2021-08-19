@@ -1,35 +1,23 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {toggleAttribute} from '#core/dom';
+import {childElementsByTag} from '#core/dom/query';
+import {toArray} from '#core/types/array';
+import {dict, memo} from '#core/types/object';
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
+import {useLayoutEffect, useRef} from '#preact';
+import {PreactBaseElement} from '#preact/base-element';
+import {forwardRef} from '#preact/compat';
+import {useDOMHandle} from '#preact/component';
+import {useSlotContext} from '#preact/slot';
+
 import {
   Accordion,
   AccordionContent,
   AccordionHeader,
   AccordionSection,
 } from './component';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {childElementsByTag, toggleAttribute} from '../../../src/dom';
+
 import {devAssert} from '../../../src/log';
-import {dict, memo} from '../../../src/core/types/object';
-import {forwardRef} from '../../../src/preact/compat';
-import {toArray} from '../../../src/core/types/array';
-import {useDOMHandle} from '../../../src/preact/component';
-import {useLayoutEffect, useRef} from '../../../src/preact';
-import {useSlotContext} from '../../../src/preact/slot';
 
 const SECTION_SHIM_PROP = '__AMP_S_SHIM';
 const HEADER_SHIM_PROP = '__AMP_H_SHIM';
@@ -132,7 +120,7 @@ function getState(element, mu, getExpandStateTrigger) {
  * @param {!AccordionDef.SectionShimProps} props
  * @return {PreactDef.Renderable}
  */
-function SectionShim(sectionElement, {expanded, children}) {
+function SectionShim(sectionElement, {children, expanded}) {
   useLayoutEffect(() => {
     toggleAttribute(sectionElement, 'expanded', expanded);
     if (sectionElement[SECTION_POST_RENDER]) {
@@ -156,11 +144,11 @@ const bindSectionShimToElement = (element) => SectionShim.bind(null, element);
 function HeaderShim(
   sectionElement,
   {
-    id,
-    role,
-    onClick,
     'aria-controls': ariaControls,
     'aria-expanded': ariaExpanded,
+    id,
+    onClick,
+    role,
   }
 ) {
   const headerElement = sectionElement.firstElementChild;
@@ -209,7 +197,7 @@ const bindHeaderShimToElement = (element) => HeaderShim.bind(null, element);
  */
 function ContentShimWithRef(
   sectionElement,
-  {id, role, 'aria-labelledby': ariaLabelledBy},
+  {'aria-labelledby': ariaLabelledBy, id, role},
   ref
 ) {
   const contentElement = sectionElement.lastElementChild;
@@ -238,10 +226,9 @@ function ContentShimWithRef(
  */
 const bindContentShimToElement = (element) =>
   forwardRef(
-    /** @type {function(?, {current:?}):PreactDef.Renderable} */ (ContentShimWithRef.bind(
-      null,
-      element
-    ))
+    /** @type {function(?, {current:?}):PreactDef.Renderable} */ (
+      ContentShimWithRef.bind(null, element)
+    )
   );
 
 /** @override */

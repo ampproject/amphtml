@@ -1,29 +1,15 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../src/preact/index';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {CanPlay, CanRender, LoadingProp} from '../../../src/core/contextprops';
-import {Slot, useSlotContext} from '../../../src/preact/slot';
-import {WithAmpContext} from '../../../src/preact/context';
-import {createElementWithAttributes} from '../../../src/dom';
-import {createRef, useLayoutEffect, useRef} from '../../../src/preact';
-import {forwardRef} from '../../../src/preact/compat';
 import {mount} from 'enzyme';
-import {setIsRoot, subscribe} from '../../../src/context';
+
+import {setIsRoot, subscribe} from '#core/context';
+import {createElementWithAttributes} from '#core/dom';
+
+import * as Preact from '#preact';
+import {createRef, useLayoutEffect, useRef} from '#preact';
+import {forwardRef} from '#preact/compat';
+import {WithAmpContext} from '#preact/context';
+import {CanPlay, CanRender, LoadingProp} from '#preact/contextprops';
+import {Slot, createSlot, useSlotContext} from '#preact/slot';
 
 describes.sandboxed('Slot', {}, () => {
   let wrapper;
@@ -338,5 +324,94 @@ describes.realWin('Slot mount/unmount', {}, (env) => {
       expect(child1.unmount).to.not.be.called;
       expect(child2.unmount).to.not.be.called;
     });
+  });
+});
+
+describes.realWin('createSlot', {}, (env) => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
+
+  it('should create slot and set corresponding slot attr', () => {
+    const element = doc.createElement('div');
+    const slot = createSlot(element, 'element');
+    expect(element.getAttribute('slot')).to.equal('element');
+    expect(slot.type).to.equal(Slot);
+    expect(slot.props).to.deep.equal({'name': 'element'});
+  });
+
+  it('should create slot with props', () => {
+    const element = doc.createElement('div');
+    const slot = createSlot(element, 'element', {'propA': true});
+    expect(element.getAttribute('slot')).to.equal('element');
+    expect(slot.type).to.equal(Slot);
+    expect(slot.props).to.deep.equal({'name': 'element', 'propA': true});
+  });
+
+  it('should create slot function and set corresponding slot attr', () => {
+    const element = doc.createElement('div');
+    const slotComp = createSlot(element, 'element', {}, /* as */ true);
+    expect(element.getAttribute('slot')).to.equal('element');
+
+    expect(typeof slotComp).to.equal('function');
+    expect(slotComp.name).to.equal('SlotWithProps');
+
+    const slot = slotComp();
+    expect(slot.type).to.equal(Slot);
+    expect(slot.props).to.deep.equal({'name': 'element'});
+  });
+
+  it('should create slot function with props', () => {
+    const element = doc.createElement('div');
+    const slotComp = createSlot(
+      element,
+      'element',
+      {'propA': true},
+      /* as */ true
+    );
+    expect(element.getAttribute('slot')).to.equal('element');
+
+    expect(typeof slotComp).to.equal('function');
+    expect(slotComp.name).to.equal('SlotWithProps');
+
+    const slot = slotComp();
+    expect(slot.type).to.equal(Slot);
+    expect(slot.props).to.deep.equal({'name': 'element', 'propA': true});
+  });
+
+  it('should return cached slot function', () => {
+    const element = doc.createElement('div');
+    const slotComp = createSlot(element, 'element', {}, /* as */ true);
+    const slotComp2 = createSlot(element, 'element', {}, /* as */ true);
+    expect(slotComp2).to.deep.equal(slotComp);
+  });
+
+  it('should update cached slot function with new defaultProps', () => {
+    const element = doc.createElement('div');
+    const slotComp = createSlot(
+      element,
+      'element',
+      {'propA': false},
+      /* as */ true
+    );
+    const slotComp2 = createSlot(
+      element,
+      'element',
+      {'propA': true},
+      /* as */ true
+    );
+    expect(slotComp2).not.to.deep.equal(slotComp);
+  });
+
+  it('should return unique slot functions for unique elements', () => {
+    const element = doc.createElement('div');
+    const slotComp = createSlot(element, 'element', {}, /* as */ true);
+
+    const element2 = doc.createElement('div');
+    const slotComp2 = createSlot(element2, 'element', {}, /* as */ true);
+    expect(slotComp2).not.to.deep.equal(slotComp);
   });
 });

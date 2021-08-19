@@ -1,27 +1,14 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Keys} from '#core/constants/key-codes';
+import {measureIntersection} from '#core/dom/layout/intersection';
+import {toWin} from '#core/window';
 
-import {Keys} from '../../../src/core/constants/key-codes';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
+
 import {Util} from './util';
-import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
-import {measureIntersection} from '../../../src/utils/intersection';
-import {openWindowDialog} from '../../../src/dom';
-import {toWin} from '../../../src/types';
+
 import {user, userAssert} from '../../../src/log';
+import {openWindowDialog} from '../../../src/open-window-dialog';
+import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 
 // Popup options
 const POP =
@@ -347,7 +334,7 @@ export class PinWidget {
   /**
    * Determine the height of the contents to allow resizing after first layout.
    *
-   * @return {!Promise<number|null>}
+   * @return {!Promise<?number>}
    */
   height() {
     return measureIntersection(this.heightOwnerElement_).then(

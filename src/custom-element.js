@@ -1,35 +1,27 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as dom from './dom';
-import {AmpEvents} from './core/constants/amp-events';
-import {CommonSignals} from './core/constants/common-signals';
-import {ElementStub} from './element-stub';
+import {AmpEvents} from '#core/constants/amp-events';
+import {CommonSignals} from '#core/constants/common-signals';
+import {ReadyState} from '#core/constants/ready-state';
+import {tryResolve} from '#core/data-structures/promise';
+import {Signals} from '#core/data-structures/signals';
+import * as dom from '#core/dom';
 import {
-  Layout,
-  LayoutPriority,
-  applyStaticLayout,
-  isInternalElement,
-  isLoadingAllowed,
-} from './layout';
-import {MediaQueryProps} from './utils/media-query-props';
-import {ReadyState} from './core/constants/ready-state';
-import {ResourceState} from './service/resource';
-import {Services} from './services';
-import {Signals} from './utils/signals';
+  UPGRADE_TO_CUSTOMELEMENT_PROMISE,
+  UPGRADE_TO_CUSTOMELEMENT_RESOLVER,
+} from '#core/dom/amp-element-helpers';
+import {Layout, LayoutPriority, isLoadingAllowed} from '#core/dom/layout';
+import {MediaQueryProps} from '#core/dom/media-query-props';
+import * as query from '#core/dom/query';
+import {setStyle} from '#core/dom/style';
+import {rethrowAsync} from '#core/error';
+import {toWin} from '#core/window';
+
+import {Services} from '#service';
+import {ResourceState} from '#service/resource';
+import {getSchedulerForDoc} from '#service/scheduler';
+
+import {startupChunk} from './chunk';
+import {shouldBlockOnConsentByMeta} from './consent';
+import {ElementStub} from './element-stub';
 import {
   blockedByConsentError,
   cancellation,
@@ -38,16 +30,9 @@ import {
   reportError,
 } from './error-reporting';
 import {dev, devAssert, user, userAssert} from './log';
-import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
 import {getMode} from './mode';
-import {getSchedulerForDoc} from './service/scheduler';
-import {isExperimentOn} from './experiments';
-import {rethrowAsync} from './core/error';
-import {setStyle} from './style';
-import {shouldBlockOnConsentByMeta} from './consent';
-import {startupChunk} from './chunk';
-import {toWin} from './types';
-import {tryResolve} from './core/data-structures/promise';
+import {applyStaticLayout} from './static-layout';
+import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
 
 const TAG = 'CustomElement';
 
@@ -89,17 +74,29 @@ function isTemplateTagSupported() {
  * Creates a named custom element class.
  *
  * @param {!Window} win The window in which to register the custom element.
- * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement element, ?(typeof BaseElement))} elementConnectedCallback
+ * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement, ?(typeof BaseElement))} elementConnectedCallback
  * @return {typeof AmpElement} The custom element class.
  */
 export function createCustomElementClass(win, elementConnectedCallback) {
-  const BaseCustomElement = /** @type {typeof HTMLElement} */ (createBaseCustomElementClass(
-    win,
-    elementConnectedCallback
-  ));
+  const BaseCustomElement = /** @type {typeof HTMLElement} */ (
+    createBaseCustomElementClass(win, elementConnectedCallback)
+  );
   // It's necessary to create a subclass, because the same "base" class cannot
   // be registered to multiple custom elements.
-  class CustomAmpElement extends BaseCustomElement {}
+  class CustomAmpElement extends BaseCustomElement {
+    /**
+     * adoptedCallback is only called when using a Native implementation of Custom Elements V1.
+     * Our polyfill does not call this method.
+     */
+    adoptedCallback() {
+      // Work around an issue with Firefox changing the prototype of our
+      // already constructed element to the new document's HTMLElement.
+      if (Object.getPrototypeOf(this) !== customAmpElementProto) {
+        Object.setPrototypeOf(this, customAmpElementProto);
+      }
+    }
+  }
+  const customAmpElementProto = CustomAmpElement.prototype;
   return /** @type {typeof AmpElement} */ (CustomAmpElement);
 }
 
@@ -107,7 +104,7 @@ export function createCustomElementClass(win, elementConnectedCallback) {
  * Creates a base custom element class.
  *
  * @param {!Window} win The window in which to register the custom element.
- * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement element, ?(typeof BaseElement))} elementConnectedCallback
+ * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement, ?(typeof BaseElement))} elementConnectedCallback
  * @return {typeof HTMLElement}
  */
 function createBaseCustomElementClass(win, elementConnectedCallback) {
@@ -280,10 +277,10 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       /** @private {?MediaQueryProps} */
       this.mediaQueryProps_ = null;
 
-      if (nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
-        nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER](nonStructThis);
-        delete nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER];
-        delete nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_PROMISE];
+      if (nonStructThis[UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
+        nonStructThis[UPGRADE_TO_CUSTOMELEMENT_RESOLVER](nonStructThis);
+        delete nonStructThis[UPGRADE_TO_CUSTOMELEMENT_RESOLVER];
+        delete nonStructThis[UPGRADE_TO_CUSTOMELEMENT_PROMISE];
       }
     }
 
@@ -321,8 +318,9 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         this.resources_,
         'no resources yet, since element is not attached'
       );
-      return /** @type {!./service/resources-interface.ResourcesInterface} */ (this
-        .resources_);
+      return /** @type {!./service/resources-interface.ResourcesInterface} */ (
+        this.resources_
+      );
     }
 
     /**
@@ -393,7 +391,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       this.classList.remove('i-amphtml-unresolved');
       this.assertLayout_();
       this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
-      if (!this.V1()) {
+      if (!this.R1()) {
         this.getResources().upgraded(this);
       }
       this.signals_.signal(CommonSignals.UPGRADED);
@@ -430,7 +428,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     /**
      * Get the priority to load the element.
      * @return {number}
-     * TODO(#31915): remove once V1 migration is complete.
+     * TODO(#31915): remove once R1 migration is complete.
      */
     getLayoutPriority() {
       return this.impl_
@@ -500,16 +498,8 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       // Wait for consent.
       const consentPromise = implPromise.then(() => {
         const policyId = this.getConsentPolicy_();
-        const isGranularConsentExperimentOn = isExperimentOn(
-          win,
-          'amp-consent-granular-consent'
-        );
-        const purposeConsents =
-          isGranularConsentExperimentOn && !policyId
-            ? this.getPurposesConsent_()
-            : null;
-
-        if (!policyId && !(isGranularConsentExperimentOn && purposeConsents)) {
+        const purposeConsents = !policyId ? this.getPurposesConsent_() : null;
+        if (!policyId && !purposeConsents) {
           return;
         }
         // Must have policyId or granularExp w/ purposeConsents
@@ -543,7 +533,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           this.classList.remove('amp-notbuilt');
           this.signals_.signal(CommonSignals.BUILT);
 
-          if (this.V1()) {
+          if (this.R1()) {
             this.setReadyStateInternal(
               this.readyState_ != ReadyState.BUILDING
                 ? this.readyState_
@@ -579,7 +569,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
             /** @type {!Error} */ (reason)
           );
 
-          if (this.V1()) {
+          if (this.R1()) {
             this.setReadyStateInternal(ReadyState.ERROR, reason);
           }
 
@@ -603,7 +593,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         CommonSignals.READY_TO_UPGRADE
       );
       return readyPromise.then(() => {
-        if (this.V1()) {
+        if (this.R1()) {
           const scheduler = getSchedulerForDoc(this.getAmpDoc());
           scheduler.scheduleAsap(this);
         }
@@ -630,7 +620,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       const {signal} = this.mountAbortController_;
       return (this.mountPromise_ = this.buildInternal()
         .then(() => {
-          devAssert(this.V1());
+          devAssert(this.R1());
           if (signal.aborted) {
             // Mounting has been canceled.
             return;
@@ -694,7 +684,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         CommonSignals.READY_TO_UPGRADE
       );
       return readyPromise.then(() => {
-        if (!this.V1()) {
+        if (!this.R1()) {
           return this.whenBuilt();
         }
         if (signal.aborted) {
@@ -717,8 +707,8 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         this.pause();
       }
 
-      // Legacy pre-V1 elements simply unlayout.
-      if (!this.V1()) {
+      // Legacy R0 elements simply unlayout.
+      if (!this.R1()) {
         this.unlayout_();
         return;
       }
@@ -775,7 +765,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      */
     ensureLoaded(opt_parentPriority) {
       return this.mount().then(() => {
-        if (this.V1()) {
+        if (this.R1()) {
           if (this.implClass_.usesLoading(this)) {
             this.impl_.ensureLoaded();
           }
@@ -848,7 +838,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
       this.readyState_ = state;
 
-      if (!this.V1()) {
+      if (!this.R1()) {
         return;
       }
 
@@ -888,7 +878,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * Called to instruct the element to preconnect to hosts it uses during
      * layout.
      * @param {boolean} onLayout Whether this was called after a layout.
-     * TODO(#31915): remove once V1 migration is complete.
+     * TODO(#31915): remove once R1 migration is complete.
      */
     preconnect(onLayout) {
       devAssert(this.isUpgraded());
@@ -908,13 +898,13 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     }
 
     /**
-     * See `BaseElement.V1()`.
+     * See `BaseElement.R1()`.
      *
      * @return {boolean}
      * @final
      */
-    V1() {
-      return this.implClass_ ? this.implClass_.V1() : false;
+    R1() {
+      return this.implClass_ ? this.implClass_.R1() : false;
     }
 
     /**
@@ -1132,7 +1122,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      */
     connectedCallback() {
       if (!isTemplateTagSupported() && this.isInTemplate_ === undefined) {
-        this.isInTemplate_ = !!dom.closestAncestorElementBySelector(
+        this.isInTemplate_ = !!query.closestAncestorElementBySelector(
           this,
           'template'
         );
@@ -1172,13 +1162,13 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           this.reset_();
         }
         if (this.isUpgraded()) {
-          if (reconstruct && !this.V1()) {
+          if (reconstruct && !this.R1()) {
             this.getResources().upgraded(this);
           }
           this.connected_();
           this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
         }
-        if (this.implClass_ && this.V1()) {
+        if (this.implClass_ && this.R1()) {
           this.upgradeOrSchedule_();
         }
       } else {
@@ -1222,12 +1212,12 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     }
 
     /**
-     * Upgrade or schedule element based on V1.
+     * Upgrade or schedule element based on R1.
      * @param {boolean=} opt_disablePreload
      * @private @final
      */
     upgradeOrSchedule_(opt_disablePreload) {
-      if (!this.V1()) {
+      if (!this.R1()) {
         this.tryUpgrade_();
         return;
       }
@@ -1374,7 +1364,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       if (this.impl_) {
         this.impl_.detachedCallback();
       }
-      if (this.V1()) {
+      if (this.R1()) {
         this.unmount();
       }
       this.toggleLoading(false);
@@ -1526,7 +1516,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * should be called again when layout changes.
      * @return {boolean}
      * @package @final
-     * TODO(#31915): remove once V1 migration is complete.
+     * TODO(#31915): remove once R1 migration is complete.
      */
     isRelayoutNeeded() {
       return this.impl_ ? this.impl_.isRelayoutNeeded() : false;
@@ -1589,7 +1579,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @param {!AbortSignal} signal
      * @return {!Promise}
      * @package @final
-     * TODO(#31915): remove once V1 migration is complete.
+     * TODO(#31915): remove once R1 migration is complete.
      */
     layoutCallback(signal) {
       assertNotTemplate(this);
@@ -1665,7 +1655,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       this.impl_.pauseCallback();
 
       // Legacy unlayoutOnPause support.
-      if (!this.V1() && this.impl_.unlayoutOnPause()) {
+      if (!this.R1() && this.impl_.unlayoutOnPause()) {
         this.unlayout_();
       }
     }
@@ -1693,7 +1683,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      *
      * @return {boolean}
      * @package @final
-     * TODO(#31915): remove once V1 migration is complete.
+     * TODO(#31915): remove once R1 migration is complete.
      */
     unlayoutCallback() {
       assertNotTemplate(this);
@@ -1879,36 +1869,12 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     }
 
     /**
-     * Returns the original nodes of the custom element without any service
-     * nodes that could have been added for markup. These nodes can include
-     * Text, Comment and other child nodes.
-     * @return {!Array<!Node>}
-     * @package @final
-     */
-    getRealChildNodes() {
-      return dom.childNodes(this, (node) => !isInternalOrServiceNode(node));
-    }
-
-    /**
-     * Returns the original children of the custom element without any service
-     * nodes that could have been added for markup.
-     * @return {!Array<!Element>}
-     * @package @final
-     */
-    getRealChildren() {
-      return dom.childElements(
-        this,
-        (element) => !isInternalOrServiceNode(element)
-      );
-    }
-
-    /**
      * Returns an optional placeholder element for this custom element.
      * @return {?Element}
      * @package @final
      */
     getPlaceholder() {
-      return dom.lastChildElement(this, (el) => {
+      return query.lastChildElement(this, (el) => {
         return (
           el.hasAttribute('placeholder') &&
           // Denylist elements that has a native placeholder property
@@ -1932,7 +1898,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           dev().assertElement(placeholder).classList.remove('amp-hidden');
         }
       } else {
-        const placeholders = dom.childElementsByAttr(this, 'placeholder');
+        const placeholders = query.childElementsByAttr(this, 'placeholder');
         for (let i = 0; i < placeholders.length; i++) {
           // Don't toggle elements with a native placeholder property
           // e.g. input, textarea
@@ -1950,7 +1916,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @package @final
      */
     getFallback() {
-      return dom.childElementByAttr(this, 'fallback');
+      return query.childElementByAttr(this, 'fallback');
     }
 
     /**
@@ -1964,6 +1930,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       const resourceState = this.getResource_().getState();
       // Do not show fallback before layout
       if (
+        !this.R1() &&
         show &&
         (resourceState == ResourceState.NOT_BUILT ||
           resourceState == ResourceState.NOT_LAID_OUT ||
@@ -2023,7 +1990,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         this.hasAttribute('noloading') ||
         (laidOut && !force) ||
         !isLoadingAllowed(this) ||
-        isInternalOrServiceNode(this)
+        query.isInternalOrServiceNode(this)
       ) {
         return false;
       }
@@ -2064,7 +2031,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      */
     getOverflowElement() {
       if (this.overflowElement_ === undefined) {
-        this.overflowElement_ = dom.childElementByAttr(this, 'overflow');
+        this.overflowElement_ = query.childElementByAttr(this, 'overflow');
         if (this.overflowElement_) {
           if (!this.overflowElement_.hasAttribute('tabindex')) {
             this.overflowElement_.setAttribute('tabindex', '0');
@@ -2153,31 +2120,11 @@ function assertNotTemplate(element) {
 }
 
 /**
- * Returns "true" for internal AMP nodes or for placeholder elements.
- * @param {!Node} node
- * @return {boolean}
- */
-function isInternalOrServiceNode(node) {
-  if (isInternalElement(node)) {
-    return true;
-  }
-  if (
-    node.tagName &&
-    (node.hasAttribute('placeholder') ||
-      node.hasAttribute('fallback') ||
-      node.hasAttribute('overflow'))
-  ) {
-    return true;
-  }
-  return false;
-}
-
-/**
  * Creates a new custom element class prototype.
  *
  * @param {!Window} win The window in which to register the custom element.
  * @param {(typeof ./base-element.BaseElement)=} opt_implementationClass For testing only.
- * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement element, ?(typeof BaseElement))=} opt_elementConnectedCallback
+ * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement, ?(typeof BaseElement))=} opt_elementConnectedCallback
  * @return {!Object} Prototype of element.
  * @visibleForTesting
  */

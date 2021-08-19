@@ -1,27 +1,13 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../../src/preact';
-import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
+import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
+
+import {VideoElementWithActions} from '../../../amp-video/1.0/storybook/_helpers';
 
 export default {
   title: 'amp-youtube-1_0',
-  decorators: [withKnobs, withA11y, withAmp],
+  decorators: [withKnobs, withAmp],
   parameters: {
     extensions: [
       {name: 'amp-youtube', version: '1.0'},
@@ -31,7 +17,7 @@ export default {
   },
 };
 
-export const Default = () => {
+export const Default = ({id}) => {
   const videoid = text('videoid', 'IAvf-rkzNck');
   const layout = text('layout', 'responsive');
   const autoplay = boolean('autoplay', false);
@@ -41,6 +27,7 @@ export const Default = () => {
   const credentials = text('credentials', 'include');
   return (
     <amp-youtube
+      id={id}
       width={width}
       height={height}
       data-videoid={videoid}
@@ -49,6 +36,15 @@ export const Default = () => {
       loop={loop}
       credentials={credentials}
     ></amp-youtube>
+  );
+};
+
+export const Actions = () => {
+  const id = 'my-amp-youtube';
+  return (
+    <VideoElementWithActions id={id}>
+      <Default id={id} />
+    </VideoElementWithActions>
   );
 };
 

@@ -1,63 +1,47 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const fs = require('fs-extra');
+const globby = require('globby');
+const path = require('path');
 const {
   ciPullRequestSha,
   circleciBuildNumber,
   isCiBuild,
   isCircleciBuild,
-  ciBuildSha,
 } = require('../common/ci');
 const {
   gitBranchCreationPoint,
   gitBranchName,
+  gitCiMainBaseline,
   gitCommitHash,
   gitDiffCommitLog,
   gitDiffStatMain,
-  gitCiMainBaseline,
   shortSha,
 } = require('../common/git');
-const {cyan, green, yellow} = require('kleur/colors');
-const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
+const {cyan, green, yellow} = require('../common/colors');
+const {exec, execOrDie, execOrThrow, execWithError} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
+const {getStdout} = require('../common/process');
 const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
 
 const UNMINIFIED_CONTAINER_DIRECTORY = 'unminified';
 const NOMODULE_CONTAINER_DIRECTORY = 'nomodule';
 const MODULE_CONTAINER_DIRECTORY = 'module';
 
-const ARTIFACT_FILE_NAME = '/tmp/artifacts/amp_nomodule_build.tar.gz';
+const ARTIFACT_DIRECTORY = '/tmp/artifacts/';
+const ARTIFACT_FILE_NAME = `${ARTIFACT_DIRECTORY}/amp_nomodule_build.tar.gz`;
+const TEST_FILES_LIST_FILE_NAME = '/tmp/testfiles.txt';
 
-// TODO(danielrozenberg): remove when Cloud Storage -> CircleCI Artifacts migration is complete.
-const NOMODULE_GCLOUD_OUTPUT_FILE = `amp_nomodule_${ciBuildSha()}.zip`;
-const GCLOUD_STORAGE_BUCKET = 'gs://amp-travis-builds';
-
-const BUILD_OUTPUT_DIRS = ['build', 'dist', 'dist.3p'];
+const BUILD_OUTPUT_DIRS = ['build', 'dist', 'dist.3p', 'dist.tools'];
 const APP_SERVING_DIRS = [
   ...BUILD_OUTPUT_DIRS,
-  'dist.tools',
   'examples',
   'test/manual',
   'test/fixtures/e2e',
 ];
 
 const GIT_BRANCH_URL =
-  'https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#create-a-git-branch';
+  'https://github.com/ampproject/amphtml/blob/main/docs/getting-started-e2e.md#create-a-git-branch';
 
 /**
  * Prints a summary of files changed by, and commits included in the PR.
@@ -139,13 +123,16 @@ function signalGracefulHalt() {
  * for skipping.
  * @param {string} jobName
  * @param {string} skipReason
+ * @param {boolean} gracefullyHaltNextJobs true to signal to downstreams jobs that they too should be skipped.
  */
-function skipDependentJobs(jobName, skipReason) {
+function skipDependentJobs(jobName, skipReason, gracefullyHaltNextJobs = true) {
   const loggingPrefix = getLoggingPrefix();
   logWithoutTimestamp(
     `${loggingPrefix} Skipping ${cyan(jobName)} because ${skipReason}.`
   );
-  signalGracefulHalt();
+  if (gracefullyHaltNextJobs) {
+    signalGracefulHalt();
+  }
 }
 
 /**
@@ -249,9 +236,24 @@ function storeBuildToWorkspace_(containerDirectory) {
   if (isCircleciBuild()) {
     fs.ensureDirSync(`/tmp/workspace/builds/${containerDirectory}`);
     for (const outputDir of BUILD_OUTPUT_DIRS) {
+      const outputPath = `${outputDir}/`;
+      if (fs.existsSync(outputPath)) {
+        fs.moveSync(
+          outputPath,
+          `/tmp/workspace/builds/${containerDirectory}/${outputDir}`
+        );
+      }
+    }
+    // Bento components are compiled inside the extension source file.
+    for (const componentFile of globby.sync('extensions/*/?.?/dist/*.js')) {
+      fs.ensureDirSync(
+        `/tmp/workspace/builds/${containerDirectory}/${path.dirname(
+          componentFile
+        )}`
+      );
       fs.moveSync(
-        `${outputDir}/`,
-        `/tmp/workspace/builds/${containerDirectory}/${outputDir}`
+        componentFile,
+        `/tmp/workspace/builds/${containerDirectory}/${componentFile}`
       );
     }
   }
@@ -286,45 +288,13 @@ function storeExperimentBuildToWorkspace(exp) {
   storeBuildToWorkspace_(exp);
 }
 
-// TODO(danielrozenberg): remove when Cloud Storage -> CircleCI Artifacts migration is complete.
-function legacyProcessAndStoreBuildToArtifacts_() {
-  const loggingPrefix = getLoggingPrefix();
-
-  logWithoutTimestamp(
-    `\n${loggingPrefix} Compressing ` +
-      cyan(APP_SERVING_DIRS.join(', ')) +
-      ' into ' +
-      cyan(NOMODULE_GCLOUD_OUTPUT_FILE) +
-      '...'
-  );
-  execOrDie(
-    `zip -r -q ${NOMODULE_GCLOUD_OUTPUT_FILE} ${APP_SERVING_DIRS.join('/ ')}/`
-  );
-  execOrDie(`du -sh ${NOMODULE_GCLOUD_OUTPUT_FILE}`);
-
-  logWithoutTimestamp(
-    `${loggingPrefix} Uploading ` +
-      cyan(NOMODULE_GCLOUD_OUTPUT_FILE) +
-      ' to ' +
-      cyan(GCLOUD_STORAGE_BUCKET) +
-      '...'
-  );
-  execOrDie(
-    `gsutil -q -m cp -r ${NOMODULE_GCLOUD_OUTPUT_FILE} ${GCLOUD_STORAGE_BUCKET}`
-  );
-}
-
 /**
  * Replaces URLS in HTML files, compresses and stores nomodule build in CI artifacts.
+ * @return {Promise<void>}
  */
 async function processAndStoreBuildToArtifacts() {
   if (!isCircleciBuild()) {
     return;
-  }
-
-  // TODO(danielrozenberg): remove when Cloud Storage -> CircleCI Artifacts migration is complete.
-  if (process.env.USE_LEGACY_GCLOUD_STORAGE) {
-    legacyProcessAndStoreBuildToArtifacts_();
   }
 
   await replaceUrls('test/manual');
@@ -339,11 +309,35 @@ async function processAndStoreBuildToArtifacts() {
       cyan(ARTIFACT_FILE_NAME) +
       '...'
   );
+  await fs.ensureDir(ARTIFACT_DIRECTORY);
   execOrDie(`tar -czf ${ARTIFACT_FILE_NAME} ${APP_SERVING_DIRS.join('/ ')}/`);
   execOrDie(`du -sh ${ARTIFACT_FILE_NAME}`);
 }
 
+/**
+ * Generates a file with a comma-separated list of test file paths that CircleCI
+ * should execute in a parallelized job shard.
+ *
+ * @param {!Array<string>} globs array of glob strings for finding test file paths.
+ */
+function generateCircleCiShardTestFileList(globs) {
+  const joinedGlobs = globs.map((glob) => `"${glob}"`).join(' ');
+  const fileList = getStdout(
+    `circleci tests glob ${joinedGlobs} | circleci tests split --split-by=timings`
+  )
+    .trim()
+    .replace(/\s+/g, ',');
+  fs.writeFileSync(TEST_FILES_LIST_FILE_NAME, fileList, {encoding: 'utf8'});
+  logWithoutTimestamp(
+    'Stored list of',
+    cyan(fileList.split(',').length),
+    'test files in',
+    cyan(TEST_FILES_LIST_FILE_NAME)
+  );
+}
+
 module.exports = {
+  TEST_FILES_LIST_FILE_NAME,
   abortTimedJob,
   printChangeSummary,
   skipDependentJobs,
@@ -358,4 +352,5 @@ module.exports = {
   storeModuleBuildToWorkspace,
   storeExperimentBuildToWorkspace,
   processAndStoreBuildToArtifacts,
+  generateCircleCiShardTestFileList,
 };

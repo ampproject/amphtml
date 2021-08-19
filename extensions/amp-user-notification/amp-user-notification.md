@@ -6,22 +6,6 @@ teaser:
   text: Displays a dismissable notification to the user.
 ---
 
-<!--
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-user-notification
 
 ## Usage
@@ -89,7 +73,7 @@ When notification is dismissed:
 
 Optionally, you can delay generation of Client IDs used for analytics and similar purposes until an `amp-user-notification` is confirmed by the user. See these docs for how to implement this:
 
--   [CLIENT_ID URL substitution](../../spec/amp-var-substitutions.md#client-id)
+-   [CLIENT_ID URL substitution](../../docs/spec/amp-var-substitutions.md#client-id)
 -   [`amp-ad`](https://amp.dev/documentation/components/amp-ad)
 -   [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics)
 
@@ -101,7 +85,7 @@ When specified, AMP will make a CORS GET request with credentials to the specifi
 on the `data-show-if-href` attribute (see [#1228](https://github.com/ampproject/amphtml/issues/1228) on why this is a GET instead of a POST).
 
 As a best practice to not let the browser cache the GET response values, you should add
-a [`TIMESTAMP` url replacement](https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md) value to the `data-show-if-href` attribute value.
+a [`TIMESTAMP` url replacement](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-var-substitutions.md) value to the `data-show-if-href` attribute value.
 You can add it as a query string field (e.g.,
 `data-show-if-href="https://foo.com/api/show-api?timestamp=TIMESTAMP"`).
 

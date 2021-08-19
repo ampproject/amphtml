@@ -1,21 +1,5 @@
-//
-// Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
 // AMP Validator client library to validate if given html is a valid AMP
 // document.
-//
 
 #include <filesystem>
 
@@ -58,25 +42,18 @@ std::string RenderErrorWithPosition(const std::string& filename,
                           RenderError(error));
 }
 
-std::string RenderRevision(const ValidationResult& result) {
-  return absl::StrCat("validator_revision: ", result.validator_revision(),
-                      "\nspec_file_revision: ", result.spec_file_revision());
-}
-
-std::string RenderResult(const std::string& filename, bool include_revisions,
+std::string RenderResult(const std::string& filename,
                          const ValidationResult& result) {
   std::string out;
   absl::StrAppend(&out, ValidationResult::Status_Name(result.status()));
   for (const ValidationError& error : result.errors()) {
     absl::StrAppend(&out, "\n", RenderErrorWithPosition(filename, error));
   }
-  if (include_revisions) absl::StrAppend(&out, "\n", RenderRevision(result));
   return out;
 }
 
 std::string RenderInlineResult(const std::string& filename,
                                const std::string& filecontents,
-                               bool include_revisions,
                                const ValidationResult& result) {
   std::string out;
   absl::StrAppend(&out, ValidationResult::Status_Name(result.status()));
@@ -105,7 +82,6 @@ std::string RenderInlineResult(const std::string& filename,
     }
     lines_emitted++;
   }
-  if (include_revisions) absl::StrAppend(&out, "\n", RenderRevision(result));
   return out;
 }
 

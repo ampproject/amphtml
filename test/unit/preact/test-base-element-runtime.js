@@ -1,35 +1,19 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {subscribe} from '#core/context';
+import {removeElement} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
 
-import * as Preact from '../../../src/preact/index';
-import {CanRender} from '../../../src/core/contextprops';
-import {
-  PreactBaseElement,
-  whenUpgraded,
-} from '../../../src/preact/base-element';
-import {Slot} from '../../../src/preact/slot';
-import {forwardRef} from '../../../src/preact/compat';
-import {getSchedulerForDoc} from '../../../src/service/scheduler';
-import {htmlFor} from '../../../src/static-template';
-import {installResizeObserverStub} from '../../../testing/resize-observer-stub';
-import {removeElement} from '../../../src/dom';
-import {subscribe} from '../../../src/context';
-import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';
-import {useAmpContext, useLoading} from '../../../src/preact/context';
-import {waitFor} from '../../../testing/test-helper';
+import * as Preact from '#preact';
+import {PreactBaseElement, whenUpgraded} from '#preact/base-element';
+import {forwardRef} from '#preact/compat';
+import {useAmpContext, useLoading} from '#preact/context';
+import {CanRender} from '#preact/contextprops';
+import {Slot} from '#preact/slot';
+
+import {upgradeOrRegisterElement} from '#service/custom-element-registry';
+import {getSchedulerForDoc} from '#service/scheduler';
+
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin('PreactBaseElement', {amp: true}, (env) => {
   let win, doc, html;

@@ -1,34 +1,24 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Deferred} from '#core/data-structures/promise';
+import {rethrowAsync} from '#core/error';
+import {map} from '#core/types/object';
 
-import {Deferred} from '../core/data-structures/promise';
-import {Services} from '../services';
+import {Services} from '#service';
+
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
   upgradeOrRegisterElement,
 } from './custom-element-registry';
 import {createExtensionScript, getExtensionScripts} from './extension-script';
-import {dev, devAssert} from '../log';
-import {getMode} from '../mode';
-import {installStylesForDoc} from '../style-installer';
-import {map} from '../core/types/object';
 import {registerExtendedTemplateForDoc} from './template-impl';
-import {registerServiceBuilder, registerServiceBuilderForDoc} from '../service';
-import {rethrowAsync} from '../core/error';
+
+import {dev, devAssert, user} from '../log';
+import {getMode} from '../mode';
+import {
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+} from '../service-helpers';
+import {installStylesForDoc} from '../style-installer';
 
 export const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
 const TAG = 'extensions';
@@ -37,13 +27,6 @@ const LATEST_VERSION = 'latest';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
 const LOADER_PROP = '__AMP_EXT_LDR';
 const SCRIPT_LOADED_PROP = '__AMP_SCR_LOADED';
-
-/**
- * Default milliseconds to wait for all extensions to load before erroring.
- * (8 seconds is the same as the CSS boilerplate timoeout)
- * @const
- */
-const LOAD_TIMEOUT = 16000;
 
 /**
  * Contains data for the declaration of a custom element.
@@ -77,6 +60,8 @@ let ExtensionDef;
  * Internal structure that maintains the state of an extension through loading.
  *
  * @typedef {{
+ *   version: string,
+ *   latest: boolean,
  *   extension: !ExtensionDef,
  *   auto: boolean,
  *   docFactories: !Array<function(!./ampdoc-impl.AmpDoc)>,
@@ -141,13 +126,34 @@ export class Extensions {
    * @restricted
    */
   registerExtension(extensionId, version, latest, factory, arg) {
-    const holder = this.getExtensionHolder_(extensionId, /* auto */ true);
+    const latestHolder = latest
+      ? this.extensions_[extensionKey(extensionId, LATEST_VERSION)]
+      : null;
+    const holder = this.getExtensionHolder_(
+      extensionId,
+      version,
+      // Inherit the `auto` (auto-install) flag from the "latest" version
+      // when available. If the "latest" has been added as a non-auto-install
+      // then this registration should not auto-install either. If the numeric
+      // version was independently added to the document, then it's auto-install
+      // will be preserved.
+      latestHolder?.auto ?? true
+    );
+    holder.latest = latest;
+
     if (holder.loaded) {
       // This extension has already been registered. This could be a
       // a "latest" script requested for a previously loaded numeric
       // version or vice versa.
       return;
     }
+
+    // Replace the "latest": both numerical and "latest" will be pointing to
+    // the same record.
+    if (latest) {
+      this.extensions_[extensionKey(extensionId, LATEST_VERSION)] = holder;
+    }
+
     try {
       this.currentExtensionId_ = extensionId;
       this.currentExtensionVersion_ = version;
@@ -161,14 +167,12 @@ export class Extensions {
         }
       }
       holder.loaded = true;
-      if (holder.resolve) {
-        holder.resolve(holder.extension);
-      }
+      holder.resolve?.(holder.extension);
+      latestHolder?.resolve?.(holder.extension);
     } catch (e) {
       holder.error = e;
-      if (holder.reject) {
-        holder.reject(e);
-      }
+      holder.reject?.(e);
+      latestHolder?.reject?.(e);
       throw e;
     } finally {
       this.currentExtensionId_ = null;
@@ -182,18 +186,21 @@ export class Extensions {
    * loading/registration.
    * @param {string} extensionId
    * @param {string} version
-   * @param {number=} opt_timeout
    * @return {!Promise<?ExtensionDef>}
    */
-  waitForExtension(extensionId, version, opt_timeout) {
-    // TODO(#33020): Wait for the specified version.
-    return /** @type {!Promise<?ExtensionDef>} */ (Services.timerFor(
-      this.win
-    ).timeoutPromise(
-      opt_timeout || LOAD_TIMEOUT,
-      this.waitFor_(this.getExtensionHolder_(extensionId, /* auto */ false)),
-      `Render timeout waiting for extension ${extensionId} to be load.`
-    ));
+  waitForExtension(extensionId, version) {
+    const wait = this.waitFor_(this.getExtensionHolder_(extensionId, version));
+
+    return Services.timerFor(this.win)
+      .timeoutPromise(16000, wait)
+      .catch((err) => {
+        if (!err.message.includes('timeout')) {
+          throw err;
+        }
+
+        user().error(TAG, `Waited over 16s to load extension ${extensionId}.`);
+        return wait;
+      });
   }
 
   /**
@@ -207,7 +214,7 @@ export class Extensions {
     if (extensionId == 'amp-embed') {
       extensionId = 'amp-ad';
     }
-    const holder = this.getExtensionHolder_(extensionId, /* auto */ false);
+    const holder = this.getExtensionHolder_(extensionId, version);
     this.insertExtensionScriptIfNeeded_(extensionId, version, holder);
     return this.waitFor_(holder);
   }
@@ -255,7 +262,7 @@ export class Extensions {
     );
     // The previously awaited extension loader must not have finished or
     // failed.
-    const holder = this.extensions_[extensionId];
+    const holder = this.extensions_[extensionKey(extensionId, version)];
     if (holder) {
       devAssert(!holder.loaded && !holder.error);
       holder.scriptPresent = false;
@@ -392,7 +399,7 @@ export class Extensions {
    * @param {function(new:Object, !./ampdoc-impl.AmpDoc)} implementationClass
    */
   addService(name, implementationClass) {
-    const holder = this.getCurrentExtensionHolder_();
+    const holder = this.getCurrentExtensionHolder_(name);
     holder.extension.services.push(
       /** @type {!ExtensionServiceDef} */ ({
         serviceName: name,
@@ -442,10 +449,10 @@ export class Extensions {
   /**
    * Preinstalls built-ins and legacy elements in the emebedded ampdoc.
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @param {!Array<string>} extensionIds
+   * @param {!Array<{extensionId: string, extensionVersion: string}>} extensions
    * @restricted
    */
-  preinstallEmbed(ampdoc, extensionIds) {
+  preinstallEmbed(ampdoc, extensions) {
     const topWin = this.win;
     const childWin = ampdoc.win;
 
@@ -454,7 +461,11 @@ export class Extensions {
     stubLegacyElements(childWin);
 
     // Stub extensions.
-    extensionIds.forEach((extensionId) => {
+    extensions.forEach(({extensionId, extensionVersion}) => {
+      // Declare the extension version on ampdoc so it doesn't request the
+      // extension again.
+      ampdoc.declareExtension(extensionId, extensionVersion);
+
       // This will extend automatic upgrade of custom elements from top
       // window to the child window.
       if (!LEGACY_ELEMENTS.includes(extensionId)) {
@@ -467,15 +478,14 @@ export class Extensions {
    * Installs all ampdoc factories previously registered with
    * `addDocFactory`.
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @param {!Array<string>} extensionIds
+   * @param {!Array<{extensionId: string, extensionVersion: string}>} extensions
    * @return {!Promise}
    * @restricted
    */
-  installExtensionsInDoc(ampdoc, extensionIds) {
+  installExtensionsInDoc(ampdoc, extensions) {
     return Promise.all(
-      extensionIds.map((extensionId) =>
-        // TODO(#33001): pass the requested version once FIE can provide it.
-        this.installExtensionInDoc(ampdoc, extensionId)
+      extensions.map(({extensionId, extensionVersion}) =>
+        this.installExtensionInDoc(ampdoc, extensionId, extensionVersion)
       )
     );
   }
@@ -489,35 +499,43 @@ export class Extensions {
    */
   installExtensionInDoc(ampdoc, extensionId, version = DEFAULT_VERSION) {
     ampdoc.declareExtension(extensionId, version);
-    const holder = this.getExtensionHolder_(extensionId, /* auto */ false);
-    return this.waitFor_(holder).then(() => {
-      holder.docFactories.forEach((factory) => {
-        try {
-          factory(ampdoc);
-        } catch (e) {
-          rethrowAsync('Doc factory failed: ', e, extensionId);
-        }
-      });
-    });
+    return this.waitFor_(this.getExtensionHolder_(extensionId, version)).then(
+      () => {
+        const holder = this.getExtensionHolder_(extensionId, version);
+        holder.docFactories.forEach((factory) => {
+          try {
+            factory(ampdoc);
+          } catch (e) {
+            rethrowAsync('Doc factory failed: ', e, extensionId);
+          }
+        });
+      }
+    );
   }
 
   /**
    * Creates or returns an existing extension holder.
    * @param {string} extensionId
-   * @param {boolean} auto
+   * @param {string} version
+   * @param {boolean=} opt_auto
    * @return {!ExtensionHolderDef}
    * @private
    */
-  getExtensionHolder_(extensionId, auto) {
-    let holder = this.extensions_[extensionId];
+  getExtensionHolder_(extensionId, version, opt_auto) {
+    const key = extensionKey(extensionId, version);
+    let holder = this.extensions_[key];
     if (!holder) {
       const extension = /** @type {ExtensionDef} */ ({
         elements: {},
         services: [],
       });
       holder = /** @type {ExtensionHolderDef} */ ({
+        version,
+        // Usually a version starts "unknown" and the latest becomes known
+        // when it has been loaded.
+        latest: version == LATEST_VERSION,
         extension,
-        auto,
+        auto: opt_auto || false,
         docFactories: [],
         promise: undefined,
         resolve: undefined,
@@ -526,7 +544,7 @@ export class Extensions {
         error: undefined,
         scriptPresent: undefined,
       });
-      this.extensions_[extensionId] = holder;
+      this.extensions_[key] = holder;
     }
     return holder;
   }
@@ -543,7 +561,7 @@ export class Extensions {
     }
     return this.getExtensionHolder_(
       this.currentExtensionId_ || UNKNOWN_EXTENSION,
-      /* auto */ true
+      this.currentExtensionVersion_ || ''
     );
   }
 
@@ -606,7 +624,7 @@ export class Extensions {
         this.win,
         extensionId,
         version,
-        /* latest */ false
+        holder.latest
       );
       holder.scriptPresent = scriptsInHead.length > 0;
     }
@@ -639,4 +657,13 @@ function copyBuiltinElementsToChildWindow(parentWin, childWin) {
 function emptyService() {
   // All services need to resolve to an object.
   return {};
+}
+
+/**
+ * @param {string} extensionId
+ * @param {string} version
+ * @return {string}
+ */
+function extensionKey(extensionId, version) {
+  return `${extensionId}:${version}`;
 }

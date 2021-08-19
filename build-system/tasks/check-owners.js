@@ -1,20 +1,4 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview This file implements the `amp check-owners` task, which checks
  * all OWNERS files in the repo for correctness, as determined by the parsing
  * API provided by the AMP owners bot.
@@ -25,7 +9,7 @@
 const fetch = require('node-fetch');
 const fs = require('fs-extra');
 const JSON5 = require('json5');
-const {cyan, red, green} = require('kleur/colors');
+const {cyan, green, red} = require('../common/colors');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
 const {log, logLocalDev} = require('../common/logging');
 
@@ -36,6 +20,7 @@ const OWNERS_SYNTAX_CHECK_URI =
  * Checks OWNERS files for correctness using the owners bot API.
  * The cumulative result is returned to the `amp` process via process.exitCode
  * so that all OWNERS files can be checked / fixed.
+ * @return {Promise<void>}
  */
 async function checkOwners() {
   if (!usesFilesOrLocalChanges('check-owners')) {
@@ -50,6 +35,7 @@ async function checkOwners() {
 /**
  * Checks a single OWNERS file using the owners bot API.
  * @param {string} file
+ * @return {Promise<void>}
  */
 async function checkFile(file) {
   if (!file.endsWith('OWNERS')) {
@@ -84,7 +70,7 @@ async function checkFile(file) {
       );
     }
 
-    const {requestErrors, fileErrors, rules} = await response.json();
+    const {fileErrors, requestErrors, rules} = await response.json();
 
     if (requestErrors) {
       requestErrors.forEach((err) => log(red(err)));
@@ -100,7 +86,7 @@ async function checkFile(file) {
       cyan(file),
       'successfully; produced',
       cyan(rules.length),
-      'rules.'
+      'rule(s).'
     );
   } catch (error) {
     log(red('FAILURE:'), error);
@@ -112,8 +98,8 @@ module.exports = {
   checkOwners,
 };
 
-checkOwners.description = 'Checks all OWNERS files in the repo for correctness';
+checkOwners.description = 'Check all OWNERS files in the repo for correctness';
 checkOwners.flags = {
-  'files': 'Checks only the specified OWNERS files',
-  'local_changes': 'Checks just the OWNERS files changed in the local branch',
+  'files': 'Check only the specified OWNERS files',
+  'local_changes': 'Check just the OWNERS files changed in the local branch',
 };

@@ -6,22 +6,6 @@ teaser:
   text: A rich, visual storytelling format.
 ---
 
-<!--
-Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-story
 
 [Web stories](https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/?format=stories) are an immersive, tappable and easily shareable storytelling format. Web stories are built using the AMP Framework. The `amp-story` component provides the AMP story subset of AMP. It is the base technology for web stories.
@@ -171,8 +155,6 @@ The following markup is a decent starting point or boilerplate. Copy this and sa
           <h1>The End</h1>
         </amp-story-grid-layer>
       </amp-story-page>
-      <amp-story-bookend src="bookendv1.json" layout="nodisplay">
-      </amp-story-bookend>
     </amp-story>
   </body>
 </html>
@@ -218,13 +200,12 @@ The `amp-story` component represents an entire story. The component itself imple
   <amp-story-page>[...]</amp-story-page>
   <amp-story-page>[...]</amp-story-page>
   <amp-story-page>[...]</amp-story-page>
-  <amp-story-bookend src="./related.json"></amp-story-bookend>
 </amp-story>
 ```
 
 ### Metadata guidelines
 
-Metadata attributes display a preview of the story across the Web Stories ecosystem, such as rendering an engaging preview link in the bookend of a related stories. These attributes future-proof your story for rich, embedded experience Web Stories surfaces to come.
+Metadata attributes display a preview of the story across the Web Stories ecosystem, such as rendering an engaging preview link. These attributes future-proof your story for rich, embedded experience Web Stories surfaces to come.
 
 These metadata attributes supplement and do not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data to your Web Stories](https://developers.google.com/search/docs/guides/enable-web-stories#implement).
 
@@ -496,38 +477,11 @@ Example:
 </a>
 ```
 
-#### Integration with sidebar for stories
-
-`amp-story` supports the use of `amp-sidebar` with a few limitations and caveats. See the [Sidebar for Stories documentation](https://amp.dev/documentation/components/amp-sidebar?format=websites#sidebar-for-stories) for more details.
-
-By using branching and `amp-sidebar`, you can create stories that have a table of contents. To do this, make use of URL fragment parameter.
-
-The following example demonstrates a table of contents inside of an `amp-sidebar`. The table of contents has a link to a specific story page, and and out-link to a different website.
-
-```html
-<amp-story id="story" standalone>
-  <amp-sidebar id="sidebar1" layout="nodisplay">
-    <ul>
-      <li><a href="#page=bacon-page"> Bacon page </a></li>
-      <li><a href="https://www.amp.dev"> External Link </a></li>
-    </ul>
-  </amp-sidebar>
-
-  <amp-story-page id="bacon-page">
-    <amp-story-grid-layer>
-      <p>Bacon, of course!</p>
-    </amp-story-grid-layer>
-  </amp-story-page>
-  ...
-</amp-story>
-```
-
 #### Other components usable in AMP stories
 
 The following are other components usable in AMP stories that require some story-specific caveats.
 
 -   [amp-consent](https://amp.dev/documentation/components/amp-consent#prompt-ui-for-stories)
--   [amp-sidebar](https://amp.dev/documentation/components/amp-sidebar#sidebar-for-stories)
 -   [amp-twitter](https://amp.dev/documentation/components/amp-twitter)
 
 For more generally usable components see the [list of allowed children](https://amp.dev/documentation/components/amp-story#children).
@@ -599,6 +553,8 @@ Used with the `live-story` attribute. Time interval (in milliseconds) between ch
 Every element inside an `<amp-story-page>` can have an entrance animation.
 
 You can configure animations by specifying a set of [animation attributes](#animation-attributes) on the element; no additional AMP extensions or configuration is needed.
+
+If there is something needed outside of the presets, custom animations can be configured using the [`<amp-story-animation>`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/amp-story-animation.md) component.
 
 {% call callout('Note', type='note') %}
 Animations can help make your Web Story more visually exciting and engaging, but use them sparingly. Some users may find long, continuous animations distracting. Other users may have motion sensitivity and be adversely affected by excessive use of motion and parallax effects.
@@ -848,7 +804,7 @@ With branching, AMP Stories now supports URLs in the form of:
 https://www.mydomain.com/good-story/#page=<page-id>
 ```
 
-where `page-id` refers to the unique id of an `amp-story-page`. You can also use the fragment parameter and the `page-id` value like an anchor link in some use cases. See [Integration with Sidebar for Stories](#integration-with-sidebar-for-stories) for an example.
+where `page-id` refers to the unique id of an `amp-story-page`. You can also use the fragment parameter and the `page-id` value like an anchor link in some use cases.
 
 ## Localization
 

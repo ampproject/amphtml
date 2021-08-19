@@ -1,21 +1,7 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import * as mode from '#core/mode';
 
-import {getMode} from '../mode';
 import {urls} from '../config';
+import {getMode} from '../mode';
 
 const CUSTOM_TEMPLATES = ['amp-mustache'];
 const LATEST_VERSION = 'latest';
@@ -55,7 +41,7 @@ export function calculateExtensionScriptUrl(
   version,
   opt_isLocalDev
 ) {
-  const fileExtension = getMode().esm ? '.mjs' : '.js';
+  const fileExtension = mode.isEsm() ? '.mjs' : '.js';
   const base = calculateScriptBaseUrl(location, opt_isLocalDev);
   const rtv = getMode().rtvVersion;
   const extensionVersion = version ? '-' + version : '';
@@ -77,7 +63,7 @@ export function calculateEntryPointScriptUrl(
   isLocalDev,
   opt_rtv
 ) {
-  const fileExtension = getMode().esm ? '.mjs' : '.js';
+  const fileExtension = mode.isEsm() ? '.mjs' : '.js';
   const base = calculateScriptBaseUrl(location, isLocalDev);
   if (isLocalDev) {
     return `${base}/${entryPoint}${fileExtension}`;
@@ -131,7 +117,7 @@ export function createExtensionScript(win, extensionId, version) {
   }
   scriptElement.setAttribute('data-script', extensionId);
   scriptElement.setAttribute('i-amphtml-inserted', '');
-  if (getMode().esm) {
+  if (mode.isEsm()) {
     scriptElement.setAttribute('type', 'module');
   }
 
@@ -235,6 +221,21 @@ export function extensionScriptsInNode(head) {
     }
   }
   return scripts;
+}
+
+/**
+ * Verifies that an extension script is present in head for
+ * installation.
+ * @param {!Window} win
+ * @param {string} id
+ * @param {string} version
+ * @return {boolean}
+ */
+export function extensionScriptInNode(win, id, version) {
+  return extensionScriptsInNode(win.document.head).some(
+    ({extensionId, extensionVersion}) =>
+      id == extensionId && version == extensionVersion
+  );
 }
 
 /**

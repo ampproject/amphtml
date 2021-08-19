@@ -2,6 +2,7 @@
 # Keep this list in sync with .gitignore, .prettierignore, and build-system/tasks/clean.js
 .babel-cache
 .css-cache
+.jss-cache
 .pre-closure-cache
 
 # Output directories
@@ -19,7 +20,7 @@ dist.tools
 export
 examples/storybook
 extensions/**/dist
-release
+/release
 result-reports
 src/purifier/dist
 test/coverage
@@ -30,9 +31,9 @@ validator/export
 # Files and directories explicitly ignored by eslint
 build-system/babel-plugins/**/fixtures/**/*.js
 build-system/babel-plugins/**/fixtures/**/*.mjs
-build-system/server/app-index/test/*.js
-build-system/tasks/make-extension/bento/amp-__component_name_hyphenated__/**/*
-build-system/tasks/visual-diff/snippets/*.js
+build-system/tasks/make-extension/template/**/*
+examples/amp-script/todomvc.ssr.js
+examples/amp-script/vue-todomvc.js
 extensions/amp-a4a/0.1/test/testdata/**
 src/purifier/noop.js
 testing/local-amp-chrome-extension/**

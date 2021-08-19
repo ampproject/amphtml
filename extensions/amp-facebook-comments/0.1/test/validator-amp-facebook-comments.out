@@ -19,7 +19,7 @@ PASS
 |    Tests support for the amp-facebook-comments tag.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">
@@ -35,6 +35,6 @@ PASS
 |        height=657
 |        layout="responsive"
 |        data-href="http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html">
-|    </amp-facebook>
+|    </amp-facebook-comments>
 |  </body>
 |  </html>

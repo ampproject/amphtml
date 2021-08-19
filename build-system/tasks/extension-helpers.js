@@ -1,49 +1,38 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const argv = require('minimist')(process.argv.slice(2));
-const debounce = require('debounce');
+const babel = require('@babel/core');
+const debounce = require('../common/debounce');
 const fs = require('fs-extra');
+const globby = require('globby');
 const path = require('path');
 const wrappers = require('../compile/compile-wrappers');
 const {
   compileJs,
-  compileJsWithEsbuild,
   doBuildJs,
   endBuildStep,
+  esbuildCompile,
   maybeToEsmName,
+  maybeToNpmEsmName,
   mkdirSync,
   watchDebounceDelay,
 } = require('./helpers');
 const {
   extensionAliasBundles,
   extensionBundles,
-  verifyExtensionBundles,
   jsBundles,
+  verifyExtensionBundles,
 } = require('../compile/bundles.config');
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {compileJison} = require('./compile-jison');
-const {green, red, cyan} = require('kleur/colors');
+const {cyan, green, red} = require('../common/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
+const {jssOptions} = require('../babel-config/jss-config');
 const {log} = require('../common/logging');
 const {parse: pathParse} = require('path');
+const {TransformCache, batchedRead} = require('../common/transform-cache');
 const {watch} = require('chokidar');
 
 /**
@@ -90,29 +79,22 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
  *   loadPriority?: string,
  *   cssBinaries?: Array<string>,
  *   extraGlobs?: Array<string>,
- *   binaries?: Array<ExtensionBinary>,
- *   npm?: Map<string, NpmBinaries>,
+ *   binaries?: Array<ExtensionBinaryDef>,
+ *   npm?: boolean,
+ *   wrapper?: string,
  * }}
  */
-const ExtensionOption = {}; // eslint-disable-line no-unused-vars
-
-/**
- * @typedef {{
- *   preact?: string,
- *   react?: string,
- * }}
- */
-const NpmBinaries = {}; // eslint-disable-line no-unused-vars
+const ExtensionOptionDef = {};
 
 /**
  * @typedef {{
  *   entryPoint: string,
  *   outfile: string,
  *   external?: Array<string>
- *   remap?: Map<string, string>
+ *   remap?: Record<string, string>
  * }}
  */
-const ExtensionBinary = {}; // eslint-disable-line no-unused-vars
+const ExtensionBinaryDef = {};
 
 // All declared extensions.
 const extensions = {};
@@ -127,7 +109,7 @@ const adVendors = [];
  * @param {string} name
  * @param {string|!Array<string>} version E.g. 0.1 or [0.1, 0.2]
  * @param {string} latestVersion E.g. 0.1
- * @param {!ExtensionOption|undefined} options extension options object.
+ * @param {!ExtensionOptionDef|undefined} options extension options object.
  * @param {!Object} extensionsObject
  * @param {boolean} includeLatest
  */
@@ -386,7 +368,7 @@ async function buildExtensions(options) {
  * @param {!Object} extensions
  * @param {string} extension
  * @param {!Object} options
- * @return {!Promise}
+ * @return {!Promise<void>}
  */
 async function doBuildExtension(extensions, extension, options) {
   const e = extensions[extension];
@@ -403,7 +385,8 @@ async function doBuildExtension(extensions, extension, options) {
 }
 
 /**
- * Watches for non-JS changes within an extensions directory to trigger recompilation.
+ * Watches for non-JS changes within an extensions directory to trigger
+ * recompilation.
  *
  * @param {string} extDir
  * @param {string} name
@@ -411,6 +394,7 @@ async function doBuildExtension(extensions, extension, options) {
  * @param {string} latestVersion
  * @param {boolean} hasCss
  * @param {?Object} options
+ * @return {Promise<void>}
  */
 async function watchExtension(
   extDir,
@@ -420,6 +404,9 @@ async function watchExtension(
   hasCss,
   options
 ) {
+  /**
+   * Steps to run when a watched file is modified.
+   */
   function watchFunc() {
     buildExtension(name, version, latestVersion, hasCss, {
       ...options,
@@ -455,7 +442,7 @@ async function watchExtension(
  * @param {boolean} hasCss Whether there is a CSS file for this extension.
  * @param {?Object} options
  * @param {!Array=} extraGlobs
- * @return {!Promise}
+ * @return {!Promise<void>}
  */
 async function buildExtension(
   name,
@@ -487,12 +474,13 @@ async function buildExtension(
     }
   }
 
-  await compileJison(path.join(extDir, '**', '*.jison'));
+  await compileJison(`${extDir}/**/*.jison`);
   if (name === 'amp-bind') {
     await doBuildJs(jsBundles, 'ww.max.js', options);
   }
   if (options.npm) {
-    await buildNpmBinaires(extDir, options);
+    await buildNpmBinaries(extDir, options);
+    await buildNpmCss(extDir, options);
   }
   if (options.binaries) {
     await buildBinaries(extDir, options.binaries, options);
@@ -506,6 +494,58 @@ async function buildExtension(
   }
 
   await buildExtensionJs(extDir, name, version, latestVersion, options);
+}
+
+/**
+ * Writes an extensions's CSS to its npm dist folder.
+ *
+ * @param {string} extDir
+ * @param {Object} options
+ * @return {Promise<void>}
+ */
+async function buildNpmCss(extDir, options) {
+  const startCssTime = Date.now();
+  const filenames = await globby(path.join(extDir, '**', '*.jss.js'));
+  if (!filenames.length) {
+    return;
+  }
+
+  const css = (await Promise.all(filenames.map(getCssForJssFile))).join('');
+  const outfile = path.join(extDir, 'dist', 'styles.css');
+  await fs.writeFile(outfile, css);
+  endBuildStep('Wrote CSS', `${options.name} → styles.css`, startCssTime);
+}
+
+/** @type {TransformCache} */
+let jssCache;
+
+/**
+ * Returns the minified CSS for a .jss.js file.
+ *
+ * @param {string} jssFile
+ * @return {Promise<string|Buffer>}
+ */
+async function getCssForJssFile(jssFile) {
+  // Lazily instantiate the TransformCache
+  if (!jssCache) {
+    jssCache = new TransformCache('.jss-cache', '.css');
+  }
+
+  const {contents, hash} = await batchedRead(jssFile);
+  const fileCss = await jssCache.get(hash);
+  if (fileCss) {
+    return fileCss;
+  }
+
+  const babelOptions = babel.loadOptions({caller: {name: 'jss'}});
+  if (!babelOptions) {
+    throw new Error('Could not find babel config for jss');
+  }
+  babelOptions['filename'] = jssFile;
+
+  await babel.transform(contents, babelOptions);
+  jssCache.set(hash, Promise.resolve(jssOptions.css));
+  return jssOptions.css;
 }
 
 /**
@@ -564,8 +604,17 @@ function buildExtensionCss(extDir, name, version, options) {
  * @param {!Object} options
  * @return {!Promise}
  */
-function buildNpmBinaires(extDir, options) {
-  const {npm} = options;
+function buildNpmBinaries(extDir, options) {
+  let {npm} = options;
+  if (npm === true) {
+    // Default to the standard/expected entrypoint
+    npm = {
+      'component.js': {
+        'preact': 'component-preact.js',
+        'react': 'component-react.js',
+      },
+    };
+  }
   const keys = Object.keys(npm);
   const promises = keys.flatMap((entryPoint) => {
     const {preact, react} = npm[entryPoint];
@@ -598,7 +647,7 @@ function buildNpmBinaires(extDir, options) {
 
 /**
  * @param {string} extDir
- * @param {!Array<ExtensionBinary>} binaries
+ * @param {!Array<ExtensionBinaryDef>} binaries
  * @param {!Object} options
  * @return {!Promise}
  */
@@ -606,23 +655,18 @@ function buildBinaries(extDir, binaries, options) {
   mkdirSync(`${extDir}/dist`);
 
   const promises = binaries.map((binary) => {
-    const {entryPoint, outfile, external, remap} = binary;
+    const {entryPoint, external, outfile, remap} = binary;
     const {name} = pathParse(outfile);
     const esm = argv.esm || argv.sxg || false;
-    return compileJsWithEsbuild(
-      extDir + '/',
-      entryPoint,
-      `${extDir}/dist`,
-      Object.assign(options, {
-        toName: maybeToEsmName(`${name}.max.js`),
-        minifiedName: maybeToEsmName(`${name}.js`),
-        latestName: '',
-        outputFormat: esm ? 'esm' : 'cjs',
-        wrapper: '',
-        externalDependencies: external,
-        remapDependencies: remap,
-      })
-    );
+    return esbuildCompile(extDir + '/', entryPoint, `${extDir}/dist`, {
+      ...options,
+      toName: maybeToNpmEsmName(`${name}.max.js`),
+      minifiedName: maybeToNpmEsmName(`${name}.js`),
+      latestName: '',
+      outputFormat: esm ? 'esm' : 'cjs',
+      externalDependencies: external,
+      remapDependencies: remap,
+    });
   });
   return Promise.all(promises);
 }
@@ -642,30 +686,27 @@ function buildBinaries(extDir, binaries, options) {
 async function buildExtensionJs(extDir, name, version, latestVersion, options) {
   const filename = options.filename || name + '.js';
   const latest = version === latestVersion;
-  await compileJs(
-    extDir + '/',
-    filename,
-    './dist/v0',
-    Object.assign(options, {
-      toName: `${name}-${version}.max.js`,
-      minifiedName: `${name}-${version}.js`,
-      latestName: latest ? `${name}-latest.js` : '',
-      // Wrapper that either registers the extension or schedules it for
-      // execution after the main binary comes back.
-      // The `function` is wrapped in `()` to avoid lazy parsing it,
-      // since it will be immediately executed anyway.
-      // See https://github.com/ampproject/amphtml/issues/3977
-      wrapper: options.noWrapper
-        ? ''
-        : wrappers.extension(
-            name,
-            version,
-            latest,
-            argv.esm,
-            options.loadPriority
-          ),
-    })
-  );
+
+  const wrapperName = options.wrapper || 'extension';
+  const wrapperOrFn = wrappers[wrapperName];
+  if (!wrapperOrFn) {
+    throw new Error(
+      `Unknown options.wrapper "${wrapperName}" (${name}:${version})\n` +
+        `Expected one of: ${Object.keys(wrappers).join(', ')}`
+    );
+  }
+  const wrapper =
+    typeof wrapperOrFn === 'function'
+      ? wrapperOrFn(name, version, latest, argv.esm, options.loadPriority)
+      : wrapperOrFn;
+
+  await compileJs(extDir + '/', filename, './dist/v0', {
+    ...options,
+    toName: `${name}-${version}.max.js`,
+    minifiedName: `${name}-${version}.js`,
+    latestName: latest ? `${name}-latest.js` : '',
+    wrapper,
+  });
 
   // If an incremental watch build fails, simply return.
   if (options.errored) {
@@ -694,6 +735,7 @@ async function buildExtensionJs(extDir, name, version, latestVersion, options) {
 /**
  * Builds and writes the HTML file used for <amp-script> sandboxed mode.
  * @param {boolean} minify
+ * @return {Promise<void>}
  */
 async function buildSandboxedProxyIframe(minify) {
   await doBuildJs(jsBundles, 'amp-script-proxy-iframe.js', {minify});
@@ -717,6 +759,7 @@ async function buildSandboxedProxyIframe(minify) {
  * them accordingly.
  *
  * @param {string} version
+ * @return {Promise<void>}
  */
 async function copyWorkerDomResources(version) {
   const startTime = Date.now();

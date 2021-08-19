@@ -1,39 +1,23 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Service for recaptcha components
  * interacting with the 3p recaptcha bootstrap iframe
  */
 
 import ampToolboxCacheUrl from '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
-import {Deferred, tryResolve} from '../../../src/core/data-structures/promise';
-import {Services} from '../../../src/services';
+import {Deferred, tryResolve} from '#core/data-structures/promise';
+import {Services} from '#service';
 import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getMode} from '../../../src/mode';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {getSourceOrigin} from '../../../src/url';
-import {internalRuntimeVersion} from '../../../src/internal-version';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
-import {removeElement} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
+import {removeElement} from '#core/dom';
+import {setStyle} from '#core/dom/style';
 import {urls} from '../../../src/config';
+import * as mode from '#core/mode';
 
 /**
  * @fileoverview
@@ -299,8 +283,8 @@ export class AmpRecaptchaService {
             '.recaptcha.' +
             winLocation.host +
             '/dist.3p/' +
-            (getMode().minified
-              ? `${internalRuntimeVersion()}/recaptcha`
+            (mode.isMinified()
+              ? `${mode.version()}/recaptcha`
               : 'current/recaptcha.max') +
             '.html'
           );
@@ -328,7 +312,7 @@ export class AmpRecaptchaService {
       const recaptchaFrameSrc =
         'https://' +
         curlsSubdomain +
-        `.recaptcha.${urls.thirdPartyFrameHost}/${internalRuntimeVersion()}/` +
+        `.recaptcha.${urls.thirdPartyFrameHost}/${mode.version()}/` +
         'recaptcha.html';
       return recaptchaFrameSrc;
     });
@@ -410,8 +394,7 @@ export class AmpRecaptchaService {
  * @return {!Promise<!AmpRecaptchaService>}
  */
 export function recaptchaServiceForDoc(element) {
-  return /** @type {!Promise<!AmpRecaptchaService>} */ (getServicePromiseForDoc(
-    element,
-    'amp-recaptcha'
-  ));
+  return /** @type {!Promise<!AmpRecaptchaService>} */ (
+    getServicePromiseForDoc(element, 'amp-recaptcha')
+  );
 }

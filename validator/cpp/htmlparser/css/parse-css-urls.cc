@@ -1,30 +1,14 @@
-//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
 #include "css/parse-css-urls.h"
 
 #include <memory>
 
-#include "glog/logging.h"
 #include "absl/algorithm/container.h"
 #include "absl/memory/memory.h"
 #include "absl/strings/ascii.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_join.h"
 #include "absl/types/variant.h"
+#include "logging.h"
 #include "strings.h"
 
 using absl::AsciiStrToLower;
@@ -157,9 +141,8 @@ class Tokenizer {
   }
 
   char32_t Next(int num = 1) {
-    CHECK_GE(num, 0);
-    CHECK_LE(num, 3)
-        << "Spec Error; no more than three codepoints of lookahead.";
+    CHECK(num >= 0, "Spec Error; negative lookahead.");
+    CHECK(num <= 3, "Spec Error; no more than three codepoints of lookahead.");
     return Codepoint(pos_ + num);
   }
 
@@ -181,9 +164,7 @@ class Tokenizer {
     return true;
   }
 
-  bool EofNext(int num = 1) {
-    return pos_ + num >= str_.size();
-  }
+  bool EofNext(int num = 1) { return pos_ + num >= str_.size(); }
 
   bool Eof() { return eof_; }
 
@@ -453,8 +434,8 @@ class Tokenizer {
       }
       if (Whitespace(Next())) Consume();
       uint32_t value;
-      if (!absl::numbers_internal::safe_strtou32_base(
-          digits, &value, /*base=*/16)) {
+      if (!absl::numbers_internal::safe_strtou32_base(digits, &value,
+                                                      /*base=*/16)) {
         value = 0xfffd;
       }
       if (value > kMaximumallowedcodepoint) value = 0xfffd;
@@ -597,8 +578,7 @@ int ConsumeAComponentValue(const vector<unique_ptr<Token>>& tokens,
 
 TokenType::Code TypeOrEof(const vector<unique_ptr<Token>>& tokens,
                           const int pos) {
-  if (pos < tokens.size())
-    return tokens[pos]->Type();
+  if (pos < tokens.size()) return tokens[pos]->Type();
   return tokens[tokens.size() - 1]->Type();
 }
 
@@ -634,7 +614,7 @@ int ConsumeABlock(const vector<unique_ptr<Token>>& tokens,
 int ConsumeAComponentValue(const vector<unique_ptr<Token>>& tokens,
                            const int start_pos) {
   TokenType::Code type = TypeOrEof(tokens, start_pos);
-  CHECK_NE(type, TokenType::EOF_TOKEN);
+  CHECK(type != TokenType::EOF_TOKEN, "");
   if (type == TokenType::OPEN_CURLY || type == TokenType::OPEN_SQUARE ||
       type == TokenType::OPEN_PAREN || type == TokenType::FUNCTION_TOKEN) {
     return ConsumeABlock(tokens, start_pos);
@@ -647,11 +627,11 @@ int ConsumeAComponentValue(const vector<unique_ptr<Token>>& tokens,
 // starts at position |start_pos|.
 int ConsumeAFontFace(const vector<unique_ptr<Token>>& tokens,
                      const int start_pos) {
-  CHECK_EQ(TypeOrEof(tokens, start_pos), TokenType::AT_KEYWORD)
-      << TokenType::Code_Name(TypeOrEof(tokens, start_pos));
-  CHECK_EQ(static_cast<const AtKeywordToken&>(*tokens[start_pos]).StringValue(),
-           "font-face")
-      << static_cast<const AtKeywordToken&>(*tokens[start_pos]).StringValue();
+  CHECK(TypeOrEof(tokens, start_pos) == TokenType::AT_KEYWORD,
+        TokenType::Code_Name(TypeOrEof(tokens, start_pos)));
+  CHECK(static_cast<const AtKeywordToken&>(*tokens[start_pos]).StringValue() ==
+            "font-face",
+        static_cast<const AtKeywordToken&>(*tokens[start_pos]).StringValue());
   int cur_pos = start_pos;
   while (true) {
     cur_pos++;
@@ -669,7 +649,7 @@ int ConsumeAFontFace(const vector<unique_ptr<Token>>& tokens,
 int ConsumeAUrlFunction(const vector<unique_ptr<Token>>& tokens,
                         const int start_pos, std::string* url) {
   TokenType::Code type = TypeOrEof(tokens, start_pos);
-  CHECK_EQ(type, TokenType::FUNCTION_TOKEN) << TokenType::Code_Name(type);
+  CHECK(type == TokenType::FUNCTION_TOKEN, TokenType::Code_Name(type));
   int cur_pos = start_pos;
   *url = "";
   while (true) {
@@ -694,8 +674,7 @@ int ConsumeAUrlFunction(const vector<unique_ptr<Token>>& tokens,
   return ConsumeABlock(tokens, start_pos);
 }
 
-bool SegmentCss(const std::string& utf8_css,
-                vector<CssSegment>* segments) {
+bool SegmentCss(const std::string& utf8_css, vector<CssSegment>* segments) {
   // This changes the input string into an array of UTF8 Codepoints. Each
   // codepoint can match one or more bytes in the input string.
   vector<char32_t> css = htmlparser::Strings::Utf8ToCodepoints(utf8_css);
@@ -706,8 +685,7 @@ bool SegmentCss(const std::string& utf8_css,
   const vector<unique_ptr<Token>> tokens = url::Tokenize(css, &errors);
 
   // Documents with CSS errors are invalid AMP, so we can just exit early.
-  if (!errors.empty())
-    return false;
+  if (!errors.empty()) return false;
 
   // This code includes limited CSS parsing. The reason it works is that we
   // can assume that the input is valid CSS. It might not be, but if it isn't
@@ -757,8 +735,7 @@ bool SegmentCss(const std::string& utf8_css,
         segments->emplace_back(segment);
       }
 
-      // Safe: |tokens| ends w/ EOF_TOKEN.
-      CHECK_LT(cur_pos + 1, tokens.size());
+      CHECK(cur_pos + 1 < tokens.size(), "tokens missing EOF_TOKEN");
       // Set our next range start to the start of the next token.
       css_chars_emitted_until = tokens[cur_pos + 1]->pos();
     }

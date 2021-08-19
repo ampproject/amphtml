@@ -1,35 +1,29 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {getDataParamsFromAttributes} from '#core/dom';
+import {Layout} from '#core/dom/layout';
+import {toggle} from '#core/dom/style';
+import {dict} from '#core/types/object';
+import {parseQueryString} from '#core/types/string/url';
+import {toWin} from '#core/window';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {BaseElement} from './base-element';
+import {getSocialConfig} from './social-share-config';
 
 import {CSS} from '../../../build/amp-social-share-1.0.css';
-import {Layout} from '../../../src/layout';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {Services} from '../../../src/services';
-import {SocialShare} from './social-share';
-import {addParamsToUrl, parseQueryString} from '../../../src/url';
-import {dict} from '../../../src/core/types/object';
-import {getDataParamsFromAttributes} from '../../../src/dom';
-import {getSocialConfig} from './social-share-config';
-import {isExperimentOn} from '../../../src/experiments';
-import {toWin} from '../../../src/types';
-import {toggle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
+import {addParamsToUrl} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-social-share';
+
+/** @const {!JsonObject<string, string>} */
+const DEFAULT_RESPONSIVE_DIMENSIONS = dict({
+  'width': '100%',
+  'height': '100%',
+});
 
 /**
  * @private
@@ -122,7 +116,7 @@ const updateTypeConfig = (element, mutations, prevTypeValue) => {
   return typeConfig;
 };
 
-class AmpSocialShare extends PreactBaseElement {
+class AmpSocialShare extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -143,14 +137,9 @@ class AmpSocialShare extends PreactBaseElement {
     this.element.classList.add(`amp-social-share-${this.ampSocialShareType_}`);
 
     this.renderWithHrefAndTarget_(typeConfig);
-    const responsive =
-      this.element.getAttribute('layout') === Layout.RESPONSIVE && '100%';
-    return dict({
-      'width': responsive || this.element.getAttribute('width'),
-      'height': responsive || this.element.getAttribute('height'),
-      'color': 'currentColor',
-      'background': 'inherit',
-    });
+    if (this.element.getAttribute('layout') === Layout.RESPONSIVE) {
+      return DEFAULT_RESPONSIVE_DIMENSIONS;
+    }
   }
 
   /** @override */
@@ -223,25 +212,6 @@ class AmpSocialShare extends PreactBaseElement {
       });
   }
 }
-
-/** @override */
-AmpSocialShare['Component'] = SocialShare;
-
-/** @override */
-AmpSocialShare['layoutSizeDefined'] = true;
-
-/** @override */
-AmpSocialShare['delegatesFocus'] = true;
-
-/** @override */
-AmpSocialShare['props'] = {
-  'children': {passthroughNonEmpty: true},
-  'tabIndex': {attr: 'tabindex'},
-  'type': {attr: 'type'},
-};
-
-/** @override */
-AmpSocialShare['usesShadowDom'] = true;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpSocialShare, CSS);

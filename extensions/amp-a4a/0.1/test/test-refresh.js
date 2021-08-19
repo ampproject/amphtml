@@ -1,18 +1,4 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
 
 import {
   DATA_ATTR_NAME,
@@ -21,9 +7,8 @@ import {
   RefreshManager,
   getPublisherSpecifiedRefreshInterval,
 } from '../refresh-manager';
-import {Services} from '../../../../src/services';
 
-describe('refresh', () => {
+describes.sandboxed('refresh', {}, (env) => {
   let mockA4a;
   const config = {
     visiblePercentageMin: 50,
@@ -36,7 +21,7 @@ describe('refresh', () => {
     div.setAttribute('style', 'width:1px; height:1px;');
     div.setAttribute('type', 'doubleclick');
     div.setAttribute(DATA_ATTR_NAME, '35');
-    window.sandbox.replaceGetter(div, 'isConnected', () => true);
+    env.sandbox.replaceGetter(div, 'isConnected', () => true);
     div.getAmpDoc = () => {
       return {
         getMetaByName: (name) => {
@@ -107,7 +92,7 @@ describe('refresh', () => {
     });
 
     it('should call convertConfiguration_ and set proper units', () => {
-      const getConfigurationSpy = window.sandbox.spy(
+      const getConfigurationSpy = env.sandbox.spy(
         RefreshManager.prototype,
         'convertAndSanitizeConfiguration_'
       );
@@ -171,7 +156,7 @@ describe('refresh', () => {
     it('should execute the refresh event correctly', () => {
       // Attach element to DOM, as is necessary for request ampdoc.
       window.document.body.appendChild(mockA4a.element);
-      const refreshSpy = window.sandbox.spy(mockA4a, 'refresh');
+      const refreshSpy = env.sandbox.spy(mockA4a, 'refresh');
 
       // Ensure initial call to initiateRefreshCycle doesn't trigger refresh, as
       // this can have flaky results.

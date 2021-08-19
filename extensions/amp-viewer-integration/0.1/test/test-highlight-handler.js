@@ -1,25 +1,11 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {VisibilityState} from '#core/constants/visibility-state';
+import * as docready from '#core/document-ready';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 
-import * as docready from '../../../../src/document-ready';
+import {Services} from '#service';
+
 import {HighlightHandler, getHighlightParam} from '../highlight-handler';
 import {Messaging, WindowPortEmulator} from '../messaging/messaging';
-import {Services} from '../../../../src/services';
-import {VisibilityState} from '../../../../src/core/constants/visibility-state';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
 
 describes.fakeWin(
   'getHighlightParam',
@@ -422,5 +408,104 @@ describes.realWin(
       expect(setScrollTopStub).to.be.calledOnce;
       expect(setScrollTopStub.firstCall.args[0]).to.equal(350);
     });
+
+    // TODO(dmanek): remove `ifChrome` once we remove Chrome version detection
+    it.configure()
+      .ifChrome()
+      .run('should highlight using text fragments for Chrome 93', async () => {
+        const {ampdoc} = env;
+        const platform = Services.platformFor(ampdoc.win);
+        env.sandbox.stub(platform, 'isChrome').returns(true);
+        env.sandbox.stub(platform, 'getMajorVersion').returns(93);
+        let whenFirstVisiblePromiseResolve;
+        const whenFirstVisiblePromise = new Promise((resolve) => {
+          whenFirstVisiblePromiseResolve = resolve;
+        });
+        env.sandbox
+          .stub(ampdoc, 'whenFirstVisible')
+          .returns(whenFirstVisiblePromise);
+
+        const highlightHandler = new HighlightHandler(ampdoc, {
+          sentences: ['amp', 'highlight'],
+        });
+
+        const updateUrlWithTextFragmentSpy = env.sandbox.spy();
+        highlightHandler.updateUrlWithTextFragment_ =
+          updateUrlWithTextFragmentSpy;
+
+        whenFirstVisiblePromiseResolve();
+        await whenFirstVisiblePromise;
+
+        expect(updateUrlWithTextFragmentSpy).to.be.calledOnce;
+        expect(updateUrlWithTextFragmentSpy.getCall(0).args[0]).to.equal(
+          'text=amp&text=highlight'
+        );
+      });
+
+    // TODO(dmanek): remove `ifChrome` once we remove Chrome version detection
+    it.configure()
+      .ifChrome()
+      .run(
+        'should not highlight using text fragments for Chrome 92',
+        async () => {
+          const {ampdoc} = env;
+          const platform = Services.platformFor(ampdoc.win);
+          env.sandbox.stub(platform, 'isChrome').returns(true);
+          env.sandbox.stub(platform, 'getMajorVersion').returns(92);
+          let whenFirstVisiblePromiseResolve;
+          const whenFirstVisiblePromise = new Promise((resolve) => {
+            whenFirstVisiblePromiseResolve = resolve;
+          });
+          env.sandbox
+            .stub(ampdoc, 'whenFirstVisible')
+            .returns(whenFirstVisiblePromise);
+
+          const highlightHandler = new HighlightHandler(ampdoc, {
+            sentences: ['amp', 'highlight'],
+          });
+
+          const updateUrlWithTextFragmentSpy = env.sandbox.spy();
+          highlightHandler.updateUrlWithTextFragment_ =
+            updateUrlWithTextFragmentSpy;
+
+          whenFirstVisiblePromiseResolve();
+          await whenFirstVisiblePromise;
+
+          expect(updateUrlWithTextFragmentSpy).not.to.be.called;
+        }
+      );
+
+    // TODO(dmanek): remove `ifChrome` once we remove Chrome version detection
+    it.configure()
+      .ifChrome()
+      .run(
+        'should not highlight if highlightInfo.sentences is empty',
+        async () => {
+          const {ampdoc} = env;
+          const platform = Services.platformFor(ampdoc.win);
+          env.sandbox.stub(platform, 'isChrome').returns(true);
+          env.sandbox.stub(platform, 'getMajorVersion').returns(93);
+          let whenFirstVisiblePromiseResolve;
+          const whenFirstVisiblePromise = new Promise((resolve) => {
+            whenFirstVisiblePromiseResolve = resolve;
+          });
+          env.sandbox
+            .stub(ampdoc, 'whenFirstVisible')
+            .returns(whenFirstVisiblePromise);
+
+          const highlightHandler = new HighlightHandler(ampdoc, {
+            sentences: [],
+          });
+
+          const updateUrlWithTextFragmentSpy = env.sandbox.spy();
+          highlightHandler.updateUrlWithTextFragment_ =
+            updateUrlWithTextFragmentSpy;
+
+          whenFirstVisiblePromiseResolve();
+          await whenFirstVisiblePromise;
+
+          expect(updateUrlWithTextFragmentSpy).not.to.be.called;
+        }
+      );
   }
 );

@@ -1,30 +1,14 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {AmpAdUIHandler} from './amp-ad-ui';
-import {CommonSignals} from '../../../src/core/constants/common-signals';
-import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {CommonSignals} from '#core/constants/common-signals';
+import {LayoutPriority, isLayoutSizeDefined} from '#core/dom/layout';
+import {Services} from '#service';
 import {addParamToUrl} from '../../../src/url';
 import {
   childElementByTag,
   closestAncestorElementBySelector,
-  removeChildren,
-} from '../../../src/dom';
-import {hasOwn} from '../../../src/core/types/object';
+} from '#core/dom/query';
+import {hasOwn} from '#core/types/object';
+import {removeChildren} from '#core/dom';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} Tag name for custom ad implementation. */

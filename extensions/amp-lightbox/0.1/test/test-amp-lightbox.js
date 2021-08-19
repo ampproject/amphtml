@@ -1,26 +1,11 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-lightbox';
-import * as dom from '../../../../src/dom';
-import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
-import {Keys} from '../../../../src/core/constants/key-codes';
-import {Services} from '../../../../src/services';
-import {whenCalled} from '../../../../testing/test-helper.js';
+import * as dom from '#core/dom';
+import {ActionService} from '#service/action-impl';
+import {ActionTrust} from '#core/constants/action-constants';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
+import {whenCalled} from '#testing/test-helper';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 describes.realWin(
   'amp-lightbox component',
@@ -84,7 +69,7 @@ describes.realWin(
       const element = createLightbox();
       env.sandbox.spy(element, 'enqueAction');
       env.sandbox.stub(element, 'getDefaultActionAlias');
-      await dom.whenUpgradedToCustomElement(element);
+      await whenUpgradedToCustomElement(element);
       const impl = await element.getImpl(true);
       impl.getHistory_ = () => {
         return {

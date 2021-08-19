@@ -1,29 +1,14 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
+import {installXhrService} from '#service/xhr-impl';
 
-import {Services} from '../../../src/services';
+import {dev} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {
   ampWorkerForTesting,
   invokeWebWorker,
 } from '../../../src/web-worker/amp-worker';
-import {dev} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {installXhrService} from '../../../src/service/xhr-impl';
 
-describe('invokeWebWorker', () => {
+describes.sandboxed('invokeWebWorker', {}, (env) => {
   let fakeWin;
 
   let ampWorker;
@@ -34,12 +19,12 @@ describe('invokeWebWorker', () => {
   let workerReadyPromise;
 
   beforeEach(() => {
-    window.sandbox.stub(Services, 'ampdocServiceFor').returns({
+    env.sandbox.stub(Services, 'ampdocServiceFor').returns({
       isSingleDoc: () => false,
     });
 
-    postMessageStub = window.sandbox.stub();
-    blobStub = window.sandbox.stub();
+    postMessageStub = env.sandbox.stub();
+    blobStub = env.sandbox.stub();
 
     fakeWorker = {};
     fakeWorker.postMessage = postMessageStub;
@@ -48,13 +33,13 @@ describe('invokeWebWorker', () => {
     fakeWin = {
       Worker: () => fakeWorker,
       Blob: blobStub,
-      URL: {createObjectURL: window.sandbox.stub()},
+      URL: {createObjectURL: env.sandbox.stub()},
       location: window.location,
     };
 
     // Stub xhr.fetchText() to return a resolved promise.
     installXhrService(fakeWin);
-    fetchTextCallStub = window.sandbox
+    fetchTextCallStub = env.sandbox
       .stub(Services.xhrFor(fakeWin), 'fetchText')
       .callsFake(() =>
         Promise.resolve({
@@ -83,7 +68,7 @@ describe('invokeWebWorker', () => {
     return workerReadyPromise.then(() => {
       expect(postMessageStub).to.have.been.calledWithMatch({
         method: 'foo',
-        args: window.sandbox.match(['bar', 123]),
+        args: env.sandbox.match(['bar', 123]),
         id: 0,
       });
 
@@ -195,7 +180,7 @@ describe('invokeWebWorker', () => {
   });
 
   it('should log error when unexpected message is received', () => {
-    const errorStub = window.sandbox.stub(dev(), 'error');
+    const errorStub = env.sandbox.stub(dev(), 'error');
 
     invokeWebWorker(fakeWin, 'foo');
 

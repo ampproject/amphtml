@@ -1,28 +1,12 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import objstr from 'obj-str';
 
-import * as Preact from '../../../src/preact';
-import {WithAmpContext} from '../../../src/preact/context';
-import {animateCollapse, animateExpand} from './animations';
-import {forwardRef} from '../../../src/preact/compat';
-import {omit} from '../../../src/core/types/object';
 import {
   randomIdGenerator,
   sequentialIdGenerator,
-} from '../../../src/utils/id-generator';
+} from '#core/data-structures/id-generator';
+import {omit} from '#core/types/object';
+
+import * as Preact from '#preact';
 import {
   useCallback,
   useContext,
@@ -32,9 +16,12 @@ import {
   useMemo,
   useRef,
   useState,
-} from '../../../src/preact';
+} from '#preact';
+import {forwardRef} from '#preact/compat';
+import {WithAmpContext} from '#preact/context';
+
+import {animateCollapse, animateExpand} from './animations';
 import {useStyles} from './component.jss';
-import objstr from 'obj-str';
 
 const AccordionContext = Preact.createContext(
   /** @type {AccordionDef.AccordionContext} */ ({})
@@ -55,15 +42,15 @@ const generateRandomId = randomIdGenerator(100000);
 
 /**
  * @param {!AccordionDef.AccordionProps} props
- * @param {{current: (!AccordionDef.AccordionApi|null)}} ref
+ * @param {{current: ?AccordionDef.AccordionApi}} ref
  * @return {PreactDef.Renderable}
  */
 function AccordionWithRef(
   {
-    as: Comp = 'section',
-    expandSingleSection = false,
     animate = false,
+    as: Comp = 'section',
     children,
+    expandSingleSection = false,
     id,
     ...rest
   },
@@ -260,11 +247,11 @@ function setExpanded(id, value, expandedMap, expandSingleSection) {
  * @return {PreactDef.Renderable}
  */
 export function AccordionSection({
-  as: Comp = 'section',
-  expanded: defaultExpanded = false,
   animate: defaultAnimate = false,
-  id: propId,
+  as: Comp = 'section',
   children,
+  expanded: defaultExpanded = false,
+  id: propId,
   onExpandStateChange,
   ...rest
 }) {
@@ -276,11 +263,11 @@ export function AccordionSection({
   const [headerIdState, setHeaderIdState] = useState(null);
 
   const {
-    registerSection,
     animate: contextAnimate,
     isExpanded,
-    toggleExpanded,
     prefix,
+    registerSection,
+    toggleExpanded,
   } = useContext(AccordionContext);
 
   const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
@@ -351,20 +338,15 @@ export function AccordionSection({
  */
 export function AccordionHeader({
   as: Comp = 'div',
-  role = 'button',
-  className = '',
-  tabIndex = 0,
-  id,
   children,
+  className = '',
+  id,
+  role = 'button',
+  tabIndex = 0,
   ...rest
 }) {
-  const {
-    contentId,
-    headerId,
-    expanded,
-    toggleHandler,
-    setHeaderId,
-  } = useContext(SectionContext);
+  const {contentId, expanded, headerId, setHeaderId, toggleHandler} =
+    useContext(SectionContext);
   const classes = useStyles();
 
   useLayoutEffect(() => {
@@ -395,17 +377,16 @@ export function AccordionHeader({
  */
 export function AccordionContent({
   as: Comp = 'div',
-  role = 'region',
+  children,
   className = '',
   id,
-  children,
+  role = 'region',
   ...rest
 }) {
   const ref = useRef(null);
   const hasMountedRef = useRef(false);
-  const {contentId, headerId, expanded, animate, setContentId} = useContext(
-    SectionContext
-  );
+  const {animate, contentId, expanded, headerId, setContentId} =
+    useContext(SectionContext);
   const classes = useStyles();
 
   useEffect(() => {

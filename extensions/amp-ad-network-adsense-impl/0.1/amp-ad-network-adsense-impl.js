@@ -1,34 +1,14 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 // Because AdSense and DoubleClick are both operated by Google and their A4A
 // implementations share some behavior in common, part of the logic for this
 // implementation is located in the ads/google/a4a directory rather than here.
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
-import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
-import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
-import {AdsenseSharedState} from './adsense-shared-state';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
-  CONSENT_POLICY_STATE,
-  CONSENT_STRING_TYPE,
-} from '../../../src/core/constants/consent-state';
-import {Navigation} from '../../../src/service/navigation';
+  addAmpExperimentIdToElement,
+  addExperimentIdToElement,
+  isInManualExperiment,
+} from '#ads/google/a4a/traffic-experiments';
 import {
   QQID_HEADER,
   SANDBOX_HEADER,
@@ -45,31 +25,42 @@ import {
   isCdnProxy,
   isReportingEnabled,
   maybeAppendErrorParameter,
-} from '../../../ads/google/a4a/utils';
-import {ResponsiveState} from './responsive-state';
-import {STICKY_AD_TRANSITION_EXP} from '../../../ads/google/a4a/sticky-ad-transition-exp';
-import {Services} from '../../../src/services';
-import {StoryAdPlacements} from '../../../src/experiments/story-ad-placements';
+  maybeInsertOriginTrialToken,
+} from '#ads/google/a4a/utils';
+
 import {
-  addAmpExperimentIdToElement,
-  addExperimentIdToElement,
-  isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
-import {computedStyle, setStyles} from '../../../src/style';
-import {dev, devAssert, user} from '../../../src/log';
-import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load';
-import {getData} from '../../../src/event-helper';
-import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '#core/constants/consent-state';
+import {removeElement} from '#core/dom';
+import {domFingerprintPlain} from '#core/dom/fingerprint';
+import {computedStyle, setStyles} from '#core/dom/style';
+import {stringHash32} from '#core/types/string';
+import {utf8Decode} from '#core/types/string/bytes';
+
 import {
   getExperimentBranch,
   randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
-import {getMode} from '../../../src/mode';
+} from '#experiments';
+import {ADS_INITIAL_INTERSECTION_EXP} from '#experiments/ads-initial-intersection-exp';
+import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
+import {StoryAdPlacements} from '#experiments/story-ad-placements';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
+
+import {Services} from '#service';
+import {Navigation} from '#service/navigation';
+
+import {AdsenseSharedState} from './adsense-shared-state';
+import {ResponsiveState} from './responsive-state';
+
+import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
+import {getData} from '../../../src/event-helper';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {removeElement} from '../../../src/dom';
-import {stringHash32} from '../../../src/core/types/string';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {dev, devAssert, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
+import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
@@ -182,6 +173,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   */
   buildCallback() {
     super.buildCallback();
+    maybeInsertOriginTrialToken(this.win);
     this.identityTokenPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() =>
@@ -231,24 +223,17 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * @visibleForTesting
    */
   divertExperiments() {
-    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
-      {
-        experimentId: STICKY_AD_TRANSITION_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          STICKY_AD_TRANSITION_EXP.control,
-          STICKY_AD_TRANSITION_EXP.experiment,
-        ],
-      },
-      {
-        experimentId: ADS_INITIAL_INTERSECTION_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          ADS_INITIAL_INTERSECTION_EXP.control,
-          ADS_INITIAL_INTERSECTION_EXP.experiment,
-        ],
-      },
-    ]);
+    const experimentInfoList =
+      /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+        {
+          experimentId: ADS_INITIAL_INTERSECTION_EXP.id,
+          isTrafficEligible: () => true,
+          branches: [
+            ADS_INITIAL_INTERSECTION_EXP.control,
+            ADS_INITIAL_INTERSECTION_EXP.experiment,
+          ],
+        },
+      ]);
     const setExps = randomlySelectUnsetExperiments(
       this.win,
       experimentInfoList
@@ -256,10 +241,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     Object.keys(setExps).forEach((expName) =>
       addExperimentIdToElement(setExps[expName], this.element)
     );
-    const moduleNomoduleExpId = this.getModuleNomoduleExpIds_();
-    if (moduleNomoduleExpId) {
-      addExperimentIdToElement(moduleNomoduleExpId, this.element);
-    }
 
     const ssrExpIds = this.getSsrExpIds_();
     for (let i = 0; i < ssrExpIds.length; i++) {
@@ -272,6 +253,22 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     );
     if (storyAdPlacementsExpId) {
       addExperimentIdToElement(storyAdPlacementsExpId, this.element);
+    }
+
+    const autoAdvanceExpBranch = getExperimentBranch(
+      this.win,
+      StoryAdAutoAdvance.ID
+    );
+    if (autoAdvanceExpBranch) {
+      addExperimentIdToElement(autoAdvanceExpBranch, this.element);
+    }
+
+    const storyAdSegmentBranch = getExperimentBranch(
+      this.win,
+      StoryAdSegmentExp.ID
+    );
+    if (storyAdSegmentBranch) {
+      addExperimentIdToElement(storyAdSegmentBranch, this.element);
     }
   }
 
@@ -416,7 +413,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // create ad.
       'pwprc': this.element.getAttribute('data-package'),
       'spsa': this.isSinglePageStoryAd
-        ? `${viewportSize.width}x${viewportSize.height}`
+        ? `${this.size_.width}x${this.size_.height}`
         : null,
     };
 

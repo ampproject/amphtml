@@ -1,58 +1,47 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust} from '#core/constants/action-constants';
+import {bezierCurve} from '#core/data-structures/curve';
+import {dispatchCustomEvent} from '#core/dom';
+import {Layout} from '#core/dom/layout';
+import {layoutRectFromDomRect, layoutRectLtwh} from '#core/dom/layout/rect';
+import {
+  observeContentSize,
+  unobserveContentSize,
+} from '#core/dom/layout/size-observer';
+import {realChildElements} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
+import {px, scale, setStyles, translate} from '#core/dom/style';
+import {numeric} from '#core/dom/transition';
+import {boundValue, distance, magnitude} from '#core/math';
+import {dict} from '#core/types/object';
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
-import {Animation} from '../../../src/animation';
+import {Services} from '#service';
+
 import {CSS} from '../../../build/amp-pan-zoom-0.1.css';
+import {Animation} from '../../../src/animation';
+import {createCustomEvent, listen} from '../../../src/event-helper';
+import {Gestures} from '../../../src/gesture';
 import {
   DoubletapRecognizer,
   PinchRecognizer,
   SwipeXYRecognizer,
   TapRecognizer,
 } from '../../../src/gesture-recognizers';
-import {Gestures} from '../../../src/gesture';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {bezierCurve} from '../../../src/curve';
-import {boundValue, distance, magnitude} from '../../../src/utils/math';
-import {continueMotion} from '../../../src/motion';
-import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {dispatchCustomEvent} from '../../../src/dom';
-import {layoutRectFromDomRect, layoutRectLtwh} from '../../../src/layout-rect';
-import {numeric} from '../../../src/transition';
-import {
-  observeContentSize,
-  unobserveContentSize,
-} from '../../../src/utils/size-observer';
-import {px, scale, setStyles, translate} from '../../../src/style';
+import {continueMotion} from '../../../src/motion';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-pan-zoom';
 const DEFAULT_MAX_SCALE = 3;
 const MAX_ANIMATION_DURATION = 250;
 
-const ELIGIBLE_TAGS = {
-  'svg': true,
-  'DIV': true,
-  'AMP-IMG': true,
-  'AMP-LAYOUT': true,
-  'AMP-SELECTOR': true,
-};
+const ELIGIBLE_TAGS = new Set([
+  'svg',
+  'DIV',
+  'AMP-IMG',
+  'AMP-LAYOUT',
+  'AMP-SELECTOR',
+  'IMG',
+]);
 
 /**
  * @extends {AMP.BaseElement}
@@ -145,13 +134,13 @@ export class AmpPanZoom extends AMP.BaseElement {
     /** @private */
     this.disableDoubleTap_ = false;
 
-    /** @private {UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.unlistenMouseDown_ = null;
 
-    /** @private {UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.unlistenMouseUp_ = null;
 
-    /** @private {UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.unlistenMouseMove_ = null;
 
     /** @private */
@@ -166,7 +155,7 @@ export class AmpPanZoom extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
-    const children = this.getRealChildren();
+    const children = realChildElements(this.element);
 
     userAssert(
       children.length == 1,
@@ -174,7 +163,7 @@ export class AmpPanZoom extends AMP.BaseElement {
       TAG
     );
     userAssert(
-      this.elementIsSupported_(children[0]),
+      ELIGIBLE_TAGS.has(children[0].tagName),
       '%s is not supported by %s',
       children[0].tagName,
       TAG
@@ -266,23 +255,14 @@ export class AmpPanZoom extends AMP.BaseElement {
   }
 
   /**
-   * Checks to see if an element is supported.
-   * @param {Element} element
-   * @return {boolean}
-   * @private
-   */
-  elementIsSupported_(element) {
-    return ELIGIBLE_TAGS[element.tagName];
-  }
-
-  /**
    * Creates zoom buttoms
    * @private
    */
   createZoomButton_() {
-    this.zoomButton_ = this.element.ownerDocument.createElement('div');
-    this.zoomButton_.classList.add('amp-pan-zoom-in-icon');
-    this.zoomButton_.classList.add('amp-pan-zoom-button');
+    this.zoomButton_ = htmlFor(
+      this.element
+    )`<div class='amp-pan-zoom-in-icon amp-pan-zoom-button'></div>`;
+
     this.zoomButton_.addEventListener('click', () => {
       if (this.zoomButton_.classList.contains('amp-pan-zoom-in-icon')) {
         this.transform(0, 0, this.maxScale_);
@@ -351,7 +331,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * @private
    */
   updateMaxScale_(sourceAspectRatio) {
-    const {width, height} = this.elementBox_;
+    const {height, width} = this.elementBox_;
     const elementBoxRatio = width / height;
     const maxScale = Math.max(
       elementBoxRatio / sourceAspectRatio,
@@ -478,7 +458,7 @@ export class AmpPanZoom extends AMP.BaseElement {
 
   /**
    * Unlisten a listener and clear. If null, does nothing
-   * @param {UnlistenDef|null} handle
+   * @param {?UnlistenDef} handle
    * @private
    */
   unlisten_(handle) {
@@ -738,12 +718,12 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   updatePanZoomBounds_(scale) {
     const {
-      width: cWidth,
-      left: xOffset,
       height: cHeight,
+      left: xOffset,
       top: yOffset,
+      width: cWidth,
     } = this.contentBox_;
-    const {width: eWidth, height: eHeight} = this.elementBox_;
+    const {height: eHeight, width: eWidth} = this.elementBox_;
 
     this.minX_ = Math.min(0, eWidth - (xOffset + (cWidth * (scale + 1)) / 2));
     this.maxX_ = Math.max(0, (cWidth * scale - cWidth) / 2 - xOffset);
@@ -757,7 +737,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * @private
    */
   updatePanZoom_() {
-    const {scale_: s, posX_: x, posY_: y, content_: content} = this;
+    const {content_: content, posX_: x, posY_: y, scale_: s} = this;
     return this.mutateElement(() => {
       setStyles(dev().assertElement(content), {
         transform: translate(x, y) + ' ' + scale(s),
@@ -864,7 +844,7 @@ export class AmpPanZoom extends AMP.BaseElement {
     if (dir == 0) {
       return Promise.resolve();
     }
-    const {width, height} = this.elementBox_;
+    const {height, width} = this.elementBox_;
     const dist = magnitude(deltaX, deltaY);
     const newScale = this.startScale_ * (1 + (dir * dist) / 100);
     const deltaCenterX = width / 2 - this.getOffsetX_(centerClientX);

@@ -1,20 +1,4 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview This file contains all the globs required for babel
  * transformation and for closure compilation. Try and maintain the glob
  * for both the babel and closure sources to be as close as possible.
@@ -24,7 +8,6 @@ const COMMON_GLOBS = [
   'third_party/amp-toolbox-cache-url/**/*.js',
   'third_party/caja/html-sanitizer.js',
   'third_party/closure-library/sha384-generated.js',
-  'third_party/closure-responding-channel/closure-bundle.js',
   'third_party/css-escape/css-escape.js',
   'third_party/d3/**/*.js',
   'third_party/fuzzysearch/index.js',
@@ -35,7 +18,6 @@ const COMMON_GLOBS = [
   'third_party/set-dom/set-dom.js',
   'third_party/subscriptions-project/*.js',
   'third_party/timeagojs/**/*.js',
-  'third_party/vega/**/*.js',
   'third_party/webcomponentsjs/ShadowCSS.js',
   'third_party/zuho/**/*.js',
   'node_modules/dompurify/package.json',
@@ -57,6 +39,8 @@ const COMMON_GLOBS = [
   'node_modules/web-activities/activity-ports.js',
   'node_modules/@ampproject/animations/package.json',
   'node_modules/@ampproject/animations/dist/animations.mjs',
+  'node_modules/@ampproject/bento-compiler/package.json',
+  'node_modules/@ampproject/bento-compiler/dist/index.js',
   'node_modules/@ampproject/toolbox-cache-url/package.json',
   'node_modules/@ampproject/toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js',
   'node_modules/@ampproject/viewer-messaging/package.json',
@@ -70,6 +54,7 @@ const COMMON_GLOBS = [
   'node_modules/preact/hooks/dist/*.js',
   'node_modules/preact/compat/package.json',
   'node_modules/preact/compat/dist/*.js',
+  'node_modules/@babel/runtime/helpers/*.js',
 ];
 
 /**
@@ -114,6 +99,8 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-animation/**/*.js',
   // Needed for amp-carousel 0.2, amp-inline-gallery, amp-stream-gallery
   'extensions/amp-base-carousel/**/*.js',
+  // amp-brightcove 0.1 and 1.0 share this file.
+  'extensions/amp-brightcove/brightcove-api.js',
   // Needed for carousel autolightbox
   'extensions/amp-lightbox-gallery/1.0/*.js',
   // Needed for amp-lightbox-gallery using amp-lightbox
@@ -124,8 +111,10 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-experiment/**/*.js',
   // Needed to access form impl from other extensions
   'extensions/amp-form/**/*.js',
-  // Needed by amp-facebook-* for the loader logo
+  // Needed by amp-facebook-* for the loader logo and base implementations
   'extensions/amp-facebook/0.1/facebook-loader.js',
+  'extensions/amp-facebook/1.0/facebook-base-element.js',
+  'extensions/amp-facebook/1.0/component.js',
   // Needed to access inputmask impl from other extensions
   'extensions/amp-inputmask/**/*.js',
   // Needed for AccessService
@@ -140,8 +129,10 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-user-notification/**/*.js',
   // Needed for video components in Bento.
   'extensions/amp-video/1.0/**/*.js',
-  // Needed for VideoService
-  'extensions/amp-video-service/**/*.js',
+  // amp-video-iframe 0.1 and 1.0 share this file.
+  'extensions/amp-video-iframe/amp-video-iframe-api.js',
+  // amp-vimeo 0.1 and 1.0 share this file.
+  'extensions/amp-vimeo/vimeo-api.js',
   // Needed to access ConsentPolicyManager from other extensions
   'extensions/amp-consent/**/*.js',
   // Needed to access AmpGeo type for service locator
@@ -153,7 +144,7 @@ const CLOSURE_SRC_GLOBS = [
   '!third_party/babel/custom-babel-helpers.js',
   // Exclude since it's not part of the runtime/extension binaries.
   '!extensions/amp-access/0.1/amp-login-done.js',
-  'builtins/**.js',
+  'builtins/**/*.js',
   // 'node_modules/core-js/modules/**.js',
   // Not sure what these files are, but they seem to duplicate code
   // one level below and confuse the compiler.

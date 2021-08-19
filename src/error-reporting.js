@@ -1,37 +1,28 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {AmpEvents} from './core/constants/amp-events';
-import {Services} from './services';
+import {AmpEvents} from '#core/constants/amp-events';
+import {duplicateErrorIfNecessary} from '#core/error';
 import {
   USER_ERROR_SENTINEL,
-  dev,
-  isUserErrorEmbed,
+  isUserErrorEmbedMessage,
   isUserErrorMessage,
-} from './log';
-import {dict} from './core/types/object';
-import {duplicateErrorIfNecessary} from './core/error';
-import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
-import {exponentialBackoff} from './exponential-backoff';
-import {getMode} from './mode';
-import {isLoadErrorMessage} from './event-helper';
-import {isProxyOrigin} from './url';
-import {makeBodyVisibleRecovery} from './style-installer';
+} from '#core/error/message-helpers';
+import * as mode from '#core/mode';
+import {findIndex} from '#core/types/array';
+import {exponentialBackoff} from '#core/types/function/exponential-backoff';
+import {dict} from '#core/types/object';
+
+import {experimentTogglesOrNull, getBinaryType, isCanary} from '#experiments';
+
+import {Services} from '#service';
+
 import {triggerAnalyticsEvent} from './analytics';
 import {urls} from './config';
+import {isLoadErrorMessage} from './event-helper';
+import {dev, setReportError} from './log';
+import {getMode} from './mode';
+import {makeBodyVisibleRecovery} from './style-installer';
+import {isProxyOrigin} from './url';
+
+export {setReportError};
 
 /**
  * @const {string}
@@ -118,13 +109,6 @@ function tryJsonStringify(value) {
 }
 
 /**
- * The true JS engine, as detected by inspecting an Error stack. This should be
- * used with the userAgent to tell definitely. I.e., Chrome on iOS is really a
- * Safari JS engine.
- */
-let detectedJsEngine;
-
-/**
  * @param {!Window} win
  * @param {*} error
  * @param {!Element=} opt_associatedElement
@@ -135,7 +119,7 @@ export function reportErrorForWin(win, error, opt_associatedElement) {
     error &&
     !!win &&
     isUserErrorMessage(error.message) &&
-    !isUserErrorEmbed(error.message)
+    !isUserErrorEmbedMessage(error.message)
   ) {
     reportErrorToAnalytics(/** @type {!Error} */ (error), win);
   }
@@ -183,6 +167,15 @@ export function reportError(error, opt_associatedElement) {
     }
     error.reported = true;
 
+    // `associatedElement` is used to add the i-amphtml-error class; in
+    // `#development=1` mode, it also adds `i-amphtml-element-error` to the
+    // element and sets the `error-message` attribute.
+    if (error.messageArray) {
+      const elIndex = findIndex(error.messageArray, (item) => item?.tagName);
+      if (elIndex > -1) {
+        error.associatedElement = error.messageArray[elIndex];
+      }
+    }
     // Update element.
     const element = opt_associatedElement || error.associatedElement;
     if (element && element.classList) {
@@ -206,7 +199,7 @@ export function reportError(error, opt_associatedElement) {
       } else {
         if (element) {
           output.call(console, error.message, element);
-        } else if (!getMode().minified) {
+        } else if (!mode.isMinified()) {
           output.call(console, error.stack);
         } else {
           output.call(console, error.message);
@@ -357,7 +350,7 @@ function onError(message, filename, line, col, error) {
 
 /**
  * Determines the error reporting endpoint which should be used.
- * If changing this URL, keep `/spec/amp-errors.md` in sync.
+ * If changing this URL, keep `docs/spec/amp-errors.md` in sync.
  * @return {string} error reporting endpoint URL.
  */
 function chooseReportingUrl_() {
@@ -445,7 +438,6 @@ export function errorReportingDataForViewer(errorReportData) {
     'ex': errorReportData['ex'], // expected error?
     'v': errorReportData['v'], // runtime
     'pt': errorReportData['pt'], // is pre-throttled
-    'jse': errorReportData['jse'], // detectedJsEngine
   });
 }
 
@@ -551,7 +543,7 @@ export function getErrorReportData(
   if (IS_SXG) {
     runtime = 'sxg';
     data['sxg'] = '1';
-  } else if (IS_ESM) {
+  } else if (mode.isEsm()) {
     runtime = 'esm';
     data['esm'] = '1';
   } else if (self.context && self.context.location) {
@@ -596,11 +588,6 @@ export function getErrorReportData(
       data['mso'] = messagingOrigin;
     }
   }
-
-  if (!detectedJsEngine) {
-    detectedJsEngine = detectJsEngineFromStack();
-  }
-  data['jse'] = detectedJsEngine;
 
   const exps = [];
   const experiments = experimentTogglesOrNull(self);
@@ -673,56 +660,6 @@ export function detectNonAmpJs(win) {
  */
 export function resetAccumulatedErrorMessagesForTesting() {
   accumulatedErrorMessages = [];
-}
-
-/**
- * Does a series of checks on the stack of an thrown error to determine the
- * JS engine that is currently running. This gives a bit more information than
- * just the UserAgent, since browsers often allow overriding it to "emulate"
- * mobile.
- * @return {string}
- * @visibleForTesting
- */
-export function detectJsEngineFromStack() {
-  /** @constructor */
-  function Fn() {}
-  Fn.prototype.t = function () {
-    throw new Error('message');
-  };
-  const object = new Fn();
-  try {
-    object.t();
-  } catch (e) {
-    const {stack} = e;
-
-    // Safari 12 and under only mentions the method name.
-    if (stack.startsWith('t@')) {
-      return 'Safari';
-    }
-
-    // Firefox mentions "prototype".
-    if (stack.indexOf('.prototype.t@') > -1) {
-      return 'Firefox';
-    }
-
-    // IE looks like Chrome, but includes a context for the base stack line.
-    // Explicitly, we're looking for something like:
-    // "    at Global code (https://example.com/app.js:1:200)" or
-    // "    at Anonymous function (https://example.com/app.js:1:200)"
-    // vs Chrome which has:
-    // "    at https://example.com/app.js:1:200"
-    const last = stack.split('\n').pop();
-    if (/\bat .* \(/i.test(last)) {
-      return 'IE';
-    }
-
-    // Finally, chrome includes the error message in the stack.
-    if (stack.startsWith('Error: message')) {
-      return 'Chrome';
-    }
-  }
-
-  return 'unknown';
 }
 
 /**

@@ -1,27 +1,14 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {getDataParamsFromAttributes} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {dict} from '#core/types/object';
 
-import {PauseHelper} from '../../../src/utils/pause-helper';
-import {Services} from '../../../src/services';
-import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/core/types/object';
-import {getDataParamsFromAttributes} from '../../../src/dom';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {setIsMediaComponent} from '../../../src/video-interface';
+import {Services} from '#service';
+
 import {userAssert} from '../../../src/log';
+import {addParamsToUrl} from '../../../src/url';
+import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpKaltura extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -102,7 +89,7 @@ class AmpKaltura extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.element.appendChild(iframe);
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
@@ -124,8 +111,20 @@ class AmpKaltura extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.win.document.createElement('amp-img');
-    this.propagateAttributes(['aria-label'], placeholder);
+    const placeholder = this.win.document.createElement('img');
+    propagateAttributes(['aria-label'], this.element, placeholder);
+    applyFillContent(placeholder);
+    placeholder.setAttribute('loading', 'lazy');
+    placeholder.setAttribute('placeholder', '');
+    placeholder.setAttribute('referrerpolicy', 'origin');
+    if (placeholder.hasAttribute('aria-label')) {
+      placeholder.setAttribute(
+        'alt',
+        'Loading video - ' + placeholder.getAttribute('aria-label')
+      );
+    } else {
+      placeholder.setAttribute('alt', 'Loading video');
+    }
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
     let src = `https://${encodeURIComponent(
@@ -140,17 +139,6 @@ class AmpKaltura extends AMP.BaseElement {
       src += `/height/${height}`;
     }
     placeholder.setAttribute('src', src);
-    placeholder.setAttribute('layout', 'fill');
-    placeholder.setAttribute('placeholder', '');
-    placeholder.setAttribute('referrerpolicy', 'origin');
-    if (placeholder.hasAttribute('aria-label')) {
-      placeholder.setAttribute(
-        'alt',
-        'Loading video - ' + placeholder.getAttribute('aria-label')
-      );
-    } else {
-      placeholder.setAttribute('alt', 'Loading video');
-    }
     return placeholder;
   }
 

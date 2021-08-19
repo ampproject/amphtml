@@ -19,7 +19,7 @@ FAIL
 |    Tests for the amp-story tag.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <title>STAMP examples</title>
@@ -29,7 +29,7 @@ FAIL
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
 >>   ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-deprecated.html:29:2 The attribute 'src' in tag 'amp-story extension script' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-story-0.1.js'. (see https://amp.dev/documentation/components/amp-story)
+amp-story/1.0/test/validator-amp-story-deprecated.html:29:2 The extension 'amp-story' is referenced at version '0.1' which is an invalid version. Please use a valid version of this extension. (see https://amp.dev/documentation/components/amp-story)
 |  </head>
 |  <body>
 |    <amp-story standalone bookend-config-src="./bookend-config-src.json" background-audio="path/to/my.mp3">

@@ -6,22 +6,6 @@ teaser:
   text: A single layer of a single page of an AMP story that positions its content in a grid-based layout.
 ---
 
-<!--
-Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-story-grid-layer
 
 ## Usage
@@ -403,11 +387,11 @@ Example:
 
 #### Modern aspect-ratio
 
-Responsive presets on grid-layers maximize usable screen space and scale assets consistently.
+Responsive presets on grid-layers maximize usable screen space for foreground elements and scale assets consistently.
 
 ```html
 <amp-story-grid-layer preset="2021-background" template="fill">
-    <amp-img src="cat.jpg" alt="...">
+    <amp-img src="cat.jpg" layout="fill" alt="...">
 </amp-story-grid-layer>
 <amp-story-grid-layer preset="2021-foreground">
     <h1>This will stay consistent with the bg</h1>
@@ -424,18 +408,22 @@ The background preset is mostly useful for designing layouts with both backgroun
 
 ##### Foreground
 
-Use the `2021-foreground` preset for foreground elements. This anchors foreground layers to pin items, such as logos or footnotes, to the page corners or borders.
+Use the `2021-foreground` preset for foreground elements. This layer will always be fully visible and expand to the borders either horizontally or vertically, maximizing the size without cropping. The attribute `anchor` can be used to pin foreground layers to the page corners or borders, such that elements can be positioned relative to those borders or corners (which is useful for logos or footnotes).
 
 ##### Background
 
-Use the `2021-background` preset for the background layer. This preset covers the entire screen on all mobile devices with the background asset. It does so without letterboxing and keeps scaling consistent with the foreground elements.
+Use the `2021-background` preset for the background layer. This preset covers the entire screen on most mobile phones with the background asset. It does so without letterboxing, and keeps positioning consistent with the foreground elements.
 While this technique provides the most consistent user experience, it may crop up to 7% of one or all borders of your background. Keep this in mind when designing and picking your assets.
 
-<div layout="container" width="3" height="2">
+[tip type="warning"]
+This preset may show letterboxing on devices that don't have conventional phone screen sizes, such as tablets or foldable phones. You may change the background color of your pages to match the background for the best visual outcome.
+[/tip]
+
+<amp-layout layout="container" width="3" height="2">
   <div style="width:33%;display:inline-block">
     <amp-img src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/preset_story_scaled.gif" layout="responsive" alt="Animation showing how a perfectly scaled with a 7.2% bleed-area adapts to different screen aspect ratios, always keeping content visible" width="200" height="350"/>
   </div>
   <div style="width:66%;display:inline-block">
     <amp-img src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/preset_story_anchor.gif" layout="responsive" alt="Animation showing a background that remains anchored to the bottom of the viewport, regardless of screen aspect ratio/height" width="500" height="400"/>
   </div>
-</div>
+</amp-layout>

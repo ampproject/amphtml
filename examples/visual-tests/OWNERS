@@ -4,12 +4,7 @@
 {
   rules: [
     {
-      owners: [
-        {name: 'danielrozenberg'},
-        {name: 'erwinmombay'},
-        {name: 'estherkim'},
-        {name: 'rsimha'},
-      ],
+      owners: [{name: 'ampproject/wg-infra'}],
     },
   ],
 }

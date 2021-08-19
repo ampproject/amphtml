@@ -1,79 +1,64 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {ActionTrust} from '../../../src/core/constants/action-constants';
-import {AmpEvents} from '../../../src/core/constants/amp-events';
-import {AmpFormTextarea} from './amp-form-textarea';
+import {ActionTrust} from '#core/constants/action-constants';
+import {AmpEvents} from '#core/constants/amp-events';
 import {
   AsyncInputAttributes,
   AsyncInputClasses,
-} from '../../../src/async-input';
-import {CSS} from '../../../build/amp-form-0.1.css';
-import {Deferred, tryResolve} from '../../../src/core/data-structures/promise';
+} from '#core/constants/async-input';
+import {Keys} from '#core/constants/key-codes';
+import {Deferred, tryResolve} from '#core/data-structures/promise';
+import {
+  createElementWithAttributes,
+  iterateCursor,
+  removeElement,
+  tryFocus,
+} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {
+  formOrNullForElement,
+  getFormAsObject,
+  setFormForElement,
+} from '#core/dom/form';
+import {ancestorElementsByTag, childElementByAttr} from '#core/dom/query';
+import {isArray, toArray} from '#core/types/array';
+import {deepMerge, dict} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
+import {parseQueryString} from '#core/types/string/url';
+import {toWin} from '#core/window';
+
+import {Services} from '#service';
+
+import {AmpFormTextarea} from './amp-form-textarea';
+import {FormDirtiness} from './form-dirtiness';
+import {FormEvents} from './form-events';
+import {installFormProxy} from './form-proxy';
+import {FormSubmitService} from './form-submit-service';
+import {getFormValidator, isCheckValiditySupported} from './form-validators';
 import {
   FORM_VERIFY_OPTOUT,
   FORM_VERIFY_PARAM,
   getFormVerifier,
 } from './form-verifiers';
-import {FormDirtiness} from './form-dirtiness';
-import {FormEvents} from './form-events';
-import {FormSubmitService} from './form-submit-service';
-import {Keys} from '../../../src/core/constants/key-codes';
+
+import {CSS} from '../../../build/amp-form-0.1.css';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {createCustomEvent} from '../../../src/event-helper';
+import {createFormDataWrapper} from '../../../src/form-data-wrapper';
+import {isAmp4Email} from '../../../src/format';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
+import {installStylesForDoc} from '../../../src/style-installer';
 import {
   SOURCE_ORIGIN_PARAM,
   addParamsToUrl,
   isProxyOrigin,
-  parseQueryString,
   serializeQueryString,
 } from '../../../src/url';
-import {Services} from '../../../src/services';
-import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
-import {
-  ancestorElementsByTag,
-  childElementByAttr,
-  createElementWithAttributes,
-  iterateCursor,
-  removeElement,
-  tryFocus,
-} from '../../../src/dom';
-import {createCustomEvent} from '../../../src/event-helper';
-import {createFormDataWrapper} from '../../../src/form-data-wrapper';
-import {deepMerge, dict} from '../../../src/core/types/object';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {
-  formOrNullForElement,
-  getFormAsObject,
-  setFormForElement,
-} from '../../../src/form';
-import {getFormValidator, isCheckValiditySupported} from './form-validators';
-import {getMode} from '../../../src/mode';
-import {installFormProxy} from './form-proxy';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {isAmp4Email} from '../../../src/format';
-import {isArray, toArray} from '../../../src/core/types/array';
 import {
   setupAMPCors,
   setupInit,
   setupInput,
 } from '../../../src/utils/xhr-utils';
-
-import {toWin} from '../../../src/types';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryParseJson} from '../../../src/json';
 
 /** @const {string} */
 const TAG = 'amp-form';
@@ -445,7 +430,7 @@ export class AmpForm {
     if (!this.ssrTemplateHelper_.isEnabled()) {
       this.form_.addEventListener('change', (e) => {
         this.verifier_.onCommit().then((updatedErrors) => {
-          const {updatedElements, errors} = updatedErrors;
+          const {errors, updatedElements} = updatedErrors;
           updatedElements.forEach(checkUserValidityAfterInteraction_);
           // Tell the validation to reveal any input.validationMessage added
           // by the form verifier.
@@ -1407,8 +1392,9 @@ export class AmpForm {
     const queryParams = parseQueryString(this.win_.location.search);
     Object.keys(queryParams).forEach((key) => {
       // Typecast since Closure is missing NodeList union type in HTMLFormElement.elements.
-      const formControls = /** @type {(!Element|!NodeList)} */ (this.form_
-        .elements[key]);
+      const formControls = /** @type {(!Element|!NodeList)} */ (
+        this.form_.elements[key]
+      );
       if (!formControls) {
         return;
       }

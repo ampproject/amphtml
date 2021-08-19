@@ -1,24 +1,9 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-} from './core/constants/consent-state';
-import {Services} from './services';
-import {dict} from './core/types/object';
+} from '#core/constants/consent-state';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
 
 /**
  * Returns a promise that resolve when all consent state the policy wait
@@ -118,13 +103,15 @@ export function getConsentDataToForward(element, opt_policyId) {
     if (!policy) {
       return gettersOrNull;
     }
-    return /** @type {!JsonObject} */ (Promise.all(
-      Object.keys(gettersOrNull).map((key) =>
-        gettersOrNull[key]
-          .call(policy, opt_policyId || 'default')
-          .then((value) => ({[key]: value}))
-      )
-    ).then((objs) => Object.assign.apply({}, objs)));
+    return /** @type {!JsonObject} */ (
+      Promise.all(
+        Object.keys(gettersOrNull).map((key) =>
+          gettersOrNull[key]
+            .call(policy, opt_policyId || 'default')
+            .then((value) => ({[key]: value}))
+        )
+      ).then((objs) => Object.assign.apply({}, objs))
+    );
   });
 }
 

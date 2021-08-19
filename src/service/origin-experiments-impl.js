@@ -1,25 +1,14 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {parseJson} from '#core/types/object/json';
+import {bytesToString, stringToBytes} from '#core/types/string/bytes';
 
-import {Services} from '../services';
-import {bytesToString, stringToBytes} from '../utils/bytes';
-import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
-import {getSourceOrigin} from '../url';
-import {parseJson} from '../json';
+import {Services} from '#service';
+
 import {user} from '../log';
+import {
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+} from '../service-helpers';
+import {getSourceOrigin} from '../url';
 
 /** @const {string} */
 const TAG = 'OriginExperiments';
@@ -31,8 +20,7 @@ const PUBLIC_JWK = /** @type {!webCrypto.JsonWebKey} */ ({
   'ext': true,
   'key_ops': ['verify'],
   'kty': 'RSA',
-  'n':
-    'uAGSMYKze8Fit508UaGHz1eZowfX4YsA0lmyi-65xQfjF7nMo61c4Iz4erdqgRp-ov662yVPquhPmTxgB-nzNcTPrj15Jo05Js78Q9hS2hrPIjKMlzcKSYQN_08QieWKOSmVbLSv_-4n9Ms5ta8nRs4pwc_2nX5n7m5B5GH4VerGbqIWIn9FRNYMShBRQ9TCHpb6BIUTwUn6iwmJLenq0A1xhGrQ9rswGC1QJhjotkeReKXZDLLWaFr0uRw-IyvRa5RiiEGntgOvcbvamM5TnbKavc2rxvg2TWTCNQnb7lWSAzldJA_yAOYet_MjnHMyj2srUdbQSDCk8kPWWuafiQ',
+  'n': 'uAGSMYKze8Fit508UaGHz1eZowfX4YsA0lmyi-65xQfjF7nMo61c4Iz4erdqgRp-ov662yVPquhPmTxgB-nzNcTPrj15Jo05Js78Q9hS2hrPIjKMlzcKSYQN_08QieWKOSmVbLSv_-4n9Ms5ta8nRs4pwc_2nX5n7m5B5GH4VerGbqIWIn9FRNYMShBRQ9TCHpb6BIUTwUn6iwmJLenq0A1xhGrQ9rswGC1QJhjotkeReKXZDLLWaFr0uRw-IyvRa5RiiEGntgOvcbvamM5TnbKavc2rxvg2TWTCNQnb7lWSAzldJA_yAOYet_MjnHMyj2srUdbQSDCk8kPWWuafiQ',
 });
 
 /**
@@ -297,8 +285,7 @@ export function installOriginExperimentsForDoc(ampdoc) {
  * @return {!OriginExperiments}
  */
 export function originExperimentsForDoc(element) {
-  return /** @type {!OriginExperiments} */ (getServiceForDoc(
-    element,
-    'origin-experiments'
-  ));
+  return /** @type {!OriginExperiments} */ (
+    getServiceForDoc(element, 'origin-experiments')
+  );
 }

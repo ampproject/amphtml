@@ -1,20 +1,4 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-const {resolve, dirname, relative, join} = require('path').posix;
+const {dirname, join, relative, resolve} = require('path').posix;
 
 /**
  * Returns a new Map<string, {detected: boolean, removeable: Array<string>}
@@ -22,7 +6,7 @@ const {resolve, dirname, relative, join} = require('path').posix;
  * value.detected indicates if the callee name (key) was imported into the current module.
  * value.removeable is the array of property names that can be removed.
  * Example: ['dev', {detected: false, removeable: ['fine']}] would mean ... `dev().fine(...)` can be removed.
- * @return {Map<string, {detected: boolean, removeable: Array<string>}}
+ * @return {Map<string, {detected: boolean, removeable: Array<string>}>}
  */
 function defaultCalleeToPropertiesMap() {
   return new Map([
@@ -62,7 +46,7 @@ module.exports = function () {
       },
       ImportDeclaration({node}, state) {
         // Only remove the CallExpressions if this module imported the correct method ('dev') from '/log'.
-        const {specifiers, source} = node;
+        const {source, specifiers} = node;
         if (!source.value.endsWith('/log')) {
           return;
         }

@@ -1,27 +1,8 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../src/preact';
-import {
-  MessageType,
-  ProxyIframeEmbed,
-} from '../../../src/preact/component/3p-frame';
-import {deserializeMessage} from '../../../src/3p-frame-messaging';
-import {forwardRef} from '../../../src/preact/compat';
-import {useCallback, useState} from '../../../src/preact';
+import * as Preact from '#preact';
+import {MessageType, ProxyIframeEmbed} from '#preact/component/3p-frame';
+import {deserializeMessage} from '#core/3p-frame-messaging';
+import {forwardRef} from '#preact/compat';
+import {useCallback, useMemo, useState} from '#preact';
 
 /** @const {string} */
 const TYPE = 'twitter';
@@ -33,8 +14,26 @@ const MATCHES_MESSAGING_ORIGIN = () => true;
  * @param {{current: (!TwitterDef.Api|null)}} ref
  * @return {PreactDef.Renderable}
  */
-function TwitterWithRef({requestResize, title, ...rest}, ref) {
-  const [height, setHeight] = useState(FULL_HEIGHT);
+function TwitterWithRef(
+  {
+    cards,
+    conversation,
+    limit,
+    momentid,
+    options: optionsProps,
+    requestResize,
+    style,
+    timelineScreenName,
+    timelineSourceType,
+    timelineUserId,
+    title,
+    tweetLimit,
+    tweetid,
+    ...rest
+  },
+  ref
+) {
+  const [height, setHeight] = useState(null);
   const messageHandler = useCallback(
     (event) => {
       const data = deserializeMessage(event.data);
@@ -50,6 +49,32 @@ function TwitterWithRef({requestResize, title, ...rest}, ref) {
     },
     [requestResize]
   );
+  const options = useMemo(
+    () => ({
+      cards,
+      conversation,
+      limit,
+      momentid,
+      timelineScreenName,
+      timelineSourceType,
+      timelineUserId,
+      tweetLimit,
+      tweetid,
+      ...optionsProps,
+    }),
+    [
+      cards,
+      conversation,
+      limit,
+      momentid,
+      optionsProps,
+      timelineScreenName,
+      timelineSourceType,
+      timelineUserId,
+      tweetLimit,
+      tweetid,
+    ]
+  );
 
   return (
     <ProxyIframeEmbed
@@ -60,8 +85,9 @@ function TwitterWithRef({requestResize, title, ...rest}, ref) {
       // non-overridable props
       matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
       messageHandler={messageHandler}
+      options={options}
       type={TYPE}
-      wrapperStyle={{height}}
+      style={height ? {...style, height} : style}
     />
   );
 }

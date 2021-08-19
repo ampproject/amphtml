@@ -1,24 +1,9 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Deferred} from '#core/data-structures/promise';
+import {isIframed} from '#core/dom';
+import {memo} from '#core/types/object';
+import {toWin} from '#core/window';
 
-import {Deferred} from '../../../src/core/data-structures/promise';
 import {getMode} from '../../../src/mode';
-import {isIframed} from '../../../src/dom';
-import {memo} from '../../../src/core/types/object';
-import {toWin} from '../../../src/types';
 
 const OBSERVERS_MAP_PROP = '__AMP_A4A_VP_MAP';
 
@@ -59,7 +44,7 @@ function createObserver(win, viewportNum) {
 
   const callback = (records) => {
     for (let i = 0; i < records.length; i++) {
-      const {target: element, isIntersecting} = records[i];
+      const {isIntersecting, target: element} = records[i];
       const deferred = elements.get(element);
       if (deferred && isIntersecting) {
         deferred.resolve();
@@ -70,9 +55,9 @@ function createObserver(win, viewportNum) {
   };
 
   const iframed = isIframed(win);
-  const root = /** @type {?Element} */ (iframed
-    ? /** @type {*} */ (win.document)
-    : null);
+  const root = /** @type {?Element} */ (
+    iframed ? /** @type {*} */ (win.document) : null
+  );
   const observer = new win.IntersectionObserver(callback, {
     root,
     rootMargin: `${(viewportNum - 1) * 100}%`,

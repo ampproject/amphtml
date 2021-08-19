@@ -1,22 +1,6 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {JwtHelper, pemToBytes} from '../jwt';
 
-describe('JwtHelper', () => {
+describes.sandboxed('JwtHelper', {}, (env) => {
   // Generated from https://jwt.io/#debugger
   // Name deliberately changed from "John Doe" to "John ௵Z加䅌ਇ☎Èʘغޝ" to test
   // correct unicode handling on our part.
@@ -171,7 +155,7 @@ describe('JwtHelper', () => {
         importKey: () => {},
         verify: () => {},
       };
-      subtleMock = window.sandbox.mock(subtle);
+      subtleMock = env.sandbox.mock(subtle);
 
       windowApi = {
         crypto: {subtle},
@@ -237,8 +221,8 @@ describe('JwtHelper', () => {
         .withExactArgs(
           {name: 'RSASSA-PKCS1-v1_5'},
           key,
-          /* sig */ window.sandbox.match(() => true),
-          /* verifiable */ window.sandbox.match(() => true)
+          /* sig */ env.sandbox.match(() => true),
+          /* verifiable */ env.sandbox.match(() => true)
         )
         .returns(Promise.resolve(true))
         .once();
@@ -250,10 +234,10 @@ describe('JwtHelper', () => {
 });
 
 // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
-describe
+describes.sandboxed
   .configure()
   .skipSafari()
-  .run('pemToBytes', () => {
+  .run('pemToBytes', {}, () => {
     const PLAIN_TEXT =
       'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdlatRjRjogo3WojgGHFHYLugd' +
       'UWAY9iR3fy4arWNA1KoS8kVw33cJibXr8bvwUAUparCwlvdbH6dvEOfou0/gCFQs' +

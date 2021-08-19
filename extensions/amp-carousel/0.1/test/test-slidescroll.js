@@ -1,29 +1,11 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-carousel';
-import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
-import {Services} from '../../../../src/services';
-import {
-  createElementWithAttributes,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
-import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
+import {ActionService} from '#service/action-impl';
+import {ActionTrust} from '#core/constants/action-constants';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {user} from '../../../../src/log';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 describes.realWin(
   'SlideScroll',
@@ -917,7 +899,7 @@ describes.realWin(
         const ampSlideScroll = await getAmpSlideScroll(false, 3, true, true, 2);
         const impl = await ampSlideScroll.getImpl();
 
-        const removeAutoplaySpy = env.sandbox.spy(impl, 'removeAutoplay');
+        const removeAutoplaySpy = env.sandbox.spy(impl, 'removeAutoplay_');
         impl.showSlide_(1);
         impl.showSlide_(2);
         expect(impl.loopsMade_).to.equal(1);

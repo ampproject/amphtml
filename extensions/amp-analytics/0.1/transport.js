@@ -1,19 +1,3 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   BatchSegmentDef,
   RequestDef,
@@ -22,28 +6,27 @@ import {
   defaultSerializer,
 } from './transport-serializer';
 import {IframeTransport} from './iframe-transport';
-import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
+import {Services} from '#service';
+import {WindowInterface} from '#core/window/interface';
 import {
   assertHttpsUrl,
   checkCorsUrl,
+  isAmpScriptUri,
   parseUrlDeprecated,
 } from '../../../src/url';
 import {createPixel} from '../../../src/pixel';
 import {dev, user, userAssert} from '../../../src/log';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getMode} from '../../../src/mode';
-import {getTopWindow} from '../../../src/service';
+import {getTopWindow} from '../../../src/service-helpers';
+
 import {loadPromise} from '../../../src/event-helper';
-import {removeElement} from '../../../src/dom';
-import {toWin} from '../../../src/types';
-import {toggle} from '../../../src/style';
+import {removeElement} from '#core/dom';
+import {toWin} from '#core/window';
+import {toggle} from '#core/dom/style';
 
 /** @const {string} */
 const TAG_ = 'amp-analytics/transport';
-
-/** @const {string} */
-const AMP_SCRIPT_URI_SCHEME = 'amp-script:';
 
 /**
  * Transport defines the ways how the analytics pings are going to be sent.
@@ -64,9 +47,9 @@ export class Transport {
     this.options_ = options;
 
     /** @private {string|undefined} */
-    this.referrerPolicy_ = /** @type {string|undefined} */ (this.options_[
-      'referrerPolicy'
-    ]);
+    this.referrerPolicy_ = /** @type {string|undefined} */ (
+      this.options_['referrerPolicy']
+    );
 
     // no-referrer is only supported in image transport
     if (this.referrerPolicy_ === 'no-referrer') {
@@ -103,7 +86,7 @@ export class Transport {
       const request = inBatch
         ? serializer.generateBatchRequest(url, segments, withPayload)
         : serializer.generateRequest(url, segments[0], withPayload);
-      if (!request.url.startsWith(AMP_SCRIPT_URI_SCHEME)) {
+      if (!isAmpScriptUri(request.url)) {
         assertHttpsUrl(request.url, 'amp-analytics request');
         checkCorsUrl(request.url);
       }
@@ -223,7 +206,7 @@ export class Transport {
         parseUrlDeprecated(this.win_.location.href).origin,
       'Origin of iframe request must not be equal to the document origin.' +
         ' See https://github.com/ampproject/' +
-        'amphtml/blob/main/spec/amp-iframe-origin-policy.md for details.'
+        'amphtml/blob/main/docs/spec/amp-iframe-origin-policy.md for details.'
     );
 
     /** @const {!Element} */
@@ -245,9 +228,9 @@ export class Transport {
    * @return {!TransportSerializerDef}
    */
   getSerializer_() {
-    return /** @type {!TransportSerializerDef} */ (TransportSerializers[
-      'default'
-    ]);
+    return /** @type {!TransportSerializerDef} */ (
+      TransportSerializers['default']
+    );
   }
 
   /**
@@ -326,33 +309,13 @@ export class Transport {
   /**
    * @param {!AmpDoc} ampdoc
    * @param {!RequestDef} request
-   * @return {boolean} True if this browser supports cross-domain XHR.
+   * @return {!Promise}
    */
   static forwardRequestToAmpScript(ampdoc, request) {
-    userAssert(
-      request.url.startsWith(AMP_SCRIPT_URI_SCHEME),
-      `[${TAG_}]: "amp-script" URL must begin with "amp-script:"`
-    );
-
-    const target = request.url.slice(AMP_SCRIPT_URI_SCHEME.length).split('.');
-    userAssert(
-      target.length === 2 && target[0].length > 0 && target[1].length > 0,
-      `[${TAG_}]: "amp-script" target must be specified as "scriptId.functionIdentifier".`
-    );
-
-    const ampScriptId = target[0];
-    const fnIdentifier = target[1];
-    const ampScriptEl = ampdoc.getElementById(ampScriptId);
-    userAssert(
-      ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
-      `[${TAG_}]: could not find <amp-script> with ID "${ampScriptId}"`
-    );
-
-    ampScriptEl
-      .getImpl()
-      .then((impl) =>
-        impl.callFunction(fnIdentifier, JSON.parse(request.payload))
-      );
+    return Services.scriptForDocOrNull(ampdoc).then((ampScriptService) => {
+      userAssert(ampScriptService, 'AMP-SCRIPT is not installed');
+      ampScriptService.fetch(request.url, JSON.parse(request.payload));
+    });
   }
 }
 

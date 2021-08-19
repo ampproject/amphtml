@@ -1,23 +1,7 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {Side} from './sidebar-config';
-import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
-import {useLayoutEffect, useRef} from '../../../src/preact';
-import {useValueRef} from '../../../src/preact/component';
+import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
+import {useLayoutEffect, useRef} from '#preact';
+import {useValueRef} from '#preact/component';
 
 const ANIMATION_DURATION = 350;
 const ANIMATION_EASE_IN = 'cubic-bezier(0,0,.21,1)';
@@ -49,12 +33,12 @@ function safelySetStyles(element, styles) {
 /**
  * @param {boolean} mounted
  * @param {boolean} opened
- * @param {{current: function|undefined}} onAfterOpen
- * @param {{current: function|undefined}} onAfterClose
+ * @param {{current: function():void} | {current: void}} onAfterOpen
+ * @param {{current: function():void} | {current: void}} onAfterClose
  * @param {string} side
- * @param {{current: Element|null}} sidebarRef
- * @param {{current: Element|null}} backdropRef
- * @param {function} setMounted
+ * @param {{current: (Element|null)}} sidebarRef
+ * @param {{current: (Element|null)}} backdropRef
+ * @param {function():undefined} setMounted
  */
 export function useSidebarAnimation(
   mounted,

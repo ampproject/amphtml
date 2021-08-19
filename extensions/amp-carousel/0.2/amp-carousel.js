@@ -1,36 +1,21 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
-import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
-import {Carousel} from '../../amp-base-carousel/0.1/carousel.js';
+import {Carousel} from '../../amp-base-carousel/0.1/carousel';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {
   closestAncestorElementBySelector,
-  dispatchCustomEvent,
-} from '../../../src/dom';
-import {computedStyle} from '../../../src/style';
+  realChildElements,
+} from '#core/dom/query';
+import {computedStyle} from '#core/dom/style';
 import {createCustomEvent, getDetail, listen} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {htmlFor} from '../../../src/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {dict} from '#core/types/object';
+import {dispatchCustomEvent} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /**
@@ -144,7 +129,7 @@ class AmpCarousel extends AMP.BaseElement {
     this.action_ = Services.actionServiceForDoc(this.element);
 
     const {element, win} = this;
-    const slides = this.getRealChildren();
+    const slides = realChildElements(this.element);
 
     element.appendChild(this.renderContainerDom_());
     this.scrollContainer_ = this.element.querySelector(

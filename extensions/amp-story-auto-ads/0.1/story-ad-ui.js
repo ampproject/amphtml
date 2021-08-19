@@ -1,30 +1,12 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {createElementWithAttributes, iterateCursor} from '#core/dom';
+import {dict, map} from '#core/types/object';
 
-import {assertHttpsUrl} from '../../../src/url';
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
-import {
-  createElementWithAttributes,
-  iterateCursor,
-  openWindowDialog,
-} from '../../../src/dom';
-import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {CSS as ctaButtonCSS} from '../../../build/amp-story-auto-ads-cta-button-0.1.css';
 import {dev, user} from '../../../src/log';
-import {dict, map} from '../../../src/core/types/object';
+import {openWindowDialog} from '../../../src/open-window-dialog';
+import {assertHttpsUrl} from '../../../src/url';
+import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
 /**
  * @typedef {{
@@ -82,7 +64,7 @@ export function getStoryAdMetadataFromDoc(doc) {
   const storyMetaTags = getStoryAdMetaTags(doc);
   const vars = map();
   iterateCursor(storyMetaTags, (tag) => {
-    const {name, content} = tag;
+    const {content, name} = tag;
     if (name.startsWith(CTA_META_PREFIX)) {
       const key = name.split('amp-')[1];
       vars[key] = content;
@@ -111,7 +93,7 @@ export function getStoryAdMetadataFromElement(adElement) {
 /**
  * Returns a boolean indicating if there is sufficent metadata to render CTA.
  * @param {!StoryAdUIMetadata} metadata
- * @param {=boolean} opt_inabox
+ * @param {boolean=} opt_inabox
  * @return {boolean}
  */
 export function validateCtaMetadata(metadata, opt_inabox) {

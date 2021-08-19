@@ -1,23 +1,8 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {handleClick, warmupDynamic, warmupStatic} from '#ads/alp/handler';
 
-import {handleClick, warmupDynamic, warmupStatic} from '../../ads/alp/handler';
 import {parseUrlDeprecated} from '../../src/url';
 
-describe('alp-handler', () => {
+describes.sandboxed('alp-handler', {}, (env) => {
   let event;
   let anchor;
   let open;
@@ -32,32 +17,32 @@ describe('alp-handler', () => {
       Image() {
         image = this;
       },
-      postMessage: window.sandbox.stub(),
+      postMessage: env.sandbox.stub(),
       _id: 'base-win',
     };
     win.parent = {
-      postMessage: window.sandbox.stub(),
+      postMessage: env.sandbox.stub(),
       _id: 'p0',
     };
     win.parent.parent = {
-      postMessage: window.sandbox.stub(),
+      postMessage: env.sandbox.stub(),
       _id: 'p1',
     };
     win.parent.parent.parent = {
-      postMessage: window.sandbox.stub(),
+      postMessage: env.sandbox.stub(),
       _id: 'p2',
     };
     win.parent.parent.parent.parent = {
-      postMessage: window.sandbox.stub(),
+      postMessage: env.sandbox.stub(),
       _id: 'p3',
     };
-    open = window.sandbox.stub(win, 'open').callsFake(() => {
+    open = env.sandbox.stub(win, 'open').callsFake(() => {
       return {};
     });
     const doc = {
       defaultView: win,
       head: {
-        appendChild: window.sandbox.spy(),
+        appendChild: env.sandbox.spy(),
       },
     };
     win.document = doc;
@@ -70,7 +55,7 @@ describe('alp-handler', () => {
           'https://cdn.ampproject.org/c/www.example.com/amp.html'
         ),
       ownerDocument: doc,
-      getAttribute: window.sandbox.stub(),
+      getAttribute: env.sandbox.stub(),
       get search() {
         return parseUrlDeprecated(this.href).search;
       },
@@ -79,7 +64,7 @@ describe('alp-handler', () => {
       trusted: true,
       buttons: 0,
       target: anchor,
-      preventDefault: window.sandbox.spy(),
+      preventDefault: env.sandbox.spy(),
       defaultPrevented: false,
     };
   });
@@ -190,7 +175,7 @@ describe('alp-handler', () => {
   });
 
   it('should perform special navigation if specially asked for', () => {
-    const navigateSpy = window.sandbox.spy();
+    const navigateSpy = env.sandbox.spy();
     const opt_navigate = (val) => {
       navigateSpy();
       expect(val).to.equal(

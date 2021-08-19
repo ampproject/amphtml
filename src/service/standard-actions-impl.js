@@ -1,27 +1,14 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust} from '#core/constants/action-constants';
+import {tryFocus} from '#core/dom';
+import {Layout, getLayoutClass} from '#core/dom/layout';
+import {computedStyle, toggle} from '#core/dom/style';
+import {isFiniteNumber} from '#core/types';
+import {toWin} from '#core/window';
 
-import {ActionTrust} from '../core/constants/action-constants';
-import {Layout, getLayoutClass} from '../layout';
-import {Services} from '../services';
-import {computedStyle, toggle} from '../style';
+import {Services} from '#service';
+
 import {dev, user, userAssert} from '../log';
-import {getAmpdoc, registerServiceBuilderForDoc} from '../service';
-import {isFiniteNumber, toWin} from '../types';
-import {tryFocus} from '../dom';
+import {getAmpdoc, registerServiceBuilderForDoc} from '../service-helpers';
 
 /**
  * @param {!Element} element
@@ -123,7 +110,7 @@ export class StandardActions {
     if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
       return null;
     }
-    const {node, method, args} = invocation;
+    const {args, method, node} = invocation;
     const win = getWin(node);
     switch (method) {
       case 'pushState':
@@ -178,7 +165,7 @@ export class StandardActions {
    * @private Visible to tests only.
    */
   handleNavigateTo_(invocation) {
-    const {node, caller, method, args} = invocation;
+    const {args, caller, method, node} = invocation;
     const win = getWin(node);
     // Some components have additional constraints on allowing navigation.
     let permission = Promise.resolve();

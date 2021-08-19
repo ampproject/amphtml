@@ -1,46 +1,31 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {Animation} from '../../../src/animation';
-import {BaseSlides} from './base-slides';
-import {Keys} from '../../../src/core/constants/key-codes';
-import {Services} from '../../../src/services';
-import {bezierCurve} from '../../../src/curve';
+import {dev, user, userAssert} from '../../../src/log';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
+import {bezierCurve} from '#core/data-structures/curve';
 import {
   closestAncestorElementBySelector,
-  dispatchCustomEvent,
-} from '../../../src/dom';
+  realChildElements,
+} from '#core/dom/query';
 import {createCustomEvent, listen} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {getStyle, setStyle} from '../../../src/style';
-import {isExperimentOn} from '../../../src/experiments';
-import {isFiniteNumber} from '../../../src/types';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {numeric} from '../../../src/transition';
+import {dict} from '#core/types/object';
+import {dispatchCustomEvent} from '#core/dom';
+import {getStyle, setStyle} from '#core/dom/style';
+import {isExperimentOn} from '#experiments';
+import {isFiniteNumber} from '#core/types';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {numeric} from '#core/dom/transition';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
+} from '#core/dom/layout/size-observer';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
+} from '#core/dom/layout/viewport-observer';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {BaseCarousel} from './base-carousel';
 
 /** @const {string} */
 const SHOWN_CSS_CLASS = 'i-amphtml-slide-item-show';
@@ -62,7 +47,7 @@ const CUSTOM_SNAP_TIMEOUT = 100;
 
 const TAG = 'AMP-CAROUSEL';
 
-export class AmpSlideScroll extends BaseSlides {
+export class AmpSlideScroll extends BaseCarousel {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -93,6 +78,33 @@ export class AmpSlideScroll extends BaseSlides {
 
     /** @private {boolean} */
     this.isTouching_ = false;
+
+    /** @private {?number} */
+    this.autoplayTimeoutId_ = null;
+
+    /** @private {boolean} */
+    this.hasLoop_ = false;
+
+    /** @private {boolean} */
+    this.loopAdded_ = false;
+
+    /** @private {boolean} */
+    this.hasAutoplay_ = false;
+
+    /** @private {number} */
+    this.autoplayDelay_ = 5000;
+
+    /** @protected {?number} */
+    this.autoplayLoops_ = null;
+
+    /** @protected {number} */
+    this.loopsMade_ = 0;
+
+    /** @protected {boolean} */
+    this.shouldLoop = false;
+
+    /** @private {boolean} */
+    this.shouldAutoplay_ = false;
 
     /**
      * 0 - not in an elastic state.
@@ -161,6 +173,42 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /** @override */
+  buildCarousel() {
+    this.hasLoop_ = this.element.hasAttribute('loop');
+
+    this.hasAutoplay_ = this.element.hasAttribute('autoplay');
+    const autoplayVal = this.element.getAttribute('autoplay');
+    if (autoplayVal) {
+      this.autoplayLoops_ = parseInt(autoplayVal, 10);
+      userAssert(isFiniteNumber(this.autoplayLoops_));
+    }
+    this.buildSlides();
+
+    this.shouldLoop = this.hasLoop_ && this.isLoopingEligible();
+
+    this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
+
+    if (this.shouldAutoplay_ && this.autoplayLoops_ != 0) {
+      this.setupAutoplay_();
+    }
+
+    this.registerAction(
+      'toggleAutoplay',
+      (invocation) => {
+        const {args} = invocation;
+        if (args && args['toggleOn'] !== undefined) {
+          this.toggleAutoplay_(args['toggleOn']);
+        } else {
+          this.toggleAutoplay_(!this.hasAutoplay_);
+        }
+      },
+      ActionTrust.LOW
+    );
+  }
+
+  /**
+   * Builds slides
+   */
   buildSlides() {
     this.vsync_ = this.getVsync();
     this.action_ = Services.actionServiceForDoc(this.element);
@@ -176,7 +224,7 @@ export class AmpSlideScroll extends BaseSlides {
 
     this.element.classList.add('i-amphtml-slidescroll');
 
-    this.slides_ = this.getRealChildren();
+    this.slides_ = realChildElements(this.element);
 
     this.noOfSlides_ = this.slides_.length;
 
@@ -268,7 +316,10 @@ export class AmpSlideScroll extends BaseSlides {
     unobserveContentSize(this.element, this.onResized_);
   }
 
-  /** @override */
+  /**
+   * Checks if a carousel is eligible to loop, regardless of the loop attribute.
+   * @return {boolean}
+   */
   isLoopingEligible() {
     return this.noOfSlides_ > 1;
   }
@@ -286,8 +337,29 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   touchMoveHandler_() {
-    this.clearAutoplay();
+    this.clearAutoplayTimer_();
     this.isTouching_ = true;
+  }
+
+  /** @override */
+  viewportCallbackTemp(inViewport) {
+    super.viewportCallbackTemp(inViewport);
+    if (inViewport) {
+      this.autoplay_();
+    } else {
+      this.clearAutoplayTimer_();
+    }
+  }
+
+  /** @override */
+  goCallback(dir, animate, opt_autoplay) {
+    const trust = opt_autoplay ? ActionTrust.LOW : ActionTrust.HIGH;
+    this.moveSlide(dir, animate, trust);
+    if (opt_autoplay) {
+      this.autoplay_();
+    } else {
+      this.clearAutoplayTimer_();
+    }
   }
 
   /**
@@ -300,23 +372,23 @@ export class AmpSlideScroll extends BaseSlides {
       Services.timerFor(this.win).cancel(this.scrollTimeout_);
     }
 
-    this.scrollTimeout_ = /** @type {number} */ (Services.timerFor(
-      this.win
-    ).delay(() => {
-      this.scrollTimeout_ = null;
+    this.scrollTimeout_ = /** @type {number} */ (
+      Services.timerFor(this.win).delay(() => {
+        this.scrollTimeout_ = null;
 
-      if (this.snappingInProgress_ || this.isTouching_) {
-        return;
-      }
+        if (this.snappingInProgress_ || this.isTouching_) {
+          return;
+        }
 
-      const currentScrollLeft = this.slidesContainer_./*OK*/ scrollLeft;
+        const currentScrollLeft = this.slidesContainer_./*OK*/ scrollLeft;
 
-      if (this.hasNativeSnapPoints_) {
-        this.updateOnScroll_(currentScrollLeft, ActionTrust.LOW);
-      } else {
-        this.customSnap_(currentScrollLeft, undefined, ActionTrust.LOW);
-      }
-    }, timeout));
+        if (this.hasNativeSnapPoints_) {
+          this.updateOnScroll_(currentScrollLeft, ActionTrust.LOW);
+        } else {
+          this.customSnap_(currentScrollLeft, undefined, ActionTrust.LOW);
+        }
+      }, timeout)
+    );
   }
 
   /**
@@ -403,7 +475,12 @@ export class AmpSlideScroll extends BaseSlides {
     return this.shouldLoop || this.slideIndex_ < this.slides_.length - 1;
   }
 
-  /** @override */
+  /**
+   * Proceeds to the next slide in the desired direction.
+   * @param {number} dir -1 or 1
+   * @param {boolean} animate
+   * @param {!ActionTrust} trust
+   */
   moveSlide(dir, animate, trust) {
     if (this.slideIndex_ !== null) {
       const hasNext = this.hasNext();
@@ -749,9 +826,8 @@ export class AmpSlideScroll extends BaseSlides {
         this.slides_[showIndex].setAttribute('aria-hidden', 'true');
       }
     });
-    this.slidesContainer_./*OK*/ scrollLeft = this.getScrollLeftForIndex_(
-      newIndex
-    );
+    this.slidesContainer_./*OK*/ scrollLeft =
+      this.getScrollLeftForIndex_(newIndex);
     this.triggerAnalyticsEvent_(newIndex);
     this.slideIndex_ = newIndex;
     // If we have a specified number of autoplay loops and
@@ -761,7 +837,7 @@ export class AmpSlideScroll extends BaseSlides {
     if (this.autoplayLoops_ && this.slideIndex_ === this.noOfSlides_ - 1) {
       this.loopsMade_++;
       if (this.loopsMade_ == this.autoplayLoops_) {
-        this.removeAutoplay();
+        this.removeAutoplay_();
       }
     }
     this.hideRestOfTheSlides_(showIndexArr);
@@ -926,5 +1002,105 @@ export class AmpSlideScroll extends BaseSlides {
    */
   analyticsEvent_(eventType, vars) {
     triggerAnalyticsEvent(this.element, eventType, vars);
+  }
+
+  /**
+   * Sets up the `autoplay` configuration.
+   * @private
+   */
+  setupAutoplay_() {
+    const delayValue = Number(this.element.getAttribute('delay'));
+    // If it isn't a number and is not greater than 0 then don't assign
+    // and use the default.
+    if (delayValue > 0) {
+      // Guard against autoplayValue that is lower than 1s to prevent
+      // people from crashing the runtime with providing very low delays.
+      this.autoplayDelay_ = Math.max(1000, delayValue);
+    }
+
+    // By default `autoplay` should also mean that the current carousel slide
+    // is looping. (to be able to advance past the last item)
+    if (!this.hasLoop_) {
+      this.element.setAttribute('loop', '');
+      this.loopAdded_ = true;
+      this.hasLoop_ = true;
+      this.shouldLoop = true;
+    }
+  }
+
+  /**
+   * Starts the autoplay delay if allowed.
+   * @private
+   */
+  autoplay_() {
+    if (!this.shouldAutoplay_ || this.autoplayLoops_ == 0) {
+      return;
+    }
+    this.clearAutoplayTimer_();
+    this.autoplayTimeoutId_ = /** @type {number} */ (
+      Services.timerFor(this.win).delay(
+        this.go.bind(
+          this,
+          /* dir */ 1,
+          /* animate */ true,
+          /* autoplay */ true
+        ),
+        this.autoplayDelay_
+      )
+    );
+  }
+
+  /**
+   * Called by toggleAutoplay action to toggle the autoplay feature.
+   * @param {boolean} toggleOn
+   * @private
+   */
+  toggleAutoplay_(toggleOn) {
+    if (toggleOn == this.shouldAutoplay_) {
+      return;
+    }
+
+    const prevAutoplayStatus = this.shouldAutoplay_;
+
+    this.hasAutoplay_ = toggleOn;
+    this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
+
+    if (!prevAutoplayStatus && this.shouldAutoplay_) {
+      this.setupAutoplay_();
+    }
+
+    if (this.shouldAutoplay_) {
+      this.autoplay_();
+    } else {
+      this.clearAutoplayTimer_();
+    }
+  }
+
+  /**
+   * Clear the autoplay timer.
+   * @private
+   */
+  clearAutoplayTimer_() {
+    if (this.autoplayTimeoutId_ !== null) {
+      Services.timerFor(this.win).cancel(this.autoplayTimeoutId_);
+      this.autoplayTimeoutId_ = null;
+    }
+  }
+
+  /**
+   * Remove autoplay.
+   * @private
+   */
+  removeAutoplay_() {
+    this.clearAutoplayTimer_();
+    if (this.loopAdded_) {
+      // Only remove if specified due to the `autoplay` attribute
+      this.element.removeAttribute('loop');
+      this.loopAdded_ = false;
+      this.hasLoop_ = false;
+      this.shouldLoop = false;
+    }
+    this.hasAutoplay_ = false;
+    this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
   }
 }

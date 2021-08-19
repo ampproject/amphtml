@@ -1,23 +1,7 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-tiktok';
-import * as dom from '../../../../src/dom';
-import {computedStyle} from '../../../../src/style';
-import {isAmpElement} from '../../../../src/dom';
+import * as dom from '#core/dom';
+import {Services} from '#service';
+import {computedStyle} from '#core/dom/style';
 
 const VIDEOID = '6948210747285441798';
 
@@ -48,9 +32,17 @@ describes.realWin(
           }
           return createElementWithAttributes(document, tagName, attributes);
         });
+
+      const oEmbedJsonResponse = {
+        'thumbnail_url': '/examples/img/ampicon.png',
+        'title': 'Test TikTok Title',
+      };
+      env.sandbox
+        .stub(Services.xhrFor(win), 'fetchJson')
+        .resolves({json: () => Promise.resolve(oEmbedJsonResponse)});
     });
 
-    async function getTiktok(attrs = {}) {
+    function getTiktokBuildOnly(attrs = {}) {
       const tiktok = dom.createElementWithAttributes(
         win.document,
         'amp-tiktok',
@@ -62,12 +54,13 @@ describes.realWin(
         }
       );
       doc.body.appendChild(tiktok);
-      return tiktok
-        .buildInternal()
-        .then(() => {
-          return tiktok.layoutCallback();
-        })
-        .then(() => tiktok);
+      return tiktok.buildInternal().then(() => tiktok);
+    }
+
+    async function getTiktok(attrs = {}) {
+      const tiktok = await getTiktokBuildOnly(attrs);
+      const impl = await tiktok.getImpl();
+      return impl.layoutCallback().then(() => tiktok);
     }
 
     it('renders with videoId', async () => {
@@ -78,7 +71,7 @@ describes.realWin(
       expect(iframe.getAttribute('src')).to.contain('en-US');
     });
 
-    it('renders with videoId', async () => {
+    it('renders with video src url', async () => {
       const videoSrc =
         'https://www.tiktok.com/@scout2015/video/6948210747285441798';
       const player = await getTiktok({'data-src': videoSrc});
@@ -100,19 +93,44 @@ describes.realWin(
     });
 
     it('resizes using the fallback mechanism when no messages are received', async () => {
+      // Stub timeoutPromise to skip 1000ms wait before catch statement executes.
+      env.sandbox.stub(Services.timerFor(win), 'timeoutPromise').rejects();
       const player = await getTiktok({'data-src': VIDEOID});
+
       const playerIframe = player.querySelector('iframe');
-      const impl = await player.getImpl(false);
-      env.sandbox.stub(impl, 'handleTiktokMessages_');
-
-      // Wait 1100ms for resize fallback to be invoked.
-      await new Promise((resolve) => {
-        setTimeout(() => {
-          resolve();
-        }, 1100);
-      });
-
       expect(computedStyle(win, playerIframe).height).to.equal('775.25px');
+    });
+
+    it('renders placeholder', async () => {
+      const videoSrc =
+        'https://www.tiktok.com/@scout2015/video/6948210747285441798';
+      const player = await getTiktok({'data-src': videoSrc});
+      const placeholder = player.querySelector('img');
+      expect(placeholder).to.not.be.null;
+      expect(placeholder.getAttribute('src')).to.equal(
+        '/examples/img/ampicon.png'
+      );
+    });
+
+    it('renders aria title without oEmbed Request', async () => {
+      // Stub timeoutPromise to skip 1000ms wait before catch statement executes.
+      env.sandbox.stub(Services.timerFor(win), 'timeoutPromise').rejects();
+      const player = await getTiktok({'data-src': VIDEOID});
+
+      const playerIframe = player.querySelector('iframe');
+      expect(playerIframe.title).to.equal('TikTok');
+    });
+
+    it('renders aria title with oEmbed request', async () => {
+      const videoSrc =
+        'https://www.tiktok.com/@scout2015/video/6948210747285441798';
+      const player = await getTiktok({'data-src': videoSrc});
+      const impl = await player.getImpl();
+      // Replace debounced function with function which is called directly to avoid 1000ms wait.
+      impl.resizeOuterDebounced_ = impl.resizeOuter_;
+
+      const playerIframe = player.querySelector('iframe');
+      expect(playerIframe.title).to.equal('TikTok: Test TikTok Title');
     });
 
     it('removes iframe after unlayoutCallback', async () => {

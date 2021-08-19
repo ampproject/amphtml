@@ -1,25 +1,12 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {installImg} from '#builtins/amp-img/amp-img';
 
-import {BrowserController} from '../../testing/test-helper';
-import {applyStaticLayout} from '../../src/layout';
-import {createElementWithAttributes} from '../../src/dom';
-import {createIframePromise} from '../../testing/iframe';
-import {installImg} from '../../builtins/amp-img';
-import {toArray} from '../../src/core/types/array';
+import {createElementWithAttributes} from '#core/dom';
+import {toArray} from '#core/types/array';
+
+import {createIframePromise} from '#testing/iframe';
+import {BrowserController} from '#testing/test-helper';
+
+import {applyStaticLayout} from '../../src/static-layout';
 
 describes.sandboxed('amp-img layout intrinsic', {}, () => {
   let fixture;
@@ -63,115 +50,89 @@ describes.sandboxed('amp-img layout intrinsic', {}, () => {
         browser = new BrowserController(fixture.win);
       });
       it('should not exceed given width and height even if image\
-      natural size is larger', () => {
-        let ampImg;
-        return getImg({
+      natural size is larger', async () => {
+        const ampImg = await getImg({
           src: '/examples/img/sample.jpg', // 641 x 481
           width: 100,
           height: 100,
           layout: 'intrinsic',
-        })
-          .then((image) => {
-            ampImg = image;
-            return browser.waitForElementLayout('amp-img');
-          })
-          .then(() => {
-            expect(ampImg.getBoundingClientRect()).to.include({
-              width: 100,
-              height: 100,
-            });
-            const img = ampImg.querySelector('img');
-            expect(img.getBoundingClientRect()).to.include({
-              width: 100,
-              height: 100,
-            });
-          });
+        });
+        await browser.waitForElementLayout('amp-img');
+        expect(ampImg.getBoundingClientRect()).to.include({
+          width: 100,
+          height: 100,
+        });
+        const img = ampImg.querySelector('img');
+        expect(img.getBoundingClientRect()).to.include({
+          width: 100,
+          height: 100,
+        });
       });
 
       it('should reach given width and height even if image\
-      natural size is smaller', () => {
-        let ampImg;
-        return getImg({
+      natural size is smaller', async () => {
+        const ampImg = await getImg({
           src: '/examples/img/sample.jpg', // 641 x 481
           width: 800,
           height: 600,
           layout: 'intrinsic',
-        })
-          .then((image) => {
-            ampImg = image;
-            return browser.waitForElementLayout('amp-img');
-          })
-          .then(() => {
-            expect(ampImg.getBoundingClientRect()).to.include({
-              width: 800,
-              height: 600,
-            });
-            const img = ampImg.querySelector('img');
-            expect(img.getBoundingClientRect()).to.include({
-              width: 800,
-              height: 600,
-            });
-          });
+        });
+        await browser.waitForElementLayout('amp-img');
+        expect(ampImg.getBoundingClientRect()).to.include({
+          width: 800,
+          height: 600,
+        });
+        const img = ampImg.querySelector('img');
+        expect(img.getBoundingClientRect()).to.include({
+          width: 800,
+          height: 600,
+        });
       });
 
-      it('expands a parent div with no explicit dimensions', () => {
-        let ampImg;
+      it('expands a parent div with no explicit dimensions', async () => {
         const parentDiv = fixture.doc.getElementById('parent');
         // inline-block to force width and height to size of children
         // font-size 0 to get rid of the 4px added by inline-block for whitespace
         parentDiv.setAttribute('style', 'display: inline-block; font-size: 0;');
-        return getImg({
+        const ampImg = await getImg({
           src: '/examples/img/sample.jpg', // 641 x 481
           width: 600,
           height: 400,
           layout: 'intrinsic',
-        })
-          .then((image) => {
-            ampImg = image;
-            return browser.waitForElementLayout('amp-img');
-          })
-          .then(() => {
-            expect(ampImg.getBoundingClientRect()).to.include({
-              width: 600,
-              height: 400,
-            });
-            const parentDiv = fixture.doc.getElementById('parent');
-            expect(parentDiv.getBoundingClientRect()).to.include({
-              width: 600,
-              height: 400,
-            });
-          });
+        });
+        await browser.waitForElementLayout('amp-img');
+        expect(ampImg.getBoundingClientRect()).to.include({
+          width: 600,
+          height: 400,
+        });
+        expect(parentDiv.getBoundingClientRect()).to.include({
+          width: 600,
+          height: 400,
+        });
       });
 
-      it('is bounded by explicit dimensions of a parent container', () => {
-        let ampImg;
+      it('is bounded by explicit dimensions of a parent container', async () => {
         const parentDiv = fixture.doc.getElementById('parent');
         parentDiv.setAttribute('style', 'width: 80px; height: 80px');
-        return getImg({
+
+        const ampImg = await getImg({
           src: '/examples/img/sample.jpg', // 641 x 481
           width: 800,
           height: 600,
           layout: 'intrinsic',
-        })
-          .then((image) => {
-            ampImg = image;
-            return browser.waitForElementLayout('amp-img');
-          })
-          .then(() => {
-            expect(ampImg.getBoundingClientRect()).to.include({
-              width: 80,
-              height: 60,
-            });
-            const parentDiv = fixture.doc.getElementById('parent');
-            expect(parentDiv.getBoundingClientRect()).to.include({
-              width: 80,
-              height: 80,
-            });
-          });
+        });
+        await browser.waitForElementLayout('amp-img');
+        expect(ampImg.getBoundingClientRect()).to.include({
+          width: 80,
+          height: 60,
+        });
+        expect(parentDiv.getBoundingClientRect()).to.include({
+          width: 80,
+          height: 80,
+        });
       });
 
-      it('SSR sizer does not interfere with img creation', () => {
-        let ampImg;
+      it('SSR sizer does not interfere with img creation', async () => {
         const parentDiv = fixture.doc.getElementById('parent');
         parentDiv.setAttribute('style', 'width: 80px; height: 80px');
 
@@ -182,6 +143,13 @@ describes.sandboxed('amp-img layout intrinsic', {}, () => {
           height: 600,
           layout: 'intrinsic',
         });
+        const serverRenderedImg = createElementWithAttributes(
+          fixture.doc,
+          'img',
+          {
+            src: '/examples/img/sample.jpg',
+          }
+        );
         applyStaticLayout(tmp);
         const attributes = {
           'i-amphtml-ssr': '',
@@ -190,19 +158,16 @@ describes.sandboxed('amp-img layout intrinsic', {}, () => {
           attributes[tmp.attributes[i].name] = tmp.attributes[i].value;
         }
 
-        return getImg(attributes, toArray(tmp.children))
-          .then((image) => {
-            ampImg = image;
-            return browser.waitForElementLayout('amp-img');
-          })
-          .then(() => {
-            expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
-            expect(ampImg.querySelector('img[src*="image/svg+xml"]')).to.exist;
-          });
+        const ampImg = await getImg(
+          attributes,
+          [serverRenderedImg].concat(toArray(tmp.children))
+        );
+        await browser.waitForElementLayout('amp-img');
+        expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
+        expect(ampImg.querySelector('img[src*="image/svg+xml"]')).to.exist;
       });
 
-      it('SSR sizer does not interfere with SSR img before', () => {
-        let ampImg;
+      it('SSR sizer does not interfere with SSR img before', async () => {
         const parentDiv = fixture.doc.getElementById('parent');
         parentDiv.setAttribute('style', 'width: 80px; height: 80px');
 
@@ -230,19 +195,13 @@ describes.sandboxed('amp-img layout intrinsic', {}, () => {
           })
         );
 
-        return getImg(attributes, children)
-          .then((image) => {
-            ampImg = image;
-            return browser.waitForElementLayout('amp-img');
-          })
-          .then(() => {
-            expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
-            expect(ampImg.querySelector('img[src*="image/svg+xml"]')).to.exist;
-          });
+        const ampImg = await getImg(attributes, children);
+        await browser.waitForElementLayout('amp-img');
+        expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
+        expect(ampImg.querySelector('img[src*="image/svg+xml"]')).to.exist;
       });
 
-      it('SSR sizer does not interfere with SSR img after', () => {
-        let ampImg;
+      it('SSR sizer does not interfere with SSR img after', async () => {
         const parentDiv = fixture.doc.getElementById('parent');
         parentDiv.setAttribute('style', 'width: 80px; height: 80px');
 
@@ -270,15 +229,10 @@ describes.sandboxed('amp-img layout intrinsic', {}, () => {
           })
         );
 
-        return getImg(attributes, children)
-          .then((image) => {
-            ampImg = image;
-            return browser.waitForElementLayout('amp-img');
-          })
-          .then(() => {
-            expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
-            expect(ampImg.querySelector('img[src*="image/svg+xml"]')).to.exist;
-          });
+        const ampImg = await getImg(attributes, children);
+        await browser.waitForElementLayout('amp-img');
+        expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
+        expect(ampImg.querySelector('img[src*="image/svg+xml"]')).to.exist;
       });
     });
 });
