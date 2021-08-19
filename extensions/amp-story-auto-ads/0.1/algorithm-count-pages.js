@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {InsertionState} from './story-ad-page-manager';
-import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 import {hasOwn, map} from '#core/types/object';
+
+import {InsertionState} from './story-ad-page-manager';
+
+import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 
 /** @const {number} */
 const INTERVAL = 7;

@@ -13,6 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {CommonSignals} from '#core/constants/common-signals';
+import {
+  createElementWithAttributes,
+  isJsonScriptTag,
+  toggleAttribute,
+} from '#core/dom';
+import {elementByTag} from '#core/dom/query';
+import {setStyle} from '#core/dom/style';
+import {dict, map} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
+
+import {getExperimentBranch} from '#experiments';
+import {
+  AdvanceExpToTime,
+  StoryAdAutoAdvance,
+} from '#experiments/story-ad-auto-advance';
+import {
+  BranchToTimeValues,
+  StoryAdSegmentExp,
+} from '#experiments/story-ad-progress-segment';
+
+import {
+  AnalyticsEvents,
+  AnalyticsVars,
+  STORY_AD_ANALYTICS,
+} from './story-ad-analytics';
 import {
   A4AVarNames,
   START_CTA_ANIMATION_ATTR,
@@ -22,41 +48,18 @@ import {
   maybeCreateAttribution,
   validateCtaMetadata,
 } from './story-ad-ui';
-import {
-  AdvanceExpToTime,
-  StoryAdAutoAdvance,
-} from '#experiments/story-ad-auto-advance';
-import {
-  AnalyticsEvents,
-  AnalyticsVars,
-  STORY_AD_ANALYTICS,
-} from './story-ad-analytics';
-import {
-  BranchToTimeValues,
-  StoryAdSegmentExp,
-} from '#experiments/story-ad-progress-segment';
-import {CommonSignals} from '#core/constants/common-signals';
+import {getFrameDoc, localizeCtaText} from './utils';
+
+import {getData, listen} from '../../../src/event-helper';
 import {Gestures} from '../../../src/gesture';
+import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
+import {dev, devAssert, userAssert} from '../../../src/log';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
+import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
-import {assertConfig} from '../../amp-ad-exit/0.1/config';
-import {
-  createElementWithAttributes,
-  isJsonScriptTag,
-  toggleAttribute,
-} from '#core/dom';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict, map} from '#core/types/object';
-import {elementByTag} from '#core/dom/query';
-import {getData, listen} from '../../../src/event-helper';
-import {getExperimentBranch} from '#experiments';
-import {getFrameDoc, localizeCtaText} from './utils';
-import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {parseJson} from '#core/types/object/json';
-import {setStyle} from '#core/dom/style';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page';

@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from '#core/constants/common-signals';
+
+import {forceExperimentBranch} from '#experiments';
+import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
+
+import {macroTask} from '#testing/helpers';
+
+import {Gestures} from '../../../../src/gesture';
 import * as openWindowDialog from '../../../../src/open-window-dialog';
 import * as service from '../../../../src/service-helpers';
 import {
@@ -21,15 +29,10 @@ import {
   UIType,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {ButtonTextFitter} from '../story-ad-button-text-fitter';
-import {CommonSignals} from '#core/constants/common-signals';
-import {Gestures} from '../../../../src/gesture';
 import {StoryAdAnalytics} from '../story-ad-analytics';
-import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
+import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 import {StoryAdLocalization} from '../story-ad-localization';
 import {StoryAdPage} from '../story-ad-page';
-import {forceExperimentBranch} from '#experiments';
-import {macroTask} from '#testing/helpers';
 
 const NOOP = () => {};
 
