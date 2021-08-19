@@ -27,6 +27,9 @@ import {tryParseJson} from '#core/types/object/json';
 /** @type {string} */
 const TAG = 'amp-ad-network-smartadserver-impl';
 
+/** @type {string} */
+const SAS_NO_AD_STRING = 'window.context.noContentAvailable';
+
 /** @const {number} */
 const MAX_URL_LENGTH = 15360;
 
@@ -49,77 +52,78 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
 
     /** @protected {!Deferred<string>} */
     this.getAdUrlDeferred = new Deferred();
+
+    /** @private {?Element} */
+    this.fallback_ = this.getFallback();
   }
 
   /** @override */
   getAdUrl(opt_consentTuple, opt_rtcResponsesPromise) {
     const consentPolicy = super.getConsentPolicy() || 'default';
-    Promise.race([
+    Promise.any([
       getConsentPolicyInfo(this.element, consentPolicy),
-      new Promise((resolve) => setTimeout(() => resolve(''), 100)),
+      new Promise((resolve) => setTimeout(() => resolve(), 20)),
     ]).then((consentString) => {
       opt_rtcResponsesPromise = opt_rtcResponsesPromise || Promise.resolve();
-
       const checkStillCurrent = this.verifyStillCurrent();
-      opt_rtcResponsesPromise.then((result) => {
-        checkStillCurrent();
+      opt_rtcResponsesPromise
+        .then((result) => {
+          checkStillCurrent();
+          const hb_ = {};
+          const cache_ = {};
+          const vendor = this.getBestRtcCallout_(result);
+          if (vendor && Object.keys(vendor).length) {
+            hb_['hb_bid'] = vendor.hb_bidder || 'unknown';
+            hb_['hb_cpm'] = vendor.hb_pb || 0.0;
+            hb_['hb_ccy'] = 'USD';
 
-        const vendor = this.getBestRtcCallout_(result);
-        const hbParams = {};
-        const cacheParams = {};
-        if (vendor && Object.keys(vendor).length) {
-          hbParams['hb_bid'] = vendor.hb_bidder || 'unknown';
-          hbParams['hb_cpm'] = vendor.hb_pb || 0.0;
-          hbParams['hb_ccy'] = 'USD';
+            cache_.id = vendor.hb_cache_id;
+            cache_.host = vendor.hb_cache_host;
+            cache_.path = vendor.hb_cache_path;
+          }
 
-          cacheParams.id = vendor.hb_cache_id;
-          cacheParams.host = vendor.hb_cache_host;
-          cacheParams.path = vendor.hb_cache_path;
-        }
+          const domain =
+            this.element.getAttribute('data-domain') ||
+            'https://www.smartadserver.com';
+          const formatId = this.element.getAttribute('data-format');
+          const tagId = 'sas_' + formatId;
 
-        const domain =
-          this.element.getAttribute('data-domain') ||
-          'https://www.smartadserver.com';
-        const formatId = this.element.getAttribute('data-format');
-        const tagId = 'sas_' + formatId;
+          const adUrl = buildUrl(
+            domain + '/ac',
+            {
+              siteid: this.element.getAttribute('data-site'),
+              pgid: this.element.getAttribute('data-page'),
+              fmtid: formatId,
+              tgt: this.element.getAttribute('data-target'),
+              tag: tagId,
+              out: 'amp',
+              // eslint-disable-next-line google-camelcase/google-camelcase
+              gdpr_consent: consentString,
+              ...hb_,
+              pgDomain: this.win.top.location.hostname,
+              tmstp: Date.now(),
+            },
+            MAX_URL_LENGTH,
+            TRUNCATION_PARAM
+          );
 
-        const adUrl = buildUrl(
-          domain + '/ac',
-          {
-            siteid: this.element.getAttribute('data-site'),
-            pgid: this.element.getAttribute('data-page'),
-            fmtid: formatId,
-            tgt: this.element.getAttribute('data-target'),
-            tag: tagId,
-            // eslint-disable-next-line google-camelcase/google-camelcase
-            gdpr_consent: consentString,
-            noadcbk: true,
-            pgDomain: this.win.top.location.hostname,
-            out: 'iframe',
-            tmstp: Date.now(),
-            ...hbParams,
-          },
-          MAX_URL_LENGTH,
-          TRUNCATION_PARAM
-        );
+          fetch(new Request(adUrl), {credentials: 'include'})
+            .then((response) => {
+              response.text().then((adResponse) => {
+                if (!adResponse.includes(SAS_NO_AD_STRING)) {
+                  this.renderIframe_(adResponse, this.element, false);
+                } else {
+                  Object.keys(cache_).length
+                    ? this.getRtcAd_(cache_, this.element)
+                    : this.element.setAttribute('style', 'display:none');
+                }
+              });
+            })
+            .catch(console.error);
 
-        this.getAdUrlDeferred.resolve(adUrl);
-
-        this.win.addEventListener(
-          'message',
-          (event) => {
-            if (
-              event.origin === domain &&
-              event.data === 'SMRT NOAD ' + tagId
-            ) {
-              Object.keys(cacheParams).length
-                ? this.renderRtcAd_(cacheParams)
-                : this.element.setAttribute('style', 'height:0px');
-            }
-          },
-          false
-        );
-      });
+          this.getAdUrlDeferred.resolve();
+        })
+        .catch(console.error);
     });
 
     return this.getAdUrlDeferred.promise;
@@ -152,32 +156,51 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
   }
 
   /**
-   * Gets and renders RTC creative
+   * Gets and starts rendering RTC creative
    * @param {Object} params
+   * @param {Element} element
    * @return {?Promise}
    */
-  renderRtcAd_(params) {
+  getRtcAd_(params, element) {
     fetch(
       new Request(
         `https://${params.host}${params.path}?showAdm=1&uuid=${params.id}`
       )
     )
       .then((response) => response.json())
-      .then((creative) => {
-        const i = document.createElement('iframe');
-        i.setAttribute('scrolling', 'no');
-        i.setAttribute('style', 'border:0; margin:0');
-        i.setAttribute('width', this.element.getAttribute('width'));
-        i.setAttribute('height', this.element.getAttribute('height'));
-        this.element.appendChild(i);
+      .then((creative) => this.renderIframe_(creative.adm, element));
+  }
 
-        const d = i.contentWindow.document;
-        d.write(
-          `<html><head></head><body style="margin:0px">${creative.adm}</body></html>`
-        );
-        d.close();
-      })
-      .catch(console.error);
+  /**
+   * Renders iframe with ad
+   * @param {string} adScript
+   * @param {Element} element
+   * @param {boolean} isHtml
+   */
+  renderIframe_(adScript, element, isHtml = true) {
+    const i = document.createElement('iframe');
+    i.setAttribute('width', '100%');
+    i.setAttribute('height', '100%');
+    i.setAttribute('scrolling', 'no');
+    i.setAttribute('style', 'border:0; margin:0');
+    element.appendChild(i);
+
+    const d = i.contentWindow.document;
+    const html = isHtml ? adScript : `<script>${adScript}</script>`;
+    d.open('text/html', 'replace');
+    d.write(
+      `<!DOCTYPE html><head></head><body style="margin:0">${html}</body></html>`
+    );
+    d.close();
+
+    const width = element.getAttribute('width');
+    const height = element.getAttribute('height');
+    element.setAttribute('style', `width:${width}px; height:${height}px`);
+    element.removeAttribute('hidden');
+
+    if (this.fallback_) {
+      this.fallback_.setAttribute('hidden', '');
+    }
   }
 
   /** @override */
@@ -237,12 +260,3 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
 AMP.extension(TAG, '0.1', (AMP) =>
   AMP.registerElement(TAG, AmpAdNetworkSmartadserverImpl)
 );
-
-// const _log = (msg) => {
-//   console /*OK*/
-//     .log(
-//       '%cks',
-//       'background:#900c3f; border-radius:2px; color:#feffff; font-family:lato,sans-serif; padding:1px 3px',
-//       msg
-//     );
-// };
