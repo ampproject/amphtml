@@ -1,4 +1,4 @@
-import {createExtensionScript} from '#service/extension-script';
+import {urls} from 'src/config';
 
 const loaded = Object.create(null);
 
@@ -9,7 +9,13 @@ const loaded = Object.create(null);
  * @return {!Promise<*>}
  */
 function loadExtensionScript(win, name, version = '0.1') {
-  const scriptElement = createExtensionScript(win, name, version);
+  const scriptElement = win.document.createElement('script');
+  scriptElement.async = true;
+  scriptElement.src =
+    urls.cdn +
+    // eslint-disable-next-line local/no-forbidden-terms
+    `/rtv/${INTERNAL_RUNTIME_VERSION}` +
+    `/v0/${name}${version}${IS_ESM ? '.mjs' : '.js'}`;
   return new Promise((resolve, reject) => {
     scriptElement.onload = resolve;
     scriptElement.onerror = reject;
@@ -26,12 +32,13 @@ export default new (class {
    */
   preloadExtension(name) {
     /* eslint-enable local/no-forbidden-terms */
-    // We know for sure that we try to load `amp-crypto-polyfill`.
-    // In its place, we inject it in the bundle to install it synchronously
+    // We may try to load `amp-crypto-polyfill` on old browsers or insecure
+    // contexts.
     if (name !== 'amp-crypto-polyfill') {
       throw new Error(name);
     }
     if (!loaded[name]) {
+      // TODO(alanorozco): I haven't tested that this works lol
       loaded[name] = loadExtensionScript(self, name);
     }
     return loaded[name];

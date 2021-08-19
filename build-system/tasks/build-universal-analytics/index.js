@@ -11,19 +11,11 @@ const entryPoints = ['extensions/amp-analytics/0.1/amp-analytics.js'];
 const outfile = 'dist/universal-analytics.js';
 
 const cwd = process.cwd();
-
 const injectedSrcDir = `${cwd}/extensions/amp-analytics/universal`;
 
 const inject = [
   // Equivalent implementation of the AMP global, including BaseElement.
   `${injectedSrcDir}/amp.js`,
-
-  // Bundle amp-crypto-polyfill instead of expecting a separate script.
-  // TODO(alanorozco): This is only required when Subtle.digest is not supported
-  // by the browser. We likely want to load it async'ly like on AMP documents,
-  // via the extension service. For now, we avoid the polyfill.
-  // (Bundling it incurs a ~3kb brotli size increase.)
-  // 'extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill.js',
 ];
 
 const aliasPatterns = [
