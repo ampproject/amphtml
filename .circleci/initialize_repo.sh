@@ -24,11 +24,15 @@ GREEN() { echo -e "\033[0;32m$1\033[0m"; }
 RED() { echo -e "\033[0;31m$1\033[0m"; }
 CYAN() { echo -e "\033[0;36m$1\033[0m"; }
 
-echo "$(GREEN "Fetching") $(CYAN "main") $(GREEN "branch to update") $(CYAN ".git") $(GREEN "cache.")"
-git fetch origin main:main
-
-echo "$(GREEN "Fetching other branches to update") $(CYAN ".git") $(GREEN "cache.")"
-git fetch
+# Update the .git cache for non-main branches.
+if [[ "$CIRCLE_BRANCH" == "main" ]]; then
+  echo "$(GREEN "No need to update the") $(CYAN ".git") $(GREEN "cache because this is the") $(CYAN "main") $(GREEN "branch.")"
+else
+  echo "$(GREEN "Fetching") $(CYAN "main") $(GREEN "branch to update") $(CYAN ".git") $(GREEN "cache.")"
+  git fetch origin main:main
+  echo "$(GREEN "Fetching other branches to update") $(CYAN ".git") $(GREEN "cache.")"
+  git fetch
+fi
 
 # Ensure the CircleCI workspace directory exists.
 mkdir -p /tmp/workspace
