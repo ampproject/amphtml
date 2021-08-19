@@ -9,19 +9,46 @@ import {
 } from '#service/url-replacements-impl';
 import extensionsImpl from './extensions-impl';
 
+const unavailable = once(() => Promise.resolve(null));
+
+const definedServices = {
+  // Same implementations as core, but with injected dependencies or a forced
+  // global window.
+  cryptoFor: once(() => new Crypto(self)),
+  urlReplacementsForDoc: once(
+    () => new UrlReplacements(ampdocImpl, new GlobalVariableSource(ampdocImpl))
+  ),
+
+  // These are our own implementations. They may be incomplete.
+  ampdoc: () => ampdocImpl,
+  extensionsFor: () => extensionsImpl,
+  timerFor: () => timerImpl,
+  urlForDoc: () => urlImpl,
+
+  // These can be null since they're optional.
+  // For now, we assume that their interoperability is unavailable.
+  consentPolicyServiceForDocOrNull: unavailable,
+  geoForDocOrNull: unavailable,
+};
+
+// Export as proxy that creates empty placeholders for undefined services.
+// eslint-disable-next-line local/no-export-side-effect
+export const Services = new Proxy(definedServices, {
+  get(target, name) {
+    if (!target[name]) {
+      target[name] = once(() => empty(name));
+    }
+    return target[name];
+  },
+});
+
 /**
  * @param {string} objectName
  * @return {!Object}
  */
 function empty(objectName) {
   return new Proxy(Object.create(null), {
-    get(target, name) {
-      // Special case to allow us to print access of methods of Services
-      // resolved from a promise, instead of merely erroring-out during an
-      // implicit `.then()`.
-      if (name === 'then') {
-        return undefined;
-      }
+    get(unusedTarget, name) {
       try {
         throw new Error(
           `[universal] Attempted to use property ${objectName}(...).${name} on unimplemented service.`
@@ -33,36 +60,3 @@ function empty(objectName) {
     },
   });
 }
-
-const unavailable = once(() => Promise.resolve(null));
-
-export const Services = {
-  ampdoc: () => ampdocImpl,
-  timerFor: () => timerImpl,
-  urlForDoc: () => urlImpl,
-  extensionsFor: () => extensionsImpl,
-
-  // Same implementations as core, but with injected dependencies or a forced
-  // global window.
-  urlReplacementsForDoc: once(
-    () => new UrlReplacements(ampdocImpl, new GlobalVariableSource(ampdocImpl))
-  ),
-  cryptoFor: once(() => new Crypto(self)),
-
-  // Passthrough placeholders for services that aren't yet known to be required
-  // for the supported codepaths.
-  viewerPromiseForDoc: once(() =>
-    Promise.resolve(empty('viewerPromiseForDoc'))
-  ),
-  viewportForDoc: once(() => empty('viewportForDoc')),
-  formSubmitForDoc: once(() => empty('formSubmitForDoc')),
-  preconnectFor: once(() => empty('preconnectFor')),
-  // eslint-disable-next-line local/no-forbidden-terms
-  storageForDoc: () => once(() => empty('storageForDoc')),
-  xhrFor: () => once(() => empty('xhrFor')),
-
-  // These can be null since they're optional.
-  // For now, we assume that their interoperability is unavailable.
-  geoForDocOrNull: unavailable,
-  consentPolicyServiceForDocOrNull: unavailable,
-};
