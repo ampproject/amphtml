@@ -2,21 +2,28 @@ const argv = require('minimist')(process.argv.slice(2));
 const esbuild = require('esbuild');
 const terser = require('terser');
 const {BUILD_CONSTANTS} = require('../../compile/build-constants');
+const {cyan} = require('../../common/colors');
 const {getStdout} = require('../../common/process');
+const {log} = require('../../common/logging');
 const {readFile, writeFile} = require('fs').promises;
-
-const cwd = process.cwd();
-const injectedSrcDir = `${__dirname}/src/`;
 
 const entryPoints = ['extensions/amp-analytics/0.1/amp-analytics.js'];
 const outfile = 'dist/universal-analytics.js';
+
+const cwd = process.cwd();
+
+const injectedSrcDir = `${cwd}/extensions/amp-analytics/universal`;
 
 const inject = [
   // Equivalent implementation of the AMP global, including BaseElement.
   `${injectedSrcDir}/amp.js`,
 
   // Bundle amp-crypto-polyfill instead of expecting a separate script.
-  'extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill.js',
+  // TODO(alanorozco): This is only required when Subtle.digest is not supported
+  // by the browser. We likely want to load it async'ly like on AMP documents,
+  // via the extension service. For now, we avoid the polyfill.
+  // (Bundling it incurs a ~3kb brotli size increase.)
+  // 'extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill.js',
 ];
 
 const aliasPatterns = [
@@ -69,7 +76,10 @@ function getBrotliSize(file) {
   return parseInt(getStdout(`cat ${file} | brotli -c | wc -c`), 10);
 }
 
-(async () => {
+/**
+ * @return {Promise}
+ */
+async function buildUniversalAnalytics() {
   await esbuild.build({
     entryPoints,
     bundle: true,
@@ -80,15 +90,24 @@ function getBrotliSize(file) {
     ),
     plugins: [alias],
   });
-  console.log('Unminified Size:\n', getBrotliSize(outfile));
+  log(`Unminified Size: ${getBrotliSize(outfile)}`);
   // Not a full-fledged minification config, but good enough to keep track of
   // how the bundle grows.
   if (argv.minified) {
-    const result = await terser.minify(await readFile(outfile, 'utf8'), {
+    const {code} = await terser.minify(await readFile(outfile, 'utf8'), {
       mangle: {properties: {regex: /_$/}},
     });
-    await writeFile(outfile, result.code);
-    console.log('Minified Size:\n', getBrotliSize(outfile));
+    if (!code) {
+      throw new Error('could not minify');
+    }
+    await writeFile(outfile, code);
+    log(`Minified Size: ${getBrotliSize(outfile)}`);
   }
-  console.log('==========\n' + new Date().toLocaleTimeString());
-})();
+  log('Built', cyan(outfile));
+}
+
+buildUniversalAnalytics.flags = {
+  minified: 'Minify the output using terser',
+};
+
+module.exports = {buildUniversalAnalytics};

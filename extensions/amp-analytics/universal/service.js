@@ -6,7 +6,7 @@ import urlImpl from './url-impl';
 import {
   GlobalVariableSource,
   UrlReplacements,
-} from '#service/url-replacements-impl.js';
+} from '#service/url-replacements-impl';
 import extensionsImpl from './extensions-impl';
 
 /**
@@ -23,7 +23,7 @@ function passthrough(objectName) {
             `[universal] Attempted to use property ${objectName}(...).${name} on unimplemented service.`
           );
         } catch (e) {
-          console.warn(e.stack);
+          console./*OK*/ warn(e.stack);
         }
         return () => {};
       },

@@ -1,45 +1,42 @@
-import {Log, initLogConstructor, user} from '../../../../src/log';
+import {initLogConstructor, user} from '../../../src/log';
 import {registerServiceBuilderForDoc} from './service-helpers';
 import ampdocImpl from './ampdoc-impl';
 
 initLogConstructor();
 
-export const AMP = new (class {
-  /**
-   * @param {Window} win
-   */
-  constructor(win) {
-    /** @private @const {!Object<string, function(*)>} */
-    this.services_ = Object.create(null);
+self.AMP = self.AMP || [];
 
-    this.win = win;
-  }
+for (const cb of self.AMP) {
+  cb();
+}
 
-  /**
-   * @param {string} unusedTag
-   * @param {string} unusedVersion
-   * @param {function(typeof this)} callback
-   */
-  extension(unusedTag, unusedVersion, callback) {
-    callback(this);
-  }
+self.AMP.push = (cb) => cb();
+self.AMP.win = self;
 
-  /**
-   * @param {string} name
-   * @param {AMP.BaseElement} ctor
-   */
-  registerElement(name, ctor) {
-    customElements.define(name, getCustomElement(ctor));
-  }
+/**
+ * @param {string} unusedTag
+ * @param {string} unusedVersion
+ * @param {function(typeof self.AMP)} callback
+ */
+self.AMP.extension = function (unusedTag, unusedVersion, callback) {
+  callback(self.AMP);
+};
 
-  /**
-   * @param {string} name
-   * @param {function(*)} ctor
-   */
-  registerServiceForDoc(name, ctor) {
-    registerServiceBuilderForDoc(this.element, name, ctor);
-  }
-})(self);
+/**
+ * @param {string} name
+ * @param {AMP.BaseElement} ctor
+ */
+self.AMP.registerElement = function (name, ctor) {
+  customElements.define(name, getCustomElement(ctor));
+};
+
+/**
+ * @param {string} name
+ * @param {function(*)} ctor
+ */
+self.AMP.registerServiceForDoc = function (name, ctor) {
+  registerServiceBuilderForDoc(self.document, name, ctor);
+};
 
 // TODO: Too similar to bento-ce.js
 
@@ -54,28 +51,25 @@ class BaseElement {
     /** @const {!Element} */
     this.element = element;
   }
-
   /**
    * @return {!typeof ampdocImpl}
    */
   getAmpDoc() {
     return this.element.getAmpDoc();
   }
-
   /**
-   * @return {Log}
+   * @return {../../../src/log.Log}
    */
   user() {
     return user();
   }
-
   /** */
   collapse() {
     this.element.setAttribute('hidden', '');
   }
 }
 
-AMP.BaseElement = BaseElement;
+self.AMP.BaseElement = BaseElement;
 
 /**
  * @param {typeof BaseElement} Ctor

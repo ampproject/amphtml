@@ -37,6 +37,7 @@ createTask('analytics-vendor-configs', 'analyticsVendorConfigs');
 createTask('ava');
 createTask('babel-plugin-tests', 'babelPluginTests');
 createTask('build');
+createTask('build-universal-analytics', 'buildUniversalAnalytics');
 createTask('bundle-size', 'bundleSize');
 createTask('caches-json', 'cachesJson');
 createTask('check-analytics-vendors-list', 'checkAnalyticsVendorsList');
