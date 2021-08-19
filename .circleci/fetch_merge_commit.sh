@@ -14,8 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 
-# This script fetches the merge commit of a PR branch with the main branch to
-# make sure PRs are tested against all the latest changes on CircleCI.
+# This script updates the .git cache and fetches the merge commit of a PR branch
+# with the main branch to make sure PRs are tested against all the latest
+# changes on CircleCI.
 
 set -e
 err=0
@@ -23,6 +24,12 @@ err=0
 GREEN() { echo -e "\033[0;32m$1\033[0m"; }
 RED() { echo -e "\033[0;31m$1\033[0m"; }
 CYAN() { echo -e "\033[0;36m$1\033[0m"; }
+
+echo "$(GREEN "Fetching") $(CYAN "main") $(GREEN "branch to update") $(CYAN ".git") $(GREEN "cache.")"
+git fetch origin main:main
+
+echo "$(GREEN "Fetching other branches to update") $(CYAN ".git") $(GREEN "cache.")"
+git fetch
 
 # Try to determine the PR number.
 ./.circleci/get_pr_number.sh
@@ -40,9 +47,6 @@ fi
 if [[ ! -f /tmp/restored-workspace/.CIRCLECI_MERGE_COMMIT ]]; then
   exit 0
 fi
-
-echo "$(GREEN "Fetching all branches to update") $(CYAN ".git") $(GREEN "cache.")"
-git fetch
 
 # Extract the merge commit for this workflow and make it visible to other steps.
 CIRCLECI_MERGE_COMMIT="$(cat /tmp/restored-workspace/.CIRCLECI_MERGE_COMMIT)"
