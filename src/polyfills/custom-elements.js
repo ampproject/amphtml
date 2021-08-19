@@ -882,7 +882,7 @@ export function copyProperties(obj, prototype) {
  * done.
  *
  * @param {!Window} win
- * @param {!Function} ctor
+ * @param {!Function=} ctor
  */
 export function install(win, ctor) {
   // Don't install in no-DOM environments e.g. worker.

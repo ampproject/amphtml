@@ -1,7 +1,2 @@
-(function (AMP) {
-  AMP.registerTemplate(TAG, AmpMustache);
-})(self.AMP);
-
-(AMP => {
-  AMP.registerElement('amp-gist', AmpGist);
-})(self.AMP);
+AMP.registerTemplate(TAG, AmpMustache);
+AMP.registerElement('amp-gist', AmpGist);
