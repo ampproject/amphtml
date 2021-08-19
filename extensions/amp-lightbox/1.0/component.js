@@ -204,7 +204,7 @@ function ScreenReaderCloseButton({'aria-label': ariaLabel, onClick}) {
   return (
     <button
       aria-label={ariaLabel}
-      className={classes.closeButton}
+      class={classes.closeButton}
       onClick={onClick}
       tabIndex={-1}
     />
