@@ -559,7 +559,7 @@ export function getErrorReportData(
   if (IS_SXG) {
     runtime = 'sxg';
     data['sxg'] = '1';
-  } else if (IS_ESM) {
+  } else if (mode.isEsm()) {
     runtime = 'esm';
     data['esm'] = '1';
   } else if (self.context && self.context.location) {

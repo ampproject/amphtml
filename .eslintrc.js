@@ -52,7 +52,6 @@ module.exports = {
     'jsdoc',
     'local',
     'module-resolver',
-    'notice',
     'prettier',
     'react',
     'react-hooks',
@@ -214,8 +213,6 @@ module.exports = {
     'local/no-mixed-interpolation': 2,
     'local/no-mixed-operators': 2,
     'local/no-module-exports': 2,
-    'local/no-rest': 2,
-    'local/no-spread': 2,
     'local/no-static-this': 2,
     'local/no-style-display': 2,
     'local/no-style-property-setting': 2,
@@ -271,16 +268,6 @@ module.exports = {
     'no-useless-concat': 2,
     'no-undef': 2,
     'no-var': 2,
-    'notice/notice': [
-      2,
-      {
-        'mustMatch': 'Copyright 20\\d{2} The AMP HTML Authors\\.',
-        'templateFile': 'build-system/common/LICENSE-TEMPLATE.txt',
-        'messages': {
-          'whenFailedToMatch': 'Missing or incorrect license header',
-        },
-      },
-    ],
     'object-shorthand': [
       2,
       'properties',

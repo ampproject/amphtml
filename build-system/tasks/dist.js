@@ -257,7 +257,7 @@ async function preBuildWebPushPublisherFiles() {
       const js = await fs.readFile(`${srcPath}/${fileName}.js`, 'utf8');
       const builtName = `${fileName}.js`;
       await fs.outputFile(`${destPath}/${builtName}`, js);
-      const jsFiles = globby.sync(`${srcPath}/*.js`);
+      const jsFiles = await globby(`${srcPath}/*.js`);
       await Promise.all(
         jsFiles.map((jsFile) => {
           return fs.copy(jsFile, `${destPath}/${path.basename(jsFile)}`);
@@ -320,7 +320,7 @@ async function preBuildExperiments() {
   const js = await fs.readFile(jsSrcPath, 'utf8');
   const builtName = 'experiments.max.js';
   await fs.outputFile(`${jsDir}/${builtName}`, js);
-  const jsFiles = globby.sync(`${expDir}/*.js`);
+  const jsFiles = await globby(`${expDir}/*.js`);
   await Promise.all(
     jsFiles.map((jsFile) => {
       return fs.copy(jsFile, `${jsDir}/${path.basename(jsFile)}`);
@@ -362,7 +362,7 @@ async function preBuildLoginDoneVersion(version) {
   const js = await fs.readFile(jsPath, 'utf8');
   const builtName = `amp-login-done-${version}.max.js`;
   await fs.outputFile(`${buildDir}/${builtName}`, js);
-  const jsFiles = globby.sync(`${srcDir}/*.js`);
+  const jsFiles = await globby(`${srcDir}/*.js`);
   await Promise.all(
     jsFiles.map((jsFile) => {
       return fs.copy(jsFile, `${buildDir}/${path.basename(jsFile)}`);
