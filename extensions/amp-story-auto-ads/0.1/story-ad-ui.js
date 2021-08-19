@@ -1,11 +1,12 @@
-import {assertHttpsUrl} from '../../../src/url';
-import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {createElementWithAttributes, iterateCursor} from '#core/dom';
-import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
+import {dict, map} from '#core/types/object';
+
+import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {CSS as ctaButtonCSS} from '../../../build/amp-story-auto-ads-cta-button-0.1.css';
 import {dev, user} from '../../../src/log';
-import {dict, map} from '#core/types/object';
 import {openWindowDialog} from '../../../src/open-window-dialog';
+import {assertHttpsUrl} from '../../../src/url';
+import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
 /**
  * @typedef {{

@@ -1,18 +1,20 @@
+import {findIndex} from '#core/types/array';
+
 import {
   AnalyticsEvents,
   AnalyticsVars,
   STORY_AD_ANALYTICS,
 } from './story-ad-analytics';
 import {ButtonTextFitter} from './story-ad-button-text-fitter';
+import {StoryAdLocalization} from './story-ad-localization';
+import {StoryAdPage} from './story-ad-page';
+
+import {devAssert} from '../../../src/log';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {
   StateProperty,
   getStoreService,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {StoryAdLocalization} from './story-ad-localization';
-import {StoryAdPage} from './story-ad-page';
-import {devAssert} from '../../../src/log';
-import {findIndex} from '#core/types/array';
-import {getServicePromiseForDoc} from '../../../src/service-helpers';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page-manager';

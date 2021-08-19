@@ -1,5 +1,3 @@
-
-
 // To use this:
 // (1) Install the App Engine SDK for Go from
 //     https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Go

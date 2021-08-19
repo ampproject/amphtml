@@ -197,8 +197,6 @@ module.exports = {
     'local/no-mixed-interpolation': 2,
     'local/no-mixed-operators': 2,
     'local/no-module-exports': 2,
-    'local/no-rest': 2,
-    'local/no-spread': 2,
     'local/no-static-this': 2,
     'local/no-style-display': 2,
     'local/no-style-property-setting': 2,

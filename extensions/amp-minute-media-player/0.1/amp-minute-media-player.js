@@ -1,8 +1,17 @@
 import {Deferred} from '#core/data-structures/promise';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '#core/dom/fullscreen';
 import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {dict} from '#core/types/object';
+
 import {Services} from '#service';
-import {VideoEvents} from '../../../src/video-interface';
-import {addParamsToUrl} from '../../../src/url';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen} from '../../../src/event-helper';
 import {
   createFrameFor,
   isJsonOrObj,
@@ -12,15 +21,8 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {dispatchCustomEvent, removeElement} from '#core/dom';
-import {
-  fullscreenEnter,
-  fullscreenExit,
-  isFullscreenElement,
-} from '#core/dom/fullscreen';
-import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {addParamsToUrl} from '../../../src/url';
+import {VideoEvents} from '../../../src/video-interface';
 
 /** @const */
 const TAG = 'amp-minute-media-player';
