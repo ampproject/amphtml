@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.179 */
+/** Version: 0.1.22.180 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -4590,7 +4590,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.179',
+    '_client': 'SwG 0.1.22.180',
   });
 }
 
@@ -5833,7 +5833,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.179',
+        '_client': 'SwG 0.1.22.180',
         'supportsEventManager': true,
       },
       args || {}
@@ -6679,7 +6679,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.179');
+    context.setClientVersion('SwG 0.1.22.180');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -7323,7 +7323,7 @@ class ButtonApi {
       button.setAttribute('lang', options['lang']);
     }
     if (!options['enable']) {
-      button.disabled = true;
+      button.setAttribute('disabled', 'disabled');
     }
     button./*OK*/ innerHTML = BUTTON_INNER_HTML.replace(
       '$theme$',
@@ -7359,7 +7359,7 @@ class ButtonApi {
       button.setAttribute('lang', options['lang']);
     }
     if (!options['enable']) {
-      button.disabled = true;
+      button.setAttribute('disabled', 'disabled');
     }
     button./*OK*/ innerHTML = BUTTON_INNER_HTML.replace(
       '$theme$',
@@ -9157,6 +9157,9 @@ class Dialog {
 
     /** @private {?./view.View} */
     this.previousProgressView_ = null;
+
+    /** @private {number} */
+    this.maxAllowedHeightRatio_ = 0.9;
   }
 
   /**
@@ -9483,7 +9486,19 @@ class Dialog {
    * @private
    */
   getMaxAllowedHeight_(height) {
-    return Math.min(height, this.doc_.getWin()./*OK*/ innerHeight * 0.9);
+    return Math.min(
+      height,
+      this.doc_.getWin()./*OK*/ innerHeight * this.maxAllowedHeightRatio_
+    );
+  }
+
+  /**
+   * Sets the max allowed height as a ratio to the viewport height. For example,
+   * ratio = 0.9 means the max allowed height is 90% of the viewport height.
+   * @param {number} ratio
+   */
+  setMaxAllowedHeightRatio(ratio) {
+    this.maxAllowedHeightRatio_ = ratio;
   }
 
   /**
@@ -9593,11 +9608,18 @@ class DialogManager {
   /**
    * @param {!./view.View} view
    * @param {boolean=} hidden
+   * @param {?number=} maxAllowedHeightRatio The max allowed height of the
+   *    view as a ratio of the viewport height.
    * @return {!Promise}
    */
-  openView(view, hidden = false) {
+  openView(view, hidden = false, maxAllowedHeightRatio = null) {
     this.handleCancellations(view);
-    return this.openDialog(hidden).then((dialog) => dialog.openView(view));
+    return this.openDialog(hidden).then((dialog) => {
+      if (maxAllowedHeightRatio) {
+        dialog.setMaxAllowedHeightRatio(maxAllowedHeightRatio);
+      }
+      return dialog.openView(view);
+    });
   }
 
   /**
