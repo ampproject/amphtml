@@ -86,9 +86,13 @@ async function buildUniversalAnalytics() {
   // Not a full-fledged minification config, but good enough to keep track of
   // how the bundle grows.
   if (argv.minified) {
-    const {code} = await terser.minify(await readFile(outfile, 'utf8'), {
+    const options = {
       mangle: {properties: {regex: /_$/}},
-    });
+    };
+    const {code} = await terser.minify(
+      await readFile(outfile, 'utf8'),
+      options
+    );
     if (!code) {
       throw new Error('could not minify');
     }
