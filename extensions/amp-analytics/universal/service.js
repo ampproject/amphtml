@@ -8,6 +8,7 @@ import {
   UrlReplacements,
 } from '#service/url-replacements-impl';
 import extensionsImpl from './extensions-impl';
+import xhrImpl from './xhr-impl';
 
 const unavailable = once(() => Promise.resolve(null));
 
@@ -24,6 +25,7 @@ const definedServices = {
   extensionsFor: () => extensionsImpl,
   timerFor: () => timerImpl,
   urlForDoc: () => urlImpl,
+  xhrFor: () => xhrImpl,
 
   // These can be null since they're optional.
   // For now, we assume that their interoperability is unavailable.
