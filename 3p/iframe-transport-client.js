@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import {IframeMessagingClient} from './iframe-messaging-client';
-import {MessageType} from '../src/3p-frame-messaging';
-import {dev, devAssert, user, userAssert} from '../src/log';
+import {IframeTransportEventDef, MessageType} from '#core/3p-frame-messaging';
 import {tryParseJson} from '#core/types/object/json';
+
+import {IframeMessagingClient} from './iframe-messaging-client';
+
+import {dev, devAssert, user, userAssert} from '../src/log';
 
 /** @private @const {string} */
 const TAG_ = 'iframe-transport-client';
@@ -63,12 +65,9 @@ export class IframeTransportClient {
       MessageType.SEND_IFRAME_TRANSPORT_EVENTS,
       MessageType.IFRAME_TRANSPORT_EVENTS,
       (eventData) => {
-        const events =
-          /**
-           * @type
-           *   {!Array<../src/3p-frame-messaging.IframeTransportEvent>}
-           */
-          (eventData['events']);
+        const events = /** @type {!Array<IframeTransportEventDef>} */ (
+          eventData['events']
+        );
         devAssert(
           events,
           'Received malformed events list in ' + this.win_.location.href

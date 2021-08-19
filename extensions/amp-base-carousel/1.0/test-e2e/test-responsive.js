@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {getCarousel, getScrollingElement, getSlide, sleep} from './helpers';
+import {sleep} from '#testing/helpers';
+import {getCarousel, getScrollingElement, getSlide} from './helpers';
 import {useStyles} from '../component.jss';
 
 const pageWidth = 1000;
@@ -29,7 +30,7 @@ describes.endtoend(
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single', 'viewer-demo'],
   },
-  async (env) => {
+  (env) => {
     const styles = useStyles();
     let controller;
     let carousel;

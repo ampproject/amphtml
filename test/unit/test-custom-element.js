@@ -15,20 +15,22 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
+
 import {AmpEvents} from '#core/constants/amp-events';
-import {BaseElement} from '../../src/base-element';
 import {CommonSignals} from '#core/constants/common-signals';
-import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '#core/dom/layout';
-import {Resource, ResourceState} from '#service/resource';
+
 import {Services} from '#service';
+import {elementConnectedCallback} from '#service/custom-element-registry';
+import {Resource, ResourceState} from '#service/resource';
+
+import {BaseElement} from '../../src/base-element';
 import {chunkInstanceForTesting} from '../../src/chunk';
 import {
   createAmpElementForTesting,
   getImplSyncForTesting,
 } from '../../src/custom-element';
-import {elementConnectedCallback} from '#service/custom-element-registry';
-import {toggleExperiment} from '#experiments';
+import {ElementStub} from '../../src/element-stub';
 
 describes.realWin('CustomElement', {amp: true}, (env) => {
   // TODO(dvoytenko, #11827): Make this test work on Safari.
@@ -704,15 +706,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         );
       });
 
-      describe('granular consent experiment', () => {
-        beforeEach(() => {
-          toggleExperiment(win, 'amp-consent-granular-consent', true);
-        });
-
-        afterEach(() => {
-          toggleExperiment(win, 'amp-consent-granular-consent', false);
-        });
-
+      describe('consent', () => {
         describe('getPurposeConsent_', () => {
           let element;
           beforeEach(() => {

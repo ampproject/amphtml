@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-import {AmpDocService, AmpDocSingle} from '#service/ampdoc-impl';
 import {RAW_OBJECT_ARGS_KEY} from '#core/constants/action-constants';
+import {htmlFor} from '#core/dom/static-template';
+import {toggle} from '#core/dom/style';
+
 import {Services} from '#service';
+import {AmpDocService, AmpDocSingle} from '#service/ampdoc-impl';
+import {cidServiceForDocForTesting} from '#service/cid-impl';
+import {installHistoryServiceForDoc} from '#service/history-impl';
 import {
   StandardActions,
   getAutofocusElementForShowAction,
 } from '#service/standard-actions-impl';
-import {cidServiceForDocForTesting} from '#service/cid-impl';
-import {htmlFor} from '#core/dom/static-template';
-import {installHistoryServiceForDoc} from '#service/history-impl';
-import {macroTask} from '#testing/yield';
-import {toggle} from '#core/dom/style';
+
+import {macroTask} from '#testing/helpers';
+
 import {user} from '../../src/log';
 
 describes.sandboxed('StandardActions', {}, (env) => {

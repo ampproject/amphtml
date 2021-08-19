@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Preact from '#preact';
-import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
-import {Lightbox} from '../../amp-lightbox/1.0/component';
-import {LightboxGalleryContext} from './context';
-import {PADDING_ALLOWANCE, useStyles} from './component.jss';
-import {forwardRef} from '#preact/compat';
+import objstr from 'obj-str';
+
 import {mod} from '#core/math';
+
+import * as Preact from '#preact';
 import {
   useCallback,
   useImperativeHandle,
@@ -27,7 +25,13 @@ import {
   useRef,
   useState,
 } from '#preact';
-import objstr from 'obj-str';
+import {forwardRef} from '#preact/compat';
+
+import {PADDING_ALLOWANCE, useStyles} from './component.jss';
+import {LightboxGalleryContext} from './context';
+
+import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
+import {Lightbox} from '../../amp-lightbox/1.0/component';
 
 /** @const {string} */
 const DEFAULT_GROUP = 'default';
@@ -282,17 +286,17 @@ export {LightboxGalleryProvider};
  * @param {!LightboxDef.CloseButtonProps} props
  * @return {PreactDef.Renderable}
  */
-function CloseButtonIcon(props) {
+function CloseButtonIcon({onClick}) {
   const classes = useStyles();
   return (
     <svg
-      {...props}
       aria-label="Close the lightbox"
       className={objstr({
         [classes.control]: true,
         [classes.topControl]: true,
         [classes.closeButton]: true,
       })}
+      onClick={onClick}
       role="button"
       tabIndex="0"
       viewBox="0 0 24 24"
@@ -312,17 +316,21 @@ function CloseButtonIcon(props) {
  * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-function NavButtonIcon({by, ...rest}) {
+function NavButtonIcon({'aria-disabled': ariaDisabled, by, disabled, onClick}) {
   const classes = useStyles();
   return (
     <svg
-      {...rest}
+      aria-disabled={ariaDisabled}
       className={objstr({
         [classes.arrow]: true,
         [classes.control]: true,
         [classes.prevArrow]: by < 0,
         [classes.nextArrow]: by > 0,
       })}
+      disabled={disabled}
+      onClick={onClick}
+      role="button"
+      tabIndex="0"
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -342,7 +350,7 @@ function NavButtonIcon({by, ...rest}) {
  * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-function ToggleViewIcon({showCarousel, ...rest}) {
+function ToggleViewIcon({onClick, showCarousel}) {
   const classes = useStyles();
   return (
     <svg
@@ -353,11 +361,11 @@ function ToggleViewIcon({showCarousel, ...rest}) {
         [classes.control]: true,
         [classes.topControl]: true,
       })}
+      onClick={onClick}
       role="button"
       tabIndex="0"
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      {...rest}
     >
       {showCarousel ? (
         <g fill="#fff">
@@ -401,6 +409,7 @@ function Thumbnail({onClick, render}) {
       className={classes.thumbnail}
       onClick={onClick}
       role="button"
+      tabIndex="0"
     >
       {render()}
     </div>

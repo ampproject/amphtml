@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
 import {VisibilityState} from '#core/constants/visibility-state';
-import {createCustomEvent} from '../../src/event-helper';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {getVendorJsPropertyName} from '#core/dom/style';
-import {whenUpgradedToCustomElement} from '../../src/amp-element-helpers';
+
+import {Services} from '#service';
+
+import {createCustomEvent} from '../../src/event-helper';
 
 const t = describes.sandboxed
   .configure()

@@ -16,9 +16,11 @@
 
 import '../../../amp-ad/0.1/amp-ad';
 import '../amp-sticky-ad';
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
-import {macroTask} from '#testing/yield';
+
+import {Services} from '#service';
+
+import {macroTask} from '#testing/helpers';
 import {poll} from '#testing/iframe';
 
 describes.realWin(

@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-instagram-1.0.css';
 import {dict} from '#core/types/object';
+
 import {isExperimentOn} from '#experiments';
+
+import {BaseElement} from './base-element';
+
+import {CSS} from '../../../build/amp-instagram-1.0.css';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */

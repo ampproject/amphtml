@@ -14,8 +14,15 @@
  * limitations under the License.
  */
 
-import {duplicateErrorIfNecessary, rethrowAsync} from '#core/error';
-import {isUserErrorMessage, user} from '../../../src/log';
+import {
+  devError,
+  devExpectedError,
+  duplicateErrorIfNecessary,
+  rethrowAsync,
+} from '#core/error';
+import {isUserErrorMessage} from '#core/error/message-helpers';
+
+import {setReportError, user} from '../../../src/log';
 
 describes.sandboxed('errors', {}, (env) => {
   describe('rethrowAsync', () => {
@@ -122,6 +129,83 @@ describes.sandboxed('errors', {}, (env) => {
       expect(duplicate.stack).to.equal(error.stack);
       expect(duplicate.args).to.equal(error.args);
       expect(duplicate.associatedElement).to.equal(error.associatedElement);
+    });
+  });
+
+  describe('helpers', () => {
+    let reportedError;
+
+    beforeEach(() =>
+      setReportError((e) => {
+        reportedError = e;
+      })
+    );
+
+    describe('devError', () => {
+      it('reuses errors', () => {
+        let error = new Error('test');
+
+        devError('TAG', error);
+        expect(reportedError).to.equal(error);
+        expect(error.message).to.equal('test');
+
+        devError('TAG', 'should fail', 'XYZ', error);
+        expect(reportedError).to.equal(error);
+        expect(error.message).to.equal('should fail XYZ: test');
+
+        // #8917
+        try {
+          // This is an intentionally bad query selector
+          document.body.querySelector('#');
+        } catch (e) {
+          error = e;
+        }
+
+        devError('TAG', error);
+        expect(reportedError).not.to.equal(error);
+        expect(reportedError.message).to.equal(error.message);
+
+        devError('TAG', 'should fail', 'XYZ', error);
+        expect(reportedError).not.to.equal(error);
+        expect(reportedError.message).to.contain('should fail XYZ:');
+      });
+    });
+
+    describe('devExpectedError', () => {
+      it('reuses errors', () => {
+        let error = new Error('test');
+
+        devExpectedError('TAG', error);
+        expect(reportedError).to.equal(error);
+        expect(error.message).to.equal('test');
+
+        devExpectedError('TAG', 'should fail', 'XYZ', error);
+        expect(reportedError).to.equal(error);
+        expect(error.message).to.equal('should fail XYZ: test');
+
+        // #8917
+        try {
+          // This is an intentionally bad query selector
+          document.body.querySelector('#');
+        } catch (e) {
+          error = e;
+        }
+
+        devExpectedError('TAG', error);
+        expect(reportedError).not.to.equal(error);
+        expect(reportedError.message).to.equal(error.message);
+
+        devExpectedError('TAG', 'should fail', 'XYZ', error);
+        expect(reportedError).not.to.equal(error);
+        expect(reportedError.message).to.contain('should fail XYZ:');
+      });
+
+      it('sets `expected` to true', () => {
+        const error = new Error('test');
+
+        devExpectedError('TAG', error);
+        expect(error.expected).to.be.true;
+      });
     });
   });
 });

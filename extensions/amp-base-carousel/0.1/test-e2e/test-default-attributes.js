@@ -31,7 +31,7 @@ describes.endtoend(
     let scrollContainer;
     let loop;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 

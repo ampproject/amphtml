@@ -15,6 +15,7 @@
  */
 
 import {poll} from '#testing/iframe';
+
 import {simulateKeyboardInteraction} from './utils';
 
 const config = describes.sandboxed.configure().ifChrome();

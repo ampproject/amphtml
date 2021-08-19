@@ -42,7 +42,7 @@ const vendorBundles = generateBundles();
  * @return {string}
  */
 function maybeGetUnminifiedName(bundles, name) {
-  if (argv.compiled) {
+  if (argv.minified) {
     for (const key of Object.keys(bundles)) {
       if (
         key == name ||
@@ -98,7 +98,7 @@ async function build(bundles, name, buildFunc) {
   bundle.watched = true;
   bundle.pendingBuild = buildFunc(bundles, name, {
     watch: true,
-    minify: argv.compiled,
+    minify: argv.minified,
     onWatchBuild: async (bundlePromise) => {
       bundle.pendingBuild = bundlePromise;
       await bundlePromise;
@@ -118,7 +118,7 @@ async function build(bundles, name, buildFunc) {
  * @return {Promise<void>}
  */
 async function lazyBuildExtensions(req, _res, next) {
-  const matcher = argv.compiled
+  const matcher = argv.minified
     ? /\/dist\/v0\/([^\/]*)\.js/ // '/dist/v0/*.js'
     : /\/dist\/v0\/([^\/]*)\.max\.js/; // '/dist/v0/*.max.js'
   await lazyBuild(req.url, matcher, extensionBundles, doBuildExtension, next);
@@ -146,7 +146,7 @@ async function lazyBuildJs(req, _res, next) {
  * @return {Promise<void>}
  */
 async function lazyBuild3pVendor(req, _res, next) {
-  const matcher = argv.compiled
+  const matcher = argv.minified
     ? new RegExp(`\\/dist\\.3p\\/${VERSION}\\/vendor\\/([^\/]*)\\.js`) // '/dist.3p/21900000/vendor/*.js'
     : /\/dist\.3p\/current\/vendor\/([^\/]*)\.max\.js/; // '/dist.3p/current/vendor/*.max.js'
   await lazyBuild(req.url, matcher, vendorBundles, doBuild3pVendor, next);

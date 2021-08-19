@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,11 @@ export const EXPERIMENTS = [
     id: 'amp-lightbox-a4a-proto',
     name: 'Allows the new lightbox experience to be used in A4A (prototype).',
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
+  },
+  {
+    id: 'analytics-browser-events',
+    name: 'Allows tracking of a custom set of browser events',
+    spec: 'https://github.com/ampproject/amphtml/pull/35193',
   },
   {
     id: 'ios-fixed-no-transfer',
@@ -166,24 +171,14 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/30291',
   },
   {
-    id: 'tcf-post-message-proxy-api',
-    name: 'Proxy for TCF PostMessageAPI to send TCData to 3p iframes',
-    spec: 'https://github.com/ampproject/amphtml/issues/30385',
-  },
-  {
     id: 'dfp-render-on-idle-cwv-exp',
     name: 'To measure the CWV impact of ads idle rendering',
     spec: 'https://github.com/ampproject/amphtml/issues/31436',
   },
   {
-    id: 'amp-consent-granular-consent',
-    name: 'Client-side granular consent',
-    spec: 'https://github.com/ampproject/amphtml/issues/31607',
-  },
-  {
-    id: 'amp-story-page-attachment-ui-v2',
-    name: 'New UI for all new page attachments in stories format',
-    spec: 'https://github.com/ampproject/amphtml/projects/123',
+    id: 'amp-story-desktop-one-panel',
+    name: 'New desktop one-panel UI with background blur for stories.',
+    spec: 'https://github.com/ampproject/amphtml/projects/128',
   },
   {
     id: 'flexible-bitrate',

@@ -14,24 +14,29 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '#core/constants/amp-events';
+import {CommonSignals} from '#core/constants/common-signals';
+import {ReadyState} from '#core/constants/ready-state';
+import {tryResolve} from '#core/data-structures/promise';
+import {Signals} from '#core/data-structures/signals';
+import * as dom from '#core/dom';
 import {
   UPGRADE_TO_CUSTOMELEMENT_PROMISE,
   UPGRADE_TO_CUSTOMELEMENT_RESOLVER,
-} from './amp-element-helpers';
+} from '#core/dom/amp-element-helpers';
+import {Layout, LayoutPriority, isLoadingAllowed} from '#core/dom/layout';
+import {MediaQueryProps} from '#core/dom/media-query-props';
+import * as query from '#core/dom/query';
+import {setStyle} from '#core/dom/style';
+import {rethrowAsync} from '#core/error';
+import {toWin} from '#core/window';
+
+import {Services} from '#service';
+import {ResourceState} from '#service/resource';
+import {getSchedulerForDoc} from '#service/scheduler';
+
 import {startupChunk} from './chunk';
 import {shouldBlockOnConsentByMeta} from './consent';
-import {AmpEvents} from './core/constants/amp-events';
-import {CommonSignals} from './core/constants/common-signals';
-import {ReadyState} from './core/constants/ready-state';
-import {tryResolve} from './core/data-structures/promise';
-import {Signals} from './core/data-structures/signals';
-import * as dom from './core/dom';
-import {Layout, LayoutPriority, isLoadingAllowed} from './core/dom/layout';
-import {MediaQueryProps} from './core/dom/media-query-props';
-import * as query from './core/dom/query';
-import {setStyle} from './core/dom/style';
-import {rethrowAsync} from './core/error';
-import {toWin} from './core/window';
 import {ElementStub} from './element-stub';
 import {
   blockedByConsentError,
@@ -40,12 +45,8 @@ import {
   isCancellation,
   reportError,
 } from './error-reporting';
-import {isExperimentOn} from './experiments';
 import {dev, devAssert, user, userAssert} from './log';
 import {getMode} from './mode';
-import {Services} from './service';
-import {ResourceState} from './service/resource';
-import {getSchedulerForDoc} from './service/scheduler';
 import {applyStaticLayout} from './static-layout';
 import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
 
@@ -513,16 +514,8 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       // Wait for consent.
       const consentPromise = implPromise.then(() => {
         const policyId = this.getConsentPolicy_();
-        const isGranularConsentExperimentOn = isExperimentOn(
-          win,
-          'amp-consent-granular-consent'
-        );
-        const purposeConsents =
-          isGranularConsentExperimentOn && !policyId
-            ? this.getPurposesConsent_()
-            : null;
-
-        if (!policyId && !(isGranularConsentExperimentOn && purposeConsents)) {
+        const purposeConsents = !policyId ? this.getPurposesConsent_() : null;
+        if (!policyId && !purposeConsents) {
           return;
         }
         // Must have policyId or granularExp w/ purposeConsents

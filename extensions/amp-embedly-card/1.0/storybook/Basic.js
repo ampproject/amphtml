@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import {text, withKnobs} from '@storybook/addon-knobs';
+
 import * as Preact from '#preact';
+
 import {EmbedlyCard} from '../component';
 import {EmbedlyContext} from '../embedly-context';
-import {text, withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'EmbedlyCard',
@@ -28,8 +30,6 @@ export default {
 export const _default = () => {
   return (
     <EmbedlyCard
-      bootstrap="http://localhost:9001/dist.3p/current/vendor/embedly.max.js"
-      src="http://ads.localhost:9001/dist.3p/current/frame.max.html"
       url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
       title="Embedly Card"
       style={{width: '400px', height: '400px'}}
@@ -43,8 +43,6 @@ export const WithAPIKey = () => {
   return (
     <EmbedlyContext.Provider value={apiKey}>
       <EmbedlyCard
-        bootstrap="http://localhost:9001/dist.3p/current/vendor/embedly.max.js"
-        src="http://ads.localhost:9001/dist.3p/current/frame.max.html"
         url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
         title="Embedly Card"
         style={{width: '400px', height: '400px'}}

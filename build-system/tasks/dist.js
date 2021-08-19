@@ -116,20 +116,10 @@ async function runPreDistSteps(options) {
  * @return {Promise<void>}
  */
 async function dist() {
-  await doDist();
-}
-
-/**
- * Performs a minified build with the given extra args.
- *
- * @param {Object=} extraArgs
- * @return {Promise<void>}
- */
-async function doDist(extraArgs = {}) {
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
   const options = {
-    fortesting: extraArgs.fortesting || argv.fortesting,
+    fortesting: argv.fortesting,
     minify: true,
     watch: argv.watch,
   };
@@ -267,7 +257,7 @@ async function preBuildWebPushPublisherFiles() {
       const js = await fs.readFile(`${srcPath}/${fileName}.js`, 'utf8');
       const builtName = `${fileName}.js`;
       await fs.outputFile(`${destPath}/${builtName}`, js);
-      const jsFiles = globby.sync(`${srcPath}/*.js`);
+      const jsFiles = await globby(`${srcPath}/*.js`);
       await Promise.all(
         jsFiles.map((jsFile) => {
           return fs.copy(jsFile, `${destPath}/${path.basename(jsFile)}`);
@@ -330,7 +320,7 @@ async function preBuildExperiments() {
   const js = await fs.readFile(jsSrcPath, 'utf8');
   const builtName = 'experiments.max.js';
   await fs.outputFile(`${jsDir}/${builtName}`, js);
-  const jsFiles = globby.sync(`${expDir}/*.js`);
+  const jsFiles = await globby(`${expDir}/*.js`);
   await Promise.all(
     jsFiles.map((jsFile) => {
       return fs.copy(jsFile, `${jsDir}/${path.basename(jsFile)}`);
@@ -372,7 +362,7 @@ async function preBuildLoginDoneVersion(version) {
   const js = await fs.readFile(jsPath, 'utf8');
   const builtName = `amp-login-done-${version}.max.js`;
   await fs.outputFile(`${buildDir}/${builtName}`, js);
-  const jsFiles = globby.sync(`${srcDir}/*.js`);
+  const jsFiles = await globby(`${srcDir}/*.js`);
   await Promise.all(
     jsFiles.map((jsFile) => {
       return fs.copy(jsFile, `${buildDir}/${path.basename(jsFile)}`);
@@ -382,7 +372,6 @@ async function preBuildLoginDoneVersion(version) {
 
 module.exports = {
   dist,
-  doDist,
   runPreDistSteps,
 };
 
@@ -394,11 +383,11 @@ dist.flags = {
   pseudo_names:
     'Compile with readable names (useful while profiling / debugging production code)',
   pretty_print:
-    'Output compiled code with whitespace (useful while profiling / debugging production code)',
+    'Output code with whitespace (useful while profiling / debugging production code)',
   fortesting: 'Compile production binaries for local testing',
   noconfig: 'Compile production binaries without applying AMP_CONFIG',
   config: 'Set the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-  coverage: 'Instrument compiled code for collecting coverage information',
+  coverage: 'Instrument code for collecting coverage information',
   extensions: 'Build only the listed extensions',
   extensions_from: 'Build only the extensions from the listed AMP(s)',
   noextensions: 'Build with no extensions',
@@ -415,7 +404,7 @@ dist.flags = {
     'Build runtime with the EXPERIMENT constant set to true',
   sanitize_vars_for_diff:
     'Sanitize the output to diff build results (requires --pseudo_names)',
-  sxg: 'Output the compiled code for the SxG build',
+  sxg: 'Output the minified code for the SxG build',
   warning_level:
     "Optionally set closure's warning level to one of [quiet, default, verbose]",
 };

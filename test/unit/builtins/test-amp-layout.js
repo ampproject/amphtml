@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {AmpLayout, buildDom} from '#builtins/amp-layout/amp-layout';
+
 import {createElementWithAttributes} from '#core/dom';
 import {Layout} from '#core/dom/layout';
 
@@ -54,5 +56,22 @@ describes.realWin('amp-layout', {amp: true}, (env) => {
 
     expect(ampLayout.childNodes).have.length(2);
     expect(ampLayout.innerHTML).equal(children);
+  });
+
+  it('buildDom and buildCallback should result in the same outerHTML', () => {
+    const layout1 = createElementWithAttributes(
+      env.win.document,
+      'amp-layout',
+      {
+        width: 100,
+        height: 100,
+      }
+    );
+    const layout2 = layout1.cloneNode(/* deep */ true);
+
+    new AmpLayout(layout1).buildCallback();
+    buildDom(layout2);
+
+    expect(layout1.outerHTML).to.equal(layout2.outerHTML);
   });
 });

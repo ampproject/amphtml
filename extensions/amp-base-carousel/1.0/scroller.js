@@ -62,12 +62,12 @@ function ScrollerWithRef(
     lightboxGroup,
     loop,
     mixedLength,
+    onClick,
     restingIndex,
     setRestingIndex,
     snap,
     snapBy = 1,
     visibleCount,
-    ...rest
   },
   ref
 ) {
@@ -268,12 +268,12 @@ function ScrollerWithRef(
   return (
     <div
       ref={containerRef}
+      onClick={onClick}
       onScroll={handleScroll}
       class={`${classes.scrollContainer} ${classes.hideScrollbar} ${
         axis === Axis.X ? classes.horizontalScroll : classes.verticalScroll
       }`}
       tabindex={0}
-      {...rest}
     >
       {slides}
     </div>
@@ -371,7 +371,9 @@ function renderSlides(
             ? classes.centerAlign
             : classes.startAlign
         } ${_thumbnails ? classes.thumbnails : ''} `}
-        group={lightboxGroup}
+        // lightboxGroup is a string when defined, and `false` otherwise. In the case
+        // of the latter, we do not want to pass group={false} into the DOM.
+        group={lightboxGroup || undefined}
         part="slide"
         style={{
           flex: mixedLength ? '0 0 auto' : `0 0 ${100 / visibleCount}%`,

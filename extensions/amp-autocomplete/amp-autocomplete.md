@@ -29,12 +29,6 @@ limitations under the License.
 
 The `amp-autocomplete` extension should be used for suggesting completed items based on user input to help users carry out their task more quickly.
 
-[filter formats="email"]
-
-Warning: This component is currently experimental in the AMP for Email format as email clients add support for the feature. Until the component is publicly available in the format, you will notice the component is in some cases valid and sendable in emails but may be only functioning in its fallback behavior capacity across email clients as well as in their respective playgrounds. The fallback for the component does not display autocomplete suggestions, and will behave as the unenhanced `input` or `textarea` field it is given.
-
-[/filter] <!-- formats="email" -->
-
 This can be used to power search experiences, in cases where the user may not know the full range of potential inputs, or in forms to help ensure inputs where there may be multiple ways to express the same intent (using a state abbreviation instead of its full name, for example) yield more predictable results.
 
 Example:
@@ -177,8 +171,7 @@ Specifies the key to the data array within the JSON response. Nested keys can be
 
 [filter formats="websites"]
 
-  <pre lang="html">
-
+```html
       <amp-autocomplete filter="prefix">
           <input type="text">
           <script type=application/json>
@@ -186,45 +179,41 @@ Specifies the key to the data array within the JSON response. Nested keys can be
            </script>
 
       </amp-autocomplete>
+```
 
-  </pre>
-  <pre lang="html">
+```html
+<amp-autocomplete filter="prefix" items="fruit">
+  <input type="text">
+  <script type=application/json>
+    { "fruit" : ["kiwis", "oranges", "watermelons"]  }
+    </script>
+</amp-autocomplete>
+```
 
-      <amp-autocomplete filter="prefix" items="fruit">
-        <input type="text">
-        <script type=application/json>
-          { "fruit" : ["kiwis", "oranges", "watermelons"]  }
-          </script>
-      </amp-autocomplete>
-
-  </pre>
 [/filter] <!-- formats="websites" -->
 
 [filter formats="email"]
 
 Note that the following data is returned by the remote `src`:
 
-  <pre lang="json">
-    { 
-      "items" : ["apples", "bananas", "pears"], 
-      "fruit" : ["kiwis", "oranges", "watermelons"] 
-    }
-  </pre>
+```json
+{
+  "items" : ["apples", "bananas", "pears"],
+  "fruit" : ["kiwis", "oranges", "watermelons"]
+}
+```
 
-  <pre lang="html">
+```html
+<amp-autocomplete src="{{server_for_email}}/static/samples/json/amp-autocomplete-fruit-items.json">
+  <input type="text">
+</amp-autocomplete>
+```
 
-      <amp-autocomplete src="{{server_for_email}}/static/samples/json/amp-autocomplete-fruit-items.json">
-        <input type="text">
-      </amp-autocomplete>
-
-  </pre>
-  <pre lang="html">
-
-      <amp-autocomplete src="{{server_for_email}}/static/samples/json/amp-autocomplete-fruit-items.json" items="fruit">
-        <input type="text">
-      </amp-autocomplete>
-
-  </pre>
+```html
+<amp-autocomplete src="{{server_for_email}}/static/samples/json/amp-autocomplete-fruit-items.json" items="fruit">
+  <input type="text">
+</amp-autocomplete>
+```
 
 [/filter] <!-- formats="email" -->
 

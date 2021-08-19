@@ -15,8 +15,9 @@
  */
 
 import '../../../amp-mustache/0.2/amp-mustache';
-import {AmpAdTemplateHelper} from '../amp-ad-template-helper';
 import {Xhr} from '#service/xhr-impl';
+
+import {AmpAdTemplateHelper} from '../amp-ad-template-helper';
 
 describes.fakeWin('AmpAdTemplateHelper', {amp: true}, (env) => {
   const cdnUrl =

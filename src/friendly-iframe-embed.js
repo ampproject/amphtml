@@ -14,42 +14,46 @@
  * limitations under the License.
  */
 
-import {urls} from './config';
-import {CommonSignals} from './core/constants/common-signals';
-import {VisibilityState} from './core/constants/visibility-state';
-import {Deferred} from './core/data-structures/promise';
-import {Signals} from './core/data-structures/signals';
-import {isDocumentReady} from './core/document-ready';
-import {escapeHtml} from './core/dom';
-import {layoutRectLtwh, moveLayoutRect} from './core/dom/layout/rect';
+import {CommonSignals} from '#core/constants/common-signals';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {Deferred} from '#core/data-structures/promise';
+import {Signals} from '#core/data-structures/signals';
+import {isDocumentReady} from '#core/document-ready';
+import {escapeHtml} from '#core/dom';
+import {layoutRectLtwh, moveLayoutRect} from '#core/dom/layout/rect';
 import {
   px,
   resetStyles,
   setImportantStyles,
   setStyle,
   setStyles,
-} from './core/dom/style';
-import {rethrowAsync} from './core/error';
-import {toWin} from './core/window';
+} from '#core/dom/style';
+import {rethrowAsync} from '#core/error';
+import * as mode from '#core/mode';
+import {toWin} from '#core/window';
+
+import {install as installAbortController} from '#polyfills/abort-controller';
+import {install as installCustomElements} from '#polyfills/custom-elements';
+import {install as installDocContains} from '#polyfills/document-contains';
+import {install as installDOMTokenList} from '#polyfills/domtokenlist';
+import {installForChildWin as installIntersectionObserver} from '#polyfills/intersection-observer';
+import {installForChildWin as installResizeObserver} from '#polyfills/resize-observer';
+
+import {Services} from '#service';
+import {installAmpdocServicesForEmbed} from '#service/core-services';
+import {installTimerInEmbedWindow} from '#service/timer-impl';
+
+import {urls} from './config';
 import {loadPromise} from './event-helper';
 import {FIE_EMBED_PROP} from './iframe-helper';
 import {whenContentIniLoad} from './ini-load';
 import {dev, devAssert, userAssert} from './log';
 import {getMode} from './mode';
-import {install as installAbortController} from './polyfills/abort-controller';
-import {install as installCustomElements} from './polyfills/custom-elements';
-import {install as installDocContains} from './polyfills/document-contains';
-import {install as installDOMTokenList} from './polyfills/domtokenlist';
-import {installForChildWin as installIntersectionObserver} from './polyfills/intersection-observer';
-import {installForChildWin as installResizeObserver} from './polyfills/resize-observer';
-import {Services} from './service';
 import {
   disposeServicesForEmbed,
   getTopWindow,
   setParentWindow,
 } from './service-helpers';
-import {installAmpdocServicesForEmbed} from './service/core-services';
-import {installTimerInEmbedWindow} from './service/timer-impl';
 import {installStylesForDoc} from './style-installer';
 
 import {cssText as ampSharedCss} from '../build/ampshared.css';
@@ -696,7 +700,7 @@ export class FriendlyIframeEmbed {
  * @param {!Window} childWin
  */
 function installPolyfillsInChildWindow(parentWin, childWin) {
-  if (!IS_ESM) {
+  if (!mode.isEsm()) {
     installDocContains(childWin);
     installDOMTokenList(childWin);
   }
@@ -747,7 +751,7 @@ export class Installers {
       })
       .then(getDelayPromise)
       .then(() => {
-        if (IS_ESM) {
+        if (mode.isEsm()) {
           // TODO: This is combined (ampdoc + shared), not just shared
           // const css = parentWin.document.querySelector('style[amp-runtime]')
           // .textContent;

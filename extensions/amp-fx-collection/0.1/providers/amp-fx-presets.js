@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-import {FxType} from '../fx-type';
+import {
+  assertDoesNotContainDisplay,
+  computedStyle,
+  setStyles,
+} from '#core/dom/style';
+
 import {Services} from '#service';
-import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
-import {computedStyle, setStyles} from '#core/dom/style';
+
 import {dev, devAssert, userAssert} from '../../../../src/log';
+import {FxType} from '../fx-type';
 
 /**
  * These fully qualified names, my goodness.

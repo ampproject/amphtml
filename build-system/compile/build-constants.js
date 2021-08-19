@@ -26,7 +26,7 @@ const testTasks = [
 ];
 const isTestTask = testTasks.some((task) => argv._.includes(task));
 const isProd = argv._.includes('dist') && !argv.fortesting;
-const isMinified = argv._.includes('dist') || !!argv.compiled;
+const isMinified = argv._.includes('dist') || !!argv.minified;
 
 /**
  * Build time constants. Used by babel but hopefully one day directly by the bundlers..

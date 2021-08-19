@@ -19,8 +19,8 @@ import {
   devAssertNumber,
   devAssertString,
   userAssert,
-} from './core/assert';
-import {transparentPng} from './core/dom/img';
+} from '#core/assert';
+import {transparentPng} from '#core/dom/img';
 import {
   Layout,
   getLayoutClass,
@@ -29,11 +29,13 @@ import {
   isLayoutSizeDefined,
   parseLayout,
   parseLength,
-} from './core/dom/layout';
-import {htmlFor} from './core/dom/static-template';
-import {setStyle, setStyles, toggle} from './core/dom/style';
-import {toWin} from './core/window';
-import {isExperimentOn} from './experiments';
+} from '#core/dom/layout';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyle, setStyles, toggle} from '#core/dom/style';
+import * as mode from '#core/mode';
+import {toWin} from '#core/window';
+
+import {isExperimentOn} from '#experiments';
 
 /**
  * Whether aspect-ratio CSS can be used to implement responsive layouts.
@@ -223,7 +225,7 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
     const intrinsicSizer = sizer.firstElementChild;
     intrinsicSizer.setAttribute(
       'src',
-      !IS_ESM && fixIeIntrinsic && element.ownerDocument
+      !mode.isEsm() && fixIeIntrinsic && element.ownerDocument
         ? transparentPng(
             element.ownerDocument,
             devAssertNumber(getLengthNumeral(width)),

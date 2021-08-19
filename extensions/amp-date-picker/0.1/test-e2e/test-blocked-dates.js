@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Key} from '../../../../build-system/tasks/e2e/e2e-types';
+import {Key} from '#testing/helpers/types';
 
 describes.endtoend(
   'amp-date-picker',
@@ -22,10 +22,10 @@ describes.endtoend(
     fixture: 'amp-date-picker/blocked-dates.html',
     environments: ['single', 'viewer-demo'],
   },
-  async (env) => {
+  (env) => {
     let controller;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 
