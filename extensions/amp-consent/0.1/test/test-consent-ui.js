@@ -95,6 +95,8 @@ describes.realWin(
       resetServiceForTesting(win, 'consentStateManager');
       registerServiceBuilder(win, 'consentStateManager', function () {
         return Promise.resolve({
+          consentPageViewId64: () =>
+            Promise.resolve('foo_consent_page_view_id_64_123'),
           getLastConsentInstanceInfo: () => {
             return Promise.resolve(
               constructConsentInfo(
@@ -325,7 +327,12 @@ describes.realWin(
 
       it('should expand the promptUISrc', async () => {
         const config = dict({
-          'promptUISrc': 'https://example.test/?cid=CLIENT_ID&r=RANDOM',
+          'promptUISrc':
+            'https://example.test/?' +
+            'cid=CLIENT_ID&' +
+            'clientconfig=CONSENT_INFO(clientConfig)&' +
+            'cpid=CONSENT_PAGE_VIEW_ID_64&' +
+            'r=RANDOM',
           'clientConfig': {
             'test': 'ABC',
           },
@@ -333,7 +340,17 @@ describes.realWin(
         consentUI = new ConsentUI(mockInstance, config);
         consentUI.show(false);
         await macroTask();
-        expect(consentUI.ui_.src).to.match(/cid=amp-.{22}&r=RANDOM/);
+        await macroTask();
+        expect(consentUI.ui_.src).to.match(
+          new RegExp(
+            'cid=amp-.{22}&' +
+              `clientconfig=${encodeURIComponent(
+                JSON.stringify(config.clientConfig)
+              )}&` +
+              'cpid=foo_consent_page_view_id_64_123&' +
+              'r=RANDOM'
+          )
+        );
       });
 
       it("should pass info into iframe's name", async () => {
