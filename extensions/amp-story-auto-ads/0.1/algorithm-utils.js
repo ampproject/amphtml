@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import {getExperimentBranch} from '#experiments';
+import {StoryAdPlacements} from '#experiments/story-ad-placements';
+
 import {CountPagesAlgorithm} from './algorithm-count-pages';
 import {PredeterminedPositionAlgorithm} from './algorithm-predetermined';
-import {StoryAdPlacements} from '#experiments/story-ad-placements';
-import {getExperimentBranch} from '#experiments';
 
 /**
  * Choose placement algorithm implementation.

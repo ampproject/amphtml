@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 import {
   A4AVarNames,
   createCta,
@@ -22,7 +23,6 @@ import {
   maybeCreateAttribution,
   validateCtaMetadata,
 } from '../story-ad-ui';
-import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 
 describes.realWin('story-ad-ui', {amp: true}, (env) => {
   let win;

@@ -14,44 +14,48 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from '#core/constants/common-signals';
+import {toggleAttribute} from '#core/dom';
+import {svgFor} from '#core/dom/static-template';
+import {setStyle} from '#core/dom/style';
+import {dict} from '#core/types/object';
+
+import {forceExperimentBranch, getExperimentBranch} from '#experiments';
 import {
   AdvanceExpToTime,
   StoryAdAutoAdvance,
   divertStoryAdAutoAdvance,
 } from '#experiments/story-ad-auto-advance';
+import {divertStoryAdPlacements} from '#experiments/story-ad-placements';
+import {
+  StoryAdSegmentExp,
+  ViewerSetTimeToBranch,
+} from '#experiments/story-ad-progress-segment';
+
+import {Services} from '#service';
+
+import {getPlacementAlgo} from './algorithm-utils';
 import {
   AnalyticsEvents,
   AnalyticsVars,
   STORY_AD_ANALYTICS,
   StoryAdAnalytics,
 } from './story-ad-analytics';
+import {StoryAdConfig} from './story-ad-config';
+import {StoryAdPageManager} from './story-ad-page-manager';
+
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
-import {CommonSignals} from '#core/constants/common-signals';
-import {EventType, dispatch} from '../../amp-story/1.0/events';
-import {Services} from '#service';
+import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
+import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
+import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
+import {dev, devAssert, userAssert} from '../../../src/log';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {StoryAdConfig} from './story-ad-config';
-import {StoryAdPageManager} from './story-ad-page-manager';
-import {
-  StoryAdSegmentExp,
-  ViewerSetTimeToBranch,
-} from '#experiments/story-ad-progress-segment';
-import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
+import {EventType, dispatch} from '../../amp-story/1.0/events';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {divertStoryAdPlacements} from '#experiments/story-ad-placements';
-import {forceExperimentBranch, getExperimentBranch} from '#experiments';
-import {getPlacementAlgo} from './algorithm-utils';
-import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
-import {setStyle} from '#core/dom/style';
-import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
-import {toggleAttribute} from '#core/dom';
-import {svgFor} from '#core/dom/static-template';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads';

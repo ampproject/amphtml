@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
+import {StoryAdPlacements} from '#experiments/story-ad-placements';
+
+import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {
   Action,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {
   PredeterminedPositionAlgorithm,
   getAdPositions,
   getNumberOfAds,
 } from '../algorithm-predetermined';
 import {StoryAdPageManager} from '../story-ad-page-manager';
-import {StoryAdPlacements} from '#experiments/story-ad-placements';
 
 describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
   let storeService;

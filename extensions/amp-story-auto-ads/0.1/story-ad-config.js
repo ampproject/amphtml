@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
 import {isJsonScriptTag} from '#core/dom';
 import {isObject} from '#core/types';
 import {parseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
 import {user, userAssert} from '../../../src/log';
 
 /** @const {string} */

@@ -19,11 +19,18 @@ import {
   CONSENT_STRING_TYPE,
 } from '#core/constants/consent-state';
 import {Deferred} from '#core/data-structures/promise';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
-import {addParamsToUrl} from '../../../src/url';
+import {removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {
+  observeContentSize,
+  unobserveContentSize,
+} from '#core/dom/layout/size-observer';
+import {PauseHelper} from '#core/dom/video/pause-helper';
 import {dict} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
@@ -31,14 +38,9 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getData} from '../../../src/event-helper';
-import {
-  observeContentSize,
-  unobserveContentSize,
-} from '#core/dom/layout/size-observer';
-import {removeElement} from '#core/dom';
-import {setIsMediaComponent} from '../../../src/video-interface';
-import {tryParseJson} from '#core/types/object/json';
 import {userAssert} from '../../../src/log';
+import {addParamsToUrl} from '../../../src/url';
+import {setIsMediaComponent} from '../../../src/video-interface';
 
 /**
  * @param {!Array<T>} promises
