@@ -19,7 +19,6 @@ import {htmlFor} from '#core/dom/static-template';
 import {toggleExperiment} from '#experiments';
 import {waitFor} from '#testing/test-helper';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-import {elementStringOrPassThru} from '#core/error/message-helpers';
 
 describes.realWin(
   'amp-iframe-v1.0',

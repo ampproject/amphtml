@@ -47,7 +47,7 @@ describes.sandboxed('Iframe preact component v1.0', {}, (env) => {
   it('should trigger onLoadCallback when iframe loads', () => {
     const onLoadSpy = env.sandbox.spy();
     const wrapper = mount(
-      <Iframe src={'https://www.google.com'} onLoadCallback={onLoadSpy} />
+      <Iframe src={'https://www.google.com'} onLoad={onLoadSpy} />
     );
     wrapper.find('iframe').simulate('load');
     expect(onLoadSpy).to.be.calledOnce;
