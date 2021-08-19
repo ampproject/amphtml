@@ -7,7 +7,7 @@ import {elementByTag} from '#core/dom/query';
 import {expandConsentEndpointUrl} from './consent-config';
 import {getConsentStateValue} from './consent-info';
 import {getData} from '../../../src/event-helper';
-import {getServicePromiseForDoc} from '../../../src/service-helpers';
+import {getConsentStateManager} from './consent-state-manager';
 import {htmlFor} from '#core/dom/static-template';
 import {insertAtStart, removeElement, tryFocus} from '#core/dom';
 import {
@@ -17,7 +17,6 @@ import {
 import {setImportantStyles, setStyles, toggle} from '#core/dom/style';
 
 const TAG = 'amp-consent-ui';
-const CONSENT_STATE_MANAGER = 'consentStateManager';
 const MINIMUM_INITIAL_HEIGHT = 10;
 const DEFAULT_INITIAL_HEIGHT = 30;
 const MODAL_HEIGHT_ENABLED = 60;
@@ -161,8 +160,8 @@ export class ConsentUI {
     /** @private @const {!Function} */
     this.boundHandleIframeMessages_ = this.handleIframeMessages_.bind(this);
 
-    /** @private {?Promise<string>} */
-    this.promptUISrcPromise_ = null;
+    /** @private @const {!JsonObject} */
+    this.config_ = config;
 
     this.init_(config, opt_postPromptUI);
   }
@@ -203,10 +202,7 @@ export class ConsentUI {
       this.isCreatedIframe_ = true;
       assertHttpsUrl(promptUISrc, this.parent_);
       // TODO: Preconnect to the promptUISrc?
-      this.promptUISrcPromise_ = expandConsentEndpointUrl(
-        this.parent_,
-        promptUISrc
-      );
+
       this.ui_ = this.createPromptIframe_(promptUISrc);
       this.placeholder_ = this.createPlaceholder_();
       this.clientConfig_ = config['clientConfig'] || null;
@@ -232,7 +228,7 @@ export class ConsentUI {
     classList.remove('amp-hidden');
     // Add to fixed layer
     this.baseInstance_.getViewport().addToFixedLayer(this.parent_);
-    if (this.isCreatedIframe_ && this.promptUISrcPromise_) {
+    if (this.isCreatedIframe_) {
       // show() can be called multiple times, but notificationsUiManager
       // ensures that only 1 is shown at a time, so no race condition here
       this.isActionPromptTrigger_ = isActionPromptTrigger;
@@ -510,10 +506,7 @@ export class ConsentUI {
    * @return {!Promise<JsonObject>}
    */
   getClientInfoPromise_() {
-    const consentStateManagerPromise = getServicePromiseForDoc(
-      this.ampdoc_,
-      CONSENT_STATE_MANAGER
-    );
+    const consentStateManagerPromise = getConsentStateManager(this.ampdoc_);
     return consentStateManagerPromise.then((consentStateManager) => {
       return consentStateManager
         .getLastConsentInstanceInfo()
@@ -549,10 +542,16 @@ export class ConsentUI {
     classList.add(consentUiClasses.loading);
     toggle(dev().assertElement(this.ui_), false);
 
-    const iframePromise = this.promptUISrcPromise_.then((expandedSrc) => {
-      this.removeIframe_ = false;
-      this.ui_.src = expandedSrc;
-      return this.getClientInfoPromise_().then((clientInfo) => {
+    this.removeIframe_ = false;
+    const iframePromise = this.getClientInfoPromise_().then((clientInfo) => {
+      return expandConsentEndpointUrl(
+        this.parent_,
+        this.config_['promptUISrc'],
+        {
+          'CONSENT_INFO': (property) => JSON.stringify(clientInfo[property]),
+        }
+      ).then((expandedSrc) => {
+        this.ui_.src = expandedSrc;
         this.ui_.setAttribute('name', JSON.stringify(clientInfo));
         this.win_.addEventListener('message', this.boundHandleIframeMessages_);
         insertAtStart(this.parent_, dev().assertElement(this.ui_));

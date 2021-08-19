@@ -561,7 +561,6 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
             },
           };
         });
-
         instance = new ConsentInstance(ampdoc, 'test', {
           'onUpdateHref': '//updateHref',
         });
@@ -569,6 +568,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
 
       it('send update request on reject/accept', function* () {
         yield instance.update(CONSENT_ITEM_STATE.ACCEPTED);
+        yield macroTask();
         yield macroTask();
         expect(requestSpy).to.be.calledOnce;
         expect(requestSpy).to.be.calledWith('//updateHref');
