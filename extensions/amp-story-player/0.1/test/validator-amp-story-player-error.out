@@ -1,17 +1,5 @@
 FAIL
 |  <!--
-|    Copyright 2021 The AMP HTML Authors. All Rights Reserved.
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|        http://www.apache.org/licenses/LICENSE-2.0
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    Tests that should fail for the amp-story-player tag.
 |  -->
@@ -32,7 +20,7 @@ FAIL
 |      <!-- <img> should be a child of <a> -->
 |      <img data-amp-story-player-poster-img src="https://www.example.com/img" width="360" height="600" loading="lazy">
 >>     ^~~~~~~~~
-amp-story-player/0.1/test/validator-amp-story-player-error.html:32:4 The parent tag of tag 'img' is 'amp-story-player', but it can only be 'a'. (see https://amp.dev/documentation/components/amp-story-player/)
+amp-story-player/0.1/test/validator-amp-story-player-error.html:20:4 The parent tag of tag 'img' is 'amp-story-player', but it can only be 'a'. (see https://amp.dev/documentation/components/amp-story-player/)
 |      <a href="https://www.example.com" class="story">
 |        <span class="title">A local’s guide to what to eat and do in New York City</span>
 |      </a>
@@ -40,14 +28,14 @@ amp-story-player/0.1/test/validator-amp-story-player-error.html:32:4 The parent 
 |        <!-- <img> should contain src attribute -->
 |        <img data-amp-story-player-poster-img width="360" height="600" loading="lazy">
 >>       ^~~~~~~~~
-amp-story-player/0.1/test/validator-amp-story-player-error.html:38:6 The mandatory attribute 'src' is missing in tag 'img'. (see https://amp.dev/documentation/components/amp-story-player/)
+amp-story-player/0.1/test/validator-amp-story-player-error.html:26:6 The mandatory attribute 'src' is missing in tag 'img'. (see https://amp.dev/documentation/components/amp-story-player/)
 |        <span class="title">A local’s guide to what to eat and do in Mexico City</span>
 |      </a>
 |      <a href="https://www.example.com2" class="story">
 |        <!-- <img> should contain data-amp-story-player-poster-img attribute -->
 |        <img src="https://www.example.com/img" width="360" height="600" loading="lazy">
 >>       ^~~~~~~~~
-amp-story-player/0.1/test/validator-amp-story-player-error.html:43:6 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
+amp-story-player/0.1/test/validator-amp-story-player-error.html:31:6 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
 |        <span class="title">A local’s guide to what to eat and do in Mexico City</span>
 |      </a>
 |  </amp-story-player>

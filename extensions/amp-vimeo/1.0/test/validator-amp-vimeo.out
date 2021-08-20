@@ -1,20 +1,5 @@
 FAIL
 |  <!--
-|    Copyright 2021 The AMP HTML Authors. All Rights Reserved.
-|
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|
-|        http://www.apache.org/licenses/LICENSE-2.0
-|
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    This tests validation for the amp-vimeo tag version 1.0.
 |  -->
@@ -56,7 +41,7 @@ FAIL
 |      <!-- invalid: bad videoid -->
 |      <amp-vimeo
 >>     ^~~~~~~~~
-amp-vimeo/1.0/test/validator-amp-vimeo.html:56:4 The attribute 'data-videoid' in tag 'amp-vimeo' is set to the invalid value 'i don't think so'. (see https://amp.dev/documentation/components/amp-vimeo)
+amp-vimeo/1.0/test/validator-amp-vimeo.html:41:4 The attribute 'data-videoid' in tag 'amp-vimeo' is set to the invalid value 'i don't think so'. (see https://amp.dev/documentation/components/amp-vimeo)
 |        data-videoid="i don't think so"
 |        width="500"
 |        height="281"
@@ -66,12 +51,12 @@ amp-vimeo/1.0/test/validator-amp-vimeo.html:56:4 The attribute 'data-videoid' in
 |      <!-- invalid: videoid missing -->
 |      <amp-vimeo width="500" height="281" layout="responsive"></amp-vimeo>
 >>     ^~~~~~~~~
-amp-vimeo/1.0/test/validator-amp-vimeo.html:64:4 The mandatory attribute 'data-videoid' is missing in tag 'amp-vimeo'. (see https://amp.dev/documentation/components/amp-vimeo)
+amp-vimeo/1.0/test/validator-amp-vimeo.html:49:4 The mandatory attribute 'data-videoid' is missing in tag 'amp-vimeo'. (see https://amp.dev/documentation/components/amp-vimeo)
 |
 |      <!-- invalid: noloading must not have a value other than "" or noloading -->
 |      <amp-vimeo
 >>     ^~~~~~~~~
-amp-vimeo/1.0/test/validator-amp-vimeo.html:67:4 The attribute 'noloading' in tag 'amp-vimeo' is set to the invalid value 'foo'. (see https://amp.dev/documentation/components/amp-vimeo)
+amp-vimeo/1.0/test/validator-amp-vimeo.html:52:4 The attribute 'noloading' in tag 'amp-vimeo' is set to the invalid value 'foo'. (see https://amp.dev/documentation/components/amp-vimeo)
 |        width="500"
 |        height="281"
 |        layout="responsive"

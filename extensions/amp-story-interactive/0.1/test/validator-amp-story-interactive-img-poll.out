@@ -1,20 +1,5 @@
 FAIL
 |  <!--
-|    Copyright 2021 The AMP HTML Authors. All Rights Reserved.
-|
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|
-|        http://www.apache.org/licenses/LICENSE-2.0
-|
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    Correct image poll, as well as 3 incorrect image polls
 |  -->
@@ -62,7 +47,7 @@ FAIL
 |          <!-- Invalid: Image poll cannot have option-{1/2/3/4}-correct -->
 |          <amp-story-interactive-img-poll
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:62:8 The attribute 'option-1-image-correct' may not appear in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:47:8 The attribute 'option-1-image-correct' may not appear in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
 |            id="invalid-correct-img-poll"
 |            prompt-text="Which of these places would you travel to first?"
 |            prompt-size="large"
@@ -90,7 +75,7 @@ amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:62:
 |          <!-- Invalid: Image poll endpoint must be a valid URL -->
 |          <amp-story-interactive-img-poll
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:88:8 Missing URL for attribute 'endpoint' in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:73:8 Missing URL for attribute 'endpoint' in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
 |            id="invalid-endpoint-img-poll"
 |            prompt-text="Which of these places would you travel to first?"
 |            prompt-size="large"
@@ -117,13 +102,13 @@ amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:88:
 |          <!-- Invalid: Image poll options must have alt attributes -->
 |          <amp-story-interactive-img-poll
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:113:8 The attribute 'option-3-image-alt' in tag 'amp-story-interactive-img-poll' is missing or incorrect, but required by attribute 'option-3-image'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:98:8 The attribute 'option-3-image-alt' in tag 'amp-story-interactive-img-poll' is missing or incorrect, but required by attribute 'option-3-image'. (see https://amp.dev/documentation/components/amp-story-interactive)
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:113:8 The attribute 'option-4-image-alt' in tag 'amp-story-interactive-img-poll' is missing or incorrect, but required by attribute 'option-4-image'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:98:8 The attribute 'option-4-image-alt' in tag 'amp-story-interactive-img-poll' is missing or incorrect, but required by attribute 'option-4-image'. (see https://amp.dev/documentation/components/amp-story-interactive)
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:113:8 The mandatory attribute 'option-1-image-alt' is missing in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:98:8 The mandatory attribute 'option-1-image-alt' is missing in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:113:8 The mandatory attribute 'option-2-image-alt' is missing in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:98:8 The mandatory attribute 'option-2-image-alt' is missing in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
 |            id="missing-alt-img-poll"
 |            prompt-text="Which of these places would you travel to first?"
 |            prompt-size="large"
@@ -146,13 +131,13 @@ amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:113
 |          <!-- Invalid: Image poll image URL must use a valid protocol -->
 |          <amp-story-interactive-img-poll
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:134:8 Invalid URL protocol 'nothttps:' for attribute 'option-1-image' in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:119:8 Invalid URL protocol 'nothttps:' for attribute 'option-1-image' in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:134:8 Invalid URL protocol 'nothttps:' for attribute 'option-2-image' in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:119:8 Invalid URL protocol 'nothttps:' for attribute 'option-2-image' in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:134:8 Invalid URL protocol 'nothttps:' for attribute 'option-3-image' in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:119:8 Invalid URL protocol 'nothttps:' for attribute 'option-3-image' in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:134:8 Invalid URL protocol 'nothttps:' for attribute 'option-4-image' in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-poll.html:119:8 Invalid URL protocol 'nothttps:' for attribute 'option-4-image' in tag 'amp-story-interactive-img-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
 |            id="invalid-img-url-img-poll"
 |            prompt-text="Which of these places would you travel to first?"
 |            prompt-size="large"

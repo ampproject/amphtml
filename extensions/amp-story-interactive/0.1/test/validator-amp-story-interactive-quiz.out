@@ -1,20 +1,5 @@
 FAIL
 |  <!--
-|    Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-|
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|
-|        http://www.apache.org/licenses/LICENSE-2.0
-|
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    Correct quiz, as well as 2 incorrect quizzes
 |  -->
@@ -54,7 +39,7 @@ FAIL
 |          <!-- Invalid: Quiz missing a option-{1/2/3/4}-correct -->
 |          <amp-story-interactive-quiz
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-quiz.html:54:8 The tag 'amp-story-interactive-quiz' is missing a mandatory attribute - pick one of ['option-1-correct', 'option-2-correct', 'option-3-correct', 'option-4-correct']. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-quiz.html:39:8 The tag 'amp-story-interactive-quiz' is missing a mandatory attribute - pick one of ['option-1-correct', 'option-2-correct', 'option-3-correct', 'option-4-correct']. (see https://amp.dev/documentation/components/amp-story-interactive)
 |            id="missing-correct-quiz"
 |            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
 |            option-1-text="France"
@@ -68,7 +53,7 @@ amp-story-interactive/0.1/test/validator-amp-story-interactive-quiz.html:54:8 Th
 |          <!-- Invalid: Quiz endpoint must be a valid URL -->
 |          <amp-story-interactive-poll
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-quiz.html:66:8 The relative URL 'hi' for attribute 'endpoint' in tag 'amp-story-interactive-poll' is disallowed. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-quiz.html:51:8 The relative URL 'hi' for attribute 'endpoint' in tag 'amp-story-interactive-poll' is disallowed. (see https://amp.dev/documentation/components/amp-story-interactive)
 |            id="wrong-endpoint-quiz"
 |            endpoint="hi"
 |            option-1-text="France"

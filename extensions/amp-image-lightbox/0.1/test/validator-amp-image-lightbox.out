@@ -1,20 +1,5 @@
 FAIL
 |  <!--
-|    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-|
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|
-|        http://www.apache.org/licenses/LICENSE-2.0
-|
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    Tests for the amp-image-lightbox tag. See the inline comments.
 |  -->
@@ -39,6 +24,6 @@ FAIL
 |    <!-- Invalid: illegal layout. -->
 |    <amp-image-lightbox id="lightbox1" width=1 height=1></amp-image-lightbox>
 >>   ^~~~~~~~~
-amp-image-lightbox/0.1/test/validator-amp-image-lightbox.html:39:2 The implied layout 'FIXED' is not supported by tag 'amp-image-lightbox'. (see https://amp.dev/documentation/components/amp-image-lightbox)
+amp-image-lightbox/0.1/test/validator-amp-image-lightbox.html:24:2 The implied layout 'FIXED' is not supported by tag 'amp-image-lightbox'. (see https://amp.dev/documentation/components/amp-image-lightbox)
 |  </body>
 |  </html>

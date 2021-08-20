@@ -1,20 +1,5 @@
 FAIL
 |  <!--
-|    Copyright 2021 The AMP HTML Authors. All Rights Reserved.
-|
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|
-|        http://www.apache.org/licenses/LICENSE-2.0
-|
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    Tests support for the amp-tiktok tag.
 |  -->
@@ -75,12 +60,12 @@ FAIL
 |    <!-- Invalid: missing width and height -->
 |    <amp-tiktok data-src="6943753342808034566">
 >>   ^~~~~~~~~
-amp-tiktok/0.1/test/validator-amp-tiktok.html:75:2 Incomplete layout attributes specified for tag 'amp-tiktok'. For example, provide attributes 'width' and 'height'. (see https://amp.dev/documentation/components/amp-tiktok)
+amp-tiktok/0.1/test/validator-amp-tiktok.html:60:2 Incomplete layout attributes specified for tag 'amp-tiktok'. For example, provide attributes 'width' and 'height'. (see https://amp.dev/documentation/components/amp-tiktok)
 |    </amp-tiktok>
 |    <!-- Invalid: missing data-src -->
 |    <amp-tiktok width="500" height="500">
 >>   ^~~~~~~~~
-amp-tiktok/0.1/test/validator-amp-tiktok.html:78:2 Tag 'amp-tiktok' must have a minimum of 1 child tags - saw 0 child tags. (see https://amp.dev/documentation/components/amp-tiktok)
+amp-tiktok/0.1/test/validator-amp-tiktok.html:63:2 Tag 'amp-tiktok' must have a minimum of 1 child tags - saw 0 child tags. (see https://amp.dev/documentation/components/amp-tiktok)
 |    </amp-tiktok>
 |    <!-- Invalid: blockquote child missing placeholder attr -->
 |    <amp-tiktok width="500" height="800">
