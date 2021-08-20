@@ -337,29 +337,27 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise}
    * @private
    */
-  initializeLoadMoreElements_() {
-    return this.mutateElement(() => {
+  async initializeLoadMoreElements_() {
+    await this.mutateElement(() => {
       this.getLoadMoreService_().initializeLoadMore();
       const overflowElement = this.getOverflowElement();
       if (overflowElement) {
         toggle(overflowElement, false);
       }
       this.element.warnOnMissingOverflow = false;
-    }).then(() => {
-      this.adjustContainerForLoadMoreButton_();
-      listen(
-        this.getLoadMoreService_().getLoadMoreFailedClickable(),
-        'click',
-        () =>
-          this.loadMoreCallback_(/*opt_reload*/ true, /*opt_fromClick*/ true)
-      );
-      listen(
-        this.getLoadMoreService_().getLoadMoreButtonClickable(),
-        'click',
-        () =>
-          this.loadMoreCallback_(/*opt_reload*/ false, /*opt_fromClick*/ true)
-      );
     });
+
+    this.adjustContainerForLoadMoreButton_();
+    listen(
+      this.getLoadMoreService_().getLoadMoreFailedClickable(),
+      'click',
+      () => this.loadMoreCallback_(/*opt_reload*/ true, /*opt_fromClick*/ true)
+    );
+    listen(
+      this.getLoadMoreService_().getLoadMoreButtonClickable(),
+      'click',
+      () => this.loadMoreCallback_(/*opt_reload*/ false, /*opt_fromClick*/ true)
+    );
   }
 
   /**
