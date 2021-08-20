@@ -282,11 +282,6 @@ export class ResourcesImpl {
   }
 
   /** @override */
-  getAmpdoc() {
-    return this.ampdoc;
-  }
-
-  /** @override */
   getResourceForElement(element) {
     return Resource.forElement(element);
   }

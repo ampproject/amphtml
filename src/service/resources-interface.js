@@ -38,7 +38,7 @@ export class ResourcesInterface {
   /**
    * @return {!./ampdoc-impl.AmpDoc}
    */
-  getAmpdoc() {}
+  get ampdoc() {}
 
   /**
    * Returns the {@link Resource} instance corresponding to the specified AMP

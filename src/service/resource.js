@@ -503,7 +503,7 @@ export class Resource {
     // Calculate whether the element is currently is or in `position:fixed`.
     let isFixed = false;
     if (viewport.supportsPositionFixed() && this.isDisplayed()) {
-      const {win} = this.resources_.getAmpdoc();
+      const {win} = this.resources_.ampdoc;
       const {body} = win.document;
       for (let n = this.element; n && n != body; n = n./*OK*/ offsetParent) {
         if (n.isAlwaysFixed && n.isAlwaysFixed()) {

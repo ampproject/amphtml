@@ -39,7 +39,7 @@ export class SsrTemplateHelper {
    * @return {boolean}
    */
   isEnabled() {
-    const ampdoc = this.viewer_.getAmpDoc();
+    const {ampdoc} = this.viewer_;
     if (ampdoc.isSingleDoc()) {
       const htmlElement = ampdoc.getRootNode().documentElement;
       if (htmlElement.hasAttribute('allow-viewer-render-template')) {

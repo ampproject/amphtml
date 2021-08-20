@@ -11,7 +11,7 @@ export class ViewerInterface {
   /**
    * @return {!./ampdoc-impl.AmpDoc}
    */
-  getAmpDoc() {}
+  get ampdoc() {}
 
   /**
    * Returns the value of a viewer's startup parameter with the specified

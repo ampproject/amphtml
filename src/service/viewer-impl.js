@@ -316,11 +316,6 @@ export class ViewerImpl {
   }
 
   /** @override */
-  getAmpDoc() {
-    return this.ampdoc;
-  }
-
-  /** @override */
   getParam(name) {
     return this.ampdoc.getParam(name);
   }
