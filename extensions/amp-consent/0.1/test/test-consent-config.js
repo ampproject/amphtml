@@ -7,7 +7,7 @@ import {
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '#service';
 import {dict} from '#core/types/object';
-import {macroTask} from '#testing/yield';
+import {macroTask} from '#testing/helpers';
 
 describes.realWin('ConsentConfig', {amp: 1}, (env) => {
   let doc;
