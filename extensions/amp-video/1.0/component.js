@@ -66,7 +66,7 @@ const getMetadata = (player, props) =>
 function VideoWrapperWithRef(
   {
     autoplay = false,
-    className,
+    'class': className,
     component: Component = 'video',
     controls = false,
     loading: loadingProp,

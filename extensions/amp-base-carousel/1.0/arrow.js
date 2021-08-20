@@ -50,7 +50,7 @@ export function Arrow({
 function DefaultArrow({
   'aria-disabled': ariaDisabled,
   by,
-  className,
+  'class': className,
   disabled,
   onClick,
 }) {

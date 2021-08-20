@@ -26,7 +26,7 @@ function StreamGalleryWithRef(props, ref) {
     arrowPrevAs = DefaultArrow,
     arrowNextAs = DefaultArrow,
     children,
-    className,
+    'class': className,
     extraSpace,
     maxItemWidth = Number.MAX_VALUE,
     minItemWidth = 1,
@@ -130,7 +130,7 @@ export {StreamGallery};
 function DefaultArrow({
   'aria-disabled': ariaDisabled,
   by,
-  className,
+  'class': className,
   disabled,
   onClick,
   outsetArrows,

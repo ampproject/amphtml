@@ -18,7 +18,7 @@ import {useStyles} from './thumbnails.jss';
 export function Thumbnails({
   aspectRatio,
   children,
-  className = '',
+  'class': className = '',
   loop = false,
   ...rest
 }) {

@@ -205,6 +205,7 @@ module.exports = {
     'local/no-unload-listener': 2,
     'local/objstr-literal': 2,
     'local/preact': 2,
+    'local/prefer-class-prop': 2,
     'local/prefer-deferred-promise': 0,
     'local/prefer-destructuring': 2,
     'local/prefer-spread-props': 2,

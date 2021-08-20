@@ -38,7 +38,7 @@ function ContainWrapperWithRef(
   {
     as: Comp = 'div',
     children,
-    'className': className,
+    'class': className,
     contentAs: ContentComp = 'div',
     contentClassName,
     contentProps,

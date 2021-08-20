@@ -13,7 +13,7 @@ function WrapperWithRef(
   {
     as: Comp = 'div',
     children,
-    'className': className,
+    'class': className,
     'style': style,
     wrapperClassName,
     wrapperStyle,

@@ -339,7 +339,7 @@ export function AccordionSection({
 export function AccordionHeader({
   as: Comp = 'div',
   children,
-  className = '',
+  'class': className = '',
   id,
   role = 'button',
   tabIndex = 0,
@@ -378,7 +378,7 @@ export function AccordionHeader({
 export function AccordionContent({
   as: Comp = 'div',
   children,
-  className = '',
+  'class': className = '',
   id,
   role = 'region',
   ...rest
