@@ -1,3 +1,6 @@
+import {whenDocumentReady} from '#core/document-ready';
+import {once} from '#core/types/function';
+
 const firstVisibleTime = Date.now();
 
 export default new (class {
@@ -5,6 +8,9 @@ export default new (class {
   constructor() {
     /** @public @const {!Window} */
     this.win = self;
+
+    /** @public @const {function():Promise} */
+    this.whenReady = once(() => whenDocumentReady(self.document));
   }
   /**
    * @return {time}
