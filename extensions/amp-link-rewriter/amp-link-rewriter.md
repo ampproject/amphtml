@@ -143,21 +143,22 @@ The resulting, rewritten URL would be:
 Apart from vars defined in the `vars` property of the JSON configuration, or as
 a data attribute, there are other predefined `vars` which are AMP URL MACROs
 plus anchor attributes `id` and `href` that could be used for replacing values
-in the output pattern. The AMP URL MACROs available are `DOCUMENT_REFERRER` and
+in the output pattern. The AMP URL MACROs available are `AMP_GEO`, `DOCUMENT_REFERRER`, and
 `SOURCE_URL`. The following table shows the relationship between defined data
 and placeholders.
 
-| value        | source | example                                        | placeholder         |
-| ------------ | ------ | ---------------------------------------------- | ------------------- |
-| data-vars-\* | anchor | `<a href="..." data-vars-merchant-id="123" />` | `${merchantId}`     |
-| href         | anchor | `<a href="https://retailer.com" />`            | `${href}`           |
-| id           | anchor | `<a href="..." id="link" />`                   | `${id}`             |
-| location     | page   | `https://www.partnerweb.com/`                  | `SOURCE_URL`        |
-| random       | page   | `Math.random().toString(32).substr(2)`         | `${random}`         |
-| referrer     | page   | `https://google.de/`                           | `DOCUMENT_REFERRER` |
-| rel          | anchor | `<a href="..." rel="pass" />`                  | `${rel}`            |
-| rev          | anchor | `<a href="..." rev="author" />`                | `${rev}`            |
-| vars.\*      | config | `{ "vars": { "publisherId": "123" } }`         | `${publisherId}`    |
+| value        | source | example                                        | placeholder           |
+| ------------ | ------ | ---------------------------------------------- | --------------------- |
+| country      | geo    | `us`                                           | `AMP_GEO(ISOCountry)` |
+| data-vars-\* | anchor | `<a href="..." data-vars-merchant-id="123" />` | `${merchantId}`       |
+| href         | anchor | `<a href="https://retailer.com" />`            | `${href}`             |
+| id           | anchor | `<a href="..." id="link" />`                   | `${id}`               |
+| location     | page   | `https://www.partnerweb.com/`                  | `SOURCE_URL`          |
+| random       | page   | `Math.random().toString(32).substr(2)`         | `${random}`           |
+| referrer     | page   | `https://google.de/`                           | `DOCUMENT_REFERRER`   |
+| rel          | anchor | `<a href="..." rel="pass" />`                  | `${rel}`              |
+| rev          | anchor | `<a href="..." rev="author" />`                | `${rev}`              |
+| vars.\*      | config | `{ "vars": { "publisherId": "123" } }`         | `${publisherId}`      |
 
 #### section (optional)
 
