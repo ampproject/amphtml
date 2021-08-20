@@ -747,17 +747,16 @@ async function applyAmpConfig(targetFile, localDev, fortesting) {
   const baseConfigFile =
     'build-system/global-configs/' + config + '-config.json';
 
-  return removeConfig(targetFile).then(() => {
-    return applyConfig(
-      config,
-      targetFile,
-      baseConfigFile,
-      /* opt_localDev */ localDev,
-      /* opt_localBranch */ true,
-      /* opt_branch */ undefined,
-      /* opt_fortesting */ fortesting
-    );
-  });
+  await removeConfig(targetFile);
+  await applyConfig(
+    config,
+    targetFile,
+    baseConfigFile,
+    /* opt_localDev */ localDev,
+    /* opt_localBranch */ true,
+    /* opt_branch */ undefined,
+    /* opt_fortesting */ fortesting
+  );
 }
 
 /**
