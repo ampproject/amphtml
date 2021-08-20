@@ -1,26 +1,11 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as dom from '#core/dom';
-import {loadPromise} from '../../../../src/event-helper';
-import {matches} from '#core/dom/query';
 import {setScopeSelectorSupportedForTesting} from '#core/dom/css-selectors';
+import {matches} from '#core/dom/query';
 import {setShadowDomSupportedVersionForTesting} from '#core/dom/web-components';
 
-describes.sandboxed('DOM', {}, (env) => {
+import {loadPromise} from '../../../../src/event-helper';
+
+describes.sandboxed('DOM helpers', {}, (env) => {
   afterEach(() => {
     setScopeSelectorSupportedForTesting(undefined);
     setShadowDomSupportedVersionForTesting(undefined);
@@ -464,6 +449,57 @@ describes.sandboxed('DOM', {}, (env) => {
       const element = document.createElement('div');
       element.setAttribute('type', 'application/json');
       expect(dom.isJsonScriptTag(element)).to.be.false;
+    });
+  });
+
+  describe('getChildJsonConfig', () => {
+    let element;
+    let script;
+    let text;
+    beforeEach(() => {
+      element = document.createElement('div');
+      script = document.createElement('script');
+      script.setAttribute('type', 'application/json');
+      text = '{"a":{"b": "c"}}';
+      script.textContent = text;
+    });
+
+    it('return json config', () => {
+      element.appendChild(script);
+      expect(dom.getChildJsonConfig(element)).to.deep.equal({
+        'a': {
+          'b': 'c',
+        },
+      });
+    });
+
+    it('throw if not one script', () => {
+      expect(() => dom.getChildJsonConfig(element)).to.throw(
+        'Found 0 <script> children. Expected 1'
+      );
+      element.appendChild(script);
+      const script2 = document.createElement('script');
+      element.appendChild(script2);
+      expect(() => dom.getChildJsonConfig(element)).to.throw(
+        'Found 2 <script> children. Expected 1'
+      );
+    });
+
+    it('throw if type is not application/json', () => {
+      script.setAttribute('type', '');
+      element.appendChild(script);
+      expect(() => dom.getChildJsonConfig(element)).to.throw(
+        '<script> child must have type="application/json"'
+      );
+    });
+
+    it('throw if cannot parse json', () => {
+      const invalidText = '{"a":{"b": "c",}}';
+      script.textContent = invalidText;
+      element.appendChild(script);
+      expect(() => dom.getChildJsonConfig(element)).to.throw(
+        'Failed to parse <script> contents. Is it valid JSON?'
+      );
     });
   });
 

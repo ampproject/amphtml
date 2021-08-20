@@ -1,29 +1,15 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const argv = require('minimist')(process.argv.slice(2));
+const babel = require('@babel/core');
 const debounce = require('../common/debounce');
 const fs = require('fs-extra');
+const globby = require('globby');
 const path = require('path');
 const wrappers = require('../compile/compile-wrappers');
 const {
   compileJs,
-  compileJsWithEsbuild,
   doBuildJs,
   endBuildStep,
+  esbuildCompile,
   maybeToEsmName,
   maybeToNpmEsmName,
   mkdirSync,
@@ -43,8 +29,10 @@ const {compileJison} = require('./compile-jison');
 const {cyan, green, red} = require('../common/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
+const {jssOptions} = require('../babel-config/jss-config');
 const {log} = require('../common/logging');
 const {parse: pathParse} = require('path');
+const {TransformCache, batchedRead} = require('../common/transform-cache');
 const {watch} = require('chokidar');
 
 /**
@@ -486,12 +474,13 @@ async function buildExtension(
     }
   }
 
-  await compileJison(path.join(extDir, '**', '*.jison'));
+  await compileJison(`${extDir}/**/*.jison`);
   if (name === 'amp-bind') {
     await doBuildJs(jsBundles, 'ww.max.js', options);
   }
   if (options.npm) {
     await buildNpmBinaries(extDir, options);
+    await buildNpmCss(extDir, options);
   }
   if (options.binaries) {
     await buildBinaries(extDir, options.binaries, options);
@@ -505,6 +494,58 @@ async function buildExtension(
   }
 
   await buildExtensionJs(extDir, name, version, latestVersion, options);
+}
+
+/**
+ * Writes an extensions's CSS to its npm dist folder.
+ *
+ * @param {string} extDir
+ * @param {Object} options
+ * @return {Promise<void>}
+ */
+async function buildNpmCss(extDir, options) {
+  const startCssTime = Date.now();
+  const filenames = await globby(path.join(extDir, '**', '*.jss.js'));
+  if (!filenames.length) {
+    return;
+  }
+
+  const css = (await Promise.all(filenames.map(getCssForJssFile))).join('');
+  const outfile = path.join(extDir, 'dist', 'styles.css');
+  await fs.writeFile(outfile, css);
+  endBuildStep('Wrote CSS', `${options.name} → styles.css`, startCssTime);
+}
+
+/** @type {TransformCache} */
+let jssCache;
+
+/**
+ * Returns the minified CSS for a .jss.js file.
+ *
+ * @param {string} jssFile
+ * @return {Promise<string|Buffer>}
+ */
+async function getCssForJssFile(jssFile) {
+  // Lazily instantiate the TransformCache
+  if (!jssCache) {
+    jssCache = new TransformCache('.jss-cache', '.css');
+  }
+
+  const {contents, hash} = await batchedRead(jssFile);
+  const fileCss = await jssCache.get(hash);
+  if (fileCss) {
+    return fileCss;
+  }
+
+  const babelOptions = babel.loadOptions({caller: {name: 'jss'}});
+  if (!babelOptions) {
+    throw new Error('Could not find babel config for jss');
+  }
+  babelOptions['filename'] = jssFile;
+
+  await babel.transform(contents, babelOptions);
+  jssCache.set(hash, Promise.resolve(jssOptions.css));
+  return jssOptions.css;
 }
 
 /**
@@ -617,19 +658,15 @@ function buildBinaries(extDir, binaries, options) {
     const {entryPoint, external, outfile, remap} = binary;
     const {name} = pathParse(outfile);
     const esm = argv.esm || argv.sxg || false;
-    return compileJsWithEsbuild(
-      extDir + '/',
-      entryPoint,
-      `${extDir}/dist`,
-      Object.assign(options, {
-        toName: maybeToNpmEsmName(`${name}.max.js`),
-        minifiedName: maybeToNpmEsmName(`${name}.js`),
-        latestName: '',
-        outputFormat: esm ? 'esm' : 'cjs',
-        externalDependencies: external,
-        remapDependencies: remap,
-      })
-    );
+    return esbuildCompile(extDir + '/', entryPoint, `${extDir}/dist`, {
+      ...options,
+      toName: maybeToNpmEsmName(`${name}.max.js`),
+      minifiedName: maybeToNpmEsmName(`${name}.js`),
+      latestName: '',
+      outputFormat: esm ? 'esm' : 'cjs',
+      externalDependencies: external,
+      remapDependencies: remap,
+    });
   });
   return Promise.all(promises);
 }
@@ -663,17 +700,13 @@ async function buildExtensionJs(extDir, name, version, latestVersion, options) {
       ? wrapperOrFn(name, version, latest, argv.esm, options.loadPriority)
       : wrapperOrFn;
 
-  await compileJs(
-    extDir + '/',
-    filename,
-    './dist/v0',
-    Object.assign(options, {
-      toName: `${name}-${version}.max.js`,
-      minifiedName: `${name}-${version}.js`,
-      latestName: latest ? `${name}-latest.js` : '',
-      wrapper,
-    })
-  );
+  await compileJs(extDir + '/', filename, './dist/v0', {
+    ...options,
+    toName: `${name}-${version}.max.js`,
+    minifiedName: `${name}-${version}.js`,
+    latestName: latest ? `${name}-latest.js` : '',
+    wrapper,
+  });
 
   // If an incremental watch build fails, simply return.
   if (options.errored) {

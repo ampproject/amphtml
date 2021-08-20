@@ -1,25 +1,10 @@
 /**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview
  * Creates npm package files for a given component and AMP version.
  */
 
 const [extension, ampVersion, extensionVersion] = process.argv.slice(2);
+const {getSemver} = require('./utils');
 const {log} = require('../common/logging');
 const {stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
@@ -43,16 +28,8 @@ async function shouldSkip() {
  * @return {Promise<void>}
  */
 async function writePackageJson() {
-  const extensionVersionArr = extensionVersion.split('.', 2);
-  const major = extensionVersionArr[0];
-  const minor = ampVersion.slice(0, 10);
-  const patch = Number(ampVersion.slice(-3)); // npm trims leading zeroes in patch number, so mimic this in package.json
-  const version = `${major}.${minor}.${patch}`;
-  if (
-    !valid(version) ||
-    ampVersion.length != 13 ||
-    extensionVersionArr[1] !== '0'
-  ) {
+  const version = getSemver(extensionVersion, ampVersion);
+  if (!valid(version) || ampVersion.length != 13) {
     log(
       'Invalid semver version',
       version,

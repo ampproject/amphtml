@@ -1,19 +1,3 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const requiresReviewPrivacy =
   'Usage of this API requires dedicated review due to ' +
   'being privacy sensitive. Please file an issue asking for permission' +
@@ -52,7 +36,8 @@ const realiasGetMode =
  *   check term in files whose path includes /test/ (false by default)
  *
  * - checkProse:
- *   check term in comments and documentation (.md) (false by default)
+ *   check term in comments and documentation (.md)
+ *   (false by default, implies `checkInTestFolder`)
  */
 let ForbiddenTermDef;
 
@@ -64,15 +49,15 @@ const forbiddenTermsGlobal = {
   'DO NOT SUBMIT': {
     checkProse: true,
   },
-  'whitelist|white-list': {
+  'white[-\\s]*list': {
     message: 'Please use the term allowlist instead',
     checkProse: true,
   },
-  'blacklist|black-list': {
+  'black[-\\s]*list': {
     message: 'Please use the term denylist instead',
     checkProse: true,
   },
-  'grandfather|grandfathered': {
+  'grandfather': {
     message: 'Please use the term legacy instead',
     checkProse: true,
   },
@@ -98,29 +83,38 @@ const forbiddenTermsGlobal = {
   },
   'describe\\.only': {
     message: 'Please remove all instances of describe.only',
+    checkInTestFolder: true,
     allowlist: ['testing/describes.js'],
   },
   'describes.*\\.only': {
     message: 'Please remove all instances of describes.only',
+    checkInTestFolder: true,
   },
   'dev\\(\\)\\.assert\\(': 'Use the devAssert function instead.',
   '[^.]user\\(\\)\\.assert\\(': 'Use the userAssert function instead.',
-  'it\\.only': '',
+  'it\\.only': {
+    message: 'Please remove all instances of it.only',
+    checkInTestFolder: true,
+  },
   'Math.random[^;()]*=': 'Use Sinon to stub!!!',
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
+    checkInTestFolder: true,
   },
   '(\\w*([sS]py|[sS]tub|[mM]ock|clock).restore)': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
+    checkInTestFolder: true,
   },
   'sinon\\.useFake\\w+': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
+    checkInTestFolder: true,
   },
   'sandbox\\.(spy|stub|mock)\\([^,\\s]*[iI]?frame[^,\\s]*,': {
     message:
       'Do NOT stub on a cross domain iframe! #5359\n' +
       '  If this is same domain, mark /*OK*/.\n' +
       '  If this is cross domain, overwrite the method directly.',
+    checkInTestFolder: true,
   },
   'window\\.sandbox': {
     message: 'Usage of window.sandbox is forbidden. Use env.sandbox instead.',
@@ -146,13 +140,14 @@ const forbiddenTermsGlobal = {
     message: realiasGetMode,
     allowlist: ['src/mode-object.js', 'src/iframe-attributes.js'],
   },
-  'INTERNAL_RUNTIME_VERSION|IS_(PROD|MINIFIED)': {
+  'INTERNAL_RUNTIME_VERSION|IS_(PROD|MINIFIED|ESM)': {
     message:
       'Do not use build constants directly. Instead, use the helpers in `#core/mode`.',
     allowlist: [
-      'src/internal-version.js',
+      'src/core/mode/version.js',
       'src/core/mode/minified.js',
       'src/core/mode/prod.js',
+      'src/core/mode/esm.js',
       'build-system/compile/build-constants.js',
       'build-system/babel-plugins/babel-plugin-amp-mode-transformer/index.js',
     ],
@@ -337,6 +332,7 @@ const forbiddenTermsGlobal = {
       'src/amp-story-player/amp-story-component-manager.js',
       'src/runtime.js',
       'src/log.js',
+      'src/error-reporting.js',
       'src/web-worker/web-worker.js',
       'testing/async-errors.js',
       'tools/experiments/experiments.js',
@@ -509,7 +505,10 @@ const forbiddenTermsGlobal = {
       'src/service/url-replacements-impl.js',
     ],
   },
-  'debugger': '',
+  'debugger': {
+    message: 'Please remove all instances of debugger',
+    checkInTestFolder: true,
+  },
   // Overridden APIs.
   '(doc.*)\\.referrer': {
     message: 'Use Viewer.getReferrerUrl() instead.',
@@ -534,10 +533,10 @@ const forbiddenTermsGlobal = {
   },
   'internalListenImplementation': {
     message:
-      'Use `listen()` in either `event-helper` or `3p-frame-messaging`' +
+      'Use `listen()` in either `event-helper` or `#core/3p-frame-messaging`' +
       ', depending on your use case.',
     allowlist: [
-      'src/3p-frame-messaging.js',
+      'src/core/3p-frame-messaging.js',
       'src/event-helper.js',
       'src/core/dom/event-helper-listen.js',
     ],
@@ -1129,7 +1128,7 @@ function matchForbiddenTerms(srcFile, contents, terms) {
       // if needed but that might be too permissive.
       if (
         (Array.isArray(allowlist) && allowlist.indexOf(srcFile) != -1) ||
-        (isInTestFolder(srcFile) && !checkInTestFolder) ||
+        (isInTestFolder(srcFile) && !checkInTestFolder && !checkProse) ||
         (srcFile.endsWith('.md') && !checkProse)
       ) {
         return [];

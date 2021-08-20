@@ -1,18 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const fs = require('fs-extra');
@@ -43,13 +28,13 @@ const UNMINIFIED_CONTAINER_DIRECTORY = 'unminified';
 const NOMODULE_CONTAINER_DIRECTORY = 'nomodule';
 const MODULE_CONTAINER_DIRECTORY = 'module';
 
-const ARTIFACT_FILE_NAME = '/tmp/artifacts/amp_nomodule_build.tar.gz';
+const ARTIFACT_DIRECTORY = '/tmp/artifacts/';
+const ARTIFACT_FILE_NAME = `${ARTIFACT_DIRECTORY}/amp_nomodule_build.tar.gz`;
 const TEST_FILES_LIST_FILE_NAME = '/tmp/testfiles.txt';
 
-const BUILD_OUTPUT_DIRS = ['build', 'dist', 'dist.3p'];
+const BUILD_OUTPUT_DIRS = ['build', 'dist', 'dist.3p', 'dist.tools'];
 const APP_SERVING_DIRS = [
   ...BUILD_OUTPUT_DIRS,
-  'dist.tools',
   'examples',
   'test/manual',
   'test/fixtures/e2e',
@@ -138,13 +123,16 @@ function signalGracefulHalt() {
  * for skipping.
  * @param {string} jobName
  * @param {string} skipReason
+ * @param {boolean} gracefullyHaltNextJobs true to signal to downstreams jobs that they too should be skipped.
  */
-function skipDependentJobs(jobName, skipReason) {
+function skipDependentJobs(jobName, skipReason, gracefullyHaltNextJobs = true) {
   const loggingPrefix = getLoggingPrefix();
   logWithoutTimestamp(
     `${loggingPrefix} Skipping ${cyan(jobName)} because ${skipReason}.`
   );
-  signalGracefulHalt();
+  if (gracefullyHaltNextJobs) {
+    signalGracefulHalt();
+  }
 }
 
 /**
@@ -248,10 +236,13 @@ function storeBuildToWorkspace_(containerDirectory) {
   if (isCircleciBuild()) {
     fs.ensureDirSync(`/tmp/workspace/builds/${containerDirectory}`);
     for (const outputDir of BUILD_OUTPUT_DIRS) {
-      fs.moveSync(
-        `${outputDir}/`,
-        `/tmp/workspace/builds/${containerDirectory}/${outputDir}`
-      );
+      const outputPath = `${outputDir}/`;
+      if (fs.existsSync(outputPath)) {
+        fs.moveSync(
+          outputPath,
+          `/tmp/workspace/builds/${containerDirectory}/${outputDir}`
+        );
+      }
     }
     // Bento components are compiled inside the extension source file.
     for (const componentFile of globby.sync('extensions/*/?.?/dist/*.js')) {
@@ -318,6 +309,7 @@ async function processAndStoreBuildToArtifacts() {
       cyan(ARTIFACT_FILE_NAME) +
       '...'
   );
+  await fs.ensureDir(ARTIFACT_DIRECTORY);
   execOrDie(`tar -czf ${ARTIFACT_FILE_NAME} ${APP_SERVING_DIRS.join('/ ')}/`);
   execOrDie(`du -sh ${ARTIFACT_FILE_NAME}`);
 }

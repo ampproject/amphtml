@@ -1,25 +1,15 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {AmpStoryInteractiveSlider} from '../amp-story-interactive-slider';
 import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {Services} from '#service';
 import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {LocalizationService} from '#service/localization';
+import {getSliderInteractiveData} from './helpers';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {
+  MID_SELECTION_CLASS,
+  POST_SELECTION_CLASS,
+} from '../amp-story-interactive-abstract';
 
 describes.realWin(
   'amp-story-interactive-slider',
@@ -53,6 +43,7 @@ describes.realWin(
       win.document.body.appendChild(storyEl);
       ampStorySlider = new AmpStoryInteractiveSlider(ampStorySliderEl);
 
+      ampStorySliderEl.getAmpDoc = () => new AmpDocSingle(win);
       ampStorySliderEl.getResources = () => win.__AMP_SERVICES.resources.obj;
       requestService = new AmpStoryRequestService(win);
       registerServiceBuilder(win, 'story-request', function () {
@@ -130,7 +121,7 @@ describes.realWin(
       // simulates an input event, which is when the user drags the slider
       slider.dispatchEvent(new CustomEvent('input'));
       expect(ampStorySlider.getRootElement()).to.have.class(
-        'i-amphtml-story-interactive-mid-selection'
+        MID_SELECTION_CLASS
       );
     });
 
@@ -143,7 +134,7 @@ describes.realWin(
       // simulates a change event, which is when the user releases the slider
       slider.dispatchEvent(new CustomEvent('change'));
       expect(ampStorySlider.getRootElement()).to.have.class(
-        'i-amphtml-story-interactive-post-selection'
+        POST_SELECTION_CLASS
       );
     });
 
@@ -155,6 +146,49 @@ describes.realWin(
         .getRootElement()
         .querySelector('.i-amphtml-story-interactive-slider-bubble');
       expect(sliderBubble.textContent).to.be.equal('😄');
+    });
+
+    it('should show post-selection state when backend replies with user selection', async () => {
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getSliderInteractiveData());
+      ampStorySlider.element.setAttribute('endpoint', 'https://example.com');
+      await ampStorySlider.buildCallback();
+      await ampStorySlider.layoutCallback();
+      expect(ampStorySlider.getRootElement()).to.have.class(
+        POST_SELECTION_CLASS
+      );
+    });
+
+    it('should display the selected value in the post-state bubble', async () => {
+      await ampStorySlider.buildCallback();
+      await ampStorySlider.layoutCallback();
+      const slider = ampStorySlider
+        .getRootElement()
+        .querySelector('input[type="range"]');
+      const sliderBubble = ampStorySlider
+        .getRootElement()
+        .querySelector('.i-amphtml-story-interactive-slider-bubble');
+      slider.value = 30;
+      // simulates an input event, which is when the user drags the slider
+      // simulates a change event, which is when the user releases the slider
+      slider.dispatchEvent(new CustomEvent('input'));
+      slider.dispatchEvent(new CustomEvent('change'));
+      expect(sliderBubble.textContent).to.be.equal('30%');
+    });
+
+    it('should display the average indicator in the correct position', async () => {
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getSliderInteractiveData());
+      ampStorySlider.element.setAttribute('endpoint', 'https://example.com');
+      await ampStorySlider.buildCallback();
+      await ampStorySlider.layoutCallback();
+      expect(
+        win
+          .getComputedStyle(ampStorySlider.getRootElement())
+          .getPropertyValue('--average')
+      ).to.be.equal('51%');
     });
   }
 );

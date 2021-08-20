@@ -1,19 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {devAssert} from '#core/assert';
 import {ActionTrust} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
@@ -32,17 +16,18 @@ import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {MediaQueryProps} from '#core/dom/media-query-props';
 import {childElementByAttr, childElementByTag} from '#core/dom/query';
 import {PauseHelper} from '#core/dom/video/pause-helper';
+import * as mode from '#core/mode';
 import {isElement} from '#core/types';
 import {dict, hasOwn, map} from '#core/types/object';
 
-import {hydrate, render} from '#preact';
 import * as Preact from '#preact';
+import {hydrate, render} from '#preact';
+import {BaseElement} from '#preact/bento-ce';
 
 import {WithAmpContext} from './context';
 import {CanPlay, CanRender, LoadingProp} from './contextprops';
 import {AmpElementPropDef, collectProps} from './parse-props';
 
-import {getMode} from '../mode';
 import {installShadowStyle} from '../shadow-embed';
 
 /** @const {!MutationObserverInit} */
@@ -128,7 +113,7 @@ const HAS_PASSTHROUGH = (def) => !!(def.passthrough || def.passthroughNonEmpty);
  *
  * @template API_TYPE
  */
-export class PreactBaseElement extends AMP.BaseElement {
+export class PreactBaseElement extends BaseElement {
   /** @override @nocollapse */
   static R1() {
     return true;
@@ -143,26 +128,28 @@ export class PreactBaseElement extends AMP.BaseElement {
   /** @override @nocollapse */
   static usesLoading() {
     // eslint-disable-next-line local/no-static-this
-    const Ctor = this;
-    return Ctor['loadable'];
+    return this['loadable'];
   }
 
   /** @override @nocollapse */
   static prerenderAllowed() {
     // eslint-disable-next-line local/no-static-this
-    const Ctor = this;
-    return !Ctor.usesLoading();
+    return !this.usesLoading();
   }
 
-  /** @param {!AmpElement} element */
+  /** @param {!Element} element */
   constructor(element) {
     super(element);
 
     /** @private {!JsonObject} */
     this.defaultProps_ = dict({
       'loading': Loading.AUTO,
-      'onReadyState': this.onReadyState_.bind(this),
-      'onPlayingState': this.updateIsPlaying_.bind(this),
+      'onReadyState': (state, opt_failure) => {
+        this.onReadyState_(state, opt_failure);
+      },
+      'onPlayingState': (isPlaying) => {
+        this.updateIsPlaying_(isPlaying);
+      },
     });
 
     /** @private {!AmpContextDef.ContextType} */
@@ -266,7 +253,7 @@ export class PreactBaseElement extends AMP.BaseElement {
   buildCallback() {
     const Ctor = this.constructor;
 
-    this.observer = new MutationObserver(this.checkMutations_.bind(this));
+    this.observer = new MutationObserver((rs) => this.checkMutations_(rs));
     const props = Ctor['props'];
     const childrenInit = checkPropsFor(props, HAS_SELECTOR)
       ? CHILDREN_MUTATION_INIT
@@ -337,7 +324,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     this.scheduleRender_();
 
     if (Ctor['loadable']) {
-      this.setReadyState(ReadyState.LOADING);
+      this.setReadyState?.(ReadyState.LOADING);
     }
     this.maybeUpdateReadyState_();
 
@@ -385,6 +372,9 @@ export class PreactBaseElement extends AMP.BaseElement {
   /** @override */
   attemptChangeHeight(newHeight) {
     return super.attemptChangeHeight(newHeight).catch((e) => {
+      // It's okay to disable this lint rule since we check that the restricted
+      // method exists.
+      // eslint-disable-next-line local/restrict-this-access
       if (this.getOverflowElement && !this.getOverflowElement()) {
         console./* OK */ warn(
           '[overflow] element not found. Provide one to enable resizing to full contents.',
@@ -413,13 +403,17 @@ export class PreactBaseElement extends AMP.BaseElement {
   }
 
   /**
+   * Register an action for AMP documents to execute an API handler.
+   *
+   * This has no effect on Bento documents, since they lack an Actions system.
+   * Instead, they should use `(await element.getApi()).action()`
    * @param {string} alias
    * @param {function(!API_TYPE, !../service/action-impl.ActionInvocation)} handler
    * @param {../action-constants.ActionTrust} minTrust
    * @protected
    */
   registerApiAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
-    this.registerAction(
+    this.registerAction?.(
       alias,
       (invocation) => handler(this.api(), invocation),
       minTrust
@@ -500,7 +494,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    * @private
    */
   onReadyState_(state, opt_failure) {
-    this.setReadyState(state, opt_failure);
+    this.setReadyState?.(state, opt_failure);
 
     const Ctor = this.constructor;
     if (Ctor['unloadOnPause']) {
@@ -574,9 +568,9 @@ export class PreactBaseElement extends AMP.BaseElement {
             SERVICE_SLOT_ATTRS
           );
           shadowRoot.appendChild(serviceSlot);
-          this.getPlaceholder()?.setAttribute('slot', SERVICE_SLOT_NAME);
-          this.getFallback()?.setAttribute('slot', SERVICE_SLOT_NAME);
-          this.getOverflowElement()?.setAttribute('slot', SERVICE_SLOT_NAME);
+          this.getPlaceholder?.()?.setAttribute('slot', SERVICE_SLOT_NAME);
+          this.getFallback?.()?.setAttribute('slot', SERVICE_SLOT_NAME);
+          this.getOverflowElement?.()?.setAttribute('slot', SERVICE_SLOT_NAME);
         }
         this.container_ = container;
 
@@ -587,6 +581,7 @@ export class PreactBaseElement extends AMP.BaseElement {
         // to create a simple mechanism that would automatically compute
         // `CanRender = false` on undistributed children.
         addGroup(this.element, UNSLOTTED_GROUP, MATCH_ANY, /* weight */ -1);
+        // eslint-disable-next-line local/restrict-this-access
         setGroupProp(this.element, UNSLOTTED_GROUP, CanRender, this, false);
       } else if (lightDomTag) {
         this.container_ = this.element;
@@ -723,6 +718,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     const keys = Object.keys(current);
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
+      // eslint-disable-next-line local/restrict-this-access
       wrapRefProperty(this, api, key);
     }
     this.apiWrapper_ = api;
@@ -740,7 +736,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    * @private
    */
   checkApiWrapper_(current) {
-    if (!getMode().localDev) {
+    if (!mode.isLocalDev()) {
       return;
     }
     // Hack around https://github.com/preactjs/preact/issues/3084
@@ -858,7 +854,7 @@ PreactBaseElement['staticProps'] = undefined;
 /**
  * @protected {!Array<!ContextProp>}
  */
-PreactBaseElement['useContexts'] = getMode().localDev ? Object.freeze([]) : [];
+PreactBaseElement['useContexts'] = mode.isLocalDev() ? Object.freeze([]) : [];
 
 /**
  * Whether the component implements a loading protocol.

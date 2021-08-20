@@ -1,20 +1,4 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Embeds a story
  *
  * Example:
@@ -59,6 +43,7 @@ import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '#core/constants/common-signals';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
+import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {HistoryState, getHistoryState, setHistoryState} from './history';
 import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '#core/constants/key-codes';
@@ -107,7 +92,7 @@ import {
   shouldShowStoryUrlInfo,
 } from './utils';
 import {upgradeBackgroundAudio} from './audio';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsDe from './_locales/de.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsDefault from './_locales/default.json' assert {type: 'json'}; // lgtm[js/syntax-error]
@@ -466,6 +451,14 @@ export class AmpStory extends AMP.BaseElement {
     if (isExperimentOn(this.win, 'story-load-first-page-only')) {
       Services.performanceFor(this.win).addEnabledExperiment(
         'story-load-first-page-only'
+      );
+    }
+    if (
+      isExperimentOn(this.win, 'story-disable-animations-first-page') ||
+      prefersReducedMotion(this.win)
+    ) {
+      Services.performanceFor(this.win).addEnabledExperiment(
+        'story-disable-animations-first-page'
       );
     }
     if (isExperimentOn(this.win, 'story-load-inactive-outside-viewport')) {
@@ -956,6 +949,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     const lockOrientation =
+      screen.orientation?.lock ||
       screen.lockOrientation ||
       screen.mozLockOrientation ||
       screen.msLockOrientation ||
@@ -1027,7 +1021,10 @@ export class AmpStory extends AMP.BaseElement {
         // Preloads and prerenders the share menu.
         this.shareMenu_.build();
 
-        const infoDialog = shouldShowStoryUrlInfo(devAssert(this.viewer_))
+        const infoDialog = shouldShowStoryUrlInfo(
+          devAssert(this.viewer_),
+          this.storeService_
+        )
           ? new InfoDialog(this.win, this.element)
           : null;
         if (infoDialog) {
@@ -2106,7 +2103,7 @@ export class AmpStory extends AMP.BaseElement {
     const fallbackEl = this.getFallback();
     if (isBrowserSupported) {
       // Removes the default unsupported browser layer or throws an error
-      // if the publisher has provided their own fallback
+      // if the publisher has provided their own fallback.
       if (fallbackEl) {
         dev().error(
           TAG,

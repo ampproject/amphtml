@@ -6,22 +6,6 @@ teaser:
   text: A rich, visual storytelling format.
 ---
 
-<!--
-Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-story
 
 [Web stories](https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/?format=stories) are an immersive, tappable and easily shareable storytelling format. Web stories are built using the AMP Framework. The `amp-story` component provides the AMP story subset of AMP. It is the base technology for web stories.
@@ -493,38 +477,11 @@ Example:
 </a>
 ```
 
-#### Integration with sidebar for stories
-
-`amp-story` supports the use of `amp-sidebar` with a few limitations and caveats. See the [Sidebar for Stories documentation](https://amp.dev/documentation/components/amp-sidebar?format=websites#sidebar-for-stories) for more details.
-
-By using branching and `amp-sidebar`, you can create stories that have a table of contents. To do this, make use of URL fragment parameter.
-
-The following example demonstrates a table of contents inside of an `amp-sidebar`. The table of contents has a link to a specific story page, and and out-link to a different website.
-
-```html
-<amp-story id="story" standalone>
-  <amp-sidebar id="sidebar1" layout="nodisplay">
-    <ul>
-      <li><a href="#page=bacon-page"> Bacon page </a></li>
-      <li><a href="https://www.amp.dev"> External Link </a></li>
-    </ul>
-  </amp-sidebar>
-
-  <amp-story-page id="bacon-page">
-    <amp-story-grid-layer>
-      <p>Bacon, of course!</p>
-    </amp-story-grid-layer>
-  </amp-story-page>
-  ...
-</amp-story>
-```
-
 #### Other components usable in AMP stories
 
 The following are other components usable in AMP stories that require some story-specific caveats.
 
 -   [amp-consent](https://amp.dev/documentation/components/amp-consent#prompt-ui-for-stories)
--   [amp-sidebar](https://amp.dev/documentation/components/amp-sidebar#sidebar-for-stories)
 -   [amp-twitter](https://amp.dev/documentation/components/amp-twitter)
 
 For more generally usable components see the [list of allowed children](https://amp.dev/documentation/components/amp-story#children).
@@ -597,7 +554,7 @@ Every element inside an `<amp-story-page>` can have an entrance animation.
 
 You can configure animations by specifying a set of [animation attributes](#animation-attributes) on the element; no additional AMP extensions or configuration is needed.
 
-You can also create more advanced animations by using the `<amp-story-animation>` component. Read more on the [Advanced animations](#Advanced-animations).
+If there is something needed outside of the presets, custom animations can be configured using the [`<amp-story-animation>`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/amp-story-animation.md) component.
 
 {% call callout('Note', type='note') %}
 Animations can help make your Web Story more visually exciting and engaging, but use them sparingly. Some users may find long, continuous animations distracting. Other users may have motion sensitivity and be adversely affected by excessive use of motion and parallax effects.
@@ -831,33 +788,6 @@ You can apply multiple entrance animations on one element (for example, an eleme
 If a composed animation is supposed to start after the end of a separate element's animation, make sure that all nested elements that compose the animation have the attribute `animate-in-after` set to the same `id`.
 {% endcall %}
 
-## Advanced animations
-
-You can create more advanced animations by using the `<amp-story-animation>` component. It lets you create [`<amp-animation>`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-animation/amp-animation.md)-type animations inside your Web Story.
-
-To use it, add a `<amp-story-animation layout="nodisplay" trigger="visibility">` tag under your `<amp-story-page>` with a child `<script type="application/json">` containing the JSON configuration describing your animation. In the following example, the "rotate with amp-story-animation" text will be rotated for 1 second using `<amp-story-animation>`:
-
-```html
-...
-      <amp-story-page id="cover">
-        <amp-story-grid-layer template="vertical">
-          <strong class="animate">rotate with amp-story-animation</strong>
-        </amp-story-grid-layer>
-
-        <amp-story-animation layout="nodisplay" trigger="visibility">
-          <script type="application/json">
-            {
-              "selector": ".animate",
-              "duration": "1s",
-              "keyframes": {"transform": "rotate(360deg)"}
-            }
-          </script>
-        </amp-story-animation>
-      </amp-story-page>
-```
-
-For more details on the animation configuration and options, please refer to the [`<amp-animation> docs`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-animation/amp-animation.md)
-
 ## Branching
 
 Branching enables the identification of individual story pages. Users can jump around within a story, start a story from somewhere other than the beginning, and share specific story pages. An example is a table of contents or multiple choice buttons.
@@ -874,7 +804,7 @@ With branching, AMP Stories now supports URLs in the form of:
 https://www.mydomain.com/good-story/#page=<page-id>
 ```
 
-where `page-id` refers to the unique id of an `amp-story-page`. You can also use the fragment parameter and the `page-id` value like an anchor link in some use cases. See [Integration with Sidebar for Stories](#integration-with-sidebar-for-stories) for an example.
+where `page-id` refers to the unique id of an `amp-story-page`. You can also use the fragment parameter and the `page-id` value like an anchor link in some use cases.
 
 ## Localization
 

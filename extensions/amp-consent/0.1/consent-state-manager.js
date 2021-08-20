@@ -1,19 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   CONSENT_ITEM_STATE,
   ConsentInfoDef,
@@ -34,8 +18,22 @@ import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert} from '../../../src/log';
 import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
 import {hasOwn} from '#core/types/object';
+import {once} from '#core/types/function';
+import {getRandomString64} from '#service/cid-impl';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 
 const TAG = 'CONSENT-STATE-MANAGER';
+
+/**
+ * Returns a promise for a service for the given id and ampdoc. Also expects
+ * a service that has the actual implementation. The promise resolves when
+ * the implementation loaded.
+ * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} element
+ * @return {!Promise<!Object>}
+ */
+export function getConsentStateManager(element) {
+  return getServicePromiseForDoc(element, 'consentStateManager');
+}
 
 export class ConsentStateManager {
   /**
@@ -71,6 +69,9 @@ export class ConsentStateManager {
 
     /** @private {!Promise} */
     this.hasAllPurposeConsentsPromise_ = allPurposeConsentsDeferred.promise;
+
+    /** @public @const {function():string} */
+    this.consentPageViewId64 = once(() => getRandomString64(this.ampdoc_.win));
   }
 
   /**

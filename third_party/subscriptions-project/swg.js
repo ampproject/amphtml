@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.173 */
+/** Version: 0.1.22.180 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -2021,6 +2021,21 @@ function acceptPortResultData(
  */
 
 /**
+ * Debug logger, only log message if #swg.log=1
+ * @param {...*} var_args [decription]
+ */
+
+/* eslint-disable */
+
+function debugLog(var_args) {
+  if (/swg.debug=1/.test(self.location.hash)) {
+    const logArgs = Array.prototype.slice.call(arguments, 0);
+    logArgs.unshift('[Subscriptions]');
+    log.apply(log, logArgs);
+  }
+}
+
+/**
  * @param  {...*} var_args [description]
  */
 function log(var_args) {
@@ -3305,6 +3320,9 @@ class JwtHelper {
 /** Source for Google-provided metering entitlements. */
 const GOOGLE_METERING_SOURCE = 'google:metering';
 
+/** Subscription token for dev mode entitlements. */
+const DEV_MODE_TOKEN = 'GOOGLE_DEV_MODE_TOKEN';
+
 /**
  * The holder of the entitlements for a service.
  */
@@ -3376,16 +3394,20 @@ class Entitlements {
   }
 
   /**
-   * Returns true if the current article is unlocked by a
-   * cacheable entitlement. Metering entitlements aren't cacheable,
-   * because each metering entitlement is meant to be used for one article.
-   * Subscription entitlements are cacheable, because subscription entitlements
+   * Returns true if the current article is unlocked by a cacheable entitlement.
+   * Metering entitlements aren't cacheable, because each metering entitlement
+   * is meant to be used for one article. Subscription entitlements that are
+   * not returned by dev mode are cacheable, because subscription entitlements
    * are meant to be used across multiple articles on a publication.
    * @return {boolean}
    */
   enablesThisWithCacheableEntitlements() {
     const entitlement = this.getEntitlementForThis();
-    return !!entitlement && entitlement.source !== GOOGLE_METERING_SOURCE;
+    return (
+      !!entitlement &&
+      entitlement.source !== GOOGLE_METERING_SOURCE &&
+      entitlement.subscriptionToken !== DEV_MODE_TOKEN
+    );
   }
 
   /**
@@ -3581,13 +3603,25 @@ class Entitlement {
     if (!product) {
       return false;
     }
-    // Wildcard allows this product.
     const eq = product.indexOf(':');
-    if (
-      eq != -1 &&
-      this.products.includes(product.substring(0, eq + 1) + '*')
-    ) {
-      return true;
+    // Handle wildcards
+    if (eq != -1) {
+      // Wildcard product (publication:*) unlocks on any entitlement matching publication
+      const publication = product.substring(0, eq + 1);
+      if(
+        publication + '*' == product &&
+        this.products.find((candidate) => candidate.substring(0, eq + 1) == publication)
+      ) {
+        debugLog('enabled with wildcard productId');
+        return true;
+      }
+      // Wildcard entitlement allows any product matching this publication
+      if (
+        this.products.includes(publication + '*')
+      ) {
+        debugLog('enabled with wildcard entitlement');
+        return true;
+      }
     }
     return this.products.includes(product);
   }
@@ -3628,10 +3662,9 @@ class Entitlement {
     if (this.source !== 'google') {
       return null;
     }
-    const sku = /** @type {?string} */ (getPropertyFromJsonString(
-      this.subscriptionToken,
-      'productId'
-    ) || null);
+    const sku = /** @type {?string} */ (
+      getPropertyFromJsonString(this.subscriptionToken, 'productId') || null
+    );
     if (!sku) {
       warn('Unable to retrieve SKU from SwG subscription token');
     }
@@ -4236,6 +4269,7 @@ const WindowOpenMode = {
 const ProductType = {
   SUBSCRIPTION: 'SUBSCRIPTION',
   UI_CONTRIBUTION: 'UI_CONTRIBUTION',
+  VIRTUAL_GIFT: 'VIRTUAL_GIFT',
 };
 
 /**
@@ -4556,7 +4590,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.173',
+    '_client': 'SwG 0.1.22.180',
   });
 }
 
@@ -4891,6 +4925,19 @@ class PayCompleteFlow {
     } else {
       args['loginHint'] = response.userData && response.userData.email;
     }
+
+    let confirmFeUrl;
+    if (args.productType === ProductType.VIRTUAL_GIFT) {
+      confirmFeUrl = feUrl('/payconfirmiframe', '', {
+        productType: args.productType,
+        publicationId: args.publicationId,
+        offerId: this.sku_,
+        origin: parseUrl(this.win_.location.href).origin,
+      });
+    } else {
+      confirmFeUrl = feUrl('/payconfirmiframe');
+    }
+
     return (this.activityIframeViewPromise_ = this.clientConfigManager_
       .getClientConfig()
       .then((clientConfig) => {
@@ -4898,7 +4945,7 @@ class PayCompleteFlow {
         return new ActivityIframeView(
           this.win_,
           this.activityPorts_,
-          feUrl('/payconfirmiframe'),
+          confirmFeUrl,
           feArgs(args),
           /* shouldFadeBody */ true
         );
@@ -5786,7 +5833,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.173',
+        '_client': 'SwG 0.1.22.180',
         'supportsEventManager': true,
       },
       args || {}
@@ -6632,7 +6679,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.173');
+    context.setClientVersion('SwG 0.1.22.180');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -7170,7 +7217,7 @@ const ButtonAttributeValues = {
   CONTRIBUTION: 'contribution',
 };
 
-const BUTTON_INNER_HTML = `<img class="swg-button-v2-icon-$theme$"></div>$textContent$`;
+const BUTTON_INNER_HTML = `<div class="swg-button-v2-icon-$theme$"></div>$textContent$`;
 
 /**
  * The button stylesheet can be found in the `/assets/swg-button.css`.
@@ -7276,7 +7323,7 @@ class ButtonApi {
       button.setAttribute('lang', options['lang']);
     }
     if (!options['enable']) {
-      button.disabled = true;
+      button.setAttribute('disabled', 'disabled');
     }
     button./*OK*/ innerHTML = BUTTON_INNER_HTML.replace(
       '$theme$',
@@ -7312,7 +7359,7 @@ class ButtonApi {
       button.setAttribute('lang', options['lang']);
     }
     if (!options['enable']) {
-      button.disabled = true;
+      button.setAttribute('disabled', 'disabled');
     }
     button./*OK*/ innerHTML = BUTTON_INNER_HTML.replace(
       '$theme$',
@@ -7343,7 +7390,7 @@ class ButtonApi {
     attributeValues.forEach((attributeValue) => {
       const elements = this.doc_
         .getRootNode()
-        .querySelectorAll(`button[${attribute}="${attributeValue}"]`);
+        .querySelectorAll(`[${attribute}="${attributeValue}"]`);
       for (let i = 0; i < elements.length; i++) {
         if (attributeValue === ButtonAttributeValues.SUBSCRIPTION) {
           this.attachSubscribeButton(
@@ -7764,6 +7811,39 @@ class Callbacks {
  */
 
 /**
+ * Container for attribution details for the publisher / creator.
+ */
+class AttributionParams {
+  /**
+   * @param {string} displayName
+   * @param {string} avatarUrl
+   */
+  constructor(displayName, avatarUrl) {
+    /** @const {string} */
+    this.displayName = displayName;
+
+    /** @const {string} */
+    this.avatarUrl = avatarUrl;
+  }
+}
+
+/**
+ * Copyright 2021 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * Container for the auto prompt configuation details.
  */
 class AutoPromptConfig {
@@ -7872,12 +7952,14 @@ class ClientConfig {
    * @param {string=} paySwgVersion
    * @param {boolean=} useUpdatedOfferFlows
    * @param {./auto-prompt-config.UiPredicates=} uiPredicates
+   * @param {./attribution-params.AttributionParams=} attributionParams
    */
   constructor(
     autoPromptConfig,
     paySwgVersion,
     useUpdatedOfferFlows,
-    uiPredicates
+    uiPredicates,
+    attributionParams
   ) {
     /** @const {!./auto-prompt-config.AutoPromptConfig|undefined} */
     this.autoPromptConfig = autoPromptConfig;
@@ -7890,6 +7972,9 @@ class ClientConfig {
 
     /** @const {./auto-prompt-config.UiPredicates|undefined} */
     this.uiPredicates = uiPredicates;
+
+    /** @const {./attribution-params.AttributionParams|undefined} */
+    this.attributionParams = attributionParams;
   }
 }
 
@@ -8083,11 +8168,21 @@ class ClientConfigManager {
       );
     }
 
+    const attributionParamsJson = json['attributionParams'];
+    let attributionParams;
+    if (attributionParamsJson) {
+      attributionParams = new AttributionParams(
+        attributionParamsJson.displayName,
+        attributionParamsJson.avatarUrl
+      );
+    }
+
     return new ClientConfig(
       autoPromptConfig,
       paySwgVersion,
       json['useUpdatedOfferFlows'],
-      uiPredicates
+      uiPredicates,
+      attributionParams
     );
   }
 }
@@ -8141,25 +8236,27 @@ class ContributionsFlow {
     const isClosable = options?.isClosable ?? true;
 
     /** @private @const {!Promise<!ActivityIframeView>} */
-    this.activityIframeViewPromise_ = this.getUrl_(
-      this.clientConfigManager_.getClientConfig()
-    ).then((url) => {
-      return new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl(url),
-        feArgs({
-          'productId': deps.pageConfig().getProductId(),
-          'publicationId': deps.pageConfig().getPublicationId(),
-          'productType': ProductType.UI_CONTRIBUTION,
-          'list': (options && options.list) || 'default',
-          'skus': (options && options.skus) || null,
-          'isClosable': isClosable,
-          'supportsEventManager': true,
-        }),
-        /* shouldFadeBody */ true
-      );
-    });
+    this.activityIframeViewPromise_ = this.clientConfigManager_
+      .getClientConfig()
+      .then((clientConfig) => {
+        return this.shouldShow_(clientConfig)
+          ? new ActivityIframeView(
+              this.win_,
+              this.activityPorts_,
+              feUrl(this.getUrl_(clientConfig)),
+              feArgs({
+                'productId': deps.pageConfig().getProductId(),
+                'publicationId': deps.pageConfig().getPublicationId(),
+                'productType': ProductType.UI_CONTRIBUTION,
+                'list': (options && options.list) || 'default',
+                'skus': (options && options.skus) || null,
+                'isClosable': isClosable,
+                'supportsEventManager': true,
+              }),
+              /* shouldFadeBody */ true
+            )
+          : null;
+      });
   }
 
   /**
@@ -8201,6 +8298,10 @@ class ContributionsFlow {
    */
   start() {
     return this.activityIframeViewPromise_.then((activityIframeView) => {
+      if (!activityIframeView) {
+        return Promise.resolve();
+      }
+
       // Start/cancel events.
       this.deps_
         .callbacks()
@@ -8221,18 +8322,25 @@ class ContributionsFlow {
   }
 
   /**
-   * Gets the URL that should be used for the activity iFrame view.
-   * @param {!Promise<../model/client-config.ClientConfig>} clientConfigPromise
-   * @return {!Promise<string>}
+   * Returns whether this flow is configured as enabled, not showing
+   * even on explicit start when flag is configured false.
+   *
+   * @param {!../model/client-config.ClientConfig} clientConfig
+   * @return {boolean}
    */
-  getUrl_(clientConfigPromise) {
-    return clientConfigPromise.then((clientConfig) => {
-      if (clientConfig.useUpdatedOfferFlows) {
-        return '/contributionoffersiframe';
-      } else {
-        return '/contributionsiframe';
-      }
-    });
+  shouldShow_(clientConfig) {
+    return clientConfig.uiPredicates?.canDisplayAutoPrompt !== false;
+  }
+
+  /**
+   * Gets the URL that should be used for the activity iFrame view.
+   * @param {!../model/client-config.ClientConfig} clientConfig
+   * @return {string}
+   */
+  getUrl_(clientConfig) {
+    return clientConfig.useUpdatedOfferFlows
+      ? '/contributionoffersiframe'
+      : '/contributionsiframe';
   }
 
   /**
@@ -9038,11 +9146,20 @@ class Dialog {
     /** @private {?Promise} */
     this.animating_ = null;
 
+    /**
+     * Helps identify stale animations.
+     * @private {number}
+     */
+    this.animationNumber_ = 0;
+
     /** @private {boolean} */
     this.hidden_ = false;
 
     /** @private {?./view.View} */
     this.previousProgressView_ = null;
+
+    /** @private {number} */
+    this.maxAllowedHeightRatio_ = 0.9;
   }
 
   /**
@@ -9270,12 +9387,23 @@ class Dialog {
     }
     const newHeight = this.getMaxAllowedHeight_(height);
 
+    // Uniquely identify this animation.
+    // This lets callbacks abandon stale animations.
+    const animationNumber = ++this.animationNumber_;
+    const isStale = () => {
+      return animationNumber !== this.animationNumber_;
+    };
+
     let animating;
     if (animated) {
       const oldHeight = this.getElement().offsetHeight;
       if (newHeight >= oldHeight) {
         // Expand.
         animating = this.animate_(() => {
+          if (isStale()) {
+            return Promise.resolve();
+          }
+
           setImportantStyles$1(this.getElement(), {
             'height': `${newHeight}px`,
             'transform': `translateY(${newHeight - oldHeight}px)`,
@@ -9292,14 +9420,21 @@ class Dialog {
       } else {
         // Collapse.
         animating = this.animate_(() => {
-          return transition$1(
-            this.getElement(),
-            {
-              'transform': `translateY(${oldHeight - newHeight}px)`,
-            },
-            300,
-            'ease-out'
-          ).then(() => {
+          const transitionPromise = isStale()
+            ? Promise.resolve()
+            : transition$1(
+                this.getElement(),
+                {
+                  'transform': `translateY(${oldHeight - newHeight}px)`,
+                },
+                300,
+                'ease-out'
+              );
+          return transitionPromise.then(() => {
+            if (isStale()) {
+              return;
+            }
+
             setImportantStyles$1(this.getElement(), {
               'height': `${newHeight}px`,
               'transform': 'translateY(0)',
@@ -9314,6 +9449,10 @@ class Dialog {
       animating = Promise.resolve();
     }
     return animating.then(() => {
+      if (isStale()) {
+        return;
+      }
+
       this.updatePaddingToHtml_(height);
       view.resized();
     });
@@ -9347,7 +9486,19 @@ class Dialog {
    * @private
    */
   getMaxAllowedHeight_(height) {
-    return Math.min(height, this.doc_.getWin()./*OK*/ innerHeight * 0.9);
+    return Math.min(
+      height,
+      this.doc_.getWin()./*OK*/ innerHeight * this.maxAllowedHeightRatio_
+    );
+  }
+
+  /**
+   * Sets the max allowed height as a ratio to the viewport height. For example,
+   * ratio = 0.9 means the max allowed height is 90% of the viewport height.
+   * @param {number} ratio
+   */
+  setMaxAllowedHeightRatio(ratio) {
+    this.maxAllowedHeightRatio_ = ratio;
   }
 
   /**
@@ -9457,11 +9608,18 @@ class DialogManager {
   /**
    * @param {!./view.View} view
    * @param {boolean=} hidden
+   * @param {?number=} maxAllowedHeightRatio The max allowed height of the
+   *    view as a ratio of the viewport height.
    * @return {!Promise}
    */
-  openView(view, hidden = false) {
+  openView(view, hidden = false, maxAllowedHeightRatio = null) {
     this.handleCancellations(view);
-    return this.openDialog(hidden).then((dialog) => dialog.openView(view));
+    return this.openDialog(hidden).then((dialog) => {
+      if (maxAllowedHeightRatio) {
+        dialog.setMaxAllowedHeightRatio(maxAllowedHeightRatio);
+      }
+      return dialog.openView(view);
+    });
   }
 
   /**
@@ -16354,7 +16512,7 @@ class Propensity {
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
+const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgb(0 0 0/20%),0 2px 2px 0 rgb(0 0 0/14%),0 1px 5px 0 rgb(0 0 0/12%)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -17153,7 +17311,10 @@ class ConfiguredRuntime {
       !entitlement ||
       !isSecure(this.win().location) ||
       !wasReferredByGoogle(parseUrl(this.win().document.referrer)) ||
-      !queryStringHasFreshGaaParams(this.win().location.search)
+      !queryStringHasFreshGaaParams(
+        this.win().location.search,
+        /*allowAllAccessTypes=*/ true
+      )
     ) {
       return Promise.resolve();
     }

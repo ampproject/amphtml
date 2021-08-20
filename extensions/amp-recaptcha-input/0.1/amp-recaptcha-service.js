@@ -1,20 +1,4 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Service for recaptcha components
  * interacting with the 3p recaptcha bootstrap iframe
  */
@@ -28,7 +12,6 @@ import {dict} from '#core/types/object';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {getSourceOrigin} from '../../../src/url';
-import {internalRuntimeVersion} from '../../../src/internal-version';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '#core/dom';
@@ -301,7 +284,7 @@ export class AmpRecaptchaService {
             winLocation.host +
             '/dist.3p/' +
             (mode.isMinified()
-              ? `${internalRuntimeVersion()}/recaptcha`
+              ? `${mode.version()}/recaptcha`
               : 'current/recaptcha.max') +
             '.html'
           );
@@ -329,7 +312,7 @@ export class AmpRecaptchaService {
       const recaptchaFrameSrc =
         'https://' +
         curlsSubdomain +
-        `.recaptcha.${urls.thirdPartyFrameHost}/${internalRuntimeVersion()}/` +
+        `.recaptcha.${urls.thirdPartyFrameHost}/${mode.version()}/` +
         'recaptcha.html';
       return recaptchaFrameSrc;
     });

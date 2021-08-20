@@ -1,28 +1,16 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
-import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-lightbox-gallery-1.0.css';
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {elementByTag} from '#core/dom/query';
+
 import {isExperimentOn} from '#experiments';
-import {userAssert} from '../../../src/log';
+
+import {Services} from '#service';
+
+import {BaseElement} from './base-element';
+
+import {CSS} from '../../../build/amp-lightbox-gallery-1.0.css';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-lightbox-gallery';
@@ -32,7 +20,20 @@ const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
 
 class AmpLightboxGallery extends BaseElement {
   /** @override */
+  constructor(element) {
+    super(element);
+
+    /** @private {!../../../src/service/history-impl.History} */
+    this.history_ = null;
+
+    /** @private {number|null} */
+    this.historyId_ = null;
+  }
+
+  /** @override */
   init() {
+    this.history_ = Services.historyForDoc(this.getAmpDoc());
+
     this.registerApiAction(
       DEFAULT_ACTION,
       (api, invocation) => this.openAction(api, invocation),
@@ -75,12 +76,21 @@ class AmpLightboxGallery extends BaseElement {
     const scroller = this.element.shadowRoot.querySelector('[part=scroller]');
     this.setAsContainer?.(scroller);
     triggerAnalyticsEvent(this.element, 'lightboxOpened');
+
+    this.history_
+      .push(() => this.api().close())
+      .then((historyId) => (this.historyId_ = historyId));
   }
 
   /** @override */
   afterClose() {
     super.afterClose();
     this.removeAsContainer?.();
+
+    if (this.historyId_ != null) {
+      this.history_.pop(this.historyId_);
+      this.historyId_ = null;
+    }
   }
 
   /** @override */

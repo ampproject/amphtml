@@ -1,33 +1,21 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '#service/real-time-config/real-time-config-impl';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {Deferred} from '#core/data-structures/promise';
-import {RefreshManager} from '../../amp-a4a/0.1/refresh-manager';
-import {Services} from '#service';
-import {WindowInterface} from '#core/window/interface';
-import {dev} from '../../../src/log';
 import {domFingerprintPlain} from '#core/dom/fingerprint';
-import {getBinaryType, isExperimentOn} from '#experiments';
-import {getFlexibleAdSlotData} from './flexible-ad-slot-utils';
-import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
-import {internalRuntimeVersion} from '../../../src/internal-version';
+import * as mode from '#core/mode';
 import {stringHash32} from '#core/types/string';
+import {WindowInterface} from '#core/window/interface';
+
+import {getBinaryType, isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {getFlexibleAdSlotData} from './flexible-ad-slot-utils';
+
+import {getOrCreateAdCid} from '../../../src/ad-cid';
+import {dev} from '../../../src/log';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {RefreshManager} from '../../amp-a4a/0.1/refresh-manager';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-valueimpression-impl';
@@ -335,7 +323,7 @@ export class AmpAdNetworkValueimpressionImpl extends AmpA4A {
         'is_amp': this.isXhrAllowed()
           ? AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP
           : AmpAdImplementation.AMP_AD_IFRAME_GET,
-        'amp_v': internalRuntimeVersion(),
+        'amp_v': mode.version(),
         'd_imp': 1,
         'c': getCorrelator(win, ampDoc, clientId),
         'ga_cid': win.gaGlobal.cid || null,

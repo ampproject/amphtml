@@ -1,18 +1,4 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 
 @import './amp-story-access.css';
 @import './amp-story-affiliate-link.css';
@@ -924,6 +910,7 @@ amp-story .amp-video-eq,
   --i-amphtml-interactive-component-shadow: 0px 4px 12px rgba(60, 64, 67, 0.08), 0px 2px 4px rgba(60, 64, 67, 0.12);
   --i-amphtml-interactive-prompt-clamp: 4 !important;
   --i-amphtml-interactive-results-prompt-margin: 20px !important;
+  --i-amphtml-interactive-placeholder-background: rgba(32, 33, 36, 0.2) !important;
   --i-amphtml-story-interactive-img-quiz-answer-filter: none;
   --i-amphtml-interactive-img-border: 0 0 0 transparent !important;
 }
@@ -936,6 +923,7 @@ amp-story .amp-video-eq,
   --i-amphtml-interactive-theme-shading-base: rgb(60, 61, 63) !important;
   --i-amphtml-interactive-theme-shading-flash: rgba(167, 173, 180, 0.5) !important;
   --i-amphtml-interactive-strong-text-color: white !important;
+  --i-amphtml-interactive-placeholder-background: rgba(255, 255, 255, 0.2) !important;
   --i-amphtml-story-interactive-img-quiz-answer-filter: invert(100%);
 }
 
@@ -975,7 +963,8 @@ amp-story .amp-video-eq,
 }
 
 amp-story-interactive-binary-poll.i-amphtml-story-interactive-component, amp-story-interactive-results.i-amphtml-story-interactive-component,
-amp-story-interactive-img-poll.i-amphtml-story-interactive-component, amp-story-interactive-img-quiz.i-amphtml-story-interactive-component {
+amp-story-interactive-img-poll.i-amphtml-story-interactive-component, amp-story-interactive-img-quiz.i-amphtml-story-interactive-component,
+amp-story-interactive-results-detailed.i-amphtml-story-interactive-component {
   max-width: 18em !important;
 }
 

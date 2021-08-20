@@ -1,21 +1,11 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 /*eslint "max-len": 0*/
+
+// This expands into
+//   - `src/*.js`` -> all JS files directly under `src`
+//   - `src/!(core)/**/*.js` -> all JS files in subfolders excluding `src/core`
+const SRC_EXCLUDING_CORE = 'src{,/!(core)/**}/*.js';
 
 // It is often OK to add things to the allowlist, but make sure to highlight
 // this in review.
@@ -85,26 +75,12 @@ exports.rules = [
   // Rules for 3p
   {
     filesMatching: '3p/**/*.js',
-    mustNotDependOn: 'src/**/*.js',
+    mustNotDependOn: SRC_EXCLUDING_CORE,
     allowlist: [
-      '3p/**->src/core/constants/amp-events.js',
-      '3p/**->src/core/data-structures/observable.js',
-      '3p/**->src/core/data-structures/promise.js',
-      '3p/**->src/core/error/index.js',
-      '3p/**->src/core/types/enum.js',
-      '3p/**->src/core/types/function/index.js',
-      '3p/**->src/core/types/index.js',
-      '3p/**->src/core/types/object/index.js',
-      '3p/**->src/core/types/string/index.js',
-      '3p/**->src/core/types/string/url.js',
       '3p/**->src/log.js',
-      '3p/**->src/core/dom/style.js',
       '3p/**->src/url.js',
       '3p/**->src/config.js',
       '3p/**->src/mode.js',
-      '3p/**->src/core/types/object/json.js',
-      '3p/**->src/3p-frame-messaging.js',
-      '3p/**->src/internal-version.js',
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
@@ -123,36 +99,19 @@ exports.rules = [
   // Rules for ads
   {
     filesMatching: 'ads/**/*.js',
-    mustNotDependOn: 'src/**/*.js',
+    mustNotDependOn: SRC_EXCLUDING_CORE,
     allowlist: [
-      'ads/**->src/core/dom/fingerprint.js',
-      'ads/**->src/core/constants/consent-state.js',
-      'ads/**->src/core/error/index.js',
-      'ads/**->src/core/types/array.js',
-      'ads/**->src/core/types/function/index.js',
-      'ads/**->src/core/types/index.js',
-      'ads/**->src/core/types/object/index.js',
-      'ads/**->src/core/types/string/index.js',
-      'ads/**->src/core/types/string/url.js',
       'ads/**->src/log.js',
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
-      'ads/**->src/core/dom/static-template.js',
-      'ads/**->src/core/dom/style.js',
-      'ads/**->src/internal-version.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
       'ads/google/a4a/**->src/ad-cid.js',
       'ads/google/a4a/**->src/consent.js',
-      'ads/google/a4a/**->src/amp-element-helpers.js',
       'ads/google/a4a/**->src/experiments/index.js',
       'ads/google/a4a/**->src/service/index.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',
       'ads/google/a4a/utils.js->src/ini-load.js',
-      'ads/google/a4a/utils.js->src/core/dom/index.js',
-      'ads/google/a4a/utils.js->src/core/dom/layout/page-layout-box.js',
-      // Some ads need to depend on json.js
-      'ads/**->src/core/types/object/json.js',
       // IMA, similar to other non-Ad 3Ps above, needs access to event-helper
       'ads/google/ima/ima-video.js->src/event-helper.js',
     ],
@@ -221,6 +180,9 @@ exports.rules = [
 
       // Ads needs iframe transports
       'extensions/amp-ad-exit/0.1/config.js->extensions/amp-analytics/0.1/iframe-transport-vendors.js',
+
+      // <amp-brightcove> versions share this message API definition.
+      'extensions/amp-brightcove/**->extensions/amp-brightcove/brightcove-api.js',
 
       // Amp carousel (and friends) depending on base carousel
       'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/action-source.js',
@@ -304,6 +266,7 @@ exports.rules = [
       'extensions/amp-story-interactive/0.1/amp-story-interactive-img-quiz.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-interactive/0.1/amp-story-interactive-results.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-interactive/0.1/interactive-disclaimer.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-slider.js->extensions/amp-story/1.0/amp-story-store-service.js',
 
       // Subscriptions.
       'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',
@@ -389,6 +352,8 @@ exports.rules = [
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js->' +
         'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/cookie-writer.js->' +
+        'src/service/cid-impl.js',
+      'extensions/amp-consent/0.1/consent-state-manager.js->' +
         'src/service/cid-impl.js',
       'extensions/amp-consent/0.1/cookie-writer.js->' +
         'src/service/cid-impl.js',
