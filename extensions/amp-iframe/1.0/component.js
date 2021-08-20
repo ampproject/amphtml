@@ -69,7 +69,6 @@ export function Iframe({
       if (event.data?.type !== MessageType.EMBED_SIZE) {
         return;
       }
-      // const {width, height} = event.data;
       dataRef.current = event.data;
       attemptResize();
     },
