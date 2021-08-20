@@ -63,7 +63,7 @@
         border-color: #675cff;
       }
       .track-click {
-        margin: 20px 0 0;
+        margin: 20px 0;
         text-align: center;
       }
       .configurable {
@@ -89,10 +89,14 @@
         padding: 20px;
         margin: 0 auto;
       }
-      @media (max-width: 767px) {
-        textarea {
-          margin: 0 0 10px;
-        }
+      .spacer {
+        height: 100vh;
+      }
+      .visibility-marker {
+        color: #be4f0e;
+        border: 2px solid #ffdac5;
+        padding: 10px 20px;
+        margin: 10px 0;
       }
     </style>
   </head>
@@ -103,29 +107,76 @@
         Partial implementation of <code>amp-analytics</code> for documents
         without the AMP runtime.
       </p>
+
+      <h2>Configuration</h2>
+      <form class="configurable">
+        <textarea spellcheck="false"></textarea>
+        <button type="submit">Use configuration</button>
+      </form>
+
+      <h2>Visibility Marker</h2>
+      <section class="visibility-marker" data-vars-name="first">
+        <p>
+          Triggers an event when this section visible for longer than
+          <strong>2000 milliseconds.</strong>
+        </p>
+        <p>
+          These markers are selected by <code>.visibility-marker</code> on the
+          default configuration.
+        </p>
+        <p>
+          They have a <code>data-vars-name</code> attribute
+          <a
+            href="https://github.com/ampproject/amphtml/blob/main/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute"
+            target="_blank"
+            >that can be propagated as a variable</a
+          >, included in request configuration as <code>${name}</code>.
+        </p>
+      </section>
+
       <h2>Track click</h2>
       <p>
         These buttons are selected by <code>.track-click button</code> on the
         default configuration.
       </p>
       <p>
-        They have a <code>data-vars-button-name</code> attribute
+        They have a <code>data-vars-name</code> attribute
         <a
           href="https://github.com/ampproject/amphtml/blob/main/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute"
           target="_blank"
           >that can be propagated as a variable</a
-        >, included in request configuration as <code>${buttonName}</code>.
+        >, included in request configuration as <code>${name}</code>.
       </p>
       <section class="track-click">
-        <button data-vars-button-name="one">Click One</button>
-        <button data-vars-button-name="two">Click Two</button>
-        <button data-vars-button-name="three">Click Three</button>
+        <button data-vars-name="one">Click One</button>
+        <button data-vars-name="two">Click Two</button>
+        <button data-vars-name="three">Click Three</button>
       </section>
-      <h2>Configuration</h2>
-      <form class="configurable">
-        <textarea spellcheck="false"></textarea>
-        <button type="submit">Use configuration</button>
-      </form>
+
+      <h2>Visibility Marker</h2>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec
+        odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla
+        quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent
+        mauris. Fusce nec tellus sed augue semper porta. Mauris massa.
+        Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad
+        litora torquent per conubia nostra, per inceptos himenaeos. Curabitur
+        sodales ligula in libero. Sed dignissim lacinia nunc.
+      </p>
+
+      <p>
+        Curabitur tortor. Pellentesque nibh. Aenean quam. In scelerisque sem at
+        dolor. Maecenas mattis. Sed convallis tristique sem. Proin ut ligula vel
+        nunc egestas porttitor. Morbi lectus risus, iaculis vel, suscipit quis,
+        luctus non, massa. Fusce ac turpis quis ligula lacinia aliquet. Mauris
+        ipsum. Nulla metus metus, ullamcorper vel, tincidunt sed, euismod in,
+        nibh.
+      </p>
+      <div class="visibility-marker" data-vars-name="second">
+        <p>This is another visibility marker.</p>
+      </div>
+
+      <div class="spacer"></div>
     </main>
     <amp-analytics>
       <script type="application/json">
@@ -136,18 +187,37 @@
             "image": false
           },
           "requests": {
-            "pageview": "https://example.com/?pageview&RANDOM",
-            "click": "https://example.com/?click&n=${buttonName}&RANDOM"
+            "event": "https://example.com/"
           },
           "triggers": {
             "trackPageview": {
               "on": "visible",
-              "request": "pageview"
+              "request": "event",
+              "extraUrlParams": {
+                "e": "pageview",
+                "r": "RANDOM"
+              }
             },
             "trackClick": {
               "selector": ".track-click button",
               "on": "click",
-              "request": "click"
+              "request": "event",
+              "extraUrlParams": {
+                "e": "click",
+                "n": "${name}"
+              }
+            },
+            "trackVisible": {
+              "on": "visible",
+              "request": "event",
+              "selector": [".visibility-marker"],
+              "extraUrlParams": {
+                "e": "visible",
+                "n": "${name}"
+              },
+              "visibilitySpec": {
+                "totalTimeMin": 2000
+              }
             }
           }
         }
