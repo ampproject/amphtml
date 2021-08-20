@@ -2776,7 +2776,7 @@ func (x *ReferencePoint) GetUnique() bool {
 
 // Specs specific to AMP Extensions. This is a field within TagSpec that
 // replaces the standard tagspec list of attributes, requirements, etc.
-// NEXT AVAILABLE TAG: 10
+// NEXT AVAILABLE TAG: 11
 type ExtensionSpec struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
