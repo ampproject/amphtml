@@ -109,12 +109,7 @@ module.exports = {
         }
         context.report({
           node,
-          message:
-            'Prefer `' +
-            alternative +
-            '` to `' +
-            node.name +
-            '` when using JSX.',
+          message: `Prefer \`${alternative}\` to \`${node.name.name}\` when using JSX.`,
 
           fix(fixer) {
             return fixer.replaceText(node.name, alternative);
