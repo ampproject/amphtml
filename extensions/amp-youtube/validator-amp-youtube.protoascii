@@ -7,6 +7,7 @@ tags: {  # amp-youtube 1.0
     name: "amp-youtube"
     version_name: "v1.0"
     version: "1.0"
+    bento_supported_version: "1.0"
   }
   attr_lists: "common-extension-attrs"
 }
