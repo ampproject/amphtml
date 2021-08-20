@@ -11,7 +11,6 @@ const {getReplacePlugin} = require('./helpers');
  * @return {!Object}
  */
 function getPreClosureConfig() {
-  const isCheckTypes = argv._.includes('check-types');
   const isProd = argv._.includes('dist') && !argv.fortesting;
 
   const reactJsxPlugin = [
@@ -22,8 +21,8 @@ function getPreClosureConfig() {
       useSpread: true,
     },
   ];
-  const replacePlugin = getReplacePlugin();
-  const preClosurePlugins = [
+
+  const plugins = [
     'optimize-objstr',
     getImportResolverPlugin(),
     argv.coverage ? 'babel-plugin-istanbul' : null,
@@ -33,9 +32,8 @@ function getPreClosureConfig() {
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
     '@babel/plugin-transform-react-constant-elements',
     reactJsxPlugin,
-    argv.esm || argv.sxg
-      ? './build-system/babel-plugins/babel-plugin-transform-dev-methods'
-      : null,
+    (argv.esm || argv.sxg) &&
+      './build-system/babel-plugins/babel-plugin-transform-dev-methods',
     // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
     [
       './build-system/babel-plugins/babel-plugin-transform-log-methods',
@@ -50,36 +48,40 @@ function getPreClosureConfig() {
     './build-system/babel-plugins/babel-plugin-transform-html-template',
     './build-system/babel-plugins/babel-plugin-transform-jss',
     './build-system/babel-plugins/babel-plugin-transform-default-assignment',
-    replacePlugin,
+    getReplacePlugin(),
     './build-system/babel-plugins/babel-plugin-transform-amp-asserts',
     // TODO(erwinm, #28698): fix this in fixit week
     // argv.esm
     //? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
     //: null,
-    !isCheckTypes &&
-      './build-system/babel-plugins/babel-plugin-transform-json-configuration',
+    './build-system/babel-plugins/babel-plugin-transform-json-configuration',
     isProd && [
       './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
       BUILD_CONSTANTS,
     ],
+    ['@babel/plugin-transform-for-of', {loose: true, allowArrayLike: true}],
   ].filter(Boolean);
   const presetEnv = [
     '@babel/preset-env',
     {
       bugfixes: true,
       modules: false,
-      targets: {esmodules: true},
+      targets: argv.esm || argv.sxg ? {esmodules: true} : {ie: 11, chrome: 41},
     },
   ];
-  const preClosurePresets = argv.esm || argv.sxg ? [presetEnv] : [];
-  const preClosureConfig = {
+
+  return {
     compact: false,
-    plugins: preClosurePlugins,
-    presets: preClosurePresets,
-    retainLines: true,
+    plugins,
+    presets: [presetEnv],
     sourceMaps: true,
+    retainLines: true,
+    assumptions: {
+      constantSuper: true,
+      noClassCalls: true,
+      setClassMethods: true,
+    },
   };
-  return preClosureConfig;
 }
 
 module.exports = {
