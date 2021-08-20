@@ -1,20 +1,5 @@
 FAIL
 |  <!--
-|    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-|
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|
-|        http://www.apache.org/licenses/LICENSE-2.0
-|
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    Tests for the amp-bodymovin-animation tag. See the inline comments.
 |  -->
@@ -61,18 +46,18 @@ FAIL
 |    <!-- Invalid because missing `height` and `width` attributes for `layout="fixed"` -->
 |    <amp-bodymovin-animation layout="fixed" src="https://nainar.github.io/loader.json">
 >>   ^~~~~~~~~
-amp-bodymovin-animation/0.1/test/validator-amp-bodymovin-animation.html:61:2 The mandatory attribute 'height' is missing in tag 'amp-bodymovin-animation'. (see https://amp.dev/documentation/components/amp-bodymovin-animation/)
+amp-bodymovin-animation/0.1/test/validator-amp-bodymovin-animation.html:46:2 The mandatory attribute 'height' is missing in tag 'amp-bodymovin-animation'. (see https://amp.dev/documentation/components/amp-bodymovin-animation/)
 |    </amp-bodymovin-animation>
 |
 |    <!-- Invalid becuase `loop`is set to an invalid value. -->
 |    <amp-bodymovin-animation layout="fixed" width="200" height="200" src="https://nainar.github.io/loader.json" loop='nope'>
 >>   ^~~~~~~~~
-amp-bodymovin-animation/0.1/test/validator-amp-bodymovin-animation.html:65:2 The attribute 'loop' in tag 'amp-bodymovin-animation' is set to the invalid value 'nope'. (see https://amp.dev/documentation/components/amp-bodymovin-animation/)
+amp-bodymovin-animation/0.1/test/validator-amp-bodymovin-animation.html:50:2 The attribute 'loop' in tag 'amp-bodymovin-animation' is set to the invalid value 'nope'. (see https://amp.dev/documentation/components/amp-bodymovin-animation/)
 |    </amp-bodymovin-animation>
 |
 |    <!-- Invalid becuase `autoplay`attribute isn't allowed on `<amp-bodymovin-animation>`. -->
 |    <amp-bodymovin-animation layout="responsive" width="200" height="200" src="https://nainar.github.io/loader.json" loop='true' autoplay>
 >>   ^~~~~~~~~
-amp-bodymovin-animation/0.1/test/validator-amp-bodymovin-animation.html:69:2 The attribute 'autoplay' may not appear in tag 'amp-bodymovin-animation'. (see https://amp.dev/documentation/components/amp-bodymovin-animation/)
+amp-bodymovin-animation/0.1/test/validator-amp-bodymovin-animation.html:54:2 The attribute 'autoplay' may not appear in tag 'amp-bodymovin-animation'. (see https://amp.dev/documentation/components/amp-bodymovin-animation/)
 |    </amp-bodymovin-animation>
 |  </html>
