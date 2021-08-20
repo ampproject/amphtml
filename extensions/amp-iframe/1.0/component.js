@@ -24,7 +24,7 @@ export function Iframe({
 }) {
   const iframeRef = useRef();
   const dataRef = useRef(null);
-  const isIntersectingRef = useRef(false);
+  const isIntersectingRef = useRef(null);
 
   const attemptResize = useCallback(() => {
     const iframe = iframeRef.current;
@@ -38,13 +38,16 @@ export function Iframe({
     }
     if (requestResize) {
       // Currently `requestResize` is called twice:
-      // 1. when the message is received in viewport
+      // 1. when post message is received in viewport
       // 2. when exiting viewport
       // This could be optimized by reducing to one call by assessing when to call.
       requestResize(height, width);
       iframe.height = FULL_HEIGHT;
       iframe.width = FULL_HEIGHT;
-    } else if (!isIntersectingRef.current) {
+    } else if (isIntersectingRef.current === false) {
+      // attemptResize can be called before the IntersectionObserver starts observing
+      // the component if an event is fired immediately. Therefore we check
+      // isIntersectingRef has changed via isIntersectingRef.current === false.
       if (width) {
         iframe.width = width;
       }
@@ -59,8 +62,9 @@ export function Iframe({
       if (event.data?.type !== MessageType.EMBED_SIZE) {
         return;
       }
-      const {width, height} = event.data;
-      attemptResize(width, height);
+      // const {width, height} = event.data;
+      dataRef.current = event.data;
+      attemptResize();
     },
     [attemptResize]
   );
