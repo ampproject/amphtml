@@ -221,7 +221,6 @@ async function makeExtensionFromTemplates(
   const namePascalCase = dashToPascalCase(name);
 
   const replacements = {
-    '__current_year__': `${new Date().getFullYear()}`,
     '__component_version__': version,
     '__component_version_snakecase__': version.replace(/\./g, '_'),
     '__component_name_hyphenated__': name,

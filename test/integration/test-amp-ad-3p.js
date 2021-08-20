@@ -1,8 +1,5 @@
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 
-import {forceExperimentBranch} from '#experiments';
-import {ADS_INITIAL_INTERSECTION_EXP} from '#experiments/ads-initial-intersection-exp';
-
 import {Services} from '#service';
 import {installPlatformService} from '#service/platform-impl';
 
@@ -26,11 +23,6 @@ describes.sandboxed('amp-ad 3P', {}, () => {
     return createFixture().then((f) => {
       fixture = f;
       installPlatformService(fixture.win);
-      forceExperimentBranch(
-        fixture.win,
-        ADS_INITIAL_INTERSECTION_EXP.id,
-        ADS_INITIAL_INTERSECTION_EXP.experiment
-      );
     });
   });
 
@@ -86,18 +78,7 @@ describes.sandboxed('amp-ad 3P', {}, () => {
         });
         const {initialIntersection} = context;
         expect(initialIntersection.rootBounds).to.deep.equal(
-          layoutRectLtwh(
-            0,
-            0,
-            Math.min(
-              iframe.ownerDocument.body.clientWidth,
-              iframe.ownerDocument.defaultView.innerWidth
-            ),
-            Math.min(
-              iframe.ownerDocument.body.clientHeight,
-              iframe.ownerDocument.defaultView.innerHeight
-            )
-          )
+          layoutRectLtwh(0, 0, 500, IFRAME_HEIGHT)
         );
 
         expect(initialIntersection.boundingClientRect).to.deep.equal(

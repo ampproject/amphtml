@@ -7,6 +7,7 @@ import {
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '#service';
 import {dict} from '#core/types/object';
+import {macroTask} from '#testing/yield';
 
 describes.realWin('ConsentConfig', {amp: 1}, (env) => {
   let doc;
@@ -540,6 +541,7 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
           // RANDOM is not allowed
           'r=RANDOM'
       );
+
       expect(url).to.match(
         /cid=amp-.{22}&pid=[0-9]+&pid64=.{22}&sourceurl=about%3Asrcdoc&r=RANDOM/
       );
@@ -548,20 +550,26 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
     it('override CLIENT_ID scope', async () => {
       const u1 = await expandConsentEndpointUrl(
         doc.body,
-        'https://example.test?cid=CLIENT_ID'
+        'https://example.test?cid=CLIENT_ID&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
       );
+
       const u2 = await expandConsentEndpointUrl(
         doc.body,
-        'https://example.test?cid=CLIENT_ID()'
+        'https://example.test?cid=CLIENT_ID()&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
       );
+
       const u3 = await expandConsentEndpointUrl(
         doc.body,
-        'https://example.test?cid=CLIENT_ID(123)'
+        'https://example.test?cid=CLIENT_ID(123)&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
       );
+
       const u4 = await expandConsentEndpointUrl(
         doc.body,
-        'https://example.test?cid=CLIENT_ID(abc)'
+        'https://example.test?cid=CLIENT_ID(abc)&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
       );
+
+      await macroTask();
+
       expect(u1).to.equal(u2).to.equal(u3).to.equal(u4);
     });
   });
