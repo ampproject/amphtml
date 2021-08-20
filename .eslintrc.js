@@ -205,7 +205,6 @@ module.exports = {
     'local/no-unload-listener': 2,
     'local/objstr-literal': 2,
     'local/preact': 2,
-    'local/prefer-class-prop': 2,
     'local/prefer-deferred-promise': 0,
     'local/prefer-destructuring': 2,
     'local/prefer-spread-props': 2,
@@ -455,6 +454,10 @@ module.exports = {
     {
       'files': ['3p/**/*.js', 'src/**/*.js', 'test/**/*.js', 'testing/**/*.js'],
       'rules': {'import/order': 2},
+    },
+    {
+      'files': ['src/preact/**', 'extensions/**/1.0/**'],
+      'rules': {'local/prefer-class-prop': 2},
     },
   ],
 };
