@@ -385,21 +385,6 @@ export class PreactBaseElement extends BaseElement {
     });
   }
 
-  /** @override */
-  attemptChangeSize(newHeight, newWidth, opt_event) {
-    return super
-      .attemptChangeSize(newHeight, newWidth, undefined, opt_event)
-      .catch((e) => {
-        if (!this.getOverflowElement?.()) {
-          console./* OK */ warn(
-            '[overflow] element not found. Provide one to enable resizing to full contents.',
-            this.element
-          );
-        }
-        throw e;
-      });
-  }
-
   /**
    * @protected
    * @param {!JsonObject} props

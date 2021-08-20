@@ -76,7 +76,15 @@ class AmpIframe extends BaseElement {
       return;
     }
 
-    this.attemptChangeSize(height, width);
+    this.attemptChangeSize(height, width).catch((e) => {
+      if (this.getOverflowElement?.()) {
+        console./* OK */ warn(
+          '[overflow] element not found. Provide one to enable resizing to full contents.',
+          this.element
+        );
+      }
+      throw e;
+    });
   }
 
   /** @override */
