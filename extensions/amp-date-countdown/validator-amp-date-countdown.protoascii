@@ -6,6 +6,7 @@ tags: {  # amp-date-countdown
     version: "0.1"
     version: "1.0"
     version: "latest"
+    bento_supported_version: "1.0"
   }
   attr_lists: "common-extension-attrs"
 }
