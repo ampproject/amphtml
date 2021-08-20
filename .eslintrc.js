@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const fs = require('fs');
 
 const {
@@ -227,6 +211,25 @@ module.exports = {
     'local/prefer-unnested-spread-objects': 2,
     'local/private-prop-names': 2,
     'local/query-selector': 2,
+    'local/restrict-this-access': [
+      2,
+      {
+        className: 'PreactBaseElement',
+        allowed: [
+          'api',
+          'element',
+          'getProp',
+          'loadable',
+          'mutateElement',
+          'mutateProps',
+          'registerApiAction',
+          'triggerEvent',
+          'usesLoading',
+          'usesShadowDom',
+          'win',
+        ],
+      },
+    ],
     'local/todo-format': 0,
     'local/unused-private-field': 2,
     'local/vsync': 0,
