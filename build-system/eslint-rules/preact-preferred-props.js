@@ -126,7 +126,7 @@ module.exports = {
 
         context.report({
           node,
-          message: `Prefer \`${preferred}\` to \`${property}\` when using JSX.`,
+          message: `Prefer \`${preferred}\` property access to \`${property}\`.`,
 
           fix(fixer) {
             if (!prop.key.value) {
