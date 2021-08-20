@@ -272,6 +272,7 @@ export {Selector};
  */
 export function Option({
   as: Comp = 'div',
+  'class': className = '',
   disabled = false,
   index,
   onClick: customOnClick,
@@ -361,26 +362,29 @@ export function Option({
   );
 
   const isSelected = /** @type {!Array} */ (selected).includes(option);
-  const optionProps = {
-    ...rest,
-    className: objstr({
-      [classes.option]: true,
-      [classes.selected]: isSelected && !selectorMultiple,
-      [classes.multiselected]: isSelected && selectorMultiple,
-      [classes.disabled]: disabled || selectorDisabled,
-    }),
-    disabled,
-    'aria-disabled': String(disabled),
-    onClick,
-    onFocus: () => (focusRef.current.active = option),
-    onKeyDown,
-    option,
-    ref,
-    role,
-    selected: isSelected,
-    'aria-selected': String(isSelected),
-    tabIndex:
-      tabIndex ?? keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? -1 : 0,
-  };
-  return <Comp {...optionProps} />;
+  return (
+    <Comp
+      {...rest}
+      aria-disabled={String(disabled)}
+      aria-selected={String(isSelected)}
+      class={objstr({
+        [className]: !!className,
+        [classes.option]: true,
+        [classes.selected]: isSelected && !selectorMultiple,
+        [classes.multiselected]: isSelected && selectorMultiple,
+        [classes.disabled]: disabled || selectorDisabled,
+      })}
+      disabled={disabled}
+      onClick={onClick}
+      onFocus={() => (focusRef.current.active = option)}
+      onKeyDown={onKeyDown}
+      ref={ref}
+      role={role}
+      selected={isSelected}
+      tabIndex={
+        tabIndex ?? keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? -1 : 0
+      }
+      value={option}
+    />
+  );
 }
