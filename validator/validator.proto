@@ -464,6 +464,8 @@ message ExtensionSpec {
   // deprecated_version must be a strict subset of version. If the version
   // matches a deprecated_version, validation will emit a warning.
   repeated string deprecated_version = 3;
+  // Bento supported versions (e.g. "1.0").
+  repeated string bento_supported_version = 10;
 
   // Most extensions are custom-elements. For custom-template extensions, this
   // value needs to be set true. E.g: amp-mustache.
