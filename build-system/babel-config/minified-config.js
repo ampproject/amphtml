@@ -75,14 +75,10 @@ function getMinifiedConfig() {
     sourceMaps: 'inline',
     presets: [presetEnv],
     retainLines: true,
-
-    // TODO: @jridgewell please help double check these make sense.
-    // Important for enabling prop mangle so that we don't use the heavy form of classes.
     assumptions: {
       constantSuper: true,
       noClassCalls: true,
       setClassMethods: true,
-      superIsCallableConstructor: true,
     },
   };
 }
