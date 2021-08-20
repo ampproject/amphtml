@@ -67,7 +67,6 @@ import {
   isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '#experiments';
-import {ADS_INITIAL_INTERSECTION_EXP} from '#experiments/ads-initial-intersection-exp';
 import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
 import {StoryAdPlacements} from '#experiments/story-ad-placements';
 import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
@@ -465,14 +464,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           experimentId: ZINDEX_EXP,
           isTrafficEligible: () => true,
           branches: Object.values(ZINDEX_EXP_BRANCHES),
-        },
-        {
-          experimentId: ADS_INITIAL_INTERSECTION_EXP.id,
-          isTrafficEligible: () => true,
-          branches: [
-            ADS_INITIAL_INTERSECTION_EXP.control,
-            ADS_INITIAL_INTERSECTION_EXP.experiment,
-          ],
         },
         {
           experimentId: IDLE_CWV_EXP,

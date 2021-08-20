@@ -42,7 +42,6 @@ import {
   getExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '#experiments';
-import {ADS_INITIAL_INTERSECTION_EXP} from '#experiments/ads-initial-intersection-exp';
 import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
 import {StoryAdPlacements} from '#experiments/story-ad-placements';
 import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
@@ -224,16 +223,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    */
   divertExperiments() {
     const experimentInfoList =
-      /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
-        {
-          experimentId: ADS_INITIAL_INTERSECTION_EXP.id,
-          isTrafficEligible: () => true,
-          branches: [
-            ADS_INITIAL_INTERSECTION_EXP.control,
-            ADS_INITIAL_INTERSECTION_EXP.experiment,
-          ],
-        },
-      ]);
+      /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([]);
     const setExps = randomlySelectUnsetExperiments(
       this.win,
       experimentInfoList
