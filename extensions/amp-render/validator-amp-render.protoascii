@@ -5,6 +5,7 @@ tags: {  # amp-render
     name: "amp-render"
     version: "1.0"
     version: "latest"
+    bento_supported_version: "1.0"
   }
   attr_lists: "common-extension-attrs"
 }
