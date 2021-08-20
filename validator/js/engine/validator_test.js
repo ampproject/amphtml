@@ -314,7 +314,7 @@ describe('ValidatorOutput', () => {
     const results = validator.validateString(test.ampHtmlFileContents);
     const observed =
         validator.renderValidationResult(results, test.ampUrl).join('\n');
-    const expectedSubstr = 'http://google.com/foo.html:28:3';
+    const expectedSubstr = 'http://google.com/foo.html:13:3';
     if (observed.indexOf(expectedSubstr) === -1) {
       asserts.fail(
           'expectedSubstr:\n' + expectedSubstr + '\nsaw:\n' + observed);
