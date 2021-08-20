@@ -31,10 +31,17 @@ export function Iframe({
     if (!iframe) {
       return;
     }
-    const height = Number(dataRef.current.height);
-    const width = Number(dataRef.current.width);
+    let height = Number(dataRef.current.height);
+    let width = Number(dataRef.current.width);
     if (!height && !width) {
       return;
+    }
+    // TODO(dmanek): Calculate width and height of the container to include padding.
+    if (!height) {
+      height = iframe./*OK*/ offsetHeight;
+    }
+    if (!width) {
+      width = iframe./*OK*/ offsetWidth;
     }
     if (requestResize) {
       // Currently `requestResize` is called twice:

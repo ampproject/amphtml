@@ -76,8 +76,6 @@ class AmpIframe extends BaseElement {
       return;
     }
 
-    // TODO(dmanek): Calculate width and height of the container to include padding.
-
     this.attemptChangeSize(height, width);
   }
 
