@@ -35,7 +35,6 @@ import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {isArray, isEnumValue, isObject} from '#core/types';
 import {realChildElements} from '#core/dom/query';
-
 import {toggle} from '#core/dom/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
