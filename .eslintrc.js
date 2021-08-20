@@ -172,7 +172,6 @@ module.exports = {
     'local/is-experiment-on': 2,
     'local/json-configuration': 2,
     'local/jss-animation-name': 2,
-    'local/jsx-alternative-props': 2,
     'local/no-arrow-on-register-functions': 2,
     'local/no-bigint': 2,
     'local/no-deep-destructuring': 2,
@@ -456,8 +455,8 @@ module.exports = {
       'rules': {'import/order': 2},
     },
     {
-      'files': ['src/preact/**', 'extensions/**/1.0/**'],
-      'rules': {'local/prefer-class-prop': 2},
+      'files': ['src/preact/**', 'extensions/**/1.0/**', '**/storybook/**'],
+      'rules': {'local/preact-preferred-props': 2},
     },
   ],
 };
