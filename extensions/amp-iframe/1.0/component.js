@@ -72,12 +72,11 @@ export function Iframe({
 
   const handlePostMessage = useCallback(
     (event) => {
-      // Currently we're only handling `embed-size` post messages
       if (event.data?.type !== MessageType.EMBED_SIZE) {
         return;
       }
-      dataRef.current = event.data;
-      attemptResize();
+      const {width, height} = event.data;
+      attemptResize(width, height);
     },
     [attemptResize]
   );
@@ -119,7 +118,7 @@ export function Iframe({
       allowtransparency={allowTransparency}
       referrerpolicy={referrerPolicy}
       onload={onLoad}
-      frameBorder={0}
+      frameBorder="0"
       {...rest}
     ></iframe>
   );

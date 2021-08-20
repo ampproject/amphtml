@@ -400,7 +400,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     return super
       .attemptChangeSize(newHeight, newWidth, undefined, opt_event)
       .catch((e) => {
-        if (this.getOverflowElement && !this.getOverflowElement()) {
+        if (!this.getOverflowElement?.()) {
           console./* OK */ warn(
             '[overflow] element not found. Provide one to enable resizing to full contents.',
             this.element
