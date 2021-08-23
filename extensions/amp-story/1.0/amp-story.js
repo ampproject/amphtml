@@ -958,7 +958,7 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    // Will return boolean or undefined.
+    // Returns boolean or undefined.
     const lockOrientation =
       screen.lockOrientation ||
       screen.mozLockOrientation ||
