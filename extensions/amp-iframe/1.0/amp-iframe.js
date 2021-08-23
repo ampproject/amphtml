@@ -75,10 +75,10 @@ class AmpIframe extends BaseElement {
       return;
     }
 
-    this.attemptChangeSize(height, width).catch((e) => {
+    this.attemptChangeSize(height, width).catch(() => {
       if (this.getOverflowElement?.()) {
         console./* OK */ warn(
-          '[overflow] element not found. Provide one to enable resizing to full contents.',
+          '[overflow] element not found. Provide one to enable resizing.',
           this.element
         );
       }
