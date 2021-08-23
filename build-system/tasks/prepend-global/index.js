@@ -284,7 +284,8 @@ async function removeConfig(target) {
     return;
   }
   sanityCheck(contents);
-  const config = /self\.AMP_CONFIG\|\|\(self\.AMP_CONFIG=.*?\/\*AMP_CONFIG\*\//;
+  const config =
+    /self\.AMP_CONFIG\|\|\(self\.AMP_CONFIG=(.|\n)*?\/\*AMP_CONFIG\*\//;
   contents = contents.replace(config, '');
   await writeTarget_(target, contents, argv.dryrun);
   log('Removed existing config from', cyan(target));
