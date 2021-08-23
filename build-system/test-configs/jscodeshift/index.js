@@ -1,5 +1,5 @@
-const {execScriptAsync} = require('../../common/exec');
-const {getOutput} = require('../../common/process');
+const {execScriptAsync} = require('../../common/exec.mjs');
+const {getOutput} = require('../../common/process.mjs');
 
 const command = (args = []) =>
   [

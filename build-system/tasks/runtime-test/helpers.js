@@ -3,8 +3,8 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const path = require('path');
-const {cyan, green, red, yellow} = require('../../common/colors');
-const {isCiBuild} = require('../../common/ci');
+const {cyan, green, red, yellow} = require('../../common/colors.mjs');
+const {isCiBuild} = require('../../common/ci.mjs');
 const {log, logWithoutTimestamp} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
 const {Server} = require('karma');

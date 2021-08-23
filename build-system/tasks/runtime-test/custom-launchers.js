@@ -5,7 +5,7 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
-const {isCiBuild} = require('../../common/ci');
+const {isCiBuild} = require('../../common/ci.mjs');
 
 const DEFAULT_CHROME_FLAGS = [
   // Dramatically speeds up iframe creation.

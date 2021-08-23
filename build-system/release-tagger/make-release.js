@@ -9,7 +9,7 @@ const {
   getPullRequestsBetweenCommits,
   getRelease,
 } = require('./utils');
-const {getExtensions, getSemver} = require('../npm-publish/utils');
+const {getExtensions, getSemver} = require('../npm-publish/utils.mjs');
 const {GraphQlQueryResponseData} = require('@octokit/graphql'); //eslint-disable-line no-unused-vars
 
 const prereleaseConfig = {

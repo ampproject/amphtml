@@ -413,7 +413,7 @@ module.exports = {
       'files': [
         '**/.eslintrc.js',
         'amp.js',
-        'babel.config.js',
+        'babel.config.mjs',
         'package-scripts.js',
       ],
       'globals': {

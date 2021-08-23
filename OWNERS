@@ -25,7 +25,7 @@
       owners: [{name: 'ampproject/wg-infra'}],
     },
     {
-      pattern: '{babel.config.js,package-scripts.js}',
+      pattern: '{babel.config.mjs,package-scripts.js}',
       owners: [
         {name: 'ampproject/wg-infra'},
         {name: 'ampproject/wg-performance'},

@@ -33,8 +33,8 @@
 
 'use strict';
 
-const {cyan, green, red} = require('../common/colors');
-const {getOutput} = require('../common/process');
+const {cyan, green, red} = require('../common/colors.mjs');
+const {getOutput} = require('../common/process.mjs');
 const {log} = require('../common/logging');
 
 /**

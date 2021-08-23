@@ -12,7 +12,7 @@ const {
   buildTargetsInclude,
   determineBuildTargets,
 } = require('../pr-check/build-targets');
-const {runNpmChecks} = require('../common/npm-checks');
+const {runNpmChecks} = require('../common/npm-checks.mjs');
 const {setLoggingPrefix} = require('../common/logging');
 
 const jobName = 'pr-check.js';

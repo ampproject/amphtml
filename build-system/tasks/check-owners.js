@@ -9,8 +9,11 @@
 const fetch = require('node-fetch');
 const fs = require('fs-extra');
 const JSON5 = require('json5');
-const {cyan, green, red} = require('../common/colors');
-const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
+const {
+  getFilesToCheck,
+  usesFilesOrLocalChanges,
+} = require('../common/utils.mjs');
+const {cyan, green, red} = require('../common/colors.mjs');
 const {log, logLocalDev} = require('../common/logging');
 
 const OWNERS_SYNTAX_CHECK_URI =

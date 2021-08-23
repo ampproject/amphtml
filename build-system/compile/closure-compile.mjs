@@ -1,0 +1,88 @@
+import compiler from '@ampproject/google-closure-compiler';
+import vinylFs from 'vinyl-fs';
+import {cyan, red, yellow} from 'kleur/colors';
+import {getBabelOutputDir} from './pre-closure-babel.mjs';
+import {log, logWithoutTimestamp} from '../common/logging.mjs';
+
+/**
+ * Logs a closure compiler error message after syntax highlighting it and then
+ * formatting it into a more readable form by dropping the plugin's logging
+ * prefix, normalizing paths, and emphasizing errors and warnings.
+ * @param {string} message
+ */
+export function logClosureCompilerError(message) {
+  log(red('ERROR:'));
+  const babelOutputDir = `${getBabelOutputDir()}/`;
+  const loggingPrefix = /^.*?gulp-google-closure-compiler.*?: /;
+  const {highlight} = require('cli-highlight'); // Lazy-required to speed up task loading.
+  const highlightedMessage = highlight(message, {ignoreIllegals: true});
+  const formattedMessage = highlightedMessage
+    .replace(loggingPrefix, '')
+    .replace(new RegExp(babelOutputDir, 'g'), '')
+    .replace(/ ERROR /g, red(' ERROR '))
+    .replace(/ WARNING /g, yellow(' WARNING '));
+  logWithoutTimestamp(formattedMessage);
+}
+
+/**
+ * Handles a closure error during compilation and type checking. Passes through
+ * the error except in watch mode, where we want to print a failure message and
+ * continue.
+ * @param {!compiler.PluginError} err
+ * @param {string} outputFilename
+ * @param {?Object} options
+ * @return {!compiler.PluginError|undefined}
+ */
+function handleClosureCompilerError(err, outputFilename, options) {
+  if (options.typeCheckOnly) {
+    if (!options.logger) {
+      log(`${red('ERROR:')} Type checking failed`);
+    }
+    return err;
+  }
+  log(`${red('ERROR:')} Could not minify ${cyan(outputFilename)}`);
+  if (options.continueOnError) {
+    options.errored = true;
+    return;
+  }
+  return err;
+}
+
+/**
+ * Initializes closure compiler with the given set of flags. We use the gulp
+ * streaming plugin because invoking a command with a long list of --fs flags
+ * on Windows exceeds the command line size limit. The stream mode is 'IN'
+ * because output files and sourcemaps are written directly to disk.
+ * @param {Array<string>} flags
+ * @param {!Object} options
+ * @return {!Object}
+ */
+function initializeClosure(flags, options) {
+  const pluginOptions = {
+    streamMode: 'IN',
+    logger: options.logger || logClosureCompilerError,
+  };
+  return compiler.gulp()(flags, pluginOptions);
+}
+
+/**
+ * Runs closure compiler with the given set of flags.
+ * @param {string} outputFilename
+ * @param {!Object} options
+ * @param {Array<string>} flags
+ * @param {Array<string>} srcFiles
+ * @return {Promise<void>}
+ */
+export function runClosure(outputFilename, options, flags, srcFiles) {
+  return new Promise((resolve, reject) => {
+    vinylFs
+      .src(srcFiles, {base: getBabelOutputDir()})
+      .pipe(initializeClosure(flags, options))
+      .on('error', (err) => {
+        const reason = handleClosureCompilerError(err, outputFilename, options);
+        reason ? reject(reason) : resolve();
+      })
+      .on('end', resolve)
+      .pipe(vinylFs.dest('.'));
+  });
+}

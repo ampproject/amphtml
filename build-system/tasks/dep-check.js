@@ -8,11 +8,11 @@ const path = require('path');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
-} = require('../common/ctrlcHandler');
+} = require('../common/ctrlcHandler.mjs');
 const {compileJison} = require('./compile-jison');
 const {css} = require('./css');
-const {cyan, green, red, yellow} = require('../common/colors');
-const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
+const {cyan, green, red, yellow} = require('../common/colors.mjs');
+const {getEsbuildBabelPlugin} = require('../common/esbuild-babel.mjs');
 const {log, logLocalDev} = require('../common/logging');
 
 /**

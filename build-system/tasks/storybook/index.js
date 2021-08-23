@@ -2,13 +2,13 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const path = require('path');
-const {createCtrlcHandler} = require('../../common/ctrlcHandler');
-const {cyan} = require('../../common/colors');
+const {createCtrlcHandler} = require('../../common/ctrlcHandler.mjs');
+const {cyan} = require('../../common/colors.mjs');
 const {defaultTask: runAmpDevBuildServer} = require('../default-task');
-const {exec, execScriptAsync} = require('../../common/exec');
+const {exec, execScriptAsync} = require('../../common/exec.mjs');
 const {getBaseUrl} = require('../pr-deploy-bot-utils');
-const {isCiBuild} = require('../../common/ci');
-const {isPullRequestBuild} = require('../../common/ci');
+const {isCiBuild} = require('../../common/ci.mjs');
+const {isPullRequestBuild} = require('../../common/ci.mjs');
 const {log} = require('../../common/logging');
 const {writeFileSync} = require('fs-extra');
 

@@ -1,11 +1,11 @@
 'use strict';
 
-const colors = require('../common/colors');
+const colors = require('../common/colors.mjs');
 const fs = require('fs-extra');
-const {ciBuildSha, isCiBuild} = require('../common/ci');
-const {getStdout} = require('../common/process');
+const {ciBuildSha, isCiBuild} = require('../common/ci.mjs');
+const {getStdout} = require('../common/process.mjs');
 const {log} = require('../common/logging');
-const {shortSha} = require('../common/git');
+const {shortSha} = require('../common/git.mjs');
 
 const {cyan, green, yellow} = colors;
 const CODECOV_EXEC = './node_modules/.bin/codecov';

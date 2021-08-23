@@ -3,16 +3,16 @@ const globby = require('globby');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
-} = require('../common/ctrlcHandler');
+} = require('../common/ctrlcHandler.mjs');
 const {
   displayLifecycleDebugging,
-} = require('../compile/debug-compilation-lifecycle');
-const {cleanupBuildDir, closureCompile} = require('../compile/compile');
+} = require('../compile/debug-compilation-lifecycle.mjs');
+const {cleanupBuildDir, closureCompile} = require('../compile/compile.mjs');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
-const {cyan, green, red, yellow} = require('../common/colors');
+const {cyan, green, red, yellow} = require('../common/colors.mjs');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
-const {logClosureCompilerError} = require('../compile/closure-compile');
+const {logClosureCompilerError} = require('../compile/closure-compile.mjs');
 const {log} = require('../common/logging');
 const {typecheckNewServer} = require('../server/typescript-compile');
 

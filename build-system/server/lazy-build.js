@@ -11,8 +11,8 @@ const {
   maybeInitializeExtensions,
 } = require('../tasks/extension-helpers');
 const {compileCoreRuntime, doBuildJs} = require('../tasks/helpers');
-const {jsBundles} = require('../compile/bundles.config');
-const {VERSION} = require('../compile/internal-version');
+const {jsBundles} = require('../compile/bundles.config.mjs');
+const {VERSION} = require('../compile/internal-version.mjs');
 
 const extensionBundles = {};
 maybeInitializeExtensions(extensionBundles, /* includeLatest */ true);

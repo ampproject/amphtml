@@ -1,9 +1,9 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {cyan, green, red, yellow} = require('../common/colors');
-const {execOrThrow} = require('../common/exec');
-const {getOutput} = require('../common/process');
+const {cyan, green, red, yellow} = require('../common/colors.mjs');
+const {execOrThrow} = require('../common/exec.mjs');
+const {getOutput} = require('../common/process.mjs');
 const {log} = require('../common/logging');
 
 /**

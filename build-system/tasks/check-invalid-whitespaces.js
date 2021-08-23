@@ -1,8 +1,8 @@
 'using strict';
 
-const {getFilesToCheck} = require('../common/utils');
-const {getStdout} = require('../common/process');
-const {green, red} = require('../common/colors');
+const {getFilesToCheck} = require('../common/utils.mjs');
+const {getStdout} = require('../common/process.mjs');
+const {green, red} = require('../common/colors.mjs');
 const {invalidWhitespaceGlobs} = require('../test-configs/config');
 const {log, logLocalDev, logWithoutTimestamp} = require('../common/logging');
 

@@ -1,7 +1,7 @@
 const globby = require('globby');
 const {basename} = require('path');
 const {readFile} = require('fs-extra');
-const {writeDiffOrFail} = require('../common/diff');
+const {writeDiffOrFail} = require('../common/diff.mjs');
 
 /**
  * Ensures that this Markdown file contains a section for every matching vendor.

@@ -2,9 +2,9 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
-const {cyan, green, red} = require('../common/colors');
+const {cyan, green, red} = require('../common/colors.mjs');
 const {decode} = require('sourcemap-codec');
-const {execOrDie} = require('../common/exec');
+const {execOrDie} = require('../common/exec.mjs');
 const {log} = require('../common/logging');
 
 // Compile related constants

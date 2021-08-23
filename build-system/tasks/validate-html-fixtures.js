@@ -8,9 +8,9 @@ const {
   logWithoutTimestamp,
   logWithoutTimestampLocalDev,
 } = require('../common/logging');
-const {cyan, green, red} = require('../common/colors');
-const {getFilesToCheck} = require('../common/utils');
-const {getOutput} = require('../common/process');
+const {cyan, green, red} = require('../common/colors.mjs');
+const {getFilesToCheck} = require('../common/utils.mjs');
+const {getOutput} = require('../common/process.mjs');
 const {htmlFixtureGlobs} = require('../test-configs/config');
 const {readFile} = require('fs-extra');
 

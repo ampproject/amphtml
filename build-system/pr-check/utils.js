@@ -8,7 +8,13 @@ const {
   circleciBuildNumber,
   isCiBuild,
   isCircleciBuild,
-} = require('../common/ci');
+} = require('../common/ci.mjs');
+const {
+  exec,
+  execOrDie,
+  execOrThrow,
+  execWithError,
+} = require('../common/exec.mjs');
 const {
   gitBranchCreationPoint,
   gitBranchName,
@@ -17,11 +23,10 @@ const {
   gitDiffCommitLog,
   gitDiffStatMain,
   shortSha,
-} = require('../common/git');
-const {cyan, green, yellow} = require('../common/colors');
-const {exec, execOrDie, execOrThrow, execWithError} = require('../common/exec');
+} = require('../common/git.mjs');
+const {cyan, green, yellow} = require('../common/colors.mjs');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
-const {getStdout} = require('../common/process');
+const {getStdout} = require('../common/process.mjs');
 const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
 
 const UNMINIFIED_CONTAINER_DIRECTORY = 'unminified';

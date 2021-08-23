@@ -1,7 +1,7 @@
 'use strict';
 
 const {dotWrappingWidth} = require('../common/logging');
-const {isCiBuild} = require('../common/ci');
+const {isCiBuild} = require('../common/ci.mjs');
 
 const TEST_SERVER_PORT = 8081;
 

@@ -5,9 +5,9 @@ const fs = require('fs-extra');
 const minimist = require('minimist');
 const objstr = require('obj-str');
 const path = require('path');
-const {cyan, green, red, yellow} = require('../../common/colors');
+const {cyan, green, red, yellow} = require('../../common/colors.mjs');
 const {format} = require('./format');
-const {getOutput, getStdout} = require('../../common/process');
+const {getOutput, getStdout} = require('../../common/process.mjs');
 const {log, logLocalDev, logWithoutTimestamp} = require('../../common/logging');
 
 const argv = minimist(process.argv.slice(2), {string: ['version']});

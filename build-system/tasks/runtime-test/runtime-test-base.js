@@ -14,15 +14,18 @@ const {
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
-} = require('../../common/ctrlcHandler');
+} = require('../../common/ctrlcHandler.mjs');
+const {
+  getFilesFromArgv,
+  getFilesFromFileList,
+} = require('../../common/utils.mjs');
 const {app} = require('../../server/test-server');
 const {createKarmaServer, getAdTypes} = require('./helpers');
 const {customLaunchers} = require('./custom-launchers');
-const {cyan, green, red, yellow} = require('../../common/colors');
+const {cyan, green, red, yellow} = require('../../common/colors.mjs');
 const {dotWrappingWidth} = require('../../common/logging');
-const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel');
-const {getFilesFromArgv, getFilesFromFileList} = require('../../common/utils');
-const {isCiBuild, isCircleciBuild} = require('../../common/ci');
+const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel.mjs');
+const {isCiBuild, isCircleciBuild} = require('../../common/ci.mjs');
 const {log} = require('../../common/logging');
 const {SERVER_TRANSFORM_PATH} = require('../../server/typescript-compile');
 const {startServer, stopServer} = require('../serve');

@@ -1,5 +1,5 @@
 const path = require('path');
-const {BUILD_CONSTANTS} = require('../../../compile/build-constants');
+const {BUILD_CONSTANTS} = require('../../../compile/build-constants.mjs');
 const {DefinePlugin} = require('webpack');
 const {getRelativeAliasMap} = require('../../../babel-config/import-resolver');
 const {webpackConfigNoChunkTilde} = require('../env-utils');

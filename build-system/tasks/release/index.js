@@ -37,11 +37,11 @@ const fs = require('fs-extra');
 const klaw = require('klaw');
 const path = require('path');
 const tar = require('tar');
-const {cyan, green} = require('../../common/colors');
-const {execOrDie} = require('../../common/exec');
+const {cyan, green} = require('../../common/colors.mjs');
+const {execOrDie} = require('../../common/exec.mjs');
 const {log} = require('../../common/logging');
 const {MINIFIED_TARGETS} = require('../helpers');
-const {VERSION} = require('../../compile/internal-version');
+const {VERSION} = require('../../compile/internal-version.mjs');
 
 // Flavor config for the base flavor type.
 const BASE_FLAVOR_CONFIG = {

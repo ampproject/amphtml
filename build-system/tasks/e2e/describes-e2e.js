@@ -19,7 +19,7 @@ const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {configureHelpers} = require('../../../testing/helpers');
 const {HOST, PORT} = require('../serve');
 const {installRepl, uninstallRepl} = require('./repl');
-const {isCiBuild} = require('../../common/ci');
+const {isCiBuild} = require('../../common/ci.mjs');
 const {Builder, Capabilities, logging} = selenium;
 
 /** Should have something in the name, otherwise nothing is shown. */

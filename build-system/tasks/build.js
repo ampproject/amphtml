@@ -8,7 +8,7 @@ const {
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
-} = require('../common/ctrlcHandler');
+} = require('../common/ctrlcHandler.mjs');
 const {buildExtensions} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss} = require('./css');

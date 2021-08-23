@@ -14,6 +14,7 @@
     "preinstall": "node build-system/common/check-package-manager.js",
     "postinstall": "node build-system/task-runner/install-amp-task-runner.js"
   },
+  "type": "module",
   "dependencies": {
     "@ampproject/animations": "0.2.2",
     "@ampproject/bento-compiler": "0.0.2",

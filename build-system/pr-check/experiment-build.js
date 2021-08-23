@@ -10,7 +10,7 @@ const {
   timedExecOrDie,
 } = require('./utils');
 const {experiment} = require('minimist')(process.argv.slice(2));
-const {getExperimentConfig} = require('../common/utils');
+const {getExperimentConfig} = require('../common/utils.mjs');
 const {runCiJob} = require('./ci-job');
 const {Targets, buildTargetsInclude} = require('./build-targets');
 

@@ -1,7 +1,7 @@
 const globby = require('globby');
 const path = require('path');
-const {cyan, green} = require('../common/colors');
-const {execOrThrow} = require('../common/exec');
+const {cyan, green} = require('../common/colors.mjs');
+const {execOrThrow} = require('../common/exec.mjs');
 const {log} = require('../common/logging');
 const {updateSubpackages} = require('../common/update-packages');
 

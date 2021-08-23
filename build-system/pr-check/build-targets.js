@@ -5,14 +5,14 @@
  * This script sets the build targets for our PR check, where the build targets
  * determine which tasks are required to run for pull request builds.
  */
-const config = require('../test-configs/config');
+const config = require('../test-configs/config.mjs');
 const globby = require('globby');
 const minimatch = require('minimatch');
 const path = require('path');
-const {cyan} = require('../common/colors');
+const {cyan} = require('../common/colors.mjs');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
-const {gitDiffNameOnlyMain} = require('../common/git');
-const {isCiBuild} = require('../common/ci');
+const {gitDiffNameOnlyMain} = require('../common/git.mjs');
+const {isCiBuild} = require('../common/ci.mjs');
 
 /**
  * Used to prevent the repeated recomputing of build targets during PR jobs.
@@ -132,7 +132,7 @@ const targetMatchers = {
       file == 'build-system/compile/internal-version.js' ||
       file == 'build-system/compile/log-messages.js' ||
       file == 'build-system/tasks/babel-plugin-tests.js' ||
-      file == 'babel.config.js' ||
+      file == 'babel.config.mjs' ||
       file.startsWith('build-system/babel-plugins/') ||
       file.startsWith('build-system/babel-config/')
     );

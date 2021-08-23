@@ -1,4 +1,4 @@
-const {getOutput} = require('../../common/process');
+const {getOutput} = require('../../common/process.mjs');
 
 /**
  * @param {Array<string>} files

@@ -11,16 +11,16 @@ const {
   circleciPrMergeCommit,
   isPullRequestBuild,
   isPushBuild,
-} = require('../../common/ci');
+} = require('../../common/ci.mjs');
 const {
   gitCiMainBaseline,
   gitCommitHash,
   shortSha,
-} = require('../../common/git');
+} = require('../../common/git.mjs');
 const {
   VERSION: internalRuntimeVersion,
-} = require('../../compile/internal-version');
-const {cyan, red, yellow} = require('../../common/colors');
+} = require('../../compile/internal-version.mjs');
+const {cyan, red, yellow} = require('../../common/colors.mjs');
 const {log, logWithoutTimestamp} = require('../../common/logging');
 const {NoTTYReport, report} = require('@ampproject/filesize');
 

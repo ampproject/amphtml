@@ -1,6 +1,6 @@
 const argv = require('minimist')(process.argv.slice(2));
-const {createCtrlcHandler} = require('../common/ctrlcHandler');
-const {cyan, green} = require('../common/colors');
+const {createCtrlcHandler} = require('../common/ctrlcHandler.mjs');
+const {cyan, green} = require('../common/colors.mjs');
 const {doServe} = require('./serve');
 const {log} = require('../common/logging');
 const {parseExtensionFlags} = require('./extension-helpers');

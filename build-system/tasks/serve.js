@@ -1,7 +1,7 @@
 'use strict';
 
 const connect = require('gulp-connect');
-const debounce = require('../common/debounce');
+const debounce = require('../common/debounce.mjs');
 const globby = require('globby');
 const header = require('connect-header');
 const minimist = require('minimist');
@@ -20,8 +20,8 @@ const {
   SERVER_TRANSFORM_PATH,
   buildNewServer,
 } = require('../server/typescript-compile');
-const {createCtrlcHandler} = require('../common/ctrlcHandler');
-const {cyan, green, red} = require('../common/colors');
+const {createCtrlcHandler} = require('../common/ctrlcHandler.mjs');
+const {cyan, green, red} = require('../common/colors.mjs');
 const {logServeMode, setServeMode} = require('../server/app-utils');
 const {log} = require('../common/logging');
 const {watchDebounceDelay} = require('./helpers');

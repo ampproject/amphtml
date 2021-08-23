@@ -1,8 +1,8 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
 const path = require('path');
-const {buildRuntime} = require('../common/utils');
-const {green} = require('../common/colors');
+const {buildRuntime} = require('../common/utils.mjs');
+const {green} = require('../common/colors.mjs');
 const {log} = require('../common/logging');
 
 /**

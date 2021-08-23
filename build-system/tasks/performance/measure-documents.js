@@ -16,7 +16,7 @@ const {
   getAnalyticsMetrics,
   setupAnalyticsHandler,
 } = require('./analytics-handler');
-const {cyan, green} = require('../../common/colors');
+const {cyan, green} = require('../../common/colors.mjs');
 const {log} = require('../../common/logging');
 const {setupAdRequestHandler} = require('./ads-handler');
 

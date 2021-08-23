@@ -3,6 +3,7 @@
  * Logs Bento components to publish.
  */
 
-const {getExtensions} = require('./utils');
+import {getExtensions} from './utils.mjs';
+
 console /*OK*/
   .log(JSON.stringify(getExtensions()));

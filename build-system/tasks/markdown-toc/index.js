@@ -2,11 +2,11 @@ const globby = require('globby');
 const path = require('path');
 const prettier = require('prettier');
 const toc = require('markdown-toc');
-const {getStdout} = require('../../common/process');
-const {green} = require('../../common/colors');
+const {getStdout} = require('../../common/process.mjs');
+const {green} = require('../../common/colors.mjs');
 const {logOnSameLineLocalDev} = require('../../common/logging');
 const {readFile} = require('fs-extra');
-const {writeDiffOrFail} = require('../../common/diff');
+const {writeDiffOrFail} = require('../../common/diff.mjs');
 
 const task = 'markdown-toc';
 

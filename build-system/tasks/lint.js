@@ -8,9 +8,9 @@ const {
   logOnSameLine,
   logOnSameLineLocalDev,
 } = require('../common/logging');
-const {cyan, green, red, yellow} = require('../common/colors');
+const {cyan, green, red, yellow} = require('../common/colors.mjs');
 const {ESLint} = require('eslint');
-const {getFilesToCheck} = require('../common/utils');
+const {getFilesToCheck} = require('../common/utils.mjs');
 const {lintGlobs} = require('../test-configs/config');
 
 /** @type {ESLint.Options} */

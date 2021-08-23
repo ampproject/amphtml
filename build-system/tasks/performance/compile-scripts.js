@@ -1,5 +1,5 @@
 const argv = require('minimist')(process.argv.slice(2));
-const {buildRuntime} = require('../../common/utils');
+const {buildRuntime} = require('../../common/utils.mjs');
 const {EXPERIMENT, urlToCachePath} = require('./helpers');
 const {setExtensionsToBuildFromDocuments} = require('../extension-helpers');
 

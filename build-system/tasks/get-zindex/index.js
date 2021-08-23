@@ -10,10 +10,10 @@ const {
   getJscodeshiftReport,
   jscodeshiftAsync,
 } = require('../../test-configs/jscodeshift');
-const {getStdout} = require('../../common/process');
-const {gray, magenta} = require('../../common/colors');
+const {getStdout} = require('../../common/process.mjs');
+const {gray, magenta} = require('../../common/colors.mjs');
 const {logLocalDev, logOnSameLineLocalDev} = require('../../common/logging');
-const {writeDiffOrFail} = require('../../common/diff');
+const {writeDiffOrFail} = require('../../common/diff.mjs');
 
 /** @type {Postcss.default} */
 const postcss = /** @type {*} */ (Postcss);

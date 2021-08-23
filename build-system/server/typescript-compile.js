@@ -2,9 +2,9 @@ const esbuild = require('esbuild');
 const globby = require('globby');
 const path = require('path');
 const {accessSync} = require('fs-extra');
-const {cyan, green} = require('../common/colors');
+const {cyan, green} = require('../common/colors.mjs');
 const {endBuildStep} = require('../tasks/helpers');
-const {exec} = require('../common/exec');
+const {exec} = require('../common/exec.mjs');
 const {log} = require('../common/logging');
 
 const SERVER_TRANSFORM_PATH = 'build-system/server/new-server/transforms';

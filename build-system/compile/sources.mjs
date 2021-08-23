@@ -1,0 +1,153 @@
+/**
+ * @fileoverview This file contains all the globs required for babel
+ * transformation and for closure compilation. Try and maintain the glob
+ * for both the babel and closure sources to be as close as possible.
+ */
+
+const COMMON_GLOBS = [
+  'third_party/amp-toolbox-cache-url/**/*.js',
+  'third_party/caja/html-sanitizer.js',
+  'third_party/closure-library/sha384-generated.js',
+  'third_party/css-escape/css-escape.js',
+  'third_party/d3/**/*.js',
+  'third_party/fuzzysearch/index.js',
+  'third_party/inputmask/**/*.js',
+  'third_party/mustache/**/*.js',
+  'third_party/react-dates/bundle.js',
+  'third_party/resize-observer-polyfill/ResizeObserver.install.js',
+  'third_party/set-dom/set-dom.js',
+  'third_party/subscriptions-project/*.js',
+  'third_party/timeagojs/**/*.js',
+  'third_party/webcomponentsjs/ShadowCSS.js',
+  'third_party/zuho/**/*.js',
+  'node_modules/dompurify/package.json',
+  'node_modules/dompurify/dist/purify.es.js',
+  'node_modules/intersection-observer/package.json',
+  'node_modules/intersection-observer/intersection-observer.install.js',
+  'node_modules/resize-observer-polyfill/package.json',
+  'node_modules/resize-observer-polyfill/ResizeObserver.install.js',
+  'node_modules/obj-str/package.json',
+  'node_modules/obj-str/dist/obj-str.mjs',
+  'node_modules/promise-pjs/package.json',
+  'node_modules/promise-pjs/promise.mjs',
+  'node_modules/rrule/dist/es5/rrule.js',
+  'node_modules/timeago.js/package.json',
+  'node_modules/timeago.js/**/*.js',
+  'node_modules/web-animations-js/package.json',
+  'node_modules/web-animations-js/web-animations.install.js',
+  'node_modules/web-activities/package.json',
+  'node_modules/web-activities/activity-ports.js',
+  'node_modules/@ampproject/animations/package.json',
+  'node_modules/@ampproject/animations/dist/animations.mjs',
+  'node_modules/@ampproject/bento-compiler/package.json',
+  'node_modules/@ampproject/bento-compiler/dist/index.js',
+  'node_modules/@ampproject/toolbox-cache-url/package.json',
+  'node_modules/@ampproject/toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js',
+  'node_modules/@ampproject/viewer-messaging/package.json',
+  'node_modules/@ampproject/viewer-messaging/messaging.js',
+  'node_modules/@ampproject/worker-dom/package.json',
+  'node_modules/@ampproject/worker-dom/dist/amp-production/main.mjs',
+  'node_modules/preact/package.json',
+  'node_modules/preact/dist/*.js',
+  'node_modules/preact/dom/*.js',
+  'node_modules/preact/hooks/package.json',
+  'node_modules/preact/hooks/dist/*.js',
+  'node_modules/preact/compat/package.json',
+  'node_modules/preact/compat/dist/*.js',
+  'node_modules/@babel/runtime/helpers/*.js',
+];
+
+/**
+ * NOTE: Keep the globs here in sync with the `CLOSURE_SRC_GLOBS`.
+ */
+export const BABEL_SRC_GLOBS = [
+  'src/**/*.js',
+  'builtins/**/*.js',
+  'build/**/*.js',
+  'extensions/**/*.js',
+  '3p/**/*.js',
+  'ads/**/*.js',
+].concat(COMMON_GLOBS);
+
+/**
+ * NOTE: Keep the globs here in sync with the `BABEL_SRC_GLOBS`.
+ */
+export const CLOSURE_SRC_GLOBS = [
+  '3p/3p.js',
+  // Ads config files.
+  'ads/_*.js',
+  'ads/alp/**/*.js',
+  'ads/google/**/*.js',
+  'ads/inabox/**/*.js',
+  // Files under build/. Should be sparse.
+  'build/*.css.js',
+  'build/fake-module/**/*.js',
+  'build/patched-module/**/*.js',
+  'build/experiments/**/*.js',
+  'build/parsers/**/*.js',
+  // A4A has these cross extension deps.
+  'extensions/amp-ad-network*/**/*-config.js',
+  'extensions/amp-ad/**/*.js',
+  'extensions/amp-a4a/**/*.js',
+  // TODO(#24080) Remove this when story ads have full ad network support.
+  // Needed for amp-story-auto-ads to validate amp-ad-exit config.
+  'extensions/amp-ad-exit/**/*.js',
+  // Currently needed for crypto.js and visibility.js.
+  // Should consider refactoring.
+  'extensions/amp-analytics/**/*.js',
+  // Needed for WebAnimationService
+  'extensions/amp-animation/**/*.js',
+  // Needed for amp-carousel 0.2, amp-inline-gallery, amp-stream-gallery
+  'extensions/amp-base-carousel/**/*.js',
+  // amp-brightcove 0.1 and 1.0 share this file.
+  'extensions/amp-brightcove/brightcove-api.js',
+  // Needed for carousel autolightbox
+  'extensions/amp-lightbox-gallery/1.0/*.js',
+  // Needed for amp-lightbox-gallery using amp-lightbox
+  'extensions/amp-lightbox/1.0/*.js',
+  // For amp-bind in the web worker (ww.js).
+  'extensions/amp-bind/**/*.js',
+  // Needed to access to Variant interface from other extensions
+  'extensions/amp-experiment/**/*.js',
+  // Needed to access form impl from other extensions
+  'extensions/amp-form/**/*.js',
+  // Needed by amp-facebook-* for the loader logo and base implementations
+  'extensions/amp-facebook/0.1/facebook-loader.js',
+  'extensions/amp-facebook/1.0/facebook-base-element.js',
+  'extensions/amp-facebook/1.0/component.js',
+  // Needed to access inputmask impl from other extensions
+  'extensions/amp-inputmask/**/*.js',
+  // Needed for AccessService
+  'extensions/amp-access/**/*.js',
+  // Needed for AmpStoryVariableService
+  'extensions/amp-story/**/*.js',
+  // Needed for story ad inabox
+  'extensions/amp-story-auto-ads/**/*.js',
+  // Needed for SubscriptionsService
+  'extensions/amp-subscriptions/**/*.js',
+  // Needed to access UserNotificationManager from other extensions
+  'extensions/amp-user-notification/**/*.js',
+  // Needed for video components in Bento.
+  'extensions/amp-video/1.0/**/*.js',
+  // amp-video-iframe 0.1 and 1.0 share this file.
+  'extensions/amp-video-iframe/amp-video-iframe-api.js',
+  // amp-vimeo 0.1 and 1.0 share this file.
+  'extensions/amp-vimeo/vimeo-api.js',
+  // Needed to access ConsentPolicyManager from other extensions
+  'extensions/amp-consent/**/*.js',
+  // Needed to access AmpGeo type for service locator
+  'extensions/amp-geo/**/*.js',
+  // Needed for amp-smartlinks dep on amp-skimlinks
+  'extensions/amp-skimlinks/0.1/**/*.js',
+  'src/*.js',
+  'src/**/*.js',
+  '!third_party/babel/custom-babel-helpers.js',
+  // Exclude since it's not part of the runtime/extension binaries.
+  '!extensions/amp-access/0.1/amp-login-done.js',
+  'builtins/**/*.js',
+  // 'node_modules/core-js/modules/**.js',
+  // Not sure what these files are, but they seem to duplicate code
+  // one level below and confuse the compiler.
+  '!node_modules/core-js/modules/library/**.js',
+  '!extensions/**/dist/**/*.js',
+].concat(COMMON_GLOBS);

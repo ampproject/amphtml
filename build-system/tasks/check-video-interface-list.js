@@ -1,7 +1,7 @@
 const globby = require('globby');
-const {getStdout} = require('../common/process');
+const {getStdout} = require('../common/process.mjs');
 const {readFile} = require('fs-extra');
-const {writeDiffOrFail} = require('../common/diff');
+const {writeDiffOrFail} = require('../common/diff.mjs');
 
 /** Checks or updates 3rd party video player list on this Markdown file. */
 const filepath = 'docs/spec/amp-video-interface.md';

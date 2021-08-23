@@ -11,7 +11,7 @@ const puppeteer = require('puppeteer');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
-} = require('../../common/ctrlcHandler');
+} = require('../../common/ctrlcHandler.mjs');
 const {
   escapeHtml,
   log,
@@ -25,10 +25,10 @@ const {
   gitCiMainBaseline,
   gitCommitterEmail,
   shortSha,
-} = require('../../common/git');
-const {buildRuntime} = require('../../common/utils');
-const {cyan, yellow} = require('../../common/colors');
-const {isCiBuild} = require('../../common/ci');
+} = require('../../common/git.mjs');
+const {buildRuntime} = require('../../common/utils.mjs');
+const {cyan, yellow} = require('../../common/colors.mjs');
+const {isCiBuild} = require('../../common/ci.mjs');
 const {startServer, stopServer} = require('../serve');
 
 // CSS injected in every page tested.

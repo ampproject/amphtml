@@ -13,15 +13,15 @@ const {
   buildRuntime,
   getFilesFromArgv,
   getFilesFromFileList,
-} = require('../../common/utils');
+} = require('../../common/utils.mjs');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
-} = require('../../common/ctrlcHandler');
-const {cyan} = require('../../common/colors');
-const {execOrDie} = require('../../common/exec');
+} = require('../../common/ctrlcHandler.mjs');
+const {cyan} = require('../../common/colors.mjs');
+const {execOrDie} = require('../../common/exec.mjs');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
-const {isCiBuild, isCircleciBuild} = require('../../common/ci');
+const {isCiBuild, isCircleciBuild} = require('../../common/ci.mjs');
 const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
 const {watch} = require('chokidar');

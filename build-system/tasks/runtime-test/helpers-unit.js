@@ -6,11 +6,11 @@ const listImportsExports = require('list-imports-exports');
 const minimatch = require('minimatch');
 const path = require('path');
 const testConfig = require('../../test-configs/config');
-const {cyan, green} = require('../../common/colors');
-const {execOrDie} = require('../../common/exec');
+const {cyan, green} = require('../../common/colors.mjs');
+const {execOrDie} = require('../../common/exec.mjs');
 const {extensions, maybeInitializeExtensions} = require('../extension-helpers');
-const {gitDiffNameOnlyMain} = require('../../common/git');
-const {isCiBuild} = require('../../common/ci');
+const {gitDiffNameOnlyMain} = require('../../common/git.mjs');
+const {isCiBuild} = require('../../common/ci.mjs');
 const {log, logLocalDev} = require('../../common/logging');
 
 const LARGE_REFACTOR_THRESHOLD = 50;

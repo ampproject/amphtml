@@ -28,7 +28,7 @@
   ],
   "include": [
     "./**/*.js"
-  ],
+, "compile/internal-version.mjs", "compile/helpers.mjs", "compile/debug-compilation-lifecycle.mjs", "compile/compile.mjs", "compile/closure-compile.mjs", "compile/check-for-unknown-deps.mjs", "compile/bundles.config.mjs", "compile/build-constants.mjs", "common/esbuild-babel.mjs", "common/utils.mjs", "common/transform-cache.mjs", "common/process.mjs", "common/npm-checks.mjs", "common/git.mjs", "common/exec.mjs", "common/diff.mjs", "common/debounce.mjs", "common/ctrlcHandler.mjs", "common/ci.mjs", "common/check-package-manager.mjs", "common/colors.mjs"  ],
   "exclude": [
     "./**/node_modules/**",
     "./**/test/**/*.js",
