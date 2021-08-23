@@ -968,7 +968,7 @@ export class AmpStory extends AMP.BaseElement {
     try {
       lockOrientation('portrait');
     } catch (e) {
-      orientationWarning(e.message);
+      orientationWarning(e);
     }
   }
 
