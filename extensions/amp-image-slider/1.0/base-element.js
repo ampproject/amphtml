@@ -26,6 +26,15 @@ BaseElement['Component'] = ImageSlider;
 /** @override */
 BaseElement['props'] = {
   'children': {passthrough: true},
+  initialPosition: {
+    attr: 'initial-slider-position',
+    type: 'string',
+  },
+  shouldHintReappear: {
+    attr: 'disable-hint-reappear',
+    type: 'boolean',
+  },
+  stepSize: {attr: 'step-size', type: 'number', default: 0.1},
   // 'children': {passthroughNonEmpty: true},
   // 'children': {selector: '...'},
 };

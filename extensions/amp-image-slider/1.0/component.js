@@ -30,7 +30,13 @@ import {useStyles} from './component.jss';
  * @param {!ImageSliderDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function ImageSlider({exampleTagNameProp, ...rest}) {
+export function ImageSlider({
+  children,
+  initialPosition,
+  shouldHintReappear,
+  stepSize = 0.1,
+  ...rest
+}) {
   // Examples of state and hooks
   // DO NOT SUBMIT: This is example code only.
   const [exampleValue, setExampleValue] = useState(0);
@@ -52,7 +58,6 @@ export function ImageSlider({exampleTagNameProp, ...rest}) {
 
   return (
     <ContainWrapper layout size paint {...rest}>
-      {exampleTagNameProp}
       <div className={`${styles.exampleContentHidden}`}>This is hidden</div>
     </ContainWrapper>
   );

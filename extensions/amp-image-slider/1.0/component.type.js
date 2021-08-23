@@ -21,7 +21,9 @@ var ImageSliderDef = {};
 
 /**
  * @typedef {{
- *   exampleProperty: (string|undefined), (DO NOT SUBMIT)
+ *   initialPosition: (string|undefined),
+ *   shouldHintReappear: (boolean|undefined),
+ *   stepSize: (number),
  * }}
  */
 ImageSliderDef.Props;
