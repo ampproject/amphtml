@@ -78,8 +78,8 @@ export function BentoFitText({
       contentClassName={classes.fitTextContentWrapper}
       {...rest}
     >
-      <div ref={measurerRef} className={classes.fitTextContent}>
-        <div ref={heightRef} className={classes.minContentHeight}>
+      <div ref={measurerRef} class={classes.fitTextContent}>
+        <div ref={heightRef} class={classes.minContentHeight}>
           {children}
         </div>
       </div>

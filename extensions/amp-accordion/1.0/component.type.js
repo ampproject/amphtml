@@ -46,7 +46,7 @@ AccordionDef.AccordionSectionProps;
  * @typedef {{
  *   as: (string|PreactDef.FunctionalComponent|undefined),
  *   role: (string|undefined),
- *   className: (string|undefined),
+ *   class: (string|undefined),
  *   tabIndex: (number|string|undefined),
  *   id: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),
@@ -58,7 +58,7 @@ AccordionDef.AccordionHeaderProps;
  * @typedef {{
  *   as: (string|PreactDef.FunctionalComponent|undefined),
  *   role: (string|undefined),
- *   className: (string|undefined),
+ *   class: (string|undefined),
  *   id: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  * }}

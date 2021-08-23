@@ -273,7 +273,7 @@ function ScrollerWithRef(
       class={`${classes.scrollContainer} ${classes.hideScrollbar} ${
         axis === Axis.X ? classes.horizontalScroll : classes.verticalScroll
       }`}
-      tabindex={0}
+      tabIndex={0}
     >
       {slides}
     </div>

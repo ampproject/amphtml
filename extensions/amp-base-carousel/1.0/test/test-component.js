@@ -45,12 +45,12 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
 
   it('should render custom Arrows when given', () => {
     const arrowPrev = (props) => (
-      <div {...props} className="my-custom-arrow-prev">
+      <div {...props} class="my-custom-arrow-prev">
         left
       </div>
     );
     const arrowNext = (props) => (
-      <div {...props} className="my-custom-arrow-next">
+      <div {...props} class="my-custom-arrow-next">
         right
       </div>
     );
