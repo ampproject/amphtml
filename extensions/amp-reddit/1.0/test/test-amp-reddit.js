@@ -83,7 +83,7 @@ describes.realWin(
       await waitForRender(element);
 
       const impl = await element.getImpl(false);
-      const forceChangeHeightStub = env.sandbox.stub(impl, 'forceChangeHeight');
+     const attemptChangeHeightStub = env.sandbox.stub(impl, 'attemptChangeHeight').resolves();
 
       const mockEvent = new CustomEvent('message');
       const sentinel = JSON.parse(
@@ -96,7 +96,7 @@ describes.realWin(
         'iframe'
       ).contentWindow;
       win.dispatchEvent(mockEvent);
-      expect(forceChangeHeightStub).to.be.calledOnce.calledWith(1000);
+      expect(attemptChangeHeightStub).to.be.calledOnce.calledWith(1000);
     });
   }
 );
