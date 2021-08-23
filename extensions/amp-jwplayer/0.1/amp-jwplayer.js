@@ -15,7 +15,11 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
-import {dispatchCustomEvent, removeElement} from '#core/dom';
+import {
+  dispatchCustomEvent, 
+  getDataParamsFromAttributes, 
+  removeElement
+} from '#core/dom';
 import {
   fullscreenEnter,
   fullscreenExit,
@@ -26,10 +30,14 @@ import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {once} from '#core/types/function';
 import {dict} from '#core/types/object';
-
+import {tryParseJson} from '#core/types/object/json';
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
-
+import {
+  getConsentMetadata,
+  getConsentPolicyInfo,
+  getConsentPolicyState,
+} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
 import {

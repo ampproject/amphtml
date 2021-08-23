@@ -563,6 +563,10 @@ describes.realWin(
       expect(imp['playerid_']).to.equal(attributes['data-player-id']);
       expect(imp['contentSearch_']).to.equal('');
       expect(imp['contentBackfill_']).to.equal('');
+      expect(imp['consentState_']).to.equal(null);
+      expect(imp['consentString_']).to.equal(null);
+      expect(imp['consentMetadata_']).to.equal(null);
+
       await jwp.layoutCallback();
 
       const placeholder = jwp.querySelector('[placeholder]');
