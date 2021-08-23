@@ -6,6 +6,10 @@ import {measureIntersection} from '#core/dom/layout/intersection';
 
 /** @const {string} */
 const TAG = 'amp-iframe';
+/** @const {number} */
+const MINIMUM_DISTANCE_FROM_TOP_PX = 600;
+/** @const {number} */
+const MINIMUM_VIEWPORT_PROPORTION = 0.75;
 
 class AmpIframe extends BaseElement {
   /** @override */
@@ -33,12 +37,15 @@ class AmpIframe extends BaseElement {
     measureIntersection(this.element).then((intersectionEntry) => {
       const {top} = intersectionEntry.boundingClientRect;
       const viewportHeight = intersectionEntry.rootBounds.height;
-      const minTop = Math.min(600, viewportHeight * 0.75);
+      const minTop = Math.min(
+        MINIMUM_DISTANCE_FROM_TOP_PX,
+        viewportHeight * MINIMUM_VIEWPORT_PROPORTION
+      );
       userAssert(
         top >= minTop,
         '<amp-iframe> elements must be positioned outside the first 75% ' +
           'of the viewport or 600px from the top (whichever is smaller): %s ' +
-          ' Current position %s. Min: %s' +
+          ' Current position: %s. Min: %s' +
           "Positioning rules don't apply for iframes that use `placeholder`." +
           'See https://github.com/ampproject/amphtml/blob/main/extensions/' +
           'amp-iframe/amp-iframe.md#iframe-with-placeholder for details.',
@@ -57,14 +64,6 @@ class AmpIframe extends BaseElement {
    * @private
    */
   updateSize_(height, width) {
-    if (!height && !width) {
-      this.user().error(
-        TAG,
-        'Ignoring embed-size request because width and height value is invalid',
-        this.element
-      );
-    }
-
     if (height < 100) {
       this.user().error(
         TAG,
@@ -83,7 +82,6 @@ class AmpIframe extends BaseElement {
           this.element
         );
       }
-      throw e;
     });
   }
 

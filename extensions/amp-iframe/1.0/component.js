@@ -34,6 +34,9 @@ export function Iframe({
     let height = Number(dataRef.current.height);
     let width = Number(dataRef.current.width);
     if (!height && !width) {
+      console./*OK*/ error(
+        'Ignoring resize request because width and height value is invalid'
+      );
       return;
     }
     // TODO(dmanek): Calculate width and height of the container to include padding.
