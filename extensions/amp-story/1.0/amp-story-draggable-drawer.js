@@ -230,7 +230,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.element.addEventListener('transitionend', (e) => {
       if (
         e.propertyName === 'transform' &&
-        this.state_ === DrawerState.CLOSED
+        this.state === DrawerState.CLOSED
       ) {
         this.containerEl./*OK*/ scrollTop = 0;
       }
@@ -601,8 +601,8 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     this.storeService.dispatch(Action.TOGGLE_PAUSED, false);
 
+    this.unfocusChildElements_();
     this.mutateElement(() => {
-      this.unfocusChildElements_();
       this.element.setAttribute('aria-hidden', true);
       resetStyles(this.element, ['transform', 'transition']);
 
