@@ -199,14 +199,10 @@ async function getConfig(
 
 /**
  * Given a target, retrieves the appropriate AMP_CONFIG string to prepend.
- * Returns an empty string
- * Writes AMP_CONFIG to a runtime file. Optionally enables localDev mode and
- * fortesting mode. Called by "amp build" and "amp dist" while building
- * various runtime files.
- *
+ * Returns an empty string if no AMP_CONFIG is necessary.
  *
  * @param {string} filename the file being operated on.
- * @param {Object} options Whether or not to enable testing mode.
+ * @param {Object} options
  * @return {!Promise<string>}
  */
 async function getAmpConfigForFile(filename, options) {
