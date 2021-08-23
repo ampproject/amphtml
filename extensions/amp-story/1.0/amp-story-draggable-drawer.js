@@ -228,10 +228,7 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     // Reset scroll position on end of close transiton.
     this.element.addEventListener('transitionend', (e) => {
-      if (
-        e.propertyName === 'transform' &&
-        this.state === DrawerState.CLOSED
-      ) {
+      if (e.propertyName === 'transform' && this.state === DrawerState.CLOSED) {
         this.containerEl./*OK*/ scrollTop = 0;
       }
     });
@@ -619,7 +616,6 @@ export class DraggableDrawer extends AMP.BaseElement {
       owners.schedulePause(this.element, this.ampComponents_);
     });
   }
-
 
   /**
    * Removes focus from ......
