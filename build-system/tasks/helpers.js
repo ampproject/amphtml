@@ -17,7 +17,7 @@ const {applyConfig, removeConfig} = require('./prepend-global');
 const {closureCompile} = require('../compile/compile');
 const {cyan, green, red} = require('../common/colors');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
-const {getSourceMapBase} = require('../compile/helpers');
+const {getSourceRoot} = require('../compile/helpers');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
@@ -847,7 +847,7 @@ function massageSourcemaps(sourcemapsFile, options) {
     }
     return source;
   });
-  sourcemaps.sourceRoot = getSourceMapBase(options);
+  sourcemaps.sourceRoot = getSourceRoot(options);
   if (sourcemaps.file) {
     sourcemaps.file = path.basename(sourcemaps.file);
   }
