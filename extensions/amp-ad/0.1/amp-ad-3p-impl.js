@@ -1,24 +1,7 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   ADSENSE_MCRSPV_TAG,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
 } from '#ads/google/utils';
-import {ADS_INITIAL_INTERSECTION_EXP} from '#experiments/ads-initial-intersection-exp';
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
 import {
@@ -48,12 +31,8 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getExperimentBranch} from '#experiments';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {
-  intersectionEntryToJson,
-  measureIntersection,
-} from '#core/dom/layout/intersection';
+import {intersectionEntryToJson} from '#core/dom/layout/intersection';
 import {moveLayoutRect} from '#core/dom/layout/rect';
 import {
   observeWithSharedInOb,
@@ -150,9 +129,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
      * @private {boolean}
      */
     this.isFullWidthRequested_ = false;
-
-    /** @private {Promise<!IntersectionObserverEntry>} */
-    this.initialIntersectionPromise_ = null;
   }
 
   /** @override */
@@ -219,13 +195,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (this.isFullWidthRequested_) {
       return this.attemptFullWidthSizeChange_();
     }
-
-    const asyncIntersection =
-      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
-      ADS_INITIAL_INTERSECTION_EXP.experiment;
-    this.initialIntersectionPromise_ = asyncIntersection
-      ? measureIntersection(this.element)
-      : Promise.resolve(this.element.getIntersectionChangeEntry());
   }
 
   /**
@@ -425,20 +394,19 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         // here, though, allows us to measure the impact of ad throttling via
         // incrementLoadingAds().
 
-        return this.initialIntersectionPromise_.then((intersection) => {
-          const iframe = getIframe(
-            toWin(this.element.ownerDocument.defaultView),
-            this.element,
-            this.type_,
-            opt_context,
-            {
-              initialIntersection: intersectionEntryToJson(intersection),
-            }
-          );
-          iframe.title = this.element.title || 'Advertisement';
-          this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
-          return this.xOriginIframeHandler_.init(iframe);
-        });
+        const intersection = this.element.getIntersectionChangeEntry();
+        const iframe = getIframe(
+          toWin(this.element.ownerDocument.defaultView),
+          this.element,
+          this.type_,
+          opt_context,
+          {
+            initialIntersection: intersectionEntryToJson(intersection),
+          }
+        );
+        iframe.title = this.element.title || 'Advertisement';
+        this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
+        return this.xOriginIframeHandler_.init(iframe);
       })
       .then(() => {
         observeWithSharedInOb(this.element, (inViewport) =>

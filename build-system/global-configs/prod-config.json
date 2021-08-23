@@ -16,8 +16,8 @@
   "amp-cid-backup": 1,
   "story-ad-placements": 0.01,
   "story-disable-animations-first-page": 0.5,
-  "story-load-first-page-only": 0.1,
-  "story-load-inactive-outside-viewport": 0.5,
+  "story-load-first-page-only": 0.5,
+  "story-load-inactive-outside-viewport": 1,
   "amp-story-page-attachment-ui-v2": 1,
   "amp-sticky-ad-to-amp-ad": 0
 }
