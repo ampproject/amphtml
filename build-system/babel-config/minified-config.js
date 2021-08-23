@@ -33,7 +33,7 @@ function getMinifiedConfig() {
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
     '@babel/plugin-transform-react-constant-elements',
     reactJsxPlugin,
-    argv.esm &&
+    (argv.esm || argv.sxg) &&
       './build-system/babel-plugins/babel-plugin-transform-dev-methods',
     // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
     [
@@ -65,7 +65,7 @@ function getMinifiedConfig() {
     {
       bugfixes: true,
       modules: false,
-      targets: argv.esm ? {esmodules: true} : {ie: 11, chrome: 41},
+      targets: argv.esm || argv.sxg ? {esmodules: true} : {ie: 11, chrome: 41},
     },
   ];
 
