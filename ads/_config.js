@@ -317,6 +317,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://s.ato.mx/p.js',
   },
 
+  'avantisvideo': {
+    renderStartImplemented: true,
+  },
+
   'beaverads': {
     renderStartImplemented: true,
   },
