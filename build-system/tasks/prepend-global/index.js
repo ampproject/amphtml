@@ -157,7 +157,7 @@ async function getConfig(
   opt_fortesting,
   opt_derandomize
 ) {
-  const configString = await fetchConfigFromBranch_(
+  const fsConfigString = await fetchConfigFromBranch_(
     filename,
     opt_localBranch,
     opt_branch
@@ -168,7 +168,7 @@ async function getConfig(
 
   let configJson;
   try {
-    configJson = JSON.parse(configString);
+    configJson = JSON.parse(fsConfigString);
   } catch (e) {
     log(red(`Error parsing config file: ${filename}`));
     throw e;
@@ -194,6 +194,8 @@ async function getConfig(
   if (opt_derandomize) {
     configJson = derandomize_(target, configJson);
   }
+
+  const configString = JSON.stringify(configJson);
   return `self.AMP_CONFIG||(self.AMP_CONFIG=${configString});/*AMP_CONFIG*/`;
 }
 
