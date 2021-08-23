@@ -948,8 +948,18 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
+    const orientationWarning = (e) =>
+      dev().warn(TAG, 'Failed to lock screen orientation:', e.message);
+
+    // Returns a promise.
+    const lockOrientationPromise = screen.orientation?.lock;
+    if (lockOrientationPromise) {
+      lockOrientationPromise('portrait').catch(orientationWarning);
+      return;
+    }
+
+    // Will return boolean or undefined.
     const lockOrientation =
-      screen.orientation?.lock ||
       screen.lockOrientation ||
       screen.mozLockOrientation ||
       screen.msLockOrientation ||
@@ -958,7 +968,7 @@ export class AmpStory extends AMP.BaseElement {
     try {
       lockOrientation('portrait');
     } catch (e) {
-      dev().warn(TAG, 'Failed to lock screen orientation:', e.message);
+      orientationWarning(e.message);
     }
   }
 
