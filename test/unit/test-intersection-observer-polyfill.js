@@ -5,7 +5,7 @@ import {installHiddenObserverForDoc} from '#service/hidden-observer-impl';
 
 import {
   IntersectionObserver3pHost,
-  getIntersectionChangeEntry,
+  getIntersectionChangeEntryHelper,
   intersectionRatio,
 } from '../../src/utils/intersection-observer-3p-host';
 
@@ -110,7 +110,7 @@ describes.sandboxed('getIntersectionChangeEntry', {}, (env) => {
 
   it('without owner', () => {
     expect(
-      getIntersectionChangeEntry(
+      getIntersectionChangeEntryHelper(
         layoutRectLtwh(0, 100, 50, 50),
         null,
         layoutRectLtwh(0, 100, 100, 100)
@@ -123,7 +123,7 @@ describes.sandboxed('getIntersectionChangeEntry', {}, (env) => {
       intersectionRatio: 1,
     });
     expect(
-      getIntersectionChangeEntry(
+      getIntersectionChangeEntryHelper(
         layoutRectLtwh(50, 200, 150, 200),
         null,
         layoutRectLtwh(0, 100, 100, 100)
@@ -138,7 +138,7 @@ describes.sandboxed('getIntersectionChangeEntry', {}, (env) => {
   });
   it('with owner', () => {
     expect(
-      getIntersectionChangeEntry(
+      getIntersectionChangeEntryHelper(
         layoutRectLtwh(50, 50, 150, 200),
         layoutRectLtwh(0, 50, 100, 100),
         layoutRectLtwh(0, 100, 100, 100)

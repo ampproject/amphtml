@@ -6,6 +6,8 @@ import {
 } from '#core/dom/layout/rect';
 import {dict} from '#core/types/object';
 
+import {Services} from '#service';
+
 import {SubscriptionApi} from '../iframe-helper';
 
 /**
@@ -29,13 +31,6 @@ export const DEFAULT_THRESHOLD = [
   0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1,
 ];
 
-/** @typedef {{
- *    element: !Element,
- *    currentThresholdSlot: number,
- *  }}
- */
-let ElementIntersectionStateDef;
-
 /** @const @private */
 const INIT_TIME = Date.now();
 
@@ -43,17 +38,39 @@ const INIT_TIME = Date.now();
  * A function to get the element's current IntersectionObserverEntry
  * regardless of the intersetion ratio. Only available when element is not
  * nested in a container iframe.
- * @param {!../layout-rect.LayoutRectDef} element element's rect
- * @param {?../layout-rect.LayoutRectDef} owner element's owner rect
- * @param {!../layout-rect.LayoutRectDef} hostViewport hostViewport's rect
+ * @param {!../layout-rect.LayoutRectDef} elementBox element's rect
+ * @param {?../layout-rect.LayoutRectDef} ownerBox element's owner rect
+ * @param {!../layout-rect.LayoutRectDef} viewportBox hostViewport's rect
  * @return {!IntersectionObserverEntry} A change entry.
  */
-export function getIntersectionChangeEntry(element, owner, hostViewport) {
+export function getIntersectionChangeEntryHelper(
+  elementBox,
+  ownerBox,
+  viewportBox
+) {
   const intersection =
-    rectIntersection(element, owner, hostViewport) ||
+    rectIntersection(elementBox, ownerBox, viewportBox) ??
     layoutRectLtwh(0, 0, 0, 0);
-  const ratio = intersectionRatio(intersection, element);
-  return calculateChangeEntry(element, hostViewport, intersection, ratio);
+  const ratio = intersectionRatio(intersection, elementBox);
+  return calculateChangeEntry(elementBox, viewportBox, intersection, ratio);
+}
+
+/**
+ * Returns a change entry that should be compatible with
+ * IntersectionObserverEntry.
+ *
+ * @param {!Element} element
+ * @return {?IntersectionObserverEntry} A change entry.
+ */
+export function getIntersectionChangeEntry(element) {
+  const box = element.impl_
+    ? element.impl_.getIntersectionElementLayoutBox()
+    : element.getLayoutBox();
+  const ownerBox = element.getOwner()?.getLayoutBox();
+  const viewportBox = Services.viewportForDoc(element.getAmpDoc()).getRect();
+
+  // TODO(jridgewell, #4826): We may need to make this recursive.
+  return getIntersectionChangeEntryHelper(box, ownerBox, viewportBox);
 }
 
 /**

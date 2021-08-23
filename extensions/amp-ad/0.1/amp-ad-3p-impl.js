@@ -39,6 +39,7 @@ import {
   unobserveWithSharedInOb,
 } from '#core/dom/layout/viewport-observer';
 import {toWin} from '#core/window';
+import {getIntersectionChangeEntry} from '../../../src/utils/intersection-observer-3p-host';
 
 /** @const {string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
@@ -394,7 +395,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         // here, though, allows us to measure the impact of ad throttling via
         // incrementLoadingAds().
 
-        const intersection = this.element.getIntersectionChangeEntry();
+        const intersection = getIntersectionChangeEntry(this.element);
         const iframe = getIframe(
           toWin(this.element.ownerDocument.defaultView),
           this.element,

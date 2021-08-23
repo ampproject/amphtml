@@ -32,7 +32,6 @@ import {
 import {dev, devAssert, user, userAssert} from './log';
 import {getMode} from './mode';
 import {applyStaticLayout} from './static-layout';
-import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
 
 const TAG = 'CustomElement';
 
@@ -1473,24 +1472,6 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      */
     getOwner() {
       return this.getResource_().getOwner();
-    }
-
-    /**
-     * Returns a change entry for that should be compatible with
-     * IntersectionObserverEntry.
-     * @return {?IntersectionObserverEntry} A change entry.
-     * @final
-     */
-    getIntersectionChangeEntry() {
-      const box = this.impl_
-        ? this.impl_.getIntersectionElementLayoutBox()
-        : this.getLayoutBox();
-      const owner = this.getOwner();
-      const viewport = Services.viewportForDoc(this.getAmpDoc());
-      const viewportBox = viewport.getRect();
-      // TODO(jridgewell, #4826): We may need to make this recursive.
-      const ownerBox = owner && owner.getLayoutBox();
-      return getIntersectionChangeEntry(box, ownerBox, viewportBox);
     }
 
     /**
