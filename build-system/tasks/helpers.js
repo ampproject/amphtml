@@ -571,8 +571,6 @@ async function minify(code, map, {mangle} = {mangle: false}) {
       beautify: !!argv.pretty_print,
       // eslint-disable-next-line google-camelcase/google-camelcase
       keep_quoted_props: true,
-      // // TODO: only add preamble for mainBundles?
-      preamble: ';',
     },
     sourceMap: {content: map},
     module: !!argv.esm,
@@ -737,6 +735,8 @@ async function maybePrintCoverageMessage(covPath = '') {
  * fortesting mode. Called by "amp build" and "amp dist" while building
  * various runtime files.
  *
+ * Also update the sourcemap.
+ *
  * @param {string} targetFile File to which the config is to be written.
  * @param {boolean} localDev Whether or not to enable local development.
  * @param {boolean} fortesting Whether or not to enable testing mode.
@@ -757,6 +757,12 @@ async function applyAmpConfig(targetFile, localDev, fortesting) {
     /* opt_branch */ undefined,
     /* opt_fortesting */ fortesting
   );
+
+  const sourcemap = await fs.readJson(`${targetFile}.map`);
+  if (!sourcemap.mapping.startsWith(';')) {
+    sourcemap.mappings = ';' + sourcemap.mappings;
+    await fs.writeJson(`${targetFile}.map`, sourcemap);
+  }
 }
 
 /**
