@@ -842,20 +842,20 @@ async function getDependencies(entryPoint, options) {
 function massageSourcemaps(sourcemapsFile, options) {
   const sourcemaps = JSON.parse(sourcemapsFile);
   sourcemaps.sources = sourcemaps.sources.map((source) => {
-    if (!source.startsWith('../')) {
-      return source;
+    if (source.startsWith('../')) {
+      return source.slice('../'.length);
     }
-    return source.slice('../'.length);
+    return source;
   });
+  sourcemaps.sourceRoot = getSourceMapBase(options);
   if (sourcemaps.file) {
     sourcemaps.file = path.basename(sourcemaps.file);
   }
+  if (!argv.full_sourcemaps) {
+    delete sourcemaps.sourcesContent;
+  }
 
-  const extra = {
-    sourceRoot: getSourceMapBase(options),
-    includeContent: !!argv.full_sourcemaps,
-  };
-  return JSON.stringify({...sourcemaps, ...extra});
+  return JSON.stringify(sourcemaps);
 }
 
 /**
