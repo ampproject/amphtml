@@ -369,22 +369,6 @@ export class PreactBaseElement extends BaseElement {
     }
   }
 
-  /** @override */
-  attemptChangeHeight(newHeight) {
-    return super.attemptChangeHeight(newHeight).catch((e) => {
-      // It's okay to disable this lint rule since we check that the restricted
-      // method exists.
-      // eslint-disable-next-line local/restrict-this-access
-      if (this.getOverflowElement && !this.getOverflowElement()) {
-        console./* OK */ warn(
-          '[overflow] element not found. Provide one to enable resizing to full contents.',
-          this.element
-        );
-      }
-      throw e;
-    });
-  }
-
   /**
    * @protected
    * @param {!JsonObject} props
