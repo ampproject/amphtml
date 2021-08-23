@@ -92,6 +92,7 @@ const ExtensionOptionDef = {};
  *   outfile: string,
  *   external?: Array<string>
  *   remap?: Record<string, string>
+ *   wrapper?: string,
  * }}
  */
 const ExtensionBinaryDef = {};
@@ -625,6 +626,7 @@ function buildNpmBinaries(extDir, options) {
         outfile: preact,
         external: ['preact', 'preact/dom', 'preact/compat', 'preact/hooks'],
         remap: {'preact/dom': 'preact'},
+        wrapper: '',
       });
     }
     if (react) {
@@ -638,6 +640,7 @@ function buildNpmBinaries(extDir, options) {
           'preact/hooks': 'react',
           'preact/dom': 'react-dom',
         },
+        wrapper: '',
       });
     }
     return buildBinaries(extDir, binaries, options);
@@ -655,7 +658,7 @@ function buildBinaries(extDir, binaries, options) {
   mkdirSync(`${extDir}/dist`);
 
   const promises = binaries.map((binary) => {
-    const {entryPoint, external, outfile, remap} = binary;
+    const {entryPoint, external, outfile, remap, wrapper} = binary;
     const {name} = pathParse(outfile);
     const esm = argv.esm || argv.sxg || false;
     return esbuildCompile(extDir + '/', entryPoint, `${extDir}/dist`, {
@@ -666,6 +669,7 @@ function buildBinaries(extDir, binaries, options) {
       outputFormat: esm ? 'esm' : 'cjs',
       externalDependencies: external,
       remapDependencies: remap,
+      wrapper: wrapper ?? options.wrapper,
     });
   });
   return Promise.all(promises);
