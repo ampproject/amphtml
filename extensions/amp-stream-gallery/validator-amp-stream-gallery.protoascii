@@ -6,6 +6,7 @@ tags: {  # amp-stream-gallery
     version: "1.0"
     version: "latest"
     bento_supported_version: "1.0"
+    bento_supported_version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
