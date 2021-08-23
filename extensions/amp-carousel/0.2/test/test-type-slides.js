@@ -4,6 +4,8 @@ import {ActionTrust} from '#core/constants/action-constants';
 import {CarouselEvents} from '../../../amp-base-carousel/0.1/carousel-events';
 import {Services} from '#service';
 import {getDetail, listenOncePromise} from '../../../../src/event-helper';
+import {createElementWithAttributes} from '#core/dom';
+import {AmpCarousel, buildDom} from '../amp-carousel';
 
 /**
  * @fileoverview Some simple tests for amp-carousel. Most of the functionality
@@ -128,6 +130,32 @@ describes.realWin(
 
       return carousel;
     }
+
+    it.only('buildDom and buildCallback should result in the same outerHTML', async () => {
+      const slideCount = 3;
+      const carousel1 = createElementWithAttributes(doc, 'amp-carousel', {
+        width: '111px',
+        height: '222px',
+        slideCount,
+      });
+      for (let i = 0; i < slideCount; i++) {
+        const img = createElementWithAttributes(doc, 'amp-img', {
+          src: 'http://localhost:8000/test.jpg',
+          width: 400,
+          height: 300,
+        });
+        img.style.display = 'inline';
+        carousel1.appendChild(img);
+      }
+      const carousel2 = carousel1.cloneNode(/* deep */ true);
+      container.appendChild(carousel1);
+      container.appendChild(carousel2);
+
+      new AmpCarousel(carousel1).buildCallback();
+      buildDom(carousel2);
+
+      expect(carousel1.outerHTML).to.equal(carousel2.outerHTML);
+    });
 
     it('should create container and wrappers and show initial slides', async () => {
       const carousel = await getCarousel({loop: false});
