@@ -26,7 +26,7 @@ function StreamGalleryWithRef(props, ref) {
     arrowPrevAs = DefaultArrow,
     arrowNextAs = DefaultArrow,
     children,
-    className,
+    'class': className,
     extraSpace,
     maxItemWidth = Number.MAX_VALUE,
     minItemWidth = 1,
@@ -103,7 +103,7 @@ function StreamGalleryWithRef(props, ref) {
       advanceCount={Math.floor(visibleCount)}
       arrowPrevAs={arrowPrevAs}
       arrowNextAs={arrowNextAs}
-      className={objstr({
+      class={objstr({
         [className]: !!className,
         [classes.gallery]: true,
         [classes.extraSpace]: extraSpace === 'around',
@@ -130,18 +130,18 @@ export {StreamGallery};
 function DefaultArrow({
   'aria-disabled': ariaDisabled,
   by,
-  className,
+  'class': className,
   disabled,
   onClick,
   outsetArrows,
 }) {
   const classes = useStyles();
   return (
-    <div className={className}>
+    <div class={className}>
       <button
         aria-disabled={ariaDisabled}
         aria-hidden="true"
-        className={objstr({
+        class={objstr({
           [classes.arrow]: true,
           [classes.arrowPrev]: by < 0,
           [classes.arrowNext]: by > 0,

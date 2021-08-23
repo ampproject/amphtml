@@ -339,7 +339,7 @@ export function AccordionSection({
 export function AccordionHeader({
   as: Comp = 'div',
   children,
-  className = '',
+  'class': className = '',
   id,
   role = 'button',
   tabIndex = 0,
@@ -360,7 +360,7 @@ export function AccordionHeader({
       {...rest}
       id={headerId}
       role={role}
-      className={`${className} ${classes.sectionChild} ${classes.header}`}
+      class={`${className} ${classes.sectionChild} ${classes.header}`}
       tabIndex={tabIndex}
       aria-controls={contentId}
       onClick={() => toggleHandler()}
@@ -378,7 +378,7 @@ export function AccordionHeader({
 export function AccordionContent({
   as: Comp = 'div',
   children,
-  className = '',
+  'class': className = '',
   id,
   role = 'region',
   ...rest
@@ -414,7 +414,7 @@ export function AccordionContent({
       <Comp
         {...rest}
         ref={ref}
-        className={objstr({
+        class={objstr({
           [className]: true,
           [classes.sectionChild]: true,
           [classes.contentHidden]: !expanded,

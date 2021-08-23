@@ -126,7 +126,7 @@ describes.sandboxed('LightboxGallery preact component', {}, () => {
 
     it('opens with rendered when given', () => {
       const classes = useStyles();
-      const renderImg = () => <img className="rendered-img"></img>;
+      const renderImg = () => <img class="rendered-img"></img>;
       const wrapper = mount(
         <LightboxGalleryProvider>
           <WithLightbox key="1" id="standard">
@@ -200,7 +200,7 @@ describes.sandboxed('LightboxGallery preact component', {}, () => {
 
     it('toggles to grid view', () => {
       const classes = useStyles();
-      const renderImg = () => <img className="rendered-img"></img>;
+      const renderImg = () => <img class="rendered-img"></img>;
       const wrapper = mount(
         <LightboxGalleryProvider>
           <WithLightbox key="1" id="standard">
@@ -267,7 +267,7 @@ describes.sandboxed('LightboxGallery preact component', {}, () => {
 
     it('toggles to grid view and back to carousel', () => {
       const classes = useStyles();
-      const renderImg = () => <img className="rendered-img"></img>;
+      const renderImg = () => <img class="rendered-img"></img>;
       const wrapper = mount(
         <LightboxGalleryProvider>
           <WithLightbox key="1" id="standard">
@@ -318,7 +318,7 @@ describes.sandboxed('LightboxGallery preact component', {}, () => {
 
     it('toggles to specific carousel slide from grid view ', () => {
       const classes = useStyles();
-      const renderImg = () => <img className="rendered-img"></img>;
+      const renderImg = () => <img class="rendered-img"></img>;
       const wrapper = mount(
         <LightboxGalleryProvider>
           <WithLightbox key="1" id="standard">
@@ -484,7 +484,7 @@ describes.sandboxed('LightboxGallery preact component', {}, () => {
 
     it('opens with rendered when given', () => {
       const classes = useStyles();
-      const renderImg = () => <img className="rendered-img"></img>;
+      const renderImg = () => <img class="rendered-img"></img>;
       const render = () => [
         <WithLightbox key="1" id="standard">
           <img />
@@ -557,7 +557,7 @@ describes.sandboxed('LightboxGallery preact component', {}, () => {
 
     it('toggles to grid view', () => {
       const classes = useStyles();
-      const renderImg = () => <img className="rendered-img"></img>;
+      const renderImg = () => <img class="rendered-img"></img>;
       const render = () => [
         <WithLightbox key="1" id="standard">
           <img />
@@ -622,7 +622,7 @@ describes.sandboxed('LightboxGallery preact component', {}, () => {
 
     it('toggles to grid view and back to carousel', () => {
       const classes = useStyles();
-      const renderImg = () => <img className="rendered-img"></img>;
+      const renderImg = () => <img class="rendered-img"></img>;
       const render = () => [
         <WithLightbox key="1" id="standard">
           <img />
@@ -672,7 +672,7 @@ describes.sandboxed('LightboxGallery preact component', {}, () => {
 
     it('toggles to specific carousel slide from grid view ', () => {
       const classes = useStyles();
-      const renderImg = () => <img className="rendered-img"></img>;
+      const renderImg = () => <img class="rendered-img"></img>;
       const render = () => [
         <WithLightbox key="1" id="standard">
           <img />

@@ -13,7 +13,7 @@ function WrapperWithRef(
   {
     as: Comp = 'div',
     children,
-    'className': className,
+    'class': className,
     'style': style,
     wrapperClassName,
     wrapperStyle,
@@ -25,7 +25,7 @@ function WrapperWithRef(
     <Comp
       {...rest}
       ref={ref}
-      className={`${className || ''} ${wrapperClassName || ''}`.trim() || null}
+      class={`${className || ''} ${wrapperClassName || ''}`.trim() || null}
       style={{...style, ...wrapperStyle}}
     >
       {children}
