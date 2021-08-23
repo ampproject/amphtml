@@ -12,6 +12,16 @@ const exec = util.promisify(childProcess.exec);
 
 const {cyan, red} = colors;
 
+/**
+ * List of unminified targets to which AMP_CONFIG should be written
+ */
+const UNMINIFIED_TARGETS = ['alp.max', 'amp-inabox', 'amp-shadow', 'amp'];
+
+/**
+ * List of minified targets to which AMP_CONFIG should be written
+ */
+const MINIFIED_TARGETS = ['alp', 'amp4ads-v0', 'shadow-v0', 'v0'];
+
 // custom-config.json overlays the active config. It is not part of checked-in
 // source (.gitignore'd). See:
 // https://github.com/ampproject/amphtml/blob/main/build-system/global-configs/README.md#custom-configjson
@@ -58,18 +68,6 @@ async function fetchConfigFromBranch_(filename, opt_localBranch, opt_branch) {
 }
 
 /**
- * @param {string} configString String containing the AMP config
- * @param {string} fileString String containing the AMP runtime
- * @return {string}
- */
-function prependConfig(configString, fileString) {
-  return (
-    `self.AMP_CONFIG||(self.AMP_CONFIG=${configString});` +
-    `/*AMP_CONFIG*/${fileString}`
-  );
-}
-
-/**
  * @param {string} filename Destination filename
  * @param {string} fileString String to write
  * @param {boolean=} opt_dryrun If true, print the contents without writing them
@@ -97,7 +95,7 @@ function valueOrDefault(value, defaultValue) {
 }
 
 /**
- * @param {string} config Prod or canary
+ * @param {string} type Prod or canary
  * @param {string} target File containing the AMP runtime (amp.js or v0.js)
  * @param {string} filename File containing the (prod or canary) config
  * @param {boolean=} opt_localDev Whether to enable local development
@@ -108,7 +106,49 @@ function valueOrDefault(value, defaultValue) {
  * @return {!Promise<void>}
  */
 async function applyConfig(
-  config,
+  type,
+  target,
+  filename,
+  opt_localDev,
+  opt_localBranch,
+  opt_branch,
+  opt_fortesting,
+  opt_derandomize
+) {
+  const config = await getConfig(
+    target,
+    filename,
+    opt_localDev,
+    opt_localBranch,
+    opt_branch,
+    opt_fortesting,
+    opt_derandomize
+  );
+  const targetString = await fs.promises.readFile(target, 'utf8');
+  const fileString = config + targetString;
+  sanityCheck(fileString);
+  await writeTarget_(target, fileString, argv.dryrun);
+  const details =
+    '(' +
+    cyan(type) +
+    (opt_localDev ? ', ' + cyan('localDev') : '') +
+    (opt_fortesting ? ', ' + cyan('test') : '') +
+    (opt_derandomize ? ', ' + cyan('derandomized') : '') +
+    ')';
+  log('Applied AMP config', details, 'to', cyan(path.basename(target)));
+}
+
+/**
+ * @param {string} target File containing the AMP runtime (amp.js or v0.js)
+ * @param {string} filename File containing the (prod or canary) config
+ * @param {boolean=} opt_localDev Whether to enable local development
+ * @param {boolean=} opt_localBranch Whether to use the local branch version
+ * @param {string=} opt_branch If not the local branch, which branch to use
+ * @param {boolean=} opt_fortesting Whether to force getMode().test to be true
+ * @param {boolean=} opt_derandomize Whether to remove experiment randomization
+ * @return {!Promise<string>}
+ */
+async function getConfig(
   target,
   filename,
   opt_localDev,
@@ -122,10 +162,9 @@ async function applyConfig(
     opt_localBranch,
     opt_branch
   );
-  const [targetString, overlayString] = await Promise.all([
-    fs.promises.readFile(target, 'utf8'),
-    fs.promises.readFile(customConfigFile, 'utf8').catch(() => {}),
-  ]);
+  const overlayString = await fs.promises
+    .readFile(customConfigFile, 'utf8')
+    .catch(() => {});
 
   let configJson;
   try {
@@ -155,20 +194,39 @@ async function applyConfig(
   if (opt_derandomize) {
     configJson = derandomize_(target, configJson);
   }
-  const fileString = await prependConfig(
-    JSON.stringify(configJson),
-    targetString
+  return `self.AMP_CONFIG||(self.AMP_CONFIG=${configString});/*AMP_CONFIG*/`;
+}
+
+/**
+ * Given a target, retrieves the appropriate AMP_CONFIG string to prepend.
+ * Returns an empty string
+ * Writes AMP_CONFIG to a runtime file. Optionally enables localDev mode and
+ * fortesting mode. Called by "amp build" and "amp dist" while building
+ * various runtime files.
+ *
+ *
+ * @param {string} filename the file being operated on.
+ * @param {Object} options Whether or not to enable testing mode.
+ * @return {!Promise<string>}
+ */
+async function getAmpConfigForFile(filename, options) {
+  const targets = options.minified ? MINIFIED_TARGETS : UNMINIFIED_TARGETS;
+  const target = path.basename(filename, path.extname(filename));
+  if (!argv.noconfig || !targets.includes(target)) {
+    return '';
+  }
+
+  const type = argv.config === 'canary' ? 'canary' : 'prod';
+  const baseConfigFile = 'build-system/global-configs/' + type + '-config.json';
+
+  return getConfig(
+    target,
+    baseConfigFile,
+    /* opt_localDev */ !!options.fortesting,
+    /* opt_localBranch */ true,
+    /* opt_branch */ undefined,
+    /* opt_fortesting */ !!options.fortesting
   );
-  sanityCheck(fileString);
-  await writeTarget_(target, fileString, argv.dryrun);
-  const details =
-    '(' +
-    cyan(config) +
-    (opt_localDev ? ', ' + cyan('localDev') : '') +
-    (opt_fortesting ? ', ' + cyan('test') : '') +
-    (opt_derandomize ? ', ' + cyan('derandomized') : '') +
-    ')';
-  log('Applied AMP config', details, 'to', cyan(path.basename(target)));
 }
 
 /**
@@ -282,13 +340,14 @@ async function prependGlobal() {
 }
 
 module.exports = {
-  applyConfig,
+  getAmpConfigForFile,
   numConfigs,
-  prependConfig,
   prependGlobal,
   removeConfig,
   sanityCheck,
   valueOrDefault,
+  MINIFIED_TARGETS,
+  UNMINIFIED_TARGETS,
 };
 
 prependGlobal.description = 'Prepend a json config to a target file';
