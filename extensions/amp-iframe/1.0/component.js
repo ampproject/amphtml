@@ -51,9 +51,10 @@ export function Iframe({
       // 1. when post message is received in viewport
       // 2. when exiting viewport
       // This could be optimized by reducing to one call by assessing when to call.
-      requestResize(height, width);
-      iframe.height = FULL_HEIGHT;
-      iframe.width = FULL_HEIGHT;
+      requestResize(height, width).then(() => {
+        iframe.height = FULL_HEIGHT;
+        iframe.width = FULL_HEIGHT;
+      });
     } else if (isIntersectingRef.current === false) {
       // attemptResize can be called before the IntersectionObserver starts observing
       // the component if an event is fired immediately. Therefore we check
