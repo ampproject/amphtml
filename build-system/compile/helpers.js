@@ -13,7 +13,7 @@ const {VERSION: internalRuntimeVersion} = require('./internal-version');
  * @param {Object} options
  * @return {string}
  */
-function getSourceMapBase(options) {
+function getSourceRoot(options) {
   if (argv.sourcemap_url) {
     return String(argv.sourcemap_url)
       .replace(/\{version\}/g, internalRuntimeVersion)
@@ -49,12 +49,14 @@ function updatePaths(sourcemaps) {
  */
 async function writeSourcemaps(sourcemapsFile, options) {
   const sourcemaps = await fs.readJson(sourcemapsFile);
+
   updatePaths(sourcemaps);
-  const extra = {
-    sourceRoot: getSourceMapBase(options),
-    includeContent: !!argv.full_sourcemaps,
-  };
-  await fs.writeJSON(sourcemapsFile, {...sourcemaps, ...extra});
+  if (!argv.full_sourcemaps) {
+    delete sourcemaps.sourcesContent;
+  }
+  sourcemaps.sourceRoot = getSourceRoot(options);
+
+  await fs.writeJSON(sourcemapsFile, sourcemaps);
 }
 
 module.exports = {

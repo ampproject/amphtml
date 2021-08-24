@@ -61,6 +61,7 @@ class AmpIframe extends BaseElement {
    * requested dimensions.
    * @param {number} height
    * @param {number} width
+   * @return {!Promise}
    * @private
    */
   updateSize_(height, width) {
@@ -72,13 +73,13 @@ class AmpIframe extends BaseElement {
           'using amp-ad instead.',
         this.element
       );
-      return;
+      return Promise.reject('Resize height is < 100px');
     }
 
-    this.attemptChangeSize(height, width).catch((e) => {
-      if (this.getOverflowElement?.()) {
+    return this.attemptChangeSize(height, width).catch(() => {
+      if (!this.getOverflowElement?.()) {
         console./* OK */ warn(
-          '[overflow] element not found. Provide one to enable resizing to full contents.',
+          '[overflow] element not found. Provide one to enable resizing.',
           this.element
         );
       }
@@ -92,7 +93,7 @@ class AmpIframe extends BaseElement {
         this.handleOnLoad_();
       },
       'requestResize': (height, width) => {
-        this.updateSize_(height, width);
+        return this.updateSize_(height, width);
       },
     });
   }

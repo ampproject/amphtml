@@ -92,7 +92,7 @@ export const WithOverflowButton = () => {
         <div placeholder>Placeholder</div>
         <button overflow>Show More</button>
       </amp-iframe>
-      <h3>Click the "Show More" button to resize the iframe to 300x300 px</h3>
+      <h3>Click the "Show More" button to resize the iframe</h3>
     </div>
   );
 };
