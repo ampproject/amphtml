@@ -25,7 +25,8 @@ BaseElement['Component'] = ImageSlider;
 
 /** @override */
 BaseElement['props'] = {
-  'children': {passthrough: true},
+  images: {selector: 'img' || 'amp-img', single: false, clone: true},
+  labels: {selector: 'div', single: false, clone: true},
   initialPosition: {
     attr: 'initial-slider-position',
     type: 'string',
