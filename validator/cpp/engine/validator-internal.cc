@@ -4647,9 +4647,6 @@ void ValidateAttributes(const ParsedTagSpec& parsed_tag_spec,
 
 const set<std::string>& ProxyKnowsIntertagsToValidate() {
   static const set<std::string>* tags = [] {
-    // WARNING: If you update this list, you MUST change
-    // min_validator_revision_required in validator.protoascii to
-    // avoid crashing old binaries.
     return new set<std::string>({"AMP-TIMEAGO", "SCRIPT", "STYLE"});
   }();
   return *tags;
