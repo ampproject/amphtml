@@ -53,6 +53,7 @@
 }
 
 .i-amphtml-story-draggable-drawer-content {
+  position: relative !important;  
   opacity: 1 !important;
   transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
   background: var(--i-amphtml-draggable-drawer-background-color) !important;
