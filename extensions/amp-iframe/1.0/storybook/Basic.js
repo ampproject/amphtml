@@ -38,8 +38,8 @@ WithIntersectingIframe.storyName = 'Resizable iframe in viewport';
 export const WithResizableIframe = () => {
   const sampleText =
     'Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore, beatae repellat, eligendi tempora, cumque veniam voluptatibus amet cum aliquid aut aperiam officiis autem pariatur. Nemo cum maxime vitae. Consectetur, iure?';
-  const textAbove = text('text above', sampleText.repeat(10));
-  const textBelow = text('text below', sampleText.repeat(10));
+  const textAbove = text('text above', sampleText.repeat(20));
+  const textBelow = text('text below', sampleText.repeat(5));
   return (
     <div>
       <h1>{textAbove}</h1>
