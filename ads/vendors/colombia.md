@@ -40,4 +40,3 @@ Supported parameters:
 -   `data-clmb_slot`: Ad slot
 -   `data-clmb_position` : Ad position
 -   `data-clmb_section` : Ad sections
--   `data-clmb_policy` : policy compliance status
