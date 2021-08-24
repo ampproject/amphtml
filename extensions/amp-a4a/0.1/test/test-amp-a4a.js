@@ -382,6 +382,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
       const ampdocService = Services.ampdocServiceFor(doc.defaultView);
       return ampdocService.getAmpDoc(element);
     };
+    element.getOwner = () => null;
     element.isBuilt = () => {
       return true;
     };

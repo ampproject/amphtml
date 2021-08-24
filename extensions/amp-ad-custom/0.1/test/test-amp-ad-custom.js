@@ -32,6 +32,7 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
       reset: () => {},
       whenSignal: () => Promise.resolve(),
     });
+    containerElement.getOwner = () => undefined;
     containerElement.renderStarted = () => {};
     containerElement.getLayoutBox = () => ({
       left: 0,

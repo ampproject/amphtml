@@ -38,6 +38,9 @@ describes.realWin('NameFrameRenderer', realWinConfig, (env) => {
       rootBounds: {},
       intersectionRect: {},
     });
+    containerElement.getOwner = () => undefined;
+    containerElement.getLayoutBox = () => ({});
+    containerElement.getAmpDoc = () => env.ampdoc;
     env.win.document.body.appendChild(containerElement);
 
     await new NameFrameRenderer().render(
