@@ -494,6 +494,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
       // Create the instance.
       const implPromise = this.createImpl_();
+      this.getSizer_();
 
       // Wait for consent.
       const consentPromise = implPromise.then(() => {
@@ -962,6 +963,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       ) {
         // Expect sizer to exist, just not yet discovered.
         this.sizerElement = this.querySelector('i-amphtml-sizer');
+        this.sizerElement?.setAttribute('slot', 'i-amphtml-svc');
       }
       return this.sizerElement || null;
     }
