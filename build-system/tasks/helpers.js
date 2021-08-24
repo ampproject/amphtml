@@ -579,16 +579,16 @@ async function minify(code, map, {mangle} = {mangle: false}) {
   };
 
   // Enabling property mangling requires disabling two other optimization.
-  // - Should not mangle computed properties (often used for cross-binary purposes)
-  // - Should not convert computed properties into regular property access (compress.properties = false)
+  // - Should not mangle quoted properties (often used for cross-binary purposes)
+  // - Should not convert computed properties into regular property definition
   if (mangle) {
     // eslint-disable-next-line google-camelcase/google-camelcase
     terserOptions.mangle.properties = {keep_quoted: true, regex: '_$'};
     terserOptions.nameCache = nameCache;
 
-    // Disables converting computed properties (a['hello']) into regular prop access (a.hello).
+    // Disables converting computed properties ({['hello']: 5}) into regular prop ({ hello: 5}).
     // This was an assumption baked into closure.
-    terserOptions.compress.properties = false;
+    terserOptions.compress.computed_props = false; // eslint-disable-line google-camelcase/google-camelcase
   }
 
   const minified = await terser.minify(code, terserOptions);

@@ -48,7 +48,7 @@ function getEsbuildBabelPlugin(
       .then((result) => {
         const {code, map} = result || {};
         debug('post-babel', filename, code, map);
-        return code;
+        return code + `\n// ${filename}`;
       });
 
     if (enableCache) {
