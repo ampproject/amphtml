@@ -34,7 +34,6 @@ export function colombia(global, data) {
     clmbposition: data.clmb_position,
     clmbsection: data.clmb_section,
     clmbdivid: data.clmb_divid,
-    clmbpolicy: data.clmb_policy,
 	gam: data.gam,
 	clmbcustom: data.clmbcustom
   });
