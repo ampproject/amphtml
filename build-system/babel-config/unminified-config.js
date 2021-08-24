@@ -51,6 +51,11 @@ function getUnminifiedConfig() {
     plugins: unminifiedPlugins,
     presets: unminifiedPresets,
     sourceMaps: 'inline',
+    assumptions: {
+      constantSuper: true,
+      noClassCalls: true,
+      setClassMethods: true,
+    },
   };
 }
 
