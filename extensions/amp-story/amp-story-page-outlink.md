@@ -16,9 +16,9 @@ It must have the `layout="nodisplay"` attribute.
 
 `amp-story-page-outlink` requires a single `a` element child.
 
-<amp-img alt="AMP Story page attachment" layout="fixed" src="img/amp-story-page-outlink.gif" width="240" height="480">
+<amp-img alt="AMP Story page attachment" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-outlink.gif" width="240" height="480">
   <noscript>
-    <img alt="AMP Story page attachment" src="img/amp-story-page-outlink.gif" />
+    <img alt="AMP Story page attachment" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-outlink.gif" />
   </noscript>
 </amp-img>
 
@@ -45,7 +45,7 @@ Both [`amp-story-page-outlink`](amp-story-page-outlink.md) and [`amp-story-page-
 
 When no attributes are set, the default UI will render:
 
-![amp-story-page-outlink-default](img/amp-story-page-outlink-default.jpg)
+![amp-story-page-outlink-default](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-outlink-default.jpg)
 
 ```html
 <amp-story-page-outlink layout="nodisplay">
@@ -57,7 +57,7 @@ When no attributes are set, the default UI will render:
 
 String that customizes the button text. The default is "Swipe up".
 
-![amp-story-page-outlink-cta-text](img/amp-story-page-outlink-cta-text.jpg)
+![amp-story-page-outlink-cta-text](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-outlink-cta-text.jpg)
 
 ```html
 <amp-story-page-outlink
@@ -80,7 +80,7 @@ String representing the color theme, default is light. Accepts values `light`, `
 
 Contrast protection is automatically applied to ensure readability and a11y compliance. For example, when the accent element is “background”, the higher contrast color (black or white) is applied to the text.
 
-![amp-story-page-outlink-dark-theme](img/amp-story-page-outlink-dark-theme.jpg)
+![amp-story-page-outlink-dark-theme](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-outlink-dark-theme.jpg)
 
 ```html
 <amp-story-page-outlink
@@ -90,7 +90,7 @@ Contrast protection is automatically applied to ensure readability and a11y comp
 </amp-story-page-outlink>
 ```
 
-![amp-story-page-outlink-custom-theme](img/amp-story-page-outlink-custom-theme-background.jpg)
+![amp-story-page-outlink-custom-theme](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-outlink-custom-theme-background.jpg)
 
 ```html
 <amp-story-page-outlink
@@ -102,7 +102,7 @@ Contrast protection is automatically applied to ensure readability and a11y comp
 </amp-story-page-outlink>
 ```
 
-![amp-story-page-outlink-custom-theme](img/amp-story-page-outlink-custom-theme-text.jpg)
+![amp-story-page-outlink-custom-theme](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-outlink-custom-theme-text.jpg)
 
 ```html
 <amp-story-page-outlink
@@ -118,7 +118,7 @@ Contrast protection is automatically applied to ensure readability and a11y comp
 
 String representing a URL pointing to an image. Optimize performance and avoid distortion by using a 32x32px image. A link icon will be displayed by default.
 
-![amp-story-page-outlink-cta-image](img/amp-story-page-outlink-cta-image.jpg)
+![amp-story-page-outlink-cta-image](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-outlink-cta-image.jpg)
 
 ```html
 <amp-story-page-outlink
@@ -130,7 +130,7 @@ String representing a URL pointing to an image. Optimize performance and avoid d
 
 Specifying `cta-image=none` will remove the default link icon.
 
-![amp-story-page-outlink-cta-image-none](img/amp-story-page-outlink-cta-image-none.jpg)
+![amp-story-page-outlink-cta-image-none](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-outlink-cta-image-none.jpg)
 
 ```html
 <amp-story-page-outlink
