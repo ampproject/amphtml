@@ -1,25 +1,17 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 const argv = require('minimist')(process.argv.slice(2));
 const {VERSION} = require('./internal-version');
 
-const testTasks = ['e2e', 'integration', 'visual-diff', 'unit', 'check-types'];
+const testTasks = [
+  'e2e',
+  'integration',
+  'visual-diff',
+  'unit',
+  'check-types',
+  'babel-plugin-tests',
+];
 const isTestTask = testTasks.some((task) => argv._.includes(task));
-const isForTesting = argv.fortesting || isTestTask;
-const isMinified = argv._.includes('dist') || !!argv.compiled;
+const isProd = argv._.includes('dist') && !argv.fortesting;
+const isMinified = argv._.includes('dist') || !!argv.minified;
 
 /**
  * Build time constants. Used by babel but hopefully one day directly by the bundlers..
@@ -30,7 +22,7 @@ const isMinified = argv._.includes('dist') || !!argv.compiled;
  * @type {Object<string, boolean|string>}
  */
 const BUILD_CONSTANTS = {
-  IS_FORTESTING: isForTesting,
+  IS_PROD: isProd,
   IS_MINIFIED: isMinified,
   INTERNAL_RUNTIME_VERSION: isTestTask ? '$internalRuntimeVersion$' : VERSION,
 

@@ -1,25 +1,8 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import * as Preact from '#preact';
-import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
-import {Lightbox} from '../../amp-lightbox/1.0/component';
-import {LightboxGalleryContext} from './context';
-import {PADDING_ALLOWANCE, useStyles} from './component.jss';
-import {forwardRef} from '#preact/compat';
+import objstr from 'obj-str';
+
 import {mod} from '#core/math';
+
+import * as Preact from '#preact';
 import {
   useCallback,
   useImperativeHandle,
@@ -27,7 +10,13 @@ import {
   useRef,
   useState,
 } from '#preact';
-import objstr from 'obj-str';
+import {forwardRef} from '#preact/compat';
+
+import {PADDING_ALLOWANCE, useStyles} from './component.jss';
+import {LightboxGalleryContext} from './context';
+
+import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
+import {Lightbox} from '../../amp-lightbox/1.0/component';
 
 /** @const {string} */
 const DEFAULT_GROUP = 'default';
@@ -54,7 +43,15 @@ const CAPTION_PROPS = {
  * @return {PreactDef.Renderable}
  */
 export function LightboxGalleryProviderWithRef(
-  {children, onAfterClose, onAfterOpen, onBeforeOpen, render},
+  {
+    children,
+    onAfterClose,
+    onAfterOpen,
+    onBeforeOpen,
+    onToggleCaption,
+    onViewGrid,
+    render,
+  },
   ref
 ) {
   const classes = useStyles();
@@ -185,7 +182,7 @@ export function LightboxGalleryProviderWithRef(
   return (
     <>
       <Lightbox
-        className={objstr({
+        class={objstr({
           [classes.lightbox]: true,
           [classes.showControls]: showControls,
           [classes.hideControls]: !showControls,
@@ -196,16 +193,21 @@ export function LightboxGalleryProviderWithRef(
         onAfterClose={onAfterClose}
         ref={lightboxRef}
       >
-        <div className={classes.controlsPanel}>
+        <div class={classes.controlsPanel}>
           <ToggleViewIcon
-            onClick={() => setShowCarousel(!showCarousel)}
+            onClick={() => {
+              if (showCarousel) {
+                onViewGrid?.();
+              }
+              setShowCarousel(!showCarousel);
+            }}
             showCarousel={showCarousel}
           />
         </div>
         <BaseCarousel
           arrowPrevAs={NavButtonIcon}
           arrowNextAs={NavButtonIcon}
-          className={classes.gallery}
+          class={classes.gallery}
           defaultSlide={mod(index, count.current[group]) || 0}
           hidden={!showCarousel}
           loop
@@ -217,7 +219,7 @@ export function LightboxGalleryProviderWithRef(
         </BaseCarousel>
         <div
           hidden={!showCarousel}
-          className={objstr({
+          class={objstr({
             [classes.caption]: true,
             [classes.control]: true,
             [classes[captionState]]: true,
@@ -227,6 +229,7 @@ export function LightboxGalleryProviderWithRef(
             ? null
             : {
                 onClick: () => {
+                  onToggleCaption?.();
                   if (captionState === CaptionState.CLIP) {
                     setCaptionState(CaptionState.EXPAND);
                   } else {
@@ -237,7 +240,7 @@ export function LightboxGalleryProviderWithRef(
               })}
         >
           <div
-            className={objstr({
+            class={objstr({
               [classes.captionText]: true,
               [EXPOSED_CAPTION_CLASS]: true,
             })}
@@ -247,9 +250,7 @@ export function LightboxGalleryProviderWithRef(
           </div>
         </div>
         {!showCarousel && (
-          <div
-            className={objstr({[classes.gallery]: true, [classes.grid]: true})}
-          >
+          <div class={objstr({[classes.gallery]: true, [classes.grid]: true})}>
             {gridElements.current[group]}
           </div>
         )}
@@ -268,17 +269,17 @@ export {LightboxGalleryProvider};
  * @param {!LightboxDef.CloseButtonProps} props
  * @return {PreactDef.Renderable}
  */
-function CloseButtonIcon(props) {
+function CloseButtonIcon({onClick}) {
   const classes = useStyles();
   return (
     <svg
-      {...props}
       aria-label="Close the lightbox"
-      className={objstr({
+      class={objstr({
         [classes.control]: true,
         [classes.topControl]: true,
         [classes.closeButton]: true,
       })}
+      onClick={onClick}
       role="button"
       tabIndex="0"
       viewBox="0 0 24 24"
@@ -298,17 +299,21 @@ function CloseButtonIcon(props) {
  * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-function NavButtonIcon({by, ...rest}) {
+function NavButtonIcon({'aria-disabled': ariaDisabled, by, disabled, onClick}) {
   const classes = useStyles();
   return (
     <svg
-      {...rest}
-      className={objstr({
+      aria-disabled={ariaDisabled}
+      class={objstr({
         [classes.arrow]: true,
         [classes.control]: true,
         [classes.prevArrow]: by < 0,
         [classes.nextArrow]: by > 0,
       })}
+      disabled={disabled}
+      onClick={onClick}
+      role="button"
+      tabIndex="0"
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -328,22 +333,22 @@ function NavButtonIcon({by, ...rest}) {
  * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-function ToggleViewIcon({showCarousel, ...rest}) {
+function ToggleViewIcon({onClick, showCarousel}) {
   const classes = useStyles();
   return (
     <svg
       aria-label={
         showCarousel ? 'Switch to grid view' : 'Switch to carousel view'
       }
-      className={objstr({
+      class={objstr({
         [classes.control]: true,
         [classes.topControl]: true,
       })}
+      onClick={onClick}
       role="button"
       tabIndex="0"
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      {...rest}
     >
       {showCarousel ? (
         <g fill="#fff">
@@ -384,9 +389,10 @@ function Thumbnail({onClick, render}) {
   return (
     <div
       aria-label="View in carousel"
-      className={classes.thumbnail}
+      class={classes.thumbnail}
       onClick={onClick}
       role="button"
+      tabIndex="0"
     >
       {render()}
     </div>

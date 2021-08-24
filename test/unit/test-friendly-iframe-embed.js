@@ -1,24 +1,19 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {AmpDocFie} from '#service/ampdoc-impl';
-import {BaseElement} from '../../src/base-element';
 import {Deferred} from '#core/data-structures/promise';
-import {ElementStub} from '../../src/element-stub';
+import {Signals} from '#core/data-structures/signals';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {setStyles} from '#core/dom/style';
+
+import {Services} from '#service';
+import {AmpDocFie} from '#service/ampdoc-impl';
+import {resetScheduledElementForTesting} from '#service/custom-element-registry';
+import {installExtensionsService} from '#service/extensions-impl';
+
 import {FakeWindow} from '#testing/fake-dom';
+import {isAnimationNone} from '#testing/test-helper';
+
+import {BaseElement} from '../../src/base-element';
+import {ElementStub} from '../../src/element-stub';
+import {loadPromise} from '../../src/event-helper';
 import {
   FriendlyIframeEmbed,
   Installers,
@@ -27,8 +22,6 @@ import {
   preloadFriendlyIframeEmbedExtensions,
   setSrcdocSupportedForTesting,
 } from '../../src/friendly-iframe-embed';
-import {Services} from '#service';
-import {Signals} from '#core/data-structures/signals';
 import {getFriendlyIframeEmbedOptional} from '../../src/iframe-helper';
 import {
   getServiceInEmbedWin,
@@ -36,12 +29,6 @@ import {
   registerServiceBuilderInEmbedWin,
   setParentWindow,
 } from '../../src/service-helpers';
-import {installExtensionsService} from '#service/extensions-impl';
-import {isAnimationNone} from '#testing/test-helper';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {loadPromise} from '../../src/event-helper';
-import {resetScheduledElementForTesting} from '#service/custom-element-registry';
-import {setStyles} from '#core/dom/style';
 
 describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
   let window, document;
@@ -669,10 +656,6 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
   it('should call for remeasure upon resize', async () => {
     const iframe = document.createElement('iframe');
     const {promise, resolve} = new Deferred();
-    const mutateSpy = env.sandbox.stub(
-      Services.mutatorForDoc(env.ampdoc),
-      'mutateElement'
-    );
 
     await installFriendlyIframeEmbed(iframe, document.body, {
       url: 'https://acme.org/url1',
@@ -680,6 +663,10 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       extensions: [],
     });
 
+    const mutateSpy = env.sandbox.stub(
+      Services.mutatorForDoc(env.ampdoc),
+      'mutateElement'
+    );
     expect(mutateSpy).to.not.be.called;
     setStyles(iframe, {height: '100px', width: '100px'});
     // Need to wait for resize event.

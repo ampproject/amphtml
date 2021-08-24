@@ -1,19 +1,4 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import * as fakeTimers from '@sinonjs/fake-timers';
 import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import * as IniLoad from '../../../../src/ini-load';
@@ -36,6 +21,7 @@ import {
   googleAdUrl,
   groupAmpAdsByType,
   maybeAppendErrorParameter,
+  maybeInsertOriginTrialToken,
   mergeExperimentIds,
 } from '#ads/google/a4a/utils';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
@@ -388,6 +374,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         return fixture.addElement(elem).then(() =>
           googleAdUrl(impl, '', 0, [], []).then((url1) => {
@@ -409,6 +396,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         const getRect = () => {
           return {'width': 100, 'height': 200};
@@ -441,6 +429,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           [AMP_EXPERIMENT_ATTRIBUTE]: '111,222',
         });
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, {}, ['789', '098']).then((url1) => {
@@ -462,6 +451,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         impl.win.AMP_CONFIG = {type: 'production'};
         impl.win.location.hash = 'foo,deid=123456,654321,bar';
@@ -484,6 +474,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         impl.win.gaGlobal = {cid: 'foo', hid: 'bar'};
         return fixture.addElement(elem).then(() => {
@@ -506,6 +497,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         const createElementStub = env.sandbox.stub(
           impl.win.document,
@@ -535,6 +527,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         const createElementStub = env.sandbox.stub(
           impl.win.document,
@@ -562,6 +555,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         impl.win.SVGElement = undefined;
         const createElementStub = env.sandbox.stub(
@@ -592,6 +586,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         env.sandbox
           .stub(Services.viewerForDoc(impl.getAmpDoc()), 'getReferrerUrl')
@@ -621,11 +616,77 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
         doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {});
         const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
         noopMethods(impl, fixture.ampdoc, env.sandbox);
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', Date.now(), [], []).then((url) => {
             expect(url).to.match(/[&?]bdt=[1-9][0-9]*[&$]/);
           });
+        });
+      });
+    });
+
+    it('should include user agent hint params', () => {
+      return createIframePromise().then((fixture) => {
+        setupForAdTesting(fixture);
+        const {doc} = fixture;
+        doc.win = fixture.win;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {});
+        const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
+        noopMethods(impl, fixture.ampdoc, env.sandbox);
+        Object.defineProperty(impl.win.navigator, 'userAgentData', {
+          'value': {
+            'getHighEntropyValues': () =>
+              Promise.resolve({
+                platform: 'Windows',
+                platformVersion: 10,
+                architecture: 'x86',
+                model: 'Pixel',
+                uaFullVersion: 3.14159,
+                bitness: 42,
+              }),
+          },
+        });
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', Date.now(), [], []).then((url) => {
+            expect(url).to.match(
+              /[&?]uap=Windows&uapv=10&uaa=x86&uam=Pixel&uafv=3.14159&uab=42[&$]/
+            );
+          });
+        });
+      });
+    });
+
+    it('should proceed if user agent hint params time outs', () => {
+      return createIframePromise().then((fixture) => {
+        setupForAdTesting(fixture);
+        const clock = fakeTimers.withGlobal(fixture.win).install({
+          toFake: ['Date', 'setTimeout', 'clearTimeout'],
+        });
+        const {doc} = fixture;
+        doc.win = fixture.win;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {});
+        const impl = new MockA4AImpl(elem);
+        impl.uiHandler = {isStickyAd: () => false};
+        noopMethods(impl, fixture.ampdoc, env.sandbox);
+        Object.defineProperty(impl.win.navigator, 'userAgentData', {
+          'value': {
+            // Promise that never resolves
+            'getHighEntropyValues': () => new Promise(() => {}),
+          },
+        });
+        expectAsyncConsoleError('[AMP-A4A] UACH timeout!', 1);
+        return fixture.addElement(elem).then(() => {
+          const promise = googleAdUrl(impl, '', Date.now(), [], []).then(
+            (url) => {
+              expect(url).to.not.match(
+                /[&?]uap=Windows&uapv=10&uaa=x86&uam=Pixel&uafv=3.14159&uab=42[&$]/
+              );
+            }
+          );
+          clock.tick(1001);
+          return promise;
         });
       });
     });
@@ -1222,5 +1283,29 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, (env) => {
           )
       );
     });
+  });
+});
+
+describes.realWin('maybeInsertOriginTrialToken', {}, (env) => {
+  let doc;
+  let win;
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
+
+  it('should insert the token', () => {
+    expect(doc.querySelector('meta[http-equiv=origin-trial]')).to.not.exist;
+    maybeInsertOriginTrialToken(win);
+    expect(doc.querySelector('meta[http-equiv=origin-trial]')).to.exist;
+  });
+
+  it('should only insert the token once on multiple calls', () => {
+    maybeInsertOriginTrialToken(win);
+    maybeInsertOriginTrialToken(win);
+    maybeInsertOriginTrialToken(win);
+    expect(
+      doc.querySelectorAll('meta[http-equiv=origin-trial]').length
+    ).to.equal(1);
   });
 });

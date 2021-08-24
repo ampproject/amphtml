@@ -1,24 +1,9 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {TickLabel} from '#core/constants/enums';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {Signals} from '#core/data-structures/signals';
 import {whenDocumentComplete, whenDocumentReady} from '#core/document-ready';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {computedStyle} from '#core/dom/style';
 import {throttle} from '#core/types/function';
 import {dict, map} from '#core/types/object';
 
@@ -203,6 +188,11 @@ export class Performance {
     whenDocumentComplete(win.document).then(() => this.onload_());
     this.registerPerformanceObserver_();
     this.registerFirstInputDelayPolyfillListener_();
+
+    /**
+     * @private {boolean}
+     */
+    this.googleFontExpRecorded_ = false;
   }
 
   /**
@@ -466,6 +456,20 @@ export class Performance {
    */
   tickCumulativeMetrics_() {
     if (this.supportsLayoutShift_) {
+      if (!this.googleFontExpRecorded_) {
+        this.googleFontExpRecorded_ = true;
+        const {win} = this;
+        const googleFontExp = parseInt(
+          computedStyle(win, win.document.body).getPropertyValue(
+            '--google-font-exp'
+          ),
+          10
+        );
+        if (googleFontExp >= 0) {
+          this.addEnabledExperiment(`google-font-exp=${googleFontExp}`);
+        }
+      }
+
       this.tickLayoutShiftScore_();
     }
     if (this.supportsLargestContentfulPaint_) {
@@ -716,8 +720,11 @@ export class Performance {
       opt_delta == undefined ? this.win.performance.now() : opt_delta;
     const end = this.timeOrigin_ + delta;
 
-    // Order is timeOrigin -> firstVisibleTime -> end.
-    const visibleTime = this.ampdoc_ && this.ampdoc_.getFirstVisibleTime();
+    // If on Origin, use timeOrigin
+    // If in a viewer, use firstVisibleTime
+    const visibleTime = this.viewer_?.isEmbedded()
+      ? this.ampdoc_?.getFirstVisibleTime()
+      : this.timeOrigin_;
     const v = visibleTime ? Math.max(end - visibleTime, 0) : 0;
     this.tickDelta(label, v);
   }

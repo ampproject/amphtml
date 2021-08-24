@@ -1,19 +1,3 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {CSS} from '../../../build/amp-fit-text-0.1.css';
 import {
   applyFillContent,
@@ -32,7 +16,7 @@ const MEASURER_CLASS = 'i-amphtml-fit-text-measurer';
 const CONTENT_CLASS = 'i-amphtml-fit-text-content';
 const CONTENT_WRAPPER_CLASS = 'i-amphtml-fit-text-content-wrapper';
 
-class AmpFitText extends AMP.BaseElement {
+export class AmpFitText extends AMP.BaseElement {
   /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
@@ -77,10 +61,7 @@ class AmpFitText extends AMP.BaseElement {
   buildCallback() {
     const {element} = this;
 
-    const {content, contentWrapper, measurer} = buildDom(
-      element.ownerDocument,
-      element
-    );
+    const {content, contentWrapper, measurer} = buildDom(element);
     this.content_ = content;
     this.contentWrapper_ = contentWrapper;
     this.measurer_ = measurer;
@@ -224,21 +205,22 @@ export function updateOverflow_(content, measurer, maxHeight, fontSize) {
 }
 
 /**
+ * @see amphtml/compiler/types.js for full description
  *
- * @param {!Document} document
  * @param {!Element} element
  * @return {{content: !Element, contentWrapper: !Element, measurer: !Element}}
  */
-export function buildDom(document, element) {
-  const content = document.createElement('div');
+export function buildDom(element) {
+  const doc = element.ownerDocument;
+  const content = doc.createElement('div');
   applyFillContent(content);
   content.classList.add(CONTENT_CLASS);
 
-  const contentWrapper = document.createElement('div');
+  const contentWrapper = doc.createElement('div');
   contentWrapper.classList.add(CONTENT_WRAPPER_CLASS);
   content.appendChild(contentWrapper);
 
-  const measurer = document.createElement('div');
+  const measurer = doc.createElement('div');
   measurer.classList.add(MEASURER_CLASS);
 
   realChildNodes(element).forEach((node) => contentWrapper.appendChild(node));

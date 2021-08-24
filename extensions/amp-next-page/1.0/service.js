@@ -1,56 +1,41 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {CSS} from '../../../build/amp-next-page-1.0.css';
-import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page';
-import {MultidocManager} from '../../../src/multidoc-manager';
-import {Services} from '#service';
-import {
-  UrlReplacementPolicy,
-  batchFetchJsonFor,
-} from '../../../src/batched-json';
 import {VisibilityState} from '#core/constants/visibility-state';
-import {
-  childElementByAttr,
-  childElementsByTag,
-  scopedQuerySelector,
-} from '#core/dom/query';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {findIndex, toArray} from '#core/types/array';
-import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {
   insertAtStart,
   isJsonScriptTag,
   removeChildren,
   removeElement,
 } from '#core/dom';
-import {installStylesForDoc} from '../../../src/style-installer';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {
+  childElementByAttr,
+  childElementsByTag,
+  scopedQuerySelector,
+} from '#core/dom/query';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {setStyles, toggle} from '#core/dom/style';
+import {findIndex, toArray} from '#core/types/array';
+import {tryParseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page';
+import {validatePage, validateUrl} from './utils';
+import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
+
+import {CSS} from '../../../build/amp-next-page-1.0.css';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {
+  UrlReplacementPolicy,
+  batchFetchJsonFor,
+} from '../../../src/batched-json';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {
   parseFavicon,
   parseOgImage,
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
-
-import {setStyles, toggle} from '#core/dom/style';
-
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryParseJson} from '#core/types/object/json';
-import {validatePage, validateUrl} from './utils';
-import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
+import {MultidocManager} from '../../../src/multidoc-manager';
+import {installStylesForDoc} from '../../../src/style-installer';
 
 const TAG = 'amp-next-page';
 const PRERENDER_VIEWPORT_COUNT = 3;

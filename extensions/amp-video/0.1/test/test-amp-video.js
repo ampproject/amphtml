@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
 import {AmpVideo, isCachedByCdn} from '../amp-video';
 import {Services} from '#service';
@@ -71,7 +55,7 @@ describes.realWin(
       const impl = await v.getImpl(false);
 
       if (opt_noLayout) {
-        return;
+        return v;
       }
       if (opt_beforeLayoutCallback) {
         opt_beforeLayoutCallback(v, impl);
@@ -821,6 +805,215 @@ describes.realWin(
         expect(sources.length).to.equal(1);
         expect(sources[0].getAttribute('src')).to.equal(origSrc);
       });
+
+      describe('prerendering', () => {
+        let makeVisible;
+        let visibilityStubs;
+
+        beforeEach(() => {
+          visibilityStubs = {
+            getVisibilityState: env.sandbox.stub(
+              env.ampdoc,
+              'getVisibilityState'
+            ),
+            whenFirstVisible: env.sandbox.stub(env.ampdoc, 'whenFirstVisible'),
+          };
+          visibilityStubs.getVisibilityState.returns(VisibilityState.PRERENDER);
+          const visiblePromise = new Promise((resolve) => {
+            makeVisible = resolve;
+          });
+          visibilityStubs.whenFirstVisible.returns(visiblePromise);
+        });
+
+        it('should propagate cached sources in prerendering', async () => {
+          remoteSources.push({
+            url: 'https://example.com/cached-video.mp4',
+            type: 'video/mp4',
+          });
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'https://example.com/video.mp4');
+          const v = await getVideo(
+            {
+              type: 'video/mp4',
+              cache: 'google',
+              layout: 'responsive',
+              height: '100px',
+              width: '100px',
+            },
+            [source],
+            null,
+            /* opt_noLayout */ true
+          );
+          v.layoutCallback();
+          const sources = v.querySelectorAll('video source');
+          // Only one source, and the cached one.
+          expect(sources.length).to.equal(1);
+          expect(sources[0].getAttribute('src')).to.equal(
+            'https://example.com/cached-video.mp4'
+          );
+        });
+
+        it('should have all sources when visible after prerendering', async () => {
+          remoteSources.push({
+            url: 'https://example.com/cached-video.mp4',
+            type: 'video/mp4',
+          });
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'https://example.com/video.mp4');
+          const v = await getVideo(
+            {
+              type: 'video/mp4',
+              cache: 'google',
+              layout: 'responsive',
+              height: '100px',
+              width: '100px',
+            },
+            [source],
+            null,
+            /* opt_noLayout */ true
+          );
+          v.layoutCallback();
+          makeVisible();
+          await Promise.resolve();
+          const sources = v.querySelectorAll('video source');
+          // Cached + non cached source and in the right order.
+          expect(sources.length).to.equal(2);
+          expect(sources[0].getAttribute('src')).to.equal(
+            'https://example.com/cached-video.mp4'
+          );
+          expect(sources[1].getAttribute('src')).to.equal(
+            'https://example.com/video.mp4'
+          );
+        });
+      });
+
+      describe('max bitrate', () => {
+        beforeEach(() => {
+          toggleExperiment(env.win, 'amp-story-first-page-max-bitrate', true);
+        });
+
+        afterEach(() => {
+          toggleExperiment(env.win, 'amp-story-first-page-max-bitrate', false);
+        });
+
+        it('should apply a max bitrate on first story page', async () => {
+          remoteSources.push({
+            url: 'https://example.com/cached-video-2000.mp4',
+            type: 'video/mp4',
+            'bitrate_kbps': 2000,
+          });
+          remoteSources.push({
+            url: 'https://example.com/cached-video-720.mp4',
+            type: 'video/mp4',
+            'bitrate_kbps': 720,
+          });
+          const attrs = {
+            src: 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+            type: 'video/mp4',
+            'amp-orig-src': 'https://example.com/video.mp4',
+            cache: 'google',
+            layout: 'responsive',
+            height: '100px',
+            width: '100px',
+          };
+          const storyEl = doc.createElement('amp-story');
+          const storyPageEl = doc.createElement('amp-story-page');
+          const v = doc.createElement('amp-video');
+          for (const key in attrs) {
+            v.setAttribute(key, attrs[key]);
+          }
+          storyEl.appendChild(storyPageEl);
+          storyPageEl.appendChild(v);
+          doc.body.appendChild(storyEl);
+          await v.buildInternal();
+          await v.getImpl(false);
+
+          try {
+            await v.layoutCallback();
+          } catch (e) {}
+
+          const sources = v.querySelectorAll('source');
+          expect(sources[0].getAttribute('src')).to.equal(
+            'https://example.com/cached-video-720.mp4'
+          );
+        });
+
+        it('should not apply a max bitrate on second story page', async () => {
+          remoteSources.push({
+            url: 'https://example.com/cached-video-2000.mp4',
+            type: 'video/mp4',
+            'bitrate_kbps': 2000,
+          });
+          remoteSources.push({
+            url: 'https://example.com/cached-video-720.mp4',
+            type: 'video/mp4',
+            'bitrate_kbps': 720,
+          });
+          const attrs = {
+            src: 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+            type: 'video/mp4',
+            'amp-orig-src': 'https://example.com/video.mp4',
+            cache: 'google',
+            layout: 'responsive',
+            height: '100px',
+            width: '100px',
+          };
+          const storyEl = doc.createElement('amp-story');
+          const storyPageEl = doc.createElement('amp-story-page');
+          const storyPageEl2 = doc.createElement('amp-story-page');
+          const v = doc.createElement('amp-video');
+          for (const key in attrs) {
+            v.setAttribute(key, attrs[key]);
+          }
+          storyEl.appendChild(storyPageEl);
+          storyEl.appendChild(storyPageEl2);
+          storyPageEl2.appendChild(v);
+          doc.body.appendChild(storyEl);
+          await v.buildInternal();
+          await v.getImpl(false);
+
+          try {
+            await v.layoutCallback();
+          } catch (e) {}
+
+          const sources = v.querySelectorAll('source');
+          expect(sources[0].getAttribute('src')).to.equal(
+            'https://example.com/cached-video-2000.mp4'
+          );
+        });
+
+        it('should apply a max bitrate on first story page with legacy caching', async () => {
+          const attrs = {
+            src: 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+            type: 'video/mp4',
+            'amp-orig-src': 'https://example.com/video.mp4',
+            layout: 'responsive',
+            height: '100px',
+            width: '100px',
+          };
+          const storyEl = doc.createElement('amp-story');
+          const storyPageEl = doc.createElement('amp-story-page');
+          const v = doc.createElement('amp-video');
+          for (const key in attrs) {
+            v.setAttribute(key, attrs[key]);
+          }
+          storyEl.appendChild(storyPageEl);
+          storyPageEl.appendChild(v);
+          doc.body.appendChild(storyEl);
+          await v.buildInternal();
+          await v.getImpl(false);
+
+          try {
+            await v.layoutCallback();
+          } catch (e) {}
+
+          const sources = v.querySelectorAll('source');
+          expect(sources[0].getAttribute('src')).to.equal(
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_video_quality=medium'
+          );
+          expect(sources[0].getAttribute('data-bitrate')).to.equal('720');
+        });
+      });
     });
 
     describe('blurred image placeholder', () => {
@@ -1009,6 +1202,14 @@ describes.realWin(
         it('with just cached src', () => {
           video.setAttribute('src', 'https://example.com/video.mp4');
           video.setAttribute('poster', 'https://example.com/poster.jpg');
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+        });
+      });
+
+      describe('should prerender remote video cache', () => {
+        it('with cache="*"', () => {
+          video.setAttribute('src', 'https://example.com/video.mp4');
+          video.setAttribute('cache', 'google');
           expect(AmpVideo.prerenderAllowed(video)).to.be.true;
         });
       });

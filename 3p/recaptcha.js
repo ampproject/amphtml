@@ -1,25 +1,12 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 // src/polyfills.js must be the first import.
 import './polyfills';
 
-import ampToolboxCacheUrl from '../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
+import {dict, hasOwn} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
 
+import {loadScript} from './3p';
 import {IframeMessagingClient} from './iframe-messaging-client';
+
 import {
   dev,
   devAssert,
@@ -27,10 +14,8 @@ import {
   setReportError,
   user,
 } from '../src/log';
-import {dict, hasOwn} from '#core/types/object';
 import {isProxyOrigin, parseUrlDeprecated} from '../src/url';
-import {loadScript} from './3p';
-import {parseJson} from '#core/types/object/json';
+import ampToolboxCacheUrl from '../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
 /**
  * @fileoverview

@@ -1,47 +1,33 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {ActionTrust} from '#core/constants/action-constants';
-import {Animation} from '../../../src/animation';
+import {bezierCurve} from '#core/data-structures/curve';
+import {dispatchCustomEvent} from '#core/dom';
+import {Layout} from '#core/dom/layout';
+import {layoutRectFromDomRect, layoutRectLtwh} from '#core/dom/layout/rect';
+import {
+  observeContentSize,
+  unobserveContentSize,
+} from '#core/dom/layout/size-observer';
+import {realChildElements} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
+import {px, scale, setStyles, translate} from '#core/dom/style';
+import {numeric} from '#core/dom/transition';
+import {boundValue, distance, magnitude} from '#core/math';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
 import {CSS} from '../../../build/amp-pan-zoom-0.1.css';
+import {Animation} from '../../../src/animation';
+import {createCustomEvent, listen} from '../../../src/event-helper';
+import {Gestures} from '../../../src/gesture';
 import {
   DoubletapRecognizer,
   PinchRecognizer,
   SwipeXYRecognizer,
   TapRecognizer,
 } from '../../../src/gesture-recognizers';
-import {Gestures} from '../../../src/gesture';
-import {Layout} from '#core/dom/layout';
-import {Services} from '#service';
-import {bezierCurve} from '#core/data-structures/curve';
-import {boundValue, distance, magnitude} from '#core/math';
-import {continueMotion} from '../../../src/motion';
-import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {dispatchCustomEvent} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
-import {layoutRectFromDomRect, layoutRectLtwh} from '#core/dom/layout/rect';
-import {numeric} from '../../../src/transition';
-import {
-  observeContentSize,
-  unobserveContentSize,
-} from '#core/dom/layout/size-observer';
-import {px, scale, setStyles, translate} from '#core/dom/style';
-import {realChildElements} from '#core/dom/query';
+import {continueMotion} from '../../../src/motion';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-pan-zoom';

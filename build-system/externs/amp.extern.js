@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /** @externs */
 
 /**
@@ -467,7 +451,26 @@ let time;
  * Just an element, but used with AMP custom elements..
  * @constructor @extends {HTMLElement}
  */
-let AmpElement = function () {};
+
+// Commented out segments below have been migrated into
+// #core/dom/amp-element.extern, but are left here for now for easy access
+// during migration
+
+// let AmpElement = function () {};
+// /** */
+// AmpElement.prototype.pause = function () {};
+
+// /** */
+// AmpElement.prototype.unmount = function () {};
+
+// *
+//  * @param {number=} opt_parentPriority
+//  * @return {!Promise}
+
+// AmpElement.prototype.ensureLoaded = function (opt_parentPriority) {};
+
+// /** @return {?Element} */
+// AmpElement.prototype.getPlaceholder = function () {};
 
 /** @return {boolean} */
 AmpElement.prototype.R1 = function () {};
@@ -477,21 +480,6 @@ AmpElement.prototype.deferredMount = function () {};
 
 /** @return {!Signals} */
 AmpElement.prototype.signals = function () {};
-
-/** */
-AmpElement.prototype.pause = function () {};
-
-/** */
-AmpElement.prototype.unmount = function () {};
-
-/**
- * @param {number=} opt_parentPriority
- * @return {!Promise}
- */
-AmpElement.prototype.ensureLoaded = function (opt_parentPriority) {};
-
-/** @return {?Element} */
-AmpElement.prototype.getPlaceholder = function () {};
 
 /** @param {boolean} show */
 AmpElement.prototype.togglePlaceholder = function (show) {};

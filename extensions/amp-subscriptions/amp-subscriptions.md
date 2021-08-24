@@ -6,22 +6,6 @@ teaser:
   text: Implements subscription-style access protocol.
 ---
 
-<!---
-Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-subscriptions
 
 ## Usage
@@ -415,9 +399,9 @@ By default, as the body, pingback POST request receives the entitlement object r
 
 To accurately identify the Reader, the Publisher should associate the [AMP Reader ID][1] with any Publisher cookies relevant to the Reader.
 
-<amp-img alt="reader id cookie association" layout="responsive" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-subscriptions/images/reader-id-assoociation.png">
+<amp-img alt="reader id cookie association" layout="responsive" width="1195" height="1148" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-subscriptions/images/reader-id-assoociation.png">
   <noscript>
-    <img alt="reader id cookie association" layout="responsive" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-subscriptions/images/reader-id-assoociation.png">
+    <img alt="reader id cookie association" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-subscriptions/images/reader-id-assoociation.png">
   </noscript>
 </amp-img>
 
