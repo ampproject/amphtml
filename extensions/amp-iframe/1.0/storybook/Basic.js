@@ -53,6 +53,7 @@ export const WithResizableIframe = () => {
       >
         <div placeholder>Placeholder</div>
       </Iframe>
+      <p>The above iframe should resize to 300x300px when visible</p>
       <h1>{textBelow}</h1>
     </div>
   );

@@ -3,6 +3,7 @@ import {useCallback, useEffect, useRef} from '#preact';
 import {MessageType} from '#preact/component/3p-frame';
 import {toWin} from '#core/window';
 import {ContainWrapper} from '#preact/component';
+import {setStyle} from '#core/dom/style';
 
 const NOOP = () => {};
 const FULL_HEIGHT = '100%';
@@ -53,18 +54,22 @@ export function Iframe({
       // 1. when post message is received in viewport
       // 2. when exiting viewport
       // This could be optimized by reducing to one call by assessing when to call.
-      requestResize(height, width);
-      container.height = FULL_HEIGHT;
-      container.width = FULL_HEIGHT;
+      requestResize(height, width).then(() => {
+        container.height = FULL_HEIGHT;
+        container.width = FULL_HEIGHT;
+      });
     } else if (isIntersectingRef.current === false) {
+      const iframe = iframeRef.current;
       // attemptResize can be called before the IntersectionObserver starts observing
       // the component if an event is fired immediately. Therefore we check
       // isIntersectingRef has changed via isIntersectingRef.current === false.
       if (width) {
-        container.width = width;
+        setStyle(container, 'width', width, 'px');
+        iframe.width = width;
       }
       if (height) {
-        container.height = height;
+        setStyle(container, 'height', height, 'px');
+        iframe.height = height;
       }
     }
   }, [requestResize]);
