@@ -20,6 +20,7 @@ import {useMemo} from '#preact';
 import {VideoEvents} from '../../../src/video-interface';
 import {dispatchCustomEvent} from '#core/dom';
 import {
+  DAILYMOTION_VIDEO_EVENTS,
   DailymotionEvents,
   getDailymotionIframeSrc,
   makeDailymotionMessage,
@@ -52,24 +53,12 @@ function makeMethodMessage(method) {
 function onMessage({currentTarget, data}) {
   const parsedData = parseQueryString(/** @type {string} */ (data));
   const event = parsedData?.['event'];
-  if (event === DailymotionEvents.API_READY) {
-    dispatchCustomEvent(currentTarget, 'canplay');
-    return;
-  }
-  if (event === DailymotionEvents.END) {
-    dispatchCustomEvent(currentTarget, [VideoEvents.ENDED, VideoEvents.PAUSE]);
-    return;
-  }
-  if (event === DailymotionEvents.PAUSE) {
-    dispatchCustomEvent(currentTarget, VideoEvents.PAUSE);
-    return;
-  }
-  if (event === DailymotionEvents.PLAY) {
-    dispatchCustomEvent(currentTarget, VideoEvents.PLAY);
+  if (DAILYMOTION_VIDEO_EVENTS[event]) {
+    dispatchCustomEvent(currentTarget, DAILYMOTION_VIDEO_EVENTS[event]);
     return;
   }
   if (DailymotionEvents[event]) {
-    dispatchEvent(currentTarget, DailymotionEvents.event);
+    dispatchCustomEvent(currentTarget, DailymotionEvents.event);
     return;
   }
 }
@@ -124,7 +113,7 @@ export function DailymotionWithRef(
   return (
     <VideoIframe
       autoplay={autoplay}
-      controls={true}
+      controls
       ref={ref}
       {...rest}
       src={src}

@@ -17,6 +17,7 @@
 import {addParamsToUrl} from '../../src/url';
 import {dict} from '#core/types/object';
 import {isAutoplaySupported} from '#core/dom/video';
+import {VideoEvents} from '../../src/video-interface';
 
 /**
  *
@@ -82,12 +83,27 @@ export function makeDailymotionMessage(command, params = []) {
 }
 
 /**
+ * Maps events coming from the Dailymotion frame to events to be dispatched from the
+ * component element.
+ *
+ * If the item does not have a value, the event will not be forwarded 1:1, but
+ * it will be listened to.
+ *
+ * @const {!Object<string, ?string>}
+ */
+export const DAILYMOTION_VIDEO_EVENTS = {
+  'apiready': ['canplay', VideoEvents.LOAD],
+  'end': [VideoEvents.ENDED, VideoEvents.PAUSE],
+  'pause': VideoEvents.PAUSE,
+  'play': VideoEvents.PLAYING,
+};
+
+/**
  * Player events reverse-engineered from the Dailymotion API
  * NOTE: 'unstarted' isn't part of the API, just a placeholder
  * as an initial state
  *
  * @enum {string}
- * @private
  */
 export const DailymotionEvents = {
   UNSTARTED: 'unstarted',
