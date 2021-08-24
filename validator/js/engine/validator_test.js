@@ -1456,10 +1456,6 @@ describe('ValidatorRulesMakeSense', () => {
     });
   }
 
-  it('min_validator_revision_required defined', () => {
-    expect(rules.minValidatorRevisionRequired).toBeGreaterThan(0);
-  });
-
   it('template_spec_url is set', () => {
     expect(rules.templateSpecUrl).not.toEqual(null);
   });
