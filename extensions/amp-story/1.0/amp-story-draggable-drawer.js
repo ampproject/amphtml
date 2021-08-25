@@ -592,7 +592,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.state = DrawerState.CLOSED;
 
     this.storeService.dispatch(Action.TOGGLE_PAUSED, false);
-    this.unfocusChildElements_();
+    this.dismissSoftKeyboard_();
 
     this.mutateElement(() => {
       this.element.setAttribute('aria-hidden', true);
@@ -613,10 +613,10 @@ export class DraggableDrawer extends AMP.BaseElement {
   }
 
   /**
-   * Removes focus from any focused element within the draggable drawer,
-   * causing the soft keyboard to close.
+   * Close the soft keyboard by removing focus from any focused element within
+   * the draggable drawer.
    */
-  unfocusChildElements_() {
+  dismissSoftKeyboard_() {
     const focusedEl = this.element.querySelector(':focus');
     focusedEl?.blur();
   }
