@@ -210,14 +210,6 @@ export class DraggableDrawer extends AMP.BaseElement {
       this.spacerElHeight_ = e[0].contentRect.height;
     }).observe(spacerEl);
 
-    // Ensure that the drawer is removed from view when it is closed along with
-    // the soft keyboard, whose openings and closing trigger window resizes.
-    new this.win.ResizeObserver((e) => {
-      if (this.state === DrawerState.CLOSED) {
-        this.mutateElement(() => e[0].target.setAttribute('hidden', ''));
-      }
-    }).observe(this.element);
-
     // Reset scroll position on end of close transiton.
     this.element.addEventListener('transitionend', (e) => {
       if (e.propertyName === 'transform' && this.state === DrawerState.CLOSED) {
@@ -526,9 +518,6 @@ export class DraggableDrawer extends AMP.BaseElement {
     }
 
     this.mutateElement(() => {
-      if (this.state !== DrawerState.CLOSED) {
-        this.element.removeAttribute('hidden');
-      }
       setImportantStyles(this.element, {
         transform: translate,
         transition: 'none',
@@ -592,7 +581,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.state = DrawerState.CLOSED;
 
     this.storeService.dispatch(Action.TOGGLE_PAUSED, false);
-    this.dismissSoftKeyboard_();
+    this.handleSoftKeyboardOnDrawerClose_();
 
     this.mutateElement(() => {
       this.element.setAttribute('aria-hidden', true);
@@ -613,11 +602,34 @@ export class DraggableDrawer extends AMP.BaseElement {
   }
 
   /**
-   * Close the soft keyboard by removing focus from any focused element within
-   * the draggable drawer.
+   * Handle the soft keyboard during the closing of the drawer.
+   * @private
    */
-  dismissSoftKeyboard_() {
+  handleSoftKeyboardOnDrawerClose_() {
+    this.dismissSoftKeyboard_();
+    // Reset the story's scroll position, which can unintentionally be altered
+    // by the opening of the soft keyboard.
+    this.resetStoryScrollPosition_();
+  }
+
+  /**
+   * Dismiss the soft keyboard, if displayed.
+   * @private
+   */
+   dismissSoftKeyboard_() {
     const focusedEl = this.element.querySelector(':focus');
     focusedEl?.blur();
+  }
+
+  /**
+   * Set the story's scroll position to its default state, if necessary.
+   * @private
+   */
+   resetStoryScrollPosition_() {
+    const storyEl = closest(
+      this.element,
+      (el) => el.tagName === 'AMP-STORY-PAGE'
+    );
+    storyEl.scrollTo(0, 0);
   }
 }
