@@ -81,11 +81,6 @@ describes.sandboxed('StandardActions', {}, (env) => {
     expect(element.checked).to.false;
   }
 
-  function expectCheckboxToHaveState(element, state) {
-    expectElementMutatedAsync(element);
-    expect(element.checked).to.state;
-  }
-
   function expectAmpElementToHaveBeenHidden(element) {
     expectElementMutatedAsync(element);
     expect(element.collapse).to.be.calledOnce;
@@ -576,7 +571,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
         },
       };
       standardActions.handletoggleState_(invocation);
-      expectCheckboxToHaveState(element, true);
+      expectCheckboxToHaveStateTrue(element);
     });
 
     it('should set checked state to false when force=false', () => {
@@ -590,7 +585,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
         },
       };
       standardActions.handletoggleState_(invocation);
-      expectCheckboxToHaveState(element, false);
+      expectCheckboxToHaveStateFalse(element);
     });
   });
 
