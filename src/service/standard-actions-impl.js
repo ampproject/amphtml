@@ -97,8 +97,8 @@ export class StandardActions {
     );
 
     actionService.addGlobalMethodHandler(
-      'toggleState',
-      this.handletoggleState_.bind(this)
+      'toggleChecked',
+      this.handleToggleChecked_.bind(this)
     );
   }
 
@@ -424,12 +424,12 @@ export class StandardActions {
   }
 
   /**
-   * Handles "toggleState" action.
+   * Handles "toggleChecked" action.
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {?Promise}
    * @private Visible to tests only.
    */
-  handletoggleState_(invocation) {
+  handleToggleChecked_(invocation) {
     const target = dev().assertElement(invocation.node);
     const {args} = invocation;
 
