@@ -104,7 +104,6 @@
     "eslint-plugin-jsdoc": "35.4.0",
     "eslint-plugin-local": "1.0.0",
     "eslint-plugin-module-resolver": "1.4.0",
-    "eslint-plugin-notice": "0.9.10",
     "eslint-plugin-prettier": "3.4.0",
     "eslint-plugin-react": "7.24.0",
     "eslint-plugin-react-hooks": "4.2.0",

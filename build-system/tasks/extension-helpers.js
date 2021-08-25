@@ -1,19 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
 const debounce = require('../common/debounce');
@@ -23,9 +7,9 @@ const path = require('path');
 const wrappers = require('../compile/compile-wrappers');
 const {
   compileJs,
-  compileJsWithEsbuild,
   doBuildJs,
   endBuildStep,
+  esbuildCompile,
   maybeToEsmName,
   maybeToNpmEsmName,
   mkdirSync,
@@ -108,6 +92,7 @@ const ExtensionOptionDef = {};
  *   outfile: string,
  *   external?: Array<string>
  *   remap?: Record<string, string>
+ *   wrapper?: string,
  * }}
  */
 const ExtensionBinaryDef = {};
@@ -490,7 +475,7 @@ async function buildExtension(
     }
   }
 
-  await compileJison(path.join(extDir, '**', '*.jison'));
+  await compileJison(`${extDir}/**/*.jison`);
   if (name === 'amp-bind') {
     await doBuildJs(jsBundles, 'ww.max.js', options);
   }
@@ -641,6 +626,7 @@ function buildNpmBinaries(extDir, options) {
         outfile: preact,
         external: ['preact', 'preact/dom', 'preact/compat', 'preact/hooks'],
         remap: {'preact/dom': 'preact'},
+        wrapper: '',
       });
     }
     if (react) {
@@ -654,6 +640,7 @@ function buildNpmBinaries(extDir, options) {
           'preact/hooks': 'react',
           'preact/dom': 'react-dom',
         },
+        wrapper: '',
       });
     }
     return buildBinaries(extDir, binaries, options);
@@ -671,22 +658,19 @@ function buildBinaries(extDir, binaries, options) {
   mkdirSync(`${extDir}/dist`);
 
   const promises = binaries.map((binary) => {
-    const {entryPoint, external, outfile, remap} = binary;
+    const {entryPoint, external, outfile, remap, wrapper} = binary;
     const {name} = pathParse(outfile);
     const esm = argv.esm || argv.sxg || false;
-    return compileJsWithEsbuild(
-      extDir + '/',
-      entryPoint,
-      `${extDir}/dist`,
-      Object.assign(options, {
-        toName: maybeToNpmEsmName(`${name}.max.js`),
-        minifiedName: maybeToNpmEsmName(`${name}.js`),
-        latestName: '',
-        outputFormat: esm ? 'esm' : 'cjs',
-        externalDependencies: external,
-        remapDependencies: remap,
-      })
-    );
+    return esbuildCompile(extDir + '/', entryPoint, `${extDir}/dist`, {
+      ...options,
+      toName: maybeToNpmEsmName(`${name}.max.js`),
+      minifiedName: maybeToNpmEsmName(`${name}.js`),
+      latestName: '',
+      outputFormat: esm ? 'esm' : 'cjs',
+      externalDependencies: external,
+      remapDependencies: remap,
+      wrapper: wrapper ?? options.wrapper,
+    });
   });
   return Promise.all(promises);
 }
@@ -720,17 +704,13 @@ async function buildExtensionJs(extDir, name, version, latestVersion, options) {
       ? wrapperOrFn(name, version, latest, argv.esm, options.loadPriority)
       : wrapperOrFn;
 
-  await compileJs(
-    extDir + '/',
-    filename,
-    './dist/v0',
-    Object.assign(options, {
-      toName: `${name}-${version}.max.js`,
-      minifiedName: `${name}-${version}.js`,
-      latestName: latest ? `${name}-latest.js` : '',
-      wrapper,
-    })
-  );
+  await compileJs(extDir + '/', filename, './dist/v0', {
+    ...options,
+    toName: `${name}-${version}.max.js`,
+    minifiedName: `${name}-${version}.js`,
+    latestName: latest ? `${name}-latest.js` : '',
+    wrapper,
+  });
 
   // If an incremental watch build fails, simply return.
   if (options.errored) {

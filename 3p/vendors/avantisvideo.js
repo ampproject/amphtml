@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
-const runner = require('@babel/helper-plugin-test-runner').default;
+// src/polyfills.js must be the first import.
+import '#3p/polyfills';
 
-runner(__dirname);
+import {register} from '#3p/3p';
+import {draw3p, init} from '#3p/integration-lib';
+
+import {avantisvideo} from '#ads/vendors/avantisvideo';
+
+init(window);
+register('avantisvideo', avantisvideo);
+
+window.draw3p = draw3p;

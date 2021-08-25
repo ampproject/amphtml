@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as Preact from '#preact';
 import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
@@ -34,7 +18,7 @@ import {useStyles} from './thumbnails.jss';
 export function Thumbnails({
   aspectRatio,
   children,
-  className = '',
+  'class': className = '',
   loop = false,
   ...rest
 }) {
@@ -69,7 +53,7 @@ export function Thumbnails({
 
   return (
     <BaseCarousel
-      className={`${className} ${classes.thumbnails}`}
+      class={`${className} ${classes.thumbnails}`}
       mixedLength={true}
       snap={false}
       snapAlign={loop ? 'center' : 'start'}
@@ -85,7 +69,7 @@ export function Thumbnails({
           const {thumbnailSrc} = slide.props;
           return (
             <img
-              className={classes.slide}
+              class={classes.slide}
               onClick={() => setCurrentSlide(i)}
               loading="lazy"
               role="button"
@@ -94,7 +78,7 @@ export function Thumbnails({
                 height: px(height),
                 width: aspectRatio ? px(aspectRatio * height) : '',
               }}
-              tabindex="0"
+              tabIndex="0"
             />
           );
         })}

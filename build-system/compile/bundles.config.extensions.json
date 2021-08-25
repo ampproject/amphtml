@@ -357,7 +357,7 @@
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "wrappers": "bento"
+      "wrapper": "bento"
     }
   },
   {
@@ -934,7 +934,7 @@
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "wrappers": "bento"
+      "wrapper": "bento"
     }
   },
   {
@@ -1247,7 +1247,7 @@
     "latestVersion": "1.0",
     "options": {
       "npm": true,
-      "wrappers": "bento"
+      "wrapper": "bento"
     }
   },
   {

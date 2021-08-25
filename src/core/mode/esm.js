@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-{
-  const [, second] = document;
-  const [x, , z] = document;
-}
+import {isProd} from './prod';
 
-{
-  const [, second] = document();
-  const [x, , z] = document();
+/**
+ * Returns true when compiling an esm binary.
+ * This is a magic constant that is replaced by babel.
+ *
+ * @return {boolean}
+ */
+export function isEsm() {
+  if (isProd()) {
+    return IS_ESM;
+  }
+
+  return self?.__AMP_MODE?.esm ?? IS_ESM;
 }

@@ -12,22 +12,6 @@ tags:
 author: mszylkowski
 ---
 
-<!---
-Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 The `amp-story-interactive` component provides a set of experiences, such as quizzes or polls, in [Web Stories](https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/?format=stories).
 
 <amp-layout layout="container" width="3" height="2">
@@ -178,6 +162,24 @@ Results can feed its state from quizzes if all categories also specify `option-{
 </amp-story-interactive-results>
 [/sourcecode]
 
+### amp-story-interactive-slider
+
+The `amp-story-interactive-slider` element provides a voting experience for values along a range. Users interact with the slider by dragging the thumb across the track, and release to vote. When selected, the average response is displayed.
+
+Displays the percentage selected, or an emoji via the attribute `option-1-text`. Does not support pairing with `amp-story-interactive-results`, and can optionally have a prompt.
+
+<amp-img alt="An example of an interactive slider: 'How much do you like this product?' with a percentage slider with a custom accent color" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/slider-raw.png" layout="intrinsic" width="400" height="450">
+
+[sourcecode:html]
+<amp-story-interactive-slider
+    style="--interactive-accent-color: #651ffe"
+    prompt-text="How much do you like this product?"
+    align-self="center"
+    justify-self="center"
+    endpoint="https://backend.com/v1/interactives">
+</amp-story-interactive-slider>
+[/sourcecode]
+
 ### Store and display user selection
 
 All selectable interactive elements (`amp-story-interactive-binary-poll`, `amp-story-interactive-img-poll`, `amp-story-interactive-img-quiz`, `amp-story-interactive-poll`, `amp-story-interactive-quiz`) show the percentage of users that selected each option. The backend specified with the `endpoint` attribute will store the aggregate data for the interaction following the API described below.
@@ -222,11 +224,11 @@ Backends need to be specified on the necessary components (binary-poll, poll, qu
 
 The interactive experience elements from `amp-story-interactive` share an API language for customizing options.
 
-### id (required for binary-poll, img-poll, img-quiz, poll, quiz)
+### id (required for binary-poll, img-poll, img-quiz, poll, quiz, slider)
 
 Element ID that identifies the interactive component in the story. Used to compose the [`interactiveId`](#interactiveId) sent to the backend. Should be unique for each component in the story.
 
-### endpoint (required for binary-poll, img-poll, img-quiz, poll, quiz)
+### endpoint (required for binary-poll, img-poll, img-quiz, poll, quiz, slider)
 
 Complete URL of backend. Stores interactive element votes.
 
@@ -234,16 +236,16 @@ Complete URL of backend. Stores interactive element votes.
 
 Controls the color of the chips and text. Can be `light` (default), `dark`.
 
-### chip-style (optional for img-poll, img-quiz, poll, quiz, results)
+### chip-style (optional for img-poll, img-quiz, poll, quiz, results, slider)
 
 Controls the style of the component. Can be `flat` (default), `shadow`, or `transparent`.
-Results, binary-poll, img-poll, and img-quiz elements don't support shadow.
+Results, binary-poll, sliders, img-poll, and img-quiz elements don't support shadow.
 
 ### prompt-text (optional)
 
 Adds a prompt to the top of the component. Use `prompt-text` to write the poll/quiz question, or as a prefix to the category in the `amp-story-interactive-result` element.
 
-### prompt-size (optional for binary-poll, img-poll, img-quiz, poll, quiz)
+### prompt-size (optional for binary-poll, img-poll, img-quiz, poll, quiz, slider)
 
 Controls the `font-size` of prompt text. Can be `small`, `medium` (default), `large`. Large prompts will hold up to 3 lines of text, other sizes will hold up to 4 lines of text.
 
@@ -251,7 +253,7 @@ This attribute does not apply styling to `amp-story-interactive-result` category
 
 ### option-{1/2/3/4}-text (required for binary-poll, poll, quiz, results)
 
-String that represents a numbered option. Binary polls require 2 options. Polls and quizzes may include between 2 and 4 options.
+String that represents a numbered option. Binary polls require 2 options. Polls and quizzes may include between 2 and 4 options. Sliders may include 1 option for an optional emoji.
 
 The `amp-story-interactive-result` element uses this string value as category description.
 

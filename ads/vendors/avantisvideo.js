@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-/** @const */
-export const ADS_INITIAL_INTERSECTION_EXP = {
-  id: 'ads-initialIntersection',
-  control: '31060065',
-  experiment: '31060066',
-};
+import {validateData, writeScript} from '#3p/3p';
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function avantisvideo(global, data) {
+  const requiredParams = ['id', 'tagid'];
+  validateData(data, requiredParams);
+  const src = data.src || 'https://cdn.avantisvideo.com/avm/js/video-loader.js';
+  const script = `${src}?type=amp&id=${data.id}&tagId=${data.tagid}`;
+  writeScript(global, script);
+}
