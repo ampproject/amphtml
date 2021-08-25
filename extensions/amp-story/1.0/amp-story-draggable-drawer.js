@@ -210,12 +210,17 @@ export class DraggableDrawer extends AMP.BaseElement {
       this.spacerElHeight_ = e[0].contentRect.height;
     }).observe(spacerEl);
 
+    // Ensure that the drawer is removed from view when it is closed along with
+    // the soft keyboard, whose openings and closing trigger window resizes.
+    new this.win.ResizeObserver((e) => {
+      if (this.state === DrawerState.CLOSED) {
+        this.mutateElement(() => e[0].target.setAttribute('hidden', ''));
+      }
+    }).observe(this.element);
+
     // Reset scroll position on end of close transiton.
     this.element.addEventListener('transitionend', (e) => {
-      if (
-        e.propertyName === 'transform' &&
-        this.state_ === DrawerState.CLOSED
-      ) {
+      if (e.propertyName === 'transform' && this.state === DrawerState.CLOSED) {
         this.containerEl./*OK*/ scrollTop = 0;
       }
     });
@@ -521,6 +526,9 @@ export class DraggableDrawer extends AMP.BaseElement {
     }
 
     this.mutateElement(() => {
+      if (this.state !== DrawerState.CLOSED) {
+        this.element.removeAttribute('hidden');
+      }
       setImportantStyles(this.element, {
         transform: translate,
         transition: 'none',
@@ -584,8 +592,8 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.state = DrawerState.CLOSED;
 
     this.storeService.dispatch(Action.TOGGLE_PAUSED, false);
-
     this.unfocusChildElements_();
+
     this.mutateElement(() => {
       this.element.setAttribute('aria-hidden', true);
       resetStyles(this.element, ['transform', 'transition']);
@@ -605,7 +613,8 @@ export class DraggableDrawer extends AMP.BaseElement {
   }
 
   /**
-   * Removes focus from ......
+   * Removes focus from any focused element within the draggable drawer,
+   * causing the soft keyboard to close.
    */
   unfocusChildElements_() {
     const focusedEl = this.element.querySelector(':focus');
