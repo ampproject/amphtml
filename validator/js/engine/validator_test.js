@@ -314,7 +314,7 @@ describe('ValidatorOutput', () => {
     const results = validator.validateString(test.ampHtmlFileContents);
     const observed =
         validator.renderValidationResult(results, test.ampUrl).join('\n');
-    const expectedSubstr = 'http://google.com/foo.html:28:3';
+    const expectedSubstr = 'http://google.com/foo.html:13:3';
     if (observed.indexOf(expectedSubstr) === -1) {
       asserts.fail(
           'expectedSubstr:\n' + expectedSubstr + '\nsaw:\n' + observed);
@@ -1455,10 +1455,6 @@ describe('ValidatorRulesMakeSense', () => {
       expect(rules.internedStrings[-1 - index]).not.toEqual('[style]');
     });
   }
-
-  it('min_validator_revision_required defined', () => {
-    expect(rules.minValidatorRevisionRequired).toBeGreaterThan(0);
-  });
 
   it('template_spec_url is set', () => {
     expect(rules.templateSpecUrl).not.toEqual(null);
