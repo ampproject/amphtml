@@ -116,6 +116,7 @@ async function applyConfig(
   opt_derandomize
 ) {
   const config = await getConfig(
+    type,
     target,
     filename,
     opt_localDev,
@@ -128,17 +129,10 @@ async function applyConfig(
   const fileString = config + targetString;
   sanityCheck(fileString);
   await writeTarget_(target, fileString, argv.dryrun);
-  const details =
-    '(' +
-    cyan(type) +
-    (opt_localDev ? ', ' + cyan('localDev') : '') +
-    (opt_fortesting ? ', ' + cyan('test') : '') +
-    (opt_derandomize ? ', ' + cyan('derandomized') : '') +
-    ')';
-  log('Applied AMP config', details, 'to', cyan(path.basename(target)));
 }
 
 /**
+ * @param {string} type Prod or canary
  * @param {string} target File containing the AMP runtime (amp.js or v0.js)
  * @param {string} filename File containing the (prod or canary) config
  * @param {boolean=} opt_localDev Whether to enable local development
@@ -149,6 +143,7 @@ async function applyConfig(
  * @return {!Promise<string>}
  */
 async function getConfig(
+  type,
   target,
   filename,
   opt_localDev,
@@ -195,6 +190,15 @@ async function getConfig(
     configJson = derandomize_(target, configJson);
   }
 
+  const details =
+    '(' +
+    cyan(type) +
+    (opt_localDev ? ', ' + cyan('localDev') : '') +
+    (opt_fortesting ? ', ' + cyan('test') : '') +
+    (opt_derandomize ? ', ' + cyan('derandomized') : '') +
+    ')';
+  log('Created AMP config', details, 'to', cyan(path.basename(target)));
+
   const configString = JSON.stringify(configJson);
   return `self.AMP_CONFIG||(self.AMP_CONFIG=${configString});/*AMP_CONFIG*/`;
 }
@@ -218,6 +222,7 @@ async function getAmpConfigForFile(filename, options) {
   const baseConfigFile = 'build-system/global-configs/' + type + '-config.json';
 
   return getConfig(
+    type,
     target,
     baseConfigFile,
     /* opt_localDev */ !!options.fortesting,
