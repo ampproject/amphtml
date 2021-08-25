@@ -534,7 +534,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
     });
   });
 
-  describe('"toggleState" action', () => {
+  describe('"toggleChecked" action', () => {
 
     it('should set checked state to false when state is true', () => {
       const element = createElement();
@@ -544,7 +544,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
         node: element,
         satisfiesTrust: () => true,
       };
-      standardActions.handletoggleState_(invocation);
+      standardActions.handleToggleChecked_(invocation);
       expectCheckboxToHaveStateFalse(element);
     });
 
@@ -556,7 +556,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
         node: element,
         satisfiesTrust: () => true,
       };
-      standardActions.handletoggleState_(invocation);
+      standardActions.handleToggleChecked_(invocation);
       expectCheckboxToHaveStateTrue(element);
     });
 
@@ -570,7 +570,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
           'force': true,
         },
       };
-      standardActions.handletoggleState_(invocation);
+      standardActions.handleToggleChecked_(invocation);
       expectCheckboxToHaveStateTrue(element);
     });
 
@@ -584,7 +584,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
           'force': false,
         },
       };
-      standardActions.handletoggleState_(invocation);
+      standardActions.handleToggleChecked_(invocation);
       expectCheckboxToHaveStateFalse(element);
     });
   });
