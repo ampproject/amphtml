@@ -50,7 +50,7 @@ class AmpAudio extends BaseElement {
       'onError': () => {
         this.toggleFallback(true);
       },
-      'onPlay': () => {
+      'onPlaying': () => {
         triggerAnalyticsEvent(this.element, 'audio-play');
       },
       'onPause': () => {

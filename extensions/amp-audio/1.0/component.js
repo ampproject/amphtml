@@ -15,7 +15,13 @@
  */
 
 import * as Preact from '#preact';
-import {useCallback, useImperativeHandle, useMemo, useRef} from '#preact';
+import {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+} from '#preact';
 import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 
@@ -43,7 +49,7 @@ export function AudioWithRef(
     loop = false,
     muted = false,
     onPause,
-    onPlay,
+    onPlaying,
     preload,
     sources,
     src,
@@ -75,34 +81,31 @@ export function AudioWithRef(
    * Plays audio callback
    */
   const play = useCallback(() => {
-    onPlay?.();
     audioRef.current.play();
     isPlaying.current = true;
-  }, [onPlay]);
+  }, []);
 
   /**
    * Pauses audio callback
    */
   const pause = useCallback(() => {
-    onPause?.();
     audioRef.current.pause();
     isPlaying.current = false;
-  }, [onPause]);
+  }, []);
 
   /**
    * Updates media session for current window/tab
    */
-  const onPlaying = useCallback(() => {
-    const win = audioRef.current?.ownerDocument?.defaultView;
+  const playingCallback = useCallback(() => {
+    onPlaying?.();
+  }, [onPlaying]);
 
-    /**
-     * TODO(AnuragVasanwala):
-     * Add "validateMediaMetadata?.(element, metadata)"
-     * once validation step for video components on Bento are included
-     */
-
-    setMediaSession(win, metadata, play, pause);
-  }, [metadata, play, pause]);
+  /**
+   * Updates media session for current window/tab
+   */
+  const pauseCallback = useCallback(() => {
+    onPause?.();
+  }, [onPause]);
 
   /** Audio Component - API Functions */
   useImperativeHandle(
@@ -115,6 +118,18 @@ export function AudioWithRef(
       }),
     [play, pause]
   );
+
+  useEffect(() => {
+    const win = audioRef.current?.ownerDocument?.defaultView;
+
+    /**
+     * TODO(AnuragVasanwala):
+     * Add "validateMediaMetadata?.(element, metadata)"
+     * once validation step for video components on Bento are included
+     */
+
+    setMediaSession(win, metadata, play, pause);
+  }, [metadata, play, pause]);
 
   return (
     <ContainWrapper contentRef={wrapperRef} size layout paint {...rest}>
@@ -129,7 +144,8 @@ export function AudioWithRef(
         loading={loading}
         loop={loop}
         muted={muted}
-        onPlaying={onPlaying}
+        onPause={pauseCallback}
+        onPlaying={playingCallback}
         preload={preload}
         src={src}
       >
