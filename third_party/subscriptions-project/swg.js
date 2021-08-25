@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.180 */
+/** Version: 0.1.22.181 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -168,7 +168,7 @@ class AccountCreationRequest {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -238,7 +238,7 @@ class AlreadySubscribedResponse {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -305,6 +305,12 @@ class AnalyticsContext {
 
     /** @private {?string} */
     this.url_ = data[10 + base] == null ? null : data[10 + base];
+
+    /** @private {?Timestamp} */
+    this.clientTimestamp_ =
+      data[11 + base] == null || data[11 + base] == undefined
+        ? null
+        : new Timestamp(data[11 + base], includesLabel);
   }
 
   /**
@@ -462,7 +468,21 @@ class AnalyticsContext {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @return {?Timestamp}
+   */
+  getClientTimestamp() {
+    return this.clientTimestamp_;
+  }
+
+  /**
+   * @param {!Timestamp} value
+   */
+  setClientTimestamp(value) {
+    this.clientTimestamp_ = value;
+  }
+
+  /**
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -479,6 +499,7 @@ class AnalyticsContext {
         this.label_, // field 9 - label
         this.clientVersion_, // field 10 - client_version
         this.url_, // field 11 - url
+        this.clientTimestamp_ ? this.clientTimestamp_.toArray(includeLabel) : [], // field 12 - client_timestamp
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -542,7 +563,7 @@ class AnalyticsEventMeta {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -656,7 +677,7 @@ class AnalyticsRequest {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -729,7 +750,7 @@ class EntitlementJwt {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -874,7 +895,7 @@ class EntitlementsRequest {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -949,7 +970,7 @@ class EntitlementsResponse {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1105,7 +1126,7 @@ class EventParams {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1181,7 +1202,7 @@ class FinishedLoggingResponse {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1252,7 +1273,7 @@ class LinkSaveTokenRequest {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1306,7 +1327,7 @@ class LinkingInfoResponse {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1461,7 +1482,7 @@ class SkuSelectedResponse {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1520,7 +1541,7 @@ class SmartBoxMessage {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1573,7 +1594,7 @@ class SubscribeResponse$1 {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1643,7 +1664,7 @@ class Timestamp {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1697,7 +1718,7 @@ class ToastCloseRequest {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1750,7 +1771,7 @@ class ViewSubscriptionsResponse {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -3610,7 +3631,7 @@ class Entitlement {
       const publication = product.substring(0, eq + 1);
       if(
         publication + '*' == product &&
-        this.products.find((candidate) => candidate.substring(0, eq + 1) == publication)
+        this.products.filter((candidate) => candidate.substring(0, eq + 1) == publication).length >= 1
       ) {
         debugLog('enabled with wildcard productId');
         return true;
@@ -4524,16 +4545,86 @@ function wasReferredByGoogle(parsedReferrer) {
  * @package Visible for testing only.
  */
 const CACHE_KEYS = {
+  'zero': 0, //testing value
   'nocache': 1,
   'hr1': 3600000, // 1hr = 1000 * 60 * 60
   'hr12': 43200000, // 12hr = 1000 * 60 * 60 * 12
 };
 
 /**
+ * Default operating Mode
+ */
+const DEFAULT = {
+  frontEnd: 'https://news.google.com',
+  payEnv: 'PRODUCTION',
+  playEnv: 'PROD',
+  feCache: 'hr1',
+};
+
+/**
+ * Default operating Mode
+ */
+const PROD = {
+  frontEnd: 'https://news.google.com',
+  payEnv: 'PRODUCTION',
+  playEnv: 'PROD',
+  feCache: CACHE_KEYS.hr1,
+};
+
+/**
+ * Default operating Mode
+ */
+const AUTOPUSH = {
+  frontEnd: 'https://subscribe-autopush.sandbox.google.com',
+  payEnv: 'PRODUCTION',
+  playEnv: 'AUTOPUSH',
+  feCache: CACHE_KEYS.nocache,
+};
+
+/**
+ * Default operating Mode
+ */
+const QUAL = {
+  frontEnd: 'https://subscribe-qual.sandbox.google.com',
+  payEnv: 'SANDBOX',
+  playEnv: 'STAGING',
+  feCache: CACHE_KEYS.hr1,
+};
+
+/**
+ * Operating modes, only runtime switchgable modes are here
+ * build time modes set the default and are configured in prepare.sh
+ *
+ * IMPORTANT: modes other than prod will only work on google internal networks!
+ * @type {!Object<Object>}
+ * @package Visible for testing only.
+ */
+const MODES = {
+  'default': DEFAULT,
+  'prod': PROD,
+  'autopush': AUTOPUSH,
+  'qual': QUAL,
+};
+
+/**
+ * Check for swg.mode= in url fragemnet if it exists use it
+ * otherwise use the default build mode.
+ * @returns {Object}
+ */
+function getSwgMode() {
+  const query = parseQueryString(self.location.hash);
+  const swgMode = query['swg.mode'];
+  if (swgMode && MODES[swgMode]) {
+    return MODES[swgMode];
+  }
+  return MODES['default'];
+}
+
+/**
  * @return {string}
  */
 function feOrigin() {
-  return parseUrl('https://news.google.com').origin;
+  return parseUrl(getSwgMode().frontEnd).origin;
 }
 
 /**
@@ -4541,7 +4632,7 @@ function feOrigin() {
  * @return {string} The complete URL.
  */
 function serviceUrl(url) {
-  return 'https://news.google.com/swg/_/api/v1' + url;
+  return `${getSwgMode().frontEnd}/swg/_/api/v1` + url;
 }
 
 /**
@@ -4560,7 +4651,7 @@ function adsUrl(url) {
  */
 function feUrl(url, prefix = '', params) {
   // Add cache param.
-  url = feCached('https://news.google.com' + prefix + '/swg/_/ui/v1' + url);
+  url = feCached(`${getSwgMode().frontEnd}${prefix}/swg/_/ui/v1${url}`);
 
   // Optionally add jsmode param. This allows us to test against "aggressively" compiled Boq JS.
   const query = parseQueryString(self.location.hash);
@@ -4581,7 +4672,7 @@ function feUrl(url, prefix = '', params) {
  * @return {string} The complete URL including cache param.
  */
 function feCached(url) {
-  return addQueryParam(url, '_', cacheParam('hr1'));
+  return addQueryParam(url, '_', cacheParam(getSwgMode().feCache));
 }
 
 /**
@@ -4590,7 +4681,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.180',
+    '_client': 'SwG 0.1.22.181',
   });
 }
 
@@ -4773,8 +4864,8 @@ class PayStartFlow {
       ({
         'apiVersion': 1,
         'allowedPaymentMethods': ['CARD'],
-        'environment': 'PRODUCTION',
-        'playEnvironment': 'PROD',
+        'environment': getSwgMode().payEnv,
+        'playEnvironment': getSwgMode().playEnv,
         'swg': swgPaymentRequest,
         'i': {
           'startTimeMs': Date.now(),
@@ -5833,7 +5924,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.180',
+        '_client': 'SwG 0.1.22.181',
         'supportsEventManager': true,
       },
       args || {}
@@ -6466,6 +6557,33 @@ function getOnExperiments(win) {
 }
 
 /**
+ * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @param {!number} millis
+ * @return {!Timestamp}
+ */
+function toTimestamp(millis) {
+  return new Timestamp(
+    [Math.floor(millis / 1000), (millis % 1000) * 1000000],
+    false
+  );
+}
+
+/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -6576,6 +6694,12 @@ class AnalyticsService {
     // the user wait too long.
     /** @private {?number} */
     this.timeout_ = null;
+
+    // A callback for setting the client timestamp before sending requests.
+    /** @private {function():!../proto/api_messages.Timestamp} */
+    this.getTimestamp_ = () => {
+      return toTimestamp(Date.now());
+    };
   }
 
   /**
@@ -6679,7 +6803,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.180');
+    context.setClientVersion('SwG 0.1.22.181');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -6761,7 +6885,9 @@ class AnalyticsService {
     const meta = new AnalyticsEventMeta();
     meta.setEventOriginator(event.eventOriginator);
     meta.setIsFromUserAction(!!event.isFromUserAction);
-
+    // Update the of the analytics context to the current time.
+    // This needs to be current for log analysis.
+    this.context_.setClientTimestamp(this.getTimestamp_());
     const request = new AnalyticsRequest();
     request.setEvent(/** @type {!AnalyticsEvent} */ (event.eventType));
     request.setContext(this.context_);
@@ -10430,33 +10556,6 @@ function queryStringHasFreshGaaParams(
   }
 
   return true;
-}
-
-/**
- * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @param {!number} millis
- * @return {!Timestamp}
- */
-function toTimestamp(millis) {
-  return new Timestamp(
-    [Math.floor(millis / 1000), (millis % 1000) * 1000000],
-    false
-  );
 }
 
 /**
