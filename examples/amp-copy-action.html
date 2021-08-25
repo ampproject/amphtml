@@ -7,16 +7,32 @@
   <link rel="canonical" href="https://amp.dev/documentation/examples/components/amp-copy-action/">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
 </head>
+<style>
+    .column {
+        padding: 20px;
+    }
+    .column div {
+        padding-bottom: 10px;
+    }
+</style>
 <body>
 
 <!-- Call to action-copy. -->
-<div id='divTarget'>Sample DIV Content</div>
-<button on="tap:divTarget.copy()">Copy DIV Content</button>
-
-<input id='inputTarget' value="Sample Input Value" />
-<button on="tap:inputTarget.copy()">Copy Input Value</button>
-
-<button on="tap:AMP.copy(text='hello AMP')">Copy Static Text</button>
-
+<div>
+    <div class="column">
+        <div id='divTarget'>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</div>
+        <button on="tap:divTarget.copy()">Copy DIV Content</button>
+    </div>
+    <div class="column">
+    <input id='inputTarget' value="Sample Input Value" />
+    <button on="tap:inputTarget.copy()">Copy Input Value</button>
+    </div>
+    <div class="column">
+    <button on="tap:AMP.copy(text='Hello AMP')">Copy Static Text</button>
+    </div>
+    <div class="column">
+        <textarea placeholder="Paste here!" rows="10" cols="50"></textarea>
+    </div>
+</div>
 </body>
 </html>
