@@ -98,32 +98,18 @@ function valueOrDefault(value, defaultValue) {
  * @param {string} type Prod or canary
  * @param {string} target File containing the AMP runtime (amp.js or v0.js)
  * @param {string} filename File containing the (prod or canary) config
- * @param {boolean=} opt_localDev Whether to enable local development
- * @param {boolean=} opt_localBranch Whether to use the local branch version
- * @param {string=} opt_branch If not the local branch, which branch to use
- * @param {boolean=} opt_fortesting Whether to force getMode().test to be true
- * @param {boolean=} opt_derandomize Whether to remove experiment randomization
  * @return {!Promise<void>}
  */
-async function applyConfig(
-  type,
-  target,
-  filename,
-  opt_localDev,
-  opt_localBranch,
-  opt_branch,
-  opt_fortesting,
-  opt_derandomize
-) {
+async function applyConfig(type, target, filename) {
   const config = await getConfig(
     type,
     target,
     filename,
-    opt_localDev,
-    opt_localBranch,
-    opt_branch,
-    opt_fortesting,
-    opt_derandomize
+    argv.local_dev,
+    argv.local_branch,
+    argv.branch,
+    argv.fortesting,
+    argv.derandomize
   );
   const targetString = await fs.promises.readFile(target, 'utf8');
   const fileString = config + targetString;
@@ -314,7 +300,7 @@ async function prependGlobal() {
   let filename = '';
 
   // Prod by default.
-  const config = argv.canary ? 'canary' : 'prod';
+  const type = argv.canary ? 'canary' : 'prod';
   if (argv.canary) {
     filename = valueOrDefault(
       argv.canary,
@@ -327,20 +313,9 @@ async function prependGlobal() {
     );
   }
   await Promise.all([...targets.map(removeConfig)]);
-  await Promise.all([
-    ...targets.map((target) =>
-      applyConfig(
-        config,
-        target,
-        filename,
-        argv.local_dev,
-        argv.local_branch,
-        argv.branch,
-        argv.fortesting,
-        argv.derandomize
-      )
-    ),
-  ]);
+  await Promise.all(
+    targets.map((target) => applyConfig(type, target, filename))
+  );
 }
 
 module.exports = {
