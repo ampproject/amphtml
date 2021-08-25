@@ -50,7 +50,6 @@ function SelectorWithRef(
     multiple,
     name,
     onChange,
-    onKeyDown: customOnKeyDown,
     role = 'listbox',
     tabIndex,
     children,
@@ -209,9 +208,6 @@ function SelectorWithRef(
 
   const onKeyDown = useCallback(
     (e) => {
-      if (customOnKeyDown) {
-        customOnKeyDown(e);
-      }
       const {key} = e;
       let dir;
       switch (key) {
@@ -234,7 +230,7 @@ function SelectorWithRef(
         }
       }
     },
-    [customOnKeyDown, keyboardSelectMode, focusBy, selectBy]
+    [keyboardSelectMode, focusBy, selectBy]
   );
 
   return (
@@ -272,11 +268,10 @@ export {Selector};
  */
 export function Option({
   as: Comp = 'div',
+  'class': className = '',
   disabled = false,
+  focus: customFocus,
   index,
-  onClick: customOnClick,
-  onFocus: customOnFocus,
-  onKeyDown: customOnKeyDown,
   option,
   role = 'option',
   tabIndex,
@@ -294,17 +289,12 @@ export function Option({
     selected,
   } = useContext(SelectorContext);
 
-  const focus = useCallback(
-    (e) => {
-      if (customOnFocus) {
-        customOnFocus(e);
-      }
-      if (ref.current) {
-        tryFocus(ref.current);
-      }
-    },
-    [customOnFocus]
-  );
+  const focus = useCallback(() => {
+    customFocus?.();
+    if (ref.current) {
+      tryFocus(ref.current);
+    }
+  }, [customFocus]);
 
   // Element should be "registered" before it is visible.
   useLayoutEffect(() => {
@@ -338,49 +328,43 @@ export function Option({
     selectOption(option);
   }, [disabled, option, selectOption, selectorDisabled]);
 
-  const onClick = useCallback(
-    (e) => {
-      trySelect();
-      if (customOnClick) {
-        customOnClick(e);
-      }
-    },
-    [customOnClick, trySelect]
-  );
+  const onClick = useCallback(() => {
+    trySelect();
+  }, [trySelect]);
 
   const onKeyDown = useCallback(
     (e) => {
       if (e.key === Keys.ENTER || e.key === Keys.SPACE) {
         trySelect();
       }
-      if (customOnKeyDown) {
-        customOnKeyDown(e);
-      }
     },
-    [customOnKeyDown, trySelect]
+    [trySelect]
   );
 
   const isSelected = /** @type {!Array} */ (selected).includes(option);
-  const optionProps = {
-    ...rest,
-    className: objstr({
-      [classes.option]: true,
-      [classes.selected]: isSelected && !selectorMultiple,
-      [classes.multiselected]: isSelected && selectorMultiple,
-      [classes.disabled]: disabled || selectorDisabled,
-    }),
-    disabled,
-    'aria-disabled': String(disabled),
-    onClick,
-    onFocus: () => (focusRef.current.active = option),
-    onKeyDown,
-    option,
-    ref,
-    role,
-    selected: isSelected,
-    'aria-selected': String(isSelected),
-    tabIndex:
-      tabIndex ?? keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? -1 : 0,
-  };
-  return <Comp {...optionProps} />;
+  return (
+    <Comp
+      {...rest}
+      aria-disabled={String(disabled)}
+      aria-selected={String(isSelected)}
+      class={objstr({
+        [className]: !!className,
+        [classes.option]: true,
+        [classes.selected]: isSelected && !selectorMultiple,
+        [classes.multiselected]: isSelected && selectorMultiple,
+        [classes.disabled]: disabled || selectorDisabled,
+      })}
+      disabled={disabled}
+      onClick={onClick}
+      onFocus={() => (focusRef.current.active = option)}
+      onKeyDown={onKeyDown}
+      ref={ref}
+      role={role}
+      selected={isSelected}
+      tabIndex={
+        tabIndex ?? keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? -1 : 0
+      }
+      value={option}
+    />
+  );
 }
