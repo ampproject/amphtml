@@ -41,11 +41,10 @@ Supported parameters:
 -   `data-config`
 -   `data-stylesheet`
 
-
 ### Required Parameters:
 
 `data-config` - Config for ad call JAC
-`data-sa`     - Config for ad call DARLA
+`data-sa` - Config for ad call DARLA
 
 ### Optional parameters:
 
