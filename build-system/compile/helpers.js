@@ -60,5 +60,6 @@ async function writeSourcemaps(sourcemapsFile, options) {
 }
 
 module.exports = {
+  getSourceRoot,
   writeSourcemaps,
 };
