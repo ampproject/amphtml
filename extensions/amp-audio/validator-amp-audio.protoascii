@@ -22,8 +22,7 @@ tags: {  # amp-audio 1.0
     name: "amp-audio"
     version_name: "v1.0"
     version: "1.0"
-    deprecated_allow_duplicates: true
-    requires_usage: EXEMPTED
+    bento_supported_version: "1.0"
   }
   attr_lists: "common-extension-attrs"
 }
