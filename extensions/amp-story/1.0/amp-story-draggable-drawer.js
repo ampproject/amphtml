@@ -584,7 +584,7 @@ export class DraggableDrawer extends AMP.BaseElement {
    * @param {boolean=} shouldAnimate
    * @protected
    */
-   closeInternal_(shouldAnimate = true) {
+  closeInternal_(shouldAnimate = true) {
     if (this.state === DrawerState.CLOSED) {
       return;
     }
