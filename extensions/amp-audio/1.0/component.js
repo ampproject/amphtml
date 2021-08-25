@@ -129,7 +129,7 @@ export function AudioWithRef(
         loading={loading}
         loop={loop}
         muted={muted}
-        onPlaying={() => onPlaying()}
+        onPlaying={onPlaying}
         preload={preload}
         src={src}
       >
