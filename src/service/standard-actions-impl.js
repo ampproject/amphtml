@@ -95,6 +95,11 @@ export class StandardActions {
       'toggleClass',
       this.handleToggleClass_.bind(this)
     );
+
+    actionService.addGlobalMethodHandler(
+      'toggleState',
+      this.handletoggleState_.bind(this)
+    );
   }
 
   /**
@@ -412,6 +417,36 @@ export class StandardActions {
         target.classList.toggle(className, shouldForce);
       } else {
         target.classList.toggle(className);
+      }
+    });
+
+    return null;
+  }
+
+  /**
+   * Handles "toggleState" action.
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @return {?Promise}
+   * @private Visible to tests only.
+   */
+  handletoggleState_(invocation) {
+    const target = dev().assertElement(invocation.node);
+    const {args} = invocation;
+
+    this.mutator_.mutateElement(target, () => {
+      if (args['force'] !== undefined) {
+        // must be boolean, won't do type conversion
+        const shouldForce = user().assertBoolean(
+          args['force'],
+          "Optional argument 'force' must be a boolean."
+        );
+        target.checked = shouldForce;
+      } else {
+        if (target.checked === true) {
+          target.checked = false;
+        } else {
+          target.checked = true;
+        }
       }
     });
 
