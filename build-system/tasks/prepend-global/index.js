@@ -183,7 +183,7 @@ async function getConfig(
     (opt_fortesting ? ', ' + cyan('test') : '') +
     (opt_derandomize ? ', ' + cyan('derandomized') : '') +
     ')';
-  log('Applying AMP config', details, 'to', cyan(target));
+  log('Generated AMP config', details, 'for', cyan(target));
 
   const configString = JSON.stringify(configJson);
   return `self.AMP_CONFIG||(self.AMP_CONFIG=${configString});/*AMP_CONFIG*/`;
