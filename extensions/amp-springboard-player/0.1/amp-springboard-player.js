@@ -1,23 +1,11 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {PauseHelper} from '#core/dom/video/pause-helper';
 
-import {Services} from '../../../src/services';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {Services} from '#service';
+
+import {userAssert} from '../../../src/log';
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 class AmpSpringboardPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -41,6 +29,9 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -120,10 +111,24 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
       encodeURIComponent(this.domain_) +
       '/' +
       encodeURIComponent(items);
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
     this.element.appendChild(iframe);
+
+    this.pauseHelper_.updatePlaying(true);
+
     return this.loadPromise(iframe);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    this.pauseHelper_.updatePlaying(false);
+    return true;
   }
 
   /** @override */
@@ -135,27 +140,11 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.win.document.createElement('amp-img');
-    this.propagateAttributes(['aria-label'], placeholder);
-    placeholder.setAttribute(
-      'src',
-      'https://www.springboardplatform.com/storage/' +
-        encodeURIComponent(this.domain_) +
-        '/snapshots/' +
-        encodeURIComponent(this.contentId_) +
-        '.jpg'
-    );
-    /** Show default image for playlist */
-    if (this.mode_ == 'playlist') {
-      placeholder.setAttribute(
-        'src',
-        'https://www.springboardplatform.com/storage/default/' +
-          'snapshots/default_snapshot.png'
-      );
-    }
+    const placeholder = this.win.document.createElement('img');
+    propagateAttributes(['aria-label'], this.element, placeholder);
+    applyFillContent(placeholder);
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
-    placeholder.setAttribute('layout', 'fill');
     if (placeholder.hasAttribute('aria-label')) {
       placeholder.setAttribute(
         'alt',
@@ -164,6 +153,15 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
     } else {
       placeholder.setAttribute('alt', 'Loading video');
     }
+    placeholder.setAttribute(
+      'src',
+      'https://www.springboardplatform.com/storage/' +
+        (this.mode_ == 'playlist'
+          ? 'default/snapshots/default_snapshot.png'
+          : `${encodeURIComponent(this.domain_)}/snapshots/${encodeURIComponent(
+              this.contentId_
+            )}.jpg`)
+    );
     return placeholder;
   }
 }

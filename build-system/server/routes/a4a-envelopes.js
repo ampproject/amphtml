@@ -1,25 +1,9 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const express = require('express');
+const fetch = require('node-fetch');
 const fs = require('fs');
-const request = require('request');
 const {getServeMode, replaceUrls} = require('../app-utils');
 const {log} = require('../../common/logging');
-const {red} = require('kleur/colors');
+const {red} = require('../../common/colors');
 
 const app = express.Router();
 
@@ -141,23 +125,15 @@ function getInaboxUrl(req, extraExperiment) {
  * @param {Object} query
  * @return {!Promise<?string>}
  */
-function requestFromUrl(template, url, query) {
-  return new Promise((resolve, reject) => {
-    request(url, (error, response, body) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-      if (
-        !response.headers['content-type'] ||
-        response.headers['content-type'].startsWith('text/html')
-      ) {
-        resolve(fillTemplate(template, url, query, body));
-      } else {
-        resolve(null);
-      }
-    });
-  });
+async function requestFromUrl(template, url, query) {
+  const response = await fetch(url);
+  if (
+    !response.headers.has('Content-Type') ||
+    response.headers.get('Content-Type').startsWith('text/html')
+  ) {
+    return fillTemplate(template, url, query, await response.text());
+  }
+  return null;
 }
 
 /**

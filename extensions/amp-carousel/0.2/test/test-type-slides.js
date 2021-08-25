@@ -1,22 +1,8 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-carousel';
-import {ActionTrust} from '../../../../src/action-constants';
+import * as Listen from '../../../../src/event-helper';
+import {ActionTrust} from '#core/constants/action-constants';
 import {CarouselEvents} from '../../../amp-base-carousel/0.1/carousel-events';
+import {Services} from '#service';
 import {getDetail, listenOncePromise} from '../../../../src/event-helper';
 
 /**
@@ -96,9 +82,9 @@ describes.realWin(
     });
 
     async function getCarousel({
+      dir = null,
       loop = false,
       slideCount = 5,
-      dir = null,
     } = {}) {
       const imgUrl =
         'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
@@ -169,8 +155,9 @@ describes.realWin(
       const slideWrappers = getSlideWrappers(carousel);
       expect(slideWrappers.length).to.equal(5);
 
-      const slides = carousel.querySelector('.i-amphtml-carousel-scroll')
-        .children;
+      const slides = carousel.querySelector(
+        '.i-amphtml-carousel-scroll'
+      ).children;
 
       // Ensure that the spacers have the snap property and not the
       // slides.
@@ -403,12 +390,10 @@ describes.realWin(
 
         const {left: firstLeft} = slideWrappers[0].getBoundingClientRect();
         const {left: secondLeft} = slideWrappers[1].getBoundingClientRect();
-        const {left: nextLeft} = getNextButton(
-          carousel
-        ).getBoundingClientRect();
-        const {left: prevLeft} = getPrevButton(
-          carousel
-        ).getBoundingClientRect();
+        const {left: nextLeft} =
+          getNextButton(carousel).getBoundingClientRect();
+        const {left: prevLeft} =
+          getPrevButton(carousel).getBoundingClientRect();
 
         expect(firstLeft).to.be.greaterThan(secondLeft);
         expect(prevLeft).to.be.greaterThan(nextLeft);
@@ -422,12 +407,10 @@ describes.realWin(
 
         const {left: firstLeft} = slideWrappers[0].getBoundingClientRect();
         const {left: secondLeft} = slideWrappers[1].getBoundingClientRect();
-        const {left: nextLeft} = getNextButton(
-          carousel
-        ).getBoundingClientRect();
-        const {left: prevLeft} = getPrevButton(
-          carousel
-        ).getBoundingClientRect();
+        const {left: nextLeft} =
+          getNextButton(carousel).getBoundingClientRect();
+        const {left: prevLeft} =
+          getPrevButton(carousel).getBoundingClientRect();
 
         expect(firstLeft).to.be.greaterThan(secondLeft);
         expect(prevLeft).to.be.greaterThan(nextLeft);
@@ -441,12 +424,10 @@ describes.realWin(
 
         const {left: firstLeft} = slideWrappers[0].getBoundingClientRect();
         const {left: secondLeft} = slideWrappers[1].getBoundingClientRect();
-        const {left: nextLeft} = getNextButton(
-          carousel
-        ).getBoundingClientRect();
-        const {left: prevLeft} = getPrevButton(
-          carousel
-        ).getBoundingClientRect();
+        const {left: nextLeft} =
+          getNextButton(carousel).getBoundingClientRect();
+        const {left: prevLeft} =
+          getPrevButton(carousel).getBoundingClientRect();
 
         expect(secondLeft).to.be.greaterThan(firstLeft);
         expect(nextLeft).to.be.greaterThan(prevLeft);
@@ -460,12 +441,10 @@ describes.realWin(
 
         const {left: firstLeft} = slideWrappers[0].getBoundingClientRect();
         const {left: secondLeft} = slideWrappers[1].getBoundingClientRect();
-        const {left: nextLeft} = getNextButton(
-          carousel
-        ).getBoundingClientRect();
-        const {left: prevLeft} = getPrevButton(
-          carousel
-        ).getBoundingClientRect();
+        const {left: nextLeft} =
+          getNextButton(carousel).getBoundingClientRect();
+        const {left: prevLeft} =
+          getPrevButton(carousel).getBoundingClientRect();
 
         expect(secondLeft).to.be.greaterThan(firstLeft);
         expect(nextLeft).to.be.greaterThan(prevLeft);
@@ -527,6 +506,31 @@ describes.realWin(
             'Next item in carousel (1 of 3)'
           );
         });
+      });
+    });
+
+    describe('event propogation', () => {
+      it('should add touchmove event if in viewer', async () => {
+        env.sandbox.stub(Services, 'viewerForDoc').returns({
+          isEmbedded: () => true,
+        });
+        const listenSpy = env.sandbox.spy(Listen, 'listen');
+        const carousel = await getCarousel({loop: false});
+        const impl = await carousel.getImpl();
+
+        expect(listenSpy.lastCall.args[0]).to.equal(impl.scrollContainer_);
+        expect(listenSpy.lastCall.args[1]).to.equal('touchmove');
+        expect(listenSpy.args.length).to.equal(5);
+      });
+
+      it('should not add touchmove event if not in the viewer', async () => {
+        env.sandbox.stub(Services, 'viewerForDoc').returns({
+          isEmbedded: () => false,
+        });
+        const listenSpy = env.sandbox.spy(Listen, 'listen');
+        await getCarousel({loop: false});
+
+        expect(listenSpy.args.length).to.equal(4);
       });
     });
   }

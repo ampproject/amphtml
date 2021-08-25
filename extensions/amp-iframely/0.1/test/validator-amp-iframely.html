@@ -1,0 +1,37 @@
+<!--
+  Test Description:
+  Tests for the amp-iframely tag. See the inline comments.
+-->
+<!DOCTYPE html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Amp Iframely Demo</title>
+  <link rel="canonical" href="self.html" />
+  <meta name="viewport" content="width=device-width" />
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async custom-element="amp-iframely" src="https://cdn.ampproject.org/v0/amp-iframely-latest.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp-custom>
+    h1 {
+      margin: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Valid -->
+  <amp-iframely data-id="UjEwgS" width="400" height="140" layout="responsive" resizable></amp-iframely>
+  <amp-iframely data-id="JQfo4N" data-domain="cdn.iframe.ly" width="400" height="225" layout="responsive"></amp-iframely>
+  <amp-iframely data-id="CsmRlq" width="400" height="213" layout="responsive"></amp-iframely>
+  <amp-iframely data-url="https://iframely.com/" data-key="8a237467d51be2771401abcabbd46d92" height="200" width="400" layout="responsive"></amp-iframely>
+
+  <!-- Invalid: Missing mandatory data-id attribute -->
+  <amp-iframely width="600" height="400"></amp-iframely>
+
+  <!-- Invalid: data-domain="example.com" -->
+  <amp-iframely data-id="JQfo4N" data-domain="example.com" width="400" height="225" layout="responsive"></amp-iframely>
+
+  <!-- Invalid: data-url without corresponding data-key -->
+  <amp-iframely data-url="https://iframely.com/" height="200" width="400" layout="responsive"></amp-iframely>
+</body>
+</html>

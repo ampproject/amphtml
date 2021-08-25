@@ -1,29 +1,15 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
-import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import '../../../amp-ad/0.1/amp-ad';
+import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {htmlFor} from '#core/dom/static-template';
+import {pushIfNotExist, removeItem} from '#core/types/array';
+
+import {upgradeOrRegisterElement} from '#service/custom-element-registry';
+
 import {AmpA4A} from '../amp-a4a';
-import {htmlFor} from '../../../../src/static-template';
-import {pushIfNotExist, removeItem} from '../../../../src/utils/array';
-import {upgradeOrRegisterElement} from '../../../../src/service/custom-element-registry';
 
 describes.realWin(
   'amp-a4a: whenWithinViewport',
@@ -72,7 +58,7 @@ describes.realWin(
 
     function notifyIntersection(rootMargin, isIntersecting) {
       for (let i = 0; i < observers.length; i++) {
-        const {elements, callback, options} = observers[i];
+        const {callback, elements, options} = observers[i];
         if (
           elements.includes(element) &&
           options.root === doc &&

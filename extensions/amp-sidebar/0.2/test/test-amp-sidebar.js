@@ -1,27 +1,12 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-sidebar';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {ActionTrust} from '../../../../src/action-constants';
-import {Keys} from '../../../../src/utils/key-codes';
-import {Services} from '../../../../src/services';
-import {assertScreenReaderElement} from '../../../../testing/test-helper';
-import {clearModalStack, getModalStackLength} from '../../../../src/modal';
-import {toggleExperiment} from '../../../../src/experiments';
+import {ActionTrust} from '#core/constants/action-constants';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
+import {assertScreenReaderElement} from '#testing/test-helper';
+import {clearModalStack, getModalStackLength} from '#core/dom/modal';
+import {createElementWithAttributes} from '#core/dom';
+import {toggleExperiment} from '#experiments';
 
 // Represents the correct value of KeyboardEvent.which for the Escape key
 const KEYBOARD_EVENT_WHICH_ESCAPE = 27;
@@ -221,6 +206,8 @@ describes.realWin(
       it('should open sidebar on button click', async () => {
         const sidebarElement = await getAmpSidebar();
         const impl = await sidebarElement.getImpl(false);
+        env.sandbox.stub(sidebarElement, 'setAsContainerInternal');
+        env.sandbox.stub(sidebarElement, 'removeAsContainerInternal');
         const screenReaderCloseButton = sidebarElement.querySelector(
           'button.i-amphtml-screen-reader'
         );
@@ -268,6 +255,9 @@ describes.realWin(
         expect(owners.scheduleLayout).to.be.calledOnce;
         expect(historyPushSpy).to.be.calledOnce;
         expect(historyPopSpy).to.have.not.been.called;
+
+        expect(sidebarElement.setAsContainerInternal).to.be.calledOnce;
+        expect(sidebarElement.removeAsContainerInternal).to.not.be.called;
       });
 
       it('ignore repeated calls to open', async () => {
@@ -293,9 +283,19 @@ describes.realWin(
       it('should close sidebar on button click', async () => {
         const sidebarElement = await getAmpSidebar({'stubHistory': true});
         const impl = await sidebarElement.getImpl(false);
+        env.sandbox.stub(sidebarElement, 'setAsContainerInternal');
+        env.sandbox.stub(sidebarElement, 'removeAsContainerInternal');
         clock = fakeTimers.withGlobal(impl.win).install({
           toFake: ['Date', 'setTimeout'],
         });
+
+        // Sidebar has a child.
+        const child = createElementWithAttributes(doc, 'amp-img', {
+          layout: 'nodisplay',
+        });
+        sidebarElement.appendChild(child);
+        env.sandbox.stub(child, 'unmount');
+
         owners.schedulePause = env.sandbox.spy();
         const historyPushSpy = env.sandbox.spy();
         const historyPopSpy = env.sandbox.spy();
@@ -332,6 +332,9 @@ describes.realWin(
         execute(impl, 'close');
         expect(owners.schedulePause).to.be.calledOnce;
         expect(historyPopSpy).to.be.calledOnce;
+
+        expect(sidebarElement.removeAsContainerInternal).to.be.calledOnce;
+        expect(child.unmount).to.be.calledOnce;
       });
 
       it('should toggle sidebar on button click', async () => {

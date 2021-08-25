@@ -1,31 +1,10 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../src/preact';
-import {ContainWrapper, useValueRef} from '../../../src/preact/component';
-import {Keys} from '../../../src/utils/key-codes';
-import {forwardRef} from '../../../src/preact/compat';
-import {setStyle} from '../../../src/style';
-import {tryFocus} from '../../../src/dom';
-import {
-  useImperativeHandle,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from '../../../src/preact';
+import * as Preact from '#preact';
+import {ContainWrapper, useValueRef} from '#preact/component';
+import {Keys} from '#core/constants/key-codes';
+import {forwardRef} from '#preact/compat';
+import {setStyle} from '#core/dom/style';
+import {tryFocus} from '#core/dom';
+import {useImperativeHandle, useLayoutEffect, useRef, useState} from '#preact';
 import {useStyles} from './component.jss';
 
 const ANIMATION_DURATION = 200;
@@ -46,9 +25,11 @@ const ANIMATION_PRESETS = {
 
 const DEFAULT_CLOSE_LABEL = 'Close the modal';
 
+const CONTENT_PROPS = {'part': 'scroller'};
+
 /**
  * @param {!LightboxDef.Props} props
- * @param {{current: (!LightboxDef.LightboxApi|null)}} ref
+ * @param {{current: ?LightboxDef.LightboxApi}} ref
  * @return {PreactDef.Renderable}
  */
 function LightboxWithRef(
@@ -56,9 +37,9 @@ function LightboxWithRef(
     animation = 'fade-in',
     children,
     closeButtonAs,
-    onBeforeOpen,
     onAfterClose,
-    scrollable = false,
+    onAfterOpen,
+    onBeforeOpen,
     ...rest
   },
   ref
@@ -78,14 +59,13 @@ function LightboxWithRef(
   const animationRef = useValueRef(animation);
   const onBeforeOpenRef = useValueRef(onBeforeOpen);
   const onAfterCloseRef = useValueRef(onAfterClose);
+  const onAfterOpenRef = useValueRef(onAfterOpen);
 
   useImperativeHandle(
     ref,
     () => ({
       open: () => {
-        if (onBeforeOpenRef.current) {
-          onBeforeOpenRef.current();
-        }
+        onBeforeOpenRef.current?.();
         setMounted(true);
         setVisible(true);
       },
@@ -109,6 +89,7 @@ function LightboxWithRef(
         setStyle(element, 'opacity', 1);
         setStyle(element, 'visibility', 'visible');
         tryFocus(element);
+        onAfterOpenRef.current?.();
       };
       if (!element.animate) {
         postVisibleAnim();
@@ -148,7 +129,7 @@ function LightboxWithRef(
         animation.cancel();
       }
     };
-  }, [visible, animationRef, onAfterCloseRef]);
+  }, [visible, animationRef, onAfterCloseRef, onAfterOpenRef]);
 
   return (
     mounted && (
@@ -158,18 +139,11 @@ function LightboxWithRef(
         layout={true}
         paint={true}
         part="lightbox"
-        contentStyle={
-          // Prefer style over class to override `ContainWrapper`'s overflow
-          scrollable && {
-            overflow: 'scroll',
-            overscrollBehavior: 'none',
-          }
-        }
-        wrapperClassName={`${classes.defaultStyles} ${classes.wrapper} ${
-          scrollable ? '' : classes.containScroll
-        }`}
+        contentClassName={classes.content}
+        wrapperClassName={classes.wrapper}
+        contentProps={CONTENT_PROPS}
         role="dialog"
-        tabindex="0"
+        tabIndex="0"
         onKeyDown={(event) => {
           if (event.key === Keys.ESCAPE) {
             setVisible(false);
@@ -209,7 +183,14 @@ function CloseButton({onClick, as: Comp = ScreenReaderCloseButton}) {
  * @param {!LightboxDef.CloseButtonProps} props
  * @return {PreactDef.Renderable}
  */
-function ScreenReaderCloseButton(props) {
+function ScreenReaderCloseButton({'aria-label': ariaLabel, onClick}) {
   const classes = useStyles();
-  return <button {...props} tabIndex={-1} className={classes.closeButton} />;
+  return (
+    <button
+      aria-label={ariaLabel}
+      class={classes.closeButton}
+      onClick={onClick}
+      tabIndex={-1}
+    />
+  );
 }

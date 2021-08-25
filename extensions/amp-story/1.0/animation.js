@@ -1,26 +1,10 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '#core/data-structures/promise';
 import {
   PRESET_OPTION_ATTRIBUTES,
   presets,
   setStyleForPreset,
 } from './animation-presets';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {
   StoryAnimationConfigDef,
   StoryAnimationDimsDef,
@@ -32,13 +16,19 @@ import {
   WebKeyframesCreateFnDef,
   WebKeyframesDef,
 } from './animation-types';
-import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
+import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {getChildJsonConfig} from '../../../src/json';
-import {map, omit} from '../../../src/utils/object';
-import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {getChildJsonConfig} from '#core/dom';
+import {map, omit} from '#core/types/object';
+import {prefersReducedMotion} from '#core/dom/media-query-props';
+import {
+  matches,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '#core/dom/query';
 import {timeStrToMillis, unscaledClientRect} from './utils';
+import {isExperimentOn} from '#experiments';
 
 const TAG = 'AMP-STORY';
 
@@ -109,7 +99,7 @@ export class AnimationRunner {
    * @param {!AnimationSequence} sequence
    */
   constructor(page, config, webAnimationBuilderPromise, vsync, sequence) {
-    const {source, preset, startAfterId, spec} = config;
+    const {preset, source, spec, startAfterId} = config;
 
     /** @private @const */
     this.page_ = page;
@@ -246,7 +236,9 @@ export class AnimationRunner {
   resolvePresetKeyframes_(keyframesOrCreateFn, keyframeOptions) {
     if (typeof keyframesOrCreateFn === 'function') {
       return this.getDims().then((dimensions) => {
-        const fn = /** @type {!WebKeyframesCreateFnDef} */ (keyframesOrCreateFn);
+        const fn = /** @type {!WebKeyframesCreateFnDef} */ (
+          keyframesOrCreateFn
+        );
         return fn(dimensions, keyframeOptions || {});
       });
     }
@@ -269,11 +261,9 @@ export class AnimationRunner {
     // The need for this cast is an unfortunate result of using @mixes in
     // WebAnimationDef. Otherwise Closure will not understand the timing props
     // mixed in from another type.
-    const {
-      delay,
-      duration,
-      easing,
-    } = /** @type {!WebAnimationTimingDef} */ (spec);
+    const {delay, duration, easing} = /** @type {!WebAnimationTimingDef} */ (
+      spec
+    );
     const {target} = /** @type {!WebAnimationSelectorDef} */ (spec);
     return this.resolvePresetKeyframes_(preset.keyframes, keyframeOptions).then(
       (keyframes) => ({
@@ -322,6 +312,20 @@ export class AnimationRunner {
           assertDoesNotContainDisplay(devAssert(firstFrameProps))
         );
       });
+    });
+  }
+
+  /**
+   * Applies the last animation frame.
+   * @return {!Promise<void>}
+   */
+  applyLastFrame() {
+    if (this.presetTarget_) {
+      return Promise.resolve();
+    }
+    this.runnerPromise_.then((runner) => {
+      runner.init();
+      runner.finish(/* pauseOnError */ true);
     });
   }
 
@@ -382,8 +386,7 @@ export class AnimationRunner {
       try {
         this.runner_.pause();
       } catch (e) {
-        // This fails when the animation is finished explicitly
-        // (runner.finish()) since this destroys internal players. This is fine.
+        // This fails when the story animations are not initialized and pause is called. Context on #35161.
       }
     }
   }
@@ -397,7 +400,7 @@ export class AnimationRunner {
     }
 
     if (this.runner_) {
-      devAssert(this.runner_).resume();
+      this.runner_.resume();
     }
   }
 
@@ -450,10 +453,12 @@ export class AnimationRunner {
       /**
        * @type {!../../amp-animation/0.1/runners/animation-runner.AnimationRunner}
        */
-      (devAssert(
-        this.runner_,
-        'Tried to execute playbackWhenReady_ before runner was resolved.'
-      ));
+      (
+        devAssert(
+          this.runner_,
+          'Tried to execute playbackWhenReady_ before runner was resolved.'
+        )
+      );
 
     (wait || Promise.resolve()).then(() => {
       if (!this.isActivityScheduled_(activity)) {
@@ -536,6 +541,12 @@ export class AnimationManager {
     /** @private @const */
     this.builderPromise_ = this.createAnimationBuilderPromise_();
 
+    /** @private @const {bool} */
+    this.skipAnimations_ =
+      prefersReducedMotion(ampdoc.win) ||
+      (isExperimentOn(ampdoc.win, 'story-disable-animations-first-page') &&
+        matches(page, 'amp-story-page:first-of-type'));
+
     /** @private {?Array<!AnimationRunner>} */
     this.runners_ = null;
 
@@ -558,14 +569,31 @@ export class AnimationManager {
    * Applies first frame to target element before starting animation.
    * @return {!Promise}
    */
-  applyFirstFrame() {
+  applyFirstFrameOrFinish() {
     return Promise.all(
-      this.getOrCreateRunners_().map((runner) => runner.applyFirstFrame())
+      this.getOrCreateRunners_().map((runner) =>
+        this.skipAnimations_
+          ? runner.applyLastFrame()
+          : runner.applyFirstFrame()
+      )
+    );
+  }
+
+  /**
+   * Applies last frame to target element before starting animation.
+   * @return {!Promise}
+   */
+  applyLastFrame() {
+    return Promise.all(
+      this.getOrCreateRunners_().map((runner) => runner.applyLastFrame())
     );
   }
 
   /** Starts all entrance animations for the page. */
   animateIn() {
+    if (this.skipAnimations_) {
+      return;
+    }
     this.getRunners_().forEach((runner) => runner.start());
   }
 
@@ -585,7 +613,7 @@ export class AnimationManager {
 
   /** Pauses all animations in the page. */
   pauseAll() {
-    if (!this.runners_) {
+    if (!this.runners_ || this.skipAnimations_) {
       return;
     }
     this.getRunners_().forEach((runner) => runner.pause());
@@ -593,7 +621,7 @@ export class AnimationManager {
 
   /** Resumes all animations in the page. */
   resumeAll() {
-    if (!this.runners_) {
+    if (!this.runners_ || this.skipAnimations_) {
       return;
     }
     this.getRunners_().forEach((runner) => runner.resume());
@@ -612,7 +640,7 @@ export class AnimationManager {
    * @private
    */
   getRunners_() {
-    return devAssert(this.runners_, 'Executed before applyFirstFrame');
+    return devAssert(this.runners_, 'Executed before applyFirstFrameOrFinish');
   }
 
   /**

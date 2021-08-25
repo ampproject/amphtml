@@ -1,24 +1,24 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {Deferred} from '#core/data-structures/promise';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '#core/dom/fullscreen';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {htmlFor} from '#core/dom/static-template';
+import {PauseHelper} from '#core/dom/video/pause-helper';
 
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
-import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {
+  getConsentPolicyInfo,
+  getConsentPolicyState,
+} from '../../../src/consent';
+import {getData, listen} from '../../../src/event-helper';
 import {
   createFrameFor,
   mutedOrUnmutedEvent,
@@ -26,21 +26,8 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {
-  dispatchCustomEvent,
-  fullscreenEnter,
-  fullscreenExit,
-  isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
-import {
-  getConsentPolicyInfo,
-  getConsentPolicyState,
-} from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/static-template';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {VideoEvents} from '../../../src/video-interface';
 
 const TAG = 'amp-brid-player';
 
@@ -84,6 +71,9 @@ class AmpBridPlayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -127,6 +117,8 @@ class AmpBridPlayer extends AMP.BaseElement {
       feedType = this.element.getAttribute('data-dynamic');
     } else if (this.element.hasAttribute('data-playlist')) {
       feedType = 'playlist';
+    } else if (this.element.hasAttribute('data-carousel')) {
+      feedType = 'carousel';
     } else if (this.element.hasAttribute('data-outstream')) {
       feedType = 'outstream';
     }
@@ -169,8 +161,9 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.feedID_ = userAssert(
       element.getAttribute('data-video') ||
         element.getAttribute('data-playlist') ||
+        element.getAttribute('data-carousel') ||
         element.getAttribute('data-outstream'),
-      'Either the data-video or the data-playlist or the data-outstream ' +
+      'Either the data-video, data-playlist, data-carousel or data-outstream ' +
         'attributes must be specified for <amp-brid-player> %s',
       element
     );
@@ -211,6 +204,9 @@ class AmpBridPlayer extends AMP.BaseElement {
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
+
+    this.pauseHelper_.updatePlaying(false);
+
     return true; // Call layoutCallback again.
   }
 
@@ -230,17 +226,21 @@ class AmpBridPlayer extends AMP.BaseElement {
       return;
     }
 
-    const {partnerID_: partnerID, feedID_: feedID} = this;
+    const {feedID_: feedID, partnerID_: partnerID} = this;
 
-    const placeholder = htmlFor(element)`
-      <amp-img referrerpolicy=origin layout=fill placeholder>
-        <amp-img referrerpolicy=origin layout=fill fallback
-            src="https://cdn.brid.tv/live/default/defaultSnapshot.png">
-        </amp-img>
-      </amp-img>`;
+    const html = htmlFor(element);
+    const placeholder = html`
+      <img placeholder referrerpolicy="origin" loading="lazy" />
+    `;
 
-    this.propagateAttributes(['aria-label'], placeholder);
-    this.applyFillContent(placeholder);
+    propagateAttributes(['aria-label'], this.element, placeholder);
+    applyFillContent(placeholder);
+
+    const altText = placeholder.hasAttribute('aria-label')
+      ? 'Loading video - ' + placeholder.getAttribute('aria-label')
+      : 'Loading video';
+
+    placeholder.setAttribute('alt', altText);
 
     placeholder.setAttribute(
       'src',
@@ -248,11 +248,9 @@ class AmpBridPlayer extends AMP.BaseElement {
         `/snapshot/${encodeURIComponent(feedID)}.jpg`
     );
 
-    const altText = placeholder.hasAttribute('aria-label')
-      ? 'Loading video - ' + placeholder.getAttribute('aria-label')
-      : 'Loading video';
-
-    placeholder.setAttribute('alt', altText);
+    this.loadPromise(placeholder).catch(() => {
+      placeholder.src = 'https://cdn.brid.tv/live/default/defaultSnapshot.png';
+    });
 
     return placeholder;
   }
@@ -337,11 +335,20 @@ class AmpBridPlayer extends AMP.BaseElement {
     const params = eventData.split('|');
 
     if (params[2] == 'trigger') {
-      if (params[3] == 'ready') {
-        this.playerReadyResolver_(this.iframe_);
-      }
-      if (params[3] == 'requestAMPGDPR') {
-        this.getConsentData_();
+      switch (params[3]) {
+        case 'ready':
+          this.playerReadyResolver_(this.iframe_);
+          break;
+        case 'requestAMPGDPR':
+          this.getConsentData_();
+          break;
+        case 'play':
+          this.pauseHelper_.updatePlaying(true);
+          break;
+        case 'pause':
+        case 'ended':
+          this.pauseHelper_.updatePlaying(false);
+          break;
       }
       redispatch(element, params[3], {
         'ready': VideoEvents.LOAD,

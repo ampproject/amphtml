@@ -1,27 +1,12 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {CMP_CONFIG} from './cmps';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
-import {Services} from '../../../src/services';
-import {childElementByTag} from '../../../src/dom';
-import {deepMerge, hasOwn, map} from '../../../src/utils/object';
+import {Services} from '#service';
+import {childElementByTag} from '#core/dom/query';
+import {deepMerge, hasOwn, map} from '#core/types/object';
 import {devAssert, user, userAssert} from '../../../src/log';
-import {getChildJsonConfig} from '../../../src/json';
+import {getChildJsonConfig} from '#core/dom';
+import {getConsentStateManager} from './consent-state-manager';
 
 const TAG = 'amp-consent/consent-config';
 const AMP_STORY_CONSENT_TAG = 'amp-story-consent';
@@ -36,9 +21,9 @@ const ALLOWED_DEPR_CONSENTINSTANCE_ATTRS = {
 
 /** @const @type {!Object<string, boolean>} */
 const CONSENT_VARS_ALLOWED_LIST = {
-  'CLIENT_ID': true,
   'PAGE_VIEW_ID': true,
   'PAGE_VIEW_ID_64': true,
+  'SOURCE_URL': true,
 };
 
 /** @const @type {string} */
@@ -128,19 +113,16 @@ export class ConsentConfig {
    */
   validateAndParseConfig_() {
     const inlineConfig = this.convertInlineConfigFormat_(
-      /** @type {!JsonObject} */ (userAssert(
-        this.getInlineConfig_(),
-        '%s: Inline config not found'
-      ))
+      /** @type {!JsonObject} */ (
+        userAssert(this.getInlineConfig_(), '%s: Inline config not found')
+      )
     );
 
     const cmpConfig = this.getCMPConfig_();
 
-    const config = /** @type {!JsonObject} */ (deepMerge(
-      cmpConfig || {},
-      inlineConfig || {},
-      1
-    ));
+    const config = /** @type {!JsonObject} */ (
+      deepMerge(cmpConfig || {}, inlineConfig || {}, 1)
+    );
 
     userAssert(
       config['consentInstanceId'],
@@ -322,16 +304,22 @@ export class ConsentConfig {
  * Expand consent endpoint url
  * @param {!Element|!ShadowRoot} element
  * @param {string} url
+ * @param {Object<string, *>=} opt_vars
  * @return {!Promise<string>}
  */
-export function expandConsentEndpointUrl(element, url) {
-  return Services.urlReplacementsForDoc(element).expandUrlAsync(
-    url,
-    {
-      'CLIENT_ID': getConsentCID(element),
-    },
-    CONSENT_VARS_ALLOWED_LIST
-  );
+export function expandConsentEndpointUrl(element, url, opt_vars) {
+  const vars = {
+    'CLIENT_ID': getConsentCID(element),
+    'CONSENT_PAGE_VIEW_ID_64': () =>
+      getConsentStateManager(element).then((consentStateManager) =>
+        consentStateManager.consentPageViewId64()
+      ),
+    ...opt_vars,
+  };
+  return Services.urlReplacementsForDoc(element).expandUrlAsync(url, vars, {
+    ...vars,
+    ...CONSENT_VARS_ALLOWED_LIST,
+  });
 }
 
 /**

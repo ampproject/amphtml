@@ -1,20 +1,4 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Embeds an AddThis widget.
  * The data-pub-id and data-widget-id can be found easily in the AddThis
  * dashboard at addthis.com.
@@ -51,12 +35,13 @@ import {ConfigManager} from './config-manager';
 import {DwellMonitor} from './addthis-utils/monitors/dwell-monitor';
 import {PostMessageDispatcher} from './post-message-dispatcher';
 import {ScrollMonitor} from './addthis-utils/monitors/scroll-monitor';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {callEng} from './addthis-utils/eng';
 import {callLojson} from './addthis-utils/lojson';
 import {callPjson} from './addthis-utils/pjson';
-import {createElementWithAttributes, removeElement} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
+import {createElementWithAttributes, removeElement} from '#core/dom';
+import {dict} from '#core/types/object';
 import {
   getAddThisMode,
   isProductCode,
@@ -65,12 +50,11 @@ import {
 } from './addthis-utils/mode';
 import {getOgImage} from './addthis-utils/meta';
 import {getWidgetOverload} from './addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
-import {internalRuntimeVersion} from '../../../src/internal-version';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import * as mode from '#core/mode';
 import {listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
-import {setStyle} from '../../../src/style';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {setStyle} from '#core/dom/style';
+import {userAssert} from '../../../src/log';
 
 // The following items will be shared by all AmpAddThis elements on a page, to
 // prevent unnecessary HTTP requests, get accurate analytics, etc., and hence
@@ -120,7 +104,7 @@ class AmpAddThis extends AMP.BaseElement {
     /** @private {string} */
     this.referrer_ = '';
 
-    /** @private {(?JsonObject<string, string>|null)} */
+    /** @private {?JsonObject<string, string>} */
     this.shareConfig_ = null;
 
     /** @private {(?JsonObject)} */
@@ -302,7 +286,7 @@ class AmpAddThis extends AMP.BaseElement {
         // Document has overly long cache age: go.amp.dev/issue/24848
         // Adding AMP runtime version as a meaningless query param to force bust
         // cached versions.
-        'src': `${ORIGIN}/dc/amp-addthis.html?_amp_=${internalRuntimeVersion()}`,
+        'src': `${ORIGIN}/dc/amp-addthis.html?_amp_=${mode.version()}`,
         'id': this.widgetId_,
         'pco': this.productCode_,
         'containerClassName': this.containerClassName_,
@@ -310,7 +294,7 @@ class AmpAddThis extends AMP.BaseElement {
     );
     const iframeLoadPromise = this.loadPromise(iframe);
 
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.element.appendChild(iframe);
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
@@ -404,12 +388,17 @@ class AmpAddThis extends AMP.BaseElement {
   }
 
   /**
+   * @typedef {{
+   *   ampdoc: !../../../src/service/ampdoc-impl.AmpDoc,
+   *   loc: *,
+   *   pubId: *,
+   * }} SetupListenersInput
+   */
+
+  /**
    * Sets up listeners.
    *
-   * @param {!Object} input
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} [input.ampdoc]
-   * @param {*} [input.loc]
-   * @param {*} [input.pubId]
+   * @param {!SetupListenersInput} input
    * @memberof AmpAddThis
    */
   setupListeners_(input) {

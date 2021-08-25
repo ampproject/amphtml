@@ -1,25 +1,10 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {tryResolve} from '#core/data-structures/promise';
 
 import {Util} from './util';
-import {assertHttpsUrl} from '../../../src/url';
-import {openWindowDialog} from '../../../src/dom';
-import {tryResolve} from '../../../src/utils/promise';
 
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
+import {openWindowDialog} from '../../../src/open-window-dialog';
+import {assertHttpsUrl} from '../../../src/url';
 
 // Popup options
 const POP_FOLLOW = `status=no,resizable=yes,scrollbars=yes,
@@ -94,7 +79,7 @@ export class FollowButton {
   /**
    * Determine the height of the contents to allow resizing after first layout.
    *
-   * @return {!Promise<number|null>}
+   * @return {!Promise<?number>}
    */
   height() {
     return Promise.resolve(null);

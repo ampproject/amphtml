@@ -1,44 +1,28 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {ActionSource} from './action-source';
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-base-carousel-0.1.css';
-import {Carousel} from './carousel.js';
+import {Carousel} from './carousel';
 import {CarouselEvents} from './carousel-events';
 import {ChildLayoutManager} from './child-layout-manager';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '#core/constants/key-codes';
 import {
   ResponsiveAttributes,
   getResponsiveAttributeValue,
 } from './responsive-attributes';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '#core/types/object';
 import {
   dispatchCustomEvent,
   isRTL,
   iterateCursor,
-  scopedQuerySelectorAll,
   toggleAttribute,
-} from '../../../src/dom';
-import {htmlFor} from '../../../src/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {toArray} from '../../../src/types';
+} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {scopedQuerySelectorAll} from '#core/dom/query';
+import {toArray} from '#core/types/array';
 
 /**
  * @enum {number}
@@ -137,7 +121,7 @@ class AmpCarousel extends AMP.BaseElement {
         this.carousel_.updateHorizontal(newValue === 'true');
       },
       'loop': (newValue) => {
-        this.carousel_.updateLoop(newValue === 'true');
+        this.carousel_.updateLoop(newValue === 'true' || newValue === '');
       },
       'mixed-length': (newValue) => {
         this.carousel_.updateMixedLength(newValue === 'true');
@@ -245,7 +229,7 @@ class AmpCarousel extends AMP.BaseElement {
    * }=} options
    */
   goToSlide(index, options = {}) {
-    const {smoothScroll = false, actionSource} = options;
+    const {actionSource, smoothScroll = false} = options;
     this.carousel_.goToSlide(index, {smoothScroll, actionSource});
   }
 
@@ -343,7 +327,7 @@ class AmpCarousel extends AMP.BaseElement {
             stroke-width="2px"
             stroke-linejoin="round"
             stroke-linecap="round"
-          />
+          ></path>
         </svg>
       </button>
     `;
@@ -370,7 +354,7 @@ class AmpCarousel extends AMP.BaseElement {
             stroke-width="2px"
             stroke-linejoin="round"
             stroke-linecap="round"
-          />
+          ></path>
         </svg>
       </button>
     `;
@@ -450,7 +434,7 @@ class AmpCarousel extends AMP.BaseElement {
       'goToSlide',
       (actionInvocation) => {
         const {args, trust} = actionInvocation;
-        this.carousel_.goToSlide(args['index'] ?? -1, {
+        this.carousel_.goToSlide(Number(args['index'] ?? -1), {
           actionSource: this.getActionSource_(trust),
         });
       },

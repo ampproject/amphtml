@@ -1,28 +1,14 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-video-iframe';
-import {Services} from '../../../../src/services';
-import {VideoEvents} from '../../../../src/video-interface';
-import {
-  createElementWithAttributes,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
+import {createElementWithAttributes} from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+
+import {Services} from '#service';
+
+import {macroTask} from '#testing/helpers';
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
+
 import {listenOncePromise} from '../../../../src/event-helper';
-import {macroTask} from '../../../../testing/yield';
+import {VideoEvents} from '../../../../src/video-interface';
 
 describes.realWin(
   'amp-video-iframe',
@@ -37,6 +23,7 @@ describes.realWin(
     let win;
     let doc;
     let videoManagerStub;
+    let resizeObserverStub;
 
     beforeEach(() => {
       win = env.win;
@@ -49,6 +36,7 @@ describes.realWin(
       env.sandbox
         .stub(Services, 'videoManagerForDoc')
         .returns(videoManagerStub);
+      resizeObserverStub = installResizeObserverStub(env.sandbox, win);
     });
 
     function getIframeSrc(fixture = null) {
@@ -200,6 +188,65 @@ describes.realWin(
       });
     });
 
+    describe('pause', () => {
+      let player, impl;
+      let postMessageSpy;
+
+      beforeEach(async () => {
+        player = createVideoIframe();
+        await layoutAndLoad(player);
+        await acceptMockedMessages(player);
+        env.sandbox.stub(player, 'isBuilt').returns(true);
+        impl = await player.getImpl(false);
+        postMessageSpy = await stubPostMessage(player);
+      });
+
+      it('should auto-pause when playing and no size', async () => {
+        impl.onMessage_({data: {event: VideoEvents.PLAYING}});
+        // First send "size" event and then "no size".
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+        });
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
+        });
+        await macroTask();
+        expect(
+          postMessageSpy.withArgs(
+            env.sandbox.match({
+              event: 'method',
+              method: 'pause',
+            })
+          )
+        ).to.be.calledOnce;
+      });
+
+      it('should NOT auto-pause when not playing', async () => {
+        impl.onMessage_({data: {event: VideoEvents.PLAYING}});
+        impl.onMessage_({data: {event: VideoEvents.PAUSE}});
+        // First send "size" event and then "no size".
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+        });
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
+        });
+        await macroTask();
+        expect(
+          postMessageSpy.withArgs(
+            env.sandbox.match({
+              event: 'method',
+              method: 'pause',
+            })
+          )
+        ).to.not.be.called;
+      });
+    });
+
     describe('#createPlaceholderCallback', () => {
       it('does not create placeholder without poster attribute', () => {
         const placeholder = createVideoIframe().createPlaceholder();
@@ -212,6 +259,7 @@ describes.realWin(
         expect(placeholder).to.have.attribute('placeholder');
         expect(placeholder.tagName.toLowerCase()).to.equal('img');
         expect(placeholder).to.have.class('i-amphtml-fill-content');
+        expect(placeholder.getAttribute('loading')).to.equal('lazy');
         expect(placeholder.getAttribute('src')).to.equal(poster);
       });
 
@@ -406,7 +454,7 @@ describes.realWin(
           eventType: 'tacos al pastor',
           sufix: 'with invalid event name',
         },
-      ].forEach(({sufix, eventType, vars, accept}) => {
+      ].forEach(({accept, eventType, sufix, vars}) => {
         const verb = accept ? 'dispatch' : 'reject';
 
         it(`should ${verb} custom analytics event ${sufix}`, async () => {

@@ -1,24 +1,14 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {getDate} from '#core/types/date';
 
-import * as Preact from '../../../src/preact';
-import {Wrapper, useRenderer} from '../../../src/preact/component';
-import {getDate} from '../../../src/utils/date';
-import {useMemo} from '../../../src/preact';
-import {useResourcesNotify} from '../../../src/preact/utils';
+import * as Preact from '#preact';
+import {useMemo} from '#preact';
+import {Wrapper, useRenderer} from '#preact/component';
+import {useResourcesNotify} from '#preact/utils';
+
+import {user} from '../../../src/log';
+
+/** @const {string} */
+const TAG = 'amp-date-display';
 
 /** @const {string} */
 const DEFAULT_DISPLAY_IN = 'local';
@@ -33,12 +23,6 @@ const DEFAULT_DATETIME_OPTIONS = {
   'day': 'numeric',
   'hour': 'numeric',
   'minute': 'numeric',
-};
-
-/** @const {!Object<string, *>} */
-const DEFAULT_DATETIME_OPTIONS_UTC = {
-  ...DEFAULT_DATETIME_OPTIONS,
-  timeZone: 'UTC',
 };
 
 /**
@@ -95,13 +79,14 @@ export function DateDisplay({
   datetime,
   displayIn = DEFAULT_DISPLAY_IN,
   locale = DEFAULT_LOCALE,
+  localeOptions,
   render = DEFAULT_RENDER,
   ...rest
 }) {
   const date = getDate(datetime);
   const data = useMemo(
-    () => getDataForTemplate(new Date(date), displayIn, locale),
-    [date, displayIn, locale]
+    () => getDataForTemplate(new Date(date), displayIn, locale, localeOptions),
+    [date, displayIn, locale, localeOptions]
   );
 
   const rendered = useRenderer(render, data);
@@ -126,13 +111,14 @@ export function DateDisplay({
  * @param {!Date} date
  * @param {string} displayIn
  * @param {string} locale
+ * @param {Object<string, *>} localeOptions
  * @return {!EnhancedVariablesV2Def}
  */
-function getDataForTemplate(date, displayIn, locale) {
+function getDataForTemplate(date, displayIn, locale, localeOptions) {
   const basicData =
     displayIn.toLowerCase() === 'utc'
-      ? getVariablesInUTC(date, locale)
-      : getVariablesInLocal(date, locale);
+      ? getVariablesInUTC(date, locale, localeOptions)
+      : getVariablesInLocal(date, locale, localeOptions);
 
   return enhanceBasicVariables(basicData);
 }
@@ -174,9 +160,29 @@ function enhanceBasicVariables(data) {
 /**
  * @param {!Date} date
  * @param {string} locale
+ * @param {?Object<string, *>} localeOptions
+ * @return {string}
+ * @private
+ */
+function getLocaleString_(date, locale, localeOptions) {
+  try {
+    return date.toLocaleString(locale, localeOptions);
+  } catch (e) {
+    user().error(TAG, 'localeOptions', e);
+  }
+}
+
+/**
+ * @param {!Date} date
+ * @param {string} locale
+ * @param {?Object<string, *>} localeOptions
  * @return {!VariablesV2Def}
  */
-function getVariablesInLocal(date, locale) {
+function getVariablesInLocal(
+  date,
+  locale,
+  localeOptions = DEFAULT_DATETIME_OPTIONS
+) {
   return {
     'year': date.getFullYear(),
     'month': date.getMonth() + 1,
@@ -193,16 +199,25 @@ function getVariablesInLocal(date, locale) {
     'minute': date.getMinutes(),
     'second': date.getSeconds(),
     'iso': date.toISOString(),
-    'localeString': date.toLocaleString(locale, DEFAULT_DATETIME_OPTIONS),
+    'localeString': getLocaleString_(date, locale, localeOptions),
   };
 }
 
 /**
  * @param {!Date} date
  * @param {string} locale
+ * @param {?Object<string, *>} localeOptions
  * @return {!VariablesV2Def}
  */
-function getVariablesInUTC(date, locale) {
+function getVariablesInUTC(
+  date,
+  locale,
+  localeOptions = DEFAULT_DATETIME_OPTIONS
+) {
+  const localeOptionsInUTC = {
+    ...localeOptions,
+    timeZone: 'UTC',
+  };
   return {
     'year': date.getUTCFullYear(),
     'month': date.getUTCMonth() + 1,
@@ -227,6 +242,6 @@ function getVariablesInUTC(date, locale) {
     'minute': date.getUTCMinutes(),
     'second': date.getUTCSeconds(),
     'iso': date.toISOString(),
-    'localeString': date.toLocaleString(locale, DEFAULT_DATETIME_OPTIONS_UTC),
+    'localeString': getLocaleString_(date, locale, localeOptionsInUTC),
   };
 }

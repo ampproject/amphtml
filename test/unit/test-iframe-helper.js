@@ -1,26 +1,12 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import * as IframeHelper from '../../src/iframe-helper';
-import {createIframePromise} from '../../testing/iframe';
-import {generateSentinel} from '../../src/3p-frame';
+import {createIframePromise} from '#testing/iframe';
 
-describe
+import {generateSentinel} from '../../src/3p-frame';
+import * as IframeHelper from '../../src/iframe-helper';
+
+describes.sandboxed
   .configure()
   .skipFirefox()
-  .run('iframe-helper', function () {
+  .run('iframe-helper', {}, function (env) {
     const iframeSrc =
       'http://iframe.localhost:' +
       location.port +
@@ -175,7 +161,7 @@ describe
     });
 
     // TODO(cvializ, #3314): Figure out why this fails. Probably have to do with
-    // removing the iframes in _init_tests.
+    // removing the iframes in init-tests.
     it.skip('should un-listen on next message when iframe is unattached', () => {
       let calls = 0;
       let otherCalls = 0;
@@ -209,7 +195,7 @@ describe
     // TODO(wg-components, #32103): This fails regularly during CI
     it.skip('should set sentinel on postMessage data', () => {
       insert(testIframe);
-      const postMessageSpy = window.sandbox /*OK*/
+      const postMessageSpy = env.sandbox /*OK*/
         .spy(testIframe.contentWindow, 'postMessage');
       IframeHelper.postMessage(
         testIframe,

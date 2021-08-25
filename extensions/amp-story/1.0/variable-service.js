@@ -1,22 +1,7 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {StateProperty, getStoreService} from './amp-story-store-service';
-import {dict} from '../../../src/utils/object';
-import {registerServiceBuilder} from '../../../src/service';
+import {dict} from '#core/types/object';
+import {registerServiceBuilder} from '../../../src/service-helpers';
 
 /**
  * @typedef {!JsonObject}
@@ -25,9 +10,6 @@ export let StoryVariableDef;
 
 /** @enum {string} */
 export const AnalyticsVariable = {
-  BOOKEND_COMPONENT_POSITION: 'storyBookendComponentPosition',
-  BOOKEND_COMPONENT_TYPE: 'storyBookendComponentType',
-  BOOKEND_TARGET_HREF: 'storyBookendTargetHref',
   STORY_INTERACTIVE_ID: 'storyInteractiveId',
   STORY_INTERACTIVE_RESPONSE: 'storyInteractiveResponse',
   STORY_INTERACTIVE_TYPE: 'storyInteractiveType',
@@ -72,9 +54,6 @@ export class AmpStoryVariableService {
   constructor(win) {
     /** @private {!StoryVariableDef} */
     this.variables_ = dict({
-      [AnalyticsVariable.BOOKEND_COMPONENT_POSITION]: null,
-      [AnalyticsVariable.BOOKEND_COMPONENT_TYPE]: null,
-      [AnalyticsVariable.BOOKEND_TARGET_HREF]: null,
       [AnalyticsVariable.STORY_INTERACTIVE_ID]: null,
       [AnalyticsVariable.STORY_INTERACTIVE_RESPONSE]: null,
       [AnalyticsVariable.STORY_INTERACTIVE_TYPE]: null,
@@ -106,19 +85,19 @@ export class AmpStoryVariableService {
           return;
         }
 
-        this.variables_[
-          AnalyticsVariable.STORY_PREVIOUS_PAGE_ID
-        ] = this.variables_[AnalyticsVariable.STORY_PAGE_ID];
+        this.variables_[AnalyticsVariable.STORY_PREVIOUS_PAGE_ID] =
+          this.variables_[AnalyticsVariable.STORY_PAGE_ID];
 
         this.variables_[AnalyticsVariable.STORY_PAGE_ID] = pageId;
 
-        const pageIndex = /** @type {number} */ (this.storeService_.get(
-          StateProperty.CURRENT_PAGE_INDEX
-        ));
+        const pageIndex = /** @type {number} */ (
+          this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX)
+        );
         this.variables_[AnalyticsVariable.STORY_PAGE_INDEX] = pageIndex;
 
-        const numberOfPages = this.storeService_.get(StateProperty.PAGE_IDS)
-          .length;
+        const numberOfPages = this.storeService_.get(
+          StateProperty.PAGE_IDS
+        ).length;
         if (numberOfPages > 0) {
           if (numberOfPages === 1) {
             this.variables_[AnalyticsVariable.STORY_PROGRESS] = 0;

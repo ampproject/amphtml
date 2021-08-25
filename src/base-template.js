@@ -1,20 +1,7 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {isElement} from '#core/types';
 
-import {Services} from './services';
+import {Services} from '#service';
+
 import {dev} from './log';
 
 /**
@@ -87,7 +74,7 @@ export class BaseTemplate {
         }
       } else if (n.nodeType == /* COMMENT */ 8) {
         // Ignore comments.
-      } else if (n.nodeType == /* ELEMENT */ 1) {
+      } else if (isElement(n)) {
         callback(dev().assertElement(n));
       }
     }

@@ -1,29 +1,12 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {boolean, number, select, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 const ORIENTATIONS = ['horizontal', 'vertical'];
 
 export default {
   title: 'amp-base-carousel-1_0',
-  decorators: [withKnobs, withA11y, withAmp],
+  decorators: [withKnobs, withAmp],
 
   parameters: {
     extensions: [
@@ -161,6 +144,30 @@ export const mixedLength = () => {
   );
 };
 
-Default.story = {
-  name: 'default',
+export const customArrows = () => {
+  const width = number('width', 400);
+  const height = number('height', 200);
+  const slideCount = number('slide count', 7, {min: 0, max: 99});
+  const colorIncrement = Math.floor(255 / (slideCount + 1));
+  return (
+    <amp-base-carousel id="my-carousel" width={width} height={height}>
+      {Array.from({length: slideCount}, (x, i) => {
+        const v = colorIncrement * (i + 1);
+        return (
+          <div
+            style={{
+              backgroundColor: `rgb(${v}, 100, 100)`,
+              border: 'solid white 1px',
+              width: '100%',
+              height: '100%',
+            }}
+          ></div>
+        );
+      })}
+      <button slot="next-arrow">Next</button>
+      <button slot="prev-arrow">Prev</button>
+    </amp-base-carousel>
+  );
 };
+
+Default.storyName = 'default';

@@ -1,18 +1,3 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/amp-story-player-impl';
 import {
   Action,
@@ -26,17 +11,26 @@ import {
   DevelopmentModeLog,
   DevelopmentModeLogButtonSet,
 } from './development-ui';
-import {LocalizedStringId} from '../../../src/localized-strings';
+import {LocalizedStringId} from '#service/localization/strings';
 import {ProgressBar} from './progress-bar';
-import {Services} from '../../../src/services';
-import {createShadowRootWithStyle, shouldShowStoryUrlInfo} from './utils';
+import {Services} from '#service';
+import {closest, matches, scopedQuerySelector} from '#core/dom/query';
+import {
+  createShadowRootWithStyle,
+  getStoryAttributeSrc,
+  shouldShowStoryUrlInfo,
+  triggerClickFromLightDom,
+} from './utils';
 import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '#core/types/object';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getMode} from '../../../src/mode';
-import {matches, scopedQuerySelector} from '../../../src/dom';
+import {getSourceOrigin} from '../../../src/url';
+
 import {renderAsElement} from './simple-template';
-import {setImportantStyles} from '../../../src/style';
-import {toArray} from '../../../src/types';
+
+import {setImportantStyles} from '#core/dom/style';
+import {toArray} from '#core/types/array';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
@@ -92,6 +86,9 @@ const SIDEBAR_CLASS = 'i-amphtml-story-sidebar-control';
 /** @private @const {string} */
 const HAS_NEW_PAGE_ATTRIBUTE = 'i-amphtml-story-has-new-page';
 
+/** @private @const {string} */
+const ATTRIBUTION_CLASS = 'i-amphtml-story-attribution';
+
 /** @private @const {number} */
 const HIDE_MESSAGE_TIMEOUT_MS = 1500;
 
@@ -102,6 +99,36 @@ const TEMPLATE = {
     'class': 'i-amphtml-story-system-layer i-amphtml-story-system-reset',
   }),
   children: [
+    {
+      tag: 'a',
+      attrs: dict({
+        'class': ATTRIBUTION_CLASS,
+        'target': '_blank',
+      }),
+      children: [
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-story-attribution-logo-container',
+          }),
+          children: [
+            {
+              tag: 'img',
+              attrs: dict({
+                'alt': '',
+                'class': 'i-amphtml-story-attribution-logo',
+              }),
+            },
+          ],
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-story-attribution-text',
+          }),
+        },
+      ],
+    },
     {
       tag: 'div',
       attrs: dict({
@@ -300,7 +327,6 @@ const VIEWER_CONTROL_DEFAULTS = {
  * Chrome contains:
  *   - mute/unmute button
  *   - story progress bar
- *   - bookend close button
  *   - share button
  *   - domain info button
  *   - sidebar
@@ -383,9 +409,8 @@ export class SystemLayer {
     // Make the share button link to the current document to make sure
     // embedded STAMPs always have a back-link to themselves, and to make
     // gestures like right-clicks work.
-    this.systemLayerEl_.querySelector(
-      '.i-amphtml-story-share-control'
-    ).href = Services.documentInfoForDoc(this.parentEl_).canonicalUrl;
+    this.systemLayerEl_.querySelector('.i-amphtml-story-share-control').href =
+      Services.documentInfoForDoc(this.parentEl_).canonicalUrl;
 
     createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
 
@@ -422,16 +447,45 @@ export class SystemLayer {
       ? new AmpStoryViewerMessagingHandler(this.win_, this.viewer_)
       : null;
 
-    if (shouldShowStoryUrlInfo(this.viewer_)) {
+    if (shouldShowStoryUrlInfo(this.viewer_, this.storeService_)) {
       this.systemLayerEl_.classList.add('i-amphtml-embedded');
       this.getShadowRoot().setAttribute(HAS_INFO_BUTTON_ATTRIBUTE, '');
     } else {
       this.getShadowRoot().removeAttribute(HAS_INFO_BUTTON_ATTRIBUTE);
     }
 
+    this.maybeBuildAttribution_();
+
     this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
     this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'noshow');
     return this.getRoot();
+  }
+
+  /** @private */
+  maybeBuildAttribution_() {
+    if (!this.viewer_ || this.viewer_.getParam('attribution') !== 'auto') {
+      return;
+    }
+
+    this.systemLayerEl_.querySelector('.i-amphtml-story-attribution-logo').src =
+      getStoryAttributeSrc(this.parentEl_, 'entity-logo-src') ||
+      getStoryAttributeSrc(this.parentEl_, 'publisher-logo-src');
+
+    const anchorEl = this.systemLayerEl_.querySelector(
+      `.${escapeCssSelectorIdent(ATTRIBUTION_CLASS)}`
+    );
+
+    anchorEl.href =
+      getStoryAttributeSrc(this.parentEl_, 'entity-url') ||
+      getSourceOrigin(Services.documentInfoForDoc(this.parentEl_).sourceUrl);
+
+    this.systemLayerEl_.querySelector(
+      '.i-amphtml-story-attribution-text'
+    ).textContent =
+      this.parentEl_.getAttribute('entity') ||
+      this.parentEl_.getAttribute('publisher');
+
+    anchorEl.classList.add('i-amphtml-story-attribution-visible');
   }
 
   /**
@@ -479,15 +533,16 @@ export class SystemLayer {
         )
       ) {
         this.onViewerControlClick_(dev().assertElement(event.target));
+      } else if (
+        matches(target, `.${ATTRIBUTION_CLASS}, .${ATTRIBUTION_CLASS} *`)
+      ) {
+        const anchorClicked = closest(target, (e) => matches(e, 'a[href]'));
+        triggerClickFromLightDom(anchorClicked, this.parentEl_);
       }
     });
 
     this.storeService_.subscribe(StateProperty.AD_STATE, (isAd) => {
       this.onAdStateUpdate_(isAd);
-    });
-
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
-      this.onBookendStateUpdate_(isActive);
     });
 
     this.storeService_.subscribe(
@@ -638,18 +693,6 @@ export class SystemLayer {
     isAd
       ? this.getShadowRoot().setAttribute(AD_SHOWING_ATTRIBUTE, '')
       : this.getShadowRoot().removeAttribute(AD_SHOWING_ATTRIBUTE);
-  }
-
-  /**
-   * Reacts to the bookend state updates and updates the UI accordingly.
-   * @param {boolean} isActive
-   * @private
-   */
-  onBookendStateUpdate_(isActive) {
-    this.getShadowRoot().classList.toggle(
-      'i-amphtml-story-bookend-active',
-      isActive
-    );
   }
 
   /**
@@ -830,6 +873,7 @@ export class SystemLayer {
 
       shadowRoot.classList.remove('i-amphtml-story-desktop-fullbleed');
       shadowRoot.classList.remove('i-amphtml-story-desktop-panels');
+      shadowRoot.classList.remove('i-amphtml-story-desktop-one-panel');
       shadowRoot.removeAttribute('desktop');
 
       switch (uiState) {
@@ -840,6 +884,9 @@ export class SystemLayer {
         case UIType.DESKTOP_FULLBLEED:
           shadowRoot.setAttribute('desktop', '');
           shadowRoot.classList.add('i-amphtml-story-desktop-fullbleed');
+          break;
+        case UIType.DESKTOP_ONE_PANEL:
+          shadowRoot.classList.add('i-amphtml-story-desktop-one-panel');
           break;
       }
     });

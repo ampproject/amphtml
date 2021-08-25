@@ -1,19 +1,3 @@
-<!---
-Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # AMP Viewer API
 
 ## Introduction
@@ -26,7 +10,7 @@ This document explains the API between an AMP Viewer and the AMP document(s) it 
 
 When an AMP Viewer opens an AMP document, it can include initialization parameters. The parameters are set as key value pairs encoded as a query string in the hash fragment of the AMP document URL. For example:
 www.amp.dev?origin=https%3A%2F%2Fplayground.amp.dev
-Some parameters are read by the AMP runtime (the core library that initializes and manages all components, included as v0.js) and configure its behavior and others are read by the [Viewer integration script](https://github.com/ampproject/amphtml/blob/master/extensions/amp-viewer-integration/0.1/amp-viewer-integration.js) in order to establish the communication channel used by the rest of the API. An initialization parameter is enabled or disabled via the '1' or '0' value respectively.
+Some parameters are read by the AMP runtime (the core library that initializes and manages all components, included as v0.js) and configure its behavior and others are read by the [Viewer integration script](https://github.com/ampproject/amphtml/blob/main/extensions/amp-viewer-integration/0.1/amp-viewer-integration.js) in order to establish the communication channel used by the rest of the API. An initialization parameter is enabled or disabled via the '1' or '0' value respectively.
 
 #### Viewer Integration Script Parameters
 

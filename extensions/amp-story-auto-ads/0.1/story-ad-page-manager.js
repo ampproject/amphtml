@@ -1,18 +1,4 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {findIndex} from '#core/types/array';
 
 import {
   AnalyticsEvents,
@@ -20,15 +6,15 @@ import {
   STORY_AD_ANALYTICS,
 } from './story-ad-analytics';
 import {ButtonTextFitter} from './story-ad-button-text-fitter';
+import {StoryAdLocalization} from './story-ad-localization';
+import {StoryAdPage} from './story-ad-page';
+
+import {devAssert} from '../../../src/log';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {
   StateProperty,
   getStoreService,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {StoryAdLocalization} from './story-ad-localization';
-import {StoryAdPage} from './story-ad-page';
-import {devAssert} from '../../../src/log';
-import {findIndex} from '../../../src/utils/array';
-import {getServicePromiseForDoc} from '../../../src/service';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page-manager';
@@ -69,7 +55,7 @@ export class StoryAdPageManager {
     /** @private {!./story-ad-button-text-fitter.ButtonTextFitter} */
     this.buttonFitter_ = new ButtonTextFitter(this.ampdoc_);
 
-    /** @private {Object<string, StoryAdPage} */
+    /** @private {Object<string, StoryAdPage>} */
     this.pages_ = {};
 
     /** @private {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} **/

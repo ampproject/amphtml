@@ -10,6 +10,7 @@ on:
 
 jobs:
   sweep-experiments:
+    if: github.repository == 'ampproject/amphtml'
     name: Sweep Experiments
     runs-on: ubuntu-latest
 

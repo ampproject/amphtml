@@ -1,35 +1,23 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import {addExperimentIdToElement} from '#ads/google/a4a/traffic-experiments';
 import {
   ADSENSE_MCRSPV_TAG,
   ADSENSE_RSPV_ALLOWED_HEIGHT,
   ADSENSE_RSPV_TAG,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
-} from '../../../ads/google/utils';
-import {Services} from '../../../src/services';
-import {addExperimentIdToElement} from '../../../ads/google/a4a/traffic-experiments';
-import {clamp} from '../../../src/utils/math';
-import {computedStyle, getStyle, setStyle} from '../../../src/style';
-import {dev, devAssert, user} from '../../../src/log';
+} from '#ads/google/utils';
+
+import {computedStyle, getStyle, setStyle} from '#core/dom/style';
+import {clamp} from '#core/math';
+import {hasOwn} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
+import {toWin} from '#core/window';
+
+import {randomlySelectUnsetExperiments} from '#experiments';
+
+import {Services} from '#service';
+
 import {getData} from '../../../src/event-helper';
-import {hasOwn} from '../../../src/utils/object';
-import {randomlySelectUnsetExperiments} from '../../../src/experiments';
-import {toWin} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
+import {dev, devAssert, user} from '../../../src/log';
 
 const TAG = 'amp-ad-network-adsense-impl';
 
@@ -387,13 +375,14 @@ export class ResponsiveState {
    * @private
    */
   isInResponsiveHeightFixExperimentBranch_() {
-    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
-      {
-        experimentId: MAX_HEIGHT_EXP.branch,
-        isTrafficEligible: () => true,
-        branches: [MAX_HEIGHT_EXP.control, MAX_HEIGHT_EXP.experiment],
-      },
-    ]);
+    const experimentInfoList =
+      /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+        {
+          experimentId: MAX_HEIGHT_EXP.branch,
+          isTrafficEligible: () => true,
+          branches: [MAX_HEIGHT_EXP.control, MAX_HEIGHT_EXP.experiment],
+        },
+      ]);
     const setExps = randomlySelectUnsetExperiments(
       this.win_,
       experimentInfoList

@@ -1,38 +1,22 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {
-  ImagePixelVerifier,
-  mockWindowInterface,
-} from '../../../../testing/test-helper';
+import {AmpScriptService} from '../../../amp-script/0.1/amp-script';
+import {ImagePixelVerifier, mockWindowInterface} from '#testing/test-helper';
+import {Services} from '#service';
 import {Transport} from '../transport';
 import {getMode} from '../../../../src/mode';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
-import {installTimerService} from '../../../../src/service/timer-impl';
+import {installDocService} from '#service/ampdoc-impl';
+import {installTimerService} from '#service/timer-impl';
 import {loadPromise} from '../../../../src/event-helper';
 
 describes.realWin(
   'amp-analytics.transport',
   {
-    amp: false,
+    amp: true,
     allowExternalResources: true,
   },
   (env) => {
     let win;
+    let ampdoc;
     let doc;
     let openXhrStub;
     let sendXhrStub;
@@ -41,6 +25,7 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
+      ampdoc = env.ampdoc;
       doc = win.document;
       openXhrStub = env.sandbox.stub();
       sendXhrStub = env.sandbox.stub();
@@ -163,7 +148,7 @@ describes.realWin(
 
     it('send single segment request', () => {
       setupStubs(true, true);
-      new Transport(win, {beacon: true}).sendRequest(
+      new Transport(ampdoc, {beacon: true}).sendRequest(
         'https://e.com/test',
         [
           {
@@ -182,7 +167,7 @@ describes.realWin(
 
     it('send single segment request in batch', () => {
       setupStubs(true, true);
-      new Transport(win, {beacon: true}).sendRequest(
+      new Transport(ampdoc, {beacon: true}).sendRequest(
         'https://e.com/test',
         [
           {
@@ -201,7 +186,7 @@ describes.realWin(
 
     it('send single segment request useBody', () => {
       setupStubs(true, true);
-      new Transport(win, {beacon: true, useBody: true}).sendRequest(
+      new Transport(ampdoc, {beacon: true, useBody: true}).sendRequest(
         'https://e.com/test',
         [
           {
@@ -220,7 +205,7 @@ describes.realWin(
 
     it('send single segment request useBody in batch', () => {
       setupStubs(true, true);
-      new Transport(win, {beacon: true, useBody: true}).sendRequest(
+      new Transport(ampdoc, {beacon: true, useBody: true}).sendRequest(
         'https://e.com/test',
         [
           {
@@ -239,7 +224,7 @@ describes.realWin(
 
     it('send multi-segment request w/o batch (only 1st sent)', () => {
       setupStubs(true, true);
-      new Transport(win, {beacon: true}).sendRequest(
+      new Transport(ampdoc, {beacon: true}).sendRequest(
         'https://e.com/test',
         [
           {
@@ -264,7 +249,7 @@ describes.realWin(
 
     it('send multi-segment request in batch', () => {
       setupStubs(true, true);
-      new Transport(win, {beacon: true}).sendRequest(
+      new Transport(ampdoc, {beacon: true}).sendRequest(
         'https://e.com/test',
         [
           {
@@ -289,7 +274,7 @@ describes.realWin(
 
     it('send multi-segment request useBody in batch', () => {
       setupStubs(true, true);
-      new Transport(win, {beacon: true, useBody: true}).sendRequest(
+      new Transport(ampdoc, {beacon: true, useBody: true}).sendRequest(
         'https://e.com/test',
         [
           {
@@ -338,7 +323,8 @@ describes.realWin(
         'http://iframe.localhost:9876/test/fixtures/served/iframe.html';
 
       function sendRequestUsingIframe(win, url) {
-        new Transport(win).sendRequestUsingIframe(url, {});
+        const ampdoc = {win};
+        new Transport(ampdoc).sendRequestUsingIframe(url, {});
       }
 
       it('should create and delete an iframe', () => {
@@ -380,9 +366,49 @@ describes.realWin(
       });
     });
 
+    describe('amp-script transport', () => {
+      beforeEach(() => {
+        env.sandbox
+          .stub(Services, 'scriptForDocOrNull')
+          .returns(Promise.resolve(new AmpScriptService(env.ampdoc)));
+      });
+
+      it('should throw if the url does not begin with amp-script scheme', () => {
+        const req = Transport.forwardRequestToAmpScript(env.ampdoc, {
+          url: 'receiver.functionId',
+        });
+        expect(req).rejectedWith(/URL must begin with/);
+      });
+
+      it('should throw if the amp-script cannot be found', () => {
+        const req = Transport.forwardRequestToAmpScript(env.ampdoc, {
+          url: 'amp-script:nonexistent.functionId',
+        });
+        expect(req).rejectedWith(/could not find/);
+      });
+
+      it('should forward the payload to the specifed amp-script element', async () => {
+        const callFunctionSpy = env.sandbox.spy();
+        const ampScript = doc.createElement('amp-script');
+        ampScript.id = 'receiver';
+        ampScript.getImpl = () => ({
+          then: (fn) => fn({callFunction: callFunctionSpy}),
+        });
+        doc.body.appendChild(ampScript);
+
+        const payload = '{}';
+        await Transport.forwardRequestToAmpScript(env.ampdoc, {
+          url: 'amp-script:receiver.functionId',
+          payload,
+        });
+
+        expect(callFunctionSpy).calledWith('functionId', JSON.parse(payload));
+      });
+    });
+
     describe('iframe transport', () => {
       it('does not initialize transport iframe if not used', () => {
-        const transport = new Transport(win, {
+        const transport = new Transport(ampdoc, {
           image: true,
           xhrpost: true,
           beacon: false,
@@ -395,7 +421,7 @@ describes.realWin(
       });
 
       it('initialize iframe transport when used', () => {
-        const transport = new Transport(win, {
+        const transport = new Transport(ampdoc, {
           iframe: '//test',
         });
 
@@ -408,9 +434,8 @@ describes.realWin(
           '<amp-analytics type="bg"></amp-analytics>'
         );
         frame.contentWindow.__AMP_TOP = win;
-        const ampAnalyticsEl = frame.contentWindow.document.querySelector(
-          'amp-analytics'
-        );
+        const ampAnalyticsEl =
+          frame.contentWindow.document.querySelector('amp-analytics');
 
         transport.maybeInitIframeTransport(ampAnalyticsEl);
         expect(transport.iframeTransport_).to.be.ok;
@@ -424,7 +449,7 @@ describes.realWin(
         win.__AMP_MODE.runtime = 'inabox';
         expect(getMode(win).runtime).to.equal('inabox');
 
-        const transport = new Transport(win, {
+        const transport = new Transport(ampdoc, {
           iframe: '//test',
         });
 
@@ -434,9 +459,8 @@ describes.realWin(
           '<amp-analytics type="bg"></amp-analytics>'
         );
         frame.contentWindow.__AMP_TOP = win;
-        const ampAnalyticsEl = frame.contentWindow.document.querySelector(
-          'amp-analytics'
-        );
+        const ampAnalyticsEl =
+          frame.contentWindow.document.querySelector('amp-analytics');
 
         transport.maybeInitIframeTransport(ampAnalyticsEl);
         expect(transport.iframeTransport_).to.be.ok;
@@ -447,7 +471,7 @@ describes.realWin(
 
       it('send via iframe transport', () => {
         setupStubs(true, true);
-        const transport = new Transport(win, {
+        const transport = new Transport(ampdoc, {
           beacon: true,
           xhrpost: true,
           image: true,
@@ -484,7 +508,7 @@ describes.realWin(
     }
 
     function sendRequest(win, request, options) {
-      new Transport(win, options).sendRequest(request, [{}], false);
+      new Transport(ampdoc, options).sendRequest(request, [{}], false);
     }
 
     function expectBeacon(url, payload) {

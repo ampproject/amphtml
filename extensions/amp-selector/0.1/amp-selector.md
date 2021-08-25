@@ -7,22 +7,6 @@ teaser:
   text: Represents a control that presents a menu of options and lets the user choose from it.
 ---
 
-<!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-selector
 
 ## Usage
@@ -102,7 +86,7 @@ Example:
 
 ### Clearing selections
 
-To clear all selections when an element is tapped or clicked, set the [`on`](../../../spec/amp-actions-and-events.md) action attribute on the element, and specify the AMP Selector `id` with the `clear` action method.
+To clear all selections when an element is tapped or clicked, set the [`on`](../../../docs/spec/amp-actions-and-events.md) action attribute on the element, and specify the AMP Selector `id` with the `clear` action method.
 
 Example:
 
@@ -158,7 +142,7 @@ The attributes above behave the same way as they do on a standard HTML [`<option
 Events may trigger actions on other AMP components using the `on` attribute.
 e.g. `on="select: my-tab.show"`
 
-Read more about [AMP Actions and Events](../../../spec/amp-actions-and-events.md).
+Read more about [AMP Actions and Events](../../../docs/spec/amp-actions-and-events.md).
 
 ### select
 
@@ -176,4 +160,4 @@ Tapping disabled options does not trigger the `select` event.
 
 ## Validation
 
-See [amp-selector rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-selector/validator-amp-selector.protoascii) in the AMP validator specification.
+See [amp-selector rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-selector/validator-amp-selector.protoascii) in the AMP validator specification.

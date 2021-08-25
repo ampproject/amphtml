@@ -1,0 +1,43 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests for the amp-lightbox tag. See the inline comments.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-1.0.js"></script>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|    <!-- Valid -->
+|    <amp-lightbox id="lb-0" layout="nodisplay">
+|
+|    <!-- Invalid: layout must be nodisplay. -->
+|    <amp-lightbox width="512" height="360"></amp-lightbox>
+>>   ^~~~~~~~~
+amp-lightbox/1.0/test/validator-amp-lightbox.html:20:2 The implied layout 'FIXED' is not supported by tag 'amp-lightbox'. (see https://amp.dev/documentation/components/amp-lightbox)
+|
+|    <!-- Valid -->
+|    <amp-lightbox id="lb-2" layout="nodisplay" animation="fade-in">
+|    </amp-lightbox>
+|
+|    <!-- Valid -->
+|    <amp-lightbox id="lb-3" layout="nodisplay" animation="fly-in-bottom">
+|    </amp-lightbox>
+|
+|    <!-- Valid -->
+|    <amp-lightbox id="lb-4" layout="nodisplay" animation="fly-in-top">
+|    </amp-lightbox>
+|
+|    <!-- Invalid: invalid `animation` value -->
+|    <amp-lightbox id="lb-5" layout="nodisplay" animation="xmas-lights">
+>>   ^~~~~~~~~
+amp-lightbox/1.0/test/validator-amp-lightbox.html:35:2 The attribute 'animation' in tag 'amp-lightbox' is set to the invalid value 'xmas-lights'. (see https://amp.dev/documentation/components/amp-lightbox)
+|    </amp-lightbox>
+|  </body>
+|  </html>

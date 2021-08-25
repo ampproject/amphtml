@@ -1,30 +1,13 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   MEDIA_LOAD_FAILURE_SRC_PROPERTY,
   listen,
 } from '../../../src/event-helper';
-import {Services} from '../../../src/services';
-import {TickLabel} from '../../../src/enums';
+import {Services} from '#service';
+import {TickLabel} from '#core/constants/enums';
 import {dev} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {lastChildElement} from '../../../src/dom';
-import {registerServiceBuilder} from '../../../src/service';
-import {urls} from '../../../src/config';
+import {lastChildElement, matches} from '#core/dom/query';
+import {registerServiceBuilder} from '../../../src/service-helpers';
+import {toArray} from '#core/types/array';
 
 /**
  * Media status.
@@ -45,6 +28,15 @@ const CacheState = {
   ORIGIN: 0, // Served from origin.
   ORIGIN_CACHE_MISS: 1, // Served from origin even though cache URL was present.
   CACHE: 2, // Served from cache.
+};
+
+/**
+ * Video is first page status.
+ * @enum
+ */
+const FirstPageState = {
+  NOT_ON_FIRST_PAGE: 0, // Video is not on the first page.
+  ON_FIRST_PAGE: 1, // Video is on the first page.
 };
 
 /**
@@ -121,9 +113,6 @@ export class MediaPerformanceMetricsService {
 
     /** @private @const {!../../../src/service/performance-impl.Performance} */
     this.performanceService_ = Services.performanceFor(win);
-
-    /** @private @const {!../../../src/service/url-impl.Url} */
-    this.urlService_ = Services.urlForDoc(win.document.body);
   }
 
   /**
@@ -202,21 +191,15 @@ export class MediaPerformanceMetricsService {
   sendMetrics_(mediaEntry) {
     const {media, metrics} = mediaEntry;
 
-    let videoCacheState;
-    if (this.urlService_.isProxyOrigin(media.currentSrc)) {
-      videoCacheState = CacheState.CACHE;
-    } else {
-      // Media is served from origin. Checks if there was a cached source.
-      const {hostname} = this.urlService_.parse(urls.cdn);
-      videoCacheState = media.querySelector(
-        `[src*="${escapeCssSelectorIdent(hostname)}"]`
-      )
-        ? CacheState.ORIGIN_CACHE_MISS
-        : CacheState.ORIGIN;
-    }
     this.performanceService_.tickDelta(
       TickLabel.VIDEO_CACHE_STATE,
-      videoCacheState
+      this.getVideoCacheState_(media)
+    );
+    this.performanceService_.tickDelta(
+      TickLabel.VIDEO_ON_FIRST_PAGE,
+      matches(media, `amp-story-page:first-of-type ${media.tagName}`)
+        ? FirstPageState.ON_FIRST_PAGE
+        : FirstPageState.NOT_ON_FIRST_PAGE
     );
 
     // If the media errored.
@@ -390,7 +373,7 @@ export class MediaPerformanceMetricsService {
    */
   onPlaying_(event) {
     const mediaEntry = this.mediaMap_.get(event.target);
-    const {timeStamps, metrics} = mediaEntry;
+    const {metrics, timeStamps} = mediaEntry;
 
     if (!metrics.jointLatency) {
       metrics.jointLatency = Date.now() - timeStamps.start;
@@ -418,5 +401,32 @@ export class MediaPerformanceMetricsService {
 
     timeStamps.waiting = Date.now();
     mediaEntry.status = Status.WAITING;
+  }
+
+  /**
+   * @param {!HTMLMediaElement} media
+   * @return {!CacheState}
+   * @private
+   */
+  getVideoCacheState_(media) {
+    let hasCachedSource = false;
+    // All video caching mechanisms rely on HTMLSourceElements and never a src
+    // on the HTMLMediaElement as it does not allow for fallback sources.
+    const sources = toArray(media.querySelectorAll('source'));
+    for (const source of sources) {
+      const isCachedSource = source.hasAttribute(
+        'i-amphtml-video-cached-source'
+      );
+      // Playing source is cached.
+      if (isCachedSource && media.currentSrc === source.src) {
+        return CacheState.CACHE;
+      }
+      // Non playing source but is cached. Used to differentiate a cache miss
+      // (e.g. cache returned a 40x) vs no cached source at all.
+      if (isCachedSource) {
+        hasCachedSource = true;
+      }
+    }
+    return hasCachedSource ? CacheState.ORIGIN_CACHE_MISS : CacheState.ORIGIN;
   }
 }

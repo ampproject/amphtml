@@ -1,23 +1,9 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-nexxtv-player';
-import {VideoEvents} from '../../../../src/video-interface';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '#core/dom';
+
+import * as consent from '../../../../src/consent';
 import {listenOncePromise} from '../../../../src/event-helper';
+import {VideoEvents} from '../../../../src/video-interface';
 
 describes.realWin(
   'amp-nexxtv-player',
@@ -60,6 +46,7 @@ describes.realWin(
       const element = await getNexxtvPlayer({
         'data-mediaid': '71QQG852413DU7J',
         'data-client': '761',
+        'data-streamtype': 'video',
       });
       const playerIframe = element.querySelector('iframe');
       expect(playerIframe).to.not.be.null;
@@ -70,7 +57,7 @@ describes.realWin(
             element.getAttribute('data-client') +
               '/video/' +
               element.getAttribute('data-mediaid') +
-              '\\?dataMode=static&platform=amp' +
+              '\\?platform=amp' +
               '$' // suffix
           )
         );
@@ -109,6 +96,20 @@ describes.realWin(
       const p4 = listenOncePromise(nexxtv, VideoEvents.UNMUTED);
       await sendFakeMessage(nexxtv, iframe, {event: 'unmute'});
       return p4;
+    });
+
+    it('should pass consent value to iframe', () => {
+      env.sandbox.stub(consent, 'getConsentPolicyInfo').resolves('testinfo');
+
+      return getNexxtvPlayer({
+        'data-mediaid': '71QQG852413DU7J',
+        'data-client': '761',
+        'data-block-on-consent': '_till_accepted',
+      }).then((nexxplayer) => {
+        const iframe = nexxplayer.querySelector('iframe');
+
+        expect(iframe.src).to.contain('consentString=testinfo');
+      });
     });
 
     async function sendFakeMessage(nexxtv, iframe, command) {

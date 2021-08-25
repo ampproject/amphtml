@@ -1,19 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   CONSENT_ITEM_STATE,
   ConsentInfoDef,
@@ -28,17 +12,28 @@ import {
   isConsentInfoStoredValueSame,
   recalculateConsentStateValue,
 } from './consent-info';
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {Services} from '#service';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev, devAssert, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
+import {dev, devAssert} from '../../../src/log';
 import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
+import {hasOwn} from '#core/types/object';
+import {once} from '#core/types/function';
+import {getRandomString64} from '#service/cid-impl';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 
 const TAG = 'CONSENT-STATE-MANAGER';
 
-/** @visibleForTesting */
-export const CONSENT_STORAGE_MAX = 1200;
+/**
+ * Returns a promise for a service for the given id and ampdoc. Also expects
+ * a service that has the actual implementation. The promise resolves when
+ * the implementation loaded.
+ * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} element
+ * @return {!Promise<!Object>}
+ */
+export function getConsentStateManager(element) {
+  return getServicePromiseForDoc(element, 'consentStateManager');
+}
 
 export class ConsentStateManager {
   /**
@@ -74,6 +69,9 @@ export class ConsentStateManager {
 
     /** @private {!Promise} */
     this.hasAllPurposeConsentsPromise_ = allPurposeConsentsDeferred.promise;
+
+    /** @public @const {function():string} */
+    this.consentPageViewId64 = once(() => getRandomString64(this.ampdoc_.win));
   }
 
   /**
@@ -447,39 +445,6 @@ export class ConsentInstance {
         return;
       }
 
-      // Check size
-      const size = JSON.stringify(
-        dict({
-          [this.storageKey_]: value,
-        })
-      ).length;
-
-      if (size > CONSENT_STORAGE_MAX) {
-        // Size restriction only applies to documents servered from a viewer
-        // that implements the storage API.
-        const usesViewerStorage = storage.isViewerStorage();
-        if (usesViewerStorage) {
-          // 1200 * 4/3 (base64) = 1600 bytes
-          user().error(
-            TAG,
-            'Cannot store consent information which length exceeds %s. ' +
-              'Previous stored consentInfo will be cleared',
-            CONSENT_STORAGE_MAX
-          );
-          // If new consentInfo value cannot be stored, need to remove previous
-          // value
-          storage.remove(this.storageKey_);
-          // TODO: Good to have a way to inform CMP service in this case
-          return;
-        }
-        user().info(
-          TAG,
-          'Current consent information length exceeds %s ' +
-            'and will not be stored when the page is served ' +
-            'from a viewer that supports the Local Storage API.',
-          CONSENT_STORAGE_MAX
-        );
-      }
       this.savedConsentInfo_ = consentInfo;
       storage.setNonBoolean(this.storageKey_, value);
       this.sendUpdateHrefRequest_(consentInfo);

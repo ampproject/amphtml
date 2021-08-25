@@ -1,18 +1,10 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Observable} from '#core/data-structures/observable';
+import {
+  detectEvtListenerOptsSupport,
+  resetEvtListenerOptsSupportForTesting,
+  resetPassiveSupportedForTesting,
+  supportsPassiveEventListener,
+} from '#core/dom/event-helper-listen';
 
 import {
   MEDIA_LOAD_FAILURE_SRC_PROPERTY,
@@ -23,15 +15,8 @@ import {
   listenOncePromise,
   loadPromise,
 } from '../../src/event-helper';
-import {Observable} from '../../src/observable';
-import {
-  detectEvtListenerOptsSupport,
-  resetEvtListenerOptsSupportForTesting,
-  resetPassiveSupportedForTesting,
-  supportsPassiveEventListener,
-} from '../../src/event-helper-listen';
 
-describe('EventHelper', () => {
+describes.sandboxed('EventHelper', {}, (env) => {
   function getEvent(name, target) {
     const event = document.createEvent('Event');
     event.initEvent(name, true, true);
@@ -295,7 +280,7 @@ describe('EventHelper', () => {
     expect(native.type).to.equal('foo');
     expect(native.detail).to.deep.equal({bar: 123});
 
-    const initCustomEventSpy = window.sandbox.spy();
+    const initCustomEventSpy = env.sandbox.spy();
     const win = {};
     win.CustomEvent = {};
     win.document = {};
@@ -318,11 +303,11 @@ describe('EventHelper', () => {
       }
     };
     // Simulate an addEventListener that accepts options
-    addEventListenerStub = window.sandbox
+    addEventListenerStub = env.sandbox
       .stub(self, 'addEventListener')
       .callsFake(eventListenerStubAcceptOpts);
     // Simulate a removeEventListener that accepts options
-    removeEventListenerStub = window.sandbox
+    removeEventListenerStub = env.sandbox
       .stub(self, 'removeEventListener')
       .callsFake(eventListenerStubAcceptOpts);
     resetEvtListenerOptsSupportForTesting();
@@ -350,11 +335,11 @@ describe('EventHelper', () => {
       }
     };
     // Simulate an addEventListener that does not accept options
-    addEventListenerStub = window.sandbox
+    addEventListenerStub = env.sandbox
       .stub(self, 'addEventListener')
       .callsFake(eventListenerStubRejectOpts);
     // Simulate a removeEventListener that does not accept options
-    removeEventListenerStub = window.sandbox
+    removeEventListenerStub = env.sandbox
       .stub(self, 'removeEventListener')
       .callsFake(eventListenerStubRejectOpts);
     resetEvtListenerOptsSupportForTesting();

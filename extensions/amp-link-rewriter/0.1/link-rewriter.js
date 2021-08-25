@@ -1,23 +1,7 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {getConfigOpts} from './config-options';
-import {getDataParamsFromAttributes} from '../../../src/dom';
-import {getScopeElements} from './scope';
+import {getDataParamsFromAttributes} from '#core/dom';
+import {getScopeElements, isElementInScope} from './scope';
 
 const WL_ANCHOR_ATTR = ['href', 'id', 'rel', 'rev'];
 const PREFIX_DATA_ATTR = /^vars(.+)/;
@@ -25,6 +9,7 @@ const REG_DOMAIN_URL = /^(?:https?:)?(?:\/\/)?([^\/?]+)/i;
 const PAGE_PROP_ALLOWLIST = {
   'SOURCE_URL': true,
   'DOCUMENT_REFERRER': true,
+  'AMP_GEO': true,
 };
 
 export class LinkRewriter {
@@ -66,8 +51,7 @@ export class LinkRewriter {
     if (this.isRewritten_(anchor)) {
       return;
     }
-
-    if (!this.isListed_(anchor)) {
+    if (!this.isNotFiltered_(anchor)) {
       return;
     }
     const sourceTrimmedDomain = Services.documentInfoForDoc(
@@ -101,6 +85,21 @@ export class LinkRewriter {
       anchor.href.match(REG_DOMAIN_URL)[1] ===
       this.rewrittenUrl_.match(REG_DOMAIN_URL)[1]
     );
+  }
+
+  /**
+   * Check if anchor is not filtered by attribute or section scope
+   *
+   * @param {!Element} anchor
+   * @return {boolean}
+   * @private
+   */
+  isNotFiltered_(anchor) {
+    if (!this.configOpts_.scopeDocument) {
+      return isElementInScope(anchor, this.configOpts_);
+    }
+
+    return this.isListed_(anchor);
   }
 
   /**

@@ -1,18 +1,4 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 
 /**
  * @fileoverview CSS specifically for non-AMP4ADS formats.
@@ -44,7 +30,7 @@ html:not([amp4ads]) body {
 /**
  * Margin:0 is currently needed for iOS viewer embeds.
  * See:
- * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
+ * https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-layout.md
  */
 html:not([amp4ads]) body {
   margin: 0 !important;
@@ -234,17 +220,6 @@ amp-experiment {
   display: none;
 }
 
-.i-amphtml-jank-meter {
-  position: fixed;
-  background-color: rgba(232,72,95,.5);
-  bottom: 0;
-  right: 0;
-  color: #fff;
-  font-size: 16px;
-  z-index: 1000;
-  padding: 5px;
-}
-
 /* amp-list CSS to avoid FOUC */
 
 /**
@@ -356,7 +331,7 @@ amp-autocomplete > textarea,
 /**
  * amp-script[nodom] is an element with no UI, similar to amp-analytics.
  */
-amp-script[nodom] {
+amp-script[nodom], amp-script[sandboxed] {
   /* Fixed to make position independent of page other elements. */
   position: fixed !important;
   top: 0 !important;

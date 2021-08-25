@@ -1,32 +1,16 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import '../../src/polyfills';
-import '../../src/service/timer-impl';
-import {Deferred} from '../../src/utils/promise';
+import '#polyfills';
+import '#service/timer-impl';
+import {Deferred} from '#core/data-structures/promise';
 import {EXPERIMENTS} from './experiments-config';
 import {SameSite, getCookie, setCookie} from '../../src/cookies';
 import {devAssert, initLogConstructor, setReportError} from '../../src/log';
 import {getMode} from '../../src/mode';
-import {isExperimentOn, toggleExperiment} from '../../src/experiments';
+import {isExperimentOn, toggleExperiment} from '#experiments';
 import {listenOnce} from '../../src/event-helper';
-import {onDocumentReady} from '../../src/document-ready';
+import {onDocumentReady} from '#core/document-ready';
 import {parseUrlDeprecated} from '../../src/url';
 //TODO(@cramforce): For type. Replace with forward declaration.
-import {reportError} from '../../src/error';
+import {reportError} from '../../src/error-reporting';
 
 initLogConstructor();
 setReportError(reportError);
@@ -73,20 +57,17 @@ const CHANNELS = [
   {
     id: EXPERIMENTAL_CHANNEL_ID,
     name: 'AMP Experimental Channel (more info)',
-    spec:
-      'https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#amp-experimental-and-beta-channels',
+    spec: 'https://github.com/ampproject/amphtml/blob/main/docs/release-schedule.md#amp-experimental-and-beta-channels',
   },
   {
     id: BETA_CHANNEL_ID,
     name: 'AMP Beta Channel (more info)',
-    spec:
-      'https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#amp-experimental-and-beta-channels',
+    spec: 'https://github.com/ampproject/amphtml/blob/main/docs/release-schedule.md#amp-experimental-and-beta-channels',
   },
   {
     id: NIGHTLY_CHANNEL_ID,
     name: 'AMP Nightly Channel (more info)',
-    spec:
-      'https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#amp-experimental-and-beta-channels',
+    spec: 'https://github.com/ampproject/amphtml/blob/main/docs/release-schedule.md#amp-experimental-and-beta-channels',
   },
 ];
 
@@ -393,7 +374,7 @@ function showConfirmation_(message, callback) {
  */
 function getAmpConfig() {
   const deferred = new Deferred();
-  const {promise, resolve, reject} = deferred;
+  const {promise, reject, resolve} = deferred;
   const xhr = new XMLHttpRequest();
   xhr.addEventListener('load', () => {
     resolve(xhr.responseText);

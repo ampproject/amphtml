@@ -1,33 +1,14 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-brightcove';
 import * as consent from '../../../../src/consent';
 import {BaseElement} from '../../../../src/base-element';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {CommonSignals} from '../../../../src/common-signals';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {CommonSignals} from '#core/constants/common-signals';
 import {VideoEvents} from '../../../../src/video-interface';
-import {
-  createElementWithAttributes,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {macroTask} from '../../../../testing/yield';
+import {macroTask} from '#testing/helpers';
 import {parseUrlDeprecated} from '../../../../src/url';
-import {user} from '../../../../src/log';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 describes.realWin(
   'amp-brightcove',
@@ -96,32 +77,13 @@ describes.realWin(
       });
     }
 
-    // https://go.amp.dev/issue/32706
-    it('should remove `dock`', async () => {
-      const warn = env.sandbox.spy(user(), 'warn');
+    it('should not remove `dock`', async () => {
       const element = await getBrightcoveBuild({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
         'dock': '',
       });
-      expect(element.hasAttribute('dock')).to.be.false;
-      expect(
-        warn.withArgs(
-          env.sandbox.match.any,
-          env.sandbox.match(/`dock` has been disabled/)
-        )
-      ).to.have.been.calledOnce;
-    });
-
-    // https://go.amp.dev/issue/32706
-    it('should not warn without `dock`', async () => {
-      const warn = env.sandbox.spy(user(), 'warn');
-      const element = await getBrightcoveBuild({
-        'data-account': '1290862519001',
-        'data-video-id': 'ref:amp-test-video',
-      });
-      expect(element.hasAttribute('dock')).to.be.false;
-      expect(warn).to.not.have.been.called;
+      expect(element.hasAttribute('dock')).to.be.true;
     });
 
     it('renders', () => {
@@ -134,7 +96,8 @@ describes.realWin(
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.src).to.equal(
           'https://players.brightcove.net/1290862519001/default_default' +
-            '/index.html?videoId=ref:amp-test-video&playsinline=true'
+            '/index.html?amp=1' +
+            '&videoId=ref:amp-test-video&playsinline=true'
         );
       });
     });
@@ -164,6 +127,18 @@ describes.realWin(
       });
     });
 
+    it('should exclude data-param-autoplay attribute', () => {
+      return getBrightcove({
+        'data-account': '1290862519001',
+        'data-video-id': 'ref:amp-test-video',
+        'data-param-autoplay': 'muted',
+      }).then((bc) => {
+        const iframe = bc.querySelector('iframe');
+        const params = parseUrlDeprecated(iframe.src).search.split('&');
+        expect(params).to.not.contain('autoplay');
+      });
+    });
+
     it('should propagate mutated attributes', () => {
       return getBrightcove({
         'data-account': '1290862519001',
@@ -173,7 +148,8 @@ describes.realWin(
 
         expect(iframe.src).to.equal(
           'https://players.brightcove.net/1290862519001/default_default' +
-            '/index.html?videoId=ref:amp-test-video&playsinline=true'
+            '/index.html?amp=1' +
+            '&videoId=ref:amp-test-video&playsinline=true'
         );
 
         bc.setAttribute('data-account', '12345');
@@ -185,7 +161,8 @@ describes.realWin(
 
         expect(iframe.src).to.equal(
           'https://players.brightcove.net/' +
-            '12345/default_default/index.html?videoId=abcdef&playsinline=true'
+            '12345/default_default/index.html?amp=1' +
+            '&videoId=abcdef&playsinline=true'
         );
       });
     });
@@ -341,6 +318,21 @@ describes.realWin(
         );
         expect(iframe.src).to.contain('ampInitialConsentValue=abc');
       });
+    });
+
+    it('should distinguish autoplay', async () => {
+      const bc = await getBrightcove({
+        'data-account': '1290862519001',
+        'data-video-id': 'ref:amp-test-video',
+      });
+      const impl = await bc.getImpl();
+      const spy = env.sandbox.spy(impl, 'sendCommand_');
+
+      impl.play(true);
+      expect(spy).to.be.calledWith('play', true);
+
+      impl.play(false);
+      expect(spy).to.be.calledWith('play', false);
     });
   }
 );

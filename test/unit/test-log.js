@@ -1,35 +1,20 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {
+  USER_ERROR_SENTINEL,
+  isUserErrorEmbedMessage,
+  isUserErrorMessage,
+} from '#core/error/message-helpers';
 
 import {
   Log,
   LogLevel,
-  USER_ERROR_SENTINEL,
   dev,
   devAssert,
-  duplicateErrorIfNecessary,
-  isUserErrorEmbed,
-  isUserErrorMessage,
-  rethrowAsync,
   setReportError,
   user,
   userAssert,
 } from '../../src/log';
 
-describe('Logging', () => {
+describes.sandboxed('Logging', {}, (env) => {
   const RETURNS_FINE = () => LogLevel.FINE;
   const RETURNS_INFO = () => LogLevel.INFO;
   const RETURNS_WARN = () => LogLevel.WARN;
@@ -45,8 +30,8 @@ describe('Logging', () => {
     mode = {};
     window.__AMP_MODE = mode;
 
-    logSpy = window.sandbox.spy();
-    timeoutSpy = window.sandbox.spy();
+    logSpy = env.sandbox.spy();
+    timeoutSpy = env.sandbox.spy();
     win = {
       console: {
         log: logSpy,
@@ -55,11 +40,13 @@ describe('Logging', () => {
       setTimeout: timeoutSpy,
       __AMP_REPORT_ERROR: (error) => error,
     };
-    window.sandbox.stub(self, '__AMP_REPORT_ERROR').callsFake((error) => error);
+    env.sandbox.stub(self, '__AMP_REPORT_ERROR').callsFake((error) => error);
   });
 
   afterEach(() => {
     window.__AMP_MODE = undefined;
+    delete window.__AMP_LOG.user;
+    delete window.__AMP_LOG.dev;
   });
 
   describe('Level', () => {
@@ -80,7 +67,7 @@ describe('Logging', () => {
     });
 
     it('should be disabled with hash param log=0', () => {
-      mode.log = '0';
+      win.location.hash = '#log=0';
       expect(new Log(win, RETURNS_FINE).level_).to.equal(LogLevel.OFF);
     });
 
@@ -232,19 +219,19 @@ describe('Logging', () => {
     });
 
     it('should be enabled with log=1', () => {
-      mode.log = '1';
-      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
+      win.location.hash = '#log=1';
+      expect(user().defaultLevelWithFunc_(win)).to.equal(LogLevel.FINE);
     });
 
     it('should be enabled with log>1', () => {
-      mode.log = '2';
-      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
+      win.location.hash = '#log=2';
+      expect(user().defaultLevelWithFunc_(win)).to.equal(LogLevel.FINE);
 
-      mode.log = '3';
-      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
+      win.location.hash = '#log=3';
+      expect(user().defaultLevelWithFunc_(win)).to.equal(LogLevel.FINE);
 
-      mode.log = '4';
-      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
+      win.location.hash = '#log=4';
+      expect(user().defaultLevelWithFunc_(win)).to.equal(LogLevel.FINE);
     });
 
     it('should be configured with USER suffix', () => {
@@ -263,18 +250,18 @@ describe('Logging', () => {
     });
 
     it('should NOT be enabled with log=1', () => {
-      mode.log = '1';
-      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.OFF);
+      win.location.hash = '#log=1';
+      expect(dev().defaultLevelWithFunc_(win)).to.equal(LogLevel.OFF);
     });
 
     it('should be enabled as INFO with log=2', () => {
-      mode.log = '2';
-      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.INFO);
+      win.location.hash = '#log=2';
+      expect(dev().defaultLevelWithFunc_(win)).to.equal(LogLevel.INFO);
     });
 
     it('should be enabled as FINE with log=3', () => {
-      mode.log = '3';
-      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
+      win.location.hash = '#log=3';
+      expect(dev().defaultLevelWithFunc_(win)).to.equal(LogLevel.FINE);
     });
 
     it('should be configured with no suffix', () => {
@@ -371,7 +358,14 @@ describe('Logging', () => {
       }
       expect(error).to.be.instanceof(Error);
       expect(error.message).to.equal('1 a 2 b 3' + USER_ERROR_SENTINEL);
-      expect(error.messageArray).to.deep.equal([1, 'a', 2, 'b', 3]);
+      expect(error.messageArray).to.deep.equal([
+        1,
+        'a',
+        2,
+        'b',
+        3,
+        USER_ERROR_SENTINEL,
+      ]);
     });
 
     it('should add element and assert info', () => {
@@ -383,8 +377,7 @@ describe('Logging', () => {
         error = e;
       }
       expect(error).to.be.instanceof(Error);
-      expect(error.associatedElement).to.equal(div);
-      expect(error.fromAssert).to.equal(true);
+      expect(error.messageArray[0]).to.equal(div);
     });
 
     it('should recognize asserts', () => {
@@ -526,37 +519,6 @@ describe('Logging', () => {
     });
   });
 
-  describe('assertEnumValue', () => {
-    let log;
-
-    beforeEach(() => {
-      log = new Log(win, RETURNS_FINE);
-    });
-
-    it('should return the enum value', () => {
-      const enum1 = {a: 'value1', b: 'value2'};
-      expect(log.assertEnumValue(enum1, 'value1')).to.equal('value1');
-      expect(log.assertEnumValue(enum1, 'value2')).to.equal('value2');
-    });
-
-    it('should fail with unknown enum value', () => {
-      const enum1 = {a: 'value1', b: 'value2'};
-      expect(() => log.assertEnumValue(enum1, 'value3')).to.throw(
-        'Unknown enum value: "value3"'
-      );
-      expect(() => log.assertEnumValue(enum1, 'value3', 'MyEnum')).to.throw(
-        'Unknown MyEnum value: "value3"'
-      );
-    });
-
-    it('should fail with values of different case', () => {
-      const enum1 = {a: 'value1', b: 'value2'};
-      expect(() => log.assertEnumValue(enum1, 'VALUE1')).to.throw(
-        'Unknown enum value: "VALUE1"'
-      );
-    });
-  });
-
   describe('assertArray', () => {
     let log;
 
@@ -619,113 +581,6 @@ describe('Logging', () => {
     });
   });
 
-  describe('rethrowAsync', () => {
-    let clock;
-
-    beforeEach(() => {
-      clock = window.sandbox.useFakeTimers();
-      restoreAsyncErrorThrows();
-    });
-
-    afterEach(() => {
-      stubAsyncErrorThrows();
-    });
-
-    it('should rethrow error with single message', () => {
-      rethrowAsync('intended');
-      expect(() => {
-        clock.tick(1);
-      }).to.throw(Error, /^intended/);
-    });
-
-    it('should rethrow a single error', () => {
-      const orig = new Error('intended');
-      rethrowAsync(orig);
-      let error;
-      try {
-        clock.tick(1);
-      } catch (e) {
-        error = e;
-      }
-      expect(error).to.equal(orig);
-      expect(error.message).to.match(/^intended/);
-    });
-
-    it('should rethrow error with many messages', () => {
-      rethrowAsync('first', 'second', 'third');
-      let error;
-      try {
-        clock.tick(1);
-      } catch (e) {
-        error = e;
-      }
-      expect(error.message).to.match(/^first second third/);
-    });
-
-    it('should rethrow error with original error and messages', () => {
-      const orig = new Error('intended');
-      rethrowAsync('first', orig, 'second', 'third');
-      let error;
-      try {
-        clock.tick(1);
-      } catch (e) {
-        error = e;
-      }
-      expect(error).to.equal(orig);
-      expect(error.message).to.match(/^first second third: intended/);
-    });
-
-    it('should preserve error suffix', () => {
-      const orig = user().createError('intended');
-      expect(isUserErrorMessage(orig.message)).to.be.true;
-      rethrowAsync('first', orig, 'second');
-      let error;
-      try {
-        clock.tick(1);
-      } catch (e) {
-        error = e;
-      }
-      expect(error).to.equal(orig);
-      expect(isUserErrorMessage(error.message)).to.be.true;
-    });
-  });
-
-  describe('duplicateErrorIfNecessary', () => {
-    it('should not duplicate if message is writeable', () => {
-      const error = {message: 'test'};
-
-      expect(duplicateErrorIfNecessary(error)).to.equal(error);
-    });
-
-    it('should duplicate if message is non-writable', () => {
-      const error = {};
-      Object.defineProperty(error, 'message', {
-        value: 'test',
-        writable: false,
-      });
-
-      expect(duplicateErrorIfNecessary(error)).to.not.equal(error);
-    });
-
-    it('copies all the tidbits', () => {
-      const error = {
-        stack: 'stack',
-        args: [1, 2, 3],
-        associatedElement: error,
-      };
-
-      Object.defineProperty(error, 'message', {
-        value: 'test',
-        writable: false,
-      });
-
-      const duplicate = duplicateErrorIfNecessary(error);
-      expect(duplicate.stack).to.equal(error.stack);
-      expect(duplicate.args).to.equal(error.args);
-      expect(duplicate.associatedElement).to.equal(error.associatedElement);
-    });
-  });
-
   describe('embed error', () => {
     let iframe;
     let element;
@@ -743,7 +598,7 @@ describe('Logging', () => {
 
     it('should return logger for user-error', () => {
       const error = user().createError();
-      expect(isUserErrorEmbed(error.message)).to.be.false;
+      expect(isUserErrorEmbedMessage(error.message)).to.be.false;
       expect(isUserErrorMessage(error.message)).to.be.true;
     });
 
@@ -751,7 +606,7 @@ describe('Logging', () => {
       element = document.createElement('embed');
       iframe.contentWindow.document.body.appendChild(element);
       const error = user(element).createError();
-      expect(isUserErrorEmbed(error.message)).to.be.true;
+      expect(isUserErrorEmbedMessage(error.message)).to.be.true;
     });
 
     it('should not create extra identical loggers', () => {

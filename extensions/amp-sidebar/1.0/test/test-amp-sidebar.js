@@ -1,24 +1,11 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import '../amp-sidebar';
-import {ActionInvocation} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
-import {htmlFor} from '../../../../src/static-template';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {ActionInvocation} from '#service/action-impl';
+import {ActionTrust} from '#core/constants/action-constants';
+import {createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {toggleExperiment} from '#experiments';
+import {waitFor, whenCalled} from '#testing/test-helper';
+import {Services} from '#service/';
 
 describes.realWin(
   'amp-sidebar:1.0',
@@ -33,6 +20,10 @@ describes.realWin(
       await waitFor(isOpenOrNot, 'element open updated');
     }
 
+    function isMounted(win, container) {
+      return win.getComputedStyle(container)['display'] !== 'none';
+    }
+
     describe('basic actions', () => {
       let win;
       let html;
@@ -45,6 +36,8 @@ describes.realWin(
       let animateFunction;
       let consoleWarnSpy;
       let consoleWarn;
+      let historyPopSpy;
+      let historyPushSpy;
 
       function invocation(method, args = {}) {
         const source = null;
@@ -74,6 +67,19 @@ describes.realWin(
         console.warn = () => true;
         consoleWarnSpy = env.sandbox.spy(console, 'warn');
 
+        historyPopSpy = env.sandbox.spy();
+        historyPushSpy = env.sandbox.spy();
+        env.sandbox.stub(Services, 'historyForDoc').returns({
+          push() {
+            historyPushSpy();
+            return Promise.resolve(11);
+          },
+          pop() {
+            historyPopSpy();
+            return Promise.resolve(11);
+          },
+        });
+
         fullHtml = html`
           <div>
             <amp-sidebar id="sidebar" side="left">
@@ -100,7 +106,7 @@ describes.realWin(
         win.document.body.appendChild(fullHtml);
         await element.buildInternal();
 
-        container = element.shadowRoot.firstElementChild;
+        container = element.shadowRoot.firstElementChild.firstElementChild;
         openButton = fullHtml.querySelector('#open');
         closeButton = fullHtml.querySelector('#close');
         toggleButton = fullHtml.querySelector('#toggle');
@@ -114,51 +120,79 @@ describes.realWin(
       it('open attribute is synced with component mounted', async () => {
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         openButton.click();
         await waitForOpen(element, true);
 
         expect(element).to.have.attribute('open');
-        expect(container.children.length).to.not.equal(0);
+        expect(isMounted(win, container)).to.equal(true);
 
         closeButton.click();
         await waitForOpen(element, false);
 
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
       });
 
       it('should open and close when "open" attribute is set', async () => {
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
+        env.sandbox.stub(element, 'setAsContainerInternal');
+        env.sandbox.stub(element, 'removeAsContainerInternal');
+
+        // Sidebar has a child.
+        const child = createElementWithAttributes(win.document, 'amp-img', {
+          layout: 'nodisplay',
+        });
+        element.appendChild(child);
+        env.sandbox.stub(child, 'pause');
+        env.sandbox.stub(child, 'unmount');
 
         element.setAttribute('open', '');
         await waitForOpen(element, true);
 
         expect(element).to.have.attribute('open');
-        expect(container.children.length).to.not.equal(0);
+        expect(isMounted(win, container)).to.equal(true);
+
+        await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
+
+        const sidebar = element.shadowRoot.querySelector('[part=sidebar]');
+        expect(sidebar).to.exist;
+        expect(element.setAsContainerInternal).to.be.calledOnce.calledWith(
+          sidebar
+        );
+        expect(element.removeAsContainerInternal).to.not.be.called;
 
         element.removeAttribute('open');
         await waitForOpen(element, false);
 
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
+
+        expect(element.removeAsContainerInternal).to.be.calledOnce;
+        expect(element.setAsContainerInternal).to.be.calledOnce; // no change.
+        expect(historyPopSpy).to.be.calledOnce;
+        expect(historyPushSpy).to.be.calledOnce; // no change.
+        expect(child.pause).to.be.calledOnce;
+        expect(child.unmount).to.not.be.called;
       });
 
       it('should close when the backdrop is clicked', async () => {
         element.enqueAction(invocation('open'));
         await waitForOpen(element, true);
 
-        expect(container.children.length).to.equal(2);
+        expect(isMounted(win, container)).to.equal(true);
         const backdrop = container.children[1];
         backdrop.click();
 
         await waitForOpen(element, false);
 
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
       });
 
       it('should close the sidebar when the esc key is pressed', async () => {
@@ -166,7 +200,7 @@ describes.realWin(
         await waitForOpen(element, true);
 
         // sidebar is opened, wait for eventListener to be attached
-        expect(container.children.length).to.equal(2);
+        expect(isMounted(win, container)).to.equal(true);
         const sidebar = container.children[0];
         const doc = sidebar.ownerDocument;
         const addListenerSpy = env.sandbox.spy(doc, 'addEventListener');
@@ -185,12 +219,12 @@ describes.realWin(
         // verify sidebar is closed
         await waitForOpen(element, false);
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
       });
 
       it('should render all children of the sidebar', async () => {
         // closed sidebar should not render any content
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         // open the sidebar
         openButton.click();
@@ -198,7 +232,7 @@ describes.realWin(
         expect(element).to.have.attribute('open');
 
         // confirm slot within the shadow root
-        expect(container.children.length).to.equal(2);
+        expect(isMounted(win, container)).to.equal(true);
         expect(container.children[0].firstElementChild).to.be.ok;
         expect(container.children[0].firstElementChild.firstElementChild).to.be
           .ok;
@@ -383,7 +417,7 @@ describes.realWin(
         element = fullHtml.firstElementChild;
         win.document.body.appendChild(fullHtml);
         await element.buildInternal();
-        container = element.shadowRoot.firstElementChild;
+        container = element.shadowRoot.firstElementChild.firstElementChild;
         openButton = fullHtml.querySelector('#open');
 
         // open the sidebar
@@ -413,7 +447,7 @@ describes.realWin(
         element = fullHtml.firstElementChild;
         win.document.body.appendChild(fullHtml);
         await element.buildInternal();
-        container = element.shadowRoot.firstElementChild;
+        container = element.shadowRoot.firstElementChild.firstElementChild;
         openButton = fullHtml.querySelector('#open');
 
         // open the sidebar
@@ -595,7 +629,7 @@ describes.realWin(
         win.document.body.appendChild(fullHtml);
         await element.buildInternal();
 
-        container = element.shadowRoot.firstElementChild;
+        container = element.shadowRoot.firstElementChild.firstElementChild;
         openButton = fullHtml.querySelector('#open');
         closeButton = fullHtml.querySelector('#close');
       });
@@ -616,7 +650,7 @@ describes.realWin(
 
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         openButton.click();
         await waitForOpen(element, true);
@@ -626,7 +660,7 @@ describes.realWin(
         animation.onfinish();
 
         expect(element).to.have.attribute('open');
-        expect(container.children.length).to.not.equal(0);
+        expect(isMounted(win, container)).to.equal(true);
       });
 
       it('should animate collapse', async () => {
@@ -635,7 +669,7 @@ describes.realWin(
 
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         // synchronous open
         openButton.click();
@@ -655,12 +689,12 @@ describes.realWin(
 
         // still displayed while animating
         expect(element).to.have.attribute('open');
-        expect(container.children.length).to.not.equal(0);
+        expect(isMounted(win, container)).to.equal(true);
 
         animation.onfinish();
         await waitForOpen(element, false);
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
       });
 
       it('should reverse animations if closed while opening', async () => {
@@ -672,7 +706,7 @@ describes.realWin(
 
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         // begin open animation
         openButton.click();
@@ -698,7 +732,7 @@ describes.realWin(
 
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         // synchronous open
         openButton.click();
@@ -712,7 +746,7 @@ describes.realWin(
 
         // sidebar is initially opened
         expect(element).to.have.attribute('open');
-        expect(container.children.length).to.not.equal(0);
+        expect(isMounted(win, container)).to.equal(true);
 
         // begin close animation
         closeButton.click();
@@ -730,6 +764,143 @@ describes.realWin(
           'reverse animation has begun'
         );
         expect(animation.reverse).to.be.calledTwice;
+      });
+    });
+
+    describe('toolbar', () => {
+      let win;
+      let html;
+      let element;
+      let target;
+
+      beforeEach(async () => {
+        win = env.win;
+        html = htmlFor(win.document);
+        toggleExperiment(win, 'bento-sidebar', true, true);
+      });
+
+      it('toolbar target should receive expected content from toolbar', async () => {
+        target = html`<div id="toolbar-target"></div>`;
+        element = html`
+          <amp-sidebar id="sidebar" side="left">
+            <span>
+              Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at
+              aeque inermis reprehendunt.
+            </span>
+            <nav toolbar="" toolbar-target="toolbar-target">
+              <ul>
+                <li>Toolbar Item 1</li>
+                <li>Toolbar Item 2</li>
+              </ul>
+            </nav>
+          </amp-sidebar>
+        `;
+
+        win.document.body.appendChild(target);
+        win.document.body.appendChild(element);
+        await element.buildInternal();
+        await waitFor(() => target.hasChildNodes(), 'effects have run');
+
+        expect(target.hasChildNodes()).to.be.true;
+        expect(target.childElementCount).to.equal(2);
+        expect(target.firstElementChild.nodeName).to.equal('NAV');
+        expect(target.lastElementChild.nodeName).to.equal('STYLE');
+      });
+
+      it('existing children in toolbar target should not be overwritten', async () => {
+        target = html`
+        <div id="toolbar-target">
+          <span>hello world<span>
+        </div>`;
+        element = html`
+          <amp-sidebar id="sidebar" side="left">
+            <span>
+              Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at
+              aeque inermis reprehendunt.
+            </span>
+            <nav toolbar="" toolbar-target="toolbar-target">
+              <ul>
+                <li>Toolbar Item 1</li>
+                <li>Toolbar Item 2</li>
+              </ul>
+            </nav>
+          </amp-sidebar>
+        `;
+
+        win.document.body.appendChild(target);
+        win.document.body.appendChild(element);
+        await element.buildInternal();
+        await waitFor(() => target.childElementCount != 1, 'effects have run');
+
+        expect(target.hasChildNodes()).to.be.true;
+        expect(target.childElementCount).to.equal(3);
+        expect(target.firstElementChild.nodeName).to.equal('SPAN');
+        expect(target.children[1].nodeName).to.equal('NAV');
+        expect(target.lastElementChild.nodeName).to.equal('STYLE');
+      });
+
+      it('toolbar should sanitize an invalid media query', async () => {
+        target = html`<div id="toolbar-target"></div>`;
+        element = html`
+          <amp-sidebar id="sidebar" side="left">
+            <span>
+              Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at
+              aeque inermis reprehendunt.
+            </span>
+            <nav toolbar="foo {}" toolbar-target="toolbar-target">
+              <ul>
+                <li>Toolbar Item 1</li>
+                <li>Toolbar Item 2</li>
+              </ul>
+            </nav>
+          </amp-sidebar>
+        `;
+
+        win.document.body.appendChild(target);
+        win.document.body.appendChild(element);
+        await element.buildInternal();
+        await waitFor(() => target.hasChildNodes(), 'effects have run');
+
+        expect(target.hasChildNodes()).to.be.true;
+        expect(target.childElementCount).to.equal(2);
+        const styleElementText = target.lastElementChild.textContent;
+        expect(styleElementText).to.include('not all'); //sanitized media query
+        expect(styleElementText).not.to.include('foo'); //unsanitized media query
+      });
+
+      it('toolbar should sanitize the toolbar target attribute', async () => {
+        const getElementByIdSpy = env.sandbox.spy(
+          win.document,
+          'getElementById'
+        );
+        target = html`<div id="toolbar-target"></div>`;
+        element = html`
+          <amp-sidebar id="sidebar" side="left">
+            <span>
+              Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at
+              aeque inermis reprehendunt.
+            </span>
+            <nav toolbar="foo {}" toolbar-target="toolbar-target:.">
+              <ul>
+                <li>Toolbar Item 1</li>
+                <li>Toolbar Item 2</li>
+              </ul>
+            </nav>
+          </amp-sidebar>
+        `;
+
+        win.document.body.appendChild(target);
+        win.document.body.appendChild(element);
+        await element.buildInternal();
+        await waitFor(
+          () => getElementByIdSpy.callCount != 0,
+          'effects have run'
+        );
+
+        expect(getElementByIdSpy).to.be.calledOnce;
+        //sanitized toolbar target attribute
+        expect(getElementByIdSpy).to.be.calledWith('toolbar-target\\:\\.');
+        expect(target.hasChildNodes()).to.be.false;
       });
     });
   }

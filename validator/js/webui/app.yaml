@@ -9,7 +9,12 @@ handlers:
 
 - url: /$
   static_files: index.html
-  upload: index.html
+  upload: index\.html
+  secure: always
+
+- url: /legacy\.html$
+  static_files: legacy.html
+  upload: legacy\.html
   secure: always
 
 - url: /amp_favicon.png$

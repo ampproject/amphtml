@@ -7,22 +7,6 @@ teaser:
   text: Provides a way to display and update content live.
 ---
 
-<!--
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-live-list
 
 ## Usage
@@ -265,7 +249,7 @@ If a `data-update-time` attribute is present and its value is a number higher
 than the original `data-sort-time` on the attribute, the item will be updated in
 place through a `replaceChild` operation. If a `data-tombstone` attribute is
 present the element's subtree will be emptied out and the item is hidden through
-css (see [amp-live-list.css](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/0.1/amp-live-list.css)).
+css (see [amp-live-list.css](https://github.com/ampproject/amphtml/blob/main/extensions/amp-live-list/0.1/amp-live-list.css)).
 
 If a replace or tombstone operation is found but no insert (no new items) is
 found on a poll request, the replace and the tombstone operation will occur
@@ -426,5 +410,5 @@ point, and you can hook into this class to add transitions.
 
 ## Validation
 
-See [amp-live-list rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/validator-amp-live-list.protoascii)
+See [amp-live-list rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-live-list/validator-amp-live-list.protoascii)
 in the AMP validator specification.

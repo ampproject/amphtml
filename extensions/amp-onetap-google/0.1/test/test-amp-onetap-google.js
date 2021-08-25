@@ -1,27 +1,15 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-onetap-google';
-import {ACTIONS, SENTINEL} from '../amp-onetap-google';
-import {AmpDoc} from '../../../../src/service/ampdoc-impl';
+import {createElementWithAttributes, waitForChild} from '#core/dom';
+
+import {Services} from '#service';
+import {AmpDoc} from '#service/ampdoc-impl';
+
+import {macroTask} from '#testing/helpers';
+
 import {BaseElement} from '../../../../src/base-element';
-import {Services} from '../../../../src/services';
-import {createElementWithAttributes, waitForChild} from '../../../../src/dom';
-import {macroTask} from '../../../../testing/yield';
+import {loadPromise} from '../../../../src/event-helper';
 import {user} from '../../../../src/log';
+import {ACTIONS, SENTINEL} from '../amp-onetap-google';
 
 const TAG = 'amp-onetap-google';
 
@@ -60,6 +48,8 @@ describes.realWin(
 
     async function fakePostMessage(element, iframe, data) {
       const origin = 'https://fake.localhost';
+
+      await loadPromise(iframe); // so we have access to a contentWindow
 
       const impl = await element.getImpl();
       impl.handleIntermediateIframeMessage_(origin, {
@@ -137,7 +127,10 @@ describes.realWin(
 
       const iframe = await whenSelectedAvailable(element, 'iframe');
 
-      env.sandbox./*OK*/ stub(iframe.contentWindow, 'postMessage');
+      const postMessage = env.sandbox.stub(
+        await element.getImpl(),
+        'postMessage_'
+      );
 
       const nonce = 'chilaquiles';
 
@@ -148,7 +141,8 @@ describes.realWin(
       });
 
       expect(
-        iframe.contentWindow.postMessage.withArgs(
+        postMessage.withArgs(
+          iframe.contentWindow,
           env.sandbox.match({command: 'parent_frame_ready', nonce})
         )
       ).to.have.been.calledOnce;

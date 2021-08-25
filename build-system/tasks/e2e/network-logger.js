@@ -1,19 +1,6 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {logging} from 'selenium-webdriver';
+import selenium from 'selenium-webdriver';
+
+const {logging} = selenium;
 
 /** @enum {string} */
 const PerformanceMethods = {
@@ -26,17 +13,16 @@ const PerformanceMethods = {
   'WINDOW_OPEN': 'Network.windowOpen',
 };
 
-class NetworkLogger {
-  /** @param {!WebDriver} driver */
+export class NetworkLogger {
+  /** @param {!selenium.WebDriver} driver */
   constructor(driver) {
-    /** @type {WebDriver} */
+    /** @type {selenium.WebDriver} */
     this.driver_ = driver;
   }
 
   /**
-   *
    * @param {PerformanceMethods} networkMethod
-   * @return {Promise<string[]>}
+   * @return {Promise<*>}
    */
   async getEntries_(networkMethod) {
     const entries = await this.driver_
@@ -54,7 +40,7 @@ class NetworkLogger {
   /**
    * Gets sent requests with an optional url to filter by.
    * @param {string=} url
-   * @return {Array<logging.Entry>}
+   * @return {Promise<Array<*>>}
    */
   async getSentRequests(url) {
     const entries = await this.getEntries_(
@@ -66,7 +52,3 @@ class NetworkLogger {
     return entries;
   }
 }
-
-module.exports = {
-  NetworkLogger,
-};

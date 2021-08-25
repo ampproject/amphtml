@@ -1,30 +1,22 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {addExperimentIdToElement} from '#ads/google/a4a/traffic-experiments';
 
-import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
-import {CommonSignals} from '../../../src/common-signals';
-import {Services} from '../../../src/services';
+import {CommonSignals} from '#core/constants/common-signals';
+import {removeElement} from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {realChildElements} from '#core/dom/query';
 import {
   computedStyle,
   removeAlphaFromColor,
   setStyle,
   toggle,
-} from '../../../src/style';
+} from '#core/dom/style';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
 import {dev, user, userAssert} from '../../../src/log';
-import {removeElement, whenUpgradedToCustomElement} from '../../../src/dom';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -55,10 +47,16 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    userAssert(
+      this.win.document.querySelectorAll(
+        'amp-sticky-ad.i-amphtml-built, amp-ad[sticky].i-amphtml-built'
+      ).length <= 1,
+      'At most one sticky ad can be loaded per page'
+    );
     this.viewport_ = this.getViewport();
     this.element.classList.add('i-amphtml-sticky-ad-layout');
 
-    const children = this.getRealChildren();
+    const children = realChildElements(this.element);
     userAssert(
       children.length == 1 && children[0].tagName == 'AMP-AD',
       'amp-sticky-ad must have a single amp-ad child'
@@ -102,6 +100,40 @@ class AmpStickyAd extends AMP.BaseElement {
       owners.scheduleLayout(this.element, dev().assertElement(this.ad_));
     }
     return Promise.resolve();
+  }
+
+  /** @override */
+  upgradeCallback() {
+    if (!isExperimentOn(this.win, 'amp-sticky-ad-to-amp-ad')) {
+      return null;
+    }
+
+    const children = realChildElements(this.element);
+    userAssert(
+      children.length == 1 && children[0].tagName == 'AMP-AD',
+      'amp-sticky-ad must have a single amp-ad child'
+    );
+
+    const ad = children[0];
+    const enableConversion = Math.random() < 0.5;
+
+    const adType = (ad.getAttribute('type') || '').toLowerCase();
+    if (adType == 'doubleclick' || adType == 'adsense') {
+      addExperimentIdToElement(enableConversion ? '31061856' : '31061855', ad);
+    }
+
+    if (!enableConversion) {
+      // Wait for the amp-ad extension to be loaded for a fairer comparison
+      return Services.extensionsFor(this.win)
+        .loadElementClass('amp-ad', '0.1')
+        .then(() => null);
+    }
+
+    ad.setAttribute('sticky', 'bottom');
+    this.element.parentElement.replaceChild(ad, this.element);
+    return Services.extensionsFor(this.win)
+      .loadElementClass('amp-ad', '0.1')
+      .then((AmpAd) => new AmpAd(ad));
   }
 
   /** @override */

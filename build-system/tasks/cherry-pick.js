@@ -1,23 +1,9 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {execOrThrow, getOutput} = require('../common/exec');
-const {green, cyan, red, yellow} = require('kleur/colors');
+const {cyan, green, red, yellow} = require('../common/colors');
+const {execOrThrow} = require('../common/exec');
+const {getOutput} = require('../common/process');
 const {log} = require('../common/logging');
 
 /**
@@ -84,14 +70,10 @@ async function cherryPick() {
   let onto = String(argv.onto || '');
 
   if (!commits.length) {
-    const error = new Error('Must provide commit list with --commits');
-    error.showStack = false;
-    throw error;
+    throw new Error('Must provide commit list with --commits');
   }
   if (!onto) {
-    const error = new Error('Must provide 13-digit AMP version with --onto');
-    error.showStack = false;
-    throw error;
+    throw new Error('Must provide 13-digit AMP version with --onto');
   }
   if (onto.length === 15) {
     log(
@@ -103,9 +85,7 @@ async function cherryPick() {
     onto = onto.substr(2);
   }
   if (onto.length !== 13) {
-    const error = new Error('Expected 13-digit AMP version');
-    error.showStack = false;
-    throw error;
+    throw new Error('Expected 13-digit AMP version');
   }
 
   const branch = cherryPickBranchName(onto, commits.length);
@@ -134,17 +114,17 @@ async function cherryPick() {
   } catch (e) {
     log(red('ERROR:'), e.message);
     log('Deleting branch', cyan(branch));
-    getOutput(`git checkout master && git branch -d ${branch}`);
+    getOutput(`git checkout main && git branch -d ${branch}`);
     throw e;
   }
 }
 
 module.exports = {cherryPick};
 
-cherryPick.description = 'Cherry-picks one or more commits onto a new branch';
+cherryPick.description = 'Cherry-pick one or more commits onto a new branch';
 cherryPick.flags = {
   'commits': 'Comma-delimited list of commit SHAs to cherry-pick',
-  'push': 'If set, will push the created branch to the remote',
-  'remote': 'Remote to refresh tags from (default: origin)',
+  'push': 'If set, push the created branch to the remote',
+  'remote': 'Remote ref to refresh tags from (default: origin)',
   'onto': '13-digit AMP version to cherry-pick onto',
 };

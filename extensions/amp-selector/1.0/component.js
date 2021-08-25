@@ -1,24 +1,10 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import objstr from 'obj-str';
 
-import * as Preact from '../../../src/preact';
-import {Keys} from '../../../src/utils/key-codes';
-import {forwardRef} from '../../../src/preact/compat';
-import {mod} from '../../../src/utils/math';
-import {tryFocus} from '../../../src/dom';
+import {Keys} from '#core/constants/key-codes';
+import {tryFocus} from '#core/dom';
+import {mod} from '#core/math';
+
+import * as Preact from '#preact';
 import {
   useCallback,
   useContext,
@@ -28,9 +14,10 @@ import {
   useMemo,
   useRef,
   useState,
-} from '../../../src/preact';
+} from '#preact';
+import {forwardRef} from '#preact/compat';
+
 import {useStyles} from './component.jss';
-import objstr from 'obj-str';
 
 const SelectorContext = Preact.createContext(
   /** @type {SelectorDef.ContextProps} */ ({selected: []})
@@ -49,7 +36,7 @@ export const KEYBOARD_SELECT_MODE = {
 
 /**
  * @param {!SelectorDef.Props} props
- * @param {{current: (!SelectorDef.SelectorApi|null)}} ref
+ * @param {{current: ?SelectorDef.SelectorApi}} ref
  * @return {PreactDef.Renderable}
  */
 function SelectorWithRef(
@@ -303,8 +290,8 @@ export function Option({
     keyboardSelectMode,
     multiple: selectorMultiple,
     optionsRef,
-    selected,
     selectOption,
+    selected,
   } = useContext(SelectorContext);
 
   const focus = useCallback(

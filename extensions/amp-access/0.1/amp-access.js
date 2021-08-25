@@ -1,38 +1,25 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust} from '#core/constants/action-constants';
+import {AmpEvents} from '#core/constants/amp-events';
+import {TickLabel} from '#core/constants/enums';
+import {Observable} from '#core/data-structures/observable';
+import {isJsonScriptTag} from '#core/dom';
+import {isArray} from '#core/types';
+import {dict, getValueForExpr} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
 
-import {AccessSource, AccessType} from './amp-access-source';
-import {AccessVars} from './access-vars';
-import {ActionTrust} from '../../../src/action-constants';
+import {Services} from '#service';
+
 import {AmpAccessEvaluator} from './access-expr';
-import {AmpEvents} from '../../../src/amp-events';
+import {AccessVars} from './access-vars';
+import {AccessSource, AccessType} from './amp-access-source';
+
 import {CSS} from '../../../build/amp-access-0.1.css';
-import {Observable} from '../../../src/observable';
-import {Services} from '../../../src/services';
-import {TickLabel} from '../../../src/enums';
-import {cancellation} from '../../../src/error';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getSourceOrigin} from '../../../src/url';
-import {getValueForExpr, tryParseJson} from '../../../src/json';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {isArray} from '../../../src/types';
-import {isJsonScriptTag} from '../../../src/dom';
-import {listenOnce} from '../../../src/event-helper';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {cancellation} from '../../../src/error-reporting';
+import {listenOnce} from '../../../src/event-helper';
+import {dev, user, userAssert} from '../../../src/log';
+import {installStylesForDoc} from '../../../src/style-installer';
+import {getSourceOrigin} from '../../../src/url';
 
 /** @const */
 const TAG = 'amp-access';
@@ -261,7 +248,10 @@ export class AccessService {
     for (let i = 0; i < this.sources_.length; i++) {
       const source = this.sources_[i];
       if (source.getType() == AccessType.VENDOR) {
-        const vendorAdapter = /** @type {!./amp-access-vendor.AccessVendorAdapter} */ (source.getAdapter());
+        const vendorAdapter =
+          /** @type {!./amp-access-vendor.AccessVendorAdapter} */ (
+            source.getAdapter()
+          );
         if (vendorAdapter.getVendorName() == name) {
           return source;
         }
@@ -771,8 +761,9 @@ export class AccessService {
    */
   combinedResponses() {
     if (this.sources_.length == 1 && !this.sources_[0].getNamespace()) {
-      return /** @type {!JsonObject} */ (this.sources_[0].getAuthResponse() ||
-        {});
+      return /** @type {!JsonObject} */ (
+        this.sources_[0].getAuthResponse() || {}
+      );
     }
 
     const combined = /** @type {!JsonObject} */ ({});

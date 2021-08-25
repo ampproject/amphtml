@@ -1,22 +1,6 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {BindValidator} from '../bind-validator';
 
-describe('BindValidator (allowUrlProperties=true)', () => {
+describes.sandboxed('BindValidator (allowUrlProperties=true)', {}, () => {
   let val;
 
   beforeEach(() => {
@@ -258,6 +242,10 @@ describe('BindValidator (allowUrlProperties=true)', () => {
       expect(val.canBind('AMP-LIST', 'is-layout-container')).to.be.true;
     });
 
+    it('should support <amp-render>', () => {
+      expect(val.canBind('AMP-RENDER', 'src')).to.be.true;
+    });
+
     it('should support <amp-selector>', () => {
       expect(val.canBind('AMP-SELECTOR', 'disabled')).to.be.true;
       expect(val.canBind('AMP-SELECTOR', 'selected')).to.be.true;
@@ -310,7 +298,7 @@ describe('BindValidator (allowUrlProperties=true)', () => {
   });
 });
 
-describe('BindValidator (allowUrlProperties=false)', () => {
+describes.sandboxed('BindValidator (allowUrlProperties=false)', {}, () => {
   let val;
 
   beforeEach(() => {

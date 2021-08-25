@@ -8,22 +8,6 @@ teaser:
   text: Allows you to create forms to submit input fields in an AMP document.
 ---
 
-<!---
-Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-form
 
 ## Usage
@@ -113,9 +97,9 @@ Before creating a `<form>`, you must include the required script for the `<amp-f
 
 [/filter]<!-- formats="email" -->
 
-(Relaxing some of these rules might be reconsidered in the future - [please let us know](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#suggestions-and-feature-requests) if you require these and provide use cases).
+(Relaxing some of these rules might be reconsidered in the future - [please let us know](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#suggestions-and-feature-requests) if you require these and provide use cases).
 
-For details on valid inputs and fields, see [amp-form rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii) in the AMP validator specification.
+For details on valid inputs and fields, see [amp-form rules](https://github.com/ampproject/amphtml/blob/main/validator/validator-main.protoascii) in the AMP validator specification.
 
 ### Success and error response rendering
 
@@ -434,7 +418,7 @@ For more examples, see [examples/forms.amp.html](../../examples/forms.amp.html).
 
 ### Variable substitutions
 
-The `amp-form` extension allows [platform variable substitutions](../../spec/amp-var-substitutions.md) for inputs that are hidden and that have the `data-amp-replace` attribute. On each form submission, `amp-form` finds all `input[type=hidden][data-amp-replace]` inside the form and applies variable substitutions to its `value` attribute and replaces it with the result of the substitution.
+The `amp-form` extension allows [platform variable substitutions](../../docs/spec/amp-var-substitutions.md) for inputs that are hidden and that have the `data-amp-replace` attribute. On each form submission, `amp-form` finds all `input[type=hidden][data-amp-replace]` inside the form and applies variable substitutions to its `value` attribute and replaces it with the result of the substitution.
 
 You must provide the variables you are using for each substitution on each input by specifying a space-separated string of the variables used in `data-amp-replace` (see example below). AMP will not replace variables that are not explicitly specified.
 
@@ -482,7 +466,7 @@ Once the user tries to submit the form, AMP will try to resolve the variables an
 
 Note how `CANONICAL_HOSTNAME` above did not get replaced because it was not in the allowlist through `data-amp-replace` attribute on the first field.
 
-Substitutions will happen on every subsequent submission. Read more about [variable substitutions in AMP](../../spec/amp-var-substitutions.md).
+Substitutions will happen on every subsequent submission. Read more about [variable substitutions in AMP](../../docs/spec/amp-var-substitutions.md).
 
 [/filter]<!-- formats="websites, ads" -->
 

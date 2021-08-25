@@ -1,32 +1,19 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {CommonSignals} from '../../../src/common-signals';
-import {Deferred} from '../../../src/utils/promise';
-import {Observable} from '../../../src/observable';
+import {CommonSignals} from '#core/constants/common-signals';
+import {Deferred} from '#core/data-structures/promise';
+import {Observable} from '#core/data-structures/observable';
 import {
   PlayingStates,
   VideoAnalyticsEvents,
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
-import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
+import {deepMerge, dict, hasOwn} from '#core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
-import {getDataParamsFromAttributes, isAmpElement} from '../../../src/dom';
-import {isArray, isEnumValue, isFiniteNumber} from '../../../src/types';
+import {getDataParamsFromAttributes} from '#core/dom';
+import {isAmpElement} from '#core/dom/amp-element-helpers';
+import {isArray, isEnumValue, isFiniteNumber} from '#core/types';
+import {debounce} from '#core/types/function';
+import {isExperimentOn} from '#experiments';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -36,6 +23,7 @@ const DEFAULT_MAX_TIMER_LENGTH_SECONDS = 7200;
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function () {};
 const TAG = 'amp-analytics/events';
+const SESSION_DEBOUNCE_TIME_MS = 500;
 
 /**
  * Events that can result in analytics data to be sent.
@@ -44,6 +32,7 @@ const TAG = 'amp-analytics/events';
  */
 export const AnalyticsEventType = {
   CLICK: 'click',
+  BROWSER_EVENT: 'browser-event',
   CUSTOM: 'custom',
   HIDDEN: 'hidden',
   INI_LOAD: 'ini-load',
@@ -53,6 +42,11 @@ export const AnalyticsEventType = {
   TIMER: 'timer',
   VIDEO: 'video',
   VISIBLE: 'visible',
+};
+
+const BrowserEventType = {
+  BLUR: 'blur',
+  CHANGE: 'change',
 };
 
 const ALLOWED_FOR_ALL_ROOT_TYPES = ['ampdoc', 'embed'];
@@ -72,6 +66,14 @@ const TRACKER_TYPE = Object.freeze({
     // Escape the temporal dead zone by not referencing a class directly.
     klass: function (root) {
       return new ClickEventTracker(root);
+    },
+  },
+  [AnalyticsEventType.BROWSER_EVENT]: {
+    name: AnalyticsEventType.BROWSER_EVENT,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    // Escape the temporal dead zone by not referencing a class directly.
+    klass: function (root) {
+      return new BrowserEventTracker(root);
     },
   },
   [AnalyticsEventType.CUSTOM]: {
@@ -151,11 +153,31 @@ function isAmpStoryTriggerType(triggerType) {
 }
 
 /**
+ * Assert that the selectors are all unique
+ * @param {!Array<string>|string} selectors
+ */
+function assertUniqueSelectors(selectors) {
+  userAssert(
+    !isArray(selectors) || new Set(selectors).size === selectors.length,
+    'Cannot have duplicate selectors in selectors list: %s',
+    selectors
+  );
+}
+
+/**
  * @param {string} triggerType
  * @return {boolean}
  */
 function isVideoTriggerType(triggerType) {
   return triggerType.startsWith('video');
+}
+
+/**
+ * @param {string} triggerType
+ * @return {boolean}
+ */
+function isCustomBrowserTriggerType(triggerType) {
+  return isEnumValue(BrowserEventType, triggerType);
 }
 
 /**
@@ -173,6 +195,9 @@ function isReservedTriggerType(triggerType) {
 export function getTrackerKeyName(eventType) {
   if (isVideoTriggerType(eventType)) {
     return AnalyticsEventType.VIDEO;
+  }
+  if (isCustomBrowserTriggerType(eventType)) {
+    return AnalyticsEventType.BROWSER_EVENT;
   }
   if (isAmpStoryTriggerType(eventType)) {
     return AnalyticsEventType.STORY;
@@ -212,7 +237,8 @@ export function getTrackerTypesForParentType(parentType) {
 function mergeDataVars(target, eventVars) {
   const vars = getDataParamsFromAttributes(
     target,
-    /* computeParamNameFunc */ undefined,
+    /* computeParamNameFunc */
+    undefined,
     VARIABLE_DATA_ATTRIBUTE_KEY
   );
   // Merge eventVars into vars, depth=0 because
@@ -293,6 +319,89 @@ export class EventTracker {
 }
 
 /**
+ * Tracks browser events as a pass-through.
+ */
+export class BrowserEventTracker extends EventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root);
+
+    /** @private {?Observable<!Event>} */
+    this.observables_ = new Observable();
+
+    /** @private {!Object<BrowserEventType, boolean>} */
+    this.listenerMap_ = dict({});
+
+    /** @private {?function(!Event)} */
+    this.boundOnSession_ = this.observables_.fire.bind(this.observables_);
+
+    /** @private {?function(!Event):void} */
+    this.debouncedBoundOnSession_ = debounce(
+      this.root.ampdoc.win,
+      this.boundOnSession_,
+      SESSION_DEBOUNCE_TIME_MS
+    );
+  }
+
+  /** @override */
+  dispose() {
+    const root = this.root.getRoot();
+    Object.keys(this.listenerMap_).forEach((eventName) => {
+      root.removeEventListener(eventName, this.debouncedBoundOnSession_);
+    });
+    this.boundOnSession_ = null;
+    this.observables_ = null;
+  }
+
+  /** @override */
+  add(context, eventType, config, listener) {
+    userAssert(
+      isExperimentOn(this.root.ampdoc.win, 'analytics-browser-events'),
+      'expected global "analytics-browser-events" experiment to be enabled'
+    );
+
+    const {
+      'on': eventName,
+      'selectionMethod': selectionMethod = null,
+      'selector': selector,
+    } = config;
+    userAssert(
+      selector?.length,
+      'Missing required selector on browser event trigger'
+    );
+    assertUniqueSelectors(selector);
+    const targetPromises = this.root.getElements(
+      context,
+      selector,
+      selectionMethod,
+      false
+    );
+    if (!this.listenerMap_[eventName]) {
+      this.root
+        .getRootElement()
+        .addEventListener(eventName, this.debouncedBoundOnSession_, true);
+      this.listenerMap_[eventName] = true;
+    }
+    return this.observables_.add((event) => {
+      if (event.type !== eventName) {
+        return;
+      }
+      targetPromises.then((targets) => {
+        targets.forEach((target) => {
+          const el = event.target;
+          if (!target.contains(el)) {
+            return;
+          }
+          // TODO(kalemuw): Allowlist properties from event.detail to pass as vars.
+          listener(new AnalyticsEvent(target, eventName, {}));
+        });
+      });
+    });
+  }
+}
+/**
  * Tracks custom events.
  */
 export class CustomEventTracker extends EventTracker {
@@ -301,10 +410,8 @@ export class CustomEventTracker extends EventTracker {
    */
   constructor(root) {
     super(root);
-
     /** @const @private {!Object<string, !Observable<!AnalyticsEvent>>} */
     this.observables_ = {};
-
     /**
      * Early events have to be buffered because there's no way to predict
      * how fast all `amp-analytics` elements will be instrumented.
@@ -466,7 +573,6 @@ export class AmpStoryEventTracker extends CustomEventTracker {
    * @param {!AnalyticsEvent} event
    * @param {!Element} rootTarget
    * @param {!JsonObject} config
-
    * @param {function(!AnalyticsEvent)} listener
    */
   fireListener_(event, rootTarget, config, listener) {
@@ -581,7 +687,7 @@ export class ScrollEventTracker extends EventTracker {
     /** @private {!./analytics-root.AnalyticsRoot} root */
     this.root_ = root;
 
-    /** @private {function(!Object)|null} */
+    /** @private {?function(!Object)} */
     this.boundScrollHandler_ = null;
   }
 
@@ -646,7 +752,7 @@ export class ScrollEventTracker extends EventTracker {
   scrollHandler_(boundsH, boundsV, useInitialPageSize, listener, e) {
     // Calculates percentage scrolled by adding screen height/width to
     // top/left and dividing by the total scroll height/width.
-    const {scrollWidth, scrollHeight} = useInitialPageSize ? e.initialSize : e;
+    const {scrollHeight, scrollWidth} = useInitialPageSize ? e.initialSize : e;
 
     this.triggerScrollEvents_(
       boundsV,
@@ -1278,19 +1384,25 @@ export class VideoEventTracker extends EventTracker {
   /** @override */
   add(context, eventType, config, listener) {
     const videoSpec = config['videoSpec'] || {};
-    const selector = config['selector'] || videoSpec['selector'];
+    const selector = userAssert(
+      config['selector'] || videoSpec['selector'],
+      'Missing required selector on video trigger'
+    );
+
+    userAssert(selector.length, 'Missing required selector on video trigger');
+    assertUniqueSelectors(selector);
     const selectionMethod = config['selectionMethod'] || null;
-    const targetReady = this.root.getElement(
+    const targetPromises = this.root.getElements(
       context,
       selector,
-      selectionMethod
+      selectionMethod,
+      false
     );
 
     const endSessionWhenInvisible = videoSpec['end-session-when-invisible'];
     const excludeAutoplay = videoSpec['exclude-autoplay'];
     const interval = videoSpec['interval'];
     const percentages = videoSpec['percentages'];
-
     const on = config['on'];
 
     const percentageInterval = 5;
@@ -1383,12 +1495,17 @@ export class VideoEventTracker extends EventTracker {
         event.target,
         'No target specified by video session event.'
       );
-      targetReady.then((target) => {
-        if (!target.contains(el)) {
-          return;
-        }
-        const normalizedDetails = removeInternalVars(details);
-        listener(new AnalyticsEvent(target, normalizedType, normalizedDetails));
+
+      targetPromises.then((targets) => {
+        targets.forEach((target) => {
+          if (!target.contains(el)) {
+            return;
+          }
+          const normalizedDetails = removeInternalVars(details);
+          listener(
+            new AnalyticsEvent(target, normalizedType, normalizedDetails)
+          );
+        });
       });
     });
   }
@@ -1473,13 +1590,11 @@ export class VisibilityTracker extends EventTracker {
     const visibilityManager = this.root.getVisibilityManager();
 
     if (reportWhenSpec == 'documentHidden') {
-      createReportReadyPromiseFunc = this.createReportReadyPromiseForDocumentHidden_.bind(
-        this
-      );
+      createReportReadyPromiseFunc =
+        this.createReportReadyPromiseForDocumentHidden_.bind(this);
     } else if (reportWhenSpec == 'documentExit') {
-      createReportReadyPromiseFunc = this.createReportReadyPromiseForDocumentExit_.bind(
-        this
-      );
+      createReportReadyPromiseFunc =
+        this.createReportReadyPromiseForDocumentExit_.bind(this);
     } else {
       userAssert(
         !reportWhenSpec,
@@ -1512,7 +1627,7 @@ export class VisibilityTracker extends EventTracker {
     // Array selectors do not suppor the special cases: ':host' & ':root'
     const selectionMethod =
       config['selectionMethod'] || visibilitySpec['selectionMethod'];
-    this.assertUniqueSelectors_(selector);
+    assertUniqueSelectors(selector);
     const unlistenPromise = this.root
       .getElements(context.parentElement || context, selector, selectionMethod)
       .then((elements) => {
@@ -1538,24 +1653,6 @@ export class VisibilityTracker extends EventTracker {
         }
       });
     };
-  }
-
-  /**
-   * Assert that the selectors are all unique
-   * @param {!Array<string>|string} selectors
-   */
-  assertUniqueSelectors_(selectors) {
-    if (isArray(selectors)) {
-      const map = {};
-      for (let i = 0; i < selectors.length; i++) {
-        userAssert(
-          !map[selectors[i]],
-          'Cannot have duplicate selectors in selectors list: %s',
-          selectors
-        );
-        map[selectors[i]] = selectors[i];
-      }
-    }
   }
 
   /**

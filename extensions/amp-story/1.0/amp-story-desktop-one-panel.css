@@ -1,0 +1,42 @@
+
+
+@import './amp-story-desktop-user-overridable.css';
+
+amp-story[standalone].i-amphtml-story-desktop-one-panel {
+  background-color: #000 !important;
+}
+/**
+ * NOTE: If you change any variables or media queries change:
+ * css/amp-story-player-shadow.css
+ */
+
+/** Variables shared between page, system layer and pagination buttons. */
+.i-amphtml-story-desktop-one-panel {
+  --i-amphtml-story-desktop-one-panel-ratio: 69 / 116;
+  --i-amphtml-story-desktop-one-panel-responsive-margin: max(74px, 8.25vh);
+    /** Calculates panel height by subtracting responsive vertical margin. */
+  --i-amphtml-story-desktop-one-panel-height: calc(100vh - var(--i-amphtml-story-desktop-one-panel-responsive-margin) * 2);
+  --i-amphtml-story-desktop-one-panel-width: calc(var(--i-amphtml-story-desktop-one-panel-height) * var(--i-amphtml-story-desktop-one-panel-ratio));
+  --i-amphtml-story-desktop-one-panel-border-radius: 10px;
+}
+
+@media(max-height: 756px) {
+  .i-amphtml-story-desktop-one-panel {
+    --i-amphtml-story-desktop-one-panel-responsive-margin: 0;
+    --i-amphtml-story-desktop-one-panel-width: calc(100vh * var(--i-amphtml-story-desktop-one-panel-ratio));
+    --i-amphtml-story-desktop-one-panel-border-radius: 0;
+  }
+}
+
+@media(max-height: 538px) {
+  .i-amphtml-story-desktop-one-panel {
+    --i-amphtml-story-desktop-one-panel-ratio: 3 / 4;
+  }
+}
+
+.i-amphtml-story-desktop-one-panel amp-story-page {
+  width: var(--i-amphtml-story-desktop-one-panel-width) !important;
+  height: var(--i-amphtml-story-desktop-one-panel-height) !important;
+  border-radius: var(--i-amphtml-story-desktop-one-panel-border-radius) !important;
+  margin: auto !important;
+}

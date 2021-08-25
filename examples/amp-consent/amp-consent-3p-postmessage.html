@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ⚡>
+<html ⚡ lang="en">
   <head>
     <meta charset="utf-8" />
     <title>amp-video-iframe</title>
@@ -8,11 +8,6 @@
     <script async custom-element="amp-video-iframe" src="https://cdn.ampproject.org/v0/amp-video-iframe-0.1.js"></script>
     <script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"></script>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
-    <script>
-      (self.AMP = self.AMP || []).push(function(AMP) {
-        AMP.toggleExperiment('tcf-post-message-proxy-api', true);
-      });
-    </script>
     <style amp-custom>
       body {
         max-width: 527px;
@@ -147,7 +142,7 @@
         This is a fallback
       </div>
     </amp-video-iframe>
-    
+
     <amp-video-iframe data-block-on-consent id="myVideo2" src="./diy-3p-iframe-tcf-postmessage.html" width="720" height="405" layout="responsive" autoplay>
       <div placeholder>
         This is a placeholder

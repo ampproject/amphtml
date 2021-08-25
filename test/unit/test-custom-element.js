@@ -1,34 +1,20 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {AmpEvents} from '../../src/amp-events';
+
+import {AmpEvents} from '#core/constants/amp-events';
+import {CommonSignals} from '#core/constants/common-signals';
+import {LOADING_ELEMENTS_, Layout} from '#core/dom/layout';
+
+import {Services} from '#service';
+import {elementConnectedCallback} from '#service/custom-element-registry';
+import {Resource, ResourceState} from '#service/resource';
+
 import {BaseElement} from '../../src/base-element';
-import {CommonSignals} from '../../src/common-signals';
-import {ElementStub} from '../../src/element-stub';
-import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
-import {Resource, ResourceState} from '../../src/service/resource';
-import {Services} from '../../src/services';
 import {chunkInstanceForTesting} from '../../src/chunk';
 import {
   createAmpElementForTesting,
   getImplSyncForTesting,
 } from '../../src/custom-element';
-import {elementConnectedCallback} from '../../src/service/custom-element-registry';
-import {toggleExperiment} from '../../src/experiments';
+import {ElementStub} from '../../src/element-stub';
 
 describes.realWin('CustomElement', {amp: true}, (env) => {
   // TODO(dvoytenko, #11827): Make this test work on Safari.
@@ -146,9 +132,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
         win.__AMP_EXTENDED_ELEMENTS['amp-test'] = TestElement;
         win.__AMP_EXTENDED_ELEMENTS['amp-stub'] = ElementStub;
-        win.__AMP_EXTENDED_ELEMENTS[
-          'amp-test-with-re-upgrade'
-        ] = TestElementWithReUpgrade;
+        win.__AMP_EXTENDED_ELEMENTS['amp-test-with-re-upgrade'] =
+          TestElementWithReUpgrade;
         ampdoc.declareExtension('amp-stub', '0.1');
 
         testElementPreconnectCallback = env.sandbox.spy();
@@ -705,28 +690,43 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         );
       });
 
-      describe('granular consent experiment', () => {
-        beforeEach(() => {
-          toggleExperiment(win, 'amp-consent-granular-consent', true);
-        });
+      describe('consent', () => {
+        describe('getPurposeConsent_', () => {
+          let element;
+          beforeEach(() => {
+            element = new ElementClass();
+          });
 
-        afterEach(() => {
-          toggleExperiment(win, 'amp-consent-granular-consent', false);
-        });
+          it('should find no consent purposes w/ no attribute', () => {
+            expect(element.getPurposesConsent_()).to.be.undefined;
+          });
 
-        it('should find the correct purposes', () => {
-          const element = new ElementClass();
-          expect(element.getPurposesConsent_()).to.be.null;
-          element.setAttribute('data-block-on-consent-purposes', '');
-          expect(element.getPurposesConsent_()).to.be.null;
-          element.setAttribute(
-            'data-block-on-consent-purposes',
-            'purpose-foo,purpose-bar'
-          );
-          expect(element.getPurposesConsent_()).to.deep.equals([
-            'purpose-foo',
-            'purpose-bar',
-          ]);
+          it('should find no consent purposes w/ no value on attribute', () => {
+            element.setAttribute('data-block-on-consent-purposes', '');
+            expect(element.getPurposesConsent_()).to.be.undefined;
+          });
+
+          it('should find correct consent purposes', () => {
+            element.setAttribute(
+              'data-block-on-consent-purposes',
+              'purpose-foo,purpose-bar'
+            );
+            expect(element.getPurposesConsent_()).to.deep.equals([
+              'purpose-foo',
+              'purpose-bar',
+            ]);
+          });
+
+          it('should find correct consent purposes w/ whitespaces', () => {
+            element.setAttribute(
+              'data-block-on-consent-purposes',
+              '     purpose-foo, purpose-bar'
+            );
+            expect(element.getPurposesConsent_()).to.deep.equals([
+              'purpose-foo',
+              'purpose-bar',
+            ]);
+          });
         });
 
         it('should default to policyId', () => {
@@ -1655,10 +1655,47 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
             element.getResource_(),
             'unlayout'
           );
+          const schedulePassStub = env.sandbox.stub(resources, 'schedulePass');
 
           element.unmount();
           expect(testElementPauseCallback).to.be.calledOnce;
           expect(resourceUnlayoutStub).to.be.calledOnce;
+          expect(schedulePassStub).to.be.calledOnce;
+        });
+
+        it('should pause and unlayout on unmount with unlayoutOnPause', async () => {
+          const element = new ElementClass();
+          container.appendChild(element);
+          await element.buildInternal();
+          element.getResource_().layoutScheduled(Date.now());
+          const impl = await element.getImpl();
+          env.sandbox.stub(impl, 'unlayoutOnPause').returns(true);
+          const schedulePassStub = env.sandbox.stub(resources, 'schedulePass');
+
+          element.unmount();
+          expect(testElementPauseCallback).to.be.calledOnce;
+          expect(testElementUnlayoutCallback).to.be.calledOnce;
+          // `schedulePass` is triggered twice: once for pause and once for
+          // unlayout. However, it's benign because only one pass will be
+          // scheduled as a result.
+          expect(schedulePassStub).to.be.calledTwice;
+        });
+
+        it('should NOT schedule pass on unmount when disconnected', async () => {
+          const element = new ElementClass();
+          container.appendChild(element);
+          await element.buildInternal();
+          const resourceUnlayoutStub = env.sandbox.stub(
+            element.getResource_(),
+            'unlayout'
+          );
+          const schedulePassStub = env.sandbox.stub(resources, 'schedulePass');
+
+          container.removeChild(element);
+          element.unmount();
+          expect(testElementPauseCallback).to.be.calledOnce;
+          expect(resourceUnlayoutStub).to.be.calledOnce;
+          expect(schedulePassStub).to.not.be.called;
         });
       });
 
@@ -1919,29 +1956,6 @@ describes.realWin('CustomElement Service Elements', {amp: true}, (env) => {
     return child;
   }
 
-  it('getRealChildren should return nothing', () => {
-    expect(element.getRealChildNodes().length).to.equal(0);
-    expect(element.getRealChildren().length).to.equal(0);
-  });
-
-  it('getRealChildren should return content-only nodes', () => {
-    element.appendChild(doc.createElement('i-amp-service'));
-    element.appendChild(createWithAttr('placeholder'));
-    element.appendChild(createWithAttr('fallback'));
-    element.appendChild(createWithAttr('overflow'));
-    element.appendChild(doc.createTextNode('abc'));
-    element.appendChild(doc.createElement('content'));
-
-    const nodes = element.getRealChildNodes();
-    expect(nodes.length).to.equal(2);
-    expect(nodes[0].textContent).to.equal('abc');
-    expect(nodes[1].tagName.toLowerCase()).to.equal('content');
-
-    const elements = element.getRealChildren();
-    expect(elements.length).to.equal(1);
-    expect(elements[0].tagName.toLowerCase()).to.equal('content');
-  });
-
   it('getPlaceholder should return nothing', () => {
     expect(element.getPlaceholder()).to.be.null;
   });
@@ -1988,6 +2002,33 @@ describes.realWin('CustomElement Service Elements', {amp: true}, (env) => {
       getResourceForElement: (element) => {
         return element.resource;
       },
+    };
+    element.getAmpDoc = () => doc;
+    const owners = Services.ownersForDoc(doc);
+    owners.scheduleLayout = env.sandbox.mock();
+    const fallback = element.appendChild(createWithAttr('fallback'));
+    element.toggleFallback(true);
+    expect(element).to.have.class('amp-notsupported');
+    expect(owners.scheduleLayout).to.be.calledOnce;
+    expect(owners.scheduleLayout).to.have.been.calledWith(element, fallback);
+
+    element.toggleFallback(false);
+    expect(element).to.not.have.class('amp-notsupported');
+  });
+
+  it('toggleFallback should toggle unsupported class on R1 elements', () => {
+    element.resource = {
+      getState: () => {
+        return ResourceState.NOT_LAID_OUT;
+      },
+    };
+    element.resources_ = {
+      getResourceForElement: (element) => {
+        return element.resource;
+      },
+    };
+    element.R1 = () => {
+      return true;
     };
     element.getAmpDoc = () => doc;
     const owners = Services.ownersForDoc(doc);

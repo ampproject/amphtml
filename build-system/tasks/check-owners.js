@@ -1,20 +1,4 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview This file implements the `amp check-owners` task, which checks
  * all OWNERS files in the repo for correctness, as determined by the parsing
  * API provided by the AMP owners bot.
@@ -22,15 +6,12 @@
 
 'use strict';
 
+const fetch = require('node-fetch');
 const fs = require('fs-extra');
 const JSON5 = require('json5');
-const request = require('request');
-const util = require('util');
-const {cyan, red, green} = require('kleur/colors');
+const {cyan, green, red} = require('../common/colors');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
 const {log, logLocalDev} = require('../common/logging');
-
-const requestPost = util.promisify(request.post);
 
 const OWNERS_SYNTAX_CHECK_URI =
   'http://ampproject-owners-bot.appspot.com/v0/syntax';
@@ -39,6 +20,7 @@ const OWNERS_SYNTAX_CHECK_URI =
  * Checks OWNERS files for correctness using the owners bot API.
  * The cumulative result is returned to the `amp` process via process.exitCode
  * so that all OWNERS files can be checked / fixed.
+ * @return {Promise<void>}
  */
 async function checkOwners() {
   if (!usesFilesOrLocalChanges('check-owners')) {
@@ -53,6 +35,7 @@ async function checkOwners() {
 /**
  * Checks a single OWNERS file using the owners bot API.
  * @param {string} file
+ * @return {Promise<void>}
  */
 async function checkFile(file) {
   if (!file.endsWith('OWNERS')) {
@@ -71,20 +54,23 @@ async function checkFile(file) {
   }
 
   try {
-    const response = await requestPost({
-      uri: OWNERS_SYNTAX_CHECK_URI,
-      json: true,
-      body: {path: file, contents},
+    const response = await fetch(OWNERS_SYNTAX_CHECK_URI, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({path: file, contents}),
     });
 
-    if (response.statusCode < 200 || response.statusCode >= 300) {
+    if (!response.ok) {
       log(red('ERROR:'), 'Could not reach the owners syntax check API');
       throw new Error(
-        `${response.statusCode} ${response.statusMessage}: ` + response.body
+        `${response.status} ${response.statusText}: ${await response.text()}`
       );
     }
 
-    const {requestErrors, fileErrors, rules} = response.body;
+    const {fileErrors, requestErrors, rules} = await response.json();
 
     if (requestErrors) {
       requestErrors.forEach((err) => log(red(err)));
@@ -100,7 +86,7 @@ async function checkFile(file) {
       cyan(file),
       'successfully; produced',
       cyan(rules.length),
-      'rules.'
+      'rule(s).'
     );
   } catch (error) {
     log(red('FAILURE:'), error);
@@ -112,8 +98,8 @@ module.exports = {
   checkOwners,
 };
 
-checkOwners.description = 'Checks all OWNERS files in the repo for correctness';
+checkOwners.description = 'Check all OWNERS files in the repo for correctness';
 checkOwners.flags = {
-  'files': 'Checks only the specified OWNERS files',
-  'local_changes': 'Checks just the OWNERS files changed in the local branch',
+  'files': 'Check only the specified OWNERS files',
+  'local_changes': 'Check just the OWNERS files changed in the local branch',
 };

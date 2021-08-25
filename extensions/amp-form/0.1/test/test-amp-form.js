@@ -1,51 +1,38 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../../../amp-mustache/0.1/amp-mustache';
+import {ActionTrust} from '#core/constants/action-constants';
+import {AmpEvents} from '#core/constants/amp-events';
+import {
+  AsyncInputAttributes,
+  AsyncInputClasses,
+} from '#core/constants/async-input';
+import {createElementWithAttributes} from '#core/dom';
+import {fromIterator} from '#core/types/array';
+import {parseQueryString} from '#core/types/string/url';
+
+import {Services} from '#service';
+import {ActionService} from '#service/action-impl';
+import {cidServiceForDocForTesting} from '#service/cid-impl';
+
+import {whenCalled} from '#testing/test-helper';
+
+import {createCustomEvent} from '../../../../src/event-helper';
+import {
+  createFormDataWrapper,
+  isFormDataWrapper,
+} from '../../../../src/form-data-wrapper';
+import {user} from '../../../../src/log';
 import * as xhrUtils from '../../../../src/utils/xhr-utils';
-import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
-import {AmpEvents} from '../../../../src/amp-events';
+import {AmpSelector} from '../../../amp-selector/0.1/amp-selector';
 import {
   AmpForm,
   AmpFormService,
   checkUserValidityAfterInteraction_,
 } from '../amp-form';
-import {AmpSelector} from '../../../amp-selector/0.1/amp-selector';
-import {
-  AsyncInputAttributes,
-  AsyncInputClasses,
-} from '../../../../src/async-input';
 import {DIRTINESS_INDICATOR_CLASS} from '../form-dirtiness';
-import {Services} from '../../../../src/services';
-import {cidServiceForDocForTesting} from '../../../../src/service/cid-impl';
-import {createCustomEvent} from '../../../../src/event-helper';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {
-  createFormDataWrapper,
-  isFormDataWrapper,
-} from '../../../../src/form-data-wrapper';
-import {fromIterator} from '../../../../src/utils/array';
-import {parseQueryString} from '../../../../src/url.js';
 import {
   setCheckValiditySupportedForTesting,
   setReportValiditySupportedForTesting,
 } from '../form-validators';
-import {user} from '../../../../src/log';
-import {whenCalled} from '../../../../testing/test-helper.js';
 
 describes.repeated(
   '',
@@ -322,9 +309,8 @@ describes.repeated(
                 .onSecondCall()
                 .resolves(response);
 
-              const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
-                event
-              );
+              const handleSubmitEventPromise =
+                ampForm.handleSubmitEvent_(event);
               return whenCalled(ssr)
                 .then(() => {
                   expect(ampForm.ssrTemplateHelper_.ssr).to.have.been.called;
@@ -397,9 +383,8 @@ describes.repeated(
                 .onSecondCall()
                 .resolves(response);
 
-              const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
-                event
-              );
+              const handleSubmitEventPromise =
+                ampForm.handleSubmitEvent_(event);
               return whenCalled(ssr)
                 .then(() => {
                   expect(ampForm.ssrTemplateHelper_.ssr).to.have.been.called;
@@ -477,9 +462,8 @@ describes.repeated(
                 'renderTemplate_'
               );
 
-              const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
-                event
-              );
+              const handleSubmitEventPromise =
+                ampForm.handleSubmitEvent_(event);
               return whenCalled(renderTemplate, 2).then(() => {
                 expect(ampForm.ssrTemplateHelper_.applySsrOrCsrTemplate).to.have
                   .been.called;
@@ -698,7 +682,8 @@ describes.repeated(
           env.sandbox.stub(ampForm.xhr_, 'fetch').resolves();
           env.sandbox.stub(ampForm, 'analyticsEvent_');
           env.sandbox.spy(form, 'checkValidity');
-          const errorRe = /Only XHR based \(via action-xhr attribute\) submissions are supported/;
+          const errorRe =
+            /Only XHR based \(via action-xhr attribute\) submissions are supported/;
           expectAsyncConsoleError(errorRe);
           return ampForm.handleSubmitEvent_(event).catch(() => {
             expect(event.preventDefault).to.be.called;
@@ -754,7 +739,8 @@ describes.repeated(
           };
           env.sandbox.stub(ampForm.xhr_, 'fetch').resolves();
           env.sandbox.spy(form, 'checkValidity');
-          const submitErrorRe = /Only XHR based \(via action-xhr attribute\) submissions are supported/;
+          const submitErrorRe =
+            /Only XHR based \(via action-xhr attribute\) submissions are supported/;
           expectAsyncConsoleError(submitErrorRe);
           return ampForm.handleSubmitEvent_(event).catch(() => {
             expect(event.preventDefault).to.be.called;
@@ -1169,9 +1155,10 @@ describes.repeated(
               })
               .then(() => {
                 expect(ampForm.templates_.findAndRenderTemplate).to.be.called;
-                expect(
-                  ampForm.templates_.findAndRenderTemplate
-                ).calledWith(messageContainer, {'name': 'John Doe'});
+                expect(ampForm.templates_.findAndRenderTemplate).calledWith(
+                  messageContainer,
+                  {'name': 'John Doe'}
+                );
                 expect(mutateElementStub).to.have.been.calledOnce;
                 expect(messageContainer.firstChild).to.equal(renderedTemplate);
 
@@ -2024,9 +2011,8 @@ describes.repeated(
               };
 
               // Submit an invalid form
-              const invalidFormPromiseResponse = ampForm.handleSubmitEvent_(
-                event
-              );
+              const invalidFormPromiseResponse =
+                ampForm.handleSubmitEvent_(event);
               return invalidFormPromiseResponse
                 .then(() => {
                   expect(form.checkValidity).to.be.called;
@@ -3140,12 +3126,8 @@ describes.repeated(
               'hidden inputs for Async Inputs',
             () => {
               return getAmpFormWithAsyncInput().then((response) => {
-                const {
-                  ampForm,
-                  asyncInput,
-                  asyncInputValue,
-                  getValueStub,
-                } = response;
+                const {ampForm, asyncInput, asyncInputValue, getValueStub} =
+                  response;
 
                 const newAsyncInputValue = 'new-async-input-value';
                 let hiddenInput;
@@ -3154,9 +3136,8 @@ describes.repeated(
                 return ampForm
                   .submit_(ActionTrust.HIGH)
                   .then(() => {
-                    previousHiddenInputCount = ampForm.form_.querySelectorAll(
-                      'input[hidden]'
-                    ).length;
+                    previousHiddenInputCount =
+                      ampForm.form_.querySelectorAll('input[hidden]').length;
                     const name = asyncInput.getAttribute(
                       AsyncInputAttributes.NAME
                     );
@@ -3170,9 +3151,8 @@ describes.repeated(
                     return ampForm.submit_(ActionTrust.HIGH);
                   })
                   .then(() => {
-                    const totalHiddenInputs = ampForm.form_.querySelectorAll(
-                      'input[hidden]'
-                    );
+                    const totalHiddenInputs =
+                      ampForm.form_.querySelectorAll('input[hidden]');
                     expect(totalHiddenInputs.length).to.be.equal(
                       previousHiddenInputCount
                     );

@@ -1,48 +1,29 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {LruCache} from '#core/data-structures/lru-cache';
+import * as mode from '#core/mode';
+import {arrayOrSingleItemToArray} from '#core/types/array';
+import {dict, hasOwn} from '#core/types/object';
+import {endsWith} from '#core/types/string';
+import {parseQueryString} from '#core/types/string/url';
 
-import {LruCache} from './utils/lru-cache';
-import {dict, hasOwn} from './utils/object';
-import {endsWith} from './string';
-import {getMode} from './mode';
-import {isArray} from './types';
-import {parseQueryString_} from './url-parse-query-string';
-import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
 import {urls} from './config';
-import {pureUserAssert as userAssert} from './core/assert';
+import {userAssert} from './log';
 
-/**
- * @type {!JsonObject}
- */
-const SERVING_TYPE_PREFIX = dict({
+const SERVING_TYPE_PREFIX = new Set([
   // No viewer
-  'c': true,
+  'c',
   // In viewer
-  'v': true,
+  'v',
   // Ad landing page
-  'a': true,
+  'a',
   // Ad
-  'ad': true,
-});
+  'ad',
+]);
 
 /**
  * Cached a-tag to avoid memory allocation during URL parsing.
  * @type {HTMLAnchorElement}
  */
-let a;
+let cachedAnchorEl;
 
 /**
  * We cached all parsed URLs. As of now there are no use cases
@@ -50,34 +31,26 @@ let a;
  * but we often parse the same one over and over again.
  * @type {LruCache}
  */
-let cache;
+let urlCache;
 
-/** @private @const Matches amp_js_* parameters in query string. */
-const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
-
-/** @private @const Matches amp_gsa parameters in query string. */
-const AMP_GSA_PARAMS_REGEX = /[?&]amp_gsa[^&]*/;
-
-/** @private @const Matches amp_r parameters in query string. */
-const AMP_R_PARAMS_REGEX = /[?&]amp_r[^&]*/;
-
-/** @private @const Matches amp_kit parameters in query string. */
-const AMP_KIT_PARAMS_REGEX = /[?&]amp_kit[^&]*/;
-
-/** @private @const Matches usqp parameters from goog experiment in query string. */
-const GOOGLE_EXPERIMENT_PARAMS_REGEX = /[?&]usqp[^&]*/;
-
-const INVALID_PROTOCOLS = [
-  /*eslint no-script-url: 0*/ 'javascript:',
-  /*eslint no-script-url: 0*/ 'data:',
-  /*eslint no-script-url: 0*/ 'vbscript:',
-];
+// eslint-disable-next-line no-script-url
+const INVALID_PROTOCOLS = ['javascript:', 'data:', 'vbscript:'];
 
 /** @const {string} */
 export const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
 
 /**
+ * Coerces a url into a location;
+ * @function
+ * @param {string|!Location} url
+ * @return {!Location}
+ */
+const urlAsLocation = (url) =>
+  typeof url == 'string' ? parseUrlDeprecated(url) : url;
+
+/**
  * Returns the correct origin for a given window.
+ * TODO(rcebulko): This really belongs under #core/window somewhere, not in url
  * @param {!Window} win
  * @return {string} origin
  */
@@ -90,20 +63,32 @@ export function getWinOrigin(win) {
  * the URL gets resolved.
  * Consider the returned object immutable. This is enforced during
  * testing by freezing the object.
+ * TODO(#34453): The URL constructor isn't supported in IE11, but is supported
+ * everywhere else. There's a lot of code paths (and all uses of the LruCache)
+ * that are built around this polyfill. Once we can drop IE11 support and just
+ * use the URL constructor, we can clear out all of parseWithA, all the URL
+ * cache logic (incl. additional caches in other call-sites). Most is guarded by
+ * isEsm() and is only included in nomodule builds, but still.
  * @param {string} url
  * @param {boolean=} opt_nocache
  *   Cache is always ignored on ESM builds, see https://go.amp.dev/pr/31594
  * @return {!Location}
  */
 export function parseUrlDeprecated(url, opt_nocache) {
-  if (!a) {
-    a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-    cache = IS_ESM
+  if (!cachedAnchorEl) {
+    cachedAnchorEl = /** @type {!HTMLAnchorElement} */ (
+      self.document.createElement('a')
+    );
+    urlCache = mode.isEsm()
       ? null
       : self.__AMP_URL_CACHE || (self.__AMP_URL_CACHE = new LruCache(100));
   }
 
-  return parseUrlWithA(a, url, IS_ESM || opt_nocache ? null : cache);
+  return parseUrlWithA(
+    cachedAnchorEl,
+    url,
+    mode.isEsm() || opt_nocache ? null : urlCache
+  );
 }
 
 /**
@@ -111,40 +96,42 @@ export function parseUrlDeprecated(url, opt_nocache) {
  * the URL gets resolved.
  * Consider the returned object immutable. This is enforced during
  * testing by freezing the object.
- * @param {!HTMLAnchorElement} a
+ * @param {!HTMLAnchorElement} anchorEl
  * @param {string} url
  * @param {LruCache=} opt_cache
  *   Cache is always ignored on ESM builds, see https://go.amp.dev/pr/31594
  * @return {!Location}
  * @restricted
  */
-export function parseUrlWithA(a, url, opt_cache) {
-  if (IS_ESM) {
-    a.href = '';
-    return /** @type {!Location} */ (new URL(url, a.href));
+export function parseUrlWithA(anchorEl, url, opt_cache) {
+  if (mode.isEsm()) {
+    // Doing this causes the <a> to auto-set its own href to the resolved path,
+    // which would be the baseUrl for the URL constructor.
+    anchorEl.href = '';
+    return /** @type {?} */ (new URL(url, anchorEl.href));
   }
 
   if (opt_cache && opt_cache.has(url)) {
     return opt_cache.get(url);
   }
 
-  a.href = url;
+  anchorEl.href = url;
 
   // IE11 doesn't provide full URL components when parsing relative URLs.
   // Assigning to itself again does the trick #3449.
-  if (!a.protocol) {
-    a.href = a.href;
+  if (!anchorEl.protocol) {
+    anchorEl.href = anchorEl.href;
   }
 
   const info = /** @type {!Location} */ ({
-    href: a.href,
-    protocol: a.protocol,
-    host: a.host,
-    hostname: a.hostname,
-    port: a.port == '0' ? '' : a.port,
-    pathname: a.pathname,
-    search: a.search,
-    hash: a.hash,
+    href: anchorEl.href,
+    protocol: anchorEl.protocol,
+    host: anchorEl.host,
+    hostname: anchorEl.hostname,
+    port: anchorEl.port == '0' ? '' : anchorEl.port,
+    pathname: anchorEl.pathname,
+    search: anchorEl.search,
+    hash: anchorEl.hash,
     origin: null, // Set below.
   });
 
@@ -164,11 +151,11 @@ export function parseUrlWithA(a, url, opt_cache) {
     info.host = info.hostname;
   }
 
-  // For data URI a.origin is equal to the string 'null' which is not useful.
+  // For data URI anchorEl.origin is equal to the string 'null' which is not useful.
   // We instead return the actual origin which is the full URL.
   let origin;
-  if (a.origin && a.origin != 'null') {
-    origin = a.origin;
+  if (anchorEl.origin && anchorEl.origin != 'null') {
+    origin = anchorEl.origin;
   } else if (info.protocol == 'data:' || !info.host) {
     origin = info.href;
   } else {
@@ -177,7 +164,7 @@ export function parseUrlWithA(a, url, opt_cache) {
   info.origin = origin;
 
   // Freeze during testing to avoid accidental mutation.
-  const frozen = getMode().test && Object.freeze ? Object.freeze(info) : info;
+  const frozen = mode.isTest() && Object.freeze ? Object.freeze(info) : info;
 
   if (opt_cache) {
     opt_cache.put(url, frozen);
@@ -215,6 +202,16 @@ export function appendEncodedParamStringToUrl(
   newUrl += mainAndFragment[1] ? `#${mainAndFragment[1]}` : '';
   return newUrl;
 }
+
+/**
+ * @param {string} key
+ * @param {string} value
+ * @return {string}
+ */
+function urlEncodeKeyValue(key, value) {
+  return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+}
+
 /**
  * Appends a query string field and value to a url. `key` and `value`
  * will be ran through `encodeURIComponent` before appending.
@@ -225,8 +222,11 @@ export function appendEncodedParamStringToUrl(
  * @return {string}
  */
 export function addParamToUrl(url, key, value, opt_addToFront) {
-  const field = `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
-  return appendEncodedParamStringToUrl(url, field, opt_addToFront);
+  return appendEncodedParamStringToUrl(
+    url,
+    urlEncodeKeyValue(key, value),
+    opt_addToFront
+  );
 }
 
 /**
@@ -269,17 +269,14 @@ export function addMissingParamsToUrl(url, params) {
 export function serializeQueryString(params) {
   const s = [];
   for (const k in params) {
-    const v = params[k];
+    let v = params[k];
     if (v == null) {
       continue;
-    } else if (isArray(v)) {
-      for (let i = 0; i < v.length; i++) {
-        const sv = /** @type {string} */ (v[i]);
-        s.push(`${encodeURIComponent(k)}=${encodeURIComponent(sv)}`);
-      }
-    } else {
-      const sv = /** @type {string} */ (v);
-      s.push(`${encodeURIComponent(k)}=${encodeURIComponent(sv)}`);
+    }
+
+    v = arrayOrSingleItemToArray(v);
+    for (let i = 0; i < v.length; i++) {
+      s.push(urlEncodeKeyValue(k, v[i]));
     }
   }
   return s.join('&');
@@ -291,9 +288,7 @@ export function serializeQueryString(params) {
  * @return {boolean}
  */
 export function isSecureUrlDeprecated(url) {
-  if (typeof url == 'string') {
-    url = parseUrlDeprecated(url);
-  }
+  url = urlAsLocation(url);
   return (
     url.protocol == 'https:' ||
     url.hostname == 'localhost' ||
@@ -324,18 +319,16 @@ export function assertHttpsUrl(
     elementContext,
     sourceName
   );
-  // (erwinm, #4560): type cast necessary until #4560 is fixed.
-  const theUrlString = /** @type {string} */ (urlString);
   userAssert(
-    isSecureUrlDeprecated(theUrlString) || /^(\/\/)/.test(theUrlString),
+    isSecureUrlDeprecated(urlString) || /^\/\//.test(urlString),
     '%s %s must start with ' +
       '"https://" or "//" or be relative and served from ' +
       'either https or from localhost. Invalid value: %s',
     elementContext,
     sourceName,
-    theUrlString
+    urlString
   );
-  return theUrlString;
+  return urlString;
 }
 
 /**
@@ -350,20 +343,6 @@ export function assertAbsoluteHttpOrHttpsUrl(urlString) {
     urlString
   );
   return parseUrlDeprecated(urlString).href;
-}
-
-/**
- * Parses the query string of an URL. This method returns a simple key/value
- * map. If there are duplicate keys the latest value is returned.
- *
- * This function is implemented in a separate file to avoid a circular
- * dependency.
- *
- * @param {string} queryString
- * @return {!JsonObject}
- */
-export function parseQueryString(queryString) {
-  return parseQueryString_(queryString);
 }
 
 /**
@@ -400,10 +379,24 @@ export function getFragment(url) {
  * @return {boolean}
  */
 export function isProxyOrigin(url) {
-  if (typeof url == 'string') {
-    url = parseUrlDeprecated(url);
-  }
-  return urls.cdnProxyRegex.test(url.origin);
+  return urls.cdnProxyRegex.test(urlAsLocation(url).origin);
+}
+
+/**
+ * Returns whether the URL origin is localhost.
+ * @param {string|!Location} url URL of an AMP document.
+ * @return {boolean}
+ */
+export function isLocalhostOrigin(url) {
+  return urls.localhostRegex.test(urlAsLocation(url).origin);
+}
+
+/**
+ * @param {string} uri
+ * @return {boolean}
+ */
+export function isAmpScriptUri(uri) {
+  return uri.startsWith('amp-script:');
 }
 
 /**
@@ -414,26 +407,12 @@ export function isProxyOrigin(url) {
  * @return {?string}
  */
 export function getProxyServingType(url) {
-  if (typeof url == 'string') {
-    url = parseUrlDeprecated(url);
-  }
+  url = urlAsLocation(url);
   if (!isProxyOrigin(url)) {
     return null;
   }
   const path = url.pathname.split('/', 2);
   return path[1];
-}
-
-/**
- * Returns whether the URL origin is localhost.
- * @param {string|!Location} url URL of an AMP document.
- * @return {boolean}
- */
-export function isLocalhostOrigin(url) {
-  if (typeof url == 'string') {
-    url = parseUrlDeprecated(url);
-  }
-  return urls.localhostRegex.test(url.origin);
 }
 
 /**
@@ -443,13 +422,7 @@ export function isLocalhostOrigin(url) {
  * @return {boolean}
  */
 export function isProtocolValid(url) {
-  if (!url) {
-    return true;
-  }
-  if (typeof url == 'string') {
-    url = parseUrlDeprecated(url);
-  }
-  return !INVALID_PROTOCOLS.includes(url.protocol);
+  return !(url && INVALID_PROTOCOLS.includes(urlAsLocation(url).protocol));
 }
 
 /**
@@ -458,9 +431,9 @@ export function isProtocolValid(url) {
  * @return {string}
  */
 export function removeAmpJsParamsFromUrl(url) {
-  const parsed = parseUrlDeprecated(url);
-  const search = removeAmpJsParamsFromSearch(parsed.search);
-  return parsed.origin + parsed.pathname + search + parsed.hash;
+  const {hash, origin, pathname, search} = parseUrlDeprecated(url);
+  const searchRemoved = removeAmpJsParamsFromSearch(search);
+  return origin + pathname + searchRemoved + hash;
 }
 
 /**
@@ -484,17 +457,15 @@ export function removeSearch(url) {
  * @return {string}
  */
 function removeAmpJsParamsFromSearch(urlSearch) {
-  if (!urlSearch || urlSearch == '?') {
-    return '';
-  }
-  const search = urlSearch
-    .replace(AMP_JS_PARAMS_REGEX, '')
-    .replace(AMP_GSA_PARAMS_REGEX, '')
-    .replace(AMP_R_PARAMS_REGEX, '')
-    .replace(AMP_KIT_PARAMS_REGEX, '')
-    .replace(GOOGLE_EXPERIMENT_PARAMS_REGEX, '')
-    .replace(/^[?&]/, ''); // Removes first ? or &.
-  return search ? '?' + search : '';
+  // The below regex is a combo of these original patterns. Combining these,
+  // removing the corresponding `.replace` calls, and reusing
+  // removeParamsFromSearch saves ~175B. Matches params in query string:
+  // - /[?&]amp_js[^&]*/   amp_js_*
+  // - /[?&]amp_gsa[^&]*/  amp_gsa
+  // - /[?&]amp_r[^&]*/    amp_r
+  // - /[?&]amp_kit[^&]*/  amp_kit
+  // - /[?&]usqp[^&]*/     usqp (from goog experiment)
+  return removeParamsFromSearch(urlSearch, '(amp_(js[^&=]*|gsa|r|kit)|usqp)');
 }
 
 /**
@@ -504,12 +475,11 @@ function removeAmpJsParamsFromSearch(urlSearch) {
  * @return {string}
  */
 export function removeParamsFromSearch(urlSearch, paramName) {
-  // TODO: reuse the function in removeAmpJsParamsFromSearch. Accept paramNames
-  // as an array.
+  // TODO: Accept paramNames as an array.
   if (!urlSearch || urlSearch == '?') {
     return '';
   }
-  const paramRegex = new RegExp(`[?&]${paramName}=[^&]*`, 'g');
+  const paramRegex = new RegExp(`[?&]${paramName}\\b[^&]*`, 'g');
   const search = urlSearch.replace(paramRegex, '').replace(/^[?&]/, '');
   return search ? '?' + search : '';
 }
@@ -521,9 +491,7 @@ export function removeParamsFromSearch(urlSearch, paramName) {
  * @return {string}
  */
 export function getSourceUrl(url) {
-  if (typeof url == 'string') {
-    url = parseUrlDeprecated(url);
-  }
+  url = urlAsLocation(url);
 
   // Not a proxy URL - return the URL itself.
   if (!isProxyOrigin(url)) {
@@ -537,7 +505,7 @@ export function getSourceUrl(url) {
   const path = url.pathname.split('/');
   const prefix = path[1];
   userAssert(
-    SERVING_TYPE_PREFIX[prefix],
+    SERVING_TYPE_PREFIX.has(prefix),
     'Unknown path prefix in url %s',
     url.href
   );
@@ -574,10 +542,8 @@ export function getSourceOrigin(url) {
  * @return {string}
  */
 export function resolveRelativeUrl(relativeUrlString, baseUrl) {
-  if (typeof baseUrl == 'string') {
-    baseUrl = parseUrlDeprecated(baseUrl);
-  }
-  if (IS_ESM || typeof URL == 'function') {
+  baseUrl = urlAsLocation(baseUrl);
+  if (mode.isEsm() || typeof URL == 'function') {
     return new URL(relativeUrlString, baseUrl.href).toString();
   }
   return resolveRelativeUrlFallback_(relativeUrlString, baseUrl);
@@ -591,9 +557,7 @@ export function resolveRelativeUrl(relativeUrlString, baseUrl) {
  * @private @visibleForTesting
  */
 export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
-  if (typeof baseUrl == 'string') {
-    baseUrl = parseUrlDeprecated(baseUrl);
-  }
+  baseUrl = urlAsLocation(baseUrl);
   relativeUrlString = relativeUrlString.replace(/\\/g, '/');
   const relativeUrl = parseUrlDeprecated(relativeUrlString);
 
@@ -644,18 +608,6 @@ export function checkCorsUrl(url) {
     'Source origin is not allowed in %s',
     url
   );
-}
-
-/**
- * Tries to decode a URI component, falling back to opt_fallback (or an empty
- * string)
- *
- * @param {string} component
- * @param {string=} opt_fallback
- * @return {string}
- */
-export function tryDecodeUriComponent(component, opt_fallback) {
-  return tryDecodeUriComponent_(component, opt_fallback);
 }
 
 /**

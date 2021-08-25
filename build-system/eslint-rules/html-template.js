@@ -1,24 +1,9 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const {
   staticTemplateFactories,
-  staticTemplateTags,
   staticTemplateFactoryFns,
+  staticTemplateTags,
 } = require('../babel-plugins/static-template-metadata');
 
 /**
@@ -28,7 +13,7 @@ const {
  *   TaggedTemplateExpression: {Function(node: CompilerNode): void}
  * }}
  */
-module.exports = function (context) {
+function create(context) {
   /**
    * @param {CompilerNode} node
    */
@@ -119,16 +104,21 @@ module.exports = function (context) {
       });
     }
 
-    const invalids = invalidVoidTag(string);
+    const invalids = /<(svg)/i.test(string) ? [] : invalidVoidTag(string);
+
     if (invalids.length) {
       const sourceCode = context.getSourceCode();
       const {start} = template;
 
-      for (let i = 0; i < invalids.length; i++) {
-        const {tag, offset} = invalids[i];
+      for (const {offset, tag} of invalids) {
+        const itemStart = start + offset;
+        const loc = {
+          start: sourceCode.getLocFromIndex(itemStart),
+          end: sourceCode.getLocFromIndex(itemStart + tag.length + 1),
+        };
         context.report({
           node: template,
-          loc: sourceCode.getLocFromIndex(start + offset),
+          loc,
           message: `Invalid void tag "${tag}"`,
         });
       }
@@ -140,19 +130,23 @@ module.exports = function (context) {
    * @return {{
    *   tag: string,
    *   offset: number,
+   *   length: number,
    * }[]}
    */
   function invalidVoidTag(string) {
     // Void tags are defined at
     // https://html.spec.whatwg.org/multipage/syntax.html#void-elements
-    const invalid = /<(?!area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)([a-zA-Z-]+)( [^>]*)?\/>/g;
+    const invalid =
+      /<(?!area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)([a-zA-Z-]+)([\s\n][^>]*)?\/>/gm;
     const matches = [];
 
     let match;
     while ((match = invalid.exec(string))) {
+      const [fullMatch, tag] = match;
       matches.push({
-        tag: match[1],
+        tag,
         offset: match.index,
+        length: fullMatch.length,
       });
     }
 
@@ -187,4 +181,11 @@ module.exports = function (context) {
       tagUsage(node);
     },
   };
+}
+
+module.exports = {
+  meta: {
+    fixable: 'code',
+  },
+  create,
 };

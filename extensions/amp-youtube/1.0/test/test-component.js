@@ -1,25 +1,13 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../../src/preact';
-import {Youtube} from '../component';
-import {createRef} from '../../../../src/preact';
-
-import {dispatchCustomEvent} from '../../../../src/dom';
 import {mount} from 'enzyme';
+
+import {dispatchCustomEvent} from '#core/dom';
+
+import * as Preact from '#preact';
+import {createRef} from '#preact';
+
+import {useStyles} from 'extensions/amp-video/1.0/component.jss';
+
+import {Youtube} from '../component';
 
 describes.realWin('YouTube preact component v1.0', {}, (env) => {
   let window, document;
@@ -54,8 +42,10 @@ describes.realWin('YouTube preact component v1.0', {}, (env) => {
     // Style propagated to container, but not iframe.
     expect(wrapper.prop('style').width).to.equal(600);
     expect(wrapper.prop('style').height).to.equal(500);
-    expect(wrapper.find('iframe').prop('style').width).to.equal('100%');
-    expect(wrapper.find('iframe').prop('style').height).to.equal('100%');
+
+    // width/height applied via class
+    const classes = useStyles();
+    expect(wrapper.find('iframe').hasClass(classes.fillStretch)).to.be.true;
   });
 
   it('Pass correct param attributes to the iframe src', () => {
@@ -76,8 +66,9 @@ describes.realWin('YouTube preact component v1.0', {}, (env) => {
     const iframe = wrapper.find('iframe');
 
     expect(iframe.prop('src')).to.contain('&myparam=hello%20world');
+    // data-param-autoplay is disallowed in favor of just autoplay
     expect(iframe.prop('src')).to.not.contain('autoplay=1');
-    // data-param-loop is black listed in favor of just loop for single videos
+    // data-param-loop is disallowed in favor of just loop for single videos
     expect(iframe.prop('src')).to.not.contain('loop=1');
     // playsinline should default to 1 if not provided.
     expect(iframe.prop('src')).to.contain('playsinline=1');

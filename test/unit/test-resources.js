@@ -1,28 +1,15 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {LayoutPriority} from '../../src/layout';
-import {Resource, ResourceState} from '../../src/service/resource';
-import {ResourcesImpl} from '../../src/service/resources-impl';
-import {Services} from '../../src/services';
-import {Signals} from '../../src/utils/signals';
-import {VisibilityState} from '../../src/visibility-state';
-import {layoutRectLtwh} from '../../src/layout-rect';
+
+import {VisibilityState} from '#core/constants/visibility-state';
+import {Signals} from '#core/data-structures/signals';
+import {LayoutPriority} from '#core/dom/layout';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+
+import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {Resource, ResourceState} from '#service/resource';
+import {ResourcesImpl} from '#service/resources-impl';
+
 import {loadPromise} from '../../src/event-helper';
 
 /*eslint "google-camelcase/google-camelcase": 0*/
@@ -48,16 +35,16 @@ describes.realWin('Resources', {amp: true}, (env) => {
   function createResource(opts) {
     const {
       id,
-      isBuilt,
+      idleRenderOutsideViewport,
       isBuilding,
-      state,
+      isBuilt,
       isDisplayed,
       isFixed,
       isInViewport,
+      layoutPriority,
       prerenderAllowed,
       renderOutsideViewport,
-      idleRenderOutsideViewport,
-      layoutPriority,
+      state,
       taskId,
     } = {
       id: '1',
@@ -76,7 +63,7 @@ describes.realWin('Resources', {amp: true}, (env) => {
     };
 
     const element = document.createElement('amp-el');
-    element.V1 = () => false;
+    element.R1 = () => false;
     element.isBuilt = () => isBuilt;
     element.isBuilding = () => isBuilding;
     element.pause = () => {};
@@ -619,7 +606,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
   function createElement(rect) {
     const element = env.win.document.createElement('amp-test');
     element.classList.add('i-amphtml-element');
-    element.V1 = () => false;
+    element.R1 = () => false;
     element.signals = () => new Signals();
     element.whenBuilt = () => Promise.resolve();
     element.isBuilt = () => true;
@@ -722,44 +709,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     resources.discoverWork_();
 
     expect(resource1.hasBeenMeasured()).to.be.true;
-  });
-
-  describe('intersect-resources', () => {
-    beforeEach(() => {
-      // Enable "intersect-resources" experiment.
-      resources.intersectionObserver_ = {};
-      resource1.intersect_ = resource2.intersect_ = true;
-    });
-
-    it('should not force relayout after build', () => {
-      resources.relayoutAll_ = false;
-
-      // Unmeasured elements.
-      env.sandbox.stub(resource1, 'hasBeenMeasured').returns(false);
-
-      // Measured elements that need relayout.
-      env.sandbox.stub(resource2, 'hasBeenMeasured').returns(true);
-      env.sandbox
-        .stub(resource2, 'getState')
-        .returns(ResourceState.NOT_LAID_OUT);
-
-      resources.discoverWork_();
-    });
-
-    it('should invalidate premeasurements after resize event', () => {
-      resource1.premeasure({});
-      expect(resource1.hasBeenPremeasured()).true;
-      expect(resource1.isMeasureRequested()).false;
-      resources.viewport_.changeObservable_.fire({relayoutAll_: true});
-      expect(resource1.hasBeenPremeasured()).false;
-      expect(resource1.isMeasureRequested()).true;
-    });
-
-    it('should schedule a pass after resize event', () => {
-      const schedulePassStub = sandbox.stub(resources, 'schedulePass');
-      resources.viewport_.changeObservable_.fire({relayoutAll_: false});
-      expect(schedulePassStub).calledOnce;
-    });
   });
 
   it('should render two screens when visible', () => {
@@ -951,45 +900,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     resources.work_();
     expect(resource1.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
     expect(resource1.element.layoutScheduleTime).to.be.greaterThan(0);
-  });
-
-  describe('intersect-resources', () => {
-    beforeEach(() => {
-      // Enables the "intersect-resources" experiment.
-      resources.intersectionObserver_ = {};
-    });
-
-    it('should not remeasure before layout', () => {
-      sandbox.stub(resource1, 'hasBeenPremeasured').returns(false);
-      sandbox.stub(resource1, 'measure');
-
-      resources.scheduleLayoutOrPreload(resource1, /* layout */ true);
-      resources.work_();
-
-      expect(resources.exec_.getSize()).to.equal(1);
-      expect(resource1.measure).to.not.be.called;
-      expect(resource1.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
-    });
-
-    it('should check premeasured rect before layout', () => {
-      sandbox.stub(resource1, 'hasBeenMeasured').returns(true);
-      sandbox.stub(resource1, 'hasBeenPremeasured').returns(true);
-      sandbox.stub(resource1, 'isDisplayed').returns(true);
-      resource1.isDisplayed
-        .withArgs(/* usePremeasuredRect */ true)
-        .returns(false);
-      sandbox.spy(resource1, 'layoutCanceled');
-
-      resources.scheduleLayoutOrPreload(resource1, /* layout */ true);
-      resources.work_();
-
-      expect(resources.exec_.getSize()).to.equal(0);
-      expect(resource1.isDisplayed).to.be.calledWith(
-        /* usePremeasuredRect */ true
-      );
-      expect(resource1.layoutCanceled).to.be.calledOnce;
-      expect(resource1.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
-    });
   });
 
   it('should not schedule resource execution outside viewport', () => {
@@ -1517,22 +1427,6 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       expect(resource2.isBuilding()).to.be.false;
     }
   );
-
-  it('should observe element after adding it', () => {
-    // Enables the 'intersect-resources' experiment.
-    const observer = (resources.intersectionObserver_ = {
-      observe: env.sandbox.spy(),
-    });
-    // Avoid creating a new Resource, which is tricky to spy on.
-    env.sandbox.stub(child1, 'reconstructWhenReparented').returns(false);
-    env.sandbox.stub(resource1, 'getState').returns(ResourceState.NOT_LAID_OUT);
-    env.sandbox.spy(resource1, 'requestMeasure');
-
-    resources.add(child1);
-
-    expect(resource1.requestMeasure).to.be.calledOnce;
-    expect(observer.observe).to.be.calledOnceWith(child1);
-  });
 
   describe('buildReadyResources_', () => {
     let schedulePassStub;

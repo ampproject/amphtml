@@ -1,32 +1,19 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../src/preact';
-import {Option, Selector} from './component';
-import {PreactBaseElement} from '../../../src/preact/base-element';
 import {
-  closestAncestorElementBySelector,
   createElementWithAttributes,
   toggleAttribute,
   tryFocus,
-} from '../../../src/dom';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
-import {dict} from '../../../src/utils/object';
-import {toArray} from '../../../src/types';
-import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
+} from '#core/dom';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+import {toArray} from '#core/types/array';
+import {dict} from '#core/types/object';
+
+import * as Preact from '#preact';
+import {useCallback, useLayoutEffect, useRef} from '#preact';
+import {PreactBaseElement} from '#preact/base-element';
+
+import {Option, Selector} from './component';
+
+import {devAssert} from '../../../src/log';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */
@@ -68,7 +55,7 @@ export class BaseElement extends PreactBaseElement {
     };
 
     // Return props
-    const {children, value, options} = getOptions(element, mu);
+    const {children, options, value} = getOptions(element, mu);
     this.optionState = options;
     return dict({
       'as': SelectorShim,
@@ -137,13 +124,13 @@ function getOptions(element, mu) {
  * @return {PreactDef.Renderable}
  */
 export function OptionShim({
-  shimDomElement,
+  disabled,
   onClick,
   onFocus,
   onKeyDown,
-  selected,
-  disabled,
   role = 'option',
+  selected,
+  shimDomElement,
   tabIndex,
 }) {
   const syncEvent = useCallback(
@@ -159,10 +146,10 @@ export function OptionShim({
 
   useLayoutEffect(() => syncEvent('click', onClick), [onClick, syncEvent]);
   useLayoutEffect(() => syncEvent('focus', onFocus), [onFocus, syncEvent]);
-  useLayoutEffect(() => syncEvent('keydown', onKeyDown), [
-    onKeyDown,
-    syncEvent,
-  ]);
+  useLayoutEffect(
+    () => syncEvent('keydown', onKeyDown),
+    [onKeyDown, syncEvent]
+  );
 
   useLayoutEffect(() => {
     toggleAttribute(shimDomElement, 'selected', !!selected);
@@ -191,14 +178,14 @@ export function OptionShim({
  * @return {PreactDef.Renderable}
  */
 function SelectorShim({
-  shimDomElement,
   children,
+  disabled,
   form,
   multiple,
   name,
-  disabled,
   onKeyDown,
   role = 'listbox',
+  shimDomElement,
   tabIndex,
   value,
 }) {

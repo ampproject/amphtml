@@ -1,19 +1,3 @@
-/**
- * @license
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the license.
- */
 goog.module('amp.validator.ValidatorTest');
 
 const asserts = goog.require('goog.asserts');
@@ -330,7 +314,7 @@ describe('ValidatorOutput', () => {
     const results = validator.validateString(test.ampHtmlFileContents);
     const observed =
         validator.renderValidationResult(results, test.ampUrl).join('\n');
-    const expectedSubstr = 'http://google.com/foo.html:28:3';
+    const expectedSubstr = 'http://google.com/foo.html:13:3';
     if (observed.indexOf(expectedSubstr) === -1) {
       asserts.fail(
           'expectedSubstr:\n' + expectedSubstr + '\nsaw:\n' + observed);
@@ -1472,10 +1456,6 @@ describe('ValidatorRulesMakeSense', () => {
     });
   }
 
-  it('min_validator_revision_required defined', () => {
-    expect(rules.minValidatorRevisionRequired).toBeGreaterThan(0);
-  });
-
   it('template_spec_url is set', () => {
     expect(rules.templateSpecUrl).not.toEqual(null);
   });
@@ -1522,7 +1502,8 @@ describe('ValidatorRulesMakeSense', () => {
         expect(specNameIsUnique.hasOwnProperty(tagSpec.specName)).toBe(false);
         specNameIsUnique[tagSpec.specName] = 0;
       } else if (tagSpec.extensionSpec !== null) {
-        const specName = tagSpec.extensionSpec.name + ' extension script';
+        const specName = tagSpec.extensionSpec.name + ' ' +
+            tagSpec.extensionSpec.versionName + ' extension script';
 
         expect(specNameIsUnique.hasOwnProperty(specName)).toBe(false);
         specNameIsUnique[specName] = 0;
@@ -1552,7 +1533,7 @@ describe('ValidatorRulesMakeSense', () => {
         (tagSpec.htmlFormat.indexOf(generated.HtmlFormat.Code.AMP4ADS) !==
          -1)) {
       // AMP4ADS format lists approved extensions.
-      // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
+      // https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       // Changes to the following map must be approved by the Ads Working
       // Group, @wg-monetization.
       const approvedAmp4AdsExtensions = {
@@ -1768,7 +1749,7 @@ describe('ValidatorRulesMakeSense', () => {
            // it's sufficiently wrapped in private context inside the validator
            // that I don't see a way to call it.  For now just gold the current
            // index.
-           expect(tagSpec.attrLists[0]).toEqual(15);
+           expect(tagSpec.attrLists[0]).toEqual(17);
          });
     }
 
@@ -1887,8 +1868,8 @@ describe('ValidatorRulesMakeSense', () => {
            () => {
              expect(
                  hasSrc || hasJson || hasTextPlain ||
-                 (hasOctetStream && hasCiphertext) ||
-                 hasAmpOnerror).toBe(true);
+                 (hasOctetStream && hasCiphertext) || hasAmpOnerror)
+                 .toBe(true);
            });
       }
       // cdata_regex and mandatory_cdata
