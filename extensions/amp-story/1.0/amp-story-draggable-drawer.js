@@ -616,7 +616,7 @@ export class DraggableDrawer extends AMP.BaseElement {
    * Dismiss the soft keyboard, if displayed.
    * @private
    */
-   dismissSoftKeyboard_() {
+  dismissSoftKeyboard_() {
     const focusedEl = this.element.querySelector(':focus');
     focusedEl?.blur();
   }
@@ -625,11 +625,11 @@ export class DraggableDrawer extends AMP.BaseElement {
    * Set the story's scroll position to its default state, if necessary.
    * @private
    */
-   resetStoryScrollPosition_() {
+  resetStoryScrollPosition_() {
     const storyEl = closest(
       this.element,
       (el) => el.tagName === 'AMP-STORY-PAGE'
     );
-    storyEl.scrollTo(0, 0);
+    storyEl./*OK*/ scrollTo(0, 0);
   }
 }
