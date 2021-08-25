@@ -11,7 +11,7 @@ export default {
 export const _default = () => {
   return (
     <Iframe
-      iframeStyle={{width: 800, height: 600, borderWidth: 2}}
+      iframeStyle={{width: 800, height: 600, border: '1px solid black'}}
       src="https://www.wikipedia.org/"
       title="Wikipedia"
     ></Iframe>

@@ -137,7 +137,6 @@ export function Iframe({
       contentProps={contentProps}
       contentRef={iframeRef}
       contentStyle={iframeStyle}
-      size={false}
       {...rest}
     />
   );
