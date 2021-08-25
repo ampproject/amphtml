@@ -1,0 +1,22 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <link rel="canonical" href="https://amp.dev/documentation/examples/components/amp-copy-action/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+</head>
+<body>
+
+<!-- Call to action-copy. -->
+<div id='divTarget'>Sample DIV Content</div>
+<button on="tap:divTarget.copy()">Copy DIV Content</button>
+
+<input id='inputTarget' value="Sample Input Value" />
+<button on="tap:inputTarget.copy()">Copy Input Value</button>
+
+<button on="tap:AMP.copy(text='hello AMP')">Copy Static Text</button>
+
+</body>
+</html>

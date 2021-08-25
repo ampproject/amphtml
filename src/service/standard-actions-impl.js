@@ -10,6 +10,11 @@ import {Services} from '#service';
 import {dev, user, userAssert} from '../log';
 import {getAmpdoc, registerServiceBuilderForDoc} from '../service-helpers';
 
+import {
+  copyTextToClipboard,
+  isCopyingToClipboardSupported,
+} from '#core/window/clipboard';
+
 /**
  * @param {!Element} element
  * @return {boolean}
@@ -95,6 +100,8 @@ export class StandardActions {
       'toggleClass',
       this.handleToggleClass_.bind(this)
     );
+
+    actionService.addGlobalMethodHandler('copy', this.handleCopy_.bind(this));
   }
 
   /**
@@ -148,6 +155,9 @@ export class StandardActions {
         win.print();
         return null;
 
+      case 'copy':
+        return this.handleCopy_(invocation);
+
       case 'optoutOfCid':
         return Services.cidForDoc(this.ampdoc)
           .then((cid) => cid.optOut())
@@ -157,6 +167,36 @@ export class StandardActions {
     }
     throw user().createError('Unknown AMP action ', method);
   }
+
+  /**
+   * Handles the copy to clipboard action
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @return {!null}
+   */
+   handleCopy_(invocation) {
+    const {args, node} = invocation;
+    const win = getWin(node);
+
+    let textToCopy;
+    if(invocation.tagOrTarget === 'AMP'){
+      /**
+       * Copy Static Text
+       *  Example: AMP.copy(text='TextToCopy');
+       */
+      textToCopy = args['text'].trim();
+    }
+    else {
+      /**
+       * Copy Target Element Text
+       *  Example: targetId.copy();
+       */
+      const target = dev().assertElement(invocation.node);
+      textToCopy = (target.value ?? target.textContent).trim();
+    }
+    
+    copyTextToClipboard(win, textToCopy);
+    return null;
+   }
 
   /**
    * Handles the `navigateTo` action.
