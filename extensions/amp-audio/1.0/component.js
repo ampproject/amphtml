@@ -26,7 +26,7 @@ import {
 
 /**
  * @param {!AudioDef.Props} props
- * @param {{current: (!AudioDef.AudioApi|null)}} ref
+ * @param {{current: ?AudioDef.AudioApi}} ref
  * @return {PreactDef.Renderable}
  */
 export function AudioWithRef(
