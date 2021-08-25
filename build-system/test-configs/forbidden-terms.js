@@ -1078,11 +1078,13 @@ const forbiddenTermsSrcInclusive = {
   '\\.getIntersectionElementLayoutBox': {
     message: measurementApiDeprecated,
     allowlist: [
-      'src/utils/intersection-observer-3p-host.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
-      'extensions/amp-ad/0.1/amp-ad-3p-impl.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
+      'extensions/amp-ad/0.1/amp-ad-3p-impl.js',
+      'extensions/amp-iframe/0.1/amp-iframe.js',
+      'src/custom-element.js',
+      'src/utils/intersection-observer-3p-host.js',
     ],
   },
   "require\\('fancy-log'\\)": {

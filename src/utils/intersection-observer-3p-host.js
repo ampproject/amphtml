@@ -63,9 +63,7 @@ export function getIntersectionChangeEntryHelper(
  * @return {?IntersectionObserverEntry} A change entry.
  */
 export function getIntersectionChangeEntry(element) {
-  const box = element.impl_
-    ? element.impl_.getIntersectionElementLayoutBox()
-    : element.getLayoutBox();
+  const box = element.getIntersectionElementLayoutBox();
   const ownerBox = element.getOwner()?.getLayoutBox();
   const viewportBox = Services.viewportForDoc(element.getAmpDoc()).getRect();
 

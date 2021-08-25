@@ -1458,6 +1458,17 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     }
 
     /**
+     * Returns the layout rectangle used for calculating this element's
+     * intersection with the viewport.
+     * @return {!./layout-rect.LayoutRectDef}
+     */
+    getIntersectionElementLayoutBox() {
+      return this.impl_
+        ? this.impl_.getIntersectionElementLayoutBox()
+        : this.getLayoutBox();
+    }
+
+    /**
      * Returns a previously measured layout size.
      * @return {!./layout-rect.LayoutSizeDef}
      * @final
