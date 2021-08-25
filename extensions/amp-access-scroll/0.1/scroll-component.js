@@ -93,6 +93,20 @@ export class ScrollComponent {
   }
 
   /**
+   * Action toggleState.
+   * @param {boolean} condition
+   * @protected
+   */
+  toggleState(condition) {
+    const input = devAssert(this.root_);
+    if (condition) {
+      input.checked = true;
+    } else {
+      input.checked = false;
+    }
+  }
+
+  /**
    * @param {Object} updates
    * @return {boolean} true if changed
    * @protected
