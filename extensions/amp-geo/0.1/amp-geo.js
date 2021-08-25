@@ -129,7 +129,7 @@ export class AmpGeo extends AMP.BaseElement {
       : {};
 
     /** @type {!Promise<!GeoDef>} */
-    const geo = this.addToBody_(config || {});
+    const geo = this.addToHtmlAndBody_(config || {});
 
     /* resolve the service promise singleton we stashed earlier */
     geoDeferred.resolve(geo);
@@ -160,7 +160,11 @@ export class AmpGeo extends AMP.BaseElement {
    */
   findCountry_(ampdoc) {
     // Flag to see if we've been pre-rendered with a country
-    const preRenderMatch = ampdoc.getBody().className.match(PRE_RENDER_REGEX);
+    const bodyElem = ampdoc.getBody();
+    const preRenderMatch =
+      bodyElem.className.match(PRE_RENDER_REGEX) ||
+      bodyElem.parentElement.className.match(PRE_RENDER_REGEX);
+
     // Trim the spaces off the patched country.
     // This is guaranteed to always match
     // - Correctly patched will have the two-char country code and whitespace.
@@ -446,11 +450,10 @@ export class AmpGeo extends AMP.BaseElement {
    * @return {!Promise<!GeoDef>} service response
    * @private
    */
-  addToBody_(config) {
+  addToHtmlAndBody_(config) {
     const ampdoc = this.getAmpDoc();
     /** @type {Object} */
     const states = {};
-    const self = this;
 
     // Wait for the body before we figure anything out because we might be
     // prerendered and we know that from body classes
@@ -458,51 +461,60 @@ export class AmpGeo extends AMP.BaseElement {
       .whenReady()
       .then(() => ampdoc.waitForBodyOpen())
       .then((body) => {
-        return self.findCountry_(ampdoc).then(() => body);
+        return this.findCountry_(ampdoc).then(() => body);
       })
       .then((body) => {
-        self.matchCountryGroups_(config);
+        const html = body.parentElement;
+        this.matchCountryGroups_(config);
 
         let classesToRemove = [];
 
-        switch (self.mode_) {
+        switch (this.mode_) {
           case mode.GEO_OVERRIDE:
-            classesToRemove = self.clearPreRender_(body);
+            // NOTE: we extract the classes to remove from the body element
+            // but apply the removal on both html and body elements. This
+            // assumes that amp-geo classes are in sync always on both elements.
+            classesToRemove = this.clearPreRender_(body);
           // Intentionally fall through.
           case mode.GEO_HOT_PATCH:
           case mode.GEO_API:
             // Build the AMP State, add classes
-            states.ISOCountry = self.country_;
+            states.ISOCountry = this.country_;
 
-            const classesToAdd = self.matchedGroups_.map((group) => {
+            const classesToAdd = this.matchedGroups_.map((group) => {
               states[group] = true;
               return GROUP_PREFIX + group;
             });
 
-            if (!self.matchedGroups_.length) {
+            if (!this.matchedGroups_.length) {
               classesToAdd.push('amp-geo-no-group');
             }
 
-            if (self.error_) {
+            if (this.error_) {
               classesToAdd.push('amp-geo-error');
             }
 
-            states.ISOCountryGroups = self.matchedGroups_;
+            states.ISOCountryGroups = this.matchedGroups_;
             classesToAdd.push(COUNTRY_PREFIX + this.country_);
 
             // Let the runtime know we're mutating the AMP body
             // Actual change happens in callback so runtime can
             // optimize dom mutations.
-            self.mutateElement(() => {
-              const {classList} = body;
+            this.mutateElement(() => {
+              const {classList: htmlClassList} = html;
+              const {classList: bodyClassList} = body;
               // Always remove the pending class
               classesToRemove.push('amp-geo-pending');
               classesToRemove.forEach((toRemove) => {
-                /** @type {!DOMTokenList} */ (classList).remove(toRemove);
+                /** @type {!DOMTokenList} */ (bodyClassList).remove(toRemove);
+                /** @type {!DOMTokenList} */ (htmlClassList).remove(toRemove);
               });
 
-              // add the new classes to <body>
-              classesToAdd.forEach((toAdd) => classList.add(toAdd));
+              // add the new classes to <html> and <<body>
+              classesToAdd.forEach((toAdd) => {
+                htmlClassList.add(toAdd);
+                bodyClassList.add(toAdd);
+              });
 
               // Only include amp state if user requests it to
               // avoid validator issue with missing amp-bind js
@@ -521,7 +533,7 @@ export class AmpGeo extends AMP.BaseElement {
                 state.id = GEO_ID;
                 body.appendChild(state);
               }
-            }, body);
+            }, html);
 
             break;
           case mode.GEO_PRERENDER:
@@ -529,8 +541,8 @@ export class AmpGeo extends AMP.BaseElement {
         }
 
         return {
-          ISOCountry: self.country_,
-          matchedISOCountryGroups: self.matchedGroups_,
+          ISOCountry: this.country_,
+          matchedISOCountryGroups: this.matchedGroups_,
           allISOCountryGroups: this.definedGroups_,
           /* API */
           isInCountryGroup: this.isInCountryGroup.bind(this),
