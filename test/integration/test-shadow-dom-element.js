@@ -6,7 +6,6 @@ import {createFixtureIframe} from '#testing/iframe';
 
 describes.sandboxed
   .configure()
-  .enableIe()
   .run('Render a shadow-dom based element', {}, () => {
     let fixture;
 
