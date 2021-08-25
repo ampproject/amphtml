@@ -209,7 +209,7 @@ async function getAmpConfigForFile(filename, options) {
 
   return getConfig(
     type,
-    target,
+    filename,
     baseConfigFile,
     /* opt_localDev */ !!options.fortesting,
     /* opt_localBranch */ true,
