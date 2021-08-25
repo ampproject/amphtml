@@ -1792,7 +1792,7 @@ describes.realWin(
       });
 
       it('should supply default actions allowlist', () => {
-        const i = getActionInvocation(target, 'toggleState', 'AMP');
+        const i = getActionInvocation(target, 'toggleChecked', 'AMP');
         action.invoke_(i);
         expect(spy).to.be.calledWithExactly(i);
       });
