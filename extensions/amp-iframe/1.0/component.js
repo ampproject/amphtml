@@ -25,15 +25,19 @@ export function Iframe({
   ...rest
 }) {
   const iframeRef = useRef();
-  // const containerRef = useRef(null);
   const dataRef = useRef(null);
   const isIntersectingRef = useRef(null);
 
+  const updateIframeSize = (height, width) => {
+    const iframe = iframeRef.current;
+    if (!iframe) {
+      return;
+    }
+    setStyle(iframe, 'width', width, 'px');
+    setStyle(iframe, 'height', height, 'px');
+  };
+
   const attemptResize = useCallback(() => {
-    // const container = containerRef.current;
-    // if (!container) {
-    //   return;
-    // }
     const iframe = iframeRef.current;
     let height = Number(dataRef.current.height);
     let width = Number(dataRef.current.width);
@@ -51,27 +55,18 @@ export function Iframe({
       width = iframe./*OK*/ offsetWidth;
     }
     if (requestResize) {
-      // Currently `requestResize` is called twice:
-      // 1. when post message is received in viewport
-      // 2. when exiting viewport
-      // This could be optimized by reducing to one call by assessing when to call.
+      // Currently `requestResize` is called twice when:
+      // 1. post message is received in viewport
+      // 2. exiting viewport
+      // This could be optimized by reducing to one call.
       requestResize(height, width).then(() => {
-        // iframe.height = FULL_HEIGHT;
-        // iframe.width = FULL_HEIGHT;
-        setStyle(iframe, 'width', width, 'px');
-        setStyle(iframe, 'height', height, 'px');
+        updateIframeSize(height, width);
       });
     } else if (isIntersectingRef.current === false) {
-      const iframe = iframeRef.current;
       // attemptResize can be called before the IntersectionObserver starts observing
       // the component if an event is fired immediately. Therefore we check
       // isIntersectingRef has changed via isIntersectingRef.current === false.
-      if (width) {
-        setStyle(iframe, 'width', width, 'px');
-      }
-      if (height) {
-        setStyle(iframe, 'height', height, 'px');
-      }
+      updateIframeSize(height, width);
     }
   }, [requestResize]);
 
@@ -88,11 +83,10 @@ export function Iframe({
 
   useEffect(() => {
     const iframe = iframeRef.current;
-    // const container = containerRef.current;
-    if (!iframe /*|| !container*/) {
+    if (!iframe) {
       return;
     }
-    const win = iframe && toWin(iframe.ownerDocument.defaultView);
+    const win = toWin(iframe.ownerDocument.defaultView);
     if (!win) {
       return;
     }
@@ -144,8 +138,7 @@ export function Iframe({
       contentRef={iframeRef}
       contentStyle={iframeStyle}
       size={false}
-      layout={false}
-      paint={false}
+      {...rest}
     />
   );
 }
