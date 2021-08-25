@@ -535,7 +535,6 @@ describes.sandboxed('StandardActions', {}, (env) => {
   });
 
   describe('"toggleChecked" action', () => {
-
     it('should set checked state to false when state is true', () => {
       const element = createElement();
       element.type = 'checkbox';
