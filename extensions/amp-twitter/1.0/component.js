@@ -1,5 +1,6 @@
 import * as Preact from '#preact';
 import {MessageType, ProxyIframeEmbed} from '#preact/component/3p-frame';
+
 import {deserializeMessage} from '#core/3p-frame-messaging';
 import {forwardRef} from '#preact/compat';
 import {useCallback, useMemo, useState} from '#preact';
@@ -20,6 +21,8 @@ function TwitterWithRef(
     conversation,
     limit,
     momentid,
+    onError,
+    onLoad,
     options: optionsProps,
     requestResize,
     style,
@@ -45,9 +48,13 @@ function TwitterWithRef(
         } else {
           setHeight(height);
         }
+
+        onLoad?.();
+      } else if (data['type'] === MessageType.NO_CONTENT) {
+        onError?.();
       }
     },
-    [requestResize]
+    [requestResize, onLoad, onError]
   );
   const options = useMemo(
     () => ({
