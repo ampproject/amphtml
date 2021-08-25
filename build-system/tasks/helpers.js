@@ -13,9 +13,9 @@ const wrappers = require('../compile/compile-wrappers');
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
-const {applyConfig, removeConfig} = require('./prepend-global');
 const {closureCompile} = require('../compile/compile');
 const {cyan, green, red} = require('../common/colors');
+const {getAmpConfigForFile} = require('./prepend-global');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {getSourceRoot} = require('../compile/helpers');
 const {isCiBuild} = require('../common/ci');
@@ -51,16 +51,6 @@ const EXTENSION_BUNDLE_MAP = {
     'node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd.install.js',
   ],
 };
-
-/**
- * List of unminified targets to which AMP_CONFIG should be written
- */
-const UNMINIFIED_TARGETS = ['alp.max', 'amp-inabox', 'amp-shadow', 'amp'];
-
-/**
- * List of minified targets to which AMP_CONFIG should be written
- */
-const MINIFIED_TARGETS = ['alp', 'amp4ads-v0', 'shadow-v0', 'v0'];
 
 /**
  * Used while building the 3p frame
@@ -320,15 +310,6 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
     name += ` → ${maybeToEsmName(options.latestName)}`;
   }
   endBuildStep('Minified', name, timeInfo.startTime);
-
-  const target = path.basename(minifiedName, path.extname(minifiedName));
-  if (!argv.noconfig && MINIFIED_TARGETS.includes(target)) {
-    await applyAmpConfig(
-      maybeToEsmName(`${destDir}/${minifiedName}`),
-      /* localDev */ options.fortesting,
-      /* fortesting */ options.fortesting
-    );
-  }
 }
 
 /**
@@ -394,16 +375,6 @@ async function finishBundle(
         : destFilename;
     endBuildStep(logPrefix, loggingName, startTime);
   }
-
-  const targets = options.minify ? MINIFIED_TARGETS : UNMINIFIED_TARGETS;
-  const target = path.basename(destFilename, path.extname(destFilename));
-  if (targets.includes(target)) {
-    await applyAmpConfig(
-      path.join(destDir, destFilename),
-      /* localDev */ true,
-      /* fortesting */ options.fortesting
-    );
-  }
 }
 
 /**
@@ -434,7 +405,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
    * @return {Object}
    */
   function splitWrapper() {
-    const wrapper = options.wrapper || wrappers.none;
+    const wrapper = options.wrapper ?? wrappers.none;
     const sentinel = '<%= contents %>';
     const start = wrapper.indexOf(sentinel);
     return {
@@ -443,6 +414,10 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     };
   }
   const {banner, footer} = splitWrapper();
+  const config = await getAmpConfigForFile(srcFilename, options);
+  if (config) {
+    banner.js = config + banner.js;
+  }
 
   const babelPlugin = getEsbuildBabelPlugin(
     options.minify ? 'minified' : 'unminified',
@@ -495,7 +470,6 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
       fs.outputFile(`${destFile}.map`, map),
     ]);
 
-    // TODO: finishBundle should operate in-mem instead of reading/writing from FS.
     await finishBundle(srcFilename, destDir, destFilename, options, startTime);
   }
 
@@ -571,8 +545,6 @@ async function minify(code, map, {mangle} = {mangle: false}) {
       beautify: !!argv.pretty_print,
       // eslint-disable-next-line google-camelcase/google-camelcase
       keep_quoted_props: true,
-      // // TODO: only add preamble for mainBundles?
-      preamble: ';',
     },
     sourceMap: {content: map},
     module: !!argv.esm,
@@ -733,33 +705,6 @@ async function maybePrintCoverageMessage(covPath = '') {
 }
 
 /**
- * Writes AMP_CONFIG to a runtime file. Optionally enables localDev mode and
- * fortesting mode. Called by "amp build" and "amp dist" while building
- * various runtime files.
- *
- * @param {string} targetFile File to which the config is to be written.
- * @param {boolean} localDev Whether or not to enable local development.
- * @param {boolean} fortesting Whether or not to enable testing mode.
- * @return {!Promise}
- */
-async function applyAmpConfig(targetFile, localDev, fortesting) {
-  const config = argv.config === 'canary' ? 'canary' : 'prod';
-  const baseConfigFile =
-    'build-system/global-configs/' + config + '-config.json';
-
-  await removeConfig(targetFile);
-  await applyConfig(
-    config,
-    targetFile,
-    baseConfigFile,
-    /* opt_localDev */ localDev,
-    /* opt_localBranch */ true,
-    /* opt_branch */ undefined,
-    /* opt_fortesting */ fortesting
-  );
-}
-
-/**
  * Copies frame.html to output folder, replaces js references to minified
  * copies, and generates symlink to it.
  *
@@ -871,8 +816,6 @@ function shouldUseClosure() {
 }
 
 module.exports = {
-  MINIFIED_TARGETS,
-  applyAmpConfig,
   bootstrapThirdPartyFrames,
   compileAllJs,
   compileCoreRuntime,
