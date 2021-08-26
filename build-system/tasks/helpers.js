@@ -182,6 +182,21 @@ async function compileAllJs(options) {
 }
 
 /**
+ * Returns the compiled file to prepend within an extension bundle, empty string if nothing.
+ * @param {string} srcFilename Name of the JS source file
+ * @return {Promise<string>}
+ */
+async function getCompiledFile(srcFilename) {
+  const bundleFiles = EXTENSION_BUNDLE_MAP[srcFilename];
+  if (!bundleFiles) {
+    return '';
+  }
+  return (
+    await Promise.all(bundleFiles.map((file) => fs.readFile(file, 'utf8')))
+  ).join(MODULE_SEPARATOR);
+}
+
+/**
  * Allows pending inside the compile wrapper to the already minified JS file.
  * @param {string} srcFilename Name of the JS source file
  * @param {string} destFilePath File path to the minified JS file
@@ -355,26 +370,13 @@ function handleBundleError(err, continueOnError, destFilename) {
 /**
  * Performs the final steps after a JS file is bundled and optionally minified
  * with esbuild and babel.
- * @param {string} srcFilename
  * @param {string} destDir
  * @param {string} destFilename
  * @param {?Object} options
  * @param {number} startTime
  * @return {Promise<void>}
  */
-async function finishBundle(
-  srcFilename,
-  destDir,
-  destFilename,
-  options,
-  startTime
-) {
-  combineWithCompiledFile(
-    srcFilename,
-    path.join(destDir, destFilename),
-    options
-  );
-
+async function finishBundle(destDir, destFilename, options, startTime) {
   const logPrefix = options.minify ? 'Minified' : 'Compiled';
   let {latestName} = options;
   if (latestName) {
@@ -443,6 +445,8 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     };
   }
   const {banner, footer} = splitWrapper();
+  const compiledFile = await getCompiledFile(srcFilename);
+  banner.js += compiledFile;
 
   const babelPlugin = getEsbuildBabelPlugin(
     options.minify ? 'minified' : 'unminified',
@@ -495,8 +499,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
       fs.outputFile(`${destFile}.map`, map),
     ]);
 
-    // TODO: finishBundle should operate in-mem instead of reading/writing from FS.
-    await finishBundle(srcFilename, destDir, destFilename, options, startTime);
+    await finishBundle(destDir, destFilename, options, startTime);
   }
 
   /**
