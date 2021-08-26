@@ -94,7 +94,6 @@ const HtmlEnvelopeSelector = ({htmlEnvelopePrefix}) =>
 const JsModeSelector = ({jsMode}) =>
   PanelSelector({
     key: jsModeStateKey,
-    name: 'mode',
     children: jsModes.map(({description, value}) =>
       PanelSelectorBlock({
         id: `serve-mode-${value}`,

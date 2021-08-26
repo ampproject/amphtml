@@ -216,7 +216,9 @@ function overwriteAlwaysUseSuper(utils) {
         }
       };
 
-      const resultPromise = waitForValue(valueSatisfiesExpectation);
+      const resultPromise = /** @type {*}*/ (waitForValue)(
+        valueSatisfiesExpectation
+      );
       flag(that, 'object', resultPromise);
       return resultPromise;
     };
