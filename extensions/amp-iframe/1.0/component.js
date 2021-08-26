@@ -27,14 +27,15 @@ export function Iframe({
   const iframeRef = useRef();
   const dataRef = useRef(null);
   const isIntersectingRef = useRef(null);
+  const containerRef = useRef(null);
 
   const updateIframeSize = (height, width) => {
-    const iframe = iframeRef.current;
-    if (!iframe) {
+    const container = containerRef.current;
+    if (!container) {
       return;
     }
-    setStyle(iframe, 'width', width, 'px');
-    setStyle(iframe, 'height', height, 'px');
+    setStyle(container, 'width', width, 'px');
+    setStyle(container, 'height', height, 'px');
   };
 
   const attemptResize = useCallback(() => {
@@ -136,7 +137,11 @@ export function Iframe({
       contentAs="iframe"
       contentProps={contentProps}
       contentRef={iframeRef}
-      contentStyle={iframeStyle}
+      contentStyle={{'box-sizing': 'border-box', ...iframeStyle}}
+      ref={containerRef}
+      size
+      layout
+      paint
       {...rest}
     />
   );
