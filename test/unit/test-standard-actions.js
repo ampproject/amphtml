@@ -71,12 +71,12 @@ describes.sandboxed('StandardActions', {}, (env) => {
     expect(element.classList.contains(className)).to.false;
   }
 
-  function expectCheckboxToHaveStateTrue(element) {
+  function expectCheckboxToHaveCheckedStateTrue(element) {
     expectElementMutatedAsync(element);
     expect(element.checked).to.true;
   }
 
-  function expectCheckboxToHaveStateFalse(element) {
+  function expectCheckboxToHaveCheckedStateFalse(element) {
     expectElementMutatedAsync(element);
     expect(element.checked).to.false;
   }
@@ -544,7 +544,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
         satisfiesTrust: () => true,
       };
       standardActions.handleToggleChecked_(invocation);
-      expectCheckboxToHaveStateFalse(element);
+      expectCheckboxToHaveCheckedStateFalse(element);
     });
 
     it('should set checked state to true when state is false', () => {
@@ -556,7 +556,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
         satisfiesTrust: () => true,
       };
       standardActions.handleToggleChecked_(invocation);
-      expectCheckboxToHaveStateTrue(element);
+      expectCheckboxToHaveCheckedStateTrue(element);
     });
 
     it('should set checked state to true when force=true', () => {
@@ -570,7 +570,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
         },
       };
       standardActions.handleToggleChecked_(invocation);
-      expectCheckboxToHaveStateTrue(element);
+      expectCheckboxToHaveCheckedStateTrue(element);
     });
 
     it('should set checked state to false when force=false', () => {
@@ -584,7 +584,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
         },
       };
       standardActions.handleToggleChecked_(invocation);
-      expectCheckboxToHaveStateFalse(element);
+      expectCheckboxToHaveCheckedStateFalse(element);
     });
   });
 
