@@ -5,7 +5,7 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
-const {MINIFIED_TARGETS} = require('../tasks/prepend-global');
+const {MINIFIED_TARGETS} = require('../tasks/helpers');
 const {runCiJob} = require('./ci-job');
 const {skipDependentJobs, timedExecOrDie} = require('./utils');
 const {Targets, buildTargetsInclude} = require('./build-targets');
