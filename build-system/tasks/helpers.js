@@ -592,13 +592,7 @@ async function minify(code, map, {mangle} = {mangle: false}) {
   }
 
   const minified = await terser.minify(code, terserOptions);
-  if (!minified.code) {
-    throw new Error(
-      `Minification resulted in an empty bundle. This should never happen.`
-    );
-  }
-
-  return {code: minified.code, map: minified.map};
+  return {code: minified.code ?? '', map: minified.map};
 }
 
 /**
