@@ -96,7 +96,7 @@ let VideoOrBaseElementPlayableDef;
 export function tryPlay(element, isAutoplay) {
   // Some browsers return undefined, some a boolean, and some a real promise.
   // Using tryResolve coerces all of those into a real promise.
-  const promise = tryResolve(() => element.play(isAutoplay));
+  const promise = tryResolve(() => element.play(!!isAutoplay));
   // Fork the promise chain to report any rejected error as expected. We don't
   // return the promise returned by `.catch()` so that we don't
   // introduce any new microtasks.
