@@ -144,9 +144,7 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
       // Find sizer, but assume that it might not have been parsed yet.
       element.sizerElement =
         element.querySelector('i-amphtml-sizer') || undefined;
-      if (element.sizerElement) {
-        element.sizerElement.setAttribute('slot', 'i-amphtml-svc');
-      }
+      element.sizerElement?.setAttribute('slot', 'i-amphtml-svc');
     } else if (layout == Layout.NODISPLAY) {
       toggle(element, false);
       // TODO(jridgewell): Temporary hack while SSR still adds an inline
