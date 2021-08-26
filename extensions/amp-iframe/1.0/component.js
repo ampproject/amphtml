@@ -1,6 +1,6 @@
 import * as Preact from '#preact';
 import {useCallback, useEffect, useMemo, useRef} from '#preact';
-import {MessageType} from '#preact/component/3p-frame';
+import {MessageType} from '#core/3p-frame-messaging';
 import {toWin} from '#core/window';
 import {ContainWrapper} from '#preact/component';
 import {setStyle} from '#core/dom/style';
