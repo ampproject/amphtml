@@ -583,12 +583,13 @@ async function minify(code, map, {mangle} = {mangle: false}) {
   // - Should not convert computed properties into regular property definition
   if (mangle) {
     // eslint-disable-next-line google-camelcase/google-camelcase
-    terserOptions.mangle.properties = {keep_quoted: true, regex: '_$'};
+    terserOptions.mangle.properties = {keep_quoted: 'strict', regex: '_$'};
     terserOptions.nameCache = nameCache;
 
-    // Disables converting computed properties ({['hello']: 5}) into regular prop ({ hello: 5}).
-    // This was an assumption baked into closure.
+    // TODO: uncomment once terser bugs related to these are fixed
+    // https://github.com/terser/terser/pull/1058
     terserOptions.compress.computed_props = false; // eslint-disable-line google-camelcase/google-camelcase
+    terserOptions.compress.properties = false;
   }
 
   const minified = await terser.minify(code, terserOptions);
