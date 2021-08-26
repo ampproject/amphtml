@@ -38,6 +38,7 @@ const DEFAULT_DATETIME_OPTIONS = {
   minute: number,
   second: number,
   iso: string,
+  timeZoneName: string,
 }} */
 let VariablesDef;
 
@@ -63,7 +64,6 @@ let VariablesDef;
   secondTwoDigit: string,
   dayPeriod: string,
   localeString: string,
-  timeZoneName: string,
  }} */
 let EnhancedVariablesDef;
 
