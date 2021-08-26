@@ -1,9 +1,9 @@
-import {deserializeMessage} from '#core/3p-frame-messaging';
+import {MessageType, deserializeMessage} from '#core/3p-frame-messaging';
 
 import * as Preact from '#preact';
 import {useCallback, useContext, useState} from '#preact';
 import {forwardRef} from '#preact/compat';
-import {MessageType, ProxyIframeEmbed} from '#preact/component/3p-frame';
+import {ProxyIframeEmbed} from '#preact/component/3p-frame';
 
 import {EmbedlyContext} from './embedly-context';
 
