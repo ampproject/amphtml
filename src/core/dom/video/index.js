@@ -78,12 +78,19 @@ export function getInternalVideoElementFor(element) {
 }
 
 /**
- * @param {!HTMLMediaElement|../../../video-interface.VideoOrBaseElementDef} element
+ * @typedef {{
+ *   play: (function(boolean): Promise<undefined>|undefined)
+ * }}
+ */
+let VideoOrBaseElementPlayableDef;
+
+/**
+ * @param {!HTMLMediaElement|VideoOrBaseElementPlayableDef} element
  * @param {boolean=} isAutoplay
  * @return {Promise<undefined>}
  */
 export function tryPlay(element, isAutoplay) {
-  const ret = element.play(isAutoplay);
+  const ret = element.play(!!isAutoplay);
   if (!ret.catch) {
     return Promise.resolve();
   }
