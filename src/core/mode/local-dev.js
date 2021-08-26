@@ -1,4 +1,3 @@
-import {isProd} from './prod';
 import {isTest} from './test';
 
 /**
@@ -9,9 +8,5 @@ import {isTest} from './test';
  * @return {boolean}
  */
 export function isLocalDev(opt_win) {
-  if (isProd()) {
-    return false;
-  }
-
-  return !!self.AMP_CONFIG?.localDev || isTest(opt_win);
+  return isTest(opt_win);
 }
