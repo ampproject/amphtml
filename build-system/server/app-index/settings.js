@@ -49,6 +49,15 @@ const PanelSelectorButton = ({expression, type, value}) =>
     </button>
   `;
 
+/**
+ * @param {{
+ *   children: string[],
+ *   compact?: boolean,
+ *   key: string,
+ *   name?: null | string,
+ * }} param0
+ * @return {string}
+ */
 const PanelSelector = ({children, compact = false, key, name = null}) => html`
   <amp-selector
     layout="container"
