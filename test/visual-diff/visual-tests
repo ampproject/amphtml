@@ -727,7 +727,8 @@
     {
       "url": "examples/visual-tests/amp-story/amp-story-prestyle-step1.html",
       "name": "amp-story: prestyle step 1 - before JS loads (mobile)",
-      "viewport": {"width": 375, "height": 635},
+      "viewport": {"width": 375, "height": 635}, 
+      "loading_complete_delay_ms": 100,
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-prestyle-step2.html",
@@ -741,6 +742,7 @@
       "url": "examples/visual-tests/amp-story/amp-story-prestyle-step1.html",
       "name": "amp-story: prestyle step 1 - before JS loads (desktop)",
       "viewport": {"width": 1280, "height": 72},
+      "loading_complete_delay_ms": 100,
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-prestyle-step2.html",
