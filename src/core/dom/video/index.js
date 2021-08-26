@@ -38,10 +38,7 @@ export function detectIsAutoplaySupported(win) {
 
   // Promise wrapped this way to catch both sync throws and async rejections.
   // More info: https://github.com/tc39/proposal-promise-try
-  new Promise((resolve) => resolve(detectionElement.play())).catch(() => {
-    // Suppress any errors, useless to report as they are expected.
-  });
-
+  playIgnoringError(detectionElement);
   return Promise.resolve(!detectionElement.paused);
 }
 
@@ -94,4 +91,20 @@ export function tryPlay(element, isAutoplay) {
     devExpectedError('TRYPLAY', err);
     throw err;
   });
+}
+
+/**
+ * @param {!HTMLMediaElement} element
+ * @return {Promise<undefined>}
+ */
+export function playIgnoringError(element) {
+  // Some browsers return undefined, some a boolean, and some a real promise.
+  element.play()?.catch?.(() => {
+    // Empty catch to prevent useless unhandled promise rejection logging.
+    // Play can fail for many reasons such as video getting paused before
+    // play() is finished.
+    // We use events to know the state of the video and do not care about
+    // the success or failure of the play()'s returned promise.
+  });
+  return Promise.resolve();
 }

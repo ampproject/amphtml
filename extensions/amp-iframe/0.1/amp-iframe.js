@@ -1,7 +1,7 @@
+import {playIgnoringError} from '#core/dom/video';
 import {AMPDOC_SINGLETON_NAME} from '#core/constants/enums';
 import {ActionTrust} from '#core/constants/action-constants';
 import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
-import {tryPlay} from '#core/dom/video';
 import {
   LayoutPriority,
   applyFillContent,
@@ -836,7 +836,7 @@ export class AmpIframe extends AMP.BaseElement {
       return false;
     }
     const audio = this.win.document.createElement('audio');
-    tryPlay(audio);
+    playIgnoringError(audio);
     if (audio.paused) {
       return false;
     }
