@@ -606,17 +606,17 @@ export class DraggableDrawer extends AMP.BaseElement {
    * @private
    */
   handleSoftKeyboardOnDrawerClose_() {
-    this.dismissSoftKeyboard_();
-    // Reset the story's scroll position, which can unintentionally be altered
-    // by the opening of the soft keyboard.
+    this.blurFocusedEl_();
+    // Reset the story's scroll position, which can be unintentionally altered
+    // by the opening of the soft keyboard on Android devices.
     this.resetStoryScrollPosition_();
   }
 
   /**
-   * Dismiss the soft keyboard, if displayed.
+   * Blur the focused element, with the intent of dismissing the soft keyboard.
    * @private
    */
-  dismissSoftKeyboard_() {
+  blurFocusedEl_() {
     const focusedEl = this.element.querySelector(':focus');
     focusedEl?.blur();
   }
