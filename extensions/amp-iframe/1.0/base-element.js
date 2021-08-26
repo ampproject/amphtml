@@ -19,3 +19,6 @@ BaseElement['props'] = {
 
 /** @override */
 BaseElement['layoutSizeDefined'] = true;
+
+/** @override */
+BaseElement['usesShadowDom'] = true;
