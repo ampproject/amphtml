@@ -8,7 +8,6 @@ const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {cpus} = require('os');
 const {cyan, green} = require('../common/colors');
-const {getAmpConfigForFile} = require('../tasks/prepend-global');
 const {log, logLocalDev} = require('../common/logging');
 const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel} = require('./pre-closure-babel');
@@ -184,11 +183,10 @@ function getSrcs(entryModuleFilenames, options) {
  * Generates the set of options with which to invoke Closure compiler.
  * TODO(wg-infra,wg-performance): Clean up unnecessary options.
  *
- * @param {string} outputFilename
  * @param {!OptionsDef} options
  * @return {!Promise<!Object>}
  */
-async function generateCompilerOptions(outputFilename, options) {
+async function generateCompilerOptions(options) {
   // Determine externs
   let externs = options.externs || [];
   if (!options.noAddDeps) {
@@ -221,11 +219,6 @@ async function generateCompilerOptions(outputFilename, options) {
   if (argv.pseudo_names) {
     define.push('PSEUDO_NAMES=true');
   }
-  const ampConfig = await getAmpConfigForFile(outputFilename, options);
-  let wrapper = options.wrapper
-    ? options.wrapper.replace('<%= contents %>', '%output%')
-    : `(function(){%output%})();`;
-  wrapper = `${ampConfig}${wrapper}\n\n//# sourceMappingURL=${outputFilename}.map`;
 
   /**
    * TODO(#28387) write a type for this.
@@ -258,7 +251,7 @@ async function generateCompilerOptions(outputFilename, options) {
     // PRUNE strips all files from the input set that aren't explicitly
     // required.
     dependency_mode: options.noAddDeps ? 'SORT_ONLY' : 'PRUNE',
-    output_wrapper: wrapper,
+    output_wrapper: options.wrapper ?? '(function(){%output%})();',
     source_map_include_content: !!argv.full_sourcemaps,
     // These arrays are filled in below.
     jscomp_error: [],
@@ -402,10 +395,7 @@ async function compile(
   }
   const destFile = `${outputDir}/${outputFilename}`;
   const sourcemapFile = `${destFile}.map`;
-  const compilerOptions = await generateCompilerOptions(
-    outputFilename,
-    options
-  );
+  const compilerOptions = await generateCompilerOptions(options);
   const srcs = options.noAddDeps
     ? entryModuleFilenames.concat(options.extraGlobs || [])
     : getSrcs(entryModuleFilenames, options);

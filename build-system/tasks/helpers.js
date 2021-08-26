@@ -4,10 +4,8 @@ const esbuild = require('esbuild');
 /** @type {Object} */
 const experimentDefines = require('../global-configs/experiments-const.json');
 const fs = require('fs-extra');
-const magicstring = require('magic-string');
 const open = require('open');
 const path = require('path');
-const Remapping = require('@ampproject/remapping');
 const terser = require('terser');
 const wrappers = require('../compile/compile-wrappers');
 const {
@@ -23,12 +21,6 @@ const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {watch} = require('chokidar');
-
-/** @type {Remapping.default} */
-const remapping = /** @type {*} */ (Remapping);
-
-/** @type {magicstring.default} */
-const MagicString = /** @type {*} */ (magicstring);
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -172,79 +164,18 @@ async function compileAllJs(options) {
 }
 
 /**
- * Allows pending inside the compile wrapper to the already minified JS file.
- * @param {string} srcFilename Name of the JS source file
- * @param {string} destFilePath File path to the minified JS file
- * @param {?Object} options
+ * Returns the compiled file to prepend within an extension bundle, empty string if nothing.
+ * @param {string} srcFilename Name of the JS source file *
+ * @return {Promise<string>}
  */
-function combineWithCompiledFile(srcFilename, destFilePath, options) {
+async function getCompiledFile(srcFilename) {
   const bundleFiles = EXTENSION_BUNDLE_MAP[srcFilename];
   if (!bundleFiles) {
-    return;
+    return '';
   }
-  const bundle = new MagicString.Bundle({
-    separator: '\n',
-  });
-  // We need to inject the code _inside_ the extension wrapper
-  const destFileName = path.basename(destFilePath);
-  /**
-   * TODO (rileyajones) This should be import('magic-string').MagicStringOptions but
-   * is invalid until https://github.com/Rich-Harris/magic-string/pull/183
-   * is merged.
-   * @type {Object}
-   */
-  const mapMagicStringOptions = {filename: destFileName};
-  const contents = new MagicString(
-    fs.readFileSync(destFilePath, 'utf8'),
-    mapMagicStringOptions
-  );
-  const map = JSON.parse(fs.readFileSync(`${destFilePath}.map`, 'utf8'));
-  const {sourceRoot} = map;
-  map.sourceRoot = undefined;
-
-  // The wrapper may have been minified further. Search backwards from the
-  // expected <%=contents%> location to find the start of the `{` in the
-  // wrapping function.
-  const wrapperIndex = options.wrapper.indexOf('<%= contents %>');
-  const index = contents.original.lastIndexOf('{', wrapperIndex) + 1;
-
-  const wrapperOpen = contents.snip(0, index);
-  const remainingContents = contents.snip(index, contents.length());
-
-  bundle.addSource(wrapperOpen);
-  for (const bundleFile of bundleFiles) {
-    const contents = fs.readFileSync(bundleFile, 'utf8');
-    /**
-     * TODO (rileyajones) This should be import('magic-string').MagicStringOptions but
-     * is invalid until https://github.com/Rich-Harris/magic-string/pull/183
-     * is merged.
-     * @type {Object}
-     */
-    const bundleMagicStringOptions = {filename: bundleFile};
-    bundle.addSource(new MagicString(contents, bundleMagicStringOptions));
-    bundle.append(MODULE_SEPARATOR);
-  }
-  bundle.addSource(remainingContents);
-
-  const bundledMap = bundle.generateDecodedMap({
-    file: destFileName,
-    hires: true,
-  });
-
-  const remapped = remapping(
-    bundledMap,
-    (file) => {
-      if (file === destFileName) {
-        return map;
-      }
-      return null;
-    },
-    !argv.full_sourcemaps
-  );
-  remapped.sourceRoot = sourceRoot;
-
-  fs.writeFileSync(destFilePath, bundle.toString(), 'utf8');
-  fs.writeFileSync(`${destFilePath}.map`, remapped.toString(), 'utf8');
+  return (
+    await Promise.all(bundleFiles.map((file) => fs.readFile(file, 'utf8')))
+  ).join(MODULE_SEPARATOR);
 }
 
 /**
@@ -289,6 +220,16 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
   const minifiedName = maybeToEsmName(options.minifiedName);
 
   options.errored = false;
+
+  const ampConfig = await getAmpConfigForFile(entryPoint, options);
+  const compiledFile = await getCompiledFile(srcFilename);
+  options.wrapper = options.wrapper ?? `(function(){<%= contents %>})();`;
+  options.wrapper = options.wrapper.replace(
+    '<%= contents %>',
+    () => `${compiledFile}%output%`
+  );
+  options.wrapper = `${ampConfig}${options.wrapper}\n\n//# sourceMappingURL=${minifiedName}.map`;
+
   await closureCompile(entryPoint, destDir, minifiedName, options, timeInfo);
   // If an incremental watch build fails, simply return.
   if (options.watch && options.errored) {
@@ -296,7 +237,6 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
   }
 
   const destPath = path.join(destDir, minifiedName);
-  combineWithCompiledFile(srcFilename, destPath, options);
   fs.writeFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
   if (options.latestName) {
     fs.copySync(
@@ -336,26 +276,13 @@ function handleBundleError(err, continueOnError, destFilename) {
 /**
  * Performs the final steps after a JS file is bundled and optionally minified
  * with esbuild and babel.
- * @param {string} srcFilename
  * @param {string} destDir
  * @param {string} destFilename
  * @param {?Object} options
  * @param {number} startTime
  * @return {Promise<void>}
  */
-async function finishBundle(
-  srcFilename,
-  destDir,
-  destFilename,
-  options,
-  startTime
-) {
-  combineWithCompiledFile(
-    srcFilename,
-    path.join(destDir, destFilename),
-    options
-  );
-
+async function finishBundle(destDir, destFilename, options, startTime) {
   const logPrefix = options.minify ? 'Minified' : 'Compiled';
   let {latestName} = options;
   if (latestName) {
@@ -415,9 +342,8 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   }
   const {banner, footer} = splitWrapper();
   const config = await getAmpConfigForFile(srcFilename, options);
-  if (config) {
-    banner.js = config + banner.js;
-  }
+  const compiledFile = await getCompiledFile(srcFilename);
+  banner.js = config + banner.js + compiledFile;
 
   const babelPlugin = getEsbuildBabelPlugin(
     options.minify ? 'minified' : 'unminified',
@@ -470,7 +396,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
       fs.outputFile(`${destFile}.map`, map),
     ]);
 
-    await finishBundle(srcFilename, destDir, destFilename, options, startTime);
+    await finishBundle(destDir, destFilename, options, startTime);
   }
 
   /**
