@@ -535,7 +535,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
   });
 
   describe('"toggleChecked" action', () => {
-    it('should set checked state to false when state is true', () => {
+    it('should set checked property to false when checked property is true', () => {
       const element = createElement();
       element.type = 'checkbox';
       element.checked = true;
@@ -547,7 +547,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
       expectCheckboxToHaveCheckedStateFalse(element);
     });
 
-    it('should set checked state to true when state is false', () => {
+    it('should set checked property to true when checked property is false', () => {
       const element = createElement();
       element.type = 'checkbox';
       element.checked = false;
@@ -559,7 +559,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
       expectCheckboxToHaveCheckedStateTrue(element);
     });
 
-    it('should set checked state to true when force=true', () => {
+    it('should set checked property to true when force=true', () => {
       const element = createElement();
       element.type = 'checkbox';
       const invocation = {
@@ -573,7 +573,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
       expectCheckboxToHaveCheckedStateTrue(element);
     });
 
-    it('should set checked state to false when force=false', () => {
+    it('should set checked property to false when force=false', () => {
       const element = createElement();
       element.type = 'checkbox';
       const invocation = {
