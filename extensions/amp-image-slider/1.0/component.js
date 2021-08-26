@@ -16,7 +16,9 @@
 
 import * as Preact from '#preact';
 import {Gestures} from '../../../src/gesture';
+import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {Services} from '#service';
+import {clamp} from '#core/math';
 import {forwardRef} from '#preact/compat';
 import {
   useCallback,
@@ -51,7 +53,7 @@ export function ImageSliderWithRef(
 ) {
   /** Common variables */
   let containsAmpImages;
-  const gestures = useRef(null);
+  const gesturesRef = useRef(null);
   const {isEdge, setIsEdge} = useState();
   const isEventRegistered = false;
   const styles = useStyles();
@@ -235,6 +237,94 @@ export function ImageSliderWithRef(
   //     });
   // }, []);
 
+  const unregisterTouchGestures = useCallback(() => {
+    if (gesturesRef.current == null) {
+      return;
+    }
+    gesturesRef.current.cleanup();
+    gesturesRef.current = null;
+  }, []);
+
+  const registerTouchGestures = useCallback(() => {
+    if (gesturesRef.current) {
+      return;
+    }
+
+    gesturesRef.current = Gestures.get(
+      containerRef.current,
+      /* shouldNotPreventDefault */ true
+    );
+
+    // gesturesRef.current = Gestures.get(
+    //   leftImageRef.current,
+    //   /* shouldNotPreventDefault */ true
+    // );
+
+    gesturesRef.current.onGesture(SwipeXRecognizer, (e) => {
+      if (e.data.first) {
+        // Disable hint reappearance timeout if needed
+        animateHideHint();
+      }
+      pointerMoveX(e.data.startX + e.data.deltaX);
+    });
+
+    gesturesRef.current.onPointerDown((e) => {
+      // Ensure touchstart changes slider position
+      pointerMoveX(e.touches[0].pageX);
+      animateHideHint();
+    });
+  }, [animateHideHint, pointerMoveX]);
+
+  const animateHideHint = useCallback(() => {
+    leftHintBodyRef.current.classList.add('i-amphtml-image-slider-hint-hidden');
+    rightHintBodyRef.current.classList.add(
+      'i-amphtml-image-slider-hint-hidden'
+    );
+  }, []);
+
+  const animateShowHint = useCallback(() => {
+    //this.mutateElement(() => {
+    leftHintBodyRef.current.classList.remove(
+      'i-amphtml-image-slider-hint-hidden'
+    );
+    rightHintBodyRef.current.classList.remove(
+      'i-amphtml-image-slider-hint-hidden'
+    );
+    //});
+  }, []);
+
+  const pointerMoveX = useCallback((pointerX) => {
+    // This is to address the "snap to leftmost" bug that occurs on
+    // pointer down after scrolling away and back 3+ slides
+    // layoutBox is not updated correctly when first landed on page
+
+    const rect = containerRef.current./*OK*/ getBoundingClientRect();
+    const {left, right, width} = rect;
+
+    const newPos = clamp(pointerX, left, right);
+    const newPercentage = (newPos - left) / width;
+    console.log(newPercentage);
+    //this.updatePositions_(newPercentage);
+  }, []);
+
+  const registerEvents = useCallback(() => {
+    // if (isEventRegistered.current) {
+    //   return;
+    // }
+    // unlistenMouseDown.current = listen(
+    //   element,
+    //   'mousedown',
+    //   onMouseDown_.bind(this)
+    // );
+    // this.unlistenKeyDown_ = listen(
+    //   this.element,
+    //   'keydown',
+    //   this.onKeyDown_.bind(this)
+    // );
+    registerTouchGestures();
+    //this.isEventRegistered = true;
+  }, [registerTouchGestures]);
+
   useEffect(() => {
     /** Common variables */
     win.current = containerRef.current.ownerDocument.defaultView;
@@ -300,12 +390,19 @@ export function ImageSliderWithRef(
 
     leftMaskRef.current.appendChild(leftImageRef.current);
     rightMaskRef.current.appendChild(rightImageRef.current);
-  }, [images, labels, buildImageWrappers, buildBar, buildHint]);
+
+    //const {element} = containerRef.current;
+    registerEvents();
+  }, [images, labels, buildImageWrappers, buildBar, buildHint, registerEvents]);
   useLayoutEffect(() => {
     /* Do things */
   }, []);
   useMemo(() => {
     /* Do things */
+  }, []);
+
+  const testEventHandler = useCallback((e) => {
+    console.log(e.key);
   }, []);
 
   return (
@@ -315,6 +412,9 @@ export function ImageSliderWithRef(
       layout
       size
       paint
+      tabIndex="0"
+      onKeyUp={testEventHandler}
+      onMouseUp={testEventHandler}
       {...rest}
     ></div>
   );
