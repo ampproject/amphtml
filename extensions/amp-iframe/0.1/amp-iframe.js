@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
@@ -14,6 +15,9 @@
  * limitations under the License.
  */
 
+=======
+import {playIgnoringError} from '#core/dom/video';
+>>>>>>> 8889d8c740... Wrap all play calls in catch handler (#35811)
 import {AMPDOC_SINGLETON_NAME} from '#core/constants/enums';
 import {ActionTrust} from '#core/constants/action-constants';
 import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
@@ -851,7 +855,7 @@ export class AmpIframe extends AMP.BaseElement {
       return false;
     }
     const audio = this.win.document.createElement('audio');
-    audio.play();
+    playIgnoringError(audio);
     if (audio.paused) {
       return false;
     }

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
@@ -13,6 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+=======
+import {tryPlay} from '#core/dom/video';
+>>>>>>> 8889d8c740... Wrap all play calls in catch handler (#35811)
 import {tryDecodeUriComponent} from '#core/types/string/url';
 
 import {loadScript} from './3p';
@@ -91,7 +95,7 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
       return;
     }
     if (action === 'play') {
-      viqeoPlayerInstance.play();
+      tryPlay(viqeoPlayerInstance);
     } else if (action === 'pause') {
       viqeoPlayerInstance.pause();
     } else if (action === 'stop') {

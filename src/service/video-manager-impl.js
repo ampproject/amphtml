@@ -19,7 +19,11 @@ import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {measureIntersection} from '#core/dom/layout/intersection';
 import {createViewportObserver} from '#core/dom/layout/viewport-observer';
 import {toggle} from '#core/dom/style';
-import {getInternalVideoElementFor, isAutoplaySupported} from '#core/dom/video';
+import {
+  getInternalVideoElementFor,
+  isAutoplaySupported,
+  tryPlay,
+} from '#core/dom/video';
 import {clamp} from '#core/math';
 import {isFiniteNumber} from '#core/types';
 import {once} from '#core/types/function';
@@ -249,7 +253,7 @@ export class VideoManager {
     // specific handling (e.g. user gesture requirement for unmuted playback).
     const trust = ActionTrust.LOW;
 
-    registerAction('play', () => video.play(/* isAutoplay */ false));
+    registerAction('play', () => tryPlay(video, /* isAutoplay */ false));
     registerAction('pause', () => video.pause());
     registerAction('mute', () => video.mute());
     registerAction('unmute', () => video.unmute());
@@ -495,7 +499,7 @@ class VideoEntry {
 
     /** @private @const {function()} */
     this.boundMediasessionPlay_ = () => {
-      this.video.play(/* isAutoplay */ false);
+      tryPlay(this.video, /* isAutoplay */ false);
     };
 
     /** @private @const {function()} */
@@ -917,7 +921,7 @@ class VideoEntry {
     }
     if (this.isVisible_) {
       this.visibilitySessionManager_.beginSession();
-      this.video.play(/*autoplay*/ true);
+      tryPlay(this.video, /*autoplay*/ true);
       this.playCalledByAutoplay_ = true;
     } else {
       if (this.isPlaying_) {

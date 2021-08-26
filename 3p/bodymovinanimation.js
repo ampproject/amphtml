@@ -15,6 +15,7 @@
  */
 
 import {setStyles} from '#core/dom/style';
+import {tryPlay} from '#core/dom/video';
 import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
@@ -58,7 +59,7 @@ function parseMessage(event) {
   const eventMessage = parseJson(getData(event));
   const action = eventMessage['action'];
   if (action == 'play') {
-    animationHandler.play();
+    tryPlay(animationHandler);
   } else if (action == 'pause') {
     animationHandler.pause();
   } else if (action == 'stop') {

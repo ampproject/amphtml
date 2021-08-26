@@ -16,6 +16,7 @@
 
 import * as Preact from '#preact';
 import {ContainWrapper, useValueRef} from '#preact/component';
+import {tryPlay} from '#core/dom/video';
 import {Deferred} from '#core/data-structures/promise';
 import {Loading} from '#core/constants/loading-instructions';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
@@ -157,7 +158,7 @@ function VideoWrapperWithRef(
   }, [load, setPlayingState]);
 
   const play = useCallback(() => {
-    return readyDeferred.promise.then(() => playerRef.current.play());
+    return readyDeferred.promise.then(() => tryPlay(playerRef.current));
   }, [readyDeferred]);
 
   const pause = useCallback(() => {
