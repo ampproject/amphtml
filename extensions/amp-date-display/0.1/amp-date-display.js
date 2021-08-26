@@ -63,6 +63,7 @@ let VariablesDef;
   secondTwoDigit: string,
   dayPeriod: string,
   localeString: string,
+  timeZoneName: string,
  }} */
 let EnhancedVariablesDef;
 
@@ -268,6 +269,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
       second: date.getSeconds(),
       iso: date.toISOString(),
       localeString: this.getLocaleString_(date, locale, localeOptions),
+      timeZoneName: getTimeZoneName(date, locale, localeOptions),
     };
   }
 
@@ -308,6 +310,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
       second: date.getUTCSeconds(),
       iso: date.toISOString(),
       localeString: this.getLocaleString_(date, locale, localeOptionsInUTC),
+      timeZoneName: getTimeZoneName(date, locale, localeOptionsInUTC),
     };
   }
 
@@ -365,6 +368,25 @@ export class AmpDateDisplay extends AMP.BaseElement {
       this.element.dispatchEvent(event);
     });
   }
+}
+
+/**
+ * @param {!Date} date
+ * @param {string} locale
+ * @param {?Object<string, *>} options
+ * @return {string}
+ * @private
+ */
+function getTimeZoneName(date, locale, options) {
+  if (!options.timeZoneName || !Intl?.DateTimeFormat) {
+    return '';
+  }
+  const formatter = new Intl.DateTimeFormat(locale, {
+    timeZone: options.timeZone,
+    timeZoneName: options.timeZoneName,
+  });
+  return formatter.formatToParts(date).find(({type}) => type === 'timeZoneName')
+    .value;
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {
