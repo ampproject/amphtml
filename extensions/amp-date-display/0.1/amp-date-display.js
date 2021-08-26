@@ -385,8 +385,10 @@ function getTimeZoneName(date, locale, options) {
     timeZone: options.timeZone,
     timeZoneName: options.timeZoneName,
   });
-  return formatter.formatToParts(date).find(({type}) => type === 'timeZoneName')
-    .value;
+  return (
+    formatter.formatToParts(date).find(({type}) => type === 'timeZoneName')
+      ?.value || ''
+  );
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {
