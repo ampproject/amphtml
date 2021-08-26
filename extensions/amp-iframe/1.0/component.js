@@ -29,7 +29,7 @@ export function Iframe({
   const isIntersectingRef = useRef(null);
   const containerRef = useRef(null);
 
-  const updateIframeSize = (height, width) => {
+  const updateContainerSize = (height, width) => {
     const container = containerRef.current;
     if (!container) {
       return;
@@ -60,14 +60,12 @@ export function Iframe({
       // 1. post message is received in viewport
       // 2. exiting viewport
       // This could be optimized by reducing to one call.
-      requestResize(height, width).then(() => {
-        updateIframeSize(height, width);
-      });
+      requestResize(height, width);
     } else if (isIntersectingRef.current === false) {
       // attemptResize can be called before the IntersectionObserver starts observing
       // the component if an event is fired immediately. Therefore we check
       // isIntersectingRef has changed via isIntersectingRef.current === false.
-      updateIframeSize(height, width);
+      updateContainerSize(height, width);
     }
   }, [requestResize]);
 
