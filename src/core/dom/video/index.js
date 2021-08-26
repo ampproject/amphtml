@@ -98,7 +98,7 @@ export function tryPlay(element, isAutoplay) {
   // Using tryResolve coerces all of those into a real promise.
   const promise = tryResolve(() => element.play(isAutoplay));
   // Fork the promise chain to report any rejected error as expected. We don't
-  // return the promise created returned by `.catch()` so that we don't
+  // return the promise returned by `.catch()` so that we don't
   // introduce any new microtasks.
   promise.catch((err) => {
     devExpectedError('TRYPLAY', err);
