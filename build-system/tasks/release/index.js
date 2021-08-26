@@ -40,7 +40,7 @@ const tar = require('tar');
 const {cyan, green} = require('../../common/colors');
 const {execOrDie} = require('../../common/exec');
 const {log} = require('../../common/logging');
-const {MINIFIED_TARGETS} = require('../prepend-global');
+const {MINIFIED_TARGETS} = require('../helpers');
 const {VERSION} = require('../../compile/internal-version');
 
 // Flavor config for the base flavor type.
