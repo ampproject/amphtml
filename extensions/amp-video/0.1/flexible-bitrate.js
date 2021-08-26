@@ -1,3 +1,4 @@
+import {tryPlay} from '#core/dom/video';
 import {DomBasedWeakRef} from '#core/data-structures/dom-based-weakref';
 import {Services} from '#service';
 import {childElement, childElementsByTag} from '#core/dom/query';
@@ -239,14 +240,14 @@ export class BitrateManager {
     video.pause();
     const hasChanges = this.sortSources_(video);
     if (!hasChanges) {
-      video.play();
+      tryPlay(video);
       return;
     }
     video.load();
     listenOnce(video, 'loadedmetadata', () => {
       // Restore currentTime after loading new source.
       video.currentTime = currentTime;
-      video.play();
+      tryPlay(video);
       dev().fine(TAG, 'Playing at lower bitrate %s', video.currentSrc);
     });
   }
