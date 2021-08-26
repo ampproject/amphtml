@@ -11,7 +11,8 @@ export default {
 export const _default = () => {
   return (
     <Iframe
-      iframeStyle={{width: 800, height: 600, border: '1px solid black'}}
+      style={{width: 800, height: 600}}
+      iframeStyle={{border: '1px solid black'}}
       src="https://www.wikipedia.org/"
       title="Wikipedia"
     ></Iframe>
@@ -21,7 +22,7 @@ export const _default = () => {
 export const WithIntersectingIframe = () => {
   return (
     <Iframe
-      style={{width: '100px', height: '100px'}}
+      style={{width: 100, height: 100}}
       iframeStyle={{border: '1px solid black'}}
       sandbox="allow-scripts allow-same-origin"
       resizable
@@ -43,7 +44,7 @@ export const WithResizableIframe = () => {
     <div>
       <h1>{textAbove}</h1>
       <Iframe
-        style={{width: '100px', height: '100px'}}
+        style={{width: 100, height: 100}}
         iframeStyle={{border: '1px solid black'}}
         sandbox="allow-scripts allow-same-origin"
         resizable
