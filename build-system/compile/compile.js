@@ -38,6 +38,7 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS =
  *  noAddDeps?: boolean,
  *  continueOnError?: boolean,
  *  errored?: boolean,
+ *  compiledFile?: string,
  * }}
  */
 let OptionsDef;
@@ -414,7 +415,19 @@ async function compile(
     destFile,
     sourcemapFile
   );
+
   await runClosure(outputFilename, options, flags, transformedSrcFiles);
+
+  // This code is to workaround CLI arg length limits that exists on some machines.
+  // We can't pass a very large wrapper, so we insert the compiled file here.
+  if (options.compiledFile) {
+    const file = await fs.readFile(destFile, 'utf8');
+    await fs.writeFile(
+      destFile,
+      file.replace('/*AMP_COMPILED_FILE*/', () => options.compiledFile)
+    );
+  }
+
   if (options.errored && options.continueOnError) {
     return; // Watch build. Bail on compilation errors.
   }

@@ -226,9 +226,12 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
   options.wrapper = options.wrapper ?? `(function(){<%= contents %>})();`;
   options.wrapper = options.wrapper.replace(
     '<%= contents %>',
-    () => `${compiledFile}%output%`
+    () => `${compiledFile ? '/*AMP_COMPILED_FILE*/' : ''}%output%`
   );
   options.wrapper = `${ampConfig}${options.wrapper}\n\n//# sourceMappingURL=${minifiedName}.map`;
+  if (compiledFile) {
+    options.compiledFile = compiledFile;
+  }
 
   await closureCompile(entryPoint, destDir, minifiedName, options, timeInfo);
   // If an incremental watch build fails, simply return.
