@@ -1,5 +1,6 @@
 import {devAssertElement} from '#core/assert';
 import {setStyles} from '#core/dom/style';
+import {devExpectedError} from '#core/error';
 
 /**
  * @param {!Window} win
@@ -77,4 +78,20 @@ export function resetIsAutoplaySupported(win) {
  */
 export function getInternalVideoElementFor(element) {
   return devAssertElement(element.querySelector('video, iframe'));
+}
+
+/**
+ * @param {!HTMLMediaElement|../../../video-interface.VideoOrBaseElementDef} element
+ * @param {boolean=} isAutoplay
+ * @return {Promise<undefined>}
+ */
+export function tryPlay(element, isAutoplay) {
+  const ret = element.play(isAutoplay);
+  if (!ret.catch) {
+    return Promise.resolve();
+  }
+  return ret.catch((err) => {
+    devExpectedError('TRYPLAY', err);
+    throw err;
+  });
 }

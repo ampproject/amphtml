@@ -1,3 +1,4 @@
+import {tryPlay} from '#core/dom/video';
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
@@ -792,17 +793,7 @@ export class AmpVideo extends AMP.BaseElement {
    * @override
    */
   play(unusedIsAutoplay) {
-    const ret = this.video_.play();
-
-    if (ret && ret.catch) {
-      ret.catch(() => {
-        // Empty catch to prevent useless unhandled promise rejection logging.
-        // Play can fail for many reasons such as video getting paused before
-        // play() is finished.
-        // We use events to know the state of the video and do not care about
-        // the success or failure of the play()'s returned promise.
-      });
-    }
+    tryPlay(this.video_);
   }
 
   /**

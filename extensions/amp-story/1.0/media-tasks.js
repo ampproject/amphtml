@@ -1,4 +1,5 @@
-import {Deferred, tryResolve} from '#core/data-structures/promise';
+import {Deferred} from '#core/data-structures/promise';
+import {tryPlay} from '#core/dom/video';
 import {Sources} from './sources';
 import {isConnectedNode} from '#core/dom';
 
@@ -204,10 +205,7 @@ export class PlayTask extends MediaTask {
       return Promise.resolve();
     }
 
-    // The play() invocation is wrapped in a Promise.resolve(...) due to the
-    // fact that some browsers return a promise from media elements' play()
-    // function, while others return a boolean.
-    return tryResolve(() => mediaEl.play());
+    return tryPlay(mediaEl);
   }
 }
 
