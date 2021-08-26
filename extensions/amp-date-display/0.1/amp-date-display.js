@@ -40,6 +40,7 @@ const DEFAULT_DATETIME_OPTIONS = {
   second: number,
   iso: string,
   timeZoneName: string,
+  timeZoneNameShort: string,
 }} */
 let VariablesDef;
 
@@ -271,6 +272,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
       iso: date.toISOString(),
       localeString: this.getLocaleString_(date, locale, localeOptions),
       timeZoneName: getTimeZoneName(date, locale, localeOptions),
+      timeZoneNameShort: getTimeZoneName(date, locale, localeOptions, 'short'),
     };
   }
 
@@ -312,6 +314,12 @@ export class AmpDateDisplay extends AMP.BaseElement {
       iso: date.toISOString(),
       localeString: this.getLocaleString_(date, locale, localeOptionsInUTC),
       timeZoneName: getTimeZoneName(date, locale, localeOptionsInUTC),
+      timeZoneNameShort: getTimeZoneName(
+        date,
+        locale,
+        localeOptionsInUTC,
+        'short'
+      ),
     };
   }
 

@@ -175,9 +175,13 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
     expect(data.second).to.equal('6');
     expect(data.secondTwoDigit).to.equal('06');
     expect(data.dayPeriod).to.equal('am');
-    // timeZoneName is empty when localeOptions.timeZoneName is not set to
-    // define the format.
-    expect(data.timeZoneName).to.equal('');
+    // default timezone is affected by running platform, so we just verify
+    // that both timezone values are present, and that they differ.
+    // (Another set of tests below verify that the timezone is labelled
+    // properly in different locales.)
+    expect(data.timeZoneName).to.be.ok;
+    expect(data.timeZoneNameShort).to.be.ok;
+    expect(data.timeZoneName).to.not.equal(data.timeZoneNameShort);
   });
 
   it('provides variables in Czech when "cs" locale is passed', () => {
@@ -196,9 +200,8 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
     expect(data.monthNameShort).to.equal('úno');
     expect(data.dayName).to.equal('sobota');
     expect(data.dayNameShort).to.equal('so');
-    // timeZoneName is empty when localeOptions.timeZoneName is not set to
-    // define the format.
-    expect(data.timeZoneName).to.equal('');
+    expect(data.timeZoneName).to.equal('Koordinovaný světový čas');
+    expect(data.timeZoneNameShort).to.equal('UTC');
   });
 
   it('shows custom locale string when localeOptions is passed', () => {
@@ -217,62 +220,38 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
     expect(data.localeString).to.equal('上午4:05');
   });
 
-  const formatExpectsTimeZoneNameAmericaNewYork = {
+  const expectedTimeZoneNamesAmericaNewYork = {
     'en': {
-      long: 'Eastern Standard Time',
-      short: 'EST',
+      timeZoneName: 'Eastern Standard Time',
+      timeZoneNameShort: 'EST',
     },
     'ja-JP': {
-      long: 'アメリカ東部標準時',
-      short: 'GMT-5',
+      timeZoneName: 'アメリカ東部標準時',
+      timeZoneNameShort: 'GMT-5',
     },
     'ar-EG': {
-      long: 'التوقيت الرسمي الشرقي لأمريكا الشمالية',
-      short: 'غرينتش-٥',
+      timeZoneName: 'التوقيت الرسمي الشرقي لأمريكا الشمالية',
+      timeZoneNameShort: 'غرينتش-٥',
     },
   };
-  for (const locale in formatExpectsTimeZoneNameAmericaNewYork) {
-    const expectedTimeZoneNames =
-      formatExpectsTimeZoneNameAmericaNewYork[locale];
-    for (const format in expectedTimeZoneNames) {
-      it(`shows timeZoneName when localeOptions.timeZoneName is passed (${locale}, ${format})`, () => {
-        const jsx = (
-          <DateDisplay
-            render={render}
-            datetime={Date.parse('2001-02-03T04:05:06.007Z')}
-            locale={locale}
-            localeOptions={{
-              timeZone: 'America/New_York',
-              timeZoneName: format,
-            }}
-          />
-        );
-        const wrapper = mount(jsx);
-        const data = JSON.parse(wrapper.text());
-        expect(data.timeZoneName).to.equal(expectedTimeZoneNames[format]);
-      });
-    }
-  }
-
-  const formatExpectsTimeZoneNameUtc = {
-    long: 'Coordinated Universal Time',
-    short: 'UTC',
-  };
-  for (const format in formatExpectsTimeZoneNameUtc) {
-    it(`shows timeZoneName when localeOptions.timeZoneName is passed (UTC, ${format})`, () => {
+  for (const locale in expectedTimeZoneNamesAmericaNewYork) {
+    const {timeZoneName, timeZoneNameShort} =
+      expectedTimeZoneNamesAmericaNewYork[locale];
+    it(`shows timeZoneName and timeZoneNameShort with specified TZ (${locale})`, () => {
       const jsx = (
         <DateDisplay
           render={render}
           datetime={Date.parse('2001-02-03T04:05:06.007Z')}
-          displayIn="UTC"
+          locale={locale}
           localeOptions={{
-            timeZoneName: format,
+            timeZone: 'America/New_York',
           }}
         />
       );
       const wrapper = mount(jsx);
       const data = JSON.parse(wrapper.text());
-      expect(data.timeZoneName).to.equal(formatExpectsTimeZoneNameUtc[format]);
+      expect(data.timeZoneName).to.equal(timeZoneName);
+      expect(data.timeZoneNameShort).to.equal(timeZoneNameShort);
     });
   }
 

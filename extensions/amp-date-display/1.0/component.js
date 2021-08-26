@@ -202,6 +202,7 @@ function getVariablesInLocal(
     'iso': date.toISOString(),
     'localeString': getLocaleString_(date, locale, localeOptions),
     'timeZoneName': getTimeZoneName(date, locale, localeOptions),
+    'timeZoneNameShort': getTimeZoneName(date, locale, localeOptions, 'short'),
   };
 }
 
@@ -246,5 +247,11 @@ function getVariablesInUTC(
     'iso': date.toISOString(),
     'localeString': getLocaleString_(date, locale, localeOptionsInUTC),
     'timeZoneName': getTimeZoneName(date, locale, localeOptionsInUTC),
+    'timeZoneNameShort': getTimeZoneName(
+      date,
+      locale,
+      localeOptionsInUTC,
+      'short'
+    ),
   };
 }
