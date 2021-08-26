@@ -47,10 +47,6 @@ const customLaunchers = {
     base: argv.headless ? 'EdgeBetaHeadless' : 'EdgeBeta',
     flags: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
   },
-  IECustom: {
-    base: 'IE',
-    flags: ['-extoff'],
-  },
 };
 
 module.exports = {
