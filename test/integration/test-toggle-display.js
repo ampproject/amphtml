@@ -2,7 +2,7 @@ import {setInitialDisplay, toggle} from '#core/dom/style';
 
 import {BrowserController} from '#testing/test-helper';
 
-describes.integration.configure().run(
+describes.integration(
   'toggle display helper',
   {
     body: '<amp-img src="/examples/img/hero@1x.jpg" width="289" height="216"></amp-img>',

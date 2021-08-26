@@ -110,8 +110,6 @@ class RuntimeTestConfig {
       ? 'EdgeCustom'
       : argv.firefox
       ? 'FirefoxCustom'
-      : argv.ie
-      ? 'IECustom'
       : argv.safari
       ? 'SafariCustom'
       : 'ChromeCustom';

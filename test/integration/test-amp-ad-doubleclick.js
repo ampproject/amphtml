@@ -1,6 +1,6 @@
 import {createFixtureIframe, poll, pollForLayout} from '#testing/iframe';
 
-describes.sandboxed.configure().run('Rendering of one ad', {}, () => {
+describes.sandboxed('Rendering of one ad', {}, () => {
   let fixture;
   let beforeHref;
 
