@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
@@ -15,11 +16,14 @@
  */
 
 import {deserializeMessage} from '#core/3p-frame-messaging';
+=======
+import {MessageType, deserializeMessage} from '#core/3p-frame-messaging';
+>>>>>>> b29db7c0b2... remove re-export and update MessageType imports (#35817)
 
 import * as Preact from '#preact';
 import {useCallback, useContext, useState} from '#preact';
 import {forwardRef} from '#preact/compat';
-import {MessageType, ProxyIframeEmbed} from '#preact/component/3p-frame';
+import {ProxyIframeEmbed} from '#preact/component/3p-frame';
 
 import {EmbedlyContext} from './embedly-context';
 

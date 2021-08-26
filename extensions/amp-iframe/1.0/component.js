@@ -16,7 +16,7 @@
 
 import * as Preact from '#preact';
 import {useCallback, useEffect, useRef} from '#preact';
-import {MessageType} from '#preact/component/3p-frame';
+import {MessageType} from '#core/3p-frame-messaging';
 import {toWin} from '#core/window';
 
 const NOOP = () => {};
