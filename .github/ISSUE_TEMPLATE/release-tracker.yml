@@ -4,25 +4,26 @@ description: Track a new AMP release.
 labels: 'Type: Release'
 title: "\U0001F684 Release VERSION"
 body:
-  - type: input
+  - type: textarea
     id: amp_version
     attributes:
-      label: AMP version
-      placeholder: e.g. 2107170150000
+      label: AMP Version
+      description: Replace VERSION with AMP version
+      value: |
+        [VERSION](https://github.com/ampproject/amphtml/releases/tag/VERSION)
     validations:
       required: true
-  - type: checkboxes
+  - type: textarea
     id: promotions
     attributes:
-      label: Promotions for this release.
-      options:
-        - label: Release VERSION promoted to Experimental and Beta (opt-in) channels (PROMOTE_TIME)
-        - label: Release VERSION promoted to Experimental and Beta (1% traffic) channels (PROMOTE_TIME)
-        - label: Release VERSION promoted to Stable channel (PROMOTE_TIME)
-        - label: (optional) Release VERSION promoted to LTS channel (PROMOTE_TIME)
-  - type: textarea
-    id: notifications
-    attributes:
-      label: Notifications
-      description: Add working groups or individuals you want to notify about this release.
-      value: /cc @ampproject/release-on-duty
+      label: Promotions
+      description: Replace VERSION with AMP version and PROMOTE_TIME with CL submit time
+      value: |
+        - [ ] VERSION promoted to Experimental and Beta (opt-in) channels (PROMOTE_TIME)
+        - [ ] VERSION promoted to Experimental and Beta (1% traffic) channels (PROMOTE_TIME)
+        - [ ] VERSION promoted to Stable channel (PROMOTE_TIME)
+        - [ ] (optional) VERSION promoted to LTS channel (PROMOTE_TIME)
+
+        /cc @ampproject/release-on-duty
+    validations:
+      required: true
