@@ -27,7 +27,8 @@ export default {
 export const _default = () => {
   return (
     <Iframe
-      style={{width: 800, height: 600, borderWidth: 2}}
+      style={{width: 800, height: 600}}
+      iframeStyle={{border: '1px solid black'}}
       src="https://www.wikipedia.org/"
       title="Wikipedia"
     ></Iframe>
@@ -37,9 +38,8 @@ export const _default = () => {
 export const WithIntersectingIframe = () => {
   return (
     <Iframe
-      style={{borderWidth: 2}}
-      width="100"
-      height="100"
+      style={{width: 100, height: 100}}
+      iframeStyle={{border: '1px solid black'}}
       sandbox="allow-scripts allow-same-origin"
       resizable
       src="/examples/bento/amp-iframe-resizing-example.html"
@@ -60,15 +60,15 @@ export const WithResizableIframe = () => {
     <div>
       <h1>{textAbove}</h1>
       <Iframe
-        style={{borderWidth: 2}}
-        width="100"
-        height="100"
+        style={{width: 100, height: 100}}
+        iframeStyle={{border: '1px solid black'}}
         sandbox="allow-scripts allow-same-origin"
         resizable
         src="/examples/bento/amp-iframe-resizing-example.html"
       >
         <div placeholder>Placeholder</div>
       </Iframe>
+      <p>The above iframe should resize to 300x300px when visible</p>
       <h1>{textBelow}</h1>
     </div>
   );
