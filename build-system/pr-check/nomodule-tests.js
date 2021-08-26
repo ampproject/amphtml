@@ -25,7 +25,7 @@ const {
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
-const {MINIFIED_TARGETS} = require('../tasks/prepend-global');
+const {MINIFIED_TARGETS} = require('../tasks/helpers');
 const {runCiJob} = require('./ci-job');
 const {Targets, buildTargetsInclude} = require('./build-targets');
 
