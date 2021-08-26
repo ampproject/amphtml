@@ -30,7 +30,7 @@ function FacebookWithRef(
     layout,
     locale: localeProp,
     numPosts,
-    onReady,
+    onLoad,
     orderBy,
     refLabel,
     requestResize,
@@ -51,7 +51,7 @@ function FacebookWithRef(
     (event) => {
       const data = tryParseJson(event.data) ?? deserializeMessage(event.data);
       if (data['action'] == 'ready') {
-        onReady?.();
+        onLoad?.();
       }
       if (data['type'] == MessageType.EMBED_SIZE) {
         const height = data['height'];
@@ -63,7 +63,7 @@ function FacebookWithRef(
         }
       }
     },
-    [requestResize, onReady]
+    [requestResize, onLoad]
   );
 
   const [locale, setLocale] = useState(localeProp);

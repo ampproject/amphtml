@@ -30,7 +30,7 @@ export function RenderWithRef(
     render = DEFAULT_RENDER,
     ariaLiveValue = 'polite',
     onLoading,
-    onReady,
+    onLoad,
     onRefresh,
     onError,
     ...rest
@@ -68,12 +68,12 @@ export function RenderWithRef(
     getJson(src, /* shouldRefresh */ true)
       .then((data) => {
         setData(data);
-        onReady?.();
+        onLoad?.();
       })
       .catch((e) => {
         onError?.(e);
       });
-  }, [getJson, src, onReady, onRefresh, onError]);
+  }, [getJson, src, onLoad, onRefresh, onError]);
 
   useImperativeHandle(
     ref,
@@ -93,9 +93,9 @@ export function RenderWithRef(
       if (!node?.firstElementChild || !rendered) {
         return;
       }
-      onReady?.();
+      onLoad?.();
     },
-    [rendered, onReady]
+    [rendered, onLoad]
   );
 
   return (
