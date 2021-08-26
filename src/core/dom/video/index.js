@@ -91,7 +91,7 @@ let VideoOrBaseElementPlayableDef;
  */
 export function tryPlay(element, isAutoplay) {
   const ret = element.play(!!isAutoplay);
-  if (!ret.catch) {
+  if (!ret?.catch) {
     return Promise.resolve();
   }
   return ret.catch((err) => {
@@ -102,7 +102,6 @@ export function tryPlay(element, isAutoplay) {
 
 /**
  * @param {!HTMLMediaElement} element
- * @return {Promise<undefined>}
  */
 export function playIgnoringError(element) {
   // Some browsers return undefined, some a boolean, and some a real promise.
@@ -113,5 +112,4 @@ export function playIgnoringError(element) {
     // We use events to know the state of the video and do not care about
     // the success or failure of the play()'s returned promise.
   });
-  return Promise.resolve();
 }
