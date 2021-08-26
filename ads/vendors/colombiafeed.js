@@ -21,7 +21,7 @@ import {loadScript, validateData} from '../../3p/3p';
  * @param {!Object} data
  */
 export function colombiafeed(global, data) {
-  validateData(data, ['feedslot','feedposition','feedsection']);
+  validateData(data, ['feedslot', 'feedposition', 'feedsection']);
   // push the two object into the '_colombiafeed' global
   (global._colombiafeed = global._colombiafeed || []).push({
     feedslot: data.feedslot,

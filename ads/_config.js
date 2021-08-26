@@ -396,7 +396,8 @@ const adConfig = jsonConfiguration({
   },
 
   'colombiafeed': {
-    prefetch:'https://static.clmbtech.com/c1e/static/themes/js/colombiafeed-amp.js',
+    prefetch:
+      'https://static.clmbtech.com/c1e/static/themes/js/colombiafeed-amp.js',
   },
 
   'conative': {
