@@ -18,8 +18,8 @@ export function colombia(global, data) {
     clmbposition: data.clmb_position,
     clmbsection: data.clmb_section,
     clmbdivid: data.clmb_divid,
-	  gam: data.gam,
-	  clmbcustom: data.clmb_custom,
+    gam: data.gam,
+    clmbcustom: data.clmb_custom,
   });
   // install observation on entering/leaving the view
   global.context.observeIntersection(function (newrequest) {
