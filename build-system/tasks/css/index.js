@@ -76,6 +76,13 @@ const cssEntryPoints = [
     append: false,
   },
   {
+    // Story CSS used to layout story before JS loads.
+    path: 'amp-story-prestyle.css',
+    outJs: 'amp-story-prestyle.css.js',
+    outCss: 'amp-story-prestyle.css',
+    append: false,
+  },
+  {
     path: 'amp-ima-video-iframe.css',
     outJs: 'amp-ima-video-iframe.css.js',
     outCss: 'amp-ima-video-iframe-v0.css',
