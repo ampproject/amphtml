@@ -58,6 +58,8 @@ class AmpTwitter extends BaseElement {
   /** @override */
   init() {
     return dict({
+      'onLoad': () => this.togglePlaceholder(false),
+      'onError': () => this.togglePlaceholder(true),
       'requestResize': (height) => this.attemptChangeHeight(height),
     });
   }

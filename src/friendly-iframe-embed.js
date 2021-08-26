@@ -19,7 +19,6 @@ import {toWin} from '#core/window';
 import {install as installAbortController} from '#polyfills/abort-controller';
 import {install as installCustomElements} from '#polyfills/custom-elements';
 import {install as installDocContains} from '#polyfills/document-contains';
-import {install as installDOMTokenList} from '#polyfills/domtokenlist';
 import {installForChildWin as installIntersectionObserver} from '#polyfills/intersection-observer';
 import {installForChildWin as installResizeObserver} from '#polyfills/resize-observer';
 
@@ -686,7 +685,6 @@ export class FriendlyIframeEmbed {
 function installPolyfillsInChildWindow(parentWin, childWin) {
   if (!mode.isEsm()) {
     installDocContains(childWin);
-    installDOMTokenList(childWin);
   }
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
