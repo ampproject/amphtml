@@ -23,6 +23,7 @@ const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {watch} = require('chokidar');
+const isProd = argv._.includes('dist') && !argv.fortesting;
 
 /** @type {Remapping.default} */
 const remapping = /** @type {*} */ (Remapping);
@@ -323,11 +324,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
 
   const target = path.basename(minifiedName, path.extname(minifiedName));
   if (!argv.noconfig && MINIFIED_TARGETS.includes(target)) {
-    await applyAmpConfig(
-      maybeToEsmName(`${destDir}/${minifiedName}`),
-      /* localDev */ options.fortesting,
-      /* fortesting */ options.fortesting
-    );
+    await applyAmpConfig(maybeToEsmName(`${destDir}/${minifiedName}`));
   }
 }
 
@@ -398,11 +395,7 @@ async function finishBundle(
   const targets = options.minify ? MINIFIED_TARGETS : UNMINIFIED_TARGETS;
   const target = path.basename(destFilename, path.extname(destFilename));
   if (targets.includes(target)) {
-    await applyAmpConfig(
-      path.join(destDir, destFilename),
-      /* localDev */ true,
-      /* fortesting */ options.fortesting
-    );
+    await applyAmpConfig(path.join(destDir, destFilename));
   }
 }
 
@@ -738,11 +731,9 @@ async function maybePrintCoverageMessage(covPath = '') {
  * various runtime files.
  *
  * @param {string} targetFile File to which the config is to be written.
- * @param {boolean} localDev Whether or not to enable local development.
- * @param {boolean} fortesting Whether or not to enable testing mode.
  * @return {!Promise}
  */
-async function applyAmpConfig(targetFile, localDev, fortesting) {
+async function applyAmpConfig(targetFile) {
   const config = argv.config === 'canary' ? 'canary' : 'prod';
   const baseConfigFile =
     'build-system/global-configs/' + config + '-config.json';
@@ -752,10 +743,9 @@ async function applyAmpConfig(targetFile, localDev, fortesting) {
     config,
     targetFile,
     baseConfigFile,
-    /* opt_localDev */ localDev,
+    /* isTest */ !isProd,
     /* opt_localBranch */ true,
-    /* opt_branch */ undefined,
-    /* opt_fortesting */ fortesting
+    /* opt_branch */ undefined
   );
 }
 
