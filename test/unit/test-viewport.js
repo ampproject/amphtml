@@ -1807,6 +1807,7 @@ describes.sandboxed('createViewport', {}, () => {
       });
 
       it('should NOT bind to "iOS embed" when iframed but not embedded', () => {
+        getMode(win).test = false;
         win.parent = {};
         env.sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
         installViewportServiceForDoc(ampDoc);
@@ -1816,7 +1817,6 @@ describes.sandboxed('createViewport', {}, () => {
 
       it('should bind to "iOS embed" when iframed but in test mode', () => {
         win.parent = {};
-        getMode(win).test = true;
         env.sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
         installViewportServiceForDoc(ampDoc);
         const viewport = Services.viewportForDoc(ampDoc);
@@ -1826,6 +1826,7 @@ describes.sandboxed('createViewport', {}, () => {
       });
 
       it('should bind to "natural" when iframed, but iOS supports scrollable iframes', () => {
+        getMode(win).test = false;
         win.parent = {};
         env.sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
         env.sandbox

@@ -9,6 +9,7 @@ import {
 import {installTimerService} from '#service/timer-impl';
 
 import {listenOncePromise} from '../../../../src/event-helper';
+import {getMode} from '../../../../src/mode';
 import {parseUrlDeprecated} from '../../../../src/url';
 
 describes.fakeWin(
@@ -323,6 +324,7 @@ describes.sandboxed('Window - History', {}, (env) => {
         addEventListener: () => null,
       };
       ampdoc = new AmpDocSingle(win);
+      getMode(win).test = false;
       installHistoryServiceForDoc(ampdoc);
     });
 
