@@ -8,7 +8,7 @@ body:
     id: amp_version
     attributes:
       label: AMP Version
-      description: Replace VERSION with AMP version
+      description: Replace VERSION with AMP version.
       value: |
         [VERSION](https://github.com/ampproject/amphtml/releases/tag/VERSION)
     validations:
@@ -17,7 +17,7 @@ body:
     id: promotions
     attributes:
       label: Promotions
-      description: Replace VERSION with AMP version and PROMOTE_TIME with CL submit time
+      description: Replace VERSION with AMP version and PROMOTE_TIME with CL submit time.
       value: |
         - [ ] VERSION promoted to Experimental and Beta (opt-in) channels (PROMOTE_TIME)
         - [ ] VERSION promoted to Experimental and Beta (1% traffic) channels (PROMOTE_TIME)
