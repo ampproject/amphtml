@@ -1,18 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import '../amp-lightbox';
 import {ActionInvocation} from '#service/action-impl';
 import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
@@ -20,6 +5,7 @@ import {htmlFor} from '#core/dom/static-template';
 import {poll} from '#testing/iframe';
 import {toggleExperiment} from '#experiments';
 import {whenCalled} from '#testing/test-helper';
+import {Services} from '#service/';
 
 describes.realWin(
   'amp-lightbox:1.0',
@@ -32,6 +18,8 @@ describes.realWin(
     let win;
     let html;
     let element;
+    let historyPopSpy;
+    let historyPushSpy;
 
     async function waitForOpen(el, open) {
       const isOpenOrNot = () => el.hasAttribute('open') === open;
@@ -48,7 +36,21 @@ describes.realWin(
     beforeEach(async () => {
       win = env.win;
       html = htmlFor(win.document);
-      toggleExperiment(win, 'bento-selector', true, true);
+      toggleExperiment(win, 'bento-lightbox', true, true);
+
+      historyPopSpy = env.sandbox.spy();
+      historyPushSpy = env.sandbox.spy();
+      env.sandbox.stub(Services, 'historyForDoc').returns({
+        push() {
+          historyPushSpy();
+          return Promise.resolve(11);
+        },
+        pop() {
+          historyPopSpy();
+          return Promise.resolve(11);
+        },
+      });
+
       element = html`
         <amp-lightbox layout="nodisplay">
           <p>Hello World</p>
@@ -111,6 +113,9 @@ describes.realWin(
         expect(eventSpy).to.be.calledOnce;
 
         await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
+
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
         expect(scroller).to.exist;
         expect(element.setAsContainerInternal).to.be.calledWith(scroller);

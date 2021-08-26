@@ -1,35 +1,28 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import '../../../amp-ad/0.1/amp-ad';
+import {MANUAL_EXPERIMENT_ID} from '#ads/google/a4a/traffic-experiments';
+import {EXPERIMENT_ATTRIBUTE} from '#ads/google/a4a/utils';
+
+import {Deferred} from '#core/data-structures/promise';
+import {createElementWithAttributes} from '#core/dom';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
+
+import {Xhr} from '#service/xhr-impl';
+
+import {BaseElement} from '../../../../src/base-element';
+import {devAssert} from '../../../../src/log';
 import {
   AmpA4A,
   EXPERIMENT_FEATURE_HEADER_NAME,
   RENDERING_TYPE_HEADER,
   XORIGIN_MODE,
 } from '../../../amp-a4a/0.1/amp-a4a';
+import {SignatureVerifier} from '../../../amp-a4a/0.1/signature-verifier';
 import {
   AmpAdNetworkDoubleclickImpl,
   getNetworkId,
   resetSraStateForTesting,
 } from '../amp-ad-network-doubleclick-impl';
-import {BaseElement} from '../../../../src/base-element';
-import {Deferred} from '#core/data-structures/promise';
-import {EXPERIMENT_ATTRIBUTE} from '#ads/google/a4a/utils';
-import {MANUAL_EXPERIMENT_ID} from '#ads/google/a4a/traffic-experiments';
-import {SignatureVerifier} from '../../../amp-a4a/0.1/signature-verifier';
 import {
   TFCD,
   combineInventoryUnits,
@@ -48,11 +41,6 @@ import {
   isAdTest,
   sraBlockCallbackHandler,
 } from '../sra-utils';
-import {Xhr} from '#service/xhr-impl';
-import {createElementWithAttributes} from '#core/dom';
-import {devAssert} from '../../../../src/log';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
 
 const config = {amp: true, allowExternalResources: true};
 

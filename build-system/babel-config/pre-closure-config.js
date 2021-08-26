@@ -1,21 +1,7 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the 'License');
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS-IS' BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const {BUILD_CONSTANTS} = require('../compile/build-constants');
 const {getImportResolverPlugin} = require('./import-resolver');
 const {getReplacePlugin} = require('./helpers');
 
@@ -26,9 +12,7 @@ const {getReplacePlugin} = require('./helpers');
  */
 function getPreClosureConfig() {
   const isCheckTypes = argv._.includes('check-types');
-  const testTasks = ['e2e', 'integration', 'visual-diff'];
-  const isTestTask = testTasks.some((task) => argv._.includes(task));
-  const isFortesting = argv.fortesting || isTestTask;
+  const isProd = argv._.includes('dist') && !argv.fortesting;
 
   const reactJsxPlugin = [
     '@babel/plugin-transform-react-jsx',
@@ -65,7 +49,6 @@ function getPreClosureConfig() {
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
     './build-system/babel-plugins/babel-plugin-transform-html-template',
     './build-system/babel-plugins/babel-plugin-transform-jss',
-    './build-system/babel-plugins/babel-plugin-transform-simple-array-destructure',
     './build-system/babel-plugins/babel-plugin-transform-default-assignment',
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-amp-asserts',
@@ -73,15 +56,12 @@ function getPreClosureConfig() {
     // argv.esm
     //? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
     //: null,
-    !isCheckTypes
-      ? './build-system/babel-plugins/babel-plugin-transform-json-configuration'
-      : null,
-    !(isFortesting || isCheckTypes)
-      ? [
-          './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
-          {isEsmBuild: !!argv.esm},
-        ]
-      : null,
+    !isCheckTypes &&
+      './build-system/babel-plugins/babel-plugin-transform-json-configuration',
+    isProd && [
+      './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
+      BUILD_CONSTANTS,
+    ],
   ].filter(Boolean);
   const presetEnv = [
     '@babel/preset-env',

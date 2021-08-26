@@ -1,23 +1,8 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {PriorityQueue} from '#core/data-structures/priority-queue';
 import {isIframed, tryFocus} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {closestAncestorElementBySelector} from '#core/dom/query';
+import * as mode from '#core/mode';
 import {dict} from '#core/types/object';
 import {toWin} from '#core/window';
 
@@ -618,7 +603,7 @@ export class Navigation {
     // confusing behavior e.g. when pressing "tab" button.
     // @see https://humanwhocodes.com/blog/2013/01/15/fixing-skip-to-content-links/
     // @see https://github.com/ampproject/amphtml/issues/18671
-    if (!IS_ESM && Services.platformFor(this.ampdoc.win).isIe()) {
+    if (!mode.isEsm() && Services.platformFor(this.ampdoc.win).isIe()) {
       const id = toLocation.hash.substring(1);
       const elementWithId = this.ampdoc.getElementById(id);
       if (elementWithId) {

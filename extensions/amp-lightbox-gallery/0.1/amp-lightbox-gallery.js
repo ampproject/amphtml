@@ -1,34 +1,9 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {prepareImageAnimation} from '@ampproject/animations';
 
-import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
 import {CommonSignals} from '#core/constants/common-signals';
-import {
-  ELIGIBLE_TAP_TAGS,
-  LightboxManager,
-  LightboxThumbnailDataDef,
-  VIDEO_TAGS,
-} from './service/lightbox-manager-impl';
-import {Gestures} from '../../../src/gesture';
 import {Keys} from '#core/constants/key-codes';
-import {LightboxCaption, OverflowState} from './lightbox-caption';
-import {LightboxControls, LightboxControlsAction} from './lightbox-controls';
-import {Services} from '#service';
-import {SwipeDef, SwipeYRecognizer} from '../../../src/gesture-recognizers';
-import {SwipeToDismiss} from './swipe-to-dismiss';
+import {getVerticalScrollbarWidth, toggleAttribute} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {
   childElementByTag,
   closest,
@@ -36,24 +11,37 @@ import {
   elementByTag,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyle, setStyles, toggle} from '#core/dom/style';
 import {clamp} from '#core/math';
+import {toArray} from '#core/types/array';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {LightboxCaption, OverflowState} from './lightbox-caption';
+import {LightboxControls, LightboxControlsAction} from './lightbox-controls';
+import {
+  ELIGIBLE_TAP_TAGS,
+  LightboxManager,
+  LightboxThumbnailDataDef,
+  VIDEO_TAGS,
+} from './service/lightbox-manager-impl';
+import {SwipeToDismiss} from './swipe-to-dismiss';
 import {
   delayAfterDeferringToEventLoop,
   secondsToTimestampString,
 } from './utils';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
-import {getElementServiceForDoc} from '../../../src/element-service';
-import {getVerticalScrollbarWidth, toggleAttribute} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
-import {isExperimentOn} from '#experiments';
-import {prepareImageAnimation} from '@ampproject/animations';
-import {reportError} from '../../../src/error-reporting';
-import {setStyle, setStyles, toggle} from '#core/dom/style';
-import {toArray} from '#core/types/array';
+
+import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {getElementServiceForDoc} from '../../../src/element-service';
+import {reportError} from '../../../src/error-reporting';
+import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
+import {Gestures} from '../../../src/gesture';
+import {SwipeDef, SwipeYRecognizer} from '../../../src/gesture-recognizers';
+import {dev, devAssert, userAssert} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-lightbox-gallery';
@@ -451,11 +439,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     );
     const el = this.lightboxCaption_.getElement();
     el.addEventListener('click', (event) => {
-      triggerAnalyticsEvent(
-        this.element,
-        'descriptionOverflowToggled',
-        dict({})
-      );
+      triggerAnalyticsEvent(this.element, 'descriptionOverflowToggled');
       this.lightboxCaption_.toggleOverflow();
       event.stopPropagation();
       event.preventDefault();
@@ -583,7 +567,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.hideControls_();
       }
     }
-    triggerAnalyticsEvent(this.element, 'controlsToggled', dict({}));
+    triggerAnalyticsEvent(this.element, 'controlsToggled');
   }
 
   /**
@@ -782,7 +766,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       .then(() => {
         setStyle(this.element, 'opacity', '');
         this.showOverlay_();
-        triggerAnalyticsEvent(this.element, 'lightboxOpened', dict({}));
+        triggerAnalyticsEvent(this.element, 'lightboxOpened');
       });
   }
 
@@ -1249,7 +1233,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.container_.setAttribute('gallery-view', '');
       toggle(dev().assertElement(this.carousel_), false);
     });
-    triggerAnalyticsEvent(this.element, 'thumbnailsViewToggled', dict({}));
+    triggerAnalyticsEvent(this.element, 'thumbnailsViewToggled');
   }
 
   /**

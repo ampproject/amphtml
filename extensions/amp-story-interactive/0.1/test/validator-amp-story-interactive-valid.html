@@ -1,21 +1,6 @@
 <!--
-  Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS-IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the license.
--->
-<!--
   Test Description:
-  One correct component of each type: binary-poll, poll, quiz, results
+  One correct component of each type: binary-poll, poll, quiz, image poll, image quiz, results
 -->
 <!doctype html>
 <html ⚡ lang="en">
@@ -76,6 +61,47 @@
       </amp-story-grid-layer>
     </amp-story-page>
     <amp-story-page id="4">
+      <amp-story-grid-layer template="fill">
+        <!-- Valid: Example of amp-story-interactive-img-poll -->
+        <amp-story-interactive-img-poll
+          id="correct-img-poll"
+          prompt-text="Which of these places would you travel to first?"
+          endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+          option-1-image="https://images.com/1"
+          option-1-image-alt="Lake Tahoe"
+          option-1-results-category="Lake lover"
+          option-2-image="https://images.com/2"
+          option-2-image-alt="Hong Kong"
+          option-2-results-category="City-goer"
+          option-3-image="https://images.com/3"
+          option-3-image-alt="Hawaii"
+          option-3-results-category="Tropical explorer"
+          option-4-image="https://images.com/4"
+          option-4-image-alt="Grand Canyon"
+          option-4-results-category="National Park lover">
+        </amp-story-interactive-img-poll>
+      </amp-story-grid-layer>
+    </amp-story-page>
+    <amp-story-page id="5">
+      <amp-story-grid-layer template="fill">
+        <!-- Valid: Example of amp-story-interactive-img-quiz -->
+        <amp-story-interactive-img-quiz
+          id="correct-img-quiz"
+          prompt-text="Which of these structures is oldest?"
+          endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+          option-1-image="https://images.com/1"
+          option-1-image-alt="Statue of Liberty"
+          option-1-correct
+          option-2-image="https://images.com/2"
+          option-2-image-alt="Golden Gate Bridge"
+          option-3-image="https://images.com/3"
+          option-3-image-alt="Christ the Redeemer"
+          option-4-image="https://images.com/4"
+          option-4-image-alt="Eiffel Tower">
+        </amp-story-interactive-img-quiz>
+      </amp-story-grid-layer>
+    </amp-story-page>
+    <amp-story-page id="6">
       <amp-story-grid-layer template="fill">
       <!-- Valid: Example of amp-story-interactive-results -->
         <amp-story-interactive-results

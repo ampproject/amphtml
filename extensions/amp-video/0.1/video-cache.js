@@ -1,19 +1,3 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {Services} from '#service';
 import {addParamsToUrl, resolveRelativeUrl} from '../../../src/url';
 import {
@@ -32,10 +16,19 @@ import {user} from '../../../src/log';
  *
  * @param {!Element} videoEl
  * @param {!AmpDoc} ampdoc
+ * @param {number=} maxBitrate
  * @return {!Promise}
  */
-export function fetchCachedSources(videoEl, ampdoc) {
+export function fetchCachedSources(
+  videoEl,
+  ampdoc,
+  maxBitrate = Number.POSITIVE_INFINITY
+) {
   const {win} = ampdoc;
+  // Keep non cached evergreen sources for crawlers.
+  if (Services.platformFor(win).isBot()) {
+    return Promise.resolve();
+  }
   if (
     !(
       videoEl.getAttribute('src') ||
@@ -58,11 +51,11 @@ export function fetchCachedSources(videoEl, ampdoc) {
         'amp_video_host_url':
           /* document url that contains the video */ canonicalUrl,
       });
-      return Services.xhrFor(win).fetch(requestUrl);
+      return Services.xhrFor(win).fetch(requestUrl, {prerenderSafe: true});
     })
     .then((response) => response.json())
     .then((jsonResponse) =>
-      applySourcesToVideo(videoEl, jsonResponse['sources'])
+      applySourcesToVideo(videoEl, jsonResponse['sources'], maxBitrate)
     )
     .catch(() => {
       // If cache fails, video should still load properly.
@@ -88,11 +81,15 @@ function selectVideoSource(videoEl) {
  *
  * @param {!Element} videoEl
  * @param {!Array<!Object>} sources
+ * @param {number} maxBitrate
  */
-function applySourcesToVideo(videoEl, sources) {
+function applySourcesToVideo(videoEl, sources, maxBitrate) {
   sources
     .sort((a, b) => a['bitrate_kbps'] - b['bitrate_kbps'])
     .forEach((source) => {
+      if (source['bitrate_kbps'] > maxBitrate) {
+        return;
+      }
       const sourceEl = createElementWithAttributes(
         videoEl.ownerDocument,
         'source',

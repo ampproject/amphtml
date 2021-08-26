@@ -1,20 +1,5 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {getNextArrow, getPrevArrow, getSlides, sleep} from './helpers';
+import {getNextArrow, getPrevArrow, getSlides} from './helpers';
+import {awaitFrameAfter} from '#testing/helpers';
 
 describes.endtoend(
   'amp-base-carousel - advancing with multiple visible slides',
@@ -38,7 +23,8 @@ describes.endtoend(
       prevArrow = await getPrevArrow(controller);
     });
 
-    it('should not go forward past end and it should be able to go back correctly', async () => {
+    it('should not go forward past end and it should be able to go back correctly', async function () {
+      this.timeout(10000);
       const slideCount = 7;
       const slidesInView = 3;
       const slides = await getSlides(controller);
@@ -47,7 +33,7 @@ describes.endtoend(
       for (let i = 0; i < slideCount - slidesInView; i++) {
         await controller.click(nextArrow);
         // Need to sleep due to amp-base-carousel buffering clicks
-        await sleep(1000);
+        await awaitFrameAfter(500);
       }
 
       let slideRect = await rect(slides[slideCount - slidesInView]);
@@ -64,7 +50,7 @@ describes.endtoend(
       // Click `prev` the correct number of times to take us back to first slide.
       for (let i = 0; i < slideCount - slidesInView; i++) {
         await controller.click(prevArrow);
-        await sleep(1000);
+        await awaitFrameAfter(500);
       }
 
       slideRect = await rect(slides[0]);

@@ -1,23 +1,9 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import * as mode from '#core/mode';
 import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
 import {toWin} from '#core/window';
 
-import {matches} from './query';
+import {childElementsByTag, matches} from './query';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',
@@ -46,7 +32,6 @@ const DEFAULT_CUSTOM_EVENT_OPTIONS = {bubbles: true, cancelable: true};
  * @param {!Element} parent
  * @param {function(!Element):boolean} checkFunc
  * @param {function()} callback
- * @suppress {suspiciousCode} due to IS_ESM
  */
 export function waitForChild(parent, checkFunc, callback) {
   if (checkFunc(parent)) {
@@ -54,7 +39,7 @@ export function waitForChild(parent, checkFunc, callback) {
     return;
   }
   const win = toWin(parent.ownerDocument.defaultView);
-  if (IS_ESM || win.MutationObserver) {
+  if (mode.isEsm() || win.MutationObserver) {
     const observer = new win.MutationObserver(() => {
       if (checkFunc(parent)) {
         observer.disconnect();
@@ -536,4 +521,30 @@ export function dispatchCustomEvent(node, name, opt_data, opt_options) {
  */
 export function containsNotSelf(parent, child) {
   return child !== parent && parent.contains(child);
+}
+
+/**
+ * Helper method to get the json config from an element <script> tag
+ * @param {!Element} element
+ * @return {?JsonObject}
+ * @throws {!Error} If element does not have exactly one <script> child
+ * with type="application/json", or if the <script> contents are not valid JSON.
+ */
+export function getChildJsonConfig(element) {
+  const scripts = childElementsByTag(element, 'script');
+  const {length} = scripts;
+  if (length !== 1) {
+    throw new Error(`Found ${length} <script> children. Expected 1.`);
+  }
+
+  const script = scripts[0];
+  if (!isJsonScriptTag(script)) {
+    throw new Error('<script> child must have type="application/json"');
+  }
+
+  try {
+    return parseJson(script.textContent);
+  } catch {
+    throw new Error('Failed to parse <script> contents. Is it valid JSON?');
+  }
 }

@@ -1,19 +1,3 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {Deferred} from '#core/data-structures/promise';
 import {
   PRESET_OPTION_ATTRIBUTES,
@@ -32,15 +16,19 @@ import {
   WebKeyframesCreateFnDef,
   WebKeyframesDef,
 } from './animation-types';
-import {assertDoesNotContainDisplay} from '../../../src/assert-display';
+import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getChildJsonConfig} from '../../../src/json';
+import {getChildJsonConfig} from '#core/dom';
 import {map, omit} from '#core/types/object';
 import {prefersReducedMotion} from '#core/dom/media-query-props';
-import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
-import {setStyles} from '#core/dom/style';
+import {
+  matches,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '#core/dom/query';
 import {timeStrToMillis, unscaledClientRect} from './utils';
+import {isExperimentOn} from '#experiments';
 
 const TAG = 'AMP-STORY';
 
@@ -554,7 +542,10 @@ export class AnimationManager {
     this.builderPromise_ = this.createAnimationBuilderPromise_();
 
     /** @private @const {bool} */
-    this.prefersReducedMotion_ = prefersReducedMotion(ampdoc.win);
+    this.skipAnimations_ =
+      prefersReducedMotion(ampdoc.win) ||
+      (isExperimentOn(ampdoc.win, 'story-disable-animations-first-page') &&
+        matches(page, 'amp-story-page:first-of-type'));
 
     /** @private {?Array<!AnimationRunner>} */
     this.runners_ = null;
@@ -581,7 +572,7 @@ export class AnimationManager {
   applyFirstFrameOrFinish() {
     return Promise.all(
       this.getOrCreateRunners_().map((runner) =>
-        this.prefersReducedMotion_
+        this.skipAnimations_
           ? runner.applyLastFrame()
           : runner.applyFirstFrame()
       )
@@ -600,7 +591,7 @@ export class AnimationManager {
 
   /** Starts all entrance animations for the page. */
   animateIn() {
-    if (this.prefersReducedMotion_) {
+    if (this.skipAnimations_) {
       return;
     }
     this.getRunners_().forEach((runner) => runner.start());
@@ -622,7 +613,7 @@ export class AnimationManager {
 
   /** Pauses all animations in the page. */
   pauseAll() {
-    if (!this.runners_ || this.prefersReducedMotion_) {
+    if (!this.runners_ || this.skipAnimations_) {
       return;
     }
     this.getRunners_().forEach((runner) => runner.pause());
@@ -630,7 +621,7 @@ export class AnimationManager {
 
   /** Resumes all animations in the page. */
   resumeAll() {
-    if (!this.runners_ || this.prefersReducedMotion_) {
+    if (!this.runners_ || this.skipAnimations_) {
       return;
     }
     this.getRunners_().forEach((runner) => runner.resume());

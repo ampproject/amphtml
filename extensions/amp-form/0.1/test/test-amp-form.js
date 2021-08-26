@@ -1,51 +1,38 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../../../amp-mustache/0.1/amp-mustache';
-import * as xhrUtils from '../../../../src/utils/xhr-utils';
-import {ActionService} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
+import {
+  AsyncInputAttributes,
+  AsyncInputClasses,
+} from '#core/constants/async-input';
+import {createElementWithAttributes} from '#core/dom';
+import {fromIterator} from '#core/types/array';
+import {parseQueryString} from '#core/types/string/url';
+
+import {Services} from '#service';
+import {ActionService} from '#service/action-impl';
+import {cidServiceForDocForTesting} from '#service/cid-impl';
+
+import {whenCalled} from '#testing/test-helper';
+
+import {createCustomEvent} from '../../../../src/event-helper';
+import {
+  createFormDataWrapper,
+  isFormDataWrapper,
+} from '../../../../src/form-data-wrapper';
+import {user} from '../../../../src/log';
+import * as xhrUtils from '../../../../src/utils/xhr-utils';
+import {AmpSelector} from '../../../amp-selector/0.1/amp-selector';
 import {
   AmpForm,
   AmpFormService,
   checkUserValidityAfterInteraction_,
 } from '../amp-form';
-import {AmpSelector} from '../../../amp-selector/0.1/amp-selector';
-import {
-  AsyncInputAttributes,
-  AsyncInputClasses,
-} from '../../../../src/async-input';
 import {DIRTINESS_INDICATOR_CLASS} from '../form-dirtiness';
-import {Services} from '#service';
-import {cidServiceForDocForTesting} from '#service/cid-impl';
-import {createCustomEvent} from '../../../../src/event-helper';
-import {createElementWithAttributes} from '#core/dom';
-import {
-  createFormDataWrapper,
-  isFormDataWrapper,
-} from '../../../../src/form-data-wrapper';
-import {fromIterator} from '#core/types/array';
-import {parseQueryString} from '#core/types/string/url';
 import {
   setCheckValiditySupportedForTesting,
   setReportValiditySupportedForTesting,
 } from '../form-validators';
-import {user} from '../../../../src/log';
-import {whenCalled} from '#testing/test-helper';
 
 describes.repeated(
   '',
