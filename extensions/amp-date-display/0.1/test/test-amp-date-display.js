@@ -70,6 +70,9 @@ describes.realWin(
       expect(data.secondTwoDigit).to.equal('06');
       expect(data.dayPeriod).to.equal('am');
       expect(data.localeString).to.equal('Feb 3, 2001, 4:05 AM');
+      // timeZoneName is empty when data-options-time-zone-name is not set to
+      // define the format.
+      expect(data.timeZoneName).to.equal('');
     });
 
     it('provides all variables in local and English (default)', async () => {
@@ -98,6 +101,9 @@ describes.realWin(
       expect(data.secondTwoDigit).to.equal('06');
       expect(data.dayPeriod).to.equal('am');
       expect(data.localeString).to.equal('Feb 3, 2001, 4:05 AM');
+      // timeZoneName is empty when data-options-time-zone-name is not set to
+      // define the format.
+      expect(data.timeZoneName).to.equal('');
     });
 
     const formatExpectsTimeZoneNameAmericaNewYork = {
@@ -114,38 +120,38 @@ describes.realWin(
         short: 'غرينتش-٥',
       },
     };
-    Object.entries(formatExpectsTimeZoneNameAmericaNewYork).forEach(
-      ([locale, formats]) => {
-        Object.entries(formats).forEach(([format, expectedTimeZoneName]) => {
-          it(`provides timeZoneName (${locale}, ${format})`, async () => {
-            element.setAttribute('datetime', 'now');
-            element.setAttribute('locale', locale);
-            element.setAttribute('data-options-time-zone', 'America/New_York');
-            element.setAttribute('data-options-time-zone-name', format);
-            await element.buildInternal();
-            const data = impl.getDataForTemplate_();
-            expect(data.timeZoneName).to.equal(expectedTimeZoneName);
-          });
+    for (const locale in formatExpectsTimeZoneNameAmericaNewYork) {
+      const expectedTimeZoneNames =
+        formatExpectsTimeZoneNameAmericaNewYork[locale];
+      for (const format in expectedTimeZoneNames) {
+        it(`provides timeZoneName when data-options-time-zone-name is provided (${locale}, ${format})`, async () => {
+          element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
+          element.setAttribute('locale', locale);
+          element.setAttribute('data-options-time-zone', 'America/New_York');
+          element.setAttribute('data-options-time-zone-name', format);
+          await element.buildInternal();
+          const data = impl.getDataForTemplate_();
+          expect(data.timeZoneName).to.equal(expectedTimeZoneNames[format]);
         });
       }
-    );
+    }
 
     const formatExpectsTimeZoneNameUtc = {
       long: 'Coordinated Universal Time',
       short: 'UTC',
     };
-    Object.entries(formatExpectsTimeZoneNameUtc).forEach(
-      ([format, expectedTimeZoneName]) => {
-        it(`provides timeZoneName (UTC, ${format})`, async () => {
-          element.setAttribute('datetime', 'now');
-          element.setAttribute('display-in', 'utc');
-          element.setAttribute('data-options-time-zone-name', format);
-          await element.buildInternal();
-          const data = impl.getDataForTemplate_();
-          expect(data.timeZoneName).to.equal(expectedTimeZoneName);
-        });
-      }
-    );
+    for (const format in formatExpectsTimeZoneNameUtc) {
+      it(`provides timeZoneName when data-options-time-zone-name is provided (UTC, ${format})`, async () => {
+        element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
+        element.setAttribute('display-in', 'utc');
+        element.setAttribute('data-options-time-zone-name', format);
+        await element.buildInternal();
+        const data = impl.getDataForTemplate_();
+        expect(data.timeZoneName).to.equal(
+          formatExpectsTimeZoneNameUtc[format]
+        );
+      });
+    }
 
     describe('correctly parses', () => {
       it('now keyword', async () => {

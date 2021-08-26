@@ -63,6 +63,7 @@ describes.realWin(
         dayPeriod: '{{dayPeriod}}',
         iso: '{{iso}}',
         localeString: '{{localeString}}',
+        timeZoneName: '{{timeZoneName}}',
       });
       element.appendChild(template);
       element.setAttribute('layout', 'nodisplay');
@@ -95,6 +96,9 @@ describes.realWin(
       expect(data.secondTwoDigit).to.equal('06');
       expect(data.dayPeriod).to.equal('am');
       expect(data.localeString).to.equal('Feb 3, 2001, 4:05 AM');
+      // timeZoneName is empty when data-options-time-zone-name is not set to
+      // define the format.
+      expect(data.timeZoneName).to.equal('');
     });
 
     it('renders mustache template with "timestamp-ms"', async () => {
@@ -127,7 +131,59 @@ describes.realWin(
       expect(data.secondTwoDigit).to.equal('06');
       expect(data.dayPeriod).to.equal('am');
       expect(data.localeString).to.equal('Feb 3, 2001, 4:05 AM');
+      // timeZoneName is empty when data-options-time-zone-name is not set to
+      // define the format.
+      expect(data.timeZoneName).to.equal('');
     });
+
+    const formatExpectsTimeZoneNameAmericaNewYork = {
+      'en': {
+        long: 'Eastern Standard Time',
+        short: 'EST',
+      },
+      'ja-JP': {
+        long: 'アメリカ東部標準時',
+        short: 'GMT-5',
+      },
+      'ar-EG': {
+        long: 'التوقيت الرسمي الشرقي لأمريكا الشمالية',
+        short: 'غرينتش-٥',
+      },
+    };
+    for (const locale in formatExpectsTimeZoneNameAmericaNewYork) {
+      const expectedTimeZoneNames =
+        formatExpectsTimeZoneNameAmericaNewYork[locale];
+      for (const format in expectedTimeZoneNames) {
+        it(`provides timeZoneName when data-options-time-zone-name is provided (${locale}, ${format})`, async () => {
+          element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
+          element.setAttribute('locale', locale);
+          element.setAttribute('data-options-time-zone', 'America/New_York');
+          element.setAttribute('data-options-time-zone-name', format);
+          win.document.body.appendChild(element);
+          const data = await getRenderedData();
+          expect(data.timeZoneName).to.equal(expectedTimeZoneNames[format]);
+        });
+      }
+    }
+
+    const formatExpectsTimeZoneNameUtc = {
+      long: 'Coordinated Universal Time',
+      short: 'UTC',
+    };
+    for (const format in formatExpectsTimeZoneNameUtc) {
+      it(`provides timeZoneName when data-options-time-zone-name is provided (UTC, ${format})`, async () => {
+        element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
+        element.setAttribute('display-in', 'utc');
+        element.setAttribute('data-options-time-zone-name', format);
+
+        win.document.body.appendChild(element);
+
+        const data = await getRenderedData();
+        expect(data.timeZoneName).to.equal(
+          formatExpectsTimeZoneNameUtc[format]
+        );
+      });
+    }
 
     it('render localeString with data-options-time-style', async () => {
       element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');

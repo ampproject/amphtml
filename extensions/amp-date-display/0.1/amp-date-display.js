@@ -7,6 +7,7 @@ import {Services} from '#service';
 
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {getTimeZoneName} from '../format';
 
 /** @const {string} */
 const TAG = 'amp-date-display';
@@ -368,27 +369,6 @@ export class AmpDateDisplay extends AMP.BaseElement {
       this.element.dispatchEvent(event);
     });
   }
-}
-
-/**
- * @param {!Date} date
- * @param {string} locale
- * @param {?Object<string, *>} options
- * @return {string}
- * @private
- */
-function getTimeZoneName(date, locale, options) {
-  if (!Intl?.DateTimeFormat) {
-    return '';
-  }
-  const formatter = new Intl.DateTimeFormat(locale, {
-    timeZone: options.timeZone,
-    timeZoneName: options.timeZoneName,
-  });
-  return (
-    formatter.formatToParts(date).find(({type}) => type === 'timeZoneName')
-      ?.value || ''
-  );
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {
