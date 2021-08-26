@@ -17,6 +17,7 @@ const {applyConfig, removeConfig} = require('./prepend-global');
 const {closureCompile} = require('../compile/compile');
 const {cyan, green, red} = require('../common/colors');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
+const {getSourceRoot} = require('../compile/helpers');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
@@ -269,6 +270,10 @@ function toEsmName(name) {
  * @return {string}
  */
 function maybeToEsmName(name) {
+  // Npm esm names occur at an earlier stage.
+  if (name.includes('.module')) {
+    return name;
+  }
   return argv.esm ? toEsmName(name) : name;
 }
 
@@ -376,8 +381,9 @@ async function finishBundle(
     if (!options.minify) {
       latestName = latestName.replace(/\.js$/, '.max.js');
     }
+    latestName = maybeToEsmName(latestName);
     fs.copySync(
-      path.join(destDir, options.toName),
+      path.join(destDir, destFilename),
       path.join(destDir, latestName)
     );
     endBuildStep(logPrefix, `${destFilename} → ${latestName}`, startTime);
@@ -413,10 +419,10 @@ async function finishBundle(
 async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const startTime = Date.now();
   const entryPoint = path.join(srcDir, srcFilename);
-  const fileName = options.minify
+  const filename = options.minify
     ? options.minifiedName
     : options.toName ?? srcFilename;
-  const destFilename = options.npm ? fileName : maybeToEsmName(fileName);
+  const destFilename = maybeToEsmName(filename);
   const destFile = path.join(destDir, destFilename);
 
   if (watchedTargets.has(entryPoint)) {
@@ -480,7 +486,8 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     let map = result.outputFiles.find(({path}) => path.endsWith('.map')).text;
 
     if (options.minify) {
-      ({code, map} = await minify(code, map));
+      ({code, map} = await minify(code, map, {mangle: options.mangle}));
+      map = await massageSourcemaps(map, options);
     }
 
     await Promise.all([
@@ -538,13 +545,21 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
 }
 
 /**
+ * Name cache to help terser perform cross-binary property mangling.
+ *
+ * TODO: ensure this is actually necessary.
+ */
+const nameCache = {};
+
+/**
  * Minify the code with Terser. Only used by the ESBuild.
  *
  * @param {string} code
  * @param {string} map
+ * @param {{mangle: boolean}} options
  * @return {!Promise<{code: string, map: *, error?: Error}>}
  */
-async function minify(code, map) {
+async function minify(code, map, {mangle} = {mangle: false}) {
   const terserOptions = {
     mangle: {},
     compress: {
@@ -556,11 +571,25 @@ async function minify(code, map) {
       beautify: !!argv.pretty_print,
       // eslint-disable-next-line google-camelcase/google-camelcase
       keep_quoted_props: true,
+      // // TODO: only add preamble for mainBundles?
       preamble: ';',
     },
     sourceMap: {content: map},
     module: !!argv.esm,
   };
+
+  // Enabling property mangling requires disabling two other optimization.
+  // - Should not mangle quoted properties (often used for cross-binary purposes)
+  // - Should not convert computed properties into regular property definition
+  if (mangle) {
+    // eslint-disable-next-line google-camelcase/google-camelcase
+    terserOptions.mangle.properties = {keep_quoted: true, regex: '_$'};
+    terserOptions.nameCache = nameCache;
+
+    // Disables converting computed properties ({['hello']: 5}) into regular prop ({ hello: 5}).
+    // This was an assumption baked into closure.
+    terserOptions.compress.computed_props = false; // eslint-disable-line google-camelcase/google-camelcase
+  }
 
   const minified = await terser.minify(code, terserOptions);
   if (!minified.code) {
@@ -609,9 +638,13 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
    * @return {Promise<void>}
    */
   async function doCompileJs(options) {
-    const buildResult = options.minify
-      ? compileMinifiedJs(srcDir, srcFilename, destDir, options)
-      : esbuildCompile(srcDir, srcFilename, destDir, options);
+    const buildResult =
+      options.minify && shouldUseClosure()
+        ? compileMinifiedJs(srcDir, srcFilename, destDir, options)
+        : esbuildCompile(srcDir, srcFilename, destDir, {
+            ...options,
+            mangle: true,
+          });
     if (options.onWatchBuild) {
       options.onWatchBuild(buildResult);
     }
@@ -714,17 +747,16 @@ async function applyAmpConfig(targetFile, localDev, fortesting) {
   const baseConfigFile =
     'build-system/global-configs/' + config + '-config.json';
 
-  return removeConfig(targetFile).then(() => {
-    return applyConfig(
-      config,
-      targetFile,
-      baseConfigFile,
-      /* opt_localDev */ localDev,
-      /* opt_localBranch */ true,
-      /* opt_branch */ undefined,
-      /* opt_fortesting */ fortesting
-    );
-  });
+  await removeConfig(targetFile);
+  await applyConfig(
+    config,
+    targetFile,
+    baseConfigFile,
+    /* opt_localDev */ localDev,
+    /* opt_localBranch */ true,
+    /* opt_branch */ undefined,
+    /* opt_fortesting */ fortesting
+  );
 }
 
 /**
@@ -802,6 +834,42 @@ async function getDependencies(entryPoint, options) {
   return Object.keys(result.metafile?.inputs ?? {});
 }
 
+/**
+ * @param {*} sourcemapsFile
+ * @param {*} options
+ * @return {*}
+ */
+function massageSourcemaps(sourcemapsFile, options) {
+  const sourcemaps = JSON.parse(sourcemapsFile);
+  sourcemaps.sources = sourcemaps.sources.map((source) => {
+    if (source.startsWith('../')) {
+      return source.slice('../'.length);
+    }
+    return source;
+  });
+  sourcemaps.sourceRoot = getSourceRoot(options);
+  if (sourcemaps.file) {
+    sourcemaps.file = path.basename(sourcemaps.file);
+  }
+  if (!argv.full_sourcemaps) {
+    delete sourcemaps.sourcesContent;
+  }
+
+  return JSON.stringify(sourcemaps);
+}
+
+/**
+ * Returns whether or not we should compile with Closure Compiler.
+ * @return {boolean}
+ */
+function shouldUseClosure() {
+  // Normally setting this server-side experiment flag would be handled by
+  // the release process automatically. Since this experiment is actually on the build system
+  // itself instead of runtime, it is never run through babel (where the replacements usually happen).
+  // Therefore we must compute this one by hand.
+  return argv.define_experiment_constant !== 'ESBUILD_COMPILATION';
+}
+
 module.exports = {
   MINIFIED_TARGETS,
   applyAmpConfig,
@@ -819,4 +887,5 @@ module.exports = {
   printConfigHelp,
   printNobuildHelp,
   watchDebounceDelay,
+  shouldUseClosure,
 };

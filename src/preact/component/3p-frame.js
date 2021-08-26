@@ -1,4 +1,5 @@
 import {getOptionalSandboxFlags, getRequiredSandboxFlags} from '#core/3p-frame';
+import {MessageType} from '#core/3p-frame-messaging';
 import {sequentialIdGenerator} from '#core/data-structures/id-generator';
 import {dict} from '#core/types/object';
 import {includes} from '#core/types/string';
@@ -26,11 +27,8 @@ import {parseUrlDeprecated} from '../../url';
 /** @type {!Object<string,function():void>} 3p frames for that type. */
 export const countGenerators = {};
 
-/** @enum {string} */
-export const MessageType = {
-  // TODO(wg-bento): Add more types as they become needed.
-  EMBED_SIZE: 'embed-size',
-};
+/** re-exports variable to preserve compat with components that already import this */
+export {MessageType};
 
 // Block synchronous XHR in ad. These are very rare, but super bad for UX
 // as they block the UI thread for the arbitrary amount of time until the
