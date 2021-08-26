@@ -378,7 +378,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
  * @private
  */
 function getTimeZoneName(date, locale, options) {
-  if (!options.timeZoneName || !Intl?.DateTimeFormat) {
+  if (!Intl?.DateTimeFormat) {
     return '';
   }
   const formatter = new Intl.DateTimeFormat(locale, {
