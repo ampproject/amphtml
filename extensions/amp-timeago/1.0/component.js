@@ -1,8 +1,9 @@
+import {devAssertElement} from '#core/assert';
 import {getDate} from '#core/types/date';
 import {toWin} from '#core/window';
 
 import * as Preact from '#preact';
-import {useEffect, useRef, useState} from '#preact';
+import {useRef, useState} from '#preact';
 import {Wrapper, useIntersectionObserver} from '#preact/component';
 import {useResourcesNotify} from '#preact/utils';
 
@@ -40,12 +41,9 @@ export function Timeago({
   const date = getDate(datetime);
 
   const inViewportCallback = ({isIntersecting}) => {
-    const node = ref.current;
-    if (!node) {
-      return;
-    }
+    const node = devAssertElement(ref.current);
     let {lang} = node.ownerDocument.documentElement;
-    const win = node && toWin(node.ownerDocument.defaultView);
+    const win = toWin(node.ownerDocument?.defaultView);
     if (lang === 'unknown') {
       lang = win.navigator?.language || DEFAULT_LOCALE;
     }
