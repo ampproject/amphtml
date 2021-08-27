@@ -101,7 +101,7 @@
     "eslint-plugin-google-camelcase": "0.0.2",
     "eslint-plugin-import": "2.24.2",
     "eslint-plugin-jasmine": "4.1.2",
-    "eslint-plugin-jsdoc": "35.5.1",
+    "eslint-plugin-jsdoc": "36.0.8",
     "eslint-plugin-local": "1.0.0",
     "eslint-plugin-module-resolver": "1.4.0",
     "eslint-plugin-prettier": "3.4.1",
