@@ -63,6 +63,8 @@ const SERVICE_TAG = 'geo';
 const API_TIMEOUT = 60; // Seconds
 const GEO_HOTPATCH_STR_REGEX = /^(?:(\w{2})(?:\s(\w{2}-\w{2}))?)?\s*/;
 
+const STRIP_RE = new RegExp('^' + COUNTRY_PREFIX + '|^' + GROUP_PREFIX, 'i');
+
 /**
  * Operating Mode
  * @enum {number}
@@ -161,9 +163,12 @@ export class AmpGeo extends AMP.BaseElement {
   findCountry_(ampdoc) {
     // Flag to see if we've been pre-rendered with a country
     const bodyElem = ampdoc.getBody();
+    // Prioritize the prerender hinting classes found in `html` over `body`
+    // though we do not drop support for detecting in `body` for backwards
+    // compatibility.
     const preRenderMatch =
-      bodyElem.className.match(PRE_RENDER_REGEX) ||
-      bodyElem.parentElement.className.match(PRE_RENDER_REGEX);
+      bodyElem.parentElement.className.match(PRE_RENDER_REGEX) ||
+      bodyElem.className.match(PRE_RENDER_REGEX);
 
     // Trim the spaces off the patched country.
     // This is guaranteed to always match
@@ -422,17 +427,23 @@ export class AmpGeo extends AMP.BaseElement {
   /**
    * clearPreRender_()
    * Returns a list of classes to remove if pre-render has
-   * been invalidated by way of being on an amp cache
-   * @param {Element} body
-   * @return {Array<string>}
+   * been invalidated by way of an override.
+   * @param {!Element} body
+   * @return {!Array<string>}
    */
   clearPreRender_(body) {
-    const {classList} = body;
-    const classesToRemove = [];
-    const stripRe = new RegExp('^' + COUNTRY_PREFIX + '|^' + GROUP_PREFIX, 'i');
-    for (let i = classList.length - 1; i > 0; i--) {
-      if (stripRe.test(classList[i])) {
-        classesToRemove.push(classList[i]);
+    const {classList: bodyClassList} = body;
+    const {classList: htmlClassList} = body.parentElement;
+    const classesToRemove = new Set();
+
+    for (let i = htmlClassList.length - 1; i > 0; i--) {
+      if (STRIP_RE.test(htmlClassList[i])) {
+        classesToRemove.add(htmlClassList[i]);
+      }
+    }
+    for (let i = bodyClassList.length - 1; i > 0; i--) {
+      if (STRIP_RE.test(bodyClassList[i])) {
+        classesToRemove.add(bodyClassList[i]);
       }
     }
     return classesToRemove;
@@ -461,13 +472,10 @@ export class AmpGeo extends AMP.BaseElement {
         const html = body.parentElement;
         this.matchCountryGroups_(config);
 
-        let classesToRemove = [];
+        let classesToRemove = new Set();
 
         switch (this.mode_) {
           case mode.GEO_OVERRIDE:
-            // NOTE: we extract the classes to remove from the body element
-            // but apply the removal on both html and body elements. This
-            // assumes that amp-geo classes are in sync always on both elements.
             classesToRemove = this.clearPreRender_(body);
           // Intentionally fall through.
           case mode.GEO_HOT_PATCH:
@@ -498,7 +506,7 @@ export class AmpGeo extends AMP.BaseElement {
               const {classList: htmlClassList} = html;
               const {classList: bodyClassList} = body;
               // Always remove the pending class
-              classesToRemove.push('amp-geo-pending');
+              classesToRemove.add('amp-geo-pending');
               classesToRemove.forEach((toRemove) => {
                 /** @type {!DOMTokenList} */ (bodyClassList).remove(toRemove);
                 /** @type {!DOMTokenList} */ (htmlClassList).remove(toRemove);
