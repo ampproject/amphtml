@@ -135,13 +135,6 @@ startupChunk(self.document, function initial() {
     /* opt_isRuntimeCss */ true,
     /* opt_ext */ 'amp-runtime'
   );
-  // TODO(kbax) Remove this IE deprecation warning on 26 August 2021.
-  if (Services.platformFor(self).isIe() && self.console) {
-    (console.info || console.log).call(
-      console,
-      'IE Support is being deprecated, in September 2021 IE will no longer be supported. See https://github.com/ampproject/amphtml/issues/34453 for more details.'
-    );
-  }
 });
 
 // Output a message to the console and add an attribute to the <html>
