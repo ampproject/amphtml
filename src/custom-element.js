@@ -1135,7 +1135,11 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       this.isConnected_ = true;
 
       if (!this.everAttached) {
-        this.classList.add('i-amphtml-element', 'i-amphtml-notbuilt', 'amp-notbuilt');
+        this.classList.add(
+          'i-amphtml-element',
+          'i-amphtml-notbuilt',
+          'amp-notbuilt'
+        );
       }
 
       if (!this.ampdoc_) {

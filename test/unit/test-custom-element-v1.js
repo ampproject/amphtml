@@ -89,7 +89,10 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element.readyState).to.equal('building');
       expect(element.isBuilt()).to.be.false;
       expect(element.getBuildPriority()).equal(LayoutPriority.CONTENT);
-      expect(removeSpy).to.have.been.calledWith('amp-unresolved', 'i-amphtml-unresolved');
+      expect(removeSpy).to.have.been.calledWith(
+        'amp-unresolved',
+        'i-amphtml-unresolved'
+      );
     });
 
     it('should not upgrade immediately when attached', () => {
