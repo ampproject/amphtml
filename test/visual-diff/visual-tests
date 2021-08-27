@@ -734,7 +734,7 @@
       "name": "amp-story: prestyle step 2 - after JS loads (mobile)",
       "viewport": {"width": 375, "height": 635},
       "loading_complete_selectors": [
-        ".i-amphtml-story-loaded amp-story-page[active]",
+        ".i-amphtml-story-loaded",
       ],
     },
     {
@@ -747,7 +747,7 @@
       "name": "amp-story: prestyle step 2 - after JS loads (desktop)",
       "viewport": {"width": 1280, "height": 800},
       "loading_complete_selectors": [
-        ".i-amphtml-story-loaded amp-story-page[active]",
+        ".i-amphtml-story-loaded",
       ],
     },
     {
