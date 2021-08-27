@@ -2,7 +2,7 @@ import * as Preact from '#preact';
 import {useCallback, useEffect, useMemo, useRef} from '#preact';
 import {MessageType} from '#core/3p-frame-messaging';
 import {toWin} from '#core/window';
-import {ContainWrapper} from '#preact/component';
+import {ContainWrapper, useIntersectionObserver} from '#preact/component';
 import {setStyle} from '#core/dom/style';
 
 const NOOP = () => {};
@@ -80,6 +80,32 @@ export function Iframe({
     [attemptResize]
   );
 
+  // useEffect(() => {
+  //   const iframe = iframeRef.current;
+  //   if (!iframe) {
+  //     return;
+  //   }
+  //   const win = toWin(iframe.ownerDocument.defaultView);
+  //   if (!win) {
+  //     return;
+  //   }
+  //   const io = new win.IntersectionObserver((entries) => {
+  //     const last = entries[entries.length - 1];
+  //     isIntersectingRef.current = last.isIntersecting;
+  //     if (last.isIntersecting || !dataRef.current || !win) {
+  //       return;
+  //     }
+  //     attemptResize();
+  //   });
+  //   io.observe(iframe);
+  //   win.addEventListener('message', handlePostMessage);
+
+  //   return () => {
+  //     io.unobserve(iframe);
+  //     win.removeEventListener('message', handlePostMessage);
+  //   };
+  // }, [attemptResize, handlePostMessage]);
+
   useEffect(() => {
     const iframe = iframeRef.current;
     if (!iframe) {
@@ -89,22 +115,33 @@ export function Iframe({
     if (!win) {
       return;
     }
-    const io = new win.IntersectionObserver((entries) => {
-      const last = entries[entries.length - 1];
-      isIntersectingRef.current = last.isIntersecting;
-      if (last.isIntersecting || !dataRef.current || !win) {
-        return;
-      }
-      attemptResize();
-    });
-    io.observe(iframe);
+
     win.addEventListener('message', handlePostMessage);
 
     return () => {
-      io.unobserve(iframe);
       win.removeEventListener('message', handlePostMessage);
     };
-  }, [attemptResize, handlePostMessage]);
+  }, [handlePostMessage]);
+
+  const callback = useCallback(
+    ({isIntersecting}) => {
+      if (isIntersecting === isIntersectingRef.current) {
+        // unchanged
+        return;
+      }
+      isIntersectingRef.current = isIntersecting;
+      if (!isIntersecting) {
+        attemptResize();
+      }
+    },
+    [attemptResize]
+  );
+
+  useIntersectionObserver(
+    iframeRef,
+    undefined, // toWin(iframeRef.current.ownerDocument.defaultView),
+    callback
+  );
 
   const contentProps = useMemo(
     () => ({
