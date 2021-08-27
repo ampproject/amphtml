@@ -136,7 +136,6 @@
     "karma-firefox-launcher": "2.1.1",
     "karma-fixture": "0.2.6",
     "karma-html2js-preprocessor": "1.1.0",
-    "karma-ie-launcher": "1.0.0",
     "karma-junit-reporter": "2.0.1",
     "karma-mocha": "2.0.1",
     "karma-mocha-reporter": "2.2.5",
