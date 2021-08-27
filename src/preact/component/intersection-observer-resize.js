@@ -3,6 +3,7 @@ import {toWin} from '#core/window';
 import {useEffect} from '#preact';
 
 const ioForWindow = {};
+const callbackMap = {};
 
 /**
  * Uses a shared IntersectionObserver per window instance to observe the given `ref`.
@@ -18,19 +19,27 @@ export function useIntersectionObserver(ref, targetWin, callback) {
     if (!win) {
       return;
     }
-    const {current} = ref;
+    const node = ref.current;
+    if (!node) {
+      return;
+    }
+    callbackMap[node] = callback;
+
     ioForWindow[win] =
       ioForWindow[win] ??
       new win.IntersectionObserver((entries) => {
-        const targetEntries = entries.filter(
-          (entry) => entry.target === current
-        );
-        const last = targetEntries[targetEntries.length - 1];
-        callback(last);
+        entries.reduceRight((accumulator, currentValue) => {
+          const {target} = currentValue;
+          if (!accumulator.has(target)) {
+            accumulator.add(target);
+            callbackMap[target](currentValue);
+          }
+        }, new Set());
       });
-    ioForWindow[win].observe(current);
+    ioForWindow[win].observe(node);
     return () => {
-      ioForWindow[win].unobserve(current);
+      ioForWindow[win].unobserve(node);
+      delete callbackMap[node];
     };
   }, [ref, targetWin, callback]);
 }
