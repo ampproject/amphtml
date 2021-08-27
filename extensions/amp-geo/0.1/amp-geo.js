@@ -436,16 +436,16 @@ export class AmpGeo extends AMP.BaseElement {
     const {classList: htmlClassList} = body.parentElement;
     const classesToRemove = new Set();
 
-    for (let i = htmlClassList.length - 1; i > 0; i--) {
-      if (STRIP_RE.test(htmlClassList[i])) {
-        classesToRemove.add(htmlClassList[i]);
+    htmlClassList.forEach((el) => {
+      if (STRIP_RE.test(el)) {
+        classesToRemove.add(el);
       }
-    }
-    for (let i = bodyClassList.length - 1; i > 0; i--) {
-      if (STRIP_RE.test(bodyClassList[i])) {
-        classesToRemove.add(bodyClassList[i]);
+    });
+    bodyClassList.forEach((el) => {
+      if (STRIP_RE.test(el)) {
+        classesToRemove.add(el);
       }
-    }
+    });
     return classesToRemove;
   }
 
