@@ -12,7 +12,7 @@ export default {
   },
 };
 
-const AmpVideoIframeWithKnobs = ({i, ...rest}) => {
+const AmpVideoIframeWithKnobs = ({i, withPlaceholder, ...rest}) => {
   const group = i ? `Player ${i + 1}` : undefined;
 
   const width = text('width', '640px', group);
@@ -39,6 +39,17 @@ const AmpVideoIframeWithKnobs = ({i, ...rest}) => {
     'https://amp.dev/static/samples/files/amp-video-iframe-videojs.html'
   );
 
+  const placeholderAndFallback = withPlaceholder ? (
+    <>
+      <div placeholder style="background:red">
+        placeholder
+      </div>
+      <div fallback style="background:blue">
+        fallback
+      </div>
+    </>
+  ) : null;
+
   return (
     <amp-video-iframe
       {...rest}
@@ -57,7 +68,9 @@ const AmpVideoIframeWithKnobs = ({i, ...rest}) => {
       width={width}
       height={height}
       src={src}
-    ></amp-video-iframe>
+    >
+      {placeholderAndFallback}
+    </amp-video-iframe>
   );
 };
 
@@ -119,5 +132,28 @@ export const Actions = () => {
         <ActionButton on="tap:player.fullscreen">Fullscreen</ActionButton>
       </div>
     </div>
+  );
+};
+
+export const WithPlaceholderAndFallback = () => {
+  const amount = number('Amount', 1, {}, 'Page');
+  const spacerHeight = text('Space', '80vh', 'Page');
+  const spaceAbove = boolean('Space above', false, 'Page');
+  const spaceBelow = boolean('Space below', false, 'Page');
+
+  const players = [];
+  for (let i = 0; i < amount; i++) {
+    players.push(<AmpVideoIframeWithKnobs key={i} i={i} placeholder={true} />);
+    if (i < amount - 1) {
+      players.push(<Spacer height={spacerHeight} />);
+    }
+  }
+
+  return (
+    <>
+      {spaceAbove && <Spacer height={spacerHeight} />}
+      {players}
+      {spaceBelow && <Spacer height={spacerHeight} />}
+    </>
   );
 };

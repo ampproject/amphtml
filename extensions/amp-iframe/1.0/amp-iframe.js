@@ -26,6 +26,7 @@ class AmpIframe extends BaseElement {
    * Callback for onload event of iframe. Checks if the component has a placeholder
    * element and hides it if it does. Also checks the position of the iframe on the
    * document.
+   * @override
    */
   handleOnLoad() {
     if (this.getPlaceholder()) {
