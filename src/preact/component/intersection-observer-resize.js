@@ -1,6 +1,8 @@
-import {useEffect, useState} from '#preact';
+import {toWin} from '#core/window';
 
-const ioForWindow = {}; // new Map()?
+import {useEffect} from '#preact';
+
+const ioForWindow = {};
 
 /**
  * Uses a shared IntersectionObserver per window instance to observe the given `ref`.
@@ -10,29 +12,25 @@ const ioForWindow = {}; // new Map()?
  * @param callback
  */
 export function useIntersectionObserver(ref, targetWin, callback) {
-  // If a window instance is not provided, uses the one local to the given `ref`.
-  const win = targetWin ?? toWin(ref.current?.ownerDocument?.defaultView);
-
   useEffect(() => {
+    // If a window instance is not provided, uses the one local to the given `ref`.
+    const win = targetWin ?? toWin(ref.current?.ownerDocument?.defaultView);
     if (!win) {
       return;
     }
-    const currentRef = ref.current;
+    const {current} = ref;
     ioForWindow[win] =
       ioForWindow[win] ??
       new win.IntersectionObserver((entries) => {
         const targetEntries = entries.filter(
-          (entry) => entry.target === currentRef
+          (entry) => entry.target === current
         );
         const last = targetEntries[targetEntries.length - 1];
-        setLastEntry(last);
         callback(last);
       });
+    ioForWindow[win].observe(current);
     return () => {
-      // cleanup
-      ioForWindow[win].unobserve(currentRef);
+      ioForWindow[win].unobserve(current);
     };
-  }, [ref, win, callback]);
-
-  return lastEntry;
+  }, [ref, targetWin, callback]);
 }
