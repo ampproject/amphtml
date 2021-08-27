@@ -312,7 +312,7 @@ describes.realWin(
 
     describe('preconnectCallback', () => {
       it('should add preconnect and prefetch to DOM header', () => {
-        env.sandbox.stub(mode, 'isProd').returns(true);
+        env.sandbox.stub(mode, 'isTest').returns(false);
         ad3p.buildCallback();
         ad3p.preconnectCallback();
         return whenFirstVisible.then(() => {

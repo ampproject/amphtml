@@ -186,7 +186,7 @@ export function addDataAndJsonAttributes_(element, attributes) {
  */
 export function getBootstrapUrl(type) {
   const extension = mode.isEsm() ? '.mjs' : '.js';
-  if (mode.isProd()) {
+  if (!mode.isTest()) {
     return `${urls.thirdParty}/${mode.version()}/vendor/${type}${extension}`;
   }
   const filename = mode.isMinified()
@@ -252,7 +252,7 @@ export function resetBootstrapBaseUrlForTesting(win) {
  */
 export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
   const srcFileBasename = opt_srcFileBasename || 'frame';
-  if (!mode.isProd()) {
+  if (mode.isTest()) {
     return getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename);
   }
   // Ensure same sub-domain is used despite potentially different file.

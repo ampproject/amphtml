@@ -142,7 +142,10 @@ function checkSourcemapMappings(sourcemapJson, map) {
   if (shouldUseClosure()) {
     expectedFirstLine = map.includes('mjs')
       ? {file: 'src/core/mode/version.js', code: 'function version() {'}
-      : {file: 'src/core/mode/prod.js', code: 'export function isProd() {'};
+      : {
+          file: 'src/core/mode/minified.js',
+          code: 'export function isMinified() {',
+        };
   }
 
   if (firstLineFile != expectedFirstLine.file) {

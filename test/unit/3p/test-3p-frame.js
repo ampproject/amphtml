@@ -29,7 +29,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
 
   function mockMode(options) {
     env.sandbox.stub(window.parent, '__AMP_MODE').value(options);
-    env.sandbox.stub(mode, 'isProd').returns(!!options.isProd);
+    env.sandbox.stub(mode, 'isTest').returns(!!options.test);
   }
 
   describe
@@ -136,7 +136,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
           esm: false,
           localDev: true,
           development: false,
-          test: false,
+          test: true,
           version: '$internalRuntimeVersion$',
         });
         toggleExperiment(window, 'exp-a', true);
@@ -210,7 +210,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
             'mode': {
               'localDev': true,
               'development': false,
-              'test': false,
+              'test': true,
               'esm': false,
             },
             'canary': false,
@@ -306,14 +306,6 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
         expect(iframe.getAttribute('sandbox')).to.equal(null);
       });
 
-      it('should pick the right bootstrap url for local-dev mode', () => {
-        mockMode({localDev: true});
-        const ampdoc = Services.ampdoc(window.document);
-        expect(getBootstrapBaseUrl(window, ampdoc)).to.equal(
-          'http://ads.localhost:9876/dist.3p/current/frame.max.html'
-        );
-      });
-
       it('should pick the right bootstrap url for testing mode', () => {
         mockMode({test: true});
         const ampdoc = Services.ampdoc(window.document);
@@ -323,7 +315,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       });
 
       it('should pick the right bootstrap unique url (prod)', () => {
-        mockMode({isProd: true});
+        mockMode({test: false});
         const ampdoc = Services.ampdoc(window.document);
         expect(getBootstrapBaseUrl(window, ampdoc)).to.match(
           /^https:\/\/d-\d+\.ampproject\.net\/\$\internal\w+\$\/frame\.html$/
@@ -331,7 +323,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       });
 
       it('should return a stable URL in getBootstrapBaseUrl', () => {
-        mockMode({isProd: true});
+        mockMode({test: false});
         const ampdoc = Services.ampdoc(window.document);
         expect(getBootstrapBaseUrl(window, ampdoc)).to.equal(
           getBootstrapBaseUrl(window, ampdoc)
@@ -339,7 +331,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       });
 
       it('should return a stable URL in getDefaultBootstrapBaseUrl', () => {
-        mockMode({isProd: true});
+        mockMode({test: false});
         expect(getDefaultBootstrapBaseUrl(window)).to.equal(
           getDefaultBootstrapBaseUrl(window)
         );
@@ -354,7 +346,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       });
 
       it('should return different values for different file names', () => {
-        mockMode({isProd: true});
+        mockMode({test: false});
         let match =
           /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame\.html$/.exec(
             getDefaultBootstrapBaseUrl(window)

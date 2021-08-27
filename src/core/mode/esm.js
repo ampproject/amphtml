@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isProd} from './prod';
+import {isTest} from './test';
 
 /**
  * Returns true when compiling an esm binary.
@@ -23,7 +23,7 @@ import {isProd} from './prod';
  * @return {boolean}
  */
 export function isEsm() {
-  if (isProd()) {
+  if (!isTest()) {
     return IS_ESM;
   }
 
