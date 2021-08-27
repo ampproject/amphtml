@@ -97,7 +97,7 @@ export function Iframe({
     };
   }, [handlePostMessage]);
 
-  const callback = useCallback(
+  const inViewportCallback = useCallback(
     ({isIntersecting}) => {
       if (isIntersecting === isIntersectingRef.current) {
         return;
@@ -112,7 +112,7 @@ export function Iframe({
 
   useIntersectionObserver(
     iframeRef,
-    iframeRef.current?.ownerDocument.defaultView,
+    toWin(iframeRef.current?.ownerDocument?.defaultView),
     callback
   );
 
