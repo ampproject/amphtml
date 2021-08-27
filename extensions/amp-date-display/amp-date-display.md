@@ -41,29 +41,31 @@ for rendering. Refer to the
 
 This table lists the format you can specify in your Mustache template:
 
-| Format         | Meaning                                                       |
-| -------------- | ------------------------------------------------------------- |
-| day            | 1, 2, ...12, 13, etc.                                         |
-| dayName        | string,                                                       |
-| dayNameShort   | string,                                                       |
-| dayPeriod      | string,                                                       |
-| dayTwoDigit    | 01, 02, 03, ..., 12, 13, etc.                                 |
-| hour           | 0, 1, 2, 3, ..., 12, 13, ..., 22, 23                          |
-| hour12         | 1, 2, 3, ..., 12, 1, 2, ..., 11, 12                           |
-| hour12TwoDigit | 01, 02, ..., 12, 01, 02, ..., 11, 12                          |
-| hourTwoDigit   | 00, 01, 02, ..., 12, 13, ..., 22, 23                          |
-| iso            | A standard ISO8601 date string e.g. 2019-01-23T15:31:21.213Z, |
-| minute         | 0, 1, 2, ..., 58, 59                                          |
-| minuteTwoDigit | 00, 01, 02, ..., 58, 59                                       |
-| month          | 1, 2, 3, ..., 12                                              |
-| monthName      | Internationalized month name string.                          |
-| monthNameShort | Internationalized abbreviated month name string.,             |
-| monthTwoDigit  | 01, 02, ..., 11, 12                                           |
-| second         | 0, 1, 2, ..., 58, 59                                          |
-| secondTwoDigit | 00, 01, 02, ..., 58, 59                                       |
-| year           | 0, 1, 2, ..., 1999, 2000, 2001, etc.                          |
-| yearTwoDigit   | 00, 01, 02, ..., 17, 18, 19, ..., 98, 99                      |
-| localeString   | A string with a language sensitive representation.            |
+| Format            | Meaning                                                       |
+| ----------------- | ------------------------------------------------------------- |
+| day               | 1, 2, ...12, 13, etc.                                         |
+| dayName           | string,                                                       |
+| dayNameShort      | string,                                                       |
+| dayPeriod         | string,                                                       |
+| dayTwoDigit       | 01, 02, 03, ..., 12, 13, etc.                                 |
+| hour              | 0, 1, 2, 3, ..., 12, 13, ..., 22, 23                          |
+| hour12            | 1, 2, 3, ..., 12, 1, 2, ..., 11, 12                           |
+| hour12TwoDigit    | 01, 02, ..., 12, 01, 02, ..., 11, 12                          |
+| hourTwoDigit      | 00, 01, 02, ..., 12, 13, ..., 22, 23                          |
+| iso               | A standard ISO8601 date string e.g. 2019-01-23T15:31:21.213Z, |
+| localeString      | A string with a language sensitive representation.            |
+| minute            | 0, 1, 2, ..., 58, 59                                          |
+| minuteTwoDigit    | 00, 01, 02, ..., 58, 59                                       |
+| month             | 1, 2, 3, ..., 12                                              |
+| monthName         | Internationalized month name string.                          |
+| monthNameShort    | Internationalized abbreviated month name string.,             |
+| monthTwoDigit     | 01, 02, ..., 11, 12                                           |
+| second            | 0, 1, 2, ..., 58, 59                                          |
+| secondTwoDigit    | 00, 01, 02, ..., 58, 59                                       |
+| timeZoneName      | Internationalized timezone, like `Pacific Daylight Time`      |
+| timeZoneNameShort | Internationalized timezone, abbreviated, like `PST`           |
+| year              | 0, 1, 2, ..., 1999, 2000, 2001, etc.                          |
+| yearTwoDigit      | 00, 01, 02, ..., 17, 18, 19, ..., 98, 99                      |
 
 ### Standalone use outside valid AMP documents
 

@@ -6,6 +6,7 @@ import {Wrapper, useRenderer} from '#preact/component';
 import {useResourcesNotify} from '#preact/utils';
 
 import {user} from '../../../src/log';
+import {getTimeZoneName} from '../format';
 
 /** @const {string} */
 const TAG = 'amp-date-display';
@@ -200,6 +201,8 @@ function getVariablesInLocal(
     'second': date.getSeconds(),
     'iso': date.toISOString(),
     'localeString': getLocaleString_(date, locale, localeOptions),
+    'timeZoneName': getTimeZoneName(date, locale, localeOptions),
+    'timeZoneNameShort': getTimeZoneName(date, locale, localeOptions, 'short'),
   };
 }
 
@@ -243,5 +246,12 @@ function getVariablesInUTC(
     'second': date.getUTCSeconds(),
     'iso': date.toISOString(),
     'localeString': getLocaleString_(date, locale, localeOptionsInUTC),
+    'timeZoneName': getTimeZoneName(date, locale, localeOptionsInUTC),
+    'timeZoneNameShort': getTimeZoneName(
+      date,
+      locale,
+      localeOptionsInUTC,
+      'short'
+    ),
   };
 }
