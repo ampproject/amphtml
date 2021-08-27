@@ -75,15 +75,7 @@ class AmpIframe extends BaseElement {
       );
       return Promise.reject('Resize height is < 100px');
     }
-
-    return this.attemptChangeSize(height, width).catch(() => {
-      if (!this.getOverflowElement?.()) {
-        console./* OK */ warn(
-          '[overflow] element not found. Provide one to enable resizing.',
-          this.element
-        );
-      }
-    });
+    return this.attemptChangeSize(height, width);
   }
 
   /** @override */
