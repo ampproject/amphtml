@@ -13,7 +13,6 @@ import {install as installMapSet} from './map-set';
 import {install as installMathSign} from './math-sign';
 import {install as installObjectAssign} from './object-assign';
 import {install as installObjectValues} from './object-values';
-import {install as installPromise} from './promise';
 import {install as installResizeObserver} from './resize-observer';
 import {install as installSet} from './set';
 import {install as installStringStartsWith} from './string-starts-with';
@@ -24,7 +23,6 @@ if (!mode.isEsm()) {
   installMathSign(self);
   installObjectAssign(self);
   installObjectValues(self);
-  installPromise(self);
   installArrayIncludes(self);
   installMapSet(self);
   installWeakMapSet(self);
