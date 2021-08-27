@@ -112,7 +112,7 @@ export function Iframe({
 
   useIntersectionObserver(
     iframeRef,
-    undefined, // toWin(iframeRef.current.ownerDocument.defaultView),
+    iframeRef.current?.ownerDocument.defaultView,
     callback
   );
 

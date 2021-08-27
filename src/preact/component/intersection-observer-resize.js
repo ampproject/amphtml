@@ -1,6 +1,6 @@
 import {useEffect, useState} from '#preact';
 
-const ioForWindow = {};
+const ioForWindow = {}; // new Map()?
 
 /**
  * @param ref
@@ -16,7 +16,6 @@ export function useIntersectionObserver(ref, targetWin, callback) {
       return;
     }
     const currentRef = ref.current;
-    // other stuff we were doing with io
     ioForWindow[win] =
       ioForWindow[win] ??
       new win.IntersectionObserver((entries) => {
@@ -35,26 +34,3 @@ export function useIntersectionObserver(ref, targetWin, callback) {
 
   return lastEntry;
 }
-
-// component.js
-// Will `isIntersecting` cause new render if its value is unchanged,
-// but other properties of the entry do change?
-// const isIntersectingRef = useRef(null);
-// const attemptResize = useCallback(({isIntersecting}) => {
-//   if (isIntersecting === isIntersectingRef.current) {
-//     // unchanged
-//     return;
-//   }
-//   isIntersectingRef.current = isIntersecting;
-//   if (!isIntersecting) {
-//     requestResize();
-//   }
-// });
-// useInOb(iframeRef, /* window */ undefined, attemptResize);
-// useEffect(() => {
-//   if (!ioEntry.isIntersecting) {
-//     attemptResize();
-//   }
-// }, [isIntersecting]);
-
-// const {boundingClientRect, inViewport, rootBounds} = useInOb(ref)
