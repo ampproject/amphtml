@@ -161,13 +161,14 @@ export class AmpGeo extends AMP.BaseElement {
    * @return {Promise}
    */
   findCountry_(ampdoc) {
-    // Flag to see if we've been pre-rendered with a country
     const bodyElem = ampdoc.getBody();
+    const docElem = ampdoc.getRootNode().documentElement;
+    // Flag to see if we've been pre-rendered with a country
     // Prioritize the prerender hinting classes found in `html` over `body`
     // though we do not drop support for detecting in `body` for backwards
     // compatibility.
     const preRenderMatch =
-      bodyElem.parentElement.className.match(PRE_RENDER_REGEX) ||
+      docElem.className.match(PRE_RENDER_REGEX) ||
       bodyElem.className.match(PRE_RENDER_REGEX);
 
     // Trim the spaces off the patched country.
@@ -428,15 +429,16 @@ export class AmpGeo extends AMP.BaseElement {
    * clearPreRender_()
    * Returns a list of classes to remove if pre-render has
    * been invalidated by way of an override.
+   * @param {!Element} docElem
    * @param {!Element} body
    * @return {!Array<string>}
    */
-  clearPreRender_(body) {
+  clearPreRender_(docElem, body) {
     const {classList: bodyClassList} = body;
-    const {classList: htmlClassList} = body.parentElement;
+    const {classList: docElemClassList} = docElem;
     const classesToRemove = new Set();
 
-    htmlClassList.forEach((el) => {
+    docElemClassList.forEach((el) => {
       if (STRIP_RE.test(el)) {
         classesToRemove.add(el);
       }
@@ -469,14 +471,14 @@ export class AmpGeo extends AMP.BaseElement {
         return this.findCountry_(ampdoc).then(() => body);
       })
       .then((body) => {
-        const html = body.parentElement;
+        const docElem = ampdoc.getRootNode().documentElement;
         this.matchCountryGroups_(config);
 
         let classesToRemove = new Set();
 
         switch (this.mode_) {
           case mode.GEO_OVERRIDE:
-            classesToRemove = this.clearPreRender_(body);
+            classesToRemove = this.clearPreRender_(docElem, body);
           // Intentionally fall through.
           case mode.GEO_HOT_PATCH:
           case mode.GEO_API:
@@ -503,18 +505,20 @@ export class AmpGeo extends AMP.BaseElement {
             // Actual change happens in callback so runtime can
             // optimize dom mutations.
             this.mutateElement(() => {
-              const {classList: htmlClassList} = html;
+              const {classList: docElemClassList} = docElem;
               const {classList: bodyClassList} = body;
               // Always remove the pending class
               classesToRemove.add('amp-geo-pending');
               classesToRemove.forEach((toRemove) => {
                 /** @type {!DOMTokenList} */ (bodyClassList).remove(toRemove);
-                /** @type {!DOMTokenList} */ (htmlClassList).remove(toRemove);
+                /** @type {!DOMTokenList} */ (docElemClassList).remove(
+                  toRemove
+                );
               });
 
               // add the new classes to <html> and <<body>
               classesToAdd.forEach((toAdd) => {
-                htmlClassList.add(toAdd);
+                docElemClassList.add(toAdd);
                 bodyClassList.add(toAdd);
               });
 
@@ -535,7 +539,7 @@ export class AmpGeo extends AMP.BaseElement {
                 state.id = GEO_ID;
                 body.appendChild(state);
               }
-            }, html);
+            }, docElem);
 
             break;
           case mode.GEO_PRERENDER:

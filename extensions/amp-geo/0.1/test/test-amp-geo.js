@@ -533,9 +533,7 @@ describes.realWin(
       // NOTE: notide that we cause the the body and html element classes
       // to go out of sync but we still clear `amp-iso-country-mx` AND
       // `amp-geo-group-nafta`.
-      doc.documentElement.classList.add(
-        'amp-iso-country-mx'
-      );
+      doc.documentElement.classList.add('amp-iso-country-mx');
       doc.body.classList.add('amp-geo-group-nafta');
       addConfigElement('script');
       geo.buildCallback();
