@@ -1240,6 +1240,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'trafficstars': {
+    prefetch: 'https://cdn.tsyndicate.com/sdk/v1/master.spot.js',
+    renderStartImplemented: true,
+  },
+
   'triplelift': {},
 
   'trugaze': {
