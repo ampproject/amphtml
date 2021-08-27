@@ -145,8 +145,7 @@ async function applyConfig(
     }
   }
   if (opt_fortesting) {
-    configJson = enableLocalDev_(target, configJson);
-    configJson = {test: true, ...configJson};
+    configJson = enableTest_(target, configJson);
   }
   if (opt_derandomize) {
     configJson = derandomize_(target, configJson);
@@ -171,8 +170,8 @@ async function applyConfig(
  * @param {!JSON} configJson The json object in which to enable local dev
  * @return {!JSON}
  */
-function enableLocalDev_(target, configJson) {
-  let LOCAL_DEV_AMP_CONFIG = {localDev: true};
+function enableTest_(target, configJson) {
+  let LOCAL_DEV_AMP_CONFIG = {test: true};
   const TESTING_HOST = process.env.AMP_TESTING_HOST;
   if (typeof TESTING_HOST == 'string') {
     const TESTING_HOST_FULL_URL = TESTING_HOST.match(/^https?:\/\//)
