@@ -1,10 +1,6 @@
 import {useEffect, useState} from '#preact';
 
 const ioForWindow = {};
-//   window: null,
-// };
-
-// let io;
 
 /**
  * @param ref
@@ -16,10 +12,13 @@ export function useIntersectionObserver(ref, targetWin, callback) {
   const win = targetWin ?? ref.current?.ownerDocument.defaultView;
 
   useEffect(() => {
+    if (!win) {
+      return;
+    }
     const currentRef = ref.current;
     // other stuff we were doing with io
-    ioForWindow =
-      ioForWindow ??
+    ioForWindow[win] =
+      ioForWindow[win] ??
       new win.IntersectionObserver((entries) => {
         const targetEntries = entries.filter(
           (entry) => entry.target === currentRef

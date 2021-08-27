@@ -80,32 +80,6 @@ export function Iframe({
     [attemptResize]
   );
 
-  // useEffect(() => {
-  //   const iframe = iframeRef.current;
-  //   if (!iframe) {
-  //     return;
-  //   }
-  //   const win = toWin(iframe.ownerDocument.defaultView);
-  //   if (!win) {
-  //     return;
-  //   }
-  //   const io = new win.IntersectionObserver((entries) => {
-  //     const last = entries[entries.length - 1];
-  //     isIntersectingRef.current = last.isIntersecting;
-  //     if (last.isIntersecting || !dataRef.current || !win) {
-  //       return;
-  //     }
-  //     attemptResize();
-  //   });
-  //   io.observe(iframe);
-  //   win.addEventListener('message', handlePostMessage);
-
-  //   return () => {
-  //     io.unobserve(iframe);
-  //     win.removeEventListener('message', handlePostMessage);
-  //   };
-  // }, [attemptResize, handlePostMessage]);
-
   useEffect(() => {
     const iframe = iframeRef.current;
     if (!iframe) {
@@ -126,7 +100,6 @@ export function Iframe({
   const callback = useCallback(
     ({isIntersecting}) => {
       if (isIntersecting === isIntersectingRef.current) {
-        // unchanged
         return;
       }
       isIntersectingRef.current = isIntersecting;
