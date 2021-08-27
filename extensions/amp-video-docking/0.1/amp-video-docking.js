@@ -334,6 +334,9 @@ export class VideoDocking {
     /** @private {boolean} */
     this.isTransitioning_ = false;
 
+    /** @private {number} */
+    this.lastWidth_ = undefined;
+
     this.registerAll_();
   }
 
@@ -613,9 +616,13 @@ export class VideoDocking {
         this.dock_(video, target, /* step */ 1);
         return;
       }
-      if (this.isCurrentlyDocked_(video)) {
+      // no undocking when height changed (e.g. some browsers dynamically show/hide
+      // the URL bar during scroll, which leads to a viewport resize)
+      const widthChanged = this.lastWidth_ !== this.viewportRect_.width;
+      if (this.isCurrentlyDocked_(video) && widthChanged) {
         this.undock_(video);
       }
+      this.lastWidth_ = this.viewportRect_.width;
     });
   }
 
