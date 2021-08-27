@@ -65,7 +65,7 @@ function getExperimentConfig(experiment) {
  * @return {!Array<string>}
  */
 function getFilesChanged(globs, options) {
-  const allFiles = globby.sync(globs, options);
+  const allFiles = globby.sync(globs, options).map(String);
   return gitDiffNameOnlyMain().filter((changedFile) => {
     return fs.existsSync(changedFile) && allFiles.includes(changedFile);
   });
@@ -149,7 +149,7 @@ function getFilesToCheck(globs, options = {}, ignoreFile = undefined) {
     }
     return logFiles(filesChanged);
   }
-  return ignored.filter(globby.sync(globs, options));
+  return ignored.filter(globby.sync(globs, options).map(String));
 }
 
 /**
