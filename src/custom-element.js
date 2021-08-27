@@ -387,8 +387,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       this.upgradeDelayMs_ = win.Date.now() - upgradeStartTime;
       this.upgradeState_ = UpgradeState.UPGRADED;
       this.setReadyStateInternal(ReadyState.BUILDING);
-      this.classList.remove('amp-unresolved');
-      this.classList.remove('i-amphtml-unresolved');
+      this.classList.remove('amp-unresolved', 'i-amphtml-unresolved');
       this.assertLayout_();
       this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
       if (!this.R1()) {
@@ -529,8 +528,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         () => {
           this.built_ = true;
           this.classList.add('i-amphtml-built');
-          this.classList.remove('i-amphtml-notbuilt');
-          this.classList.remove('amp-notbuilt');
+          this.classList.remove('i-amphtml-notbuilt', 'amp-notbuilt');
           this.signals_.signal(CommonSignals.BUILT);
 
           if (this.R1()) {
@@ -1137,9 +1135,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       this.isConnected_ = true;
 
       if (!this.everAttached) {
-        this.classList.add('i-amphtml-element');
-        this.classList.add('i-amphtml-notbuilt');
-        this.classList.add('amp-notbuilt');
+        this.classList.add('i-amphtml-element', 'i-amphtml-notbuilt', 'amp-notbuilt');
       }
 
       if (!this.ampdoc_) {
@@ -1184,8 +1180,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           this.upgradeOrSchedule_();
         }
         if (!this.isUpgraded()) {
-          this.classList.add('amp-unresolved');
-          this.classList.add('i-amphtml-unresolved');
+          this.classList.add('amp-unresolved', 'i-amphtml-unresolved');
           this.dispatchCustomEventForTesting(AmpEvents.STUBBED);
         }
       }
@@ -1227,6 +1222,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       // Schedule build and mount.
       const scheduler = getSchedulerForDoc(this.getAmpDoc());
       scheduler.schedule(this);
+      this.classList.remove('amp-unresolved', 'i-amphtml-unresolved');
 
       if (this.buildingPromise_) {
         // Already built or building: just needs to be mounted.
