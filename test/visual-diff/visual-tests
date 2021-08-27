@@ -728,28 +728,26 @@
       "url": "examples/visual-tests/amp-story/amp-story-prestyle-step1.html",
       "name": "amp-story: prestyle step 1 - before JS loads (mobile)",
       "viewport": {"width": 375, "height": 635}, 
-      "loading_complete_delay_ms": 100,
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-prestyle-step2.html",
       "name": "amp-story: prestyle step 2 - after JS loads (mobile)",
       "viewport": {"width": 375, "height": 635},
       "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-loaded amp-story-page[active]",
       ],
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-prestyle-step1.html",
       "name": "amp-story: prestyle step 1 - before JS loads (desktop)",
-      "viewport": {"width": 1280, "height": 72},
-      "loading_complete_delay_ms": 100,
+      "viewport": {"width": 1280, "height": 800},
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-prestyle-step2.html",
       "name": "amp-story: prestyle step 2 - after JS loads (desktop)",
-      "viewport": {"width": 1280, "height": 72},
+      "viewport": {"width": 1280, "height": 800},
       "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-loaded amp-story-page[active]",
       ],
     },
     {
