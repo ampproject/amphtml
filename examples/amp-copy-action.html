@@ -21,14 +21,15 @@
 <div>
     <div class="column">
         <div id='divTarget'>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</div>
-        <button on="tap:divTarget.copy()">Copy DIV Content</button>
+        <button on="tap:divTarget.copy();copy-success:divTarget.hide()">Copy DIV Content</button>
     </div>
     <div class="column">
-    <input id='inputTarget' value="Sample Input Value" />
-    <button on="tap:inputTarget.copy()">Copy Input Value</button>
+        <input id='inputTarget' value="Sample Input Value" />
+        <button on="tap:inputTarget.copy();copy-success:inputTarget.hide()">Copy Input Value</button>
     </div>
     <div class="column">
-    <button on="tap:AMP.copy(text='Hello AMP')">Copy Static Text</button>
+        <button on="tap:AMP.copy(text='Hello AMP');copy-success:copied.show()">Copy Static Text</button>
+        <p hidden id="copied">Copied!</p>
     </div>
     <div class="column">
         <textarea placeholder="Paste here!" rows="10" cols="50"></textarea>

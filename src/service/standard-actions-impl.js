@@ -4,16 +4,16 @@ import {Layout, getLayoutClass} from '#core/dom/layout';
 import {computedStyle, toggle} from '#core/dom/style';
 import {isFiniteNumber} from '#core/types';
 import {toWin} from '#core/window';
-
-import {Services} from '#service';
-
-import {dev, user, userAssert} from '../log';
-import {getAmpdoc, registerServiceBuilderForDoc} from '../service-helpers';
-
 import {
   copyTextToClipboard,
   isCopyingToClipboardSupported,
 } from '#core/window/clipboard';
+
+import {Services} from '#service';
+
+import {createCustomEvent} from '../event-helper';
+import {dev, user, userAssert} from '../log';
+import {getAmpdoc, registerServiceBuilderForDoc} from '../service-helpers';
 
 /**
  * @param {!Element} element
@@ -173,19 +173,25 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {!null}
    */
-   handleCopy_(invocation) {
+  handleCopy_(invocation) {
+    /** @enum {string} */
+    const CopyEvents = {
+      COPY_ERROR: 'copy-error',
+      COPY_SUCCESS: 'copy-success',
+      SUPPORT_ERROR: 'support-error',
+    };
+    let eventName;
     const {args, node} = invocation;
     const win = getWin(node);
 
     let textToCopy;
-    if(invocation.tagOrTarget === 'AMP'){
+    if (invocation.tagOrTarget === 'AMP') {
       /**
        * Copy Static Text
        *  Example: AMP.copy(text='TextToCopy');
        */
       textToCopy = args['text'].trim();
-    }
-    else {
+    } else {
       /**
        * Copy Target Element Text
        *  Example: targetId.copy();
@@ -193,10 +199,42 @@ export class StandardActions {
       const target = dev().assertElement(invocation.node);
       textToCopy = (target.value ?? target.textContent).trim();
     }
-    
-    copyTextToClipboard(win, textToCopy);
+
+    /**
+     * Trigger Event based on copy action
+     *  - If content got copied to the clipboard successfully, it will
+     *  fire `copy-success` event.
+     *  - If there's any error in copying, it will
+     *  fire `copy-error` event.
+     *  - If browser is not supporting the copy function/action, it
+     *  will fire `support-error` event.
+     *
+     *  Example: <button on="tap:AMP.copy(text='Hello AMP');copy-success:copied.show()">Copy</button>
+     */
+    const action_ = Services.actionServiceForDoc(invocation.caller);
+    if (isCopyingToClipboardSupported(win.document)) {
+      if (copyTextToClipboard(win, textToCopy)) {
+        eventName = CopyEvents.COPY_SUCCESS;
+      } else {
+        eventName = CopyEvents.COPY_ERROR;
+      }
+    } else {
+      eventName = CopyEvents.SUPPORT_ERROR;
+    }
+
+    const selectEvent = createCustomEvent(
+      win,
+      `${eventName}`,
+      /* Details */ null
+    );
+    action_.trigger(
+      invocation.caller,
+      eventName,
+      selectEvent,
+      ActionTrust.HIGH
+    );
     return null;
-   }
+  }
 
   /**
    * Handles the `navigateTo` action.
