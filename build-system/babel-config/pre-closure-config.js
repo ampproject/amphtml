@@ -12,7 +12,7 @@ const {getReplacePlugin} = require('./helpers');
  */
 function getPreClosureConfig() {
   const isCheckTypes = argv._.includes('check-types');
-  const isProd = argv._.includes('dist') && !argv.fortesting;
+  const isProd = BUILD_CONSTANTS.IS_PROD;
 
   const reactJsxPlugin = [
     '@babel/plugin-transform-react-jsx',

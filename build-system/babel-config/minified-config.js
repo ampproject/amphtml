@@ -11,7 +11,7 @@ const {getReplacePlugin} = require('./helpers');
  * @return {!Object}
  */
 function getMinifiedConfig() {
-  const isProd = argv._.includes('dist') && !argv.fortesting;
+  const isProd = BUILD_CONSTANTS.IS_PROD;
 
   const reactJsxPlugin = [
     '@babel/plugin-transform-react-jsx',

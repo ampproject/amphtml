@@ -14,6 +14,7 @@ const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global');
+const {BUILD_CONSTANTS} = require('../compile/build-constants');
 const {closureCompile} = require('../compile/compile');
 const {cyan, green, red} = require('../common/colors');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
@@ -23,7 +24,6 @@ const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {watch} = require('chokidar');
-const isProd = argv._.includes('dist') && !argv.fortesting;
 
 /** @type {Remapping.default} */
 const remapping = /** @type {*} */ (Remapping);
@@ -738,14 +738,14 @@ async function applyAmpConfig(targetFile) {
   const baseConfigFile =
     'build-system/global-configs/' + config + '-config.json';
 
+  const isTest = !BUILD_CONSTANTS.IS_PROD;
   await removeConfig(targetFile);
   await applyConfig(
     config,
     targetFile,
     baseConfigFile,
-    /* isTest */ !isProd,
-    /* opt_localBranch */ true,
-    /* opt_branch */ undefined
+    isTest,
+    /* opt_localBranch */ true
   );
 }
 
