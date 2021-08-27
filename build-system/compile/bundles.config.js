@@ -112,10 +112,10 @@ exports.jsBundles = {
     srcDir: './src/compiler/',
     srcFilename: 'index.js',
     destDir: './dist',
-    minifiedDestDir: './dist',
     options: {
-      minifiedName: 'compiler.js',
+      toName: 'compiler.js',
       extraGlobs: ['src/builtins/**/*.js', 'extensions/amp-fit-text/**/*.js'],
+      minify: false,
     },
   },
   'amp-viewer-host.max.js': {

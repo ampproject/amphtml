@@ -1,3 +1,6 @@
+// Temporary hack
+globalThis['self'] = globalThis;
+
 import * as compiler from '@ampproject/bento-compiler';
 
 import {getBuilders} from './builders';

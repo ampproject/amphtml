@@ -1,21 +1,13 @@
 import {CSS} from '../../../build/amp-fit-text-0.1.css';
-import {
-  applyFillContent,
-  getLengthNumeral,
-  isLayoutSizeDefined,
-} from '#core/dom/layout';
+import {getLengthNumeral, isLayoutSizeDefined} from '#core/dom/layout';
 import {px, setImportantStyles, setStyle, setStyles} from '#core/dom/style';
-import {realChildNodes} from '#core/dom/query';
 import {throttle} from '#core/types/function';
 import {copyChildren, removeChildren} from '#core/dom';
+import {buildDom} from './build-dom';
 
 const TAG = 'amp-fit-text';
 const LINE_HEIGHT_EM_ = 1.15; // WARNING: when updating this ensure you also update the css values for line-height.
 const RESIZE_THROTTLE_MS = 100;
-const MEASURER_CLASS = 'i-amphtml-fit-text-measurer';
-const CONTENT_CLASS = 'i-amphtml-fit-text-content';
-const CONTENT_WRAPPER_CLASS = 'i-amphtml-fit-text-content-wrapper';
-
 export class AmpFitText extends AMP.BaseElement {
   /** @override @nocollapse */
   static prerenderAllowed() {
@@ -202,33 +194,6 @@ export function updateOverflow_(content, measurer, maxHeight, fontSize) {
     lineClamp: overflown ? numberOfLines : '',
     maxHeight: overflown ? px(lineHeight * numberOfLines) : '',
   });
-}
-
-/**
- * @see amphtml/compiler/types.js for full description
- *
- * @param {!Element} element
- * @return {{content: !Element, contentWrapper: !Element, measurer: !Element}}
- */
-export function buildDom(element) {
-  const doc = element.ownerDocument;
-  const content = doc.createElement('div');
-  applyFillContent(content);
-  content.classList.add(CONTENT_CLASS);
-
-  const contentWrapper = doc.createElement('div');
-  contentWrapper.classList.add(CONTENT_WRAPPER_CLASS);
-  content.appendChild(contentWrapper);
-
-  const measurer = doc.createElement('div');
-  measurer.classList.add(MEASURER_CLASS);
-
-  realChildNodes(element).forEach((node) => contentWrapper.appendChild(node));
-  mirrorNode(contentWrapper, measurer);
-  element.appendChild(content);
-  element.appendChild(measurer);
-
-  return {content, contentWrapper, measurer};
 }
 
 /**

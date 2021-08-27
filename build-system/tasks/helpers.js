@@ -86,12 +86,13 @@ const watchedTargets = new Map();
  */
 function doBuildJs(jsBundles, name, extraOptions) {
   const target = jsBundles[name];
+  const options = {...extraOptions, ...target.options};
   if (target) {
     return compileJs(
       target.srcDir,
       target.srcFilename,
-      extraOptions.minify ? target.minifiedDestDir : target.destDir,
-      {...target.options, ...extraOptions}
+      options.minify ? target.minifiedDestDir : target.destDir,
+      options
     );
   } else {
     return Promise.reject(
@@ -157,23 +158,23 @@ async function compileAllJs(options) {
   }
   const startTime = Date.now();
   await Promise.all([
-    minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
-    doBuildJs(jsBundles, 'custom-elements-polyfill.js', options),
-    doBuildJs(jsBundles, 'alp.max.js', options),
-    doBuildJs(jsBundles, 'integration.js', options),
-    doBuildJs(jsBundles, 'ampcontext-lib.js', options),
-    doBuildJs(jsBundles, 'iframe-transport-client-lib.js', options),
-    doBuildJs(jsBundles, 'recaptcha.js', options),
-    doBuildJs(jsBundles, 'amp-viewer-host.max.js', options),
+    // minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
+    // doBuildJs(jsBundles, 'custom-elements-polyfill.js', options),
+    // doBuildJs(jsBundles, 'alp.max.js', options),
+    // doBuildJs(jsBundles, 'integration.js', options),
+    // doBuildJs(jsBundles, 'ampcontext-lib.js', options),
+    // doBuildJs(jsBundles, 'iframe-transport-client-lib.js', options),
+    // doBuildJs(jsBundles, 'recaptcha.js', options),
+    // doBuildJs(jsBundles, 'amp-viewer-host.max.js', options),
     doBuildJs(jsBundles, 'compiler.js', options),
-    doBuildJs(jsBundles, 'video-iframe-integration.js', options),
-    doBuildJs(jsBundles, 'amp-story-entry-point.js', options),
-    doBuildJs(jsBundles, 'amp-story-player.js', options),
-    doBuildJs(jsBundles, 'amp-inabox-host.js', options),
-    doBuildJs(jsBundles, 'amp-shadow.js', options),
-    doBuildJs(jsBundles, 'amp-inabox.js', options),
+    // doBuildJs(jsBundles, 'video-iframe-integration.js', options),
+    // doBuildJs(jsBundles, 'amp-story-entry-point.js', options),
+    // doBuildJs(jsBundles, 'amp-story-player.js', options),
+    // doBuildJs(jsBundles, 'amp-inabox-host.js', options),
+    // doBuildJs(jsBundles, 'amp-shadow.js', options),
+    // doBuildJs(jsBundles, 'amp-inabox.js', options),
   ]);
-  await compileCoreRuntime(options);
+  // await compileCoreRuntime(options);
   endBuildStep(
     minify ? 'Minified' : 'Compiled',
     'all runtime JS files',
