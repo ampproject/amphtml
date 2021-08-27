@@ -542,6 +542,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
       const invocation = {
         node: element,
         satisfiesTrust: () => true,
+        args: {}
       };
       standardActions.handleToggleChecked_(invocation);
       expectCheckboxToHaveCheckedStateFalse(element);
@@ -554,6 +555,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
       const invocation = {
         node: element,
         satisfiesTrust: () => true,
+        args: {}
       };
       standardActions.handleToggleChecked_(invocation);
       expectCheckboxToHaveCheckedStateTrue(element);
