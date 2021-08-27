@@ -65,27 +65,28 @@ class AmpFacebookComments extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.element.setAttribute('data-embed-as', 'comments');
-    const iframe = getIframe(this.win, this.element, TYPE);
-    iframe.title = this.element.title || 'Facebook comments';
-    applyFillContent(iframe);
-    // Triggered by context.updateDimensions() inside the iframe.
-    listenFor(
-      iframe,
-      'embed-size',
-      (data) => {
-        this.forceChangeHeight(data['height']);
-      },
-      /* opt_is3P */ true
-    );
-    this.unlistenMessage_ = listen(
-      this.win,
-      'message',
-      this.handleFacebookMessages_.bind(this)
-    );
-    this.toggleLoading(true);
-    this.element.appendChild(iframe);
-    this.iframe_ = iframe;
-    return this.loadPromise(iframe);
+    return getIframe(this.win, this.element, TYPE).then((iframe) => {
+      iframe.title = this.element.title || 'Facebook comments';
+      applyFillContent(iframe);
+      // Triggered by context.updateDimensions() inside the iframe.
+      listenFor(
+        iframe,
+        'embed-size',
+        (data) => {
+          this.forceChangeHeight(data['height']);
+        },
+        /* opt_is3P */ true
+      );
+      this.unlistenMessage_ = listen(
+        this.win,
+        'message',
+        this.handleFacebookMessages_.bind(this)
+      );
+      this.toggleLoading(true);
+      this.element.appendChild(iframe);
+      this.iframe_ = iframe;
+      return this.loadPromise(iframe);
+    });
   }
 
   /**

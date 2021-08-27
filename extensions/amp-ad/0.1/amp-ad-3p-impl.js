@@ -395,7 +395,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         // incrementLoadingAds().
 
         const intersection = this.element.getIntersectionChangeEntry();
-        const iframe = getIframe(
+        return getIframe(
           toWin(this.element.ownerDocument.defaultView),
           this.element,
           this.type_,
@@ -403,10 +403,11 @@ export class AmpAd3PImpl extends AMP.BaseElement {
           {
             initialIntersection: intersectionEntryToJson(intersection),
           }
-        );
-        iframe.title = this.element.title || 'Advertisement';
-        this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
-        return this.xOriginIframeHandler_.init(iframe);
+        ).then((iframe) => {
+          iframe.title = this.element.title || 'Advertisement';
+          this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
+          return this.xOriginIframeHandler_.init(iframe);
+        });
       })
       .then(() => {
         this.unobserveIntersections_ = observeIntersections(

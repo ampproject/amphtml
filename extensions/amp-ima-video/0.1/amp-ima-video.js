@@ -193,40 +193,44 @@ class AmpImaVideo extends AMP.BaseElement {
       'data-source-children',
       JSON.stringify(this.sourceChildren_)
     );
-    return consentPromise.then((initialConsentState) => {
-      const iframe = getIframe(
-        win,
-        element,
-        TYPE,
-        {initialConsentState},
-        {allowFullscreen: true}
-      );
-      iframe.title = this.element.title || 'IMA video';
+    return consentPromise
+      .then((initialConsentState) =>
+        getIframe(
+          win,
+          element,
+          TYPE,
+          {initialConsentState},
+          {allowFullscreen: true}
+        )
+      )
+      .then((iframe) => {
+        iframe.title = this.element.title || 'IMA video';
 
-      applyFillContent(iframe);
+        applyFillContent(iframe);
 
-      // This is temporary until M74 launches.
-      // TODO(aghassemi, #21247)
-      addUnsafeAllowAutoplay(iframe);
+        // This is temporary until M74 launches.
+        // TODO(aghassemi, #21247)
+        addUnsafeAllowAutoplay(iframe);
 
-      this.iframe_ = iframe;
+        this.iframe_ = iframe;
 
-      const deferred = new Deferred();
-      this.playerReadyPromise_ = deferred.promise;
-      this.playerReadyResolver_ = deferred.resolve;
+        const deferred = new Deferred();
+        this.playerReadyPromise_ = deferred.promise;
+        this.playerReadyResolver_ = deferred.resolve;
 
-      this.unlistenMessage_ = listen(this.win, 'message', (e) =>
-        this.handlePlayerMessage_(/** @type {!Event} */ (e))
-      );
+        this.unlistenMessage_ = listen(this.win, 'message', (e) =>
+          this.handlePlayerMessage_(/** @type {!Event} */ (e))
+        );
 
-      element.appendChild(iframe);
+        element.appendChild(iframe);
 
-      installVideoManagerForDoc(element);
-      Services.videoManagerForDoc(element).register(this);
-      observeContentSize(this.element, this.onResized_);
+        installVideoManagerForDoc(element);
+        Services.videoManagerForDoc(element).register(this);
+        observeContentSize(this.element, this.onResized_);
 
-      return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
-    });
+        return this.loadPromise(iframe);
+      })
+      .then(() => this.playerReadyPromise_);
   }
 
   /** @override */

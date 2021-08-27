@@ -131,7 +131,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
         });
       });
 
-      it('should create an iframe', () => {
+      it('should create an iframe', async () => {
         mockMode({
           esm: false,
           localDev: true,
@@ -175,7 +175,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
           .returns({href: locationHref});
 
         const initialIntersection = {test: 'testIntersection'};
-        const iframe = getIframe(
+        const iframe = await getIframe(
           window,
           div,
           '_ping_',
@@ -240,7 +240,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
         expect(name.attributes).to.deep.jsonEqual(fragment);
       });
 
-      it('should copy attributes to iframe', () => {
+      it('should copy attributes to iframe', async () => {
         const div = document.createElement('my-element');
         div.setAttribute('width', '50');
         div.setAttribute('height', '100');
@@ -250,7 +250,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
 
         container.appendChild(div);
 
-        const iframe = getIframe(window, div, 'none');
+        const iframe = await getIframe(window, div, 'none');
 
         expect(iframe.width).to.equal('50');
         expect(iframe.height).to.equal('100');
@@ -258,19 +258,19 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
         expect(iframe.not_allowlisted).to.equal(undefined);
       });
 
-      it('should set feature policy for sync-xhr', () => {
+      it('should set feature policy for sync-xhr', async () => {
         const div = document.createElement('my-element');
         setupElementFunctions(div);
         container.appendChild(div);
-        const iframe = getIframe(window, div, 'none');
+        const iframe = await getIframe(window, div, 'none');
         expect(iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
       });
 
-      it('should set sandbox', () => {
+      it('should set sandbox', async () => {
         const div = document.createElement('my-element');
         setupElementFunctions(div);
         container.appendChild(div);
-        const iframe = getIframe(window, div, 'none');
+        const iframe = await getIframe(window, div, 'none');
         expect(iframe.getAttribute('sandbox')).to.equal(
           'allow-top-navigation-by-user-activation ' +
             'allow-popups-to-escape-sandbox allow-forms ' +
@@ -306,35 +306,35 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
         expect(iframe.getAttribute('sandbox')).to.equal(null);
       });
 
-      it('should pick the right bootstrap url for local-dev mode', () => {
+      it('should pick the right bootstrap url for local-dev mode', async () => {
         mockMode({localDev: true});
         const ampdoc = Services.ampdoc(window.document);
-        expect(getBootstrapBaseUrl(window, ampdoc)).to.equal(
+        expect(await getBootstrapBaseUrl(window, ampdoc)).to.equal(
           'http://ads.localhost:9876/dist.3p/current/frame.max.html'
         );
       });
 
-      it('should pick the right bootstrap url for testing mode', () => {
+      it('should pick the right bootstrap url for testing mode', async () => {
         mockMode({test: true});
         const ampdoc = Services.ampdoc(window.document);
-        expect(getBootstrapBaseUrl(window, ampdoc)).to.equal(
+        expect(await getBootstrapBaseUrl(window, ampdoc)).to.equal(
           'http://ads.localhost:9876/dist.3p/current/frame.max.html'
         );
       });
 
-      it('should pick the right bootstrap unique url (prod)', () => {
+      it('should pick the right bootstrap unique url (prod)', async () => {
         mockMode({isProd: true});
         const ampdoc = Services.ampdoc(window.document);
-        expect(getBootstrapBaseUrl(window, ampdoc)).to.match(
+        expect(await getBootstrapBaseUrl(window, ampdoc)).to.match(
           /^https:\/\/d-\d+\.ampproject\.net\/\$\internal\w+\$\/frame\.html$/
         );
       });
 
-      it('should return a stable URL in getBootstrapBaseUrl', () => {
+      it('should return a stable URL in getBootstrapBaseUrl', async () => {
         mockMode({isProd: true});
         const ampdoc = Services.ampdoc(window.document);
-        expect(getBootstrapBaseUrl(window, ampdoc)).to.equal(
-          getBootstrapBaseUrl(window, ampdoc)
+        expect(await getBootstrapBaseUrl(window, ampdoc)).to.equal(
+          await getBootstrapBaseUrl(window, ampdoc)
         );
       });
 
@@ -345,10 +345,10 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
         );
       });
 
-      it('should pick the right bootstrap url (custom)', () => {
+      it('should pick the right bootstrap url (custom)', async () => {
         addCustomBootstrap('https://example.com/boot/remote.html');
         const ampdoc = Services.ampdoc(window.document);
-        expect(getBootstrapBaseUrl(window, ampdoc)).to.equal(
+        expect(await getBootstrapBaseUrl(window, ampdoc)).to.equal(
           'https://example.com/boot/remote.html?$internalRuntimeVersion$'
         );
       });
@@ -390,9 +390,9 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
         });
       });
 
-      it('should create frame with default url if custom disabled', () => {
+      it('should create frame with default url if custom disabled', async () => {
         setupElementFunctions(container);
-        const iframe = getIframe(window, container, '_ping_', {
+        const iframe = await getIframe(window, container, '_ping_', {
           clientId: 'cidValue',
         });
         expect(iframe.src).to.equal(
@@ -405,17 +405,20 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
         const ampdoc = Services.ampdoc(window.document);
         preloadBootstrap(window, 'avendor', ampdoc, preconnect);
         // Wait for visible promise.
-        return ampdoc.whenFirstVisible().then(() => {
-          const fetches = document.querySelectorAll('link[rel=preload]');
-          expect(fetches).to.have.length(2);
-          expect(fetches[0].href).to.match(
-            /^https:\/\/d-\d+\.ampproject\.net\/\$internalRuntimeVersion\$\/frame\.html$/
-          );
-          expect(fetches[1]).to.have.property(
-            'href',
-            'https://3p.ampproject.net/$internalRuntimeVersion$/vendor/avendor.js'
-          );
-        });
+        return ampdoc
+          .whenFirstVisible()
+          .then(() => preloadBootstrap(window, 'avendor', ampdoc, preconnect))
+          .then(() => {
+            const fetches = document.querySelectorAll('link[rel=preload]');
+            expect(fetches).to.have.length(2);
+            expect(fetches[0]).to.have.property(
+              'href',
+              'https://3p.ampproject.net/$internalRuntimeVersion$/vendor/avendor.js'
+            );
+            expect(fetches[1].href).to.match(
+              /^https:\/\/d-\d+\.ampproject\.net\/\$internalRuntimeVersion\$\/frame\.html$/
+            );
+          });
       });
 
       it('should make sub domains (unique)', () => {
@@ -453,7 +456,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
         expect(getSubDomain(fakeWin)).to.equal('d-5670');
       });
 
-      it('uses a unique name based on domain', () => {
+      it('uses a unique name based on domain', async () => {
         const viewerMock = env.sandbox.mock(
           Services.viewerForDoc(window.document)
         );
@@ -489,10 +492,10 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
         };
 
         container.appendChild(div);
-        const name = JSON.parse(getIframe(window, div).name);
+        const name = JSON.parse((await getIframe(window, div)).name);
         resetBootstrapBaseUrlForTesting(window);
         resetCountForTesting();
-        const newName = JSON.parse(getIframe(window, div).name);
+        const newName = JSON.parse((await getIframe(window, div)).name);
         expect(name.host).to.match(/d-\d+.ampproject.net/);
         expect(name.type).to.match(/ping/);
         expect(name.count).to.match(/1/);

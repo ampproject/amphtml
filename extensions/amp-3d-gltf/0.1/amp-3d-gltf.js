@@ -153,17 +153,20 @@ export class Amp3dGltf extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    const iframe = getIframe(this.win, this.element, TYPE, this.context_);
-    iframe.title = this.element.title || 'GLTF 3D model';
-    applyFillContent(iframe, true);
-    this.iframe_ = iframe;
-    this.unlistenMessage_ = devAssert(this.listenGltfViewerMessages_());
+    return getIframe(this.win, this.element, TYPE, this.context_).then(
+      (iframe) => {
+        iframe.title = this.element.title || 'GLTF 3D model';
+        applyFillContent(iframe, true);
+        this.iframe_ = iframe;
+        this.unlistenMessage_ = devAssert(this.listenGltfViewerMessages_());
 
-    this.element.appendChild(this.iframe_);
+        this.element.appendChild(this.iframe_);
 
-    observeContentSize(this.element, this.onResized_);
+        observeContentSize(this.element, this.onResized_);
 
-    return this.willBeLoaded_.promise;
+        return this.willBeLoaded_.promise;
+      }
+    );
   }
 
   /**
