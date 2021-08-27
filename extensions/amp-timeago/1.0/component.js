@@ -3,7 +3,7 @@ import {toWin} from '#core/window';
 
 import * as Preact from '#preact';
 import {useEffect, useRef, useState} from '#preact';
-import {Wrapper} from '#preact/component';
+import {Wrapper, useIntersectionObserver} from '#preact/component';
 import {useResourcesNotify} from '#preact/utils';
 
 import {format, getLocale} from './locales';
@@ -39,28 +39,28 @@ export function Timeago({
 
   const date = getDate(datetime);
 
-  useEffect(() => {
+  const inViewportCallback = ({isIntersecting}) => {
     const node = ref.current;
-    const win = node && toWin(node.ownerDocument.defaultView);
-    if (!win) {
-      return undefined;
+    if (!node) {
+      return;
     }
-    const observer = new win.IntersectionObserver((entries) => {
-      let {lang} = node.ownerDocument.documentElement;
-      if (lang === 'unknown') {
-        lang = win.navigator?.language || DEFAULT_LOCALE;
-      }
-      const locale = getLocale(localeProp || lang);
-      const last = entries[entries.length - 1];
-      if (last.isIntersecting) {
-        setTimestamp(
-          getFuzzyTimestampValue(new Date(date), locale, cutoff, placeholder)
-        );
-      }
-    });
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [date, localeProp, cutoff, placeholder]);
+    let {lang} = node.ownerDocument.documentElement;
+    const win = node && toWin(node.ownerDocument.defaultView);
+    if (lang === 'unknown') {
+      lang = win.navigator?.language || DEFAULT_LOCALE;
+    }
+    const locale = getLocale(localeProp || lang);
+    if (isIntersecting) {
+      setTimestamp(
+        getFuzzyTimestampValue(new Date(date), locale, cutoff, placeholder)
+      );
+    }
+  };
+  useIntersectionObserver(
+    ref,
+    toWin(ref.current?.ownerDocument?.defaultView),
+    inViewportCallback
+  );
 
   useResourcesNotify();
 
