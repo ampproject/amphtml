@@ -45,7 +45,6 @@ module.exports = function (api) {
     const configFunctionName = babelTransforms.get(callerName);
     return require('./build-system/babel-config')[configFunctionName]();
   } else {
-    console.trace(callerName);
     log(
       yellow('WARNING:'),
       'Unrecognized Babel caller',
