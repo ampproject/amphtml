@@ -13,7 +13,10 @@
     opacity: 0;
     pointer-events: none;
     width: 325px;
-    height: 500px;
+    /* This size is ok because the iframe is temporarily `position: fixed;`
+    1000px was chosen because TikTok requires a large height in order to send 
+    the height messages to the iframe*/
+    height: 1000px;
 }
 
 .i-amphtml-tiktok-placeholder-image {
