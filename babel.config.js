@@ -25,6 +25,8 @@ const babelTransforms = new Map([
   ['minified', 'getMinifiedConfig'],
   ['jss', 'getJssConfig'],
   ['@babel/eslint-parser', 'getEslintConfig'],
+  ['is-enum-value', 'getEmptyConfig'],
+  ['import-resolver', 'getEmptyConfig'],
 ]);
 
 /**
@@ -43,6 +45,7 @@ module.exports = function (api) {
     const configFunctionName = babelTransforms.get(callerName);
     return require('./build-system/babel-config')[configFunctionName]();
   } else {
+    console.trace(callerName);
     log(
       yellow('WARNING:'),
       'Unrecognized Babel caller',
