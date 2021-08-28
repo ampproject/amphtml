@@ -72,6 +72,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
   describe('upgrade', () => {
     it('should not create impl immediately when attached', () => {
       const element = new ElementClass();
+      const removeSpy = env.sandbox.spy(element.classList, 'remove');
 
       builderMock.expects('schedule').withExactArgs(element).once();
 
@@ -88,6 +89,10 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element.readyState).to.equal('building');
       expect(element.isBuilt()).to.be.false;
       expect(element.getBuildPriority()).equal(LayoutPriority.CONTENT);
+      expect(removeSpy).to.have.been.calledWith(
+        'amp-unresolved',
+        'i-amphtml-unresolved'
+      );
     });
 
     it('should not upgrade immediately when attached', () => {
