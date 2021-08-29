@@ -33,7 +33,7 @@ export const useIO = () => {
       <div
         style={{
           position: 'relative',
-          width: '100vw',
+          width: '100%',
           height: '100vh',
           backgroundColor: 'blue',
         }}
@@ -42,7 +42,7 @@ export const useIO = () => {
       <div
         style={{
           position: 'relative',
-          width: '100vw',
+          width: '100%',
           height: '100vh',
           backgroundColor: 'blue',
         }}
@@ -51,7 +51,7 @@ export const useIO = () => {
       <div
         style={{
           position: 'relative',
-          width: '100vw',
+          width: '100%',
           height: '100vh',
           backgroundColor: 'blue',
         }}
