@@ -20,7 +20,6 @@ describes.realWin(
     let doc;
     let html;
     let element;
-    let ampAudio;
 
     beforeEach(async () => {
       win = env.win;
