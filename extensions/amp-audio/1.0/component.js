@@ -27,7 +27,8 @@ export function AudioWithRef(
     'aria-labelledby': ariaLabelledby,
     artist = EMPTY_METADATA.artist,
     artwork = EMPTY_METADATA.artwork,
-    autoplay = false,
+    // TODO(dmanek): Use InOb hook for autoplay.
+    // autoplay = false,
     controlsList,
     loading = 'lazy',
     loop = false,
@@ -122,7 +123,8 @@ export function AudioWithRef(
         aria-describedby={ariaDescribedby}
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledby}
-        autoplay={autoplay}
+        // TODO(dmanek): Use InOb hook for autoplay.
+        // autoplay={autoplay}
         controls // Force controls otherwise there is no player UI.
         controlsList={controlsList}
         loading={loading}

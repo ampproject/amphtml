@@ -17,7 +17,8 @@ BaseElement['props'] = {
   'aria-labelledby': {attr: 'aria-labelledby', type: 'string'},
   artist: {attr: 'artist', type: 'string'},
   artwork: {attr: 'artwork', type: 'string'},
-  autoplay: {attr: 'autoplay', type: 'boolean', default: false},
+  // TODO(dmanek): Use InOb hook for autoplay.
+  // autoplay: {attr: 'autoplay', type: 'boolean'},
   controlsList: {attr: 'controlsList'},
   loop: {attr: 'loop', type: 'boolean', default: false},
   muted: {attr: 'muted', type: 'boolean', default: false},
