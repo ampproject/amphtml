@@ -19,7 +19,6 @@ BaseElement['props'] = {
   artwork: {attr: 'artwork', type: 'string', default: EMPTY_METADATA.artwork},
   autoplay: {attr: 'autoplay', type: 'boolean', default: false},
   controlsList: {attr: 'controlsList'},
-  loading: {attr: 'loading', type: 'string', default: 'lazy'},
   loop: {attr: 'loop', type: 'boolean', default: false},
   muted: {attr: 'muted', type: 'boolean', default: false},
   preload: {attr: 'preload'},
