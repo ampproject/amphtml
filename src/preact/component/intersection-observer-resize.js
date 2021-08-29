@@ -2,9 +2,7 @@ import {toWin} from '#core/window';
 
 import {useEffect} from '#preact';
 
-const ioForWindow = {};
-// const callbackMap = {};
-// const ioForWindow = new Map();
+const ioForWindow = new Map();
 const callbackMap = new Map();
 
 /**
@@ -25,29 +23,28 @@ export function useIntersectionObserver(ref, targetWin, callback) {
     if (!win) {
       return;
     }
-    // callbackMap[node] = callback;
     callbackMap.set(node, callback);
 
-    console.log(callbackMap);
-    ioForWindow[win] =
-      ioForWindow[win] ??
-      new win.IntersectionObserver((entries) => {
-        entries.reduceRight((accumulator, currentValue) => {
-          const {target} = currentValue;
+    if (ioForWindow.has(win)) {
+      ioForWindow.get(win).observe(node);
+    } else {
+      const io = new win.IntersectionObserver((entries) => {
+        entries.reduceRight((accumulator, entry) => {
+          const {target} = entry;
           if (!accumulator.has(target)) {
             accumulator.add(target);
-            console.log(callbackMap);
-            // callbackMap[target](currentValue);
-            callbackMap.get(target)(currentValue);
+            callbackMap.get(target)(entry);
           }
           return accumulator;
         }, new Set());
       });
-    ioForWindow[win].observe(node);
+      ioForWindow.set(win, io);
+      io.observe(node);
+    }
+
     return () => {
-      console.log('cleaning up:', node);
-      ioForWindow[win].unobserve(node);
-      delete callbackMap[node];
+      ioForWindow.get(win).unobserve(node);
+      callbackMap.delete(node);
     };
-  }, [callback]);
+  }, [callback, ref, targetWin]);
 }
