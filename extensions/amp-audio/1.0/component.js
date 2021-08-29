@@ -30,6 +30,7 @@ export function AudioWithRef(
     loading = 'lazy',
     loop = false,
     muted = false,
+    onError,
     onPause,
     onPlaying,
     preload,
@@ -127,6 +128,7 @@ export function AudioWithRef(
         loading={loading}
         loop={loop}
         muted={muted}
+        onError={onError}
         onPause={pauseCallback}
         onPlaying={playingCallback}
         preload={preload}
