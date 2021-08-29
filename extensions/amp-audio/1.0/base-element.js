@@ -2,8 +2,6 @@ import {PreactBaseElement} from '#preact/base-element';
 
 import {Audio} from './component';
 
-import {EMPTY_METADATA} from '../../../src/mediasession-helper';
-
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
@@ -11,7 +9,7 @@ BaseElement['Component'] = Audio;
 
 /** @override */
 BaseElement['props'] = {
-  album: {attr: 'album', type: 'string', default: EMPTY_METADATA.album},
+  album: {attr: 'album', type: 'string'},
   'aria-describedby': {attr: 'aria-describedby', type: 'string'},
   'aria-label': {attr: 'aria-label', type: 'string'},
   'aria-labelledby': {attr: 'aria-labelledby', type: 'string'},
@@ -25,7 +23,7 @@ BaseElement['props'] = {
   preload: {attr: 'preload'},
   sources: {selector: 'source', single: false, clone: true},
   src: {attr: 'src'},
-  title: {attr: 'title', type: 'string', default: EMPTY_METADATA.title},
+  title: {attr: 'title', type: 'string'},
 };
 
 /** @override */

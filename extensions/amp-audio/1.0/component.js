@@ -9,10 +9,7 @@ import {
 import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 
-import {
-  EMPTY_METADATA,
-  setMediaSession,
-} from '../../../src/mediasession-helper';
+import {setMediaSession} from '../../../src/mediasession-helper';
 
 /**
  * @param {!AudioDef.Props} props
@@ -21,12 +18,12 @@ import {
  */
 export function AudioWithRef(
   {
-    album = EMPTY_METADATA.album,
+    album = '',
     'aria-describedby': ariaDescribedby,
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledby,
-    artist = EMPTY_METADATA.artist,
-    artwork = EMPTY_METADATA.artwork,
+    artist = '',
+    artwork = '',
     // TODO(dmanek): Use InOb hook for autoplay.
     // autoplay = false,
     controlsList,
@@ -38,7 +35,7 @@ export function AudioWithRef(
     preload,
     sources,
     src,
-    title = EMPTY_METADATA.title,
+    title = '',
     ...rest
   },
   ref
