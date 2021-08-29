@@ -20,8 +20,8 @@ BaseElement['props'] = {
   // TODO(dmanek): Use InOb hook for autoplay.
   // autoplay: {attr: 'autoplay', type: 'boolean'},
   controlsList: {attr: 'controlsList'},
-  loop: {attr: 'loop', type: 'boolean', default: false},
-  muted: {attr: 'muted', type: 'boolean', default: false},
+  loop: {attr: 'loop', type: 'boolean'},
+  muted: {attr: 'muted', type: 'boolean'},
   preload: {attr: 'preload'},
   sources: {selector: 'source', single: false, clone: true},
   src: {attr: 'src'},
