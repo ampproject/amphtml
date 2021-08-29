@@ -93,7 +93,7 @@ describes.realWin(
 
       expect(audio.tagName).to.equal('AUDIO');
       expect(audio.getAttribute('src')).to.equal('audio.mp3');
-      expect(audio.hasAttribute('controls')).to.be.true;
+      expect(audio).to.have.attribute('controls');
       expect(element.style.width).to.be.equal('300px');
       expect(element.style.height).to.be.equal('30px');
     });
@@ -187,12 +187,12 @@ describes.realWin(
       expect(element.getAttribute('height')).to.be.equal('53');
       expect(element.offsetWidth).to.be.greaterThan(1);
       expect(element.offsetHeight).to.be.greaterThan(1);
-      expect(audio.hasAttribute('controls')).to.be.true;
-      expect(audio.hasAttribute('autoplay')).to.be.true;
+      expect(audio).to.have.attribute('controls');
+      expect(audio).to.have.attribute('autoplay');
       expect(audio.muted).to.be.true;
-      expect(audio.hasAttribute('preload')).to.be.true;
-      expect(audio.hasAttribute('loop')).to.be.true;
-      expect(audio.hasAttribute('src')).to.be.false;
+      expect(audio).to.have.attribute('preload');
+      expect(audio).to.have.attribute('loop');
+      expect(audio).to.not.have.attribute('src');
       expect(audio.childNodes[0].tagName).to.equal('SOURCE');
       expect(audio.childNodes[0].getAttribute('src')).to.equal('audio.mp3');
       expect(audio.childNodes[1].tagName).to.equal('SOURCE');
