@@ -8,6 +8,7 @@
  * </amp-story-page>
  * </code>
  */
+import {isAutoplaySupported, tryPlay} from '#core/dom/video';
 import {
   AFFILIATE_LINK_SELECTOR,
   AmpStoryAffiliateLink,
@@ -53,7 +54,6 @@ import {getLogEntries} from './logging';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '#core/dom/static-template';
-import {isAutoplaySupported} from '#core/dom/video';
 import {isExperimentOn} from '#experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '../../../src/event-helper';
@@ -1028,7 +1028,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   playMedia_(mediaPool, mediaEl) {
     if (this.isBotUserAgent_) {
-      mediaEl.play();
+      tryPlay(mediaEl);
       return Promise.resolve();
     } else {
       return this.loadPromise(mediaEl).then(
@@ -1151,7 +1151,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       mediaEl.muted = false;
       mediaEl.removeAttribute('muted');
       if (mediaEl.tagName === 'AUDIO' && mediaEl.paused) {
-        mediaEl.play();
+        tryPlay(mediaEl);
       }
       return Promise.resolve();
     } else {

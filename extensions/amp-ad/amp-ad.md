@@ -461,6 +461,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Teads](../../ads/vendors/teads.md)
 -   [torimochi](../../ads/vendors/torimochi.md)
 -   [Tracdelight](../../ads/vendors/tracdelight.md)
+-   [TrafficStars](../../ads/vendors/trafficstars.md)
 -   [TripleLift](../../ads/vendors/triplelift.md)
 -   [Trugaze](../../ads/vendors/trugaze.md)
 -   [UZOU](../../ads/vendors/uzou.md)
