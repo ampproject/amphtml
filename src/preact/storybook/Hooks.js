@@ -16,15 +16,14 @@ function Component({prop}) {
   const ref = useRef(null);
   const ioCallback = useCallback(
     (entry) => {
-      console.log(entry);
       setText(`is intersecting for ${prop}: ${entry.isIntersecting}`);
     },
     [prop]
   );
   useIntersectionObserver(
     ref,
-    toWin(ref.current?.ownerDocument?.defaultView),
-    ioCallback
+    ioCallback,
+    toWin(ref.current?.ownerDocument?.defaultView)
   );
   return <div ref={ref}>{text}</div>;
 }

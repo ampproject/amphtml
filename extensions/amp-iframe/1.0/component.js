@@ -112,8 +112,8 @@ export function Iframe({
 
   useIntersectionObserver(
     iframeRef,
-    iframeRef.current?.ownerDocument?.defaultView,
-    inViewportCallback
+    inViewportCallback,
+    iframeRef.current?.ownerDocument?.defaultView
   );
 
   const contentProps = useMemo(

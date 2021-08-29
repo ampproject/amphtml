@@ -9,10 +9,10 @@ const callbackMap = new Map();
  * Uses a shared IntersectionObserver per window instance to observe the given `ref`.
  *
  * @param {{current: Element}} ref
- * @param {?Window} targetWin
  * @param {function(IntersectionObserverEntry)} callback
+ * @param {?Window} targetWin
  */
-export function useIntersectionObserver(ref, targetWin, callback) {
+export function useIntersectionObserver(ref, callback, targetWin = null) {
   useEffect(() => {
     const node = ref.current;
     if (!node) {

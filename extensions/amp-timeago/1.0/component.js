@@ -56,8 +56,8 @@ export function Timeago({
   };
   useIntersectionObserver(
     ref,
-    toWin(ref.current?.ownerDocument?.defaultView),
-    inViewportCallback
+    inViewportCallback,
+    toWin(ref.current?.ownerDocument?.defaultView)
   );
 
   useResourcesNotify();
