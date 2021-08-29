@@ -66,7 +66,8 @@ describes.realWin('Audio preact component v1.0', {}, (env) => {
     expect(component.prop('controls')).to.be.true;
 
     const audio = component.find('audio');
-    expect(audio.prop('autoplay')).not.to.be.undefined;
+    // TODO(dmanek): Use InOb hook for autoplay.
+    // expect(audio.prop('autoplay')).not.to.be.undefined;
     expect(audio.prop('muted')).not.to.be.undefined;
     expect(audio.getDOMNode().muted).not.to.be.undefined;
     expect(audio.prop('preload')).not.to.be.undefined;
