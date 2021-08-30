@@ -1,11 +1,10 @@
+import {isExperimentOn} from '#experiments';
 import {createElementWithAttributes, iterateCursor} from '#core/dom';
 import {dict, map} from '#core/types/object';
-
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {CSS as ctaButtonCSS} from '../../../build/amp-story-auto-ads-cta-button-0.1.css';
 import {dev, user} from '../../../src/log';
 import {openWindowDialog} from '../../../src/open-window-dialog';
-import {isExperimentOn} from '#experiments';
 import {assertHttpsUrl} from '../../../src/url';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
@@ -193,6 +192,63 @@ export function handleAttributionClick(win, href) {
 
 /**
  * @param {!Document} doc
+ * @param {!StoryAdUIMetadata} uiMetadata
+ * @param {!Element} container
+ * @return {?Element}
+ */
+function createPageOutlink_(doc, uiMetadata, container) {
+  const pageOutlink = doc.createElement('amp-story-page-outlink');
+  pageOutlink.setAttribute('layout', 'nodisplay');
+
+  const pageAnchorTag = doc.createElement('a');
+  pageAnchorTag.href = uiMetadata[A4AVarNames.CTA_URL];
+  pageAnchorTag.textContent = uiMetadata[A4AVarNames.CTA_TYPE];
+
+  pageOutlink.appendChild(pageAnchorTag);
+
+  for (const pageOutlinkLayerVarName of PageOutlinkLayerVarNames) {
+    if (uiMetadata[pageOutlinkLayerVarName]) {
+      pageOutlink.setAttribute(
+        pageOutlinkLayerVarName,
+        uiMetadata[pageOutlinkLayerVarName]
+      );
+    }
+  }
+
+  pageOutlink.className = 'i-amphtml-story-page-outlink-container';
+
+  container.appendChild(pageOutlink);
+  return container;
+}
+
+/**
+ * @param {!Element} a
+ * @param {!Document} doc
+ * @param {!Element} container
+ * @return {?Element}
+ */
+function createCtaLayer_(a, doc, container) {
+  const ctaLayer = doc.createElement('amp-story-cta-layer');
+  ctaLayer.className = 'i-amphtml-cta-container';
+
+  const linkRoot = createElementWithAttributes(
+    doc,
+    'div',
+    dict({
+      'class': 'i-amphtml-story-ad-link-root',
+      'role': 'button',
+    })
+  );
+
+  createShadowRootWithStyle(linkRoot, a, ctaButtonCSS);
+
+  ctaLayer.appendChild(linkRoot);
+  container.appendChild(ctaLayer);
+  return a;
+}
+
+/**
+ * @param {!Document} doc
  * @param {!./story-ad-button-text-fitter.ButtonTextFitter} buttonFitter
  * @param {!Element} container
  * @param {!StoryAdUIMetadata} uiMetadata
@@ -233,44 +289,9 @@ export function createCta(doc, buttonFitter, container, uiMetadata) {
     }
 
     if (isExperimentOn(doc.defaultView, 'amp-story-page-outlink')) {
-      const pageOutlink = doc.createElement('amp-story-page-outlink');
-      pageOutlink.setAttribute('layout', 'nodisplay');
-
-      const pageAnchorTag = doc.createElement('a');
-      pageAnchorTag.setAttribute('href', 'https://www.google.com');
-      pageOutlink.appendChild(pageAnchorTag);
-
-      for (const pageOutlinkLayerVarName of PageOutlinkLayerVarNames) {
-        if (uiMetadata[pageOutlinkLayerVarName]) {
-          pageOutlink.setAttribute(
-            pageOutlinkLayerVarName,
-            uiMetadata[pageOutlinkLayerVarName]
-          );
-        }
-      }
-
-      pageOutlink.className = 'i-amphtml-story-page-outlink-container';
-
-      container.appendChild(pageOutlink);
-      return container;
+      return createPageOutlink_(doc, uiMetadata, container);
     } else {
-      const ctaLayer = doc.createElement('amp-story-cta-layer');
-      ctaLayer.className = 'i-amphtml-cta-container';
-
-      const linkRoot = createElementWithAttributes(
-        doc,
-        'div',
-        dict({
-          'class': 'i-amphtml-story-ad-link-root',
-          'role': 'button',
-        })
-      );
-
-      createShadowRootWithStyle(linkRoot, a, ctaButtonCSS);
-
-      ctaLayer.appendChild(linkRoot);
-      container.appendChild(ctaLayer);
-      return a;
+      return createCtaLayer_(a, doc, container);
     }
   });
 }

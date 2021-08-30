@@ -233,6 +233,8 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
         'cta-image':
           '/examples/visual-tests/picsum.photos/image1068_300x169.jpg',
         'theme': 'custom',
+        [A4AVarNames.CTA_TYPE]: 'SHOP',
+        [A4AVarNames.CTA_URL]: 'https://www.cats.com',
       };
       return createCta(
         doc,
@@ -256,6 +258,10 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
           '/examples/visual-tests/picsum.photos/image1068_300x169.jpg'
         );
         expect(containerElem.getAttribute('theme')).to.equal('custom');
+        expect(containerElem.children[0].href).to.equal(
+          'https://www.cats.com/'
+        );
+        expect(containerElem.children[0].textContent).to.equal('SHOP');
       });
     });
   });
@@ -271,6 +277,8 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
     it('returns the created anchor for the page outlink', () => {
       const metadata = {
         'theme': 'light',
+        [A4AVarNames.CTA_TYPE]: 'SHOP',
+        [A4AVarNames.CTA_URL]: 'https://www.cats.com',
       };
       return createCta(
         doc,
@@ -284,6 +292,10 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
         );
         expect(containerElem).to.exist;
         expect(containerElem.getAttribute('theme')).to.equal('light');
+        expect(containerElem.children[0].href).to.equal(
+          'https://www.cats.com/'
+        );
+        expect(containerElem.children[0].textContent).to.equal('SHOP');
       });
     });
   });
@@ -299,6 +311,8 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
     it('returns the created anchor for the page outlink', () => {
       const metadata = {
         'theme': 'dark',
+        [A4AVarNames.CTA_TYPE]: 'SHOP',
+        [A4AVarNames.CTA_URL]: 'https://www.cats.com',
       };
       return createCta(
         doc,
@@ -312,6 +326,10 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
         );
         expect(containerElem).to.exist;
         expect(containerElem.getAttribute('theme')).to.equal('dark');
+        expect(containerElem.children[0].href).to.equal(
+          'https://www.cats.com/'
+        );
+        expect(containerElem.children[0].textContent).to.equal('SHOP');
       });
     });
   });
@@ -329,6 +347,8 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
         'theme': 'dark',
         'cta-accent-color': '#FF00FF',
         'cta-accent-element': 'text',
+        [A4AVarNames.CTA_TYPE]: 'SHOP',
+        [A4AVarNames.CTA_URL]: 'https://www.cats.com',
       };
       return createCta(
         doc,
@@ -342,6 +362,10 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
         );
         expect(containerElem).to.exist;
         expect(containerElem.getAttribute('theme')).to.equal('dark');
+        expect(containerElem.children[0].href).to.equal(
+          'https://www.cats.com/'
+        );
+        expect(containerElem.children[0].textContent).to.equal('SHOP');
       });
     });
   });
