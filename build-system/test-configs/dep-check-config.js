@@ -214,6 +214,9 @@ exports.rules = [
       'extensions/amp-lightbox-gallery/1.0/base-element.js->extensions/amp-lightbox/1.0/component.jss.js',
       'extensions/amp-lightbox-gallery/1.0/base-element.js->extensions/amp-base-carousel/1.0/component.jss.js',
 
+      // <amp-date-display> versions share these date format helpers
+      'extensions/amp-date-display/**->extensions/amp-date-display/format.js',
+
       // Facebook components
       'extensions/amp-facebook/1.0/amp-facebook.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
@@ -424,7 +427,6 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/string-starts-with.js',
       'src/amp.js->src/polyfills/index.js',
       'src/polyfills/index.js->src/polyfills/abort-controller.js',
-      'src/polyfills/index.js->src/polyfills/domtokenlist.js',
       'src/polyfills/index.js->src/polyfills/document-contains.js',
       'src/polyfills/index.js->src/polyfills/fetch.js',
       'src/polyfills/index.js->src/polyfills/get-bounding-client-rect.js',
@@ -443,7 +445,6 @@ exports.rules = [
       'src/friendly-iframe-embed.js->src/polyfills/abort-controller.js',
       'src/friendly-iframe-embed.js->src/polyfills/custom-elements.js',
       'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
-      'src/friendly-iframe-embed.js->src/polyfills/domtokenlist.js',
       'src/friendly-iframe-embed.js->src/polyfills/intersection-observer.js',
       'src/friendly-iframe-embed.js->src/polyfills/resize-observer.js',
     ],
