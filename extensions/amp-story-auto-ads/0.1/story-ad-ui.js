@@ -1,5 +1,6 @@
 import {createElementWithAttributes, iterateCursor} from '#core/dom';
 import {dict, map} from '#core/types/object';
+
 import {isExperimentOn} from '#experiments';
 
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
