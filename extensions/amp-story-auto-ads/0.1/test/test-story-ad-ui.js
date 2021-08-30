@@ -1,4 +1,6 @@
+import {toggleExperiment} from '#experiments';
 import {ButtonTextFitter} from '../story-ad-button-text-fitter';
+import {expect} from 'chai';
 import {
   A4AVarNames,
   createCta,
@@ -7,9 +9,6 @@ import {
   maybeCreateAttribution,
   validateCtaMetadata,
 } from '../story-ad-ui';
-import {ButtonTextFitter} from '../story-ad-button-text-fitter';
-import {toggleExperiment} from '#experiments';
-import {expect} from 'chai';
 
 describes.realWin('story-ad-ui', {amp: true}, (env) => {
   let win;
