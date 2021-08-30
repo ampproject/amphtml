@@ -419,7 +419,8 @@ async function watchExtension(
 
   const cssDeps = `${extDir}/**/*.css`;
   const jisonDeps = `${extDir}/**/*.jison`;
-  watch([cssDeps, jisonDeps]).on(
+  const ignored = /dist/; //should not watch npm dist folders.
+  watch([cssDeps, jisonDeps], {ignored}).on(
     'change',
     debounce(watchFunc, watchDebounceDelay)
   );
