@@ -74,6 +74,7 @@
   display: block !important;
   font-family: var(--i-amphtml-draggable-drawer-header-font-family) !important;
   font-size: var(--i-amphtml-draggable-drawer-header-font-size) !important;
+  /* font-weight: 200 !important; */
   overflow: hidden !important;
   position: absolute !important;
   text-align: center !important;
