@@ -389,6 +389,8 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
     element.getLayout = () => 'fixed';
     element.getLayoutBox = () => layoutBox;
     element.getLayoutSize = () => layoutSizeFromRect(layoutBox);
+    element.getIntersectionElementLayoutBox = () =>
+      layoutSizeFromRect(layoutBox);
     element.getIntersectionChangeEntry = () => {
       return {
         time: null,

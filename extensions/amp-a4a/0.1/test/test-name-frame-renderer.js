@@ -32,8 +32,8 @@ describes.realWin('NameFrameRenderer', realWinConfig, (env) => {
     containerElement = env.win.document.createElement('div');
     containerElement.setAttribute('height', 50);
     containerElement.setAttribute('width', 320);
+    containerElement.getIntersectionElementLayoutBox = () => ({});
     containerElement.getIntersectionChangeEntry = () => ({
-      time: null,
       boundingClientRect: {},
       rootBounds: {},
       intersectionRect: {},
