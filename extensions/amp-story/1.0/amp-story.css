@@ -416,7 +416,7 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
   padding: 0 !important;
 }
 
-amp-story-grid-layer[template="fill"] > * {
+[template="fill"] > * {
   bottom: 0 !important;
   height: auto !important;
   left: 0 !important;
@@ -426,17 +426,17 @@ amp-story-grid-layer[template="fill"] > * {
   width: auto !important;
 }
 
-amp-story-grid-layer[template="vertical"] {
+[template="vertical"] {
   grid-auto-flow: row !important;
   grid-template-columns: 100% !important;
 }
 
-amp-story-grid-layer[template="horizontal"] {
+[template="horizontal"] {
   grid-auto-flow: column !important;
   grid-template-rows: 100% !important;
 }
 
-amp-story-grid-layer[template="thirds"] {
+[template="thirds"] {
   height: 100% !important;
   grid-template-rows: 33% 33% 33% !important; /* `fr` is broken in Safari. */
   grid-template-areas: "upper-third"
@@ -444,7 +444,7 @@ amp-story-grid-layer[template="thirds"] {
                        "lower-third" !important;
 }
 
-amp-story-grid-layer[aspect-ratio], amp-story-grid-layer[preset] {
+[aspect-ratio], [preset] {
   margin: auto;
   width: var(--i-amphtml-story-layer-width, 100%);
   height: var(--i-amphtml-story-layer-height, 100%);
