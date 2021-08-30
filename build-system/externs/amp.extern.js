@@ -596,6 +596,9 @@ AmpElement.prototype.expand = function () {};
 /** */
 AmpElement.prototype.collapse = function () {};
 
+/** */
+AmpElement.prototype.getIntersectionElementLayoutBox = function () {};
+
 let Signals = class {};
 /**
  * @param {string} unusedName
