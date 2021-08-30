@@ -1,6 +1,5 @@
 import {toggleExperiment} from '#experiments';
 import {ButtonTextFitter} from '../story-ad-button-text-fitter';
-import {expect} from 'chai';
 import {
   A4AVarNames,
   createCta,
@@ -229,11 +228,11 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
 
     it('returns the created anchor for the page outlink', () => {
       const metadata = {
-        ['cta-accent-color']: '#FF00FF',
-        ['cta-accent-element']: 'text',
-        ['cta-image']:
+        'cta-accent-color': '#FF00FF',
+        'cta-accent-element': 'text',
+        'cta-image':
           '/examples/visual-tests/picsum.photos/image1068_300x169.jpg',
-        ['theme']: 'custom',
+        'theme': 'custom',
       };
       return createCta(
         doc,
@@ -271,7 +270,7 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
 
     it('returns the created anchor for the page outlink', () => {
       const metadata = {
-        ['theme']: 'light',
+        'theme': 'light',
       };
       return createCta(
         doc,
@@ -299,7 +298,7 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
 
     it('returns the created anchor for the page outlink', () => {
       const metadata = {
-        ['theme']: 'dark',
+        'theme': 'dark',
       };
       return createCta(
         doc,
@@ -327,9 +326,9 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
 
     it('returns the created anchor for the page outlink', () => {
       const metadata = {
-        ['theme']: 'dark',
-        ['cta-accent-color']: '#FF00FF',
-        ['cta-accent-element']: 'text',
+        'theme': 'dark',
+        'cta-accent-color': '#FF00FF',
+        'cta-accent-element': 'text',
       };
       return createCta(
         doc,

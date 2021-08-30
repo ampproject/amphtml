@@ -141,7 +141,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   });
 
   it('should call beforeVisible after layoutCallback resolves', async () => {
-    const spy = env.sandbox.spy(page, 'renderOpenAttachmentUI_');
+    const spy = env.sandbox.spy(page, 'beforeVisible');
     page.buildCallback();
     await page.layoutCallback();
     expect(spy).to.have.been.calledOnce;

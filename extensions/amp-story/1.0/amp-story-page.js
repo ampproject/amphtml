@@ -704,6 +704,15 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @return {!Promise} */
   beforeVisible() {
+    /*
+     * Note that this.renderOpenAttachmentUI_ is called twice,
+     * once in the layoutCallback, and once again in beforeVisible.
+     * This is to make sure that the page-outlink element is created and loaded properly
+     * and will display for the user(as the element may not be fully created / loaded during
+     * the beginning of the layout callback), the code will short circuit at the beginning
+     * of the function call if the element has not been created, so there are no almost drawbacks
+     * performance-wise to doing this operation. This fix was done to reduce developer code complexity.
+     */
     this.renderOpenAttachmentUI_();
     return this.maybeApplyFirstAnimationFrameOrFinish();
   }

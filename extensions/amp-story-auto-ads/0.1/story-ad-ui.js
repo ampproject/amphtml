@@ -39,7 +39,7 @@ export const A4AVarNames = {
   CTA_URL: 'cta-url',
 };
 
-/** @enum {string} */
+/** @type {Array<string>} */
 export const PageOutlinkLayerVarNames = [
   'cta-accent-color',
   'cta-accent-element',
