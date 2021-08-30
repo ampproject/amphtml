@@ -75,7 +75,6 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
 
     storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
 
-    expect(gridLayerEl).to.have.class('i-amphtml-story-grid-template-aspect');
     expect(
       parseInt(
         gridLayerEl.style.getPropertyValue('--i-amphtml-story-layer-width'),
@@ -96,7 +95,6 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
 
     storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
 
-    expect(gridLayerEl).to.have.class('i-amphtml-story-grid-template-aspect');
     expect(
       parseInt(
         gridLayerEl.style.getPropertyValue('--i-amphtml-story-layer-width'),
@@ -118,7 +116,6 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
 
     storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
 
-    expect(gridLayerEl).to.have.class('i-amphtml-story-grid-template-aspect');
     expect(
       parseInt(
         gridLayerEl.style.getPropertyValue('--i-amphtml-story-layer-width'),
@@ -147,8 +144,6 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
     await buildGridLayer();
 
     storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
-
-    expect(gridLayerEl).to.have.class('i-amphtml-story-grid-template-aspect');
   });
 
   it('should not add aspect-ratio attribute if preset passed is incorrect', async () => {
