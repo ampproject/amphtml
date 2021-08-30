@@ -104,8 +104,9 @@ describes.realWin(
     it('should resolve the first message before load', async () => {
       const tiktok = await getTiktokBuildOnly({height: '600'});
       const impl = await tiktok.getImpl();
+
       // ensure that loadPromise is never resolved
-      env.sandbox.stub(impl, 'loadPromise').returns(new Promise(() => {}));
+      const loadPromiseStub = env.sandbox.stub(impl, 'loadPromise');
       impl.layoutCallback();
 
       // ensure that resolver is set after layoutCallback
@@ -114,9 +115,8 @@ describes.realWin(
         impl,
         'resolveReceivedFirstMessage_'
       );
-
+      loadPromiseStub.resolves();
       impl.handleTiktokMessages_({data: JSON.stringify({height: 555})});
-
       expect(firstMessageStub).to.have.been.calledOnce;
     });
 
