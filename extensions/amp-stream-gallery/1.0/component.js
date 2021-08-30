@@ -1,19 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as Preact from '#preact';
 import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
 import {forwardRef} from '#preact/compat';
@@ -42,7 +26,7 @@ function StreamGalleryWithRef(props, ref) {
     arrowPrevAs = DefaultArrow,
     arrowNextAs = DefaultArrow,
     children,
-    className,
+    'class': className,
     extraSpace,
     maxItemWidth = Number.MAX_VALUE,
     minItemWidth = 1,
@@ -119,7 +103,7 @@ function StreamGalleryWithRef(props, ref) {
       advanceCount={Math.floor(visibleCount)}
       arrowPrevAs={arrowPrevAs}
       arrowNextAs={arrowNextAs}
-      className={objstr({
+      class={objstr({
         [className]: !!className,
         [classes.gallery]: true,
         [classes.extraSpace]: extraSpace === 'around',
@@ -146,18 +130,18 @@ export {StreamGallery};
 function DefaultArrow({
   'aria-disabled': ariaDisabled,
   by,
-  className,
+  'class': className,
   disabled,
   onClick,
   outsetArrows,
 }) {
   const classes = useStyles();
   return (
-    <div className={className}>
+    <div class={className}>
       <button
         aria-disabled={ariaDisabled}
         aria-hidden="true"
-        className={objstr({
+        class={objstr({
           [classes.arrow]: true,
           [classes.arrowPrev]: by < 0,
           [classes.arrowNext]: by > 0,

@@ -1,19 +1,3 @@
-<!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # Testing in AMP HTML
 
 This document provides details for testing and building your AMP code.
@@ -111,7 +95,6 @@ Before running these commands, make sure you have Node.js installed. For instruc
 | `amp [unit\|integration] --safari`                       | Runs tests in Safari.                                                                                                                                                                                                                                  |
 | `amp [unit\|integration] --firefox`                      | Runs tests in Firefox.                                                                                                                                                                                                                                 |
 | `amp [unit\|integration] --edge`                         | Runs tests in Edge.                                                                                                                                                                                                                                    |
-| `amp [unit\|integration] --ie`                           | Runs tests in Internet Explorer.                                                                                                                                                                                                                       |
 | `amp [unit\|integration] --files=<test-files-path-glob>` | Runs specific test files.                                                                                                                                                                                                                              |
 | `amp [unit\|integration] --testnames`                    | Lists the name of each test being run, and prints a summary at the end.                                                                                                                                                                                |
 | `amp serve`                                              | Serves content from the repository root at http://localhost:8000/. Examples live in http://localhost:8000/examples/. Serves unminified binaries by default.                                                                                            |

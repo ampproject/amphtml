@@ -1,23 +1,7 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const argv = require('minimist')(process.argv.slice(2));
 const experimentsConfig = require('../global-configs/experiments-config.json');
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const {clean} = require('../tasks/clean');
 const {cyan, green, red, yellow} = require('./colors');
 const {default: ignore} = require('ignore');
@@ -65,7 +49,7 @@ function getExperimentConfig(experiment) {
  * @return {!Array<string>}
  */
 function getFilesChanged(globs, options) {
-  const allFiles = globby.sync(globs, options);
+  const allFiles = fastGlob.sync(globs, options).map(String);
   return gitDiffNameOnlyMain().filter((changedFile) => {
     return fs.existsSync(changedFile) && allFiles.includes(changedFile);
   });
@@ -95,12 +79,11 @@ function getFilesFromArgv() {
   if (!argv.files) {
     return [];
   }
-  // TODO(#30223): globby only takes posix globs. Find a Windows alternative.
   const toPosix = (str) => str.replace(/\\\\?/g, '/');
   const globs = Array.isArray(argv.files) ? argv.files : argv.files.split(',');
   const allFiles = [];
   for (const glob of globs) {
-    const files = globby.sync(toPosix(glob.trim()));
+    const files = fastGlob.sync(toPosix(glob.trim()));
     if (files.length == 0) {
       log(red('ERROR:'), 'Argument', cyan(glob), 'matched zero files.');
       throw new Error('Argument matched zero files.');
@@ -149,7 +132,7 @@ function getFilesToCheck(globs, options = {}, ignoreFile = undefined) {
     }
     return logFiles(filesChanged);
   }
-  return ignored.filter(globby.sync(globs, options));
+  return ignored.filter(fastGlob.sync(globs, options).map(String));
 }
 
 /**

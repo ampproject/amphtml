@@ -1,18 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
@@ -21,6 +6,7 @@ const {cyan, green, red} = require('../common/colors');
 const {decode} = require('sourcemap-codec');
 const {execOrDie} = require('../common/exec');
 const {log} = require('../common/logging');
+const {shouldUseClosure} = require('./helpers');
 
 // Compile related constants
 const distWithSourcemapsCmd = 'amp dist --core_runtime_only --full_sourcemaps';
@@ -142,9 +128,22 @@ function checkSourcemapMappings(sourcemapJson, map) {
     '.';
 
   // Mapping related constants
-  const expectedFirstLine = map.includes('mjs')
-    ? {file: 'src/core/mode/version.js', code: 'function version() {'}
-    : {file: 'src/core/mode/prod.js', code: 'export function isProd() {'};
+  let expectedFirstLine = map.includes('mjs')
+    ? {
+        file: 'src/polyfills/abort-controller.js',
+        code: 'class AbortController {',
+      }
+    : {
+        file: 'node_modules/@babel/runtime/helpers/esm/createClass.js',
+        code: 'function _defineProperties(target, props) {',
+      };
+
+  // TODO(samouri): remove branching once we decide for or against closure
+  if (shouldUseClosure()) {
+    expectedFirstLine = map.includes('mjs')
+      ? {file: 'src/core/mode/version.js', code: 'function version() {'}
+      : {file: 'src/core/mode/prod.js', code: 'export function isProd() {'};
+  }
 
   if (firstLineFile != expectedFirstLine.file) {
     log(red('ERROR:'), 'Found mapping for incorrect file.');

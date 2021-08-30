@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-/** @const */
-export const ADS_INITIAL_INTERSECTION_EXP = {
-  id: 'ads-initialIntersection',
-  control: '31060065',
-  experiment: '31060066',
-};
+// src/polyfills.js must be the first import.
+import '#3p/polyfills';
+
+import {register} from '#3p/3p';
+import {draw3p, init} from '#3p/integration-lib';
+
+import {avantisvideo} from '#ads/vendors/avantisvideo';
+
+init(window);
+register('avantisvideo', avantisvideo);
+
+window.draw3p = draw3p;

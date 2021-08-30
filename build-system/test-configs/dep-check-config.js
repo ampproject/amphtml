@@ -1,18 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 /*eslint "max-len": 0*/
@@ -229,6 +214,9 @@ exports.rules = [
       'extensions/amp-lightbox-gallery/1.0/base-element.js->extensions/amp-lightbox/1.0/component.jss.js',
       'extensions/amp-lightbox-gallery/1.0/base-element.js->extensions/amp-base-carousel/1.0/component.jss.js',
 
+      // <amp-date-display> versions share these date format helpers
+      'extensions/amp-date-display/**->extensions/amp-date-display/format.js',
+
       // Facebook components
       'extensions/amp-facebook/1.0/amp-facebook.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
@@ -368,6 +356,8 @@ exports.rules = [
         'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/cookie-writer.js->' +
         'src/service/cid-impl.js',
+      'extensions/amp-consent/0.1/consent-state-manager.js->' +
+        'src/service/cid-impl.js',
       'extensions/amp-consent/0.1/cookie-writer.js->' +
         'src/service/cid-impl.js',
       'extensions/amp-next-page/0.1/next-page-service.js->' +
@@ -437,7 +427,6 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/string-starts-with.js',
       'src/amp.js->src/polyfills/index.js',
       'src/polyfills/index.js->src/polyfills/abort-controller.js',
-      'src/polyfills/index.js->src/polyfills/domtokenlist.js',
       'src/polyfills/index.js->src/polyfills/document-contains.js',
       'src/polyfills/index.js->src/polyfills/fetch.js',
       'src/polyfills/index.js->src/polyfills/get-bounding-client-rect.js',
@@ -456,7 +445,6 @@ exports.rules = [
       'src/friendly-iframe-embed.js->src/polyfills/abort-controller.js',
       'src/friendly-iframe-embed.js->src/polyfills/custom-elements.js',
       'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
-      'src/friendly-iframe-embed.js->src/polyfills/domtokenlist.js',
       'src/friendly-iframe-embed.js->src/polyfills/intersection-observer.js',
       'src/friendly-iframe-embed.js->src/polyfills/resize-observer.js',
     ],

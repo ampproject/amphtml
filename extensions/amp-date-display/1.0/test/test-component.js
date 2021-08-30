@@ -1,19 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {mount} from 'enzyme';
 
 import * as Preact from '#preact';
@@ -191,6 +175,13 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
     expect(data.second).to.equal('6');
     expect(data.secondTwoDigit).to.equal('06');
     expect(data.dayPeriod).to.equal('am');
+    // default timezone is affected by running platform, so we just verify
+    // that both timezone values are present, and that they differ.
+    // (Another set of tests below verify that the timezone is labelled
+    // properly in different locales.)
+    expect(data.timeZoneName).to.be.ok;
+    expect(data.timeZoneNameShort).to.be.ok;
+    expect(data.timeZoneName).to.not.equal(data.timeZoneNameShort);
   });
 
   it('provides variables in Czech when "cs" locale is passed', () => {
@@ -209,6 +200,8 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
     expect(data.monthNameShort).to.equal('úno');
     expect(data.dayName).to.equal('sobota');
     expect(data.dayNameShort).to.equal('so');
+    expect(data.timeZoneName).to.equal('Koordinovaný světový čas');
+    expect(data.timeZoneNameShort).to.equal('UTC');
   });
 
   it('shows custom locale string when localeOptions is passed', () => {
@@ -226,6 +219,41 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
 
     expect(data.localeString).to.equal('上午4:05');
   });
+
+  const expectedTimeZoneNamesAmericaNewYork = {
+    'en': {
+      timeZoneName: 'Eastern Standard Time',
+      timeZoneNameShort: 'EST',
+    },
+    'ja-JP': {
+      timeZoneName: 'アメリカ東部標準時',
+      timeZoneNameShort: 'GMT-5',
+    },
+    'ar-EG': {
+      timeZoneName: 'التوقيت الرسمي الشرقي لأمريكا الشمالية',
+      timeZoneNameShort: 'غرينتش-٥',
+    },
+  };
+  for (const locale in expectedTimeZoneNamesAmericaNewYork) {
+    const {timeZoneName, timeZoneNameShort} =
+      expectedTimeZoneNamesAmericaNewYork[locale];
+    it(`shows timeZoneName and timeZoneNameShort with specified TZ (${locale})`, () => {
+      const jsx = (
+        <DateDisplay
+          render={render}
+          datetime={Date.parse('2001-02-03T04:05:06.007Z')}
+          locale={locale}
+          localeOptions={{
+            timeZone: 'America/New_York',
+          }}
+        />
+      );
+      const wrapper = mount(jsx);
+      const data = JSON.parse(wrapper.text());
+      expect(data.timeZoneName).to.equal(timeZoneName);
+      expect(data.timeZoneNameShort).to.equal(timeZoneNameShort);
+    });
+  }
 
   describe('invalid data-options-* settings', () => {
     it('throws error when invalid localeOptions is passed', () => {

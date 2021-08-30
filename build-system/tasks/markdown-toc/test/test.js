@@ -1,19 +1,4 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const path = require('path');
 const test = require('ava');
 const {headerRegExpForTesting, overrideToc, overrideTocGlob} = require('../');
@@ -38,7 +23,9 @@ test('README.md includes correct header', async (t) => {
 });
 
 test('overrideToc ./all-are-complete', async (t) => {
-  for (const filename of await globby(`${dirname}/all-are-complete/**/*.md`)) {
+  for (const filename of await fastGlob(
+    `${dirname}/all-are-complete/**/*.md`
+  )) {
     const content = await readFile(filename, 'utf-8');
     t.deepEqual(await overrideToc(content), content);
   }
