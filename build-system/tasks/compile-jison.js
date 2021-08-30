@@ -1,7 +1,7 @@
 'use strict';
 
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const jison = require('jison');
 const path = require('path');
 const {jisonPath} = require('../test-configs/config');
@@ -28,7 +28,7 @@ const imports = new Map([
  * @return {!Promise}
  */
 async function compileJison(searchDir = jisonPath) {
-  const jisonFiles = await globby(searchDir);
+  const jisonFiles = await fastGlob(searchDir);
   await Promise.all(
     jisonFiles.map((jisonFile) => {
       const jsFile = path.basename(jisonFile, '.jison');

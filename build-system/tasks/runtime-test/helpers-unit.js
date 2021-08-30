@@ -1,7 +1,7 @@
 'use strict';
 
+const fastGlob = require('fast-glob');
 const fs = require('fs');
-const globby = require('globby');
 const listImportsExports = require('list-imports-exports');
 const minimatch = require('minimatch');
 const path = require('path');
@@ -204,7 +204,7 @@ function unitTestsToRun() {
    * @return {string[]}
    */
   function getTestsFor(srcFiles) {
-    const allUnitTests = globby.sync(unitTestPaths);
+    const allUnitTests = fastGlob.sync(unitTestPaths);
     return allUnitTests.filter((testFile) => {
       return shouldRunTest(testFile, srcFiles);
     });

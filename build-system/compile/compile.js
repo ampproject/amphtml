@@ -1,8 +1,8 @@
 'use strict';
 const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const path = require('path');
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
@@ -195,8 +195,8 @@ function generateCompilerOptions(outputFilename, options) {
       'third_party/web-animations-externs/web_animations.js',
       'third_party/react-externs/externs.js',
       'third_party/moment/moment.extern.js',
-      ...globby.sync('src/core{,/**}/*.extern.js'),
-      ...globby.sync('build-system/externs/*.extern.js'),
+      ...fastGlob.sync('src/core{,/**}/*.extern.js'),
+      ...fastGlob.sync('build-system/externs/*.extern.js'),
       ...externs,
     ];
   }
@@ -405,7 +405,7 @@ async function compile(
     ? entryModuleFilenames.concat(options.extraGlobs || [])
     : getSrcs(entryModuleFilenames, options);
   const transformedSrcFiles = await Promise.all(
-    globby
+    fastGlob
       .sync(srcs)
       .map((src) => preClosureBabel(src, outputFilename, options))
   );

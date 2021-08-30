@@ -1,7 +1,7 @@
 'use strict';
 
+const fastGlob = require('fast-glob');
 const fs = require('fs');
-const globby = require('globby');
 const srcGlobs = require('../test-configs/config').presubmitGlobs;
 const {
   forbiddenTermsGlobal,
@@ -47,7 +47,7 @@ function hasForbiddenTerms(srcFile) {
  */
 async function presubmit() {
   let forbiddenFound = false;
-  const srcFiles = await globby(srcGlobs);
+  const srcFiles = await fastGlob(srcGlobs);
   for (const srcFile of srcFiles) {
     forbiddenFound = hasForbiddenTerms(srcFile) || forbiddenFound;
   }

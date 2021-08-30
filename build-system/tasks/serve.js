@@ -2,7 +2,7 @@
 
 const connect = require('gulp-connect');
 const debounce = require('../common/debounce');
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const header = require('connect-header');
 const minimist = require('minimist');
 const morgan = require('morgan');
@@ -57,7 +57,7 @@ let url = null;
 let quiet = !!argv.quiet;
 
 // Used for live reload.
-const serverFiles = globby.sync([
+const serverFiles = fastGlob.sync([
   'build-system/server/**',
   `!${SERVER_TRANSFORM_PATH}/dist/**`,
 ]);

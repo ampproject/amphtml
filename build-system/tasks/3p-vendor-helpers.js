@@ -1,5 +1,5 @@
 const debounce = require('../common/debounce');
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const {cyan, red} = require('../common/colors');
 const {endBuildStep} = require('./helpers');
 const {esbuildCompile} = require('./helpers');
@@ -104,7 +104,7 @@ function generateBundles() {
  * @return {!Array<string>}
  */
 function listVendors() {
-  const filesToBuild = globby.sync(SRCPATH);
+  const filesToBuild = fastGlob.sync(SRCPATH);
   const srcMatcher = /^3p\/vendors\/(.*)\.js/;
   const results = [];
 

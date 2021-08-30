@@ -1,7 +1,7 @@
 'use strict';
 
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const path = require('path');
 const {
   ciPullRequestSha,
@@ -245,7 +245,7 @@ function storeBuildToWorkspace_(containerDirectory) {
       }
     }
     // Bento components are compiled inside the extension source file.
-    for (const componentFile of globby.sync('extensions/*/?.?/dist/*.js')) {
+    for (const componentFile of fastGlob.sync('extensions/*/?.?/dist/*.js')) {
       fs.ensureDirSync(
         `/tmp/workspace/builds/${containerDirectory}/${path.dirname(
           componentFile

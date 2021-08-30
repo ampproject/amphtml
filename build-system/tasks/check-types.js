@@ -1,5 +1,5 @@
 const argv = require('minimist')(process.argv.slice(2));
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
@@ -135,12 +135,12 @@ const TYPE_CHECK_TARGETS = {
       'ads/inabox/inabox-host.js',
       'src/web-worker/web-worker.js',
     ],
-    extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
+    extraGlobs: ['src/inabox/*.js', '!node_modules/preact/**'],
     warningLevel: 'QUIET',
   },
   'extensions': () => ({
     entryPoints: getExtensionSrcPaths(),
-    extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
+    extraGlobs: ['src/inabox/*.js', '!node_modules/preact/**'],
     warningLevel: 'QUIET',
   }),
   'integration': {
@@ -204,7 +204,7 @@ async function typeCheck(targetName) {
 
   // If srcGlobs and externGlobs are defined, determine the externs/extraGlobs
   if (srcGlobs.length || externGlobs.length) {
-    opts.externs = externGlobs.flatMap(globby.sync);
+    opts.externs = externGlobs.flatMap(fastGlob.sync);
 
     // Included globs should explicitly exclude any externs
     const excludedExterns = externGlobs.map((glob) => `!${glob}`);
