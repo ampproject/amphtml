@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
@@ -14,6 +15,9 @@
  * limitations under the License.
  */
 const globby = require('globby');
+=======
+const fastGlob = require('fast-glob');
+>>>>>>> d30dfcd1ae... 🏗 Replace `globby` with `fast-glob` (#35846)
 const {getStdout} = require('../common/process');
 const {readFile} = require('fs-extra');
 const {writeDiffOrFail} = require('../common/diff');
@@ -44,7 +48,7 @@ const entry = (name) =>
  */
 const generateList = () =>
   getStdout(
-    ['grep -lr', `"${grepJsContent}"`, ...globby.sync(grepJsFiles)].join(' ')
+    ['grep -lr', `"${grepJsContent}"`, ...fastGlob.sync(grepJsFiles)].join(' ')
   )
     .trim()
     .split('\n')

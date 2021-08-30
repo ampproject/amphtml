@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
@@ -14,6 +15,9 @@
  * limitations under the License.
  */
 const globby = require('globby');
+=======
+const fastGlob = require('fast-glob');
+>>>>>>> d30dfcd1ae... 🏗 Replace `globby` with `fast-glob` (#35846)
 const {basename} = require('path');
 const {readFile} = require('fs-extra');
 const {writeDiffOrFail} = require('../common/diff');
@@ -47,7 +51,7 @@ const blockRegExp = (name) =>
  * @return {Promise<void>}
  */
 async function checkAnalyticsVendorsList() {
-  const vendors = globby
+  const vendors = fastGlob
     .sync(vendorsGlob)
     .map((path) => basename(path, '.json'))
     .sort();

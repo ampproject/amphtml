@@ -138,11 +138,7 @@ function summarizeResults(results, fixedFiles) {
  * @return {Promise<void>}
  */
 async function lint() {
-  const filesToCheck = getFilesToCheck(
-    lintGlobs,
-    {gitignore: true},
-    '.eslintignore'
-  );
+  const filesToCheck = getFilesToCheck(lintGlobs, {}, '.eslintignore');
   if (filesToCheck.length == 0) {
     return;
   }

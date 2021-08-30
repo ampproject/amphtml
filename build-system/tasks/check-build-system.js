@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
@@ -14,6 +15,9 @@
  * limitations under the License.
  */
 const globby = require('globby');
+=======
+const fastGlob = require('fast-glob');
+>>>>>>> d30dfcd1ae... 🏗 Replace `globby` with `fast-glob` (#35846)
 const path = require('path');
 const {cyan, green} = require('../common/colors');
 const {execOrThrow} = require('../common/exec');
@@ -25,7 +29,7 @@ const {updateSubpackages} = require('../common/update-packages');
  * Skips npm checks during CI (already done while running each task).
  */
 function updateBuildSystemSubpackages() {
-  const packageFiles = globby.sync('build-system/tasks/*/package.json');
+  const packageFiles = fastGlob.sync('build-system/tasks/*/package.json');
   for (const packageFile of packageFiles) {
     const packageDir = path.dirname(packageFile);
     updateSubpackages(packageDir, /* skipNpmChecks */ true);

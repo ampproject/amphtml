@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
@@ -14,6 +15,9 @@
  * limitations under the License.
  */
 const globby = require('globby');
+=======
+const fastGlob = require('fast-glob');
+>>>>>>> d30dfcd1ae... 🏗 Replace `globby` with `fast-glob` (#35846)
 const path = require('path');
 const test = require('ava');
 const {headerRegExpForTesting, overrideToc, overrideTocGlob} = require('../');
@@ -38,7 +42,9 @@ test('README.md includes correct header', async (t) => {
 });
 
 test('overrideToc ./all-are-complete', async (t) => {
-  for (const filename of await globby(`${dirname}/all-are-complete/**/*.md`)) {
+  for (const filename of await fastGlob(
+    `${dirname}/all-are-complete/**/*.md`
+  )) {
     const content = await readFile(filename, 'utf-8');
     t.deepEqual(await overrideToc(content), content);
   }

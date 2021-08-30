@@ -15,8 +15,8 @@
  */
 
 const debounce = require('../../common/debounce');
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const path = require('path');
 const {buildExtensions} = require('../extension-helpers');
 const {endBuildStep, watchDebounceDelay} = require('../helpers');
@@ -93,7 +93,7 @@ async function copyCss() {
   for (const {outCss} of cssEntryPoints) {
     await fs.copy(`build/css/${outCss}`, `dist/${outCss}`);
   }
-  const cssFiles = await globby('build/css/amp-*.css');
+  const cssFiles = await fastGlob('build/css/amp-*.css');
   await Promise.all(
     cssFiles.map((cssFile) => {
       return fs.copy(cssFile, `dist/v0/${path.basename(cssFile)}`);

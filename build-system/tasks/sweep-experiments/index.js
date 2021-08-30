@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 const argv = require('minimist')(process.argv.slice(2));
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const path = require('path');
 const {
   getJscodeshiftReport,
@@ -83,7 +83,7 @@ const cmdEscape = (str) => str.replace(/["`]/g, (c) => `\\${c}`);
  */
 const filesContainingPattern = (glob, string) =>
   getStdoutLines(
-    `grep -El "${cmdEscape(string)}" {${globby.sync(glob).join(',')}}`
+    `grep -El "${cmdEscape(string)}" {${fastGlob.sync(glob).join(',')}}`
   );
 
 /**

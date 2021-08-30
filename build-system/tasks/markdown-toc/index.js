@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
@@ -14,6 +15,9 @@
  * limitations under the License.
  */
 const globby = require('globby');
+=======
+const fastGlob = require('fast-glob');
+>>>>>>> d30dfcd1ae... 🏗 Replace `globby` with `fast-glob` (#35846)
 const path = require('path');
 const prettier = require('prettier');
 const toc = require('markdown-toc');
@@ -140,7 +144,9 @@ async function overrideTocGlob(cwd) {
     '**/*.md',
     '!**/{node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
   ];
-  const files = (await globby(glob, {cwd})).map((file) => path.join(cwd, file));
+  const files = (await fastGlob(glob, {cwd})).map((file) =>
+    path.join(cwd, file)
+  );
   const filesIncludingString = getStdout(
     [`grep -irl "${task}"`, ...files].join(' ')
   )
