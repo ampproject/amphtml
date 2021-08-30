@@ -101,7 +101,6 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   buildCallback() {
     super.buildCallback();
     this.applyResponsivenessPresets_();
-    this.applyTemplateClassName_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
     this.initializeListeners_();
@@ -169,21 +168,6 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
           '--i-amphtml-story-layer-height': px(height * this.scalingFactor_),
         });
       });
-    }
-  }
-
-  /**
-   * Applies internal CSS class names for the template attribute, so that styles
-   * can use the class name instead of compound
-   * amp-story-grid-layer[template="..."] selectors, since the latter increases
-   * CSS specificity and can prevent users from being able to override styles.
-   * @private
-   */
-  applyTemplateClassName_() {
-    if (this.element.hasAttribute(TEMPLATE_ATTRIBUTE_NAME)) {
-      const templateName = this.element.getAttribute(TEMPLATE_ATTRIBUTE_NAME);
-      const templateClassName = GRID_LAYER_TEMPLATE_CLASS_NAMES[templateName];
-      this.element.classList.add(templateClassName);
     }
   }
 
