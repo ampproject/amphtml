@@ -211,7 +211,7 @@ async function getAmpConfigForFile(filename, options) {
     type,
     filename,
     baseConfigFile,
-    /* opt_localDev */ !!options.fortesting,
+    /* opt_localDev */ !!options.localDev,
     /* opt_localBranch */ true,
     /* opt_branch */ undefined,
     /* opt_fortesting */ !!options.fortesting
@@ -326,7 +326,6 @@ module.exports = {
   sanityCheck,
   valueOrDefault,
   MINIFIED_TARGETS,
-  UNMINIFIED_TARGETS,
 };
 
 prependGlobal.description = 'Prepend a json config to a target file';
