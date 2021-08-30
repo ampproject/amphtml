@@ -29,6 +29,13 @@ describes.realWin(
       toggleExperiment(win, 'bento-audio', true, true);
     });
 
+    afterEach(async () => {
+      // Clean up the child elements that are appended in the body in attachAndRun method.
+      while (doc.body.firstChild) {
+        doc.body.removeChild(doc.body.firstChild);
+      }
+    });
+
     /**
      * Wait for iframe to be mounted
      */
