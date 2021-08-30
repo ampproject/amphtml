@@ -61,8 +61,13 @@ function readJsconfigPaths() {
  */
 function getImportResolver() {
   return {
-    'root': ['.'],
-    'alias': readJsconfigPaths(),
+    root: ['.'],
+    alias: readJsconfigPaths(),
+    babelOptions: {
+      caller: {
+        name: 'import-resolver',
+      },
+    },
   };
 }
 
