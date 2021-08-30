@@ -234,19 +234,17 @@ export const setCustomThemeStyles = (attachmentEl, openAttachmentEl) => {
 
   // Calculating contrast color (black or white) needed for outlink CTA UI.
   let contrastColor = null;
-  if (accentColor) {
-    setImportantStyles(attachmentEl, {
-      'background-color': accentColor,
-    });
+  setImportantStyles(attachmentEl, {
+    'background-color': accentColor,
+  });
 
-    const win = toWin(attachmentEl.ownerDocument.defaultView);
-    const styles = computedStyle(win, attachmentEl);
-    const rgb = getRGBFromCssColorValue(styles['background-color']);
-    contrastColor = getTextColorForRGB(rgb);
-    setImportantStyles(attachmentEl, {
-      'background-color': '',
-    });
-  }
+  const win = toWin(attachmentEl.ownerDocument.defaultView);
+  const styles = computedStyle(win, attachmentEl);
+  const rgb = getRGBFromCssColorValue(styles['background-color']);
+  contrastColor = getTextColorForRGB(rgb);
+  setImportantStyles(attachmentEl, {
+    'background-color': '',
+  });
   if (
     attachmentEl.getAttribute('cta-accent-element') ===
     CtaAccentElement.BACKGROUND
