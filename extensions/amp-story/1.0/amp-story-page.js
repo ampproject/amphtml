@@ -720,6 +720,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @return {!Promise} */
   beforeVisible() {
+    this.renderOpenAttachmentUI_();
     return this.maybeApplyFirstAnimationFrameOrFinish();
   }
 

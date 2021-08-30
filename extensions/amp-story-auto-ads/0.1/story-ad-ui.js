@@ -22,6 +22,7 @@ import {CSS as ctaButtonCSS} from '../../../build/amp-story-auto-ads-cta-button-
 import {dev, user} from '../../../src/log';
 import {dict, map} from '#core/types/object';
 import {openWindowDialog} from '../../../src/open-window-dialog';
+import {isExperimentOn} from '#experiments';
 
 /**
  * @typedef {{
@@ -52,6 +53,14 @@ export const A4AVarNames = {
   CTA_TYPE: 'cta-type',
   CTA_URL: 'cta-url',
 };
+
+/** @enum {string} */
+export const PageOutlinkLayerVarNames = [
+  'cta-accent-color',
+  'cta-accent-element',
+  'cta-image',
+  'theme',
+];
 
 /** @enum {string} */
 const DataAttrs = {
@@ -238,22 +247,45 @@ export function createCta(doc, buttonFitter, container, uiMetadata) {
       return null;
     }
 
-    const ctaLayer = doc.createElement('amp-story-cta-layer');
-    ctaLayer.className = 'i-amphtml-cta-container';
+    if (isExperimentOn(doc.defaultView, 'amp-story-page-outlink')) {
+      const pageOutlink = doc.createElement('amp-story-page-outlink');
+      pageOutlink.setAttribute('layout', 'nodisplay');
 
-    const linkRoot = createElementWithAttributes(
-      doc,
-      'div',
-      dict({
-        'class': 'i-amphtml-story-ad-link-root',
-        'role': 'button',
-      })
-    );
+      const pageAnchorTag = doc.createElement('a');
+      pageAnchorTag.setAttribute('href', 'https://www.google.com');
+      pageOutlink.appendChild(pageAnchorTag);
 
-    createShadowRootWithStyle(linkRoot, a, ctaButtonCSS);
+      for (const pageOutlinkLayerVarName of PageOutlinkLayerVarNames) {
+        if (uiMetadata[pageOutlinkLayerVarName]) {
+          pageOutlink.setAttribute(
+            pageOutlinkLayerVarName,
+            uiMetadata[pageOutlinkLayerVarName]
+          );
+        }
+      }
 
-    ctaLayer.appendChild(linkRoot);
-    container.appendChild(ctaLayer);
-    return a;
+      pageOutlink.className = 'i-amphtml-story-page-outlink-container';
+
+      container.appendChild(pageOutlink);
+      return container;
+    } else {
+      const ctaLayer = doc.createElement('amp-story-cta-layer');
+      ctaLayer.className = 'i-amphtml-cta-container';
+
+      const linkRoot = createElementWithAttributes(
+        doc,
+        'div',
+        dict({
+          'class': 'i-amphtml-story-ad-link-root',
+          'role': 'button',
+        })
+      );
+
+      createShadowRootWithStyle(linkRoot, a, ctaButtonCSS);
+
+      ctaLayer.appendChild(linkRoot);
+      container.appendChild(ctaLayer);
+      return a;
+    }
   });
 }

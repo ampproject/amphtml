@@ -23,6 +23,8 @@ import {
   validateCtaMetadata,
 } from '../story-ad-ui';
 import {ButtonTextFitter} from '../story-ad-button-text-fitter';
+import {toggleExperiment} from '#experiments';
+import {expect} from 'chai';
 
 describes.realWin('story-ad-ui', {amp: true}, (env) => {
   let win;
@@ -229,6 +231,134 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
       ).then((anchor) => {
         expect(anchor).to.be.null;
         expect(doc.querySelector('amp-story-cta-layer')).not.to.exist;
+      });
+    });
+  });
+
+  describe('createCta page outlink custom element', () => {
+    let buttonFitter;
+
+    beforeEach(() => {
+      buttonFitter = new ButtonTextFitter(env.ampdoc);
+      toggleExperiment(env.win, 'amp-story-page-outlink', true, true);
+    });
+
+    it('returns the created anchor for the page outlink', () => {
+      const metadata = {
+        ['cta-accent-color']: '#FF00FF',
+        ['cta-accent-element']: 'text',
+        ['cta-image']:
+          '/examples/visual-tests/picsum.photos/image1068_300x169.jpg',
+        ['theme']: 'custom',
+      };
+      return createCta(
+        doc,
+        buttonFitter,
+        doc.body /* container */,
+        metadata
+      ).then((container) => {
+        expect(container).to.exist;
+        const containerElem = doc.querySelector(
+          '.i-amphtml-story-page-outlink-container'
+        );
+        expect(containerElem).to.exist;
+
+        expect(containerElem.getAttribute('cta-accent-color')).to.equal(
+          '#FF00FF'
+        );
+        expect(containerElem.getAttribute('cta-accent-element')).to.equal(
+          'text'
+        );
+        expect(containerElem.getAttribute('cta-image')).to.equal(
+          '/examples/visual-tests/picsum.photos/image1068_300x169.jpg'
+        );
+        expect(containerElem.getAttribute('theme')).to.equal('custom');
+      });
+    });
+  });
+
+  describe('createCta page outlink light theme element', () => {
+    let buttonFitter;
+
+    beforeEach(() => {
+      buttonFitter = new ButtonTextFitter(env.ampdoc);
+      toggleExperiment(env.win, 'amp-story-page-outlink', true, true);
+    });
+
+    it('returns the created anchor for the page outlink', () => {
+      const metadata = {
+        ['theme']: 'light',
+      };
+      return createCta(
+        doc,
+        buttonFitter,
+        doc.body /* container */,
+        metadata
+      ).then((container) => {
+        expect(container).to.exist;
+        const containerElem = doc.querySelector(
+          '.i-amphtml-story-page-outlink-container'
+        );
+        expect(containerElem).to.exist;
+        expect(containerElem.getAttribute('theme')).to.equal('light');
+      });
+    });
+  });
+
+  describe('createCta page outlink dark theme element', () => {
+    let buttonFitter;
+
+    beforeEach(() => {
+      buttonFitter = new ButtonTextFitter(env.ampdoc);
+      toggleExperiment(env.win, 'amp-story-page-outlink', true, true);
+    });
+
+    it('returns the created anchor for the page outlink', () => {
+      const metadata = {
+        ['theme']: 'dark',
+      };
+      return createCta(
+        doc,
+        buttonFitter,
+        doc.body /* container */,
+        metadata
+      ).then((container) => {
+        expect(container).to.exist;
+        const containerElem = doc.querySelector(
+          '.i-amphtml-story-page-outlink-container'
+        );
+        expect(containerElem).to.exist;
+        expect(containerElem.getAttribute('theme')).to.equal('dark');
+      });
+    });
+  });
+
+  describe('createCta page outlink dark theme element with color and accent-element (should have no effect)', () => {
+    let buttonFitter;
+
+    beforeEach(() => {
+      buttonFitter = new ButtonTextFitter(env.ampdoc);
+      toggleExperiment(env.win, 'amp-story-page-outlink', true, true);
+    });
+
+    it('returns the created anchor for the page outlink', () => {
+      const metadata = {
+        ['theme']: 'dark',
+        ['cta-accent-color']: '#FF00FF',
+        ['cta-accent-element']: 'text',
+      };
+      return createCta(
+        doc,
+        buttonFitter,
+        doc.body /* container */,
+        metadata
+      ).then((container) => {
+        expect(container).to.exist;
+        const containerElem = doc.querySelector(
+          '.i-amphtml-story-page-outlink-container'
+        );
+        expect(containerElem).to.exist;
+        expect(containerElem.getAttribute('theme')).to.equal('dark');
       });
     });
   });
