@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.179 */
+/** Version: 0.1.22.181 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -1393,7 +1393,7 @@ class GaaMeteringRegwall {
    * Gets publisher name from JSON-LD page config.
    * @private
    * @nocollapse
-   * @return {string}
+   * @return {string|undefined}
    */
   static getPublisherNameFromJsonLdPageConfig_() {
     const ldJsonElements = self.document.querySelectorAll(
@@ -1423,7 +1423,7 @@ class GaaMeteringRegwall {
    * Gets publisher name from Microdata page config.
    * @private
    * @nocollapse
-   * @return {string}
+   * @return {string|undefined}
    */
   static getPublisherNameFromMicrodataPageConfig_() {
     const publisherNameElements = self.document.querySelectorAll(

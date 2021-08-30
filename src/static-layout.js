@@ -1,26 +1,4 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {
-  devAssert,
-  devAssertNumber,
-  devAssertString,
-  userAssert,
-} from '#core/assert';
-import {transparentPng} from '#core/dom/img';
+import {devAssert, devAssertString, userAssert} from '#core/assert';
 import {
   Layout,
   getLayoutClass,
@@ -139,10 +117,9 @@ export function getNaturalDimensions(element) {
  * implement SSR. For more information on SSR see bit.ly/amp-ssr.
  *
  * @param {!Element} element
- * @param {boolean} fixIeIntrinsic
  * @return {!Layout}
  */
-export function applyStaticLayout(element, fixIeIntrinsic = false) {
+export function applyStaticLayout(element) {
   // Check if the layout has already been done by server-side rendering or
   // client-side rendering and the element was cloned. The document may be
   // visible to the user if the boilerplate was removed so please take care in
@@ -214,7 +191,7 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
     }
   } else if (layout == Layout.INTRINSIC) {
     // Intrinsic uses an svg inside the sizer element rather than the padding
-    // trick Note a naked svg won't work becasue other thing expect the
+    // trick Note a naked svg won't work because other things expect the
     // i-amphtml-sizer element
     const sizer = htmlFor(element)`
       <i-amphtml-sizer class="i-amphtml-sizer" slot="i-amphtml-svc">
@@ -224,13 +201,7 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
     const intrinsicSizer = sizer.firstElementChild;
     intrinsicSizer.setAttribute(
       'src',
-      !IS_ESM && fixIeIntrinsic && element.ownerDocument
-        ? transparentPng(
-            element.ownerDocument,
-            devAssertNumber(getLengthNumeral(width)),
-            devAssertNumber(getLengthNumeral(height))
-          )
-        : `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`
+      `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`
     );
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement = sizer;

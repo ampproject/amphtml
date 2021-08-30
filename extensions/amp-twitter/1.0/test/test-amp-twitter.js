@@ -1,19 +1,3 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-twitter';
 import {createElementWithAttributes} from '#core/dom';
 import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
@@ -123,6 +107,48 @@ describes.realWin(
         .getAttribute('name');
       expect(newName).not.to.contain(originalTweetId);
       expect(newName).to.contain(newTweetId);
+    });
+
+    it('should test toggling placeholder off', async () => {
+      element = createElementWithAttributes(doc, 'amp-twitter', {
+        'data-tweetid': '585110598171631616',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
+
+      const impl = await element.getImpl(false);
+      const togglePlaceholderStub = env.sandbox.stub(impl, 'togglePlaceholder');
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      const {sentinel} = JSON.parse(iframe.getAttribute('name')).attributes;
+      const mockEvent = new CustomEvent('message');
+      mockEvent.data = serializeMessage('embed-size', sentinel, {
+        height: '1000',
+      });
+      mockEvent.source = iframe.contentWindow;
+      win.dispatchEvent(mockEvent);
+
+      expect(togglePlaceholderStub).to.be.calledOnce.calledWith(false);
+    });
+
+    it('should test toggling placeholder on', async () => {
+      element = createElementWithAttributes(doc, 'amp-twitter', {
+        'data-tweetid': '585110598171631616',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
+
+      const impl = await element.getImpl(false);
+      const togglePlaceholderStub = env.sandbox.stub(impl, 'togglePlaceholder');
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      const {sentinel} = JSON.parse(iframe.getAttribute('name')).attributes;
+      const mockEvent = new CustomEvent('message');
+      mockEvent.data = serializeMessage('no-content', sentinel);
+      mockEvent.source = iframe.contentWindow;
+      win.dispatchEvent(mockEvent);
+
+      expect(togglePlaceholderStub).to.be.calledOnce.calledWith(true);
     });
   }
 );
