@@ -7,6 +7,7 @@ import {Services} from '#service';
 import {HighlightHandler, getHighlightParam} from '../highlight-handler';
 import {Messaging, WindowPortEmulator} from '../messaging/messaging';
 
+// TODO: restructure tests to better separate out Chrome 93.
 describes.fakeWin(
   'getHighlightParam',
   {
@@ -109,7 +110,8 @@ describes.realWin(
   },
   (env) => {
     let root = null;
-    let docreadyCb = null;
+    let initCb = null;
+
     beforeEach(() => {
       const {document} = env.win;
       root = document.createElement('div');
@@ -121,11 +123,20 @@ describes.realWin(
       div1.textContent = 'highlighted text';
       root.appendChild(div1);
 
-      env.sandbox.stub(docready, 'whenDocumentReady').returns({
-        then: (cb) => {
-          docreadyCb = cb;
-        },
-      });
+      //  Used in Chrome 93+
+      env.sandbox
+        .stub(env.ampdoc, 'whenFirstVisible')
+        .returns({then: (cb) => (initCb = cb)});
+
+      // Used in everything else.
+      env.sandbox
+        .stub(docready, 'whenDocumentReady')
+        .returns({then: (cb) => (initCb = cb)});
+
+      const platform = Services.platformFor(env.ampdoc.win);
+      if (platform.isChrome()) {
+        env.sandbox.stub(platform, 'getMajorVersion').returns(92);
+      }
     });
 
     it('initialize with visibility=visible', () => {
@@ -150,7 +161,7 @@ describes.realWin(
 
       // initHighlight_ is not called before document become ready.
       expect(handler.highlightedNodes_).to.be.null;
-      docreadyCb();
+      initCb();
       // initHighlight_ was called in docreadyCb() and highlightedNodes_ is set.
       expect(handler.highlightedNodes_).not.to.be.null;
 
@@ -212,7 +223,7 @@ describes.realWin(
         sentences: ['amp', 'highlight'],
         skipRendering: true,
       });
-      docreadyCb();
+      initCb();
 
       expect(scrollStub).not.to.be.called;
 
@@ -253,8 +264,8 @@ describes.realWin(
 
       // initHighlight_ is not called before document become ready.
       expect(handler.highlightedNodes_).to.be.null;
-      docreadyCb();
-      // initHighlight_ was called in docreadyCb() and highlightedNodes_ is set.
+      initCb();
+      // initHighlight_ was called in initCb() and highlightedNodes_ is set.
       expect(handler.highlightedNodes_).not.to.be.null;
 
       expect(setScrollTop).to.be.calledOnce;
@@ -296,7 +307,7 @@ describes.realWin(
       );
 
       new HighlightHandler(ampdoc, {sentences: ['amp', 'highlight']});
-      docreadyCb();
+      initCb();
 
       expect(scrollStub).not.to.be.called;
 
@@ -334,7 +345,7 @@ describes.realWin(
         .returns(VisibilityState.PRERENDER);
 
       new HighlightHandler(ampdoc, {sentences: ['amp', 'highlight']});
-      docreadyCb();
+      initCb();
 
       expect(setScrollTop).to.be.calledOnce;
       expect(setScrollTop.firstCall.args.length).to.equal(1);
@@ -351,7 +362,7 @@ describes.realWin(
 
     it('calcTopToCenterHighlightedNodes_ center elements', () => {
       const handler = new HighlightHandler(env.ampdoc, {sentences: ['amp']});
-      docreadyCb();
+      initCb();
       expect(handler.highlightedNodes_).not.to.be.null;
 
       const viewport = Services.viewportForDoc(env.ampdoc);
@@ -368,7 +379,7 @@ describes.realWin(
 
     it('calcTopToCenterHighlightedNodes_ too tall element', () => {
       const handler = new HighlightHandler(env.ampdoc, {sentences: ['amp']});
-      docreadyCb();
+      initCb();
       expect(handler.highlightedNodes_).not.to.be.null;
 
       const viewport = Services.viewportForDoc(env.ampdoc);
@@ -387,7 +398,7 @@ describes.realWin(
 
     it('mayAdjustTop_', () => {
       const handler = new HighlightHandler(env.ampdoc, {sentences: ['amp']});
-      docreadyCb();
+      initCb();
       expect(handler.highlightedNodes_).not.to.be.null;
 
       // Set up an environment where calcTopToCenterHighlightedNodes_
@@ -415,15 +426,13 @@ describes.realWin(
       .run('should highlight using text fragments for Chrome 93', async () => {
         const {ampdoc} = env;
         const platform = Services.platformFor(ampdoc.win);
-        env.sandbox.stub(platform, 'isChrome').returns(true);
-        env.sandbox.stub(platform, 'getMajorVersion').returns(93);
+        platform.getMajorVersion.returns(93);
+
         let whenFirstVisiblePromiseResolve;
         const whenFirstVisiblePromise = new Promise((resolve) => {
           whenFirstVisiblePromiseResolve = resolve;
         });
-        env.sandbox
-          .stub(ampdoc, 'whenFirstVisible')
-          .returns(whenFirstVisiblePromise);
+        ampdoc.whenFirstVisible.returns(whenFirstVisiblePromise);
 
         const highlightHandler = new HighlightHandler(ampdoc, {
           sentences: ['amp', 'highlight'],
@@ -449,16 +458,11 @@ describes.realWin(
         'should not highlight using text fragments for Chrome 92',
         async () => {
           const {ampdoc} = env;
-          const platform = Services.platformFor(ampdoc.win);
-          env.sandbox.stub(platform, 'isChrome').returns(true);
-          env.sandbox.stub(platform, 'getMajorVersion').returns(92);
           let whenFirstVisiblePromiseResolve;
           const whenFirstVisiblePromise = new Promise((resolve) => {
             whenFirstVisiblePromiseResolve = resolve;
           });
-          env.sandbox
-            .stub(ampdoc, 'whenFirstVisible')
-            .returns(whenFirstVisiblePromise);
+          ampdoc.whenFirstVisible.returns(whenFirstVisiblePromise);
 
           const highlightHandler = new HighlightHandler(ampdoc, {
             sentences: ['amp', 'highlight'],
@@ -483,15 +487,12 @@ describes.realWin(
         async () => {
           const {ampdoc} = env;
           const platform = Services.platformFor(ampdoc.win);
-          env.sandbox.stub(platform, 'isChrome').returns(true);
-          env.sandbox.stub(platform, 'getMajorVersion').returns(93);
+          platform.getMajorVersion.returns(93);
           let whenFirstVisiblePromiseResolve;
           const whenFirstVisiblePromise = new Promise((resolve) => {
             whenFirstVisiblePromiseResolve = resolve;
           });
-          env.sandbox
-            .stub(ampdoc, 'whenFirstVisible')
-            .returns(whenFirstVisiblePromise);
+          ampdoc.whenFirstVisible.returns(whenFirstVisiblePromise);
 
           const highlightHandler = new HighlightHandler(ampdoc, {
             sentences: [],
