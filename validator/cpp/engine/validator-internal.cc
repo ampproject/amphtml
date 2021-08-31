@@ -4847,6 +4847,8 @@ void ParsedValidatorRules::ExpandExtensionSpec(ValidatorRules* rules) const {
     if (!tagspec->has_descriptive_name())
       tagspec->set_descriptive_name(tagspec->spec_name());
     tagspec->set_mandatory_parent("HEAD");
+    // This is satisfied by any of the `v0.js` variants:
+    tagspec->add_requires("amphtml javascript runtime (v0.js)");
 
     if (extension_spec.deprecated_allow_duplicates()) {
       tagspec->set_unique_warning(true);
