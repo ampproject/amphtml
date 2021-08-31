@@ -644,7 +644,6 @@ const forbiddenTermsGlobal = {
       'src/experiments/shame.extern.js',
       'src/mode.js',
       'src/core/mode/test.js',
-      'src/core/mode/local-dev.js',
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'testing/init-tests.js',
       'tools/experiments/experiments.js',
@@ -1033,7 +1032,6 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-ad/0.1/amp-ad-3p-impl.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
-      'extensions/amp-iframe/0.1/amp-iframe.js',
     ],
   },
   "require\\('fancy-log'\\)": {
