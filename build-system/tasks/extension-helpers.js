@@ -1,8 +1,8 @@
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
 const debounce = require('../common/debounce');
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const path = require('path');
 const wrappers = require('../compile/compile-wrappers');
 const {
@@ -419,7 +419,8 @@ async function watchExtension(
 
   const cssDeps = `${extDir}/**/*.css`;
   const jisonDeps = `${extDir}/**/*.jison`;
-  watch([cssDeps, jisonDeps]).on(
+  const ignored = /dist/; //should not watch npm dist folders.
+  watch([cssDeps, jisonDeps], {ignored}).on(
     'change',
     debounce(watchFunc, watchDebounceDelay)
   );
@@ -506,7 +507,7 @@ async function buildExtension(
  */
 async function buildNpmCss(extDir, options) {
   const startCssTime = Date.now();
-  const filenames = await globby(path.join(extDir, '**', '*.jss.js'));
+  const filenames = await fastGlob(path.join(extDir, '**', '*.jss.js'));
   if (!filenames.length) {
     return;
   }

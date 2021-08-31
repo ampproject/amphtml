@@ -1,7 +1,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const experimentsConfig = require('../global-configs/experiments-config.json');
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const {clean} = require('../tasks/clean');
 const {cyan, green, red, yellow} = require('./colors');
 const {default: ignore} = require('ignore');
@@ -49,7 +49,7 @@ function getExperimentConfig(experiment) {
  * @return {!Array<string>}
  */
 function getFilesChanged(globs, options) {
-  const allFiles = globby.sync(globs, options);
+  const allFiles = fastGlob.sync(globs, options).map(String);
   return gitDiffNameOnlyMain().filter((changedFile) => {
     return fs.existsSync(changedFile) && allFiles.includes(changedFile);
   });
@@ -79,12 +79,11 @@ function getFilesFromArgv() {
   if (!argv.files) {
     return [];
   }
-  // TODO(#30223): globby only takes posix globs. Find a Windows alternative.
   const toPosix = (str) => str.replace(/\\\\?/g, '/');
   const globs = Array.isArray(argv.files) ? argv.files : argv.files.split(',');
   const allFiles = [];
   for (const glob of globs) {
-    const files = globby.sync(toPosix(glob.trim()));
+    const files = fastGlob.sync(toPosix(glob.trim()));
     if (files.length == 0) {
       log(red('ERROR:'), 'Argument', cyan(glob), 'matched zero files.');
       throw new Error('Argument matched zero files.');
@@ -133,7 +132,7 @@ function getFilesToCheck(globs, options = {}, ignoreFile = undefined) {
     }
     return logFiles(filesChanged);
   }
-  return ignored.filter(globby.sync(globs, options));
+  return ignored.filter(fastGlob.sync(globs, options).map(String));
 }
 
 /**

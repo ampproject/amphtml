@@ -71,6 +71,16 @@ describes.sandboxed('StandardActions', {}, (env) => {
     expect(element.classList.contains(className)).to.false;
   }
 
+  function expectCheckboxToHaveCheckedStateTrue(element) {
+    expectElementMutatedAsync(element);
+    expect(element.checked).to.true;
+  }
+
+  function expectCheckboxToHaveCheckedStateFalse(element) {
+    expectElementMutatedAsync(element);
+    expect(element.checked).to.false;
+  }
+
   function expectAmpElementToHaveBeenHidden(element) {
     expectElementMutatedAsync(element);
     expect(element.collapse).to.be.calledOnce;
@@ -521,6 +531,62 @@ describes.sandboxed('StandardActions', {}, (env) => {
       };
       standardActions.handleToggleClass_(invocation);
       expectElementToDropClass(element, dummyClass);
+    });
+  });
+
+  describe('"toggleChecked" action', () => {
+    it('should set checked property to false when checked property is true', () => {
+      const element = createElement();
+      element.type = 'checkbox';
+      element.checked = true;
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {},
+      };
+      standardActions.handleToggleChecked_(invocation);
+      expectCheckboxToHaveCheckedStateFalse(element);
+    });
+
+    it('should set checked property to true when checked property is false', () => {
+      const element = createElement();
+      element.type = 'checkbox';
+      element.checked = false;
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {},
+      };
+      standardActions.handleToggleChecked_(invocation);
+      expectCheckboxToHaveCheckedStateTrue(element);
+    });
+
+    it('should set checked property to true when force=true', () => {
+      const element = createElement();
+      element.type = 'checkbox';
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {
+          'force': true,
+        },
+      };
+      standardActions.handleToggleChecked_(invocation);
+      expectCheckboxToHaveCheckedStateTrue(element);
+    });
+
+    it('should set checked property to false when force=false', () => {
+      const element = createElement();
+      element.type = 'checkbox';
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {
+          'force': false,
+        },
+      };
+      standardActions.handleToggleChecked_(invocation);
+      expectCheckboxToHaveCheckedStateFalse(element);
     });
   });
 

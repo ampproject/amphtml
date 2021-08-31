@@ -1,5 +1,7 @@
 import {devAssertElement} from '#core/assert';
+import {tryResolve} from '#core/data-structures/promise';
 import {setStyles} from '#core/dom/style';
+import {devExpectedError} from '#core/error';
 
 /**
  * @param {!Window} win
@@ -37,10 +39,7 @@ export function detectIsAutoplaySupported(win) {
 
   // Promise wrapped this way to catch both sync throws and async rejections.
   // More info: https://github.com/tc39/proposal-promise-try
-  new Promise((resolve) => resolve(detectionElement.play())).catch(() => {
-    // Suppress any errors, useless to report as they are expected.
-  });
-
+  playIgnoringError(detectionElement);
   return Promise.resolve(!detectionElement.paused);
 }
 
@@ -77,4 +76,49 @@ export function resetIsAutoplaySupported(win) {
  */
 export function getInternalVideoElementFor(element) {
   return devAssertElement(element.querySelector('video, iframe'));
+}
+
+/**
+ * @typedef {{
+ *   play: (function(boolean): Promise<undefined>|undefined)
+ * }}
+ */
+let VideoOrBaseElementPlayableDef;
+
+/**
+ * Tries to play the media element, marking any rejected error as an expected
+ * error for reproting.
+ *
+ * @param {!HTMLMediaElement|VideoOrBaseElementPlayableDef} element
+ * @param {boolean=} isAutoplay
+ * @return {Promise<undefined>}
+ */
+export function tryPlay(element, isAutoplay) {
+  // Some browsers return undefined, some a boolean, and some a real promise.
+  // Using tryResolve coerces all of those into a real promise.
+  const promise = tryResolve(() => element.play(!!isAutoplay));
+  // Fork the promise chain to report any rejected error as expected. We don't
+  // return the promise returned by `.catch()` so that we don't
+  // introduce any new microtasks.
+  promise.catch((err) => {
+    devExpectedError('TRYPLAY', err);
+  });
+  return promise;
+}
+
+/**
+ * Plays the media element, discarding any error without reporting it.
+ *
+ * @param {!HTMLMediaElement} element
+ */
+export function playIgnoringError(element) {
+  // Some browsers return undefined, some a boolean, and some a real promise.
+  // Using tryResolve coerces all of those into a real promise.
+  tryResolve(() => element.play()).catch(() => {
+    // Empty catch to prevent useless unhandled promise rejection logging.
+    // Play can fail for many reasons such as video getting paused before
+    // play() is finished.
+    // We use events to know the state of the video and do not care about
+    // the success or failure of the play()'s returned promise.
+  });
 }
