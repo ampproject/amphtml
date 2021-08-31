@@ -11,7 +11,7 @@ teaser:
 
 ## Behavior
 
-The `amp-twitter` component allows you to embed a Tweet or Moment for the specified Twitter ID.
+The `amp-twitter` component allows you to embed a Tweet or Moment.
 
 Here's an example of a basic embedded Tweet:
 
