@@ -219,7 +219,7 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
     });
   });
 
-  describe('createCta page outlink custom element', () => {
+  describe('createCta page outlink element', () => {
     let buttonFitter;
 
     beforeEach(() => {
@@ -227,7 +227,7 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
       toggleExperiment(env.win, 'amp-story-page-outlink', true, true);
     });
 
-    it('returns the created anchor for the page outlink', () => {
+    it('createCta page outlink custom theme element', () => {
       const metadata = {
         'cta-accent-color': '#FF00FF',
         'cta-accent-element': 'text',
@@ -265,17 +265,8 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
         expect(containerElem.children[0].textContent).to.equal('SHOP');
       });
     });
-  });
 
-  describe('createCta page outlink light theme element', () => {
-    let buttonFitter;
-
-    beforeEach(() => {
-      buttonFitter = new ButtonTextFitter(env.ampdoc);
-      toggleExperiment(env.win, 'amp-story-page-outlink', true, true);
-    });
-
-    it('returns the created anchor for the page outlink', () => {
+    it('createCta page outlink light theme element', () => {
       const metadata = {
         'theme': 'light',
         [A4AVarNames.CTA_TYPE]: 'SHOP',
@@ -299,17 +290,8 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
         expect(containerElem.children[0].textContent).to.equal('SHOP');
       });
     });
-  });
 
-  describe('createCta page outlink dark theme element', () => {
-    let buttonFitter;
-
-    beforeEach(() => {
-      buttonFitter = new ButtonTextFitter(env.ampdoc);
-      toggleExperiment(env.win, 'amp-story-page-outlink', true, true);
-    });
-
-    it('returns the created anchor for the page outlink', () => {
+    it('createCta page outlink dark theme element', () => {
       const metadata = {
         'theme': 'dark',
         [A4AVarNames.CTA_TYPE]: 'SHOP',
@@ -333,17 +315,8 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
         expect(containerElem.children[0].textContent).to.equal('SHOP');
       });
     });
-  });
 
-  describe('createCta page outlink dark theme element with color and accent-element (should have no effect)', () => {
-    let buttonFitter;
-
-    beforeEach(() => {
-      buttonFitter = new ButtonTextFitter(env.ampdoc);
-      toggleExperiment(env.win, 'amp-story-page-outlink', true, true);
-    });
-
-    it('returns the created anchor for the page outlink', () => {
+    it('createCta page outlink dark theme element with color and accent-element (should have no effect)', () => {
       const metadata = {
         'theme': 'dark',
         'cta-accent-color': '#FF00FF',

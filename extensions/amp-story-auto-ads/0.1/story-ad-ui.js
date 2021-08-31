@@ -192,7 +192,8 @@ export function handleAttributionClick(win, href) {
   openWindowDialog(win, href, '_blank');
 }
 
-/**  Creates a page-outlink element, returns an anchor tag containing relevant data if successful
+/**
+ * Creates a page-outlink element, returns an anchor tag containing relevant data if successful.
  * @param {!Document} doc
  * @param {!StoryAdUIMetadata} uiMetadata
  * @param {!Element} container
@@ -223,7 +224,8 @@ function createPageOutlink_(doc, uiMetadata, container) {
   return container;
 }
 
-/** Creates a CTA layer, returns an anchor tag containing relevant data if successful
+/**
+ * Creates a CTA layer, returns an anchor tag containing relevant data if successful.
  * @param {!Element} a
  * @param {!Document} doc
  * @param {!Element} container
