@@ -680,6 +680,22 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.win,
       this.element.parentElement
     );
+
+    const targeting =
+      (this.jsonTargeting && this.jsonTargeting['targeting']) || null;
+
+    const onRefresh =
+      (this.isRefreshing &&
+        this.jsonTargeting &&
+        this.jsonTargeting['onRefresh']) ||
+      null;
+
+    const scp = serializeTargeting(
+      {...targeting, ...onRefresh},
+      (this.jsonTargeting && this.jsonTargeting['categoryExclusions']) || null,
+      null
+    );
+
     const {fwSignal, parentWidth, slotWidth} = this.flexibleAdSlotData_;
     // If slotWidth is -1, that means its width must be determined by its
     // parent container, and so should have the same value as parentWidth.
@@ -703,12 +719,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'msz': msz,
       'psz': psz,
       'fws': fws,
-      'scp': serializeTargeting(
-        (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
-        (this.jsonTargeting && this.jsonTargeting['categoryExclusions']) ||
-          null,
-        null
-      ),
+      'scp': scp,
       'spsa': this.isSinglePageStoryAd
         ? `${pageLayoutBox.width}x${pageLayoutBox.height}`
         : null,
