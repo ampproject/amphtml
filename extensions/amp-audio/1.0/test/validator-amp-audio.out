@@ -89,7 +89,7 @@ PASS
 |        <source type="audio/ogg" src="foo.ogg" />
 |      </amp-audio>
 |
-|      <!-- test controlslist attr, which is often provided in camelCase -->
+|      <!-- Valid: test controlslist attr, which is often provided in camelCase -->
 |      <amp-audio
 |        width="400"
 |        height="300"
