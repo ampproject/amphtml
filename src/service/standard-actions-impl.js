@@ -216,7 +216,6 @@ export class StandardActions {
      *
      *  Example: <button on="tap:AMP.copy(text='Hello AMP');copy-success:copied.show()">Copy</button>
      */
-    const action_ = Services.actionServiceForDoc(invocation.caller);
     if (isCopyingToClipboardSupported(win.document)) {
       if (copyTextToClipboard(win, textToCopy)) {
         eventName = CopyEvents.COPY_SUCCESS;
@@ -232,6 +231,7 @@ export class StandardActions {
       `${eventName}`,
       /* Details */ null
     );
+    const action_ = Services.actionServiceForDoc(invocation.caller);
     action_.trigger(
       invocation.caller,
       eventName,
