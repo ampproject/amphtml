@@ -63,7 +63,7 @@ export class AdNetworkConfigDef {
  * @return {?AdNetworkConfigDef}
  */
 export function getAdNetworkConfig(type, autoAmpAdsElement) {
-  if ((getMode().test || getMode().localDev) && type == '_ping_') {
+  if (getMode().test && type == '_ping_') {
     return new PingNetworkConfig(autoAmpAdsElement);
   }
   if (type == 'adsense') {

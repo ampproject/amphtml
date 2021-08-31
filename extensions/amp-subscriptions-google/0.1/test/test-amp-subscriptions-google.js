@@ -358,7 +358,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       {enableLAA: true, enableEntitlements: false},
       serviceAdapter
     );
-    ampdoc.win.__AMP_MODE.localDev = false;
+    ampdoc.win.__AMP_MODE.test = false;
     env.sandbox.stub(platform, 'getUrlParams_').returns({
       'gaa_ts': (Date.now() / 1000 + 10).toString(16),
       'gaa_at': 'la',
@@ -388,7 +388,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       {enableLAA: true, enableEntitlements: false},
       serviceAdapter
     );
-    ampdoc.win.__AMP_MODE.localDev = false;
+    ampdoc.win.__AMP_MODE.test = false;
     env.sandbox.stub(platform, 'getUrlParams_').returns({
       'gaa_ts': (Date.now() / 1000 + 10).toString(16),
       'gaa_at': 'la',

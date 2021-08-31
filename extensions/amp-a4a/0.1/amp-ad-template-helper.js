@@ -47,7 +47,7 @@ export class AmpAdTemplateHelper {
   fetch(templateUrl) {
     const {win} = this.parentAmpdoc_;
     const proxyUrl =
-      getMode(win).localDev && !isNaN(templateUrl)
+      getMode(win).test && !isNaN(templateUrl)
         ? `http://ads.localhost:${win.location.port}` +
           `/a4a_template/adzerk/${templateUrl}`
         : this.getTemplateProxyUrl_(templateUrl);

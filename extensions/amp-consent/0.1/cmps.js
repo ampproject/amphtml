@@ -11,7 +11,7 @@ import {getMode} from '../../../src/mode';
 
 export const CMP_CONFIG = {};
 
-if (getMode().test || getMode().localDev) {
+if (getMode().test) {
   CMP_CONFIG['_ping_'] = {
     'consentInstanceId': '_ping_',
     'checkConsentHref': '/get-consent-v1?cid=CLIENT_ID&pid=PAGE_VIEW_ID',

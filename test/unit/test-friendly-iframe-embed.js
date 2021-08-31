@@ -835,7 +835,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     });
 
     it('should create the correct script-src CSP in dev mode', () => {
-      env.sandbox.stub(self, '__AMP_MODE').value({localDev: true});
+      env.sandbox.stub(self, '__AMP_MODE').value({test: true});
       spec.html = '<html><head></head><body></body></html>';
       const src = extractScriptSrc(mergeHtmlForTesting(spec));
       expect(src).to.equal(
@@ -846,7 +846,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     });
 
     it('should create the correct script-src CSP in non-dev mode', () => {
-      env.sandbox.stub(self, '__AMP_MODE').value({localDev: false});
+      env.sandbox.stub(self, '__AMP_MODE').value({test: false});
       spec.html = '<html><head></head><body></body></html>';
       const src = extractScriptSrc(mergeHtmlForTesting(spec));
       expect(src).to.equal(

@@ -63,7 +63,7 @@ describes.realWin(
 
       it('should allow only lower-than-default timeout in production', () => {
         env.sandbox.stub(mode, 'getMode').callsFake(() => {
-          return {development: false, localDev: false};
+          return {development: false, test: false};
         });
 
         let adapter;

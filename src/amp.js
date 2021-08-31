@@ -147,8 +147,8 @@ if (self.console) {
     self.location.href
   );
 }
-// This code is eleminated in prod build through a babel transformer.
-if (getMode().localDev) {
+// This code is eleminated in prod build through DCE.
+if (getMode().test) {
   self.document.documentElement.setAttribute('esm', mode.isEsm() ? 1 : 0);
 }
 self.document.documentElement.setAttribute('amp-version', mode.version());

@@ -134,7 +134,6 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       it('should create an iframe', () => {
         mockMode({
           esm: false,
-          localDev: true,
           development: false,
           test: false,
           version: '$internalRuntimeVersion$',
@@ -208,7 +207,6 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
             'location': {'href': locationHref},
             'tagName': 'MY-ELEMENT',
             'mode': {
-              'localDev': true,
               'development': false,
               'test': false,
               'esm': false,
@@ -307,7 +305,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       });
 
       it('should pick the right bootstrap url for local-dev mode', () => {
-        mockMode({localDev: true});
+        mockMode({test: true});
         const ampdoc = Services.ampdoc(window.document);
         expect(getBootstrapBaseUrl(window, ampdoc)).to.equal(
           'http://ads.localhost:9876/dist.3p/current/frame.max.html'

@@ -75,7 +75,7 @@ export class LiveListManager {
 
       // For testing purposes only, we speed up the interval of the update.
       // This should NEVER be allowed in production.
-      if (getMode().localDev) {
+      if (getMode().test) {
         const path = this.ampdoc.win.location.pathname;
         if (
           path.indexOf('/examples/live-list-update.amp.html') != -1 ||

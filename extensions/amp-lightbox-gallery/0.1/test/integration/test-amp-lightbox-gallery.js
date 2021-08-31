@@ -36,7 +36,7 @@ describes.sandboxed.configure().skip('amp-lightbox-gallery', function () {
 
       beforeEach(() => {
         win = env.win;
-        win.__AMP_MODE.localDev = true;
+        win.__AMP_MODE.test = true;
         triggerAnalyticsEventSpy = env.sandbox.spy(
           analytics,
           'triggerAnalyticsEvent'
@@ -200,7 +200,7 @@ describes.sandboxed.configure().skip('amp-lightbox-gallery', function () {
 
       beforeEach(() => {
         win = env.win;
-        win.__AMP_MODE.localDev = true;
+        win.__AMP_MODE.test = true;
         triggerAnalyticsEventSpy = env.sandbox.spy(
           analytics,
           'triggerAnalyticsEvent'

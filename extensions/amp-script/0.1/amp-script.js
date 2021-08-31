@@ -274,7 +274,7 @@ export class AmpScript extends AMP.BaseElement {
     const sandbox = this.element.getAttribute('sandbox') || '';
     const sandboxTokens = sandbox.split(' ').map((s) => s.trim());
     let iframeUrl;
-    if (getMode().localDev) {
+    if (getMode().test) {
       const folder = mode.isMinified() ? 'current-min' : 'current';
       iframeUrl = `/dist.3p/${folder}/amp-script-proxy-iframe.html`;
     } else {
@@ -336,7 +336,7 @@ export class AmpScript extends AMP.BaseElement {
       getMode().test && this.win.testLocation
         ? this.win.testLocation
         : this.win.location;
-    const useLocal = getMode().localDev || getMode().test;
+    const useLocal = getMode().test;
     const workerUrl = calculateExtensionScriptUrl(
       location,
       this.nodom_ ? 'amp-script-worker-nodom' : 'amp-script-worker',

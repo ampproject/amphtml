@@ -12,7 +12,7 @@ describes.fakeWin('amp-ad-network-nws-impl', {amp: true}, (env) => {
 
   beforeEach(() => {
     win = env.win;
-    win.__AMP_MODE = {localDev: false};
+    win.__AMP_MODE = {test: false};
     doc = win.document;
     element = createElementWithAttributes(doc, 'amp-ad', {
       'type': 'nws',

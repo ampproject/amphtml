@@ -103,7 +103,7 @@ export function isSrcdocSupported() {
  * @return {string}
  */
 export function getFieSafeScriptSrcs() {
-  const cdnBase = getMode().localDev ? 'http://localhost:8000/dist' : urls.cdn;
+  const cdnBase = getMode().test ? 'http://localhost:8000/dist' : urls.cdn;
   return `${cdnBase}/lts/ ${cdnBase}/rtv/ ${cdnBase}/sw/`;
 }
 

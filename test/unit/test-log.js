@@ -77,8 +77,8 @@ describes.sandboxed('Logging', {}, (env) => {
       expect(new Log(win, RETURNS_OFF).level_).to.equal(LogLevel.FINE);
     });
 
-    it('should be enabled as INFO when forced for localDev', () => {
-      mode.localDev = true;
+    it('should be enabled as INFO when forced for test', () => {
+      mode.test = true;
       expect(new Log(win, RETURNS_OFF).level_).to.equal(LogLevel.INFO);
     });
   });

@@ -11,7 +11,5 @@ export function isTest(opt_win) {
     return false;
   }
   const win = opt_win || self;
-  return !(
-    win.AMP_CONFIG?.test === false || win.AMP_CONFIG?.localDev === false
-  );
+  return !(win.AMP_CONFIG?.test === false);
 }

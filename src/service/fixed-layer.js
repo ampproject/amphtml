@@ -148,7 +148,7 @@ export class FixedLayer {
    */
   setup() {
     const viewer = Services.viewerForDoc(this.ampdoc);
-    if (!getMode().localDev && !viewer.isEmbedded()) {
+    if (!getMode().test && !viewer.isEmbedded()) {
       // FixedLayer is not needed for standalone documents.
       return false;
     }

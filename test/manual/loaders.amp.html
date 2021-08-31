@@ -69,11 +69,11 @@
 
     <script>
       // Hack to delay everything!
-      window.__AMP_MODE = {test: true, localDev: true};
+      window.__AMP_MODE = {test: true};
       const delay = parseInt(window.location.search.replace('?', '')) || 5000;
       document.addEventListener(
         'amp:attached',
-        e => {
+        (e) => {
           if (e.srcElement.hasAttribute('placeholder')) {
             return;
           }
@@ -81,8 +81,8 @@
           const lc = e.srcElement.implementation_.layoutCallback.bind(
             e.srcElement.implementation_
           );
-          e.srcElement.implementation_.layoutCallback = function() {
-            return new Promise(function(resolve) {
+          e.srcElement.implementation_.layoutCallback = function () {
+            return new Promise(function (resolve) {
               setTimeout(() => {
                 lc().then(resolve);
               }, delay);
@@ -323,9 +323,7 @@
     </div>
 
     <amp-selector class="tabs-with-flex" role="tablist">
-      <div role="tab" option selected>
-        amp-img
-      </div>
+      <div role="tab" option selected>amp-img</div>
       <div role="tabpanel">
         <section id="sectionAmpImg">
           <h2>normal</h2>
@@ -377,9 +375,7 @@
           ></amp-img>
         </section>
       </div>
-      <div role="tab" option>
-        amp-anim
-      </div>
+      <div role="tab" option>amp-anim</div>
       <div role="tabpanel">
         <section>
           <h2>amp-anim</h2>
@@ -414,9 +410,7 @@
           </amp-anim>
         </section>
       </div>
-      <div role="tab" option>
-        amp-iframe
-      </div>
+      <div role="tab" option>amp-iframe</div>
       <div role="tabpanel">
         <section id="sectionAmpIframe">
           <h2>amp-iframe with image placeholder</h2>
@@ -466,9 +460,7 @@
           ></amp-iframe>
         </section>
       </div>
-      <div role="tab" option>
-        amp-twitter
-      </div>
+      <div role="tab" option>amp-twitter</div>
       <div role="tabpanel">
         <section>
           <h2>normal amp-twitter</h2>
@@ -509,9 +501,7 @@
           </amp-twitter>
         </section>
       </div>
-      <div role="tab" option>
-        amp-youtube
-      </div>
+      <div role="tab" option>amp-youtube</div>
       <div role="tabpanel">
         <section>
           <h2>amp-youtube</h2>
@@ -541,9 +531,7 @@
           </amp-youtube>
         </section>
       </div>
-      <div role="tab" option>
-        amp-*-video-player
-      </div>
+      <div role="tab" option>amp-*-video-player</div>
       <div role="tabpanel">
         <section>
           <h2>amp-ima-video</h2>
@@ -583,9 +571,7 @@
           </amp-brightcove>
         </section>
       </div>
-      <div role="tab" option>
-        amp-facebook-*
-      </div>
+      <div role="tab" option>amp-facebook-*</div>
       <div role="tabpanel">
         <section>
           <h2>amp-facebook</h2>
@@ -636,9 +622,7 @@
         </section>
       </div>
 
-      <div role="tab" option>
-        amp-pinterest
-      </div>
+      <div role="tab" option>amp-pinterest</div>
       <div role="tabpanel">
         <section>
           <h2>amp-pinterest</h2>
@@ -679,9 +663,7 @@
           </amp-pinterest>
         </section>
       </div>
-      <div role="tab" option>
-        amp-list
-      </div>
+      <div role="tab" option>amp-list</div>
       <div role="tabpanel">
         <section>
           <button on="tap:list1.refresh,list2.refresh,list3.refresh">
@@ -747,9 +729,7 @@
         </section>
       </div>
 
-      <div role="tab" option>
-        amp-google-document-embed
-      </div>
+      <div role="tab" option>amp-google-document-embed</div>
       <div role="tabpanel">
         <section>
           <h2>amp-google-document-embed</h2>
@@ -762,14 +742,10 @@
         </section>
       </div>
 
-      <div role="tab" option>
-        amp-instagram (partially implemented)
-      </div>
+      <div role="tab" option>amp-instagram (partially implemented)</div>
       <div role="tabpanel">
         <section>
-          <h1>
-            PARTIAL IMPLEMENTED - branded loader to be implemented
-          </h1>
+          <h1>PARTIAL IMPLEMENTED - branded loader to be implemented</h1>
           <h2>amp-instagram</h2>
           <amp-instagram
             data-shortcode="fBwFP"
@@ -790,9 +766,7 @@
         </section>
       </div>
 
-      <div role="tab" option>
-        amp-ad
-      </div>
+      <div role="tab" option>amp-ad</div>
       <div role="tabpanel">
         <section>
           <h2>normal amp-ad</h2>

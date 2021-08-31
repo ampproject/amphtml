@@ -165,7 +165,7 @@ function handleScript(extensions, script) {
   }
 
   const {src} = script;
-  const isTesting = getMode().test || getMode().localDev;
+  const isTesting = getMode().test;
   if (
     EXTENSION_URL_PREFIX.test(src) ||
     // Integration tests point to local files.

@@ -688,7 +688,7 @@ describes.sandboxed('reportError', {}, (env) => {
   });
 
   it('should accept string and report incorrect use', () => {
-    window.__AMP_MODE = {localDev: true, test: false};
+    window.__AMP_MODE = {test: false};
     let result;
     allowConsoleError(() => {
       result = reportError('error');
@@ -703,7 +703,7 @@ describes.sandboxed('reportError', {}, (env) => {
   });
 
   it('should accept number and report incorrect use', () => {
-    window.__AMP_MODE = {localDev: true, test: false};
+    window.__AMP_MODE = {test: false};
     let result;
     allowConsoleError(() => {
       result = reportError(101);
@@ -718,7 +718,7 @@ describes.sandboxed('reportError', {}, (env) => {
   });
 
   it('should accept null and report incorrect use', () => {
-    window.__AMP_MODE = {localDev: true, test: false};
+    window.__AMP_MODE = {test: false};
     let result;
     allowConsoleError(() => {
       result = reportError(null);

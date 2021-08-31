@@ -258,13 +258,12 @@ export class AmpRecaptchaService {
    * @private
    */
   getRecaptchaFrameSrc_() {
-    if (getMode().localDev || getMode().test) {
+    if (getMode().test) {
       /**
        * Get our window location.
-       * In localDev mode, this will be this.win_.location
        * In test mode, this will be this.win_.testLocation
        *
-       * tesLocation is needed because test fixtures are
+       * testLocation is needed because test fixtures are
        * loaded in friendly iframes, thus win.location
        * would give about:blank.
        */

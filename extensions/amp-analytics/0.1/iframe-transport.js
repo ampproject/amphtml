@@ -44,7 +44,7 @@ export function getIframeTransportScriptUrlForTesting(
  */
 function getIframeTransportScriptUrl(ampWin, opt_forceProdUrl) {
   if (
-    (getMode().localDev || getMode().test) &&
+    getMode().test &&
     !opt_forceProdUrl &&
     ampWin.parent &&
     ampWin.parent.location

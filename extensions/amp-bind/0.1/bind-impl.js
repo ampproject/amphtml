@@ -750,10 +750,9 @@ export class Bind {
     // For each node, scan it for bindings and store them.
     const scanPromises = nodes.map((node) => {
       // Limit number of total bindings (unless in local manual testing).
-      const limit =
-        getMode().localDev && !getMode().test
-          ? Number.POSITIVE_INFINITY
-          : this.maxNumberOfBindings_ - this.numberOfBindings();
+      const limit = getMode().test
+        ? Number.POSITIVE_INFINITY
+        : this.maxNumberOfBindings_ - this.numberOfBindings();
 
       return this.scanNode_(node, limit).then((results) => {
         const {bindings, limitExceeded} = results;

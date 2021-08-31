@@ -765,7 +765,7 @@ describes.sandboxed
         env.sandbox
           .stub(viewer, 'isTrustedViewer')
           .returns(Promise.resolve(false));
-        env.sandbox.stub(mode, 'getMode').returns({localDev: true});
+        env.sandbox.stub(mode, 'getMode').returns({test: true});
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
@@ -778,7 +778,7 @@ describes.sandboxed
         env.sandbox
           .stub(viewer, 'isTrustedViewer')
           .returns(Promise.resolve(false));
-        env.sandbox.stub(mode, 'getMode').returns({localDev: false});
+        env.sandbox.stub(mode, 'getMode').returns({test: false});
         env.sandbox
           .stub(viewer, 'hasCapability')
           .withArgs('xhrInterceptor')

@@ -71,7 +71,7 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
   getAdUrl() {
     const data = this.element.getAttribute('data-r');
     devAssert(data, 'Expected data-r attribte on amp-ad tag');
-    if (getMode(this.win).localDev) {
+    if (getMode(this.win).test) {
       return `http://ads.localhost:${this.win.location.port}/adzerk/` + data;
     }
     return `https://engine.adzerk.net/amp?r=${encodeURIComponent(data)}`;

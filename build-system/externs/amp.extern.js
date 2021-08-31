@@ -301,8 +301,6 @@ AmpConfigType.prototype.errorReportingUrl;
 /* @public {string} */
 AmpConfigType.prototype.betaErrorReportingUrl;
 /* @public {string} */
-AmpConfigType.prototype.localDev;
-/* @public {string} */
 AmpConfigType.prototype.v;
 /* @public {string} */
 AmpConfigType.prototype.type;

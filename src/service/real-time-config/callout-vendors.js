@@ -237,7 +237,7 @@ const RTC_VENDORS = jsonConfiguration({
 });
 
 // DO NOT MODIFY: Setup for tests
-if (getMode().localDev || getMode().test) {
+if (getMode().test) {
   RTC_VENDORS['fakevendor'] = /** @type {RtcVendorDef} */ ({
     url: 'https://localhost:8000/examples/rtcE1.json?slot_id=SLOT_ID&page_id=PAGE_ID&foo_id=FOO_ID',
     macros: ['SLOT_ID', 'PAGE_ID', 'FOO_ID'],

@@ -1,14 +1,17 @@
 // @ts-nocheck
 
-/**
- * Changes the values of getMode().test, getMode().localDev to false
- * and getMode().localDev to true.
- * @param {Object} babelTypes
- */
 const {dirname, join, relative, resolve} = require('path').posix;
 
-// This plugin is only executed when bundling for production builds (minified).
-module.exports = function ({types: t}) {
+/**
+ * This plugin is only executed when bundling for production builds (minified).
+ * It replaces the value of some mode constants.
+ *
+ * @interface {babel.PluginPass}
+ * @param {babel} babel
+ * @return {babel.PluginObj}
+ */
+module.exports = function (babel) {
+  const {types: t} = babel;
   let getModeFound = false;
   return {
     visitor: {
@@ -40,7 +43,7 @@ module.exports = function ({types: t}) {
         const {INTERNAL_RUNTIME_VERSION: version, IS_ESM} = this.opts;
 
         if (callee && callee.name === 'getMode') {
-          if (property.name === 'test' || property.name === 'localDev') {
+          if (property.name === 'test') {
             path.replaceWith(t.booleanLiteral(false));
           } else if (property.name === 'development' && IS_ESM) {
             path.replaceWith(t.booleanLiteral(false));

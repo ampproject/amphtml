@@ -306,7 +306,7 @@ user().warn(
   'f.js in iframe is being deprecated (see https://github.com/ampproject/amphtml/issues/35349 for details)'
 );
 
-if (getMode().test || getMode().localDev) {
+if (getMode().test) {
   register('_ping_', _ping_);
   register('fake-delayed', fakeDelayed);
 }

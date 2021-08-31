@@ -3,7 +3,6 @@ import {getHashParams} from '#core/types/string/url';
 
 /**
  * @typedef {{
- *   localDev: boolean,
  *   development: boolean,
  *   esm: boolean,
  *   test: boolean,
@@ -42,12 +41,11 @@ export function getMode(opt_win) {
 function getMode_(win) {
   const hashParams = getHashParams(win);
 
-  // The `minified`, `test` and `localDev` properties are replaced
+  // The `minified`, and `test` properties are replaced
   // as boolean literals when we run `amp dist` without the `--fortesting`
   // flags. This improved DCE on the production file we deploy as the code
   // paths for localhost/testing/development are eliminated.
   return {
-    localDev: coreMode.isTest(win),
     development: isModeDevelopment(win, hashParams),
     esm: coreMode.isEsm(),
     test: coreMode.isTest(win),

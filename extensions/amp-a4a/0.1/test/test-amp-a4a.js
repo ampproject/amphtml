@@ -166,7 +166,7 @@ describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
   });
 
   it('should not throw on polyfill scripts', async () => {
-    env.sandbox.stub(mode, 'getMode').returns({localDev: false});
+    env.sandbox.stub(mode, 'getMode').returns({test: false});
     await a4a.buildCallback();
     a4a.onLayoutMeasure();
     await a4a.layoutCallback();
@@ -181,7 +181,7 @@ describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
   });
 
   it('should throw on non-approved injected scripts', async () => {
-    env.sandbox.stub(mode, 'getMode').returns({localDev: false});
+    env.sandbox.stub(mode, 'getMode').returns({test: false});
     await a4a.buildCallback();
     a4a.onLayoutMeasure();
     await a4a.layoutCallback();

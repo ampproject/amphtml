@@ -16,7 +16,7 @@ const OBSERVERS_MAP_PROP = '__AMP_A4A_VP_MAP';
 export function whenWithinViewport(element, viewportNum) {
   // This can only fully be implemented when `root=document` is polyfilled
   // everywhere.
-  if (!(WITHIN_VIEWPORT_INOB || getMode().localDev || getMode().test)) {
+  if (!(WITHIN_VIEWPORT_INOB || getMode().test)) {
     return Promise.reject('!WITHIN_VIEWPORT_INOB');
   }
 

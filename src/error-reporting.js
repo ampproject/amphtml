@@ -153,7 +153,7 @@ export function reportError(error, opt_associatedElement) {
       error = new Error('Unknown error');
     }
     // Report if error is not an expected type.
-    if (!isValidError && getMode().localDev && !getMode().test) {
+    if (!isValidError && getMode().test && !getMode().test) {
       setTimeout(function () {
         const rethrow = new Error(
           '_reported_ Error reported incorrectly: ' + error
@@ -189,9 +189,7 @@ export function reportError(error, opt_associatedElement) {
     // Report to console.
     if (
       self.console &&
-      (isUserErrorMessage(error.message) ||
-        !error.expected ||
-        getMode().localDev)
+      (isUserErrorMessage(error.message) || !error.expected || getMode().test)
     ) {
       const output = console.error || console.log;
       if (error.messageArray) {
@@ -307,7 +305,7 @@ function onError(message, filename, line, col, error) {
     // eslint-disable-next-line local/no-invalid-this
     makeBodyVisibleRecovery(this.document);
   }
-  if (getMode().localDev || getMode().development || getMode().test) {
+  if (getMode().test || getMode().development) {
     return;
   }
   let hasNonAmpJs = false;

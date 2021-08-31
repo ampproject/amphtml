@@ -98,7 +98,7 @@ describes.sandboxed('utils/xhr-utils', {}, (env) => {
       viewerForDoc = env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
       win = {
         __AMP_MODE: {
-          localDev: false,
+          test: false,
         },
         location: {
           hash: '',
@@ -125,12 +125,12 @@ describes.sandboxed('utils/xhr-utils', {}, (env) => {
     });
 
     it('should not intercept if request is initialized to bypass for local development', async () => {
-      // Given the bypass flag and localDev being true.
+      // Given the bypass flag and test being true.
       init = {
         bypassInterceptorForDev: true,
       };
       win.__AMP_MODE = {
-        localDev: true,
+        test: true,
       };
 
       await getViewerInterceptResponse(win, ampDocSingle, input, init);

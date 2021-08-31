@@ -189,7 +189,7 @@ export class Builder {
    */
   createRunner(spec, opt_args, opt_positionObserverData = null) {
     return this.resolveRequests([], spec, opt_args).then((requests) => {
-      if (getMode().localDev || getMode().development) {
+      if (getMode().test || getMode().development) {
         user().fine(TAG, 'Animation: ', requests);
       }
       return Promise.all(this.loaders_).then(() => {

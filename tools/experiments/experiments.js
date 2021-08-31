@@ -71,7 +71,7 @@ const CHANNELS = [
   },
 ];
 
-if (getMode().localDev) {
+if (getMode().test) {
   EXPERIMENTS.forEach((experiment) => {
     devAssert(
       experiment.cleanupIssue,

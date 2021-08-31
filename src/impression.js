@@ -216,7 +216,7 @@ function handleClickUrl(win) {
  * @return {!Promise<?JsonObject>}
  */
 function invoke(win, clickUrl) {
-  if (getMode().localDev && !getMode().test) {
+  if (getMode().test) {
     clickUrl = 'http://localhost:8000/impression-proxy?url=' + clickUrl;
   }
   return Services.xhrFor(win)

@@ -7,7 +7,6 @@
  * AMP configuration and runtime settings structure.
  * @typedef {{
  *   test: (boolean|undefined),
- *   localDev: (boolean|undefined),
  * }}
  */
 let AmpConfigDef;

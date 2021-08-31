@@ -437,7 +437,7 @@ export class SubscriptionService {
     }
 
     let timeout = ENTITLEMENTS_REQUEST_TIMEOUT;
-    if (getMode().development || getMode().localDev) {
+    if (getMode().development || getMode().test) {
       timeout = ENTITLEMENTS_REQUEST_TIMEOUT * 2;
     }
     // Prerender safe platforms don't have to wait for the

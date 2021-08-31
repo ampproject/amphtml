@@ -113,7 +113,7 @@ export class GoogleSubscriptionsPlatform {
     this.vsync_ = Services.vsyncFor(ampdoc.win);
 
     /** @private @const {boolean} */
-    this.isDev_ = getMode().development || getMode().localDev;
+    this.isDev_ = getMode().development || getMode().test;
 
     /**
      * @private @const
@@ -543,7 +543,7 @@ export class GoogleSubscriptionsPlatform {
         // Note we don't use the more generic this.isDev_ flag because that can be
         // triggered by a hash value which would allow non google hostnames to
         // construct LAA urls.
-        !getMode(this.ampdoc_.win).localDev
+        !getMode(this.ampdoc_.win).test
       ) {
         return ShowcaseStrategy.NONE;
       }

@@ -55,7 +55,6 @@ function getMetaUrl(name) {
  *   localhostRegex: !RegExp,
  *   errorReporting: string,
  *   betaErrorReporting: string,
- *   localDev: boolean,
  *   trustedViewerHosts: !Array<!RegExp>,
  *   geoApi: ?string,
  * }}

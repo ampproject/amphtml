@@ -196,7 +196,7 @@ export class LaterpayVendor {
   getConfigUrl_() {
     const region = this.laterpayConfig_['region'] || DEFAULT_REGION;
     if (
-      (getMode().localDev || getMode().development) &&
+      (getMode().test || getMode().development) &&
       this.laterpayConfig_['configUrl']
     ) {
       return this.laterpayConfig_['configUrl'];

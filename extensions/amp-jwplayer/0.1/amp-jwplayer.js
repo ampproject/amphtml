@@ -505,7 +505,7 @@ class AmpJWPlayer extends AMP.BaseElement {
    * @return {string}
    */
   getSingleLineEmbed_() {
-    const isDev = getMode(this.win).localDev;
+    const isDev = getMode(this.win).test;
     const pid = encodeURIComponent(this.playerid_);
     let cid = encodeURIComponent(this.contentid_);
 

@@ -417,7 +417,7 @@ describes.realWin(
 
     it('geo should log an error if unpatched in production. ', () => {
       expectAsyncConsoleError(/GEONOTPATCHED/);
-      env.sandbox.stub(win.__AMP_MODE, 'localDev').value(false);
+      env.sandbox.stub(win.__AMP_MODE, 'test').value(false);
       addConfigElement('script');
 
       geo.buildCallback();
@@ -428,7 +428,7 @@ describes.realWin(
     });
 
     it('should recognize country if API has valid schema', () => {
-      env.sandbox.stub(win.__AMP_MODE, 'localDev').value(false);
+      env.sandbox.stub(win.__AMP_MODE, 'test').value(false);
       env.sandbox.stub(urls, 'geoApi').value('/geoapi');
       xhr.fetchJson.resolves({
         json: () => Promise.resolve(JSON.parse('{"country": "ca", "x": "y"}')),
@@ -443,7 +443,7 @@ describes.realWin(
     });
 
     it('should recognize country and subdivision if API has valid schema', () => {
-      env.sandbox.stub(win.__AMP_MODE, 'localDev').value(false);
+      env.sandbox.stub(win.__AMP_MODE, 'test').value(false);
       env.sandbox.stub(urls, 'geoApi').value('/geoapi');
       xhr.fetchJson.resolves({
         json: () =>
@@ -469,7 +469,7 @@ describes.realWin(
 
     it('should not recognize country if API has invalid schema', () => {
       expectAsyncConsoleError(/GEONOTPATCHED/);
-      env.sandbox.stub(win.__AMP_MODE, 'localDev').value(false);
+      env.sandbox.stub(win.__AMP_MODE, 'test').value(false);
       env.sandbox.stub(urls, 'geoApi').value('/geoapi');
       xhr.fetchJson.resolves({
         json: () =>
@@ -486,7 +486,7 @@ describes.realWin(
 
     it('should not recognize country if API unreachable', () => {
       expectAsyncConsoleError(/GEONOTPATCHED/);
-      env.sandbox.stub(win.__AMP_MODE, 'localDev').value(false);
+      env.sandbox.stub(win.__AMP_MODE, 'test').value(false);
       env.sandbox.stub(urls, 'geoApi').value('/geoapi');
       xhr.fetchJson.rejects({status: 404});
       addConfigElement('script');
@@ -500,7 +500,7 @@ describes.realWin(
 
     it('should not recognize country if API times out', () => {
       expectAsyncConsoleError(/GEONOTPATCHED/);
-      env.sandbox.stub(win.__AMP_MODE, 'localDev').value(false);
+      env.sandbox.stub(win.__AMP_MODE, 'test').value(false);
       env.sandbox.stub(urls, 'geoApi').value('/geoapi');
       env.sandbox.stub(Services, 'timerFor').returns({
         timeoutPromise: function (delay, racePromise, msg) {

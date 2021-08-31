@@ -585,7 +585,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     this.useSra =
       !delayFetchEnabled &&
-      ((getMode().localDev &&
+      ((getMode().test &&
         /(\?|&)force_sra=true(&|$)/.test(this.win.location.search)) ||
         pubEnabledSra ||
         [

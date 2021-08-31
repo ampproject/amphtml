@@ -491,7 +491,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * @private
    */
   getCtypes_() {
-    if (!getMode().localDev) {
+    if (!getMode().test) {
       return null;
     }
     const ctypesReMatch = /[?&]force_a4a_ctypes=([^&]+)/.exec(

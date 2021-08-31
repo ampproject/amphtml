@@ -68,7 +68,7 @@ export class AccessClientAdapter {
       typeof timeout == 'number',
       '"authorizationTimeout" must be a number'
     );
-    if (!(getMode().localDev || getMode().development)) {
+    if (!(getMode().test || getMode().development)) {
       timeout = Math.min(timeout, DEFAULT_AUTHORIZATION_TIMEOUT);
     }
     return timeout;

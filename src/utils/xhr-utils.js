@@ -191,7 +191,7 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
   const urlIsProxy = isProxyOrigin(input);
   const viewerCanIntercept = viewer.hasCapability('xhrInterceptor');
   const interceptorDisabledForLocalDev =
-    init.bypassInterceptorForDev && getMode(win).localDev;
+    init.bypassInterceptorForDev && getMode(win).test;
   if (urlIsProxy || !viewerCanIntercept || interceptorDisabledForLocalDev) {
     return whenUnblocked;
   }
@@ -208,7 +208,7 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
       if (
         !(
           viewerTrusted ||
-          getMode(win).localDev ||
+          getMode(win).test ||
           isExperimentOn(win, 'untrusted-xhr-interception')
         )
       ) {

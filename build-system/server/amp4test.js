@@ -35,10 +35,10 @@ app.use('/compose-doc', function (req, res) {
   let experimentsBlock = '';
   if (experiments) {
     const string = `"${experiments.split(',').join('","')}"`;
-    // TODO: Why is setting localDev necessary?
+    // TODO: Why is setting test necessary?
     // `allow-doc-opt-in` enables any experiment to be enabled via doc opt-in.
     experimentsBlock = `<script>
-        window.AMP_CONFIG = window.AMP_CONFIG || {"localDev": true};
+        window.AMP_CONFIG = window.AMP_CONFIG || {"test": true};
         window.AMP_CONFIG['allow-doc-opt-in'] = (window.AMP_CONFIG['allow-doc-opt-in'] || []).concat([${string}]);
       </script>
       <meta name="amp-experiments-opt-in" content="${experiments}">`;

@@ -17,7 +17,7 @@ const backwardCompat =
 
 const realiasGetMode =
   'Do not re-alias getMode or its return so it can be ' +
-  'DCE\'d. Use explicitly like "getMode().localDev" instead.';
+  'DCE\'d. Use explicitly like "getMode().test" instead.';
 
 /**
  * @typedef {{

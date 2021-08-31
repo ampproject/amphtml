@@ -650,7 +650,7 @@ export class AmpA4A extends AMP.BaseElement {
   whenWithinViewport(viewport) {
     devAssert(viewport !== false);
     const resource = this.getResource();
-    if (WITHIN_VIEWPORT_INOB || getMode().localDev || getMode().test) {
+    if (WITHIN_VIEWPORT_INOB || getMode().test) {
       // Resolve is already laid out or viewport is true.
       if (!resource.isLayoutPending() || viewport === true) {
         return Promise.resolve();
@@ -833,11 +833,7 @@ export class AmpA4A extends AMP.BaseElement {
             fetchResponse.headers.get(EXPERIMENT_FEATURE_HEADER_NAME)
           );
         }
-        if (
-          getMode().localDev &&
-          this.win.location &&
-          this.win.location.search
-        ) {
+        if (getMode().test && this.win.location && this.win.location.search) {
           // Allow for setting experiment features via query param which
           // will potentially override values returned in response.
           const match = /(?:\?|&)a4a_feat_exp=([^&]+)/.exec(
@@ -1296,7 +1292,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Additional arguments.
     assignAdUrlToError(/** @type {!Error} */ (error), this.adUrl_);
 
-    if (getMode().development || getMode().localDev || logHashParam()) {
+    if (getMode().development || getMode().test || logHashParam()) {
       user().error(TAG, error);
     } else {
       user().warn(TAG, error);
@@ -1722,7 +1718,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!Array<string>} A list of signing services.
    */
   getSigningServiceNames() {
-    return getMode().localDev ? ['google', 'google-dev'] : ['google'];
+    return getMode().test ? ['google', 'google-dev'] : ['google'];
   }
 
   /**

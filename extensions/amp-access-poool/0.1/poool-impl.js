@@ -191,7 +191,7 @@ export class PooolVendor {
             typeof this.pooolConfig_['debug'] !== 'undefined' &&
             this.pooolConfig_['debug'] !== null
               ? this.pooolConfig_['debug']
-              : getMode().development || getMode().localDev,
+              : getMode().development || getMode().test,
           'fw': this.pooolConfig_['forceWidget'],
           'cs': this.pooolConfig_['customSegment'],
           'lo': this.pooolConfig_['locale'],

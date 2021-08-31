@@ -71,10 +71,7 @@ export class AnalyticsConfig {
    * @return {string} the URL to request the vendor config file from
    */
   getVendorUrl_(vendor) {
-    const baseUrl = calculateScriptBaseUrl(
-      this.win_.location,
-      getMode().localDev
-    );
+    const baseUrl = calculateScriptBaseUrl(this.win_.location, getMode().test);
     // bg has a special canary config
     const canary = vendor === 'bg' && isCanary(self) ? '.canary' : '';
     return `${baseUrl}/rtv/${
@@ -408,7 +405,8 @@ export class AnalyticsConfig {
         TAG,
         'Inline configs are not allowed to specify transport iframe'
       );
-      if (!getMode().localDev || getMode().test) {
+      // TODO: this line below cannot be correct.
+      if (!getMode().test || getMode().test) {
         inlineConfig['transport']['iframe'] = undefined;
       }
     }

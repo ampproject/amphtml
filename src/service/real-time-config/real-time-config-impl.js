@@ -161,11 +161,7 @@ export class RealTimeConfigManager {
    * @param {string} errorReportingUrl
    */
   sendErrorMessage(errorType, errorReportingUrl) {
-    if (
-      !getMode(this.win_).localDev &&
-      !getMode(this.win_).test &&
-      Math.random() >= 0.01
-    ) {
+    if (!getMode(this.win_).test && Math.random() >= 0.01) {
       return;
     }
     const allowlist = {ERROR_TYPE: true, HREF: true};

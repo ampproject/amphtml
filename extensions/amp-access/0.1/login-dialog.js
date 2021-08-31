@@ -322,7 +322,7 @@ export class WebLoginDialog {
   getReturnUrl_() {
     const currentUrl = this.viewer.getResolvedViewerUrl();
     let returnUrl;
-    if (getMode().localDev) {
+    if (getMode().test) {
       const loc = this.win.location;
       returnUrl =
         loc.protocol +

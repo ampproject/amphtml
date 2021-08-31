@@ -8,7 +8,6 @@ import {getMode} from './mode';
  */
 export function getModeObject(opt_win) {
   return {
-    localDev: getMode(opt_win).localDev,
     development: getMode(opt_win).development,
     esm: getMode(opt_win).esm,
     test: getMode(opt_win).test,

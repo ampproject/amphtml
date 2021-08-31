@@ -198,7 +198,7 @@ code elimination to trim down the file size for the file we deploy to production
 If the origin resource is on HTTPS, the URLs are http://localhost:8000/a4a[-3p]/proxy/s/output.jsbin.com/pegizoq/quiet
 
 Notice that all documents are assumed to have a "fake" signature. Thus, this functionality is only available in the
-`localDev` mode.
+`test` mode.
 
 Additionally, the following query parameters can be provided:
 

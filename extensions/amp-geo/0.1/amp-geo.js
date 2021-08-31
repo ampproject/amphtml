@@ -175,7 +175,7 @@ export class AmpGeo extends AMP.BaseElement {
 
     // default country is 'unknown' which is also the zero length case
     const geoOverride = getHashParams(this.win)['amp-geo'];
-    if (geoOverride && (isCanary(this.win) || getMode(this.win).localDev)) {
+    if (geoOverride && (isCanary(this.win) || getMode(this.win).test)) {
       // debug override case, only works in canary or localdev
       // match to \w characters only to prevent xss vector
       const overrideGeoMatch = GEO_HOTPATCH_STR_REGEX.exec(
@@ -213,7 +213,7 @@ export class AmpGeo extends AMP.BaseElement {
     } else if (trimmedGeoMatch[0] === '' && urls.geoApi) {
       // We were not patched, but an API is available
       this.mode_ = mode.GEO_API;
-    } else if (trimmedGeoMatch[0] === '' && !getMode(this.win).localDev) {
+    } else if (trimmedGeoMatch[0] === '' && !getMode(this.win).test) {
       // We were not patched, if we're not in dev this is an error
       // and we leave the country at the default 'unknown'
       this.error_ = true;

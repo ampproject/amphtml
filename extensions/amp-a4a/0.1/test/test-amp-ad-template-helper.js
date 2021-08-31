@@ -15,7 +15,7 @@ describes.fakeWin('AmpAdTemplateHelper', {amp: true}, (env) => {
 
   beforeEach(() => {
     win = env.win;
-    win.__AMP_MODE = {localDev: false};
+    win.__AMP_MODE = {test: false};
     doc = win.document;
     ampdoc = env.ampdoc;
     fetchTextMock = env.sandbox.stub(Xhr.prototype, 'fetchText');

@@ -25,7 +25,7 @@ module.exports = function (context) {
         node,
         message:
           'Do not re-alias getMode or its return value so it can be ' +
-          "DCE'd. Use explicitly like `getMode().localDev` instead.",
+          "DCE'd. Use explicitly like `getMode().test` instead.",
       });
     },
   };

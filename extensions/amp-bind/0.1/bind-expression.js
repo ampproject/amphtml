@@ -222,7 +222,7 @@ export class BindExpression {
 
     // Check if this expression string is too large (for performance).
     const maxSize = opt_maxAstSize || MAX_AST_SIZE;
-    const skipConstraint = getMode().localDev && !getMode().test;
+    const skipConstraint = getMode().test;
     if (this.expressionSize > maxSize && !skipConstraint) {
       throw new Error(
         `Expression size (${this.expressionSize}) exceeds max ` +

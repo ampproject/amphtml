@@ -423,7 +423,7 @@ export function adoptShadowMode(global) {
  * @return {boolean}
  */
 function maybeLoadCorrectVersion(win, fnOrStruct) {
-  if (getMode().localDev && isExperimentOn(win, 'disable-version-locking')) {
+  if (getMode().test && isExperimentOn(win, 'disable-version-locking')) {
     return false;
   }
   if (typeof fnOrStruct == 'function') {

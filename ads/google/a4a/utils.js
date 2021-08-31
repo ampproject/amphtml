@@ -147,10 +147,7 @@ function getNavigationTiming(win, timingEvent) {
  *   pathway.
  */
 export function isGoogleAdsA4AValidEnvironment(win) {
-  return (
-    supportsNativeCrypto(win) &&
-    (!!isCdnProxy(win) || getMode(win).localDev || getMode(win).test)
-  );
+  return supportsNativeCrypto(win) && (!!isCdnProxy(win) || getMode(win).test);
 }
 
 /**

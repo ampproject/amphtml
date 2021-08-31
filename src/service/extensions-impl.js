@@ -159,7 +159,7 @@ export class Extensions {
       this.currentExtensionVersion_ = version;
       this.currentExtensionLatest_ = latest;
       factory(arg, arg['_']);
-      if (getMode(this.win).localDev || getMode(this.win).test) {
+      if (getMode(this.win).test) {
         if (Object.freeze) {
           const m = holder.extension;
           m.elements = Object.freeze(m.elements);

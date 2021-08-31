@@ -87,7 +87,7 @@ describes.sandboxed('3p integration.js', {}, () => {
       'examples/","canonicalUrl":"http://localhost:8000/' +
       'examples/amps.html","location":{"href":"http://' +
       'localhost:8000/examples/twitter.amp.html"},' +
-      '"mode":{"localDev":true,"development":false,"minified":false}}}';
+      '"mode":{"test":true,"development":false,"minified":false}}}';
     const data = parseFragment(unencoded);
     expect(data).to.be.an('object');
     expect(data.tweetid).to.equal('638793490521001985');
@@ -104,7 +104,7 @@ describes.sandboxed('3p integration.js', {}, () => {
       'referrer%22:%22http://localhost:8000/examples/%22,%22canoni' +
       'calUrl%22:%22http://localhost:8000/examples/amps.html%22,%22' +
       'location%22:{%22href%22:%22http://localhost:8000/examples/t' +
-      'witter.amp.html%22},%22mode%22:{%22localDev%22:true,%22develop' +
+      'witter.amp.html%22},%22mode%22:{%22test%22:true,%22develop' +
       'ment%22:false,%22minified%22:false}}}';
     const data = parseFragment(encoded);
     expect(data).to.be.an('object');

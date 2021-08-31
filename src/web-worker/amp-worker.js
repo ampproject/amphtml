@@ -69,7 +69,7 @@ class AmpWorker {
       loc = win.testLocation;
     }
     // Use RTV to make sure we fetch prod/canary/experiment correctly.
-    const useLocal = getMode().localDev || getMode().test;
+    const useLocal = getMode().test;
     const useRtvVersion = !useLocal;
     const url = calculateEntryPointScriptUrl(
       loc,
@@ -86,7 +86,7 @@ class AmpWorker {
     this.fetchPromise_ = this.xhr_
       .fetchText(url, {
         ampCors: false,
-        bypassInterceptorForDev: getMode().localDev,
+        bypassInterceptorForDev: getMode().test,
       })
       .then((res) => res.text())
       .then((text) => {
