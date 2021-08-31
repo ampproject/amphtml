@@ -415,9 +415,11 @@ describes.fakeWin(
     });
 
     it('should load correct extension version', async function () {
-      self.__AMP_MODE = {
-        rtvVersion: 'test-version',
-      };
+      // calculateExtensionScript isn't passed an opt_win arg
+      // so we can't use win.__AMP_MODE for both.
+      self.__AMP_MODE = {rtvVersion: 'test-version'};
+      win.__AMP_MODE = {test: false};
+
       function addExisting(index) {
         const s = document.createElement('script');
         const name = 'amp-test-element' + index;

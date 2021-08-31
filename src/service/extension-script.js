@@ -134,11 +134,12 @@ export function createExtensionScript(win, extensionId, version) {
   if (getMode(win).test && win.testLocation) {
     loc = win.testLocation;
   }
+
   const scriptSrc = calculateExtensionScriptUrl(
     loc,
     extensionId,
     version,
-    getMode(win).localDev
+    getMode(win).test
   );
   scriptElement.src = scriptSrc;
   return scriptElement;

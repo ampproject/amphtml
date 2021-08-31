@@ -43,7 +43,7 @@ const viewportCallbacks = new WeakMap();
  */
 export function observeWithSharedInOb(element, viewportCallback) {
   // There should never be two unique observers of the same element.
-  if (mode.isLocalDev()) {
+  if (mode.isTest()) {
     devAssert(
       !viewportCallbacks.has(element) ||
         viewportCallbacks.get(element) === viewportCallback
