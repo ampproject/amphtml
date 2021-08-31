@@ -201,7 +201,7 @@ export class StandardActions {
        * Copy Target Element Text
        *  Example: targetId.copy();
        */
-      const target = dev().assertElement(invocation.node);
+      const target = devAssertElement(invocation.node);
       textToCopy = (target.value ?? target.textContent).trim();
     }
 
