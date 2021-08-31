@@ -14,6 +14,7 @@ import {Services} from '#service';
 import {createCustomEvent} from '../event-helper';
 import {dev, user, userAssert} from '../log';
 import {getAmpdoc, registerServiceBuilderForDoc} from '../service-helpers';
+import {devAssertElement} from '#core/assert';
 
 /**
  * @param {!Element} element
