@@ -28,5 +28,3 @@ feature_tests/manufactured_body_whitespace.html:14:2 The parent tag of tag 'amph
 |  Hello, world.
 |  </body>
 |  </html>
->>       ^~~~~~~~~
-feature_tests/manufactured_body_whitespace.html:19:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites)

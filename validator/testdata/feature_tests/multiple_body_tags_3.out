@@ -35,5 +35,3 @@ feature_tests/multiple_body_tags_3.html:19:2 The parent tag of tag 'amphtml engi
 |         body so that counts as the first body tag. -->
 |  </body>
 |  </html>
->>       ^~~~~~~~~
-feature_tests/multiple_body_tags_3.html:26:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites)

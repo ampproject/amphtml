@@ -387,7 +387,7 @@ describe('ValidatorOutput', () => {
     assertStrictEqual(results.status, 'FAIL');
     assertStrictEqual(
         results.errors[0].params.toString(),
-        'head > style[amp4email-boilerplate]');
+        'style[amp-boilerplate],amphtml engine script');
     assertStrictEqual(results.errors.length, 1);
   });
 

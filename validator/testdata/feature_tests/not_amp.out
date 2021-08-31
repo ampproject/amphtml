@@ -18,9 +18,3 @@ feature_tests/not_amp.html:6:0 The mandatory attribute '⚡' is missing in tag '
 feature_tests/not_amp.html:13:6 The mandatory tag 'link rel=canonical' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 >>       ^~~~~~~~~
 feature_tests/not_amp.html:13:6 The mandatory tag 'meta name=viewport' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
->>       ^~~~~~~~~
-feature_tests/not_amp.html:13:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites)
->>       ^~~~~~~~~
-feature_tests/not_amp.html:13:6 The mandatory tag 'noscript > style[amp-boilerplate]' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites)
->>       ^~~~~~~~~
-feature_tests/not_amp.html:13:6 The mandatory tag 'amphtml engine script' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)

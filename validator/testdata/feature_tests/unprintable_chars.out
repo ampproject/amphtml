@@ -47,5 +47,3 @@ feature_tests/unprintable_chars.html:21:2 The parent tag of tag 'amphtml engine 
 |  </html>
 >>       ^~~~~~~~~
 feature_tests/unprintable_chars.html:26:6 The mandatory tag 'html !doctype' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
->>       ^~~~~~~~~
-feature_tests/unprintable_chars.html:26:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites)
