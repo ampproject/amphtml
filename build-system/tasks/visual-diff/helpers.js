@@ -2,7 +2,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const puppeteer = require('puppeteer'); // eslint-disable-line no-unused-vars
-const {cyan, green, red, yellow} = require('../../common/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {log: logBase} = require('../../common/logging');
 
 const CSS_SELECTOR_RETRY_MS = 200;

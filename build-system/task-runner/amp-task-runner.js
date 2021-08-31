@@ -13,7 +13,7 @@ const {
   updatePackages,
   updateSubpackages,
 } = require('../common/update-packages');
-const {cyan, green, magenta, red} = require('../common/colors');
+const {cyan, green, magenta, red} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {log} = require('../common/logging');
 

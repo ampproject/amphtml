@@ -38,7 +38,7 @@ const {
 } = require('./recaptcha-router');
 const {logWithoutTimestamp} = require('../common/logging');
 const {log} = require('../common/logging');
-const {red} = require('../common/colors');
+const {red} = require('kleur/colors');
 const {renderShadowViewer} = require('./shadow-viewer');
 
 /**
