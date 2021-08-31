@@ -41,7 +41,7 @@ export const A4AVarNames = {
 };
 
 /** @type {Array<string>} */
-export const PageOutlinkLayerVarNames = [
+const PageOutlinkLayerVarNames = [
   'cta-accent-color',
   'cta-accent-element',
   'cta-image',

@@ -144,8 +144,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const spy = env.sandbox.spy(page, 'renderOpenAttachmentUI_');
     page.buildCallback();
     await page.layoutCallback();
-    page.beforeVisible();
-    expect(spy).to.have.been.calledThrice;
+    expect(spy).to.have.been.calledTwice;
   });
 
   it('should mark page as loaded after media is loaded', async () => {
