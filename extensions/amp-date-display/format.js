@@ -20,9 +20,9 @@ export function getTimeZoneName(date, locale, options, format = 'long') {
     timeZoneName: format,
   });
   const parts = formatter.formatToParts?.(date) || [];
-  for (let i = 0; i < parts.length; i++) {
-    if (parts[i].type === 'timeZoneName') {
-      return parts[i].value;
+  for (const part of parts) {
+    if (part.type === 'timeZoneName') {
+      return part.value;
     }
   }
   return '';
