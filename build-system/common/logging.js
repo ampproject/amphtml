@@ -1,6 +1,6 @@
 'use strict';
 
-const {bold, gray, yellow} = require('./colors');
+const {bold, gray, yellow} = require('kleur/colors');
 const {isCiBuild} = require('./ci');
 
 /**

@@ -1,6 +1,6 @@
 const debounce = require('../common/debounce');
 const fastGlob = require('fast-glob');
-const {cyan, red} = require('../common/colors');
+const {cyan, red} = require('kleur/colors');
 const {endBuildStep} = require('./helpers');
 const {esbuildCompile} = require('./helpers');
 const {VERSION} = require('../compile/internal-version');

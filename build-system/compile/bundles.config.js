@@ -1,7 +1,7 @@
 'use strict';
 const extensionBundles = require('./bundles.config.extensions.json');
 const wrappers = require('./compile-wrappers');
-const {cyan, red} = require('../common/colors');
+const {cyan, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
