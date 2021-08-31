@@ -14,7 +14,6 @@ const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global');
-const {BUILD_CONSTANTS} = require('../compile/build-constants');
 const {closureCompile} = require('../compile/compile');
 const {cyan, green, red} = require('../common/colors');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
@@ -738,13 +737,11 @@ async function applyAmpConfig(targetFile) {
   const baseConfigFile =
     'build-system/global-configs/' + config + '-config.json';
 
-  const isTest = !BUILD_CONSTANTS.IS_PROD;
   await removeConfig(targetFile);
   await applyConfig(
     config,
     targetFile,
     baseConfigFile,
-    isTest,
     /* opt_localBranch */ true
   );
 }

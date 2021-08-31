@@ -6,6 +6,7 @@ const colors = require('../../common/colors');
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
+const {BUILD_CONSTANTS} = require('../../compile/build-constants');
 const {log} = require('../../common/logging');
 
 const exec = util.promisify(childProcess.exec);
@@ -100,7 +101,6 @@ function valueOrDefault(value, defaultValue) {
  * @param {string} config Prod or canary
  * @param {string} target File containing the AMP runtime (amp.js or v0.js)
  * @param {string} filename File containing the (prod or canary) config
- * @param {boolean=} opt_fortesting Whether for testing.
  * @param {boolean=} opt_localBranch Whether to use the local branch version
  * @param {string=} opt_branch If not the local branch, which branch to use
  * @param {boolean=} opt_derandomize Whether to remove experiment randomization
@@ -110,7 +110,6 @@ async function applyConfig(
   config,
   target,
   filename,
-  opt_fortesting,
   opt_localBranch,
   opt_branch,
   opt_derandomize
@@ -144,7 +143,8 @@ async function applyConfig(
       );
     }
   }
-  if (opt_fortesting) {
+  const isTest = !BUILD_CONSTANTS.IS_PROD;
+  if (isTest) {
     configJson = enableTest_(target, configJson);
   }
   if (opt_derandomize) {
@@ -159,7 +159,7 @@ async function applyConfig(
   const details =
     '(' +
     cyan(config) +
-    (opt_fortesting ? ', ' + cyan('test') : '') +
+    (isTest ? ', ' + cyan('test') : '') +
     (opt_derandomize ? ', ' + cyan('derandomized') : '') +
     ')';
   log('Applied AMP config', details, 'to', cyan(path.basename(target)));
@@ -258,7 +258,6 @@ async function prependGlobal() {
       'build-system/global-configs/prod-config.json'
     );
   }
-  const fortesting = !argv._.includes('dist') || argv.fortesting;
   await Promise.all([...targets.map(removeConfig)]);
   await Promise.all([
     ...targets.map((target) =>
@@ -266,7 +265,6 @@ async function prependGlobal() {
         config,
         target,
         filename,
-        fortesting,
         argv.local_branch,
         argv.branch,
         argv.derandomize

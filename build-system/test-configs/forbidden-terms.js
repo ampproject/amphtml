@@ -144,11 +144,11 @@ const forbiddenTermsGlobal = {
     message:
       'Do not use build constants directly. Instead, use the helpers in `#core/mode`.',
     allowlist: [
+      'build-system/tasks/prepend-global/index.js',
       'build-system/babel-config/minified-config.js',
       'build-system/babel-config/pre-closure-config.js',
       'build-system/babel-plugins/babel-plugin-amp-mode-transformer/index.js',
       'build-system/compile/build-constants.js',
-      'build-system/tasks/helpers.js',
       'src/core/mode/esm.js',
       'src/core/mode/minified.js',
       'src/core/mode/prod.js',
