@@ -19,11 +19,8 @@ export function getTimeZoneName(date, locale, options, format = 'long') {
     timeZone: options?.timeZone,
     timeZoneName: format,
   });
-  const parts = formatter.formatToParts?.(date) || [];
-  for (const part of parts) {
-    if (part.type === 'timeZoneName') {
-      return part.value;
-    }
-  }
-  return '';
+  return (
+    formatter.formatToParts(date).find(({type}) => type === 'timeZoneName')
+      ?.value || ''
+  );
 }
