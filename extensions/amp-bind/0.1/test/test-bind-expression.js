@@ -755,6 +755,7 @@ describes.sandboxed('BindExpression', {}, () => {
     });
 
     it('disallow: exceeding maximum AST size', () => {
+      window.AMP_CONFIG = {test: false};
       expect(new BindExpression('1 + 1', {}, /* maxAstSize */ 3)).to.not.be
         .null;
 

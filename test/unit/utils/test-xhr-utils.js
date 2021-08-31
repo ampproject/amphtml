@@ -129,9 +129,6 @@ describes.sandboxed('utils/xhr-utils', {}, (env) => {
       init = {
         bypassInterceptorForDev: true,
       };
-      win.__AMP_MODE = {
-        test: true,
-      };
 
       await getViewerInterceptResponse(win, ampDocSingle, input, init);
 

@@ -1,4 +1,5 @@
 import {Deferred} from '#core/data-structures/promise';
+import {isTest} from '#core/mode';
 import {parseQueryString} from '#core/types/string/url';
 import {WindowInterface} from '#core/window/interface';
 
@@ -7,7 +8,6 @@ import {isExperimentOn} from '#experiments';
 import {Services} from '#service';
 
 import {dev, user, userAssert} from './log';
-import {getMode} from './mode';
 import {addParamsToUrl, isProxyOrigin, parseUrlDeprecated} from './url';
 
 const TIMEOUT_VALUE = 8000;
@@ -216,7 +216,7 @@ function handleClickUrl(win) {
  * @return {!Promise<?JsonObject>}
  */
 function invoke(win, clickUrl) {
-  if (getMode().test) {
+  if (isTest(win)) {
     clickUrl = 'http://localhost:8000/impression-proxy?url=' + clickUrl;
   }
   return Services.xhrFor(win)

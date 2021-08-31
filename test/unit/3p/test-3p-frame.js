@@ -305,7 +305,6 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       });
 
       it('should pick the right bootstrap url for local-dev mode', () => {
-        mockMode({test: true});
         const ampdoc = Services.ampdoc(window.document);
         expect(getBootstrapBaseUrl(window, ampdoc)).to.equal(
           'http://ads.localhost:9876/dist.3p/current/frame.max.html'
@@ -313,7 +312,6 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       });
 
       it('should pick the right bootstrap url for testing mode', () => {
-        mockMode({test: true});
         const ampdoc = Services.ampdoc(window.document);
         expect(getBootstrapBaseUrl(window, ampdoc)).to.equal(
           'http://ads.localhost:9876/dist.3p/current/frame.max.html'

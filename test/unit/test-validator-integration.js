@@ -29,7 +29,6 @@ describes.fakeWin('validator-integration', {}, (env) => {
     });
 
     it('should not load validator script if bypassed', () => {
-      getModeStub.returns({test: true});
       isModeDevelopmentStub.returns(true);
       win.location = 'https://www.example.com/#development=1&validate=0';
       maybeValidate(win);
@@ -45,7 +44,6 @@ describes.fakeWin('validator-integration', {}, (env) => {
     });
 
     it('should load WebAssembly validator', () => {
-      getModeStub.returns({test: true});
       isModeDevelopmentStub.returns(true);
       win.location = 'https://www.example.com/#development=1';
       maybeValidate(win);

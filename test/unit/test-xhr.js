@@ -765,7 +765,6 @@ describes.sandboxed
         env.sandbox
           .stub(viewer, 'isTrustedViewer')
           .returns(Promise.resolve(false));
-        env.sandbox.stub(mode, 'getMode').returns({test: true});
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 

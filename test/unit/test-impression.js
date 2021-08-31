@@ -135,6 +135,7 @@ describes.realWin('impression', {amp: true}, (env) => {
     });
 
     it('should invoke click URL with experiment on', function* () {
+      window.AMP_CONFIG = {test: false};
       env.sandbox.spy(viewer, 'sendMessageAwaitResponse');
       toggleExperiment(window, 'alp', true);
       isTrustedViewer = false;
@@ -152,6 +153,7 @@ describes.realWin('impression', {amp: true}, (env) => {
     });
 
     it('should invoke click URL in trusted viewer', function* () {
+      window.AMP_CONFIG = {test: false};
       toggleExperiment(window, 'alp', false);
       isTrustedViewer = true;
       viewer.getParam.withArgs('click').returns('https://www.example.com');
@@ -168,6 +170,7 @@ describes.realWin('impression', {amp: true}, (env) => {
     });
 
     it('should invoke click URL for trusted referrer', function* () {
+      window.AMP_CONFIG = {test: false};
       toggleExperiment(window, 'alp', false);
       isTrustedViewer = false;
       referrer = 'https://t.co/docref';

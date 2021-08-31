@@ -1,4 +1,4 @@
-import {getMode} from '../../../../../../../src/mode';
+import { getMode } from '../../../../../../../src/mode'; // prettier-ignore
 import * as mode from '#core/mode';
 const test = false;
 const minified = true;

@@ -1761,7 +1761,7 @@ describes.sandboxed(
       win = new FakeWindow();
       window.__AMP_MODE = {
         development: false,
-        test: false,
+        test: true,
         version: '$internalRuntimeVersion$',
       };
 

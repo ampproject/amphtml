@@ -633,10 +633,7 @@ chromed.run('Bind', {}, function () {
         });
 
         it('should verify class bindings in dev mode', () => {
-          window.__AMP_MODE = {
-            development: true,
-            test: true,
-          };
+          window.__AMP_MODE = {development: true};
           createElement(env, container, '[class]="\'foo\'" class="foo"', {
             insertQuerySelectorAttr: useQuerySelector,
           });
@@ -658,10 +655,7 @@ chromed.run('Bind', {}, function () {
         });
 
         it('should verify string attribute bindings in dev mode', () => {
-          window.__AMP_MODE = {
-            development: true,
-            test: true,
-          };
+          window.__AMP_MODE = {development: true};
           // Only the initial value for [a] binding does not match.
           createElement(
             env,
@@ -677,10 +671,7 @@ chromed.run('Bind', {}, function () {
         });
 
         it('should verify boolean attribute bindings in dev mode', () => {
-          window.__AMP_MODE = {
-            development: true,
-            test: true,
-          };
+          window.__AMP_MODE = {development: true};
           createElement(env, container, '[disabled]="true" disabled', {
             tag: 'button',
             insertQuerySelectorAttr: useQuerySelector,
