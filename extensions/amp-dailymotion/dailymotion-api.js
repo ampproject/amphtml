@@ -1,7 +1,6 @@
 import {addParamsToUrl} from '../../src/url';
 import {dict} from '#core/types/object';
 import {isAutoplaySupported} from '#core/dom/video';
-import {VideoEvents} from '../../src/video-interface';
 
 /**
  *

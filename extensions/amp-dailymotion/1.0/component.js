@@ -3,7 +3,6 @@ import {forwardRef} from '#preact/compat';
 import {useMemo} from '#preact';
 import {dispatchCustomEvent} from '#core/dom';
 import {
-  DAILYMOTION_VIDEO_EVENTS,
   DailymotionEvents,
   getDailymotionIframeSrc,
   makeDailymotionMessage,
