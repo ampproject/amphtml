@@ -568,6 +568,7 @@ async function minify(code, map, {mangle} = {mangle: false}) {
       passes: 3,
     },
     output: {
+      ascii_only: true,
       beautify: !!argv.pretty_print,
       // eslint-disable-next-line google-camelcase/google-camelcase
       keep_quoted_props: true,

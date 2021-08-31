@@ -28,6 +28,7 @@ async function terserMinify(code, filename) {
       unused: true,
     },
     output: {
+      ascii_only: true,
       beautify: !!argv.pretty_print,
       comments: /\/*/,
       // eslint-disable-next-line google-camelcase/google-camelcase
