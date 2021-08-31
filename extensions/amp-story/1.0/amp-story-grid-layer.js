@@ -44,12 +44,6 @@ const SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR = Object.keys(
   .join(',');
 
 /**
- * The attribute name for grid layer templates.
- * @private @const {string}
- */
-const TEMPLATE_ATTRIBUTE_NAME = 'template';
-
-/**
  * The attribute name for grid layer presets.
  * @private @const {string}
  */
