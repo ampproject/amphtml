@@ -2,6 +2,7 @@ import {toWin} from '#core/window';
 
 import {useEffect} from '#preact';
 
+/** @type {WeakMap<!Element, function(boolean)>} */ 
 const ioForWindow = new WeakMap();
 const callbackMap = new WeakMap();
 
@@ -12,7 +13,7 @@ const callbackMap = new WeakMap();
  * @param {function(IntersectionObserverEntry)} callback
  * @param {?Window} targetWin
  */
-export function useIntersectionObserver(ref, callback, targetWin = null) {
+export function useIntersectionObserver(ref, callback, targetWin) {
   useEffect(() => {
     const node = ref.current;
     if (!node) {

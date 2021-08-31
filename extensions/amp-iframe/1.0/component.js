@@ -97,7 +97,7 @@ export function Iframe({
     };
   }, [handlePostMessage]);
 
-  const inViewportCallback = useCallback(
+  const ioCallback = useCallback(
     ({isIntersecting}) => {
       if (isIntersecting === isIntersectingRef.current) {
         return;
