@@ -12,7 +12,7 @@ bento: true
 
 ## Behavior
 
-The Bento Twitter component allows you to embed a Tweet or Moment for the specified Twitter ID. Use it as a web component [`<bento-twitter>`](#web-component), or a Preact/React functional component [`<BentoTwitter>`](#preact/react-Component).
+The Bento Twitter component allows you to embed a Tweet or Moment. Use it as a web component [`<bento-twitter>`](#web-component), or a Preact/React functional component [`<BentoTwitter>`](#preact/react-Component).
 
 ### Web Component
 
