@@ -17,7 +17,7 @@
   --i-amphtml-draggable-drawer-text-color: #202125 !important;
   --i-amphtml-draggable-drawer-handle-color: rgba(0, 0, 0, .2) !important;
   --i-amphtml-draggable-drawer-header-font-family: 'Roboto', sans-serif !important;
-  --i-amphtml-draggable-drawer-header-font-size: 14px !important;
+  --i-amphtml-draggable-drawer-header-font-size: 16px !important;
   --i-amphtml-draggable-drawer-header-title-height: 44px !important;
   background: var(--i-amphtml-draggable-drawer-background-color) !important;
 }
@@ -112,7 +112,7 @@
   font-family: var(--i-amphtml-draggable-drawer-header-font-family) !important;
   width: calc(100% - 80px) !important;
   color: var(--i-amphtml-draggable-drawer-text-color) !important;
-  font-size: var(--i-amphtml-draggable-drawer-header-font-size) !important;
+  font-size: calc(var(--i-amphtml-draggable-drawer-header-font-size) - 2px) !important;
   line-height: 40px !important;
   overflow: hidden !important;
   text-align: center !important;
