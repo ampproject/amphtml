@@ -101,12 +101,12 @@ describes.realWin(
       expect(computedStyle(win, playerIframe).height).to.equal('775.25px');
     });
 
-    it('should resolve the first message before load', async () => {
+    it('should resolve messages received before load', async () => {
       const tiktok = await getTiktokBuildOnly({height: '600'});
       const impl = await tiktok.getImpl();
 
       // ensure that loadPromise is never resolved
-      const loadPromiseStub = env.sandbox.stub(impl, 'loadPromise');
+      env.sandbox.stub(impl, 'loadPromise').returns(new Promise(() => {}));
       impl.layoutCallback();
 
       // ensure that resolver is set after layoutCallback
@@ -115,9 +115,12 @@ describes.realWin(
         impl,
         'resolveReceivedFirstMessage_'
       );
-      loadPromiseStub.resolves();
-      impl.handleTiktokMessages_({data: JSON.stringify({height: 555})});
-      expect(firstMessageStub).to.have.been.calledOnce;
+      impl.handleTiktokMessages_({
+        origin: 'https://www.tiktok.com',
+        source: tiktok.querySelector('iframe').contentWindow,
+        data: JSON.stringify({height: 555}),
+      });
+      expect(firstMessageStub).to.be.calledOnce;
     });
 
     it('renders placeholder', async () => {
