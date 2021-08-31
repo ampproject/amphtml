@@ -36,13 +36,15 @@ function makeMethodMessage(method) {
 function onMessage({currentTarget, data}) {
   const parsedData = parseQueryString(/** @type {string} */ (data));
   const event = parsedData?.['event'];
-  if (DAILYMOTION_VIDEO_EVENTS[event]) {
-    dispatchCustomEvent(currentTarget, DAILYMOTION_VIDEO_EVENTS[event]);
-    return;
-  }
-  if (DailymotionEvents[event]) {
-    dispatchCustomEvent(currentTarget, DailymotionEvents.event);
-    return;
+  if (event === DailymotionEvents.PAUSE) {
+    dispatchCustomEvent(currentTarget, 'pause');
+  } else if (event === DailymotionEvents.PLAY) {
+    dispatchCustomEvent(currentTarget, 'playing');
+  } else if (event === DailymotionEvents.END) {
+    dispatchCustomEvent(currentTarget, 'pause');
+    dispatchCustomEvent(currentTarget, 'end');
+  } else if (event === DailymotionEvents.API_READY) {
+    dispatchCustomEvent(currentTarget, 'canplay');
   }
 }
 

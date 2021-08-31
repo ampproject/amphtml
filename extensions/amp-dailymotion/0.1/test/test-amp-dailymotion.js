@@ -48,11 +48,12 @@ describes.realWin(
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-        'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp&mute=0'
+        'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp'
       );
     });
 
     it('renders responsively', async () => {
+      // optResponsive: true
       const dailymotion = await getDailymotion('x2m8jpp', true);
       const iframe = dailymotion.querySelector('iframe');
       expect(iframe).to.not.be.null;
@@ -60,15 +61,20 @@ describes.realWin(
     });
 
     it('renders with custom settings', async () => {
+      // optResponsive: false
+      // optCustomSettings: true
       const dailymotion = await getDailymotion('x2m8jpp', false, true);
       const iframe = dailymotion.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
-        'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp&mute=0&start=123&origin=example%26.org'
+        'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp&start=123&origin=example%26.org'
       );
     });
 
     it('renders already muted when autoplay is enabled', async () => {
+      // optResponsive: false
+      // optCustomSettings: false
+      // optAutoplay: true
       const dailymotion = await getDailymotion('x2m8jpp', false, false, true);
       const iframe = dailymotion.querySelector('iframe');
       expect(iframe).to.not.be.null;
@@ -78,11 +84,13 @@ describes.realWin(
     });
 
     it('renders without mute when autoplay and mute are not explicitly added', async () => {
+      // optResponsive: false
+      // optCustomSettings: false
       const dailymotion = await getDailymotion('x2m8jpp', false, false);
       const iframe = dailymotion.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
-        'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp&mute=0'
+        'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp'
       );
     });
 

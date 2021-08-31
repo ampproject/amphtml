@@ -41,7 +41,7 @@ export function getDailymotionIframeSrc(
         'info': info,
         // In order to support autoplay the video needs to be muted on load so we
         // dont receive an unmute event which prevents the video from autoplay.
-        'mute': Number(!!(mute || (autoplay && isAutoplaySupported(win)))),
+        'mute': mute || (autoplay && isAutoplaySupported(win)) ? 1 : undefined,
         'sharing-enable': sharingEnable,
         'start': start,
         'ui-highlight': uiHighlight,
@@ -65,22 +65,6 @@ export function makeDailymotionMessage(command, params = []) {
     })
   );
 }
-
-/**
- * Maps events coming from the Dailymotion frame to events to be dispatched from the
- * component element.
- *
- * If the item does not have a value, the event will not be forwarded 1:1, but
- * it will be listened to.
- *
- * @const {!Object<string, ?string>}
- */
-export const DAILYMOTION_VIDEO_EVENTS = {
-  'apiready': ['canplay', VideoEvents.LOAD],
-  'end': [VideoEvents.ENDED, VideoEvents.PAUSE],
-  'pause': VideoEvents.PAUSE,
-  'play': VideoEvents.PLAYING,
-};
 
 /**
  * Player events reverse-engineered from the Dailymotion API

@@ -15,7 +15,7 @@ describes.sandboxed('Dailymotion preact component v1.0', {}, () => {
     const iframe = wrapper.find('iframe');
 
     expect(iframe.prop('src')).to.equal(
-      'https://www.dailymotion.com/embed/video/x3rdtfy?api=1&html=1&app=amp&mute=0'
+      'https://www.dailymotion.com/embed/video/x3rdtfy?api=1&html=1&app=amp'
     );
 
     // Style propagated to container, but not iframe.
@@ -28,7 +28,6 @@ describes.sandboxed('Dailymotion preact component v1.0', {}, () => {
       <Dailymotion
         style={{width: 300, height: 200}}
         videoId="x3rdtfy"
-        mute={false}
         endscreenEnable={false}
         sharingEnable={false}
         uiHighlight="444444"
@@ -38,8 +37,6 @@ describes.sandboxed('Dailymotion preact component v1.0', {}, () => {
 
     const iframe = wrapper.find('iframe');
 
-    // Mute Attr
-    expect(iframe.prop('src')).to.contain('mute=0');
     // Enscreen Enable attr
     expect(iframe.prop('src')).to.contain('endscreen-enable=false');
     // Sharing Enable attr
@@ -55,14 +52,14 @@ describes.sandboxed('Dailymotion preact component v1.0', {}, () => {
       <Dailymotion
         style={{width: 300, height: 200}}
         videoId="x3rdtfy"
-        mute={false}
+        mute={true}
       ></Dailymotion>
     );
 
     const iframe = wrapper.find('iframe');
 
     // Mute Attr
-    expect(iframe.prop('src')).to.contain('mute=0');
+    expect(iframe.prop('src')).to.contain('mute=1');
   });
 
   it('Renders with iframe already muted when autoplay is passed', () => {
