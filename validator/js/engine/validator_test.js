@@ -434,7 +434,7 @@ describe('Validator.DocSizeAmpEmail', () => {
   assertStrictEqual(20, validBlob.length);
 
   it('accepts 200000 bytes in the test document', () => {
-    const body = Array(9945).join(validBlob);
+    const body = Array(9975).join(validBlob);
     const test = new ValidatorTestCase('amp4email_feature_tests/doc_size.html');
     test.ampHtmlFileContents =
         test.ampHtmlFileContents.replace('replace_body', body);
@@ -445,7 +445,7 @@ describe('Validator.DocSizeAmpEmail', () => {
   });
 
   it('will not accept 200001 bytes in the test document', () => {
-    const body = Array(9945).join(validBlob) + ' ';
+    const body = Array(9975).join(validBlob) + ' ';
     const test = new ValidatorTestCase('amp4email_feature_tests/doc_size.html');
     test.ampHtmlFileContents =
         test.ampHtmlFileContents.replace('replace_body', body);
@@ -453,7 +453,7 @@ describe('Validator.DocSizeAmpEmail', () => {
     test.inlineOutput = false;
     test.expectedOutputFile = null;
     test.expectedOutput = 'FAIL\n' +
-        'amp4email_feature_tests/doc_size.html:9977:6 ' +
+        'amp4email_feature_tests/doc_size.html:9993:6 ' +
         'Document exceeded 200000 bytes limit. Actual size 200001 bytes. ' +
         '(see https://amp.dev/documentation/guides-and-tutorials/learn/' +
         'email-spec/amp-email-format/?format=email)';
@@ -491,7 +491,7 @@ describe('Validator.ScriptLength', () => {
         test.ampHtmlFileContents.replace('replace_inline_script', inlineScript);
     test.expectedOutputFile = null;
     test.expectedOutput = 'FAIL\n' +
-        'feature_tests/inline_script_length.html:35:2 The inline script ' +
+        'feature_tests/inline_script_length.html:20:2 The inline script ' +
         'is 10001 bytes, which exceeds the limit of 10000 bytes. ' +
         '(see https://amp.dev/documentation/components/amp-script/#faq)';
     test.run();
@@ -540,7 +540,7 @@ describe('Validator.CssLength', () => {
                .replace('replace_inline_style', '');
        test.expectedOutputFile = null;
        test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:28:2 The author stylesheet ' +
+           'feature_tests/css_length.html:13:2 The author stylesheet ' +
            'specified in tag \'style amp-custom\' is too long - document ' +
            'contains 75001 bytes whereas the limit is 75000 bytes. ' +
            '(see https://amp.dev/documentation/guides-and-tutorials/' +
@@ -561,7 +561,7 @@ describe('Validator.CssLength', () => {
                .replace('replace_inline_style', '');
        test.expectedOutputFile = null;
        test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:28:2 The author stylesheet ' +
+           'feature_tests/css_length.html:13:2 The author stylesheet ' +
            'specified in tag \'style amp-custom\' is too long - document ' +
            'contains 75002 bytes whereas the limit is 75000 bytes. ' +
            '(see https://amp.dev/documentation/guides-and-tutorials/' +
@@ -592,7 +592,7 @@ describe('Validator.CssLength', () => {
                .replace('replace_inline_style', inlineStyle);
        test.expectedOutputFile = null;
        test.expectedOutput =
-           'FAIL\nfeature_tests/css_length.html:36:6 The author stylesheet specified in tag \'style amp-custom\' and the combined inline styles is too large - document contains 75010 bytes whereas the limit is 75000 bytes. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)';
+           'FAIL\nfeature_tests/css_length.html:21:6 The author stylesheet specified in tag \'style amp-custom\' and the combined inline styles is too large - document contains 75010 bytes whereas the limit is 75000 bytes. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)';
        test.run();
      });
 
@@ -608,7 +608,7 @@ describe('Validator.CssLength', () => {
                .replace('.replace_amp_custom {}', stylesheet)
                .replace('replace_inline_style', '<b style=display:block;></b>');
        test.expectedOutput =
-           'FAIL\nfeature_tests/css_length.html:7536:6 The author stylesheet specified in tag \'style amp-custom\' and the combined inline styles is too large - document contains 75014 bytes whereas the limit is 75000 bytes. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)';
+           'FAIL\nfeature_tests/css_length.html:7521:6 The author stylesheet specified in tag \'style amp-custom\' and the combined inline styles is too large - document contains 75014 bytes whereas the limit is 75000 bytes. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)';
        test.run();
      });
 });
@@ -640,7 +640,7 @@ describe('Validator.CssLengthAmpEmail', () => {
                .replace('.replace_amp_custom {}', stylesheet)
                .replace('replace_inline_style', '');
        test.expectedOutput = 'PASS\n' +
-           'amp4email_feature_tests/css_length.html:23:0 Tag \'html\' ' +
+           'amp4email_feature_tests/css_length.html:8:0 Tag \'html\' ' +
            'marked with attribute \'amp4email\' is missing the corresponding ' +
            'attribute \'data-css-strict\' for enabling strict CSS ' +
            'validation. This may become an error in the future. ' +
@@ -662,12 +662,12 @@ describe('Validator.CssLengthAmpEmail', () => {
                .replace('replace_inline_style', '');
        test.expectedOutputFile = null;
        test.expectedOutput = 'FAIL\n' +
-           'amp4email_feature_tests/css_length.html:23:0 Tag \'html\' ' +
+           'amp4email_feature_tests/css_length.html:8:0 Tag \'html\' ' +
            'marked with attribute \'amp4email\' is missing the corresponding ' +
            'attribute \'data-css-strict\' for enabling strict CSS ' +
            'validation. This may become an error in the future. ' +
            '(see https://github.com/ampproject/amphtml/issues/32587)\n' +
-           'amp4email_feature_tests/css_length.html:28:2 The author stylesheet ' +
+           'amp4email_feature_tests/css_length.html:13:2 The author stylesheet ' +
            'specified in tag \'style amp-custom\' is too long - document ' +
            'contains 75001 bytes whereas the limit is 75000 bytes. ' +
            '(see https://amp.dev/documentation/guides-and-tutorials/' +
@@ -689,12 +689,12 @@ describe('Validator.CssLengthAmpEmail', () => {
                .replace('replace_inline_style', '');
        test.expectedOutputFile = null;
        test.expectedOutput = 'FAIL\n' +
-           'amp4email_feature_tests/css_length.html:23:0 Tag \'html\' ' +
+           'amp4email_feature_tests/css_length.html:8:0 Tag \'html\' ' +
            'marked with attribute \'amp4email\' is missing the corresponding ' +
            'attribute \'data-css-strict\' for enabling strict CSS ' +
            'validation. This may become an error in the future. ' +
            '(see https://github.com/ampproject/amphtml/issues/32587)\n' +
-           'amp4email_feature_tests/css_length.html:28:2 The author ' +
+           'amp4email_feature_tests/css_length.html:13:2 The author ' +
            'stylesheet specified in tag \'style amp-custom\' is ' +
            'too long - document contains 75002 bytes whereas the limit is ' +
            '75000 bytes. (see ' +
@@ -713,7 +713,7 @@ describe('Validator.CssLengthAmpEmail', () => {
            test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
                .replace('replace_inline_style', inlineStyle);
        test.expectedOutput = 'PASS\n' +
-           'amp4email_feature_tests/css_length.html:23:0 Tag \'html\' ' +
+           'amp4email_feature_tests/css_length.html:8:0 Tag \'html\' ' +
            'marked with attribute \'amp4email\' is missing the corresponding ' +
            'attribute \'data-css-strict\' for enabling strict CSS ' +
            'validation. This may become an error in the future. ' +
@@ -735,12 +735,12 @@ describe('Validator.CssLengthAmpEmail', () => {
        // TODO(gregable): This should not pass for the case when there are more
        // than 75,000 bytes of inline style.
        test.expectedOutput = 'PASS\n' +
-           'amp4email_feature_tests/css_length.html:23:0 Tag \'html\' ' +
+           'amp4email_feature_tests/css_length.html:8:0 Tag \'html\' ' +
            'marked with attribute \'amp4email\' is missing the corresponding ' +
            'attribute \'data-css-strict\' for enabling strict CSS ' +
            'validation. This may become an error in the future. ' +
            '(see https://github.com/ampproject/amphtml/issues/32587)\n' +
-           'amp4email_feature_tests/css_length.html:34:6 The author ' +
+           'amp4email_feature_tests/css_length.html:19:6 The author ' +
            'stylesheet specified in tag \'style amp-custom\' and the ' +
            'combined inline styles is too large - document contains 75010 ' +
            'bytes whereas the limit is 75000 bytes. ' +
@@ -764,12 +764,12 @@ describe('Validator.CssLengthAmpEmail', () => {
        // TODO(gregable): This should not pass, as we have more than 75,000
        // bytes of total style.
        test.expectedOutput = 'PASS\n' +
-           'amp4email_feature_tests/css_length.html:23:0 Tag \'html\' ' +
+           'amp4email_feature_tests/css_length.html:8:0 Tag \'html\' ' +
            'marked with attribute \'amp4email\' is missing the corresponding ' +
            'attribute \'data-css-strict\' for enabling strict CSS ' +
            'validation. This may become an error in the future. ' +
            '(see https://github.com/ampproject/amphtml/issues/32587)\n' +
-           'amp4email_feature_tests/css_length.html:7534:6 The author ' +
+           'amp4email_feature_tests/css_length.html:7519:6 The author ' +
            'stylesheet specified in tag \'style amp-custom\' and the ' +
            'combined inline styles is too large - document contains 75014 ' +
            'bytes whereas the limit is 75000 bytes. (see https://amp.dev/' +
@@ -815,7 +815,7 @@ describe('Validator.CssLengthWithUrls', () => {
                .replace('replace_inline_style', '');
        test.expectedOutputFile = null;
        test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:28:2 The author stylesheet ' +
+           'feature_tests/css_length.html:13:2 The author stylesheet ' +
            'specified in tag \'style amp-custom\' is too long - document ' +
            'contains 75010 bytes whereas the limit is 75000 bytes. ' +
            '(see https://amp.dev/documentation/guides-and-tutorials/' +
@@ -841,7 +841,7 @@ describe('Validator.CssLengthWithUrls', () => {
                .replace('replace_inline_style', '');
        test.expectedOutputFile = null;
        test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:28:2 The author stylesheet ' +
+           'feature_tests/css_length.html:13:2 The author stylesheet ' +
            'specified in tag \'style amp-custom\' is too long - document ' +
            'contains 75010 bytes whereas the limit is 75000 bytes. ' +
            '(see https://amp.dev/documentation/guides-and-tutorials/' +
@@ -867,7 +867,7 @@ describe('Validator.CssLengthWithUrls', () => {
                .replace('replace_inline_style', '');
        test.expectedOutputFile = null;
        test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:28:2 The author stylesheet ' +
+           'feature_tests/css_length.html:13:2 The author stylesheet ' +
            'specified in tag \'style amp-custom\' is too long - document ' +
            'contains 75010 bytes whereas the limit is 75000 bytes. ' +
            '(see https://amp.dev/documentation/guides-and-tutorials/' +
@@ -889,7 +889,7 @@ describe('Validator.CssLengthWithUrls', () => {
                .replace('replace_inline_style', inlineStyle);
        test.expectedOutputFile = null;
        test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:36:6 The author stylesheet specified in tag \'style amp-custom\' and the combined inline styles is too large - document contains 75009 bytes whereas the limit is 75000 bytes. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)';
+           'feature_tests/css_length.html:21:6 The author stylesheet specified in tag \'style amp-custom\' and the combined inline styles is too large - document contains 75009 bytes whereas the limit is 75000 bytes. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)';
        test.run();
      });
 
@@ -907,7 +907,7 @@ describe('Validator.CssLengthWithUrls', () => {
                .replace('replace_inline_style', inlineStyle);
        test.expectedOutputFile = null;
        test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:36:6 The author stylesheet specified in tag \'style amp-custom\' and the combined inline styles is too large - document contains 75009 bytes whereas the limit is 75000 bytes. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)';
+           'feature_tests/css_length.html:21:6 The author stylesheet specified in tag \'style amp-custom\' and the combined inline styles is too large - document contains 75009 bytes whereas the limit is 75000 bytes. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)';
        test.run();
      });
 });
@@ -990,7 +990,7 @@ describe('ValidatorTransformedAmp.CssLengthWithUrls', () => {
                .replace('replace_inline_style', '');
        test.expectedOutputFile = null;
        test.expectedOutput = 'FAIL\n' +
-           'transformed_feature_tests/css_length.html:29:2 The author ' +
+           'transformed_feature_tests/css_length.html:14:2 The author ' +
            'stylesheet specified in tag \'style amp-custom\' ' +
            'is too long - document contains 75010 bytes whereas the limit ' +
            'is 75000 bytes. ' +
@@ -1013,7 +1013,7 @@ describe('ValidatorTransformedAmp.CssLengthWithUrls', () => {
                .replace('replace_inline_style', inlineStyle);
        test.expectedOutputFile = null;
        test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:36:6 The author stylesheet specified in tag \'style amp-custom\' and the combined inline styles is too large - document contains 75009 bytes whereas the limit is 75000 bytes. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)';
+           'feature_tests/css_length.html:21:6 The author stylesheet specified in tag \'style amp-custom\' and the combined inline styles is too large - document contains 75009 bytes whereas the limit is 75000 bytes. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)';
        test.run();
      });
 
@@ -1031,7 +1031,7 @@ describe('ValidatorTransformedAmp.CssLengthWithUrls', () => {
                .replace('replace_inline_style', inlineStyle);
        test.expectedOutputFile = null;
        test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:36:6 The author stylesheet specified in tag \'style amp-custom\' and the combined inline styles is too large - document contains 75009 bytes whereas the limit is 75000 bytes. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)';
+           'feature_tests/css_length.html:21:6 The author stylesheet specified in tag \'style amp-custom\' and the combined inline styles is too large - document contains 75009 bytes whereas the limit is 75000 bytes. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)';
        test.run();
      });
 });
