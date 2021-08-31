@@ -17,6 +17,15 @@ push_builds_only: &push_builds_only
         - main
         - /^amp-release-.*$/
 
+release_builds_only: &release_builds_only
+  filters:
+    branches:
+      only:
+        - nightly
+        - /^amp-release-.*$/
+        # TODO(danielrozenberg): DO NOT MERGE
+        - pull/35872
+
 pr_builds_only: &pr_builds_only
   filters:
     branches:
@@ -428,6 +437,39 @@ jobs:
           command: node build-system/pr-check/experiment-e2e-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
       - teardown_vm
+  amp_release:
+    executor:
+      name: node-docker-xlarge
+    parameters:
+      flavor:
+        description: 'Which of the release flavors to build'
+        type: enum
+        enum: ['base', 'experimentA', 'experimentB', 'experimentC']
+      esm:
+        description: 'Whether to build module or nomodule release'
+        type: enum
+        enum: ['no-esm', 'esm']
+    environment:
+      EXP: << parameters.flavor >>
+      FLAVOR: << parameters.flavor >>
+      ESM: << parameters.esm >>
+    steps:
+      - setup_vm
+      - run:
+          name: '⭐ amp release ⭐'
+          command: node --unhandled-rejections=strict build-system/release-workflows/build-release.js
+      - teardown_vm
+  upload_release:
+    executor:
+      name: node-docker-medium
+    steps:
+      - setup_vm
+      - run:
+          name: '⭐ Upload Release Artifacts ⭐'
+          command: node --unhandled-rejections=strict build-system/release-workflows/upload-release.js
+      - store_artifacts:
+          path: /tmp/release.tar.gz
+      - teardown_vm
 
 workflows:
   version: 2
@@ -569,3 +611,22 @@ workflows:
       #     <<: *push_builds_only
       #     requires:
       #       - 'Nomodule Build (Test)'
+
+  'Release':
+    jobs:
+      - initialize_repository:
+          name: 'Initialize Repository'
+          <<: *release_builds_only
+      - amp_release:
+          name: '<< matrix.flavor >> << matrix.esm >>'
+          matrix:
+            parameters:
+              flavor: ['base', 'experimentA', 'experimentB', 'experimentC']
+              esm: ['no-esm', 'esm']
+          <<: *release_builds_only
+          requires:
+            - 'Initialize Repository'
+      - upload_release:
+          name: 'Upload release'
+          requires:
+            - amp_release
