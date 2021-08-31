@@ -2,8 +2,8 @@ import {toWin} from '#core/window';
 
 import {useEffect} from '#preact';
 
-const ioForWindow = new Map();
-const callbackMap = new Map();
+const ioForWindow = new WeakMap();
+const callbackMap = new WeakMap();
 
 /**
  * Uses a shared IntersectionObserver per window instance to observe the given `ref`.
