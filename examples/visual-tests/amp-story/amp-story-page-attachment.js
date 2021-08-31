@@ -225,7 +225,7 @@ module.exports = {
     ]);
   },
 
-  'form presence - the keyboard should close upon attachment dismissal': async (
+  'form presence - the input field should blur on close': async (
     page,
     name
   ) => {
@@ -244,16 +244,18 @@ module.exports = {
       `amp-story-page#${pageID} .i-amphtml-story-inline-page-attachment-chip`
     );
 
-    // Tap the input element to cause the soft keyboard to appear.
+    // Tap the input element. This causes the soft keyboard to appear on
+    // mobile.
     await page.waitForSelector(`amp-story-page#${pageID} input`);
     await page.tap(`amp-story-page#${pageID} input`);
     await page.waitForSelector(`amp-story-page#${pageID} input:focus`);
 
-    // Dismiss the attachment by tapping an element on the story page.
-    await page.waitForSelector(`amp-story-page#${pageID} p`);
-    await page.tap(`amp-story-page#${pageID} p`);
-
-    // Verify that the keyboard is gone by ensuring that no input has focus.
+    // Dismiss the attachment by tapping an element on the story page, which
+    // should blur the input field. This ensures that the soft keyboard is
+    // dismissed.
+    await page.tap(
+      `amp-story-page#${pageID} .i-amphtml-story-draggable-drawer-spacer`
+    );
     await verifySelectorsInvisible(page, name, [
       `amp-story-page#${pageID} input:focus`,
     ]);
