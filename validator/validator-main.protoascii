@@ -1,9 +1,4 @@
-# This revision id refers to the validator revision id, currently a Google
-# internal mechanism. When backwards incompatible changes to the validator
-# engine are made, this value must be incremented to prevent old binaries
-# in production from crashing. This id is not relevant to validator.js
-# because thus far, engine (validator.js) and spec file
-# (validator-main.protoascii, etc) are always released together.
+# DEPRECATED: This value is no longer updated.
 min_validator_revision_required: 475
 
 # DEPRECATED: This value is no longer updated.
