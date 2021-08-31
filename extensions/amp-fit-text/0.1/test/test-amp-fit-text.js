@@ -1,10 +1,6 @@
 import {createElementWithAttributes} from '#core/dom';
-import {
-  AmpFitText,
-  buildDom,
-  calculateFontSize_,
-  updateOverflow_,
-} from '../amp-fit-text';
+import {AmpFitText, calculateFontSize_, updateOverflow_} from '../amp-fit-text';
+import {buildDom} from '../build-dom';
 
 describes.realWin(
   'amp-fit-text component',
