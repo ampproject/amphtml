@@ -5,7 +5,6 @@ import {getHistoryState} from '#core/window/history';
 import {Services} from '#service';
 
 import {dev, devAssert} from '../log';
-import {getMode} from '../mode';
 import {
   getService,
   registerServiceBuilder,
@@ -1115,11 +1114,7 @@ export class HistoryBindingVirtual_ {
 function createHistory(ampdoc) {
   const viewer = Services.viewerForDoc(ampdoc);
   let binding;
-  if (
-    viewer.isOvertakeHistory() ||
-    getMode(ampdoc.win).test ||
-    ampdoc.win.__AMP_TEST_IFRAME
-  ) {
+  if (viewer.isOvertakeHistory() || ampdoc.win.__AMP_TEST_IFRAME) {
     binding = new HistoryBindingVirtual_(ampdoc.win, viewer);
   } else {
     // Only one global "natural" binding is allowed since it works with the
