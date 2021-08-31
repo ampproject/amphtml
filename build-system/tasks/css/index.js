@@ -77,9 +77,8 @@ const cssEntryPoints = [
   },
   {
     // Story CSS used to layout story before JS loads.
-    path: 'amp-story-prestyle.css',
-    outJs: 'amp-story-prestyle.css.js',
-    outCss: 'amp-story-prestyle.css',
+    path: 'amp-story.css',
+    outCss: 'amp-story-v1.css',
     append: false,
   },
   {

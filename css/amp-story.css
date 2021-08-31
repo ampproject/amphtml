@@ -1,6 +1,6 @@
 /**
- * Styles that can be preapplied to amp-story[standalone] documents to layout
- * the story before the JS loads.
+ * @fileoverview Styles that can be preapplied to amp-story[standalone]
+ * documents to layout the story before the JS loads.
 */
 
 html.i-amphtml-singledoc.i-amphtml-standalone body, body,
