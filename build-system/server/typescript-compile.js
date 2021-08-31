@@ -1,5 +1,5 @@
 const esbuild = require('esbuild');
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const path = require('path');
 const {accessSync} = require('fs-extra');
 const {cyan, green} = require('../common/colors');
@@ -30,7 +30,7 @@ async function buildNewServer() {
     green('at'),
     cyan(outdir) + green('...')
   );
-  const entryPoints = await globby(`${SERVER_TRANSFORM_PATH}/**/*.ts`);
+  const entryPoints = await fastGlob(`${SERVER_TRANSFORM_PATH}/**/*.ts`);
   const startTime = Date.now();
   await esbuild.build({
     ...esbuildOptions,
