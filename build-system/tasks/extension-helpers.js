@@ -721,7 +721,6 @@ async function buildExtensionJs(extDir, name, version, latestVersion, options) {
   const aliasBundle = extensionAliasBundles[name];
   const isAliased = aliasBundle && aliasBundle.version == version;
 
-  /** @type {([string, string] | null)[]} */
   const aliases = [
     isAliased ? [name, aliasBundle.aliasedVersion] : null,
     // TODO(alanorozco): We'd like to provide bento-foo.js binaries that only
