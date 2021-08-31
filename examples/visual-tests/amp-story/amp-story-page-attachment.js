@@ -255,7 +255,7 @@ module.exports = {
 
     // Verify that the keyboard is gone by ensuring that no input has focus.
     await verifySelectorsInvisible(page, name, [
-      `amp-story-page#${pageID} input:focus`
+      `amp-story-page#${pageID} input:focus`,
     ]);
   },
 };
