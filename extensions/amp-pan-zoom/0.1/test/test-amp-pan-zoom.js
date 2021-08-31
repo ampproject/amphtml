@@ -231,7 +231,8 @@ describes.realWin(
         });
     });
 
-    it('should correctly update bounds with bottom-aligned content', () => {
+    // TODO: unskip after root causing.
+    it.skip('should correctly update bounds with bottom-aligned content', () => {
       return getPanZoom({
         'style': 'justify-content: start; flex-direction: column-reverse',
       })
