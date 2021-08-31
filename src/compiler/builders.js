@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
@@ -14,8 +15,11 @@
  * limitations under the License.
  */
 import {buildDom as ampLayoutClassic} from '#builtins/amp-layout/amp-layout';
+=======
+import {buildDom as ampLayoutClassic} from '#builtins/amp-layout/build-dom';
+>>>>>>> f5fcc1ae2a... Make `compiler.js` runnable within a node.js environment (#35849)
 
-import {buildDom as ampFitTextClassic} from '../../extensions/amp-fit-text/0.1/amp-fit-text';
+import {buildDom as ampFitTextClassic} from '../../extensions/amp-fit-text/0.1/build-dom';
 
 const builderMap = {
   'v0': {

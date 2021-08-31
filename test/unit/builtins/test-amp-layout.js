@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
@@ -15,6 +16,10 @@
  */
 
 import {AmpLayout, buildDom} from '#builtins/amp-layout/amp-layout';
+=======
+import {AmpLayout} from '#builtins/amp-layout/amp-layout';
+import {buildDom} from '#builtins/amp-layout/build-dom';
+>>>>>>> f5fcc1ae2a... Make `compiler.js` runnable within a node.js environment (#35849)
 
 import {createElementWithAttributes} from '#core/dom';
 import {Layout} from '#core/dom/layout';

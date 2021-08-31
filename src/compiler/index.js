@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
@@ -14,6 +15,9 @@
  * limitations under the License.
  */
 
+=======
+import './polyfills';
+>>>>>>> f5fcc1ae2a... Make `compiler.js` runnable within a node.js environment (#35849)
 import * as compiler from '@ampproject/bento-compiler';
 
 import {getBuilders} from './builders';
