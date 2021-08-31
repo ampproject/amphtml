@@ -224,4 +224,38 @@ module.exports = {
         '.i-amphtml-story-page-attachment-domain-label',
     ]);
   },
+
+  'form presence - the keyboard should close upon attachment dismissal': async (
+    page,
+    name
+  ) => {
+    const url = await page.url();
+    const pageID = 'attachment-with-form';
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+
+    // Open the page attachment.
+    await page.waitForSelector(
+      `amp-story-page#${pageID} .i-amphtml-story-inline-page-attachment-chip`
+    );
+    await page.tap(
+      `amp-story-page#${pageID} .i-amphtml-story-inline-page-attachment-chip`
+    );
+
+    // Tap the input element to cause the soft keyboard to appear.
+    await page.waitForSelector(`amp-story-page#${pageID} input`);
+    await page.tap(`amp-story-page#${pageID} input`);
+    await page.waitForSelector(`amp-story-page#${pageID} input:focus`);
+
+    // Dismiss the attachment by tapping an element on the story page.
+    await page.waitForSelector(`amp-story-page#${pageID} p`);
+    await page.tap(`amp-story-page#${pageID} p`);
+
+    // Verify that the keyboard is gone by ensuring that no input has focus.
+    await verifySelectorsInvisible(page, name, [
+      `amp-story-page#${pageID} input:focus`
+    ]);
+  },
 };
