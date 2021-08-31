@@ -3415,23 +3415,13 @@ tags: {
 # 4.11.2 The noscript element
 tags: {
   html_format: AMP
-  disabled_by: "transformed"
   tag_name: "NOSCRIPT"
-  spec_name: "noscript enclosure for boilerplate"
-  descriptive_name: "noscript enclosure for boilerplate"
-  mandatory: true
-  unique: true
+  spec_name: "noscript enclosure for amp style tags"
   mandatory_parent: "HEAD"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites"
-}
-tags: {
-  html_format: AMP
-  enabled_by: "transformed"
-  tag_name: "NOSCRIPT"
-  spec_name: "noscript enclosure for boilerplate (transformed)"
-  descriptive_name: "noscript enclosure for boilerplate"
-  unique: true
-  mandatory_parent: "HEAD"
+  child_tags {
+    child_tag_name_oneof: "STYLE"
+    mandatory_min_num_child_tags: 1
+  }
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites"
 }
 # We allow noscript in the body to contain tags otherwise disallowed by AMP.
