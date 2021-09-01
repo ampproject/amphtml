@@ -12,11 +12,18 @@ import {useCallback} from '#preact';
  * @return {function}
  */
 export function useIntersectionObserver(callback) {
+  const nodeRef = useRef(null);
   const refCb = useCallback(
     (node) => {
+      const prevNode = nodeRef.current;
+      nodeRef.current = node;
+      if (prevNode) {
+        unobserveWithSharedInOb(nodeRef.current, callback);
+      }
       if (!node) {
         return;
       }
+      
       observeWithSharedInOb(node, callback);
 
       return () => {
