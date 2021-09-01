@@ -224,7 +224,7 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
 
     beforeEach(() => {
       buttonFitter = new ButtonTextFitter(env.ampdoc);
-      toggleExperiment(env.win, 'amp-story-page-outlink', true, true);
+      toggleExperiment(env.win, 'amp-story-ads-page-outlink', true, true);
     });
 
     it('createCta page outlink custom theme element', () => {

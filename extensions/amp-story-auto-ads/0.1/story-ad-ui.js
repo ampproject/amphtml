@@ -292,7 +292,7 @@ export function createCta(doc, buttonFitter, container, uiMetadata) {
       return null;
     }
 
-    if (isExperimentOn(doc.defaultView, 'amp-story-page-outlink')) {
+    if (isExperimentOn(doc.defaultView, 'amp-story-ads-page-outlink')) {
       return createPageOutlink_(doc, uiMetadata, container);
     } else {
       return createCtaLayer_(a, doc, container);
