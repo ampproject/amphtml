@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {Gestures} from '../../../src/gesture';
-import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
-import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyle} from '#core/dom/style';
 import {clamp} from '#core/math';
-import {forwardRef} from '#preact/compat';
+
+import * as Preact from '#preact';
 import {
   useCallback,
   useEffect,
@@ -28,16 +28,21 @@ import {
   useRef,
   useState,
 } from '#preact';
+import {forwardRef} from '#preact/compat';
 
-import {createElementWithAttributes} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
+// import {Services} from '#service';
+
 import {useStyles} from './component.jss';
+
+import {listen} from '../../../src/event-helper';
+import {Gestures} from '../../../src/gesture';
+import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 
 const VALID_IMAGE_TAGNAMES = new Set(['AMP-IMG', 'IMG']);
 
 /**
  * @param {!ImageSliderDef.Props} props
- * @param ref
+ * @param {{current: ?ImageSliderDef.ImageSliderApi}} ref
  * @return {PreactDef.Renderable}
  */
 export function ImageSliderWithRef(
@@ -89,6 +94,14 @@ export function ImageSliderWithRef(
   /** Hint Body References */
   const leftHintBodyRef = useRef(null);
   const rightHintBodyRef = useRef(null);
+
+  /** Unlisten Handlers for Mouse */
+  const unlistenMouseUp = useRef(null);
+  const unlistenMouseDown = useRef(null);
+  const unlistenMouseMove = useRef(null);
+
+  /** Unlisten Handlers for Keyboard */
+  const unlistenKeyDown = useRef(null);
 
   const buildImageWrappers = useCallback(() => {
     leftMaskRef.current = createElementWithAttributes(doc.current, 'div');
@@ -237,44 +250,6 @@ export function ImageSliderWithRef(
   //     });
   // }, []);
 
-  const unregisterTouchGestures = useCallback(() => {
-    if (gesturesRef.current == null) {
-      return;
-    }
-    gesturesRef.current.cleanup();
-    gesturesRef.current = null;
-  }, []);
-
-  const registerTouchGestures = useCallback(() => {
-    if (gesturesRef.current) {
-      return;
-    }
-
-    gesturesRef.current = Gestures.get(
-      containerRef.current,
-      /* shouldNotPreventDefault */ true
-    );
-
-    // gesturesRef.current = Gestures.get(
-    //   leftImageRef.current,
-    //   /* shouldNotPreventDefault */ true
-    // );
-
-    gesturesRef.current.onGesture(SwipeXRecognizer, (e) => {
-      if (e.data.first) {
-        // Disable hint reappearance timeout if needed
-        animateHideHint();
-      }
-      pointerMoveX(e.data.startX + e.data.deltaX);
-    });
-
-    gesturesRef.current.onPointerDown((e) => {
-      // Ensure touchstart changes slider position
-      pointerMoveX(e.touches[0].pageX);
-      animateHideHint();
-    });
-  }, [animateHideHint, pointerMoveX]);
-
   const animateHideHint = useCallback(() => {
     leftHintBodyRef.current.classList.add('i-amphtml-image-slider-hint-hidden');
     rightHintBodyRef.current.classList.add(
@@ -293,6 +268,49 @@ export function ImageSliderWithRef(
     //});
   }, []);
 
+  /** Listen / Unlisten Handler */
+  /**
+   * Unlisten a listener and clear. If null, does nothing
+   * @param {?UnlistenDef} unlistenHandle
+   * @private
+   */
+  const unlisten = useCallback((unlistenHandle) => {
+    if (unlistenHandle) {
+      unlistenHandle();
+      unlistenHandle = null;
+    }
+  }, []);
+
+  const unregisterTouchGestures = useCallback(() => {
+    if (gesturesRef.current == null) {
+      return;
+    }
+    gesturesRef.current.cleanup();
+    gesturesRef.current = null;
+  }, []);
+
+  /**
+   * Unregister events
+   * @private
+   */
+  const unregisterEvents = useCallback(() => {
+    unlisten(unlistenMouseDown.current);
+    unlisten(unlistenMouseMove.current);
+    unlisten(unlistenMouseUp.current);
+    unlisten(unlistenKeyDown.current);
+    unregisterTouchGestures();
+    isEventRegistered.current = false;
+    unregisterTouchGestures();
+  }, [
+    unlistenMouseDown,
+    unlistenMouseUp,
+    unlistenMouseMove,
+    unlistenKeyDown,
+    isEventRegistered,
+    unregisterTouchGestures,
+    unlisten,
+  ]);
+
   const pointerMoveX = useCallback((pointerX) => {
     // This is to address the "snap to leftmost" bug that occurs on
     // pointer down after scrolling away and back 3+ slides
@@ -307,23 +325,281 @@ export function ImageSliderWithRef(
     //this.updatePositions_(newPercentage);
   }, []);
 
+  const registerTouchGestures = useCallback(() => {
+    if (gesturesRef.current) {
+      return;
+    }
+
+    gesturesRef.current = Gestures.get(
+      containerRef.current,
+      /* shouldNotPreventDefault */ true
+    );
+
+    gesturesRef.current.onGesture(SwipeXRecognizer, (e) => {
+      if (e.data.first) {
+        // Disable hint reappearance timeout if needed
+        animateHideHint();
+      }
+      pointerMoveX(e.data.startX + e.data.deltaX);
+    });
+
+    gesturesRef.current.onPointerDown((e) => {
+      // Ensure touchstart changes slider position
+      pointerMoveX(e.touches[0].pageX);
+      animateHideHint();
+    });
+  }, [animateHideHint, pointerMoveX]);
+
+  /**
+   * Limit percentage between 0 and 1
+   * @param {number} percentage
+   * @private
+   * @return {number}
+   */
+  const limitPercentage = useCallback((percentage) => {
+    return clamp(percentage, 0, 1);
+  }, []);
+
+  /**
+   * Set translateX of the element
+   * Only used in updatePositions_, which should be wrapped in mutateElement
+   * @param {Element} element
+   * @param {number} percentage
+   * @private
+   */
+  const updateTranslateX = useCallback((element, percentage) => {
+    setStyle(element, 'transform', `translateX(${percentage * 100}%)`);
+  }, []);
+
+  /**
+   * Get current slider's percentage to the left
+   * Should be wrapped inside measureElement
+   * @private
+   * @return {number}
+   */
+  const getCurrentSliderPercentage = useCallback(() => {
+    const {left: barLeft} = barRef.current./*OK*/ getBoundingClientRect();
+    const {left: boxLeft, width: boxWidth} =
+      containerRef.current./*OK*/ getBoundingClientRect();
+    return (barLeft - boxLeft) / boxWidth;
+  }, []);
+
+  /**
+   * Update element positions based on percentage
+   * Should be wrapped inside mutateElement
+   * @param {number} percentFromLeft
+   * @private
+   */
+  const updatePositions = useCallback(
+    (percentFromLeft) => {
+      percentFromLeft = limitPercentage(percentFromLeft);
+
+      updateTranslateX(barRef.current, percentFromLeft);
+      updateTranslateX(rightMaskRef.current, percentFromLeft);
+      updateTranslateX(rightImageRef.current, -percentFromLeft);
+      const adjustedDeltaFromLeft = percentFromLeft - 0.5;
+      updateTranslateX(leftHintBodyRef.current, adjustedDeltaFromLeft);
+      updateTranslateX(rightHintBodyRef.current, adjustedDeltaFromLeft);
+      if (rightLabelWrapperRef.current != null) {
+        updateTranslateX(rightLabelWrapperRef.current, -percentFromLeft);
+      }
+    },
+    [limitPercentage, updateTranslateX]
+  );
+
+  /**
+   * One step left
+   * @param {boolean=} opt_toEnd
+   * @private
+   */
+  const stepLeft = useCallback(
+    (opt_toEnd) => {
+      // To the very end of left
+      if (opt_toEnd === true) {
+        //this.mutateElement(() => {
+        updatePositions(0);
+        //});
+      } else {
+        //this.measureMutateElement(
+        //() => {
+        const newPercentage = limitPercentage(
+          getCurrentSliderPercentage() - stepSize
+        );
+        //},
+        //() => {
+        updatePositions(newPercentage);
+        //}
+        //);
+      }
+    },
+    [getCurrentSliderPercentage, updatePositions, limitPercentage, stepSize]
+  );
+
+  /**
+   * Step to the center
+   * @private
+   */
+  const stepExactCenter = useCallback(() => {
+    //this.mutateElement(() => {
+    updatePositions(0.5);
+    //});
+  }, [updatePositions]);
+
+  /**
+   * One step right
+   * @param {boolean=} opt_toEnd
+   * @private
+   */
+  const stepRight = useCallback(
+    (opt_toEnd) => {
+      // To the very end of right
+      if (opt_toEnd === true) {
+        //this.mutateElement(() => {
+        updatePositions(1);
+        //});
+      } else {
+        //let newPercentage;
+        //this.measureMutateElement(
+        //() => {
+        const newPercentage = limitPercentage(
+          getCurrentSliderPercentage() + stepSize
+        );
+        //},
+        //() => {
+        updatePositions(newPercentage);
+        //}
+      }
+    },
+    [updatePositions, limitPercentage, getCurrentSliderPercentage, stepSize]
+  );
+
+  /**
+   * Handler on key down
+   * @param {Event} e
+   * @private
+   */
+  const onKeyDown = useCallback(
+    (e) => {
+      // Check if current element has focus
+      if (doc.current.activeElement !== containerRef?.current) {
+        return;
+      }
+
+      animateHideHint();
+
+      switch (e.key.toLowerCase()) {
+        case 'left': // Edge non-standard, pre EdgeHTML 17
+        case 'arrowleft':
+          e.preventDefault();
+          e.stopPropagation();
+          stepLeft();
+          break;
+        case 'right': // Edge non-standard, pre EdgeHTML 17
+        case 'arrowright':
+          e.preventDefault();
+          e.stopPropagation();
+          stepRight();
+          break;
+        case 'pageup':
+          // prevent scrolling the page
+          e.preventDefault();
+          e.stopPropagation();
+          stepLeft(true);
+          break;
+        case 'pagedown':
+          e.preventDefault();
+          e.stopPropagation();
+          stepRight(true);
+          break;
+        case 'home':
+          e.preventDefault();
+          e.stopPropagation();
+          stepExactCenter();
+          break;
+      }
+    },
+    [animateHideHint, stepLeft, stepRight, stepExactCenter]
+  );
+  /**
+   * Handler on mouse move
+   * @param {Event} e
+   * @private
+   */
+  const onMouseMove = useCallback(
+    (e) => {
+      e.preventDefault();
+      pointerMoveX(e.pageX);
+    },
+    [pointerMoveX]
+  );
+
+  /**
+   * Handler on mouse button up
+   * @param {Event} e
+   * @private
+   */
+  const onMouseUp = useCallback(
+    (e) => {
+      e.preventDefault();
+      unlisten(unlistenMouseMove?.current);
+      unlisten(unlistenMouseUp?.current);
+    },
+    [unlisten]
+  );
+  /**
+   * Handler on mouse button down
+   * @param {Event} e
+   * @private
+   */
+  const onMouseDown = useCallback(
+    (e) => {
+      e.preventDefault();
+      pointerMoveX(e.pageX);
+
+      // In case, clear up remnants
+      // This is to prevent right mouse button down when left still down
+      unlisten(unlistenMouseMove?.current);
+      unlisten(unlistenMouseUp?.current);
+
+      unlistenMouseMove.current = listen(win.current, 'mousemove', onMouseMove);
+      unlistenMouseUp.current = listen(win.current, 'mouseup', onMouseUp);
+
+      animateHideHint();
+    },
+    [
+      animateHideHint,
+      pointerMoveX,
+      unlistenMouseMove,
+      unlistenMouseUp,
+      onMouseMove,
+      onMouseUp,
+      unlisten,
+    ]
+  );
+
   const registerEvents = useCallback(() => {
-    // if (isEventRegistered.current) {
-    //   return;
-    // }
-    // unlistenMouseDown.current = listen(
-    //   element,
-    //   'mousedown',
-    //   onMouseDown_.bind(this)
-    // );
-    // this.unlistenKeyDown_ = listen(
-    //   this.element,
-    //   'keydown',
-    //   this.onKeyDown_.bind(this)
-    // );
+    if (isEventRegistered.current) {
+      return;
+    }
+    unlistenMouseDown.current = listen(
+      containerRef.current,
+      'mousedown',
+      onMouseDown
+    );
+    unlistenKeyDown.current = listen(
+      containerRef.current,
+      'keydown',
+      onKeyDown
+    );
     registerTouchGestures();
     //this.isEventRegistered = true;
-  }, [registerTouchGestures]);
+  }, [
+    registerTouchGestures,
+    unlistenKeyDown,
+    isEventRegistered,
+    onMouseDown,
+    onKeyDown,
+  ]);
 
   useEffect(() => {
     /** Common variables */

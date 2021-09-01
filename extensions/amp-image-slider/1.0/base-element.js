@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {CSS as COMPONENT_CSS} from './component.jss';
-import {ImageSlider} from './component';
 import {PreactBaseElement} from '#preact/base-element';
+
+import {ImageSlider} from './component';
+import {CSS as COMPONENT_CSS} from './component.jss';
 
 export class BaseElement extends PreactBaseElement {}
 

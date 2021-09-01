@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {ImageSlider} from '../component';
 import {withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
+
+import {ImageSlider} from '../component';
 
 export default {
   title: 'ImageSlider',

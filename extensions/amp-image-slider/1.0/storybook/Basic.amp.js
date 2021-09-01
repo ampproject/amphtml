@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
 import {withAmp} from '@ampproject/storybook-addon';
 import {text, withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
 
 export default {
   title: 'amp-image-slider-1_0',
