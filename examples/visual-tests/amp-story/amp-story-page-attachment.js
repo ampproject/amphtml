@@ -187,10 +187,9 @@ module.exports = {
 
     // Remove the publisher domain text, to prevent flaky test failures due
     // to inconsistent port values.
-    await page.$eval('.i-amphtml-story-page-attachment-domain-label',
-      (el) => {
-        el.textContent = '';
-      });
+    await page.$eval('.i-amphtml-story-page-attachment-domain-label', (el) => {
+      el.textContent = '';
+    });
 
     // Open the page attachment.
     await page.waitForSelector(
@@ -221,10 +220,9 @@ module.exports = {
 
     // Remove the publisher domain text, to prevent flaky test failures due
     // to inconsistent port values.
-    await page.$eval('.i-amphtml-story-page-attachment-domain-label',
-      (el) => {
-        el.textContent = '';
-      });
+    await page.$eval('.i-amphtml-story-page-attachment-domain-label', (el) => {
+      el.textContent = '';
+    });
 
     // Open the page attachment.
     await page.waitForSelector(
