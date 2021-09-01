@@ -25,6 +25,7 @@ var TwitterDef = {};
  *   onReadyState: (function(string, *=)|undefined),
  *   requestResize: (function(number):*|undefined),
  *   title: (string|undefined),
+ *   onLoad: (function():undefined|undefined),
  * }}
  */
 TwitterDef.Props;

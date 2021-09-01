@@ -19,6 +19,7 @@ import {ProxyIframeEmbed} from '#preact/component/3p-frame';
 import {MessageType, deserializeMessage} from '#core/3p-frame-messaging';
 import {forwardRef} from '#preact/compat';
 import {useCallback, useMemo, useState} from '#preact';
+import {useValueRef} from '#preact/component';
 
 /** @const {string} */
 const TYPE = 'twitter';
@@ -52,6 +53,9 @@ function TwitterWithRef(
   ref
 ) {
   const [height, setHeight] = useState(null);
+  const onLoadRef = useValueRef(onLoad);
+  const onErrorRef = useValueRef(onError);
+
   const messageHandler = useCallback(
     (event) => {
       const data = deserializeMessage(event.data);
@@ -64,12 +68,12 @@ function TwitterWithRef(
           setHeight(height);
         }
 
-        onLoad?.();
+        onLoadRef.current?.();
       } else if (data['type'] === MessageType.NO_CONTENT) {
-        onError?.();
+        onErrorRef.current?.();
       }
     },
-    [requestResize, onLoad, onError]
+    [requestResize, onLoadRef, onErrorRef]
   );
   const options = useMemo(
     () => ({

@@ -20,6 +20,7 @@ import {parseJson} from '#core/types/object/json';
 import * as Preact from '#preact';
 import {useCallback, useState} from '#preact';
 import {forwardRef} from '#preact/compat';
+import {useValueRef} from '#preact/component';
 import {IframeEmbed} from '#preact/component/iframe';
 
 import {getData} from '../../../src/event-helper';
@@ -34,11 +35,12 @@ const MATCHES_MESSAGING_ORIGIN = (origin) =>
  * @return {PreactDef.Renderable}
  */
 function InstagramWithRef(
-  {captioned, requestResize, shortcode, title = 'Instagram', ...rest},
+  {captioned, onLoad, requestResize, shortcode, title = 'Instagram', ...rest},
   ref
 ) {
   const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);
   const [opacity, setOpacity] = useState(0);
+  const onLoadRef = useValueRef(onLoad);
 
   const messageHandler = useCallback(
     (event) => {
@@ -50,9 +52,11 @@ function InstagramWithRef(
         }
         setHeightStyle(dict({'height': height}));
         setOpacity(1);
+
+        onLoadRef.current?.();
       }
     },
-    [requestResize]
+    [requestResize, onLoadRef]
   );
 
   return (

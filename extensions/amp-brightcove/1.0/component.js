@@ -21,6 +21,7 @@ import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {dispatchCustomEvent} from '#core/dom';
 import {BRIGHTCOVE_EVENTS, getBrightcoveIframeSrc} from '../brightcove-api';
+import {useValueRef} from '#preact/component';
 
 /** @const {string} */
 const DEFAULT = 'default';
@@ -53,10 +54,12 @@ export function BrightcoveWithRef(props, ref) {
     videoId,
     onPlayingState,
     urlParams,
+    onLoad,
     ...rest
   } = props;
 
   const playerStateRef = useRef({});
+  const onLoadRef = useValueRef(onLoad);
   const [muted, setMuted] = useState(mutedProp);
   const src = useMemo(
     () =>
@@ -78,6 +81,7 @@ export function BrightcoveWithRef(props, ref) {
       switch (eventType) {
         case 'ready':
           dispatchCustomEvent(currentTarget, 'canplay');
+          onLoadRef.current?.();
           break;
         case 'playing':
           onPlayingState?.(true);
@@ -112,7 +116,7 @@ export function BrightcoveWithRef(props, ref) {
         dispatchCustomEvent(currentTarget, mutedOrUnmutedEvent(isMuted));
       }
     },
-    [muted, onPlayingState]
+    [muted, onPlayingState, onLoadRef]
   );
 
   // Check for valid props

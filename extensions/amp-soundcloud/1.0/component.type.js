@@ -26,6 +26,7 @@ var SoundcloudDef = {};
  *   secretToken: (string|undefined),
  *   trackId: (string|undefined),
  *   visual: boolean,
+ *   onLoad: (function():undefined|undefined),
  * }}
  */
 SoundcloudDef.Props;
