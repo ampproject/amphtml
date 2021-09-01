@@ -15,18 +15,34 @@ function Component({prop}) {
   const [text, setText] = useState('initial render');
   const ref = useRef(null);
   const ioCallback = useCallback(
-    (entry) => {
-      setText(`is intersecting for ${prop}: ${entry.isIntersecting}`);
+    (isIntersecting) => {
+      setText(`is intersecting for ${prop}: ${isIntersecting}`);
     },
     [prop]
   );
+
+  const anotherIoCallback = useCallback(
+    (isIntersecting) => {
+      // eslint-disable-next-line local/no-forbidden-terms
+      console.log(`is intersecting for ${prop}: ${isIntersecting}`);
+    },
+    [prop]
+  );
+
   useIntersectionObserver(
     ref,
     ioCallback,
     toWin(ref.current?.ownerDocument?.defaultView)
   );
+
+  useIntersectionObserver(
+    ref,
+    anotherIoCallback,
+    toWin(ref.current?.ownerDocument?.defaultView)
+  );
   return <div ref={ref}>{text}</div>;
 }
+
 export const useIO = () => {
   return (
     <>
