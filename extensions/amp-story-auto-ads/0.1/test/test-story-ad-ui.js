@@ -1,3 +1,5 @@
+import {toggleExperiment} from '#experiments';
+
 import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 import {
   A4AVarNames,
@@ -213,6 +215,131 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
       ).then((anchor) => {
         expect(anchor).to.be.null;
         expect(doc.querySelector('amp-story-cta-layer')).not.to.exist;
+      });
+    });
+  });
+
+  describe('createCta page outlink element', () => {
+    let buttonFitter;
+
+    beforeEach(() => {
+      buttonFitter = new ButtonTextFitter(env.ampdoc);
+      toggleExperiment(env.win, 'amp-story-ads-page-outlink', true, true);
+    });
+
+    it('createCta page outlink custom theme element', () => {
+      const metadata = {
+        'cta-accent-color': '#FF00FF',
+        'cta-accent-element': 'text',
+        'cta-image':
+          '/examples/visual-tests/picsum.photos/image1068_300x169.jpg',
+        'theme': 'custom',
+        [A4AVarNames.CTA_TYPE]: 'SHOP',
+        [A4AVarNames.CTA_URL]: 'https://www.cats.com',
+      };
+      return createCta(
+        doc,
+        buttonFitter,
+        doc.body /* container */,
+        metadata
+      ).then((container) => {
+        expect(container).to.exist;
+        const containerElem = doc.querySelector(
+          '.i-amphtml-story-page-outlink-container'
+        );
+        expect(containerElem).to.exist;
+
+        expect(containerElem.getAttribute('cta-accent-color')).to.equal(
+          '#FF00FF'
+        );
+        expect(containerElem.getAttribute('cta-accent-element')).to.equal(
+          'text'
+        );
+        expect(containerElem.getAttribute('cta-image')).to.equal(
+          '/examples/visual-tests/picsum.photos/image1068_300x169.jpg'
+        );
+        expect(containerElem.getAttribute('theme')).to.equal('custom');
+        expect(containerElem.children[0].href).to.equal(
+          'https://www.cats.com/'
+        );
+        expect(containerElem.children[0].textContent).to.equal('SHOP');
+      });
+    });
+
+    it('createCta page outlink light theme element', () => {
+      const metadata = {
+        'theme': 'light',
+        [A4AVarNames.CTA_TYPE]: 'SHOP',
+        [A4AVarNames.CTA_URL]: 'https://www.cats.com',
+      };
+      return createCta(
+        doc,
+        buttonFitter,
+        doc.body /* container */,
+        metadata
+      ).then((container) => {
+        expect(container).to.exist;
+        const containerElem = doc.querySelector(
+          '.i-amphtml-story-page-outlink-container'
+        );
+        expect(containerElem).to.exist;
+        expect(containerElem.getAttribute('theme')).to.equal('light');
+        expect(containerElem.children[0].href).to.equal(
+          'https://www.cats.com/'
+        );
+        expect(containerElem.children[0].textContent).to.equal('SHOP');
+      });
+    });
+
+    it('createCta page outlink dark theme element', () => {
+      const metadata = {
+        'theme': 'dark',
+        [A4AVarNames.CTA_TYPE]: 'SHOP',
+        [A4AVarNames.CTA_URL]: 'https://www.cats.com',
+      };
+      return createCta(
+        doc,
+        buttonFitter,
+        doc.body /* container */,
+        metadata
+      ).then((container) => {
+        expect(container).to.exist;
+        const containerElem = doc.querySelector(
+          '.i-amphtml-story-page-outlink-container'
+        );
+        expect(containerElem).to.exist;
+        expect(containerElem.getAttribute('theme')).to.equal('dark');
+        expect(containerElem.children[0].href).to.equal(
+          'https://www.cats.com/'
+        );
+        expect(containerElem.children[0].textContent).to.equal('SHOP');
+      });
+    });
+
+    it('createCta page outlink dark theme element with color and accent-element (should have no effect)', () => {
+      const metadata = {
+        'theme': 'dark',
+        'cta-accent-color': '#FF00FF',
+        'cta-accent-element': 'text',
+        [A4AVarNames.CTA_TYPE]: 'SHOP',
+        [A4AVarNames.CTA_URL]: 'https://www.cats.com',
+      };
+      return createCta(
+        doc,
+        buttonFitter,
+        doc.body /* container */,
+        metadata
+      ).then((container) => {
+        expect(container).to.exist;
+        const containerElem = doc.querySelector(
+          '.i-amphtml-story-page-outlink-container'
+        );
+        expect(containerElem).to.exist;
+        expect(containerElem.getAttribute('theme')).to.equal('dark');
+        expect(containerElem.children[0].href).to.equal(
+          'https://www.cats.com/'
+        );
+        expect(containerElem.children[0].textContent).to.equal('SHOP');
       });
     });
   });
