@@ -5,6 +5,7 @@ var EmbedlyCardDef = {};
 
 /**
  * @typedef {{
+ *   onLoad: (function():undefined|undefined),
  *   requestResize: (function(number):*|undefined),
  *   title: (string|undefined),
  *   url: (string),

@@ -51,6 +51,12 @@ export const WithRemoteSrc = () => {
 
   return (
     <amp-render src={srcUrl} width="300" height="400" layout="fixed">
+      <div placeholder style="background:red">
+        placeholder
+      </div>
+      <div fallback style="background:blue">
+        fallback
+      </div>
       <template type="amp-mustache">{`Hi {{name}}!`}</template>
     </amp-render>
   );

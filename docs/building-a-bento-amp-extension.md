@@ -25,6 +25,7 @@ Read this document to learn how to create a new Bento AMP component.
     -   [Actions and events](#actions-and-events)
     -   [PreactBaseElement callbacks](#preactbaseelement-callbacks)
     -   [Element and Component classes](#element-and-component-classes)
+    -   [Loading state](#loading-state)
     -   [Element styling](#element-styling)
     -   [Layouts supported in your element](#layouts-supported-in-your-element)
     -   [Register element with AMP](#register-element-with-amp)
@@ -324,6 +325,27 @@ You must document your element's actions and events in its own reference documen
 -   **Usage**: If your extension 'props' definition is not sufficient, or when registering AMP actions and events.
 -   **Example Usage**: `amp-base-carousel`, `amp-lightbox`
 
+#### handleOnLoading
+
+-   **Default**: Optional.
+-   **Override**: Sometimes
+-   **Usage**: Method to override to customize the display of the Placeholder/Fallback/Loader
+-   **Example Usage**: `amp-render`
+
+#### handleOnLoad
+
+-   **Default**: Optional.
+-   **Override**: Sometimes
+-   **Usage**: Method to override to customize the display of the Placeholder/Fallback/Loader
+-   **Example Usage**: `amp-render`, `amp-iframe`
+
+#### handleOnError
+
+-   **Default**: Optional.
+-   **Override**: Sometimes
+-   **Usage**: Method to override to customize the display of the Placeholder/Fallback/Loader
+-   **Example Usage**: `amp-render`
+
 #### mutationObserverCallback
 
 -   **Default**: Optional.
@@ -418,6 +440,22 @@ export function MyElement({propName1, propName2, ...rest}) {
   );
 }
 ```
+
+### Loading state
+
+For components that may load asynchronously, be sure to support `onLoading`, `onLoad`, and `onError` callbacks as props on your Preact component to allow components to fail gracefully.
+
+By default, `PreactBaseElement` provides callbacks which do the following from the AMP layer:
+
+-   `onLoading` toggles on a loader
+-   `onLoad` toggles off any loaders, placeholders, or fallbacks
+-   `onError` toggles on the fallpack (or, if unavailable, the placeholder)
+
+Your Preact component **must** invoke the `onLoad()` callback once your component has loaded. This is especially important for components that display content dynamically, for example through an iframe or after fetching remote data, because they may take time to load which would affect perceived performance.
+
+Your Preact component _should_ invoke the `onLoading()` and `onError()` callbacks so document authors in any environment can implement graceful behavior when appropriate.
+
+Your AMP extension may customize this behavior by overriding the `handleOnLoading()` / `handleOnLoad()` / `handleOnError()` methods in your AMP extension's class.
 
 ### Element styling
 

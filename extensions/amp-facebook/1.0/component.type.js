@@ -15,6 +15,7 @@ var FacebookDef = {};
  *   locale: (string|undefined),
  *   layout: (string|undefined),
  *   numPosts: (number|undefined),
+ *   onLoad: (function():undefined|undefined),
  *   orderBy: (string|undefined),
  *   onReadyState: (function(string, *=)|undefined),
  *   refLabel: (string|undefined),

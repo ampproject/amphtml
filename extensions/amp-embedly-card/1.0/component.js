@@ -3,6 +3,7 @@ import {MessageType, deserializeMessage} from '#core/3p-frame-messaging';
 import * as Preact from '#preact';
 import {useCallback, useContext, useState} from '#preact';
 import {forwardRef} from '#preact/compat';
+import {useValueRef} from '#preact/component';
 import {ProxyIframeEmbed} from '#preact/component/3p-frame';
 
 import {EmbedlyContext} from './embedly-context';
@@ -22,10 +23,11 @@ const FULL_HEIGHT = '100%';
  * @return {PreactDef.Renderable}
  */
 export function EmbedlyCardWithRef(
-  {requestResize, style, title, url, ...rest},
+  {onLoad, requestResize, style, title, url, ...rest},
   ref
 ) {
   const [height, setHeight] = useState(null);
+  const onLoadRef = useValueRef(onLoad);
   const messageHandler = useCallback(
     (event) => {
       const data = deserializeMessage(event.data);
@@ -37,9 +39,11 @@ export function EmbedlyCardWithRef(
         } else {
           setHeight(height);
         }
+
+        onLoadRef.current?.();
       }
     },
-    [requestResize]
+    [requestResize, onLoadRef]
   );
 
   const {apiKey} = useContext(EmbedlyContext);
