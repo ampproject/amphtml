@@ -752,7 +752,7 @@ export class PreactBaseElement extends BaseElement {
    * @private
    */
   checkApiWrapper_(current) {
-    if (!mode.isTest()) {
+    if (!mode.isLocalDev()) {
       return;
     }
     // Hack around https://github.com/preactjs/preact/issues/3084
@@ -870,7 +870,7 @@ PreactBaseElement['staticProps'] = undefined;
 /**
  * @protected {!Array<!ContextProp>}
  */
-PreactBaseElement['useContexts'] = mode.isTest() ? Object.freeze([]) : [];
+PreactBaseElement['useContexts'] = mode.isLocalDev() ? Object.freeze([]) : [];
 
 /**
  * Whether the component implements a loading protocol.

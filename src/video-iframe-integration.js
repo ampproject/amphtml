@@ -22,6 +22,7 @@ import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 import {getData, listen} from './event-helper';
+import {getMode} from './mode';
 
 /** @fileoverview Entry point for documents inside an <amp-video-iframe>. */
 
@@ -379,7 +380,9 @@ export class AmpVideoIntegration {
     const id = this.callCounter_++;
     const completeData = {id, ...data};
 
-    this.win_?.parent./*OK*/ postMessage(completeData, '*');
+    if (!getMode(this.win_).test && this.win_.parent) {
+      this.win_.parent./*OK*/ postMessage(completeData, '*');
+    }
 
     if (opt_callback) {
       this.callbacks_[id] = opt_callback;
@@ -463,4 +466,6 @@ export function adopt(global) {
   callbacks.forEach(callbacks.push);
 }
 
-adopt(self);
+if (!getMode(self).test) {
+  adopt(self);
+}

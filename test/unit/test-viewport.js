@@ -38,6 +38,7 @@ import {installVsyncService} from '#service/vsync-impl';
 
 import {loadPromise} from '../../src/event-helper';
 import {dev} from '../../src/log';
+import {getMode} from '../../src/mode';
 import {setParentWindow} from '../../src/service-helpers';
 
 const NOOP = () => {};
@@ -1822,7 +1823,6 @@ describes.sandboxed('createViewport', {}, () => {
       });
 
       it('should NOT bind to "iOS embed" when iframed but not embedded', () => {
-        win.AMP_CONFIG = {test: false};
         win.parent = {};
         env.sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
         installViewportServiceForDoc(ampDoc);
@@ -1832,6 +1832,7 @@ describes.sandboxed('createViewport', {}, () => {
 
       it('should bind to "iOS embed" when iframed but in test mode', () => {
         win.parent = {};
+        getMode(win).test = true;
         env.sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
         installViewportServiceForDoc(ampDoc);
         const viewport = Services.viewportForDoc(ampDoc);
@@ -1841,7 +1842,6 @@ describes.sandboxed('createViewport', {}, () => {
       });
 
       it('should bind to "natural" when iframed, but iOS supports scrollable iframes', () => {
-        win.AMP_CONFIG = {test: false};
         win.parent = {};
         env.sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
         env.sandbox
