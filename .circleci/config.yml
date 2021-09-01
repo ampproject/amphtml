@@ -118,6 +118,8 @@ commands:
     steps:
       - browser-tools/install-chrome:
           replace-existing: true
+          # TODO(danielrozenberg): temporary workaround for https://github.com/CircleCI-Public/browser-tools-orb/issues/34
+          chrome-version: 92.0.4515.159
       - browser-tools/install-chromedriver
   install_firefox:
     steps:
