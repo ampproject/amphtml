@@ -437,7 +437,7 @@ jobs:
     steps:
       - run:
           name: '⭐ Cut Nightly Branch ⭐'
-          command: node --unhandled-rejections=strict build-system/scheduled-jobs/cut-nightly.js
+          command: node --unhandled-rejections=strict build-system/release-workflows/cut-nightly.js
 
 workflows:
   version: 2
