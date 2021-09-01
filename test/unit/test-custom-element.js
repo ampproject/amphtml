@@ -573,6 +573,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
       it('Element - build allowed', () => {
         const element = new ElementClass();
+        const getSizerStub = env.sandbox.stub(element, 'getSizer_');
 
         expect(element.isBuilt()).to.equal(false);
         expect(testElementBuildCallback).to.have.not.been.called;
@@ -585,6 +586,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           expect(element).to.not.have.class('i-amphtml-notbuilt');
           expect(element).to.not.have.class('amp-notbuilt');
           expect(element).to.have.class('i-amphtml-built');
+          expect(getSizerStub).to.be.calledOnce;
           expect(testElementBuildCallback).to.be.calledOnce;
           expect(element.signals().get(CommonSignals.BUILT)).to.be.ok;
           return element.whenBuilt(); // Should eventually resolve.
