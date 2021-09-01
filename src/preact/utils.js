@@ -14,3 +14,15 @@ export function useResourcesNotify() {
     }
   });
 }
+
+/**
+ * Combines multiple refs to pass into `ref` prop.
+ * @param {...any} refs
+ * @return {function(!Element)}
+ */
+export function refs(...refs) {
+  return (element) =>
+    refs.forEach((ref) =>
+      typeof ref == 'function' ? ref(element) : (ref.current = element)
+    );
+}

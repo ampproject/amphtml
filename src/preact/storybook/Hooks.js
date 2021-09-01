@@ -1,10 +1,9 @@
 import {withKnobs} from '@storybook/addon-knobs';
 
-import {toWin} from '#core/window';
-
 import * as Preact from '#preact';
-import {useCallback, useRef, useState} from '#preact';
+import {useCallback, useState} from '#preact';
 import {useIntersectionObserver} from '#preact/component';
+import {refs} from '#preact/utils';
 
 export default {
   title: '0/Hooks',
@@ -13,7 +12,6 @@ export default {
 
 function Component({prop}) {
   const [text, setText] = useState('initial render');
-  const ref = useRef(null);
   const ioCallback = useCallback(
     ({isIntersecting}) => {
       setText(`is intersecting for ${prop}: ${isIntersecting}`);
@@ -29,18 +27,10 @@ function Component({prop}) {
     [prop]
   );
 
-  useIntersectionObserver(
-    ref,
-    ioCallback,
-    toWin(ref.current?.ownerDocument?.defaultView)
-  );
+  const ref = useIntersectionObserver(ioCallback);
+  const anotherRef = useIntersectionObserver(anotherIoCallback);
 
-  useIntersectionObserver(
-    ref,
-    anotherIoCallback,
-    toWin(ref.current?.ownerDocument?.defaultView)
-  );
-  return <div ref={ref}>{text}</div>;
+  return <div ref={refs(ref, anotherRef)}>{text}</div>;
 }
 
 export const useIO = () => {

@@ -4,15 +4,9 @@ import {MessageType} from '#core/3p-frame-messaging';
 import {toWin} from '#core/window';
 import {ContainWrapper, useIntersectionObserver} from '#preact/component';
 import {setStyle} from '#core/dom/style';
+import {refs} from '#preact/utils';
 
 const NOOP = () => {};
-
-function refs(...refs) {
-  return (element) =>
-    refs.forEach((ref) =>
-      typeof ref == 'function' ? ref(element) : (ref.current = element)
-    );
-}
 
 /**
  * @param {!IframeDef.Props} props
@@ -116,12 +110,6 @@ export function Iframe({
     },
     [attemptResize]
   );
-
-  // useIntersectionObserver(
-  //   iframeRef,
-  //   ioCallback,
-  //   iframeRef.current?.ownerDocument?.defaultView
-  // );
 
   const measureRef = useIntersectionObserver(ioCallback);
 

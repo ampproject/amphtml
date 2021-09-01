@@ -9,11 +9,14 @@ import {useCallback} from '#preact';
  * Uses a shared IntersectionObserver per window instance to observe the given `ref`.
  *
  * @param {function(IntersectionObserverEntry)} callback
- * @return {Function}
+ * @return {function}
  */
 export function useIntersectionObserver(callback) {
   const refCb = useCallback(
     (node) => {
+      if (!node) {
+        return;
+      }
       observeWithSharedInOb(node, callback);
 
       return () => {
