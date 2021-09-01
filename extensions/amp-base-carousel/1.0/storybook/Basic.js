@@ -1,6 +1,5 @@
 import * as Preact from '#preact';
 import {BaseCarousel} from '../component';
-import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 
 const CONTROLS = ['auto', 'always', 'never'];
 const SNAP_ALIGN = ['start', 'center'];
@@ -9,7 +8,145 @@ const ORIENTATIONS = ['horizontal', 'vertical'];
 export default {
   title: 'BaseCarousel',
   component: BaseCarousel,
-  decorators: [withKnobs],
+  decorators: [],
+
+  argTypes: {
+    width: {
+      control: {
+        type: "number"
+      }
+    },
+
+    height: {
+      control: {
+        type: "number"
+      }
+    },
+
+    slideCount: {
+      control: {
+        type: "number"
+      }
+    },
+
+    snap: {
+      control: {
+        type: "boolean"
+      }
+    },
+
+    snapAlign: {
+      control: {
+        type: "select"
+      }
+    },
+
+    snapBy: {
+      control: {
+        type: "number"
+      }
+    },
+
+    orientation: {
+      control: {
+        type: "select"
+      }
+    },
+
+    loop: {
+      control: {
+        type: "boolean"
+      }
+    },
+
+    advanceCount: {
+      control: {
+        type: "number"
+      }
+    },
+
+    visibleCount: {
+      control: {
+        type: "number"
+      }
+    },
+
+    outsetArrows: {
+      control: {
+        type: "boolean"
+      }
+    },
+
+    controls: {
+      control: {
+        type: "select"
+      }
+    },
+
+    defaultSlide: {
+      control: {
+        type: "number"
+      }
+    },
+
+    autoAdvance: {
+      control: {
+        type: "boolean"
+      }
+    },
+
+    autoAdvanceCount: {
+      control: {
+        type: "number"
+      }
+    },
+
+    autoAdvanceInterval: {
+      control: {
+        type: "number"
+      }
+    },
+
+    autoAdvanceLoops: {
+      control: {
+        type: "number"
+      }
+    },
+
+    mixedLength: {
+      control: {
+        type: "boolean"
+      }
+    },
+
+    preset: {
+      control: {
+        type: "select"
+      }
+    }
+  },
+
+  args: {
+    width: 225,
+    height: 440,
+    slideCount: 5,
+    snap: true,
+    snapAlign: SNAP_ALIGN,
+    snapBy: 1,
+    orientation: ORIENTATIONS,
+    loop: true,
+    advanceCount: 1,
+    visibleCount: 2,
+    outsetArrows: false,
+    controls: CONTROLS,
+    defaultSlide: 0,
+    autoAdvance: true,
+    autoAdvanceCount: 1,
+    autoAdvanceInterval: 1000,
+    autoAdvanceLoops: 3,
+    mixedLength: true,
+    preset: [1, 2, 3]
+  }
 };
 
 /**
@@ -32,21 +169,24 @@ function CarouselWithActions(props) {
   );
 }
 
-export const _default = () => {
-  const width = number('width', 225);
-  const height = number('height', 440);
-  const slideCount = number('slide count', 5, {min: 0, max: 99});
-  const snap = boolean('snap', true);
-  const snapAlign = select('snap alignment', SNAP_ALIGN, 'start');
-  const snapBy = number('snap by', 1);
-  const orientation = select('orientation', ORIENTATIONS, 'vertical');
-  const loop = boolean('loop', true);
-  const advanceCount = number('advance count', 1, {min: 1});
-  const visibleCount = number('visible count', 2, {min: 1});
-  const outsetArrows = boolean('outset arrows', false);
+export const _default = (
+  {
+    width,
+    height,
+    slideCount,
+    snap,
+    snapAlign,
+    snapBy,
+    orientation,
+    loop,
+    advanceCount,
+    visibleCount,
+    outsetArrows,
+    controls,
+    defaultSlide
+  }
+) => {
   const colorIncrement = Math.floor(255 / (slideCount + 1));
-  const controls = select('show controls', CONTROLS);
-  const defaultSlide = number('default slide', 0);
   return (
     <CarouselWithActions
       advanceCount={advanceCount}
@@ -82,28 +222,31 @@ export const _default = () => {
   );
 };
 
-export const mixedLength = () => {
-  const width = number('width', 300);
-  const height = number('height', 300);
+export const mixedLength = (
+  {
+    width,
+    height,
+    autoAdvance,
+    autoAdvanceCount,
+    autoAdvanceInterval,
+    autoAdvanceLoops,
+    loop,
+    snap,
+    snapAlign,
+    snapBy,
+    mixedLength,
+    controls,
+    preset,
+    orientation
+  }
+) => {
   const slideCount = 15;
   const colorIncrement = Math.floor(255 / (slideCount + 1));
-  const autoAdvance = boolean('auto advance', true);
-  const autoAdvanceCount = number('auto advance count', 1);
-  const autoAdvanceInterval = number('auto advance interval', 1000);
-  const autoAdvanceLoops = number('auto advance loops', 3);
-  const loop = boolean('loop', true);
-  const snap = boolean('snap', true);
-  const snapAlign = select('snap alignment', SNAP_ALIGN, 'start');
-  const snapBy = number('snap by', 1);
-  const mixedLength = boolean('mixed length', true);
-  const controls = select('show controls', ['auto', 'always', 'never']);
   const randomPreset = [
     [143, 245, 289, 232, 280, 233, 182, 155, 114, 269, 242, 196, 249, 265, 241],
     [225, 158, 201, 205, 230, 233, 231, 255, 143, 264, 227, 157, 120, 203, 144],
     [252, 113, 115, 186, 248, 188, 162, 104, 100, 109, 175, 227, 143, 249, 280],
   ];
-  const preset = select('random preset', [1, 2, 3]);
-  const orientation = select('orientation', ORIENTATIONS, 'vertical');
   const horizontal = orientation == 'horizontal';
   return (
     <BaseCarousel
@@ -141,11 +284,14 @@ export const mixedLength = () => {
   );
 };
 
-export const provideArrows = () => {
-  const outsetArrows = boolean('outset arrows', false);
-  const width = number('width', 440);
-  const height = number('height', 225);
-  const controls = select('show controls', CONTROLS);
+export const provideArrows = (
+  {
+    outsetArrows,
+    width,
+    height,
+    controls
+  }
+) => {
   const myButtonStyle = {
     background: 'lightblue',
     borderRadius: '50%',
@@ -178,8 +324,11 @@ export const provideArrows = () => {
   );
 };
 
-export const WithCaptions = () => {
-  const controls = select('show controls', CONTROLS);
+export const WithCaptions = (
+  {
+    controls
+  }
+) => {
   return (
     <BaseCarousel
       visibleCount={3}
@@ -212,18 +361,21 @@ export const WithCaptions = () => {
   );
 };
 
-export const AutoAdvance = () => {
-  const slideCount = number('slide count', 5, {min: 0, max: 99});
-  const snap = boolean('snap', true);
-  const snapAlign = select('snap alignment', SNAP_ALIGN, 'start');
-  const snapBy = number('snap by', 1);
-  const loop = boolean('loop', true);
-  const autoAdvance = boolean('auto advance', true);
-  const autoAdvanceCount = number('auto advance count', 1);
-  const autoAdvanceInterval = number('auto advance interval', 1000);
-  const autoAdvanceLoops = number('auto advance loops', 3);
-  const advanceCount = number('advance count', 1, {min: 1});
-  const visibleCount = number('visible count', 2, {min: 1});
+export const AutoAdvance = (
+  {
+    slideCount,
+    snap,
+    snapAlign,
+    snapBy,
+    loop,
+    autoAdvance,
+    autoAdvanceCount,
+    autoAdvanceInterval,
+    autoAdvanceLoops,
+    advanceCount,
+    visibleCount
+  }
+) => {
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   return (
     <CarouselWithActions

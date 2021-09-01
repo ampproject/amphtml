@@ -13,6 +13,7 @@ module.exports = {
     // '@storybook/addon-a11y',
     '@storybook/addon-viewport/register',
     '@storybook/addon-knobs/register',
+    '@storybook/addon-controls/register',
     '@ampproject/storybook-addon',
   ],
   managerWebpack: (config) => {

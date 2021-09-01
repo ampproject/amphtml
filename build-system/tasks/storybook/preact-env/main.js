@@ -8,6 +8,7 @@ module.exports = {
   addons: [
     '@storybook/addon-a11y',
     '@storybook/addon-viewport/register',
+    '@storybook/addon-controls/register',
     '@storybook/addon-knobs/register',
   ],
   managerWebpack: (config) => {

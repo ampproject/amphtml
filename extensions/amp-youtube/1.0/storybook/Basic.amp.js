@@ -1,5 +1,4 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
@@ -7,7 +6,8 @@ import {VideoElementWithActions} from '../../../amp-video/1.0/storybook/_helpers
 
 export default {
   title: 'amp-youtube-1_0',
-  decorators: [withKnobs, withAmp],
+  decorators: [withAmp],
+
   parameters: {
     extensions: [
       {name: 'amp-youtube', version: '1.0'},
@@ -15,28 +15,69 @@ export default {
     ],
     experiments: ['bento'],
   },
+
+  argTypes: {
+    "data-videoid": {
+      control: {
+        type: "text"
+      }
+    },
+
+    layout: {
+      control: {
+        type: "text"
+      }
+    },
+
+    autoplay: {
+      control: {
+        type: "boolean"
+      }
+    },
+
+    loop: {
+      control: {
+        type: "boolean"
+      }
+    },
+
+    width: {
+      control: {
+        type: "number"
+      }
+    },
+
+    height: {
+      control: {
+        type: "number"
+      }
+    },
+
+    credentials: {
+      control: {
+        type: "text"
+      }
+    },
+
+    "data-videoid": {},
+    "data-videoid": {}
+  },
+
+  args: {
+    "data-videoid": 'IAvf-rkzNck',
+    layout: 'responsive',
+    autoplay: false,
+    loop: false,
+    width: 300,
+    height: 200,
+    credentials: 'include',
+    "data-videoid": {},
+    "data-videoid": {}
+  }
 };
 
-export const Default = ({id}) => {
-  const videoid = text('videoid', 'IAvf-rkzNck');
-  const layout = text('layout', 'responsive');
-  const autoplay = boolean('autoplay', false);
-  const loop = boolean('loop', false);
-  const width = number('width', 300);
-  const height = number('height', 200);
-  const credentials = text('credentials', 'include');
-  return (
-    <amp-youtube
-      id={id}
-      width={width}
-      height={height}
-      data-videoid={videoid}
-      layout={layout}
-      autoplay={autoplay}
-      loop={loop}
-      credentials={credentials}
-    ></amp-youtube>
-  );
+export const Default = args => {
+  return <amp-youtube id={id}></amp-youtube>;
 };
 
 export const Actions = () => {
@@ -48,11 +89,14 @@ export const Actions = () => {
   );
 };
 
-export const InsideAccordion = () => {
-  const videoid = text('videoid', 'IAvf-rkzNck');
-  const width = number('width', 300);
-  const height = number('height', 200);
-  const autoplay = boolean('autoplay', false);
+export const InsideAccordion = (
+  {
+    videoid,
+    width,
+    height,
+    autoplay
+  }
+) => {
   return (
     <amp-accordion expand-single-section>
       <section expanded>
@@ -71,11 +115,14 @@ export const InsideAccordion = () => {
   );
 };
 
-export const InsideDetails = () => {
-  const videoid = text('videoid', 'IAvf-rkzNck');
-  const width = number('width', 300);
-  const height = number('height', 200);
-  const autoplay = boolean('autoplay', false);
+export const InsideDetails = (
+  {
+    videoid,
+    width,
+    height,
+    autoplay
+  }
+) => {
   return (
     <details open>
       <summary>YouTube Video</summary>
