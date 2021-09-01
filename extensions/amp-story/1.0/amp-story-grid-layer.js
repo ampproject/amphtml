@@ -178,7 +178,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     // closes.
     if (storeService.get(StateProperty.UI_STATE) === UIType.MOBILE) {
       new this.win.ResizeObserver((e) => {
-        const currentHeight = e[0].target.getLayoutBox().height;
+        const currentHeight = e[0].target./* OK */ getLayoutBox().height;
         if (currentHeight >= this.maxHeightSeen_) {
           this.maxHeightSeen_ = currentHeight;
           this.getVsync().mutate(() => {
