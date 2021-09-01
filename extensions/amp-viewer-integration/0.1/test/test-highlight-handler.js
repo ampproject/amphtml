@@ -115,7 +115,8 @@ describes.fakeWin(
   }
 );
 
-describes.realWin(
+// TODO(35898): unskip
+describes.realWin.skip(
   'HighlightHandler',
   {
     // We can not overwrite win.location with realWin.
