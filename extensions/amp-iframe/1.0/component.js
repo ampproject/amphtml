@@ -61,12 +61,15 @@ export function Iframe({
       // 1. post message is received in viewport
       // 2. exiting viewport
       // This could be optimized by reducing to one call.
-      requestResize(height, width);
+      requestResize(height, width).finally(() => {
+        dataRef.current = null;
+      });
     } else if (isIntersectingRef.current === false) {
       // attemptResize can be called before the IntersectionObserver starts observing
       // the component if an event is fired immediately. Therefore we check
       // isIntersectingRef has changed via isIntersectingRef.current === false.
       updateContainerSize(height, width);
+      dataRef.current = null;
     }
   }, [requestResize]);
 
@@ -76,7 +79,9 @@ export function Iframe({
         return;
       }
       dataRef.current = event.data;
-      attemptResize();
+      if (dataRef.current !== null) {
+        attemptResize();
+      }
     },
     [attemptResize]
   );
