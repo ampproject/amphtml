@@ -4647,9 +4647,6 @@ void ValidateAttributes(const ParsedTagSpec& parsed_tag_spec,
 
 const set<std::string>& ProxyKnowsIntertagsToValidate() {
   static const set<std::string>* tags = [] {
-    // WARNING: If you update this list, you MUST change
-    // min_validator_revision_required in validator.protoascii to
-    // avoid crashing old binaries.
     return new set<std::string>({"AMP-TIMEAGO", "SCRIPT", "STYLE"});
   }();
   return *tags;
@@ -4850,6 +4847,8 @@ void ParsedValidatorRules::ExpandExtensionSpec(ValidatorRules* rules) const {
     if (!tagspec->has_descriptive_name())
       tagspec->set_descriptive_name(tagspec->spec_name());
     tagspec->set_mandatory_parent("HEAD");
+    // This is satisfied by any of the `v0.js` variants:
+    tagspec->add_requires("amphtml javascript runtime (v0.js)");
 
     if (extension_spec.deprecated_allow_duplicates()) {
       tagspec->set_unique_warning(true);
