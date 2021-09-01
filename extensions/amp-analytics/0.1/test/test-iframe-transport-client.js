@@ -40,7 +40,8 @@ describes.sandboxed('iframe-transport-client', {}, (env) => {
     window./*OK*/ postMessage(payload, '*');
   }
 
-  it('fails to create iframeTransportClient if no window.name ', () => {
+  // TODO:(35898): unskip
+  it.skip('fails to create iframeTransportClient if no window.name ', () => {
     const oldWindowName = window.name;
     expect(() => {
       window.name = '';
