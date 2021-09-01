@@ -454,5 +454,9 @@ module.exports = {
       'files': ['3p/**/*.js', 'src/**/*.js', 'test/**/*.js', 'testing/**/*.js'],
       'rules': {'import/order': 2},
     },
+    {
+      'files': ['src/preact/**', 'extensions/**/1.0/**', '**/storybook/**'],
+      'rules': {'local/preact-preferred-props': 2},
+    },
   ],
 };

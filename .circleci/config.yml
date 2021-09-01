@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  browser-tools: circleci/browser-tools@1.1.3
+  browser-tools: circleci/browser-tools@1.2.1
   node: circleci/node@4.7.0
 
 push_and_pr_builds: &push_and_pr_builds
@@ -38,6 +38,10 @@ executors:
   base-docker-small:
     docker:
       - image: cimg/base:stable
+    resource_class: small
+  node-docker-small:
+    docker:
+      - image: cimg/node:lts-browsers
     resource_class: small
   node-docker-medium:
     docker:
@@ -427,8 +431,17 @@ jobs:
           command: node build-system/pr-check/experiment-e2e-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
       - teardown_vm
+  cut_nightly:
+    executor:
+      name: node-docker-small
+    steps:
+      - run:
+          name: '⭐ Cut Nightly Branch ⭐'
+          command: node --unhandled-rejections=strict build-system/release-workflows/cut-nightly.js
 
 workflows:
+  version: 2
+
   'CircleCI':
     jobs:
       - initialize_repository:
@@ -566,3 +579,18 @@ workflows:
       #     <<: *push_builds_only
       #     requires:
       #       - 'Nomodule Build (Test)'
+
+  'Nightly':
+    triggers:
+      - schedule:
+          # 1 a.m. PST / 12 a.m. PDT, Tuesdays through Saturdays.
+          cron: '0 8 * * 2-6'
+          filters:
+            branches:
+              only:
+                - main
+    jobs:
+      - initialize_repository:
+          name: 'Initialize Repository'
+      - cut_nightly:
+          name: 'Cut Nightly Branch'

@@ -13,6 +13,7 @@ tags: {  # amp-facebook 1.0
     name: "amp-facebook"
     version_name: "v1.0"
     version: "1.0"
+    bento_supported_version: "1.0"
   }
   attr_lists: "common-extension-attrs"
 }

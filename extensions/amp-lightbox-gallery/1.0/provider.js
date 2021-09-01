@@ -182,7 +182,7 @@ export function LightboxGalleryProviderWithRef(
   return (
     <>
       <Lightbox
-        className={objstr({
+        class={objstr({
           [classes.lightbox]: true,
           [classes.showControls]: showControls,
           [classes.hideControls]: !showControls,
@@ -193,7 +193,7 @@ export function LightboxGalleryProviderWithRef(
         onAfterClose={onAfterClose}
         ref={lightboxRef}
       >
-        <div className={classes.controlsPanel}>
+        <div class={classes.controlsPanel}>
           <ToggleViewIcon
             onClick={() => {
               if (showCarousel) {
@@ -207,7 +207,7 @@ export function LightboxGalleryProviderWithRef(
         <BaseCarousel
           arrowPrevAs={NavButtonIcon}
           arrowNextAs={NavButtonIcon}
-          className={classes.gallery}
+          class={classes.gallery}
           defaultSlide={mod(index, count.current[group]) || 0}
           hidden={!showCarousel}
           loop
@@ -219,7 +219,7 @@ export function LightboxGalleryProviderWithRef(
         </BaseCarousel>
         <div
           hidden={!showCarousel}
-          className={objstr({
+          class={objstr({
             [classes.caption]: true,
             [classes.control]: true,
             [classes[captionState]]: true,
@@ -240,7 +240,7 @@ export function LightboxGalleryProviderWithRef(
               })}
         >
           <div
-            className={objstr({
+            class={objstr({
               [classes.captionText]: true,
               [EXPOSED_CAPTION_CLASS]: true,
             })}
@@ -250,9 +250,7 @@ export function LightboxGalleryProviderWithRef(
           </div>
         </div>
         {!showCarousel && (
-          <div
-            className={objstr({[classes.gallery]: true, [classes.grid]: true})}
-          >
+          <div class={objstr({[classes.gallery]: true, [classes.grid]: true})}>
             {gridElements.current[group]}
           </div>
         )}
@@ -276,7 +274,7 @@ function CloseButtonIcon({onClick}) {
   return (
     <svg
       aria-label="Close the lightbox"
-      className={objstr({
+      class={objstr({
         [classes.control]: true,
         [classes.topControl]: true,
         [classes.closeButton]: true,
@@ -306,7 +304,7 @@ function NavButtonIcon({'aria-disabled': ariaDisabled, by, disabled, onClick}) {
   return (
     <svg
       aria-disabled={ariaDisabled}
-      className={objstr({
+      class={objstr({
         [classes.arrow]: true,
         [classes.control]: true,
         [classes.prevArrow]: by < 0,
@@ -342,7 +340,7 @@ function ToggleViewIcon({onClick, showCarousel}) {
       aria-label={
         showCarousel ? 'Switch to grid view' : 'Switch to carousel view'
       }
-      className={objstr({
+      class={objstr({
         [classes.control]: true,
         [classes.topControl]: true,
       })}
@@ -391,7 +389,7 @@ function Thumbnail({onClick, render}) {
   return (
     <div
       aria-label="View in carousel"
-      className={classes.thumbnail}
+      class={classes.thumbnail}
       onClick={onClick}
       role="button"
       tabIndex="0"

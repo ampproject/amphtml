@@ -1,4 +1,4 @@
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const path = require('path');
 const {cyan, green} = require('../common/colors');
 const {execOrThrow} = require('../common/exec');
@@ -10,7 +10,7 @@ const {updateSubpackages} = require('../common/update-packages');
  * Skips npm checks during CI (already done while running each task).
  */
 function updateBuildSystemSubpackages() {
-  const packageFiles = globby.sync('build-system/tasks/*/package.json');
+  const packageFiles = fastGlob.sync('build-system/tasks/*/package.json');
   for (const packageFile of packageFiles) {
     const packageDir = path.dirname(packageFile);
     updateSubpackages(packageDir, /* skipNpmChecks */ true);

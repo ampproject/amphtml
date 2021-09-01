@@ -317,6 +317,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://s.ato.mx/p.js',
   },
 
+  'avantisvideo': {
+    renderStartImplemented: true,
+  },
+
   'beaverads': {
     renderStartImplemented: true,
   },
@@ -1229,6 +1233,11 @@ const adConfig = jsonConfiguration({
 
   'tracdelight': {
     prefetch: 'https://scripts.tracdelight.io/amp.js',
+    renderStartImplemented: true,
+  },
+
+  'trafficstars': {
+    prefetch: 'https://cdn.tsyndicate.com/sdk/v1/master.spot.js',
     renderStartImplemented: true,
   },
 

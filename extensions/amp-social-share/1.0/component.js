@@ -60,7 +60,7 @@ export function SocialShare({
     <Wrapper
       {...rest}
       role="button"
-      tabindex={tabIndex}
+      tabIndex={tabIndex}
       onKeyDown={(e) => handleKeyPress(e, finalEndpoint, checkedTarget)}
       onClick={() => handleActivation(finalEndpoint, checkedTarget)}
       wrapperStyle={{
