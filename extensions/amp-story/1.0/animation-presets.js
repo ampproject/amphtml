@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
@@ -15,6 +16,8 @@
  */
 
 import {GRID_LAYER_TEMPLATE_CLASS_NAMES} from './amp-story-grid-layer';
+=======
+>>>>>>> ca8db68a57... ♻️ [Story performance] Simplify templates CSS by using attr instead of class (#35861)
 import {StoryAnimationPresetDef} from './animation-types';
 import {
   calculateTargetScalingFactor,
@@ -28,8 +31,6 @@ import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const FULL_BLEED_CATEGORY = 'full-bleed';
-/** @const {string} */
-const FILL_TEMPLATE_LAYOUT = 'fill';
 /** @const {number} */
 const SCALE_HIGH_DEFAULT = 3;
 /** @const {number} */
@@ -85,15 +86,6 @@ export function setStyleForPreset(el, presetName) {
   // For full bleed animations.
   if (FULL_BLEED_ANIMATION_NAMES.indexOf(presetName) >= 0) {
     const parent = el.parentElement;
-    if (
-      parent.classList.contains(
-        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]
-      )
-    ) {
-      parent.classList.remove(
-        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]
-      );
-    }
     parent.classList.add(ANIMATION_CSS_CLASS_NAMES[FULL_BLEED_CATEGORY]);
   }
 }
