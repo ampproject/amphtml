@@ -139,9 +139,10 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
     });
   });
 
+  // TODO(35898): unskip
   it.configure()
     .skipFirefox()
-    .run('should throw error if metadata missing', () => {
+    .skip('should throw error if metadata missing', () => {
       win.name = generateIncorrectAttributes();
       const platform = new Platform(window);
       expect(() => new AmpContext(win)).to.throw(
