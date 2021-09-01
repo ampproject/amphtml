@@ -15,14 +15,14 @@ function Component({prop}) {
   const [text, setText] = useState('initial render');
   const ref = useRef(null);
   const ioCallback = useCallback(
-    (isIntersecting) => {
+    ({isIntersecting}) => {
       setText(`is intersecting for ${prop}: ${isIntersecting}`);
     },
     [prop]
   );
 
   const anotherIoCallback = useCallback(
-    (isIntersecting) => {
+    ({isIntersecting}) => {
       // eslint-disable-next-line local/no-forbidden-terms
       console.log(`is intersecting for ${prop}: ${isIntersecting}`);
     },

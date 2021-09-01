@@ -31,7 +31,7 @@ export function createViewportObserver(ioCallback, win, opts = {}) {
 /** @type {!WeakMap<!Window, !IntersectionObserver>} */
 const viewportObservers = new WeakMap();
 
-/** @type {!WeakMap<!Element, !Array<function(boolean)>>} */
+/** @type {!WeakMap<!Element, !Array<function(IntersectionObserverEntry)>>} */
 const viewportCallbacks = new WeakMap();
 
 /**
@@ -42,14 +42,6 @@ const viewportCallbacks = new WeakMap();
  * @param {function(boolean)} viewportCallback
  */
 export function observeWithSharedInOb(element, viewportCallback) {
-  // There should never be two unique observers of the same element.
-  // if (mode.isTest()) {
-  //   devAssert(
-  //     !viewportCallbacks.has(element) ||
-  //       viewportCallbacks.get(element) === viewportCallback
-  //   );
-  // }
-
   const win = toWin(element.ownerDocument.defaultView);
   let viewportObserver = viewportObservers.get(win);
   if (!viewportObserver) {
@@ -87,10 +79,10 @@ export function unobserveWithSharedInOb(element) {
  */
 function ioCallback(entries) {
   entries.forEach((entry) => {
-    const {isIntersecting, target} = entry;
+    const {target} = entry;
     const callbacks = viewportCallbacks.get(target) ?? [];
     callbacks.forEach((callback) => {
-      callback(isIntersecting);
+      callback(entry);
     });
   });
 }
