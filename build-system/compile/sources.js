@@ -107,8 +107,6 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-lightbox/1.0/*.js',
   // For amp-bind in the web worker (ww.js).
   'extensions/amp-bind/**/*.js',
-  // amp-date-display 0.1 and 1.0 share this file.
-  'extensions/amp-date-display/format.js',
   // Needed to access to Variant interface from other extensions
   'extensions/amp-experiment/**/*.js',
   // Needed to access form impl from other extensions
