@@ -40,7 +40,8 @@ const viewportCallbacks = new WeakMap();
  * @param {function(boolean)} viewportCallback
  */
 export function observeWithSharedInOb(element, viewportCallback) {
-  const win = toWin(element.ownerDocument.defaultView);
+  console.log(element, win);
+  const win = toWin(element.ownerDocument?.defaultView);
   let viewportObserver = viewportObservers.get(win);
   if (!viewportObserver) {
     viewportObservers.set(

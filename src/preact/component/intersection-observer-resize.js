@@ -3,25 +3,25 @@ import {
   unobserveWithSharedInOb,
 } from '#core/dom/layout/viewport-observer';
 
-import {useEffect} from '#preact';
+import {useCallback} from '#preact';
 
 /**
  * Uses a shared IntersectionObserver per window instance to observe the given `ref`.
  *
- * @param {{current: Element}} ref
  * @param {function(IntersectionObserverEntry)} callback
- * @param {?Window} targetWin
+ * @return {Function}
  */
-export function useIntersectionObserver(ref, callback, targetWin) {
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) {
-      return;
-    }
-    observeWithSharedInOb(node, callback);
+export function useIntersectionObserver(callback) {
+  const refCb = useCallback(
+    (node) => {
+      observeWithSharedInOb(node, callback);
 
-    return () => {
-      unobserveWithSharedInOb(node);
-    };
-  }, [callback, ref, targetWin]);
+      return () => {
+        unobserveWithSharedInOb(node);
+      };
+    },
+    [callback]
+  );
+
+  return refCb;
 }

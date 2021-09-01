@@ -7,6 +7,13 @@ import {setStyle} from '#core/dom/style';
 
 const NOOP = () => {};
 
+function refs(...refs) {
+  return (element) =>
+    refs.forEach((ref) =>
+      typeof ref == 'function' ? ref(element) : (ref.current = element)
+    );
+}
+
 /**
  * @param {!IframeDef.Props} props
  * @return {PreactDef.Renderable}
@@ -110,11 +117,13 @@ export function Iframe({
     [attemptResize]
   );
 
-  useIntersectionObserver(
-    iframeRef,
-    ioCallback,
-    iframeRef.current?.ownerDocument?.defaultView
-  );
+  // useIntersectionObserver(
+  //   iframeRef,
+  //   ioCallback,
+  //   iframeRef.current?.ownerDocument?.defaultView
+  // );
+
+  const measureRef = useIntersectionObserver(ioCallback);
 
   const contentProps = useMemo(
     () => ({
@@ -144,7 +153,7 @@ export function Iframe({
     <ContainWrapper
       contentAs="iframe"
       contentProps={contentProps}
-      contentRef={iframeRef}
+      contentRef={refs(iframeRef, measureRef)}
       contentStyle={{'box-sizing': 'border-box', ...iframeStyle}}
       ref={containerRef}
       size
