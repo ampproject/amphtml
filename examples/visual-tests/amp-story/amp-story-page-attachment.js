@@ -185,6 +185,15 @@ module.exports = {
       `amp-story-page#${pageID}[active][distance="0"]`
     );
 
+    // Remove the publisher domain text, to prevent flaky test failures due
+    // to inconsistent port values.
+    await page.$eval(
+      '.i-amphtml-story-page-attachment-domain-label',
+      (el) => {
+        el.textContent = '';
+      }
+    );
+
     // Open the page attachment.
     await page.waitForSelector(
       `amp-story-page#${pageID} .i-amphtml-story-inline-page-attachment-chip`
@@ -210,6 +219,15 @@ module.exports = {
     await page.goto(`${url}#page=${pageID}`);
     await page.waitForSelector(
       `amp-story-page#${pageID}[active][distance="0"]`
+    );
+
+    // Remove the publisher domain text, to prevent flaky test failures due
+    // to inconsistent port values.
+    await page.$eval(
+      '.i-amphtml-story-page-attachment-domain-label',
+      (el) => {
+        el.textContent = '';
+      }
     );
 
     // Open the page attachment.
