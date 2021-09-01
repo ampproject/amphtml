@@ -122,6 +122,7 @@ commands:
     steps:
       - browser-tools/install-chrome:
           replace-existing: true
+          chrome-version: 93.0.4577.63
       - browser-tools/install-chromedriver
   install_firefox:
     steps:
