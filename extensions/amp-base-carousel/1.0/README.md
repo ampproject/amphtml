@@ -58,8 +58,7 @@ import '@ampproject/bento-base-carousel';
       position: relative;
     }
   </style>
-  <!-- TODO(wg-bento): Once available, change src to bento-base-carousel.js -->
-  <script async src="https://cdn.ampproject.org/v0/amp-base-carousel-1.0.js"></script>
+  <script async src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.js"></script>
   <style>
     bento-base-carousel, bento-base-carousel > div {
       aspect-ratio: 4/1;
