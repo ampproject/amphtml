@@ -327,7 +327,6 @@ describes.sandboxed('Window - History', {}, (env) => {
     });
 
     it('should create natural binding and make it singleton', () => {
-      win.AMP_CONFIG = {test: false};
       const history = Services.historyForDoc(ampdoc);
       expect(history.binding_).to.be.instanceOf(HistoryBindingNatural_);
       expect(win.__AMP_SERVICES.history.obj).to.equal(history);
@@ -348,6 +347,9 @@ describes.sandboxed('Window - History', {}, (env) => {
   });
 
   describe('HistoryBindingNatural', () => {
+    // TODO: Fix tests s.t. they are isolated from both each other and other test files.
+    delete window.history.state['AMP.History'];
+
     let clock;
     let onStateUpdated;
     let history;
@@ -1013,6 +1015,7 @@ describes.fakeWin(
     });
   }
 );
+
 describes.fakeWin('Window - History - Get and update fragment', {}, (env) => {
   let history;
   let viewer;
