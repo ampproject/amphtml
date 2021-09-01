@@ -2,7 +2,7 @@ import {toWin} from '#core/window';
 
 import {useEffect} from '#preact';
 
-/** @type {WeakMap<!Element, function(boolean)>} */ 
+/** @type {WeakMap<!Element, function(boolean)>} */
 const ioForWindow = new WeakMap();
 const callbackMap = new WeakMap();
 
@@ -26,10 +26,9 @@ export function useIntersectionObserver(ref, callback, targetWin) {
     }
     callbackMap.set(node, callback);
 
-    if (ioForWindow.has(win)) {
-      ioForWindow.get(win).observe(node);
-    } else {
-      const io = new win.IntersectionObserver((entries) => {
+    let observer = ioForWindow.get(win);
+    if (!observer) {
+      observer = new win.IntersectionObserver((entries) => {
         entries.reduceRight((accumulator, entry) => {
           const {target} = entry;
           if (!accumulator.has(target)) {
@@ -39,9 +38,9 @@ export function useIntersectionObserver(ref, callback, targetWin) {
           return accumulator;
         }, new Set());
       });
-      ioForWindow.set(win, io);
-      io.observe(node);
+      ioForWindow.set(win, observer);
     }
+    observer.observe(node);
 
     return () => {
       ioForWindow.get(win).unobserve(node);
