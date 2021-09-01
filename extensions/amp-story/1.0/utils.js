@@ -12,7 +12,6 @@ import {
 } from '#core/dom/query';
 import {createShadowRoot} from '../../../src/shadow-embed';
 import {dev, user, userAssert} from '../../../src/log';
-import {getMode} from '../../../src/mode';
 
 import {setStyle, toggle} from '#core/dom/style';
 
@@ -89,9 +88,7 @@ export function createShadowRootWithStyle(container, element, css) {
   const style = self.document.createElement('style');
   style./*OK*/ textContent = css;
 
-  const containerToUse = getMode().test
-    ? container
-    : createShadowRoot(container);
+  const containerToUse = createShadowRoot(container);
 
   containerToUse.appendChild(style);
   containerToUse.appendChild(element);
