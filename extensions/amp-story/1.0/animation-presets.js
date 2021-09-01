@@ -11,8 +11,6 @@ import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const FULL_BLEED_CATEGORY = 'full-bleed';
-/** @const {string} */
-const FILL_TEMPLATE_LAYOUT = 'fill';
 /** @const {number} */
 const SCALE_HIGH_DEFAULT = 3;
 /** @const {number} */
