@@ -1,6 +1,4 @@
-import {devAssert} from '#core/assert';
 import {isIframed} from '#core/dom';
-import * as mode from '#core/mode';
 import {toWin} from '#core/window';
 
 /**
