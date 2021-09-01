@@ -135,6 +135,11 @@ const renderShadowViewer = ({baseHref, src}) =>
       <head>
         <base href="${baseHref}" />
         <title>Shadow Viewer</title>
+        // TODO(35889): determine why this is necessary for AMP_SHADOW test of
+        amp-lightbox.
+        <script>
+          window.__AMP_TEST_IFRAME = true;
+        </script>
         <script>
           ${SCRIPT};
         </script>
