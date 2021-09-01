@@ -16,7 +16,7 @@ let loggingPrefix = '';
 
 /**
  * Logs messages with a timestamp. The timezone suffix is dropped.
- * @param  {...string} messages
+ * @param  {...any} messages
  */
 function log(...messages) {
   const timestamp = new Date().toTimeString().split(' ')[0];
