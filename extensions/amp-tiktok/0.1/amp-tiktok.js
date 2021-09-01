@@ -197,6 +197,9 @@ export class AmpTiktok extends AMP.BaseElement {
       this.handleTiktokMessages_.bind(this)
     );
 
+    const {promise, resolve} = new Deferred();
+    this.resolveReceivedFirstMessage_ = resolve;
+
     Promise.resolve(this.oEmbedResponsePromise_).then((data) => {
       if (data?.['title']) {
         iframe.title = `TikTok: ${data['title']}`;
@@ -205,13 +208,10 @@ export class AmpTiktok extends AMP.BaseElement {
 
     this.element.appendChild(iframe);
     return this.loadPromise(iframe).then(() => {
-      const {promise, resolve} = new Deferred();
-
-      this.resolveRecievedFirstMessage_ = resolve;
       Services.timerFor(this.win)
         .timeoutPromise(1000, promise)
         .catch(() => {
-          // If no resize messages are recieved the fallback is to
+          // If no resize messages are received the fallback is to
           // resize to the fallbackHeight value.
           this.resizeOuter_(this.fallbackHeight_);
           setStyles(this.iframe_, {
