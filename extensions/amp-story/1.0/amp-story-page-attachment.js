@@ -125,9 +125,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
           </button>`;
     const localizationService = getLocalizationService(devAssert(this.element));
 
-    const titleEl = htmlFor(this.element)`
-    <span class="i-amphtml-story-page-attachment-title"></span>`;
-
     if (localizationService) {
       const localizedCloseString = localizationService.getLocalizedString(
         LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
@@ -135,16 +132,21 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       closeButtonEl.setAttribute('aria-label', localizedCloseString);
     }
 
-    if (this.element.hasAttribute('data-title')) {
-      titleEl.textContent = this.element.getAttribute('data-title');
-    }
-
     const titleAndCloseWrapperEl = this.headerEl.appendChild(
       htmlFor(this.element)`
             <div class="i-amphtml-story-draggable-drawer-header-title-and-close"></div>`
     );
     titleAndCloseWrapperEl.appendChild(closeButtonEl);
-    titleAndCloseWrapperEl.appendChild(titleEl);
+
+    const titleText =
+      this.element.getAttribute('title') ||
+      this.element.getAttribute('data-title');
+    if (titleText) {
+      const titleEl = htmlFor(this.element)`
+        <span class="i-amphtml-story-page-attachment-title"></span>`;
+      titleEl.textContent = titleText;
+      titleAndCloseWrapperEl.appendChild(titleEl);
+    }
 
     if (this.doesContainFormElement_()) {
       // Page attachments that contain forms must display the page's publisher
