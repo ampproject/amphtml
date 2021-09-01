@@ -23,6 +23,7 @@
         -   [`origin`](#origin)
         -   [Playback methods with `makeMethodMessage`](#playback-methods-with-makemethodmessage)
         -   [Handling events with `onMessage`](#handling-events-with-onmessage)
+        -   [Placeholders](#placeholders)
     -   [Use `VideoWrapper` directly](#use-videowrapper-directly)
         -   [Specifying `component`](#specifying-component)
         -   [Passing or overriding props](#passing-or-overriding-props)
@@ -347,6 +348,12 @@ function FantasticPlayerWithRef(
 ```
 
 Your iframe's interface to post messages is likely different, but your component should always dispatch [`HTMLMediaElement` events](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement#events) upstream.
+
+#### Placeholders
+
+All Bento components implemented using iframes should utilize placeholders to mitigate the risk of poor perceived performance. Placeholders, Fallbacks, and Loaders can be toggled on/off using the hooks provided to the Preact Component. See [here](https://github.com/ampproject/amphtml/blob/main/docs/building-a-bento-amp-extension.md#placeholders) for detailed instructions on how to toggle placeholders/fallbacks/loaders.
+
+It is encouraged to create a Storybook story that specifically demonstrates utilization of placeholders and fallbacks.
 
 ### Use `VideoWrapper` directly
 
