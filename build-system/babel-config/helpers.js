@@ -101,10 +101,6 @@ function getReplaceGlobalsPlugin() {
               return;
             }
             const possibleNames = ['globalThis', 'self'];
-            // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/globalThis#browser_compatibility
-            if (argv.ie) {
-              possibleNames.shift();
-            }
             const name = possibleNames.find((name) => !scope.getBinding(name));
             if (!name) {
               throw path.buildCodeFrameError(

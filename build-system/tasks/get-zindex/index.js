@@ -1,7 +1,7 @@
 'use strict';
 
+const fastGlob = require('fast-glob');
 const fs = require('fs');
-const globby = require('globby');
 const path = require('path');
 const Postcss = require('postcss');
 const prettier = require('prettier');
@@ -110,7 +110,7 @@ function createTable(filesData) {
  */
 async function getZindexSelectors(glob, cwd = '.') {
   const filesData = Object.create(null);
-  const files = await globby(glob, {cwd});
+  const files = await fastGlob(glob, {cwd});
   for (const file of files) {
     const contents = await fs.promises.readFile(path.join(cwd, file), 'utf-8');
     const selectors = Object.create(null);
@@ -131,7 +131,9 @@ async function getZindexSelectors(glob, cwd = '.') {
  */
 function getZindexChainsInJs(glob, cwd = '.') {
   return new Promise((resolve) => {
-    const files = globby.sync(glob, {cwd}).map((file) => path.join(cwd, file));
+    const files = fastGlob
+      .sync(glob, {cwd})
+      .map((file) => path.join(cwd, file));
 
     const filesIncludingString = getStdout(
       ['grep -irl "z-*index"', ...files].join(' ')

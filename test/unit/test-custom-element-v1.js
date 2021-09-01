@@ -72,6 +72,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
   describe('upgrade', () => {
     it('should not create impl immediately when attached', () => {
       const element = new ElementClass();
+      const removeSpy = env.sandbox.spy(element.classList, 'remove');
 
       builderMock.expects('schedule').withExactArgs(element).once();
 
@@ -88,6 +89,10 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element.readyState).to.equal('building');
       expect(element.isBuilt()).to.be.false;
       expect(element.getBuildPriority()).equal(LayoutPriority.CONTENT);
+      expect(removeSpy).to.have.been.calledWith(
+        'amp-unresolved',
+        'i-amphtml-unresolved'
+      );
     });
 
     it('should not upgrade immediately when attached', () => {
@@ -246,6 +251,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       );
 
       const element = new ElementClass();
+      const getSizerStub = env.sandbox.stub(element, 'getSizer_');
       doc.body.appendChild(element);
 
       const promise = element.buildInternal();
@@ -259,6 +265,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element).to.not.have.class('i-amphtml-built');
       expect(element.signals().get(CommonSignals.BUILT)).to.be.null;
       expect(attachedCallbackStub).to.not.be.called;
+      expect(getSizerStub).to.be.calledOnce;
 
       await promise;
       expect(getImplSyncForTesting(element)).to.be.instanceOf(TestElement);
@@ -280,6 +287,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       );
 
       const element = new ElementClass();
+      const getSizerStub = env.sandbox.stub(element, 'getSizer_');
       doc.body.appendChild(element);
 
       const promise = element.mountInternal();
@@ -293,6 +301,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element).to.not.have.class('i-amphtml-built');
       expect(element.signals().get(CommonSignals.BUILT)).to.be.null;
       expect(attachedCallbackStub).to.not.be.called;
+      expect(getSizerStub).to.be.calledOnce;
 
       await promise;
       expect(getImplSyncForTesting(element)).to.be.instanceOf(TestElement);
@@ -314,6 +323,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       );
 
       const element = new StubElementClass();
+      const getSizerStub = env.sandbox.stub(element, 'getSizer_');
       doc.body.appendChild(element);
       element.upgrade(TestElement);
 
@@ -324,6 +334,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element.isBuilt()).to.be.false;
       expect(element.readyState).to.equal('building');
       expect(attachedCallbackStub).to.not.be.called;
+      expect(getSizerStub).to.be.calledOnce;
 
       await promise;
       expect(getImplSyncForTesting(element)).to.be.instanceOf(TestElement);
@@ -345,6 +356,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       );
 
       const element = new StubElementClass();
+      const getSizerStub = env.sandbox.stub(element, 'getSizer_');
       doc.body.appendChild(element);
       element.upgrade(TestElement);
 
@@ -355,6 +367,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element.isBuilt()).to.be.false;
       expect(element.readyState).to.equal('building');
       expect(attachedCallbackStub).to.not.be.called;
+      expect(getSizerStub).to.be.calledOnce;
 
       await promise;
       expect(getImplSyncForTesting(element)).to.be.instanceOf(TestElement);
@@ -373,11 +386,13 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       env.sandbox.stub(TestElement, 'usesLoading').returns(true);
 
       const element = new ElementClass();
+      const getSizerStub = env.sandbox.stub(element, 'getSizer_');
       doc.body.appendChild(element);
 
       await element.mountInternal();
       expect(buildCallbackStub).to.be.calledOnce;
       expect(element.readyState).to.equal('loading');
+      expect(getSizerStub).to.be.calledOnce;
     });
 
     it('should continue in a state if modified by buildCallback', async () => {

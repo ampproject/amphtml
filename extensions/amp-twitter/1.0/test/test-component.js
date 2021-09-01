@@ -138,4 +138,54 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
     wrapper.setProps({playable: false});
     expect(spy.set).to.be.calledOnce;
   });
+
+  it('should call onLoad when loaded', () => {
+    const onLoadSpy = env.sandbox.spy();
+    const onErrorSpy = env.sandbox.spy();
+
+    const wrapper = mount(
+      <Twitter
+        tweetid="1356304203044499462"
+        height="500"
+        width="500"
+        onLoad={onLoadSpy}
+        onError={onErrorSpy}
+      ></Twitter>
+    );
+
+    const iframe = wrapper.find('iframe').getDOMNode();
+    const {sentinel} = JSON.parse(iframe.getAttribute('name')).attributes;
+    const mockEvent = new CustomEvent('message');
+    mockEvent.data = serializeMessage('embed-size', sentinel, {height: '1000'});
+    mockEvent.source = iframe.contentWindow;
+    window.dispatchEvent(mockEvent);
+
+    expect(onLoadSpy).to.have.been.calledOnce;
+    expect(onErrorSpy).not.to.have.been.called;
+  });
+
+  it('should call onError when error', () => {
+    const onErrorSpy = env.sandbox.spy();
+    const onLoadSpy = env.sandbox.spy();
+
+    const wrapper = mount(
+      <Twitter
+        tweetid="00000000111111"
+        height="500"
+        width="500"
+        onError={onErrorSpy}
+        onLoad={onLoadSpy}
+      ></Twitter>
+    );
+
+    const iframe = wrapper.find('iframe').getDOMNode();
+    const {sentinel} = JSON.parse(iframe.getAttribute('name')).attributes;
+    const mockEvent = new CustomEvent('message');
+    mockEvent.data = serializeMessage('no-content', sentinel);
+    mockEvent.source = iframe.contentWindow;
+    window.dispatchEvent(mockEvent);
+
+    expect(onErrorSpy).to.have.been.calledOnce;
+    expect(onLoadSpy).not.to.have.been.called;
+  });
 });
