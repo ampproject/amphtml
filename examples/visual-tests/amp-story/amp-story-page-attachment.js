@@ -253,8 +253,12 @@ module.exports = {
     // Dismiss the attachment by tapping an element on the story page, which
     // should blur the input field. This ensures that the soft keyboard is
     // dismissed.
-    await page.waitForSelector(`amp-story-page#${pageID} p`);
-    await page.tap(`amp-story-page#${pageID} p`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID} .i-amphtml-story-page-attachment-close-button`
+    );
+    await page.tap(
+      `amp-story-page#${pageID} .i-amphtml-story-page-attachment-close-button`
+    );
     await verifySelectorsInvisible(page, name, [
       `amp-story-page#${pageID} input:focus`,
     ]);
