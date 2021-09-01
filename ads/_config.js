@@ -349,6 +349,10 @@ const adConfig = jsonConfiguration({
     preconnect: ['https://static.bh-cdn.com', 'https://core-api.bringhub.io'],
   },
 
+  'broadbandy': {
+    renderStartImplemented: true,
+  },
+
   'broadstreetads': {
     prefetch: 'https://cdn.broadstreetads.com/init-2.min.js',
     renderStartImplemented: true,
