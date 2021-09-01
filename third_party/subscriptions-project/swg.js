@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.181 */
+/** Version: 0.1.22.182 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -109,6 +109,7 @@ const AnalyticsEvent = {
   EVENT_HAS_METERING_ENTITLEMENTS: 3010,
   EVENT_OFFERED_METER: 3011,
   EVENT_UNLOCKED_FREE_PAGE: 3012,
+  EVENT_INELIGIBLE_PAYWALL: 3013,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -119,6 +120,7 @@ const EntitlementResult = {
   UNLOCKED_METER: 1003,
   LOCKED_REGWALL: 2001,
   LOCKED_PAYWALL: 2002,
+  INELIGIBLE_PAYWALL: 2003,
 };
 /** @enum {number} */
 const EntitlementSource = {
@@ -4681,7 +4683,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.181',
+    '_client': 'SwG 0.1.22.182',
   });
 }
 
@@ -5374,10 +5376,12 @@ class OffersFlow {
     /** @private  @const {!Array<!string>} */
     this.skus_ = feArgsObj['skus'] || [ALL_SKUS];
 
+    /** @private @const {!Promise<!../model/client-config.ClientConfig>} */
+    this.clientConfig_ = this.clientConfigManager_.getClientConfig();
+
     /** @private @const {!Promise<?ActivityIframeView>} */
-    this.activityIframeViewPromise_ = this.clientConfigManager_
-      .getClientConfig()
-      .then((clientConfig) => {
+    this.activityIframeViewPromise_ = this.clientConfig_.then(
+      (clientConfig) => {
         return this.shouldShow_(clientConfig)
           ? new ActivityIframeView(
               this.win_,
@@ -5387,7 +5391,8 @@ class OffersFlow {
               /* shouldFadeBody */ true
             )
           : null;
-      });
+      }
+    );
   }
 
   /**
@@ -5479,7 +5484,16 @@ class OffersFlow {
           this.startNativeFlow_.bind(this)
         );
         this.activityIframeView_ = activityIframeView;
-        return this.dialogManager_.openView(this.activityIframeView_);
+        return this.clientConfig_.then((clientConfig) => {
+          if (!this.activityIframeView_) {
+            return;
+          }
+          return this.dialogManager_.openView(
+            this.activityIframeView_,
+            /* hidden */ false,
+            this.getDialogConfig_(clientConfig)
+          );
+        });
       });
     }
     return Promise.resolve();
@@ -5494,6 +5508,19 @@ class OffersFlow {
    */
   shouldShow_(clientConfig) {
     return clientConfig.uiPredicates?.canDisplayAutoPrompt !== false;
+  }
+
+  /**
+   * Gets display configuration options for the opened dialog. Uses the
+   * responsive desktop design properties if the updated offer flows UI (for
+   * SwG Basic) is enabled.
+   * @param {!../model/client-config.ClientConfig} clientConfig
+   * @return {!../components/dialog.DialogConfig}
+   */
+  getDialogConfig_(clientConfig) {
+    return clientConfig.useUpdatedOfferFlows
+      ? {desktopConfig: {isCenterPositioned: true, supportsWideScreen: true}}
+      : {};
   }
 
   /**
@@ -5924,7 +5951,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.181',
+        '_client': 'SwG 0.1.22.182',
         'supportsEventManager': true,
       },
       args || {}
@@ -6803,7 +6830,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.181');
+    context.setClientVersion('SwG 0.1.22.182');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -8649,7 +8676,7 @@ class DeferredAccountFlow {
   }
 }
 
-const CSS$1 = "body{margin:0;padding:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{-ms-flex-align:center!important;-ms-flex-pack:center!important;align-items:center!important;bottom:0!important;display:-ms-flexbox!important;display:flex!important;height:100%!important;justify-content:center!important;margin-top:5px!important;min-height:148px!important;width:100%!important;z-index:2147483647!important}@media (min-height:630px),(min-width:630px){swg-loading-container{background-color:#fff!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;margin-left:35px!important;width:560px!important}}swg-loading{animation:mspin-rotate 1568.63ms linear infinite;height:36px;overflow:hidden;width:36px;z-index:2147483647!important}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{animation:swg-loading-film 5332ms steps(324) infinite;background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;height:36px;width:11664px}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/";
+const CSS$1 = "body{margin:0;padding:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{-ms-flex-align:center!important;-ms-flex-pack:center!important;align-items:center!important;bottom:0!important;display:-ms-flexbox!important;display:flex!important;height:100%!important;justify-content:center!important;margin-top:5px!important;min-height:148px!important;width:100%!important;z-index:2147483647!important}@media (min-height:630px),(min-width:630px){swg-loading-container{background-color:#fff!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;margin-left:auto!important;margin-right:auto!important;width:560px!important}}swg-loading{animation:mspin-rotate 1568.63ms linear infinite;height:36px;overflow:hidden;width:36px;z-index:2147483647!important}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{animation:swg-loading-film 5332ms steps(324) infinite;background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;height:36px;width:11664px}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -9238,14 +9265,18 @@ class Dialog {
    * @param {!../model/doc.Doc} doc
    * @param {!Object<string, string|number>=} importantStyles
    * @param {!Object<string, string|number>=} styles
+   * @param {!DialogConfig=} dialogConfig Configuration options for the dialog.
    */
-  constructor(doc, importantStyles = {}, styles = {}) {
+  constructor(doc, importantStyles = {}, styles = {}, dialogConfig = {}) {
     /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
 
+    const desktopDialogConfig = dialogConfig.desktopConfig || {};
+    const supportsWideScreen = !!desktopDialogConfig.supportsWideScreen;
+
     /** @private @const {!FriendlyIframe} */
     this.iframe_ = new FriendlyIframe(doc.getWin().document, {
-      'class': 'swg-dialog',
+      'class': `swg-dialog ${supportsWideScreen ? 'swg-wide-dialog' : ''}`,
     });
 
     /** @private @const {!Graypane} */
@@ -9284,8 +9315,25 @@ class Dialog {
     /** @private {?./view.View} */
     this.previousProgressView_ = null;
 
-    /** @private {number} */
-    this.maxAllowedHeightRatio_ = 0.9;
+    /** @const @private {number} */
+    this.maxAllowedHeightRatio_ =
+      dialogConfig.maxAllowedHeightRatio !== undefined
+        ? dialogConfig.maxAllowedHeightRatio
+        : 0.9;
+
+    /** @const @private {boolean} */
+    this.positionCenterOnDesktop_ = !!desktopDialogConfig.isCenterPositioned;
+
+    /** @const @private {!MediaQueryList} */
+    this.desktopMediaQuery_ = this.doc_
+      .getWin()
+      .matchMedia('(min-width: 641px)');
+
+    /**
+     * Reference to the listener that acts on changes to desktopMediaQuery.
+     * @private {?function()}
+     */
+    this.desktopMediaQueryListener_ = null;
   }
 
   /**
@@ -9340,6 +9388,14 @@ class Dialog {
     this.container_ = createElement(iframeDoc, 'swg-container', {});
     iframeBody.appendChild(this.container_);
     this.setPosition_();
+
+    // Add listener to adjust position when crossing a media query breakpoint.
+    if (this.positionCenterOnDesktop_) {
+      this.desktopMediaQueryListener_ = () => {
+        this.setPosition_();
+      };
+      this.desktopMediaQuery_.addListener(this.desktopMediaQueryListener_);
+    }
   }
 
   /**
@@ -9370,6 +9426,9 @@ class Dialog {
 
       this.removePaddingToHtml_();
       this.graypane_.destroy();
+      if (this.desktopMediaQueryListener_) {
+        this.desktopMediaQuery_.removeListener(this.desktopMediaQueryListener_);
+      }
     });
   }
 
@@ -9406,6 +9465,22 @@ class Dialog {
    */
   getLoadingView() {
     return this.loadingView_;
+  }
+
+  /**
+   * Returns the max allowed height of the view as a ratio of viewport height.
+   * @return {number}
+   */
+  getMaxAllowedHeightRatio() {
+    return this.maxAllowedHeightRatio_;
+  }
+
+  /**
+   * Returns whether the dialog is center-positioned on desktop screens.
+   * @return {boolean}
+   */
+  isPositionCenterOnDesktop() {
+    return this.positionCenterOnDesktop_;
   }
 
   /**
@@ -9489,7 +9564,7 @@ class Dialog {
       return transition$1(
         this.getElement(),
         {
-          'transform': 'translateY(0)',
+          'transform': this.getDefaultTranslateY_(),
           'opacity': 1,
           'visibility': 'visible',
         },
@@ -9537,7 +9612,7 @@ class Dialog {
           return transition$1(
             this.getElement(),
             {
-              'transform': 'translateY(0)',
+              'transform': this.getDefaultTranslateY_(),
             },
             300,
             'ease-out'
@@ -9563,7 +9638,7 @@ class Dialog {
 
             setImportantStyles$1(this.getElement(), {
               'height': `${newHeight}px`,
-              'transform': 'translateY(0)',
+              'transform': this.getDefaultTranslateY_(),
             });
           });
         });
@@ -9619,22 +9694,6 @@ class Dialog {
   }
 
   /**
-   * Sets the max allowed height as a ratio to the viewport height. For example,
-   * ratio = 0.9 means the max allowed height is 90% of the viewport height.
-   * @param {number} ratio
-   */
-  setMaxAllowedHeightRatio(ratio) {
-    this.maxAllowedHeightRatio_ = ratio;
-  }
-
-  /**
-   * Sets the position of the dialog. Currently 'BOTTOM' is set by default.
-   */
-  setPosition_() {
-    setImportantStyles$1(this.getElement(), this.getPositionStyle_());
-  }
-
-  /**
    * Add the padding to the containing page so as to not hide the content
    * behind the popup, if rendered at the bottom.
    * @param {number} newHeight
@@ -9657,12 +9716,43 @@ class Dialog {
   }
 
   /**
+   * Sets the position of the dialog. Currently only supports 'BOTTOM', with
+   * an option of switching to 'CENTER' on desktop screens.
+   */
+  setPosition_() {
+    setImportantStyles$1(this.getElement(), this.getPositionStyle_());
+  }
+
+  /**
    * Returns the styles required to postion the dialog.
    * @return {!Object<string, string|number>}
    * @private
    */
   getPositionStyle_() {
-    return {'bottom': 0};
+    if (this.positionCenterOnDesktop_ && this.desktopMediaQuery_.matches) {
+      return {
+        'top': '50%',
+        'bottom': 0,
+        'transform': this.getDefaultTranslateY_(),
+      };
+    }
+    return {
+      'top': 'auto',
+      'bottom': 0,
+      'transform': this.getDefaultTranslateY_(),
+    };
+  }
+
+  /**
+   * Returns default translateY style for the dialog.
+   * @return {string}
+   * @private
+   */
+  getDefaultTranslateY_() {
+    if (this.positionCenterOnDesktop_ && this.desktopMediaQuery_.matches) {
+      return 'translateY(-50%)';
+    }
+    return 'translateY(0px)';
   }
 }
 
@@ -9721,11 +9811,18 @@ class DialogManager {
 
   /**
    * @param {boolean=} hidden
+   * @param {!./dialog.DialogConfig=} dialogConfig Configuration options for the
+   *     dialog.
    * @return {!Promise<!Dialog>}
    */
-  openDialog(hidden = false) {
+  openDialog(hidden = false, dialogConfig = {}) {
     if (!this.openPromise_) {
-      this.dialog_ = new Dialog(this.doc_);
+      this.dialog_ = new Dialog(
+        this.doc_,
+        /* importantStyles */ {},
+        /* styles */ {},
+        dialogConfig
+      );
       this.openPromise_ = this.dialog_.open(hidden);
     }
     return this.openPromise_;
@@ -9734,16 +9831,13 @@ class DialogManager {
   /**
    * @param {!./view.View} view
    * @param {boolean=} hidden
-   * @param {?number=} maxAllowedHeightRatio The max allowed height of the
-   *    view as a ratio of the viewport height.
+   * @param {!./dialog.DialogConfig=} dialogConfig Configuration options for the
+   *    dialog.
    * @return {!Promise}
    */
-  openView(view, hidden = false, maxAllowedHeightRatio = null) {
+  openView(view, hidden = false, dialogConfig = {}) {
     this.handleCancellations(view);
-    return this.openDialog(hidden).then((dialog) => {
-      if (maxAllowedHeightRatio) {
-        dialog.setMaxAllowedHeightRatio(maxAllowedHeightRatio);
-      }
+    return this.openDialog(hidden, dialogConfig).then((dialog) => {
       return dialog.openView(view);
     });
   }
@@ -10348,8 +10442,8 @@ const ShowcaseEvents = {
     AnalyticsEvent.IMPRESSION_PAYWALL,
   ],
   [ShowcaseEvent.EVENT_SHOWCASE_INELIGIBLE_PAYWALL]: [
-    // TODO(b/181690059): Create showcase ineligible AnalyticsEvent
-    AnalyticsEvent.IMPRESSION_PAYWALL,
+    AnalyticsEvent.EVENT_INELIGIBLE_PAYWALL,
+    AnalyticsEvent.EVENT_NO_ENTITLEMENTS,
   ],
 };
 
@@ -10361,6 +10455,8 @@ const AnalyticsEventToEntitlementResult = {
     EntitlementResult.UNLOCKED_SUBSCRIBER,
   [AnalyticsEvent.EVENT_UNLOCKED_FREE_PAGE]: EntitlementResult.UNLOCKED_FREE,
   [AnalyticsEvent.IMPRESSION_PAYWALL]: EntitlementResult.LOCKED_PAYWALL,
+  [AnalyticsEvent.EVENT_INELIGIBLE_PAYWALL]:
+    EntitlementResult.INELIGIBLE_PAYWALL,
 };
 
 /**
@@ -16611,7 +16707,7 @@ class Propensity {
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgb(0 0 0/20%),0 2px 2px 0 rgb(0 0 0/14%),0 1px 5px 0 rgb(0 0 0/12%)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
+const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (min-width:871px) and (min-height:641px){.swg-dialog.swg-wide-dialog{left:-435px!important;width:870px!important}}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgb(0 0 0/20%),0 2px 2px 0 rgb(0 0 0/14%),0 1px 5px 0 rgb(0 0 0/12%)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
