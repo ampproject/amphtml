@@ -11,8 +11,6 @@ const {getReplacePlugin} = require('./helpers');
  * @return {!Object}
  */
 function getMinifiedConfig() {
-  const isProd = BUILD_CONSTANTS.IS_PROD;
-
   const reactJsxPlugin = [
     '@babel/plugin-transform-react-jsx',
     {
@@ -54,7 +52,7 @@ function getMinifiedConfig() {
     //? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
     //: null,
     './build-system/babel-plugins/babel-plugin-transform-json-configuration',
-    isProd && [
+    BUILD_CONSTANTS.IS_PROD && [
       './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
       BUILD_CONSTANTS,
     ],

@@ -171,7 +171,7 @@ async function applyConfig(
  * @return {!JSON}
  */
 function enableTest_(target, configJson) {
-  let LOCAL_DEV_AMP_CONFIG = {test: true};
+  let TEST_AMP_CONFIG = {test: true};
   const TESTING_HOST = process.env.AMP_TESTING_HOST;
   if (typeof TESTING_HOST == 'string') {
     const TESTING_HOST_FULL_URL = TESTING_HOST.match(/^https?:\/\//)
@@ -179,7 +179,7 @@ function enableTest_(target, configJson) {
       : 'http://' + TESTING_HOST;
     const TESTING_HOST_NO_PROTOCOL = TESTING_HOST.replace(/^https?:\/\//, '');
 
-    LOCAL_DEV_AMP_CONFIG = Object.assign(LOCAL_DEV_AMP_CONFIG, {
+    TEST_AMP_CONFIG = Object.assign(TEST_AMP_CONFIG, {
       thirdPartyUrl: TESTING_HOST_FULL_URL,
       thirdPartyFrameHost: TESTING_HOST_NO_PROTOCOL,
       thirdPartyFrameRegex: TESTING_HOST_NO_PROTOCOL,
@@ -193,7 +193,7 @@ function enableTest_(target, configJson) {
       cyan(target)
     );
   }
-  return Object.assign(LOCAL_DEV_AMP_CONFIG, configJson);
+  return Object.assign(TEST_AMP_CONFIG, configJson);
 }
 
 /**
