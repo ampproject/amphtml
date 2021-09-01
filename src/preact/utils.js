@@ -21,8 +21,10 @@ export function useResourcesNotify() {
  * @return {function(!Element)}
  */
 export function refs(...refs) {
-  return (element) =>
-    refs.forEach((ref) =>
-      typeof ref == 'function' ? ref(element) : (ref.current = element)
-    );
+  return (element) => {
+    for (let i = 0; i < refs.length; i++) {
+      const ref = refs[i];
+      typeof ref == 'function' ? ref(element) : (ref.current = element);
+    }
+  };
 }

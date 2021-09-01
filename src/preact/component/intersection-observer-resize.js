@@ -3,7 +3,7 @@ import {
   unobserveWithSharedInOb,
 } from '#core/dom/layout/viewport-observer';
 
-import {useCallback} from '#preact';
+import {useCallback, useRef} from '#preact';
 
 /**
  * Uses a shared IntersectionObserver per window instance to observe the given `ref`.
@@ -18,12 +18,12 @@ export function useIntersectionObserver(callback) {
       const prevNode = nodeRef.current;
       nodeRef.current = node;
       if (prevNode) {
-        unobserveWithSharedInOb(nodeRef.current, callback);
+        unobserveWithSharedInOb(prevNode);
       }
       if (!node) {
         return;
       }
-      
+
       observeWithSharedInOb(node, callback);
 
       return () => {

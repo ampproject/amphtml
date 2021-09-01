@@ -40,7 +40,7 @@ const viewportCallbacks = new WeakMap();
  * @param {function(boolean)} viewportCallback
  */
 export function observeWithSharedInOb(element, viewportCallback) {
-  const win = toWin(element?.ownerDocument?.defaultView);
+  const win = toWin(element.ownerDocument.defaultView);
   let viewportObserver = viewportObservers.get(win);
   if (!viewportObserver) {
     viewportObservers.set(
@@ -76,11 +76,13 @@ export function unobserveWithSharedInOb(element) {
  * @param {!Array<!IntersectionObserverEntry>} entries
  */
 function ioCallback(entries) {
-  entries.forEach((entry) => {
+  for (let i = 0; i < entries.length; i++) {
+    const entry = entries[i];
     const {target} = entry;
-    const callbacks = viewportCallbacks.get(target) ?? [];
-    callbacks.forEach((callback) => {
+    const callbacks = viewportCallbacks.get(target);
+    for (let j = 0; j < callbacks.length; j++) {
+      const callback = callbacks[j];
       callback(entry);
-    });
-  });
+    }
+  }
 }

@@ -5,7 +5,7 @@ import {toWin} from '#core/window';
 import * as Preact from '#preact';
 import {useRef, useState} from '#preact';
 import {Wrapper, useIntersectionObserver} from '#preact/component';
-import {useResourcesNotify} from '#preact/utils';
+import {refs, useResourcesNotify} from '#preact/utils';
 
 import {format, getLocale} from './locales';
 
@@ -41,6 +41,9 @@ export function Timeago({
   const date = getDate(datetime);
 
   const inViewportCallback = ({isIntersecting}) => {
+    if (!isIntersecting) {
+      return;
+    }
     const node = devAssertElement(ref.current);
     let {lang} = node.ownerDocument.documentElement;
     const win = toWin(node.ownerDocument?.defaultView);
@@ -48,17 +51,12 @@ export function Timeago({
       lang = win.navigator?.language || DEFAULT_LOCALE;
     }
     const locale = getLocale(localeProp || lang);
-    if (isIntersecting) {
-      setTimestamp(
-        getFuzzyTimestampValue(new Date(date), locale, cutoff, placeholder)
-      );
-    }
+    setTimestamp(
+      getFuzzyTimestampValue(new Date(date), locale, cutoff, placeholder)
+    );
   };
-  useIntersectionObserver(
-    ref,
-    inViewportCallback,
-    toWin(ref.current?.ownerDocument?.defaultView)
-  );
+
+  const inObRef = useIntersectionObserver(inViewportCallback);
 
   useResourcesNotify();
 
@@ -66,7 +64,7 @@ export function Timeago({
     <Wrapper
       {...rest}
       as="time"
-      ref={ref}
+      ref={refs(ref, inObRef)}
       datetime={new Date(date).toISOString()}
     >
       {timestamp}
