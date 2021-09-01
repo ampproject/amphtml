@@ -1,115 +1,13 @@
 import * as Preact from '#preact';
 import {StreamGallery} from '../component';
+import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 
 const CONTROLS = ['auto', 'always', 'never'];
 
 export default {
   title: 'StreamGallery',
   component: StreamGallery,
-  decorators: [],
-
-  argTypes: {
-    width: {
-      control: {
-        type: "number"
-      }
-    },
-
-    height: {
-      control: {
-        type: "number"
-      }
-    },
-
-    slideCount: {
-      control: {
-        type: "number"
-      }
-    },
-
-    extraSpace: {
-      control: {
-        type: "boolean"
-      }
-    },
-
-    controls: {
-      control: {
-        type: "select"
-      }
-    },
-
-    loop: {
-      control: {
-        type: "boolean"
-      }
-    },
-
-    snap: {
-      control: {
-        type: "boolean"
-      }
-    },
-
-    slideAlign: {
-      control: {
-        type: "select"
-      }
-    },
-
-    minItemWidth: {
-      control: {
-        type: "number"
-      }
-    },
-
-    maxItemWidth: {
-      control: {
-        type: "number"
-      }
-    },
-
-    minVisibleCount: {
-      control: {
-        type: "number"
-      }
-    },
-
-    maxVisibleCount: {
-      control: {
-        type: "number"
-      }
-    },
-
-    peek: {
-      control: {
-        type: "number"
-      }
-    },
-
-    outsetArrows: {
-      control: {
-        type: "boolean"
-      }
-    }
-  },
-
-  args: {
-    width: 735,
-    height: 225,
-    slideCount: 5,
-    extraSpace: true,
-    controls: CONTROLS,
-    loop: true,
-    snap: true,
-    slideAlign: ['start', 'center'],
-    minItemWidth: 130,
-    maxItemWidth: 180,
-    minVisibleCount: 3,
-    maxVisibleCount: 5,
-    peek: 0,
-    outsetArrows: true
-  }
+  decorators: [withKnobs],
 };
 
 /**
@@ -132,24 +30,21 @@ function CarouselWithActions(props) {
   );
 }
 
-export const _default = (
-  {
-    width,
-    height,
-    slideCount,
-    extraSpace,
-    controls,
-    loop,
-    snap,
-    slideAlign,
-    minItemWidth,
-    maxItemWidth,
-    minVisibleCount,
-    maxVisibleCount,
-    peek,
-    outsetArrows
-  }
-) => {
+export const _default = () => {
+  const width = number('width', 735);
+  const height = number('height', 225);
+  const slideCount = number('slide count', 5, {min: 0, max: 99});
+  const extraSpace = boolean('extra space around?', true);
+  const controls = select('controls', CONTROLS);
+  const loop = boolean('loop', true);
+  const snap = boolean('snap', true);
+  const slideAlign = select('slide align', ['start', 'center']);
+  const minItemWidth = number('min item width', 130, {min: 1});
+  const maxItemWidth = number('max item width', 180, {min: 1});
+  const minVisibleCount = number('min visible count', 3, {min: 1});
+  const maxVisibleCount = number('max visible count', 5, {min: 1});
+  const peek = number('peek', 0, {min: 1});
+  const outsetArrows = boolean('outset arrows', true);
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   return (
     <>
