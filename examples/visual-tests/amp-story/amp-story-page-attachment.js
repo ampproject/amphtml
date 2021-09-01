@@ -185,10 +185,10 @@ module.exports = {
       `amp-story-page#${pageID}[active][distance="0"]`
     );
 
-    // Remove the publisher domain text, to prevent flaky test failures due
-    // to inconsistent port values.
+    // Set the publisher domain text instead of using the actual domain, to
+    // avoid flaky test failures due to inconsistent port values.
     await page.$eval('.i-amphtml-story-page-attachment-domain-label', (el) => {
-      el.textContent = '';
+      el.textContent = 'www.publisherdomain.com';
     });
 
     // Open the page attachment.
@@ -218,10 +218,10 @@ module.exports = {
       `amp-story-page#${pageID}[active][distance="0"]`
     );
 
-    // Remove the publisher domain text, to prevent flaky test failures due
-    // to inconsistent port values.
+    // Set the publisher domain text instead of using the actual domain, to
+    // avoid flaky test failures due to inconsistent port values.
     await page.$eval('.i-amphtml-story-page-attachment-domain-label', (el) => {
-      el.textContent = '';
+      el.textContent = 'www.publisherdomain.com';
     });
 
     // Open the page attachment.
