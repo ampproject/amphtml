@@ -14,13 +14,13 @@ import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {
   StateProperty,
   UIType,
-  getStoreService
+  getStoreService,
 } from './amp-story-store-service';
 import {
   assertDoesNotContainDisplay,
   px,
   setStyle,
-  setStyles
+  setStyles,
 } from '#core/dom/style';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {scopedQuerySelectorAll} from '#core/dom/query';
