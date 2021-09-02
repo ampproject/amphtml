@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
@@ -569,6 +553,7 @@ describes.realWin(
     describe('#getAdUrl', () => {
       beforeEach(() => {
         resetSharedState();
+        impl.uiHandler = {isStickyAd: () => false};
       });
 
       afterEach(() => {
@@ -783,6 +768,10 @@ describes.realWin(
         const impl1 = new AmpAdNetworkAdsenseImpl(elem1);
         const impl2 = new AmpAdNetworkAdsenseImpl(elem2);
         const impl3 = new AmpAdNetworkAdsenseImpl(elem3);
+
+        impl1.uiHandler = {isStickyAd: () => false};
+        impl2.uiHandler = {isStickyAd: () => false};
+        impl3.uiHandler = {isStickyAd: () => false};
         return impl1.getAdUrl().then((adUrl1) => {
           expect(adUrl1).to.match(/pv=2/);
           expect(adUrl1).to.not.match(/prev_fmts/);

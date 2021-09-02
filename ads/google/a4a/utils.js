@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {DomFingerprint} from '#core/dom/fingerprint';
 import {GEO_IN_GROUP} from '../../../extensions/amp-geo/0.1/amp-geo-in-group';
@@ -219,6 +203,12 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
   const slotRect = getPageLayoutBoxBlocking(adElement);
   const iframeDepth = iframeNestingDepth(win);
   const enclosingContainers = getEnclosingContainerTypes(adElement);
+  if (
+    a4a.uiHandler.isStickyAd() &&
+    !enclosingContainers.includes(ValidAdContainerTypes['AMP-STICKY-AD'])
+  ) {
+    enclosingContainers.push(ValidAdContainerTypes['AMP-STICKY-AD']);
+  }
   let eids = adElement.getAttribute(EXPERIMENT_ATTRIBUTE);
   if (opt_experimentIds) {
     eids = mergeExperimentIds(opt_experimentIds, eids);

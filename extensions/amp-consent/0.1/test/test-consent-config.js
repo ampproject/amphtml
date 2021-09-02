@@ -1,19 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {
   ConsentConfig,
@@ -23,6 +7,7 @@ import {
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '#service';
 import {dict} from '#core/types/object';
+import {macroTask} from '#testing/helpers';
 
 describes.realWin('ConsentConfig', {amp: 1}, (env) => {
   let doc;
@@ -556,6 +541,7 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
           // RANDOM is not allowed
           'r=RANDOM'
       );
+
       expect(url).to.match(
         /cid=amp-.{22}&pid=[0-9]+&pid64=.{22}&sourceurl=about%3Asrcdoc&r=RANDOM/
       );
@@ -564,20 +550,26 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
     it('override CLIENT_ID scope', async () => {
       const u1 = await expandConsentEndpointUrl(
         doc.body,
-        'https://example.test?cid=CLIENT_ID'
+        'https://example.test?cid=CLIENT_ID&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
       );
+
       const u2 = await expandConsentEndpointUrl(
         doc.body,
-        'https://example.test?cid=CLIENT_ID()'
+        'https://example.test?cid=CLIENT_ID()&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
       );
+
       const u3 = await expandConsentEndpointUrl(
         doc.body,
-        'https://example.test?cid=CLIENT_ID(123)'
+        'https://example.test?cid=CLIENT_ID(123)&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
       );
+
       const u4 = await expandConsentEndpointUrl(
         doc.body,
-        'https://example.test?cid=CLIENT_ID(abc)'
+        'https://example.test?cid=CLIENT_ID(abc)&pid=PAGE_VIEW_ID&clientconfig=CONSENT_INFO(clientConfig)&cpid='
       );
+
+      await macroTask();
+
       expect(u1).to.equal(u2).to.equal(u3).to.equal(u4);
     });
   });

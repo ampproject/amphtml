@@ -1,19 +1,3 @@
-//
-// Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
 #include <algorithm>
 #include <fstream>
 #include <map>
@@ -4663,9 +4647,6 @@ void ValidateAttributes(const ParsedTagSpec& parsed_tag_spec,
 
 const set<std::string>& ProxyKnowsIntertagsToValidate() {
   static const set<std::string>* tags = [] {
-    // WARNING: If you update this list, you MUST change
-    // min_validator_revision_required in validator.protoascii to
-    // avoid crashing old binaries.
     return new set<std::string>({"AMP-TIMEAGO", "SCRIPT", "STYLE"});
   }();
   return *tags;
@@ -4866,6 +4847,8 @@ void ParsedValidatorRules::ExpandExtensionSpec(ValidatorRules* rules) const {
     if (!tagspec->has_descriptive_name())
       tagspec->set_descriptive_name(tagspec->spec_name());
     tagspec->set_mandatory_parent("HEAD");
+    // This is satisfied by any of the `v0.js` variants:
+    tagspec->add_requires("amphtml javascript runtime (v0.js)");
 
     if (extension_spec.deprecated_allow_duplicates()) {
       tagspec->set_unique_warning(true);

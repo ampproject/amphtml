@@ -1,18 +1,4 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 
 /**
  * Particulars of the webpages used in the AMP visual diff tests.
@@ -280,8 +266,7 @@
       "name": "amp-story: Grid layer (fill)",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        ".i-amphtml-story-grid-template-fill"
+        ".i-amphtml-story-loaded"
       ]
     },
     {
@@ -289,8 +274,7 @@
       "name": "amp-story: Grid layer (vertical)",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        ".i-amphtml-story-grid-template-vertical"
+        ".i-amphtml-story-loaded"
       ]
     },
     {
@@ -298,8 +282,7 @@
       "name": "amp-story: Grid layer (horizontal)",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        ".i-amphtml-story-grid-template-horizontal"
+        ".i-amphtml-story-loaded"
       ]
     },
     {
@@ -310,8 +293,7 @@
         "[grid-area]"
       ],
       "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        ".i-amphtml-story-grid-template-thirds"
+        ".i-amphtml-story-loaded"
       ]
     },
     {
@@ -319,8 +301,7 @@
       "name": "amp-story: Grid layer anchoring with preset (vertically)",
       "viewport": {"width": 250, "height": 500},
       "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        ".i-amphtml-story-grid-template-aspect"
+        ".i-amphtml-story-loaded"
       ]
     },
     {
@@ -328,8 +309,7 @@
       "name": "amp-story: Grid layer anchoring with preset (horizontally)",
       "viewport": {"width": 400, "height": 500},
       "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        ".i-amphtml-story-grid-template-aspect"
+        ".i-amphtml-story-loaded"
       ]
     },
     {
@@ -411,8 +391,7 @@
       "name": "amp-story: Grid layer (fill) (desktop)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        ".i-amphtml-story-grid-template-fill"
+        ".i-amphtml-story-loaded"
       ]
     },
     {
@@ -420,8 +399,7 @@
       "name": "amp-story: Grid layer (vertical) (desktop)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        ".i-amphtml-story-grid-template-vertical"
+        ".i-amphtml-story-loaded"
       ]
     },
     {
@@ -429,8 +407,7 @@
       "name": "amp-story: Grid layer (horizontal) (desktop)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        ".i-amphtml-story-grid-template-horizontal"
+        ".i-amphtml-story-loaded"
       ]
     },
     {
@@ -441,8 +418,7 @@
         "[grid-area]"
       ],
       "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        ".i-amphtml-story-grid-template-thirds"
+        ".i-amphtml-story-loaded"
       ]
     },
     {
