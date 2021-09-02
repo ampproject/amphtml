@@ -32,6 +32,7 @@ export function colombiafeed(global, data) {
     lazyload: data.lazyload,
     lazyloadlimit: data.lazyloadlimit,
     feedsnippetid: data.feedsnippetid,
+    feedcustom: data.feedcustom,
   });
 
   // install observation on entering/leaving the view
