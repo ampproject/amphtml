@@ -1,51 +1,43 @@
-import {color, object, select, text, withKnobs} from '@storybook/addon-knobs';
-
 import * as Preact from '#preact';
 
 import {SocialShare} from '../component';
 
+const types = [
+  'email',
+  'facebook',
+  'linkedin',
+  'pinterest',
+  'tumblr',
+  'twitter',
+  'whatsapp',
+  'line',
+  'sms',
+  'system',
+  'custom',
+  undefined,
+];
+
 export default {
   title: 'SocialShare',
   component: SocialShare,
-  decorators: [withKnobs],
+  argTypes: {
+    type: {control: {type: 'select'}, options: types},
+    color: {control: {type: 'color'}},
+    background: {control: {type: 'color'}},
+  },
+  args: {
+    type: types[0],
+    endpoint: '',
+    params: {'subject': 'test'},
+    target: '',
+    width: '',
+    height: '',
+    children: '',
+    color: '',
+    background: '',
+  },
 };
 
-export const _default = () => {
-  const knobConfigurations = [
-    'email',
-    'facebook',
-    'linkedin',
-    'pinterest',
-    'tumblr',
-    'twitter',
-    'whatsapp',
-    'line',
-    'sms',
-    'system',
-    'custom',
-    undefined,
-  ];
-  const type = select('type', knobConfigurations, knobConfigurations[0]);
-  const endpoint = text('customEndpoint', null);
-  const additionalParams = object('additionalParams', {'subject': 'test'});
-  const target = text('target', null);
-  const width = text('width', null);
-  const height = text('height', null);
-  const foregroundColor = color('color');
-  const background = color('background');
-  const children = text('children', null);
-
-  return (
-    <SocialShare
-      type={type}
-      endpoint={endpoint}
-      params={additionalParams}
-      target={target}
-      width={width}
-      height={height}
-      color={foregroundColor}
-      background={background}
-      children={children}
-    />
-  );
+export const _default = (args) => {
+  return <SocialShare {...args} />;
 };

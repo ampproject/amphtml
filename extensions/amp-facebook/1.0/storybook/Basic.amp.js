@@ -1,17 +1,9 @@
 import * as Preact from '#preact';
-import {
-  boolean,
-  optionsKnob,
-  select,
-  text,
-  withKnobs,
-} from '@storybook/addon-knobs';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
   title: 'amp-facebook-1_0',
-  decorators: [withKnobs, withAmp],
-
+  decorators: [withAmp],
   parameters: {
     extensions: [{name: 'amp-facebook', version: '1.0'}],
     experiments: ['bento'],
@@ -26,27 +18,17 @@ const SAMPLE_HREFS = {
     'https://www.facebook.com/NASA/photos/a.67899501771/10159193669016772/?comment_id=10159193676606772',
 };
 
-export const Default = () => {
-  const embedAs = select('embed type', ['post', 'video', 'comment'], 'post');
-  const href = SAMPLE_HREFS[embedAs];
-  const allowFullScreen = boolean('allowfullscreen', false);
-  const locale = boolean('french locale') ? 'fr_FR' : undefined;
-  const showText = boolean('show text (video only)', false);
-  const includeCommentParent = boolean(
-    'include comment parent (comment only)',
-    false
-  );
+export const Default = ({frenchLocale, ...args}) => {
+  const dataHref = SAMPLE_HREFS[args['data-embed-as']];
+  const dataLocale = frenchLocale ? 'fr_FR' : undefined;
   return (
     <amp-facebook
-      data-allowfullscreen={allowFullScreen}
-      data-embed-as={embedAs}
-      data-href={href}
-      data-include-comment-parent={includeCommentParent}
-      data-locale={locale}
-      data-show-text={showText}
+      data-href={dataHref}
+      data-locale={dataLocale}
       width="300"
       height="200"
       layout="responsive"
+      {...args}
     >
       <div placeholder style="background:red">
         Placeholder. Loading content...
@@ -59,33 +41,46 @@ export const Default = () => {
   );
 };
 
-export const FacebookComments = () => {
-  const embedAs = optionsKnob(
-    'use as',
-    {
-      'amp-facebook-comments': 'amp-facebook-comments',
-      'amp-facebook data-embed-as="comments':
-        'amp-facebook data-embed-as="comments',
-    },
-    'amp-facebook-comments',
-    {display: 'radio'}
-  );
-  const href = text(
-    'data-href',
-    'http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html'
-  );
-  const numPosts = boolean('show 5 comments max') ? 5 : undefined;
-  const orderBy = boolean('order by time') ? 'time' : undefined;
-  const locale = boolean('french locale') ? 'fr_FR' : undefined;
+Default.args = {
+  frenchLocale: false,
+  'data-embed-as': 'post',
+  'data-allowfullscreen': false,
+  'data-show-text': false,
+  'data-include-comment-parent': false,
+};
+
+Default.argTypes = {
+  'data-embed-as': {
+    control: {type: 'select'},
+    options: ['post', 'video', 'comment'],
+  },
+  'data-show-text': {
+    name: 'data-show-text (video only)',
+  },
+  'data-include-comment-parent': {
+    name: 'data-include-comment-parent (comment only)',
+  },
+};
+
+export const FacebookComments = ({
+  embedAs,
+  frenchLocale,
+  orderByTime,
+  showFiveMax,
+  ...args
+}) => {
+  const dataLocale = frenchLocale ? 'fr_FR' : undefined;
+  const dataNumPosts = showFiveMax ? 5 : undefined;
+  const dataOrderBy = orderByTime ? 'time' : undefined;
   return embedAs === 'amp-facebook-comments' ? (
     <amp-facebook-comments
       width="486"
       height="657"
       layout="responsive"
-      data-href={href}
-      data-locale={locale}
-      data-numposts={numPosts}
-      data-order-by={orderBy}
+      data-locale={dataLocale}
+      data-numposts={dataNumPosts}
+      data-order-by={dataOrderBy}
+      {...args}
     >
       <div placeholder>
         <h1>Placeholder</h1>
@@ -97,10 +92,10 @@ export const FacebookComments = () => {
       width="486"
       height="657"
       layout="responsive"
-      data-href={href}
-      data-locale={locale}
-      data-numposts={numPosts}
-      data-order-by={orderBy}
+      data-locale={dataLocale}
+      data-numposts={dataNumPosts}
+      data-order-by={dataOrderBy}
+      {...args}
     >
       <div placeholder>
         <h1>Placeholder</h1>
@@ -109,116 +104,141 @@ export const FacebookComments = () => {
   );
 };
 
-export const FacebookLike = () => {
-  const embedAs = optionsKnob(
-    'use as',
-    {
-      'amp-facebook-like': 'amp-facebook-like',
-      'amp-facebook data-embed-as="like': 'amp-facebook data-embed-as="like',
-    },
-    'amp-facebook-like',
-    {display: 'radio'}
-  );
-  const href = text('href', 'https://www.facebook.com/nasa/');
-  const locale = boolean('french locale') ? 'fr_FR' : undefined;
+FacebookComments.args = {
+  embedAs: 'amp-facebook-comments',
+  'data-href':
+    'http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html',
+  'data-numposts': 5,
+  orderByTime: false,
+  frenchLocale: false,
+};
 
-  const action = select('action', ['like', 'recommend'], undefined);
-  const colorscheme = select(
-    'colorscheme (broken)',
-    ['light', 'dark'],
-    undefined
-  );
-  const kdSite = boolean('kd_site') || undefined;
-  const layout = select(
-    'layout',
-    ['standard', 'button_count', 'button', 'box_count'],
-    undefined
-  );
-  const refLabel = text('ref', undefined);
-  const share = boolean('share') ? 'true' : undefined;
-  const size = select('size (small by default)', ['large', 'small'], undefined);
+FacebookComments.argTypes = {
+  embedAs: {
+    control: {type: 'radio'},
+    options: ['amp-facebook-comments', 'amp-facebook data-embed-as="comments'],
+  },
+};
+
+export const FacebookLike = ({embedAs, frenchLocale, ...args}) => {
+  const dataLocale = frenchLocale ? 'fr_FR' : undefined;
+
   return embedAs === 'amp-facebook-like' ? (
     <amp-facebook-like
       width="400"
       height="600"
-      data-href={href}
-      data-locale={locale}
-      data-action={action}
-      data-colorscheme={colorscheme}
-      data-kd_site={kdSite}
-      data-layout={layout}
-      data-ref={refLabel}
-      data-share={share}
-      data-size={size}
+      data-locale={dataLocale}
+      {...args}
     ></amp-facebook-like>
   ) : (
     <amp-facebook
       data-embed-as="like"
       width="400"
       height="600"
-      data-href={href}
-      data-locale={locale}
-      data-action={action}
-      data-colorscheme={colorscheme}
-      data-kd_site={kdSite}
-      data-layout={layout}
-      data-ref={refLabel}
-      data-share={share}
-      data-size={size}
+      data-locale={dataLocale}
+      {...args}
     ></amp-facebook>
   );
 };
 
-export const FacebookPage = () => {
-  const embedAs = optionsKnob(
-    'use as',
-    {
-      'amp-facebook-page': 'amp-facebook-page',
-      'amp-facebook data-embed-as="page"': 'amp-facebook data-embed-as="page"',
-    },
-    'amp-facebook-page',
-    {display: 'radio'}
-  );
-  const href = text('href', 'https://www.facebook.com/nasa/');
-  const locale = boolean('french locale') ? 'fr_FR' : undefined;
+FacebookLike.args = {
+  embedAs: 'amp-facebook-like',
+  frenchLocale: false,
+  'data-href': 'https://www.facebook.com/nasa/',
+  'data-kd_site': false,
+  'data-size': 'small',
+  'data-ref': '',
+  'data-share': false,
+};
 
-  const hideCover = boolean('hide cover') ? 'true' : undefined;
-  const hideCta = boolean('hide cta') ? 'true' : undefined;
-  const smallHeader = boolean('small header') ? 'true' : undefined;
-  const showFacepile = boolean('show facepile') ? undefined : 'false';
-  const tabs = optionsKnob(
-    'tabs',
-    {timeline: 'timeline', events: 'events', messages: 'messages'},
-    undefined,
-    {display: 'inline-check'}
-  );
+FacebookLike.argTypes = {
+  embedAs: {
+    control: {type: 'radio'},
+    options: ['amp-facebook-like', 'amp-facebook data-embed-as="like'],
+  },
+  'data-layout': {
+    name: 'data-layout',
+    control: {type: 'select'},
+    options: ['standard', 'button_count', 'button', 'box_count'],
+  },
+  'data-colorscheme': {
+    name: 'data-colorscheme (broken)',
+    control: {type: 'select'},
+    options: ['light', 'dark'],
+  },
+  'data-action': {
+    name: 'data-action',
+    control: {type: 'select'},
+    options: ['like', 'recommend'],
+  },
+  'data-size': {
+    name: 'data-size',
+    control: {type: 'select'},
+    options: ['large', 'small'],
+  },
+};
+
+export const FacebookPage = ({
+  embedAs,
+  frenchLocale,
+  hideCover,
+  hideCta,
+  showFacepile,
+  smallHeader,
+  ...args
+}) => {
+  const dataLocale = frenchLocale ? 'fr_FR' : undefined;
+  const dataHideCover = hideCover ? 'true' : undefined;
+  const dataHideCta = hideCta ? 'true' : undefined;
+  const dataSmallHeader = smallHeader ? 'true' : undefined;
+  const dataShowFacepile = showFacepile ? undefined : 'false';
 
   return embedAs === 'amp-facebook-page' ? (
     <amp-facebook-page
       width="400"
       height="600"
-      data-href={href}
-      data-locale={locale}
-      data-hide-cover={hideCover}
-      date-hide-cta={hideCta}
-      data-small-header={smallHeader}
-      data-show-facepile={showFacepile}
-      data-tabs={tabs}
+      data-locale={dataLocale}
+      data-hide-cover={dataHideCover}
+      data-hide-cta={dataHideCta}
+      data-small-header={dataSmallHeader}
+      data-show-facepile={dataShowFacepile}
+      {...args}
     ></amp-facebook-page>
   ) : (
     <amp-facebook
       data-embed-as="page"
       width="400"
       height="600"
-      data-href={href}
-      data-locale={locale}
-      data-hide-cover={hideCover}
-      date-hide-cta={hideCta}
-      data-small-header={smallHeader}
-      data-show-facepile={showFacepile}
-      data-tabs={tabs}
+      data-locale={dataLocale}
+      data-hide-cover={dataHideCover}
+      data-hide-cta={dataHideCta}
+      data-small-header={dataSmallHeader}
+      data-show-facepile={dataShowFacepile}
+      {...args}
     ></amp-facebook>
   );
+};
+
+FacebookPage.args = {
+  embedAs: 'amp-facebook-page',
+  frenchLocale: false,
+  'data-href': 'https://www.facebook.com/nasa/',
+  'data-hide-cover': false,
+  'date-hide-cta': false,
+  'data-small-header': false,
+  'data-show-facepile': true,
+  'data-tabs': 'timeline',
+};
+
+FacebookPage.argTypes = {
+  embedAs: {
+    control: {type: 'radio'},
+    options: ['amp-facebook-page', 'amp-facebook data-embed-as="page'],
+  },
+  'data-tabs': {
+    control: {type: 'inline-check'},
+    options: ['timeline', 'events', 'messages'],
+  },
 };
 
 export const InvalidEmbedType = () => {
