@@ -30,7 +30,13 @@ export const Default = ({frenchLocale, ...args}) => {
       layout="responsive"
       {...args}
     >
-      <div placeholder>Loading...</div>
+      <div placeholder style="background:red">
+        Placeholder. Loading content...
+      </div>
+
+      <div fallback style="background:blue">
+        Fallback. Could not load content...
+      </div>
     </amp-facebook>
   );
 };

@@ -46,3 +46,29 @@ export const InsideDetails = (args) => {
     </details>
   );
 };
+
+export const WithPlaceholderAndFallback = () => {
+  const width = number('width', 500);
+  const height = number('height', 600);
+  const shortcode = text('shortcode', 'B8QaZW4AQY_');
+  const captioned = boolean('captioned');
+  const layout = text('layout', 'fixed');
+
+  return (
+    <amp-instagram
+      data-shortcode={shortcode}
+      data-captioned={captioned}
+      width={width}
+      height={height}
+      layout={layout}
+    >
+      <div placeholder style="background:red">
+        Placeholder. Loading content...
+      </div>
+
+      <div fallback style="background:blue">
+        Fallback. Could not load content...
+      </div>
+    </amp-instagram>
+  );
+};
