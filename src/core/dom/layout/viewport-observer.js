@@ -76,12 +76,20 @@ export function unobserveWithSharedInOb(element) {
  * @param {!Array<!IntersectionObserverEntry>} entries
  */
 function ioCallback(entries) {
-  for (let i = 0; i < entries.length; i++) {
+  const seen = new Set();
+  for (let i = entries.length - 1; i >= 0; i--) {
     const entry = entries[i];
     const {target} = entry;
+    if (seen.has(target)) {
+      continue;
+    }
+    seen.add(target);
     const callbacks = viewportCallbacks.get(target);
-    for (let j = 0; j < callbacks.length; j++) {
-      const callback = callbacks[j];
+    if (!callbacks) {
+      continue;
+    }
+    for (let k = 0; k < callbacks.length; k++) {
+      const callback = callbacks[k];
       callback(entry);
     }
   }
