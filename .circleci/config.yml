@@ -429,6 +429,8 @@ jobs:
       - teardown_vm
 
 workflows:
+  version: 2
+
   'CircleCI':
     jobs:
       - initialize_repository:
