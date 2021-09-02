@@ -8,7 +8,7 @@ import * as Preact from '#preact';
  * are summarized below:
  *
  * Key Configuration Parameters -
- * type - This is a required attribute.  It configures a pre-configured set
+ * type - This is a required attribute.  It configures a set
  *   of parameters needed to share with a particular social-media.  Most
  *   notably, the share-endpoint is set by the type.  Configuration details
  *   can be found in amp-social-share-config.js.  The user may also select
