@@ -1,8 +1,16 @@
 import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
 
 import * as Preact from '#preact';
-import {useEffect, useRef} from '#preact';
+import {useCallback, useEffect, useRef} from '#preact';
+import {useValueRef} from '#preact/component';
 import {IframeEmbed} from '#preact/component/iframe';
+
+import {getData} from '../../../src/event-helper';
+
+const MATCHES_MESSAGING_ORIGIN = (origin) => {
+  return origin === 'https://w.soundcloud.com';
+};
 
 /**
  * @param {!SoundcloudDef.Props} props
@@ -10,6 +18,7 @@ import {IframeEmbed} from '#preact/component/iframe';
  */
 export function Soundcloud({
   color,
+  onLoad,
   playlistId,
   secretToken,
   trackId,
@@ -18,6 +27,7 @@ export function Soundcloud({
 }) {
   // Property and Reference Variables
   const iframeRef = useRef(null);
+  const onLoadRef = useValueRef(onLoad);
 
   useEffect(() => {
     /** Unmount Procedure */
@@ -32,6 +42,16 @@ export function Soundcloud({
       iframeRef.current = null;
     };
   }, []);
+
+  const messageHandler = useCallback(
+    (event) => {
+      const data = parseJson(getData(event));
+      if (data.method === 'ready') {
+        onLoadRef.current?.();
+      }
+    },
+    [onLoadRef]
+  );
 
   // Checking for valid props
   if (!checkProps(trackId, playlistId)) {
@@ -73,6 +93,8 @@ export function Soundcloud({
       scrolling="no"
       src={iframeSrc}
       title={'Soundcloud Widget - ' + mediaId}
+      messageHandler={messageHandler}
+      matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
       {...rest}
     />
   );

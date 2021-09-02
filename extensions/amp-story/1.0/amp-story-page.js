@@ -704,6 +704,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @return {!Promise} */
   beforeVisible() {
+    // Ensures a dynamically added page-attachment or page-outlink element is built.
+    // This happens by amp-story-ads.
+    this.renderOpenAttachmentUI_();
     return this.maybeApplyFirstAnimationFrameOrFinish();
   }
 

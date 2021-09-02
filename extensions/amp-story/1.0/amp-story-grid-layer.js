@@ -53,23 +53,6 @@ const SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR = Object.keys(
   .join(',');
 
 /**
- * The attribute name for grid layer templates.
- * @private @const {string}
- */
-const TEMPLATE_ATTRIBUTE_NAME = 'template';
-
-/**
- * A mapping of template attribute values to CSS class names.
- * @const {!Object<string, string>}
- */
-export const GRID_LAYER_TEMPLATE_CLASS_NAMES = {
-  'fill': 'i-amphtml-story-grid-template-fill',
-  'vertical': 'i-amphtml-story-grid-template-vertical',
-  'horizontal': 'i-amphtml-story-grid-template-horizontal',
-  'thirds': 'i-amphtml-story-grid-template-thirds',
-};
-
-/**
  * The attribute name for grid layer presets.
  * @private @const {string}
  */
@@ -124,7 +107,6 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   buildCallback() {
     super.buildCallback();
     this.applyResponsivenessPresets_();
-    this.applyTemplateClassName_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
     this.initializeListeners_();
@@ -203,27 +185,11 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     const height = Math.min(vh, (vw * vert) / horiz);
     if (width > 0 && height > 0) {
       this.getVsync().mutate(() => {
-        this.element.classList.add('i-amphtml-story-grid-template-aspect');
         setStyles(this.element, {
           '--i-amphtml-story-layer-width': px(width * this.scalingFactor_),
           '--i-amphtml-story-layer-height': px(height * this.scalingFactor_),
         });
       });
-    }
-  }
-
-  /**
-   * Applies internal CSS class names for the template attribute, so that styles
-   * can use the class name instead of compound
-   * amp-story-grid-layer[template="..."] selectors, since the latter increases
-   * CSS specificity and can prevent users from being able to override styles.
-   * @private
-   */
-  applyTemplateClassName_() {
-    if (this.element.hasAttribute(TEMPLATE_ATTRIBUTE_NAME)) {
-      const templateName = this.element.getAttribute(TEMPLATE_ATTRIBUTE_NAME);
-      const templateClassName = GRID_LAYER_TEMPLATE_CLASS_NAMES[templateName];
-      this.element.classList.add(templateClassName);
     }
   }
 
