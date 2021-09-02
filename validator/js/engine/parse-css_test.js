@@ -1206,6 +1206,7 @@ describe('parseMediaQueries', () => {
       'only screen and (color)',
       'NOT screen AND (color)',
       'screen \t \n , \t \n braille',
+      '(min-width: calc(840px - 48px))',
     ];
 
     for (const testcase of cases) {
