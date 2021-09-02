@@ -40,7 +40,7 @@ export function Timeago({
 
   const date = getDate(datetime);
 
-  const inViewportCallback = ({isIntersecting}) => {
+  const ioCallback = ({isIntersecting}) => {
     if (!isIntersecting) {
       return;
     }
@@ -56,7 +56,7 @@ export function Timeago({
     );
   };
 
-  const inObRef = useIntersectionObserver(inViewportCallback);
+  const inObRef = useIntersectionObserver(ioCallback);
 
   useResourcesNotify();
 
