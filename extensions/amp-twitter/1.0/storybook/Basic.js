@@ -3,7 +3,7 @@ import {BentoTwitter} from '../component';
 import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 
 export default {
-  title: 'BentoTwitter',
+  title: 'Twitter',
   component: BentoTwitter,
   decorators: [withKnobs],
 };
