@@ -68,7 +68,7 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
-import {computedStyle, setImportantStyles, toggle} from '#core/dom/style';
+import {computedStyle, px, setImportantStyles, toggle} from '#core/dom/style';
 import {createPseudoLocale} from '#service/localization/strings';
 import {debounce} from '#core/types/function';
 import {dev, devAssert, user} from '../../../src/log';
@@ -342,6 +342,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?BackgroundBlur} */
     this.backgroundBlur_ = null;
+
+    /** @private {number} */
+    this.maxHeightSeen_ = 0;
   }
 
   /** @override */
@@ -1741,6 +1744,20 @@ export class AmpStory extends AMP.BaseElement {
   onResize() {
     const uiState = this.getUIType_();
     this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
+
+    // Maintain story height on screen resize to prevent layout shift. This is
+    // particularly necessary when the Android soft keyboard opens or closes.
+    if (uiState === UIType.MOBILE) {
+      const currentHeight = this.element.getLayoutBox().height;
+      if (currentHeight >= this.maxHeightSeen_) {
+        this.maxHeightSeen_ = currentHeight;
+        this.mutateElement(() => {
+          setImportantStyles(this.element, {
+            'height': px(this.maxHeightSeen_),
+          });
+        });
+      }
+    }
 
     const isLandscape = this.isLandscape_();
     const isLandscapeSupported = this.isLandscapeSupported_();

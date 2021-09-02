@@ -11,17 +11,8 @@
  */
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
-import {
-  StateProperty,
-  UIType,
-  getStoreService,
-} from './amp-story-store-service';
-import {
-  assertDoesNotContainDisplay,
-  px,
-  setStyle,
-  setStyles,
-} from '#core/dom/style';
+import {StateProperty, getStoreService,} from './amp-story-store-service';
+import {assertDoesNotContainDisplay, px, setStyles,} from '#core/dom/style';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {scopedQuerySelectorAll} from '#core/dom/query';
 
@@ -98,9 +89,6 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
 
     /** @private {number} */
     this.scalingFactor_ = 1;
-
-    /** @private {number} */
-    this.maxHeightSeen_ = 0;
   }
 
   /** @override */
@@ -153,21 +141,6 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
           true /* callToInitialize */
         );
       }
-    }
-
-    // Maintain grid layer height on screen resize to prevent layout shift.
-    // This is particularly necessary when the Android soft keyboard opens or
-    // closes.
-    if (storeService.get(StateProperty.UI_STATE) === UIType.MOBILE) {
-      new this.win.ResizeObserver((e) => {
-        const currentHeight = e[0].target./* OK */ getLayoutBox().height;
-        if (currentHeight >= this.maxHeightSeen_) {
-          this.maxHeightSeen_ = currentHeight;
-          this.getVsync().mutate(() => {
-            setStyle(e[0].target, 'height', px(this.maxHeightSeen_));
-          });
-        }
-      }).observe(this.element);
     }
   }
 
