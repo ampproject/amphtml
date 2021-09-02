@@ -12,7 +12,7 @@ import * as Preact from '#preact';
  *   of parameters needed to share with a particular social-media.  Most
  *   notably, the share-endpoint is set by the type.  Configuration details
  *   can be found in amp-social-share-config.js.  The user may also select
- *   'custom' with this knob to manually specify the required parameters.
+ *   'custom' with this control to manually specify the required parameters.
  *   Setting any of the other attributes below overwrites the
  *   pre-configured parameters defined by the type.
  * data-share-endpoint - This is the api endpoint of the social-media with
