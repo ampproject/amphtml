@@ -1628,16 +1628,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return;
         }
         // Create amp-pixel and append to document to send impression.
-        this.getAmpDoc().getBody().appendChild(
-          createElementWithAttributes(
-            this.win.document,
-            'amp-pixel',
-            dict({
-              'src': url,
-              'referrerpolicy': scrubReferer ? 'no-referrer' : '',
-            })
-          )
-        );
+        this.getAmpDoc()
+          .getBody()
+          .appendChild(
+            createElementWithAttributes(
+              this.win.document,
+              'amp-pixel',
+              dict({
+                'src': url,
+                'referrerpolicy': scrubReferer ? 'no-referrer' : '',
+              })
+            )
+          );
       } catch (unusedError) {}
     });
   }
