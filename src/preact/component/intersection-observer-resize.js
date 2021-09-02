@@ -23,9 +23,7 @@ export function useIntersectionObserver(callback) {
       if (!node) {
         return;
       }
-
       observeWithSharedInOb(node, callback);
-
     },
     [callback]
   );

@@ -40,7 +40,6 @@ export function Iframe({
   };
 
   const attemptResize = useCallback(() => {
-    const iframe = iframeRef.current;
     let height = Number(dataRef.current?.height);
     let width = Number(dataRef.current?.width);
     dataRef.current = null;
@@ -50,6 +49,7 @@ export function Iframe({
       );
       return;
     }
+    const iframe = iframeRef.current;
     // TODO(dmanek): Calculate width and height of the container to include padding.
     if (!height) {
       height = iframe./*OK*/ offsetHeight;
@@ -77,7 +77,7 @@ export function Iframe({
         return;
       }
       dataRef.current = event.data;
-      if (isIntersectingRef.current) {
+      if (isIntersectingRef.current !== null) {
         attemptResize();
       }
     },
