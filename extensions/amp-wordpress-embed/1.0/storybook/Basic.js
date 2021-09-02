@@ -5,7 +5,6 @@ import {WordPressEmbed} from '../component';
 export default {
   title: 'WordPressEmbed',
   component: WordPressEmbed,
-  decorators: [],
   args: {
     url: 'https://wordpress.org/news/2021/06/gutenberg-highlights',
     width: 500,
