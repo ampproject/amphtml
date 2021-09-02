@@ -28,8 +28,7 @@ export const _default = ({apiKey}) => {
   );
 };
 
-export const WithPlaceholderAndFallback = () => {
-  const apiKey = text('Embedly API Key', 'valid-api-key');
+export const WithPlaceholderAndFallback = ({apiKey}) => {
   return (
     <>
       <amp-embedly-key layout="nodisplay" value={apiKey}></amp-embedly-key>
@@ -39,11 +38,11 @@ export const WithPlaceholderAndFallback = () => {
         width="300"
         height="200"
       >
-        <div placeholder style="background:red">
+        <div placeholder style={{background: 'red'}}>
           Placeholder. Loading content...
         </div>
 
-        <div fallback style="background:blue">
+        <div fallback style={{background: 'blue'}}>
           Fallback. Could not load content...
         </div>
       </amp-embedly-card>
