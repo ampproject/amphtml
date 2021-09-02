@@ -150,6 +150,15 @@ export class PreactBaseElement extends BaseElement {
       'onPlayingState': (isPlaying) => {
         this.updateIsPlaying_(isPlaying);
       },
+      'onLoading': () => {
+        this.handleOnLoading();
+      },
+      'onLoad': () => {
+        this.handleOnLoad();
+      },
+      'onError': () => {
+        this.handleOnError();
+      },
     });
 
     /** @private {!AmpContextDef.ContextType} */
@@ -511,6 +520,43 @@ export class PreactBaseElement extends BaseElement {
     }
   }
 
+  /**
+   * Default handler for onLoad event
+   * Displays loader. Override to customize.
+   * @protected
+   */
+  handleOnLoad() {
+    this.toggleLoading?.(false);
+    this.toggleFallback?.(false);
+    this.togglePlaceholder?.(false);
+  }
+
+  /**
+   * Default handler for onLoading event
+   * Reveals loader. Override to customize.
+   * @protected
+   */
+  handleOnLoading() {
+    this.toggleLoading?.(true);
+  }
+
+  /**
+   * Default handler for onError event
+   * Displays Fallback / Placeholder. Override to customize.
+   * @protected
+   */
+  handleOnError() {
+    this.toggleLoading?.(false);
+    // If the content fails to load and there's a fallback element, display the fallback.
+    // Otherwise, continue displaying the placeholder.
+    if (this.getFallback?.()) {
+      this.toggleFallback?.(true);
+      this.togglePlaceholder?.(false);
+    } else {
+      this.togglePlaceholder?.(true);
+    }
+  }
+
   /** @private */
   rerender_() {
     // If the component unmounted before the scheduled render runs, exit
@@ -736,7 +782,7 @@ export class PreactBaseElement extends BaseElement {
    * @private
    */
   checkApiWrapper_(current) {
-    if (!mode.isTest()) {
+    if (!mode.isLocalDev()) {
       return;
     }
     // Hack around https://github.com/preactjs/preact/issues/3084
@@ -854,7 +900,7 @@ PreactBaseElement['staticProps'] = undefined;
 /**
  * @protected {!Array<!ContextProp>}
  */
-PreactBaseElement['useContexts'] = mode.isTest() ? Object.freeze([]) : [];
+PreactBaseElement['useContexts'] = mode.isLocalDev() ? Object.freeze([]) : [];
 
 /**
  * Whether the component implements a loading protocol.
