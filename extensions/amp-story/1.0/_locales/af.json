@@ -1,200 +1,200 @@
 {
-    "10": {
-        "string": "LinkedIn"
-    },
-    "11": {
-        "string": "Pinterest"
-    },
-    "12": {
-        "string": "SMS"
-    },
-    "13": {
-        "string": "Meer"
-    },
-    "14": {
-        "string": "Tumblr"
-    },
-    "15": {
-        "string": "Twitter"
-    },
-    "16": {
-        "string": "WhatsApp"
-    },
-    "18": {
-        "string": "Maak sowel die hoogte as breedte van jou venster groter om hierdie ervaring te bekyk"
-    },
-    "19": {
-        "string": "Jy moet die amp-story-eksperiment aktiveer om hierdie inhoud te bekyk."
-    },
-    "2": {
-        "string": "Tik Volgende"
-    },
-    "20": {
-        "string": "Die bladsy kan die beste in portretmodus bekyk word"
-    },
-    "21": {
-        "string": "Ons is jammer, maar dit lyk of jou blaaier nie hierdie ervaring steun nie"
-    },
-    "22": {
-        "string": "Aanvaar"
-    },
-    "23": {
-        "string": "Wys af"
-    },
-    "25": {
-        "string": "Bekyk op oorspronklike domein:"
-    },
-    "26": {
-        "string": "Meer oor AMP-resultate"
-    },
-    "27": {
-        "string": "Gaan in elk geval voort"
-    },
-    "3": {
-        "string": "Tik Terug"
-    },
-    "31": {
-        "string": "Klank af"
-    },
-    "32": {
-        "string": "Klank aan"
-    },
-    "33": {
-        "string": "Hierdie bladsy het geen klank nie"
-    },
-    "34": {
-        "string": "Speel video"
-    },
-    "35": {
-        "string": "Vee opwaarts"
-    },
-    "36": {
-        "string": "Vou twiet uit"
-    },
-    "37": {
-        "string": "Maak jou venster se hoogte groter om hierdie ervaring te bekyk"
-    },
-    "38": {
-        "string": "Maak jou venster se breedte groter om hierdie ervaring te bekyk"
-    },
-    "4": {
-        "string": "Kon nie die skakel na die knipbord kopieer nie :("
-    },
-    "5": {
-        "string": "Skakel gekopieer!"
-    },
-    "6": {
-        "string": "E-pos"
-    },
-    "62": {
-        "string": "Deel vanaf hierdie bladsy"
-    },
-    "63": {
-        "string": "LINE"
-    },
-    "64": {
-        "string": "Bygewerk"
-    },
-    "65": {
-        "string": "Kon nie video speel nie"
-    },
-    "66": {
-        "string": "Doof storie"
-    },
-    "67": {
-        "string": "Ontdoof storie"
-    },
-    "68": {
-        "string": "Storie-inligting"
-    },
-    "69": {
-        "string": "Deel storie"
-    },
-    "7": {
-        "string": "Facebook"
-    },
-    "70": {
-        "string": "Wissel storiekieslys"
-    },
-    "71": {
-        "string": "A"
-    },
-    "72": {
-        "string": "B"
-    },
-    "73": {
-        "string": "C"
-    },
-    "74": {
-        "string": "D"
-    },
-    "75": {
-        "string": "Wenk 1 van 2"
-    },
-    "76": {
-        "string": "Tik om na die volgende skerm te gaan"
-    },
-    "77": {
-        "string": "Volgende"
-    },
-    "78": {
-        "string": "Wenk 2 van 2"
-    },
-    "79": {
-        "string": "Vee om na die volgende storie te gaan"
-    },
-    "8": {
-        "string": "Google+"
-    },
-    "80": {
-        "string": "Ek verstaan"
-    },
-    "81": {
-        "string": "Wenk"
-    },
-    "82": {
-        "string": "Vorige bladsy"
-    },
-    "83": {
-        "string": "Aktiveer"
-    },
-    "84": {
-        "string": "TELLING:"
-    },
-    "85": {
-        "string": "Laat wag storie"
-    },
-    "86": {
-        "string": "Speel storie"
-    },
-    "87": {
-        "string": "Maak toe"
-    },
-    "88": {
-        "string": "Slaan volgende oor"
-    },
-    "89": {
-        "string": "Jou antwoord sal gestuur word na"
-    },
-    "9": {
-        "string": "Kry skakel"
-    },
-    "90": {
-        "string": "Volgende storie"
-    },
-    "91": {
-        "string": "Volgende bladsy"
-    },
-    "92": {
-        "string": "Speel weer"
-    },
-    "93": {
-        "string": "Vorige bladsy"
-    },
-    "96": {
-        "string": "Skuif die toestel om te verken"
-    },
-    "97": {
-        "string": "Wird geöffnet"
-    }
+  "2": {
+    "string": "Tik Volgende"
+  },
+  "3": {
+    "string": "Tik Terug"
+  },
+  "4": {
+    "string": "Kon nie die skakel na die knipbord kopieer nie :("
+  },
+  "5": {
+    "string": "Skakel gekopieer!"
+  },
+  "6": {
+    "string": "E-pos"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "8": {
+    "string": "Google+"
+  },
+  "9": {
+    "string": "Kry skakel"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "SMS"
+  },
+  "13": {
+    "string": "Meer"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
+  "18": {
+    "string": "Maak sowel die hoogte as breedte van jou venster groter om hierdie ervaring te bekyk"
+  },
+  "19": {
+    "string": "Jy moet die amp-story-eksperiment aktiveer om hierdie inhoud te bekyk."
+  },
+  "20": {
+    "string": "Die bladsy kan die beste in portretmodus bekyk word"
+  },
+  "21": {
+    "string": "Ons is jammer, maar dit lyk of jou blaaier nie hierdie ervaring steun nie"
+  },
+  "22": {
+    "string": "Aanvaar"
+  },
+  "23": {
+    "string": "Wys af"
+  },
+  "25": {
+    "string": "Bekyk op oorspronklike domein:"
+  },
+  "26": {
+    "string": "Meer oor AMP-resultate"
+  },
+  "27": {
+    "string": "Gaan in elk geval voort"
+  },
+  "31": {
+    "string": "Klank af"
+  },
+  "32": {
+    "string": "Klank aan"
+  },
+  "33": {
+    "string": "Hierdie bladsy het geen klank nie"
+  },
+  "34": {
+    "string": "Speel video"
+  },
+  "35": {
+    "string": "Vee opwaarts"
+  },
+  "36": {
+    "string": "Vou twiet uit"
+  },
+  "37": {
+    "string": "Maak jou venster se hoogte groter om hierdie ervaring te bekyk"
+  },
+  "38": {
+    "string": "Maak jou venster se breedte groter om hierdie ervaring te bekyk"
+  },
+  "62": {
+    "string": "Deel vanaf hierdie bladsy"
+  },
+  "63": {
+    "string": "LINE"
+  },
+  "64": {
+    "string": "Bygewerk"
+  },
+  "65": {
+    "string": "Kon nie video speel nie"
+  },
+  "66": {
+    "string": "Doof storie"
+  },
+  "67": {
+    "string": "Ontdoof storie"
+  },
+  "68": {
+    "string": "Storie-inligting"
+  },
+  "69": {
+    "string": "Deel storie"
+  },
+  "70": {
+    "string": "Wissel storiekieslys"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "Wenk 1 van 2"
+  },
+  "76": {
+    "string": "Tik om na die volgende skerm te gaan"
+  },
+  "77": {
+    "string": "Volgende"
+  },
+  "78": {
+    "string": "Wenk 2 van 2"
+  },
+  "79": {
+    "string": "Vee om na die volgende storie te gaan"
+  },
+  "80": {
+    "string": "Ek verstaan"
+  },
+  "81": {
+    "string": "Wenk"
+  },
+  "82": {
+    "string": "Vorige bladsy"
+  },
+  "83": {
+    "string": "Aktiveer"
+  },
+  "84": {
+    "string": "TELLING:"
+  },
+  "85": {
+    "string": "Laat wag storie"
+  },
+  "86": {
+    "string": "Speel storie"
+  },
+  "87": {
+    "string": "Maak toe"
+  },
+  "88": {
+    "string": "Slaan volgende oor"
+  },
+  "89": {
+    "string": "Jou antwoord sal gestuur word na"
+  },
+  "90": {
+    "string": "Volgende storie"
+  },
+  "91": {
+    "string": "Volgende bladsy"
+  },
+  "92": {
+    "string": "Speel weer"
+  },
+  "93": {
+    "string": "Vorige bladsy"
+  },
+  "96": {
+    "string": "Skuif die toestel om te verken"
+  },
+  "97": {
+    "string": "Wird geöffnet"
+  }
 }

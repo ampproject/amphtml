@@ -1,200 +1,200 @@
 {
-    "10": {
-        "string": "LinkedIn"
-    },
-    "11": {
-        "string": "Pinterest"
-    },
-    "12": {
-        "string": "Tekstiviesti"
-    },
-    "13": {
-        "string": "Lisää"
-    },
-    "14": {
-        "string": "Tumblr"
-    },
-    "15": {
-        "string": "Twitter"
-    },
-    "16": {
-        "string": "WhatsApp"
-    },
-    "18": {
-        "string": "Lisää ikkunan korkeutta ja leveyttä, jotta voit tarkastella tätä kokemusta"
-    },
-    "19": {
-        "string": "Sinun täytyy ottaa AMP-tarinakokeilu käyttöön, jotta voit tarkastella tätä sisältöä."
-    },
-    "2": {
-        "string": "Valitse Seuraava"
-    },
-    "20": {
-        "string": "Sivu toimii parhaiten pystysuuntatilassa"
-    },
-    "21": {
-        "string": "Valitettavasti selaimesi ei tue tätä ominaisuutta"
-    },
-    "22": {
-        "string": "Hyväksy"
-    },
-    "23": {
-        "string": "Hylkää"
-    },
-    "25": {
-        "string": "Näytä alkuperäisessä verkkotunnuksessa:"
-    },
-    "26": {
-        "string": "Lisätietoja AMP-tuloksista"
-    },
-    "27": {
-        "string": "Jatka silti"
-    },
-    "3": {
-        "string": "Valitse Takaisin"
-    },
-    "31": {
-        "string": "Äänet pois käytöstä"
-    },
-    "32": {
-        "string": "Äänet käytössä"
-    },
-    "33": {
-        "string": "Tällä sivulla ei ole ääntä"
-    },
-    "34": {
-        "string": "Toista video"
-    },
-    "35": {
-        "string": "Pyyhkäise ylös"
-    },
-    "36": {
-        "string": "Laajenna tviitti"
-    },
-    "37": {
-        "string": "Lisää ikkunan korkeutta, jotta voit tarkastella tätä kokemusta"
-    },
-    "38": {
-        "string": "Lisää ikkunan leveyttä, jotta voit tarkastella tätä kokemusta"
-    },
-    "4": {
-        "string": "Linkkiä ei voitu kopioida leikepöydälle :("
-    },
-    "5": {
-        "string": "Linkki kopioitu!"
-    },
-    "6": {
-        "string": "Sähköposti"
-    },
-    "62": {
-        "string": "Jaa tältä sivulta alkaen"
-    },
-    "63": {
-        "string": "LINE"
-    },
-    "64": {
-        "string": "Päivitetty"
-    },
-    "65": {
-        "string": "Videon toistaminen epäonnistui"
-    },
-    "66": {
-        "string": "Mykistä tarina"
-    },
-    "67": {
-        "string": "Poista tarinan mykistys"
-    },
-    "68": {
-        "string": "Tarinan tiedot"
-    },
-    "69": {
-        "string": "Jaa tarina"
-    },
-    "7": {
-        "string": "Facebook"
-    },
-    "70": {
-        "string": "Avaa tarinan valikko"
-    },
-    "71": {
-        "string": "A"
-    },
-    "72": {
-        "string": "B"
-    },
-    "73": {
-        "string": "C"
-    },
-    "74": {
-        "string": "D"
-    },
-    "75": {
-        "string": "Vinkki 1/2"
-    },
-    "76": {
-        "string": "Siirry seuraavaan ruutuun napauttamalla"
-    },
-    "77": {
-        "string": "Seuraava"
-    },
-    "78": {
-        "string": "Vinkki 2/2"
-    },
-    "79": {
-        "string": "Siirry seuraavaan tarinaan pyyhkäisemällä"
-    },
-    "8": {
-        "string": "Google+"
-    },
-    "80": {
-        "string": "Selvä"
-    },
-    "81": {
-        "string": "Vinkki"
-    },
-    "82": {
-        "string": "Edellinen sivu"
-    },
-    "83": {
-        "string": "Aktivoi"
-    },
-    "84": {
-        "string": "PISTEET:"
-    },
-    "85": {
-        "string": "Keskeytä tarina"
-    },
-    "86": {
-        "string": "Toista tarina"
-    },
-    "87": {
-        "string": "Sulje"
-    },
-    "88": {
-        "string": "Ohita seuraava"
-    },
-    "89": {
-        "string": "Vastauksesi lähetetään taholle"
-    },
-    "9": {
-        "string": "Hae linkki"
-    },
-    "90": {
-        "string": "Seuraava tarina"
-    },
-    "91": {
-        "string": "Seuraava sivu"
-    },
-    "92": {
-        "string": "Toista uudelleen"
-    },
-    "93": {
-        "string": "Edellinen sivu"
-    },
-    "96": {
-        "string": "Selaa liikuttamalla laitetta"
-    },
-    "97": {
-        "string": "Avataan"
-    }
+  "2": {
+    "string": "Valitse Seuraava"
+  },
+  "3": {
+    "string": "Valitse Takaisin"
+  },
+  "4": {
+    "string": "Linkkiä ei voitu kopioida leikepöydälle :("
+  },
+  "5": {
+    "string": "Linkki kopioitu!"
+  },
+  "6": {
+    "string": "Sähköposti"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "8": {
+    "string": "Google+"
+  },
+  "9": {
+    "string": "Hae linkki"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "Tekstiviesti"
+  },
+  "13": {
+    "string": "Lisää"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
+  "18": {
+    "string": "Lisää ikkunan korkeutta ja leveyttä, jotta voit tarkastella tätä kokemusta"
+  },
+  "19": {
+    "string": "Sinun täytyy ottaa AMP-tarinakokeilu käyttöön, jotta voit tarkastella tätä sisältöä."
+  },
+  "20": {
+    "string": "Sivu toimii parhaiten pystysuuntatilassa"
+  },
+  "21": {
+    "string": "Valitettavasti selaimesi ei tue tätä ominaisuutta"
+  },
+  "22": {
+    "string": "Hyväksy"
+  },
+  "23": {
+    "string": "Hylkää"
+  },
+  "25": {
+    "string": "Näytä alkuperäisessä verkkotunnuksessa:"
+  },
+  "26": {
+    "string": "Lisätietoja AMP-tuloksista"
+  },
+  "27": {
+    "string": "Jatka silti"
+  },
+  "31": {
+    "string": "Äänet pois käytöstä"
+  },
+  "32": {
+    "string": "Äänet käytössä"
+  },
+  "33": {
+    "string": "Tällä sivulla ei ole ääntä"
+  },
+  "34": {
+    "string": "Toista video"
+  },
+  "35": {
+    "string": "Pyyhkäise ylös"
+  },
+  "36": {
+    "string": "Laajenna tviitti"
+  },
+  "37": {
+    "string": "Lisää ikkunan korkeutta, jotta voit tarkastella tätä kokemusta"
+  },
+  "38": {
+    "string": "Lisää ikkunan leveyttä, jotta voit tarkastella tätä kokemusta"
+  },
+  "62": {
+    "string": "Jaa tältä sivulta alkaen"
+  },
+  "63": {
+    "string": "LINE"
+  },
+  "64": {
+    "string": "Päivitetty"
+  },
+  "65": {
+    "string": "Videon toistaminen epäonnistui"
+  },
+  "66": {
+    "string": "Mykistä tarina"
+  },
+  "67": {
+    "string": "Poista tarinan mykistys"
+  },
+  "68": {
+    "string": "Tarinan tiedot"
+  },
+  "69": {
+    "string": "Jaa tarina"
+  },
+  "70": {
+    "string": "Avaa tarinan valikko"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "Vinkki 1/2"
+  },
+  "76": {
+    "string": "Siirry seuraavaan ruutuun napauttamalla"
+  },
+  "77": {
+    "string": "Seuraava"
+  },
+  "78": {
+    "string": "Vinkki 2/2"
+  },
+  "79": {
+    "string": "Siirry seuraavaan tarinaan pyyhkäisemällä"
+  },
+  "80": {
+    "string": "Selvä"
+  },
+  "81": {
+    "string": "Vinkki"
+  },
+  "82": {
+    "string": "Edellinen sivu"
+  },
+  "83": {
+    "string": "Aktivoi"
+  },
+  "84": {
+    "string": "PISTEET:"
+  },
+  "85": {
+    "string": "Keskeytä tarina"
+  },
+  "86": {
+    "string": "Toista tarina"
+  },
+  "87": {
+    "string": "Sulje"
+  },
+  "88": {
+    "string": "Ohita seuraava"
+  },
+  "89": {
+    "string": "Vastauksesi lähetetään taholle"
+  },
+  "90": {
+    "string": "Seuraava tarina"
+  },
+  "91": {
+    "string": "Seuraava sivu"
+  },
+  "92": {
+    "string": "Toista uudelleen"
+  },
+  "93": {
+    "string": "Edellinen sivu"
+  },
+  "96": {
+    "string": "Selaa liikuttamalla laitetta"
+  },
+  "97": {
+    "string": "Avataan"
+  }
 }

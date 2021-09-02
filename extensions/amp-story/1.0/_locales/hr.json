@@ -1,200 +1,200 @@
 {
-    "10": {
-        "string": "LinkedIn"
-    },
-    "11": {
-        "string": "Pinterest"
-    },
-    "12": {
-        "string": "SMS"
-    },
-    "13": {
-        "string": "Više"
-    },
-    "14": {
-        "string": "Tumblr"
-    },
-    "15": {
-        "string": "Twitter"
-    },
-    "16": {
-        "string": "WhatsApp"
-    },
-    "18": {
-        "string": "Povećajte visinu i širinu svog prozora kako biste vidjeli ovo iskustvo"
-    },
-    "19": {
-        "string": "Morate omogućiti ovaj amp-story eksperiment za gledanje ovog sadržaja."
-    },
-    "2": {
-        "string": "Dodirnite Sljedeće"
-    },
-    "20": {
-        "string": "Stranicu je najbolje gledati u orijentaciji portreta"
-    },
-    "21": {
-        "string": "Na žalost, čini se da Vaš pretraživač ne podržava ovo iskustvo"
-    },
-    "22": {
-        "string": "Prihvati"
-    },
-    "23": {
-        "string": "Odbij"
-    },
-    "25": {
-        "string": "Pogledaj na originalnoj domeni:"
-    },
-    "26": {
-        "string": "Više o AMP rezultatima"
-    },
-    "27": {
-        "string": "Svejedno nastavi"
-    },
-    "3": {
-        "string": "Dodirnite Povratak"
-    },
-    "31": {
-        "string": "Zvuk isključen"
-    },
-    "32": {
-        "string": "Zvuk uključen"
-    },
-    "33": {
-        "string": "Ova stranica nema zvuka"
-    },
-    "34": {
-        "string": "Reproduciraj videozapis"
-    },
-    "35": {
-        "string": "Prijeđite prstom prema gore"
-    },
-    "36": {
-        "string": "Proširi Tweet"
-    },
-    "37": {
-        "string": "Povećajte visinu svog prozora kako biste vidjeli ovo iskustvo"
-    },
-    "38": {
-        "string": "Povećajte širinu svog prozora kako biste vidjeli ovo iskustvo"
-    },
-    "4": {
-        "string": "Nije moguće kopirati poveznicu u međuspremnik :("
-    },
-    "5": {
-        "string": "Poveznica je kopirana!"
-    },
-    "6": {
-        "string": "E-poruka"
-    },
-    "62": {
-        "string": "Podijelite, počevši s ovom stranicom"
-    },
-    "63": {
-        "string": "Line"
-    },
-    "64": {
-        "string": "Ažurirano"
-    },
-    "65": {
-        "string": "Nije uspjela reprodukcija videozapisa"
-    },
-    "66": {
-        "string": "Utišaj priču"
-    },
-    "67": {
-        "string": "Poništi utišavanje priče"
-    },
-    "68": {
-        "string": "Informacije o priči"
-    },
-    "69": {
-        "string": "Podijelite priču"
-    },
-    "7": {
-        "string": "Facebook"
-    },
-    "70": {
-        "string": "Promijenite izbornik priča"
-    },
-    "71": {
-        "string": "A"
-    },
-    "72": {
-        "string": "B"
-    },
-    "73": {
-        "string": "C"
-    },
-    "74": {
-        "string": "D"
-    },
-    "75": {
-        "string": "Savjet 1 od 2"
-    },
-    "76": {
-        "string": "Dodirnite za odlazak na sljedeći zaslon"
-    },
-    "77": {
-        "string": "Sljedeće"
-    },
-    "78": {
-        "string": "Savjet 2 od 2"
-    },
-    "79": {
-        "string": "Prevucite prstom za odlazak na sljedeću priču"
-    },
-    "8": {
-        "string": "Google+"
-    },
-    "80": {
-        "string": "Razumijem"
-    },
-    "81": {
-        "string": "Savjet"
-    },
-    "82": {
-        "string": "Prethodna stranica"
-    },
-    "83": {
-        "string": "Aktiviraj"
-    },
-    "84": {
-        "string": "REZULTAT:"
-    },
-    "85": {
-        "string": "Privremeno zaustavi priču"
-    },
-    "86": {
-        "string": "Reproduciraj priču"
-    },
-    "87": {
-        "string": "Zatvori"
-    },
-    "88": {
-        "string": "Preskoči na sljedeće"
-    },
-    "89": {
-        "string": "Vaš će odgovor biti poslan"
-    },
-    "9": {
-        "string": "Nabavite poveznicu"
-    },
-    "90": {
-        "string": "Sljedeća priča"
-    },
-    "91": {
-        "string": "Sljedeća stranica"
-    },
-    "92": {
-        "string": "Ponovno reproduciraj"
-    },
-    "93": {
-        "string": "Prethodna stranica"
-    },
-    "96": {
-        "string": "Pomaknite uređaj za istraživanje"
-    },
-    "97": {
-        "string": "Otvaram"
-    }
+  "2": {
+    "string": "Dodirnite Sljedeće"
+  },
+  "3": {
+    "string": "Dodirnite Povratak"
+  },
+  "4": {
+    "string": "Nije moguće kopirati poveznicu u međuspremnik :("
+  },
+  "5": {
+    "string": "Poveznica je kopirana!"
+  },
+  "6": {
+    "string": "E-poruka"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "8": {
+    "string": "Google+"
+  },
+  "9": {
+    "string": "Nabavite poveznicu"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "SMS"
+  },
+  "13": {
+    "string": "Više"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
+  "18": {
+    "string": "Povećajte visinu i širinu svog prozora kako biste vidjeli ovo iskustvo"
+  },
+  "19": {
+    "string": "Morate omogućiti ovaj amp-story eksperiment za gledanje ovog sadržaja."
+  },
+  "20": {
+    "string": "Stranicu je najbolje gledati u orijentaciji portreta"
+  },
+  "21": {
+    "string": "Na žalost, čini se da Vaš pretraživač ne podržava ovo iskustvo"
+  },
+  "22": {
+    "string": "Prihvati"
+  },
+  "23": {
+    "string": "Odbij"
+  },
+  "25": {
+    "string": "Pogledaj na originalnoj domeni:"
+  },
+  "26": {
+    "string": "Više o AMP rezultatima"
+  },
+  "27": {
+    "string": "Svejedno nastavi"
+  },
+  "31": {
+    "string": "Zvuk isključen"
+  },
+  "32": {
+    "string": "Zvuk uključen"
+  },
+  "33": {
+    "string": "Ova stranica nema zvuka"
+  },
+  "34": {
+    "string": "Reproduciraj videozapis"
+  },
+  "35": {
+    "string": "Prijeđite prstom prema gore"
+  },
+  "36": {
+    "string": "Proširi Tweet"
+  },
+  "37": {
+    "string": "Povećajte visinu svog prozora kako biste vidjeli ovo iskustvo"
+  },
+  "38": {
+    "string": "Povećajte širinu svog prozora kako biste vidjeli ovo iskustvo"
+  },
+  "62": {
+    "string": "Podijelite, počevši s ovom stranicom"
+  },
+  "63": {
+    "string": "Line"
+  },
+  "64": {
+    "string": "Ažurirano"
+  },
+  "65": {
+    "string": "Nije uspjela reprodukcija videozapisa"
+  },
+  "66": {
+    "string": "Utišaj priču"
+  },
+  "67": {
+    "string": "Poništi utišavanje priče"
+  },
+  "68": {
+    "string": "Informacije o priči"
+  },
+  "69": {
+    "string": "Podijelite priču"
+  },
+  "70": {
+    "string": "Promijenite izbornik priča"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "Savjet 1 od 2"
+  },
+  "76": {
+    "string": "Dodirnite za odlazak na sljedeći zaslon"
+  },
+  "77": {
+    "string": "Sljedeće"
+  },
+  "78": {
+    "string": "Savjet 2 od 2"
+  },
+  "79": {
+    "string": "Prevucite prstom za odlazak na sljedeću priču"
+  },
+  "80": {
+    "string": "Razumijem"
+  },
+  "81": {
+    "string": "Savjet"
+  },
+  "82": {
+    "string": "Prethodna stranica"
+  },
+  "83": {
+    "string": "Aktiviraj"
+  },
+  "84": {
+    "string": "REZULTAT:"
+  },
+  "85": {
+    "string": "Privremeno zaustavi priču"
+  },
+  "86": {
+    "string": "Reproduciraj priču"
+  },
+  "87": {
+    "string": "Zatvori"
+  },
+  "88": {
+    "string": "Preskoči na sljedeće"
+  },
+  "89": {
+    "string": "Vaš će odgovor biti poslan"
+  },
+  "90": {
+    "string": "Sljedeća priča"
+  },
+  "91": {
+    "string": "Sljedeća stranica"
+  },
+  "92": {
+    "string": "Ponovno reproduciraj"
+  },
+  "93": {
+    "string": "Prethodna stranica"
+  },
+  "96": {
+    "string": "Pomaknite uređaj za istraživanje"
+  },
+  "97": {
+    "string": "Otvaram"
+  }
 }

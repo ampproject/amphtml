@@ -1,200 +1,200 @@
 {
-    "10": {
-        "string": "LinkedIn"
-    },
-    "11": {
-        "string": "Pinterest"
-    },
-    "12": {
-        "string": "SMS"
-    },
-    "13": {
-        "string": "Máis"
-    },
-    "14": {
-        "string": "Tumblr"
-    },
-    "15": {
-        "string": "Twitter"
-    },
-    "16": {
-        "string": "WhatsApp"
-    },
-    "18": {
-        "string": "Amplía o alto e o ancho da xanela para ver esta experiencia"
-    },
-    "19": {
-        "string": "Para ver este contido, debes activar o experimento amp-story."
-    },
-    "2": {
-        "string": "Preme Seguinte"
-    },
-    "20": {
-        "string": "A páxina verase mellor no modo vertical"
-    },
-    "21": {
-        "string": "Sentímolo, pero semella que o teu navegador non é compatible con esta experiencia"
-    },
-    "22": {
-        "string": "Aceptar"
-    },
-    "23": {
-        "string": "Rexeitar"
-    },
-    "25": {
-        "string": "Ver no dominio orixinal:"
-    },
-    "26": {
-        "string": "Máis información sobre os resultados de AMP"
-    },
-    "27": {
-        "string": "Continuar de todas formas"
-    },
-    "3": {
-        "string": "Preme Atrás"
-    },
-    "31": {
-        "string": "Son desactivado"
-    },
-    "32": {
-        "string": "Son activado"
-    },
-    "33": {
-        "string": "Esta páxina non ten son"
-    },
-    "34": {
-        "string": "Reproducir vídeo"
-    },
-    "35": {
-        "string": "Deslizar cara enriba"
-    },
-    "36": {
-        "string": "Mostrar todo"
-    },
-    "37": {
-        "string": "Amplía o alto da xanela para ver esta experiencia"
-    },
-    "38": {
-        "string": "Amplía o ancho da xanela para ver esta experiencia"
-    },
-    "4": {
-        "string": "Non se puido copiar a ligazón no portapapeis :("
-    },
-    "5": {
-        "string": "Ligazón copiada!"
-    },
-    "6": {
-        "string": "Correo electrónico"
-    },
-    "62": {
-        "string": "Compartir a partir desta páxina"
-    },
-    "63": {
-        "string": "Line"
-    },
-    "64": {
-        "string": "Actualizado"
-    },
-    "65": {
-        "string": "Erro na reprodución do vídeo"
-    },
-    "66": {
-        "string": "Desactivar son"
-    },
-    "67": {
-        "string": "Activar son"
-    },
-    "68": {
-        "string": "Información da historia"
-    },
-    "69": {
-        "string": "Compartir historia"
-    },
-    "7": {
-        "string": "Facebook"
-    },
-    "70": {
-        "string": "Mostrar o menú da historia"
-    },
-    "71": {
-        "string": "A"
-    },
-    "72": {
-        "string": "B"
-    },
-    "73": {
-        "string": "C"
-    },
-    "74": {
-        "string": "D"
-    },
-    "75": {
-        "string": "Consello 1 de 2"
-    },
-    "76": {
-        "string": "Preme para ir á seguinte pantalla"
-    },
-    "77": {
-        "string": "Seguinte"
-    },
-    "78": {
-        "string": "Consello 2 de 2"
-    },
-    "79": {
-        "string": "Desliza para ir á seguinte historia"
-    },
-    "8": {
-        "string": "Google+"
-    },
-    "80": {
-        "string": "Entendido"
-    },
-    "81": {
-        "string": "Consello"
-    },
-    "82": {
-        "string": "Páxina anterior"
-    },
-    "83": {
-        "string": "Activar"
-    },
-    "84": {
-        "string": "PUNTUACIÓN:"
-    },
-    "85": {
-        "string": "Parar historia"
-    },
-    "86": {
-        "string": "Reproducir historia"
-    },
-    "87": {
-        "string": "Pechar"
-    },
-    "88": {
-        "string": "Saltar ó seguinte"
-    },
-    "89": {
-        "string": "A túa resposta enviarase a"
-    },
-    "9": {
-        "string": "Obter ligazón"
-    },
-    "90": {
-        "string": "Seguinte historia"
-    },
-    "91": {
-        "string": "Seguinte páxina"
-    },
-    "92": {
-        "string": "Repetir"
-    },
-    "93": {
-        "string": "Páxina anterior"
-    },
-    "96": {
-        "string": "Move o dispositivo para explorar"
-    },
-    "97": {
-        "string": "Abrindo"
-    }
+  "2": {
+    "string": "Preme Seguinte"
+  },
+  "3": {
+    "string": "Preme Atrás"
+  },
+  "4": {
+    "string": "Non se puido copiar a ligazón no portapapeis :("
+  },
+  "5": {
+    "string": "Ligazón copiada!"
+  },
+  "6": {
+    "string": "Correo electrónico"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "8": {
+    "string": "Google+"
+  },
+  "9": {
+    "string": "Obter ligazón"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "SMS"
+  },
+  "13": {
+    "string": "Máis"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
+  "18": {
+    "string": "Amplía o alto e o ancho da xanela para ver esta experiencia"
+  },
+  "19": {
+    "string": "Para ver este contido, debes activar o experimento amp-story."
+  },
+  "20": {
+    "string": "A páxina verase mellor no modo vertical"
+  },
+  "21": {
+    "string": "Sentímolo, pero semella que o teu navegador non é compatible con esta experiencia"
+  },
+  "22": {
+    "string": "Aceptar"
+  },
+  "23": {
+    "string": "Rexeitar"
+  },
+  "25": {
+    "string": "Ver no dominio orixinal:"
+  },
+  "26": {
+    "string": "Máis información sobre os resultados de AMP"
+  },
+  "27": {
+    "string": "Continuar de todas formas"
+  },
+  "31": {
+    "string": "Son desactivado"
+  },
+  "32": {
+    "string": "Son activado"
+  },
+  "33": {
+    "string": "Esta páxina non ten son"
+  },
+  "34": {
+    "string": "Reproducir vídeo"
+  },
+  "35": {
+    "string": "Deslizar cara enriba"
+  },
+  "36": {
+    "string": "Mostrar todo"
+  },
+  "37": {
+    "string": "Amplía o alto da xanela para ver esta experiencia"
+  },
+  "38": {
+    "string": "Amplía o ancho da xanela para ver esta experiencia"
+  },
+  "62": {
+    "string": "Compartir a partir desta páxina"
+  },
+  "63": {
+    "string": "Line"
+  },
+  "64": {
+    "string": "Actualizado"
+  },
+  "65": {
+    "string": "Erro na reprodución do vídeo"
+  },
+  "66": {
+    "string": "Desactivar son"
+  },
+  "67": {
+    "string": "Activar son"
+  },
+  "68": {
+    "string": "Información da historia"
+  },
+  "69": {
+    "string": "Compartir historia"
+  },
+  "70": {
+    "string": "Mostrar o menú da historia"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "Consello 1 de 2"
+  },
+  "76": {
+    "string": "Preme para ir á seguinte pantalla"
+  },
+  "77": {
+    "string": "Seguinte"
+  },
+  "78": {
+    "string": "Consello 2 de 2"
+  },
+  "79": {
+    "string": "Desliza para ir á seguinte historia"
+  },
+  "80": {
+    "string": "Entendido"
+  },
+  "81": {
+    "string": "Consello"
+  },
+  "82": {
+    "string": "Páxina anterior"
+  },
+  "83": {
+    "string": "Activar"
+  },
+  "84": {
+    "string": "PUNTUACIÓN:"
+  },
+  "85": {
+    "string": "Parar historia"
+  },
+  "86": {
+    "string": "Reproducir historia"
+  },
+  "87": {
+    "string": "Pechar"
+  },
+  "88": {
+    "string": "Saltar ó seguinte"
+  },
+  "89": {
+    "string": "A túa resposta enviarase a"
+  },
+  "90": {
+    "string": "Seguinte historia"
+  },
+  "91": {
+    "string": "Seguinte páxina"
+  },
+  "92": {
+    "string": "Repetir"
+  },
+  "93": {
+    "string": "Páxina anterior"
+  },
+  "96": {
+    "string": "Move o dispositivo para explorar"
+  },
+  "97": {
+    "string": "Abrindo"
+  }
 }

@@ -1,200 +1,200 @@
 {
-    "10": {
-        "string": "LinkedIn"
-    },
-    "11": {
-        "string": "Pinterest"
-    },
-    "12": {
-        "string": "SMS"
-    },
-    "13": {
-        "string": "Altro"
-    },
-    "14": {
-        "string": "Tumblr"
-    },
-    "15": {
-        "string": "Twitter"
-    },
-    "16": {
-        "string": "WhatsApp"
-    },
-    "18": {
-        "string": "Espandi l'altezza e la larghezza della finestra per visualizzare questa esperienza"
-    },
-    "19": {
-        "string": "Per visualizzare questo contenuto, abilita l'esperimento amp-story."
-    },
-    "2": {
-        "string": "Tocca Avanti"
-    },
-    "20": {
-        "string": "Pagina ottimizzata per la visualizzazione in modalità verticale"
-    },
-    "21": {
-        "string": "Spiacenti, il browser in uso non supporta questa esperienza"
-    },
-    "22": {
-        "string": "Accetta"
-    },
-    "23": {
-        "string": "Rifiuta"
-    },
-    "25": {
-        "string": "Visualizza nel dominio originale:"
-    },
-    "26": {
-        "string": "Ulteriori informazioni sui risultati AMP"
-    },
-    "27": {
-        "string": "Continua comunque"
-    },
-    "3": {
-        "string": "Tocca Indietro"
-    },
-    "31": {
-        "string": "Audio disattivato"
-    },
-    "32": {
-        "string": "Audio attivato"
-    },
-    "33": {
-        "string": "Pagina senza contenuti audio"
-    },
-    "34": {
-        "string": "Riproduci video"
-    },
-    "35": {
-        "string": "Scorri verso l'alto"
-    },
-    "36": {
-        "string": "Espandi Tweet"
-    },
-    "37": {
-        "string": "Espandi l'altezza della finestra per visualizzare questa esperienza"
-    },
-    "38": {
-        "string": "Espandi la larghezza della finestra per visualizzare questa esperienza"
-    },
-    "4": {
-        "string": "Impossibile copiare il link negli appunti :("
-    },
-    "5": {
-        "string": "Link copiato!"
-    },
-    "6": {
-        "string": "Email"
-    },
-    "62": {
-        "string": "Condividi a partire da questa pagina"
-    },
-    "63": {
-        "string": "Line"
-    },
-    "64": {
-        "string": "Aggiornato"
-    },
-    "65": {
-        "string": "Impossibile riprodurre il video"
-    },
-    "66": {
-        "string": "Disattiva audio storia"
-    },
-    "67": {
-        "string": "Riattiva audio storia"
-    },
-    "68": {
-        "string": "Informazioni sulla storia"
-    },
-    "69": {
-        "string": "Condividi storia"
-    },
-    "7": {
-        "string": "Facebook"
-    },
-    "70": {
-        "string": "Interruttore menu storia"
-    },
-    "71": {
-        "string": "A"
-    },
-    "72": {
-        "string": "B"
-    },
-    "73": {
-        "string": "C"
-    },
-    "74": {
-        "string": "D"
-    },
-    "75": {
-        "string": "Suggerimento 1 di 2"
-    },
-    "76": {
-        "string": "Tocca per passare alla schermata successiva"
-    },
-    "77": {
-        "string": "Avanti"
-    },
-    "78": {
-        "string": "Suggerimento 2 di 2"
-    },
-    "79": {
-        "string": "Scorri per passare alla storia successiva"
-    },
-    "8": {
-        "string": "Google+"
-    },
-    "80": {
-        "string": "Ho capito"
-    },
-    "81": {
-        "string": "Suggerimento"
-    },
-    "82": {
-        "string": "Pagina precedente"
-    },
-    "83": {
-        "string": "Attiva"
-    },
-    "84": {
-        "string": "PUNTEGGIO:"
-    },
-    "85": {
-        "string": "Metti storia in pausa"
-    },
-    "86": {
-        "string": "Riproduci storia"
-    },
-    "87": {
-        "string": "Chiudi"
-    },
-    "88": {
-        "string": "Prossimo elemento"
-    },
-    "89": {
-        "string": "La tua risposta verrà inviata a"
-    },
-    "9": {
-        "string": "Ottieni link"
-    },
-    "90": {
-        "string": "Storia successiva"
-    },
-    "91": {
-        "string": "Pagina successiva"
-    },
-    "92": {
-        "string": "Riproduci di nuovo"
-    },
-    "93": {
-        "string": "Pagina precedente"
-    },
-    "96": {
-        "string": "Muovi il dispositivo per esplorare"
-    },
-    "97": {
-        "string": "Apertura in corso"
-    }
+  "2": {
+    "string": "Tocca Avanti"
+  },
+  "3": {
+    "string": "Tocca Indietro"
+  },
+  "4": {
+    "string": "Impossibile copiare il link negli appunti :("
+  },
+  "5": {
+    "string": "Link copiato!"
+  },
+  "6": {
+    "string": "Email"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "8": {
+    "string": "Google+"
+  },
+  "9": {
+    "string": "Ottieni link"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "SMS"
+  },
+  "13": {
+    "string": "Altro"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
+  "18": {
+    "string": "Espandi l'altezza e la larghezza della finestra per visualizzare questa esperienza"
+  },
+  "19": {
+    "string": "Per visualizzare questo contenuto, abilita l'esperimento amp-story."
+  },
+  "20": {
+    "string": "Pagina ottimizzata per la visualizzazione in modalità verticale"
+  },
+  "21": {
+    "string": "Spiacenti, il browser in uso non supporta questa esperienza"
+  },
+  "22": {
+    "string": "Accetta"
+  },
+  "23": {
+    "string": "Rifiuta"
+  },
+  "25": {
+    "string": "Visualizza nel dominio originale:"
+  },
+  "26": {
+    "string": "Ulteriori informazioni sui risultati AMP"
+  },
+  "27": {
+    "string": "Continua comunque"
+  },
+  "31": {
+    "string": "Audio disattivato"
+  },
+  "32": {
+    "string": "Audio attivato"
+  },
+  "33": {
+    "string": "Pagina senza contenuti audio"
+  },
+  "34": {
+    "string": "Riproduci video"
+  },
+  "35": {
+    "string": "Scorri verso l'alto"
+  },
+  "36": {
+    "string": "Espandi Tweet"
+  },
+  "37": {
+    "string": "Espandi l'altezza della finestra per visualizzare questa esperienza"
+  },
+  "38": {
+    "string": "Espandi la larghezza della finestra per visualizzare questa esperienza"
+  },
+  "62": {
+    "string": "Condividi a partire da questa pagina"
+  },
+  "63": {
+    "string": "Line"
+  },
+  "64": {
+    "string": "Aggiornato"
+  },
+  "65": {
+    "string": "Impossibile riprodurre il video"
+  },
+  "66": {
+    "string": "Disattiva audio storia"
+  },
+  "67": {
+    "string": "Riattiva audio storia"
+  },
+  "68": {
+    "string": "Informazioni sulla storia"
+  },
+  "69": {
+    "string": "Condividi storia"
+  },
+  "70": {
+    "string": "Interruttore menu storia"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "Suggerimento 1 di 2"
+  },
+  "76": {
+    "string": "Tocca per passare alla schermata successiva"
+  },
+  "77": {
+    "string": "Avanti"
+  },
+  "78": {
+    "string": "Suggerimento 2 di 2"
+  },
+  "79": {
+    "string": "Scorri per passare alla storia successiva"
+  },
+  "80": {
+    "string": "Ho capito"
+  },
+  "81": {
+    "string": "Suggerimento"
+  },
+  "82": {
+    "string": "Pagina precedente"
+  },
+  "83": {
+    "string": "Attiva"
+  },
+  "84": {
+    "string": "PUNTEGGIO:"
+  },
+  "85": {
+    "string": "Metti storia in pausa"
+  },
+  "86": {
+    "string": "Riproduci storia"
+  },
+  "87": {
+    "string": "Chiudi"
+  },
+  "88": {
+    "string": "Prossimo elemento"
+  },
+  "89": {
+    "string": "La tua risposta verrà inviata a"
+  },
+  "90": {
+    "string": "Storia successiva"
+  },
+  "91": {
+    "string": "Pagina successiva"
+  },
+  "92": {
+    "string": "Riproduci di nuovo"
+  },
+  "93": {
+    "string": "Pagina precedente"
+  },
+  "96": {
+    "string": "Muovi il dispositivo per esplorare"
+  },
+  "97": {
+    "string": "Apertura in corso"
+  }
 }
