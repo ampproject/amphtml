@@ -1,26 +1,11 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as Preact from '#preact';
-import {MessageType, ProxyIframeEmbed} from '#preact/component/3p-frame';
+import {ProxyIframeEmbed} from '#preact/component/3p-frame';
 import {dashToUnderline} from '#core/types/string';
-import {deserializeMessage} from '#core/3p-frame-messaging';
+import {MessageType, deserializeMessage} from '#core/3p-frame-messaging';
 import {forwardRef} from '#preact/compat';
 import {tryParseJson} from '#core/types/object/json';
-import {useCallback, useLayoutEffect, useState} from '#preact';
+import {useCallback, useLayoutEffect, useMemo, useState} from '#preact';
+import {useValueRef} from '#preact/component';
 
 /** @const {string} */
 const TYPE = 'facebook';
@@ -46,7 +31,7 @@ function FacebookWithRef(
     layout,
     locale: localeProp,
     numPosts,
-    onReady,
+    onLoad,
     orderBy,
     refLabel,
     requestResize,
@@ -63,11 +48,12 @@ function FacebookWithRef(
   ref
 ) {
   const [height, setHeight] = useState(null);
+  const onLoadRef = useValueRef(onLoad);
   const messageHandler = useCallback(
     (event) => {
       const data = tryParseJson(event.data) ?? deserializeMessage(event.data);
       if (data['action'] == 'ready') {
-        onReady?.();
+        onLoadRef.current?.();
       }
       if (data['type'] == MessageType.EMBED_SIZE) {
         const height = data['height'];
@@ -79,7 +65,7 @@ function FacebookWithRef(
         }
       }
     },
-    [requestResize, onReady]
+    [requestResize, onLoadRef]
   );
 
   const [locale, setLocale] = useState(localeProp);
@@ -95,29 +81,54 @@ function FacebookWithRef(
     setLocale(dashToUnderline(win.navigator.language));
   }, [localeProp, ref]);
 
+  const options = useMemo(
+    () => ({
+      action,
+      colorscheme,
+      embedAs,
+      hideCover,
+      hideCta,
+      href,
+      includeCommentParent,
+      'kd_site': kdSite,
+      layout,
+      locale,
+      numPosts,
+      orderBy,
+      ref: refLabel,
+      share,
+      showFacepile,
+      showText,
+      size,
+      smallHeader,
+      tabs,
+    }),
+    [
+      action,
+      colorscheme,
+      embedAs,
+      hideCover,
+      hideCta,
+      href,
+      includeCommentParent,
+      kdSite,
+      layout,
+      locale,
+      numPosts,
+      orderBy,
+      refLabel,
+      share,
+      showFacepile,
+      showText,
+      size,
+      smallHeader,
+      tabs,
+    ]
+  );
+
   return (
     <ProxyIframeEmbed
-      options={{
-        action,
-        colorscheme,
-        embedAs,
-        hideCover,
-        hideCta,
-        href,
-        includeCommentParent,
-        'kd_site': kdSite,
-        layout,
-        locale,
-        numPosts,
-        orderBy,
-        ref: refLabel,
-        share,
-        showFacepile,
-        showText,
-        size,
-        smallHeader,
-        tabs,
-      }}
+      options={options}
       ref={ref}
       title={title}
       {...rest}

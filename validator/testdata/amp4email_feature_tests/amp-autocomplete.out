@@ -1,20 +1,5 @@
 FAIL
 |  <!--
-|    Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-|
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|
-|        http://www.apache.org/licenses/LICENSE-2.0
-|
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    Tests the additional restrictions AMP4EMAIL sets on AMP-AUTOCOMPLETE.
 |  -->
@@ -84,11 +69,11 @@ FAIL
 |      <!-- Invalid: amp-component with static data -->
 |      <amp-autocomplete>
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:84:4 The mandatory attribute 'src' is missing in tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete)
+amp4email_feature_tests/amp-autocomplete.html:69:4 The mandatory attribute 'src' is missing in tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete)
 |        <input />
 |        <script type="application/json">
 >>       ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:86:6 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+amp4email_feature_tests/amp-autocomplete.html:71:6 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
 |          {}
 |        </script>
 |      </amp-autocomplete>
@@ -96,7 +81,7 @@ amp4email_feature_tests/amp-autocomplete.html:86:6 Custom JavaScript is not allo
 |      <!-- Invalid: amp-component with filter attribute -->
 |      <amp-autocomplete
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:92:4 The attribute 'filter' may not appear in tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete)
+amp4email_feature_tests/amp-autocomplete.html:77:4 The attribute 'filter' may not appear in tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete)
 |        filter="prefix"
 |        src="https://data.com/articles.json?ref=CANONICAL_URL"
 |      >
@@ -106,7 +91,7 @@ amp4email_feature_tests/amp-autocomplete.html:92:4 The attribute 'filter' may no
 |      <!-- Invalid: amp-component with filter-value attribute -->
 |      <amp-autocomplete
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:100:4 The attribute 'filter-value' may not appear in tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete)
+amp4email_feature_tests/amp-autocomplete.html:85:4 The attribute 'filter-value' may not appear in tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete)
 |        filter-value="property"
 |        src="https://data.com/articles.json?ref=CANONICAL_URL"
 |      >
@@ -120,12 +105,12 @@ amp4email_feature_tests/amp-autocomplete.html:100:4 The attribute 'filter-value'
 |          <div>
 |            <amp-autocomplete
 >>           ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:112:10 The tag 'amp-autocomplete' may not appear as a descendant of tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete)
+amp4email_feature_tests/amp-autocomplete.html:97:10 The tag 'amp-autocomplete' may not appear as a descendant of tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete)
 |              src="https://data.com/articles.json?ref=CANONICAL_URL"
 |            >
 |              <template type="amp-mustache" id="1234">
 >>             ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:115:12 The tag 'template' may not appear as a descendant of tag 'template (amp4email)'. (see https://amp.dev/documentation/components/amp-mustache)
+amp4email_feature_tests/amp-autocomplete.html:100:12 The tag 'template' may not appear as a descendant of tag 'template (amp4email)'. (see https://amp.dev/documentation/components/amp-mustache)
 |                <div>
 |                  <a href="https://somelink.com">{{blah}}</a>
 |                </div>
@@ -141,12 +126,12 @@ amp4email_feature_tests/amp-autocomplete.html:115:12 The tag 'template' may not 
 |          <div>
 |            <amp-state src="https://someserver.json">
 >>           ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:129:10 The tag 'amp-state' may not appear as a descendant of tag 'template'. (see https://amp.dev/documentation/components/amp-bind/)
+amp4email_feature_tests/amp-autocomplete.html:114:10 The tag 'amp-state' may not appear as a descendant of tag 'template'. (see https://amp.dev/documentation/components/amp-bind/)
 >>           ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:129:10 The tag 'amp-state' requires including the 'amp-bind' extension JavaScript. (see https://amp.dev/documentation/components/amp-bind/)
+amp4email_feature_tests/amp-autocomplete.html:114:10 The tag 'amp-state' requires including the 'amp-bind' extension JavaScript. (see https://amp.dev/documentation/components/amp-bind/)
 |              <script type="application/json">
 >>             ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:130:12 The tag 'script' requires including the 'amp-bind' extension JavaScript. (see https://amp.dev/documentation/components/amp-bind/)
+amp4email_feature_tests/amp-autocomplete.html:115:12 The tag 'script' requires including the 'amp-bind' extension JavaScript. (see https://amp.dev/documentation/components/amp-bind/)
 |                {}
 |              </script>
 |            </amp-state>
@@ -160,7 +145,7 @@ amp4email_feature_tests/amp-autocomplete.html:130:12 The tag 'script' requires i
 |          <div>
 |            <amp-autocomplete
 >>           ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:142:10 The tag 'amp-autocomplete' may not appear as a descendant of tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete)
+amp4email_feature_tests/amp-autocomplete.html:127:10 The tag 'amp-autocomplete' may not appear as a descendant of tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete)
 |              src="https://data.com/articles.json?ref=CANONICAL_URL"
 |              template="1234"
 |            >
@@ -175,12 +160,12 @@ amp4email_feature_tests/amp-autocomplete.html:142:10 The tag 'amp-autocomplete' 
 |          <div>
 |            <amp-state id="123" src="https://someserver.json" template="1234">
 >>           ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:155:10 The tag 'amp-state' may not appear as a descendant of tag 'template'. (see https://amp.dev/documentation/components/amp-bind/)
+amp4email_feature_tests/amp-autocomplete.html:140:10 The tag 'amp-state' may not appear as a descendant of tag 'template'. (see https://amp.dev/documentation/components/amp-bind/)
 >>           ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:155:10 The tag 'amp-state' requires including the 'amp-bind' extension JavaScript. (see https://amp.dev/documentation/components/amp-bind/)
+amp4email_feature_tests/amp-autocomplete.html:140:10 The tag 'amp-state' requires including the 'amp-bind' extension JavaScript. (see https://amp.dev/documentation/components/amp-bind/)
 |              <script type="application/json">
 >>             ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:156:12 The tag 'script' requires including the 'amp-bind' extension JavaScript. (see https://amp.dev/documentation/components/amp-bind/)
+amp4email_feature_tests/amp-autocomplete.html:141:12 The tag 'script' requires including the 'amp-bind' extension JavaScript. (see https://amp.dev/documentation/components/amp-bind/)
 |                {}
 |              </script>
 |            </amp-state>
@@ -193,7 +178,7 @@ amp4email_feature_tests/amp-autocomplete.html:156:12 The tag 'script' requires i
 |        <div>
 |          <amp-autocomplete
 >>         ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:167:8 The tag 'amp-autocomplete' may not appear as a descendant of tag 'template'. (see https://amp.dev/documentation/components/amp-autocomplete)
+amp4email_feature_tests/amp-autocomplete.html:152:8 The tag 'amp-autocomplete' may not appear as a descendant of tag 'template'. (see https://amp.dev/documentation/components/amp-autocomplete)
 |            src="https://data.com/articles.json?ref=CANONICAL_URL"
 |            template="1234"
 |          >
@@ -204,47 +189,47 @@ amp4email_feature_tests/amp-autocomplete.html:167:8 The tag 'amp-autocomplete' m
 |      <!-- Invalid: URLs cannot be empty. -->
 |      <amp-autocomplete src="">
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:176:4 Missing URL for attribute 'src' in tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete)
+amp4email_feature_tests/amp-autocomplete.html:161:4 Missing URL for attribute 'src' in tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete)
 |        <input />
 |      </amp-autocomplete>
 |
 |      <!-- Invalid: The protocol can only be https -->
 |      <amp-autocomplete src="http://data.com/articles.json?ref=CANONICAL_URL">
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:181:4 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete)
+amp4email_feature_tests/amp-autocomplete.html:166:4 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete)
 |        <input />
 |      </amp-autocomplete>
 |
 |      <!-- Invalid: src of amp-autocomplete is not bindable -->
 |      <amp-autocomplete [src]="data">
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:186:4 The attribute '[src]' may not appear in tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete)
+amp4email_feature_tests/amp-autocomplete.html:171:4 The attribute '[src]' may not appear in tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete)
 |        <input />
 |      </amp-autocomplete>
 |
 |      <!-- Invalid: Mustache delimiters are disallowed in src -->
 |      <amp-autocomplete src="foo{{bar">
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:191:4 The relative URL 'foo{{bar' for attribute 'src' in tag 'amp-autocomplete' is disallowed. (see https://amp.dev/documentation/components/amp-autocomplete)
+amp4email_feature_tests/amp-autocomplete.html:176:4 The relative URL 'foo{{bar' for attribute 'src' in tag 'amp-autocomplete' is disallowed. (see https://amp.dev/documentation/components/amp-autocomplete)
 |        <input />
 |      </amp-autocomplete>
 |
 |      <!-- Invalid: Mustache delimiters are disallowed in src -->
 |      <amp-autocomplete src="foo{{bar">
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:196:4 The relative URL 'foo{{bar' for attribute 'src' in tag 'amp-autocomplete' is disallowed. (see https://amp.dev/documentation/components/amp-autocomplete)
+amp4email_feature_tests/amp-autocomplete.html:181:4 The relative URL 'foo{{bar' for attribute 'src' in tag 'amp-autocomplete' is disallowed. (see https://amp.dev/documentation/components/amp-autocomplete)
 |        <input />
 |      </amp-autocomplete>
 |
 |      <!-- Invalid: Mustache variables cannot be concatenated in href -->
 |      <amp-autocomplete src="http://data.com/articles.json?ref=CANONICAL_URL">
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:201:4 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete)
+amp4email_feature_tests/amp-autocomplete.html:186:4 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete)
 |        <input />
 |        <template type="amp-mustache">
 |          <a href="{{bar}}{{foo}}">disallowed</a>
 >>         ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:204:8 The attribute 'href' in tag 'a' is set to the invalid value '{{bar}}{{foo}}'.
+amp4email_feature_tests/amp-autocomplete.html:189:8 The attribute 'href' in tag 'a' is set to the invalid value '{{bar}}{{foo}}'.
 |        </template>
 |      </amp-autocomplete>
 |    </body>

@@ -1,19 +1,3 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {getOptionalSandboxFlags, getRequiredSandboxFlags} from '#core/3p-frame';
 import {sequentialIdGenerator} from '#core/data-structures/id-generator';
 import {dict} from '#core/types/object';
@@ -42,12 +26,6 @@ import {parseUrlDeprecated} from '../../url';
 /** @type {!Object<string,function():void>} 3p frames for that type. */
 export const countGenerators = {};
 
-/** @enum {string} */
-export const MessageType = {
-  // TODO(wg-bento): Add more types as they become needed.
-  EMBED_SIZE: 'embed-size',
-};
-
 // Block synchronous XHR in ad. These are very rare, but super bad for UX
 // as they block the UI thread for the arbitrary amount of time until the
 // request completes.
@@ -69,8 +47,6 @@ const DEFAULT_SANDBOX =
 function ProxyIframeEmbedWithRef(
   {
     allow = BLOCK_SYNC_XHR,
-    bootstrap,
-    contextOptions,
     excludeSandbox,
     name: nameProp,
     messageHandler,
@@ -100,6 +76,8 @@ function ProxyIframeEmbedWithRef(
 
   const [nameAndSrc, setNameAndSrc] = useState({name: nameProp, src: srcProp});
   const {name, src} = nameAndSrc;
+  const sentinelRef = useRef(null);
+
   useLayoutEffect(() => {
     const win = contentRef.current?.ownerDocument?.defaultView;
     const src =
@@ -111,14 +89,16 @@ function ProxyIframeEmbedWithRef(
     if (!win) {
       return;
     }
+    if (!sentinelRef.current) {
+      sentinelRef.current = generateSentinel(win);
+    }
     const context = Object.assign(
       dict({
         'location': {
           'href': win.location.href,
         },
-        'sentinel': generateSentinel(win),
-      }),
-      contextOptions
+        'sentinel': sentinelRef.current,
+      })
     );
     const attrs = Object.assign(
       dict({
@@ -132,7 +112,7 @@ function ProxyIframeEmbedWithRef(
       name: JSON.stringify(
         dict({
           'host': parseUrlDeprecated(src).hostname,
-          'bootstrap': bootstrap ?? getBootstrapUrl(type),
+          'bootstrap': getBootstrapUrl(type),
           'type': type,
           // "name" must be unique across iframes, so we add a count.
           // See: https://github.com/ampproject/amphtml/pull/2955
@@ -142,16 +122,7 @@ function ProxyIframeEmbedWithRef(
       ),
       src,
     });
-  }, [
-    bootstrap,
-    contextOptions,
-    count,
-    nameProp,
-    options,
-    srcProp,
-    title,
-    type,
-  ]);
+  }, [count, nameProp, options, srcProp, title, type]);
 
   useEffect(() => {
     const iframe = iframeRef.current?.node;

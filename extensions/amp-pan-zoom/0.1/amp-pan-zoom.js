@@ -1,19 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {ActionTrust} from '#core/constants/action-constants';
 import {bezierCurve} from '#core/data-structures/curve';
 import {dispatchCustomEvent} from '#core/dom';
@@ -26,6 +10,7 @@ import {
 import {realChildElements} from '#core/dom/query';
 import {htmlFor} from '#core/dom/static-template';
 import {px, scale, setStyles, translate} from '#core/dom/style';
+import {numeric} from '#core/dom/transition';
 import {boundValue, distance, magnitude} from '#core/math';
 import {dict} from '#core/types/object';
 
@@ -43,7 +28,6 @@ import {
 } from '../../../src/gesture-recognizers';
 import {dev, userAssert} from '../../../src/log';
 import {continueMotion} from '../../../src/motion';
-import {numeric} from '../../../src/transition';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-pan-zoom';
