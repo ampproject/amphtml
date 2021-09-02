@@ -319,24 +319,6 @@ describes.realWin(
         expect(progressBackground).to.have.attribute(Attributes.AD_SHOWING);
       });
 
-      it('should propagate the desktop-panels attribute to badge & progress bar', () => {
-        const adBadgeContainer = doc.querySelector(
-          '.i-amphtml-ad-overlay-container'
-        );
-        const progressBackground = doc.querySelector(
-          '.i-amphtml-story-ad-progress-background'
-        );
-        expect(adBadgeContainer).not.to.have.attribute(
-          Attributes.DESKTOP_PANELS
-        );
-        expect(progressBackground).not.to.have.attribute(
-          Attributes.DESKTOP_PANELS
-        );
-        storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
-        expect(adBadgeContainer).to.have.attribute(Attributes.DESKTOP_PANELS);
-        expect(progressBackground).to.have.attribute(Attributes.DESKTOP_PANELS);
-      });
-
       it('should propagate the desktop-one-panel attribute to badge & progress bar', () => {
         toggleExperiment(win, 'amp-story-desktop-one-panel', true);
 

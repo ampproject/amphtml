@@ -25,6 +25,9 @@ const DURATION_MS = 1000;
 /** @const {number}  */
 const DISTANCE_TO_CENTER_EDGE_PERCENT = 50;
 
+/** @const {number}  */
+const NEXT_PAGE_DISTANCE = 1;
+
 /**
  * A small number used to calculate zooming out to 0.
  * @const {number}
@@ -86,9 +89,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
     /** @private {?number} Distance from active page. */
     this.pageDistance_ = null;
-
-    /** @private {number} Max distance from active page to animate. Either 0 or 1. */
-    this.maxDistanceToAnimate_ = 1;
 
     /** @private {?string} */
     this.groupId_ = null;
@@ -154,13 +154,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       StateProperty.PANNING_MEDIA_STATE,
       (panningMediaState) => this.onPanningMediaStateChange_(panningMediaState),
       true /** callToInitialize */
-    );
-    this.storeService_.subscribe(
-      StateProperty.UI_STATE,
-      (uiState) => {
-        this.maxDistanceToAnimate_ = uiState === UIType.DESKTOP_PANELS ? 0 : 1;
-      },
-      true /* callToInitialize */
     );
     // Mutation observer for distance attribute
     const config = {attributes: true, attributeFilter: ['distance']};
@@ -283,7 +276,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    */
   onPanningMediaStateChange_(panningMediaState) {
     if (
-      this.pageDistance_ <= this.maxDistanceToAnimate_ &&
+      this.pageDistance_ <= NEXT_PAGE_DISTANCE &&
       panningMediaState[this.groupId_] &&
       // Prevent update if value is same as previous value.
       // This happens when 2 or more components are on the same page.

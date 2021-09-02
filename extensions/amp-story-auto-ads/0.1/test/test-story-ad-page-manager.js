@@ -200,31 +200,5 @@ describes.realWin('StoryAdPageManager', {amp: true}, (env) => {
       expect(pageManager.hasUnusedAdPage()).to.be.false;
       expect(result).to.equal(InsertionState.SUCCESS);
     });
-
-    it('successfully inserts 2 pages away on desktop', async () => {
-      const storeService = getServiceForDoc(env.ampdoc, 'story-store');
-      storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
-      const pageAfterElement = {id: 'two', hasAttribute: () => false};
-      const mockPageAfter = {isAd: () => false, element: pageAfterElement};
-      const mockTwoPagesAfter = {isAd: () => false};
-      env.sandbox.stub(ampStory, 'getPageById').returns({});
-      env.sandbox
-        .stub(ampStory, 'getNextPage')
-        .onFirstCall()
-        .returns(mockPageAfter)
-        .onSecondCall()
-        .returns(mockTwoPagesAfter)
-        .returns(mockPageAfter);
-      const insertStub = env.sandbox.stub(ampStory, 'insertPage').returns(true);
-      env.sandbox.stub(ampStory, 'getPageIndexById').returns(0);
-
-      const pageManager = new StoryAdPageManager(ampStory, mockConfig);
-      pageManager.createAdPage();
-      const nextAdPage = pageManager.getUnusedAdPage();
-      env.sandbox.stub(nextAdPage, 'maybeCreateCta').resolves(true);
-      const result = await pageManager.maybeInsertPageAfter('one', nextAdPage);
-      expect(insertStub).to.be.calledWith('two', 'i-amphtml-ad-page-1');
-      expect(result).to.equal(InsertionState.SUCCESS);
-    });
   });
 });

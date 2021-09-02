@@ -962,8 +962,7 @@
         "amp-story-share-menu",
         "amp-story-system-layer",
         "amp-story-tooltip",
-        "amp-story-unsupported-browser-layer",
-        "amp-story-viewport-warning-layer"
+        "amp-story-unsupported-browser-layer"
       ]
     }
   },
