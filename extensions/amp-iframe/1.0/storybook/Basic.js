@@ -1,11 +1,12 @@
 import * as Preact from '#preact';
 import {Iframe} from '../component';
-import {text, withKnobs} from '@storybook/addon-knobs';
+
+const sampleText =
+  'Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore, beatae repellat, eligendi tempora, cumque veniam voluptatibus amet cum aliquid aut aperiam officiis autem pariatur. Nemo cum maxime vitae. Consectetur, iure?';
 
 export default {
   title: 'Iframe',
   component: Iframe,
-  decorators: [withKnobs],
 };
 
 export const _default = () => {
@@ -35,11 +36,7 @@ export const WithIntersectingIframe = () => {
 
 WithIntersectingIframe.storyName = 'Resizable iframe in viewport';
 
-export const WithResizableIframe = () => {
-  const sampleText =
-    'Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore, beatae repellat, eligendi tempora, cumque veniam voluptatibus amet cum aliquid aut aperiam officiis autem pariatur. Nemo cum maxime vitae. Consectetur, iure?';
-  const textAbove = text('text above', sampleText.repeat(20));
-  const textBelow = text('text below', sampleText.repeat(5));
+export const WithResizableIframe = ({textAbove, textBelow}) => {
   return (
     <div>
       <h1>{textAbove}</h1>
@@ -59,3 +56,7 @@ export const WithResizableIframe = () => {
 };
 
 WithResizableIframe.storyName = 'Resizable iframe outside viewport';
+WithResizableIframe.args = {
+  textAbove: sampleText.repeat(20),
+  textBelow: sampleText.repeat(5),
+};

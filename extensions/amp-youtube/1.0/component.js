@@ -67,7 +67,16 @@ function createDefaultInfo() {
  * @template T
  */
 function YoutubeWithRef(
-  {autoplay, loop, videoid, liveChannelid, params = {}, credentials, ...rest},
+  {
+    autoplay,
+    loop,
+    videoid,
+    liveChannelid,
+    onLoad,
+    params = {},
+    credentials,
+    ...rest
+  },
   ref
 ) {
   const datasourceExists =
@@ -128,6 +137,7 @@ function YoutubeWithRef(
 
     if (event == 'initialDelivery') {
       dispatchVideoEvent(currentTarget, VideoEvents.LOADEDMETADATA);
+      onLoad?.();
       return;
     }
 

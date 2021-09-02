@@ -1,5 +1,3 @@
-import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
-
 import * as Preact from '#preact';
 
 import {
@@ -13,29 +11,25 @@ import {Instagram} from '../component';
 export default {
   title: 'Instagram',
   component: Instagram,
-  decorators: [withKnobs],
+  args: {
+    width: 500,
+    height: 600,
+    shortcode: 'B8QaZW4AQY_',
+    captioned: false,
+  },
 };
 
-export const _default = () => {
-  const width = number('width', 500);
-  const height = number('height', 600);
-  const shortcode = text('shortcode', 'B8QaZW4AQY_');
-  const captioned = boolean('captioned');
-
+export const _default = ({height, width, ...args}) => {
   return (
     <Instagram
-      shortcode={shortcode}
       style={{width, height}}
-      captioned={captioned}
       alt="AMP Instagram Storybook Preact Example"
+      {...args}
     ></Instagram>
   );
 };
 
-export const InsideAccordion = () => {
-  const shortcode = text('shortcode', 'Bp4I3hRhd_v');
-  const width = number('width', 500);
-  const height = number('height', 600);
+export const InsideAccordion = ({height, width, ...args}) => {
   return (
     <Accordion expandSingleSection>
       <AccordionSection key={1} expanded={true}>
@@ -44,9 +38,9 @@ export const InsideAccordion = () => {
         </AccordionHeader>
         <AccordionContent>
           <Instagram
-            shortcode={shortcode}
             style={{width, height}}
             alt="AMP Instagram Storybook Preact Example"
+            {...args}
           ></Instagram>
         </AccordionContent>
       </AccordionSection>
