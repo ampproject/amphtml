@@ -1,19 +1,3 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as Preact from '#preact';
 import {useCallback, useMemo, useRef, useState} from '#preact';
 import {forwardRef} from '#preact/compat';
@@ -21,6 +5,7 @@ import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {dispatchCustomEvent} from '#core/dom';
 import {BRIGHTCOVE_EVENTS, getBrightcoveIframeSrc} from '../brightcove-api';
+import {useValueRef} from '#preact/component';
 
 /** @const {string} */
 const DEFAULT = 'default';
@@ -53,10 +38,12 @@ export function BrightcoveWithRef(props, ref) {
     videoId,
     onPlayingState,
     urlParams,
+    onLoad,
     ...rest
   } = props;
 
   const playerStateRef = useRef({});
+  const onLoadRef = useValueRef(onLoad);
   const [muted, setMuted] = useState(mutedProp);
   const src = useMemo(
     () =>
@@ -78,6 +65,7 @@ export function BrightcoveWithRef(props, ref) {
       switch (eventType) {
         case 'ready':
           dispatchCustomEvent(currentTarget, 'canplay');
+          onLoadRef.current?.();
           break;
         case 'playing':
           onPlayingState?.(true);
@@ -112,7 +100,7 @@ export function BrightcoveWithRef(props, ref) {
         dispatchCustomEvent(currentTarget, mutedOrUnmutedEvent(isMuted));
       }
     },
-    [muted, onPlayingState]
+    [muted, onPlayingState, onLoadRef]
   );
 
   // Check for valid props

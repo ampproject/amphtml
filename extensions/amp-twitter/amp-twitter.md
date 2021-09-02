@@ -2,32 +2,17 @@
 $category@: social
 formats:
   - websites
-  - stories
 teaser:
   text: Displays a Twitter Tweet or Moment.
+experimental: true
+bento: true
 ---
-
-<!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
 
 # amp-twitter
 
 ## Behavior
 
-The `amp-twitter` component allows you to embed a Tweet or Moment for the specified Twitter ID.
+The `amp-twitter` component allows you to embed a Tweet or Moment.
 
 Here's an example of a basic embedded Tweet:
 
@@ -44,6 +29,10 @@ Here's an example of a basic embedded Tweet:
 ```
 
 [/example]
+
+### Standalone use outside valid AMP documents
+
+Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/). To find the standalone version of `amp-twitter`, see [`bento-twitter`](./1.0/README.md).
 
 ## Appearance
 

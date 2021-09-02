@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import objstr from 'obj-str';
 
 import {
@@ -355,7 +339,7 @@ export function AccordionSection({
 export function AccordionHeader({
   as: Comp = 'div',
   children,
-  className = '',
+  'class': className = '',
   id,
   role = 'button',
   tabIndex = 0,
@@ -376,7 +360,7 @@ export function AccordionHeader({
       {...rest}
       id={headerId}
       role={role}
-      className={`${className} ${classes.sectionChild} ${classes.header}`}
+      class={`${className} ${classes.sectionChild} ${classes.header}`}
       tabIndex={tabIndex}
       aria-controls={contentId}
       onClick={() => toggleHandler()}
@@ -394,7 +378,7 @@ export function AccordionHeader({
 export function AccordionContent({
   as: Comp = 'div',
   children,
-  className = '',
+  'class': className = '',
   id,
   role = 'region',
   ...rest
@@ -430,7 +414,7 @@ export function AccordionContent({
       <Comp
         {...rest}
         ref={ref}
-        className={objstr({
+        class={objstr({
           [className]: true,
           [classes.sectionChild]: true,
           [classes.contentHidden]: !expanded,

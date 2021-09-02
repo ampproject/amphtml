@@ -1,19 +1,3 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as VideoUtils from '#core/dom/video';
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
@@ -29,6 +13,7 @@ import {htmlFor} from '#core/dom/static-template';
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {scopedQuerySelectorAll} from '#core/dom/query';
+import {afterRenderPromise} from '#testing/helpers';
 
 const extensions = ['amp-story:1.0', 'amp-audio'];
 
@@ -155,6 +140,13 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(spy).to.have.been.calledOnce;
   });
 
+  it('should call renderOpenAttachmentUI_ in beforeVisible', async () => {
+    const spy = env.sandbox.spy(page, 'renderOpenAttachmentUI_');
+    page.buildCallback();
+    await page.layoutCallback();
+    expect(spy).to.have.been.calledTwice;
+  });
+
   it('should mark page as loaded after media is loaded', async () => {
     const waitForMediaLayoutSpy = env.sandbox.spy(page, 'waitForMediaLayout_');
     const markPageAsLoadedSpy = env.sandbox.spy(page, 'markPageAsLoaded_');
@@ -189,7 +181,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
-      .then((mediaPool) => {
+      .then(async (mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock.expects('register').withExactArgs(videoEl).once();
 
@@ -206,10 +198,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         // `setState` runs code that creates subtasks (Promise callbacks).
         // Waits for the next frame to make sure all the subtasks are
         // already executed when we run the assertions.
-        win.requestAnimationFrame(() => {
-          mediaPoolMock.verify();
-          done();
-        });
+        await afterRenderPromise();
+        mediaPoolMock.verify();
+        done();
       });
   });
 
@@ -228,7 +219,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
-      .then((mediaPool) => {
+      .then(async (mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock.expects('preload').resolves();
         mediaPoolMock.expects('play').resolves();
@@ -236,10 +227,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
         page.setState(PageState.PLAYING);
 
-        win.requestAnimationFrame(() => {
-          mediaPoolMock.verify();
-          done();
-        });
+        await afterRenderPromise();
+        mediaPoolMock.verify();
+        done();
       });
   });
 
@@ -262,7 +252,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       page
         .layoutCallback()
         .then(() => page.mediaPoolPromise_)
-        .then((mediaPool) => {
+        .then(async (mediaPool) => {
           mediaPoolMock = env.sandbox.mock(mediaPool);
           mediaPoolMock.expects('register').withExactArgs(videoEl).once();
 
@@ -279,10 +269,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
           // `setState` runs code that creates subtasks (Promise callbacks).
           // Waits for the next frame to make sure all the subtasks are
           // already executed when we run the assertions.
-          win.requestAnimationFrame(() => {
-            mediaPoolMock.verify();
-            done();
-          });
+          await afterRenderPromise();
+          mediaPoolMock.verify();
+          done();
         });
     });
   });
@@ -480,7 +469,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
-      .then((mediaPool) => {
+      .then(async (mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock
           .expects('pause')
@@ -492,10 +481,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         // `setState` runs code that creates subtasks (Promise callbacks).
         // Waits for the next frame to make sure all the subtasks are
         // already executed when we run the assertions.
-        win.requestAnimationFrame(() => {
-          mediaPoolMock.verify();
-          done();
-        });
+        await afterRenderPromise();
+        mediaPoolMock.verify();
+        done();
       });
   });
 
@@ -512,16 +500,15 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
-      .then((mediaPool) => {
+      .then(async (mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock.expects('mute').withExactArgs(videoEl).once();
 
         page.setState(PageState.NOT_ACTIVE);
 
-        win.requestAnimationFrame(() => {
-          mediaPoolMock.verify();
-          done();
-        });
+        await afterRenderPromise();
+        mediaPoolMock.verify();
+        done();
       });
   });
 
@@ -545,7 +532,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
-      .then((mediaPool) => {
+      .then(async (mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock
           .expects('pause')
@@ -557,10 +544,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         // `setState` runs code that creates subtasks (Promise callbacks).
         // Waits for the next frame to make sure all the subtasks are
         // already executed when we run the assertions.
-        win.requestAnimationFrame(() => {
-          mediaPoolMock.verify();
-          done();
-        });
+        await afterRenderPromise();
+        mediaPoolMock.verify();
+        done();
       });
   });
 

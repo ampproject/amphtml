@@ -1,19 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {getDate} from '#core/types/date';
 
 import * as Preact from '#preact';
@@ -22,6 +6,7 @@ import {Wrapper, useRenderer} from '#preact/component';
 import {useResourcesNotify} from '#preact/utils';
 
 import {user} from '../../../src/log';
+import {getTimeZoneName} from '../format';
 
 /** @const {string} */
 const TAG = 'amp-date-display';
@@ -216,6 +201,8 @@ function getVariablesInLocal(
     'second': date.getSeconds(),
     'iso': date.toISOString(),
     'localeString': getLocaleString_(date, locale, localeOptions),
+    'timeZoneName': getTimeZoneName(date, locale, localeOptions),
+    'timeZoneNameShort': getTimeZoneName(date, locale, localeOptions, 'short'),
   };
 }
 
@@ -259,5 +246,12 @@ function getVariablesInUTC(
     'second': date.getUTCSeconds(),
     'iso': date.toISOString(),
     'localeString': getLocaleString_(date, locale, localeOptionsInUTC),
+    'timeZoneName': getTimeZoneName(date, locale, localeOptionsInUTC),
+    'timeZoneNameShort': getTimeZoneName(
+      date,
+      locale,
+      localeOptionsInUTC,
+      'short'
+    ),
   };
 }

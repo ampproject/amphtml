@@ -1,28 +1,8 @@
 /**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview
- * Create release functions for the release tagger.
- * Parameters
- * 1. tag (or AMP version)
- * 2. previous tag
+ * Make release for the release tagger.
  */
 
-const argv = require('minimist')(process.argv.slice(2));
 const dedent = require('dedent');
 const {
   createRelease,
@@ -31,6 +11,12 @@ const {
 } = require('./utils');
 const {getExtensions, getSemver} = require('../npm-publish/utils');
 const {GraphQlQueryResponseData} = require('@octokit/graphql'); //eslint-disable-line no-unused-vars
+
+const prereleaseConfig = {
+  'beta': true,
+  'stable': false,
+  'lts': false,
+};
 
 /**
  * @typedef {{
@@ -187,22 +173,32 @@ function _createBody(head, base, prs) {
      <h2>Changes by component</h2>
      ${components.join('')}\
    `;
-  return template;
+
+  const cherrypickHeader = head.endsWith('0')
+    ? ''
+    : dedent`\
+    <h2>🌸 Cherry-picked release 🌸</h2>
+    <a href="https://github.com/ampproject/amphtml/releases/tag/${base}">\
+    ${base}</a> was patched and published as <b>${head}</b>. Refer to the \
+    <a href="https://amp-release-calendar.appspot.com">release calendar</a> \
+    for additional channel information.\n\n`;
+  return cherrypickHeader + template;
 }
 
 /**
  * Main function
- * @param {string} tag
- * @param {string} previousTag
+ * @param {string} head
+ * @param {string} base
+ * @param {string} channel
  * @return {Promise<Object>}
  */
-async function main(tag, previousTag) {
-  const {'target_commitish': commit} = await getRelease(tag);
-  const {'target_commitish': previousCommit} = await getRelease(previousTag);
-  const prs = await getPullRequestsBetweenCommits(commit, previousCommit);
-  const body = _createBody(tag, previousTag, prs);
-  return await createRelease(tag, commit, body);
+async function makeRelease(head, base, channel) {
+  const {'target_commitish': headCommit} = await getRelease(head);
+  const {'target_commitish': baseCommit} = await getRelease(base);
+  const prs = await getPullRequestsBetweenCommits(headCommit, baseCommit);
+  const body = _createBody(head, base, prs);
+  const prerelease = prereleaseConfig[channel];
+  return await createRelease(head, headCommit, body, prerelease);
 }
 
-main(argv.tag, argv.previousTag);
-module.exports = {main};
+module.exports = {makeRelease};

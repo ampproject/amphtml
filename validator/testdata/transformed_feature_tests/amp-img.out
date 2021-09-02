@@ -1,20 +1,5 @@
 FAIL
 |  <!--
-|    Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-|
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|
-|        http://www.apache.org/licenses/LICENSE-2.0
-|
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    This tests that <img> is allowed as child tag for <amp-img>.
 |  -->
@@ -50,21 +35,21 @@ FAIL
 |    <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="responsive" width="900" height="600">
 |      <img src="/img/canoe_900x600.jpg" alt="An image about canoeing" class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async">
 >>     ^~~~~~~~~
-transformed_feature_tests/amp-img.html:50:4 The parent tag of tag 'img' is 'amp-img', but it can only be 'i-amphtml-sizer-intrinsic'.
+transformed_feature_tests/amp-img.html:35:4 The parent tag of tag 'img' is 'amp-img', but it can only be 'i-amphtml-sizer-intrinsic'.
 |    </amp-img>
 |
 |    <!-- Invalid: amp-img > img, missing decoding attr -->
 |    <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="responsive" width="900" height="600" i-amphtml-ssr>
 |      <img src="/img/canoe_900x600.jpg" alt="An image about canoeing" class="i-amphtml-fill-content i-amphtml-replaced-content">
 >>     ^~~~~~~~~
-transformed_feature_tests/amp-img.html:55:4 The mandatory attribute 'decoding' is missing in tag 'img'.
+transformed_feature_tests/amp-img.html:40:4 The mandatory attribute 'decoding' is missing in tag 'img'.
 |    </amp-img>
 |
 |    <!-- Invalid: amp-img > img, missing class attr -->
 |    <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="responsive" width="900" height="600" i-amphtml-ssr>
 |      <img src="/img/canoe_900x600.jpg" alt="An image about canoeing" decoding="async">
 >>     ^~~~~~~~~
-transformed_feature_tests/amp-img.html:60:4 The mandatory attribute 'class' is missing in tag 'img'.
+transformed_feature_tests/amp-img.html:45:4 The mandatory attribute 'class' is missing in tag 'img'.
 |    </amp-img>
 |
 |    <!-- Valid: amp-img > img, blurry image placeholder -->
@@ -91,7 +76,7 @@ transformed_feature_tests/amp-img.html:60:4 The mandatory attribute 'class' is m
 |    <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="intrinsic" width="900" height="600" i-amphtml-layout="intrinsic" i-amphtml-ssr>
 |      <i-amphtml-sizer slot="asd" class="i-amphtml-sizer">
 >>     ^~~~~~~~~
-transformed_feature_tests/amp-img.html:85:4 The attribute 'slot' in tag 'i-amphtml-sizer' is set to the invalid value 'asd'.
+transformed_feature_tests/amp-img.html:70:4 The attribute 'slot' in tag 'i-amphtml-sizer' is set to the invalid value 'asd'.
 |        <img alt aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;charset=utf-8,<svg height=&quot;600&quot; width=&quot;900&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; version=&quot;1.1&quot;/>">
 |      </i-amphtml-sizer>
 |      <img src="/img/canoe_900x600.jpg" alt="An image about canoeing" class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async">
@@ -101,7 +86,7 @@ transformed_feature_tests/amp-img.html:85:4 The attribute 'slot' in tag 'i-ampht
 |    <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="responsive" width="900" height="600" i-amphtml-ssr>
 |      <i-amphtml-sizer slot="asd" style=display:block;padding-top:58.6667%;></i-amphtml-sizer>
 >>     ^~~~~~~~~
-transformed_feature_tests/amp-img.html:93:4 The attribute 'slot' in tag 'i-amphtml-sizer' is set to the invalid value 'asd'.
+transformed_feature_tests/amp-img.html:78:4 The attribute 'slot' in tag 'i-amphtml-sizer' is set to the invalid value 'asd'.
 |      <img loading="lazy" src="/img/canoe_900x600.jpg" alt="An image about canoeing" class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async">
 |    </amp-img>
 |
@@ -109,7 +94,7 @@ transformed_feature_tests/amp-img.html:93:4 The attribute 'slot' in tag 'i-ampht
 |    <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="intrinsic" width="900" height="600" i-amphtml-layout="intrinsic" i-amphtml-ssr>
 |      <i-amphtml-sizer slot class="i-amphtml-sizer">
 >>     ^~~~~~~~~
-transformed_feature_tests/amp-img.html:99:4 The attribute 'slot' in tag 'i-amphtml-sizer' is set to the invalid value ''.
+transformed_feature_tests/amp-img.html:84:4 The attribute 'slot' in tag 'i-amphtml-sizer' is set to the invalid value ''.
 |        <img alt aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;charset=utf-8,<svg height=&quot;600&quot; width=&quot;900&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; version=&quot;1.1&quot;/>">
 |      </i-amphtml-sizer>
 |      <img src="/img/canoe_900x600.jpg" alt="An image about canoeing" class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async">
@@ -119,7 +104,7 @@ transformed_feature_tests/amp-img.html:99:4 The attribute 'slot' in tag 'i-ampht
 |    <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="responsive" width="900" height="600" i-amphtml-ssr>
 |      <i-amphtml-sizer slot style=display:block;padding-top:58.6667%;></i-amphtml-sizer>
 >>     ^~~~~~~~~
-transformed_feature_tests/amp-img.html:107:4 The attribute 'slot' in tag 'i-amphtml-sizer' is set to the invalid value ''.
+transformed_feature_tests/amp-img.html:92:4 The attribute 'slot' in tag 'i-amphtml-sizer' is set to the invalid value ''.
 |      <img loading="lazy" src="/img/canoe_900x600.jpg" alt="An image about canoeing" class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async">
 |    </amp-img>
 |  </body>

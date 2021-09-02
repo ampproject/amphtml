@@ -10,13 +10,19 @@
       "#build/*": ["./build/*"],
 
       "#builtins/*": ["./src/builtins/*"],
+      "#compiler": ["./src/compiler"],
       "#compiler/*": ["./src/compiler/*"],
       "#core/*": ["./src/core/*"],
+      "#experiments": ["./src/experiments"],
       "#experiments/*": ["./src/experiments/*"],
       "#inabox/*": ["./src/inabox/*"],
+      "#polyfills": ["./src/polyfills"],
       "#polyfills/*": ["./src/polyfills/*"],
+      "#preact": ["./src/preact"],
       "#preact/*": ["./src/preact/*"],
+      "#purifier": ["./src/purifier"],
       "#purifier/*": ["./src/purifier/*"],
+      "#service": ["./src/service"],
       "#service/*": ["./src/service/*"],
 
       "#test/*": ["./test/*"],
@@ -25,5 +31,6 @@
       "#third_party/*": ["./third_party/*"]
     }
   },
-  "exclude": ["node_modules", "dist"]
+  "include": ["src", "3p", "ads", "extensions", "test", "testing"],
+  "exclude": ["build", "dist", "dist.*", "node_modules"]
 }

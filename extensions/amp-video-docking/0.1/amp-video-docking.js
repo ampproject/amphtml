@@ -1,18 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {ActionTrust} from '#core/constants/action-constants';
 import {isRTL, removeElement} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
@@ -128,6 +113,7 @@ export const DockTargetType = {
  *   video: !VideoOrBaseElementDef,
  *   target: !DockTargetDef,
  *   step: number,
+ *   viewportRect: !RectDef,
  * }}
  */
 let DockedDef;
@@ -435,6 +421,15 @@ export class VideoDocking {
 
   /** @private */
   onViewportResize_() {
+    if (
+      this.viewportRect_.width === this.currentlyDocked_?.viewportRect.width
+    ) {
+      // Ignore resize events that occur when only the height changes.
+      // This works around issues where the browser may hide the location bar,
+      // or a virtual keyboard; causing a height-only resize that would
+      // otherwise undock the video.
+      return;
+    }
     this.observed_.forEach((video) => this.updateOnResize_(video));
   }
 
@@ -1154,7 +1149,8 @@ export class VideoDocking {
    */
   setCurrentlyDocked_(video, target, step) {
     const previouslyDocked = this.currentlyDocked_;
-    this.currentlyDocked_ = {video, target, step};
+    const viewportRect = {...this.viewportRect_};
+    this.currentlyDocked_ = {video, target, step, viewportRect};
     if (
       previouslyDocked &&
       previouslyDocked.video == video &&
