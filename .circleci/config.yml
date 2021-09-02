@@ -39,10 +39,6 @@ executors:
     docker:
       - image: cimg/base:stable
     resource_class: small
-  node-docker-small:
-    docker:
-      - image: cimg/node:lts-browsers
-    resource_class: small
   node-docker-medium:
     docker:
       - image: cimg/node:lts-browsers
@@ -431,13 +427,6 @@ jobs:
           command: node build-system/pr-check/experiment-e2e-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
       - teardown_vm
-  cut_nightly:
-    executor:
-      name: node-docker-small
-    steps:
-      - run:
-          name: '⭐ Cut Nightly Branch ⭐'
-          command: node --unhandled-rejections=strict build-system/release-workflows/cut-nightly.js
 
 workflows:
   version: 2
@@ -579,18 +568,3 @@ workflows:
       #     <<: *push_builds_only
       #     requires:
       #       - 'Nomodule Build (Test)'
-
-  'Nightly':
-    triggers:
-      - schedule:
-          # 1 a.m. PST / 12 a.m. PDT, Tuesdays through Saturdays.
-          cron: '0 8 * * 2-6'
-          filters:
-            branches:
-              only:
-                - main
-    jobs:
-      - initialize_repository:
-          name: 'Initialize Repository'
-      - cut_nightly:
-          name: 'Cut Nightly Branch'
