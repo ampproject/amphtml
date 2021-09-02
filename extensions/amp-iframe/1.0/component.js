@@ -43,6 +43,7 @@ export function Iframe({
     const iframe = iframeRef.current;
     let height = Number(dataRef.current?.height);
     let width = Number(dataRef.current?.width);
+    dataRef.current = null;
     if (!height && !width) {
       console./*OK*/ error(
         'Ignoring resize request because width and height value is invalid'
@@ -61,15 +62,12 @@ export function Iframe({
       // 1. post message is received in viewport
       // 2. exiting viewport
       // This could be optimized by reducing to one call.
-      requestResize(height, width).finally(() => {
-        dataRef.current = null;
-      });
+      requestResize(height, width);
     } else if (isIntersectingRef.current === false) {
       // attemptResize can be called before the IntersectionObserver starts observing
       // the component if an event is fired immediately. Therefore we check
       // isIntersectingRef has changed via isIntersectingRef.current === false.
       updateContainerSize(height, width);
-      dataRef.current = null;
     }
   }, [requestResize]);
 
