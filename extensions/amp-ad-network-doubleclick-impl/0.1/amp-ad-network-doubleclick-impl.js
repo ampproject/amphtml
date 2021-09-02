@@ -1628,7 +1628,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return;
         }
         // Create amp-pixel and append to document to send impression.
-        this.win.document.body.appendChild(
+        this.getAmpDoc().getBody().appendChild(
           createElementWithAttributes(
             this.win.document,
             'amp-pixel',
