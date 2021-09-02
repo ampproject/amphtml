@@ -367,6 +367,6 @@ function BaseCarouselWithRef(
   );
 }
 
-const BaseCarousel = forwardRef(BaseCarouselWithRef);
-BaseCarousel.displayName = 'BaseCarousel'; // Make findable for tests.
-export {BaseCarousel};
+const BentoBaseCarousel = forwardRef(BaseCarouselWithRef);
+BentoBaseCarousel.displayName = 'BentoBaseCarousel'; // Make findable for tests.
+export {BentoBaseCarousel};

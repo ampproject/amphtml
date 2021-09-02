@@ -1,18 +1,18 @@
 import * as Preact from '#preact';
-import {BaseCarousel} from '../component';
+import {BentoBaseCarousel} from '../component';
 import {mount} from 'enzyme';
 import {useStyles} from '../component.jss';
 
-describes.sandboxed('BaseCarousel preact component', {}, () => {
+describes.sandboxed('BentoBaseCarousel preact component', {}, () => {
   const styles = useStyles();
 
   it('should render Arrows and propagates children to Scroller', () => {
     const wrapper = mount(
-      <BaseCarousel>
+      <BentoBaseCarousel>
         <div>slide 1</div>
         <div>slide 2</div>
         <div>slide 3</div>
-      </BaseCarousel>
+      </BentoBaseCarousel>
     );
     expect(wrapper.find('Arrow')).to.have.lengthOf(2);
     expect(wrapper.find('Arrow').first().prop('rtl')).to.equal('false');
@@ -39,11 +39,11 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
       </div>
     );
     const wrapper = mount(
-      <BaseCarousel arrowPrevAs={arrowPrev} arrowNextAs={arrowNext}>
+      <BentoBaseCarousel arrowPrevAs={arrowPrev} arrowNextAs={arrowNext}>
         <div>slide 1</div>
         <div>slide 2</div>
         <div>slide 3</div>
-      </BaseCarousel>
+      </BentoBaseCarousel>
     );
     const arrows = wrapper.find('Arrow');
     expect(arrows).to.have.lengthOf(2);
@@ -53,11 +53,11 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
 
   it('should not loop by default', () => {
     const wrapper = mount(
-      <BaseCarousel>
+      <BentoBaseCarousel>
         <div>slide 1</div>
         <div>slide 2</div>
         <div>slide 3</div>
-      </BaseCarousel>
+      </BentoBaseCarousel>
     );
     const slides = wrapper.find('[data-slide]');
     expect(slides).to.have.lengthOf(3);
@@ -71,11 +71,11 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
 
   it('should render in preparation for looping with loop prop', () => {
     const wrapper = mount(
-      <BaseCarousel loop>
+      <BentoBaseCarousel loop>
         <div>slide 1</div>
         <div>slide 2</div>
         <div>slide 3</div>
-      </BaseCarousel>
+      </BentoBaseCarousel>
     );
     const slides = wrapper.find('[data-slide]');
     expect(slides).to.have.lengthOf(3);
@@ -89,11 +89,11 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
 
   it('should snap to slides by default', () => {
     const wrapper = mount(
-      <BaseCarousel>
+      <BentoBaseCarousel>
         <div>slide 1</div>
         <div>slide 2</div>
         <div>slide 3</div>
-      </BaseCarousel>
+      </BentoBaseCarousel>
     );
     expect(wrapper.find(`[snap="true"]`)).not.to.be.null;
     expect(wrapper.find(`.${styles.enableSnap}`)).to.have.lengthOf(3);
@@ -101,11 +101,11 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
 
   it('should not snap to slides with snap={false}', () => {
     const wrapper = mount(
-      <BaseCarousel snap={false}>
+      <BentoBaseCarousel snap={false}>
         <div>slide 1</div>
         <div>slide 2</div>
         <div>slide 3</div>
-      </BaseCarousel>
+      </BentoBaseCarousel>
     );
     expect(wrapper.find(`[snap="false"]`)).not.to.be.null;
     expect(wrapper.find(`.${styles.disableSnap}`)).to.have.lengthOf(3);
@@ -113,45 +113,45 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
 
   it('should render Arrows with controls=always', () => {
     const wrapper = mount(
-      <BaseCarousel controls="always">
+      <BentoBaseCarousel controls="always">
         <div>slide 1</div>
         <div>slide 2</div>
         <div>slide 3</div>
-      </BaseCarousel>
+      </BentoBaseCarousel>
     );
     expect(wrapper.find('Arrow')).to.have.lengthOf(2);
   });
 
   it('should render Arrows with controls=never and outset-arrows', () => {
     const wrapper = mount(
-      <BaseCarousel controls="never" outsetArrows>
+      <BentoBaseCarousel controls="never" outsetArrows>
         <div>slide 1</div>
         <div>slide 2</div>
         <div>slide 3</div>
-      </BaseCarousel>
+      </BentoBaseCarousel>
     );
     expect(wrapper.find('Arrow')).to.have.lengthOf(2);
   });
 
   it('should not render Arrows with controls=never', () => {
     const wrapper = mount(
-      <BaseCarousel controls="never">
+      <BentoBaseCarousel controls="never">
         <div>slide 1</div>
         <div>slide 2</div>
         <div>slide 3</div>
-      </BaseCarousel>
+      </BentoBaseCarousel>
     );
     expect(wrapper.find('Arrow')).to.have.lengthOf(0);
   });
 
   it('should respect snap-by if snapping', () => {
     const wrapper = mount(
-      <BaseCarousel snapBy={2} controls="never">
+      <BentoBaseCarousel snapBy={2} controls="never">
         <div>slide 1</div>
         <div>slide 2</div>
         <div>slide 3</div>
         <div>slide 4</div>
-      </BaseCarousel>
+      </BentoBaseCarousel>
     );
     const snapEnabledSlides = wrapper.find(`.${styles.enableSnap}`);
     expect(snapEnabledSlides).to.have.lengthOf(2);
