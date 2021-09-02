@@ -1,10 +1,10 @@
 import * as Preact from '#preact';
-import {Twitter} from '../component';
+import {BentoTwitter} from '../component';
 import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 
 export default {
-  title: 'Twitter',
-  component: Twitter,
+  title: 'BentoTwitter',
+  component: BentoTwitter,
   decorators: [withKnobs],
 };
 
@@ -17,7 +17,7 @@ export const _default = () => {
   const cards = boolean('show cards', true) ? undefined : 'hidden';
   const conversation = boolean('show conversation', false) ? undefined : 'none';
   return (
-    <Twitter
+    <BentoTwitter
       cards={cards}
       conversation={conversation}
       tweetid={tweetId}
@@ -29,7 +29,7 @@ export const _default = () => {
 export const moments = () => {
   const limit = number('limit to', 2);
   return (
-    <Twitter
+    <BentoTwitter
       limit={limit}
       momentid="1009149991452135424"
       style={{width: '300px', height: '200px'}}
@@ -47,7 +47,7 @@ export const timelines = () => {
   const timelineScreenName = 'amphtml';
   const timelineUserId = '3450662892';
   return (
-    <Twitter
+    <BentoTwitter
       tweetLimit={tweetLimit}
       timelineSourceType={timelineSourceType}
       timelineScreenName={timelineScreenName}

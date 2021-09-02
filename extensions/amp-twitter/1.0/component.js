@@ -11,8 +11,8 @@ const FULL_HEIGHT = '100%';
 const MATCHES_MESSAGING_ORIGIN = () => true;
 
 /**
- * @param {!TwitterDef.Props} props
- * @param {{current: (!TwitterDef.Api|null)}} ref
+ * @param {!BentoTwitterDef.Props} props
+ * @param {{current: (!BentoTwitterDef.Api|null)}} ref
  * @return {PreactDef.Renderable}
  */
 function TwitterWithRef(
@@ -102,6 +102,6 @@ function TwitterWithRef(
   );
 }
 
-const Twitter = forwardRef(TwitterWithRef);
-Twitter.displayName = 'Twitter'; // Make findable for tests.
-export {Twitter};
+const BentoTwitter = forwardRef(TwitterWithRef);
+BentoTwitter.displayName = 'BentoTwitter'; // Make findable for tests.
+export {BentoTwitter};
