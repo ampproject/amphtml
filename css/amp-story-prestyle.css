@@ -3,6 +3,8 @@
  * the story before the JS loads.
 */
 
+@import '../extensions/amp-story/1.0/amp-story.css';
+
 html.i-amphtml-singledoc.i-amphtml-standalone body, body,
 html.i-amphtml-singledoc.i-amphtml-standalone, html {
   animation:none !important;
@@ -15,6 +17,88 @@ html.i-amphtml-singledoc.i-amphtml-standalone, html {
 .i-amphtml-notbuilt {
   color: initial !important;
 }
+
 .i-amphtml-notbuilt > * {
   display: initial;
+}
+
+html {
+  --story-page-vmax: 1vh;
+  --story-page-vmin: 1vw;
+  --story-page-vh: 1vh;
+  --story-page-vw: 1vw;
+  font-size: calc(2.5 * var(--story-page-vmax, 8px));
+}
+
+amp-story-page:first-of-type,
+amp-story-page:first-of-type amp-story-grid-layer {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  animation: none;
+}
+
+amp-story-page {
+  top: 9000vh;
+}
+
+amp-story:not(.i-amphtml-story-loaded) [animate-in] {
+  visibility: hidden;
+}
+
+amp-story[standalone] {
+  /* Override ampdoc.css for bg color */
+  background-color: black !important;
+}
+
+/*# Required only when bundled with amp-story.css from the start */
+amp-story[standalone], amp-story:not(.i-amphtml-story-loaded) amp-story-page:first-of-type,
+amp-story:not(.i-amphtml-story-loaded) amp-story-page:first-of-type amp-story-grid-layer {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  animation: none;
+}
+
+amp-story:not(.i-amphtml-story-loaded) amp-story-page:not([active]) {
+  transform: none !important;
+}
+
+/*# Desktop one panel (can be removed once one-panel is cleaned up) */
+@media (min-aspect-ratio: 3 / 4) {
+  amp-story:not(.i-amphtml-story-loaded):not([supports-landscape]) amp-story-page:first-of-type{
+    border-radius: 10px;
+    margin: auto !important;
+    width: var(--i-amphtml-story-desktop-one-panel-width) !important;
+    height: var(--i-amphtml-story-desktop-one-panel-height) !important;
+  }
+  amp-story:not(.i-amphtml-story-loaded):not([supports-landscape]) {
+    --i-amphtml-story-desktop-one-panel-ratio: 69 / 116;
+    --i-amphtml-story-desktop-one-panel-responsive-margin: max(74px, 8.25vh);
+    --i-amphtml-story-desktop-one-panel-height: calc(100vh - var(--i-amphtml-story-desktop-one-panel-responsive-margin) * 2);
+    --i-amphtml-story-desktop-one-panel-width: calc(var(--i-amphtml-story-desktop-one-panel-height) * var(--i-amphtml-story-desktop-one-panel-ratio));
+    --i-amphtml-story-desktop-one-panel-border-radius: 10px;
+    --story-page-vmax: calc(var(--i-amphtml-story-desktop-one-panel-height) * 0.01);
+    --story-page-vmin: calc(var(--i-amphtml-story-desktop-one-panel-width) * 0.01);
+    --story-page-vh: calc(var(--i-amphtml-story-desktop-one-panel-height) * 0.01);
+    --story-page-vw: calc(var(--i-amphtml-story-desktop-one-panel-width) * 0.01);
+    font-size: calc(2.5 * var(--story-page-vmax, 8px));
+  }
+}
+
+@media(max-height: 756px) and (min-aspect-ratio: 3 / 4) {
+  amp-story:not(.i-amphtml-story-loaded):not([supports-landscape]) {
+    --i-amphtml-story-desktop-one-panel-responsive-margin: 0;
+    --i-amphtml-story-desktop-one-panel-width: calc(100vh * var(--i-amphtml-story-desktop-one-panel-ratio));
+    --i-amphtml-story-desktop-one-panel-border-radius: 0;
+  }
+}
+
+@media(max-height: 538px) and (min-aspect-ratio: 3 / 4) {
+  amp-story:not(.i-amphtml-story-loaded):not([supports-landscape]) {
+    --i-amphtml-story-desktop-one-panel-ratio: 3 / 4;
+  }
 }
