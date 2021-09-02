@@ -38,11 +38,11 @@ export const WithPlaceholderAndFallback = ({apiKey}) => {
         width="300"
         height="200"
       >
-        <div placeholder style={{background: 'red'}}>
+        <div placeholder style={{background: 'blue'}}>
           Placeholder. Loading content...
         </div>
 
-        <div fallback style={{background: 'blue'}}>
+        <div fallback style={{background: 'red'}}>
           Fallback. Could not load content...
         </div>
       </amp-embedly-card>

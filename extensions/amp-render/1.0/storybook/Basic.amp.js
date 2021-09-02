@@ -44,10 +44,10 @@ WithAmpState.storyName = 'With AMP State';
 export const WithRemoteSrc = (args) => {
   return (
     <amp-render {...args} width="300" height="400" layout="fixed">
-      <div placeholder style={{background: 'red'}}>
+      <div placeholder style={{background: 'blue'}}>
         placeholder
       </div>
-      <div fallback style={{background: 'blue'}}>
+      <div fallback style={{background: 'red'}}>
         fallback
       </div>
       <template type="amp-mustache">{`Hi {{name}}!`}</template>

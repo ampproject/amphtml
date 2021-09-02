@@ -24,11 +24,11 @@ export const _default = (args) => {
 export const WithPlaceholder = (args) => {
   return (
     <amp-instagram {...args}>
-      <div placeholder style={{background: 'red'}}>
+      <div placeholder style={{background: 'blue'}}>
         Placeholder. Loading content...
       </div>
 
-      <div fallback style={{background: 'blue'}}>
+      <div fallback style={{background: 'red'}}>
         Fallback. Could not load content...
       </div>
     </amp-instagram>
