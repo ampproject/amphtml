@@ -367,7 +367,7 @@ amp-story-grid-layer[anchor*="right"] {
 }
 
 /**
- * Prevents long-press image preview on iOS 15.
+ * Prevents long-press image preview on iOS 15 that breaks pause UX.
  */
 amp-story amp-img img {
   pointer-events: none !important;
