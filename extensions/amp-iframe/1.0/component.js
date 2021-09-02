@@ -77,7 +77,7 @@ export function Iframe({
         return;
       }
       dataRef.current = event.data;
-      if (dataRef.current !== null) {
+      if (isIntersectingRef.current) {
         attemptResize();
       }
     },
