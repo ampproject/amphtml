@@ -74,8 +74,5 @@ export const ConfigureContent = ({content, height, width, ...args}) => {
 ConfigureContent.args = {
   minFontSize: 6,
   maxFontSize: 200,
-};
-
-ConfigureContent.args = {
   content: 'hello world',
 };
