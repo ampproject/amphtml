@@ -1157,6 +1157,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           promises.push(mediaPool.play(mediaEl));
         }
 
+        this.pauseAllMedia_(true /** rewindToBeginning */);
         this.playAudioElementFromTimestamp_ = null;
       }
 
