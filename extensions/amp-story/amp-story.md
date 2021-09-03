@@ -397,7 +397,7 @@ This same image can be used for both mobile portrait and landscape desktop using
 
 ##### Optimize `amp-video` by using a free Google hosted video cache on origin documents
 
-The `<amp-video>` element on stories supports the Google video cache to be used on origin documents through the attribute `cache="google"`. The video cache will fetch and store the video contents periodically, so that story requests to the cache can return a processed list of video sources for that origin video. The video cache reduces serving costs for videos, serving most requests from the Google infrastructure, and generating transcodes with different quality settings that adapt the bitrate to the network conditions.
+The `<amp-video>` element on stories supports the Google video cache to be used on origin documents through the attribute `cache="google"`. The video cache will fetch and store the video contents periodically, reducing serving costs for videos, and generating transcodes with different quality settings that adapt the bitrate to the network conditions.
 
 Use 720p videos or higher to take advantage of all the video transcodes and adaptive bitrate algorithms.
 
