@@ -335,7 +335,7 @@ function BaseCarouselWithRef(
           by={-advanceCount}
           disabled={disableForDir(-1)}
           outsetArrows={outsetArrows}
-          rtl={rtl.toString()}
+          rtl={rtl}
         />
       )}
       <Scroller
@@ -375,7 +375,7 @@ function BaseCarouselWithRef(
           as={arrowNextAs}
           disabled={disableForDir(1)}
           outsetArrows={outsetArrows}
-          rtl={rtl.toString()}
+          rtl={rtl}
         />
       )}
     </ContainWrapper>
