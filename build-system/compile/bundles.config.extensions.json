@@ -955,6 +955,7 @@
       "cssBinaries": [
         "amp-story-consent",
         "amp-story-draggable-drawer-header",
+        "amp-story-element",
         "amp-story-hint",
         "amp-story-info-dialog",
         "amp-story-open-page-attachment",
