@@ -76,6 +76,10 @@ const REMOVE_AMP_SCRIPTS_SNIPPET = fs.readFileSync(
   path.resolve(__dirname, 'snippets/remove-amp-scripts.js'),
   'utf8'
 );
+const REMOVE_NO_SCRIPT_ELEMENT_SNIPPET = fs.readFileSync(
+  path.resolve(__dirname, 'snippets/remove-no-script.js'),
+  'utf8'
+);
 // HTML snippet to create an error page snapshot.
 const SNAPSHOT_ERROR_SNIPPET = fs.readFileSync(
   path.resolve(__dirname, 'snippets/snapshot-error.html'),
