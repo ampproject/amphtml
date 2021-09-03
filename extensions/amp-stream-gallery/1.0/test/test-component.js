@@ -3,7 +3,7 @@ import {StreamGallery} from '../component';
 import {mount} from 'enzyme';
 
 describes.sandboxed('StreamGallery preact component', {}, () => {
-  it('should render BaseCarousel', () => {
+  it('should render BentoBaseCarousel', () => {
     const wrapper = mount(
       <StreamGallery>
         <div>slide 1</div>
@@ -11,7 +11,7 @@ describes.sandboxed('StreamGallery preact component', {}, () => {
         <div>slide 3</div>
       </StreamGallery>
     );
-    const carousel = wrapper.find('BaseCarousel');
+    const carousel = wrapper.find('BentoBaseCarousel');
     expect(carousel).to.have.lengthOf(1);
     expect(wrapper.find('Arrow')).to.have.lengthOf(2);
 

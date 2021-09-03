@@ -67,7 +67,7 @@ const generateCarouselKey = sequentialIdGenerator();
  * @param {{current: ?BaseCarouselDef.CarouselApi}} ref
  * @return {PreactDef.Renderable}
  */
-function BaseCarouselWithRef(
+function BentoBaseCarouselWithRef(
   {
     advanceCount = 1,
     arrowPrevAs,
@@ -367,6 +367,6 @@ function BaseCarouselWithRef(
   );
 }
 
-const BaseCarousel = forwardRef(BaseCarouselWithRef);
-BaseCarousel.displayName = 'BaseCarousel'; // Make findable for tests.
-export {BaseCarousel};
+const BentoBaseCarousel = forwardRef(BentoBaseCarouselWithRef);
+BentoBaseCarousel.displayName = 'BentoBaseCarousel'; // Make findable for tests.
+export {BentoBaseCarousel};
