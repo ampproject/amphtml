@@ -15,12 +15,12 @@
  */
 
 import {PreactBaseElement} from '#preact/base-element';
-import {Twitter} from './component';
+import {BentoTwitter} from './component';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = Twitter;
+BaseElement['Component'] = BentoTwitter;
 
 /** @override */
 BaseElement['props'] = {
