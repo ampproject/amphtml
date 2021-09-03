@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
@@ -15,6 +16,9 @@
  */
 
 import {BaseCarousel} from './component';
+=======
+import {BentoBaseCarousel} from './component';
+>>>>>>> 196a92384b... Rename `BaseCarousel` as `BentoBaseCarousel` (#35935)
 import {CSS as COMPONENT_CSS} from './component.jss';
 import {CarouselContextProp} from './carousel-props';
 import {PreactBaseElement} from '#preact/base-element';
@@ -55,7 +59,7 @@ export class BaseElement extends PreactBaseElement {
 }
 
 /** @override */
-BaseElement['Component'] = BaseCarousel;
+BaseElement['Component'] = BentoBaseCarousel;
 
 /** @override */
 BaseElement['layoutSizeDefined'] = true;

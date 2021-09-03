@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '#preact';
-import {BaseCarousel} from '../component';
+import {BentoBaseCarousel} from '../component';
 import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 
 const CONTROLS = ['auto', 'always', 'never'];
@@ -24,7 +24,7 @@ const ORIENTATIONS = ['horizontal', 'vertical'];
 
 export default {
   title: 'BaseCarousel',
-  component: BaseCarousel,
+  component: BentoBaseCarousel,
   decorators: [withKnobs],
 };
 
@@ -38,7 +38,7 @@ function CarouselWithActions(props) {
   const ref = Preact.useRef();
   return (
     <section>
-      <BaseCarousel ref={ref} {...props} />
+      <BentoBaseCarousel ref={ref} {...props} />
       <div style={{marginTop: 8}}>
         <button onClick={() => ref.current.goToSlide(3)}>goToSlide(3)</button>
         <button onClick={() => ref.current.next()}>next</button>
@@ -122,7 +122,7 @@ export const mixedLength = () => {
   const orientation = select('orientation', ORIENTATIONS, 'vertical');
   const horizontal = orientation == 'horizontal';
   return (
-    <BaseCarousel
+    <BentoBaseCarousel
       autoAdvance={autoAdvance}
       autoAdvanceCount={autoAdvanceCount}
       autoAdvanceInterval={autoAdvanceInterval}
@@ -153,7 +153,7 @@ export const mixedLength = () => {
           ></div>
         );
       })}
-    </BaseCarousel>
+    </BentoBaseCarousel>
   );
 };
 
@@ -180,7 +180,7 @@ export const provideArrows = () => {
     );
   };
   return (
-    <BaseCarousel
+    <BentoBaseCarousel
       controls={controls}
       style={{width, height}}
       outsetArrows={outsetArrows}
@@ -190,14 +190,14 @@ export const provideArrows = () => {
       {['lightcoral', 'peachpuff', 'lavender'].map((color) => (
         <div style={{backgroundColor: color, width, height}}></div>
       ))}
-    </BaseCarousel>
+    </BentoBaseCarousel>
   );
 };
 
 export const WithCaptions = () => {
   const controls = select('show controls', CONTROLS);
   return (
-    <BaseCarousel
+    <BentoBaseCarousel
       visibleCount={3}
       controls={controls}
       loop
@@ -224,7 +224,7 @@ export const WithCaptions = () => {
         />
         <figcaption>The third image has its caption.</figcaption>
       </figure>
-    </BaseCarousel>
+    </BentoBaseCarousel>
   );
 };
 

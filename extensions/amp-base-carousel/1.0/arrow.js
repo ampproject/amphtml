@@ -20,7 +20,7 @@ import {useStyles} from './component.jss';
 import objstr from 'obj-str';
 
 /**
- * @param {!BaseCarouselDef.ArrowProps} props
+ * @param {!BentoBaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
 export function Arrow({
@@ -60,7 +60,7 @@ export function Arrow({
 }
 
 /**
- * @param {!BaseCarouselDef.ArrowProps} props
+ * @param {!BentoBaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
 function DefaultArrow({

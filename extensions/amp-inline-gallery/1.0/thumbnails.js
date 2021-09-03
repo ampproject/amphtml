@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '#preact';
-import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
+import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
 import {px} from '#core/dom/style';
 import {
@@ -68,7 +68,7 @@ export function Thumbnails({
   }, [aspectRatio, height]);
 
   return (
-    <BaseCarousel
+    <BentoBaseCarousel
       class={`${className} ${classes.thumbnails}`}
       mixedLength={true}
       snap={false}
@@ -98,7 +98,7 @@ export function Thumbnails({
             />
           );
         })}
-    </BaseCarousel>
+    </BentoBaseCarousel>
   );
 }
 

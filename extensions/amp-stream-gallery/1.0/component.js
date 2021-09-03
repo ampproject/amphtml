@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '#preact';
-import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
+import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
 import {forwardRef} from '#preact/compat';
 import {setStyle} from '#core/dom/style';
 import {toWin} from '#core/window';
@@ -34,7 +34,7 @@ const OUTSET_ARROWS_WIDTH = 100;
 
 /**
  * @param {!StreamGalleryDef.Props} props
- * @param {{current: (!BaseCarouselDef.CarouselApi|null)}} ref
+ * @param {{current: (!BentoBaseCarouselDef.CarouselApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
 function StreamGalleryWithRef(props, ref) {
@@ -84,7 +84,7 @@ function StreamGalleryWithRef(props, ref) {
   useImperativeHandle(
     ref,
     () =>
-      /** @type {!BaseCarouselDef.CarouselApi} */ ({
+      /** @type {!BentoBaseCarouselDef.CarouselApi} */ ({
         goToSlide: (index) => carouselRef.current.goToSlide(index),
         next: () => carouselRef.current.next(),
         prev: () => carouselRef.current.prev(),
@@ -115,7 +115,7 @@ function StreamGalleryWithRef(props, ref) {
   }, [measure]);
 
   return (
-    <BaseCarousel
+    <BentoBaseCarousel
       advanceCount={Math.floor(visibleCount)}
       arrowPrevAs={arrowPrevAs}
       arrowNextAs={arrowNextAs}
@@ -131,7 +131,7 @@ function StreamGalleryWithRef(props, ref) {
       {...rest}
     >
       {children}
-    </BaseCarousel>
+    </BentoBaseCarousel>
   );
 }
 
