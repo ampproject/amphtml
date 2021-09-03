@@ -344,7 +344,7 @@ export class AmpStory extends AMP.BaseElement {
     this.backgroundBlur_ = null;
 
     /** @private {number} */
-    this.maxHeightSeen_ = 0;
+    this.maxViewportHeight_ = 0;
   }
 
   /** @override */
@@ -834,6 +834,7 @@ export class AmpStory extends AMP.BaseElement {
       attributeFilter: ['class'],
     });
 
+    this.maxViewportHeight_ = this.getViewport().getHeight();
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
 
@@ -1745,15 +1746,16 @@ export class AmpStory extends AMP.BaseElement {
     const uiState = this.getUIType_();
     this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
 
-    // Maintain story height on screen resize to prevent layout shift. This is
-    // particularly necessary when the Android soft keyboard opens or closes.
     if (uiState === UIType.MOBILE) {
-      const currentHeight = this.element.getLayoutBox().height;
-      if (currentHeight >= this.maxHeightSeen_) {
-        this.maxHeightSeen_ = currentHeight;
+      const currentHeight = this.getViewport().getHeight();
+      if (currentHeight > this.maxViewportHeight_) {
+        this.maxViewportHeight_ = currentHeight;
+        // Maintain story height on viewport resize to prevent the story page
+        // from resizing. This is particularly necessary on Android, when
+        // opening or closing the soft keyboard triggers a viewport resize.
         this.mutateElement(() => {
           setImportantStyles(this.element, {
-            'height': px(this.maxHeightSeen_),
+            'height': px(this.maxViewportHeight_),
           });
         });
       }
