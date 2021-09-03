@@ -120,8 +120,6 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
 
   /** @private */
   initializeListeners_() {
-    const storeService = getStoreService(this.win);
-
     const aspectRatio = this.element.getAttribute('aspect-ratio');
     const scalingFactorFloat = parseFloat(
       this.element.getAttribute('scaling-factor')
@@ -135,6 +133,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
       const vert = parseInt(aspectRatioSplits[1], 10);
       if (horiz > 0 && vert > 0) {
         this.aspectRatio_ = {horiz, vert};
+        const storeService = getStoreService(this.win);
         storeService.subscribe(
           StateProperty.PAGE_SIZE,
           this.updatePageSize_.bind(this),
