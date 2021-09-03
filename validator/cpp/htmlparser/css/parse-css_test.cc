@@ -2431,6 +2431,23 @@ TEST(ParseCssTest, ParseMediaQueries_SemicolonTerminatedQuery) {
   EXPECT_EQ(media_errors.size(), 0);
 }
 
+TEST(ParseCssTest, ParseMediaQueries_IncludesFunction) {
+  // https://github.com/ampproject/amphtml/issues/35793
+  vector<char32_t> css = htmlparser::Strings::Utf8ToCodepoints(
+      "@media (min-width: calc(840px - 48px));");
+  vector<unique_ptr<ErrorToken>> parse_errors;
+  vector<unique_ptr<Token>> tokens =
+      Tokenize(&css, /*line=*/1, /*col=*/0, &parse_errors);
+  unique_ptr<Stylesheet> stylesheet =
+      ParseAStylesheet(&tokens, AmpCssParsingConfig(), &parse_errors);
+  EXPECT_EQ(JsonFromList(parse_errors), "[]");
+
+  std::vector<unique_ptr<ErrorToken>> media_errors;
+  std::vector<unique_ptr<Token>> media_types, media_features;
+  ParseMediaQueries(*stylesheet, &media_types, &media_features, &media_errors);
+  EXPECT_EQ(media_errors.size(), 0);
+}
+
 unique_ptr<Stylesheet> MediaQueryStyleSheet(const std::string& media_query) {
   vector<char32_t> css = htmlparser::Strings::Utf8ToCodepoints(
       absl::StrCat("@media ", media_query, " {}"));
