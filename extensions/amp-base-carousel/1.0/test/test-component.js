@@ -14,9 +14,20 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
         <div>slide 3</div>
       </BaseCarousel>
     );
-    expect(wrapper.find('Arrow')).to.have.lengthOf(2);
-    expect(wrapper.find('Arrow').first().prop('rtl')).to.equal('false');
-    expect(wrapper.find('Arrow').last().prop('rtl')).to.equal('false');
+
+    const arrows = wrapper.find('Arrow');
+    expect(arrows).to.have.lengthOf(2);
+    const arrow0 = arrows.first();
+    const arrow1 = arrows.last();
+
+    // Arrows are given rtl booleans and propagate them as strings.
+    expect(arrow0.prop('rtl')).to.equal(false);
+    expect(arrow0.children()).to.have.lengthOf(1);
+    expect(arrow0.childAt(0).prop('rtl')).to.equal('false');
+    expect(arrow1.prop('rtl')).to.equal(false);
+    expect(arrow1.children()).to.have.lengthOf(1);
+    expect(arrow1.childAt(0).prop('rtl')).to.equal('false');
+
     expect(wrapper.find('Scroller').prop('group')).to.be.undefined;
 
     const slides = wrapper.find('[data-slide]');
