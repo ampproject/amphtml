@@ -84,6 +84,12 @@ const REMOVE_NO_SCRIPT_ELEMENT_SNIPPET = fs.readFileSync(
   path.resolve(__dirname, 'snippets/remove-no-script.js'),
   'utf8'
 );
+
+const SHADOW_TO_LIGHT_SNIPPET = fs.readFileSync(
+  path.resolve(__dirname, 'snippets/shadow-to-light.js'),
+  'utf8'
+);
+
 // HTML snippet to create an error page snapshot.
 const SNAPSHOT_ERROR_SNIPPET = fs.readFileSync(
   path.resolve(__dirname, 'snippets/snapshot-error.html'),
@@ -642,6 +648,7 @@ async function snapshotWebpages(browser, webpages) {
             await page.evaluate(REMOVE_AMP_SCRIPTS_SNIPPET);
             await page.evaluate(FREEZE_CANVAS_IMAGE_SNIPPET);
             await page.evaluate(REMOVE_NO_SCRIPT_ELEMENT_SNIPPET);
+            await page.evaluate(SHADOW_TO_LIGHT_SNIPPET);
 
             // Create a default set of snapshot options for Percy and modify
             // them based on the test's configuration.
