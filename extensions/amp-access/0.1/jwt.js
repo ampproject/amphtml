@@ -1,23 +1,9 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
-import {pemToBytes} from '../../../src/utils/pem';
-import {stringToBytes, utf8Decode} from '../../../src/utils/bytes';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '#core/types/object/json';
+import {
+  base64DecodeToBytes,
+  base64UrlDecodeToBytes,
+} from '#core/types/string/base64';
+import {stringToBytes, utf8Decode} from '#core/types/string/bytes';
 
 /**
  * @typedef {{
@@ -28,6 +14,26 @@ import {tryParseJson} from '../../../src/json';
  * }}
  */
 let JwtTokenInternalDef;
+
+/**
+ * Converts a text in PEM format into a binary array buffer.
+ * @param {string} pem
+ * @return {!Uint8Array}
+ * @visibleForTesting
+ */
+export function pemToBytes(pem) {
+  const key = pem
+    .trim()
+    // Remove pem prefix, e.g. "----BEGIN PUBLIC KEY----".
+    .replace(/^-+BEGIN[^-]*-+/, '')
+    // Remove pem suffix, e.g. "----END PUBLIC KEY----".
+    .replace(/-+END[^-]*-+$/, '')
+    // Remove line breaks.
+    .replace(/[\r\n]/g, '')
+    // Remove surrounding whitespace.
+    .trim();
+  return base64DecodeToBytes(key);
+}
 
 /**
  * Provides helper methods to decode and verify JWT tokens.

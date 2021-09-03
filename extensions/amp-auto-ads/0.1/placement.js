@@ -1,34 +1,21 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Attributes, getAttributesFromConfigObj} from './attributes';
+import {createElementWithAttributes} from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {
   LayoutMarginsChangeDef,
   cloneLayoutMarginsChangeDef,
-} from '../../../src/layout-rect';
-import {Services} from '../../../src/services';
+} from '#core/dom/layout/rect';
 import {
   closestAncestorElementBySelector,
-  createElementWithAttributes,
   scopedQuerySelectorAll,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
+} from '#core/dom/query';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {Attributes, getAttributesFromConfigObj} from './attributes';
+import {measurePageLayoutBox} from './measure-page-layout-box';
+
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {measurePageLayoutBox} from '../../../src/utils/page-layout-box';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -194,6 +181,10 @@ export class Placement {
    */
   placeAd(baseAttributes, sizing, adTracker, isResponsiveEnabled) {
     return this.getEstimatedPosition().then((yPosition) => {
+      if (this.ampdoc.win./*OK*/ scrollY > yPosition) {
+        this.state_ = PlacementState.UNUSED;
+        return this.state_;
+      }
       return adTracker.isTooNearAnAd(yPosition).then((tooNear) => {
         if (tooNear) {
           this.state_ = PlacementState.TOO_NEAR_EXISTING_AD;
@@ -278,16 +269,18 @@ export class Placement {
    * @private
    */
   createAdElement_(baseAttributes, width) {
-    const attributes = /** @type {!JsonObject} */ (Object.assign(
-      dict({
-        'layout': width ? 'fixed' : 'fixed-height',
-        'height': '0',
-        'width': width ? width : 'auto',
-        'class': 'i-amphtml-layout-awaiting-size',
-      }),
-      baseAttributes,
-      this.attributes_
-    ));
+    const attributes = /** @type {!JsonObject} */ (
+      Object.assign(
+        dict({
+          'layout': width ? 'fixed' : 'fixed-height',
+          'height': '0',
+          'width': width ? width : 'auto',
+          'class': 'i-amphtml-layout-awaiting-size',
+        }),
+        baseAttributes,
+        this.attributes_
+      )
+    );
     return createElementWithAttributes(
       this.ampdoc.win.document,
       'amp-ad',
@@ -301,18 +294,20 @@ export class Placement {
    * @private
    */
   createFullWidthResponsiveAdElement_(baseAttributes) {
-    const attributes = /** @type {!JsonObject} */ (Object.assign(
-      dict({
-        'width': '100vw',
-        'height': '0',
-        'layout': 'fixed',
-        'class': 'i-amphtml-layout-awaiting-size',
-        'data-auto-format': 'rspv',
-        'data-full-width': '',
-      }),
-      baseAttributes,
-      this.attributes_
-    ));
+    const attributes = /** @type {!JsonObject} */ (
+      Object.assign(
+        dict({
+          'width': '100vw',
+          'height': '0',
+          'layout': 'fixed',
+          'class': 'i-amphtml-layout-awaiting-size',
+          'data-auto-format': 'rspv',
+          'data-full-width': '',
+        }),
+        baseAttributes,
+        this.attributes_
+      )
+    );
     return createElementWithAttributes(
       this.ampdoc.win.document,
       'amp-ad',

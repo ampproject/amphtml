@@ -1,32 +1,15 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-accordion';
-import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
-import {Keys} from '../../../../src/utils/key-codes';
-import {Services} from '../../../../src/services';
-import {computedStyle} from '../../../../src/style';
-import {
-  createElementWithAttributes,
-  tryFocus,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
-import {poll} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
+import {ActionTrust} from '#core/constants/action-constants';
+import {Keys} from '#core/constants/key-codes';
+import {createElementWithAttributes, tryFocus} from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {htmlFor} from '#core/dom/static-template';
+import {computedStyle} from '#core/dom/style';
+
+import {Services} from '#service';
+import {ActionService} from '#service/action-impl';
+
+import {poll} from '#testing/iframe';
 
 describes.realWin(
   'amp-accordion',
@@ -199,25 +182,6 @@ describes.realWin(
 
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[1].getAttribute('aria-expanded')).to.equal('false');
-    });
-
-    it('should expand when beforematch event is triggered on a collapsed section', async () => {
-      // Enable display locking feature.
-      toggleExperiment(win, 'amp-accordion-display-locking', true);
-      doc.body.onbeforematch = null;
-      await getAmpAccordion();
-      const section = doc.querySelector('section:not([expanded])');
-      const header = section.firstElementChild;
-      const content = section.children[1];
-      expect(section.hasAttribute('expanded')).to.be.false;
-      expect(header.getAttribute('aria-expanded')).to.equal('false');
-      content.dispatchEvent(new Event('beforematch'));
-      expect(section.hasAttribute('expanded')).to.be.true;
-      expect(header.getAttribute('aria-expanded')).to.equal('true');
-
-      // Reset display locking feature
-      toggleExperiment(win, 'amp-accordion-display-locking', false);
-      doc.body.onbeforematch = undefined;
     });
 
     it(
@@ -864,6 +828,33 @@ describes.realWin(
       expect(header2.getAttribute('id')).to.equal(
         content2.getAttribute('aria-labelledby')
       );
+    });
+
+    it('should throw an error when amp-bind used with expanded attribute ', async () => {
+      const errors = [];
+      const consoleError = console.error;
+      console.error = (msg) => {
+        errors.push(msg);
+      };
+
+      const html = htmlFor(win.document);
+      const accordion = html`
+        <amp-accordion animate>
+          <section [expanded]="section1">
+            <h2>Section 1</h2>
+            <div>Puppies are cute.</div>
+          </section>
+        </amp-accordion>
+      `;
+      doc.body.appendChild(accordion);
+
+      await accordion.buildInternal().catch((err) => {
+        expect(err.message).to.include('The "expanded" attribute');
+      });
+
+      expect(errors.length).to.equal(1);
+      expect(errors[0]).to.include('The "expanded" attribute');
+      console.error = consoleError;
     });
   }
 );

@@ -1,31 +1,13 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import '../amp-base-carousel';
-import {ActionInvocation} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
-import {
-  createElementWithAttributes,
-  waitForChildPromise,
-} from '../../../../src/dom';
-import {mod} from '../../../../src/utils/math';
-import {setStyles} from '../../../../src/style';
-import {toArray} from '../../../../src/types';
-import {toggleExperiment} from '../../../../src/experiments';
-import {useStyles} from '../base-carousel.jss';
-import {waitFor, whenCalled} from '../../../../testing/test-helper';
+import {ActionInvocation} from '#service/action-impl';
+import {ActionTrust} from '#core/constants/action-constants';
+import {createElementWithAttributes, waitForChildPromise} from '#core/dom';
+import {mod} from '#core/math';
+import {setStyles} from '#core/dom/style';
+import {toArray} from '#core/types/array';
+import {toggleExperiment} from '#experiments';
+import {useStyles} from '../component.jss';
+import {waitFor, whenCalled} from '#testing/test-helper';
 
 describes.realWin(
   'amp-base-carousel:1.0',

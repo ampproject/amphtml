@@ -6,22 +6,6 @@ teaser:
   text: Provides an AMP paywall and subscription support.
 ---
 
-<!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-access
 
 AMP Access or “AMP paywall and subscription support” gives Publishers control over which content can be accessed by a Reader and with what restrictions, based on the Reader’s subscription status, number of views, and other factors.
@@ -206,7 +190,7 @@ It is possible to specify multiple access providers using an array instead of a 
 
 ### Access URL Variables
 
-When configuring the URLs for various endpoints, the Publisher can use substitution variables. The full list of these variables are defined in the [AMP Var Spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md). In addition, this spec adds a few access-specific variables such as `READER_ID` and `AUTHDATA`. Some of the most relevant variables are described in the table below:
+When configuring the URLs for various endpoints, the Publisher can use substitution variables. The full list of these variables are defined in the [AMP Var Spec](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-var-substitutions.md). In addition, this spec adds a few access-specific variables such as `READER_ID` and `AUTHDATA`. Some of the most relevant variables are described in the table below:
 
 <table>
   <tr>
@@ -629,4 +613,4 @@ This section will cover a detailed explanation of the design underlying the amp-
 
 ## Validation
 
-See [amp-access rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/validator-amp-access.protoascii) in the AMP validator specification.
+See [amp-access rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-access/validator-amp-access.protoascii) in the AMP validator specification.

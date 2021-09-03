@@ -1,19 +1,4 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import {loadPromise} from '../../src/event-helper';
 import {
   adoptServiceFactoryForEmbedDoc,
   adoptServiceForEmbedDoc,
@@ -36,17 +21,16 @@ import {
   rejectServicePromiseForDoc,
   resetServiceForTesting,
   setParentWindow,
-} from '../../src/service';
-import {loadPromise} from '../../src/event-helper';
+} from '../../src/service-helpers';
 
-describe('service', () => {
+describes.sandboxed('service', {}, (env) => {
   describe('disposable interface', () => {
     let disposable;
     let nonDisposable;
 
     beforeEach(() => {
       nonDisposable = {};
-      disposable = {dispose: window.sandbox.spy()};
+      disposable = {dispose: env.sandbox.spy()};
     });
 
     it('should test disposable interface', () => {
@@ -76,7 +60,7 @@ describe('service', () => {
           this.count = ++count;
         }
       };
-      factory = window.sandbox.spy(() => {
+      factory = env.sandbox.spy(() => {
         return new Class();
       });
       resetServiceForTesting(window, 'a');
@@ -234,7 +218,7 @@ describe('service', () => {
           this.count = ++count;
         }
       };
-      factory = window.sandbox.spy(function () {
+      factory = env.sandbox.spy(function () {
         return new Class();
       });
       windowApi = {
@@ -246,7 +230,7 @@ describe('service', () => {
         isSingleDoc: () => false,
         win: windowApi,
       };
-      ampdocMock = window.sandbox.mock(ampdoc);
+      ampdocMock = env.sandbox.mock(ampdoc);
       ampdocServiceApi = {getAmpDoc: () => ampdoc};
       registerServiceBuilder(windowApi, 'ampdoc', function () {
         return ampdocServiceApi;
@@ -431,7 +415,7 @@ describe('service', () => {
       expectAsyncConsoleError(/intentional/);
       const disposableFactory = function () {
         return {
-          dispose: window.sandbox.spy(),
+          dispose: env.sandbox.spy(),
         };
       };
       registerServiceBuilderForDoc(node, 'a', disposableFactory);
@@ -439,7 +423,7 @@ describe('service', () => {
 
       registerServiceBuilderForDoc(node, 'b', function () {
         return {
-          dispose: window.sandbox.stub().throws('intentional'),
+          dispose: env.sandbox.stub().throws('intentional'),
         };
       });
       const disposableWithError = getServiceForDoc(node, 'b');
@@ -537,7 +521,7 @@ describe('service', () => {
           isSingleDoc: () => false,
           win: windowApi,
         };
-        window.sandbox.stub(ampdocServiceApi, 'getAmpDoc').callsFake((node) => {
+        env.sandbox.stub(ampdocServiceApi, 'getAmpDoc').callsFake((node) => {
           if (node == childWinNode || node == grandChildWinNode) {
             return childAmpdoc;
           }
@@ -559,7 +543,7 @@ describe('service', () => {
           win: windowApi,
         };
         registerServiceBuilderForDoc(childAmpdoc, 'c', factory);
-        window.sandbox.stub(ampdocServiceApi, 'getAmpDoc').callsFake((node) => {
+        env.sandbox.stub(ampdocServiceApi, 'getAmpDoc').callsFake((node) => {
           if (node == childWinNode || node == grandChildWinNode) {
             return childAmpdoc;
           }
@@ -601,7 +585,7 @@ describe('service', () => {
       it('should dispose disposable services', () => {
         const disposableFactory = function () {
           return {
-            dispose: window.sandbox.spy(),
+            dispose: env.sandbox.spy(),
           };
         };
 

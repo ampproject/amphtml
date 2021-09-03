@@ -1,23 +1,25 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '#core/data-structures/promise';
 import {
-  MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
-  VideoEvents,
-} from '../../../src/video-interface';
+  dispatchCustomEvent,
+  getDataParamsFromAttributes,
+  removeElement,
+} from '#core/dom';
+import {isFullscreenElement} from '#core/dom/fullscreen';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {measureIntersection} from '#core/dom/layout/intersection';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {once} from '#core/types/function';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getConsentDataToForward} from '../../../src/consent';
+import {getData, listen} from '../../../src/event-helper';
+import {
+  disableScrollingOnIframe,
+  looksLikeTrackingIframe,
+} from '../../../src/iframe-helper';
 import {
   SandboxOptions,
   createFrameFor,
@@ -25,26 +27,13 @@ import {
   objOrParseJson,
   originMatches,
 } from '../../../src/iframe-video';
-import {Services} from '../../../src/services';
-import {addParamsToUrl} from '../../../src/url';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {addParamsToUrl} from '../../../src/url';
 import {
-  disableScrollingOnIframe,
-  looksLikeTrackingIframe,
-} from '../../../src/iframe-helper';
-import {
-  dispatchCustomEvent,
-  getDataParamsFromAttributes,
-  isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
-import {getConsentDataToForward} from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {measureIntersection} from '../../../src/utils/intersection';
-import {once} from '../../../src/utils/function';
+  MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
+  VideoEvents,
+} from '../../../src/video-interface';
+import {BUBBLE_MESSAGE_EVENTS} from '../amp-video-iframe-api';
 
 /** @private @const */
 const TAG = 'amp-video-iframe';
@@ -59,20 +48,6 @@ const SANDBOX = [
   SandboxOptions.ALLOW_POPUPS,
   SandboxOptions.ALLOW_POPUPS_TO_ESCAPE_SANDBOX,
   SandboxOptions.ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION,
-];
-
-/**
- * Events allowed to be dispatched from messages.
- * @private @const
- */
-const ALLOWED_EVENTS = [
-  VideoEvents.PLAYING,
-  VideoEvents.PAUSE,
-  VideoEvents.ENDED,
-  VideoEvents.MUTED,
-  VideoEvents.UNMUTED,
-  VideoEvents.AD_START,
-  VideoEvents.AD_END,
 ];
 
 /**
@@ -112,7 +87,7 @@ class AmpVideoIframe extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {!UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.unlistenFrame_ = null;
 
     /** @private {?Deferred} */
@@ -127,6 +102,9 @@ class AmpVideoIframe extends AMP.BaseElement {
      * @private
      */
     this.boundOnMessage_ = (e) => this.onMessage_(e);
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /** @override */
@@ -180,8 +158,8 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @private
    */
   getMetadata_() {
-    const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(this.element);
-    const {title, documentElement} = this.getAmpDoc().getRootNode();
+    const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(this.element);
+    const {documentElement, title} = this.getAmpDoc().getRootNode();
 
     return dict({
       'sourceUrl': sourceUrl,
@@ -207,8 +185,9 @@ class AmpVideoIframe extends AMP.BaseElement {
     }
     const img = new Image();
     img.src = addDataParamsToUrl(poster, element);
+    img.setAttribute('loading', 'lazy');
     img.setAttribute('placeholder', '');
-    this.applyFillContent(img);
+    applyFillContent(img);
     return img;
   }
 
@@ -216,6 +195,7 @@ class AmpVideoIframe extends AMP.BaseElement {
   unlayoutCallback() {
     this.canPlay_ = false;
     this.removeIframe_();
+    this.pauseHelper_.updatePlaying(false);
     return true; // layout again.
   }
 
@@ -345,7 +325,17 @@ class AmpVideoIframe extends AMP.BaseElement {
       return;
     }
 
-    if (ALLOWED_EVENTS.indexOf(eventReceived) > -1) {
+    switch (eventReceived) {
+      case 'playing':
+        this.pauseHelper_.updatePlaying(true);
+        break;
+      case 'pause':
+      case 'ended':
+        this.pauseHelper_.updatePlaying(false);
+        break;
+    }
+
+    if (BUBBLE_MESSAGE_EVENTS.indexOf(eventReceived) > -1) {
       dispatchCustomEvent(this.element, eventReceived);
       return;
     }

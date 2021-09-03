@@ -1,25 +1,11 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust} from '#core/constants/action-constants';
+import {clamp, sum} from '#core/math';
+import {dict} from '#core/types/object';
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Services} from '../../../src/services';
-import {clamp, sum} from '../../../src/utils/math';
+import {Services} from '#service';
+
 import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/utils/object';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-orientation-observer';
 /**
@@ -142,7 +128,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
       const {screen} = this.win;
 
       const {alpha} = event;
-      let {gamma, beta} = event;
+      let {beta, gamma} = event;
 
       // Detect the implementation of orientation angle
       const angle =
@@ -178,9 +164,9 @@ export class AmpOrientationObserver extends AMP.BaseElement {
               /** @type {number} */ (currentValue[axis])
             );
           } else {
-            this.computedValue_[axis] = /** @type {number} */ (currentValue[
-              axis
-            ]);
+            this.computedValue_[axis] = /** @type {number} */ (
+              currentValue[axis]
+            );
           }
           this.triggerEvent_(
             axis,

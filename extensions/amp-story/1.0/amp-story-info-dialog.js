@@ -1,19 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
@@ -25,15 +9,15 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-info-dialog-1.0.css';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
+import {LocalizedStringId} from '#service/localization/strings';
+import {Services} from '#service';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
-import {closest, matches} from '../../../src/dom';
+import {closest, matches} from '#core/dom/query';
 import {createShadowRootWithStyle, triggerClickFromLightDom} from './utils';
 import {dev} from '../../../src/log';
-import {getAmpdoc} from '../../../src/service';
+import {getAmpdoc} from '../../../src/service-helpers';
 import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '#core/dom/static-template';
 
 /** @const {string} Class to toggle the info dialog. */
 export const DIALOG_VISIBLE_CLASS = 'i-amphtml-story-info-dialog-visible';
@@ -120,8 +104,9 @@ export class InfoDialog {
       this.parentEl_.appendChild(root);
     });
 
-    const pageUrl = Services.documentInfoForDoc(getAmpdoc(this.parentEl_))
-      .canonicalUrl;
+    const pageUrl = Services.documentInfoForDoc(
+      getAmpdoc(this.parentEl_)
+    ).canonicalUrl;
 
     return Promise.all([
       appendPromise,

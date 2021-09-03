@@ -1,19 +1,3 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   ExpansionOptions,
   VariableService,
@@ -22,12 +6,13 @@ import {
   installVariableServiceForTesting,
   variableServiceForDoc,
 } from '../variables';
-import {Services} from '../../../../src/services';
-import {forceExperimentBranch} from '../../../../src/experiments';
+import {Services} from '#service';
+import {forceExperimentBranch} from '#experiments';
 import {
   installLinkerReaderService,
   linkerReaderServiceFor,
 } from '../linker-reader';
+import {installSessionServiceForTesting} from '../session-manager';
 
 describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
   let fakeElement;
@@ -36,6 +21,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
   beforeEach(() => {
     fakeElement = env.win.document.documentElement;
     installLinkerReaderService(env.win);
+    installSessionServiceForTesting(env.ampdoc);
     variables = new VariableService(env.ampdoc);
   });
 
@@ -269,6 +255,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
       win = env.win;
       doc = win.document;
       installLinkerReaderService(win);
+      installSessionServiceForTesting(doc);
       installVariableServiceForTesting(doc);
       variables = variableServiceForDoc(doc);
       const {documentElement} = win.document;
@@ -351,6 +338,40 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
 
     it('base64 works', () => {
       return check('$BASE64(Hello World!)', 'SGVsbG8gV29ybGQh');
+    });
+
+    describe('$CALC', () => {
+      it('calc addition works', () => check('$CALC(1, 2, add)', '3'));
+
+      it('calc addition works with rounding flag', () =>
+        check('$CALC(1, 2, add, true)', '3'));
+
+      it('calc subtraction works', () =>
+        check('$CALC(1, 2, subtract, true)', '-1'));
+
+      it('calc multiplication works', () =>
+        check('$CALC(1, 2, multiply, true)', '2'));
+
+      it('calc division works', () =>
+        check('$CALC(1, 2, divide, false)', '0.5'));
+
+      it('calc division should round 2/3 to 1', () =>
+        check('$CALC(2, 3, divide, true)', '1'));
+
+      it('calc division should round 1/3 to 0', () =>
+        check('$CALC(1, 3, divide, true)', '0'));
+
+      it('calc division should round 1/2 to 1', () =>
+        check('$CALC(1, 2, divide, true)', '1'));
+
+      it('calc with unknown operation defaults to zero', () =>
+        check('$CALC(1, 2, somethingelse, true)', '0'));
+
+      it('calc with nested macro works', () =>
+        check('$CALC($SUBSTR(123456, 2, 5), 10, multiply, false)', '34560'));
+
+      it('calc should replace CUMULATIVE_LAYOUT_SHIFT with 1', () =>
+        check('$CALC(CUMULATIVE_LAYOUT_SHIFT, 10, multiply, true)', '10'));
     });
 
     it('if works with true', () =>
@@ -445,7 +466,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
     });
 
     it('replaces CONSENT_METADATA', () => {
-      window.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+      env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
         Promise.resolve({
           getConsentMetadataInfo: () => {
             return Promise.resolve({
@@ -464,7 +485,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
     });
 
     it('replaces CONSENT_STRING', () => {
-      window.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+      env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
         Promise.resolve({
           getConsentStringInfo: () => {
             return Promise.resolve('userConsentString');

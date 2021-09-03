@@ -1,26 +1,13 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-3q-player';
-import * as dom from '../../../../src/dom';
-import {Services} from '../../../../src/services';
-import {VideoEvents} from '../../../../src/video-interface';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
+import {createElementWithAttributes} from '#core/dom';
+import * as fullscreen from '#core/dom/fullscreen';
+
+import {Services} from '#service';
+
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
+
 import {listenOncePromise} from '../../../../src/event-helper';
+import {VideoEvents} from '../../../../src/video-interface';
 
 describes.realWin(
   'amp-3q-player',
@@ -77,7 +64,11 @@ describes.realWin(
         sendFakeMessage(impl, iframe, 'playing');
         resizeObserverStub.notifySync({
           target: player,
-          contentRect: {width: 0, height: 0},
+          borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+        });
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
         });
         expect(postMessageSpy).to.be.calledWith('pause');
       });
@@ -87,7 +78,11 @@ describes.realWin(
         sendFakeMessage(impl, iframe, 'paused');
         resizeObserverStub.notifySync({
           target: player,
-          contentRect: {width: 0, height: 0},
+          borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+        });
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
         });
         expect(postMessageSpy).to.not.be.calledWith('pause');
       });
@@ -200,13 +195,13 @@ describes.realWin(
       });
 
       it('can enter fullscreen', () => {
-        const spy = env.sandbox.spy(dom, 'fullscreenEnter');
+        const spy = env.sandbox.spy(fullscreen, 'fullscreenEnter');
         impl.fullscreenEnter();
         expect(spy).calledWith(impl.iframe_);
       });
 
       it('can exit fullscreen', () => {
-        const spy = env.sandbox.spy(dom, 'fullscreenExit');
+        const spy = env.sandbox.spy(fullscreen, 'fullscreenExit');
         impl.fullscreenExit();
         expect(spy).calledWith(impl.iframe_);
         expect(impl.isFullscreen()).to.be.false;

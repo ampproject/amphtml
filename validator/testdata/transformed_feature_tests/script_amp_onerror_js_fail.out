@@ -1,0 +1,25 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This tests the validity of the script tag for early styling on fast failure
+|    to load v0.js. See GitHub #22543.
+|  -->
+|  <!doctype html>
+|  <html ⚡ transformed="google;v=1">
+|  <head>
+|    <meta charset="utf-8">
+|    <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
+|    <meta name="viewport" content="width=device-width">
+|    <script async src=https://cdn.ampproject.org/v0.js></script>
+|
+|    <!-- Invalid: cdata does not match exactly -->
+|    <script amp-onerror>document.querySelector("script[src*='/v0.js']").onerror=function(){document.querySelector('style[amp-boilerplate]').textContent=' '}</script>
+>>   ^~~~~~~~~
+transformed_feature_tests/script_amp_onerror_js_fail.html:15:2 The mandatory text inside tag 'script amp-onerror' is missing or incorrect.
+|
+|    <link rel="canonical" href="./regular-html-version.html">
+|  </head>
+|  <body>
+|  Hello, world.
+|  </body>
+|  </html>

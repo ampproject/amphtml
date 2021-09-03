@@ -14,11 +14,17 @@
  * the License.
  */
 
+import {parseQueryString} from '#core/types/string/url';
+
 import {TAG} from './vars';
 import {WindowMessenger} from './window-messenger';
+
+import {reportError} from '../../../src/error-reporting';
+import {initLogConstructor, setReportError, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {parseQueryString} from '../../../src/url.js';
-import {user} from '../../../src/log';
+
+initLogConstructor();
+setReportError(reportError);
 
 /**
  * @typedef {{
@@ -375,7 +381,7 @@ export class AmpWebPushHelperFrame {
    * Sets up message listeners for messages from the AMP page and service
    * worker.
    *
-   * @param {string|null} allowedOrigin For testing purposes only. Pass in the
+   * @param {?string} allowedOrigin For testing purposes only. Pass in the
    * allowedOrigin since test environments cannot access the parent origin.
    */
   run(allowedOrigin) {

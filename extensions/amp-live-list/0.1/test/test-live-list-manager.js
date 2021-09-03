@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   AMP_LIVE_LIST_CUSTOM_SLOT_ID,
   LiveListManager,
@@ -837,26 +821,27 @@ describes.realWin(
       expect(
         doc.head.querySelectorAll('[custom-element="amp-test"]')
       ).to.have.length(0);
-      expect(extensions.extensions_['amp-test']).to.be.undefined;
+      expect(extensions.extensions_['amp-test:0.2']).to.be.undefined;
 
       expect(
         doc.head.querySelectorAll('[custom-template="amp-template"]')
       ).to.have.length(0);
-      expect(extensions.extensions_['amp-template']).to.be.undefined;
+      expect(extensions.extensions_['amp-template:0.2']).to.be.undefined;
 
       manager.installExtensionsForDoc_(div);
 
       expect(
         doc.head.querySelectorAll('[custom-element="amp-test"][src*="-0.2"]')
       ).to.have.length(1);
-      expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+      expect(extensions.extensions_['amp-test:0.2'].scriptPresent).to.be.true;
 
       expect(
         doc.head.querySelectorAll(
           '[custom-element="amp-template"][src*="-0.2"]'
         )
       ).to.have.length(1);
-      expect(extensions.extensions_['amp-template'].scriptPresent).to.be.true;
+      expect(extensions.extensions_['amp-template:0.2'].scriptPresent).to.be
+        .true;
     });
   }
 );

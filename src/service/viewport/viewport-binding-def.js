@@ -1,20 +1,4 @@
-import {computedStyle} from '../../style';
-
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {computedStyle} from '#core/dom/style';
 
 /**
  * ViewportBindingDef is an interface that defines an underlying technology
@@ -179,15 +163,9 @@ export class ViewportBindingDef {
    *     pass in, if they cached these values and would like to avoid
    *     remeasure. Requires appropriate updating the values on scroll.
    * @param {number=} unusedScrollTop Same comment as above.
-   * @param {!ClientRect=} unusedPremeasuredRect
    * @return {!../../layout-rect.LayoutRectDef}
    */
-  getLayoutRect(
-    unusedEl,
-    unusedScrollLeft,
-    unusedScrollTop,
-    unusedPremeasuredRect
-  ) {}
+  getLayoutRect(unusedEl, unusedScrollLeft, unusedScrollTop) {}
 
   /**
    * Returns the client rect of the current window.

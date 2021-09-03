@@ -1,19 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {
   CONSENT_ITEM_STATE,
@@ -24,19 +8,19 @@ import {
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
-} from '../../../../src/consent-state';
+} from '#core/constants/consent-state';
 import {
   ConsentPolicyInstance,
   ConsentPolicyManager,
 } from '../consent-policy-manager';
-import {dict} from '../../../../src/utils/object';
+import {dict} from '#core/types/object';
 import {expandPolicyConfig} from '../consent-config';
-import {macroTask} from '../../../../testing/yield';
+import {macroTask} from '#testing/helpers';
 
 import {
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../../../src/service';
+} from '../../../../src/service-helpers';
 
 describes.realWin(
   'ConsentPolicyManager',
@@ -437,7 +421,7 @@ describes.realWin(
         });
 
         it('will fire only fire for a valid change', () => {
-          const spy = window.sandbox.spy();
+          const spy = env.sandbox.spy();
           manager.setOnPolicyChange(spy);
           expect(manager.tcfConsentChangeHandler_).to.not.be.null;
 
@@ -454,7 +438,7 @@ describes.realWin(
         });
 
         it('will fire on multiple changes', () => {
-          const spy = window.sandbox.spy();
+          const spy = env.sandbox.spy();
           manager.setOnPolicyChange(spy);
           expect(manager.tcfConsentChangeHandler_).to.not.be.null;
 

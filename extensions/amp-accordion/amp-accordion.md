@@ -8,22 +8,6 @@ experimental: true
 bento: true
 ---
 
-<!---
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-accordion
 
 Provides a way for viewers to glance at the content outline and jump to any section. This is helpful for mobile devices where even a couple of sentences into a section requires scrolling.
@@ -44,7 +28,7 @@ on mobile devices.
     `amp-accordion`. It must be a heading element such as `<h1>-<h6>` or
     `<header>`.
 -   The second child in a `<section>` is the expandable/collapsible content. It
-    can be any tag allowed in [AMP HTML](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md).
+    can be any tag allowed in [AMP HTML](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-format.md).
 -   A click or tap on a `<section>` heading expands or collapses the section.
 -   An `amp-accordion` with a defined `id` preserves the collapsed or expanded
     state of each section while the user remains on your domain.
@@ -60,7 +44,7 @@ on mobile devices.
     `amp-accordion`. It must be a heading element such as `<h1>-<h6>` or
     `<header>`.
 -   The second child in a `<section>` is the expandable/collapsible content. It
-    can be any tag allowed in [AMP for Email](https://github.com/ampproject/amphtml/blob/master/spec/email/amp-email-html.md).
+    can be any tag allowed in [AMP for Email](https://github.com/ampproject/amphtml/blob/main/docs/spec/email/amp-email-html.md).
 -   A click or tap on a `<section>` heading expands or collapses the section.
 
 [/filter]
@@ -296,7 +280,7 @@ Fully valid AMP pages use the AMP layout system to infer sizing of elements to c
 Include the `animate` attribute in `<amp-accordion>` to add a "roll down"
 animation when the content is expanded and "roll up" animation when collapsed.
 
-This attribute can be configured to based on a [media query](./../../spec/amp-html-responsive-attributes.md).
+This attribute can be configured to based on a [media query](./../../docs/spec/amp-html-responsive-attributes.md).
 
 [example preview="top-frame" playground="true" imports="amp-accordion:1.0"]
 
@@ -425,4 +409,4 @@ Keep the following points in mind when you style an amp-accordion:
 
 The experimental `1.0` version of `amp-accordion` does not support session states. It behaves as if the `disable-session-states` attribute is always applied.
 
-Version `0.1` and `1.0` are compatible with `amp-bind`, but some binding syntax is different. You may bind directly with the `expanded` attribute in version `1.0`. The `[data-expanded]` is not supported in version `1.0`. See the `expanded` attribute below for further information.
+Version `0.1` and `1.0` are compatible with `amp-bind`, but some binding syntax is different. You may bind directly with the `expanded` attribute in version `1.0`. The `data-expand` binding is not supported in version `1.0`. See the [`expanded` attribute](#expanded) for further information.

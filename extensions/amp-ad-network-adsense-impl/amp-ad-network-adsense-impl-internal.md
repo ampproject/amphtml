@@ -1,19 +1,3 @@
-<!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 ### amp-ad-network-adsense-impl
 
 AdSense implementation of AMP Ad tag which requests early by XHR and
@@ -39,7 +23,7 @@ of this library, publishers can include its script declaration.
 
 #### AMP Consent integration
 
-The `<amp-consent>` element can be used to block the ad request until the user or AMP consent [checkConsentHref](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#consent-configuration) end point provide consent state. After the amp-consent extension has been configured (please refer to its [documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md)), it can be linked to the amp-ad element via the `data-block-on-consent` attribute.
+The `<amp-consent>` element can be used to block the ad request until the user or AMP consent [checkConsentHref](https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/amp-consent.md#consent-configuration) end point provide consent state. After the amp-consent extension has been configured (please refer to its [documentation](https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/amp-consent.md)), it can be linked to the amp-ad element via the `data-block-on-consent` attribute.
 
 If the user has responded negatively to the amp-consent component (user rejects the consent prompt), RTC call-outs will not be made and [non-personalized ads](https://support.google.com/dfp_premium/answer/9005435) will be requested.
 
@@ -67,7 +51,7 @@ Example - AdSense Ad
 
 ##### always-serve-npa
 
-`always-serve-npa` provides a way to utilize the `<amp-geo>` component to detect user's geo location to decide if a non-personalized ad should be requested from AdSense, regardless of the [user's consent decision](#AMP-Consent-integration). The value of `always-serve-npa` should be a comma delimited string of geo group codes which are defined in `<amp-geo>` (details [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md)). If no value is found or an empty string is provided, then a NPA will always be requested, regardless of the location.
+`always-serve-npa` provides a way to utilize the `<amp-geo>` component to detect user's geo location to decide if a non-personalized ad should be requested from AdSense, regardless of the [user's consent decision](#AMP-Consent-integration). The value of `always-serve-npa` should be a comma delimited string of geo group codes which are defined in `<amp-geo>` (details [here](https://github.com/ampproject/amphtml/blob/main/extensions/amp-geo/amp-geo.md)). If no value is found or an empty string is provided, then a NPA will always be requested, regardless of the location.
 
 ```html
 <amp-ad

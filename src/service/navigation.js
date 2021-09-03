@@ -1,35 +1,18 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {PriorityQueue} from '#core/data-structures/priority-queue';
+import {isIframed} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+import {dict} from '#core/types/object';
+import {toWin} from '#core/window';
 
-import {Services} from '../services';
-import {
-  closestAncestorElementBySelector,
-  isIframed,
-  openWindowDialog,
-  tryFocus,
-} from '../dom';
-import {dev, user, userAssert} from '../log';
-import {dict} from '../utils/object';
-import {escapeCssSelectorIdent} from '../css';
+import {Services} from '#service';
+
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
+import {dev, user, userAssert} from '../log';
 import {getMode} from '../mode';
+import {openWindowDialog} from '../open-window-dialog';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 import {isLocalhostOrigin} from '../url';
-import {registerServiceBuilderForDoc} from '../service';
-import {toWin} from '../types';
-import PriorityQueue from '../utils/priority-queue';
 
 const TAG = 'navigation';
 
@@ -131,10 +114,11 @@ export class Navigation {
      * Must use URL parsing scoped to `rootNode_` for correct FIE behavior.
      * @private @const {!Element|!ShadowRoot}
      */
-    this.serviceContext_ = /** @type {!Element|!ShadowRoot} */ (this.rootNode_
-      .nodeType == Node.DOCUMENT_NODE
-      ? this.rootNode_.documentElement
-      : this.rootNode_);
+    this.serviceContext_ = /** @type {!Element|!ShadowRoot} */ (
+      this.rootNode_.nodeType == Node.DOCUMENT_NODE
+        ? this.rootNode_.documentElement
+        : this.rootNode_
+    );
 
     /** @private @const {!function(!Event)|undefined} */
     this.boundHandle_ = this.handle_.bind(this);
@@ -248,7 +232,7 @@ export class Navigation {
    * }=} options
    */
   navigateTo(win, url, opt_requestedBy, options = {}) {
-    const {target = '_top', opener = false} = options;
+    const {opener = false, target = '_top'} = options;
     url = this.applyNavigateToMutators_(url);
     const urlService = Services.urlForDoc(this.serviceContext_);
     if (!urlService.isProtocolValid(url)) {
@@ -614,23 +598,6 @@ export class Navigation {
    * @private
    */
   handleHashNavigation_(e, toLocation, fromLocation) {
-    // Anchor navigation in IE doesn't change input focus, which can result in
-    // confusing behavior e.g. when pressing "tab" button.
-    // @see https://humanwhocodes.com/blog/2013/01/15/fixing-skip-to-content-links/
-    // @see https://github.com/ampproject/amphtml/issues/18671
-    if (!IS_ESM && Services.platformFor(this.ampdoc.win).isIe()) {
-      const id = toLocation.hash.substring(1);
-      const elementWithId = this.ampdoc.getElementById(id);
-      if (elementWithId) {
-        if (
-          !/^(?:a|select|input|button|textarea)$/i.test(elementWithId.tagName)
-        ) {
-          elementWithId.tabIndex = -1;
-        }
-        tryFocus(elementWithId);
-      }
-    }
-
     // We prevent default so that the current click does not push
     // into the history stack as this messes up the external documents
     // history which contains the amp document.

@@ -1,42 +1,28 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const fs = require('fs-extra');
 const markdownLinkCheck = require('markdown-link-check');
 const path = require('path');
+const {cyan, green, red, yellow} = require('../common/colors');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
-const {gitDiffAddedNameOnlyMaster} = require('../common/git');
-const {green, cyan, red, yellow} = require('kleur/colors');
+const {gitDiffAddedNameOnlyMain} = require('../common/git');
 const {linkCheckGlobs} = require('../test-configs/config');
 const {log, logLocalDev} = require('../common/logging');
 
 const LARGE_REFACTOR_THRESHOLD = 20;
-const GITHUB_BASE_PATH = 'https://github.com/ampproject/amphtml/blob/master/';
+const GITHUB_BASE_PATH = 'https://github.com/ampproject/amphtml/blob/main/';
 
 let filesIntroducedByPr;
 
 /**
  * Checks for dead links in .md files passed in via --files or --local_changes.
+ * @return {Promise<void>}
  */
 async function checkLinks() {
   if (!usesFilesOrLocalChanges('check-links')) {
     return;
   }
-  const filesToCheck = getFilesToCheck(linkCheckGlobs);
+  const filesToCheck = getFilesToCheck(linkCheckGlobs, {dot: true});
   if (filesToCheck.length == 0) {
     return;
   }
@@ -45,7 +31,7 @@ async function checkLinks() {
     return;
   }
   logLocalDev(green('Starting checks...'));
-  filesIntroducedByPr = gitDiffAddedNameOnlyMaster();
+  filesIntroducedByPr = gitDiffAddedNameOnlyMain();
   const results = await Promise.all(filesToCheck.map(checkLinksInFile));
   reportResults(results);
 }
@@ -119,6 +105,8 @@ function checkLinksInFile(file) {
       {pattern: /localhost/},
       // codepen returns a 503 for these link checks
       {pattern: /https:\/\/codepen.*/},
+      // GitHub PRs and Issues can be assumed to exist
+      {pattern: /https:\/\/github.com\/ampproject\/amphtml\/(pull|issue)\/.*/},
       // Templated links are merely used to generate other markdown files.
       {pattern: /\$\{[a-z]*\}/},
       {pattern: /https:.*?__component_name\w*__/},
@@ -172,8 +160,8 @@ module.exports = {
   checkLinks,
 };
 
-checkLinks.description = 'Detects dead links in markdown files';
+checkLinks.description = 'Check markdown files for dead links';
 checkLinks.flags = {
-  'files': 'Checks only the specified files',
-  'local_changes': 'Checks just the files changed in the local branch',
+  'files': 'Check only the specified files',
+  'local_changes': 'Check just the files changed in the local branch',
 };

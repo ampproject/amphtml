@@ -1,27 +1,10 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {boolean, select, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
   title: 'amp-lightbox-1_0',
-  decorators: [withKnobs, withA11y, withAmp],
+  decorators: [withKnobs, withAmp],
 
   parameters: {
     extensions: [{name: 'amp-lightbox', version: '1.0'}],
@@ -47,9 +30,7 @@ export const Default = () => {
       <div style="height: 300px;">
         <amp-lightbox id="lightbox" layout="nodisplay" animation={animation}>
           <p>Test</p>
-          <button slot="close-button" on="tap:lightbox.close">
-            Close
-          </button>
+          <button slot="close-button">Close</button>
         </amp-lightbox>
         <div class="buttons">
           <button on="tap:lightbox">Open</button>
@@ -59,7 +40,7 @@ export const Default = () => {
   );
 };
 
-export const scrollable = () => {
+export const overflowAuto = () => {
   const animation = select('animation', [
     'fade-in',
     'fly-in-top',
@@ -67,7 +48,6 @@ export const scrollable = () => {
   ]);
   const backgroundColor = text('background color', 'rgba(0,0,0,0.5)');
   const color = text('font color', '');
-  const scrollable = boolean('scrollable', true);
   const lotsOfText = boolean('lots of text?', true);
   return (
     <>
@@ -78,12 +58,7 @@ export const scrollable = () => {
         }
       `}</style>
       <div style="height: 300px;">
-        <amp-lightbox
-          id="lightbox"
-          layout="nodisplay"
-          animation={animation}
-          scrollable={scrollable}
-        >
+        <amp-lightbox id="lightbox" layout="nodisplay" animation={animation}>
           <p>
             Dessert tootsie roll marzipan pastry. Powder powder jelly beans
             chocolate bar candy sugar plum. Jelly-o gummi bears jelly icing
@@ -346,6 +321,4 @@ export const scrollable = () => {
   );
 };
 
-Default.story = {
-  name: 'Default',
-};
+Default.storyName = 'Default';

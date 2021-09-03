@@ -6,22 +6,6 @@ teaser:
   text: Provides a widget to select dates. The date picker can render as an overlay relative to input fields, or as a static calendar widget.
 ---
 
-<!---
-Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-date-picker
 
 ## Usage
@@ -36,9 +20,9 @@ select a single date:
 <amp-date-picker layout="fixed-height" height="360"> </amp-date-picker>
 ```
 
-<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-basic.png" width="329" height="365">
+<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-date-picker/img/amp-date-picker-basic.png" width="329" height="365">
   <noscript>
-    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-basic.png" width="329" height="365">
+    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-date-picker/img/amp-date-picker-basic.png" width="329" height="365">
   </noscript>
 </amp-img>
 
@@ -153,9 +137,9 @@ and the user can select a single date. This is the default selection type.
 </amp-date-picker>
 ```
 
-<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-single-static.png" width="336" height="370">
+<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-date-picker/img/amp-date-picker-single-static.png" width="336" height="370">
   <noscript>
-    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-single-static.png" width="336" height="370">
+    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-date-picker/img/amp-date-picker-single-static.png" width="336" height="370">
   </noscript>
 </amp-img>
 
@@ -169,9 +153,9 @@ and the user can select a date range with a starting date and ending date.
 </amp-date-picker>
 ```
 
-<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-range-static.png" width="332" height="373">
+<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-date-picker/img/amp-date-picker-range-static.png" width="332" height="373">
   <noscript>
-    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-range-static.png"  width="332" height="373">
+    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-date-picker/img/amp-date-picker-range-static.png"  width="332" height="373">
   </noscript>
 </amp-img>
 
@@ -517,9 +501,9 @@ This works best with `layout="fill"`.
 </amp-lightbox>
 ```
 
-<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-lightbox-fullscreen.png" width="320" height="571">
+<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-date-picker/img/amp-date-picker-lightbox-fullscreen.png" width="320" height="571">
   <noscript>
-    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-lightbox-fullscreen.png" width="320" height="571">
+    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-date-picker/img/amp-date-picker-lightbox-fullscreen.png" width="320" height="571">
   </noscript>
 </amp-img>
 

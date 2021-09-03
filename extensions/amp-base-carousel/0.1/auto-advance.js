@@ -1,22 +1,6 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {ActionSource} from './action-source';
 import {CarouselEvents} from './carousel-events';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce} from '#core/types/function';
 import {getDetail, listen, listenOnce} from '../../../src/event-helper';
 
 const MIN_AUTO_ADVANCE_INTERVAL = 1000;
@@ -48,7 +32,7 @@ export class AutoAdvance {
    * }} config
    */
   constructor(config) {
-    const {win, element, scrollContainer, advanceable} = config;
+    const {advanceable, element, scrollContainer, win} = config;
     /** @private @const */
     this.win_ = win;
 

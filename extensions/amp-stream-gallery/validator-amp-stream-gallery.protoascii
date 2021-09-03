@@ -1,0 +1,104 @@
+tags: {  # amp-stream-gallery
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-stream-gallery"
+    version: "1.0"
+    version: "latest"
+    bento_supported_version: "1.0"
+    bento_supported_version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-stream-gallery>
+  html_format: AMP
+  tag_name: "AMP-STREAM-GALLERY"
+  requires_extension: "amp-stream-gallery"
+  attr_lists: "amp-stream-gallery-common"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+
+# Examples for media query / value pairs:
+# (min-width: 600px) and (min-height: 800px)  false, true
+# (min-width: 600px) false,(min-width: 600px) true,false
+# true
+attr_lists: {
+  name: "amp-stream-gallery-common"
+  attrs: {
+    name: "controls"
+    # Media query / (always|auto|never)
+    value_regex: "([^,]+\\s+(always|auto|never),\\s*)*(always|auto|never)"
+  }
+  attrs: {
+    name: "extra-space"
+    value: "between"
+  }
+  attrs: {
+    name: "loop"
+    # Media query / boolean pairs
+    value_regex: "([^,]+\\s+(true|false),\\s*)*(true|false|^$)"
+  }
+  attrs: {
+    name: "min-visible-count"
+    # Media query / positive float pairs
+    value_regex: "([^,]+\\s+(\\d+(\\.\\d+)?),\\s*)*(\\d+(\\.\\d+)?)"
+  }
+  attrs: {
+    name: "max-visible-count"
+    # Media query / positive float pairs
+    value_regex: "([^,]+\\s+(\\d+(\\.\\d+)?),\\s*)*(\\d+(\\.\\d+)?)"
+  }
+  attrs: {
+    name: "min-item-width"
+    # Media query / positive integer pairs
+    value_regex: "([^,]+\\s+(\\d+),\\s*)*(\\d+)"
+  }
+  attrs: {
+    name: "max-item-width"
+    # Media query / positive integer pairs
+    value_regex: "([^,]+\\s+(\\d+),\\s*)*(\\d+)"
+  }
+  attrs: {
+    name: "outset-arrows"
+    # Media query / boolean pairs
+    value_regex: "([^,]+\\s+(true|false),\\s*)*(true|false)"
+  }
+  attrs: {
+    name: "peek"
+    # Media query / positive float pairs
+    value_regex: "([^,]+\\s+(\\d+(\\.\\d+)?),\\s*)*(\\d+(\\.\\d+)?)"
+  }
+  attrs: {
+    name: "slide-align"
+    # Media query / (start|center) pairs
+    value_regex: "([^,]+\\s+(start|center),\\s*)*(start|center)"
+  }
+  attrs: {
+    name: "snap"
+    # Media query / boolean pairs
+    value_regex: "([^,]+\\s+(true|false),\\s*)*(true|false)"
+  }
+
+  # amp-bind
+  attrs: { name: "[controls]" }
+  attrs: { name: "[extra-space]" }
+  attrs: { name: "[loop]" }
+  attrs: { name: "[min-visible-count]" }
+  attrs: { name: "[max-visible-count]" } # 0.1 only
+  attrs: { name: "[min-item-width]" }
+  attrs: { name: "[max-item-width]" }
+  attrs: { name: "[outset-arrows]" }
+  attrs: { name: "[peek]" }
+  attrs: { name: "[slide-align]" }
+  attrs: { name: "[snap]" }
+}

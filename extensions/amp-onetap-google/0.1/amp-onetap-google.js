@@ -26,17 +26,19 @@
  * </code>
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
+import {removeElement} from '#core/dom';
+import {Layout} from '#core/dom/layout';
+import {px, setStyle, toggle} from '#core/dom/style';
+import {isObject} from '#core/types';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
 import {CSS} from '../../../build/amp-onetap-google-0.1.css';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
-import {dev, devAssert, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {getData, listen} from '../../../src/event-helper';
-import {isObject} from '../../../src/types';
-import {px, setStyle, toggle} from '../../../src/style';
-import {removeElement} from '../../../src/dom';
+import {dev, devAssert, user} from '../../../src/log';
+import {assertHttpsUrl} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-onetap-google';
@@ -86,6 +88,16 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
   }
 
   /**
+   * @param {!MessageEventSource} source
+   * @param {*} message
+   * @param {string} origin
+   * @private
+   */
+  postMessage_(source, message, origin) {
+    source./*OK*/ postMessage(message, origin);
+  }
+
+  /**
    * @param {string} origin
    * @param {Event} event
    * @private
@@ -107,7 +119,8 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
         if (!nonce) {
           return;
         }
-        event.source./*OK*/ postMessage(
+        this.postMessage_(
+          event.source,
           dict({
             'sentinel': SENTINEL,
             'command': 'parent_frame_ready',

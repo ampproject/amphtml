@@ -1,26 +1,10 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryGridLayer} from '../amp-story-grid-layer';
 import {AmpStoryPage} from '../amp-story-page';
 import {MediaType} from '../media-pool';
-import {Services} from '../../../../src/services';
-import {registerServiceBuilder} from '../../../../src/service';
+import {Services} from '#service';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
   let win;
@@ -91,7 +75,6 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
 
     storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
 
-    expect(gridLayerEl).to.have.class('i-amphtml-story-grid-template-aspect');
     expect(
       parseInt(
         gridLayerEl.style.getPropertyValue('--i-amphtml-story-layer-width'),
@@ -112,7 +95,6 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
 
     storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
 
-    expect(gridLayerEl).to.have.class('i-amphtml-story-grid-template-aspect');
     expect(
       parseInt(
         gridLayerEl.style.getPropertyValue('--i-amphtml-story-layer-width'),
@@ -134,7 +116,6 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
 
     storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
 
-    expect(gridLayerEl).to.have.class('i-amphtml-story-grid-template-aspect');
     expect(
       parseInt(
         gridLayerEl.style.getPropertyValue('--i-amphtml-story-layer-width'),
@@ -156,15 +137,6 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
     storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
 
     expect(gridLayerEl.getAttribute('aspect-ratio')).to.equal('69:116');
-  });
-
-  it('should use the responsiveness preset to change the layer aspect', async () => {
-    gridLayerEl.setAttribute('preset', '2021-foreground');
-    await buildGridLayer();
-
-    storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
-
-    expect(gridLayerEl).to.have.class('i-amphtml-story-grid-template-aspect');
   });
 
   it('should not add aspect-ratio attribute if preset passed is incorrect', async () => {

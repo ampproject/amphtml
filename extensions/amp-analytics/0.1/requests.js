@@ -1,28 +1,12 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {AnalyticsEventType} from './events';
 import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-allowlist';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '#core/types/object';
 import {getResourceTiming} from './resource-timing';
-import {isArray, isFiniteNumber, isObject} from '../../../src/types';
+import {isArray, isFiniteNumber, isObject} from '#core/types';
 
 const BATCH_INTERVAL_MIN = 200;
 
@@ -243,9 +227,9 @@ export class RequestHandler {
    */
   fire_() {
     const {
-      requestOriginPromise_: requestOriginPromise,
       baseUrlPromise_: baseUrlPromise,
       batchSegmentPromises_: segmentPromises,
+      requestOriginPromise_: requestOriginPromise,
     } = this;
     const trigger = /** @type {!JsonObject} */ (this.lastTrigger_);
     this.reset_();

@@ -1,22 +1,6 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {TcfApiCommandManager} from '../tcf-api-command-manager';
-import {macroTask} from '../../../../testing/yield';
-import {mockWindowInterface} from '../../../../testing/test-helper';
+import {macroTask} from '#testing/helpers';
+import {mockWindowInterface} from '#testing/test-helper';
 import {user} from '../../../../src/log';
 
 describes.realWin(
@@ -40,8 +24,8 @@ describes.realWin(
       let callId;
 
       beforeEach(() => {
-        mockWin = mockWindowInterface(window.sandbox);
-        mockWin.postMessage = window.sandbox.spy();
+        mockWin = mockWindowInterface(env.sandbox);
+        mockWin.postMessage = env.sandbox.spy();
         mockMetadata = {};
         mockSharedData = {};
         mockTcString = '';
@@ -55,7 +39,7 @@ describes.realWin(
           getMergedSharedData: (opt_policy) => {
             return Promise.resolve(mockSharedData);
           },
-          setOnPolicyChange: window.sandbox.spy(),
+          setOnPolicyChange: env.sandbox.spy(),
         };
       });
 

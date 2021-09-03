@@ -1,24 +1,9 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const path = require('path');
 const prettier = require('prettier');
 const toc = require('markdown-toc');
-const {getStdout} = require('../../common/exec');
-const {green} = require('kleur/colors');
+const {getStdout} = require('../../common/process');
+const {green} = require('../../common/colors');
 const {logOnSameLineLocalDev} = require('../../common/logging');
 const {readFile} = require('fs-extra');
 const {writeDiffOrFail} = require('../../common/diff');
@@ -84,7 +69,7 @@ function isolateCommentJson(maybeComment) {
 
 /**
  * @param {string} content
- * @return {Promise<string|null>}
+ * @return {Promise<?string>}
  */
 async function overrideToc(content) {
   const headerMatch = content.match(headerRegexp);
@@ -140,7 +125,9 @@ async function overrideTocGlob(cwd) {
     '**/*.md',
     '!**/{node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
   ];
-  const files = globby.sync(glob, {cwd}).map((file) => path.join(cwd, file));
+  const files = (await fastGlob(glob, {cwd})).map((file) =>
+    path.join(cwd, file)
+  );
   const filesIncludingString = getStdout(
     [`grep -irl "${task}"`, ...files].join(' ')
   )
@@ -164,6 +151,10 @@ async function overrideTocGlob(cwd) {
   return result;
 }
 
+/**
+ * Entry point for the `amp markdown-toc` task.
+ * @return {Promise<void>}
+ */
 async function markdownToc() {
   const result = await overrideTocGlob('.');
   let errored = false;
@@ -195,8 +186,8 @@ module.exports = {
 };
 
 markdownToc.description =
-  'Finds Markdown files that contain table of contents and updates them.';
+  'Update all markdown files that contain a table of contents';
 
 markdownToc.flags = {
-  'fix': 'Write to file',
+  'fix': 'Update the list and write results to file',
 };

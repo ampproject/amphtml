@@ -1,0 +1,52 @@
+tags: {  # amp-iframely
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-iframely"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-iframely>
+  html_format: AMP
+  tag_name: "AMP-IFRAMELY"
+  requires_extension: "amp-iframely"
+  # either data-id
+  attrs: {  # iframely generated ID of a widget
+    name: "data-id"
+    mandatory_oneof: "['data-id', 'data-url']"
+  }
+  attrs: { # iframe url to build widget from
+    name: "data-url"
+    mandatory_oneof: "['data-id', 'data-url']"
+    trigger: {
+      also_requires_attr: "data-key"
+    }
+  }
+  attrs: { name: "data-key" } # iframely key hash
+
+  # optional attributes
+  attrs: { name: "data-img" value: "" }
+  attrs: {
+    name: "data-border"
+    value_regex: "(\\d+)"
+  }
+  attrs: {
+    name: "data-domain"
+    value_regex: "^((?:[^\\.\\/]+\\.)?iframe\\.ly|if\\-cdn\\.com|iframely\\.net|oembed\\.vice\\.com|iframe\\.nbcnews\\.com)$"
+  }
+  attrs: { name: "resizable" value: "" }
+  # data-* attributes are converted into options
+  # for building iframely widget from url
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-iframely"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: RESPONSIVE
+    supported_layouts: INTRINSIC
+  }
+}

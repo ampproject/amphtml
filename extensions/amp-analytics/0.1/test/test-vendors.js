@@ -1,30 +1,11 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {AmpAnalytics} from '../amp-analytics';
 import {AnalyticsConfig} from '../config';
 import {ExpansionOptions, variableServiceForDoc} from '../variables';
 import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors';
-import {
-  ImagePixelVerifier,
-  mockWindowInterface,
-} from '../../../../testing/test-helper';
-import {Services} from '../../../../src/services';
-import {hasOwn} from '../../../../src/utils/object';
-import {macroTask} from '../../../../testing/yield';
+import {ImagePixelVerifier, mockWindowInterface} from '#testing/test-helper';
+import {Services} from '#service';
+import {hasOwn} from '#core/types/object';
+import {macroTask} from '#testing/helpers';
 import VENDOR_REQUESTS from './vendor-requests.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 
 describes.realWin(
@@ -84,7 +65,7 @@ describes.realWin(
             const urlReplacements = Services.urlReplacementsForDoc(
               doc.documentElement
             );
-            window.sandbox
+            env.sandbox
               .stub(urlReplacements.getVariableSource(), 'get')
               .callsFake(function (name) {
                 expect(this.replacements_).to.have.property(name);
@@ -93,7 +74,7 @@ describes.realWin(
                 };
               });
 
-            window.sandbox
+            env.sandbox
               .stub(ExpansionOptions.prototype, 'getVar')
               .callsFake(function (name) {
                 let val = this.vars[name];
@@ -112,7 +93,7 @@ describes.realWin(
             // Have to get service after analytics element is created
             const variableService = variableServiceForDoc(doc);
 
-            window.sandbox
+            env.sandbox
               .stub(variableService, 'getMacros')
               .callsFake(function () {
                 // Add all the macros in amp-analytics

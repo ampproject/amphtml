@@ -1,28 +1,11 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../';
-import {WithAmpContext, useAmpContext, useLoading} from '../context';
 import {boolean, select, withKnobs} from '@storybook/addon-knobs';
 
-import {withA11y} from '@storybook/addon-a11y';
+import * as Preact from '#preact';
+import {WithAmpContext, useAmpContext, useLoading} from '#preact/context';
 
 export default {
   title: '0/Context',
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 const IMG_SRC =
@@ -67,8 +50,8 @@ function Composite() {
  * @param {{title: string, loading: string}} props
  * @return {PreactDef.Renderable}
  */
-function Info({title, loading: loadingProp, ...rest}) {
-  const {renderable, playable, loading: loadingContext} = useAmpContext();
+function Info({loading: loadingProp, title, ...rest}) {
+  const {loading: loadingContext, playable, renderable} = useAmpContext();
   const loading = useLoading(loadingProp);
   const load = loading != 'unload';
   const infoStyle = {border: '1px dotted gray', margin: 8};

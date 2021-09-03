@@ -1,19 +1,3 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as consent from '../../../../src/consent';
 import * as utils from '../utils';
 import {
@@ -22,22 +6,23 @@ import {
   StateProperty,
   UIType,
 } from '../amp-story-store-service';
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {AdvancementMode} from '../story-analytics';
 import {AmpStory} from '../amp-story';
-import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryConsent} from '../amp-story-consent';
-import {CommonSignals} from '../../../../src/common-signals';
-import {Keys} from '../../../../src/utils/key-codes';
-import {LocalizationService} from '../../../../src/service/localization';
+import {CommonSignals} from '#core/constants/common-signals';
+import {Keys} from '#core/constants/key-codes';
+import {LocalizationService} from '#service/localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
-import {Services} from '../../../../src/services';
-import {VisibilityState} from '../../../../src/visibility-state';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {registerServiceBuilder} from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {Performance} from '#service/performance-impl';
+import {Services} from '#service';
+import {Signals} from '#core/data-structures/signals';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {createElementWithAttributes} from '#core/dom';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {toggleExperiment} from '#experiments';
+import {waitFor} from '#testing/test-helper';
 
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
 const KEYBOARD_EVENT_WHICH_RIGHT_ARROW = 39;
@@ -58,6 +43,8 @@ describes.realWin(
     let story;
     let replaceStateStub;
     let win;
+
+    const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
     /**
      * @param {number} count
@@ -104,9 +91,6 @@ describes.realWin(
       ampdoc = env.ampdoc;
 
       replaceStateStub = env.sandbox.stub(win.history, 'replaceState');
-      // Required by the bookend code.
-      win.document.title = 'Story';
-      env.ampdoc.defaultView = env.win;
 
       const localizationService = new LocalizationService(win.document.body);
       env.sandbox
@@ -174,28 +158,6 @@ describes.realWin(
       expect(story.element.innerText).to.not.have.string(textToRemove);
     });
 
-    it('should preload the bookend if navigating to the last page', async () => {
-      await createStoryWithPages(1, ['cover']);
-
-      const buildBookendStub = env.sandbox.stub(
-        story,
-        'buildAndPreloadBookend_'
-      );
-      await story.layoutCallback();
-      expect(buildBookendStub).to.have.been.calledOnce;
-    });
-
-    it('should not preload the bookend if not on the last page', async () => {
-      await createStoryWithPages(2, ['cover']);
-
-      const buildBookendStub = env.sandbox.stub(
-        story,
-        'buildAndPreloadBookend_'
-      );
-      await story.layoutCallback();
-      expect(buildBookendStub).to.not.have.been.called;
-    });
-
     it('should prerender/load the share menu', async () => {
       await createStoryWithPages(2);
 
@@ -222,7 +184,6 @@ describes.realWin(
 
     it('should pause/resume pages when switching pages', async () => {
       await createStoryWithPages(2, ['cover', 'page-1']);
-      env.sandbox.stub(story, 'maybePreloadBookend_').returns();
 
       await story.layoutCallback();
       // Getting all the AmpStoryPage objects.
@@ -349,26 +310,6 @@ describes.realWin(
       );
     });
 
-    it('should not block layoutCallback when bookend xhr fails', async () => {
-      await createStoryWithPages(1, ['page-1']);
-      env.sandbox.stub(AmpStoryBookend.prototype, 'build');
-
-      const bookendXhr = env.sandbox
-        .stub(AmpStoryBookend.prototype, 'loadConfigAndMaybeRenderBookend')
-        .returns(Promise.reject());
-
-      story.buildCallback();
-
-      return story
-        .layoutCallback()
-        .then(() => {
-          expect(bookendXhr).to.have.been.calledOnce;
-        })
-        .catch((error) => {
-          expect(error).to.be.undefined;
-        });
-    });
-
     it('should NOT update page id in browser history if ad', async () => {
       const firstPageId = 'i-amphtml-ad-page-1';
       const pageCount = 2;
@@ -401,6 +342,21 @@ describes.realWin(
       await story.layoutCallback();
       expect(story.storeService_.get(StateProperty.UI_STATE)).to.equals(
         UIType.DESKTOP_PANELS
+      );
+    });
+
+    it('should default to the one panel UI desktop experience when axperiment is active', async () => {
+      toggleExperiment(win, 'amp-story-desktop-one-panel', true);
+      await createStoryWithPages(4, ['cover', '1', '2', '3']);
+
+      // Don't do this at home. :(
+      story.desktopMedia_ = {matches: true};
+
+      story.buildCallback();
+
+      await story.layoutCallback();
+      expect(story.storeService_.get(StateProperty.UI_STATE)).to.equals(
+        UIType.DESKTOP_ONE_PANEL
       );
     });
 
@@ -718,7 +674,7 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        const setStateStub = window.sandbox.stub(story.activePage_, 'setState');
+        const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
         story.getAmpDoc().overrideVisibilityState(VisibilityState.INACTIVE);
         expect(setStateStub.getCall(1)).to.have.been.calledWithExactly(
           PageState.NOT_ACTIVE
@@ -737,7 +693,7 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        const setStateStub = window.sandbox.stub(story.activePage_, 'setState');
+        const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
         story.getAmpDoc().overrideVisibilityState(VisibilityState.HIDDEN);
         expect(setStateStub).to.have.been.calledOnceWithExactly(
           PageState.PAUSED
@@ -756,7 +712,7 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        const setStateStub = window.sandbox.stub(story.activePage_, 'setState');
+        const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
         story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
         expect(setStateStub).to.have.been.calledOnceWithExactly(
           PageState.PAUSED
@@ -776,7 +732,7 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        const setStateStub = window.sandbox.stub(story.activePage_, 'setState');
+        const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
         story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
         story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
         expect(setStateStub.getCall(1)).to.have.been.calledWithExactly(
@@ -788,7 +744,7 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        const setStateStub = window.sandbox.stub(story.activePage_, 'setState');
+        const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
         story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
         story.getAmpDoc().overrideVisibilityState(VisibilityState.INACTIVE);
         story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
@@ -960,7 +916,6 @@ describes.realWin(
       });
 
       it('should add previous visited attribute', async () => {
-        env.sandbox.stub(story, 'maybePreloadBookend_').returns();
         env.sandbox
           .stub(utils, 'setAttributeInMutate')
           .callsFake((el, attr) => el.element.setAttribute(attr, ''));
@@ -1181,20 +1136,6 @@ describes.realWin(
       });
 
       describe('amp-story NO_NEXT_PAGE', () => {
-        describe('without #cap=swipe', () => {
-          it('should open the bookend when tapping on the last page', async () => {
-            await createStoryWithPages(1, ['cover']);
-
-            await story.layoutCallback();
-            // Click on right side of the screen to trigger page advancement.
-            const clickEvent = new MouseEvent('click', {clientX: 200});
-            story.activePage_.element.dispatchEvent(clickEvent);
-            await waitFor(() => {
-              return !!story.storeService_.get(StateProperty.BOOKEND_STATE);
-            }, 'BOOKEND_STATE should be true');
-          });
-        });
-
         describe('with #cap=swipe', () => {
           before(() => {
             hasSwipeCapability = true;
@@ -1242,42 +1183,15 @@ describes.realWin(
 
             story.activePage_.advancement_.onAdvance();
 
-            await waitFor(() => {
-              if (sendMessageStub.calledOnce) {
-                expect(sendMessageStub).to.be.calledWithExactly(
-                  'selectDocument',
-                  {
-                    next: true,
-                    advancementMode: AdvancementMode.AUTO_ADVANCE_TIME,
-                  }
-                );
-                return true;
-              }
-              return false;
-            }, 'sendMessageStub should be called');
+            expect(sendMessageStub).to.be.calledWithExactly('selectDocument', {
+              next: true,
+              advancementMode: AdvancementMode.AUTO_ADVANCE_TIME,
+            });
           });
         });
       });
 
       describe('amp-story NO_PREVIOUS_PAGE', () => {
-        describe('without #cap=swipe', () => {
-          it('should open the bookend when tapping on the last page', async () => {
-            await createStoryWithPages(1, ['cover']);
-            const showPageHintStub = env.sandbox.stub(
-              story.ampStoryHint_,
-              'showFirstPageHintOverlay'
-            );
-
-            await story.layoutCallback();
-            // Click on left side of the screen to trigger page advancement.
-            const clickEvent = new MouseEvent('click', {clientX: 10});
-            story.activePage_.element.dispatchEvent(clickEvent);
-            await waitFor(() => {
-              return showPageHintStub.calledOnce;
-            }, 'showPageHintStub should be called');
-          });
-        });
-
         describe('with #cap=swipe', () => {
           before(() => {
             hasSwipeCapability = true;
@@ -1909,6 +1823,63 @@ describes.realWin(
             StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE
           )
         ).to.be.false;
+      });
+    });
+
+    describe('experiment for story-load-first-page-only', () => {
+      let pages;
+      let performanceImpl;
+      beforeEach(async () => {
+        toggleExperiment(win, 'story-load-first-page-only', true);
+        performanceImpl = new Performance(env.win);
+        env.sandbox.stub(Services, 'performanceFor').returns(performanceImpl);
+        pages = await createStoryWithPages(2, ['page-1', 'page-2'], false);
+        env.sandbox.stub(story, 'mutateElement').callsFake((fn) => fn());
+      });
+
+      it('should position the active page so it preloads', async () => {
+        story.buildCallback();
+        await story.layoutCallback();
+
+        // Check page 0 is loaded with distance 0.
+        expect(pages[0].getAttribute('distance')).to.be.equal('0');
+      });
+
+      it('should not position the inactive page so it preloads before the active page is loaded', async () => {
+        const signals = new Signals();
+        pages[0].signals = () => signals;
+        story.buildCallback();
+        await story.layoutCallback();
+
+        // Check page 1 is not loaded.
+        expect(pages[1].hasAttribute('distance')).to.be.false;
+      });
+
+      it('should position the inactive page so it preloads after the active page is loaded', async () => {
+        const signals = new Signals();
+        pages[0].signals = () => signals;
+        story.buildCallback();
+        await story.layoutCallback();
+
+        // Check page 1 is not loaded.
+        expect(pages[1].hasAttribute('distance')).to.be.false;
+
+        signals.signal(CommonSignals.LOAD_END);
+        await nextTick();
+
+        // Check page 1 is loaded with distance 1.
+        expect(pages[1].getAttribute('distance')).to.be.equal('1');
+      });
+
+      it('should enable the CSI experiment', async () => {
+        const enableSpy = env.sandbox.spy(
+          performanceImpl,
+          'addEnabledExperiment'
+        );
+        story.buildCallback();
+        await story.layoutCallback();
+
+        expect(enableSpy).to.be.calledWith('story-load-first-page-only');
       });
     });
   }

@@ -1,0 +1,189 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests for the amp-stream-gallery tag. See the inline comments.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-stream-gallery" src="https://cdn.ampproject.org/v0/amp-stream-gallery-1.0.js"></script>
+|  </head>
+|  <body>
+|    <!-- Boolean values -->
+|    <section>
+|      <!-- Valid: true -->
+|      <amp-stream-gallery width="4" height="3" loop="true">
+|      </amp-stream-gallery>
+|      <!-- Valid: false -->
+|      <amp-stream-gallery width="4" height="3" loop="false">
+|      </amp-stream-gallery>
+|      <!-- Valid: booleans with a media query -->
+|      <amp-stream-gallery width="4" height="3" loop="(min-width: 800px) true, false">
+|      </amp-stream-gallery>
+|      <!-- Valid: booleans with multiple media queries -->
+|      <amp-stream-gallery width="4" height="3" loop="(min-width: 800px) true, (max-height: 1000px) true, false">
+|      </amp-stream-gallery>
+|      <!-- Valid: no value for loop -->
+|      <amp-stream-gallery width="4" height="3" loop>
+|      </amp-stream-gallery>
+|      <!-- Invalid: no default value-->
+|      <amp-stream-gallery width="4" height="3" loop="(min-width: 800px) true">
+>>     ^~~~~~~~~
+amp-stream-gallery/1.0/test/validator-amp-stream-gallery.html:34:4 The attribute 'loop' in tag 'amp-stream-gallery' is set to the invalid value '(min-width: 800px) true'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+|      </amp-stream-gallery>
+|      <!-- Invalid: no value -->
+|      <amp-stream-gallery width="4" height="3" snap>
+>>     ^~~~~~~~~
+amp-stream-gallery/1.0/test/validator-amp-stream-gallery.html:37:4 The attribute 'snap' in tag 'amp-stream-gallery' is set to the invalid value ''. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+|      </amp-stream-gallery>
+|      <!-- Invalid: incorrect value -->
+|      <amp-stream-gallery width="4" height="3" loop="5">
+>>     ^~~~~~~~~
+amp-stream-gallery/1.0/test/validator-amp-stream-gallery.html:40:4 The attribute 'loop' in tag 'amp-stream-gallery' is set to the invalid value '5'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+|      </amp-stream-gallery>
+|      <!-- Invalid: incorrect in media query -->
+|      <amp-stream-gallery width="4" height="3" loop="(min-width: 800px) true, (max-height: 1000px) 5, false">
+>>     ^~~~~~~~~
+amp-stream-gallery/1.0/test/validator-amp-stream-gallery.html:43:4 The attribute 'loop' in tag 'amp-stream-gallery' is set to the invalid value '(min-width: 800px) true, (max-height: 1000px) 5, false'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+|      </amp-stream-gallery>
+|    </section>
+|
+|    <!-- Integer values-->
+|    <section>
+|      <!-- Valid: positive integer value -->
+|      <amp-stream-gallery width="4" height="3" min-item-width="200">
+|      </amp-stream-gallery>
+|      <!-- Valid: integer values with media queries -->
+|      <amp-stream-gallery width="4" height="3" min-item-width="(min-width: 800px) 300, 100">
+|      </amp-stream-gallery>
+|      <!-- Valid: integer values with multiple media queries -->
+|      <amp-stream-gallery width="4" height="3" min-item-width="(min-width: 800px) 200, (max-height: 1000px) 300, 100">
+|      </amp-stream-gallery>
+|      <!-- Invalid: no default value-->
+|      <amp-stream-gallery width="4" height="3" min-item-width="(min-width: 800px) 300">
+>>     ^~~~~~~~~
+amp-stream-gallery/1.0/test/validator-amp-stream-gallery.html:59:4 The attribute 'min-item-width' in tag 'amp-stream-gallery' is set to the invalid value '(min-width: 800px) 300'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+|      </amp-stream-gallery>
+|      <!-- Invalid: no value -->
+|      <amp-stream-gallery width="4" height="3" min-item-width>
+>>     ^~~~~~~~~
+amp-stream-gallery/1.0/test/validator-amp-stream-gallery.html:62:4 The attribute 'min-item-width' in tag 'amp-stream-gallery' is set to the invalid value ''. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+|      </amp-stream-gallery>
+|      <!-- Invalid: negative integer value -->
+|      <amp-stream-gallery width="4" height="3" min-item-width="-2">
+>>     ^~~~~~~~~
+amp-stream-gallery/1.0/test/validator-amp-stream-gallery.html:65:4 The attribute 'min-item-width' in tag 'amp-stream-gallery' is set to the invalid value '-2'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+|      </amp-stream-gallery>
+|      <!-- Invalid: floating point value -->
+|      <amp-stream-gallery width="4" height="3" min-item-width="300.5">
+>>     ^~~~~~~~~
+amp-stream-gallery/1.0/test/validator-amp-stream-gallery.html:68:4 The attribute 'min-item-width' in tag 'amp-stream-gallery' is set to the invalid value '300.5'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+|      </amp-stream-gallery>
+|      <!-- Invalid: floating point value in media query -->
+|      <amp-stream-gallery width="4" height="3" min-item-width="(min-width: 800px) -300, (max-height: 1000px) 300.5, 1">
+>>     ^~~~~~~~~
+amp-stream-gallery/1.0/test/validator-amp-stream-gallery.html:71:4 The attribute 'min-item-width' in tag 'amp-stream-gallery' is set to the invalid value '(min-width: 800px) -300, (max-height: 1000px) 300.5, 1'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+|      </amp-stream-gallery>
+|    </section>
+|
+|    <!-- Positive float values-->
+|    <section>
+|      <!-- Valid: integer value -->
+|      <amp-stream-gallery width="4" height="3" min-visible-count="2">
+|      </amp-stream-gallery>
+|      <!-- Valid: floating point value -->
+|      <amp-stream-gallery width="4" height="3" min-visible-count="3.2">
+|      </amp-stream-gallery>
+|      <!-- Valid: mixed value with one media query -->
+|      <amp-stream-gallery width="4" height="3" min-visible-count="(min-width: 800px) 3.2, 1">
+|      </amp-stream-gallery>
+|      <!-- Valid: mixed values with multiple media queries -->
+|      <amp-stream-gallery width="4" height="3" min-visible-count="(min-width: 800px) 3, (max-height: 1000px) 3, 1.1">
+|      </amp-stream-gallery>
+|      <!-- Invalid: negative integer value -->
+|      <amp-stream-gallery width="4" height="3" min-visible-count="-2">
+>>     ^~~~~~~~~
+amp-stream-gallery/1.0/test/validator-amp-stream-gallery.html:90:4 The attribute 'min-visible-count' in tag 'amp-stream-gallery' is set to the invalid value '-2'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+|      </amp-stream-gallery>
+|      <!-- Invalid: no default value-->
+|      <amp-stream-gallery width="4" height="3" min-visible-count="(min-width: 800px) 3">
+>>     ^~~~~~~~~
+amp-stream-gallery/1.0/test/validator-amp-stream-gallery.html:93:4 The attribute 'min-visible-count' in tag 'amp-stream-gallery' is set to the invalid value '(min-width: 800px) 3'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+|      </amp-stream-gallery>
+|      <!-- Invalid: no value -->
+|      <amp-stream-gallery width="4" height="3" min-visible-count>
+>>     ^~~~~~~~~
+amp-stream-gallery/1.0/test/validator-amp-stream-gallery.html:96:4 The attribute 'min-visible-count' in tag 'amp-stream-gallery' is set to the invalid value ''. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+|      </amp-stream-gallery>
+|      <!-- Invalid: string value -->
+|      <amp-stream-gallery width="4" height="3" min-visible-count="foo">
+>>     ^~~~~~~~~
+amp-stream-gallery/1.0/test/validator-amp-stream-gallery.html:99:4 The attribute 'min-visible-count' in tag 'amp-stream-gallery' is set to the invalid value 'foo'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+|      </amp-stream-gallery>
+|      <!-- Invalid: negative value in media query -->
+|      <amp-stream-gallery width="4" height="3" min-visible-count="(min-width: 800px) -3, (max-height: 1000px) 3, 1">
+>>     ^~~~~~~~~
+amp-stream-gallery/1.0/test/validator-amp-stream-gallery.html:102:4 The attribute 'min-visible-count' in tag 'amp-stream-gallery' is set to the invalid value '(min-width: 800px) -3, (max-height: 1000px) 3, 1'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+|      </amp-stream-gallery>
+|    </section>
+|
+|    <!-- String values -->
+|    <section>
+|      <!-- Valid: always -->
+|      <amp-stream-gallery width="4" height="3" controls="always">
+|      </amp-stream-gallery>
+|      <!-- Valid: auto -->
+|      <amp-stream-gallery width="4" height="3" controls="auto">
+|      </amp-stream-gallery>
+|      <!-- Valid: never -->
+|      <amp-stream-gallery width="4" height="3" controls="never">
+|      </amp-stream-gallery>
+|      <!-- Valid: strings with a media query -->
+|      <amp-stream-gallery width="4" height="3" controls="(min-width: 800px) never, auto">
+|      </amp-stream-gallery>
+|      <!-- Valid: strings with multiple media queries -->
+|      <amp-stream-gallery width="4" height="3" controls="(min-width: 800px) always, (max-height: 1000px) auto, never">
+|      </amp-stream-gallery>
+|      <!-- Invalid: no default value-->
+|      <amp-stream-gallery width="4" height="3" controls="(min-width: 800px) always">
+>>     ^~~~~~~~~
+amp-stream-gallery/1.0/test/validator-amp-stream-gallery.html:124:4 The attribute 'controls' in tag 'amp-stream-gallery' is set to the invalid value '(min-width: 800px) always'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+|      </amp-stream-gallery>
+|      <!-- Invalid: no value -->
+|      <amp-stream-gallery width="4" height="3" controls>
+>>     ^~~~~~~~~
+amp-stream-gallery/1.0/test/validator-amp-stream-gallery.html:127:4 The attribute 'controls' in tag 'amp-stream-gallery' is set to the invalid value ''. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+|      </amp-stream-gallery>
+|      <!-- Invalid: incorrect value -->
+|      <amp-stream-gallery width="4" height="3" controls="true">
+>>     ^~~~~~~~~
+amp-stream-gallery/1.0/test/validator-amp-stream-gallery.html:130:4 The attribute 'controls' in tag 'amp-stream-gallery' is set to the invalid value 'true'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+|      </amp-stream-gallery>
+|      <!-- Invalid: incorrect in media query -->
+|      <amp-stream-gallery width="4" height="3" controls="(min-width: 800px) auto, (max-height: 1000px) true, never">
+>>     ^~~~~~~~~
+amp-stream-gallery/1.0/test/validator-amp-stream-gallery.html:133:4 The attribute 'controls' in tag 'amp-stream-gallery' is set to the invalid value '(min-width: 800px) auto, (max-height: 1000px) true, never'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+|      </amp-stream-gallery>
+|    </section>
+|
+|    <!-- Spaces-->
+|    <section>
+|      <!-- Valid: spaces between groups -->
+|      <amp-stream-gallery width="4" height="3" loop="(min-width: 800px) true, false">
+|      </amp-stream-gallery>
+|      <!-- Valid: no spaces between groups -->
+|      <amp-stream-gallery width="4" height="3" loop="(min-width: 800px) true,(max-height: 1000px) true,false">
+|      </amp-stream-gallery>
+|      <!-- Invalid: no space between media query and value -->
+|      <amp-stream-gallery width="4" height="3" loop="(min-width: 800px)true, false">
+>>     ^~~~~~~~~
+amp-stream-gallery/1.0/test/validator-amp-stream-gallery.html:146:4 The attribute 'loop' in tag 'amp-stream-gallery' is set to the invalid value '(min-width: 800px)true, false'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+|      </amp-stream-gallery>
+|    </section>
+|  </body>
+|  </html>

@@ -1,20 +1,6 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
- /**
+
+/**
   * We need a separate container for `position: absolute` for two reasons:
   *
   * 1. We do not want to make the scrolling area positioned, so that content
@@ -57,17 +43,17 @@
  * calculating the 100% height (or width) of the slide.
 */
 /* Firefox */
-.i-amphtml-carousel-scroll[hide-scrollbar="true"] {
-  scrollbar-width: none; 
+.i-amphtml-carousel-scroll[hide-scrollbar='true'] {
+  scrollbar-width: none;
 }
 
- /* Chrome, Safari */
-.i-amphtml-carousel-scroll[hide-scrollbar="true"]::-webkit-scrollbar {
+/* Chrome, Safari */
+.i-amphtml-carousel-scroll[hide-scrollbar='true']::-webkit-scrollbar {
   display: none;
   box-sizing: content-box !important;
 }
 
-.i-amphtml-carousel-scroll[horizontal="true"] {
+.i-amphtml-carousel-scroll[horizontal='true'] {
   flex-direction: row;
   scroll-snap-type-x: mandatory; /* Firefox, IE */
   scroll-snap-type: x mandatory;
@@ -76,7 +62,7 @@
   overflow-y: hidden;
 }
 
-.i-amphtml-carousel-scroll[horizontal="false"] {
+.i-amphtml-carousel-scroll[horizontal='false'] {
   flex-direction: column;
   scroll-snap-type-y: mandatory; /* Firefox, IE */
   scroll-snap-type: y mandatory;
@@ -85,16 +71,17 @@
   overflow-x: hidden;
 }
 
-.i-amphtml-carousel-scroll[snap="false"] {
+.i-amphtml-carousel-scroll[snap='false'] {
   scroll-snap-type: none;
 }
 
-.i-amphtml-carousel-scroll[user-scrollable="false"] {
+.i-amphtml-carousel-scroll[user-scrollable='false'] {
   overflow: hidden;
 }
 
 .i-amphtml-carousel-spacer {
-  z-index: -1;  
+  visibility: hidden;
+  z-index: -1;
 }
 
 .i-amphtml-carousel-slotted,
@@ -107,29 +94,37 @@
   scroll-snap-stop: always;
 }
 
-.i-amphtml-carousel-scroll[horizontal="true"][mixed-length="false"] > .i-amphtml-carousel-slotted,
-.i-amphtml-carousel-scroll[horizontal="true"][mixed-length="false"] > .i-amphtml-carousel-spacer {
+.i-amphtml-carousel-scroll[horizontal='true'][mixed-length='false']
+  > .i-amphtml-carousel-slotted,
+.i-amphtml-carousel-scroll[horizontal='true'][mixed-length='false']
+  > .i-amphtml-carousel-spacer {
   /** TODO(sparhami) Do not use CSS custom property */
   width: calc(100% / var(--visible-count)) !important;
   min-width: auto !important;
   max-width: none !important;
 }
 
-.i-amphtml-carousel-scroll[horizontal="false"][mixed-length="false"] > .i-amphtml-carousel-slotted,
-.i-amphtml-carousel-scroll[horizontal="false"][mixed-length="false"] > .i-amphtml-carousel-spacer {
+.i-amphtml-carousel-scroll[horizontal='false'][mixed-length='false']
+  > .i-amphtml-carousel-slotted,
+.i-amphtml-carousel-scroll[horizontal='false'][mixed-length='false']
+  > .i-amphtml-carousel-spacer {
   /** TODO(sparhami) Do not use CSS custom property */
   height: calc(100% / var(--visible-count)) !important;
   min-height: auto !important;
   max-height: none !important;
 }
 
-.i-amphtml-carousel-scroll[horizontal="true"][snap="true"][mixed-length="true"] > .i-amphtml-carousel-slotted,
-.i-amphtml-carousel-scroll[horizontal="true"][snap="true"][mixed-length="true"] > .i-amphtml-carousel-spacer {
+.i-amphtml-carousel-scroll[horizontal='true'][snap='true'][mixed-length='true']
+  > .i-amphtml-carousel-slotted,
+.i-amphtml-carousel-scroll[horizontal='true'][snap='true'][mixed-length='true']
+  > .i-amphtml-carousel-spacer {
   max-width: 100% !important;
 }
 
-.i-amphtml-carousel-scroll[horizontal="false"][snap="true"][mixed-length="true"] > .i-amphtml-carousel-slotted,
-.i-amphtml-carousel-scroll[horizontal="false"][snap="true"][mixed-length="true"] > .i-amphtml-carousel-spacer {
+.i-amphtml-carousel-scroll[horizontal='false'][snap='true'][mixed-length='true']
+  > .i-amphtml-carousel-slotted,
+.i-amphtml-carousel-scroll[horizontal='false'][snap='true'][mixed-length='true']
+  > .i-amphtml-carousel-spacer {
   max-height: 100% !important;
 }
 

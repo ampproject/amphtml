@@ -1,19 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {
   CONSENT_ITEM_STATE,
@@ -21,19 +5,18 @@ import {
   constructConsentInfo,
   constructMetadata,
 } from '../consent-info';
-import {CONSENT_STRING_TYPE} from '../../../../src/consent-state';
+import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
 import {ConsentUI, consentUiClasses} from '../consent-ui';
-import {Services} from '../../../../src/services';
-import {dict} from '../../../../src/utils/object';
-import {elementByTag} from '../../../../src/dom';
-import {macroTask} from '../../../../testing/yield';
+import {Services} from '#service';
+import {dict} from '#core/types/object';
+import {elementByTag} from '#core/dom/query';
+import {macroTask} from '#testing/helpers';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
+} from '../../../../src/service-helpers';
 import {user} from '../../../../src/log';
-import {whenCalled} from '../../../../testing/test-helper.js';
+import {whenCalled} from '#testing/test-helper';
 
 describes.realWin(
   'consent-ui',
@@ -96,6 +79,8 @@ describes.realWin(
       resetServiceForTesting(win, 'consentStateManager');
       registerServiceBuilder(win, 'consentStateManager', function () {
         return Promise.resolve({
+          consentPageViewId64: () =>
+            Promise.resolve('foo_consent_page_view_id_64_123'),
           getLastConsentInstanceInfo: () => {
             return Promise.resolve(
               constructConsentInfo(
@@ -298,86 +283,61 @@ describes.realWin(
     });
 
     describe('CMP Iframe', () => {
-      it(
-        'should load the iframe, ' +
-          'then show it with correct state CSS classes',
-        () => {
-          const config = dict({
-            'promptUISrc': 'https://promptUISrc',
-          });
-          consentUI = new ConsentUI(mockInstance, config);
-          expect(parent.classList.contains('amp-active')).to.be.false;
-          expect(parent.classList.contains('amp-hidden')).to.be.false;
-
-          const showIframeSpy = env.sandbox.spy(consentUI, 'showIframe_');
-          const applyInitialStylesSpy = env.sandbox.spy(
-            consentUI,
-            'applyInitialStyles_'
-          );
-
-          consentUI.show(false);
-          expect(parent.classList.contains('amp-active')).to.be.true;
-          expect(parent.classList.contains(consentUiClasses.loading)).to.be
-            .true;
-          expect(parent).to.not.have.display('none');
-
-          // Resolve the iframe ready
-          consentUI.iframeReady_.resolve();
-
-          return whenCalled(showIframeSpy).then(() => {
-            expect(parent.classList.contains(consentUiClasses.iframeActive)).to
-              .be.true;
-
-            return whenCalled(applyInitialStylesSpy);
-          });
-        }
-      );
-
-      it('should expand the promptUISrc', function* () {
-        const config = dict({
-          'promptUISrc': 'https://example.test?cid=CLIENT_ID&r=RANDOM',
-          'clientConfig': {
-            'test': 'ABC',
-          },
-        });
-        consentUI = new ConsentUI(mockInstance, config);
-        consentUI.show(false);
-        yield macroTask();
-        expect(consentUI.ui_.src).to.match(/cid=amp-.{22}&r=RANDOM/);
-      });
-
-      it('should pass the info to the iframe', function* () {
+      it('should load the iframe, then show it with correct state CSS classes', async () => {
         const config = dict({
           'promptUISrc': 'https://promptUISrc',
+        });
+        consentUI = new ConsentUI(mockInstance, config);
+        expect(parent).to.not.have.class('amp-active');
+        expect(parent).to.not.have.class('amp-hidden');
+
+        const showIframeSpy = env.sandbox.spy(consentUI, 'showIframe_');
+        const applyInitialStylesSpy = env.sandbox.spy(
+          consentUI,
+          'applyInitialStyles_'
+        );
+
+        consentUI.show(false);
+        expect(parent).to.have.class('amp-active');
+        expect(parent).to.have.class(consentUiClasses.loading);
+        expect(parent).to.not.have.display('none');
+
+        consentUI.iframeReady_.resolve();
+
+        await whenCalled(showIframeSpy);
+        expect(parent).to.have.class(consentUiClasses.iframeActive);
+        await whenCalled(applyInitialStylesSpy);
+      });
+
+      it('should expand the promptUISrc', async () => {
+        const config = dict({
+          'promptUISrc':
+            'https://example.test/?' +
+            'cid=CLIENT_ID&' +
+            'clientconfig=CONSENT_INFO(clientConfig)&' +
+            'cpid=CONSENT_PAGE_VIEW_ID_64&' +
+            'r=RANDOM',
           'clientConfig': {
             'test': 'ABC',
           },
         });
         consentUI = new ConsentUI(mockInstance, config);
         consentUI.show(false);
-        yield macroTask();
-
-        expect(consentUI.ui_.getAttribute('name')).to.deep.equal(
-          JSON.stringify({
-            'clientConfig': {
-              'test': 'ABC',
-            },
-            'consentState': 'accepted',
-            'consentStateValue': 'accepted',
-            'consentMetadata': constructMetadata(
-              CONSENT_STRING_TYPE.TCF_V2,
-              '1~1.10.12.103'
-            ),
-            'consentString': 'test',
-            'promptTrigger': 'load',
-            'isDirty': false,
-          })
+        await macroTask();
+        await macroTask();
+        expect(consentUI.ui_.src).to.match(
+          new RegExp(
+            'cid=amp-.{22}&' +
+              `clientconfig=${encodeURIComponent(
+                JSON.stringify(config.clientConfig)
+              )}&` +
+              'cpid=foo_consent_page_view_id_64_123&' +
+              'r=RANDOM'
+          )
         );
       });
 
-      // TODO(micajuineho): consolidate w/ test above after exp done
-      it('should pass purpose consents to the iframe', async () => {
-        toggleExperiment(win, 'amp-consent-granular-consent', true);
+      it("should pass info into iframe's name", async () => {
         const config = dict({
           'promptUISrc': 'https://promptUISrc',
           'clientConfig': {
@@ -388,7 +348,7 @@ describes.realWin(
         consentUI.show(false);
         await macroTask();
 
-        expect(consentUI.ui_.getAttribute('name')).to.deep.equal(
+        expect(consentUI.ui_.getAttribute('name')).to.equal(
           JSON.stringify({
             'clientConfig': {
               'test': 'ABC',
@@ -405,7 +365,6 @@ describes.realWin(
             'purposeConsents': {'abc': 1},
           })
         );
-        toggleExperiment(win, 'amp-consent-granular-consent', false);
       });
 
       it('should pass the promptTrigger reason to the iframe', function* () {

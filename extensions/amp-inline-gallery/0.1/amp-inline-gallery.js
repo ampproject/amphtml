@@ -1,19 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {CSS as AmpInlineGalleryCSS} from '../../../build/amp-inline-gallery-0.1.css';
 import {AmpInlineGalleryCaptions} from './amp-inline-gallery-captions';
 import {CSS as AmpInlineGalleryCaptionsCSS} from '../../../build/amp-inline-gallery-captions-0.1.css';
@@ -25,14 +9,11 @@ import {AmpInlineGalleryThumbnails} from './amp-inline-gallery-thumbnails';
 import {CSS as AmpInlineGalleryThumbnailsCSS} from '../../../build/amp-inline-gallery-thumbnails-0.1.css';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {InlineGalleryEvents} from './inline-gallery-events';
-import {Layout} from '../../../src/layout';
+import {Layout} from '#core/dom/layout';
 import {getDetail} from '../../../src/event-helper';
-import {
-  iterateCursor,
-  scopedQuerySelector,
-  scopedQuerySelectorAll,
-} from '../../../src/dom';
-import {toArray} from '../../../src/types';
+import {iterateCursor} from '#core/dom';
+import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
+import {toArray} from '#core/types/array';
 
 /**
  * The selector of children to update the progress on as the gallery's carousel
@@ -82,9 +63,9 @@ class AmpInlineGallery extends AMP.BaseElement {
     Promise.all([
       scopedQuerySelector(this.element, CAROUSEL_SELECTOR).getImpl(),
       Promise.all(
-        toArray(
-          scopedQuerySelectorAll(this.element, THUMBNAILS_SELECTORS)
-        ).map((el) => el.getImpl())
+        toArray(scopedQuerySelectorAll(this.element, THUMBNAILS_SELECTORS)).map(
+          (el) => el.getImpl()
+        )
       ),
     ]).then((data) => {
       const carouselImpl = data[0];

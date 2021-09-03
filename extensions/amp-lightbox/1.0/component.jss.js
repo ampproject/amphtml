@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {createUseStyles} from 'react-jss';
 
 const closeButton = {
@@ -46,31 +30,20 @@ const wrapper = {
   height: '100%',
   position: 'fixed',
   boxSizing: 'border-box',
-};
-
-// User overridable styles
-const defaultStyles = {
   zIndex: 1000,
   backgroundColor: 'rgba(0, 0, 0, 0.9)',
   color: '#fff',
 };
 
-/* 
-  overflow: hidden does not trigger overscrollBehavior, so 
-  overflow: auto is applied even though the lightbox should not scroll.
-  We rely instead on the overflow: hidden in ContainWrapper to prevent 
-  scrolling inside the lightbox.
-*/
-const containScroll = {
-  overflow: 'auto', // Prevent scrolling inside lightbox.
-  overscrollBehavior: 'none', // Prevent scrolling outside lightbox.
+const content = {
+  overflow: 'auto !important',
+  overscrollBehavior: 'none !important',
 };
 
 const JSS = {
   closeButton,
   wrapper,
-  defaultStyles,
-  containScroll,
+  content,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.

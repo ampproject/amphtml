@@ -1,22 +1,18 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Deferred} from '#core/data-structures/promise';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '#core/dom/fullscreen';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {dict} from '#core/types/object';
 
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen} from '../../../src/event-helper';
 import {
   createFrameFor,
   isJsonOrObj,
@@ -26,17 +22,7 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {
-  dispatchCustomEvent,
-  fullscreenEnter,
-  fullscreenExit,
-  isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
-import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {VideoEvents} from '../../../src/video-interface';
 
 const TAG = 'amp-mowplayer';
 
@@ -83,6 +69,9 @@ class AmpMowplayer extends AMP.BaseElement {
      * @private @const {string}
      */
     this.baseUrl_ = 'https://mowplayer.com/watch/';
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -145,6 +134,9 @@ class AmpMowplayer extends AMP.BaseElement {
       dispatchCustomEvent(this.element, VideoEvents.LOAD);
     });
     this.playerReadyResolver_(loaded);
+
+    this.pauseHelper_.updatePlaying(true);
+
     return loaded;
   }
 
@@ -160,6 +152,9 @@ class AmpMowplayer extends AMP.BaseElement {
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
+
+    this.pauseHelper_.updatePlaying(false);
+
     return true; // Call layoutCallback again.
   }
 
@@ -291,6 +286,11 @@ class AmpMowplayer extends AMP.BaseElement {
   /** @override */
   pause() {
     this.sendCommand_('pauseVideo');
+    // The player doesn't appear to respect "pauseVideo" message.
+    const iframe = this.iframe_;
+    if (iframe) {
+      iframe.src = iframe.src;
+    }
   }
 
   /** @override */

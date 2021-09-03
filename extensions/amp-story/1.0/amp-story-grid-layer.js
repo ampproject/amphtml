@@ -1,20 +1,4 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview This is a layer that lays its children out into a grid. Its
  * implementation is based off of the CSS Grid Spec.
  *
@@ -28,9 +12,9 @@
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {StateProperty, getStoreService} from './amp-story-store-service';
-import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
+import {assertDoesNotContainDisplay, px, setStyles} from '#core/dom/style';
 import {isPrerenderActivePage} from './prerender-active-page';
-import {scopedQuerySelectorAll} from '../../../src/dom';
+import {scopedQuerySelectorAll} from '#core/dom/query';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -58,23 +42,6 @@ const SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR = Object.keys(
 )
   .map((key) => `[${key}]`)
   .join(',');
-
-/**
- * The attribute name for grid layer templates.
- * @private @const {string}
- */
-const TEMPLATE_ATTRIBUTE_NAME = 'template';
-
-/**
- * A mapping of template attribute values to CSS class names.
- * @const {!Object<string, string>}
- */
-export const GRID_LAYER_TEMPLATE_CLASS_NAMES = {
-  'fill': 'i-amphtml-story-grid-template-fill',
-  'vertical': 'i-amphtml-story-grid-template-vertical',
-  'horizontal': 'i-amphtml-story-grid-template-horizontal',
-  'thirds': 'i-amphtml-story-grid-template-thirds',
-};
 
 /**
  * The attribute name for grid layer presets.
@@ -128,7 +95,6 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   buildCallback() {
     super.buildCallback();
     this.applyResponsivenessPresets_();
-    this.applyTemplateClassName_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
     this.initializeListeners_();
@@ -185,33 +151,17 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     if (!pageSize) {
       return;
     }
-    const {width: vw, height: vh} = pageSize;
+    const {height: vh, width: vw} = pageSize;
     const {horiz, vert} = this.aspectRatio_;
     const width = Math.min(vw, (vh * horiz) / vert);
     const height = Math.min(vh, (vw * vert) / horiz);
     if (width > 0 && height > 0) {
       this.getVsync().mutate(() => {
-        this.element.classList.add('i-amphtml-story-grid-template-aspect');
         setStyles(this.element, {
           '--i-amphtml-story-layer-width': px(width * this.scalingFactor_),
           '--i-amphtml-story-layer-height': px(height * this.scalingFactor_),
         });
       });
-    }
-  }
-
-  /**
-   * Applies internal CSS class names for the template attribute, so that styles
-   * can use the class name instead of compound
-   * amp-story-grid-layer[template="..."] selectors, since the latter increases
-   * CSS specificity and can prevent users from being able to override styles.
-   * @private
-   */
-  applyTemplateClassName_() {
-    if (this.element.hasAttribute(TEMPLATE_ATTRIBUTE_NAME)) {
-      const templateName = this.element.getAttribute(TEMPLATE_ATTRIBUTE_NAME);
-      const templateClassName = GRID_LAYER_TEMPLATE_CLASS_NAMES[templateName];
-      this.element.classList.add(templateClassName);
     }
   }
 

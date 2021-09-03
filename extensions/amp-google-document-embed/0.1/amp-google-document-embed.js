@@ -1,20 +1,4 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Embeds the Google Docs viewer
  *
  * Example:
@@ -27,11 +11,14 @@
  * </code>
  */
 
-import {Services} from '../../../src/services';
-import {addParamToUrl} from '../../../src/url';
+import {removeElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+
+import {Services} from '#service';
+
 import {dev, userAssert} from '../../../src/log';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
+import {addParamToUrl} from '../../../src/url';
 
 export const TAG = 'amp-google-document-embed';
 
@@ -90,11 +77,11 @@ export class AmpDriveViewer extends AMP.BaseElement {
 
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', '');
-    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, iframe);
+    propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.element, iframe);
 
     iframe.src = this.getSrc_(this.element.getAttribute('src'));
 
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.element.appendChild(iframe);
     return this.loadPromise(iframe);
   }
@@ -105,7 +92,12 @@ export class AmpDriveViewer extends AMP.BaseElement {
       (value) => mutations[value] !== undefined
     );
     const iframe = dev().assertElement(this.iframe_);
-    this.propagateAttributes(attrs, iframe, /* opt_removeMissingAttrs */ true);
+    propagateAttributes(
+      attrs,
+      this.element,
+      iframe,
+      /* opt_removeMissingAttrs */ true
+    );
     const src = mutations['src'];
     if (src) {
       iframe.src = this.getSrc_(src);

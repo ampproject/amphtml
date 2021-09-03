@@ -1,31 +1,18 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {RAW_OBJECT_ARGS_KEY} from '#core/constants/action-constants';
+import {htmlFor} from '#core/dom/static-template';
+import {toggle} from '#core/dom/style';
 
-import {AmpDocService, AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {RAW_OBJECT_ARGS_KEY} from '../../src/action-constants';
-import {Services} from '../../src/services';
+import {Services} from '#service';
+import {AmpDocService, AmpDocSingle} from '#service/ampdoc-impl';
+import {cidServiceForDocForTesting} from '#service/cid-impl';
+import {installHistoryServiceForDoc} from '#service/history-impl';
 import {
   StandardActions,
   getAutofocusElementForShowAction,
-} from '../../src/service/standard-actions-impl';
-import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
-import {htmlFor} from '../../src/static-template';
-import {installHistoryServiceForDoc} from '../../src/service/history-impl';
-import {macroTask} from '../../testing/yield';
-import {toggle} from '../../src/style';
+} from '#service/standard-actions-impl';
+
+import {macroTask} from '#testing/helpers';
+
 import {user} from '../../src/log';
 
 describes.sandboxed('StandardActions', {}, (env) => {
@@ -82,6 +69,16 @@ describes.sandboxed('StandardActions', {}, (env) => {
   function expectElementToDropClass(element, className) {
     expectElementMutatedAsync(element);
     expect(element.classList.contains(className)).to.false;
+  }
+
+  function expectCheckboxToHaveCheckedStateTrue(element) {
+    expectElementMutatedAsync(element);
+    expect(element.checked).to.true;
+  }
+
+  function expectCheckboxToHaveCheckedStateFalse(element) {
+    expectElementMutatedAsync(element);
+    expect(element.checked).to.false;
   }
 
   function expectAmpElementToHaveBeenHidden(element) {
@@ -537,6 +534,62 @@ describes.sandboxed('StandardActions', {}, (env) => {
     });
   });
 
+  describe('"toggleChecked" action', () => {
+    it('should set checked property to false when checked property is true', () => {
+      const element = createElement();
+      element.type = 'checkbox';
+      element.checked = true;
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {},
+      };
+      standardActions.handleToggleChecked_(invocation);
+      expectCheckboxToHaveCheckedStateFalse(element);
+    });
+
+    it('should set checked property to true when checked property is false', () => {
+      const element = createElement();
+      element.type = 'checkbox';
+      element.checked = false;
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {},
+      };
+      standardActions.handleToggleChecked_(invocation);
+      expectCheckboxToHaveCheckedStateTrue(element);
+    });
+
+    it('should set checked property to true when force=true', () => {
+      const element = createElement();
+      element.type = 'checkbox';
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {
+          'force': true,
+        },
+      };
+      standardActions.handleToggleChecked_(invocation);
+      expectCheckboxToHaveCheckedStateTrue(element);
+    });
+
+    it('should set checked property to false when force=false', () => {
+      const element = createElement();
+      element.type = 'checkbox';
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {
+          'force': false,
+        },
+      };
+      standardActions.handleToggleChecked_(invocation);
+      expectCheckboxToHaveCheckedStateFalse(element);
+    });
+  });
+
   describe('"scrollTo" action', () => {
     it('should handle normal element', () => {
       const element = createElement();
@@ -698,7 +751,10 @@ describes.sandboxed('StandardActions', {}, (env) => {
           });
         yield standardActions.handleAmpTarget_(invocation);
         expect(navigator.navigateTo).to.be.calledTwice;
-        expect(userError).to.be.calledWith('STANDARD-ACTIONS', 'Fake error.');
+        expect(userError).to.be.calledWith(
+          'STANDARD-ACTIONS',
+          env.sandbox.match((arg) => arg.message === 'Fake error.')
+        );
       });
     });
 

@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   AdvancementConfig,
   ManualAdvancement,
@@ -21,7 +5,7 @@ import {
   TimeBasedAdvancement,
 } from '../page-advancement';
 import {StateProperty} from '../amp-story-store-service';
-import {htmlFor} from '../../../../src/static-template';
+import {htmlFor} from '#core/dom/static-template';
 
 describes.realWin('page-advancement', {amp: true}, (env) => {
   let html;
@@ -128,6 +112,76 @@ describes.realWin('page-advancement', {amp: true}, (env) => {
         const advancement = AdvancementConfig.forElement(win, pageEl);
 
         expect(advancement).to.not.be.instanceOf(TimeBasedAdvancement);
+      });
+
+      it('should update delayMs_ when updateTimeDelay() is called', () => {
+        const pageEl = html`
+          <amp-story-page auto-advance-after="3s"> </amp-story-page>
+        `;
+        const advancement = AdvancementConfig.forElement(win, pageEl);
+        expect(advancement.delayMs_).to.be.equal(3000);
+
+        advancement.updateTimeDelay('5s');
+
+        expect(advancement.delayMs_).to.be.above(4500).and.below(5500);
+        expect(advancement.remainingDelayMs_).to.be.equal(null);
+      });
+
+      it('should update remainingDelayMs_ when updateTimeDelay() is called', () => {
+        const pageEl = html`
+          <amp-story-page auto-advance-after="3s"> </amp-story-page>
+        `;
+        const advancement = AdvancementConfig.forElement(win, pageEl);
+        // Simulate a pause after 1 second.
+        advancement.start();
+        advancement.startTimeMs_ -= 1000;
+        advancement.stop(true /** canResume */);
+        expect(advancement.remainingDelayMs_).to.be.above(1500).and.below(2500);
+
+        advancement.updateTimeDelay('5s');
+
+        expect(advancement.remainingDelayMs_).to.be.above(3500).and.below(4500);
+      });
+
+      it('should not keep a remainingDelayMs_ if will not resume', () => {
+        const pageEl = html`
+          <amp-story-page auto-advance-after="3s"> </amp-story-page>
+        `;
+        const advancement = AdvancementConfig.forElement(win, pageEl);
+        // Simulate a pause after 1 second.
+        advancement.start();
+        advancement.startTimeMs_ -= 1000;
+        advancement.stop(false /** canResume */);
+        expect(advancement.remainingDelayMs_).to.be.null;
+      });
+
+      it('should return progress 0 if stopped and will not resume, then start again', () => {
+        const pageEl = html`
+          <amp-story-page auto-advance-after="3s"> </amp-story-page>
+        `;
+        const advancement = AdvancementConfig.forElement(win, pageEl);
+        // Simulate a pause after 1 second.
+        advancement.start();
+        advancement.startTimeMs_ -= 1000;
+        advancement.stop(false /** canResume */);
+        advancement.start();
+        // Progress of ~0
+        expect(advancement.getProgress()).to.be.below(0.1);
+      });
+
+      it('should return progress > 0 if stopped and will resume', () => {
+        const pageEl = html`
+          <amp-story-page auto-advance-after="3s"> </amp-story-page>
+        `;
+        const advancement = AdvancementConfig.forElement(win, pageEl);
+        // Simulate a pause after 1 second.
+        advancement.start();
+        advancement.startTimeMs_ -= 1000;
+        advancement.stop(true /** canResume */);
+        advancement.start();
+        // Progress of ~0.33
+        expect(advancement.getProgress()).to.be.above(0.3);
+        expect(advancement.getProgress()).to.be.below(0.4);
       });
     });
 

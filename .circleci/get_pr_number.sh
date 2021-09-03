@@ -1,30 +1,16 @@
 #!/bin/bash
 #
-# Copyright 2021 The AMP HTML Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS-IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the license.
-
 # This script extracts the PR number (if there is one) for a CircleCI build.
 # Reference: https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables
 
 set -e
 err=0
 
-GREEN() { echo -e "\n\033[0;32m$1\033[0m"; }
-YELLOW() { echo -e "\n\033[0;33m$1\033[0m"; }
+GREEN() { echo -e "\033[0;32m$1\033[0m"; }
+YELLOW() { echo -e "\033[0;33m$1\033[0m"; }
 
-# Push builds are only run against master and amp-release branches.
-if [[ "$CIRCLE_BRANCH" == "master" || "$CIRCLE_BRANCH" =~ ^amp-release-* ]]; then
+# Push builds are only run against the main branch and amp-release branches.
+if [[ "$CIRCLE_BRANCH" == "main" || "$CIRCLE_BRANCH" =~ ^amp-release-* ]]; then
   echo $(GREEN "Nothing to do because $CIRCLE_BRANCH is not a PR branch.")
   # Warn if the build is linked to a PR on a different repo (known CircleCI bug).
   if [[ -n "$CIRCLE_PULL_REQUEST" && ! "$CIRCLE_PULL_REQUEST" =~ ^https://github.com/ampproject/amphtml* ]]; then

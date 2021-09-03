@@ -1,27 +1,11 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../../src/preact';
-import {boolean, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
+import {boolean, withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
 
 export default {
   title: 'amp-accordion-1_0',
-  decorators: [withKnobs, withA11y, withAmp],
+  decorators: [withKnobs, withAmp],
 
   parameters: {
     extensions: [
@@ -49,7 +33,7 @@ export const withAmpBind = () => {
           <h2>Section 2</h2>
           <div>Kittens are furry.</div>
         </section>
-        <section expanded data-amp-bind-expanded="section3">
+        <section data-amp-bind-expanded="section3">
           <h2>Section 3</h2>
           <div>Elephants have great memory.</div>
         </section>

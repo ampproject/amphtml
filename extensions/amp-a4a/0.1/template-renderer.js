@@ -1,23 +1,8 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Renderer} from './amp-ad-type-defs';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
+import {Renderer} from './amp-ad-type-defs';
 import {renderCreativeIntoFriendlyFrame} from './friendly-frame-util';
+
+import {devAssert} from '../../../src/log';
 
 /**
  * @typedef {{
@@ -55,7 +40,7 @@ export class TemplateRenderer extends Renderer {
   render(context, element, creativeData) {
     creativeData = /** @type {CreativeData} */ (creativeData);
 
-    const {size, adUrl} = context;
+    const {adUrl, size} = context;
     const {creativeMetadata} = creativeData;
 
     devAssert(size, 'missing creative size');
@@ -67,7 +52,10 @@ export class TemplateRenderer extends Renderer {
       element,
       creativeMetadata
     ).then((iframe) => {
-      const templateData = /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (creativeData.templateData);
+      const templateData =
+        /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
+          creativeData.templateData
+        );
       const {data} = templateData;
       if (!data) {
         return Promise.resolve();
@@ -81,9 +69,8 @@ export class TemplateRenderer extends Renderer {
             templateHelper.insertAnalytics(renderedElement, analytics);
           }
           // This element must exist, or #render() would have thrown.
-          const templateElement = this.getDocument(iframe).querySelector(
-            'template'
-          );
+          const templateElement =
+            this.getDocument(iframe).querySelector('template');
           templateElement.parentNode.replaceChild(
             renderedElement,
             templateElement

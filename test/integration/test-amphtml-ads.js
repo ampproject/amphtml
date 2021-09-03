@@ -1,28 +1,14 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {parseQueryString} from '#core/types/string/url';
 
-import {RequestBank} from '../../testing/test-helper';
-import {maybeSwitchToCompiledJs} from '../../testing/iframe';
-import {parseQueryString} from '../../src/url';
-import {xhrServiceForTesting} from '../../src/service/xhr-impl';
+import {xhrServiceForTesting} from '#service/xhr-impl';
+
+import {maybeSwitchToMinifiedJs} from '#testing/iframe';
+import {RequestBank} from '#testing/test-helper';
 
 // TODO(wg-monetization, #29112): Unskip on Safari.
-const t = describe.configure().skipSafari();
+const t = describes.sandboxed.configure().skipSafari();
 
-t.run('AMPHTML ad on AMP Page', () => {
+t.run('AMPHTML ad on AMP Page', {}, () => {
   describes.integration(
     'ATF',
     {
@@ -85,7 +71,7 @@ t.run('AMPHTML ad on AMP Page', () => {
   );
 });
 
-t.run('AMPHTML ad on non-AMP page (inabox)', () => {
+t.run('AMPHTML ad on non-AMP page (inabox)', {}, () => {
   describes.integration(
     'ATF',
     {
@@ -284,7 +270,7 @@ t.skip('A more real AMPHTML image ad', () => {
   // The image ad as seen in examples/inabox.gpt.html,
   // with visibility pings being placeholders that's substituted with calls to
   // the request bank.
-  const adBody = maybeSwitchToCompiledJs(
+  const adBody = maybeSwitchToMinifiedJs(
     // eslint-disable-next-line no-undef
     __html__['test/fixtures/amp-cupcake-ad.html']
   )

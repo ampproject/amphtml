@@ -1,19 +1,3 @@
-<!---
-Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # Imonomy
 
 Imonomy supports Header Tag style bidding using Doubleclick as the ad server.
@@ -46,4 +30,4 @@ Ad size is based on the `width` and `height` attributes of the `amp-ad` tag by d
 -   `data-sub-id`
 -   `data-slot`
 
-Additional parameters including `json` will be passed through in the resulting call to DFP. For details please see the [Doubleclick documentation](https://github.com/ampproject/amphtml/blob/master/ads/google/doubleclick.md).
+Additional parameters including `json` will be passed through in the resulting call to DFP. For details please see the [Doubleclick documentation](https://github.com/ampproject/amphtml/blob/main/ads/google/doubleclick.md).
