@@ -46,18 +46,21 @@ MyStory.args = {
   width: 500,
   height: 200,
   layout: 'responsive'
+  'data-foo': 'bar',
 };
 ```
 
 🚫 Don't:
 
 ```js
-const MyStory = ({width, height, layout}) => {
+const MyStory = ({width, height, layout, foo}) => {
   return (
     <amp-my-component
+      // bad: not spreading {...args}
       width={width}
       height={height}
       layout={layout}
+      data-foo={foo} // bad: different names
     />
   );
 };
@@ -66,6 +69,7 @@ MyStory.args = {
   width: 500,
   height: 200,
   layout: 'responsive'
+  foo: 'bar',
 };
 ```
 
