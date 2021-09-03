@@ -76,6 +76,10 @@ const REMOVE_AMP_SCRIPTS_SNIPPET = fs.readFileSync(
   path.resolve(__dirname, 'snippets/remove-amp-scripts.js'),
   'utf8'
 );
+const FREEZE_CANVAS_IMAGE_SNIPPET = fs.readFileSync(
+  path.resolve(__dirname, 'snippets/freeze-canvas-image.js'),
+  'utf8'
+);
 const REMOVE_NO_SCRIPT_ELEMENT_SNIPPET = fs.readFileSync(
   path.resolve(__dirname, 'snippets/remove-no-script.js'),
   'utf8'
@@ -636,6 +640,7 @@ async function snapshotWebpages(browser, webpages) {
             // prepare it for snapshotting on Percy. See comments inside the
             // snippet files for description of each.
             await page.evaluate(REMOVE_AMP_SCRIPTS_SNIPPET);
+            await page.evaluate(FREEZE_CANVAS_IMAGE_SNIPPET);
             await page.evaluate(REMOVE_NO_SCRIPT_ELEMENT_SNIPPET);
 
             // Create a default set of snapshot options for Percy and modify
