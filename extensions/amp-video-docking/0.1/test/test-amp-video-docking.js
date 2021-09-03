@@ -1281,6 +1281,34 @@ describes.realWin('video docking', {amp: true}, (env) => {
     });
   });
 
+  describe('onViewportResize_', () => {
+    beforeEach(() => {
+      env.sandbox.stub(docking, 'trigger_');
+      env.sandbox.stub(docking, 'updateOnResize_');
+
+      const video = createVideo();
+      mockAreaWidth(400);
+
+      docking.observed_.push(video);
+      docking.setCurrentlyDocked_(
+        video,
+        /* target, irrelevant */ {},
+        /* step, irrelevant */ 1
+      );
+    });
+    it('updates dock on resize when docked and viewport width changed', () => {
+      mockAreaWidth(399);
+      docking.onViewportResize_();
+      expect(docking.updateOnResize_.withArgs()).to.have.been.calledOnce;
+    });
+
+    it('does not update dock on resize when docked and viewport width did not change', () => {
+      mockAreaWidth(400); // unchanged
+      docking.onViewportResize_();
+      expect(docking.updateOnResize_).not.to.have.been.called;
+    });
+  });
+
   describes.repeated(
     '',
     {
