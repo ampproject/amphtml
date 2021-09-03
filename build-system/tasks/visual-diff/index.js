@@ -49,9 +49,9 @@ const percyCss = [
 // 3. Look up the full version at https://en.wikipedia.org/wiki/Google_Chrome_version_history
 // 4. Open https://omahaproxy.appspot.com in a browser
 // 5. Go to "Tools" -> "Version information"
-// 6. Paste the full version in the "Version" field and click "Lookup"
+// 6. Paste the full version (add ".0" at the end) in the "Version" field and click "Lookup"
 // 7. Copy the value next to "Branch Base Position" and update the line below
-const PUPPETEER_CHROMIUM_REVISION = '827102'; // 88.0.4324.0
+const PUPPETEER_CHROMIUM_REVISION = '870763'; // 91.0.4472.0
 
 const SNAPSHOT_SINGLE_BUILD_OPTIONS = {
   widths: [375],
