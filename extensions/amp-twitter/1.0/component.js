@@ -15,7 +15,7 @@ const MATCHES_MESSAGING_ORIGIN = () => true;
  * @param {{current: (!BentoTwitterDef.Api|null)}} ref
  * @return {PreactDef.Renderable}
  */
-function TwitterWithRef(
+function BentoTwitterWithRef(
   {
     cards,
     conversation,
@@ -102,6 +102,6 @@ function TwitterWithRef(
   );
 }
 
-const BentoTwitter = forwardRef(TwitterWithRef);
+const BentoTwitter = forwardRef(BentoTwitterWithRef);
 BentoTwitter.displayName = 'BentoTwitter'; // Make findable for tests.
 export {BentoTwitter};
