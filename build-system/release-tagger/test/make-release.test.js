@@ -196,7 +196,7 @@ test('cherry-pick', async (t) => {
       object: {sha: '2abcdef'},
     })
     // https://docs.github.com/en/rest/reference/git#get-a-reference
-    .get('/repos/ampproject/amphtml/git/ref/tags%2F2107280123000')
+    .get('/repos/ampproject/amphtml/git/ref/tags%2F2107210123000')
     .reply(200, {
       id: 1,
       object: {sha: '1abcdef'},
@@ -220,8 +220,8 @@ test('cherry-pick', async (t) => {
         'release calendar</a> for additional channel information.\n\n' +
         '<h2>Changelog</h2>\n<p>\n' +
         '<a href="https://github.com/ampproject/amphtml/compare/' +
-        '2107280123000...2107280123001">\n' +
-        '<code>2107280123000...2107280123001</code>\n</a>\n</p>\n\n' +
+        '2107210123000...2107280123001">\n' +
+        '<code>2107210123000...2107280123001</code>\n</a>\n</p>\n\n' +
         '<h2>npm packages @ 1.2107280123.1</h2>\n\n\n' +
         `<b>Packages not changed:</b> <i>${packages.join(', ')}</i>\n\n` +
         '<h2>Changes by component</h2>\n' +
@@ -272,7 +272,7 @@ test('cherry-pick', async (t) => {
       },
     });
 
-  await makeRelease('2107280123001', '2107280123000', 'stable');
+  await makeRelease('2107280123001', '2107210123000', 'stable');
   t.true(rest.isDone());
   t.true(graphql.isDone());
 });
