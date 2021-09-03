@@ -20,7 +20,7 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
     const arrow0 = arrows.first();
     const arrow1 = arrows.last();
 
-    // Arrows are given booleans and propagate them as strings.
+    // Arrows are given rtl booleans and propagate them as strings.
     expect(arrow0.prop('rtl')).to.equal(false);
     expect(arrow0.children()).to.have.lengthOf(1);
     expect(arrow0.childAt(0).prop('rtl')).to.equal('false');
