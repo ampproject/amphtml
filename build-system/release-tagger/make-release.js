@@ -7,7 +7,7 @@ const dedent = require('dedent');
 const {
   createRelease,
   getPullRequestsBetweenCommits,
-  getRelease,
+  getRef,
 } = require('./utils');
 const {getExtensions, getSemver} = require('../npm-publish/utils');
 const {GraphQlQueryResponseData} = require('@octokit/graphql'); //eslint-disable-line no-unused-vars
@@ -193,12 +193,12 @@ function _createBody(head, base, prs) {
  * @return {Promise<Object>}
  */
 async function makeRelease(head, base, channel) {
-  const {'target_commitish': headCommit} = await getRelease(head);
-  const {'target_commitish': baseCommit} = await getRelease(base);
-  const prs = await getPullRequestsBetweenCommits(headCommit, baseCommit);
+  const {object: headRef} = await getRef(head);
+  const {object: baseRef} = await getRef(base);
+  const prs = await getPullRequestsBetweenCommits(headRef.sha, baseRef.sha);
   const body = _createBody(head, base, prs);
   const prerelease = prereleaseConfig[channel];
-  return await createRelease(head, headCommit, body, prerelease);
+  return await createRelease(head, headRef.sha, body, prerelease);
 }
 
 module.exports = {makeRelease};

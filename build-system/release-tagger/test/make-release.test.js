@@ -23,17 +23,17 @@ test('create', async (t) => {
   const packages = getExtensions().map((e) => e.extension);
 
   const rest = nock('https://api.github.com')
-    // https://docs.github.com/en/rest/reference/repos#get-a-release-by-tag-name
-    .get('/repos/ampproject/amphtml/releases/tags/2107280123000')
+    // https://docs.github.com/en/rest/reference/git#get-a-reference
+    .get('/repos/ampproject/amphtml/git/ref/tags%2F2107280123000')
     .reply(200, {
       id: 2,
-      'target_commitish': '3abcdef',
+      object: {sha: '3abcdef'},
     })
-    // https://docs.github.com/en/rest/reference/repos#get-a-release-by-tag-name
-    .get('/repos/ampproject/amphtml/releases/tags/2107210123000')
+    // https://docs.github.com/en/rest/reference/git#get-a-reference
+    .get('/repos/ampproject/amphtml/git/ref/tags%2F2107210123000')
     .reply(200, {
       id: 1,
-      'target_commitish': '1abcdef',
+      object: {sha: '1abcdef'},
     })
     // https://docs.github.com/en/rest/reference/repos#compare-two-commits
     .get('/repos/ampproject/amphtml/compare/1abcdef...3abcdef')
@@ -189,17 +189,17 @@ test('cherry-pick', async (t) => {
   const packages = getExtensions().map((e) => e.extension);
 
   const rest = nock('https://api.github.com')
-    // https://docs.github.com/en/rest/reference/repos#get-a-release-by-tag-name
-    .get('/repos/ampproject/amphtml/releases/tags/2107280123001')
+    // https://docs.github.com/en/rest/reference/git#get-a-reference
+    .get('/repos/ampproject/amphtml/git/ref/tags%2F2107280123001')
     .reply(200, {
       id: 2,
-      'target_commitish': '2abcdef',
+      object: {sha: '2abcdef'},
     })
-    // https://docs.github.com/en/rest/reference/repos#get-a-release-by-tag-name
-    .get('/repos/ampproject/amphtml/releases/tags/2107280123000')
+    // https://docs.github.com/en/rest/reference/git#get-a-reference
+    .get('/repos/ampproject/amphtml/git/ref/tags%2F2107280123000')
     .reply(200, {
       id: 1,
-      'target_commitish': '1abcdef',
+      object: {sha: '1abcdef'},
     })
     // https://docs.github.com/en/rest/reference/repos#compare-two-commits
     .get('/repos/ampproject/amphtml/compare/1abcdef...2abcdef')
