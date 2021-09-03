@@ -968,7 +968,7 @@ TEST(ValidatorTest, TestTransformedAmpCssLengthWithUrls) {
     std::string test_case_name =
         StrCat(test_case.name, "[MaxBytesWithUrlTest]");
     std::string url = "http://example.com/";
-    ASSERT_EQ(19, url.length());
+    ASSERT_EQ(17, url.length());
     std::string css_with_url = StrCat("a{b:url('", url, "')");
     ASSERT_EQ(30, css_with_url.length());
     std::string stylesheet =
