@@ -335,7 +335,7 @@ This command launches a separate browser tab for each Storybook, on `localhost:9
 You may launch a single environment by specifying `--storybook_env`:
 
 ```sh
-amp storybook --storybook-env=preact
+amp storybook --storybook_env=preact
 ```
 
 > Launching the `amp` environment also initiates the build-and-serve task that's normally launched using the [`amp` command](#testing-commands). This provides an additional server on `localhost:8000`.
