@@ -29,6 +29,8 @@ const MyStory = () => {
 };
 ```
 
+Read on about [migrating from Knobs to Controls](https://github.com/storybookjs/storybook/blob/next/addons/controls/README.md#how-do-i-migrate-from-addon-knobs).
+
 ### Identify `args` and `argTypes` exactly like their component properties
 
 Passing a value from a Control specified through `args` or `argTypes` without modification is implicit when spreading `{...args}`.
@@ -55,12 +57,13 @@ MyStory.args = {
 ```js
 const MyStory = ({width, height, layout, foo}) => {
   return (
+    // bad: not spreading {...args}
+    // bad: different names for data-foo and foo
     <amp-my-component
-      // bad: not spreading {...args}
       width={width}
       height={height}
       layout={layout}
-      data-foo={foo} // bad: different names
+      data-foo={foo}
     />
   );
 };
