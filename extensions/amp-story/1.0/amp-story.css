@@ -1,18 +1,4 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 
 @import './amp-story-access.css';
 @import './amp-story-affiliate-link.css';
@@ -373,12 +359,18 @@ amp-story-grid-layer[anchor*="right"] {
 }
 
 /**
- * Prevents pre-load placeholders from pushing content offscreen.
  * Prevents preload placeholders from pushing content offscreen.
  */
-.i-amphtml-story-grid-template-fill amp-img img,
-.i-amphtml-story-grid-template-fill amp-video video {
+[template="fill"] amp-img img,
+[template="fill"] amp-video video {
   position: absolute !important;
+}
+
+/**
+ * Prevents long-press image preview on iOS 15 that breaks pause UX.
+ */
+ amp-story-grid-layer amp-img img {
+  pointer-events: none !important;
 }
 
 /**
@@ -430,7 +422,7 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
   padding: 0 !important;
 }
 
-.i-amphtml-story-grid-template-fill > * {
+[template="fill"]:not(.i-amphtml-story-grid-template-with-full-bleed-animation) > * {
   bottom: 0 !important;
   height: auto !important;
   left: 0 !important;
@@ -440,17 +432,17 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
   width: auto !important;
 }
 
-.i-amphtml-story-grid-template-vertical {
+[template="vertical"] {
   grid-auto-flow: row !important;
   grid-template-columns: 100% !important;
 }
 
-.i-amphtml-story-grid-template-horizontal {
+[template="horizontal"] {
   grid-auto-flow: column !important;
   grid-template-rows: 100% !important;
 }
 
-.i-amphtml-story-grid-template-thirds {
+[template="thirds"] {
   height: 100% !important;
   grid-template-rows: 33% 33% 33% !important; /* `fr` is broken in Safari. */
   grid-template-areas: "upper-third"
@@ -458,7 +450,7 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
                        "lower-third" !important;
 }
 
-.i-amphtml-story-grid-template-aspect {
+[aspect-ratio], [preset] {
   margin: auto;
   width: var(--i-amphtml-story-layer-width, 100%);
   height: var(--i-amphtml-story-layer-height, 100%);
@@ -977,7 +969,8 @@ amp-story .amp-video-eq,
 }
 
 amp-story-interactive-binary-poll.i-amphtml-story-interactive-component, amp-story-interactive-results.i-amphtml-story-interactive-component,
-amp-story-interactive-img-poll.i-amphtml-story-interactive-component, amp-story-interactive-img-quiz.i-amphtml-story-interactive-component {
+amp-story-interactive-img-poll.i-amphtml-story-interactive-component, amp-story-interactive-img-quiz.i-amphtml-story-interactive-component,
+amp-story-interactive-results-detailed.i-amphtml-story-interactive-component {
   max-width: 18em !important;
 }
 

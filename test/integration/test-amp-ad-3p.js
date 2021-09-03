@@ -1,26 +1,11 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {ADS_INITIAL_INTERSECTION_EXP} from '#experiments/ads-initial-intersection-exp';
-import {Services} from '#service';
-import {createCustomEvent} from '../../src/event-helper';
-import {createFixtureIframe, poll} from '#testing/iframe';
-import {forceExperimentBranch} from '#experiments';
-import {installPlatformService} from '#service/platform-impl';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
+
+import {Services} from '#service';
+import {installPlatformService} from '#service/platform-impl';
+
+import {createFixtureIframe, poll} from '#testing/iframe';
+
+import {createCustomEvent} from '../../src/event-helper';
 
 const IFRAME_HEIGHT = 3000;
 function createFixture() {
@@ -38,11 +23,6 @@ describes.sandboxed('amp-ad 3P', {}, () => {
     return createFixture().then((f) => {
       fixture = f;
       installPlatformService(fixture.win);
-      forceExperimentBranch(
-        fixture.win,
-        ADS_INITIAL_INTERSECTION_EXP.id,
-        ADS_INITIAL_INTERSECTION_EXP.experiment
-      );
     });
   });
 
@@ -98,18 +78,7 @@ describes.sandboxed('amp-ad 3P', {}, () => {
         });
         const {initialIntersection} = context;
         expect(initialIntersection.rootBounds).to.deep.equal(
-          layoutRectLtwh(
-            0,
-            0,
-            Math.min(
-              iframe.ownerDocument.body.clientWidth,
-              iframe.ownerDocument.defaultView.innerWidth
-            ),
-            Math.min(
-              iframe.ownerDocument.body.clientHeight,
-              iframe.ownerDocument.defaultView.innerHeight
-            )
-          )
+          layoutRectLtwh(0, 0, 500, IFRAME_HEIGHT)
         );
 
         expect(initialIntersection.boundingClientRect).to.deep.equal(
@@ -140,7 +109,7 @@ describes.sandboxed('amp-ad 3P', {}, () => {
         // Nevertheless this only happens in test. In real world AMP will not
         // in srcdoc iframe.
         expect(context.sourceUrl).to.equal(
-          platform.isEdge() || platform.isIe()
+          platform.isEdge()
             ? 'http://localhost:9876/context.html'
             : 'about:srcdoc'
         );

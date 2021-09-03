@@ -6,22 +6,6 @@ teaser:
   text: A container to display an ad.
 ---
 
-<!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-ad / amp-embed
 
 ## Usage
@@ -319,6 +303,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [AppNexus](../../ads/vendors/appnexus.md)
 -   [AppVador](../../ads/vendors/appvador.md)
 -   [Atomx](../../ads/vendors/atomx.md)
+-   [AvantisVideo](../../ads/vendors/avantisvideo.md)
 -   [Baidu](../../ads/vendors/baidu.md)
 -   [BeaverAds](../../ads/vendors/beaverads.md)
 -   [BeOpinion](../amp-beopinion/amp-beopinion.md)
@@ -476,6 +461,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Teads](../../ads/vendors/teads.md)
 -   [torimochi](../../ads/vendors/torimochi.md)
 -   [Tracdelight](../../ads/vendors/tracdelight.md)
+-   [TrafficStars](../../ads/vendors/trafficstars.md)
 -   [TripleLift](../../ads/vendors/triplelift.md)
 -   [Trugaze](../../ads/vendors/trugaze.md)
 -   [UZOU](../../ads/vendors/uzou.md)

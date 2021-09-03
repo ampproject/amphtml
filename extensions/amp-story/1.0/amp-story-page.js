@@ -1,20 +1,4 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Embeds a single page in a story
  *
  * Example:
@@ -24,6 +8,7 @@
  * </amp-story-page>
  * </code>
  */
+import {isAutoplaySupported, tryPlay} from '#core/dom/video';
 import {
   AFFILIATE_LINK_SELECTOR,
   AmpStoryAffiliateLink,
@@ -69,9 +54,7 @@ import {getLogEntries} from './logging';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '#core/dom/static-template';
-import {isAutoplaySupported} from '#core/dom/video';
 import {isExperimentOn} from '#experiments';
-import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
@@ -79,7 +62,7 @@ import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {px, toggle} from '#core/dom/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 import {toArray} from '#core/types/array';
 import {upgradeBackgroundAudio} from './audio';
@@ -721,6 +704,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @return {!Promise} */
   beforeVisible() {
+    // Ensures a dynamically added page-attachment or page-outlink element is built.
+    // This happens by amp-story-ads.
+    this.renderOpenAttachmentUI_();
     return this.maybeApplyFirstAnimationFrameOrFinish();
   }
 
@@ -1045,7 +1031,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   playMedia_(mediaPool, mediaEl) {
     if (this.isBotUserAgent_) {
-      mediaEl.play();
+      tryPlay(mediaEl);
       return Promise.resolve();
     } else {
       return this.loadPromise(mediaEl).then(
@@ -1168,7 +1154,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       mediaEl.muted = false;
       mediaEl.removeAttribute('muted');
       if (mediaEl.tagName === 'AUDIO' && mediaEl.paused) {
-        mediaEl.play();
+        tryPlay(mediaEl);
       }
       return Promise.resolve();
     } else {
@@ -1828,10 +1814,8 @@ export class AmpStoryPage extends AMP.BaseElement {
       container.setAttribute('role', 'button');
 
       container.addEventListener('click', (e) => {
-        if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-          // Prevent default so link can be opened programmatically after URL preview is shown.
-          e.preventDefault();
-        }
+        // Prevent default so link can be opened programmatically after URL preview is shown.
+        e.preventDefault();
         this.openAttachment();
       });
 

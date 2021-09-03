@@ -6,22 +6,6 @@ teaser:
   text: A rich, visual storytelling format.
 ---
 
-<!--
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-story
 
 [Web stories](https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/?format=stories) are an immersive, tappable and easily shareable storytelling format. Web stories are built using the AMP Framework. The `amp-story` component provides the AMP story subset of AMP. It is the base technology for web stories.
@@ -507,38 +491,11 @@ Example:
 </a>
 ```
 
-#### Integration with sidebar for stories
-
-`amp-story` supports the use of `amp-sidebar` with a few limitations and caveats. See the [Sidebar for Stories documentation](https://amp.dev/documentation/components/amp-sidebar?format=websites#sidebar-for-stories) for more details.
-
-By using branching and `amp-sidebar`, you can create stories that have a table of contents. To do this, make use of URL fragment parameter.
-
-The following example demonstrates a table of contents inside of an `amp-sidebar`. The table of contents has a link to a specific story page, and and out-link to a different website.
-
-```html
-<amp-story id="story" standalone>
-  <amp-sidebar id="sidebar1" layout="nodisplay">
-    <ul>
-      <li><a href="#page=bacon-page"> Bacon page </a></li>
-      <li><a href="https://www.amp.dev"> External Link </a></li>
-    </ul>
-  </amp-sidebar>
-
-  <amp-story-page id="bacon-page">
-    <amp-story-grid-layer>
-      <p>Bacon, of course!</p>
-    </amp-story-grid-layer>
-  </amp-story-page>
-  ...
-</amp-story>
-```
-
 #### Other components usable in AMP stories
 
 The following are other components usable in AMP stories that require some story-specific caveats.
 
 -   [amp-consent](https://amp.dev/documentation/components/amp-consent#prompt-ui-for-stories)
--   [amp-sidebar](https://amp.dev/documentation/components/amp-sidebar#sidebar-for-stories)
 -   [amp-twitter](https://amp.dev/documentation/components/amp-twitter)
 
 For more generally usable components see the [list of allowed children](https://amp.dev/documentation/components/amp-story#children).
@@ -861,7 +818,7 @@ With branching, AMP Stories now supports URLs in the form of:
 https://www.mydomain.com/good-story/#page=<page-id>
 ```
 
-where `page-id` refers to the unique id of an `amp-story-page`. You can also use the fragment parameter and the `page-id` value like an anchor link in some use cases. See [Integration with Sidebar for Stories](#integration-with-sidebar-for-stories) for an example.
+where `page-id` refers to the unique id of an `amp-story-page`. You can also use the fragment parameter and the `page-id` value like an anchor link in some use cases.
 
 ## Localization
 

@@ -1,94 +1,77 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {signingServerURLs} from '#ads/_a4a-config';
 
-import {A4AVariableSource} from './a4a-variable-source';
-import {ADS_INITIAL_INTERSECTION_EXP} from '#experiments/ads-initial-intersection-exp';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {Deferred, tryResolve} from '#core/data-structures/promise';
-import {DetachedDomStream, streamResponseToWriter} from '#core/dom/stream';
-import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
-import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
+import {createElementWithAttributes} from '#core/dom';
 import {
   Layout,
   LayoutPriority,
   applyFillContent,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
-import {Services} from '#service';
-import {SignatureVerifier, VerificationStatus} from './signature-verifier';
+import {intersectionEntryToJson} from '#core/dom/layout/intersection';
 import {
-  applySandbox,
-  generateSentinel,
-  getDefaultBootstrapBaseUrl,
-} from '../../../src/3p-frame';
-import {assertHttpsUrl} from '../../../src/url';
-import {cancellation, isCancellation} from '../../../src/error-reporting';
-import {createElementWithAttributes} from '#core/dom';
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '#core/dom/layout/viewport-observer';
+import {DetachedDomStream, streamResponseToWriter} from '#core/dom/stream';
+import {setStyle} from '#core/dom/style';
+import {duplicateErrorIfNecessary} from '#core/error';
+import {isArray, isEnumValue, isObject} from '#core/types';
+import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
+import {padStart} from '#core/types/string';
+import {utf8Decode} from '#core/types/string/bytes';
+import {tryDecodeUriComponent} from '#core/types/string/url';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
+import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
+
+import {A4AVariableSource} from './a4a-variable-source';
+import {getExtensionsFromMetadata} from './amp-ad-utils';
+import {processHead} from './head-validation';
 import {
   createSecureDocSkeleton,
   createSecureFrame,
   isAttributionReportingSupported,
 } from './secure-frame';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {duplicateErrorIfNecessary} from '#core/error';
+import {SignatureVerifier, VerificationStatus} from './signature-verifier';
+import {whenWithinViewport} from './within-viewport';
+
 import {
-  getAmpAdRenderOutsideViewport,
-  incrementLoadingAds,
-  is3pThrottled,
-} from '../../amp-ad/0.1/concurrent-load';
+  applySandbox,
+  generateSentinel,
+  getDefaultBootstrapBaseUrl,
+} from '../../../src/3p-frame';
+import {isAdPositionAllowed} from '../../../src/ad-helper';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getContextMetadata} from '../../../src/iframe-attributes';
-import {getExperimentBranch, isExperimentOn} from '#experiments';
-import {getExtensionsFromMetadata} from './amp-ad-utils';
-import {getMode} from '../../../src/mode';
+import {cancellation, isCancellation} from '../../../src/error-reporting';
+import {listenOnce} from '../../../src/event-helper';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   installFriendlyIframeEmbed,
   isSrcdocSupported,
   preloadFriendlyIframeEmbedExtensions,
 } from '../../../src/friendly-iframe-embed';
-import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
-import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
+import {getContextMetadata} from '../../../src/iframe-attributes';
+import {dev, devAssert, logHashParam, user, userAssert} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {assertHttpsUrl} from '../../../src/url';
+import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {
-  intersectionEntryToJson,
-  measureIntersection,
-} from '#core/dom/layout/intersection';
-import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {isArray, isEnumValue, isObject} from '#core/types';
-import {tryDecodeUriComponent} from '#core/types/string/url';
-
-import {listenOnce} from '../../../src/event-helper';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
-import {padStart} from '#core/types/string';
-import {parseJson} from '#core/types/object/json';
-import {processHead} from './head-validation';
-import {setStyle} from '#core/dom/style';
-import {signingServerURLs} from '#ads/_a4a-config';
-
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {utf8Decode} from '#core/types/string/bytes';
-import {whenWithinViewport} from './within-viewport';
+  getAmpAdRenderOutsideViewport,
+  incrementLoadingAds,
+  is3pThrottled,
+} from '../../amp-ad/0.1/concurrent-load';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -299,9 +282,6 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?../../../src/layout-rect.LayoutSizeDef} */
     this.originalSlotSize_ = null;
 
-    /** @private {Promise<!IntersectionObserverEntry>} */
-    this.initialIntersectionPromise_ = null;
-
     /**
      * Note(keithwrightbos) - ensure the default here is null so that ios
      * uses safeframe when response header is not specified.
@@ -452,13 +432,6 @@ export class AmpA4A extends AMP.BaseElement {
     }
 
     this.isSinglePageStoryAd = this.element.hasAttribute('amp-story');
-
-    const asyncIntersection =
-      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
-      ADS_INITIAL_INTERSECTION_EXP.experiment;
-    this.initialIntersectionPromise_ = asyncIntersection
-      ? measureIntersection(this.element)
-      : Promise.resolve(this.element.getIntersectionChangeEntry());
   }
 
   /** @override */
@@ -1323,7 +1296,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Additional arguments.
     assignAdUrlToError(/** @type {!Error} */ (error), this.adUrl_);
 
-    if (getMode().development || getMode().localDev || getMode().log) {
+    if (getMode().development || getMode().localDev || logHashParam()) {
       user().error(TAG, error);
     } else {
       user().warn(TAG, error);
@@ -2113,16 +2086,15 @@ export class AmpA4A extends AMP.BaseElement {
       this.sentinel
     );
 
-    return this.initialIntersectionPromise_.then((intersection) => {
-      contextMetadata['_context']['initialIntersection'] =
-        intersectionEntryToJson(intersection);
-      return this.iframeRenderHelper_(
-        dict({
-          'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
-          'name': JSON.stringify(contextMetadata),
-        })
-      );
-    });
+    const intersection = this.element.getIntersectionChangeEntry();
+    contextMetadata['_context']['initialIntersection'] =
+      intersectionEntryToJson(intersection);
+    return this.iframeRenderHelper_(
+      dict({
+        'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
+        'name': JSON.stringify(contextMetadata),
+      })
+    );
   }
 
   /**
@@ -2189,21 +2161,20 @@ export class AmpA4A extends AMP.BaseElement {
         this.getAdditionalContextMetadata(method == XORIGIN_MODE.SAFEFRAME)
       );
 
-      return this.initialIntersectionPromise_.then((intersection) => {
-        contextMetadata['initialIntersection'] =
-          intersectionEntryToJson(intersection);
-        if (method == XORIGIN_MODE.NAMEFRAME) {
-          contextMetadata['creative'] = creative;
-          name = JSON.stringify(contextMetadata);
-        } else if (method == XORIGIN_MODE.SAFEFRAME) {
-          contextMetadata = JSON.stringify(contextMetadata);
-          name =
-            `${this.safeframeVersion};${creative.length};${creative}` +
-            `${contextMetadata}`;
-        }
+      const intersection = this.element.getIntersectionChangeEntry();
+      contextMetadata['initialIntersection'] =
+        intersectionEntryToJson(intersection);
+      if (method == XORIGIN_MODE.NAMEFRAME) {
+        contextMetadata['creative'] = creative;
+        name = JSON.stringify(contextMetadata);
+      } else if (method == XORIGIN_MODE.SAFEFRAME) {
+        contextMetadata = JSON.stringify(contextMetadata);
+        name =
+          `${this.safeframeVersion};${creative.length};${creative}` +
+          `${contextMetadata}`;
+      }
 
-        return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
-      });
+      return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
     });
   }
 

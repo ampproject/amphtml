@@ -2,6 +2,7 @@
 # Keep this list in sync with .gitignore, .prettierignore, and build-system/tasks/clean.js
 .babel-cache
 .css-cache
+.jss-cache
 .pre-closure-cache
 
 # Output directories
@@ -28,6 +29,7 @@ validator/**/dist
 validator/export
 
 # Files and directories explicitly ignored by eslint
+**/node_modules/**
 build-system/babel-plugins/**/fixtures/**/*.js
 build-system/babel-plugins/**/fixtures/**/*.mjs
 build-system/tasks/make-extension/template/**/*

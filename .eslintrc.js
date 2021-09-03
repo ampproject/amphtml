@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const fs = require('fs');
 
 const {
@@ -52,7 +36,6 @@ module.exports = {
     'jsdoc',
     'local',
     'module-resolver',
-    'notice',
     'prettier',
     'react',
     'react-hooks',
@@ -189,7 +172,6 @@ module.exports = {
     'local/is-experiment-on': 2,
     'local/json-configuration': 2,
     'local/jss-animation-name': 2,
-    'local/no-array-destructuring': 2,
     'local/no-arrow-on-register-functions': 2,
     'local/no-bigint': 2,
     'local/no-deep-destructuring': 2,
@@ -215,8 +197,6 @@ module.exports = {
     'local/no-mixed-interpolation': 2,
     'local/no-mixed-operators': 2,
     'local/no-module-exports': 2,
-    'local/no-rest': 2,
-    'local/no-spread': 2,
     'local/no-static-this': 2,
     'local/no-style-display': 2,
     'local/no-style-property-setting': 2,
@@ -230,6 +210,25 @@ module.exports = {
     'local/prefer-unnested-spread-objects': 2,
     'local/private-prop-names': 2,
     'local/query-selector': 2,
+    'local/restrict-this-access': [
+      2,
+      {
+        className: 'PreactBaseElement',
+        allowed: [
+          'api',
+          'element',
+          'getProp',
+          'loadable',
+          'mutateElement',
+          'mutateProps',
+          'registerApiAction',
+          'triggerEvent',
+          'usesLoading',
+          'usesShadowDom',
+          'win',
+        ],
+      },
+    ],
     'local/todo-format': 0,
     'local/unused-private-field': 2,
     'local/vsync': 0,
@@ -272,16 +271,6 @@ module.exports = {
     'no-useless-concat': 2,
     'no-undef': 2,
     'no-var': 2,
-    'notice/notice': [
-      2,
-      {
-        'mustMatch': 'Copyright 20\\d{2} The AMP HTML Authors\\.',
-        'templateFile': 'build-system/common/LICENSE-TEMPLATE.txt',
-        'messages': {
-          'whenFailedToMatch': 'Missing or incorrect license header',
-        },
-      },
-    ],
     'object-shorthand': [
       2,
       'properties',
@@ -462,8 +451,12 @@ module.exports = {
       },
     },
     {
-      'files': ['3p/**/*.js', 'src/**/*.js'],
+      'files': ['3p/**/*.js', 'src/**/*.js', 'test/**/*.js', 'testing/**/*.js'],
       'rules': {'import/order': 2},
+    },
+    {
+      'files': ['src/preact/**', 'extensions/**/1.0/**', '**/storybook/**'],
+      'rules': {'local/preact-preferred-props': 2},
     },
   ],
 };

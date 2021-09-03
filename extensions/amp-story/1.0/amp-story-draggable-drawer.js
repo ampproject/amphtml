@@ -1,19 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   Action,
   StateProperty,
@@ -29,8 +13,7 @@ import {createShadowRootWithStyle} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '#core/dom/static-template';
-import {isAmpElement} from '../../../src/amp-element-helpers';
-import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
+import {isAmpElement} from '#core/dom/amp-element-helpers';
 import {listen} from '../../../src/event-helper';
 import {resetStyles, setImportantStyles, toggle} from '#core/dom/style';
 
@@ -125,7 +108,6 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.openThreshold_ = Infinity;
 
     /**
-     * For amp-story-page-attachment-ui-v2 experiment
      * Used for offsetting drag.
      * @private {?number}
      */
@@ -156,27 +138,19 @@ export class DraggableDrawer extends AMP.BaseElement {
       )
     );
 
-    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-      const spacerEl = this.win.document.createElement('button');
-      spacerEl.classList.add('i-amphtml-story-draggable-drawer-spacer');
-      spacerEl.classList.add('i-amphtml-story-system-reset');
-      spacerEl.setAttribute('role', 'button');
-      const localizationService = getLocalizationService(
-        devAssert(this.element)
+    const spacerEl = this.win.document.createElement('button');
+    spacerEl.classList.add('i-amphtml-story-draggable-drawer-spacer');
+    spacerEl.classList.add('i-amphtml-story-system-reset');
+    spacerEl.setAttribute('role', 'button');
+    const localizationService = getLocalizationService(devAssert(this.element));
+    if (localizationService) {
+      const localizedCloseString = localizationService.getLocalizedString(
+        LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
       );
-      if (localizationService) {
-        const localizedCloseString = localizationService.getLocalizedString(
-          LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
-        );
-        spacerEl.setAttribute('aria-label', localizedCloseString);
-      }
-      this.containerEl.insertBefore(spacerEl, this.contentEl);
-      this.contentEl.appendChild(headerShadowRootEl);
-      this.element.classList.add('i-amphtml-amp-story-page-attachment-ui-v2');
-      this.headerEl.classList.add('i-amphtml-amp-story-page-attachment-ui-v2');
-    } else {
-      templateEl.insertBefore(headerShadowRootEl, templateEl.firstChild);
+      spacerEl.setAttribute('aria-label', localizedCloseString);
     }
+    this.containerEl.insertBefore(spacerEl, this.contentEl);
+    this.contentEl.appendChild(headerShadowRootEl);
 
     this.element.appendChild(templateEl);
     this.element.setAttribute('aria-hidden', true);
@@ -214,39 +188,34 @@ export class DraggableDrawer extends AMP.BaseElement {
       true /** callToInitialize */
     );
 
-    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-      const spacerEl = dev().assertElement(
-        this.element.querySelector('.i-amphtml-story-draggable-drawer-spacer')
+    const spacerEl = dev().assertElement(
+      this.element.querySelector('.i-amphtml-story-draggable-drawer-spacer')
+    );
+
+    // Handle click on spacer element to close.
+    spacerEl.addEventListener('click', () => {
+      this.close_();
+    });
+
+    // For displaying sticky header on mobile.
+    new this.win.IntersectionObserver((e) => {
+      this.headerEl.classList.toggle(
+        'i-amphtml-story-draggable-drawer-header-stuck',
+        !e[0].isIntersecting
       );
+    }).observe(spacerEl);
 
-      // Handle click on spacer element to close.
-      spacerEl.addEventListener('click', () => {
-        this.close_();
-      });
+    // Update spacerElHeight_ on resize for drag offset.
+    new this.win.ResizeObserver((e) => {
+      this.spacerElHeight_ = e[0].contentRect.height;
+    }).observe(spacerEl);
 
-      // For displaying sticky header on mobile.
-      new this.win.IntersectionObserver((e) => {
-        this.headerEl.classList.toggle(
-          'i-amphtml-story-draggable-drawer-header-stuck',
-          !e[0].isIntersecting
-        );
-      }).observe(spacerEl);
-
-      // Update spacerElHeight_ on resize for drag offset.
-      new this.win.ResizeObserver((e) => {
-        this.spacerElHeight_ = e[0].contentRect.height;
-      }).observe(spacerEl);
-
-      // Reset scroll position on end of close transiton.
-      this.element.addEventListener('transitionend', (e) => {
-        if (
-          e.propertyName === 'transform' &&
-          this.state === DrawerState.CLOSED
-        ) {
-          this.containerEl./*OK*/ scrollTop = 0;
-        }
-      });
-    }
+    // Reset scroll position on end of close transiton.
+    this.element.addEventListener('transitionend', (e) => {
+      if (e.propertyName === 'transform' && this.state === DrawerState.CLOSED) {
+        this.containerEl./*OK*/ scrollTop = 0;
+      }
+    });
   }
 
   /**
@@ -534,10 +503,8 @@ export class DraggableDrawer extends AMP.BaseElement {
           return;
         }
         this.state = DrawerState.DRAGGING_TO_OPEN;
-        let drag = Math.max(deltaY, -this.dragCap_);
-        if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-          drag -= this.spacerElHeight_;
-        }
+        const drag = Math.max(deltaY, -this.dragCap_) - this.spacerElHeight_;
+
         translate = `translate3d(0, calc(100% + ${drag}px), 0)`;
         break;
       case DrawerState.OPEN:
@@ -614,6 +581,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.state = DrawerState.CLOSED;
 
     this.storeService.dispatch(Action.TOGGLE_PAUSED, false);
+    this.handleSoftKeyboardOnDrawerClose_();
 
     this.mutateElement(() => {
       this.element.setAttribute('aria-hidden', true);
@@ -631,5 +599,29 @@ export class DraggableDrawer extends AMP.BaseElement {
       const owners = Services.ownersForDoc(this.element);
       owners.schedulePause(this.element, this.ampComponents_);
     });
+  }
+
+  /**
+   * Handle the soft keyboard during the closing of the drawer.
+   * @private
+   */
+  handleSoftKeyboardOnDrawerClose_() {
+    // Blur the focused element in order to dismiss the soft keyboard.
+    this.win.document.activeElement?.blur();
+    // Reset the story's scroll position, which can be unintentionally altered
+    // by the opening of the soft keyboard on Android devices.
+    this.resetStoryScrollPosition_();
+  }
+
+  /**
+   * Set the story's scroll position to its default state, if necessary.
+   * @private
+   */
+  resetStoryScrollPosition_() {
+    const storyEl = closest(
+      this.element,
+      (el) => el.tagName === 'AMP-STORY-PAGE'
+    );
+    storyEl./*OK*/ scrollTo(0, 0);
   }
 }
