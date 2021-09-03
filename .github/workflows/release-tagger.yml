@@ -16,7 +16,6 @@ on:
         required: true
 jobs:
   tagger:
-    if: contains(['beta', 'stable', 'lts'], github.event.channel)
     environment: release_tagger
     runs-on: ubuntu-latest
     steps:
