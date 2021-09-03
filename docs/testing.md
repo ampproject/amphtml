@@ -338,7 +338,7 @@ You may launch a single environment by specifying `--storybook_env`:
 amp storybook --storybook-env=preact
 ```
 
-> Launching the `amp` environment also initiates the build-and-serve task that's normally launched using the [`amp` command](#testing-commands), which makes an additional server available on `localhost:8000`.
+> Launching the `amp` environment also initiates the build-and-serve task that's normally launched using the [`amp` command](#testing-commands). This provides an additional server on `localhost:8000`.
 
 ### Writing test scenarios
 
