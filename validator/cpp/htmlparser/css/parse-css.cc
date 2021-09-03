@@ -10,7 +10,6 @@
 #include "absl/strings/str_join.h"
 #include "absl/types/variant.h"
 #include "css/parse-css.pb.h"
-#include "css/parse-css.proto.h"
 #include "logging.h"
 #include "strings.h"
 
