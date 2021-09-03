@@ -1,13 +1,13 @@
 @import 'amp-story-element.css';
 
-/* html.i-amphtml-singledoc.i-amphtml-standalone body, body,
+html.i-amphtml-singledoc.i-amphtml-standalone body, body,
 html.i-amphtml-singledoc.i-amphtml-standalone, html {
   animation:none !important;
   height: 100% !important;
   width: 100% !important;
   margin: 0;
   overflow: hidden;
-} */
+}
 .i-amphtml-notbuilt {
   color: initial !important;
 }
