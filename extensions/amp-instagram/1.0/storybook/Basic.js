@@ -6,11 +6,11 @@ import {
   AccordionHeader,
   AccordionSection,
 } from '../../../amp-accordion/1.0/component';
-import {Instagram} from '../component';
+import {BentoInstagram} from '../component';
 
 export default {
   title: 'Instagram',
-  component: Instagram,
+  component: BentoInstagram,
   args: {
     width: 500,
     height: 600,
@@ -21,11 +21,11 @@ export default {
 
 export const _default = ({height, width, ...args}) => {
   return (
-    <Instagram
+    <BentoInstagram
       style={{width, height}}
-      alt="AMP Instagram Storybook Preact Example"
+      alt="Bento Instagram Storybook Preact Example"
       {...args}
-    ></Instagram>
+    ></BentoInstagram>
   );
 };
 
@@ -37,11 +37,11 @@ export const InsideAccordion = ({height, width, ...args}) => {
           <h2>Post</h2>
         </AccordionHeader>
         <AccordionContent>
-          <Instagram
+          <BentoInstagram
             style={{width, height}}
-            alt="AMP Instagram Storybook Preact Example"
+            alt="Bento Instagram Storybook Preact Example"
             {...args}
-          ></Instagram>
+          ></BentoInstagram>
         </AccordionContent>
       </AccordionSection>
     </Accordion>
