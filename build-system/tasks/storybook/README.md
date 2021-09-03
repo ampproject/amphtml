@@ -100,16 +100,14 @@ Simple controls, like `text`, `boolean`, `number` and `object` derive their conf
 
 However, you should feel free to use `argTypes` when you need more than the default configuration, like specifying a `name` label that does not match the property name, or specifying a number range.
 
-Additionally, other controls, like `select`, `file`, or `color`<sup>[1]</sup> can only be configured through `argTypes`, so it's fine to use in that case. See [possible types in the official Storybook documentation](https://storybook.js.org/docs/react/essentials/controls#annotation).
-
-> <sup>[1]</sup> `color` has an exception. It **can** be derived from `args` [as long as the property name ends with `background` or `color`.](https://storybook.js.org/docs/react/essentials/controls#custom-control-type-matchers)
+Additionally, other controls, like `select`, `file`, or `color` can only be configured through `argTypes`, so it's fine to use in that case. See [possible types in the official Storybook documentation](https://storybook.js.org/docs/react/essentials/controls#annotation).
 
 ✅ Do:
 
 ```js
 MyStory.args = {
   two: 2,
-  color: '#66ccff',
+  foo: 'bar',
 };
 
 MyStory.argTypes = {
@@ -129,10 +127,10 @@ MyStory.argTypes = {
     name: 'two',
     defaultValue: 2,
   },
-  color: {
-    name: 'color',
-    defaultValue: '#66ccff',
-    control: {type: 'color'},
+  foo: {
+    name: 'foo',
+    defaultValue: 'bar',
+    control: {type: 'text'},
   },
   bestPants: {
     name: 'best kind of pants',
