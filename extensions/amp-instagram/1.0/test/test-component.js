@@ -8,7 +8,7 @@ import {waitFor} from '#testing/test-helper';
 
 import {BentoInstagram} from '../component';
 
-describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
+describes.sandboxed('BentoInstagram preact component v1.0', {}, (env) => {
   it('Normal render', () => {
     const wrapper = mount(
       <BentoInstagram
