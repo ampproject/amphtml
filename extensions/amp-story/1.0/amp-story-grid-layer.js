@@ -11,8 +11,8 @@
  */
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
-import {StateProperty, getStoreService,} from './amp-story-store-service';
-import {assertDoesNotContainDisplay, px, setStyles,} from '#core/dom/style';
+import {StateProperty, getStoreService} from './amp-story-store-service';
+import {assertDoesNotContainDisplay, px, setStyles} from '#core/dom/style';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {scopedQuerySelectorAll} from '#core/dom/query';
 
