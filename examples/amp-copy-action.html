@@ -6,6 +6,7 @@
   <!-- ## Setup -->
   <link rel="canonical" href="https://amp.dev/documentation/examples/components/amp-copy-action/">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
 </head>
 <style>
     .column {
@@ -30,6 +31,15 @@
     <div class="column">
         <button on="tap:AMP.copy(text='Hello AMP');copy-success:copied.show()">Copy Static Text</button>
         <p hidden id="copied">Copied!</p>
+    </div>
+    <div class="column">
+        <button 
+            [class]="eventResult"
+            [text]="eventResult"
+            on="tap:AMP.copy(text='Copy error');
+            copy-error:AMP.setState({eventResult: event.data.type});
+            copy-success:AMP.setState({eventResult: event.data.type})">Copy Text - Event</button>
+        <p hidden [hidden]="eventResult != 'error'">Copy Error</p>
     </div>
     <div class="column">
         <textarea placeholder="Paste here!" rows="10" cols="50"></textarea>

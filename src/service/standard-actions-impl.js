@@ -15,6 +15,7 @@ import {createCustomEvent} from '../event-helper';
 import {dev, user, userAssert} from '../log';
 import {getAmpdoc, registerServiceBuilderForDoc} from '../service-helpers';
 import {devAssertElement} from '#core/assert';
+import {dict} from '#core/types/object';
 
 /**
  * @param {!Element} element
@@ -184,9 +185,9 @@ export class StandardActions {
     const CopyEvents = {
       COPY_ERROR: 'copy-error',
       COPY_SUCCESS: 'copy-success',
-      SUPPORT_ERROR: 'support-error',
     };
     let eventName;
+    let eventResult;
     const {args, node} = invocation;
     const win = getWin(node);
 
@@ -209,34 +210,39 @@ export class StandardActions {
     /**
      * Trigger Event based on copy action
      *  - If content got copied to the clipboard successfully, it will
-     *  fire `copy-success` event.
+     *  fire `copy-success` event with data type `success`.
      *  - If there's any error in copying, it will
-     *  fire `copy-error` event.
+     *  fire `copy-error` event with data type `error`.
      *  - If browser is not supporting the copy function/action, it
-     *  will fire `support-error` event.
+     *  will fire `copy-error` event with data type `browser`.
      *
      *  Example: <button on="tap:AMP.copy(text='Hello AMP');copy-success:copied.show()">Copy</button>
      */
+    eventName = CopyEvents.COPY_ERROR;
     if (isCopyingToClipboardSupported(win.document)) {
       if (copyTextToClipboard(win, textToCopy)) {
         eventName = CopyEvents.COPY_SUCCESS;
+        eventResult = 'success';
       } else {
-        eventName = CopyEvents.COPY_ERROR;
+        eventResult = 'error';
       }
     } else {
-      eventName = CopyEvents.SUPPORT_ERROR;
+      eventResult = 'browser';
     }
-
-    const selectEvent = createCustomEvent(
+    const eventValue = /** @type {!JsonObject} */ ({
+      data: /** @type {!JsonObject} */ {type: eventResult},
+    });
+    let copyEvent = createCustomEvent(
       win,
       `${eventName}`,
-      /* Details */ null
+      eventValue
     );
+    
     const action_ = Services.actionServiceForDoc(invocation.caller);
     action_.trigger(
       invocation.caller,
       eventName,
-      selectEvent,
+      copyEvent,
       ActionTrust.HIGH
     );
     return null;
