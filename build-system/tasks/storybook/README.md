@@ -71,7 +71,7 @@ const MyStory = ({width, height, layout, foo}) => {
 MyStory.args = {
   width: 500,
   height: 200,
-  layout: 'responsive'
+  layout: 'responsive',
   foo: 'bar',
 };
 ```
@@ -151,7 +151,7 @@ MyStory.argTypes = {
 
 Listed Stories derive their names from their functions, and are split according to `camelCase` (`MyNamedStory` becomes `My Named Story` when listed).
 
-For this reason, the `.storyName` property should be avoided when it's too similar to the function name.
+For this reason, the `storyName` property should be avoided when it's too similar to the function name.
 
 ✅ Do:
 
