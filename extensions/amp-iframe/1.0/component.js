@@ -107,7 +107,7 @@ export function Iframe({
         return;
       }
       isIntersectingRef.current = isIntersecting;
-      if (!isIntersecting) {
+      if (!isIntersecting && dataRef.current) {
         attemptResize();
       }
     },
