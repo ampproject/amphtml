@@ -36,10 +36,27 @@ const viewportCallbacks = new WeakMap();
  * Lazily creates an IntersectionObserver per Window to track when elements
  * enter and exit the viewport. Fires viewportCallback when this happens.
  *
+ * TODO(dmanek): This is a wrapper around `observeIntersections` to maintain
+ * backwards compatibility and can be deleted once all instances have been
+ * migrated.
+ *
  * @param {!Element} element
  * @param {function(boolean)} viewportCallback
  */
 export function observeWithSharedInOb(element, viewportCallback) {
+  observeIntersections(element, ({isIntersecting}) =>
+    viewportCallback(isIntersecting)
+  );
+}
+
+/**
+ * Lazily creates an IntersectionObserver per Window to track when elements
+ * enter and exit the viewport. Fires viewportCallback when this happens.
+ *
+ * @param {!Element} element
+ * @param {function(boolean)} viewportCallback
+ */
+export function observeIntersections(element, viewportCallback) {
   const win = toWin(element.ownerDocument.defaultView);
   let viewportObserver = viewportObservers.get(win);
   if (!viewportObserver) {

@@ -1,5 +1,5 @@
 import {
-  observeWithSharedInOb,
+  observeIntersections,
   unobserveWithSharedInOb,
 } from '#core/dom/layout/viewport-observer';
 
@@ -23,7 +23,7 @@ export function useIntersectionObserver(callback) {
       if (!node) {
         return;
       }
-      observeWithSharedInOb(node, callback);
+      observeIntersections(node, callback);
     },
     [callback]
   );
