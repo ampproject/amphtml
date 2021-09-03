@@ -379,6 +379,20 @@ This same image can be used for both mobile portrait and landscape desktop using
 <amp-img src="cat.jpg" alt="..." object-position="75% 40%"></amp-img>
 ```
 
+##### Optimize `amp-video` by using a free Google hosted video cache on origin documents
+
+The `<amp-video>` element on stories supports the Google video cache to be used on origin documents through the attribute `cache="google"`. The video cache will fetch and store the video contents periodically, reducing serving costs for videos, and generating transcodes with different quality settings that adapt the bitrate to the network conditions.
+
+Use 720p videos or higher to take advantage of all the video transcodes and adaptive bitrate algorithms.
+
+Example:
+
+```html
+<amp-video layout="fill" poster="img.png" cache="google">
+  <source src="video.mp4" type="video/mp4">
+</amp-video>
+```
+
 ##### `data-text-background-color`
 
 The `data-text-background-color` attribute highlights the text of the element with a specified color. To highlight the entire block, add this attribute directly to the text element. To only highlight the text, add the attribute and text to an inner <span>. Note that works anywhere inside an `<amp-story-page>`, not just in `<amp-story-grid-layer>`.
