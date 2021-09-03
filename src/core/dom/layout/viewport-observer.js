@@ -54,7 +54,7 @@ export function observeWithSharedInOb(element, viewportCallback) {
  * enter and exit the viewport. Fires viewportCallback when this happens.
  *
  * @param {!Element} element
- * @param {function(boolean)} viewportCallback
+ * @param {function(IntersectionObserverEntry)} viewportCallback
  */
 export function observeIntersections(element, viewportCallback) {
   const win = toWin(element.ownerDocument.defaultView);

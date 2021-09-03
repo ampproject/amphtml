@@ -116,18 +116,6 @@ describes.sandboxed('DOM - layout - Viewport Observer', {}, (env) => {
       expect(el1Events).eql([false]);
     });
 
-    it('Observing twice with the same callback is fine, but unique ones throw', () => {
-      const noop = () => {};
-      observeWithSharedInOb(el1, noop);
-      observeWithSharedInOb(el1, noop);
-
-      allowConsoleError(() => {
-        expect(() => observeWithSharedInOb(el1, () => {})).throws(
-          'Assertion failed'
-        );
-      });
-    });
-
     it('A quick observe and unobserve pair should not cause an error or fire the callback', () => {
       const spy = env.sandbox.spy();
       observeWithSharedInOb(el1, spy);
