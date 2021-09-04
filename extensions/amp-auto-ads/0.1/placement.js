@@ -88,6 +88,7 @@ export class Placement {
    * @param {function(!Element, !Element)} injector
    * @param {!JsonObject<string, string>} attributes
    * @param {!../../../src/layout-rect.LayoutMarginsChangeDef=} opt_margins
+   * @param {!JsonObject} customAnalytics
    */
   constructor(
     ampdoc,
@@ -95,7 +96,8 @@ export class Placement {
     position,
     injector,
     attributes,
-    opt_margins
+    opt_margins,
+    customAnalytics
   ) {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
@@ -126,6 +128,9 @@ export class Placement {
 
     /** @private {!PlacementState} */
     this.state_ = PlacementState.UNUSED;
+
+    /** @const @private {!JsonObject} */
+    this.customAnalytics_ = customAnalytics;
   }
 
   /**
@@ -167,6 +172,22 @@ export class Placement {
   }
 
   /**
+   * Add custom amp-analytics emement
+   */
+  addCustomAmpAnalytics_() {
+    if (this.customAnalytics_) {
+      const doc = this.ampdoc.win.document;
+      const customAmpAnalytics = createElementWithAttributes(
+        doc,
+        'amp-analytics',
+        this.customAnalytics_
+      );
+      this.getAdElement().appendChild(customAmpAnalytics);
+    }
+  }
+
+
+  /**
    * @param {!JsonObject<string, string>} baseAttributes Any attributes to add to
    *     injected <amp-ad>. Specific attributes will override defaults, but be
    *     overridden by placement specific attributes defined in the
@@ -195,6 +216,7 @@ export class Placement {
           ? this.createFullWidthResponsiveAdElement_(baseAttributes)
           : this.createAdElement_(baseAttributes, sizing.width);
 
+        this.addCustomAmpAnalytics_();
         this.injector_(this.anchorElement_, this.getAdElement());
 
         if (shouldUseFullWidthResponsive) {
@@ -323,8 +345,9 @@ export class Placement {
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!JsonObject} configObj
  * @return {!Array<!Placement>}
+ * @param {!JsonObject} customAnalytics
  */
-export function getPlacementsFromConfigObj(ampdoc, configObj) {
+export function getPlacementsFromConfigObj(ampdoc, configObj, customAnalytics) {
   const placementObjs = /** @type {Array} */ (configObj['placements']);
   if (!placementObjs) {
     user().info(TAG, 'No placements in config');
@@ -332,7 +355,7 @@ export function getPlacementsFromConfigObj(ampdoc, configObj) {
   }
   const placements = [];
   placementObjs.forEach((placementObj) => {
-    getPlacementsFromObject(ampdoc, placementObj, placements);
+    getPlacementsFromObject(ampdoc, placementObj, placements, customAnalytics);
   });
   return placements;
 }
@@ -343,8 +366,14 @@ export function getPlacementsFromConfigObj(ampdoc, configObj) {
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!JsonObject} placementObj
  * @param {!Array<!Placement>} placements
+ * @param {!JsonObject} customAnalytics
  */
-function getPlacementsFromObject(ampdoc, placementObj, placements) {
+function getPlacementsFromObject(
+  ampdoc,
+  placementObj,
+  placements,
+  customAnalytics
+) {
   const injector = INJECTORS[placementObj['pos']];
   if (!injector) {
     user().warn(TAG, 'No injector for position');
@@ -386,7 +415,8 @@ function getPlacementsFromObject(ampdoc, placementObj, placements) {
         placementObj['pos'],
         injector,
         attributes,
-        margins
+        margins,
+        customAnalytics
       )
     );
   });

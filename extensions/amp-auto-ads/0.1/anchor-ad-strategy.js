@@ -14,8 +14,9 @@ export class AnchorAdStrategy {
    * @param {!JsonObject<string, string>} baseAttributes Any attributes that
    *     should be added to any inserted ads.
    * @param {!JsonObject} configObj
+   * @param {!JsonObject} customAnalytics
    */
-  constructor(ampdoc, baseAttributes, configObj) {
+  constructor(ampdoc, baseAttributes, configObj, customAnalytics) {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -24,6 +25,9 @@ export class AnchorAdStrategy {
 
     /** @const @private {!JsonObject} */
     this.configObj_ = configObj;
+
+    /** @const @private {!JsonObject} */
+    this.customAnalytics_ = customAnalytics;
   }
 
   /**
@@ -82,6 +86,23 @@ export class AnchorAdStrategy {
   }
 
   /**
+   * Add custom amp-analytics emement
+   * @param {HTMLElement} adElement
+   */
+  addCustomAmpAnalytics_(adElement) {
+    if (this.customAnalytics_) {
+      const doc = this.ampdoc.win.document;
+      const customAmpAnalytics = createElementWithAttributes(
+        doc,
+        'amp-analytics',
+        this.customAnalytics_
+      );
+      adElement.appendChild(customAmpAnalytics);
+    }
+  }
+
+
+  /**
    * @private
    */
   placeAmpAdStickyAd_() {
@@ -111,9 +132,14 @@ export class AnchorAdStrategy {
     delete attributes.sticky; // To ensure that no sticky attribute will be wrapped inside an amp-sticky-ad element.
     const doc = this.ampdoc.win.document;
     const ampAd = createElementWithAttributes(doc, 'amp-ad', attributes);
-    const stickyAd = createElementWithAttributes(doc, 'amp-sticky-ad', {
-      'layout': 'nodisplay',
-    });
+    this.addCustomAmpAnalytics_(ampAd);
+    const stickyAd = createElementWithAttributes(
+      doc,
+      'amp-sticky-ad',
+      dict({
+        'layout': 'nodisplay',
+      })
+    );
     stickyAd.appendChild(ampAd);
     const body = this.ampdoc.getBody();
     body.insertBefore(stickyAd, body.firstChild);

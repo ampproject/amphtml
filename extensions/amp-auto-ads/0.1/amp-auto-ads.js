@@ -31,6 +31,12 @@ export class AmpAutoAds extends AMP.BaseElement {
     this.adNetwork_ = getAdNetworkConfig(type, this.element);
     userAssert(this.adNetwork_, 'No AdNetworkConfig for type: ' + type);
 
+    this.customAnalytics_ = this.element.getAttribute('custom-analytics');
+    if (this.customAnalytics_) {
+      this.customAnalytics_ = JSON.parse(this.customAnalytics_);
+    }
+
+
     if (!this.adNetwork_.isEnabled(this.win)) {
       return;
     }
@@ -112,11 +118,18 @@ export class AmpAutoAds extends AMP.BaseElement {
         this.user().warn(TAG, noConfigReason);
       }
 
-      const placements = getPlacementsFromConfigObj(ampdoc, configObj);
-      const attributes = /** @type {!JsonObject} */ ({
-        ...this.adNetwork_.getAttributes(),
-        ...getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES),
-      });
+      const placements = getPlacementsFromConfigObj(
+        ampdoc,
+        configObj,
+        this.customAnalytics_
+      );
+      const attributes = /** @type {!JsonObject} */ (
+        Object.assign(
+          dict({}),
+          this.adNetwork_.getAttributes(),
+          getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES)
+        )
+      );
       const sizing = this.adNetwork_.getSizing();
       const adConstraints =
         getAdConstraintsFromConfigObj(ampdoc, configObj) ||
@@ -127,16 +140,23 @@ export class AmpAutoAds extends AMP.BaseElement {
         attributes,
         sizing,
         adTracker,
-        this.adNetwork_.isResponsiveEnabled()
+        this.adNetwork_.isResponsiveEnabled(),
+        ampdoc,
+        this.customAnalytics_
       ).run();
-      const stickyAdAttributes = /** @type {!JsonObject} */ ({
-        ...attributes,
-        ...getAttributesFromConfigObj(
-          configObj,
-          Attributes.STICKY_AD_ATTRIBUTES
-        ),
-      });
-      new AnchorAdStrategy(ampdoc, stickyAdAttributes, configObj).run();
+      const stickyAdAttributes = /** @type {!JsonObject} */ (
+        Object.assign(
+          dict({}),
+          attributes,
+          getAttributesFromConfigObj(configObj, Attributes.STICKY_AD_ATTRIBUTES)
+        )
+      );
+      new AnchorAdStrategy(
+        ampdoc,
+        stickyAdAttributes,
+        configObj,
+        this.customAnalytics_
+      ).run();
     });
   }
 }
