@@ -1,32 +1,19 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust} from '#core/constants/action-constants';
+import {getChildJsonConfig} from '#core/dom';
+import {setInitialDisplay, setStyles, toggle} from '#core/dom/style';
+import {clamp} from '#core/math';
+import {isFiniteNumber} from '#core/types';
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
-import {Builder} from './web-animations';
-import {Pass} from '../../../src/pass';
-import {Services} from '../../../src/services';
-import {WebAnimationPlayState} from './web-animation-types';
-import {WebAnimationService} from './web-animation-service';
-import {clamp} from '../../../src/utils/math';
-import {dev, userAssert} from '../../../src/log';
-import {getChildJsonConfig} from '../../../src/json';
-import {getDetail, listen} from '../../../src/event-helper';
+import {Services} from '#service';
+
 import {installWebAnimationsIfNecessary} from './install-polyfill';
-import {isFiniteNumber} from '../../../src/types';
-import {setInitialDisplay, setStyles, toggle} from '../../../src/style';
+import {WebAnimationService} from './web-animation-service';
+import {WebAnimationPlayState} from './web-animation-types';
+import {Builder} from './web-animations';
+
+import {getDetail, listen} from '../../../src/event-helper';
+import {dev, userAssert} from '../../../src/log';
+import {Pass} from '../../../src/pass';
 
 const TAG = 'amp-animation';
 
@@ -372,7 +359,7 @@ export class AmpAnimation extends AMP.BaseElement {
   onResize_() {
     // Store the previous `triggered` and `pausedByAction` value since
     // `cancel` may reset it.
-    const {triggered_: triggered, pausedByAction_: pausedByAction} = this;
+    const {pausedByAction_: pausedByAction, triggered_: triggered} = this;
 
     // Stop animation right away.
     if (this.runner_) {

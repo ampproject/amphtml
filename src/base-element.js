@@ -1,28 +1,14 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
+import {dispatchCustomEvent} from '#core/dom';
+import {Layout, LayoutPriority} from '#core/dom/layout';
+import {isArray} from '#core/types';
+import {toWin} from '#core/window';
 
-import {ActionTrust, DEFAULT_ACTION} from './core/constants/action-constants';
-import {Layout, LayoutPriority} from './layout';
-import {Services} from './services';
-import {devAssert, user, userAssert} from './log';
-import {dispatchCustomEvent} from './dom';
+import {Services} from '#service';
+
 import {getData, listen, loadPromise} from './event-helper';
+import {devAssert, user, userAssert} from './log';
 import {getMode} from './mode';
-import {isArray} from './core/types';
-import {toWin} from './types';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting
@@ -743,29 +729,6 @@ export class BaseElement {
   }
 
   /**
-   * Utility method that propagates attributes from this element
-   * to the given element.
-   * If `opt_removeMissingAttrs` is true, then also removes any specified
-   * attributes that are missing on this element from the target element.
-   * @param {string|!Array<string>} attributes
-   * @param {!Element} element
-   * @param {boolean=} opt_removeMissingAttrs
-   * @public @final
-   */
-  propagateAttributes(attributes, element, opt_removeMissingAttrs) {
-    attributes = isArray(attributes) ? attributes : [attributes];
-    for (let i = 0; i < attributes.length; i++) {
-      const attr = attributes[i];
-      const val = this.element.getAttribute(attr);
-      if (null !== val) {
-        element.setAttribute(attr, val);
-      } else if (opt_removeMissingAttrs) {
-        element.removeAttribute(attr);
-      }
-    }
-  }
-
-  /**
    * Utility method that forwards the given list of non-bubbling events
    * from the given element to this element as custom events with the same name.
    * @param  {string|!Array<string>} events
@@ -845,46 +808,6 @@ export class BaseElement {
    */
   renderStarted() {
     this.element.renderStarted();
-  }
-
-  /**
-   * Returns the original nodes of the custom element without any service nodes
-   * that could have been added for markup. These nodes can include Text,
-   * Comment and other child nodes.
-   * @return {!Array<!Node>}
-   * @public @final
-   */
-  getRealChildNodes() {
-    return this.element.getRealChildNodes();
-  }
-
-  /**
-   * Returns the original children of the custom element without any service
-   * nodes that could have been added for markup.
-   * @return {!Array<!Element>}
-   * @public @final
-   */
-  getRealChildren() {
-    return this.element.getRealChildren();
-  }
-
-  /**
-   * Configures the supplied element to have a "fill content" layout. The
-   * exact interpretation of "fill content" depends on the element's layout.
-   *
-   * If `opt_replacedContent` is specified, it indicates whether the "replaced
-   * content" styling should be applied. Replaced content is not allowed to
-   * have its own paddings or border.
-   *
-   * @param {!Element} element
-   * @param {boolean=} opt_replacedContent
-   * @public @final
-   */
-  applyFillContent(element, opt_replacedContent) {
-    element.classList.add('i-amphtml-fill-content');
-    if (opt_replacedContent) {
-      element.classList.add('i-amphtml-replaced-content');
-    }
   }
 
   /**

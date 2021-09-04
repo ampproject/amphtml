@@ -1,25 +1,8 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {bytesToString} from '#core/types/string/bytes';
 
-import {
-  OriginExperiments,
-  TokenMaster,
-} from '../../src/service/origin-experiments-impl';
-import {Services} from '../../src/services';
-import {bytesToString} from '../../src/core/types/string/bytes';
+import {Services} from '#service';
+import {OriginExperiments, TokenMaster} from '#service/origin-experiments-impl';
+
 import {user} from '../../src/log';
 
 describes.fakeWin('OriginExperiments', {amp: true}, (env) => {
@@ -35,7 +18,7 @@ describes.fakeWin('OriginExperiments', {amp: true}, (env) => {
   let error;
 
   beforeEach(() => {
-    ({win, ampdoc} = env);
+    ({ampdoc, win} = env);
 
     const crypto = Services.cryptoFor(win);
     isPkcsAvailable = env.sandbox.stub(crypto, 'isPkcsAvailable').returns(true);
@@ -139,7 +122,7 @@ describes.fakeWin('TokenMaster', {amp: true}, (env) => {
         tokenMaster = new TokenMaster(crypto, url);
 
         return tokenMaster.generateKeys().then((keyPair) => {
-          ({publicKey, privateKey} = keyPair);
+          ({privateKey, publicKey} = keyPair);
 
           const config = {
             origin: 'https://origin.com',

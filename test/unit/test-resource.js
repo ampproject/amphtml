@@ -1,27 +1,13 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {LayoutPriority} from '#core/dom/layout';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {LayoutPriority} from '../../src/layout';
-import {OwnersImpl} from '../../src/service/owners-impl';
-import {Resource, ResourceState} from '../../src/service/resource';
-import {ResourcesImpl} from '../../src/service/resources-impl';
-import {Services} from '../../src/services';
+import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {OwnersImpl} from '#service/owners-impl';
+import {Resource, ResourceState} from '#service/resource';
+import {ResourcesImpl} from '#service/resources-impl';
+
 import {isCancellation} from '../../src/error-reporting';
-import {layoutRectLtwh} from '../../src/layout-rect';
 
 describes.realWin('Resource', {amp: true}, (env) => {
   let win, doc;

@@ -1,33 +1,17 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
+const fastGlob = require('fast-glob');
 const fs = require('fs');
-const globby = require('globby');
 const listImportsExports = require('list-imports-exports');
 const minimatch = require('minimatch');
 const path = require('path');
 const testConfig = require('../../test-configs/config');
+const {cyan, green} = require('../../common/colors');
 const {execOrDie} = require('../../common/exec');
 const {extensions, maybeInitializeExtensions} = require('../extension-helpers');
 const {gitDiffNameOnlyMain} = require('../../common/git');
-const {green, cyan} = require('../../common/colors');
 const {isCiBuild} = require('../../common/ci');
 const {log, logLocalDev} = require('../../common/logging');
-const {reportTestSkipped} = require('../report-test-status');
 
 const LARGE_REFACTOR_THRESHOLD = 50;
 const TEST_FILE_COUNT_THRESHOLD = 20;
@@ -135,9 +119,9 @@ function getJsFilesFor(cssFile, cssJsFileMap) {
 
 /**
  * Computes the list of unit tests to run under difference scenarios
- * @return {Promise<Array<string>|void>}
+ * @return {Array<string>|void}
  */
-async function getUnitTestsToRun() {
+function getUnitTestsToRun() {
   log(green('INFO:'), 'Determining which unit tests to run...');
 
   if (isLargeRefactor()) {
@@ -145,7 +129,6 @@ async function getUnitTestsToRun() {
       green('INFO:'),
       'Skipping tests on local changes because this is a large refactor.'
     );
-    await reportTestSkipped();
     return;
   }
 
@@ -155,7 +138,6 @@ async function getUnitTestsToRun() {
       green('INFO:'),
       'No unit tests were directly affected by local changes.'
     );
-    await reportTestSkipped();
     return;
   }
   if (isCiBuild() && tests.length > TEST_FILE_COUNT_THRESHOLD) {
@@ -163,7 +145,6 @@ async function getUnitTestsToRun() {
       green('INFO:'),
       'Several tests were affected by local changes. Running all tests below.'
     );
-    await reportTestSkipped();
     return;
   }
 
@@ -223,7 +204,7 @@ function unitTestsToRun() {
    * @return {string[]}
    */
   function getTestsFor(srcFiles) {
-    const allUnitTests = globby.sync(unitTestPaths);
+    const allUnitTests = fastGlob.sync(unitTestPaths);
     return allUnitTests.filter((testFile) => {
       return shouldRunTest(testFile, srcFiles);
     });

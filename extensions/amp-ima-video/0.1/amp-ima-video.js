@@ -1,44 +1,27 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ImaPlayerData} from '#ads/google/ima/ima-player-data';
 
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {ImaPlayerData} from '../../../ads/google/ima/ima-player-data';
-import {PauseHelper} from '../../../src/utils/pause-helper';
-import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
-import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
-import {assertHttpsUrl} from '../../../src/url';
-import {
-  childElementsByTag,
-  dispatchCustomEvent,
-  isJsonScriptTag,
-  removeElement,
-} from '../../../src/dom';
-import {dict} from '../../../src/core/types/object';
-import {getConsentPolicyState} from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isEnumValue, isObject} from '../../../src/core/types';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {Deferred} from '#core/data-structures/promise';
+import {dispatchCustomEvent, isJsonScriptTag, removeElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
-import {toArray} from '../../../src/core/types/array';
+} from '#core/dom/layout/size-observer';
+import {childElementsByTag} from '#core/dom/query';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {isEnumValue, isObject} from '#core/types';
+import {toArray} from '#core/types/array';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {getConsentPolicyState} from '../../../src/consent';
+import {getData, listen} from '../../../src/event-helper';
+import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
+import {assertHttpsUrl} from '../../../src/url';
+import {VideoEvents} from '../../../src/video-interface';
 
 /** @const */
 const TAG = 'amp-ima-video';
@@ -220,7 +203,7 @@ class AmpImaVideo extends AMP.BaseElement {
       );
       iframe.title = this.element.title || 'IMA video';
 
-      this.applyFillContent(iframe);
+      applyFillContent(iframe);
 
       // This is temporary until M74 launches.
       // TODO(aghassemi, #21247)
@@ -270,7 +253,7 @@ class AmpImaVideo extends AMP.BaseElement {
    * @param {!../layout-rect.LayoutSizeDef} size
    * @private
    */
-  onResized_({width, height}) {
+  onResized_({height, width}) {
     if (!this.iframe_) {
       return;
     }
@@ -350,6 +333,20 @@ class AmpImaVideo extends AMP.BaseElement {
       this.isFullscreen_ = !!eventData['isFullscreen'];
       return;
     }
+  }
+
+  /** @override */
+  createPlaceholderCallback() {
+    const {poster} = this.element.dataset;
+    if (!poster) {
+      return null;
+    }
+    const img = new Image();
+    img.src = poster;
+    img.setAttribute('placeholder', '');
+    img.setAttribute('loading', 'lazy');
+    applyFillContent(img);
+    return img;
   }
 
   /** @override */

@@ -1,35 +1,22 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {CommonSignals} from '#core/constants/common-signals';
 
-import * as dom from '../../../../src/dom';
-import * as service from '../../../../src/service';
+import {forceExperimentBranch} from '#experiments';
+import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
+
+import {macroTask} from '#testing/helpers';
+
+import {Gestures} from '../../../../src/gesture';
+import * as openWindowDialog from '../../../../src/open-window-dialog';
+import * as service from '../../../../src/service-helpers';
 import {
   Action,
   UIType,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {ButtonTextFitter} from '../story-ad-button-text-fitter';
-import {CommonSignals} from '../../../../src/core/constants/common-signals';
-import {Gestures} from '../../../../src/gesture';
 import {StoryAdAnalytics} from '../story-ad-analytics';
-import {StoryAdAutoAdvance} from '../../../../src/experiments/story-ad-auto-advance';
+import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 import {StoryAdLocalization} from '../story-ad-localization';
 import {StoryAdPage} from '../story-ad-page';
-import {forceExperimentBranch} from '../../../../src/experiments';
-import {macroTask} from '../../../../testing/yield';
 
 const NOOP = () => {};
 
@@ -402,7 +389,10 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
         'https://googleads.g.doubleclick.net/pagead/images/mtad/ad_choices_blue.png'
       );
 
-      const openWindowDialogStub = env.sandbox.stub(dom, 'openWindowDialog');
+      const openWindowDialogStub = env.sandbox.stub(
+        openWindowDialog,
+        'openWindowDialog'
+      );
       attribution.click();
       expect(openWindowDialogStub).to.be.calledOnce;
       expect(openWindowDialogStub).to.be.calledWithExactly(

@@ -1,18 +1,4 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// @ts-nocheck
 
 /**
  * Takes a .jss.js file and transforms the `useStyles` export to remove side effects
@@ -49,7 +35,7 @@ const hash = require('./create-hash');
 const {addNamed} = require('@babel/helper-module-imports');
 const {create} = require('jss');
 const {default: preset} = require('jss-preset-default');
-const {relative, join} = require('path');
+const {join, relative} = require('path');
 const {transformCssSync} = require('../../tasks/css/jsify-css-sync');
 
 module.exports = function ({template, types: t}) {
@@ -61,6 +47,10 @@ module.exports = function ({template, types: t}) {
     return filename.endsWith('.jss.js');
   }
 
+  /**
+   * @param {string} name
+   * @return {string}
+   */
   function classnameId(name) {
     return `\$${name}`;
   }
@@ -238,6 +228,11 @@ module.exports = function ({template, types: t}) {
     );
   }
 
+  /**
+   * @param {Path} importDeclaration
+   * @param {string} name
+   * @return {string}
+   */
   function getImportIdentifier(importDeclaration, name) {
     return addNamed(
       importDeclaration,
@@ -325,6 +320,13 @@ module.exports = function ({template, types: t}) {
           throw path.buildCodeFrameError(
             'Cannot have class named CSS in your JSS object.'
           );
+        }
+
+        // This codepath is used when generating CSS files for npm distribution, separate from
+        // AMP-mode compilation.
+        if (this.opts.css) {
+          this.opts.css = transformCssSync(sheet.toString()).css;
+          return;
         }
 
         // Create the classes var.

@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   Action,
   StateProperty,
@@ -21,7 +5,7 @@ import {
 } from './amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from './variable-service';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 
 /** @type {string} */
 const TAG = 'amp-story-viewer-messaging-handler';
@@ -57,6 +41,10 @@ const GET_STATE_CONFIGURATIONS = {
   'PAGE_ATTACHMENT_STATE': {
     dataSource: DataSources.STORE_SERVICE,
     property: StateProperty.PAGE_ATTACHMENT_STATE,
+  },
+  'UI_STATE': {
+    dataSource: DataSources.STORE_SERVICE,
+    property: StateProperty.UI_STATE,
   },
   'STORY_PROGRESS': {
     dataSource: DataSources.VARIABLE_SERVICE,

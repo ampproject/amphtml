@@ -1,19 +1,3 @@
-<!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # Developing in AMP
 
 ## How to get started
@@ -78,7 +62,7 @@ In general we support the 2 latest versions of major browsers like Chrome, Firef
 
 Beyond that the core AMP library and builtin elements should aim for very wide browser support and we accept fixes for all browsers with market share greater than 1 percent.
 
-In particular, we try to maintain "it might not be perfect but isn't broken"-support for IE 11, iOS 8, the Android 4.0 system browser and Chrome 41.
+In particular, we try to maintain "it might not be perfect but isn't broken"-support for iOS 8, the Android 4.0 system browser and Chrome 41.
 
 ## Eng docs
 
@@ -109,7 +93,7 @@ To opt your browser into the a pre-release channel, go to [the AMP experiments p
 
 **If you find an issue that appears to only occur in the _Experimental/Beta Channel_ version of AMP**:
 
--   please [file an issue](https://github.com/ampproject/amphtml/issues/new) with a description of the problem
+-   please [file a bug report](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=Type%3A+Bug&template=bug-report.yml) with a description of the problem
     -   include a note that the problem is new to the _Experimental/Beta Channel_ build so that it can be properly prioritized
     -   include a URL to a page that reproduces the problem
 -   ping the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)) with the issue you filed so we can delay the push of the _Experimental/Beta Channel_ version to production if needed

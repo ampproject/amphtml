@@ -1,22 +1,7 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {CONFIGURATION_EVENT, ORIGIN} from './constants';
 import {getAddThisMode} from './addthis-utils/mode';
 
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 
 /**
  * Configuration request status enum.
@@ -91,12 +76,12 @@ export class ConfigManager {
 
     iframeData.forEach((iframeDatum) => {
       const {
-        iframe,
-        widgetId,
-        shareConfig,
         atConfig,
-        productCode,
         containerClassName,
+        iframe,
+        productCode,
+        shareConfig,
+        widgetId,
       } = iframeDatum;
       this.sendConfiguration_({
         iframe,
@@ -128,13 +113,13 @@ export class ConfigManager {
    */
   sendConfiguration_(input) {
     const {
+      atConfig,
+      containerClassName,
       iframe,
-      widgetId,
+      productCode,
       pubId,
       shareConfig,
-      atConfig,
-      productCode,
-      containerClassName,
+      widgetId,
     } = input;
     const pubData = this.dataForPubId_[pubId];
     const {config: dashboardConfig, requestStatus: configRequestStatus} =
@@ -209,15 +194,15 @@ export class ConfigManager {
    */
   register(config) {
     const {
-      pubId,
-      widgetId,
-      productCode,
+      activeToolsMonitor,
+      atConfig,
       containerClassName,
       iframe,
       iframeLoadPromise,
+      productCode,
+      pubId,
       shareConfig,
-      atConfig,
-      activeToolsMonitor,
+      widgetId,
     } = config;
     if (!this.activeToolsMonitor_) {
       this.activeToolsMonitor_ = activeToolsMonitor;
@@ -264,7 +249,7 @@ export class ConfigManager {
    * @param {{pubId:string, iframe:Element}} param
    */
   unregister(param) {
-    const {pubId, iframe} = param;
+    const {iframe, pubId} = param;
     this.configProviderIframes_ = this.configProviderIframes_.filter(
       (providerFrame) => providerFrame !== iframe
     );

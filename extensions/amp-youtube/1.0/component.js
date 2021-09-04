@@ -1,28 +1,14 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {dispatchCustomEvent} from '#core/dom';
+import {dict} from '#core/types/object';
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
+import {useRef} from '#preact';
+import {forwardRef} from '#preact/compat';
+
+import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';
+import {addParamsToUrl} from '../../../src/url';
 import {VideoEvents} from '../../../src/video-interface';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
-import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/core/types/object';
-import {dispatchCustomEvent} from '../../../src/dom';
-import {forwardRef} from '../../../src/preact/compat';
-import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';
-import {useRef} from '../../../src/preact';
 
 // Correct PlayerStates taken from
 // https://developers.google.com/youtube/iframe_api_reference#Playback_status
@@ -59,7 +45,7 @@ const PlayerFlags = {
   HIDE_ANNOTATION: 3,
 };
 
-/** @const {!../../../src/dom.CustomEventOptionsDef} */
+/** @const {!../../../src/core/dom.CustomEventOptionsDef} */
 const VIDEO_EVENT_OPTIONS = {bubbles: false, cancelable: false};
 
 /**
@@ -81,7 +67,16 @@ function createDefaultInfo() {
  * @template T
  */
 function YoutubeWithRef(
-  {autoplay, loop, videoid, liveChannelid, params = {}, credentials, ...rest},
+  {
+    autoplay,
+    loop,
+    videoid,
+    liveChannelid,
+    onLoad,
+    params = {},
+    credentials,
+    ...rest
+  },
   ref
 ) {
   const datasourceExists =
@@ -132,7 +127,7 @@ function YoutubeWithRef(
     playerStateRef.current = createDefaultInfo();
   }
 
-  const onMessage = ({data, currentTarget}) => {
+  const onMessage = ({currentTarget, data}) => {
     const parsedData = objOrParseJson(data);
     if (!parsedData) {
       return;
@@ -142,6 +137,7 @@ function YoutubeWithRef(
 
     if (event == 'initialDelivery') {
       dispatchVideoEvent(currentTarget, VideoEvents.LOADEDMETADATA);
+      onLoad?.();
       return;
     }
 

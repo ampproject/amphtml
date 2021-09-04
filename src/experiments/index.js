@@ -1,35 +1,20 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Experiments system allows a developer to opt-in to test
  * features that are not yet fully tested.
  *
  * Experiments page: https://cdn.ampproject.org/experiments.html *
  */
 
+import {isArray} from '#core/types';
+import {hasOwn, map} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
+import {parseQueryString} from '#core/types/string/url';
+
+import {ExperimentInfoDef} from './experiments.type';
+
 import {dev, user} from '../log';
 import {getMode} from '../mode';
-import {getTopWindow} from '../service';
-import {hasOwn, map} from '../core/types/object';
-import {isArray} from '../core/types';
-import {parseQueryString} from '../core/types/string/url';
-
-// typedef imports
-import {ExperimentInfoDef} from './experiments.type';
+import {getTopWindow} from '../service-helpers';
 
 /** @const {string} */
 const TAG = 'EXPERIMENTS';
@@ -125,13 +110,15 @@ export function experimentToggles(win) {
   win[TOGGLES_WINDOW_PROPERTY] = map();
   const toggles = win[TOGGLES_WINDOW_PROPERTY];
 
-  // Read the default config of this build.
-  if (win.AMP_CONFIG) {
-    for (const experimentId in win.AMP_CONFIG) {
-      const frequency = win.AMP_CONFIG[experimentId];
-      if (typeof frequency === 'number' && frequency >= 0 && frequency <= 1) {
-        toggles[experimentId] = Math.random() < frequency;
-      }
+  // Read default and injected configs of this build.
+  const buildExperimentConfigs = {
+    ...(win.AMP_CONFIG ?? {}),
+    ...(win.AMP_EXP ?? parseJson(win.__AMP_EXP?.textContent || '{}')),
+  };
+  for (const experimentId in buildExperimentConfigs) {
+    const frequency = buildExperimentConfigs[experimentId];
+    if (typeof frequency === 'number' && frequency >= 0 && frequency <= 1) {
+      toggles[experimentId] = Math.random() < frequency;
     }
   }
   // Read document level override from meta tag.

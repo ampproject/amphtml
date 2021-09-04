@@ -1,29 +1,14 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-video-iframe';
-import {Services} from '../../../../src/services';
-import {VideoEvents} from '../../../../src/video-interface';
-import {
-  createElementWithAttributes,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
-import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
+import {createElementWithAttributes} from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+
+import {Services} from '#service';
+
+import {macroTask} from '#testing/helpers';
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
+
 import {listenOncePromise} from '../../../../src/event-helper';
-import {macroTask} from '../../../../testing/yield';
+import {VideoEvents} from '../../../../src/video-interface';
 
 describes.realWin(
   'amp-video-iframe',
@@ -274,6 +259,7 @@ describes.realWin(
         expect(placeholder).to.have.attribute('placeholder');
         expect(placeholder.tagName.toLowerCase()).to.equal('img');
         expect(placeholder).to.have.class('i-amphtml-fill-content');
+        expect(placeholder.getAttribute('loading')).to.equal('lazy');
         expect(placeholder.getAttribute('src')).to.equal(poster);
       });
 
@@ -468,7 +454,7 @@ describes.realWin(
           eventType: 'tacos al pastor',
           sufix: 'with invalid event name',
         },
-      ].forEach(({sufix, eventType, vars, accept}) => {
+      ].forEach(({accept, eventType, sufix, vars}) => {
         const verb = accept ? 'dispatch' : 'reject';
 
         it(`should ${verb} custom analytics event ${sufix}`, async () => {

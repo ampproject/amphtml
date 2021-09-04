@@ -29,21 +29,21 @@
   "files": ["dist", "package.json", "../LICENSE", "README.md"],
   "dependencies": {
     "punycode": "2.1.1",
-    "url-parse": "1.5.1"
+    "url-parse": "1.5.3"
   },
   "devDependencies": {
-    "@ampproject/rollup-plugin-closure-compiler": "0.26.0",
-    "eslint": "7.26.0",
+    "@ampproject/rollup-plugin-closure-compiler": "0.27.0",
+    "eslint": "7.32.0",
     "eslint-config-google": "0.14.0",
-    "jasmine": "3.7.0",
-    "karma": "6.3.2",
+    "jasmine": "3.9.0",
+    "karma": "6.3.4",
     "karma-chrome-launcher": "3.1.0",
     "karma-jasmine": "4.0.1",
     "npm-run-all": "4.1.5",
-    "rollup": "2.48.0",
+    "rollup": "2.56.3",
     "rollup-plugin-commonjs": "10.1.0",
     "rollup-plugin-filesize": "9.1.1",
-    "rollup-plugin-ignore": "1.0.9",
+    "rollup-plugin-ignore": "1.0.10",
     "rollup-plugin-json": "4.0.0",
     "rollup-plugin-node-builtins": "2.1.2",
     "rollup-plugin-node-resolve": "5.2.0",

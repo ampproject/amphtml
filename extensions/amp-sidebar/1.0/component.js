@@ -1,26 +1,9 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../src/preact';
-import {ContainWrapper, useValueRef} from '../../../src/preact/component';
-import {Keys} from '../../../src/core/constants/key-codes';
+import * as Preact from '#preact';
+import {ContainWrapper, useValueRef} from '#preact/component';
+import {Keys} from '#core/constants/key-codes';
 import {Side} from './sidebar-config';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
-import {forwardRef} from '../../../src/preact/compat';
-import {isRTL} from '../../../src/dom';
+import {forwardRef} from '#preact/compat';
+import {isRTL} from '#core/dom';
 import {
   useCallback,
   useEffect,
@@ -28,9 +11,10 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-} from '../../../src/preact';
+} from '#preact';
 import {useSidebarAnimation} from './sidebar-animations-hook';
 import {useStyles} from './component.jss';
+import {useToolbarHook} from './sidebar-toolbar-hook';
 import objstr from 'obj-str';
 
 /**
@@ -41,13 +25,13 @@ import objstr from 'obj-str';
 function SidebarWithRef(
   {
     as: Comp = 'div',
-    side: sideProp,
-    onBeforeOpen,
-    onAfterOpen,
-    onAfterClose,
-    backdropStyle,
     backdropClassName,
+    backdropStyle,
     children,
+    onAfterClose,
+    onAfterOpen,
+    onBeforeOpen,
+    side: sideProp,
     ...rest
   },
   ref
@@ -137,7 +121,7 @@ function SidebarWithRef(
   }, [opened, close]);
 
   return (
-    <div className={objstr({[classes.unmounted]: !mounted})} part="wrapper">
+    <div class={objstr({[classes.unmounted]: !mounted})} part="wrapper">
       <ContainWrapper
         as={Comp}
         ref={sidebarRef}
@@ -152,7 +136,7 @@ function SidebarWithRef(
           [classes.right]: side !== Side.LEFT,
         })}
         role="menu"
-        tabindex="-1"
+        tabIndex="-1"
         hidden={!side}
         {...rest}
       >
@@ -163,14 +147,14 @@ function SidebarWithRef(
         onClick={() => close()}
         part="backdrop"
         style={backdropStyle}
-        className={objstr({
+        class={objstr({
           [classes.backdrop]: true,
           [classes.defaultBackdropStyles]: true,
           [backdropClassName]: backdropClassName,
         })}
         hidden={!side}
       >
-        <div className={classes.backdropOverscrollBlocker}></div>
+        <div class={classes.backdropOverscrollBlocker}></div>
       </div>
     </div>
   );
@@ -185,56 +169,13 @@ export {Sidebar};
  * @return {PreactDef.Renderable}
  */
 export function SidebarToolbar({
+  children,
   toolbar: mediaQueryProp,
   toolbarTarget: toolbarTargetProp,
-  children,
   ...rest
 }) {
   const ref = useRef(null);
-  const [mediaQuery, setMediaQuery] = useState(null);
-  const [toolbarTarget, setToolbarTarget] = useState(null);
-  const [targetEl, setTargetEl] = useState(null);
-
-  useEffect(() => {
-    const doc = ref.current?.ownerDocument;
-    if (!doc) {
-      return;
-    }
-
-    const sanitizedToolbarTarget = escapeCssSelectorIdent(toolbarTargetProp);
-    setToolbarTarget(sanitizedToolbarTarget);
-    setTargetEl(doc.getElementById(sanitizedToolbarTarget));
-  }, [toolbarTargetProp]);
-
-  useEffect(() => {
-    const win = ref.current?.ownerDocument?.defaultView;
-    if (!win) {
-      return;
-    }
-
-    setMediaQuery(sanitizeMediaQuery(win, mediaQueryProp));
-  }, [mediaQueryProp]);
-
-  useEffect(() => {
-    const element = ref.current;
-    const doc = ref.current?.ownerDocument;
-    if (!doc || !targetEl || mediaQuery == null) {
-      return;
-    }
-
-    const clone = element.cloneNode(true);
-    const style = doc.createElement('style');
-    style./*OK*/ textContent =
-      `#${toolbarTarget}{display: none;}` +
-      `@media ${mediaQuery}{#${toolbarTarget}{display: initial;}}`;
-
-    targetEl.appendChild(clone);
-    targetEl.appendChild(style);
-    return () => {
-      targetEl.removeChild(clone);
-      targetEl.removeChild(style);
-    };
-  }, [mediaQuery, toolbarTarget, targetEl]);
+  useToolbarHook(ref, mediaQueryProp, toolbarTargetProp);
 
   return (
     <nav
@@ -246,13 +187,4 @@ export function SidebarToolbar({
       {children}
     </nav>
   );
-}
-
-/**
- * @param {!Window} win
- * @param {string|undefined} query
- * @return {string}
- */
-function sanitizeMediaQuery(win, query) {
-  return win.matchMedia(query).media;
 }

@@ -1,20 +1,26 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust} from '#core/constants/action-constants';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
+import {measureIntersection} from '#core/dom/layout/intersection';
+import {createViewportObserver} from '#core/dom/layout/viewport-observer';
+import {toggle} from '#core/dom/style';
+import {
+  getInternalVideoElementFor,
+  isAutoplaySupported,
+  tryPlay,
+} from '#core/dom/video';
+import {clamp} from '#core/math';
+import {isFiniteNumber} from '#core/types';
+import {once} from '#core/types/function';
+import {dict, map} from '#core/types/object';
 
-import {ActionTrust} from '../core/constants/action-constants';
+import {Services} from '#service';
+
+import {VideoSessionManager} from './video-session-manager';
+import {renderIcon, renderInteractionOverlay} from './video/autoplay';
+import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
+
+import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
+import {dev, devAssert, user, userAssert} from '../log';
 import {
   EMPTY_METADATA,
   parseFavicon,
@@ -23,6 +29,7 @@ import {
   setMediaSession,
   validateMediaMetadata,
 } from '../mediasession-helper';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
   PlayingStates,
@@ -34,22 +41,6 @@ import {
   userInteractedWith,
   videoAnalyticsCustomEventTypeKey,
 } from '../video-interface';
-import {Services} from '../services';
-import {VideoSessionManager} from './video-session-manager';
-import {clamp} from '../utils/math';
-import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
-import {createViewportObserver} from '../viewport-observer';
-import {dev, devAssert, user, userAssert} from '../log';
-import {dict, map} from '../core/types/object';
-import {dispatchCustomEvent, removeElement} from '../dom';
-import {getInternalVideoElementFor, isAutoplaySupported} from '../utils/video';
-import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
-import {isFiniteNumber} from '../types';
-import {measureIntersection} from '../utils/intersection';
-import {once} from '../core/types/function';
-import {registerServiceBuilderForDoc} from '../service';
-import {renderIcon, renderInteractionOverlay} from './video/autoplay';
-import {toggle} from '../style';
 
 /** @private @const {string} */
 const TAG = 'video-manager';
@@ -197,7 +188,7 @@ export class VideoManager {
       const viewportCallback = (
         /** @type {!Array<!IntersectionObserverEntry>} */ records
       ) =>
-        records.forEach(({target, isIntersecting}) => {
+        records.forEach(({isIntersecting, target}) => {
           this.getEntry_(target).updateVisibility(
             /* isVisible */ isIntersecting
           );
@@ -246,7 +237,7 @@ export class VideoManager {
     // specific handling (e.g. user gesture requirement for unmuted playback).
     const trust = ActionTrust.LOW;
 
-    registerAction('play', () => video.play(/* isAutoplay */ false));
+    registerAction('play', () => tryPlay(video, /* isAutoplay */ false));
     registerAction('pause', () => video.pause());
     registerAction('mute', () => video.mute());
     registerAction('unmute', () => video.unmute());
@@ -492,7 +483,7 @@ class VideoEntry {
 
     /** @private @const {function()} */
     this.boundMediasessionPlay_ = () => {
-      this.video.play(/* isAutoplay */ false);
+      tryPlay(this.video, /* isAutoplay */ false);
     };
 
     /** @private @const {function()} */
@@ -812,7 +803,7 @@ class VideoEntry {
       // Only muted videos are allowed to autoplay
       this.video.mute();
 
-      this.installAutoplayArtifacts_();
+      this.installAutoplayElements_();
     });
   }
 
@@ -822,7 +813,7 @@ class VideoEntry {
    * `controls` is set. See `video-autoplay.css`.
    * @private
    */
-  installAutoplayArtifacts_() {
+  installAutoplayElements_() {
     const {video} = this;
     const {element, win} = this.video;
 
@@ -834,27 +825,60 @@ class VideoEntry {
     }
 
     const animation = renderIcon(win, element);
+    const children = [animation];
+
+    /** @param {boolean} shouldDisplay */
+    function toggleElements(shouldDisplay) {
+      video.mutateElementSkipRemeasure(() => {
+        children.forEach((child) => {
+          toggle(child, shouldDisplay);
+        });
+      });
+    }
 
     /** @param {boolean} isPlaying */
-    const toggleAnimation = (isPlaying) => {
+    function toggleAnimation(isPlaying) {
       video.mutateElementSkipRemeasure(() =>
         animation.classList.toggle('amp-video-eq-play', isPlaying)
       );
-    };
-
-    video.mutateElementSkipRemeasure(() => element.appendChild(animation));
+    }
 
     const unlisteners = [
       listen(element, VideoEvents.PAUSE, () => toggleAnimation(false)),
       listen(element, VideoEvents.PLAYING, () => toggleAnimation(true)),
+      listen(element, VideoEvents.AD_START, () => {
+        toggleElements(false);
+        video.showControls();
+      }),
+      listen(element, VideoEvents.AD_END, () => {
+        toggleElements(true);
+        video.hideControls();
+      }),
+      listen(element, VideoEvents.UNMUTED, () => userInteractedWith(video)),
     ];
+
+    if (video.isInteractive()) {
+      video.hideControls();
+
+      const mask = renderInteractionOverlay(element, this.metadata_);
+      children.push(mask);
+      unlisteners.push(listen(mask, 'click', () => userInteractedWith(video)));
+    }
+
+    video.mutateElementSkipRemeasure(() => {
+      children.forEach((child) => {
+        element.appendChild(child);
+      });
+    });
+
+    if (this.isRollingAd_) {
+      toggleElements(false);
+    }
 
     video
       .signals()
       .whenSignal(VideoServiceSignals.USER_INTERACTED)
       .then(() => {
-        const {video} = this;
-        const {element} = video;
         this.firstPlayEventOrNoop_();
         if (video.isInteractive()) {
           video.showControls();
@@ -863,43 +887,12 @@ class VideoEntry {
         unlisteners.forEach((unlistener) => {
           unlistener();
         });
-        const animation = element.querySelector('.amp-video-eq');
-        const mask = element.querySelector('.i-amphtml-video-mask');
-        if (animation) {
-          removeElement(animation);
-        }
-        if (mask) {
-          removeElement(mask);
-        }
+        video.mutateElementSkipRemeasure(() => {
+          children.forEach((child) => {
+            removeElement(child);
+          });
+        });
       });
-
-    if (!video.isInteractive()) {
-      return;
-    }
-
-    const mask = renderInteractionOverlay(element, this.metadata_);
-
-    /** @param {boolean} display */
-    const setMaskDisplay = (display) => {
-      video.mutateElementSkipRemeasure(() => toggle(mask, display));
-    };
-
-    video.hideControls();
-
-    video.mutateElementSkipRemeasure(() => element.appendChild(mask));
-
-    [
-      listen(mask, 'click', () => userInteractedWith(video)),
-      listen(element, VideoEvents.AD_START, () => {
-        setMaskDisplay(false);
-        video.showControls();
-      }),
-      listen(element, VideoEvents.AD_END, () => {
-        setMaskDisplay(true);
-        video.hideControls();
-      }),
-      listen(element, VideoEvents.UNMUTED, () => userInteractedWith(video)),
-    ].forEach((unlistener) => unlisteners.push(unlistener));
   }
 
   /**
@@ -912,7 +905,7 @@ class VideoEntry {
     }
     if (this.isVisible_) {
       this.visibilitySessionManager_.beginSession();
-      this.video.play(/*autoplay*/ true);
+      tryPlay(this.video, /*autoplay*/ true);
       this.playCalledByAutoplay_ = true;
     } else {
       if (this.isPlaying_) {
@@ -998,7 +991,7 @@ class VideoEntry {
       const intersection = /** @type {!IntersectionObserverEntry} */ (
         responses[1]
       );
-      const {width, height} = intersection.boundingClientRect;
+      const {height, width} = intersection.boundingClientRect;
       const autoplay = this.hasAutoplay && isAutoplaySupported;
       const playedRanges = video.getPlayedRanges();
       const playedTotal = playedRanges.reduce(
@@ -1242,7 +1235,7 @@ export class AutoFullscreenManager {
     return this.onceOrientationChanges_()
       .then(() => measureIntersection(element))
       .then(({boundingClientRect}) => {
-        const {top, bottom} = boundingClientRect;
+        const {bottom, top} = boundingClientRect;
         const vh = viewport.getSize().height;
         const fullyVisible = top >= 0 && bottom <= vh;
         if (fullyVisible) {
@@ -1312,8 +1305,8 @@ export class AutoFullscreenManager {
    * @return {number}
    */
   compareEntries_(a, b) {
-    const {intersectionRatio: ratioA, boundingClientRect: rectA} = a;
-    const {intersectionRatio: ratioB, boundingClientRect: rectB} = b;
+    const {boundingClientRect: rectA, intersectionRatio: ratioA} = a;
+    const {boundingClientRect: rectB, intersectionRatio: ratioB} = b;
 
     // Prioritize by how visible they are, with a tolerance of 10%
     const ratioTolerance = 0.1;

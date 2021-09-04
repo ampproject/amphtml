@@ -21,17 +21,17 @@ How would you like to help?
 -   [Get started with open source](#get-started-with-open-source)
 -   [Ongoing participation](#ongoing-participation)
 
-If you have questions about _using_ AMP or are _encountering problems using AMP_ on your site please visit our [support page](SUPPORT.md) for help.
+If you have questions about _using_ AMP or are _encountering problems using AMP_ on your site please visit our [support page](./support.md) for help.
 
 ## Report a bug
 
-[File an issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=Type%3A+Bug&template=bug-report.md&title=) if you find a bug in AMP. Provide a detailed description and steps for reproducing the bug; screenshots and working examples that demonstrate the problem are appreciated!
+[File a bug report](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=Type%3A+Bug&template=bug-report.yml) if you find a bug in AMP. Provide a detailed description and steps for reproducing the bug; screenshots and working examples that demonstrate the problem are appreciated!
 
 The community regularly monitoring issues and will try to fix open bugs quickly according to our [prioritization guidelines](./issue-priorities.md).
 
 ## Make a suggestion
 
-[File a "feature request" issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=Type%3A+Feature+Request&template=feature_request.md&title=) if you have a suggestion for a way to improve AMP or a request for a new AMP feature.
+[File a feature request](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=Type%3A+Feature+Request&template=feature-request.yml) if you have a suggestion for a way to improve AMP or a request for a new AMP feature.
 
 If you are suggesting a feature that you are intending to implement, please see the [Contributing code/features](#contribute-code-features) section below for next steps.
 
@@ -39,7 +39,7 @@ If you are suggesting a feature that you are intending to implement, please see 
 
 We'd love to have your help contributing code and features to AMP!
 
-See the [Contributing code and features](docs/contributing-code.md) document for details on the process you can use to add code/features.
+See the [Contributing code and features](./contributing-code.md) document for details on the process you can use to add code/features.
 
 ## Get started with open source
 

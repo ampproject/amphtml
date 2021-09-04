@@ -1,19 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   ActionStatus,
   SubscriptionAnalytics,
@@ -29,22 +13,22 @@ import {Metering} from './metering';
 import {
   PageConfig as PageConfigInterface,
   PageConfigResolver,
-} from '../../../third_party/subscriptions-project/config';
+} from '#third_party/subscriptions-project/config';
 import {PlatformStore} from './platform-store';
 import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {SubscriptionPlatform as SubscriptionPlatformInterface} from './subscription-platform';
 import {ViewerSubscriptionPlatform} from './viewer-subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, getValueForExpr} from '../../../src/core/types/object';
+import {dict, getValueForExpr} from '#core/types/object';
 import {getMode} from '../../../src/mode';
 import {getWinOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isStoryDocument} from '../../../src/utils/story';
 import {localSubscriptionPlatformFactory} from './local-subscription-platform';
-import {tryParseJson} from '../../../src/core/types/object/json';
+import {tryParseJson} from '#core/types/object/json';
 
 /** @const */
 const TAG = 'amp-subscriptions';

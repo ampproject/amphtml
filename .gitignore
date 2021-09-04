@@ -2,6 +2,7 @@
 # Keep this list in sync with .eslintignore, .prettierignore, and build-system/tasks/clean.js
 .babel-cache
 .css-cache
+.jss-cache
 .pre-closure-cache
 
 # Output directories
@@ -19,7 +20,7 @@ dist.tools
 export
 examples/storybook
 extensions/**/dist
-release
+/release
 result-reports
 src/purifier/dist
 test/coverage

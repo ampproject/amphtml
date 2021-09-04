@@ -1,18 +1,10 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {
+  ActionTrust,
+  DEFAULT_ACTION,
+  RAW_OBJECT_ARGS_KEY,
+} from '#core/constants/action-constants';
+import {Keys} from '#core/constants/key-codes';
+import {htmlFor} from '#core/dom/static-template';
 
 import {
   ActionInvocation,
@@ -20,17 +12,12 @@ import {
   DeferredEvent,
   dereferenceArgsVariables,
   parseActionMap,
-} from '../../src/service/action-impl';
-import {
-  ActionTrust,
-  DEFAULT_ACTION,
-  RAW_OBJECT_ARGS_KEY,
-} from '../../src/core/constants/action-constants';
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {Keys} from '../../src/core/constants/key-codes';
+} from '#service/action-impl';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+
+import {whenCalled} from '#testing/test-helper';
+
 import {createCustomEvent} from '../../src/event-helper';
-import {htmlFor} from '../../src/static-template';
-import {whenCalled} from '../../testing/test-helper.js';
 
 /**
  * @return {!ActionService}
@@ -844,11 +831,11 @@ describes.sandboxed('Action method', {}, (env) => {
         const {
           actionEventType,
           args,
+          caller,
+          event,
           method,
           node,
           source,
-          caller,
-          event,
           tagOrTarget,
           trust,
         } = invocation;
@@ -1483,7 +1470,7 @@ describes.fakeWin('Core events', {amp: true}, (env) => {
       element,
       'change',
       env.sandbox.match((e) => {
-        const {min, max, value, valueAsNumber} = e.detail;
+        const {max, min, value, valueAsNumber} = e.detail;
         return (
           min === '0' && max === '10' && value === '5' && valueAsNumber === 5
         );
@@ -1800,6 +1787,12 @@ describes.realWin(
 
       it('should supply default actions allowlist', () => {
         const i = getActionInvocation(target, 'toggleClass', 'AMP');
+        action.invoke_(i);
+        expect(spy).to.be.calledWithExactly(i);
+      });
+
+      it('should supply default actions allowlist', () => {
+        const i = getActionInvocation(target, 'toggleChecked', 'AMP');
         action.invoke_(i);
         expect(spy).to.be.calledWithExactly(i);
       });

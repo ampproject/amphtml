@@ -1,20 +1,5 @@
 PASS
 |  <!--
-|    Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-|
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|
-|        http://www.apache.org/licenses/LICENSE-2.0
-|
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    Test JSON parsing.
 |  -->
@@ -34,7 +19,7 @@ PASS
 |  <amp-state id="td_amp_menu_state">
 |  <script type="application/json">
 >> ^~~~~~~~~
-feature_tests/json-parsing-invalid.html:34:0 The script tag contains invalid JSON that cannot be parsed.
+feature_tests/json-parsing-invalid.html:19:0 The script tag contains invalid JSON that cannot be parsed.
 |  {"visible": true,
 |   "display": "none",
 |   "background":
@@ -45,7 +30,7 @@ feature_tests/json-parsing-invalid.html:34:0 The script tag contains invalid JSO
 |  <amp-state id="td_amp_menu_state">
 |  <script type="application/json">{"visible":
 >> ^~~~~~~~~
-feature_tests/json-parsing-invalid.html:43:0 The script tag contains invalid JSON that cannot be parsed.
+feature_tests/json-parsing-invalid.html:28:0 The script tag contains invalid JSON that cannot be parsed.
 |  # visibility hidden.
 |  false}</script>
 |  </amp-state>
@@ -53,26 +38,26 @@ feature_tests/json-parsing-invalid.html:43:0 The script tag contains invalid JSO
 |  <amp-state id="td_amp_menu_state">
 |  <script type="application/json">{"visible":
 >> ^~~~~~~~~
-feature_tests/json-parsing-invalid.html:49:0 The script tag contains invalid JSON that cannot be parsed.
+feature_tests/json-parsing-invalid.html:34:0 The script tag contains invalid JSON that cannot be parsed.
 |                      False}</script>
 |  </amp-state>
 |
 |  <amp-state id="td_amp_menu_state">
 |  <script type="application/json">{"visible":           hidden}</script>
 >> ^~~~~~~~~
-feature_tests/json-parsing-invalid.html:54:0 The script tag contains invalid JSON that cannot be parsed.
+feature_tests/json-parsing-invalid.html:39:0 The script tag contains invalid JSON that cannot be parsed.
 |  </amp-state>
 |
 |  <amp-state id="td_amp_menu_state">
 |    <script type="application/json">ohmygod</script>
 >>   ^~~~~~~~~
-feature_tests/json-parsing-invalid.html:58:2 The script tag contains invalid JSON that cannot be parsed.
+feature_tests/json-parsing-invalid.html:43:2 The script tag contains invalid JSON that cannot be parsed.
 |  </amp-state>
 |
 |  <amp-state id="td_amp_menu_state">
 |    <script type="application/json">
 >>   ^~~~~~~~~
-feature_tests/json-parsing-invalid.html:62:2 The script tag contains invalid JSON that cannot be parsed.
+feature_tests/json-parsing-invalid.html:47:2 The script tag contains invalid JSON that cannot be parsed.
 |
 |
 |
@@ -83,7 +68,7 @@ feature_tests/json-parsing-invalid.html:62:2 The script tag contains invalid JSO
 |  <amp-state id="td_amp_menu_state">
 |    <script type="application/json">
 >>   ^~~~~~~~~
-feature_tests/json-parsing-invalid.html:71:2 The script tag contains invalid JSON that cannot be parsed.
+feature_tests/json-parsing-invalid.html:56:2 The script tag contains invalid JSON that cannot be parsed.
 |
 |
 |
@@ -96,6 +81,6 @@ feature_tests/json-parsing-invalid.html:71:2 The script tag contains invalid JSO
 |    <!-- Invalid: JSON-LD can not be parsed. -->
 |    <script type="application/ld+json">lemur</script>
 >>   ^~~~~~~~~
-feature_tests/json-parsing-invalid.html:82:2 The script tag contains invalid JSON that cannot be parsed.
+feature_tests/json-parsing-invalid.html:67:2 The script tag contains invalid JSON that cannot be parsed.
 |  </body>
 |  </html>

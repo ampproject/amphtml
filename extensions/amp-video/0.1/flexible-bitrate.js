@@ -1,25 +1,11 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {DomBasedWeakRef} from '../../../src/utils/dom-based-weakref';
-import {childElement, childElementsByTag} from '../../../src/dom';
+import {tryPlay} from '#core/dom/video';
+import {DomBasedWeakRef} from '#core/data-structures/dom-based-weakref';
+import {Services} from '#service';
+import {childElement, childElementsByTag} from '#core/dom/query';
 import {dev, devAssert} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
+import {isExperimentOn} from '#experiments';
 import {listen, listenOnce} from '../../../src/event-helper';
-import {toArray} from '../../../src/core/types/array';
+import {toArray} from '#core/types/array';
 
 const TAG = 'amp-video';
 
@@ -53,6 +39,11 @@ export function getBitrateManager(win) {
   if (instance) {
     return instance;
   }
+
+  if (isExperimentOn(win, 'flexible-bitrate')) {
+    Services.performanceFor(win).addEnabledExperiment('flexible-bitrate');
+  }
+
   return (instance = new BitrateManager(win));
 }
 
@@ -249,14 +240,14 @@ export class BitrateManager {
     video.pause();
     const hasChanges = this.sortSources_(video);
     if (!hasChanges) {
-      video.play();
+      tryPlay(video);
       return;
     }
     video.load();
     listenOnce(video, 'loadedmetadata', () => {
       // Restore currentTime after loading new source.
       video.currentTime = currentTime;
-      video.play();
+      tryPlay(video);
       dev().fine(TAG, 'Playing at lower bitrate %s', video.currentSrc);
     });
   }

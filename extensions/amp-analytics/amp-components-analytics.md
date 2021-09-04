@@ -1,19 +1,3 @@
-<!---
-Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # Implementing analytics for AMP components
 
 ## APIs
@@ -39,7 +23,7 @@ In the following example, the component creates a **`customEventReporter`** obje
 ```js
   buildCallback() {
     const builder = new customEventReporterBuilder(this.element);
-    builder.track('layout', 'example.come/layout');
+    builder.track('layout', 'example.come/core/dom/layout');
     builder.track('id', ['example.com/${id}', 'example2.com/${id}']);
     this.reporter_ = builder.build();
   }
@@ -64,7 +48,7 @@ Note: With the use of **`customEventReporter`**, AMP assumes all custom events a
 
 ### useAnalyticsInSandbox API
 
-Third-party AMP components can contain an amp-analytics [configuration](amp-analytics.md#sending-analytics-to-a-vendor-or-in-house) to collect analytics events. Currently, only the `visible` and `hidden` events are supported. To request other existing analytics [events](amp-analytics.md#triggers) (e.g., `ini-load`, `click`) to support analytics in third-party AMP components, please submit a [feature request in Github](https://github.com/ampproject/amphtml/issues/new).
+Third-party AMP components can contain an amp-analytics [configuration](amp-analytics.md#sending-analytics-to-a-vendor-or-in-house) to collect analytics events. Currently, only the `visible` and `hidden` events are supported. To request other existing analytics [events](amp-analytics.md#triggers) (e.g., `ini-load`, `click`) to support analytics in third-party AMP components, please submit a [feature request](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=Type%3A+Feature+Request&template=feature-request.yml) on GitHub.
 
 To send analytics pings, third-party AMP components must call the `useAnalyticsInSandbox()` API function and provide a promise that resolves with their analytics configuration when it is ready. The analytics configuration should be a JSON object specified in accordance with the amp-analytics [spec](amp-analytics.md#triggers).
 

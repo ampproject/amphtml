@@ -1,25 +1,24 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {Deferred} from '#core/data-structures/promise';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '#core/dom/fullscreen';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {htmlFor} from '#core/dom/static-template';
+import {PauseHelper} from '#core/dom/video/pause-helper';
 
-import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {PauseHelper} from '../../../src/utils/pause-helper';
-import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
-import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {
+  getConsentPolicyInfo,
+  getConsentPolicyState,
+} from '../../../src/consent';
+import {getData, listen} from '../../../src/event-helper';
 import {
   createFrameFor,
   mutedOrUnmutedEvent,
@@ -27,21 +26,8 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {
-  dispatchCustomEvent,
-  fullscreenEnter,
-  fullscreenExit,
-  isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
-import {
-  getConsentPolicyInfo,
-  getConsentPolicyState,
-} from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/static-template';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {VideoEvents} from '../../../src/video-interface';
 
 const TAG = 'amp-brid-player';
 
@@ -240,17 +226,21 @@ class AmpBridPlayer extends AMP.BaseElement {
       return;
     }
 
-    const {partnerID_: partnerID, feedID_: feedID} = this;
+    const {feedID_: feedID, partnerID_: partnerID} = this;
 
-    const placeholder = htmlFor(element)`
-      <amp-img referrerpolicy=origin layout=fill placeholder>
-        <amp-img referrerpolicy=origin layout=fill fallback
-            src="https://cdn.brid.tv/live/default/defaultSnapshot.png">
-        </amp-img>
-      </amp-img>`;
+    const html = htmlFor(element);
+    const placeholder = html`
+      <img placeholder referrerpolicy="origin" loading="lazy" />
+    `;
 
-    this.propagateAttributes(['aria-label'], placeholder);
-    this.applyFillContent(placeholder);
+    propagateAttributes(['aria-label'], this.element, placeholder);
+    applyFillContent(placeholder);
+
+    const altText = placeholder.hasAttribute('aria-label')
+      ? 'Loading video - ' + placeholder.getAttribute('aria-label')
+      : 'Loading video';
+
+    placeholder.setAttribute('alt', altText);
 
     placeholder.setAttribute(
       'src',
@@ -258,11 +248,9 @@ class AmpBridPlayer extends AMP.BaseElement {
         `/snapshot/${encodeURIComponent(feedID)}.jpg`
     );
 
-    const altText = placeholder.hasAttribute('aria-label')
-      ? 'Loading video - ' + placeholder.getAttribute('aria-label')
-      : 'Loading video';
-
-    placeholder.setAttribute('alt', altText);
+    this.loadPromise(placeholder).catch(() => {
+      placeholder.src = 'https://cdn.brid.tv/live/default/defaultSnapshot.png';
+    });
 
     return placeholder;
   }

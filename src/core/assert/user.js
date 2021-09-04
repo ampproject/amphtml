@@ -1,36 +1,6 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {USER_ERROR_SENTINEL} from '#core/error/message-helpers';
 
 import * as assertions from './base';
-import {USER_ERROR_SENTINEL} from '../error-message-helpers';
 
 /**
  * @fileoverview This file provides the entrypoint for user assertions. It's
@@ -181,25 +151,5 @@ export function userAssertBoolean(shouldBeBoolean, opt_message) {
     /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
     shouldBeBoolean,
     opt_message
-  );
-}
-
-/**
- * Asserts and returns the enum value. If the enum doesn't contain such a
- * value, the error is thrown.
- *
- * @param {!Object<T>} enumObj
- * @param {*} shouldBeEnum
- * @param {string=} opt_enumName
- * @return {T}
- * @template T
- * @closurePrimitive {asserts.matchesReturn}
- */
-export function userAssertEnumValue(enumObj, shouldBeEnum, opt_enumName) {
-  return assertions.assertEnumValue(
-    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
-    enumObj,
-    shouldBeEnum,
-    opt_enumName
   );
 }

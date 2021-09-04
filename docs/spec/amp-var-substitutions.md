@@ -1,19 +1,3 @@
-<!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # AMP HTML URL Variable Substitutions
 
 ## Overview
@@ -52,7 +36,7 @@ The following table lists the features that enable variable substitutions, as we
     <td width="25%">None</td>
   </tr>
   <tr>
-    <td width="25%"><code>amp-pixel</code><br><a href="https://github.com/ampproject/amphtml/blob/main/builtins/amp-pixel/amp-pixel.md#substitutions">Detailed documentation</a></td>
+    <td width="25%"><code>amp-pixel</code><br><a href="https://github.com/ampproject/amphtml/blob/main/src/builtins/amp-pixel/amp-pixel.md#substitutions">Detailed documentation</a></td>
     <td width="25%">Requests must be HTTPS URLs (not a requirement specific to variable substitutions)</td>
     <td width="25%">No</td>
     <td width="25%">None</td>
@@ -220,6 +204,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Timezone](#timezone)                               | `TIMEZONE`                | `${timezone}`              |
 | [Timezone Code](#timezone-code)                     | N/A                       | `${timezoneCode}`          |
 | [User Agent](#user-agent)                           | `USER_AGENT`              | `${userAgent}`             |
+| [User Agent Client Hint](#user-agent-client-hint)   | `UACH`                    | `${uach}`                  |
 | [Viewport Height](#viewport-height)                 | `VIEWPORT_HEIGHT`         | `${viewportHeight}`        |
 | [Viewport Width](#viewport-width)                   | `VIEWPORT_WIDTH`          | `${viewportWidth}`         |
 
@@ -499,7 +484,7 @@ Provides the `amp-carousel` slide from which the traversal happens. The value is
 -   **platform variable**: N/A
 -   **amp-analytics variable**: `${fromSlide}`
 
-For more information on analytics for `amp-carousel`, see [AMP Carousel and Analytics](../extensions/amp-carousel/amp-carousel-analytics.md).
+For more information on analytics for `amp-carousel`, see [AMP Carousel and Analytics](../../extensions/amp-carousel/amp-carousel-analytics.md).
 
 #### Carousel To Slide
 
@@ -508,7 +493,7 @@ Provides the `amp-carousel` slide to which the traversal happens. The value is e
 -   **platform variable**: N/A
 -   **amp-analytics variable**: `${toSlide}`
 
-For more information on analytics for `amp-carousel`, see [AMP Carousel and Analytics](../extensions/amp-carousel/amp-carousel-analytics.md).
+For more information on analytics for `amp-carousel`, see [AMP Carousel and Analytics](../../extensions/amp-carousel/amp-carousel-analytics.md).
 
 #### Client ID
 
@@ -549,7 +534,7 @@ Provides a per document-source-origin (the origin of the website where you publi
 You can pass the following arguments into the Client ID variable like a function. Spaces between arguments and values are not allowed.
 
 -   `cid scope` (Required): The namespace for the Client ID.
--   `amp-user-notification id` (Optional): Use this argument to make the Client ID substitution dependent on the dismissal of a user notification shown to the visitor of the page. In amp-analytics, this is the same as using the [`data-consent-notification-id`](../extensions/amp-analytics/amp-analytics.md) attribute -- you may choose to use either one for the amp-analytics component.
+-   `amp-user-notification id` (Optional): Use this argument to make the Client ID substitution dependent on the dismissal of a user notification shown to the visitor of the page. In amp-analytics, this is the same as using the [`data-consent-notification-id`](../../extensions/amp-analytics/amp-analytics.md) attribute -- you may choose to use either one for the amp-analytics component.
 -   `cookie name` (Optional): The name of the fallback cookie when the document is not served by an AMP proxy. If not provided, `cid scope` will be used as the cookie name.
 -   `disable backup` (Optional): If set to `true`, then will opt-out of storing the AMP generated CID in Storage as a backup when the document is not served by an AMP proxy. Otherwise, will default into this behavior.
 
@@ -700,7 +685,7 @@ Analytics vendor might prefer this value to Document Referrer for better session
 
 #### Extra URL Parameters
 
-Provides all the parameters that are defined in the [`extraUrlParams`](../extensions/amp-analytics/amp-analytics.md#extra-url-params) block of the amp-analytics config as a variable. If you use the `extraUrlParams` variable, the parameters are not appended to the end of the URL.
+Provides all the parameters that are defined in the [`extraUrlParams`](../../extensions/amp-analytics/amp-analytics.md#extra-url-params) block of the amp-analytics config as a variable. If you use the `extraUrlParams` variable, the parameters are not appended to the end of the URL.
 
 -   **platform variable**: N/A
 -   **amp-analytics variable**: `${extraUrlParams}`
@@ -722,7 +707,7 @@ Provides the time when the element met visibility conditions for the first time 
 
 #### Geolocation
 
-Provides the approximate, country level, location of the user provided by the [`amp-geo`](../extensions/amp-geo/amp-geo.md#variable-substitution) extension.
+Provides the approximate, country level, location of the user provided by the [`amp-geo`](../../extensions/amp-geo/amp-geo.md#variable-substitution) extension.
 
 -   **platform variable**: AMP_GEO
     -   Example: <br>
@@ -1211,7 +1196,7 @@ Provides the user's IANA time-zone code (if available).
 
 #### Total Engaged Time
 
-Provides the total time (in seconds) the user has been engaged with the page since the page first became visible in the viewport. Total engaged time will be 0 until the page first becomes visible. This variable requires the [amp-analytics](../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
+Provides the total time (in seconds) the user has been engaged with the page since the page first became visible in the viewport. Total engaged time will be 0 until the page first becomes visible. This variable requires the [amp-analytics](../../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
 
 -   **platform variable**: `TOTAL_ENGAGED_TIME`
 -   **amp-analytics variable**: `${totalEngagedTime}`
@@ -1219,7 +1204,7 @@ Provides the total time (in seconds) the user has been engaged with the page sin
 
 #### Incremental Engaged Time
 
-Provides the time (in seconds) the user has been engaged with the page since the last time it was reset. It takes two arguments. The first is the name of the timer, the second is whether or not to reset it (it is optional and defaults to true). Incremental engaged time will be 0 until the page first becomes visible. This variable requires the [amp-analytics](../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
+Provides the time (in seconds) the user has been engaged with the page since the last time it was reset. It takes two arguments. The first is the name of the timer, the second is whether or not to reset it (it is optional and defaults to true). Incremental engaged time will be 0 until the page first becomes visible. This variable requires the [amp-analytics](../../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
 
 -   **platform variable**: `INCREMENTAL_ENGAGED_TIME`
 -   **amp-analytics variable**: `${incrementalEngagedTime(foo,false)}`
@@ -1264,6 +1249,17 @@ Provides a string representing the user agent of the requesting software, usuall
     ```
 -   **amp-analytics variable**: `${userAgent}`
     -   Example value: `Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0`
+
+#### User Agent Client Hint
+
+Provides the [user agent client hint](https://github.com/WICG/ua-client-hints) information. Its values are obtained from getHighEntropyValues API. Currently only available on Chromium-based browsers. On an unsupported browser, its value will be an empty string.
+
+-   **platform variable**: `UACH(variableName)`
+    -   Example: <br>
+    ```html
+    <amp-pixel src="https://foo.com/pixel?sh=UACH(platform)"></amp-pixel>
+    ```
+-   **amp-analytics variable**: `${uach(variableName)}`
 
 #### Vertical Scroll Boundary
 

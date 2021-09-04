@@ -1,37 +1,26 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 // These two imports must precede all others.
-import '../src/polyfills';
+import '#polyfills';
 import './setup_chai_sinon';
 
-import * as describes from './describes';
-import {Services} from '../src/services';
-import {TestConfig} from './test-config';
-import {activateChunkingForTesting} from '../src/chunk';
-import {adoptWithMultidocDeps} from '../src/runtime';
-import {cancelTimersForTesting} from '../src/service/timer-impl';
 import {configure as configureEnzyme} from 'enzyme';
+import PreactEnzyme from 'enzyme-adapter-preact-pure';
+
+import {removeElement} from '#core/dom';
+import {resetEvtListenerOptsSupportForTesting} from '#core/dom/event-helper-listen';
+
+import {resetExperimentTogglesForTesting} from '#experiments';
+
+import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
 import {
   installAmpdocServices,
   installRuntimeServices,
-} from '../src/service/core-services';
-import {installDocService} from '../src/service/ampdoc-impl';
-import {installYieldIt} from './yield';
+} from '#service/core-services';
+import {cancelTimersForTesting} from '#service/timer-impl';
+
+import {preventAsyncErrorThrows} from './async-errors';
 import {
   maybeStubConsoleInfoLogWarn,
   restoreConsoleError,
@@ -40,14 +29,15 @@ import {
   setTestRunner,
   warnForConsoleError,
 } from './console-logging-setup';
-import {preventAsyncErrorThrows} from './async-errors';
-import {removeElement} from '../src/dom';
-import {resetAccumulatedErrorMessagesForTesting} from '../src/error-reporting';
-import {resetEvtListenerOptsSupportForTesting} from '../src/event-helper-listen';
-import {resetExperimentTogglesForTesting} from '../src/experiments';
-import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
+import * as describes from './describes';
+import {TestConfig} from './test-config';
+import {installYieldIt} from './yield';
+
 import AMP_CONFIG from '../build-system/global-configs/prod-config.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import PreactEnzyme from 'enzyme-adapter-preact-pure';
+import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
+import {activateChunkingForTesting} from '../src/chunk';
+import {resetAccumulatedErrorMessagesForTesting} from '../src/error-reporting';
+import {adoptWithMultidocDeps} from '../src/runtime';
 
 /** @fileoverview
  * This file initializes AMP's Karma + Mocha based unit & integration tests.

@@ -1,38 +1,26 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
-import {FetchMock, networkFailure} from './fetch-mock';
-import {MockA4AImpl, TEST_URL} from './utils';
-import {createIframePromise} from '../../../../testing/iframe';
-import {getA4ARegistry, signingServerURLs} from '../../../../ads/_a4a-config';
-import {installCryptoService} from '../../../../src/service/crypto-impl';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
-import {loadPromise} from '../../../../src/event-helper';
+import {getA4ARegistry, signingServerURLs} from '#ads/_a4a-config';
+
+import {installDocService} from '#service/ampdoc-impl';
+import {installCryptoService} from '#service/crypto-impl';
 import {
   resetScheduledElementForTesting,
   upgradeOrRegisterElement,
-} from '../../../../src/service/custom-element-registry';
+} from '#service/custom-element-registry';
+
+import {createIframePromise} from '#testing/iframe';
+
+import {FetchMock, networkFailure} from './fetch-mock';
 import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
+import {MockA4AImpl, TEST_URL} from './utils';
+
+import {loadPromise} from '../../../../src/event-helper';
+import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
 
 // Integration tests for A4A.  These stub out accesses to the outside world
 // (e.g., XHR requests and interfaces to ad network-specific code), but

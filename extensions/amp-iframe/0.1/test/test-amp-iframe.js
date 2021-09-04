@@ -1,35 +1,18 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {AmpIframe, setTrackingIframeTimeoutForTesting} from '../amp-iframe';
-import {CommonSignals} from '../../../../src/core/constants/common-signals';
-import {LayoutPriority} from '../../../../src/layout';
-import {Services} from '../../../../src/services';
-import {
-  createElementWithAttributes,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
+import {CommonSignals} from '#core/constants/common-signals';
+import {LayoutPriority} from '#core/dom/layout';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
-import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {isAdLike} from '../../../../src/iframe-helper';
-import {macroTask} from '../../../../testing/yield';
-import {poll} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
+import {macroTask} from '#testing/helpers';
+import {poll} from '#testing/iframe';
+import {toggleExperiment} from '#experiments';
 import {user} from '../../../../src/log';
+import {whenCalled} from '#testing/test-helper';
 
 /** @const {number} */
 const IFRAME_MESSAGE_TIMEOUT = 50;
@@ -906,39 +889,6 @@ describes.realWin(
       yield ampIframe.signals().whenSignal(CommonSignals.LOAD_START);
     });
 
-    it('should not cache intersection box', async () => {
-      const ampIframe = createAmpIframe(env, {
-        src: iframeSrc,
-        sandbox: 'allow-scripts allow-same-origin',
-        width: 300,
-        height: 250,
-      });
-      await waitForAmpIframeLayoutPromise(doc, ampIframe);
-      const impl = await ampIframe.getImpl(false);
-      const stub = env.sandbox.stub(impl, 'getLayoutBox');
-      const box = {
-        top: 100,
-        bottom: 200,
-        left: 0,
-        right: 100,
-        width: 100,
-        height: 100,
-      };
-      stub.returns(box);
-
-      impl.onLayoutMeasure();
-      const intersection = impl.getIntersectionElementLayoutBox();
-      // Simulate a fixed position element "moving" 100px by scrolling down
-      // the page.
-      box.top += 100;
-      box.bottom += 100;
-      const newIntersection = impl.getIntersectionElementLayoutBox();
-      expect(newIntersection).not.to.deep.equal(intersection);
-      expect(newIntersection.top).to.equal(intersection.top + 100);
-      expect(newIntersection.width).to.equal(300);
-      expect(newIntersection.height).to.equal(250);
-    });
-
     it('should propagate `src` when container attribute is mutated', async () => {
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
@@ -968,7 +918,7 @@ describes.realWin(
         });
 
         impl = await element.getImpl();
-        env.sandbox.stub(impl, 'sendConsentDataToIframe_');
+        env.sandbox.spy(impl, 'sendConsentDataToIframe_');
 
         await waitForAmpIframeLayoutPromise(doc, element);
 
@@ -998,7 +948,9 @@ describes.realWin(
           '*'
         );
 
-        await macroTask();
+        await whenCalled(impl.sendConsentDataToIframe_);
+
+        // Ensure listener only triggers once by waiting for event queue to flush
         await macroTask();
 
         expect(
@@ -1030,6 +982,9 @@ describes.realWin(
           '*'
         );
 
+        await whenCalled(impl.sendConsentDataToIframe_);
+
+        // Ensure listener only triggers once by waiting for event queue to flush
         await macroTask();
 
         expect(

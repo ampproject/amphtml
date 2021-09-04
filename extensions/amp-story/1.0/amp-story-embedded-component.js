@@ -1,19 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   Action,
   EmbeddedComponentState,
@@ -29,27 +13,24 @@ import {
 } from './story-analytics';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
-import {Keys} from '../../../src/core/constants/key-codes';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
-import {
-  addAttributesToElement,
-  closest,
-  matches,
-  tryFocus,
-} from '../../../src/dom';
+import {Keys} from '#core/constants/key-codes';
+import {LocalizedStringId} from '#service/localization/strings';
+import {Services} from '#service';
+import {addAttributesToElement, tryFocus} from '#core/dom';
+import {closest, matches} from '#core/dom/query';
 import {
   createShadowRootWithStyle,
   getSourceOriginForElement,
   triggerClickFromLightDom,
 } from './utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {getAmpdoc} from '../../../src/service';
+import {dict} from '#core/types/object';
+import {getAmpdoc} from '../../../src/service-helpers';
 import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
-import {px, resetStyles, setImportantStyles, toggle} from '../../../src/style';
+
+import {px, resetStyles, setImportantStyles, toggle} from '#core/dom/style';
 
 /**
  * Action icons to be placed in tooltip.
@@ -889,9 +870,12 @@ export class AmpStoryEmbeddedComponent {
     this.mutator_.mutateElement(
       dev().assertElement(this.focusedStateOverlay_),
       () => {
-        [UIType.DESKTOP_FULLBLEED, UIType.DESKTOP_PANELS].includes(uiState)
-          ? this.focusedStateOverlay_.setAttribute('desktop', '')
-          : this.focusedStateOverlay_.removeAttribute('desktop');
+        const isDesktop = [
+          UIType.DESKTOP_FULLBLEED,
+          UIType.DESKTOP_PANELS,
+          UIType.DESKTOP_ONE_PANEL,
+        ].includes(uiState);
+        this.focusedStateOverlay_.toggleAttribute('desktop', isDesktop);
       }
     );
   }
@@ -1421,7 +1405,7 @@ export class AmpStoryEmbeddedComponent {
       </section>
     `;
     const overlayEls = htmlRefs(tooltipOverlay);
-    const {tooltip, buttonLeft, buttonRight, arrow} =
+    const {arrow, buttonLeft, buttonRight, tooltip} =
       /** @type {!tooltipElementsDef} */ (overlayEls);
 
     this.tooltip_ = tooltip;

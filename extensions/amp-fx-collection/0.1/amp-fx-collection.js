@@ -1,34 +1,20 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {AmpEvents} from '#core/constants/amp-events';
+import {iterateCursor} from '#core/dom';
+import {tryCallback} from '#core/error';
 
-import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {
   FxBindings,
   FxObservesSignal,
   FxType, // eslint-disable-line no-unused-vars
   getFxTypes,
 } from './fx-type';
-import {devAssert} from '../../../src/log';
 import {
   installPositionBoundFx,
   installScrollToggledFx,
 } from './providers/fx-provider';
-import {iterateCursor} from '../../../src/dom';
+
 import {listen} from '../../../src/event-helper';
-import {tryCallback} from '../../../src/core/error';
+import {devAssert} from '../../../src/log';
 
 const TAG = 'amp-fx-collection';
 

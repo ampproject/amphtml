@@ -1,38 +1,21 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   Action,
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
-import {Layout} from '../../../src/layout';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
+import {Layout} from '#core/dom/layout';
+import {LocalizedStringId} from '#service/localization/strings';
+import {Services} from '#service';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {
   childElementByTag,
   closest,
   closestAncestorElementBySelector,
-  isJsonScriptTag,
   matches,
-} from '../../../src/dom';
-import {computedStyle, setImportantStyles} from '../../../src/style';
+} from '#core/dom/query';
+import {computedStyle, setImportantStyles} from '#core/dom/style';
 import {
   createShadowRootWithStyle,
   getRGBFromCssColorValue,
@@ -40,9 +23,11 @@ import {
   triggerClickFromLightDom,
 } from './utils';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from './../../../src/core/types/object';
-import {isArray} from '../../../src/core/types';
-import {parseJson} from '../../../src/core/types/object/json';
+import {dict} from '#core/types/object';
+import {isArray} from '#core/types';
+import {isJsonScriptTag} from '#core/dom';
+
+import {parseJson} from '#core/types/object/json';
 import {renderAsElement} from './simple-template';
 
 /** @const {string} */

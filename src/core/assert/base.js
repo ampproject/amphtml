@@ -1,23 +1,6 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {elementStringOrPassThru} from '../error-message-helpers';
-import {includes} from '../types/string';
-import {isArray, isElement, isEnumValue, isString} from '../types';
-import {remove} from '../types/array';
+import {elementStringOrPassThru} from '#core/error/message-helpers';
+import {isArray, isElement, isString} from '#core/types';
+import {remove} from '#core/types/array';
 
 /**
  * @fileoverview This file provides the base implementation for assertion
@@ -59,7 +42,7 @@ export function assert(
   }
 
   // Include the sentinel string if provided and not already present
-  if (sentinel && !includes(opt_message, sentinel)) {
+  if (sentinel && opt_message.indexOf(sentinel) == -1) {
     opt_message += sentinel;
   }
 
@@ -86,9 +69,7 @@ export function assert(
   // __AMP_REPORT_ERROR is installed globally per window in the entry point in
   // AMP documents. It may not be present for Bento/Preact elements on non-AMP
   // pages.
-  if (self.__AMP_REPORT_ERROR) {
-    self.__AMP_REPORT_ERROR(error);
-  }
+  self.__AMP_REPORT_ERROR?.(error);
   throw error;
 }
 
@@ -249,31 +230,5 @@ export function assertBoolean(assertFn, shouldBeBoolean, opt_message) {
       'Boolean expected',
       opt_message
     )
-  );
-}
-
-/**
- * Asserts and returns the enum value. If the enum doesn't contain such a
- * value, the error is thrown.
- *
- * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
- * @param {!Object<T>} enumObj
- * @param {*} shouldBeEnum
- * @param {string=} opt_enumName
- * @return {T}
- * @template T
- * @closurePrimitive {asserts.matchesReturn}
- */
-export function assertEnumValue(
-  assertFn,
-  enumObj,
-  shouldBeEnum,
-  opt_enumName = 'enum'
-) {
-  return assertType_(
-    assertFn,
-    shouldBeEnum,
-    isEnumValue(enumObj, shouldBeEnum),
-    `Unknown ${opt_enumName} value: "${shouldBeEnum}"`
   );
 }

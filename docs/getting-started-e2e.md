@@ -1,19 +1,3 @@
-<!---
-Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # Getting Started End-to-end
 
 This end-to-end guide will show you how to contribute code to the AMP open source project. It covers everything from creating a GitHub account to getting your code reviewed and merged.
@@ -171,23 +155,21 @@ git branch -u upstream/main main
 
 # Building AMP and starting a local server
 
-Now that you have all of the files copied locally you can actually build the code and run a local server to try things out. We use Node.js, the NPM package manager, and Closure Compiler to build amphtml and start up a local server that lets you try out your changes.
+Now that you have all of the files copied locally you can actually build the code and run a local server to try things out. We use Node.js along with several npm packages to build amphtml and start up a local server that lets you try out your changes.
 
--   Install the latest LTS version of [Node.js](https://nodejs.org/) (which includes npm). If you're on Mac or Linux, an easy way to install Node.js is with `nvm`: [here](https://github.com/creationix/nvm).
+-   Install the latest LTS version of [Node.js](https://nodejs.org/) (which includes `npm`). An easy way to do so is by first installing `nvm`. Follow the macOS / Linux instructions [here](https://github.com/creationix/nvm), or the Windows instructions [here](https://github.com/coreybutler/nvm-windows). Then run the install command(s):
 
     ```sh
+    # macOS / Linux
     nvm install --lts
+
+    # Windows
+    nvm list available
+    nvm install <lts_version>
+    nvm use <lts_version>
     ```
 
--   Closure Compiler is automatically installed by NPM, but it requires Java 8 which you need to install separately. AMP's version of Closure Compiler won't run with newer versions of Java. Download an installer for Mac, Linux or Windows [here](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html).
-
-    -   Note: If you are using Mac OS and have multiple versions of Java installed, make sure you are using Java 8 by adding this to `~/.bashrc`:
-
-    ```sh
-    export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
-    ```
-
--   In your local repository directory (e.g. `~/src/ampproject/amphtml`), install the packages that AMP uses by running
+-   In your local repository directory (e.g. `~/src/ampproject/amphtml`), install the packages that AMP uses by running this command:
     ```
     npm install
     ```
@@ -410,7 +392,7 @@ To run the tests that are affected by the changes on your feature branch:
 amp unit --local_changes
 ```
 
-By default, all tests are run on Chrome. Pass one of the following flags to run tests on a different browser: `--firefox`, `--safari`, `--edge`, `--ie`.
+By default, all tests are run on Chrome. Pass one of the following flags to run tests on a different browser: `--firefox`, `--safari`, `--edge`.
 
 If you need help with fixing failing tests, please ask on the GitHub issue you're working on or reach out to the community as described in [How to get help](#how-to-get-help).
 

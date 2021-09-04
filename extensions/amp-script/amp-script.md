@@ -6,22 +6,6 @@ teaser:
   text: Runs custom JavaScript in a Web Worker.
 ---
 
-<!---
-Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 ## Usage
 
 The `amp-script` component allows you to run custom JavaScript. To maintain AMP's performance guarantees, your code runs in a Web Worker, and certain restrictions apply.
@@ -151,7 +135,7 @@ For a complete list of supported DOM APIs, see the [API compatibility table](htt
 
 `amp-script` supports common Web APIs like `Fetch`, `WebSockets`, `localStorage`, `sessionStorage`, and `Canvas`. Presently, the `History` API is not implemented, and neither are cookies.
 
-`amp-script` does not support the entire DOM API or Web API, as this would make `amp-script`'s own JavaScript too large and slow. If there's an API you'd like to see supported, please [file an issue](https://github.com/ampproject/amphtml/issues/new) or [suggest and contribute the change yourself](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md).
+`amp-script` does not support the entire DOM API or Web API, as this would make `amp-script`'s own JavaScript too large and slow. If there's an API you'd like to see supported, please [file an issue](https://github.com/ampproject/amphtml/issues/new/choose) or [suggest and contribute the change yourself](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md).
 
 [tip type="default"]
 For a set of samples showing `amp-script` in use, [see here](https://amp.dev/documentation/examples/components/amp-script/).

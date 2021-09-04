@@ -1,29 +1,17 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {utf8Decode} from '#core/types/string/bytes';
 
-import * as mode from '../../src/mode';
-import {Services} from '../../src/services';
-import {assertSuccess} from '../../src/utils/xhr-utils';
-import {createFormDataWrapper} from '../../src/form-data-wrapper';
-import {fetchPolyfill} from '../../src/polyfills/fetch';
+import {toggleExperiment} from '#experiments';
+
+import {fetchPolyfill} from '#polyfills/fetch';
+
+import {Services} from '#service';
+import {xhrServiceForTesting} from '#service/xhr-impl';
+
 import {getCookie} from '../../src/cookies';
-import {toggleExperiment} from '../../src/experiments';
+import {createFormDataWrapper} from '../../src/form-data-wrapper';
 import {user} from '../../src/log';
-import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
-import {xhrServiceForTesting} from '../../src/service/xhr-impl';
+import * as mode from '../../src/mode';
+import {assertSuccess} from '../../src/utils/xhr-utils';
 
 // TODO(jridgewell, #11827): Make this test work on Safari.
 describes.sandboxed
@@ -522,7 +510,7 @@ describes.sandboxed
               expect(response.headers.get('X-bar-header')).to.equal('bar data');
               response
                 .arrayBuffer()
-                .then((bytes) => utf8FromArrayBuffer(bytes))
+                .then((bytes) => utf8Decode(bytes))
                 .then((text) => {
                   expect(text).to.equal(creative);
                 });

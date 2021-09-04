@@ -1,19 +1,4 @@
 <!--
-  Copyright 2021 The AMP HTML Authors. All Rights Reserved.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS-IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the license.
--->
-<!--
   Test Description:
   Tests for the amp-date-display tag.
 -->
@@ -172,6 +157,11 @@
   <!-- invalid, missing fractions-->
   <amp-date-display datetime="2017-08-02T15:05:05.+04:00" layout="fixed" width="360" height="20">
     <template type="amp-mustache">{{iso}}</template>
+  </amp-date-display>
+
+  <!-- valid, with data-options-time-style -->
+  <amp-date-display datetime="now" layout="fixed" width="360" height="20" data-options-time-style="short">
+    <template type="amp-mustache">{{localeString}}</template>
   </amp-date-display>
 </body>
 

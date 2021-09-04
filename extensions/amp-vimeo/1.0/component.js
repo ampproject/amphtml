@@ -1,20 +1,15 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {dispatchCustomEvent} from '#core/dom';
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
+import {useCallback, useMemo, useRef} from '#preact';
+import {forwardRef} from '#preact/compat';
+import {useValueRef} from '#preact/component';
+
+import {
+  objOrParseJson,
+  postMessageWhenAvailable,
+} from '../../../src/iframe-video';
+import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {
   VIMEO_EVENTS,
   getVimeoIframeSrc,
@@ -22,14 +17,6 @@ import {
   listenToVimeoEvents,
   makeVimeoMessage,
 } from '../vimeo-api';
-import {VideoIframe} from '../../amp-video/1.0/video-iframe';
-import {dispatchCustomEvent} from '../../../src/dom';
-import {forwardRef} from '../../../src/preact/compat';
-import {
-  objOrParseJson,
-  postMessageWhenAvailable,
-} from '../../../src/iframe-video';
-import {useCallback, useMemo, useRef} from '../../../src/preact';
 
 /**
  * @param {!HTMLIframeElement} iframe
@@ -63,7 +50,7 @@ function makeMethodMessage(method) {
  * @template T
  */
 export function VimeoWithRef(
-  {videoid, autoplay = false, doNotTrack = false, ...rest},
+  {autoplay = false, doNotTrack = false, onLoad, videoid, ...rest},
   ref
 ) {
   const origin = useMemo(getVimeoOriginRegExp, []);
@@ -73,6 +60,8 @@ export function VimeoWithRef(
   );
 
   const readyIframeRef = useRef(null);
+  const onLoadRef = useValueRef(onLoad);
+
   const onReadyMessage = useCallback((iframe) => {
     if (readyIframeRef.current === iframe) {
       return;
@@ -96,10 +85,11 @@ export function VimeoWithRef(
       }
       if (VIMEO_EVENTS[event]) {
         dispatchEvent(currentTarget, VIMEO_EVENTS[event]);
+        onLoadRef.current?.();
         return;
       }
     },
-    [onReadyMessage]
+    [onReadyMessage, onLoadRef]
   );
 
   const onIframeLoad = useCallback((e) => {

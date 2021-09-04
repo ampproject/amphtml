@@ -1,18 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const colors = require('../common/colors');
@@ -22,7 +7,7 @@ const {getStdout} = require('../common/process');
 const {log} = require('../common/logging');
 const {shortSha} = require('../common/git');
 
-const {green, yellow, cyan} = colors;
+const {cyan, green, yellow} = colors;
 const CODECOV_EXEC = './node_modules/.bin/codecov';
 const COVERAGE_REPORTS = {
   'unit_tests': 'test/coverage/lcov-unit.info',
@@ -53,6 +38,7 @@ function uploadReport(file, flags) {
 
 /**
  * Uploads code coverage reports for unit / integration tests during CI builds.
+ * @return {Promise<void>}
  */
 async function codecovUpload() {
   if (!isCiBuild()) {
@@ -80,4 +66,4 @@ module.exports = {
 };
 
 codecovUpload.description =
-  'Uploads code coverage reports to codecov.io during CI builds.';
+  'Upload code coverage reports to codecov.io during CI';

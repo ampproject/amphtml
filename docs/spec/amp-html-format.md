@@ -1,19 +1,3 @@
-<!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # AMP HTML ⚡
 
 [TOC]
@@ -53,7 +37,7 @@ In concrete terms this means that:
 
 ```html
 <!DOCTYPE html>
-<html ⚡>
+<html ⚡ lang="en">
   <head>
     <meta charset="utf-8" />
     <title>Sample document</title>
@@ -268,7 +252,7 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%">link</td>
-    <td><code>rel</code> values registered on <a href="http://microformats.org/wiki/existing-rel-values">microformats.org</a> are allowed. If a <code>rel</code> value is missing from our allowlist, <a href="https://github.com/ampproject/amphtml/issues/new">please submit an issue</a>. <code>stylesheet</code> and other values like <code>preconnect</code>, <code>prerender</code> and <code>prefetch</code> that have side effects in the browser are disallowed. There is a special case for fetching stylesheets from allowlisted font providers.</td>
+    <td><code>rel</code> values registered on <a href="http://microformats.org/wiki/existing-rel-values">microformats.org</a> are allowed. If a <code>rel</code> value is missing from our allowlist, <a href="https://github.com/ampproject/amphtml/issues/new?assignees=&labels=Type%3A+Bug&template=bug-report.yml">please file a bug report</a>. <code>stylesheet</code> and other values like <code>preconnect</code>, <code>prerender</code> and <code>prefetch</code> that have side effects in the browser are disallowed. There is a special case for fetching stylesheets from allowlisted font providers.</td>
   </tr>
   <tr>
     <td width="30%">meta</td>
@@ -312,7 +296,7 @@ Certain ID names are disallowed in AMP HTML, such as IDs prefixed with `-amp-` a
 
 Consult the AMP documentation for specific extensions before using `amp-` and `AMP` IDs to avoid conflict with the features provided by these extensions, such as `amp-access`.
 
-View the full list of disallowed ID names by searching for `mandatory-id-attr` [here](../validator/validator-main.protoascii).
+View the full list of disallowed ID names by searching for `mandatory-id-attr` [here](../../validator/validator-main.protoascii).
 
 ### Links
 

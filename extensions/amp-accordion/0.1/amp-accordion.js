@@ -1,38 +1,25 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {ActionTrust} from '../../../src/core/constants/action-constants';
-import {Animation} from '../../../src/animation';
-import {CSS} from '../../../build/amp-accordion-0.1.css';
-import {Keys} from '../../../src/core/constants/key-codes';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {bezierCurve} from '../../../src/core/data-structures/curve';
-import {clamp} from '../../../src/utils/math';
-import {closest, dispatchCustomEvent, tryFocus} from '../../../src/dom';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {getStyle, setImportantStyles, setStyles} from '../../../src/style';
+import {ActionTrust} from '#core/constants/action-constants';
+import {Keys} from '#core/constants/key-codes';
+import {bezierCurve} from '#core/data-structures/curve';
+import {dispatchCustomEvent, tryFocus} from '#core/dom';
+import {Layout} from '#core/dom/layout';
+import {closest, realChildElements} from '#core/dom/query';
+import {getStyle, setImportantStyles, setStyles} from '#core/dom/style';
 import {
   numeric,
   px,
   setStyles as setStylesTransition,
-} from '../../../src/transition';
-import {parseJson} from '../../../src/core/types/object/json';
+} from '#core/dom/transition';
+import {clamp} from '#core/math';
+import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {CSS} from '../../../build/amp-accordion-0.1.css';
+import {Animation} from '../../../src/animation';
+import {createCustomEvent} from '../../../src/event-helper';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {removeFragment} from '../../../src/url';
 
 const TAG = 'amp-accordion';
@@ -88,7 +75,7 @@ class AmpAccordion extends AMP.BaseElement {
     this.sessionId_ = this.getSessionStorageKey_();
     this.currentState_ = this.getSessionState_();
 
-    this.sections_ = this.getRealChildren();
+    this.sections_ = realChildElements(this.element);
     this.sections_.forEach((section, index) => {
       userAssert(
         section.tagName.toLowerCase() == 'section',
@@ -195,7 +182,7 @@ class AmpAccordion extends AMP.BaseElement {
    * @private
    */
   handleAction_(invocation) {
-    const {method, args, trust} = invocation;
+    const {args, method, trust} = invocation;
 
     let toExpand = undefined;
     if (method === 'expand') {

@@ -1,18 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const depCheckConfig = require('../test-configs/dep-check-config');
@@ -33,7 +18,7 @@ const {log, logLocalDev} = require('../common/logging');
 /**
  * @typedef {{
  *   name: string,
- *   deps: ?Array<!Object<string, !ModuleDef>>
+ *   deps: !Array<string>
  * }}
  */
 let ModuleDef;
@@ -69,22 +54,22 @@ let RuleConfigDef;
  * @param {!RuleConfigDef} config
  */
 function Rule(config) {
-  /** @private @const {!RuleConfigDef} */
+  /** @const {!RuleConfigDef} */
   this.config_ = config;
 
-  /** @private @const {string} */
+  /** @const {string} */
   this.type_ = config.type || 'forbidden';
 
   /**
    * Default to all files if none given.
-   * @private @const {!GlobsDef}
+   * @const {!GlobsDef}
    */
   this.filesMatching_ = toArrayOrDefault(config.filesMatching, ['**/*.js']);
 
-  /** @private @const {!GlobsDef} */
+  /** @const {!GlobsDef} */
   this.mustNotDependOn_ = toArrayOrDefault(config.mustNotDependOn, []);
 
-  /** @private @const {!Array<string>} */
+  /** @const {!Array<string>} */
   this.allowlist_ = toArrayOrDefault(config.allowlist, []);
 
   /** @const {!Set<string>} */
@@ -178,7 +163,11 @@ async function getEntryPointModule() {
     .map((x) => `extensions/${x}`)
     .filter((x) => fs.statSync(x).isDirectory())
     .map(getEntryPoint);
-  const allEntryPoints = flatten(extensionEntryPoints).concat(coreBinaries);
+  const vendors = await fs.promises.readdir('3p/vendors');
+  const vendorEntryPoints = vendors.map((x) => `3p/vendors/${x}`);
+  const allEntryPoints = flatten(extensionEntryPoints)
+    .concat(coreBinaries)
+    .concat(vendorEntryPoints);
   const entryPointData = allEntryPoints
     .map((file) => `import './${file}';`)
     .join('\n');
@@ -202,7 +191,7 @@ async function getModuleGraph(entryPointModule) {
     plugins: [plugin],
   });
 
-  const entryPoints = result.metafile.inputs;
+  const entryPoints = result.metafile?.inputs || [];
   const moduleGraph = Object.create(null);
   moduleGraph.name = entryPointModule;
   moduleGraph.deps = [];
@@ -257,9 +246,11 @@ function flattenGraph(entryPoints) {
  */
 function runRules(moduleGraph) {
   const errors = [];
-  Object.entries(moduleGraph).forEach(([moduleName, deps]) => {
+  Object.keys(moduleGraph).forEach((moduleName) => {
     // Run Rules against the modules and flatten for reporting.
-    const results = rules.flatMap((rule) => rule.run(moduleName, deps));
+    const results = rules.flatMap((rule) =>
+      rule.run(moduleName, moduleGraph[moduleName])
+    );
     errors.push(...results);
   });
 
@@ -303,8 +294,8 @@ async function depCheck() {
 /**
  * Put value in Array context.
  *
- * @param {!GlobsDef|string} value
- * @param {!Array<string>} defaultValue
+ * @param {GlobsDef|string|undefined} value
+ * @param {!GlobsDef} defaultValue
  * @return {!GlobsDef}
  */
 function toArrayOrDefault(value, defaultValue) {
@@ -318,9 +309,9 @@ function toArrayOrDefault(value, defaultValue) {
 }
 
 /**
- * Flatten array of arrays.
+ * Flatten array of arrays if necessary.
  *
- * @param {!Array<!Array>} arr
+ * @param {Array} arr
  * @return {!Array}
  */
 function flatten(arr) {
@@ -331,4 +322,4 @@ module.exports = {
   depCheck,
 };
 
-depCheck.description = 'Runs a dependency check on each module';
+depCheck.description = 'Run a dependency check on each module';

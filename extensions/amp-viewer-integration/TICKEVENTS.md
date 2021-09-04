@@ -1,19 +1,3 @@
-<!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 ### Tick Events
 
 When implementing a viewer one can use the tick events for performance tracking.
@@ -42,8 +26,7 @@ As an example if we executed `perf.tick('label')` we assume we have a counterpar
 | Layout Jank, second exit                 | `lj-2`                       | The aggregate jank score when the user leaves the page (navigation, tab switching, dismissing application) for the second time.                                                                    |
 | Cumulative Layout Shift, first exit      | `cls`                        | The aggregate layout shift score when the user leaves the page (navigation, tab switching, dismissing application) for the first time. See https://web.dev/layout-instability-api                  |
 | Cumulative Layout Shift, second exit     | `cls-2`                      | The aggregate layout shift score when the user leaves the page (navigation, tab switching, dismissing application) for the second time.                                                            |
-| Largest Contentful Paint, load time      | `lcpl`                       | The time in milliseconds for the first contentful element to display. This is the load time version of this metric. See https://github.com/WICG/largest-contentful-paint                           |
-| Largest Contentful Paint, render time    | `lcpr`                       | The time in milliseconds for the first contentful element to display. This is the render time version of this metric. https://github.com/WICG/largest-contentful-paint                             |
+| Largest Contentful Paint                 | `lcp`                        | The time in milliseconds for the largest contentful element to display.                                                                                                                            |
 | Largest Contentful Paint (since visible) | `lcpv`                       | The time in ms for largest contentful element to display, offset by first visible time. Based on render time, falls back to load time.                                                             |
 | DOM Complete                             | `domComplete`                | Time immediately before the browser sets the current document readiness of the current document to complete                                                                                        |
 | DOM Content Loaded Event End             | `domContentLoadedEventEnd`   | Time immediately after the current document's DOMContentLoaded event completes                                                                                                                     |

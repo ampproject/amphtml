@@ -1,23 +1,8 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   Action,
   AmpStoryStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   AmpStoryInteractiveResults,
   decideStrategy,
@@ -25,22 +10,10 @@ import {
   processResultsPercentage,
 } from '../amp-story-interactive-results';
 import {InteractiveType} from '../amp-story-interactive-abstract';
-import {LocalizationService} from '../../../../src/service/localization';
-import {Services} from '../../../../src/services';
-import {addConfigToInteractive} from './test-amp-story-interactive';
-import {registerServiceBuilder} from '../../../../src/service';
-
-const addThresholdsToInteractive = (interactive, thresholdList) => {
-  addConfigToInteractive(interactive, thresholdList.length, null, [
-    'results-category',
-  ]);
-  thresholdList.forEach((threshold, index) => {
-    interactive.element.setAttribute(
-      `option-${index + 1}-results-threshold`,
-      threshold
-    );
-  });
-};
+import {LocalizationService} from '#service/localization';
+import {Services} from '#service';
+import {addConfigToInteractive, addThresholdsToInteractive} from './helpers';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(
   'amp-story-interactive-results',
@@ -59,6 +32,7 @@ describes.realWin(
       const ampStoryResultsEl = win.document.createElement(
         'amp-story-interactive-results'
       );
+      ampStoryResultsEl.getAmpDoc = () => new AmpDocSingle(win);
       ampStoryResultsEl.getResources = () => win.__AMP_SERVICES.resources.obj;
 
       storeService = new AmpStoryStoreService(win);

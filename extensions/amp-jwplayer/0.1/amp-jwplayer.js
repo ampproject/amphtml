@@ -1,24 +1,21 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Deferred} from '#core/data-structures/promise';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '#core/dom/fullscreen';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {once} from '#core/types/function';
+import {dict} from '#core/types/object';
 
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {PauseHelper} from '../../../src/utils/pause-helper';
-import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
-import {addParamsToUrl} from '../../../src/url';
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen} from '../../../src/event-helper';
+import {disableScrollingOnIframe} from '../../../src/iframe-helper';
 import {
   addUnsafeAllowAutoplay,
   createFrameFor,
@@ -28,20 +25,9 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {disableScrollingOnIframe} from '../../../src/iframe-helper';
-import {
-  dispatchCustomEvent,
-  fullscreenEnter,
-  fullscreenExit,
-  isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
-import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {once} from '../../../src/core/types/function';
+import {addParamsToUrl} from '../../../src/url';
+import {VideoEvents} from '../../../src/video-interface';
 
 const JWPLAYER_EVENTS = {
   'ready': VideoEvents.LOAD,
@@ -185,7 +171,7 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   getMetadata() {
-    const {win, playlistItem_} = this;
+    const {playlistItem_, win} = this;
     if (win.MediaMetadata && playlistItem_['meta']) {
       try {
         return new win.MediaMetadata(playlistItem_['meta']);
@@ -348,15 +334,9 @@ class AmpJWPlayer extends AMP.BaseElement {
     if (!this.element.hasAttribute('data-media-id')) {
       return;
     }
-    const placeholder = this.win.document.createElement('amp-img');
-    this.propagateAttributes(['aria-label'], placeholder);
-    placeholder.setAttribute(
-      'src',
-      'https://content.jwplatform.com/thumbs/' +
-        encodeURIComponent(this.contentid_) +
-        '-720.jpg'
-    );
-    placeholder.setAttribute('layout', 'fill');
+    const placeholder = this.win.document.createElement('img');
+    propagateAttributes(['aria-label'], this.element, placeholder);
+    applyFillContent(placeholder);
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
     if (placeholder.hasAttribute('aria-label')) {
@@ -367,6 +347,13 @@ class AmpJWPlayer extends AMP.BaseElement {
     } else {
       placeholder.setAttribute('alt', 'Loading video');
     }
+    placeholder.setAttribute('loading', 'lazy');
+    placeholder.setAttribute(
+      'src',
+      'https://content.jwplatform.com/thumbs/' +
+        encodeURIComponent(this.contentid_) +
+        '-720.jpg'
+    );
     return placeholder;
   }
 
@@ -445,7 +432,7 @@ class AmpJWPlayer extends AMP.BaseElement {
           }
           break;
         case 'meta':
-          const {metadataType, duration} = detail;
+          const {duration, metadataType} = detail;
           if (metadataType === 'media') {
             this.duration_ = duration;
           }

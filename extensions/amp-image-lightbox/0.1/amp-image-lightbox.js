@@ -1,54 +1,39 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Keys} from '#core/constants/key-codes';
+import {bezierCurve} from '#core/data-structures/curve';
+import * as dom from '#core/dom';
+import {
+  layoutRectFromDomRect,
+  layoutRectLtwh,
+  moveLayoutRect,
+} from '#core/dom/layout/rect';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import * as query from '#core/dom/query';
+import {srcsetFromElement} from '#core/dom/srcset';
+import {setStyles, toggle} from '#core/dom/style';
+import * as st from '#core/dom/style';
+import * as tr from '#core/dom/transition';
+import {boundValue, clamp, distance, magnitude} from '#core/math';
+import {WindowInterface} from '#core/window/interface';
 
-import * as dom from '../../../src/dom';
-import * as st from '../../../src/style';
-import * as tr from '../../../src/transition';
-import {Animation} from '../../../src/animation';
+import {Services} from '#service';
+
 import {CSS} from '../../../build/amp-image-lightbox-0.1.css';
+import {Animation} from '../../../src/animation';
+import {isLoaded} from '../../../src/event-helper';
+import {Gestures} from '../../../src/gesture';
 import {
   DoubletapRecognizer,
   SwipeXYRecognizer,
   TapRecognizer,
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
-import {Gestures} from '../../../src/gesture';
-import {Keys} from '../../../src/core/constants/key-codes';
-import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
-import {bezierCurve} from '../../../src/core/data-structures/curve';
-import {boundValue, clamp, distance, magnitude} from '../../../src/utils/math';
-import {continueMotion} from '../../../src/motion';
 import {dev, userAssert} from '../../../src/log';
-import {isLoaded} from '../../../src/event-helper';
-import {
-  layoutRectFromDomRect,
-  layoutRectLtwh,
-  moveLayoutRect,
-} from '../../../src/layout-rect';
-import {setStyles, toggle} from '../../../src/style';
-import {srcsetFromElement} from '../../../src/srcset';
+import {continueMotion} from '../../../src/motion';
 
 const TAG = 'amp-image-lightbox';
 
-/** @private @const {!Object<string, boolean>} */
-const SUPPORTED_ELEMENTS_ = {
-  'amp-img': true,
-  'amp-anim': true,
-};
+/** @private @const {!Set<string>} */
+const SUPPORTED_ELEMENTS_ = new Set(['amp-img', 'amp-anim', 'img']);
 
 /** @private @const */
 const ARIA_ATTRIBUTES = ['aria-label', 'aria-describedby', 'aria-labelledby'];
@@ -253,9 +238,15 @@ export class ImageViewer {
     this.setSourceDimensions_(sourceElement, sourceImage);
     this.srcset_ = srcsetFromElement(sourceElement);
 
-    sourceElement.getImpl().then((elem) => {
-      elem.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
-    });
+    if (sourceElement.tagName.toLowerCase() === 'img') {
+      propagateAttributes(ARIA_ATTRIBUTES, sourceElement, this.image_);
+    } else {
+      sourceElement
+        .getImpl()
+        .then((impl) =>
+          propagateAttributes(ARIA_ATTRIBUTES, impl.element, this.image_)
+        );
+    }
 
     if (sourceImage && isLoaded(sourceImage) && sourceImage.src) {
       // Set src provisionally to the known loaded value for fast display.
@@ -869,8 +860,9 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.buildLightbox_();
 
     const source = invocation.caller;
+    const tagName = source.tagName.toLowerCase();
     userAssert(
-      source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
+      source && SUPPORTED_ELEMENTS_.has(tagName),
       'Unsupported element: %s',
       source.tagName
     );
@@ -981,19 +973,19 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.sourceElement_ = sourceElement;
 
     // Initialize the viewer.
-    this.sourceImage_ = dom.childElementByTag(sourceElement, 'img');
+    this.sourceImage_ = query.childElementByTag(sourceElement, 'img');
     this.imageViewer_.init(this.sourceElement_, this.sourceImage_);
 
     // Discover caption.
     let caption = null;
 
     // 1. Check <figure> and <figcaption>.
-    const figure = dom.closestAncestorElementBySelector(
+    const figure = query.closestAncestorElementBySelector(
       sourceElement,
       'figure'
     );
     if (figure) {
-      caption = dom.elementByTag(figure, 'figcaption');
+      caption = query.elementByTag(figure, 'figcaption');
     }
 
     // 2. Check "aria-describedby".

@@ -1,53 +1,46 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import {tryPlay} from '#core/dom/video';
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
-import {PauseHelper} from '../../../src/utils/pause-helper';
-import {Services} from '../../../src/services';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
-import {VisibilityState} from '../../../src/core/constants/visibility-state';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {addParamsToUrl} from '../../../src/url';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {
   childElement,
   childElementByTag,
   childElementsByTag,
-  dispatchCustomEvent,
-  fullscreenEnter,
-  fullscreenExit,
-  insertAfterOrAtStart,
-  isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+  matches,
+} from '#core/dom/query';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert, user} from '../../../src/log';
+import {
+  addAttributesToElement,
+  dispatchCustomEvent,
+  insertAfterOrAtStart,
+  removeElement,
+} from '#core/dom';
 import {fetchCachedSources} from './video-cache';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '#core/dom/fullscreen';
 import {getBitrateManager} from './flexible-bitrate';
 import {getMode} from '../../../src/mode';
-import {htmlFor} from '../../../src/static-template';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {htmlFor} from '#core/dom/static-template';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {isExperimentOn} from '#experiments';
 import {listen, listenOncePromise} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {
   propagateObjectFitStyles,
   setImportantStyles,
   setInitialDisplay,
   setStyles,
-} from '../../../src/style';
-import {toArray} from '../../../src/core/types/array';
+} from '#core/dom/style';
+import {toArray} from '#core/types/array';
 
 const TAG = 'amp-video';
 
@@ -123,11 +116,11 @@ export class AmpVideo extends AMP.BaseElement {
    * @nocollapse
    */
   static prerenderAllowed(element) {
-    // Only allow prerender if video sources are cached on CDN, or if video has
-    // a poster image.
+    // Only allow prerender if video sources are cached on CDN or remote video
+    // cache, or if video has a poster image.
 
-    // Poster is available.
-    if (element.getAttribute('poster')) {
+    // Poster is available, or cache is configured.
+    if (element.getAttribute('poster') || element.hasAttribute('cache')) {
       return true;
     }
 
@@ -234,13 +227,14 @@ export class AmpVideo extends AMP.BaseElement {
     // Disable video preload in prerender mode.
     this.video_.setAttribute('preload', 'none');
     this.checkA11yAttributeText_();
-    this.propagateAttributes(
+    propagateAttributes(
       ATTRS_TO_PROPAGATE_ON_BUILD,
+      this.element,
       this.video_,
       /* opt_removeMissingAttrs */ true
     );
     this.installEventHandlers_();
-    this.applyFillContent(this.video_, true);
+    applyFillContent(this.video_, true);
     propagateObjectFitStyles(this.element, this.video_);
 
     element.appendChild(this.video_);
@@ -260,16 +254,24 @@ export class AmpVideo extends AMP.BaseElement {
     // Cached so mediapool operations (eg: swapping sources) don't interfere with this bool.
     this.hasBitrateSources_ =
       !!this.element.querySelector('source[data-bitrate]') ||
-      this.hasAnyCachedSources_() ||
-      this.element.hasAttribute('cache');
+      this.element.hasAttribute('cache') ||
+      this.hasAnyCachedSources_();
 
     installVideoManagerForDoc(element);
 
     Services.videoManagerForDoc(element).register(this);
 
-    // Fetch and add cached sources URLs if opted-in, and if the sources don't already contained cached URLs from the AMP Cache.
-    if (this.element.hasAttribute('cache') && !this.hasAnyCachedSources_()) {
-      return fetchCachedSources(this.element, this.win);
+    if (this.element.hasAttribute('cache')) {
+      // If enabled, disables AMP Cache video caching (cdn.ampproject.org),
+      // opted-in through the "amp-orig-src" attribute.
+      this.removeCachedSources_();
+      // Fetch new sources from remote video cache, opted-in through the "cache"
+      // attribute.
+      return fetchCachedSources(
+        this.element,
+        this.getAmpDoc(),
+        this.getMaxBitrate_()
+      );
     }
   }
 
@@ -313,13 +315,18 @@ export class AmpVideo extends AMP.BaseElement {
     if (mutations['src']) {
       const urlService = this.getUrlService_();
       urlService.assertHttpsUrl(element.getAttribute('src'), element);
-      this.propagateAttributes(['src'], dev().assertElement(this.video_));
+      propagateAttributes(
+        ['src'],
+        this.element,
+        dev().assertElement(this.video_)
+      );
     }
     const attrs = ATTRS_TO_PROPAGATE.filter(
       (value) => mutations[value] !== undefined
     );
-    this.propagateAttributes(
+    propagateAttributes(
       attrs,
+      this.element,
       dev().assertElement(this.video_),
       /* opt_removeMissingAttrs */ true
     );
@@ -357,8 +364,9 @@ export class AmpVideo extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    this.propagateAttributes(
+    propagateAttributes(
       ATTRS_TO_PROPAGATE_ON_LAYOUT,
+      this.element,
       dev().assertElement(this.video_),
       /* opt_removeMissingAttrs */ true
     );
@@ -471,6 +479,21 @@ export class AmpVideo extends AMP.BaseElement {
   }
 
   /**
+   * Disables AMP Cache video caching (cdn.ampproject.org), opted-in through
+   * amp-orig-src.
+   * @private
+   */
+  removeCachedSources_() {
+    this.getCachedSources_().forEach((cachedSource) => {
+      cachedSource.setAttribute(
+        'src',
+        cachedSource.getAttribute('amp-orig-src')
+      );
+      cachedSource.removeAttribute('amp-orig-src');
+    });
+  }
+
+  /**
    * @private
    * Propagate sources that are cached by the CDN.
    */
@@ -493,29 +516,41 @@ export class AmpVideo extends AMP.BaseElement {
       sources.unshift(srcSource);
     }
 
-    // Only cached sources are added during prerender, with all the available transcodes generated by the cache.
+    // Only cached sources are added during prerender, with all the available
+    // transcodes generated by the cache.
     // Origin sources will only be added when document becomes visible.
     sources.forEach((source) => {
+      // Cached by the AMP Cache (amp-video[amp-orig-src]).
       if (isCachedByCdn(source, this.element)) {
         source.remove();
         const qualities = Object.keys(AMP_VIDEO_QUALITY_BITRATES);
         const origType = source.getAttribute('type');
         const origSrc = source.getAttribute('amp-orig-src');
+        const maxBitrate = this.getMaxBitrate_();
         qualities.forEach((quality, index) => {
+          if (maxBitrate < AMP_VIDEO_QUALITY_BITRATES[quality]) {
+            return;
+          }
           const cachedSource = addParamsToUrl(source.src, {
             'amp_video_quality': quality,
           });
-          const currSource = this.createSourceElement_(
-            cachedSource,
-            origType,
-            AMP_VIDEO_QUALITY_BITRATES[quality]
-          );
+          const currSource = this.createSourceElement_(cachedSource, origType, {
+            'data-bitrate': AMP_VIDEO_QUALITY_BITRATES[quality],
+            'i-amphtml-video-cached-source': '',
+          });
           // Keep src of amp-orig only in last one so it adds the orig source after it.
           if (index === qualities.length - 1) {
             currSource.setAttribute('amp-orig-src', origSrc);
           }
           this.video_.appendChild(currSource);
         });
+
+        return;
+      }
+
+      // Cached by the remote video caching (amp-video[cache=*]).
+      if (source.hasAttribute('i-amphtml-video-cached-source')) {
+        this.video_.appendChild(source);
       }
     });
 
@@ -539,7 +574,11 @@ export class AmpVideo extends AMP.BaseElement {
     // If the `src` of `amp-video` itself is NOT cached, set it on video
     if (element.hasAttribute('src') && !isCachedByCdn(element)) {
       urlService.assertHttpsUrl(element.getAttribute('src'), element);
-      this.propagateAttributes(['src'], dev().assertElement(this.video_));
+      propagateAttributes(
+        ['src'],
+        this.element,
+        dev().assertElement(this.video_)
+      );
     }
 
     sources.forEach((source) => {
@@ -576,11 +615,11 @@ export class AmpVideo extends AMP.BaseElement {
   /**
    * @param {string} src
    * @param {?string} type
-   * @param {number=} bitrate
+   * @param {Object=} attributes
    * @return {!Element} source element
    * @private
    */
-  createSourceElement_(src, type, bitrate = null) {
+  createSourceElement_(src, type, attributes = {}) {
     const {element} = this;
     this.getUrlService_().assertHttpsUrl(src, element);
     const source = element.ownerDocument.createElement('source');
@@ -588,10 +627,25 @@ export class AmpVideo extends AMP.BaseElement {
     if (type) {
       source.setAttribute('type', type);
     }
-    if (bitrate !== null) {
-      source.setAttribute('data-bitrate', bitrate);
-    }
+    addAttributesToElement(source, attributes);
     return source;
+  }
+
+  /**
+   * @private
+   * @return {!Array<!Element>}
+   */
+  getCachedSources_() {
+    const {element} = this;
+    const sources = toArray(childElementsByTag(element, 'source'));
+    const cachedSources = [];
+    sources.push(element);
+    for (let i = 0; i < sources.length; i++) {
+      if (isCachedByCdn(sources[i])) {
+        cachedSources.push(sources[i]);
+      }
+    }
+    return cachedSources;
   }
 
   /**
@@ -599,15 +653,25 @@ export class AmpVideo extends AMP.BaseElement {
    * @return {boolean}
    */
   hasAnyCachedSources_() {
-    const {element} = this;
-    const sources = toArray(childElementsByTag(element, 'source'));
-    sources.push(element);
-    for (let i = 0; i < sources.length; i++) {
-      if (isCachedByCdn(sources[i])) {
-        return true;
-      }
+    return !!this.getCachedSources_().length;
+  }
+
+  /**
+   * Sets a max bitrate if video is on the first page of an amp-story doc.
+   * @return {number}
+   */
+  getMaxBitrate_() {
+    if (
+      this.isManagedByPool_() &&
+      isExperimentOn(this.win, 'amp-story-first-page-max-bitrate') &&
+      matches(this.element, 'amp-story-page:first-of-type amp-video')
+    ) {
+      Services.performanceFor(this.win).addEnabledExperiment(
+        'amp-story-first-page-max-bitrate'
+      );
+      return 1000;
     }
-    return false;
+    return Number.POSITIVE_INFINITY;
   }
 
   /**
@@ -729,17 +793,7 @@ export class AmpVideo extends AMP.BaseElement {
    * @override
    */
   play(unusedIsAutoplay) {
-    const ret = this.video_.play();
-
-    if (ret && ret.catch) {
-      ret.catch(() => {
-        // Empty catch to prevent useless unhandled promise rejection logging.
-        // Play can fail for many reasons such as video getting paused before
-        // play() is finished.
-        // We use events to know the state of the video and do not care about
-        // the success or failure of the play()'s returned promise.
-      });
-    }
+    tryPlay(this.video_);
   }
 
   /**
@@ -766,7 +820,7 @@ export class AmpVideo extends AMP.BaseElement {
       'background-position': 'center',
     });
     poster.classList.add('i-amphtml-android-poster-bug');
-    this.applyFillContent(poster);
+    applyFillContent(poster);
     element.appendChild(poster);
   }
 

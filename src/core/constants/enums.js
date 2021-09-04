@@ -1,20 +1,4 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * Registred singleton on AMP doc.
  * @enum {number}
  */
@@ -49,9 +33,8 @@ export const TickLabel = {
   FIRST_VIEWPORT_READY: 'pc',
   GOOD_FRAME_PROBABILITY: 'gfp',
   INSTALL_STYLES: 'is',
+  LARGEST_CONTENTFUL_PAINT: 'lcp',
   LARGEST_CONTENTFUL_PAINT_VISIBLE: 'lcpv',
-  LARGEST_CONTENTFUL_PAINT_LOAD: 'lcpl',
-  LARGEST_CONTENTFUL_PAINT_RENDER: 'lcpr',
   LONG_TASKS_CHILD: 'ltc',
   LONG_TASKS_SELF: 'lts',
   MAKE_BODY_VISIBLE: 'mbv',

@@ -1,33 +1,20 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {createElementWithAttributes} from '#core/dom';
+import {dict} from '#core/types/object';
+import {parseQueryString} from '#core/types/string/url';
 
-import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
-import {CSS} from '../../../build/amp-access-scroll-0.1.css';
-import {PROTOCOL_VERSION} from './scroll-protocol';
-import {ReadDepthTracker} from './read-depth-tracker.js';
-import {Relay} from './scroll-relay';
+import {Services} from '#service';
+
+import {ReadDepthTracker} from './read-depth-tracker';
 import {ScrollBar} from './scroll-bar';
-import {Services} from '../../../src/services';
+import {PROTOCOL_VERSION} from './scroll-protocol';
+import {Relay} from './scroll-relay';
 import {Sheet} from './scroll-sheet';
-import {addParamToUrl, isProxyOrigin} from '../../../src/url';
 import {buildUrl, connectHostname} from './scroll-url';
-import {createElementWithAttributes} from '../../../src/dom';
-import {dict} from '../../../src/core/types/object';
+
+import {CSS} from '../../../build/amp-access-scroll-0.1.css';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {parseQueryString} from '../../../src/core/types/string/url';
+import {addParamToUrl, isProxyOrigin} from '../../../src/url';
+import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
 
 const TAG = 'amp-access-scroll-elt';
 /**

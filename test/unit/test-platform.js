@@ -1,20 +1,4 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Platform} from '../../src/service/platform-impl';
+import {Platform} from '#service/platform-impl';
 
 describes.sandboxed('Platform', {}, (env) => {
   let isIos;
@@ -23,7 +7,6 @@ describes.sandboxed('Platform', {}, (env) => {
   let isSafari;
   let isFirefox;
   let isOpera;
-  let isIe;
   let isEdge;
   let isWebKit;
   let isStandalone;
@@ -39,7 +22,6 @@ describes.sandboxed('Platform', {}, (env) => {
     isSafari = false;
     isFirefox = false;
     isOpera = false;
-    isIe = false;
     isEdge = false;
     isWebKit = false;
     isStandalone = false;
@@ -57,7 +39,6 @@ describes.sandboxed('Platform', {}, (env) => {
     expect(platform.isSafari()).to.equal(isSafari);
     expect(platform.isFirefox()).to.equal(isFirefox);
     expect(platform.isOpera()).to.equal(isOpera);
-    expect(platform.isIe()).to.equal(isIe);
     expect(platform.isEdge()).to.equal(isEdge);
     expect(platform.isWebKit()).to.equal(isWebKit);
     expect(platform.getMajorVersion()).to.equal(majorVersion);
@@ -284,26 +265,6 @@ describes.sandboxed('Platform', {}, (env) => {
       'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_2 like Mac OS X)' +
       ' AppleWebKit/603.2.4 (KHTML, like Gecko) OPiOS/14.0.0.104835' +
       ' Mobile/14F89 Safari/9537.53';
-    testUserAgent(userAgent);
-    testStandalone(userAgent, isStandalone);
-  });
-
-  it('IE', () => {
-    isIe = true;
-    majorVersion = 10;
-    userAgent =
-      'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 7.0;' +
-      ' InfoPath.3; .NET CLR 3.1.40767; Trident/6.0; en-IN)';
-    testUserAgent(userAgent);
-    testStandalone(userAgent, isStandalone);
-  });
-
-  it('IEMobile', () => {
-    isIe = true;
-    majorVersion = 10;
-    userAgent =
-      'Mozilla/5.0 (compatible; MSIE 10.0; Windows Phone 8.0;' +
-      ' Trident/6.0; IEMobile/10.0; ARM; Touch; NOKIA; Lumia 520)';
     testUserAgent(userAgent);
     testStandalone(userAgent, isStandalone);
   });

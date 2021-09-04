@@ -1,27 +1,13 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {addParamsToUrl} from '../../../src/url';
-import {createElementWithAttributes, removeElement} from '../../../src/dom';
+import {createElementWithAttributes, removeElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {measureIntersection} from '#core/dom/layout/intersection';
+import {setStyle} from '#core/dom/style';
+import {omit} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
+
 import {getData, listen} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {measureIntersection} from '../../../src/utils/intersection';
-import {omit} from '../../../src/core/types/object';
-import {setStyle} from '../../../src/style';
-import {tryParseJson} from '../../../src/core/types/object/json';
 import {userAssert} from '../../../src/log';
+import {addParamsToUrl} from '../../../src/url';
 
 /** @const {string} */
 export const TAG = 'amp-iframely';
@@ -122,15 +108,17 @@ export class AmpIframely extends AMP.BaseElement {
         this.constructSrc_('/thumbnail'),
         this.options_
       );
-      return createElementWithAttributes(
+      const element = createElementWithAttributes(
         this.element.ownerDocument,
-        'amp-img',
+        'img',
         {
           'src': src,
+          'loading': 'lazy',
           'placeholder': '',
-          'layout': 'fill',
         }
       );
+      applyFillContent(element);
+      return element;
     }
     return null;
   }
@@ -146,7 +134,7 @@ export class AmpIframely extends AMP.BaseElement {
     );
     this.src_ = addParamsToUrl(this.src_, this.options_);
     this.iframe_.src = this.src_;
-    this.applyFillContent(this.iframe_);
+    applyFillContent(this.iframe_);
     this.element.appendChild(this.iframe_);
 
     this.unlistener_ = listen(this.win, 'message', (event) => {

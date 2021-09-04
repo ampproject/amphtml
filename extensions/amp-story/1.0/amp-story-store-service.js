@@ -1,26 +1,10 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {EmbedMode, parseEmbedMode} from './embed-mode';
-import {Observable} from '../../../src/core/data-structures/observable';
-import {Services} from '../../../src/services';
-import {deepEquals} from '../../../src/core/types/object/json';
+import {Observable} from '#core/data-structures/observable';
+import {Services} from '#service';
+import {deepEquals} from '#core/types/object/json';
 import {dev} from '../../../src/log';
-import {hasOwn} from '../../../src/core/types/object';
-import {registerServiceBuilder} from '../../../src/service';
+import {hasOwn} from '#core/types/object';
+import {registerServiceBuilder} from '../../../src/service-helpers';
 
 /** @type {string} */
 const TAG = 'amp-story';
@@ -51,8 +35,9 @@ export const getStoreService = (win) => {
  */
 export const UIType = {
   MOBILE: 0,
-  DESKTOP_PANELS: 1, // Default desktop UI.
+  DESKTOP_PANELS: 1, // Default desktop UI displaying previous and next pages.
   DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
+  DESKTOP_ONE_PANEL: 4, // Desktop UI with one panel and space around story.
   VERTICAL: 3, // Vertical scrolling versions, for search engine bots indexing.
 };
 
@@ -93,6 +78,7 @@ export let InteractiveReactData;
  *    canShowPaginationButtons: boolean,
  *    canShowPreviousPageHelp: boolean,
  *    canShowSharingUis: boolean,
+ *    canShowStoryUrlInfo: boolean,
  *    canShowSystemLayerButtons: boolean,
  *    viewerCustomControls: !Array<!Object>,
  *    accessState: boolean,
@@ -143,6 +129,7 @@ export const StateProperty = {
   CAN_SHOW_PAGINATION_BUTTONS: 'canShowPaginationButtons',
   CAN_SHOW_PREVIOUS_PAGE_HELP: 'canShowPreviousPageHelp',
   CAN_SHOW_SHARING_UIS: 'canShowSharingUis',
+  CAN_SHOW_STORY_URL_INFO: 'canShowStoryUrlInfo',
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canShowSystemLayerButtons',
   VIEWER_CUSTOM_CONTROLS: 'viewerCustomControls',
 
@@ -589,6 +576,7 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
       [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: true,
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
+      [StateProperty.CAN_SHOW_STORY_URL_INFO]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.VIEWER_CUSTOM_CONTROLS]: [],
       [StateProperty.ACCESS_STATE]: false,
@@ -670,6 +658,7 @@ export class AmpStoryStoreService {
         return {
           [StateProperty.CAN_SHOW_AUDIO_UI]: false,
           [StateProperty.CAN_SHOW_SHARING_UIS]: false,
+          [StateProperty.CAN_SHOW_STORY_URL_INFO]: false,
         };
       default:
         return {};

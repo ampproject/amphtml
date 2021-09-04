@@ -1,30 +1,16 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {whenDocumentReady} from '#core/document-ready';
+import {moveLayoutRect} from '#core/dom/layout/rect';
+import {resetStyles, setInitialDisplay, setStyles} from '#core/dom/style';
+import {once} from '#core/types/function';
+import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
+import {parseQueryString} from '#core/types/string/url';
 
-import {Services} from '../../../src/services';
-import {dict} from '../../../src/core/types/object';
+import {Services} from '#service';
+
 import {findSentences, markTextRangeList} from './findtext';
-import {isExperimentOn} from '../../../src/experiments';
+
 import {listenOnce} from '../../../src/event-helper';
-import {moveLayoutRect} from '../../../src/layout-rect';
-import {once} from '../../../src/core/types/function';
-import {parseJson} from '../../../src/core/types/object/json';
-import {parseQueryString} from '../../../src/core/types/string/url';
-import {resetStyles, setInitialDisplay, setStyles} from '../../../src/style';
-import {whenDocumentReady} from '../../../src/document-ready';
 
 /**
  * The message name sent by viewers to dismiss highlights.
@@ -157,9 +143,22 @@ export class HighlightHandler {
     /** @private {?Array<!Element>} */
     this.highlightedNodes_ = null;
 
+    const platform =
+      /* @type {!./service/platform-impl.Platform} */ Services.platformFor(
+        this.ampdoc_.win
+      );
+
+    // Chrome 81 added support for text fragment proposal. However, it is
+    // not supported across iframes but Chrome 81 thru 92 report
+    // `'fragmentDirective' in document = true` which breaks feature detection.
+    // Chrome 93 supports the proposal that works across iframes, hence this
+    // version check.
+    // TODO(dmanek): remove `ifChrome()` from unit tests when we remove
+    // Chrome version detection below
     if (
       'fragmentDirective' in document &&
-      isExperimentOn(ampdoc.win, 'use-text-fragments-for-highlights')
+      platform.isChrome() &&
+      platform.getMajorVersion() >= 93
     ) {
       ampdoc
         .whenFirstVisible()
@@ -329,7 +328,7 @@ export class HighlightHandler {
       // top and bottom returned by getLayoutRect includes the header padding
       // size. We need to cancel the padding to calculate the positions in
       // document.body like Viewport.animateScrollIntoView does.
-      const {top, bottom} = moveLayoutRect(
+      const {bottom, top} = moveLayoutRect(
         viewport.getLayoutRect(nodes[i]),
         0,
         -paddingTop

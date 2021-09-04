@@ -1,34 +1,21 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {DomWriterBulk, DomWriterStreamer} from './utils/dom-writer';
-import {Services} from './services';
-import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
+import {iterateCursor} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {setInitialDisplay, setStyle} from '#core/dom/style';
 import {
   ShadowDomVersion,
   getShadowDomSupportedVersion,
   isShadowCssSupported,
-} from './web-components';
+} from '#core/dom/web-components';
+import {toArray} from '#core/types/array';
+import {toWin} from '#core/window';
+
+import {Services} from '#service';
+
+import {ShadowCSS} from '#third_party/webcomponentsjs/ShadowCSS';
+
 import {dev, devAssert} from './log';
-import {escapeCssSelectorIdent} from './core/dom/css';
 import {installCssTransformer} from './style-installer';
-import {iterateCursor} from './dom';
-import {setInitialDisplay, setStyle} from './style';
-import {toArray} from './core/types/array';
-import {toWin} from './types';
+import {DomWriterBulk, DomWriterStreamer} from './utils/dom-writer';
 
 /** @const {!RegExp} */
 const CSS_SELECTOR_BEG_REGEX = /[^\.\-\_0-9a-zA-Z]/;

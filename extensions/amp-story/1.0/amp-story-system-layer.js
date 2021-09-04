@@ -1,18 +1,3 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/amp-story-player-impl';
 import {
   Action,
@@ -26,10 +11,10 @@ import {
   DevelopmentModeLog,
   DevelopmentModeLogButtonSet,
 } from './development-ui';
-import {LocalizedStringId} from '../../../src/localized-strings';
+import {LocalizedStringId} from '#service/localization/strings';
 import {ProgressBar} from './progress-bar';
-import {Services} from '../../../src/services';
-import {closest, matches, scopedQuerySelector} from '../../../src/dom';
+import {Services} from '#service';
+import {closest, matches, scopedQuerySelector} from '#core/dom/query';
 import {
   createShadowRootWithStyle,
   getStoryAttributeSrc,
@@ -37,13 +22,15 @@ import {
   triggerClickFromLightDom,
 } from './utils';
 import {dev} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {dict} from '#core/types/object';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
+
 import {renderAsElement} from './simple-template';
-import {setImportantStyles} from '../../../src/style';
-import {toArray} from '../../../src/core/types/array';
+
+import {setImportantStyles} from '#core/dom/style';
+import {toArray} from '#core/types/array';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
@@ -460,7 +447,7 @@ export class SystemLayer {
       ? new AmpStoryViewerMessagingHandler(this.win_, this.viewer_)
       : null;
 
-    if (shouldShowStoryUrlInfo(this.viewer_)) {
+    if (shouldShowStoryUrlInfo(this.viewer_, this.storeService_)) {
       this.systemLayerEl_.classList.add('i-amphtml-embedded');
       this.getShadowRoot().setAttribute(HAS_INFO_BUTTON_ATTRIBUTE, '');
     } else {
@@ -886,6 +873,7 @@ export class SystemLayer {
 
       shadowRoot.classList.remove('i-amphtml-story-desktop-fullbleed');
       shadowRoot.classList.remove('i-amphtml-story-desktop-panels');
+      shadowRoot.classList.remove('i-amphtml-story-desktop-one-panel');
       shadowRoot.removeAttribute('desktop');
 
       switch (uiState) {
@@ -896,6 +884,9 @@ export class SystemLayer {
         case UIType.DESKTOP_FULLBLEED:
           shadowRoot.setAttribute('desktop', '');
           shadowRoot.classList.add('i-amphtml-story-desktop-fullbleed');
+          break;
+        case UIType.DESKTOP_ONE_PANEL:
+          shadowRoot.classList.add('i-amphtml-story-desktop-one-panel');
           break;
       }
     });

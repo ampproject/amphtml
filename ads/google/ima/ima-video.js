@@ -1,28 +1,12 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {ImaPlayerData} from './ima-player-data';
-import {camelCaseToTitleCase, setStyle, toggle} from '../../../src/style';
+import {camelCaseToTitleCase, setStyle, toggle} from '#core/dom/style';
 import {getData} from '../../../src/event-helper';
-import {htmlFor, htmlRefs, svgFor} from '../../../src/static-template';
-import {isArray, isObject} from '../../../src/core/types';
-import {loadScript} from '../../../3p/3p';
-import {throttle} from '../../../src/core/types/function';
-import {tryParseJson} from '../../../src/core/types/object/json';
+import {htmlFor, htmlRefs, svgFor} from '#core/dom/static-template';
+import {isArray, isObject} from '#core/types';
+import {loadScript} from '#3p/3p';
+import {throttle} from '#core/types/function';
+import {tryParseJson} from '#core/types/object/json';
 // Source for this constant is css/amp-ima-video-iframe.css
 import {cssText} from '../../../build/amp-ima-video-iframe.css';
 
@@ -254,12 +238,9 @@ function renderElements(elementOrDoc) {
           </div>
         </div>
 
-        <div ref="time">
-          <!-- Text content must match format in updateTime(). -->
-          -:- / 0:00
-        </div>
+        <div ref="time">-:-</div>
 
-        <div ref="progress">
+        <div ref="progress" hidden>
           <div ref="progressLine"></div>
           <div ref="progressMarker"></div>
         </div>
@@ -291,7 +272,7 @@ function renderElements(elementOrDoc) {
 
   // Buttons toggle SVGs by including two each, one is displayed at a time.
   // See CSS selectors for buttons under .root[data-*].
-  const {'playButton': playButton, 'muteButton': muteButton} = elements;
+  const {'muteButton': muteButton, 'playButton': playButton} = elements;
 
   playButton.appendChild(icons.play(svg));
   playButton.appendChild(icons.pause(svg));
@@ -388,10 +369,10 @@ export function imaVideo(global, data) {
   imaLoadAllowed = true;
 
   const {
+    'fullscreenButton': fullscreenButton,
+    'muteButton': muteButton,
     'playButton': playButton,
     'progress': progress,
-    'muteButton': muteButton,
-    'fullscreenButton': fullscreenButton,
   } = elements;
 
   let mobileBrowser = false;
@@ -592,7 +573,7 @@ function onImaLoadFail() {
  * @visibleForTesting
  */
 export function onOverlayButtonInteract(global) {
-  const {'video': video, 'overlayButton': overlayButton} = elements;
+  const {'overlayButton': overlayButton, 'video': video} = elements;
   if (playbackStarted) {
     // Resart the video
     playVideo();
@@ -862,7 +843,7 @@ export function onContentPauseRequested(global) {
  * @visibleForTesting
  */
 export function onContentResumeRequested() {
-  const {'video': video, 'overlayButton': overlayButton} = elements;
+  const {'overlayButton': overlayButton, 'video': video} = elements;
   adsActive = false;
   addHoverEventToElement(
     /** @type {!Element} */ (video),
@@ -949,14 +930,35 @@ function playerDataTick() {
  */
 export function updateTime(currentTime, duration) {
   const {
-    'time': time,
+    'progress': progress,
     'progressLine': progressLine,
     'progressMarker': progressMarker,
+    'time': time,
   } = elements;
-  time.textContent = formatTime(currentTime) + ' / ' + formatTime(duration);
-  const progressPercent = Math.floor((currentTime / duration) * 100);
-  setStyle(progressLine, 'width', progressPercent + '%');
-  setStyle(progressMarker, 'left', progressPercent - 1 + '%');
+
+  // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/duration
+  const isLivestream = duration === Infinity;
+
+  // Progress bar should not be displayed on livestreams.
+  // TODO(alanorozco): This is likely handled by native controls, so we wouldn't
+  // need this clause if we switch. https://go.amp.dev/issue/8841
+  if (progress.hasAttribute('hidden') !== isLivestream) {
+    toggle(progress, !isLivestream);
+    progress.setAttribute('aria-hidden', String(isLivestream));
+  }
+
+  // TODO(alanorozco): Consider adding a label for livestreams to display next
+  // to the current time.
+  const currentTimeFormatted = formatTime(currentTime);
+  time.textContent = isLivestream
+    ? currentTimeFormatted
+    : `${currentTimeFormatted} / ${formatTime(duration)}`;
+
+  if (!isLivestream) {
+    const progressPercent = Math.floor((currentTime / duration) * 100);
+    setStyle(progressLine, 'width', progressPercent + '%');
+    setStyle(progressMarker, 'left', progressPercent - 1 + '%');
+  }
 }
 
 /**
@@ -1031,7 +1033,7 @@ function onProgressClickEnd() {
  * @param {!Event} event
  */
 function onProgressMove(event) {
-  const {'video': video, 'progress': progress} = elements;
+  const {'progress': progress, 'video': video} = elements;
   const progressWrapperPosition = getPagePosition(progress);
   const progressListStart = progressWrapperPosition.x;
   const progressListWidth = progress./*OK*/ offsetWidth;
@@ -1452,9 +1454,6 @@ export function getPropertiesForTesting() {
     playPauseDiv: elements['playButton'],
     countdownDiv: elements['countdown'],
     timeDiv: elements['time'],
-    progressBarWrapper: elements['progress'],
-    progressLine: elements['progressLine'],
-    progressMarkerDiv: elements['progressMarker'],
     muteUnmuteDiv: elements['muteButton'],
     fullscreenDiv: elements['fullscreenButton'],
     bigPlayDiv: elements['overlayButton'],

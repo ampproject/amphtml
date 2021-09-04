@@ -1,22 +1,10 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-date-display';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {Services} from '../../../../src/services';
+import {expect} from 'chai';
+
+import {Services} from '#service';
+
+import {user} from '../../../../src/log';
 
 describes.realWin(
   'amp-date-display',
@@ -81,6 +69,9 @@ describes.realWin(
       expect(data.second).to.equal(6);
       expect(data.secondTwoDigit).to.equal('06');
       expect(data.dayPeriod).to.equal('am');
+      expect(data.localeString).to.equal('Feb 3, 2001, 4:05 AM');
+      expect(data.timeZoneName).to.equal('Coordinated Universal Time');
+      expect(data.timeZoneNameShort).to.equal('UTC');
     });
 
     it('provides all variables in local and English (default)', async () => {
@@ -108,7 +99,43 @@ describes.realWin(
       expect(data.second).to.equal(6);
       expect(data.secondTwoDigit).to.equal('06');
       expect(data.dayPeriod).to.equal('am');
+      expect(data.localeString).to.equal('Feb 3, 2001, 4:05 AM');
+      // default timezone is affected by running platform, so we just verify
+      // that both timezone values are present, and that they differ.
+      // (Another set of tests below verify that the timezone is labelled
+      // properly in different locales.)
+      expect(data.timeZoneName).to.be.ok;
+      expect(data.timeZoneNameShort).to.be.ok;
+      expect(data.timeZoneName).to.not.equal(data.timeZoneNameShort);
     });
+
+    const expectedTimeZoneNamesAmericaNewYork = {
+      'en': {
+        timeZoneName: 'Eastern Standard Time',
+        timeZoneNameShort: 'EST',
+      },
+      'ja-JP': {
+        timeZoneName: 'アメリカ東部標準時',
+        timeZoneNameShort: 'GMT-5',
+      },
+      'ar-EG': {
+        timeZoneName: 'التوقيت الرسمي الشرقي لأمريكا الشمالية',
+        timeZoneNameShort: 'غرينتش-٥',
+      },
+    };
+    for (const locale in expectedTimeZoneNamesAmericaNewYork) {
+      const {timeZoneName, timeZoneNameShort} =
+        expectedTimeZoneNamesAmericaNewYork[locale];
+      it(`provides timeZoneName and timeZoneNameShort with specified TZ (${locale})`, async () => {
+        element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
+        element.setAttribute('locale', locale);
+        element.setAttribute('data-options-time-zone', 'America/New_York');
+        await element.buildInternal();
+        const data = impl.getDataForTemplate_();
+        expect(data.timeZoneName).to.equal(timeZoneName);
+        expect(data.timeZoneNameShort).to.equal(timeZoneNameShort);
+      });
+    }
 
     describe('correctly parses', () => {
       it('now keyword', async () => {
@@ -173,6 +200,31 @@ describes.realWin(
           '2001-02-03T04:05:06.007Z'
         );
       });
+
+      it('locale and data-options-time-style', async () => {
+        element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
+        element.setAttribute('display-in', 'UTC');
+        element.setAttribute('locale', 'zh-TW');
+        element.setAttribute('data-options-time-style', 'short');
+        await element.buildInternal();
+
+        const data = impl.getDataForTemplate_();
+
+        expect(data.localeString).to.equal('上午4:05');
+      });
+
+      it('locale, data-options-time-style, and data-options-date-style', async () => {
+        element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
+        element.setAttribute('display-in', 'UTC');
+        element.setAttribute('locale', 'zh-TW');
+        element.setAttribute('data-options-date-style', 'full');
+        element.setAttribute('data-options-time-style', 'medium');
+        await element.buildInternal();
+
+        const data = impl.getDataForTemplate_();
+
+        expect(data.localeString).to.equal('2001年2月3日 星期六 上午4:05:06');
+      });
     });
 
     it('adds offset seconds', async () => {
@@ -205,6 +257,35 @@ describes.realWin(
       expect(data.monthNameShort).to.equal('úno');
       expect(data.dayName).to.equal('sobota');
       expect(data.dayNameShort).to.equal('so');
+    });
+
+    describe('invalid data-options-* settings', () => {
+      it('throws error when invalid data-options value is provided', async () => {
+        const spy = env.sandbox.stub(user(), 'error');
+        element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
+        element.setAttribute('display-in', 'UTC');
+        element.setAttribute('locale', 'zh-TW');
+        element.setAttribute('data-options-time-style', 'invalid');
+
+        await element.buildInternal();
+        const data = impl.getDataForTemplate_();
+
+        expect(spy.args[0][1]).to.equal('localeOptions');
+        expect(spy.args[0][2]).to.match(/RangeError/);
+        expect(data.localeString).to.be.undefined;
+      });
+
+      it('ignores the attr when invalid data-options-attr is provided', async () => {
+        element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
+        element.setAttribute('display-in', 'UTC');
+        element.setAttribute('locale', 'zh-TW');
+        element.setAttribute('data-options-invalid', 'invalid');
+
+        await element.buildInternal();
+        const data = impl.getDataForTemplate_();
+
+        expect(data.localeString).to.equal('2001/2/3 上午4:05:06');
+      });
     });
   }
 );

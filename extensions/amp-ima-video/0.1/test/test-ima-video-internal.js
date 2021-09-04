@@ -1,21 +1,6 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import * as imaVideoObj from '#ads/google/ima/ima-video';
 
-import * as imaVideoObj from '../../../../ads/google/ima/ima-video';
-import {CONSENT_POLICY_STATE} from '../../../../src/core/constants/consent-state';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 
 describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   const srcUrl = 'http://rmcdn.2mdn.net/Demo/vast_inspector/android.mp4';
@@ -186,8 +171,8 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       getAd: () => ({getAdPodInfo: () => adPodInfo}),
     });
 
-    tests.forEach(({mock, label, expected}) => {
-      const {remainingTime, totalAds, adPosition} = mock;
+    tests.forEach(({expected, label, mock}) => {
+      const {adPosition, remainingTime, totalAds} = mock;
       let defaults = videoDefaults;
       if (label) {
         defaults = Object.assign(defaults, {adLabel: label});
@@ -672,7 +657,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     imaVideoObj.setVideoPlayerForTesting(getVideoPlayerMock());
     imaVideoObj.setContentCompleteForTesting(true);
     // expect a subset of controls to be hidden / displayed during ad
-    const {controlsDiv, playPauseDiv, timeDiv, muteUnmuteDiv, fullscreenDiv} =
+    const {controlsDiv, fullscreenDiv, muteUnmuteDiv, playPauseDiv, timeDiv} =
       imaVideoObj.getPropertiesForTesting();
     expect(controlsDiv).not.to.be.null;
     expect(playPauseDiv).not.to.be.null;
@@ -827,50 +812,51 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       tag: adTagUrl,
     });
 
+    const {elements} = imaVideoObj.getPropertiesForTesting();
+
     imaVideoObj.updateTime(0, 60);
-    expect(imaVideoObj.getPropertiesForTesting().timeDiv.textContent).to.eql(
-      '0:00 / 1:00'
-    );
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressLine.style.width
-    ).to.eql('0%');
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressMarkerDiv.style.left
-    ).to.eql('-1%');
+    expect(elements.time.textContent).to.eql('0:00 / 1:00');
+    expect(elements.progress).to.not.have.attribute('hidden');
+    expect(elements.progress.getAttribute('aria-hidden')).to.equal('false');
+    expect(elements.progressLine.style.width).to.eql('0%');
+    expect(elements.progressMarker.style.left).to.eql('-1%');
+
     imaVideoObj.updateTime(30, 60);
-    expect(imaVideoObj.getPropertiesForTesting().timeDiv.textContent).to.eql(
-      '0:30 / 1:00'
-    );
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressLine.style.width
-    ).to.eql('50%');
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressMarkerDiv.style.left
-    ).to.eql('49%');
+    expect(elements.time.textContent).to.eql('0:30 / 1:00');
+    expect(elements.progress).to.not.have.attribute('hidden');
+    expect(elements.progress.getAttribute('aria-hidden')).to.equal('false');
+    expect(elements.progressLine.style.width).to.eql('50%');
+    expect(elements.progressMarker.style.left).to.eql('49%');
+
     imaVideoObj.updateTime(60, 60);
-    expect(imaVideoObj.getPropertiesForTesting().timeDiv.textContent).to.eql(
-      '1:00 / 1:00'
-    );
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressLine.style.width
-    ).to.eql('100%');
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressMarkerDiv.style.left
-    ).to.eql('99%');
+    expect(elements.time.textContent).to.eql('1:00 / 1:00');
+    expect(elements.progress).to.not.have.attribute('hidden');
+    expect(elements.progress.getAttribute('aria-hidden')).to.equal('false');
+    expect(elements.progressLine.style.width).to.eql('100%');
+    expect(elements.progressMarker.style.left).to.eql('99%');
+
+    const livestreamDuration = Infinity;
+
+    // Compare against current progress state since livestreams should not change it.
+    const progressLineWidth = elements.progressLine.style.width;
+    const progressMarkerLeft = elements.progressMarker.style.left;
+
+    imaVideoObj.updateTime(61, livestreamDuration);
+    expect(elements.time.textContent).to.eql('1:01');
+    expect(elements.progress).to.have.attribute('hidden');
+    expect(elements.progress.getAttribute('aria-hidden')).to.equal('true');
+    expect(elements.progressLine.style.width).to.eql(progressLineWidth);
+    expect(elements.progressMarker.style.left).to.eql(progressMarkerLeft);
+
+    imaVideoObj.updateTime(122, livestreamDuration);
+    expect(elements.time.textContent).to.eql('2:02');
+    expect(elements.progress).to.have.attribute('hidden');
+    expect(elements.progress.getAttribute('aria-hidden')).to.equal('true');
+    expect(elements.progressLine.style.width).to.eql(progressLineWidth);
+    expect(elements.progressMarker.style.left).to.eql(progressMarkerLeft);
   });
 
   it('formats time', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
-    imaVideoObj.imaVideo(win, {
-      width: 640,
-      height: 360,
-      src: srcUrl,
-      tag: adTagUrl,
-    });
-
     let formattedTime = imaVideoObj.formatTime(0);
     expect(formattedTime).to.eql('0:00');
     formattedTime = imaVideoObj.formatTime(55);
@@ -1171,7 +1157,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       src: srcUrl,
       tag: adTagUrl,
     });
-    imaVideoObj.adsActive = false;
 
     imaVideoObj.hideControls();
     expect(imaVideoObj.getPropertiesForTesting().controlsDiv).to.have.attribute(
@@ -1198,7 +1183,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       src: srcUrl,
       tag: adTagUrl,
     });
-    imaVideoObj.adsActive = false;
 
     imaVideoObj.hideControls();
     expect(imaVideoObj.getPropertiesForTesting().controlsDiv).to.have.attribute(
@@ -1346,7 +1330,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       tag: adTagUrl,
     });
 
-    imaVideoObj.imaLoadAllowed = true;
     imaVideoObj.setConsentStateForTesting(CONSENT_POLICY_STATE.UNKNOWN);
     imaVideoObj.requestAds();
 

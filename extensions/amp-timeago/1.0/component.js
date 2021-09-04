@@ -1,26 +1,12 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {getDate} from '#core/types/date';
+import {toWin} from '#core/window';
 
-import * as Preact from '../../../src/preact';
-import {Wrapper} from '../../../src/preact/component';
+import * as Preact from '#preact';
+import {useEffect, useRef, useState} from '#preact';
+import {Wrapper} from '#preact/component';
+import {useResourcesNotify} from '#preact/utils';
+
 import {format, getLocale} from './locales';
-import {getDate} from '../../../src/core/types/date';
-import {toWin} from '../../../src/types';
-import {useEffect, useRef, useState} from '../../../src/preact';
-import {useResourcesNotify} from '../../../src/preact/utils';
 
 /** @const {string} */
 const DEFAULT_LOCALE = 'en_US';
@@ -42,9 +28,9 @@ const DEFAULT_TIME_OPTIONS = {'hour': 'numeric', 'minute': 'numeric'};
  * @return {PreactDef.Renderable}
  */
 export function Timeago({
+  cutoff,
   datetime,
   locale: localeProp,
-  cutoff,
   placeholder,
   ...rest
 }) {

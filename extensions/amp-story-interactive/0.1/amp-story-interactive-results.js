@@ -1,28 +1,12 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   AmpStoryInteractive,
   InteractiveType,
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-results-0.1.css';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
-import {computedStyle, setStyle} from '../../../src/style';
+import {computedStyle, setStyle} from '#core/dom/style';
 import {dev} from '../../../src/log';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '#core/dom/static-template';
 
 /**
  * @typedef {{
@@ -33,7 +17,15 @@ import {htmlFor} from '../../../src/static-template';
 export let InteractiveResultsDef;
 
 /**
- * Generates the template for the quiz.
+ * @typedef {{
+ *    option: ?./amp-story-interactive-abstract.OptionConfigType,
+ *    interactiveId: string
+ * }}
+ */
+export let InteractiveStateEntryType;
+
+/**
+ * Generates the template for the results component.
  *
  * @param {!Element} element
  * @return {!Element}
@@ -42,20 +34,32 @@ const buildResultsTemplate = (element) => {
   const html = htmlFor(element);
   return html`
     <div class="i-amphtml-story-interactive-results-container">
-      <div class="i-amphtml-story-interactive-results-top">
-        <div class="i-amphtml-story-interactive-results-top-score">SCORE:</div>
-        <div class="i-amphtml-story-interactive-results-top-value">
-          <span class="i-amphtml-story-interactive-results-top-value-number"
-            >100</span
-          ><span>%</span>
-        </div>
-      </div>
       <div class="i-amphtml-story-interactive-results-image-border">
         <div class="i-amphtml-story-interactive-results-image"></div>
       </div>
       <div class="i-amphtml-story-interactive-results-prompt"></div>
       <div class="i-amphtml-story-interactive-results-title"></div>
       <div class="i-amphtml-story-interactive-results-description"></div>
+    </div>
+  `;
+};
+
+/**
+ * Generates the template for the top bar of the results component.
+ *
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildResultsTopTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <div class="i-amphtml-story-interactive-results-top">
+      <div class="i-amphtml-story-interactive-results-top-score">SCORE:</div>
+      <div class="i-amphtml-story-interactive-results-top-value">
+        <span class="i-amphtml-story-interactive-results-top-value-number"
+          >100</span
+        ><span>%</span>
+      </div>
     </div>
   `;
 };
@@ -186,14 +190,24 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
   }
 
   /** @override */
-  buildCallback() {
-    return super.buildCallback(CSS);
+  buildCallback(additionalCSS = '') {
+    return super.buildCallback(CSS + additionalCSS);
   }
 
   /** @override */
   buildComponent() {
     this.rootEl_ = buildResultsTemplate(this.element);
+    this.buildTop();
     return this.rootEl_;
+  }
+
+  /**
+   * Inserts the HTML for the top bar into the rest of the results component.
+   *
+   * @protected
+   */
+  buildTop() {
+    this.rootEl_.prepend(buildResultsTopTemplate(this.element));
   }
 
   /** @override */
@@ -205,17 +219,17 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
     }
     this.storeService_.subscribe(
       StateProperty.INTERACTIVE_REACT_STATE,
-      (data) => this.onInteractiveReactStateUpdate_(data),
+      (data) => this.onInteractiveReactStateUpdate(data),
       true
     );
   }
 
   /**
    * Receives state updates and fills up DOM with the result
-   * @param {!Map<string, {option: ?./amp-story-interactive-abstract.OptionConfigType, interactiveId: string}>} interactiveState
-   * @private
+   * @param {!Map<string, InteractiveStateEntryType>} interactiveState
+   * @protected
    */
-  onInteractiveReactStateUpdate_(interactiveState) {
+  onInteractiveReactStateUpdate(interactiveState) {
     const results = processResults(interactiveState, this.options_);
     this.rootEl_.classList.toggle(HAS_SCORE_CLASS, results.percentage != null);
     this.rootEl_.querySelector(

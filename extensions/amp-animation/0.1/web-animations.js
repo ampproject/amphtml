@@ -1,20 +1,24 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {
+  closestAncestorElementBySelector,
+  matches,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '#core/dom/query';
+import {computedStyle, getVendorJsPropertyName} from '#core/dom/style';
+import {isEnumValue, isObject} from '#core/types';
+import {isArray, toArray} from '#core/types/array';
+import {map} from '#core/types/object';
+import {dashToCamelCase} from '#core/types/string';
 
+import {isExperimentOn} from '#experiments';
+
+import {parseCss} from './parsers/css-expr';
 import {CssNumberNode, CssTimeNode, isVarCss} from './parsers/css-expr-ast';
+import {extractKeyframes} from './parsers/keyframes-extractor';
+import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
+import {ScrollTimelineWorkletRunner} from './runners/scrolltimeline-worklet-runner';
 import {
   InternalWebAnimationRequestDef,
   WebAnimationDef,
@@ -30,28 +34,11 @@ import {
   WebSwitchAnimationDef,
   isAllowlistedProp,
 } from './web-animation-types';
-import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
-import {ScrollTimelineWorkletRunner} from './runners/scrolltimeline-worklet-runner';
-import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
-import {
-  closestAncestorElementBySelector,
-  matches,
-  scopedQuerySelector,
-  scopedQuerySelectorAll,
-} from '../../../src/dom';
-import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
-import {dashToCamelCase} from '../../../src/core/types/string';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
-import {extractKeyframes} from './parsers/keyframes-extractor';
-import {getMode} from '../../../src/mode';
-import {isArray, toArray} from '../../../src/core/types/array';
-import {isExperimentOn} from '../../../src/experiments';
+
 import {isInFie} from '../../../src/iframe-helper';
-import {isObject} from '../../../src/core/types';
-import {layoutRectLtwh} from '../../../src/layout-rect';
-import {map} from '../../../src/core/types/object';
-import {parseCss} from './parsers/css-expr';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-animation';
@@ -423,10 +410,10 @@ export class MeasureScanner extends Scanner {
     });
     this.with_(spec, () => {
       const {
-        target_: target,
         index_: index,
-        vars_: vars,
+        target_: target,
         timing_: timing,
+        vars_: vars,
       } = this;
       const promise = otherSpecPromise
         .then((otherSpec) => {
@@ -593,10 +580,10 @@ export class MeasureScanner extends Scanner {
   with_(spec, callback) {
     // Save context.
     const {
-      target_: prevTarget,
       index_: prevIndex,
-      vars_: prevVars,
+      target_: prevTarget,
       timing_: prevTiming,
+      vars_: prevVars,
     } = this;
 
     // Push new context and perform calculations.
@@ -792,16 +779,17 @@ export class MeasureScanner extends Scanner {
       '"iterationStart" is invalid: %s',
       newTiming.iterationStart
     );
-    user().assertEnumValue(
-      WebAnimationTimingDirection,
-      /** @type {string} */ (direction),
-      'direction'
+
+    userAssert(
+      isEnumValue(WebAnimationTimingDirection, direction),
+      `Unknown direction: ${direction}`
     );
-    user().assertEnumValue(
-      WebAnimationTimingFill,
-      /** @type {string} */ (fill),
-      'fill'
+
+    userAssert(
+      isEnumValue(WebAnimationTimingFill, fill),
+      `Unknown fill: ${fill}`
     );
+
     return {
       duration,
       delay,
@@ -852,7 +840,7 @@ class CssContextImpl {
    * @param {!./web-animation-types.WebAnimationBuilderOptionsDef} options
    */
   constructor(win, rootNode, baseUrl, options) {
-    const {scope = null, scaleByScope = false} = options;
+    const {scaleByScope = false, scope = null} = options;
 
     /** @const @private */
     this.win_ = win;
@@ -993,7 +981,7 @@ class CssContextImpl {
    * @protected
    */
   withTarget(target, index, callback) {
-    const {currentTarget_: prev, currentIndex_: prevIndex} = this;
+    const {currentIndex_: prevIndex, currentTarget_: prev} = this;
     this.currentTarget_ = target;
     this.currentIndex_ = index;
     const result = callback(target);
@@ -1198,7 +1186,7 @@ class CssContextImpl {
     if (!this.viewportParams_) {
       if (this.scope_ && this.scaleByScope_) {
         const rect = this.scope_./*OK*/ getBoundingClientRect();
-        const {offsetWidth, offsetHeight} = this.scope_;
+        const {offsetHeight, offsetWidth} = this.scope_;
         this.viewportParams_ = {
           offset: {x: rect.x, y: rect.y},
           size: {width: offsetWidth, height: offsetHeight},
@@ -1206,7 +1194,7 @@ class CssContextImpl {
           scaleFactorY: offsetHeight / (rect.height || 1),
         };
       } else {
-        const {innerWidth, innerHeight} = this.win_;
+        const {innerHeight, innerWidth} = this.win_;
         this.viewportParams_ = {
           offset: {x: 0, y: 0},
           size: {width: innerWidth, height: innerHeight},
@@ -1300,7 +1288,7 @@ class CssContextImpl {
    */
   getElementRect_(target) {
     const {offset, scaleFactorX, scaleFactorY} = this.getViewportParams_();
-    const {x, y, width, height} = target./*OK*/ getBoundingClientRect();
+    const {height, width, x, y} = target./*OK*/ getBoundingClientRect();
 
     // This assumes default `transform-origin: center center`
     return layoutRectLtwh(

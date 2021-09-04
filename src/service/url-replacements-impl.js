@@ -1,19 +1,11 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import * as mode from '#core/mode';
+import {hasOwn} from '#core/types/object';
+import {getHashParams, parseQueryString} from '#core/types/string/url';
+import {WindowInterface} from '#core/window/interface';
 
+import {Services} from '#service';
+
+import {Expander} from './url-expander/expander';
 import {
   AsyncResolverDef,
   ResolverReturnDef,
@@ -23,9 +15,13 @@ import {
   getTimingDataAsync,
   getTimingDataSync,
 } from './variable-source';
-import {Expander} from './url-expander/expander';
-import {Services} from '../services';
-import {WindowInterface} from '../window-interface';
+
+import {getTrackImpressionPromise} from '../impression';
+import {dev, devAssert, user, userAssert} from '../log';
+import {
+  installServiceInEmbedDoc,
+  registerServiceBuilderForDoc,
+} from '../service-helpers';
 import {
   addMissingParamsToUrl,
   addParamsToUrl,
@@ -35,15 +31,6 @@ import {
   removeAmpJsParamsFromUrl,
   removeFragment,
 } from '../url';
-import {dev, devAssert, user, userAssert} from '../log';
-import {getTrackImpressionPromise} from '../impression.js';
-import {hasOwn} from '../core/types/object';
-import {
-  installServiceInEmbedDoc,
-  registerServiceBuilderForDoc,
-} from '../service';
-import {internalRuntimeVersion} from '../internal-version';
-import {parseQueryString} from '../core/types/string/url';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -77,9 +64,38 @@ function screenProperty(screen, property) {
 }
 
 /**
+ *
+ * @param {Object<string,(string|Array<string>)>|null} geo
+ * @param {string} geoType
+ * @return {string}
+ */
+function geoData(geo, geoType) {
+  if (geoType) {
+    userAssert(
+      geoType === 'ISOCountry',
+      'The value passed to AMP_GEO() is not valid name:' + geoType
+    );
+    return /** @type {string} */ ((geo && geo[geoType]) || 'unknown');
+  }
+  return /** @type {string} */ (
+    geo?.matchedISOCountryGroups.join(GEO_DELIM) || 'unknown'
+  );
+}
+
+/**
  * Class to provide variables that pertain to top level AMP window.
  */
 export class GlobalVariableSource extends VariableSource {
+  /**
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    super(ampdoc);
+
+    /** @private {Object<string,(string|Array<string>)>|null} */
+    this.cachedGeo_ = null;
+  }
+
   /**
    * Utility function for setting resolver for timing data that supports
    * sync and async.
@@ -108,6 +124,11 @@ export class GlobalVariableSource extends VariableSource {
 
     /** @const {!./viewport/viewport-interface.ViewportInterface} */
     const viewport = Services.viewportForDoc(this.ampdoc);
+
+    // Greedily cache the geo location if available for synchronous replacements.
+    Services.geoForDocOrNull(this.ampdoc).then((geo) => {
+      this.cachedGeo_ = geo;
+    });
 
     // Returns a random value for cache busters.
     this.set('RANDOM', () => Math.random());
@@ -369,24 +390,10 @@ export class GlobalVariableSource extends VariableSource {
     );
 
     // Returns assigned geo value for geoType or all groups.
-    this.setAsync(
+    this.setBoth(
       'AMP_GEO',
-      /** @type {AsyncResolverDef} */ (
-        (geoType) => {
-          return this.getGeo_((geos) => {
-            if (geoType) {
-              userAssert(
-                geoType === 'ISOCountry',
-                'The value passed to AMP_GEO() is not valid name:' + geoType
-              );
-              return /** @type {string} */ (geos[geoType] || 'unknown');
-            }
-            return /** @type {string} */ (
-              geos.matchedISOCountryGroups.join(GEO_DELIM)
-            );
-          }, 'AMP_GEO');
-        }
-      )
+      (geoType) => geoData(this.cachedGeo_, geoType),
+      (geoType) => this.getGeo_((geo) => geoData(geo, geoType), 'AMP_GEO')
     );
 
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
@@ -449,6 +456,15 @@ export class GlobalVariableSource extends VariableSource {
     this.set('USER_AGENT', () => {
       return win.navigator.userAgent;
     });
+
+    // Returns the user agent client hint.
+    this.setAsync(
+      'UACH',
+      (variable) =>
+        win.navigator?.userAgentData
+          ?.getHighEntropyValues([variable])
+          ?.then((values) => values[variable]) || Promise.resolve('')
+    );
 
     // Returns the time it took to load the whole page. (excludes amp-* elements
     // that are not rendered by the system yet.)
@@ -589,7 +605,7 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // returns the AMP version number
-    this.set('AMP_VERSION', () => internalRuntimeVersion());
+    this.set('AMP_VERSION', () => mode.version());
 
     this.set('BACKGROUND_STATE', () => {
       return this.ampdoc.isVisible() ? '0' : '1';
@@ -728,8 +744,7 @@ export class GlobalVariableSource extends VariableSource {
         'param is required'
     );
     userAssert(typeof param == 'string', 'param should be a string');
-    const hash = this.ampdoc.win.location['originalHash'];
-    const params = parseQueryString(hash);
+    const params = getHashParams(this.ampdoc.win);
     return params[param] === undefined ? defaultValue : params[param];
   }
 
@@ -763,9 +778,13 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   getGeo_(getter, expr) {
-    const element = this.ampdoc.getHeadNode();
-    return Services.geoForDocOrNull(element).then((geo) => {
+    if (this.cachedGeo_ !== null) {
+      return getter(this.cachedGeo_);
+    }
+
+    return Services.geoForDocOrNull(this.ampdoc.getHeadNode()).then((geo) => {
       userAssert(geo, 'To use variable %s, amp-geo should be configured', expr);
+      this.cachedGeo_ = geo;
       return getter(geo);
     });
   }

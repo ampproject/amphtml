@@ -1,26 +1,13 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
 
-import * as Preact from '../../../src/preact';
-import {IframeEmbed} from '../../../src/preact/component/iframe';
-import {dict} from '../../../src/core/types/object';
-import {forwardRef} from '../../../src/preact/compat';
+import * as Preact from '#preact';
+import {useCallback, useState} from '#preact';
+import {forwardRef} from '#preact/compat';
+import {useValueRef} from '#preact/component';
+import {IframeEmbed} from '#preact/component/iframe';
+
 import {getData} from '../../../src/event-helper';
-import {parseJson} from '../../../src/core/types/object/json';
-import {useCallback, useState} from '../../../src/preact';
 
 const NO_HEIGHT_STYLE = dict();
 const MATCHES_MESSAGING_ORIGIN = (origin) =>
@@ -32,11 +19,12 @@ const MATCHES_MESSAGING_ORIGIN = (origin) =>
  * @return {PreactDef.Renderable}
  */
 function InstagramWithRef(
-  {captioned, shortcode, requestResize, title = 'Instagram', ...rest},
+  {captioned, onLoad, requestResize, shortcode, title = 'Instagram', ...rest},
   ref
 ) {
   const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);
   const [opacity, setOpacity] = useState(0);
+  const onLoadRef = useValueRef(onLoad);
 
   const messageHandler = useCallback(
     (event) => {
@@ -48,9 +36,11 @@ function InstagramWithRef(
         }
         setHeightStyle(dict({'height': height}));
         setOpacity(1);
+
+        onLoadRef.current?.();
       }
     },
-    [requestResize]
+    [requestResize, onLoadRef]
   );
 
   return (

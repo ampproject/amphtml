@@ -1,29 +1,14 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 const argv = require('minimist')(process.argv.slice(2));
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const path = require('path');
 const {
-  jscodeshift,
   getJscodeshiftReport,
+  jscodeshift,
 } = require('../../test-configs/jscodeshift');
 const {cyan, magenta, yellow} = require('../../common/colors');
 const {getOutput} = require('../../common/process');
 const {log} = require('../../common/logging');
-const {readJsonSync, writeFileSync} = require('fs-extra');
+const {readJsonSync, writeJsonSync} = require('fs-extra');
 
 const containRuntimeSource = ['3p', 'ads', 'extensions', 'src', 'test'];
 const containExampleHtml = ['examples', 'test'];
@@ -54,7 +39,7 @@ const isSpecialCannotBeRemoved = (id) =>
  * @return {string}
  */
 function getStdoutThrowOnError(cmd) {
-  const {stdout, stderr} = getOutput(cmd);
+  const {stderr, stdout} = getOutput(cmd);
   if (!stdout && stderr) {
     throw new Error(`${cmd}\n\n${stderr}`);
   }
@@ -83,7 +68,7 @@ const cmdEscape = (str) => str.replace(/["`]/g, (c) => `\\${c}`);
  */
 const filesContainingPattern = (glob, string) =>
   getStdoutLines(
-    `grep -El "${cmdEscape(string)}" {${globby.sync(glob).join(',')}}`
+    `grep -El "${cmdEscape(string)}" {${fastGlob.sync(glob).join(',')}}`
   );
 
 /**
@@ -141,7 +126,7 @@ function removeFromJsonConfig(config, path, id) {
     }
   }
 
-  writeFileSync(path, JSON.stringify(config, null, 2) + '\n');
+  writeJsonSync(path, config, {spaces: 2});
   return [path];
 }
 
@@ -180,7 +165,7 @@ function gitCommitSingleExperiment(id, workItem, modified) {
       `Previous history on ${prodConfigPath.split('/').pop()}:`,
       workItem.previousHistory
         .map(
-          ({hash, authorDate, subject}) =>
+          ({authorDate, hash, subject}) =>
             `- ${hash} - ${authorDate} - ${subject}`
         )
         .join('\n')
@@ -312,11 +297,11 @@ const readmeMdGithubLink = () =>
  * @return {string}
  */
 function summaryCommitMessage({
-  removed,
   cleanupIssues,
   cutoffDateFormatted,
-  modifiedSourceFiles,
   htmlFilesWithReferences,
+  modifiedSourceFiles,
+  removed,
 }) {
   const paragraphs = [
     `🚮 Sweep experiments older than ${cutoffDateFormatted}`,
@@ -331,7 +316,7 @@ function summaryCommitMessage({
       "Close these once they've been addressed and this PR has been merged:",
       checklistMarkdown(
         cleanupIssues.map(
-          ({id, cleanupIssue}) =>
+          ({cleanupIssue, id}) =>
             `\`${id}\`: ${issueUrlToNumberOrUrl(cleanupIssue)}`
         )
       )
@@ -426,6 +411,7 @@ function collectWork(
 /**
  * Entry point to amp sweep-experiments.
  * See README.md for usage.
+ * @return {Promise<void>}
  */
 async function sweepExperiments() {
   const headHash = getStdoutThrowOnError('git log -1 --format=%h');
@@ -434,7 +420,7 @@ async function sweepExperiments() {
   const canaryConfig = readJsonSync(canaryConfigPath);
 
   const cutoffDateFormatted = dateDaysAgo(
-    argv.experiment ? 0 : argv.days_ago || 365
+    argv.experiment ? 0 : argv.days_ago || 180
   ).toISOString();
 
   const {exclude, include = {}} = collectWork(
@@ -482,8 +468,15 @@ async function sweepExperiments() {
       ...removeFromRuntimeSource(id, workItem.percentage),
     ];
 
+    const formattable = modified.filter(
+      (filename) =>
+        // We don't need to format JSON files since they were written with
+        // {spaces: 2}, and matches prettier's `json-stringify` parser
+        !filename.endsWith('.json')
+    );
+
     getStdoutThrowOnError(
-      `./node_modules/prettier/bin-prettier.js --write ${modified.join(' ')}`
+      `./node_modules/prettier/bin-prettier.js --write ${formattable.join(' ')}`
     );
 
     for (const line of gitCommitSingleExperiment(id, workItem, modified)) {
@@ -535,12 +528,12 @@ module.exports = {
 };
 
 sweepExperiments.description =
-  'Sweep experiments whose configuration is too old, or specified with --experiment.';
+  'Remove outdated experiments from the AMP config';
 
 sweepExperiments.flags = {
   'days_ago':
-    'How old experiment configuration flips must be for an experiment to be removed. Default is 365 days. This is ignored when using --experiment.',
+    'Age at which experiments are removed (default: 365 days, unless using --experiment)',
   'dry_run':
-    "Don't write, but only list the experiments that would be removed by this command.",
-  'experiment': 'Remove a specific experiment id.',
+    'List experiments that will be removed without actually removing them',
+  'experiment': 'Remove a specific experiment id, no matter what its age is',
 };

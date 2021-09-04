@@ -1,18 +1,4 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 
 /*
  * In desktop panel mode i-amphtml-story-button-container acts as a sentinel
@@ -69,7 +55,7 @@ amp-story:not([desktop]) .i-amphtml-story-button-move,
   filter: invert(100%) drop-shadow(0 0 3px rgba(0, 0, 0, 0.5)) !important;
 }
 
-body:not(.amp-mode-keyboard-active) amp-story:not([desktop]) .i-amphtml-story-button-move {
+body:not(.amp-mode-keyboard-active) amp-story:not([desktop]):not(.i-amphtml-story-desktop-one-panel) .i-amphtml-story-button-move {
   /* Hides background unless navigating with keyboard. */
   background: none !important;
 }
@@ -93,6 +79,47 @@ body:not(.amp-mode-keyboard-active) amp-story:not([desktop]) .i-amphtml-story-bu
   transition: 150ms opacity linear, 350ms transform linear!important;
   cursor: pointer!important;
   pointer-events: all!important;
+}
+
+amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-container {
+  height: 40px !important;
+  width: 40px !important;
+  transform: translateY(-50%) !important;
+  top: 50% !important;
+  bottom: auto !important;
+  pointer-events: all !important;
+  /* Calculates position of button by factoring in page width. */
+  --i-amphtml-story-desktop-one-panel-button-margin: max(10px, calc(50vw - 72px - var(--i-amphtml-story-desktop-one-panel-width) / 2));
+}
+
+amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-container.prev-container {
+  margin-inline-start: var(--i-amphtml-story-desktop-one-panel-button-margin) !important;
+}
+
+amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-container.next-container {
+  margin-inline-end: var(--i-amphtml-story-desktop-one-panel-button-margin) !important;
+}
+
+amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-move,
+[dir=rtl] amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-move {
+  filter: none !important;
+  background-color: white !important;
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
+  background-position-y: 52% !important;
+  background-size: 20% !important;
+}
+
+amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-fwd-replay > .i-amphtml-story-button-move {
+  background-size: 52% !important;
+  background-position-y: 56% !important;
+}
+
+amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-hidden {
+  visibility: visible !important;
+  opacity: .1 !important;
+  pointer-events: none !important;
 }
 
 .i-amphtml-story-desktop-fullbleed .i-amphtml-story-button-move {

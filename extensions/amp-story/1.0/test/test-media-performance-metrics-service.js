@@ -1,23 +1,7 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '../../../../src/event-helper';
 import {MediaPerformanceMetricsService} from '../media-performance-metrics-service';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 
 describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
   let clock;
@@ -395,6 +379,7 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
         'src',
         'htps://foo-com.cdn.ampproject.org/bv/s/foo.com/foo.mp4'
       );
+      cacheSource.setAttribute('i-amphtml-video-cached-source', '');
       originSource.setAttribute('src', 'foo.mp4');
       video.appendChild(cacheSource);
       video.appendChild(originSource);
@@ -411,6 +396,7 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
       const video = win.document.createElement('video');
       const source = win.document.createElement('source');
       source.setAttribute('src', url);
+      source.setAttribute('i-amphtml-video-cached-source', '');
       video.appendChild(source);
       env.sandbox.stub(video, 'currentSrc').value(url);
 

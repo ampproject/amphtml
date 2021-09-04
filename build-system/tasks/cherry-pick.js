@@ -1,24 +1,9 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const {cyan, green, red, yellow} = require('../common/colors');
 const {execOrThrow} = require('../common/exec');
 const {getOutput} = require('../common/process');
-const {green, cyan, red, yellow} = require('../common/colors');
 const {log} = require('../common/logging');
 
 /**
@@ -136,10 +121,10 @@ async function cherryPick() {
 
 module.exports = {cherryPick};
 
-cherryPick.description = 'Cherry-picks one or more commits onto a new branch';
+cherryPick.description = 'Cherry-pick one or more commits onto a new branch';
 cherryPick.flags = {
   'commits': 'Comma-delimited list of commit SHAs to cherry-pick',
-  'push': 'If set, will push the created branch to the remote',
-  'remote': 'Remote to refresh tags from (default: origin)',
+  'push': 'If set, push the created branch to the remote',
+  'remote': 'Remote ref to refresh tags from (default: origin)',
   'onto': '13-digit AMP version to cherry-pick onto',
 };

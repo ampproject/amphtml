@@ -1,28 +1,13 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
-import {Services} from '../src/services';
+import {Services} from '#service';
 
 /**
  * Helper class to skip or retry tests under specific environment. Instantiate
  * using describes.configure(), describe.configure(), or it.configure().
  *
  * Example usage:
- * 1. describes.configure().skipChrome().enableIe().run(name, spec, function);
+ * 1. describes.configure().skipChrome().skipIos().run(name, spec, function);
  * 2. describe.configure().skipFirefox().skipSafari().run(name, function);
  * 3. it.configure().skipEdge().run(name, function);
  */
@@ -58,12 +43,6 @@ export class TestConfig {
     this.runOnFirefox = this.platform.isFirefox.bind(this.platform);
     this.runOnSafari = this.platform.isSafari.bind(this.platform);
     this.runOnIos = this.platform.isIos.bind(this.platform);
-    this.runOnIe = this.platform.isIe.bind(this.platform);
-
-    /**
-     * By default, IE is skipped. Individual tests may opt in.
-     */
-    this.skip(this.runOnIe);
   }
 
   skipModuleBuild() {
@@ -91,14 +70,7 @@ export class TestConfig {
   }
 
   skipIfPropertiesObfuscated() {
-    return this.skip(function () {
-      return window.__karma__.config.amp.propertiesObfuscated;
-    });
-  }
-
-  enableIe() {
-    this.skipMatchers.splice(this.skipMatchers.indexOf(this.runOnIe), 1);
-    return this;
+    return this.skip(() => window.__karma__.config.amp.propertiesObfuscated);
   }
 
   /**
@@ -131,11 +103,6 @@ export class TestConfig {
 
   ifIos() {
     return this.if(this.runOnIos);
-  }
-
-  ifIe() {
-    // It's necessary to first enable IE because we skip it by default.
-    return this.enableIe().if(this.runOnIe);
   }
 
   /**

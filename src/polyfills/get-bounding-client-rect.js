@@ -1,28 +1,13 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview
  * IE 10 throws "Unspecified error" when calling getBoundingClientRect() on a
  * disconnected node.
  * @see https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/106812/
  */
 
-import {LayoutRectDef, layoutRectLtwh} from '../layout-rect';
-import {isConnectedNode} from '../dom';
+import {isConnectedNode} from '#core/dom';
+import {LayoutRectDef, layoutRectLtwh} from '#core/dom/layout/rect';
+import * as mode from '#core/mode';
 
 /**
  * Stores the native getBoundingClientRect before we patch it, so that the
@@ -34,11 +19,10 @@ let nativeClientRect;
  * Polyfill for Node.getBoundingClientRect API.
  * @this {!Element}
  * @return {!ClientRect|!LayoutRectDef}
- * @suppress {suspiciousCode} due to IS_ESM inlining
  */
 function getBoundingClientRect() {
   // eslint-disable-next-line local/no-invalid-this
-  if (IS_ESM || isConnectedNode(this)) {
+  if (mode.isEsm() || isConnectedNode(this)) {
     return nativeClientRect.call(this);
   }
 
@@ -49,10 +33,9 @@ function getBoundingClientRect() {
  * Determines if this polyfill should be installed.
  * @param {!Window} win
  * @return {boolean}
- * @suppress {uselessCode} due to IS_ESM inlining
  */
 function shouldInstall(win) {
-  if (IS_ESM) {
+  if (mode.isEsm()) {
     return false;
   }
 

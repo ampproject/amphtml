@@ -1,28 +1,15 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {omit} from '#core/types/object';
 
-import * as Preact from '../../../src/preact/index';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {Slot} from '../../../src/preact/slot';
-import {createElementWithAttributes} from '../../../src/dom';
-import {htmlFor} from '../../../src/static-template';
-import {omit} from '../../../src/core/types/object';
-import {testElementR1} from '../../../testing/element-v1';
-import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';
-import {waitFor} from '../../../testing/test-helper';
+import * as Preact from '#preact';
+import {PreactBaseElement} from '#preact/base-element';
+import {Slot} from '#preact/slot';
+
+import {upgradeOrRegisterElement} from '#service/custom-element-registry';
+
+import {testElementR1} from '#testing/element-v1';
+import {waitFor} from '#testing/test-helper';
 
 const spec = {amp: true, frameStyle: {width: '300px'}};
 
@@ -353,6 +340,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
           <div id="child1"></div>
           <div placeholder>foo</div>
           <div fallback>bar</div>
+          <div overflow>load more</div>
         </amp-preact>
       `;
     });
@@ -375,7 +363,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       ).to.have.lengthOf(1);
     });
 
-    it('should pass placeholder and fallback elements to service slot', async () => {
+    it('should pass placeholder, fallback, and overflow elements to service slot', async () => {
       doc.body.appendChild(element);
       await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
@@ -385,11 +373,14 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(serviceSlot).to.have.lengthOf(1);
       const placeholder = element.querySelector('[placeholder]');
       const fallback = element.querySelector('[fallback]');
+      const overflow = element.querySelector('[overflow]');
       expect(placeholder.getAttribute('slot')).to.equal('i-amphtml-svc');
       expect(fallback.getAttribute('slot')).to.equal('i-amphtml-svc');
-      expect(serviceSlot[0].assignedElements()).to.have.lengthOf(2);
+      expect(overflow.getAttribute('slot')).to.equal('i-amphtml-svc');
+      expect(serviceSlot[0].assignedElements()).to.have.lengthOf(3);
       expect(serviceSlot[0].assignedElements()[0]).to.equal(placeholder);
       expect(serviceSlot[0].assignedElements()[1]).to.equal(fallback);
+      expect(serviceSlot[0].assignedElements()[2]).to.equal(overflow);
     });
 
     describe('SSR', () => {

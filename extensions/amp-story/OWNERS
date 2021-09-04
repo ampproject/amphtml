@@ -15,7 +15,6 @@
         },
         {
           name: 'enriqe',
-          notify: true,
         },
         {
           name: 'processprocess',

@@ -1,23 +1,8 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const connect = require('gulp-connect');
-const debounce = require('debounce');
-const globby = require('globby');
+const debounce = require('../common/debounce');
+const fastGlob = require('fast-glob');
 const header = require('connect-header');
 const minimist = require('minimist');
 const morgan = require('morgan');
@@ -25,16 +10,16 @@ const open = require('open');
 const os = require('os');
 const path = require('path');
 const {
-  buildNewServer,
-  SERVER_TRANSFORM_PATH,
-} = require('../server/typescript-compile');
-const {
+  lazyBuild3pVendor,
   lazyBuildExtensions,
   lazyBuildJs,
-  lazyBuild3pVendor,
-  preBuildRuntimeFiles,
   preBuildExtensions,
+  preBuildRuntimeFiles,
 } = require('../server/lazy-build');
+const {
+  SERVER_TRANSFORM_PATH,
+  buildNewServer,
+} = require('../server/typescript-compile');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green, red} = require('../common/colors');
 const {logServeMode, setServeMode} = require('../server/app-utils');
@@ -72,7 +57,7 @@ let url = null;
 let quiet = !!argv.quiet;
 
 // Used for live reload.
-const serverFiles = globby.sync([
+const serverFiles = fastGlob.sync([
   'build-system/server/**',
   `!${SERVER_TRANSFORM_PATH}/dist/**`,
 ]);
@@ -106,6 +91,7 @@ function getMiddleware() {
  * @param {?Object} connectOptions
  * @param {?Object} serverOptions
  * @param {?Object} modeOptions
+ * @return {Promise<void>}
  */
 async function startServer(
   connectOptions = {},
@@ -179,6 +165,7 @@ function resetServerFiles() {
 
 /**
  * Stops the currently running server
+ * @return {Promise<void>}
  */
 async function stopServer() {
   if (url) {
@@ -190,6 +177,7 @@ async function stopServer() {
 
 /**
  * Closes the existing server and restarts it
+ * @return {Promise<void>}
  */
 async function restartServer() {
   stopServer();
@@ -205,6 +193,7 @@ async function restartServer() {
 
 /**
  * Performs pre-build steps requested via command line args.
+ * @return {Promise<void>}
  */
 async function performPreBuildSteps() {
   await preBuildRuntimeFiles();
@@ -213,6 +202,7 @@ async function performPreBuildSteps() {
 
 /**
  * Entry point of the `amp serve` task.
+ * @return {Promise<void>}
  */
 async function serve() {
   await doServe();
@@ -221,6 +211,7 @@ async function serve() {
 /**
  * Starts a webserver at the repository root to serve built files.
  * @param {boolean=} lazyBuild
+ * @return {Promise<void>}
  */
 async function doServe(lazyBuild = false) {
   createCtrlcHandler('serve');
@@ -245,19 +236,18 @@ module.exports = {
 
 /* eslint "google-camelcase/google-camelcase": 0 */
 
-serve.description = 'Starts a webserver at the project root directory';
+serve.description = 'Start a webserver at the project root directory';
 serve.flags = {
   host: 'Hostname or IP address to bind to (default: localhost)',
-  port: 'Specifies alternative port (default: 8000)',
+  port: 'Specify alternative port (default: 8000)',
   https: 'Use HTTPS server',
   quiet: "Run in quiet mode and don't log HTTP requests",
   cache: 'Make local resources cacheable by the browser',
   no_caching_extensions: 'Disable caching for extensions',
-  compiled: 'Serve minified JS',
+  minified: 'Serve minified JS',
   esm: 'Serve ESM JS (uses the new typescript server transforms)',
   cdn: 'Serve current prod JS',
   rtv: 'Serve JS from the RTV provided',
   coverage:
-    'Serve instrumented code to collect coverage info; use ' +
-    '--coverage=live to auto-report coverage on page unload',
+    'Serve instrumented code to collect coverage info (use --coverage=live to auto-report coverage on page unload)',
 };

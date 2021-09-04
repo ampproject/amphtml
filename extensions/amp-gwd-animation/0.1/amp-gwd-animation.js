@@ -1,33 +1,21 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
+
+import {Services} from '#service';
+
 import {
   AmpGwdRuntimeService,
   GWD_SERVICE_NAME,
   GWD_TIMELINE_EVENT,
 } from './amp-gwd-animation-impl';
+
 import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
-import {Services} from '../../../src/services';
 import {getDetail} from '../../../src/event-helper';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
+import {userAssert} from '../../../src/log';
 import {
   getParentWindowFrameElement,
   getServiceForDocOrNull,
-} from '../../../src/service';
-import {userAssert} from '../../../src/log';
+} from '../../../src/service-helpers';
 
 /**
  * Returns a value at any level in an object structure addressed by dot-notation

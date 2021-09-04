@@ -12,7 +12,7 @@ Before you can add your analytics service to AMP HTML runtime, you may need to:
 -   Identify the triggers that result in analytics requests being sent from a page that would be relevant for your service.
 -   Consider if and how you will [track users across](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-managing-user-state.md) first-party and third-party AMP contexts.
 -   Determine how your analytics dashboard handles AMP traffic.
--   Identify any missing functionality in `amp-analytics`, and [file requests](https://github.com/ampproject/amphtml/issues/new) for needed features.
+-   Identify any missing functionality in `amp-analytics`, and [file requests](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=Type%3A+Feature+Request&template=feature-request.yml) for needed features.
 -   AMP Analytics sends its variables to a preconfigured endpoint. If you do not already have an existing endpoint, review [this sample](https://github.com/ampproject/amp-publisher-sample#amp-analytics-sample) for an overview on how to build one.
     -   For all transport types except `iframe`, variables are sent as query string parameters in a HTTPS request.
     -   For the `iframe` transport type, an iframe is created and variables are sent to it via `window.postMessage`. In this case, the message need not be a URL. This option is available only to MRC-accredited vendors.
@@ -20,7 +20,7 @@ Before you can add your analytics service to AMP HTML runtime, you may need to:
 
 ## Adding your configuration to the AMP HTML runtime
 
-1. Create an [Intent-To-Implement issue](../../docs/contributing.md#contributing-features) stating that you'll be adding your analytics service's configuration to AMP HTML's runtime. Be sure to include **cc @ampproject/wg-analytics** in your description.
+1. Create an [Intent-To-Implement issue](../../docs/contributing.md#contributing-features) stating that you'll be adding your analytics service's configuration to AMP HTML's runtime. Be sure to include **cc @ampproject/wg-components** in your description.
 1. Develop a patch that implements the following:
     1. A new configuration json file `${vendorName}.json` in the vendors [folder](https://github.com/ampproject/amphtml/tree/main/extensions/amp-analytics/0.1/vendors) including any options above and beyond the default, such as:
         1. `"vars": {}` for additional default variables.

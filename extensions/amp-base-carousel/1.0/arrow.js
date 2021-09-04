@@ -1,25 +1,10 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
+import {useCallback} from '#preact';
 import {useStyles} from './component.jss';
 import objstr from 'obj-str';
 
 /**
- * @param {!BaseCarouselDef.ArrowProps} props
+ * @param {!BentoBaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
 export function Arrow({
@@ -29,19 +14,18 @@ export function Arrow({
   disabled,
   outsetArrows,
   rtl,
-  ...rest
 }) {
   const classes = useStyles();
-  const onClick = () => {
+  const onClick = useCallback(() => {
     if (!disabled) {
       advance();
     }
-  };
+  }, [advance, disabled]);
   return (
     <Comp
       aria-disabled={String(!!disabled)}
       by={by}
-      className={objstr({
+      class={objstr({
         [classes.arrow]: true,
         [classes.arrowDisabled]: disabled,
         [classes.arrowPrev]: by < 0,
@@ -54,37 +38,40 @@ export function Arrow({
       disabled={disabled}
       onClick={onClick}
       outsetArrows={outsetArrows}
-      rtl={rtl}
-      {...rest}
+      rtl={rtl.toString()}
     />
   );
 }
 
 /**
- * @param {!BaseCarouselDef.ArrowProps} props
+ * @param {!BentoBaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-function DefaultArrow({by, className, ...rest}) {
+function DefaultArrow({
+  'aria-disabled': ariaDisabled,
+  by,
+  'class': className,
+  disabled,
+  onClick,
+}) {
   const classes = useStyles();
   return (
-    <div className={className}>
+    <div class={className}>
       <button
+        aria-disabled={ariaDisabled}
         aria-label={
           by < 0 ? 'Previous item in carousel' : 'Next item in carousel'
         }
-        className={classes.defaultArrowButton}
-        {...rest}
+        class={classes.defaultArrowButton}
+        disabled={disabled}
+        onClick={onClick}
       >
+        <div class={`${classes.arrowBaseStyle} ${classes.arrowFrosting}`}></div>
+        <div class={`${classes.arrowBaseStyle} ${classes.arrowBackdrop}`}></div>
         <div
-          className={`${classes.arrowBaseStyle} ${classes.arrowFrosting}`}
+          class={`${classes.arrowBaseStyle} ${classes.arrowBackground}`}
         ></div>
-        <div
-          className={`${classes.arrowBaseStyle} ${classes.arrowBackdrop}`}
-        ></div>
-        <div
-          className={`${classes.arrowBaseStyle} ${classes.arrowBackground}`}
-        ></div>
-        <svg className={classes.arrowIcon} viewBox="0 0 24 24">
+        <svg class={classes.arrowIcon} viewBox="0 0 24 24">
           <path
             d={
               by < 0 ? 'M14,7.4 L9.4,12 L14,16.6' : 'M10,7.4 L14.6,12 L10,16.6'

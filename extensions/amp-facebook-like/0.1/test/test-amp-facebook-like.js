@@ -1,24 +1,8 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-facebook-like';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {facebook} from '../../../../3p/facebook';
-import {resetServiceForTesting} from '../../../../src/service';
-import {serializeMessage} from '../../../../src/3p-frame-messaging';
+import {createElementWithAttributes} from '#core/dom';
+import {facebook} from '#3p/facebook';
+import {resetServiceForTesting} from '../../../../src/service-helpers';
+import {serializeMessage} from '#core/3p-frame-messaging';
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
 
 describes.realWin(
@@ -97,6 +81,21 @@ describes.realWin(
       expect(iframe.getAttribute('name')).to.contain('"locale":"fr_FR"');
     });
 
+    it('renders with correct embed type', async () => {
+      element = createElementWithAttributes(doc, 'amp-facebook-like', {
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
+      doc.body.appendChild(element);
+      await element.buildInternal();
+      await element.layoutCallback();
+
+      const iframe = element.querySelector('iframe');
+      const context = JSON.parse(iframe.getAttribute('name'));
+      expect(context.attributes.embedAs).to.equal('like');
+    });
+
     it("container's height is changed", async () => {
       const iframeSrc =
         'http://ads.localhost:' +
@@ -138,11 +137,9 @@ describes.realWin(
       const div = document.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK-LIKE',
-      };
 
       facebook(win, {
+        embedAs: 'like',
         href,
         width: 100,
         height: 100,
@@ -156,11 +153,9 @@ describes.realWin(
       const div = document.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK-LIKE',
-      };
 
       facebook(win, {
+        embedAs: 'like',
         href,
         locale: 'fr_FR',
         width: 100,
@@ -178,11 +173,9 @@ describes.realWin(
       const div = document.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK-LIKE',
-      };
 
       facebook(win, {
+        embedAs: 'like',
         href,
         action: 'recommend',
         width: 100,
@@ -198,11 +191,9 @@ describes.realWin(
       const div = document.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK-LIKE',
-      };
 
       facebook(win, {
+        embedAs: 'like',
         href,
         colorscheme: 'dark',
         width: 100,
@@ -218,11 +209,9 @@ describes.realWin(
       const div = document.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK-LIKE',
-      };
 
       facebook(win, {
+        embedAs: 'like',
         href,
         'kd_site': true,
         width: 100,
@@ -238,11 +227,9 @@ describes.realWin(
       const div = document.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK-LIKE',
-      };
 
       facebook(win, {
+        embedAs: 'like',
         href,
         layout: 'button',
         width: 100,
@@ -258,11 +245,9 @@ describes.realWin(
       const div = document.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK-LIKE',
-      };
 
       facebook(win, {
+        embedAs: 'like',
         href,
         ref: 'asd',
         width: 100,
@@ -278,11 +263,9 @@ describes.realWin(
       const div = document.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK-LIKE',
-      };
 
       facebook(win, {
+        embedAs: 'like',
         href,
         share: true,
         width: 100,
@@ -298,11 +281,9 @@ describes.realWin(
       const div = document.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK-LIKE',
-      };
 
       facebook(win, {
+        embedAs: 'like',
         href,
         'show_faces': true,
         width: 100,
@@ -318,11 +299,9 @@ describes.realWin(
       const div = document.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK-LIKE',
-      };
 
       facebook(win, {
+        embedAs: 'like',
         href,
         size: 'large',
         width: 100,
@@ -338,11 +317,9 @@ describes.realWin(
       const div = document.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK-LIKE',
-      };
 
       facebook(win, {
+        embedAs: 'like',
         href,
         width: 100,
         height: 100,
