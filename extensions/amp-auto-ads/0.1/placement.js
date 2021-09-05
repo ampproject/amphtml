@@ -186,7 +186,6 @@ export class Placement {
     }
   }
 
-
   /**
    * @param {!JsonObject<string, string>} baseAttributes Any attributes to add to
    *     injected <amp-ad>. Specific attributes will override defaults, but be

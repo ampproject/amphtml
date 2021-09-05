@@ -36,7 +36,6 @@ export class AmpAutoAds extends AMP.BaseElement {
       this.customAnalytics_ = JSON.parse(this.customAnalytics_);
     }
 
-
     if (!this.adNetwork_.isEnabled(this.win)) {
       return;
     }
