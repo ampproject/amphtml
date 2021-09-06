@@ -140,8 +140,7 @@ export class AmpAutoAds extends AMP.BaseElement {
         sizing,
         adTracker,
         this.adNetwork_.isResponsiveEnabled(),
-        ampdoc,
-        this.customAnalytics_
+        ampdoc
       ).run();
       const stickyAdAttributes = /** @type {!JsonObject} */ (
         Object.assign(
