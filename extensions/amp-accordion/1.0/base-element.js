@@ -1,36 +1,23 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {toggleAttribute} from '#core/dom';
+import {childElementsByTag} from '#core/dom/query';
+import {toArray} from '#core/types/array';
+import {dict, memo} from '#core/types/object';
 
 import * as Preact from '#preact';
+import {useLayoutEffect, useRef} from '#preact';
+import {PreactBaseElement} from '#preact/base-element';
+import {forwardRef} from '#preact/compat';
+import {useDOMHandle} from '#preact/component';
+import {useSlotContext} from '#preact/slot';
+
 import {
   Accordion,
   AccordionContent,
   AccordionHeader,
   AccordionSection,
 } from './component';
-import {PreactBaseElement} from '#preact/base-element';
-import {childElementsByTag} from '#core/dom/query';
+
 import {devAssert} from '../../../src/log';
-import {dict, memo} from '#core/types/object';
-import {forwardRef} from '#preact/compat';
-import {toArray} from '#core/types/array';
-import {toggleAttribute} from '#core/dom';
-import {useDOMHandle} from '#preact/component';
-import {useLayoutEffect, useRef} from '#preact';
-import {useSlotContext} from '#preact/slot';
 
 const SECTION_SHIM_PROP = '__AMP_S_SHIM';
 const HEADER_SHIM_PROP = '__AMP_H_SHIM';

@@ -1,21 +1,5 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as Preact from '#preact';
-import {BaseCarousel} from '../component';
+import {BentoBaseCarousel} from '../component';
 import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 
 const CONTROLS = ['auto', 'always', 'never'];
@@ -24,7 +8,7 @@ const ORIENTATIONS = ['horizontal', 'vertical'];
 
 export default {
   title: 'BaseCarousel',
-  component: BaseCarousel,
+  component: BentoBaseCarousel,
   decorators: [withKnobs],
 };
 
@@ -38,7 +22,7 @@ function CarouselWithActions(props) {
   const ref = Preact.useRef();
   return (
     <section>
-      <BaseCarousel ref={ref} {...props} />
+      <BentoBaseCarousel ref={ref} {...props} />
       <div style={{marginTop: 8}}>
         <button onClick={() => ref.current.goToSlide(3)}>goToSlide(3)</button>
         <button onClick={() => ref.current.next()}>next</button>
@@ -122,7 +106,7 @@ export const mixedLength = () => {
   const orientation = select('orientation', ORIENTATIONS, 'vertical');
   const horizontal = orientation == 'horizontal';
   return (
-    <BaseCarousel
+    <BentoBaseCarousel
       autoAdvance={autoAdvance}
       autoAdvanceCount={autoAdvanceCount}
       autoAdvanceInterval={autoAdvanceInterval}
@@ -153,7 +137,7 @@ export const mixedLength = () => {
           ></div>
         );
       })}
-    </BaseCarousel>
+    </BentoBaseCarousel>
   );
 };
 
@@ -180,7 +164,7 @@ export const provideArrows = () => {
     );
   };
   return (
-    <BaseCarousel
+    <BentoBaseCarousel
       controls={controls}
       style={{width, height}}
       outsetArrows={outsetArrows}
@@ -190,14 +174,14 @@ export const provideArrows = () => {
       {['lightcoral', 'peachpuff', 'lavender'].map((color) => (
         <div style={{backgroundColor: color, width, height}}></div>
       ))}
-    </BaseCarousel>
+    </BentoBaseCarousel>
   );
 };
 
 export const WithCaptions = () => {
   const controls = select('show controls', CONTROLS);
   return (
-    <BaseCarousel
+    <BentoBaseCarousel
       visibleCount={3}
       controls={controls}
       loop
@@ -224,7 +208,7 @@ export const WithCaptions = () => {
         />
         <figcaption>The third image has its caption.</figcaption>
       </figure>
-    </BaseCarousel>
+    </BentoBaseCarousel>
   );
 };
 

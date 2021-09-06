@@ -1,23 +1,8 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const connect = require('gulp-connect');
 const debounce = require('../common/debounce');
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const header = require('connect-header');
 const minimist = require('minimist');
 const morgan = require('morgan');
@@ -72,7 +57,7 @@ let url = null;
 let quiet = !!argv.quiet;
 
 // Used for live reload.
-const serverFiles = globby.sync([
+const serverFiles = fastGlob.sync([
   'build-system/server/**',
   `!${SERVER_TRANSFORM_PATH}/dist/**`,
 ]);
@@ -259,7 +244,7 @@ serve.flags = {
   quiet: "Run in quiet mode and don't log HTTP requests",
   cache: 'Make local resources cacheable by the browser',
   no_caching_extensions: 'Disable caching for extensions',
-  compiled: 'Serve minified JS',
+  minified: 'Serve minified JS',
   esm: 'Serve ESM JS (uses the new typescript server transforms)',
   cdn: 'Serve current prod JS',
   rtv: 'Serve JS from the RTV provided',

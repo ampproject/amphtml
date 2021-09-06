@@ -1,19 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {Action, StateProperty, UIType} from './amp-story-store-service';
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {HistoryState, setHistoryState} from './history';
@@ -25,6 +9,7 @@ import {closest} from '#core/dom/query';
 import {dev, devAssert} from '../../../src/log';
 import {getHistoryState} from '#core/window/history';
 import {getLocalizationService} from './amp-story-localization-service';
+import {getSourceOrigin} from '../../../src/url';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {removeElement} from '#core/dom';
 import {setImportantStyles, toggle} from '#core/dom/style';
@@ -91,11 +76,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   buildCallback() {
     super.buildCallback();
 
-    const theme = this.element.getAttribute('theme')?.toLowerCase();
-    if (theme && AttachmentTheme.DARK === theme) {
-      this.headerEl.setAttribute('theme', theme);
-      this.element.setAttribute('theme', theme);
-    }
+    this.maybeSetDarkThemeForElement_(this.headerEl);
+    this.maybeSetDarkThemeForElement_(this.element);
 
     // Outlinks can be an amp-story-page-outlink or the legacy version,
     // an amp-story-page-attachment with an href.
@@ -137,14 +119,19 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildInline_() {
+    if (this.doesContainFormElement_()) {
+      // Page attachments that contain forms must display the page's publisher
+      // domain above the attachment's contents. This enables users to gauge
+      // the trustworthiness of publishers before sending data to them.
+      this.headerEl.append(this.createDomainLabelElement_());
+      this.headerEl.classList.add('i-amphtml-story-page-attachment-with-form');
+    }
+
     const closeButtonEl = htmlFor(this.element)`
           <button class="i-amphtml-story-page-attachment-close-button" aria-label="close"
               role="button">
           </button>`;
     const localizationService = getLocalizationService(devAssert(this.element));
-
-    const titleEl = htmlFor(this.element)`
-    <span class="i-amphtml-story-page-attachment-title"></span>`;
 
     if (localizationService) {
       const localizedCloseString = localizationService.getLocalizedString(
@@ -153,16 +140,21 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       closeButtonEl.setAttribute('aria-label', localizedCloseString);
     }
 
-    if (this.element.hasAttribute('data-title')) {
-      titleEl.textContent = this.element.getAttribute('data-title');
-    }
-
     const titleAndCloseWrapperEl = this.headerEl.appendChild(
       htmlFor(this.element)`
             <div class="i-amphtml-story-draggable-drawer-header-title-and-close"></div>`
     );
     titleAndCloseWrapperEl.appendChild(closeButtonEl);
-    titleAndCloseWrapperEl.appendChild(titleEl);
+
+    const titleText =
+      this.element.getAttribute('title') ||
+      this.element.getAttribute('data-title');
+    if (titleText) {
+      const titleEl = htmlFor(this.element)`
+        <span class="i-amphtml-story-page-attachment-title"></span>`;
+      titleEl.textContent = titleText;
+      titleAndCloseWrapperEl.appendChild(titleEl);
+    }
 
     const templateEl = this.element.querySelector(
       '.i-amphtml-story-draggable-drawer'
@@ -444,5 +436,51 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         isActive
       );
     });
+  }
+
+  /**
+   * Updates the given element with the appropriate class or attribute, if the
+   * page attachment's theme is 'dark'.
+   * @param {!Element} element The element upon which to set the dark theme.
+   * @private
+   */
+  maybeSetDarkThemeForElement_(element) {
+    const theme = this.element.getAttribute('theme')?.toLowerCase();
+    if (theme && AttachmentTheme.DARK === theme) {
+      element.setAttribute('theme', theme);
+    }
+  }
+
+  /**
+   * Create the domain label element to be displayed at the top of the page
+   * attachment.
+   * @return {!Element} element The domain label element.
+   * @private
+   */
+  createDomainLabelElement_() {
+    const domainLabelEl = this.win.document.createElement('div');
+    domainLabelEl.classList.add('i-amphtml-story-page-attachment-domain-label');
+    domainLabelEl.textContent = this.getPublisherOrigin_();
+    return domainLabelEl;
+  }
+
+  /**
+   * Returns whether a form element exists within this page attachment.
+   * @return {boolean} True, only if a form element exists as a descendant of
+   *     this page attachment.
+   * @private
+   */
+  doesContainFormElement_() {
+    return Boolean(this.element.querySelector('form'));
+  }
+
+  /**
+   * Returns the publisher origin URL string (e.g., "stories.example.com").
+   * @return {string} The domain of the publisher.
+   * @private
+   */
+  getPublisherOrigin_() {
+    const publisherOrigin = getSourceOrigin(this.getAmpDoc().getUrl());
+    return publisherOrigin.replace(/https?:\/\//, '');
   }
 }

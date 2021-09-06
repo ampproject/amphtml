@@ -1,18 +1,3 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
@@ -64,9 +49,9 @@ const percyCss = [
 // 3. Look up the full version at https://en.wikipedia.org/wiki/Google_Chrome_version_history
 // 4. Open https://omahaproxy.appspot.com in a browser
 // 5. Go to "Tools" -> "Version information"
-// 6. Paste the full version in the "Version" field and click "Lookup"
+// 6. Paste the full version (add ".0" at the end) in the "Version" field and click "Lookup"
 // 7. Copy the value next to "Branch Base Position" and update the line below
-const PUPPETEER_CHROMIUM_REVISION = '827102'; // 88.0.4324.0
+const PUPPETEER_CHROMIUM_REVISION = '870763'; // 91.0.4472.0
 
 const SNAPSHOT_SINGLE_BUILD_OPTIONS = {
   widths: [375],
@@ -91,15 +76,14 @@ const REMOVE_AMP_SCRIPTS_SNIPPET = fs.readFileSync(
   path.resolve(__dirname, 'snippets/remove-amp-scripts.js'),
   'utf8'
 );
-const FREEZE_FORM_VALUE_SNIPPET = fs.readFileSync(
-  path.resolve(__dirname, 'snippets/freeze-form-values.js'),
-  'utf8'
-);
 const FREEZE_CANVAS_IMAGE_SNIPPET = fs.readFileSync(
   path.resolve(__dirname, 'snippets/freeze-canvas-image.js'),
   'utf8'
 );
-
+const REMOVE_NO_SCRIPT_ELEMENT_SNIPPET = fs.readFileSync(
+  path.resolve(__dirname, 'snippets/remove-no-script.js'),
+  'utf8'
+);
 // HTML snippet to create an error page snapshot.
 const SNAPSHOT_ERROR_SNIPPET = fs.readFileSync(
   path.resolve(__dirname, 'snippets/snapshot-error.html'),
@@ -231,7 +215,7 @@ async function launchWebServer() {
   await startServer(
     {host: HOST, port: PORT},
     {quiet: !argv.webserver_debug},
-    {compiled: true}
+    {minified: true}
   );
 }
 
@@ -656,8 +640,8 @@ async function snapshotWebpages(browser, webpages) {
             // prepare it for snapshotting on Percy. See comments inside the
             // snippet files for description of each.
             await page.evaluate(REMOVE_AMP_SCRIPTS_SNIPPET);
-            await page.evaluate(FREEZE_FORM_VALUE_SNIPPET);
             await page.evaluate(FREEZE_CANVAS_IMAGE_SNIPPET);
+            await page.evaluate(REMOVE_NO_SCRIPT_ELEMENT_SNIPPET);
 
             // Create a default set of snapshot options for Percy and modify
             // them based on the test's configuration.
@@ -676,7 +660,7 @@ async function snapshotWebpages(browser, webpages) {
                   .replace(/__PERCY_CSS__/g, percyCss)
               );
             } else {
-              snapshotOptions.percyCss = percyCss;
+              snapshotOptions.percyCSS = percyCss;
             }
 
             // Finally, send the snapshot to percy.

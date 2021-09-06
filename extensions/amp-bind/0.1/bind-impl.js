@@ -1,46 +1,30 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import {RAW_OBJECT_ARGS_KEY} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
+import {Deferred} from '#core/data-structures/promise';
+import {Signals} from '#core/data-structures/signals';
+import {iterateCursor} from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+import {isFiniteNumber, isObject} from '#core/types';
+import {findIndex, isArray, remove, toArray} from '#core/types/array';
+import {debounce} from '#core/types/function';
+import {deepMerge, dict, getValueForExpr, map} from '#core/types/object';
+import {deepEquals, parseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
 import {BindEvents} from './bind-events';
 import {BindValidator} from './bind-validator';
+
 import {ChunkPriority, chunk} from '../../../src/chunk';
-import {Deferred} from '#core/data-structures/promise';
-import {RAW_OBJECT_ARGS_KEY} from '#core/constants/action-constants';
-import {Services} from '#service';
-import {Signals} from '#core/data-structures/signals';
-import {closestAncestorElementBySelector} from '#core/dom/query';
-import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {debounce} from '#core/types/function';
-import {deepEquals, parseJson} from '#core/types/object/json';
-import {deepMerge, dict, getValueForExpr, map} from '#core/types/object';
-import {dev, devAssert, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {findIndex, isArray, remove, toArray} from '#core/types/array';
-import {getMode} from '../../../src/mode';
-import {iterateCursor} from '#core/dom';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
-
-import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
-import {isAmp4Email} from '../../../src/format';
-
-import {isFiniteNumber, isObject} from '#core/types';
-
 import {reportError} from '../../../src/error-reporting';
+import {createCustomEvent, getDetail} from '../../../src/event-helper';
+import {isAmp4Email} from '../../../src/format';
+import {dev, devAssert, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {rewriteAttributesForElement} from '../../../src/url-rewrite';
+import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 
 /** @const {string} */
 const TAG = 'amp-bind';

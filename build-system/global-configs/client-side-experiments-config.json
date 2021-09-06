@@ -9,12 +9,20 @@
       "percentage": 1
     },
     {
+      "name": "amp-story-first-page-max-bitrate",
+      "percentage": 0.3
+    },
+    {
       "name": "story-disable-animations-first-page",
       "percentage": 0.5
     },
     {
+      "name": "story-load-first-page-only",
+      "percentage": 0.5
+    },
+    {
       "name": "story-load-inactive-outside-viewport",
-      "percentage": 0.1
+      "percentage": 1
     }
   ]
 }
