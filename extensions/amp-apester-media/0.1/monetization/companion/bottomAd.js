@@ -53,6 +53,7 @@ export function handleCompanionBottomAd(media, apesterElement) {
 function constructCompanionBottomAd(slot, bannerSizes, apesterElement) {
   const width = bannerSizes[0][0];
   const height = bannerSizes[0][1];
+  const refreshInterval = 30;
   const ampAd = createElementWithAttributes(
     /** @type {!Document} */ (apesterElement.ownerDocument),
     'amp-ad',
@@ -65,6 +66,7 @@ function constructCompanionBottomAd(slot, bannerSizes, apesterElement) {
       'layout': 'fixed',
       'data-slot': `${slot}`,
       'data-multi-size-validation': 'false',
+      'data-enable-refresh': `${refreshInterval}`,
     })
   );
   ampAd.classList.add('i-amphtml-amp-apester-companion');
