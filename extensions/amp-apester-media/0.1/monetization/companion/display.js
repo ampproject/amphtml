@@ -30,10 +30,16 @@ export function handleCompanionDisplay(media, apesterElement) {
     settings['bannerAdProvider'] === ALLOWED_AD_PROVIDER
   ) {
     const slot = settings['slot'];
-    const refreshInterval = settings['options']['autoRefreshTime'] === 60000 ? 60 : 30;
+    const refreshInterval =
+      settings['options']['autoRefreshTime'] === 60000 ? 60 : 30;
     const defaultBannerSizes = [[300, 250]];
     const bannerSizes = settings['bannerSizes'] || defaultBannerSizes;
-    constructCompanionDisplayAd(slot, bannerSizes, apesterElement, refreshInterval);
+    constructCompanionDisplayAd(
+      slot,
+      bannerSizes,
+      apesterElement,
+      refreshInterval
+    );
   }
 }
 
@@ -41,9 +47,15 @@ export function handleCompanionDisplay(media, apesterElement) {
  * @param {string} slot
  * @param {Array} bannerSizes
  * @param {!AmpElement} apesterElement
+ * @param {number} refreshInterval
  * @return {!Element}
  */
-function constructCompanionDisplayAd(slot, bannerSizes, apesterElement, refreshInterval) {
+function constructCompanionDisplayAd(
+  slot,
+  bannerSizes,
+  apesterElement,
+  refreshInterval
+) {
   const maxWidth = Math.max.apply(
     null,
     bannerSizes.map((s) => s[0])
