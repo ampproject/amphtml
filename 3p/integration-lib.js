@@ -66,6 +66,7 @@ const AMP_EMBED_ALLOWED = {
   svknative: true,
   taboola: true,
   temedya: true,
+  trafficstars: true,
   vlyby: true,
   whopainfeed: true,
   yahoofedads: true,

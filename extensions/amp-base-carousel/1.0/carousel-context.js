@@ -1,7 +1,7 @@
 import {createContext} from '#preact';
 
 const CarouselContext = createContext(
-  /** @type {BaseCarouselDef.ContextProps} */ ({
+  /** @type {BentoBaseCarouselDef.ContextProps} */ ({
     slides: [],
     setSlides: (unusedSlides) => {},
   })
