@@ -6,7 +6,7 @@ import {forwardRef} from '#preact/compat';
 import {useValueRef} from '#preact/component';
 import {ProxyIframeEmbed} from '#preact/component/3p-frame';
 
-import {EmbedlyContext} from './embedly-context';
+import {BentoEmbedlyContext} from './embedly-context';
 
 /**
  * Attribute name used to set api key with name
@@ -18,11 +18,11 @@ const API_KEY_ATTR_NAME = 'data-card-key';
 const FULL_HEIGHT = '100%';
 
 /**
- * @param {!EmbedlyCardDef.Props} props
- * @param {{current: ?EmbedlyCardDef.Api}} ref
+ * @param {!BentoEmbedlyCardDef.Props} props
+ * @param {{current: ?BentoEmbedlyCardDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
-export function EmbedlyCardWithRef(
+export function BentoEmbedlyCardWithRef(
   {onLoad, requestResize, style, title, url, ...rest},
   ref
 ) {
@@ -46,11 +46,11 @@ export function EmbedlyCardWithRef(
     [requestResize, onLoadRef]
   );
 
-  const {apiKey} = useContext(EmbedlyContext);
+  const {apiKey} = useContext(BentoEmbedlyContext);
 
   // Check for valid props
   if (!checkProps(url)) {
-    displayWarning('url prop is required for EmbedlyCard');
+    displayWarning('url prop is required for BentoEmbedlyCard');
   }
 
   // Prepare options for ProxyIframeEmbed
@@ -96,6 +96,6 @@ function displayWarning(message) {
     .warn(message);
 }
 
-const EmbedlyCard = forwardRef(EmbedlyCardWithRef);
-EmbedlyCard.displayName = 'EmbedlyCard'; // Make findable for tests.
-export {EmbedlyCard};
+const BentoEmbedlyCard = forwardRef(BentoEmbedlyCardWithRef);
+BentoEmbedlyCard.displayName = 'BentoEmbedlyCard'; // Make findable for tests.
+export {BentoEmbedlyCard};
