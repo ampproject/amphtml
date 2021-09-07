@@ -60,3 +60,11 @@
   display: block;
   margin: 10px auto;
 }
+.i-amphtml-amp-apester-bottom-ad {
+  display: block !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  margin: auto !important;
+}
