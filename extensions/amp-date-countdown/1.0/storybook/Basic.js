@@ -18,11 +18,11 @@ import {boolean, date, select, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
-import {DateCountdown} from '../component';
+import {BentoDateCountdown} from '../component';
 
 export default {
   title: 'DateCountdown',
-  component: DateCountdown,
+  component: BentoDateCountdown,
   decorators: [withKnobs],
 };
 
@@ -77,7 +77,7 @@ export const _default = () => {
 
   return (
     <div>
-      <DateCountdown
+      <BentoDateCountdown
         datetime={datetime}
         locale={locale}
         whenEnded={whenEnded}
@@ -94,7 +94,7 @@ export const _default = () => {
             <span>{`${data.seconds} ${data.ss} ${data.s}`}</span>
           </div>
         )}
-      ></DateCountdown>
+      ></BentoDateCountdown>
     </div>
   );
 };
@@ -120,13 +120,13 @@ export const defaultRenderer = () => {
 
   return (
     <div>
-      <DateCountdown
+      <BentoDateCountdown
         datetime={datetime}
         locale={locale}
         whenEnded={whenEnded}
         biggestUnit={biggestUnit}
         countUp={countUp}
-      ></DateCountdown>
+      ></BentoDateCountdown>
     </div>
   );
 };

@@ -16,6 +16,9 @@
 
 /** @externs */
 
+/** @const */
+var BentoDateCountdownDef = {};
+
 /**
  * @typedef {{
  *   dateTime: (!Date|number|string),
@@ -26,4 +29,4 @@
  *   render: (?RendererFunctionType|undefined),
  * }}
  */
-var DateCountdownPropsDef;
+BentoDateCountdownDef.Props;
