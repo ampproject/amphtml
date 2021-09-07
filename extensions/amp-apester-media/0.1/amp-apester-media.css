@@ -64,7 +64,7 @@
   display: block !important;
   position: absolute !important;
   bottom: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  margin: auto !important;
+  left: 50% !important;
+  transform: translateX(-50%);
+  margin: 0 !important;
 }
