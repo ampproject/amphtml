@@ -1,5 +1,7 @@
 import {toggleExperiment} from '#experiments';
 
+import {querySelectShadows} from 'extensions/amp-story/1.0/utils';
+
 import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 import {
   A4AVarNames,
@@ -114,7 +116,7 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
         'https://www.kittens.com/img1'
       );
       expect(doc.querySelector('.i-amphtml-attribution-host')).to.exist;
-      expect(doc.querySelector('img')).to.equal(element);
+      expect(querySelectShadows(doc, 'img')).to.equal(element);
     });
 
     it('returns null and does not create if no icon url', () => {
@@ -167,23 +169,23 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
       buttonFitter = new ButtonTextFitter(env.ampdoc);
     });
 
-    it('returns the created anchor', () => {
+    it('returns the created anchor', async () => {
       const metadata = {
         [A4AVarNames.CTA_TYPE]: 'SHOP',
         [A4AVarNames.CTA_URL]: 'https://www.cats.com',
       };
-      return createCta(
+      const anchor = await createCta(
         doc,
         buttonFitter,
         doc.body /* container */,
         metadata
-      ).then((anchor) => {
-        expect(anchor).to.exist;
-        expect(anchor.href).to.equal('https://www.cats.com/');
-        expect(anchor.textContent).to.equal('SHOP');
-        expect(doc.querySelector('amp-story-cta-layer')).to.exist;
-        expect(doc.querySelector('a')).to.exist;
-      });
+      );
+
+      expect(anchor).to.exist;
+      expect(anchor.href).to.equal('https://www.cats.com/');
+      expect(anchor.textContent).to.equal('SHOP');
+      expect(doc.querySelector('amp-story-cta-layer')).to.exist;
+      expect(querySelectShadows(doc, 'a')).to.exist;
     });
 
     it('returns null if button text is too long', () => {

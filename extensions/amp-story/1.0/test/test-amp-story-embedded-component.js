@@ -263,7 +263,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
 
     const tooltip = component
       .getShadowRootForTesting()
-      .querySelector('a.i-amphtml-story-tooltip');
+      .shadowRoot.querySelector('a.i-amphtml-story-tooltip');
     tooltip.onclick = (e) => {
       e.preventDefault(); // Make the test not actually navigate.
     };
@@ -290,7 +290,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
 
     const tooltip = component
       .getShadowRootForTesting()
-      .querySelector('a.i-amphtml-story-tooltip');
+      .shadowRoot.querySelector('a.i-amphtml-story-tooltip');
     tooltip.onclick = (e) => {
       e.preventDefault(); // Make the test not actually navigate.
     };

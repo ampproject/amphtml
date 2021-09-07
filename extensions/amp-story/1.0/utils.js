@@ -95,6 +95,27 @@ export function createShadowRootWithStyle(container, element, css) {
 }
 
 /**
+ * Wrapper around querySelector() that queries all of the pages shadow roots instead
+ * of the Light DOM.
+ *
+ * TODO: move this fn. to somewhere more fitting (test-only code).
+ *
+ * @param {!Element} container
+ * @param {string} query
+ * @return {Element}
+ */
+export function querySelectShadows(container, query) {
+  const shadowHosts = container.querySelectorAll('.i-amphtml-shadow-host');
+  for (const host of shadowHosts) {
+    const foundEl = host.shadowRoot.querySelector(query);
+    if (foundEl) {
+      return foundEl;
+    }
+  }
+  return null;
+}
+
+/**
  * Parses the resolved CSS color property, that is always in the form of
  * `rgba(0, 0, 0, 1)` or `rgb(0, 0, 0)`, that can be retrieved using
  * `getComputedStyle`.

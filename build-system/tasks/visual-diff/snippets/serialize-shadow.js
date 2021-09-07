@@ -10,7 +10,7 @@
  * @param {*} doc document to operate on.
  */
 function serializeShadow(doc) {
-  doc.documentElement.innerHTML = doc.documentElement.getInnerHTML({
+  doc.documentElement./*OK*/ innerHTML = doc.documentElement.getInnerHTML({
     includeShadowRoots: true,
   });
 }

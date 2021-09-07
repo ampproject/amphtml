@@ -7,6 +7,8 @@ import {Services} from '#service';
 
 import {macroTask} from '#testing/helpers';
 
+import {querySelectShadows} from 'extensions/amp-story/1.0/utils';
+
 import {
   MockStoryImpl,
   addStoryAutoAdsConfig,
@@ -270,7 +272,10 @@ describes.realWin(
       await autoAds.buildCallback();
       await autoAds.layoutCallback();
 
-      const progressBar = doc.querySelector('.i-amphtml-story-ad-progress-bar');
+      const progressBar = querySelectShadows(
+        doc,
+        '.i-amphtml-story-ad-progress-bar'
+      );
       expect(progressBar).to.exist;
     });
 
@@ -294,22 +299,25 @@ describes.realWin(
       });
 
       it('should create ad badge', () => {
-        const adBadge = doc.querySelector('.i-amphtml-story-ad-badge');
+        const adBadge = querySelectShadows(doc, '.i-amphtml-story-ad-badge');
         expect(adBadge).to.exist;
       });
 
       it('should create progress bar', () => {
-        const progressBar = doc.querySelector(
+        const progressBar = querySelectShadows(
+          doc,
           '.i-amphtml-story-ad-progress-bar'
         );
         expect(progressBar).to.exist;
       });
 
       it('should propagate the ad-showing attribute to badge & progress bar', () => {
-        const adBadgeContainer = doc.querySelector(
+        const adBadgeContainer = querySelectShadows(
+          doc,
           '.i-amphtml-ad-overlay-container'
         );
-        const progressBackground = doc.querySelector(
+        const progressBackground = querySelectShadows(
+          doc,
           '.i-amphtml-story-ad-progress-background'
         );
         expect(adBadgeContainer).not.to.have.attribute(Attributes.AD_SHOWING);
@@ -320,10 +328,12 @@ describes.realWin(
       });
 
       it('should propagate the desktop-one-panel attribute to badge & progress bar', () => {
-        const adBadgeContainer = doc.querySelector(
+        const adBadgeContainer = querySelectShadow(
+          doc,
           '.i-amphtml-ad-overlay-container'
         );
-        const progressBackground = doc.querySelector(
+        const progressBackground = querySelectShadows(
+          doc,
           '.i-amphtml-story-ad-progress-background'
         );
         storeService.dispatch(Action.TOGGLE_UI, UIType.MOBILE);
@@ -343,7 +353,8 @@ describes.realWin(
       });
 
       it('should propagate the dir=rtl attribute', () => {
-        const adBadgeContainer = doc.querySelector(
+        const adBadgeContainer = querySelectShadows(
+          doc,
           '.i-amphtml-ad-overlay-container'
         );
         expect(adBadgeContainer).not.to.have.attribute(Attributes.DIR);
@@ -352,7 +363,8 @@ describes.realWin(
       });
 
       it('should propagate the pause state if ad showing', () => {
-        const progressBackground = doc.querySelector(
+        const progressBackground = querySelectShadows(
+          doc,
           '.i-amphtml-story-ad-progress-background'
         );
         storeService.dispatch(Action.TOGGLE_AD, true);

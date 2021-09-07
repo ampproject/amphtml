@@ -14,6 +14,7 @@ import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed'
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {scopedQuerySelectorAll} from '#core/dom/query';
 import {afterRenderPromise} from '#testing/helpers';
+import {querySelectShadows} from '../utils';
 
 const extensions = ['amp-story:1.0', 'amp-audio'];
 
@@ -649,7 +650,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
-    const openAttachmentEl = element.querySelector(
+    const openAttachmentEl = querySelectShadows(
+      element,
       '.i-amphtml-story-page-open-attachment'
     );
     expect(openAttachmentEl).to.exist;
@@ -667,7 +669,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
-    const openAttachmentEl = element.querySelector(
+    const openAttachmentEl = querySelectShadows(
+      element,
       '.i-amphtml-story-page-open-attachment'
     );
 
@@ -685,7 +688,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
-    const openAttachmentEl = element.querySelector(
+    const openAttachmentEl = querySelectShadows(
+      element,
       '.i-amphtml-story-page-open-attachment'
     );
 
@@ -701,7 +705,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
-    const openoutlinkEl = element.querySelector(
+    const openoutlinkEl = querySelectShadows(
+      element,
       '.i-amphtml-story-page-open-attachment'
     );
     expect(openoutlinkEl).to.exist;
@@ -720,7 +725,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
-    const openAttachmentEl = element.querySelector(
+    const openAttachmentEl = querySelectShadows(
+      element,
       '.i-amphtml-story-page-open-attachment'
     );
 
@@ -744,7 +750,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
-    const openAttachmentEl = element.querySelector(
+    const openAttachmentEl = querySelectShadows(
+      element,
       '.i-amphtml-story-page-open-attachment'
     );
 
@@ -769,7 +776,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
-    const openAttachmentEl = element.querySelector(
+    const openAttachmentEl = querySelectShadows(
+      element,
       '.i-amphtml-story-page-open-attachment'
     );
 
@@ -791,7 +799,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
-    const openAttachmentEl = element.querySelector(
+    const openAttachmentEl = querySelectShadows(
+      element,
       '.i-amphtml-story-page-open-attachment'
     );
 
@@ -813,7 +822,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
-    const openAttachmentEl = element.querySelector(
+    const openAttachmentEl = querySelectShadows(
+      element,
       '.i-amphtml-story-page-open-attachment'
     );
 
@@ -836,7 +846,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
-    const openAttachmentLabelEl = element.querySelector(
+    const openAttachmentLabelEl = querySelectShadows(
+      element,
       '.i-amphtml-story-page-attachment-label'
     );
     expect(openAttachmentLabelEl.textContent).to.equal('Custom text');
@@ -855,7 +866,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
-    const openAttachmentLabelEl = element.querySelector(
+    const openAttachmentLabelEl = querySelectShadows(
+      element,
       '.i-amphtml-story-page-attachment-label'
     );
 
@@ -872,7 +884,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
-    const openAttachmentEl = element.querySelector(
+    const openAttachmentEl = querySelectShadows(
+      element,
       '.i-amphtml-story-page-open-attachment'
     );
 
@@ -893,7 +906,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
-    const openAttachmentEl = element.querySelector(
+    const openAttachmentEl = querySelectShadows(
+      element,
       '.i-amphtml-story-page-open-attachment'
     );
 

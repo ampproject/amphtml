@@ -27,6 +27,7 @@ import {getBackendSpecs} from '../interactive-disclaimer';
 import {htmlFor} from '#core/dom/static-template';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {toggleExperiment} from '#experiments/';
+import {querySelectShadows} from 'extensions/amp-story/1.0/utils';
 
 class InteractiveTest extends AmpStoryInteractive {
   constructor(element) {
@@ -409,7 +410,8 @@ describes.realWin(
           .click();
 
         expect(
-          storyEl.querySelector(
+          querySelectShadows(
+            storyEl,
             '.i-amphtml-story-interactive-disclaimer-dialog'
           )
         ).to.not.be.null;
@@ -433,7 +435,8 @@ describes.realWin(
           .click();
 
         expect(
-          storyEl.querySelector(
+          querySelectShadows(
+            storyEl,
             '.i-amphtml-story-interactive-disclaimer-dialog'
           )
         ).to.not.be.null;
@@ -458,7 +461,8 @@ describes.realWin(
           .click();
 
         expect(
-          storyEl.querySelector(
+          querySelectShadows(
+            storyEl,
             '.i-amphtml-story-interactive-disclaimer-dialog .i-amphtml-story-interactive-disclaimer-url'
           ).textContent
         ).to.be.equal('notabackend.com');

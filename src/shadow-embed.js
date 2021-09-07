@@ -44,6 +44,7 @@ export function createShadowRoot(hostElement) {
     existingRoot./*OK*/ innerHTML = '';
     return existingRoot;
   }
+  hostElement.classList.add('i-amphtml-shadow-host');
 
   let shadowRoot;
   const shadowDomSupported = getShadowDomSupportedVersion();

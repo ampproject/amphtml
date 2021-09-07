@@ -1505,7 +1505,8 @@ describes.realWin(
             await createStoryWithPages(2);
             dispatchSwipeEvent(100, 0);
             await story.mutateElement(() => {
-              const hintEl = story.element.querySelector(
+              const hintEl = utils.querySelectShadows(
+                story.element,
                 '.i-amphtml-story-hint-container'
               );
               expect(hintEl).to.not.have.class('i-amphtml-hidden');

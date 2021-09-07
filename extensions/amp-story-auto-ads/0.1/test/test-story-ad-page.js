@@ -5,6 +5,8 @@ import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
 
 import {macroTask} from '#testing/helpers';
 
+import {querySelectShadows} from 'extensions/amp-story/1.0/utils';
+
 import {Gestures} from '../../../../src/gesture';
 import * as openWindowDialog from '../../../../src/open-window-dialog';
 import * as service from '../../../../src/service-helpers';
@@ -229,7 +231,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       ampAdElement.setAttribute('data-vars-ctatype', 'INSTALL');
       await storyAdPage.maybeCreateCta();
 
-      const anchor = doc.querySelector('.i-amphtml-story-ad-link');
+      const anchor = querySelectShadows(doc, '.i-amphtml-story-ad-link');
       expect(anchor).to.exist;
       expect(anchor).not.to.have.attribute('cta-active');
       storyAdPage.toggleVisibility();
@@ -259,7 +261,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
 
       const ctaLayer = doc.querySelector('amp-story-cta-layer');
       expect(ctaLayer).to.exist;
-      const anchor = ctaLayer.querySelector('a');
+      const anchor = querySelectShadows(ctaLayer, 'a');
       expect(anchor.target).to.equal('_blank');
       expect(anchor.href).to.equal('https://amp.dev/');
       expect(anchor).to.have.attribute(
@@ -279,7 +281,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
 
       const ctaLayer = doc.querySelector('amp-story-cta-layer');
       expect(ctaLayer).to.exist;
-      const anchor = ctaLayer.querySelector('a');
+      const anchor = querySelectShadows(ctaLayer, 'a');
       expect(anchor.target).to.equal('_blank');
       expect(anchor.href).to.equal('https://amp.dev/');
       expect(anchor).to.have.attribute(
@@ -315,7 +317,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
 
       const created = await storyAdPage.maybeCreateCta();
       expect(created).to.be.true;
-      const anchor = doc.querySelector('a');
+      const anchor = querySelectShadows(doc, 'a');
       expect(anchor.href).to.equal('https://www.example.com/');
       expect(anchor.textContent).to.equal('Shop Now');
     });
@@ -343,7 +345,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
       const created = await storyAdPage.maybeCreateCta();
       expect(created).to.be.true;
-      const anchor = doc.querySelector('a');
+      const anchor = querySelectShadows(doc, 'a');
       expect(anchor.href).to.equal('https://amp.dev/');
       expect(anchor.textContent).to.equal('Shop Now');
     });
@@ -381,7 +383,10 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
       const created = await storyAdPage.maybeCreateCta();
       expect(created).to.be.true;
-      const attribution = doc.querySelector('.i-amphtml-story-ad-attribution');
+      const attribution = querySelectShadows(
+        doc,
+        '.i-amphtml-story-ad-attribution'
+      );
       expect(attribution).to.exist;
       expect(attribution.tagName).to.equal('IMG');
       expect(attribution).to.have.attribute(
@@ -418,7 +423,10 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
       await storyAdPage.maybeCreateCta();
 
-      const attribution = doc.querySelector('.i-amphtml-story-ad-attribution');
+      const attribution = querySelectShadows(
+        doc,
+        '.i-amphtml-story-ad-attribution'
+      );
       expect(attribution).to.have.class('i-amphtml-story-ad-fullbleed');
 
       storeService.dispatch(Action.TOGGLE_UI, UIType.MOBILE);
@@ -549,13 +557,12 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
 
       await storyAdPage.maybeCreateCta();
-      const cta = doc.querySelector('.i-amphtml-story-ad-link');
+      const cta = querySelectShadows(doc, '.i-amphtml-story-ad-link');
       // Don't open new tab for test.
       cta.target = '_self';
       cta.click();
 
-      // In real world the shadow host element will be the click target.
-      expect(cta.parentElement.getAttribute('role')).to.equal('button');
+      expect(cta.parentNode.host.getAttribute('role')).to.equal('button');
       await macroTask();
       expect(fireEventStub).to.be.calledWithExactly(
         pageElement,
