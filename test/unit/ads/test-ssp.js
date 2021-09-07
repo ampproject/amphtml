@@ -42,6 +42,7 @@ describes.fakeWin('amp-ad-ssp', {}, (env) => {
     commonData = {
       width: '200',
       height: '200',
+      said: 'said1234',
       position:
         '{ "id": "id-1", "width": "200", "height": "200", "zoneId": "1234" }',
     };
@@ -90,11 +91,12 @@ describes.fakeWin('amp-ad-ssp', {}, (env) => {
       {
         width: '200',
         height: '200',
+        said: 'said1234',
         position:
           '{ "id": "id-1", "width": "200", "height": "200", "zoneId": "1234" }',
       },
       ['position'],
-      ['site']
+      ['site', 'said']
     );
   });
 
@@ -172,7 +174,10 @@ describes.fakeWin('amp-ad-ssp', {}, (env) => {
     ssp(win, commonData);
 
     expect(sssp.config).to.have.been.calledOnce;
-    expect(sssp.config).to.have.been.calledWith({site: 'https://test.com'});
+    expect(sssp.config).to.have.been.calledWith({
+      site: 'https://test.com',
+      said: 'said1234',
+    });
   });
 
   it('should call context.noContentAvailable() when position is invalid', () => {
@@ -254,7 +259,14 @@ describes.fakeWin('amp-ad-ssp', {}, (env) => {
 
     expect(sssp.getAds).to.have.been.calledOnce;
     expect(sssp.getAds).to.have.been.calledWith(
-      [{id: 'id-1', width: '200', height: '200', zoneId: '1234'}],
+      [
+        {
+          id: 'id-1',
+          width: '200',
+          height: '200',
+          zoneId: '1234',
+        },
+      ],
       {AMPcallback: sandbox.match.func}
     );
   });
