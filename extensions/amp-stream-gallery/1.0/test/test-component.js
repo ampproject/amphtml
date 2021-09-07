@@ -1,15 +1,15 @@
 import * as Preact from '#preact';
-import {StreamGallery} from '../component';
+import {BentoStreamGallery} from '../component';
 import {mount} from 'enzyme';
 
 describes.sandboxed('StreamGallery preact component', {}, () => {
   it('should render BentoBaseCarousel', () => {
     const wrapper = mount(
-      <StreamGallery>
+      <BentoStreamGallery>
         <div>slide 1</div>
         <div>slide 2</div>
         <div>slide 3</div>
-      </StreamGallery>
+      </BentoStreamGallery>
     );
     const carousel = wrapper.find('BentoBaseCarousel');
     expect(carousel).to.have.lengthOf(1);
@@ -35,11 +35,11 @@ describes.sandboxed('StreamGallery preact component', {}, () => {
       </div>
     );
     const wrapper = mount(
-      <StreamGallery arrowPrevAs={arrowPrev} arrowNextAs={arrowNext}>
+      <BentoStreamGallery arrowPrevAs={arrowPrev} arrowNextAs={arrowNext}>
         <div>slide 1</div>
         <div>slide 2</div>
         <div>slide 3</div>
-      </StreamGallery>
+      </BentoStreamGallery>
     );
     const arrows = wrapper.find('Arrow');
     expect(arrows).to.have.lengthOf(2);
@@ -49,11 +49,11 @@ describes.sandboxed('StreamGallery preact component', {}, () => {
 
   it('should not loop by default', () => {
     const wrapper = mount(
-      <StreamGallery>
+      <BentoStreamGallery>
         <div class="my-slide">slide 1</div>
         <div class="my-slide">slide 2</div>
         <div class="my-slide">slide 3</div>
-      </StreamGallery>
+      </BentoStreamGallery>
     );
     const slides = wrapper.find('[data-slide]');
     expect(slides).to.have.lengthOf(3);
@@ -67,11 +67,11 @@ describes.sandboxed('StreamGallery preact component', {}, () => {
 
   it('should render in preparation for looping with loop prop', () => {
     const wrapper = mount(
-      <StreamGallery loop>
+      <BentoStreamGallery loop>
         <div class="my-slide">slide 1</div>
         <div class="my-slide">slide 2</div>
         <div class="my-slide">slide 3</div>
-      </StreamGallery>
+      </BentoStreamGallery>
     );
     const slides = wrapper.find('[data-slide]');
     expect(slides).to.have.lengthOf(3);
