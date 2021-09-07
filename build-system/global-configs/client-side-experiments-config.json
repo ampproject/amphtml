@@ -18,7 +18,7 @@
     },
     {
       "name": "story-load-first-page-only",
-      "percentage": 0.5
+      "percentage": 1
     },
     {
       "name": "story-load-inactive-outside-viewport",
