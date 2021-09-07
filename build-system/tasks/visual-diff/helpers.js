@@ -262,7 +262,11 @@ async function waitForSelectorExistence(page, selector) {
       return null;
     }
     // If nothing was found in Light DOM, check shadow
-    if ((await page.evaluate((body) => queryShadow(body, selector))) !== null) {
+    if (
+      (await page.evaluate(() =>
+        queryShadow(window.document.body, selector)
+      )) !== null
+    ) {
       return true;
     }
     await sleep(CSS_SELECTOR_RETRY_MS);
