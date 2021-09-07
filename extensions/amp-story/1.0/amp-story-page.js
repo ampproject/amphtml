@@ -653,9 +653,6 @@ export class AmpStoryPage extends AMP.BaseElement {
           state.width = width;
           state.vh = height / 100;
           state.vw = width / 100;
-          state.fiftyVw = Math.round(width / 2);
-          state.vmin = Math.min(state.vh, state.vw);
-          state.vmax = Math.max(state.vh, state.vw);
         },
         mutate: (state) => {
           const {height, width} = state;
@@ -671,11 +668,8 @@ export class AmpStoryPage extends AMP.BaseElement {
           }
           this.cssVariablesStyleEl_.textContent =
             `:root {` +
-            `--story-page-vh: ${px(state.vh)};` +
-            `--story-page-vw: ${px(state.vw)};` +
-            `--story-page-vmin: ${px(state.vmin)};` +
-            `--story-page-vmax: ${px(state.vmax)};` +
-            `--i-amphtml-story-page-50vw: ${px(state.fiftyVw)};` +
+            `--story-page-vh: ${px(state.vh)}; !important` +
+            `--story-page-vw: ${px(state.vw)}; !important` +
             `}`;
         },
       },

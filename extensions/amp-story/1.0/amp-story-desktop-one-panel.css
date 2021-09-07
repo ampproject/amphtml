@@ -2,7 +2,7 @@
 
 @import './amp-story-desktop-user-overridable.css';
 
-amp-story[standalone].i-amphtml-story-desktop-one-panel {
+amp-story[standalone] {
   background-color: #000 !important;
 }
 /**
@@ -11,32 +11,36 @@ amp-story[standalone].i-amphtml-story-desktop-one-panel {
  */
 
 /** Variables shared between page, system layer and pagination buttons. */
-.i-amphtml-story-desktop-one-panel {
-  --i-amphtml-story-desktop-one-panel-ratio: 69 / 116;
-  --i-amphtml-story-desktop-one-panel-responsive-margin: max(74px, 8.25vh);
-    /** Calculates panel height by subtracting responsive vertical margin. */
-  --i-amphtml-story-desktop-one-panel-height: calc(100vh - var(--i-amphtml-story-desktop-one-panel-responsive-margin) * 2);
-  --i-amphtml-story-desktop-one-panel-width: calc(var(--i-amphtml-story-desktop-one-panel-height) * var(--i-amphtml-story-desktop-one-panel-ratio));
-  --i-amphtml-story-desktop-one-panel-border-radius: 10px;
+@media(min-aspect-ratio: 3/4) {
+  :root {
+    --i-amphtml-story-desktop-one-panel-ratio: 69 / 116;
+    --i-amphtml-story-desktop-one-panel-responsive-margin: max(74px, 8.25vh);
+      /** Calculates panel height by subtracting responsive vertical margin. */
+    --i-amphtml-story-desktop-one-panel-height: calc(100vh - var(--i-amphtml-story-desktop-one-panel-responsive-margin) * 2);
+    --i-amphtml-story-desktop-one-panel-width: calc(var(--i-amphtml-story-desktop-one-panel-height) * var(--i-amphtml-story-desktop-one-panel-ratio));
+    --i-amphtml-story-desktop-one-panel-border-radius: 10px;
+  }
+
+  amp-story:not([supports-landscape]) amp-story-page {
+    width: var(--i-amphtml-story-desktop-one-panel-width) !important;
+    height: var(--i-amphtml-story-desktop-one-panel-height) !important;
+    border-radius: var(--i-amphtml-story-desktop-one-panel-border-radius) !important;
+    margin: auto !important;
+  }
 }
 
-@media(max-height: 756px) {
-  .i-amphtml-story-desktop-one-panel {
+@media(max-height: 756px) and (min-aspect-ratio: 3/4) {
+  :root {
+    --story-page-vw: calc(1vh * var(--i-amphtml-story-desktop-one-panel-ratio));
+    --story-page-vh: 1vh;
     --i-amphtml-story-desktop-one-panel-responsive-margin: 0;
     --i-amphtml-story-desktop-one-panel-width: calc(100vh * var(--i-amphtml-story-desktop-one-panel-ratio));
     --i-amphtml-story-desktop-one-panel-border-radius: 0;
   }
 }
 
-@media(max-height: 538px) {
-  .i-amphtml-story-desktop-one-panel {
+@media(max-height: 538px) and (min-aspect-ratio: 3/4) {
+  :root {
     --i-amphtml-story-desktop-one-panel-ratio: 3 / 4;
   }
-}
-
-.i-amphtml-story-desktop-one-panel amp-story-page {
-  width: var(--i-amphtml-story-desktop-one-panel-width) !important;
-  height: var(--i-amphtml-story-desktop-one-panel-height) !important;
-  border-radius: var(--i-amphtml-story-desktop-one-panel-border-radius) !important;
-  margin: auto !important;
 }

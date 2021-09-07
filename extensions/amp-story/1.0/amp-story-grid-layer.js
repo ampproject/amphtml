@@ -87,7 +87,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     /** @private {?{horiz: number, vert: number}} */
     this.aspectRatio_ = null;
 
-    /** @private {number} */
+    /** @private {number} used for aspect-ratio background layers */
     this.scalingFactor_ = 1;
   }
 
