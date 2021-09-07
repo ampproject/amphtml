@@ -1,4 +1,4 @@
-import {BaseCarousel} from './component';
+import {BentoBaseCarousel} from './component';
 import {CSS as COMPONENT_CSS} from './component.jss';
 import {CarouselContextProp} from './carousel-props';
 import {PreactBaseElement} from '#preact/base-element';
@@ -39,7 +39,7 @@ export class BaseElement extends PreactBaseElement {
 }
 
 /** @override */
-BaseElement['Component'] = BaseCarousel;
+BaseElement['Component'] = BentoBaseCarousel;
 
 /** @override */
 BaseElement['layoutSizeDefined'] = true;

@@ -15,10 +15,10 @@
  */
 import * as Preact from '#preact';
 import {
-  Accordion,
-  AccordionContent,
-  AccordionHeader,
-  AccordionSection,
+  BentoAccordion,
+  BentoAccordionContent,
+  BentoAccordionHeader,
+  BentoAccordionSection,
 } from '../../../amp-accordion/1.0/component';
 import {VideoIframe} from '../video-iframe';
 import {createCustomEvent} from '../../../../src/event-helper';
@@ -90,16 +90,16 @@ UsingVideoIframe.args = {
 
 export const InsideAccordion = ({height, width, ...args}) => {
   return (
-    <Accordion expandSingleSection>
-      <AccordionSection key={1} expanded>
-        <AccordionHeader>
+    <BentoAccordion expandSingleSection>
+      <BentoAccordionSection key={1} expanded>
+        <BentoAccordionHeader>
           <h2>Controls</h2>
-        </AccordionHeader>
-        <AccordionContent>
+        </BentoAccordionHeader>
+        <BentoAccordionContent>
           <AmpVideoIframeLike loop={true} style={{width, height}} {...args} />
-        </AccordionContent>
-      </AccordionSection>
-    </Accordion>
+        </BentoAccordionContent>
+      </BentoAccordionSection>
+    </BentoAccordion>
   );
 };
 
