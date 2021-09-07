@@ -189,7 +189,7 @@ export const EXPERIMENTS = [
   },
   {
     id: 'story-ad-page-outlink',
-    name: 'Story Ad CTA Page Outlink',
+    name: 'Story ad CTA page outlink',
     spec: 'https://github.com/ampproject/amphtml/pull/35867',
   },
 ];

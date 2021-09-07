@@ -10,7 +10,7 @@ export const StoryAdPageOutlink = {
 };
 
 /**
- * Choose what time value to auto advance story ads.
+ * Page outlink experiment and control ID branch setup
  * @param {!Window} win
  */
 export function divertStoryAdPageOutlink(win) {
