@@ -4,7 +4,7 @@ import {
   verifyElementsBuilt,
   verifyPromptsHidden,
 } from './common';
-import {afterRenderPromise} from '#testing/helpers';
+import {afterRenderPromise} from '#testing/test-helper';
 
 describes.endtoend(
   'amp-consent',

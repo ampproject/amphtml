@@ -5,7 +5,7 @@ import {
 } from '../amp-story-store-service';
 import {AmpStoryAccess, Type} from '../amp-story-access';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-import {afterRenderPromise} from '#testing/helpers';
+import {afterRenderPromise} from '#testing/test-helper';
 
 describes.realWin('amp-story-access', {amp: true}, (env) => {
   let win;

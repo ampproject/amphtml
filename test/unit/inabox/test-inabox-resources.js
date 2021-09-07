@@ -6,7 +6,7 @@ import {InaboxResources} from '#inabox/inabox-resources';
 
 import {ResourceState} from '#service/resource';
 
-import {macroTask} from '#testing/helpers';
+import {macroTask} from '#testing/test-helper';
 
 describes.realWin('inabox-resources', {amp: true}, (env) => {
   let win;

@@ -1,7 +1,7 @@
 import '../amp-story-panning-media';
 import {createElementWithAttributes} from '#core/dom';
 
-import {afterRenderPromise} from '#testing/helpers';
+import {afterRenderPromise} from '#testing/test-helper';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {

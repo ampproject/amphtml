@@ -5,7 +5,7 @@ import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
 
 import {Services} from '#service';
 
-import {macroTask} from '#testing/helpers';
+import {macroTask} from '#testing/test-helper';
 
 import {
   MockStoryImpl,

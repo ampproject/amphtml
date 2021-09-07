@@ -3,7 +3,7 @@ import {CommonSignals} from '#core/constants/common-signals';
 import {forceExperimentBranch} from '#experiments';
 import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
 
-import {macroTask} from '#testing/helpers';
+import {macroTask} from '#testing/test-helper';
 
 import {Gestures} from '../../../../src/gesture';
 import * as openWindowDialog from '../../../../src/open-window-dialog';

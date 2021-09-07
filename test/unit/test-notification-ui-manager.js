@@ -1,6 +1,6 @@
 import {NotificationUiManager} from '#service/notification-ui-manager';
 
-import {macroTask} from '#testing/helpers';
+import {macroTask} from '#testing/test-helper';
 
 describes.realWin('NotificationUiManager', {amp: 1}, (env) => {
   describe('Notification UI Manager', () => {

@@ -3,7 +3,7 @@ import * as domQuery from '#core/dom/query';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
 import {createElementWithAttributes} from '#core/dom';
-import {macroTask} from '#testing/helpers';
+import {macroTask} from '#testing/test-helper';
 import {setStyles} from '#core/dom/style';
 
 describes.realWin(

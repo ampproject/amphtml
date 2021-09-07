@@ -1,4 +1,4 @@
-import {sleep} from '#testing/helpers';
+import {sleep} from '#testing/test-helper';
 import {getCarousel, getScrollingElement, getSlide} from './helpers';
 import {useStyles} from '../component.jss';
 

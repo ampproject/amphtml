@@ -6,7 +6,7 @@ import {CommonSignals} from '#core/constants/common-signals';
 import {VideoEvents} from '../../../../src/video-interface';
 import {createElementWithAttributes} from '#core/dom';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {macroTask} from '#testing/helpers';
+import {macroTask} from '#testing/test-helper';
 import {parseUrlDeprecated} from '../../../../src/url';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 

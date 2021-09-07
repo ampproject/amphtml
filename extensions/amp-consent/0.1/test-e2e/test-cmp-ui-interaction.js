@@ -1,4 +1,4 @@
-import {afterRenderPromise, awaitFrameAfter} from '#testing/helpers';
+import {afterRenderPromise, awaitFrameAfter} from '#testing/test-helper';
 
 describes.endtoend(
   'amp-consent',

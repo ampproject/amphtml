@@ -1,5 +1,5 @@
 //
-import {Key} from '#testing/helpers/types';
+import {Key} from '#testing/test-helper';
 
 describes.endtoend(
   'amp-sidebar',

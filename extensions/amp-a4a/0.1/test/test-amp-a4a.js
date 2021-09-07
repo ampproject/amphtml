@@ -20,8 +20,8 @@ import {resetScheduledElementForTesting} from '#service/custom-element-registry'
 import {Extensions} from '#service/extensions-impl';
 import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
 
-import {macroTask} from '#testing/helpers';
 import {createIframePromise} from '#testing/iframe';
+import {macroTask} from '#testing/test-helper';
 
 import {FetchMock, networkFailure} from './fetch-mock';
 import {data as testFragments} from './testdata/test_fragments';

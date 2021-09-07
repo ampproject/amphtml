@@ -1,7 +1,7 @@
 import {Expander} from '#service/url-expander/expander';
 import {GlobalVariableSource} from '#service/url-replacements-impl';
 
-import {macroTask} from '#testing/helpers';
+import {macroTask} from '#testing/test-helper';
 
 describes.realWin(
   'Expander',

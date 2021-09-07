@@ -6,7 +6,7 @@ import {toggleExperiment} from '#experiments';
 
 import {Services} from '#service';
 
-import {macroTask} from '#testing/helpers';
+import {macroTask} from '#testing/test-helper';
 
 import * as DocFetcher from '../../../../src/document-fetcher';
 import {getServicePromiseForDoc} from '../../../../src/service-helpers';

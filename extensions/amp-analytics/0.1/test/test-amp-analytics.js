@@ -1,7 +1,11 @@
 import {AmpAnalytics} from '../amp-analytics';
 import {AnalyticsConfig} from '../config';
 import {ClickEventTracker, VisibilityTracker} from '../events';
-import {ImagePixelVerifier, mockWindowInterface} from '#testing/test-helper';
+import {
+  ImagePixelVerifier,
+  macroTask,
+  mockWindowInterface,
+} from '#testing/test-helper';
 import {LayoutPriority} from '#core/dom/layout';
 import {LinkerManager} from '../linker-manager';
 import {Services} from '#service';
@@ -17,7 +21,6 @@ import {
 import {installCryptoService} from '#service/crypto-impl';
 import {installUserNotificationManagerForTesting} from '../../../amp-user-notification/0.1/amp-user-notification';
 import {instrumentationServiceForDocForTesting} from '../instrumentation';
-import {macroTask} from '#testing/helpers';
 
 describes.realWin(
   'amp-analytics',

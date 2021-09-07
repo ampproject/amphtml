@@ -10,13 +10,12 @@ import {ConsentUI, consentUiClasses} from '../consent-ui';
 import {Services} from '#service';
 import {dict} from '#core/types/object';
 import {elementByTag} from '#core/dom/query';
-import {macroTask} from '#testing/helpers';
+import {macroTask, whenCalled} from '#testing/test-helper';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service-helpers';
 import {user} from '../../../../src/log';
-import {whenCalled} from '#testing/test-helper';
 
 describes.realWin(
   'consent-ui',

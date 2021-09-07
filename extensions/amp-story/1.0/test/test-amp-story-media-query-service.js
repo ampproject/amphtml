@@ -1,6 +1,6 @@
 import {AmpStoryMediaQueryService} from '../amp-story-media-query-service';
 import {poll} from '#testing/iframe';
-import {afterRenderPromise} from '#testing/helpers';
+import {afterRenderPromise} from '#testing/test-helper';
 
 describes.realWin('amp-story-media-query-service', {amp: true}, (env) => {
   let mediaQueryService;

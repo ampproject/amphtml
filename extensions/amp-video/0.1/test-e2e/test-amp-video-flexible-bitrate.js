@@ -1,4 +1,4 @@
-import {afterRenderPromise} from '#testing/helpers';
+import {afterRenderPromise} from '#testing/test-helper';
 
 const VIEWPORT = {
   HEIGHT: 768,

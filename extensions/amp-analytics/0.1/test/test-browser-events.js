@@ -4,7 +4,7 @@ import {
   AnalyticsEventType,
   BrowserEventTracker,
 } from '../events';
-import {macroTask} from '#testing/helpers';
+import {macroTask} from '#testing/test-helper';
 import {toggleExperiment} from '#experiments';
 
 describes.realWin(

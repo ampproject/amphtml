@@ -1,4 +1,4 @@
-import {macroTask} from '#testing/helpers';
+import {macroTask} from '#testing/test-helper';
 
 import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {

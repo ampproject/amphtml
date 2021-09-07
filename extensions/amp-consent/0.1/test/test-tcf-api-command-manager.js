@@ -1,6 +1,5 @@
 import {TcfApiCommandManager} from '../tcf-api-command-manager';
-import {macroTask} from '#testing/helpers';
-import {mockWindowInterface} from '#testing/test-helper';
+import {macroTask, mockWindowInterface} from '#testing/test-helper';
 import {user} from '../../../../src/log';
 
 describes.realWin(

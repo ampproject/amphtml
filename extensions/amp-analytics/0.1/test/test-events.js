@@ -15,7 +15,7 @@ import {
 import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {Deferred} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
-import {macroTask} from '#testing/helpers';
+import {macroTask} from '#testing/test-helper';
 
 describes.realWin('Events', {amp: 1}, (env) => {
   let win;

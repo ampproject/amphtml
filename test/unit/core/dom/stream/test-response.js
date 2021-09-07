@@ -1,6 +1,6 @@
 import {streamResponseToWriter} from '#core/dom/stream';
 
-import {macroTask} from '#testing/helpers';
+import {macroTask} from '#testing/test-helper';
 
 const chunk1 = `
  <!doctype html>

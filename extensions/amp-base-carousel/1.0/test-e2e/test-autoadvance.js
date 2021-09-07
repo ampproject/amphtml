@@ -1,5 +1,5 @@
 import {getCarousel, getSlides} from './helpers';
-import {afterRenderPromise, sleep} from '#testing/helpers';
+import {afterRenderPromise, sleep} from '#testing/test-helper';
 import {useStyles} from '../component.jss';
 
 const pageWidth = 800;

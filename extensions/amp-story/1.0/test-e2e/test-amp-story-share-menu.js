@@ -1,5 +1,4 @@
-import {Key} from '#testing/helpers/types';
-import {sleep} from '#testing/helpers';
+import {Key, sleep} from '#testing/test-helper';
 
 describes.endtoend(
   'amp story share menu',

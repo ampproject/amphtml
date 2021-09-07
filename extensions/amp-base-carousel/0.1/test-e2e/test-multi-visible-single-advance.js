@@ -1,5 +1,5 @@
 import {getNextArrow, getPrevArrow, getSlides} from './helpers';
-import {awaitFrameAfter} from '#testing/helpers';
+import {awaitFrameAfter} from '#testing/test-helper';
 
 describes.endtoend(
   'amp-base-carousel - advancing with multiple visible slides',

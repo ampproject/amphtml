@@ -11,7 +11,7 @@ import {
   getAutofocusElementForShowAction,
 } from '#service/standard-actions-impl';
 
-import {macroTask} from '#testing/helpers';
+import {macroTask} from '#testing/test-helper';
 
 import {user} from '../../src/log';
 

@@ -51,7 +51,7 @@ const PanelSelectorButton = ({expression, type, value}) =>
 
 /**
  * @param {{
- *   children: string[],
+ *   children: JSX.ElementChildrenAttribute[],
  *   compact?: boolean,
  *   key: string,
  *   name?: null | string,

@@ -1,4 +1,4 @@
-import {Key} from '#testing/helpers/types';
+import {Key} from '#testing/test-helper';
 
 const expectedSubmitUrl =
   'https://example.com/submit?__amp_source_origin=http%3A%2F%2Flocalhost%3A8000';

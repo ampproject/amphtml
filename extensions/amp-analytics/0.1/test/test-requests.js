@@ -6,7 +6,7 @@ import {RequestHandler, expandPostMessage} from '../requests';
 import {Services} from '#service';
 import {installLinkerReaderService} from '../linker-reader';
 import {installSessionServiceForTesting} from '../session-manager';
-import {macroTask} from '#testing/helpers';
+import {macroTask} from '#testing/test-helper';
 
 describes.realWin('Requests', {amp: 1}, (env) => {
   let ampdoc;

@@ -1,5 +1,5 @@
 import {getNextArrow, getSlides} from './helpers';
-import {afterRenderPromise} from '#testing/helpers';
+import {afterRenderPromise} from '#testing/test-helper';
 
 describes.endtoend(
   'AMP carousel 0.2 with responsive slides',
