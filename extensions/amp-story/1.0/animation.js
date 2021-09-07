@@ -400,7 +400,11 @@ export class AnimationRunner {
     }
 
     if (this.runner_) {
-      this.runner_.resume();
+      try {
+        this.runner_.resume();
+      } catch (e) {
+        // This fails when the story animations are not initialized and resume is called. Context on #35161.
+      }
     }
   }
 
