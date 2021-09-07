@@ -249,23 +249,21 @@ async function waitForSelectorExistence(page, selector) {
      *
      * @param {*} container
      * @param {*} query
-     * @return {null|Element}
+     * @return {boolean}
      */
-    function queryShadow(container, query) {
+    function shadowHasSelector(container, query) {
       const shadowHosts = container.querySelectorAll('.i-amphtml-shadow-host');
       for (const host of shadowHosts) {
         const foundEl = host.shadowRoot.querySelector(query);
         if (foundEl) {
-          return foundEl;
+          return true;
         }
       }
-      return null;
+      return false;
     }
     // If nothing was found in Light DOM, check shadow
     if (
-      (await page.evaluate(() =>
-        queryShadow(window.document.body, selector)
-      )) !== null
+      await page.evaluate(() => shadowHasSelector(window.document, selector))
     ) {
       return true;
     }
