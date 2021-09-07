@@ -33,11 +33,11 @@ const DEFAULT_VISIBLE_COUNT = 1;
 const OUTSET_ARROWS_WIDTH = 100;
 
 /**
- * @param {!StreamGalleryDef.Props} props
+ * @param {!BentoStreamGalleryDef.Props} props
  * @param {{current: (!BentoBaseCarouselDef.CarouselApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
-function StreamGalleryWithRef(props, ref) {
+function BentoStreamGalleryWithRef(props, ref) {
   const {
     arrowPrevAs = DefaultArrow,
     arrowNextAs = DefaultArrow,
@@ -135,12 +135,12 @@ function StreamGalleryWithRef(props, ref) {
   );
 }
 
-const StreamGallery = forwardRef(StreamGalleryWithRef);
-StreamGallery.displayName = 'StreamGallery'; // Make findable for tests.
-export {StreamGallery};
+const BentoStreamGallery = forwardRef(BentoStreamGalleryWithRef);
+BentoStreamGallery.displayName = 'StreamGallery'; // Make findable for tests.
+export {BentoStreamGallery};
 
 /**
- * @param {!StreamGalleryDef.ArrowProps} props
+ * @param {!BentoStreamGalleryDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
 function DefaultArrow({

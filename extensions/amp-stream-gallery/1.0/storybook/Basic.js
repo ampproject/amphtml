@@ -15,14 +15,14 @@
  */
 
 import * as Preact from '#preact';
-import {StreamGallery} from '../component';
+import {BentoStreamGallery} from '../component';
 import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 
 const CONTROLS = ['auto', 'always', 'never'];
 
 export default {
   title: 'StreamGallery',
-  component: StreamGallery,
+  component: BentoStreamGallery,
   decorators: [withKnobs],
 };
 
@@ -36,7 +36,7 @@ function CarouselWithActions(props) {
   const ref = Preact.useRef();
   return (
     <section>
-      <StreamGallery ref={ref} {...props} />
+      <BentoStreamGallery ref={ref} {...props} />
       <div style={{marginTop: 8}}>
         <button onClick={() => ref.current.goToSlide(3)}>goToSlide(3)</button>
         <button onClick={() => ref.current.next()}>next</button>
