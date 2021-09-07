@@ -1,5 +1,6 @@
 import {
   createViewportObserver,
+  observeIntersections,
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '#core/dom/layout/viewport-observer';
@@ -123,6 +124,23 @@ describes.sandboxed('DOM - layout - Viewport Observer', {}, (env) => {
       toggleViewport(el1, true);
 
       expect(spy).not.called;
+    });
+
+    it('can observe multiple elements', () => {
+      const el1InObEntries = [];
+      const el2InObEntries = [];
+
+      observeIntersections(el1, (entry) => el1InObEntries.push(entry));
+      observeIntersections(el2, (entry) => el2InObEntries.push(entry));
+      toggleViewport(el1, false);
+      toggleViewport(el2, true);
+      toggleViewport(el1, true);
+      toggleViewport(el2, false);
+
+      expect(el1InObEntries[0].isIntersecting).to.be.false;
+      expect(el1InObEntries[1].isIntersecting).to.be.true;
+      expect(el2InObEntries[0].isIntersecting).to.be.true;
+      expect(el2InObEntries[1].isIntersecting).to.be.false;
     });
   });
 });
