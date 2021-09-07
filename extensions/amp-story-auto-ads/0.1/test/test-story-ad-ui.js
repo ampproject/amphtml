@@ -1,4 +1,4 @@
-import {toggleExperiment} from '#experiments';
+import {forceExperimentBranch, toggleExperiment} from '#experiments';
 
 import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 import {
@@ -13,6 +13,15 @@ import {
 describes.realWin('story-ad-ui', {amp: true}, (env) => {
   let win;
   let doc;
+
+  /** @const {!{branch: string, control: string, experiment: string}}
+    @visibleForTesting
+  */
+  const AD_PAGE_OUTLINK_EXP = {
+    BRANCH: 'story-ad-page-outlink',
+    CONTROL: '20212524',
+    EXPERIMENT: '20212523',
+  };
 
   beforeEach(() => {
     win = env.win;
@@ -174,6 +183,7 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
       };
       return createCta(
         doc,
+        win,
         buttonFitter,
         doc.body /* container */,
         metadata
@@ -209,6 +219,7 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
       };
       return createCta(
         doc,
+        win,
         buttonFitter,
         doc.body /* container */,
         metadata
@@ -224,7 +235,11 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
 
     beforeEach(() => {
       buttonFitter = new ButtonTextFitter(env.ampdoc);
-      toggleExperiment(env.win, 'amp-story-ads-page-outlink', true, true);
+      forceExperimentBranch(
+        win,
+        AD_PAGE_OUTLINK_EXP.BRANCH,
+        AD_PAGE_OUTLINK_EXP.EXPERIMENT
+      );
     });
 
     it('createCta page outlink custom theme element', () => {
@@ -239,6 +254,7 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
       };
       return createCta(
         doc,
+        win,
         buttonFitter,
         doc.body /* container */,
         metadata
@@ -274,6 +290,7 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
       };
       return createCta(
         doc,
+        win,
         buttonFitter,
         doc.body /* container */,
         metadata
@@ -299,6 +316,7 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
       };
       return createCta(
         doc,
+        win,
         buttonFitter,
         doc.body /* container */,
         metadata
@@ -326,6 +344,7 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
       };
       return createCta(
         doc,
+        win,
         buttonFitter,
         doc.body /* container */,
         metadata
