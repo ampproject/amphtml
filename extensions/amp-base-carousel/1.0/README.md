@@ -83,9 +83,9 @@ import '@ampproject/bento-base-carousel';
   <div class="green-gradient"></div>
 </bento-base-carousel>
 <div class="buttons" style="margin-top: 8px;">
-  <button id='prev-button'>Go to previous slide</button>
-  <button id='next-button'>Go to next slide</button>
-  <button id='go-to-button'>Go to slide with green gradient</button>
+  <button id="prev-button">Go to previous slide</button>
+  <button id="next-button">Go to next slide</button>
+  <button id="go-to-button">Go to slide with green gradient</button>
 </div>
 
 <script>
@@ -403,7 +403,7 @@ npm install @ampproject/bento-base-carousel
 
 ```javascript
 import React from 'react';
-import { BaseCarousel } from '@ampproject/bento-base-carousel/react';
+import {BaseCarousel} from '@ampproject/bento-base-carousel/react';
 import '@ampproject/bento-base-carousel/styles.css';
 
 function App() {
@@ -498,7 +498,7 @@ The `BentoBaseCarousel` component has a defined layout size type. To ensure the 
 Or via `className`:
 
 ```jsx
-<BaseCarousel className='custom-styles'>
+<BaseCarousel className="custom-styles">
   <img src="puppies.jpg" />
   <img src="kittens.jpg" />
   <img src="hamsters.jpg" />
@@ -570,7 +570,7 @@ const count = window.matchMedia('(max-width: 600px)').matches ? 4 : 3;
 >
   <img style={{height: '100%', width: '100%'}} src="…" />
   …
-</bento-base-carousel>
+</BentoBaseCarousel>
 ```
 
 #### Props
@@ -691,19 +691,19 @@ Arrow buttons can be customized by passing in your own custom markup. For exampl
 }
 ```
 
-```html
+```jsx
 function CustomPrevButton(props) {
-  return <button {...props} className='carousel-prev'>
+  return <button {...props} className="carousel-prev" />
 }
 
 function CustomNextButton(props) {
-  return <button {...props} className='carousel-prev'>
+  return <button {...props} className="carousel-prev" />
 }
 
 <BentoBaseCarousel
   arrowPrevAs={CustomPrevButton}
-  arrowNextAs={CustomNextButton>
+  arrowNextAs={CustomNextButton}>
   <div>first slide</div>
-  …
+  // …
 </BentoBaseCarousel>
 ```
