@@ -18,11 +18,11 @@ import {date, number, select, text, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
-import {Timeago} from '../component';
+import {BentoTimeago} from '../component';
 
 export default {
   title: 'Timeago',
-  component: Timeago,
+  component: BentoTimeago,
   decorators: [withKnobs],
 };
 
@@ -48,7 +48,7 @@ export const _default = () => {
   );
   const locale = select('Locale', allLocales, userLocale);
   return (
-    <Timeago
+    <BentoTimeago
       datetime={dateTime}
       locale={locale}
       cutoff={cutoff}

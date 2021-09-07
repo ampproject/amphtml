@@ -20,9 +20,9 @@ import * as Preact from '#preact';
 
 import {waitFor} from '#testing/test-helper';
 
-import {Timeago} from '../component';
+import {BentoTimeago} from '../component';
 
-describes.realWin('Timeago 1.0 preact component', {}, (env) => {
+describes.realWin('BentoTimeago 1.0 preact component', {}, (env) => {
   function getTime(wrapper) {
     const time = wrapper.find('time');
     expect(time).to.have.lengthOf(1);
@@ -36,7 +36,7 @@ describes.realWin('Timeago 1.0 preact component', {}, (env) => {
       datetime: date.toISOString(),
       displayIn: 'UTC',
     };
-    const wrapper = mount(<Timeago {...props} />, {
+    const wrapper = mount(<BentoTimeago {...props} />, {
       attachTo: env.win.document.body,
     });
     expect(getTime(wrapper)).to.equal('');
@@ -52,7 +52,7 @@ describes.realWin('Timeago 1.0 preact component', {}, (env) => {
       datetime: date.getTime(),
       placeholder,
     };
-    const wrapper = mount(<Timeago {...props} />, {
+    const wrapper = mount(<BentoTimeago {...props} />, {
       attachTo: env.win.document.body,
     });
     expect(getTime(wrapper)).to.equal(placeholder);
@@ -68,7 +68,7 @@ describes.realWin('Timeago 1.0 preact component', {}, (env) => {
       datetime: date.toISOString(),
       placeholder,
     };
-    const wrapper = mount(<Timeago {...props} />, {
+    const wrapper = mount(<BentoTimeago {...props} />, {
       attachTo: env.win.document.body,
     });
     expect(getTime(wrapper)).to.equal(placeholder);
@@ -88,7 +88,7 @@ describes.realWin('Timeago 1.0 preact component', {}, (env) => {
       datetime: date.toISOString(),
       placeholder,
     };
-    const wrapper = mount(<Timeago {...props} />, {
+    const wrapper = mount(<BentoTimeago {...props} />, {
       attachTo: env.win.document.body,
     });
     expect(getTime(wrapper)).to.equal(placeholder);

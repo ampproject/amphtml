@@ -24,4 +24,4 @@
  *   placeholder: (string|!PreactDef.VNode|null|undefined),
  * }}
  */
-var TimeagoProps;
+var BentoTimeagoProps;
