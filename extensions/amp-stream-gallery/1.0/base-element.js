@@ -1,7 +1,7 @@
 import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/component.jss';
 import {CSS as GALLERY_CSS} from './component.jss';
 import {PreactBaseElement} from '#preact/base-element';
-import {StreamGallery} from './component';
+import {BentoStreamGallery} from './component';
 import {dict} from '#core/types/object';
 
 export class BaseElement extends PreactBaseElement {
@@ -17,7 +17,7 @@ export class BaseElement extends PreactBaseElement {
 }
 
 /** @override */
-BaseElement['Component'] = StreamGallery;
+BaseElement['Component'] = BentoStreamGallery;
 
 /** @override */
 BaseElement['layoutSizeDefined'] = true;

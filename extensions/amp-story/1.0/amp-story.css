@@ -366,6 +366,13 @@ amp-story-grid-layer[anchor*="right"] {
 }
 
 /**
+ * Prevents long-press image preview on iOS 15 that breaks pause UX.
+ */
+ amp-story-grid-layer amp-img img {
+  pointer-events: none !important;
+}
+
+/**
  * Prevents amp-video to layout until its element has been swapped by the media
  * pool. See #26718 for context.
  */
