@@ -1,7 +1,6 @@
 import {
   Action,
   StateProperty,
-  UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
@@ -55,20 +54,6 @@ const buildPaginationButton = (element) =>
       <div class="i-amphtml-story-button-container">
         <button class="i-amphtml-story-button-move"></button>
       </div>`;
-
-/**
- * @param {!Element} hoverEl
- * @param {!Element} targetEl
- * @param {string} className
- * @return {?Array<function(!Event)>}
- */
-function setClassOnHover(hoverEl, targetEl, className) {
-  const enterListener = () => targetEl.classList.add(className);
-  const exitListener = () => targetEl.classList.remove(className);
-  hoverEl.addEventListener('mouseenter', enterListener);
-  hoverEl.addEventListener('mouseleave', exitListener);
-  return [enterListener, exitListener];
-}
 
 /**
  * Desktop navigation buttons.

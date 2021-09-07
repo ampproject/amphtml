@@ -1,8 +1,6 @@
 import {macroTask} from '#testing/helpers';
 
-import {getServiceForDoc} from '../../../../src/service-helpers';
 import {AmpStory} from '../../../amp-story/1.0/amp-story';
-import {Action, UIType} from '../../../amp-story/1.0/amp-story-store-service';
 import {StoryAdPage} from '../story-ad-page';
 import {InsertionState, StoryAdPageManager} from '../story-ad-page-manager';
 

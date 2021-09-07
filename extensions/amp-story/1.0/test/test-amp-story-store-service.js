@@ -2,7 +2,6 @@ import {
   Action,
   AmpStoryStoreService,
   StateProperty,
-  UIType,
 } from '../amp-story-store-service';
 import {EmbedMode, EmbedModeParam} from '../embed-mode';
 

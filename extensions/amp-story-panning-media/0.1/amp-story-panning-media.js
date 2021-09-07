@@ -13,7 +13,6 @@ import {dev, user} from '../../../src/log';
 import {
   Action,
   StateProperty,
-  UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
 
 /** @const {string} */

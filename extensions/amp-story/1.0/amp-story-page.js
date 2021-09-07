@@ -119,9 +119,6 @@ const TAG = 'amp-story-page';
 /** @private @const {string} */
 const ADVERTISEMENT_ATTR_NAME = 'ad';
 
-/** @private @const {number} */
-const REWIND_TIMEOUT_MS = 350;
-
 /** @private @const {string} */
 const DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION = '2s';
 
@@ -274,9 +271,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
-
-    /** @private @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = Services.timerFor(this.win);
 
     /** @private {!Deferred} */
     this.backgroundAudioDeferred_ = new Deferred();
@@ -1197,24 +1191,6 @@ export class AmpStoryPage extends AMP.BaseElement {
         /** @type {!./media-pool.DomElementDef} */ (mediaEl)
       );
     }
-  }
-
-  /**
-   * Rewinds all media on this page.
-   * @return {!Promise} Promise that resolves after the callbacks are called.
-   * @private
-   */
-  rewindAllMedia_() {
-    return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      if (this.isBotUserAgent_) {
-        mediaEl.currentTime = 0;
-        return Promise.resolve();
-      } else {
-        return mediaPool.rewindToBeginning(
-          /** @type {!./media-pool.DomElementDef} */ (mediaEl)
-        );
-      }
-    });
   }
 
   /**
