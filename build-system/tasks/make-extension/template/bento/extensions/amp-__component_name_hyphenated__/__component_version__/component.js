@@ -11,10 +11,10 @@ import {
 __jss_import_use_styles__;
 
 /**
- * @param {!__component_name_pascalcase__Def.Props} props
+ * @param {!Bento__component_name_pascal_case__.Props} props
  * @return {PreactDef.Renderable}
  */
-export function __component_name_pascalcase__({exampleTagNameProp, ...rest}) {
+export function Bento__component_name_pascal_case__({exampleTagNameProp, ...rest}) {
   // Examples of state and hooks
   // __do_not_submit__: This is example code only.
   const [exampleValue, setExampleValue] = useState(0);
