@@ -125,7 +125,7 @@ it('rejects a specific file that is known to have errors', function(done) {
           if (error.specUrl) {
             out += ' (see ' + error.specUrl + ')';
           }
-          out += ' [' + error.category + ']\n';
+          out += '\n';
         }
 
         expect(out).toBe(severalErrorsOut);
