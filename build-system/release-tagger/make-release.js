@@ -174,16 +174,13 @@ function _createBody(head, base, prs) {
      ${components.join('')}\
    `;
 
+  const patched = head.slice(0, -3) + '000';
   const cherrypickHeader = head.endsWith('0')
     ? ''
     : dedent`\
     <h2>🌸 Cherry-picked release 🌸</h2>
-    <a href="https://github.com/ampproject/amphtml/releases/tag/${
-      head.slice(0, -3) + '000'
-    }">\
-    ${
-      head.slice(0, -3) + '000'
-    }</a> was patched and published as <b>${head}</b>. Refer to the \
+    <a href="https://github.com/ampproject/amphtml/releases/tag/${patched}">\
+    ${patched}</a> was patched and published as <b>${head}</b>. Refer to the \
     <a href="https://amp-release-calendar.appspot.com">release calendar</a> \
     for additional channel information.\n\n`;
   return cherrypickHeader + template;
