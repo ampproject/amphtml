@@ -1,17 +1,17 @@
 /** @externs */
 
 /** @const */
-var __bento_component_name_pascalcase__Def = {};
+var Bento__component_name_pascal_case__Def = {};
 
 /**
  * @typedef {{
  *   exampleProperty: (string|undefined), (__do_not_submit__)
  * }}
  */
-__bento_component_name_pascalcase__Def.Props;
+Bento__component_name_pascal_case__Def.Props;
 
 /** @interface */
-__bento_component_name_pascalcase__Def.__bento_component_name_pascalcase__Api = class {
+Bento__component_name_pascal_case__Def.Bento__component_name_pascal_case__Api = class {
   /** Example: API method to toggle the component */
   exampleToggle() {} // __do_not_submit__
 };
