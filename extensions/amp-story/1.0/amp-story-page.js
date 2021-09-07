@@ -542,6 +542,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.togglePlayMessage_(false);
     this.playAudioElementFromTimestamp_ = null;
 
+    this.pauseAllMedia_(true /** rewindToBeginning */);
+
     if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
       this.muteAllMedia();
     }
@@ -1157,7 +1159,6 @@ export class AmpStoryPage extends AMP.BaseElement {
           promises.push(mediaPool.play(mediaEl));
         }
 
-        this.pauseAllMedia_(true /** rewindToBeginning */);
         this.playAudioElementFromTimestamp_ = null;
       }
 
