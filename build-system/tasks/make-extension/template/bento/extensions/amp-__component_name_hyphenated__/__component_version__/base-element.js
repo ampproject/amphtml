@@ -1,11 +1,11 @@
 __jss_import_component_css__;
-import {__component_name_pascalcase__} from './component';
+import {__bento_component_name_pascalcase__} from './component';
 import {PreactBaseElement} from '#preact/base-element';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = __component_name_pascalcase__;
+BaseElement['Component'] = __bento_component_name_pascalcase__;
 
 /** @override */
 BaseElement['props'] = {
