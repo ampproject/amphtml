@@ -113,17 +113,18 @@ async function dist() {
   await runPreDistSteps(options);
 
   // These steps use closure compiler. Small ones before large (parallel) ones.
+  const steps = [];
   if (argv.core_runtime_only) {
-    await compileCoreRuntime(options);
+    steps.push(compileCoreRuntime(options));
   } else {
-    await buildExperiments();
-    await buildLoginDone('0.1');
-    await buildWebPushPublisherFiles();
-    await compileAllJs(options);
+    steps.push(buildExperiments());
+    steps.push(buildLoginDone('0.1'));
+    steps.push(buildWebPushPublisherFiles());
+    steps.push(compileAllJs(options));
   }
 
   // This step internally parses the various extension* flags.
-  await buildExtensions(options);
+  steps.push(buildExtensions(options));
 
   // This step is to be run only during a full `amp dist`.
   if (
@@ -132,8 +133,10 @@ async function dist() {
     !argv.extensions_from &&
     !argv.noextensions
   ) {
-    await buildVendorConfigs(options);
+    steps.push(buildVendorConfigs(options));
   }
+
+  await Promise.all(steps);
 
   // This step is required no matter which binaries are built.
   await formatExtractedMessages();
