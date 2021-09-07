@@ -1,6 +1,6 @@
 import {CommonSignals} from '#core/constants/common-signals';
 
-import {forceExperimentBranch, toggleExperiment} from '#experiments';
+import {forceExperimentBranch} from '#experiments';
 import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
 
 import {Services} from '#service';
