@@ -1,5 +1,5 @@
 import * as Preact from '#preact';
-import {BaseCarousel} from '../../../amp-base-carousel/1.0/component';
+import {BentoBaseCarousel} from '../../../amp-base-carousel/1.0/component';
 import {InlineGallery} from '../component';
 import {Pagination} from '../pagination';
 import {Thumbnails} from '../thumbnails';
@@ -42,7 +42,7 @@ export const _default = () => {
         <br />
         <Thumbnails />
         <br />
-        <BaseCarousel
+        <BentoBaseCarousel
           style={{height}}
           autoAdvanceCount={autoAdvanceCount}
           autoAdvanceInterval={autoAdvanceInterval}
@@ -74,7 +74,7 @@ export const _default = () => {
             src="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
             thumbnailSrc="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
           />
-        </BaseCarousel>
+        </BentoBaseCarousel>
         <Pagination inset={bottomInset} />
       </InlineGallery>
       Content below carousel
@@ -114,9 +114,9 @@ export const WithLooping = () => {
 
   return (
     <InlineGallery style={{width, position: 'relative'}}>
-      <BaseCarousel loop style={{height, position: 'relative'}}>
+      <BentoBaseCarousel loop style={{height, position: 'relative'}}>
         {slides}
-      </BaseCarousel>
+      </BentoBaseCarousel>
       <Pagination inset={inset} style={{height: paginationHeight}} />
       <Thumbnails
         aspectRatio={aspectRatio}
