@@ -324,14 +324,13 @@ def RunSmokeTest(out_dir):
   """
   logging.info('entering ...')
   # Run cli.js on the minimum valid amp and observe that it passes.
-  p = subprocess.Popen(
-      [
-          'node', 'js/nodejs/cli.js', '--validator_js',
-          '%s/validator_minified.js' % out_dir,
-          'testdata/feature_tests/minimum_valid_amp.html', '--format=text'
-      ],
-      stdout=subprocess.PIPE,
-      stderr=subprocess.PIPE)
+  p = subprocess.Popen([
+      'node', 'js/nodejs/cli.js', '--validator_js',
+      '%s/validator_minified.js' % out_dir,
+      'testdata/feature_tests/minimum_valid_amp.html', '--format=text'
+  ],
+                       stdout=subprocess.PIPE,
+                       stderr=subprocess.PIPE)
   (stdout, stderr) = p.communicate()
   if (b'testdata/feature_tests/minimum_valid_amp.html: PASS\n', b'',
       p.returncode) != (stdout, stderr, 0):
@@ -339,14 +338,13 @@ def RunSmokeTest(out_dir):
         (p.returncode, stdout, stderr))
 
   # Run cli.js on an empty file and observe that it fails.
-  p = subprocess.Popen(
-      [
-          'node', 'js/nodejs/cli.js', '--validator_js',
-          '%s/validator_minified.js' % out_dir,
-          'testdata/feature_tests/empty.html', '--format=text'
-      ],
-      stdout=subprocess.PIPE,
-      stderr=subprocess.PIPE)
+  p = subprocess.Popen([
+      'node', 'js/nodejs/cli.js', '--validator_js',
+      '%s/validator_minified.js' % out_dir, 'testdata/feature_tests/empty.html',
+      '--format=text'
+  ],
+                       stdout=subprocess.PIPE,
+                       stderr=subprocess.PIPE)
   (stdout, stderr) = p.communicate()
   if p.returncode != 1:
     Die('smoke test failed. Expected p.returncode==1, saw: %s' % p.returncode)
@@ -360,11 +358,10 @@ def RunIndexTest():
   """Runs the index_test.js, which tests the NodeJS API.
   """
   logging.info('entering ...')
-  p = subprocess.Popen(
-      ['node', './index_test.js'],
-      stdout=subprocess.PIPE,
-      stderr=subprocess.PIPE,
-      cwd='js/nodejs')
+  p = subprocess.Popen(['node', './index_test.js'],
+                       stdout=subprocess.PIPE,
+                       stderr=subprocess.PIPE,
+                       cwd='js/nodejs')
   (stdout, stderr) = p.communicate()
   if p.returncode != 0:
     Die('index_test.js failed. returncode=%d stdout="%s" stderr="%s"' %
@@ -473,7 +470,8 @@ def CompileAmp4AdsParseCssTestMinified(out_dir):
           'js/engine/definitions.js', 'js/engine/amp4ads-parse-css_test.js',
           'js/engine/parse-css.js', 'js/engine/parse-url.js',
           'js/engine/amp4ads-parse-css.js', 'js/engine/tokenize-css.js',
-          'js/engine/json-testutil.js', '%s/validator-generated.js' % out_dir,
+          'js/engine/json-testutil.js',
+          '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
@@ -495,7 +493,8 @@ def CompileKeyframesParseCssTestMinified(out_dir):
           'js/engine/definitions.js', 'js/engine/keyframes-parse-css_test.js',
           'js/engine/parse-css.js', 'js/engine/parse-url.js',
           'js/engine/keyframes-parse-css.js', 'js/engine/tokenize-css.js',
-          'js/engine/json-testutil.js', '%s/validator-generated.js' % out_dir,
+          'js/engine/json-testutil.js',
+          '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
