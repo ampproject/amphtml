@@ -21,10 +21,10 @@ import {useContext} from '#preact';
 import {useStyles} from './pagination.jss';
 
 /**
- * @param {!InlineGalleryDef.PaginationProps} props
+ * @param {!BentoInlineGalleryDef.PaginationProps} props
  * @return {PreactDef.Renderable}
  */
-export function Pagination({inset, ...rest}) {
+export function BentoInlineGalleryPagination({inset, ...rest}) {
   const classes = useStyles();
   const {currentSlide, setCurrentSlide, slides} = useContext(CarouselContext);
   const slideCount = slides ? slides.length : 0;
@@ -65,7 +65,7 @@ export function Pagination({inset, ...rest}) {
 }
 
 /**
- * @param {!InlineGalleryDef.PaginationProps} props
+ * @param {!BentoInlineGalleryDef.PaginationProps} props
  * @return {PreactDef.Renderable}
  */
 function Dots({currentSlide, goTo, inset, slideCount}) {
@@ -93,7 +93,7 @@ function Dots({currentSlide, goTo, inset, slideCount}) {
 }
 
 /**
- * @param {!InlineGalleryDef.PaginationProps} props
+ * @param {!BentoInlineGalleryDef.PaginationProps} props
  * @return {PreactDef.Renderable}
  */
 function Numbers({currentSlide, inset, slideCount}) {

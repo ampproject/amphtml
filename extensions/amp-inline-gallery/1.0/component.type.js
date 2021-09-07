@@ -17,7 +17,7 @@
 /** @externs */
 
 /** @const */
-var InlineGalleryDef = {};
+var BentoInlineGalleryDef = {};
 
 /**
  * @typedef {{
@@ -28,7 +28,7 @@ var InlineGalleryDef = {};
  *   onSlideChange: (function(number):undefined|undefined),
  * }}
  */
-InlineGalleryDef.Props;
+BentoInlineGalleryDef.Props;
 
 /**
  * @typedef {{
@@ -39,7 +39,7 @@ InlineGalleryDef.Props;
  *   children: !Array<PreactDef.Renderable>
  * }}
  */
-InlineGalleryDef.PaginationProps;
+BentoInlineGalleryDef.PaginationProps;
 
 /**
  * Note that aspectRatio is expressed in terms of width/height.
@@ -49,7 +49,7 @@ InlineGalleryDef.PaginationProps;
  *   children: !Array<PreactDef.Renderable>
  * }}
  */
-InlineGalleryDef.ThumbnailProps;
+BentoInlineGalleryDef.ThumbnailProps;
 
 /**
  * @typedef {{
@@ -57,4 +57,4 @@ InlineGalleryDef.ThumbnailProps;
  *   style: (!Object|undefined),
  * }}
  */
-InlineGalleryDef.SlideProps;
+BentoInlineGalleryDef.SlideProps;

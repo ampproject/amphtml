@@ -28,10 +28,10 @@ import {
 import {useStyles} from './thumbnails.jss';
 
 /**
- * @param {!InlineGalleryDef.ThumbnailProps} props
+ * @param {!BentoInlineGalleryDef.BentoThumbnailProps} props
  * @return {PreactDef.Renderable}
  */
-export function Thumbnails({
+export function BentoInlineGalleryThumbnails({
   aspectRatio,
   children,
   'class': className = '',
