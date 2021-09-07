@@ -100,8 +100,8 @@ describes.sandboxed('DOM - layout - Viewport Observer', {}, (env) => {
       toggleViewport(el2, true);
       toggleViewport(el1, true);
 
-      expect(el1Events).eql([false, true]);
-      expect(el2Events).eql([true]);
+      expect(el1Events).to.eql([false, true]);
+      expect(el2Events).to.eql([true]);
     });
 
     it('once unobserved, the callback is no longer fired', () => {
@@ -114,7 +114,7 @@ describes.sandboxed('DOM - layout - Viewport Observer', {}, (env) => {
       toggleViewport(el1, true);
       toggleViewport(el1, false);
 
-      expect(el1Events).eql([false]);
+      expect(el1Events).to.eql([false]);
     });
 
     it('A quick observe and unobserve pair should not cause an error or fire the callback', () => {
@@ -137,6 +137,8 @@ describes.sandboxed('DOM - layout - Viewport Observer', {}, (env) => {
       toggleViewport(el1, true);
       toggleViewport(el2, false);
 
+      expect(el1InObEntries[0].target).to.eql(el1);
+      expect(el1InObEntries[1].target).to.eql(el2);
       expect(el1InObEntries[0].isIntersecting).to.be.false;
       expect(el1InObEntries[1].isIntersecting).to.be.true;
       expect(el2InObEntries[0].isIntersecting).to.be.true;
