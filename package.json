@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@ampproject/animations": "0.2.2",
-    "@ampproject/bento-compiler": "0.0.2",
+    "@ampproject/bento-compiler": "0.0.3",
     "@ampproject/toolbox-cache-url": "2.8.0",
     "@ampproject/viewer-messaging": "1.1.2",
     "@ampproject/worker-dom": "0.30.1",
