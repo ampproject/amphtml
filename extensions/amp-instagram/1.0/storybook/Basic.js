@@ -1,10 +1,10 @@
 import * as Preact from '#preact';
 
 import {
-  Accordion,
-  AccordionContent,
-  AccordionHeader,
-  AccordionSection,
+  BentoAccordion,
+  BentoAccordionContent,
+  BentoAccordionHeader,
+  BentoAccordionSection,
 } from '../../../amp-accordion/1.0/component';
 import {BentoInstagram} from '../component';
 
@@ -31,19 +31,19 @@ export const _default = ({height, width, ...args}) => {
 
 export const InsideAccordion = ({height, width, ...args}) => {
   return (
-    <Accordion expandSingleSection>
-      <AccordionSection key={1} expanded={true}>
-        <AccordionHeader>
+    <BentoAccordion expandSingleSection>
+      <BentoAccordionSection key={1} expanded={true}>
+        <BentoAccordionHeader>
           <h2>Post</h2>
-        </AccordionHeader>
-        <AccordionContent>
+        </BentoAccordionHeader>
+        <BentoAccordionContent>
           <BentoInstagram
             style={{width, height}}
             alt="Bento Instagram Storybook Preact Example"
             {...args}
           ></BentoInstagram>
-        </AccordionContent>
-      </AccordionSection>
-    </Accordion>
+        </BentoAccordionContent>
+      </BentoAccordionSection>
+    </BentoAccordion>
   );
 };
