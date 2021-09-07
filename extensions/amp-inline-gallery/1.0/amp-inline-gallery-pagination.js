@@ -1,6 +1,6 @@
 import {CSS} from './pagination.jss';
 import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
-import {Pagination} from './pagination';
+import {BentoInlineGalleryPagination} from './pagination';
 import {PreactBaseElement} from '#preact/base-element';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';
@@ -24,7 +24,7 @@ export class AmpInlineGalleryPagination extends PreactBaseElement {
 }
 
 /** @override */
-AmpInlineGalleryPagination['Component'] = Pagination;
+AmpInlineGalleryPagination['Component'] = BentoInlineGalleryPagination;
 
 /** @override */
 AmpInlineGalleryPagination['props'] = {
