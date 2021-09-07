@@ -403,7 +403,7 @@ export class AnimationRunner {
       try {
         this.runner_.resume();
       } catch (e) {
-        // This fails when the story animations are not initialized and resume is called. Context on #35161.
+        // This fails when the story animations are not initialized and resume is called. Context on #35987.
       }
     }
   }
