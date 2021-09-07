@@ -244,6 +244,27 @@ async function waitForSelectorExistence(page, selector) {
     if ((await page.$(selector)) !== null) {
       return true;
     }
+
+    /**
+     *
+     * @param {*} container
+     * @param {*} query
+     * @return {null|Element}
+     */
+    function queryShadow(container, query) {
+      const shadowHosts = container.querySelectorAll('.i-amphtml-shadow-host');
+      for (const host of shadowHosts) {
+        const foundEl = host.shadowRoot.querySelector(query);
+        if (foundEl) {
+          return foundEl;
+        }
+      }
+      return null;
+    }
+    // If nothing was found in Light DOM, check shadow
+    if ((await page.evaluate((body) => queryShadow(body, selector))) !== null) {
+      return true;
+    }
     await sleep(CSS_SELECTOR_RETRY_MS);
     attempt++;
   } while (attempt < CSS_SELECTOR_RETRY_ATTEMPTS);
