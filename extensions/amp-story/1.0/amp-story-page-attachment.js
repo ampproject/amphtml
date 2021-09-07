@@ -1,6 +1,7 @@
 import {Action, StateProperty, UIType} from './amp-story-store-service';
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {HistoryState, setHistoryState} from './history';
+import {LoadingSpinner} from './loading-spinner';
 import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
@@ -119,12 +120,17 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildInline_() {
-    if (this.doesContainFormElement_()) {
+    const attachmentForms = this.getAllFormElements_();
+    if (attachmentForms.length > 0) {
       // Page attachments that contain forms must display the page's publisher
       // domain above the attachment's contents. This enables users to gauge
       // the trustworthiness of publishers before sending data to them.
       this.headerEl.append(this.createDomainLabelElement_());
       this.headerEl.classList.add('i-amphtml-story-page-attachment-with-form');
+
+      attachmentForms.forEach((form) => {
+        this.addFallbackFormResponseAttributes_(form);
+      });
     }
 
     const closeButtonEl = htmlFor(this.element)`
@@ -465,13 +471,13 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   }
 
   /**
-   * Returns whether a form element exists within this page attachment.
-   * @return {boolean} True, only if a form element exists as a descendant of
-   *     this page attachment.
+   * Returns all form elements that exist within this page attachment.
+   * @return {!NodeList<!Element>} The list of all form elements that exist
+   *    within the page attachment.
    * @private
    */
-  doesContainFormElement_() {
-    return Boolean(this.element.querySelector('form'));
+  getAllFormElements_() {
+    return this.element.querySelectorAll('form');
   }
 
   /**
@@ -482,5 +488,51 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   getPublisherOrigin_() {
     const publisherOrigin = getSourceOrigin(this.getAmpDoc().getUrl());
     return publisherOrigin.replace(/https?:\/\//, '');
+  }
+
+  /**
+   * Add a default form submission response attribute div for each attribute
+   * that is missing.
+   * @param {!Element} formEl The form to which the attributes will be added.
+   * @private
+   */
+  addFallbackFormResponseAttributes_(formEl) {
+    const defaultAttributeClassPrefix = 'i-amphtml-story-page-attachment-form-status';
+    const defaultAttributeClass = defaultAttributeClassPrefix + 'default';
+    const defaultIconClass = defaultAttributeClassPrefix + 'icon';
+    const defaultTextClass = defaultAttributeClassPrefix + 'text';
+
+    const submitting = 'submitting';
+    if (!formEl.querySelector(`div[${submitting}]`)) {
+      const loadingSpinner = new LoadingSpinner(this.win.document);
+      const submittingEl = htmlFor(this.element)`
+            <div ${submitting} class="${defaultAttributeClass} ${defaultAttributeClassPrefix}-${submitting}">
+            </div>`;
+      loadingSpinner.classList.add(defaultIconClass);
+      submittingEl.appendChild(loadingSpinner.build());
+      formEl.appendChild(submittingEl);
+    }
+
+    const submit_success = 'submit-success';
+    if (!formEl.querySelector(`div[${submit_success}]`)) {
+      const successText = 'Form successfully submitted';  // Needs to be localized
+      const successEl = htmlFor(this.element)`
+            <div ${submit_success} class="${defaultAttributeClass} ${defaultAttributeClassPrefix}-${submit_success}">
+              <svg class="${defaultIconClass}"></svg>
+              <div class="${defaultTextClass}">${successText}</div>
+            </div>`;
+      formEl.appendChild(successEl);
+    }
+
+    const submit_error = 'submit-error';
+    if (!formEl.querySelector(`div[${submit_error}]`)) {
+      const errorText = 'Form not submitted, try again.';  // Needs to be localized
+      const errorEl = htmlFor(this.element)`
+            <div ${submit_error} class="${defaultAttributeClass} ${defaultAttributeClassPrefix}-${submit_error}">
+              <svg class="${defaultIconClass}"></svg>
+              <div class="${defaultTextClass}">${errorText}</div>
+            </div>`;
+      formEl.appendChild(errorEl);
+    }
   }
 }
