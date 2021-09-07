@@ -17,6 +17,7 @@
   "layout-aspect-ratio-css": 1,
   "disable-a4a-non-sd": 1,
   "story-ad-auto-advance": 1,
+  "story-ad-page-outlink": 1,
   "story-ad-placements": 1,
   "story-load-first-page-only": 0.5,
   "story-load-inactive-outside-viewport": 1,

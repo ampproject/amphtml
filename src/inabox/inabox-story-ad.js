@@ -29,7 +29,7 @@ export function maybeRenderInaboxAsStoryAd(ampdoc) {
 
   // TODO(ccordry): maybe use inOb for visible signal to fire animation
   // across amp & inabox environments.
-  createCta(doc, buttonFitter, ctaContainer, storyAdMetadata).then(
+  createCta(doc, win, buttonFitter, ctaContainer, storyAdMetadata).then(
     (ctaAnchor) =>
       ctaAnchor && ctaAnchor.setAttribute(START_CTA_ANIMATION_ATTR, '')
   );

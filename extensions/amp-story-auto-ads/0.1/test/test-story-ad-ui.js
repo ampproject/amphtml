@@ -194,7 +194,7 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
       const container = doc.createElement('div');
       container.width = '400px';
 
-      return createCta(doc, buttonFitter, container, metadata).then(
+      return createCta(doc, win, buttonFitter, container, metadata).then(
         (anchor) => {
           expect(anchor).to.be.null;
           expect(container.querySelector('amp-story-cta-layer')).not.to.exist;

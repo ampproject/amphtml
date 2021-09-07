@@ -1,7 +1,8 @@
 import {createElementWithAttributes, iterateCursor} from '#core/dom';
 import {dict, map} from '#core/types/object';
 
-import {isExperimentOn} from '#experiments';
+import {getExperimentBranch} from '#experiments';
+import {StoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
 
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {CSS as ctaButtonCSS} from '../../../build/amp-story-auto-ads-cta-button-0.1.css';
@@ -253,12 +254,13 @@ function createCtaLayer_(a, doc, container) {
 
 /**
  * @param {!Document} doc
+ * @param {!Window} win
  * @param {!./story-ad-button-text-fitter.ButtonTextFitter} buttonFitter
  * @param {!Element} container
  * @param {!StoryAdUIMetadata} uiMetadata
  * @return {!Promise<?Element>} If anchor was successfully created.
  */
-export function createCta(doc, buttonFitter, container, uiMetadata) {
+export function createCta(doc, win, buttonFitter, container, uiMetadata) {
   const ctaUrl = uiMetadata[A4AVarNames.CTA_URL];
   const ctaText = uiMetadata[A4AVarNames.CTA_TYPE];
 
@@ -292,7 +294,12 @@ export function createCta(doc, buttonFitter, container, uiMetadata) {
       return null;
     }
 
-    if (isExperimentOn(doc.defaultView, 'amp-story-ads-page-outlink')) {
+    const autoAdvanceExpBranch = getExperimentBranch(
+      win,
+      StoryAdPageOutlink.ID
+    );
+
+    if (autoAdvanceExpBranch === StoryAdPageOutlink.EXPERIMENT) {
       return createPageOutlink_(doc, uiMetadata, container);
     } else {
       return createCtaLayer_(a, doc, container);
