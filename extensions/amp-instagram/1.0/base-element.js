@@ -16,12 +16,12 @@
 
 import {PreactBaseElement} from '#preact/base-element';
 
-import {Instagram} from './component';
+import {BentoInstagram} from './component';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = Instagram;
+BaseElement['Component'] = BentoInstagram;
 
 /** @override */
 BaseElement['loadable'] = true;

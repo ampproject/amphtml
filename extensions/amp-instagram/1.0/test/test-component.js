@@ -22,12 +22,12 @@ import {WithAmpContext} from '#preact/context';
 
 import {waitFor} from '#testing/test-helper';
 
-import {Instagram} from '../component';
+import {BentoInstagram} from '../component';
 
-describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
+describes.sandboxed('BentoInstagram preact component v1.0', {}, (env) => {
   it('Normal render', () => {
     const wrapper = mount(
-      <Instagram
+      <BentoInstagram
         shortcode="B8QaZW4AQY_"
         style={{
           'width': 500,
@@ -48,7 +48,7 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
 
   it('Render with caption', () => {
     const wrapper = mount(
-      <Instagram
+      <BentoInstagram
         shortcode="B8QaZW4AQY_"
         captioned
         style={{'width': 500, 'height': 705}}
@@ -65,7 +65,7 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
   it('Resize prop is called', () => {
     const requestResizeSpy = env.sandbox.spy();
     const wrapper = mount(
-      <Instagram
+      <BentoInstagram
         shortcode="B8QaZW4AQY_"
         captioned
         style={{'width': 500, 'height': 705}}
@@ -84,7 +84,7 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
 
   it('Height is changed', async () => {
     const wrapper = mount(
-      <Instagram
+      <BentoInstagram
         shortcode="B8QaZW4AQY_"
         style={{'width': 500, 'height': 600}}
       />
@@ -110,7 +110,7 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
     const ref = createRef();
     const onReadyState = env.sandbox.spy();
     const wrapper = mount(
-      <Instagram
+      <BentoInstagram
         ref={ref}
         shortcode="B8QaZW4AQY_"
         style={{'width': 500, 'height': 600}}
@@ -132,7 +132,7 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
     const ref = createRef();
     const wrapper = mount(
       <WithAmpContext playable={true}>
-        <Instagram
+        <BentoInstagram
           ref={ref}
           shortcode="B8QaZW4AQY_"
           style={{'width': 500, 'height': 600}}
