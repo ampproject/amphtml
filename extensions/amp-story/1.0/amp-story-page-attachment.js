@@ -120,6 +120,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildInline_() {
+    const localizationService = getLocalizationService(devAssert(this.element));
+
     const attachmentForms = this.getAllFormElements_();
     if (attachmentForms.length > 0) {
       // Page attachments that contain forms must display the page's publisher
@@ -129,7 +131,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       this.headerEl.classList.add('i-amphtml-story-page-attachment-with-form');
 
       attachmentForms.forEach((form) => {
-        this.addFallbackFormResponseAttributes_(form);
+        this.addFallbackFormResponseAttributes_(form, localizationService);
       });
     }
 
@@ -137,7 +139,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
           <button class="i-amphtml-story-page-attachment-close-button" aria-label="close"
               role="button">
           </button>`;
-    const localizationService = getLocalizationService(devAssert(this.element));
 
     if (localizationService) {
       const localizedCloseString = localizationService.getLocalizedString(
@@ -494,44 +495,54 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * Add a default form submission response attribute div for each attribute
    * that is missing.
    * @param {!Element} formEl The form to which the attributes will be added.
+   * @param {!LocalizationService} localizationService The service used for
+   *     localizing form submission status text.
    * @private
    */
-  addFallbackFormResponseAttributes_(formEl) {
+  addFallbackFormResponseAttributes_(formEl, localizationService) {
     const defaultAttributeClassPrefix = 'i-amphtml-story-page-attachment-form-status';
     const defaultAttributeClass = defaultAttributeClassPrefix + 'default';
-    const defaultIconClass = defaultAttributeClassPrefix + 'icon';
-    const defaultTextClass = defaultAttributeClassPrefix + 'text';
 
-    const submitting = 'submitting';
-    if (!formEl.querySelector(`div[${submitting}]`)) {
+    if (!formEl.querySelector(`div[submitting]`)) {
       const loadingSpinner = new LoadingSpinner(this.win.document);
       const submittingEl = htmlFor(this.element)`
-            <div ${submitting} class="${defaultAttributeClass} ${defaultAttributeClassPrefix}-${submitting}">
-            </div>`;
-      loadingSpinner.classList.add(defaultIconClass);
+            <div submitting class="i-amphtml-story-page-attachment-form-status-default"></div>`;
       submittingEl.appendChild(loadingSpinner.build());
       formEl.appendChild(submittingEl);
     }
 
-    const submit_success = 'submit-success';
-    if (!formEl.querySelector(`div[${submit_success}]`)) {
-      const successText = 'Form successfully submitted';  // Needs to be localized
+    if (!formEl.querySelector(`div[submit-success]`)) {
       const successEl = htmlFor(this.element)`
-            <div ${submit_success} class="${defaultAttributeClass} ${defaultAttributeClassPrefix}-${submit_success}">
-              <svg class="${defaultIconClass}"></svg>
-              <div class="${defaultTextClass}">${successText}</div>
+            <div submit-success class="i-amphtml-story-page-attachment-form-status-default">
+              <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="26" height="26" fill="none">
+                <rect x="-14" y="-14" width="328" height="54" rx="12" fill="white"/>
+                <circle cx="13" cy="13" r="13" fill="#8BDC8F"/>
+                <path d="M5.77777 13.8972L10.7342 18.8889L20.2222 9.33334" stroke="black" stroke-width="2.5"/>
+              </svg>
             </div>`;
+      const textEl = this.win.document.createElement('div');
+      textEl.innerHTML = localizationService.getLocalizedString(
+        'Form successfully submitted'
+      );
+      successEl.append(textEl);
       formEl.appendChild(successEl);
     }
 
-    const submit_error = 'submit-error';
-    if (!formEl.querySelector(`div[${submit_error}]`)) {
-      const errorText = 'Form not submitted, try again.';  // Needs to be localized
+    if (!formEl.querySelector(`div[submit-error]`)) {
       const errorEl = htmlFor(this.element)`
-            <div ${submit_error} class="${defaultAttributeClass} ${defaultAttributeClassPrefix}-${submit_error}">
-              <svg class="${defaultIconClass}"></svg>
-              <div class="${defaultTextClass}">${errorText}</div>
+            <div submit-error class="i-amphtml-story-page-attachment-form-status-default">
+              <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <rect width="26" height="26" fill="#0F0F0F"/>
+                <rect x="-14" y="-14" width="328" height="54" rx="12" fill="white"/>
+                <circle cx="13" cy="13" r="13" fill="black"/>
+                <path d="M12.987 0C5.811 0 0 5.824 0 13C0 20.176 5.811 26 12.987 26C20.176 26 26 20.176 26 13C26 5.824 20.176 0 12.987 0ZM14.3 13C14.3 13.715 13.715 14.3 13 14.3C12.285 14.3 11.7 13.715 11.7 13V7.8C11.7 7.085 12.285 6.5 13 6.5C13.715 6.5 14.3 7.085 14.3 7.8V13ZM14.3 18.2C14.3 18.915 13.715 19.5 13 19.5C12.285 19.5 11.7 18.915 11.7 18.2C11.7 17.485 12.285 16.9 13 16.9C13.715 16.9 14.3 17.485 14.3 18.2Z" fill="#FF5252"/>
+              </svg>
             </div>`;
+      const textEl = this.win.document.createElement('div');
+      textEl.innerHTML = localizationService.getLocalizedString(
+        'Form not submitted, try again.'
+      );
+      errorEl.appendChild(textEl);
       formEl.appendChild(errorEl);
     }
   }
