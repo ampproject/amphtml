@@ -162,6 +162,8 @@
       ]
     },
     {
+      // TODO(#34792, samouri): See issue for details.
+      "flaky": true,
       "url": "examples/visual-tests/font.amp.404/font.amp.html",
       "name": "Fonts 404",
       "loading_complete_selectors": [
