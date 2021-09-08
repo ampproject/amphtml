@@ -1090,7 +1090,6 @@ const forbiddenTermsSrcInclusive = {
       'third_party/react-dates/scope-require.js',
     ],
   },
-
   'detectIsAutoplaySupported': {
     message:
       'Detecting autoplay support is expensive. Use the cached function "isAutoplaySupported" instead.',
