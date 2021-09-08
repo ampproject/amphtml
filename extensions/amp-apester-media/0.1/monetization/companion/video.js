@@ -90,6 +90,7 @@ function getCompanionPosition(video) {
  */
 function addCompanionSrElement(videoTag, position, macros, apesterElement) {
   const size = getCompanionVideoAdSize(apesterElement);
+  const refreshInterval = 30;
   const ampBladeAd = createElementWithAttributes(
     /** @type {!Document} */ (apesterElement.ownerDocument),
     'amp-ad',
@@ -103,6 +104,7 @@ function addCompanionSrElement(videoTag, position, macros, apesterElement) {
       'data-blade_macros': JSON.stringify(macros),
       'data-blade_player_id': videoTag,
       'data-blade_api_key': '5857d2ee263dc90002000001',
+      'data-enable-refresh': `${refreshInterval}`,
     })
   );
 
