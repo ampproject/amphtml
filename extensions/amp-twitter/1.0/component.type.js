@@ -1,7 +1,7 @@
 /** @externs */
 
 /** @const */
-var TwitterDef = {};
+var BentoTwitterDef = {};
 
 /**
  * @typedef {{
@@ -12,10 +12,10 @@ var TwitterDef = {};
  *   onLoad: (function():undefined|undefined),
  * }}
  */
-TwitterDef.Props;
+BentoTwitterDef.Props;
 
 /** @constructor */
-TwitterDef.Api = function () {};
+BentoTwitterDef.Api = function () {};
 
 /** @type {string} */
-TwitterDef.Api.prototype.readyState;
+BentoTwitterDef.Api.prototype.readyState;

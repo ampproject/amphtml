@@ -299,7 +299,8 @@
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "wrapper": "bento"
+      "wrapper": "bento",
+      "hasCss": true
     }
   },
   {
@@ -313,7 +314,8 @@
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "wrapper": "bento"
+      "wrapper": "bento",
+      "hasCss": true
     }
   },
   {
@@ -1151,6 +1153,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
+      "npm": true,
       "wrapper": "bento"
     }
   },

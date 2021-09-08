@@ -25,10 +25,10 @@ const DEFAULT_DATETIME_OPTIONS = {
 const DEFAULT_TIME_OPTIONS = {'hour': 'numeric', 'minute': 'numeric'};
 
 /**
- * @param {!TimeagoProps} props
+ * @param {!BentoTimeagoProps} props
  * @return {PreactDef.Renderable}
  */
-export function Timeago({
+export function BentoTimeago({
   cutoff,
   datetime,
   locale: localeProp,
