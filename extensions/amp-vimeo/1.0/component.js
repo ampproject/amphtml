@@ -65,7 +65,7 @@ function makeMethodMessage(method) {
  * @return {PreactDef.Renderable}
  * @template T
  */
-export function VimeoWithRef(
+function BentoVimeoWithRef(
   {autoplay = false, doNotTrack = false, onLoad, videoid, ...rest},
   ref
 ) {
@@ -128,6 +128,6 @@ export function VimeoWithRef(
   );
 }
 
-const Vimeo = forwardRef(VimeoWithRef);
-Vimeo.displayName = 'Vimeo'; // Make findable for tests.
-export {Vimeo};
+const BentoVimeo = forwardRef(BentoVimeoWithRef);
+BentoVimeo.displayName = 'BentoVimeo'; // Make findable for tests.
+export {BentoVimeo};

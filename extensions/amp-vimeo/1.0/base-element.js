@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
@@ -15,13 +16,16 @@
  */
 
 import {Vimeo} from './component';
+=======
+import {BentoVimeo} from './component';
+>>>>>>> 2c314559c1... ♻️ Rename `Vimeo` to `BentoVimeo` (#35995)
 
 import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
 
 export class BaseElement extends VideoBaseElement {}
 
 /** @override */
-BaseElement['Component'] = Vimeo;
+BaseElement['Component'] = BentoVimeo;
 
 /** @override */
 BaseElement['props'] = {

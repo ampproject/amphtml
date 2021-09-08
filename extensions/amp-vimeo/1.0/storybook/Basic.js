@@ -18,11 +18,11 @@ import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
-import {Vimeo} from '../component';
+import {BentoVimeo} from '../component';
 
 export default {
   title: 'Vimeo',
-  component: Vimeo,
+  component: BentoVimeo,
   decorators: [withKnobs],
 };
 
@@ -33,7 +33,7 @@ export const _default = () => {
   const autoplay = boolean('autoplay', true);
   const doNotTrack = boolean('do-not-track', false);
   return (
-    <Vimeo
+    <BentoVimeo
       style={{width, height}}
       autoplay={autoplay}
       doNotTrack={doNotTrack}
