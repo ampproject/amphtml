@@ -21,12 +21,12 @@ import {
   BentoAccordionHeader,
   BentoAccordionSection,
 } from '../../../amp-accordion/1.0/component';
-import {VideoWrapper} from '../component';
+import {BentoVideo} from '../component';
 import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
 
 export default {
-  title: 'Video Wrapper',
-  component: VideoWrapper,
+  title: 'Video',
+  component: BentoVideo,
   decorators: [withKnobs],
 };
 
@@ -69,7 +69,7 @@ const VideoTagPlayer = ({i}) => {
   );
 
   return (
-    <VideoWrapper
+    <BentoVideo
       component="video"
       ariaLabel={ariaLabel}
       autoplay={autoplay}
@@ -135,7 +135,7 @@ export const InsideAccordion = () => {
           <h2>Controls</h2>
         </BentoAccordionHeader>
         <BentoAccordionContent>
-          <VideoWrapper
+          <BentoVideo
             component="video"
             controls={true}
             loop={true}
@@ -150,7 +150,7 @@ export const InsideAccordion = () => {
           <h2>Autoplay</h2>
         </BentoAccordionHeader>
         <BentoAccordionContent>
-          <VideoWrapper
+          <BentoVideo
             component="video"
             autoplay={true}
             loop={true}
