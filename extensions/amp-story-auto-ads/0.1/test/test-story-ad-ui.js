@@ -15,7 +15,7 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
   let doc;
 
   /** @const {!{branch: string, control: string, experiment: string}}
-    @visibleForTesting
+   @visibleForTesting
   */
   const AD_PAGE_OUTLINK_EXP = {
     BRANCH: 'story-ad-page-outlink',
