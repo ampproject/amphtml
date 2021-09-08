@@ -14,7 +14,8 @@ function compile(request) {
   const document = request.document ?? {root: 0, tree: []};
   const versions = request.versions ?? {'amp-layout': 'v0'};
 
-  return {document: compiler.renderAst(document, getBuilders(versions))};
+  // TODO(samouri): handle type=error case.
+  return {document: compiler.renderAst(document, getBuilders(versions)).value};
 }
 
 globalThis['compile'] = compile;
