@@ -1,9 +1,9 @@
 import * as Preact from '#preact';
-import {Brightcove} from '../component';
+import {BentoBrightcove} from '../component';
 
 export default {
   title: 'Brightcove',
-  component: Brightcove,
+  component: BentoBrightcove,
   args: {
     autoplay: false,
     videoId: 'ref:amp-docs-sample',
@@ -13,5 +13,5 @@ export default {
 };
 
 export const _default = (args) => {
-  return <Brightcove style={{width: 480, height: 270}} {...args} />;
+  return <BentoBrightcove style={{width: 480, height: 270}} {...args} />;
 };
