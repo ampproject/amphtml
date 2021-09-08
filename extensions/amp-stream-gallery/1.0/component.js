@@ -1,5 +1,5 @@
 import * as Preact from '#preact';
-import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
+import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
 import {forwardRef} from '#preact/compat';
 import {setStyle} from '#core/dom/style';
 import {toWin} from '#core/window';
@@ -17,11 +17,11 @@ const DEFAULT_VISIBLE_COUNT = 1;
 const OUTSET_ARROWS_WIDTH = 100;
 
 /**
- * @param {!StreamGalleryDef.Props} props
- * @param {{current: (!BaseCarouselDef.CarouselApi|null)}} ref
+ * @param {!BentoStreamGalleryDef.Props} props
+ * @param {{current: (!BentoBaseCarouselDef.CarouselApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
-function StreamGalleryWithRef(props, ref) {
+function BentoStreamGalleryWithRef(props, ref) {
   const {
     arrowPrevAs = DefaultArrow,
     arrowNextAs = DefaultArrow,
@@ -68,7 +68,7 @@ function StreamGalleryWithRef(props, ref) {
   useImperativeHandle(
     ref,
     () =>
-      /** @type {!BaseCarouselDef.CarouselApi} */ ({
+      /** @type {!BentoBaseCarouselDef.CarouselApi} */ ({
         goToSlide: (index) => carouselRef.current.goToSlide(index),
         next: () => carouselRef.current.next(),
         prev: () => carouselRef.current.prev(),
@@ -99,7 +99,7 @@ function StreamGalleryWithRef(props, ref) {
   }, [measure]);
 
   return (
-    <BaseCarousel
+    <BentoBaseCarousel
       advanceCount={Math.floor(visibleCount)}
       arrowPrevAs={arrowPrevAs}
       arrowNextAs={arrowNextAs}
@@ -115,16 +115,16 @@ function StreamGalleryWithRef(props, ref) {
       {...rest}
     >
       {children}
-    </BaseCarousel>
+    </BentoBaseCarousel>
   );
 }
 
-const StreamGallery = forwardRef(StreamGalleryWithRef);
-StreamGallery.displayName = 'StreamGallery'; // Make findable for tests.
-export {StreamGallery};
+const BentoStreamGallery = forwardRef(BentoStreamGalleryWithRef);
+BentoStreamGallery.displayName = 'StreamGallery'; // Make findable for tests.
+export {BentoStreamGallery};
 
 /**
- * @param {!StreamGalleryDef.ArrowProps} props
+ * @param {!BentoStreamGalleryDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
 function DefaultArrow({

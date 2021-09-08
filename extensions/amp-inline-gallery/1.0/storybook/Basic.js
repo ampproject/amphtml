@@ -1,13 +1,13 @@
 import * as Preact from '#preact';
-import {BaseCarousel} from '../../../amp-base-carousel/1.0/component';
-import {InlineGallery} from '../component';
-import {Pagination} from '../pagination';
-import {Thumbnails} from '../thumbnails';
+import {BentoBaseCarousel} from '../../../amp-base-carousel/1.0/component';
+import {BentoInlineGallery} from '../component';
+import {BentoInlineGalleryPagination} from '../pagination';
+import {BentoInlineGalleryThumbnails} from '../thumbnails';
 import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'InlineGallery',
-  component: InlineGallery,
+  component: BentoInlineGallery,
   decorators: [withKnobs],
 };
 
@@ -32,17 +32,20 @@ export const _default = () => {
 
   return (
     <>
-      <InlineGallery style={{width}}>
-        <Pagination style={{height: paginationHeight}} inset={topInset} />
-        <Thumbnails
+      <BentoInlineGallery style={{width}}>
+        <BentoInlineGalleryPagination
+          style={{height: paginationHeight}}
+          inset={topInset}
+        />
+        <BentoInlineGalleryThumbnails
           aspectRatio={aspectRatio}
           loop={loop}
           style={{height: thumbnailHeight}}
         />
         <br />
-        <Thumbnails />
+        <BentoInlineGalleryThumbnails />
         <br />
-        <BaseCarousel
+        <BentoBaseCarousel
           style={{height}}
           autoAdvanceCount={autoAdvanceCount}
           autoAdvanceInterval={autoAdvanceInterval}
@@ -74,9 +77,9 @@ export const _default = () => {
             src="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
             thumbnailSrc="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
           />
-        </BaseCarousel>
-        <Pagination inset={bottomInset} />
-      </InlineGallery>
+        </BentoBaseCarousel>
+        <BentoInlineGalleryPagination inset={bottomInset} />
+      </BentoInlineGallery>
       Content below carousel
     </>
   );
@@ -113,12 +116,15 @@ export const WithLooping = () => {
   ));
 
   return (
-    <InlineGallery style={{width, position: 'relative'}}>
-      <BaseCarousel loop style={{height, position: 'relative'}}>
+    <BentoInlineGallery style={{width, position: 'relative'}}>
+      <BentoBaseCarousel loop style={{height, position: 'relative'}}>
         {slides}
-      </BaseCarousel>
-      <Pagination inset={inset} style={{height: paginationHeight}} />
-      <Thumbnails
+      </BentoBaseCarousel>
+      <BentoInlineGalleryPagination
+        inset={inset}
+        style={{height: paginationHeight}}
+      />
+      <BentoInlineGalleryThumbnails
         aspectRatio={aspectRatio}
         loop={loop}
         style={{height: thumbnailHeight}}
@@ -127,7 +133,7 @@ export const WithLooping = () => {
         <div>b</div>
         <div>c</div>
         <div>d</div>
-      </Thumbnails>
-    </InlineGallery>
+      </BentoInlineGalleryThumbnails>
+    </BentoInlineGallery>
   );
 };
