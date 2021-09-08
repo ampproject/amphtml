@@ -16,7 +16,11 @@ import {
   fullscreenExit,
   isFullscreenElement,
 } from '#core/dom/fullscreen';
-import {DailymotionEvents, getDailymotionIframeSrc} from '../dailymotion-api';
+import {
+  DailymotionEvents,
+  getDailymotionIframeSrc,
+  makeDailymotionMessage,
+} from '../dailymotion-api';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {isLayoutSizeDefined} from '#core/dom/layout';
@@ -218,13 +222,10 @@ class AmpDailymotion extends AMP.BaseElement {
     const endpoint = 'https://www.dailymotion.com';
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        const message = JSON.stringify(
-          dict({
-            'command': command,
-            'parameters': opt_args || [],
-          })
+        this.iframe_.contentWindow./*OK*/ postMessage(
+          makeDailymotionMessage(command, opt_args),
+          endpoint
         );
-        this.iframe_.contentWindow./*OK*/ postMessage(message, endpoint);
       }
     });
   }

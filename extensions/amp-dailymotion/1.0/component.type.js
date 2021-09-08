@@ -3,15 +3,15 @@ var DailymotionDef = {};
 
 /**
  * @typedef {{
- *   videoId: string,
+ *   videoId: (string),
  *   autoplay: (boolean|undefined),
- *   endscreenEnable: string,
- *   info: string,
- *   mute: string,
- *   sharingEnable: string
- *   start: string,
- *   uiHighlight: string,
- *   uiLogo: string,
+ *   endscreenEnable: (string|undefined),
+ *   info: (string|undefined),
+ *   mute: (string|undefined),
+ *   sharingEnable: (string|undefined),
+ *   start: (string|undefined),
+ *   uiHighlight: (string|undefined),
+ *   uiLogo: (string|undefined),
  * }}
  */
 DailymotionDef.Props;

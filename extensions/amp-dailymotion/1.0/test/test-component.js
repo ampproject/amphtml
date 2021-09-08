@@ -36,15 +36,11 @@ describes.sandboxed('Dailymotion preact component v1.0', {}, () => {
     );
 
     const iframe = wrapper.find('iframe');
-
-    // Enscreen Enable attr
-    expect(iframe.prop('src')).to.contain('endscreen-enable=false');
-    // Sharing Enable attr
-    expect(iframe.prop('src')).to.contain('sharing-enable=false');
-    // UI Highlight attr
-    expect(iframe.prop('src')).to.contain('ui-highlight=444444');
-    // info attr
-    expect(iframe.prop('src')).to.contain('info=false');
+    const src = iframe.prop('src');
+    expect(src).to.contain('endscreen-enable=false');
+    expect(src).to.contain('sharing-enable=false');
+    expect(src).to.contain('ui-highlight=444444');
+    expect(src).to.contain('info=false');
   });
 
   it('Pass mute param to iframe src', () => {
@@ -57,8 +53,6 @@ describes.sandboxed('Dailymotion preact component v1.0', {}, () => {
     );
 
     const iframe = wrapper.find('iframe');
-
-    // Mute Attr
     expect(iframe.prop('src')).to.contain('mute=1');
   });
 
@@ -72,8 +66,6 @@ describes.sandboxed('Dailymotion preact component v1.0', {}, () => {
     );
 
     const iframe = wrapper.find('iframe');
-
-    // Mute Attr
     expect(iframe.prop('src')).to.contain('mute=1');
   });
 });
