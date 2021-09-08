@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
@@ -174,7 +175,11 @@
           cta-text="Subscribe">
           <div class="attachment-content">
             <p>Form within a small attachment:</p>
-            <form>
+            <form
+              method="POST"
+              action-xhr="https://www.example.com"
+              target="_top"
+              >
               <input type="email" name="email" placeholder="Email" required>
               <input type="submit" value="Subscribe">
             </form>
