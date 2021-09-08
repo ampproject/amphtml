@@ -185,6 +185,11 @@ MixedLength.args = {
   orientation: 'vertical',
 };
 
+MixedLength.argTypes = {
+  controls: argTypes.controls,
+  orientation: argTypes.orientation,
+  preset: argTypes.preset,
+};
 export const ProvideArrows = ({height, width, ...args}) => {
   const myButtonStyle = {
     background: 'lightblue',
