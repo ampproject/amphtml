@@ -50,7 +50,7 @@ let GulpConnectOptionsDef;
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
 
 const HOST = argv.host || '0.0.0.0';
-const PORT = argv.port || '4000';
+const PORT = argv.port || '8000';
 
 // Used for logging.
 let url = null;
