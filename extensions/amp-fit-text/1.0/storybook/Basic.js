@@ -3,7 +3,7 @@ import {BentoFitText} from '../component';
 import {number, text, withKnobs} from '@storybook/addon-knobs';
 
 export default {
-  title: 'BentoFitText',
+  title: 'FitText',
   component: BentoFitText,
   decorators: [withKnobs],
 };
