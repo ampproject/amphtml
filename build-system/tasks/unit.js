@@ -59,7 +59,6 @@ unit.flags = {
   'files': 'Run tests for specific files',
   'grep': 'Run tests that match the pattern',
   'headless': 'Run tests in a headless Chrome window',
-  'ie': 'Runs tests on IE',
   'local_changes':
     'Run unit tests directly affected by the files changed in the local branch',
   'nohelp': 'Silence help messages that are printed prior to test run',

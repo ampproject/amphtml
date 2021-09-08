@@ -523,24 +523,6 @@ describes.realWin(
       expect(impl.toggleFallback).to.have.been.calledWith(true);
     });
 
-    it('play() should not log promise rejections', async () => {
-      const playPromise = Promise.reject('The play() request was interrupted');
-      const catchSpy = env.sandbox.spy(playPromise, 'catch');
-      await getVideo(
-        {
-          src: 'video.mp4',
-          width: 160,
-          height: 90,
-        },
-        null,
-        function (element, impl) {
-          env.sandbox.stub(impl.video_, 'play').returns(playPromise);
-          impl.play();
-        }
-      );
-      expect(catchSpy.called).to.be.true;
-    });
-
     it('decode error retries the next source', async () => {
       const s0 = doc.createElement('source');
       s0.setAttribute('src', './0.mp4');

@@ -327,6 +327,7 @@ describes.sandboxed('Window - History', {}, (env) => {
     });
 
     it('should create natural binding and make it singleton', () => {
+      win.AMP_CONFIG = {test: false};
       const history = Services.historyForDoc(ampdoc);
       expect(history.binding_).to.be.instanceOf(HistoryBindingNatural_);
       expect(win.__AMP_SERVICES.history.obj).to.equal(history);
