@@ -3,15 +3,15 @@ import {boolean, withKnobs} from '@storybook/addon-knobs';
 import * as Preact from '#preact';
 
 import {
-  Accordion,
-  AccordionContent,
-  AccordionHeader,
-  AccordionSection,
+  BentoAccordion,
+  BentoAccordionContent,
+  BentoAccordionHeader,
+  BentoAccordionSection,
 } from '../component';
 
 export default {
   title: 'Accordion',
-  component: Accordion,
+  component: BentoAccordion,
   decorators: [withKnobs],
 };
 
@@ -25,7 +25,7 @@ function AccordionWithActions(props) {
   const ref = Preact.useRef();
   return (
     <section>
-      <Accordion ref={ref} {...props} />
+      <BentoAccordion ref={ref} {...props} />
       <div style={{marginTop: 8}}>
         <button onClick={() => ref.current.toggle('section1')}>
           toggle(section1)
@@ -53,24 +53,26 @@ export const _default = () => {
         expandSingleSection={expandSingleSection}
         animate={animate}
       >
-        <AccordionSection id="section1" key={1}>
-          <AccordionHeader>
+        <BentoAccordionSection id="section1" key={1}>
+          <BentoAccordionHeader>
             <h2>Section 1</h2>
-          </AccordionHeader>
-          <AccordionContent>Puppies are cute.</AccordionContent>
-        </AccordionSection>
-        <AccordionSection key={2}>
-          <AccordionHeader>
+          </BentoAccordionHeader>
+          <BentoAccordionContent>Puppies are cute.</BentoAccordionContent>
+        </BentoAccordionSection>
+        <BentoAccordionSection key={2}>
+          <BentoAccordionHeader>
             <h2>Section 2</h2>
-          </AccordionHeader>
-          <AccordionContent>Kittens are furry.</AccordionContent>
-        </AccordionSection>
-        <AccordionSection key={3} expanded>
-          <AccordionHeader>
+          </BentoAccordionHeader>
+          <BentoAccordionContent>Kittens are furry.</BentoAccordionContent>
+        </BentoAccordionSection>
+        <BentoAccordionSection key={3} expanded>
+          <BentoAccordionHeader>
             <h2>Section 3</h2>
-          </AccordionHeader>
-          <AccordionContent>Elephants have great memory.</AccordionContent>
-        </AccordionSection>
+          </BentoAccordionHeader>
+          <BentoAccordionContent>
+            Elephants have great memory.
+          </BentoAccordionContent>
+        </BentoAccordionSection>
       </AccordionWithActions>
     </main>
   );
@@ -86,14 +88,14 @@ function AccordionWithEvents(props) {
   const ref = Preact.useRef();
   return (
     <section>
-      <Accordion ref={ref} {...props}>
-        <AccordionSection id="section1" key={1} expanded>
-          <AccordionHeader>
+      <BentoAccordion ref={ref} {...props}>
+        <BentoAccordionSection id="section1" key={1} expanded>
+          <BentoAccordionHeader>
             <h2>Section 1</h2>
-          </AccordionHeader>
-          <AccordionContent>Puppies are cute.</AccordionContent>
-        </AccordionSection>
-        <AccordionSection
+          </BentoAccordionHeader>
+          <BentoAccordionContent>Puppies are cute.</BentoAccordionContent>
+        </BentoAccordionSection>
+        <BentoAccordionSection
           id="section2"
           key={2}
           onExpandStateChange={(expanded) => {
@@ -102,12 +104,12 @@ function AccordionWithEvents(props) {
             }
           }}
         >
-          <AccordionHeader>
+          <BentoAccordionHeader>
             <h2>Section 2</h2>
-          </AccordionHeader>
-          <AccordionContent>Kittens are furry.</AccordionContent>
-        </AccordionSection>
-        <AccordionSection
+          </BentoAccordionHeader>
+          <BentoAccordionContent>Kittens are furry.</BentoAccordionContent>
+        </BentoAccordionSection>
+        <BentoAccordionSection
           id="section3"
           key={3}
           onExpandStateChange={(expanded) => {
@@ -116,12 +118,14 @@ function AccordionWithEvents(props) {
             }
           }}
         >
-          <AccordionHeader>
+          <BentoAccordionHeader>
             <h2>Section 3</h2>
-          </AccordionHeader>
-          <AccordionContent>Elephants have great memory.</AccordionContent>
-        </AccordionSection>
-      </Accordion>
+          </BentoAccordionHeader>
+          <BentoAccordionContent>
+            Elephants have great memory.
+          </BentoAccordionContent>
+        </BentoAccordionSection>
+      </BentoAccordion>
       <div style={{marginTop: 8}}>
         <button onClick={() => ref.current.expand('section2')}>
           expand(section2)
