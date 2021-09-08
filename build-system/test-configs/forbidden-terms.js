@@ -726,6 +726,49 @@ const forbiddenTermsGlobal = {
     ],
     checkInTestFolder: true,
   },
+  'withA11y':
+    'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
+  '@storybook/addon-knobs': {
+    message:
+      'The @storybook/addon-knobs package has been deprecated. Use Controls instead (`args` and `argTypes`). https://storybook.js.org/docs/react/essentials/controls',
+    allowlist: [
+      // TODO(#35923): Update existing files to use Controls instead.
+      'extensions/amp-animation/0.1/storybook/template.js',
+      'extensions/amp-date-display/1.0/storybook/Basic.amp.js',
+      'extensions/amp-date-display/1.0/storybook/Basic.js',
+      'extensions/amp-iframe/0.1/storybook/Basic.amp.js',
+      'extensions/amp-iframe/1.0/storybook/Basic.amp.js',
+      'extensions/amp-image-slider/0.1/storybook/Basic.amp.js',
+      'extensions/amp-inline-gallery/1.0/storybook/Basic.js',
+      'extensions/amp-lightbox/1.0/storybook/Basic.amp.js',
+      'extensions/amp-lightbox/1.0/storybook/Basic.js',
+      'extensions/amp-lightbox-gallery/1.0/storybook/Basic.amp.js',
+      'extensions/amp-lightbox-gallery/1.0/storybook/Basic.js',
+      'extensions/amp-render/1.0/storybook/Basic.js',
+      'extensions/amp-selector/1.0/storybook/Basic.amp.js',
+      'extensions/amp-selector/1.0/storybook/Basic.js',
+      'extensions/amp-sidebar/0.1/storybook/Basic.amp.js',
+      'extensions/amp-sidebar/1.0/storybook/Basic.amp.js',
+      'extensions/amp-sidebar/1.0/storybook/Basic.js',
+      'extensions/amp-soundcloud/1.0/storybook/Basic.amp.js',
+      'extensions/amp-soundcloud/1.0/storybook/Basic.js',
+      'extensions/amp-stream-gallery/1.0/storybook/Basic.amp.js',
+      'extensions/amp-stream-gallery/1.0/storybook/Basic.js',
+      'extensions/amp-timeago/1.0/storybook/Basic.js',
+      'extensions/amp-twitter/0.1/storybook/Basic.amp.js',
+      'extensions/amp-twitter/1.0/storybook/Basic.amp.js',
+      'extensions/amp-twitter/1.0/storybook/Basic.js',
+      'extensions/amp-video/1.0/storybook/Basic.amp.js',
+      'extensions/amp-video/1.0/storybook/Basic.js',
+      'extensions/amp-video-iframe/1.0/storybook/Basic.amp.js',
+      'extensions/amp-vimeo/1.0/storybook/Basic.amp.js',
+      'extensions/amp-vimeo/1.0/storybook/Basic.js',
+      'extensions/amp-wordpress-embed/1.0/storybook/Basic.amp.js',
+      'extensions/amp-youtube/0.1/storybook/Basic.amp.js',
+      'extensions/amp-youtube/1.0/storybook/Basic.amp.js',
+      'extensions/amp-youtube/1.0/storybook/Basic.js',
+    ],
+  },
 };
 
 const bannedTermsHelpString =
@@ -1047,8 +1090,7 @@ const forbiddenTermsSrcInclusive = {
       'third_party/react-dates/scope-require.js',
     ],
   },
-  'withA11y':
-    'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
+
   'detectIsAutoplaySupported': {
     message:
       'Detecting autoplay support is expensive. Use the cached function "isAutoplaySupported" instead.',
