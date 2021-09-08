@@ -73,10 +73,10 @@ let VariablesV2Def;
 let EnhancedVariablesV2Def;
 
 /**
- * @param {!DateDisplayDef.Props} props
+ * @param {!BentoDateDisplayDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function DateDisplay({
+export function BentoDateDisplay({
   datetime,
   displayIn = DEFAULT_DISPLAY_IN,
   locale = DEFAULT_LOCALE,

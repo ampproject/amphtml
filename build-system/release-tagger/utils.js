@@ -201,6 +201,20 @@ async function unlabelPullRequests(prs, labelId) {
   return await _runQueryInBatches('mutation', mutations);
 }
 
+/**
+ * Get a git ref
+ * @param {string} tag
+ * @return {Promise<Object>}
+ */
+async function getRef(tag) {
+  const {data} = await octokit.rest.git.getRef({
+    owner,
+    repo,
+    ref: `tags/${tag}`,
+  });
+  return data;
+}
+
 module.exports = {
   createRelease,
   getLabel,
@@ -209,4 +223,5 @@ module.exports = {
   labelPullRequests,
   unlabelPullRequests,
   updateRelease,
+  getRef,
 };

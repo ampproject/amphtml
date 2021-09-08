@@ -9,11 +9,12 @@
     "@babel/preset-react": "7.14.5",
     "@babel/runtime-corejs3": "7.15.3",
     "@storybook/addon-a11y": "6.3.7",
+    "@storybook/addon-controls": "6.3.7",
     "@storybook/addon-knobs": "6.2.9",
     "@storybook/addon-viewport": "6.3.7",
     "@storybook/preact": "6.3.7",
     "babel-loader": "8.2.2",
-    "core-js": "3.16.3",
+    "core-js": "3.16.4",
     "preact": "10.5.14",
     "preact-render-to-string": "5.1.19",
     "styled-jsx": "4.0.0"
