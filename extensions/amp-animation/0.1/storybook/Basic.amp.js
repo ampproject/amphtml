@@ -1,5 +1,4 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {select, text, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
@@ -29,6 +28,8 @@ const KEYFRAMES_OPTIONS = {
   },
 };
 
+const keyframesOptionValues = Object.keys(KEYFRAMES_OPTIONS);
+
 const BLOCK_STYLE = {
   background: 'blue',
   width: '100px',
@@ -37,22 +38,24 @@ const BLOCK_STYLE = {
 
 export default {
   title: 'Animation',
-  decorators: [withKnobs, withAmp],
-
+  decorators: [withAmp],
   parameters: {
     extensions: [{name: 'amp-animation', version: 0.1}],
   },
+  argTypes: {
+    keyframesName: {
+      control: {type: 'select'},
+      options: keyframesOptionValues,
+    },
+  },
+  args: {
+    keyframesName: keyframesOptionValues[0],
+    easing: 'cubic-bezier(0,0,.21,1)',
+  },
 };
 
-export const Default = () => {
-  const keyframesOptions = Object.keys(KEYFRAMES_OPTIONS);
-  const keyframesName = select(
-    'Keyframes',
-    keyframesOptions,
-    keyframesOptions[0]
-  );
+export const Default = ({easing, keyframesName}) => {
   const keyframes = KEYFRAMES_OPTIONS[keyframesName];
-  const easing = text('Easing', 'cubic-bezier(0,0,.21,1)');
   const spec = {
     animations: {
       selector: '#block',

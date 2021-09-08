@@ -1,5 +1,3 @@
-import {text, withKnobs} from '@storybook/addon-knobs';
-
 import * as Preact from '#preact';
 
 import {BentoEmbedlyCard} from '../component';
@@ -8,7 +6,6 @@ import {BentoEmbedlyContext} from '../embedly-context';
 export default {
   title: 'EmbedlyCard',
   component: BentoEmbedlyCard,
-  decorators: [withKnobs],
 };
 
 export const _default = () => {
@@ -21,9 +18,7 @@ export const _default = () => {
   );
 };
 
-export const WithAPIKey = () => {
-  const apiKey = text('BentoEmbedly API Key', 'valid-api-key');
-
+export const WithApiKey = ({apiKey}) => {
   return (
     <BentoEmbedlyContext.Provider value={apiKey}>
       <BentoEmbedlyCard
@@ -33,4 +28,8 @@ export const WithAPIKey = () => {
       />
     </BentoEmbedlyContext.Provider>
   );
+};
+
+WithApiKey.args = {
+  apiKey: 'valid-api-key',
 };

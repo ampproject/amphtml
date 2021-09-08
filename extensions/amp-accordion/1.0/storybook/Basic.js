@@ -1,5 +1,3 @@
-import {boolean, withKnobs} from '@storybook/addon-knobs';
-
 import * as Preact from '#preact';
 
 import {
@@ -10,16 +8,19 @@ import {
 } from '../component';
 
 export default {
-  title: 'Accordion',
+  title: 'BentoAccordion',
   component: BentoAccordion,
-  decorators: [withKnobs],
+  args: {
+    expandSingleSection: false,
+    animate: false,
+  },
 };
 
 /**
  * @param {!Object} props
  * @return {*}
  */
-function AccordionWithActions(props) {
+function BentoAccordionWithActions(props) {
   // TODO(#30447): replace imperative calls with "button" knobs when the
   // Storybook 6.1 is released.
   const ref = Preact.useRef();
@@ -44,15 +45,10 @@ function AccordionWithActions(props) {
   );
 }
 
-export const _default = () => {
-  const expandSingleSection = boolean('expandSingleSection', false);
-  const animate = boolean('animate', false);
+export const _default = (args) => {
   return (
     <main>
-      <AccordionWithActions
-        expandSingleSection={expandSingleSection}
-        animate={animate}
-      >
+      <BentoAccordionWithActions {...args}>
         <BentoAccordionSection id="section1" key={1}>
           <BentoAccordionHeader>
             <h2>Section 1</h2>
@@ -73,7 +69,7 @@ export const _default = () => {
             Elephants have great memory.
           </BentoAccordionContent>
         </BentoAccordionSection>
-      </AccordionWithActions>
+      </BentoAccordionWithActions>
     </main>
   );
 };
@@ -82,7 +78,7 @@ export const _default = () => {
  * @param {!Object} props
  * @return {*}
  */
-function AccordionWithEvents(props) {
+function BentoAccordionWithEvents(props) {
   // TODO(#30447): replace imperative calls with "button" knobs when the
   // Storybook 6.1 is released.
   const ref = Preact.useRef();
@@ -139,15 +135,10 @@ function AccordionWithEvents(props) {
   );
 }
 
-export const events = () => {
-  const expandSingleSection = boolean('expandSingleSection', false);
-  const animate = boolean('animate', false);
+export const events = (args) => {
   return (
     <main>
-      <AccordionWithEvents
-        expandSingleSection={expandSingleSection}
-        animate={animate}
-      ></AccordionWithEvents>
+      <BentoAccordionWithEvents {...args}></BentoAccordionWithEvents>
     </main>
   );
 };
