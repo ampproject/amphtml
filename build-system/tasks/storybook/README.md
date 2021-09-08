@@ -1,6 +1,38 @@
 # Storybook
 
+Task that launches [Storybook](https://storybook.js.org/) for isolated component testing.
+
+```console
+amp storybook
+```
+
+Run `amp storybook -h` or see [testing.md](../../../docs/testing.md) for more launch options.
+
 ## Style Recommendations
+
+Follow these recommendations when [writing stories.](https://storybook.js.org/docs/guides/guide-preact/#step-4-write-your-stories)
+
+### Do not include `Bento` in Story titles
+
+Even though a component's name may include `Bento`, it should be excluded from the title for consistency with existing stories.
+
+✅ Do:
+
+```jsx
+export default {
+  title: 'Accordion',
+  component: BentoAccordion,
+};
+```
+
+🚫 Don't:
+
+```jsx
+export default {
+  title: 'BentoAccordion',
+  component: BentoAccordion,
+};
+```
 
 ### Identify `args` and `argTypes` exactly like their component properties
 
