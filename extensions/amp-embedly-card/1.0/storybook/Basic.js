@@ -2,35 +2,35 @@ import {text, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
-import {EmbedlyCard} from '../component';
-import {EmbedlyContext} from '../embedly-context';
+import {BentoEmbedlyCard} from '../component';
+import {BentoEmbedlyContext} from '../embedly-context';
 
 export default {
   title: 'EmbedlyCard',
-  component: EmbedlyCard,
+  component: BentoEmbedlyCard,
   decorators: [withKnobs],
 };
 
 export const _default = () => {
   return (
-    <EmbedlyCard
+    <BentoEmbedlyCard
       url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
-      title="Embedly Card"
+      title="BentoEmbedly Card"
       style={{width: '400px', height: '400px'}}
     />
   );
 };
 
 export const WithAPIKey = () => {
-  const apiKey = text('Embedly API Key', 'valid-api-key');
+  const apiKey = text('BentoEmbedly API Key', 'valid-api-key');
 
   return (
-    <EmbedlyContext.Provider value={apiKey}>
-      <EmbedlyCard
+    <BentoEmbedlyContext.Provider value={apiKey}>
+      <BentoEmbedlyCard
         url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
-        title="Embedly Card"
+        title="BentoEmbedly Card"
         style={{width: '400px', height: '400px'}}
       />
-    </EmbedlyContext.Provider>
+    </BentoEmbedlyContext.Provider>
   );
 };
