@@ -1467,6 +1467,11 @@ describes.realWin(
         };
 
         const dispatchSwipeEvent = (deltaX, deltaY) => {
+          // Don't do this at home. :(
+          // Forces mobile experience so overlay will attach.
+          story.desktopOnePanelMedia_ = {matches: false};
+          story.buildCallback();
+
           story.element.dispatchEvent(
             new TouchEvent('touchstart', getTouchOptions(-10, -10))
           );
@@ -1500,6 +1505,7 @@ describes.realWin(
 
           it('should trigger the navigation overlay', async () => {
             await createStoryWithPages(2);
+
             dispatchSwipeEvent(100, 0);
             await story.mutateElement(() => {
               const hintEl = story.element.querySelector(
