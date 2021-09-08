@@ -352,7 +352,7 @@ Test scenarios (stories) are located inside a component's directory. Their filen
 
     `extensions/amp-example/0.1/storybook/Basic.amp.js`
 
-Read more about [Writing Stories](https://storybook.js.org/docs/guides/guide-preact/#step-4-write-your-stories) in the official [Storybook documentation](https://storybook.js.org/docs/).
+Read more about [Writing Stories](https://storybook.js.org/docs/guides/guide-preact/#step-4-write-your-stories) in the official [Storybook documentation](https://storybook.js.org/docs/). Make sure to also follow our own [Style Recommendations](../build-system/tasks/storybook/README.md#style-recommendations)
 
 ## Testing on devices
 
