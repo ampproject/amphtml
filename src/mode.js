@@ -47,7 +47,7 @@ function getMode_(win) {
   // flags. This improved DCE on the production file we deploy as the code
   // paths for localhost/testing/development are eliminated.
   return {
-    localDev: coreMode.isTest(win),
+    localDev: coreMode.isLocalDev(win),
     development: isModeDevelopment(win, hashParams),
     esm: coreMode.isEsm(),
     test: coreMode.isTest(win),

@@ -24,11 +24,11 @@ import {animateCollapse, animateExpand} from './animations';
 import {useStyles} from './component.jss';
 
 const AccordionContext = Preact.createContext(
-  /** @type {AccordionDef.AccordionContext} */ ({})
+  /** @type {BentoAccordionDef.AccordionContext} */ ({})
 );
 
 const SectionContext = Preact.createContext(
-  /** @type {AccordionDef.SectionContext} */ ({})
+  /** @type {BentoAccordionDef.SectionContext} */ ({})
 );
 
 /** @type {!Object<string, boolean>} */
@@ -41,11 +41,11 @@ const generateSectionId = sequentialIdGenerator();
 const generateRandomId = randomIdGenerator(100000);
 
 /**
- * @param {!AccordionDef.AccordionProps} props
- * @param {{current: ?AccordionDef.AccordionApi}} ref
+ * @param {!BentoAccordionDef.BentoAccordionProps} props
+ * @param {{current: ?BentoAccordionDef.AccordionApi}} ref
  * @return {PreactDef.Renderable}
  */
-function AccordionWithRef(
+function BentoAccordionWithRef(
   {
     animate = false,
     as: Comp = 'section',
@@ -187,7 +187,7 @@ function AccordionWithRef(
   useImperativeHandle(
     ref,
     () =>
-      /** @type {!AccordionDef.AccordionApi} */ ({
+      /** @type {!BentoAccordionDef.AccordionApi} */ ({
         toggle,
         expand,
         collapse,
@@ -197,7 +197,7 @@ function AccordionWithRef(
 
   const context = useMemo(
     () =>
-      /** @type {!AccordionDef.AccordionContext} */ ({
+      /** @type {!BentoAccordionDef.AccordionContext} */ ({
         registerSection,
         toggleExpanded,
         isExpanded,
@@ -216,9 +216,9 @@ function AccordionWithRef(
   );
 }
 
-const Accordion = forwardRef(AccordionWithRef);
-Accordion.displayName = 'Accordion'; // Make findable for tests.
-export {Accordion};
+const BentoAccordion = forwardRef(BentoAccordionWithRef);
+BentoAccordion.displayName = 'Accordion'; // Make findable for tests.
+export {BentoAccordion};
 
 /**
  * @param {string} id
@@ -243,10 +243,10 @@ function setExpanded(id, value, expandedMap, expandSingleSection) {
 }
 
 /**
- * @param {!AccordionDef.AccordionSectionProps} props
+ * @param {!BentoAccordionDef.BentoAccordionSectionProps} props
  * @return {PreactDef.Renderable}
  */
-export function AccordionSection({
+export function BentoAccordionSection({
   animate: defaultAnimate = false,
   as: Comp = 'section',
   children,
@@ -311,7 +311,7 @@ export function AccordionSection({
 
   const context = useMemo(
     () =>
-      /** @type {AccordionDef.SectionContext} */ ({
+      /** @type {BentoAccordionDef.SectionContext} */ ({
         animate,
         contentId,
         headerId,
@@ -333,10 +333,10 @@ export function AccordionSection({
 }
 
 /**
- * @param {!AccordionDef.AccordionHeaderProps} props
+ * @param {!BentoAccordionDef.BentoAccordionHeaderProps} props
  * @return {PreactDef.Renderable}
  */
-export function AccordionHeader({
+export function BentoAccordionHeader({
   as: Comp = 'div',
   children,
   'class': className = '',
@@ -372,10 +372,10 @@ export function AccordionHeader({
 }
 
 /**
- * @param {!AccordionDef.AccordionContentProps} props
+ * @param {!BentoAccordionDef.BentoAccordionContentProps} props
  * @return {PreactDef.Renderable}
  */
-export function AccordionContent({
+export function BentoAccordionContent({
   as: Comp = 'div',
   children,
   'class': className = '',

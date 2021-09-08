@@ -140,6 +140,13 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(spy).to.have.been.calledOnce;
   });
 
+  it('should call renderOpenAttachmentUI_ in beforeVisible', async () => {
+    const spy = env.sandbox.spy(page, 'renderOpenAttachmentUI_');
+    page.buildCallback();
+    await page.layoutCallback();
+    expect(spy).to.have.been.calledTwice;
+  });
+
   it('should mark page as loaded after media is loaded', async () => {
     const waitForMediaLayoutSpy = env.sandbox.spy(page, 'waitForMediaLayout_');
     const markPageAsLoadedSpy = env.sandbox.spy(page, 'markPageAsLoaded_');
