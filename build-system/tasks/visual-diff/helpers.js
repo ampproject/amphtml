@@ -245,25 +245,30 @@ async function waitForSelectorExistence(page, selector) {
       return true;
     }
 
-    /**
-     *
-     * @param {*} container
-     * @param {*} query
-     * @return {boolean}
-     */
-    function shadowHasSelector(container, query) {
-      const shadowHosts = container.querySelectorAll('.i-amphtml-shadow-host');
-      for (const host of shadowHosts) {
-        const foundEl = host.shadowRoot.querySelector(query);
-        if (foundEl) {
-          return true;
-        }
-      }
-      return false;
-    }
     // If nothing was found in Light DOM, check shadow
     if (
-      await page.evaluate(() => shadowHasSelector(window.document, selector))
+      await page.evaluate((selector) => {
+        /**
+         *
+         * @param {*} container
+         * @param {*} query
+         * @return {boolean}
+         */
+        function shadowHasSelector(container, query) {
+          const shadowHosts = container.querySelectorAll(
+            '.i-amphtml-shadow-host'
+          );
+          for (const host of shadowHosts) {
+            const foundEl = host.shadowRoot.querySelector(query);
+            if (foundEl) {
+              return true;
+            }
+          }
+          return false;
+        }
+
+        return shadowHasSelector(window.document, selector);
+      }, selector)
     ) {
       return true;
     }
