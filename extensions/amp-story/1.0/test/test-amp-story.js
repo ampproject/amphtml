@@ -1505,7 +1505,6 @@ describes.realWin(
 
           it('should trigger the navigation overlay', async () => {
             await createStoryWithPages(2);
-
             dispatchSwipeEvent(100, 0);
             await story.mutateElement(() => {
               const hintEl = story.element.querySelector(
