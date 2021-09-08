@@ -201,7 +201,7 @@ export class ConsentUI {
       if (!isEsm() && promptElement.querySelector('amp-iframe')) {
         user().error(
           TAG,
-          '`promptUI` element contains an <amp-iframe>. This may cause content flashing when consent is not required. Consider using `promptUISrc` instead. https://go.amp.dev/c/amp-analytics'
+          '`promptUI` element contains an <amp-iframe>. This may cause content flashing when consent is not required. Consider using `promptUISrc` instead. See https://go.amp.dev/c/amp-analytics'
         );
       }
       this.ui_ = dev().assertElement(promptElement);
