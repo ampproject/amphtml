@@ -1,5 +1,4 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
@@ -28,8 +27,7 @@ const DROP_STYLE = {
 
 export default {
   title: 'Animation',
-  decorators: [withKnobs, withAmp],
-
+  decorators: [withAmp],
   parameters: {
     extensions: [{name: 'amp-animation', version: 0.1}],
   },

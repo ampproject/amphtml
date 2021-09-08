@@ -1,12 +1,12 @@
 import * as Preact from '#preact';
-import {Brightcove} from '../component';
+import {BentoBrightcove} from '../component';
 import {mount} from 'enzyme';
 import {parseUrlDeprecated} from '../../../../src/url';
 
 describes.sandboxed('Brightcove preact component v1.0', {}, () => {
   it('renders', async () => {
     const wrapper = mount(
-      <Brightcove account="1290862519001" videoId="ref:amp-test-video" />
+      <BentoBrightcove account="1290862519001" videoId="ref:amp-test-video" />
     );
     const iframe = wrapper.find('iframe');
     expect(iframe).to.not.be.null;
@@ -19,7 +19,7 @@ describes.sandboxed('Brightcove preact component v1.0', {}, () => {
 
   it('should pass data-param-* attributes to the iframe src', async () => {
     const wrapper = mount(
-      <Brightcove
+      <BentoBrightcove
         account="1290862519001"
         videoId="ref:amp-test-video"
         urlParams={{myParam: 'hello world'}}
@@ -32,7 +32,7 @@ describes.sandboxed('Brightcove preact component v1.0', {}, () => {
 
   it('should exclude data-param-autoplay attribute', async () => {
     const wrapper = mount(
-      <Brightcove
+      <BentoBrightcove
         account="1290862519001"
         videoId="ref:amp-test-video"
         urlParams={{autoplay: 'muted'}}
@@ -45,7 +45,7 @@ describes.sandboxed('Brightcove preact component v1.0', {}, () => {
 
   it('should give precedence to playlist id', async () => {
     const wrapper = mount(
-      <Brightcove
+      <BentoBrightcove
         account="1290862519001"
         videoId="ref:amp-test-video"
         playlistId="ref:test-playlist"
@@ -57,21 +57,26 @@ describes.sandboxed('Brightcove preact component v1.0', {}, () => {
   });
 
   it('should allow both playlist and video id to be unset', async () => {
-    const wrapper = mount(<Brightcove account="1290862519001" />);
+    const wrapper = mount(<BentoBrightcove account="1290862519001" />);
     const iframe = wrapper.find('iframe');
     expect(iframe.prop('src')).not.to.contain('&playlistId');
     expect(iframe.prop('src')).not.to.contain('&videoId');
   });
 
   it('should pass referrer', async () => {
-    const wrapper = mount(<Brightcove account="1290862519001" referrer="1" />);
+    const wrapper = mount(
+      <BentoBrightcove account="1290862519001" referrer="1" />
+    );
     const iframe = wrapper.find('iframe');
     expect(iframe.prop('src')).to.contain('referrer=1');
   });
 
   it('should force playsinline', async () => {
     const wrapper = mount(
-      <Brightcove account="1290862519001" urlParams={{playsinline: false}} />
+      <BentoBrightcove
+        account="1290862519001"
+        urlParams={{playsinline: false}}
+      />
     );
     const iframe = wrapper.find('iframe');
     expect(iframe.prop('src')).to.contain('playsinline=true');
