@@ -14,8 +14,12 @@ function compile(request) {
   const document = request.document ?? {root: 0, tree: []};
   const versions = request.versions ?? {'amp-layout': 'v0'};
 
-  // TODO(samouri): handle type=error case.
-  return {document: compiler.renderAst(document, getBuilders(versions)).value};
+  const result = compiler.renderAst(document, getBuilders(versions));
+  if (result.error) {
+    const [tagName, errorMsg] = Array.from(result.error)[0];
+    throw new Error(`Failure to render: ${tagName}: ${errorMsg}`);
+  }
+  return {document: result.value};
 }
 
 globalThis['compile'] = compile;
