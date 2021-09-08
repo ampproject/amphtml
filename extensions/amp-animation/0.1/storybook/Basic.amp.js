@@ -28,7 +28,7 @@ const KEYFRAMES_OPTIONS = {
   },
 };
 
-const keyframesOptionValues = Object.keys(KEYFRAMES_OPTIONS);
+const keyframesOptions = Object.keys(KEYFRAMES_OPTIONS);
 
 const BLOCK_STYLE = {
   background: 'blue',
@@ -45,11 +45,11 @@ export default {
   argTypes: {
     keyframesName: {
       control: {type: 'select'},
-      options: keyframesOptionValues,
+      options: keyframesOptions,
     },
   },
   args: {
-    keyframesName: keyframesOptionValues[0],
+    keyframesName: keyframesOptions[0],
     easing: 'cubic-bezier(0,0,.21,1)',
   },
 };

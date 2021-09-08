@@ -14,28 +14,19 @@ export default {
     'data-video-id': 'ref:amp-docs-sample',
     'data-player-id': 'SyIOV8yWM',
     'data-account': '1290862519001',
+    'data-referrer': 'EXTERNAL_REFERRER',
     height: '270',
     width: '480',
   },
 };
 
 export const Default = (args) => {
-  return (
-    <amp-brightcove
-      data-referrer="EXTERNAL_REFERRER"
-      layout="responsive"
-      {...args}
-    ></amp-brightcove>
-  );
+  return <amp-brightcove layout="responsive" {...args}></amp-brightcove>;
 };
 
 export const WithPlaceholderAndFallback = (args) => {
   return (
-    <amp-brightcove
-      data-referrer="EXTERNAL_REFERRER"
-      layout="responsive"
-      {...args}
-    >
+    <amp-brightcove layout="responsive" {...args}>
       <div placeholder style="background:red">
         Placeholder. Loading content...
       </div>
