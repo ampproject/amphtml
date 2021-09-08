@@ -17,7 +17,7 @@
 /** @externs */
 
 /** @const */
-var EmbedlyCardDef = {};
+var BentoEmbedlyCardDef = {};
 
 /**
  * @typedef {{
@@ -27,11 +27,11 @@ var EmbedlyCardDef = {};
  *   url: (string),
  * }}
  */
-EmbedlyCardDef.Props;
+BentoEmbedlyCardDef.Props;
 
 /**
  * @typedef {{
  *   apiKey: (string|undefined),
  * }}
  */
-EmbedlyCardDef.EmbedlyContext;
+BentoEmbedlyCardDef.EmbedlyContext;

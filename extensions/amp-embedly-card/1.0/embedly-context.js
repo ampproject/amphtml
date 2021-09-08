@@ -15,7 +15,7 @@
  */
 import {createContext} from '#preact';
 
-const EmbedlyContext = createContext(
-  /** @type {EmbedlyCardDef.EmbedlyContext} */ ({apiKey: ''})
+const BentoEmbedlyContext = createContext(
+  /** @type {BentoEmbedlyCardDef.EmbedlyContext} */ ({apiKey: ''})
 );
-export {EmbedlyContext};
+export {BentoEmbedlyContext};
