@@ -1,7 +1,6 @@
 /**
  * Polyfills for the compiler.js binary.
  * It is meant to run in a barebones v8 environment.
- *
  * That means no builtins provided by either Node.js or Browsers.
  * This includes: setTimeout, Node, self, etc.
  *
