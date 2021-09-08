@@ -8,7 +8,7 @@ import {
 } from '../component';
 
 export default {
-  title: 'BentoAccordion',
+  title: 'Accordion',
   component: BentoAccordion,
   args: {
     expandSingleSection: false,
@@ -20,7 +20,7 @@ export default {
  * @param {!Object} props
  * @return {*}
  */
-function BentoAccordionWithActions(props) {
+function AccordionWithActions(props) {
   // TODO(#30447): replace imperative calls with "button" knobs when the
   // Storybook 6.1 is released.
   const ref = Preact.useRef();
@@ -48,7 +48,7 @@ function BentoAccordionWithActions(props) {
 export const _default = (args) => {
   return (
     <main>
-      <BentoAccordionWithActions {...args}>
+      <AccordionWithActions {...args}>
         <BentoAccordionSection id="section1" key={1}>
           <BentoAccordionHeader>
             <h2>Section 1</h2>
@@ -69,7 +69,7 @@ export const _default = (args) => {
             Elephants have great memory.
           </BentoAccordionContent>
         </BentoAccordionSection>
-      </BentoAccordionWithActions>
+      </AccordionWithActions>
     </main>
   );
 };
@@ -78,7 +78,7 @@ export const _default = (args) => {
  * @param {!Object} props
  * @return {*}
  */
-function BentoAccordionWithEvents(props) {
+function AccordionWithEvents(props) {
   // TODO(#30447): replace imperative calls with "button" knobs when the
   // Storybook 6.1 is released.
   const ref = Preact.useRef();
@@ -138,7 +138,7 @@ function BentoAccordionWithEvents(props) {
 export const events = (args) => {
   return (
     <main>
-      <BentoAccordionWithEvents {...args}></BentoAccordionWithEvents>
+      <AccordionWithEvents {...args}></AccordionWithEvents>
     </main>
   );
 };

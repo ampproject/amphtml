@@ -2,7 +2,7 @@ import * as Preact from '#preact';
 import {BentoBaseCarousel} from '../component';
 
 export default {
-  title: 'BentoBaseCarousel',
+  title: 'BaseCarousel',
   component: BentoBaseCarousel,
 };
 
@@ -134,12 +134,12 @@ export const MixedLength = ({
   height,
   orientation,
   preset,
-  slideCount,
   snap,
   snapAlign,
   width,
   ...args
 }) => {
+  const slideCount = 15;
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   const horizontal = orientation == 'horizontal';
   return (
@@ -175,7 +175,6 @@ MixedLength.args = {
   autoAdvanceInterval: 1000,
   autoAdvanceLoops: 3,
   controls: 'auto',
-  slideCount: 5,
   loop: true,
   snap: true,
   snapAlign: 'start',
