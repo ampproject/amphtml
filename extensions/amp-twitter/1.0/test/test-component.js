@@ -1,5 +1,5 @@
 import * as Preact from '#preact';
-import {Twitter} from '../component';
+import {BentoTwitter} from '../component';
 import {WithAmpContext} from '#preact/context';
 import {createRef} from '#preact';
 import {mount} from 'enzyme';
@@ -9,7 +9,7 @@ import {waitFor} from '#testing/test-helper';
 describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
   it('should render', () => {
     const wrapper = mount(
-      <Twitter
+      <BentoTwitter
         tweetid="1356304203044499462"
         style={{
           'width': '500px',
@@ -30,7 +30,7 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
   it('should call given requestResize', () => {
     const requestResizeSpy = env.sandbox.spy();
     const wrapper = mount(
-      <Twitter
+      <BentoTwitter
         tweetid="1356304203044499462"
         style={{
           'width': '500px',
@@ -59,7 +59,7 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
 
   it('should change height', async () => {
     const wrapper = mount(
-      <Twitter
+      <BentoTwitter
         tweetid="1356304203044499462"
         style={{
           'width': '500px',
@@ -96,7 +96,7 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
     const ref = createRef();
     const onReadyState = env.sandbox.spy();
     const wrapper = mount(
-      <Twitter
+      <BentoTwitter
         ref={ref}
         tweetid="1356304203044499462"
         style={{
@@ -121,7 +121,7 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
     const ref = createRef();
     const wrapper = mount(
       <WithAmpContext playable={true}>
-        <Twitter
+        <BentoTwitter
           ref={ref}
           tweetid="1356304203044499462"
           style={{
@@ -144,13 +144,13 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
     const onErrorSpy = env.sandbox.spy();
 
     const wrapper = mount(
-      <Twitter
+      <BentoTwitter
         tweetid="1356304203044499462"
         height="500"
         width="500"
         onLoad={onLoadSpy}
         onError={onErrorSpy}
-      ></Twitter>
+      ></BentoTwitter>
     );
 
     const iframe = wrapper.find('iframe').getDOMNode();
@@ -169,13 +169,13 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
     const onLoadSpy = env.sandbox.spy();
 
     const wrapper = mount(
-      <Twitter
+      <BentoTwitter
         tweetid="00000000111111"
         height="500"
         width="500"
         onError={onErrorSpy}
         onLoad={onLoadSpy}
-      ></Twitter>
+      ></BentoTwitter>
     );
 
     const iframe = wrapper.find('iframe').getDOMNode();

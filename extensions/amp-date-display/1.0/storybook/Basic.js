@@ -2,11 +2,11 @@ import {date, select, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
-import {DateDisplay} from '../component';
+import {BentoDateDisplay} from '../component';
 
 export default {
   title: 'DateDisplay',
-  component: DateDisplay,
+  component: BentoDateDisplay,
   decorators: [withKnobs],
 };
 
@@ -22,7 +22,7 @@ export const _default = () => {
   );
   const locale = select('Locale', LOCALES, LOCALES[0]);
   return (
-    <DateDisplay
+    <BentoDateDisplay
       datetime={dateTime}
       displayIn={displayIn}
       locale={locale}
@@ -42,6 +42,10 @@ export const defaultRenderer = () => {
   const dateTime = date('Date/time', new Date());
   const locale = select('Locale', LOCALES, LOCALES[0]);
   return (
-    <DateDisplay datetime={dateTime} displayIn={displayIn} locale={locale} />
+    <BentoDateDisplay
+      datetime={dateTime}
+      displayIn={displayIn}
+      locale={locale}
+    />
   );
 };

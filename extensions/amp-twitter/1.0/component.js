@@ -3,6 +3,7 @@ import {ProxyIframeEmbed} from '#preact/component/3p-frame';
 import {MessageType, deserializeMessage} from '#core/3p-frame-messaging';
 import {forwardRef} from '#preact/compat';
 import {useCallback, useMemo, useState} from '#preact';
+import {useValueRef} from '#preact/component';
 
 /** @const {string} */
 const TYPE = 'twitter';
@@ -10,11 +11,11 @@ const FULL_HEIGHT = '100%';
 const MATCHES_MESSAGING_ORIGIN = () => true;
 
 /**
- * @param {!TwitterDef.Props} props
- * @param {{current: (!TwitterDef.Api|null)}} ref
+ * @param {!BentoTwitterDef.Props} props
+ * @param {{current: (!BentoTwitterDef.Api|null)}} ref
  * @return {PreactDef.Renderable}
  */
-function TwitterWithRef(
+function BentoTwitterWithRef(
   {
     cards,
     conversation,
@@ -36,6 +37,9 @@ function TwitterWithRef(
   ref
 ) {
   const [height, setHeight] = useState(null);
+  const onLoadRef = useValueRef(onLoad);
+  const onErrorRef = useValueRef(onError);
+
   const messageHandler = useCallback(
     (event) => {
       const data = deserializeMessage(event.data);
@@ -48,12 +52,12 @@ function TwitterWithRef(
           setHeight(height);
         }
 
-        onLoad?.();
+        onLoadRef.current?.();
       } else if (data['type'] === MessageType.NO_CONTENT) {
-        onError?.();
+        onErrorRef.current?.();
       }
     },
-    [requestResize, onLoad, onError]
+    [requestResize, onLoadRef, onErrorRef]
   );
   const options = useMemo(
     () => ({
@@ -98,6 +102,6 @@ function TwitterWithRef(
   );
 }
 
-const Twitter = forwardRef(TwitterWithRef);
-Twitter.displayName = 'Twitter'; // Make findable for tests.
-export {Twitter};
+const BentoTwitter = forwardRef(BentoTwitterWithRef);
+BentoTwitter.displayName = 'BentoTwitter'; // Make findable for tests.
+export {BentoTwitter};

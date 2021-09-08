@@ -1,21 +1,22 @@
 import * as Preact from '#preact';
-import {__component_name_pascalcase__} from '../component'
-import {withKnobs} from '@storybook/addon-knobs';
+import {Bento__component_name_pascal_case__} from '../component'
 
 export default {
   title: '__component_name_pascalcase__',
-  component: __component_name_pascalcase__,
-  decorators: [withKnobs],
+  component: Bento__component_name_pascal_case__,
+  args: {
+    'exampleProperty': 'example string property argument'
+  }
 };
 
-export const _default = () => {
-  // __do_not_submit__: This is example code only.
+// __do_not_submit__: This is example code only.
+export const _default = (args) => {
   return (
-    <__component_name_pascalcase__
+    <Bento__component_name_pascal_case__
       style={{width: 300, height: 200}}
-      example-property="example string property value"
+      {...args}
     >
       This text is inside.
-    </__component_name_pascalcase__>
+    </Bento__component_name_pascal_case__>
   );
 };
