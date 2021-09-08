@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.182 */
+/** Version: 0.1.22.183 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -4683,7 +4683,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.182',
+    '_client': 'SwG 0.1.22.183',
   });
 }
 
@@ -5951,7 +5951,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.182',
+        '_client': 'SwG 0.1.22.183',
         'supportsEventManager': true,
       },
       args || {}
@@ -6830,7 +6830,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.182');
+    context.setClientVersion('SwG 0.1.22.183');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -10882,20 +10882,19 @@ class EntitlementsManager {
     let source = null;
 
     switch (event.eventOriginator) {
-      // The indicates the publisher reported it via subscriptions.setShowcaseEntitlement
+      // Publisher JS logged this event.
       case EventOriginator.SHOWCASE_CLIENT:
         source = EntitlementSource.PUBLISHER_ENTITLEMENT;
         break;
-      case EventOriginator.SWG_CLIENT: // Fallthrough, these are the same
-      case EventOriginator.SWG_SERVER:
+      // Swgjs logged this event.
+      case EventOriginator.SWG_CLIENT:
         if (result == EntitlementResult.UNLOCKED_METER) {
-          // Meters from Google require a valid jwt, which is sent by
-          // an entitlement.
+          // The `consumeMeter_` method already tracks this.
           return;
         }
+
         source = EntitlementSource.GOOGLE_SUBSCRIBER_ENTITLEMENT;
         break;
-      // Permission to pingback other sources was not requested
       default:
         return;
     }
@@ -15914,7 +15913,7 @@ const PAY_ORIGIN = {
 
 /** @return {string} */
 function payUrl() {
-  return feCached(PAY_ORIGIN['PRODUCTION'] + '/gp/p/ui/pay');
+  return feCached(PAY_ORIGIN[getSwgMode().payEnv] + '/gp/p/ui/pay');
 }
 
 /**
@@ -16005,7 +16004,7 @@ class PayClient {
     this.client_ = this.createClient_(
       /** @type {!PaymentOptions} */
       ({
-        environment: 'PRODUCTION',
+        environment: getSwgMode().payEnv,
         'i': {
           'redirectKey': this.redirectVerifierHelper_.restoreKey(),
         },
