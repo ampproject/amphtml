@@ -11,8 +11,11 @@ module.exports = {
     // since it only checks the structure of the outer iframe element.
     // Enable this once we find a way to inspect the iframe document's tree.
     // '@storybook/addon-a11y',
-    '@storybook/addon-viewport',
-    '@storybook/addon-knobs',
+    '@storybook/addon-viewport/register',
+    '@storybook/addon-controls/register',
+    // TODO(#35923): Remove addon-knobs once all stories are migrated to
+    // addon-controls (args/argTypes).
+    '@storybook/addon-knobs/register',
     '@ampproject/storybook-addon',
   ],
   managerWebpack: (config) => {

@@ -1,8 +1,8 @@
 'use strict';
 
 const babel = require('@babel/core');
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const path = require('path');
 const tempy = require('tempy');
 const {BABEL_SRC_GLOBS} = require('./sources');
@@ -47,7 +47,11 @@ function getBabelOutputDir() {
  * @return {!Array<string>}
  */
 function getFilesToTransform() {
-  return globby.sync([...BABEL_SRC_GLOBS, '!node_modules/', '!third_party/']);
+  return fastGlob.sync([
+    ...BABEL_SRC_GLOBS,
+    '!node_modules/**',
+    '!third_party/**',
+  ]);
 }
 
 /**

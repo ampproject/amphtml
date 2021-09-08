@@ -1,28 +1,24 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {boolean, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
 export default {
   title: 'amp-accordion-1_0',
-  decorators: [withKnobs, withAmp],
-
+  decorators: [withAmp],
   parameters: {
     extensions: [{name: 'amp-accordion', version: '1.0'}],
     experiments: ['bento'],
   },
+  args: {
+    'expand-single-section': false,
+    animate: false,
+  },
 };
 
-export const _default = () => {
-  const expandSingleSection = boolean('expandSingleSection', false);
-  const animate = boolean('animate', false);
+export const _default = (args) => {
   return (
     <main>
-      <amp-accordion
-        id="accordion"
-        expand-single-section={expandSingleSection}
-        animate={animate}
-      >
+      <amp-accordion id="accordion" {...args}>
         <section id="section1">
           <h2>Section 1</h2>
           <div>Puppies are cute.</div>
@@ -55,16 +51,10 @@ export const _default = () => {
   );
 };
 
-export const events = () => {
-  const expandSingleSection = boolean('expandSingleSection', false);
-  const animate = boolean('animate', false);
+export const events = (args) => {
   return (
     <main>
-      <amp-accordion
-        id="accordion"
-        expand-single-section={expandSingleSection}
-        animate={animate}
-      >
+      <amp-accordion id="accordion" {...args}>
         <section id="section1">
           <h2>Section 1</h2>
           <div>Puppies are cute.</div>

@@ -66,8 +66,17 @@ function createDefaultInfo() {
  * @return {PreactDef.Renderable}
  * @template T
  */
-function YoutubeWithRef(
-  {autoplay, loop, videoid, liveChannelid, params = {}, credentials, ...rest},
+function BentoYoutubeWithRef(
+  {
+    autoplay,
+    loop,
+    videoid,
+    liveChannelid,
+    onLoad,
+    params = {},
+    credentials,
+    ...rest
+  },
   ref
 ) {
   const datasourceExists =
@@ -128,6 +137,7 @@ function YoutubeWithRef(
 
     if (event == 'initialDelivery') {
       dispatchVideoEvent(currentTarget, VideoEvents.LOADEDMETADATA);
+      onLoad?.();
       return;
     }
 
@@ -237,6 +247,6 @@ function makeMethodMessage(method) {
   );
 }
 
-const Youtube = forwardRef(YoutubeWithRef);
-Youtube.displayName = 'Youtube'; // Make findable for tests.
-export {Youtube};
+const BentoYoutube = forwardRef(BentoYoutubeWithRef);
+BentoYoutube.displayName = 'BentoYoutube'; // Make findable for tests.
+export {BentoYoutube};

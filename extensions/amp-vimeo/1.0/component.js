@@ -3,6 +3,7 @@ import {dispatchCustomEvent} from '#core/dom';
 import * as Preact from '#preact';
 import {useCallback, useMemo, useRef} from '#preact';
 import {forwardRef} from '#preact/compat';
+import {useValueRef} from '#preact/component';
 
 import {
   objOrParseJson,
@@ -48,8 +49,8 @@ function makeMethodMessage(method) {
  * @return {PreactDef.Renderable}
  * @template T
  */
-export function VimeoWithRef(
-  {autoplay = false, doNotTrack = false, videoid, ...rest},
+function BentoVimeoWithRef(
+  {autoplay = false, doNotTrack = false, onLoad, videoid, ...rest},
   ref
 ) {
   const origin = useMemo(getVimeoOriginRegExp, []);
@@ -59,6 +60,8 @@ export function VimeoWithRef(
   );
 
   const readyIframeRef = useRef(null);
+  const onLoadRef = useValueRef(onLoad);
+
   const onReadyMessage = useCallback((iframe) => {
     if (readyIframeRef.current === iframe) {
       return;
@@ -82,10 +85,11 @@ export function VimeoWithRef(
       }
       if (VIMEO_EVENTS[event]) {
         dispatchEvent(currentTarget, VIMEO_EVENTS[event]);
+        onLoadRef.current?.();
         return;
       }
     },
-    [onReadyMessage]
+    [onReadyMessage, onLoadRef]
   );
 
   const onIframeLoad = useCallback((e) => {
@@ -108,6 +112,6 @@ export function VimeoWithRef(
   );
 }
 
-const Vimeo = forwardRef(VimeoWithRef);
-Vimeo.displayName = 'Vimeo'; // Make findable for tests.
-export {Vimeo};
+const BentoVimeo = forwardRef(BentoVimeoWithRef);
+BentoVimeo.displayName = 'BentoVimeo'; // Make findable for tests.
+export {BentoVimeo};

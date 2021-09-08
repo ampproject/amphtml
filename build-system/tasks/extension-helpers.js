@@ -1,8 +1,8 @@
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
 const debounce = require('../common/debounce');
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const path = require('path');
 const wrappers = require('../compile/compile-wrappers');
 const {
@@ -507,7 +507,7 @@ async function buildExtension(
  */
 async function buildNpmCss(extDir, options) {
   const startCssTime = Date.now();
-  const filenames = await globby(path.join(extDir, '**', '*.jss.js'));
+  const filenames = await fastGlob(path.join(extDir, '**', '*.jss.js'));
   if (!filenames.length) {
     return;
   }
@@ -720,12 +720,27 @@ async function buildExtensionJs(extDir, name, version, latestVersion, options) {
 
   const aliasBundle = extensionAliasBundles[name];
   const isAliased = aliasBundle && aliasBundle.version == version;
-  if (isAliased) {
+
+  const aliases = [
+    isAliased ? [name, aliasBundle.aliasedVersion] : null,
+    // TODO(alanorozco): We'd like to provide bento-foo.js binaries that only
+    // contain a Bento Custom Element like <bento-foo>.
+    // In the meantime, amp-foo.js and bento-foo.js are identical, and work on
+    // both AMP mode and Bento mode. Once we provide a unique bento-foo.js,
+    // we should remove the code that duplicates the binaries.
+    wrapperName === 'bento' ? [name.replace(/^amp-/, 'bento-'), version] : null,
+  ];
+
+  for (const aliasOptional of aliases) {
+    if (!aliasOptional) {
+      continue;
+    }
+    const [aliasedName, aliasedVersion] = aliasOptional;
     const src = maybeToEsmName(
       `${name}-${version}${options.minify ? '' : '.max'}.js`
     );
     const dest = maybeToEsmName(
-      `${name}-${aliasBundle.aliasedVersion}${options.minify ? '' : '.max'}.js`
+      `${aliasedName}-${aliasedVersion}${options.minify ? '' : '.max'}.js`
     );
     fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
     fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
