@@ -2,35 +2,6 @@
 
 ## Style Recommendations
 
-### Do not use Knobs
-
-Knobs have been deprecated and all Stories should instead use [Controls](https://storybook.js.org/docs/react/essentials/controls) moving forward.
-
-✅ Do:
-
-```js
-const MyStory = (args) => {
-  return <Foo {...args} />;
-};
-
-MyStory.args = {
-  foo: 'bar',
-};
-```
-
-🚫 Don't:
-
-```js
-import {text} from '@storybook/addons-knobs';
-
-const MyStory = () => {
-  const foo = text('foo', 'bar');
-  return <Foo foo={foo} />;
-};
-```
-
-Read on about [migrating from Knobs to Controls](https://github.com/storybookjs/storybook/blob/next/addons/controls/README.md#how-do-i-migrate-from-addon-knobs).
-
 ### Identify `args` and `argTypes` exactly like their component properties
 
 Passing a value from a Control specified through `args` or `argTypes` without modification is implicit when spreading `{...args}`.
