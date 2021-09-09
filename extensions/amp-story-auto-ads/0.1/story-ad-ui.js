@@ -260,7 +260,7 @@ function createCtaLayer_(a, doc, container) {
  * @param {!StoryAdUIMetadata} uiMetadata
  * @return {!Promise<?Element>} If anchor was successfully created.
  */
-export function createCta(doc, win, buttonFitter, container, uiMetadata) {
+export function createCta(doc, buttonFitter, container, uiMetadata) {
   const ctaUrl = uiMetadata[A4AVarNames.CTA_URL];
   const ctaText = uiMetadata[A4AVarNames.CTA_TYPE];
 
@@ -295,7 +295,7 @@ export function createCta(doc, win, buttonFitter, container, uiMetadata) {
     }
 
     const autoAdvanceExpBranch = getExperimentBranch(
-      win,
+      doc.defaultView,
       StoryAdPageOutlink.ID
     );
 

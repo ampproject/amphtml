@@ -443,7 +443,6 @@ export class StoryAdPage {
   createCtaLayer_(uiMetadata) {
     return createCta(
       this.doc_,
-      this.win_,
       devAssert(this.buttonFitter_),
       dev().assertElement(this.pageElement_), // Container.
       uiMetadata
