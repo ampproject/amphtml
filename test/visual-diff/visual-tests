@@ -559,16 +559,6 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-consent.js"
     },
     {
-      // The url here should not matter; this UI should be triggered for all
-      // story documents, based on the viewport dimensions.
-      "url": "examples/visual-tests/amp-story/basic.html",
-      "name": "amp-story: rotation overlay",
-      "viewport": {"width": 480, "height": 320},
-      "loading_complete_selectors": [
-        ".i-amphtml-story-no-rotation-overlay"
-      ]
-    },
-    {
       // TODO(#27453, @ampproject/wg-monetization): disabled in #21935 because this test is not hermetic.
       "flaky": true,
       "url": "examples/visual-tests/amp-inabox/amp-inabox-gpt.html",

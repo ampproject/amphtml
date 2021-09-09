@@ -3,7 +3,6 @@
 @import './amp-story-access.css';
 @import './amp-story-affiliate-link.css';
 @import './amp-story-desktop-one-panel.css';
-@import './amp-story-desktop-panels.css';
 @import './amp-story-draggable-drawer.css';
 @import './amp-story-page-attachment.css';
 @import './amp-story-templates.css';
@@ -997,8 +996,4 @@ amp-story-interactive-results[chip-style="transparent"] {
 amp-story-interactive-results[theme="dark"][chip-style="transparent"] {
   --i-amphtml-interactive-option-text-color: white !important;
   --interactive-prompt-text-color: white;
-}
-
-amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-component {
-  --i-amphtml-interactive-animation-delay: 350ms !important;
 }

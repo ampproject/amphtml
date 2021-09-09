@@ -18,13 +18,6 @@
   right: 0 !important;
 }
 
-.i-amphtml-ad-overlay-container[desktop-panels] {
-  /* On desktop a story page has a with of 45vh. */
-  left: calc(50vw - 22.5vh) !important;
-  /* And a height of 75 vh. */
-  top: 12.5vh !important;
-}
-
 .i-amphtml-story-ad-badge-svg {
   top: 50%  !important;
   left: 50% !important;
@@ -42,11 +35,6 @@
 [dir='rtl'] .i-amphtml-story-ad-badge {
   margin-left: 0px !important;
   margin-right: 16px !important;
-}
-
-[ad-showing][desktop-panels] .i-amphtml-story-ad-badge {
-  /* Have to wait for page to slide in. */
-  transition: opacity 0.1s linear 0.3s;
 }
 
 [ad-showing] .i-amphtml-story-ad-badge {
