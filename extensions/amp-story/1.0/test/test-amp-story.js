@@ -1467,10 +1467,8 @@ describes.realWin(
         };
 
         const dispatchSwipeEvent = (deltaX, deltaY) => {
-          // Don't do this at home. :(
-          // Forces mobile experience so overlay will attach.
-          story.desktopOnePanelMedia_ = {matches: false};
-          story.buildCallback();
+          // Triggers mobile UI so hint overlay can attach.
+          story.storeService_.dispatch(Action.TOGGLE_UI, UIType.MOBILE);
 
           story.element.dispatchEvent(
             new TouchEvent('touchstart', getTouchOptions(-10, -10))
