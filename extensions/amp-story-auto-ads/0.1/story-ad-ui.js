@@ -254,7 +254,6 @@ function createCtaLayer_(a, doc, container) {
 
 /**
  * @param {!Document} doc
- * @param {!Window} win
  * @param {!./story-ad-button-text-fitter.ButtonTextFitter} buttonFitter
  * @param {!Element} container
  * @param {!StoryAdUIMetadata} uiMetadata
