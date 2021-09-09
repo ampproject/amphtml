@@ -87,7 +87,7 @@ In the following example, we specified a `min-font-size` of `40`, and added more
 
 ```html
 <div style="width: 300px; height: 300px; background:#005AF0; color: #FFF;">
-  <bento-fit-text width="200" height="200" layout="responsive" min-font-size="40">
+  <bento-fit-text min-font-size="40">
     Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque
     inermis reprehendunt. Lorem ipsum dolor sit amet, has nisl nihil convenire
     et, vim at aeque inermis reprehendunt
@@ -137,7 +137,7 @@ While overflowing content is _visually_ truncated to fit the container, note tha
 ##### Media Queries
 
 The attributes for `<bento-fit-text>` can be configured to use different
-options based on a [media query](./../../docs/spec/amp-html-responsive-attributes.md).
+options based on a [media query](./../../../docs/spec/amp-html-responsive-attributes.md).
 
 ##### `min-font-size`
 
