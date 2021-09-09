@@ -77,7 +77,12 @@ export function Iframe({
         return;
       }
       dataRef.current = event.data;
-      if (isIntersectingRef.current !== null) {
+      // We only allow resizing when the iframe is outside the viewport,
+      // to guarantee CLS compliance. This may have the side effect of the iframe
+      // not resizing on `embed-size` postMessage while it's within the viewport
+      // where an author wants to resize the iframe. In that
+      // case remove this check & call `attemptResize` directly.
+      if (isIntersectingRef.current === false) {
         attemptResize();
       }
     },
