@@ -126,25 +126,6 @@ describes.sandboxed('DOM - layout - Viewport Observer', {}, (env) => {
       expect(spy).not.called;
     });
 
-    it('can observe multiple elements', () => {
-      const el1InObEntries = [];
-      const el2InObEntries = [];
-
-      observeIntersections(el1, (entry) => el1InObEntries.push(entry));
-      observeIntersections(el2, (entry) => el2InObEntries.push(entry));
-      toggleViewport(el1, false);
-      toggleViewport(el2, true);
-      toggleViewport(el1, true);
-      toggleViewport(el2, false);
-
-      expect(el1InObEntries[0].target).to.eql(el1);
-      expect(el1InObEntries[1].target).to.eql(el2);
-      expect(el1InObEntries[0].isIntersecting).to.be.false;
-      expect(el1InObEntries[1].isIntersecting).to.be.true;
-      expect(el2InObEntries[0].isIntersecting).to.be.true;
-      expect(el2InObEntries[1].isIntersecting).to.be.false;
-    });
-
     it('can have multiple obsevers for the same element', () => {
       let elInObEntries = [];
 
