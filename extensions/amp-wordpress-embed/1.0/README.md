@@ -124,16 +124,13 @@ npm install @ampproject/bento-wordpress-embed
 
 ```javascript
 import React from 'react';
-import {BaseCarousel} from '@ampproject/bento-wordpress-embed/react';
-import '@ampproject/bento-wordpress-embed/styles.css';
+import {BentoWordPressEmbed} from '@ampproject/bento-wordpress-embed/react';
 
 function App() {
   return (
-    <BaseCarousel>
-      <img src="puppies.jpg" />
-      <img src="kittens.jpg" />
-      <img src="hamsters.jpg" />
-    </BaseCarousel>
+    <BentoWordPressEmbed
+      url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
+    ></BentoWordPressEmbed>
   );
 }
 ```
