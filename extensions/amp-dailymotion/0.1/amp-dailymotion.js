@@ -215,15 +215,15 @@ class AmpDailymotion extends AMP.BaseElement {
   /**
    * Sends a command to the player through postMessage.
    * @param {string} command
-   * @param {Array<boolean>=} opt_args
+   * @param {boolean} opt_arg
    * @private
    */
-  sendCommand_(command, opt_args) {
+  sendCommand_(command, opt_arg) {
     const endpoint = 'https://www.dailymotion.com';
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
         this.iframe_.contentWindow./*OK*/ postMessage(
-          makeDailymotionMessage(command, opt_args),
+          makeDailymotionMessage(command, opt_arg),
           endpoint
         );
       }

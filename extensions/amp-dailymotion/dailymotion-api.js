@@ -53,14 +53,14 @@ export function getDailymotionIframeSrc(
 
 /**
  * @param {string} command
- * @param {?Object|string=} params
+ * @param {?boolean} param
  * @return {string}
  */
-export function makeDailymotionMessage(command, params = []) {
+export function makeDailymotionMessage(command, param) {
   return JSON.stringify(
     dict({
       'command': command,
-      'parameters': params,
+      'parameters': param,
     })
   );
 }
