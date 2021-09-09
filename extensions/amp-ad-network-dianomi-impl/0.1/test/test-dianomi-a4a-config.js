@@ -23,6 +23,8 @@ describes.fakeWin('amp-ad-network-dianomi-impl', {amp: true}, (env) => {
     it('should be valid', () => {
       const requestParamId = '5519';
       element.setAttribute('data-request-param-id', requestParamId);
+      element.setAttribute('data-dianomi-env', 'live');
+      element.setAttribute('data-dianomi-type', 'smartads');
       expect(impl.getAdUrl()).to.equal(
         `https://www.dianomi.com/smartads.pl?format=a4a&id=${requestParamId}`
       );
@@ -43,6 +45,28 @@ describes.fakeWin('amp-ad-network-dianomi-impl', {amp: true}, (env) => {
       allowConsoleError(() => {
         expect(() => impl.getAdUrl()).to.throw(
           'The Dianomi request parameter ID provided is invalid'
+        );
+      });
+    });
+
+    it('should throw an error if provided an incorrect dianomi-type param', () => {
+      const requestParamId = '1452';
+      element.setAttribute('data-request-param-id', requestParamId);
+      element.setAttribute('data-dianomi-type', 'wrongType');
+      allowConsoleError(() => {
+        expect(() => impl.getAdUrl()).to.throw(
+          'The Dianomi type parameter \'wrongtype\' is not a valid input'
+        );
+      });
+    });
+
+    it('should throw an error if provided an incorrect dianomi-env param', () => {
+      const requestParamId = '1452';
+      element.setAttribute('data-request-param-id', requestParamId);
+      element.setAttribute('data-dianomi-env', 'wrongEnv');
+      allowConsoleError(() => {
+        expect(() => impl.getAdUrl()).to.throw(
+          'The Dianomi env parameter \'wrongenv\' is not a valid input'
         );
       });
     });
