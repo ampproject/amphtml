@@ -122,7 +122,7 @@ Install via npm:
 npm install @ampproject/bento-wordpress-embed
 ```
 
-```javascript
+```jsx
 import React from 'react';
 import {BentoWordPressEmbed} from '@ampproject/bento-wordpress-embed/react';
 
