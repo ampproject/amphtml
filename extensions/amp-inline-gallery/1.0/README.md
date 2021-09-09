@@ -46,6 +46,7 @@ The example below contains a `bento-inline-gallery` consisting of three slides w
 <head>
   <script src="https://cdn.ampproject.org/custom-elements-polyfill.js"></script>
   <script async src="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-inline-gallery-1.0.css">
 </head>
 <body>
 

@@ -50,6 +50,8 @@ The example below contains an `bento-stream-gallery` with three sections. The
 <head>
   <script src="https://cdn.ampproject.org/custom-elements-polyfill.js"></script>
   <script async src="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-streamGallery-1.0.css">
+
 </head>
 <body>
   <bento-stream-gallery>
