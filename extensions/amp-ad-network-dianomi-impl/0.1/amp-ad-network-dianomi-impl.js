@@ -5,14 +5,14 @@ const REQUEST_PARAM_ID = new RegExp(/^.[0-9]*$/);
 
 /**
  * Dianomi ad types
- * @type {string[]}
+ * @type {Array<string>} TYPES
  * @private
  */
 const TYPES = ['smartads', 'recirc', 'context'];
 
 /**
  * Dianomi environments
- * @type {object}
+ * @type {object} ENVIRONMENTS
  * @private
  */
 const ENVIRONMENTS = {
