@@ -52,7 +52,7 @@ Unlike `0.1`, the experimental `1.0` version of `amp-fit-text` does not account 
 
 ### Standalone use outside valid AMP documents
 
-Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
+Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/). To find the standalone version of `amp-fit-text`, see [`bento-fit-text`](./1.0/README.md).
 
 #### Example
 
@@ -148,11 +148,11 @@ options based on a [media query](./../../docs/spec/amp-html-responsive-attribute
 
 ### `min-font-size`
 
-Specifies the minimum font size as an integer that the `amp-fit-text` can use.
+Specifies the minimum font size in pixels as an integer that the `amp-fit-text` can use.
 
 ### `max-font-size`
 
-Specifies the maximum font size as an integer that the `amp-fit-text` can use.
+Specifies the maximum font size in pixels as an integer that the `amp-fit-text` can use.
 
 ### Common attributes
 
