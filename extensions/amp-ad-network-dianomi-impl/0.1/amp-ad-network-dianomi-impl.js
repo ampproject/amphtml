@@ -5,7 +5,6 @@ const REQUEST_PARAM_ID = new RegExp(/^.[0-9]*$/);
 
 /**
  * Dianomi ad types
- * 
  * @type {string[]}
  * @private
  */
@@ -13,7 +12,6 @@ const TYPES = ['smartads', 'recirc', 'context'];
 
 /**
  * Dianomi environments
- * 
  * @type {object}
  * @private
  */
@@ -36,7 +34,7 @@ export class AmpAdNetworkDianomiImpl extends AmpA4A {
       env = ENVIRONMENTS[envAttr.toLowerCase()];
     }
 
-    if(typeAttr) {
+    if (typeAttr) {
       assertArray(TYPES, typeAttr.toLowerCase(), 'type');
       type = typeAttr.toLowerCase();
     }
@@ -52,10 +50,9 @@ export class AmpAdNetworkDianomiImpl extends AmpA4A {
 
 /**
  * Checks if value is in array and throws error if not
- * 
- * @param {Array} arr 
- * @param {string} value 
- * @param {string} type 
+ * @param {Array} arr
+ * @param {string} value
+ * @param {string} type
  */
 function assertArray(arr, value, type) {
   userAssert(

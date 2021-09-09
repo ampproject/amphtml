@@ -55,7 +55,7 @@ describes.fakeWin('amp-ad-network-dianomi-impl', {amp: true}, (env) => {
       element.setAttribute('data-dianomi-type', 'wrongType');
       allowConsoleError(() => {
         expect(() => impl.getAdUrl()).to.throw(
-          'The Dianomi type parameter \'wrongtype\' is not a valid input'
+          `The Dianomi type parameter 'wrongtype' is not a valid input`
         );
       });
     });
@@ -66,7 +66,7 @@ describes.fakeWin('amp-ad-network-dianomi-impl', {amp: true}, (env) => {
       element.setAttribute('data-dianomi-env', 'wrongEnv');
       allowConsoleError(() => {
         expect(() => impl.getAdUrl()).to.throw(
-          'The Dianomi env parameter \'wrongenv\' is not a valid input'
+          `The Dianomi env parameter 'wrongenv' is not a valid input`
         );
       });
     });
