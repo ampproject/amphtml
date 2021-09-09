@@ -141,11 +141,11 @@ options based on a [media query](./../../../docs/spec/amp-html-responsive-attrib
 
 ##### `min-font-size`
 
-Specifies the minimum font size as an integer that the `bento-fit-text` can use.
+Specifies the minimum font size in pixels as an integer that the `bento-fit-text` can use.
 
 ##### `max-font-size`
 
-Specifies the maximum font size as an integer that the `bento-fit-text` can use.
+Specifies the maximum font size in pixels as an integer that the `bento-fit-text` can use.
 
 ### Preact/React Component
 
@@ -211,8 +211,8 @@ Or via `className`:
 
 ##### `minFontSize`
 
-Specifies the minimum font size as an integer that the `bento-fit-text` can use.
+Specifies the minimum font size in pixels as an integer that the `bento-fit-text` can use.
 
 ##### `maxFontSize`
 
-Specifies the maximum font size as an integer that the `bento-fit-text` can use.
+Specifies the maximum font size in pixels as an integer that the `bento-fit-text` can use.

@@ -148,11 +148,11 @@ options based on a [media query](./../../docs/spec/amp-html-responsive-attribute
 
 ### `min-font-size`
 
-Specifies the minimum font size as an integer that the `amp-fit-text` can use.
+Specifies the minimum font size in pixels as an integer that the `amp-fit-text` can use.
 
 ### `max-font-size`
 
-Specifies the maximum font size as an integer that the `amp-fit-text` can use.
+Specifies the maximum font size in pixels as an integer that the `amp-fit-text` can use.
 
 ### Common attributes
 
