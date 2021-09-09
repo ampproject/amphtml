@@ -48,6 +48,7 @@ Currently, the supported players are:
 -   [`amp-dailymotion`](https://amp.dev/documentation/components/amp-dailymotion)
 -   [`amp-delight-player`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-delight-player/amp-delight-player.md)
 -   [`amp-ima-video`](https://amp.dev/documentation/components/amp-ima-video)
+-   [`amp-jwplayer`](https://amp.dev/documentation/components/amp-jwplayer)
 -   [`amp-video`](https://amp.dev/documentation/components/amp-video)
 -   [`amp-video-iframe`](https://amp.dev/documentation/components/amp-video-iframe)
 -   [`amp-youtube`](https://amp.dev/documentation/components/amp-youtube)

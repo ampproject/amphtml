@@ -75,7 +75,7 @@ For an example, visit [AMP By Example](https://amp.dev/documentation/examples/co
 
 attribute: **`dock`**
 
-This attribute is currently only supported for `amp-brightcove`, `amp-dailymotion`, `amp-delight-player`, `amp-ima-video`, `amp-video`, `amp-video-iframe` and `amp-youtube`.
+This attribute is currently only supported for `amp-brightcove`, `amp-dailymotion`, `amp-delight-player`, `amp-ima-video`, `amp-jwplayer`, `amp-video`, `amp-video-iframe` and `amp-youtube`.
 
 If this attribute is present and the video is playing manually, the video will
 be "minimized" and fixed to a corner when the user scrolls out of the video
