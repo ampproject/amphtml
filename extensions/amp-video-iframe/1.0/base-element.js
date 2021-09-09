@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
@@ -14,13 +15,16 @@
  * limitations under the License.
  */
 import {VideoIframe} from './component';
+=======
+import {BentoVideoIframe} from './component';
+>>>>>>> 8018c5d8f8... ♻️ Rename `VideoIframe` to `BentoVideoIframe` (#36005)
 
 import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
 
 export class BaseElement extends VideoBaseElement {}
 
 /** @override */
-BaseElement['Component'] = VideoIframe;
+BaseElement['Component'] = BentoVideoIframe;
 
 /** @override */
 BaseElement['props'] = {

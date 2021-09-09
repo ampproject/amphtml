@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
@@ -15,3 +16,7 @@
  */
 
 export {VideoIframe} from '../../amp-video/1.0/video-iframe';
+=======
+// Expose from package as BentoVideoIframe
+export {VideoIframe as BentoVideoIframe} from '../../amp-video/1.0/video-iframe';
+>>>>>>> 8018c5d8f8... ♻️ Rename `VideoIframe` to `BentoVideoIframe` (#36005)
