@@ -384,4 +384,8 @@ const AutoplayIconContent = /** @type {function():!PreactDef.Renderable} */ (
 
 const VideoWrapper = forwardRef(VideoWrapperWithRef);
 VideoWrapper.displayName = 'VideoWrapper'; // Make findable for tests.
+
+// VideoWrapper is used by many video component implementations, but we also
+// provide it as BentoVideo using default props.
 export {VideoWrapper};
+export {VideoWrapper as BentoVideo};

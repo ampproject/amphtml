@@ -2,6 +2,8 @@ import '../amp-jwplayer';
 import * as fullscreen from '#core/dom/fullscreen';
 import {htmlFor} from '#core/dom/static-template';
 
+import * as consent from '../../../../src/consent';
+import {parseUrlDeprecated} from '../../../../src/url';
 import {VideoEvents} from '../../../../src/video-interface';
 
 describes.realWin(
@@ -98,6 +100,34 @@ describes.realWin(
         expect(iframe.src).to.equal(
           'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=dog&backfill=true&isAMP=true'
         );
+      });
+
+      it('should pass data-player-querystring value to the iframe src', async () => {
+        const queryString = 'name1=abc&name2=xyz&name3=123';
+        const queryStringParams = queryString.split('&');
+        const jw = await getjwplayer({
+          'data-playlist-id': '482jsTAr',
+          'data-player-id': 'sDZEo0ea',
+          'data-player-querystring': queryString,
+        });
+        const iframe = jw.querySelector('iframe');
+        const params = parseUrlDeprecated(iframe.src).search.split('&');
+        for (let i = 0; i < queryStringParams.length; i++) {
+          expect(params).to.contain(queryStringParams[i]);
+        }
+      });
+
+      it('should pass data-player-param-* attributes to the iframe src', async () => {
+        const jw = await getjwplayer({
+          'data-playlist-id': '482jsTAr',
+          'data-player-id': 'sDZEo0ea',
+          'data-player-param-language': 'de',
+          'data-player-param-custom-ad-data': 'key:value;key2:value2',
+        });
+        const iframe = jw.querySelector('iframe');
+        const params = parseUrlDeprecated(iframe.src).search.split('&');
+        expect(params).to.contain('language=de');
+        expect(params).to.contain('customAdData=key%3Avalue%3Bkey2%3Avalue2');
       });
     });
 
@@ -246,6 +276,12 @@ describes.realWin(
           expect(spy).calledWith(detail);
         });
 
+        it('calls onSetup if valid setup message recieved', () => {
+          const spy = env.sandbox.spy(impl, 'onSetupOnce_');
+          mockMessage('setup');
+          expect(spy.called).to.be.true;
+        });
+
         it('updates fullscreen on message', () => {
           const enterSpy = env.sandbox.spy(impl, 'fullscreenEnter');
           const exitSpy = env.sandbox.spy(impl, 'fullscreenExit');
@@ -331,6 +367,117 @@ describes.realWin(
       });
     });
 
+    describe('setup', () => {
+      it('sends command with skin url', async () => {
+        const skinUrl = 'http://foo.bar.css';
+        const jwp = await getjwplayer({
+          'data-media-id': 'BZ6tc0gy',
+          'data-player-id': 'uoIbMPm3',
+          'data-config-skin-url': skinUrl,
+        });
+        const impl = await jwp.getImpl(false);
+        const spy = env.sandbox.stub(impl, 'postCommandMessage_');
+
+        impl.onSetup_();
+        const config = {skinUrl};
+        expect(spy).calledWith('setupConfig', config);
+      });
+
+      it('sends command with plugin url', async () => {
+        const pluginUrl = 'http://foo.bar.js';
+
+        const jwp = await getjwplayer({
+          'data-media-id': 'BZ6tc0gy',
+          'data-player-id': 'uoIbMPm3',
+          'data-config-plugin-url': pluginUrl,
+        });
+        const impl = await jwp.getImpl(false);
+        const spy = env.sandbox.stub(impl, 'postCommandMessage_');
+
+        impl.onSetup_();
+        const config = {pluginUrl};
+        expect(spy).calledWith('setupConfig', config);
+      });
+
+      it('sends command with json object', async () => {
+        const jwp = await getjwplayer({
+          'data-media-id': 'BZ6tc0gy',
+          'data-player-id': 'uoIbMPm3',
+          'data-config-json':
+            '{"playbackRateControls":true,"displaytitle":false}',
+        });
+        const impl = await jwp.getImpl(false);
+        const spy = env.sandbox.stub(impl, 'postCommandMessage_');
+
+        impl.onSetup_();
+        const config = {
+          playbackRateControls: true,
+          displaytitle: false,
+        };
+        expect(spy).calledWith('setupConfig', config);
+      });
+
+      it('sends command with json object and skin url', async () => {
+        const skinUrl = 'http://foo.bar.css';
+        const jwp = await getjwplayer({
+          'data-media-id': 'BZ6tc0gy',
+          'data-player-id': 'uoIbMPm3',
+          'data-config-skin-url': skinUrl,
+          'data-config-json':
+            '{"playbackRateControls":true,"displaytitle":false}',
+        });
+        const impl = await jwp.getImpl(false);
+        const spy = env.sandbox.stub(impl, 'postCommandMessage_');
+
+        impl.onSetup_();
+        const config = {
+          playbackRateControls: true,
+          displaytitle: false,
+          skinUrl,
+        };
+        expect(spy).calledWith('setupConfig', config);
+      });
+
+      it('sends command with json object containing custom params', async () => {
+        const jwp = await getjwplayer({
+          'data-media-id': 'BZ6tc0gy',
+          'data-player-id': 'uoIbMPm3',
+          'data-ad-cust-params': '{"key1": "value1","keyTest": "value2"}',
+        });
+        const impl = await jwp.getImpl(false);
+        const spy = env.sandbox.stub(impl, 'postCommandMessage_');
+
+        impl.onSetup_();
+        const config = {
+          adCustParams: {
+            key1: 'value1',
+            keyTest: 'value2',
+          },
+        };
+        expect(spy).calledWith('setupConfig', config);
+      });
+
+      it('sends command with json object containing ad macros', async () => {
+        const jwp = await getjwplayer({
+          'data-media-id': 'BZ6tc0gy',
+          'data-player-id': 'uoIbMPm3',
+          'data-ad-macro-test': 'value1',
+          'data-ad-macro-item-param': 'value2',
+        });
+        const impl = await jwp.getImpl(false);
+        const spy = env.sandbox.stub(impl, 'postCommandMessage_');
+
+        impl.onSetup_();
+        const config = {
+          adMacros: {
+            test: 'value1',
+            itemParam: 'value2',
+          },
+        };
+        expect(spy).calledWith('setupConfig', config);
+      });
+    });
+
     describe('createPlaceholderCallback', () => {
       it('should create a placeholder image', async () => {
         const jw = await getjwplayer({
@@ -400,6 +547,10 @@ describes.realWin(
       expect(imp['playerid_']).to.equal(attributes['data-player-id']);
       expect(imp['contentSearch_']).to.equal('');
       expect(imp['contentBackfill_']).to.equal('');
+      expect(imp['consentState_']).to.equal(null);
+      expect(imp['consentString_']).to.equal(null);
+      expect(imp['consentMetadata_']).to.equal(null);
+
       await jwp.layoutCallback();
 
       const placeholder = jwp.querySelector('[placeholder]');
@@ -442,6 +593,24 @@ describes.realWin(
         expect(iframe.src).to.equal(
           'https://content.jwplatform.com/players/zzz-sDZEo0ea.html?isAMP=true'
         );
+      });
+    });
+
+    it('adds consent data to iframe src', () => {
+      env.sandbox.stub(consent, 'getConsentPolicyInfo').resolves('test');
+      env.sandbox
+        .stub(consent, 'getConsentMetadata')
+        .resolves({gdprApplies: true, key: 2});
+
+      return getjwplayer({
+        'data-media-id': 'Wferorsv',
+        'data-player-id': 'sDZEo0ea',
+        'data-block-on-consent': '_till_accepted',
+      }).then((jw) => {
+        const iframe = jw.querySelector('iframe');
+
+        expect(iframe.src).to.contain('consentValue=test');
+        expect(iframe.src).to.contain('consentGdpr=true');
       });
     });
   }
