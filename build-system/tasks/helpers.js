@@ -870,7 +870,7 @@ function shouldUseClosure() {
   // the release process automatically. Since this experiment is actually on the build system
   // itself instead of runtime, it is never run through babel (where the replacements usually happen).
   // Therefore we must compute this one by hand.
-  return argv.define_experiment_constant !== 'ESBUILD_COMPILATION';
+  return argv.define_experiment_constant !== 'ESBUILD_COMPILATION' && false;
 }
 
 module.exports = {
