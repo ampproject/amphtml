@@ -28,14 +28,14 @@ test('create', async (t) => {
         '### AMP Version\n\n[2109080123000]' +
         '(https://github.com/ampproject/amphtml/releases/tag/2109080123000)\n\n' +
         '### Promotions\n\n' +
-        '- [x] <!-- tag=2109080123000 channel=beta-opt-in -->' +
+        '- [x] <!-- amp-version=2109080123000 channel=beta-opt-in -->' +
         '2109080123000 promoted to Experimental and Beta (opt-in) channels (testtime)\n' +
-        '- [ ] <!-- tag=2109080123000 channel=beta-percent -->' +
-        '2109080123000 promoted to Experimental and Beta (1% traffic) channels (PROMOTE_TIME)\n' +
-        '- [ ] <!-- tag=2109080123000 channel=stable -->' +
-        '2109080123000 promoted to Stable channel (PROMOTE_TIME)\n' +
-        '- [ ] <!-- tag=2109080123000 channel=lts -->' +
-        '2109080123000 promoted to LTS channel (PROMOTE_TIME)\n\n' +
+        '- [ ] <!-- amp-version=2109080123000 channel=beta-percent -->' +
+        '2109080123000 promoted to Experimental and Beta (1% traffic) channels <!-- promote-time -->\n' +
+        '- [ ] <!-- amp-version=2109080123000 channel=stable -->' +
+        '2109080123000 promoted to Stable channel <!-- promote-time -->\n' +
+        '- [ ] <!-- amp-version=2109080123000 channel=lts -->' +
+        '2109080123000 promoted to LTS channel <!-- promote-time -->\n\n' +
         '/cc @ampproject/release-on-duty',
     })
     .reply(201);
@@ -70,14 +70,14 @@ test('mark task complete', async (t) => {
                 '### AMP Version\n\n[2109080123000]' +
                 '(https://github.com/ampproject/amphtml/releases/tag/2109080123000)\n\n' +
                 '### Promotions\n\n' +
-                '- [x] <!-- tag=2109080123000 channel=beta-opt-in -->' +
+                '- [x] <!-- amp-version=2109080123000 channel=beta-opt-in -->' +
                 '2109080123000 promoted to Experimental and Beta (opt-in) channels (optintime)\n' +
-                '- [ ] <!-- tag=2109080123000 channel=beta-percent -->' +
-                '2109080123000 promoted to Experimental and Beta (1% traffic) channels (PROMOTE_TIME)\n' +
-                '- [ ] <!-- tag=2109080123000 channel=stable -->' +
-                '2109080123000 promoted to Stable channel (PROMOTE_TIME)\n' +
-                '- [ ] <!-- tag=2109080123000 channel=lts -->' +
-                '2109080123000 promoted to LTS channel (PROMOTE_TIME)\n\n' +
+                '- [ ] <!-- amp-version=2109080123000 channel=beta-percent -->' +
+                '2109080123000 promoted to Experimental and Beta (1% traffic) channels <!-- promote-time -->\n' +
+                '- [ ] <!-- amp-version=2109080123000 channel=stable -->' +
+                '2109080123000 promoted to Stable channel <!-- promote-time -->\n' +
+                '- [ ] <!-- amp-version=2109080123000 channel=lts -->' +
+                '2109080123000 promoted to LTS channel <!-- promote-time -->\n\n' +
                 '/cc @ampproject/release-on-duty',
             },
           ],
@@ -93,14 +93,14 @@ test('mark task complete', async (t) => {
         '### AMP Version\n\n[2109080123000]' +
         '(https://github.com/ampproject/amphtml/releases/tag/2109080123000)\n\n' +
         '### Promotions\n\n' +
-        '- [x] <!-- tag=2109080123000 channel=beta-opt-in -->' +
+        '- [x] <!-- amp-version=2109080123000 channel=beta-opt-in -->' +
         '2109080123000 promoted to Experimental and Beta (opt-in) channels (optintime)\n' +
-        '- [x] <!-- tag=2109080123000 channel=beta-percent -->' +
+        '- [x] <!-- amp-version=2109080123000 channel=beta-percent -->' +
         '2109080123000 promoted to Experimental and Beta (1% traffic) channels (testtime)\n' +
-        '- [ ] <!-- tag=2109080123000 channel=stable -->' +
-        '2109080123000 promoted to Stable channel (PROMOTE_TIME)\n' +
-        '- [ ] <!-- tag=2109080123000 channel=lts -->' +
-        '2109080123000 promoted to LTS channel (PROMOTE_TIME)\n\n' +
+        '- [ ] <!-- amp-version=2109080123000 channel=stable -->' +
+        '2109080123000 promoted to Stable channel <!-- promote-time -->\n' +
+        '- [ ] <!-- amp-version=2109080123000 channel=lts -->' +
+        '2109080123000 promoted to LTS channel <!-- promote-time -->\n\n' +
         '/cc @ampproject/release-on-duty',
     })
     .reply(200);
@@ -135,14 +135,14 @@ test('add cherrypick tasks', async (t) => {
                 '### AMP Version\n\n[2109080123000]' +
                 '(https://github.com/ampproject/amphtml/releases/tag/2109080123000)\n\n' +
                 '### Promotions\n\n' +
-                '- [x] <!-- tag=2109080123000 channel=beta-opt-in -->' +
+                '- [x] <!-- amp-version=2109080123000 channel=beta-opt-in -->' +
                 '2109080123000 promoted to Experimental and Beta (opt-in) channels (optintime)\n' +
-                '- [x] <!-- tag=2109080123000 channel=beta-percent -->' +
+                '- [x] <!-- amp-version=2109080123000 channel=beta-percent -->' +
                 '2109080123000 promoted to Experimental and Beta (1% traffic) channels (percenttime)\n' +
-                '- [x] <!-- tag=2109080123000 channel=stable -->' +
+                '- [x] <!-- amp-version=2109080123000 channel=stable -->' +
                 '2109080123000 promoted to Stable channel (stabletime)\n' +
-                '- [ ] <!-- tag=2109080123000 channel=lts -->' +
-                '2109080123000 promoted to LTS channel (PROMOTE_TIME)\n\n' +
+                '- [ ] <!-- amp-version=2109080123000 channel=lts -->' +
+                '2109080123000 promoted to LTS channel <!-- promote-time -->\n\n' +
                 '/cc @ampproject/release-on-duty',
             },
           ],
@@ -158,17 +158,17 @@ test('add cherrypick tasks', async (t) => {
         '### AMP Version\n\n[2109080123001]' +
         '(https://github.com/ampproject/amphtml/releases/tag/2109080123001)\n\n' +
         '### Promotions\n\n' +
-        '- [x] <!-- tag=2109080123000 channel=beta-opt-in -->' +
+        '- [x] <!-- amp-version=2109080123000 channel=beta-opt-in -->' +
         '2109080123000 promoted to Experimental and Beta (opt-in) channels (optintime)\n' +
-        '- [x] <!-- tag=2109080123000 channel=beta-percent -->' +
+        '- [x] <!-- amp-version=2109080123000 channel=beta-percent -->' +
         '2109080123000 promoted to Experimental and Beta (1% traffic) channels (percenttime)\n' +
-        '- [x] <!-- tag=2109080123000 channel=stable -->' +
+        '- [x] <!-- amp-version=2109080123000 channel=stable -->' +
         '2109080123000 promoted to Stable channel (stabletime)\n' +
         '🌸 2109080123000 was cherry-picked to create 2109080123001\n' +
-        '- [x] <!-- tag=2109080123001 channel=stable -->' +
+        '- [x] <!-- amp-version=2109080123001 channel=stable -->' +
         '2109080123001 promoted to Stable channel (testtime)\n' +
-        '- [ ] <!-- tag=2109080123001 channel=lts -->' +
-        '2109080123001 promoted to LTS channel (PROMOTE_TIME)\n\n' +
+        '- [ ] <!-- amp-version=2109080123001 channel=lts -->' +
+        '2109080123001 promoted to LTS channel <!-- promote-time -->\n\n' +
         '/cc @ampproject/release-on-duty',
     })
     .reply(200);

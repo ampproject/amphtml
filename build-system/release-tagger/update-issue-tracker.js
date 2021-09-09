@@ -49,7 +49,7 @@ class IssueTracker {
    * @return {string}
    */
   _createTask(channel, tag) {
-    return `- [ ] <!-- tag=${tag} channel=${channel} -->${tag} promoted to ${CHANNEL_NAMES[channel]} (PROMOTE_TIME)`;
+    return `- [ ] <!-- amp-version=${tag} channel=${channel} -->${tag} promoted to ${CHANNEL_NAMES[channel]} <!-- promote-time -->`;
   }
 
   /** @param {string} channel */
@@ -86,7 +86,9 @@ class IssueTracker {
   checkTask(channel, time) {
     const task = this._createTask(channel, this.head);
     const [before, after] = this.main.split(task);
-    const checked = task.replace('[ ]', '[x]').replace('PROMOTE_TIME', time);
+    const checked = task
+      .replace('[ ]', '[x]')
+      .replace('<!-- promote-time -->', `(${time})`);
     this.main = `${before}${checked}${after}`;
   }
 }
