@@ -17,7 +17,6 @@
   --story-page-vh: 1vh;
   --story-page-vmin: min(var(--story-page-vw), var(--story-page-vh));
   --story-page-vmax: max(var(--story-page-vw), var(--story-page-vh));
-  --i-amphtml-story-page-50vw: calc(var(--story-page-vw) * 50);
 }
 amp-story, amp-story-page, amp-story-cta-layer {
   contain: strict !important;
