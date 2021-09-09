@@ -1,5 +1,3 @@
-import {withKnobs} from '@storybook/addon-knobs';
-
 import * as Preact from '#preact';
 import {useCallback, useState} from '#preact';
 import {useIntersectionObserver} from '#preact/component';
@@ -7,7 +5,6 @@ import {refs} from '#preact/utils';
 
 export default {
   title: '0/Hooks',
-  decorators: [withKnobs],
 };
 
 function Component({prop}) {
