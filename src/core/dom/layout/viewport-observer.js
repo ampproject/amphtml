@@ -83,6 +83,8 @@ export function unobserveWithSharedInOb(element) {
   const win = toWin(element.ownerDocument.defaultView);
   const viewportObserver = viewportObservers.get(win);
   viewportObserver?.unobserve(element);
+  // TODO(dmanek): This is a potential bug. We only want to remove
+  // a single callback as opposed to all.
   viewportCallbacks.delete(element);
 }
 
