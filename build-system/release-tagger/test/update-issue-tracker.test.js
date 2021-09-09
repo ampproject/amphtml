@@ -35,7 +35,7 @@ test('create', async (t) => {
         '- [ ] <!-- tag=2109080123000 channel=stable -->' +
         '2109080123000 promoted to Stable channel (PROMOTE_TIME)\n' +
         '- [ ] <!-- tag=2109080123000 channel=lts -->' +
-        '(optional) 2109080123000 promoted to LTS channel (PROMOTE_TIME)\n\n' +
+        '2109080123000 promoted to LTS channel (PROMOTE_TIME)\n\n' +
         '/cc @ampproject/release-on-duty',
     })
     .reply(201);
@@ -77,7 +77,7 @@ test('mark task complete', async (t) => {
                 '- [ ] <!-- tag=2109080123000 channel=stable -->' +
                 '2109080123000 promoted to Stable channel (PROMOTE_TIME)\n' +
                 '- [ ] <!-- tag=2109080123000 channel=lts -->' +
-                '(optional) 2109080123000 promoted to LTS channel (PROMOTE_TIME)\n\n' +
+                '2109080123000 promoted to LTS channel (PROMOTE_TIME)\n\n' +
                 '/cc @ampproject/release-on-duty',
             },
           ],
@@ -100,7 +100,7 @@ test('mark task complete', async (t) => {
         '- [ ] <!-- tag=2109080123000 channel=stable -->' +
         '2109080123000 promoted to Stable channel (PROMOTE_TIME)\n' +
         '- [ ] <!-- tag=2109080123000 channel=lts -->' +
-        '(optional) 2109080123000 promoted to LTS channel (PROMOTE_TIME)\n\n' +
+        '2109080123000 promoted to LTS channel (PROMOTE_TIME)\n\n' +
         '/cc @ampproject/release-on-duty',
     })
     .reply(200);
@@ -142,7 +142,7 @@ test('add cherrypick tasks', async (t) => {
                 '- [x] <!-- tag=2109080123000 channel=stable -->' +
                 '2109080123000 promoted to Stable channel (stabletime)\n' +
                 '- [ ] <!-- tag=2109080123000 channel=lts -->' +
-                '(optional) 2109080123000 promoted to LTS channel (PROMOTE_TIME)\n\n' +
+                '2109080123000 promoted to LTS channel (PROMOTE_TIME)\n\n' +
                 '/cc @ampproject/release-on-duty',
             },
           ],
@@ -168,7 +168,7 @@ test('add cherrypick tasks', async (t) => {
         '- [x] <!-- tag=2109080123001 channel=stable -->' +
         '2109080123001 promoted to Stable channel (testtime)\n' +
         '- [ ] <!-- tag=2109080123001 channel=lts -->' +
-        '(optional) 2109080123001 promoted to LTS channel (PROMOTE_TIME)\n\n' +
+        '2109080123001 promoted to LTS channel (PROMOTE_TIME)\n\n' +
         '/cc @ampproject/release-on-duty',
     })
     .reply(200);

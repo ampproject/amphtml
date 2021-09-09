@@ -6,15 +6,11 @@
 const dedent = require('dedent');
 const {createIssue, getIssue, updateIssue} = require('./utils');
 
-const promotions = {
-  'beta-opt-in': (tag) =>
-    `- [ ] <!-- tag=${tag} channel=beta-opt-in -->${tag} promoted to Experimental and Beta (opt-in) channels (PROMOTE_TIME)`,
-  'beta-percent': (tag) =>
-    `- [ ] <!-- tag=${tag} channel=beta-percent -->${tag} promoted to Experimental and Beta (1% traffic) channels (PROMOTE_TIME)`,
-  'stable': (tag) =>
-    `- [ ] <!-- tag=${tag} channel=stable -->${tag} promoted to Stable channel (PROMOTE_TIME)`,
-  'lts': (tag) =>
-    `- [ ] <!-- tag=${tag} channel=lts -->(optional) ${tag} promoted to LTS channel (PROMOTE_TIME)`,
+const CHANNEL_NAMES = {
+  'beta-opt-in': 'Experimental and Beta (opt-in) channels',
+  'beta-percent': 'Experimental and Beta (1% traffic) channels',
+  'stable': 'Stable channel',
+  'lts': 'LTS channel',
 };
 
 class IssueTracker {
@@ -35,8 +31,8 @@ class IssueTracker {
     if (!body) {
       // create task list
       this.main = dedent`### Promotions\n\n\
-      ${Object.values(promotions)
-        .map((promotion) => promotion(this.head))
+      ${Object.keys(CHANNEL_NAMES)
+        .map((channel) => this._createTask(channel, this.head))
         .join('\n')}`;
     } else {
       // get existing task list
@@ -45,6 +41,15 @@ class IssueTracker {
         body.indexOf('\n\n/cc')
       );
     }
+  }
+
+  /**
+   * @param {string} channel
+   * @param {string} tag
+   * @return {string}
+   */
+  _createTask(channel, tag) {
+    return `- [ ] <!-- tag=${tag} channel=${channel} -->${tag} promoted to ${CHANNEL_NAMES[channel]} (PROMOTE_TIME)`;
   }
 
   /** @param {string} channel */
@@ -59,11 +64,11 @@ class IssueTracker {
     }
 
     // add tasks for new release starting with given channel
-    const keys = Object.keys(promotions);
+    const keys = Object.keys(CHANNEL_NAMES);
     const add = [];
     let index = keys.indexOf(channel);
     while (index < keys.length) {
-      add.push(promotions[keys[index]](this.head));
+      add.push(this._createTask(keys[index], this.head));
       index++;
     }
 
@@ -79,7 +84,7 @@ class IssueTracker {
    * @param {string} time
    */
   checkTask(channel, time) {
-    const task = promotions[channel](this.head);
+    const task = this._createTask(channel, this.head);
     const [before, after] = this.main.split(task);
     const checked = task.replace('[ ]', '[x]').replace('PROMOTE_TIME', time);
     this.main = `${before}${checked}${after}`;
