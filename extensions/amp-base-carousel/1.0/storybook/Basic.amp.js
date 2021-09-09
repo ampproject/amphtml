@@ -1,13 +1,9 @@
 import * as Preact from '#preact';
-import {boolean, number, select, text, withKnobs} from '@storybook/addon-knobs';
 import {withAmp} from '@ampproject/storybook-addon';
-
-const ORIENTATIONS = ['horizontal', 'vertical'];
 
 export default {
   title: 'amp-base-carousel-1_0',
-  decorators: [withKnobs, withAmp],
-
+  decorators: [withAmp],
   parameters: {
     extensions: [
       {name: 'amp-bind', version: '0.1'},
@@ -17,47 +13,58 @@ export default {
   },
 };
 
-export const Default = () => {
-  const loop = boolean('loop', true);
-  const snap = boolean('snap', true);
-  const snapAlign = select('snap alignment', ['start', 'center'], 'start');
-  const snapBy = number('snap by', 1);
-  const advanceCount = number('advance count', 1, {min: 1});
-  const autoAdvance = boolean('auto advance', true);
-  const autoAdvanceCount = number('auto advance count', 1);
-  const autoAdvanceInterval = number('auto advance interval', 1000);
-  const autoAdvanceLoops = number('auto advance loops', 3);
-  const visibleCount = text('visible count', '(min-width: 400px) 2, 1');
-  const outsetArrows = text('outset arrows', '(min-width: 400px) true, false');
-  const controls = select('show controls', ['auto', 'always', 'never']);
-  const defaultSlide = number('default slide', 0);
-  const orientation = select('orientation', ORIENTATIONS, 'vertical');
-  const slideCount = number('slide count', 5, {min: 0, max: 99});
+// Different exported stories use some of these.
+const argTypes = {
+  slideCount: {
+    control: {type: 'number', min: 0, max: 99, step: 1},
+  },
+  controls: {
+    control: {type: 'inline-radio'},
+    options: ['auto', 'always', 'never'],
+  },
+  orientation: {
+    control: {type: 'inline-radio'},
+    options: ['horizontal', 'vertical'],
+  },
+  'snap-align': {
+    control: {type: 'inline-radio'},
+    options: ['start', 'center'],
+  },
+  preset: {
+    name: 'random preset',
+    control: {type: 'inline-radio'},
+    options: [1, 2, 3],
+    mapping: {
+      1: [
+        143, 245, 289, 232, 280, 233, 182, 155, 114, 269, 242, 196, 249, 265,
+        241,
+      ],
+      2: [
+        225, 158, 201, 205, 230, 233, 231, 255, 143, 264, 227, 157, 120, 203,
+        144,
+      ],
+      3: [
+        252, 113, 115, 186, 248, 188, 162, 104, 100, 109, 175, 227, 143, 249,
+        280,
+      ],
+    },
+  },
+};
+
+export const Default = ({slideCount, snap, ...args}) => {
   const colorIncrement = Math.floor(255 / (slideCount + 1));
 
   return (
     <main>
       <amp-base-carousel
         id="carousel"
-        advance-count={advanceCount}
-        auto-advance={autoAdvance}
-        auto-advance-count={autoAdvanceCount}
-        auto-advance-interval={autoAdvanceInterval}
-        auto-advance-loops={autoAdvanceLoops}
-        controls={controls}
-        orientation={orientation}
-        outset-arrows={outsetArrows}
         width="450"
         height="450"
         data-amp-bind-slide="activeSlide"
-        slide={defaultSlide}
         snap={String(snap)}
-        snap-align={snapAlign}
-        snap-by={snapBy}
-        loop={loop}
-        visible-count={visibleCount}
+        {...args}
       >
-        {Array.from({length: slideCount}, (x, i) => {
+        {Array.from({length: args['slide-count']}, (x, i) => {
           const v = colorIncrement * (i + 1);
           return (
             <amp-layout width="225" height="225" layout="responsive">
@@ -91,37 +98,48 @@ export const Default = () => {
   );
 };
 
-export const mixedLength = () => {
-  const width = number('width', 300);
-  const height = number('height', 300);
-  const slideCount = number('slide count', 7, {min: 0, max: 99});
+Default.args = {
+  'advance-count': 1,
+  'auto-advance': true,
+  'auto-advance-count': 1,
+  'auto-advance-interval': 1000,
+  'auto-advance-loops': 3,
+  controls: 'auto',
+  slide: 0,
+  loop: true,
+  orientation: 'vertical',
+  'outset-arrows': '(min-width: 400px) true, false',
+  slideCount: 5,
+  snap: true,
+  'snap-align': 'start',
+  'snap-by': 1,
+  'visible-count': '(min-width: 400px) 2, 1',
+};
+
+Default.argTypes = {
+  slideCount: argTypes.slideCount,
+  controls: argTypes.controls,
+  orientation: argTypes.orientation,
+  'snap-align': argTypes['snap-align'],
+};
+
+export const MixedLength = ({
+  orientation,
+  preset,
+  slideCount,
+  snap,
+  snapAlign,
+  ...args
+}) => {
   const colorIncrement = Math.floor(255 / (slideCount + 1));
-  const loop = boolean('loop', true);
-  const snap = boolean('snap', true);
-  const snapAlign = select('snap alignment', ['start', 'center'], 'start');
-  const snapBy = number('snap by', 1);
-  const mixedLength = boolean('mixed length', true);
-  const controls = select('show controls', ['auto', 'always', 'never']);
-  const randomPreset = [
-    [143, 245, 289, 232, 280, 233, 182, 155, 114, 269, 242, 196, 249, 265, 241],
-    [225, 158, 201, 205, 230, 233, 231, 255, 143, 264, 227, 157, 120, 203, 144],
-    [252, 113, 115, 186, 248, 188, 162, 104, 100, 109, 175, 227, 143, 249, 280],
-  ];
-  const preset = select('random preset', [1, 2, 3]);
-  const orientation = select('orientation', ORIENTATIONS, 'vertical');
   const horizontal = orientation == 'horizontal';
 
   return (
     <amp-base-carousel
-      controls={controls}
-      mixed-length={mixedLength}
-      loop={loop}
       orientation={orientation}
       snap={String(snap)}
       snap-align={snapAlign}
-      snap-by={snapBy}
-      width={width}
-      height={height}
+      {...args}
     >
       {Array.from({length: slideCount}, (x, i) => {
         const v = colorIncrement * (i + 1);
@@ -130,12 +148,8 @@ export const mixedLength = () => {
             style={{
               backgroundColor: `rgb(${v}, 100, 100)`,
               border: 'solid white 1px',
-              width: horizontal
-                ? `${randomPreset[preset - 1 || 0][i]}px`
-                : '100px',
-              height: horizontal
-                ? '100px'
-                : `${randomPreset[preset - 1 || 0][i]}px`,
+              width: horizontal ? `${preset[i]}px` : '100px',
+              height: horizontal ? '100px' : `${preset[i]}px`,
             }}
           ></div>
         );
@@ -144,10 +158,28 @@ export const mixedLength = () => {
   );
 };
 
-export const customArrows = () => {
-  const width = number('width', 400);
-  const height = number('height', 200);
-  const slideCount = number('slide count', 7, {min: 0, max: 99});
+MixedLength.args = {
+  controls: 'auto',
+  height: 300,
+  width: 300,
+  slideCount: 5,
+  loop: true,
+  snap: true,
+  'snap-align': 'start',
+  'snap-by': 1,
+  'mixed-length': true,
+  preset: 1,
+  orientation: 'vertical',
+};
+
+MixedLength.argTypes = {
+  controls: argTypes.controls,
+  orientation: argTypes.orientation,
+  preset: argTypes.preset,
+  'snap-align': argTypes['snap-align'],
+};
+
+export const CustomArrows = ({height, slideCount, width}) => {
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   return (
     <amp-base-carousel id="my-carousel" width={width} height={height}>
@@ -170,4 +202,8 @@ export const customArrows = () => {
   );
 };
 
-Default.storyName = 'default';
+CustomArrows.args = {
+  height: 300,
+  width: 300,
+  slideCount: 5,
+};
