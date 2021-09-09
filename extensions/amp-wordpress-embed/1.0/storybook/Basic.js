@@ -21,11 +21,11 @@ import {number, text, withKnobs} from '@storybook/addon-knobs';
 >>>>>>> 64cb73b217... ♻️ Use Storybook `args` (first round) (#35915)
 import * as Preact from '#preact';
 
-import {WordPressEmbed} from '../component';
+import {BentoWordPressEmbed} from '../component';
 
 export default {
   title: 'WordPressEmbed',
-  component: WordPressEmbed,
+  component: BentoWordPressEmbed,
   args: {
     url: 'https://wordpress.org/news/2021/06/gutenberg-highlights',
     width: 500,
@@ -34,5 +34,5 @@ export default {
 };
 
 export const _default = ({height, width, ...args}) => {
-  return <WordPressEmbed style={{width, height}} {...args} />;
+  return <BentoWordPressEmbed style={{width, height}} {...args} />;
 };
