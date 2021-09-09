@@ -1,7 +1,7 @@
 /** @externs */
 
 /** @const */
-var WordPressEmbedDef = {};
+var BentoWordPressEmbedDef = {};
 
 /**
  * @typedef {{
@@ -13,10 +13,10 @@ var WordPressEmbedDef = {};
  *   onLoad: (function():undefined|undefined),
  * }}
  */
-WordPressEmbedDef.Props;
+BentoWordPressEmbedDef.Props;
 
 /** @constructor */
-WordPressEmbedDef.Api = function () {};
+BentoWordPressEmbedDef.Api = function () {};
 
 /** @type {string} */
-WordPressEmbedDef.Api.prototype.readyState;
+BentoWordPressEmbedDef.Api.prototype.readyState;
