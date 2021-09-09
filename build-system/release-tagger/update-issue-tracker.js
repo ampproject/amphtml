@@ -30,14 +30,21 @@ class IssueTracker {
     this.head = head;
     this.base = base;
     this.number = number ? Number(number) : -1;
-    this.main = body
-      ? body.substring(body.indexOf('### Promotions'), body.indexOf('\n\n/cc'))
-      : dedent`### Promotions\n\n\
+    this.title = `🚄 Release ${this.head}`;
+    this.header = `### AMP Version\n\n\[${this.head}](https://github.com/ampproject/amphtml/releases/tag/${this.head})`;
+    if (!body) {
+      // create task list
+      this.main = dedent`### Promotions\n\n\
       ${Object.values(promotions)
         .map((promotion) => promotion(this.head))
         .join('\n')}`;
-    this.title = `🚄 Release ${this.head}`;
-    this.header = `### AMP Version\n\n\[${this.head}](https://github.com/ampproject/amphtml/releases/tag/${this.head})`;
+    } else {
+      // get existing task list
+      this.main = body.substring(
+        body.indexOf('### Promotions'),
+        body.indexOf('\n\n/cc')
+      );
+    }
   }
 
   /** @param {string} channel */
