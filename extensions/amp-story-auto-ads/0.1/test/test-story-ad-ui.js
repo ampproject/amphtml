@@ -1,5 +1,5 @@
 import {forceExperimentBranch} from '#experiments';
-import {StoryAdPageOutlink} from '#experiments/story-ad-page-outlink.js';
+import {StoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
 
 import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 import {
@@ -227,7 +227,7 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
       buttonFitter = new ButtonTextFitter(env.ampdoc);
       forceExperimentBranch(
         win,
-        StoryAdPageOutlink.BRANCH,
+        StoryAdPageOutlink.ID,
         StoryAdPageOutlink.EXPERIMENT
       );
     });
