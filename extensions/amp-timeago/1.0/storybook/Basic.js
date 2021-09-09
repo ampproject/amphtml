@@ -163,7 +163,7 @@ export const WithIntersectionObserver = () => {
         text long for something a little meatier? Give our generator a try… it’s
         tasty!
       </p>
-      <Timeago
+      <BentoTimeago
         datetime={dateTime}
         locale={locale}
         cutoff={cutoff}
