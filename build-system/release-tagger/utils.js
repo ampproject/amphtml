@@ -56,8 +56,8 @@ async function _runQueryInBatches(queryType, queries) {
  * @param {string} title
  * @return {Promise<Object>}
  */
-async function createIssue(body, label, title) {
-  return await octokit.rest.issues.create({
+function createIssue(body, label, title) {
+  return octokit.rest.issues.create({
     owner,
     repo,
     title,
@@ -120,8 +120,8 @@ async function getRelease(tag) {
  * @param {string} title
  * @return {Promise<Object>}
  */
-async function updateIssue(body, number, title) {
-  return await octokit.rest.issues.update({
+function updateIssue(body, number, title) {
+  return octokit.rest.issues.update({
     owner,
     repo,
     'issue_number': number,

@@ -18,6 +18,8 @@ const promotions = {
 };
 
 class IssueTracker {
+  footer = '/cc @ampproject/release-on-duty';
+  label = 'Type: Release';
   /**
    * @param {string} head
    * @param {string} base
@@ -36,14 +38,12 @@ class IssueTracker {
         .join('\n')}`;
     this.title = `🚄 Release ${this.head}`;
     this.header = `### AMP Version\n\n\[${this.head}](https://github.com/ampproject/amphtml/releases/tag/${this.head})`;
-    this.footer = '/cc @ampproject/release-on-duty';
-    this.label = 'Type: Release';
   }
 
   /** @param {string} channel */
   addCherrypickTasks(channel) {
     // keep completed tasks
-    const lines = this.main.split(new RegExp('Promotions'))[1].split('\n');
+    const lines = this.main.split(/Promotions/)[1].split('\n');
     const keep = [];
     for (const line of lines) {
       if (line.startsWith('- [x]') || line.startsWith('🌸')) {
