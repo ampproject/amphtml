@@ -1,16 +1,16 @@
 import * as Preact from '#preact';
 import {
-  Accordion,
-  AccordionContent,
-  AccordionHeader,
-  AccordionSection,
+  BentoAccordion,
+  BentoAccordionContent,
+  BentoAccordionHeader,
+  BentoAccordionSection,
 } from '../../../amp-accordion/1.0/component';
-import {VideoWrapper} from '../component';
+import {BentoVideo} from '../component';
 import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
 
 export default {
-  title: 'Video Wrapper',
-  component: VideoWrapper,
+  title: 'Video',
+  component: BentoVideo,
   decorators: [withKnobs],
 };
 
@@ -53,7 +53,7 @@ const VideoTagPlayer = ({i}) => {
   );
 
   return (
-    <VideoWrapper
+    <BentoVideo
       component="video"
       ariaLabel={ariaLabel}
       autoplay={autoplay}
@@ -113,13 +113,13 @@ export const InsideAccordion = () => {
   const width = text('width', '320px');
   const height = text('height', '180px');
   return (
-    <Accordion expandSingleSection>
-      <AccordionSection key={1} expanded>
-        <AccordionHeader>
+    <BentoAccordion expandSingleSection>
+      <BentoAccordionSection key={1} expanded>
+        <BentoAccordionHeader>
           <h2>Controls</h2>
-        </AccordionHeader>
-        <AccordionContent>
-          <VideoWrapper
+        </BentoAccordionHeader>
+        <BentoAccordionContent>
+          <BentoVideo
             component="video"
             controls={true}
             loop={true}
@@ -127,14 +127,14 @@ export const InsideAccordion = () => {
             src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
             poster="https://amp.dev/static/inline-examples/images/kitten-playing.png"
           />
-        </AccordionContent>
-      </AccordionSection>
-      <AccordionSection key={2}>
-        <AccordionHeader>
+        </BentoAccordionContent>
+      </BentoAccordionSection>
+      <BentoAccordionSection key={2}>
+        <BentoAccordionHeader>
           <h2>Autoplay</h2>
-        </AccordionHeader>
-        <AccordionContent>
-          <VideoWrapper
+        </BentoAccordionHeader>
+        <BentoAccordionContent>
+          <BentoVideo
             component="video"
             autoplay={true}
             loop={true}
@@ -148,8 +148,8 @@ export const InsideAccordion = () => {
               />,
             ]}
           />
-        </AccordionContent>
-      </AccordionSection>
-    </Accordion>
+        </BentoAccordionContent>
+      </BentoAccordionSection>
+    </BentoAccordion>
   );
 };
