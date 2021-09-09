@@ -106,7 +106,8 @@ function ioCallback(entries) {
       continue;
     }
     for (let k = 0; k < callbacks.length; k++) {
-      callbacks[k].?();
+      const callback = callbacks[k];
+      callback();
     }
   }
 }

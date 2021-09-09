@@ -18,6 +18,7 @@ function Component({prop}) {
 
   const anotherIoCallback = useCallback(
     ({isIntersecting}) => {
+      // TODO(dmanek): Look into using Storybook actions instead of console.log below
       // eslint-disable-next-line local/no-forbidden-terms
       console.log(`is intersecting for ${prop}: ${isIntersecting}`);
     },
