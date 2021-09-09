@@ -3,7 +3,7 @@ import {getDate} from '#core/types/date';
 import {toWin} from '#core/window';
 
 import * as Preact from '#preact';
-import {useRef, useState} from '#preact';
+import {useCallback, useRef, useState} from '#preact';
 import {Wrapper, useIntersectionObserver} from '#preact/component';
 import {refs, useResourcesNotify} from '#preact/utils';
 
@@ -40,21 +40,24 @@ export function BentoTimeago({
 
   const date = getDate(datetime);
 
-  const ioCallback = ({isIntersecting}) => {
-    if (!isIntersecting) {
-      return;
-    }
-    const node = devAssertElement(ref.current);
-    let {lang} = node.ownerDocument.documentElement;
-    const win = toWin(node.ownerDocument?.defaultView);
-    if (lang === 'unknown') {
-      lang = win.navigator?.language || DEFAULT_LOCALE;
-    }
-    const locale = getLocale(localeProp || lang);
-    setTimestamp(
-      getFuzzyTimestampValue(new Date(date), locale, cutoff, placeholder)
-    );
-  };
+  const ioCallback = useCallback(
+    ({isIntersecting}) => {
+      if (!isIntersecting) {
+        return;
+      }
+      const node = devAssertElement(ref.current);
+      let {lang} = node.ownerDocument.documentElement;
+      const win = toWin(node.ownerDocument?.defaultView);
+      if (lang === 'unknown') {
+        lang = win.navigator?.language || DEFAULT_LOCALE;
+      }
+      const locale = getLocale(localeProp || lang);
+      setTimestamp(
+        getFuzzyTimestampValue(new Date(date), locale, cutoff, placeholder)
+      );
+    },
+    [cutoff, date, localeProp, placeholder]
+  );
 
   const inObRef = useIntersectionObserver(ioCallback);
 
