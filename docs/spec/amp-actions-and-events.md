@@ -100,6 +100,14 @@ For example, the following is possible in AMP:
     <td><code>tap</code></td>
     <td>Fired when the element is clicked/tapped.</td>
   </tr>
+  <tr>
+    <td><code>copy-success</code></td>
+    <td>Fired when the content/text is successfully copied into the clipboard.</td>
+  </tr>
+  <tr>
+    <td><code>copy-error</code></td>
+    <td>Fired when there's an error while copying the content. If there's an error while copying the content, the <code>event.data.type</code> will be set to the <code>error</code> value. If the browser is not supporting the copy method, the <code>event.data.type</code> will be set to the <code>browser</code> value.</td>
+  </tr>
 </table>
 
 ### Input elements <a name="input-elements"></a>
@@ -740,6 +748,12 @@ actions that apply to the whole document.
     <td>
       <p>Requires <a href="https://amp.dev/documentation/components/amp-bind.html#modifying-history-with-amppushstate">amp-bind</a>.</p>
       <p>Merges an object literal into the bindable state and pushes a new entry onto browser history stack. Popping the entry will restore the previous values of variables (in this example, <code>foo</code>).    </td>
+  </tr>
+  <tr>
+    <td><code>copy(text='content')</code></td>
+    <td>
+      <p>Copy any content to the clipboard. <code>text</code> is optional, and if is set it will copy those content/value into the clipboard.</p>
+    </td>
   </tr>
 </table>
 
