@@ -589,6 +589,8 @@ Adds support for Umeng+ Analytics. More details for adding Umeng+ Analytics supp
 
 Type attribute value: `upscore`
 
+Adds support for Upscore Analytics. Configuration details can be found at [upscore.com](https://upscore.com).
+
 ### Vpon Analytics
 
 Type attribute value: `vponanalytics`
