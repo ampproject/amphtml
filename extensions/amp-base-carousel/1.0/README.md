@@ -403,16 +403,16 @@ npm install @ampproject/bento-base-carousel
 
 ```javascript
 import React from 'react';
-import {BaseCarousel} from '@ampproject/bento-base-carousel/react';
+import {BentoBaseCarousel} from '@ampproject/bento-base-carousel/react';
 import '@ampproject/bento-base-carousel/styles.css';
 
 function App() {
   return (
-    <BaseCarousel>
+    <BentoBaseCarousel>
       <img src="puppies.jpg" />
       <img src="kittens.jpg" />
       <img src="hamsters.jpg" />
-    </BaseCarousel>
+    </BentoBaseCarousel>
   );
 }
 ```
@@ -429,11 +429,11 @@ const ref = createRef();
 
 function App() {
   return (
-    <BaseCarousel ref={ref}>
+    <BentoBaseCarousel ref={ref}>
       <img src="puppies.jpg" />
       <img src="kittens.jpg" />
       <img src="hamsters.jpg" />
-    </BaseCarousel>
+    </BentoBaseCarousel>
   );
 }
 ```
@@ -474,11 +474,11 @@ The `BentoBaseCarousel` API allows you to register and respond to the following 
 This event is triggered when the index displayed by the carousel has changed.
 
 ```jsx
-<BaseCarousel onSlideChange={(index) => console.log(index)}>
+<BentoBaseCarousel onSlideChange={(index) => console.log(index)}>
   <img src="puppies.jpg" />
   <img src="kittens.jpg" />
   <img src="hamsters.jpg" />
-</BaseCarousel>
+</BentoBaseCarousel>
 ```
 
 #### Layout and style
@@ -488,21 +488,21 @@ This event is triggered when the index displayed by the carousel has changed.
 The `BentoBaseCarousel` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
 
 ```jsx
-<BaseCarousel style={{width: '300px', height: '100px'}}>
+<BentoBaseCarousel style={{width: '300px', height: '100px'}}>
   <img src="puppies.jpg" />
   <img src="kittens.jpg" />
   <img src="hamsters.jpg" />
-</BaseCarousel>
+</BentoBaseCarousel>
 ```
 
 Or via `className`:
 
 ```jsx
-<BaseCarousel className="custom-styles">
+<BentoBaseCarousel className="custom-styles">
   <img src="puppies.jpg" />
   <img src="kittens.jpg" />
   <img src="hamsters.jpg" />
-</BaseCarousel>
+</BentoBaseCarousel>
 ```
 
 ```css
