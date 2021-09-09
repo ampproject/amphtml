@@ -144,5 +144,25 @@ describes.sandboxed('DOM - layout - Viewport Observer', {}, (env) => {
       expect(el2InObEntries[0].isIntersecting).to.be.true;
       expect(el2InObEntries[1].isIntersecting).to.be.false;
     });
+
+    it('can have multiple obsevers for the same element', () => {
+      let elInObEntries = [];
+
+      observeIntersections(el1, (entry) => elInObEntries.push(entry));
+      observeIntersections(el1, (entry) => elInObEntries.push(entry));
+      toggleViewport(el1, true);
+
+      expect(elInObEntries).to.have.lengthOf(2);
+      expect(elInObEntries[0].target).to.eql(el1);
+      expect(elInObEntries[0].isIntersecting).to.be.true;
+      expect(elInObEntries[1].target).to.eql(el1);
+      expect(elInObEntries[1].isIntersecting).to.be.true;
+
+      elInObEntries = [];
+      toggleViewport(el1, false);
+      expect(elInObEntries).to.have.lengthOf(2);
+      expect(elInObEntries[0].isIntersecting).to.be.false;
+      expect(elInObEntries[1].isIntersecting).to.be.false;
+    });
   });
 });
