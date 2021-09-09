@@ -51,7 +51,7 @@ import '@ampproject/bento-wordpress-embed';
   </style>
   <script async src="https://cdn.ampproject.org/v0/bento-wordpress-embed-1.0.js"></script>
 </head>
-<bento-wordpress-embed id="my-embed
+<bento-wordpress-embed id="my-embed"
   data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
 ></bento-wordpress-embed>
 <div class="buttons" style="margin-top: 8px;">
