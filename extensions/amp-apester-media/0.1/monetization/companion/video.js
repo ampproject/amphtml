@@ -101,6 +101,7 @@ function addCompanionAvElement(
   consentObj
 ) {
   const size = getCompanionVideoAdSize(apesterElement);
+  const refreshInterval = 30;
   const ampAvAd = createElementWithAttributes(
     /** @type {!Document} */ (apesterElement.ownerDocument),
     'amp-ad',
@@ -110,6 +111,7 @@ function addCompanionAvElement(
       'type': 'aniview',
       'data-publisherid': '5fabb425e5d4cb4bbc0ca7e4',
       'data-channelid': playerOptions.aniviewChannelId,
+      'data-enable-refresh': `${refreshInterval}`,
     })
   );
 
