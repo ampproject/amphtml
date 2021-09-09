@@ -86,7 +86,7 @@ In the following example, we specified a `min-font-size` of `40`, and added more
 [example preview="inline" playground="true" imports="bento-fit-text:1.0"]
 
 ```html
-<div style="width: 300px; height: 300px; background:#005AF0; color: #FFF;">
+<div style="width: 300px; height: 300px; background: #005AF0; color: #FFF;">
   <bento-fit-text min-font-size="40">
     Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque
     inermis reprehendunt. Lorem ipsum dolor sit amet, has nisl nihil convenire
