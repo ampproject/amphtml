@@ -17,6 +17,20 @@ export const _default = () => {
   );
 };
 
+export const _customSettings = () => {
+  return (
+    <Dailymotion
+      style={{width: 300, height: 200}}
+      videoId="x3rdtfy"
+      endscreenEnable="false"
+      sharingEnable="false"
+      uiHighlight="444444"
+      uiLogo="false"
+      info="false"
+    ></Dailymotion>
+  );
+};
+
 export const _autoplay = () => {
   return (
     <Dailymotion
