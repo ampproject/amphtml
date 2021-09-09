@@ -14,12 +14,7 @@ function compile(request) {
   const document = request.document ?? {root: 0, tree: []};
   const versions = request.versions ?? {'amp-layout': 'v0'};
 
-  const result = compiler.renderAst(document, getBuilders(versions));
-  if (result.error) {
-    const [tagName, errorMsg] = Array.from(result.error)[0];
-    throw new Error(`Failure to render: ${tagName}: ${errorMsg}`);
-  }
-  return {document: result.value};
+  return {document: compiler.renderAst(document, getBuilders(versions))};
 }
 
 globalThis['compile'] = compile;
