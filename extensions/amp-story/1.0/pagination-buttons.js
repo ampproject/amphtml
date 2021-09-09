@@ -16,7 +16,6 @@
 import {
   Action,
   StateProperty,
-  UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
@@ -70,20 +69,6 @@ const buildPaginationButton = (element) =>
       <div class="i-amphtml-story-button-container">
         <button class="i-amphtml-story-button-move"></button>
       </div>`;
-
-/**
- * @param {!Element} hoverEl
- * @param {!Element} targetEl
- * @param {string} className
- * @return {?Array<function(!Event)>}
- */
-function setClassOnHover(hoverEl, targetEl, className) {
-  const enterListener = () => targetEl.classList.add(className);
-  const exitListener = () => targetEl.classList.remove(className);
-  hoverEl.addEventListener('mouseenter', enterListener);
-  hoverEl.addEventListener('mouseleave', exitListener);
-  return [enterListener, exitListener];
-}
 
 /**
  * Desktop navigation buttons.
@@ -216,34 +201,10 @@ export class PaginationButtons {
     /** @private {?ButtonState_1_0_Def} */
     this.forwardButtonStateToRestore_ = null;
 
-    /** @private {?Array<function(!Event)>} */
-    this.hoverListeners_ = null;
-
     this.initializeListeners_();
 
     this.ampStory_.element.appendChild(this.forwardButton_.element);
     this.ampStory_.element.appendChild(this.backButton_.element);
-  }
-
-  /** @private */
-  addHoverListeners_() {
-    if (this.hoverListeners_) {
-      return;
-    }
-
-    const forwardButtonListeners = setClassOnHover(
-      this.forwardButton_.element,
-      this.ampStory_.element,
-      'i-amphtml-story-next-hover'
-    );
-
-    const backButtonListeners = setClassOnHover(
-      this.backButton_.element,
-      this.ampStory_.element,
-      'i-amphtml-story-prev-hover'
-    );
-
-    this.hoverListeners_ = forwardButtonListeners.concat(backButtonListeners);
   }
 
   /** @private */
@@ -271,14 +232,6 @@ export class PaginationButtons {
       (isVisible) => {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
-    );
-
-    this.storeService_.subscribe(
-      StateProperty.UI_STATE,
-      (uiState) => {
-        this.onUIStateUpdate_(uiState);
-      },
-      true /** callToInitialize */
     );
   }
 
@@ -333,20 +286,6 @@ export class PaginationButtons {
       this.backButton_.updateState(BackButtonStates.HIDDEN);
       this.forwardButtonStateToRestore_ = this.forwardButton_.getState();
       this.forwardButton_.updateState(ForwardButtonStates.HIDDEN);
-    }
-  }
-
-  /**
-   * Reacts to UI state updates.
-   * @param {!UIType} uiState
-   * @private
-   */
-  onUIStateUpdate_(uiState) {
-    if (
-      uiState === UIType.DESKTOP_PANELS ||
-      uiState === UIType.DESKTOP_FULLBLEED
-    ) {
-      this.addHoverListeners_();
     }
   }
 }

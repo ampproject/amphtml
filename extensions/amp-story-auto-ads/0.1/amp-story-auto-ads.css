@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
@@ -19,6 +20,8 @@
   transform: scale(1) translateX(-100%) translateY(200%) !important;
 }
 
+=======
+>>>>>>> 56b609e6df... 🚮[Amp story] Delete desktop 3 panel and viewport warning code. (#35932)
 .i-amphtml-story-desktop-fullbleed .i-amphtml-cta-container {
   /* Ad will be 75vh, align bottom of container to bottom of ad. */
   bottom: 12.5vh !important;

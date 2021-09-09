@@ -51,7 +51,6 @@ export const getStoreService = (win) => {
  */
 export const UIType = {
   MOBILE: 0,
-  DESKTOP_PANELS: 1, // Default desktop UI displaying previous and next pages.
   DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
   DESKTOP_ONE_PANEL: 4, // Desktop UI with one panel and space around story.
   VERTICAL: 3, // Vertical scrolling versions, for search engine bots indexing.
@@ -154,7 +153,6 @@ export const StateProperty = {
   AD_STATE: 'adState',
   PAGE_ATTACHMENT_STATE: 'pageAttachmentState',
   AFFILIATE_LINK_STATE: 'affiliateLinkState',
-  DESKTOP_STATE: 'desktopState',
   EDUCATION_STATE: 'educationState',
   GYROSCOPE_PERMISSION_STATE: 'gyroscopePermissionState',
   HAS_SIDEBAR_STATE: 'hasSidebarState',
@@ -182,7 +180,6 @@ export const StateProperty = {
   STORY_HAS_PLAYBACK_UI_STATE: 'storyHasPlaybackUiState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
   UI_STATE: 'uiState',
-  VIEWPORT_WARNING_STATE: 'viewportWarningState',
 
   // App data.
   ACTIONS_ALLOWLIST: 'actionsAllowlist',
@@ -228,7 +225,6 @@ export const Action = {
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
   SET_GYROSCOPE_PERMISSION: 'setGyroscopePermission',
-  TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
   ADD_NEW_PAGE_ID: 'addNewPageId',
   SET_PAGE_SIZE: 'updatePageSize',
   ADD_PANNING_MEDIA_STATE: 'addPanningMediaState',
@@ -343,8 +339,7 @@ const actions = (state, action, data) => {
           data.state === EmbeddedComponentState.EXPANDED ||
           data.state === EmbeddedComponentState.FOCUSED,
         [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]:
-          data.state !== EmbeddedComponentState.EXPANDED ||
-          state.uiState === UIType.DESKTOP_PANELS,
+          data.state !== EmbeddedComponentState.EXPANDED,
         [StateProperty.INTERACTIVE_COMPONENT_STATE]: data,
       });
     // Shows or hides the info dialog.
@@ -443,18 +438,12 @@ const actions = (state, action, data) => {
       }
       return /** @type {!State} */ ({
         ...state,
-        [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP_PANELS,
         [StateProperty.UI_STATE]: data,
       });
     case Action.SET_GYROSCOPE_PERMISSION:
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.GYROSCOPE_PERMISSION_STATE]: data,
-      });
-    case Action.TOGGLE_VIEWPORT_WARNING:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.VIEWPORT_WARNING_STATE]: !!data,
       });
     case Action.SET_CONSENT_ID:
       return /** @type {!State} */ ({
@@ -598,7 +587,6 @@ export class AmpStoryStoreService {
       [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
       [StateProperty.AFFILIATE_LINK_STATE]: null,
-      [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.EDUCATION_STATE]: false,
       [StateProperty.GYROSCOPE_PERMISSION_STATE]: '',
       [StateProperty.HAS_SIDEBAR_STATE]: false,
@@ -623,7 +611,6 @@ export class AmpStoryStoreService {
       [StateProperty.STORY_HAS_PLAYBACK_UI_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
       [StateProperty.UI_STATE]: UIType.MOBILE,
-      [StateProperty.VIEWPORT_WARNING_STATE]: false,
       // amp-story only allows actions on a case-by-case basis to preserve UX
       // behaviors. By default, no actions are allowed.
       [StateProperty.ACTIONS_ALLOWLIST]: [],
