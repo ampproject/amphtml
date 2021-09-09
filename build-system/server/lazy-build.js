@@ -1,18 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
@@ -42,7 +27,7 @@ const vendorBundles = generateBundles();
  * @return {string}
  */
 function maybeGetUnminifiedName(bundles, name) {
-  if (argv.compiled) {
+  if (argv.minified) {
     for (const key of Object.keys(bundles)) {
       if (
         key == name ||
@@ -98,7 +83,7 @@ async function build(bundles, name, buildFunc) {
   bundle.watched = true;
   bundle.pendingBuild = buildFunc(bundles, name, {
     watch: true,
-    minify: argv.compiled,
+    minify: argv.minified,
     onWatchBuild: async (bundlePromise) => {
       bundle.pendingBuild = bundlePromise;
       await bundlePromise;
@@ -118,7 +103,7 @@ async function build(bundles, name, buildFunc) {
  * @return {Promise<void>}
  */
 async function lazyBuildExtensions(req, _res, next) {
-  const matcher = argv.compiled
+  const matcher = argv.minified
     ? /\/dist\/v0\/([^\/]*)\.js/ // '/dist/v0/*.js'
     : /\/dist\/v0\/([^\/]*)\.max\.js/; // '/dist/v0/*.max.js'
   await lazyBuild(req.url, matcher, extensionBundles, doBuildExtension, next);
@@ -146,7 +131,7 @@ async function lazyBuildJs(req, _res, next) {
  * @return {Promise<void>}
  */
 async function lazyBuild3pVendor(req, _res, next) {
-  const matcher = argv.compiled
+  const matcher = argv.minified
     ? new RegExp(`\\/dist\\.3p\\/${VERSION}\\/vendor\\/([^\/]*)\\.js`) // '/dist.3p/21900000/vendor/*.js'
     : /\/dist\.3p\/current\/vendor\/([^\/]*)\.max\.js/; // '/dist.3p/current/vendor/*.max.js'
   await lazyBuild(req.url, matcher, vendorBundles, doBuild3pVendor, next);

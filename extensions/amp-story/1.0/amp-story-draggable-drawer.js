@@ -1,19 +1,3 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   Action,
   StateProperty,
@@ -228,10 +212,7 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     // Reset scroll position on end of close transiton.
     this.element.addEventListener('transitionend', (e) => {
-      if (
-        e.propertyName === 'transform' &&
-        this.state_ === DrawerState.CLOSED
-      ) {
+      if (e.propertyName === 'transform' && this.state === DrawerState.CLOSED) {
         this.containerEl./*OK*/ scrollTop = 0;
       }
     });
@@ -600,6 +581,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.state = DrawerState.CLOSED;
 
     this.storeService.dispatch(Action.TOGGLE_PAUSED, false);
+    this.handleSoftKeyboardOnDrawerClose_();
 
     this.mutateElement(() => {
       this.element.setAttribute('aria-hidden', true);
@@ -617,5 +599,29 @@ export class DraggableDrawer extends AMP.BaseElement {
       const owners = Services.ownersForDoc(this.element);
       owners.schedulePause(this.element, this.ampComponents_);
     });
+  }
+
+  /**
+   * Handle the soft keyboard during the closing of the drawer.
+   * @private
+   */
+  handleSoftKeyboardOnDrawerClose_() {
+    // Blur the focused element in order to dismiss the soft keyboard.
+    this.win.document.activeElement?.blur();
+    // Reset the story's scroll position, which can be unintentionally altered
+    // by the opening of the soft keyboard on Android devices.
+    this.resetStoryScrollPosition_();
+  }
+
+  /**
+   * Set the story's scroll position to its default state, if necessary.
+   * @private
+   */
+  resetStoryScrollPosition_() {
+    const storyEl = closest(
+      this.element,
+      (el) => el.tagName === 'AMP-STORY-PAGE'
+    );
+    storyEl./*OK*/ scrollTo(0, 0);
   }
 }

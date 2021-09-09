@@ -1,28 +1,12 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {mount} from 'enzyme';
 
 import * as Preact from '#preact';
 
 import {waitFor} from '#testing/test-helper';
 
-import {Timeago} from '../component';
+import {BentoTimeago} from '../component';
 
-describes.realWin('Timeago 1.0 preact component', {}, (env) => {
+describes.realWin('BentoTimeago 1.0 preact component', {}, (env) => {
   function getTime(wrapper) {
     const time = wrapper.find('time');
     expect(time).to.have.lengthOf(1);
@@ -36,7 +20,7 @@ describes.realWin('Timeago 1.0 preact component', {}, (env) => {
       datetime: date.toISOString(),
       displayIn: 'UTC',
     };
-    const wrapper = mount(<Timeago {...props} />, {
+    const wrapper = mount(<BentoTimeago {...props} />, {
       attachTo: env.win.document.body,
     });
     expect(getTime(wrapper)).to.equal('');
@@ -52,7 +36,7 @@ describes.realWin('Timeago 1.0 preact component', {}, (env) => {
       datetime: date.getTime(),
       placeholder,
     };
-    const wrapper = mount(<Timeago {...props} />, {
+    const wrapper = mount(<BentoTimeago {...props} />, {
       attachTo: env.win.document.body,
     });
     expect(getTime(wrapper)).to.equal(placeholder);
@@ -68,7 +52,7 @@ describes.realWin('Timeago 1.0 preact component', {}, (env) => {
       datetime: date.toISOString(),
       placeholder,
     };
-    const wrapper = mount(<Timeago {...props} />, {
+    const wrapper = mount(<BentoTimeago {...props} />, {
       attachTo: env.win.document.body,
     });
     expect(getTime(wrapper)).to.equal(placeholder);
@@ -88,7 +72,7 @@ describes.realWin('Timeago 1.0 preact component', {}, (env) => {
       datetime: date.toISOString(),
       placeholder,
     };
-    const wrapper = mount(<Timeago {...props} />, {
+    const wrapper = mount(<BentoTimeago {...props} />, {
       attachTo: env.win.document.body,
     });
     expect(getTime(wrapper)).to.equal(placeholder);

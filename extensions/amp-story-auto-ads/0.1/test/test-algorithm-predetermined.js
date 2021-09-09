@@ -1,31 +1,16 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {StoryAdPlacements} from '#experiments/story-ad-placements';
 
+import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {
   Action,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {
   PredeterminedPositionAlgorithm,
   getAdPositions,
   getNumberOfAds,
 } from '../algorithm-predetermined';
 import {StoryAdPageManager} from '../story-ad-page-manager';
-import {StoryAdPlacements} from '#experiments/story-ad-placements';
 
 describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
   let storeService;

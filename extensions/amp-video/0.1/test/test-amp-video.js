@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
 import {AmpVideo, isCachedByCdn} from '../amp-video';
 import {Services} from '#service';
@@ -537,24 +521,6 @@ describes.realWin(
       const impl = await v.getImpl(false);
       expect(impl.toggleFallback.called).to.be.true;
       expect(impl.toggleFallback).to.have.been.calledWith(true);
-    });
-
-    it('play() should not log promise rejections', async () => {
-      const playPromise = Promise.reject('The play() request was interrupted');
-      const catchSpy = env.sandbox.spy(playPromise, 'catch');
-      await getVideo(
-        {
-          src: 'video.mp4',
-          width: 160,
-          height: 90,
-        },
-        null,
-        function (element, impl) {
-          env.sandbox.stub(impl.video_, 'play').returns(playPromise);
-          impl.play();
-        }
-      );
-      expect(catchSpy.called).to.be.true;
     });
 
     it('decode error retries the next source', async () => {

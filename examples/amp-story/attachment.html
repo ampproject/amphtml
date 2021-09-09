@@ -40,8 +40,16 @@
       }
 
       .attachment-content p {
+        font-size: 18px;
         margin-top: 0;
         margin-bottom: 16px;
+      }
+
+      form input {
+        display: block;
+        height: 60px;
+        margin-bottom: 30px;
+        width: 100%;
       }
     </style>
   </head>
@@ -63,7 +71,7 @@
             <span data-text-background-color="#00A3DB">Default amp-story-page-attachment.</span></br></br>
           </p>
         </amp-story-grid-layer>
-        <amp-story-page-attachment data-title="Lorem ipsum" layout="nodisplay">
+        <amp-story-page-attachment title="Lorem ipsum" layout="nodisplay">
           <a href="https://google.com">Left link</a>
           <div style="text-align: center;"><a href="https://google.com">Center link</a></div>
           <div style="text-align: right;"><a href="https://google.com">Right link</a></div>
@@ -148,6 +156,59 @@
 
           <p>Ut tristique et egestas quis ipsum. Aliquam malesuada bibendum arcu vitae elementum curabitur vitae nunc sed. Elementum curabitur vitae nunc sed velit dignissim. Tristique et egestas quis ipsum suspendisse ultrices gravida dictum fusce. At elementum eu facilisis sed odio morbi. Imperdiet proin fermentum leo vel orci porta non. Quam lacus suspendisse faucibus interdum. Eu non diam phasellus vestibulum lorem sed risus. Commodo viverra maecenas accumsan lacus vel facilisis volutpat est velit. Sagittis aliquam malesuada bibendum arcu vitae elementum. Ut sem viverra aliquet eget sit amet. Nulla facilisi morbi tempus iaculis. Sed odio morbi quis commodo odio aenean sed adipiscing diam. Donec ultrices tincidunt arcu non sodales. Amet venenatis urna cursus eget. Sapien et ligula ullamcorper malesuada proin. Tristique sollicitudin nibh sit amet commodo nulla facilisi. Venenatis tellus in metus vulputate eu scelerisque felis.</p>
           <a href="https://linkinattachment.com">Link in page attachment</a>
+        </amp-story-page-attachment>
+      </amp-story-page>
+
+      <amp-story-page id="short-inline-containing-form">
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat1.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <p>
+            <span data-text-background-color="#00A3DB">amp-story-page-attachment: one form within small attachment.</span></br></br>
+          </p>
+        </amp-story-grid-layer>
+        <amp-story-page-attachment
+          title="Subscribe"
+          layout="nodisplay"
+          cta-text="Subscribe">
+          <div class="attachment-content">
+            <p>Form within a small attachment:</p>
+            <form>
+              <input type="email" name="email" placeholder="Email" required>
+              <input type="submit" value="Subscribe">
+            </form>
+          </div>
+        </amp-story-page-attachment>
+      </amp-story-page>
+
+      <amp-story-page id="long-inline-containing-forms">
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat1.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <p>
+            <span data-text-background-color="#00A3DB">amp-story-page-attachment: two forms within large attachment.</span></br></br>
+          </p>
+        </amp-story-grid-layer>
+        <amp-story-page-attachment
+          title="Subscribe"
+          layout="nodisplay"
+          cta-text="Subscribe">
+          <div class="attachment-content">
+          <p>Forms within a large attachment:</p>
+            <form>
+              <input type="email" name="email" placeholder="Email" required>
+              <input type="submit" value="Subscribe">
+            </form>
+            <p>In nisl nisi scelerisque eu ultrices vitae auctor eu. Tristique magna sit amet purus gravida. Tincidunt id aliquet risus feugiat in ante metus dictum. Mattis nunc sed blandit libero volutpat sed. Imperdiet massa tincidunt nunc pulvinar sapien et ligula ullamcorper malesuada. Sit amet mattis vulputate enim nulla aliquet porttitor lacus luctus. Proin sagittis nisl rhoncus mattis rhoncus. Pulvinar neque laoreet suspendisse interdum consectetur libero. Nibh tellus molestie nunc non blandit massa enim nec dui. Sagittis eu volutpat odio facilisis. Tristique senectus et netus et malesuada fames ac. Molestie a iaculis at erat. Sit amet cursus sit amet. Suscipit tellus mauris a diam maecenas sed enim ut. Gravida quis blandit turpis cursus in. Tincidunt vitae semper quis lectus nulla at volutpat diam ut. Morbi tempus iaculis urna id. Faucibus et molestie ac feugiat sed lectus vestibulum. Mauris augue neque gravida in. Ac turpis egestas sed tempus.</p>
+            <p>In nisl nisi scelerisque eu ultrices vitae auctor eu. Tristique magna sit amet purus gravida. Tincidunt id aliquet risus feugiat in ante metus dictum. Mattis nunc sed blandit libero volutpat sed. Imperdiet massa tincidunt nunc pulvinar sapien et ligula ullamcorper malesuada. Sit amet mattis vulputate enim nulla aliquet porttitor lacus luctus. Proin sagittis nisl rhoncus mattis rhoncus. Pulvinar neque laoreet suspendisse interdum consectetur libero. Nibh tellus molestie nunc non blandit massa enim nec dui. Sagittis eu volutpat odio facilisis. Tristique senectus et netus et malesuada fames ac. Molestie a iaculis at erat. Sit amet cursus sit amet. Suscipit tellus mauris a diam maecenas sed enim ut. Gravida quis blandit turpis cursus in. Tincidunt vitae semper quis lectus nulla at volutpat diam ut. Morbi tempus iaculis urna id. Faucibus et molestie ac feugiat sed lectus vestibulum. Mauris augue neque gravida in. Ac turpis egestas sed tempus.</p>
+            <p>Ut tristique et egestas quis ipsum. Aliquam malesuada bibendum arcu vitae elementum curabitur vitae nunc sed. Elementum curabitur vitae nunc sed velit dignissim. Tristique et egestas quis ipsum suspendisse ultrices gravida dictum fusce. At elementum eu facilisis sed odio morbi. Imperdiet proin fermentum leo vel orci porta non. Quam lacus suspendisse faucibus interdum. Eu non diam phasellus vestibulum lorem sed risus. Commodo viverra maecenas accumsan lacus vel facilisis volutpat est velit. Sagittis aliquam malesuada bibendum arcu vitae elementum. Ut sem viverra aliquet eget sit amet. Nulla facilisi morbi tempus iaculis. Sed odio morbi quis commodo odio aenean sed adipiscing diam. Donec ultrices tincidunt arcu non sodales. Amet venenatis urna cursus eget. Sapien et ligula ullamcorper malesuada proin. Tristique sollicitudin nibh sit amet commodo nulla facilisi. Venenatis tellus in metus vulputate eu scelerisque felis.</p>
+            <form>
+              <input type="text" name="feedback" placeholder="Feedback">
+              <input type="submit" value="Submit">
+            </form>
+          </div>
         </amp-story-page-attachment>
       </amp-story-page>
 

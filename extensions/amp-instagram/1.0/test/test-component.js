@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {mount} from 'enzyme';
 
 import * as Preact from '#preact';
@@ -22,12 +6,12 @@ import {WithAmpContext} from '#preact/context';
 
 import {waitFor} from '#testing/test-helper';
 
-import {Instagram} from '../component';
+import {BentoInstagram} from '../component';
 
-describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
+describes.sandboxed('BentoInstagram preact component v1.0', {}, (env) => {
   it('Normal render', () => {
     const wrapper = mount(
-      <Instagram
+      <BentoInstagram
         shortcode="B8QaZW4AQY_"
         style={{
           'width': 500,
@@ -48,7 +32,7 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
 
   it('Render with caption', () => {
     const wrapper = mount(
-      <Instagram
+      <BentoInstagram
         shortcode="B8QaZW4AQY_"
         captioned
         style={{'width': 500, 'height': 705}}
@@ -65,7 +49,7 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
   it('Resize prop is called', () => {
     const requestResizeSpy = env.sandbox.spy();
     const wrapper = mount(
-      <Instagram
+      <BentoInstagram
         shortcode="B8QaZW4AQY_"
         captioned
         style={{'width': 500, 'height': 705}}
@@ -84,7 +68,7 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
 
   it('Height is changed', async () => {
     const wrapper = mount(
-      <Instagram
+      <BentoInstagram
         shortcode="B8QaZW4AQY_"
         style={{'width': 500, 'height': 600}}
       />
@@ -110,7 +94,7 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
     const ref = createRef();
     const onReadyState = env.sandbox.spy();
     const wrapper = mount(
-      <Instagram
+      <BentoInstagram
         ref={ref}
         shortcode="B8QaZW4AQY_"
         style={{'width': 500, 'height': 600}}
@@ -132,7 +116,7 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
     const ref = createRef();
     const wrapper = mount(
       <WithAmpContext playable={true}>
-        <Instagram
+        <BentoInstagram
           ref={ref}
           shortcode="B8QaZW4AQY_"
           style={{'width': 500, 'height': 600}}

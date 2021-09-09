@@ -1,31 +1,15 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as Preact from '#preact';
-import {Twitter} from '../component';
+import {BentoTwitter} from '../component';
 import {WithAmpContext} from '#preact/context';
 import {createRef} from '#preact';
 import {mount} from 'enzyme';
-import {serializeMessage} from '../../../../src/3p-frame-messaging';
+import {serializeMessage} from '#core/3p-frame-messaging';
 import {waitFor} from '#testing/test-helper';
 
 describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
   it('should render', () => {
     const wrapper = mount(
-      <Twitter
+      <BentoTwitter
         tweetid="1356304203044499462"
         style={{
           'width': '500px',
@@ -46,7 +30,7 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
   it('should call given requestResize', () => {
     const requestResizeSpy = env.sandbox.spy();
     const wrapper = mount(
-      <Twitter
+      <BentoTwitter
         tweetid="1356304203044499462"
         style={{
           'width': '500px',
@@ -75,7 +59,7 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
 
   it('should change height', async () => {
     const wrapper = mount(
-      <Twitter
+      <BentoTwitter
         tweetid="1356304203044499462"
         style={{
           'width': '500px',
@@ -112,7 +96,7 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
     const ref = createRef();
     const onReadyState = env.sandbox.spy();
     const wrapper = mount(
-      <Twitter
+      <BentoTwitter
         ref={ref}
         tweetid="1356304203044499462"
         style={{
@@ -137,7 +121,7 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
     const ref = createRef();
     const wrapper = mount(
       <WithAmpContext playable={true}>
-        <Twitter
+        <BentoTwitter
           ref={ref}
           tweetid="1356304203044499462"
           style={{
@@ -153,5 +137,55 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
     const spy = env.sandbox./*OK*/ spy(iframe, 'src', ['set']);
     wrapper.setProps({playable: false});
     expect(spy.set).to.be.calledOnce;
+  });
+
+  it('should call onLoad when loaded', () => {
+    const onLoadSpy = env.sandbox.spy();
+    const onErrorSpy = env.sandbox.spy();
+
+    const wrapper = mount(
+      <BentoTwitter
+        tweetid="1356304203044499462"
+        height="500"
+        width="500"
+        onLoad={onLoadSpy}
+        onError={onErrorSpy}
+      ></BentoTwitter>
+    );
+
+    const iframe = wrapper.find('iframe').getDOMNode();
+    const {sentinel} = JSON.parse(iframe.getAttribute('name')).attributes;
+    const mockEvent = new CustomEvent('message');
+    mockEvent.data = serializeMessage('embed-size', sentinel, {height: '1000'});
+    mockEvent.source = iframe.contentWindow;
+    window.dispatchEvent(mockEvent);
+
+    expect(onLoadSpy).to.have.been.calledOnce;
+    expect(onErrorSpy).not.to.have.been.called;
+  });
+
+  it('should call onError when error', () => {
+    const onErrorSpy = env.sandbox.spy();
+    const onLoadSpy = env.sandbox.spy();
+
+    const wrapper = mount(
+      <BentoTwitter
+        tweetid="00000000111111"
+        height="500"
+        width="500"
+        onError={onErrorSpy}
+        onLoad={onLoadSpy}
+      ></BentoTwitter>
+    );
+
+    const iframe = wrapper.find('iframe').getDOMNode();
+    const {sentinel} = JSON.parse(iframe.getAttribute('name')).attributes;
+    const mockEvent = new CustomEvent('message');
+    mockEvent.data = serializeMessage('no-content', sentinel);
+    mockEvent.source = iframe.contentWindow;
+    window.dispatchEvent(mockEvent);
+
+    expect(onErrorSpy).to.have.been.calledOnce;
+    expect(onLoadSpy).not.to.have.been.called;
   });
 });

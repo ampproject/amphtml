@@ -1,20 +1,4 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Sets location specific CSS, bind variables, and attributes on
  * AMP pages
  * Example:
@@ -39,6 +23,7 @@ import {Deferred} from '#core/data-structures/promise';
 import {isJsonScriptTag} from '#core/dom';
 import {isArray, isObject} from '#core/types';
 import {tryParseJson} from '#core/types/object/json';
+import {getHashParams} from '#core/types/string/url';
 
 import {isCanary} from '#experiments';
 
@@ -189,20 +174,18 @@ export class AmpGeo extends AMP.BaseElement {
     const trimmedGeoMatch = GEO_HOTPATCH_STR_REGEX.exec(COUNTRY);
 
     // default country is 'unknown' which is also the zero length case
-    if (
-      getMode(this.win).geoOverride &&
-      (isCanary(this.win) || getMode(this.win).localDev)
-    ) {
+    const geoOverride = getHashParams(this.win)['amp-geo'];
+    if (geoOverride && (isCanary(this.win) || getMode(this.win).localDev)) {
       // debug override case, only works in canary or localdev
       // match to \w characters only to prevent xss vector
       const overrideGeoMatch = GEO_HOTPATCH_STR_REGEX.exec(
-        getMode(this.win).geoOverride.toLowerCase()
+        geoOverride.toLowerCase()
       );
       if (overrideGeoMatch[1]) {
-        this.country_ = overrideGeoMatch[1].toLowerCase();
+        this.country_ = overrideGeoMatch[1];
         if (overrideGeoMatch[2]) {
           // Allow subdivision_ to be customized for testing, not checking us-ca
-          this.subdivision_ = overrideGeoMatch[2].toLowerCase();
+          this.subdivision_ = overrideGeoMatch[2];
         }
         this.mode_ = mode.GEO_OVERRIDE;
       }

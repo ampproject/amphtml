@@ -299,7 +299,8 @@
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "wrapper": "bento"
+      "wrapper": "bento",
+      "hasCss": true
     }
   },
   {
@@ -313,7 +314,8 @@
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "wrapper": "bento"
+      "wrapper": "bento",
+      "hasCss": true
     }
   },
   {
@@ -348,7 +350,7 @@
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "wrappers": "bento"
+      "wrapper": "bento"
     }
   },
   {
@@ -925,7 +927,7 @@
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "wrappers": "bento"
+      "wrapper": "bento"
     }
   },
   {
@@ -1151,6 +1153,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
+      "npm": true,
       "wrapper": "bento"
     }
   },
@@ -1238,7 +1241,7 @@
     "latestVersion": "1.0",
     "options": {
       "npm": true,
-      "wrappers": "bento"
+      "wrapper": "bento"
     }
   },
   {

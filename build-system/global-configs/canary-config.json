@@ -18,9 +18,9 @@
   "disable-a4a-non-sd": 1,
   "story-ad-auto-advance": 1,
   "story-ad-placements": 1,
-  "story-load-first-page-only": 0.1,
-  "story-load-inactive-outside-viewport": 0.1,
+  "story-load-first-page-only": 1,
+  "story-load-inactive-outside-viewport": 1,
   "story-disable-animations-first-page": 0.5,
   "amp-story-page-attachment-ui-v2": 1,
-  "amp-sticky-ad-to-amp-ad": 0
+  "amp-sticky-ad-to-amp-ad-v2": 0
 }

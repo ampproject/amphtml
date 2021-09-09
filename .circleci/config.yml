@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  browser-tools: circleci/browser-tools@1.1.3
+  browser-tools: circleci/browser-tools@1.2.1
   node: circleci/node@4.7.0
 
 push_and_pr_builds: &push_and_pr_builds
@@ -118,6 +118,7 @@ commands:
     steps:
       - browser-tools/install-chrome:
           replace-existing: true
+          chrome-version: 93.0.4577.63
       - browser-tools/install-chromedriver
   install_firefox:
     steps:
@@ -429,6 +430,8 @@ jobs:
       - teardown_vm
 
 workflows:
+  version: 2
+
   'CircleCI':
     jobs:
       - initialize_repository:

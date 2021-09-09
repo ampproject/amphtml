@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {CommonSignals} from '#core/constants/common-signals';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
@@ -29,12 +13,12 @@ import {
   setStyles,
 } from '#core/dom/style';
 import {rethrowAsync} from '#core/error';
+import * as mode from '#core/mode';
 import {toWin} from '#core/window';
 
 import {install as installAbortController} from '#polyfills/abort-controller';
 import {install as installCustomElements} from '#polyfills/custom-elements';
 import {install as installDocContains} from '#polyfills/document-contains';
-import {install as installDOMTokenList} from '#polyfills/domtokenlist';
 import {installForChildWin as installIntersectionObserver} from '#polyfills/intersection-observer';
 import {installForChildWin as installResizeObserver} from '#polyfills/resize-observer';
 
@@ -699,9 +683,8 @@ export class FriendlyIframeEmbed {
  * @param {!Window} childWin
  */
 function installPolyfillsInChildWindow(parentWin, childWin) {
-  if (!IS_ESM) {
+  if (!mode.isEsm()) {
     installDocContains(childWin);
-    installDOMTokenList(childWin);
   }
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
@@ -750,7 +733,7 @@ export class Installers {
       })
       .then(getDelayPromise)
       .then(() => {
-        if (IS_ESM) {
+        if (mode.isEsm()) {
           // TODO: This is combined (ampdoc + shared), not just shared
           // const css = parentWin.document.querySelector('style[amp-runtime]')
           // .textContent;

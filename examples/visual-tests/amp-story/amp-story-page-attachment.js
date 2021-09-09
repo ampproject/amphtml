@@ -1,18 +1,3 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const {
@@ -200,6 +185,12 @@ module.exports = {
       `amp-story-page#${pageID}[active][distance="0"]`
     );
 
+    // Set the publisher domain text instead of using the actual domain, to
+    // avoid flaky test failures due to inconsistent port values.
+    await page.$eval('.i-amphtml-story-page-attachment-domain-label', (el) => {
+      el.textContent = 'www.publisherdomain.com';
+    });
+
     // Open the page attachment.
     await page.waitForSelector(
       `amp-story-page#${pageID} .i-amphtml-story-inline-page-attachment-chip`
@@ -213,6 +204,51 @@ module.exports = {
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-draggable-drawer-open ' +
         '.i-amphtml-story-page-attachment-domain-label',
+    ]);
+  },
+
+  'form presence - the input field should blur on close': async (
+    page,
+    name
+  ) => {
+    const url = await page.url();
+    const pageID = 'attachment-with-form';
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+
+    // Set the publisher domain text instead of using the actual domain, to
+    // avoid flaky test failures due to inconsistent port values.
+    await page.$eval('.i-amphtml-story-page-attachment-domain-label', (el) => {
+      el.textContent = 'www.publisherdomain.com';
+    });
+
+    // Open the page attachment.
+    await page.waitForSelector(
+      `amp-story-page#${pageID} .i-amphtml-story-inline-page-attachment-chip`
+    );
+    await page.tap(
+      `amp-story-page#${pageID} .i-amphtml-story-inline-page-attachment-chip`
+    );
+
+    // Tap the input element. This causes the soft keyboard to appear on
+    // mobile.
+    await page.waitForSelector(`amp-story-page#${pageID} input`);
+    await page.tap(`amp-story-page#${pageID} input`);
+    await page.waitForSelector(`amp-story-page#${pageID} input:focus`);
+
+    // Dismiss the attachment by tapping an element on the story page, which
+    // should blur the input field. This ensures that the soft keyboard is
+    // dismissed.
+    await page.waitForSelector(
+      `amp-story-page#${pageID} .i-amphtml-story-page-attachment-close-button`
+    );
+    await page.tap(
+      `amp-story-page#${pageID} .i-amphtml-story-page-attachment-close-button`
+    );
+    await verifySelectorsInvisible(page, name, [
+      `amp-story-page#${pageID} input:focus`,
     ]);
   },
 
