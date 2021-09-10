@@ -396,6 +396,12 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeStoryPlayer_();
 
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
+    if (this.isLandscapeSupported_()) {
+      this.win.document.documentElement.setAttribute(
+        'data-story-supports-landscape',
+        ''
+      );
+    }
 
     // Removes title in order to prevent incorrect titles appearing on link
     // hover. (See 17654)
