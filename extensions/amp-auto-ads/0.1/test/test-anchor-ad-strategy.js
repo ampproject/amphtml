@@ -36,6 +36,39 @@ describes.realWin(
     });
 
     describe('run', () => {
+      it('should insert sticky ad with inside custom analytics', () => {
+        configObj['optInStatus'].push(2);
+
+        const anchorAdStrategy = new AnchorAdStrategy(
+          env.ampdoc,
+          attributes,
+          configObj,
+          {'data-custom': 'true', 'config': 'api.domain.com/config.json'}
+        );
+
+        const strategyPromise = anchorAdStrategy.run().then((placed) => {
+          expect(placed).to.equal(true);
+        });
+
+        const expectPromise = new Promise((resolve) => {
+          waitForChild(
+            env.win.document.body,
+            (parent) => {
+              return parent.firstChild.tagName == 'AMP-STICKY-AD';
+            },
+            () => {
+              const stickyAd = env.win.document.body.firstChild;
+              expect(stickyAd.getAttribute('layout')).to.equal('nodisplay');
+              const ampAd = stickyAd.firstChild;
+              const ampAnalytics = ampAd.firstChild;
+              expect(ampAnalytics.getAttribute('data-custom')).to.equal('true');
+              resolve();
+            }
+          );
+        });
+
+        return Promise.all([strategyPromise, expectPromise]);
+      });
       it('should insert sticky ad if opted in', () => {
         configObj['optInStatus'].push(2);
 
