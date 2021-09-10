@@ -415,7 +415,3 @@ carousel.
 
 Either `true` or `false`, defaults to `true`. Determines whether or not the
 carousel should snap on slides when scrolling.
-
-#### Styling
-
-You may use the `BentoStreamGallery` element selector to style the carousel freely.
