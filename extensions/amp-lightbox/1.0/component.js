@@ -44,11 +44,11 @@ const DEFAULT_CLOSE_LABEL = 'Close the modal';
 const CONTENT_PROPS = {'part': 'scroller'};
 
 /**
- * @param {!LightboxDef.Props} props
- * @param {{current: ?LightboxDef.LightboxApi}} ref
+ * @param {!BentoLightboxDef.Props} props
+ * @param {{current: ?BentoLightboxDef.LightboxApi}} ref
  * @return {PreactDef.Renderable}
  */
-function LightboxWithRef(
+function BentoLightboxWithRef(
   {
     animation = 'fade-in',
     children,
@@ -174,13 +174,13 @@ function LightboxWithRef(
   );
 }
 
-const Lightbox = forwardRef(LightboxWithRef);
-Lightbox.displayName = 'Lightbox';
-export {Lightbox};
+const BentoLightbox = forwardRef(BentoLightboxWithRef);
+BentoLightbox.displayName = 'Lightbox';
+export {BentoLightbox};
 
 /**
  *
- * @param {!LightboxDef.CloseButtonProps} props
+ * @param {!BentoLightboxDef.CloseButtonProps} props
  * @return {PreactDef.Renderable}
  */
 function CloseButton({onClick, as: Comp = ScreenReaderCloseButton}) {
@@ -196,7 +196,7 @@ function CloseButton({onClick, as: Comp = ScreenReaderCloseButton}) {
  * We do not want this in the tab order since it is not really "visible"
  * and would be confusing to tab to if not using a screen reader.
  *
- * @param {!LightboxDef.CloseButtonProps} props
+ * @param {!BentoLightboxDef.CloseButtonProps} props
  * @return {PreactDef.Renderable}
  */
 function ScreenReaderCloseButton({'aria-label': ariaLabel, onClick}) {

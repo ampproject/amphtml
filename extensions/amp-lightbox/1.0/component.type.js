@@ -16,7 +16,7 @@
 
 /** @externs */
 
-var LightboxDef = {};
+var BentoLightboxDef = {};
 
 /**
  * @typedef {{
@@ -31,7 +31,7 @@ var LightboxDef = {};
  *   onAfterClose: (function():void|undefined),
  * }}
  */
-LightboxDef.Props;
+BentoLightboxDef.Props;
 
 /**
  * @typedef {{
@@ -40,10 +40,10 @@ LightboxDef.Props;
  *   onClick: function():void,
  * }}
  */
-LightboxDef.CloseButtonProps;
+BentoLightboxDef.CloseButtonProps;
 
 /** @interface */
-LightboxDef.LightboxApi = class {
+BentoLightboxDef.LightboxApi = class {
   /** Open the lightbox */
   open() {}
 

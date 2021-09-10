@@ -31,7 +31,7 @@ import {PADDING_ALLOWANCE, useStyles} from './component.jss';
 import {LightboxGalleryContext} from './context';
 
 import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
-import {Lightbox} from '../../amp-lightbox/1.0/component';
+import {BentoLightbox} from '../../amp-lightbox/1.0/component';
 
 /** @const {string} */
 const DEFAULT_GROUP = 'default';
@@ -196,7 +196,7 @@ export function LightboxGalleryProviderWithRef(
 
   return (
     <>
-      <Lightbox
+      <BentoLightbox
         class={objstr({
           [classes.lightbox]: true,
           [classes.showControls]: showControls,
@@ -269,7 +269,7 @@ export function LightboxGalleryProviderWithRef(
             {gridElements.current[group]}
           </div>
         )}
-      </Lightbox>
+      </BentoLightbox>
       <LightboxGalleryContext.Provider value={context}>
         {render ? render() : children}
       </LightboxGalleryContext.Provider>
