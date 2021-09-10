@@ -4,8 +4,6 @@ formats:
   - websites
 teaser:
   text: Displays multiple similar pieces of content at a time, for features like related products or articles.
-experimental: true
-bento: true
 ---
 
 # Bento Stream Gallery

@@ -4,8 +4,6 @@ formats:
   - websites
 teaser:
   text: The Bento Date Display component displays time data that you can render in your page.
-experiental: true
-bento: true
 ---
 
 # Bento Date Display

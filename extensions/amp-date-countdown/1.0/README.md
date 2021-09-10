@@ -4,8 +4,6 @@ formats:
   - websites
 teaser:
   text: Displays a countdown sequence to a specified date.
-experimental: true
-bento: true
 ---
 
 # Bento Date Countdown
