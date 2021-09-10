@@ -27,10 +27,7 @@ import {StoryAdPage} from './story-ad-page';
 
 import {devAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {
-  StateProperty,
-  getStoreService,
-} from '../../amp-story/1.0/amp-story-store-service';
+import {getStoreService} from '../../amp-story/1.0/amp-story-store-service';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page-manager';
@@ -182,20 +179,8 @@ export class StoryAdPageManager {
    * @return {!Promise<!InsertionState>}
    */
   maybeInsertPageAfter(pageBeforeAdId, nextAdPage) {
-    let pageBeforeAd = this.ampStory_.getPageById(pageBeforeAdId);
-    let pageAfterAd = this.ampStory_.getNextPage(pageBeforeAd);
-    if (!pageAfterAd) {
-      return Promise.resolve(InsertionState.DELAYED);
-    }
-
-    if (this.isDesktopView_()) {
-      // If we are in desktop view the ad must be inserted 2 pages away because
-      // the next page will already be in view
-      pageBeforeAdId = pageAfterAd.element.id;
-      pageBeforeAd = pageAfterAd;
-      pageAfterAd = this.ampStory_.getNextPage(pageAfterAd);
-    }
-
+    const pageBeforeAd = this.ampStory_.getPageById(pageBeforeAdId);
+    const pageAfterAd = this.ampStory_.getNextPage(pageBeforeAd);
     if (!pageAfterAd) {
       return Promise.resolve(InsertionState.DELAYED);
     }
@@ -251,14 +236,6 @@ export class StoryAdPageManager {
       [AnalyticsVars.AD_INSERTED]: Date.now(),
     });
     this.adsConsumed_++;
-  }
-
-  /**
-   * @private
-   * @return {boolean}
-   */
-  isDesktopView_() {
-    return !!this.storeService_.get(StateProperty.DESKTOP_STATE);
   }
 
   /**
