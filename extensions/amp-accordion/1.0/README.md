@@ -64,6 +64,7 @@ The example below contains an `bento-accordion` with three sections. The
 <head>
   <script src="https://cdn.ampproject.org/custom-elements-polyfill.js"></script>
   <script async src="https://cdn.ampproject.org/v0/bento-accordion-1.0.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-accordion-1.0.css">
 </head>
 <body>
   <bento-accordion id="my-accordion"{% if not format=='email'%} disable-session-states{% endif %}>
