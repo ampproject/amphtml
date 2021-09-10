@@ -1,7 +1,13 @@
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {loadScript, validateData} from '#3p/3p';
 
-const pubmineOptional = ['section', 'pt', 'ht', 'npaOnUnknownConsent', 'blogid'],
+const pubmineOptional = [
+    'section',
+    'pt',
+    'ht',
+    'npaOnUnknownConsent',
+    'blogid',
+  ],
   pubmineRequired = ['siteid'],
   pubmineURL = 'https://s.pubmine.com/head.js';
 
@@ -60,7 +66,7 @@ export function pubmine(global, data) {
 
   const slotConfig = {
     sectionId,
-    height: data.height == 250 ? 250 : data.height - 15,
+    height:data.height == 250 ? 250 : data.height - 15,
     width: data.width,
     window: global,
   };
