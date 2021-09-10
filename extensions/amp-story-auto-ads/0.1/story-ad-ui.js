@@ -1,9 +1,6 @@
 import {createElementWithAttributes, iterateCursor} from '#core/dom';
 import {dict, map} from '#core/types/object';
 
-import {getExperimentBranch} from '#experiments';
-import {StoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
-
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {CSS as ctaButtonCSS} from '../../../build/amp-story-auto-ads-cta-button-0.1.css';
 import {dev, user} from '../../../src/log';
@@ -293,15 +290,6 @@ export function createCta(doc, buttonFitter, container, uiMetadata) {
       return null;
     }
 
-    const autoAdvanceExpBranch = getExperimentBranch(
-      doc.defaultView,
-      StoryAdPageOutlink.ID
-    );
-
-    if (autoAdvanceExpBranch === StoryAdPageOutlink.EXPERIMENT) {
-      return createPageOutlink_(doc, uiMetadata, container);
-    } else {
-      return createCtaLayer_(a, doc, container);
-    }
+    return createPageOutlink_(doc, uiMetadata, container);
   });
 }

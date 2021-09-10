@@ -1,6 +1,3 @@
-import {forceExperimentBranch} from '#experiments';
-import {StoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
-
 import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 import {
   A4AVarNames,
@@ -225,11 +222,6 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
 
     beforeEach(() => {
       buttonFitter = new ButtonTextFitter(env.ampdoc);
-      forceExperimentBranch(
-        win,
-        StoryAdPageOutlink.ID,
-        StoryAdPageOutlink.EXPERIMENT
-      );
     });
 
     it('createCta page outlink custom theme element', () => {
