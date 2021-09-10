@@ -39,6 +39,7 @@ const {
 const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
+const {buildCompiler} = require('../compile/build-compiler');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss, copyCss} = require('./css');
@@ -136,6 +137,7 @@ async function dist() {
     steps.push(buildExperiments());
     steps.push(buildLoginDone('0.1'));
     steps.push(buildWebPushPublisherFiles());
+    steps.push(buildCompiler());
     steps.push(compileAllJs(options));
   }
 

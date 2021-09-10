@@ -41,3 +41,16 @@ export let TreeProtoDef;
  * @typedef {Object<string, string>}}
  */
 export let VersionsDef;
+
+/**
+ * @typedef {{
+ *   document: TreeProtoDef,
+ *   versions: VersionsDef
+ * }}
+ */
+export let CompilerRequest;
+
+/**
+ * @typedef {{ document: TreeProtoDef }}
+ */
+export let CompilerResponse;
