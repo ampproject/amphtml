@@ -66,7 +66,7 @@ export function pubmine(global, data) {
 
   const slotConfig = {
     sectionId,
-    height:data.height == 250 ? 250 : data.height - 15,
+    height: data.height == 250 ? 250 : data.height - 15,
     width: data.width,
     window: global,
   };
