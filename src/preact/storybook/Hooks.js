@@ -1,7 +1,7 @@
 import * as Preact from '#preact';
 import {useCallback, useState} from '#preact';
 import {useIntersectionObserver} from '#preact/component';
-import {refs} from '#preact/utils';
+import {useMergeRefs} from '#preact/utils';
 
 export default {
   title: '0/Hooks',
@@ -28,7 +28,7 @@ function Component({prop}) {
   const ref = useIntersectionObserver(ioCallback);
   const anotherRef = useIntersectionObserver(anotherIoCallback);
 
-  return <div ref={refs(ref, anotherRef)}>{text}</div>;
+  return <div ref={useMergeRefs([ref, anotherRef])}>{text}</div>;
 }
 
 export const useIO = () => {

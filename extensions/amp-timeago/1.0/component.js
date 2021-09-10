@@ -24,7 +24,7 @@ import {toWin} from '#core/window';
 import * as Preact from '#preact';
 import {useCallback, useRef, useState} from '#preact';
 import {Wrapper, useIntersectionObserver} from '#preact/component';
-import {refs, useResourcesNotify} from '#preact/utils';
+import {useMergeRefs, useResourcesNotify} from '#preact/utils';
 
 import {format, getLocale} from './locales';
 
@@ -86,7 +86,7 @@ export function BentoTimeago({
     <Wrapper
       {...rest}
       as="time"
-      ref={refs(ref, inObRef)}
+      ref={useMergeRefs([ref, inObRef])}
       datetime={new Date(date).toISOString()}
     >
       {timestamp}
