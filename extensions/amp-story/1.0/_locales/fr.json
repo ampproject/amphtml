@@ -44,14 +44,8 @@
   "16": {
     "string": "WhatsApp"
   },
-  "18": {
-    "string": "Modifiez la hauteur et la largeur de la fenêtre pour voir cette expérience"
-  },
   "19": {
     "string": "Vous devez activer l'expérience amp-story pour voir ce contenu."
-  },
-  "20": {
-    "string": "La page s'affiche mieux en mode Portrait"
   },
   "21": {
     "string": "Nous sommes désolés, mais votre navigateur n'est pas compatible avec cette expérience"
@@ -88,12 +82,6 @@
   },
   "36": {
     "string": "Développer le tweet"
-  },
-  "37": {
-    "string": "Augmentez la hauteur de votre fenêtre pour voir cette expérience"
-  },
-  "38": {
-    "string": "Élargissez la fenêtre pour voir cette expérience"
   },
   "62": {
     "string": "Partager à partir de cette page"

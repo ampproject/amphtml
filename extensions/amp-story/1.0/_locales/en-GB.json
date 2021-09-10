@@ -44,14 +44,8 @@
   "16": {
     "string": "WhatsApp"
   },
-  "18": {
-    "string": "Expand both the height and width of your window to view this experience"
-  },
   "19": {
     "string": "You must enable the AMP Story experiment to view this content."
-  },
-  "20": {
-    "string": "The page is best viewed in portrait mode"
   },
   "21": {
     "string": "We're sorry, it looks like your browser doesn't support this experience"
@@ -88,12 +82,6 @@
   },
   "36": {
     "string": "Expand Tweet"
-  },
-  "37": {
-    "string": "Expand the height of your window to view this experience"
-  },
-  "38": {
-    "string": "Expand the width of your window to view this experience"
   },
   "62": {
     "string": "Share starting from this page"

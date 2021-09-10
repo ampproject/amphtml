@@ -44,14 +44,8 @@
   "16": {
     "string": "WhatsApp"
   },
-  "18": {
-    "string": "Bu deneyimi görüntülemek için pencerenizin hem yüksekliğini hem de genişliğini artırın"
-  },
   "19": {
     "string": "Bu içeriği görüntülemek için amp-story deneyini etkinleştirmelisiniz."
-  },
-  "20": {
-    "string": "Sayfa en iyi dikey modda görüntülenir"
   },
   "21": {
     "string": "Üzgünüz, görünüşe göre tarayıcınız bu deneyimi desteklemiyor"
@@ -88,12 +82,6 @@
   },
   "36": {
     "string": "Tweet'i genişlet"
-  },
-  "37": {
-    "string": "Bu deneyimi görüntülemek için pencerenizin yüksekliğini artırın"
-  },
-  "38": {
-    "string": "Bu deneyimi görüntülemek için pencerenizin genişliğini artırın"
   },
   "62": {
     "string": "Bu sayfadan başlayarak paylaşın"

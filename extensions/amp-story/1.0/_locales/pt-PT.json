@@ -20,19 +20,13 @@
     "16": {
         "string": "WhatsApp"
     },
-    "18": {
-        "string": "Expanda a altura e largura da sua janela para ver esta experiência"
-    },
-    "19": {
+      "19": {
         "string": "Deve ativar a experiência de amp-story para ver este conteúdo."
     },
     "2": {
         "string": "Toque em Seguinte"
     },
-    "20": {
-        "string": "Conseguirá visualizar melhor esta página no modo retrato"
-    },
-    "21": {
+      "21": {
         "string": "Pedimos desculpa, mas parece que o seu navegador não suporta esta experiência"
     },
     "22": {
@@ -71,13 +65,7 @@
     "36": {
         "string": "Expandir Tweet"
     },
-    "37": {
-        "string": "Expanda a altura e largura da sua janela para visualizar esta experiência"
-    },
-    "38": {
-        "string": "Expanda a largura da sua janela para visualizar esta experiência"
-    },
-    "4": {
+        "4": {
         "string": "Não foi possível copiar a ligação para a área de transferência :("
     },
     "5": {

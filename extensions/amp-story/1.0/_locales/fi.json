@@ -44,14 +44,8 @@
   "16": {
     "string": "WhatsApp"
   },
-  "18": {
-    "string": "Lisää ikkunan korkeutta ja leveyttä, jotta voit tarkastella tätä kokemusta"
-  },
   "19": {
     "string": "Sinun täytyy ottaa AMP-tarinakokeilu käyttöön, jotta voit tarkastella tätä sisältöä."
-  },
-  "20": {
-    "string": "Sivu toimii parhaiten pystysuuntatilassa"
   },
   "21": {
     "string": "Valitettavasti selaimesi ei tue tätä ominaisuutta"
@@ -88,12 +82,6 @@
   },
   "36": {
     "string": "Laajenna tviitti"
-  },
-  "37": {
-    "string": "Lisää ikkunan korkeutta, jotta voit tarkastella tätä kokemusta"
-  },
-  "38": {
-    "string": "Lisää ikkunan leveyttä, jotta voit tarkastella tätä kokemusta"
   },
   "62": {
     "string": "Jaa tältä sivulta alkaen"

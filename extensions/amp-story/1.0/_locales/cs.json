@@ -44,14 +44,8 @@
   "16": {
     "string": "WhatsApp"
   },
-  "18": {
-    "string": "Pokud chcete zobrazit tento prvek, zvětšete výšku i šířku okna"
-  },
   "19": {
     "string": "Pokud chcete zobrazit tento obsah, musíte povolit experiment s příběhem amp-story."
-  },
-  "20": {
-    "string": "Stránku je nejlepší prohlížet v režimu na výšku"
   },
   "21": {
     "string": "Je nám líto, zdá se, že váš prohlížeč toto tento prvek nepodporuje"
@@ -88,12 +82,6 @@
   },
   "36": {
     "string": "Rozbalit tweet"
-  },
-  "37": {
-    "string": "Pokud chcete zobrazit tento prvek, zvětšete výšku okna"
-  },
-  "38": {
-    "string": "Pokud chcete zobrazit tento prvek, zvětšete šířku okna"
   },
   "62": {
     "string": "Sdílet od této stránky"

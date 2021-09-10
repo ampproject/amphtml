@@ -20,19 +20,13 @@
     "16": {
         "string": "WhatsApp"
     },
-    "18": {
-        "string": "Selle looga tutvumiseks peate akna kõrgemaks ja laiemaks muutma"
-    },
-    "19": {
+      "19": {
         "string": "Selle sisu vaatamiseks peate lubama amp-story kogemuse."
     },
     "2": {
         "string": "Toksake valikut Järgmine"
     },
-    "20": {
-        "string": "Seda lehte on parem vaadata vertikaalrežiimis"
-    },
-    "21": {
+      "21": {
         "string": "Vabandame, kahjuks ei saa teie brauseris seda lugu vaadata"
     },
     "22": {
@@ -71,13 +65,7 @@
     "36": {
         "string": "Laiendage säutsu"
     },
-    "37": {
-        "string": "Selle looga tutvumiseks muutke aken kõrgemaks"
-    },
-    "38": {
-        "string": "Selle looga tutvumiseks muutke aken laiemaks"
-    },
-    "4": {
+        "4": {
         "string": "Linki ei saanud lõikelauale kopeerida :("
     },
     "5": {

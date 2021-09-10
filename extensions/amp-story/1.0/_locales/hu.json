@@ -44,14 +44,8 @@
   "16": {
     "string": "WhatsApp"
   },
-  "18": {
-    "string": "A látvány megtekintéséhez növelje az ablak magasságát és szélességét is"
-  },
   "19": {
     "string": "A tartalom megtekintéséhez engedélyeznie kell az amp-történet kísérletet."
-  },
-  "20": {
-    "string": "Az oldalt álló tájolásban érdemes megtekinteni"
   },
   "21": {
     "string": "Sajnos úgy tűnik, a böngészője nem támogatja ezt a látványt"
@@ -88,12 +82,6 @@
   },
   "36": {
     "string": "Tweet kibontása"
-  },
-  "37": {
-    "string": "Az élmény megtekintéséhez növelje az ablak magasságát"
-  },
-  "38": {
-    "string": "Az élmény megtekintéséhez növelje az ablak szélességét"
   },
   "62": {
     "string": "Megosztás ettől az oldaltól kezdve"

@@ -44,14 +44,8 @@
   "16": {
     "string": "WhatsApp"
   },
-  "18": {
-    "string": "Expandera både höjd och bredd på ditt fönster för att visa den här upplevelsen"
-  },
   "19": {
     "string": "Du måste aktivera amp-story-experimentet för att visa det här innehållet."
-  },
-  "20": {
-    "string": "Sidan visas bäst i porträttläge"
   },
   "21": {
     "string": "Det verkar dessvärre som om din webbläsare inte stöder den här upplevelsen"
@@ -88,12 +82,6 @@
   },
   "36": {
     "string": "Expandera tweet"
-  },
-  "37": {
-    "string": "Expandera höjden på ditt fönster för att visa den här upplevelsen"
-  },
-  "38": {
-    "string": "Expandera bredden på ditt fönster för att visa den här upplevelsen"
   },
   "62": {
     "string": "Dela med start från den här sidan"

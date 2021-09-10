@@ -44,14 +44,8 @@
   "16": {
     "string": "WhatsApp"
   },
-  "18": {
-    "string": "Amplia tant l'alçada com l'amplada de la finestra per veure aquesta experiència"
-  },
   "19": {
     "string": "Has d'activar l'experiment d'AMP-story per veure aquest contingut."
-  },
-  "20": {
-    "string": "La pàgina es veu millor en mode vertical"
   },
   "21": {
     "string": "Sembla que el teu navegador no admet aquesta experiència"
@@ -88,12 +82,6 @@
   },
   "36": {
     "string": "Amplia el tuit"
-  },
-  "37": {
-    "string": "Amplia l'alçada de la finestra per veure aquesta experiència"
-  },
-  "38": {
-    "string": "Amplia l'amplada de la finestra per veure aquesta experiència"
   },
   "62": {
     "string": "Comparteix a partir d'aquesta pàgina"

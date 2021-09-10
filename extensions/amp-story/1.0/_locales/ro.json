@@ -44,14 +44,8 @@
   "16": {
     "string": "WhatsApp"
   },
-  "18": {
-    "string": "Extindeți atât înălțimea, cât și lățimea ferestrei pentru a vizualiza această experiență"
-  },
   "19": {
     "string": "Trebuie să activați experimentul amp-story pentru a vizualiza acest conținut."
-  },
-  "20": {
-    "string": "Pagina este vizualizată cel mai bine în modul portret"
   },
   "21": {
     "string": "Ne pare rău, se pare că browserul dvs. nu acceptă această experiență"
@@ -88,12 +82,6 @@
   },
   "36": {
     "string": "Extindeți tweetul"
-  },
-  "37": {
-    "string": "Extindeți înălțimea ferestrei pentru a vizualiza această experiență"
-  },
-  "38": {
-    "string": "Extindeți lățimea ferestrei pentru a vizualiza această experiență"
   },
   "62": {
     "string": "Distribuiți începând cu această pagină"
