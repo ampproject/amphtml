@@ -16,7 +16,7 @@ export function useResourcesNotify() {
 }
 
 /**
- * @param {*} ref
+ * @param {{current: ?}|function()} ref
  * @param {!Element} value
  */
 function setRef(ref, value) {
@@ -34,7 +34,12 @@ function setRef(ref, value) {
  */
 export function useMergeRefs(refs) {
   return useCallback(
-    (element) => refs.forEach((ref) => setRef(ref, element)),
-    [refs]
+    (element) => {
+      for (let i = 0; i < refs.length; i++) {
+        setRef(refs[i], element);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    refs
   );
 }
