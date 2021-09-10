@@ -160,7 +160,7 @@ will be visible once an ad is shown.
 
 (example taken from [app install](https://github.com/ampproject/amphtml/blob/main/examples/amp-story/ads/app-install.html))
 
-### Meta Tag Configurability Options
+### Meta Tag Display Options
 
 The following options and values are currently supported:
 
