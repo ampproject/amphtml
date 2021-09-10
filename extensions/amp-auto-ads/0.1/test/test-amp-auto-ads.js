@@ -225,7 +225,7 @@ describes.realWin(
 
     it('should insert ads with custom analytics childrens node', () => {
       return getAmpAutoAds(
-        'NONE',
+        'doubleclick',
         '{"data-custom": "true","config":"api.domain.com/track.gif"}'
       ).then(() => {
         return new Promise((resolve) => {
