@@ -4,8 +4,6 @@ formats:
   - websites
 teaser:
   text: Displays multiple similar pieces of content along a horizontal axis, with optional pagination dots and thumbnails.
-experimental: true
-bento: true
 ---
 
 # Bento Inline Gallery
@@ -89,11 +87,6 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
   amp-inline-gallery-thumbnails {
     overflow: hidden;
     position: relative;
-  }
-  amp-inline-gallery-pagination:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc),
-  amp-inline-gallery-thumbnails:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc) {
-    display: none;
-    content-visibility: hidden;
   }
 </style>
 ```
@@ -216,7 +209,3 @@ Number: ratio of width to height that slides should be displayed in.
 Default: `false`
 
 Boolean attribute indicating whether thumbnails should loop.
-
-#### Styling
-
-You may use the `BentoInlineGallery` element selector to style the carousel freely.
