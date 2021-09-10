@@ -161,10 +161,13 @@ describes.realWin(
       whenVisible.returns(Promise.resolve());
     });
 
-    function getAmpAutoAds(type) {
+    function getAmpAutoAds(type, customAnalytics) {
       const ampAutoAds = doc.createElement('amp-auto-ads');
       if (type !== 'NONE') {
         ampAutoAds.setAttribute('type', type || '_ping_');
+      }
+      if (customAnalytics) {
+        ampAutoAds.setAttribute('custom-analytics', customAnalytics);
       }
       doc.body.appendChild(ampAutoAds);
       return ampAutoAds.buildInternal().then(() => {
@@ -214,6 +217,44 @@ describes.realWin(
               verifyAdElement(anchor2.childNodes[0]);
               verifyAdElement(anchor4.childNodes[0]);
               resolve();
+            }
+          );
+        });
+      });
+    });
+
+    it('should insert ads with custom analytics childrens node', () => {
+      return getAmpAutoAds(
+        'NONE',
+        '{"data-custom": "true","config":"api.domain.com/track.gif"}'
+      ).then(() => {
+        return new Promise((resolve) => {
+          waitForChild(
+            anchor4,
+            (parent) => {
+              return parent.childNodes.length > 0;
+            },
+            () => {
+              expect(anchor1.childNodes).to.have.lengthOf(1);
+              expect(
+                anchor1.childNodes[0]
+                  .querySelector('amp-analytics')
+                  .getAttribute('data-custom')
+              ).to.equal('true');
+
+              expect(anchor2.childNodes).to.have.lengthOf(1);
+              expect(
+                anchor2.childNodes[0]
+                  .querySelector('amp-analytics')
+                  .getAttribute('data-custom')
+              ).to.equal('true');
+
+              expect(anchor4.childNodes).to.have.lengthOf(1);
+              expect(
+                anchor2.childNodes[0]
+                  .querySelector('amp-analytics')
+                  .getAttribute('data-custom')
+              ).to.equal('true');
             }
           );
         });
