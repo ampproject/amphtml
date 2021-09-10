@@ -66,7 +66,7 @@ function createDefaultInfo() {
  * @return {PreactDef.Renderable}
  * @template T
  */
-function YoutubeWithRef(
+function BentoYoutubeWithRef(
   {
     autoplay,
     loop,
@@ -247,6 +247,6 @@ function makeMethodMessage(method) {
   );
 }
 
-const Youtube = forwardRef(YoutubeWithRef);
-Youtube.displayName = 'Youtube'; // Make findable for tests.
-export {Youtube};
+const BentoYoutube = forwardRef(BentoYoutubeWithRef);
+BentoYoutube.displayName = 'BentoYoutube'; // Make findable for tests.
+export {BentoYoutube};

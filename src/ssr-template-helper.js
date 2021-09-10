@@ -106,7 +106,7 @@ export class SsrTemplateHelper {
     if (this.isEnabled()) {
       userAssert(
         typeof data['html'] === 'string',
-        'Server side html response must be defined'
+        'Skipping template rendering due to failed fetch'
       );
       renderTemplatePromise = this.assertTrustedViewer(element).then(() => {
         return this.templates_.findAndSetHtmlForTemplate(
