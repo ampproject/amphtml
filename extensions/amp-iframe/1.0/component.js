@@ -4,7 +4,7 @@ import {MessageType} from '#core/3p-frame-messaging';
 import {toWin} from '#core/window';
 import {ContainWrapper, useIntersectionObserver} from '#preact/component';
 import {setStyle} from '#core/dom/style';
-import {refs} from '#preact/utils';
+import {useMergeRefs} from '#preact/utils';
 
 const NOOP = () => {};
 
@@ -149,7 +149,7 @@ export function Iframe({
     <ContainWrapper
       contentAs="iframe"
       contentProps={contentProps}
-      contentRef={refs(iframeRef, measureRef)}
+      contentRef={useMergeRefs(iframeRef, measureRef)}
       contentStyle={{'box-sizing': 'border-box', ...iframeStyle}}
       ref={containerRef}
       size

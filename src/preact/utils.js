@@ -1,4 +1,4 @@
-import {useLayoutEffect} from '#preact';
+import {useLayoutEffect, useMemo} from '#preact';
 
 import {useAmpContext} from './context';
 
@@ -16,15 +16,31 @@ export function useResourcesNotify() {
 }
 
 /**
- * Combines multiple refs to pass into `ref` prop.
- * @param {...any} refs
- * @return {function(!Element)}
+ * @param {any} ref
+ * @param {!Element} value
  */
-export function refs(...refs) {
-  return (element) => {
-    for (let i = 0; i < refs.length; i++) {
-      const ref = refs[i];
-      typeof ref == 'function' ? ref(element) : (ref.current = element);
+function setRef(ref, value) {
+  if (typeof ref === 'function') {
+    ref(value);
+  } else if (ref) {
+    ref.current = value;
+  }
+}
+
+/**
+ * Combines refs to pass into `ref` prop.
+ * @param {any} refOne
+ * @param {any} refTwo
+ * @return {function()}
+ */
+export function useMergeRefs(refOne, refTwo) {
+  return useMemo(() => {
+    if (refOne === null && refTwo === null) {
+      return null;
     }
-  };
+    return (element) => {
+      setRef(refOne, element);
+      setRef(refTwo, element);
+    };
+  }, [refOne, refTwo]);
 }
