@@ -30,7 +30,7 @@ function setRef(ref, value) {
 /**
  * Combines refs to pass into `ref` prop.
  * @param {!Array<*>} refs
- * @return {function():function}
+ * @return {function(Element):function()}
  */
 export function useMergeRefs(refs) {
   return useCallback(
