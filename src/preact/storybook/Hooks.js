@@ -28,7 +28,7 @@ function Component({prop}) {
   const ref = useIntersectionObserver(ioCallback);
   const anotherRef = useIntersectionObserver(anotherIoCallback);
 
-  return <div ref={useMergeRefs(ref, anotherRef)}>{text}</div>;
+  return <div ref={useMergeRefs([ref, anotherRef])}>{text}</div>;
 }
 
 export const useIO = () => {

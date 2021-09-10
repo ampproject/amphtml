@@ -67,7 +67,7 @@ export function BentoTimeago({
     <Wrapper
       {...rest}
       as="time"
-      ref={useMergeRefs(ref, inObRef)}
+      ref={useMergeRefs([ref, inObRef])}
       datetime={new Date(date).toISOString()}
     >
       {timestamp}

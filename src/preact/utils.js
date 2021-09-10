@@ -1,4 +1,4 @@
-import {useLayoutEffect, useMemo} from '#preact';
+import {useCallback, useLayoutEffect} from '#preact';
 
 import {useAmpContext} from './context';
 
@@ -16,7 +16,7 @@ export function useResourcesNotify() {
 }
 
 /**
- * @param {any} ref
+ * @param {*} ref
  * @param {!Element} value
  */
 function setRef(ref, value) {
@@ -29,18 +29,12 @@ function setRef(ref, value) {
 
 /**
  * Combines refs to pass into `ref` prop.
- * @param {any} refOne
- * @param {any} refTwo
- * @return {function()}
+ * @param {!Array<*>} refs
+ * @return {function():function}
  */
-export function useMergeRefs(refOne, refTwo) {
-  return useMemo(() => {
-    if (refOne === null && refTwo === null) {
-      return null;
-    }
-    return (element) => {
-      setRef(refOne, element);
-      setRef(refTwo, element);
-    };
-  }, [refOne, refTwo]);
+export function useMergeRefs(refs) {
+  return useCallback(
+    (element) => refs.forEach((ref) => setRef(ref, element)),
+    [refs]
+  );
 }

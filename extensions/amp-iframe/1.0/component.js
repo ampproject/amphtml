@@ -149,7 +149,7 @@ export function Iframe({
     <ContainWrapper
       contentAs="iframe"
       contentProps={contentProps}
-      contentRef={useMergeRefs(iframeRef, measureRef)}
+      contentRef={useMergeRefs([iframeRef, measureRef])}
       contentStyle={{'box-sizing': 'border-box', ...iframeStyle}}
       ref={containerRef}
       size
