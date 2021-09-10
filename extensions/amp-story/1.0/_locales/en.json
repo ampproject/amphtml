@@ -262,5 +262,13 @@
   "97": {
     "string": "Opening",
     "description": "Text displayed to users on tap of outlink button."
+  },
+  "98": {
+    "string": "Form not submitted, try again",
+    "description": "Text displayed to users when they press a button to submit a form, and this submission fails."
+  },
+  "99": {
+    "string": "Form successfully submitted",
+    "description": "Text displayed to users when they press a button to submit a form, and this submission succeeds."
   }
 }

@@ -11,7 +11,6 @@ const SPINNER = {
   attrs: dict({
     'class': 'i-amphtml-story-spinner',
     'aria-hidden': 'true',
-    'aria-label': 'Loading video',
   }),
   children: [
     {
