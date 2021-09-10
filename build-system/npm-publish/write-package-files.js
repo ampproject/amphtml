@@ -60,6 +60,7 @@ async function writePackageJson() {
         import: './dist/component-react.module.js',
         require: './dist/component-react.js',
       },
+      './styles.css': './dist/styles.css',
     },
     files: ['dist/*', 'react.js'],
     repository: {
