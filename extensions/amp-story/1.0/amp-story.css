@@ -1,5 +1,3 @@
-
-
 @import './amp-story-access.css';
 @import './amp-story-affiliate-link.css';
 @import './amp-story-desktop-one-panel.css';
@@ -16,6 +14,7 @@
   --story-page-vh: 1vh;
   --story-page-vmin: min(var(--story-page-vw), var(--story-page-vh));
   --story-page-vmax: max(var(--story-page-vw), var(--story-page-vh));
+  font-size: calc(2.5 * var(--story-page-vh, 8px));
 }
 amp-story, amp-story-page, amp-story-cta-layer {
   contain: strict !important;
@@ -80,10 +79,6 @@ amp-story {
   width: 100% !important;
   /* Disables double tap to zoom, and ensures fast-tap is enabled on iOS. */
   touch-action: manipulation !important;
-}
-
-html.i-amphtml-story-standalone {
-  font-size: calc(2.5 * var(--story-page-vmax, 8px));
 }
 
 html.i-amphtml-story-standalone,
