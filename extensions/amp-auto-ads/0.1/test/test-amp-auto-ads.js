@@ -255,6 +255,7 @@ describes.realWin(
                   .querySelector('amp-analytics')
                   .getAttribute('data-custom')
               ).to.equal('true');
+              resolve();
             }
           );
         });
