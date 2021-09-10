@@ -16,6 +16,7 @@
 
 import {
   createViewportObserver,
+  observeIntersections,
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '#core/dom/layout/viewport-observer';
@@ -115,8 +116,8 @@ describes.sandboxed('DOM - layout - Viewport Observer', {}, (env) => {
       toggleViewport(el2, true);
       toggleViewport(el1, true);
 
-      expect(el1Events).eql([false, true]);
-      expect(el2Events).eql([true]);
+      expect(el1Events).to.eql([false, true]);
+      expect(el2Events).to.eql([true]);
     });
 
     it('once unobserved, the callback is no longer fired', () => {
@@ -129,19 +130,7 @@ describes.sandboxed('DOM - layout - Viewport Observer', {}, (env) => {
       toggleViewport(el1, true);
       toggleViewport(el1, false);
 
-      expect(el1Events).eql([false]);
-    });
-
-    it('Observing twice with the same callback is fine, but unique ones throw', () => {
-      const noop = () => {};
-      observeWithSharedInOb(el1, noop);
-      observeWithSharedInOb(el1, noop);
-
-      allowConsoleError(() => {
-        expect(() => observeWithSharedInOb(el1, () => {})).throws(
-          'Assertion failed'
-        );
-      });
+      expect(el1Events).to.eql([false]);
     });
 
     it('A quick observe and unobserve pair should not cause an error or fire the callback', () => {
@@ -151,6 +140,26 @@ describes.sandboxed('DOM - layout - Viewport Observer', {}, (env) => {
       toggleViewport(el1, true);
 
       expect(spy).not.called;
+    });
+
+    it('can have multiple obsevers for the same element', () => {
+      let elInObEntries = [];
+
+      observeIntersections(el1, (entry) => elInObEntries.push(entry));
+      observeIntersections(el1, (entry) => elInObEntries.push(entry));
+      toggleViewport(el1, true);
+
+      expect(elInObEntries).to.have.lengthOf(2);
+      expect(elInObEntries[0].target).to.eql(el1);
+      expect(elInObEntries[0].isIntersecting).to.be.true;
+      expect(elInObEntries[1].target).to.eql(el1);
+      expect(elInObEntries[1].isIntersecting).to.be.true;
+
+      elInObEntries = [];
+      toggleViewport(el1, false);
+      expect(elInObEntries).to.have.lengthOf(2);
+      expect(elInObEntries[0].isIntersecting).to.be.false;
+      expect(elInObEntries[1].isIntersecting).to.be.false;
     });
   });
 });

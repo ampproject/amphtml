@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
@@ -14,13 +15,16 @@
  * limitations under the License.
  */
 
+=======
+import {devAssertElement} from '#core/assert';
+>>>>>>> 8ddf724231... Custom hook using IntersectionObserver (#35835)
 import {getDate} from '#core/types/date';
 import {toWin} from '#core/window';
 
 import * as Preact from '#preact';
-import {useEffect, useRef, useState} from '#preact';
-import {Wrapper} from '#preact/component';
-import {useResourcesNotify} from '#preact/utils';
+import {useCallback, useRef, useState} from '#preact';
+import {Wrapper, useIntersectionObserver} from '#preact/component';
+import {refs, useResourcesNotify} from '#preact/utils';
 
 import {format, getLocale} from './locales';
 
@@ -55,28 +59,26 @@ export function BentoTimeago({
 
   const date = getDate(datetime);
 
-  useEffect(() => {
-    const node = ref.current;
-    const win = node && toWin(node.ownerDocument.defaultView);
-    if (!win) {
-      return undefined;
-    }
-    const observer = new win.IntersectionObserver((entries) => {
+  const ioCallback = useCallback(
+    ({isIntersecting}) => {
+      if (!isIntersecting) {
+        return;
+      }
+      const node = devAssertElement(ref.current);
       let {lang} = node.ownerDocument.documentElement;
+      const win = toWin(node.ownerDocument?.defaultView);
       if (lang === 'unknown') {
         lang = win.navigator?.language || DEFAULT_LOCALE;
       }
       const locale = getLocale(localeProp || lang);
-      const last = entries[entries.length - 1];
-      if (last.isIntersecting) {
-        setTimestamp(
-          getFuzzyTimestampValue(new Date(date), locale, cutoff, placeholder)
-        );
-      }
-    });
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [date, localeProp, cutoff, placeholder]);
+      setTimestamp(
+        getFuzzyTimestampValue(new Date(date), locale, cutoff, placeholder)
+      );
+    },
+    [cutoff, date, localeProp, placeholder]
+  );
+
+  const inObRef = useIntersectionObserver(ioCallback);
 
   useResourcesNotify();
 
@@ -84,7 +86,7 @@ export function BentoTimeago({
     <Wrapper
       {...rest}
       as="time"
-      ref={ref}
+      ref={refs(ref, inObRef)}
       datetime={new Date(date).toISOString()}
     >
       {timestamp}
