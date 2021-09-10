@@ -83,9 +83,9 @@ import '@ampproject/bento-base-carousel';
   <div class="green-gradient"></div>
 </bento-base-carousel>
 <div class="buttons" style="margin-top: 8px;">
-  <button id='prev-button'>Go to previous slide</button>
-  <button id='next-button'>Go to next slide</button>
-  <button id='go-to-button'>Go to slide with green gradient</button>
+  <button id="prev-button">Go to previous slide</button>
+  <button id="next-button">Go to next slide</button>
+  <button id="go-to-button">Go to slide with green gradient</button>
 </div>
 
 <script>
@@ -403,16 +403,16 @@ npm install @ampproject/bento-base-carousel
 
 ```javascript
 import React from 'react';
-import { BaseCarousel } from '@ampproject/bento-base-carousel/react';
+import {BentoBaseCarousel} from '@ampproject/bento-base-carousel/react';
 import '@ampproject/bento-base-carousel/styles.css';
 
 function App() {
   return (
-    <BaseCarousel>
+    <BentoBaseCarousel>
       <img src="puppies.jpg" />
       <img src="kittens.jpg" />
       <img src="hamsters.jpg" />
-    </BaseCarousel>
+    </BentoBaseCarousel>
   );
 }
 ```
@@ -429,11 +429,11 @@ const ref = createRef();
 
 function App() {
   return (
-    <BaseCarousel ref={ref}>
+    <BentoBaseCarousel ref={ref}>
       <img src="puppies.jpg" />
       <img src="kittens.jpg" />
       <img src="hamsters.jpg" />
-    </BaseCarousel>
+    </BentoBaseCarousel>
   );
 }
 ```
@@ -474,11 +474,11 @@ The `BentoBaseCarousel` API allows you to register and respond to the following 
 This event is triggered when the index displayed by the carousel has changed.
 
 ```jsx
-<BaseCarousel onSlideChange={(index) => console.log(index)}>
+<BentoBaseCarousel onSlideChange={(index) => console.log(index)}>
   <img src="puppies.jpg" />
   <img src="kittens.jpg" />
   <img src="hamsters.jpg" />
-</BaseCarousel>
+</BentoBaseCarousel>
 ```
 
 #### Layout and style
@@ -488,21 +488,21 @@ This event is triggered when the index displayed by the carousel has changed.
 The `BentoBaseCarousel` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
 
 ```jsx
-<BaseCarousel style={{width: '300px', height: '100px'}}>
+<BentoBaseCarousel style={{width: '300px', height: '100px'}}>
   <img src="puppies.jpg" />
   <img src="kittens.jpg" />
   <img src="hamsters.jpg" />
-</BaseCarousel>
+</BentoBaseCarousel>
 ```
 
 Or via `className`:
 
 ```jsx
-<BaseCarousel className='custom-styles'>
+<BentoBaseCarousel className="custom-styles">
   <img src="puppies.jpg" />
   <img src="kittens.jpg" />
   <img src="hamsters.jpg" />
-</BaseCarousel>
+</BentoBaseCarousel>
 ```
 
 ```css
@@ -570,7 +570,7 @@ const count = window.matchMedia('(max-width: 600px)').matches ? 4 : 3;
 >
   <img style={{height: '100%', width: '100%'}} src="…" />
   …
-</bento-base-carousel>
+</BentoBaseCarousel>
 ```
 
 #### Props
@@ -691,19 +691,19 @@ Arrow buttons can be customized by passing in your own custom markup. For exampl
 }
 ```
 
-```html
+```jsx
 function CustomPrevButton(props) {
-  return <button {...props} className='carousel-prev'>
+  return <button {...props} className="carousel-prev" />
 }
 
 function CustomNextButton(props) {
-  return <button {...props} className='carousel-prev'>
+  return <button {...props} className="carousel-prev" />
 }
 
 <BentoBaseCarousel
   arrowPrevAs={CustomPrevButton}
-  arrowNextAs={CustomNextButton>
+  arrowNextAs={CustomNextButton}>
   <div>first slide</div>
-  …
+  // …
 </BentoBaseCarousel>
 ```

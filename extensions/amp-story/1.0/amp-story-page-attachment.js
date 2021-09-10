@@ -135,19 +135,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildInline_() {
-    const forms = this.getAllFormElements_();
-    if (forms.length > 0) {
-      forms.forEach((form) => this.maybeAddDefaultFormStatusElements_(form));
-      // Page attachments that contain forms must display the page's publisher
-      // domain above the attachment's contents. This enables users to gauge
-      // the trustworthiness of publishers before sending data to them.
-      this.headerEl.append(this.createDomainLabelElement_());
-      this.headerEl.classList.add('i-amphtml-story-page-attachment-with-form');
-      this.storeService.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, [
-        {tagOrTarget: 'FORM', method: 'submit'},
-      ]);
-    }
-
     const closeButtonEl = htmlFor(this.element)`
           <button class="i-amphtml-story-page-attachment-close-button" aria-label="close"
               role="button">
@@ -175,6 +162,19 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         <span class="i-amphtml-story-page-attachment-title"></span>`;
       titleEl.textContent = titleText;
       titleAndCloseWrapperEl.appendChild(titleEl);
+    }
+
+    const forms = this.getAllFormElements_();
+    if (forms.length > 0) {
+      forms.forEach((form) => this.maybeAddDefaultFormStatusElements_(form));
+      // Page attachments that contain forms must display the page's publisher
+      // domain above the attachment's contents. This enables users to gauge
+      // the trustworthiness of publishers before sending data to them.
+      this.headerEl.append(this.createDomainLabelElement_());
+      this.headerEl.classList.add('i-amphtml-story-page-attachment-with-form');
+      this.storeService.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, [
+        {tagOrTarget: 'FORM', method: 'submit'},
+      ]);
     }
 
     const templateEl = this.element.querySelector(
