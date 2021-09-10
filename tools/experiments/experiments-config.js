@@ -203,4 +203,9 @@ export const EXPERIMENTS = [
     name: 'Auto advancing story ads',
     spec: 'https://github.com/ampproject/amphtml/issues/33969',
   },
+  {
+    id: 'story-ad-page-outlink',
+    name: 'Story ad CTA page outlink',
+    spec: 'https://github.com/ampproject/amphtml/pull/35867',
+  },
 ];

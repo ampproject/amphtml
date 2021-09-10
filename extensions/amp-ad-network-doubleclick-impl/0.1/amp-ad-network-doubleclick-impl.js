@@ -84,6 +84,7 @@ import {
   randomlySelectUnsetExperiments,
 } from '#experiments';
 import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
+import {StoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
 import {StoryAdPlacements} from '#experiments/story-ad-placements';
 import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
@@ -511,6 +512,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     );
     if (storyAdPlacementsExpId) {
       addExperimentIdToElement(storyAdPlacementsExpId, this.element);
+    }
+
+    const storyAdPageOutlinkExpId = getExperimentBranch(
+      this.win,
+      StoryAdPageOutlink.ID
+    );
+    if (storyAdPageOutlinkExpId) {
+      addExperimentIdToElement(storyAdPageOutlinkExpId, this.element);
     }
 
     const autoAdvanceExpBranch = getExperimentBranch(

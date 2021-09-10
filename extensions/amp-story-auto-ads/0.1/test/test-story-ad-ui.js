@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 /**
  * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
@@ -17,6 +18,10 @@
 =======
 import {toggleExperiment} from '#experiments';
 >>>>>>> 339ff4d186... Added CTA Migration page-outlink experiment (#35867)
+=======
+import {forceExperimentBranch} from '#experiments';
+import {StoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
+>>>>>>> 114e330e50... 🧪 Added branch level experiment for page Outlink layer (#35983)
 
 import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 import {
@@ -242,7 +247,11 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
 
     beforeEach(() => {
       buttonFitter = new ButtonTextFitter(env.ampdoc);
-      toggleExperiment(env.win, 'amp-story-ads-page-outlink', true, true);
+      forceExperimentBranch(
+        win,
+        StoryAdPageOutlink.ID,
+        StoryAdPageOutlink.EXPERIMENT
+      );
     });
 
     it('createCta page outlink custom theme element', () => {
