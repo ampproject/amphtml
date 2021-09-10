@@ -143,3 +143,30 @@ Specifying `cta-image=none` will remove the default link icon.
 [tip type="note"]
 The functionality of `amp-story-page-outlink` used to be supported by [`amp-story-page-attachment`](https://amp.dev/documentation/components/amp-story-page-attachment/?format=stories). Please use `amp-story-page-outlink` for one-tap outlinking UI.
 [/tip]
+
+## Advertiser Configurability
+
+Advertisers can now use meta tags within ads such as the ones listed below
+in order to style their own page-outlink.
+The page outlink with the customized styling configuration
+will be visible once an ad is shown.
+
+```html
+  <meta name="amp4ads-vars-cta-accent-element" content="text">
+  <meta name="amp4ads-vars-cta-accent-color" content="#FF00FF">
+  <meta name="amp4ads-vars-cta-image" content="/examples/visual-tests/picsum.photos/image1068_300x169.jpg">
+  <meta name="amp4ads-vars-theme" content="custom">
+```
+
+(example taken from [app install](https://github.com/ampproject/amphtml/blob/main/examples/amp-story/ads/app-install.html))
+
+### Meta Tag Configurability Options
+
+The following options and values are currently supported:
+
+| amp4ads-vars type               |           Accepted Values           |
+| ------------------------------- | :---------------------------------: |
+| amp4ads-vars-cta-accent-element |         text \| background          |
+| amp4ads-vars-cta-accent-color   | any hex value from #000000-#FFFFFF  |
+| amp4ads-vars-cta-image          | image files (\*.png \| \*.jpg etc.) |
+| amp4ads-vars-theme              |       custom \| light \| dark       |
