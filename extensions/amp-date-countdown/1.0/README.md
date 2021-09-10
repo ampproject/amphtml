@@ -284,10 +284,6 @@ interface DateParams {
 }
 ```
 
-#### Styling
-
-You may use the `BentoDateCountdown` element selector to style the carousel freely.
-
 ### Returned Time Parameters
 
 This table lists the format you can specify in your Mustache template:

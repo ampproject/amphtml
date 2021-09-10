@@ -625,9 +625,3 @@ BentoAccordionHeader does not yet support any custom props
 This component supports the [common props](../../../docs/spec/bento-common-props.md) for React and Preact components.
 
 BentoAccordionContent does not yet support any custom props
-
-#### Styling
-
-You may use the `BentoAccordion` element selector to style the carousel freely.
-
-## Version notes
