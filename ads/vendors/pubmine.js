@@ -1,7 +1,7 @@
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {loadScript, validateData} from '#3p/3p';
 
-const pubmineOptional = ['section', 'pt', 'ht', 'npaOnUnknownConsent'],
+const pubmineOptional = ['section', 'pt', 'ht', 'npaOnUnknownConsent', 'blogid'],
   pubmineRequired = ['siteid'],
   pubmineURL = 'https://s.pubmine.com/head.js';
 
@@ -31,6 +31,7 @@ function initMasterFrame(data, global) {
     amp: true,
     consent: consent ? 1 : 0,
     siteid: Number(data['siteid']) || undefined,
+    blogid: Number(data['blogid']) || undefined,
   };
   global['__ATA'] = global['__ATA'] || {};
   global['__ATA']['cmd'] = global['__ATA']['cmd'] || [];
