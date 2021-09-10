@@ -39,6 +39,7 @@ export function useMergeRefs(refs) {
         setRef(refs[i], element);
       }
     },
+    // refs is an array, but ESLint cannot statically verify it
     // eslint-disable-next-line react-hooks/exhaustive-deps
     refs
   );
