@@ -6,12 +6,15 @@ import {getBuilders} from './builders';
 /**
  * Returns the AST for an AMP Document with eligible components server-rendered.
  *
- * @param {!./types.TreeProtoDef} ast
- * @param {!./types.VersionsDef} versions
- * @return {!./types.TreeProtoDef}
+ * @param {!./types.CompilerRequest} request
+ * @return {!./types.CompilerResponse}
  */
-function compileAst(ast, versions) {
-  return compiler.renderAst(ast, getBuilders(versions));
+function compile(request) {
+  // TODO(samouri): remove the defaults.
+  const document = request.document ?? {root: 0, tree: []};
+  const versions = request.versions ?? {'amp-layout': 'v0'};
+
+  return {document: compiler.renderAst(document, getBuilders(versions))};
 }
 
-globalThis['compileAst'] = compileAst;
+globalThis['compile'] = compile;
