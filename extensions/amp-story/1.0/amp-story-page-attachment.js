@@ -40,7 +40,8 @@ const POST_TAP_ANIMATION_DURATION = 500;
  * The class name used by form submission elements.
  * @const {string}
  */
-const FORM_SUBMISSION_STATUS_CLASS_NAME = 'i-amphtml-story-page-attachment-form-submission-status';
+const FORM_SUBMISSION_STATUS_CLASS_NAME =
+  'i-amphtml-story-page-attachment-form-submission-status';
 
 /**
  * @enum {string}
@@ -62,7 +63,7 @@ const AttachmentType = {
 /**
  * @enum {string}
  */
- const FormResponseAttribute = {
+const FormResponseAttribute = {
   SUBMITTING: 'submitting',
   SUCCESS: 'submit-success',
   ERROR: 'submit-error',
@@ -491,9 +492,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   getPublisherOrigin_() {
-  const publisherOrigin = getSourceOrigin(this.getAmpDoc().getUrl());
-  return publisherOrigin.replace(/https?:\/\//, '');
-    }
+    const publisherOrigin = getSourceOrigin(this.getAmpDoc().getUrl());
+    return publisherOrigin.replace(/https?:\/\//, '');
+  }
 
   /**
    * Returns all form elements that exist within this page attachment.
@@ -512,7 +513,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    *     added.
    * @private
    */
-   maybeAddDefaultFormStatusElements_(formEl) {
+  maybeAddDefaultFormStatusElements_(formEl) {
     if (!formEl.querySelector(`[${FormResponseAttribute.SUBMITTING}]`)) {
       formEl.appendChild(this.createFormSubmissionInProgressEl_());
     }
