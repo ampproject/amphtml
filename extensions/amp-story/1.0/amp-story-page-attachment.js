@@ -166,7 +166,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       titleAndCloseWrapperEl.appendChild(titleEl);
     }
 
-    const forms = this.getAllFormElements_();
+    const forms = this.element.querySelectorAll('form');
     if (forms.length > 0) {
       forms.forEach((form) => this.addMissingFormStatusElements_(form));
       // Page attachments that contain forms must display the page's publisher
@@ -495,16 +495,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   getPublisherOrigin_() {
     const publisherOrigin = getSourceOrigin(this.getAmpDoc().getUrl());
     return publisherOrigin.replace(/https?:\/\//, '');
-  }
-
-  /**
-   * Returns all form elements that exist within this page attachment.
-   * @return {!NodeList<!Element>} The list of all form elements that exist
-   *    within the page attachment.
-   * @private
-   */
-  getAllFormElements_() {
-    return this.element.querySelectorAll('form');
   }
 
   /**

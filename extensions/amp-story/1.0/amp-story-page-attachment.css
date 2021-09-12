@@ -140,8 +140,6 @@ amp-story[desktop] .i-amphtml-story-page-attachment-remote  {
   font-weight: bold !important;
   height: 54px !important;
   margin: 16px 0px !important;
-  /* max-height: 54px !important; */
-  /* overflow: visible !important; */
   width: 100% !important;
   --i-amphtml-story-page-attachment-form-submission-status-icon-height: 26px !important;
 }
@@ -203,6 +201,8 @@ amp-story[desktop] .i-amphtml-story-page-attachment-remote  {
 
 .i-amphtml-story-page-attachment-form-submission-status .i-amphtml-story-spinner-layer {
   color: black !important;
+
+  /* Overriding default spinner values. */
   filter: none !important;
 }
 
