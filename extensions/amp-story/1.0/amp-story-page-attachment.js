@@ -505,23 +505,24 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   addMissingFormStatusElements_(formEl) {
-    const formContainsSubmittingEl = formEl.querySelector(
+    const submittingEl = formEl.querySelector(
       `[${escapeCssSelectorIdent(FormResponseAttribute.SUBMITTING)}]`
     );
-    const formContainsSuccessEl = formEl.querySelector(
-      `[${escapeCssSelectorIdent(FormResponseAttribute.SUCCESS)}]`
-    );
-    const formContainsErrorEl = formEl.querySelector(
-      `[${escapeCssSelectorIdent(FormResponseAttribute.ERROR)}]`
-    );
-
-    if (!formContainsSubmittingEl) {
+    if (!submittingEl) {
       formEl.appendChild(this.createFormSubmittingEl_());
     }
-    if (!formContainsSuccessEl) {
+
+    const successEl = formEl.querySelector(
+      `[${escapeCssSelectorIdent(FormResponseAttribute.SUCCESS)}]`
+    );
+    if (!successEl) {
       formEl.appendChild(this.createFormResultEl_(true));
     }
-    if (!formContainsErrorEl) {
+
+    const errorEl = formEl.querySelector(
+      `[${escapeCssSelectorIdent(FormResponseAttribute.ERROR)}]`
+    );
+    if (!errorEl) {
       formEl.appendChild(this.createFormResultEl_(false));
     }
   }
