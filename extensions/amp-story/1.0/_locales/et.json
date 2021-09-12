@@ -1,188 +1,188 @@
 {
   "10": {
-     "string": "LinkedIn"
+    "string": "LinkedIn"
   },
   "11": {
-     "string": "Pinterest"
+    "string": "Pinterest"
   },
   "12": {
-     "string": "SMS"
+    "string": "SMS"
   },
   "13": {
-     "string": "Veel"
+    "string": "Veel"
   },
   "14": {
-     "string": "Tumblr"
+    "string": "Tumblr"
   },
   "15": {
-     "string": "Twitter"
+    "string": "Twitter"
   },
   "16": {
-     "string": "WhatsApp"
+    "string": "WhatsApp"
   },
   "19": {
-     "string": "Selle sisu vaatamiseks peate lubama amp-story kogemuse."
+    "string": "Selle sisu vaatamiseks peate lubama amp-story kogemuse."
   },
   "2": {
-     "string": "Toksake valikut Järgmine"
+    "string": "Toksake valikut Järgmine"
   },
   "21": {
-     "string": "Vabandame, kahjuks ei saa teie brauseris seda lugu vaadata"
+    "string": "Vabandame, kahjuks ei saa teie brauseris seda lugu vaadata"
   },
   "22": {
-     "string": "Nõustun"
+    "string": "Nõustun"
   },
   "23": {
-     "string": "Keeldun"
+    "string": "Keeldun"
   },
   "25": {
-     "string": "Kuva algses domeenis:"
+    "string": "Kuva algses domeenis:"
   },
   "26": {
-     "string": "Lisateave AMP tulemuste kohta"
+    "string": "Lisateave AMP tulemuste kohta"
   },
   "27": {
-     "string": "Jätka sellegipoolest"
+    "string": "Jätka sellegipoolest"
   },
   "3": {
-     "string": "Toksake valikut Tagasi"
+    "string": "Toksake valikut Tagasi"
   },
   "31": {
-     "string": "Heli välja"
+    "string": "Heli välja"
   },
   "32": {
-     "string": "Heli sisse"
+    "string": "Heli sisse"
   },
   "33": {
-     "string": "Sellel lehel pole heli"
+    "string": "Sellel lehel pole heli"
   },
   "34": {
-     "string": "Esita video"
+    "string": "Esita video"
   },
   "35": {
-     "string": "Pühkige üles"
+    "string": "Pühkige üles"
   },
   "36": {
-     "string": "Laiendage säutsu"
+    "string": "Laiendage säutsu"
   },
   "4": {
-     "string": "Linki ei saanud lõikelauale kopeerida :("
+    "string": "Linki ei saanud lõikelauale kopeerida :("
   },
   "5": {
-     "string": "Link on kopeeritud!"
+    "string": "Link on kopeeritud!"
   },
   "6": {
-     "string": "E-post"
+    "string": "E-post"
   },
   "62": {
-     "string": "Jaga alates sellest lehest"
+    "string": "Jaga alates sellest lehest"
   },
   "63": {
-     "string": "Line"
+    "string": "Line"
   },
   "64": {
-     "string": "Uuendatud"
+    "string": "Uuendatud"
   },
   "65": {
-     "string": "Video esitamine nurjus"
+    "string": "Video esitamine nurjus"
   },
   "66": {
-     "string": "Vaigista lugu"
+    "string": "Vaigista lugu"
   },
   "67": {
-     "string": "Tühista loo vaigistus"
+    "string": "Tühista loo vaigistus"
   },
   "68": {
-     "string": "Loo teave"
+    "string": "Loo teave"
   },
   "69": {
-     "string": "Jaga lugu"
+    "string": "Jaga lugu"
   },
   "7": {
-     "string": "Facebook"
+    "string": "Facebook"
   },
   "70": {
-     "string": "Ava/peida loo menüü"
+    "string": "Ava/peida loo menüü"
   },
   "71": {
-     "string": "A"
+    "string": "A"
   },
   "72": {
-     "string": "B"
+    "string": "B"
   },
   "73": {
-     "string": "C"
+    "string": "C"
   },
   "74": {
-     "string": "D"
+    "string": "D"
   },
   "75": {
-     "string": "1. näpunäide 2st"
+    "string": "1. näpunäide 2st"
   },
   "76": {
-     "string": "Toksake, et liikuda järgmisele kuvale"
+    "string": "Toksake, et liikuda järgmisele kuvale"
   },
   "77": {
-     "string": "Järgmine"
+    "string": "Järgmine"
   },
   "78": {
-     "string": "2. näpunäide 2st"
+    "string": "2. näpunäide 2st"
   },
   "79": {
-     "string": "Nipsake, et liikuda järgmise loo juurde"
+    "string": "Nipsake, et liikuda järgmise loo juurde"
   },
   "8": {
-     "string": "Google+"
+    "string": "Google+"
   },
   "80": {
-     "string": "Sain aru"
+    "string": "Sain aru"
   },
   "81": {
-     "string": "Näpunäide"
+    "string": "Näpunäide"
   },
   "82": {
-     "string": "Eelmine leht"
+    "string": "Eelmine leht"
   },
   "83": {
-     "string": "Aktiveeri"
+    "string": "Aktiveeri"
   },
   "84": {
-     "string": "TULEMUS:"
+    "string": "TULEMUS:"
   },
   "85": {
-     "string": "Peata lugu"
+    "string": "Peata lugu"
   },
   "86": {
-     "string": "Esita lugu"
+    "string": "Esita lugu"
   },
   "87": {
-     "string": "Sule"
+    "string": "Sule"
   },
   "88": {
-     "string": "Liigu järgmise juurde"
+    "string": "Liigu järgmise juurde"
   },
   "89": {
-     "string": "Teie vastus saadetakse aadressile"
+    "string": "Teie vastus saadetakse aadressile"
   },
   "9": {
-     "string": "Hangi link"
+    "string": "Hangi link"
   },
   "90": {
-     "string": "Järgmine lugu"
+    "string": "Järgmine lugu"
   },
   "91": {
-     "string": "Järgmine leht"
+    "string": "Järgmine leht"
   },
   "92": {
-     "string": "Taasesita"
+    "string": "Taasesita"
   },
   "93": {
-     "string": "Eelmine leht"
+    "string": "Eelmine leht"
   },
   "96": {
-     "string": "Uurimiseks liigutage seadet"
+    "string": "Uurimiseks liigutage seadet"
   },
   "97": {
-     "string": "Avamine"
+    "string": "Avamine"
   }
 }
