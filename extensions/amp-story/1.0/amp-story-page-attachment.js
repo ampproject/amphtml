@@ -8,6 +8,7 @@ import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {buildOutlinkLinkIconElement} from './amp-story-open-page-attachment';
 import {closest} from '#core/dom/query';
 import {dev, devAssert} from '../../../src/log';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getHistoryState} from '#core/window/history';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getSourceOrigin} from '../../../src/url';
@@ -167,7 +168,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     const forms = this.getAllFormElements_();
     if (forms.length > 0) {
-      forms.forEach((form) => this.maybeAddDefaultFormStatusElements_(form));
+      forms.forEach((form) => this.addMissingFormStatusElements_(form));
       // Page attachments that contain forms must display the page's publisher
       // domain above the attachment's contents. This enables users to gauge
       // the trustworthiness of publishers before sending data to them.
@@ -513,15 +514,25 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    *     added.
    * @private
    */
-  maybeAddDefaultFormStatusElements_(formEl) {
-    if (!formEl.querySelector(`[${FormResponseAttribute.SUBMITTING}]`)) {
-      formEl.appendChild(this.createFormSubmissionInProgressEl_());
+  addMissingFormStatusElements_(formEl) {
+    const formContainsSubmittingEl = formEl.querySelector(
+      `[${escapeCssSelectorIdent(FormResponseAttribute.SUBMITTING)}]`
+    );
+    const formContainsSuccessEl = formEl.querySelector(
+      `[${escapeCssSelectorIdent(FormResponseAttribute.SUCCESS)}]`
+    );
+    const formContainsErrorEl = formEl.querySelector(
+      `[${escapeCssSelectorIdent(FormResponseAttribute.ERROR)}]`
+    );
+
+    if (!formContainsSubmittingEl) {
+      formEl.appendChild(this.createFormSubmittingEl_());
     }
-    if (!formEl.querySelector(`[${FormResponseAttribute.SUCCESS}]`)) {
-      formEl.appendChild(this.createFormSubmissionResultEl_(true));
+    if (!formContainsSuccessEl) {
+      formEl.appendChild(this.createFormResultEl_(true));
     }
-    if (!formEl.querySelector(`[${FormResponseAttribute.ERROR}]`)) {
-      formEl.appendChild(this.createFormSubmissionResultEl_(false));
+    if (!formContainsErrorEl) {
+      formEl.appendChild(this.createFormResultEl_(false));
     }
   }
 
@@ -529,54 +540,59 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * Create an element that is used as a container for each default form status
    * element.
    * @param {!FormResponseAttribute} responseAttribute
-   * @returns {!Element}
+   * @return {!Element}
    * @private
    */
-  createFormStatusContainerEl_(responseAttribute) {
+  createFormStatusEl_(responseAttribute) {
     const containerEl = this.win.document.createElement('div');
     containerEl.setAttribute(responseAttribute, '');
-    const statusEl = this.win.document.createElement('div');
-    statusEl.classList.add(FORM_SUBMISSION_STATUS_CLASS_NAME);
-    containerEl.appendChild(statusEl);
+    const contentEl = this.win.document.createElement('div');
+    contentEl.classList.add(FORM_SUBMISSION_STATUS_CLASS_NAME);
+    containerEl.appendChild(contentEl);
     return containerEl;
   }
 
   /**
    * Create an element that is used to display the in-progress state of a form
    * submission attempt.
+   * @return {!Element}
    * @private
    */
-  createFormSubmissionInProgressEl_() {
-    const formSubmittingEl = this.createFormStatusContainerEl_(FormResponseAttribute.SUBMITTING);
-    const statusEl = formSubmittingEl.querySelector('.' + FORM_SUBMISSION_STATUS_CLASS_NAME);
+  createFormSubmittingEl_() {
+    const submittingEl = this.createFormStatusEl_(
+      FormResponseAttribute.SUBMITTING
+    );
     const loadingSpinner = new LoadingSpinner(this.win.document);
-    statusEl.appendChild(loadingSpinner.build());
+    submittingEl.firstElementChild.appendChild(loadingSpinner.build());
     loadingSpinner.toggle(true /* isActive */);
-    return formSubmittingEl;
+    return submittingEl;
   }
 
   /**
    * Create an element that is used to display the result of a form submission
    * attempt.
    * @param {boolean} isSuccess Whether the form submission was successful.
-   * @returns {!Element}
+   * @return {!Element}
    * @private
    */
-   createFormSubmissionResultEl_(isSuccess) {
-    const iconEl = this.win.document.createElement('div');
-    iconEl.classList.add(FORM_SUBMISSION_STATUS_CLASS_NAME + '-icon');
-
-    const textEl = this.win.document.createElement('div');
-    textEl.classList.add(FORM_SUBMISSION_STATUS_CLASS_NAME + '-text-container');
-    const localizationService = getLocalizationService(devAssert(this.element));
-    textEl.innerHTML = localizationService.getLocalizedString(isSuccess ? LocalizedStringId.AMP_STORY_FORM_SUBMIT_SUCCESS : LocalizedStringId.AMP_STORY_FORM_SUBMIT_ERROR);
-
-    const containerEl = this.createFormStatusContainerEl_(
+  createFormResultEl_(isSuccess) {
+    const resultEl = this.createFormStatusEl_(
       isSuccess ? FormResponseAttribute.SUCCESS : FormResponseAttribute.ERROR
     );
-    const statusEl = containerEl.querySelector('.' + FORM_SUBMISSION_STATUS_CLASS_NAME);
-    statusEl.appendChild(iconEl);
-    statusEl.appendChild(textEl);
-    return containerEl;
+
+    const iconEl = this.win.document.createElement('div');
+    iconEl.classList.add(FORM_SUBMISSION_STATUS_CLASS_NAME + '-icon');
+    resultEl.firstElementChild.appendChild(iconEl);
+
+    const textEl = this.win.document.createElement('div');
+    const localizationService = getLocalizationService(devAssert(this.element));
+    textEl.textContent = localizationService.getLocalizedString(
+      isSuccess
+        ? LocalizedStringId.AMP_STORY_FORM_SUBMIT_SUCCESS
+        : LocalizedStringId.AMP_STORY_FORM_SUBMIT_ERROR
+    );
+    resultEl.firstElementChild.appendChild(textEl);
+
+    return resultEl;
   }
 }

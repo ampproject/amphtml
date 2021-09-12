@@ -190,12 +190,15 @@ amp-story[desktop] .i-amphtml-story-page-attachment-remote  {
 }
 
 .i-amphtml-story-page-attachment-form-submission-status .i-amphtml-story-spinner {
-  bottom: 0 !important;
   height: var(--i-amphtml-story-page-attachment-form-submission-status-icon-height) !important;
   margin: 0 auto !important;
   position: relative !important;
-  right: 0 !important;
   width: var(--i-amphtml-story-page-attachment-form-submission-status-icon-height) !important;
+
+  /* Overriding default spinner values. */
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
 }
 
 .i-amphtml-story-page-attachment-form-submission-status .i-amphtml-story-spinner-layer {
