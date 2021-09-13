@@ -346,7 +346,7 @@ If you're adding support for a new third-party ad service, changes to the follow
 -   `/ads/yournetwork.js`: Implement the main logic here. This is the code that's invoked in the third-party iframe once loaded.
 -   `/ads/yournetwork.md`: Documentation detailing yourr ad service for publishers to read.
 -   `/ads/_config.js`: Add service specific configuration here.
--   `/3p/integration.js`: Register your service here.
+-   `/3p/vendors/yournetwork.js`: Register your service here.
 -   `/extensions/amp-ad/amp-ad.md`: Add a link that points to your publisher doc.
 -   `/examples/ads.amp.html`: Add publisher examples here. Since a real ad isn't guaranteed to fill, a consistently displayed fake ad is highly recommended here to help AMP developers confidently identify new bugs.
 
