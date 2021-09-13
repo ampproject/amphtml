@@ -1,0 +1,26 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Smartadserver Examples</title>
+    <link rel="canonical" href="http://nonblocking.io/">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+</head>
+<body>
+    <amp-ad width="300" height="250" type="smartadserver" data-domain="https://www4.smartadserver.com"
+        data-site="95802" data-page="633338" data-format="35679" data-target="foo=bar">
+    </amp-ad>
+
+    <amp-ad width="300" height="250" type="smartadserver" data-domain="https://www4.smartadserver.com"
+        data-site="95802" data-page="633338" data-format="35679" data-target="test=rtc&foo=bar"
+        rtc-config='{
+            "vendors": {
+                "fakeVendor": { "SLOT_ID": "1", "PAGE_ID": "2" },
+                "fakeVendor2": { "SLOT_ID": "1" }
+            },
+            "timeoutMillis": 400}'>
+    </amp-ad>
+</body>
+</html>
