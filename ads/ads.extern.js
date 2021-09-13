@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {data} from 'autoprefixer';
-
 /** @externs */
 
 // HACK. Define application types used in default AMP externs
