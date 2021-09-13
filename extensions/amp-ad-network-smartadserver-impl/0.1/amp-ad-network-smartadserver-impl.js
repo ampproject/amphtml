@@ -107,7 +107,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
             TRUNCATION_PARAM
           );
 
-          fetch(new Request(adUrl), {credentials: 'include'})
+          fetch(adUrl, {credentials: 'include'})
             .then((response) => {
               response.text().then((adResponse) => {
                 if (!adResponse.includes(SAS_NO_AD_STRING)) {
@@ -130,7 +130,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
   }
 
   /**
-   * Chooses RTC callout with highest bid price.
+   * Chooses RTC callout with highest bid price
    * @param {Array<Object>} rtcResponseArray
    * @return {Object}
    */
@@ -227,7 +227,6 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
       HREF: () => this.win.location.href,
       CANONICAL_URL: () =>
         Services.documentInfoForDoc(this.element).canonicalUrl,
-      REFERRER: (opt_timeout) => this.getReferrer_(opt_timeout),
       TGT: () =>
         JSON.stringify(
           (tryParseJson(this.element.getAttribute('json')) || {})['targeting']
