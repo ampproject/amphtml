@@ -1,86 +1,63 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import * as Preact from '#preact';
 
-import * as Preact from '../../../../src/preact';
-import {DateCountdown} from '../component';
-import {boolean, date, select, withKnobs} from '@storybook/addon-knobs';
+import {BentoDateCountdown} from '../component';
 
 export default {
   title: 'DateCountdown',
-  component: DateCountdown,
-  decorators: [withKnobs],
+  component: BentoDateCountdown,
+  argTypes: {
+    datetime: {
+      name: 'datetime',
+      defaultValue: new Date(Date.now() + 10000),
+      control: {type: 'date'},
+    },
+    locale: {
+      name: 'locale',
+      control: {type: 'select'},
+      defaultValue: 'en',
+      options: [
+        'de',
+        'en',
+        'es',
+        'fr',
+        'id',
+        'it',
+        'ja',
+        'ko',
+        'nl',
+        'pt',
+        'ru',
+        'th',
+        'tr',
+        'vi',
+        'zh-cn',
+        'zh-tw',
+      ],
+    },
+    whenEnded: {
+      name: 'whenEnded',
+      defaultValue: 'stop',
+      control: {type: 'inline-radio'},
+      options: ['stop', 'continue'],
+    },
+    biggestUnit: {
+      name: 'biggestUnit',
+      control: {type: 'inline-radio'},
+      defaultValue: null,
+      options: [null, 'DAYS', 'HOURS', 'MINUTES', 'SECONDS'],
+    },
+  },
+
+  args: {
+    countUp: false,
+  },
 };
 
-const LOCALE_CONFIGURATIONS = [
-  'google',
-  'de',
-  'en',
-  'es',
-  'fr',
-  'id',
-  'it',
-  'ja',
-  'ko',
-  'nl',
-  'pt',
-  'ru',
-  'th',
-  'tr',
-  'vi',
-  'zh-cn',
-  'zh-tw',
-];
-
-const WHEN_ENDED_CONFIGURATIONS = ['stop', 'continue'];
-
-const BIGGEST_UNIT_CONFIGURATIONS = [
-  null,
-  'DAYS',
-  'HOURS',
-  'MINUTES',
-  'SECONDS',
-];
-
-export const _default = () => {
-  const datetime = date('endDate', new Date(Date.now() + 10000));
-  const locale = select(
-    'locale',
-    LOCALE_CONFIGURATIONS,
-    LOCALE_CONFIGURATIONS[0]
-  );
-  const whenEnded = select(
-    'whenEnded',
-    WHEN_ENDED_CONFIGURATIONS,
-    WHEN_ENDED_CONFIGURATIONS[0]
-  );
-  const biggestUnit = select(
-    'biggestUnit',
-    BIGGEST_UNIT_CONFIGURATIONS,
-    BIGGEST_UNIT_CONFIGURATIONS[0]
-  );
-  const countUp = boolean('countUp', false);
-
+export const _default = (args) => {
   return (
     <div>
-      <DateCountdown
-        datetime={datetime}
-        locale={locale}
-        whenEnded={whenEnded}
-        biggestUnit={biggestUnit}
-        countUp={countUp}
+      <BentoDateCountdown
+        {...args}
         render={(data) => (
           <div>
             <span>{`${data.days} ${data.dd} ${data.d}`}</span>
@@ -92,39 +69,15 @@ export const _default = () => {
             <span>{`${data.seconds} ${data.ss} ${data.s}`}</span>
           </div>
         )}
-      ></DateCountdown>
+      />
     </div>
   );
 };
 
-export const defaultRenderer = () => {
-  const datetime = date('endDate', new Date(Date.now() + 10000));
-  const locale = select(
-    'locale',
-    LOCALE_CONFIGURATIONS,
-    LOCALE_CONFIGURATIONS[0]
-  );
-  const whenEnded = select(
-    'whenEnded',
-    WHEN_ENDED_CONFIGURATIONS,
-    WHEN_ENDED_CONFIGURATIONS[0]
-  );
-  const biggestUnit = select(
-    'biggestUnit',
-    BIGGEST_UNIT_CONFIGURATIONS,
-    BIGGEST_UNIT_CONFIGURATIONS[0]
-  );
-  const countUp = boolean('countUp', false);
-
+export const defaultRenderer = (args) => {
   return (
     <div>
-      <DateCountdown
-        datetime={datetime}
-        locale={locale}
-        whenEnded={whenEnded}
-        biggestUnit={biggestUnit}
-        countUp={countUp}
-      ></DateCountdown>
+      <BentoDateCountdown {...args} />
     </div>
   );
 };

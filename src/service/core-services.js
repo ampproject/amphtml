@@ -1,43 +1,21 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {installImg} from '#builtins/amp-img/amp-img';
+import {installLayout} from '#builtins/amp-layout/amp-layout';
+import {installPixel} from '#builtins/amp-pixel/amp-pixel';
 
-import {
-  adoptServiceFactoryForEmbedDoc,
-  adoptServiceForEmbedDoc,
-} from '../service';
-import {devAssert} from '../log';
+import {installInaboxResourcesServiceForDoc} from '#inabox/inabox-resources';
+
 import {installActionServiceForDoc} from './action-impl';
 import {installBatchedXhrService} from './batched-xhr-impl';
 import {installCidService} from './cid-impl';
 import {installCryptoService} from './crypto-impl';
 import {installDocumentInfoServiceForDoc} from './document-info-impl';
-import {installGlobalNavigationHandlerForDoc} from './navigation';
-import {installGlobalSubmitListenerForDoc} from '../document-submit';
 import {installHiddenObserverForDoc} from './hidden-observer-impl';
 import {installHistoryServiceForDoc} from './history-impl';
-import {installImg} from '../../builtins/amp-img';
-import {installInaboxResourcesServiceForDoc} from '../inabox/inabox-resources';
-import {installInputService} from '../input';
-import {installLayout} from '../../builtins/amp-layout';
 import {installLoadingIndicatorForDoc} from './loading-indicator';
 import {installMutatorServiceForDoc} from './mutator-impl';
+import {installGlobalNavigationHandlerForDoc} from './navigation';
 import {installOwnersServiceForDoc} from './owners-impl';
-import {installPixel} from '../../builtins/amp-pixel';
 import {installPlatformService} from './platform-impl';
-import {installPreconnectService} from '../preconnect';
 import {installResourcesServiceForDoc} from './resources-impl';
 import {installStandardActionsForDoc} from './standard-actions-impl';
 import {installStorageServiceForDoc} from './storage-impl';
@@ -49,6 +27,15 @@ import {installViewerServiceForDoc} from './viewer-impl';
 import {installViewportServiceForDoc} from './viewport/viewport-impl';
 import {installVsyncService} from './vsync-impl';
 import {installXhrService} from './xhr-impl';
+
+import {installGlobalSubmitListenerForDoc} from '../document-submit';
+import {installInputService} from '../input';
+import {devAssert} from '../log';
+import {installPreconnectService} from '../preconnect';
+import {
+  adoptServiceFactoryForEmbedDoc,
+  adoptServiceForEmbedDoc,
+} from '../service-helpers';
 
 /**
  * Install builtins.

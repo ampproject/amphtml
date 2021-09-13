@@ -1,20 +1,5 @@
 FAIL
 |  <!--
-|    Copyright 2016 The AMP HTML Authors. All Rights Reserved.
-|
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|
-|        http://www.apache.org/licenses/LICENSE-2.0
-|
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    Tests for the amp-ooyala-player tag. See the inline comments.
 |  -->
@@ -51,7 +36,7 @@ FAIL
 |      <!-- invalid, needs data-pcode -->
 |      <amp-ooyala-player
 >>     ^~~~~~~~~
-amp-ooyala-player/0.1/test/validator-amp-ooyala.html:51:4 The mandatory attribute 'data-pcode' is missing in tag 'amp-ooyala-player'. (see https://amp.dev/documentation/components/amp-ooyala-player)
+amp-ooyala-player/0.1/test/validator-amp-ooyala.html:36:4 The mandatory attribute 'data-pcode' is missing in tag 'amp-ooyala-player'. (see https://amp.dev/documentation/components/amp-ooyala-player)
 |        height=400
 |        width=400
 |        data-embedcode="93eGs5MDE6dQ-pp527TpHmaFz4zuU9aX"
@@ -61,7 +46,7 @@ amp-ooyala-player/0.1/test/validator-amp-ooyala.html:51:4 The mandatory attribut
 |      <!-- invalid, needs data-embedcode -->
 |      <amp-ooyala-player
 >>     ^~~~~~~~~
-amp-ooyala-player/0.1/test/validator-amp-ooyala.html:59:4 The mandatory attribute 'data-embedcode' is missing in tag 'amp-ooyala-player'. (see https://amp.dev/documentation/components/amp-ooyala-player)
+amp-ooyala-player/0.1/test/validator-amp-ooyala.html:44:4 The mandatory attribute 'data-embedcode' is missing in tag 'amp-ooyala-player'. (see https://amp.dev/documentation/components/amp-ooyala-player)
 |        height=400
 |        width=400
 |        data-pcode="p0cW46sbRY1PxXueRVL2a_4BfdFz"
@@ -71,7 +56,7 @@ amp-ooyala-player/0.1/test/validator-amp-ooyala.html:59:4 The mandatory attribut
 |      <!-- invalid, needs data-playerid -->
 |      <amp-ooyala-player
 >>     ^~~~~~~~~
-amp-ooyala-player/0.1/test/validator-amp-ooyala.html:67:4 The mandatory attribute 'data-playerid' is missing in tag 'amp-ooyala-player'. (see https://amp.dev/documentation/components/amp-ooyala-player)
+amp-ooyala-player/0.1/test/validator-amp-ooyala.html:52:4 The mandatory attribute 'data-playerid' is missing in tag 'amp-ooyala-player'. (see https://amp.dev/documentation/components/amp-ooyala-player)
 |        height=400
 |        width=400
 |        data-embedcode="93eGs5MDE6dQ-pp527TpHmaFz4zuU9aX"

@@ -1,84 +1,77 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {signingServerURLs} from '#ads/_a4a-config';
+
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {Deferred, tryResolve} from '#core/data-structures/promise';
+import {createElementWithAttributes} from '#core/dom';
+import {
+  Layout,
+  LayoutPriority,
+  applyFillContent,
+  isLayoutSizeDefined,
+} from '#core/dom/layout';
+import {intersectionEntryToJson} from '#core/dom/layout/intersection';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '#core/dom/layout/viewport-observer';
+import {DetachedDomStream, streamResponseToWriter} from '#core/dom/stream';
+import {setStyle} from '#core/dom/style';
+import {duplicateErrorIfNecessary} from '#core/error';
+import {isArray, isEnumValue, isObject} from '#core/types';
+import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
+import {padStart} from '#core/types/string';
+import {utf8Decode} from '#core/types/string/bytes';
+import {tryDecodeUriComponent} from '#core/types/string/url';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
+import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
 
 import {A4AVariableSource} from './a4a-variable-source';
-import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
-import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
-import {Deferred, tryResolve} from '../../../src/core/data-structures/promise';
-import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
-import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
-import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
-import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {getExtensionsFromMetadata} from './amp-ad-utils';
+import {processHead} from './head-validation';
+import {
+  createSecureDocSkeleton,
+  createSecureFrame,
+  isAttributionReportingSupported,
+} from './secure-frame';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
+import {whenWithinViewport} from './within-viewport';
+
 import {
   applySandbox,
   generateSentinel,
   getDefaultBootstrapBaseUrl,
 } from '../../../src/3p-frame';
-import {assertHttpsUrl, tryDecodeUriComponent} from '../../../src/url';
-import {cancellation, isCancellation} from '../../../src/error-reporting';
-import {createElementWithAttributes} from '../../../src/dom';
-import {createSecureDocSkeleton, createSecureFrame} from './secure-frame';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {duplicateErrorIfNecessary} from '../../../src/core/error';
-import {
-  getAmpAdRenderOutsideViewport,
-  incrementLoadingAds,
-  is3pThrottled,
-} from '../../amp-ad/0.1/concurrent-load';
+import {isAdPositionAllowed} from '../../../src/ad-helper';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getContextMetadata} from '../../../src/iframe-attributes';
-import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
-import {getExtensionsFromMetadata} from './amp-ad-utils';
-import {getMode} from '../../../src/mode';
+import {cancellation, isCancellation} from '../../../src/error-reporting';
+import {listenOnce} from '../../../src/event-helper';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   installFriendlyIframeEmbed,
   isSrcdocSupported,
   preloadFriendlyIframeEmbedExtensions,
 } from '../../../src/friendly-iframe-embed';
-import {installRealTimeConfigServiceForDoc} from '../../../src/service/real-time-config/real-time-config-impl';
-import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
+import {getContextMetadata} from '../../../src/iframe-attributes';
+import {dev, devAssert, logHashParam, user, userAssert} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {assertHttpsUrl} from '../../../src/url';
+import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {
-  intersectionEntryToJson,
-  measureIntersection,
-} from '../../../src/utils/intersection';
-import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {isArray, isEnumValue, isObject} from '../../../src/core/types';
-
-import {listenOnce} from '../../../src/event-helper';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
-import {padStart} from '../../../src/core/types/string';
-import {parseJson} from '../../../src/json';
-import {processHead} from './head-validation';
-import {setStyle} from '../../../src/style';
-import {signingServerURLs} from '../../../ads/_a4a-config';
-import {streamResponseToWriter} from '../../../src/utils/stream-response';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {utf8Decode} from '../../../src/utils/bytes';
-import {whenWithinViewport} from './within-viewport';
+  getAmpAdRenderOutsideViewport,
+  incrementLoadingAds,
+  is3pThrottled,
+} from '../../amp-ad/0.1/concurrent-load';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -191,13 +184,6 @@ const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
   'crossDomainIframeLoaded': AnalyticsTrigger.AD_IFRAME_LOADED,
 };
 
-/** @const @enum {string} */
-export const MODULE_NOMODULE_PARAMS_EXP = {
-  ID: 'module-nomodule',
-  CONTROL: '21066677',
-  EXPERIMENT: '21066678',
-};
-
 /**
  * Utility function that ensures any error thrown is handled by optional
  * onError handler (if none provided or handler throws, error is swallowed and
@@ -296,15 +282,13 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?../../../src/layout-rect.LayoutSizeDef} */
     this.originalSlotSize_ = null;
 
-    /** @private {Promise<!IntersectionObserverEntry>} */
-    this.initialIntersectionPromise_ = null;
-
     /**
      * Note(keithwrightbos) - ensure the default here is null so that ios
      * uses safeframe when response header is not specified.
      * @private {?XORIGIN_MODE}
      */
-    this.experimentalNonAmpCreativeRenderMethod_ = this.getNonAmpCreativeRenderingMethod();
+    this.experimentalNonAmpCreativeRenderMethod_ =
+      this.getNonAmpCreativeRenderingMethod();
 
     /**
      * Gets a notion of current time, in ms.  The value is not necessarily
@@ -425,6 +409,7 @@ export class AmpA4A extends AMP.BaseElement {
     );
 
     this.uiHandler = new AMP.AmpAdUIHandler(this);
+    this.uiHandler.validateStickyAd();
 
     const verifier = signatureVerifierFor(this.win);
     this.keysetPromise_ = this.getAmpDoc()
@@ -447,13 +432,6 @@ export class AmpA4A extends AMP.BaseElement {
     }
 
     this.isSinglePageStoryAd = this.element.hasAttribute('amp-story');
-
-    const asyncIntersection =
-      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
-      ADS_INITIAL_INTERSECTION_EXP.experiment;
-    this.initialIntersectionPromise_ = asyncIntersection
-      ? measureIntersection(this.element)
-      : Promise.resolve(this.element.getIntersectionChangeEntry());
   }
 
   /** @override */
@@ -629,7 +607,10 @@ export class AmpA4A extends AMP.BaseElement {
       );
       return false;
     }
-    if (!isAdPositionAllowed(this.element, this.win)) {
+    if (
+      !this.uiHandler.isStickyAd() &&
+      !isAdPositionAllowed(this.element, this.win)
+    ) {
       user().warn(
         TAG,
         `<${this.element.tagName}> is not allowed to be ` +
@@ -790,8 +771,8 @@ export class AmpA4A extends AMP.BaseElement {
           ? consentMetadata['consentStringType']
           : consentMetadata;
 
-        return /** @type {!Promise<?string>} */ (this.getServeNpaSignal().then(
-          (npaSignal) =>
+        return /** @type {!Promise<?string>} */ (
+          this.getServeNpaSignal().then((npaSignal) =>
             this.getAdUrl(
               {
                 consentState,
@@ -803,11 +784,14 @@ export class AmpA4A extends AMP.BaseElement {
               this.tryExecuteRealTimeConfig_(
                 consentState,
                 consentString,
-                /** @type {?Object<string, string|number|boolean|undefined>} */ (consentMetadata)
+                /** @type {?Object<string, string|number|boolean|undefined>} */ (
+                  consentMetadata
+                )
               ),
               npaSignal
             )
-        ));
+          )
+        );
       })
       // This block returns the (possibly empty) response to the XHR request.
       /** @return {!Promise<?Response>} */
@@ -1312,7 +1296,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Additional arguments.
     assignAdUrlToError(/** @type {!Error} */ (error), this.adUrl_);
 
-    if (getMode().development || getMode().localDev || getMode().log) {
+    if (getMode().development || getMode().localDev || logHashParam()) {
       user().error(TAG, error);
     } else {
       user().warn(TAG, error);
@@ -1380,7 +1364,9 @@ export class AmpA4A extends AMP.BaseElement {
 
         if (this.isInNoSigningExp()) {
           friendlyRenderPromise = this.renderFriendlyTrustless_(
-            /** @type {!./head-validation.ValidatedHeadDef} */ (creativeMetaData),
+            /** @type {!./head-validation.ValidatedHeadDef} */ (
+              creativeMetaData
+            ),
             checkStillCurrent
           );
         } else {
@@ -1467,7 +1453,8 @@ export class AmpA4A extends AMP.BaseElement {
     this.creativeBody_ = null;
     this.isVerifiedAmpCreative_ = false;
     this.transferDomBody_ = null;
-    this.experimentalNonAmpCreativeRenderMethod_ = this.getNonAmpCreativeRenderingMethod();
+    this.experimentalNonAmpCreativeRenderMethod_ =
+      this.getNonAmpCreativeRenderingMethod();
     this.postAdResponseExperimentFeatures = {};
   }
 
@@ -1809,7 +1796,7 @@ export class AmpA4A extends AMP.BaseElement {
       width
     );
     if (!this.uiHandler.isStickyAd()) {
-      this.applyFillContent(this.iframe);
+      applyFillContent(this.iframe);
     }
 
     let body = '';
@@ -1882,23 +1869,25 @@ export class AmpA4A extends AMP.BaseElement {
     devAssert(!!this.element.ownerDocument, 'missing owner document?!');
     this.maybeTriggerAnalyticsEvent_('renderFriendlyStart');
     // Create and setup friendly iframe.
-    this.iframe = /** @type {!HTMLIFrameElement} */ (createElementWithAttributes(
-      /** @type {!Document} */ (this.element.ownerDocument),
-      'iframe',
-      dict({
-        // NOTE: It is possible for either width or height to be 'auto',
-        // a non-numeric value.
-        'height': this.creativeSize_.height,
-        'width': this.creativeSize_.width,
-        'frameborder': '0',
-        'allowfullscreen': '',
-        'allowtransparency': '',
-        'scrolling': 'no',
-        'title': this.getIframeTitle(),
-      })
-    ));
+    this.iframe = /** @type {!HTMLIFrameElement} */ (
+      createElementWithAttributes(
+        /** @type {!Document} */ (this.element.ownerDocument),
+        'iframe',
+        dict({
+          // NOTE: It is possible for either width or height to be 'auto',
+          // a non-numeric value.
+          'height': this.creativeSize_.height,
+          'width': this.creativeSize_.width,
+          'frameborder': '0',
+          'allowfullscreen': '',
+          'allowtransparency': '',
+          'scrolling': 'no',
+          'title': this.getIframeTitle(),
+        })
+      )
+    );
     if (!this.uiHandler.isStickyAd()) {
-      this.applyFillContent(this.iframe);
+      applyFillContent(this.iframe);
     }
     const fontsArray = [];
     if (creativeMetaData.customStylesheets) {
@@ -2028,15 +2017,23 @@ export class AmpA4A extends AMP.BaseElement {
     // Block synchronous XHR in ad. These are very rare, but super bad for UX
     // as they block the UI thread for the arbitrary amount of time until the
     // request completes.
-    mergedAttributes['allow'] = "sync-xhr 'none';";
-    this.iframe = /** @type {!HTMLIFrameElement} */ (createElementWithAttributes(
-      /** @type {!Document} */ (this.element.ownerDocument),
-      'iframe',
-      /** @type {!JsonObject} */ (Object.assign(
-        mergedAttributes,
-        SHARED_IFRAME_PROPERTIES
-      ))
-    ));
+    let featurePolicies = "sync-xhr 'none';";
+
+    if (isAttributionReportingSupported(this.win.document)) {
+      featurePolicies += "attribution-reporting 'src';";
+    }
+
+    mergedAttributes['allow'] = featurePolicies;
+
+    this.iframe = /** @type {!HTMLIFrameElement} */ (
+      createElementWithAttributes(
+        /** @type {!Document} */ (this.element.ownerDocument),
+        'iframe',
+        /** @type {!JsonObject} */ (
+          Object.assign(mergedAttributes, SHARED_IFRAME_PROPERTIES)
+        )
+      )
+    );
     if (this.sandboxHTMLCreativeFrame()) {
       applySandbox(this.iframe);
     }
@@ -2089,17 +2086,15 @@ export class AmpA4A extends AMP.BaseElement {
       this.sentinel
     );
 
-    return this.initialIntersectionPromise_.then((intersection) => {
-      contextMetadata['_context'][
-        'initialIntersection'
-      ] = intersectionEntryToJson(intersection);
-      return this.iframeRenderHelper_(
-        dict({
-          'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
-          'name': JSON.stringify(contextMetadata),
-        })
-      );
-    });
+    const intersection = this.element.getIntersectionChangeEntry();
+    contextMetadata['_context']['initialIntersection'] =
+      intersectionEntryToJson(intersection);
+    return this.iframeRenderHelper_(
+      dict({
+        'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
+        'name': JSON.stringify(contextMetadata),
+      })
+    );
   }
 
   /**
@@ -2166,22 +2161,20 @@ export class AmpA4A extends AMP.BaseElement {
         this.getAdditionalContextMetadata(method == XORIGIN_MODE.SAFEFRAME)
       );
 
-      return this.initialIntersectionPromise_.then((intersection) => {
-        contextMetadata['initialIntersection'] = intersectionEntryToJson(
-          intersection
-        );
-        if (method == XORIGIN_MODE.NAMEFRAME) {
-          contextMetadata['creative'] = creative;
-          name = JSON.stringify(contextMetadata);
-        } else if (method == XORIGIN_MODE.SAFEFRAME) {
-          contextMetadata = JSON.stringify(contextMetadata);
-          name =
-            `${this.safeframeVersion};${creative.length};${creative}` +
-            `${contextMetadata}`;
-        }
+      const intersection = this.element.getIntersectionChangeEntry();
+      contextMetadata['initialIntersection'] =
+        intersectionEntryToJson(intersection);
+      if (method == XORIGIN_MODE.NAMEFRAME) {
+        contextMetadata['creative'] = creative;
+        name = JSON.stringify(contextMetadata);
+      } else if (method == XORIGIN_MODE.SAFEFRAME) {
+        contextMetadata = JSON.stringify(contextMetadata);
+        name =
+          `${this.safeframeVersion};${creative.length};${creative}` +
+          `${contextMetadata}`;
+      }
 
-        return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
-      });
+      return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
     });
   }
 
@@ -2345,10 +2338,12 @@ export class AmpA4A extends AMP.BaseElement {
     const analyticsEvent = devAssert(
       LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER[lifecycleStage]
     );
-    const analyticsVars = /** @type {!JsonObject} */ (Object.assign(
-      dict({'time': Math.round(this.getNow_())}),
-      this.getA4aAnalyticsVars(analyticsEvent)
-    ));
+    const analyticsVars = /** @type {!JsonObject} */ (
+      Object.assign(
+        dict({'time': Math.round(this.getNow_())}),
+        this.getA4aAnalyticsVars(analyticsEvent)
+      )
+    );
     triggerAnalyticsEvent(this.element, analyticsEvent, analyticsVars);
   }
 
@@ -2391,17 +2386,16 @@ export class AmpA4A extends AMP.BaseElement {
       return this.getBlockRtc_().then((shouldBlock) =>
         shouldBlock
           ? undefined
-          : Services.realTimeConfigForDoc(
-              this.getAmpDoc()
-            ).then((realTimeConfig) =>
-              realTimeConfig.maybeExecuteRealTimeConfig(
-                this.element,
-                this.getCustomRealTimeConfigMacros_(),
-                consentState,
-                consentString,
-                consentMetadata,
-                this.verifyStillCurrent()
-              )
+          : Services.realTimeConfigForDoc(this.getAmpDoc()).then(
+              (realTimeConfig) =>
+                realTimeConfig.maybeExecuteRealTimeConfig(
+                  this.element,
+                  this.getCustomRealTimeConfigMacros_(),
+                  consentState,
+                  consentString,
+                  consentMetadata,
+                  this.verifyStillCurrent()
+                )
             )
       );
     }
@@ -2469,27 +2463,6 @@ export class AmpA4A extends AMP.BaseElement {
    */
   getIframeTitle() {
     return this.element.getAttribute('title') || '3rd party ad content';
-  }
-
-  /**
-   * Queries the dom through the `runtime-type` meta. If the value is one of
-   * 2, 4, 10 (which corresponds to module/nomodule or its control diversion)
-   * and returns the correct experiment ID.
-   *
-   * @protected
-   * @return {?string}
-   */
-  getModuleNomoduleExpIds_() {
-    const runtimeType = this.getAmpDoc().getMetaByName('runtime-type');
-    // ModuleNomoduleControl = 10 (current default, just nomodule)
-    if (runtimeType === '10') {
-      return MODULE_NOMODULE_PARAMS_EXP.CONTROL;
-    }
-    // ES6 = 2 (module/nomodule mode)
-    if (runtimeType === '2') {
-      return MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT;
-    }
-    return null;
   }
 
   /**

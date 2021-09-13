@@ -1,45 +1,34 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
-import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {createExtensionScript} from '../../../../src/service/extension-script';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
 import {fetchCachedSources} from '../video-cache';
-import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
+import {installPerformanceService} from '#service/performance-impl';
+import {xhrServiceForTesting} from '#service/xhr-impl';
 
 describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
-  let xhrService;
   let cacheUrlService;
+  let extensionsService;
+  let xhrService;
 
   beforeEach(() => {
     xhrService = xhrServiceForTesting(env.win);
     env.sandbox.stub(Services, 'xhrFor').returns(xhrService);
 
+    extensionsService = {
+      installExtensionForDoc: env.sandbox.spy(() => Promise.resolve()),
+    };
+    env.sandbox.stub(Services, 'extensionsFor').returns(extensionsService);
+
     cacheUrlService = new AmpCacheUrlService();
     env.sandbox
       .stub(Services, 'cacheUrlServicePromiseForDoc')
       .resolves(cacheUrlService);
-    env.win.document.head.appendChild(
-      createExtensionScript(env.win, 'amp-cache-url', '0.1')
-    );
     env.sandbox.stub(Services, 'documentInfoForDoc').returns({
       sourceUrl: 'https://example.com',
       canonicalUrl: 'https://canonical.com',
     });
+
+    installPerformanceService(env.win);
   });
 
   describe('select sources', () => {
@@ -47,7 +36,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       const videoEl = createVideo([{src: 'video1.mp4'}]);
       const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
 
-      await fetchCachedSources(videoEl, env.win);
+      await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
         'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
@@ -58,7 +47,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       const videoEl = createVideo([{src: 'video1.mp4'}, {src: 'video2.mp4'}]);
       const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
 
-      await fetchCachedSources(videoEl, env.win);
+      await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
         'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
@@ -72,10 +61,25 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       ]);
       const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
 
-      await fetchCachedSources(videoEl, env.win);
+      await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
         'https://example-com.cdn.ampproject.org/mbv/s/example.com/video2.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+      );
+    });
+
+    it('should select the video[src] and never the sources children', async () => {
+      const videoEl = createVideo([
+        {src: 'video2.mp4'},
+        {src: 'video3.mp4', type: 'video/mp4'},
+      ]);
+      videoEl.setAttribute('src', 'video1.mp4');
+      const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
+
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      expect(xhrSpy).to.have.been.calledWith(
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
       );
     });
   });
@@ -85,7 +89,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       const videoEl = createVideo([{'src': 'https://website.com/video.html'}]);
       const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
 
-      await fetchCachedSources(videoEl, env.win);
+      await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
         'https://website-com.cdn.ampproject.org/mbv/s/website.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com'
@@ -96,10 +100,21 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       const videoEl = createVideo([{'src': 'video.html'}]);
       const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
 
-      await fetchCachedSources(videoEl, env.win);
+      await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
         'https://example-com.cdn.ampproject.org/mbv/s/example.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+      );
+    });
+
+    it('should send the request to the correct address if the video has a .gif extension', async () => {
+      const videoEl = createVideo([{'src': 'https://website.com/video.gif'}]);
+      const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
+
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      expect(xhrSpy).to.have.been.calledWith(
+        'https://website-com.cdn.ampproject.org/mbv/s/website.com/video.gif?amp_video_host_url=https%3A%2F%2Fcanonical.com'
       );
     });
   });
@@ -116,7 +131,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       });
 
       const videoEl = createVideo([{src: 'video.mp4'}]);
-      await fetchCachedSources(videoEl, env.win);
+      await fetchCachedSources(videoEl, env.ampdoc);
 
       const addedSource = videoEl.querySelector('source');
       expect(addedSource.getAttribute('src')).to.equal('video1.mp4');
@@ -138,12 +153,62 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
 
       const videoEl = createVideo([{src: 'video.mp4'}]);
 
-      await fetchCachedSources(videoEl, env.win);
+      await fetchCachedSources(videoEl, env.ampdoc);
 
       const addedSources = videoEl.querySelectorAll('source');
       expect(addedSources[0].getAttribute('data-bitrate')).to.equal('2000');
       expect(addedSources[1].getAttribute('data-bitrate')).to.equal('1500');
       expect(addedSources[2].getAttribute('data-bitrate')).to.equal('700');
+    });
+
+    it('should add video[src] as the last fallback source', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            sources: [
+              {'url': 'video1.mp4', 'bitrate_kbps': 700, type: 'video/mp4'},
+              {'url': 'video2.mp4', 'bitrate_kbps': 2000, type: 'video/mp4'},
+              {'url': 'video3.mp4', 'bitrate_kbps': 1500, type: 'video/mp4'},
+            ],
+          }),
+      });
+
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+      videoEl.setAttribute('src', 'video1.mp4');
+      videoEl.setAttribute('type', 'video/mp4');
+
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      const lastSource = videoEl.querySelector('source:last-of-type');
+      expect(lastSource.getAttribute('src')).to.equal('video1.mp4');
+      expect(lastSource.getAttribute('type')).to.equal('video/mp4');
+    });
+
+    it('should clear the unused sources when video[src]', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            sources: [
+              {'url': 'video1.mp4', 'bitrate_kbps': 700, type: 'video/mp4'},
+              {'url': 'video2.mp4', 'bitrate_kbps': 2000, type: 'video/mp4'},
+              {'url': 'video3.mp4', 'bitrate_kbps': 1500, type: 'video/mp4'},
+            ],
+          }),
+      });
+
+      const videoEl = createVideo([
+        {src: 'video.mp4'},
+        {src: 'video.mp4'},
+        {src: 'video.mp4'},
+        {src: 'video.mp4'},
+        {src: 'video.mp4'},
+      ]);
+      videoEl.setAttribute('src', 'video1.mp4');
+
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      const addedSources = videoEl.querySelectorAll('source');
+      expect(addedSources).to.have.lengthOf(4); // 3 from cache + 1 fallback.
     });
   });
 
@@ -160,15 +225,47 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
 
       const videoEl = createVideo([{src: 'video.mp4'}]);
 
-      await fetchCachedSources(videoEl, env.win);
+      await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(videoEl.querySelector('source[data-bitrate]')).to.not.be.null;
     });
-    it('should not create the sources if there is amp-orig-src attribute', async () => {
-      const videoEl = createVideo([{'src': 'video.mp4', 'amp-orig-src': ''}]);
-      await fetchCachedSources(videoEl, env.win);
 
-      expect(videoEl.querySelector('source[data-bitrate]')).to.be.null;
+    it('should set an attribute on cached video sources', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            sources: [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          }),
+      });
+
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      const source = videoEl.querySelector('source[data-bitrate]');
+      expect(source).to.exist;
+      expect(source).to.have.attribute('i-amphtml-video-cached-source');
+    });
+
+    it('should not set an attribute on non cached video sources', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            sources: [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          }),
+      });
+
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      const source = videoEl.querySelector('source:not(source[data-bitrate])');
+      expect(source).to.exist;
+      expect(source).to.not.have.attribute('i-amphtml-video-cached-source');
     });
   });
 

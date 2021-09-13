@@ -10,9 +10,9 @@ http_archive(
 
 http_archive(
     name = "com_google_googletest",
-    sha256 = "e61e3889bd5cc3e6bc1084d2108ecda2f110c0387ba88b394ffd16043a1d5709",
-    strip_prefix = "googletest-f5e592d8ee5ffb1d9af5be7f715ce3576b8bf9c4",
-    urls = ["https://github.com/google/googletest/archive/f5e592d8ee5ffb1d9af5be7f715ce3576b8bf9c4.zip"],  # 2019-01-07
+    sha256 = "1129a3ff6d81d1b4cd080784e6cb539a9b34d8309831ae4560804337b8cfd27c",
+    strip_prefix = "googletest-955c7f837efad184ec63e771c42542d37545eaef",
+    urls = ["https://github.com/google/googletest/archive/955c7f837efad184ec63e771c42542d37545eaef.zip"],  # 2019-01-07
 )
 
 http_archive(
@@ -23,8 +23,8 @@ http_archive(
 
 http_archive(
     name = "com_github_re2",
-    strip_prefix = "re2-master",
-    urls = ["https://github.com/google/re2/archive/master.zip"],
+    strip_prefix = "re2-main",
+    urls = ["https://github.com/google/re2/archive/main.zip"],
 )
 
 http_archive(

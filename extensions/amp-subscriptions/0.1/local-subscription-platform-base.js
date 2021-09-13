@@ -1,24 +1,8 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {Action} from './analytics';
 import {Actions} from './actions';
 import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
 import {UrlBuilder} from './url-builder';
-import {closestAncestorElementBySelector} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {dev, userAssert} from '../../../src/log';
 
 /**
@@ -49,9 +33,8 @@ export class LocalSubscriptionBasePlatform {
     this.serviceConfig_ = platformConfig;
 
     /** @private @const {boolean} */
-    this.pingbackAllEntitlements_ = !!this.serviceConfig_[
-      'pingbackAllEntitlements'
-    ];
+    this.pingbackAllEntitlements_ =
+      !!this.serviceConfig_['pingbackAllEntitlements'];
 
     /** @protected @const {!./service-adapter.ServiceAdapter} */
     this.serviceAdapter_ = serviceAdapter;

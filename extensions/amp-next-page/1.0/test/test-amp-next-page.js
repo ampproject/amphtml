@@ -1,25 +1,12 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import '../amp-next-page';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyle} from '#core/dom/style';
+
+import {Services} from '#service';
+
 import {HostPage, PageState} from '../page';
 import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
-import {Services} from '../../../../src/services';
-import {VisibilityState} from '../../../../src/core/constants/visibility-state';
-import {htmlFor} from '../../../../src/static-template';
-import {setStyle} from '../../../../src/style';
 
 const MOCK_NEXT_PAGE = `<header>Header</header>
     <div style="height:1000px"></div>
@@ -751,12 +738,10 @@ describes.realWin(
           }
         );
 
-        const template1 = service.pages_[1].container.querySelector(
-          '[separator]'
-        );
-        const template2 = service.pages_[2].container.querySelector(
-          '[separator]'
-        );
+        const template1 =
+          service.pages_[1].container.querySelector('[separator]');
+        const template2 =
+          service.pages_[2].container.querySelector('[separator]');
 
         expect(template1.innerText).to.equal('Rendered 1');
         expect(template2.innerText).to.equal('Rendered 2');

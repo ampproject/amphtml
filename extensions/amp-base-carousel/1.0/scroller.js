@@ -1,19 +1,4 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {
   Alignment,
   Axis,
@@ -21,21 +6,20 @@ import {
   getPercentageOffsetFromAlignment,
   scrollContainerToElement,
 } from './dimensions';
-import {LightboxGalleryContext} from '../../amp-lightbox-gallery/1.0/context';
-import {debounce} from '../../../src/core/types/function';
-import {forwardRef} from '../../../src/preact/compat';
-import {mod} from '../../../src/utils/math';
-import {setStyle} from '../../../src/style';
-import {toWin} from '../../../src/types';
+import {WithLightbox} from '../../amp-lightbox-gallery/1.0/component';
+import {debounce} from '#core/types/function';
+import {forwardRef} from '#preact/compat';
+import {mod} from '#core/math';
+import {setStyle} from '#core/dom/style';
+import {toWin} from '#core/window';
 import {
   useCallback,
-  useContext,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
   useRef,
-} from '../../../src/preact';
-import {useStyles} from './base-carousel.jss';
+} from '#preact';
+import {useStyles} from './component.jss';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last
@@ -55,20 +39,20 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
  */
 function ScrollerWithRef(
   {
+    _thumbnails,
     advanceCount,
     alignment,
     axis,
     children,
-    lightbox,
+    lightboxGroup,
     loop,
     mixedLength,
+    onClick,
     restingIndex,
     setRestingIndex,
     snap,
     snapBy = 1,
     visibleCount,
-    _thumbnails,
-    ...rest
   },
   ref
 ) {
@@ -138,7 +122,6 @@ function ScrollerWithRef(
    */
   const scrollOffset = useRef(0);
 
-  const {open: openLightbox} = useContext(LightboxGalleryContext);
   const slides = renderSlides(
     {
       alignment,
@@ -146,7 +129,7 @@ function ScrollerWithRef(
       loop,
       mixedLength,
       offsetRef,
-      openLightbox: lightbox && openLightbox,
+      lightboxGroup,
       pivotIndex,
       restingIndex,
       snap,
@@ -270,12 +253,12 @@ function ScrollerWithRef(
   return (
     <div
       ref={containerRef}
+      onClick={onClick}
       onScroll={handleScroll}
       class={`${classes.scrollContainer} ${classes.hideScrollbar} ${
         axis === Axis.X ? classes.horizontalScroll : classes.verticalScroll
       }`}
-      tabindex={0}
-      {...rest}
+      tabIndex={0}
     >
       {slides}
     </div>
@@ -340,31 +323,28 @@ export {Scroller};
  */
 function renderSlides(
   {
+    _thumbnails,
     alignment,
     children,
+    lightboxGroup,
     loop,
     mixedLength,
-    restingIndex,
     offsetRef,
-    openLightbox,
     pivotIndex,
+    restingIndex,
     snap,
     snapBy,
     visibleCount,
-    _thumbnails,
   },
   classes
 ) {
   const {length} = children;
-  const lightboxProps = openLightbox && {
-    role: 'button',
-    tabindex: '0',
-    onClick: () => openLightbox(),
-  };
+  const Comp = lightboxGroup ? WithLightbox : 'div';
   const slides = children.map((child, index) => {
     const key = `slide-${child.key || index}`;
     return (
-      <div
+      <Comp
+        caption={child.props.caption}
         key={key}
         data-slide={index}
         class={`${classes.slideSizing} ${classes.slideElement} ${
@@ -376,14 +356,16 @@ function renderSlides(
             ? classes.centerAlign
             : classes.startAlign
         } ${_thumbnails ? classes.thumbnails : ''} `}
+        // lightboxGroup is a string when defined, and `false` otherwise. In the case
+        // of the latter, we do not want to pass group={false} into the DOM.
+        group={lightboxGroup || undefined}
         part="slide"
         style={{
           flex: mixedLength ? '0 0 auto' : `0 0 ${100 / visibleCount}%`,
         }}
-        {...lightboxProps}
       >
         {child}
-      </div>
+      </Comp>
     );
   });
 

@@ -82,6 +82,8 @@ The AMP runtime provides the following information to the ad:
   <dd>Contains the sanitized  <code>Location</code> object of the primary document. This object contains keys like <code>href</code>, <code>origin</code> and other keys common for <a href="https://developer.mozilla.org/en-US/docs/Web/API/Location">Location</a> objects. In browsers that support <code>location.ancestorOrigins</code> you can trust that the <code>origin</code> of the location is actually correct (so rogue pages cannot claim they represent an origin they do not actually represent).</dd>
   <dt><code>window.context.pageViewId</code></dt>
   <dd>Contains a relatively low entropy id that is the same for all ads shown on a page.</dd>
+  <dt><code>window.context.pageViewId64</code></dt>
+  <dd>Contains a high entropy id, likely to be unique per URL, user and day, that is the same for all ads shown on a page.</dd>
   <dt><code>window.context.referrer</code></dt>
   <dd>Contains the origin of the referrer value of the primary document if available.
     <ul>
@@ -89,7 +91,7 @@ The AMP runtime provides the following information to the ad:
     </ul>
   </dd>
   <dt><code>window.context.sourceUrl</code></dt>
-  <dd>Contains the source URL of the original AMP document. See details <a href="../spec/amp-var-substitutions.md#source-url">here</a></code>.</dd>
+  <dd>Contains the source URL of the original AMP document. See details <a href="../docs/spec/amp-var-substitutions.md#source-url">here</a></code>.</dd>
   <dt><code>window.context.startTime</code></dt>
   <dd>Contains the time at which processing of the amp-ad element started.</dd>
 </dl>
@@ -335,7 +337,7 @@ If the publisher would like to add custom JavaScript in the `remote.html` file t
 
 ## Developer guidelines for a pull request
 
-Please read through [DEVELOPING.md](../contributing/DEVELOPING.md) before contributing to this code repository.
+Please read through [developing.md](../docs/developing.md) before contributing to this code repository.
 
 ### Files to change
 
@@ -380,7 +382,7 @@ To speed up the review process, please run `amp lint` and `amp check-types`, the
 -   Add **cc ampproject/wg-monetization** in all pull request's descriptions.
 -   It's highly recommended to maintain [an integration test outside AMP repo](../3p/README.md#adding-proper-integration-tests).
 -   Please consider implementing the `render-start` and `no-content-available` APIs (see [Available APIs](#available-apis)), which helps AMP to provide user a much better ad loading experience.
--   [CLA](../CONTRIBUTING.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are:
+-   [CLA](../docs/contributing.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are:
     1. Using a different email address in the git commit.
     2. Not providing the exact company name in the PR thread.
 

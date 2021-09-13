@@ -1,27 +1,13 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {getDate} from '#core/types/date';
+import {dict} from '#core/types/object';
 
-import * as Preact from '../../../src/preact';
-import {Wrapper, useRenderer} from '../../../src/preact/component';
-import {dict} from '../../../src/core/types/object';
-import {getDate} from '../../../src/core/types/date';
+import * as Preact from '#preact';
+import {useEffect, useMemo, useRef, useState} from '#preact';
+import {Wrapper, useRenderer} from '#preact/component';
+import {useAmpContext} from '#preact/context';
+import {useResourcesNotify} from '#preact/utils';
+
 import {getLocaleStrings} from './messages';
-import {useAmpContext} from '../../../src/preact/context';
-import {useEffect, useMemo, useRef, useState} from '../../../src/preact';
-import {useResourcesNotify} from '../../../src/preact/utils';
 
 const NAME = 'DateCountdown';
 
@@ -60,16 +46,18 @@ const DEFAULT_COUNT_UP = false;
  * @return {string}
  */
 const DEFAULT_RENDER = (data) =>
-  /** @type {string} */ (`${data['days']} ${data['dd']}, ` +
-    `${data['hours']} ${data['hh']}, ` +
-    `${data['minutes']} ${data['mm']}, ` +
-    `${data['seconds']} ${data['ss']}`);
+  /** @type {string} */ (
+    `${data['days']} ${data['dd']}, ` +
+      `${data['hours']} ${data['hh']}, ` +
+      `${data['minutes']} ${data['mm']}, ` +
+      `${data['seconds']} ${data['ss']}`
+  );
 
 /**
- * @param {!DateCountdownPropsDef} props
+ * @param {!BentoDateCountdownDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function DateCountdown({
+export function BentoDateCountdown({
   datetime,
   whenEnded = DEFAULT_WHEN_ENDED,
   locale = DEFAULT_LOCALE,

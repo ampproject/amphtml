@@ -1,22 +1,7 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {isIframed} from '#core/dom';
 
-import {READY_SCAN_SIGNAL} from './service/resources-interface';
-import {Services} from './services';
-import {isIframed} from './dom';
+import {Services} from '#service';
+import {READY_SCAN_SIGNAL} from '#service/resources-interface';
 
 /** @const {!Array<string>} */
 const EXCLUDE_INI_LOAD = [
@@ -54,14 +39,13 @@ export function whenContentIniLoad(
 
 /**
  * A legacy way using direct measurement.
+ * Used by inabox runtime, and will be moved there after #31915.
  *
  * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {!Window} hostWin
  * @param {!./layout-rect.LayoutRectDef} rect
  * @param {boolean=} opt_prerenderableOnly signifies if we are in prerender mode.
  * @return {!Promise}
- * @visibleForTesting
- * TODO(#31915): remove, once launched.
  */
 export function whenContentIniLoadMeasure(
   elementOrAmpDoc,
@@ -132,7 +116,7 @@ export function whenContentIniLoadInOb(elementOrAmpDoc, opt_prerenderableOnly) {
           io.disconnect();
           const intersecting = [];
           for (let i = 0; i < entries.length; i++) {
-            const {target, isIntersecting} = entries[i];
+            const {isIntersecting, target} = entries[i];
             if (isIntersecting) {
               intersecting.push(target);
             }

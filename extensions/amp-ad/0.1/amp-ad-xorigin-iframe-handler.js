@@ -1,40 +1,25 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {CONSTANTS, MessageType} from '../../../src/3p-frame-messaging';
-import {CommonSignals} from '../../../src/core/constants/common-signals';
-import {Deferred} from '../../../src/core/data-structures/promise';
+import {CONSTANTS, MessageType} from '#core/3p-frame-messaging';
+import {CommonSignals} from '#core/constants/common-signals';
+import {Deferred} from '#core/data-structures/promise';
 import {LegacyAdIntersectionObserverHost} from './legacy-ad-intersection-observer-host';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {
   SubscriptionApi,
   listenFor,
   listenForOncePromise,
   postMessageToWindows,
 } from '../../../src/iframe-helper';
+import {applyFillContent} from '#core/dom/layout';
 import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getData} from '../../../src/event-helper';
-import {getHtml} from '../../../src/get-html';
-import {isExperimentOn} from '../../../src/experiments';
-import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
-import {removeElement} from '../../../src/dom';
+import {getHtml} from '#core/dom/get-html';
+import {isExperimentOn} from '#experiments';
+import {isGoogleAdsA4AValidEnvironment} from '#ads/google/a4a/utils';
+import {removeElement} from '#core/dom';
 import {reportErrorToAnalytics} from '../../../src/error-reporting';
-import {setStyle} from '../../../src/style';
-import {throttle} from '../../../src/core/types/function';
+import {setStyle} from '#core/dom/style';
+import {throttle} from '#core/types/function';
 
 const VISIBILITY_TIMEOUT = 10000;
 
@@ -42,6 +27,9 @@ const MIN_INABOX_POSITION_EVENT_INTERVAL = 100;
 
 /** @type {string} */
 const TAG = 'amp-ad-xorigin-iframe';
+
+/** @type {number} */
+const MSEC_REPEATED_REQUEST_DELAY = 500;
 
 export class AmpAdXOriginIframeHandler {
   /**
@@ -62,6 +50,15 @@ export class AmpAdXOriginIframeHandler {
 
     /** @type {?HTMLIFrameElement} iframe instance */
     this.iframe = null;
+
+    /* This variable keeps keeps track when an invalid resize request is made, and
+     * is associated with each iframe. If the request is invalid, then a new request
+     * cannot be made until a certain amount of time has passed, 500 ms by default
+     * (see MSEC_REPEATED_REQUEST_DELAY). Once the timer has cooled down,
+     * a new request can be made.
+     */
+    /** @private {number} */
+    this.lastRejectedResizeTime_ = 0;
 
     /** @private {?LegacyAdIntersectionObserverHost} */
     this.legacyIntersectionObserverApiHost_ = null;
@@ -101,16 +98,14 @@ export class AmpAdXOriginIframeHandler {
     this.iframe = iframe;
     this.iframe.setAttribute('scrolling', 'no');
     if (!this.uiHandler_.isStickyAd()) {
-      this.baseInstance_.applyFillContent(this.iframe);
+      applyFillContent(this.iframe);
     }
     const timer = Services.timerFor(this.baseInstance_.win);
 
     // Init the legacy observeInterection API service.
     // (Behave like position observer)
-    this.legacyIntersectionObserverApiHost_ = new LegacyAdIntersectionObserverHost(
-      this.baseInstance_,
-      this.iframe
-    );
+    this.legacyIntersectionObserverApiHost_ =
+      new LegacyAdIntersectionObserverHost(this.baseInstance_, this.iframe);
 
     this.embedStateApi_ = new SubscriptionApi(
       this.iframe,
@@ -171,14 +166,29 @@ export class AmpAdXOriginIframeHandler {
           if (!!data['hasOverflow']) {
             this.element_.warnOnMissingOverflow = false;
           }
-          this.handleResize_(
-            data['id'],
-            data['height'],
-            data['width'],
-            source,
-            origin,
-            event
-          );
+          if (
+            Date.now() - this.lastRejectedResizeTime_ >=
+            MSEC_REPEATED_REQUEST_DELAY
+          ) {
+            this.handleResize_(
+              data['id'],
+              data['height'],
+              data['width'],
+              source,
+              origin,
+              event
+            );
+          } else {
+            // need to wait 500ms until next resize request is allowed.
+            this.sendEmbedSizeResponse_(
+              false,
+              data['id'],
+              data['width'],
+              data['height'],
+              source,
+              origin
+            );
+          }
         },
         true,
         true
@@ -234,14 +244,10 @@ export class AmpAdXOriginIframeHandler {
       });
 
     // Calculate render-start and no-content signals.
-    const {
-      promise: renderStartPromise,
-      resolve: renderStartResolve,
-    } = new Deferred();
-    const {
-      promise: noContentPromise,
-      resolve: noContentResolve,
-    } = new Deferred();
+    const {promise: renderStartPromise, resolve: renderStartResolve} =
+      new Deferred();
+    const {promise: noContentPromise, resolve: noContentResolve} =
+      new Deferred();
 
     if (
       this.baseInstance_.config &&
@@ -460,6 +466,12 @@ export class AmpAdXOriginIframeHandler {
         .updateSize(height, width, iframeHeight, iframeWidth, event)
         .then(
           (info) => {
+            if (!info.success) {
+              // invalid request parameters, disable requests for 500ms
+              this.lastRejectedResizeTime_ = Date.now();
+            } else {
+              this.lastRejectedResizeTime_ = 0;
+            }
             this.uiHandler_.onResizeSuccess();
             this.sendEmbedSizeResponse_(
               info.success,

@@ -6,9 +6,11 @@
     {
       owners: [
         {name: 'chenshay'},
-        {name: 'dparikh'},
+        {name: 'chrisantaki'},
         {name: 'dvoytenko'},
+        {name: 'elijahsoria'},
         {name: 'jpettitt'},
+        {name: 'qidonna'},
       ],
     },
   ],

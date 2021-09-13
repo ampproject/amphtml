@@ -1,29 +1,18 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {elementStringOrPassThru} from '../error-message-helpers';
-import {includes} from '../types/string';
-import {isArray, isElement, isEnumValue, isString} from '../types';
-import {remove} from '../types/array';
+import {elementStringOrPassThru} from '#core/error/message-helpers';
+import {isArray, isElement, isString} from '#core/types';
+import {remove} from '#core/types/array';
 
 /**
  * @fileoverview This file provides the base implementation for assertion
  * functions. Most files should never import from this; instead, import from
  * `dev` or `user`. It is also used by the Log class for its assertions.
  */
+
+/**
+ * A base assertion function, provided to various assertion helpers.
+ * @typedef {function(?, string=, ...*):?|function(?, !Array<*>)}
+ */
+export let AssertionFunctionDef;
 
 /**
  * Throws an error if the second argument isn't trueish.
@@ -53,7 +42,7 @@ export function assert(
   }
 
   // Include the sentinel string if provided and not already present
-  if (sentinel && !includes(opt_message, sentinel)) {
+  if (sentinel && opt_message.indexOf(sentinel) == -1) {
     opt_message += sentinel;
   }
 
@@ -80,9 +69,7 @@ export function assert(
   // __AMP_REPORT_ERROR is installed globally per window in the entry point in
   // AMP documents. It may not be present for Bento/Preact elements on non-AMP
   // pages.
-  if (self.__AMP_REPORT_ERROR) {
-    self.__AMP_REPORT_ERROR(error);
-  }
+  self.__AMP_REPORT_ERROR?.(error);
   throw error;
 }
 
@@ -94,7 +81,7 @@ export function assert(
  * Otherwise creates a sprintf syntax string containing the optional message or the
  * default. The `subject` of the assertion is added at the end.
  *
- * @param {!AssertionFunction} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {T} subject
  * @param {*} shouldBeTruthy
  * @param {string} defaultMessage
@@ -127,7 +114,7 @@ function assertType_(
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunction} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {*} shouldBeElement
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {!Element} The value of shouldBeTrueish.
@@ -135,13 +122,15 @@ function assertType_(
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertElement(assertFn, shouldBeElement, opt_message) {
-  return /** @type {!Element} */ (assertType_(
-    assertFn,
-    shouldBeElement,
-    isElement(shouldBeElement),
-    'Element expected',
-    opt_message
-  ));
+  return /** @type {!Element} */ (
+    assertType_(
+      assertFn,
+      shouldBeElement,
+      isElement(shouldBeElement),
+      'Element expected',
+      opt_message
+    )
+  );
 }
 
 /**
@@ -150,7 +139,7 @@ export function assertElement(assertFn, shouldBeElement, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunction} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {*} shouldBeString
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {string} The string value. Can be an empty string.
@@ -158,13 +147,15 @@ export function assertElement(assertFn, shouldBeElement, opt_message) {
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertString(assertFn, shouldBeString, opt_message) {
-  return /** @type {string} */ (assertType_(
-    assertFn,
-    shouldBeString,
-    isString(shouldBeString),
-    'String expected',
-    opt_message
-  ));
+  return /** @type {string} */ (
+    assertType_(
+      assertFn,
+      shouldBeString,
+      isString(shouldBeString),
+      'String expected',
+      opt_message
+    )
+  );
 }
 
 /**
@@ -173,7 +164,7 @@ export function assertString(assertFn, shouldBeString, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunction} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {*} shouldBeNumber
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {number} The number value. The allowed values include `0`
@@ -182,13 +173,15 @@ export function assertString(assertFn, shouldBeString, opt_message) {
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertNumber(assertFn, shouldBeNumber, opt_message) {
-  return /** @type {number} */ (assertType_(
-    assertFn,
-    shouldBeNumber,
-    typeof shouldBeNumber == 'number',
-    'Number expected',
-    opt_message
-  ));
+  return /** @type {number} */ (
+    assertType_(
+      assertFn,
+      shouldBeNumber,
+      typeof shouldBeNumber == 'number',
+      'Number expected',
+      opt_message
+    )
+  );
 }
 
 /**
@@ -197,7 +190,7 @@ export function assertNumber(assertFn, shouldBeNumber, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunction} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {*} shouldBeArray
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {!Array} The array value
@@ -205,13 +198,15 @@ export function assertNumber(assertFn, shouldBeNumber, opt_message) {
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertArray(assertFn, shouldBeArray, opt_message) {
-  return /** @type {!Array} */ (assertType_(
-    assertFn,
-    shouldBeArray,
-    isArray(shouldBeArray),
-    'Array expected',
-    opt_message
-  ));
+  return /** @type {!Array} */ (
+    assertType_(
+      assertFn,
+      shouldBeArray,
+      isArray(shouldBeArray),
+      'Array expected',
+      opt_message
+    )
+  );
 }
 
 /**
@@ -219,7 +214,7 @@ export function assertArray(assertFn, shouldBeArray, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunction} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {*} shouldBeBoolean
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {boolean} The boolean value.
@@ -227,37 +222,13 @@ export function assertArray(assertFn, shouldBeArray, opt_message) {
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertBoolean(assertFn, shouldBeBoolean, opt_message) {
-  return /** @type {boolean} */ (assertType_(
-    assertFn,
-    shouldBeBoolean,
-    !!shouldBeBoolean === shouldBeBoolean,
-    'Boolean expected',
-    opt_message
-  ));
-}
-
-/**
- * Asserts and returns the enum value. If the enum doesn't contain such a
- * value, the error is thrown.
- *
- * @param {!AssertionFunction} assertFn underlying assertion function to call
- * @param {!Object<T>} enumObj
- * @param {*} shouldBeEnum
- * @param {string=} opt_enumName
- * @return {T}
- * @template T
- * @closurePrimitive {asserts.matchesReturn}
- */
-export function assertEnumValue(
-  assertFn,
-  enumObj,
-  shouldBeEnum,
-  opt_enumName = 'enum'
-) {
-  return assertType_(
-    assertFn,
-    shouldBeEnum,
-    isEnumValue(enumObj, shouldBeEnum),
-    `Unknown ${opt_enumName} value: "${shouldBeEnum}"`
+  return /** @type {boolean} */ (
+    assertType_(
+      assertFn,
+      shouldBeBoolean,
+      !!shouldBeBoolean === shouldBeBoolean,
+      'Boolean expected',
+      opt_message
+    )
   );
 }

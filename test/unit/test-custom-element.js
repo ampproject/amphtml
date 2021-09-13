@@ -1,34 +1,20 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {AmpEvents} from '../../src/core/constants/amp-events';
+
+import {AmpEvents} from '#core/constants/amp-events';
+import {CommonSignals} from '#core/constants/common-signals';
+import {LOADING_ELEMENTS_, Layout} from '#core/dom/layout';
+
+import {Services} from '#service';
+import {elementConnectedCallback} from '#service/custom-element-registry';
+import {Resource, ResourceState} from '#service/resource';
+
 import {BaseElement} from '../../src/base-element';
-import {CommonSignals} from '../../src/core/constants/common-signals';
-import {ElementStub} from '../../src/element-stub';
-import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
-import {Resource, ResourceState} from '../../src/service/resource';
-import {Services} from '../../src/services';
 import {chunkInstanceForTesting} from '../../src/chunk';
 import {
   createAmpElementForTesting,
   getImplSyncForTesting,
 } from '../../src/custom-element';
-import {elementConnectedCallback} from '../../src/service/custom-element-registry';
-import {toggleExperiment} from '../../src/experiments';
+import {ElementStub} from '../../src/element-stub';
 
 describes.realWin('CustomElement', {amp: true}, (env) => {
   // TODO(dvoytenko, #11827): Make this test work on Safari.
@@ -146,9 +132,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
         win.__AMP_EXTENDED_ELEMENTS['amp-test'] = TestElement;
         win.__AMP_EXTENDED_ELEMENTS['amp-stub'] = ElementStub;
-        win.__AMP_EXTENDED_ELEMENTS[
-          'amp-test-with-re-upgrade'
-        ] = TestElementWithReUpgrade;
+        win.__AMP_EXTENDED_ELEMENTS['amp-test-with-re-upgrade'] =
+          TestElementWithReUpgrade;
         ampdoc.declareExtension('amp-stub', '0.1');
 
         testElementPreconnectCallback = env.sandbox.spy();
@@ -588,6 +573,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
       it('Element - build allowed', () => {
         const element = new ElementClass();
+        const getSizerStub = env.sandbox.stub(element, 'getSizer_');
 
         expect(element.isBuilt()).to.equal(false);
         expect(testElementBuildCallback).to.have.not.been.called;
@@ -600,6 +586,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           expect(element).to.not.have.class('i-amphtml-notbuilt');
           expect(element).to.not.have.class('amp-notbuilt');
           expect(element).to.have.class('i-amphtml-built');
+          expect(getSizerStub).to.be.calledOnce;
           expect(testElementBuildCallback).to.be.calledOnce;
           expect(element.signals().get(CommonSignals.BUILT)).to.be.ok;
           return element.whenBuilt(); // Should eventually resolve.
@@ -705,15 +692,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         );
       });
 
-      describe('granular consent experiment', () => {
-        beforeEach(() => {
-          toggleExperiment(win, 'amp-consent-granular-consent', true);
-        });
-
-        afterEach(() => {
-          toggleExperiment(win, 'amp-consent-granular-consent', false);
-        });
-
+      describe('consent', () => {
         describe('getPurposeConsent_', () => {
           let element;
           beforeEach(() => {
@@ -1979,29 +1958,6 @@ describes.realWin('CustomElement Service Elements', {amp: true}, (env) => {
     return child;
   }
 
-  it('getRealChildren should return nothing', () => {
-    expect(element.getRealChildNodes().length).to.equal(0);
-    expect(element.getRealChildren().length).to.equal(0);
-  });
-
-  it('getRealChildren should return content-only nodes', () => {
-    element.appendChild(doc.createElement('i-amp-service'));
-    element.appendChild(createWithAttr('placeholder'));
-    element.appendChild(createWithAttr('fallback'));
-    element.appendChild(createWithAttr('overflow'));
-    element.appendChild(doc.createTextNode('abc'));
-    element.appendChild(doc.createElement('content'));
-
-    const nodes = element.getRealChildNodes();
-    expect(nodes.length).to.equal(2);
-    expect(nodes[0].textContent).to.equal('abc');
-    expect(nodes[1].tagName.toLowerCase()).to.equal('content');
-
-    const elements = element.getRealChildren();
-    expect(elements.length).to.equal(1);
-    expect(elements[0].tagName.toLowerCase()).to.equal('content');
-  });
-
   it('getPlaceholder should return nothing', () => {
     expect(element.getPlaceholder()).to.be.null;
   });
@@ -2048,6 +2004,33 @@ describes.realWin('CustomElement Service Elements', {amp: true}, (env) => {
       getResourceForElement: (element) => {
         return element.resource;
       },
+    };
+    element.getAmpDoc = () => doc;
+    const owners = Services.ownersForDoc(doc);
+    owners.scheduleLayout = env.sandbox.mock();
+    const fallback = element.appendChild(createWithAttr('fallback'));
+    element.toggleFallback(true);
+    expect(element).to.have.class('amp-notsupported');
+    expect(owners.scheduleLayout).to.be.calledOnce;
+    expect(owners.scheduleLayout).to.have.been.calledWith(element, fallback);
+
+    element.toggleFallback(false);
+    expect(element).to.not.have.class('amp-notsupported');
+  });
+
+  it('toggleFallback should toggle unsupported class on R1 elements', () => {
+    element.resource = {
+      getState: () => {
+        return ResourceState.NOT_LAID_OUT;
+      },
+    };
+    element.resources_ = {
+      getResourceForElement: (element) => {
+        return element.resource;
+      },
+    };
+    element.R1 = () => {
+      return true;
     };
     element.getAmpDoc = () => doc;
     const owners = Services.ownersForDoc(doc);

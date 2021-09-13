@@ -1,24 +1,9 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
 
-import {Services} from '../../src/services';
 import {UrlReplacementPolicy, batchFetchJsonFor} from '../../src/batched-json';
 import {user} from '../../src/log';
 
-describe('batchFetchJsonFor', () => {
+describes.sandboxed('batchFetchJsonFor', {}, (env) => {
   // Fakes.
   const ampdoc = {win: null};
   // Service fakes.
@@ -43,24 +28,24 @@ describe('batchFetchJsonFor', () => {
 
   beforeEach(() => {
     urlReplacements = {
-      expandUrlAsync: window.sandbox.stub(),
-      collectDisallowedVarsSync: window.sandbox.stub(),
+      expandUrlAsync: env.sandbox.stub(),
+      collectDisallowedVarsSync: env.sandbox.stub(),
     };
-    window.sandbox
+    env.sandbox
       .stub(Services, 'urlReplacementsForDoc')
       .returns(urlReplacements);
 
-    fetchJson = window.sandbox.stub().returns(
+    fetchJson = env.sandbox.stub().returns(
       Promise.resolve({
         json: () => Promise.resolve(data),
       })
     );
 
     xhr = {xssiJson: () => Promise.resolve(data)};
-    window.sandbox.stub(Services, 'xhrFor').returns(xhr);
+    env.sandbox.stub(Services, 'xhrFor').returns(xhr);
 
     batchedXhr = {fetchJson};
-    window.sandbox.stub(Services, 'batchedXhrFor').returns(batchedXhr);
+    env.sandbox.stub(Services, 'batchedXhrFor').returns(batchedXhr);
   });
 
   describe('URL replacement', () => {
@@ -86,7 +71,8 @@ describe('batchFetchJsonFor', () => {
         urlReplacements.collectDisallowedVarsSync.withArgs(el).returns(['BAR']);
 
         const optIn = UrlReplacementPolicy.OPT_IN;
-        const rejectError = /Please add data-amp-replace="BAR" to the <AMP-LIST> element./;
+        const rejectError =
+          /Please add data-amp-replace="BAR" to the <AMP-LIST> element./;
         return batchFetchJsonFor(ampdoc, el, {
           urlReplacement: optIn,
         }).should.eventually.be.rejectedWith(rejectError);
@@ -100,7 +86,7 @@ describe('batchFetchJsonFor', () => {
         .withArgs('https://data.com?x=FOO&y=BAR')
         .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
 
-      const userError = window.sandbox.stub(user(), 'error');
+      const userError = env.sandbox.stub(user(), 'error');
       const all = UrlReplacementPolicy.ALL;
       return batchFetchJsonFor(ampdoc, el, {urlReplacement: all}).then(() => {
         expect(fetchJson).to.be.calledWith('https://data.com?x=abc&y=BAR');

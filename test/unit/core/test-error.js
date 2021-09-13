@@ -1,28 +1,19 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {
+  devError,
+  devExpectedError,
+  duplicateErrorIfNecessary,
+  rethrowAsync,
+} from '#core/error';
+import {isUserErrorMessage} from '#core/error/message-helpers';
 
-import {duplicateErrorIfNecessary, rethrowAsync} from '../../../src/core/error';
-import {isUserErrorMessage, user} from '../../../src/log';
+import {setReportError, user} from '../../../src/log';
 
-describes.sandboxed('errors', {}, () => {
+describes.sandboxed('errors', {}, (env) => {
   describe('rethrowAsync', () => {
     let clock;
 
     beforeEach(() => {
-      clock = window.sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
       restoreAsyncErrorThrows();
     });
 
@@ -122,6 +113,83 @@ describes.sandboxed('errors', {}, () => {
       expect(duplicate.stack).to.equal(error.stack);
       expect(duplicate.args).to.equal(error.args);
       expect(duplicate.associatedElement).to.equal(error.associatedElement);
+    });
+  });
+
+  describe('helpers', () => {
+    let reportedError;
+
+    beforeEach(() =>
+      setReportError((e) => {
+        reportedError = e;
+      })
+    );
+
+    describe('devError', () => {
+      it('reuses errors', () => {
+        let error = new Error('test');
+
+        devError('TAG', error);
+        expect(reportedError).to.equal(error);
+        expect(error.message).to.equal('test');
+
+        devError('TAG', 'should fail', 'XYZ', error);
+        expect(reportedError).to.equal(error);
+        expect(error.message).to.equal('should fail XYZ: test');
+
+        // #8917
+        try {
+          // This is an intentionally bad query selector
+          document.body.querySelector('#');
+        } catch (e) {
+          error = e;
+        }
+
+        devError('TAG', error);
+        expect(reportedError).not.to.equal(error);
+        expect(reportedError.message).to.equal(error.message);
+
+        devError('TAG', 'should fail', 'XYZ', error);
+        expect(reportedError).not.to.equal(error);
+        expect(reportedError.message).to.contain('should fail XYZ:');
+      });
+    });
+
+    describe('devExpectedError', () => {
+      it('reuses errors', () => {
+        let error = new Error('test');
+
+        devExpectedError('TAG', error);
+        expect(reportedError).to.equal(error);
+        expect(error.message).to.equal('test');
+
+        devExpectedError('TAG', 'should fail', 'XYZ', error);
+        expect(reportedError).to.equal(error);
+        expect(error.message).to.equal('should fail XYZ: test');
+
+        // #8917
+        try {
+          // This is an intentionally bad query selector
+          document.body.querySelector('#');
+        } catch (e) {
+          error = e;
+        }
+
+        devExpectedError('TAG', error);
+        expect(reportedError).not.to.equal(error);
+        expect(reportedError.message).to.equal(error.message);
+
+        devExpectedError('TAG', 'should fail', 'XYZ', error);
+        expect(reportedError).not.to.equal(error);
+        expect(reportedError.message).to.contain('should fail XYZ:');
+      });
+
+      it('sets `expected` to true', () => {
+        const error = new Error('test');
+
+        devExpectedError('TAG', error);
+        expect(error.expected).to.be.true;
+      });
     });
   });
 });

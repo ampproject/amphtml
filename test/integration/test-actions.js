@@ -1,21 +1,5 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {BrowserController} from '../../testing/test-helper';
-import {poll} from '../../testing/iframe.js';
+import {poll} from '#testing/iframe';
+import {BrowserController} from '#testing/test-helper';
 
 describes.integration(
   'on="..."',
@@ -82,7 +66,7 @@ describes.integration(
             // This is brittle but I don't know how else to stub
             // window navigation.
             const navigationService = win.__AMP_SERVICES.navigation.obj;
-            const navigateTo = window.sandbox.stub(
+            const navigateTo = env.sandbox.stub(
               navigationService,
               'navigateTo'
             );
@@ -95,7 +79,7 @@ describes.integration(
         });
 
       it('AMP.print()', async () => {
-        const print = window.sandbox.stub(win, 'print');
+        const print = env.sandbox.stub(win, 'print');
 
         doc.getElementById('printBtn').click();
         await poll('print() called once', () => print.calledOnce);

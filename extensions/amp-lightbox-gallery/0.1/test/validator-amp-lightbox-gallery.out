@@ -1,25 +1,10 @@
 FAIL
 |  <!--
-|    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-|
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|
-|        http://www.apache.org/licenses/LICENSE-2.0
-|
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    Tests for the amp-lightbox-gallery tag. See inline comments.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">
@@ -42,7 +27,7 @@ FAIL
 |    <!-- Invalid: missing value for lightbox-thumbnail-id -->
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id></amp-img>
 >>   ^~~~~~~~~
-amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:42:2 The attribute 'lightbox-thumbnail-id' in tag 'amp-img' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-img/)
+amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:27:2 The attribute 'lightbox-thumbnail-id' in tag 'amp-img' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-img/)
 |    <!-- Invalid: missing lightbox attribute for element with lightbox-thumbnail-id -->
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox-thumbnail-id="a"></amp-img>
 |
@@ -99,12 +84,12 @@ amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:42:2 The attri
 |    <!-- Invalid: missing value for lightbox-thumbnail-id -->
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id></amp-img>
 >>   ^~~~~~~~~
-amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:97:2 The attribute 'lightbox-thumbnail-id' in tag 'amp-img' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-img/)
+amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:82:2 The attribute 'lightbox-thumbnail-id' in tag 'amp-img' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-img/)
 |    <!-- Invalid: missing lightbox attribute for element with lightbox-thumbnail-id -->
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox-thumbnail-id="a"></amp-img>
 |    <!-- Invalid: invalid use of lightbox-exclude -->
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox-exclude></amp-img>
 >>   ^~~~~~~~~
-amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:101:2 The attribute 'lightbox-exclude' may not appear in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img/)
+amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:86:2 The attribute 'lightbox-exclude' may not appear in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img/)
 |  </body>
 |  </html>

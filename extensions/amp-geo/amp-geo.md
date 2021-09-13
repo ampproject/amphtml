@@ -7,22 +7,6 @@ teaser:
   text: Provides an approximate country-level geolocation interface.
 ---
 
-<!---
-Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-geo
 
 ## Usage
@@ -286,8 +270,8 @@ document is served directly from their origin while retaining dynamic
 configuration when served from a cache.
 
 Caches that wish to pre-render `amp-geo` should
-[open an issue](https://github.com/ampproject/amphtml/issues/new) requesting to
-be removed from the pre-render override.
+[open an issue](https://github.com/ampproject/amphtml/issues/new/choose)
+requesting to be removed from the pre-render override.
 
 ### Self Hosting
 
@@ -315,7 +299,7 @@ security reasons, to prevent sharing of geo-spoofing urls, this feature is only
 available to users who have enabled the
 [Experimental Channel](https://amp.dev/documentation/guides-and-tutorials/learn/experimental)
 or who are testing locally (i.e., `amp-geo.js` is served in development mode via
-[`amp serve`](https://github.com/ampproject/amphtml/blob/main/contributing/DEVELOPING.md)).
+[`amp serve`](https://github.com/ampproject/amphtml/blob/main/docs/developing.md)).
 
 [tip type="note"]
 

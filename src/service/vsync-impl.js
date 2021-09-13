@@ -1,32 +1,19 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Deferred} from '../core/data-structures/promise';
-import {Pass} from '../pass';
-import {Services} from '../services';
+import {Deferred} from '#core/data-structures/promise';
 import {
   addDocumentVisibilityChangeListener,
   isDocumentHidden,
   removeDocumentVisibilityChangeListener,
-} from '../utils/document-visibility';
+} from '#core/document-visibility';
+import {rethrowAsync} from '#core/error';
+
+import {Services} from '#service';
+
+import {installTimerService} from './timer-impl';
+
 import {cancellation} from '../error-reporting';
 import {dev, devAssert} from '../log';
-import {getService, registerServiceBuilder} from '../service';
-import {installTimerService} from './timer-impl';
-import {rethrowAsync} from '../core/error';
+import {Pass} from '../pass';
+import {getService, registerServiceBuilder} from '../service-helpers';
 
 /** @const {time} */
 const FRAME_TIME = 16;
@@ -212,9 +199,11 @@ export class Vsync {
    * @return {function(!VsyncStateDef=)}
    */
   createTask(task) {
-    return /** @type {function(!VsyncStateDef=)} */ ((opt_state) => {
-      this.run(task, opt_state);
-    });
+    return /** @type {function(!VsyncStateDef=)} */ (
+      (opt_state) => {
+        this.run(task, opt_state);
+      }
+    );
   }
 
   /**
@@ -328,9 +317,11 @@ export class Vsync {
    * @return {function(!VsyncStateDef=):boolean}
    */
   createAnimTask(contextNode, task) {
-    return /** @type {function(!VsyncStateDef=):boolean} */ ((opt_state) => {
-      return this.runAnim(contextNode, task, opt_state);
-    });
+    return /** @type {function(!VsyncStateDef=):boolean} */ (
+      (opt_state) => {
+        return this.runAnim(contextNode, task, opt_state);
+      }
+    );
   }
 
   /**
@@ -402,7 +393,7 @@ export class Vsync {
     this.backupPass_.cancel();
     this.scheduled_ = false;
 
-    const {tasks_: tasks, states_: states, nextFrameResolver_: resolver} = this;
+    const {nextFrameResolver_: resolver, states_: states, tasks_: tasks} = this;
     this.nextFrameResolver_ = null;
     this.nextFramePromise_ = null;
     // Double buffering

@@ -1,26 +1,13 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {devAssertElement} from '#core/assert';
+import {getDate} from '#core/types/date';
+import {toWin} from '#core/window';
 
-import * as Preact from '../../../src/preact';
-import {Wrapper} from '../../../src/preact/component';
+import * as Preact from '#preact';
+import {useCallback, useRef, useState} from '#preact';
+import {Wrapper, useIntersectionObserver} from '#preact/component';
+import {useMergeRefs, useResourcesNotify} from '#preact/utils';
+
 import {format, getLocale} from './locales';
-import {getDate} from '../../../src/core/types/date';
-import {toWin} from '../../../src/types';
-import {useEffect, useRef, useState} from '../../../src/preact';
-import {useResourcesNotify} from '../../../src/preact/utils';
 
 /** @const {string} */
 const DEFAULT_LOCALE = 'en_US';
@@ -38,13 +25,13 @@ const DEFAULT_DATETIME_OPTIONS = {
 const DEFAULT_TIME_OPTIONS = {'hour': 'numeric', 'minute': 'numeric'};
 
 /**
- * @param {!TimeagoProps} props
+ * @param {!BentoTimeagoProps} props
  * @return {PreactDef.Renderable}
  */
-export function Timeago({
+export function BentoTimeago({
+  cutoff,
   datetime,
   locale: localeProp,
-  cutoff,
   placeholder,
   ...rest
 }) {
@@ -53,28 +40,26 @@ export function Timeago({
 
   const date = getDate(datetime);
 
-  useEffect(() => {
-    const node = ref.current;
-    const win = node && toWin(node.ownerDocument.defaultView);
-    if (!win) {
-      return undefined;
-    }
-    const observer = new win.IntersectionObserver((entries) => {
+  const ioCallback = useCallback(
+    ({isIntersecting}) => {
+      if (!isIntersecting) {
+        return;
+      }
+      const node = devAssertElement(ref.current);
       let {lang} = node.ownerDocument.documentElement;
+      const win = toWin(node.ownerDocument?.defaultView);
       if (lang === 'unknown') {
         lang = win.navigator?.language || DEFAULT_LOCALE;
       }
       const locale = getLocale(localeProp || lang);
-      const last = entries[entries.length - 1];
-      if (last.isIntersecting) {
-        setTimestamp(
-          getFuzzyTimestampValue(new Date(date), locale, cutoff, placeholder)
-        );
-      }
-    });
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [date, localeProp, cutoff, placeholder]);
+      setTimestamp(
+        getFuzzyTimestampValue(new Date(date), locale, cutoff, placeholder)
+      );
+    },
+    [cutoff, date, localeProp, placeholder]
+  );
+
+  const inObRef = useIntersectionObserver(ioCallback);
 
   useResourcesNotify();
 
@@ -82,7 +67,7 @@ export function Timeago({
     <Wrapper
       {...rest}
       as="time"
-      ref={ref}
+      ref={useMergeRefs([ref, inObRef])}
       datetime={new Date(date).toISOString()}
     >
       {timestamp}

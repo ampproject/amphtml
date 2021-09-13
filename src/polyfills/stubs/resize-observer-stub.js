@@ -1,20 +1,4 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview
  * See https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver
  *
@@ -72,7 +56,9 @@ export function upgradePolyfill(win, installer) {
     const upgrade = (upgrader) => {
       microtask.then(() => upgrader(Polyfill));
     };
-    upgraders.forEach(upgrade);
+    for (const upgrader of upgraders) {
+      upgrade(upgrader);
+    }
     Stub[UPGRADERS] = {'push': upgrade};
   } else {
     // Even if this is not the stub, we still may need to install the polyfill.
@@ -95,7 +81,7 @@ export class ResizeObserverStub {
     /** @private @const {!ResizeObserverCallback} */
     this.callback_ = callback;
 
-    /** @private {?Array<!Element>} */
+    /** @private {!Array<!Element>} */
     this.elements_ = [];
 
     /** @private {?ResizeObserver} */
@@ -144,8 +130,10 @@ export class ResizeObserverStub {
   upgrade_(Ctor) {
     const inst = new Ctor(this.callback_);
     this.inst_ = inst;
-    this.elements_.forEach((e) => inst.observe(e));
-    this.elements_ = null;
+    for (const e of this.elements_) {
+      inst.observe(e);
+    }
+    this.elements_.length = 0;
   }
 }
 

@@ -1,56 +1,42 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {dispatchCustomEvent, waitForChildPromise} from '#core/dom';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {isAutoplaySupported, resetIsAutoplaySupported} from '#core/dom/video';
+import {toArray} from '#core/types/array';
 
-import {PlayingStates, VideoEvents} from '../../src/video-interface';
-import {Services} from '../../src/services';
-import {dispatchCustomEvent} from '../../src/dom';
-import {installVideoManagerForDoc} from '../../src/service/video-manager-impl';
-import {
-  isAutoplaySupported,
-  resetIsAutoplaySupported,
-} from '../../src/utils/video';
-import {isLayoutSizeDefined} from '../../src/layout';
-import {listenOncePromise} from '../../src/event-helper';
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
 import {runVideoPlayerIntegrationTests} from './test-video-players-helper';
-import {toArray} from '../../src/core/types/array';
+
+import {listenOncePromise} from '../../src/event-helper';
+import {PlayingStates, VideoEvents} from '../../src/video-interface';
 
 // TODO(dvoytenko): These tests time out when run with the prod AMP config.
 // See #11588.
-describe.configure().skip('Fake Video PlayerIntegration Tests', () => {
-  // We run the video player integration tests on a fake video player as part
-  // of functional testing. Same tests run on real video players such as
-  // `amp-video` and `amp-youtube` as part of integration testing.
-  runVideoPlayerIntegrationTests((fixture) => {
-    fixture.win.AMP.push({
-      n: 'amp-test-fake-videoplayer',
-      f: function (AMP) {
-        AMP.registerElement(
-          'amp-test-fake-videoplayer',
-          createFakeVideoPlayerClass(fixture.win)
-        );
-      },
+describes.sandboxed
+  .configure()
+  .skip('Fake Video PlayerIntegration Tests', {}, (env) => {
+    // We run the video player integration tests on a fake video player as part
+    // of functional testing. Same tests run on real video players such as
+    // `amp-video` and `amp-youtube` as part of integration testing.
+    runVideoPlayerIntegrationTests(env, (fixture) => {
+      fixture.win.AMP.push({
+        n: 'amp-test-fake-videoplayer',
+        f: function (AMP) {
+          AMP.registerElement(
+            'amp-test-fake-videoplayer',
+            createFakeVideoPlayerClass(fixture.win)
+          );
+        },
+      });
+      return fixture.doc.createElement('amp-test-fake-videoplayer');
     });
-    return fixture.doc.createElement('amp-test-fake-videoplayer');
   });
-});
 
-describe
+describes.sandboxed
   .configure()
   .ifChrome()
-  .run('VideoManager', function () {
+  .run('VideoManager', {}, function () {
     describes.realWin(
       'VideoManager',
       {
@@ -211,25 +197,82 @@ describe
           expect(videoManager.userInteracted(impl)).to.be.false;
         });
 
-        it('autoplay - there should be user interaction if the ad was unmuted', () => {
+        it('autoplay - there should be user interaction if the ad was unmuted', async () => {
           video.setAttribute('autoplay', '');
+
+          const playingPromise = listenOncePromise(video, VideoEvents.PLAYING);
+          const unmutedPromise = listenOncePromise(video, VideoEvents.UNMUTED);
 
           videoManager.register(impl);
           const entry = videoManager.getEntry_(impl);
           entry.isVisible_ = true;
           entry.loaded_ = true;
-          entry.videoVisibilityChanged_();
+          entry.autoplayLoadedVideoVisibilityChanged_();
 
-          return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
-            expect(videoManager.userInteracted(impl)).to.be.false;
+          expect(videoManager.userInteracted(impl)).to.be.false;
 
-            listenOncePromise(video, VideoEvents.UNMUTED).then(() => {
-              expect(videoManager.userInteracted(impl)).to.be.true;
-            });
+          dispatchCustomEvent(video, VideoEvents.AD_START);
 
-            dispatchCustomEvent(video, VideoEvents.AD_START);
-            dispatchCustomEvent(video, VideoEvents.UNMUTED);
+          await playingPromise;
+
+          impl.unmute();
+          await unmutedPromise;
+
+          expect(videoManager.userInteracted(impl)).to.be.true;
+        });
+
+        it('autoplay - hide autoplay elements when PLAYING after AD_START', async () => {
+          video.setAttribute('autoplay', '');
+          video.setAttribute('controls', '');
+
+          const playingPromise = listenOncePromise(video, VideoEvents.PLAYING);
+
+          videoManager.register(impl);
+          const entry = videoManager.getEntry_(impl);
+          entry.isVisible_ = true;
+          entry.loaded_ = true;
+
+          dispatchCustomEvent(video, VideoEvents.AD_START);
+
+          entry.autoplayLoadedVideoVisibilityChanged_();
+
+          await playingPromise;
+
+          let eq, mask;
+          await waitForChildPromise(video, () => {
+            eq = eq || video.querySelector('.amp-video-eq');
+            mask = mask || video.querySelector('.i-amphtml-video-mask');
+            return eq && mask;
           });
+
+          expect(eq).to.have.attribute('hidden');
+          expect(mask).to.have.attribute('hidden');
+        });
+
+        it('autoplay - show autoplay elements when PLAYING', async () => {
+          video.setAttribute('autoplay', '');
+          video.setAttribute('controls', '');
+
+          const playingPromise = listenOncePromise(video, VideoEvents.PLAYING);
+
+          videoManager.register(impl);
+          const entry = videoManager.getEntry_(impl);
+          entry.isVisible_ = true;
+          entry.loaded_ = true;
+
+          entry.autoplayLoadedVideoVisibilityChanged_();
+
+          await playingPromise;
+
+          let eq, mask;
+          await waitForChildPromise(video, () => {
+            eq = eq || video.querySelector('.amp-video-eq');
+            mask = mask || video.querySelector('.i-amphtml-video-mask');
+            return eq && mask;
+          });
+
+          expect(eq).to.not.have.attribute('hidden');
+          expect(mask).to.not.have.attribute('hidden');
         });
 
         it('autoplay - PAUSED if autoplaying and video is outside of view', () => {
@@ -281,10 +324,10 @@ describe
     );
   });
 
-describe
+describes.sandboxed
   .configure()
   .ifChrome()
-  .run('Autoplay support', () => {
+  .run('Autoplay support', {}, (env) => {
     let win;
     let video;
     let createElementSpy;
@@ -316,9 +359,9 @@ describe
 
       win = {document: doc};
 
-      createElementSpy = window.sandbox.spy(doc, 'createElement');
-      setAttributeSpy = window.sandbox.spy(video, 'setAttribute');
-      playStub = window.sandbox.stub(video, 'play');
+      createElementSpy = env.sandbox.spy(doc, 'createElement');
+      setAttributeSpy = env.sandbox.spy(video, 'setAttribute');
+      playStub = env.sandbox.stub(video, 'play');
 
       resetIsAutoplaySupported(win);
     });
@@ -535,6 +578,11 @@ function createFakeVideoPlayerClass(win) {
 
     /** @override */
     preimplementsMediaSessionAPI() {
+      return false;
+    }
+
+    /** @override */
+    preimplementsAutoFullscreen() {
       return false;
     }
 

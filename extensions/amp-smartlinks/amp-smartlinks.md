@@ -7,29 +7,13 @@ teaser:
   text: Run Narrativ's Linkmate process inside your AMP page
 ---
 
-<!---
-Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-smartlinks
 
 ## Overview
 
 At [Narrativ](https://narrativ.com/), we transform static commerce links into dynamic, multimerchant nodes. With a library of millions of products matched to expert reviews from top commerce publishers, we lift publisher revenue through real-time bidding and data solutions.
 
-This AMP extension is our Linkmate service in AMP. See the full documentation for Linkmate [here](http://docs.narrativ.com/en/stable/linkmate.html).
+This AMP extension is our Linkmate service in AMP. See the full documentation for Linkmate [here](https://docs.narrativ.com/en/stable/amp.html).
 
 ## Getting started
 
@@ -41,7 +25,7 @@ In your AMP page you will have to add the following snippets:
 
 ```html
 <!DOCTYPE html>
-<html ⚡>
+<html ⚡ lang="en">
   <head>
     ...
     <meta

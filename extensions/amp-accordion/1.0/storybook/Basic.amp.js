@@ -1,43 +1,24 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../../src/preact';
-import {boolean, withKnobs} from '@storybook/addon-knobs';
 import {withAmp} from '@ampproject/storybook-addon';
+
+import * as Preact from '#preact';
 
 export default {
   title: 'amp-accordion-1_0',
-  decorators: [withKnobs, withAmp],
-
+  decorators: [withAmp],
   parameters: {
     extensions: [{name: 'amp-accordion', version: '1.0'}],
     experiments: ['bento'],
   },
+  args: {
+    'expand-single-section': false,
+    animate: false,
+  },
 };
 
-export const _default = () => {
-  const expandSingleSection = boolean('expandSingleSection', false);
-  const animate = boolean('animate', false);
+export const _default = (args) => {
   return (
     <main>
-      <amp-accordion
-        id="accordion"
-        expand-single-section={expandSingleSection}
-        animate={animate}
-      >
+      <amp-accordion style={{background: 'red'}} id="accordion" {...args}>
         <section id="section1">
           <h2>Section 1</h2>
           <div>Puppies are cute.</div>
@@ -70,16 +51,10 @@ export const _default = () => {
   );
 };
 
-export const events = () => {
-  const expandSingleSection = boolean('expandSingleSection', false);
-  const animate = boolean('animate', false);
+export const events = (args) => {
   return (
     <main>
-      <amp-accordion
-        id="accordion"
-        expand-single-section={expandSingleSection}
-        animate={animate}
-      >
+      <amp-accordion id="accordion" {...args}>
         <section id="section1">
           <h2>Section 1</h2>
           <div>Puppies are cute.</div>

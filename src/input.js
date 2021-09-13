@@ -1,24 +1,10 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Observable} from '#core/data-structures/observable';
 
-import {Observable} from './core/data-structures/observable';
-import {Services} from './services';
-import {dev} from './log';
+import {Services} from '#service';
+
 import {listenOnce, listenOncePromise} from './event-helper';
-import {registerServiceBuilder} from './service';
+import {dev} from './log';
+import {registerServiceBuilder} from './service-helpers';
 
 const TAG_ = 'Input';
 
@@ -84,15 +70,15 @@ export class Input {
     // mouse events.
     if (this.hasTouch_) {
       this.hasMouse_ = !this.hasTouch_;
-      this.boundOnMouseMove_ = /** @type {function(!Event)} */ (this.onMouseMove_.bind(
-        this
-      ));
+      this.boundOnMouseMove_ = /** @type {function(!Event)} */ (
+        this.onMouseMove_.bind(this)
+      );
       listenOnce(win.document, 'mousemove', this.boundOnMouseMove_);
     }
   }
 
   /**
-   * See https://github.com/ampproject/amphtml/blob/main/spec/amp-css-classes.md#input-mode-classes
+   * See https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-css-classes.md#input-mode-classes
    * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    */
   setupInputModeClasses(ampdoc) {

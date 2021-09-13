@@ -1,33 +1,20 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as WorkerDOM from '@ampproject/worker-dom/dist/amp-production/main.mjs';
+
+import {Services} from '#service';
+
+import {FakeWindow} from '#testing/fake-dom';
+
+import {user} from '../../../../../src/log';
+import {
+  registerServiceBuilderForDoc,
+  resetServiceForTesting,
+} from '../../../../../src/service-helpers';
 import {
   AmpScript,
   AmpScriptService,
   SanitizerImpl,
   StorageLocation,
 } from '../../amp-script';
-import {FakeWindow} from '../../../../../testing/fake-dom';
-import {Services} from '../../../../../src/services';
-import {
-  registerServiceBuilderForDoc,
-  resetServiceForTesting,
-} from '../../../../../src/service';
-import {user} from '../../../../../src/log';
 
 describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
   let element;
@@ -339,7 +326,7 @@ describes.repeated(
   }
 );
 
-describe('SanitizerImpl', () => {
+describes.sandboxed('SanitizerImpl', {}, (env) => {
   let el;
   let win;
   let s;
@@ -349,7 +336,7 @@ describe('SanitizerImpl', () => {
     win = new FakeWindow();
     el = win.document.createElement('div');
 
-    getSanitizer = ({byUserGesture, byFixedSize}) =>
+    getSanitizer = ({byFixedSize, byUserGesture}) =>
       new SanitizerImpl(
         {
           win,
@@ -543,11 +530,11 @@ describe('SanitizerImpl', () => {
 
     beforeEach(() => {
       bind = {
-        getStateValue: window.sandbox.stub(),
-        setState: window.sandbox.stub(),
-        constrain: window.sandbox.stub(),
+        getStateValue: env.sandbox.stub(),
+        setState: env.sandbox.stub(),
+        constrain: env.sandbox.stub(),
       };
-      window.sandbox.stub(Services, 'bindForDocOrNull').resolves(bind);
+      env.sandbox.stub(Services, 'bindForDocOrNull').resolves(bind);
     });
 
     it('AMP.setState(json), without user interaction', async () => {

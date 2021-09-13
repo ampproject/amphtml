@@ -1,45 +1,32 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as cookie from '../../src/cookies';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import * as url from '../../src/url';
-import {Crypto, installCryptoService} from '../../src/service/crypto-impl';
-import {Services} from '../../src/services';
+
+import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
 import {
   cidServiceForDocForTesting,
   getProxySourceOrigin,
   isOptedOutOfCid,
   optOutOfCid,
-} from '../../src/service/cid-impl';
-import {getCookie, setCookie} from '../../src/cookies';
+} from '#service/cid-impl';
+import {Crypto, installCryptoService} from '#service/crypto-impl';
+import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
+import {installExtensionsService} from '#service/extensions-impl';
+import {installPlatformService} from '#service/platform-impl';
+import {installTimerService} from '#service/timer-impl';
+import {installViewerServiceForDoc} from '#service/viewer-impl';
+
+import {macroTask} from '#testing/helpers';
+import {stubServiceForDoc} from '#testing/test-helper';
+
 import {installCryptoPolyfill} from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
-import {installExtensionsService} from '../../src/service/extensions-impl';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installTimerService} from '../../src/service/timer-impl';
-import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
-import {macroTask} from '../../testing/yield';
-import {parseUrlDeprecated} from '../../src/url';
+import {getCookie, setCookie} from '../../src/cookies';
+import * as cookie from '../../src/cookies';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../src/service';
-import {stubServiceForDoc} from '../../testing/test-helper';
+} from '../../src/service-helpers';
+import {parseUrlDeprecated} from '../../src/url';
+import * as url from '../../src/url';
 
 const DAY = 24 * 3600 * 1000;
 
@@ -803,7 +790,7 @@ describes.sandboxed('cid', {}, (env) => {
   }
 });
 
-describe('getProxySourceOrigin', () => {
+describes.sandboxed('getProxySourceOrigin', {}, () => {
   it('should fail on non-proxy origin', () => {
     allowConsoleError(() => {
       expect(() => {

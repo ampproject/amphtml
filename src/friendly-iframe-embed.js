@@ -1,57 +1,45 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {CommonSignals} from './core/constants/common-signals';
-import {Deferred} from './core/data-structures/promise';
-import {FIE_EMBED_PROP} from './iframe-helper';
-import {Services} from './services';
-import {Signals} from './core/data-structures/signals';
-import {VisibilityState} from './core/constants/visibility-state';
-import {cssText as ampSharedCss} from '../build/ampshared.css';
-import {dev, devAssert, userAssert} from './log';
-import {
-  disposeServicesForEmbed,
-  getTopWindow,
-  setParentWindow,
-} from './service';
-import {escapeHtml} from './dom';
-import {getMode} from './mode';
-import {install as installAbortController} from './polyfills/abort-controller';
-import {installAmpdocServicesForEmbed} from './service/core-services';
-import {install as installCustomElements} from './polyfills/custom-elements';
-import {install as installDOMTokenList} from './polyfills/domtokenlist';
-import {install as installDocContains} from './polyfills/document-contains';
-import {installForChildWin as installIntersectionObserver} from './polyfills/intersection-observer';
-import {installForChildWin as installResizeObserver} from './polyfills/resize-observer';
-import {installStylesForDoc} from './style-installer';
-import {installTimerInEmbedWindow} from './service/timer-impl';
-import {isDocumentReady} from './document-ready';
-import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
-import {loadPromise} from './event-helper';
+import {CommonSignals} from '#core/constants/common-signals';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {Deferred} from '#core/data-structures/promise';
+import {Signals} from '#core/data-structures/signals';
+import {isDocumentReady} from '#core/document-ready';
+import {escapeHtml} from '#core/dom';
+import {layoutRectLtwh, moveLayoutRect} from '#core/dom/layout/rect';
 import {
   px,
   resetStyles,
   setImportantStyles,
   setStyle,
   setStyles,
-} from './style';
-import {rethrowAsync} from './core/error';
-import {toWin} from './types';
+} from '#core/dom/style';
+import {rethrowAsync} from '#core/error';
+import * as mode from '#core/mode';
+import {toWin} from '#core/window';
+
+import {install as installAbortController} from '#polyfills/abort-controller';
+import {install as installCustomElements} from '#polyfills/custom-elements';
+import {install as installDocContains} from '#polyfills/document-contains';
+import {installForChildWin as installIntersectionObserver} from '#polyfills/intersection-observer';
+import {installForChildWin as installResizeObserver} from '#polyfills/resize-observer';
+
+import {Services} from '#service';
+import {installAmpdocServicesForEmbed} from '#service/core-services';
+import {installTimerInEmbedWindow} from '#service/timer-impl';
+
 import {urls} from './config';
+import {loadPromise} from './event-helper';
+import {FIE_EMBED_PROP} from './iframe-helper';
 import {whenContentIniLoad} from './ini-load';
+import {dev, devAssert, userAssert} from './log';
+import {getMode} from './mode';
+import {
+  disposeServicesForEmbed,
+  getTopWindow,
+  setParentWindow,
+} from './service-helpers';
+import {installStylesForDoc} from './style-installer';
+
+import {cssText as ampSharedCss} from '../build/ampshared.css';
 
 /**
  * Parameters used to create the new "friendly iframe" embed.
@@ -557,9 +545,9 @@ export class FriendlyIframeEmbed {
    * @visibleForTesting
    */
   getBodyElement() {
-    return /** @type {!HTMLBodyElement} */ ((
-      this.iframe.contentDocument || this.iframe.contentWindow.document
-    ).body);
+    return /** @type {!HTMLBodyElement} */ (
+      (this.iframe.contentDocument || this.iframe.contentWindow.document).body
+    );
   }
 
   /**
@@ -618,7 +606,7 @@ export class FriendlyIframeEmbed {
 
         // Offset by scroll top as iframe will be position: fixed.
         const dy = -Services.viewportForDoc(this.iframe).getScrollTop();
-        const {top, left, width, height} = moveLayoutRect(rect, /* dx */ 0, dy);
+        const {height, left, top, width} = moveLayoutRect(rect, /* dx */ 0, dy);
 
         // Offset body by header height to prevent visual jump.
         bodyStyle = {
@@ -695,9 +683,8 @@ export class FriendlyIframeEmbed {
  * @param {!Window} childWin
  */
 function installPolyfillsInChildWindow(parentWin, childWin) {
-  if (!IS_ESM) {
+  if (!mode.isEsm()) {
     installDocContains(childWin);
-    installDOMTokenList(childWin);
   }
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
@@ -746,7 +733,7 @@ export class Installers {
       })
       .then(getDelayPromise)
       .then(() => {
-        if (IS_ESM) {
+        if (mode.isEsm()) {
           // TODO: This is combined (ampdoc + shared), not just shared
           // const css = parentWin.document.querySelector('style[amp-runtime]')
           // .textContent;

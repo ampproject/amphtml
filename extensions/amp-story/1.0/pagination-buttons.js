@@ -1,45 +1,22 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {
   Action,
   StateProperty,
-  UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
-import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {EventType, dispatch} from './events';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
+import {LocalizedStringId} from '#service/localization/strings';
+import {Services} from '#service';
 import {dev, devAssert} from '../../../src/log';
 
 import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '#core/dom/static-template';
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
 let ButtonState_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
 
 /** @const {!Object<string, !ButtonState_1_0_Def>} */
 const BackButtonStates = {
-  CLOSE_BOOKEND: {
-    className: 'i-amphtml-story-back-close-bookend',
-    action: Action.TOGGLE_BOOKEND,
-    data: false,
-    label: LocalizedStringId.AMP_STORY_CLOSE_BOOKEND,
-  },
   HIDDEN: {className: 'i-amphtml-story-button-hidden'},
   PREVIOUS_PAGE: {
     className: 'i-amphtml-story-back-prev',
@@ -66,12 +43,6 @@ const ForwardButtonStates = {
     triggers: EventType.REPLAY,
     label: LocalizedStringId.AMP_STORY_REPLAY,
   },
-  SHOW_BOOKEND: {
-    className: 'i-amphtml-story-fwd-more',
-    action: Action.TOGGLE_BOOKEND,
-    data: true,
-    label: LocalizedStringId.AMP_STORY_SHOW_BOOKEND,
-  },
 };
 
 /**
@@ -83,20 +54,6 @@ const buildPaginationButton = (element) =>
       <div class="i-amphtml-story-button-container">
         <button class="i-amphtml-story-button-move"></button>
       </div>`;
-
-/**
- * @param {!Element} hoverEl
- * @param {!Element} targetEl
- * @param {string} className
- * @return {?Array<function(!Event)>}
- */
-function setClassOnHover(hoverEl, targetEl, className) {
-  const enterListener = () => targetEl.classList.add(className);
-  const exitListener = () => targetEl.classList.remove(className);
-  hoverEl.addEventListener('mouseenter', enterListener);
-  hoverEl.addEventListener('mouseleave', exitListener);
-  return [enterListener, exitListener];
-}
 
 /**
  * Desktop navigation buttons.
@@ -229,9 +186,6 @@ export class PaginationButtons {
     /** @private {?ButtonState_1_0_Def} */
     this.forwardButtonStateToRestore_ = null;
 
-    /** @private {?Array<function(!Event)>} */
-    this.hoverListeners_ = null;
-
     this.initializeListeners_();
 
     this.ampStory_.element.appendChild(this.forwardButton_.element);
@@ -239,32 +193,7 @@ export class PaginationButtons {
   }
 
   /** @private */
-  addHoverListeners_() {
-    if (this.hoverListeners_) {
-      return;
-    }
-
-    const forwardButtonListeners = setClassOnHover(
-      this.forwardButton_.element,
-      this.ampStory_.element,
-      'i-amphtml-story-next-hover'
-    );
-
-    const backButtonListeners = setClassOnHover(
-      this.backButton_.element,
-      this.ampStory_.element,
-      'i-amphtml-story-prev-hover'
-    );
-
-    this.hoverListeners_ = forwardButtonListeners.concat(backButtonListeners);
-  }
-
-  /** @private */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
-      this.onBookendStateUpdate_(isActive);
-    });
-
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_INDEX,
       (pageIndex) => {
@@ -275,18 +204,10 @@ export class PaginationButtons {
     this.storeService_.subscribe(
       StateProperty.PAGE_IDS,
       () => {
-        // Since onCurrentPageIndexUpdate_ uses this.hasBookend, and the bookend
-        // isn't initialized until after the story is laid out, we wait for the
-        // story to be laid out before calling this function.
-        this.ampStory_.element
-          .signals()
-          .whenSignal(CommonSignals.LOAD_END)
-          .then(() => {
-            const currentPageIndex = Number(
-              this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX)
-            );
-            this.onCurrentPageIndexUpdate_(currentPageIndex);
-          });
+        const currentPageIndex = Number(
+          this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX)
+        );
+        this.onCurrentPageIndexUpdate_(currentPageIndex);
       },
       true /** callToInitialize */
     );
@@ -297,28 +218,6 @@ export class PaginationButtons {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
     );
-
-    this.storeService_.subscribe(
-      StateProperty.UI_STATE,
-      (uiState) => {
-        this.onUIStateUpdate_(uiState);
-      },
-      true /** callToInitialize */
-    );
-  }
-
-  /**
-   * @param {boolean} isActive
-   * @private
-   */
-  onBookendStateUpdate_(isActive) {
-    if (isActive) {
-      this.backButton_.updateState(BackButtonStates.CLOSE_BOOKEND);
-      this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
-    } else {
-      this.backButton_.updateState(BackButtonStates.PREVIOUS_PAGE);
-      this.forwardButton_.updateState(ForwardButtonStates.SHOW_BOOKEND);
-    }
   }
 
   /**
@@ -327,13 +226,12 @@ export class PaginationButtons {
    */
   onCurrentPageIndexUpdate_(pageIndex) {
     const totalPages = this.storeService_.get(StateProperty.PAGE_IDS).length;
-    const bookendActive = this.storeService_.get(StateProperty.BOOKEND_STATE);
 
     if (pageIndex === 0) {
       this.backButton_.updateState(BackButtonStates.HIDDEN);
     }
 
-    if (pageIndex > 0 && !bookendActive) {
+    if (pageIndex > 0) {
       this.backButton_.updateState(BackButtonStates.PREVIOUS_PAGE);
     }
 
@@ -341,21 +239,13 @@ export class PaginationButtons {
       this.forwardButton_.updateState(ForwardButtonStates.NEXT_PAGE);
     }
 
-    if (pageIndex === totalPages - 1 && !bookendActive) {
-      this.forwardButton_.updateState(ForwardButtonStates.SHOW_BOOKEND);
-    }
-
     if (pageIndex === totalPages - 1) {
-      this.ampStory_.hasBookend().then((hasBookend) => {
-        const viewer = Services.viewerForDoc(this.ampStory_.element);
-        if (!hasBookend) {
-          if (viewer.hasCapability('swipe')) {
-            this.forwardButton_.updateState(ForwardButtonStates.NEXT_STORY);
-          } else {
-            this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
-          }
-        }
-      });
+      const viewer = Services.viewerForDoc(this.ampStory_.element);
+      if (viewer.hasCapability('swipe')) {
+        this.forwardButton_.updateState(ForwardButtonStates.NEXT_STORY);
+      } else {
+        this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
+      }
     }
   }
 
@@ -367,34 +257,20 @@ export class PaginationButtons {
   onSystemUiIsVisibleStateUpdate_(isVisible) {
     if (isVisible) {
       this.backButton_.updateState(
-        /** @type {!ButtonState_1_0_Def} */ (devAssert(
-          this.backButtonStateToRestore_
-        ))
+        /** @type {!ButtonState_1_0_Def} */ (
+          devAssert(this.backButtonStateToRestore_)
+        )
       );
       this.forwardButton_.updateState(
-        /** @type {!ButtonState_1_0_Def} */ (devAssert(
-          this.forwardButtonStateToRestore_
-        ))
+        /** @type {!ButtonState_1_0_Def} */ (
+          devAssert(this.forwardButtonStateToRestore_)
+        )
       );
     } else {
       this.backButtonStateToRestore_ = this.backButton_.getState();
       this.backButton_.updateState(BackButtonStates.HIDDEN);
       this.forwardButtonStateToRestore_ = this.forwardButton_.getState();
       this.forwardButton_.updateState(ForwardButtonStates.HIDDEN);
-    }
-  }
-
-  /**
-   * Reacts to UI state updates.
-   * @param {!UIType} uiState
-   * @private
-   */
-  onUIStateUpdate_(uiState) {
-    if (
-      uiState === UIType.DESKTOP_PANELS ||
-      uiState === UIType.DESKTOP_FULLBLEED
-    ) {
-      this.addHoverListeners_();
     }
   }
 }

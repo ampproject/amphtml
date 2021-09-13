@@ -1,24 +1,8 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-const debounce = require('debounce');
-const globby = require('globby');
-const {compileJsWithEsbuild} = require('./helpers');
+const debounce = require('../common/debounce');
+const fastGlob = require('fast-glob');
+const {cyan, red} = require('../common/colors');
 const {endBuildStep} = require('./helpers');
-const {red, cyan} = require('kleur/colors');
+const {esbuildCompile} = require('./helpers');
 const {VERSION} = require('../compile/internal-version');
 const {watchDebounceDelay} = require('./helpers');
 const {watch} = require('chokidar');
@@ -50,7 +34,7 @@ async function buildVendorConfigs(options) {
 
   await Promise.all(
     Object.values(bundles).map((bundle) =>
-      compileJsWithEsbuild(
+      esbuildCompile(
         bundle.srcDir,
         bundle.srcFilename,
         options.minify ? bundle.minifiedDestDir : bundle.destDir,
@@ -78,7 +62,7 @@ async function buildVendorConfigs(options) {
 async function doBuild3pVendor(jsBundles, name, options) {
   const target = jsBundles[name];
   if (target) {
-    return compileJsWithEsbuild(
+    return esbuildCompile(
       target.srcDir,
       target.srcFilename,
       options.minify ? target.minifiedDestDir : target.destDir,
@@ -120,7 +104,7 @@ function generateBundles() {
  * @return {!Array<string>}
  */
 function listVendors() {
-  const filesToBuild = globby.sync(SRCPATH);
+  const filesToBuild = fastGlob.sync(SRCPATH);
   const srcMatcher = /^3p\/vendors\/(.*)\.js/;
   const results = [];
 

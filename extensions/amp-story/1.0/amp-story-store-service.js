@@ -1,26 +1,10 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {EmbedMode, parseEmbedMode} from './embed-mode';
-import {Observable} from '../../../src/core/data-structures/observable';
-import {Services} from '../../../src/services';
-import {deepEquals} from '../../../src/json';
+import {Observable} from '#core/data-structures/observable';
+import {Services} from '#service';
+import {deepEquals} from '#core/types/object/json';
 import {dev} from '../../../src/log';
-import {hasOwn} from '../../../src/core/types/object';
-import {registerServiceBuilder} from '../../../src/service';
+import {hasOwn} from '#core/types/object';
+import {registerServiceBuilder} from '../../../src/service-helpers';
 
 /** @type {string} */
 const TAG = 'amp-story';
@@ -51,8 +35,8 @@ export const getStoreService = (win) => {
  */
 export const UIType = {
   MOBILE: 0,
-  DESKTOP_PANELS: 1, // Default desktop UI.
   DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
+  DESKTOP_ONE_PANEL: 4, // Desktop UI with one panel and space around story.
   VERTICAL: 3, // Vertical scrolling versions, for search engine bots indexing.
 };
 
@@ -88,19 +72,18 @@ export let InteractiveReactData;
 /**
  * @typedef {{
  *    canInsertAutomaticAd: boolean,
- *    canShowBookend: boolean,
  *    canShowAudioUi: boolean,
  *    canShowNavigationOverlayHint: boolean,
  *    canShowPaginationButtons: boolean,
  *    canShowPreviousPageHelp: boolean,
  *    canShowSharingUis: boolean,
+ *    canShowStoryUrlInfo: boolean,
  *    canShowSystemLayerButtons: boolean,
  *    viewerCustomControls: !Array<!Object>,
  *    accessState: boolean,
  *    adState: boolean,
  *    pageAttachmentState: boolean,
  *    affiliateLinkState: !Element,
- *    bookendState: boolean,
  *    desktopState: boolean,
  *    educationState: boolean,
  *    gyroscopeEnabledState: string,
@@ -140,12 +123,12 @@ export let State;
 export const StateProperty = {
   // Embed options.
   CAN_INSERT_AUTOMATIC_AD: 'canInsertAutomaticAd',
-  CAN_SHOW_BOOKEND: 'canShowBookend',
   CAN_SHOW_AUDIO_UI: 'canShowAudioUi',
   CAN_SHOW_NAVIGATION_OVERLAY_HINT: 'canShowNavigationOverlayHint',
   CAN_SHOW_PAGINATION_BUTTONS: 'canShowPaginationButtons',
   CAN_SHOW_PREVIOUS_PAGE_HELP: 'canShowPreviousPageHelp',
   CAN_SHOW_SHARING_UIS: 'canShowSharingUis',
+  CAN_SHOW_STORY_URL_INFO: 'canShowStoryUrlInfo',
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canShowSystemLayerButtons',
   VIEWER_CUSTOM_CONTROLS: 'viewerCustomControls',
 
@@ -153,9 +136,7 @@ export const StateProperty = {
   ACCESS_STATE: 'accessState', // amp-access paywall.
   AD_STATE: 'adState',
   PAGE_ATTACHMENT_STATE: 'pageAttachmentState',
-  BOOKEND_STATE: 'bookendState',
   AFFILIATE_LINK_STATE: 'affiliateLinkState',
-  DESKTOP_STATE: 'desktopState',
   EDUCATION_STATE: 'educationState',
   GYROSCOPE_PERMISSION_STATE: 'gyroscopePermissionState',
   HAS_SIDEBAR_STATE: 'hasSidebarState',
@@ -183,7 +164,6 @@ export const StateProperty = {
   STORY_HAS_PLAYBACK_UI_STATE: 'storyHasPlaybackUiState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
   UI_STATE: 'uiState',
-  VIEWPORT_WARNING_STATE: 'viewportWarningState',
 
   // App data.
   ACTIONS_ALLOWLIST: 'actionsAllowlist',
@@ -209,8 +189,6 @@ export const Action = {
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_AFFILIATE_LINK: 'toggleAffiliateLink',
-  TOGGLE_BOOKEND: 'toggleBookend',
-  TOGGLE_CAN_SHOW_BOOKEND: 'toggleCanShowBookend',
   TOGGLE_EDUCATION: 'toggleEducation',
   TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
@@ -231,7 +209,6 @@ export const Action = {
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
   SET_GYROSCOPE_PERMISSION: 'setGyroscopePermission',
-  TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
   ADD_NEW_PAGE_ID: 'addNewPageId',
   SET_PAGE_SIZE: 'updatePageSize',
   ADD_PANNING_MEDIA_STATE: 'addPanningMediaState',
@@ -333,21 +310,6 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.AFFILIATE_LINK_STATE]: data,
       });
-    // Shows or hides the bookend.
-    case Action.TOGGLE_BOOKEND:
-      if (!state[StateProperty.CAN_SHOW_BOOKEND]) {
-        return state;
-      }
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.BOOKEND_STATE]: !!data,
-        [StateProperty.PAUSED_STATE]: !!data,
-      });
-    case Action.TOGGLE_CAN_SHOW_BOOKEND:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.CAN_SHOW_BOOKEND]: !!data,
-      });
     case Action.TOGGLE_EDUCATION:
       return /** @type {!State} */ ({
         ...state,
@@ -361,8 +323,7 @@ const actions = (state, action, data) => {
           data.state === EmbeddedComponentState.EXPANDED ||
           data.state === EmbeddedComponentState.FOCUSED,
         [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]:
-          data.state !== EmbeddedComponentState.EXPANDED ||
-          state.uiState === UIType.DESKTOP_PANELS,
+          data.state !== EmbeddedComponentState.EXPANDED,
         [StateProperty.INTERACTIVE_COMPONENT_STATE]: data,
       });
     // Shows or hides the info dialog.
@@ -461,18 +422,12 @@ const actions = (state, action, data) => {
       }
       return /** @type {!State} */ ({
         ...state,
-        [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP_PANELS,
         [StateProperty.UI_STATE]: data,
       });
     case Action.SET_GYROSCOPE_PERMISSION:
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.GYROSCOPE_PERMISSION_STATE]: data,
-      });
-    case Action.TOGGLE_VIEWPORT_WARNING:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.VIEWPORT_WARNING_STATE]: !!data,
       });
     case Action.SET_CONSENT_ID:
       return /** @type {!State} */ ({
@@ -605,19 +560,17 @@ export class AmpStoryStoreService {
     // properties, so we have to force the type.
     return /** @type {!State} */ ({
       [StateProperty.CAN_INSERT_AUTOMATIC_AD]: true,
-      [StateProperty.CAN_SHOW_BOOKEND]: true,
       [StateProperty.CAN_SHOW_AUDIO_UI]: true,
       [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: true,
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
       [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: true,
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
+      [StateProperty.CAN_SHOW_STORY_URL_INFO]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.VIEWER_CUSTOM_CONTROLS]: [],
       [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
       [StateProperty.AFFILIATE_LINK_STATE]: null,
-      [StateProperty.BOOKEND_STATE]: false,
-      [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.EDUCATION_STATE]: false,
       [StateProperty.GYROSCOPE_PERMISSION_STATE]: '',
       [StateProperty.HAS_SIDEBAR_STATE]: false,
@@ -642,7 +595,6 @@ export class AmpStoryStoreService {
       [StateProperty.STORY_HAS_PLAYBACK_UI_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
       [StateProperty.UI_STATE]: UIType.MOBILE,
-      [StateProperty.VIEWPORT_WARNING_STATE]: false,
       // amp-story only allows actions on a case-by-case basis to preserve UX
       // behaviors. By default, no actions are allowed.
       [StateProperty.ACTIONS_ALLOWLIST]: [],
@@ -670,7 +622,6 @@ export class AmpStoryStoreService {
       case EmbedMode.NAME_TBD:
         return {
           [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
-          [StateProperty.CAN_SHOW_BOOKEND]: false,
           [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
           [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: false,
           [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
@@ -685,7 +636,6 @@ export class AmpStoryStoreService {
         return {
           [StateProperty.PREVIEW_STATE]: true,
           [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
-          [StateProperty.CAN_SHOW_BOOKEND]: false,
           [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
           [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: false,
           [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
@@ -695,6 +645,7 @@ export class AmpStoryStoreService {
         return {
           [StateProperty.CAN_SHOW_AUDIO_UI]: false,
           [StateProperty.CAN_SHOW_SHARING_UIS]: false,
+          [StateProperty.CAN_SHOW_STORY_URL_INFO]: false,
         };
       default:
         return {};

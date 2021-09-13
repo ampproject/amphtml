@@ -1,20 +1,4 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {jsonConfiguration} from '../../../src/json';
+import {jsonConfiguration} from '#core/types/object/json';
 
 // TODO(zhouyx@: Rename file and object name)
 const defaultConfig = jsonConfiguration({
@@ -76,6 +60,11 @@ const defaultConfig = jsonConfiguration({
     'scrollLeft': 'SCROLL_LEFT',
     'scrollTop': 'SCROLL_TOP',
     'scrollWidth': 'SCROLL_WIDTH',
+    'sessionId': 'SESSION_ID',
+    'sessionCount': 'SESSION_COUNT',
+    'sessionEngaged': 'SESSION_ENGAGED',
+    'sessionEventTimestamp': 'SESSION_EVENT_TIMESTAMP',
+    'sessionTimestamp': 'SESSION_TIMESTAMP',
     'serverResponseTime': 'SERVER_RESPONSE_TIME',
     'sourceHost': 'SOURCE_HOST',
     'sourceHostname': 'SOURCE_HOSTNAME',
@@ -87,6 +76,7 @@ const defaultConfig = jsonConfiguration({
     'timezoneCode': 'TIMEZONE_CODE',
     'title': 'TITLE',
     'totalEngagedTime': 'TOTAL_ENGAGED_TIME',
+    'uach': 'UACH',
     'userAgent': 'USER_AGENT',
     'viewer': 'VIEWER',
     'viewportHeight': 'VIEWPORT_HEIGHT',

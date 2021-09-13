@@ -1,30 +1,16 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Deferred, tryResolve} from '#core/data-structures/promise';
+import {dict, map} from '#core/types/object';
+import {getHistoryState} from '#core/window/history';
 
-import {Deferred, tryResolve} from '../core/data-structures/promise';
-import {Services} from '../services';
+import {Services} from '#service';
+
 import {dev, devAssert} from '../log';
-import {dict, map} from '../core/types/object';
 import {getMode} from '../mode';
 import {
   getService,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
-} from '../service';
-import {getState} from '../history';
+} from '../service-helpers';
 
 /** @private @const {string} */
 const TAG_ = 'History';
@@ -247,7 +233,7 @@ export class History {
    */
   enque_(callback, name) {
     const deferred = new Deferred();
-    const {promise, resolve, reject} = deferred;
+    const {promise, reject, resolve} = deferred;
 
     // TODO(dvoytenko, #8785): cleanup after tracing.
     const trace = new Error('history trace for ' + name + ': ');
@@ -390,7 +376,7 @@ export class HistoryBindingNatural_ {
 
     /** @private {number} */
     this.startIndex_ = history.length - 1;
-    const state = getState(history);
+    const state = getHistoryState(history);
     if (state && state[HISTORY_PROP_] !== undefined) {
       this.startIndex_ = Math.min(state[HISTORY_PROP_], this.startIndex_);
     }
@@ -651,7 +637,7 @@ export class HistoryBindingNatural_ {
   /** @private */
   getState_() {
     if (this.supportsState_) {
-      return getState(this.win.history);
+      return getHistoryState(this.win.history);
     }
     return this.unsupportedState_;
   }
@@ -684,7 +670,7 @@ export class HistoryBindingNatural_ {
   wait_() {
     this.assertReady_();
     const deferred = new Deferred();
-    const {resolve, reject} = deferred;
+    const {reject, resolve} = deferred;
     const promise = this.timer_.timeoutPromise(500, deferred.promise);
     this.waitingState_ = {promise, resolve, reject};
     return promise;
@@ -965,9 +951,11 @@ export class HistoryBindingVirtual_ {
     return this.viewer_
       .sendMessageAwaitResponse(pop, message)
       .then((response) => {
-        const fallbackState = /** @type {!HistoryStateDef} */ (dict({
-          'stackIndex': this.stackIndex_ - 1,
-        }));
+        const fallbackState = /** @type {!HistoryStateDef} */ (
+          dict({
+            'stackIndex': this.stackIndex_ - 1,
+          })
+        );
         const newState = this.toHistoryState_(response, fallbackState, pop);
         this.updateHistoryState_(newState);
         return newState;
@@ -987,9 +975,11 @@ export class HistoryBindingVirtual_ {
       if (!this.viewer_.hasCapability('fullReplaceHistory')) {
         // Full URL replacement requested, but not supported by the viewer.
         // Don't update, and return the current state.
-        const curState = /** @type {!HistoryStateDef} */ (dict({
-          'stackIndex': this.stackIndex_,
-        }));
+        const curState = /** @type {!HistoryStateDef} */ (
+          dict({
+            'stackIndex': this.stackIndex_,
+          })
+        );
         return Promise.resolve(curState);
       }
 
@@ -1107,11 +1097,13 @@ export class HistoryBindingVirtual_ {
     if (!this.viewer_.hasCapability('fragment')) {
       return Promise.resolve();
     }
-    return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
-      'replaceHistory',
-      dict({'fragment': fragment}),
-      /* cancelUnsent */ true
-    ));
+    return /** @type {!Promise} */ (
+      this.viewer_.sendMessageAwaitResponse(
+        'replaceHistory',
+        dict({'fragment': fragment}),
+        /* cancelUnsent */ true
+      )
+    );
   }
 }
 

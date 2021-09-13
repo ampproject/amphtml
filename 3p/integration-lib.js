@@ -1,35 +1,21 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import * as mode from '#core/mode';
+import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
+import {endsWith} from '#core/types/string';
 
+import {run, setExperimentToggles} from './3p';
 import {IntegrationAmpContext} from './ampcontext-integration';
-import {dict} from '../src/core/types/object';
-import {endsWith} from '../src/core/types/string';
+import {installEmbedStateListener, manageWin} from './environment';
 import {getAmpConfig, getEmbedType, getLocation} from './frame-metadata';
-import {getSourceUrl, isProxyOrigin, parseUrlDeprecated} from '../src/url';
+
+import {urls} from '../src/config';
 import {
   initLogConstructor,
   isUserErrorMessage,
   setReportError,
   userAssert,
 } from '../src/log';
-import {installEmbedStateListener, manageWin} from './environment';
-import {internalRuntimeVersion} from '../src/internal-version';
-import {parseJson} from '../src/json';
-import {run, setExperimentToggles} from './3p';
-import {urls} from '../src/config';
+import {getSourceUrl, isProxyOrigin, parseUrlDeprecated} from '../src/url';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -47,6 +33,7 @@ const AMP_EMBED_ALLOWED = {
   epeex: true,
   firstimpression: true,
   forkmedia: true,
+  gecko: true,
   glomex: true,
   idealmedia: true,
   insticator: true,
@@ -78,6 +65,7 @@ const AMP_EMBED_ALLOWED = {
   svknative: true,
   taboola: true,
   temedya: true,
+  trafficstars: true,
   vlyby: true,
   whopainfeed: true,
   yahoofedads: true,
@@ -277,8 +265,9 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
     // If we are on the cache domain, parse the source hostname from
     // the referrer. The referrer is used because it should be
     // trustable.
-    hostname = parseUrlDeprecated(getSourceUrl(window.document.referrer))
-      .hostname;
+    hostname = parseUrlDeprecated(
+      getSourceUrl(window.document.referrer)
+    ).hostname;
   }
   for (let i = 0; i < allowedHostnames.length; i++) {
     // Either the hostname is allowed
@@ -356,7 +345,7 @@ function lightweightErrorReport(e, isCanary) {
   new Image().src =
     urls.errorReporting +
     '?3p=1&v=' +
-    encodeURIComponent(internalRuntimeVersion()) +
+    encodeURIComponent(mode.version()) +
     '&m=' +
     encodeURIComponent(e.message) +
     '&ca=' +

@@ -1,18 +1,12 @@
+import {isString} from './string';
+
+/** @fileoverview helpers for dealing with dates and times. */
+
 /**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Absolute time in milliseconds.
+ * @typedef {number}
  */
+export let TimestampDef;
 
 /**
  * Parses the date using the `Date.parse()` rules. Additionally supports the
@@ -20,7 +14,7 @@
  * valid epoch value or null.
  *
  * @param {?string|undefined} s
- * @return {?Timestamp}
+ * @return {?TimestampDef}
  */
 export function parseDate(s) {
   if (!s) {
@@ -34,9 +28,9 @@ export function parseDate(s) {
 }
 
 /**
- * Converts various date formats into a Timestamp.
+ * Converts various date formats into a timestamp in ms.
  * @param {!Date|number|string} value
- * @return {?Timestamp}
+ * @return {?TimestampDef}
  */
 export function getDate(value) {
   if (!value) {
@@ -45,8 +39,8 @@ export function getDate(value) {
   if (typeof value == 'number') {
     return value;
   }
-  if (typeof value == 'string') {
-    return parseDate(value);
+  if (isString(value)) {
+    return parseDate(/** @type {string} */ (value));
   }
   value = /** @type {!Date} */ (value);
   return value.getTime();

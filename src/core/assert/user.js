@@ -1,36 +1,6 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {USER_ERROR_SENTINEL} from '#core/error/message-helpers';
 
 import * as assertions from './base';
-import {USER_ERROR_SENTINEL} from '../error-message-helpers';
 
 /**
  * @fileoverview This file provides the entrypoint for user assertions. It's
@@ -56,7 +26,7 @@ import {USER_ERROR_SENTINEL} from '../error-message-helpers';
  * @throws {UserError} when shouldBeTruthy is not truthy.
  * @closurePrimitive {asserts.truthy}
  */
-export function assert(
+export function userAssert(
   shouldBeTruthy,
   opt_message,
   opt_1,
@@ -96,9 +66,9 @@ export function assert(
  * @throws {Error} when shouldBeElement is not an Element
  * @closurePrimitive {asserts.matchesReturn}
  */
-export function assertElement(shouldBeElement, opt_message) {
+export function userAssertElement(shouldBeElement, opt_message) {
   return assertions.assertElement(
-    /** @type {!AssertionFunction} */ (assert),
+    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
     shouldBeElement,
     opt_message
   );
@@ -116,9 +86,9 @@ export function assertElement(shouldBeElement, opt_message) {
  * @throws {Error} when shouldBeString is not an String
  * @closurePrimitive {asserts.matchesReturn}
  */
-export function assertString(shouldBeString, opt_message) {
+export function userAssertString(shouldBeString, opt_message) {
   return assertions.assertString(
-    /** @type {!AssertionFunction} */ (assert),
+    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
     shouldBeString,
     opt_message
   );
@@ -137,9 +107,9 @@ export function assertString(shouldBeString, opt_message) {
  * @throws {Error} when shouldBeNumber is not an Number
  * @closurePrimitive {asserts.matchesReturn}
  */
-export function assertNumber(shouldBeNumber, opt_message) {
+export function userAssertNumber(shouldBeNumber, opt_message) {
   return assertions.assertNumber(
-    /** @type {!AssertionFunction} */ (assert),
+    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
     shouldBeNumber,
     opt_message
   );
@@ -157,9 +127,9 @@ export function assertNumber(shouldBeNumber, opt_message) {
  * @throws {Error} when shouldBeArray is not an Array
  * @closurePrimitive {asserts.matchesReturn}
  */
-export function assertArray(shouldBeArray, opt_message) {
+export function userAssertArray(shouldBeArray, opt_message) {
   return assertions.assertArray(
-    /** @type {!AssertionFunction} */ (assert),
+    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
     shouldBeArray,
     opt_message
   );
@@ -176,30 +146,10 @@ export function assertArray(shouldBeArray, opt_message) {
  * @throws {Error} when shouldBeBoolean is not an Boolean
  * @closurePrimitive {asserts.matchesReturn}
  */
-export function assertBoolean(shouldBeBoolean, opt_message) {
+export function userAssertBoolean(shouldBeBoolean, opt_message) {
   return assertions.assertBoolean(
-    /** @type {!AssertionFunction} */ (assert),
+    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
     shouldBeBoolean,
     opt_message
-  );
-}
-
-/**
- * Asserts and returns the enum value. If the enum doesn't contain such a
- * value, the error is thrown.
- *
- * @param {!Object<T>} enumObj
- * @param {*} shouldBeEnum
- * @param {string=} opt_enumName
- * @return {T}
- * @template T
- * @closurePrimitive {asserts.matchesReturn}
- */
-export function assertEnumValue(enumObj, shouldBeEnum, opt_enumName) {
-  return assertions.assertEnumValue(
-    /** @type {!AssertionFunction} */ (assert),
-    enumObj,
-    shouldBeEnum,
-    opt_enumName
   );
 }

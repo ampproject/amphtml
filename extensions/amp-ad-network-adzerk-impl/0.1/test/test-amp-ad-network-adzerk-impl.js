@@ -1,32 +1,18 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-mustache/0.1/amp-mustache';
+import {createElementWithAttributes} from '#core/dom';
+import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
+
+import {Xhr} from '#service/xhr-impl';
+
 import {
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   AmpAdNetworkAdzerkImpl,
 } from '../amp-ad-network-adzerk-impl';
-import {Xhr} from '../../../../src/service/xhr-impl';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
 
 describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, (env) => {
   let win, doc;
@@ -100,7 +86,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, (env) => {
           IMG_SRC: 'https://some.img.com?a=b',
         },
       };
-      const template = `<!doctype html><html ⚡><head>
+      const template = `<!doctype html><html ⚡ lang="en"><head>
           <script async src="https://cdn.ampproject.org/v0.js"></script>
           <script async custom-template="amp-mustache"
             src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
@@ -166,7 +152,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, (env) => {
     let template;
 
     beforeEach(() => {
-      template = `<!doctype html><html ⚡><head>
+      template = `<!doctype html><html ⚡ lang="en"><head>
           <script async src="https://cdn.ampproject.org/v0.js"></script>
           <script async custom-template="amp-mustache"
             src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>

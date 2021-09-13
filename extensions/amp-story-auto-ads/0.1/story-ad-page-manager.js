@@ -1,18 +1,4 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {findIndex} from '#core/types/array';
 
 import {
   AnalyticsEvents,
@@ -20,15 +6,12 @@ import {
   STORY_AD_ANALYTICS,
 } from './story-ad-analytics';
 import {ButtonTextFitter} from './story-ad-button-text-fitter';
-import {
-  StateProperty,
-  getStoreService,
-} from '../../amp-story/1.0/amp-story-store-service';
 import {StoryAdLocalization} from './story-ad-localization';
 import {StoryAdPage} from './story-ad-page';
+
 import {devAssert} from '../../../src/log';
-import {findIndex} from '../../../src/core/types/array';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
+import {getStoreService} from '../../amp-story/1.0/amp-story-store-service';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page-manager';
@@ -180,20 +163,8 @@ export class StoryAdPageManager {
    * @return {!Promise<!InsertionState>}
    */
   maybeInsertPageAfter(pageBeforeAdId, nextAdPage) {
-    let pageBeforeAd = this.ampStory_.getPageById(pageBeforeAdId);
-    let pageAfterAd = this.ampStory_.getNextPage(pageBeforeAd);
-    if (!pageAfterAd) {
-      return Promise.resolve(InsertionState.DELAYED);
-    }
-
-    if (this.isDesktopView_()) {
-      // If we are in desktop view the ad must be inserted 2 pages away because
-      // the next page will already be in view
-      pageBeforeAdId = pageAfterAd.element.id;
-      pageBeforeAd = pageAfterAd;
-      pageAfterAd = this.ampStory_.getNextPage(pageAfterAd);
-    }
-
+    const pageBeforeAd = this.ampStory_.getPageById(pageBeforeAdId);
+    const pageAfterAd = this.ampStory_.getNextPage(pageBeforeAd);
     if (!pageAfterAd) {
       return Promise.resolve(InsertionState.DELAYED);
     }
@@ -249,14 +220,6 @@ export class StoryAdPageManager {
       [AnalyticsVars.AD_INSERTED]: Date.now(),
     });
     this.adsConsumed_++;
-  }
-
-  /**
-   * @private
-   * @return {boolean}
-   */
-  isDesktopView_() {
-    return !!this.storeService_.get(StateProperty.DESKTOP_STATE);
   }
 
   /**

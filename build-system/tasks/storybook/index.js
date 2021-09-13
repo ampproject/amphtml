@@ -1,24 +1,9 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
 const path = require('path');
 const {createCtrlcHandler} = require('../../common/ctrlcHandler');
-const {cyan} = require('kleur/colors');
+const {cyan} = require('../../common/colors');
 const {defaultTask: runAmpDevBuildServer} = require('../default-task');
 const {exec, execScriptAsync} = require('../../common/exec');
 const {getBaseUrl} = require('../pr-deploy-bot-utils');
@@ -100,7 +85,7 @@ function buildEnv(env) {
  * @return {Promise<void>}
  */
 async function storybook() {
-  const {'storybook_env': env = 'amp,preact', build = false} = argv;
+  const {build = false, 'storybook_env': env = 'amp,preact'} = argv;
   const envs = env.split(',');
   if (!build && envs.includes('amp')) {
     await runAmpDevBuildServer();
@@ -115,12 +100,12 @@ module.exports = {
   storybook,
 };
 
-storybook.description = 'Isolated testing and development for AMP components.';
+storybook.description =
+  'Set up isolated development and testing for AMP components';
 
 storybook.flags = {
-  'build':
-    'Builds a static web application, as described in https://storybook.js.org/docs/react/workflows/publish-storybook',
+  'build': 'Build a static web application (see https://storybook.js.org/docs)',
   'storybook_env':
-    "Set environment(s) to run Storybook, either 'amp', 'preact' or a list as 'amp,preact'",
-  'storybook_port': 'Set port from which to run the Storybook dashboard.',
+    "Environment(s) to run Storybook (either 'amp', 'preact' or a list as 'amp,preact')",
+  'storybook_port': 'Port from which to run the Storybook dashboard',
 };

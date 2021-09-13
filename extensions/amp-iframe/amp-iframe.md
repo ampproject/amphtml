@@ -4,27 +4,19 @@ formats:
   - websites
 teaser:
   text: Displays an iframe.
+experimental: true
+bento: true
 ---
-
-<!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
 
 # amp-iframe
 
 ## Usage
+
+[tip type="warning"]
+
+This component is work in progress.
+
+[/tip]
 
 Displays an AMP valid iframe. `amp-iframe` has several important differences from vanilla iframes that are
 designed to make it more secure and avoid AMP files that are dominated by a
@@ -40,7 +32,7 @@ single iframe:
     via the `srcdoc` attribute.
 -   An `amp-iframe` must not be in the same origin as the container unless they
     do not allow `allow-same-origin` in the `sandbox` attribute. See the
-    ["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md)
+    ["Iframe origin policy"](../../docs/spec/amp-iframe-origin-policy.md)
     doc for further details on allowed origins for iframes.
 
 ```html

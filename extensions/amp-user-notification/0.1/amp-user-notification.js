@@ -1,36 +1,22 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Deferred} from '#core/data-structures/promise';
+import {toggle} from '#core/dom/style';
+import {rethrowAsync} from '#core/error';
+import {dict} from '#core/types/object';
 
-import {CSS} from '../../../build/amp-user-notification-0.1.css';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
+import {Services} from '#service';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
-} from '../../../src/service/notification-ui-manager';
-import {Services} from '../../../src/services';
-import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
+} from '#service/notification-ui-manager';
+
+import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
-} from '../../../src/service';
-import {rethrowAsync} from '../../../src/core/error';
-import {toggle} from '../../../src/style';
+} from '../../../src/service-helpers';
+import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 
 const TAG = 'amp-user-notification';
 const SERVICE_ID = 'userNotificationManager';

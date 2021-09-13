@@ -1,25 +1,10 @@
 FAIL
 |  <!--
-|    Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-|
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|
-|        http://www.apache.org/licenses/LICENSE-2.0
-|
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    Tests support for the amp-ad tag.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">
@@ -44,6 +29,12 @@ FAIL
 |    <amp-ad sticky width=300 height=250 type="a9" data-aax_size="300x250" data-aax_pubname="test123" data-aax_src="302">
 |    </amp-ad>
 |    <!-- Valid -->
+|    <amp-ad sticky="top" width=300 height=250 type="a9" data-aax_size="300x250" data-aax_pubname="test123" data-aax_src="302">
+|    </amp-ad>
+|    <!-- Valid -->
+|    <amp-ad sticky="bottom" width=300 height=250 type="a9" data-aax_size="300x250" data-aax_pubname="test123" data-aax_src="302">
+|    </amp-ad>
+|    <!-- Valid -->
 |    <amp-ad width=300 height=250
 |        type="custom"
 |        data-url="https://foobar.com"
@@ -65,32 +56,38 @@ FAIL
 |    <amp-fx-flying-carpet height="300">
 |      <amp-ad data-multi-size="" height="300" type="foo"></amp-ad>
 >>     ^~~~~~~~~
-amp-ad/0.1/test/validator-amp-ad.html:65:4 The tag 'amp-ad' may not appear as a descendant of tag 'amp-fx-flying-carpet'. (see https://amp.dev/documentation/components/amp-ad/)
+amp-ad/0.1/test/validator-amp-ad.html:56:4 The tag 'amp-ad' may not appear as a descendant of tag 'amp-fx-flying-carpet'. (see https://amp.dev/documentation/components/amp-ad/)
 |    </amp-fx-flying-carpet>
 |    <!-- Invalid: amp-ad in an amp ad container with data-multi-size attr -->
 |    <amp-fx-flying-carpet height="300">
 |      <amp-embed data-multi-size="" height="300" type="foo"></amp-ad>
 >>     ^~~~~~~~~
-amp-ad/0.1/test/validator-amp-ad.html:69:4 The tag 'amp-embed' may not appear as a descendant of tag 'amp-fx-flying-carpet'. (see https://amp.dev/documentation/components/amp-ad/)
+amp-ad/0.1/test/validator-amp-ad.html:60:4 The tag 'amp-embed' may not appear as a descendant of tag 'amp-fx-flying-carpet'. (see https://amp.dev/documentation/components/amp-ad/)
 |    </amp-fx-flying-carpet>
 |    <!-- Invalid: amp-ad missing layout=fluid for fluid ad -->
 |    <amp-ad type=doubleclick width="100" height="fluid"></amp-ad>
 >>   ^~~~~~~~~
-amp-ad/0.1/test/validator-amp-ad.html:72:2 The attribute 'height' in tag 'amp-ad' is set to the invalid value 'fluid'. (see https://amp.dev/documentation/components/amp-ad/)
+amp-ad/0.1/test/validator-amp-ad.html:63:2 The attribute 'height' in tag 'amp-ad' is set to the invalid value 'fluid'. (see https://amp.dev/documentation/components/amp-ad/)
 |    <!-- Invalid: amp-ad type=custom missing data-url-->
 |    <amp-ad width=300 height=250
 >>   ^~~~~~~~~
-amp-ad/0.1/test/validator-amp-ad.html:74:2 The mandatory attribute 'data-url' is missing in tag 'amp-ad'. (see https://github.com/ampproject/amphtml/blob/main/ads/custom.md)
+amp-ad/0.1/test/validator-amp-ad.html:65:2 The mandatory attribute 'data-url' is missing in tag 'amp-ad'. (see https://github.com/ampproject/amphtml/blob/main/ads/custom.md)
 |        type="custom"
 |        template="template-1">
 |    </amp-ad>
 |    <!-- Invalid: amp-ad type=custom non-https data-url-->
 |    <amp-ad width=300 height=250
 >>   ^~~~~~~~~
-amp-ad/0.1/test/validator-amp-ad.html:79:2 Invalid URL protocol 'http:' for attribute 'data-url' in tag 'amp-ad'. (see https://github.com/ampproject/amphtml/blob/main/ads/custom.md)
+amp-ad/0.1/test/validator-amp-ad.html:70:2 Invalid URL protocol 'http:' for attribute 'data-url' in tag 'amp-ad'. (see https://github.com/ampproject/amphtml/blob/main/ads/custom.md)
 |        type="custom"
 |        data-url="http://foobar.com"
 |        template="template-1">
+|    </amp-ad>
+|    <!-- Invalid: amp-ad sticky attribute invalid -->
+|    <amp-ad sticky="center" width=300 height=250 type="a9" data-aax_size="300x250" data-aax_pubname="test123"
+>>   ^~~~~~~~~
+amp-ad/0.1/test/validator-amp-ad.html:76:2 The attribute 'sticky' in tag 'amp-ad' is set to the invalid value 'center'. (see https://amp.dev/documentation/components/amp-ad/)
+|      data-aax_src="302">
 |    </amp-ad>
 |  </body>
 |  </html>

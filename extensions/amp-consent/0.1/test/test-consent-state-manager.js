@@ -1,18 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {
   CONSENT_ITEM_STATE,
   PURPOSE_CONSENT_STATE,
@@ -20,15 +5,15 @@ import {
   constructConsentInfo,
   constructMetadata,
 } from '../consent-info';
-import {CONSENT_STRING_TYPE} from '../../../../src/core/constants/consent-state';
+import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
 import {ConsentInstance, ConsentStateManager} from '../consent-state-manager';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 import {dev} from '../../../../src/log';
-import {macroTask} from '../../../../testing/yield';
+import {macroTask} from '#testing/helpers';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../../../src/service';
+} from '../../../../src/service-helpers';
 
 describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
   let win;
@@ -576,7 +561,6 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
             },
           };
         });
-
         instance = new ConsentInstance(ampdoc, 'test', {
           'onUpdateHref': '//updateHref',
         });
@@ -584,6 +568,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
 
       it('send update request on reject/accept', function* () {
         yield instance.update(CONSENT_ITEM_STATE.ACCEPTED);
+        yield macroTask();
         yield macroTask();
         expect(requestSpy).to.be.calledOnce;
         expect(requestSpy).to.be.calledWith('//updateHref');

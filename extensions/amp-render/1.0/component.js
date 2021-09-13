@@ -1,29 +1,8 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../src/preact';
-import {Wrapper, useRenderer} from '../../../src/preact/component';
-import {forwardRef} from '../../../src/preact/compat';
-import {
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useState,
-} from '../../../src/preact';
-import {useResourcesNotify} from '../../../src/preact/utils';
+import * as Preact from '#preact';
+import {Wrapper, useRenderer, useValueRef} from '#preact/component';
+import {forwardRef} from '#preact/compat';
+import {useCallback, useEffect, useImperativeHandle, useState} from '#preact';
+import {useResourcesNotify} from '#preact/utils';
 
 /**
  * @param {!JsonObject} data
@@ -45,12 +24,24 @@ const DEFAULT_GET_JSON = (url) => {
  * @return {PreactDef.Renderable}
  */
 export function RenderWithRef(
-  {src = '', getJson = DEFAULT_GET_JSON, render = DEFAULT_RENDER, ...rest},
+  {
+    src = '',
+    getJson = DEFAULT_GET_JSON,
+    render = DEFAULT_RENDER,
+    ariaLiveValue = 'polite',
+    onLoading,
+    onLoad,
+    onRefresh,
+    onError,
+    ...rest
+  },
   ref
 ) {
   useResourcesNotify();
 
   const [data, setData] = useState({});
+  const onLoadRef = useValueRef(onLoad);
+  const onErrorRef = useValueRef(onError);
 
   useEffect(() => {
     // TODO(dmanek): Add additional validation for src
@@ -59,21 +50,32 @@ export function RenderWithRef(
       return;
     }
     let cancelled = false;
-    getJson(src).then((data) => {
-      if (!cancelled) {
-        setData(data);
-      }
-    });
+    onLoading?.();
+    getJson(src)
+      .then((data) => {
+        if (!cancelled) {
+          setData(data);
+        }
+      })
+      .catch((e) => {
+        onErrorRef.current?.(e);
+      });
     return () => {
       cancelled = true;
     };
-  }, [src, getJson]);
+  }, [getJson, src, onErrorRef, onLoading]);
 
   const refresh = useCallback(() => {
-    getJson(src, /* shouldRefresh */ true).then((data) => {
-      setData(data);
-    });
-  }, [getJson, src]);
+    onRefresh?.();
+    getJson(src, /* shouldRefresh */ true)
+      .then((data) => {
+        setData(data);
+        onLoadRef.current?.();
+      })
+      .catch((e) => {
+        onErrorRef.current?.(e);
+      });
+  }, [getJson, src, onLoadRef, onRefresh, onErrorRef]);
 
   useImperativeHandle(
     ref,
@@ -88,8 +90,23 @@ export function RenderWithRef(
   const isHtml =
     rendered && typeof rendered == 'object' && '__html' in rendered;
 
+  const refFn = useCallback(
+    (node) => {
+      if (!node?.firstElementChild || !rendered) {
+        return;
+      }
+      onLoadRef.current?.();
+    },
+    [rendered, onLoadRef]
+  );
+
   return (
-    <Wrapper {...rest} dangerouslySetInnerHTML={isHtml ? rendered : null}>
+    <Wrapper
+      ref={refFn}
+      {...rest}
+      dangerouslySetInnerHTML={isHtml ? rendered : null}
+      aria-live={ariaLiveValue}
+    >
       {isHtml ? null : rendered}
     </Wrapper>
   );

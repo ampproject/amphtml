@@ -1,19 +1,3 @@
-<!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # AMPHTML Ad Creative Format
 
 _If you'd like to propose changes to the standard, please comment on the [Intent
@@ -93,7 +77,7 @@ In addition, creatives must obey the following rules:
 
 ### Boilerplate
 
-AMPHTML ad creatives require a different, and considerably simpler, boilerplate style line than [general AMP documents do](https://github.com/ampproject/amphtml/blob/main/spec/amp-boilerplate.md):
+AMPHTML ad creatives require a different, and considerably simpler, boilerplate style line than [general AMP documents do](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-boilerplate.md):
 
 ```html
 <style amp4ads-boilerplate>
@@ -118,7 +102,7 @@ Finally, the AMPHTML ad boilerplate uses `amp-a4a-boilerplate` rather than
 more accurate error messages to help developers.
 
 Note that the same rules about mutations to the boilerplate text apply as in
-the [general AMP boilerplate](https://github.com/ampproject/amphtml/blob/main/spec/amp-boilerplate.md).
+the [general AMP boilerplate](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-boilerplate.md).
 
 ### CSS
 
@@ -297,7 +281,7 @@ is demonstrated desire for it.
 
 The following are _allowed_ tags in an AMPHTML ads creative. Tags not explicitly
 allowed are prohibited. This list is a subset of the general [AMP tag
-addendum allowlist](../../spec/amp-tag-addendum.md). Like that list, it is
+addendum allowlist](../../docs/spec/amp-tag-addendum.md). Like that list, it is
 ordered consistent with HTML5 spec in section 4 [The Elements of HTML](http://www.w3.org/TR/html5/single-page.html#html-elements).
 
 Most of the omissions are either for performance or because the tags are not

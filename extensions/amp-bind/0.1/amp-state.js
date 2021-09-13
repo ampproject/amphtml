@@ -1,34 +1,20 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust} from '#core/constants/action-constants';
+import {Deferred} from '#core/data-structures/promise';
+import {isJsonScriptTag} from '#core/dom';
+import {LayoutPriority} from '#core/dom/layout';
+import {toggle} from '#core/dom/style';
+import {dict, map} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {LayoutPriority} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
+
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict, map} from '../../../src/core/types/object';
 import {getSourceOrigin} from '../../../src/url';
-import {isJsonScriptTag} from '../../../src/dom';
-import {toggle} from '../../../src/style';
-import {tryParseJson} from '../../../src/json';
 
 export class AmpState extends AMP.BaseElement {
   /**

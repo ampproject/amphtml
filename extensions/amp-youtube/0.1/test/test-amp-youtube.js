@@ -1,24 +1,10 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-youtube';
-import {Services} from '../../../../src/services';
-import {VideoEvents} from '../../../../src/video-interface';
-import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
+import {Services} from '#service';
+
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
+
 import {listenOncePromise} from '../../../../src/event-helper';
+import {VideoEvents} from '../../../../src/video-interface';
 
 const EXAMPLE_VIDEOID = 'mGENRKrdoGY';
 const EXAMPLE_LIVE_CHANNELID = 'UCB8Kb4pxYzsDsHxzBfnid4Q';
@@ -111,9 +97,9 @@ describes.realWin(
         });
         const iframe = yt.querySelector('iframe');
         expect(iframe.src).to.contain('myParam=hello%20world');
-        // data-param-autoplay is black listed in favor of just autoplay
+        // data-param-autoplay is disallowed in favor of just autoplay
         expect(iframe.src).to.not.contain('autoplay=1');
-        // data-param-loop is black listed in favor of just loop for single videos
+        // data-param-loop is disallowed in favor of just loop for single videos
         expect(iframe.src).to.not.contain('loop=1');
         // playsinline should default to 1 if not provided.
         expect(iframe.src).to.contain('playsinline=1');

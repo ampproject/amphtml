@@ -13,22 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {
-  Accordion,
-  AccordionContent,
-  AccordionHeader,
-  AccordionSection,
+  BentoAccordion,
+  BentoAccordionContent,
+  BentoAccordionHeader,
+  BentoAccordionSection,
 } from '../../../amp-accordion/1.0/component';
 import {VideoIframe} from '../video-iframe';
-import {boolean, text, withKnobs} from '@storybook/addon-knobs';
 import {createCustomEvent} from '../../../../src/event-helper';
-import {useCallback} from '../../../../src/preact';
+import {useCallback} from '#preact';
 
 export default {
   title: 'VideoIframe',
   component: VideoIframe,
-  decorators: [withKnobs],
 };
 
 const AmpVideoIframeLike = ({unloadOnPause, ...rest}) => {
@@ -68,77 +66,48 @@ const AmpVideoIframeLike = ({unloadOnPause, ...rest}) => {
   );
 };
 
-export const UsingVideoIframe = () => {
-  const width = text('width', '640px');
-  const height = text('height', '360px');
+export const UsingVideoIframe = ({height, width, ...args}) => {
+  return <AmpVideoIframeLike style={{width, height}} {...args} />;
+};
 
-  const ariaLabel = text('aria-label', 'Video Player');
-  const autoplay = boolean('autoplay', true);
-  const controls = boolean('controls', true);
-  const mediasession = boolean('mediasession', true);
-  const noaudio = boolean('noaudio', false);
-  const loop = boolean('loop', false);
-  const poster = text(
-    'poster',
-    'https://amp.dev/static/samples/img/amp-video-iframe-sample-placeholder.jpg'
-  );
+UsingVideoIframe.args = {
+  width: '640px',
+  height: '360px',
+  autoplay: true,
+  controls: true,
+  noaudio: false,
+  loop: false,
+  ariaLabel: 'Video Player',
+  poster:
+    'https://amp.dev/static/samples/img/amp-video-iframe-sample-placeholder.jpg',
+  src: 'https://amp.dev/static/samples/files/amp-video-iframe-videojs.html',
+  mediasession: true,
+  artist: '',
+  album: '',
+  artwork: '',
+  title: '',
+};
 
-  const artist = text('artist', '');
-  const album = text('album', '');
-  const artwork = text('artwork', '');
-  const title = text('title', '');
-
-  const src = text(
-    'src',
-    'https://amp.dev/static/samples/files/amp-video-iframe-videojs.html'
-  );
-
+export const InsideAccordion = ({height, width, ...args}) => {
   return (
-    <AmpVideoIframeLike
-      ariaLabel={ariaLabel}
-      autoplay={autoplay}
-      controls={controls}
-      mediasession={mediasession}
-      noaudio={noaudio}
-      loop={loop}
-      poster={poster}
-      artist={artist}
-      album={album}
-      artwork={artwork}
-      title={title}
-      style={{width, height}}
-      src={src}
-    />
+    <BentoAccordion expandSingleSection>
+      <BentoAccordionSection key={1} expanded>
+        <BentoAccordionHeader>
+          <h2>Controls</h2>
+        </BentoAccordionHeader>
+        <BentoAccordionContent>
+          <AmpVideoIframeLike loop={true} style={{width, height}} {...args} />
+        </BentoAccordionContent>
+      </BentoAccordionSection>
+    </BentoAccordion>
   );
 };
 
-export const InsideAccordion = () => {
-  const width = text('width', '640px');
-  const height = text('height', '360px');
-  const autoplay = boolean('autoplay', false);
-  const controls = boolean('controls', true);
-  const src = text(
-    'src',
-    'https://amp.dev/static/samples/files/amp-video-iframe-videojs.html'
-  );
-  const unloadOnPause = boolean('unloadOnPause', false);
-  return (
-    <Accordion expandSingleSection>
-      <AccordionSection key={1} expanded>
-        <AccordionHeader>
-          <h2>Controls</h2>
-        </AccordionHeader>
-        <AccordionContent>
-          <AmpVideoIframeLike
-            controls={controls}
-            autoplay={autoplay}
-            loop={true}
-            style={{width, height}}
-            src={src}
-            unloadOnPause={unloadOnPause}
-          />
-        </AccordionContent>
-      </AccordionSection>
-    </Accordion>
-  );
+InsideAccordion.args = {
+  width: '640px',
+  height: '360px',
+  autoplay: true,
+  controls: true,
+  src: 'https://amp.dev/static/samples/files/amp-video-iframe-videojs.html',
+  unloadOnPause: false,
 };

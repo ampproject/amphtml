@@ -1,56 +1,43 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * The entry point for AMP Runtime (v0.js) when AMP Runtime = AMP Doc.
  */
 
 // src/polyfills.js must be the first import.
 import './polyfills';
 
-import {Services} from './services';
-import {TickLabel} from './core/constants/enums';
-import {adoptWithMultidocDeps} from './runtime';
-import {cssText as ampDocCss} from '../build/ampdoc.css';
-import {cssText as ampSharedCss} from '../build/ampshared.css';
-import {fontStylesheetTimeout} from './font-stylesheet-timeout';
-import {getMode} from './mode';
+import {TickLabel} from '#core/constants/enums';
+import * as mode from '#core/mode';
+
+import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
 import {
   installAmpdocServices,
   installBuiltinElements,
   installRuntimeServices,
-} from './service/core-services';
+} from '#service/core-services';
+import {stubElementsForDoc} from '#service/custom-element-registry';
+import {installPerformanceService} from '#service/performance-impl';
+import {installPlatformService} from '#service/platform-impl';
+
 import {installAutoLightboxExtension} from './auto-lightbox';
-import {installDocService} from './service/ampdoc-impl';
+import {startupChunk} from './chunk';
 import {installErrorReporting} from './error-reporting';
-import {installPerformanceService} from './service/performance-impl';
-import {installPlatformService} from './service/platform-impl';
+import {fontStylesheetTimeout} from './font-stylesheet-timeout';
+import {maybeTrackImpression} from './impression';
+import {getMode} from './mode';
+import {preconnectToOrigin} from './preconnect';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
+import {adoptWithMultidocDeps} from './runtime';
 import {installStandaloneExtension} from './standalone';
 import {
   installStylesForDoc,
   makeBodyVisible,
   makeBodyVisibleRecovery,
 } from './style-installer';
-import {internalRuntimeVersion} from './internal-version';
-import {maybeTrackImpression} from './impression';
 import {maybeValidate} from './validator-integration';
-import {preconnectToOrigin} from './preconnect';
-import {startupChunk} from './chunk';
-import {stubElementsForDoc} from './service/custom-element-registry';
+
+import {cssText as ampDocCss} from '../build/ampdoc.css';
+import {cssText as ampSharedCss} from '../build/ampshared.css';
 
 /**
  * Execute the bootstrap
@@ -131,25 +118,23 @@ startupChunk(self.document, function initial() {
   installPerformanceService(self);
   /** @const {!./service/performance-impl.Performance} */
   const perf = Services.performanceFor(self);
-  if (self.document.documentElement.hasAttribute('i-amphtml-no-boilerplate')) {
-    perf.addEnabledExperiment('no-boilerplate');
-  }
-  if (IS_ESM) {
+  if (mode.isEsm()) {
     perf.addEnabledExperiment('esm');
   }
   fontStylesheetTimeout(self);
   perf.tick(TickLabel.INSTALL_STYLES);
-  if (IS_ESM) {
+  if (mode.isEsm()) {
     bootstrap(ampdoc, perf);
-  } else {
-    installStylesForDoc(
-      ampdoc,
-      ampDocCss + ampSharedCss,
-      () => bootstrap(ampdoc, perf),
-      /* opt_isRuntimeCss */ true,
-      /* opt_ext */ 'amp-runtime'
-    );
+    return;
   }
+
+  installStylesForDoc(
+    ampdoc,
+    ampDocCss + ampSharedCss,
+    () => bootstrap(ampdoc, perf),
+    /* opt_isRuntimeCss */ true,
+    /* opt_ext */ 'amp-runtime'
+  );
 });
 
 // Output a message to the console and add an attribute to the <html>
@@ -158,15 +143,12 @@ startupChunk(self.document, function initial() {
 if (self.console) {
   (console.info || console.log).call(
     console,
-    `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
+    `Powered by AMP ⚡ HTML – Version ${mode.version()}`,
     self.location.href
   );
 }
 // This code is eleminated in prod build through a babel transformer.
 if (getMode().localDev) {
-  self.document.documentElement.setAttribute('esm', IS_ESM ? 1 : 0);
+  self.document.documentElement.setAttribute('esm', mode.isEsm() ? 1 : 0);
 }
-self.document.documentElement.setAttribute(
-  'amp-version',
-  internalRuntimeVersion()
-);
+self.document.documentElement.setAttribute('amp-version', mode.version());

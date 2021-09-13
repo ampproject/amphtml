@@ -1,25 +1,10 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /** @fileoverview Installs polyfills depending on build environment. */
+
+import * as mode from '#core/mode';
 
 import {install as installAbortController} from './abort-controller';
 import {install as installArrayIncludes} from './array-includes';
 import {install as installCustomElements} from './custom-elements';
-import {install as installDOMTokenList} from './domtokenlist';
 import {install as installDocContains} from './document-contains';
 import {install as installFetch} from './fetch';
 import {install as installGetBoundingClientRect} from './get-bounding-client-rect';
@@ -30,11 +15,11 @@ import {install as installObjectAssign} from './object-assign';
 import {install as installObjectValues} from './object-values';
 import {install as installPromise} from './promise';
 import {install as installResizeObserver} from './resize-observer';
-import {install as installSetAdd} from './set-add';
+import {install as installSet} from './set';
 import {install as installStringStartsWith} from './string-starts-with';
 import {install as installWeakMapSet} from './weakmap-set';
 
-if (!IS_ESM) {
+if (!mode.isEsm()) {
   installFetch(self);
   installMathSign(self);
   installObjectAssign(self);
@@ -43,14 +28,13 @@ if (!IS_ESM) {
   installArrayIncludes(self);
   installMapSet(self);
   installWeakMapSet(self);
-  installSetAdd(self);
+  installSet(self);
   installStringStartsWith(self);
 }
 
 // Polyfills that depend on DOM availability
 if (self.document) {
-  if (!IS_ESM) {
-    installDOMTokenList(self);
+  if (!mode.isEsm()) {
     installDocContains(self);
     installGetBoundingClientRect(self);
   }

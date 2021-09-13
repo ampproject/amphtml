@@ -1,28 +1,13 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as st from '../../../src/style';
+import * as st from '#core/dom/style';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {dev} from '../../../src/log';
-import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../../src/utils/img';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '#core/dom/img';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
-import {propagateObjectFitStyles} from '../../../src/style';
+} from '#core/dom/layout/viewport-observer';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {propagateObjectFitStyles} from '#core/dom/style';
 
 const TAG = 'amp-anim';
 const BUILD_ATTRIBUTES = [
@@ -55,8 +40,8 @@ export class AmpAnim extends AMP.BaseElement {
   buildCallback() {
     this.img_ = new Image();
     this.img_.setAttribute('decoding', 'async');
-    this.propagateAttributes(BUILD_ATTRIBUTES, this.img_);
-    this.applyFillContent(this.img_, true);
+    propagateAttributes(BUILD_ATTRIBUTES, this.element, this.img_);
+    applyFillContent(this.img_, true);
     propagateObjectFitStyles(this.element, this.img_);
 
     // Remove role=img otherwise this breaks screen-readers focus and
@@ -88,8 +73,9 @@ export class AmpAnim extends AMP.BaseElement {
     const img = dev().assertElement(this.img_);
     // Remove missing attributes to remove the placeholder srcset if none is
     // specified on the element.
-    this.propagateAttributes(
+    propagateAttributes(
       LAYOUT_ATTRIBUTES,
+      this.element,
       img,
       /* opt_removeMissingAttrs */ true
     );

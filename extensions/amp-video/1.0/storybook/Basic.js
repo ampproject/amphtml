@@ -1,32 +1,16 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {
-  Accordion,
-  AccordionContent,
-  AccordionHeader,
-  AccordionSection,
+  BentoAccordion,
+  BentoAccordionContent,
+  BentoAccordionHeader,
+  BentoAccordionSection,
 } from '../../../amp-accordion/1.0/component';
-import {VideoWrapper} from '../video-wrapper';
+import {BentoVideo} from '../component';
 import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
 
 export default {
-  title: 'Video Wrapper',
-  component: VideoWrapper,
+  title: 'Video',
+  component: BentoVideo,
   decorators: [withKnobs],
 };
 
@@ -57,8 +41,7 @@ const VideoTagPlayer = ({i}) => {
     'sources',
     [
       {
-        src:
-          'https://amp.dev/static/inline-examples/videos/kitten-playing.webm',
+        src: 'https://amp.dev/static/inline-examples/videos/kitten-playing.webm',
         type: 'video/webm',
       },
       {
@@ -70,7 +53,7 @@ const VideoTagPlayer = ({i}) => {
   );
 
   return (
-    <VideoWrapper
+    <BentoVideo
       component="video"
       ariaLabel={ariaLabel}
       autoplay={autoplay}
@@ -130,13 +113,13 @@ export const InsideAccordion = () => {
   const width = text('width', '320px');
   const height = text('height', '180px');
   return (
-    <Accordion expandSingleSection>
-      <AccordionSection key={1} expanded>
-        <AccordionHeader>
+    <BentoAccordion expandSingleSection>
+      <BentoAccordionSection key={1} expanded>
+        <BentoAccordionHeader>
           <h2>Controls</h2>
-        </AccordionHeader>
-        <AccordionContent>
-          <VideoWrapper
+        </BentoAccordionHeader>
+        <BentoAccordionContent>
+          <BentoVideo
             component="video"
             controls={true}
             loop={true}
@@ -144,14 +127,14 @@ export const InsideAccordion = () => {
             src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
             poster="https://amp.dev/static/inline-examples/images/kitten-playing.png"
           />
-        </AccordionContent>
-      </AccordionSection>
-      <AccordionSection key={2}>
-        <AccordionHeader>
+        </BentoAccordionContent>
+      </BentoAccordionSection>
+      <BentoAccordionSection key={2}>
+        <BentoAccordionHeader>
           <h2>Autoplay</h2>
-        </AccordionHeader>
-        <AccordionContent>
-          <VideoWrapper
+        </BentoAccordionHeader>
+        <BentoAccordionContent>
+          <BentoVideo
             component="video"
             autoplay={true}
             loop={true}
@@ -165,8 +148,8 @@ export const InsideAccordion = () => {
               />,
             ]}
           />
-        </AccordionContent>
-      </AccordionSection>
-    </Accordion>
+        </BentoAccordionContent>
+      </BentoAccordionSection>
+    </BentoAccordion>
   );
 };

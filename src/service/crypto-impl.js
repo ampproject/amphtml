@@ -1,24 +1,10 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {base64UrlEncodeFromBytes} from '#core/types/string/base64';
+import {stringToBytes, utf8Encode} from '#core/types/string/bytes';
 
-import {Services} from '../services';
-import {base64UrlEncodeFromBytes} from '../utils/base64';
+import {Services} from '#service';
+
 import {dev, devAssert, user} from '../log';
-import {getService, registerServiceBuilder} from '../service';
-import {stringToBytes, utf8Encode} from '../utils/bytes';
+import {getService, registerServiceBuilder} from '../service-helpers';
 
 /** @const {string} */
 const TAG = 'Crypto';
@@ -78,9 +64,9 @@ export class Crypto {
 
     if (!this.subtle || this.polyfillPromise_) {
       // means native Crypto API is not available or failed before.
-      return (
-        this.polyfillPromise_ || this.loadPolyfill_()
-      ).then((polyfillSha384) => polyfillSha384(input));
+      return (this.polyfillPromise_ || this.loadPolyfill_()).then(
+        (polyfillSha384) => polyfillSha384(input)
+      );
     }
 
     try {
@@ -187,13 +173,9 @@ export class Crypto {
     const keyData = this.isLegacyWebkit_
       ? utf8Encode(JSON.stringify(/** @type {!JsonObject} */ (jwk)))
       : /** @type {!webCrypto.JsonWebKey} */ (jwk);
-    return /** @type {!Promise<!webCrypto.CryptoKey>} */ (this.subtle.importKey(
-      'jwk',
-      keyData,
-      this.pkcsAlgo,
-      true,
-      ['verify']
-    ));
+    return /** @type {!Promise<!webCrypto.CryptoKey>} */ (
+      this.subtle.importKey('jwk', keyData, this.pkcsAlgo, true, ['verify'])
+    );
   }
 
   /**
@@ -208,12 +190,9 @@ export class Crypto {
    */
   verifyPkcs(key, signature, data) {
     devAssert(this.isPkcsAvailable());
-    return /** @type {!Promise<boolean>} */ (this.subtle.verify(
-      this.pkcsAlgo,
-      key,
-      signature,
-      data
-    ));
+    return /** @type {!Promise<boolean>} */ (
+      this.subtle.verify(this.pkcsAlgo, key, signature, data)
+    );
   }
 }
 

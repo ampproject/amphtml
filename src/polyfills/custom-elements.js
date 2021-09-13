@@ -1,20 +1,7 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Deferred} from '../core/data-structures/promise';
+import {Deferred} from '#core/data-structures/promise';
+import {rethrowAsync} from '#core/error';
+import * as mode from '#core/mode';
+import {map} from '#core/types/object';
 
 /**
  * For type anotations where Element is a local variable.
@@ -99,19 +86,6 @@ function isPatched(win) {
 }
 
 /**
- * Throws the error outside the current event loop.
- * TODO(rcebulko): Condense with core/error#rethrowAsync
- *
- * @param {!Error} error
- */
-function rethrowAsync(error) {
-  setTimeout(() => {
-    self.__AMP_REPORT_ERROR(error);
-    throw error;
-  });
-}
-
-/**
  * The public Custom Elements API.
  */
 class CustomElementRegistry {
@@ -127,7 +101,7 @@ class CustomElementRegistry {
     this.registry_ = registry;
 
     /** @private @const @type {!Object<string, !Deferred>} */
-    this.pendingDefines_ = Object.create(null);
+    this.pendingDefines_ = map();
   }
 
   /**
@@ -212,7 +186,7 @@ class Registry {
     this.win_ = win;
 
     /** @private @const @type {!Object<string, !CustomElementDef>} */
-    this.definitions_ = Object.create(null);
+    this.definitions_ = map();
 
     /**
      * A up-to-date DOM selector for all custom elements.
@@ -320,9 +294,9 @@ class Registry {
     };
 
     this.observe_(name);
-    this.roots_.forEach((tree) => {
+    for (const tree of this.roots_) {
       this.upgrade(tree, name);
-    });
+    }
   }
 
   /**
@@ -342,8 +316,7 @@ class Registry {
     const query = opt_query || this.query_;
     const upgradeCandidates = this.queryAll_(root, query);
 
-    for (let i = 0; i < upgradeCandidates.length; i++) {
-      const candidate = upgradeCandidates[i];
+    for (const candidate of upgradeCandidates) {
       if (newlyDefined) {
         this.connectedCallback_(candidate);
       } else {
@@ -491,9 +464,9 @@ class Registry {
     // I would love to not have to hold onto all of the roots, since it's a
     // memory leak. Unfortunately, there's no way to iterate a list and hold
     // onto its contents weakly.
-    this.roots_.forEach((tree) => {
+    for (const tree of this.roots_) {
       mo.observe(tree, TRACK_SUBTREE);
-    });
+    }
 
     installPatches(this.win_, this);
   }
@@ -530,28 +503,25 @@ class Registry {
    * @param {!Array<!MutationRecord>} records
    */
   handleRecords_(records) {
-    for (let i = 0; i < records.length; i++) {
-      const record = records[i];
+    for (const record of records) {
       if (!record) {
         continue;
       }
 
       const {addedNodes, removedNodes} = record;
-      for (let i = 0; i < addedNodes.length; i++) {
-        const node = addedNodes[i];
+      for (const node of addedNodes) {
         const connectedCandidates = this.queryAll_(node, this.query_);
         this.connectedCallback_(node);
-        for (let i = 0; i < connectedCandidates.length; i++) {
-          this.connectedCallback_(connectedCandidates[i]);
+        for (const candidate of connectedCandidates) {
+          this.connectedCallback_(candidate);
         }
       }
 
-      for (let i = 0; i < removedNodes.length; i++) {
-        const node = removedNodes[i];
+      for (const node of removedNodes) {
         const disconnectedCandidates = this.queryAll_(node, this.query_);
         this.disconnectedCallback_(node);
-        for (let i = 0; i < disconnectedCandidates.length; i++) {
-          this.disconnectedCallback_(disconnectedCandidates[i]);
+        for (const candidate of disconnectedCandidates) {
+          this.disconnectedCallback_(candidate);
         }
       }
     }
@@ -569,13 +539,8 @@ function installPatches(win, registry) {
   const elProto = Element.prototype;
   const nodeProto = Node.prototype;
   const {createElement, importNode} = docProto;
-  const {
-    appendChild,
-    cloneNode,
-    insertBefore,
-    removeChild,
-    replaceChild,
-  } = nodeProto;
+  const {appendChild, cloneNode, insertBefore, removeChild, replaceChild} =
+    nodeProto;
 
   // Patch createElement to immediately upgrade the custom element.
   // This has the added benefit that it avoids the "already created but needs
@@ -665,7 +630,7 @@ function installPatches(win, registry) {
       'innerHTML'
     );
   }
-  if (innerHTMLDesc && innerHTMLDesc.configurable) {
+  if (innerHTMLDesc?.configurable) {
     const innerHTMLSetter = innerHTMLDesc.set;
     innerHTMLDesc.set = function (html) {
       innerHTMLSetter.call(this, html);
@@ -859,10 +824,9 @@ function supportsUnderProto() {
  * old IE.
  * @param {!Object} obj
  * @param {!Object} prototype
- * @suppress {suspiciousCode} due to IS_ESM inlining
  */
 function setPrototypeOf(obj, prototype) {
-  if (IS_ESM || Object.setPrototypeOf) {
+  if (mode.isEsm() || Object.setPrototypeOf) {
     // Every decent browser.
     Object.setPrototypeOf(obj, prototype);
   } else if (supportsUnderProto()) {
@@ -889,17 +853,14 @@ export function copyProperties(obj, prototype) {
       break;
     }
 
-    const props = Object.getOwnPropertyNames(current);
-    for (let i = 0; i < props.length; i++) {
-      const prop = props[i];
+    for (const prop of Object.getOwnPropertyNames(current)) {
       if (Object.hasOwnProperty.call(obj, prop)) {
         continue;
       }
 
-      const desc = /** @type {!ObjectPropertyDescriptor<Object>} */ (Object.getOwnPropertyDescriptor(
-        current,
-        prop
-      ));
+      const desc = /** @type {!ObjectPropertyDescriptor<Object>} */ (
+        Object.getOwnPropertyDescriptor(current, prop)
+      );
       Object.defineProperty(obj, prop, desc);
     }
 
@@ -921,7 +882,7 @@ export function copyProperties(obj, prototype) {
  * done.
  *
  * @param {!Window} win
- * @param {!Function} ctor
+ * @param {!Function=} ctor
  */
 export function install(win, ctor) {
   // Don't install in no-DOM environments e.g. worker.
@@ -955,7 +916,7 @@ export function install(win, ctor) {
 
       // If that didn't throw, we're transpiled.
       // Let's find out if we can wrap HTMLElement and avoid a full patch.
-      installWrapper = !!(Reflect && Reflect.construct);
+      installWrapper = !!Reflect?.construct;
     } catch (e) {
       // The ctor threw when we constructed it via ES5, so it's a real class.
       // We're ok to not install the polyfill.

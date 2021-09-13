@@ -1,24 +1,12 @@
 FAIL
 |  <!--
-|    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|        http://www.apache.org/licenses/LICENSE-2.0
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    This is the minimum valid AMP document; it includes all of the required
 |    fields from the spec, but nothing else.
 |  -->
 |  <!DOCTYPE html>
 |  <!-- prettier-ignore -->
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |    <head>
 |    <meta charset="utf-8">
 |    <title>amp-date-countdown example</title>
@@ -162,7 +150,7 @@ FAIL
 |    <!-- Should error if the `template` referent is missing. -->
 |    <amp-date-countdown timestamp-ms="1521880470000" offset-seconds="1521880470" when-ended="stop" locale='zh-tw' height="50" width="360" template="notMyTemplate">
 >>   ^~~~~~~~~
-amp-date-countdown/1.0/test/validator-amp-date-countdown.html:162:2 Attribute 'template' in tag 'amp-date-countdown' contains a value that does not match any other tags on the page. (see https://amp.dev/documentation/components/amp-date-countdown)
+amp-date-countdown/1.0/test/validator-amp-date-countdown.html:150:2 Attribute 'template' in tag 'amp-date-countdown' contains a value that does not match any other tags on the page. (see https://amp.dev/documentation/components/amp-date-countdown)
 |    </amp-date-countdown>
 |
 |    <!-- Should allow `data-count-up` attribute. -->
@@ -172,7 +160,7 @@ amp-date-countdown/1.0/test/validator-amp-date-countdown.html:162:2 Attribute 't
 |    <!-- Should error if `data-count-up` attribute is given a non-empty value. -->
 |    <amp-date-countdown data-count-up="true" timestamp-seconds="1521880470" offset-seconds="1521880470" when-ended="continue" locale='de' height="50" width="360" template="myTemplate">
 >>   ^~~~~~~~~
-amp-date-countdown/1.0/test/validator-amp-date-countdown.html:170:2 The attribute 'data-count-up' in tag 'amp-date-countdown' is set to the invalid value 'true'. (see https://amp.dev/documentation/components/amp-date-countdown)
+amp-date-countdown/1.0/test/validator-amp-date-countdown.html:158:2 The attribute 'data-count-up' in tag 'amp-date-countdown' is set to the invalid value 'true'. (see https://amp.dev/documentation/components/amp-date-countdown)
 |    </amp-date-countdown>
 |
 |  </body>

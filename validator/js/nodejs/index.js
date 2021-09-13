@@ -1,20 +1,3 @@
-/**
- * @license
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the license.
- */
-
 'use strict';
 
 const colors = require('colors/safe');
@@ -24,8 +7,6 @@ const https = require('https');
 const path = require('path');
 const program = require('commander');
 const Promise = require('promise');
-const querystring = require('querystring');
-const url = require('url');
 const util = require('util');
 const vm = require('vm');
 
@@ -217,8 +198,8 @@ function ValidationError() {
 
 /**
  * The validator instance is a proxy object to a precompiled
- * validator.js script - in practice the script was either downloaded
- * from 'https://cdn.ampproject.org/v0/validator.js' or read from a
+ * validator_wasm.js script - in practice the script was either downloaded
+ * from 'https://cdn.ampproject.org/v0/validator_wasm.js' or read from a
  * local file.
  * @param {string} scriptContents
  * @throws {!Error}
@@ -239,7 +220,8 @@ function Validator(scriptContents) {
   try {
     new vm.Script(scriptContents).runInContext(this.sandbox);
   } catch (error) {
-    throw new Error('Could not instantiate validator.js - ' + error.message);
+    throw new Error('Could not instantiate validator_wasm.js - ' +
+        error.message);
   }
 }
 
@@ -292,7 +274,7 @@ Validator.prototype.validateString = function(inputString, htmlFormat) {
 const instanceByValidatorJs = {};
 
 /**
- * Provided a URL or a filename from which to fetch the validator.js
+ * Provided a URL or a filename from which to fetch the validator_wasm.js
  * file, fetches, instantiates, and caches the validator instance
  * asynchronously.  If you prefer to implement your own fetching /
  * caching logic, you may want to consider newInstance() instead,
@@ -305,7 +287,7 @@ const instanceByValidatorJs = {};
  */
 function getInstance(opt_validatorJs, opt_userAgent) {
   const validatorJs =
-      opt_validatorJs || 'https://cdn.ampproject.org/v0/validator.js';
+      opt_validatorJs || 'https://cdn.ampproject.org/v0/validator_wasm.js';
   const userAgent = opt_userAgent || DEFAULT_USER_AGENT;
   if (instanceByValidatorJs.hasOwnProperty(validatorJs)) {
     return Promise.resolve(instanceByValidatorJs[validatorJs]);
@@ -326,15 +308,17 @@ function getInstance(opt_validatorJs, opt_userAgent) {
     }
     instanceByValidatorJs[validatorJs] = instance;
     return instance;
+  }).then(function(instance) {
+    return instance.init().then(() => instance);
   });
 }
 exports.getInstance = getInstance;
 
 /**
- * Provided the contents of the validator.js file, e.g. as downloaded from
- * 'https://cdn.ampproject.org/v0/validator.js', returns a new validator
+ * Provided the contents of the validator_wasm.js file, e.g. as downloaded from
+ * 'https://cdn.ampproject.org/v0/validator_wasm.js', returns a new validator
  * instance. The tradeoff between this function and getInstance() is that this
- * function is synchronous but requires the contents of the validator.js
+ * function is synchronous but requires the contents of the validator_wasm.js
  * file as a parameter, while getInstance is asynchronous, fetches files
  * from disk or the web, and caches them.
  *
@@ -401,7 +385,7 @@ function main() {
               '  Latest published version by default, or\n' +
               '  dist/validator_minified.js (built with build.py)\n' +
               '  for development.',
-          'https://cdn.ampproject.org/v0/validator.js')
+          'https://cdn.ampproject.org/v0/validator_wasm.js')
       .option(
           '--user-agent <userAgent>', 'User agent string to use in requests.',
           DEFAULT_USER_AGENT)
@@ -453,9 +437,6 @@ function main() {
     }
   }
   getInstance(opts.validator_js, opts.userAgent)
-      .then(function(validator) {
-        return validator.init().then(() => validator);
-      })
       .then(function(validator) {
         Promise.all(inputs)
             .then(function(resolvedInputs) {

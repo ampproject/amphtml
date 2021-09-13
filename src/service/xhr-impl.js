@@ -1,20 +1,11 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {parseJson} from '#core/types/object/json';
 
-import {Services} from '../services';
+import {Services} from '#service';
+
+import {isFormDataWrapper} from '../form-data-wrapper';
+import {dev, user} from '../log';
+import {getService, registerServiceBuilder} from '../service-helpers';
+import {getCorsUrl, parseUrlDeprecated} from '../url';
 import {
   assertSuccess,
   getViewerInterceptResponse,
@@ -23,11 +14,6 @@ import {
   setupInput,
   setupJsonFetchInit,
 } from '../utils/xhr-utils';
-import {dev, user} from '../log';
-import {getCorsUrl, parseUrlDeprecated} from '../url';
-import {getService, registerServiceBuilder} from '../service';
-import {isFormDataWrapper} from '../form-data-wrapper';
-import {parseJson} from '../json';
 
 /**
  * A service that polyfills Fetch API for use within AMP.
@@ -80,7 +66,9 @@ export class Xhr {
       // will expect a native `FormData` object in the `body` property, so
       // the native `FormData` object needs to be unwrapped.
       if (isFormDataWrapper(init.body)) {
-        const formDataWrapper = /** @type {!FormDataWrapperInterface} */ (init.body);
+        const formDataWrapper = /** @type {!FormDataWrapperInterface} */ (
+          init.body
+        );
         init.body = formDataWrapper.getFormData();
       }
       return this.win.fetch.apply(null, arguments);

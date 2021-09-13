@@ -1,27 +1,13 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Deferred} from '#core/data-structures/promise';
+import * as DocumentReady from '#core/document-ready';
 
-import * as DocumentReady from '../../../../src/document-ready';
-import * as SkimOptionsModule from '../skim-options';
+import helpersFactory from './helpers';
+
 import * as chunkModule from '../../../../src/chunk';
-import {Deferred} from '../../../../src/core/data-structures/promise';
-import {LinkRewriterManager} from '../link-rewriter/link-rewriter-manager';
 import {SKIMLINKS_REWRITER_ID} from '../constants';
 import {EVENTS as linkRewriterEvents} from '../link-rewriter/constants';
-import helpersFactory from './helpers';
+import {LinkRewriterManager} from '../link-rewriter/link-rewriter-manager';
+import * as SkimOptionsModule from '../skim-options';
 
 describes.fakeWin(
   'amp-skimlinks',
@@ -309,7 +295,7 @@ describes.fakeWin(
 
         it('Should wait until visible to send the impression tracking', () => {
           const isVisibleDefer = new Deferred();
-          window.sandbox
+          env.sandbox
             .stub(ampdoc, 'whenFirstVisible')
             .returns(isVisibleDefer.promise);
 
@@ -329,8 +315,8 @@ describes.fakeWin(
         it('Should update tracking info with the guid', () => {
           return ampSkimlinks.onPageScanned_().then(() => {
             const {
-              setTrackingInfo: setTrackingInfoStub,
               sendImpressionTracking: sendImpressionTrackingStub,
+              setTrackingInfo: setTrackingInfoStub,
             } = ampSkimlinks.trackingService_;
             expect(setTrackingInfoStub.withArgs({guid}).calledOnce).to.be.true;
             expect(setTrackingInfoStub.calledBefore(sendImpressionTrackingStub))
@@ -341,9 +327,8 @@ describes.fakeWin(
 
       describe('When beacon call has already been made', () => {
         beforeEach(() => {
-          ampSkimlinks.affiliateLinkResolver_.firstRequest = Promise.resolve(
-            beaconResponse
-          );
+          ampSkimlinks.affiliateLinkResolver_.firstRequest =
+            Promise.resolve(beaconResponse);
         });
 
         it('Should not make the fallback call', () => {
@@ -369,7 +354,7 @@ describes.fakeWin(
 
         it('Should wait until visible to send the impression tracking', () => {
           const isVisibleDefer = new Deferred();
-          window.sandbox
+          env.sandbox
             .stub(ampdoc, 'whenFirstVisible')
             .returns(isVisibleDefer.promise);
 
@@ -386,8 +371,8 @@ describes.fakeWin(
         it('Should update tracking info with the guid', () => {
           return ampSkimlinks.onPageScanned_().then(() => {
             const {
-              setTrackingInfo: setTrackingInfoStub,
               sendImpressionTracking: sendImpressionTrackingStub,
+              setTrackingInfo: setTrackingInfoStub,
             } = ampSkimlinks.trackingService_;
             expect(setTrackingInfoStub.withArgs({guid}).calledOnce).to.be.true;
             expect(setTrackingInfoStub.calledBefore(sendImpressionTrackingStub))

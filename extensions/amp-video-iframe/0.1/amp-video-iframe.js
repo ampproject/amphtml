@@ -1,25 +1,25 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {BUBBLE_MESSAGE_EVENTS} from '../amp-video-iframe-api';
-import {Deferred} from '../../../src/core/data-structures/promise';
+import {Deferred} from '#core/data-structures/promise';
 import {
-  MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
-  VideoEvents,
-} from '../../../src/video-interface';
-import {PauseHelper} from '../../../src/utils/pause-helper';
+  dispatchCustomEvent,
+  getDataParamsFromAttributes,
+  removeElement,
+} from '#core/dom';
+import {isFullscreenElement} from '#core/dom/fullscreen';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {measureIntersection} from '#core/dom/layout/intersection';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {once} from '#core/types/function';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getConsentDataToForward} from '../../../src/consent';
+import {getData, listen} from '../../../src/event-helper';
+import {
+  disableScrollingOnIframe,
+  looksLikeTrackingIframe,
+} from '../../../src/iframe-helper';
 import {
   SandboxOptions,
   createFrameFor,
@@ -27,26 +27,13 @@ import {
   objOrParseJson,
   originMatches,
 } from '../../../src/iframe-video';
-import {Services} from '../../../src/services';
-import {addParamsToUrl} from '../../../src/url';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {addParamsToUrl} from '../../../src/url';
 import {
-  disableScrollingOnIframe,
-  looksLikeTrackingIframe,
-} from '../../../src/iframe-helper';
-import {
-  dispatchCustomEvent,
-  getDataParamsFromAttributes,
-  isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
-import {getConsentDataToForward} from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {measureIntersection} from '../../../src/utils/intersection';
-import {once} from '../../../src/core/types/function';
+  MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
+  VideoEvents,
+} from '../../../src/video-interface';
+import {BUBBLE_MESSAGE_EVENTS} from '../amp-video-iframe-api';
 
 /** @private @const */
 const TAG = 'amp-video-iframe';
@@ -171,8 +158,8 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @private
    */
   getMetadata_() {
-    const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(this.element);
-    const {title, documentElement} = this.getAmpDoc().getRootNode();
+    const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(this.element);
+    const {documentElement, title} = this.getAmpDoc().getRootNode();
 
     return dict({
       'sourceUrl': sourceUrl,
@@ -198,8 +185,9 @@ class AmpVideoIframe extends AMP.BaseElement {
     }
     const img = new Image();
     img.src = addDataParamsToUrl(poster, element);
+    img.setAttribute('loading', 'lazy');
     img.setAttribute('placeholder', '');
-    this.applyFillContent(img);
+    applyFillContent(img);
     return img;
   }
 

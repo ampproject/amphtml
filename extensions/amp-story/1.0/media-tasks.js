@@ -1,22 +1,7 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Deferred, tryResolve} from '../../../src/core/data-structures/promise';
+import {Deferred} from '#core/data-structures/promise';
+import {tryPlay} from '#core/dom/video';
 import {Sources} from './sources';
-import {isConnectedNode} from '../../../src/dom';
+import {isConnectedNode} from '#core/dom';
 
 /**
  * The name for a boolean property on an element indicating whether that element
@@ -220,10 +205,7 @@ export class PlayTask extends MediaTask {
       return Promise.resolve();
     }
 
-    // The play() invocation is wrapped in a Promise.resolve(...) due to the
-    // fact that some browsers return a promise from media elements' play()
-    // function, while others return a boolean.
-    return tryResolve(() => mediaEl.play());
+    return tryPlay(mediaEl);
   }
 }
 

@@ -1,27 +1,13 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {removeChildren} from '#core/dom';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
 
 import {CSS} from '../../../build/amp-access-laterpay-0.2.css';
-import {Services} from '../../../src/services';
+import {listen} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {listen} from '../../../src/event-helper';
-import {removeChildren} from '../../../src/dom';
 
 const TAG = 'amp-access-laterpay';
 
@@ -170,11 +156,13 @@ export class LaterpayVendor {
     this.currentLocale_ = this.laterpayConfig_['locale'] || 'en';
 
     /** @private {!JsonObject} */
-    this.i18n_ = /** @type {!JsonObject} */ (Object.assign(
-      dict(),
-      DEFAULT_MESSAGES,
-      this.laterpayConfig_['localeMessages'] || dict()
-    ));
+    this.i18n_ = /** @type {!JsonObject} */ (
+      Object.assign(
+        dict(),
+        DEFAULT_MESSAGES,
+        this.laterpayConfig_['localeMessages'] || dict()
+      )
+    );
 
     /** @private {string} */
     this.purchaseConfigBaseUrl_ = this.getConfigUrl_() + CONFIG_BASE_PATH;

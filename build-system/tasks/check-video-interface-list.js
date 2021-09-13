@@ -1,25 +1,10 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const {getStdout} = require('../common/process');
 const {readFile} = require('fs-extra');
 const {writeDiffOrFail} = require('../common/diff');
 
 /** Checks or updates 3rd party video player list on this Markdown file. */
-const filepath = 'spec/amp-video-interface.md';
+const filepath = 'docs/spec/amp-video-interface.md';
 
 /** Excludes these extensions since they're on a separate list. */
 const excludeGeneric = ['amp-video', 'amp-video-iframe'];
@@ -44,7 +29,7 @@ const entry = (name) =>
  */
 const generateList = () =>
   getStdout(
-    ['grep -lr', `"${grepJsContent}"`, ...globby.sync(grepJsFiles)].join(' ')
+    ['grep -lr', `"${grepJsContent}"`, ...fastGlob.sync(grepJsFiles)].join(' ')
   )
     .trim()
     .split('\n')
@@ -67,6 +52,7 @@ const getListRegExp = () =>
 
 /**
  * Checks or updates 3rd party video player list.
+ * @return {Promise<void>}
  */
 async function checkVideoInterfaceList() {
   const current = await readFile(filepath, 'utf-8');
@@ -80,8 +66,9 @@ module.exports = {
   checkVideoInterfaceList,
 };
 
-checkVideoInterfaceList.description = `Checks or updates 3rd party video player list on ${filepath}`;
+checkVideoInterfaceList.description =
+  'Check 3rd party video player list in amp-video-interface.md';
 
 checkVideoInterfaceList.flags = {
-  'fix': 'Write to file',
+  'fix': 'Update the list and write results to file',
 };
