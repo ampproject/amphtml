@@ -18,7 +18,7 @@ const {isCiBuild} = require('../common/ci');
 const {log} = require('../common/logging');
 
 /**
- * @function {{
+ * @typedef {Function & {
  *  description: string,
  *  flags?: Object,
  * }}

@@ -205,8 +205,8 @@ async function waitForElementVisibility(page, selector, options) {
         'verbose',
         'Expecting all element visibilities to be',
         cyan(waitForVisible),
-        '; they are',
-        cyan(elementsAreVisible)
+        '; they are:',
+        cyan(elementsAreVisible.join(', '))
       );
     } else {
       log('verbose', 'No', cyan(selector), 'matches found');

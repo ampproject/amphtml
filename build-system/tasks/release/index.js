@@ -2,8 +2,8 @@
 
 /**
  * @typedef {{
- *  name?: string,
- *  environment?: string,
+ *  name: string,
+ *  environment: string,
  *  issue?: string,
  *  expiration_date_utc?: string,
  *  define_experiment_constant?: string,
@@ -13,9 +13,9 @@ let ExperimentConfigDef;
 
 /**
  * @typedef {{
- *  experimentA: ExperimentConfigDef,
- *  experimentB: ExperimentConfigDef,
- *  experimentC: ExperimentConfigDef,
+ *  experimentA: ExperimentConfigDef | {},
+ *  experimentB: ExperimentConfigDef | {},
+ *  experimentC: ExperimentConfigDef | {},
  * }}
  */
 let ExperimentsConfigDef;
@@ -44,6 +44,7 @@ const {MINIFIED_TARGETS} = require('../helpers');
 const {VERSION} = require('../../compile/internal-version');
 
 // Flavor config for the base flavor type.
+/** @type {DistFlavorDef} */
 const BASE_FLAVOR_CONFIG = {
   flavorType: 'base',
   name: 'base',
@@ -151,17 +152,25 @@ function discoverDistFlavors_() {
     ...experimentConfigDefs
       .filter(
         // Only include experiments that have a `define_experiment_constant` field.
-        ([, experimentConfig]) => experimentConfig.define_experiment_constant
+        ([, experimentConfig]) =>
+          'define_experiment_constant' in experimentConfig &&
+          experimentConfig.define_experiment_constant
       )
-      .map(([flavorType, experimentConfig]) => ({
-        // TODO(#28168, erwinmombay): relace with single `--module --nomodule` command.
-        command: `amp dist --noconfig --define_experiment_constant ${experimentConfig.define_experiment_constant}`,
-        flavorType,
-        rtvPrefixes: [
-          EXPERIMENTAL_RTV_PREFIXES[experimentConfig.environment][flavorType],
-        ],
-        ...experimentConfig,
-      })),
+      .map(
+        (
+          /** @type {[string, ExperimentConfigDef]} // guaranteed by .filter */ [
+            flavorType,
+            experimentConfig,
+          ]
+        ) => ({
+          command: `amp dist --noconfig --define_experiment_constant ${experimentConfig.define_experiment_constant}`,
+          flavorType,
+          rtvPrefixes: [
+            EXPERIMENTAL_RTV_PREFIXES[experimentConfig.environment][flavorType],
+          ],
+          ...experimentConfig,
+        })
+      ),
   ].filter(
     // If --flavor is defined, filter out the rest.
     ({flavorType}) => !argv.flavor || flavorType == argv.flavor
@@ -303,8 +312,11 @@ async function populateOrgCdn_(flavorType, rtvPrefixes, tempDir, outputDir) {
   if (flavorType == 'base') {
     rtvCopyingPromises.push(
       ...Object.entries(experimentsConfig)
-        // eslint-disable-next-line local/no-deep-destructuring
-        .filter(([, {environment}]) => environment == 'INABOX')
+        .filter(
+          ([, experimentConfig]) =>
+            'environment' in experimentConfig &&
+            experimentConfig.environment == 'INABOX'
+        )
         .map(
           ([experimentFlavor]) =>
             EXPERIMENTAL_RTV_PREFIXES['INABOX'][`${experimentFlavor}-control`]
