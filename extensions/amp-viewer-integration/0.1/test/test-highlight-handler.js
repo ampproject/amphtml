@@ -100,7 +100,7 @@ describes.fakeWin(
 );
 
 describes.realWin(
-  'HighlightHandler',
+  'HighlightHandler with Chrome < 93 and other browsers',
   {
     // We can not overwrite win.location with realWin.
     amp: {
@@ -122,12 +122,6 @@ describes.realWin(
       div1.textContent = 'highlighted text';
       root.appendChild(div1);
 
-      //  Used in Chrome 93+
-      env.sandbox
-        .stub(env.ampdoc, 'whenFirstVisible')
-        .returns({then: (cb) => (initCb = cb)});
-
-      // Used in everything else.
       env.sandbox
         .stub(docready, 'whenDocumentReady')
         .returns({then: (cb) => (initCb = cb)});
@@ -458,7 +452,7 @@ describes.realWin(
     // TODO(dmanek): remove `ifChrome` once we remove Chrome version detection
     it.configure()
       .ifChrome()
-      .run('should highlight using text fragments for Chrome 93', async () => {
+      .run('should highlight using text fragments', async () => {
         const {ampdoc} = env;
         let whenFirstVisiblePromiseResolve;
         const whenFirstVisiblePromise = new Promise((resolve) => {
