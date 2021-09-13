@@ -158,13 +158,6 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
     });
   });
 
-  describe('createCta', () => {
-    let buttonFitter;
-
-    beforeEach(() => {
-      buttonFitter = new ButtonTextFitter(env.ampdoc);
-    });
-
   describe('createCta page outlink element', () => {
     let buttonFitter;
 
