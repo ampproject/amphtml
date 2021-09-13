@@ -223,33 +223,6 @@ function createPageOutlink_(doc, uiMetadata, container) {
 }
 
 /**
- * Creates a CTA layer, returns an anchor tag containing relevant data if successful.
- * @param {!Element} a
- * @param {!Document} doc
- * @param {!Element} container
- * @return {?Element}
- */
-function createCtaLayer_(a, doc, container) {
-  const ctaLayer = doc.createElement('amp-story-cta-layer');
-  ctaLayer.className = 'i-amphtml-cta-container';
-
-  const linkRoot = createElementWithAttributes(
-    doc,
-    'div',
-    dict({
-      'class': 'i-amphtml-story-ad-link-root',
-      'role': 'button',
-    })
-  );
-
-  createShadowRootWithStyle(linkRoot, a, ctaButtonCSS);
-
-  ctaLayer.appendChild(linkRoot);
-  container.appendChild(ctaLayer);
-  return a;
-}
-
-/**
  * @param {!Document} doc
  * @param {!./story-ad-button-text-fitter.ButtonTextFitter} buttonFitter
  * @param {!Element} container
