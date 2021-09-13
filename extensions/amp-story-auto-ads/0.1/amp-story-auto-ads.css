@@ -1,10 +1,3 @@
-
-
-.i-amphtml-story-desktop-panels amp-story-page[i-amphtml-loading][ad] {
-  /* Move below viewport so that ad preloads */
-  transform: scale(1) translateX(-100%) translateY(200%) !important;
-}
-
 .i-amphtml-story-desktop-fullbleed .i-amphtml-cta-container {
   /* Ad will be 75vh, align bottom of container to bottom of ad. */
   bottom: 12.5vh !important;
