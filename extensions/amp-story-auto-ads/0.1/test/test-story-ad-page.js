@@ -217,24 +217,6 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       storyAdPage.toggleVisibility();
       expect(altBody).not.to.have.attribute('amp-story-visible');
     });
-
-    it('should add/remove the cta-active signal', async () => {
-      const pageElement = storyAdPage.build();
-      // Stub delegateVideoAutoplay.
-      pageElement.getImpl = () => Promise.resolve(pageImplMock);
-      doc.body.appendChild(pageElement);
-
-      const ampAdElement = doc.querySelector('amp-ad');
-      ampAdElement.setAttribute('data-vars-ctaurl', 'https://cats.example');
-      ampAdElement.setAttribute('data-vars-ctatype', 'INSTALL');
-      await storyAdPage.maybeCreateCta();
-
-      const anchor = doc.querySelector('.i-amphtml-story-ad-link');
-      expect(anchor).to.exist;
-      expect(anchor).not.to.have.attribute('cta-active');
-      storyAdPage.toggleVisibility();
-      expect(anchor).to.have.attribute('cta-active');
-    });
   });
 
   describe('#maybeCreateCta', () => {
@@ -248,46 +230,6 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       doc.body.appendChild(pageElement);
 
       ampAdElement = doc.querySelector('amp-ad');
-    });
-
-    it('reads cta values as data-attributes added by a4a impl', async () => {
-      ampAdElement.setAttribute('data-vars-ctaurl', 'https://amp.dev');
-      ampAdElement.setAttribute('data-vars-ctatype', 'INSTALL');
-
-      const created = await storyAdPage.maybeCreateCta();
-      expect(created).to.be.true;
-
-      const ctaLayer = doc.querySelector('amp-story-cta-layer');
-      expect(ctaLayer).to.exist;
-      const anchor = ctaLayer.querySelector('a');
-      expect(anchor.target).to.equal('_blank');
-      expect(anchor.href).to.equal('https://amp.dev/');
-      expect(anchor).to.have.attribute(
-        'style',
-        'font-size: 0px; transform: scale(0);'
-      );
-      expect(anchor).to.have.class('i-amphtml-story-ad-link');
-      expect(anchor.textContent).to.equal('Install Now');
-    });
-
-    it('allows custom CTA text', async () => {
-      ampAdElement.setAttribute('data-vars-ctaurl', 'https://amp.dev');
-      ampAdElement.setAttribute('data-vars-ctatype', 'I am a custom button!');
-
-      const created = await storyAdPage.maybeCreateCta();
-      expect(created).to.be.true;
-
-      const ctaLayer = doc.querySelector('amp-story-cta-layer');
-      expect(ctaLayer).to.exist;
-      const anchor = ctaLayer.querySelector('a');
-      expect(anchor.target).to.equal('_blank');
-      expect(anchor.href).to.equal('https://amp.dev/');
-      expect(anchor).to.have.attribute(
-        'style',
-        'font-size: 0px; transform: scale(0);'
-      );
-      expect(anchor).to.have.class('i-amphtml-story-ad-link');
-      expect(anchor.textContent).to.equal('I am a custom button!');
     });
 
     it('rejects custom CTA text if it is too long', async () => {
