@@ -72,7 +72,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.animateTo_ = {};
 
     /** @private {?{width: number, height: number}} */
-    this.pageSize_ = null;
+    this.elementSize_ = null;
 
     /** @private {?panningMediaPositionDef} Current animation state. */
     this.animationState_ = {};
@@ -129,8 +129,11 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   initializeListeners_() {
     this.storeService_.subscribe(
       StateProperty.PAGE_SIZE,
-      (pageSize) => {
-        this.pageSize_ = pageSize;
+      () => {
+        this.elementSize_ = {
+          width: this.element_./*OK*/ offsetWidth,
+          height: this.element_./*OK*/ offsetHeight,
+        };
         this.setImageCenteringStyles_();
         this.setAnimateTo_();
         this.animate_();
@@ -187,7 +190,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    */
   getMaxBounds_() {
     // Calculations to clamp image to edge of container.
-    const {height: containerHeight, width: containerWidth} = this.pageSize_;
+    const {height, width} = this.elementSize_;
 
     const ampImgWidth = this.ampImgEl_.getAttribute('width');
     const ampImgHeight = this.ampImgEl_.getAttribute('height');
@@ -198,20 +201,17 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       );
     }
 
-    const containerRatio = containerWidth / containerHeight;
+    const containerRatio = width / height;
     const imageRatio = ampImgWidth / ampImgHeight;
     const percentScaledToFitViewport =
-      containerRatio < imageRatio
-        ? containerHeight / ampImgHeight
-        : containerWidth / ampImgWidth;
+      containerRatio < imageRatio ? height / ampImgHeight : width / ampImgWidth;
 
     const scaledImageWidth = percentScaledToFitViewport * ampImgWidth;
     const scaledImageHeight = percentScaledToFitViewport * ampImgHeight;
 
-    const widthFraction =
-      1 - containerWidth / (scaledImageWidth * this.animateTo_.zoom);
+    const widthFraction = 1 - width / (scaledImageWidth * this.animateTo_.zoom);
     const heightFraction =
-      1 - containerHeight / (scaledImageHeight * this.animateTo_.zoom);
+      1 - height / (scaledImageHeight * this.animateTo_.zoom);
 
     return {
       horizontal: DISTANCE_TO_CENTER_EDGE_PERCENT * widthFraction,
@@ -281,8 +281,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     if (!imgEl) {
       return;
     }
-    const {height: containerHeight, width: containerWidth} = this.pageSize_;
-    const containerRatio = containerWidth / containerHeight;
+    const {height, width} = this.elementSize_;
+    const containerRatio = width / height;
     const ampImgWidth = this.ampImgEl_.getAttribute('width');
     const ampImgHeight = this.ampImgEl_.getAttribute('height');
     const imageRatio = ampImgWidth / ampImgHeight;
