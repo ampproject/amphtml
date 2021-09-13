@@ -2,6 +2,10 @@
 
 @import './amp-story-desktop-user-overridable.css';
 
+amp-story[standalone] {
+  background-color: black;
+}
+
 /**
  * NOTE: If you change any variables or media queries change:
  * css/amp-story-player-shadow.css
@@ -12,13 +16,14 @@
   :root:not([data-story-supports-landscape]) {
     --i-amphtml-story-desktop-one-panel-ratio: 69 / 116;
     --i-amphtml-story-desktop-one-panel-responsive-margin: max(74px, 8.25vh);
-      /** Calculates panel height by subtracting responsive vertical margin. */
-    --story-page-vh: calc(100vh - var(--i-amphtml-story-desktop-one-panel-responsive-margin) * 2);
-    --story-page-vw: calc(var(--i-amphtml-story-desktop-one-panel-height) * var(--i-amphtml-story-desktop-one-panel-ratio));
+    /** Calculates panel height by subtracting responsive vertical margin. */
+    --i-amphtml-story-desktop-one-panel-height: calc(100vh - var(--i-amphtml-story-desktop-one-panel-responsive-margin) * 2);
+    --i-amphtml-story-desktop-one-panel-width: calc(var(--i-amphtml-story-desktop-one-panel-height) * var(--i-amphtml-story-desktop-one-panel-ratio));
     --i-amphtml-story-desktop-one-panel-border-radius: 10px;
+    font-size: calc(var(--i-amphtml-story-desktop-one-panel-height, 100vh) * .025);
   }
 
-  @media (max-height: 756px) {
+  @media(max-height: 756px) {
     :root:not([data-story-supports-landscape]) {
       --i-amphtml-story-desktop-one-panel-responsive-margin: 0;
       --i-amphtml-story-desktop-one-panel-width: calc(100vh * var(--i-amphtml-story-desktop-one-panel-ratio));
@@ -31,7 +36,13 @@
       --i-amphtml-story-desktop-one-panel-ratio: 3 / 4;
     }
   }
-  :root:not([data-story-supports-landscape]) amp-story-page {
+  amp-story:not([supports-landscape]) {
+    --story-page-vw: calc(var(--i-amphtml-story-desktop-one-panel-width) * .01);
+    --story-page-vh: calc(var(--i-amphtml-story-desktop-one-panel-height) * .01);
+  }
+  amp-story:not([supports-landscape]) amp-story-page {
+    width: var(--i-amphtml-story-desktop-one-panel-width) !important;
+    height: var(--i-amphtml-story-desktop-one-panel-height) !important;
     border-radius: var(--i-amphtml-story-desktop-one-panel-border-radius) !important;
     margin: auto !important;
   }
