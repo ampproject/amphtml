@@ -8,9 +8,6 @@ const {cyan, green, red, yellow} = require('../common/colors');
 const {log} = require('../common/logging');
 const {Octokit} = require('@octokit/rest');
 
-// TODO(danielrozenberg): remove this once the Google-backed job is turned off.
-const DRY_RUN = true;
-
 const params = {owner: 'ampproject', repo: 'amphtml'};
 
 const colorizeState = (state) =>
@@ -60,11 +57,6 @@ async function cutNightlyBranch() {
     log('Status of commit', cyan(sha), 'is', colorizeState(state));
 
     if (state === 'success') {
-      if (DRY_RUN) {
-        log(yellow('NOTE:'), 'this job is running in DRY_RUN mode.');
-        break;
-      }
-
       const response = await octokit.rest.git.updateRef({
         ...params,
         ref: 'heads/nightly',
