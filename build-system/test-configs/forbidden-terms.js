@@ -144,12 +144,13 @@ const forbiddenTermsGlobal = {
     message:
       'Do not use build constants directly. Instead, use the helpers in `#core/mode`.',
     allowlist: [
-      'src/core/mode/version.js',
+      'build-system/babel-plugins/babel-plugin-amp-mode-transformer/index.js',
+      'build-system/compile/build-compiler.js',
+      'build-system/compile/build-constants.js',
+      'src/core/mode/esm.js',
       'src/core/mode/minified.js',
       'src/core/mode/prod.js',
-      'src/core/mode/esm.js',
-      'build-system/compile/build-constants.js',
-      'build-system/babel-plugins/babel-plugin-amp-mode-transformer/index.js',
+      'src/core/mode/version.js',
     ],
   },
   '\\.prefetch\\(': {
@@ -726,6 +727,55 @@ const forbiddenTermsGlobal = {
     ],
     checkInTestFolder: true,
   },
+  'withA11y':
+    'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
+  '@storybook/addon-knobs': {
+    message:
+      'The @storybook/addon-knobs package has been deprecated. Use Controls instead (`args` and `argTypes`). https://storybook.js.org/docs/react/essentials/controls',
+    allowlist: [
+      // TODO(#35923): Update existing files to use Controls instead.
+      'build-system/tasks/storybook/amp-env/main.js',
+      'build-system/tasks/storybook/preact-env/main.js',
+      'extensions/amp-animation/0.1/storybook/template.js',
+      'extensions/amp-date-display/1.0/storybook/Basic.amp.js',
+      'extensions/amp-date-display/1.0/storybook/Basic.js',
+      'extensions/amp-iframe/0.1/storybook/Basic.amp.js',
+      'extensions/amp-iframe/1.0/storybook/Basic.amp.js',
+      'extensions/amp-image-slider/0.1/storybook/Basic.amp.js',
+      'extensions/amp-inline-gallery/1.0/storybook/Basic.js',
+      'extensions/amp-lightbox/1.0/storybook/Basic.amp.js',
+      'extensions/amp-lightbox/1.0/storybook/Basic.js',
+      'extensions/amp-lightbox-gallery/1.0/storybook/Basic.amp.js',
+      'extensions/amp-lightbox-gallery/1.0/storybook/Basic.js',
+      'extensions/amp-render/1.0/storybook/Basic.js',
+      'extensions/amp-selector/1.0/storybook/Basic.amp.js',
+      'extensions/amp-selector/1.0/storybook/Basic.js',
+      'extensions/amp-sidebar/0.1/storybook/Basic.amp.js',
+      'extensions/amp-sidebar/1.0/storybook/Basic.amp.js',
+      'extensions/amp-sidebar/1.0/storybook/Basic.js',
+      'extensions/amp-soundcloud/1.0/storybook/Basic.amp.js',
+      'extensions/amp-soundcloud/1.0/storybook/Basic.js',
+      'extensions/amp-stream-gallery/1.0/storybook/Basic.amp.js',
+      'extensions/amp-stream-gallery/1.0/storybook/Basic.js',
+      'extensions/amp-timeago/1.0/storybook/Basic.js',
+      'extensions/amp-twitter/0.1/storybook/Basic.amp.js',
+      'extensions/amp-twitter/1.0/storybook/Basic.amp.js',
+      'extensions/amp-twitter/1.0/storybook/Basic.js',
+      'extensions/amp-video/1.0/storybook/Basic.amp.js',
+      'extensions/amp-video/1.0/storybook/Basic.js',
+      'extensions/amp-video-iframe/1.0/storybook/Basic.amp.js',
+      'extensions/amp-vimeo/1.0/storybook/Basic.amp.js',
+      'extensions/amp-vimeo/1.0/storybook/Basic.js',
+      'extensions/amp-wordpress-embed/1.0/storybook/Basic.amp.js',
+      'extensions/amp-youtube/0.1/storybook/Basic.amp.js',
+      'extensions/amp-youtube/1.0/storybook/Basic.amp.js',
+      'extensions/amp-youtube/1.0/storybook/Basic.js',
+      'src/builtins/storybook/amp-layout-with-aspect-ratio-css.amp.js',
+      'src/builtins/storybook/amp-layout.amp.js',
+      'src/preact/storybook/Context.js',
+      'src/preact/storybook/Wrappers.js',
+    ],
+  },
 };
 
 const bannedTermsHelpString =
@@ -1047,8 +1097,6 @@ const forbiddenTermsSrcInclusive = {
       'third_party/react-dates/scope-require.js',
     ],
   },
-  'withA11y':
-    'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
   'detectIsAutoplaySupported': {
     message:
       'Detecting autoplay support is expensive. Use the cached function "isAutoplaySupported" instead.',

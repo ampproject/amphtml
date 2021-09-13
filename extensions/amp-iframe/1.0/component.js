@@ -2,8 +2,9 @@ import * as Preact from '#preact';
 import {useCallback, useEffect, useMemo, useRef} from '#preact';
 import {MessageType} from '#core/3p-frame-messaging';
 import {toWin} from '#core/window';
-import {ContainWrapper} from '#preact/component';
+import {ContainWrapper, useIntersectionObserver} from '#preact/component';
 import {setStyle} from '#core/dom/style';
+import {useMergeRefs} from '#preact/utils';
 
 const NOOP = () => {};
 
@@ -39,15 +40,16 @@ export function Iframe({
   };
 
   const attemptResize = useCallback(() => {
-    const iframe = iframeRef.current;
-    let height = Number(dataRef.current.height);
-    let width = Number(dataRef.current.width);
+    let height = Number(dataRef.current?.height);
+    let width = Number(dataRef.current?.width);
+    dataRef.current = null;
     if (!height && !width) {
       console./*OK*/ error(
         'Ignoring resize request because width and height value is invalid'
       );
       return;
     }
+    const iframe = iframeRef.current;
     // TODO(dmanek): Calculate width and height of the container to include padding.
     if (!height) {
       height = iframe./*OK*/ offsetHeight;
@@ -75,7 +77,14 @@ export function Iframe({
         return;
       }
       dataRef.current = event.data;
-      attemptResize();
+      // We only allow resizing when the iframe is outside the viewport,
+      // to guarantee CLS compliance. This may have the side effect of the iframe
+      // not resizing on `embed-size` postMessage while it's within the viewport
+      // where an author wants to resize the iframe. In that
+      // case remove this check & call `attemptResize` directly.
+      if (isIntersectingRef.current === false) {
+        attemptResize();
+      }
     },
     [attemptResize]
   );
@@ -89,22 +98,28 @@ export function Iframe({
     if (!win) {
       return;
     }
-    const io = new win.IntersectionObserver((entries) => {
-      const last = entries[entries.length - 1];
-      isIntersectingRef.current = last.isIntersecting;
-      if (last.isIntersecting || !dataRef.current || !win) {
-        return;
-      }
-      attemptResize();
-    });
-    io.observe(iframe);
+
     win.addEventListener('message', handlePostMessage);
 
     return () => {
-      io.unobserve(iframe);
       win.removeEventListener('message', handlePostMessage);
     };
-  }, [attemptResize, handlePostMessage]);
+  }, [handlePostMessage]);
+
+  const ioCallback = useCallback(
+    ({isIntersecting}) => {
+      if (isIntersecting === isIntersectingRef.current) {
+        return;
+      }
+      isIntersectingRef.current = isIntersecting;
+      if (!isIntersecting && dataRef.current) {
+        attemptResize();
+      }
+    },
+    [attemptResize]
+  );
+
+  const measureRef = useIntersectionObserver(ioCallback);
 
   const contentProps = useMemo(
     () => ({
@@ -134,7 +149,7 @@ export function Iframe({
     <ContainWrapper
       contentAs="iframe"
       contentProps={contentProps}
-      contentRef={iframeRef}
+      contentRef={useMergeRefs([iframeRef, measureRef])}
       contentStyle={{'box-sizing': 'border-box', ...iframeStyle}}
       ref={containerRef}
       size

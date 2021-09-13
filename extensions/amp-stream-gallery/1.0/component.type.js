@@ -1,7 +1,7 @@
 /** @externs */
 
 /** @const */
-var StreamGalleryDef = {};
+var BentoStreamGalleryDef = {};
 
 /**
  * @typedef {{
@@ -22,7 +22,7 @@ var StreamGalleryDef = {};
  *   snap: (boolean|undefined)
  * }}
  */
-StreamGalleryDef.Props;
+BentoStreamGalleryDef.Props;
 
 /**
  * @typedef {{
@@ -33,4 +33,4 @@ StreamGalleryDef.Props;
  *   outsetArrows: (boolean|undefined)
  * }}
  */
-StreamGalleryDef.ArrowProps;
+BentoStreamGalleryDef.ArrowProps;

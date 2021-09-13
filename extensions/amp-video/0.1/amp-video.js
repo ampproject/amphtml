@@ -20,6 +20,7 @@ import {
   insertAfterOrAtStart,
   removeElement,
 } from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {fetchCachedSources} from './video-cache';
 import {
   fullscreenEnter,
@@ -606,6 +607,7 @@ export class AmpVideo extends AMP.BaseElement {
     tracks.forEach((track) => {
       this.video_.appendChild(track);
     });
+    this.setUpCaptions_();
 
     if (this.video_.changedSources) {
       this.video_.changedSources();
@@ -746,6 +748,29 @@ export class AmpVideo extends AMP.BaseElement {
     listenOncePromise(this.video_, 'loadedmetadata').then(() =>
       this.onVideoLoaded_()
     );
+    this.setUpCaptions_();
+  }
+
+  /**
+   * Connects to amp-story-captions component.
+   * @private
+   */
+  setUpCaptions_() {
+    const captionsId = this.element.getAttribute('captions-id');
+    if (!captionsId) {
+      return;
+    }
+    const captionsElement = this.win.document.querySelector(
+      `amp-story-captions#${escapeCssSelectorIdent(captionsId)}`
+    );
+    if (!captionsElement) {
+      return;
+    }
+    captionsElement.getImpl().then((impl) => {
+      if (impl.setVideoElement) {
+        impl.setVideoElement(this.video_);
+      }
+    });
   }
 
   /** @private */
