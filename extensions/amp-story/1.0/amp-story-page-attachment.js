@@ -38,13 +38,6 @@ const DRAG_CAP_PX = 56;
 const POST_TAP_ANIMATION_DURATION = 500;
 
 /**
- * The class name used by form submission elements.
- * @const {string}
- */
-const FORM_SUBMISSION_STATUS_CLASS_NAME =
-  'i-amphtml-story-page-attachment-form-submission-status';
-
-/**
  * @enum {string}
  */
 export const AttachmentTheme = {
@@ -500,7 +493,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   /**
    * Add a default form submission status element for each absent response
    * attribute.
-   * @param {!Element} formEl The form to which the response elements will be
+   * @param {!Element} formEl The form to which the status elements will be
    *     added.
    * @private
    */
@@ -528,19 +521,17 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   }
 
   /**
-   * Create an element that is used as a container for each default form status
-   * element.
+   * Create an element that is used to display the form status corresponding to
+   * the given response attribute.
    * @param {!FormResponseAttribute} responseAttribute
    * @return {!Element}
    * @private
    */
   createFormStatusEl_(responseAttribute) {
-    const containerEl = this.win.document.createElement('div');
-    containerEl.setAttribute(responseAttribute, '');
-    const contentEl = this.win.document.createElement('div');
-    contentEl.classList.add(FORM_SUBMISSION_STATUS_CLASS_NAME);
-    containerEl.appendChild(contentEl);
-    return containerEl;
+    const statusEl = htmlFor(this.element)`
+      <div><div class="i-amphtml-story-page-attachment-form-submission-status"></div></div>`;
+    statusEl.setAttribute(responseAttribute, '');
+    return statusEl;
   }
 
   /**
@@ -572,7 +563,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     );
 
     const iconEl = this.win.document.createElement('div');
-    iconEl.classList.add(FORM_SUBMISSION_STATUS_CLASS_NAME + '-icon');
+    iconEl.classList.add(
+      'i-amphtml-story-page-attachment-form-submission-status-icon'
+    );
     resultEl.firstElementChild.appendChild(iconEl);
 
     const textEl = this.win.document.createElement('div');
