@@ -270,7 +270,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       this.rootEl_.classList.add('i-amphtml-story-interactive-container');
       if (
         isExperimentOn(this.win, 'amp-story-interactive-disclaimer') &&
-        this.element.hasAttribute('endpoint')
+        this.element.getAttribute('endpoint')
       ) {
         this.disclaimerIcon_ = buildInteractiveDisclaimerIcon(this);
         this.rootEl_.prepend(this.disclaimerIcon_);

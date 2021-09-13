@@ -18,6 +18,7 @@
   "story-disable-animations-first-page": 0.5,
   "story-load-first-page-only": 1,
   "story-load-inactive-outside-viewport": 1,
+  "amp-story-interactive-disclaimer": 1,
   "amp-story-page-attachment-ui-v2": 1,
   "amp-sticky-ad-to-amp-ad-v2": 0
 }
