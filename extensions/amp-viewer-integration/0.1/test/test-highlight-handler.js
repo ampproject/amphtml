@@ -100,7 +100,7 @@ describes.fakeWin(
 );
 
 // TODO(35898): unskip
-describes.realWin.skip(
+describes.realWin(
   'HighlightHandler',
   {
     // We can not overwrite win.location with realWin.
@@ -129,286 +129,310 @@ describes.realWin.skip(
       });
     });
 
-    it('initialize with visibility=visible', () => {
-      const {ampdoc} = env;
-      const scrollStub = env.sandbox.stub(
-        Services.viewportForDoc(ampdoc),
-        'animateScrollIntoView'
-      );
-      scrollStub.returns(Promise.reject());
-      const sendMsgStub = env.sandbox.stub(
-        Services.viewerForDoc(ampdoc),
-        'sendMessage'
-      );
-      const setScrollTop = env.sandbox.stub(
-        Services.viewportForDoc(ampdoc),
-        'setScrollTop'
-      );
+    it.configure()
+      .skipChrome()
+      .run('initialize with visibility=visible', () => {
+        const {ampdoc} = env;
+        const scrollStub = env.sandbox.stub(
+          Services.viewportForDoc(ampdoc),
+          'animateScrollIntoView'
+        );
+        scrollStub.returns(Promise.reject());
+        const sendMsgStub = env.sandbox.stub(
+          Services.viewerForDoc(ampdoc),
+          'sendMessage'
+        );
+        const setScrollTop = env.sandbox.stub(
+          Services.viewportForDoc(ampdoc),
+          'setScrollTop'
+        );
 
-      const handler = new HighlightHandler(ampdoc, {
-        sentences: ['amp', 'highlight'],
+        const handler = new HighlightHandler(ampdoc, {
+          sentences: ['amp', 'highlight'],
+        });
+
+        // initHighlight_ is not called before document become ready.
+        expect(handler.highlightedNodes_).to.be.null;
+        docreadyCb();
+        // initHighlight_ was called in docreadyCb() and highlightedNodes_ is set.
+        expect(handler.highlightedNodes_).not.to.be.null;
+
+        expect(setScrollTop).to.be.calledOnce;
+        expect(setScrollTop.firstCall.args.length).to.equal(1);
+
+        expect(scrollStub).to.be.calledOnce;
+        expect(scrollStub.firstCall.args.length).to.equal(1);
+        expect(scrollStub.firstCall.args[0].style.pointerEvents).to.equal(
+          'none'
+        );
+        expect(scrollStub.firstCall.args[0].style.display).to.equal('block');
+
+        // For some reason, expect(args).to.deep.equal does not work.
+        expect(sendMsgStub.callCount).to.equal(2);
+        expect(sendMsgStub.firstCall.args[0]).to.equal('highlightState');
+        expect(sendMsgStub.firstCall.args[1]).to.deep.equal({
+          state: 'found',
+          scroll: 0,
+        });
+        expect(sendMsgStub.secondCall.args[1]).to.deep.equal({
+          state: 'auto_scroll',
+        });
+
+        expect(root.innerHTML).to.equal(
+          '<div>text in <span style="background-color: rgb(252, 255, 0); ' +
+            'color: rgb(0, 0, 0);">amp</span> doc</div><div>' +
+            '<span style="background-color: rgb(252, 255, 0); color: ' +
+            'rgb(0, 0, 0);">highlight</span>ed text</div>'
+        );
+
+        const viewerOrigin = 'http://localhost:9876';
+        const port = new WindowPortEmulator(window, viewerOrigin);
+        port.addEventListener = function () {};
+        port.postMessage = function () {};
+        const messaging = new Messaging(env.win, port);
+
+        handler.setupMessaging(messaging);
+        messaging.handleRequest_({
+          name: 'highlightDismiss',
+        });
+        expect(root.innerHTML).to.equal(
+          '<div>text in <span style="">amp</span> doc</div><div>' +
+            '<span style="">highlight</span>ed text</div>'
+        );
       });
 
-      // initHighlight_ is not called before document become ready.
-      expect(handler.highlightedNodes_).to.be.null;
-      docreadyCb();
-      // initHighlight_ was called in docreadyCb() and highlightedNodes_ is set.
-      expect(handler.highlightedNodes_).not.to.be.null;
+    it.configure()
+      .skipChrome()
+      .run('initialize with skipRendering', () => {
+        const {ampdoc} = env;
+        const scrollStub = env.sandbox.stub(
+          Services.viewportForDoc(ampdoc),
+          'animateScrollIntoView'
+        );
+        scrollStub.returns(Promise.reject());
+        const sendMsgStub = env.sandbox.stub(
+          Services.viewerForDoc(ampdoc),
+          'sendMessage'
+        );
 
-      expect(setScrollTop).to.be.calledOnce;
-      expect(setScrollTop.firstCall.args.length).to.equal(1);
+        new HighlightHandler(ampdoc, {
+          sentences: ['amp', 'highlight'],
+          skipRendering: true,
+        });
+        docreadyCb();
 
-      expect(scrollStub).to.be.calledOnce;
-      expect(scrollStub.firstCall.args.length).to.equal(1);
-      expect(scrollStub.firstCall.args[0].style.pointerEvents).to.equal('none');
-      expect(scrollStub.firstCall.args[0].style.display).to.equal('block');
+        expect(scrollStub).not.to.be.called;
 
-      // For some reason, expect(args).to.deep.equal does not work.
-      expect(sendMsgStub.callCount).to.equal(2);
-      expect(sendMsgStub.firstCall.args[0]).to.equal('highlightState');
-      expect(sendMsgStub.firstCall.args[1]).to.deep.equal({
-        state: 'found',
-        scroll: 0,
-      });
-      expect(sendMsgStub.secondCall.args[1]).to.deep.equal({
-        state: 'auto_scroll',
-      });
+        // For some reason, expect(args).to.deep.equal does not work.
+        expect(sendMsgStub.callCount).to.equal(1);
+        expect(sendMsgStub.firstCall.args[0]).to.equal('highlightState');
+        expect(sendMsgStub.firstCall.args[1]).to.deep.equal({
+          state: 'found',
+          scroll: 0,
+        });
 
-      expect(root.innerHTML).to.equal(
-        '<div>text in <span style="background-color: rgb(252, 255, 0); ' +
-          'color: rgb(0, 0, 0);">amp</span> doc</div><div>' +
-          '<span style="background-color: rgb(252, 255, 0); color: ' +
-          'rgb(0, 0, 0);">highlight</span>ed text</div>'
-      );
-
-      const viewerOrigin = 'http://localhost:9876';
-      const port = new WindowPortEmulator(window, viewerOrigin);
-      port.addEventListener = function () {};
-      port.postMessage = function () {};
-      const messaging = new Messaging(env.win, port);
-
-      handler.setupMessaging(messaging);
-      messaging.handleRequest_({
-        name: 'highlightDismiss',
-      });
-      expect(root.innerHTML).to.equal(
-        '<div>text in <span style="">amp</span> doc</div><div>' +
-          '<span style="">highlight</span>ed text</div>'
-      );
-    });
-
-    it('initialize with skipRendering', () => {
-      const {ampdoc} = env;
-      const scrollStub = env.sandbox.stub(
-        Services.viewportForDoc(ampdoc),
-        'animateScrollIntoView'
-      );
-      scrollStub.returns(Promise.reject());
-      const sendMsgStub = env.sandbox.stub(
-        Services.viewerForDoc(ampdoc),
-        'sendMessage'
-      );
-
-      new HighlightHandler(ampdoc, {
-        sentences: ['amp', 'highlight'],
-        skipRendering: true,
-      });
-      docreadyCb();
-
-      expect(scrollStub).not.to.be.called;
-
-      // For some reason, expect(args).to.deep.equal does not work.
-      expect(sendMsgStub.callCount).to.equal(1);
-      expect(sendMsgStub.firstCall.args[0]).to.equal('highlightState');
-      expect(sendMsgStub.firstCall.args[1]).to.deep.equal({
-        state: 'found',
-        scroll: 0,
+        expect(root.innerHTML).to.equal(
+          '<div>text in <span>amp</span> doc</div><div><span>highlight</span>' +
+            'ed text</div>'
+        );
       });
 
-      expect(root.innerHTML).to.equal(
-        '<div>text in <span>amp</span> doc</div><div><span>highlight</span>' +
-          'ed text</div>'
-      );
-    });
+    it.configure()
+      .skipChrome()
+      .run('initialize with skipScrollAnimation', () => {
+        const {ampdoc} = env;
+        const scrollStub = env.sandbox.stub(
+          Services.viewportForDoc(ampdoc),
+          'animateScrollIntoView'
+        );
+        scrollStub.returns(Promise.reject());
+        const sendMsgStub = env.sandbox.stub(
+          Services.viewerForDoc(ampdoc),
+          'sendMessage'
+        );
+        const setScrollTop = env.sandbox.stub(
+          Services.viewportForDoc(ampdoc),
+          'setScrollTop'
+        );
 
-    it('initialize with skipScrollAnimation', () => {
-      const {ampdoc} = env;
-      const scrollStub = env.sandbox.stub(
-        Services.viewportForDoc(ampdoc),
-        'animateScrollIntoView'
-      );
-      scrollStub.returns(Promise.reject());
-      const sendMsgStub = env.sandbox.stub(
-        Services.viewerForDoc(ampdoc),
-        'sendMessage'
-      );
-      const setScrollTop = env.sandbox.stub(
-        Services.viewportForDoc(ampdoc),
-        'setScrollTop'
-      );
+        const handler = new HighlightHandler(ampdoc, {
+          sentences: ['amp', 'highlight'],
+          skipScrollAnimation: true,
+        });
 
-      const handler = new HighlightHandler(ampdoc, {
-        sentences: ['amp', 'highlight'],
-        skipScrollAnimation: true,
+        // initHighlight_ is not called before document become ready.
+        expect(handler.highlightedNodes_).to.be.null;
+        docreadyCb();
+        // initHighlight_ was called in docreadyCb() and highlightedNodes_ is set.
+        expect(handler.highlightedNodes_).not.to.be.null;
+
+        expect(setScrollTop).to.be.calledOnce;
+        expect(setScrollTop.firstCall.args.length).to.equal(1);
+
+        expect(scrollStub).not.to.be.calledOnce;
+
+        // For some reason, expect(args).to.deep.equal does not work.
+        expect(sendMsgStub.callCount).to.equal(3);
+        expect(sendMsgStub.firstCall.args[0]).to.equal('highlightState');
+        expect(sendMsgStub.firstCall.args[1]).to.deep.equal({
+          state: 'found',
+          scroll: 0,
+        });
+        expect(sendMsgStub.secondCall.args[1]).to.deep.equal({
+          state: 'auto_scroll',
+        });
+        expect(sendMsgStub.thirdCall.args[1]).to.deep.equal({
+          state: 'shown',
+        });
       });
 
-      // initHighlight_ is not called before document become ready.
-      expect(handler.highlightedNodes_).to.be.null;
-      docreadyCb();
-      // initHighlight_ was called in docreadyCb() and highlightedNodes_ is set.
-      expect(handler.highlightedNodes_).not.to.be.null;
+    it.configure()
+      .skipChrome()
+      .run('initialize with amp-access', () => {
+        // Inject <script id="amp-access"> to emulate pages with <amp-access>.
+        const {document} = env.win;
+        const script = document.createElement('script');
+        script.id = 'amp-access';
+        document.body.appendChild(script);
 
-      expect(setScrollTop).to.be.calledOnce;
-      expect(setScrollTop.firstCall.args.length).to.equal(1);
+        const {ampdoc} = env;
+        const scrollStub = env.sandbox.stub(
+          Services.viewportForDoc(ampdoc),
+          'animateScrollIntoView'
+        );
+        scrollStub.returns(Promise.reject());
+        const sendMsgStub = env.sandbox.stub(
+          Services.viewerForDoc(ampdoc),
+          'sendMessage'
+        );
 
-      expect(scrollStub).not.to.be.calledOnce;
+        new HighlightHandler(ampdoc, {sentences: ['amp', 'highlight']});
+        docreadyCb();
 
-      // For some reason, expect(args).to.deep.equal does not work.
-      expect(sendMsgStub.callCount).to.equal(3);
-      expect(sendMsgStub.firstCall.args[0]).to.equal('highlightState');
-      expect(sendMsgStub.firstCall.args[1]).to.deep.equal({
-        state: 'found',
-        scroll: 0,
-      });
-      expect(sendMsgStub.secondCall.args[1]).to.deep.equal({
-        state: 'auto_scroll',
-      });
-      expect(sendMsgStub.thirdCall.args[1]).to.deep.equal({
-        state: 'shown',
-      });
-    });
+        expect(scrollStub).not.to.be.called;
 
-    it('initialize with amp-access', () => {
-      // Inject <script id="amp-access"> to emulate pages with <amp-access>.
-      const {document} = env.win;
-      const script = document.createElement('script');
-      script.id = 'amp-access';
-      document.body.appendChild(script);
+        // For some reason, expect(args).to.deep.equal does not work.
+        expect(sendMsgStub.callCount).to.equal(1);
+        expect(sendMsgStub.firstCall.args[0]).to.equal('highlightState');
+        expect(sendMsgStub.firstCall.args[1]).to.deep.equal({
+          state: 'has_amp_access',
+        });
 
-      const {ampdoc} = env;
-      const scrollStub = env.sandbox.stub(
-        Services.viewportForDoc(ampdoc),
-        'animateScrollIntoView'
-      );
-      scrollStub.returns(Promise.reject());
-      const sendMsgStub = env.sandbox.stub(
-        Services.viewerForDoc(ampdoc),
-        'sendMessage'
-      );
-
-      new HighlightHandler(ampdoc, {sentences: ['amp', 'highlight']});
-      docreadyCb();
-
-      expect(scrollStub).not.to.be.called;
-
-      // For some reason, expect(args).to.deep.equal does not work.
-      expect(sendMsgStub.callCount).to.equal(1);
-      expect(sendMsgStub.firstCall.args[0]).to.equal('highlightState');
-      expect(sendMsgStub.firstCall.args[1]).to.deep.equal({
-        state: 'has_amp_access',
+        expect(root.innerHTML).to.equal(
+          '<div>text in amp doc</div><div>highlighted text</div>'
+        );
       });
 
-      expect(root.innerHTML).to.equal(
-        '<div>text in amp doc</div><div>highlighted text</div>'
-      );
-    });
+    it.configure()
+      .skipChrome()
+      .run('initialize with visibility=prerender', () => {
+        // If visibility != visible, highlight texts and scroll to the start
+        // position of the animation. But do not trigger the animation.
+        const {ampdoc} = env;
+        const scrollStub = env.sandbox.stub(
+          Services.viewportForDoc(ampdoc),
+          'animateScrollIntoView'
+        );
+        scrollStub.returns(Promise.reject());
+        const sendMsgStub = env.sandbox.stub(
+          Services.viewerForDoc(ampdoc),
+          'sendMessage'
+        );
+        const setScrollTop = env.sandbox.stub(
+          Services.viewportForDoc(ampdoc),
+          'setScrollTop'
+        );
+        env.sandbox
+          .stub(ampdoc, 'getVisibilityState')
+          .returns(VisibilityState.PRERENDER);
 
-    it('initialize with visibility=prerender', () => {
-      // If visibility != visible, highlight texts and scroll to the start
-      // position of the animation. But do not trigger the animation.
-      const {ampdoc} = env;
-      const scrollStub = env.sandbox.stub(
-        Services.viewportForDoc(ampdoc),
-        'animateScrollIntoView'
-      );
-      scrollStub.returns(Promise.reject());
-      const sendMsgStub = env.sandbox.stub(
-        Services.viewerForDoc(ampdoc),
-        'sendMessage'
-      );
-      const setScrollTop = env.sandbox.stub(
-        Services.viewportForDoc(ampdoc),
-        'setScrollTop'
-      );
-      env.sandbox
-        .stub(ampdoc, 'getVisibilityState')
-        .returns(VisibilityState.PRERENDER);
+        new HighlightHandler(ampdoc, {sentences: ['amp', 'highlight']});
+        docreadyCb();
 
-      new HighlightHandler(ampdoc, {sentences: ['amp', 'highlight']});
-      docreadyCb();
+        expect(setScrollTop).to.be.calledOnce;
+        expect(setScrollTop.firstCall.args.length).to.equal(1);
+        expect(scrollStub).not.to.be.called;
+        // For some reason, expect(args).to.deep.equal does not work.
+        expect(sendMsgStub.callCount).to.equal(1);
+        expect(sendMsgStub.firstCall.args[1]).to.deep.equal({
+          state: 'found',
+          scroll: 0,
+        });
 
-      expect(setScrollTop).to.be.calledOnce;
-      expect(setScrollTop.firstCall.args.length).to.equal(1);
-      expect(scrollStub).not.to.be.called;
-      // For some reason, expect(args).to.deep.equal does not work.
-      expect(sendMsgStub.callCount).to.equal(1);
-      expect(sendMsgStub.firstCall.args[1]).to.deep.equal({
-        state: 'found',
-        scroll: 0,
+        expect(root.innerHTML).to.have.string('highlight</span>ed');
       });
 
-      expect(root.innerHTML).to.have.string('highlight</span>ed');
-    });
+    it.configure()
+      .skipChrome()
+      .run('calcTopToCenterHighlightedNodes_ center elements', () => {
+        const handler = new HighlightHandler(env.ampdoc, {
+          sentences: ['amp'],
+        });
+        docreadyCb();
+        expect(handler.highlightedNodes_).not.to.be.null;
 
-    it('calcTopToCenterHighlightedNodes_ center elements', () => {
-      const handler = new HighlightHandler(env.ampdoc, {sentences: ['amp']});
-      docreadyCb();
-      expect(handler.highlightedNodes_).not.to.be.null;
+        const viewport = Services.viewportForDoc(env.ampdoc);
+        env.sandbox
+          .stub(viewport, 'getLayoutRect')
+          .returns(layoutRectLtwh(0, 500, 100, 50));
+        env.sandbox.stub(viewport, 'getHeight').returns(300);
+        env.sandbox.stub(viewport, 'getPaddingTop').returns(50);
 
-      const viewport = Services.viewportForDoc(env.ampdoc);
-      env.sandbox
-        .stub(viewport, 'getLayoutRect')
-        .returns(layoutRectLtwh(0, 500, 100, 50));
-      env.sandbox.stub(viewport, 'getHeight').returns(300);
-      env.sandbox.stub(viewport, 'getPaddingTop').returns(50);
+        // 525px (The center of the element) - 0.5 * 250px (window height)
+        // - 50px (padding top) = 350px.
+        expect(handler.calcTopToCenterHighlightedNodes_()).to.equal(350);
+      });
 
-      // 525px (The center of the element) - 0.5 * 250px (window height)
-      // - 50px (padding top) = 350px.
-      expect(handler.calcTopToCenterHighlightedNodes_()).to.equal(350);
-    });
+    it.configure()
+      .skipChrome()
+      .run('calcTopToCenterHighlightedNodes_ too tall element', () => {
+        const handler = new HighlightHandler(env.ampdoc, {
+          sentences: ['amp'],
+        });
+        docreadyCb();
+        expect(handler.highlightedNodes_).not.to.be.null;
 
-    it('calcTopToCenterHighlightedNodes_ too tall element', () => {
-      const handler = new HighlightHandler(env.ampdoc, {sentences: ['amp']});
-      docreadyCb();
-      expect(handler.highlightedNodes_).not.to.be.null;
+        const viewport = Services.viewportForDoc(env.ampdoc);
+        env.sandbox
+          .stub(viewport, 'getLayoutRect')
+          .returns(layoutRectLtwh(0, 500, 100, 500));
+        env.sandbox.stub(viewport, 'getHeight').returns(300);
+        env.sandbox.stub(viewport, 'getPaddingTop').returns(50);
 
-      const viewport = Services.viewportForDoc(env.ampdoc);
-      env.sandbox
-        .stub(viewport, 'getLayoutRect')
-        .returns(layoutRectLtwh(0, 500, 100, 500));
-      env.sandbox.stub(viewport, 'getHeight').returns(300);
-      env.sandbox.stub(viewport, 'getPaddingTop').returns(50);
+        // Scroll to the top of the element with PAGE_TOP_MARGIN margin
+        // because it's too tall.
+        // 500px (The top of the element) - 50px (padding top)
+        // - 80px (PAGE_TOP_MARGIN) = 370px.
+        expect(handler.calcTopToCenterHighlightedNodes_()).to.equal(370);
+      });
 
-      // Scroll to the top of the element with PAGE_TOP_MARGIN margin
-      // because it's too tall.
-      // 500px (The top of the element) - 50px (padding top)
-      // - 80px (PAGE_TOP_MARGIN) = 370px.
-      expect(handler.calcTopToCenterHighlightedNodes_()).to.equal(370);
-    });
+    it.configure()
+      .skipChrome()
+      .run('mayAdjustTop_', () => {
+        const handler = new HighlightHandler(env.ampdoc, {
+          sentences: ['amp'],
+        });
+        docreadyCb();
+        expect(handler.highlightedNodes_).not.to.be.null;
 
-    it('mayAdjustTop_', () => {
-      const handler = new HighlightHandler(env.ampdoc, {sentences: ['amp']});
-      docreadyCb();
-      expect(handler.highlightedNodes_).not.to.be.null;
+        // Set up an environment where calcTopToCenterHighlightedNodes_
+        // returns 350.
+        const viewport = Services.viewportForDoc(env.ampdoc);
+        env.sandbox
+          .stub(viewport, 'getLayoutRect')
+          .returns(layoutRectLtwh(0, 500, 100, 50));
+        env.sandbox.stub(viewport, 'getHeight').returns(300);
+        env.sandbox.stub(viewport, 'getPaddingTop').returns(50);
+        // The current top is 500.
+        env.sandbox.stub(viewport, 'getScrollTop').returns(500);
 
-      // Set up an environment where calcTopToCenterHighlightedNodes_
-      // returns 350.
-      const viewport = Services.viewportForDoc(env.ampdoc);
-      env.sandbox
-        .stub(viewport, 'getLayoutRect')
-        .returns(layoutRectLtwh(0, 500, 100, 50));
-      env.sandbox.stub(viewport, 'getHeight').returns(300);
-      env.sandbox.stub(viewport, 'getPaddingTop').returns(50);
-      // The current top is 500.
-      env.sandbox.stub(viewport, 'getScrollTop').returns(500);
+        const setScrollTopStub = env.sandbox.stub(viewport, 'setScrollTop');
 
-      const setScrollTopStub = env.sandbox.stub(viewport, 'setScrollTop');
-
-      const param = handler.mayAdjustTop_(400);
-      expect(param).to.deep.equal({'nd': 150, 'od': 100});
-      expect(setScrollTopStub).to.be.calledOnce;
-      expect(setScrollTopStub.firstCall.args[0]).to.equal(350);
-    });
+        const param = handler.mayAdjustTop_(400);
+        expect(param).to.deep.equal({'nd': 150, 'od': 100});
+        expect(setScrollTopStub).to.be.calledOnce;
+        expect(setScrollTopStub.firstCall.args[0]).to.equal(350);
+      });
 
     // TODO(dmanek): remove `ifChrome` once we remove Chrome version detection
     it.configure()
