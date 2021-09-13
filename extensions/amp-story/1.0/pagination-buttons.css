@@ -191,21 +191,3 @@ amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-hidden {
   opacity: 0 !important;
   pointer-events: none !important;
 }
-
-/* Mouseover states */
-.i-amphtml-story-desktop-panels.i-amphtml-story-next-hover > .i-amphtml-story-fwd-next >
-    .i-amphtml-story-button-move {
-  transform: translateX(8px)!important;
-  opacity: 1!important;
-}
-
-.i-amphtml-story-desktop-panels.i-amphtml-story-next-hover > .i-amphtml-story-fwd-replay >
-    .i-amphtml-story-button-move {
-  opacity: 1 !important;
-}
-
-.i-amphtml-story-desktop-panels.i-amphtml-story-prev-hover > .i-amphtml-story-back-prev >
-    .i-amphtml-story-button-move {
-  transform: translateX(-8px)!important;
-  opacity: 1!important;
-}

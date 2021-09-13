@@ -2,9 +2,6 @@
 
 @import './amp-story-desktop-user-overridable.css';
 
-amp-story[standalone].i-amphtml-story-desktop-one-panel {
-  background-color: #000 !important;
-}
 /**
  * NOTE: If you change any variables or media queries change:
  * css/amp-story-player-shadow.css
