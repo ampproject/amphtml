@@ -430,7 +430,6 @@ describes.realWin(
       .ifChrome()
       .run('with Chrome >= 93', () => {
         let root = null;
-        let initCb = null;
 
         beforeEach(() => {
           const {document} = env.win;
@@ -444,9 +443,7 @@ describes.realWin(
           root.appendChild(div1);
 
           //  Used in Chrome 93+
-          env.sandbox
-            .stub(env.ampdoc, 'whenFirstVisible')
-            .returns({then: (cb) => (initCb = cb)});
+          env.sandbox.stub(env.ampdoc, 'whenFirstVisible');
 
           const platform = Services.platformFor(env.ampdoc.win);
           if (platform.isChrome()) {
