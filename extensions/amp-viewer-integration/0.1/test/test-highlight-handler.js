@@ -100,7 +100,7 @@ describes.fakeWin(
 );
 
 describes.realWin(
-  'HighlightHandler with Chrome < 93 and other browsers',
+  'HighlightHandler',
   {
     // We can not overwrite win.location with realWin.
     amp: {
@@ -416,7 +416,7 @@ describes.realWin(
 );
 
 describes.realWin(
-  'HighlightHandler with Chrome >= 93',
+  'HighlightHandler',
   {
     // We can not overwrite win.location with realWin.
     amp: {
@@ -424,65 +424,62 @@ describes.realWin(
     },
   },
   (env) => {
-    let root = null;
-    let initCb = null;
-
-    beforeEach(() => {
-      const {document} = env.win;
-      root = document.createElement('div');
-      document.body.appendChild(root);
-      const div0 = document.createElement('div');
-      div0.textContent = 'text in amp doc';
-      root.appendChild(div0);
-      const div1 = document.createElement('div');
-      div1.textContent = 'highlighted text';
-      root.appendChild(div1);
-
-      //  Used in Chrome 93+
-      env.sandbox
-        .stub(env.ampdoc, 'whenFirstVisible')
-        .returns({then: (cb) => (initCb = cb)});
-
-      const platform = Services.platformFor(env.ampdoc.win);
-      if (platform.isChrome()) {
-        env.sandbox.stub(platform, 'getMajorVersion').returns(93);
-      }
-    });
-
     // TODO(dmanek): remove `ifChrome` once we remove Chrome version detection
-    it.configure()
+    describe
+      .configure()
       .ifChrome()
-      .run('should highlight using text fragments', async () => {
-        const {ampdoc} = env;
-        let whenFirstVisiblePromiseResolve;
-        const whenFirstVisiblePromise = new Promise((resolve) => {
-          whenFirstVisiblePromiseResolve = resolve;
-        });
-        ampdoc.whenFirstVisible.returns(whenFirstVisiblePromise);
+      .run('with Chrome >= 93', () => {
+        let root = null;
+        let initCb = null;
 
-        const highlightHandler = new HighlightHandler(ampdoc, {
-          sentences: ['amp', 'highlight'],
+        beforeEach(() => {
+          const {document} = env.win;
+          root = document.createElement('div');
+          document.body.appendChild(root);
+          const div0 = document.createElement('div');
+          div0.textContent = 'text in amp doc';
+          root.appendChild(div0);
+          const div1 = document.createElement('div');
+          div1.textContent = 'highlighted text';
+          root.appendChild(div1);
+
+          //  Used in Chrome 93+
+          env.sandbox
+            .stub(env.ampdoc, 'whenFirstVisible')
+            .returns({then: (cb) => (initCb = cb)});
+
+          const platform = Services.platformFor(env.ampdoc.win);
+          if (platform.isChrome()) {
+            env.sandbox.stub(platform, 'getMajorVersion').returns(93);
+          }
         });
 
-        const updateUrlWithTextFragmentSpy = env.sandbox.spy();
-        highlightHandler.updateUrlWithTextFragment_ =
-          updateUrlWithTextFragmentSpy;
+        it('should highlight using text fragments', async () => {
+          const {ampdoc} = env;
+          let whenFirstVisiblePromiseResolve;
+          const whenFirstVisiblePromise = new Promise((resolve) => {
+            whenFirstVisiblePromiseResolve = resolve;
+          });
+          ampdoc.whenFirstVisible.returns(whenFirstVisiblePromise);
 
-        whenFirstVisiblePromiseResolve();
-        await whenFirstVisiblePromise;
+          const highlightHandler = new HighlightHandler(ampdoc, {
+            sentences: ['amp', 'highlight'],
+          });
 
-        expect(updateUrlWithTextFragmentSpy).to.be.calledOnce;
-        expect(updateUrlWithTextFragmentSpy.getCall(0).args[0]).to.equal(
-          'text=amp&text=highlight'
-        );
-      });
+          const updateUrlWithTextFragmentSpy = env.sandbox.spy();
+          highlightHandler.updateUrlWithTextFragment_ =
+            updateUrlWithTextFragmentSpy;
 
-    // TODO(dmanek): remove `ifChrome` once we remove Chrome version detection
-    it.configure()
-      .ifChrome()
-      .run(
-        'should not highlight using text fragments for Chrome 92',
-        async () => {
+          whenFirstVisiblePromiseResolve();
+          await whenFirstVisiblePromise;
+
+          expect(updateUrlWithTextFragmentSpy).to.be.calledOnce;
+          expect(updateUrlWithTextFragmentSpy.getCall(0).args[0]).to.equal(
+            'text=amp&text=highlight'
+          );
+        });
+
+        it('should not highlight using text fragments for Chrome 92', async () => {
           const {ampdoc} = env;
           const platform = Services.platformFor(ampdoc.win);
           platform.getMajorVersion.returns(92);
@@ -504,15 +501,9 @@ describes.realWin(
           await whenFirstVisiblePromise;
 
           expect(updateUrlWithTextFragmentSpy).not.to.be.called;
-        }
-      );
+        });
 
-    // TODO(dmanek): remove `ifChrome` once we remove Chrome version detection
-    it.configure()
-      .ifChrome()
-      .run(
-        'should not highlight if highlightInfo.sentences is empty',
-        async () => {
+        it('should not highlight if highlightInfo.sentences is empty', async () => {
           const {ampdoc} = env;
           let whenFirstVisiblePromiseResolve;
           const whenFirstVisiblePromise = new Promise((resolve) => {
@@ -532,7 +523,7 @@ describes.realWin(
           await whenFirstVisiblePromise;
 
           expect(updateUrlWithTextFragmentSpy).not.to.be.called;
-        }
-      );
+        });
+      });
   }
 );
