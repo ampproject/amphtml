@@ -6,7 +6,7 @@
     "finalBeat": "${host}${basePrefix}&type=final",
     "heartbeat": "${host}${basePrefix}&type=pulse",
     "pageView": "${host}${basePrefix}&${initialHit}&type=init",
-    "conversion": "${host}${basePrefix}&type=pulse&conversion=${conversion}",
+    "conversion": "${host}${basePrefix}&type=pulse&conversion=${conversion_value}",
     "videoBase": "${host}url=${canonicalUrl}&video_id=${video_id}",
     "videoTime": "ct=${currentTime}&d=${duration}",
     "video-play": "${videoBase}&e=video_start&${videoTime}&video_name=${video_name}&video_thumb=${video_thumbnail}",
@@ -42,7 +42,7 @@
       "selector": "${lead_selector}",
       "request": "conversion",
       "vars": {
-        "conversion": 1
+        "conversion_value": 1
       }
     },
     "subscription": {
@@ -50,7 +50,7 @@
       "selector": "${subscription_selector}",
       "request": "conversion",
       "vars": {
-        "conversion": 2
+        "conversion_value": 2
       }
     }
   },
