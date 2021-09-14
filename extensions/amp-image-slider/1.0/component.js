@@ -303,7 +303,7 @@ export function ImageSliderWithRef(
 
     const newPos = clamp(pointerX, left, right);
     const newPercentage = (newPos - left) / width;
-    console.log(newPercentage);
+
     //this.updatePositions_(newPercentage);
   }, []);
 
@@ -591,7 +591,6 @@ export function ImageSliderWithRef(
 
     /** Retrive Images */
     images.forEach((child) => {
-      console.log(child);
       if (VALID_IMAGE_TAGNAMES.has(child.type.toUpperCase())) {
         if (leftImageRef.current == null) {
           // First encountered = left image
@@ -660,7 +659,7 @@ export function ImageSliderWithRef(
   }, []);
 
   const testEventHandler = useCallback((e) => {
-    console.log(e.key);
+    // console.log(e.key);
   }, []);
 
   return (
