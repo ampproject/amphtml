@@ -9,11 +9,11 @@ import {htmlFor} from '#core/dom/static-template';
 /**
  * @enum {string}
  */
- const FormResponseAttribute = {
-    SUBMITTING: 'submitting',
-    SUCCESS: 'submit-success',
-    ERROR: 'submit-error',
-  };
+const FormResponseAttribute = {
+  SUBMITTING: 'submitting',
+  SUCCESS: 'submit-success',
+  ERROR: 'submit-error',
+};
 
 /**
  * Adds AMP form actions to the action allow list.
@@ -94,7 +94,7 @@ function createFormResultEl_(ampEl, formEl, isSuccess) {
 
   const iconEl = ampEl.win.document.createElement('div');
   iconEl.classList.add(
-      'i-amphtml-story-page-attachment-form-submission-status-icon'
+    'i-amphtml-story-page-attachment-form-submission-status-icon'
   );
   resultEl.firstElementChild.appendChild(iconEl);
 
@@ -119,9 +119,9 @@ function createFormResultEl_(ampEl, formEl, isSuccess) {
  * @return {!Element}
  * @private
  */
- function createResponseAttributeEl_(formEl, responseAttribute) {
-    const statusEl = htmlFor(formEl)`
-      <div><div class="i-amphtml-story-page-attachment-form-submission-status"></div></div>`;
-    statusEl.setAttribute(responseAttribute, '');
-    return statusEl;
-  }
+function createResponseAttributeEl_(formEl, responseAttribute) {
+  const statusEl = htmlFor(formEl)`
+    <div><div class="i-amphtml-story-page-attachment-form-submission-status"></div></div>`;
+  statusEl.setAttribute(responseAttribute, '');
+  return statusEl;
+}
