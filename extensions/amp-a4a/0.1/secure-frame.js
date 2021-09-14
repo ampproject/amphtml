@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
@@ -13,6 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+=======
+import {TOKEN_VALUE} from '#ads/google/a4a/utils';
+>>>>>>> cfb102aafc... 🐛 Fix attribution reporting OT token in FIE (#36057)
 
 import {createElementWithAttributes, escapeHtml} from '#core/dom';
 import {dict} from '#core/types/object';
@@ -67,6 +71,7 @@ export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
       default-src 'none';
       style-src ${fontProviderAllowList} 'unsafe-inline';
     ">
+    <meta http-equiv="origin-trial" content=${TOKEN_VALUE}>    
     ${sanitizedHeadElements}
   </head>
   <body>${body}</body>
