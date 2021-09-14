@@ -375,7 +375,6 @@ register('blade', blade);
 register('bodymovinanimation', bodymovinanimation);
 register('brainy', brainy);
 register('bringhub', bringhub);
-register('broadbandy', broadbandy);
 register('broadstreetads', broadstreetads);
 register('byplay', byplay);
 register('caajainfeed', caajainfeed);
