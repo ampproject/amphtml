@@ -604,6 +604,12 @@ export class NextPageService {
         }
       );
 
+      // Reuse message deliverer from existing viewer.
+      // Even though we have multiple instances of the Viewer service, we only
+      // have a single messaging channel.
+      const messageDeliverer = this.viewer_.maybeGetMessageDeliverer();
+      amp.onMessage(messageDeliverer);
+
       const ampdoc = devAssert(amp.ampdoc);
       installStylesForDoc(ampdoc, CSS, null, false, TAG);
 

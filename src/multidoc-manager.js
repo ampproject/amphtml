@@ -116,13 +116,13 @@ export class MultidocManager {
      */
     amp['postMessage'] = viewer.receiveMessage.bind(viewer);
 
-    /** @type {function(string, *, boolean):(!Promise<*>|undefined)} */
+    /** @type {?function(string, *, boolean):(!Promise<*>|undefined)|undefined} */
     let onMessage;
 
     /**
      * Provides a message delivery mechanism by which AMP document can send
      * messages to the viewer.
-     * @param {function(string, *, boolean):(!Promise<*>|undefined)} callback
+     * @param {?function(string, *, boolean):(!Promise<*>|undefined)} callback
      */
     amp['onMessage'] = function (callback) {
       onMessage = callback;
