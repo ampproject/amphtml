@@ -1,4 +1,4 @@
-import {createUseStyles} from 'react-jss'',
+import {createUseStyles} from 'react-jss';
 
 const imageSliderContainer = {
   position: 'absolute !important',
@@ -11,7 +11,7 @@ const imageSliderContainer = {
   /* Remove webkit tap highlight grayish color
    * '-webkit-tap-highlight-color': 'rgba(0,0,0,0)' <-- Not available in JSS
    */
-}
+};
 
 const imageSliderLeftMask = {
   position: 'absolute !important',
@@ -35,12 +35,12 @@ const imageSliderRightMask = {
 const imageSlider = {
   'amp-img > img': {
     /* Deals with image not fitting size */
-    'object-fit': 'cover'
-  }
+    'object-fit': 'cover',
+  },
 };
 
 const imageSliderPushLeft = {
-  transform: 'translateX(-50%)'
+  transform: 'translateX(-50%)',
 };
 
 const imageSliderPushRight = {
@@ -63,7 +63,7 @@ const imageSliderBarStick = {
   height: '100% !important',
   cursor: 'col-resize !important',
   '&:before': {
-    content: '\'\' !important',
+    content: "'' !important",
     position: 'absolute !important',
     display: 'block !important',
     top: '0 !important',
@@ -72,8 +72,8 @@ const imageSliderBarStick = {
     border: '0.5px solid white !important',
     'box-sizing': 'border-box !important',
     opacity: '0.5 !important',
-    transform: 'translate(-50%, 0) !important'
-  }
+    transform: 'translate(-50%, 0) !important',
+  },
 };
 
 const imageSliderLabelWrapper = {
@@ -84,16 +84,16 @@ const imageSliderLabelWrapper = {
   left: '0 !important',
   'z-index': '1 !important',
   '& > [first]': {
-    position: 'absolute !important'
+    position: 'absolute !important',
   },
   '& > [second]': {
-    position: 'absolute !important'
-  }
+    position: 'absolute !important',
+  },
 };
 
 const imageSliderHintHidden = {
   opacity: 0,
-  transition: 'opacity linear 0.4s'
+  transition: 'opacity linear 0.4s',
 };
 
 const imageSliderHint = {
@@ -103,7 +103,7 @@ const imageSliderHint = {
   bottom: '0 !important',
   left: '0 !important',
   'z-index': 2,
-  transition: 'opacity ease-in 0.4s'
+  transition: 'opacity ease-in 0.4s',
 };
 
 const imageSliderHintLeftWrapper = {
@@ -112,7 +112,7 @@ const imageSliderHintLeftWrapper = {
   height: '100% !important',
   display: 'flex !important',
   'flex-direction': 'column !important',
-  'justify-content': 'center !important'
+  'justify-content': 'center !important',
 };
 
 const imageSliderHintRightWrapper = {
@@ -121,23 +121,25 @@ const imageSliderHintRightWrapper = {
   height: '100% !important',
   display: 'flex !important',
   'flex-direction': 'column !important',
-  'justify-content': 'center !important'
+  'justify-content': 'center !important',
 };
 
 const imageSliderHintLeft = {
   'background-size': '56px 16px',
   width: '56px',
   height: '16px',
-  'background-image': 'url(\'data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 8"><g><path d="M4 5h12V3H4V0L0 4l4 4z" fill="#fff"/></g></svg>\')',
-  filter: 'drop-shadow(3px 3px 4px black)'
+  'background-image':
+    'url(\'data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 8"><g><path d="M4 5h12V3H4V0L0 4l4 4z" fill="#fff"/></g></svg>\')',
+  filter: 'drop-shadow(3px 3px 4px black)',
 };
 
 const imageSliderHintRight = {
   'background-size': '56px 16px',
   width: '56px',
   height: '16px',
-  'background-image': 'url(\'data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 8"><g><path d="M24 5h-12V3H24V0L28 4l-4 4z" fill="#fff"/></g></svg>\')',
-  filter: 'drop-shadow(3px 3px 4px black)'
+  'background-image':
+    'url(\'data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 8"><g><path d="M24 5h-12V3H24V0L28 4l-4 4z" fill="#fff"/></g></svg>\')',
+  filter: 'drop-shadow(3px 3px 4px black)',
 };
 
 const JSS = {
@@ -155,7 +157,7 @@ const JSS = {
   imageSliderHintLeftWrapper,
   imageSliderHintRightWrapper,
   imageSliderHintLeft,
-  imageSliderHintRight
+  imageSliderHintRight,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.
