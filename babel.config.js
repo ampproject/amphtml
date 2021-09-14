@@ -9,7 +9,7 @@
 
 'use strict';
 
-const {cyan, yellow} = require('./build-system/common/colors');
+const {cyan, yellow} = require('kleur/colors');
 const {log} = require('./build-system/common/logging');
 
 /**

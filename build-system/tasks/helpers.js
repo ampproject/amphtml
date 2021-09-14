@@ -15,7 +15,7 @@ const {
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global');
 const {closureCompile} = require('../compile/compile');
-const {cyan, green, red} = require('../common/colors');
+const {cyan, green, red} = require('kleur/colors');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {getSourceRoot} = require('../compile/helpers');
 const {isCiBuild} = require('../common/ci');
