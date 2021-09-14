@@ -974,8 +974,7 @@
         "amp-story-share-menu",
         "amp-story-system-layer",
         "amp-story-tooltip",
-        "amp-story-unsupported-browser-layer",
-        "amp-story-viewport-warning-layer"
+        "amp-story-unsupported-browser-layer"
       ]
     }
   },
@@ -1007,6 +1006,14 @@
     "name": "amp-story-auto-analytics",
     "version": "0.1",
     "latestVersion": "0.1"
+  },
+  {
+    "name": "amp-story-captions",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
   },
   {
     "name": "amp-story-dev-tools",
@@ -1163,6 +1170,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
+      "npm": true,
       "wrapper": "bento"
     }
   },
@@ -1249,6 +1257,7 @@
     "version": "1.0",
     "latestVersion": "1.0",
     "options": {
+      "hasCss": true,
       "npm": true,
       "wrapper": "bento"
     }
