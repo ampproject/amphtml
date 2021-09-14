@@ -1,36 +1,188 @@
 {
-  "2": {"string": "Kliknij Dalej"},
-  "3": {"string": "Kliknij Wstecz"},
-  "4": {"string": "Nie udało się skopiować linku do schowka :("},
-  "5": {"string": "Link skopiowany"},
-  "6": {"string": "E-mail"},
-  "7": {"string": "Facebook"},
-  "8": {"string": "Google+"},
-  "9": {"string": "Pobierz link"},
-  "10": {"string": "LinkedIn"},
-  "11": {"string": "Pinterest"},
-  "12": {"string": "SMS"},
-  "14": {"string": "Tumblr"},
-  "15": {"string": "Twitter"},
-  "16": {"string": "WhatsApp"},
-  "18": {"string": "Powiększ i poszerz okno, by użyć tej funkcji"},
-  "19": {
-    "string": "Musisz włączyć eksperyment z relacją w technologii AMP, by wyświetlić te treści."
+  "2": {
+    "string": "Dotknij przycisku Dalej"
   },
-  "20": {"string": "Tę stronę najlepiej oglądać w pionie"},
-  "21": {"string": "Twoja przeglądarka nie obsługuje tej funkcji"},
-  "22": {"string": "Zaakceptuj"},
-  "23": {"string": "Odrzuć"},
-  "25": {"string": "Zobacz w oryginalnej domenie:"},
-  "26": {"string": "Więcej informacji o wynikach AMP"},
-  "27": {"string": "Kontynuuj mimo to"},
-  "31": {"string": "Dźwięk wyłączony"},
-  "32": {"string": "Dźwięk włączony"},
-  "33": {"string": "Na tej stronie nie ma dźwięku"},
-  "34": {"string": "Odtwórz film"},
-  "35": {"string": "Przesuń w górę"},
-  "36": {"string": "Rozwiń tweeta"},
-  "37": {"string": "Powiększ okno, by użyć tej funkcji"},
-  "38": {"string": "Poszerz okno, by użyć tej funkcji"},
-  "63": {"string": "Line"}
+  "3": {
+    "string": "Dotknij przycisku Wstecz"
+  },
+  "4": {
+    "string": "Nie udało się skopiować linku do schowka :("
+  },
+  "5": {
+    "string": "Link skopiowany!"
+  },
+  "6": {
+    "string": "E-mail"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "8": {
+    "string": "Google+"
+  },
+  "9": {
+    "string": "Uzyskaj link"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "SMS"
+  },
+  "13": {
+    "string": "Więcej"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
+  "19": {
+    "string": "Aby wyświetlić tę zawartość, musisz włączyć eksperyment ze składnikiem amp-story."
+  },
+  "21": {
+    "string": "Niestety, Twoja przeglądarka nie obsługuje tej funkcji"
+  },
+  "22": {
+    "string": "Zaakceptuj"
+  },
+  "23": {
+    "string": "Odrzuć"
+  },
+  "25": {
+    "string": "Wyświetl w oryginalnej domenie:"
+  },
+  "26": {
+    "string": "Więcej informacji o wynikach AMP"
+  },
+  "27": {
+    "string": "Mimo to kontynuuj"
+  },
+  "31": {
+    "string": "Dźwięk wyłączony"
+  },
+  "32": {
+    "string": "Dźwięk włączony"
+  },
+  "33": {
+    "string": "Na tej stronie nie ma dźwięku"
+  },
+  "34": {
+    "string": "Odtwórz wideo"
+  },
+  "35": {
+    "string": "Przesuń w górę"
+  },
+  "36": {
+    "string": "Rozwiń tweet"
+  },
+  "62": {
+    "string": "Udostępnij, zaczynając od tej strony"
+  },
+  "63": {
+    "string": "Line"
+  },
+  "64": {
+    "string": "Zaktualizowano"
+  },
+  "65": {
+    "string": "Nie udało się odtworzyć wideo"
+  },
+  "66": {
+    "string": "Wycisz relację"
+  },
+  "67": {
+    "string": "Wyłącz wyciszenie relacji"
+  },
+  "68": {
+    "string": "Informacje o relacji"
+  },
+  "69": {
+    "string": "Udostępnij relację"
+  },
+  "70": {
+    "string": "Przełącz menu relacji"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "Wskazówka 1 z 2"
+  },
+  "76": {
+    "string": "Dotknij, aby przejść do następnego ekranu"
+  },
+  "77": {
+    "string": "Dalej"
+  },
+  "78": {
+    "string": "Wskazówka 2 z 2"
+  },
+  "79": {
+    "string": "Przesuń, aby przejść do następnej relacji"
+  },
+  "80": {
+    "string": "Rozumiem"
+  },
+  "81": {
+    "string": "Wskazówka"
+  },
+  "82": {
+    "string": "Poprzednia strona"
+  },
+  "83": {
+    "string": "Aktywuj"
+  },
+  "84": {
+    "string": "WYNIK:"
+  },
+  "85": {
+    "string": "Wstrzymaj relację"
+  },
+  "86": {
+    "string": "Odtwórz relację"
+  },
+  "87": {
+    "string": "Zamknij"
+  },
+  "88": {
+    "string": "Przejdź do następnego"
+  },
+  "89": {
+    "string": "Twoja odpowiedź zostanie wysłana do"
+  },
+  "90": {
+    "string": "Następna relacja"
+  },
+  "91": {
+    "string": "Następna strona"
+  },
+  "92": {
+    "string": "Odtwórz ponownie"
+  },
+  "93": {
+    "string": "Poprzednia strona"
+  },
+  "96": {
+    "string": "Poruszaj urządzeniem, aby eksplorować"
+  },
+  "97": {
+    "string": "Otwieranie"
+  }
 }

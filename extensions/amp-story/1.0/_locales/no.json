@@ -1,38 +1,188 @@
 {
-  "2": {"string": "Trykk på Neste"},
-  "3": {"string": "Trykk på Tilbake"},
-  "4": {"string": "Kunne ikke kopiere linken til utklippstavlen :("},
-  "5": {"string": "Linken er kopiert."},
-  "6": {"string": "E-post"},
-  "7": {"string": "Facebook"},
-  "8": {"string": "Google+"},
-  "9": {"string": "Hent linken"},
-  "10": {"string": "LinkedIn"},
-  "11": {"string": "Pinterest"},
-  "12": {"string": "SMS"},
-  "14": {"string": "Tumblr"},
-  "15": {"string": "Twitter"},
-  "16": {"string": "WhatsApp"},
-  "18": {"string": "Gjør vinduet ditt større for å se denne opplevelsen"},
+  "2": {
+    "string": "Trykk på «Neste»"
+  },
+  "3": {
+    "string": "Trykk på «Tilbake»"
+  },
+  "4": {
+    "string": "Kunne ikke kopiere til utklippstavlen :("
+  },
+  "5": {
+    "string": "Lenke kopiert!"
+  },
+  "6": {
+    "string": "E-post"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "8": {
+    "string": "Google+"
+  },
+  "9": {
+    "string": "Hent lenke"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "SMS"
+  },
+  "13": {
+    "string": "Mer"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
   "19": {
-    "string": "Du må aktivere eksperimentet med AMP-snuttsamlinger for å se dette innholdet."
+    "string": "Du må aktivere amp-story-eksperimentet for å se innholdet."
   },
-  "20": {"string": "Den beste visningen av siden er i stående retning"},
   "21": {
-    "string": "Beklager, men det ser ut til at nettleseren din ikke støtter denne opplevelsen"
+    "string": "Vi beklager! Det virker som om nettleseren din ikke støtter denne opplevelsen"
   },
-  "22": {"string": "Godta"},
-  "23": {"string": "Avslå"},
-  "25": {"string": "Se på det opprinnelige domenet:"},
-  "26": {"string": "Mer om AMP-resultater"},
-  "27": {"string": "Fortsett likevel"},
-  "31": {"string": "Lyd av"},
-  "32": {"string": "Lyd på"},
-  "33": {"string": "Denne siden har ikke noe lyd"},
-  "34": {"string": "Spill av videoen"},
-  "35": {"string": "Sveip opp"},
-  "36": {"string": "Vis Twitter-meldingen"},
-  "37": {"string": "Gjør vinduet ditt større for å se denne opplevelsen"},
-  "38": {"string": "Gjør vinduet ditt bredere for å se denne opplevelsen"},
-  "63": {"string": "Line"}
+  "22": {
+    "string": "Godta"
+  },
+  "23": {
+    "string": "Avslå"
+  },
+  "25": {
+    "string": "Vis på opprinnelig domene:"
+  },
+  "26": {
+    "string": "Mer om AMP-resultater"
+  },
+  "27": {
+    "string": "Fortsett likevel"
+  },
+  "31": {
+    "string": "Lyd av"
+  },
+  "32": {
+    "string": "Lyd på"
+  },
+  "33": {
+    "string": "Denne siden har ingen lyd"
+  },
+  "34": {
+    "string": "Spill av video"
+  },
+  "35": {
+    "string": "Sveip opp"
+  },
+  "36": {
+    "string": "Utvid Tweet"
+  },
+  "62": {
+    "string": "Del med start fra denne siden"
+  },
+  "63": {
+    "string": "Linje"
+  },
+  "64": {
+    "string": "Oppdatert"
+  },
+  "65": {
+    "string": "Kunne ikke avspille video"
+  },
+  "66": {
+    "string": "Slå av lyd i historie"
+  },
+  "67": {
+    "string": "Slå på lyd i historie"
+  },
+  "68": {
+    "string": "Historieinformasjon"
+  },
+  "69": {
+    "string": "Del historie"
+  },
+  "70": {
+    "string": "Slå på/av historiemeny"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "Tips én av to"
+  },
+  "76": {
+    "string": "Trykk for å gå til neste skjerm"
+  },
+  "77": {
+    "string": "Neste"
+  },
+  "78": {
+    "string": "Tips to av to"
+  },
+  "79": {
+    "string": "Sveip for å gå til neste historie"
+  },
+  "80": {
+    "string": "Jeg forstår"
+  },
+  "81": {
+    "string": "Tips"
+  },
+  "82": {
+    "string": "Forrige side"
+  },
+  "83": {
+    "string": "Aktiver"
+  },
+  "84": {
+    "string": "RESULTAT:"
+  },
+  "85": {
+    "string": "Sett historie på pause"
+  },
+  "86": {
+    "string": "Spill av historie"
+  },
+  "87": {
+    "string": "Lukk"
+  },
+  "88": {
+    "string": "Gå til neste"
+  },
+  "89": {
+    "string": "Svaret ditt sendes til"
+  },
+  "90": {
+    "string": "Neste historie"
+  },
+  "91": {
+    "string": "Neste side"
+  },
+  "92": {
+    "string": "Spill på nytt"
+  },
+  "93": {
+    "string": "Forrige side"
+  },
+  "96": {
+    "string": "Beveg på enheten for å utforske"
+  },
+  "97": {
+    "string": "Åpner"
+  }
 }
