@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
@@ -14,6 +15,8 @@
  * limitations under the License.
  */
 
+=======
+>>>>>>> ea5e24f469... 🐛 Fix pre-upgrade Bento styles for sizer element (#36056)
 /* Pre-upgrade: display:block element */
 amp-inline-gallery,
 amp-inline-gallery-pagination,
@@ -34,8 +37,10 @@ amp-inline-gallery-thumbnails {
 }
 
 /* Pre-upgrade: size-defining element - hide children. */
-amp-inline-gallery-pagination:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc),
-amp-inline-gallery-thumbnails:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc) {
+amp-inline-gallery-pagination:not(.i-amphtml-built)
+  > :not([placeholder]):not([slot='i-amphtml-svc']),
+amp-inline-gallery-thumbnails:not(.i-amphtml-built)
+  > :not([placeholder]):not([slot='i-amphtml-svc']) {
   display: none;
   content-visibility: hidden;
 }
