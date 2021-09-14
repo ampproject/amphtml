@@ -1,5 +1,3 @@
-
-
 /*
  * Pre-upgrade:
  * - display:block element
@@ -12,7 +10,8 @@ amp-brightcove {
 }
 
 /* Pre-upgrade: size-defining element - hide children. */
-amp-brightcove:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc) {
+amp-brightcove:not(.i-amphtml-built)
+  > :not([placeholder]):not([slot='i-amphtml-svc']) {
   display: none;
   content-visibility: hidden;
 }

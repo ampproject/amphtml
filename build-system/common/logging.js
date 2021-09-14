@@ -1,6 +1,6 @@
 'use strict';
 
-const {bold, gray, yellow} = require('./colors');
+const {bold, gray, yellow} = require('kleur/colors');
 const {isCiBuild} = require('./ci');
 
 /**
@@ -16,7 +16,7 @@ let loggingPrefix = '';
 
 /**
  * Logs messages with a timestamp. The timezone suffix is dropped.
- * @param  {...string} messages
+ * @param  {...any} messages
  */
 function log(...messages) {
   const timestamp = new Date().toTimeString().split(' ')[0];
