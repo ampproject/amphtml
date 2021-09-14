@@ -2,7 +2,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const childProcess = require('child_process');
-const colors = require('../../common/colors');
+const colors = require('kleur/colors');
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
