@@ -43,7 +43,7 @@
   .i-amphtml-story-page-attachment-form-submission-status div {
     /* The entire [submitting] div will fade in along with its border, after which only the contents
     of the [submit-success] and [submit-error] divs will fade in. */
-    animation: submission-status-fade-in 0.3s !important;
+    animation: submission-status-fade-in 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
   }
   
   .i-amphtml-story-page-attachment-form-submission-status-icon {
