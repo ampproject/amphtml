@@ -3,18 +3,18 @@ import {withKnobs} from '@storybook/addon-knobs';
 import * as Preact from '#preact';
 
 import {BentoBaseCarousel} from '../../../amp-base-carousel/1.0/component';
-import {LightboxGalleryProvider, WithLightbox} from '../component';
+import {BentoLightboxGalleryProvider, WithBentoLightboxGallery} from '../component';
 
 export default {
   title: 'LightboxGallery',
-  component: LightboxGalleryProvider,
+  component: BentoLightboxGalleryProvider,
   decorators: [withKnobs],
 };
 
 export const _default = () => {
   return (
     <>
-      <LightboxGalleryProvider>
+      <BentoLightboxGalleryProvider>
         <style>{`
         img {
           width: 240px;
@@ -24,11 +24,11 @@ export const _default = () => {
           color: red;
         }
       `}</style>
-        <WithLightbox caption="This is the caption for the first image. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry.">
+        <WithBentoLightboxGallery caption="This is the caption for the first image. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry.">
           <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80" />
-        </WithLightbox>
+        </WithBentoLightboxGallery>
         <p>abc</p>
-        <WithLightbox
+        <WithBentoLightboxGallery
           as="img"
           alt="larger img"
           id="foo"
@@ -41,13 +41,13 @@ export const _default = () => {
           )}
         />
         <p>abc</p>
-        <WithLightbox caption="This is the caption for the third image.">
+        <WithBentoLightboxGallery caption="This is the caption for the third image.">
           <img src="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80" />
-        </WithLightbox>
+        </WithBentoLightboxGallery>
         <div>
           <div>
             <div>
-              <WithLightbox
+              <WithBentoLightboxGallery
                 as="section"
                 render={() => (
                   <img
@@ -58,11 +58,11 @@ export const _default = () => {
               >
                 <img src="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80" />
                 <img src="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80" />
-              </WithLightbox>
+              </WithBentoLightboxGallery>
             </div>
           </div>
         </div>
-      </LightboxGalleryProvider>
+      </BentoLightboxGalleryProvider>
     </>
   );
 };
@@ -76,7 +76,7 @@ export const carousel = () => {
       height: 160px;
     }
   `}</style>
-      <LightboxGalleryProvider>
+      <BentoLightboxGalleryProvider>
         <BentoBaseCarousel lightbox style={{width: '240px', height: '160px'}}>
           <img
             src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"
@@ -103,7 +103,7 @@ export const carousel = () => {
             thumbnailSrc="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
           />
         </BentoBaseCarousel>
-      </LightboxGalleryProvider>
+      </BentoLightboxGalleryProvider>
     </>
   );
 };
@@ -121,11 +121,11 @@ export const grouping = () => {
         Note: The standalone img/amp-img elements are lightboxed in a separate
         lightbox-gallery group than the carousel elements.
       </p>
-      <LightboxGalleryProvider>
-        <WithLightbox caption="This is the caption for the first image. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry.">
+      <BentoLightboxGalleryProvider>
+        <WithBentoLightboxGallery caption="This is the caption for the first image. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry.">
           <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80" />
-        </WithLightbox>
-        <WithLightbox
+        </WithBentoLightboxGallery>
+        <WithBentoLightboxGallery
           as="img"
           alt="larger img"
           id="foo"
@@ -137,9 +137,9 @@ export const grouping = () => {
             />
           )}
         />
-        <WithLightbox aria-label="This is the caption for the third image.">
+        <WithBentoLightboxGallery aria-label="This is the caption for the third image.">
           <img src="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80" />
-        </WithLightbox>
+        </WithBentoLightboxGallery>
         <BentoBaseCarousel lightbox style={{width: '240px', height: '160px'}}>
           <img
             alt="Image 1 long. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry."
@@ -157,7 +157,7 @@ export const grouping = () => {
             thumbnailSrc="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
           />
         </BentoBaseCarousel>
-      </LightboxGalleryProvider>
+      </BentoLightboxGalleryProvider>
     </>
   );
 };

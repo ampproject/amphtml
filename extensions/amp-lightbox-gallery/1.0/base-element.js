@@ -12,7 +12,7 @@ import {dict} from '#core/types/object';
 import * as Preact from '#preact';
 import {PreactBaseElement} from '#preact/base-element';
 
-import {LightboxGalleryProvider, WithLightbox} from './component';
+import {BentoLightboxGalleryProvider, WithBentoLightboxGallery} from './component';
 import {CSS as COMPONENT_CSS} from './component.jss';
 
 import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/component.jss';
@@ -172,7 +172,7 @@ function processLightboxElement(
     ? element
     : childElement(element, isLightboxEligible);
   return (
-    <WithLightbox
+    <WithBentoLightboxGallery
       group={group}
       as="img"
       caption={getDescriptionForElement(document, img)}
@@ -229,7 +229,7 @@ function getDescriptionForElement(document, element) {
 }
 
 /** @override */
-BaseElement['Component'] = LightboxGalleryProvider;
+BaseElement['Component'] = BentoLightboxGalleryProvider;
 
 /** @override */
 BaseElement['usesShadowDom'] = true;

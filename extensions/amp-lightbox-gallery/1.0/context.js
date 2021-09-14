@@ -1,10 +1,10 @@
 import {createContext} from '#preact';
 
-const LightboxGalleryContext = createContext(
-  /** @type {LightboxGalleryDef.ContextProps} */ ({
+const BentoLightboxGalleryContext = createContext(
+  /** @type {BentoLightboxGalleryDef.ContextProps} */ ({
     deregister: () => {},
     register: () => {},
     open: () => {},
   })
 );
-export {LightboxGalleryContext};
+export {BentoLightboxGalleryContext};

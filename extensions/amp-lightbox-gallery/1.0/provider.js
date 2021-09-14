@@ -13,7 +13,7 @@ import {
 import {forwardRef} from '#preact/compat';
 
 import {PADDING_ALLOWANCE, useStyles} from './component.jss';
-import {LightboxGalleryContext} from './context';
+import {BentoLightboxGalleryContext} from './context';
 
 import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
 import {BentoLightbox} from '../../amp-lightbox/1.0/component';
@@ -38,11 +38,11 @@ const CAPTION_PROPS = {
 };
 
 /**
- * @param {!LightboxGalleryDef.Props} props
+ * @param {!BentoLightboxGalleryDef.Props} props
  * @param {{current: ?LightboxDef.LightboxApi}} ref
  * @return {PreactDef.Renderable}
  */
-export function LightboxGalleryProviderWithRef(
+export function BentoLightboxGalleryProviderWithRef(
   {
     children,
     onAfterClose,
@@ -255,16 +255,16 @@ export function LightboxGalleryProviderWithRef(
           </div>
         )}
       </BentoLightbox>
-      <LightboxGalleryContext.Provider value={context}>
+      <BentoLightboxGalleryContext.Provider value={context}>
         {render ? render() : children}
-      </LightboxGalleryContext.Provider>
+      </BentoLightboxGalleryContext.Provider>
     </>
   );
 }
 
-const LightboxGalleryProvider = forwardRef(LightboxGalleryProviderWithRef);
-LightboxGalleryProvider.displayName = 'LightboxGalleryProvider';
-export {LightboxGalleryProvider};
+const BentoLightboxGalleryProvider = forwardRef(BentoLightboxGalleryProviderWithRef);
+BentoLightboxGalleryProvider.displayName = 'BentoLightboxGalleryProvider';
+export {BentoLightboxGalleryProvider};
 /**
  * @param {!LightboxDef.CloseButtonProps} props
  * @return {PreactDef.Renderable}
@@ -381,7 +381,7 @@ function ToggleViewIcon({onClick, showCarousel}) {
 }
 
 /**
- * @param {!LightboxGalleryDef.ThumbnailProps} props
+ * @param {!BentoLightboxGalleryDef.ThumbnailProps} props
  * @return {PreactDef.Renderable}
  */
 function Thumbnail({onClick, render}) {
