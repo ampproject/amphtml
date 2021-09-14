@@ -455,6 +455,23 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
   height: var(--i-amphtml-story-layer-height, 100%);
   font-size: calc(var(--i-amphtml-story-layer-height, 100vh) / 10);
   margin-left: calc((var(--story-page-vw, 1%) * 100 - var(--i-amphtml-story-layer-width, 100%)) * 0.5); /* Set margin to 1/2 of page-width - layer-width to center layer */
+
+  --i-amphtml-aspect-ratio-calculated: calc(var(--aspect-ratio)) !important; /* Avoid fractions, which don't work with compilers that remove parenthesis */
+  --i-amphtml-story-page-width: calc(100 * var(--story-page-vw, 1vw)) !important;
+  --i-amphtml-story-page-height: calc(100 * var(--story-page-vh, 1vh)) !important;
+  --i-amphtml-story-unscaled-width: min(var(--i-amphtml-story-page-width), calc(var(--i-amphtml-story-page-height) * var(--i-amphtml-aspect-ratio-calculated))) !important;
+  --i-amphtml-story-unscaled-height: min(var(--i-amphtml-story-page-height), calc(var(--i-amphtml-story-page-width) / var(--i-amphtml-aspect-ratio-calculated))) !important;
+  --i-amphtml-story-layer-width: calc(var(--i-amphtml-story-unscaled-width) * var(--scaling-factor, 1)) !important;
+  --i-amphtml-story-layer-height: calc(var(--i-amphtml-story-unscaled-height) * var(--scaling-factor, 1)) !important;
+}
+
+[preset="2021-foreground"] {
+  --aspect-ratio: 69/116 !important;
+}
+
+[preset="2021-background"] {
+  --aspect-ratio: 69/116 !important;
+  --scaling-factor: 1.142 !important;
 }
 
 /**
