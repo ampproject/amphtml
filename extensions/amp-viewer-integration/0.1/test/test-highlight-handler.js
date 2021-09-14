@@ -428,7 +428,7 @@ describes.realWin(
     describe
       .configure()
       .ifChrome()
-      .run('with Chrome >= 93', () => {
+      .run('Text Fragments', () => {
         let root = null;
 
         beforeEach(() => {
