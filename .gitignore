@@ -43,6 +43,3 @@ npm-debug.log
 .firebase
 firebase
 firebase.json
-
-#Editor configs
-.idea
