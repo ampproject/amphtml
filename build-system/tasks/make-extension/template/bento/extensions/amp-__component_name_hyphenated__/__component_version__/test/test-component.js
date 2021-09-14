@@ -10,7 +10,7 @@ describes.sandboxed('Bento__component_name_pascalcase__ preact component v1.0', 
       <Bento__component_name_pascalcase__ testProp={true}/>
     );
 
-    const component = wrapper.find(Bento__component_name_pascal_case__.name);
+    const component = wrapper.find(Bento__component_name_pascalcase__.name);
     expect(component).to.have.lengthOf(1);
     expect(component.prop('testProp')).to.be.true;
   });
