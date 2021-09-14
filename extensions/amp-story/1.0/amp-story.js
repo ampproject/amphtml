@@ -328,6 +328,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {number} */
     this.maxViewportHeight_ = 0;
+
+    /** @private {?UIType} */
+    this.uiState_ = null;
   }
 
   /** @override */
@@ -398,7 +401,9 @@ export class AmpStory extends AMP.BaseElement {
     this.initializePageIds_();
     this.initializeStoryPlayer_();
 
-    this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
+    const currentUiType = this.getUIType_();
+    this.storeService_.dispatch(Action.TOGGLE_UI, currentUiType);
+    this.uiState_ = currentUiType;
 
     // Removes title in order to prevent incorrect titles appearing on link
     // hover. (See 17654)
@@ -1628,10 +1633,24 @@ export class AmpStory extends AMP.BaseElement {
    * @visibleForTesting
    */
   onResize() {
-    const uiState = this.getUIType_();
-    this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
+    const previousUiState = this.uiState_;
+    this.uiState_ = this.getUIType_();
 
-    if (uiState === UIType.MOBILE) {
+    const wasMobile = previousUiState === UIType.MOBILE;
+    const inputHasFocus = this.win.document.activeElement?.tagName === 'INPUT';
+    const softKeyboardIsProbablyOpen = wasMobile && inputHasFocus;
+    if (softKeyboardIsProbablyOpen) {
+      // The opening of the Android soft keyboard triggers a viewport resize
+      // that can cause the story's dimensions to appear to be those of a
+      // desktop. Here, we assume that the soft keyboard is open if the story
+      // has resized while an input element has focus, and we maintain the
+      // existing mobile layout.
+      this.storeService_.dispatch(Action.TOGGLE_UI, UIType.MOBILE);
+    } else {
+      this.storeService_.dispatch(Action.TOGGLE_UI, this.uiState_);
+    }
+
+    if (this.uiState_ === UIType.MOBILE) {
       const currentHeight = this.getViewport().getHeight();
       if (currentHeight > this.maxViewportHeight_) {
         this.maxViewportHeight_ = currentHeight;
