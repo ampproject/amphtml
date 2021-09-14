@@ -1,18 +1,20 @@
 import {Action, StateProperty, UIType} from './amp-story-store-service';
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {HistoryState, setHistoryState} from './history';
-import {LoadingSpinner} from './loading-spinner';
 import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {buildOutlinkLinkIconElement} from './amp-story-open-page-attachment';
 import {closest} from '#core/dom/query';
 import {dev, devAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getHistoryState} from '#core/window/history';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getSourceOrigin} from '../../../src/url';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {
+  addMissingResponseAttributeElements,
+  allowlistFormActions,
+} from './amp-story-form';
 import {removeElement} from '#core/dom';
 import {setImportantStyles, toggle} from '#core/dom/style';
 
@@ -52,15 +54,6 @@ export const AttachmentTheme = {
 const AttachmentType = {
   INLINE: 0,
   OUTLINK: 1,
-};
-
-/**
- * @enum {string}
- */
-const FormResponseAttribute = {
-  SUBMITTING: 'submitting',
-  SUCCESS: 'submit-success',
-  ERROR: 'submit-error',
 };
 
 /**
@@ -161,15 +154,15 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     const forms = this.element.querySelectorAll('form');
     if (forms.length > 0) {
-      forms.forEach((form) => this.addMissingFormStatusElements_(form));
+      allowlistFormActions(this);
+      forms.forEach((form) => {
+        addMissingResponseAttributeElements(this, form);
+      });
       // Page attachments that contain forms must display the page's publisher
       // domain above the attachment's contents. This enables users to gauge
       // the trustworthiness of publishers before sending data to them.
       this.headerEl.append(this.createDomainLabelElement_());
       this.headerEl.classList.add('i-amphtml-story-page-attachment-with-form');
-      this.storeService.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, [
-        {tagOrTarget: 'FORM', method: 'submit'},
-      ]);
     }
 
     const templateEl = this.element.querySelector(
@@ -488,95 +481,5 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   getPublisherOrigin_() {
     const publisherOrigin = getSourceOrigin(this.getAmpDoc().getUrl());
     return publisherOrigin.replace(/https?:\/\//, '');
-  }
-
-  /**
-   * Add a default form submission status element for each absent response
-   * attribute.
-   * @param {!Element} formEl The form to which the status elements will be
-   *     added.
-   * @private
-   */
-  addMissingFormStatusElements_(formEl) {
-    const submittingEl = formEl.querySelector(
-      `[${escapeCssSelectorIdent(FormResponseAttribute.SUBMITTING)}]`
-    );
-    if (!submittingEl) {
-      formEl.appendChild(this.createFormSubmittingEl_());
-    }
-
-    const successEl = formEl.querySelector(
-      `[${escapeCssSelectorIdent(FormResponseAttribute.SUCCESS)}]`
-    );
-    if (!successEl) {
-      formEl.appendChild(this.createFormResultEl_(true));
-    }
-
-    const errorEl = formEl.querySelector(
-      `[${escapeCssSelectorIdent(FormResponseAttribute.ERROR)}]`
-    );
-    if (!errorEl) {
-      formEl.appendChild(this.createFormResultEl_(false));
-    }
-  }
-
-  /**
-   * Create an element that is used to display the form status corresponding to
-   * the given response attribute.
-   * @param {!FormResponseAttribute} responseAttribute
-   * @return {!Element}
-   * @private
-   */
-  createFormStatusEl_(responseAttribute) {
-    const statusEl = htmlFor(this.element)`
-      <div><div class="i-amphtml-story-page-attachment-form-submission-status"></div></div>`;
-    statusEl.setAttribute(responseAttribute, '');
-    return statusEl;
-  }
-
-  /**
-   * Create an element that is used to display the in-progress state of a form
-   * submission attempt.
-   * @return {!Element}
-   * @private
-   */
-  createFormSubmittingEl_() {
-    const submittingEl = this.createFormStatusEl_(
-      FormResponseAttribute.SUBMITTING
-    );
-    const loadingSpinner = new LoadingSpinner(this.win.document);
-    submittingEl.firstElementChild.appendChild(loadingSpinner.build());
-    loadingSpinner.toggle(true /* isActive */);
-    return submittingEl;
-  }
-
-  /**
-   * Create an element that is used to display the result of a form submission
-   * attempt.
-   * @param {boolean} isSuccess Whether the form submission was successful.
-   * @return {!Element}
-   * @private
-   */
-  createFormResultEl_(isSuccess) {
-    const resultEl = this.createFormStatusEl_(
-      isSuccess ? FormResponseAttribute.SUCCESS : FormResponseAttribute.ERROR
-    );
-
-    const iconEl = this.win.document.createElement('div');
-    iconEl.classList.add(
-      'i-amphtml-story-page-attachment-form-submission-status-icon'
-    );
-    resultEl.firstElementChild.appendChild(iconEl);
-
-    const textEl = this.win.document.createElement('div');
-    const localizationService = getLocalizationService(devAssert(this.element));
-    textEl.textContent = localizationService.getLocalizedString(
-      isSuccess
-        ? LocalizedStringId.AMP_STORY_FORM_SUBMIT_SUCCESS
-        : LocalizedStringId.AMP_STORY_FORM_SUBMIT_ERROR
-    );
-    resultEl.firstElementChild.appendChild(textEl);
-
-    return resultEl;
   }
 }
