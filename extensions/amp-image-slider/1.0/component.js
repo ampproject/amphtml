@@ -14,8 +14,6 @@ import {
 } from '#preact';
 import {forwardRef} from '#preact/compat';
 
-// import {Services} from '#service';
-
 import {useStyles} from './component.jss';
 
 import {listen} from '../../../src/event-helper';
