@@ -101,11 +101,14 @@ async function cutNightlyBranch() {
         break;
       default:
         log(
-          red('An error occurred while attempting to fast-forward the'),
+          red(
+            'An uncaught status was returned while attempting to fast-forward the'
+          ),
           cyan('nightly'),
           red('branch to commit'),
           cyan(sha)
         );
+        log('See full response:', response);
     }
 
     break;
