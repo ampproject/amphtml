@@ -136,9 +136,7 @@ export class MultidocManager {
       }
 
       // All other messages.
-      if (onMessage) {
-        return onMessage(eventType, data, awaitResponse);
-      }
+      return onMessage?.(eventType, data, awaitResponse);
     }, origin);
 
     /**
