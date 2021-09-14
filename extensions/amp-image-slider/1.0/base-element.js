@@ -37,8 +37,6 @@ BaseElement['props'] = {
     type: 'boolean',
   },
   stepSize: {attr: 'step-size', type: 'number', default: 0.1},
-  // 'children': {passthroughNonEmpty: true},
-  // 'children': {selector: '...'},
 };
 
 /** @override */
@@ -47,9 +45,5 @@ BaseElement['layoutSizeDefined'] = true;
 /** @override */
 BaseElement['usesShadowDom'] = true;
 
-// DO NOT SUBMIT: If BaseElement['shadowCss']  is set to `null`, remove the
-// following declaration.
-// Otherwise, keep it when defined to an actual value like `COMPONENT_CSS`.
-// Once addressed, remove this set of comments.
 /** @override */
 BaseElement['shadowCss'] = COMPONENT_CSS;

@@ -27,9 +27,3 @@ var ImageSliderDef = {};
  * }}
  */
 ImageSliderDef.Props;
-
-/** @interface */
-ImageSliderDef.ImageSliderApi = class {
-  /** Example: API method to toggle the component */
-  exampleToggle() {} // DO NOT SUBMIT
-};
