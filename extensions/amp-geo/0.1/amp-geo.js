@@ -25,7 +25,7 @@ import {isArray, isObject} from '#core/types';
 import {tryParseJson} from '#core/types/object/json';
 import {getHashParams} from '#core/types/string/url';
 
-import {isCanary} from '#experiments';
+import {isCanary, isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
@@ -200,7 +200,7 @@ export class AmpGeo extends AMP.BaseElement {
         }
         this.mode_ = mode.GEO_OVERRIDE;
       }
-    } else if (preRenderMatch) {
+    } else if (preRenderMatch && isExperimentOn('amp-geo-ssr')) {
       // pre-rendered by a publisher case or cache case.
       this.mode_ = mode.GEO_PRERENDER;
       this.country_ = preRenderMatch[1];
