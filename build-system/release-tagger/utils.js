@@ -50,6 +50,23 @@ async function _runQueryInBatches(queryType, queries) {
 }
 
 /**
+ * Create a GitHub issue
+ * @param {string} body
+ * @param {string} label
+ * @param {string} title
+ * @return {Promise<Object>}
+ */
+function createIssue(body, label, title) {
+  return octokit.rest.issues.create({
+    owner,
+    repo,
+    title,
+    body,
+    labels: [label],
+  });
+}
+
+/**
  * Create a GitHub release
  * @param {string} tag
  * @param {string} commit
@@ -70,6 +87,23 @@ async function createRelease(tag, commit, body, prerelease) {
 }
 
 /**
+ * Get a GitHub issue by title
+ * @param {string} title
+ * @return {Promise<GraphQlQueryResponseData|undefined>}
+ */
+async function getIssue(title) {
+  const search = dedent`\
+    search(query:"repo:${owner}/${repo} in:title ${title}", \
+    type: ISSUE, first: 1) { nodes { ... on Issue \
+    { number title body }}}`;
+  const query = `query {${search}}`;
+  const response = await graphqlWithAuth({query});
+  if (response.search?.nodes) {
+    return response.search.nodes[0];
+  }
+}
+
+/**
  * Get a GitHub release by tag name
  * @param {string} tag
  * @return {Promise<Object>}
@@ -77,6 +111,23 @@ async function createRelease(tag, commit, body, prerelease) {
 async function getRelease(tag) {
   const {data} = await octokit.rest.repos.getReleaseByTag({owner, repo, tag});
   return data;
+}
+
+/**
+ * Update a GitHub issue
+ * @param {string} body
+ * @param {number} number
+ * @param {string} title
+ * @return {Promise<Object>}
+ */
+function updateIssue(body, number, title) {
+  return octokit.rest.issues.update({
+    owner,
+    repo,
+    'issue_number': number,
+    title,
+    body,
+  });
 }
 
 /**
@@ -216,12 +267,15 @@ async function getRef(tag) {
 }
 
 module.exports = {
+  createIssue,
   createRelease,
   getLabel,
+  getIssue,
   getPullRequestsBetweenCommits,
   getRelease,
   labelPullRequests,
   unlabelPullRequests,
+  updateIssue,
   updateRelease,
   getRef,
 };
