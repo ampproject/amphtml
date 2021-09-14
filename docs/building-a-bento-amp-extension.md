@@ -487,7 +487,8 @@ amp-my-element:not(.i-amphtml-built) {
 }
 
 /* Pre-upgrade: size-defining element - hide children. */
-amp-my-element:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc) {
+amp-my-element:not(.i-amphtml-built)
+  > :not([placeholder]):not([slot='i-amphtml-svc']) {
   display: none;
   content-visibility: hidden;
 }

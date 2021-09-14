@@ -7,7 +7,7 @@ const path = require('path');
 const tempy = require('tempy');
 const {BABEL_SRC_GLOBS} = require('./sources');
 const {CompilationLifecycles, debug} = require('./debug-compilation-lifecycle');
-const {cyan, red} = require('../common/colors');
+const {cyan, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 const {TransformCache, batchedRead, md5} = require('../common/transform-cache');
 

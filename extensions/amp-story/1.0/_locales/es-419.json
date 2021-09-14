@@ -1,42 +1,188 @@
 {
-  "2": {"string": "Presiona Siguiente"},
-  "3": {"string": "Presiona Atrás"},
-  "4": {"string": "No se pudo copiar el vínculo en el portapapeles :("},
-  "5": {"string": "Se copió el vínculo."},
-  "6": {"string": "Correo electrónico"},
-  "7": {"string": "Facebook"},
-  "8": {"string": "Google+"},
-  "9": {"string": "Obtener vínculo"},
-  "10": {"string": "LinkedIn"},
-  "11": {"string": "Pinterest"},
-  "12": {"string": "SMS"},
-  "14": {"string": "Tumblr"},
-  "15": {"string": "Twitter"},
-  "16": {"string": "WhatsApp"},
-  "18": {
-    "string": "Expande el ancho y la altura de la ventana para ver esta experiencia"
+  "2": {
+    "string": "Pulsa en Siguiente"
+  },
+  "3": {
+    "string": "Pulsa en Atrás"
+  },
+  "4": {
+    "string": "No se pudo copiar el enlace en el portapapeles :("
+  },
+  "5": {
+    "string": "¡Enlace copiado!"
+  },
+  "6": {
+    "string": "Correo electrónico"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "8": {
+    "string": "Google+"
+  },
+  "9": {
+    "string": "Obtener enlace"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "SMS"
+  },
+  "13": {
+    "string": "Más"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
   },
   "19": {
-    "string": "Debes habilitar el experimento de historia en formato AMP para ver este contenido."
-  },
-  "20": {
-    "string": "La página está optimizada para verse en orientación vertical."
+    "string": "Para ver este contenido, debes habilitar el experimento en amp-story."
   },
   "21": {
-    "string": "Parece que el navegador no es compatible con esta experiencia"
+    "string": "Lo sentimos, parece que esta experiencia no está disponible para su navegador"
   },
-  "22": {"string": "Aceptar"},
-  "23": {"string": "Rechazar"},
-  "25": {"string": "Ver en el dominio original:"},
-  "26": {"string": "Más información sobre los resultados de AMP"},
-  "27": {"string": "Continuar de todos modos"},
-  "31": {"string": "Sonido desactivado"},
-  "32": {"string": "Sonido activado"},
-  "33": {"string": "Esta página no tiene sonido"},
-  "34": {"string": "Reproducir video"},
-  "35": {"string": "Deslizar el dedo hacia arriba"},
-  "36": {"string": "Expandir tweet"},
-  "37": {"string": "Expande la altura de la ventana para ver esta experiencia"},
-  "38": {"string": "Expande el ancho de la ventana para ver esta experiencia"},
-  "63": {"string": "Line"}
+  "22": {
+    "string": "Aceptar"
+  },
+  "23": {
+    "string": "Rechazar"
+  },
+  "25": {
+    "string": "Ver en el dominio original:"
+  },
+  "26": {
+    "string": "Más información sobre los resultados de AMP"
+  },
+  "27": {
+    "string": "Continuar de todas formas"
+  },
+  "31": {
+    "string": "Sonido desactivado"
+  },
+  "32": {
+    "string": "Sonido activado"
+  },
+  "33": {
+    "string": "Esta página no tiene sonido"
+  },
+  "34": {
+    "string": "Reproducir video"
+  },
+  "35": {
+    "string": "Deslizar el dedo hacia arriba"
+  },
+  "36": {
+    "string": "Mostrar tuit"
+  },
+  "62": {
+    "string": "Compartir a partir de esta página"
+  },
+  "63": {
+    "string": "Line"
+  },
+  "64": {
+    "string": "Actualizado"
+  },
+  "65": {
+    "string": "No se pudo reproducir el video"
+  },
+  "66": {
+    "string": "Silenciar historia"
+  },
+  "67": {
+    "string": "Dejar de silenciar la historia"
+  },
+  "68": {
+    "string": "Información de la historia"
+  },
+  "69": {
+    "string": "Compartir historia"
+  },
+  "70": {
+    "string": "Alternar el menú de la historia"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "Consejo 1 de 2"
+  },
+  "76": {
+    "string": "Pulsa para ir a la siguiente pantalla"
+  },
+  "77": {
+    "string": "Siguiente"
+  },
+  "78": {
+    "string": "Consejo 2 de 2"
+  },
+  "79": {
+    "string": "Desliza para ir a la siguiente historia"
+  },
+  "80": {
+    "string": "Entendido"
+  },
+  "81": {
+    "string": "Consejo"
+  },
+  "82": {
+    "string": "Página anterior"
+  },
+  "83": {
+    "string": "Activar"
+  },
+  "84": {
+    "string": "PUNTUACIÓN:"
+  },
+  "85": {
+    "string": "Pausar la historia"
+  },
+  "86": {
+    "string": "Reproducir la historia"
+  },
+  "87": {
+    "string": "Cerrar"
+  },
+  "88": {
+    "string": "Saltar al siguiente"
+  },
+  "89": {
+    "string": "Tu respuesta se enviará a"
+  },
+  "90": {
+    "string": "Historia siguiente"
+  },
+  "91": {
+    "string": "Página siguiente"
+  },
+  "92": {
+    "string": "Repetir"
+  },
+  "93": {
+    "string": "Página anterior"
+  },
+  "96": {
+    "string": "Mueve el dispositivo para explorar"
+  },
+  "97": {
+    "string": "Abriendo..."
+  }
 }

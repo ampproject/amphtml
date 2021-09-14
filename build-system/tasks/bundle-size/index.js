@@ -20,7 +20,7 @@ const {
 const {
   VERSION: internalRuntimeVersion,
 } = require('../../compile/internal-version');
-const {cyan, red, yellow} = require('../../common/colors');
+const {cyan, red, yellow} = require('kleur/colors');
 const {log, logWithoutTimestamp} = require('../../common/logging');
 const {NoTTYReport, report} = require('@ampproject/filesize');
 
