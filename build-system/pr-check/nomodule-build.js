@@ -28,7 +28,7 @@ const {
   timedExecWithError,
 } = require('./utils');
 const {log} = require('../common/logging');
-const {red, yellow} = require('../common/colors');
+const {red, yellow} = require('kleur/colors');
 const {runCiJob} = require('./ci-job');
 const {signalPrDeployUpload} = require('../tasks/pr-deploy-bot-utils');
 const {Targets, buildTargetsInclude} = require('./build-targets');

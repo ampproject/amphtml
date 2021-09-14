@@ -19,7 +19,7 @@ const globby = require('globby');
 const fastGlob = require('fast-glob');
 >>>>>>> d30dfcd1ae... 🏗 Replace `globby` with `fast-glob` (#35846)
 const path = require('path');
-const {cyan, green} = require('../common/colors');
+const {cyan, green} = require('kleur/colors');
 const {execOrThrow} = require('../common/exec');
 const {log} = require('../common/logging');
 const {updateSubpackages} = require('../common/update-packages');

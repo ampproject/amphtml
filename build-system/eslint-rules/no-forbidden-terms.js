@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
@@ -15,6 +16,9 @@
  */
 
 const {cyan} = require('../common/colors');
+=======
+const {cyan} = require('kleur/colors');
+>>>>>>> 172a408730... 🏗 Restore direct requires of kleur/colors (#35905)
 const {matchForbiddenTerms} = require('../test-configs/forbidden-terms');
 const {relative} = require('path');
 

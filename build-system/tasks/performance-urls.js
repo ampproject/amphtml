@@ -16,7 +16,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const {cyan, green, red} = require('../common/colors');
+const {cyan, green, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const CONFIG_PATH = './performance/config.json';

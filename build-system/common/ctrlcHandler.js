@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
@@ -15,6 +16,9 @@
  */
 
 const colors = require('./colors');
+=======
+const colors = require('kleur/colors');
+>>>>>>> 172a408730... 🏗 Restore direct requires of kleur/colors (#35905)
 const {exec, execScriptAsync} = require('./exec');
 const {logLocalDev} = require('./logging');
 

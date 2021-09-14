@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const colors = require('../common/colors');
+const colors = require('kleur/colors');
 const fs = require('fs-extra');
 const {ciBuildSha, isCiBuild} = require('../common/ci');
 const {getStdout} = require('../common/process');

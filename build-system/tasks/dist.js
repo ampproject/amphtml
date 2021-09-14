@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
@@ -15,6 +16,9 @@
  */
 
 const colors = require('../common/colors');
+=======
+const colors = require('kleur/colors');
+>>>>>>> 172a408730... 🏗 Restore direct requires of kleur/colors (#35905)
 const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
 const path = require('path');

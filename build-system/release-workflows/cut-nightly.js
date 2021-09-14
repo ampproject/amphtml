@@ -4,7 +4,7 @@
  * @fileoverview Script that cuts a nightly branch.
  */
 
-const {cyan, green, red, yellow} = require('../common/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {log} = require('../common/logging');
 const {Octokit} = require('@octokit/rest');
 

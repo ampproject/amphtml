@@ -15,7 +15,7 @@
  */
 
 const minimist = require('minimist');
-const {cyan, green} = require('../common/colors');
+const {cyan, green} = require('kleur/colors');
 const {log} = require('../common/logging');
 const {requireNewServerModule} = require('./typescript-compile');
 const {URL} = require('url');
