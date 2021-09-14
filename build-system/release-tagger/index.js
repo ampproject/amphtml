@@ -5,7 +5,7 @@
  * 1. action (promote|rollback)
  * 2. head (AMP version)
  * 3. base (AMP version)
- * 4. channel (beta|stable|lts)
+ * 4. channel (beta-percent|stable|lts)
  */
 
 const [action, head, base, channel] = process.argv.slice(2);
@@ -20,6 +20,11 @@ const {publishRelease, rollbackRelease} = require('./update-release');
  * @return {Promise<void>}
  */
 async function _promote() {
+  const supportedChannels = ['beta-percent', 'stable', 'lts'];
+  if (!supportedChannels.includes(channel)) {
+    return;
+  }
+
   try {
     await publishRelease(head);
     log('Published release', head);
@@ -37,6 +42,11 @@ async function _promote() {
  * @return {Promise<void>}
  */
 async function _rollback() {
+  const supportedChannels = ['beta-percent', 'stable', 'lts'];
+  if (!supportedChannels.includes(channel)) {
+    return;
+  }
+
   try {
     await rollbackRelease(head);
     log('Rolled back release', head);

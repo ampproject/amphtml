@@ -176,7 +176,7 @@ test('create', async (t) => {
       },
     });
 
-  await makeRelease('2107280123000', '2107210123000', 'beta');
+  await makeRelease('2107280123000', '2107210123000', 'beta-percent');
   t.true(rest.isDone());
   t.true(graphql.isDone());
 });

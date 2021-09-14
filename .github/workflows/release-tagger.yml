@@ -12,7 +12,7 @@ on:
         description: 'base AMP version'
         required: true
       channel:
-        description: 'release channel (beta | stable | lts)'
+        description: 'release channel (beta-opt-in | beta-percent | stable | lts)'
         required: true
 jobs:
   tagger:
