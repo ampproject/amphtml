@@ -5,7 +5,6 @@
  */
 
 const {cyan, green, red} = require('kleur/colors');
->>>>>>> 33959af59 (🏗 Restore direct requires of kleur/colors (#35905))
 const {log} = require('../common/logging');
 const {Octokit} = require('@octokit/rest');
 
