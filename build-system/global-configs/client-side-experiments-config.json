@@ -23,6 +23,10 @@
     {
       "name": "story-load-inactive-outside-viewport",
       "percentage": 1
+    },
+    {
+      "name": "amp-sticky-ad-to-amp-ad-v2",
+      "percentage": 0.05
     }
   ]
 }
