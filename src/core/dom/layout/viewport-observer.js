@@ -50,13 +50,26 @@ export function observeWithSharedInOb(element, viewportCallback) {
 }
 
 /**
+ * Unobserve an element.
+ * @param {!Element} element
+ */
+export function unobserveWithSharedInOb(element) {
+  const win = toWin(element.ownerDocument.defaultView);
+  const viewportObserver = viewportObservers.get(win);
+  viewportObserver?.unobserve(element);
+  // TODO(dmanek): This is a potential bug. We only want to remove
+  // a single callback as opposed to all.
+  viewportCallbacks.delete(element);
+}
+
+/**
  * Lazily creates an IntersectionObserver per Window to track when elements
  * enter and exit the viewport. Fires viewportCallback when this happens.
  *
  * @param {!Element} element
- * @param {function(IntersectionObserverEntry)} viewportCallback
+ * @param {function(IntersectionObserverEntry)} callback
  */
-export function observeIntersections(element, viewportCallback) {
+export function observeIntersections(element, callback) {
   const win = toWin(element.ownerDocument.defaultView);
   let viewportObserver = viewportObservers.get(win);
   if (!viewportObserver) {
@@ -70,22 +83,32 @@ export function observeIntersections(element, viewportCallback) {
     callbacks = [];
     viewportCallbacks.set(element, callbacks);
   }
-
-  callbacks.push(viewportCallback);
+  callbacks.push(callback);
   viewportObserver.observe(element);
 }
 
 /**
- * Unobserve an element.
+ * Unobserves the intersection observer for the given callback.
+ * If no callbacks remain for the element, unobserves the element too.
+ *
  * @param {!Element} element
+ * @param {function(IntersectionObserverEntry)} callback
  */
-export function unobserveWithSharedInOb(element) {
-  const win = toWin(element.ownerDocument.defaultView);
-  const viewportObserver = viewportObservers.get(win);
-  viewportObserver?.unobserve(element);
-  // TODO(dmanek): This is a potential bug. We only want to remove
-  // a single callback as opposed to all.
-  viewportCallbacks.delete(element);
+export function unobserveIntersections(element, callback) {
+  const callbacks = viewportCallbacks.get(element);
+  if (!callbacks) {
+    return;
+  }
+  const idxToDelete = callbacks.findIndex((cb) => cb === callback);
+  if (idxToDelete === -1) {
+    return;
+  }
+  callbacks.splice(idxToDelete, 1);
+  if (callbacks.length === 0) {
+    const win = toWin(element.ownerDocument.defaultView);
+    const viewportObserver = viewportObservers.get(win);
+    viewportObserver?.unobserve(element);
+  }
 }
 
 /**
