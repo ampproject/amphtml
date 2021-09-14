@@ -24,7 +24,6 @@ describes.realWin(
       toggleExperiment(win, 'bento-image-slider', true, true);
     });
 
-    // DO NOT SUBMIT: This is example code only.
     it('example test renders', async () => {
       const element = html` <amp-image-slider></amp-image-slider> `;
       doc.body.appendChild(element);

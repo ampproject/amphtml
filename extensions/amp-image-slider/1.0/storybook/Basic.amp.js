@@ -13,7 +13,6 @@ export default {
   },
 };
 
-// DO NOT SUBMIT: This is example code only.
 export const ExampleUseCase = () => {
   const first = text(
     'First image',

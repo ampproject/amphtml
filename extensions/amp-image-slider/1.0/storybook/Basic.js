@@ -11,7 +11,6 @@ export default {
 };
 
 export const _default = () => {
-  // DO NOT SUBMIT: This is example code only.
   return (
     <ImageSlider
       style={{width: 300, height: 200}}
