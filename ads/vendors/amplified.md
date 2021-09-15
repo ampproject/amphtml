@@ -15,8 +15,8 @@
 
 ## Data Attributes
 
-- `data-amplified_id`: The id for your ad unit
-- `data-amplified_params`: The params you would typically pass to our ad unit, such as `artist`, `song`, etc.
+-   `data-amplified_id`: The id for your ad unit
+-   `data-amplified_params`: The params you would typically pass to our ad unit, such as `artist`, `song`, etc.
 
 ## Support
 
