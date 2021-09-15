@@ -6,7 +6,7 @@ var ImageSliderDef = {};
 /**
  * @typedef {{
  *   initialPosition: (string|undefined),
- *   shouldHintReappear: (boolean|undefined),
+ *   repeatHint: (boolean|undefined),
  *   stepSize: (number),
  * }}
  */

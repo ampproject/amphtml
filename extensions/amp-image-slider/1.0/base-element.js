@@ -16,7 +16,7 @@ BaseElement['props'] = {
     attr: 'initial-slider-position',
     type: 'string',
   },
-  shouldHintReappear: {
+  repeatHint: {
     attr: 'disable-hint-reappear',
     type: 'boolean',
   },

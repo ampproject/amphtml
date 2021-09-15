@@ -28,14 +28,7 @@ const VALID_IMAGE_TAGNAMES = new Set(['AMP-IMG', 'IMG']);
  * @return {PreactDef.Renderable}
  */
 export function ImageSliderWithRef(
-  {
-    images,
-    initialPosition,
-    labels,
-    shouldHintReappear,
-    stepSize = 0.1,
-    ...rest
-  },
+  {images, initialPosition, labels, repeatHint, stepSize = 0.1, ...rest},
   ref
 ) {
   /** Common variables */
