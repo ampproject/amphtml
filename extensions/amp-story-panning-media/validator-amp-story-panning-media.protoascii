@@ -17,4 +17,29 @@ tags: {  # <amp-story-panning-media>
   amp_layout: {
     supported_layouts: FILL
   }
+  attrs: {
+    name: "x"
+    value_regex: "-?\\d+\\.?\\d*(%)"
+    trigger: {
+      also_requires_attr: "duration"
+    }
+  }
+  attrs: {
+    name: "y"
+    value_regex: "-?\\d+\\.?\\d*(%)"
+    trigger: {
+      also_requires_attr: "duration"
+    }
+  }
+  attrs: {
+    name: "zoom"
+    value_regex: "\\d+\\.?\\d*"
+  }
+  attrs: {
+    name: "lock-bounds"
+  }
+  child_tags: {
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "AMP-IMG"
+  }  
 }

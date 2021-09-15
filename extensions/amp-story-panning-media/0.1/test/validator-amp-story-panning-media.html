@@ -24,7 +24,20 @@
         poster-portrait-src="example.com/poster.jpg">
       <amp-story-page id="cover">
         <amp-story-grid-layer template="fill">
-          <amp-story-panning-media layout="fill"></amp-story-panning-media>
+          <amp-story-panning-media 
+            layout="fill"
+            x="10%"
+            y="-10%"
+            zoom="2"
+            lock-bounds
+          >
+          <amp-img
+            layout="fill"
+            width="4000"
+            height="3059"
+            src="img/conservatory-coords.jpg">
+          </amp-img>
+        </amp-story-panning-media>
         </amp-story-grid-layer>
       </amp-story-page>
     </amp-story>
