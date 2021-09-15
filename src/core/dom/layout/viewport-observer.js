@@ -1,4 +1,5 @@
 import {isIframed} from '#core/dom';
+import {findIndex} from '#core/types/array';
 import {toWin} from '#core/window';
 
 /**
@@ -99,7 +100,7 @@ export function unobserveIntersections(element, callback) {
   if (!callbacks) {
     return;
   }
-  const idxToDelete = callbacks.findIndex((cb) => cb === callback);
+  const idxToDelete = findIndex(callbacks, (cb) => cb === callback);
   if (idxToDelete === -1) {
     return;
   }
@@ -108,6 +109,7 @@ export function unobserveIntersections(element, callback) {
     const win = toWin(element.ownerDocument.defaultView);
     const viewportObserver = viewportObservers.get(win);
     viewportObserver?.unobserve(element);
+    viewportCallbacks.delete(element);
   }
 }
 
