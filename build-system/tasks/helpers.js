@@ -712,10 +712,10 @@ async function maybePrintCoverageMessage(covPath = '') {
 async function thirdPartyBootstrap(input, outputName, options) {
   const {fortesting, minify} = options;
   const destDir = `dist.3p/${minify ? internalRuntimeVersion : 'current'}`;
-  await fs.ensureDir(destDir);
+  fs.ensureDirSync(destDir);
 
   if (!minify) {
-    await fs.copy(input, `${destDir}/${path.basename(input)}`);
+    fs.copySync(input, `${destDir}/${path.basename(input)}`);
     return;
   }
 
@@ -730,7 +730,7 @@ async function thirdPartyBootstrap(input, outputName, options) {
   const html = fs
     .readFileSync(input, 'utf8')
     .replace(/\.\/integration\.js/g, integrationJs);
-  await fs.writeFile(`${destDir}/${outputName}`, html);
+  fs.writeFileSync(`${destDir}/${outputName}`, html);
   const aliasToLatestBuild = 'dist.3p/current-min';
   if (fs.existsSync(aliasToLatestBuild)) {
     fs.unlinkSync(aliasToLatestBuild);

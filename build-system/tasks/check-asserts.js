@@ -1,6 +1,6 @@
 'use strict';
 
-const fs = require('fs').promises;
+const fs = require('fs');
 const {cyan, green, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 
@@ -18,7 +18,7 @@ const MINIFIED_JS = './dist/v0.js';
  * @throws if a sentinel isn't/is present when it should/shouldn't be
  */
 async function checkSentinels(filePath, sentinels) {
-  const fileContents = await fs.readFile(filePath, 'utf8');
+  const fileContents = fs.readFileSync(filePath, 'utf8');
 
   for (const [sentinel, shouldBePresent] of Object.entries(sentinels)) {
     const isPresent = fileContents.includes(sentinel);

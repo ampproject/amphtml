@@ -73,10 +73,10 @@ const replace = (inputText, replacements) =>
  * @yields {string}
  */
 async function* walkDir(dir) {
-  for (const f of await fs.readdir(dir)) {
+  for (const f of fs.readdirSync(dir)) {
     const dirPath = path.join(dir, f);
 
-    if ((await fs.stat(dirPath)).isDirectory()) {
+    if (fs.statSync(dirPath).isDirectory()) {
       yield* walkDir(dirPath);
     } else {
       yield path.join(dir, f);
@@ -108,34 +108,22 @@ async function writeFromTemplateDir(
   for await (const templatePath of walkDir(templateDir)) {
     const destination = destinationPath(templatePath);
 
-    await fs.mkdirp(path.dirname(destination));
+    fs.mkdirpSync(path.dirname(destination));
 
     // Skip if the destination file already exists
-    let fileHandle;
-    try {
-      fileHandle = await fs.open(destination, 'wx');
-    } catch (e) {
-      if (e.code !== 'EEXIST') {
-        throw e;
-      }
-      if (!argv.overwrite) {
-        logLocalDev(
-          yellow('WARNING:'),
-          'Skipping existing file',
-          cyan(destination)
-        );
-        continue;
-      }
+    if (!argv.overwrite && fs.pathExistsSync(destination)) {
       logLocalDev(
         yellow('WARNING:'),
-        'Overwriting existing file',
+        'Skipping existing file',
         cyan(destination)
       );
+      continue;
     }
 
-    const template = await fs.readFile(templatePath, 'utf8');
-    await fs.write(fileHandle, replace(template, replacements));
-    await fs.close(fileHandle);
+    const fileHandle = fs.openSync(destination, 'w');
+    const template = fs.readFileSync(templatePath, 'utf8');
+    fs.writeSync(fileHandle, replace(template, replacements));
+    fs.closeSync(fileHandle);
 
     logLocalDev(green('SUCCESS:'), 'Created', cyan(destination));
 
@@ -157,7 +145,7 @@ async function insertExtensionBundlesConfig(
 ) {
   let extensionBundles = [];
   try {
-    extensionBundles = await fs.readJson(destination, {throws: false});
+    extensionBundles = fs.readJsonSync(destination, {throws: false});
   } catch (_) {}
 
   const existingOrNull = extensionBundles.find(
@@ -175,9 +163,9 @@ async function insertExtensionBundlesConfig(
     ...rest,
   });
 
-  await fs.mkdirp(path.dirname(destination));
+  fs.mkdirpSync(path.dirname(destination));
 
-  await fs.writeJson(
+  fs.writeJsonSync(
     destination,
     extensionBundles.sort((a, b) => {
       if (!a.name) {

@@ -726,6 +726,9 @@ const forbiddenTermsGlobal = {
     ],
     checkInTestFolder: true,
   },
+  '\\bawait fs.\\w+': {
+    message: '"await fs.[method]" is redundant. Use "fs.[method]Sync".',
+  },
   'withA11y':
     'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
   '@storybook/addon-knobs': {

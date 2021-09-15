@@ -14,7 +14,7 @@ const {log} = require('../common/logging');
  */
 async function checkForUnknownDeps(file) {
   const regex = /[\w$]*module\$[\w$]+/;
-  const contents = await fs.readFile(file, 'utf-8');
+  const contents = fs.readFileSync(file, 'utf-8');
   if (!contents.includes('module$')) {
     // Fast check, since regexes can backtrack like crazy.
     return;

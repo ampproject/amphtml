@@ -514,7 +514,7 @@ async function buildNpmCss(extDir, options) {
 
   const css = (await Promise.all(filenames.map(getCssForJssFile))).join('');
   const outfile = path.join(extDir, 'dist', 'styles.css');
-  await fs.writeFile(outfile, css);
+  fs.writeFileSync(outfile, css);
   endBuildStep('Wrote CSS', `${options.name} → styles.css`, startCssTime);
 }
 
@@ -764,11 +764,11 @@ async function buildSandboxedProxyIframe(minify) {
     minify ? `${internalRuntimeVersion}` : 'current'
   );
   const fileExt = argv.esm ? '.mjs' : '.js';
-  const proxyScript = await fs.readFile(
+  const proxyScript = fs.readFileSync(
     path.join(dist3pDir, 'amp-script-proxy-iframe' + fileExt)
   );
   const proxyIframe = `<html><script>${proxyScript}</script></html>`;
-  await fs.outputFile(
+  fs.outputFileSync(
     path.join(dist3pDir, 'amp-script-proxy-iframe.html'),
     proxyIframe
   );
@@ -841,7 +841,7 @@ async function copyWorkerDomResources(version) {
     ],
   ]);
   for (const [src, dest] of workerFilesToDeploy) {
-    await fs.copy(`${dir}/${src}`, `${targetDir}/${dest}`);
+    fs.copySync(`${dir}/${src}`, `${targetDir}/${dest}`);
   }
   endBuildStep('Copied', '@ampproject/worker-dom resources', startTime);
 }

@@ -48,7 +48,7 @@ function updatePaths(sourcemaps) {
  * @return {Promise<void>}
  */
 async function writeSourcemaps(sourcemapsFile, options) {
-  const sourcemaps = await fs.readJson(sourcemapsFile);
+  const sourcemaps = fs.readJsonSync(sourcemapsFile);
 
   updatePaths(sourcemaps);
   if (!argv.full_sourcemaps) {
@@ -56,7 +56,7 @@ async function writeSourcemaps(sourcemapsFile, options) {
   }
   sourcemaps.sourceRoot = getSourceRoot(options);
 
-  await fs.writeJSON(sourcemapsFile, sourcemaps);
+  fs.writeJsonSync(sourcemapsFile, sourcemaps);
 }
 
 module.exports = {

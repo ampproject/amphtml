@@ -17,7 +17,7 @@ async function sanitize(file) {
   if (!argv.sanitize_vars_for_diff) {
     return;
   }
-  const contents = await fs.readFile(file, 'utf-8');
+  const contents = fs.readFileSync(file, 'utf-8');
   const config = await prettier.resolveConfig(file);
   const options = {filepath: file, parser: 'babel', ...config};
   const replaced = Object.create(null);
@@ -30,7 +30,7 @@ async function sanitize(file) {
   );
   const formatted = prettier.format(presanitize, options);
   const sanitized = formatted.replace(/___\d+___/g, '______');
-  await fs.outputFile(file, sanitized);
+  fs.outputFileSync(file, sanitized);
 }
 
 module.exports = {sanitize};

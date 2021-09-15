@@ -18,7 +18,7 @@ const prDeployBotBaseUrl =
  */
 async function walk(dest) {
   const filelist = [];
-  const files = await fs.readdir(dest);
+  const files = fs.readdirSync(dest);
 
   for (let i = 0; i < files.length; i++) {
     const file = `${dest}/${files[i]}`;
@@ -43,11 +43,11 @@ function getBaseUrl() {
  * @return {Promise<void>}
  */
 async function replace(filePath) {
-  const data = await fs.readFile(filePath, 'utf8');
+  const data = fs.readFileSync(filePath, 'utf8');
   const hostName = getBaseUrl();
   const result = replaceUrlsAppUtil('minified', data, hostName);
 
-  await fs.writeFile(filePath, result, 'utf8');
+  fs.writeFileSync(filePath, result, 'utf8');
 }
 
 /**

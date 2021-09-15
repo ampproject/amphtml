@@ -20,7 +20,7 @@ const {
  */
 async function writeOutput(output, filename) {
   try {
-    await fs.outputJson(filename, output, {spaces: 4});
+    fs.outputJsonSync(filename, output, {spaces: 4});
   } catch (error) {
     process.stdout.write(
       Base.color(

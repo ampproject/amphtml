@@ -1405,7 +1405,7 @@ app.get(
 
 if (argv.coverage === 'live') {
   app.get('/dist/amp.js', async (req, res) => {
-    const ampJs = await fs.promises.readFile(`${pc.cwd()}${req.path}`);
+    const ampJs = fs.readFileSync(`${pc.cwd()}${req.path}`);
     res.setHeader('Content-Type', 'text/javascript');
     res.setHeader('Access-Control-Allow-Origin', '*');
     // Append an unload handler that reports coverage information each time you
@@ -1589,7 +1589,7 @@ app.use(
     const localPath = `${pc.cwd()}/dist/v0/analytics-vendors/${vendor}${max}.json`;
 
     try {
-      const file = await fs.promises.readFile(localPath);
+      const file = fs.readFileSync(localPath);
       res.setHeader('Content-Type', 'application/json');
       res.end(file);
     } catch (_) {

@@ -14,7 +14,7 @@ const app = express.Router();
 app.use(['/inabox', '/inabox-mraid'], async (req, res) => {
   const templatePath =
     process.cwd() + '/build-system/server/server-inabox-template.html';
-  let template = await fs.promises.readFile(templatePath, 'utf8');
+  let template = fs.readFileSync(templatePath, 'utf8');
   template = template.replace(/SOURCE/g, 'AD_URL');
   if (req.baseUrl == '/inabox-mraid') {
     // MRAID does not load amp4ads-host-v0.js
@@ -31,10 +31,7 @@ app.use(['/inabox', '/inabox-mraid'], async (req, res) => {
 app.use('/inabox-(friendly|safeframe)', async (req, res) => {
   const templatePath = '/build-system/server/server-inabox-template.html';
   try {
-    let template = await fs.promises.readFile(
-      process.cwd() + templatePath,
-      'utf8'
-    );
+    let template = fs.readFileSync(process.cwd() + templatePath, 'utf8');
 
     const url = getInaboxUrl(req);
     if (req.baseUrl == '/inabox-friendly') {
@@ -69,10 +66,7 @@ app.use('/a4a(|-3p)/', async (req, res) => {
   const force3p = req.baseUrl.startsWith('/a4a-3p');
   const templatePath = '/build-system/server/server-a4a-template.html';
   const url = getInaboxUrl(req);
-  const template = await fs.promises.readFile(
-    process.cwd() + templatePath,
-    'utf8'
-  );
+  const template = fs.readFileSync(process.cwd() + templatePath, 'utf8');
   const branchLevelExperiments = req.query.eid;
 
   const content = fillTemplate(template, url.href, req.query)

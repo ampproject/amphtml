@@ -158,12 +158,12 @@ const rules = depCheckConfig.rules.map((config) => new Rule(config));
  */
 async function getEntryPointModule() {
   const coreBinaries = ['src/amp.js', '3p/integration.js'];
-  const extensions = await fs.promises.readdir('extensions');
+  const extensions = fs.readdirSync('extensions');
   const extensionEntryPoints = extensions
     .map((x) => `extensions/${x}`)
     .filter((x) => fs.statSync(x).isDirectory())
     .map(getEntryPoint);
-  const vendors = await fs.promises.readdir('3p/vendors');
+  const vendors = fs.readdirSync('3p/vendors');
   const vendorEntryPoints = vendors.map((x) => `3p/vendors/${x}`);
   const allEntryPoints = flatten(extensionEntryPoints)
     .concat(coreBinaries)
@@ -208,7 +208,7 @@ async function getModuleGraph(entryPointModule) {
 
 /**
  * @param {string} extensionFolder
- * @return {!Array<!ModuleDef>}
+ * @return {!Array<string>}
  */
 function getEntryPoint(extensionFolder) {
   const extension = path.basename(extensionFolder);

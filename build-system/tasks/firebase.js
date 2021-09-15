@@ -11,7 +11,7 @@ const {log} = require('../common/logging');
  */
 async function walk(dest) {
   const filelist = [];
-  const files = await fs.readdir(dest);
+  const files = fs.readdirSync(dest);
 
   for (let i = 0; i < files.length; i++) {
     const file = `${dest}/${files[i]}`;
@@ -30,7 +30,7 @@ async function walk(dest) {
  * @return {Promise<void>}
  */
 async function copyAndReplaceUrls(src, dest) {
-  await fs.copy(src, dest, {overwrite: true});
+  fs.copySync(src, dest, {overwrite: true});
   // Recursively gets all the files within the directory and its children.
   const files = await walk(dest);
   const promises = files
@@ -46,11 +46,11 @@ async function firebase() {
   if (!argv.nobuild) {
     await buildRuntime();
   }
-  await fs.mkdirp('firebase');
+  fs.mkdirpSync('firebase');
   if (argv.file) {
     log(green(`Processing file: ${argv.file}.`));
     log(green('Writing file to firebase.index.html.'));
-    await fs.copyFile(/*src*/ argv.file, 'firebase/index.html');
+    fs.copyFileSync(/*src*/ argv.file, 'firebase/index.html');
     await replaceUrls('firebase/index.html');
   } else {
     log(green('Copying test/manual and examples folders.'));
@@ -75,7 +75,7 @@ async function firebase() {
  * @return {Promise<void>}
  */
 async function replaceUrls(filePath) {
-  const data = await fs.readFile(filePath, 'utf8');
+  const data = fs.readFileSync(filePath, 'utf8');
   let result = data.replace(
     /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
     '/dist/amp.js'
@@ -91,7 +91,7 @@ async function replaceUrls(filePath) {
       '/dist/v0/$1.max.js'
     );
   }
-  await fs.writeFile(filePath, result, 'utf8');
+  fs.writeFileSync(filePath, result, 'utf8');
 }
 
 module.exports = {

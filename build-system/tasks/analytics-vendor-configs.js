@@ -38,10 +38,10 @@ async function analyticsVendorConfigs(opt_options) {
   const startTime = Date.now();
 
   const srcFiles = await fastGlob(srcPath);
-  await fs.ensureDir(destPath);
+  fs.ensureDirSync(destPath);
   for (const srcFile of srcFiles) {
     let destFile = join(destPath, basename(srcFile));
-    let contents = await fs.readFile(srcFile, 'utf-8');
+    let contents = fs.readFileSync(srcFile, 'utf-8');
     if (options.minify) {
       contents = jsonminify(contents);
     }
@@ -61,7 +61,7 @@ async function analyticsVendorConfigs(opt_options) {
       const dir = dirname(destFile);
       destFile = join(dir, `${base}.max${extension}`);
     }
-    await fs.writeFile(destFile, contents, 'utf-8');
+    fs.writeFileSync(destFile, contents, 'utf-8');
   }
   if ((await fastGlob(srcPath)).length > 0) {
     endBuildStep(

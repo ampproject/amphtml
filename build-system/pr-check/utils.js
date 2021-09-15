@@ -309,7 +309,7 @@ async function processAndStoreBuildToArtifacts() {
       cyan(ARTIFACT_FILE_NAME) +
       '...'
   );
-  await fs.ensureDir(ARTIFACT_DIRECTORY);
+  fs.ensureDirSync(ARTIFACT_DIRECTORY);
   execOrDie(`tar -czf ${ARTIFACT_FILE_NAME} ${APP_SERVING_DIRS.join('/ ')}/`);
   execOrDie(`du -sh ${ARTIFACT_FILE_NAME}`);
 }
@@ -327,7 +327,7 @@ function generateCircleCiShardTestFileList(globs) {
   )
     .trim()
     .replace(/\s+/g, ',');
-  fs.writeFileSync(TEST_FILES_LIST_FILE_NAME, fileList, {encoding: 'utf8'});
+  fs.writeFileSync(TEST_FILES_LIST_FILE_NAME, fileList, 'utf8');
   logWithoutTimestamp(
     'Stored list of',
     cyan(fileList.split(',').length),

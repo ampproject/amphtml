@@ -269,7 +269,7 @@ function derandomize_(target, configJson) {
  * @return {!Promise<void>}
  */
 async function removeConfig(target) {
-  const file = await fs.promises.readFile(target);
+  const file = fs.readFileSync(target);
   let contents = file.toString();
   if (numConfigs(contents) == 0) {
     return;
