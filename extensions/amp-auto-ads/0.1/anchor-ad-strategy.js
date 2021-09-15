@@ -14,9 +14,9 @@ export class AnchorAdStrategy {
    * @param {!JsonObject<string, string>} baseAttributes Any attributes that
    *     should be added to any inserted ads.
    * @param {!JsonObject} configObj
-   * @param {!JsonObject} customAnalytics
+   * @param {!JsonObject|null} opt_customAnalytics
    */
-  constructor(ampdoc, baseAttributes, configObj, customAnalytics) {
+  constructor(ampdoc, baseAttributes, configObj, opt_customAnalytics) {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -26,8 +26,8 @@ export class AnchorAdStrategy {
     /** @const @private {!JsonObject} */
     this.configObj_ = configObj;
 
-    /** @const @private {!JsonObject} */
-    this.customAnalytics_ = customAnalytics;
+    /** @const @private {!JsonObject|null} */
+    this.customAnalytics_ = opt_customAnalytics;
   }
 
   /**

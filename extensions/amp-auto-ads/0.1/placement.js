@@ -88,7 +88,7 @@ export class Placement {
    * @param {function(!Element, !Element)} injector
    * @param {!JsonObject<string, string>} attributes
    * @param {!../../../src/layout-rect.LayoutMarginsChangeDef=} opt_margins
-   * @param {!JsonObject} customAnalytics
+   * @param {!JsonObject|null} opt_customAnalytics
    */
   constructor(
     ampdoc,
@@ -97,7 +97,7 @@ export class Placement {
     injector,
     attributes,
     opt_margins,
-    customAnalytics
+    opt_customAnalytics
   ) {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
@@ -129,8 +129,8 @@ export class Placement {
     /** @private {!PlacementState} */
     this.state_ = PlacementState.UNUSED;
 
-    /** @const @private {!JsonObject} */
-    this.customAnalytics_ = customAnalytics;
+    /** @const @private {!JsonObject|null} */
+    this.customAnalytics_ = opt_customAnalytics;
   }
 
   /**
