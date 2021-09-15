@@ -625,7 +625,7 @@ describes.realWin(
 
         await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
 
-        [1, 2].forEach((index) => {
+        for (const index of [1, 2]) {
           const {ampdoc} = service.pages_[index].shadowDoc;
           const viewer = Services.viewerForDoc(ampdoc);
           expect(viewer).to.not.equal(initialViewer);
@@ -639,7 +639,33 @@ describes.realWin(
 
           expect(initialMessageDeliverer.withArgs(...args)).to.have.been
             .calledOnce;
-        });
+        }
+      });
+
+      it('shadow-doc Viewer supresses viewport message requests', async () => {
+        const initialMessageDeliverer = env.sandbox.spy();
+        const initialViewer = Services.viewerForDoc(ampdoc);
+        initialViewer.setMessageDeliverer(initialMessageDeliverer, '');
+
+        await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
+
+        for (const eventType of ['documentHeight', 'scroll', 'viewport']) {
+          for (const index of [1, 2]) {
+            const {ampdoc} = service.pages_[index].shadowDoc;
+            const viewer = Services.viewerForDoc(ampdoc);
+            expect(viewer).to.not.equal(initialViewer);
+
+            const messageDeliverer = viewer.maybeGetMessageDeliverer();
+            expect(messageDeliverer).to.be.ok;
+
+            const args = [eventType, `data${index}`, true];
+
+            messageDeliverer(...args);
+
+            expect(initialMessageDeliverer.withArgs(...args)).to.not.have.been
+              .called;
+          }
+        }
       });
     });
 
