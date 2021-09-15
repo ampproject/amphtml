@@ -134,15 +134,17 @@ async function getRelease(tag) {
  * @param {string} body
  * @param {number} number
  * @param {string} title
+ * @param {'open' | 'closed'} state
  * @return {Promise<Object>}
  */
-function updateIssue(body, number, title) {
+function updateIssue(body, number, title, state = 'open') {
   return octokit.rest.issues.update({
     owner,
     repo,
     'issue_number': number,
     title,
     body,
+    state,
   });
 }
 
