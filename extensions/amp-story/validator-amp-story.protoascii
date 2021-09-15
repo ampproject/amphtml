@@ -1022,8 +1022,7 @@ tags: {
 }
 descendant_tag_list {
   # Allowlisting as many components as possible, unless they could result in a
-  # bad UX (ie: modal in a modal with amp-lightbox), or potential security
-  # issues (ie: amp-form).
+  # bad UX (ie: modal in a modal with amp-lightbox).
   name: "amp-story-page-attachment-allowed-descendants"
   tag: "A"
   tag: "ABBR"
@@ -1048,6 +1047,7 @@ descendant_tag_list {
   tag: "AMP-FACEBOOK-LIKE"
   tag: "AMP-FACEBOOK-PAGE"
   tag: "AMP-FIT-TEXT"
+  tag: "AMP-FORM"
   tag: "AMP-FX-COLLECTION"
   tag: "AMP-FX-FLYING-CARPET"
   tag: "AMP-GFYCAT"
@@ -1079,6 +1079,7 @@ descendant_tag_list {
   tag: "AMP-RENDER"
   tag: "AMP-RIDDLE-QUIZ"
   tag: "AMP-SOUNDCLOUD"
+  tag: "AMP-SELECTOR"
   tag: "AMP-SPRINGBOARD-PLAYER"
   tag: "AMP-TIMEAGO"
   tag: "AMP-TWITTER"
@@ -1126,8 +1127,10 @@ descendant_tag_list {
   tag: "FEMERGENODE"
   tag: "FEOFFSET"
   tag: "FIGCAPTION"
+  tag: "FIELDSET"
   tag: "FIGURE"
   tag: "FILTER"
+  tag: "FORM"
   tag: "FOOTER"
   tag: "G"
   tag: "GLYPH"
@@ -1145,9 +1148,12 @@ descendant_tag_list {
   tag: "I"
   tag: "IMAGE"
   tag: "IMG"  # Only allowed when document is transformed AMP
+  tag: "INPUT"
   tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
   tag: "INS"
   tag: "KBD"
+  tag: "LABEL"
+  tag: "LEGEND"
   tag: "LI"
   tag: "LINE"
   tag: "LINEARGRADIENT"
@@ -1158,6 +1164,8 @@ descendant_tag_list {
   tag: "METADATA"
   tag: "NAV"
   tag: "OL"
+  tag: "OPTGROUP"
+  tag: "OPTION"
   tag: "P"
   tag: "PATH"
   tag: "PATTERN"
@@ -1174,6 +1182,7 @@ descendant_tag_list {
   tag: "S"
   tag: "SAMP"
   tag: "SECTION"
+  tag: "SELECT"
   tag: "SMALL"
   tag: "SOLIDCOLOR"
   tag: "SOURCE"
@@ -1190,6 +1199,7 @@ descendant_tag_list {
   tag: "TD"
   tag: "TEMPLATE"
   tag: "TEXT"
+  tag: "TEXTAREA"
   tag: "TEXTPATH"
   tag: "TFOOT"
   tag: "TH"
