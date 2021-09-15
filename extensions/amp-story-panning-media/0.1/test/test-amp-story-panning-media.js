@@ -101,10 +101,9 @@ describes.realWin(
       );
     });
 
-    it('calculates transform with lock-bounds', async () => {
+    it('calculates zoom with lock-bounds', async () => {
       const attributes = {
         'group-id': 'group-1',
-        'y': '50%',
         'zoom': 0.2,
         'lock-bounds': '',
       };
