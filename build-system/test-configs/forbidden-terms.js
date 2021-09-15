@@ -144,12 +144,13 @@ const forbiddenTermsGlobal = {
     message:
       'Do not use build constants directly. Instead, use the helpers in `#core/mode`.',
     allowlist: [
-      'src/core/mode/version.js',
+      'build-system/babel-plugins/babel-plugin-amp-mode-transformer/index.js',
+      'build-system/compile/build-compiler.js',
+      'build-system/compile/build-constants.js',
+      'src/core/mode/esm.js',
       'src/core/mode/minified.js',
       'src/core/mode/prod.js',
-      'src/core/mode/esm.js',
-      'build-system/compile/build-constants.js',
-      'build-system/babel-plugins/babel-plugin-amp-mode-transformer/index.js',
+      'src/core/mode/version.js',
     ],
   },
   '\\.prefetch\\(': {
@@ -1087,14 +1088,6 @@ const forbiddenTermsSrcInclusive = {
   "require\\('fancy-log'\\)": {
     message:
       'Instead of fancy-log, use the logging functions in build-system/common/logging.js.',
-  },
-  "require\\('kleur\\/colors'\\)": {
-    message:
-      'Instead of kleur/colors, use the log-coloring functions in build-system/common/colors.js',
-    allowlist: [
-      'build-system/common/colors.js',
-      'third_party/react-dates/scope-require.js',
-    ],
   },
   'detectIsAutoplaySupported': {
     message:
