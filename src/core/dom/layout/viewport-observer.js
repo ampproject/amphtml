@@ -34,14 +34,6 @@ const viewportObservers = new WeakMap();
 const viewportCallbacks = new WeakMap();
 
 /**
- * @return {!WeakMap<!Element, !Array<function(IntersectionObserverEntry)>>}
- * @visibleForTesting
- */
-export function getViewerCallbacksForTesting() {
-  return viewportCallbacks;
-}
-
-/**
  * Lazily creates an IntersectionObserver per Window to track when elements
  * enter and exit the viewport. Fires viewportCallback when this happens.
  *

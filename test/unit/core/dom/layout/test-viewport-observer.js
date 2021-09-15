@@ -1,6 +1,5 @@
 import {
   createViewportObserver,
-  getViewerCallbacksForTesting,
   observeIntersections,
   observeWithSharedInOb,
   unobserveIntersections,
@@ -149,22 +148,27 @@ describes.sandboxed('DOM - layout - Viewport Observer', {}, (env) => {
     });
 
     it('can observe and unobserve an element with multiple callbacks', () => {
-      const cb1 = () => {};
-      const cb2 = () => {};
+      const cb1 = env.sandbox.spy();
+      const cb2 = env.sandbox.spy();
       observeIntersections(el1, cb1);
       observeIntersections(el1, cb2);
       toggleViewport(el1, true);
-      const viewportCallbacks = getViewerCallbacksForTesting();
-      expect(viewportCallbacks.get(el1)).to.have.length(2);
+      expect(cb1).to.be.called;
+      expect(cb2).to.be.called;
 
+      cb1.resetHistory();
+      cb2.resetHistory();
       unobserveIntersections(el1, cb2);
-      expect(viewportCallbacks.get(el1)).to.have.length(1);
+      toggleViewport(el1, true);
+      expect(cb1).to.be.called;
+      expect(cb2).not.to.be.called;
 
-      unobserveIntersections(el1, cb2);
-      expect(viewportCallbacks.get(el1)).to.have.length(1);
-
+      cb1.resetHistory();
+      cb2.resetHistory();
       unobserveIntersections(el1, cb1);
-      expect(viewportCallbacks.get(el1)).to.be.undefined;
+      toggleViewport(el1, true);
+      expect(cb1).not.to.be.called;
+      expect(cb2).not.to.be.called;
     });
   });
 });
