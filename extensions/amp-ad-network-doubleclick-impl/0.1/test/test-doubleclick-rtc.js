@@ -69,7 +69,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, (env) => {
           rtcTime: 100,
         },
         {
-          response: {targeting: {'a': 'foo', 'b': {e: 'f'}}},
+          response: {targeting: {'a': 'foo', 'b': {e: 'f'}}, ppid: 'testId'},
           callout: 'www.exampleB.com',
           rtcTime: 500,
         },
@@ -90,6 +90,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, (env) => {
           'b': {c: 'd', e: 'f'},
           'z': [{a: 'b'}, {c: 'd'}],
         },
+        ppid: 'testId'
       };
       testMergeRtcResponses(
         rtcResponseArray,
@@ -322,6 +323,34 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, (env) => {
 
     it('should return null for empty array', () => {
       expect(impl.mergeRtcResponses_()).to.be.null;
+    });
+
+    it('should properly merge ppid', () => {
+      const rtcResponseArray = [
+        {
+          response: {ppid: 'testId1'},
+          callout: 'www.exampleA.com',
+          rtcTime: 100,
+        },
+        {
+          response: {ppid: 'testId2'},
+          callout: 'www.exampleB.com',
+          rtcTime: 500,
+        },
+      ];
+      const expectedParams = {
+        ati: '2,2',
+        artc: '100,500',
+        ard: 'www.exampleA.com,www.exampleB.com',
+      };
+      const expectedJsonTargeting = {
+        ppid: 'testId2'
+      };
+      testMergeRtcResponses(
+        rtcResponseArray,
+        expectedParams,
+        expectedJsonTargeting
+      );
     });
   });
 

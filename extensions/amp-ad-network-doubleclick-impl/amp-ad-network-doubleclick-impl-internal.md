@@ -140,6 +140,8 @@ Supported via `json` attribute:
 -   `targeting`: Sets a custom targeting parameter for this slot. Values must of the form:
     -   `"<key_string>":"<value_string>"` or
     -   `"<key_string>":["<value1>", "<value2>", ...]`. See below for example.
+-   `ppid`: Sets a custom provided user ID for targeting. Do not set on the AMP
+    cache since this value is expected to be dynamic.
 
 Example with json attribute:
 
