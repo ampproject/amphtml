@@ -18,7 +18,7 @@ const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../../common/ctrlcHandler');
-const {cyan} = require('../../common/colors');
+const {cyan} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
 const {isCiBuild, isCircleciBuild} = require('../../common/ci');
@@ -184,7 +184,7 @@ async function runWatch_() {
       ? getFilesFromArgv().concat(getFilesFromFileList())
       : config.e2eTestPaths;
 
-  log('Watching', cyan(filesToWatch), 'for changes...');
+  log('Watching', cyan(`[${filesToWatch.join(', ')}]`), 'for changes...');
   watch(filesToWatch).on('change', (file) => {
     log('Detected a change in', cyan(file));
     const mocha = createMocha_();

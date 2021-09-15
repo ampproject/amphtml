@@ -1,36 +1,188 @@
 {
-  "2": {"string": "Pieskarieties vienumam Tālāk"},
-  "3": {"string": "Pieskarieties vienumam Atpakaļ"},
-  "4": {"string": "Diemžēl neizdevās kopēt saiti starpliktuvē"},
-  "5": {"string": "Saite ir nokopēta."},
-  "6": {"string": "Sūtīt e-pasta ziņojumu"},
-  "7": {"string": "Facebook"},
-  "8": {"string": "Google+"},
-  "9": {"string": "Iegūt saiti"},
-  "10": {"string": "LinkedIn"},
-  "11": {"string": "Pinterest"},
-  "12": {"string": "Īsziņas"},
-  "14": {"string": "Tumblr"},
-  "15": {"string": "Twitter"},
-  "16": {"string": "WhatsApp"},
-  "18": {"string": "Lai skatītu šo saturu, izvērsiet loga augstumu un platumu"},
-  "19": {
-    "string": "Lai skatītu šo saturu, jums jāiespējo AMP stāstu eksperiments."
+  "2": {
+    "string": "Pieskarties Tālāk"
   },
-  "20": {"string": "Lapu ieteicams skatīt portreta režīmā"},
-  "21": {"string": "Diemžēl jūsu pārlūkprogramma neatbalsta šo iespēju"},
-  "22": {"string": "Piekrist"},
-  "23": {"string": "Noraidīt"},
-  "25": {"string": "Skatīt sākotnējā domēnā:"},
-  "26": {"string": "Uzzināt vairāk par AMP rezultātiem"},
-  "27": {"string": "Tomēr turpināt"},
-  "31": {"string": "Skaņa ir izslēgta"},
-  "32": {"string": "Skaņa ir ieslēgta"},
-  "33": {"string": "Šajā lapā nav skaņas"},
-  "34": {"string": "Atskaņot videoklipu"},
-  "35": {"string": "Vilkt augšup"},
-  "36": {"string": "Izvērst tvītu"},
-  "37": {"string": "Lai skatītu šo saturu, izvērsiet loga augstumu"},
-  "38": {"string": "Lai skatītu šo saturu, izvērsiet loga platumu"},
-  "63": {"string": "Line"}
+  "3": {
+    "string": "Pieskarties Atpakaļ"
+  },
+  "4": {
+    "string": "Neizdevās kopēt saiti starpliktuvē :("
+  },
+  "5": {
+    "string": "Saite nokopēta!"
+  },
+  "6": {
+    "string": "E-pasts"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "8": {
+    "string": "Google+"
+  },
+  "9": {
+    "string": "Saņemt saiti"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "Īsziņa"
+  },
+  "13": {
+    "string": "Vairāk"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
+  "19": {
+    "string": "Lai skaitītu šo saturu, jums ir jāiespējo amp-story eksperiments."
+  },
+  "21": {
+    "string": "Atvainojiet! Izskatās, ka jūsu pārlūkprogramma neatbalsta šo saturu"
+  },
+  "22": {
+    "string": "Piekrist"
+  },
+  "23": {
+    "string": "Nepiekrist"
+  },
+  "25": {
+    "string": "Skatīt sākotnējo domēnu:"
+  },
+  "26": {
+    "string": "Vairāk par AMP rezultātiem"
+  },
+  "27": {
+    "string": "Turpināt"
+  },
+  "31": {
+    "string": "Skaņa izslēgta"
+  },
+  "32": {
+    "string": "Skaņa ieslēgta"
+  },
+  "33": {
+    "string": "Šajā lapā nav skaņas"
+  },
+  "34": {
+    "string": "Atskaņot video"
+  },
+  "35": {
+    "string": "Pavilkt uz augšu"
+  },
+  "36": {
+    "string": "Izvērst Twitter ierakstu"
+  },
+  "62": {
+    "string": "Kopīgot, sākot ar šo lapu"
+  },
+  "63": {
+    "string": "Line"
+  },
+  "64": {
+    "string": "Atjaunināts"
+  },
+  "65": {
+    "string": "Neizdevās atskaņot video"
+  },
+  "66": {
+    "string": "Izslēgt skaņu"
+  },
+  "67": {
+    "string": "Ieslēgt skaņu"
+  },
+  "68": {
+    "string": "Informācija par stāstu"
+  },
+  "69": {
+    "string": "Kopīgot stāstu"
+  },
+  "70": {
+    "string": "Pārslēgt stāsta izvēlni"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "1. ieteikums no 2"
+  },
+  "76": {
+    "string": "Pieskarieties, lai pārietu uz nākamo ekrānu"
+  },
+  "77": {
+    "string": "Tālāk"
+  },
+  "78": {
+    "string": "2. ieteikums no 2"
+  },
+  "79": {
+    "string": "Velciet, lai pārietu pie nākamā stāsta"
+  },
+  "80": {
+    "string": "Sapratu"
+  },
+  "81": {
+    "string": "Ieteikums"
+  },
+  "82": {
+    "string": "Iepriekšējā lapa"
+  },
+  "83": {
+    "string": "Aktivizēt"
+  },
+  "84": {
+    "string": "REZULTĀTS:"
+  },
+  "85": {
+    "string": "Pauzēt stāstu"
+  },
+  "86": {
+    "string": "Atskaņot stāstu"
+  },
+  "87": {
+    "string": "Aizvērt"
+  },
+  "88": {
+    "string": "Pāriet pie nākamā"
+  },
+  "89": {
+    "string": "Jūsu atbilde tiks nosūtīta"
+  },
+  "90": {
+    "string": "Nākamais stāsts"
+  },
+  "91": {
+    "string": "Nākamā lapa"
+  },
+  "92": {
+    "string": "Atkārtot"
+  },
+  "93": {
+    "string": "Iepriekšējā lapa"
+  },
+  "96": {
+    "string": "Kustiniet ierīci, lai pārlūkotu"
+  },
+  "97": {
+    "string": "Notiek atvēršana"
+  }
 }

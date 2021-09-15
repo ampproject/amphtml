@@ -11,7 +11,7 @@ const {
 } = require('../common/ctrlcHandler');
 const {compileJison} = require('./compile-jison');
 const {css} = require('./css');
-const {cyan, green, red, yellow} = require('../common/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {log, logLocalDev} = require('../common/logging');
 

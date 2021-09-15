@@ -8,7 +8,8 @@ on:
     - cron: '0 8 * * 2-6'
 
 jobs:
-  sweep-experiments:
+  cut-nightly:
+    environment: release_tagger
     if: github.repository == 'ampproject/amphtml'
     name: Cut Nightly Branch
     runs-on: ubuntu-latest
@@ -28,3 +29,5 @@ jobs:
 
       - name: ⭐ Cut Nightly Branch ⭐
         run: node --unhandled-rejections=strict build-system/release-workflows/cut-nightly.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}

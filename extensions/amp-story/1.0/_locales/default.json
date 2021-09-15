@@ -1,12 +1,8 @@
 {
   "4": {"string": ":("},
-  "18": {
-    "string": "Expand both the height and width of your window to view this experience"
-  },
   "19": {
     "string": "You must enable the amp-story experiment to view this content."
   },
-  "20": {"string": "The page is best viewed in portrait mode"},
   "21": {
     "string": "We're sorry, it looks like your browser doesn't support this experience"
   },
@@ -18,8 +14,6 @@
   "31": {"string": "Sound off"},
   "32": {"string": "Sound on"},
   "33": {"string": "This page has no sound"},
-  "37": {"string": "Expand the height of your window to view this experience"},
-  "38": {"string": "Expand the width of your window to view this experience"},
   "64": {"string": "Updated"},
   "71": {"string": "A"},
   "72": {"string": "B"},

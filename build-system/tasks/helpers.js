@@ -15,7 +15,7 @@ const {
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global');
 const {closureCompile} = require('../compile/compile');
-const {cyan, green, red} = require('../common/colors');
+const {cyan, green, red} = require('kleur/colors');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {getSourceRoot} = require('../compile/helpers');
 const {isCiBuild} = require('../common/ci');
@@ -643,10 +643,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
     const buildResult =
       options.minify && shouldUseClosure()
         ? compileMinifiedJs(srcDir, srcFilename, destDir, options)
-        : esbuildCompile(srcDir, srcFilename, destDir, {
-            ...options,
-            mangle: true,
-          });
+        : esbuildCompile(srcDir, srcFilename, destDir, options);
     if (options.onWatchBuild) {
       options.onWatchBuild(buildResult);
     }
