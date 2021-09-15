@@ -1,5 +1,5 @@
 /** @const */
-var DailymotionDef = {};
+var BentoDailymotionDef = {};
 
 /**
  * @typedef {{
@@ -14,4 +14,4 @@ var DailymotionDef = {};
  *   uiLogo: (string|undefined),
  * }}
  */
-DailymotionDef.Props;
+BentoDailymotionDef.Props;

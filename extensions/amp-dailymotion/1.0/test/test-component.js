@@ -1,15 +1,15 @@
 import * as Preact from '#preact';
-import {Dailymotion} from '../component';
+import {BentoDailymotion} from '../component';
 import {mount} from 'enzyme';
 import {expect} from 'chai';
 
 describes.sandboxed('Dailymotion preact component v1.0', {}, () => {
   it('Renders', () => {
     const wrapper = mount(
-      <Dailymotion
+      <BentoDailymotion
         style={{width: 300, height: 200}}
         videoId="x3rdtfy"
-      ></Dailymotion>
+      ></BentoDailymotion>
     );
 
     const iframe = wrapper.find('iframe');
@@ -25,14 +25,14 @@ describes.sandboxed('Dailymotion preact component v1.0', {}, () => {
 
   it('Pass correct param attributes to the iframe src', () => {
     const wrapper = mount(
-      <Dailymotion
+      <BentoDailymotion
         style={{width: 300, height: 200}}
         videoId="x3rdtfy"
         endscreenEnable={false}
         sharingEnable={false}
         uiHighlight="444444"
         info={false}
-      ></Dailymotion>
+      ></BentoDailymotion>
     );
 
     const iframe = wrapper.find('iframe');
@@ -45,11 +45,11 @@ describes.sandboxed('Dailymotion preact component v1.0', {}, () => {
 
   it('Pass mute param to iframe src', () => {
     const wrapper = mount(
-      <Dailymotion
+      <BentoDailymotion
         style={{width: 300, height: 200}}
         videoId="x3rdtfy"
         mute={true}
-      ></Dailymotion>
+      ></BentoDailymotion>
     );
 
     const iframe = wrapper.find('iframe');
@@ -58,11 +58,11 @@ describes.sandboxed('Dailymotion preact component v1.0', {}, () => {
 
   it('Renders with iframe already muted when autoplay is passed', () => {
     const wrapper = mount(
-      <Dailymotion
+      <BentoDailymotion
         style={{width: 300, height: 200}}
         videoId="x3rdtfy"
         autoplay
-      ></Dailymotion>
+      ></BentoDailymotion>
     );
 
     const iframe = wrapper.find('iframe');

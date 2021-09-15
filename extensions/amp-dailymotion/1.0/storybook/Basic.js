@@ -1,42 +1,34 @@
 import * as Preact from '#preact';
-import {Dailymotion} from '../component';
-import {withKnobs} from '@storybook/addon-knobs';
+import {BentoDailymotion} from '../component';
 
 export default {
   title: 'Dailymotion',
-  component: Dailymotion,
-  decorators: [withKnobs],
+  component: BentoDailymotion,
+  args: {
+    width: 300,
+    height: 200,
+    videoId: 'x3rdtfy',
+  },
 };
 
-export const _default = () => {
-  return (
-    <Dailymotion
-      style={{width: 300, height: 200}}
-      videoId="x3rdtfy"
-    ></Dailymotion>
-  );
+const Template = ({height, width, ...args}) => (
+  <BentoDailymotion style={{width, height}} {...args} />
+);
+
+export const _default = Template.bind({});
+
+export const _customSettings = Template.bind({});
+
+_customSettings.args = {
+  endscreenEnable: false,
+  sharingEnable: false,
+  uiHighlight: '444444',
+  uiLogo: false,
+  info: false,
 };
 
-export const _customSettings = () => {
-  return (
-    <Dailymotion
-      style={{width: 300, height: 200}}
-      videoId="x3rdtfy"
-      endscreenEnable="false"
-      sharingEnable="false"
-      uiHighlight="444444"
-      uiLogo="false"
-      info="false"
-    ></Dailymotion>
-  );
-};
+export const _autoplay = Template.bind({});
 
-export const _autoplay = () => {
-  return (
-    <Dailymotion
-      style={{width: 300, height: 200}}
-      videoId="x3rdtfy"
-      autoplay
-    ></Dailymotion>
-  );
+_autoplay.args = {
+  autoplay: true,
 };

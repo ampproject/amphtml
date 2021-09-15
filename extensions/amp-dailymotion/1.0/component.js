@@ -48,11 +48,11 @@ function onMessage({currentTarget, data}) {
 }
 
 /**
- * @param {!DailymotionDef.Props} props
+ * @param {!BentoDailymotionDef.Props} props
  * @param {{current: ?VideoWrapperDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
-export function DailymotionWithRef(
+export function BentoDailymotionWithRef(
   {
     autoplay,
     endscreenEnable,
@@ -107,6 +107,6 @@ export function DailymotionWithRef(
   );
 }
 
-const Dailymotion = forwardRef(DailymotionWithRef);
-Dailymotion.displayName = 'Dailymotion';
-export {Dailymotion};
+const BentoDailymotion = forwardRef(BentoDailymotionWithRef);
+BentoDailymotion.displayName = 'BentoDailymotion';
+export {BentoDailymotion};
