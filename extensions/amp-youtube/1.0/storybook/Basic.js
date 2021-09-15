@@ -4,16 +4,16 @@ import * as Preact from '#preact';
 import {useRef, useState} from '#preact';
 
 import {
-  Accordion,
-  AccordionContent,
-  AccordionHeader,
-  AccordionSection,
+  BentoAccordion,
+  BentoAccordionContent,
+  BentoAccordionHeader,
+  BentoAccordionSection,
 } from '../../../amp-accordion/1.0/component';
-import {Youtube} from '../component';
+import {BentoYoutube} from '../component';
 
 export default {
   title: 'YouTube',
-  component: Youtube,
+  component: BentoYoutube,
   decorators: [withKnobs],
 };
 
@@ -29,7 +29,7 @@ export const _default = () => {
   const params = object('params', {});
   const credentials = text('credentials', 'include');
   return (
-    <Youtube
+    <BentoYoutube
       autoplay={autoplay}
       loop={loop}
       videoid={videoid}
@@ -65,7 +65,7 @@ function WithStateTable({autoplay, credentials, loop, params, style, videoid}) {
 
   return (
     <>
-      <Youtube
+      <BentoYoutube
         ref={ref}
         autoplay={autoplay}
         loop={loop}
@@ -114,7 +114,7 @@ export const liveChannelId = () => {
   const params = object('params', {});
   const credentials = text('credentials', 'include');
   return (
-    <Youtube
+    <BentoYoutube
       autoplay={autoplay}
       loop={loop}
       liveChannelid={liveChannelid}
@@ -131,34 +131,34 @@ export const InsideAccordion = () => {
   const videoid = text('videoid', VIDEOID);
   const params = object('params', {});
   return (
-    <Accordion expandSingleSection>
-      <AccordionSection key={1} expanded>
-        <AccordionHeader>
+    <BentoAccordion expandSingleSection>
+      <BentoAccordionSection key={1} expanded>
+        <BentoAccordionHeader>
           <h2>Controls</h2>
-        </AccordionHeader>
-        <AccordionContent>
-          <Youtube
+        </BentoAccordionHeader>
+        <BentoAccordionContent>
+          <BentoYoutube
             loop={true}
             videoid={videoid}
             params={params}
             style={{width, height}}
           />
-        </AccordionContent>
-      </AccordionSection>
-      <AccordionSection key={2}>
-        <AccordionHeader>
+        </BentoAccordionContent>
+      </BentoAccordionSection>
+      <BentoAccordionSection key={2}>
+        <BentoAccordionHeader>
           <h2>Autoplay</h2>
-        </AccordionHeader>
-        <AccordionContent>
-          <Youtube
+        </BentoAccordionHeader>
+        <BentoAccordionContent>
+          <BentoYoutube
             autoplay={true}
             loop={true}
             videoid={videoid}
             params={params}
             style={{width, height}}
           />
-        </AccordionContent>
-      </AccordionSection>
-    </Accordion>
+        </BentoAccordionContent>
+      </BentoAccordionSection>
+    </BentoAccordion>
   );
 };
