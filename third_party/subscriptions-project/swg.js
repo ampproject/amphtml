@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.183 */
+/** Version: 0.1.22.184 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -110,6 +110,7 @@ const AnalyticsEvent = {
   EVENT_OFFERED_METER: 3011,
   EVENT_UNLOCKED_FREE_PAGE: 3012,
   EVENT_INELIGIBLE_PAYWALL: 3013,
+  EVENT_UNLOCKED_FOR_CRAWLER: 3014,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -3343,6 +3344,9 @@ class JwtHelper {
 /** Source for Google-provided metering entitlements. */
 const GOOGLE_METERING_SOURCE = 'google:metering';
 
+/** Source for privileged entitlements. */
+const PRIVILEGED_SOURCE = 'privileged';
+
 /** Subscription token for dev mode entitlements. */
 const DEV_MODE_TOKEN = 'GOOGLE_DEV_MODE_TOKEN';
 
@@ -3631,17 +3635,17 @@ class Entitlement {
     if (eq != -1) {
       // Wildcard product (publication:*) unlocks on any entitlement matching publication
       const publication = product.substring(0, eq + 1);
-      if(
+      if (
         publication + '*' == product &&
-        this.products.filter((candidate) => candidate.substring(0, eq + 1) == publication).length >= 1
+        this.products.filter(
+          (candidate) => candidate.substring(0, eq + 1) == publication
+        ).length >= 1
       ) {
         debugLog('enabled with wildcard productId');
         return true;
       }
       // Wildcard entitlement allows any product matching this publication
-      if (
-        this.products.includes(publication + '*')
-      ) {
+      if (this.products.includes(publication + '*')) {
         debugLog('enabled with wildcard entitlement');
         return true;
       }
@@ -4683,7 +4687,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.183',
+    '_client': 'SwG 0.1.22.184',
   });
 }
 
@@ -5951,7 +5955,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.183',
+        '_client': 'SwG 0.1.22.184',
         'supportsEventManager': true,
       },
       args || {}
@@ -6830,7 +6834,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.183');
+    context.setClientVersion('SwG 0.1.22.184');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -9274,9 +9278,15 @@ class Dialog {
     const desktopDialogConfig = dialogConfig.desktopConfig || {};
     const supportsWideScreen = !!desktopDialogConfig.supportsWideScreen;
 
+    const defaultIframeCssClass = `swg-dialog ${
+      supportsWideScreen ? 'swg-wide-dialog' : ''
+    }`;
+    const iframeCssClass =
+      dialogConfig.iframeCssClassOverride || defaultIframeCssClass;
+
     /** @private @const {!FriendlyIframe} */
     this.iframe_ = new FriendlyIframe(doc.getWin().document, {
-      'class': `swg-dialog ${supportsWideScreen ? 'swg-wide-dialog' : ''}`,
+      'class': iframeCssClass,
     });
 
     /** @private @const {!Graypane} */
@@ -9361,6 +9371,24 @@ class Dialog {
     } else {
       this.show_();
     }
+
+    return iframe.whenReady().then(() => {
+      this.buildIframe_();
+      return this;
+    });
+  }
+
+  /**
+   * Opens the iframe embedded in the given container element.
+   * @param {!Element} containerEl
+   */
+  openInContainer(containerEl) {
+    const iframe = this.iframe_;
+    if (iframe.isConnected()) {
+      throw new Error('already opened');
+    }
+
+    containerEl.appendChild(iframe.getElement());
 
     return iframe.whenReady().then(() => {
       this.buildIframe_();
@@ -11218,13 +11246,14 @@ class EntitlementsManager {
 
     const params = new EventParams();
     params.setIsUserRegistered(true);
-    this.deps_
-      .eventManager()
-      .logSwgEvent(
-        AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION,
-        false,
-        params
-      );
+
+    // Log unlock event.
+    const eventType =
+      entitlement.source === PRIVILEGED_SOURCE
+        ? AnalyticsEvent.EVENT_UNLOCKED_FOR_CRAWLER
+        : AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION;
+    this.deps_.eventManager().logSwgEvent(eventType, false, params);
+
     // Check if storage bit is set. It's only set by the `Entitlements.ack` method.
     return this.storage_.get(TOAST_STORAGE_KEY).then((value) => {
       const toastWasShown = value === '1';
