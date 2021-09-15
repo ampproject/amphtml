@@ -610,7 +610,7 @@ export class NextPageService {
       const messageDeliverer = this.viewer_.maybeGetMessageDeliverer();
       if (messageDeliverer) {
         amp.onMessage((eventType, data, awaitResponse) => {
-          // Some Viewer messages are suppressed when coming from the inserted
+          // Some messages should be suppressed when coming from the inserted
           // document. These are related to the viewport, so we allow the host
           // document to handle these events instead.
           // Otherwise, we would confuse the viewer and observe issues like the
