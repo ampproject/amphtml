@@ -1,5 +1,5 @@
 import {isIframed} from '#core/dom';
-import {findIndex} from '#core/types/array';
+import {removeItem} from '#core/types/array';
 import {toWin} from '#core/window';
 
 /**
@@ -100,17 +100,18 @@ export function unobserveIntersections(element, callback) {
   if (!callbacks) {
     return;
   }
-  const idxToDelete = findIndex(callbacks, (cb) => cb === callback);
-  if (idxToDelete === -1) {
+  if (!removeItem(callbacks, callback)) {
     return;
   }
-  callbacks.splice(idxToDelete, 1);
-  if (callbacks.length === 0) {
-    const win = toWin(element.ownerDocument.defaultView);
-    const viewportObserver = viewportObservers.get(win);
-    viewportObserver?.unobserve(element);
-    viewportCallbacks.delete(element);
+  if (callbacks.length) {
+    return;
   }
+  // if all callbacks for this elements are removed, unobserve & delete it
+  // from the list of viewport callbacks
+  const win = toWin(element.ownerDocument.defaultView);
+  const viewportObserver = viewportObservers.get(win);
+  viewportObserver?.unobserve(element);
+  viewportCallbacks.delete(element);
 }
 
 /**
