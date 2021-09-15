@@ -8,9 +8,10 @@
  * 4. channel (beta|stable|lts)
  */
 
-const [action, head, base, channel] = process.argv.slice(2);
+const [action, head, base, channel, time] = process.argv.slice(2);
 
 const {addLabels, removeLabels} = require('./label-pull-requests');
+const {createOrUpdateTracker} = require('./update-issue-tracker');
 const {log} = require('../common/logging');
 const {makeRelease} = require('./make-release');
 const {publishRelease, rollbackRelease} = require('./update-release');
@@ -30,6 +31,9 @@ async function _promote() {
 
   await addLabels(head, base, channel);
   log('Labeled PRs for release', head, 'and channel', channel);
+
+  await createOrUpdateTracker(head, base, channel, time);
+  log('Updated issue tracker for release', head, 'and channel', channel);
 }
 
 /**
