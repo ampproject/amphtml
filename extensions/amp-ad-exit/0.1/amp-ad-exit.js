@@ -434,9 +434,9 @@ export class AmpAdExit extends AMP.BaseElement {
    * @return {boolean}
    */
   detectAttributionReportingSupport() {
-    return this.win.document.featurePolicy
-      ?.features()
-      .includes('attribution-reporting');
+    return this.win.document.featurePolicy?.allowsFeature(
+      'attribution-reporting'
+    );
   }
 
   /**
