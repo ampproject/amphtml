@@ -15,25 +15,39 @@ import {devAssert} from '#utils/log';
  * @param {!JsonObject} config
  * @param {boolean=} loadAnalytics
  * @param {boolean=} disableImmediate
+ * @param {boolean=} opt_useUrlConfig
  * @return {!Element} created analytics element
  */
 export function insertAnalyticsElement(
   parentElement,
   config,
   loadAnalytics = false,
-  disableImmediate = false
+  disableImmediate = false,
+  opt_useUrlConfig = false
 ) {
   const doc = /** @type {!Document} */ (parentElement.ownerDocument);
-  const analyticsElem = createElementWithAttributes(doc, 'amp-analytics', {
-    'sandbox': 'true',
-    'trigger': disableImmediate ? '' : 'immediate',
-  });
-  const scriptElem = createElementWithAttributes(doc, 'script', {
-    'type': 'application/json',
-  });
-  scriptElem.textContent = JSON.stringify(config);
-  analyticsElem.appendChild(scriptElem);
-  analyticsElem.CONFIG = config;
+  const analyticsElem = createElementWithAttributes(
+    doc,
+    'amp-analytics',
+    opt_useUrlConfig
+      ? config
+      : dict({
+          'sandbox': 'true',
+          'trigger': disableImmediate ? '' : 'immediate',
+        })
+  );
+  if (!opt_useUrlConfig) {
+    const scriptElem = createElementWithAttributes(
+      doc,
+      'script',
+      dict({
+        'type': 'application/json',
+      })
+    );
+    scriptElem.textContent = JSON.stringify(config);
+    analyticsElem.appendChild(scriptElem);
+    analyticsElem.CONFIG = config;
+  }
 
   // Force load analytics extension if script not included in page.
   if (loadAnalytics) {
