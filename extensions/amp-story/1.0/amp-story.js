@@ -1639,14 +1639,12 @@ export class AmpStory extends AMP.BaseElement {
     const wasMobile = previousUiState === UIType.MOBILE;
     const inputHasFocus = this.win.document.activeElement?.tagName === 'INPUT';
     const softKeyboardIsProbablyOpen = wasMobile && inputHasFocus;
-    if (softKeyboardIsProbablyOpen) {
+    if (!softKeyboardIsProbablyOpen) {
       // The opening of the Android soft keyboard triggers a viewport resize
       // that can cause the story's dimensions to appear to be those of a
       // desktop. Here, we assume that the soft keyboard is open if the story
-      // has resized while an input element has focus, and we maintain the
-      // existing mobile layout.
-      this.storeService_.dispatch(Action.TOGGLE_UI, UIType.MOBILE);
-    } else {
+      // has resized while an input element has focus, and we do not toggle the
+      // UI.
       this.storeService_.dispatch(Action.TOGGLE_UI, this.uiState_);
     }
 

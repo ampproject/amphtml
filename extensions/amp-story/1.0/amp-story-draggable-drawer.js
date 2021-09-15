@@ -15,7 +15,7 @@ import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '#core/dom/static-template';
 import {isAmpElement} from '#core/dom/amp-element-helpers';
 import {listen} from '../../../src/event-helper';
-import {resetStyles, setImportantStyles, toggle} from '#core/dom/style';
+import {px, resetStyles, setImportantStyles, toggle} from '#core/dom/style';
 
 /** @const {number} */
 const TOGGLE_THRESHOLD_PX = 50;
@@ -216,6 +216,8 @@ export class DraggableDrawer extends AMP.BaseElement {
         this.containerEl./*OK*/ scrollTop = 0;
       }
     });
+
+    this.getViewport().onResize(() => this.onViewportResize_());
   }
 
   /**
@@ -231,6 +233,27 @@ export class DraggableDrawer extends AMP.BaseElement {
       : this.stopListeningForTouchEvents_();
 
     this.headerEl.toggleAttribute('desktop', !isMobile);
+  }
+
+  /**
+   * Reacts to viewport size changes.
+   * @protected
+   */
+  onViewportResize_() {
+    const contentHeight = this.contentEl./*OK*/ getBoundingClientRect().height;
+    const viewportHeight = this.getViewport().getHeight();
+    if (contentHeight > viewportHeight) {
+      // Prevent the height of the draggable drawer from ever exceeding that of
+      // the viewport, ensuring that the drawer header is always visible. This
+      // is particularly necessary on Android because opening the soft keyboard
+      // triggers a viewport resize that we counteract by setting the story
+      // size.
+      this.mutateElement(() => {
+        setImportantStyles(this.element, {'height': px(viewportHeight)});
+      });
+    } else {
+      this.mutateElement(() => resetStyles(this.element, ['height']));
+    }
   }
 
   /**
