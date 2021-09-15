@@ -7,7 +7,7 @@ In order to opt-in to server-rendering, a component must have a `buildDom` funct
 ## Classic components
 
 We create `buildDom` functions by extracting all of the DOM mutations from `buildCallback`.
-The goal is to separate out all DOM creation from side effects (e.g. attaching listeners), as we want to avoid side effects on the server.
+Separating DOM creation from side effects (e.g. attaching listeners) is important because these side effects must occur on the client.
 
 A classic component's structure that has implemented server-rendering should be:
 
@@ -27,5 +27,6 @@ function buildDom(element) {
 }
 ```
 
+Check out [<amp-layout>](../builtins/amp-layout/amp-layout.js) to see a simple example.
 
-## Bento components
+<!-- TODO(samouri): Create Bento section when the details finalize. -->
