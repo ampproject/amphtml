@@ -78,7 +78,7 @@ import {adyoulike} from '#ads/vendors/adyoulike';
 import {affiliateb} from '#ads/vendors/affiliateb';
 import {aja} from '#ads/vendors/aja';
 import {amoad} from '#ads/vendors/amoad';
-import {amplified} from '../ads/vendors/amplified';
+import {amplified} from '#ads/vendors/amplified';
 import {aniview} from '#ads/vendors/aniview';
 import {anyclip} from '#ads/vendors/anyclip';
 import {appnexus} from '#ads/vendors/appnexus';

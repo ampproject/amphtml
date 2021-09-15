@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {validateData, writeScript} from '../../3p/3p';
+import {validateData, writeScript} from '#3p/3p';
 
 /**
  * @param {!Window} global
@@ -48,7 +48,7 @@ export function amplified(global, data) {
 function createAmplifiedContainer(global) {
   const container = global.document.getElementById('c');
   const ad = global.document.createElement('div');
-
+  const adUnitId = global.adUnitId || 0;
   ad.setAttribute('id', 'amplified_' + adUnitId);
 
   container.appendChild(ad);
@@ -60,13 +60,14 @@ function createAmplifiedContainer(global) {
  */
 function setAmplifiedParams(global) {
   const queryParams = new URLSearchParams(global.context.sourceUrl);
+  const adUnitId = global.adUnitId || 0;
   const adParams = {
     id: adUnitId,
     subtag: global.params.subtag ? global.params.subtag : '',
     song: global.params.song ? global.params.song : '',
     artist: global.params.artist ? global.params.artist : '',
     alb: global.params.album ? global.params.album : '',
-    alb_is: global.params.album_is_soundtrack
+    'alb_is': global.params.album_is_soundtrack
       ? global.params.album_is_soundtrack
       : false,
     tvt: global.params.tv_term ? global.params.tv_term : '',
@@ -74,7 +75,7 @@ function setAmplifiedParams(global) {
     t: Date.now(),
     vpw: null,
     abf: 1,
-    bp_abf: 0,
+    'bp_abf': 0,
     position: '',
     ps: 1,
     'if': 1,
