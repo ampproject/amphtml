@@ -20,4 +20,4 @@
 
 ## Support
 
-For additional support, visit the API Documentation at https://publishers.bandsintown.com or https://tonefuse.com; you can also reach out to your account manager.
+For additional support, visit the API Documentation at `https://publishers.bandsintown.com` or `https://tonefuse.com`; you can also reach out to your account manager.
