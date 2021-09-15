@@ -74,7 +74,6 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     this.applyAspectRatioAttributes_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
-    this.initializeListeners_();
   }
 
   /**

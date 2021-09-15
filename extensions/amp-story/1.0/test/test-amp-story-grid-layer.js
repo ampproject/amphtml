@@ -5,6 +5,8 @@ import {AmpStoryPage} from '../amp-story-page';
 import {MediaType} from '../media-pool';
 import {Services} from '#service';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {setStyles} from '#core/dom/style';
+import {AmpStory} from '../amp-story';
 
 describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
   let win;
@@ -39,6 +41,7 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
         isPerformanceTrackingOn: () => false,
       };
     });
+    console.log(env);
 
     const story = win.document.createElement('amp-story');
     story.getImpl = () => Promise.resolve(mediaPoolRoot);
@@ -69,38 +72,31 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
     await grid.layoutCallback();
   }
 
-  it('should set the vertical aspect-ratio', async () => {
+  it.only('should set the vertical aspect-ratio', async () => {
     gridLayerEl.setAttribute('aspect-ratio', '9:16');
     await buildGridLayer();
 
-    storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
+    setStyles(gridLayerEl, {
+      '--story-page-vw': `1000px`,
+      '--story-page-vh': `1000px`,
+    });
 
-    expect(
-      parseInt(
-        gridLayerEl.style.getPropertyValue('--i-amphtml-story-layer-width'),
-        10
-      )
-    ).to.equal(562);
-    expect(
-      parseInt(
-        gridLayerEl.style.getPropertyValue('--i-amphtml-story-layer-height'),
-        10
-      )
-    ).to.equal(1000);
+    console.log(getComputedStyle(gridLayerEl).width);
+
+    expect(gridLayerEl.offsetWidth).to.equal(562);
+    expect(gridLayerEl.offsetHeight).to.equal(1000);
   });
 
   it('should set the horizontal aspect-ratio', async () => {
     gridLayerEl.setAttribute('aspect-ratio', '16:9');
     await buildGridLayer();
 
-    storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
+    setStyles(gridLayerEl, {
+      '--story-page-vw': `1000px`,
+      '--story-page-vh': `1000px`,
+    });
 
-    expect(
-      parseInt(
-        gridLayerEl.style.getPropertyValue('--i-amphtml-story-layer-width'),
-        10
-      )
-    ).to.equal(1000);
+    expect(gridLayerEl.offsetWidth).to.equal(1000);
     expect(
       parseInt(
         gridLayerEl.style.getPropertyValue('--i-amphtml-story-layer-height'),
@@ -110,24 +106,21 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
   });
 
   it('should use the scaling factor to set the size of the layer', async () => {
-    gridLayerEl.setAttribute('aspect-ratio', '1:2');
-    gridLayerEl.setAttribute('scaling-factor', '1.5');
+    setStyles(gridLayerEl, {
+      '--aspect-ratio': '1/2',
+      '--scaling-factor': 1.5,
+    });
     await buildGridLayer();
+
+    setStyles(gridLayerEl, {
+      '--story-page-vw': `1000px`,
+      '--story-page-vh': `1000px`,
+    });
 
     storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
 
-    expect(
-      parseInt(
-        gridLayerEl.style.getPropertyValue('--i-amphtml-story-layer-width'),
-        10
-      )
-    ).to.equal(750);
-    expect(
-      parseInt(
-        gridLayerEl.style.getPropertyValue('--i-amphtml-story-layer-height'),
-        10
-      )
-    ).to.equal(1500);
+    expect(gridLayerEl.offsetWidth).to.equal(750);
+    expect(gridLayerEl.offsetHeight).to.equal(1500);
   });
 
   it('should apply the aspect-ratio attribute from the responsiveness preset', async () => {
@@ -136,7 +129,9 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
 
     storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
 
-    expect(gridLayerEl.getAttribute('aspect-ratio')).to.equal('69:116');
+    expect(gridLayerEl.style.getPropertyValue('--aspect-ratio')).to.equal(
+      '69/116'
+    );
   });
 
   it('should not add aspect-ratio attribute if preset passed is incorrect', async () => {
