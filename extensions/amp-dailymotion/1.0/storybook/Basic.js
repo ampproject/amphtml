@@ -15,9 +15,9 @@ const Template = ({height, width, ...args}) => (
   <BentoDailymotion style={{width, height}} {...args} />
 );
 
-export const _default = Template.bind({});
+export const _default = (args) => <Template {...args} />;
 
-export const _customSettings = Template.bind({});
+export const _customSettings = (args) => <Template {...args} />;
 
 _customSettings.args = {
   endscreenEnable: false,
@@ -27,7 +27,7 @@ _customSettings.args = {
   info: false,
 };
 
-export const _autoplay = Template.bind({});
+export const _autoplay = (args) => <Template {...args} />;
 
 _autoplay.args = {
   autoplay: true,
