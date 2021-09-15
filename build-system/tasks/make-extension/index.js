@@ -111,19 +111,20 @@ async function writeFromTemplateDir(
     fs.mkdirpSync(path.dirname(destination));
 
     // Skip if the destination file already exists
-    if (!argv.overwrite && fs.pathExistsSync(destination)) {
+    if (fs.pathExistsSync(destination)) {
       logLocalDev(
         yellow('WARNING:'),
-        'Skipping existing file',
+        argv.overwrite ? 'Overwriting' : 'Skipping',
+        'existing file',
         cyan(destination)
       );
-      continue;
+      if (!argv.overwrite) {
+        continue;
+      }
     }
 
-    const fileHandle = fs.openSync(destination, 'w');
     const template = fs.readFileSync(templatePath, 'utf8');
-    fs.writeSync(fileHandle, replace(template, replacements));
-    fs.closeSync(fileHandle);
+    fs.writeFileSync(destination, replace(template, replacements));
 
     logLocalDev(green('SUCCESS:'), 'Created', cyan(destination));
 
@@ -143,11 +144,7 @@ async function insertExtensionBundlesConfig(
   bundle,
   destination = extensionBundlesJson
 ) {
-  let extensionBundles = [];
-  try {
-    extensionBundles = fs.readJsonSync(destination, {throws: false});
-  } catch (_) {}
-
+  const extensionBundles = fs.readJsonSync(destination, {throws: false}) ?? [];
   const existingOrNull = extensionBundles.find(
     ({name}) => name === bundle.name
   );
