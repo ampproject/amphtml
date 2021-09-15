@@ -3,7 +3,6 @@
 This directory is responsible for generating the `compiler.js` binary, whose primary function is to implement server-rendering for AMP Components.
 In order to opt-in to server-rendering, a component must have a `buildDom` function included in the [builders](./builders.js) map.
 
-
 ## Classic components
 
 We create `buildDom` functions by extracting all of the DOM mutations from `buildCallback`.
