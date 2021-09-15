@@ -25,10 +25,6 @@
       "percentage": 1
     },
     {
-      "name": "amp-sticky-ad-to-amp-ad-v2",
-      "percentage": 0.05
-    },
-    {
       "name": "story-ad-page-outlink",
       "percentage": 1,
       "rtvPrefix": [
