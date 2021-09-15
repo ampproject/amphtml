@@ -7,12 +7,12 @@ import {
 
 import {Services} from '#service';
 
-import {dev, user} from '#utils/log';
-
 import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {measurePageLayoutBox} from './measure-page-layout-box';
 
-/** @typedef {import('#core/dom/layout/rect').LayoutMarginsChangeDef} LayoutMarginsChangeDef */
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
+
+import {dev, user} from '#utils/log';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -172,17 +172,17 @@ export class Placement {
   }
 
   /**
-   * Add custom amp-analytics emement
+   * Add custom amp-analytics element
    */
   addCustomAmpAnalytics_() {
     if (this.customAnalytics_) {
-      const doc = this.ampdoc.win.document;
-      const customAmpAnalytics = createElementWithAttributes(
-        doc,
-        'amp-analytics',
-        this.customAnalytics_
+      insertAnalyticsElement(
+        this.getAdElement(),
+        this.customAnalytics_,
+        false,
+        false,
+        true
       );
-      this.getAdElement().appendChild(customAmpAnalytics);
     }
   }
 
@@ -215,8 +215,8 @@ export class Placement {
           ? this.createFullWidthResponsiveAdElement_(baseAttributes)
           : this.createAdElement_(baseAttributes, sizing.width);
 
-        this.addCustomAmpAnalytics_();
         this.injector_(this.anchorElement_, this.getAdElement());
+        this.addCustomAmpAnalytics_();
 
         if (shouldUseFullWidthResponsive) {
           return (

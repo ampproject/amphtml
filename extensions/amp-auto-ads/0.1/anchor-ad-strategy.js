@@ -2,6 +2,8 @@ import {createElementWithAttributes} from '#core/dom';
 
 import {Services} from '#service';
 
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
+
 import {user} from '#utils/log';
 
 const TAG = 'amp-auto-ads';
@@ -91,13 +93,13 @@ export class AnchorAdStrategy {
    */
   addCustomAmpAnalytics_(adElement) {
     if (this.customAnalytics_) {
-      const doc = this.ampdoc.win.document;
-      const customAmpAnalytics = createElementWithAttributes(
-        doc,
-        'amp-analytics',
-        this.customAnalytics_
+      insertAnalyticsElement(
+        adElement,
+        this.customAnalytics_,
+        false,
+        false,
+        true
       );
-      adElement.appendChild(customAmpAnalytics);
     }
   }
 
@@ -131,7 +133,6 @@ export class AnchorAdStrategy {
     delete attributes.sticky; // To ensure that no sticky attribute will be wrapped inside an amp-sticky-ad element.
     const doc = this.ampdoc.win.document;
     const ampAd = createElementWithAttributes(doc, 'amp-ad', attributes);
-    this.addCustomAmpAnalytics_(ampAd);
     const stickyAd = createElementWithAttributes(
       doc,
       'amp-sticky-ad',
@@ -142,5 +143,6 @@ export class AnchorAdStrategy {
     stickyAd.appendChild(ampAd);
     const body = this.ampdoc.getBody();
     body.insertBefore(stickyAd, body.firstChild);
+    this.addCustomAmpAnalytics_(ampAd);
   }
 }
