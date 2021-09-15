@@ -608,7 +608,6 @@ export class NextPageService {
       // Even though we have multiple instances of the Viewer service, we only
       // have a single messaging channel.
       const messageDeliverer = this.viewer_.maybeGetMessageDeliverer();
-
       if (messageDeliverer) {
         amp.onMessage((eventType, data, awaitResponse) => {
           // Some Viewer messages are suppressed when coming from the inserted
