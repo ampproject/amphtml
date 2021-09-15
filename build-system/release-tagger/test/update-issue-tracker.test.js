@@ -72,13 +72,33 @@ test('mark task complete', async (t) => {
                 '### Promotions\n\n' +
                 '- [x] <!-- amp-version=2109080123000 channel=beta-opt-in -->' +
                 '2109080123000 promoted to Experimental and Beta (opt-in) channels (optintime)\n' +
-                '- [ ] <!-- amp-version=2109080123000 channel=beta-percent -->' +
-                '2109080123000 promoted to Experimental and Beta (1% traffic) channels <!-- promote-time -->\n' +
+                '- [x] <!-- amp-version=2109080123000 channel=beta-percent -->' +
+                '2109080123000 promoted to Experimental and Beta (1% traffic) channels (percenttime)\n' +
                 '- [ ] <!-- amp-version=2109080123000 channel=stable -->' +
                 '2109080123000 promoted to Stable channel <!-- promote-time -->\n' +
                 '- [ ] <!-- amp-version=2109080123000 channel=lts -->' +
                 '2109080123000 promoted to LTS channel <!-- promote-time -->\n\n' +
                 '/cc @ampproject/release-on-duty',
+            },
+          ],
+        },
+      },
+    })
+    .post(
+      '',
+      '{"query":"query {' +
+        'search(query:\\"repo:ampproject/amphtml ' +
+        'in:title Release 2109010123000\\", type: ISSUE, first: 1) ' +
+        '{ nodes { ... on Issue { number title body }}}}"}'
+    )
+    .reply(200, {
+      data: {
+        search: {
+          nodes: [
+            {
+              number: 2,
+              title: '🚄 Release 2109010123000',
+              body: 'base body',
             },
           ],
         },
@@ -96,19 +116,27 @@ test('mark task complete', async (t) => {
         '- [x] <!-- amp-version=2109080123000 channel=beta-opt-in -->' +
         '2109080123000 promoted to Experimental and Beta (opt-in) channels (optintime)\n' +
         '- [x] <!-- amp-version=2109080123000 channel=beta-percent -->' +
-        '2109080123000 promoted to Experimental and Beta (1% traffic) channels (testtime)\n' +
-        '- [ ] <!-- amp-version=2109080123000 channel=stable -->' +
-        '2109080123000 promoted to Stable channel <!-- promote-time -->\n' +
+        '2109080123000 promoted to Experimental and Beta (1% traffic) channels (percenttime)\n' +
+        '- [x] <!-- amp-version=2109080123000 channel=stable -->' +
+        '2109080123000 promoted to Stable channel (testtime)\n' +
         '- [ ] <!-- amp-version=2109080123000 channel=lts -->' +
         '2109080123000 promoted to LTS channel <!-- promote-time -->\n\n' +
         '/cc @ampproject/release-on-duty',
+      state: 'open',
+    })
+    .reply(200)
+    // https://docs.github.com/en/rest/reference/issues#update-an-issue
+    .patch('/repos/ampproject/amphtml/issues/2', {
+      title: '🚄 Release 2109010123000',
+      body: 'base body',
+      state: 'closed',
     })
     .reply(200);
 
   await createOrUpdateTracker(
     '2109080123000',
     '2109010123000',
-    'beta-percent',
+    'stable',
     'testtime'
   );
   t.true(graphql.isDone());
@@ -170,6 +198,7 @@ test('add cherrypick tasks', async (t) => {
         '- [ ] <!-- amp-version=2109080123001 channel=lts -->' +
         '2109080123001 promoted to LTS channel <!-- promote-time -->\n\n' +
         '/cc @ampproject/release-on-duty',
+      state: 'open',
     })
     .reply(200);
 
