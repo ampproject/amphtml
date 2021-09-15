@@ -87,6 +87,33 @@ describes.realWin(
           }
         );
       });
+
+      it('should create analytics element with url config pattern, ', () => {
+        const config = {
+          'data-credentials': 'include',
+          'trigger': 'immediate',
+          'config': 'https://domain.com/config.json',
+        };
+        const ele = win.document.createElement('div');
+        win.document.body.appendChild(ele);
+        const baseEle = new BaseElement(ele);
+        registerServiceBuilderForDoc(
+          ampdoc,
+          'amp-analytics-instrumentation',
+          MockInstrumentation
+        );
+        // Force instantiation
+        getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
+        expect(baseEle.element.querySelector('amp-analytics')).to.be.null;
+        expect(
+          insertAnalyticsElement(baseEle.element, config, false, false, true)
+        ).to.be.ok;
+        return timer.promise(50).then(() => {
+          const analyticsEle = baseEle.element.querySelector('amp-analytics');
+          expect(analyticsEle).to.not.be.null;
+          expect(analyticsEle.getAttribute('trigger')).to.equal('immediate');
+        });
+      });
     });
 
     describe('CustomEventReporterBuilder', () => {
