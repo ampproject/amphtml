@@ -1,25 +1,13 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {mount} from 'enzyme';
+
+import {dispatchCustomEvent} from '#core/dom';
 
 import * as Preact from '#preact';
-import {Youtube} from '../component';
 import {createRef} from '#preact';
-import {dispatchCustomEvent} from '#core/dom';
-import {mount} from 'enzyme';
+
 import {useStyles} from 'extensions/amp-video/1.0/component.jss';
+
+import {BentoYoutube} from '../component';
 
 describes.realWin('YouTube preact component v1.0', {}, (env) => {
   let window, document;
@@ -35,7 +23,7 @@ describes.realWin('YouTube preact component v1.0', {}, (env) => {
 
   it('Normal render', () => {
     const wrapper = mount(
-      <Youtube
+      <BentoYoutube
         videoid="IAvf-rkzNck"
         style={{
           'width': 600,
@@ -62,7 +50,7 @@ describes.realWin('YouTube preact component v1.0', {}, (env) => {
 
   it('Pass correct param attributes to the iframe src', () => {
     const wrapper = mount(
-      <Youtube
+      <BentoYoutube
         videoid="IAvf-rkzNck"
         autoplay
         loop
@@ -89,7 +77,7 @@ describes.realWin('YouTube preact component v1.0', {}, (env) => {
 
   it('Keep data param: loop in iframe src for playlists', () => {
     const wrapper = mount(
-      <Youtube
+      <BentoYoutube
         videoid="IAvf-rkzNck"
         autoplay
         loop
@@ -109,7 +97,7 @@ describes.realWin('YouTube preact component v1.0', {}, (env) => {
 
   it('Uses privacy-enhanced mode', () => {
     const wrapper = mount(
-      <Youtube
+      <BentoYoutube
         videoid="IAvf-rkzNck"
         autoplay
         loop
@@ -131,7 +119,7 @@ describes.realWin('YouTube preact component v1.0', {}, (env) => {
 
   it('should trigger onCanPlay when youtube iframe is loaded', () => {
     const wrapper = mount(
-      <Youtube
+      <BentoYoutube
         videoid="IAvf-rkzNck"
         autoplay
         loop
@@ -165,7 +153,7 @@ describes.realWin('YouTube preact component v1.0', {}, (env) => {
     const ref = createRef();
 
     const wrapper = mount(
-      <Youtube
+      <BentoYoutube
         ref={ref}
         videoid="IAvf-rkzNck"
         shortcode="B8QaZW4AQY_"

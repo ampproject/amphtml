@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {DomFingerprint} from '#core/dom/fingerprint';
 import {GEO_IN_GROUP} from '../../../extensions/amp-geo/0.1/amp-geo-in-group';
@@ -30,7 +14,7 @@ import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {getTimingDataSync} from '#service/variable-source';
 import * as mode from '#core/mode';
 import {parseJson} from '#core/types/object/json';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {createElementWithAttributes} from '#core/dom';
 
 /** @type {string}  */
@@ -115,8 +99,8 @@ const CDN_PROXY_REGEXP =
   /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
 
 /** @const {string} */
-const TOKEN_VALUE =
-  'A8Ujr8y+9sg/ZBmCs90ZfQGOUFJsAS/YaHYtjLAsNn05OaQXSmZeRZ2U1wAj3PD74WY9re2x/TwinJoOaYuqFQoAAACBeyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3QubmV0OjQ0MyIsImZlYXR1cmUiOiJDb252ZXJzaW9uTWVhc3VyZW1lbnQiLCJleHBpcnkiOjE2MzE2NjM5OTksImlzU3ViZG9tYWluIjp0cnVlLCJ1c2FnZSI6InN1YnNldCJ9';
+export const TOKEN_VALUE =
+  'A560Vqrj/cxoDr3Ldu+cN8qcpkaPx5Yh67pvGScX0kOke10st2EAEQmfQrDKSlVJtF+oZ0WqUYbPLmY6nRQq5wAAAACVeyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3Qub3JnOjQ0MyIsImZlYXR1cmUiOiJDb252ZXJzaW9uTWVhc3VyZW1lbnQiLCJleHBpcnkiOjE2MzE2NjM5OTksImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWUsInVzYWdlIjoic3Vic2V0In0=';
 
 /**
  * Inserts origin-trial token for `attribution-reporting` if not already
@@ -219,6 +203,12 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
   const slotRect = getPageLayoutBoxBlocking(adElement);
   const iframeDepth = iframeNestingDepth(win);
   const enclosingContainers = getEnclosingContainerTypes(adElement);
+  if (
+    a4a.uiHandler.isStickyAd() &&
+    !enclosingContainers.includes(ValidAdContainerTypes['AMP-STICKY-AD'])
+  ) {
+    enclosingContainers.push(ValidAdContainerTypes['AMP-STICKY-AD']);
+  }
   let eids = adElement.getAttribute(EXPERIMENT_ATTRIBUTE);
   if (opt_experimentIds) {
     eids = mergeExperimentIds(opt_experimentIds, eids);
@@ -373,6 +363,7 @@ export function googlePageParameters(a4a, startTime) {
       'uaa': uaDataValues?.architecture,
       'uam': uaDataValues?.model,
       'uafv': uaDataValues?.uaFullVersion,
+      'uab': uaDataValues?.bitness,
     };
   });
 }
@@ -1198,5 +1189,6 @@ function getUserAgentClientHintParameters(win) {
     'architecture',
     'model',
     'uaFullVersion',
+    'bitness',
   ]);
 }

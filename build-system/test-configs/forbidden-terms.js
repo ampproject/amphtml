@@ -1,19 +1,3 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const requiresReviewPrivacy =
   'Usage of this API requires dedicated review due to ' +
   'being privacy sensitive. Please file an issue asking for permission' +
@@ -156,15 +140,17 @@ const forbiddenTermsGlobal = {
     message: realiasGetMode,
     allowlist: ['src/mode-object.js', 'src/iframe-attributes.js'],
   },
-  'INTERNAL_RUNTIME_VERSION|IS_(PROD|MINIFIED)': {
+  'INTERNAL_RUNTIME_VERSION|IS_(PROD|MINIFIED|ESM)': {
     message:
       'Do not use build constants directly. Instead, use the helpers in `#core/mode`.',
     allowlist: [
-      'src/core/mode/version.js',
+      'build-system/babel-plugins/babel-plugin-amp-mode-transformer/index.js',
+      'build-system/compile/build-compiler.js',
+      'build-system/compile/build-constants.js',
+      'src/core/mode/esm.js',
       'src/core/mode/minified.js',
       'src/core/mode/prod.js',
-      'build-system/compile/build-constants.js',
-      'build-system/babel-plugins/babel-plugin-amp-mode-transformer/index.js',
+      'src/core/mode/version.js',
     ],
   },
   '\\.prefetch\\(': {
@@ -548,10 +534,10 @@ const forbiddenTermsGlobal = {
   },
   'internalListenImplementation': {
     message:
-      'Use `listen()` in either `event-helper` or `3p-frame-messaging`' +
+      'Use `listen()` in either `event-helper` or `#core/3p-frame-messaging`' +
       ', depending on your use case.',
     allowlist: [
-      'src/3p-frame-messaging.js',
+      'src/core/3p-frame-messaging.js',
       'src/event-helper.js',
       'src/core/dom/event-helper-listen.js',
     ],
@@ -669,7 +655,6 @@ const forbiddenTermsGlobal = {
     message:
       'SVG data images must use charset=utf-8: ' +
       '"data:image/svg+xml;charset=utf-8,..."',
-    allowlist: ['src/service/ie-intrinsic-bug.js'],
   },
   'new CustomEvent\\(': {
     message: 'Use createCustomEvent() helper instead.',
@@ -741,6 +726,55 @@ const forbiddenTermsGlobal = {
       'validator/js/gulpjs/test/validate.js',
     ],
     checkInTestFolder: true,
+  },
+  'withA11y':
+    'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
+  '@storybook/addon-knobs': {
+    message:
+      'The @storybook/addon-knobs package has been deprecated. Use Controls instead (`args` and `argTypes`). https://storybook.js.org/docs/react/essentials/controls',
+    allowlist: [
+      // TODO(#35923): Update existing files to use Controls instead.
+      'build-system/tasks/storybook/amp-env/main.js',
+      'build-system/tasks/storybook/preact-env/main.js',
+      'extensions/amp-animation/0.1/storybook/template.js',
+      'extensions/amp-date-display/1.0/storybook/Basic.amp.js',
+      'extensions/amp-date-display/1.0/storybook/Basic.js',
+      'extensions/amp-iframe/0.1/storybook/Basic.amp.js',
+      'extensions/amp-iframe/1.0/storybook/Basic.amp.js',
+      'extensions/amp-image-slider/0.1/storybook/Basic.amp.js',
+      'extensions/amp-inline-gallery/1.0/storybook/Basic.js',
+      'extensions/amp-lightbox/1.0/storybook/Basic.amp.js',
+      'extensions/amp-lightbox/1.0/storybook/Basic.js',
+      'extensions/amp-lightbox-gallery/1.0/storybook/Basic.amp.js',
+      'extensions/amp-lightbox-gallery/1.0/storybook/Basic.js',
+      'extensions/amp-render/1.0/storybook/Basic.js',
+      'extensions/amp-selector/1.0/storybook/Basic.amp.js',
+      'extensions/amp-selector/1.0/storybook/Basic.js',
+      'extensions/amp-sidebar/0.1/storybook/Basic.amp.js',
+      'extensions/amp-sidebar/1.0/storybook/Basic.amp.js',
+      'extensions/amp-sidebar/1.0/storybook/Basic.js',
+      'extensions/amp-soundcloud/1.0/storybook/Basic.amp.js',
+      'extensions/amp-soundcloud/1.0/storybook/Basic.js',
+      'extensions/amp-stream-gallery/1.0/storybook/Basic.amp.js',
+      'extensions/amp-stream-gallery/1.0/storybook/Basic.js',
+      'extensions/amp-timeago/1.0/storybook/Basic.js',
+      'extensions/amp-twitter/0.1/storybook/Basic.amp.js',
+      'extensions/amp-twitter/1.0/storybook/Basic.amp.js',
+      'extensions/amp-twitter/1.0/storybook/Basic.js',
+      'extensions/amp-video/1.0/storybook/Basic.amp.js',
+      'extensions/amp-video/1.0/storybook/Basic.js',
+      'extensions/amp-video-iframe/1.0/storybook/Basic.amp.js',
+      'extensions/amp-vimeo/1.0/storybook/Basic.amp.js',
+      'extensions/amp-vimeo/1.0/storybook/Basic.js',
+      'extensions/amp-wordpress-embed/1.0/storybook/Basic.amp.js',
+      'extensions/amp-youtube/0.1/storybook/Basic.amp.js',
+      'extensions/amp-youtube/1.0/storybook/Basic.amp.js',
+      'extensions/amp-youtube/1.0/storybook/Basic.js',
+      'src/builtins/storybook/amp-layout-with-aspect-ratio-css.amp.js',
+      'src/builtins/storybook/amp-layout.amp.js',
+      'src/preact/storybook/Context.js',
+      'src/preact/storybook/Wrappers.js',
+    ],
   },
 };
 
@@ -1049,23 +1083,12 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-ad/0.1/amp-ad-3p-impl.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
-      'extensions/amp-iframe/0.1/amp-iframe.js',
     ],
   },
   "require\\('fancy-log'\\)": {
     message:
       'Instead of fancy-log, use the logging functions in build-system/common/logging.js.',
   },
-  "require\\('kleur\\/colors'\\)": {
-    message:
-      'Instead of kleur/colors, use the log-coloring functions in build-system/common/colors.js',
-    allowlist: [
-      'build-system/common/colors.js',
-      'third_party/react-dates/scope-require.js',
-    ],
-  },
-  'withA11y':
-    'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
   'detectIsAutoplaySupported': {
     message:
       'Detecting autoplay support is expensive. Use the cached function "isAutoplaySupported" instead.',

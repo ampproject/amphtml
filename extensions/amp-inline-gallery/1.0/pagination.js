@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as Preact from '#preact';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
 import {Wrapper} from '#preact/component';
@@ -21,10 +5,10 @@ import {useContext} from '#preact';
 import {useStyles} from './pagination.jss';
 
 /**
- * @param {!InlineGalleryDef.PaginationProps} props
+ * @param {!BentoInlineGalleryDef.PaginationProps} props
  * @return {PreactDef.Renderable}
  */
-export function Pagination({inset, ...rest}) {
+export function BentoInlineGalleryPagination({inset, ...rest}) {
   const classes = useStyles();
   const {currentSlide, setCurrentSlide, slides} = useContext(CarouselContext);
   const slideCount = slides ? slides.length : 0;
@@ -65,7 +49,7 @@ export function Pagination({inset, ...rest}) {
 }
 
 /**
- * @param {!InlineGalleryDef.PaginationProps} props
+ * @param {!BentoInlineGalleryDef.PaginationProps} props
  * @return {PreactDef.Renderable}
  */
 function Dots({currentSlide, goTo, inset, slideCount}) {
@@ -93,7 +77,7 @@ function Dots({currentSlide, goTo, inset, slideCount}) {
 }
 
 /**
- * @param {!InlineGalleryDef.PaginationProps} props
+ * @param {!BentoInlineGalleryDef.PaginationProps} props
  * @return {PreactDef.Renderable}
  */
 function Numbers({currentSlide, inset, slideCount}) {

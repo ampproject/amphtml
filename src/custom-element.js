@@ -1,25 +1,13 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {AmpEvents} from '#core/constants/amp-events';
 import {CommonSignals} from '#core/constants/common-signals';
 import {ReadyState} from '#core/constants/ready-state';
 import {tryResolve} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
 import * as dom from '#core/dom';
+import {
+  UPGRADE_TO_CUSTOMELEMENT_PROMISE,
+  UPGRADE_TO_CUSTOMELEMENT_RESOLVER,
+} from '#core/dom/amp-element-helpers';
 import {Layout, LayoutPriority, isLoadingAllowed} from '#core/dom/layout';
 import {MediaQueryProps} from '#core/dom/media-query-props';
 import * as query from '#core/dom/query';
@@ -31,10 +19,6 @@ import {Services} from '#service';
 import {ResourceState} from '#service/resource';
 import {getSchedulerForDoc} from '#service/scheduler';
 
-import {
-  UPGRADE_TO_CUSTOMELEMENT_PROMISE,
-  UPGRADE_TO_CUSTOMELEMENT_RESOLVER,
-} from './amp-element-helpers';
 import {startupChunk} from './chunk';
 import {shouldBlockOnConsentByMeta} from './consent';
 import {ElementStub} from './element-stub';
@@ -403,8 +387,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       this.upgradeDelayMs_ = win.Date.now() - upgradeStartTime;
       this.upgradeState_ = UpgradeState.UPGRADED;
       this.setReadyStateInternal(ReadyState.BUILDING);
-      this.classList.remove('amp-unresolved');
-      this.classList.remove('i-amphtml-unresolved');
+      this.classList.remove('amp-unresolved', 'i-amphtml-unresolved');
       this.assertLayout_();
       this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
       if (!this.R1()) {
@@ -510,6 +493,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
       // Create the instance.
       const implPromise = this.createImpl_();
+      this.getSizer_();
 
       // Wait for consent.
       const consentPromise = implPromise.then(() => {
@@ -545,8 +529,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         () => {
           this.built_ = true;
           this.classList.add('i-amphtml-built');
-          this.classList.remove('i-amphtml-notbuilt');
-          this.classList.remove('amp-notbuilt');
+          this.classList.remove('i-amphtml-notbuilt', 'amp-notbuilt');
           this.signals_.signal(CommonSignals.BUILT);
 
           if (this.R1()) {
@@ -978,6 +961,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       ) {
         // Expect sizer to exist, just not yet discovered.
         this.sizerElement = this.querySelector('i-amphtml-sizer');
+        this.sizerElement?.setAttribute('slot', 'i-amphtml-svc');
       }
       return this.sizerElement || null;
     }
@@ -1153,9 +1137,11 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       this.isConnected_ = true;
 
       if (!this.everAttached) {
-        this.classList.add('i-amphtml-element');
-        this.classList.add('i-amphtml-notbuilt');
-        this.classList.add('amp-notbuilt');
+        this.classList.add(
+          'i-amphtml-element',
+          'i-amphtml-notbuilt',
+          'amp-notbuilt'
+        );
       }
 
       if (!this.ampdoc_) {
@@ -1191,10 +1177,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         this.everAttached = true;
 
         try {
-          this.layout_ = applyStaticLayout(
-            this,
-            Services.platformFor(toWin(this.ownerDocument.defaultView)).isIe()
-          );
+          this.layout_ = applyStaticLayout(this);
           this.initMediaAttrs_();
         } catch (e) {
           reportError(e, this);
@@ -1203,8 +1186,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           this.upgradeOrSchedule_();
         }
         if (!this.isUpgraded()) {
-          this.classList.add('amp-unresolved');
-          this.classList.add('i-amphtml-unresolved');
+          this.classList.add('amp-unresolved', 'i-amphtml-unresolved');
           this.dispatchCustomEventForTesting(AmpEvents.STUBBED);
         }
       }
@@ -1246,6 +1228,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       // Schedule build and mount.
       const scheduler = getSchedulerForDoc(this.getAmpDoc());
       scheduler.schedule(this);
+      this.classList.remove('amp-unresolved', 'i-amphtml-unresolved');
 
       if (this.buildingPromise_) {
         // Already built or building: just needs to be mounted.

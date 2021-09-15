@@ -1,36 +1,22 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {ActionTrust} from '#core/constants/action-constants';
-import {CSS} from '../../../build/amp-image-slider-0.1.css';
 import {CommonSignals} from '#core/constants/common-signals';
-import {Gestures} from '../../../src/gesture';
-import {Services} from '#service';
-import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
-import {clamp} from '#core/math';
-import {dev, user, userAssert} from '../../../src/log';
-import {htmlFor} from '#core/dom/static-template';
 import {isLayoutSizeDefined} from '#core/dom/layout';
-import {listen, loadPromise} from '../../../src/event-helper';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '#core/dom/layout/viewport-observer';
 import {realChildElements} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
+import {clamp} from '#core/math';
+
+import {Services} from '#service';
+
+import {CSS} from '../../../build/amp-image-slider-0.1.css';
+import {listen, loadPromise} from '../../../src/event-helper';
+import {Gestures} from '../../../src/gesture';
+import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
+import {dev, user, userAssert} from '../../../src/log';
 
 const VALID_IMAGE_TAGNAMES = new Set(['AMP-IMG', 'IMG']);
 

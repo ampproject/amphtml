@@ -1,28 +1,13 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const babel = require('@babel/core');
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const path = require('path');
 const tempy = require('tempy');
 const {BABEL_SRC_GLOBS} = require('./sources');
 const {CompilationLifecycles, debug} = require('./debug-compilation-lifecycle');
-const {cyan, red} = require('../common/colors');
+const {cyan, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 const {TransformCache, batchedRead, md5} = require('../common/transform-cache');
 
@@ -62,7 +47,11 @@ function getBabelOutputDir() {
  * @return {!Array<string>}
  */
 function getFilesToTransform() {
-  return globby.sync([...BABEL_SRC_GLOBS, '!node_modules/', '!third_party/']);
+  return fastGlob.sync([
+    ...BABEL_SRC_GLOBS,
+    '!node_modules/**',
+    '!third_party/**',
+  ]);
 }
 
 /**

@@ -1,18 +1,3 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {dict, getValueForExpr} from '#core/types/object';
@@ -53,6 +38,7 @@ export function handleCompanionBottomAd(media, apesterElement) {
 function constructCompanionBottomAd(slot, bannerSizes, apesterElement) {
   const width = bannerSizes[0][0];
   const height = bannerSizes[0][1];
+  const refreshInterval = 30;
   const ampAd = createElementWithAttributes(
     /** @type {!Document} */ (apesterElement.ownerDocument),
     'amp-ad',
@@ -60,14 +46,13 @@ function constructCompanionBottomAd(slot, bannerSizes, apesterElement) {
       'width': `${width}`,
       'height': `${height}`,
       'type': 'doubleclick',
-      'style':
-        'position: absolute !important; bottom: 0;left: 50%;margin-left: -150px;margin-bottom: 0;',
       'layout': 'fixed',
       'data-slot': `${slot}`,
       'data-multi-size-validation': 'false',
+      'data-enable-refresh': `${refreshInterval}`,
     })
   );
-  ampAd.classList.add('i-amphtml-amp-apester-companion');
+  ampAd.classList.add('i-amphtml-amp-apester-bottom-ad');
   apesterElement.appendChild(ampAd);
   Services.mutatorForDoc(apesterElement).requestChangeSize(ampAd, height);
   return ampAd;

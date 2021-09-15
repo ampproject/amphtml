@@ -1,24 +1,9 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 /**
  * @typedef {{
- *  name?: string,
- *  environment?: string,
+ *  name: string,
+ *  environment: string,
  *  issue?: string,
  *  expiration_date_utc?: string,
  *  define_experiment_constant?: string,
@@ -28,9 +13,9 @@ let ExperimentConfigDef;
 
 /**
  * @typedef {{
- *  experimentA: ExperimentConfigDef,
- *  experimentB: ExperimentConfigDef,
- *  experimentC: ExperimentConfigDef,
+ *  experimentA: ExperimentConfigDef | {},
+ *  experimentB: ExperimentConfigDef | {},
+ *  experimentC: ExperimentConfigDef | {},
  * }}
  */
 let ExperimentsConfigDef;
@@ -52,13 +37,14 @@ const fs = require('fs-extra');
 const klaw = require('klaw');
 const path = require('path');
 const tar = require('tar');
-const {cyan, green} = require('../../common/colors');
+const {cyan, green} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
 const {log} = require('../../common/logging');
 const {MINIFIED_TARGETS} = require('../helpers');
 const {VERSION} = require('../../compile/internal-version');
 
 // Flavor config for the base flavor type.
+/** @type {DistFlavorDef} */
 const BASE_FLAVOR_CONFIG = {
   flavorType: 'base',
   name: 'base',
@@ -166,17 +152,25 @@ function discoverDistFlavors_() {
     ...experimentConfigDefs
       .filter(
         // Only include experiments that have a `define_experiment_constant` field.
-        ([, experimentConfig]) => experimentConfig.define_experiment_constant
+        ([, experimentConfig]) =>
+          'define_experiment_constant' in experimentConfig &&
+          experimentConfig.define_experiment_constant
       )
-      .map(([flavorType, experimentConfig]) => ({
-        // TODO(#28168, erwinmombay): relace with single `--module --nomodule` command.
-        command: `amp dist --noconfig --define_experiment_constant ${experimentConfig.define_experiment_constant}`,
-        flavorType,
-        rtvPrefixes: [
-          EXPERIMENTAL_RTV_PREFIXES[experimentConfig.environment][flavorType],
-        ],
-        ...experimentConfig,
-      })),
+      .map(
+        (
+          /** @type {[string, ExperimentConfigDef]} // guaranteed by .filter */ [
+            flavorType,
+            experimentConfig,
+          ]
+        ) => ({
+          command: `amp dist --noconfig --define_experiment_constant ${experimentConfig.define_experiment_constant}`,
+          flavorType,
+          rtvPrefixes: [
+            EXPERIMENTAL_RTV_PREFIXES[experimentConfig.environment][flavorType],
+          ],
+          ...experimentConfig,
+        })
+      ),
   ].filter(
     // If --flavor is defined, filter out the rest.
     ({flavorType}) => !argv.flavor || flavorType == argv.flavor
@@ -318,7 +312,11 @@ async function populateOrgCdn_(flavorType, rtvPrefixes, tempDir, outputDir) {
   if (flavorType == 'base') {
     rtvCopyingPromises.push(
       ...Object.entries(experimentsConfig)
-        .filter(([, {environment}]) => environment == 'INABOX')
+        .filter(
+          ([, experimentConfig]) =>
+            'environment' in experimentConfig &&
+            experimentConfig.environment == 'INABOX'
+        )
         .map(
           ([experimentFlavor]) =>
             EXPERIMENTAL_RTV_PREFIXES['INABOX'][`${experimentFlavor}-control`]

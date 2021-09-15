@@ -1,19 +1,3 @@
-<!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # AMP HTML URL Variable Substitutions
 
 ## Overview
@@ -220,6 +204,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Timezone](#timezone)                               | `TIMEZONE`                | `${timezone}`              |
 | [Timezone Code](#timezone-code)                     | N/A                       | `${timezoneCode}`          |
 | [User Agent](#user-agent)                           | `USER_AGENT`              | `${userAgent}`             |
+| [User Agent Client Hint](#user-agent-client-hint)   | `UACH`                    | `${uach}`                  |
 | [Viewport Height](#viewport-height)                 | `VIEWPORT_HEIGHT`         | `${viewportHeight}`        |
 | [Viewport Width](#viewport-width)                   | `VIEWPORT_WIDTH`          | `${viewportWidth}`         |
 
@@ -1264,6 +1249,17 @@ Provides a string representing the user agent of the requesting software, usuall
     ```
 -   **amp-analytics variable**: `${userAgent}`
     -   Example value: `Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0`
+
+#### User Agent Client Hint
+
+Provides the [user agent client hint](https://github.com/WICG/ua-client-hints) information. Its values are obtained from getHighEntropyValues API. Currently only available on Chromium-based browsers. On an unsupported browser, its value will be an empty string.
+
+-   **platform variable**: `UACH(variableName)`
+    -   Example: <br>
+    ```html
+    <amp-pixel src="https://foo.com/pixel?sh=UACH(platform)"></amp-pixel>
+    ```
+-   **amp-analytics variable**: `${uach(variableName)}`
 
 #### Vertical Scroll Boundary
 

@@ -1,23 +1,16 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
 
 import * as Preact from '#preact';
+import {useCallback, useEffect, useRef} from '#preact';
+import {useValueRef} from '#preact/component';
 import {IframeEmbed} from '#preact/component/iframe';
-import {dict} from '#core/types/object';
-import {useEffect, useRef} from '#preact';
+
+import {getData} from '../../../src/event-helper';
+
+const MATCHES_MESSAGING_ORIGIN = (origin) => {
+  return origin === 'https://w.soundcloud.com';
+};
 
 /**
  * @param {!SoundcloudDef.Props} props
@@ -25,6 +18,7 @@ import {useEffect, useRef} from '#preact';
  */
 export function Soundcloud({
   color,
+  onLoad,
   playlistId,
   secretToken,
   trackId,
@@ -33,6 +27,7 @@ export function Soundcloud({
 }) {
   // Property and Reference Variables
   const iframeRef = useRef(null);
+  const onLoadRef = useValueRef(onLoad);
 
   useEffect(() => {
     /** Unmount Procedure */
@@ -47,6 +42,16 @@ export function Soundcloud({
       iframeRef.current = null;
     };
   }, []);
+
+  const messageHandler = useCallback(
+    (event) => {
+      const data = parseJson(getData(event));
+      if (data.method === 'ready') {
+        onLoadRef.current?.();
+      }
+    },
+    [onLoadRef]
+  );
 
   // Checking for valid props
   if (!checkProps(trackId, playlistId)) {
@@ -88,6 +93,8 @@ export function Soundcloud({
       scrolling="no"
       src={iframeSrc}
       title={'Soundcloud Widget - ' + mediaId}
+      messageHandler={messageHandler}
+      matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
       {...rest}
     />
   );

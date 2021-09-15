@@ -1,22 +1,7 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const path = require('path');
 const {
   ciPullRequestSha,
@@ -33,7 +18,7 @@ const {
   gitDiffStatMain,
   shortSha,
 } = require('../common/git');
-const {cyan, green, yellow} = require('../common/colors');
+const {cyan, green, yellow} = require('kleur/colors');
 const {exec, execOrDie, execOrThrow, execWithError} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {getStdout} = require('../common/process');
@@ -260,7 +245,7 @@ function storeBuildToWorkspace_(containerDirectory) {
       }
     }
     // Bento components are compiled inside the extension source file.
-    for (const componentFile of globby.sync('extensions/*/?.?/dist/*.js')) {
+    for (const componentFile of fastGlob.sync('extensions/*/?.?/dist/*.js')) {
       fs.ensureDirSync(
         `/tmp/workspace/builds/${containerDirectory}/${path.dirname(
           componentFile

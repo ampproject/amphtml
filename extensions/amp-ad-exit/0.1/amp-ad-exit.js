@@ -1,41 +1,29 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {ActionTrust} from '#core/constants/action-constants';
-import {FilterType} from './filters/filter';
-import {HostServices} from '#inabox/host-services';
 import {
   MessageType,
   deserializeMessage,
   listen,
-} from '../../../src/3p-frame-messaging';
-import {Services} from '#service';
-import {TransportMode, assertConfig, assertVendor} from './config';
-import {createFilter} from './filters/factory';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {getAmpAdResourceId} from '../../../src/ad-helper';
-import {getData} from '../../../src/event-helper';
-import {getMode} from '../../../src/mode';
-import {getTopWindow} from '../../../src/service-helpers';
+} from '#core/3p-frame-messaging';
+import {ActionTrust} from '#core/constants/action-constants';
 import {isJsonScriptTag} from '#core/dom';
 import {isObject} from '#core/types';
-import {makeClickDelaySpec} from './filters/click-delay';
-import {makeInactiveElementSpec} from './filters/inactive-element';
-import {openWindowDialog} from '../../../src/open-window-dialog';
 import {parseJson} from '#core/types/object/json';
+
+import {HostServices} from '#inabox/host-services';
+
+import {Services} from '#service';
+
+import {TransportMode, assertConfig, assertVendor} from './config';
+import {makeClickDelaySpec} from './filters/click-delay';
+import {createFilter} from './filters/factory';
+import {FilterType} from './filters/filter';
+import {makeInactiveElementSpec} from './filters/inactive-element';
+
+import {getAmpAdResourceId} from '../../../src/ad-helper';
+import {getData} from '../../../src/event-helper';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {openWindowDialog} from '../../../src/open-window-dialog';
+import {getTopWindow} from '../../../src/service-helpers';
 import {parseUrlDeprecated} from '../../../src/url';
 
 const TAG = 'amp-ad-exit';
@@ -446,9 +434,9 @@ export class AmpAdExit extends AMP.BaseElement {
    * @return {boolean}
    */
   detectAttributionReportingSupport() {
-    return this.win.document.featurePolicy
-      ?.features()
-      .includes('attribution-reporting');
+    return this.win.document.featurePolicy?.allowsFeature(
+      'attribution-reporting'
+    );
   }
 
   /**

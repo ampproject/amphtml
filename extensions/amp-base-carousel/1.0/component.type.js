@@ -1,23 +1,7 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /** @externs */
 
 /** @const */
-var BaseCarouselDef = {};
+var BentoBaseCarouselDef = {};
 
 /**
  * @typedef {{
@@ -41,7 +25,7 @@ var BaseCarouselDef = {};
  *   visibleCount: (number|undefined),
  * }}
  */
-BaseCarouselDef.Props;
+BentoBaseCarouselDef.Props;
 
 /**
  * @typedef {{
@@ -58,7 +42,7 @@ BaseCarouselDef.Props;
  *   visibleCount: (number|undefined),
  * }}
  */
-BaseCarouselDef.ScrollerProps;
+BentoBaseCarouselDef.ScrollerProps;
 
 /**
  * @typedef {{
@@ -76,31 +60,32 @@ BaseCarouselDef.ScrollerProps;
  *   visibleCount: (number|undefined),
  * }}
  */
-BaseCarouselDef.SlideProps;
+BentoBaseCarouselDef.SlideProps;
 
 /**
  * @typedef {{
  *   advance: (function():undefined|undefined),
- *   customArrow: (PreactDef.VNode|undefined),
  *   by: number,
+ *   customArrow: (PreactDef.VNode|undefined),
  *   disabled: (boolean|undefined),
  *   outsetArrows: (boolean|undefined),
+ *   rtl: (boolean|undefined),
  * }}
  */
-BaseCarouselDef.ArrowProps;
+BentoBaseCarouselDef.ArrowProps;
 
 /**
  * @typedef {{
  *   currentSlide: (number|undefined),
  *   setCurrentSlide: (function(number):undefined),
- *   slides: !Array<BaseCarouselDef.SlideProps>,
+ *   slides: !Array<BentoBaseCarouselDef.SlideProps>,
  *   setSlides: (function(Array):undefined),
  * }}
  */
-BaseCarouselDef.ContextProps;
+BentoBaseCarouselDef.ContextProps;
 
 /** @interface */
-BaseCarouselDef.CarouselApi = class {
+BentoBaseCarouselDef.CarouselApi = class {
   /**
    * @param {number} index
    */

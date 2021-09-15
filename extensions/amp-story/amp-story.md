@@ -6,22 +6,6 @@ teaser:
   text: A rich, visual storytelling format.
 ---
 
-<!--
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-story
 
 [Web stories](https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/?format=stories) are an immersive, tappable and easily shareable storytelling format. Web stories are built using the AMP Framework. The `amp-story` component provides the AMP story subset of AMP. It is the base technology for web stories.
@@ -393,6 +377,20 @@ This same image can be used for both mobile portrait and landscape desktop using
 
 ```html
 <amp-img src="cat.jpg" alt="..." object-position="75% 40%"></amp-img>
+```
+
+##### Optimize `amp-video` by using a free Google hosted video cache on origin documents
+
+The `<amp-video>` element on stories supports the Google video cache to be used on origin documents through the attribute `cache="google"`. The video cache will fetch and store the video contents periodically, reducing serving costs for videos, and generating transcodes with different quality settings that adapt the bitrate to the network conditions.
+
+Use 720p videos or higher to take advantage of all the video transcodes and adaptive bitrate algorithms.
+
+Example:
+
+```html
+<amp-video layout="fill" poster="img.png" cache="google">
+  <source src="video.mp4" type="video/mp4">
+</amp-video>
 ```
 
 ##### `data-text-background-color`

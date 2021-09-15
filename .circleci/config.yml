@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  browser-tools: circleci/browser-tools@1.1.3
+  browser-tools: circleci/browser-tools@1.2.2
   node: circleci/node@4.7.0
 
 push_and_pr_builds: &push_and_pr_builds
@@ -105,7 +105,6 @@ commands:
           name: 'Configure Development Environment'
           command: |
             ./.circleci/fetch_merge_commit.sh
-            ./.circleci/check_config.sh
             ./.circleci/restore_build_output.sh
             cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
       - setup_node_environment
@@ -119,10 +118,16 @@ commands:
     steps:
       - browser-tools/install-chrome:
           replace-existing: true
+          chrome-version: 93.0.4577.63
       - browser-tools/install-chromedriver
   install_firefox:
     steps:
       - browser-tools/install-firefox
+  install_edge:
+    steps:
+      - run:
+          name: 'Install Microsoft Edge'
+          command: ./.circleci/install_microsoft_edge.sh
   enable_safari_automation:
     steps:
       - run:
@@ -159,6 +164,9 @@ jobs:
       - run:
           name: 'Initialize Repository'
           command: ./.circleci/initialize_repo.sh
+      - run:
+          name: 'Check Config'
+          command: ./.circleci/check_config.sh
       - run:
           name: 'Initialize Workspace'
           command: cp .circleci/maybe_gracefully_halt.sh /tmp/workspace
@@ -349,7 +357,7 @@ jobs:
       - enable_safari_automation
       - run:
           name: '⭐ Browser Tests (Safari) ⭐'
-          command: node build-system/pr-check/safari-tests.js
+          command: node build-system/pr-check/browser-tests.js --browser=safari
       - store_test_output
       - teardown_vm
   browser_tests_firefox:
@@ -360,7 +368,18 @@ jobs:
       - install_firefox
       - run:
           name: '⭐ Browser Tests (Firefox) ⭐'
-          command: node build-system/pr-check/firefox-tests.js
+          command: node build-system/pr-check/browser-tests.js --browser=firefox
+      - store_test_output
+      - teardown_vm
+  browser_tests_edge:
+    executor:
+      name: node-docker-medium
+    steps:
+      - setup_vm
+      - install_edge
+      - run:
+          name: '⭐ Browser Tests (Edge) ⭐'
+          command: node build-system/pr-check/browser-tests.js --browser=edge
       - store_test_output
       - teardown_vm
   performance_tests:
@@ -411,6 +430,8 @@ jobs:
       - teardown_vm
 
 workflows:
+  version: 2
+
   'CircleCI':
     jobs:
       - initialize_repository:
@@ -511,6 +532,11 @@ workflows:
             - 'Nomodule Build (Test)'
       - browser_tests_firefox:
           name: 'Browser Tests (Firefox)'
+          <<: *push_and_pr_builds
+          requires:
+            - 'Nomodule Build (Test)'
+      - browser_tests_edge:
+          name: 'Browser Tests (Edge)'
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build (Test)'

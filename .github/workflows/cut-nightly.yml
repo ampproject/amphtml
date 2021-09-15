@@ -1,0 +1,33 @@
+# Cuts a new nightly branch on a schedule.
+
+name: Cut Nightly Branch
+
+on:
+  schedule:
+    # 1 a.m. PST / 12 a.m. PDT, Tuesdays through Saturdays.
+    - cron: '0 8 * * 2-6'
+
+jobs:
+  cut-nightly:
+    environment: release_tagger
+    if: github.repository == 'ampproject/amphtml'
+    name: Cut Nightly Branch
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Set Up Node
+        uses: actions/setup-node@v2.4.0
+
+      - name: Set Up Environment
+        run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: ⭐ Cut Nightly Branch ⭐
+        run: node --unhandled-rejections=strict build-system/release-workflows/cut-nightly.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}

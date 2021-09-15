@@ -1,28 +1,13 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
-import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
-import {SafeframeHostApi, removeSafeframeListener} from '../safeframe-host';
 import {createElementWithAttributes} from '#core/dom';
 import {utf8Encode} from '#core/types/string/bytes';
+
+import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
+import {SafeframeHostApi, removeSafeframeListener} from '../safeframe-host';
 
 /**
  * We're allowing external resources because otherwise using realWin causes

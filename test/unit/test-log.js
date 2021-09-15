@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   USER_ERROR_SENTINEL,
   isUserErrorEmbedMessage,
@@ -83,7 +67,7 @@ describes.sandboxed('Logging', {}, (env) => {
     });
 
     it('should be disabled with hash param log=0', () => {
-      mode.log = '0';
+      win.location.hash = '#log=0';
       expect(new Log(win, RETURNS_FINE).level_).to.equal(LogLevel.OFF);
     });
 
@@ -235,19 +219,19 @@ describes.sandboxed('Logging', {}, (env) => {
     });
 
     it('should be enabled with log=1', () => {
-      mode.log = '1';
-      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
+      win.location.hash = '#log=1';
+      expect(user().defaultLevelWithFunc_(win)).to.equal(LogLevel.FINE);
     });
 
     it('should be enabled with log>1', () => {
-      mode.log = '2';
-      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
+      win.location.hash = '#log=2';
+      expect(user().defaultLevelWithFunc_(win)).to.equal(LogLevel.FINE);
 
-      mode.log = '3';
-      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
+      win.location.hash = '#log=3';
+      expect(user().defaultLevelWithFunc_(win)).to.equal(LogLevel.FINE);
 
-      mode.log = '4';
-      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
+      win.location.hash = '#log=4';
+      expect(user().defaultLevelWithFunc_(win)).to.equal(LogLevel.FINE);
     });
 
     it('should be configured with USER suffix', () => {
@@ -266,18 +250,18 @@ describes.sandboxed('Logging', {}, (env) => {
     });
 
     it('should NOT be enabled with log=1', () => {
-      mode.log = 1;
-      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.OFF);
+      win.location.hash = '#log=1';
+      expect(dev().defaultLevelWithFunc_(win)).to.equal(LogLevel.OFF);
     });
 
     it('should be enabled as INFO with log=2', () => {
-      mode.log = 2;
-      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.INFO);
+      win.location.hash = '#log=2';
+      expect(dev().defaultLevelWithFunc_(win)).to.equal(LogLevel.INFO);
     });
 
     it('should be enabled as FINE with log=3', () => {
-      mode.log = 3;
-      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
+      win.location.hash = '#log=3';
+      expect(dev().defaultLevelWithFunc_(win)).to.equal(LogLevel.FINE);
     });
 
     it('should be configured with no suffix', () => {
