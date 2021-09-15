@@ -642,7 +642,7 @@ describes.realWin(
         }
       });
 
-      it('shadow-doc Viewer supresses viewport message requests', async () => {
+      it('shadow-doc Viewer suppresses viewport message requests', async () => {
         const initialMessageDeliverer = env.sandbox.spy();
         const initialViewer = Services.viewerForDoc(ampdoc);
         initialViewer.setMessageDeliverer(initialMessageDeliverer, '');
