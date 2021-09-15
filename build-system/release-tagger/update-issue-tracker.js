@@ -102,9 +102,10 @@ class IssueTracker {
  * @return {Promise<void>}
  */
 async function createOrUpdateTracker(head, base, channel, time) {
-  const timeET = new Date(time).toLocaleString('en-US', {
-    timeZone: 'America/New_York',
-  });
+  const timeET =
+    new Date(`${time} UTC`).toLocaleString('en-US', {
+      timeZone: 'America/New_York',
+    }) + ' ET';
   const isCherrypick = Number(head) - Number(base) < 1000;
   const issue = isCherrypick
     ? await getIssue(`Release ${base}`)
