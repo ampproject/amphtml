@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import {jsonConfiguration} from '#core/types/object/json';
 
 /**
@@ -331,6 +330,10 @@ const adConfig = jsonConfiguration({
 
   'atomx': {
     prefetch: 'https://s.ato.mx/p.js',
+  },
+
+  'avantisvideo': {
+    renderStartImplemented: true,
   },
 
   'beaverads': {
@@ -1114,6 +1117,12 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://smart-ads.biz/amp.js',
   },
 
+  'smartadserver': {
+    prefetch: 'https://ec-ns.sascdn.com/diff/js/amp.v0.js',
+    preconnect: 'https://static.sascdn.com',
+    renderStartImplemented: true,
+  },
+
   'smartclip': {
     prefetch: 'https://cdn.smartclip.net/amp/amp.v0.js',
     preconnect: 'https://des.smartclip.net',
@@ -1239,6 +1248,11 @@ const adConfig = jsonConfiguration({
 
   'tracdelight': {
     prefetch: 'https://scripts.tracdelight.io/amp.js',
+    renderStartImplemented: true,
+  },
+
+  'trafficstars': {
+    prefetch: 'https://cdn.tsyndicate.com/sdk/v1/master.spot.js',
     renderStartImplemented: true,
   },
 
