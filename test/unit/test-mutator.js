@@ -21,10 +21,8 @@ import {Signals} from '#core/data-structures/signals';
 import {LayoutPriority} from '#core/dom/layout';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 
-import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {MutatorImpl} from '#service/mutator-impl';
-import {installPlatformService} from '#service/platform-impl';
 import {Resource, ResourceState} from '#service/resource';
 import {ResourcesImpl} from '#service/resources-impl';
 
@@ -63,10 +61,6 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
     mutator = new MutatorImpl(ampdoc);
     mutator.win = resources.win;
     mutator.resources_ = resources;
-
-    installPlatformService(resources.win);
-    const platform = Services.platformFor(resources.win);
-    env.sandbox.stub(platform, 'isIe').returns(false);
 
     installInputService(resources.win);
 
