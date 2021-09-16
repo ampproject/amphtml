@@ -35,12 +35,23 @@ export function allowlistFormActions(ampEl) {
  * @private
  */
 export function addMissingResponseAttributeElements(ampEl, formEl) {
-  const submittingEl = formEl.querySelector(
+  let submittingEl = formEl.querySelector(
     `[${escapeCssSelectorIdent(FormResponseAttribute.SUBMITTING)}]`
   );
   if (!submittingEl) {
-    formEl.appendChild(createFormSubmittingEl_(ampEl, formEl));
+    submittingEl = createFormSubmittingEl_(ampEl, formEl);
+    formEl.appendChild(submittingEl);
   }
+  new ampEl.win.ResizeObserver(() => {
+    // Scroll the `submitting` element into view when it is displayed. The
+    // scroll seems to require a small timeout in order to consistently work.
+    setTimeout(() => {
+      submittingEl./*OK*/ scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+      });
+    }, 25);
+  }).observe(submittingEl);
 
   const successEl = formEl.querySelector(
     `[${escapeCssSelectorIdent(FormResponseAttribute.SUCCESS)}]`
