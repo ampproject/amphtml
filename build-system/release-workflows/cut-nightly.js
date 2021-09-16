@@ -183,7 +183,6 @@ async function cutNightlyBranch() {
     throw error;
   });
 
-  // get last green commit
   const sha = await getCommit(octokit);
   if (!sha) {
     throw new Error(
@@ -196,7 +195,7 @@ async function cutNightlyBranch() {
     await createTag(octokit, sha),
   ]);
 
-  log('Successly cut nightly');
+  log('Successfully cut nightly');
 }
 
 cutNightlyBranch();
