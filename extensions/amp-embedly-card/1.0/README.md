@@ -78,7 +78,7 @@ import '@ampproject/bento-embedly-card';
 
   <div class="buttons" style="margin-top: 8px;">
     <button id="change-url">
-      Change tweet
+      Change embed
     </button>
   </div>
 
