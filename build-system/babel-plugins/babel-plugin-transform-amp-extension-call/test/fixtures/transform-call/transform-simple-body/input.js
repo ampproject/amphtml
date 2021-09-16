@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
@@ -15,9 +16,12 @@
  */
 
 AMP.extension('amp-mustache', '0.2', function(AMP) {
+=======
+AMP.extension('amp-mustache', '0.2', function (AMP) {
+>>>>>>> dfbfd1437f... 🏗♻️ Bento Auto-Envelope (#34820)
   AMP.registerTemplate(TAG, AmpMustache);
 });
 
-AMP.extension('amp-gist', '0.1', AMP => {
+AMP.extension('amp-gist', '0.1', (AMP) => {
   AMP.registerElement('amp-gist', AmpGist);
 });

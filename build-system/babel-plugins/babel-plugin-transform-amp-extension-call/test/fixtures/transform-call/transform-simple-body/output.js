@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
@@ -20,3 +21,7 @@
 (AMP => {
   AMP.registerElement('amp-gist', AmpGist);
 })(self.AMP);
+=======
+AMP.registerTemplate(TAG, AmpMustache);
+AMP.registerElement('amp-gist', AmpGist);
+>>>>>>> dfbfd1437f... 🏗♻️ Bento Auto-Envelope (#34820)
