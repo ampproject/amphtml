@@ -12,4 +12,4 @@
 
 ### Required parameters
 
-- `data-template`
+-   `data-template`
