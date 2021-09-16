@@ -18,7 +18,7 @@ const {
   gitDiffStatMain,
   shortSha,
 } = require('../common/git');
-const {cyan, green, yellow} = require('../common/colors');
+const {cyan, green, yellow} = require('kleur/colors');
 const {exec, execOrDie, execOrThrow, execWithError} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {getStdout} = require('../common/process');
