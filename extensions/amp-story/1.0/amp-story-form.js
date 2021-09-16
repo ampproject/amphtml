@@ -1,4 +1,5 @@
 import {Action, getStoreService} from './amp-story-store-service';
+import {DrawerState} from './amp-story-draggable-drawer';
 import {LoadingSpinner} from './loading-spinner';
 import {LocalizedStringId} from '#service/localization/strings';
 import {devAssert} from '../../../src/log';
@@ -17,10 +18,11 @@ const FormResponseAttribute = {
 
 /**
  * Adds AMP form actions to the action allow list.
- * @param {!AmpElement} ampEl The AMP element to which the form belongs.
+ * @param {!DraggableDrawer} drawerEl The draggable drawer AMP element to which
+ *     the form belongs.
  */
-export function allowlistFormActions(ampEl) {
-  const storeService = getStoreService(ampEl.win);
+export function allowlistFormActions(drawerEl) {
+  const storeService = getStoreService(drawerEl.win);
   storeService.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, [
     {tagOrTarget: 'FORM', method: 'clear'},
     {tagOrTarget: 'FORM', method: 'submit'},
@@ -29,12 +31,13 @@ export function allowlistFormActions(ampEl) {
 
 /**
  * Add a default form attribute element for each absent response attribute.
- * @param {!AmpElement} ampEl The AMP element to which the form belongs.
+ * @param {!DraggableDrawer} drawerEl The draggable drawer AMP element to which
+ *     the form belongs.
  * @param {!Element} formEl The form to which the attribute elements will be
  *     added.
  * @private
  */
-export function setupResponseAttributeElements(ampEl, formEl) {
+export function setupResponseAttributeElements(drawerEl, formEl) {
   let submittingEl = formEl.querySelector(
     `[${escapeCssSelectorIdent(FormResponseAttribute.SUBMITTING)}]`
   );
@@ -47,22 +50,22 @@ export function setupResponseAttributeElements(ampEl, formEl) {
 
   // Create and append fallback form attribute elements, if necessary.
   if (!submittingEl) {
-    submittingEl = createFormSubmittingEl_(ampEl, formEl);
+    submittingEl = createFormSubmittingEl_(drawerEl, formEl);
     formEl.appendChild(submittingEl);
   }
   if (!successEl) {
-    successEl = createFormResultEl_(ampEl, formEl, true);
+    successEl = createFormResultEl_(drawerEl, formEl, true);
     formEl.appendChild(successEl);
   }
   if (!errorEl) {
-    errorEl = createFormResultEl_(ampEl, formEl, false);
+    errorEl = createFormResultEl_(drawerEl, formEl, false);
     formEl.appendChild(errorEl);
   }
 
   // Scroll each element into view when it is displayed.
   [submittingEl, successEl, errorEl].forEach((el) => {
-    new ampEl.win.ResizeObserver((e) => {
-      if (e[0].contentRect.height > 0) {
+    new drawerEl.win.ResizeObserver((e) => {
+      if (drawerEl.state === DrawerState.OPEN && e[0].contentRect.height > 0) {
         el./*OK*/ scrollIntoView({behavior: 'smooth', block: 'nearest'});
       }
     }).observe(el);
@@ -72,18 +75,19 @@ export function setupResponseAttributeElements(ampEl, formEl) {
 /**
  * Create an element that is used to display the in-progress state of a form
  * submission attempt.
- * @param {!AmpElement} ampEl The AMP element to which the form belongs.
+ * @param {!DraggableDrawer} drawerEl The draggable drawer AMP element to which
+ *     the form belongs.
  * @param {!Element} formEl The form to which the `submitting` element will be
  *     added.
  * @return {!Element}
  * @private
  */
-function createFormSubmittingEl_(ampEl, formEl) {
+function createFormSubmittingEl_(drawerEl, formEl) {
   const submittingEl = createResponseAttributeEl_(
     formEl,
     FormResponseAttribute.SUBMITTING
   );
-  const loadingSpinner = new LoadingSpinner(ampEl.win.document);
+  const loadingSpinner = new LoadingSpinner(drawerEl.win.document);
   submittingEl.firstElementChild.appendChild(loadingSpinner.build());
   loadingSpinner.toggle(true /* isActive */);
   return submittingEl;
@@ -92,26 +96,29 @@ function createFormSubmittingEl_(ampEl, formEl) {
 /**
  * Create an element that is used to display the result of a form submission
  * attempt.
- * @param {!AmpElement} ampEl The AMP element to which the form belongs.
+ * @param {!DraggableDrawer} drawerEl The draggable drawer AMP element to which
+ *     the form belongs.
  * @param {!Element} formEl The form to which the result element will be added.
  * @param {boolean} isSuccess Whether the form submission was successful.
  * @return {!Element}
  * @private
  */
-function createFormResultEl_(ampEl, formEl, isSuccess) {
+function createFormResultEl_(drawerEl, formEl, isSuccess) {
   const resultEl = createResponseAttributeEl_(
     formEl,
     isSuccess ? FormResponseAttribute.SUCCESS : FormResponseAttribute.ERROR
   );
 
-  const iconEl = ampEl.win.document.createElement('div');
+  const iconEl = drawerEl.win.document.createElement('div');
   iconEl.classList.add(
     'i-amphtml-story-page-attachment-form-submission-status-icon'
   );
   resultEl.firstElementChild.appendChild(iconEl);
 
-  const textEl = ampEl.win.document.createElement('div');
-  const localizationService = getLocalizationService(devAssert(ampEl.element));
+  const textEl = drawerEl.win.document.createElement('div');
+  const localizationService = getLocalizationService(
+    devAssert(drawerEl.element)
+  );
   textEl.textContent = localizationService.getLocalizedString(
     isSuccess
       ? LocalizedStringId.AMP_STORY_FORM_SUBMIT_SUCCESS
