@@ -18,15 +18,15 @@ tags: {  # <amp-story-panning-media>
     supported_layouts: FILL
   }
   attrs: {
-    name: "x"
+    name: "data-x"
     value_regex: "-?\\d+\\.?\\d*(%)"
   }
   attrs: {
-    name: "y"
+    name: "data-y"
     value_regex: "-?\\d+\\.?\\d*(%)"
   }
   attrs: {
-    name: "zoom"
+    name: "data-zoom"
     value_regex: "\\d+\\.?\\d*"
   }
   attrs: {
