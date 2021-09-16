@@ -102,10 +102,10 @@ class IssueTracker {
  * @return {Promise<void>}
  */
 async function createOrUpdateTracker(head, base, channel, time) {
-  const timeET =
+  const timePT =
     new Date(`${time} UTC`).toLocaleString('en-US', {
-      timeZone: 'America/New_York',
-    }) + ' ET';
+      timeZone: 'America/Los_Angeles',
+    }) + ' PT';
   const isCherrypick = Number(head) - Number(base) < 1000;
   const issue = isCherrypick
     ? await getIssue(`Release ${base}`)
@@ -114,7 +114,7 @@ async function createOrUpdateTracker(head, base, channel, time) {
   // create new tracker
   if (!issue) {
     const tracker = new IssueTracker(head, base);
-    tracker.checkTask(channel, timeET);
+    tracker.checkTask(channel, timePT);
     const {footer, header, label, main, title} = tracker;
     const body = `${header}\n\n${main}\n\n${footer}`;
     return await createIssue(body, label, title);
@@ -125,7 +125,7 @@ async function createOrUpdateTracker(head, base, channel, time) {
   if (isCherrypick) {
     tracker.addCherrypickTasks(channel);
   }
-  tracker.checkTask(channel, timeET);
+  tracker.checkTask(channel, timePT);
   const {footer, header, main, number, title} = tracker;
   const body = `${header}\n\n${main}\n\n${footer}`;
   await updateIssue(body, number, title);
