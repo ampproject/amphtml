@@ -23,6 +23,14 @@
     {
       "name": "story-load-inactive-outside-viewport",
       "percentage": 1
+    },
+    {
+      "name": "story-ad-page-outlink",
+      "percentage": 1,
+      "rtvPrefix": [
+        "00",
+        "03"
+      ]
     }
   ]
 }
