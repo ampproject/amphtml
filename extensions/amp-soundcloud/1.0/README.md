@@ -49,19 +49,18 @@ import '@ampproject/bento-soundcloud';
       position: relative;
     }
   </style>
-  <!-- TODO(wg-bento): Once available, change src to bento-soundcloud.js -->
-  <script async src="https://cdn.ampproject.org/v0/amp-soundcloud-1.0.js"></script>
+  <script async src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.js"></script>
   <style>
     bento-soundcloud {
       aspect-ratio: 1;
     }
   </style>
 </head>
-<amp-soundcloud
+<bento-soundcloud
   id="my-track"
   data-trackid="243169232"
   data-visual="true"
-></amp-soundcloud>
+></bento-soundcloud>
 <div class="buttons" style="margin-top: 8px;">
   <button id="change-track">
     Change track
@@ -90,7 +89,7 @@ import '@ampproject/bento-soundcloud';
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-soundcloud-1.0.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.css">
 ```
 
 Alternatively, you may also make the light-weight pre-upgrade styles available inline:
