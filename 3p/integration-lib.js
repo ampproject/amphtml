@@ -43,6 +43,7 @@ const AMP_EMBED_ALLOWED = {
   mediaad: true,
   mgid: true,
   miximedia: true,
+  myua: true,
   mywidget: true,
   nativery: true,
   lentainform: true,

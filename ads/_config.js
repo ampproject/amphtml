@@ -821,6 +821,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'myua': {
+    renderStartImplemented: true,
+  },
+
   'mywidget': {
     preconnect: 'https://likemore-fe.go.mail.ru',
     prefetch: 'https://likemore-go.imgsmail.ru/widget_amp.js',
