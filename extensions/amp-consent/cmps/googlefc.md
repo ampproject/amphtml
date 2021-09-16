@@ -26,6 +26,9 @@
 </amp-consent>
 ```
 
+## Notes
+We are currently in a closed beta and have limited the usage of this amp-consent feature to a small batch of publishers. However, We are looking to open up access for general availability in the near future!
+
 ## Configuration (`clientConfig`)
 
 | Attribute |  Type  | Mandatory | Description                                                                                                                                                                                                |
