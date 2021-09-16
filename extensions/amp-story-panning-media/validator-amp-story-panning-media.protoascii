@@ -20,16 +20,10 @@ tags: {  # <amp-story-panning-media>
   attrs: {
     name: "x"
     value_regex: "-?\\d+\\.?\\d*(%)"
-    trigger: {
-      also_requires_attr: "duration"
-    }
   }
   attrs: {
     name: "y"
     value_regex: "-?\\d+\\.?\\d*(%)"
-    trigger: {
-      also_requires_attr: "duration"
-    }
   }
   attrs: {
     name: "zoom"
