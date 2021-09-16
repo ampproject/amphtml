@@ -30,6 +30,7 @@ jobs:
             ${{ github.event.inputs.action }} \
             ${{ github.event.inputs.head }} \
             ${{ github.event.inputs.base }} \
-            ${{ github.event.inputs.channel }}
+            ${{ github.event.inputs.channel }} \
+            ${{ github.event.inputs.time }}
         env:
           GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
