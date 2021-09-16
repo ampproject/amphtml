@@ -34,35 +34,39 @@ export function allowlistFormActions(ampEl) {
  *     added.
  * @private
  */
-export function addMissingResponseAttributeElements(ampEl, formEl) {
+export function setupResponseAttributeElements(ampEl, formEl) {
   let submittingEl = formEl.querySelector(
     `[${escapeCssSelectorIdent(FormResponseAttribute.SUBMITTING)}]`
   );
+  let successEl = formEl.querySelector(
+    `[${escapeCssSelectorIdent(FormResponseAttribute.SUCCESS)}]`
+  );
+  let errorEl = formEl.querySelector(
+    `[${escapeCssSelectorIdent(FormResponseAttribute.ERROR)}]`
+  );
+
+  // Create and append fallback form attribute elements, if necessary.
   if (!submittingEl) {
     submittingEl = createFormSubmittingEl_(ampEl, formEl);
     formEl.appendChild(submittingEl);
   }
-  new ampEl.win.ResizeObserver(() => {
-    // Scroll the `submitting` element into view when it is displayed.
-    submittingEl./*OK*/ scrollIntoView({
-      behavior: 'smooth',
-      block: 'nearest',
-    });
-  }).observe(submittingEl);
-
-  const successEl = formEl.querySelector(
-    `[${escapeCssSelectorIdent(FormResponseAttribute.SUCCESS)}]`
-  );
   if (!successEl) {
-    formEl.appendChild(createFormResultEl_(ampEl, formEl, true));
+    successEl = createFormResultEl_(ampEl, formEl, true);
+    formEl.appendChild(successEl);
+  }
+  if (!errorEl) {
+    errorEl = createFormResultEl_(ampEl, formEl, false);
+    formEl.appendChild(errorEl);
   }
 
-  const errorEl = formEl.querySelector(
-    `[${escapeCssSelectorIdent(FormResponseAttribute.ERROR)}]`
-  );
-  if (!errorEl) {
-    formEl.appendChild(createFormResultEl_(ampEl, formEl, false));
-  }
+  // Scroll each element into view when it is displayed.
+  [submittingEl, successEl, errorEl].forEach((el) => {
+    new ampEl.win.ResizeObserver((e) => {
+      if (e[0].contentRect.height > 0) {
+        el./*OK*/ scrollIntoView({behavior: 'smooth', block: 'nearest'});
+      }
+    }).observe(el);
+  });
 }
 
 /**

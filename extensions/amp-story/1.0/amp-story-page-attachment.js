@@ -12,8 +12,8 @@ import {getLocalizationService} from './amp-story-localization-service';
 import {getSourceOrigin} from '../../../src/url';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {
-  addMissingResponseAttributeElements,
   allowlistFormActions,
+  setupResponseAttributeElements,
 } from './amp-story-form';
 import {removeElement} from '#core/dom';
 import {setImportantStyles, toggle} from '#core/dom/style';
@@ -156,7 +156,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     if (forms.length > 0) {
       allowlistFormActions(this);
       forms.forEach((form) => {
-        addMissingResponseAttributeElements(this, form);
+        setupResponseAttributeElements(this, form);
       });
       // Page attachments that contain forms must display the page's publisher
       // domain above the attachment's contents. This enables users to gauge
