@@ -72,7 +72,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.animateTo_ = {};
 
     /** @private {?{width: number, height: number}} */
-    this.pageSize_ = null;
+    this.elementSize_ = null;
 
     /** @private {?panningMediaPositionDef} Current animation state. */
     this.animationState_ = {};
@@ -120,12 +120,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
         const imgEl = dev().assertElement(this.element_.querySelector('img'));
         // Remove layout="fill" classes so image is not clipped.
         imgEl.classList = '';
-        // Centers the amp-img horizontally. The image does not load if this is done in CSS.
-        // TODO(#31515): Handle base zoom of aspect ratio wider than image
-        setImportantStyles(this.ampImgEl_, {
-          left: 'auto',
-          right: 'auto',
-        });
+        this.setImageCenteringStyles_();
       })
       .catch(() => user().error(TAG, 'Failed to load the amp-img.'));
   }
@@ -134,8 +129,12 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   initializeListeners_() {
     this.storeService_.subscribe(
       StateProperty.PAGE_SIZE,
-      (pageSize) => {
-        this.pageSize_ = pageSize;
+      () => {
+        this.elementSize_ = {
+          width: this.element_./*OK*/ offsetWidth,
+          height: this.element_./*OK*/ offsetHeight,
+        };
+        this.setImageCenteringStyles_();
         this.setAnimateTo_();
         this.animate_();
       },
@@ -191,7 +190,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    */
   getMaxBounds_() {
     // Calculations to clamp image to edge of container.
-    const {height: containerHeight, width: containerWidth} = this.pageSize_;
+    const {height, width} = this.elementSize_;
 
     const ampImgWidth = this.ampImgEl_.getAttribute('width');
     const ampImgHeight = this.ampImgEl_.getAttribute('height');
@@ -201,15 +200,18 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
         '"lock-bounds" requires "width" and "height" to be set on the amp-img child.'
       );
     }
-    // TODO(#31515): When aspect ratio is portrait, containerWidth will be used for this.
-    const percentScaledToFitViewport = containerHeight / ampImgHeight;
+
+    const containerRatio = width / height;
+    const imageRatio = ampImgWidth / ampImgHeight;
+    const percentScaledToFitViewport =
+      containerRatio < imageRatio ? height / ampImgHeight : width / ampImgWidth;
+
     const scaledImageWidth = percentScaledToFitViewport * ampImgWidth;
     const scaledImageHeight = percentScaledToFitViewport * ampImgHeight;
 
-    const widthFraction =
-      1 - containerWidth / (scaledImageWidth * this.animateTo_.zoom);
+    const widthFraction = 1 - width / (scaledImageWidth * this.animateTo_.zoom);
     const heightFraction =
-      1 - containerHeight / (scaledImageHeight * this.animateTo_.zoom);
+      1 - height / (scaledImageHeight * this.animateTo_.zoom);
 
     return {
       horizontal: DISTANCE_TO_CENTER_EDGE_PERCENT * widthFraction,
@@ -267,6 +269,49 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       }
     };
     requestAnimationFrame(nextFrame);
+  }
+
+  /**
+   * Centers the amp-img horizontally or vertically based on aspect ratio.
+   * The img element does not load if this is done in CSS.
+   * @private
+   */
+  setImageCenteringStyles_() {
+    const imgEl = this.element_.querySelector('img');
+    if (!imgEl) {
+      return;
+    }
+    const {height, width} = this.elementSize_;
+    const containerRatio = width / height;
+    const ampImgWidth = this.ampImgEl_.getAttribute('width');
+    const ampImgHeight = this.ampImgEl_.getAttribute('height');
+    const imageRatio = ampImgWidth / ampImgHeight;
+
+    this.mutateElement(() => {
+      if (containerRatio < imageRatio) {
+        setImportantStyles(this.ampImgEl_, {
+          left: 'auto',
+          right: 'auto',
+          top: '0',
+          bottom: '0',
+        });
+        setImportantStyles(imgEl, {
+          width: 'auto',
+          height: '100%',
+        });
+      } else {
+        setImportantStyles(this.ampImgEl_, {
+          left: '0',
+          right: '0',
+          top: 'auto',
+          bottom: 'auto',
+        });
+        setImportantStyles(imgEl, {
+          width: '100%',
+          height: 'auto',
+        });
+      }
+    });
   }
 
   /**
