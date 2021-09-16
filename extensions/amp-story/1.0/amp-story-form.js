@@ -43,14 +43,11 @@ export function addMissingResponseAttributeElements(ampEl, formEl) {
     formEl.appendChild(submittingEl);
   }
   new ampEl.win.ResizeObserver(() => {
-    // Scroll the `submitting` element into view when it is displayed. The
-    // scroll seems to require a small timeout in order to consistently work.
-    setTimeout(() => {
-      submittingEl./*OK*/ scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-      });
-    }, 25);
+    // Scroll the `submitting` element into view when it is displayed.
+    submittingEl./*OK*/ scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+    });
   }).observe(submittingEl);
 
   const successEl = formEl.querySelector(
