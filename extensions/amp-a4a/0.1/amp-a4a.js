@@ -25,10 +25,7 @@ import {
   applyFillContent,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
-import {
-  intersectionEntryToJson,
-  measureIntersection,
-} from '#core/dom/layout/intersection';
+import {intersectionEntryToJson} from '#core/dom/layout/intersection';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
@@ -43,8 +40,7 @@ import {padStart} from '#core/types/string';
 import {utf8Decode} from '#core/types/string/bytes';
 import {tryDecodeUriComponent} from '#core/types/string/url';
 
-import {getExperimentBranch, isExperimentOn} from '#experiments';
-import {ADS_INITIAL_INTERSECTION_EXP} from '#experiments/ads-initial-intersection-exp';
+import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
@@ -302,9 +298,6 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?../../../src/layout-rect.LayoutSizeDef} */
     this.originalSlotSize_ = null;
 
-    /** @private {Promise<!IntersectionObserverEntry>} */
-    this.initialIntersectionPromise_ = null;
-
     /**
      * Note(keithwrightbos) - ensure the default here is null so that ios
      * uses safeframe when response header is not specified.
@@ -455,13 +448,6 @@ export class AmpA4A extends AMP.BaseElement {
     }
 
     this.isSinglePageStoryAd = this.element.hasAttribute('amp-story');
-
-    const asyncIntersection =
-      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
-      ADS_INITIAL_INTERSECTION_EXP.experiment;
-    this.initialIntersectionPromise_ = asyncIntersection
-      ? measureIntersection(this.element)
-      : Promise.resolve(this.element.getIntersectionChangeEntry());
   }
 
   /** @override */
@@ -2116,16 +2102,15 @@ export class AmpA4A extends AMP.BaseElement {
       this.sentinel
     );
 
-    return this.initialIntersectionPromise_.then((intersection) => {
-      contextMetadata['_context']['initialIntersection'] =
-        intersectionEntryToJson(intersection);
-      return this.iframeRenderHelper_(
-        dict({
-          'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
-          'name': JSON.stringify(contextMetadata),
-        })
-      );
-    });
+    const intersection = this.element.getIntersectionChangeEntry();
+    contextMetadata['_context']['initialIntersection'] =
+      intersectionEntryToJson(intersection);
+    return this.iframeRenderHelper_(
+      dict({
+        'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
+        'name': JSON.stringify(contextMetadata),
+      })
+    );
   }
 
   /**
@@ -2192,21 +2177,20 @@ export class AmpA4A extends AMP.BaseElement {
         this.getAdditionalContextMetadata(method == XORIGIN_MODE.SAFEFRAME)
       );
 
-      return this.initialIntersectionPromise_.then((intersection) => {
-        contextMetadata['initialIntersection'] =
-          intersectionEntryToJson(intersection);
-        if (method == XORIGIN_MODE.NAMEFRAME) {
-          contextMetadata['creative'] = creative;
-          name = JSON.stringify(contextMetadata);
-        } else if (method == XORIGIN_MODE.SAFEFRAME) {
-          contextMetadata = JSON.stringify(contextMetadata);
-          name =
-            `${this.safeframeVersion};${creative.length};${creative}` +
-            `${contextMetadata}`;
-        }
+      const intersection = this.element.getIntersectionChangeEntry();
+      contextMetadata['initialIntersection'] =
+        intersectionEntryToJson(intersection);
+      if (method == XORIGIN_MODE.NAMEFRAME) {
+        contextMetadata['creative'] = creative;
+        name = JSON.stringify(contextMetadata);
+      } else if (method == XORIGIN_MODE.SAFEFRAME) {
+        contextMetadata = JSON.stringify(contextMetadata);
+        name =
+          `${this.safeframeVersion};${creative.length};${creative}` +
+          `${contextMetadata}`;
+      }
 
-        return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
-      });
+      return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
     });
   }
 
