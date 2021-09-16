@@ -1,6 +1,23 @@
 import {jsonConfiguration} from '#core/types/object/json';
 
 /**
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import {jsonConfiguration} from '#core/types/object/json';
+
+/**
  * @typedef {{
  *   prefetch: (string|undefined),
  *   preconnect: (string|undefined),
@@ -30,6 +47,7 @@ let AdNetworkConfigDef;
  *
  *   // The cookie name to store the CID. In absence, `clientIdScope` is used.
  *   clientIdCookieName: string
+<<<<<<< HEAD
  *
  *   // If the ad network is willing to override the consent handling, which
  *   // by default is blocking ad load until the consent is accepted.
@@ -40,6 +58,18 @@ let AdNetworkConfigDef;
  *   // see details in the README.md
  *   renderStartImplemented: boolean
  *
+=======
+ *
+ *   // If the ad network is willing to override the consent handling, which
+ *   // by default is blocking ad load until the consent is accepted.
+ *   consentHandlingOverride: boolean
+ *
+ *   // Whether render-start API has been implemented
+ *   // We highly recommend all networks to implement the API,
+ *   // see details in the README.md
+ *   renderStartImplemented: boolean
+ *
+>>>>>>> master
  *   // The width / height ratio for full width ad units.
  *   // If absent, it means the network does not support full width ad units.
  *   // Example value: 1.2
@@ -1100,12 +1130,6 @@ const adConfig = jsonConfiguration({
 
   'smartads': {
     prefetch: 'https://smart-ads.biz/amp.js',
-  },
-
-  'smartadserver': {
-    prefetch: 'https://ec-ns.sascdn.com/diff/js/amp.v0.js',
-    preconnect: 'https://static.sascdn.com',
-    renderStartImplemented: true,
   },
 
   'smartclip': {
