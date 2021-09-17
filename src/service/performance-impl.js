@@ -890,7 +890,7 @@ function getOutermostAmpElement(node) {
   let max = node;
   while (node != null) {
     node = node.parentNode;
-    if (node?.nodeName.startsWith('AMP-')) {
+    if (node.nodeName.startsWith('AMP-')) {
       max = node;
     }
   }
