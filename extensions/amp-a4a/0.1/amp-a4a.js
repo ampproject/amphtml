@@ -10,10 +10,7 @@ import {
   isLayoutSizeDefined,
 } from '#core/dom/layout';
 import {intersectionEntryToJson} from '#core/dom/layout/intersection';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {DetachedDomStream, streamResponseToWriter} from '#core/dom/stream';
 import {setStyle} from '#core/dom/style';
 import {duplicateErrorIfNecessary} from '#core/error';
@@ -371,6 +368,9 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {function(boolean)} */
     this.boundViewportCallback_ = this.viewportCallbackTemp.bind(this);
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /** @override */
@@ -1313,7 +1313,10 @@ export class AmpA4A extends AMP.BaseElement {
       this.destroyFrame(true);
     }
     return this.attemptToRenderCreative().then(() => {
-      observeWithSharedInOb(this.element, this.boundViewportCallback_);
+      this.unobserveIntersections_ = observeIntersections(
+        this.element,
+        this.boundViewportCallback_
+      );
     });
   }
 
@@ -1414,7 +1417,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_();
     this.tearDownSlot();
     return true;
   }
