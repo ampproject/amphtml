@@ -5,6 +5,7 @@ import {toWin} from '#core/window';
 import {ContainWrapper, useIntersectionObserver} from '#preact/component';
 import {setStyle} from '#core/dom/style';
 import {useMergeRefs} from '#preact/utils';
+import {SubscriptionApi} from '../../../src/iframe-helper';
 
 const NOOP = () => {};
 
@@ -29,6 +30,8 @@ export function Iframe({
   const dataRef = useRef(null);
   const isIntersectingRef = useRef(null);
   const containerRef = useRef(null);
+  /** @type {?SubscriptionApi} */
+  const subscriptionApi = null;
 
   const updateContainerSize = (height, width) => {
     const container = containerRef.current;
@@ -106,6 +109,27 @@ export function Iframe({
     };
   }, [handlePostMessage]);
 
+  const intersectionsCallback = useCallback((entry) => {
+    subscriptionApi.send(
+      MessageType.INTERSECTION,
+      // dict({'changes': entries.map(cloneEntryForCrossOrigin)})
+      {'changes': entry}
+    );
+  });
+
+  useEffect(() => {
+    const ioRef = useIntersectionObserver(intersectionsCallback);
+    subscriptionApi = new SubscriptionApi(
+      iframeRef.current,
+      MessageType.SEND_INTERSECTIONS,
+      false /* is3P */,
+      () => {
+        // this.startSendingIntersection_();
+        this.intersectionObserver_.observe(this.baseElement_.element);
+      }
+    );
+  }, []);
+
   const ioCallback = useCallback(
     ({isIntersecting}) => {
       if (isIntersecting === isIntersectingRef.current) {
@@ -119,7 +143,7 @@ export function Iframe({
     [attemptResize]
   );
 
-  const measureRef = useIntersectionObserver(ioCallback);
+  const ioRef = useIntersectionObserver(ioCallback);
 
   const contentProps = useMemo(
     () => ({
@@ -149,7 +173,7 @@ export function Iframe({
     <ContainWrapper
       contentAs="iframe"
       contentProps={contentProps}
-      contentRef={useMergeRefs([iframeRef, measureRef])}
+      contentRef={useMergeRefs([iframeRef, ioRef])}
       contentStyle={{'box-sizing': 'border-box', ...iframeStyle}}
       ref={containerRef}
       size
