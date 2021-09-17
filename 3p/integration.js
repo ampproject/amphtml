@@ -470,7 +470,6 @@ register('my6sense', my6sense);
 register('myfinance', myfinance);
 register('myoffrz', myoffrz);
 register('mytarget', mytarget);
-register('myua', myua);
 register('mywidget', mywidget);
 register('nativeroll', nativeroll);
 register('nativery', nativery);
