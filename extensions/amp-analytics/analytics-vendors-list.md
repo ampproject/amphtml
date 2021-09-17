@@ -262,6 +262,20 @@ Additionally, the following variables must be defined:
 
 More details for adding INFOnline anonymous support can be found at [www.infonline.de](https://www.infonline.de/).
 
+### INFOnline base
+
+Type attribute value: `infonline_base`
+
+Additionally, the following variables must be defined:
+
+-   `st`: offer ID
+-   `co`: comment
+-   `cp`: code
+-   `url`: HTTPS location of `amp.html` on the service platform or sub domain
+-   `dn`: The relay domain name
+
+More details for adding INFOnline anonymous support can be found at [www.infonline.de](https://www.infonline.de/).
+
 ### ip-label
 
 Type attribute value: `iplabel`
