@@ -631,7 +631,7 @@ describes.realWin(
           expect(viewer).to.not.equal(initialViewer);
 
           const messageDeliverer = viewer.maybeGetMessageDeliverer();
-          expect(messageDeliverer).to.be.ok;
+          expect(messageDeliverer).to.not.be.null;
 
           const args = [`event${index}`, `data${index}`, true];
 
@@ -656,7 +656,7 @@ describes.realWin(
             expect(viewer).to.not.equal(initialViewer);
 
             const messageDeliverer = viewer.maybeGetMessageDeliverer();
-            expect(messageDeliverer).to.be.ok;
+            expect(messageDeliverer).to.not.be.null;
 
             const args = [eventType, `data${index}`, true];
 
