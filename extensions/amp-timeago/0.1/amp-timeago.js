@@ -25,7 +25,7 @@ export class AmpTimeAgo extends AMP.BaseElement {
     /** @private {boolean} */
     this.cutOffReached_ = false;
 
-    /** @private {?function()} */
+    /** @private {?UnlistenDef} */
     this.unobserveIntersections_ = null;
   }
 
