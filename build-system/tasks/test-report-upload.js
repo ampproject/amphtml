@@ -30,7 +30,7 @@ const REPORTING_API_URL = 'https://amp-test-cases.appspot.com/report';
 async function getReport(testType) {
   try {
     const report = JSON.parse(
-      fs.readFileSync(`result-reports/${testType}.json`, 'utf-8')
+      await fs.readFile(`result-reports/${testType}.json`, 'utf-8')
     );
 
     return addJobAndBuildInfo(testType, report);
@@ -115,7 +115,7 @@ async function sendCiKarmaReport(testType) {
  * @return {Promise<void>}
  */
 async function testReportUpload() {
-  const filenames = fs.readdirSync('result-reports/');
+  const filenames = await fs.readdir('result-reports/');
   const testTypes = filenames.map((filename) => path.parse(filename).name);
 
   await Promise.all(testTypes.map(sendCiKarmaReport));

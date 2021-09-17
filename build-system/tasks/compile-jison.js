@@ -48,7 +48,7 @@ async function compileJison(searchDir = jisonPath) {
  * @return {!Promise<void>}
  */
 async function compileExpr(jisonFilePath, parserName, newFilePath) {
-  const bnf = fs.readFileSync(jisonFilePath, 'utf8');
+  const bnf = await fs.readFile(jisonFilePath, 'utf8');
   const settings = {
     type: 'lalr',
     debug: false,
@@ -69,7 +69,7 @@ async function compileExpr(jisonFilePath, parserName, newFilePath) {
       // adversely affect lexer performance.
       // See https://github.com/ampproject/amphtml/pull/18574#discussion_r223506153.
       .replace(/[ \t]*_token_stack:[ \t]*/, '') + '\n';
-  fs.outputFileSync(newFilePath, out);
+  await fs.outputFile(newFilePath, out);
 }
 
 module.exports = {

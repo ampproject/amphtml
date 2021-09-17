@@ -228,7 +228,7 @@ async function prebuild() {
  */
 async function copyParsers() {
   const startTime = Date.now();
-  fs.copySync('build/parsers', 'dist/v0');
+  await fs.copy('build/parsers', 'dist/v0');
   endBuildStep('Copied', 'build/parsers/ to dist/v0', startTime);
 }
 
@@ -243,9 +243,9 @@ async function preBuildWebPushPublisherFiles() {
       const destPath = `build/all/amp-web-push-${version}`;
 
       // Build Helper Frame JS
-      const js = fs.readFileSync(`${srcPath}/${fileName}.js`, 'utf8');
+      const js = await fs.readFile(`${srcPath}/${fileName}.js`, 'utf8');
       const builtName = `${fileName}.js`;
-      fs.outputFileSync(`${destPath}/${builtName}`, js);
+      await fs.outputFile(`${destPath}/${builtName}`, js);
       const jsFiles = await fastGlob(`${srcPath}/*.js`);
       await Promise.all(
         jsFiles.map((jsFile) => {
@@ -272,13 +272,13 @@ async function postBuildWebPushPublisherFilesVersion() {
       }
 
       // Build Helper Frame HTML
-      const html = fs.readFileSync(`${basePath}/${fileName}.html`, 'utf8');
-      const js = fs.readFileSync(minifiedFile, 'utf8');
+      const html = await fs.readFile(`${basePath}/${fileName}.html`, 'utf8');
+      const js = await fs.readFile(minifiedFile, 'utf8');
       const minifiedHtml = html.replace(
         `<!-- [REPLACE-SENTINEL ${fileName}.js] -->`,
         `<script>${js}</script>`
       );
-      fs.outputFileSync(`dist/v0/${fileName}.html`, minifiedHtml);
+      await fs.outputFile(`dist/v0/${fileName}.html`, minifiedHtml);
     }
   }
 }
@@ -294,21 +294,21 @@ async function preBuildExperiments() {
   const jsSrcPath = `${expDir}/experiments.js`;
 
   // Build HTML.
-  const html = fs.readFileSync(htmlSrcPath, 'utf8');
+  const html = await fs.readFile(htmlSrcPath, 'utf8');
   const minHtml = html
     .replace(
       '/dist.tools/experiments/experiments.js',
       `https://${hostname}/v0/experiments.js`
     )
     .replace(/\$internalRuntimeVersion\$/g, VERSION);
-  fs.outputFileSync(`${htmlDestDir}/experiments.cdn.html`, minHtml);
-  fs.copySync(htmlSrcPath, `${htmlDestDir}/${path.basename(htmlSrcPath)}`);
+  await fs.outputFile(`${htmlDestDir}/experiments.cdn.html`, minHtml);
+  await fs.copy(htmlSrcPath, `${htmlDestDir}/${path.basename(htmlSrcPath)}`);
 
   // Build JS.
   const jsDir = 'build/experiments/';
-  const js = fs.readFileSync(jsSrcPath, 'utf8');
+  const js = await fs.readFile(jsSrcPath, 'utf8');
   const builtName = 'experiments.max.js';
-  fs.outputFileSync(`${jsDir}/${builtName}`, js);
+  await fs.outputFile(`${jsDir}/${builtName}`, js);
   const jsFiles = await fastGlob(`${expDir}/*.js`);
   await Promise.all(
     jsFiles.map((jsFile) => {
@@ -337,7 +337,7 @@ async function preBuildLoginDoneVersion(version) {
   const jsPath = `${srcDir}/amp-login-done.js`;
 
   // Build HTML.
-  const html = fs.readFileSync(htmlPath, 'utf8');
+  const html = await fs.readFile(htmlPath, 'utf8');
   const minJs = `https://${hostname}/v0/amp-login-done-${version}.js`;
   const minHtml = html
     .replace(`../../../dist/v0/amp-login-done-${version}.max.js`, minJs)
@@ -345,12 +345,12 @@ async function preBuildLoginDoneVersion(version) {
   if (minHtml.indexOf(minJs) == -1) {
     throw new Error('Failed to correctly set JS in login-done.html');
   }
-  fs.outputFileSync(`dist/v0/amp-login-done-${version}.html`, minHtml);
+  await fs.outputFile(`dist/v0/amp-login-done-${version}.html`, minHtml);
 
   // Build JS.
-  const js = fs.readFileSync(jsPath, 'utf8');
+  const js = await fs.readFile(jsPath, 'utf8');
   const builtName = `amp-login-done-${version}.max.js`;
-  fs.outputFileSync(`${buildDir}/${builtName}`, js);
+  await fs.outputFile(`${buildDir}/${builtName}`, js);
   const jsFiles = await fastGlob(`${srcDir}/*.js`);
   await Promise.all(
     jsFiles.map((jsFile) => {

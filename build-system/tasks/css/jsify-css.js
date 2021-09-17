@@ -57,7 +57,7 @@ function getEnvironmentHash() {
   // We want to set environmentHash to a promise synchronously s.t.
   // we never end up with multiple calculations at the same time.
   environmentHash = Promise.resolve().then(async () => {
-    const packageJsonHash = md5(fs.readFileSync(packageJsonPath));
+    const packageJsonHash = md5(await fs.promises.readFile(packageJsonPath));
     const cssOptions = JSON.stringify({cssNanoDefaultOptions, browsersList});
     return md5(packageJsonHash, cssOptions);
   });

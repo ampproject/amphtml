@@ -132,8 +132,8 @@ function logSeparator_() {
  */
 async function prepareEnvironment_(outputDir, tempDir) {
   execOrDie('amp clean');
-  fs.emptyDirSync(outputDir);
-  fs.emptyDirSync(tempDir);
+  await fs.emptyDir(outputDir);
+  await fs.emptyDir(tempDir);
   logSeparator_();
 }
 
@@ -213,7 +213,7 @@ async function compileDistFlavors_(flavorType, command, tempDir) {
 
   const flavorTempDistDir = path.join(tempDir, flavorType);
   log('Moving build artifacts to', `${cyan(flavorTempDistDir)}...`);
-  fs.ensureDirSync(flavorTempDistDir);
+  await fs.ensureDir(flavorTempDistDir);
 
   await Promise.all(
     DIST_DIRS.map((distDir) =>
@@ -279,7 +279,7 @@ async function fetchAmpSw_(flavorType, tempDir) {
     tarWritableStream.on('end', resolve);
   });
 
-  fs.copySync(ampSwTempDir, path.join(tempDir, flavorType, 'dist/sw'));
+  await fs.copy(ampSwTempDir, path.join(tempDir, flavorType, 'dist/sw'));
 
   logSeparator_();
 }
@@ -300,7 +300,7 @@ async function populateOrgCdn_(flavorType, rtvPrefixes, tempDir, outputDir) {
   const rtvCopyingPromise = async (/** @type {string} */ rtvPrefix) => {
     const rtvNumber = `${rtvPrefix}${VERSION}`;
     const rtvPath = path.join(outputDir, 'org-cdn/rtv', rtvNumber);
-    fs.ensureDirSync(rtvPath);
+    await fs.ensureDir(rtvPath);
     return fs.copy(path.join(tempDir, flavorType, 'dist'), rtvPath);
   };
 
@@ -354,7 +354,7 @@ async function generateFileListing_(outputDir) {
         files.sort();
         files.push(''); // Add an empty line at end of file.
 
-        fs.writeFileSync(filesPath, files.join('\n'));
+        await fs.writeFile(filesPath, files.join('\n'));
       })
   );
 }
@@ -410,7 +410,7 @@ async function prependConfig_(outputDir) {
           ...target.config,
         });
 
-        const contents = fs.readFileSync(targetPath, 'utf-8');
+        const contents = await fs.readFile(targetPath, 'utf-8');
         return fs.writeFile(
           targetPath,
           `self.AMP_CONFIG=${channelConfig};/*AMP_CONFIG*/${contents}`
@@ -432,8 +432,8 @@ async function prependConfig_(outputDir) {
  */
 async function populateNetWildcard_(tempDir, outputDir) {
   const netWildcardDir = path.join(outputDir, 'net-wildcard', VERSION);
-  fs.ensureDirSync(netWildcardDir);
-  fs.copySync(path.join(tempDir, 'base/dist.3p', VERSION), netWildcardDir);
+  await fs.ensureDir(netWildcardDir);
+  await fs.copy(path.join(tempDir, 'base/dist.3p', VERSION), netWildcardDir);
 
   logSeparator_();
 }
@@ -445,7 +445,7 @@ async function populateNetWildcard_(tempDir, outputDir) {
  * @return {Promise<void>}
  */
 async function cleanup_(tempDir) {
-  fs.rmdirSync(tempDir, {recursive: true});
+  await fs.rmdir(tempDir, {recursive: true});
 
   logSeparator_();
 }

@@ -22,17 +22,17 @@ const ampCliRunner = 'build-system/task-runner/amp-cli-runner.js';
 async function installAmpTaskRunner() {
   const npmBinDir = getStdout('npm bin --global').trim();
   const ampBinary = path.join(npmBinDir, 'amp');
-  const ampBinaryExists = fs.pathExistsSync(ampBinary);
+  const ampBinaryExists = await fs.pathExists(ampBinary);
   if (ampBinaryExists) {
-    const ampBinaryIsAScript = !fs.lstatSync(ampBinary).isSymbolicLink();
+    const ampBinaryIsAScript = !(await fs.lstat(ampBinary)).isSymbolicLink();
     if (ampBinaryIsAScript) {
       log(green('Detected'), cyan('amp'), green('task runner.'));
       return;
     }
   }
   log(yellow('Installing'), cyan('amp'), yellow('task runner...'));
-  fs.removeSync(ampBinary);
-  fs.copySync(ampCliRunner, ampBinary);
+  await fs.remove(ampBinary);
+  await fs.copy(ampCliRunner, ampBinary);
   log(green('Installed'), cyan('amp'), green('task runner.\n'));
 }
 

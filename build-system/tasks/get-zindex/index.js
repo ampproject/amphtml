@@ -112,7 +112,7 @@ async function getZindexSelectors(glob, cwd = '.') {
   const filesData = Object.create(null);
   const files = await fastGlob(glob, {cwd});
   for (const file of files) {
-    const contents = fs.readFileSync(path.join(cwd, file), 'utf-8');
+    const contents = await fs.promises.readFile(path.join(cwd, file), 'utf-8');
     const selectors = Object.create(null);
     const plugins = [zIndexCollector.bind(null, selectors)];
     logChecking(file);

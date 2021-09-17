@@ -73,9 +73,9 @@ const cssEntryPoints = [
  */
 async function copyCss() {
   const startTime = Date.now();
-  fs.ensureDirSync('dist/v0');
+  await fs.ensureDir('dist/v0');
   for (const {outCss} of cssEntryPoints) {
-    fs.copySync(`build/css/${outCss}`, `dist/${outCss}`);
+    await fs.copy(`build/css/${outCss}`, `dist/${outCss}`);
   }
   const cssFiles = await fastGlob('build/css/amp-*.css');
   await Promise.all(
@@ -96,13 +96,13 @@ async function copyCss() {
  * @return {Promise<void>}
  */
 async function writeCss(css, jsFilename, cssFilename, append) {
-  fs.ensureDirSync('build/css');
+  await fs.ensureDir('build/css');
   const jsContent = 'export const cssText = ' + JSON.stringify(css);
-  fs.writeFileSync(`build/${jsFilename}`, jsContent);
+  await fs.writeFile(`build/${jsFilename}`, jsContent);
   if (append) {
-    fs.appendFileSync(`build/css/${cssFilename}`, css);
+    await fs.appendFile(`build/css/${cssFilename}`, css);
   } else {
-    fs.writeFileSync(`build/css/${cssFilename}`, css);
+    await fs.writeFile(`build/css/${cssFilename}`, css);
   }
 }
 

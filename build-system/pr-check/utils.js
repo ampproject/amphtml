@@ -309,7 +309,7 @@ async function processAndStoreBuildToArtifacts() {
       cyan(ARTIFACT_FILE_NAME) +
       '...'
   );
-  fs.ensureDirSync(ARTIFACT_DIRECTORY);
+  await fs.ensureDir(ARTIFACT_DIRECTORY);
   execOrDie(`tar -czf ${ARTIFACT_FILE_NAME} ${APP_SERVING_DIRS.join('/ ')}/`);
   execOrDie(`du -sh ${ARTIFACT_FILE_NAME}`);
 }

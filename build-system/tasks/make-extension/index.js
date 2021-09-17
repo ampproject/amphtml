@@ -73,10 +73,10 @@ const replace = (inputText, replacements) =>
  * @yields {string}
  */
 async function* walkDir(dir) {
-  for (const f of fs.readdirSync(dir)) {
+  for (const f of await fs.readdir(dir)) {
     const dirPath = path.join(dir, f);
 
-    if (fs.statSync(dirPath).isDirectory()) {
+    if ((await fs.stat(dirPath)).isDirectory()) {
       yield* walkDir(dirPath);
     } else {
       yield path.join(dir, f);
@@ -108,10 +108,10 @@ async function writeFromTemplateDir(
   for await (const templatePath of walkDir(templateDir)) {
     const destination = destinationPath(templatePath);
 
-    fs.mkdirpSync(path.dirname(destination));
+    await fs.mkdirp(path.dirname(destination));
 
     // Skip if the destination file already exists
-    if (fs.pathExistsSync(destination)) {
+    if (await fs.pathExists(destination)) {
       logLocalDev(
         yellow('WARNING:'),
         argv.overwrite ? 'Overwriting' : 'Skipping',
@@ -123,8 +123,8 @@ async function writeFromTemplateDir(
       }
     }
 
-    const template = fs.readFileSync(templatePath, 'utf8');
-    fs.writeFileSync(destination, replace(template, replacements));
+    const template = await fs.readFile(templatePath, 'utf8');
+    await fs.writeFile(destination, replace(template, replacements));
 
     logLocalDev(green('SUCCESS:'), 'Created', cyan(destination));
 
@@ -160,9 +160,9 @@ async function insertExtensionBundlesConfig(
     ...rest,
   });
 
-  fs.mkdirpSync(path.dirname(destination));
+  await fs.mkdirp(path.dirname(destination));
 
-  fs.writeJsonSync(
+  await fs.writeJson(
     destination,
     extensionBundles.sort((a, b) => {
       if (!a.name) {
