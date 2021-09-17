@@ -1,4 +1,4 @@
-const colors = require('../common/colors');
+const colors = require('kleur/colors');
 const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
 const path = require('path');
