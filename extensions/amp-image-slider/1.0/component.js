@@ -12,7 +12,7 @@ import {
   useRef,
   useState,
 } from '#preact';
-import {forwardRef, toChildArray} from '#preact/compat';
+import {forwardRef} from '#preact/compat';
 
 import {useStyles} from './component.jss';
 
@@ -66,11 +66,13 @@ export function ImageSliderWithRef(
   const leftHintArrowRef = useRef(null);
   const rightHintArrowRef = useRef(null);
 
+  /** Hint Wrapper References */
+  const leftHintWrapper = useRef(null);
+  const rightHintWrapper = useRef(null);
+
   /** Hint Body References */
   const leftHintBodyRef = useRef(null);
   const rightHintBodyRef = useRef(null);
-  const leftHintWrapper = useRef(null);
-  const rightHintWrapper = useRef(null);
 
   /** Unlisten Handlers for Mouse */
   const unlistenMouseUp = useRef(null);
@@ -79,157 +81,6 @@ export function ImageSliderWithRef(
 
   /** Unlisten Handlers for Keyboard */
   const unlistenKeyDown = useRef(null);
-
-  const buildImageWrappers = useCallback(() => {
-    leftMaskRef.current = createElementWithAttributes(doc.current, 'div');
-    rightMaskRef.current = createElementWithAttributes(doc.current, 'div');
-    containerRef.current.appendChild(leftMaskRef.current);
-    containerRef.current.appendChild(rightMaskRef.current);
-
-    leftMaskRef.current.classList.add('i-amphtml-image-slider-left-mask');
-
-    if (leftLabelRef.current != undefined) {
-      leftLabelWrapperRef.current = createElementWithAttributes(
-        doc.current,
-        'div'
-      );
-      leftLabelWrapperRef.current.classList.add(
-        'i-amphtml-image-slider-label-wrapper'
-      );
-      leftLabelWrapperRef.current.appendChild(leftLabelRef.current);
-      leftMaskRef.current.appendChild(leftLabelWrapperRef.current);
-    }
-
-    rightMaskRef.current.classList.add('i-amphtml-image-slider-right-mask');
-    rightMaskRef.current.classList.add('i-amphtml-image-slider-push-right');
-    rightImageRef.current.classList.add('i-amphtml-image-slider-push-left');
-    if (rightLabelRef.current != undefined) {
-      rightLabelWrapperRef.current = createElementWithAttributes(
-        doc.current,
-        'div'
-      );
-      rightLabelWrapperRef.current.classList.add(
-        'i-amphtml-image-slider-label-wrapper'
-      );
-
-      rightLabelWrapperRef.current.classList.add(
-        'i-amphtml-image-slider-push-left'
-      );
-      rightLabelWrapperRef.current.appendChild(rightLabelRef.current);
-      rightMaskRef.current.appendChild(rightLabelWrapperRef.current);
-    }
-  }, []);
-
-  const buildBar = useCallback(() => {
-    barRef.current = htmlFor(
-      doc.current
-    )`<div class='i-amphtml-image-slider-bar i-amphtml-image-slider-push-right'>
-      <div class='i-amphtml-image-slider-bar-stick i-amphtml-image-slider-push-left'></div>
-    </div>`;
-
-    containerRef.current.appendChild(barRef.current);
-  }, []);
-
-  const buildHint = useCallback(() => {
-    // Switch to attach left and right hint separately
-    // and translate each of the two independently.
-    // This addresses:
-    // 1. Safari glitch that causes flashing arrows when 2 arrows are placed
-    //   in any kind of normal DOM flow (inline-block, flex, grid, etc.)
-    // 2. Edge glitch that forgets to update second child position if its
-    //   parent have updated its own transform
-    leftHintBodyRef.current = createElementWithAttributes(doc.current, 'div');
-    leftHintBodyRef.current.classList.add('i-amphtml-image-slider-hint');
-    rightHintBodyRef.current = createElementWithAttributes(doc.current, 'div');
-    rightHintBodyRef.current.classList.add('i-amphtml-image-slider-hint');
-
-    leftHintWrapper.current = createElementWithAttributes(doc.current, 'div');
-    rightHintWrapper.current = createElementWithAttributes(doc.current, 'div');
-    leftHintWrapper.current.classList.add(
-      'i-amphtml-image-slider-hint-left-wrapper'
-    );
-    rightHintWrapper.current.classList.add(
-      'i-amphtml-image-slider-hint-right-wrapper'
-    );
-
-    leftHintArrowRef.current = createElementWithAttributes(doc.current, 'div');
-    leftHintArrowRef.current.classList.add('amp-image-slider-hint-left');
-    rightHintArrowRef.current = createElementWithAttributes(doc.current, 'div');
-    rightHintArrowRef.current.classList.add('amp-image-slider-hint-right');
-
-    leftHintWrapper.current.appendChild(leftHintArrowRef.current);
-    rightHintWrapper.current.appendChild(rightHintArrowRef.current);
-    leftHintBodyRef.current.appendChild(leftHintWrapper.current);
-    rightHintBodyRef.current.appendChild(rightHintWrapper.current);
-    // Notice: hints are attached after amp-img finished loading
-  }, []);
-
-  // /**
-  //  * Check if aria attributes are correctly set
-  //  * If not, apply default and warn user in console
-  //  * @private
-  //  */
-  // const checkARIA = useCallback(() => {
-  //   if (!this.containsAmpImages_) {
-  //     return;
-  //   }
-
-  //   // Only if there are AMP-IMG Elements in use should this pathway execute.
-  //   const leftAmpImage = dev().assertElement(this.leftImage_);
-  //   const rightAmpImage = dev().assertElement(this.rightImage_);
-  //   leftAmpImage
-  //     .signals()
-  //     .whenSignal(CommonSignals.LOAD_END)
-  //     .then(() => {
-  //       if (leftAmpImage.childElementCount > 0) {
-  //         const img = leftAmpImage.querySelector('img');
-  //         let newAltText;
-  //         this.measureMutateElement(
-  //           () => {
-  //             const ariaSuffix =
-  //               leftAmpImage.getAttribute('data-left-image-aria-suffix') ||
-  //               'left image';
-  //             if (leftAmpImage.hasAttribute('alt')) {
-  //               newAltText = `${leftAmpImage.getAttribute(
-  //                 'alt'
-  //               )}, ${ariaSuffix}`;
-  //             } else {
-  //               newAltText = ariaSuffix;
-  //             }
-  //           },
-  //           () => {
-  //             img.setAttribute('alt', newAltText);
-  //           }
-  //         );
-  //       }
-  //     });
-  //   rightAmpImage
-  //     .signals()
-  //     .whenSignal(CommonSignals.LOAD_END)
-  //     .then(() => {
-  //       if (rightAmpImage.childElementCount > 0) {
-  //         const img = rightAmpImage.querySelector('img');
-  //         let newAltText;
-  //         this.measureMutateElement(
-  //           () => {
-  //             const ariaSuffix =
-  //               rightAmpImage.getAttribute('data-right-image-aria-suffix') ||
-  //               'right image';
-  //             if (rightAmpImage.hasAttribute('alt')) {
-  //               newAltText = `${rightAmpImage.getAttribute(
-  //                 'alt'
-  //               )}, ${ariaSuffix}`;
-  //             } else {
-  //               newAltText = ariaSuffix;
-  //             }
-  //           },
-  //           () => {
-  //             img.setAttribute('alt', newAltText);
-  //           }
-  //         );
-  //       }
-  //     });
-  // }, []);
 
   const animateHideHint = useCallback(() => {
     leftHintBodyRef.current.classList.add('i-amphtml-image-slider-hint-hidden');
@@ -397,20 +248,12 @@ export function ImageSliderWithRef(
     (opt_toEnd) => {
       // To the very end of left
       if (opt_toEnd === true) {
-        //this.mutateElement(() => {
         updatePositions(0);
-        //});
       } else {
-        //this.measureMutateElement(
-        //() => {
         const newPercentage = limitPercentage(
           getCurrentSliderPercentage() - stepSize
         );
-        //},
-        //() => {
         updatePositions(newPercentage);
-        //}
-        //);
       }
     },
     [getCurrentSliderPercentage, updatePositions, limitPercentage, stepSize]
@@ -421,9 +264,7 @@ export function ImageSliderWithRef(
    * @private
    */
   const stepExactCenter = useCallback(() => {
-    //this.mutateElement(() => {
     updatePositions(0.5);
-    //});
   }, [updatePositions]);
 
   /**
@@ -435,20 +276,12 @@ export function ImageSliderWithRef(
     (opt_toEnd) => {
       // To the very end of right
       if (opt_toEnd === true) {
-        //this.mutateElement(() => {
         updatePositions(1);
-        //});
       } else {
-        //let newPercentage;
-        //this.measureMutateElement(
-        //() => {
         const newPercentage = limitPercentage(
           getCurrentSliderPercentage() + stepSize
         );
-        //},
-        //() => {
         updatePositions(newPercentage);
-        //}
       }
     },
     [updatePositions, limitPercentage, getCurrentSliderPercentage, stepSize]
@@ -589,29 +422,16 @@ export function ImageSliderWithRef(
     //setIsEdge(Services.platformFor(win).isEdge());
 
     /** Retrieve Images */
-    const imageArray = toChildArray(images);
-    debugger;
-    console.log(imageArray[0]);
-    console.log(imageArray[1]);
-
-    /** Retrive Images */
     images.forEach((child) => {
       // TODO (@AnuragVasanwala): Please remove 'VALID_IMAGE_TAGNAMES' check for Preact.
       if (VALID_IMAGE_TAGNAMES.has(child.type.toUpperCase())) {
         if (leftImageRef.current == null) {
           // First encountered = left image
-          leftImageRef.current = createElementWithAttributes(
-            doc.current,
-            child.type,
-            child.props
-          );
+          //leftImageRef.current = images[0];
         } else if (rightImageRef.current == null) {
           // Second encountered = right image
-          rightImageRef.current = createElementWithAttributes(
-            doc.current,
-            child.type,
-            child.props
-          );
+          //rightImageRef.current = images[1];
+          images[1].key.classList.add('i-amphtml-image-slider-push-left');
         } else {
           // TODO (@AnuragVasanwala): Assert Error - Should not contain more than 2 images.
         }
@@ -645,18 +465,12 @@ export function ImageSliderWithRef(
       }
     });
 
-    buildImageWrappers();
-    buildBar();
     // Notice: hints are attached after amp-img finished loading
-    buildHint();
+    // buildHint();
     // checkARIA();
 
-    leftMaskRef.current.appendChild(leftImageRef.current);
-    rightMaskRef.current.appendChild(rightImageRef.current);
-
-    //const {element} = containerRef.current;
     registerEvents();
-  }, [images, labels, buildImageWrappers, buildBar, buildHint, registerEvents]);
+  }, [images, labels, registerEvents]);
   useLayoutEffect(() => {
     /* Do things */
   }, []);
@@ -664,67 +478,59 @@ export function ImageSliderWithRef(
     /* Do things */
   }, []);
 
-  const testEventHandler = useCallback((e) => {
-    // console.log(e.key);
-  }, []);
-
   return (
     <div
       ref={containerRef}
-      class="i-amphtml-image-slider-container"
+      class={styles.imageSliderContainer}
       layout
       size
       paint
       tabIndex="0"
-      onKeyUp={testEventHandler}
-      onMouseUp={testEventHandler}
       {...rest}
     >
       {/* Masks */}
-      <div ref={leftMaskRef} class="i-amphtml-image-slider-left-mask">
-        <div
-          ref={leftLabelWrapperRef}
-          class="i-amphtml-image-slider-label-wrapper"
-        >
+      <div ref={leftMaskRef} class={styles.imageSliderLeftMask}>
+        <div ref={leftLabelWrapperRef} class={styles.imageSliderLabelWrapper}>
           <div ref={leftLabelRef} />
           {/* { ??? leftImageRef ??? } */}
+          {images[0]}
         </div>
       </div>
       <div
         ref={rightMaskRef}
-        class="i-amphtml-image-slider-right-mask i-amphtml-image-slider-push-right"
+        classList={[styles.imageSliderRightMask, styles.imageSliderPushRight]}
       >
         <div
           ref={rightLabelWrapperRef}
-          class="i-amphtml-image-slider-label-wrapper i-amphtml-image-slider-push-left"
+          classList={[
+            styles.imageSliderLabelWrapper,
+            styles.imageSliderPushLeft,
+          ]}
         >
           <div ref={rightLabelRef} />
           {/* { ??? rightImageRef with class="i-amphtml-image-slider-push-left" ??? } */}
+          {images[1]}
         </div>
       </div>
 
       {/* Hint Body */}
-      <div ref={leftHintBodyRef} class="i-amphtml-image-slider-hint">
-        <div
-          ref={leftHintWrapper}
-          class="i-amphtml-image-slider-hint-left-wrapper"
-        >
-          <div ref={leftHintArrowRef} class="amp-image-slider-hint-left" />
+      <div ref={leftHintBodyRef} class={styles.imageSliderHint}>
+        <div ref={leftHintWrapper} class={styles.imageSliderHintLeftWrapper}>
+          <div ref={leftHintArrowRef} class={styles.imageSliderHintLeft} />
         </div>
       </div>
-      <div ref={rightHintBodyRef} class="i-amphtml-image-slider-hint">
-        <div
-          ref={rightHintWrapper}
-          class="i-amphtml-image-slider-hint-right-wrapper"
-        >
-          <div ref={rightHintArrowRef} class="amp-image-slider-hint-right" />
+      <div ref={rightHintBodyRef} class={styles.imageSliderHint}>
+        <div ref={rightHintWrapper} class={styles.imageSliderHintRightWrapper}>
+          <div ref={rightHintArrowRef} class={styles.imageSliderHintRight} />
         </div>
       </div>
 
       {/* Bar */}
       <div ref={barRef}>
-        <div class="i-amphtml-image-slider-bar i-amphtml-image-slider-push-right">
-          <div class="i-amphtml-image-slider-bar-stick i-amphtml-image-slider-push-left" />
+        <div classList={[styles.imageSliderBar, styles.imageSliderPushRight]}>
+          <div
+            classList={[styles.imageSliderBarStick, styles.imageSliderPushLeft]}
+          />
         </div>
       </div>
     </div>
