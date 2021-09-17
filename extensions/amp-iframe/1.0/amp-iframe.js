@@ -85,6 +85,9 @@ class AmpIframe extends BaseElement {
       'requestResize': (height, width) => {
         return this.updateSize_(height, width);
       },
+      'onViewportIntersection': (inObEntry) => {
+        console.log(inObEntry);
+      },
     });
   }
 }

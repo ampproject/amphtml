@@ -83,6 +83,7 @@ WithContentBelow.storyName = 'resizeable amp-iframe with content below';
 export const WithOverflowButton = () => {
   return (
     <div>
+      <div style="background: blue; height: 150vh; width: 100%"></div>
       <amp-iframe
         title="Resizable iframe example"
         width="100"

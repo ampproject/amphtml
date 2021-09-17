@@ -69,16 +69,18 @@ export function unobserveWithSharedInOb(element) {
  *
  * @param {!Element} element
  * @param {function(IntersectionObserverEntry)} callback
+ * @param opts
  */
-export function observeIntersections(element, callback) {
+export function observeIntersections(element, callback, opts = {}) {
   const win = toWin(element.ownerDocument.defaultView);
   let viewportObserver = viewportObservers.get(win);
   if (!viewportObserver) {
     viewportObservers.set(
       win,
-      (viewportObserver = createViewportObserver(ioCallback, win))
+      (viewportObserver = createViewportObserver(ioCallback, win, opts))
     );
   }
+  // perhaps check if viewport observer is already created and opt is non=empty & warn the user?
   let callbacks = viewportCallbacks.get(element);
   if (!callbacks) {
     callbacks = [];

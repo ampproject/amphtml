@@ -11,7 +11,7 @@ import {useCallback, useRef} from '#preact';
  * @param {function(IntersectionObserverEntry)} callback
  * @return {function(Element)}
  */
-export function useIntersectionObserver(callback) {
+export function useIntersectionObserver(callback, opts = {}) {
   const nodeRef = useRef(null);
   const refCb = useCallback(
     (node) => {
@@ -23,7 +23,7 @@ export function useIntersectionObserver(callback) {
       if (!node) {
         return;
       }
-      observeIntersections(node, callback);
+      observeIntersections(node, callback, opts);
     },
     [callback]
   );
