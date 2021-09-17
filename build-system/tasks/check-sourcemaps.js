@@ -115,7 +115,9 @@ function checkSourcemapMappings(sourcemapJson, map) {
 
   // Zeroth sub-array corresponds to ';' and has no mappings.
   // See https://www.npmjs.com/package/sourcemap-codec#usage
-  const firstLineMapping = decode(sourcemapJson.mappings)[1][0];
+  const firstLineMapping = decode(sourcemapJson.mappings)[
+    shouldUseClosure() ? 1 : 0
+  ][0];
   const [, sourceIndex = 0, sourceCodeLine = 0, sourceCodeColumn] =
     firstLineMapping;
 
