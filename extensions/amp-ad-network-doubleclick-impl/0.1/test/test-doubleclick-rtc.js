@@ -90,7 +90,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, (env) => {
           'b': {c: 'd', e: 'f'},
           'z': [{a: 'b'}, {c: 'd'}],
         },
-        ppid: 'testId'
+        ppid: 'testId',
       };
       testMergeRtcResponses(
         rtcResponseArray,
@@ -344,7 +344,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, (env) => {
         ard: 'www.exampleA.com,www.exampleB.com',
       };
       const expectedJsonTargeting = {
-        ppid: 'testId2'
+        ppid: 'testId2',
       };
       testMergeRtcResponses(
         rtcResponseArray,
