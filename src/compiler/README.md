@@ -11,15 +11,17 @@ Separating DOM creation from side effects (e.g. attaching listeners) is importan
 A classic component's structure that has implemented server-rendering should be:
 
 ```js
+// File: amp-component/0.1/amp-component.js
 class AmpComponent extends AMP.BaseElement {
   buildCallback() {
     if (!this.hasAttribute('i-amphtml-ssr')) {
       buildDom(this.element);
     }
-    // Attach event handlers.
+    // Attach event handlers, assign instance variables.
   }
 }
 
+// File: amp-component/0.1/build-dom.js
 function buildDom(element) {
   const doc = element.ownerDocument;
   // Likely create DOM and attach to element.
