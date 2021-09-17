@@ -64,6 +64,19 @@ const viewportCallbacks = new WeakMap();
 // }
 
 /**
+ * Unobserve an element.
+ * @param {!Element} element
+ */
+export function unobserveWithSharedInOb(element) {
+  const win = toWin(element.ownerDocument.defaultView);
+  const viewportObserver = viewportObservers.get(win);
+  viewportObserver?.unobserve(element);
+  // TODO(dmanek): This is a potential bug. We only want to remove
+  // a single callback as opposed to all.
+  viewportCallbacks.delete(element);
+}
+
+/**
  * Lazily creates an IntersectionObserver per Window to track when elements
  * enter and exit the viewport. Fires viewportCallback when this happens.
  *
@@ -93,8 +106,7 @@ export function observeIntersections(element, callback) {
 }
 
 /**
- * Unobserves the intersection observer for the given callback.
- * If no callbacks remain for the element, unobserves the element too.
+ * Unsubscribes a callback from receiving IntersectionObserver updates for an element.
  *
  * @param {!Element} element
  * @param {function(IntersectionObserverEntry)} callback
@@ -111,8 +123,7 @@ function unobserveIntersections(element, callback) {
   if (callbacks.length) {
     return;
   }
-  // if all callbacks for this elements are removed, unobserve & delete it
-  // from the list of viewport callbacks
+  // If an element has no more observer callbacks, then unobserve it.
   const win = toWin(element.ownerDocument.defaultView);
   const viewportObserver = viewportObservers.get(win);
   viewportObserver?.unobserve(element);
