@@ -363,7 +363,7 @@ export class Performance {
           const {tagName} = getOutermostAmpElement(entry.element);
           if (tagName === 'IMG' || tagName === 'AMP-IMG') {
             this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.image;
-          } else if (tagName === 'AMP-VIDEO') {
+          } else if (tagName === 'VIDEO' || tagName === 'AMP-VIDEO') {
             this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.video;
           } else if (tagName === 'AMP-CAROUSEL') {
             this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.carousel;
