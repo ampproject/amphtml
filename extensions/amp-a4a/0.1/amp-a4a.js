@@ -371,6 +371,9 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {?UnlistenDef} */
     this.unobserveIntersections_ = null;
+
+    /** @private {?Promise} */
+    this.renderCreativePromise_ = null;
   }
 
   /** @override */
@@ -1312,12 +1315,13 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.isRefreshing) {
       this.destroyFrame(true);
     }
-    return this.attemptToRenderCreative().then(() => {
+    this.renderCreativePromise_ = this.attemptToRenderCreative().then(() => {
       this.unobserveIntersections_ = observeIntersections(
         this.element,
         this.boundViewportCallback_
       );
     });
+    return this.renderCreativePromise_;
   }
 
   /**
@@ -1417,7 +1421,9 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
-    this.unobserveIntersections_();
+    this.renderCreativePromise_.then(() => {
+      this.unobserveIntersections_();
+    });
     this.tearDownSlot();
     return true;
   }
