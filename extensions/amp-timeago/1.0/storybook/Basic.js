@@ -173,4 +173,4 @@ export const WithIntersectionObserver = () => {
   );
 };
 
-WithIntersectionObserver.storyName = 'InOb';
+WithIntersectionObserver.storyName = 'IntersectionObserver';
