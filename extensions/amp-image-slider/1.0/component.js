@@ -12,7 +12,7 @@ import {
   useRef,
   useState,
 } from '#preact';
-import {forwardRef} from '#preact/compat';
+import {forwardRef, toChildArray} from '#preact/compat';
 
 import {useStyles} from './component.jss';
 
@@ -69,6 +69,8 @@ export function ImageSliderWithRef(
   /** Hint Body References */
   const leftHintBodyRef = useRef(null);
   const rightHintBodyRef = useRef(null);
+  const leftHintWrapper = useRef(null);
+  const rightHintWrapper = useRef(null);
 
   /** Unlisten Handlers for Mouse */
   const unlistenMouseUp = useRef(null);
@@ -141,20 +143,24 @@ export function ImageSliderWithRef(
     rightHintBodyRef.current = createElementWithAttributes(doc.current, 'div');
     rightHintBodyRef.current.classList.add('i-amphtml-image-slider-hint');
 
-    const leftHintWrapper = createElementWithAttributes(doc.current, 'div');
-    leftHintWrapper.classList.add('i-amphtml-image-slider-hint-left-wrapper');
-    const rightHintWrapper = createElementWithAttributes(doc.current, 'div');
-    rightHintWrapper.classList.add('i-amphtml-image-slider-hint-right-wrapper');
+    leftHintWrapper.current = createElementWithAttributes(doc.current, 'div');
+    rightHintWrapper.current = createElementWithAttributes(doc.current, 'div');
+    leftHintWrapper.current.classList.add(
+      'i-amphtml-image-slider-hint-left-wrapper'
+    );
+    rightHintWrapper.current.classList.add(
+      'i-amphtml-image-slider-hint-right-wrapper'
+    );
 
     leftHintArrowRef.current = createElementWithAttributes(doc.current, 'div');
     leftHintArrowRef.current.classList.add('amp-image-slider-hint-left');
     rightHintArrowRef.current = createElementWithAttributes(doc.current, 'div');
     rightHintArrowRef.current.classList.add('amp-image-slider-hint-right');
 
-    leftHintWrapper.appendChild(leftHintArrowRef.current);
-    rightHintWrapper.appendChild(rightHintArrowRef.current);
-    leftHintBodyRef.current.appendChild(leftHintWrapper);
-    rightHintBodyRef.current.appendChild(rightHintWrapper);
+    leftHintWrapper.current.appendChild(leftHintArrowRef.current);
+    rightHintWrapper.current.appendChild(rightHintArrowRef.current);
+    leftHintBodyRef.current.appendChild(leftHintWrapper.current);
+    rightHintBodyRef.current.appendChild(rightHintWrapper.current);
     // Notice: hints are attached after amp-img finished loading
   }, []);
 
@@ -582,8 +588,15 @@ export function ImageSliderWithRef(
     doc.current = containerRef.current.ownerDocument;
     //setIsEdge(Services.platformFor(win).isEdge());
 
+    /** Retrieve Images */
+    const imageArray = toChildArray(images);
+    debugger;
+    console.log(imageArray[0]);
+    console.log(imageArray[1]);
+
     /** Retrive Images */
     images.forEach((child) => {
+      // TODO (@AnuragVasanwala): Please remove 'VALID_IMAGE_TAGNAMES' check for Preact.
       if (VALID_IMAGE_TAGNAMES.has(child.type.toUpperCase())) {
         if (leftImageRef.current == null) {
           // First encountered = left image
@@ -666,7 +679,55 @@ export function ImageSliderWithRef(
       onKeyUp={testEventHandler}
       onMouseUp={testEventHandler}
       {...rest}
-    ></div>
+    >
+      {/* Masks */}
+      <div ref={leftMaskRef} class="i-amphtml-image-slider-left-mask">
+        <div
+          ref={leftLabelWrapperRef}
+          class="i-amphtml-image-slider-label-wrapper"
+        >
+          <div ref={leftLabelRef} />
+          {/* { ??? leftImageRef ??? } */}
+        </div>
+      </div>
+      <div
+        ref={rightMaskRef}
+        class="i-amphtml-image-slider-right-mask i-amphtml-image-slider-push-right"
+      >
+        <div
+          ref={rightLabelWrapperRef}
+          class="i-amphtml-image-slider-label-wrapper i-amphtml-image-slider-push-left"
+        >
+          <div ref={rightLabelRef} />
+          {/* { ??? rightImageRef with class="i-amphtml-image-slider-push-left" ??? } */}
+        </div>
+      </div>
+
+      {/* Hint Body */}
+      <div ref={leftHintBodyRef} class="i-amphtml-image-slider-hint">
+        <div
+          ref={leftHintWrapper}
+          class="i-amphtml-image-slider-hint-left-wrapper"
+        >
+          <div ref={leftHintArrowRef} class="amp-image-slider-hint-left" />
+        </div>
+      </div>
+      <div ref={rightHintBodyRef} class="i-amphtml-image-slider-hint">
+        <div
+          ref={rightHintWrapper}
+          class="i-amphtml-image-slider-hint-right-wrapper"
+        >
+          <div ref={rightHintArrowRef} class="amp-image-slider-hint-right" />
+        </div>
+      </div>
+
+      {/* Bar */}
+      <div ref={barRef}>
+        <div class="i-amphtml-image-slider-bar i-amphtml-image-slider-push-right">
+          <div class="i-amphtml-image-slider-bar-stick i-amphtml-image-slider-push-left" />
+        </div>
+      </div>
+    </div>
   );
 }
 
