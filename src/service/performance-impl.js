@@ -888,9 +888,8 @@ export class Performance {
  */
 function getOutermostAmpElement(node) {
   let max = node;
-  while (node != null) {
-    node = node.parentNode;
-    if (node?.nodeName.startsWith('AMP-')) {
+  while ((node = node.parentNode) != null) {
+    if (node.nodeName.startsWith('AMP-')) {
       max = node;
     }
   }
