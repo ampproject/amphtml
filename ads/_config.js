@@ -292,7 +292,10 @@ const adConfig = jsonConfiguration({
       'https://v.amoad.com',
     ],
   },
-
+  'amplified': {
+    preconnect: 'https://srv.clickfuse.com',
+    renderStartImplemented: true,
+  },
   'aniview': {
     renderStartImplemented: true,
   },
