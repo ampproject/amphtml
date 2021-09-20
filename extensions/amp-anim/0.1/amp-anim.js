@@ -83,13 +83,12 @@ export class AmpAnim extends AMP.BaseElement {
       /* opt_removeMissingAttrs */ true
     );
     guaranteeSrcForSrcsetUnsupportedBrowsers(img);
-    this.loadPromise_ = this.loadPromise(img).then(() => {
+    return this.loadPromise(img).then(() => {
       this.unobserveIntersections_ = observeIntersections(
         this.element,
         (inViewport) => this.viewportCallback_(inViewport)
       );
     });
-    return this.loadPromise_;
   }
 
   /** @override */
@@ -99,9 +98,7 @@ export class AmpAnim extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    this.loadPromise_.then(() => {
-      this.unobserveIntersections_();
-    });
+    this.unobserveIntersections_?.();
     this.viewportCallback_(false);
     // Release memory held by the image - animations are typically large.
     this.img_.src = SRC_PLACEHOLDER;
