@@ -114,10 +114,12 @@ CMP_CONFIG['LiveRamp'] = {
 
 CMP_CONFIG['googlefc'] = {
   'consentInstanceId': 'googlefc',
-  'checkConsentHref': 'https://fundingchoicesmessages.google.com/amp/consent/check?pvid=PAGE_VIEW_ID_64&anonid=CONSENT_PAGE_VIEW_ID_64&href=SOURCE_URL',
-  'promptUISrc': 'https://fundingchoicesmessages.google.com/amp/consent/message?pvid=PAGE_VIEW_ID_64&anonid=CONSENT_PAGE_VIEW_ID_64&href=SOURCE_URL&clientConfig=CONSENT_INFO(clientConfig)',
+  'checkConsentHref':
+    'https://fundingchoicesmessages.google.com/amp/consent/check?pvid=PAGE_VIEW_ID_64&anonid=CONSENT_PAGE_VIEW_ID_64&href=SOURCE_URL',
+  'promptUISrc':
+    'https://fundingchoicesmessages.google.com/amp/consent/message?pvid=PAGE_VIEW_ID_64&anonid=CONSENT_PAGE_VIEW_ID_64&href=SOURCE_URL&clientConfig=CONSENT_INFO(clientConfig)',
   'xssiPrefix': ")]}'",
-  "uiConfig": {
-            "overlay": true
-          },
+  'uiConfig': {
+    'overlay': true,
+  },
 };
