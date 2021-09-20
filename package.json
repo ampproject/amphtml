@@ -62,6 +62,7 @@
     "@types/chai": "4.2.21",
     "@types/eslint": "7.28.0",
     "@types/minimist": "1.2.2",
+    "@types/fs-extra": "9.0.12",
     "@types/mocha": "8.2.3",
     "@types/node": "14.17.12",
     "acorn-globals": "6.0.0",

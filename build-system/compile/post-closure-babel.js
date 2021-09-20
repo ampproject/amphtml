@@ -64,7 +64,7 @@ async function postClosureBabel(file) {
   const {compressed, terserMap} = await terserMinify(code);
   await fs.outputFile(file, compressed);
 
-  const closureMap = await fs.readJson(`${file}.map`, 'utf-8');
+  const closureMap = await fs.readJson(`${file}.map`, {encoding: 'utf8'});
   const sourceMap = remapping(
     [terserMap, babelMap, closureMap],
     () => null,

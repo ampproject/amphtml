@@ -81,7 +81,7 @@ async function preClosureBabel(file, outputFilename, options) {
   }
   const transformedFile = path.join(outputDir, file);
   if (!filesToTransform.includes(file)) {
-    if (!(await fs.exists(transformedFile))) {
+    if (!(await fs.pathExists(transformedFile))) {
       await fs.copy(file, transformedFile);
     }
     return transformedFile;
@@ -96,7 +96,7 @@ async function preClosureBabel(file, outputFilename, options) {
     const {contents, hash} = await batchedRead(file, optionsHash);
     const cachedPromise = transformCache.get(hash);
     if (cachedPromise) {
-      if (!(await fs.exists(transformedFile))) {
+      if (!(await fs.pathExists(transformedFile))) {
         await fs.outputFile(transformedFile, await cachedPromise);
       }
     } else {
