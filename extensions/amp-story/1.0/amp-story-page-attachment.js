@@ -13,6 +13,7 @@ import {getSourceOrigin} from '../../../src/url';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {
   allowlistFormActions,
+  getResponseAttributeElements,
   setupResponseAttributeElements,
 } from './amp-story-form';
 import {removeElement} from '#core/dom';
@@ -155,9 +156,27 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     const forms = this.element.querySelectorAll('form');
     if (forms.length > 0) {
       allowlistFormActions(this);
+
+      // Scroll each element into view when it is displayed.
       forms.forEach((form) => {
         setupResponseAttributeElements(this, form);
+        getResponseAttributeElements(form).forEach((el) => {
+          this.win
+            .ResizeObserver((e) => {
+              if (
+                this.state === DrawerState.OPEN &&
+                e[0].contentRect.height > 0
+              ) {
+                el./*OK*/ scrollIntoView({
+                  behavior: 'smooth',
+                  block: 'nearest',
+                });
+              }
+            })
+            .observe(el);
+        });
       });
+
       // Page attachments that contain forms must display the page's publisher
       // domain above the attachment's contents. This enables users to gauge
       // the trustworthiness of publishers before sending data to them.
