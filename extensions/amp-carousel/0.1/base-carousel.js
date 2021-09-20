@@ -244,6 +244,7 @@ export class BaseCarousel extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.unobserveIntersections_?.();
+    this.unobserveIntersections = null;
     return true;
   }
 

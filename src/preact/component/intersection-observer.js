@@ -16,7 +16,8 @@ export function useIntersectionObserver(callback) {
       const prevNode = nodeRef.current;
       nodeRef.current = node;
       if (prevNode) {
-        unobserveRef.current();
+        const cleanup = unobserveRef.current;
+        cleanup();
       }
       if (!node) {
         return;

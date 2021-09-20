@@ -438,6 +438,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_.length = 0;
     this.unobserveIntersections_?.();
+    this.unobserveIntersections = null;
 
     this.layoutPromise_ = null;
     this.uiHandler.applyUnlayoutUI();

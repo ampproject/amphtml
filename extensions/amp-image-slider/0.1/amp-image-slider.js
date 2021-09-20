@@ -747,6 +747,7 @@ export class AmpImageSlider extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.unobserveIntersections_?.();
+    this.unobserveIntersections = null;
     this.unregisterEvents_();
     return true;
   }

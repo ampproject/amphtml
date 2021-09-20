@@ -311,6 +311,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.unobserveIntersections_?.();
+    this.unobserveIntersections = null;
     this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_.length = 0;
 

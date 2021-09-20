@@ -69,7 +69,6 @@ export function observeIntersections(element, callback) {
  * @param {function(IntersectionObserverEntry)} callback
  */
 function unobserveIntersections(element, callback) {
-  // export function unobserveIntersections(element, callback) {
   const callbacks = viewportCallbacks.get(element);
   if (!callbacks) {
     return;
