@@ -27,7 +27,7 @@ const AttributeElementSelector = {
 
 /**
  * Adds AMP form actions to the action allow list.
- * @param {!Window} win The window in which the form exists.
+ * @param {!Window} win
  */
 export function allowlistFormActions(win) {
   const storeService = getStoreService(win);
@@ -39,7 +39,7 @@ export function allowlistFormActions(win) {
 
 /**
  * Add a default form attribute element for each absent response attribute.
- * @param {!Window} win The window in which the form exists.
+ * @param {!Window} win
  * @param {!Element} formEl The form to which the attribute elements will be
  *     added.
  * @private
@@ -84,7 +84,7 @@ export function getResponseAttributeElements(formEl) {
 /**
  * Create an element that is used to display the in-progress state of a form
  * submission attempt.
- * @param {!Window} win The window in which the form exists.
+ * @param {!Window} win
  * @param {!Element} formEl The form to which the `submitting` element will be
  *     added.
  * @return {!Element}
@@ -104,7 +104,7 @@ function createFormSubmittingEl_(win, formEl) {
 /**
  * Create an element that is used to display the result of a form submission
  * attempt.
- * @param {!Window} win The window in which the form exists.
+ * @param {!Window} win
  * @param {!Element} formEl The form to which the result element will be added.
  * @param {boolean} isSuccess Whether the form submission was successful.
  * @return {!Element}
