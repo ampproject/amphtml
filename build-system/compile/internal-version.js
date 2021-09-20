@@ -90,5 +90,9 @@ function getVersion(ref = 'HEAD') {
 }
 
 // Used to e.g. references the ads binary from the runtime to get version lock.
-exports.VERSION = getVersion();
-module.exports = {getVersion};
+const VERSION = getVersion();
+
+module.exports = {
+  VERSION,
+  getVersion,
+};
