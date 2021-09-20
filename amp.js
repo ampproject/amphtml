@@ -67,7 +67,6 @@ createTask('validate-html-fixtures', 'validateHtmlFixtures');
 createTask('validator');
 createTask('validator-cpp', 'validatorCpp', 'validator');
 createTask('validator-webui', 'validatorWebui', 'validator');
-createTask('version');
 createTask('visual-diff', 'visualDiff');
 
 /**
