@@ -12,7 +12,7 @@ const {timedExecOrDie} = require('../pr-check/utils');
  * @fileoverview Script that builds a release.
  */
 
-const jobName = 'upload-release.js';
+const jobName = 'archive-release.js';
 
 const SRCS_DIR = '/tmp/restored-workspace/releases';
 const DEST_DIR = '/tmp/release';
