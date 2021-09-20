@@ -4,8 +4,8 @@
  * @fileoverview Script that cuts a nightly branch.
  */
 
-const moment = require('moment');
 const {cyan, green, red} = require('kleur/colors');
+const {getVersion} = require('../compile/internal-version');
 const {log} = require('../common/logging');
 const {Octokit} = require('@octokit/rest');
 const params = {owner: 'ampproject', repo: 'amphtml'};
@@ -121,13 +121,7 @@ async function updateBranch(octokit, sha) {
  * @return {Promise<void>}
  */
 async function createTag(octokit, sha) {
-  // get commit time using octokit instead of git
-  const commit = await octokit.rest.git.getCommit({...params, sha});
-
-  // generate an AMP version according to `build-system/compile/internal-version.js`
-  // NOTE: this does NOT account for cherry-picked commits
-  const date = moment(commit.committer.date).format('YYMMDDHHmmss');
-  const ampVersion = date.slice(0, -2) + '000';
+  const ampVersion = getVersion(sha);
 
   await octokit.rest.git.createTag({
     ...params,
