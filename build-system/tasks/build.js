@@ -36,6 +36,7 @@ async function build() {
   process.env.NODE_ENV = 'development';
   const options = {
     fortesting: argv.fortesting,
+    localDev: true,
     minify: false,
     watch: argv.watch,
   };

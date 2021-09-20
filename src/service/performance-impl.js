@@ -37,6 +37,18 @@ const TAG = 'Performance';
 let TickEventDef;
 
 /**
+ * @enum {number}
+ */
+export const LCP_ELEMENT_TYPE = {
+  other: 0,
+  image: 1,
+  video: 2,
+  ad: 3,
+  carousel: 4,
+  bcarousel: 5,
+};
+
+/**
  * Performance holds the mechanism to call `tick` to stamp out important
  * events in the lifecycle of the AMP runtime. It can hold a small amount
  * of tick events to forward to the external `tick` function when it is set.
@@ -172,6 +184,12 @@ export class Performance {
      * @private {?number}
      */
     this.largestContentfulPaint_ = null;
+
+    /**
+     * Which type of element was chosen as the LCP.
+     * @private {LCP_ELEMENT_TYPE}
+     */
+    this.largestContentfulPaintType_ = null;
 
     this.onAmpDocVisibilityChange_ = this.onAmpDocVisibilityChange_.bind(this);
 
@@ -341,6 +359,24 @@ export class Performance {
         }
       } else if (entry.entryType === 'largest-contentful-paint') {
         this.largestContentfulPaint_ = entry.startTime;
+        if (entry.element) {
+          const {tagName} = getOutermostAmpElement(entry.element);
+          if (tagName === 'IMG' || tagName === 'AMP-IMG') {
+            this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.image;
+          } else if (tagName === 'VIDEO' || tagName === 'AMP-VIDEO') {
+            this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.video;
+          } else if (tagName === 'AMP-CAROUSEL') {
+            this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.carousel;
+          } else if (tagName === 'AMP-BASE-CAROUSEL') {
+            this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.bcarousel;
+          } else if (tagName === 'AMP-AD') {
+            this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.ad;
+          } else {
+            this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.other;
+          }
+        } else {
+          this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.other;
+        }
       } else if (entry.entryType == 'navigation' && !recordedNavigation) {
         [
           'domComplete',
@@ -559,6 +595,10 @@ export class Performance {
       return;
     }
 
+    this.tickDelta(
+      TickLabel.LARGEST_CONTENTFUL_PAINT_TYPE,
+      this.largestContentfulPaintType_
+    );
     this.tickDelta(
       TickLabel.LARGEST_CONTENTFUL_PAINT,
       this.largestContentfulPaint_
@@ -837,6 +877,23 @@ export class Performance {
   getMetric(label) {
     return this.metrics_.whenSignal(label);
   }
+}
+
+/**
+ * Traverse node ancestors and return the highest level amp element.
+ * Returns the given node if none are found.
+ *
+ * @param {!HTMLElement} node
+ * @return {!HTMLElement}
+ */
+function getOutermostAmpElement(node) {
+  let max = node;
+  while ((node = node.parentNode) != null) {
+    if (node.nodeName.startsWith('AMP-')) {
+      max = node;
+    }
+  }
+  return max;
 }
 
 /**
