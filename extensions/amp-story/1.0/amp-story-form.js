@@ -123,7 +123,7 @@ function createFormResultEl_(win, formEl, isSuccess) {
   resultEl.firstElementChild.appendChild(iconEl);
 
   const textEl = win.document.createElement('div');
-  const localizationService = getLocalizationService(devAssert(textEl));
+  const localizationService = getLocalizationService(devAssert(win.document));
   textEl.textContent = localizationService.getLocalizedString(
     isSuccess
       ? LocalizedStringId.AMP_STORY_FORM_SUBMIT_SUCCESS

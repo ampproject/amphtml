@@ -160,19 +160,17 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         setupResponseAttributeElements(this.win, form);
         // Scroll each response attribute element into view, when displayed.
         getResponseAttributeElements(form).forEach((el) => {
-          this.win
-            .ResizeObserver((e) => {
-              if (
-                this.state === DrawerState.OPEN &&
-                e[0].contentRect.height > 0
-              ) {
-                el./*OK*/ scrollIntoView({
-                  behavior: 'smooth',
-                  block: 'nearest',
-                });
-              }
-            })
-            .observe(el);
+          new this.win.ResizeObserver((e) => {
+            if (
+              this.state === DrawerState.OPEN &&
+              e[0].contentRect.height > 0
+            ) {
+              el./*OK*/ scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+              });
+            }
+          }).observe(el);
         });
       });
 
