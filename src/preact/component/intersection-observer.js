@@ -1,7 +1,4 @@
-import {
-  observeIntersections,
-  // unobserveIntersections,
-} from '#core/dom/layout/viewport-observer';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 
 import {useCallback, useRef} from '#preact';
 
@@ -19,7 +16,6 @@ export function useIntersectionObserver(callback) {
       const prevNode = nodeRef.current;
       nodeRef.current = node;
       if (prevNode) {
-        // unobserveIntersections(prevNode, callback);
         unobserveRef.current();
       }
       if (!node) {
