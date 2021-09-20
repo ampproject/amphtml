@@ -1,5 +1,6 @@
+import objstr from 'obj-str';
+
 import {createElementWithAttributes} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
 import {clamp} from '#core/math';
 
@@ -83,23 +84,16 @@ export function ImageSliderWithRef(
   /** Unlisten Handlers for Keyboard */
   const unlistenKeyDown = useRef(null);
 
+  /** Animate Hint Flag */
+  const {hideHint, setHideHint} = useState(false);
+
   const animateHideHint = useCallback(() => {
-    leftHintBodyRef.current.classList.add('i-amphtml-image-slider-hint-hidden');
-    rightHintBodyRef.current.classList.add(
-      'i-amphtml-image-slider-hint-hidden'
-    );
-  }, []);
+    setHideHint(true);
+  }, [setHideHint]);
 
   const animateShowHint = useCallback(() => {
-    //this.mutateElement(() => {
-    leftHintBodyRef.current.classList.remove(
-      'i-amphtml-image-slider-hint-hidden'
-    );
-    rightHintBodyRef.current.classList.remove(
-      'i-amphtml-image-slider-hint-hidden'
-    );
-    //});
-  }, []);
+    setHideHint(false);
+  }, [setHideHint]);
 
   /** Listen / Unlisten Handler */
   /**
@@ -527,12 +521,24 @@ export function ImageSliderWithRef(
       </div>
 
       {/* Hint Body */}
-      <div ref={leftHintBodyRef} class={styles.imageSliderHint}>
+      <div
+        ref={leftHintBodyRef}
+        class={objstr({
+          [styles.imageSliderHint]: true,
+          [styles.imageSliderHintHidden]: hideHint,
+        })}
+      >
         <div ref={leftHintWrapper} class={styles.imageSliderHintLeftWrapper}>
           <div ref={leftHintArrowRef} class={styles.imageSliderHintLeft} />
         </div>
       </div>
-      <div ref={rightHintBodyRef} class={styles.imageSliderHint}>
+      <div
+        ref={rightHintBodyRef}
+        class={objstr({
+          [styles.imageSliderHint]: true,
+          [styles.imageSliderHintHidden]: hideHint,
+        })}
+      >
         <div ref={rightHintWrapper} class={styles.imageSliderHintRightWrapper}>
           <div ref={rightHintArrowRef} class={styles.imageSliderHintRight} />
         </div>
