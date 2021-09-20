@@ -21,6 +21,8 @@ class AmpImageSlider extends BaseElement {
       },
       ActionTrust.LOW
     );
+
+    return super.init();
   }
 
   /** @override */
