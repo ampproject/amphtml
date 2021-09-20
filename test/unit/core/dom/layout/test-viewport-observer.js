@@ -79,9 +79,7 @@ describes.sandboxed('DOM - layout - Viewport Observer', {}, (env) => {
 
     it('observed element should have its callback fired each time it enters/exist the viewport.', () => {
       const viewportEvents = [];
-      observeIntersections(el1, (inViewport) =>
-        viewportEvents.push(inViewport)
-      );
+      observeIntersections(el1, (entry) => viewportEvents.push(entry));
       toggleViewport(el1, true);
       toggleViewport(el1, false);
 

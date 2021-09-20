@@ -78,7 +78,7 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    this.unobserveIntersections_();
+    this.unobserveIntersections_?.();
     this.viewportCallback_(false);
     if (this.iframe_) {
       removeElement(this.iframe_);
@@ -145,7 +145,7 @@ export class Amp3dGltf extends AMP.BaseElement {
   layoutCallback() {
     this.unobserveIntersections_ = observeIntersections(
       this.element,
-      (inViewport) => this.viewportCallback_(inViewport)
+      ({isIntersecting}) => this.viewportCallback_(isIntersecting)
     );
     if (!isWebGLSupported()) {
       this.toggleFallback(true);

@@ -113,7 +113,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   unlayoutCallback() {
-    this.unobserveIntersections_();
+    this.unobserveIntersections_?.();
     return super.unlayoutCallback();
   }
 

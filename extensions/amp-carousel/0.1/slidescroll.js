@@ -461,7 +461,7 @@ export class AmpSlideScroll extends BaseCarousel {
 
   /** @override */
   unlayoutCallback() {
-    this.unobserveIntersections_();
+    this.unobserveIntersections_?.();
     this.slideIndex_ = null;
     return super.unlayoutCallback();
   }
