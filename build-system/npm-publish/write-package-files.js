@@ -6,7 +6,7 @@
 const [extension, ampVersion, extensionVersion] = process.argv.slice(2);
 const {getSemver} = require('./utils');
 const {log} = require('../common/logging');
-const {stat, writeFile} = require('fs/promises');
+const {readdir, stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
 
 /**
@@ -21,6 +21,17 @@ async function shouldSkip() {
     log(`${extension} ${extensionVersion} : skipping, does not exist`);
     return true;
   }
+}
+
+/**
+ * Determines whether a given directory path contains CSS files
+ *
+ * @param {string} path Path to a directory.
+ * @return {Promise<boolean>}
+ */
+async function hasStylesheets(path) {
+  const files = await readdir(path);
+  return files.some((file) => file.endsWith('.css'));
 }
 
 /**
@@ -42,6 +53,24 @@ async function writePackageJson() {
     return;
   }
 
+  const exports = {
+    '.': './preact',
+    './preact': {
+      import: './dist/component-preact.module.js',
+      require: './dist/component-preact.js',
+    },
+    './react': {
+      import: './dist/component-react.module.js',
+      require: './dist/component-react.js',
+    },
+  };
+
+  if (
+    await hasStylesheets(`extensions/${extension}/${extensionVersion}/dist`)
+  ) {
+    exports['./css/*'] = './dist/*';
+  }
+
   const json = {
     name: `@ampproject/${extension}`,
     version,
@@ -50,18 +79,7 @@ async function writePackageJson() {
     license: 'Apache-2.0',
     main: './dist/component-preact.js',
     module: './dist/component-preact.module.js',
-    exports: {
-      '.': './preact',
-      './preact': {
-        import: './dist/component-preact.module.js',
-        require: './dist/component-preact.js',
-      },
-      './react': {
-        import: './dist/component-react.module.js',
-        require: './dist/component-react.js',
-      },
-      './styles.css': './dist/styles.css',
-    },
+    exports,
     files: ['dist/*', 'react.js'],
     repository: {
       type: 'git',
