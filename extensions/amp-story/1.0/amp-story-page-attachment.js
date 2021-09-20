@@ -155,7 +155,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     const forms = this.element.querySelectorAll('form');
     if (forms.length > 0) {
-      allowlistFormActions(this);
+      allowlistFormActions(this.win);
       forms.forEach((form) => {
         setupResponseAttributeElements(this, form);
         // Scroll each response attribute element into view, when displayed.
