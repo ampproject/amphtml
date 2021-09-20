@@ -29,9 +29,6 @@ export class AmpAnim extends AMP.BaseElement {
 
     /** @private {?UnlistenDef} */
     this.unobserveIntersections_ = null;
-
-    /** @private {?Promise} */
-    this.loadPromise_ = null;
   }
 
   /** @override */
