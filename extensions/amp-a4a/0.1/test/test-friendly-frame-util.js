@@ -86,6 +86,9 @@ describes.realWin('FriendlyFrameUtil', realWinConfig, (env) => {
       expect(iframe.getAttribute('allowfullscreen')).to.equal('');
       expect(iframe.getAttribute('allowtransparency')).to.equal('');
       expect(iframe.getAttribute('scrolling')).to.equal('no');
+      expect(iframe.getAttribute('role')).to.equal('region');
+      expect(iframe.getAttribute('aria-label')).to.equal('Advertisement');
+      expect(iframe.getAttribute('tabindex')).to.equal('0');
     });
   });
 
