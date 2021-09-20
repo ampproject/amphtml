@@ -170,7 +170,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
   layoutCallback() {
     this.unobserveIntersections_ = observeIntersections(
       this.element,
-      (isInViewport) => (this.isInViewport_ = isInViewport)
+      ({isIntersecting}) => (this.isInViewport_ = isIntersecting)
     );
     const src = `${this.baseURL_}/player/${this.contentID_}?amp=1`;
     const iframe = createFrameFor(this, src);

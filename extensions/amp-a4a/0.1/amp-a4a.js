@@ -366,9 +366,6 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.transferDomBody_ = null;
 
-    /** @private {function(boolean)} */
-    this.boundViewportCallback_ = this.viewportCallbackTemp.bind(this);
-
     /** @private {?UnlistenDef} */
     this.unobserveIntersections_ = null;
   }
@@ -1315,7 +1312,7 @@ export class AmpA4A extends AMP.BaseElement {
     return this.attemptToRenderCreative().then(() => {
       this.unobserveIntersections_ = observeIntersections(
         this.element,
-        this.boundViewportCallback_
+        ({isIntersecting}) => this.viewportCallbackTemp(isIntersecting)
       );
     });
   }

@@ -702,7 +702,7 @@ export class AmpImageSlider extends AMP.BaseElement {
   layoutCallback() {
     this.unobserveIntersections_ = observeIntersections(
       this.element,
-      (inViewport) => this.viewportCallback_(inViewport)
+      ({isIntersecting}) => this.viewportCallback_(isIntersecting)
     );
 
     const appendHints = () => {

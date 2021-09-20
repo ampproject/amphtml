@@ -70,7 +70,7 @@ export class AmpTimeAgo extends AMP.BaseElement {
   layoutCallback() {
     this.unobserveIntersections_ = observeIntersections(
       this.element,
-      (inViewport) => this.viewportCallback_(inViewport)
+      ({isIntersecting}) => this.viewportCallback_(isIntersecting)
     );
     return Promise.resolve();
   }

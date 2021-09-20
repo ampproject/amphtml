@@ -411,7 +411,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       .then(() => {
         this.unobserveIntersections_ = observeIntersections(
           this.element,
-          (inViewport) => this.viewportCallback_(inViewport)
+          ({isIntersecting}) => this.viewportCallback_(isIntersecting)
         );
       });
     incrementLoadingAds(this.win, this.layoutPromise_);

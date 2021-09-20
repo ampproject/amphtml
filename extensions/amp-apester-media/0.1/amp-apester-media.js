@@ -365,7 +365,7 @@ class AmpApesterMedia extends AMP.BaseElement {
           .then(() => {
             this.unobserveIntersections_ = observeIntersections(
               this.element,
-              (inViewport) => this.viewportCallback_(inViewport)
+              ({isIntersecting}) => this.viewportCallback_(isIntersecting)
             );
           });
       })

@@ -416,7 +416,7 @@ export class AmpSlideScroll extends BaseCarousel {
   layoutCallback() {
     this.unobserveIntersections_ = observeIntersections(
       this.element,
-      (inViewport) => this.viewportCallbackTemp(inViewport)
+      ({isIntersecting}) => this.viewportCallbackTemp(isIntersecting)
     );
 
     // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once

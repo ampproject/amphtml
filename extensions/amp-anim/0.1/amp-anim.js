@@ -83,7 +83,7 @@ export class AmpAnim extends AMP.BaseElement {
     return this.loadPromise(img).then(() => {
       this.unobserveIntersections_ = observeIntersections(
         this.element,
-        (inViewport) => this.viewportCallback_(inViewport)
+        ({isIntersecting}) => this.viewportCallback_(isIntersecting)
       );
     });
   }

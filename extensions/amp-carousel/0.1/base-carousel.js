@@ -236,10 +236,11 @@ export class BaseCarousel extends AMP.BaseElement {
   layoutCallback() {
     this.unobserveIntersections_ = observeIntersections(
       this.element,
-      (inViewport) => this.viewportCallbackTemp(inViewport)
+      ({isIntersecting}) => this.viewportCallbackTemp(isIntersecting)
     );
     return Promise.resolve();
   }
+
   /** @override */
   unlayoutCallback() {
     this.unobserveIntersections_?.();

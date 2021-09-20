@@ -170,7 +170,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
   layoutCallback() {
     this.unobserveIntersections_ = observeIntersections(
       this.element,
-      (inViewport) => (this.inViewport_ = inViewport)
+      ({isIntersecting}) => (this.inViewport_ = isIntersecting)
     );
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
