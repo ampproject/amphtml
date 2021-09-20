@@ -4,9 +4,10 @@
  */
 
 const [extension, ampVersion, extensionVersion] = process.argv.slice(2);
+const fastGlob = require('fast-glob');
 const {getSemver} = require('./utils');
 const {log} = require('../common/logging');
-const {readdir, stat, writeFile} = require('fs/promises');
+const {stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
 
 /**
@@ -24,14 +25,18 @@ async function shouldSkip() {
 }
 
 /**
- * Determines whether a given directory path contains CSS files
+ * Determines whether the current extension contains CSS files
  *
- * @param {string} path Path to a directory.
  * @return {Promise<boolean>}
  */
-async function hasStylesheets(path) {
-  const files = await readdir(path);
-  return files.some((file) => file.endsWith('.css'));
+async function hasStylesheets() {
+  return (
+    (
+      await fastGlob(
+        `extensions/${extension}/${extensionVersion}/dist/**/*.css`
+      )
+    ).length > 0
+  );
 }
 
 /**
@@ -65,9 +70,7 @@ async function writePackageJson() {
     },
   };
 
-  if (
-    await hasStylesheets(`extensions/${extension}/${extensionVersion}/dist`)
-  ) {
+  if (await hasStylesheets()) {
     exports['./css/*'] = './dist/*';
   }
 
