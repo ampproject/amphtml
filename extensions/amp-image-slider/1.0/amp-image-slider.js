@@ -1,3 +1,5 @@
+import {ActionTrust} from '#core/constants/action-constants';
+
 import {isExperimentOn} from '#experiments';
 
 import {BaseElement} from './base-element';
@@ -9,6 +11,18 @@ import {userAssert} from '../../../src/log';
 const TAG = 'amp-image-slider';
 
 class AmpImageSlider extends BaseElement {
+  /** @override */
+  init() {
+    this.registerApiAction(
+      'seekTo',
+      (api, invocation) => {
+        const {args} = invocation;
+        api.seekTo(args['percent']);
+      },
+      ActionTrust.LOW
+    );
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

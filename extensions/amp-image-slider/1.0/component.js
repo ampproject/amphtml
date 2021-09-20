@@ -7,6 +7,7 @@ import * as Preact from '#preact';
 import {
   useCallback,
   useEffect,
+  useImperativeHandle,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -477,6 +478,18 @@ export function ImageSliderWithRef(
   useMemo(() => {
     /* Do things */
   }, []);
+
+  /** API Function */
+  useImperativeHandle(
+    ref,
+    () =>
+      /** @type {!ImageSliderDef.ImageSliderApi} */ ({
+        seekTo: (percent = 50) => {
+          updatePositions(percent);
+        },
+      }),
+    [updatePositions]
+  );
 
   return (
     <div
