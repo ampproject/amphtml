@@ -2,11 +2,11 @@ import {withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
-import {ImageSlider} from '../component';
+import {BentoImageSlider} from '../component';
 
 export default {
   title: 'ImageSlider',
-  component: ImageSlider,
+  component: BentoImageSlider,
   decorators: [withKnobs],
 };
 
