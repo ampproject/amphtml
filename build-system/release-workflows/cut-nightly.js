@@ -116,7 +116,7 @@ async function updateBranch(octokit, sha) {
 
 /**
  * Create GitHub tag
- * @param {any} octokit
+ * @param {Octokit} octokit
  * @param {string} sha
  * @return {Promise<void>}
  */
