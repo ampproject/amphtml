@@ -7,28 +7,34 @@ const argv = require('minimist')(process.argv.slice(2));
 const commander = require('commander');
 const esprima = require('esprima');
 const fs = require('fs-extra');
+const omelette = require('omelette');
 const os = require('os');
 const path = require('path');
 const {
   updatePackages,
   updateSubpackages,
 } = require('../common/update-packages');
-const {cyan, green, magenta, red} = require('kleur/colors');
+const {cyan, green, magenta, red, yellow} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {log} = require('../common/logging');
 
 /**
  * @typedef {Function & {
  *  description: string,
- *  flags?: Object,
+ *  flags?: {[flag: string]: string},
  * }}
  */
 let TaskFuncDef;
 
 /**
- * Special-case constant that indicates if `amp --help` was invoked.
+ * Special-case constants that indicates if `amp --help`, `amp --compgen`, or
+ * `amp --setup-auto-complete` were invoked.
  */
 const isHelpTask = argv._.length == 0 && argv.hasOwnProperty('help');
+const isCompGen = !!argv.compgen;
+const isSetupAutoComplete = !!argv['setup-auto-complete'];
+
+const complete = omelette('amp');
 
 /**
  * Calculates and formats the duration for which an AMP task ran.
@@ -191,6 +197,34 @@ function getTaskDescription(taskSourceFileName, taskFuncName) {
 }
 
 /**
+ * Helper that generates terminal autocomplete suggestions.
+ * @param {string} taskName
+ * @param {string=} taskFuncName
+ * @param {string=} taskSourceFileName
+ */
+function generateAutoCompleteSuggestions(
+  taskName,
+  taskFuncName = taskName,
+  taskSourceFileName = taskName
+) {
+  if (argv.compgen == 1) {
+    process.stdout.write(`${taskName} `);
+  } else {
+    const [, invokedTask, ...invokedFlags] =
+      process.argv[process.argv.length - 1].split(/\s+/);
+    if (taskName == invokedTask) {
+      const taskFunc = getTaskFunc(taskSourceFileName, taskFuncName);
+      process.stdout.write(
+        Object.keys(taskFunc.flags ?? {})
+          .map((flag) => `--${flag}`)
+          .filter((flag) => !invokedFlags.includes(flag))
+          .join(' ')
+      );
+    }
+  }
+}
+
+/**
  * Helper that creates the tasks in AMP's toolchain based on the invocation:
  * - For `amp --help`, load all task descriptions so a list can be printed.
  * - For `amp <task> --help`, load and print just the task description + flags.
@@ -205,6 +239,14 @@ function createTask(
   taskFuncName = taskName,
   taskSourceFileName = taskName
 ) {
+  if (isSetupAutoComplete) {
+    return;
+  }
+  if (isCompGen) {
+    generateAutoCompleteSuggestions(taskName);
+    return;
+  }
+
   const isInvokedTask = argv._.includes(taskName); // `amp <task>`
   const isDefaultTask =
     argv._.length === 0 && taskName == 'default' && !isHelpTask; // `amp`
@@ -253,12 +295,44 @@ function validateUsage(task, taskName, taskFunc) {
   }
 }
 
+/** Sets up shell command autocomplete. */
+function setupAutoComplete() {
+  log(
+    yellow('Set up shell command autocomplete. Please restart your terminal.')
+  );
+  try {
+    complete.setupShellInitFile();
+  } catch (error) {
+    log(red(error.message));
+    log(
+      red('Autocomplete is supported for'),
+      cyan('bash') + ',',
+      cyan('zsh') + ',',
+      red('and'),
+      cyan('fish')
+    );
+    log('See', cyan('https://www.npmjs.com/package/omelette'), 'for details');
+  }
+}
+
 /**
  * Finalizes the task runner by doing special-case setup for `amp --help`,
  * parsing the invoked command, and printing an error message if an unknown task
  * was called.
  */
 function finalizeRunner() {
+  if (isSetupAutoComplete) {
+    setupAutoComplete();
+    return;
+  }
+  if (isCompGen) {
+    if (!process.argv[process.argv.length - 1]?.includes('--help')) {
+      process.stdout.write(' --help');
+    }
+    complete.init();
+    return;
+  }
+
   commander.addHelpCommand(false); // We already have `amp --help` and `amp <task> --help`
   if (isHelpTask) {
     commander.helpOption('--help', 'Print this list of tasks');

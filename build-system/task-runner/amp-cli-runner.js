@@ -10,10 +10,14 @@
  */
 
 const childProcess = require('child_process');
+const fs = require('fs');
 const path = require('path');
 
 /**
- * Returns the current git repo's root directory if we are inside one.
+ * Returns the current git root directory if we are inside the amphtml repo.
+ *
+ * Detects by the presence of `amp.js` in the root.
+ *
  * @return {string|undefined}
  */
 function getRepoRoot() {
@@ -22,7 +26,11 @@ function getRepoRoot() {
     shell: process.platform == 'win32' ? 'cmd' : '/bin/bash',
     encoding: 'utf-8',
   });
-  return result.status == 0 ? result.stdout.trim() : undefined;
+  const repoRoot = result.status == 0 ? result.stdout.trim() : undefined;
+  if (repoRoot && fs.existsSync(path.join(repoRoot, 'amp.js'))) {
+    return repoRoot;
+  }
+  return undefined;
 }
 
 /**
@@ -30,10 +38,13 @@ function getRepoRoot() {
  */
 function invokeAmpTaskRunner() {
   const repoRoot = getRepoRoot();
+  const isCompGen = process.argv.includes['--compgen'];
   if (repoRoot) {
     require(path.join(repoRoot, 'amp.js'));
-  } else {
-    console.log('\x1b[31mERROR:\x1b[0m Not inside a git repo');
+  } else if (!isCompGen) {
+    console.log(
+      '\x1b[31mERROR:\x1b[0m Not inside the \x1b[36mamphtml\x1b[0m git repo'
+    );
   }
 }
 

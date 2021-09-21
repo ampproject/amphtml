@@ -22,18 +22,21 @@ const ampCliRunner = 'build-system/task-runner/amp-cli-runner.js';
 async function installAmpTaskRunner() {
   const npmBinDir = getStdout('npm bin --global').trim();
   const ampBinary = path.join(npmBinDir, 'amp');
-  const ampBinaryExists = await fs.pathExists(ampBinary);
-  if (ampBinaryExists) {
-    const ampBinaryIsAScript = !(await fs.lstat(ampBinary)).isSymbolicLink();
-    if (ampBinaryIsAScript) {
-      log(green('Detected'), cyan('amp'), green('task runner.'));
-      return;
-    }
-  }
+
   log(yellow('Installing'), cyan('amp'), yellow('task runner...'));
-  await fs.remove(ampBinary);
-  await fs.copy(ampCliRunner, ampBinary);
+  await fs.copy(ampCliRunner, ampBinary, {overwrite: true});
   log(green('Installed'), cyan('amp'), green('task runner.\n'));
+
+  log(
+    yellow('Auto-complete is available for the'),
+    cyan('amp'),
+    yellow('command:')
+  );
+  log(
+    '⤷ Run',
+    cyan('amp --setup-auto-complete'),
+    'to enable shell auto-complete\n'
+  );
 }
 
 installAmpTaskRunner();
