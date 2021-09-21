@@ -20,7 +20,8 @@ amp-story[standalone] {
     --i-amphtml-story-desktop-one-panel-height: calc(100vh - var(--i-amphtml-story-desktop-one-panel-responsive-margin) * 2);
     --i-amphtml-story-desktop-one-panel-width: calc(var(--i-amphtml-story-desktop-one-panel-height) * var(--i-amphtml-story-desktop-one-panel-ratio));
     --i-amphtml-story-desktop-one-panel-border-radius: 10px;
-    font-size: calc(var(--i-amphtml-story-desktop-one-panel-height, 100vh) * .025);
+    --story-page-vw: calc(var(--i-amphtml-story-desktop-one-panel-width) * .01) !important;
+    --story-page-vh: calc(var(--i-amphtml-story-desktop-one-panel-height) * .01) !important;
   }
 
   @media(max-height: 756px) {
@@ -35,10 +36,6 @@ amp-story[standalone] {
     :root:not([data-story-supports-landscape]) {
       --i-amphtml-story-desktop-one-panel-ratio: 3 / 4;
     }
-  }
-  amp-story:not([supports-landscape]) {
-    --story-page-vw: calc(var(--i-amphtml-story-desktop-one-panel-width) * .01);
-    --story-page-vh: calc(var(--i-amphtml-story-desktop-one-panel-height) * .01);
   }
   amp-story:not([supports-landscape]) amp-story-page {
     width: var(--i-amphtml-story-desktop-one-panel-width) !important;
