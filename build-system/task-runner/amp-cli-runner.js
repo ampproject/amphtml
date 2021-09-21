@@ -38,7 +38,7 @@ function getRepoRoot() {
  */
 function invokeAmpTaskRunner() {
   const repoRoot = getRepoRoot();
-  const isCompGen = process.argv.includes['--compgen'];
+  const isCompGen = process.argv.includes('--compgen');
   if (repoRoot) {
     require(path.join(repoRoot, 'amp.js'));
   } else if (!isCompGen) {
