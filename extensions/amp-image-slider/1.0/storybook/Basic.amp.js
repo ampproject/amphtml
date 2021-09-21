@@ -23,14 +23,6 @@ export const ExampleUseCase = () => {
     'https://amp.dev/static/samples/img/canoe_900x600_blur.jpg'
   );
 
-  // return (
-  //   <amp-image-slider width="600" height="300" layout="fixed">
-  //     <img src={first} alt={'First image'}></img>
-  //     <img src={second} alt={'Second iamge'}></img>
-  //     <div first>Img1</div>
-  //     <div second>Img2</div>
-  //   </amp-image-slider>
-  // );
   return (
     <amp-image-slider
       layout="responsive"
