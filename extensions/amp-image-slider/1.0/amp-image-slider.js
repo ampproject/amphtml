@@ -12,14 +12,10 @@ const TAG = 'amp-image-slider';
 class AmpImageSlider extends BaseElement {
   /** @override */
   init() {
-    this.registerApiAction(
-      'seekTo',
-      (api, invocation) => {
-        const {args} = invocation;
-        api.seekTo(args['percent']);
-      },
-      ActionTrust.LOW
-    );
+    this.registerApiAction('seekTo', (api, invocation) => {
+      const {args} = invocation;
+      api.seekTo(args['percent']);
+    });
 
     return super.init();
   }
