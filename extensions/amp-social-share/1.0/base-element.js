@@ -1,11 +1,11 @@
 import {PreactBaseElement} from '#preact/base-element';
 
-import {SocialShare} from './component';
+import {BentoSocialShare} from './component';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = SocialShare;
+BaseElement['Component'] = BentoSocialShare;
 
 /** @override */
 BaseElement['layoutSizeDefined'] = true;
