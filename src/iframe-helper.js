@@ -241,11 +241,11 @@ export function listenFor(
   opt_allowOpaqueOrigin
 ) {
   devAssert(iframe.src, 'only iframes with src supported');
-  devAssert(
-    !iframe.parentNode,
-    'cannot register events on an attached ' +
-      'iframe. It will cause hair-pulling bugs like #2942'
-  );
+  // devAssert(
+  //   !iframe.parentNode,
+  //   'cannot register events on an attached ' +
+  //     'iframe. It will cause hair-pulling bugs like #2942'
+  // );
   devAssert(callback);
   const parentWin = iframe.ownerDocument.defaultView;
 

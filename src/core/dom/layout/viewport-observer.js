@@ -21,6 +21,8 @@ export function createViewportObserver(ioCallback, win, opts = {}) {
     isIframed(win) && needsRootBounds
       ? /** @type {?} */ (win.document)
       : undefined;
+
+  console.log(threshold);
   return new win.IntersectionObserver(ioCallback, {
     threshold,
     root,
@@ -39,15 +41,16 @@ const viewportCallbacks = new WeakMap();
  *
  * @param {!Element} element
  * @param {function(IntersectionObserverEntry)} callback
+ * @param opts
  * @return {!UnlistenDef} clean up closure to unobserve the element
  */
-export function observeIntersections(element, callback) {
+export function observeIntersections(element, callback, opts = {}) {
   const win = toWin(element.ownerDocument.defaultView);
   let viewportObserver = viewportObservers.get(win);
   if (!viewportObserver) {
     viewportObservers.set(
       win,
-      (viewportObserver = createViewportObserver(ioCallback, win))
+      (viewportObserver = createViewportObserver(ioCallback, win, opts))
     );
   }
   let callbacks = viewportCallbacks.get(element);

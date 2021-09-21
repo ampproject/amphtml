@@ -5,8 +5,14 @@ import {toWin} from '#core/window';
 import {ContainWrapper, useIntersectionObserver} from '#preact/component';
 import {setStyle} from '#core/dom/style';
 import {useMergeRefs} from '#preact/utils';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 
 const NOOP = () => {};
+
+const DEFAULT_THRESHOLDS = [
+  0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65,
+  0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1,
+];
 
 /**
  * @param {!IframeDef.Props} props
@@ -29,6 +35,30 @@ export function Iframe({
   const dataRef = useRef(null);
   const isIntersectingRef = useRef(null);
   const containerRef = useRef(null);
+
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) {
+      return;
+    }
+    const win = toWin(iframe.ownerDocument.defaultView);
+    let cleanup;
+    win.addEventListener('message', (event) => {
+      debugger;
+      cleanup = observeIntersections(
+        iframe,
+        (ioEntry) => {
+          console.log(ioEntry);
+        },
+        {
+          threshold: DEFAULT_THRESHOLDS,
+        }
+      );
+    });
+    return () => {
+      cleanup?.();
+    };
+  }, []);
 
   const updateContainerSize = (height, width) => {
     const container = containerRef.current;
