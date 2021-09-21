@@ -1,23 +1,9 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-reddit';
-import {htmlFor} from '#core/dom/static-template';
 import {serializeMessage} from '#core/3p-frame-messaging';
+import {htmlFor} from '#core/dom/static-template';
+
 import {toggleExperiment} from '#experiments';
+
 import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
@@ -49,13 +35,13 @@ describes.realWin(
 
     it('renders', async () => {
       const element = html`
-      <amp-reddit
-      layout="responsive"
-      width="300"
-      height="400"
-      data-embedtype="post"
-      data-src="https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed"
-    ></amp-reddit>
+        <amp-reddit
+          layout="responsive"
+          width="300"
+          height="400"
+          data-embedtype="post"
+          data-src="https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed"
+        ></amp-reddit>
       `;
       env.win.document.body.appendChild(element);
       await waitForRender(element);
@@ -63,27 +49,28 @@ describes.realWin(
       const iframe = element.shadowRoot.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
-        'http://ads.localhost:9876/dist.3p/current/frame.max.html' 
+        'http://ads.localhost:9876/dist.3p/current/frame.max.html'
       );
-
     });
 
     it("container's height is changed", async () => {
       const initialHeight = 300;
       const element = html`
-      <amp-reddit
-      layout="responsive"
-      width="300"
-      height="400"
-      data-embedtype="post"
-      data-src="https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed"
-    ></amp-reddit>
+        <amp-reddit
+          layout="responsive"
+          width="300"
+          height="400"
+          data-embedtype="post"
+          data-src="https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed"
+        ></amp-reddit>
       `;
       env.win.document.body.appendChild(element);
       await waitForRender(element);
 
       const impl = await element.getImpl(false);
-     const attemptChangeHeightStub = env.sandbox.stub(impl, 'attemptChangeHeight').resolves();
+      const attemptChangeHeightStub = env.sandbox
+        .stub(impl, 'attemptChangeHeight')
+        .resolves();
 
       const mockEvent = new CustomEvent('message');
       const sentinel = JSON.parse(
@@ -92,9 +79,8 @@ describes.realWin(
       mockEvent.data = serializeMessage('embed-size', sentinel, {
         'height': 1000,
       });
-      mockEvent.source = element.shadowRoot.querySelector(
-        'iframe'
-      ).contentWindow;
+      mockEvent.source =
+        element.shadowRoot.querySelector('iframe').contentWindow;
       win.dispatchEvent(mockEvent);
       expect(attemptChangeHeightStub).to.be.calledOnce.calledWith(1000);
     });
