@@ -26,8 +26,8 @@ BaseElement['props'] = {
     attr: 'initial-slider-position',
     type: 'number',
   },
-  repeatHint: {
-    attr: 'disable-hint-reappear',
+  displayHintOnce: {
+    attr: 'display-hint-once',
     type: 'boolean',
   },
   stepSize: {attr: 'step-size', type: 'number', default: 0.1},

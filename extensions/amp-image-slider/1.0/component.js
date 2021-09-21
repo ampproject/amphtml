@@ -40,11 +40,11 @@ function DisplayAs({as: Comp = 'div', ...rest}) {
  */
 export function BentoImageSliderWithRef(
   {
+    displayHintOnce,
     firstImageAs,
     firstLabelAs,
     initialPosition,
     labels,
-    repeatHint,
     secondImageAs,
     secondLabelAs,
     stepSize = 0.1,

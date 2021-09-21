@@ -6,7 +6,7 @@ var BentoImageSliderDef = {};
 /**
  * @typedef {{
  *   initialPosition: (string|undefined),
- *   repeatHint: (boolean|undefined),
+ *   displayHintOnce: (boolean|undefined),
  *   stepSize: (number),
  * }}
  */
