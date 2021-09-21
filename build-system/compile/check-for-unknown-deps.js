@@ -2,7 +2,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
-const {cyan, red, yellow} = require('../common/colors');
+const {cyan, red, yellow} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 /**

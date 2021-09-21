@@ -5,12 +5,13 @@
  * 1. action (promote|rollback)
  * 2. head (AMP version)
  * 3. base (AMP version)
- * 4. channel (beta|stable|lts)
+ * 4. channel (beta-percent|stable|lts)
  */
 
-const [action, head, base, channel] = process.argv.slice(2);
+const [action, head, base, channel, time] = process.argv.slice(2);
 
 const {addLabels, removeLabels} = require('./label-pull-requests');
+const {createOrUpdateTracker} = require('./update-issue-tracker');
 const {log} = require('../common/logging');
 const {makeRelease} = require('./make-release');
 const {publishRelease, rollbackRelease} = require('./update-release');
@@ -20,6 +21,11 @@ const {publishRelease, rollbackRelease} = require('./update-release');
  * @return {Promise<void>}
  */
 async function _promote() {
+  const supportedChannels = ['beta-percent', 'stable', 'lts'];
+  if (!supportedChannels.includes(channel)) {
+    return;
+  }
+
   try {
     await publishRelease(head);
     log('Published release', head);
@@ -30,6 +36,9 @@ async function _promote() {
 
   await addLabels(head, base, channel);
   log('Labeled PRs for release', head, 'and channel', channel);
+
+  await createOrUpdateTracker(head, base, channel, time);
+  log('Updated issue tracker for release', head, 'and channel', channel);
 }
 
 /**
@@ -37,6 +46,11 @@ async function _promote() {
  * @return {Promise<void>}
  */
 async function _rollback() {
+  const supportedChannels = ['beta-percent', 'stable', 'lts'];
+  if (!supportedChannels.includes(channel)) {
+    return;
+  }
+
   try {
     await rollbackRelease(head);
     log('Rolled back release', head);

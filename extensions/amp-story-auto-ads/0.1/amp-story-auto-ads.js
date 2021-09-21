@@ -10,6 +10,7 @@ import {
   StoryAdAutoAdvance,
   divertStoryAdAutoAdvance,
 } from '#experiments/story-ad-auto-advance';
+import {divertStoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
 import {divertStoryAdPlacements} from '#experiments/story-ad-placements';
 import {
   StoryAdSegmentExp,
@@ -141,6 +142,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
           this.config_
         );
         divertStoryAdPlacements(this.win);
+        divertStoryAdPageOutlink(this.win);
         divertStoryAdAutoAdvance(this.win);
         this.placementAlgorithm_ = getPlacementAlgo(
           this.win,

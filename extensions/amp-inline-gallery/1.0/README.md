@@ -4,15 +4,13 @@ formats:
   - websites
 teaser:
   text: Displays multiple similar pieces of content along a horizontal axis, with optional pagination dots and thumbnails.
-experimental: true
-bento: true
 ---
 
 # Bento Inline Gallery
 
 ## Usage
 
-The Bento Inline Gallery component uses a Bento Carousel component to display slides, with optional pagination dots and thumbnails. Both components must be properly installed for the environment (Web Component vs Preact). Typical usage might look like:
+The Bento Inline Gallery component uses a Bento Carousel component to display slides, with optional pagination dots and thumbnails. Both components must be properly installed for the environment (Web Component vs Preact).
 
 ### Web Component
 
@@ -46,6 +44,7 @@ The example below contains a `bento-inline-gallery` consisting of three slides w
 <head>
   <script src="https://cdn.ampproject.org/custom-elements-polyfill.js"></script>
   <script async src="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-inline-gallery-1.0.css">
 </head>
 <body>
 
@@ -88,11 +87,6 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
   amp-inline-gallery-thumbnails {
     overflow: hidden;
     position: relative;
-  }
-  amp-inline-gallery-pagination:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc),
-  amp-inline-gallery-thumbnails:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc) {
-    display: none;
-    content-visibility: hidden;
   }
 </style>
 ```
@@ -215,7 +209,3 @@ Number: ratio of width to height that slides should be displayed in.
 Default: `false`
 
 Boolean attribute indicating whether thumbnails should loop.
-
-#### Styling
-
-You may use the `BentoInlineGallery` element selector to style the carousel freely.

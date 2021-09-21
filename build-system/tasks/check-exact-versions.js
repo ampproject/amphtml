@@ -3,7 +3,7 @@
 const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
 const semver = require('semver');
-const {cyan, green, red} = require('../common/colors');
+const {cyan, green, red} = require('kleur/colors');
 const {gitDiffFileMain} = require('../common/git');
 const {log, logLocalDev, logWithoutTimestamp} = require('../common/logging');
 
@@ -12,7 +12,7 @@ const {log, logLocalDev, logWithoutTimestamp} = require('../common/logging');
  * @return {boolean}
  */
 function check(file) {
-  const json = fs.readJsonSync(file, 'utf8');
+  const json = fs.readJsonSync(file, {encoding: 'utf8'});
 
   // We purposfully ignore peerDependencies here, because that's that's for the
   // consumer to decide.

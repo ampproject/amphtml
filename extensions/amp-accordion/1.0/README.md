@@ -4,8 +4,6 @@ formats:
   - websites
 teaser:
   text: A stacked list of headers that collapse or expand content sections with user interaction.
-experimental: true
-bento: true
 ---
 
 # Bento Accordion
@@ -64,6 +62,7 @@ The example below contains an `bento-accordion` with three sections. The
 <head>
   <script src="https://cdn.ampproject.org/custom-elements-polyfill.js"></script>
   <script async src="https://cdn.ampproject.org/v0/bento-accordion-1.0.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-accordion-1.0.css">
 </head>
 <body>
   <bento-accordion id="my-accordion"{% if not format=='email'%} disable-session-states{% endif %}>
@@ -624,9 +623,3 @@ BentoAccordionHeader does not yet support any custom props
 This component supports the [common props](../../../docs/spec/bento-common-props.md) for React and Preact components.
 
 BentoAccordionContent does not yet support any custom props
-
-#### Styling
-
-You may use the `BentoAccordion` element selector to style the carousel freely.
-
-## Version notes

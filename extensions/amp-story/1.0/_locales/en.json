@@ -59,17 +59,9 @@
     "string": "WhatsApp",
     "description": "Button label for the share target that shares a link via WhatsApp."
   },
-  "18": {
-    "string": "Expand both the height and width of your window to view this experience",
-    "description": "Text for a warning screen that informs the user that stories are only supported in larger browser windows."
-  },
   "19": {
     "string": "You must enable the amp-story experiment to view this content.",
     "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
-  },
-  "20": {
-    "string": "The page is best viewed in portrait mode",
-    "description": "Text for a warning screen that informs the user that stories are only supported in portrait orientation."
   },
   "21": {
     "string": "We're sorry, it looks like your browser doesn't support this experience",
@@ -118,14 +110,6 @@
   "36": {
     "string": "Expand Tweet",
     "description": "Label in the tooltip text for when a Twitter embed is expandable."
-  },
-  "37": {
-    "string": "Expand the height of your window to view this experience",
-    "description": "Text for a warning screen that informs the user that stories are only supported in taller browser windows."
-  },
-  "38": {
-    "string": "Expand the width of your window to view this experience",
-    "description": "Text for a warning screen that informs the user that stories are only supported in wider browser windows."
   },
   "62": {
     "string": "Share starting from this page",

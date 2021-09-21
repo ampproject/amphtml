@@ -1,36 +1,188 @@
 {
-  "2": {"string": "Puudutage nuppu Järgmine"},
-  "3": {"string": "Puudutage nuppu Tagasi"},
-  "4": {"string": "Linki ei saanud lõikelauale kopeerida :("},
-  "5": {"string": "Link kopeeriti!"},
-  "6": {"string": "E-post"},
-  "7": {"string": "Facebook"},
-  "8": {"string": "Google+"},
-  "9": {"string": "Hangi link"},
-  "10": {"string": "LinkedIn"},
-  "11": {"string": "Pinterest"},
-  "12": {"string": "SMS"},
-  "14": {"string": "Tumblr"},
-  "15": {"string": "Twitter"},
-  "16": {"string": "WhatsApp"},
-  "18": {
-    "string": "Selle sisu vaatamiseks suurendage nii akna kõrgust kui ka laiust"
+  "10": {
+    "string": "LinkedIn"
   },
-  "19": {"string": "Selle sisu vaatamiseks peate lubama AMP-loo katse."},
-  "20": {"string": "Lehte on kõige parem vaadata vertikaalpaigutuses"},
-  "21": {"string": "Kahjuks näib, et teie brauser ei toeta seda sisu"},
-  "22": {"string": "Nõustu"},
-  "23": {"string": "Keeldu"},
-  "25": {"string": "Kuva algsel domeenil:"},
-  "26": {"string": "Lisateave AMP tulemuste kohta"},
-  "27": {"string": "Jätka ikkagi"},
-  "31": {"string": "Heli on väljas"},
-  "32": {"string": "Heli on sees"},
-  "33": {"string": "Sellel lehel pole heli"},
-  "34": {"string": "Esita video"},
-  "35": {"string": "Pühkige üles"},
-  "36": {"string": "Laienda säutsu"},
-  "37": {"string": "Selle sisu vaatamiseks suurendage akna kõrgust"},
-  "38": {"string": "Selle kasutuskogemuse vaatamiseks suurendage akna laiust"},
-  "63": {"string": "Line"}
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "SMS"
+  },
+  "13": {
+    "string": "Veel"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
+  "19": {
+    "string": "Selle sisu vaatamiseks peate lubama amp-story kogemuse."
+  },
+  "2": {
+    "string": "Toksake valikut Järgmine"
+  },
+  "21": {
+    "string": "Vabandame, kahjuks ei saa teie brauseris seda lugu vaadata"
+  },
+  "22": {
+    "string": "Nõustun"
+  },
+  "23": {
+    "string": "Keeldun"
+  },
+  "25": {
+    "string": "Kuva algses domeenis:"
+  },
+  "26": {
+    "string": "Lisateave AMP tulemuste kohta"
+  },
+  "27": {
+    "string": "Jätka sellegipoolest"
+  },
+  "3": {
+    "string": "Toksake valikut Tagasi"
+  },
+  "31": {
+    "string": "Heli välja"
+  },
+  "32": {
+    "string": "Heli sisse"
+  },
+  "33": {
+    "string": "Sellel lehel pole heli"
+  },
+  "34": {
+    "string": "Esita video"
+  },
+  "35": {
+    "string": "Pühkige üles"
+  },
+  "36": {
+    "string": "Laiendage säutsu"
+  },
+  "4": {
+    "string": "Linki ei saanud lõikelauale kopeerida :("
+  },
+  "5": {
+    "string": "Link on kopeeritud!"
+  },
+  "6": {
+    "string": "E-post"
+  },
+  "62": {
+    "string": "Jaga alates sellest lehest"
+  },
+  "63": {
+    "string": "Line"
+  },
+  "64": {
+    "string": "Uuendatud"
+  },
+  "65": {
+    "string": "Video esitamine nurjus"
+  },
+  "66": {
+    "string": "Vaigista lugu"
+  },
+  "67": {
+    "string": "Tühista loo vaigistus"
+  },
+  "68": {
+    "string": "Loo teave"
+  },
+  "69": {
+    "string": "Jaga lugu"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "70": {
+    "string": "Ava/peida loo menüü"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "1. näpunäide 2st"
+  },
+  "76": {
+    "string": "Toksake, et liikuda järgmisele kuvale"
+  },
+  "77": {
+    "string": "Järgmine"
+  },
+  "78": {
+    "string": "2. näpunäide 2st"
+  },
+  "79": {
+    "string": "Nipsake, et liikuda järgmise loo juurde"
+  },
+  "8": {
+    "string": "Google+"
+  },
+  "80": {
+    "string": "Sain aru"
+  },
+  "81": {
+    "string": "Näpunäide"
+  },
+  "82": {
+    "string": "Eelmine leht"
+  },
+  "83": {
+    "string": "Aktiveeri"
+  },
+  "84": {
+    "string": "TULEMUS:"
+  },
+  "85": {
+    "string": "Peata lugu"
+  },
+  "86": {
+    "string": "Esita lugu"
+  },
+  "87": {
+    "string": "Sule"
+  },
+  "88": {
+    "string": "Liigu järgmise juurde"
+  },
+  "89": {
+    "string": "Teie vastus saadetakse aadressile"
+  },
+  "9": {
+    "string": "Hangi link"
+  },
+  "90": {
+    "string": "Järgmine lugu"
+  },
+  "91": {
+    "string": "Järgmine leht"
+  },
+  "92": {
+    "string": "Taasesita"
+  },
+  "93": {
+    "string": "Eelmine leht"
+  },
+  "96": {
+    "string": "Uurimiseks liigutage seadet"
+  },
+  "97": {
+    "string": "Avamine"
+  }
 }
