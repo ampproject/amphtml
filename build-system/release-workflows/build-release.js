@@ -1,7 +1,7 @@
 'use strict';
 
 const fs = require('fs-extra');
-const {runCiJob} = require('./ci-job');
+const {runReleaseJob} = require('./release-job');
 const {timedExecOrThrow} = require('../pr-check/utils');
 
 /**
@@ -10,7 +10,7 @@ const {timedExecOrThrow} = require('../pr-check/utils');
 
 const jobName = 'build-release.js';
 
-runCiJob(jobName, async () => {
+runReleaseJob(jobName, async () => {
   const {ESM, FLAVOR} = process.env;
   timedExecOrThrow(`amp release --flavor=${FLAVOR} --${ESM}`);
   fs.ensureDirSync(`/tmp/workspace/releases/${FLAVOR}/${ESM}`);

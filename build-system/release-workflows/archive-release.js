@@ -5,7 +5,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const {cyan} = require('kleur/colors');
 const {log} = require('../common/logging');
-const {runCiJob} = require('./ci-job');
+const {runReleaseJob} = require('./release-job');
 const {timedExecOrDie} = require('../pr-check/utils');
 
 /**
@@ -67,7 +67,7 @@ function mergeFilesTxt_(flavor) {
   });
 }
 
-runCiJob(jobName, () => {
+runReleaseJob(jobName, () => {
   fs.ensureDirSync(DEST_DIR);
 
   for (const flavor of fs.readdirSync(SRCS_DIR)) {

@@ -15,7 +15,7 @@ const {updatePackages} = require('../common/update-packages');
  * @param {Function} workflow
  * @return {Promise<void>}
  */
-async function runCiJob(jobName, workflow) {
+async function runReleaseJob(jobName, workflow) {
   setLoggingPrefix(jobName);
   const startTime = startTimer(jobName);
   try {
@@ -29,5 +29,5 @@ async function runCiJob(jobName, workflow) {
 }
 
 module.exports = {
-  runCiJob,
+  runReleaseJob,
 };
