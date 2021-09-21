@@ -199,13 +199,13 @@ function getTaskDescription(taskSourceFileName, taskFuncName) {
 /**
  * Helper that generates terminal autocomplete suggestions.
  * @param {string} taskName
- * @param {string=} taskFuncName
- * @param {string=} taskSourceFileName
+ * @param {string} taskFuncName
+ * @param {string} taskSourceFileName
  */
 function generateAutoCompleteSuggestions(
   taskName,
-  taskFuncName = taskName,
-  taskSourceFileName = taskName
+  taskFuncName,
+  taskSourceFileName
 ) {
   if (argv.compgen == 1) {
     process.stdout.write(`${taskName} `);
@@ -243,7 +243,7 @@ function createTask(
     return;
   }
   if (isCompGen) {
-    generateAutoCompleteSuggestions(taskName);
+    generateAutoCompleteSuggestions(taskName, taskFuncName, taskSourceFileName);
     return;
   }
 
