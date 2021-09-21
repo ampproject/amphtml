@@ -111,31 +111,20 @@ async function writeFromTemplateDir(
     await fs.mkdirp(path.dirname(destination));
 
     // Skip if the destination file already exists
-    let fileHandle;
-    try {
-      fileHandle = await fs.open(destination, 'wx');
-    } catch (e) {
-      if (e.code !== 'EEXIST') {
-        throw e;
-      }
-      if (!argv.overwrite) {
-        logLocalDev(
-          yellow('WARNING:'),
-          'Skipping existing file',
-          cyan(destination)
-        );
-        continue;
-      }
+    if (await fs.pathExists(destination)) {
       logLocalDev(
         yellow('WARNING:'),
-        'Overwriting existing file',
+        argv.overwrite ? 'Overwriting' : 'Skipping',
+        'existing file',
         cyan(destination)
       );
+      if (!argv.overwrite) {
+        continue;
+      }
     }
 
     const template = await fs.readFile(templatePath, 'utf8');
-    await fs.write(fileHandle, replace(template, replacements));
-    await fs.close(fileHandle);
+    await fs.writeFile(destination, replace(template, replacements));
 
     logLocalDev(green('SUCCESS:'), 'Created', cyan(destination));
 
@@ -155,11 +144,7 @@ async function insertExtensionBundlesConfig(
   bundle,
   destination = extensionBundlesJson
 ) {
-  let extensionBundles = [];
-  try {
-    extensionBundles = await fs.readJson(destination, {throws: false});
-  } catch (_) {}
-
+  const extensionBundles = fs.readJsonSync(destination, {throws: false}) ?? [];
   const existingOrNull = extensionBundles.find(
     ({name}) => name === bundle.name
   );
