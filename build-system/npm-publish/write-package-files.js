@@ -25,17 +25,17 @@ async function shouldSkip() {
 }
 
 /**
- * Determines whether the current extension contains CSS files
+ * Returns relative paths to all the extension's CSS file
  *
  * @return {Promise<boolean>}
  */
-async function hasStylesheets() {
-  return (
-    (
-      await fastGlob(
-        `extensions/${extension}/${extensionVersion}/dist/**/*.css`
-      )
-    ).length > 0
+async function getStylesheets() {
+  const files = await fastGlob(
+    `extensions/${extension}/${extensionVersion}/dist/**/*.css`
+  );
+
+  return files.map((path) =>
+    path.replace(`extensions/${extension}/${extensionVersion}/dist/`, '')
   );
 }
 
@@ -70,8 +70,8 @@ async function writePackageJson() {
     },
   };
 
-  if (await hasStylesheets()) {
-    exports['./css/*'] = './dist/*';
+  for (const stylesheet of await getStylesheets()) {
+    exports[`./${stylesheet}`] = `./dist/${stylesheet}`;
   }
 
   const json = {
