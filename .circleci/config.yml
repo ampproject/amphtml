@@ -626,5 +626,6 @@ workflows:
             - 'Initialize Repository'
       - archive_release:
           name: 'Archive Release'
+          <<: *release_builds_only
           requires:
             - amp_release
