@@ -81,6 +81,7 @@
   text-overflow: ellipsis !important;
   top: 35px !important;
   white-space: nowrap !important;
+  width: calc(100% - 112px) !important;
 }
 
 .i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close {
