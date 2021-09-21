@@ -505,14 +505,17 @@ export function BentoImageSliderWithRef(
       </div>
       <div
         ref={rightMaskRef}
-        classList={[styles.imageSliderRightMask, styles.imageSliderPushRight]}
+        class={objstr({
+          [styles.imageSliderRightMask]: true,
+          [styles.imageSliderPushRight]: true,
+        })}
       >
         <div
           ref={rightLabelWrapperRef}
-          classList={[
-            styles.imageSliderLabelWrapper,
-            styles.imageSliderPushLeft,
-          ]}
+          class={objstr({
+            [styles.imageSliderLabelWrapper]: true,
+            [styles.imageSliderPushLeft]: true,
+          })}
         >
           <div ref={rightLabelRef} />
           {/* { ??? rightImageRef with class="i-amphtml-image-slider-push-left" ??? } */}
@@ -546,9 +549,17 @@ export function BentoImageSliderWithRef(
 
       {/* Bar */}
       <div ref={barRef}>
-        <div classList={[styles.imageSliderBar, styles.imageSliderPushRight]}>
+        <div
+          class={objstr({
+            [styles.imageSliderBar]: true,
+            [styles.imageSliderPushRight]: true,
+          })}
+        >
           <div
-            classList={[styles.imageSliderBarStick, styles.imageSliderPushLeft]}
+            class={objstr({
+              [styles.imageSliderBarStick]: true,
+              [styles.imageSliderPushLeft]: true,
+            })}
           />
         </div>
       </div>
