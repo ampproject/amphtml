@@ -1,9 +1,3 @@
----
-$category@: ads-analytics
-formats:
-  - websites
----
-
 # Bento Social Share
 
 ## Usage
