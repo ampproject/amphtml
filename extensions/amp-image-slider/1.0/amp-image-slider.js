@@ -1,5 +1,3 @@
-import {ActionTrust} from '#core/constants/action-constants';
-
 import {isExperimentOn} from '#experiments';
 
 import {BaseElement} from './base-element';
@@ -16,8 +14,6 @@ class AmpImageSlider extends BaseElement {
       const {args} = invocation;
       api.seekTo(args['percent']);
     });
-
-    return super.init();
   }
 
   /** @override */
