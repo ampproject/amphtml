@@ -1,12 +1,12 @@
 import {PreactBaseElement} from '#preact/base-element';
 
-import {ImageSlider} from './component';
+import {BentoImageSlider} from './component';
 import {CSS as COMPONENT_CSS} from './component.jss';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = ImageSlider;
+BaseElement['Component'] = BentoImageSlider;
 
 /** @override */
 BaseElement['props'] = {

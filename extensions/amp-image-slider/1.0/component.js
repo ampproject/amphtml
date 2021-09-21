@@ -25,11 +25,11 @@ import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 const VALID_IMAGE_TAGNAMES = new Set(['AMP-IMG', 'IMG']);
 
 /**
- * @param {!ImageSliderDef.Props} props
- * @param {{current: ?ImageSliderDef.ImageSliderApi}} ref
+ * @param {!BentoImageSliderDef.Props} props
+ * @param {{current: ?BentoImageSliderDef.BentoImageSliderApi}} ref
  * @return {PreactDef.Renderable}
  */
-export function ImageSliderWithRef(
+export function BentoImageSliderWithRef(
   {images, initialPosition, labels, repeatHint, stepSize = 0.1, ...rest},
   ref
 ) {
@@ -477,7 +477,7 @@ export function ImageSliderWithRef(
   useImperativeHandle(
     ref,
     () =>
-      /** @type {!ImageSliderDef.ImageSliderApi} */ ({
+      /** @type {!BentoImageSliderDef.BentoImageSliderApi} */ ({
         seekTo: (percent = 50) => {
           updatePositions(percent);
         },
@@ -556,6 +556,6 @@ export function ImageSliderWithRef(
   );
 }
 
-const ImageSlider = forwardRef(ImageSliderWithRef);
-ImageSlider.displayName = 'ImageSlider'; // Make findable for tests.
-export {ImageSlider};
+const BentoImageSlider = forwardRef(BentoImageSliderWithRef);
+BentoImageSlider.displayName = 'BentoImageSlider'; // Make findable for tests.
+export {BentoImageSlider};

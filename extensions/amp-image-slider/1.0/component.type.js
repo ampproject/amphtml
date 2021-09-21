@@ -1,7 +1,7 @@
 /** @externs */
 
 /** @const */
-var ImageSliderDef = {};
+var BentoImageSliderDef = {};
 
 /**
  * @typedef {{
@@ -10,10 +10,10 @@ var ImageSliderDef = {};
  *   stepSize: (number),
  * }}
  */
-ImageSliderDef.Props;
+BentoImageSliderDef.Props;
 
 /** @interface */
-ImageSliderDef.ImageSliderApi = class {
+BentoImageSliderDef.BentoImageSliderApi = class {
   /**
    * Seeks Bar to specified percentage in slider.
    * 0-49 for right side image, 50 for both image (as half) and 51-100 for left side image.
