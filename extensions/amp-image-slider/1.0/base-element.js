@@ -14,7 +14,7 @@ BaseElement['props'] = {
   labels: {selector: 'div', single: false, clone: true},
   initialPosition: {
     attr: 'initial-slider-position',
-    type: 'string',
+    type: 'number',
   },
   repeatHint: {
     attr: 'disable-hint-reappear',
