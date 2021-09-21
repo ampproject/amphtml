@@ -1,6 +1,7 @@
 import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {createElementWithAttributes, removeElement} from '#core/dom';
 import {isArray} from '#core/types';
+import {deepMerge, dict} from '#core/types/object';
 import {getWin} from '#core/window';
 
 import {Services} from '#service';
@@ -30,7 +31,7 @@ export function insertAnalyticsElement(
     doc,
     'amp-analytics',
     opt_useUrlConfig
-      ? config
+      ? deepMerge(config, {'trigger': disableImmediate ? '' : 'immediate'})
       : dict({
           'sandbox': 'true',
           'trigger': disableImmediate ? '' : 'immediate',
