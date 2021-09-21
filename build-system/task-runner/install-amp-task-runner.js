@@ -32,18 +32,22 @@ async function installAmpTaskRunner() {
     cyan('amp'),
     yellow('command:')
   );
-  if (process.env.SHELL?.includes('bash') && process.platform === 'darwin') {
-    log(
-      '⤷ Run',
-      cyan('brew install bash-completion'),
-      'to install auto-complete support for Bash on MacOS'
-    );
-  }
   log(
     '⤷ Run',
     cyan('amp --setup-auto-complete'),
     'to enable shell auto-complete\n'
   );
+  if (process.env.SHELL?.includes('bash') && process.platform === 'darwin') {
+    log(
+      'Note that MacOS requires',
+      cyan('bash-completion'),
+      'to be installed for auto-complete to function.'
+    );
+    log(
+      'If you are using Homebrew, install it by running',
+      cyan('brew install bash-completion')
+    );
+  }
 }
 
 installAmpTaskRunner();
