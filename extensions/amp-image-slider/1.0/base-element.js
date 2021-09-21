@@ -10,8 +10,18 @@ BaseElement['Component'] = BentoImageSlider;
 
 /** @override */
 BaseElement['props'] = {
-  images: {selector: 'img' || 'amp-img', single: false, clone: true},
-  labels: {selector: 'div', single: false, clone: true},
+  firstImageAs: {
+    selector: 'img[slot="first-image"]' || 'amp-img[slot="first-image"]',
+    single: true,
+    as: true,
+  },
+  secondImageAs: {
+    selector: 'img[slot="second-image"]' || 'amp-img[slot="second-image"]',
+    single: true,
+    as: true,
+  },
+  firstLabelAs: {selector: 'div[slot="first-label"', single: true, as: true},
+  secondLabelAs: {selector: 'div[slot="second-label"', single: true, as: true},
   initialPosition: {
     attr: 'initial-slider-position',
     type: 'number',

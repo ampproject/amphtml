@@ -25,12 +25,31 @@ import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 const VALID_IMAGE_TAGNAMES = new Set(['AMP-IMG', 'IMG']);
 
 /**
+ * Displays given component with supplied props.
+ * @param {*} component Component to render
+ * @return {PreactDef.Renderable}
+ */
+function DisplayAs({as: Comp = 'div', ...rest}) {
+  return <Comp {...rest} />;
+}
+
+/**
  * @param {!BentoImageSliderDef.Props} props
  * @param {{current: ?BentoImageSliderDef.BentoImageSliderApi}} ref
  * @return {PreactDef.Renderable}
  */
 export function BentoImageSliderWithRef(
-  {images, initialPosition, labels, repeatHint, stepSize = 0.1, ...rest},
+  {
+    firstImageAs,
+    firstLabelAs,
+    initialPosition,
+    labels,
+    repeatHint,
+    secondImageAs,
+    secondLabelAs,
+    stepSize = 0.1,
+    ...rest
+  },
   ref
 ) {
   /** Common variables */
@@ -416,56 +435,16 @@ export function BentoImageSliderWithRef(
     doc.current = containerRef.current.ownerDocument;
     //setIsEdge(Services.platformFor(win).isEdge());
 
-    /** Retrieve Images */
-    images.forEach((child) => {
-      // TODO (@AnuragVasanwala): Please remove 'VALID_IMAGE_TAGNAMES' check for Preact.
-      if (VALID_IMAGE_TAGNAMES.has(child.type.toUpperCase())) {
-        if (leftImageRef.current == null) {
-          // First encountered = left image
-          //leftImageRef.current = images[0];
-        } else if (rightImageRef.current == null) {
-          // Second encountered = right image
-          //rightImageRef.current = images[1];
-          images[1].key.classList.add('i-amphtml-image-slider-push-left');
-        } else {
-          // TODO (@AnuragVasanwala): Assert Error - Should not contain more than 2 images.
-        }
-      }
-    });
-
+    // TODO (@AnuragVasanwala): Assert Error - Should not contain more than 2 images.
     // TODO (@AnuragVasanwala): Assert error if images != 2
-
-    /** Retrive Lables */
-    labels.forEach((child) => {
-      if (child.type.toUpperCase() === 'DIV') {
-        if (child.props.first !== undefined) {
-          // Fetch first(left) Image Lable
-          leftLabelRef.current = createElementWithAttributes(
-            doc.current,
-            child.type,
-            child.props
-          );
-          leftLabelRef.current./*OK*/ innerHTML = child.key./*OK*/ innerHTML;
-        } else if (child.props.second !== undefined) {
-          // Fetch second(right) Image Lable
-          rightLabelRef.current = createElementWithAttributes(
-            doc.current,
-            child.type,
-            child.props
-          );
-          rightLabelRef.current./*OK*/ innerHTML = child.key./*OK*/ innerHTML;
-        } else {
-          // TODO (@AnuragVasanwala): Assert Error - Should not contain div rather than first and second
-        }
-      }
-    });
+    // TODO (@AnuragVasanwala): Assert Error - Should not contain div rather than first and second
 
     // Notice: hints are attached after amp-img finished loading
     // buildHint();
     // checkARIA();
 
     registerEvents();
-  }, [images, labels, registerEvents]);
+  }, [registerEvents]);
   useLayoutEffect(() => {
     /* Do things */
   }, []);
@@ -498,9 +477,8 @@ export function BentoImageSliderWithRef(
       {/* Masks */}
       <div ref={leftMaskRef} class={styles.imageSliderLeftMask}>
         <div ref={leftLabelWrapperRef} class={styles.imageSliderLabelWrapper}>
-          <div ref={leftLabelRef} />
-          {/* { ??? leftImageRef ??? } */}
-          {images[0]}
+          <div ref={leftLabelRef}>{DisplayAs(firstLabelAs)}</div>
+          {DisplayAs(firstImageAs)}
         </div>
       </div>
       <div
@@ -517,9 +495,8 @@ export function BentoImageSliderWithRef(
             [styles.imageSliderPushLeft]: true,
           })}
         >
-          <div ref={rightLabelRef} />
-          {/* { ??? rightImageRef with class="i-amphtml-image-slider-push-left" ??? } */}
-          {images[1]}
+          <div ref={rightLabelRef}>{DisplayAs(secondLabelAs)}</div>
+          {DisplayAs(secondImageAs)}
         </div>
       </div>
 
