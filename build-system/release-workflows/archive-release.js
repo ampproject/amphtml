@@ -39,9 +39,10 @@ function mergeOutputs_(flavor) {
 function mergeFilesTxt_(flavor) {
   const /** @type Map<string, Set<string>> */ filesByRtv = new Map();
 
-  for (const filesTxtPath of fastGlob.sync(
+  const filesTxtPaths = fastGlob.sync(
     path.join(SRCS_DIR, flavor, '*/org-cdn/rtv/*/files.txt')
-  )) {
+  );
+  for (const filesTxtPath of filesTxtPaths) {
     // filesTxtPath is guaranteed to end with '/<15-digits-rtv>/files.txt', so
     // we can extract the RTV with simple negative start/end indexes.
     const rtv = filesTxtPath.slice(-25, -10);
