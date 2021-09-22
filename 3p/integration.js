@@ -180,7 +180,6 @@ import {my6sense} from '#ads/vendors/my6sense';
 import {myfinance} from '#ads/vendors/myfinance';
 import {myoffrz} from '#ads/vendors/myoffrz';
 import {mytarget} from '#ads/vendors/mytarget';
-import {myua} from '../ads/vendors/myua';
 import {mywidget} from '#ads/vendors/mywidget';
 import {nativeroll} from '#ads/vendors/nativeroll';
 import {nativery} from '#ads/vendors/nativery';
