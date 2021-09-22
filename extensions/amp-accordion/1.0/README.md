@@ -1,11 +1,3 @@
----
-$category@: layout
-formats:
-  - websites
-teaser:
-  text: A stacked list of headers that collapse or expand content sections with user interaction.
----
-
 # Bento Accordion
 
 ## Usage
