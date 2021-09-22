@@ -5,6 +5,11 @@ import {toWin} from '#core/window';
 import {ContainWrapper, useIntersectionObserver} from '#preact/component';
 import {setStyle} from '#core/dom/style';
 import {useMergeRefs} from '#preact/utils';
+import {
+  DEFAULT_THRESHOLD,
+  cloneEntryForCrossOrigin,
+} from '../../../src/utils/intersection-observer-3p-host';
+import {postMessage} from '../../../src/iframe-helper';
 
 const NOOP = () => {};
 
@@ -29,6 +34,41 @@ export function Iframe({
   const dataRef = useRef(null);
   const isIntersectingRef = useRef(null);
   const containerRef = useRef(null);
+
+  const viewabilityCb = (entries) => {
+    const iframe = iframeRef.current;
+    if (!iframe) {
+      return;
+    }
+    postMessage(
+      iframe,
+      MessageType.INTERSECTION,
+      cloneEntryForCrossOrigin(entries[0]),
+      window.location.origin
+    );
+  };
+
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) {
+      return;
+    }
+    const win = toWin(iframe.ownerDocument.defaultView);
+    let observer;
+    win.addEventListener('message', (event) => {
+      if (event.data?.type !== MessageType.SEND_INTERSECTIONS) {
+        return;
+      }
+      observer = new win.IntersectionObserver(viewabilityCb, {
+        threshold: DEFAULT_THRESHOLD,
+      });
+      observer.observe(iframe);
+    });
+    return () => {
+      observer.unobserve(iframe);
+      observer = null;
+    };
+  }, []);
 
   const updateContainerSize = (height, width) => {
     const container = containerRef.current;
