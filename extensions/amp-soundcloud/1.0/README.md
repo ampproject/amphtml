@@ -1,11 +1,3 @@
----
-$category@: media
-formats:
-  - websites
-teaser:
-  text: Displays a Soundcloud clip.
----
-
 # Bento Soundcloud
 
 ## Usage
