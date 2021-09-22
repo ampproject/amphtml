@@ -1,11 +1,3 @@
----
-$category@: media
-formats:
-  - websites
-teaser:
-  text: Displays an Embedly card.
----
-
 # Bento Embedly Card
 
 ## Behavior

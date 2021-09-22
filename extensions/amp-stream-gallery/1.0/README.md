@@ -1,11 +1,3 @@
----
-$category@: layout
-formats:
-  - websites
-teaser:
-  text: Displays multiple similar pieces of content at a time, for features like related products or articles.
----
-
 # Bento Stream Gallery
 
 ## Usage
