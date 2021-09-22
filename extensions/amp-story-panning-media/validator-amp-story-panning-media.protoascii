@@ -19,11 +19,11 @@ tags: {  # <amp-story-panning-media>
   }
   attrs: {
     name: "data-x"
-    value_regex: "-?\\d+\\.?\\d*(%)"
+    value_regex: "-?(0|[0-9]?\d\.?\d*%|100%)"
   }
   attrs: {
     name: "data-y"
-    value_regex: "-?\\d+\\.?\\d*(%)"
+    value_regex: "-?(0|[0-9]?\d\.?\d*%|100%)"
   }
   attrs: {
     name: "data-zoom"
@@ -31,6 +31,7 @@ tags: {  # <amp-story-panning-media>
   }
   attrs: {
     name: "lock-bounds"
+    value: ""
   }
   child_tags: {
     mandatory_num_child_tags: 1
