@@ -99,29 +99,44 @@ class IssueTracker {
  * @param {string} base
  * @param {string} channel
  * @param {string} time
- * @return {Promise<Object>}
+ * @return {Promise<void>}
  */
 async function createOrUpdateTracker(head, base, channel, time) {
+  const timePT =
+    new Date(`${time} UTC`).toLocaleString('en-US', {
+      timeZone: 'America/Los_Angeles',
+    }) + ' PT';
   const isCherrypick = Number(head) - Number(base) < 1000;
   const issue = isCherrypick
     ? await getIssue(`Release ${base}`)
     : await getIssue(`Release ${head}`);
+
+  // create new tracker
   if (!issue) {
     const tracker = new IssueTracker(head, base);
-    tracker.checkTask(channel, time);
+    tracker.checkTask(channel, timePT);
     const {footer, header, label, main, title} = tracker;
     const body = `${header}\n\n${main}\n\n${footer}`;
     return await createIssue(body, label, title);
   }
 
+  // check task
   const tracker = new IssueTracker(head, base, issue.body, issue.number);
   if (isCherrypick) {
     tracker.addCherrypickTasks(channel);
   }
-  tracker.checkTask(channel, time);
+  tracker.checkTask(channel, timePT);
   const {footer, header, main, number, title} = tracker;
   const body = `${header}\n\n${main}\n\n${footer}`;
-  return await updateIssue(body, number, title);
+  await updateIssue(body, number, title);
+
+  // if stable, close last stable's tracker
+  if (channel == 'stable' && !isCherrypick) {
+    const old = await getIssue(`Release ${base}`);
+    if (old) {
+      await updateIssue(old.body, old.number, old.title, 'closed');
+    }
+  }
 }
 
 module.exports = {createOrUpdateTracker};

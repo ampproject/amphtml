@@ -84,6 +84,9 @@ export function createSecureFrame(win, title, height, width) {
         'allowtransparency': '',
         'scrolling': 'no',
         'sandbox': sandboxVals,
+        'role': 'region',
+        'aria-label': 'Advertisement',
+        'tabindex': '0',
       })
     )
   );
