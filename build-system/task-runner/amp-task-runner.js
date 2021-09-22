@@ -7,7 +7,6 @@ const argv = require('minimist')(process.argv.slice(2));
 const commander = require('commander');
 const esprima = require('esprima');
 const fs = require('fs-extra');
-const omelette = require('omelette');
 const os = require('os');
 const path = require('path');
 const {
@@ -34,7 +33,15 @@ const isHelpTask = argv._.length == 0 && argv.hasOwnProperty('help');
 const isCompGen = !!argv.compgen;
 const isSetupAutoComplete = !!argv['setup-auto-complete'];
 
-const complete = omelette('amp');
+/** @type {import('omelette').Instance} */
+let autocomplete_;
+const autocomplete = () => {
+  if (autocomplete_ === undefined) {
+    const omelette = require('omelette');
+    autocomplete_ = omelette('amp');
+  }
+  return autocomplete_;
+};
 
 /**
  * Calculates and formats the duration for which an AMP task ran.
@@ -301,7 +308,7 @@ function setupAutoComplete() {
     yellow('Set up shell command autocomplete. Please restart your terminal.')
   );
   try {
-    complete.setupShellInitFile();
+    autocomplete().setupShellInitFile();
   } catch (error) {
     log(red(error.message));
     log(
@@ -329,7 +336,7 @@ function finalizeRunner() {
     if (!process.argv[process.argv.length - 1]?.includes('--help')) {
       process.stdout.write(' --help');
     }
-    complete.init();
+    autocomplete().init();
     return;
   }
 
