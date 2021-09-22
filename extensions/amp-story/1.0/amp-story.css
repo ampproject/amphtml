@@ -76,11 +76,11 @@ amp-story {
   touch-action: manipulation !important;
 }
 
-:root {
+html:root {
   font-size: calc(2.5 * var(--story-page-vmax, 8px));
 }
 
-:root, body {
+html:root, html:root body {
   font-size: calc(2.5 * var(--story-page-vh, 8px));
   height: 100% !important;
   margin: 0 !important;
