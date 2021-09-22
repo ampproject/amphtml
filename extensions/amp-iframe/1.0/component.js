@@ -40,11 +40,12 @@ export function Iframe({
     if (!iframe) {
       return;
     }
+    const win = toWin(iframe.ownerDocument.defaultView);
     postMessage(
       iframe,
       MessageType.INTERSECTION,
       cloneEntryForCrossOrigin(entries[0]),
-      window.location.origin
+      win.location.origin
     );
   };
 
