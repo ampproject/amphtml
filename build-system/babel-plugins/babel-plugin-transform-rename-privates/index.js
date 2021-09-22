@@ -4,10 +4,9 @@
  * where we cannot guarantee that the `_` suffix means private.
  *
  * @interface {babel.PluginPass}
- * @param {babel} babel
  * @return {babel.PluginObj}
  */
-module.exports = function (babel) {
+module.exports = function () {
   return {
     visitor: {
       Identifier(path, state) {
