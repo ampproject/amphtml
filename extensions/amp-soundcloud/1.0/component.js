@@ -13,10 +13,10 @@ const MATCHES_MESSAGING_ORIGIN = (origin) => {
 };
 
 /**
- * @param {!SoundcloudDef.Props} props
+ * @param {!BentoSoundcloudDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function Soundcloud({
+export function BentoSoundcloud({
   color,
   onLoad,
   playlistId,
@@ -67,7 +67,7 @@ export function Soundcloud({
   // Extract Media ID
   const mediaId = trackId ?? playlistId;
 
-  // Prepare Soundcloud Widget URL for iFrame
+  // Prepare BentoSoundcloud Widget URL for iFrame
   let iframeSrc =
     'https://w.soundcloud.com/player/?' +
     'url=' +

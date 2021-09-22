@@ -164,10 +164,11 @@ function gitCommitterEmail() {
  * from <branch> are prefixed with '- ', and those that were not are prefixed
  * with '+ '.
  *
+ * @param {string} ref
  * @return {!Array<string>}
  */
-function gitCherryMain() {
-  const stdout = getStdout('git cherry main').trim();
+function gitCherryMain(ref = 'HEAD') {
+  const stdout = getStdout(`git cherry main ${ref}`).trim();
   return stdout ? stdout.split('\n') : [];
 }
 

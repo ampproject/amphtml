@@ -1883,6 +1883,9 @@ export class AmpA4A extends AMP.BaseElement {
           'allowtransparency': '',
           'scrolling': 'no',
           'title': this.getIframeTitle(),
+          'role': 'region',
+          'aria-label': 'Advertisement',
+          'tabindex': '0',
         })
       )
     );
@@ -2008,6 +2011,9 @@ export class AmpA4A extends AMP.BaseElement {
         'height': this.creativeSize_.height,
         'width': this.creativeSize_.width,
         'title': this.getIframeTitle(),
+        'role': 'region',
+        'aria-label': 'Advertisement',
+        'tabindex': '0',
       })
     );
 

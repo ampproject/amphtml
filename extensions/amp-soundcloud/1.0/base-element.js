@@ -1,6 +1,6 @@
 import {PreactBaseElement} from '#preact/base-element';
 
-import {Soundcloud} from './component';
+import {BentoSoundcloud} from './component';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */
@@ -10,7 +10,7 @@ export class BaseElement extends PreactBaseElement {
 }
 
 /** @override */
-BaseElement['Component'] = Soundcloud;
+BaseElement['Component'] = BentoSoundcloud;
 
 /** @override */
 BaseElement['props'] = {
