@@ -14,7 +14,7 @@ const FULL_HEIGHT = '100%';
 const MATCHES_MESSAGING_ORIGIN = () => true;
 
 /**
- * @param {!RedditDef.Props} props
+ * @param {!BentoRedditDef.Props} props
  * @param ref
  * @return {PreactDef.Renderable}
  */
@@ -49,6 +49,6 @@ export function RedditWithRef({embedtype, requestResize, src, ...rest}, ref) {
   );
 }
 
-const Reddit = forwardRef(RedditWithRef);
-Reddit.displayName = 'Reddit';
-export {Reddit};
+const BentoReddit = forwardRef(RedditWithRef);
+BentoReddit.displayName = 'BentoReddit';
+export {BentoReddit};

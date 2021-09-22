@@ -1,11 +1,11 @@
 import {PreactBaseElement} from '#preact/base-element';
 
-import {Reddit} from './component';
+import {BentoReddit} from './component';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = Reddit;
+BaseElement['Component'] = BentoReddit;
 
 /** @override */
 BaseElement['props'] = {
