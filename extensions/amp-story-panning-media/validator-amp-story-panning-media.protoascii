@@ -19,11 +19,11 @@ tags: {  # <amp-story-panning-media>
   }
   attrs: {
     name: "data-x"
-    value_regex: "-?(0|[0-9]?\d\.?\d*%|100%)"
+    value_regex: "-?(0|[0-9]?\\d\\.?\\d*%|100%)"
   }
   attrs: {
     name: "data-y"
-    value_regex: "-?(0|[0-9]?\d\.?\d*%|100%)"
+    value_regex: "-?(0|[0-9]?\\d\\.?\\d*%|100%)"
   }
   attrs: {
     name: "data-zoom"
