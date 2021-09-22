@@ -1,5 +1,3 @@
-
-
 /* Pre-upgrade: display:block element */
 amp-inline-gallery,
 amp-inline-gallery-pagination,
@@ -20,8 +18,10 @@ amp-inline-gallery-thumbnails {
 }
 
 /* Pre-upgrade: size-defining element - hide children. */
-amp-inline-gallery-pagination:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc),
-amp-inline-gallery-thumbnails:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc) {
+amp-inline-gallery-pagination:not(.i-amphtml-built)
+  > :not([placeholder]):not([slot='i-amphtml-svc']),
+amp-inline-gallery-thumbnails:not(.i-amphtml-built)
+  > :not([placeholder]):not([slot='i-amphtml-svc']) {
   display: none;
   content-visibility: hidden;
 }
