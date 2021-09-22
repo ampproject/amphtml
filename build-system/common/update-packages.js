@@ -17,7 +17,10 @@ const {runNpmChecks} = require('./npm-checks');
  * @param {string} file Contents to write
  */
 function writeIfUpdated(patchedName, file) {
-  if (!fs.existsSync(patchedName) || fs.readFileSync(patchedName) != file) {
+  if (
+    !fs.existsSync(patchedName) ||
+    fs.readFileSync(patchedName, 'utf8') != file
+  ) {
     fs.writeFileSync(patchedName, file);
     logLocalDev('Patched', cyan(patchedName));
   }

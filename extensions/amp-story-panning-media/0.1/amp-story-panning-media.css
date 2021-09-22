@@ -17,11 +17,11 @@ amp-story-panning-media {
 }
 
 amp-story-panning-media amp-img {
-backface-visibility: hidden !important;
+  backface-visibility: hidden !important;
 }
+
 amp-story-grid-layer[template="fill"] amp-story-panning-media amp-img img {
-  /* override for layout=fill. This centers the image without clipping it */
+  /* override for layout=fill */
   position: relative !important;
   display: block !important;
-  height: 100% !important;
 }

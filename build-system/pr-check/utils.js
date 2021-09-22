@@ -327,7 +327,7 @@ function generateCircleCiShardTestFileList(globs) {
   )
     .trim()
     .replace(/\s+/g, ',');
-  fs.writeFileSync(TEST_FILES_LIST_FILE_NAME, fileList, {encoding: 'utf8'});
+  fs.writeFileSync(TEST_FILES_LIST_FILE_NAME, fileList, 'utf8');
   logWithoutTimestamp(
     'Stored list of',
     cyan(fileList.split(',').length),
