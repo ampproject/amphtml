@@ -1,11 +1,3 @@
----
-$category@: presentation
-formats:
-  - websites
-teaser:
-  text: Displays a countdown sequence to a specified date.
----
-
 # Bento Date Countdown
 
 ## Usage
