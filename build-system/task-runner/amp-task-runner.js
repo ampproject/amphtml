@@ -27,11 +27,11 @@ let TaskFuncDef;
 
 /**
  * Special-case constants that indicates if `amp --help`, `amp --compgen`, or
- * `amp --setup-auto-complete` were invoked.
+ * `amp --setup_autocomplete` were invoked.
  */
 const isHelpTask = argv._.length == 0 && argv.hasOwnProperty('help');
 const isCompGen = !!argv.compgen;
-const isSetupAutoComplete = !!argv['setup-auto-complete'];
+const isSetupAutocomplete = !!argv.setup_autocomplete;
 
 /** @type {import('omelette').Instance} */
 let autocomplete_;
@@ -209,7 +209,7 @@ function getTaskDescription(taskSourceFileName, taskFuncName) {
  * @param {string} taskFuncName
  * @param {string} taskSourceFileName
  */
-function generateAutoCompleteSuggestions(
+function generateAutocompleteSuggestions(
   taskName,
   taskFuncName,
   taskSourceFileName
@@ -246,11 +246,11 @@ function createTask(
   taskFuncName = taskName,
   taskSourceFileName = taskName
 ) {
-  if (isSetupAutoComplete) {
+  if (isSetupAutocomplete) {
     return;
   }
   if (isCompGen) {
-    generateAutoCompleteSuggestions(taskName, taskFuncName, taskSourceFileName);
+    generateAutocompleteSuggestions(taskName, taskFuncName, taskSourceFileName);
     return;
   }
 
@@ -303,7 +303,7 @@ function validateUsage(task, taskName, taskFunc) {
 }
 
 /** Sets up shell command autocomplete. */
-function setupAutoComplete() {
+function setupAutocomplete() {
   log(
     yellow('Set up shell command autocomplete. Please restart your terminal.')
   );
@@ -328,8 +328,8 @@ function setupAutoComplete() {
  * was called.
  */
 function finalizeRunner() {
-  if (isSetupAutoComplete) {
-    setupAutoComplete();
+  if (isSetupAutocomplete) {
+    setupAutocomplete();
     return;
   }
   if (isCompGen) {

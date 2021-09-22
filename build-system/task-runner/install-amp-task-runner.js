@@ -34,7 +34,7 @@ async function installAmpTaskRunner() {
   );
   log(
     '⤷ Run',
-    cyan('amp --setup-auto-complete'),
+    cyan('amp --setup_autocomplete'),
     'to enable shell auto-complete\n'
   );
   if (
