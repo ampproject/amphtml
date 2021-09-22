@@ -118,7 +118,7 @@ h6 {
   font-size: 0.67rem;
 }
 
-#i-amphtml-wrapper body {
+html:root #i-amphtml-wrapper body {
   /** AMP runtime adds a 1px border on iOS iframes, causing the body to be
       1px bigger than the viewport. */
   border-top: none !important;
