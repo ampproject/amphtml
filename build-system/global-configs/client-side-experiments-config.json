@@ -31,6 +31,13 @@
         "00",
         "03"
       ]
+    },
+    {
+      "name": "story-ad-page-outlink",
+      "percentage": 0.01,
+      "rtvPrefix": [
+        "04"
+      ]
     }
   ]
 }

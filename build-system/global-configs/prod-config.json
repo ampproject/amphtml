@@ -19,6 +19,5 @@
   "story-load-first-page-only": 1,
   "story-load-inactive-outside-viewport": 1,
   "amp-story-page-attachment-ui-v2": 1,
-  "amp-sticky-ad-to-amp-ad-v3": 0,
-  "story-ad-page-outlink": 0.01
+  "amp-sticky-ad-to-amp-ad-v3": 0
 }
