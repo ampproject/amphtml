@@ -113,9 +113,13 @@ function checkSourcemapMappings(sourcemapJson, map) {
     throw new Error('Could not find mappings array');
   }
 
-  // Zeroth sub-array corresponds to ';' and has no mappings.
-  // See https://www.npmjs.com/package/sourcemap-codec#usage
+  // See https://www.npmjs.com/package/sourcemap-codec#usage.
   const firstLineMapping = decode(sourcemapJson.mappings)[
+    // In closure builds there is a newline immediately after the AMP_CONFIG.
+    // This whole segment has no mapping to the original source.
+    // Therefore we must skip the zeroth sub-array, indicated by a ';'.
+
+    // In esbuild compiled binaries there is no newline after the config, so the first line is fair game.
     shouldUseClosure() ? 1 : 0
   ][0];
   const [, sourceIndex = 0, sourceCodeLine = 0, sourceCodeColumn] =

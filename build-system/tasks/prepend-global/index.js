@@ -198,7 +198,7 @@ async function getConfig(
  * @return {!Promise<string>}
  */
 async function getAmpConfigForFile(filename, options) {
-  const targets = MINIFIED_TARGETS.concat(UNMINIFIED_TARGETS);
+  const targets = options.minify ? MINIFIED_TARGETS : UNMINIFIED_TARGETS;
   const target = path.basename(filename, path.extname(filename));
   if (!!argv.noconfig || !targets.includes(target)) {
     return '';
