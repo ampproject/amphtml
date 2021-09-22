@@ -3,7 +3,10 @@ import {mount} from 'enzyme';
 import * as Preact from '#preact';
 
 import {BentoBaseCarousel} from '../../../amp-base-carousel/1.0/component';
-import {BentoLightboxGalleryProvider, WithBentoLightboxGallery} from '../component';
+import {
+  BentoLightboxGalleryProvider,
+  WithBentoLightboxGallery,
+} from '../component';
 import {useStyles} from '../component.jss';
 
 describes.sandboxed('BentoLightboxGallery preact component', {}, () => {
@@ -133,7 +136,12 @@ describes.sandboxed('BentoLightboxGallery preact component', {}, () => {
             <img />
           </WithBentoLightboxGallery>
           <img key="2" id="no-lightbox" />
-          <WithBentoLightboxGallery key="3" as="img" id="with-as" render={renderImg} />
+          <WithBentoLightboxGallery
+            key="3"
+            as="img"
+            id="with-as"
+            render={renderImg}
+          />
           <div key="4">
             <div>
               <WithBentoLightboxGallery id="deeply-nested">
@@ -207,7 +215,12 @@ describes.sandboxed('BentoLightboxGallery preact component', {}, () => {
             <img />
           </WithBentoLightboxGallery>
           <img key="2" id="no-lightbox" />
-          <WithBentoLightboxGallery key="3" as="img" id="with-as" render={renderImg} />
+          <WithBentoLightboxGallery
+            key="3"
+            as="img"
+            id="with-as"
+            render={renderImg}
+          />
           <div key="4">
             <div>
               <WithBentoLightboxGallery id="deeply-nested">
@@ -274,7 +287,12 @@ describes.sandboxed('BentoLightboxGallery preact component', {}, () => {
             <img />
           </WithBentoLightboxGallery>
           <img key="2" id="no-lightbox" />
-          <WithBentoLightboxGallery key="3" as="img" id="with-as" render={renderImg} />
+          <WithBentoLightboxGallery
+            key="3"
+            as="img"
+            id="with-as"
+            render={renderImg}
+          />
           <div key="4">
             <div>
               <WithBentoLightboxGallery id="deeply-nested">
@@ -325,7 +343,12 @@ describes.sandboxed('BentoLightboxGallery preact component', {}, () => {
             <img />
           </WithBentoLightboxGallery>
           <img key="2" id="no-lightbox" />
-          <WithBentoLightboxGallery key="3" as="img" id="with-as" render={renderImg} />
+          <WithBentoLightboxGallery
+            key="3"
+            as="img"
+            id="with-as"
+            render={renderImg}
+          />
           <div key="4">
             <div>
               <WithBentoLightboxGallery id="deeply-nested">
@@ -490,7 +513,12 @@ describes.sandboxed('BentoLightboxGallery preact component', {}, () => {
           <img />
         </WithBentoLightboxGallery>,
         <img key="2" id="no-lightbox" />,
-        <WithBentoLightboxGallery key="3" as="img" id="with-as" render={renderImg} />,
+        <WithBentoLightboxGallery
+          key="3"
+          as="img"
+          id="with-as"
+          render={renderImg}
+        />,
         <div key="4">
           <div>
             <WithBentoLightboxGallery id="deeply-nested">
@@ -563,7 +591,12 @@ describes.sandboxed('BentoLightboxGallery preact component', {}, () => {
           <img />
         </WithBentoLightboxGallery>,
         <img key="2" id="no-lightbox" />,
-        <WithBentoLightboxGallery key="3" as="img" id="with-as" render={renderImg} />,
+        <WithBentoLightboxGallery
+          key="3"
+          as="img"
+          id="with-as"
+          render={renderImg}
+        />,
         <div key="4">
           <div>
             <WithBentoLightboxGallery id="deeply-nested">
@@ -628,7 +661,12 @@ describes.sandboxed('BentoLightboxGallery preact component', {}, () => {
           <img />
         </WithBentoLightboxGallery>,
         <img key="2" id="no-lightbox" />,
-        <WithBentoLightboxGallery key="3" as="img" id="with-as" render={renderImg} />,
+        <WithBentoLightboxGallery
+          key="3"
+          as="img"
+          id="with-as"
+          render={renderImg}
+        />,
         <div key="4">
           <div>
             <WithBentoLightboxGallery id="deeply-nested">
@@ -678,7 +716,12 @@ describes.sandboxed('BentoLightboxGallery preact component', {}, () => {
           <img />
         </WithBentoLightboxGallery>,
         <img key="2" id="no-lightbox" />,
-        <WithBentoLightboxGallery key="3" as="img" id="with-as" render={renderImg} />,
+        <WithBentoLightboxGallery
+          key="3"
+          as="img"
+          id="with-as"
+          render={renderImg}
+        />,
         <div key="4">
           <div>
             <WithBentoLightboxGallery id="deeply-nested">
@@ -924,7 +967,11 @@ describes.sandboxed('BentoLightboxGallery preact component', {}, () => {
     it('should prefer caption to alt and aria-label props', () => {
       const wrapper = mount(
         <BentoLightboxGalleryProvider>
-          <WithBentoLightboxGallery caption="First img" alt="ignored" aria-label="ignored">
+          <WithBentoLightboxGallery
+            caption="First img"
+            alt="ignored"
+            aria-label="ignored"
+          >
             <img />
           </WithBentoLightboxGallery>
         </BentoLightboxGalleryProvider>

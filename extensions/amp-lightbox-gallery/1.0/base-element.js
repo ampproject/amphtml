@@ -12,7 +12,10 @@ import {dict} from '#core/types/object';
 import * as Preact from '#preact';
 import {PreactBaseElement} from '#preact/base-element';
 
-import {BentoLightboxGalleryProvider, WithBentoLightboxGallery} from './component';
+import {
+  BentoLightboxGalleryProvider,
+  WithBentoLightboxGallery,
+} from './component';
 import {CSS as COMPONENT_CSS} from './component.jss';
 
 import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/component.jss';

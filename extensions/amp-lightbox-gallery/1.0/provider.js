@@ -262,7 +262,9 @@ export function BentoLightboxGalleryProviderWithRef(
   );
 }
 
-const BentoLightboxGalleryProvider = forwardRef(BentoLightboxGalleryProviderWithRef);
+const BentoLightboxGalleryProvider = forwardRef(
+  BentoLightboxGalleryProviderWithRef
+);
 BentoLightboxGalleryProvider.displayName = 'BentoLightboxGalleryProvider';
 export {BentoLightboxGalleryProvider};
 /**

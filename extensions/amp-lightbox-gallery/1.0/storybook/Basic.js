@@ -3,7 +3,10 @@ import {withKnobs} from '@storybook/addon-knobs';
 import * as Preact from '#preact';
 
 import {BentoBaseCarousel} from '../../../amp-base-carousel/1.0/component';
-import {BentoLightboxGalleryProvider, WithBentoLightboxGallery} from '../component';
+import {
+  BentoLightboxGalleryProvider,
+  WithBentoLightboxGallery,
+} from '../component';
 
 export default {
   title: 'LightboxGallery',
