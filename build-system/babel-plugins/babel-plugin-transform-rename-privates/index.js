@@ -21,6 +21,13 @@ module.exports = function () {
           return;
         }
 
+        // If not within a class, then it isn't a private.
+        // It could also be exported, which could cause issues.
+        const isWithinClass = !!path.findParent((p) => p.isClassDeclaration());
+        if (!isWithinClass) {
+          return;
+        }
+
         // AMP Privates are marked via trailing suffix.
         if (!path.node.name.endsWith('_')) {
           return;
