@@ -39,7 +39,7 @@ async function installAmpTaskRunner() {
   );
   if (process.env.SHELL?.includes('bash') && process.platform === 'darwin') {
     log(
-      yellow('MacOS requires'),
+      yellow('macOS requires'),
       cyan('bash-completion'),
       yellow('to be installed for auto-complete to function on Bash:')
     );
