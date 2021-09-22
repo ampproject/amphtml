@@ -1,11 +1,3 @@
----
-$category@: layout
-formats:
-  - websites
-teaser:
-  text: Displays multiple similar pieces of content along a horizontal axis or vertical axis.
----
-
 # Bento Carousel
 
 ## Usage
