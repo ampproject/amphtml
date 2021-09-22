@@ -1047,7 +1047,6 @@ descendant_tag_list {
   tag: "AMP-FACEBOOK-LIKE"
   tag: "AMP-FACEBOOK-PAGE"
   tag: "AMP-FIT-TEXT"
-  tag: "AMP-FORM"
   tag: "AMP-FX-COLLECTION"
   tag: "AMP-FX-FLYING-CARPET"
   tag: "AMP-GFYCAT"
