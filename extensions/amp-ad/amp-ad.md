@@ -311,6 +311,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Blade](../../ads/vendors/blade.md)
 -   [brainy](../../ads/vendors/brainy.md)
 -   [Broadstreet Ads](../../ads/vendors/broadstreetads.md)
+-   [Broadbandy](../../ads/vendors/broadbandy.md)
 -   [ByPlay](../../ads/vendors/byplay.md)
 -   [CA A.J.A. Infeed](../../ads/vendors/caajainfeed.md)
 -   [CA-ProFit-X](../../ads/vendors/caprofitx.md)

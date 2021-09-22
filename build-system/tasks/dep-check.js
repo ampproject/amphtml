@@ -208,7 +208,7 @@ async function getModuleGraph(entryPointModule) {
 
 /**
  * @param {string} extensionFolder
- * @return {!Array<!ModuleDef>}
+ * @return {!Array<string>}
  */
 function getEntryPoint(extensionFolder) {
   const extension = path.basename(extensionFolder);
