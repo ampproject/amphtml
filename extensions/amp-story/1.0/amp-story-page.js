@@ -263,9 +263,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
 
-    /** @private {?Element} */
-    this.cssVariablesStyleEl_ = null;
-
     /** @private {?../../../src/layout-rect.LayoutSizeDef} */
     this.layoutBox_ = null;
 
@@ -625,21 +622,13 @@ export class AmpStoryPage extends AMP.BaseElement {
           const {height, width} = layoutBox;
           state.height = height;
           state.width = width;
-          state.vh = height / 100;
-          state.vw = width / 100;
         },
         mutate: (state) => {
           const {height, width} = state;
-          if (state.vh === 0 && state.vw === 0) {
+          if (state.height === 0 && state.width === 0) {
             return;
           }
           this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
-          if (!this.cssVariablesStyleEl_) {
-            const doc = this.win.document;
-            this.cssVariablesStyleEl_ = doc.createElement('style');
-            this.cssVariablesStyleEl_.setAttribute('type', 'text/css');
-            doc.head.appendChild(this.cssVariablesStyleEl_);
-          }
         },
       },
       {}
