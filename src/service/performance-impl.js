@@ -138,20 +138,19 @@ export class Performance {
 
     /**
      * The collection of layout shift events from the Layout Instability API,
-     * used for nominal windowed sessions according to the latest CWV
+     * used for normalized windowed sessions according to the latest CWV
      * implementation. This uses 5s max window with a 1s session gap as the
      * session size.
      * See https://github.com/GoogleChrome/web-vitals/blob/main/src/getCLS.ts
      * @private {Array<LayoutShift>}
      */
-    this.layoutShiftsNominal_ = [];
+    this.layoutShiftEntires_ = [];
 
     /**
-     * The collection of layout shift events from the Layout Instability API,
-     * used for cumulative metrics over the entire lifetime of the page.
-     * @private {Array<LayoutShift>}
+     * The sum of all layout shifts.
+     * @private {number}
      */
-    this.layoutShiftsCumulative_ = [];
+    this.layoutShiftSum_ = 0;
 
     const supportedEntryTypes =
       (this.win.PerformanceObserver &&
@@ -264,10 +263,10 @@ export class Performance {
      * (since a PerfOb is async, entries that belong in the current window may
      * arrive later).
      */
-    this.debouncedFlushNominalLayoutShiftScore_ = debounce(
+    this.debouncedFlushLayoutShiftScore_ = debounce(
       win,
       () => {
-        this.flushNominalLayoutShiftScore_();
+        this.flushLayoutShiftScore_();
       },
       CLS_SESSION_MAX + 1000
     );
@@ -413,11 +412,8 @@ export class Performance {
         // Ignore layout shift that occurs within 500ms of user input, as it is
         // likely in response to the user's action.
         if (!entry.hadRecentInput) {
-          this.tickNominalLayoutShiftScore_(entry);
-          // 1000 here is a magic number to prevent unbounded growth. We don't expect it to be reached.
-          if (this.layoutShiftsCumulative_.length < 1000) {
-            this.layoutShiftsCumulative_.push(entry);
-          }
+          this.tickLayoutShiftScore_(entry);
+          this.layoutShiftSum_ += entry.value;
         }
       } else if (entry.entryType === 'largest-contentful-paint') {
         this.largestContentfulPaint_ = entry.startTime;
@@ -514,7 +510,7 @@ export class Performance {
       state === VisibilityState.HIDDEN
     ) {
       this.tickCumulativeMetrics_();
-      this.flushNominalLayoutShiftScore_();
+      this.flushLayoutShiftScore_();
     }
   }
 
@@ -552,8 +548,8 @@ export class Performance {
    *
    * @param {!LayoutShift} entry
    */
-  tickNominalLayoutShiftScore_(entry) {
-    const entries = this.layoutShiftsNominal_;
+  tickLayoutShiftScore_(entry) {
+    const entries = this.layoutShiftEntires_;
     if (entries.length > 0) {
       const first = entries[0];
       const last = entries[entries.length - 1];
@@ -566,21 +562,21 @@ export class Performance {
         return;
       }
       // This entry is the start of a new CLS window, but we haven't flushed the old value yet.
-      this.flushNominalLayoutShiftScore_();
+      this.flushLayoutShiftScore_();
     }
     entries.push(entry);
     // Ensure we report the CLS when the session closes. We're not guaranteed
     // to get more LayoutShift entires, so we need some setTimeout magic to
     // ensure it happens.
-    this.debouncedFlushNominalLayoutShiftScore_();
+    this.debouncedFlushLayoutShiftScore_();
   }
 
   /**
-   * Records the largest Nominal CLS score, following the latest CWV standard.
+   * Records the normalized CLS score, following the latest CWV standard.
    * See https://web.dev/evolving-cls/
    */
-  flushNominalLayoutShiftScore_() {
-    const entries = this.layoutShiftsNominal_;
+  flushLayoutShiftScore_() {
+    const entries = this.layoutShiftEntires_;
     const old = this.metrics_.get(TickLabel.CUMULATIVE_LAYOUT_SHIFT);
     let union = 0;
     let sum = 0;
@@ -616,14 +612,12 @@ export class Performance {
    * amount of visibility into this metric.
    */
   tickCumulativeLayoutShiftScore_() {
-    const cls = this.layoutShifts_.reduce((sum, entry) => sum + entry.value, 0);
-
     if (this.shiftScoresTicked_ === 0) {
-      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_1, cls);
+      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_1, this.layoutShiftSum_);
       this.flush();
       this.shiftScoresTicked_ = 1;
     } else if (this.shiftScoresTicked_ === 1) {
-      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_2, cls);
+      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_2, this.layoutShiftSum_);
       this.flush();
       this.shiftScoresTicked_ = 2;
     }
