@@ -4,6 +4,7 @@ import {Signals} from '#core/data-structures/signals';
 import {whenDocumentComplete, whenDocumentReady} from '#core/document-ready';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {computedStyle} from '#core/dom/style';
+import {debounce} from '#core/types/function';
 import {dict, map} from '#core/types/object';
 
 import {Services} from '#service';
@@ -38,14 +39,42 @@ let TickEventDef;
 /**
  * @enum {number}
  */
-export const LCP_ELEMENT_TYPE = {
+export const ELEMENT_TYPE = {
   other: 0,
-  image: 1,
-  video: 2,
-  ad: 3,
-  carousel: 4,
-  bcarousel: 5,
+  image: 1 << 0,
+  video: 1 << 1,
+  ad: 1 << 2,
+  carousel: 1 << 3,
+  bcarousel: 1 << 4,
+  text: 1 << 5,
 };
+
+/**
+ * @param {!Node} node
+ * @return {ELEMENT_TYPE}
+ */
+function getElementType(node) {
+  const {tagName} = getOutermostAmpElement(node);
+  if (tagName == null) {
+    return ELEMENT_TYPE.text;
+  }
+  if (tagName === 'IMG' || tagName === 'AMP-IMG') {
+    return ELEMENT_TYPE.image;
+  }
+  if (tagName === 'VIDEO' || tagName === 'AMP-VIDEO') {
+    return ELEMENT_TYPE.video;
+  }
+  if (tagName === 'AMP-CAROUSEL') {
+    return ELEMENT_TYPE.carousel;
+  }
+  if (tagName === 'AMP-BASE-CAROUSEL') {
+    return ELEMENT_TYPE.bcarousel;
+  }
+  if (tagName === 'AMP-AD') {
+    return ELEMENT_TYPE.ad;
+  }
+  return ELEMENT_TYPE.other;
+}
 
 /**
  * Performance holds the mechanism to call `tick` to stamp out important
@@ -102,10 +131,21 @@ export class Performance {
     this.shiftScoresTicked_ = 0;
 
     /**
-     * The collection of layout shift events from the Layout Instability API.
+     * The collection of layout shift events from the Layout Instability API,
+     * used for nominal windowed sessions according to the latest CWV
+     * implementation. This uses 5s max window with a 1s session gap as the
+     * session size.
+     * See https://github.com/GoogleChrome/web-vitals/blob/main/src/getCLS.ts
      * @private {Array<LayoutShift>}
      */
-    this.layoutShifts_ = [];
+    this.layoutShiftsNominal_ = [];
+
+    /**
+     * The collection of layout shift events from the Layout Instability API,
+     * used for cumulative metrics over the entire lifetime of the page.
+     * @private {Array<LayoutShift>}
+     */
+    this.layoutShiftsCumulative_ = [];
 
     const supportedEntryTypes =
       (this.win.PerformanceObserver &&
@@ -129,10 +169,11 @@ export class Performance {
     this.supportsLayoutShift_ = supportedEntryTypes.includes('layout-shift');
 
     if (!this.supportsLayoutShift_) {
-      this.metrics_.rejectSignal(
-        TickLabel.CUMULATIVE_LAYOUT_SHIFT,
-        dev().createExpectedError('Cumulative Layout Shift not supported')
+      const e = dev().createExpectedError(
+        'Cumulative Layout Shift not supported'
       );
+      this.metrics_.rejectSignal(TickLabel.CUMULATIVE_LAYOUT_SHIFT, e);
+      this.metrics_.rejectSignal(TickLabel.CUMULATIVE_LAYOUT_SHIFT_1, e);
     }
 
     /**
@@ -186,7 +227,7 @@ export class Performance {
 
     /**
      * Which type of element was chosen as the LCP.
-     * @private {LCP_ELEMENT_TYPE}
+     * @private {ELEMENT_TYPE}
      */
     this.largestContentfulPaintType_ = null;
 
@@ -209,6 +250,15 @@ export class Performance {
      * @private {boolean}
      */
     this.googleFontExpRecorded_ = false;
+
+    /** @private */
+    this.debouncedFlushNominalLayoutShiftScore_ = debounce(
+      win,
+      () => {
+        this.flushNominalLayoutShiftScore_();
+      },
+      6000
+    );
   }
 
   /**
@@ -350,29 +400,19 @@ export class Performance {
       } else if (entry.entryType === 'layout-shift') {
         // Ignore layout shift that occurs within 500ms of user input, as it is
         // likely in response to the user's action.
-        // 1000 here is a magic number to prevent unbounded growth. We don't expect it to be reached.
-        if (!entry.hadRecentInput && this.layoutShifts_.length < 1000) {
-          this.layoutShifts_.push(entry);
+        if (!entry.hadRecentInput) {
+          this.tickNominalLayoutShiftScore_(entry);
+          // 1000 here is a magic number to prevent unbounded growth. We don't expect it to be reached.
+          if (this.layoutShiftsCumulative_.length < 1000) {
+            this.layoutShiftsCumulative_.push(entry);
+          }
         }
       } else if (entry.entryType === 'largest-contentful-paint') {
         this.largestContentfulPaint_ = entry.startTime;
         if (entry.element) {
-          const {tagName} = getOutermostAmpElement(entry.element);
-          if (tagName === 'IMG' || tagName === 'AMP-IMG') {
-            this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.image;
-          } else if (tagName === 'VIDEO' || tagName === 'AMP-VIDEO') {
-            this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.video;
-          } else if (tagName === 'AMP-CAROUSEL') {
-            this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.carousel;
-          } else if (tagName === 'AMP-BASE-CAROUSEL') {
-            this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.bcarousel;
-          } else if (tagName === 'AMP-AD') {
-            this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.ad;
-          } else {
-            this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.other;
-          }
+          this.largestContentfulPaint_ = getElementType(entry.element);
         } else {
-          this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.other;
+          this.largestContentfulPaintType_ = ELEMENT_TYPE.other;
         }
       } else if (entry.entryType == 'navigation' && !recordedNavigation) {
         [
@@ -489,7 +529,7 @@ export class Performance {
         }
       }
 
-      this.tickLayoutShiftScore_();
+      this.tickCumulativeLayoutShiftScore_();
     }
     if (this.supportsLargestContentfulPaint_) {
       this.tickLargestContentfulPaint_();
@@ -497,9 +537,64 @@ export class Performance {
   }
 
   /**
+   * Tick the layout shift metric, following the latest CWV standard. This uses
+   * a 5s maximum window with a 1s gap between events to define a "session".
+   * We report the maximum session value over the lifetime of the page as the CLS.
+   *
+   * @param {!LayoutShift} entry
+   */
+  tickNominalLayoutShiftScore_(entry) {
+    const entries = this.layoutShiftsNominal_;
+    if (entries.length > 0) {
+      const first = entries[0];
+      const last = entries[entries.length - 1];
+      if (
+        entry.startTime - last.startTime < 1000 &&
+        entry.startTime - first.startTime < 5000
+      ) {
+        // This entry continues the current CLS window.
+        entries.push(entry);
+        return;
+      }
+      // This entry is the start of a new CLS window, but we haven't flushed the old value yet.
+      this.flushNominalLayoutShiftScore_();
+    }
+    entries.push(entry);
+    this.debouncedFlushNominalLayoutShiftScore_();
+  }
+
+  /**
+   * Records the largest Nominal CLS score, following the latest CWV standard.
+   * See https://web.dev/evolving-cls/
+   */
+  flushNominalLayoutShiftScore_() {
+    const entries = this.layoutShiftsNominal_;
+    const old = this.metrics_.get(TickLabel.CUMULATIVE_LAYOUT_SHIFT);
+    let union = 0;
+    let sum = 0;
+    for (const entry of entries) {
+      if (entry.sources) {
+        for (const source of entry.sources) {
+          union |= getElementType(source.node);
+        }
+      }
+      sum += entry.value;
+    }
+    entries.length = 0;
+    if (old == null || sum > old) {
+      // We'll record the largest windowed CLS.
+      this.metrics_.reset(TickLabel.CUMULATIVE_LAYOUT_SHIFT);
+      this.metrics_.reset(TickLabel.CUMULATIVE_LAYOUT_SHIFT_TYPE_UNION);
+      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT, sum);
+      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_TYPE_UNION, union);
+      this.flush();
+    }
+  }
+
+  /**
    * Tick the layout shift score metric.
    *
-   * A value of the metric is recorded in under two names, `cls` and `cls-2`,
+   * A value of the metric is recorded in under two names, `cls-1` and `cls-2`,
    * for the first two times the page transitions into a hidden lifecycle state
    * (when the page is navigated a way from, the tab is backgrounded for
    * another tab, or the user backgrounds the browser application).
@@ -508,11 +603,11 @@ export class Performance {
    * recording the value for these first two events should provide a fair
    * amount of visibility into this metric.
    */
-  tickLayoutShiftScore_() {
+  tickCumulativeLayoutShiftScore_() {
     const cls = this.layoutShifts_.reduce((sum, entry) => sum + entry.value, 0);
 
     if (this.shiftScoresTicked_ === 0) {
-      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT, cls);
+      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_1, cls);
       this.flush();
       this.shiftScoresTicked_ = 1;
     } else if (this.shiftScoresTicked_ === 1) {
