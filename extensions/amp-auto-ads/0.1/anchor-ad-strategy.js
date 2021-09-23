@@ -96,9 +96,9 @@ export class AnchorAdStrategy {
       insertAnalyticsElement(
         adElement,
         this.customAnalytics_,
-        false,
-        false,
-        true
+        /* loadAnalytics */ false,
+        /* disableImmediate */ false,
+        /* opt_useUrlConfig */ true
       );
     }
   }

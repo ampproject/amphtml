@@ -179,9 +179,9 @@ export class Placement {
       insertAnalyticsElement(
         this.getAdElement(),
         this.customAnalytics_,
-        false,
-        false,
-        true
+        /* loadAnalytics */ false,
+        /* disableImmediate */ false,
+        /* opt_useUrlConfig */ true
       );
     }
   }
