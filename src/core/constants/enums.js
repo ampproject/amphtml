@@ -26,7 +26,6 @@ export const TickLabel = {
   FIRST_CONTENTFUL_PAINT_VISIBLE: 'fcpv',
   FIRST_PAINT: 'fp',
   FIRST_INPUT_DELAY: 'fid',
-  FIRST_INPUT_DELAY_POLYFILL: 'fid-polyfill',
   FIRST_VIEWPORT_READY: 'pc',
   GOOD_FRAME_PROBABILITY: 'gfp',
   INSTALL_STYLES: 'is',
