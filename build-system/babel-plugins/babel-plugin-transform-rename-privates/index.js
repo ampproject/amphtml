@@ -1,7 +1,6 @@
 /**
- * Renames all private variables within AMP to end with AMP_PRIVATE_ for safe
- * identification later w/ terser. At that point it may be combined with files from 3p or node_modules,
- * where we cannot guarantee that the `_` suffix means private.
+ * Renames all of AMP's class properties to have a unique suffix, `AMP_PRIVATE_`.
+ * This acts as an indicator for terser to mangle the names even when combined with 3p files.
  *
  * @interface {babel.PluginPass}
  * @return {babel.PluginObj}
@@ -23,7 +22,9 @@ module.exports = function () {
 
         // If not within a class, then it isn't a private.
         // It could also be exported, which could cause issues.
-        const isWithinClass = !!path.findParent((p) => p.isClassDeclaration());
+        const isWithinClass =
+          !path.parentPath.isClassDeclaration() &&
+          !!path.findParent((p) => p.isClassDeclaration());
         if (!isWithinClass) {
           return;
         }
