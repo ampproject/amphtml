@@ -344,7 +344,7 @@ export class Placement {
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!JsonObject} configObj
  * @return {!Array<!Placement>}
- * @param {!JsonObject} customAnalytics
+ * @param {!JsonObject|null} customAnalytics
  */
 export function getPlacementsFromConfigObj(ampdoc, configObj, customAnalytics) {
   const placementObjs = /** @type {Array} */ (configObj['placements']);
@@ -365,7 +365,7 @@ export function getPlacementsFromConfigObj(ampdoc, configObj, customAnalytics) {
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!JsonObject} placementObj
  * @param {!Array<!Placement>} placements
- * @param {!JsonObject} customAnalytics
+ * @param {!JsonObject|null} customAnalytics
  */
 function getPlacementsFromObject(
   ampdoc,

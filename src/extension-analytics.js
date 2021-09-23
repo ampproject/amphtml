@@ -13,7 +13,7 @@ import {devAssert, user} from '#utils/log';
  * Method to create scoped analytics element for any element.
  * TODO: Make this function private
  * @param {!Element} parentElement
- * @param {!JsonObject} config
+ * @param {!JsonObject|null} config
  * @param {boolean=} loadAnalytics
  * @param {boolean=} disableImmediate
  * @param {boolean=} opt_useUrlConfig
@@ -27,6 +27,13 @@ export function insertAnalyticsElement(
   opt_useUrlConfig = false
 ) {
   const doc = /** @type {!Document} */ (parentElement.ownerDocument);
+
+  if (!config) {
+    return user().error(
+      'AMP-ANALYTICS',
+      'No config object defined by arguments'
+    );
+  }
 
   if (opt_useUrlConfig && !hasOwn(config, 'config')) {
     return user().error(
