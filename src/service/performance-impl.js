@@ -421,7 +421,7 @@ export class Performance {
         }
       } else if (entry.entryType === 'largest-contentful-paint') {
         this.largestContentfulPaint_ = entry.startTime;
-        this.largestContentfulPaint_ = getElementType(entry.element);
+        this.largestContentfulPaintType_ = getElementType(entry.element);
       } else if (entry.entryType == 'navigation' && !recordedNavigation) {
         [
           'domComplete',
