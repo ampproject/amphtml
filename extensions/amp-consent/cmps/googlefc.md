@@ -9,7 +9,6 @@ The amp-consent configuration for Funding Choices is in a closed Beta, and usage
 ## Example
 
 ```html
-
 <amp-consent id="consent" layout="nodisplay" type="googlefc">
   <script type="application/json">
     {
