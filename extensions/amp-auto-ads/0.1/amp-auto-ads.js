@@ -32,8 +32,8 @@ export class AmpAutoAds extends AMP.BaseElement {
     userAssert(this.adNetwork_, 'No AdNetworkConfig for type: ' + type);
 
     if (this.element.hasAttribute('custom-analytics')) {
-      this.customAnalytics_ = this.element.getAttribute('custom-analytics');
-      this.customAnalytics_ = JSON.parse(this.customAnalytics_);
+      const customAnalytics = this.element.getAttribute('custom-analytics');
+      this.customAnalytics_ = JSON.parse(customAnalytics);
     }
 
     if (!this.adNetwork_.isEnabled(this.win)) {
