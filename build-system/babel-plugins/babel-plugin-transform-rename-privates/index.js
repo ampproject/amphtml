@@ -29,6 +29,13 @@ module.exports = function () {
           return;
         }
 
+        const isProp =
+          path.parent.type === 'MemberExpression' &&
+          path.parent.object.type === 'ThisExpression';
+        if (!isProp) {
+          return false;
+        }
+
         // AMP Privates are marked via trailing suffix.
         if (!path.node.name.endsWith('_')) {
           return;

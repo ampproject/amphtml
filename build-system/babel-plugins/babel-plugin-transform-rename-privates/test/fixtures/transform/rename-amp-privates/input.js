@@ -2,6 +2,8 @@ class Foo {
   constructor() {
     // Properties within a class should be renamed
     this.hello_ = 'world';
+    let bar_ = 'world';
+    console.log(zoo_);
   }
 }
 
