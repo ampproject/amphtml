@@ -53,10 +53,13 @@ export const ELEMENT_TYPE = {
 };
 
 /**
- * @param {!Node} node
+ * @param {?Node} node
  * @return {ELEMENT_TYPE}
  */
 function getElementType(node) {
+  if (node == null) {
+    return ELEMENT_TYPE.other;
+  }
   const {tagName} = getOutermostAmpElement(node);
   if (tagName == null) {
     return ELEMENT_TYPE.text;
@@ -258,8 +261,8 @@ export class Performance {
      * This is called to ensure we'll report the current cls window's value
      * after the window closes. Its debounce time is intentionally longer than
      * the max session time so that we're certain the sesssion has closed
-     * (since a PerfOb is async, we entries that belong in the current window
-     * may arrive later).
+     * (since a PerfOb is async, entries that belong in the current window may
+     * arrive later).
      */
     this.debouncedFlushNominalLayoutShiftScore_ = debounce(
       win,
@@ -418,11 +421,7 @@ export class Performance {
         }
       } else if (entry.entryType === 'largest-contentful-paint') {
         this.largestContentfulPaint_ = entry.startTime;
-        if (entry.element) {
-          this.largestContentfulPaint_ = getElementType(entry.element);
-        } else {
-          this.largestContentfulPaintType_ = ELEMENT_TYPE.other;
-        }
+        this.largestContentfulPaint_ = getElementType(entry.element);
       } else if (entry.entryType == 'navigation' && !recordedNavigation) {
         [
           'domComplete',
