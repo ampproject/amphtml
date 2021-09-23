@@ -834,8 +834,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
 
   let performanceObserver;
   let viewerVisibilityState;
-  let whenFirstVisiblePromise;
-  let whenFirstVisibleResolve;
 
   function setupFakesForVisibilityStateManipulation() {
     env.sandbox.stub(env.win, 'PerformanceObserver');
@@ -849,15 +847,12 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
 
     installRuntimeServices(env.win);
 
-    whenFirstVisiblePromise = new Promise((resolve) => {
-      whenFirstVisibleResolve = resolve;
-    });
     const unresolvedPromise = new Promise(() => {});
     const viewportSize = {width: 0, height: 0};
     env.sandbox.stub(Services, 'ampdoc').returns({
       hasBeenVisible: () => {},
       onVisibilityChanged: () => {},
-      whenFirstVisible: () => whenFirstVisiblePromise,
+      whenFirstVisible: () => Promise.resolve(),
       getVisibilityState: () => viewerVisibilityState,
       getFirstVisibleTime: () => 0,
       isSingleDoc: () => true,

@@ -4,7 +4,6 @@ import {Signals} from '#core/data-structures/signals';
 import {whenDocumentComplete, whenDocumentReady} from '#core/document-ready';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {computedStyle} from '#core/dom/style';
-import {throttle} from '#core/types/function';
 import {dict, map} from '#core/types/object';
 
 import {Services} from '#service';
@@ -722,17 +721,6 @@ export class Performance {
         /* cancelUnsent */ true
       );
     }
-  }
-
-  /**
-   * Flush with a rate limit of 10 per second.
-   */
-  throttledFlush() {
-    if (!this.throttledFlush_) {
-      /** @private {function()} */
-      this.throttledFlush_ = throttle(this.win, this.flush.bind(this), 100);
-    }
-    this.throttledFlush_();
   }
 
   /**
