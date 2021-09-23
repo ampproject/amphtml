@@ -581,6 +581,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.state = DrawerState.CLOSED;
 
     this.storeService.dispatch(Action.TOGGLE_PAUSED, false);
+    this.handleSoftKeyboardOnDrawerClose_();
 
     this.mutateElement(() => {
       this.element.setAttribute('aria-hidden', true);
@@ -598,5 +599,29 @@ export class DraggableDrawer extends AMP.BaseElement {
       const owners = Services.ownersForDoc(this.element);
       owners.schedulePause(this.element, this.ampComponents_);
     });
+  }
+
+  /**
+   * Handle the soft keyboard during the closing of the drawer.
+   * @private
+   */
+  handleSoftKeyboardOnDrawerClose_() {
+    // Blur the focused element in order to dismiss the soft keyboard.
+    this.win.document.activeElement?.blur();
+    // Reset the story's scroll position, which can be unintentionally altered
+    // by the opening of the soft keyboard on Android devices.
+    this.resetStoryScrollPosition_();
+  }
+
+  /**
+   * Set the story's scroll position to its default state, if necessary.
+   * @private
+   */
+  resetStoryScrollPosition_() {
+    const storyEl = closest(
+      this.element,
+      (el) => el.tagName === 'AMP-STORY-PAGE'
+    );
+    storyEl./*OK*/ scrollTo(0, 0);
   }
 }

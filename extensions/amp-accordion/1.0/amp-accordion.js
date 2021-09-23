@@ -14,7 +14,7 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-accordion';
 
-/** @extends {PreactBaseElement<AccordionDef.AccordionApi>} */
+/** @extends {PreactBaseElement<BentoAccordionDef.AccordionApi>} */
 class AmpAccordion extends BaseElement {
   /** @override */
   init() {

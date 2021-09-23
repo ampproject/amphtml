@@ -54,10 +54,10 @@ const DEFAULT_RENDER = (data) =>
   );
 
 /**
- * @param {!DateCountdownPropsDef} props
+ * @param {!BentoDateCountdownDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function DateCountdown({
+export function BentoDateCountdown({
   datetime,
   whenEnded = DEFAULT_WHEN_ENDED,
   locale = DEFAULT_LOCALE,

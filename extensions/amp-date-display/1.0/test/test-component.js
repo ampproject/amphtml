@@ -3,7 +3,7 @@ import {mount} from 'enzyme';
 import * as Preact from '#preact';
 
 import {user} from '../../../../src/log';
-import {DateDisplay} from '../component';
+import {BentoDateDisplay} from '../component';
 
 describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
   let sandbox;
@@ -48,7 +48,7 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
       datetime: Date.parse('2001-02-03T04:05:06.007Z'),
       displayIn: 'UTC',
     };
-    const jsx = <DateDisplay {...props} />;
+    const jsx = <BentoDateDisplay {...props} />;
 
     const wrapper = mount(jsx);
 
@@ -63,7 +63,7 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
       datetime: Date.parse('2001-02-03T04:05:06.007Z'),
       displayIn: 'UTC',
     };
-    const jsx = <DateDisplay {...props} />;
+    const jsx = <BentoDateDisplay {...props} />;
 
     const wrapper = mount(jsx);
     const data = JSON.parse(wrapper.text());
@@ -95,7 +95,7 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
       datetime: Date.parse('2001-02-03T04:05:06.007Z'),
       displayIn: 'UTC',
     };
-    const jsx = <DateDisplay {...props} />;
+    const jsx = <BentoDateDisplay {...props} />;
 
     const wrapper = mount(jsx);
     const data = JSON.parse(wrapper.text());
@@ -108,7 +108,7 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
       datetime: Date.parse('2001-02-03T04:05:06.007Z'),
       displayIn: 'UTC',
     };
-    const jsx = <DateDisplay {...props} />;
+    const jsx = <BentoDateDisplay {...props} />;
 
     const wrapper = mount(jsx);
     expect(wrapper.text()).to.equal('Feb 3, 2001, 4:05 AM');
@@ -120,7 +120,7 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
       datetime: new Date('2001-02-03T04:05:06.007Z'),
       displayIn: 'UTC',
     };
-    const jsx = <DateDisplay {...props} />;
+    const jsx = <BentoDateDisplay {...props} />;
 
     const wrapper = mount(jsx);
     const data = JSON.parse(wrapper.text());
@@ -136,7 +136,7 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
       datetime: '2001-02-03T04:05:06.007Z',
       displayIn: 'UTC',
     };
-    const jsx = <DateDisplay {...props} />;
+    const jsx = <BentoDateDisplay {...props} />;
 
     const wrapper = mount(jsx);
     const data = JSON.parse(wrapper.text());
@@ -151,7 +151,7 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
       render,
       datetime: Date.parse('2001-02-03T04:05:06.007'),
     };
-    const jsx = <DateDisplay {...props} />;
+    const jsx = <BentoDateDisplay {...props} />;
 
     const wrapper = mount(jsx);
     const data = JSON.parse(wrapper.text());
@@ -191,7 +191,7 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
       displayIn: 'UTC',
       locale: 'cs',
     };
-    const jsx = <DateDisplay {...props} />;
+    const jsx = <BentoDateDisplay {...props} />;
 
     const wrapper = mount(jsx);
     const data = JSON.parse(wrapper.text());
@@ -212,7 +212,7 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
       locale: 'zh-TW',
       localeOptions: {timeStyle: 'short'},
     };
-    const jsx = <DateDisplay {...props} />;
+    const jsx = <BentoDateDisplay {...props} />;
 
     const wrapper = mount(jsx);
     const data = JSON.parse(wrapper.text());
@@ -239,7 +239,7 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
       expectedTimeZoneNamesAmericaNewYork[locale];
     it(`shows timeZoneName and timeZoneNameShort with specified TZ (${locale})`, () => {
       const jsx = (
-        <DateDisplay
+        <BentoDateDisplay
           render={render}
           datetime={Date.parse('2001-02-03T04:05:06.007Z')}
           locale={locale}
@@ -265,7 +265,7 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
         locale: 'zh-TW',
         localeOptions: {timeStyle: 'invalid'},
       };
-      const jsx = <DateDisplay {...props} />;
+      const jsx = <BentoDateDisplay {...props} />;
 
       const wrapper = mount(jsx);
       const data = JSON.parse(wrapper.text());
@@ -283,7 +283,7 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
         locale: 'zh-TW',
         localeOptions: {invalid: 'invalid'},
       };
-      const jsx = <DateDisplay {...props} />;
+      const jsx = <BentoDateDisplay {...props} />;
 
       const wrapper = mount(jsx);
       const data = JSON.parse(wrapper.text());

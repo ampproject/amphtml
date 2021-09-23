@@ -123,3 +123,30 @@ $ python
 ```
 
 Now `cd amphtml/validator` and run `python build.py`.
+
+### Locally Reproduce Validator Tests of Circle CI workflow
+
+In the case the test passes in your local machine but fails in Circle CI,
+you can use docker to reproduce the test errors.
+
+1. Start an interactive docker container
+    ```bash
+    docker run -it node:lts-buster bash
+    ```
+1. Run following commands in the container. Note that you are already the `root` user inside the docker container.
+    ```bash
+    apt update
+    apt install -y sudo
+    git clone https://github.com/ampproject/amphtml.git
+    cd amphtml
+    npm install
+    npm run postinstall
+    .circleci/install_validator_dependencies.sh
+    amp validator-cpp && echo SUCCESS || echo FAIL
+    ```
+1. To see more information of the tests
+    ```bash
+    sed -i 's/--test_output=errors//' build-system/tasks/validator.js
+    sed -i 's/--ui_event_filters=INFO//' build-system/tasks/validator.js
+    ```
+    Then re-run `amp validator-cpp && echo SUCCESS || echo FAIL`.

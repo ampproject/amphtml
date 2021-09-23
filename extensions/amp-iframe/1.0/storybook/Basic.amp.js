@@ -1,6 +1,6 @@
 import * as Preact from '#preact';
 import {withAmp} from '@ampproject/storybook-addon';
-import {withKnobs} from '@storybook/addon-knobs';
+import {text, withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'amp-iframe-1_0',
@@ -25,9 +25,11 @@ export const WithSrc = () => {
 WithSrc.storyName = 'amp-iframe with src attribute';
 
 export const WithPlaceholder = () => {
+  const src = text('src', `https://www.wikipedia.org/`);
   return (
-    <amp-iframe width="800" height="600" src="https://www.wikipedia.org/">
-      <h1>Placeholder</h1>
+    <amp-iframe width="800" height="600" src={src}>
+      <h1 placeholder>Placeholder</h1>
+      <h1 fallback>Fallback</h1>
     </amp-iframe>
   );
 };

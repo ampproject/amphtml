@@ -31,14 +31,6 @@
       "#third_party/*": ["./third_party/*"]
     }
   },
-  "include": [
-    "src",
-    "3p",
-    "ads",
-    "extensions",
-    "test",
-    "testing",
-    "third_party"
-  ],
+  "include": ["src", "3p", "ads", "extensions", "test", "testing"],
   "exclude": ["build", "dist", "dist.*", "node_modules"]
 }

@@ -5,7 +5,7 @@ const {
   getJscodeshiftReport,
   jscodeshift,
 } = require('../../test-configs/jscodeshift');
-const {cyan, magenta, yellow} = require('../../common/colors');
+const {cyan, magenta, yellow} = require('kleur/colors');
 const {getOutput} = require('../../common/process');
 const {log} = require('../../common/logging');
 const {readJsonSync, writeJsonSync} = require('fs-extra');

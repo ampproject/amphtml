@@ -49,7 +49,7 @@ export class ContextNode {
     let contextNode = /** @type {!ContextNode|undefined} */ (node[NODE_PROP]);
     if (!contextNode) {
       contextNode = new ContextNode(node, null);
-      if (mode.isTest()) {
+      if (mode.isLocalDev() || mode.isTest()) {
         // The `Object.defineProperty({enumerable: false})` helps tests, but
         // hurts performance. So this is only done in a dev/test modes.
         Object.defineProperty(node, NODE_PROP, {

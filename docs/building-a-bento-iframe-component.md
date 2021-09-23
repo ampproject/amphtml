@@ -21,6 +21,7 @@
     -   [Use `ProxyIframeEmbed` directly](#use-proxyiframeembed-directly)
         -   [Resizing components in AMP](#resizing-components-in-amp)
         -   [Passing or overriding props](#passing-or-overriding-props)
+    -   [Placeholders](#placeholders)
 -   [Completing your extension](#completing-your-extension)
 -   [Example Pull Requests](#example-pull-requests)
 
@@ -305,6 +306,12 @@ function FantasticEmbedInternalWithRef(
 > **If you need to pass `style` or `ref` to the underlying iframe, these are exceptional in that they are propagated to the outer `ContainWrapper` which parents the `iframe` element. You should use `iframeStyle` or `iframeRef` accordingly to pass inline styles and refs.**
 
 You may similarly choose to pass or override properties at the higher level, passed from `FantasticEmbed` into the `ProxyIframeEmbed` we instantiate. For a list of these properties [see `component.type.js`](../src/preact/component/component.type.js)
+
+### Placeholders
+
+All Bento components implemented using iframes should utilize placeholders to mitigate the risk of poor perceived performance. Placeholders, Fallbacks, and Loaders can be toggled on/off using the hooks provided to the Preact Component. See [here](https://github.com/ampproject/amphtml/blob/main/docs/building-a-bento-amp-extension.md#placeholders) for detailed instructions on how to toggle placeholders/fallbacks/loaders.
+
+It is encouraged to create a Storybook story that specifically demonstrates utilization of placeholders and fallbacks.
 
 ## Completing your extension
 

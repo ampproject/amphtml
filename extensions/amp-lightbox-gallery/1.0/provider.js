@@ -15,8 +15,8 @@ import {forwardRef} from '#preact/compat';
 import {PADDING_ALLOWANCE, useStyles} from './component.jss';
 import {LightboxGalleryContext} from './context';
 
-import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
-import {Lightbox} from '../../amp-lightbox/1.0/component';
+import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
+import {BentoLightbox} from '../../amp-lightbox/1.0/component';
 
 /** @const {string} */
 const DEFAULT_GROUP = 'default';
@@ -181,7 +181,7 @@ export function LightboxGalleryProviderWithRef(
 
   return (
     <>
-      <Lightbox
+      <BentoLightbox
         class={objstr({
           [classes.lightbox]: true,
           [classes.showControls]: showControls,
@@ -204,7 +204,7 @@ export function LightboxGalleryProviderWithRef(
             showCarousel={showCarousel}
           />
         </div>
-        <BaseCarousel
+        <BentoBaseCarousel
           arrowPrevAs={NavButtonIcon}
           arrowNextAs={NavButtonIcon}
           class={classes.gallery}
@@ -216,7 +216,7 @@ export function LightboxGalleryProviderWithRef(
           ref={carouselRef}
         >
           {carouselElements.current[group]}
-        </BaseCarousel>
+        </BentoBaseCarousel>
         <div
           hidden={!showCarousel}
           class={objstr({
@@ -254,7 +254,7 @@ export function LightboxGalleryProviderWithRef(
             {gridElements.current[group]}
           </div>
         )}
-      </Lightbox>
+      </BentoLightbox>
       <LightboxGalleryContext.Provider value={context}>
         {render ? render() : children}
       </LightboxGalleryContext.Provider>
@@ -296,7 +296,7 @@ function CloseButtonIcon({onClick}) {
 }
 
 /**
- * @param {!BaseCarouselDef.ArrowProps} props
+ * @param {!BentoBaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
 function NavButtonIcon({'aria-disabled': ariaDisabled, by, disabled, onClick}) {
@@ -330,7 +330,7 @@ function NavButtonIcon({'aria-disabled': ariaDisabled, by, disabled, onClick}) {
 }
 
 /**
- * @param {!BaseCarouselDef.ArrowProps} props
+ * @param {!BentoBaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
 function ToggleViewIcon({onClick, showCarousel}) {

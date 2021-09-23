@@ -1,12 +1,12 @@
 import {CSS} from './component.jss';
 import {CSS as CSS_AUTOPLAY} from './autoplay.jss';
 import {PreactBaseElement} from '#preact/base-element';
-import {VideoWrapper} from './component';
+import {BentoVideo} from './component';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = VideoWrapper;
+BaseElement['Component'] = BentoVideo;
 
 /** @override */
 BaseElement['loadable'] = true;
@@ -15,7 +15,7 @@ BaseElement['loadable'] = true;
 BaseElement['layoutSizeDefined'] = true;
 
 /**
- * Defaults to `{component: 'video'}` from `VideoWrapper` component.
+ * Defaults to `{component: 'video'}` from `BentoVideo` component.
  * Subclasses may set:
  * ```
  *   AmpMyPlayer['staticProps'] = dict({

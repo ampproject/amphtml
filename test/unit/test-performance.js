@@ -5,6 +5,7 @@ import {VisibilityState} from '#core/constants/visibility-state';
 import {Services} from '#service';
 import {installRuntimeServices} from '#service/core-services';
 import {
+  LCP_ELEMENT_TYPE,
   Performance,
   installPerformanceService,
 } from '#service/performance-impl';
@@ -1044,13 +1045,71 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       // The document has become hidden, e.g. via the user switching tabs.
       toggleVisibility(perf, false);
 
-      const lcpEvents = perf.events_.filter(({label}) =>
-        label.startsWith('lcp')
-      );
-      expect(lcpEvents.length).to.equal(2);
+      const lcpEvents = perf.events_.filter(({label}) => label === 'lcp');
+      expect(lcpEvents.length).to.equal(1);
       expect(lcpEvents).deep.include({
         label: 'lcp',
         delta: 23,
+      });
+    });
+
+    it('should include lcp type', async () => {
+      // Fake the Performance API.
+      env.win.PerformanceObserver.supportedEntryTypes = [
+        'largest-contentful-paint',
+      ];
+
+      installPerformanceService(env.win);
+      const perf = Services.performanceFor(env.win);
+      perf.coreServicesAvailable();
+      expect(perf.events_.length).to.equal(0);
+
+      // Fake an img being the LCP Element
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {
+              entryType: 'largest-contentful-paint',
+              startTime: 12,
+              element: document.createElement('img'),
+            },
+          ];
+        },
+      });
+      // Flush LCP
+      toggleVisibility(perf, false);
+      toggleVisibility(perf, true);
+
+      // Fake an amp-img nested within an amp-carousel.
+      const parent = document.createElement('amp-carousel');
+      const child = document.createElement('amp-img');
+      parent.appendChild(child);
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {
+              entryType: 'largest-contentful-paint',
+              loadTime: 23,
+              renderTime: undefined,
+              startTime: 23,
+              element: child,
+            },
+          ];
+        },
+      });
+      // Flush LCP again.
+      toggleVisibility(perf, false);
+
+      const lcptEvents = perf.events_.filter(({label}) =>
+        label.startsWith('lcpt')
+      );
+      expect(lcptEvents).deep.include({
+        label: 'lcpt',
+        delta: LCP_ELEMENT_TYPE.image,
+      });
+      expect(lcptEvents).deep.include({
+        label: 'lcpt',
+        delta: LCP_ELEMENT_TYPE.carousel,
       });
     });
   });

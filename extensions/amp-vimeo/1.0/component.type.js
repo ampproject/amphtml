@@ -8,6 +8,7 @@ var VimeoDef = {};
  *   videoid: string,
  *   autoplay: (boolean|undefined),
  *   doNotTrack: (boolean|undefined),
+ *   onLoad: (function():undefined|undefined),
  * }}
  */
 VimeoDef.Props;

@@ -15,6 +15,7 @@ import {
   whenUpgradedToCustomElement,
 } from '#core/dom/amp-element-helpers';
 import {setImportantStyles, setStyles, toggle} from '#core/dom/style';
+import {isEsm} from '#core/mode';
 
 const TAG = 'amp-consent-ui';
 const MINIMUM_INITIAL_HEIGHT = 10;
@@ -194,6 +195,13 @@ export class ConsentUI {
           TAG,
           'child element of <amp-consent> with promptUI id %s not found',
           promptUI
+        );
+      }
+      // Warn of use of <amp-iframe> within a promptUI element.
+      if (!isEsm() && promptElement.querySelector('amp-iframe')) {
+        user().error(
+          TAG,
+          '`promptUI` element contains an <amp-iframe>. This may cause content flashing when consent is not required. Consider using `promptUISrc` instead. See https://go.amp.dev/c/amp-analytics'
         );
       }
       this.ui_ = dev().assertElement(promptElement);

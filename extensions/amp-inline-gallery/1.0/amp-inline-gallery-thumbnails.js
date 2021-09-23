@@ -2,7 +2,7 @@ import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/component.jss';
 import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
 import {PreactBaseElement} from '#preact/base-element';
 import {CSS as THUMBNAIL_CSS} from './thumbnails.jss';
-import {Thumbnails} from './thumbnails';
+import {BentoInlineGalleryThumbnails} from './thumbnails';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';
 
@@ -25,7 +25,7 @@ export class AmpInlineGalleryThumbnails extends PreactBaseElement {
 }
 
 /** @override */
-AmpInlineGalleryThumbnails['Component'] = Thumbnails;
+AmpInlineGalleryThumbnails['Component'] = BentoInlineGalleryThumbnails;
 
 /** @override */
 AmpInlineGalleryThumbnails['props'] = {

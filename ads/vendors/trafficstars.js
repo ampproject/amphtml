@@ -2,16 +2,15 @@ import {loadScript, validateData} from '#3p/3p';
 import {parseJson} from '#core/types/object/json';
 
 const requiredParams = ['spot'];
-const optionsParams = [
+const jsonParams = ['nativeSettings', 'wrapperStyles', 'iFrameStyles'];
+const params = [
   'uploadLink',
-  'nativeSettings',
-  'wrapperStyles',
-  'iFrameStyles',
   'queriesParams',
   'onLoadResponseHook',
   'onSpotRenderedHook',
   'onLoadErrorHook',
 ];
+const optionalParams = params.concat(jsonParams);
 const adContainerId = 'trafficstars_id';
 
 /**
@@ -20,7 +19,7 @@ const adContainerId = 'trafficstars_id';
  */
 export function trafficstars(global, data) {
   // ensure we have valid widgetIds value
-  validateData(data, requiredParams, optionsParams);
+  validateData(data, requiredParams, optionalParams);
 
   const adContainer = global.document.getElementById('c');
   const adNativeContainer = getAdContainer(global);
@@ -39,18 +38,22 @@ export function trafficstars(global, data) {
  * @return {JsonObject}
  */
 function getInitData(data) {
-  const initKeys = requiredParams.concat(optionsParams);
+  const initKeys = requiredParams.concat(optionalParams);
   const initParams = {};
 
   initKeys.forEach((key) => {
     if (key in data) {
-      initParams[key] = data[key];
+      if (jsonParams.includes(key)) {
+        initParams[key] = parseJson(data[key]);
+      } else {
+        initParams[key] = data[key];
+      }
     }
   });
 
   initParams['containerId'] = adContainerId;
 
-  return parseJson(initParams);
+  return initParams;
 }
 
 /**

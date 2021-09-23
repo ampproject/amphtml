@@ -2,6 +2,7 @@ import {dict} from '#core/types/object';
 
 import * as Preact from '#preact';
 import {forwardRef} from '#preact/compat';
+import {useValueRef} from '#preact/component';
 import {IframeEmbed} from '#preact/component/iframe';
 
 import {getData} from '../../../src/event-helper';
@@ -12,18 +13,19 @@ const {useCallback, useEffect, useMemo, useRef, useState} = Preact;
 const NO_HEIGHT_STYLE = dict();
 
 /**
- * @param {!WordPressEmbedDef.Props} props
- * @param {{current: ?WordPressEmbedDef.Api}} ref
+ * @param {!BentoWordPressEmbedDef.Props} props
+ * @param {{current: ?BentoWordPressEmbedDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
-function WordPressEmbedWithRef(
-  {requestResize, title = 'WordPressEmbed', url, ...rest},
+function BentoWordPressEmbedWithRef(
+  {onLoad, requestResize, title = 'WordPress Embed', url, ...rest},
   ref
 ) {
   const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);
   const [opacity, setOpacity] = useState(0);
   const contentRef = useRef(null);
   const [win, setWin] = useState(null);
+  const onLoadRef = useValueRef(onLoad);
 
   const iframeURL = useMemo(() => {
     return addParamToUrl(url, 'embed', 'true');
@@ -52,6 +54,8 @@ function WordPressEmbedWithRef(
             setHeightStyle(dict({'height': height}));
             setOpacity(1);
           }
+
+          onLoadRef.current?.();
           break;
         case 'link':
           // Only follow a link message for the currently-active iframe if the link is for the same origin.
@@ -62,7 +66,7 @@ function WordPressEmbedWithRef(
           break;
       }
     },
-    [requestResize, matchesMessagingOrigin, win]
+    [requestResize, matchesMessagingOrigin, win, onLoadRef]
   );
 
   useEffect(() => {
@@ -90,9 +94,9 @@ function WordPressEmbedWithRef(
   );
 }
 
-const WordPressEmbed = forwardRef(WordPressEmbedWithRef);
-WordPressEmbed.displayName = 'WordPressEmbed'; // Make findable for tests.
-export {WordPressEmbed};
+const BentoWordPressEmbed = forwardRef(BentoWordPressEmbedWithRef);
+BentoWordPressEmbed.displayName = 'BentoWordPressEmbed'; // Make findable for tests.
+export {BentoWordPressEmbed};
 
 /**
  * Verify required props and throw error if necessary.
