@@ -36,7 +36,8 @@
     "rrule": "2.6.8",
     "timeago.js": "4.0.2",
     "web-activities": "1.24.0",
-    "web-animations-js": "2.3.2"
+    "web-animations-js": "2.3.2",
+    "web-vitals": "2.1.0"
   },
   "devDependencies": {
     "@ampproject/filesize": "4.3.0",

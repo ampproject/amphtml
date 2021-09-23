@@ -55,6 +55,8 @@ const COMMON_GLOBS = [
   'node_modules/preact/compat/package.json',
   'node_modules/preact/compat/dist/*.js',
   'node_modules/@babel/runtime/helpers/*.js',
+  'node_modules/web-vitals/package.json',
+  'node_modules/web-vitals/**/*.js',
 ];
 
 /**
