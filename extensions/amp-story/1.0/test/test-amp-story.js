@@ -23,6 +23,7 @@ import {createElementWithAttributes} from '#core/dom';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {toggleExperiment} from '#experiments';
 import {waitFor} from '#testing/test-helper';
+import {setImportantStyles} from '#core/dom/style';
 
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
 const KEYBOARD_EVENT_WHICH_RIGHT_ARROW = 39;
@@ -117,6 +118,9 @@ describes.realWin(
       });
 
       AmpStory.isBrowserSupported = () => true;
+
+      /** Control element lifecycle by preventing automatic callback calls. */
+      setImportantStyles(win.document.documentElement, {'height': 'auto'});
     });
 
     afterEach(() => {
