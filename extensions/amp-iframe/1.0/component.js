@@ -10,6 +10,7 @@ import {
   cloneEntryForCrossOrigin,
 } from '../../../src/utils/intersection-observer-3p-host';
 import {postMessage} from '../../../src/iframe-helper';
+import {dict} from '#core/types/object';
 
 const NOOP = () => {};
 
@@ -44,7 +45,7 @@ export function Iframe({
     postMessage(
       iframe,
       MessageType.INTERSECTION,
-      cloneEntryForCrossOrigin(entries[0]),
+      dict({'changes': entries.map(cloneEntryForCrossOrigin)}),
       win.location.origin
     );
   };
@@ -57,7 +58,11 @@ export function Iframe({
     const win = toWin(iframe.ownerDocument.defaultView);
     let observer;
     win.addEventListener('message', (event) => {
-      if (event.data?.type !== MessageType.SEND_INTERSECTIONS) {
+      const {origin} = new URL(src);
+      if (
+        event.origin !== origin ||
+        event.data?.type !== MessageType.SEND_INTERSECTIONS
+      ) {
         return;
       }
       observer = new win.IntersectionObserver(viewabilityCb, {
@@ -69,7 +74,7 @@ export function Iframe({
       observer.unobserve(iframe);
       observer = null;
     };
-  }, []);
+  }, [src]);
 
   const updateContainerSize = (height, width) => {
     const container = containerRef.current;
