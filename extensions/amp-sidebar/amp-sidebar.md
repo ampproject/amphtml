@@ -34,7 +34,7 @@ for content within the sidebar to be displayed on other parts of the main conten
 
 _Example:_
 
-In the following example, we use `amp-sidebar` to contain navigation items. However, The second and fourth item, Nav Item 2 and Nav Item 4, are assigned to element id that is on the page. By using the [`on`](../../../docs/spec/amp-actions-and-events.md) attribute, we can scroll smoothly to the element, using the element id and `scrollTo`.
+In the following example, we use `amp-sidebar` to contain navigation items. However, The second and fourth item, Nav Item 2 and Nav Item 4, are assigned to element id that is on the page. By using the [`on`](../../docs/spec/amp-actions-and-events.md) attribute, we can scroll smoothly to the element, using the element id and `scrollTo`.
 
 ```html
 <amp-sidebar id="sidebar1" layout="nodisplay" side="right">
@@ -55,7 +55,7 @@ Bento AMP allows you to use AMP components in non-AMP pages without needing to c
 
 ### Opening and closing the sidebar
 
-To toggle, open, or close the sidebar when an element is tapped or clicked, set the [`on`](../../../docs/spec/amp-actions-and-events.md) action attribute on the element, and specify one of the following action methods:
+To toggle, open, or close the sidebar when an element is tapped or clicked, set the [`on`](../../docs/spec/amp-actions-and-events.md) action attribute on the element, and specify one of the following action methods:
 
 <table>
   <tr>
@@ -201,7 +201,7 @@ Please see [this example file](https://github.com/ampproject/amphtml/blob/main/e
 
 ### Building Nested Menus
 
-`<amp-sidebar>` supports drilldown (nested) menus through a child component named [`<amp-nested-menu>`](../../amp-nested-menu/amp-nested-menu.md). With `<amp-nested-menu>`, `<amp-sidebar>` can support nesting one or more layers of submenus (and transition between them) as demonstrated by the following example:
+`<amp-sidebar>` supports drilldown (nested) menus through a child component named [`<amp-nested-menu>`](../amp-nested-menu/amp-nested-menu.md). With `<amp-nested-menu>`, `<amp-sidebar>` can support nesting one or more layers of submenus (and transition between them) as demonstrated by the following example:
 
 [tip type="note"]
 When using `amp-nested-menu`, wrap every menu item in a `li` element to improve accessibility and keyboard support.
@@ -240,7 +240,7 @@ When using `amp-nested-menu`, wrap every menu item in a `li` element to improve 
 
 [/example]
 
-See [`<amp-nested-menu>`](../../amp-nested-menu/amp-nested-menu.md) for the full documentation on nested menus along with advanced feature such as dynamic content loading.
+See [`<amp-nested-menu>`](../amp-nested-menu/amp-nested-menu.md) for the full documentation on nested menus along with advanced feature such as dynamic content loading.
 
 ### UX considerations
 
