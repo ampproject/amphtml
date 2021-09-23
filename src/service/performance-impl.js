@@ -526,29 +526,8 @@ export class Performance {
    */
   tickLayoutShiftScore_() {
     const cls = this.layoutShifts_.reduce((sum, entry) => sum + entry.value, 0);
-    const fcp = this.metrics_.get(TickLabel.FIRST_CONTENTFUL_PAINT) ?? 0; // fallback to 0, so that we never overcount.
-    const ofv = this.metrics_.get(TickLabel.ON_FIRST_VISIBLE) ?? 0;
-
-    // TODO(#33207): Remove after data collection
-    const clsBeforeFCP = this.layoutShifts_.reduce((sum, entry) => {
-      if (entry.startTime < fcp) {
-        return sum + entry.value;
-      }
-      return sum;
-    }, 0);
-    const clsBeforeOFV = this.layoutShifts_.reduce((sum, entry) => {
-      if (entry.startTime < ofv) {
-        return sum + entry.value;
-      }
-      return sum;
-    }, 0);
 
     if (this.shiftScoresTicked_ === 0) {
-      this.tick(TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_VISIBLE, clsBeforeOFV);
-      this.tickDelta(
-        TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_FCP,
-        clsBeforeFCP
-      );
       this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT, cls);
       this.flush();
       this.shiftScoresTicked_ = 1;
