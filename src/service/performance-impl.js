@@ -23,6 +23,9 @@ import {isStoryDocument} from '../utils/story';
  */
 const QUEUE_LIMIT = 50;
 
+const CLS_SESSION_GAP = 1000;
+const CLS_SESSION_MAX = 5000;
+
 const TAG = 'Performance';
 
 /**
@@ -251,13 +254,19 @@ export class Performance {
      */
     this.googleFontExpRecorded_ = false;
 
-    /** @private */
+    /**
+     * This is called to ensure we'll report the current cls window's value
+     * after the window closes. Its debounce time is intentionally longer than
+     * the max session time so that we're certain the sesssion has closed
+     * (since a PerfOb is async, we entries that belong in the current window
+     * may arrive later).
+     */
     this.debouncedFlushNominalLayoutShiftScore_ = debounce(
       win,
       () => {
         this.flushNominalLayoutShiftScore_();
       },
-      6000
+      CLS_SESSION_MAX + 1000
     );
   }
 
@@ -506,6 +515,7 @@ export class Performance {
       state === VisibilityState.HIDDEN
     ) {
       this.tickCumulativeMetrics_();
+      this.flushNominalLayoutShiftScore_();
     }
   }
 
@@ -549,8 +559,8 @@ export class Performance {
       const first = entries[0];
       const last = entries[entries.length - 1];
       if (
-        entry.startTime - last.startTime < 1000 &&
-        entry.startTime - first.startTime < 5000
+        entry.startTime - last.startTime < CLS_SESSION_GAP &&
+        entry.startTime - first.startTime < CLS_SESSION_MAX
       ) {
         // This entry continues the current CLS window.
         entries.push(entry);
@@ -560,6 +570,9 @@ export class Performance {
       this.flushNominalLayoutShiftScore_();
     }
     entries.push(entry);
+    // Ensure we report the CLS when the session closes. We're not guaranteed
+    // to get more LayoutShift entires, so we need some setTimeout magic to
+    // ensure it happens.
     this.debouncedFlushNominalLayoutShiftScore_();
   }
 
