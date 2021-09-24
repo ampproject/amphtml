@@ -402,6 +402,8 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   if (watchedTargets.has(entryPoint)) {
     return watchedTargets.get(entryPoint).rebuild();
   }
+  // TODO(36162): Only write this once as part of the dist() function.
+  fs.writeFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
 
   /**
    * Splits up the wrapper to compute the banner and footer
