@@ -23,6 +23,9 @@ const {
 const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
+const {
+  VERSION: internalRuntimeVersion,
+} = require('../compile/internal-version');
 const {buildCompiler} = require('../compile/build-compiler');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
@@ -118,6 +121,7 @@ async function dist() {
     await compileCoreRuntime(options);
   } else {
     await Promise.all([
+      writeVersionFile(),
       buildExperiments(),
       buildLoginDone('0.1'),
       buildWebPushPublisherFiles(),
@@ -145,6 +149,17 @@ async function dist() {
   if (!argv.watch) {
     exitCtrlcHandler(handlerProcess);
   }
+}
+
+/**
+ * Writes the verion.txt file.
+ * @return {!Promise}
+ */
+async function writeVersionFile() {
+  return fs.writeFile(
+    path.join('dist', 'v0', 'version.txt'),
+    internalRuntimeVersion
+  );
 }
 
 /**
