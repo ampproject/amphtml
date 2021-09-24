@@ -292,7 +292,10 @@ const adConfig = jsonConfiguration({
       'https://v.amoad.com',
     ],
   },
-
+  'amplified': {
+    preconnect: 'https://srv.clickfuse.com',
+    renderStartImplemented: true,
+  },
   'aniview': {
     renderStartImplemented: true,
   },
@@ -315,6 +318,10 @@ const adConfig = jsonConfiguration({
 
   'atomx': {
     prefetch: 'https://s.ato.mx/p.js',
+  },
+
+  'avantisvideo': {
+    renderStartImplemented: true,
   },
 
   'beaverads': {
@@ -343,6 +350,10 @@ const adConfig = jsonConfiguration({
   'bringhub': {
     renderStartImplemented: true,
     preconnect: ['https://static.bh-cdn.com', 'https://core-api.bringhub.io'],
+  },
+
+  'broadbandy': {
+    renderStartImplemented: true,
   },
 
   'broadstreetads': {
@@ -817,6 +828,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'myua': {
+    renderStartImplemented: true,
+  },
+
   'mywidget': {
     preconnect: 'https://likemore-fe.go.mail.ru',
     prefetch: 'https://likemore-go.imgsmail.ru/widget_amp.js',
@@ -1229,6 +1244,11 @@ const adConfig = jsonConfiguration({
 
   'tracdelight': {
     prefetch: 'https://scripts.tracdelight.io/amp.js',
+    renderStartImplemented: true,
+  },
+
+  'trafficstars': {
+    prefetch: 'https://cdn.tsyndicate.com/sdk/v1/master.spot.js',
     renderStartImplemented: true,
   },
 

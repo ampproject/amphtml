@@ -7,7 +7,7 @@ import {Services} from '#service';
  * using describes.configure(), describe.configure(), or it.configure().
  *
  * Example usage:
- * 1. describes.configure().skipChrome().enableIe().run(name, spec, function);
+ * 1. describes.configure().skipChrome().skipIos().run(name, spec, function);
  * 2. describe.configure().skipFirefox().skipSafari().run(name, function);
  * 3. it.configure().skipEdge().run(name, function);
  */
@@ -43,12 +43,6 @@ export class TestConfig {
     this.runOnFirefox = this.platform.isFirefox.bind(this.platform);
     this.runOnSafari = this.platform.isSafari.bind(this.platform);
     this.runOnIos = this.platform.isIos.bind(this.platform);
-    this.runOnIe = this.platform.isIe.bind(this.platform);
-
-    /**
-     * By default, IE is skipped. Individual tests may opt in.
-     */
-    this.skip(this.runOnIe);
   }
 
   skipModuleBuild() {
@@ -76,14 +70,7 @@ export class TestConfig {
   }
 
   skipIfPropertiesObfuscated() {
-    return this.skip(function () {
-      return window.__karma__.config.amp.propertiesObfuscated;
-    });
-  }
-
-  enableIe() {
-    this.skipMatchers.splice(this.skipMatchers.indexOf(this.runOnIe), 1);
-    return this;
+    return this.skip(() => window.__karma__.config.amp.propertiesObfuscated);
   }
 
   /**
@@ -116,11 +103,6 @@ export class TestConfig {
 
   ifIos() {
     return this.if(this.runOnIos);
-  }
-
-  ifIe() {
-    // It's necessary to first enable IE because we skip it by default.
-    return this.enableIe().if(this.runOnIe);
   }
 
   /**

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+_;
 import {Dailymotion} from './component';
-import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
+import {VideoBaseElement} from '../../amp-video/1.0/base-element';
 
 export class BaseElement extends VideoBaseElement {}
 
@@ -25,7 +26,7 @@ BaseElement['Component'] = Dailymotion;
 /** @override */
 BaseElement['props'] = {
   'autoplay': {attr: 'autoplay', type: 'boolean'},
-  'videoId': {attr: 'data-videoid'},
+  'videoid': {attr: 'data-videoid'},
   'mute': {attr: 'data-mute', type: 'boolean'},
   'endscreenEnable': {attr: 'data-endscreen-enable', type: 'boolean'},
   'sharingEnable': {attr: 'data-sharing-enable', type: 'boolean'},

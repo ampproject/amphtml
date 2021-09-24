@@ -1,36 +1,188 @@
 {
-  "2": {"string": "Ýttu á „Næsta“"},
-  "3": {"string": "Ýttu á „Til baka“"},
-  "4": {"string": "Ekki tókst að afrita tengil á klippiborð :("},
-  "5": {"string": "Tengill afritaður!"},
-  "6": {"string": "Tölvupóstur"},
-  "7": {"string": "Facebook"},
-  "8": {"string": "Google+"},
-  "9": {"string": "Fá tengil"},
-  "10": {"string": "LinkedIn"},
-  "11": {"string": "Pinterest"},
-  "12": {"string": "SMS-skilaboð"},
-  "14": {"string": "Tumblr"},
-  "15": {"string": "Twitter"},
-  "16": {"string": "WhatsApp"},
-  "18": {"string": "Lengdu og breikkaðu gluggann til að skoða þessa upplifun"},
-  "19": {
-    "string": "Þú verður að virkja tilraun AMP-sögu til að skoða þetta efni."
+  "2": {
+    "string": "Ýttu á Næst"
   },
-  "20": {"string": "Best er að skoða síðuna í skammsniði"},
-  "21": {"string": "Vafrinn þinn virðist ekki styðja þessa upplifun"},
-  "22": {"string": "Samþykkja"},
-  "23": {"string": "Hafna"},
-  "25": {"string": "Skoða á upprunalega léninu:"},
-  "26": {"string": "Meira um AMP-niðurstöður"},
-  "27": {"string": "Halda samt áfram"},
-  "31": {"string": "Slökkt á hljóði"},
-  "32": {"string": "Kveikt á hljóði"},
-  "33": {"string": "Ekkert hljóð er á þessari síðu"},
-  "34": {"string": "Spila myndskeið"},
-  "35": {"string": "Strjúka upp"},
-  "36": {"string": "Stækka tíst"},
-  "37": {"string": "Lengdu gluggann til að skoða þessa upplifun"},
-  "38": {"string": "Breikkaðu gluggann til að skoða þessa upplifun"},
-  "63": {"string": "Line"}
+  "3": {
+    "string": "Ýttu á Til baka"
+  },
+  "4": {
+    "string": "Ekki tókst að afrita tengil á klippiborð :("
+  },
+  "5": {
+    "string": "Tengill afritaður!"
+  },
+  "6": {
+    "string": "Tölvupóstur"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "8": {
+    "string": "Google+"
+  },
+  "9": {
+    "string": "Fá tengil"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "SMS"
+  },
+  "13": {
+    "string": "Meira"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
+  "19": {
+    "string": "Þú verður að virkja amp-story tilraunina til að skoða þetta efni."
+  },
+  "21": {
+    "string": "Því miður virðist vafrinn þinn ekki styðja þetta efni"
+  },
+  "22": {
+    "string": "Samþykkja"
+  },
+  "23": {
+    "string": "Hafna"
+  },
+  "25": {
+    "string": "Skoða á upprunalega léninu:"
+  },
+  "26": {
+    "string": "Meira um AMP niðurstöður"
+  },
+  "27": {
+    "string": "Halda samt áfram"
+  },
+  "31": {
+    "string": "Slökkt á hljóði"
+  },
+  "32": {
+    "string": "Kveikt á hljóði"
+  },
+  "33": {
+    "string": "Þessi síða hefur ekkert hljóð"
+  },
+  "34": {
+    "string": "Spila myndskeið"
+  },
+  "35": {
+    "string": "Strjúktu upp"
+  },
+  "36": {
+    "string": "Stækka tíst"
+  },
+  "62": {
+    "string": "Deila frá og með þessari síðu"
+  },
+  "63": {
+    "string": "Line"
+  },
+  "64": {
+    "string": "Uppfært"
+  },
+  "65": {
+    "string": "Ekki tókst að spila myndskeið"
+  },
+  "66": {
+    "string": "Slökkva á hljóði í sögu"
+  },
+  "67": {
+    "string": "Kveikja á hljóði í sögu"
+  },
+  "68": {
+    "string": "Söguupplýsingar"
+  },
+  "69": {
+    "string": "Deila sögu"
+  },
+  "70": {
+    "string": "Sýna/fela söguvalmynd"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "Ráð 1 af 2"
+  },
+  "76": {
+    "string": "Ýttu til að fara í næsta skjá"
+  },
+  "77": {
+    "string": "Næst"
+  },
+  "78": {
+    "string": "Ráð 2 af 2"
+  },
+  "79": {
+    "string": "Strjúktu til að fara í næstu sögu"
+  },
+  "80": {
+    "string": "Skilið"
+  },
+  "81": {
+    "string": "Ráð"
+  },
+  "82": {
+    "string": "Fyrri síða"
+  },
+  "83": {
+    "string": "Virkja"
+  },
+  "84": {
+    "string": "STIG:"
+  },
+  "85": {
+    "string": "Gera hlé á sögu"
+  },
+  "86": {
+    "string": "Spila sögu"
+  },
+  "87": {
+    "string": "Loka"
+  },
+  "88": {
+    "string": "Sleppa næsta"
+  },
+  "89": {
+    "string": "Svar þitt verður sent til"
+  },
+  "90": {
+    "string": "Næsta saga"
+  },
+  "91": {
+    "string": "Næsta síða"
+  },
+  "92": {
+    "string": "Spila aftur"
+  },
+  "93": {
+    "string": "Fyrri síða"
+  },
+  "96": {
+    "string": "Færðu tækið til að skoða"
+  },
+  "97": {
+    "string": "Opnast"
+  }
 }

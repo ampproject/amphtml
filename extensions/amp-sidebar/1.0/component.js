@@ -18,11 +18,11 @@ import {useToolbarHook} from './sidebar-toolbar-hook';
 import objstr from 'obj-str';
 
 /**
- * @param {!SidebarDef.SidebarProps} props
- * @param {{current: (!SidebarDef.SidebarApi|null)}} ref
+ * @param {!BentoSidebarDef.Props} props
+ * @param {{current: (!BentoSidebarDef.Api|null)}} ref
  * @return {PreactDef.Renderable}
  */
-function SidebarWithRef(
+function BentoSidebarWithRef(
   {
     as: Comp = 'div',
     backdropClassName,
@@ -67,7 +67,7 @@ function SidebarWithRef(
   useImperativeHandle(
     ref,
     () =>
-      /** @type {!SidebarDef.SidebarApi} */ ({
+      /** @type {!BentoSidebarDef.Api} */ ({
         open,
         close,
         toggle,
@@ -121,7 +121,7 @@ function SidebarWithRef(
   }, [opened, close]);
 
   return (
-    <div className={objstr({[classes.unmounted]: !mounted})} part="wrapper">
+    <div class={objstr({[classes.unmounted]: !mounted})} part="wrapper">
       <ContainWrapper
         as={Comp}
         ref={sidebarRef}
@@ -136,7 +136,7 @@ function SidebarWithRef(
           [classes.right]: side !== Side.LEFT,
         })}
         role="menu"
-        tabindex="-1"
+        tabIndex="-1"
         hidden={!side}
         {...rest}
       >
@@ -147,28 +147,28 @@ function SidebarWithRef(
         onClick={() => close()}
         part="backdrop"
         style={backdropStyle}
-        className={objstr({
+        class={objstr({
           [classes.backdrop]: true,
           [classes.defaultBackdropStyles]: true,
           [backdropClassName]: backdropClassName,
         })}
         hidden={!side}
       >
-        <div className={classes.backdropOverscrollBlocker}></div>
+        <div class={classes.backdropOverscrollBlocker}></div>
       </div>
     </div>
   );
 }
 
-const Sidebar = forwardRef(SidebarWithRef);
-Sidebar.displayName = 'Sidebar'; // Make findable for tests.
-export {Sidebar};
+const BentoSidebar = forwardRef(BentoSidebarWithRef);
+BentoSidebar.displayName = 'BentoSidebar'; // Make findable for tests.
+export {BentoSidebar};
 
 /**
- * @param {!SidebarDef.SidebarToolbarProps} props
+ * @param {!BentoSidebarDef.BentoSidebarToolbarProps} props
  * @return {PreactDef.Renderable}
  */
-export function SidebarToolbar({
+export function BentoSidebarToolbar({
   children,
   toolbar: mediaQueryProp,
   toolbarTarget: toolbarTargetProp,

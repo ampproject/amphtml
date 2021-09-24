@@ -1,6 +1,5 @@
-import {devAssert} from '#core/assert';
 import {isIframed} from '#core/dom';
-import * as mode from '#core/mode';
+import {removeItem} from '#core/types/array';
 import {toWin} from '#core/window';
 
 /**
@@ -31,25 +30,47 @@ export function createViewportObserver(ioCallback, win, opts = {}) {
 /** @type {!WeakMap<!Window, !IntersectionObserver>} */
 const viewportObservers = new WeakMap();
 
-/** @type {!WeakMap<!Element, function(boolean)>} */
+/** @type {!WeakMap<!Element, !Array<function(IntersectionObserverEntry)>>} */
 const viewportCallbacks = new WeakMap();
 
 /**
  * Lazily creates an IntersectionObserver per Window to track when elements
  * enter and exit the viewport. Fires viewportCallback when this happens.
  *
+ * TODO(dmanek): This is a wrapper around `observeIntersections` to maintain
+ * backwards compatibility and can be deleted once all instances have been
+ * migrated.
+ *
  * @param {!Element} element
  * @param {function(boolean)} viewportCallback
  */
 export function observeWithSharedInOb(element, viewportCallback) {
-  // There should never be two unique observers of the same element.
-  if (mode.isLocalDev()) {
-    devAssert(
-      !viewportCallbacks.has(element) ||
-        viewportCallbacks.get(element) === viewportCallback
-    );
-  }
+  observeIntersections(element, ({isIntersecting}) =>
+    viewportCallback(isIntersecting)
+  );
+}
 
+/**
+ * Unobserve an element.
+ * @param {!Element} element
+ */
+export function unobserveWithSharedInOb(element) {
+  const win = toWin(element.ownerDocument.defaultView);
+  const viewportObserver = viewportObservers.get(win);
+  viewportObserver?.unobserve(element);
+  // TODO(dmanek): This is a potential bug. We only want to remove
+  // a single callback as opposed to all.
+  viewportCallbacks.delete(element);
+}
+
+/**
+ * Lazily creates an IntersectionObserver per Window to track when elements
+ * enter and exit the viewport. Fires viewportCallback when this happens.
+ *
+ * @param {!Element} element
+ * @param {function(IntersectionObserverEntry)} callback
+ */
+export function observeIntersections(element, callback) {
   const win = toWin(element.ownerDocument.defaultView);
   let viewportObserver = viewportObservers.get(win);
   if (!viewportObserver) {
@@ -58,15 +79,33 @@ export function observeWithSharedInOb(element, viewportCallback) {
       (viewportObserver = createViewportObserver(ioCallback, win))
     );
   }
-  viewportCallbacks.set(element, viewportCallback);
+  let callbacks = viewportCallbacks.get(element);
+  if (!callbacks) {
+    callbacks = [];
+    viewportCallbacks.set(element, callbacks);
+  }
+  callbacks.push(callback);
   viewportObserver.observe(element);
 }
 
 /**
- * Unobserve an element.
+ * Unsubscribes a callback from receiving IntersectionObserver updates for an element.
+ *
  * @param {!Element} element
+ * @param {function(IntersectionObserverEntry)} callback
  */
-export function unobserveWithSharedInOb(element) {
+export function unobserveIntersections(element, callback) {
+  const callbacks = viewportCallbacks.get(element);
+  if (!callbacks) {
+    return;
+  }
+  if (!removeItem(callbacks, callback)) {
+    return;
+  }
+  if (callbacks.length) {
+    return;
+  }
+  // If an element has no more observer callbacks, then unobserve it.
   const win = toWin(element.ownerDocument.defaultView);
   const viewportObserver = viewportObservers.get(win);
   viewportObserver?.unobserve(element);
@@ -80,8 +119,21 @@ export function unobserveWithSharedInOb(element) {
  * @param {!Array<!IntersectionObserverEntry>} entries
  */
 function ioCallback(entries) {
-  for (let i = 0; i < entries.length; i++) {
-    const {isIntersecting, target} = entries[i];
-    viewportCallbacks.get(target)?.(isIntersecting);
+  const seen = new Set();
+  for (let i = entries.length - 1; i >= 0; i--) {
+    const entry = entries[i];
+    const {target} = entry;
+    if (seen.has(target)) {
+      continue;
+    }
+    seen.add(target);
+    const callbacks = viewportCallbacks.get(target);
+    if (!callbacks) {
+      continue;
+    }
+    for (let k = 0; k < callbacks.length; k++) {
+      const callback = callbacks[k];
+      callback(entry);
+    }
   }
 }

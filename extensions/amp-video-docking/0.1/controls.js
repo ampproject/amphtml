@@ -8,6 +8,7 @@ import {
   toggle,
   translate,
 } from '#core/dom/style';
+import {tryPlay} from '#core/dom/video';
 import {once} from '#core/types/function';
 
 import {Services} from '#service';
@@ -271,7 +272,7 @@ export class Controls {
       }),
 
       this.listenWhenEnabled_(this.playButton_, click, () => {
-        video.play(/* auto */ false);
+        tryPlay(video, /* auto */ false);
       }),
 
       this.listenWhenEnabled_(this.pauseButton_, click, () => {

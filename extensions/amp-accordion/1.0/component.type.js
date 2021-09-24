@@ -1,7 +1,7 @@
 /** @externs */
 
 /** @const */
-var AccordionDef = {};
+var BentoAccordionDef = {};
 
 /**
  * @typedef {{
@@ -12,7 +12,7 @@ var AccordionDef = {};
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-AccordionDef.AccordionProps;
+BentoAccordionDef.BentoAccordionProps;
 
 /**
  * @typedef {{
@@ -24,30 +24,30 @@ AccordionDef.AccordionProps;
  *   onExpandStateChange: (function(boolean):undefined|undefined),
  * }}
  */
-AccordionDef.AccordionSectionProps;
+BentoAccordionDef.BentoAccordionSectionProps;
 
 /**
  * @typedef {{
  *   as: (string|PreactDef.FunctionalComponent|undefined),
  *   role: (string|undefined),
- *   className: (string|undefined),
+ *   class: (string|undefined),
  *   tabIndex: (number|string|undefined),
  *   id: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-AccordionDef.AccordionHeaderProps;
+BentoAccordionDef.BentoAccordionHeaderProps;
 
 /**
  * @typedef {{
  *   as: (string|PreactDef.FunctionalComponent|undefined),
  *   role: (string|undefined),
- *   className: (string|undefined),
+ *   class: (string|undefined),
  *   id: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-AccordionDef.AccordionContentProps;
+BentoAccordionDef.BentoAccordionContentProps;
 
 /**
  * This is not a public API, it exists to define properties for reference
@@ -61,7 +61,7 @@ AccordionDef.AccordionContentProps;
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-AccordionDef.HeaderShimProps;
+BentoAccordionDef.HeaderShimProps;
 
 /**
  * This is not a public API, it exists to define properties for reference
@@ -73,7 +73,7 @@ AccordionDef.HeaderShimProps;
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-AccordionDef.ContentShimProps;
+BentoAccordionDef.ContentShimProps;
 
 /**
  * @typedef {{
@@ -84,7 +84,7 @@ AccordionDef.ContentShimProps;
  *   prefix: (string),
  * }}
  */
-AccordionDef.AccordionContext;
+BentoAccordionDef.AccordionContext;
 
 /**
  * @typedef {{
@@ -97,10 +97,10 @@ AccordionDef.AccordionContext;
  *   setHeaderId: (function(string)),
  * }}
  */
-AccordionDef.SectionContext;
+BentoAccordionDef.SectionContext;
 
 /** @interface */
-AccordionDef.AccordionApi = class {
+BentoAccordionDef.BentoAccordionApi = class {
   /**
    * @param {string|undefined} section
    */

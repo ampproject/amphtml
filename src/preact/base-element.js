@@ -150,6 +150,15 @@ export class PreactBaseElement extends BaseElement {
       'onPlayingState': (isPlaying) => {
         this.updateIsPlaying_(isPlaying);
       },
+      'onLoading': () => {
+        this.handleOnLoading();
+      },
+      'onLoad': () => {
+        this.handleOnLoad();
+      },
+      'onError': () => {
+        this.handleOnError();
+      },
     });
 
     /** @private {!AmpContextDef.ContextType} */
@@ -508,6 +517,43 @@ export class PreactBaseElement extends BaseElement {
     if (this.resetLoading_) {
       this.resetLoading_ = false;
       this.mutateProps({'loading': Loading.AUTO});
+    }
+  }
+
+  /**
+   * Default handler for onLoad event
+   * Displays loader. Override to customize.
+   * @protected
+   */
+  handleOnLoad() {
+    this.toggleLoading?.(false);
+    this.toggleFallback?.(false);
+    this.togglePlaceholder?.(false);
+  }
+
+  /**
+   * Default handler for onLoading event
+   * Reveals loader. Override to customize.
+   * @protected
+   */
+  handleOnLoading() {
+    this.toggleLoading?.(true);
+  }
+
+  /**
+   * Default handler for onError event
+   * Displays Fallback / Placeholder. Override to customize.
+   * @protected
+   */
+  handleOnError() {
+    this.toggleLoading?.(false);
+    // If the content fails to load and there's a fallback element, display the fallback.
+    // Otherwise, continue displaying the placeholder.
+    if (this.getFallback?.()) {
+      this.toggleFallback?.(true);
+      this.togglePlaceholder?.(false);
+    } else {
+      this.togglePlaceholder?.(true);
     }
   }
 

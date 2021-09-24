@@ -294,22 +294,19 @@
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "hasCss": true,
-      "wrapper": "bento"
+      "wrapper": "bento",
+      "hasCss": true
     }
   },
-  {
-    "name": "amp-date-countdown",
-    "version": "0.1",
-    "latestVersion": "0.1"
-  },
+  {"name": "amp-date-countdown", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-date-countdown",
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "wrapper": "bento"
+      "wrapper": "bento",
+      "hasCss": true
     }
   },
   {
@@ -317,13 +314,15 @@
     "version": "0.1",
     "latestVersion": "0.1"
   },
+  {"name": "amp-date-display", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-date-display",
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "wrapper": "bento"
+      "wrapper": "bento",
+      "hasCss": true
     }
   },
   {
@@ -357,8 +356,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
+      "hasCss": true,
       "npm": true,
-      "wrappers": "bento"
+      "wrapper": "bento"
     }
   },
   {
@@ -886,6 +886,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
+      "npm": true,
       "wrapper": "bento"
     }
   },
@@ -934,8 +935,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
+      "hasCss": true,
       "npm": true,
-      "wrappers": "bento"
+      "wrapper": "bento"
     }
   },
   {
@@ -972,8 +974,7 @@
         "amp-story-share-menu",
         "amp-story-system-layer",
         "amp-story-tooltip",
-        "amp-story-unsupported-browser-layer",
-        "amp-story-viewport-warning-layer"
+        "amp-story-unsupported-browser-layer"
       ]
     }
   },
@@ -1005,6 +1006,14 @@
     "name": "amp-story-auto-analytics",
     "version": "0.1",
     "latestVersion": "0.1"
+  },
+  {
+    "name": "amp-story-captions",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
   },
   {
     "name": "amp-story-dev-tools",
@@ -1062,9 +1071,7 @@
     "name": "amp-stream-gallery",
     "version": "0.1",
     "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "options": {"hasCss": true}
   },
   {
     "name": "amp-stream-gallery",
@@ -1161,6 +1168,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
+      "npm": true,
       "wrapper": "bento"
     }
   },
@@ -1247,8 +1255,9 @@
     "version": "1.0",
     "latestVersion": "1.0",
     "options": {
+      "hasCss": true,
       "npm": true,
-      "wrappers": "bento"
+      "wrapper": "bento"
     }
   },
   {

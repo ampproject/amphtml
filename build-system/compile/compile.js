@@ -1,13 +1,14 @@
 'use strict';
 const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const path = require('path');
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {cpus} = require('os');
-const {cyan, green} = require('../common/colors');
+const {cyan, green} = require('kleur/colors');
+const {getAmpConfigForFile} = require('../tasks/prepend-global');
 const {log, logLocalDev} = require('../common/logging');
 const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel} = require('./pre-closure-babel');
@@ -185,9 +186,9 @@ function getSrcs(entryModuleFilenames, options) {
  *
  * @param {string} outputFilename
  * @param {!OptionsDef} options
- * @return {!Object}
+ * @return {!Promise<!Object>}
  */
-function generateCompilerOptions(outputFilename, options) {
+async function generateCompilerOptions(outputFilename, options) {
   // Determine externs
   let externs = options.externs || [];
   if (!options.noAddDeps) {
@@ -195,8 +196,8 @@ function generateCompilerOptions(outputFilename, options) {
       'third_party/web-animations-externs/web_animations.js',
       'third_party/react-externs/externs.js',
       'third_party/moment/moment.extern.js',
-      ...globby.sync('src/core{,/**}/*.extern.js'),
-      ...globby.sync('build-system/externs/*.extern.js'),
+      ...fastGlob.sync('src/core{,/**}/*.extern.js'),
+      ...fastGlob.sync('build-system/externs/*.extern.js'),
       ...externs,
     ];
   }
@@ -220,10 +221,11 @@ function generateCompilerOptions(outputFilename, options) {
   if (argv.pseudo_names) {
     define.push('PSEUDO_NAMES=true');
   }
+  const ampConfig = await getAmpConfigForFile(outputFilename, options);
   let wrapper = options.wrapper
     ? options.wrapper.replace('<%= contents %>', '%output%')
     : `(function(){%output%})();`;
-  wrapper = `${wrapper}\n\n//# sourceMappingURL=${outputFilename}.map`;
+  wrapper = `${ampConfig}${wrapper}\n\n//# sourceMappingURL=${outputFilename}.map`;
 
   /**
    * TODO(#28387) write a type for this.
@@ -400,12 +402,15 @@ async function compile(
   }
   const destFile = `${outputDir}/${outputFilename}`;
   const sourcemapFile = `${destFile}.map`;
-  const compilerOptions = generateCompilerOptions(outputFilename, options);
+  const compilerOptions = await generateCompilerOptions(
+    outputFilename,
+    options
+  );
   const srcs = options.noAddDeps
     ? entryModuleFilenames.concat(options.extraGlobs || [])
     : getSrcs(entryModuleFilenames, options);
   const transformedSrcFiles = await Promise.all(
-    globby
+    fastGlob
       .sync(srcs)
       .map((src) => preClosureBabel(src, outputFilename, options))
   );

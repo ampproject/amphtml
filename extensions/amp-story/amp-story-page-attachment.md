@@ -13,9 +13,9 @@ teaser:
 `amp-story-page-attachment` allows additional content in the form of inline AMPHTML content on specific AMP story pages. This content is revealed to users through a "swipe up" gesture, or a tap on the call to action element.
 A UI button prompting the viewer to open the attachment will appear at the bottom of every page with a `amp-story-page-attachment` element.
 
-<amp-img alt="AMP Story page attachment" layout="fixed" src="img/amp-story-page-attachment.gif" width="240" height="480">
+<amp-img alt="AMP Story page attachment" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment.gif" width="240" height="480">
   <noscript>
-    <img alt="AMP Story page attachment" src="img/amp-story-page-attachment.gif" />
+    <img alt="AMP Story page attachment" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment.gif" />
   </noscript>
 </amp-img>
 
@@ -55,7 +55,7 @@ Both [`amp-story-page-attachment`](amp-story-page-attachment.md) and [`amp-story
 
 When no attributes are set, the default UI will render:
 
-![amp-story-page-attachment-default](img/amp-story-page-attachment-default.jpg)
+![amp-story-page-attachment-default](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment-default.jpg)
 
 ```html
 <amp-story-page-attachment
@@ -68,7 +68,7 @@ When no attributes are set, the default UI will render:
 
 String representing the color theme, default is `light`. Accepts values `light` & `dark`.
 
-![amp-story-page-attachment-dark-theme](img/amp-story-page-attachment-dark-theme.jpg)
+![amp-story-page-attachment-dark-theme](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment-dark-theme.jpg)
 
 ```html
 <amp-story-page-attachment
@@ -82,7 +82,7 @@ String representing the color theme, default is `light`. Accepts values `light` 
 
 String that customizes the button text. The default is "Swipe up".
 
-![amp-story-page-attachment-cta-text](img/amp-story-page-attachment-cta-text.jpg)
+![amp-story-page-attachment-cta-text](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment-cta-text.jpg)
 
 ```html
 <amp-story-page-attachment
@@ -104,7 +104,7 @@ String representing a URL pointing to an image. Optimize performance and avoid d
 </amp-story-page-attachment>
 ```
 
-![amp-story-page-attachment-1-image](img/amp-story-page-attachment-1-image.jpg)
+![amp-story-page-attachment-1-image](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment-1-image.jpg)
 
 ### `cta-image-2` (optional)
 
@@ -119,7 +119,7 @@ String representing a URL pointing to an image. Two images will display when `ct
 </amp-story-page-attachment>
 ```
 
-![amp-story-page-attachment-2-images](img/amp-story-page-attachment-2-images.jpg)
+![amp-story-page-attachment-2-images](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment-2-images.jpg)
 
 ### `title` (optional)
 

@@ -1625,6 +1625,9 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         'allowfullscreen': '',
         'allowtransparency': '',
         'scrolling': 'no',
+        'role': 'region',
+        'aria-label': 'Advertisement',
+        'tabindex': '0',
       };
       Object.keys(expectedAttributes).forEach((key) => {
         expect(friendlyIframe.getAttribute(key)).to.equal(

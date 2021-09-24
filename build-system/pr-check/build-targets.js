@@ -6,10 +6,10 @@
  * determine which tasks are required to run for pull request builds.
  */
 const config = require('../test-configs/config');
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const minimatch = require('minimatch');
 const path = require('path');
-const {cyan} = require('../common/colors');
+const {cyan} = require('kleur/colors');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {gitDiffNameOnlyMain} = require('../common/git');
 const {isCiBuild} = require('../common/ci');
@@ -393,7 +393,7 @@ function expandFileLists() {
   ];
   for (const globName of globNames) {
     const fileListName = globName.replace('Globs', 'Files');
-    fileLists[fileListName] = globby.sync(config[globName], {dot: true});
+    fileLists[fileListName] = fastGlob.sync(config[globName], {dot: true});
   }
 }
 

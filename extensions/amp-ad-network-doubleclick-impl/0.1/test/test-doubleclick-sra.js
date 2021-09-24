@@ -132,13 +132,13 @@ describes.realWin('Doubleclick SRA', config, (env) => {
           element: {
             getAttribute: (name) => {
               expect(name).to.equal('data-slot');
-              return '/1234/foo.com/news/world/2018/06/17/article';
+              return '/1234,5678/foo.com/news/world/2018/06/17/article';
             },
           },
         });
       }
       expect(combineInventoryUnits(impls)).to.jsonEqual({
-        'iu_parts': '1234,foo.com,news,world,2018,06,17,article',
+        'iu_parts': '1234:5678,foo.com,news,world,2018,06,17,article',
         'enc_prev_ius': '0/1/2/3/4/5/6/7,0/1/2/3/4/5/6/7',
       });
     });

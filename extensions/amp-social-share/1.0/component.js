@@ -8,22 +8,22 @@ import {useResourcesNotify} from '#preact/utils';
 
 import {useStyles} from './component.jss';
 import {getSocialConfig} from './social-share-config';
-import {SocialShareIcon} from './social-share-svgs';
+import {BentoSocialShareIcon} from './social-share-svgs';
 
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {addParamsToUrl} from '../../../src/url';
 
-const NAME = 'SocialShare';
+const NAME = 'BentoSocialShare';
 const DEFAULT_WIDTH = 60;
 const DEFAULT_HEIGHT = 44;
 const DEFAULT_TARGET = '_blank';
 const WINDOW_FEATURES = 'resizable,scrollbars,width=640,height=480';
 
 /**
- * @param {!SocialShareDef.Props} props
+ * @param {!BentoSocialShareDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function SocialShare({
+export function BentoSocialShare({
   background,
   children,
   color,
@@ -60,7 +60,7 @@ export function SocialShare({
     <Wrapper
       {...rest}
       role="button"
-      tabindex={tabIndex}
+      tabIndex={tabIndex}
       onKeyDown={(e) => handleKeyPress(e, finalEndpoint, checkedTarget)}
       onClick={() => handleActivation(finalEndpoint, checkedTarget)}
       wrapperStyle={{
@@ -101,7 +101,7 @@ function processChildren(type, children, color, background) {
       'backgroundColor': background || typeConfig.defaultBackgroundColor,
     });
     return (
-      <SocialShareIcon
+      <BentoSocialShareIcon
         style={{
           ...iconStyle,
           width: '100%',

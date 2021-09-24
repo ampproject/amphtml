@@ -1,6 +1,7 @@
 import {Layout, applyFillContent, isLayoutSizeFixed} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {realChildNodes} from '#core/dom/query';
+import {tryPlay} from '#core/dom/video';
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {listen} from '../../../src/event-helper';
@@ -235,7 +236,7 @@ export class AmpAudio extends AMP.BaseElement {
     if (!this.isInvocationValid_()) {
       return;
     }
-    this.audio_.play();
+    tryPlay(this.audio_);
     this.setPlayingStateForTesting_(true);
   }
 
@@ -253,7 +254,7 @@ export class AmpAudio extends AMP.BaseElement {
   /** @private */
   audioPlaying_() {
     const playHandler = () => {
-      this.audio_.play();
+      tryPlay(this.audio_);
       this.setPlayingStateForTesting_(true);
     };
     const pauseHandler = () => {

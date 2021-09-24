@@ -269,7 +269,7 @@ amp-story[standalone], amp-story-page {
 }
 
 amp-story[standalone] {
-  background-color: #202125 !important;
+  background-color: #000 !important;
   position: relative !important;
 }
 

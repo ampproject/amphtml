@@ -1,34 +1,34 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as Preact from '#preact';
-import {Dailymotion} from '../component';
-import {withKnobs} from '@storybook/addon-knobs';
+import {BentoDailymotion} from '../component';
 
 export default {
   title: 'Dailymotion',
-  component: Dailymotion,
-  decorators: [withKnobs],
+  component: BentoDailymotion,
+  args: {
+    width: 300,
+    height: 200,
+    videoId: 'x3rdtfy',
+  },
 };
 
-export const _default = () => {
-  return (
-    <Dailymotion
-      style={{width: 300, height: 200}}
-      videoId="x3rdtfy"
-    ></Dailymotion>
-  );
+const Template = ({height, width, ...args}) => (
+  <BentoDailymotion style={{width, height}} {...args} />
+);
+
+export const _default = (args) => <Template {...args} />;
+
+export const _customSettings = (args) => <Template {...args} />;
+
+_customSettings.args = {
+  endscreenEnable: false,
+  sharingEnable: false,
+  uiHighlight: '444444',
+  uiLogo: false,
+  info: false,
+};
+
+export const _autoplay = (args) => <Template {...args} />;
+
+_autoplay.args = {
+  autoplay: true,
 };

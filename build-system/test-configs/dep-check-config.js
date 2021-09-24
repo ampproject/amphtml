@@ -207,12 +207,18 @@ exports.rules = [
       'extensions/amp-stream-gallery/1.0/base-element.js->extensions/amp-base-carousel/1.0/component.jss.js',
       'extensions/amp-stream-gallery/1.0/component.js->extensions/amp-base-carousel/1.0/component.js',
 
+      // <amp-dailymotion> versions share this message API definition.
+      'extensions/amp-dailymotion/**->extensions/amp-dailymotion/dailymotion-api.js',
+
       // Autolightboxing dependencies
       'extensions/amp-base-carousel/1.0/scroller.js->extensions/amp-lightbox-gallery/1.0/component.js',
       'extensions/amp-lightbox-gallery/1.0/provider.js->extensions/amp-lightbox/1.0/component.js',
       'extensions/amp-lightbox-gallery/1.0/provider.js->extensions/amp-base-carousel/1.0/component.js',
       'extensions/amp-lightbox-gallery/1.0/base-element.js->extensions/amp-lightbox/1.0/component.jss.js',
       'extensions/amp-lightbox-gallery/1.0/base-element.js->extensions/amp-base-carousel/1.0/component.jss.js',
+
+      // <amp-date-display> versions share these date format helpers
+      'extensions/amp-date-display/**->extensions/amp-date-display/format.js',
 
       // Facebook components
       'extensions/amp-facebook/1.0/amp-facebook.js->extensions/amp-facebook/0.1/facebook-loader.js',
@@ -424,7 +430,6 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/string-starts-with.js',
       'src/amp.js->src/polyfills/index.js',
       'src/polyfills/index.js->src/polyfills/abort-controller.js',
-      'src/polyfills/index.js->src/polyfills/domtokenlist.js',
       'src/polyfills/index.js->src/polyfills/document-contains.js',
       'src/polyfills/index.js->src/polyfills/fetch.js',
       'src/polyfills/index.js->src/polyfills/get-bounding-client-rect.js',
@@ -443,7 +448,6 @@ exports.rules = [
       'src/friendly-iframe-embed.js->src/polyfills/abort-controller.js',
       'src/friendly-iframe-embed.js->src/polyfills/custom-elements.js',
       'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
-      'src/friendly-iframe-embed.js->src/polyfills/domtokenlist.js',
       'src/friendly-iframe-embed.js->src/polyfills/intersection-observer.js',
       'src/friendly-iframe-embed.js->src/polyfills/resize-observer.js',
     ],

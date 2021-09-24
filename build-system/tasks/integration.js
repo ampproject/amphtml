@@ -62,7 +62,6 @@ integration.flags = {
   'files': 'Run tests for specific files',
   'grep': 'Run tests that match the pattern',
   'headless': 'Run tests in a headless Chrome window',
-  'ie': 'Run tests on IE',
   'nobuild': 'Skip build step',
   'nohelp': 'Silence help messages that are printed prior to test run',
   'report': 'Write test result report to a local file',

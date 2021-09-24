@@ -10,6 +10,7 @@ import {
   StoryAdAutoAdvance,
   divertStoryAdAutoAdvance,
 } from '#experiments/story-ad-auto-advance';
+import {divertStoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
 import {divertStoryAdPlacements} from '#experiments/story-ad-placements';
 import {
   StoryAdSegmentExp,
@@ -54,7 +55,6 @@ const MUSTACHE_TAG = 'amp-mustache';
 export const Attributes = {
   AD_SHOWING: 'ad-showing',
   DESKTOP_ONE_PANEL: 'desktop-one-panel',
-  DESKTOP_PANELS: 'desktop-panels',
   DIR: 'dir',
   PAUSED: 'paused',
 };
@@ -142,6 +142,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
           this.config_
         );
         divertStoryAdPlacements(this.win);
+        divertStoryAdPageOutlink(this.win);
         divertStoryAdAutoAdvance(this.win);
         this.placementAlgorithm_ = getPlacementAlgo(
           this.win,
@@ -311,17 +312,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   onUIStateUpdate_(uiState) {
     this.mutateElement(() => {
-      const {DESKTOP_ONE_PANEL, DESKTOP_PANELS} = Attributes;
-      this.adBadgeContainer_.removeAttribute(DESKTOP_PANELS);
+      const {DESKTOP_ONE_PANEL} = Attributes;
       this.adBadgeContainer_.removeAttribute(DESKTOP_ONE_PANEL);
       // TODO(#33969) can no longer be null when launched.
-      this.progressBarBackground_?.removeAttribute(DESKTOP_PANELS);
       this.progressBarBackground_?.removeAttribute(DESKTOP_ONE_PANEL);
 
-      if (uiState === UIType.DESKTOP_PANELS) {
-        this.adBadgeContainer_.setAttribute(DESKTOP_PANELS, '');
-        this.progressBarBackground_?.setAttribute(DESKTOP_PANELS, '');
-      }
       if (uiState === UIType.DESKTOP_ONE_PANEL) {
         this.adBadgeContainer_.setAttribute(DESKTOP_ONE_PANEL, '');
         this.progressBarBackground_?.setAttribute(DESKTOP_ONE_PANEL, '');

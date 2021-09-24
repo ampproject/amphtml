@@ -1,5 +1,5 @@
 import * as Preact from '#preact';
-import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
+import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
 import {px} from '#core/dom/style';
 import {
@@ -12,13 +12,13 @@ import {
 import {useStyles} from './thumbnails.jss';
 
 /**
- * @param {!InlineGalleryDef.ThumbnailProps} props
+ * @param {!BentoInlineGalleryDef.BentoThumbnailProps} props
  * @return {PreactDef.Renderable}
  */
-export function Thumbnails({
+export function BentoInlineGalleryThumbnails({
   aspectRatio,
   children,
-  className = '',
+  'class': className = '',
   loop = false,
   ...rest
 }) {
@@ -52,8 +52,8 @@ export function Thumbnails({
   }, [aspectRatio, height]);
 
   return (
-    <BaseCarousel
-      className={`${className} ${classes.thumbnails}`}
+    <BentoBaseCarousel
+      class={`${className} ${classes.thumbnails}`}
       mixedLength={true}
       snap={false}
       snapAlign={loop ? 'center' : 'start'}
@@ -69,7 +69,7 @@ export function Thumbnails({
           const {thumbnailSrc} = slide.props;
           return (
             <img
-              className={classes.slide}
+              class={classes.slide}
               onClick={() => setCurrentSlide(i)}
               loading="lazy"
               role="button"
@@ -78,11 +78,11 @@ export function Thumbnails({
                 height: px(height),
                 width: aspectRatio ? px(aspectRatio * height) : '',
               }}
-              tabindex="0"
+              tabIndex="0"
             />
           );
         })}
-    </BaseCarousel>
+    </BentoBaseCarousel>
   );
 }
 

@@ -9,19 +9,21 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
 import {dispatchCustomEvent, getDataParamsFromAttributes} from '#core/dom';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
 } from '#core/dom/fullscreen';
-import {DailymotionEvents, getDailymotionIframeSrc} from '../dailymotion-api';
+import {
+  DailymotionEvents,
+  getDailymotionIframeSrc,
+  makeDailymotionMessage,
+} from '../dailymotion-api';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {parseQueryString} from '#core/types/string/url';
-import {isAutoplaySupported} from '#core/dom/video';
 
 const TAG = 'amp-dailymotion';
 
@@ -212,43 +214,44 @@ class AmpDailymotion extends AMP.BaseElement {
   /**
    * Sends a command to the player through postMessage.
    * @param {string} command
-   * @param {Array<boolean>=} opt_args
+   * @param {boolean} opt_arg
    * @private
    */
-  sendCommand_(command, opt_args) {
+  sendCommand_(command, opt_arg) {
     const endpoint = 'https://www.dailymotion.com';
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        const message = JSON.stringify(
-          dict({
-            'command': command,
-            'parameters': opt_args || [],
-          })
+        this.iframe_.contentWindow./*OK*/ postMessage(
+          makeDailymotionMessage(command, opt_arg),
+          endpoint
         );
-        this.iframe_.contentWindow./*OK*/ postMessage(message, endpoint);
       }
     });
   }
 
   /** @private */
   getIframeSrc_() {
-    const mute = this.element.getAttribute(`data-mute`);
-    const endscreenEnable = this.element.getAttribute(`data-endscreen-enable`);
-    const sharingEnable = this.element.getAttribute(`data-sharing-enable`);
-    const start = this.element.getAttribute(`data-start`);
-    const uiHighlight = this.element.getAttribute(`data-ui-highlight`);
-    const uiLogo = this.element.getAttribute(`data-ui-logo`);
-    const info = this.element.getAttribute(`data-info`);
+    const {
+      'endscreenEnable': endscreenEnable,
+      'info': info,
+      'mute': mute,
+      'sharingEnable': sharingEnable,
+      'start': start,
+      'uiHighlight': uiHighlight,
+      'uiLogo': uiLogo,
+    } = this.element.dataset;
 
     return getDailymotionIframeSrc(
+      this.win,
       this.videoid_,
-      mute,
+      this.element.hasAttribute('autoplay'),
       endscreenEnable,
+      info,
+      mute,
       sharingEnable,
       start,
       uiHighlight,
       uiLogo,
-      info,
       getDataParamsFromAttributes(this.element)
     );
   }

@@ -1,7 +1,7 @@
 /** @externs */
 
 /** @const */
-var FacebookDef = {};
+var BentoFacebookDef = {};
 
 /**
  * @typedef {{
@@ -15,6 +15,7 @@ var FacebookDef = {};
  *   locale: (string|undefined),
  *   layout: (string|undefined),
  *   numPosts: (number|undefined),
+ *   onLoad: (function():undefined|undefined),
  *   orderBy: (string|undefined),
  *   onReadyState: (function(string, *=)|undefined),
  *   refLabel: (string|undefined),
@@ -27,10 +28,10 @@ var FacebookDef = {};
  *   title: (string|undefined),
  * }}
  */
-FacebookDef.Props;
+BentoFacebookDef.Props;
 
 /** @constructor */
-FacebookDef.Api = function () {};
+BentoFacebookDef.Api = function () {};
 
 /** @type {string} */
-FacebookDef.Api.prototype.readyState;
+BentoFacebookDef.Api.prototype.readyState;

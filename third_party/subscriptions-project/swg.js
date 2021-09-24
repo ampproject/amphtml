@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.180 */
+/** Version: 0.1.22.185 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -109,6 +109,8 @@ const AnalyticsEvent = {
   EVENT_HAS_METERING_ENTITLEMENTS: 3010,
   EVENT_OFFERED_METER: 3011,
   EVENT_UNLOCKED_FREE_PAGE: 3012,
+  EVENT_INELIGIBLE_PAYWALL: 3013,
+  EVENT_UNLOCKED_FOR_CRAWLER: 3014,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -119,6 +121,7 @@ const EntitlementResult = {
   UNLOCKED_METER: 1003,
   LOCKED_REGWALL: 2001,
   LOCKED_PAYWALL: 2002,
+  INELIGIBLE_PAYWALL: 2003,
 };
 /** @enum {number} */
 const EntitlementSource = {
@@ -168,7 +171,7 @@ class AccountCreationRequest {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -238,7 +241,7 @@ class AlreadySubscribedResponse {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -305,6 +308,12 @@ class AnalyticsContext {
 
     /** @private {?string} */
     this.url_ = data[10 + base] == null ? null : data[10 + base];
+
+    /** @private {?Timestamp} */
+    this.clientTimestamp_ =
+      data[11 + base] == null || data[11 + base] == undefined
+        ? null
+        : new Timestamp(data[11 + base], includesLabel);
   }
 
   /**
@@ -462,7 +471,21 @@ class AnalyticsContext {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @return {?Timestamp}
+   */
+  getClientTimestamp() {
+    return this.clientTimestamp_;
+  }
+
+  /**
+   * @param {!Timestamp} value
+   */
+  setClientTimestamp(value) {
+    this.clientTimestamp_ = value;
+  }
+
+  /**
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -479,6 +502,7 @@ class AnalyticsContext {
         this.label_, // field 9 - label
         this.clientVersion_, // field 10 - client_version
         this.url_, // field 11 - url
+        this.clientTimestamp_ ? this.clientTimestamp_.toArray(includeLabel) : [], // field 12 - client_timestamp
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -542,7 +566,7 @@ class AnalyticsEventMeta {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -656,7 +680,7 @@ class AnalyticsRequest {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -729,7 +753,7 @@ class EntitlementJwt {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -874,7 +898,7 @@ class EntitlementsRequest {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -949,7 +973,7 @@ class EntitlementsResponse {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1105,7 +1129,7 @@ class EventParams {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1181,7 +1205,7 @@ class FinishedLoggingResponse {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1252,7 +1276,7 @@ class LinkSaveTokenRequest {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1306,7 +1330,7 @@ class LinkingInfoResponse {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1326,6 +1350,59 @@ class LinkingInfoResponse {
    */
   label() {
     return 'LinkingInfoResponse';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class OpenDialogRequest {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?string} */
+    this.urlPath_ = data[base] == null ? null : data[base];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUrlPath() {
+    return this.urlPath_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUrlPath(value) {
+    this.urlPath_ = value;
+  }
+
+  /**
+   * @param {boolean=} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+        this.urlPath_, // field 1 - url_path
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'OpenDialogRequest';
   }
 }
 
@@ -1461,7 +1538,7 @@ class SkuSelectedResponse {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1520,7 +1597,7 @@ class SmartBoxMessage {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1573,7 +1650,7 @@ class SubscribeResponse$1 {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1643,7 +1720,7 @@ class Timestamp {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1697,7 +1774,7 @@ class ToastCloseRequest {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1750,7 +1827,7 @@ class ViewSubscriptionsResponse {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1786,6 +1863,7 @@ const PROTO_MAP = {
   'FinishedLoggingResponse': FinishedLoggingResponse,
   'LinkSaveTokenRequest': LinkSaveTokenRequest,
   'LinkingInfoResponse': LinkingInfoResponse,
+  'OpenDialogRequest': OpenDialogRequest,
   'SkuSelectedResponse': SkuSelectedResponse,
   'SmartBoxMessage': SmartBoxMessage,
   'SubscribeResponse': SubscribeResponse$1,
@@ -3320,6 +3398,9 @@ class JwtHelper {
 /** Source for Google-provided metering entitlements. */
 const GOOGLE_METERING_SOURCE = 'google:metering';
 
+/** Source for privileged entitlements. */
+const PRIVILEGED_SOURCE = 'privileged';
+
 /** Subscription token for dev mode entitlements. */
 const DEV_MODE_TOKEN = 'GOOGLE_DEV_MODE_TOKEN';
 
@@ -3608,17 +3689,17 @@ class Entitlement {
     if (eq != -1) {
       // Wildcard product (publication:*) unlocks on any entitlement matching publication
       const publication = product.substring(0, eq + 1);
-      if(
+      if (
         publication + '*' == product &&
-        this.products.find((candidate) => candidate.substring(0, eq + 1) == publication)
+        this.products.filter(
+          (candidate) => candidate.substring(0, eq + 1) == publication
+        ).length >= 1
       ) {
         debugLog('enabled with wildcard productId');
         return true;
       }
       // Wildcard entitlement allows any product matching this publication
-      if (
-        this.products.includes(publication + '*')
-      ) {
+      if (this.products.includes(publication + '*')) {
         debugLog('enabled with wildcard entitlement');
         return true;
       }
@@ -4524,16 +4605,86 @@ function wasReferredByGoogle(parsedReferrer) {
  * @package Visible for testing only.
  */
 const CACHE_KEYS = {
+  'zero': 0, //testing value
   'nocache': 1,
   'hr1': 3600000, // 1hr = 1000 * 60 * 60
   'hr12': 43200000, // 12hr = 1000 * 60 * 60 * 12
 };
 
 /**
+ * Default operating Mode
+ */
+const DEFAULT = {
+  frontEnd: 'https://news.google.com',
+  payEnv: 'PRODUCTION',
+  playEnv: 'PROD',
+  feCache: 'hr1',
+};
+
+/**
+ * Default operating Mode
+ */
+const PROD = {
+  frontEnd: 'https://news.google.com',
+  payEnv: 'PRODUCTION',
+  playEnv: 'PROD',
+  feCache: CACHE_KEYS.hr1,
+};
+
+/**
+ * Default operating Mode
+ */
+const AUTOPUSH = {
+  frontEnd: 'https://subscribe-autopush.sandbox.google.com',
+  payEnv: 'PRODUCTION',
+  playEnv: 'AUTOPUSH',
+  feCache: CACHE_KEYS.nocache,
+};
+
+/**
+ * Default operating Mode
+ */
+const QUAL = {
+  frontEnd: 'https://subscribe-qual.sandbox.google.com',
+  payEnv: 'SANDBOX',
+  playEnv: 'STAGING',
+  feCache: CACHE_KEYS.hr1,
+};
+
+/**
+ * Operating modes, only runtime switchgable modes are here
+ * build time modes set the default and are configured in prepare.sh
+ *
+ * IMPORTANT: modes other than prod will only work on google internal networks!
+ * @type {!Object<Object>}
+ * @package Visible for testing only.
+ */
+const MODES = {
+  'default': DEFAULT,
+  'prod': PROD,
+  'autopush': AUTOPUSH,
+  'qual': QUAL,
+};
+
+/**
+ * Check for swg.mode= in url fragemnet if it exists use it
+ * otherwise use the default build mode.
+ * @returns {Object}
+ */
+function getSwgMode() {
+  const query = parseQueryString(self.location.hash);
+  const swgMode = query['swg.mode'];
+  if (swgMode && MODES[swgMode]) {
+    return MODES[swgMode];
+  }
+  return MODES['default'];
+}
+
+/**
  * @return {string}
  */
 function feOrigin() {
-  return parseUrl('https://news.google.com').origin;
+  return parseUrl(getSwgMode().frontEnd).origin;
 }
 
 /**
@@ -4541,7 +4692,7 @@ function feOrigin() {
  * @return {string} The complete URL.
  */
 function serviceUrl(url) {
-  return 'https://news.google.com/swg/_/api/v1' + url;
+  return `${getSwgMode().frontEnd}/swg/_/api/v1` + url;
 }
 
 /**
@@ -4560,7 +4711,7 @@ function adsUrl(url) {
  */
 function feUrl(url, prefix = '', params) {
   // Add cache param.
-  url = feCached('https://news.google.com' + prefix + '/swg/_/ui/v1' + url);
+  url = feCached(`${getSwgMode().frontEnd}${prefix}/swg/_/ui/v1${url}`);
 
   // Optionally add jsmode param. This allows us to test against "aggressively" compiled Boq JS.
   const query = parseQueryString(self.location.hash);
@@ -4581,7 +4732,7 @@ function feUrl(url, prefix = '', params) {
  * @return {string} The complete URL including cache param.
  */
 function feCached(url) {
-  return addQueryParam(url, '_', cacheParam('hr1'));
+  return addQueryParam(url, '_', cacheParam(getSwgMode().feCache));
 }
 
 /**
@@ -4590,7 +4741,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.180',
+    '_client': 'SwG 0.1.22.185',
   });
 }
 
@@ -4773,8 +4924,8 @@ class PayStartFlow {
       ({
         'apiVersion': 1,
         'allowedPaymentMethods': ['CARD'],
-        'environment': 'PRODUCTION',
-        'playEnvironment': 'PROD',
+        'environment': getSwgMode().payEnv,
+        'playEnvironment': getSwgMode().playEnv,
         'swg': swgPaymentRequest,
         'i': {
           'startTimeMs': Date.now(),
@@ -5283,10 +5434,12 @@ class OffersFlow {
     /** @private  @const {!Array<!string>} */
     this.skus_ = feArgsObj['skus'] || [ALL_SKUS];
 
+    /** @private @const {!Promise<!../model/client-config.ClientConfig>} */
+    this.clientConfig_ = this.clientConfigManager_.getClientConfig();
+
     /** @private @const {!Promise<?ActivityIframeView>} */
-    this.activityIframeViewPromise_ = this.clientConfigManager_
-      .getClientConfig()
-      .then((clientConfig) => {
+    this.activityIframeViewPromise_ = this.clientConfig_.then(
+      (clientConfig) => {
         return this.shouldShow_(clientConfig)
           ? new ActivityIframeView(
               this.win_,
@@ -5296,7 +5449,8 @@ class OffersFlow {
               /* shouldFadeBody */ true
             )
           : null;
-      });
+      }
+    );
   }
 
   /**
@@ -5388,7 +5542,16 @@ class OffersFlow {
           this.startNativeFlow_.bind(this)
         );
         this.activityIframeView_ = activityIframeView;
-        return this.dialogManager_.openView(this.activityIframeView_);
+        return this.clientConfig_.then((clientConfig) => {
+          if (!this.activityIframeView_) {
+            return;
+          }
+          return this.dialogManager_.openView(
+            this.activityIframeView_,
+            /* hidden */ false,
+            this.getDialogConfig_(clientConfig)
+          );
+        });
       });
     }
     return Promise.resolve();
@@ -5403,6 +5566,19 @@ class OffersFlow {
    */
   shouldShow_(clientConfig) {
     return clientConfig.uiPredicates?.canDisplayAutoPrompt !== false;
+  }
+
+  /**
+   * Gets display configuration options for the opened dialog. Uses the
+   * responsive desktop design properties if the updated offer flows UI (for
+   * SwG Basic) is enabled.
+   * @param {!../model/client-config.ClientConfig} clientConfig
+   * @return {!../components/dialog.DialogConfig}
+   */
+  getDialogConfig_(clientConfig) {
+    return clientConfig.useUpdatedOfferFlows
+      ? {desktopConfig: {isCenterPositioned: true, supportsWideScreen: true}}
+      : {};
   }
 
   /**
@@ -5833,7 +6009,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.180',
+        '_client': 'SwG 0.1.22.185',
         'supportsEventManager': true,
       },
       args || {}
@@ -6466,6 +6642,33 @@ function getOnExperiments(win) {
 }
 
 /**
+ * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @param {!number} millis
+ * @return {!Timestamp}
+ */
+function toTimestamp(millis) {
+  return new Timestamp(
+    [Math.floor(millis / 1000), (millis % 1000) * 1000000],
+    false
+  );
+}
+
+/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -6576,6 +6779,12 @@ class AnalyticsService {
     // the user wait too long.
     /** @private {?number} */
     this.timeout_ = null;
+
+    // A callback for setting the client timestamp before sending requests.
+    /** @private {function():!../proto/api_messages.Timestamp} */
+    this.getTimestamp_ = () => {
+      return toTimestamp(Date.now());
+    };
   }
 
   /**
@@ -6679,7 +6888,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.180');
+    context.setClientVersion('SwG 0.1.22.185');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -6761,7 +6970,9 @@ class AnalyticsService {
     const meta = new AnalyticsEventMeta();
     meta.setEventOriginator(event.eventOriginator);
     meta.setIsFromUserAction(!!event.isFromUserAction);
-
+    // Update the of the analytics context to the current time.
+    // This needs to be current for log analysis.
+    this.context_.setClientTimestamp(this.getTimestamp_());
     const request = new AnalyticsRequest();
     request.setEvent(/** @type {!AnalyticsEvent} */ (event.eventType));
     request.setContext(this.context_);
@@ -8523,7 +8734,7 @@ class DeferredAccountFlow {
   }
 }
 
-const CSS$1 = "body{margin:0;padding:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{-ms-flex-align:center!important;-ms-flex-pack:center!important;align-items:center!important;bottom:0!important;display:-ms-flexbox!important;display:flex!important;height:100%!important;justify-content:center!important;margin-top:5px!important;min-height:148px!important;width:100%!important;z-index:2147483647!important}@media (min-height:630px),(min-width:630px){swg-loading-container{background-color:#fff!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;margin-left:35px!important;width:560px!important}}swg-loading{animation:mspin-rotate 1568.63ms linear infinite;height:36px;overflow:hidden;width:36px;z-index:2147483647!important}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{animation:swg-loading-film 5332ms steps(324) infinite;background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;height:36px;width:11664px}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/";
+const CSS$1 = "body{margin:0;padding:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{-ms-flex-align:center!important;-ms-flex-pack:center!important;align-items:center!important;bottom:0!important;display:-ms-flexbox!important;display:flex!important;height:100%!important;justify-content:center!important;margin-top:5px!important;min-height:148px!important;width:100%!important;z-index:2147483647!important}@media (min-height:630px),(min-width:630px){swg-loading-container{background-color:#fff!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;margin-left:auto!important;margin-right:auto!important;width:560px!important}}swg-loading{animation:mspin-rotate 1568.63ms linear infinite;height:36px;overflow:hidden;width:36px;z-index:2147483647!important}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{animation:swg-loading-film 5332ms steps(324) infinite;background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;height:36px;width:11664px}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -9112,14 +9323,24 @@ class Dialog {
    * @param {!../model/doc.Doc} doc
    * @param {!Object<string, string|number>=} importantStyles
    * @param {!Object<string, string|number>=} styles
+   * @param {!DialogConfig=} dialogConfig Configuration options for the dialog.
    */
-  constructor(doc, importantStyles = {}, styles = {}) {
+  constructor(doc, importantStyles = {}, styles = {}, dialogConfig = {}) {
     /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
 
+    const desktopDialogConfig = dialogConfig.desktopConfig || {};
+    const supportsWideScreen = !!desktopDialogConfig.supportsWideScreen;
+
+    const defaultIframeCssClass = `swg-dialog ${
+      supportsWideScreen ? 'swg-wide-dialog' : ''
+    }`;
+    const iframeCssClass =
+      dialogConfig.iframeCssClassOverride || defaultIframeCssClass;
+
     /** @private @const {!FriendlyIframe} */
     this.iframe_ = new FriendlyIframe(doc.getWin().document, {
-      'class': 'swg-dialog',
+      'class': iframeCssClass,
     });
 
     /** @private @const {!Graypane} */
@@ -9158,8 +9379,25 @@ class Dialog {
     /** @private {?./view.View} */
     this.previousProgressView_ = null;
 
-    /** @private {number} */
-    this.maxAllowedHeightRatio_ = 0.9;
+    /** @const @private {number} */
+    this.maxAllowedHeightRatio_ =
+      dialogConfig.maxAllowedHeightRatio !== undefined
+        ? dialogConfig.maxAllowedHeightRatio
+        : 0.9;
+
+    /** @const @private {boolean} */
+    this.positionCenterOnDesktop_ = !!desktopDialogConfig.isCenterPositioned;
+
+    /** @const @private {!MediaQueryList} */
+    this.desktopMediaQuery_ = this.doc_
+      .getWin()
+      .matchMedia('(min-width: 641px)');
+
+    /**
+     * Reference to the listener that acts on changes to desktopMediaQuery.
+     * @private {?function()}
+     */
+    this.desktopMediaQueryListener_ = null;
   }
 
   /**
@@ -9195,6 +9433,24 @@ class Dialog {
   }
 
   /**
+   * Opens the iframe embedded in the given container element.
+   * @param {!Element} containerEl
+   */
+  openInContainer(containerEl) {
+    const iframe = this.iframe_;
+    if (iframe.isConnected()) {
+      throw new Error('already opened');
+    }
+
+    containerEl.appendChild(iframe.getElement());
+
+    return iframe.whenReady().then(() => {
+      this.buildIframe_();
+      return this;
+    });
+  }
+
+  /**
    * Build the iframe with the styling after iframe is loaded.
    * @private
    */
@@ -9214,6 +9470,14 @@ class Dialog {
     this.container_ = createElement(iframeDoc, 'swg-container', {});
     iframeBody.appendChild(this.container_);
     this.setPosition_();
+
+    // Add listener to adjust position when crossing a media query breakpoint.
+    if (this.positionCenterOnDesktop_) {
+      this.desktopMediaQueryListener_ = () => {
+        this.setPosition_();
+      };
+      this.desktopMediaQuery_.addListener(this.desktopMediaQueryListener_);
+    }
   }
 
   /**
@@ -9244,6 +9508,9 @@ class Dialog {
 
       this.removePaddingToHtml_();
       this.graypane_.destroy();
+      if (this.desktopMediaQueryListener_) {
+        this.desktopMediaQuery_.removeListener(this.desktopMediaQueryListener_);
+      }
     });
   }
 
@@ -9280,6 +9547,22 @@ class Dialog {
    */
   getLoadingView() {
     return this.loadingView_;
+  }
+
+  /**
+   * Returns the max allowed height of the view as a ratio of viewport height.
+   * @return {number}
+   */
+  getMaxAllowedHeightRatio() {
+    return this.maxAllowedHeightRatio_;
+  }
+
+  /**
+   * Returns whether the dialog is center-positioned on desktop screens.
+   * @return {boolean}
+   */
+  isPositionCenterOnDesktop() {
+    return this.positionCenterOnDesktop_;
   }
 
   /**
@@ -9363,7 +9646,7 @@ class Dialog {
       return transition$1(
         this.getElement(),
         {
-          'transform': 'translateY(0)',
+          'transform': this.getDefaultTranslateY_(),
           'opacity': 1,
           'visibility': 'visible',
         },
@@ -9411,7 +9694,7 @@ class Dialog {
           return transition$1(
             this.getElement(),
             {
-              'transform': 'translateY(0)',
+              'transform': this.getDefaultTranslateY_(),
             },
             300,
             'ease-out'
@@ -9437,7 +9720,7 @@ class Dialog {
 
             setImportantStyles$1(this.getElement(), {
               'height': `${newHeight}px`,
-              'transform': 'translateY(0)',
+              'transform': this.getDefaultTranslateY_(),
             });
           });
         });
@@ -9493,22 +9776,6 @@ class Dialog {
   }
 
   /**
-   * Sets the max allowed height as a ratio to the viewport height. For example,
-   * ratio = 0.9 means the max allowed height is 90% of the viewport height.
-   * @param {number} ratio
-   */
-  setMaxAllowedHeightRatio(ratio) {
-    this.maxAllowedHeightRatio_ = ratio;
-  }
-
-  /**
-   * Sets the position of the dialog. Currently 'BOTTOM' is set by default.
-   */
-  setPosition_() {
-    setImportantStyles$1(this.getElement(), this.getPositionStyle_());
-  }
-
-  /**
    * Add the padding to the containing page so as to not hide the content
    * behind the popup, if rendered at the bottom.
    * @param {number} newHeight
@@ -9531,12 +9798,43 @@ class Dialog {
   }
 
   /**
+   * Sets the position of the dialog. Currently only supports 'BOTTOM', with
+   * an option of switching to 'CENTER' on desktop screens.
+   */
+  setPosition_() {
+    setImportantStyles$1(this.getElement(), this.getPositionStyle_());
+  }
+
+  /**
    * Returns the styles required to postion the dialog.
    * @return {!Object<string, string|number>}
    * @private
    */
   getPositionStyle_() {
-    return {'bottom': 0};
+    if (this.positionCenterOnDesktop_ && this.desktopMediaQuery_.matches) {
+      return {
+        'top': '50%',
+        'bottom': 0,
+        'transform': this.getDefaultTranslateY_(),
+      };
+    }
+    return {
+      'top': 'auto',
+      'bottom': 0,
+      'transform': this.getDefaultTranslateY_(),
+    };
+  }
+
+  /**
+   * Returns default translateY style for the dialog.
+   * @return {string}
+   * @private
+   */
+  getDefaultTranslateY_() {
+    if (this.positionCenterOnDesktop_ && this.desktopMediaQuery_.matches) {
+      return 'translateY(-50%)';
+    }
+    return 'translateY(0px)';
   }
 }
 
@@ -9595,11 +9893,18 @@ class DialogManager {
 
   /**
    * @param {boolean=} hidden
+   * @param {!./dialog.DialogConfig=} dialogConfig Configuration options for the
+   *     dialog.
    * @return {!Promise<!Dialog>}
    */
-  openDialog(hidden = false) {
+  openDialog(hidden = false, dialogConfig = {}) {
     if (!this.openPromise_) {
-      this.dialog_ = new Dialog(this.doc_);
+      this.dialog_ = new Dialog(
+        this.doc_,
+        /* importantStyles */ {},
+        /* styles */ {},
+        dialogConfig
+      );
       this.openPromise_ = this.dialog_.open(hidden);
     }
     return this.openPromise_;
@@ -9608,16 +9913,13 @@ class DialogManager {
   /**
    * @param {!./view.View} view
    * @param {boolean=} hidden
-   * @param {?number=} maxAllowedHeightRatio The max allowed height of the
-   *    view as a ratio of the viewport height.
+   * @param {!./dialog.DialogConfig=} dialogConfig Configuration options for the
+   *    dialog.
    * @return {!Promise}
    */
-  openView(view, hidden = false, maxAllowedHeightRatio = null) {
+  openView(view, hidden = false, dialogConfig = {}) {
     this.handleCancellations(view);
-    return this.openDialog(hidden).then((dialog) => {
-      if (maxAllowedHeightRatio) {
-        dialog.setMaxAllowedHeightRatio(maxAllowedHeightRatio);
-      }
+    return this.openDialog(hidden, dialogConfig).then((dialog) => {
       return dialog.openView(view);
     });
   }
@@ -10222,8 +10524,8 @@ const ShowcaseEvents = {
     AnalyticsEvent.IMPRESSION_PAYWALL,
   ],
   [ShowcaseEvent.EVENT_SHOWCASE_INELIGIBLE_PAYWALL]: [
-    // TODO(b/181690059): Create showcase ineligible AnalyticsEvent
-    AnalyticsEvent.IMPRESSION_PAYWALL,
+    AnalyticsEvent.EVENT_INELIGIBLE_PAYWALL,
+    AnalyticsEvent.EVENT_NO_ENTITLEMENTS,
   ],
 };
 
@@ -10235,6 +10537,8 @@ const AnalyticsEventToEntitlementResult = {
     EntitlementResult.UNLOCKED_SUBSCRIBER,
   [AnalyticsEvent.EVENT_UNLOCKED_FREE_PAGE]: EntitlementResult.UNLOCKED_FREE,
   [AnalyticsEvent.IMPRESSION_PAYWALL]: EntitlementResult.LOCKED_PAYWALL,
+  [AnalyticsEvent.EVENT_INELIGIBLE_PAYWALL]:
+    EntitlementResult.INELIGIBLE_PAYWALL,
 };
 
 /**
@@ -10430,33 +10734,6 @@ function queryStringHasFreshGaaParams(
   }
 
   return true;
-}
-
-/**
- * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @param {!number} millis
- * @return {!Timestamp}
- */
-function toTimestamp(millis) {
-  return new Timestamp(
-    [Math.floor(millis / 1000), (millis % 1000) * 1000000],
-    false
-  );
 }
 
 /**
@@ -10687,20 +10964,19 @@ class EntitlementsManager {
     let source = null;
 
     switch (event.eventOriginator) {
-      // The indicates the publisher reported it via subscriptions.setShowcaseEntitlement
+      // Publisher JS logged this event.
       case EventOriginator.SHOWCASE_CLIENT:
         source = EntitlementSource.PUBLISHER_ENTITLEMENT;
         break;
-      case EventOriginator.SWG_CLIENT: // Fallthrough, these are the same
-      case EventOriginator.SWG_SERVER:
+      // Swgjs logged this event.
+      case EventOriginator.SWG_CLIENT:
         if (result == EntitlementResult.UNLOCKED_METER) {
-          // Meters from Google require a valid jwt, which is sent by
-          // an entitlement.
+          // The `consumeMeter_` method already tracks this.
           return;
         }
+
         source = EntitlementSource.GOOGLE_SUBSCRIBER_ENTITLEMENT;
         break;
-      // Permission to pingback other sources was not requested
       default:
         return;
     }
@@ -11024,13 +11300,14 @@ class EntitlementsManager {
 
     const params = new EventParams();
     params.setIsUserRegistered(true);
-    this.deps_
-      .eventManager()
-      .logSwgEvent(
-        AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION,
-        false,
-        params
-      );
+
+    // Log unlock event.
+    const eventType =
+      entitlement.source === PRIVILEGED_SOURCE
+        ? AnalyticsEvent.EVENT_UNLOCKED_FOR_CRAWLER
+        : AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION;
+    this.deps_.eventManager().logSwgEvent(eventType, false, params);
+
     // Check if storage bit is set. It's only set by the `Entitlements.ack` method.
     return this.storage_.get(TOAST_STORAGE_KEY).then((value) => {
       const toastWasShown = value === '1';
@@ -15719,7 +15996,7 @@ const PAY_ORIGIN = {
 
 /** @return {string} */
 function payUrl() {
-  return feCached(PAY_ORIGIN['PRODUCTION'] + '/gp/p/ui/pay');
+  return feCached(PAY_ORIGIN[getSwgMode().payEnv] + '/gp/p/ui/pay');
 }
 
 /**
@@ -15810,7 +16087,7 @@ class PayClient {
     this.client_ = this.createClient_(
       /** @type {!PaymentOptions} */
       ({
-        environment: 'PRODUCTION',
+        environment: getSwgMode().payEnv,
         'i': {
           'redirectKey': this.redirectVerifierHelper_.restoreKey(),
         },
@@ -16512,7 +16789,7 @@ class Propensity {
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgb(0 0 0/20%),0 2px 2px 0 rgb(0 0 0/14%),0 1px 5px 0 rgb(0 0 0/12%)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
+const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (min-width:871px) and (min-height:641px){.swg-dialog.swg-wide-dialog{left:-435px!important;width:870px!important}}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgb(0 0 0/20%),0 2px 2px 0 rgb(0 0 0/14%),0 1px 5px 0 rgb(0 0 0/12%)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.

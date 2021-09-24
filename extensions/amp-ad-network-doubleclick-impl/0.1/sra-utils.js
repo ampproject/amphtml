@@ -82,7 +82,9 @@ export function combineInventoryUnits(impls) {
   const prevIusEncoded = [];
   impls.forEach((instance) => {
     const iu = devAssert(instance.element.getAttribute('data-slot'));
-    const componentNames = iu.split('/');
+    const componentNames = iu
+      .split('/')
+      .map((componentName) => componentName.replace(/,/g, ':'));
     const encodedNames = [];
     for (let i = 0; i < componentNames.length; i++) {
       if (componentNames[i] == '') {

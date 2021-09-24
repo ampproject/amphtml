@@ -109,12 +109,14 @@ describes.endtoend(
         ).equal('');
       });
 
-      it('lowers the quality on close videos that are not already loaded when a video buffers', async () => {
+      // TODO(#35925): Re-enable this test.
+      it.skip('lowers the quality on close videos that are not already loaded when a video buffers', async () => {
         await forceEventOnVideo(VIDEO_EVENTS.UNLOAD, 2);
         await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
 
         const video2El = await controller.findElement('#video2 video');
 
+        // Flake here: result is sometimes #low4 instead of #med
         await expect(
           await controller.getElementProperty(video2El, 'currentSrc')
         ).contains('#med');
@@ -233,7 +235,8 @@ describes.endtoend(
         ).contains('#high');
       });
 
-      it('loads a low quality source on a far video when the connection drops and the user advances to that page', async () => {
+      // TODO(#35966): fix flaky test (disabled in #35967)
+      it.skip('loads a low quality source on a far video when the connection drops and the user advances to that page', async () => {
         await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
         await forceEventOnVideo(VIDEO_EVENTS.UNLOAD, 4);
         await controller.click(story);

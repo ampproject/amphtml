@@ -90,4 +90,34 @@ export const InsideDetails = () => {
   );
 };
 
+export const WithPlaceholder = ({id}) => {
+  const videoid = text('videoid', 'IAvf-rkzNck');
+  const layout = text('layout', 'responsive');
+  const autoplay = boolean('autoplay', false);
+  const loop = boolean('loop', false);
+  const width = number('width', 300);
+  const height = number('height', 200);
+  const credentials = text('credentials', 'include');
+  return (
+    <amp-youtube
+      id={id}
+      width={width}
+      height={height}
+      data-videoid={videoid}
+      layout={layout}
+      autoplay={autoplay}
+      loop={loop}
+      credentials={credentials}
+    >
+      <div placeholder style="background:red">
+        Placeholder. Loading content...
+      </div>
+
+      <div fallback style="background:blue">
+        Fallback. Could not load content...
+      </div>
+    </amp-youtube>
+  );
+};
+
 Default.storyName = 'Default';

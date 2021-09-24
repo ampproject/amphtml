@@ -8,6 +8,7 @@ tags: {  # amp-vimeo
     version_name: "v0.1"
     version: "0.1"
     version: "latest"
+    bento_supported_version: "1.0"
     requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }

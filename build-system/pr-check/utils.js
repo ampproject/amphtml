@@ -1,7 +1,7 @@
 'use strict';
 
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const path = require('path');
 const {
   ciPullRequestSha,
@@ -18,7 +18,7 @@ const {
   gitDiffStatMain,
   shortSha,
 } = require('../common/git');
-const {cyan, green, yellow} = require('../common/colors');
+const {cyan, green, yellow} = require('kleur/colors');
 const {exec, execOrDie, execOrThrow, execWithError} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {getStdout} = require('../common/process');
@@ -245,7 +245,7 @@ function storeBuildToWorkspace_(containerDirectory) {
       }
     }
     // Bento components are compiled inside the extension source file.
-    for (const componentFile of globby.sync('extensions/*/?.?/dist/*.js')) {
+    for (const componentFile of fastGlob.sync('extensions/*/?.?/dist/*.js')) {
       fs.ensureDirSync(
         `/tmp/workspace/builds/${containerDirectory}/${path.dirname(
           componentFile
@@ -327,7 +327,7 @@ function generateCircleCiShardTestFileList(globs) {
   )
     .trim()
     .replace(/\s+/g, ',');
-  fs.writeFileSync(TEST_FILES_LIST_FILE_NAME, fileList, {encoding: 'utf8'});
+  fs.writeFileSync(TEST_FILES_LIST_FILE_NAME, fileList, 'utf8');
   logWithoutTimestamp(
     'Stored list of',
     cyan(fileList.split(',').length),

@@ -67,8 +67,8 @@ import {
   isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '#experiments';
-import {ADS_INITIAL_INTERSECTION_EXP} from '#experiments/ads-initial-intersection-exp';
 import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
+import {StoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
 import {StoryAdPlacements} from '#experiments/story-ad-placements';
 import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
@@ -467,14 +467,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           branches: Object.values(ZINDEX_EXP_BRANCHES),
         },
         {
-          experimentId: ADS_INITIAL_INTERSECTION_EXP.id,
-          isTrafficEligible: () => true,
-          branches: [
-            ADS_INITIAL_INTERSECTION_EXP.control,
-            ADS_INITIAL_INTERSECTION_EXP.experiment,
-          ],
-        },
-        {
           experimentId: IDLE_CWV_EXP,
           isTrafficEligible: () => {
             return (
@@ -504,6 +496,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     );
     if (storyAdPlacementsExpId) {
       addExperimentIdToElement(storyAdPlacementsExpId, this.element);
+    }
+
+    const storyAdPageOutlinkExpId = getExperimentBranch(
+      this.win,
+      StoryAdPageOutlink.ID
+    );
+    if (storyAdPageOutlinkExpId) {
+      addExperimentIdToElement(storyAdPageOutlinkExpId, this.element);
     }
 
     const autoAdvanceExpBranch = getExperimentBranch(
@@ -1637,16 +1637,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return;
         }
         // Create amp-pixel and append to document to send impression.
-        this.win.document.body.appendChild(
-          createElementWithAttributes(
-            this.win.document,
-            'amp-pixel',
-            dict({
-              'src': url,
-              'referrerpolicy': scrubReferer ? 'no-referrer' : '',
-            })
-          )
-        );
+        this.getAmpDoc()
+          .getBody()
+          .appendChild(
+            createElementWithAttributes(
+              this.win.document,
+              'amp-pixel',
+              dict({
+                'src': url,
+                'referrerpolicy': scrubReferer ? 'no-referrer' : '',
+              })
+            )
+          );
       } catch (unusedError) {}
     });
   }

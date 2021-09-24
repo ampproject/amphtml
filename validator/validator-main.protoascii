@@ -1,9 +1,4 @@
-# This revision id refers to the validator revision id, currently a Google
-# internal mechanism. When backwards incompatible changes to the validator
-# engine are made, this value must be incremented to prevent old binaries
-# in production from crashing. This id is not relevant to validator.js
-# because thus far, engine (validator.js) and spec file
-# (validator-main.protoascii, etc) are always released together.
+# DEPRECATED: This value is no longer updated.
 min_validator_revision_required: 475
 
 # DEPRECATED: This value is no longer updated.
@@ -3111,10 +3106,40 @@ attr_lists: {
 }
 tags: {
   html_format: AMP
+  disabled_by: "transformed"
   tag_name: "SCRIPT"
   spec_name: "amphtml engine script"
   descriptive_name: "amphtml engine script"
-  mandatory_alternatives: "amphtml engine script"
+  satisfies: "amphtml javascript runtime (v0.js)"
+  requires: "style[amp-boilerplate]"
+  requires: "noscript > style[amp-boilerplate]"
+  unique: true
+  mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
+  attr_lists: "amphtml-engine-attrs"
+  attrs: {
+    name: "src"
+    mandatory: true
+    value: "https://cdn.ampproject.org/v0.js"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  cdata: {
+    disallowed_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
+}
+tags: {
+  # The transformed variant is the same except does not require the boilerplate,
+  # given that it may have been removed during transformation.
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "SCRIPT"
+  spec_name: "amphtml engine script (transformed)"
+  descriptive_name: "amphtml engine script"
+  satisfies: "amphtml javascript runtime (v0.js)"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -3135,10 +3160,40 @@ tags: {
 }
 tags: {
   html_format: AMP
+  disabled_by: "transformed"
   tag_name: "SCRIPT"
   spec_name: "amphtml engine script (LTS)"
   descriptive_name: "amphtml engine script"
-  mandatory_alternatives: "amphtml engine script"
+  satisfies: "amphtml javascript runtime (v0.js)"
+  requires: "style[amp-boilerplate]"
+  requires: "noscript > style[amp-boilerplate]"
+  unique: true
+  mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
+  attr_lists: "amphtml-engine-attrs"
+  attrs: {
+    name: "src"
+    mandatory: true
+    value: "https://cdn.ampproject.org/lts/v0.js"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  cdata: {
+    disallowed_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
+}
+tags: {
+  # The transformed variant is the same except does not require the boilerplate,
+  # given that it may have been removed during transformation.
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "SCRIPT"
+  spec_name: "amphtml engine script (LTS) (transformed)"
+  descriptive_name: "amphtml engine script"
+  satisfies: "amphtml javascript runtime (v0.js)"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -3163,7 +3218,7 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amphtml module engine script"
   descriptive_name: "amphtml module engine script"
-  mandatory_alternatives: "amphtml engine script"
+  satisfies: "amphtml javascript runtime (v0.js)"
   unique: true
   mandatory_parent: "HEAD"
   satisfies: "amphtml module engine script"
@@ -3188,7 +3243,7 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amphtml nomodule engine script"
   descriptive_name: "amphtml nomodule engine script"
-  mandatory_alternatives: "amphtml engine script"
+  satisfies: "amphtml javascript runtime (v0.js)"
   unique: true
   mandatory_parent: "HEAD"
   satisfies: "amphtml nomodule engine script"
@@ -3213,7 +3268,7 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amphtml module LTS engine script"
   descriptive_name: "amphtml module LTS engine script"
-  mandatory_alternatives: "amphtml engine script"
+  satisfies: "amphtml javascript runtime (v0.js)"
   unique: true
   mandatory_parent: "HEAD"
   satisfies: "amphtml module LTS engine script"
@@ -3238,7 +3293,7 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amphtml nomodule LTS engine script"
   descriptive_name: "amphtml nomdule LTS engine script"
-  mandatory_alternatives: "amphtml engine script"
+  satisfies: "amphtml javascript runtime (v0.js)"
   unique: true
   mandatory_parent: "HEAD"
   satisfies: "amphtml nomodule LTS engine script"
@@ -3262,6 +3317,8 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amphtml engine script [AMP4EMAIL]"
   descriptive_name: "amphtml engine script"
+  satisfies: "amphtml javascript runtime (v0.js)"
+  requires: "style[amp-boilerplate]"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -3286,6 +3343,8 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amp4ads engine script"
   descriptive_name: "amphtml engine script"
+  satisfies: "amphtml javascript runtime (v0.js)"
+  requires: "style[amp-boilerplate]"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -3420,23 +3479,13 @@ tags: {
 # 4.11.2 The noscript element
 tags: {
   html_format: AMP
-  disabled_by: "transformed"
   tag_name: "NOSCRIPT"
-  spec_name: "noscript enclosure for boilerplate"
-  descriptive_name: "noscript enclosure for boilerplate"
-  mandatory: true
-  unique: true
+  spec_name: "noscript enclosure for amp style tags"
   mandatory_parent: "HEAD"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites"
-}
-tags: {
-  html_format: AMP
-  enabled_by: "transformed"
-  tag_name: "NOSCRIPT"
-  spec_name: "noscript enclosure for boilerplate (transformed)"
-  descriptive_name: "noscript enclosure for boilerplate"
-  unique: true
-  mandatory_parent: "HEAD"
+  child_tags {
+    child_tag_name_oneof: "STYLE"
+    mandatory_min_num_child_tags: 1
+  }
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites"
 }
 # We allow noscript in the body to contain tags otherwise disallowed by AMP.
@@ -3621,6 +3670,9 @@ tags: {  # <amp-img>
   html_format: AMP
   html_format: AMP4ADS
   tag_name: "AMP-IMG"
+  # amp-img does not require a matching extension script, it's built in to v0.
+  # js directly, so we explicitly list that dependency here.
+  requires: "amphtml javascript runtime (v0.js)"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "crossorigin" }
@@ -3653,6 +3705,9 @@ tags: {  # <amp-img i-amphtml-ssr>
   enabled_by: "transformed"
   tag_name: "AMP-IMG"
   spec_name: "amp-img (transformed)"
+  # amp-img does not require a matching extension script, it's built in to v0.
+  # js directly, so we explicitly list that dependency here.
+  requires: "amphtml javascript runtime (v0.js)"
   attrs: {
     dispatch_key: NAME_DISPATCH
     name: "i-amphtml-ssr"
@@ -3689,6 +3744,11 @@ tags: {  # <amp-img>
   html_format: AMP4EMAIL
   tag_name: "AMP-IMG"
   spec_name: "AMP-IMG (AMP4EMAIL)"
+  # amp-img does not require a matching extension script, it's built in to v0.
+  # js directly, so we explicitly list that dependency here. This is redundant
+  # for email since v0.js is still required, but we include to for consistency
+  # and to future proof.
+  requires: "amphtml javascript runtime (v0.js)"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "placeholder" }
@@ -3713,6 +3773,9 @@ tags: {  # <amp-layout>
   html_format: AMP4ADS
   html_format: AMP4EMAIL
   tag_name: "AMP-LAYOUT"
+  # amp-pixel does not require a matching extension script, it's built in to v0.
+  # js directly, so we explicitly list that dependency here.
+  requires: "amphtml javascript runtime (v0.js)"
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-layout/"
   amp_layout: {
@@ -3730,6 +3793,9 @@ tags: {  # <amp-pixel>
   html_format: AMP
   html_format: AMP4ADS
   tag_name: "AMP-PIXEL"
+  # amp-pixel does not require a matching extension script, it's built in to v0.
+  # js directly, so we explicitly list that dependency here.
+  requires: "amphtml javascript runtime (v0.js)"
   attrs: { name: "allow-ssr-img" }
   attrs: {
     name: "referrerpolicy"

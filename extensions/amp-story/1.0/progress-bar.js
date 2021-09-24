@@ -411,10 +411,6 @@ export class ProgressBar {
         MAX_SEGMENTS = 20;
         ELLIPSE_WIDTH_PX = 2;
         break;
-      case UIType.DESKTOP_PANELS:
-        MAX_SEGMENTS = 20;
-        ELLIPSE_WIDTH_PX = 3;
-        break;
       default:
         MAX_SEGMENTS = 20;
     }

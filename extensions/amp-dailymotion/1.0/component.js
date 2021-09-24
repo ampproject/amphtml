@@ -1,29 +1,6 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as Preact from '#preact';
 import {forwardRef} from '#preact/compat';
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from '#preact';
+import {useMemo} from '#preact';
 import {dispatchCustomEvent} from '#core/dom';
 import {
   DailymotionEvents,
@@ -41,17 +18,12 @@ function makeMethodMessage(method) {
   switch (method) {
     case 'mute':
       return makeDailymotionMessage('muted', [true]);
-      break;
     case 'unmute':
       return makeDailymotionMessage('muted', [false]);
-      break;
     case 'showControls':
       return makeDailymotionMessage('controls', [true]);
-      break;
     case 'hideControls':
       return makeDailymotionMessage('controls', [false]);
-      break;
-
     default:
       return makeDailymotionMessage(method);
   }
@@ -63,23 +35,26 @@ function makeMethodMessage(method) {
 function onMessage({currentTarget, data}) {
   const parsedData = parseQueryString(/** @type {string} */ (data));
   const event = parsedData?.['event'];
-  if (event === DailymotionEvents.API_READY) {
+  if (event === DailymotionEvents.PAUSE) {
+    dispatchCustomEvent(currentTarget, 'pause');
+  } else if (event === DailymotionEvents.PLAY) {
+    dispatchCustomEvent(currentTarget, 'playing');
+  } else if (event === DailymotionEvents.END) {
+    dispatchCustomEvent(currentTarget, 'pause');
+    dispatchCustomEvent(currentTarget, 'end');
+  } else if (event === DailymotionEvents.API_READY) {
     dispatchCustomEvent(currentTarget, 'canplay');
-    return;
-  }
-  if (DailymotionEvents[event]) {
-    dispatchEvent(currentTarget, DailymotionEvents.event);
-    return;
   }
 }
 
 /**
- * @param {!DailymotionDef.Props} props
- * @param ref
+ * @param {!BentoDailymotionDef.Props} props
+ * @param {{current: ?VideoWrapperDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
-export function DailymotionWithRef(
+export function BentoDailymotionWithRef(
   {
+    autoplay,
     endscreenEnable,
     info,
     mute,
@@ -95,16 +70,20 @@ export function DailymotionWithRef(
   const src = useMemo(
     () =>
       getDailymotionIframeSrc(
+        window,
         videoId,
-        mute,
+        autoplay,
         endscreenEnable,
+        info,
+        mute,
         sharingEnable,
         start,
         uiHighlight,
-        uiLog,
-        info
+        uiLog
       ),
     [
+      videoId,
+      autoplay,
       endscreenEnable,
       info,
       mute,
@@ -112,12 +91,13 @@ export function DailymotionWithRef(
       start,
       uiHighlight,
       uiLog,
-      videoId,
     ]
   );
 
   return (
     <VideoIframe
+      autoplay={autoplay}
+      controls
       ref={ref}
       {...rest}
       src={src}
@@ -127,6 +107,6 @@ export function DailymotionWithRef(
   );
 }
 
-const Dailymotion = forwardRef(DailymotionWithRef);
-Dailymotion.displayName = 'Dailymotion';
-export {Dailymotion};
+const BentoDailymotion = forwardRef(BentoDailymotionWithRef);
+BentoDailymotion.displayName = 'BentoDailymotion';
+export {BentoDailymotion};

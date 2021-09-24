@@ -759,6 +759,11 @@ export class ViewerImpl {
   }
 
   /** @override */
+  maybeGetMessageDeliverer() {
+    return this.messageDeliverer_;
+  }
+
+  /** @override */
   sendMessage(eventType, data, cancelUnsent = false) {
     this.sendMessageInternal_(eventType, data, cancelUnsent, false);
   }

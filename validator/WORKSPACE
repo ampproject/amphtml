@@ -12,11 +12,11 @@ http_archive(
 # rules_proto defines abstract rules for building Protocol Buffers.
 http_archive(
     name = "rules_proto",
-    sha256 = "e0cab008a9cdc2400a1d6572167bf9c5afc72e19ee2b862d18581051efab42c9",
-    strip_prefix = "rules_proto-c0b62f2f46c85c16cb3b5e9e921f0d00e3101934",
+    sha256 = "36476f17a78a4c495b9a9e70bd92d182e6e78db476d90c74bac1f5f19f0d6d04",
+    strip_prefix = "rules_proto-fcad4680fee127dbd8344e6a961a28eef5820ef4",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_proto/archive/c0b62f2f46c85c16cb3b5e9e921f0d00e3101934.tar.gz",
-        "https://github.com/bazelbuild/rules_proto/archive/c0b62f2f46c85c16cb3b5e9e921f0d00e3101934.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_proto/archive/fcad4680fee127dbd8344e6a961a28eef5820ef4.tar.gz",
+        "https://github.com/bazelbuild/rules_proto/archive/fcad4680fee127dbd8344e6a961a28eef5820ef4.tar.gz",
     ],
 )
 

@@ -121,3 +121,34 @@ export const ResponsiveLayout = () => {
     />
   );
 };
+
+export const WithPlaceholderAndFallback = () => {
+  // Knobs
+  const componentColor = color('Color', 'RGBA(255, 85, 0, 1)');
+  const height = text('Height', '180');
+  const trackid = text('Track ID', '864765493');
+  const visual = boolean('Visual', true);
+
+  // Convert RGBA to HEX (without Alpha Channel)
+  const hex = rgba2hex(componentColor);
+
+  // Render Preact Component
+  return (
+    <amp-soundcloud
+      data-color={hex}
+      data-trackid={trackid}
+      data-visual={visual}
+      height={height}
+      layout="fixed-height"
+      width="auto"
+    >
+      <div placeholder style="background:red">
+        Placeholder. Loading content...
+      </div>
+
+      <div fallback style="background:blue">
+        Fallback. Could not load content...
+      </div>
+    </amp-soundcloud>
+  );
+};

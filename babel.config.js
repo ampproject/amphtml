@@ -9,7 +9,7 @@
 
 'use strict';
 
-const {cyan, yellow} = require('./build-system/common/colors');
+const {cyan, yellow} = require('kleur/colors');
 const {log} = require('./build-system/common/logging');
 
 /**
@@ -25,6 +25,8 @@ const babelTransforms = new Map([
   ['minified', 'getMinifiedConfig'],
   ['jss', 'getJssConfig'],
   ['@babel/eslint-parser', 'getEslintConfig'],
+  ['is-enum-value', 'getEmptyConfig'],
+  ['import-resolver', 'getEmptyConfig'],
 ]);
 
 /**

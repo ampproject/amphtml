@@ -4,10 +4,10 @@ import {ContainWrapper} from '#preact/component';
 import {useMemo, useState} from '#preact';
 
 /**
- * @param {!InlineGalleryDef.Props} props
+ * @param {!BentoInlineGalleryDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function InlineGallery({children, ...rest}) {
+export function BentoInlineGallery({children, ...rest}) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slides, setSlides] = useState([]);
   const carouselContext = useMemo(

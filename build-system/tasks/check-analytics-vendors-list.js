@@ -1,4 +1,4 @@
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const {basename} = require('path');
 const {readFile} = require('fs-extra');
 const {writeDiffOrFail} = require('../common/diff');
@@ -32,7 +32,7 @@ const blockRegExp = (name) =>
  * @return {Promise<void>}
  */
 async function checkAnalyticsVendorsList() {
-  const vendors = globby
+  const vendors = fastGlob
     .sync(vendorsGlob)
     .map((path) => basename(path, '.json'))
     .sort();
