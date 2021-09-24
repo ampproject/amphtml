@@ -64,7 +64,7 @@ export const stubbedElements = [];
  * implClass available are marked unresolvable.
  * @type {Set<string>}
  */
-let unresolvableExtensions = new Set();
+const unresolvableExtensions = new Set();
 
 /**
  * Whether this platform supports template tags.
