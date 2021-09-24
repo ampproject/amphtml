@@ -15,22 +15,12 @@
         },
         '*'
       );
-
-      function isAmpMessage(event, type) {
-        return (
-          event.source == window.parent &&
-          event.origin != window.location.origin &&
-          event.data &&
-          event.data.sentinel == 'amp' &&
-          event.data.type == type
-        );
-      }
       window.addEventListener('message', (event) => {
         if (event.data.sentinel !== 'amp' && event.data.type !== 'intersection') {
           return;
         }
+        const node = document.getElementById('intersections');
         event.data.changes.forEach((change) => {
-          const node = document.getElementById('intersections');
           node.innerHTML += '<p>' + change.intersectionRatio + '</p>';
         });
       });
