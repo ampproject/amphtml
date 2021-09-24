@@ -23,8 +23,7 @@ module.exports = function () {
         // If not within a class, then it isn't a private.
         // It could also be exported, which could cause issues.
         const isWithinClass =
-          !path.parentPath.isClassDeclaration() &&
-          !!path.findParent((p) => p.isClassDeclaration());
+          !path.parentPath.isClass() && !!path.findParent((p) => p.isClass());
         if (!isWithinClass) {
           return;
         }
