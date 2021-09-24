@@ -2,7 +2,11 @@ import {Services} from '#service';
 
 import {extensionScriptsInNode} from './extension-script';
 
-import {createCustomElementClass, stubbedElements, markUnresolvedElements} from '../custom-element';
+import {
+  createCustomElementClass,
+  markUnresolvedElements,
+  stubbedElements,
+} from '../custom-element';
 import {ElementStub} from '../element-stub';
 import {reportError} from '../error-reporting';
 import {userAssert} from '../log';
