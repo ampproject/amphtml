@@ -69,10 +69,27 @@ export class AmpAd extends AMP.BaseElement {
 
       this.win.ampAdSlotIdCounter = this.win.ampAdSlotIdCounter || 0;
       const slotId = this.win.ampAdSlotIdCounter++;
+      let slotIdByUnit;
+
+      if (this.element.hasAttribute('data-slot')) {
+        const dataSlot = this.element.getAttribute('data-slot');
+        this.win.ampAdSlotIdByUnitCounter =
+          this.win.ampAdSlotIdByUnitCounter || {};
+        slotIdByUnit = this.win.ampAdSlotIdByUnitCounter[dataSlot] || 0;
+        slotIdByUnit += 1;
+        this.win.ampAdSlotIdByUnitCounter[dataSlot] = slotIdByUnit;
+      }
 
       return new Promise((resolve) => {
         this.getVsync().mutate(() => {
           this.element.setAttribute('data-amp-slot-index', slotId);
+
+          if (this.element.hasAttribute('data-slot')) {
+            this.element.setAttribute(
+              'data-vars-slot-id-by-unit',
+              slotIdByUnit
+            );
+          }
 
           const useRemoteHtml = this.element
             .getAmpDoc()
