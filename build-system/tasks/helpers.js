@@ -402,14 +402,6 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     return watchedTargets.get(entryPoint).rebuild();
   }
 
-  // TODO(36162): Only write this once as part of the dist() function.
-  if (options.minify) {
-    fs.outputFileSync(
-      path.join(destDir, 'version.txt'),
-      internalRuntimeVersion
-    );
-  }
-
   /**
    * Splits up the wrapper to compute the banner and footer
    * @return {Object}

@@ -121,7 +121,7 @@ async function dist() {
     await compileCoreRuntime(options);
   } else {
     await Promise.all([
-      writeVersionFile(),
+      writeVersionFiles(),
       buildExperiments(),
       buildLoginDone('0.1'),
       buildWebPushPublisherFiles(),
@@ -155,10 +155,18 @@ async function dist() {
  * Writes the verion.txt file.
  * @return {!Promise}
  */
-async function writeVersionFile() {
-  return fs.writeFile(
-    path.join('dist', 'v0', 'version.txt'),
-    internalRuntimeVersion
+async function writeVersionFiles() {
+  // TODO: determine which of these are necessary and trim the rest via an I2D.
+  const paths = [
+    path.join('dist.tools', 'experiments'),
+    path.join('dist', 'v0'),
+    path.join('dist'),
+    path.join('dist.3p', internalRuntimeVersion),
+    path.join('dist', 'v0', 'examples'),
+    path.join('dist.3p', internalRuntimeVersion, 'vendor'),
+  ];
+  return Promise.all(
+    paths.map((p) => fs.outputFile(p, internalRuntimeVersion))
   );
 }
 
