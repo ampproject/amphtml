@@ -75,9 +75,9 @@ export class AmpAd extends AMP.BaseElement {
         const dataSlot = this.element.getAttribute('data-slot');
         this.win.ampAdSlotIdByUnitCounter =
           this.win.ampAdSlotIdByUnitCounter || {};
-        slotIdByUnit = this.win.ampAdSlotIdByUnitCounter[dataSlot] || 0;
-        slotIdByUnit += 1;
-        this.win.ampAdSlotIdByUnitCounter[dataSlot] = slotIdByUnit;
+        this.win.ampAdSlotIdByUnitCounter[dataSlot] =
+          this.win.ampAdSlotIdByUnitCounter[dataSlot] || 0;
+        slotIdByUnit = this.win.ampAdSlotIdByUnitCounter[dataSlot]++;
       }
 
       return new Promise((resolve) => {
@@ -86,7 +86,7 @@ export class AmpAd extends AMP.BaseElement {
 
           if (this.element.hasAttribute('data-slot')) {
             this.element.setAttribute(
-              'data-vars-slot-id-by-unit',
+              'data-vars-slot-index-by-unit',
               slotIdByUnit
             );
           }
