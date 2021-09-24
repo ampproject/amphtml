@@ -1,49 +1,43 @@
-// @ts-nocheck
-
-/**
- * Changes the values of getMode().test, getMode().localDev to false
- * and getMode().localDev to true.
- * @param {Object} babelTypes
- */
 const {dirname, join, relative, resolve} = require('path').posix;
 
-/** @typedef {import('../../compile/build-constants').BUILD_CONSTANTS} BuildConstantsDef */
+/**
+ * @typedef {typeof import('../../compile/build-constants').BUILD_CONSTANTS} ModeTransformerOptions
+ */
 
 /**
  * This plugin is only executed when bundling for production builds (minified).
+ *
+ * Changes the values of getMode().test, getMode().localDev to false
+ * and getMode().localDev to true.
  *
  * @interface {babel.PluginPass}
  * @param {babel} babel
  * @return {babel.PluginObj}
  */
-module.exports = function ({types: t}) {
+module.exports = function (babel) {
+  const {types: t} = babel;
   let getModeFound = false;
   return {
     visitor: {
       ImportDeclaration({node}, state) {
-        const {source, specifiers} = node;
         const {filename} = state.file.opts;
-
         if (!filename) {
-          throw new Error(
-            'babel-plugin-amp-mode-transformer must be called with a filename'
-          );
+          throw new Error('Plugin requires filename.');
         }
 
+        const {source, specifiers} = node;
         if (!source.value.endsWith('/mode')) {
           return;
         }
-
         specifiers.forEach((specifier) => {
-          if (specifier.type !== 'ImportSpecifier') {
+          if (
+            specifier.type !== 'ImportSpecifier' ||
+            specifier.imported.type !== 'Identifier'
+          ) {
             return;
           }
 
-          const name =
-            specifier.imported.type === 'Identifier'
-              ? specifier.imported.name
-              : specifier.imported.value;
-          if (name === 'getMode') {
+          if (specifier.imported.name === 'getMode') {
             const filepath = relative(
               join(__dirname, '../../../'),
               resolve(dirname(filename), source.value)
@@ -59,40 +53,38 @@ module.exports = function ({types: t}) {
         if (!getModeFound) {
           return;
         }
-
+        const {INTERNAL_RUNTIME_VERSION: version, IS_ESM} =
+          /** @type {ModeTransformerOptions} */ (this.opts);
         const {node} = path;
         const {object: obj, property} = node;
-<<<<<<< HEAD
+        if (
+          property.type !== 'Identifier' ||
+          !('callee' in obj) ||
+          obj.callee.type !== 'Identifier'
+        ) {
+          return;
+        }
         const {callee} = obj;
-        const {INTERNAL_RUNTIME_VERSION: version, IS_ESM} = this.opts;
-=======
-        const {callee} = /** @type {babel.types.CallExpression} */ (obj);
-        const {INTERNAL_RUNTIME_VERSION: version} =
-          /** @type {BuildConstantsDef} */ (this.opts);
->>>>>>> 2b57012068 (typecheck babel plugin: amp-mode-transformer)
 
-        if (callee.type === 'Identifier' && callee.name === 'getMode') {
-          const propertyName = property.type === 'Identifier' && property.name;
-          if (propertyName === 'test' || propertyName === 'localDev') {
+        if (callee && callee.name === 'getMode') {
+          if (property.name === 'test' || property.name === 'localDev') {
             path.replaceWith(t.booleanLiteral(false));
-<<<<<<< HEAD
           } else if (property.name === 'development' && IS_ESM) {
-=======
-          } else if (propertyName === 'development') {
->>>>>>> 2b57012068 (typecheck babel plugin: amp-mode-transformer)
             path.replaceWith(t.booleanLiteral(false));
-          } else if (propertyName === 'minified') {
+          } else if (property.name === 'minified') {
             path.replaceWith(t.booleanLiteral(true));
-          } else if (propertyName === 'version') {
-            path.replaceWith(t.stringLiteral(String(version)));
+          } else if (property.name === 'version') {
+            path.replaceWith(t.stringLiteral(version));
           }
         }
       },
+
       CallExpression(path) {
         const {INTERNAL_RUNTIME_VERSION: version} =
-          /** @type {BuildConstantsDef} */ (this.opts);
+          /** @type {ModeTransformerOptions} */ (this.opts);
+
         if (path.get('callee').referencesImport('#core/mode', 'version')) {
-          path.replaceWith(t.stringLiteral(String(version)));
+          path.replaceWith(t.stringLiteral(version));
         }
       },
     },
