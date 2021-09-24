@@ -1189,7 +1189,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       parent.appendChild(child);
 
       // Fake layout-shift that occured before the Performance service is started.
-      debugger;
       performanceObserver.triggerCallback({
         getEntries() {
           return [
@@ -1217,7 +1216,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       const clsEvents = perf.events_.filter((evt) =>
         evt.label.startsWith('cls')
       );
-      console.log(clsEvents);
       expect(clsEvents.length).to.equal(3);
       expect(perf.events_).deep.include({
         label: 'cls',
