@@ -44,7 +44,7 @@ export function Iframe({
       iframe,
       MessageType.INTERSECTION,
       dict({'changes': entries.map(cloneEntryForCrossOrigin)}),
-      '*' // is this ok?
+      '*'
     );
   };
 
@@ -56,7 +56,8 @@ export function Iframe({
     const win = toWin(iframe.ownerDocument.defaultView);
     let observer;
     win.addEventListener('message', (event) => {
-      const {origin} = new URL(src);
+      // incl base param to URL constructor for relative URLs used in storybooks
+      const {origin} = new URL(src, win.location.origin);
       if (
         event.origin !== origin ||
         event.data?.type !== MessageType.SEND_INTERSECTIONS
@@ -69,7 +70,7 @@ export function Iframe({
       observer.observe(iframe);
     });
     return () => {
-      observer.unobserve(iframe);
+      observer?.unobserve(iframe);
       observer = null;
     };
   }, [src]);

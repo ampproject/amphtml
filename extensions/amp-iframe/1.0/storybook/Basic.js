@@ -68,3 +68,27 @@ export const WithResizableIframe = () => {
 };
 
 WithResizableIframe.storyName = 'Resizable iframe outside viewport';
+
+export const WithSendIntersectionsPostMessage = () => {
+  return (
+    <div>
+      <div
+        style={{
+          width: '100%',
+          height: '110vh', // so that iframe is outside viewport
+          backgroundColor: 'blue',
+        }}
+      ></div>
+      <Iframe
+        style={{width: 500, height: 500}}
+        iframeStyle={{border: '1px solid black'}}
+        sandbox="allow-scripts allow-same-origin"
+        src="/examples/bento/amp-iframe-send-intersections-example.html"
+      >
+        <div placeholder>Placeholder</div>
+      </Iframe>
+    </div>
+  );
+};
+
+WithSendIntersectionsPostMessage.storyName = 'Send intersections';
