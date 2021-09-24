@@ -65,7 +65,7 @@ function bootstrap(ampdoc, perf) {
   startupChunk(self.document, function stub() {
     // Pre-stub already known elements.
     stubElementsForDoc(ampdoc);
-    whenDocumentComplete(self.document).then(markUnresolvedElements);
+    whenDocumentComplete(self.document).then(() => markUnresolvedElements());
   });
   startupChunk(
     self.document,

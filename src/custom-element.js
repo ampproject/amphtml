@@ -59,11 +59,12 @@ let templateTagSupported;
 export const stubbedElements = [];
 
 /**
- * Whether the document has already marked unresolved elements. After that
- * point, any elements that are created that don't immediately have their
- * implClass available will be marked unresolved.
+ * Extensions which have failed to load, making their elements unresolvable.
+ * If null, then any remaining elements which don't immediately have their
+ * implClass available are marked unresolvable.
+ * @type {Array<string>|null}
  */
-const markStubbedElements = false;
+let unresolvableExtensions = [];
 
 /**
  * Whether this platform supports template tags.
@@ -1204,7 +1205,10 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
         if (this.implClass_) {
           this.upgradeOrSchedule_();
-        } else if (markStubbedElements) {
+        } else if (
+          unresolvableExtensions == null ||
+          unresolvableExtensions.includes(this.tagName.toLowerCase())
+        ) {
           this.markUnresolved();
         }
 
@@ -2200,14 +2204,16 @@ export function getActionQueueForTesting(element) {
 
 /**
  * Marks each element that still stubbed as unresolved.
- * @param {string=} opt_tagName
+ * @param {string=} opt_extension
  */
-export function markUnresolvedElements(opt_tagName) {
-  if (opt_tagName == null) {
-    markUnresolvedElements = true;
+export function markUnresolvedElements(opt_extension) {
+  if (opt_extension == null) {
+    unresolvableExtensions = null;
+  } else {
+    unresolvableExtensions?.push(opt_extension);
   }
   for (const el of stubbedElements) {
-    if (opt_tagName == null || el.tagName === opt_tagName) {
+    if (opt_extension == null || el.tagName.toLowerCase() === opt_extension) {
       el.markUnresolved();
     }
   }
