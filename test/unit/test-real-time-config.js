@@ -802,6 +802,8 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
       );
       await rtc.promiseArray_[0];
       expect(fetchJsonStub).to.be.called;
+      expect(fetchJsonStub.callCount).to.equal(1);
+      expect(fetchJsonStub.firstCall.firstArg).to.equal('foo')
       expect(
         fetchJsonStub.calledWithMatch(
           /https:\/\/www.foo.example\/\?cid=amp-\S+$/
