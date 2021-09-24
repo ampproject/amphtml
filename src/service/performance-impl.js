@@ -144,7 +144,7 @@ export class Performance {
      * See https://github.com/GoogleChrome/web-vitals/blob/main/src/getCLS.ts
      * @private {Array<LayoutShift>}
      */
-    this.layoutShiftEntires_ = [];
+    this.layoutShiftEntries_ = [];
 
     /**
      * The sum of all layout shifts.
@@ -559,7 +559,7 @@ export class Performance {
     if (this.isVisibilityHidden_()) {
       return;
     }
-    const entries = this.layoutShiftEntires_;
+    const entries = this.layoutShiftEntries_;
     if (entries.length > 0) {
       const first = entries[0];
       const last = entries[entries.length - 1];
@@ -586,7 +586,7 @@ export class Performance {
    * See https://web.dev/evolving-cls/
    */
   flushLayoutShiftScore_() {
-    const entries = this.layoutShiftEntires_;
+    const entries = this.layoutShiftEntries_;
     const old = this.metrics_.get(TickLabel.CUMULATIVE_LAYOUT_SHIFT);
     let union = 0;
     let sum = 0;
