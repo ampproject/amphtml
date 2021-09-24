@@ -62,9 +62,9 @@ export const stubbedElements = [];
  * Extensions which have failed to load, making their elements unresolvable.
  * If null, then any remaining elements which don't immediately have their
  * implClass available are marked unresolvable.
- * @type {Array<string>|null}
+ * @type {Set<string>}
  */
-let unresolvableExtensions = [];
+let unresolvableExtensions = new Set();
 
 /**
  * Whether this platform supports template tags.
@@ -1206,8 +1206,8 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         if (this.implClass_) {
           this.upgradeOrSchedule_();
         } else if (
-          unresolvableExtensions == null ||
-          unresolvableExtensions.includes(this.tagName.toLowerCase())
+          unresolvableExtensions.has('*') ||
+          unresolvableExtensions.has(this.tagName.toLowerCase())
         ) {
           this.markUnresolved();
         }
@@ -2207,11 +2207,7 @@ export function getActionQueueForTesting(element) {
  * @param {string=} opt_extension
  */
 export function markUnresolvedElements(opt_extension) {
-  if (opt_extension == null) {
-    unresolvableExtensions = null;
-  } else {
-    unresolvableExtensions?.push(opt_extension);
-  }
+  unresolvableExtensions.add(opt_extension || '*');
   for (const el of stubbedElements) {
     if (opt_extension == null || el.tagName.toLowerCase() === opt_extension) {
       el.markUnresolved();
@@ -2221,5 +2217,5 @@ export function markUnresolvedElements(opt_extension) {
 
 /** */
 export function resetUnresolvedElementsForTesting() {
-  unresolvableExtensions = [];
+  unresolvableExtensions.clear();
 }
