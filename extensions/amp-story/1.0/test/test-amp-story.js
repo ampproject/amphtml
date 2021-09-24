@@ -23,7 +23,6 @@ import {createElementWithAttributes} from '#core/dom';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {toggleExperiment} from '#experiments';
 import {waitFor} from '#testing/test-helper';
-import {setImportantStyles} from '#core/dom/style';
 
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
 const KEYBOARD_EVENT_WHICH_RIGHT_ARROW = 39;
@@ -52,8 +51,9 @@ describes.realWin(
      * @param {Array<string>=} ids
      * @return {!Array<!Element>}
      */
-    async function createStoryWithPages(count, ids = [], autoAdvance = false) {
+    function createStoryWithPages(count, ids = [], autoAdvance = false) {
       element = win.document.createElement('amp-story');
+      element.getAmpDoc = () => env.ampdoc;
 
       const pageArray = Array(count)
         .fill(undefined)
@@ -68,7 +68,7 @@ describes.realWin(
         });
 
       win.document.body.appendChild(element);
-      story = await element.getImpl();
+      story = new AmpStory(element);
 
       return pageArray;
     }
@@ -118,9 +118,6 @@ describes.realWin(
       });
 
       AmpStory.isBrowserSupported = () => true;
-
-      /** Control element lifecycle by preventing automatic callback calls. */
-      setImportantStyles(win.document.documentElement, {'height': 'auto'});
     });
 
     afterEach(() => {
@@ -130,6 +127,7 @@ describes.realWin(
     it('should build with the expected number of pages', async () => {
       const pagesCount = 2;
       await createStoryWithPages(pagesCount, ['cover', 'page-1']);
+      await story.buildCallback();
       await story.layoutCallback();
       expect(story.getPageCount()).to.equal(pagesCount);
     });
@@ -137,6 +135,7 @@ describes.realWin(
     it('should activate the first page when built', async () => {
       await createStoryWithPages(2, ['cover', 'page-1']);
 
+      await story.buildCallback();
       await story.layoutCallback();
       // Getting all the AmpStoryPage objets.
       const pageElements = story.element.getElementsByTagName('amp-story-page');
@@ -167,12 +166,14 @@ describes.realWin(
 
       const buildShareMenuStub = env.sandbox.stub(story.shareMenu_, 'build');
 
+      await story.buildCallback();
       await story.layoutCallback();
       expect(buildShareMenuStub).to.have.been.calledOnce;
     });
 
     it('should return a valid page index', async () => {
       await createStoryWithPages(4, ['cover', 'page-1', 'page-2', 'page-3']);
+      await story.buildCallback();
       await story.layoutCallback();
       // Getting all the AmpStoryPage objets.
       const pageElements = story.element.getElementsByTagName('amp-story-page');
@@ -189,6 +190,7 @@ describes.realWin(
     it('should pause/resume pages when switching pages', async () => {
       await createStoryWithPages(2, ['cover', 'page-1']);
 
+      await story.buildCallback();
       await story.layoutCallback();
       // Getting all the AmpStoryPage objects.
       const pageElements = story.element.getElementsByTagName('amp-story-page');
@@ -241,6 +243,7 @@ describes.realWin(
     it('lock body when amp-story is initialized', async () => {
       await createStoryWithPages(2, ['cover', 'page-1']);
 
+      await story.buildCallback();
       await story.layoutCallback();
       story.lockBody_();
       expect(win.document.body.style.getPropertyValue('overflow')).to.be.equal(
@@ -254,6 +257,7 @@ describes.realWin(
     it('checks if pagination buttons exist ', async () => {
       await createStoryWithPages(2, ['cover', 'page-1']);
 
+      await story.buildCallback();
       await story.layoutCallback();
       expect(
         story.element.querySelectorAll('.i-amphtml-story-button-container')
