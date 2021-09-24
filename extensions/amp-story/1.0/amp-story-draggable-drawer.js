@@ -197,13 +197,18 @@ export class DraggableDrawer extends AMP.BaseElement {
       this.close_();
     });
 
-    // For displaying sticky header on mobile.
-    new this.win.IntersectionObserver((e) => {
-      this.headerEl.classList.toggle(
-        'i-amphtml-story-draggable-drawer-header-stuck',
-        !e[0].isIntersecting
-      );
-    }).observe(spacerEl);
+    // For displaying sticky header on mobile. iOS devices & Safari are
+    // excluded because the sticky positon has more restrictive functionality
+    // on those surfaces that prevents it from behaving as intended.
+    const platform = Services.platformFor(this.win);
+    if (!platform.isSafari() && !platform.isIos()) {
+      new this.win.IntersectionObserver((e) => {
+        this.headerEl.classList.toggle(
+          'i-amphtml-story-draggable-drawer-header-stuck',
+          !e[0].isIntersecting
+        );
+      }).observe(spacerEl);
+    }
 
     // Update spacerElHeight_ on resize for drag offset.
     new this.win.ResizeObserver((e) => {
