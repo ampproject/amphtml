@@ -378,7 +378,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     /**
      * When the document is ready (meaning all external resources are loaded or
      * failed), we mark any stubbed elements as unresolved. If they haven't
-     * been upgraded yet (or prending upgrade or deferredBuild elements), then
+     * been upgraded yet (or pending upgrade or deferredBuild elements), then
      * the extension failed to load.
      */
     markUnresolved() {
