@@ -405,7 +405,10 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
 
   // TODO(36162): Only write this once as part of the dist() function.
   if (options.minify) {
-    fs.writeFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
+    fs.outputFileSync(
+      path.join(destDir, 'version.txt'),
+      internalRuntimeVersion
+    );
   }
 
   /**
