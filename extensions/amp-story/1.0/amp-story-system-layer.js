@@ -373,6 +373,9 @@ export class SystemLayer {
     /** @private {!DevelopmentModeLogButtonSet} */
     this.developerButtons_ = DevelopmentModeLogButtonSet.create(win);
 
+    /** @private {?Element} */
+    this.equalizer_ = null;
+
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
 
