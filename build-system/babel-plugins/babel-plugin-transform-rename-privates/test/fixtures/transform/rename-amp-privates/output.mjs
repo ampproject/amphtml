@@ -1,15 +1,20 @@
 class Foo {
   constructor() {
-    // Properties within a class should be renamed
     this.hello_AMP_PRIVATE_ = 'world';
-    let bar_ = 'world';
-    console.log(zoo_);
+    let bar_AMP_PRIVATE_ = 'world';
+    console.log(zoo_AMP_PRIVATE_);
   }
 
-} // Classes themselves should not be renamed.
+  doFoo_AMP_PRIVATE_() {}
 
+  doBar() {
+    const {
+      foo_AMP_PRIVATE_
+    } = this;
+  }
 
-class Foo_ {} // Variables outside of a class should not be renamed
+}
 
+class Foo_AMP_PRIVATE_ {}
 
-let hello_ = 'world';
+let hello_AMP_PRIVATE_ = 'world';
