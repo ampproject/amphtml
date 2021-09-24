@@ -11,6 +11,11 @@ import {getHistoryState} from '#core/window/history';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getSourceOrigin} from '../../../src/url';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {
+  allowlistFormActions,
+  getResponseAttributeElements,
+  setupResponseAttributeElements,
+} from './amp-story-form';
 import {removeElement} from '#core/dom';
 import {setImportantStyles, toggle} from '#core/dom/style';
 
@@ -148,7 +153,27 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       titleAndCloseWrapperEl.appendChild(titleEl);
     }
 
-    if (this.doesContainFormElement_()) {
+    const forms = this.element.querySelectorAll('form');
+    if (forms.length > 0) {
+      allowlistFormActions(this.win);
+      forms.forEach((form) => {
+        setupResponseAttributeElements(this.win, form);
+        // Scroll each response attribute element into view, when displayed.
+        getResponseAttributeElements(form).forEach((el) => {
+          new this.win.ResizeObserver((e) => {
+            if (
+              this.state === DrawerState.OPEN &&
+              e[0].contentRect.height > 0
+            ) {
+              el./*OK*/ scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+              });
+            }
+          }).observe(el);
+        });
+      });
+
       // Page attachments that contain forms must display the page's publisher
       // domain above the attachment's contents. This enables users to gauge
       // the trustworthiness of publishers before sending data to them.
@@ -462,16 +487,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     domainLabelEl.classList.add('i-amphtml-story-page-attachment-domain-label');
     domainLabelEl.textContent = this.getPublisherOrigin_();
     return domainLabelEl;
-  }
-
-  /**
-   * Returns whether a form element exists within this page attachment.
-   * @return {boolean} True, only if a form element exists as a descendant of
-   *     this page attachment.
-   * @private
-   */
-  doesContainFormElement_() {
-    return Boolean(this.element.querySelector('form'));
   }
 
   /**
