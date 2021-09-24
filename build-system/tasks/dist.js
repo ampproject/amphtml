@@ -164,7 +164,7 @@ async function writeVersionFiles() {
     path.join('dist.tools', 'experiments'),
     path.join('dist.3p', internalRuntimeVersion),
     path.join('dist.3p', internalRuntimeVersion, 'vendor'),
-  ];
+  ].map((p) => path.join(p, 'version.txt'));
   return Promise.all(
     paths.map((p) => fs.outputFile(p, internalRuntimeVersion))
   );
