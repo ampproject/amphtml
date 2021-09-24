@@ -53,7 +53,7 @@ const AmpVideoIframeWithKnobs = ({i, withPlaceholder, ...rest}) => {
   return (
     <amp-video-iframe
       {...rest}
-      ariaLabel={ariaLabel}
+      aria-label={ariaLabel}
       autoplay={autoplay}
       controls={controls}
       mediasession={mediasession}
