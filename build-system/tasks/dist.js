@@ -158,13 +158,14 @@ async function dist() {
 async function writeVersionFiles() {
   // TODO: determine which of these are necessary and trim the rest via an I2D.
   const paths = [
-    path.join('dist'),
-    path.join('dist', 'v0'),
-    path.join('dist', 'v0', 'examples'),
-    path.join('dist.tools', 'experiments'),
-    path.join('dist.3p', internalRuntimeVersion),
-    path.join('dist.3p', internalRuntimeVersion, 'vendor'),
-  ].map((p) => path.join(p, 'version.txt'));
+    'dist',
+    'dist/v0',
+    'dist/v0/examples',
+    'dist.tools/experiments',
+    `dist.3p/${internalRuntimeVersion}`,
+    `dist.3p/${internalRuntimeVersion}/vendor`,
+  ].map((p) => path.join(...p.split('/'), 'version.txt'));
+
   return Promise.all(
     paths.map((p) => fs.outputFile(p, internalRuntimeVersion))
   );
