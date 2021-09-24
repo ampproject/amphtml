@@ -92,6 +92,10 @@ The reasons for this policy are that:
 -   `amp-iframe` has no fully iframe controlled resize mechanism.
 -   Viewability information may not be available to `amp-iframe`.
 
+### Standalone use outside valid AMP documents
+
+Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/). To find the standalone version of `amp-my-element`, see [`bento-my-element`](./1.0/README.md).
+
 ### Iframe with placeholder <a name="iframe-with-placeholder"></a>
 
 It is possible to have an `amp-iframe` appear at the top of a document when the
@@ -243,7 +247,8 @@ window.addEventListener('message', function (event) {
 
 The intersection message would be sent by the parent to the iframe in the format of IntersectionObserver entry wheneve there is intersectionRatio change across thresholds [0, 0.05, 0.1, ... 0.9, 0.95, 1].
 
-## Iframe & Consent Data
+<!-- TODO: uncomment when Bento amp-consent (v1.0) is ready -->
+<!-- ## Iframe & Consent Data
 
 Iframes can send a `send-consent-data` message to receive consent data if a CMP is present on their parents page.
 
@@ -288,6 +293,7 @@ window.addEventListener('message', function (event) {
   console.log(event.data.consentString);
 });
 ```
+-->
 
 ## Attributes
 
