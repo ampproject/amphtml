@@ -499,16 +499,23 @@ export class Performance {
   }
 
   /**
+   * Whether the AMP doc is hidden.
+   * @return {boolean}
+   */
+  isVisibilityHidden_() {
+    const state = this.ampdoc_.getVisibilityState();
+    return (
+      state === VisibilityState.INACTIVE || state === VisibilityState.HIDDEN
+    );
+  }
+
+  /**
    * When the viewer visibility state of the document changes to inactive or hidden,
    * send the layout score.
    * @private
    */
   onAmpDocVisibilityChange_() {
-    const state = this.ampdoc_.getVisibilityState();
-    if (
-      state === VisibilityState.INACTIVE ||
-      state === VisibilityState.HIDDEN
-    ) {
+    if (this.isVisibilityHidden_()) {
       this.tickCumulativeMetrics_();
       this.flushLayoutShiftScore_();
     }
@@ -549,6 +556,9 @@ export class Performance {
    * @param {!LayoutShift} entry
    */
   tickLayoutShiftScore_(entry) {
+    if (this.isVisibilityHidden_()) {
+      return;
+    }
     const entries = this.layoutShiftEntires_;
     if (entries.length > 0) {
       const first = entries[0];
