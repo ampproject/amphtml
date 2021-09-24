@@ -19,6 +19,9 @@ export const TickLabel = {
   BATTERY_DROP: 'bd',
   CONTENT_LAYOUT_DELAY: 'cld',
   CUMULATIVE_LAYOUT_SHIFT: 'cls',
+  // The enum union of all source types contributing to the CLS
+  CUMULATIVE_LAYOUT_SHIFT_TYPE_UNION: 'clstu',
+  CUMULATIVE_LAYOUT_SHIFT_1: 'cls-1',
   CUMULATIVE_LAYOUT_SHIFT_2: 'cls-2',
   DOCUMENT_READY: 'dr',
   END_INSTALL_STYLES: 'e_is',
