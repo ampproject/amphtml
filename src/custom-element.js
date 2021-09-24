@@ -2218,3 +2218,8 @@ export function markUnresolvedElements(opt_extension) {
     }
   }
 }
+
+/** */
+export function resetUnresolvedElementsForTesting() {
+  unresolvableExtensions = [];
+}
