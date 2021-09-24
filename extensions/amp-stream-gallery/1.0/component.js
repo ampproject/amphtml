@@ -7,7 +7,6 @@ import {
   useCallback,
   useImperativeHandle,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
 } from '#preact';
@@ -41,7 +40,7 @@ function BentoStreamGalleryWithRef(props, ref) {
   const classes = useStyles();
   const carouselRef = useRef(null);
   const [visibleCount, setVisibleCount] = useState(DEFAULT_VISIBLE_COUNT);
-  const length = useMemo(() => toChildArray(children), [children]);
+  const {length} = toChildArray(children);
   const measure = useCallback(
     (containerWidth) =>
       getVisibleCount(
