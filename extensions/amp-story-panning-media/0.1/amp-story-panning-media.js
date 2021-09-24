@@ -167,9 +167,9 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @private */
   setAnimateTo_() {
-    const x = parseFloat(this.element_.getAttribute('x') || 0);
-    const y = parseFloat(this.element_.getAttribute('y') || 0);
-    const zoom = parseFloat(this.element_.getAttribute('zoom') || 1);
+    const x = parseFloat(this.element_.getAttribute('data-x') || 0);
+    const y = parseFloat(this.element_.getAttribute('data-y') || 0);
+    const zoom = parseFloat(this.element_.getAttribute('data-zoom') || 1);
     const lockBounds = this.element_.hasAttribute('lock-bounds');
 
     if (lockBounds) {

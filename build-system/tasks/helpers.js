@@ -417,7 +417,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     };
   }
   const {banner, footer} = splitWrapper();
-  const config = await getAmpConfigForFile(srcFilename, options);
+  const config = await getAmpConfigForFile(destFilename, options);
   const compiledFile = await getCompiledFile(srcFilename);
   banner.js = config + banner.js + compiledFile;
 

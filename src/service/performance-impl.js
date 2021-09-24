@@ -4,7 +4,6 @@ import {Signals} from '#core/data-structures/signals';
 import {whenDocumentComplete, whenDocumentReady} from '#core/document-ready';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {computedStyle} from '#core/dom/style';
-import {throttle} from '#core/types/function';
 import {dict, map} from '#core/types/object';
 
 import {Services} from '#service';
@@ -205,7 +204,6 @@ export class Performance {
     // Tick window.onload event.
     whenDocumentComplete(win.document).then(() => this.onload_());
     this.registerPerformanceObserver_();
-    this.registerFirstInputDelayPolyfillListener_();
 
     /**
      * @private {boolean}
@@ -307,7 +305,6 @@ export class Performance {
    */
   onload_() {
     this.tick(TickLabel.ON_LOAD);
-    this.tickLegacyFirstPaintTime_();
     this.flush();
   }
 
@@ -458,20 +455,6 @@ export class Performance {
   }
 
   /**
-   * Reports the first input delay value calculated by a polyfill, if present.
-   * @see https://github.com/GoogleChromeLabs/first-input-delay
-   */
-  registerFirstInputDelayPolyfillListener_() {
-    if (!this.win.perfMetrics || !this.win.perfMetrics.onFirstInputDelay) {
-      return;
-    }
-    this.win.perfMetrics.onFirstInputDelay((delay) => {
-      this.tickDelta(TickLabel.FIRST_INPUT_DELAY_POLYFILL, delay);
-      this.flush();
-    });
-  }
-
-  /**
    * When the viewer visibility state of the document changes to inactive or hidden,
    * send the layout score.
    * @private
@@ -527,29 +510,8 @@ export class Performance {
    */
   tickLayoutShiftScore_() {
     const cls = this.layoutShifts_.reduce((sum, entry) => sum + entry.value, 0);
-    const fcp = this.metrics_.get(TickLabel.FIRST_CONTENTFUL_PAINT) ?? 0; // fallback to 0, so that we never overcount.
-    const ofv = this.metrics_.get(TickLabel.ON_FIRST_VISIBLE) ?? 0;
-
-    // TODO(#33207): Remove after data collection
-    const clsBeforeFCP = this.layoutShifts_.reduce((sum, entry) => {
-      if (entry.startTime < fcp) {
-        return sum + entry.value;
-      }
-      return sum;
-    }, 0);
-    const clsBeforeOFV = this.layoutShifts_.reduce((sum, entry) => {
-      if (entry.startTime < ofv) {
-        return sum + entry.value;
-      }
-      return sum;
-    }, 0);
 
     if (this.shiftScoresTicked_ === 0) {
-      this.tick(TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_VISIBLE, clsBeforeOFV);
-      this.tickDelta(
-        TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_FCP,
-        clsBeforeFCP
-      );
       this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT, cls);
       this.flush();
       this.shiftScoresTicked_ = 1;
@@ -557,33 +519,6 @@ export class Performance {
       this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_2, cls);
       this.flush();
       this.shiftScoresTicked_ = 2;
-    }
-  }
-
-  /**
-   * Tick fp time based on Chromium's legacy paint timing API when
-   * appropriate.
-   * `registerPaintTimingObserver_` calls the standards based API and this
-   * method does nothing if it is available.
-   */
-  tickLegacyFirstPaintTime_() {
-    // Detect deprecated first paint time API
-    // https://bugs.chromium.org/p/chromium/issues/detail?id=621512
-    // We'll use this until something better is available.
-    if (
-      !this.win.PerformancePaintTiming &&
-      this.win.chrome &&
-      typeof this.win.chrome.loadTimes == 'function'
-    ) {
-      const fpTime =
-        this.win.chrome.loadTimes()['firstPaintTime'] * 1000 -
-        this.win.performance.timing.navigationStart;
-      if (fpTime <= 1) {
-        // Throw away bad data generated from an apparent Chromium bug
-        // that is fixed in later Chromium versions.
-        return;
-      }
-      this.tickDelta(TickLabel.FIRST_PAINT, fpTime);
     }
   }
 
@@ -786,17 +721,6 @@ export class Performance {
         /* cancelUnsent */ true
       );
     }
-  }
-
-  /**
-   * Flush with a rate limit of 10 per second.
-   */
-  throttledFlush() {
-    if (!this.throttledFlush_) {
-      /** @private {function()} */
-      this.throttledFlush_ = throttle(this.win, this.flush.bind(this), 100);
-    }
-    this.throttledFlush_();
   }
 
   /**
