@@ -34,7 +34,6 @@ export function IframeEmbedWithRef(
   {
     allow,
     allowFullScreen,
-    allowTransparency,
     iframeStyle,
     name,
     title,
@@ -141,7 +140,6 @@ export function IframeEmbedWithRef(
         <iframe
           allow={allow}
           allowFullScreen={allowFullScreen}
-          allowTransparency={allowTransparency}
           frameborder="0"
           loading={loading}
           name={name}

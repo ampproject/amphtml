@@ -13,7 +13,6 @@ BaseElement['props'] = {
   'sandbox': {attr: 'sandbox'},
   'allowFullScreen': {attr: 'allowfullscreen'},
   'allowPaymentRequest': {attr: 'allowpaymentrequest'},
-  'allowTransparency': {attr: 'allowtransparency'},
   'referrerPolicy': {attr: 'referrerpolicy'},
 };
 

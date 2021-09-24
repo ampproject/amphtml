@@ -13,7 +13,7 @@ const {Octokit} = require('@octokit/rest');
 const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
   userAgent: 'amp release tagger',
-  timeZone: 'America/New_York',
+  timeZone: 'America/Los_Angeles',
 });
 
 const graphqlWithAuth = graphql.defaults({
@@ -118,15 +118,17 @@ async function getRelease(tag) {
  * @param {string} body
  * @param {number} number
  * @param {string} title
+ * @param {'open' | 'closed'} state
  * @return {Promise<Object>}
  */
-function updateIssue(body, number, title) {
+function updateIssue(body, number, title, state = 'open') {
   return octokit.rest.issues.update({
     owner,
     repo,
     'issue_number': number,
     title,
     body,
+    state,
   });
 }
 

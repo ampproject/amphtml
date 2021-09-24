@@ -1,13 +1,3 @@
----
-$category@: social
-formats:
-  - websites
-teaser:
-  text: Displays a Twitter Tweet or Moment.
-experimental: true
-bento: true
----
-
 # Bento Twitter
 
 ## Behavior

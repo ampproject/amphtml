@@ -292,7 +292,10 @@ const adConfig = jsonConfiguration({
       'https://v.amoad.com',
     ],
   },
-
+  'amplified': {
+    preconnect: 'https://srv.clickfuse.com',
+    renderStartImplemented: true,
+  },
   'aniview': {
     renderStartImplemented: true,
   },
@@ -347,6 +350,10 @@ const adConfig = jsonConfiguration({
   'bringhub': {
     renderStartImplemented: true,
     preconnect: ['https://static.bh-cdn.com', 'https://core-api.bringhub.io'],
+  },
+
+  'broadbandy': {
+    renderStartImplemented: true,
   },
 
   'broadstreetads': {
@@ -818,6 +825,10 @@ const adConfig = jsonConfiguration({
 
   'mytarget': {
     prefetch: 'https://ad.mail.ru/static/ads-async.js',
+    renderStartImplemented: true,
+  },
+
+  'myua': {
     renderStartImplemented: true,
   },
 
