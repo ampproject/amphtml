@@ -55,7 +55,7 @@ const VideoTagPlayer = ({i}) => {
   return (
     <BentoVideo
       component="video"
-      ariaLabel={ariaLabel}
+      aria-label={ariaLabel}
       autoplay={autoplay}
       controls={controls}
       mediasession={mediasession}
