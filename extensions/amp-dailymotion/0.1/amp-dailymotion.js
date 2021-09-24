@@ -9,7 +9,6 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
 import {dispatchCustomEvent, getDataParamsFromAttributes} from '#core/dom';
 import {
   fullscreenEnter,
