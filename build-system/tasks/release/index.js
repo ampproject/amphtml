@@ -37,7 +37,7 @@ const fs = require('fs-extra');
 const klaw = require('klaw');
 const path = require('path');
 const tar = require('tar');
-const {cyan, green} = require('kleur/colors');
+const {cyan, green, red} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
 const {log} = require('../../common/logging');
 const {MINIFIED_TARGETS} = require('../prepend-global');
@@ -116,6 +116,12 @@ const CHANNEL_CONFIGS = {
   '25': {type: 'experimentC', configBase: 'prod'}, // Spec name: 'inabox-experimentC'
 };
 
+// Paths to custom configurations
+const CUSTOM_FLAVORS_CONFIG_PATH =
+  'build-system/global-configs/custom-flavors-config.json';
+const CUSTOM_OVERLAY_CONFIG_PATH =
+  'build-system/global-configs/custom-config.json';
+
 /**
  * Prints a separator line so logs are easy to read.
  */
@@ -128,10 +134,20 @@ function logSeparator_() {
  *
  * @param {string} outputDir full directory path to emplace artifacts in.
  * @param {string} tempDir full directory path to temporary working directory.
+ * @param {boolean} retainCustomConfig whether to exclude custom overlay and
+ * release configs from cleanup.
  * @return {Promise<void>}
  */
-async function prepareEnvironment_(outputDir, tempDir) {
-  execOrDie('amp clean');
+async function prepareEnvironment_(outputDir, tempDir, retainCustomConfig) {
+  let cleanCmd = 'amp clean';
+  if (retainCustomConfig) {
+    const cleanExclusions = [
+      CUSTOM_FLAVORS_CONFIG_PATH,
+      CUSTOM_OVERLAY_CONFIG_PATH,
+    ].join(',');
+    cleanCmd += ` --exclude ${cleanExclusions}`;
+  }
+  execOrDie(cleanCmd);
   await fs.emptyDir(outputDir);
   await fs.emptyDir(tempDir);
   logSeparator_();
@@ -141,11 +157,29 @@ async function prepareEnvironment_(outputDir, tempDir) {
  * Discovers which AMP flavors are defined in the current working directory.
  *
  * The returned list of flavors will always contain the base flavor, and any
- * defined experiments in ../../global-configs/experiments-config.json.
+ * defined experiments in ../../global-configs/experiments-config.json, as well
+ * as custom flavors in ../../global-configs/custom-flavors-config.json.
  *
+ * @param {boolean} useCustomConfig whether to load custom flavors
+ * configuration.
  * @return {!Array<!DistFlavorDef>} list of AMP flavors to build.
  */
-function discoverDistFlavors_() {
+function discoverDistFlavors_(useCustomConfig) {
+  let customFlavorsConfig = [];
+  if (useCustomConfig) {
+    try {
+      customFlavorsConfig = require(path.resolve(
+        __dirname,
+        '../../..',
+        CUSTOM_FLAVORS_CONFIG_PATH
+      ));
+    } catch (ex) {
+      log(
+        red(`Error parsing custom flavors from: ${CUSTOM_FLAVORS_CONFIG_PATH}`)
+      );
+    }
+  }
+
   const experimentConfigDefs = Object.entries(experimentsConfig);
   const distFlavors = [
     BASE_FLAVOR_CONFIG,
@@ -171,6 +205,7 @@ function discoverDistFlavors_() {
           ...experimentConfig,
         })
       ),
+    ...customFlavorsConfig,
   ].filter(
     // If --flavor is defined, filter out the rest.
     ({flavorType}) => !argv.flavor || flavorType == argv.flavor
@@ -197,9 +232,16 @@ function discoverDistFlavors_() {
  * @param {string} flavorType AMP flavor to build.
  * @param {string} command `amp` command to build the flavor.
  * @param {string} tempDir full directory path to temporary working directory.
+ * @param {boolean} retainCustomConfig whether to exclude custom overlay and
+ * release configs from cleanup.
  * @return {Promise<void>}
  */
-async function compileDistFlavors_(flavorType, command, tempDir) {
+async function compileDistFlavors_(
+  flavorType,
+  command,
+  tempDir,
+  retainCustomConfig
+) {
   // TODO(danielrozenberg): remove undefined case when the release automation platform explicitly handles it.
   if (argv.esm === undefined) {
     command = `${command} --esm && ${command}`;
@@ -208,7 +250,12 @@ async function compileDistFlavors_(flavorType, command, tempDir) {
   }
   log('Compiling flavor', green(flavorType), 'using', cyan(command));
 
-  execOrDie('amp clean --exclude release');
+  const cleanExclusions = ['release'];
+  if (retainCustomConfig) {
+    cleanExclusions.push(CUSTOM_FLAVORS_CONFIG_PATH);
+    cleanExclusions.push(CUSTOM_OVERLAY_CONFIG_PATH);
+  }
+  execOrDie(`amp clean --exclude ${cleanExclusions.join(',')}`);
   execOrDie(command);
 
   const flavorTempDistDir = path.join(tempDir, flavorType);
@@ -367,9 +414,11 @@ async function generateFileListing_(outputDir) {
  * e.g., /amp4ads-v0.js for AMP ads.
  *
  * @param {string} outputDir full directory path to emplace artifacts in.
+ * @param {boolean} useCustomConfig whether to overlay config with custom
+ * config.
  * @return {Promise<void>}
  */
-async function prependConfig_(outputDir) {
+async function prependConfig_(outputDir, useCustomConfig) {
   const activeChannels = Object.entries(CHANNEL_CONFIGS).filter(
     ([rtvPrefix]) => {
       const rtvNumber = `${rtvPrefix}${VERSION}`;
@@ -382,11 +431,17 @@ async function prependConfig_(outputDir) {
   for (const [rtvPrefix, channelConfig] of activeChannels) {
     const rtvNumber = `${rtvPrefix}${VERSION}`;
     const rtvPath = path.join(outputDir, 'org-cdn/rtv', rtvNumber);
+    const overlayConfig = useCustomConfig
+      ? require(path.resolve(__dirname, '../../..', CUSTOM_OVERLAY_CONFIG_PATH))
+      : {};
+
     const channelPartialConfig = {
       v: rtvNumber,
       type: channelConfig.type,
       ...require(`../../global-configs/${channelConfig.configBase}-config.json`),
+      ...overlayConfig,
     };
+
     // Mapping of entry file names to a dictionary of AMP_CONFIG additions.
     const targetsToConfig = MINIFIED_TARGETS.flatMap((minifiedTarget) => {
       const targets = [];
@@ -439,7 +494,7 @@ async function populateNetWildcard_(tempDir, outputDir) {
 }
 
 /**
- * Cleans are deletes the temp directory.
+ * Cleans and deletes the temp directory.
  *
  * @param {string} tempDir full directory path to temporary working directory.
  * @return {Promise<void>}
@@ -456,12 +511,13 @@ async function cleanup_(tempDir) {
 async function release() {
   const outputDir = path.resolve(argv.output_dir || './release');
   const tempDir = path.join(outputDir, 'tmp');
+  const useCustomConfigs = Boolean(argv.use_custom_configs);
 
   log('Preparing environment for release build in', `${cyan(outputDir)}...`);
-  await prepareEnvironment_(outputDir, tempDir);
+  await prepareEnvironment_(outputDir, tempDir, useCustomConfigs);
 
   log('Discovering release', `${green('flavors')}...`);
-  const distFlavors = discoverDistFlavors_();
+  const distFlavors = discoverDistFlavors_(useCustomConfigs);
 
   if (argv.flavor && distFlavors.length == 0) {
     log('Flavor', cyan(argv.flavor), 'is inactive. Quitting...');
@@ -473,7 +529,7 @@ async function release() {
   }
 
   for (const {command, flavorType, rtvPrefixes} of distFlavors) {
-    await compileDistFlavors_(flavorType, command, tempDir);
+    await compileDistFlavors_(flavorType, command, tempDir, useCustomConfigs);
 
     log('Fetching npm package', `${cyan('@ampproject/amp-sw')}...`);
     await fetchAmpSw_(flavorType, tempDir);
@@ -486,7 +542,7 @@ async function release() {
   await generateFileListing_(outputDir);
 
   log('Prepending config to entry files...');
-  await prependConfig_(outputDir);
+  await prependConfig_(outputDir, useCustomConfigs);
 
   if (!argv.flavor || argv.flavor == 'base') {
     // Only populate the net-wildcard directory if --flavor=base or if --flavor is not set.
@@ -514,4 +570,6 @@ release.flags = {
   'esm':
     // TODO(danielrozenberg): remove undefined case when the release automation platform explicitly handles it.
     'Compile with --esm if true, without --esm if false, and with + without --esm if left unset',
+  'use_custom_configs':
+    'Apply custom overlay and release configurations from build-system/global-configs',
 };

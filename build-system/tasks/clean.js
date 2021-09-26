@@ -31,6 +31,7 @@ async function clean() {
     'build-system/tasks/performance/cache',
     'build-system/tasks/performance/results.json',
     'build-system/global-configs/custom-config.json',
+    'build-system/global-configs/custom-flavors-config.json',
     'dist',
     'dist.3p',
     'dist.tools',
