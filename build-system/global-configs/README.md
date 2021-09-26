@@ -71,7 +71,7 @@ This file defines custom release flavors that can be utilized by `amp release`. 
 ]
 ```
 
-and then custom release flavor "Custom Production Build" could be built with:
+and then custom release flavor "Custom Production Release" could be built with:
 
 ```sh
 amp release --use_custom_configs --flavor="custom-prod"
