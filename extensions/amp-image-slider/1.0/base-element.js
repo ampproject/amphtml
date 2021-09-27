@@ -20,8 +20,8 @@ BaseElement['props'] = {
     single: true,
     as: true,
   },
-  firstLabelAs: {selector: 'div[slot="first-label"', single: true, as: true},
-  secondLabelAs: {selector: 'div[slot="second-label"', single: true, as: true},
+  firstLabelAs: {selector: 'div[slot="first-label"]', single: true, as: true},
+  secondLabelAs: {selector: 'div[slot="second-label"]', single: true, as: true},
   initialPosition: {
     attr: 'initial-slider-position',
     type: 'number',
