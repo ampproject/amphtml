@@ -99,23 +99,19 @@ function extensionPayload(name, version, latest, isModule, loadPriority) {
  * binaries and the script check should not be present at all.
  */
 const bentoLoaderFn = removeWhitespace(`
-function (payload) {
-  self.AMP
-    ? self.AMP.push(payload)
-    : document.head.querySelector('script[src$="v0.js"],script[src$="v0.mjs"],script[src$="/amp.mjs"],script[src$="/amp.js"]')
-    ? (self.AMP = [payload])
-    : payload.f({
-        registerElement: function (n, b, s) {
-          if (s)
-            document.head.appendChild(
-              document.createElement("style")
-            ).textContent = s;
-          customElements.define(
-            n.replace(/^amp-/, 'bento-'),
-            b.CustomElement(b)
-          );
-        },
-      });
+function (p) {
+  p.f({
+    registerElement: function (n, b, s) {
+      if (s)
+        document.head.appendChild(
+          document.createElement("style")
+        ).textContent = s;
+      customElements.define(
+        n.replace(/^amp-/, 'bento-'),
+        b.CustomElement(b)
+      );
+    },
+  });
 }
 `);
 

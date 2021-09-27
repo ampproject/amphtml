@@ -706,10 +706,19 @@ function buildBinaries(extDir, binaries, options) {
 }
 
 /**
+ * @param {T|T[]} itemOrArray
+ * @return {T[]}
+ * @template T
+ */
+function arrayOrItemToArray(itemOrArray) {
+  return Array.isArray(itemOrArray) ? itemOrArray : [itemOrArray];
+}
+
+/**
  * Build the JavaScript for the extension specified
  *
- * @param {string} extDir Path to the extension's directory
- * @param {string} name Name of the extension. Must be the sub directory in
+ * @param {string} sourceDir Path to the extension's directory
+ * @param {string} sourceName Name of the extension. Must be the sub directory in
  *     the extensions directory and the name of the JS and optional CSS file.
  * @param {string} version Version of the extension. Must be identical to
  *     the sub directory inside the extension directory
@@ -717,28 +726,79 @@ function buildBinaries(extDir, binaries, options) {
  * @param {!Object} options
  * @return {!Promise}
  */
-async function buildExtensionJs(extDir, name, version, latestVersion, options) {
-  const filename = options.filename || name + '.js';
-  const latest = version === latestVersion;
+async function buildExtensionJs(
+  sourceDir,
+  sourceName,
+  version,
+  latestVersion,
+  options
+) {
+  const isLatest = version === latestVersion;
 
-  const wrapperName = options.wrapper || 'extension';
-  const wrapperOrFn = wrappers[wrapperName];
-  if (!wrapperOrFn) {
-    throw new Error(
-      `Unknown options.wrapper "${wrapperName}" (${name}:${version})\n` +
-        `Expected one of: ${Object.keys(wrappers).join(', ')}`
+  const wrapperNames = arrayOrItemToArray(options.wrapper || 'extension');
+
+  const builds = wrapperNames.map((wrapperName) => {
+    const wrapperOrFn = wrappers[wrapperName];
+    if (!wrapperOrFn) {
+      throw new Error(
+        `Unknown options.wrapper "${wrapperName}" (${sourceName}:${version})\n` +
+          `Expected one of: ${Object.keys(wrappers).join(', ')}`
+      );
+    }
+    const wrapper =
+      typeof wrapperOrFn === 'function'
+        ? wrapperOrFn(
+            sourceName,
+            version,
+            isLatest,
+            argv.esm,
+            options.loadPriority
+          )
+        : wrapperOrFn;
+    // TODO(alanorozco): Is there a nicer way to specify this rather than
+    // hardcoding based on the wrapper name? Maybe. Does it matter? idk
+    const outputName =
+      wrapperName === 'bento'
+        ? sourceName.replace(/^amp-/, 'bento-')
+        : sourceName;
+    return buildExtensionJsWithWrapper(
+      wrapper,
+      sourceDir,
+      sourceName,
+      outputName,
+      version,
+      isLatest,
+      options
     );
-  }
-  const wrapper =
-    typeof wrapperOrFn === 'function'
-      ? wrapperOrFn(name, version, latest, argv.esm, options.loadPriority)
-      : wrapperOrFn;
+  });
 
-  await compileJs(extDir + '/', filename, './dist/v0', {
+  await Promise.all(builds);
+}
+
+/**
+ * @param {string} wrapper
+ * @param {string} sourceDir
+ * @param {string} sourceName
+ * @param {string} outputName
+ * @param {string} version
+ * @param {boolean} isLatest
+ * @param {!Object} options
+ * @return {!Promise}
+ */
+async function buildExtensionJsWithWrapper(
+  wrapper,
+  sourceDir,
+  sourceName,
+  outputName,
+  version,
+  isLatest,
+  options
+) {
+  await compileJs(`${sourceDir}/`, `${sourceName}.js`, './dist/v0', {
     ...options,
-    toName: `${name}-${version}.max.js`,
-    minifiedName: `${name}-${version}.js`,
-    latestName: latest ? `${name}-latest.js` : '',
+    toName: `${outputName}-${version}.max.js`,
+    minifiedName: `${outputName}-${version}.js`,
+    latestName: isLatest ? `${outputName}-latest.js` : '',
     wrapper,
   });
 
@@ -747,35 +807,22 @@ async function buildExtensionJs(extDir, name, version, latestVersion, options) {
     return;
   }
 
-  const aliasBundle = extensionAliasBundles[name];
+  const aliasBundle = extensionAliasBundles[sourceName];
   const isAliased = aliasBundle && aliasBundle.version == version;
 
-  const aliases = [
-    isAliased ? [name, aliasBundle.aliasedVersion] : null,
-    // TODO(alanorozco): We'd like to provide bento-foo.js binaries that only
-    // contain a Bento Custom Element like <bento-foo>.
-    // In the meantime, amp-foo.js and bento-foo.js are identical, and work on
-    // both AMP mode and Bento mode. Once we provide a unique bento-foo.js,
-    // we should remove the code that duplicates the binaries.
-    wrapperName === 'bento' ? [name.replace(/^amp-/, 'bento-'), version] : null,
-  ];
-
-  for (const aliasOptional of aliases) {
-    if (!aliasOptional) {
-      continue;
-    }
-    const [aliasedName, aliasedVersion] = aliasOptional;
+  if (isAliased) {
+    const {aliasedVersion} = aliasBundle;
     const src = maybeToEsmName(
-      `${name}-${version}${options.minify ? '' : '.max'}.js`
+      `${outputName}-${version}${options.minify ? '' : '.max'}.js`
     );
     const dest = maybeToEsmName(
-      `${aliasedName}-${aliasedVersion}${options.minify ? '' : '.max'}.js`
+      `${outputName}-${aliasedVersion}${options.minify ? '' : '.max'}.js`
     );
     fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
     fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
   }
 
-  if (name === 'amp-script') {
+  if (sourceName === 'amp-script') {
     await copyWorkerDomResources(version);
     await buildSandboxedProxyIframe(options.minify);
   }
