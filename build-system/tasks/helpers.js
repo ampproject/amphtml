@@ -313,7 +313,6 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
 
   const destPath = path.join(destDir, minifiedName);
   combineWithCompiledFile(srcFilename, destPath, options);
-  fs.writeFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
   if (options.latestName) {
     fs.copySync(
       destPath,
@@ -401,14 +400,6 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
 
   if (watchedTargets.has(entryPoint)) {
     return watchedTargets.get(entryPoint).rebuild();
-  }
-
-  // TODO(36162): Only write this once as part of the dist() function.
-  if (options.minify) {
-    fs.outputFileSync(
-      path.join(destDir, 'version.txt'),
-      internalRuntimeVersion
-    );
   }
 
   /**
