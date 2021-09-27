@@ -13,7 +13,10 @@ export function useIntersectionObserver(callback) {
   const refCb = useCallback(
     (node) => {
       const cleanup = unobserveRef.current;
-      cleanup?.();
+      if (cleanup) {
+        cleanup();
+        unobserveRef.current = null;
+      }
 
       if (!node) {
         return;
