@@ -34,6 +34,7 @@ export function Iframe({
   const dataRef = useRef(null);
   const isIntersectingRef = useRef(null);
   const containerRef = useRef(null);
+  const observerRef = useRef(null);
 
   const viewabilityCb = (entries) => {
     const iframe = iframeRef.current;
@@ -48,25 +49,31 @@ export function Iframe({
     );
   };
 
+  const handleSendIntersectionsPostMessage = useCallback((event) => {
+    const iframe = iframeRef.current;
+    if (!iframe) {
+      return;
+    }
+    if (
+      event.source !== iframe.contentWindow ||
+      event.data?.type !== MessageType.SEND_INTERSECTIONS
+    ) {
+      return;
+    }
+    const win = toWin(iframe.ownerDocument.defaultView);
+    observerRef.current = new win.IntersectionObserver(viewabilityCb, {
+      threshold: DEFAULT_THRESHOLD,
+    });
+    observerRef.current.observe(iframe);
+  }, []);
+
   useEffect(() => {
     const iframe = iframeRef.current;
     if (!iframe) {
       return;
     }
     const win = toWin(iframe.ownerDocument.defaultView);
-    let observer;
-    const handleSendIntersectionsPostMessage = (event) => {
-      if (
-        event.source !== iframe.contentWindow ||
-        event.data?.type !== MessageType.SEND_INTERSECTIONS
-      ) {
-        return;
-      }
-      observer = new win.IntersectionObserver(viewabilityCb, {
-        threshold: DEFAULT_THRESHOLD,
-      });
-      observer.observe(iframe);
-    };
+    const observer = observerRef.current;
     win.addEventListener('message', handleSendIntersectionsPostMessage);
 
     return () => {
@@ -74,7 +81,7 @@ export function Iframe({
       observer = null;
       win.removeEventListener(handleSendIntersectionsPostMessage);
     };
-  }, []);
+  }, [handleSendIntersectionsPostMessage]);
 
   const updateContainerSize = (height, width) => {
     const container = containerRef.current;
