@@ -110,8 +110,6 @@ reappear if it then leaves the viewport and goes back in again. To stop such
 reappearing behavior, add the `disable-hint-reappear` attribute to the image
 slider.
 
-> Important: This attribute is renamed as `display-hint-once` in Bento Version `1.0`.
-
 The following example displays an image slider without reappearing hints:
 
 ```html
