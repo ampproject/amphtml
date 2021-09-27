@@ -12,7 +12,10 @@ class AmpImageSlider extends BaseElement {
   init() {
     this.registerApiAction('seekTo', (api, invocation) => {
       const {args} = invocation;
-      api.seekTo(args['percent']);
+      const percent = parseFloat(args['percent'], 10);
+      if (isFiniteNumber(percent)) {
+        api.seekTo(parseFloat(args['percent'], 10));
+      }
     });
   }
 
