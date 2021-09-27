@@ -1633,20 +1633,13 @@ export class AmpStory extends AMP.BaseElement {
    * @visibleForTesting
    */
   onResize() {
-    const previousUiState = this.uiState_;
+    const prevUiState = this.uiState_;
     this.uiState_ = this.getUIType_();
 
-    const wasMobile = previousUiState === UIType.MOBILE;
-    const inputHasFocus = this.win.document.activeElement?.tagName === 'INPUT';
-    const softKeyboardIsProbablyOpen = wasMobile && inputHasFocus;
-    if (!softKeyboardIsProbablyOpen) {
-      // The opening of the Android soft keyboard triggers a viewport resize
-      // that can cause the story's dimensions to appear to be those of a
-      // desktop. Here, we assume that the soft keyboard is open if the story
-      // has resized while an input element has focus, and we do not toggle the
-      // UI.
+    if (this.uiState_ !== UIType.MOBILE || this.uiState_ !== prevUiState) {
       this.storeService_.dispatch(Action.TOGGLE_UI, this.uiState_);
-    }
+      console.log('Toggling UI');
+    } else {console.log('NOT toggling UI')}
 
     if (this.uiState_ === UIType.MOBILE) {
       const currentHeight = this.getViewport().getHeight();
@@ -1792,6 +1785,17 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getUIType_() {
+    const isCurrentlyMobile = this.uiState_ === UIType.MOBILE;
+    const inputHasFocus = this.win.document.activeElement?.tagName === 'INPUT';
+    const softKeyboardIsProbablyOpen = isCurrentlyMobile && inputHasFocus;
+    if (softKeyboardIsProbablyOpen) {
+      // The opening of the Android soft keyboard triggers a viewport resize
+      // that can cause the story's dimensions to appear to be those of a
+      // desktop. Here, we assume that the soft keyboard is open if the latest
+      // UI state was mobile while an input element has focus.
+      return UIType.MOBILE;
+    }
+
     if (this.platform_.isBot()) {
       return UIType.VERTICAL;
     }
