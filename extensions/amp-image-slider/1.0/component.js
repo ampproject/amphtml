@@ -477,8 +477,10 @@ export function BentoImageSliderWithRef(
       {/* Masks */}
       <div ref={leftMaskRef} class={styles.imageSliderLeftMask}>
         <div ref={leftLabelWrapperRef} class={styles.imageSliderLabelWrapper}>
-          <div ref={leftLabelRef}>{DisplayAs(firstLabelAs)}</div>
-          {DisplayAs(firstImageAs)}
+          <div ref={leftLabelRef}>
+            <DisplayAs as={firstLabelAs} />
+          </div>
+          <DisplayAs as={firstImageAs} />
         </div>
       </div>
       <div
@@ -495,8 +497,10 @@ export function BentoImageSliderWithRef(
             [styles.imageSliderPushLeft]: true,
           })}
         >
-          <div ref={rightLabelRef}>{DisplayAs(secondLabelAs)}</div>
-          {DisplayAs(secondImageAs)}
+          <div ref={rightLabelRef}>
+            <DisplayAs as={secondLabelAs} />
+          </div>
+          <DisplayAs as={secondImageAs} />
         </div>
       </div>
 
