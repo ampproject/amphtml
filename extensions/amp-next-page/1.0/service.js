@@ -604,6 +604,28 @@ export class NextPageService {
         }
       );
 
+      // Reuse message deliverer from existing viewer.
+      // Even though we have multiple instances of the Viewer service, we only
+      // have a single messaging channel.
+      const messageDeliverer = this.viewer_.maybeGetMessageDeliverer();
+      if (messageDeliverer) {
+        amp.onMessage((eventType, data, awaitResponse) => {
+          // Some messages should be suppressed when coming from the inserted
+          // document. These are related to the viewport, so we allow the host
+          // document to handle these events instead.
+          // Otherwise, we would confuse the viewer and observe issues like the
+          // header appearing unexpectedly.
+          if (
+            eventType === 'documentHeight' ||
+            eventType === 'scroll' ||
+            eventType === 'viewport'
+          ) {
+            return;
+          }
+          messageDeliverer(eventType, data, awaitResponse);
+        });
+      }
+
       const ampdoc = devAssert(amp.ampdoc);
       installStylesForDoc(ampdoc, CSS, null, false, TAG);
 

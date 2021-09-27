@@ -21,21 +21,25 @@ const {publishRelease, rollbackRelease} = require('./update-release');
  * @return {Promise<void>}
  */
 async function _promote() {
-  const supportedChannels = ['beta-percent', 'stable', 'lts'];
+  const supportedChannels = ['beta-opt-in', 'beta-percent', 'stable', 'lts'];
   if (!supportedChannels.includes(channel)) {
     return;
   }
 
-  try {
+  if (channel == 'stable') {
     await publishRelease(head);
     log('Published release', head);
-  } catch (e) {
+  }
+
+  if (channel == 'beta-opt-in') {
     await makeRelease(head, base, channel);
     log('Created release', head);
   }
 
-  await addLabels(head, base, channel);
-  log('Labeled PRs for release', head, 'and channel', channel);
+  if (['beta-percent', 'stable', 'lts'].includes(channel)) {
+    await addLabels(head, base, channel);
+    log('Labeled PRs for release', head, 'and channel', channel);
+  }
 
   await createOrUpdateTracker(head, base, channel, time);
   log('Updated issue tracker for release', head, 'and channel', channel);

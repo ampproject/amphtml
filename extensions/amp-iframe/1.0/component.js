@@ -15,7 +15,6 @@ const NOOP = () => {};
 export function Iframe({
   allowFullScreen,
   allowPaymentRequest,
-  allowTransparency,
   iframeStyle,
   onLoad = NOOP,
   referrerPolicy,
@@ -128,7 +127,6 @@ export function Iframe({
       sandbox,
       allowFullScreen,
       allowPaymentRequest,
-      allowTransparency,
       referrerPolicy,
       onLoad,
       frameBorder: '0',
@@ -139,7 +137,6 @@ export function Iframe({
       sandbox,
       allowFullScreen,
       allowPaymentRequest,
-      allowTransparency,
       referrerPolicy,
       onLoad,
     ]
