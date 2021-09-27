@@ -22,15 +22,16 @@ export const _default = () => {
 
   return (
     <BentoImageSlider
-      layout="responsive"
-      width="100"
-      height="200"
-      initial-slider-position="0"
-    >
-      <amp-img slot="first-image" src={first} alt="A green apple"></amp-img>
-      <amp-img slot="second-image" src={second} alt="A red apple"></amp-img>
-      <div slot="first-label">Clear Picture</div>
-      <div slot="second-label">Blur Picture</div>
-    </BentoImageSlider>
+      initialSliderPosition={0}
+      firstImageAs={(props) => (
+        <img src={first} alt="A green apple" {...props} />
+      )}
+      firstLabelAs={(props) => <div {...props}>Clear picture</div>}
+      secondImageAs={(props) => (
+        <img src={second} alt="A red apple" {...props} />
+      )}
+      secondLabelAs={(props) => <div {...props}>Blur picture</div>}
+      style={{width: 100, height: 200}}
+    ></BentoImageSlider>
   );
 };
