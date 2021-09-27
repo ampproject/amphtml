@@ -55,7 +55,7 @@ export function Iframe({
     }
     const win = toWin(iframe.ownerDocument.defaultView);
     let observer;
-    win.addEventListener('message', (event) => {
+    const handleSendIntersectionsPostMessage = (event) => {
       if (
         event.source !== iframe.contentWindow ||
         event.data?.type !== MessageType.SEND_INTERSECTIONS
@@ -66,12 +66,15 @@ export function Iframe({
         threshold: DEFAULT_THRESHOLD,
       });
       observer.observe(iframe);
-    });
+    };
+    win.addEventListener('message', handleSendIntersectionsPostMessage);
+
     return () => {
       observer?.unobserve(iframe);
       observer = null;
+      win.removeEventListener(handleSendIntersectionsPostMessage);
     };
-  }, [src]);
+  }, []);
 
   const updateContainerSize = (height, width) => {
     const container = containerRef.current;
