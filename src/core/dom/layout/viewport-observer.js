@@ -37,38 +37,9 @@ const viewportCallbacks = new WeakMap();
  * Lazily creates an IntersectionObserver per Window to track when elements
  * enter and exit the viewport. Fires viewportCallback when this happens.
  *
- * TODO(dmanek): This is a wrapper around `observeIntersections` to maintain
- * backwards compatibility and can be deleted once all instances have been
- * migrated.
- *
- * @param {!Element} element
- * @param {function(boolean)} viewportCallback
- */
-export function observeWithSharedInOb(element, viewportCallback) {
-  observeIntersections(element, ({isIntersecting}) =>
-    viewportCallback(isIntersecting)
-  );
-}
-
-/**
- * Unobserve an element.
- * @param {!Element} element
- */
-export function unobserveWithSharedInOb(element) {
-  const win = toWin(element.ownerDocument.defaultView);
-  const viewportObserver = viewportObservers.get(win);
-  viewportObserver?.unobserve(element);
-  // TODO(dmanek): This is a potential bug. We only want to remove
-  // a single callback as opposed to all.
-  viewportCallbacks.delete(element);
-}
-
-/**
- * Lazily creates an IntersectionObserver per Window to track when elements
- * enter and exit the viewport. Fires viewportCallback when this happens.
- *
  * @param {!Element} element
  * @param {function(IntersectionObserverEntry)} callback
+ * @return {!UnlistenDef} clean up closure to unobserve the element
  */
 export function observeIntersections(element, callback) {
   const win = toWin(element.ownerDocument.defaultView);
@@ -86,6 +57,9 @@ export function observeIntersections(element, callback) {
   }
   callbacks.push(callback);
   viewportObserver.observe(element);
+  return () => {
+    unobserveIntersections(element, callback);
+  };
 }
 
 /**
@@ -94,7 +68,7 @@ export function observeIntersections(element, callback) {
  * @param {!Element} element
  * @param {function(IntersectionObserverEntry)} callback
  */
-export function unobserveIntersections(element, callback) {
+function unobserveIntersections(element, callback) {
   const callbacks = viewportCallbacks.get(element);
   if (!callbacks) {
     return;
