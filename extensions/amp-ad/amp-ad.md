@@ -444,7 +444,6 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Sklik](../../ads/vendors/sklik.md)
 -   [SSP](../../ads/vendors/ssp.md)
 -   [SlimCut Media](../../ads/vendors/slimcutmedia.md)
--   [Smart AdServer](../../ads/vendors/smartadserver.md)
 -   [smartclip](../../ads/vendors/smartclip.md)
 -   [SmileWanted](../../ads/vendors/smilewanted.md)
 -   [sogou Ad](../../ads/vendors/sogouad.md)
