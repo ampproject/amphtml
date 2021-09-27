@@ -1,0 +1,15 @@
+/*
+ * Pre-upgrade:
+ * - display:block element
+ * - size-defined element
+ */
+amp-mathml {
+  display: block;
+  overflow: hidden;
+  position: relative;
+}
+
+amp-mathml[inline] {
+  display: inline-block;
+  vertical-align: middle;
+}
