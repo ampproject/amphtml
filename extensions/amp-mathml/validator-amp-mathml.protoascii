@@ -1,10 +1,27 @@
-tags: {  # amp-mathml
+tags: {  # amp-mathml 1.0
   html_format: AMP
   tag_name: "SCRIPT"
+  satisfies: "amp-mathml 1.0"
+  excludes: "amp-mathml 0.1"
+  extension_spec: {
+    name: "amp-mathml"
+    version_name: "v1.0"
+    version: "1.0"
+    bento_supported_version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+tags: {  # amp-mathml 0.1
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies: "amp-mathml 0.1"
+  excludes: "amp-mathml 1.0"
   extension_spec: {
     name: "amp-mathml"
     version: "0.1"
     version: "latest"
+    version_name: "v0.1"
   }
   attr_lists: "common-extension-attrs"
 }

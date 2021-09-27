@@ -17,6 +17,7 @@ import {isRTL} from '#core/dom';
 import {sequentialIdGenerator} from '#core/data-structures/id-generator';
 import {toWin} from '#core/window';
 import {
+  cloneElement,
   useCallback,
   useContext,
   useEffect,
@@ -348,7 +349,7 @@ function BentoBaseCarouselWithRef(
               renderable={index == currentSlide}
               playable={index == currentSlide}
             >
-              {child}
+              {cloneElement(child, {...child.props, thumbnailSrc: undefined})}
             </WithAmpContext>
           );
         })}

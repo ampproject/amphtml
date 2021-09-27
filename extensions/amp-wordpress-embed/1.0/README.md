@@ -1,11 +1,3 @@
----
-$category@: presentation
-formats:
-  - websites
-teaser:
-  text: Embeds a WordPress post.
----
-
 # Bento Wordpress Embed
 
 ## Usage

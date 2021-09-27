@@ -1,11 +1,11 @@
-import {Facebook} from './component';
+import {BentoFacebook} from './component';
 import {PreactBaseElement} from '#preact/base-element';
 import {dashToUnderline} from '#core/types/string';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = Facebook;
+BaseElement['Component'] = BentoFacebook;
 
 /** @override */
 BaseElement['props'] = {
