@@ -20,10 +20,7 @@ import {
   observeContentSize,
   unobserveContentSize,
 } from '#core/dom/layout/size-observer';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {BaseCarousel} from './base-carousel';
 
@@ -165,6 +162,9 @@ export class AmpSlideScroll extends BaseCarousel {
     this.hasFirstResizedOccured_ = false;
 
     this.onResized_ = this.onResized_.bind(this);
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /** @override */
@@ -414,8 +414,9 @@ export class AmpSlideScroll extends BaseCarousel {
 
   /** @override */
   layoutCallback() {
-    observeWithSharedInOb(this.element, (inViewport) =>
-      this.viewportCallbackTemp(inViewport)
+    this.unobserveIntersections_ = observeIntersections(
+      this.element,
+      ({isIntersecting}) => this.viewportCallbackTemp(isIntersecting)
     );
 
     // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
@@ -460,7 +461,8 @@ export class AmpSlideScroll extends BaseCarousel {
 
   /** @override */
   unlayoutCallback() {
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections = null;
     this.slideIndex_ = null;
     return super.unlayoutCallback();
   }
