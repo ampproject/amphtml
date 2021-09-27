@@ -122,8 +122,8 @@ async function dist() {
       buildLoginDone('0.1'),
       buildWebPushPublisherFiles(),
       buildCompiler(),
+      compileAllJs(options),
     ]);
-    await compileAllJs(options);
   }
 
   // This step internally parses the various extension* flags.
