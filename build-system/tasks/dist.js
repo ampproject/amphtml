@@ -117,10 +117,12 @@ async function dist() {
   if (argv.core_runtime_only) {
     await compileCoreRuntime(options);
   } else {
-    await buildExperiments();
-    await buildLoginDone('0.1');
-    await buildWebPushPublisherFiles();
-    await buildCompiler();
+    await Promise.all([
+      buildExperiments(),
+      buildLoginDone('0.1'),
+      buildWebPushPublisherFiles(),
+      buildCompiler(),
+    ]);
     await compileAllJs(options);
   }
 
