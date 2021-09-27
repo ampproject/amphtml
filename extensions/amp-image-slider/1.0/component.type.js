@@ -13,7 +13,7 @@ var BentoImageSliderDef = {};
 BentoImageSliderDef.Props;
 
 /** @interface */
-BentoImageSliderDef.BentoImageSliderApi = class {
+BentoImageSliderDef.Api = class {
   /**
    * Seeks Bar to specified percentage in slider.
    * 0-49 for right side image, 50 for both image (as half) and 51-100 for left side image.

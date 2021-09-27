@@ -1,6 +1,5 @@
 import objstr from 'obj-str';
 
-import {createElementWithAttributes} from '#core/dom';
 import {setStyle} from '#core/dom/style';
 import {clamp} from '#core/math';
 
@@ -35,7 +34,7 @@ function DisplayAs({as: Comp = 'div', ...rest}) {
 
 /**
  * @param {!BentoImageSliderDef.Props} props
- * @param {{current: ?BentoImageSliderDef.BentoImageSliderApi}} ref
+ * @param {{current: ?BentoImageSliderDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
 export function BentoImageSliderWithRef(
@@ -456,7 +455,7 @@ export function BentoImageSliderWithRef(
   useImperativeHandle(
     ref,
     () =>
-      /** @type {!BentoImageSliderDef.BentoImageSliderApi} */ ({
+      /** @type {!BentoImageSliderDef.Api} */ ({
         seekTo: (percent = 50) => {
           updatePositions(percent);
         },
