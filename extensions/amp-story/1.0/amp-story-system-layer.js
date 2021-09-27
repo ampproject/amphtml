@@ -72,16 +72,10 @@ const MESSAGE_DISPLAY_CLASS = 'i-amphtml-story-messagedisplay';
 const CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE = 'i-amphtml-current-page-has-audio';
 
 /** @private @const {string} */
-const HAS_SIDEBAR_ATTRIBUTE = 'i-amphtml-story-has-sidebar';
-
-/** @private @const {string} */
 const SHARE_CLASS = 'i-amphtml-story-share-control';
 
 /** @private @const {string} */
 const INFO_CLASS = 'i-amphtml-story-info-control';
-
-/** @private @const {string} */
-const SIDEBAR_CLASS = 'i-amphtml-story-sidebar-control';
 
 /** @private @const {string} */
 const HAS_NEW_PAGE_ATTRIBUTE = 'i-amphtml-story-has-new-page';
@@ -269,13 +263,6 @@ const TEMPLATE = {
         {
           tag: 'button',
           attrs: dict({
-            'class': SIDEBAR_CLASS + ' i-amphtml-story-button',
-          }),
-          localizedLabelId: LocalizedStringId.AMP_STORY_SIDEBAR_BUTTON_LABEL,
-        },
-        {
-          tag: 'button',
-          attrs: dict({
             'class':
               CLOSE_CLASS +
               ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
@@ -329,7 +316,6 @@ const VIEWER_CONTROL_DEFAULTS = {
  *   - story progress bar
  *   - share button
  *   - domain info button
- *   - sidebar
  *   - story updated label (for live stories)
  *   - close (for players)
  *   - skip (for players)
@@ -524,8 +510,6 @@ export class SystemLayer {
         this.onShareClick_(event);
       } else if (matches(target, `.${INFO_CLASS}, .${INFO_CLASS} *`)) {
         this.onInfoClick_();
-      } else if (matches(target, `.${SIDEBAR_CLASS}, .${SIDEBAR_CLASS} *`)) {
-        this.onSidebarClick_();
       } else if (
         matches(
           target,
@@ -642,14 +626,6 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
-      StateProperty.HAS_SIDEBAR_STATE,
-      (hasSidebar) => {
-        this.onHasSidebarStateUpdate_(hasSidebar);
-      },
-      true /** callToInitialize */
-    );
-
-    this.storeService_.subscribe(
       StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
       (isVisible) => {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
@@ -693,20 +669,6 @@ export class SystemLayer {
     isAd
       ? this.getShadowRoot().setAttribute(AD_SHOWING_ATTRIBUTE, '')
       : this.getShadowRoot().removeAttribute(AD_SHOWING_ATTRIBUTE);
-  }
-
-  /**
-   * Checks if the story has a sidebar in order to display the icon representing
-   * the opening of the sidebar.
-   * @param {boolean} hasSidebar
-   * @private
-   */
-  onHasSidebarStateUpdate_(hasSidebar) {
-    if (hasSidebar) {
-      this.getShadowRoot().setAttribute(HAS_SIDEBAR_ATTRIBUTE, '');
-    } else {
-      this.getShadowRoot().removeAttribute(HAS_SIDEBAR_ATTRIBUTE);
-    }
   }
 
   /**
@@ -1010,14 +972,6 @@ export class SystemLayer {
   onInfoClick_() {
     const isOpen = this.storeService_.get(StateProperty.INFO_DIALOG_STATE);
     this.storeService_.dispatch(Action.TOGGLE_INFO_DIALOG, !isOpen);
-  }
-
-  /**
-   * Handles click events on the sidebar button and toggles the sidebar.
-   * @private
-   */
-  onSidebarClick_() {
-    this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
   }
 
   /**
