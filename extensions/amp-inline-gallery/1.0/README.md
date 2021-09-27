@@ -1,11 +1,3 @@
----
-$category@: layout
-formats:
-  - websites
-teaser:
-  text: Displays multiple similar pieces of content along a horizontal axis, with optional pagination dots and thumbnails.
----
-
 # Bento Inline Gallery
 
 ## Usage

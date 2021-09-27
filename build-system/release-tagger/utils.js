@@ -13,7 +13,7 @@ const {Octokit} = require('@octokit/rest');
 const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
   userAgent: 'amp release tagger',
-  timeZone: 'America/New_York',
+  timeZone: 'America/Los_Angeles',
 });
 
 const graphqlWithAuth = graphql.defaults({

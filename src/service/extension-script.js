@@ -197,7 +197,7 @@ export function getExtensionScripts(
 /**
  * Get list of all the extension JS files.
  * @param {HTMLHeadElement|Element|ShadowRoot|Document} head
- * @return {!Array<{extensionId: string, extensionVersion: string}>}
+ * @return {!Array<{script: HTMLScriptElement, extensionId: string, extensionVersion: string}>}
  */
 export function extensionScriptsInNode(head) {
   // ampdoc.getHeadNode() can return null.
@@ -216,9 +216,12 @@ export function extensionScriptsInNode(head) {
       script.getAttribute('custom-element') ||
       script.getAttribute('custom-template');
     const urlParts = parseExtensionUrl(script.src);
-    // TODO: register error handler
     if (extensionId && urlParts) {
-      scripts.push({extensionId, extensionVersion: urlParts.extensionVersion});
+      scripts.push({
+        script,
+        extensionId,
+        extensionVersion: urlParts.extensionVersion,
+      });
     }
   }
   return scripts;
