@@ -974,7 +974,6 @@ export class AmpStory extends AMP.BaseElement {
     const initialPageId = this.getInitialPageId_();
 
     this.buildSystemLayer_(initialPageId);
-    this.initializeSidebar_();
     this.setThemeColor_();
 
     const storyLayoutPromise = Promise.all([
@@ -2452,32 +2451,6 @@ export class AmpStory extends AMP.BaseElement {
         : NavigationDirection.PREVIOUS;
 
     this.switchTo_(targetPage.element.id, direction);
-  }
-
-  /**
-   * Checks for the presence of a sidebar. If a sidebar does exist, then an icon
-   * permitting for the opening/closing of the sidebar is shown.
-   * @private
-   */
-  initializeSidebar_() {
-    this.sidebar_ = this.element.querySelector('amp-sidebar');
-    if (!this.sidebar_) {
-      return;
-    }
-
-    this.mutateElement(() => {
-      this.sidebar_.classList.add(SIDEBAR_CLASS_NAME);
-    });
-
-    this.initializeOpacityMask_();
-    this.storeService_.dispatch(Action.TOGGLE_HAS_SIDEBAR, !!this.sidebar_);
-
-    const actions = [
-      {tagOrTarget: 'AMP-SIDEBAR', method: 'open'},
-      {tagOrTarget: 'AMP-SIDEBAR', method: 'close'},
-      {tagOrTarget: 'AMP-SIDEBAR', method: 'toggle'},
-    ];
-    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, actions);
   }
 
   /**
