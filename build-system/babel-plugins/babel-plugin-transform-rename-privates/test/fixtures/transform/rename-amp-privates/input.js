@@ -2,7 +2,7 @@ class Foo {
   constructor() {
     this.hello_ = 'world';
     let bar_ = 'world';
-    console.log(zoo_);
+    console.log(zoo_, this?.zeb_);
   }
 
   doFoo_() {}
