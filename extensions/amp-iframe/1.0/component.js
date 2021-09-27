@@ -56,10 +56,8 @@ export function Iframe({
     const win = toWin(iframe.ownerDocument.defaultView);
     let observer;
     win.addEventListener('message', (event) => {
-      // incl base param to URL constructor for relative URLs used in storybooks
-      const {origin} = new URL(src, win.location.origin);
       if (
-        event.origin !== origin ||
+        event.source !== iframe.contentWindow ||
         event.data?.type !== MessageType.SEND_INTERSECTIONS
       ) {
         return;
@@ -116,7 +114,7 @@ export function Iframe({
     }
   }, [requestResize]);
 
-  const handlePostMessage = useCallback(
+  const handleEmbedSizePostMessage = useCallback(
     (event) => {
       if (event.data?.type !== MessageType.EMBED_SIZE) {
         return;
@@ -144,12 +142,12 @@ export function Iframe({
       return;
     }
 
-    win.addEventListener('message', handlePostMessage);
+    win.addEventListener('message', handleEmbedSizePostMessage);
 
     return () => {
-      win.removeEventListener('message', handlePostMessage);
+      win.removeEventListener('message', handleEmbedSizePostMessage);
     };
-  }, [handlePostMessage]);
+  }, [handleEmbedSizePostMessage]);
 
   const ioCallback = useCallback(
     ({isIntersecting}) => {
