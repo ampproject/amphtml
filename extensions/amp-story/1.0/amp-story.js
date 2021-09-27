@@ -290,9 +290,6 @@ export class AmpStory extends AMP.BaseElement {
      */
     this.pausedStateToRestore_ = null;
 
-    /** @private {?Element} */
-    this.maskElement_ = null;
-
     /** @private {?LiveStoryManager} */
     this.liveStoryManager_ = null;
 
@@ -395,7 +392,7 @@ export class AmpStory extends AMP.BaseElement {
           Action.SET_ADVANCEMENT_MODE,
           AdvancementMode.GO_TO_PAGE
         );
-        this.switchTo_(args['id'], NavigationDirection.NEXT)
+        this.switchTo_(args['id'], NavigationDirection.NEXT);
       });
     }
     if (isExperimentOn(this.win, 'story-load-first-page-only')) {
