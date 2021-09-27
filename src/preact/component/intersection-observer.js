@@ -9,16 +9,12 @@ import {useCallback, useRef} from '#preact';
  * @return {function(Element)}
  */
 export function useIntersectionObserver(callback) {
-  const nodeRef = useRef(null);
   const unobserveRef = useRef(null);
   const refCb = useCallback(
     (node) => {
-      const prevNode = nodeRef.current;
-      nodeRef.current = node;
-      if (prevNode) {
-        const cleanup = unobserveRef.current;
-        cleanup();
-      }
+      const cleanup = unobserveRef.current;
+      cleanup?.();
+
       if (!node) {
         return;
       }
