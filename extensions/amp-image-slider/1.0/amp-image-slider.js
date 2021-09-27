@@ -1,7 +1,10 @@
+import {isFiniteNumber} from '#core/types';
+
 import {isExperimentOn} from '#experiments';
 
 import {BaseElement} from './base-element';
 
+import {CSS} from '../../../build/amp-image-slider-1.0.css';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -31,5 +34,5 @@ class AmpImageSlider extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpImageSlider);
+  AMP.registerElement(TAG, AmpImageSlider, CSS);
 });

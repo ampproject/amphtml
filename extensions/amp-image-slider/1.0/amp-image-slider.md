@@ -181,8 +181,9 @@ given percentage from left.
 Few updates and alteration are done in `1.0` which are a bit different from `0.1` version. This section describes this updates and differences.
 
 ### Attributes Update
-| `0.1` Parameter         | Update Type | `1.0` Parameter     | Note                 |
-| ----------------------- | ----------- | ------------------- | -------------------- |
+
+| `0.1` Parameter         | Update Type | `1.0` Parameter     | Note                                                            |
+| ----------------------- | ----------- | ------------------- | --------------------------------------------------------------- |
 | `disable-hint-reappear` | Renamed     | `display-hint-once` | The intention is to not have an attribute with a negative name. |
 
 ## Validation
