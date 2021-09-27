@@ -50,14 +50,20 @@ executors:
     docker:
       - image: cimg/node:lts-browsers
     resource_class: medium
+    environment:
+      NODE_OPTIONS: --max_old_space_size=3584
   node-docker-large:
     docker:
       - image: cimg/node:lts-browsers
     resource_class: large
+    environment:
+      NODE_OPTIONS: --max_old_space_size=7168
   node-docker-xlarge:
     docker:
       - image: cimg/node:lts-browsers
     resource_class: xlarge
+    environment:
+      NODE_OPTIONS: --max_old_space_size=14336
   jdk-docker-xlarge:
     docker:
       - image: cimg/openjdk:17.0-node
