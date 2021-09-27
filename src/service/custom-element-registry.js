@@ -2,7 +2,11 @@ import {Services} from '#service';
 
 import {extensionScriptsInNode} from './extension-script';
 
-import {createCustomElementClass, stubbedElements} from '../custom-element';
+import {
+  createCustomElementClass,
+  markUnresolvedElements,
+  stubbedElements,
+} from '../custom-element';
 import {ElementStub} from '../element-stub';
 import {reportError} from '../error-reporting';
 import {userAssert} from '../log';
@@ -120,8 +124,9 @@ function waitReadyForUpgrade(win, elementClass) {
  */
 export function stubElementsForDoc(ampdoc) {
   const extensions = extensionScriptsInNode(ampdoc.getHeadNode());
-  extensions.forEach(({extensionId, extensionVersion}) => {
+  extensions.forEach(({extensionId, extensionVersion, script}) => {
     ampdoc.declareExtension(extensionId, extensionVersion);
+    script.addEventListener('error', () => markUnresolvedElements(extensionId));
     stubElementIfNotKnown(ampdoc.win, extensionId);
   });
   if (ampdoc.isBodyAvailable()) {
