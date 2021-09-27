@@ -241,7 +241,6 @@ function SelectorWithRef(
       aria-multiselectable={multiple}
       disabled={disabled}
       form={form}
-      keyboardSelectMode={keyboardSelectMode}
       multiple={multiple}
       name={name}
       onKeyDown={onKeyDown}

@@ -80,7 +80,6 @@ function BentoWordPressEmbedWithRef(
 
   return (
     <IframeEmbed
-      allowTransparency
       iframeStyle={{opacity}}
       matchesMessagingOrigin={matchesMessagingOrigin}
       messageHandler={messageHandler}

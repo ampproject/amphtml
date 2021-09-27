@@ -789,7 +789,13 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
     });
 
     it('should expand globally allowed macros', async () => {
-      const url = 'https://www.foo.example/?cid=CLIENT_ID(foo)';
+      /**
+       * todo(keshavvi):
+       * This test conflicts with `should resolve element dependent vars and macros` in test-linker-manager.js
+       * Both save and retrieve to a cookie named `foo`. They should be isolated and the cookies should not be shared.
+       * But, for some reason they are. So, for now use a cookie called bar here.
+       */
+      const url = 'https://www.foo.example/?cid=CLIENT_ID(bar)';
       rtc.rtcConfig_ = {
         timeoutMillis: 1000,
       };
