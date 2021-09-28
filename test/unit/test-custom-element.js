@@ -13,6 +13,8 @@ import {chunkInstanceForTesting} from '../../src/chunk';
 import {
   createAmpElementForTesting,
   getImplSyncForTesting,
+  markUnresolvedElements,
+  resetUnresolvedElementsForTesting,
 } from '../../src/custom-element';
 import {ElementStub} from '../../src/element-stub';
 
@@ -153,6 +155,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       afterEach(() => {
         clock.uninstall();
         resourcesMock.verify();
+        resetUnresolvedElementsForTesting();
       });
 
       function skipMicroTask() {
@@ -948,9 +951,9 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
         expect(element.everAttached).to.equal(true);
         expect(element.getLayout()).to.equal(Layout.FILL);
-        // Not upgraded yet!
-        expect(element).to.have.class('amp-unresolved');
-        expect(element).to.have.class('i-amphtml-unresolved');
+        // Not upgraded yet, but extension hasn't failed.
+        expect(element).not.to.have.class('amp-unresolved');
+        expect(element).not.to.have.class('i-amphtml-unresolved');
 
         // Upgrade
         resourcesMock.expects('upgraded').withExactArgs(element).once();
@@ -965,6 +968,44 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         // Now it's called.
         expect(element).to.not.have.class('amp-unresolved');
         expect(element).to.not.have.class('i-amphtml-unresolved');
+      });
+
+      it('StubElement - attachedCallback after failed to load', () => {
+        const element = new StubElementClass();
+        markUnresolvedElements('amp-stub');
+        element.setAttribute('layout', 'fill');
+        expect(element.everAttached).to.equal(false);
+        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
+
+        resourcesMock.expects('add').withExactArgs(element).atLeast(1);
+        container.appendChild(element);
+
+        expect(element.everAttached).to.equal(true);
+        expect(element.getLayout()).to.equal(Layout.FILL);
+        // Extension already failed before attachedCallback
+        expect(element).to.have.class('amp-unresolved');
+        expect(element).to.have.class('i-amphtml-unresolved');
+      });
+
+      it('StubElement - attachedCallback before failed to load', () => {
+        const element = new StubElementClass();
+        element.setAttribute('layout', 'fill');
+        expect(element.everAttached).to.equal(false);
+        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
+
+        resourcesMock.expects('add').withExactArgs(element).atLeast(1);
+        container.appendChild(element);
+
+        expect(element.everAttached).to.equal(true);
+        expect(element.getLayout()).to.equal(Layout.FILL);
+        // Not upgraded yet, but extension hasn't failed.
+        expect(element).not.to.have.class('amp-unresolved');
+        expect(element).not.to.have.class('i-amphtml-unresolved');
+
+        // Now it's called.
+        markUnresolvedElements('amp-stub');
+        expect(element).to.have.class('amp-unresolved');
+        expect(element).to.have.class('i-amphtml-unresolved');
       });
 
       it('Element - detachedCallback', () => {

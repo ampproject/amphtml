@@ -313,7 +313,6 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
 
   const destPath = path.join(destDir, minifiedName);
   combineWithCompiledFile(srcFilename, destPath, options);
-  fs.writeFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
   if (options.latestName) {
     fs.copySync(
       destPath,
@@ -417,7 +416,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     };
   }
   const {banner, footer} = splitWrapper();
-  const config = await getAmpConfigForFile(srcFilename, options);
+  const config = await getAmpConfigForFile(destFilename, options);
   const compiledFile = await getCompiledFile(srcFilename);
   banner.js = config + banner.js + compiledFile;
 

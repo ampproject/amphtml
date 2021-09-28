@@ -60,7 +60,7 @@ executors:
     resource_class: xlarge
   jdk-docker-xlarge:
     docker:
-      - image: cimg/openjdk:16.0-node
+      - image: cimg/openjdk:17.0-node
     resource_class: xlarge
   macos-medium:
     macos:
