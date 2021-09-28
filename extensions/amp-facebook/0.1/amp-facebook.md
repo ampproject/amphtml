@@ -36,7 +36,7 @@ The following example shows how to embed a comment on a post:
 [example preview="inline" playground="true" imports="amp-facebook"][sourcecode:html]
 <amp-facebook width="552" height="500"
     layout="responsive"
-    data-embed-type="comment"
+    data-embed-as="comment"
     data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185">
 </amp-facebook>
 [/sourcecode][/example]
