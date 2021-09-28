@@ -9,6 +9,7 @@ const {getSemver} = require('./utils');
 const {log} = require('../common/logging');
 const {stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
+const path = require('path');
 
 /**
  * Determines whether to skip
@@ -27,16 +28,14 @@ async function shouldSkip() {
 /**
  * Returns relative paths to all the extension's CSS file
  *
- * @return {Promise<boolean>}
+ * @return {Promise<string[]>}
  */
 async function getStylesheets() {
-  const files = await fastGlob(
-    `extensions/${extension}/${extensionVersion}/dist/**/*.css`
-  );
-
-  return files.map((path) =>
-    path.replace(`extensions/${extension}/${extensionVersion}/dist/`, '')
-  );
+  const extDir = `extensions/${extension}/${extensionVersion}/dist`
+    .split('/')
+    .join(path.sep);
+  const files = await fastGlob(path.join(extDir, '**', '*.css'));
+  return files.map((file) => path.relative(extDir, file));
 }
 
 /**
