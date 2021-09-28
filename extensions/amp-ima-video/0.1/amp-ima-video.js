@@ -203,34 +203,42 @@ class AmpImaVideo extends AMP.BaseElement {
           {allowFullscreen: true}
         )
       )
-      .then((iframe) => {
-        iframe.title = this.element.title || 'IMA video';
-
-        applyFillContent(iframe);
-
-        // This is temporary until M74 launches.
-        // TODO(aghassemi, #21247)
-        addUnsafeAllowAutoplay(iframe);
-
-        this.iframe_ = iframe;
-
-        const deferred = new Deferred();
-        this.playerReadyPromise_ = deferred.promise;
-        this.playerReadyResolver_ = deferred.resolve;
-
-        this.unlistenMessage_ = listen(this.win, 'message', (e) =>
-          this.handlePlayerMessage_(/** @type {!Event} */ (e))
-        );
-
-        element.appendChild(iframe);
-
-        installVideoManagerForDoc(element);
-        Services.videoManagerForDoc(element).register(this);
-        observeContentSize(this.element, this.onResized_);
-
-        return this.loadPromise(iframe);
-      })
+      .then((iframe) => this.loadIframe_(iframe))
       .then(() => this.playerReadyPromise_);
+  }
+
+  /**
+   * Initialize the iframe
+   *
+   * @param {HTMLIFrameElement} iframe
+   * @return {!Promise}
+   */
+  loadIframe_(iframe) {
+    iframe.title = this.element.title || 'IMA video';
+
+    applyFillContent(iframe);
+
+    // This is temporary until M74 launches.
+    // TODO(aghassemi, #21247)
+    addUnsafeAllowAutoplay(iframe);
+
+    this.iframe_ = iframe;
+
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
+
+    this.unlistenMessage_ = listen(this.win, 'message', (e) =>
+      this.handlePlayerMessage_(/** @type {!Event} */ (e))
+    );
+
+    this.element.appendChild(iframe);
+
+    installVideoManagerForDoc(this.element);
+    Services.videoManagerForDoc(this.element).register(this);
+    observeContentSize(this.element, this.onResized_);
+
+    return this.loadPromise(iframe);
   }
 
   /** @override */

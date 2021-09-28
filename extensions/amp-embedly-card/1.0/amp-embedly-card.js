@@ -21,7 +21,7 @@ class AmpEmbedlyCard extends BaseElement {
 
   /** @override */
   static getPreconnects() {
-    return ['https://cdn.embedly.com'];
+    return Promise.resolve(['https://cdn.embedly.com']);
   }
 
   /** @override */

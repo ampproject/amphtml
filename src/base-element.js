@@ -189,14 +189,14 @@ export class BaseElement {
    * hosts and prefetch resources it is likely to need. May be called
    * multiple times because connections can time out.
    *
-   * Returns an array of URLs to be preconnected.
+   * Returns a promise resolving to an array of URLs to be preconnected.
    *
    * @param {!AmpElement} unusedElement
-   * @return {?Array<string>}
+   * @return {!Promise<?Array<string>>}
    * @nocollapse
    */
   static getPreconnects(unusedElement) {
-    return null;
+    return Promise.resolve();
   }
 
   /**

@@ -5,7 +5,7 @@ import {BentoSoundcloud} from './component';
 export class BaseElement extends PreactBaseElement {
   /** @override */
   static getPreconnects() {
-    return ['https://api.soundcloud.com/'];
+    return Promise.resolve(['https://api.soundcloud.com/']);
   }
 }
 

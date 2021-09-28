@@ -16,7 +16,7 @@ const TAG = 'amp-brightcove';
 class AmpBrightcove extends BaseElement {
   /** @override @nocollapse */
   static getPreconnects() {
-    return ['https://players.brightcove.net'];
+    return Promise.resolve(['https://players.brightcove.net']);
   }
 
   /** @override */

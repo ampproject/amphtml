@@ -26,15 +26,15 @@ class AmpFacebook extends BaseElement {
     const locale = element.hasAttribute('data-locale')
       ? element.getAttribute('data-locale')
       : dashToUnderline(window.navigator.language);
-    return [
+    return getBootstrapBaseUrl(win, ampdoc).then((bootstrapUrl) => [
       // Base URL for 3p bootstrap iframes
-      getBootstrapBaseUrl(win, ampdoc),
+      bootstrapUrl,
       // Script URL for iframe
       getBootstrapUrl(TYPE),
       'https://facebook.com',
       // This domain serves the actual tweets as JSONP.
       'https://connect.facebook.net/' + locale + '/sdk.js',
-    ];
+    ]);
   }
 
   /** @override */

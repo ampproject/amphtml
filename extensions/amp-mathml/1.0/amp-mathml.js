@@ -17,13 +17,12 @@ class AmpMathml extends BaseElement {
   static getPreconnects(element) {
     const ampdoc = element.getAmpDoc();
     const {win} = ampdoc;
-    const urls = [
+    return getBootstrapBaseUrl(win, ampdoc).then((bootstrapUrl) => [
       // Base URL for 3p bootstrap iframes
-      getBootstrapBaseUrl(win, ampdoc),
+      bootstrapUrl,
       // Script URL for iframe
       getBootstrapUrl(TYPE),
-    ];
-    return urls;
+    ]);
   }
 
   /** @override */

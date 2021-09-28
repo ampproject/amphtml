@@ -40,9 +40,9 @@ class AmpTwitter extends BaseElement {
   static getPreconnects(element) {
     const ampdoc = element.getAmpDoc();
     const {win} = ampdoc;
-    return [
+    return getBootstrapBaseUrl(win, ampdoc).then((bootstrapUrl) => [
       // Base URL for 3p bootstrap iframes
-      getBootstrapBaseUrl(win, ampdoc),
+      bootstrapUrl,
       // Script URL for iframe
       getBootstrapUrl(TYPE),
       // Hosts the script that renders tweets.
@@ -52,7 +52,7 @@ class AmpTwitter extends BaseElement {
       // All images
       'https://pbs.twimg.com',
       'https://cdn.syndication.twimg.com',
-    ];
+    ]);
   }
 
   /** @override */

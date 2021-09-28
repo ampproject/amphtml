@@ -56,36 +56,46 @@ class AmpBeOpinion extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return getIframe(this.win, this.element, TYPE).then((iframe) => {
-      iframe.title = this.element.title || 'BeOpinion content';
-      applyFillContent(iframe);
-      listenFor(
-        iframe,
-        'embed-size',
-        (data) => {
-          // We only get the message if and when there is a tweet to display,
-          // so hide the placeholder
+    return getIframe(this.win, this.element, TYPE).then((iframe) =>
+      this.loadIframe_(iframe)
+    );
+  }
+
+  /**
+   * Initialize the iframe
+   *
+   * @param {HTMLIFrameElement} iframe
+   * @return {!Promise}
+   */
+  loadIframe_(iframe) {
+    iframe.title = this.element.title || 'BeOpinion content';
+    applyFillContent(iframe);
+    listenFor(
+      iframe,
+      'embed-size',
+      (data) => {
+        // We only get the message if and when there is a tweet to display,
+        // so hide the placeholder
+        this.togglePlaceholder(false);
+        this.forceChangeHeight(data['height']);
+      },
+      /* opt_is3P */ true
+    );
+    listenFor(
+      iframe,
+      'no-content',
+      () => {
+        if (this.getFallback()) {
           this.togglePlaceholder(false);
-          this.forceChangeHeight(data['height']);
-        },
-        /* opt_is3P */ true
-      );
-      listenFor(
-        iframe,
-        'no-content',
-        () => {
-          if (this.getFallback()) {
-            this.togglePlaceholder(false);
-            this.toggleFallback(true);
-          }
-          // else keep placeholder displayed since there's no fallback
-        },
-        /* opt_is3P */ true
-      );
-      this.element.appendChild(iframe);
-      this.iframe_ = iframe;
-      return this.loadPromise(iframe);
-    });
+          this.toggleFallback(true);
+        }
+        // else keep placeholder displayed since there's no fallback
+      },
+      /* opt_is3P */ true
+    );
+    this.element.appendChild(iframe);
+    this.iframe_ = iframe;
+    return this.loadPromise(iframe);
   }
 
   /** @override */

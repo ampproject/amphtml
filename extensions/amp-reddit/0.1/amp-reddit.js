@@ -62,20 +62,28 @@ class AmpReddit extends AMP.BaseElement {
 
     return getIframe(this.win, this.element, TYPE, null, {
       allowFullscreen: true,
-    }).then((iframe) => {
-      iframe.title = this.element.title || 'Reddit';
-      applyFillContent(iframe);
-      listenFor(
-        iframe,
-        'embed-size',
-        (data) => {
-          this.forceChangeHeight(data['height']);
-        },
-        /* opt_is3P */ true
-      );
-      this.element.appendChild(iframe);
-      return this.loadPromise(iframe);
-    });
+    }).then((iframe) => this.loadIframe_(iframe));
+  }
+
+  /**
+   * Initialize the iframe
+   *
+   * @param {HTMLIFrameElement} iframe
+   * @return {!Promise}
+   */
+  loadIframe_(iframe) {
+    iframe.title = this.element.title || 'Reddit';
+    applyFillContent(iframe);
+    listenFor(
+      iframe,
+      'embed-size',
+      (data) => {
+        this.forceChangeHeight(data['height']);
+      },
+      /* opt_is3P */ true
+    );
+    this.element.appendChild(iframe);
+    return this.loadPromise(iframe);
   }
 }
 

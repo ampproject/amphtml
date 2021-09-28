@@ -1269,23 +1269,24 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
         // Schedule preconnects.
         if (!opt_disablePreload) {
-          const urls = this.implClass_.getPreconnects(this);
-          if (urls && urls.length > 0) {
-            // If we do early preconnects we delay them a bit. This is kind of
-            // an unfortunate trade off, but it seems faster, because the DOM
-            // operations themselves are not free and might delay
-            const ampdoc = this.getAmpDoc();
-            startupChunk(ampdoc, () => {
-              const {win} = ampdoc;
-              if (!win) {
-                return;
-              }
-              const preconnect = Services.preconnectFor(win);
-              urls.forEach((url) =>
-                preconnect.url(ampdoc, url, /* alsoConnecting */ false)
-              );
-            });
-          }
+          this.implClass_.getPreconnects(this).then((urls) => {
+            if (urls && urls.length > 0) {
+              // If we do early preconnects we delay them a bit. This is kind of
+              // an unfortunate trade off, but it seems faster, because the DOM
+              // operations themselves are not free and might delay
+              const ampdoc = this.getAmpDoc();
+              startupChunk(ampdoc, () => {
+                const {win} = ampdoc;
+                if (!win) {
+                  return;
+                }
+                const preconnect = Services.preconnectFor(win);
+                urls.forEach((url) =>
+                  preconnect.url(ampdoc, url, /* alsoConnecting */ false)
+                );
+              });
+            }
+          });
         }
       }
     }

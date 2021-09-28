@@ -54,7 +54,7 @@ export class AmpImg extends BaseElement {
   static getPreconnects(element) {
     const src = element.getAttribute('src');
     if (src) {
-      return [src];
+      return Promise.resolve([src]);
     }
 
     // NOTE(@wassgha): since parseSrcset is computationally expensive and can
@@ -66,11 +66,11 @@ export class AmpImg extends BaseElement {
       const srcseturl = /\S+/.exec(srcset);
       // Connect to the first url if it exists
       if (srcseturl) {
-        return [srcseturl[0]];
+        return Promise.resolve([srcseturl[0]]);
       }
     }
 
-    return null;
+    return Promise.resolve();
   }
 
   /** @param {!AmpElement} element */

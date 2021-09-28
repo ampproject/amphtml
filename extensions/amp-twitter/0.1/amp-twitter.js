@@ -83,30 +83,38 @@ class AmpTwitter extends AMP.BaseElement {
   layoutCallback() {
     return getIframe(this.win, this.element, TYPE, null, {
       allowFullscreen: true,
-    }).then((iframe) => {
-      iframe.title = this.element.title || 'Twitter';
-      applyFillContent(iframe);
-      this.updateForLoadingState_();
-      listenFor(
-        iframe,
-        MessageType.EMBED_SIZE,
-        (data) => {
-          this.updateForSuccessState_(data['height']);
-        },
-        /* opt_is3P */ true
-      );
-      listenFor(
-        iframe,
-        MessageType.NO_CONTENT,
-        () => {
-          this.updateForFailureState_();
-        },
-        /* opt_is3P */ true
-      );
-      this.element.appendChild(iframe);
-      this.iframe_ = iframe;
-      return this.loadPromise(iframe);
-    });
+    }).then((iframe) => this.loadIframe_(iframe));
+  }
+
+  /**
+   * Initialize the iframe
+   *
+   * @param {HTMLIFrameElement} iframe
+   * @return {!Promise}
+   */
+  loadIframe_(iframe) {
+    iframe.title = this.element.title || 'Twitter';
+    applyFillContent(iframe);
+    this.updateForLoadingState_();
+    listenFor(
+      iframe,
+      MessageType.EMBED_SIZE,
+      (data) => {
+        this.updateForSuccessState_(data['height']);
+      },
+      /* opt_is3P */ true
+    );
+    listenFor(
+      iframe,
+      MessageType.NO_CONTENT,
+      () => {
+        this.updateForFailureState_();
+      },
+      /* opt_is3P */ true
+    );
+    this.element.appendChild(iframe);
+    this.iframe_ = iframe;
+    return this.loadPromise(iframe);
   }
 
   /**

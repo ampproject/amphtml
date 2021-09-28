@@ -61,28 +61,38 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
       this.element.setAttribute(API_KEY_ATTR_NAME, this.apiKey_);
     }
 
-    return getIframe(this.win, this.element, 'embedly').then((iframe) => {
-      iframe.title = this.element.title || 'Embedly card';
+    return getIframe(this.win, this.element, 'embedly').then((iframe) =>
+      this.loadIframe_(iframe)
+    );
+  }
 
-      const opt_is3P = true;
-      listenFor(
-        iframe,
-        'embed-size',
-        (data) => {
-          this.forceChangeHeight(data['height']);
-        },
-        opt_is3P
-      );
+  /**
+   * Initialize the iframe
+   *
+   * @param {HTMLIFrameElement} iframe
+   * @return {!Promise}
+   */
+  loadIframe_(iframe) {
+    iframe.title = this.element.title || 'Embedly card';
 
-      applyFillContent(iframe);
-      this.getVsync().mutate(() => {
-        this.element.appendChild(iframe);
-      });
+    const opt_is3P = true;
+    listenFor(
+      iframe,
+      'embed-size',
+      (data) => {
+        this.forceChangeHeight(data['height']);
+      },
+      opt_is3P
+    );
 
-      this.iframe_ = iframe;
-
-      return this.loadPromise(iframe);
+    applyFillContent(iframe);
+    this.getVsync().mutate(() => {
+      this.element.appendChild(iframe);
     });
+
+    this.iframe_ = iframe;
+
+    return this.loadPromise(iframe);
   }
 
   /** @override */

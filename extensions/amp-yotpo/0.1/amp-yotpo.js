@@ -69,26 +69,36 @@ export class AmpYotpo extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return getIframe(this.win, this.element, 'yotpo').then((iframe) => {
-      iframe.title = this.element.title || 'Yotpo widget';
-      applyFillContent(iframe);
+    return getIframe(this.win, this.element, 'yotpo').then((iframe) =>
+      this.loadIframe_(iframe)
+    );
+  }
 
-      const unlisten = listenFor(
-        iframe,
-        'embed-size',
-        (data) => {
-          this.attemptChangeHeight(data['height']).catch(() => {
-            /* do nothing */
-          });
-        },
-        /* opt_is3P */ true
-      );
-      this.unlisteners_.push(unlisten);
+  /**
+   * Initialize the iframe
+   *
+   * @param {HTMLIFrameElement} iframe
+   * @return {!Promise}
+   */
+  loadIframe_(iframe) {
+    iframe.title = this.element.title || 'Yotpo widget';
+    applyFillContent(iframe);
 
-      this.element.appendChild(iframe);
-      this.iframe_ = iframe;
-      return this.loadPromise(iframe);
-    });
+    const unlisten = listenFor(
+      iframe,
+      'embed-size',
+      (data) => {
+        this.attemptChangeHeight(data['height']).catch(() => {
+          /* do nothing */
+        });
+      },
+      /* opt_is3P */ true
+    );
+    this.unlisteners_.push(unlisten);
+
+    this.element.appendChild(iframe);
+    this.iframe_ = iframe;
+    return this.loadPromise(iframe);
   }
 }
 

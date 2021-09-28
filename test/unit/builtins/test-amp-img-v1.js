@@ -233,16 +233,16 @@ describes.realWin('amp-img R1', {amp: true}, (env) => {
     expect(img).to.have.class('i-amphtml-ghost');
   });
 
-  it('should preconnect the src url', () => {
+  it('should preconnect the src url', async () => {
     const element = createImg({src: '/examples/img/sample.jpg'});
-    expect(AmpImg.getPreconnects(element)).to.deep.equal([
+    expect(await AmpImg.getPreconnects(element)).to.deep.equal([
       '/examples/img/sample.jpg',
     ]);
   });
 
-  it('should preconnect to the the first srcset url if src is not set', () => {
+  it('should preconnect to the the first srcset url if src is not set', async () => {
     const element = createImg({srcset: SRCSET_STRING});
-    expect(AmpImg.getPreconnects(element)).to.deep.equal([
+    expect(await AmpImg.getPreconnects(element)).to.deep.equal([
       '/examples/img/hero@1x.jpg',
     ]);
   });

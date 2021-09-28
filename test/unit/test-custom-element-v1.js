@@ -195,14 +195,19 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
     });
 
     it('should preconnect on upgrade', () => {
-      env.sandbox.stub(TestElement, 'getPreconnects').returns(['url1', 'url2']);
+      env.sandbox
+        .stub(TestElement, 'getPreconnects')
+        .returns(Promise.resolve(['url1', 'url2']));
       preconnectMock.expects('url').withExactArgs(ampdoc, 'url1', false).once();
       preconnectMock.expects('url').withExactArgs(ampdoc, 'url2', false).once();
 
       const element = new ElementClass();
       doc.body.appendChild(element);
-      expect(chunkStub).to.be.calledOnce;
-      chunkStub.firstCall.firstArg();
+
+      return Promise.resolve().then(() => {
+        expect(chunkStub).to.be.calledOnce;
+        chunkStub.firstCall.firstArg();
+      });
     });
 
     it('should NOT preconnect on upgrade if not urls', () => {

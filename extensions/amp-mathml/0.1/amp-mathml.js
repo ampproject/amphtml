@@ -52,30 +52,40 @@ export class AmpMathml extends AMP.BaseElement {
    * @return {!Promise}
    */
   layoutCallback() {
-    return getIframe(this.win, this.element, 'mathml').then((iframe) => {
-      iframe.title = this.element.title || 'MathML formula';
-      applyFillContent(iframe);
-      // Triggered by context.updateDimensions() inside the iframe.
-      listenFor(
-        iframe,
-        'embed-size',
-        (data) => {
-          if (!this.element.hasAttribute('inline')) {
-            // Don't change the width if not inlined.
-            data['width'] = undefined;
-          }
-          Services.mutatorForDoc(this.getAmpDoc()).forceChangeSize(
-            this.element,
-            data['height'],
-            data['width']
-          );
-        },
-        /* opt_is3P */ true
-      );
-      this.element.appendChild(iframe);
-      this.iframe_ = iframe;
-      return this.loadPromise(iframe);
-    });
+    return getIframe(this.win, this.element, 'mathml').then((iframe) =>
+      this.loadIframe_(iframe)
+    );
+  }
+
+  /**
+   * Initialize the iframe
+   *
+   * @param {HTMLIFrameElement} iframe
+   * @return {!Promise}
+   */
+  loadIframe_(iframe) {
+    iframe.title = this.element.title || 'MathML formula';
+    applyFillContent(iframe);
+    // Triggered by context.updateDimensions() inside the iframe.
+    listenFor(
+      iframe,
+      'embed-size',
+      (data) => {
+        if (!this.element.hasAttribute('inline')) {
+          // Don't change the width if not inlined.
+          data['width'] = undefined;
+        }
+        Services.mutatorForDoc(this.getAmpDoc()).forceChangeSize(
+          this.element,
+          data['height'],
+          data['width']
+        );
+      },
+      /* opt_is3P */ true
+    );
+    this.element.appendChild(iframe);
+    this.iframe_ = iframe;
+    return this.loadPromise(iframe);
   }
 
   /**
