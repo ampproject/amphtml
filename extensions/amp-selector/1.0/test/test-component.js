@@ -4,15 +4,15 @@ import {Keys} from '#core/constants/key-codes';
 
 import * as Preact from '#preact';
 
-import {Option, Selector} from '../component';
+import {BentoSelector, BentoSelectorOption} from '../component';
 
 describes.sandboxed('Selector preact component', {}, () => {
   describe('standalone option', () => {
     it('should render a default option', () => {
       const wrapper = mount(
-        <Option as="li" option="a">
+        <BentoSelectorOption as="li" option="a">
           option a
-        </Option>
+        </BentoSelectorOption>
       );
 
       const dom = wrapper.getDOMNode();
@@ -27,17 +27,17 @@ describes.sandboxed('Selector preact component', {}, () => {
 
     beforeEach(() => {
       wrapper = mount(
-        <Selector multiple defaultValue={[1]}>
-          <Option key={1} option={1}>
+        <BentoSelector multiple defaultValue={[1]}>
+          <BentoSelectorOption key={1} option={1}>
             option 1
-          </Option>
-          <Option key={2} option={2}>
+          </BentoSelectorOption>
+          <BentoSelectorOption key={2} option={2}>
             option 2
-          </Option>
-          <Option key={3} option={3} disabled>
+          </BentoSelectorOption>
+          <BentoSelectorOption key={3} option={3} disabled>
             option 3
-          </Option>
-        </Selector>
+          </BentoSelectorOption>
+        </BentoSelector>
       );
     });
 
@@ -165,17 +165,17 @@ describes.sandboxed('Selector preact component', {}, () => {
 
     beforeEach(() => {
       wrapper = mount(
-        <Selector defaultValue={[1]}>
-          <Option key={1} option={1}>
+        <BentoSelector defaultValue={[1]}>
+          <BentoSelectorOption key={1} option={1}>
             option 1
-          </Option>
-          <Option key={2} option={2}>
+          </BentoSelectorOption>
+          <BentoSelectorOption key={2} option={2}>
             option 2
-          </Option>
-          <Option key={3} option={3} disabled>
+          </BentoSelectorOption>
+          <BentoSelectorOption key={3} option={3} disabled>
             option 3
-          </Option>
-        </Selector>
+          </BentoSelectorOption>
+        </BentoSelector>
       );
     });
 
@@ -226,17 +226,17 @@ describes.sandboxed('Selector preact component', {}, () => {
       beforeEach(() => {
         ref = Preact.createRef();
         wrapper = mount(
-          <Selector ref={ref} multiple defaultValue={['a']}>
-            <Option key={1} option="a" index={1}>
+          <BentoSelector ref={ref} multiple defaultValue={['a']}>
+            <BentoSelectorOption key={1} option="a" index={1}>
               option a
-            </Option>
-            <Option key={2} option="b" index={2}>
+            </BentoSelectorOption>
+            <BentoSelectorOption key={2} option="b" index={2}>
               option b
-            </Option>
-            <Option key={3} option="c" disabled index={3}>
+            </BentoSelectorOption>
+            <BentoSelectorOption key={3} option="c" disabled index={3}>
               option c
-            </Option>
-          </Selector>
+            </BentoSelectorOption>
+          </BentoSelector>
         );
 
         const options = wrapper.find(Option);
@@ -362,17 +362,17 @@ describes.sandboxed('Selector preact component', {}, () => {
       beforeEach(() => {
         ref = Preact.createRef();
         wrapper = mount(
-          <Selector ref={ref} defaultValue={['a']}>
-            <Option key={1} option="a" index={1}>
+          <BentoSelector ref={ref} defaultValue={['a']}>
+            <BentoSelectorOption key={1} option="a" index={1}>
               option a
-            </Option>
-            <Option key={2} option="b" index={2}>
+            </BentoSelectorOption>
+            <BentoSelectorOption key={2} option="b" index={2}>
               option b
-            </Option>
-            <Option key={3} option="c" disabled index={3}>
+            </BentoSelectorOption>
+            <BentoSelectorOption key={3} option="c" disabled index={3}>
               option c
-            </Option>
-          </Selector>
+            </BentoSelectorOption>
+          </BentoSelector>
         );
 
         const options = wrapper.find(Option);
@@ -509,17 +509,17 @@ describes.sandboxed('Selector preact component', {}, () => {
       beforeEach(() => {
         ref = Preact.createRef();
         wrapper = mount(
-          <Selector ref={ref} multiple>
-            <Option key={1} option="a">
+          <BentoSelector ref={ref} multiple>
+            <BentoSelectorOption key={1} option="a">
               option a
-            </Option>
-            <Option key={2} option="b">
+            </BentoSelectorOption>
+            <BentoSelectorOption key={2} option="b">
               option b
-            </Option>
-            <Option key={3} option="c">
+            </BentoSelectorOption>
+            <BentoSelectorOption key={3} option="c">
               option c
-            </Option>
-          </Selector>
+            </BentoSelectorOption>
+          </BentoSelector>
         );
 
         selector = wrapper.find('div').first();
@@ -612,17 +612,17 @@ describes.sandboxed('Selector preact component', {}, () => {
       beforeEach(() => {
         ref = Preact.createRef();
         wrapper = mount(
-          <Selector ref={ref}>
-            <Option key={1} option="a">
+          <BentoSelector ref={ref}>
+            <BentoSelectorOption key={1} option="a">
               option a
-            </Option>
-            <Option key={2} option="b">
+            </BentoSelectorOption>
+            <BentoSelectorOption key={2} option="b">
               option b
-            </Option>
-            <Option key={3} option="c">
+            </BentoSelectorOption>
+            <BentoSelectorOption key={3} option="c">
               option c
-            </Option>
-          </Selector>
+            </BentoSelectorOption>
+          </BentoSelector>
         );
 
         selector = wrapper.find('div').first();
