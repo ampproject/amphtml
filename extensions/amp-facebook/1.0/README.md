@@ -47,8 +47,7 @@ import '@ampproject/bento-facebook';
       position: relative;
     }
   </style>
-  <!-- TODO(wg-bento): Once available, change src to bento-facebook.js -->
-  <script async src="https://cdn.ampproject.org/v0/amp-facebook-1.0.js"></script>
+  <script async src="https://cdn.ampproject.org/v0/bento-facebook-1.0.js"></script>
   <style>
     bento-facebook{
       width: 375px;
