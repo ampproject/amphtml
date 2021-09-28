@@ -73,8 +73,8 @@ export function Iframe({
       return;
     }
     const win = toWin(iframe.ownerDocument.defaultView);
-    const observer = observerRef.current;
     win.addEventListener('message', handleSendIntersectionsPostMessage);
+    let observer = observerRef.current;
 
     return () => {
       observer?.unobserve(iframe);
