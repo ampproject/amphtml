@@ -25,6 +25,9 @@
   <!-- Valid: We allow the src attribute to be bindable -->
   <amp-iframe width="200" height="200" src="https://example.com" [src]="iframeurl"></amp-iframe>
 
+  <!-- Invalid: We do not allow src and srcdoc value -->
+  <amp-iframe width="200" height="200" srcdoc="<p>Hello World</p>" src="https://example.com"></amp-iframe>
+
   <!-- Invalid: We do not allow to bind to the src attribute, and also specify a srcdoc value -->
   <amp-iframe width="200" height="200" srcdoc="<p>Hello World</p>" [src]="iframeurl"></amp-iframe>
 
