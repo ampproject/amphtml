@@ -5,11 +5,11 @@
 
 const [extension, ampVersion, extensionVersion] = process.argv.slice(2);
 const fastGlob = require('fast-glob');
+const path = require('path');
 const {getSemver} = require('./utils');
 const {log} = require('../common/logging');
 const {stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
-const path = require('path');
 
 /**
  * Determines whether to skip
