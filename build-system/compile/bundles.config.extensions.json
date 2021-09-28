@@ -678,6 +678,16 @@
     }
   },
   {
+    "name": "amp-mathml",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "wrapper": "bento",
+      "npm": true
+    }
+  },
+  {
     "name": "amp-mega-menu",
     "version": "0.1",
     "latestVersion": "0.1",
@@ -967,6 +977,7 @@
       "cssBinaries": [
         "amp-story-consent",
         "amp-story-draggable-drawer-header",
+        "amp-story-form",
         "amp-story-hint",
         "amp-story-info-dialog",
         "amp-story-open-page-attachment",

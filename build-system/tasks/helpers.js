@@ -313,7 +313,6 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
 
   const destPath = path.join(destDir, minifiedName);
   combineWithCompiledFile(srcFilename, destPath, options);
-  fs.writeFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
   if (options.latestName) {
     fs.copySync(
       destPath,

@@ -5,7 +5,7 @@ import {VisibilityState} from '#core/constants/visibility-state';
 import {Services} from '#service';
 import {installRuntimeServices} from '#service/core-services';
 import {
-  LCP_ELEMENT_TYPE,
+  ELEMENT_TYPE,
   Performance,
   installPerformanceService,
 } from '#service/performance-impl';
@@ -1100,11 +1100,11 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       );
       expect(lcptEvents).deep.include({
         label: 'lcpt',
-        delta: LCP_ELEMENT_TYPE.image,
+        delta: ELEMENT_TYPE.image,
       });
       expect(lcptEvents).deep.include({
         label: 'lcpt',
-        delta: LCP_ELEMENT_TYPE.carousel,
+        delta: ELEMENT_TYPE.carousel,
       });
     });
   });
@@ -1182,13 +1182,30 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
 
       const perf = getPerformance();
       perf.coreServicesAvailable();
+      toggleVisibility(perf, true);
+
+      const parent = document.createElement('amp-carousel');
+      const child = document.createElement('amp-img');
+      parent.appendChild(child);
 
       // Fake layout-shift that occured before the Performance service is started.
       performanceObserver.triggerCallback({
         getEntries() {
           return [
-            {entryType: 'layout-shift', value: 0.25, hadRecentInput: false},
-            {entryType: 'layout-shift', value: 0.3, hadRecentInput: false},
+            {
+              entryType: 'layout-shift',
+              value: 0.3,
+              startTime: 1,
+              hadRecentInput: false,
+              sources: [{node: child}],
+            },
+            {
+              entryType: 'layout-shift',
+              value: 0.25,
+              startTime: 6000,
+              hadRecentInput: false,
+              sources: [{node: parent}],
+            },
           ];
         },
       });
@@ -1199,9 +1216,17 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       const clsEvents = perf.events_.filter((evt) =>
         evt.label.startsWith('cls')
       );
-      expect(clsEvents.length).to.equal(1);
+      expect(clsEvents.length).to.equal(3);
       expect(perf.events_).deep.include({
         label: 'cls',
+        delta: 0.3,
+      });
+      expect(perf.events_).deep.include({
+        label: 'clstu',
+        delta: 8,
+      });
+      expect(perf.events_).deep.include({
+        label: 'cls-1',
         delta: 0.55,
       });
     });
