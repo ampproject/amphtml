@@ -36,14 +36,12 @@ amp-iframe/1.0/test/validator-amp-iframe.html:29:2 Mutually exclusive attributes
 >>   ^~~~~~~~~
 amp-iframe/1.0/test/validator-amp-iframe.html:32:2 The attribute 'src' in tag 'amp-iframe' is missing or incorrect, but required by attribute '[src]'. (see https://amp.dev/documentation/components/amp-iframe)
 |
-|
 |    <!-- Mandatory amp-state to avoid amp-bind validator errors -->
 |    <amp-state id=myState>
 |      <script type="application/json">
 |        {"iframeurl": "https://example.com"}
 |      </script>
 |    </amp-state>
-|
 |
 |  </body>
 |  </html>
