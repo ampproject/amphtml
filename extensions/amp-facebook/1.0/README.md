@@ -188,7 +188,7 @@ Check out the documentation for differences between
 [video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player),
 [comment embeds](https://developers.facebook.com/docs/plugins/embedded-comments),
 [like embeds](https://developers.facebook.com/docs/plugins/like-button),
-and [page embeds](https://developers.facebook.com/docs/plugins/page-button).
+and [page embeds](https://developers.facebook.com/docs/plugins/page-plugin).
 
 The `comment` value is deprecated but previously was used to embed a single comment (or reply to a comment) on a post.
 This is not to be confused with
@@ -357,7 +357,7 @@ Check out the documentation for differences between
 [video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player),
 [comment embeds](https://developers.facebook.com/docs/plugins/embedded-comments),
 [like embeds](https://developers.facebook.com/docs/plugins/like-button),
-and [page embeds](https://developers.facebook.com/docs/plugins/page-button).
+and [page embeds](https://developers.facebook.com/docs/plugins/page-plugin).
 
 The `comment` value is deprecated but previously was used to embed a single comment (or reply to a comment) on a post.
 This is not to be confused with
