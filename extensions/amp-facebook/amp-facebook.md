@@ -176,7 +176,6 @@ Hides the custom call to action button (if available). Default value is `false`.
 
 Uses the small header instead. Default value is `false`.
 
-
 ### Common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
@@ -187,7 +186,6 @@ extended to AMP components.
 **`data-colorscheme` (optional)**
 
 The color scheme. For details, see the <a href="https://developers.facebook.com/docs/plugins/comments">Facebook comments documentation</a>.<br><br><em>Note: This is no longer supported by Facebook. For more details, follow our <a href="https://github.com/ampproject/amphtml/issues/29980">our tracking issue</a> and <a href="https://developers.facebook.com/support/bugs/1759174414250782/">Facebook's bug report</a>.</em>
-
 
 ## Validation
 
