@@ -82,13 +82,17 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 
 ##### `src`
 
-The `src` attribute behaves exactly like on a standard iframe.
+The URL of the page to embed.
 
-##### `srcdoc`, `allowfullscreen`, `allowpaymentrequest`, `allowtransparency`, and `referrerpolicy`
+##### `srcdoc`
+
+Inline HTML to embed. Only one of `src` or `srcdoc` is required. If both are specified, `srcdoc` overrides `src`.
+
+##### `allowfullscreen`, `allowpaymentrequest`, and `referrerpolicy` (optional)
 
 These attributes should all behave like they do on standard iframes.
 
-##### `sandbox` <a name="sandbox"></a>
+##### `sandbox` (optional) <a name="sandbox"></a>
 
 Iframes created by `bento-iframe` always have the `sandbox` attribute defined on
 them. By default, the value is empty, which means that they are "maximum
@@ -110,3 +114,63 @@ new windows. This is likely most of the time what you want and expect.
 
 See the [docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox) for further details on the `sandbox` attribute.
 
+#### Styling
+You may use the `bento-iframe` element selector to style the component.
+
+### Preact/React Component
+
+The examples below demonstrates use of the `<BentoIframe>` as a functional component usable with the Preact or React libraries.
+
+#### Example: Import via npm
+
+[example preview="top-frame" playground="false"]
+
+Install via npm:
+
+```sh
+npm install @ampproject/bento-iframe
+```
+
+```javascript
+import React from 'react';
+import { BentoIframe } from '@ampproject/bento-iframe/react';
+import '@ampproject/bento-iframe/styles.css';
+
+function App() {
+  return (
+    <BentoIframe
+      src="https://en.wikipedia.org/wiki/Bento"
+      width="800"
+      height="600"
+    />
+  );
+}
+```
+
+[/example]
+
+#### Props
+
+##### `src`
+
+The URL of the page to embed.
+
+##### `srcdoc`
+
+Inline HTML to embed. Only one of `src` or `srcdoc` is required. If both are specified, `srcdoc` overrides `src`.
+
+##### `allowFullScreen`, `allowPaymentRequest`, and `referrerPolicy` (optional)
+
+These attributes all behave like they do on standard iframes.
+
+##### `sandbox` (optional) <a name="sandbox"></a>
+
+Iframes created by `<BentoIframe>` always have the `sandbox` attribute defined on
+them. By default, the value is empty, which means that they are "maximum
+sandboxed". By setting `sandbox` values, one can opt the iframe into being less
+sandboxed. All values supported by browsers are allowed. For example, setting
+`sandbox="allow-scripts"` allows the iframe to run JavaScript, or
+`sandbox="allow-scripts allow-same-origin"` allows the iframe to run JavaScript,
+make non-CORS XHRs, and read/write cookies.
+
+See the [docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox) for further details on the `sandbox` attribute.
