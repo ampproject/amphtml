@@ -550,7 +550,7 @@ export class Bind {
         `#${escapeCssSelectorIdent(stateId)}`
       );
       if (!ampStateEl) {
-        throw new Error(`#${stateId} does not exist.`);
+        throw user().createError(TAG, `#${stateId} does not exist.`);
       }
 
       return whenUpgradedToCustomElement(ampStateEl)
