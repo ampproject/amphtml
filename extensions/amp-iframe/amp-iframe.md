@@ -241,7 +241,7 @@ window.addEventListener('message', function (event) {
 
 The intersection message would be sent by the parent to the iframe in the format of IntersectionObserver entry wheneve there is intersectionRatio change across thresholds [0, 0.05, 0.1, ... 0.9, 0.95, 1].
 
-<!-- TODO: uncomment when Bento amp-consent (v1.0) is ready -->
+<!-- TODO(#36211): uncomment when Bento amp-consent (v1.0) is ready -->
 <!-- ## Iframe & Consent Data
 
 Iframes can send a `send-consent-data` message to receive consent data if a CMP is present on their parents page.
