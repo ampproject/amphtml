@@ -6,14 +6,14 @@ import {isAutoplaySupported} from '#core/dom/video';
  *
  * @param {!Window} win
  * @param {string} videoId
- * @param {boolean} autoplay
- * @param {boolean} endscreenEnable
- * @param {boolean} info
- * @param {boolean} mute
- * @param {boolean} sharingEnable
- * @param {string} start
- * @param {string} uiHighlight
- * @param {boolean} uiLogo
+ * @param {boolean|undefined} autoplay
+ * @param {boolean|undefined} endscreenEnable
+ * @param {boolean|undefined} info
+ * @param {boolean|undefined} mute
+ * @param {boolean|undefined} sharingEnable
+ * @param {string|undefined} start
+ * @param {string|undefined} uiHighlight
+ * @param {boolean|undefined} uiLogo
  * @param {!JsonObject} implicitParams
  * @return {string}
  */
