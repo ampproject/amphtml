@@ -556,9 +556,14 @@ export class Performance {
    * @param {!LayoutShift} entry
    */
   tickLayoutShiftScore_(entry) {
+    if (!this.ampdoc_) {
+      return;
+    }
+
     if (this.isVisibilityHidden_()) {
       return;
     }
+
     const entries = this.layoutShiftEntries_;
     if (entries.length > 0) {
       const first = entries[0];
