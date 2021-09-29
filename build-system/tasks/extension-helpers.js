@@ -608,6 +608,7 @@ function buildExtensionCss(extDir, name, version, options) {
  */
 function buildNpmBinaries(extDir, options) {
   let {npm} = options;
+  const {name} = options;
   if (npm === true) {
     // Default to the standard/expected entrypoint
     npm = {
@@ -615,11 +616,14 @@ function buildNpmBinaries(extDir, options) {
         'preact': 'component-preact.js',
         'react': 'component-react.js',
       },
+      [`${name}.js`]: {
+        'bento': 'web-component.js',
+      },
     };
   }
   const keys = Object.keys(npm);
   const promises = keys.flatMap((entryPoint) => {
-    const {preact, react} = npm[entryPoint];
+    const {bento, preact, react} = npm[entryPoint];
     const binaries = [];
     if (preact) {
       binaries.push({
@@ -642,6 +646,21 @@ function buildNpmBinaries(extDir, options) {
           'preact/dom': 'react-dom',
         },
         wrapper: '',
+      });
+    }
+    if (bento) {
+      const {latestVersion, loadPriority, version} = options;
+      const wrapper = wrappers.bentoNpm(
+        name,
+        version,
+        version === latestVersion,
+        argv.esm,
+        loadPriority
+      );
+      binaries.push({
+        entryPoint,
+        outfile: bento,
+        wrapper,
       });
     }
     return buildBinaries(extDir, binaries, options);
