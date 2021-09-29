@@ -63,7 +63,7 @@ import '@ampproject/bento-iframe';
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-date-display-1.0.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-iframe-1.0.css">
 ```
 
 Alternatively, you may also make the light-weight pre-upgrade styles available inline:
@@ -88,6 +88,13 @@ The URL of the page to embed.
 
 Inline HTML to embed. Only one of `src` or `srcdoc` is required. If both are specified, `srcdoc` overrides `src`.
 
+##### `height`
+
+Height of the iframe in pixels. Note: this is applied to the parent container and the `iframe` element is set to 100% height.
+
+##### `width`
+
+Width of the iframe in pixels. Note: this is applied to the parent container and the `iframe` element is set to 100% width.
 ##### `allowfullscreen`, `allowpaymentrequest`, and `referrerpolicy` (optional)
 
 These attributes should all behave like they do on standard iframes.
@@ -174,3 +181,15 @@ sandboxed. All values supported by browsers are allowed. For example, setting
 make non-CORS XHRs, and read/write cookies.
 
 See the [docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox) for further details on the `sandbox` attribute.
+
+##### `iframeStyle` (optional)
+
+Styles to apply to the `iframe` element, specified as JSON.
+
+##### `height`
+
+Height of the iframe in pixels. Note: this is applied to the parent container and the `iframe` element is set to 100% height.
+
+##### `width`
+
+Width of the iframe in pixels. Note: this is applied to the parent container and the `iframe` element is set to 100% width.
