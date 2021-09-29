@@ -134,13 +134,11 @@ function logSeparator_() {
  *
  * @param {string} outputDir full directory path to emplace artifacts in.
  * @param {string} tempDir full directory path to temporary working directory.
- * @param {boolean} retainCustomConfig whether to exclude custom overlay and
- * release configs from cleanup.
  * @return {Promise<void>}
  */
-async function prepareEnvironment_(outputDir, tempDir, retainCustomConfig) {
+async function prepareEnvironment_(outputDir, tempDir) {
   let cleanCmd = 'amp clean';
-  if (retainCustomConfig) {
+  if (argv.use_custom_configs) {
     const cleanExclusions = [
       CUSTOM_FLAVORS_CONFIG_PATH,
       CUSTOM_OVERLAY_CONFIG_PATH,
@@ -160,13 +158,11 @@ async function prepareEnvironment_(outputDir, tempDir, retainCustomConfig) {
  * defined experiments in ../../global-configs/experiments-config.json, as well
  * as custom flavors in ../../global-configs/custom-flavors-config.json.
  *
- * @param {boolean} useCustomConfig whether to load custom flavors
- * configuration.
  * @return {!Array<!DistFlavorDef>} list of AMP flavors to build.
  */
-function discoverDistFlavors_(useCustomConfig) {
+function discoverDistFlavors_() {
   let customFlavorsConfig = [];
-  if (useCustomConfig) {
+  if (argv.use_custom_configs) {
     try {
       customFlavorsConfig = require(path.resolve(
         __dirname,
@@ -232,16 +228,9 @@ function discoverDistFlavors_(useCustomConfig) {
  * @param {string} flavorType AMP flavor to build.
  * @param {string} command `amp` command to build the flavor.
  * @param {string} tempDir full directory path to temporary working directory.
- * @param {boolean} retainCustomConfig whether to exclude custom overlay and
- * release configs from cleanup.
  * @return {Promise<void>}
  */
-async function compileDistFlavors_(
-  flavorType,
-  command,
-  tempDir,
-  retainCustomConfig
-) {
+async function compileDistFlavors_(flavorType, command, tempDir) {
   // TODO(danielrozenberg): remove undefined case when the release automation platform explicitly handles it.
   if (argv.esm === undefined) {
     command = `${command} --esm && ${command}`;
@@ -251,7 +240,7 @@ async function compileDistFlavors_(
   log('Compiling flavor', green(flavorType), 'using', cyan(command));
 
   const cleanExclusions = ['release'];
-  if (retainCustomConfig) {
+  if (argv.use_custom_configs) {
     cleanExclusions.push(CUSTOM_FLAVORS_CONFIG_PATH);
     cleanExclusions.push(CUSTOM_OVERLAY_CONFIG_PATH);
   }
@@ -414,11 +403,9 @@ async function generateFileListing_(outputDir) {
  * e.g., /amp4ads-v0.js for AMP ads.
  *
  * @param {string} outputDir full directory path to emplace artifacts in.
- * @param {boolean} useCustomConfig whether to overlay config with custom
- * config.
  * @return {Promise<void>}
  */
-async function prependConfig_(outputDir, useCustomConfig) {
+async function prependConfig_(outputDir) {
   const activeChannels = Object.entries(CHANNEL_CONFIGS).filter(
     ([rtvPrefix]) => {
       const rtvNumber = `${rtvPrefix}${VERSION}`;
@@ -431,7 +418,7 @@ async function prependConfig_(outputDir, useCustomConfig) {
   for (const [rtvPrefix, channelConfig] of activeChannels) {
     const rtvNumber = `${rtvPrefix}${VERSION}`;
     const rtvPath = path.join(outputDir, 'org-cdn/rtv', rtvNumber);
-    const overlayConfig = useCustomConfig
+    const overlayConfig = argv.use_custom_configs
       ? require(path.resolve(__dirname, '../../..', CUSTOM_OVERLAY_CONFIG_PATH))
       : {};
 
@@ -511,13 +498,12 @@ async function cleanup_(tempDir) {
 async function release() {
   const outputDir = path.resolve(argv.output_dir || './release');
   const tempDir = path.join(outputDir, 'tmp');
-  const useCustomConfigs = Boolean(argv.use_custom_configs);
 
   log('Preparing environment for release build in', `${cyan(outputDir)}...`);
-  await prepareEnvironment_(outputDir, tempDir, useCustomConfigs);
+  await prepareEnvironment_(outputDir, tempDir);
 
   log('Discovering release', `${green('flavors')}...`);
-  const distFlavors = discoverDistFlavors_(useCustomConfigs);
+  const distFlavors = discoverDistFlavors_();
 
   if (argv.flavor && distFlavors.length == 0) {
     log('Flavor', cyan(argv.flavor), 'is inactive. Quitting...');
@@ -529,7 +515,7 @@ async function release() {
   }
 
   for (const {command, flavorType, rtvPrefixes} of distFlavors) {
-    await compileDistFlavors_(flavorType, command, tempDir, useCustomConfigs);
+    await compileDistFlavors_(flavorType, command, tempDir);
 
     log('Fetching npm package', `${cyan('@ampproject/amp-sw')}...`);
     await fetchAmpSw_(flavorType, tempDir);
@@ -542,7 +528,7 @@ async function release() {
   await generateFileListing_(outputDir);
 
   log('Prepending config to entry files...');
-  await prependConfig_(outputDir, useCustomConfigs);
+  await prependConfig_(outputDir);
 
   if (!argv.flavor || argv.flavor == 'base') {
     // Only populate the net-wildcard directory if --flavor=base or if --flavor is not set.
