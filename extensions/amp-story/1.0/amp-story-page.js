@@ -332,50 +332,60 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.initializeImgAltTags_();
     this.initializeTabbableElements_();
 
+    // Shopping templates
     const shoppingTagElTemplate = `
-      <template type="amp-mustache">
-        <div>Tag template:</div>
-        <div>{{name}}</div>
-      </template>
+      <div>shopping-tag: {{name}}</div>
     `;
 
-    const shoppingAttachmentTemplate = `
-      <template type="amp-mustache">
-        <div>Attachment template:</div>
-        <div>{{name}}</div>
-        <div>{{{stars}}}</div>
-        <div>{{price}}</div>
-      </template>
+    const itemPreviewTemplate = `
+      <div>Item preview:</div>
+      <div>{{name}}</div>
+      <div>{{{stars}}}</div>
+      <div>{{price}}</div>
     `;
 
+    const plpTemplate = `
+      <div>PLP:</div>
+      {{#items}}
+      ${itemPreviewTemplate}
+      {{/items}}
+    `;
+
+    // Check if elements exist for shopping experience
     const shoppingEl = document.querySelector('amp-story-shopping');
-    const shoppingTagEl = this.element.querySelector('amp-story-shopping-tag');
+    const shoppingTagElements = this.element.querySelectorAll(
+      'amp-story-shopping-tag'
+    );
 
-    if (shoppingEl && shoppingTagEl) {
+    if (shoppingEl && shoppingTagElements[0]) {
       const config = this.getConfig(shoppingEl.firstElementChild);
+
       config.then((json) => {
-        const tagID = shoppingTagEl.getAttribute('tag-id');
-        const dataForPage = json.items.find(
-          (entry) => entry['tag-id'] === tagID
-        );
+        // Empty holder for page attachment data
+        const attachmentData = {items: []};
+        // Render product tages
+        shoppingTagElements.forEach((shoppingTagEl) => {
+          const tagID = shoppingTagEl.getAttribute('tag-id');
+          // Get data to render tag
+          const itemData = json.items.find(
+            (entry) => entry['tag-id'] === tagID
+          );
+          this.setTemplate(shoppingTagEl, shoppingTagElTemplate);
+          this.renderTemplate_(shoppingTagEl, itemData);
+          // push data into attachmentData to render page attachment
+          attachmentData.items.push(itemData);
+        });
 
-        shoppingTagEl.innerHTML = shoppingTagElTemplate;
-        this.renderTemplate_(shoppingTagEl, dataForPage);
-
+        // Render page attachment
         const shoppingAttachmentEl = this.makeShoppingAttachmentEl_();
-        shoppingAttachmentEl.innerHTML = shoppingAttachmentTemplate;
-        this.renderTemplate_(shoppingAttachmentEl, dataForPage);
+        this.setTemplate(shoppingAttachmentEl, plpTemplate);
+        this.renderTemplate_(shoppingAttachmentEl, attachmentData);
       });
     }
   }
 
-  renderTemplate_(element, data) {
-    Services.templatesForDoc(element)
-      .findAndRenderTemplate(element, data)
-      .then((newContents) => {
-        removeChildren(element);
-        element.appendChild(newContents);
-      });
+  setTemplate(el, templateInner) {
+    el.innerHTML = `<template type="amp-mustache">${templateInner}</template>`;
   }
 
   makeShoppingAttachmentEl_() {
@@ -386,6 +396,15 @@ export class AmpStoryPage extends AMP.BaseElement {
     pageAttachmentEl.setAttribute('layout', 'nodisplay');
     this.element.appendChild(pageAttachmentEl);
     return pageAttachmentEl;
+  }
+
+  renderTemplate_(element, data) {
+    Services.templatesForDoc(element)
+      .findAndRenderTemplate(element, data)
+      .then((newContents) => {
+        removeChildren(element);
+        element.appendChild(newContents);
+      });
   }
 
   getConfig(child) {
