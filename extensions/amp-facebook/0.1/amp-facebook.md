@@ -109,4 +109,4 @@ extended to AMP components.
 
 ## Validation
 
-See [amp-facebook rules](validator-amp-facebook.protoascii) in the AMP validator specification.
+See [amp-facebook rules](../validator-amp-facebook.protoascii) in the AMP validator specification.
