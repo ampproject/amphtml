@@ -352,5 +352,4 @@ direct user purpose such as being invisible or small.
 
 ## Validation
 
-See [`amp-iframe` rules](validator-amp-iframe.protoascii)
-in the AMP validator specification.
+See [`amp-iframe` rules](validator-amp-iframe.protoascii) in the AMP validator specification.
