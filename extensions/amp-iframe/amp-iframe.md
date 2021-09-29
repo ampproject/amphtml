@@ -34,7 +34,6 @@ designed to make it more secure and avoid AMP files that are dominated by a sing
   height="100"
   sandbox="allow-scripts allow-same-origin"
   layout="responsive"
-  frameborder="0"
   src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAyAS599A2GGPKTmtNr9CptD61LE4gN6oQ&q=iceland"
 >
 </amp-iframe>
@@ -43,9 +42,12 @@ designed to make it more secure and avoid AMP files that are dominated by a sing
 <amp-iframe width="200" height="100"
     sandbox="allow-scripts allow-same-origin"
     layout="responsive"
-    frameborder="0"
     src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAyAS599A2GGPKTmtNr9CptD61LE4gN6oQ&q=iceland">
 </amp-iframe>
+
+### Migrating from 0.1
+
+Unlike `0.1`, the experimental `1.0` version of `amp-iframe` has deprecated the `frameborder` attribute. Use the CSS `border` property to control `<amp-iframe>` borders.
 
 ### Use existing AMP components instead of `amp-iframe`
 
