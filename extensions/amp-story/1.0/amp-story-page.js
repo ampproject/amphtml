@@ -38,7 +38,7 @@ import {MediaPool} from './media-pool';
 import {Services} from '#service';
 import {StoryAdSegmentTimes} from '#experiments/story-ad-progress-segment';
 import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
-import {addAttributesToElement, iterateCursor} from '#core/dom';
+import {addAttributesToElement, iterateCursor, removeChildren} from '#core/dom';
 import {
   closestAncestorElementBySelector,
   scopedQuerySelectorAll,
@@ -63,9 +63,10 @@ import {px, toggle} from '#core/dom/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-
 import {toArray} from '#core/types/array';
 import {upgradeBackgroundAudio} from './audio';
+
+import {parseJson} from '#core/types/object/json';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
@@ -330,6 +331,90 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.element.setAttribute('role', 'region');
     this.initializeImgAltTags_();
     this.initializeTabbableElements_();
+
+    const shoppingTagElTemplate = `
+      <template type="amp-mustache">
+        <div>Tag template:</div>
+        <div>{{name}}</div>
+      </template>
+    `;
+
+    const shoppingAttachmentTemplate = `
+      <template type="amp-mustache">
+        <div>Attachment template:</div>
+        <div>{{name}}</div>
+        <div>{{{stars}}}</div>
+        <div>{{price}}</div>
+      </template>
+    `;
+
+    const shoppingEl = document.querySelector('amp-story-shopping');
+    const shoppingTagEl = this.element.querySelector('amp-story-shopping-tag');
+
+    if (shoppingEl && shoppingTagEl) {
+      const config = this.getConfig(shoppingEl.firstElementChild);
+      config.then((json) => {
+        const tagID = shoppingTagEl.getAttribute('tag-id');
+        const dataForPage = json.items.find(
+          (entry) => entry['tag-id'] === tagID
+        );
+
+        shoppingTagEl.innerHTML = shoppingTagElTemplate;
+        this.renderTemplate_(shoppingTagEl, dataForPage);
+
+        const shoppingAttachmentEl = this.makeShoppingAttachmentEl_();
+        shoppingAttachmentEl.innerHTML = shoppingAttachmentTemplate;
+        this.renderTemplate_(shoppingAttachmentEl, dataForPage);
+      });
+    }
+  }
+
+  renderTemplate_(element, data) {
+    Services.templatesForDoc(element)
+      .findAndRenderTemplate(element, data)
+      .then((newContents) => {
+        removeChildren(element);
+        element.appendChild(newContents);
+      });
+  }
+
+  makeShoppingAttachmentEl_() {
+    const pageAttachmentEl = this.win.document.createElement(
+      'amp-story-page-attachment'
+    );
+    pageAttachmentEl.setAttribute('cta-text', 'Shop this page');
+    pageAttachmentEl.setAttribute('layout', 'nodisplay');
+    this.element.appendChild(pageAttachmentEl);
+    return pageAttachmentEl;
+  }
+
+  getConfig(child) {
+    const configData = child.hasAttribute('src')
+      ? this.getRemoteConfig_(child)
+      : this.getInlineConfig_(child);
+    return configData.then((jsonConfig) => jsonConfig);
+  }
+
+  getInlineConfig_(child) {
+    const inlineJSONConfig = parseJson(child.textContent);
+    return Promise.resolve(inlineJSONConfig);
+  }
+
+  /**
+   * @param {!Element} child
+   * @return {!JsonObject}
+   */
+  getRemoteConfig_(child) {
+    return Services.xhrFor(this.win_)
+      .fetchJson(child.getAttribute('src'))
+      .then((response) => response.json())
+      .catch((err) => {
+        user().error(
+          TAG,
+          'error determining if remote config is valid json: bad url or bad json',
+          err
+        );
+      });
   }
 
   /** @private */
