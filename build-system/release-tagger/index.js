@@ -6,6 +6,7 @@
  * 2. head (AMP version)
  * 3. base (AMP version)
  * 4. channel (beta-percent|stable|lts)
+ * 5. time (in UTC, Y-%m-%d %H:%M:%S)
  */
 
 const [action, head, base, channel, time] = process.argv.slice(2);
