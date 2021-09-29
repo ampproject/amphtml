@@ -50,7 +50,7 @@ describes.sandboxed('Selector preact component', {}, () => {
       expect(dom.localName).to.equal('div');
       expect(dom).to.have.attribute('multiple');
 
-      const options = wrapper.find(Option);
+      const options = wrapper.find(BentoSelectorOption);
       expect(options).to.have.lengthOf(3);
 
       const option0 = options.at(0).getDOMNode();
@@ -74,7 +74,7 @@ describes.sandboxed('Selector preact component', {}, () => {
       expect(dom).to.have.attribute('multiple');
       expect(dom).to.have.attribute('aria-multiselectable');
 
-      const options = wrapper.find(Option);
+      const options = wrapper.find(BentoSelectorOption);
       expect(options).to.have.lengthOf(3);
 
       const option0 = options.at(0).getDOMNode();
@@ -104,7 +104,7 @@ describes.sandboxed('Selector preact component', {}, () => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('div');
 
-      const options = wrapper.find(Option);
+      const options = wrapper.find(BentoSelectorOption);
       expect(options).to.have.lengthOf(3);
 
       // Click to expand.
@@ -119,7 +119,7 @@ describes.sandboxed('Selector preact component', {}, () => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('div');
 
-      const options = wrapper.find(Option);
+      const options = wrapper.find(BentoSelectorOption);
       expect(options).to.have.lengthOf(3);
 
       // Click to deselect.
@@ -133,7 +133,7 @@ describes.sandboxed('Selector preact component', {}, () => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('div');
 
-      const options = wrapper.find(Option);
+      const options = wrapper.find(BentoSelectorOption);
 
       function countSelected() {
         const nodes = [
@@ -187,7 +187,7 @@ describes.sandboxed('Selector preact component', {}, () => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('div');
 
-      const options = wrapper.find(Option);
+      const options = wrapper.find(BentoSelectorOption);
       expect(options).to.have.lengthOf(3);
       expect(options.at(0).getDOMNode()).to.have.attribute('selected');
 
@@ -203,7 +203,7 @@ describes.sandboxed('Selector preact component', {}, () => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('div');
 
-      const options = wrapper.find(Option);
+      const options = wrapper.find(BentoSelectorOption);
       expect(options).to.have.lengthOf(3);
 
       // Click to expand.
@@ -239,7 +239,7 @@ describes.sandboxed('Selector preact component', {}, () => {
           </BentoSelector>
         );
 
-        const options = wrapper.find(Option);
+        const options = wrapper.find(BentoSelectorOption);
         option0 = options.at(0).getDOMNode();
         option1 = options.at(1).getDOMNode();
         disabledOption = options.at(2).getDOMNode();
@@ -375,7 +375,7 @@ describes.sandboxed('Selector preact component', {}, () => {
           </BentoSelector>
         );
 
-        const options = wrapper.find(Option);
+        const options = wrapper.find(BentoSelectorOption);
         option0 = options.at(0).getDOMNode();
         option1 = options.at(1).getDOMNode();
         disabledOption = options.at(2).getDOMNode();
@@ -523,7 +523,7 @@ describes.sandboxed('Selector preact component', {}, () => {
         );
 
         selector = wrapper.find('div').first();
-        options = wrapper.find(Option);
+        options = wrapper.find(BentoSelectorOption);
         option0 = options.at(0).getDOMNode();
         option1 = options.at(1).getDOMNode();
         option2 = options.at(2).getDOMNode();
@@ -626,7 +626,7 @@ describes.sandboxed('Selector preact component', {}, () => {
         );
 
         selector = wrapper.find('div').first();
-        options = wrapper.find(Option);
+        options = wrapper.find(BentoSelectorOption);
         option0 = options.at(0).getDOMNode();
         option1 = options.at(1).getDOMNode();
         option2 = options.at(2).getDOMNode();
