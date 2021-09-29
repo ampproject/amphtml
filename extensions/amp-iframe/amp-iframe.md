@@ -13,8 +13,7 @@ bento: true
 ## Usage
 
 Displays an AMP valid iframe. `amp-iframe` has several important differences from vanilla iframes that are
-designed to make it more secure and avoid AMP files that are dominated by a
-single iframe:
+designed to make it more secure and avoid AMP files that are dominated by a single iframe:
 
 -   An `amp-iframe` may not appear close to the top of the document (except for
     iframes that use `placeholder` as described
