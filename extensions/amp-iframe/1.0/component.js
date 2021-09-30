@@ -35,17 +35,19 @@ export function Iframe({
   const isIntersectingRef = useRef(null);
   const containerRef = useRef(null);
   const observerRef = useRef(null);
+  const targetOriginRef = useRef(null);
 
   const viewabilityCb = (entries) => {
     const iframe = iframeRef.current;
-    if (!iframe) {
+    const targetOrigin = targetOriginRef.current;
+    if (!iframe || !targetOrigin) {
       return;
     }
     postMessage(
       iframe,
       MessageType.INTERSECTION,
       dict({'changes': entries.map(cloneEntryForCrossOrigin)}),
-      '*'
+      targetOrigin
     );
   };
 
@@ -60,6 +62,7 @@ export function Iframe({
     ) {
       return;
     }
+    targetOriginRef.current = event.origin;
     const win = toWin(iframe.ownerDocument.defaultView);
     observerRef.current = new win.IntersectionObserver(viewabilityCb, {
       threshold: DEFAULT_THRESHOLD,
@@ -79,7 +82,7 @@ export function Iframe({
     return () => {
       observer?.unobserve(iframe);
       observer = null;
-      win.removeEventListener(handleSendIntersectionsPostMessage);
+      win.removeEventListener('message', handleSendIntersectionsPostMessage);
     };
   }, [handleSendIntersectionsPostMessage]);
 
