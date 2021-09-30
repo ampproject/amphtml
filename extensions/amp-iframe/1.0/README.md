@@ -95,6 +95,7 @@ Height of the iframe in pixels. Note: this is applied to the parent container an
 ##### `width`
 
 Width of the iframe in pixels. Note: this is applied to the parent container and the `iframe` element is set to 100% width.
+
 ##### `allowfullscreen`, `allowpaymentrequest`, and `referrerpolicy` (optional)
 
 These attributes should all behave like they do on standard iframes.
@@ -122,6 +123,7 @@ new windows. This is likely most of the time what you want and expect.
 See the [docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox) for further details on the `sandbox` attribute.
 
 #### Styling
+
 You may use the `bento-iframe` element selector to style the component.
 
 ### Preact/React Component
