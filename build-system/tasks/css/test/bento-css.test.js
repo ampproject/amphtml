@@ -74,6 +74,10 @@ const cases = {
       }
     }`,
   ],
+  'preserves minification': [
+    `amp-foo>div:not(.amp-classname){background:red}amp-whatever{color:blue}`,
+    `bento-foo>div:not(.amp-classname){background:red}bento-whatever{color:blue}`,
+  ],
 };
 
 for (const name of Object.keys(cases)) {
