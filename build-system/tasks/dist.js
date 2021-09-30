@@ -23,6 +23,9 @@ const {
 const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
+const {
+  VERSION: internalRuntimeVersion,
+} = require('../compile/internal-version');
 const {buildCompiler} = require('../compile/build-compiler');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
@@ -114,19 +117,21 @@ async function dist() {
   await runPreDistSteps(options);
 
   // These steps use closure compiler. Small ones before large (parallel) ones.
-  const steps = [];
   if (argv.core_runtime_only) {
-    steps.push(compileCoreRuntime(options));
+    await compileCoreRuntime(options);
   } else {
-    steps.push(buildExperiments());
-    steps.push(buildLoginDone('0.1'));
-    steps.push(buildWebPushPublisherFiles());
-    steps.push(buildCompiler());
-    steps.push(compileAllJs(options));
+    await Promise.all([
+      writeVersionFiles(),
+      buildExperiments(),
+      buildLoginDone('0.1'),
+      buildWebPushPublisherFiles(),
+      buildCompiler(),
+      compileAllJs(options),
+    ]);
   }
 
   // This step internally parses the various extension* flags.
-  steps.push(buildExtensions(options));
+  await buildExtensions(options);
 
   // This step is to be run only during a full `amp dist`.
   if (
@@ -135,10 +140,8 @@ async function dist() {
     !argv.extensions_from &&
     !argv.noextensions
   ) {
-    steps.push(buildVendorConfigs(options));
+    await buildVendorConfigs(options);
   }
-
-  await Promise.all(steps);
 
   // This step is required no matter which binaries are built.
   await formatExtractedMessages();
@@ -146,6 +149,26 @@ async function dist() {
   if (!argv.watch) {
     exitCtrlcHandler(handlerProcess);
   }
+}
+
+/**
+ * Writes the verion.txt file.
+ * @return {!Promise}
+ */
+async function writeVersionFiles() {
+  // TODO: determine which of these are necessary and trim the rest via an I2D.
+  const paths = [
+    'dist',
+    'dist/v0',
+    'dist/v0/examples',
+    'dist.tools/experiments',
+    `dist.3p/${internalRuntimeVersion}`,
+    `dist.3p/${internalRuntimeVersion}/vendor`,
+  ].map((p) => path.join(...p.split('/'), 'version.txt'));
+
+  return Promise.all(
+    paths.map((p) => fs.outputFile(p, internalRuntimeVersion))
+  );
 }
 
 /**

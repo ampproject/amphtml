@@ -1,5 +1,4 @@
 import {loadScript, validateData} from '#3p/3p';
-import {yandex} from './yandex';
 
 /**
  * @param {!Window} global
@@ -7,53 +6,28 @@ import {yandex} from './yandex';
  */
 export function adfox(global, data) {
   validateData(data, ['adfoxParams', 'ownerId']);
-  loadScript(global, 'https://yastatic.net/pcode/adfox/loader.js', () =>
-    initAdFox(global, data)
+  loadScript(global, 'https://yandex.ru/ads/system/context.js', () =>
+    renderAdFox(global, data)
   );
 }
 
 /**
  * @param {!Window} global
- * @param {Object} data
+ * @param {!Object} data
  */
-function initAdFox(global, data) {
-  const params = JSON.parse(data.adfoxParams);
+function renderAdFox(global, data) {
+  const renderTo = 'adfox_container';
 
-  createContainer(global, 'adfox_container');
+  createContainer(global, renderTo);
 
   global.Ya.adfoxCode.create({
     ownerId: data.ownerId,
-    containerId: 'adfox_container',
-    params,
-    onLoad: (data, onRender, onError) => {
-      checkLoading(global, data, onRender, onError);
-    },
+    containerId: renderTo,
+    params: JSON.parse(data.adfoxParams),
     onRender: () => global.context.renderStart(),
     onError: () => global.context.noContentAvailable(),
     onStub: () => global.context.noContentAvailable(),
   });
-}
-
-/**
- * @param {!Window} global
- * @param {!Object} data
- * @param {!Object} onRender
- * @param {!Object} onError
- * @return {boolean}
- */
-function checkLoading(global, data, onRender, onError) {
-  if (data.bundleName === 'banner.direct') {
-    const dblParams = {
-      blockId: data.bundleParams.blockId,
-      data: data.bundleParams.data,
-      onRender,
-      onError,
-    };
-
-    yandex(global, dblParams);
-    return false;
-  }
-  return true;
 }
 
 /**
