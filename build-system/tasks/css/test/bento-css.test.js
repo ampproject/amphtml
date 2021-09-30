@@ -77,7 +77,7 @@ const cases = {
 };
 
 for (const name of Object.keys(cases)) {
-  test(name, async (t) => {
+  test(`renames amp-* selectors to bento-* (${name})`, async (t) => {
     const [input, expected] = cases[name];
     const output = await renameSelectorsToBentoTagNames(input);
     t.is(output, expected);
