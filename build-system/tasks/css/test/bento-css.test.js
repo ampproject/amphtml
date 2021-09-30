@@ -19,6 +19,9 @@ const cases = {
     }
     div {
       transform: translate(100%, 0);
+    }
+    has-amp-but-does-not-start-with-amp- {
+      background: yellow;
     }`,
     `bento-foo {
       background: red;
@@ -28,6 +31,9 @@ const cases = {
     }
     div {
       transform: translate(100%, 0);
+    }
+    has-amp-but-does-not-start-with-amp- {
+      background: yellow;
     }`,
   ],
   'mixed selector': [
