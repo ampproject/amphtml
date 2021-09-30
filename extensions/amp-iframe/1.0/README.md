@@ -4,7 +4,7 @@
 
 Displays an iframe.
 
-Use Bento Iframe as a web component `<bento-iframe>`, or as a Preact/React functional component `<BentoIframe>`.
+Use Bento Iframe as a web component [`<bento-iframe>`](#web-component), or a Preact/React functional component [`<BentoIframe>`](#preactreact-component).
 
 ### Web Component
 
@@ -34,7 +34,6 @@ import '@ampproject/bento-iframe';
 
 ```html
 <head>
-  <script src="https://cdn.ampproject.org/custom-elements-polyfill.js"></script>
   <script async custom-element="bento-iframe" src="https://cdn.ampproject.org/v0/bento-iframe-1.0.js"></script>
   <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-iframe-1.0.css">
   <style data-bento-boilerplate>
@@ -45,13 +44,26 @@ import '@ampproject/bento-iframe';
     }
   </style>
 </head>
-<bento-iframe src="https://en.wikipedia.org/wiki/Bento" width="800" height="600">
+<bento-iframe
+  id="my-iframe"
+  src="https://en.wikipedia.org/wiki/Bento"
+  width="800"
+  height="600">
 </bento-iframe>
+
+<button id="change-source">
+  Change source
+</button>
 
 <script>
   (async () => {
-    const fitText = document.querySelector('#my-fit-text');
+    const iframeEl = document.querySelector('#my-iframe');
     await customElements.whenDefined('bento-iframe');
+
+    // Reload iframe with new src
+    document.querySelector('#change-source').onclick = () => {
+      iframeEl.setAttribute('src', 'https://example.com')
+    }
   })();
 </script>
 ```
