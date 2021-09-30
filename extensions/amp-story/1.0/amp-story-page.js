@@ -66,8 +66,6 @@ import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {toArray} from '#core/types/array';
 import {upgradeBackgroundAudio} from './audio';
 
-import {parseJson} from '#core/types/object/json';
-
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
  * @const {string}
@@ -367,18 +365,14 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
 
     if (shoppingEl && shoppingTagElements[0]) {
-      const config = this.getConfig(shoppingEl.firstElementChild);
-
-      config.then((json) => {
+      setTimeout(() => {
         // Empty holder for page attachment data
         const attachmentData = {items: []};
         // Render product tags
         shoppingTagElements.forEach((shoppingTagEl) => {
           const tagID = shoppingTagEl.getAttribute('tag-id');
           // Get data to render tag
-          const itemData = json.items.find(
-            (entry) => entry['tag-id'] === tagID
-          );
+          const itemData = window.shoppingData[tagID];
           this.setTemplate(shoppingTagEl, shoppingTagElTemplate);
           this.renderTemplate_(shoppingTagEl, itemData);
           // push data into attachmentData to render page attachment
@@ -389,7 +383,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         const shoppingAttachmentEl = this.makeShoppingAttachmentEl_();
         this.setTemplate(shoppingAttachmentEl, plpTemplate);
         this.renderTemplate_(shoppingAttachmentEl, attachmentData);
-      });
+      }, 1000);
     }
   }
 
@@ -413,35 +407,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       .then((newContents) => {
         removeChildren(element);
         element.appendChild(newContents);
-      });
-  }
-
-  getConfig(child) {
-    const configData = child.hasAttribute('src')
-      ? this.getRemoteConfig_(child)
-      : this.getInlineConfig_(child);
-    return configData.then((jsonConfig) => jsonConfig);
-  }
-
-  getInlineConfig_(child) {
-    const inlineJSONConfig = parseJson(child.textContent);
-    return Promise.resolve(inlineJSONConfig);
-  }
-
-  /**
-   * @param {!Element} child
-   * @return {!JsonObject}
-   */
-  getRemoteConfig_(child) {
-    return Services.xhrFor(this.win_)
-      .fetchJson(child.getAttribute('src'))
-      .then((response) => response.json())
-      .catch((err) => {
-        user().error(
-          TAG,
-          'error determining if remote config is valid json: bad url or bad json',
-          err
-        );
       });
   }
 

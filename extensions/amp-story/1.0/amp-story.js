@@ -114,6 +114,8 @@ import LocalizedStringsVi from './_locales/vi.json' assert {type: 'json'}; // lg
 import LocalizedStringsZhCn from './_locales/zh-CN.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsZhTw from './_locales/zh-TW.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 
+import {parseJson} from '#core/types/object/json';
+
 /** @private @const {number} */
 const DESKTOP_WIDTH_THRESHOLD = 1024;
 
@@ -456,6 +458,46 @@ export class AmpStory extends AMP.BaseElement {
     if (this.maybeLoadStoryDevTools_()) {
       return;
     }
+
+    const shoppingEl = document.querySelector('amp-story-shopping');
+    if (shoppingEl) {
+      const config = this.getConfig(shoppingEl.firstElementChild);
+      config.then((json) => {
+        window.shoppingData = {};
+        json.items.forEach((item) => {
+          shoppingData[item['tag-id']] = item;
+        });
+      });
+    }
+  }
+
+  getConfig(child) {
+    const configData = child.hasAttribute('src')
+      ? this.getRemoteConfig_(child)
+      : this.getInlineConfig_(child);
+    return configData.then((jsonConfig) => jsonConfig);
+  }
+
+  getInlineConfig_(child) {
+    const inlineJSONConfig = parseJson(child.textContent);
+    return Promise.resolve(inlineJSONConfig);
+  }
+
+  /**
+   * @param {!Element} child
+   * @return {!JsonObject}
+   */
+  getRemoteConfig_(child) {
+    return Services.xhrFor(this.win_)
+      .fetchJson(child.getAttribute('src'))
+      .then((response) => response.json())
+      .catch((err) => {
+        user().error(
+          TAG,
+          'error determining if remote config is valid json: bad url or bad json',
+          err
+        );
+      });
   }
 
   /**
