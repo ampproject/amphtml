@@ -9,6 +9,9 @@ import {matches} from '#core/dom/query';
 import {toArray} from '#core/types/array';
 import {user} from '../../../src/log';
 
+/** @const {!Array<string>} */
+const CODECS_IN_DESCENDING_PRIORITY = ['vp09', 'h264'];
+
 /**
  * Add the caching sources to the video if opted in.
  * The request is sent to the AMP cache url with /mbv path prefix,
@@ -85,7 +88,28 @@ function selectVideoSource(videoEl) {
  */
 function applySourcesToVideo(videoEl, sources, maxBitrate) {
   sources
-    .sort((a, b) => a['bitrate_kbps'] - b['bitrate_kbps'])
+    .sort((a, b) => {
+      // 'codec' values can contain metadata after the '.' that we must strip
+      // for sorting purposes. For example, "vp09.00.30.08" contains level,
+      // profile, and color depth values that are ignored in this sort.
+      const aCodec = a['codec']?.split('.')[0];
+      const bCodec = b['codec']?.split('.')[0];
+
+      CODECS_IN_DESCENDING_PRIORITY.forEach((codec) => {
+        if (aCodec === codec && bCodec !== codec) {
+          // A negative value results in a being sorted before b.
+          return -1;
+        } else if (aCodec !== codec && bCodec === codec) {
+          // A positive value results in b being sorted before a.
+          return 1;
+        } else if (aCodec === codec && bCodec === codec) {
+          // If both codecs are equivalent, sort by descending bitrate.
+          return b['bitrate_kbps'] - a['bitrate_kbps'];
+        }
+      });
+      // If both codecs have unprioritized values, sort by descending bitrate.
+      return b['bitrate_kbps'] - a['bitrate_kbps'];
+    })
     .forEach((source) => {
       if (source['bitrate_kbps'] > maxBitrate) {
         return;
