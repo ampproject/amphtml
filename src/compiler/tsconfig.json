@@ -8,6 +8,6 @@
       "#compiler/*": ["./*"]
     }
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.js", "**/*.ts"],
   "exclude": ["node_modules"]
 }

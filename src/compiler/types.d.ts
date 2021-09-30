@@ -27,3 +27,8 @@ export type CompilerRequest = {document: TreeProto; versions: Versions};
  * Compiler response
  */
 export type CompilerResponse = {document: TreeProto};
+
+/**
+ * Map from tagName to builder functions.
+ */
+export type BuilderMap = {[tagName: string]: BuildDom};

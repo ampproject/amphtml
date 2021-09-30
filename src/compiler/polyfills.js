@@ -7,7 +7,7 @@
  * @fileoverview
  */
 
-const globalObject = globalThis as any;
+const globalObject = /** @type {any} */ (globalThis);
 
 globalObject['self'] = globalThis;
 

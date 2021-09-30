@@ -100,7 +100,7 @@ const TYPE_CHECK_TARGETS = {
   // errors.
   'low-bar': {
     entryPoints: ['src/amp.js'],
-    extraGlobs: ['{src,extensions}/**/*.js'],
+    extraGlobs: ['{src,extensions}/**/*.js', '!src/compiler/**/*.js'],
     onError(msg) {
       const lowBarErrors = [
         'JSC_BAD_JSDOC_ANNOTATION',
