@@ -8,6 +8,8 @@ class Foo {
   doFoo_() {}
   doBar() {
     const {foo_} = this;
+    this?.bar_();
+    this.bar_?.();
   }
 }
 

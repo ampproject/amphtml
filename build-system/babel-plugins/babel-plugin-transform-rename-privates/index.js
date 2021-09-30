@@ -8,25 +8,59 @@
 module.exports = function () {
   return {
     visitor: {
-      Identifier(path, state) {
-        const filename = state.file.opts.filenameRelative;
-        if (!filename) {
-          throw new Error('Cannot use plugin without providing a filename');
-        }
-
-        const isAmpSrcCode =
-          filename.startsWith('src/') || filename.startsWith('extensions/');
-        if (!isAmpSrcCode) {
+      OptionalMemberExpression(path, state) {
+        if (!isAmpSrc(state)) {
           return;
         }
-
-        // AMP Privates are marked via trailing suffix.
-        if (!path.node.name.endsWith('_')) {
+        maybeAppendSuffix(path.node.property);
+      },
+      MemberExpression(path, state) {
+        if (!isAmpSrc(state)) {
           return;
         }
-
-        path.node.name += `AMP_PRIVATE_`;
+        maybeAppendSuffix(path.node.property);
+      },
+      Method(path, state) {
+        if (!isAmpSrc(state)) {
+          return;
+        }
+        maybeAppendSuffix(path.node.key);
+      },
+      Property(path, state) {
+        if (!isAmpSrc(state)) {
+          return;
+        }
+        maybeAppendSuffix(path.node.key);
       },
     },
   };
 };
+
+/**
+ * @param {*} state
+ * @return {string}
+ */
+function isAmpSrc(state) {
+  const filename = state.file.opts.filenameRelative;
+  if (!filename) {
+    throw new Error('Cannot use plugin without providing a filename');
+  }
+  return filename.startsWith('src/') || filename.startsWith('extensions/');
+}
+
+/**
+ * Adds trailing AMP_PRIVATE_ suffix to an identifier.
+ * @param {babel.types.Node} ident
+ */
+function maybeAppendSuffix(ident) {
+  if (ident.type !== 'Identifier') {
+    return;
+  }
+
+  // AMP Privates are marked via trailing suffix.
+  if (!ident.name.endsWith('_')) {
+    return;
+  }
+
+  ident.name += 'AMP_PRIVATE_';
+}
