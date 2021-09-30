@@ -87,7 +87,6 @@ export let InteractiveReactData;
  *    desktopState: boolean,
  *    educationState: boolean,
  *    gyroscopeEnabledState: string,
- *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
  *    interactiveReactState: !Map<string, !InteractiveReactData>,
@@ -100,7 +99,6 @@ export let InteractiveReactData;
  *    previewState: boolean,
  *    rtlState: boolean,
  *    shareMenuState: boolean,
- *    sidebarState: boolean,
  *    storyHasAudioState: boolean,
  *    storyHasPlaybackUiState: boolean,
  *    storyHasBackgroundAudioState: boolean,
@@ -139,7 +137,6 @@ export const StateProperty = {
   AFFILIATE_LINK_STATE: 'affiliateLinkState',
   EDUCATION_STATE: 'educationState',
   GYROSCOPE_PERMISSION_STATE: 'gyroscopePermissionState',
-  HAS_SIDEBAR_STATE: 'hasSidebarState',
   INFO_DIALOG_STATE: 'infoDialogState',
   INTERACTIVE_COMPONENT_STATE: 'interactiveEmbeddedComponentState',
   // State of interactive components (polls, quizzes) on the story.
@@ -154,7 +151,6 @@ export const StateProperty = {
   PREVIEW_STATE: 'previewState',
   RTL_STATE: 'rtlState',
   SHARE_MENU_STATE: 'shareMenuState',
-  SIDEBAR_STATE: 'sidebarState',
   SUPPORTED_BROWSER_STATE: 'supportedBrowserState',
   // Any page has audio, or amp-story has a `background-audio` attribute.
   STORY_HAS_AUDIO_STATE: 'storyHasAudioState',
@@ -190,7 +186,6 @@ export const Action = {
   TOGGLE_AD: 'toggleAd',
   TOGGLE_AFFILIATE_LINK: 'toggleAffiliateLink',
   TOGGLE_EDUCATION: 'toggleEducation',
-  TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
   TOGGLE_KEYBOARD_ACTIVE_STATE: 'toggleKeyboardActiveState',
@@ -201,7 +196,6 @@ export const Action = {
   TOGGLE_PAUSED: 'togglePaused',
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
-  TOGGLE_SIDEBAR: 'toggleSidebar',
   TOGGLE_SUPPORTED_BROWSER: 'toggleSupportedBrowser',
   TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
@@ -381,21 +375,6 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.KEYBOARD_ACTIVE_STATE]: !!data,
       });
-    case Action.TOGGLE_SIDEBAR:
-      // Don't change the PAUSED_STATE if SIDEBAR_STATE is not changed.
-      if (state[StateProperty.SIDEBAR_STATE] === data) {
-        return state;
-      }
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.PAUSED_STATE]: !!data,
-        [StateProperty.SIDEBAR_STATE]: !!data,
-      });
-    case Action.TOGGLE_HAS_SIDEBAR:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.HAS_SIDEBAR_STATE]: !!data,
-      });
     case Action.TOGGLE_SUPPORTED_BROWSER:
       return /** @type {!State} */ ({
         ...state,
@@ -573,7 +552,6 @@ export class AmpStoryStoreService {
       [StateProperty.AFFILIATE_LINK_STATE]: null,
       [StateProperty.EDUCATION_STATE]: false,
       [StateProperty.GYROSCOPE_PERMISSION_STATE]: '',
-      [StateProperty.HAS_SIDEBAR_STATE]: false,
       [StateProperty.INFO_DIALOG_STATE]: false,
       [StateProperty.INTERACTIVE_COMPONENT_STATE]: {
         state: EmbeddedComponentState.HIDDEN,
@@ -588,7 +566,6 @@ export class AmpStoryStoreService {
       [StateProperty.PAUSED_STATE]: false,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
-      [StateProperty.SIDEBAR_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
