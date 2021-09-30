@@ -8,12 +8,20 @@ const postcss = require('postcss');
  * @return {Object<string, *>} Modification is done in-place, but the tree is
  *   returned for convenience.
  */
-function renameSelectorTokensRecursive(node) {
-  if (node.type === 'element') {
-    node.name = node.name.replace(/^amp-/, 'bento-');
-  } else if (Array.isArray(node.nodes)) {
-    for (const child of node.nodes) {
-      renameSelectorTokensRecursive(child);
+function renameSelectorTokens(node) {
+  /** @type {Object<string, *>[]} */
+  const stack = [node];
+  while (stack.length > 0) {
+    const node = stack.pop();
+    // annoying condition for type check
+    if (!node) {
+      continue;
+    }
+    if (node.type === 'element') {
+      node.name = node.name.replace(/^amp-/, 'bento-');
+    }
+    if (Array.isArray(node.nodes)) {
+      stack.push(...node.nodes);
     }
   }
   return node;
@@ -29,7 +37,7 @@ function renameSelectorPlugin(root) {
       return;
     }
     const parsed = CssSelectorTokenizer.parse(rule.selector);
-    const renamed = renameSelectorTokensRecursive(parsed);
+    const renamed = renameSelectorTokens(parsed);
     rule.selector = CssSelectorTokenizer.stringify(renamed);
   });
 }
