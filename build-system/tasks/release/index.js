@@ -37,7 +37,7 @@ const fs = require('fs-extra');
 const klaw = require('klaw');
 const path = require('path');
 const tar = require('tar');
-const {cyan, green, red} = require('kleur/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
 const {log} = require('../../common/logging');
 const {MINIFIED_TARGETS} = require('../prepend-global');
@@ -116,11 +116,21 @@ const CHANNEL_CONFIGS = {
   '25': {type: 'experimentC', configBase: 'prod'}, // Spec name: 'inabox-experimentC'
 };
 
-// Paths to custom configurations
-const CUSTOM_FLAVORS_CONFIG_PATH =
-  'build-system/global-configs/custom-flavors-config.json';
-const CUSTOM_OVERLAY_CONFIG_PATH =
-  'build-system/global-configs/custom-config.json';
+/**
+ * Path to custom flavors config, see: build-system/global-configs/README.md
+ */
+const CUSTOM_FLAVORS_CONFIG_PATH = path.resolve(
+  __dirname,
+  '../../global-configs/custom-flavors-config.json'
+);
+
+/**
+ * Path to custom overlay config, see: build-system/global-configs/README.md
+ */
+const CUSTOM_OVERLAY_CONFIG_PATH = path.resolve(
+  __dirname,
+  '../../global-configs/custom-config.json'
+);
 
 /**
  * Prints a separator line so logs are easy to read.
@@ -137,15 +147,7 @@ function logSeparator_() {
  * @return {Promise<void>}
  */
 async function prepareEnvironment_(outputDir, tempDir) {
-  let cleanCmd = 'amp clean';
-  if (argv.use_custom_configs) {
-    const cleanExclusions = [
-      CUSTOM_FLAVORS_CONFIG_PATH,
-      CUSTOM_OVERLAY_CONFIG_PATH,
-    ].join(',');
-    cleanCmd += ` --exclude ${cleanExclusions}`;
-  }
-  execOrDie(cleanCmd);
+  execOrDie('amp clean');
   await fs.emptyDir(outputDir);
   await fs.emptyDir(tempDir);
   logSeparator_();
@@ -162,17 +164,17 @@ async function prepareEnvironment_(outputDir, tempDir) {
  */
 function discoverDistFlavors_() {
   let customFlavorsConfig = [];
-  if (argv.use_custom_configs) {
+  if (fs.existsSync(CUSTOM_FLAVORS_CONFIG_PATH)) {
+    const flavorsFilename = path.basename(CUSTOM_FLAVORS_CONFIG_PATH);
     try {
-      customFlavorsConfig = require(path.resolve(
-        __dirname,
-        '../../..',
-        CUSTOM_FLAVORS_CONFIG_PATH
-      ));
-    } catch (ex) {
+      customFlavorsConfig = require(CUSTOM_FLAVORS_CONFIG_PATH);
       log(
-        red(`Error parsing custom flavors from: ${CUSTOM_FLAVORS_CONFIG_PATH}`)
+        yellow('Notice:'),
+        'release flavors supplemented by',
+        cyan(flavorsFilename)
       );
+    } catch (ex) {
+      log(red('Could not load custom flavors from:'), cyan(flavorsFilename));
     }
   }
 
@@ -239,12 +241,7 @@ async function compileDistFlavors_(flavorType, command, tempDir) {
   }
   log('Compiling flavor', green(flavorType), 'using', cyan(command));
 
-  const cleanExclusions = ['release'];
-  if (argv.use_custom_configs) {
-    cleanExclusions.push(CUSTOM_FLAVORS_CONFIG_PATH);
-    cleanExclusions.push(CUSTOM_OVERLAY_CONFIG_PATH);
-  }
-  execOrDie(`amp clean --exclude ${cleanExclusions.join(',')}`);
+  execOrDie('amp clean --exclude release');
   execOrDie(command);
 
   const flavorTempDistDir = path.join(tempDir, flavorType);
@@ -418,9 +415,21 @@ async function prependConfig_(outputDir) {
   for (const [rtvPrefix, channelConfig] of activeChannels) {
     const rtvNumber = `${rtvPrefix}${VERSION}`;
     const rtvPath = path.join(outputDir, 'org-cdn/rtv', rtvNumber);
-    const overlayConfig = argv.use_custom_configs
-      ? require(path.resolve(__dirname, '../../..', CUSTOM_OVERLAY_CONFIG_PATH))
-      : {};
+    let overlayConfig = {};
+    if (fs.existsSync(CUSTOM_OVERLAY_CONFIG_PATH)) {
+      const overlayFilename = path.basename(CUSTOM_OVERLAY_CONFIG_PATH);
+      try {
+        overlayConfig = require(CUSTOM_OVERLAY_CONFIG_PATH);
+        log(
+          yellow('Notice:'),
+          cyan(channelConfig.configBase),
+          'config overlaid with',
+          cyan(overlayFilename)
+        );
+      } catch (ex) {
+        log(red('Could not apply overlay from'), cyan(overlayFilename));
+      }
+    }
 
     const channelPartialConfig = {
       v: rtvNumber,
@@ -556,6 +565,4 @@ release.flags = {
   'esm':
     // TODO(danielrozenberg): remove undefined case when the release automation platform explicitly handles it.
     'Compile with --esm if true, without --esm if false, and with + without --esm if left unset',
-  'use_custom_configs':
-    'Apply custom overlay and release configurations from build-system/global-configs',
 };

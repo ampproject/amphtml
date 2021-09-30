@@ -50,7 +50,7 @@ The resulting config is
 
 # custom-flavors-config.json
 
-This file defines custom release flavors that can be utilized by `amp release`. See `DistFlavorDef` in [build-system/tasks/release/index.js](../tasks/release/index.js) for the required keys in a flavor definition. For example:
+Additional release flavors can be defined in `build-system/global-configs/custom-flavors-config.json` and they will automatically be made available to `amp release`. This file should be an array of `DistFlavorDef` objects (see definition in [build-system/tasks/release/index.js](../tasks/release/index.js)). For example:
 
 ```json
 [
@@ -71,10 +71,10 @@ This file defines custom release flavors that can be utilized by `amp release`. 
 ]
 ```
 
-and then custom release flavor "Custom Production Release" could be built with:
+and then "Custom Production Release" could be built with:
 
 ```sh
-amp release --use_custom_configs --flavor="custom-prod"
+amp release --flavor="custom-prod"
 ```
 
 Tips: Be sure to pass flag `--noconfig` to `amp dist` in the flavor command, otherwise you will end up with multiple `AMP_CONFIG` definitions in entrypoint files (`v0.js`, `shadow-v0.js`, etc.). Flag `--version_override` is not supported.
