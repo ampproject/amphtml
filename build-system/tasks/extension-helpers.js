@@ -32,6 +32,7 @@ const {jsifyCssAsync} = require('./css/jsify-css');
 const {jssOptions} = require('../babel-config/jss-config');
 const {log} = require('../common/logging');
 const {parse: pathParse} = require('path');
+const {renameSelectorsToBentoTagNames} = require('./css/bento-css');
 const {TransformCache, batchedRead} = require('../common/transform-cache');
 const {watch} = require('chokidar');
 
@@ -571,18 +572,19 @@ function buildExtensionCss(extDir, name, version, options) {
     fs.writeFileSync(jsName, jsCss, 'utf-8');
     fs.writeFileSync(cssName, css, 'utf-8');
   }
+
   const aliasBundle = extensionAliasBundles[name];
   const isAliased = aliasBundle && aliasBundle.version == version;
 
   const promises = [];
-  const mainCssBinary = jsifyCssAsync(extDir + '/' + name + '.css').then(
-    (mainCss) => {
-      writeCssBinaries(`${name}-${version}.css`, mainCss);
-      if (isAliased) {
-        writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, mainCss);
-      }
+  const mainCssFilepath = `${extDir}/${name}.css`;
+  const mainCssPromise = jsifyCssAsync(mainCssFilepath);
+  const mainCssBinaryPromise = mainCssPromise.then((mainCss) => {
+    writeCssBinaries(`${name}-${version}.css`, mainCss);
+    if (isAliased) {
+      writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, mainCss);
     }
-  );
+  });
 
   if (Array.isArray(options.cssBinaries)) {
     promises.push.apply(
@@ -597,7 +599,27 @@ function buildExtensionCss(extDir, name, version, options) {
       })
     );
   }
-  promises.push(mainCssBinary);
+  promises.push(mainCssBinaryPromise);
+
+  // Currently JSON.stringifying to allow arrays and strings:
+  // {"wrapper": "bento"} and {"wrapper": ["bento"]}
+  // TODO(alanorozco): We might need a `bento` flag instead.
+  if (options.wrapper && JSON.stringify(options.wrapper).includes('"bento"')) {
+    // TODO(alanorozco): Use a TransformCache
+    const promise = mainCssPromise.then(async (css) => {
+      const startTime = Date.now();
+
+      const bentoName = name.replace(/^amp-/, 'bento-');
+      const renamedCss = await renameSelectorsToBentoTagNames(
+        css,
+        mainCssFilepath
+      );
+      await fs.writeFile(`dist/v0/${bentoName}.css`, renamedCss);
+      endBuildStep('Transformed', `${bentoName}.css`, startTime);
+    });
+    promises.push(promise);
+  }
+
   return Promise.all(promises);
 }
 
