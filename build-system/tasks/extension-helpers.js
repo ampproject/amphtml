@@ -577,8 +577,7 @@ function buildExtensionCss(extDir, name, version, options) {
   const isAliased = aliasBundle && aliasBundle.version == version;
 
   const promises = [];
-  const mainCssFilepath = `${extDir}/${name}.css`;
-  const mainCssPromise = jsifyCssAsync(mainCssFilepath);
+  const mainCssPromise = jsifyCssAsync(`${extDir}/${name}.css`);
   const mainCssBinaryPromise = mainCssPromise.then((mainCss) => {
     writeCssBinaries(`${name}-${version}.css`, mainCss);
     if (isAliased) {
@@ -610,10 +609,7 @@ function buildExtensionCss(extDir, name, version, options) {
       const startTime = Date.now();
 
       const bentoName = name.replace(/^amp-/, 'bento-');
-      const renamedCss = await renameSelectorsToBentoTagNames(
-        css,
-        mainCssFilepath
-      );
+      const renamedCss = await renameSelectorsToBentoTagNames(css);
       await fs.writeFile(`dist/v0/${bentoName}.css`, renamedCss);
       endBuildStep('Transformed', `${bentoName}.css`, startTime);
     });

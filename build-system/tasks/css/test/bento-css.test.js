@@ -61,7 +61,7 @@ const cases = {
 for (const name of Object.keys(cases)) {
   test(name, async (t) => {
     const [input, expected] = cases[name];
-    const output = await renameSelectorsToBentoTagNames(input, 'foo.css');
+    const output = await renameSelectorsToBentoTagNames(input);
     t.is(output, expected);
   });
 }

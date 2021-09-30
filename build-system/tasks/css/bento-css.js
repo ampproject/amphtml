@@ -37,13 +37,10 @@ function renameSelectorPlugin(root) {
 /**
  * Renames element selectors in a CSS file from amp-* to bento-*
  * @param {string} css
- * @param {string} from
  * @return {!Promise<string>} The transformed CSS source
  */
-async function renameSelectorsToBentoTagNames(css, from) {
-  const result = await postcss
-    .default([renameSelectorPlugin])
-    .process(css, {from});
+async function renameSelectorsToBentoTagNames(css) {
+  const result = await postcss.default([renameSelectorPlugin]).process(css);
   return result.css;
 }
 
