@@ -10,7 +10,6 @@ function renameTagNamesInSelector(selector) {
   const nodes = [tree];
   while (nodes.length > 0) {
     const node = nodes.pop();
-    // annoying condition for type check
     if (!node) {
       continue;
     }
