@@ -139,14 +139,47 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       expect(addedSource.getAttribute('type')).to.equal('video/mp4');
     });
 
-    it('should add the sources sorted by bitrate', async () => {
+    it('should add the sources sorted first by codec priority and then by bitrate value', async () => {
       env.sandbox.stub(xhrService, 'fetch').resolves({
         json: () =>
           Promise.resolve({
             sources: [
-              {'url': 'video1.mp4', 'bitrate_kbps': 700, type: 'video/mp4'},
-              {'url': 'video2.mp4', 'bitrate_kbps': 2000, type: 'video/mp4'},
-              {'url': 'video3.mp4', 'bitrate_kbps': 1500, type: 'video/mp4'},
+              {
+                'url': 'video1.mp4',
+                'bitrate_kbps': 700,
+                'codec': 'h264',
+                type: 'video/mp4',
+              },
+              {
+                'url': 'video2.mp4',
+                'bitrate_kbps': 2000,
+                'codec': 'h264',
+                type: 'video/mp4',
+              },
+              {
+                'url': 'video3.mp4',
+                'bitrate_kbps': 1500,
+                'codec': 'h264',
+                type: 'video/mp4',
+              },
+              {
+                'url': 'video4.mp4',
+                'bitrate_kbps': 300,
+                'codec': 'vp09.00.30.08',
+                type: 'video/mp4',
+              },
+              {
+                'url': 'video5.mp4',
+                'bitrate_kbps': 200,
+                'codec': 'vp09.00.21.08',
+                type: 'video/mp4',
+              },
+              {
+                'url': 'video6.mp4',
+                'bitrate_kbps': 100,
+                'codec': 'vp09.00.21.09',
+                type: 'video/mp4',
+              },
             ],
           }),
       });
@@ -156,9 +189,12 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       const addedSources = videoEl.querySelectorAll('source');
-      expect(addedSources[0].getAttribute('data-bitrate')).to.equal('2000');
-      expect(addedSources[1].getAttribute('data-bitrate')).to.equal('1500');
-      expect(addedSources[2].getAttribute('data-bitrate')).to.equal('700');
+      expect(addedSources[0].getAttribute('data-bitrate')).to.equal('300');
+      expect(addedSources[1].getAttribute('data-bitrate')).to.equal('200');
+      expect(addedSources[2].getAttribute('data-bitrate')).to.equal('100');
+      expect(addedSources[3].getAttribute('data-bitrate')).to.equal('2000');
+      expect(addedSources[4].getAttribute('data-bitrate')).to.equal('1500');
+      expect(addedSources[5].getAttribute('data-bitrate')).to.equal('700');
     });
 
     it('should add video[src] as the last fallback source', async () => {
