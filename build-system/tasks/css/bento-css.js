@@ -2,15 +2,13 @@ const CssSelectorTokenizer = require('css-selector-tokenizer');
 const postcss = require('postcss');
 
 /**
- * Renames element selectors in a css-selector-tokenizer tree from amp-* into
- * bento-*.
- * @param {Object<string, *>} node
- * @return {Object<string, *>} Modification is done in-place, but the tree is
- *   returned for convenience.
+ * Renames elements in a selector from amp-* into bento-*.
+ * @param {string} selector
+ * @return {string}
  */
-function renameSelectorTokens(node) {
-  /** @type {Object<string, *>[]} */
-  const stack = [node];
+function renameTagNamesInSelector(selector) {
+  const tree = CssSelectorTokenizer.parse(selector);
+  const stack = [tree];
   while (stack.length > 0) {
     const node = stack.pop();
     // annoying condition for type check
@@ -18,27 +16,26 @@ function renameSelectorTokens(node) {
       continue;
     }
     if (node.type === 'element') {
+      // TODO(alanorozco): This is repeated enough times that it should be a
+      // utility function.
       node.name = node.name.replace(/^amp-/, 'bento-');
     }
     if (Array.isArray(node.nodes)) {
       stack.push(...node.nodes);
     }
   }
-  return node;
+  return CssSelectorTokenizer.stringify(tree);
 }
 
 /**
  * PostCSS plugin to rename element selectors from amp-* to bento-*
  * @param {postcss.Root} root
  */
-function renameSelectorPlugin(root) {
+function renameTagNamesInSelectorPostCssPlugin(root) {
   root.walkRules((rule) => {
-    if (!rule.selector) {
-      return;
+    if (rule.selector) {
+      rule.selector = renameTagNamesInSelector(rule.selector);
     }
-    const parsed = CssSelectorTokenizer.parse(rule.selector);
-    const renamed = renameSelectorTokens(parsed);
-    rule.selector = CssSelectorTokenizer.stringify(renamed);
   });
 }
 
@@ -48,7 +45,9 @@ function renameSelectorPlugin(root) {
  * @return {!Promise<string>} The transformed CSS source
  */
 async function renameSelectorsToBentoTagNames(css) {
-  const result = await postcss.default([renameSelectorPlugin]).process(css);
+  const result = await postcss
+    .default([renameTagNamesInSelectorPostCssPlugin])
+    .process(css);
   return result.css;
 }
 
