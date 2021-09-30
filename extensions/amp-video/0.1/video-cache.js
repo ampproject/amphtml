@@ -103,13 +103,10 @@ function applySourcesToVideo(videoEl, sources, maxBitrate) {
         } else if (aCodec !== codec && bCodec === codec) {
           // A negative value results in b being sorted before a.
           return -1;
-        } else if (aCodec === codec && bCodec === codec) {
-          // If both codecs are equivalent, sort by descending bitrate.
-          return a['bitrate_kbps'] - b['bitrate_kbps'];
         }
       }
 
-      // If both codecs have unprioritized values, sort by descending bitrate.
+      // If neither codec has greater priority, sort by descending bitrate.
       return a['bitrate_kbps'] - b['bitrate_kbps'];
     })
     .forEach((source) => {
