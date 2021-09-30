@@ -4,6 +4,7 @@ formats:
   - websites
   - ads
   - email
+  - stories
 teaser:
   text: Allows you to create forms to submit input fields in an AMP document.
 ---
