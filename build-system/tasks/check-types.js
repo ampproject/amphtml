@@ -11,6 +11,7 @@ const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {cyan, green, red, yellow} = require('kleur/colors');
+const {execOrThrow} = require('../common/exec');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {logClosureCompilerError} = require('../compile/closure-compile');
 const {log} = require('../common/logging');
@@ -85,9 +86,6 @@ const TYPE_CHECK_TARGETS = {
   'src-service': {
     srcGlobs: ['src/service/**/*.js'],
     warningLevel: 'QUIET',
-  },
-  'src-compiler': {
-    srcGlobs: ['src/compiler/**/*.js'],
   },
   'src-utils': {
     srcGlobs: ['src/utils/**/*.js'],
@@ -257,6 +255,12 @@ async function typeCheck(targetName) {
  */
 async function checkTypes() {
   const handlerProcess = createCtrlcHandler('check-types');
+
+  execOrThrow(
+    'npx -p typescript tsc --project ./src/compiler/tsconfig.json',
+    'Type checking compiler.js failed'
+  );
+  log(green('SUCCESS:'), 'Type-checking passed for compiler.js');
 
   // Prepare build environment
   process.env.NODE_ENV = 'production';

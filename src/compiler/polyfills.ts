@@ -7,9 +7,11 @@
  * @fileoverview
  */
 
-globalThis['self'] = globalThis;
+const globalObject = globalThis as any;
 
-globalThis['Node'] = {
+globalObject['self'] = globalThis;
+
+globalObject['Node'] = {
   ELEMENT_NODE: 1,
   ATTRIBUTE_NODE: 2,
   TEXT_NODE: 3,
