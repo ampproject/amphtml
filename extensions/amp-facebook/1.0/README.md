@@ -10,7 +10,7 @@ teaser:
 
 ## Usage
 
-The Bento Facebook component allows you to embed a Facebook post, a Facebook video, or a comment on a Facebook post. It can be used as a web component [`<bento-facebook>`](#web-component), or as a Preact/React functional component [`<BentoFacebook>`](#preact/react-component).
+The Bento Facebook component allows you to embed a Facebook post, a Facebook video, or a comment on a Facebook post. It can be used as a web component [`<bento-facebook>`](#web-component), or as a Preact/React functional component [`<BentoFacebook>`](#preactreact-component).
 
 ### Web Component
 
