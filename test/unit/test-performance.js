@@ -1167,6 +1167,22 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       return Services.performanceFor(env.win);
     }
 
+    it('should not throw when layout-shift occurs before core services available', () => {
+      // Fake the Performance API.
+      env.win.PerformanceObserver.supportedEntryTypes = ['layout-shift'];
+      const perf = getPerformance();
+
+      // Fake layout-shift that occured before core services registered
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {entryType: 'layout-shift', value: 0.3, hadRecentInput: false},
+          ];
+        },
+      });
+      perf.coreServicesAvailable();
+    });
+
     it('when the viewer visibility changes to inactive', () => {
       // Specify an Android Chrome user agent.
       env.sandbox
