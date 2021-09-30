@@ -351,6 +351,15 @@ export class AmpStoryPage extends AMP.BaseElement {
       {{/items}}
     `;
 
+    const pdpTemplate = `
+      <div>Item preview:</div>
+      <div>name: {{name}}</div>
+      <div>stars: {{{stars}}}</div>
+      <div>price: {{price}}</div>
+      <div>color: {{color}}</div>
+      <div>url: {{url}}</div>
+    `;
+
     // Check if elements exist for shopping experience
     const shoppingEl = document.querySelector('amp-story-shopping');
     const shoppingTagElements = this.element.querySelectorAll(
@@ -363,7 +372,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       config.then((json) => {
         // Empty holder for page attachment data
         const attachmentData = {items: []};
-        // Render product tages
+        // Render product tags
         shoppingTagElements.forEach((shoppingTagEl) => {
           const tagID = shoppingTagEl.getAttribute('tag-id');
           // Get data to render tag
