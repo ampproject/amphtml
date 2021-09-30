@@ -10,6 +10,18 @@ const cases = {
       background: red;
     }`,
   ],
+  'nested': [
+    `@media screen {
+      amp-foo {
+        background: red;
+      }
+    }`,
+    `@media screen {
+      bento-foo {
+        background: red;
+      }
+    }`,
+  ],
   'multiple': [
     `amp-foo {
       background: red;
