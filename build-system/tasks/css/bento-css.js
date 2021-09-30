@@ -2,7 +2,6 @@ const CssSelectorTokenizer = require('css-selector-tokenizer');
 const postcss = require('postcss');
 
 /**
- * Renames elements in a selector from amp-* into bento-*.
  * @param {string} selector
  * @return {string}
  */
@@ -28,7 +27,6 @@ function renameTagNamesInSelector(selector) {
 }
 
 /**
- * PostCSS plugin to rename element selectors from amp-* to bento-*
  * @param {postcss.Root} root
  */
 function renameTagNamesInSelectorPostCssPlugin(root) {
