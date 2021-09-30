@@ -1,3 +1,5 @@
+import {TreeProto} from '@ampproject/bento-compiler/dist/ast';
+
 /**
  * AMP Components must implement this "buildDom" function in order to be server-rendered.
  *
@@ -10,11 +12,6 @@
  * created during a client-side render. These nodes are often needed for ivars.
  */
 export type BuildDom = (Element) => void;
-
-/**
- * See @ampproject/bento-compiler for the definition.
- */
-export type TreeProto = any;
 
 /**
  * Contains component versioning data via a map from tagName --> version.
