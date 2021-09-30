@@ -56,7 +56,7 @@ const cases = {
       background: red;
     }`,
   ],
-  'not a rule': [
+  'ignores @rule names': [
     `@keyframes amp-x {
       from {
         opacity: 0;
