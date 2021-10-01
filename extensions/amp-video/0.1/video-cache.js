@@ -113,12 +113,14 @@ function applySourcesToVideo(videoEl, sources, maxBitrate) {
       if (source['bitrate_kbps'] > maxBitrate) {
         return;
       }
+      let type = source['type'];
+      type += source['codec'] ? '; codecs=' + source['codec'] : '';
       const sourceEl = createElementWithAttributes(
         videoEl.ownerDocument,
         'source',
         {
           'src': source['url'],
-          'type': source['type'],
+          'type': type,
           'data-bitrate': source['bitrate_kbps'],
           'i-amphtml-video-cached-source': '',
         }
