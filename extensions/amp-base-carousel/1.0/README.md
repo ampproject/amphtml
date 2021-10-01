@@ -2,7 +2,7 @@
 
 ## Usage
 
-A generic carousel for displaying multiple similar pieces of content along a horizontal or vertical axis. Use Bento Carousel as a web component [`<bento-base-carousel>`](#web-component), or a Preact/React functional component [`<BentoBaseCarousel>`](#preact/react-Component).
+A generic carousel for displaying multiple similar pieces of content along a horizontal or vertical axis. Use Bento Carousel as a web component [`<bento-base-carousel>`](#web-component), or a Preact/React functional component [`<BentoBaseCarousel>`](#preactreact-component).
 
 Each of the Bento Carousel component’s immediate children is considered an
 item in the carousel. Each of these nodes may also have arbitrary children.
