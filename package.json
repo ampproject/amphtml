@@ -40,7 +40,7 @@
   },
   "devDependencies": {
     "@ampproject/filesize": "4.3.0",
-    "@ampproject/google-closure-compiler": "20210601.0.0",
+    "@ampproject/google-closure-compiler": "20210907.0.0",
     "@ampproject/remapping": "1.0.1",
     "@babel/core": "7.15.0",
     "@babel/eslint-parser": "7.15.0",
