@@ -55,7 +55,7 @@ import '@ampproject/bento-instagram';
     await customElements.whenDefined('bento-instagram');
 
     // set up button actions
-    document.querySelector('#change-shortcode').onclick = () => instagram.setAttribute('data-shortcode', '1totVhIFXl');
+    document.querySelector('#change-shortcode').onclick = () => instagram.dataset.shortcode = '1totVhIFXl';
   })();
 </script>
 ```
