@@ -57,7 +57,7 @@
     "@jest/core": "27.2.4",
     "@jridgewell/doctrine": "3.0.2",
     "@octokit/graphql": "4.8.0",
-    "@octokit/rest": "18.11.3",
+    "@octokit/rest": "18.11.4",
     "@sinonjs/fake-timers": "7.1.2",
     "@types/chai": "4.2.22",
     "@types/eslint": "7.28.0",
