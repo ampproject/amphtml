@@ -5,33 +5,34 @@
  * @interface {babel.PluginPass}
  * @return {babel.PluginObj}
  */
-module.exports = function () {
+module.exports = function (babel) {
+  const {types: t} = babel;
+  /**
+   * Adds trailing AMP_PRIVATE_ suffix to an identifier.
+   * @param {string} field
+   */
+  function renamePrivate(field) {
+    return function (path, state) {
+      if (isAmpSrc(state)) return;
+      if (path.node.computed) return;
+
+      const key = path.get(field);
+      if (!key.isIdentifier()) return;
+
+      const {name} = key.node;
+      if (name.endsWith('_AMP_PRIVATE_')) return;
+
+      if (!name.endsWith('_')) return;
+      key.replaceWith(t.identifier(`${name}AMP_PRIVATE_`));
+    };
+  }
+
   return {
     visitor: {
-      OptionalMemberExpression(path, state) {
-        if (!isAmpSrc(state)) {
-          return;
-        }
-        maybeAppendSuffix(path.node.property);
-      },
-      MemberExpression(path, state) {
-        if (!isAmpSrc(state)) {
-          return;
-        }
-        maybeAppendSuffix(path.node.property);
-      },
-      Method(path, state) {
-        if (!isAmpSrc(state)) {
-          return;
-        }
-        maybeAppendSuffix(path.node.key);
-      },
-      Property(path, state) {
-        if (!isAmpSrc(state)) {
-          return;
-        }
-        maybeAppendSuffix(path.node.key);
-      },
+      Method: renamePrivate('key'),
+      Property: renamePrivate('key'),
+      MemberExpression: renamePrivate('property'),
+      OptionalMemberExpression: renamePrivate('property'),
     },
   };
 };
@@ -46,21 +47,4 @@ function isAmpSrc(state) {
     throw new Error('Cannot use plugin without providing a filename');
   }
   return filename.startsWith('src/') || filename.startsWith('extensions/');
-}
-
-/**
- * Adds trailing AMP_PRIVATE_ suffix to an identifier.
- * @param {babel.types.Node} ident
- */
-function maybeAppendSuffix(ident) {
-  if (ident.type !== 'Identifier') {
-    return;
-  }
-
-  // AMP Privates are marked via trailing suffix.
-  if (!ident.name.endsWith('_')) {
-    return;
-  }
-
-  ident.name += 'AMP_PRIVATE_';
 }

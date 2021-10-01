@@ -1,22 +1,94 @@
-class Foo {
-  constructor() {
-    this.hello_AMP_PRIVATE_ = 'world';
-    let bar_ = 'world';
-    console.log(zoo_, this?.zeb_AMP_PRIVATE_);
-  }
+const obj = {
+  test_AMP_PRIVATE_: 1,
 
-  doFoo_AMP_PRIVATE_() {}
+  method_AMP_PRIVATE_() {},
 
-  doBar() {
-    const {
-      foo_AMP_PRIVATE_: foo_
-    } = this;
-    this?.bar_AMP_PRIVATE_();
-    this.bar_AMP_PRIVATE_?.();
-  }
+  get getter_AMP_PRIVATE_() {},
+
+  set setter_AMP_PRIVATE_(v) {},
+
+  shorthand_AMP_PRIVATE_: shorthand_,
+  [test_AMP_PRIVATE_]: 1,
+
+  [method_AMP_PRIVATE_]() {},
+
+  get [getter_AMP_PRIVATE_]() {},
+
+  set [setter_AMP_PRIVATE_](v) {},
+
+  'test_': 1,
+
+  'method_'() {},
+
+  get 'getter_'() {},
+
+  set 'setter_'(v) {}
+
+};
+
+class Instance {
+  test_AMP_PRIVATE_ = 1;
+
+  method_AMP_PRIVATE_() {}
+
+  get getter_AMP_PRIVATE_() {}
+
+  set setter_AMP_PRIVATE_(v) {}
+
+  [test_AMP_PRIVATE_] = 1;
+
+  [method_AMP_PRIVATE_]() {}
+
+  get [getter_AMP_PRIVATE_]() {}
+
+  set [setter_AMP_PRIVATE_](v) {}
+
+  'test_' = 1;
+
+  'method_'() {}
+
+  get 'getter_'() {}
+
+  set 'setter_'(v) {}
 
 }
 
-class Foo_ {}
+class Static {
+  static test_AMP_PRIVATE_ = 1;
 
-let hello_ = 'world';
+  static method_AMP_PRIVATE_() {}
+
+  static get getter_AMP_PRIVATE_() {}
+
+  static set setter_AMP_PRIVATE_(v) {}
+
+  static [test_AMP_PRIVATE_] = 1;
+
+  static [method_AMP_PRIVATE_]() {}
+
+  static get [getter_AMP_PRIVATE_]() {}
+
+  static set [setter_AMP_PRIVATE_](v) {}
+
+  static 'test_' = 1;
+
+  static 'method_'() {}
+
+  static get 'getter_'() {}
+
+  static set 'setter_'(v) {}
+
+}
+
+foo.bar_AMP_PRIVATE_;
+foo[bar_AMP_PRIVATE_];
+foo['bar_'];
+foo?.bar_AMP_PRIVATE_;
+foo?.[bar_AMP_PRIVATE_];
+foo?.['bar_'];
+deep.foo?.bar_AMP_PRIVATE_;
+deep.foo?.[bar_AMP_PRIVATE_];
+deep.foo?.['bar_'];
+deep?.foo.bar_AMP_PRIVATE_;
+deep?.foo[bar_AMP_PRIVATE_];
+deep?.foo['bar_'];

@@ -1,18 +1,67 @@
-class Foo {
-  constructor() {
-    this.hello_ = 'world';
-    let bar_ = 'world';
-    console.log(zoo_, this?.zeb_);
-  }
+const obj = {
+  test_: 1,
+  method_() {},
+  get getter_() {},
+  set setter_(v) {},
+  shorthand_,
+  
+  [test_]: 1,
+  [method_]() {},
+  get [getter_]() {},
+  set [setter_](v) {},
 
-  doFoo_() {}
-  doBar() {
-    const {foo_} = this;
-    this?.bar_();
-    this.bar_?.();
-  }
+  'test_': 1,
+  'method_'() {},
+  get 'getter_'() {},
+  set 'setter_'(v) {},
+};
+
+class Instance {
+  test_ = 1;
+  method_() {}
+  get getter_() {}
+  set setter_(v) {}
+  
+  [test_] = 1;
+  [method_]() {}
+  get [getter_]() {}
+  set [setter_](v) {}
+
+  'test_' = 1
+  'method_'() {}
+  get 'getter_'() {}
+  set 'setter_'(v) {}
 }
 
-class Foo_ {}
+class Static {
+  static test_ = 1;
+  static method_() {}
+  static get getter_() {}
+  static set setter_(v) {}
+  
+  static [test_] = 1;
+  static [method_]() {}
+  static get [getter_]() {}
+  static set [setter_](v) {}
 
-let hello_ = 'world';
+  static 'test_' = 1
+  static 'method_'() {}
+  static get 'getter_'() {}
+  static set 'setter_'(v) {}
+}
+
+foo.bar_;
+foo[bar_];
+foo['bar_'];
+
+foo?.bar_;
+foo?.[bar_];
+foo?.['bar_'];
+
+deep.foo?.bar_;
+deep.foo?.[bar_];
+deep.foo?.['bar_'];
+
+deep?.foo.bar_;
+deep?.foo.[bar_];
+deep?.foo.['bar_'];
