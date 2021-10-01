@@ -408,14 +408,18 @@ export class AmpA4A extends AMP.BaseElement {
     this.uiHandler = new AMP.AmpAdUIHandler(this);
     this.uiHandler.validateStickyAd();
 
-    const verifier = signatureVerifierFor(this.win);
-    this.keysetPromise_ = this.getAmpDoc()
-      .whenFirstVisible()
-      .then(() => {
-        this.getSigningServiceNames().forEach((signingServiceName) => {
-          verifier.loadKeyset(signingServiceName);
+    // Disable crypto key fetching if we are not going to use it in no-signing path.
+    // TODO(ccordry): clean up with no-signing launch.
+    if (!this.isInNoSigningExp()) {
+      const verifier = signatureVerifierFor(this.win);
+      this.keysetPromise_ = this.getAmpDoc()
+        .whenFirstVisible()
+        .then(() => {
+          this.getSigningServiceNames().forEach((signingServiceName) => {
+            verifier.loadKeyset(signingServiceName);
+          });
         });
-      });
+    }
 
     this.a4aAnalyticsConfig_ = this.getA4aAnalyticsConfig();
     if (this.a4aAnalyticsConfig_) {
