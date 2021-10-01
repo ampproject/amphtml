@@ -2,27 +2,40 @@
  * Renames all of AMP's class properties to have a unique suffix, `AMP_PRIVATE_`.
  * This acts as an indicator for terser to mangle the names even when combined with 3p files.
  *
+ * @param {babel} babel
  * @interface {babel.PluginPass}
  * @return {babel.PluginObj}
  */
 module.exports = function (babel) {
   const {types: t} = babel;
+
   /**
-   * Adds trailing AMP_PRIVATE_ suffix to an identifier.
+   * Adds trailing AMP_PRIVATE_ suffix to private identifiers.
    * @param {string} field
+   * @return {function(*,*):void}
    */
   function renamePrivate(field) {
     return function (path, state) {
-      if (!isAmpSrc(state)) return;
-      if (path.node.computed) return;
+      if (!isAmpSrc(state)) {
+        return;
+      }
+      if (path.node.computed) {
+        return;
+      }
 
       const key = path.get(field);
-      if (!key.isIdentifier()) return;
+      if (!key.isIdentifier()) {
+        return;
+      }
 
       const {name} = key.node;
-      if (name.endsWith('_AMP_PRIVATE_')) return;
+      if (name.endsWith('_AMP_PRIVATE_')) {
+        return;
+      }
 
-      if (!name.endsWith('_')) return;
+      if (!name.endsWith('_')) {
+        return;
+      }
       key.replaceWith(t.identifier(`${name}AMP_PRIVATE_`));
     };
   }
