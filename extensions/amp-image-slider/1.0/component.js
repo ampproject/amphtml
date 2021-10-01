@@ -25,12 +25,15 @@ const VALID_IMAGE_TAGNAMES = new Set(['AMP-IMG', 'IMG']);
 
 /**
  * Displays given component with supplied props.
- * @param {*} component Component to render
+ * @param {*} props
+ * @param {{current: ?Element}} ref
  * @return {PreactDef.Renderable}
  */
-function DisplayAs({as: Comp = 'div', ...rest}) {
-  return <Comp {...rest} />;
+function DisplayAsWithRef({as: Comp = 'div', ...rest}, ref) {
+  return <Comp {...rest} ref={ref} />;
 }
+
+const DisplayAs = forwardRef(DisplayAsWithRef);
 
 /**
  * @param {!BentoImageSliderDef.Props} props
@@ -54,7 +57,7 @@ export function BentoImageSliderWithRef(
   /** Common variables */
   let containsAmpImages;
   const gesturesRef = useRef(null);
-  const {isEdge, setIsEdge} = useState();
+  const [isEdge, setIsEdge] = useState();
   const isEventRegistered = false;
   const styles = useStyles();
 
@@ -103,7 +106,7 @@ export function BentoImageSliderWithRef(
   const unlistenKeyDown = useRef(null);
 
   /** Animate Hint Flag */
-  const {hideHint, setHideHint} = useState(false);
+  const [hideHint, setHideHint] = useState(false);
 
   const animateHideHint = useCallback(() => {
     setHideHint(true);
@@ -226,6 +229,12 @@ export function BentoImageSliderWithRef(
     const {left: barLeft} = barRef.current./*OK*/ getBoundingClientRect();
     const {left: boxLeft, width: boxWidth} =
       containerRef.current./*OK*/ getBoundingClientRect();
+    console /*OK*/
+      .log(barLeft);
+    console /*OK*/
+      .log(boxLeft);
+    console /*OK*/
+      .log((barLeft - boxLeft) / boxWidth);
     return (barLeft - boxLeft) / boxWidth;
   }, []);
 
@@ -240,7 +249,7 @@ export function BentoImageSliderWithRef(
       percentFromLeft = limitPercentage(percentFromLeft);
 
       updateTranslateX(barRef.current, percentFromLeft);
-      updateTranslateX(rightMaskRef.current, percentFromLeft);
+      updateTranslateX(rightMaskRef.current, percentFromLeft * 2);
       updateTranslateX(rightImageRef.current, -percentFromLeft);
       const adjustedDeltaFromLeft = percentFromLeft - 0.5;
       updateTranslateX(leftHintBodyRef.current, adjustedDeltaFromLeft);
@@ -418,15 +427,9 @@ export function BentoImageSliderWithRef(
       'keydown',
       onKeyDown
     );
-    registerTouchGestures();
+    //registerTouchGestures();
     //this.isEventRegistered = true;
-  }, [
-    registerTouchGestures,
-    unlistenKeyDown,
-    isEventRegistered,
-    onMouseDown,
-    onKeyDown,
-  ]);
+  }, [unlistenKeyDown, isEventRegistered, onMouseDown, onKeyDown]);
 
   useEffect(() => {
     /** Common variables */
@@ -441,7 +444,6 @@ export function BentoImageSliderWithRef(
     // Notice: hints are attached after amp-img finished loading
     // buildHint();
     // checkARIA();
-
     registerEvents();
   }, [registerEvents]);
   useLayoutEffect(() => {
@@ -471,6 +473,10 @@ export function BentoImageSliderWithRef(
       size
       paint
       tabIndex="0"
+      autoFocus="true"
+      onMouseDown={onMouseDown}
+      onMouseMove={onMouseMove}
+      onMouseUp={onMouseUp}
       {...rest}
     >
       {/* Masks */}
@@ -479,7 +485,12 @@ export function BentoImageSliderWithRef(
           <div ref={leftLabelRef}>
             <DisplayAs as={firstLabelAs} />
           </div>
-          <DisplayAs as={firstImageAs} />
+          {/* <DisplayAs as={firstImageAs} ref={leftImageRef} /> */}
+          <img
+            src="https://amp.dev/static/samples/img/canoe_900x600.jpg"
+            ref={leftImageRef}
+            style={{width: 600, height: 300}}
+          />
         </div>
       </div>
       <div
@@ -499,7 +510,12 @@ export function BentoImageSliderWithRef(
           <div ref={rightLabelRef}>
             <DisplayAs as={secondLabelAs} />
           </div>
-          <DisplayAs as={secondImageAs} />
+          {/* <DisplayAs as={secondImageAs} ref={rightImageRef} /> */}
+          <img
+            src="https://amp.dev/static/samples/img/canoe_900x600_blur.jpg"
+            ref={rightImageRef}
+            style={{width: 600, height: 300}}
+          />
         </div>
       </div>
 
