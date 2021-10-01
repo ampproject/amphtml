@@ -3,7 +3,17 @@ workspace(name = "htmlparser")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
+    name = "com_google_protobuf",
+    sha256 = "40825ef029f05038008b6217e34d00c09e506f99cb91fb97a2f2fd20143fb849",
+    strip_prefix = "protobuf-master",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/master.zip"],
+)
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+protobuf_deps()
+
+http_archive(
     name = "com_google_absl",
+    sha256 = "9da85425cda33e13c619c35473c9653944d0dd9aab1a69ee9b3543cdaed277e5",
     strip_prefix = "abseil-cpp-master",
     urls = ["https://github.com/abseil/abseil-cpp/archive/master.zip"],
 )
@@ -12,35 +22,29 @@ http_archive(
     name = "com_google_googletest",
     sha256 = "1129a3ff6d81d1b4cd080784e6cb539a9b34d8309831ae4560804337b8cfd27c",
     strip_prefix = "googletest-955c7f837efad184ec63e771c42542d37545eaef",
-    urls = ["https://github.com/google/googletest/archive/955c7f837efad184ec63e771c42542d37545eaef.zip"],  # 2019-01-07
+    urls = ["https://github.com/google/googletest/archive/955c7f837efad184ec63e771c42542d37545eaef.zip"],
+)
+
+http_archive(
+    name = "com_googlesource_code_re2",
+    sha256 = "53f3e02c5a22240cd9b625945b8512742fc7a1509119e269b5fd3748f6c84646",
+    strip_prefix = "re2-7272283b3842bd1d24d25ce0a6e40b63caec3fe6",
+    urls = ["https://github.com/google/re2/archive/7272283b3842bd1d24d25ce0a6e40b63caec3fe6.tar.gz"],
 )
 
 http_archive(
     name = "com_github_gflags_gflags",
+    sha256 = "289609e7e2fa13d637a6545ab78cde4b56085a501aa57b7ea294ccb76026d931",
     strip_prefix = "gflags-master",
     urls = ["https://github.com/gflags/gflags/archive/master.zip"],
 )
 
 http_archive(
-    name = "com_github_re2",
-    strip_prefix = "re2-main",
-    urls = ["https://github.com/google/re2/archive/main.zip"],
-)
-
-http_archive(
     name = "com_github_glog",
+    sha256 = "fe3fc6e22356e8602d84b7dbfebec779f10b781ad041d24184e1e745b3754ffe",
     strip_prefix = "glog-master",
     urls = ["https://github.com/google/glog/archive/master.zip"],
 )
-
-http_archive(
-    name = "com_google_protobuf",
-    strip_prefix = "protobuf-master",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/master.zip"],
-)
-
-load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
-protobuf_deps()
 
 local_repository(
     name = "validator",
