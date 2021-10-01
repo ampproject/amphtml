@@ -1,10 +1,7 @@
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {isAmp4Email} from '../../../src/format';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {toggleAttribute} from '#core/dom';
 
 const _CONTROL_HIDE_ATTRIBUTE = 'i-amphtml-carousel-hide-buttons';
@@ -30,6 +27,9 @@ export class BaseCarousel extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.showControls_ = false;
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /** @override */
@@ -234,14 +234,17 @@ export class BaseCarousel extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    observeWithSharedInOb(this.element, (inViewport) =>
-      this.viewportCallbackTemp(inViewport)
+    this.unobserveIntersections_ = observeIntersections(
+      this.element,
+      ({isIntersecting}) => this.viewportCallbackTemp(isIntersecting)
     );
     return Promise.resolve();
   }
+
   /** @override */
   unlayoutCallback() {
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections = null;
     return true;
   }
 

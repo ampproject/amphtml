@@ -186,7 +186,7 @@ function calculateChangeEntry(element, hostViewport, intersection, ratio) {
  * @param {!IntersectionObserverEntry} entry
  * @return {!IntersectionObserverEntry}
  */
-function cloneEntryForCrossOrigin(entry) {
+export function cloneEntryForCrossOrigin(entry) {
   return /** @type {!IntersectionObserverEntry} */ ({
     'time': entry.time,
     'rootBounds': entry.rootBounds,

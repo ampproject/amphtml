@@ -10,10 +10,7 @@ import {
   isLayoutSizeDefined,
 } from '#core/dom/layout';
 import {intersectionEntryToJson} from '#core/dom/layout/intersection';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {DetachedDomStream, streamResponseToWriter} from '#core/dom/stream';
 import {setStyle} from '#core/dom/style';
 import {duplicateErrorIfNecessary} from '#core/error';
@@ -369,8 +366,8 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.transferDomBody_ = null;
 
-    /** @private {function(boolean)} */
-    this.boundViewportCallback_ = this.viewportCallbackTemp.bind(this);
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /** @override */
@@ -411,14 +408,18 @@ export class AmpA4A extends AMP.BaseElement {
     this.uiHandler = new AMP.AmpAdUIHandler(this);
     this.uiHandler.validateStickyAd();
 
-    const verifier = signatureVerifierFor(this.win);
-    this.keysetPromise_ = this.getAmpDoc()
-      .whenFirstVisible()
-      .then(() => {
-        this.getSigningServiceNames().forEach((signingServiceName) => {
-          verifier.loadKeyset(signingServiceName);
+    // Disable crypto key fetching if we are not going to use it in no-signing path.
+    // TODO(ccordry): clean up with no-signing launch.
+    if (!this.isInNoSigningExp()) {
+      const verifier = signatureVerifierFor(this.win);
+      this.keysetPromise_ = this.getAmpDoc()
+        .whenFirstVisible()
+        .then(() => {
+          this.getSigningServiceNames().forEach((signingServiceName) => {
+            verifier.loadKeyset(signingServiceName);
+          });
         });
-      });
+    }
 
     this.a4aAnalyticsConfig_ = this.getA4aAnalyticsConfig();
     if (this.a4aAnalyticsConfig_) {
@@ -1313,7 +1314,10 @@ export class AmpA4A extends AMP.BaseElement {
       this.destroyFrame(true);
     }
     return this.attemptToRenderCreative().then(() => {
-      observeWithSharedInOb(this.element, this.boundViewportCallback_);
+      this.unobserveIntersections_ = observeIntersections(
+        this.element,
+        ({isIntersecting}) => this.viewportCallbackTemp(isIntersecting)
+      );
     });
   }
 
@@ -1414,7 +1418,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections = null;
     this.tearDownSlot();
     return true;
   }
