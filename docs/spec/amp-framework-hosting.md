@@ -93,9 +93,11 @@ If your AMP runtime will be built with code customizations, consider using flag 
 
 -   `--sourcemap_url`: Provide the base URL for JavaScript source map links. This URL should contain placeholder `{version}` that will be replaced with the actual version when the AMP framework is built, for example `https://raw.githubusercontent.com/<github-username>/amphtml/{version}/`. Defaults to `https://raw.githubusercontent.com/ampproject/amphtml/{version}/`.
 
-Tips: Be sure to pass flag `--noconfig` to `amp dist` in the flavor command, otherwise you will end up with multiple `AMP_CONFIG` definitions in entrypoint files (`v0.js`, `shadow-v0.js`, etc.). Flag `--version_override` is not supported.
+**Tips:**
 
-Important: `build-system/global-configs/custom-flavors-config.json` is not part of checked-in source. If it exists, the custom flavors are automatically made available to `amp release`.
+-   Be sure to pass flag `--noconfig` to `amp dist` in the flavor command, otherwise you will end up with multiple `AMP_CONFIG` definitions in entrypoint files (`v0.js`, `shadow-v0.js`, etc.).
+-   Flag `--version_override` is not supported.
+-   `build-system/global-configs/custom-flavors-config.json` is not part of checked-in source. If it exists, the custom flavors are automatically made available to `amp release`.
 
 #### Build the framework
 

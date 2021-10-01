@@ -8,10 +8,6 @@ const {cyan, yellow} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const ROOT_DIR = path.resolve(__dirname, '../../');
-const CUSTOM_OVERLAY_CONFIG_PATH =
-  'build-system/global-configs/custom-config.json';
-const CUSTOM_FLAVORS_CONFIG_PATH =
-  'build-system/global-configs/custom-flavors-config.json';
 
 /**
  * Cleans up various cache and output directories. Optionally cleans up inner
@@ -35,9 +31,6 @@ async function clean() {
     'build-system/server/new-server/transforms/dist',
     'build-system/tasks/performance/cache',
     'build-system/tasks/performance/results.json',
-    // Custom configs are not deleted by default, see flag --include_custom_configs
-    // 'build-system/global-configs/custom-config.json',
-    // 'build-system/global-configs/custom-flavors-config.json',
     'dist',
     'dist.3p',
     'dist.tools',
@@ -55,15 +48,15 @@ async function clean() {
     pathsToDelete.push('**/node_modules', '!node_modules');
   }
   const customConfigs = [
-    CUSTOM_OVERLAY_CONFIG_PATH,
-    CUSTOM_FLAVORS_CONFIG_PATH,
+    'build-system/global-configs/custom-config.json',
+    'build-system/global-configs/custom-flavors-config.json',
   ];
   if (argv.include_custom_configs) {
     pathsToDelete.push(...customConfigs);
   } else {
     for (const customConfig of customConfigs) {
       if (fs.existsSync(customConfig)) {
-        log(yellow('Notice:'), 'Skipping', cyan(customConfig));
+        log(yellow('Skipping path:'), cyan(customConfig));
       }
     }
   }

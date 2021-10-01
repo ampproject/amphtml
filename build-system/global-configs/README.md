@@ -77,9 +77,11 @@ and then "Custom Production Release" could be built with:
 amp release --flavor="custom-prod"
 ```
 
-Tips: Be sure to pass flag `--noconfig` to `amp dist` in the flavor command, otherwise you will end up with multiple `AMP_CONFIG` definitions in entrypoint files (`v0.js`, `shadow-v0.js`, etc.). Flag `--version_override` is not supported.
+**Tips:**
 
-Note that `AMP_CONFIG` can be customized with [`custom-config.json`](#custom-configjson) to further tailor the build.
+-   Be sure to pass flag `--noconfig` to `amp dist` in the flavor command, otherwise you will end up with multiple `AMP_CONFIG` definitions in entrypoint files (`v0.js`, `shadow-v0.js`, etc.).
+-   Flag `--version_override` is not supported.
+-   `AMP_CONFIG` can be customized with [`custom-config.json`](#custom-configjson) to further tailor the build.
 
 # client-side-experiments-config.json
 
