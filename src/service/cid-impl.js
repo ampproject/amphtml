@@ -14,8 +14,6 @@ import {parseJson, tryParseJson} from '#core/types/object/json';
 import {base64UrlEncodeFromBytes} from '#core/types/string/base64';
 import {getCryptoRandomBytesArray} from '#core/types/string/bytes';
 
-import {isExperimentOn} from '#experiments';
-
 import {Services} from '#service';
 
 import {CacheCidApi} from './cache-cid-api';
@@ -173,7 +171,9 @@ class Cid {
     this.apiKeyMap_ = null;
 
     /** @const {boolean} */
-    this.isBackupCidExpOn = isExperimentOn(this.ampdoc.win, 'amp-cid-backup');
+    this.isBackupCidExpOn =
+      /* isExperimentOn(this.ampdoc.win, 'amp-cid-backup') // launched: true */
+      true;
   }
 
   /** @override */
