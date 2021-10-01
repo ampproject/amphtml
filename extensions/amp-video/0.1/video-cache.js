@@ -106,7 +106,8 @@ function applySourcesToVideo(videoEl, sources, maxBitrate) {
       const bitrateDifference = a['bitrate_kbps'] - b['bitrate_kbps'];
 
       // Primary sorting factor: codec. Tiebreaking sorting factor: bitrate.
-      return codecDifference != 0 ? codecDifference : bitrateDifference;
+      // A positive return value means that source A is sorted before source B.
+      return codecDifference == 0 ? bitrateDifference : codecDifference;
     })
     .forEach((source) => {
       if (source['bitrate_kbps'] > maxBitrate) {
