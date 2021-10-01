@@ -96,7 +96,7 @@ export function useSlotContext(ref, opt_props) {
     );
 
     if (!context.playable) {
-      execute(slot, pauseAll);
+      execute(slot, pauseAll, true);
     }
 
     return () => {
@@ -119,11 +119,11 @@ export function useSlotContext(ref, opt_props) {
     // use `BaseElement.setAsContainer`.
     if (loading != Loading.LAZY) {
       // TODO(#31915): switch to `mount`.
-      execute(slot, loadAll);
+      execute(slot, loadAll, true);
     }
 
     return () => {
-      execute(slot, unmountAll);
+      execute(slot, unmountAll, false);
     };
   }, [ref, loading]);
 }
@@ -131,12 +131,18 @@ export function useSlotContext(ref, opt_props) {
 /**
  * @param {!Element} slot
  * @param {function(!AmpElement):void|function(!Array<!AmpElement>):void} action
+ * @param {boolean} schedule
  */
-function execute(slot, action) {
+function execute(slot, action, schedule) {
   const assignedElements = slot.assignedElements
     ? slot.assignedElements()
     : slot;
   if (Array.isArray(assignedElements) && assignedElements.length == 0) {
+    return;
+  }
+
+  if (!schedule) {
+    action(assignedElements);
     return;
   }
 
