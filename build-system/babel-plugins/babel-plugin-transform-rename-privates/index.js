@@ -13,7 +13,7 @@ module.exports = function (babel) {
    */
   function renamePrivate(field) {
     return function (path, state) {
-      if (isAmpSrc(state)) return;
+      if (!isAmpSrc(state)) return;
       if (path.node.computed) return;
 
       const key = path.get(field);

@@ -8,13 +8,13 @@ const obj = {
   set setter_AMP_PRIVATE_(v) {},
 
   shorthand_AMP_PRIVATE_: shorthand_,
-  [test_AMP_PRIVATE_]: 1,
+  [test_]: 1,
 
-  [method_AMP_PRIVATE_]() {},
+  [method_]() {},
 
-  get [getter_AMP_PRIVATE_]() {},
+  get [getter_]() {},
 
-  set [setter_AMP_PRIVATE_](v) {},
+  set [setter_](v) {},
 
   'test_': 1,
 
@@ -35,13 +35,13 @@ class Instance {
 
   set setter_AMP_PRIVATE_(v) {}
 
-  [test_AMP_PRIVATE_] = 1;
+  [test_] = 1;
 
-  [method_AMP_PRIVATE_]() {}
+  [method_]() {}
 
-  get [getter_AMP_PRIVATE_]() {}
+  get [getter_]() {}
 
-  set [setter_AMP_PRIVATE_](v) {}
+  set [setter_](v) {}
 
   'test_' = 1;
 
@@ -62,13 +62,13 @@ class Static {
 
   static set setter_AMP_PRIVATE_(v) {}
 
-  static [test_AMP_PRIVATE_] = 1;
+  static [test_] = 1;
 
-  static [method_AMP_PRIVATE_]() {}
+  static [method_]() {}
 
-  static get [getter_AMP_PRIVATE_]() {}
+  static get [getter_]() {}
 
-  static set [setter_AMP_PRIVATE_](v) {}
+  static set [setter_](v) {}
 
   static 'test_' = 1;
 
@@ -81,14 +81,14 @@ class Static {
 }
 
 foo.bar_AMP_PRIVATE_;
-foo[bar_AMP_PRIVATE_];
+foo[bar_];
 foo['bar_'];
 foo?.bar_AMP_PRIVATE_;
-foo?.[bar_AMP_PRIVATE_];
+foo?.[bar_];
 foo?.['bar_'];
 deep.foo?.bar_AMP_PRIVATE_;
-deep.foo?.[bar_AMP_PRIVATE_];
+deep.foo?.[bar_];
 deep.foo?.['bar_'];
 deep?.foo.bar_AMP_PRIVATE_;
-deep?.foo[bar_AMP_PRIVATE_];
+deep?.foo[bar_];
 deep?.foo['bar_'];
