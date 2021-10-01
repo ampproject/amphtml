@@ -538,6 +538,8 @@ async function minify(code, map) {
     mangle: {
       properties: {
         regex: '_AMP_PRIVATE_$',
+        // eslint-disable-next-line google-camelcase/google-camelcase
+        keep_quoted: /** @type {'strict'} */ ('strict'),
       },
     },
     compress: {
@@ -555,8 +557,6 @@ async function minify(code, map) {
     nameCache,
   };
   // TS complains if defined inline, since it sees type `string` but needs type ("strict" | boolean).
-  // eslint-disable-next-line google-camelcase/google-camelcase
-  terserOptions.mangle.properties.keep_quoted = 'strict';
 
   const minified = await terser.minify(code, terserOptions);
   return {code: minified.code ?? '', map: minified.map};

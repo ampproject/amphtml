@@ -52,12 +52,14 @@ module.exports = function (babel) {
 
 /**
  * @param {*} state
- * @return {string}
+ * @return {boolean}
  */
 function isAmpSrc(state) {
   const filename = state.file.opts.filenameRelative;
   if (!filename) {
     throw new Error('Cannot use plugin without providing a filename');
   }
-  return filename.startsWith('src/') || filename.startsWith('extensions/');
+  return !(
+    filename.startsWith('node_modules') || filename.startsWith('third_party')
+  );
 }
