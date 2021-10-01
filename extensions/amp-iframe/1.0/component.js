@@ -47,7 +47,7 @@ export function Iframe({
       iframe,
       MessageType.INTERSECTION,
       dict({'changes': entries.map(cloneEntryForCrossOrigin)}),
-      targetOrigin
+      '*'
     );
   };
 
