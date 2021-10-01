@@ -3915,6 +3915,7 @@ tags: {
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "height" }
+  attrs: { name: "importance" }  # Not yet part of the html spec
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: { name: "referrerpolicy" }
