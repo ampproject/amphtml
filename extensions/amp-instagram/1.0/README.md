@@ -41,23 +41,21 @@ import '@ampproject/bento-instagram';
     }
   </style>
 </head>
-<bento-instagram id="my-instagram">
-  Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque
-  inermis reprehendunt.
+<bento-instagram
+  id="my-instagram"
+  data-shortcode="CKXYAzuj7TE"
+  data-captioned>
 </bento-instagram>
-<div class="buttons" style="margin-top: 8px;">
-  <button id="font-button">Change max-font-size</button>
-  <button id="content-button">Change content</button>
+<button id="change-shortcode">Change shortcode</button>
 </div>
 
 <script>
   (async () => {
-    const fitText = document.querySelector('#my-instagram');
+    const instagram = document.querySelector('#my-instagram');
     await customElements.whenDefined('bento-instagram');
 
     // set up button actions
-    document.querySelector('#font-button').onclick = () => fitText.setAttribute('max-font-size', '40');
-    document.querySelector('#content-button').onclick = () => fitText.textContent = 'new content';
+    document.querySelector('#change-shortcode').onclick = () => instagram.setAttribute('data-shortcode', '1totVhIFXl');
   })();
 </script>
 ```
@@ -125,14 +123,13 @@ npm install @ampproject/bento-instagram
 
 ```javascript
 import React from 'react';
-import { BentoIframe } from '@ampproject/bento-instagram/react';
+import { BentoInstagram } from '@ampproject/bento-instagram/react';
 import '@ampproject/bento-instagram/styles.css';
 function App() {
   return (
-    <BentoIframe
-      src="https://en.wikipedia.org/wiki/Bento"
-      width="800"
-      height="600"
+    <BentoInstagram
+      shortcode="CKXYAzuj7TE"
+      captioned
     />
   );
 }
