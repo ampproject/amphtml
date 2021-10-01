@@ -47,7 +47,7 @@ export function BentoIframe({
       iframe,
       MessageType.INTERSECTION,
       dict({'changes': entries.map(cloneEntryForCrossOrigin)}),
-      '*'
+      targetOrigin
     );
   };
 
