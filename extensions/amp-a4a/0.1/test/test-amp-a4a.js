@@ -12,8 +12,6 @@ import {createElementWithAttributes} from '#core/dom';
 import {LayoutPriority} from '#core/dom/layout';
 import {layoutRectLtwh, layoutSizeFromRect} from '#core/dom/layout/rect';
 
-import {toggleExperiment} from '#experiments';
-
 import {Services} from '#service';
 import {AmpDoc, installDocService} from '#service/ampdoc-impl';
 import {resetScheduledElementForTesting} from '#service/custom-element-registry';
@@ -244,7 +242,6 @@ describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
   });
 
   it('should fallback when shadow DOM is not supported', async () => {
-    toggleExperiment(env.win, 'disable-a4a-non-sd', true, true);
     attachShadowStub.value(undefined);
     const fallbackSpy = env.sandbox.spy(a4a, 'handleFallback_');
     env.sandbox.stub(a4a, 'skipClientSideValidation').returns(false);
@@ -255,7 +252,6 @@ describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
   });
 
   it('should fallback when shadow DOM is polyfilled', async () => {
-    toggleExperiment(env.win, 'disable-a4a-non-sd', true, true);
     attachShadowStub.value(function () {
       // A non-native function.
       return null;
@@ -269,7 +265,8 @@ describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
   });
 
   it('should ignore shadow DOM requirement without an experiment', async () => {
-    toggleExperiment(env.win, 'disable-a4a-non-sd', false, true);
+    /* toggleExperiment(env.win, 'disable-a4a-non-sd', false, true) // launched: true */
+    false;
     attachShadowStub.value(undefined);
     const fallbackSpy = env.sandbox.spy(a4a, 'handleFallback_');
     env.sandbox.stub(a4a, 'skipClientSideValidation').returns(false);
@@ -1661,7 +1658,6 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       // Remove attachShadow.
       attachShadowStub.value(undefined);
-      toggleExperiment(fixture.win, 'disable-a4a-non-sd', true, true);
 
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
@@ -1708,7 +1704,6 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
       attachShadowStub.value(function () {
         return null;
       });
-      toggleExperiment(fixture.win, 'disable-a4a-non-sd', true, true);
 
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
