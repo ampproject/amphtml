@@ -184,7 +184,6 @@ The `page` value embeds any public facebook page.
 Check out the documentation for differences between
 [post embeds](https://developers.facebook.com/docs/plugins/embedded-posts),
 [video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player),
-[comment embeds](https://developers.facebook.com/docs/plugins/embedded-comments),
 [like embeds](https://developers.facebook.com/docs/plugins/like-button),
 and [page embeds](https://developers.facebook.com/docs/plugins/page-plugin).
 
@@ -351,7 +350,6 @@ The `page` value embeds any public facebook page.
 Check out the documentation for differences between
 [post embeds](https://developers.facebook.com/docs/plugins/embedded-posts),
 [video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player),
-[comment embeds](https://developers.facebook.com/docs/plugins/embedded-comments),
 [like embeds](https://developers.facebook.com/docs/plugins/like-button),
 and [page embeds](https://developers.facebook.com/docs/plugins/page-plugin).
 
