@@ -10,7 +10,7 @@ import {toArray} from '#core/types/array';
 import {user} from '../../../src/log';
 
 /** @const {!Array<string>} */
-const CODECS_IN_DESCENDING_PRIORITY = ['vp09', 'h264'];
+const CODECS_IN_ASCENDING_PRIORITY = ['h264', 'vp09'];
 
 /**
  * Add the caching sources to the video if opted in.
@@ -95,19 +95,18 @@ function applySourcesToVideo(videoEl, sources, maxBitrate) {
       const aCodec = a['codec']?.split('.')[0];
       const bCodec = b['codec']?.split('.')[0];
 
-      for (let i = 0; i < CODECS_IN_DESCENDING_PRIORITY.length; i++) {
-        const codec = CODECS_IN_DESCENDING_PRIORITY[i];
-        if (aCodec === codec && bCodec !== codec) {
-          // A positive value results in a being sorted before b.
-          return 1;
-        } else if (aCodec !== codec && bCodec === codec) {
-          // A negative value results in b being sorted before a.
-          return -1;
-        }
-      }
+      // The greater the index, the more the codec is preferred.
+      const aCodecPriority = CODECS_IN_ASCENDING_PRIORITY.indexOf(aCodec);
+      const bCodecPriority = CODECS_IN_ASCENDING_PRIORITY.indexOf(bCodec);
 
-      // If neither codec has greater priority, sort by descending bitrate.
-      return a['bitrate_kbps'] - b['bitrate_kbps'];
+      // A positive difference means that source A has a superior codec.
+      const codecDifference = aCodecPriority - bCodecPriority;
+
+      // A positive difference means that source A has a superior bitrate.
+      const bitrateDifference = a['bitrate_kbps'] - b['bitrate_kbps'];
+
+      // Primary sorting factor: codec. Tiebreaking sorting factor: bitrate.
+      return codecDifference != 0 ? codecDifference : bitrateDifference;
     })
     .forEach((source) => {
       if (source['bitrate_kbps'] > maxBitrate) {
