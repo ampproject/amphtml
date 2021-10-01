@@ -15,10 +15,10 @@ import {dict} from '#core/types/object';
 const NOOP = () => {};
 
 /**
- * @param {!IframeDef.Props} props
+ * @param {!BentoIframeDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function Iframe({
+export function BentoIframe({
   allowFullScreen,
   allowPaymentRequest,
   iframeStyle,
