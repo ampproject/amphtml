@@ -1595,9 +1595,7 @@ export class AmpStory extends AMP.BaseElement {
   onResize() {
     const prevUiState = this.uiState_;
     this.uiState_ = this.getUIType_();
-    if (this.uiState_ !== UIType.MOBILE || this.uiState_ !== prevUiState) {
-      this.storeService_.dispatch(Action.TOGGLE_UI, this.uiState_);
-    }
+    this.storeService_.dispatch(Action.TOGGLE_UI, this.uiState_);
 
     if (this.uiState_ === UIType.MOBILE) {
       const currentHeight = this.getViewport().getHeight();
