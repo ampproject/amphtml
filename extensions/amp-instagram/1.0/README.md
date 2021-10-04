@@ -137,6 +137,31 @@ function App() {
 
 [/example]
 
+#### Layout and style
+
+**Container type**
+
+The `BentoInstagram` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
+
+```jsx
+<BentoInstagram style={{width: '300px', height: '200px'}} shortcode="CKXYAzuj7TE">
+</BentoInstagram>
+```
+
+Or via `className`:
+
+```jsx
+<BentoInstagram className='custom-styles' shortcode="CKXYAzuj7TE">
+</BentoInstagram>
+```
+
+```css
+.custom-styles {
+  height: 100px;
+  width: 100%;
+}
+```
+
 #### Props
 
 ##### `shortcode`
