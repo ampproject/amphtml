@@ -1,4 +1,4 @@
-import {TreeProto} from '@ampproject/bento-compiler/dist/ast';
+import {TreeProto} from '@ampproject/bento-compiler';
 
 /**
  * AMP Components must implement this "buildDom" function in order to be server-rendered.
