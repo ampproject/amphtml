@@ -295,9 +295,11 @@ function getAdsLocalhost(win) {
     adsUrl = 'http://ads.localhost'; // local dev with a localhost server
   }
   return (
-    adsUrl + ':' + new URL(win.document.baseURI)?.port ||
-    win.location.port ||
-    win.parent.location.port
+    adsUrl +
+    ':' +
+    (new URL(win.document.baseURI)?.port ||
+      win.location.port ||
+      win.parent.location.port)
   );
 }
 
