@@ -72,7 +72,9 @@ export function BentoIframe({
 
   useEffect(() => {
     const iframe = iframeRef.current;
-    if (!iframe) {
+    // TODO(36239): Ensure that effects are properly isolated between test runs.
+    // Guarding for iframe truthiness should be enough.
+    if (!iframe?.ownerDocument.defaultView) {
       return;
     }
     const win = toWin(iframe.ownerDocument.defaultView);
