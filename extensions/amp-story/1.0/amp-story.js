@@ -1755,17 +1755,20 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getUIType_() {
-    const isCurrentlyMobile = this.uiState_ === UIType.MOBILE;
-    const elementsThatOpenKeyboard = ['INPUT', 'TEXTAREA'];
-    const inputHasFocus = elementsThatOpenKeyboard.includes(
+    const platformIsAndroid = this.platform_.isAndroid();
+    const uiIsCurrentlyMobile = this.uiState_ === UIType.MOBILE;
+    const tagNamesThatTriggerKeyboard = ['INPUT', 'TEXTAREA'];
+    const textFieldHasFocus = tagNamesThatTriggerKeyboard.includes(
       this.win.document.activeElement?.tagName
     );
-    const softKeyboardIsProbablyOpen = isCurrentlyMobile && inputHasFocus;
-    if (softKeyboardIsProbablyOpen) {
+    const androidSoftKeyboardIsProbablyOpen =
+        platformIsAndroid && uiIsCurrentlyMobile && textFieldHasFocus;
+    if (androidSoftKeyboardIsProbablyOpen) {
       // The opening of the Android soft keyboard triggers a viewport resize
       // that can cause the story's dimensions to appear to be those of a
       // desktop. Here, we assume that the soft keyboard is open if the latest
-      // UI state was mobile while an input element has focus.
+      // UI state is mobile while an input element has focus, and we then
+      // ensure that the UI type does not unintentionally alter.
       return UIType.MOBILE;
     }
 
