@@ -1759,7 +1759,7 @@ export class AmpStory extends AMP.BaseElement {
       this.win.document.activeElement?.tagName
     );
     const androidSoftKeyboardIsProbablyOpen =
-        platformIsAndroid && uiIsCurrentlyMobile && textFieldHasFocus;
+      platformIsAndroid && uiIsCurrentlyMobile && textFieldHasFocus;
     if (androidSoftKeyboardIsProbablyOpen) {
       // The opening of the Android soft keyboard triggers a viewport resize
       // that can cause the story's dimensions to appear to be those of a
