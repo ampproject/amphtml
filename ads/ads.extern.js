@@ -629,13 +629,13 @@ data.site;
 data.zone;
 data.callback;
 
-// sharethrough.js
-data.pkey;
-
 // seedtag.js
 data.adunitId
 data.placement
 data.publisherId
+
+// sharethrough.js
+data.pkey;
 
 // sklik.js
 data.elm;
