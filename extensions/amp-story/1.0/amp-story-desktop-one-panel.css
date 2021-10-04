@@ -26,7 +26,7 @@ amp-story[standalone] {
 
   @media(max-height: 756px) {
     :root:not([data-story-supports-landscape]) {
-      --i-amphtml-story-desktop-one-panel-responsive-margin: 0;
+      --i-amphtml-story-desktop-one-panel-responsive-margin: 0px;
       --i-amphtml-story-desktop-one-panel-width: calc(100vh * var(--i-amphtml-story-desktop-one-panel-ratio));
       --i-amphtml-story-desktop-one-panel-border-radius: 0;
     }
