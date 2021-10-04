@@ -1612,8 +1612,6 @@ export class AmpStory extends AMP.BaseElement {
             'height': px(this.maxSeenMobileViewportHeight_),
           });
         });
-      } else if (currentHeight < this.maxSeenMobileViewportHeight_) {
-        // Do anything here?
       }
     } else if (prevUiState === UIType.MOBILE) {
       // Remove the fixed height when the UI state is no longer mobile.
@@ -1628,7 +1626,6 @@ export class AmpStory extends AMP.BaseElement {
 
     const isLandscape = this.isLandscape_();
     const isLandscapeSupported = this.isLandscapeSupported_();
-
     this.setOrientationAttribute_(isLandscape, isLandscapeSupported);
   }
 
