@@ -99,8 +99,7 @@ describes.fakeWin(
   }
 );
 
-// TODO(35898): unskip
-describes.realWin.skip(
+describes.realWin(
   'HighlightHandler',
   {
     // We can not overwrite win.location with realWin.
@@ -110,7 +109,8 @@ describes.realWin.skip(
   },
   (env) => {
     let root = null;
-    let docreadyCb = null;
+    let initCb = null;
+
     beforeEach(() => {
       const {document} = env.win;
       root = document.createElement('div');
@@ -122,11 +122,14 @@ describes.realWin.skip(
       div1.textContent = 'highlighted text';
       root.appendChild(div1);
 
-      env.sandbox.stub(docready, 'whenDocumentReady').returns({
-        then: (cb) => {
-          docreadyCb = cb;
-        },
-      });
+      env.sandbox
+        .stub(docready, 'whenDocumentReady')
+        .returns({then: (cb) => (initCb = cb)});
+
+      const platform = Services.platformFor(env.ampdoc.win);
+      if (platform.isChrome()) {
+        env.sandbox.stub(platform, 'getMajorVersion').returns(92);
+      }
     });
 
     it('initialize with visibility=visible', () => {
@@ -151,7 +154,7 @@ describes.realWin.skip(
 
       // initHighlight_ is not called before document become ready.
       expect(handler.highlightedNodes_).to.be.null;
-      docreadyCb();
+      initCb();
       // initHighlight_ was called in docreadyCb() and highlightedNodes_ is set.
       expect(handler.highlightedNodes_).not.to.be.null;
 
@@ -213,7 +216,7 @@ describes.realWin.skip(
         sentences: ['amp', 'highlight'],
         skipRendering: true,
       });
-      docreadyCb();
+      initCb();
 
       expect(scrollStub).not.to.be.called;
 
@@ -254,8 +257,8 @@ describes.realWin.skip(
 
       // initHighlight_ is not called before document become ready.
       expect(handler.highlightedNodes_).to.be.null;
-      docreadyCb();
-      // initHighlight_ was called in docreadyCb() and highlightedNodes_ is set.
+      initCb();
+      // initHighlight_ was called in initCb() and highlightedNodes_ is set.
       expect(handler.highlightedNodes_).not.to.be.null;
 
       expect(setScrollTop).to.be.calledOnce;
@@ -297,7 +300,7 @@ describes.realWin.skip(
       );
 
       new HighlightHandler(ampdoc, {sentences: ['amp', 'highlight']});
-      docreadyCb();
+      initCb();
 
       expect(scrollStub).not.to.be.called;
 
@@ -335,7 +338,7 @@ describes.realWin.skip(
         .returns(VisibilityState.PRERENDER);
 
       new HighlightHandler(ampdoc, {sentences: ['amp', 'highlight']});
-      docreadyCb();
+      initCb();
 
       expect(setScrollTop).to.be.calledOnce;
       expect(setScrollTop.firstCall.args.length).to.equal(1);
@@ -352,7 +355,7 @@ describes.realWin.skip(
 
     it('calcTopToCenterHighlightedNodes_ center elements', () => {
       const handler = new HighlightHandler(env.ampdoc, {sentences: ['amp']});
-      docreadyCb();
+      initCb();
       expect(handler.highlightedNodes_).not.to.be.null;
 
       const viewport = Services.viewportForDoc(env.ampdoc);
@@ -369,7 +372,7 @@ describes.realWin.skip(
 
     it('calcTopToCenterHighlightedNodes_ too tall element', () => {
       const handler = new HighlightHandler(env.ampdoc, {sentences: ['amp']});
-      docreadyCb();
+      initCb();
       expect(handler.highlightedNodes_).not.to.be.null;
 
       const viewport = Services.viewportForDoc(env.ampdoc);
@@ -388,7 +391,7 @@ describes.realWin.skip(
 
     it('mayAdjustTop_', () => {
       const handler = new HighlightHandler(env.ampdoc, {sentences: ['amp']});
-      docreadyCb();
+      initCb();
       expect(handler.highlightedNodes_).not.to.be.null;
 
       // Set up an environment where calcTopToCenterHighlightedNodes_
@@ -409,57 +412,79 @@ describes.realWin.skip(
       expect(setScrollTopStub).to.be.calledOnce;
       expect(setScrollTopStub.firstCall.args[0]).to.equal(350);
     });
+  }
+);
 
+describes.realWin(
+  'HighlightHandler',
+  {
+    // We can not overwrite win.location with realWin.
+    amp: {
+      ampdoc: 'single',
+    },
+  },
+  (env) => {
     // TODO(dmanek): remove `ifChrome` once we remove Chrome version detection
-    it.configure()
+    describe
+      .configure()
       .ifChrome()
-      .run('should highlight using text fragments for Chrome 93', async () => {
-        const {ampdoc} = env;
-        const platform = Services.platformFor(ampdoc.win);
-        env.sandbox.stub(platform, 'isChrome').returns(true);
-        env.sandbox.stub(platform, 'getMajorVersion').returns(93);
-        let whenFirstVisiblePromiseResolve;
-        const whenFirstVisiblePromise = new Promise((resolve) => {
-          whenFirstVisiblePromiseResolve = resolve;
+      .run('Text Fragments', () => {
+        let root = null;
+
+        beforeEach(() => {
+          const {document} = env.win;
+          root = document.createElement('div');
+          document.body.appendChild(root);
+          const div0 = document.createElement('div');
+          div0.textContent = 'text in amp doc';
+          root.appendChild(div0);
+          const div1 = document.createElement('div');
+          div1.textContent = 'highlighted text';
+          root.appendChild(div1);
+
+          //  Used in Chrome 93+
+          env.sandbox.stub(env.ampdoc, 'whenFirstVisible');
+
+          const platform = Services.platformFor(env.ampdoc.win);
+          if (platform.isChrome()) {
+            env.sandbox.stub(platform, 'getMajorVersion').returns(93);
+          }
         });
-        env.sandbox
-          .stub(ampdoc, 'whenFirstVisible')
-          .returns(whenFirstVisiblePromise);
 
-        const highlightHandler = new HighlightHandler(ampdoc, {
-          sentences: ['amp', 'highlight'],
-        });
-
-        const updateUrlWithTextFragmentSpy = env.sandbox.spy();
-        highlightHandler.updateUrlWithTextFragment_ =
-          updateUrlWithTextFragmentSpy;
-
-        whenFirstVisiblePromiseResolve();
-        await whenFirstVisiblePromise;
-
-        expect(updateUrlWithTextFragmentSpy).to.be.calledOnce;
-        expect(updateUrlWithTextFragmentSpy.getCall(0).args[0]).to.equal(
-          'text=amp&text=highlight'
-        );
-      });
-
-    // TODO(dmanek): remove `ifChrome` once we remove Chrome version detection
-    it.configure()
-      .ifChrome()
-      .run(
-        'should not highlight using text fragments for Chrome 92',
-        async () => {
+        it('should highlight using text fragments', async () => {
           const {ampdoc} = env;
-          const platform = Services.platformFor(ampdoc.win);
-          env.sandbox.stub(platform, 'isChrome').returns(true);
-          env.sandbox.stub(platform, 'getMajorVersion').returns(92);
           let whenFirstVisiblePromiseResolve;
           const whenFirstVisiblePromise = new Promise((resolve) => {
             whenFirstVisiblePromiseResolve = resolve;
           });
-          env.sandbox
-            .stub(ampdoc, 'whenFirstVisible')
-            .returns(whenFirstVisiblePromise);
+          ampdoc.whenFirstVisible.returns(whenFirstVisiblePromise);
+
+          const highlightHandler = new HighlightHandler(ampdoc, {
+            sentences: ['amp', 'highlight'],
+          });
+
+          const updateUrlWithTextFragmentSpy = env.sandbox.spy();
+          highlightHandler.updateUrlWithTextFragment_ =
+            updateUrlWithTextFragmentSpy;
+
+          whenFirstVisiblePromiseResolve();
+          await whenFirstVisiblePromise;
+
+          expect(updateUrlWithTextFragmentSpy).to.be.calledOnce;
+          expect(updateUrlWithTextFragmentSpy.getCall(0).args[0]).to.equal(
+            'text=amp&text=highlight'
+          );
+        });
+
+        it('should not highlight using text fragments for Chrome 92', async () => {
+          const {ampdoc} = env;
+          const platform = Services.platformFor(ampdoc.win);
+          platform.getMajorVersion.returns(92);
+          let whenFirstVisiblePromiseResolve;
+          const whenFirstVisiblePromise = new Promise((resolve) => {
+            whenFirstVisiblePromiseResolve = resolve;
+          });
+          ampdoc.whenFirstVisible.returns(whenFirstVisiblePromise);
 
           const highlightHandler = new HighlightHandler(ampdoc, {
             sentences: ['amp', 'highlight'],
@@ -473,26 +498,15 @@ describes.realWin.skip(
           await whenFirstVisiblePromise;
 
           expect(updateUrlWithTextFragmentSpy).not.to.be.called;
-        }
-      );
+        });
 
-    // TODO(dmanek): remove `ifChrome` once we remove Chrome version detection
-    it.configure()
-      .ifChrome()
-      .run(
-        'should not highlight if highlightInfo.sentences is empty',
-        async () => {
+        it('should not highlight if highlightInfo.sentences is empty', async () => {
           const {ampdoc} = env;
-          const platform = Services.platformFor(ampdoc.win);
-          env.sandbox.stub(platform, 'isChrome').returns(true);
-          env.sandbox.stub(platform, 'getMajorVersion').returns(93);
           let whenFirstVisiblePromiseResolve;
           const whenFirstVisiblePromise = new Promise((resolve) => {
             whenFirstVisiblePromiseResolve = resolve;
           });
-          env.sandbox
-            .stub(ampdoc, 'whenFirstVisible')
-            .returns(whenFirstVisiblePromise);
+          ampdoc.whenFirstVisible.returns(whenFirstVisiblePromise);
 
           const highlightHandler = new HighlightHandler(ampdoc, {
             sentences: [],
@@ -506,7 +520,7 @@ describes.realWin.skip(
           await whenFirstVisiblePromise;
 
           expect(updateUrlWithTextFragmentSpy).not.to.be.called;
-        }
-      );
+        });
+      });
   }
 );

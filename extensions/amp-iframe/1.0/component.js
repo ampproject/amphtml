@@ -2,19 +2,25 @@ import * as Preact from '#preact';
 import {useCallback, useEffect, useMemo, useRef} from '#preact';
 import {MessageType} from '#core/3p-frame-messaging';
 import {toWin} from '#core/window';
-import {ContainWrapper} from '#preact/component';
+import {ContainWrapper, useIntersectionObserver} from '#preact/component';
 import {setStyle} from '#core/dom/style';
+import {useMergeRefs} from '#preact/utils';
+import {
+  DEFAULT_THRESHOLD,
+  cloneEntryForCrossOrigin,
+} from '../../../src/utils/intersection-observer-3p-host';
+import {postMessage} from '../../../src/iframe-helper';
+import {dict} from '#core/types/object';
 
 const NOOP = () => {};
 
 /**
- * @param {!IframeDef.Props} props
+ * @param {!BentoIframeDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function Iframe({
+export function BentoIframe({
   allowFullScreen,
   allowPaymentRequest,
-  allowTransparency,
   iframeStyle,
   onLoad = NOOP,
   referrerPolicy,
@@ -28,6 +34,57 @@ export function Iframe({
   const dataRef = useRef(null);
   const isIntersectingRef = useRef(null);
   const containerRef = useRef(null);
+  const observerRef = useRef(null);
+  const targetOriginRef = useRef(null);
+
+  const viewabilityCb = (entries) => {
+    const iframe = iframeRef.current;
+    const targetOrigin = targetOriginRef.current;
+    if (!iframe || !targetOrigin) {
+      return;
+    }
+    postMessage(
+      iframe,
+      MessageType.INTERSECTION,
+      dict({'changes': entries.map(cloneEntryForCrossOrigin)}),
+      targetOrigin
+    );
+  };
+
+  const handleSendIntersectionsPostMessage = useCallback((event) => {
+    const iframe = iframeRef.current;
+    if (!iframe) {
+      return;
+    }
+    if (
+      event.source !== iframe.contentWindow ||
+      event.data?.type !== MessageType.SEND_INTERSECTIONS
+    ) {
+      return;
+    }
+    targetOriginRef.current = event.origin;
+    const win = toWin(iframe.ownerDocument.defaultView);
+    observerRef.current = new win.IntersectionObserver(viewabilityCb, {
+      threshold: DEFAULT_THRESHOLD,
+    });
+    observerRef.current.observe(iframe);
+  }, []);
+
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) {
+      return;
+    }
+    const win = toWin(iframe.ownerDocument.defaultView);
+    win.addEventListener('message', handleSendIntersectionsPostMessage);
+    let observer = observerRef.current;
+
+    return () => {
+      observer?.unobserve(iframe);
+      observer = null;
+      win.removeEventListener('message', handleSendIntersectionsPostMessage);
+    };
+  }, [handleSendIntersectionsPostMessage]);
 
   const updateContainerSize = (height, width) => {
     const container = containerRef.current;
@@ -39,15 +96,16 @@ export function Iframe({
   };
 
   const attemptResize = useCallback(() => {
-    const iframe = iframeRef.current;
-    let height = Number(dataRef.current.height);
-    let width = Number(dataRef.current.width);
+    let height = Number(dataRef.current?.height);
+    let width = Number(dataRef.current?.width);
+    dataRef.current = null;
     if (!height && !width) {
       console./*OK*/ error(
         'Ignoring resize request because width and height value is invalid'
       );
       return;
     }
+    const iframe = iframeRef.current;
     // TODO(dmanek): Calculate width and height of the container to include padding.
     if (!height) {
       height = iframe./*OK*/ offsetHeight;
@@ -69,13 +127,20 @@ export function Iframe({
     }
   }, [requestResize]);
 
-  const handlePostMessage = useCallback(
+  const handleEmbedSizePostMessage = useCallback(
     (event) => {
       if (event.data?.type !== MessageType.EMBED_SIZE) {
         return;
       }
       dataRef.current = event.data;
-      attemptResize();
+      // We only allow resizing when the iframe is outside the viewport,
+      // to guarantee CLS compliance. This may have the side effect of the iframe
+      // not resizing on `embed-size` postMessage while it's within the viewport
+      // where an author wants to resize the iframe. In that
+      // case remove this check & call `attemptResize` directly.
+      if (isIntersectingRef.current === false) {
+        attemptResize();
+      }
     },
     [attemptResize]
   );
@@ -89,22 +154,28 @@ export function Iframe({
     if (!win) {
       return;
     }
-    const io = new win.IntersectionObserver((entries) => {
-      const last = entries[entries.length - 1];
-      isIntersectingRef.current = last.isIntersecting;
-      if (last.isIntersecting || !dataRef.current || !win) {
-        return;
-      }
-      attemptResize();
-    });
-    io.observe(iframe);
-    win.addEventListener('message', handlePostMessage);
+
+    win.addEventListener('message', handleEmbedSizePostMessage);
 
     return () => {
-      io.unobserve(iframe);
-      win.removeEventListener('message', handlePostMessage);
+      win.removeEventListener('message', handleEmbedSizePostMessage);
     };
-  }, [attemptResize, handlePostMessage]);
+  }, [handleEmbedSizePostMessage]);
+
+  const ioCallback = useCallback(
+    ({isIntersecting}) => {
+      if (isIntersecting === isIntersectingRef.current) {
+        return;
+      }
+      isIntersectingRef.current = isIntersecting;
+      if (!isIntersecting && dataRef.current) {
+        attemptResize();
+      }
+    },
+    [attemptResize]
+  );
+
+  const measureRef = useIntersectionObserver(ioCallback);
 
   const contentProps = useMemo(
     () => ({
@@ -113,7 +184,6 @@ export function Iframe({
       sandbox,
       allowFullScreen,
       allowPaymentRequest,
-      allowTransparency,
       referrerPolicy,
       onLoad,
       frameBorder: '0',
@@ -124,7 +194,6 @@ export function Iframe({
       sandbox,
       allowFullScreen,
       allowPaymentRequest,
-      allowTransparency,
       referrerPolicy,
       onLoad,
     ]
@@ -134,7 +203,7 @@ export function Iframe({
     <ContainWrapper
       contentAs="iframe"
       contentProps={contentProps}
-      contentRef={iframeRef}
+      contentRef={useMergeRefs([iframeRef, measureRef])}
       contentStyle={{'box-sizing': 'border-box', ...iframeStyle}}
       ref={containerRef}
       size

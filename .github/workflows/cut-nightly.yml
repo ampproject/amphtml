@@ -8,7 +8,8 @@ on:
     - cron: '0 8 * * 2-6'
 
 jobs:
-  sweep-experiments:
+  cut-nightly:
+    environment: release_tagger
     if: github.repository == 'ampproject/amphtml'
     name: Cut Nightly Branch
     runs-on: ubuntu-latest
@@ -16,9 +17,13 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 100
 
       - name: Set Up Node
-        uses: actions/setup-node@v2.4.0
+        uses: actions/setup-node@v2
+        with:
+          node-version: lts/*
 
       - name: Set Up Environment
         run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
@@ -28,3 +33,5 @@ jobs:
 
       - name: ⭐ Cut Nightly Branch ⭐
         run: node --unhandled-rejections=strict build-system/release-workflows/cut-nightly.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}

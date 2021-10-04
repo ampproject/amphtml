@@ -1,42 +1,188 @@
 {
-  "2": {"string": "Atingeți Înainte"},
-  "3": {"string": "Atingeți Înapoi"},
-  "4": {"string": "Linkul nu a putut fi copiat în clipboard :("},
-  "5": {"string": "Linkul a fost copiat!"},
-  "6": {"string": "E-mail"},
-  "7": {"string": "Facebook"},
-  "8": {"string": "Google+"},
-  "9": {"string": "Obțineți linkul"},
-  "10": {"string": "LinkedIn"},
-  "11": {"string": "Pinterest"},
-  "12": {"string": "SMS"},
-  "14": {"string": "Tumblr"},
-  "15": {"string": "Twitter"},
-  "16": {"string": "WhatsApp"},
-  "18": {
-    "string": "Extindeți înălțimea și lățimea ferestrei pentru a viziona această experiență"
+  "2": {
+    "string": "Atingeți Înainte"
+  },
+  "3": {
+    "string": "Atingeți Înapoi"
+  },
+  "4": {
+    "string": "Nu s-a putut copia linkul în clipboard :("
+  },
+  "5": {
+    "string": "Link copiat!"
+  },
+  "6": {
+    "string": "E-mail"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "8": {
+    "string": "Google+"
+  },
+  "9": {
+    "string": "Obțineți linkul"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "SMS"
+  },
+  "13": {
+    "string": "Mai mult"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
   },
   "19": {
-    "string": "Trebuie să activați experimentul pentru subiectul AMP ca să vizionați acest conținut."
+    "string": "Trebuie să activați experimentul amp-story pentru a vizualiza acest conținut."
   },
-  "20": {"string": "Pagina poate fi vizionată cel mai bine în modul portret"},
-  "21": {"string": "Se pare că browserul nu acceptă această experiență"},
-  "22": {"string": "Accept"},
-  "23": {"string": "Refuz"},
-  "25": {"string": "Vedeți pe domeniul inițial:"},
-  "26": {"string": "Mai multe despre rezultatele AMP"},
-  "27": {"string": "Continuă oricum"},
-  "31": {"string": "Sunetul este dezactivat"},
-  "32": {"string": "Sunetul este activat"},
-  "33": {"string": "Pagina nu are sunet"},
-  "34": {"string": "Redați videoclipul"},
-  "35": {"string": "Glisați în sus"},
-  "36": {"string": "Extindeți tweetul"},
-  "37": {
-    "string": "Extindeți înălțimea ferestrei pentru a viziona această experiență"
+  "21": {
+    "string": "Ne pare rău, se pare că browserul dvs. nu acceptă această experiență"
   },
-  "38": {
-    "string": "Extindeți lățimea ferestrei pentru a viziona această experiență"
+  "22": {
+    "string": "Acceptați"
   },
-  "63": {"string": "Line"}
+  "23": {
+    "string": "Refuzați"
+  },
+  "25": {
+    "string": "Vizualizați pe domeniul original:"
+  },
+  "26": {
+    "string": "Mai multe detalii despre rezultatele AMP"
+  },
+  "27": {
+    "string": "Continuați oricum"
+  },
+  "31": {
+    "string": "Fără sunet"
+  },
+  "32": {
+    "string": "Cu sunet"
+  },
+  "33": {
+    "string": "Această pagină nu are sunet"
+  },
+  "34": {
+    "string": "Redați videoclipul"
+  },
+  "35": {
+    "string": "Glisați în sus"
+  },
+  "36": {
+    "string": "Extindeți tweetul"
+  },
+  "62": {
+    "string": "Distribuiți începând cu această pagină"
+  },
+  "63": {
+    "string": "Line"
+  },
+  "64": {
+    "string": "Actualizat"
+  },
+  "65": {
+    "string": "Videoclipul nu a putut fi redat"
+  },
+  "66": {
+    "string": "Opriți sunetul relatării"
+  },
+  "67": {
+    "string": "Activați sunetul relatării"
+  },
+  "68": {
+    "string": "Informații despre relatare"
+  },
+  "69": {
+    "string": "Distribuiți relatarea"
+  },
+  "70": {
+    "string": "Alternați meniul relatării"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "Sugestia 1 din 2"
+  },
+  "76": {
+    "string": "Atingeți pentru a accesa ecranul următor"
+  },
+  "77": {
+    "string": "Înainte"
+  },
+  "78": {
+    "string": "Sugestia 2 din 2"
+  },
+  "79": {
+    "string": "Glisați pentru a accesa relatarea următoare"
+  },
+  "80": {
+    "string": "Am înțeles"
+  },
+  "81": {
+    "string": "Sugestie"
+  },
+  "82": {
+    "string": "Pagina precedentă"
+  },
+  "83": {
+    "string": "Activați"
+  },
+  "84": {
+    "string": "PUNCTAJ:"
+  },
+  "85": {
+    "string": "Întrerupeți relatarea"
+  },
+  "86": {
+    "string": "Redați relatarea"
+  },
+  "87": {
+    "string": "Închideți"
+  },
+  "88": {
+    "string": "Salt la următorul"
+  },
+  "89": {
+    "string": "Răspunsul dvs. va fi trimis la"
+  },
+  "90": {
+    "string": "Următoarea relatare"
+  },
+  "91": {
+    "string": "Pagina următoare"
+  },
+  "92": {
+    "string": "Reluare"
+  },
+  "93": {
+    "string": "Pagina precedentă"
+  },
+  "96": {
+    "string": "Mutați dispozitivul pentru a explora"
+  },
+  "97": {
+    "string": "Se deschide"
+  }
 }

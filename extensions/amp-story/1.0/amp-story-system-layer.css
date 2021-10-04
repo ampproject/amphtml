@@ -293,13 +293,8 @@
 .i-amphtml-story-mute-text,
 .i-amphtml-story-unmute-sound-text,
 .i-amphtml-story-unmute-no-sound-text,
-.i-amphtml-story-sidebar-control,
 .i-amphtml-story-skip-to-next  {
   display: none !important;
-}
-
-[i-amphtml-story-has-sidebar] .i-amphtml-story-sidebar-control {
-  display: block !important;
 }
 
 .i-amphtml-story-has-audio:not([muted]) .i-amphtml-story-mute-audio-control,
@@ -359,10 +354,6 @@
 
 .i-amphtml-story-play-control {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="32px" height="32px" viewBox="0 0 32 32" fill="#FFFFFF"><path d="M23.5211 16.335L9 25.67V7L23.5211 16.335Z"/></svg>') !important;
-}
-
-.i-amphtml-story-sidebar-control {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
 }
 
 .i-amphtml-story-share-control {
@@ -442,10 +433,6 @@
   margin: 0px 10px !important;
 }
 
-.i-amphtml-story-desktop-panels .i-amphtml-story-has-new-page-notification-container {
-  top: 0 !important;
-}
-
 .i-amphtml-embedded.i-amphtml-first-page-active .i-amphtml-story-info-control {
   display: block !important;
 }
@@ -453,17 +440,6 @@
 .i-amphtml-story-no-sharing .i-amphtml-story-share-control,
 .i-amphtml-story-no-sharing .i-amphtml-story-info-control {
   display: none !important;
-}
-
-.i-amphtml-story-desktop-panels.i-amphtml-story-system-layer {
-  background: transparent !important;
-  top: auto !important;
-  bottom: 0 !important;
-  height: 96px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex-direction: row-reverse !important;
 }
 
 .i-amphtml-animate-progress li {
@@ -477,19 +453,8 @@
   padding: 0 !important;
 }
 
-.i-amphtml-story-desktop-panels .i-amphtml-story-progress-bar {
-  position: relative !important;
-  height: 3px !important;
-  width: calc(100vw / 3) !important;
-  margin: 0 24px !important;
-}
-
 .i-amphtml-story-desktop-fullbleed .i-amphtml-story-progress-bar {
   height: 3px !important;
-}
-
-.i-amphtml-story-desktop-panels .i-amphtml-story-page-progress-bar {
-  border-radius: 100px !important;
 }
 
 .i-amphtml-progress-bar-overflow .i-amphtml-story-page-progress-bar {
@@ -507,15 +472,6 @@
 
 [desktop] .i-amphtml-progress-bar-overflow .i-amphtml-story-page-progress-bar {
   width: 3px !important;
-}
-
-.i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons,
-.i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons-start-position,
-.i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-attribution
- {
-  position: fixed !important;
-  top: 0 !important;
-  width: 100vw !important;
 }
 
 .i-amphtml-story-desktop-one-panel.i-amphtml-story-system-layer {

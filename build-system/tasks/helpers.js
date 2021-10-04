@@ -13,9 +13,9 @@ const wrappers = require('../compile/compile-wrappers');
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
-const {applyConfig, removeConfig} = require('./prepend-global');
 const {closureCompile} = require('../compile/compile');
-const {cyan, green, red} = require('../common/colors');
+const {cyan, green, red} = require('kleur/colors');
+const {getAmpConfigForFile} = require('./prepend-global');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {getSourceRoot} = require('../compile/helpers');
 const {isCiBuild} = require('../common/ci');
@@ -51,16 +51,6 @@ const EXTENSION_BUNDLE_MAP = {
     'node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd.install.js',
   ],
 };
-
-/**
- * List of unminified targets to which AMP_CONFIG should be written
- */
-const UNMINIFIED_TARGETS = ['alp.max', 'amp-inabox', 'amp-shadow', 'amp'];
-
-/**
- * List of minified targets to which AMP_CONFIG should be written
- */
-const MINIFIED_TARGETS = ['alp', 'amp4ads-v0', 'shadow-v0', 'v0'];
 
 /**
  * Used while building the 3p frame
@@ -165,7 +155,6 @@ async function compileAllJs(options) {
     doBuildJs(jsBundles, 'iframe-transport-client-lib.js', options),
     doBuildJs(jsBundles, 'recaptcha.js', options),
     doBuildJs(jsBundles, 'amp-viewer-host.max.js', options),
-    doBuildJs(jsBundles, 'compiler.js', options),
     doBuildJs(jsBundles, 'video-iframe-integration.js', options),
     doBuildJs(jsBundles, 'amp-story-entry-point.js', options),
     doBuildJs(jsBundles, 'amp-story-player.js', options),
@@ -179,6 +168,23 @@ async function compileAllJs(options) {
     'all runtime JS files',
     startTime
   );
+}
+
+/**
+ * Returns compiled file to prepend within wrapper and empty string if none.
+ *
+ * @param {string} srcFilename
+ * @return {Promise<string>}
+ */
+async function getCompiledFile(srcFilename) {
+  const bundleFiles = EXTENSION_BUNDLE_MAP[srcFilename];
+  if (!bundleFiles) {
+    return '';
+  }
+  const filesContents = await Promise.all(
+    bundleFiles.map((file) => fs.readFile(file, 'utf8'))
+  );
+  return filesContents.join('\n');
 }
 
 /**
@@ -307,7 +313,6 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
 
   const destPath = path.join(destDir, minifiedName);
   combineWithCompiledFile(srcFilename, destPath, options);
-  fs.writeFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
   if (options.latestName) {
     fs.copySync(
       destPath,
@@ -320,15 +325,6 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
     name += ` → ${maybeToEsmName(options.latestName)}`;
   }
   endBuildStep('Minified', name, timeInfo.startTime);
-
-  const target = path.basename(minifiedName, path.extname(minifiedName));
-  if (!argv.noconfig && MINIFIED_TARGETS.includes(target)) {
-    await applyAmpConfig(
-      maybeToEsmName(`${destDir}/${minifiedName}`),
-      /* localDev */ options.fortesting,
-      /* fortesting */ options.fortesting
-    );
-  }
 }
 
 /**
@@ -355,26 +351,13 @@ function handleBundleError(err, continueOnError, destFilename) {
 /**
  * Performs the final steps after a JS file is bundled and optionally minified
  * with esbuild and babel.
- * @param {string} srcFilename
  * @param {string} destDir
  * @param {string} destFilename
  * @param {?Object} options
  * @param {number} startTime
  * @return {Promise<void>}
  */
-async function finishBundle(
-  srcFilename,
-  destDir,
-  destFilename,
-  options,
-  startTime
-) {
-  combineWithCompiledFile(
-    srcFilename,
-    path.join(destDir, destFilename),
-    options
-  );
-
+async function finishBundle(destDir, destFilename, options, startTime) {
   const logPrefix = options.minify ? 'Minified' : 'Compiled';
   let {latestName} = options;
   if (latestName) {
@@ -393,16 +376,6 @@ async function finishBundle(
         ? `${options.name} → ${destFilename}`
         : destFilename;
     endBuildStep(logPrefix, loggingName, startTime);
-  }
-
-  const targets = options.minify ? MINIFIED_TARGETS : UNMINIFIED_TARGETS;
-  const target = path.basename(destFilename, path.extname(destFilename));
-  if (targets.includes(target)) {
-    await applyAmpConfig(
-      path.join(destDir, destFilename),
-      /* localDev */ true,
-      /* fortesting */ options.fortesting
-    );
   }
 }
 
@@ -434,7 +407,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
    * @return {Object}
    */
   function splitWrapper() {
-    const wrapper = options.wrapper || wrappers.none;
+    const wrapper = options.wrapper ?? wrappers.none;
     const sentinel = '<%= contents %>';
     const start = wrapper.indexOf(sentinel);
     return {
@@ -443,6 +416,9 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     };
   }
   const {banner, footer} = splitWrapper();
+  const config = await getAmpConfigForFile(destFilename, options);
+  const compiledFile = await getCompiledFile(srcFilename);
+  banner.js = config + banner.js + compiledFile;
 
   const babelPlugin = getEsbuildBabelPlugin(
     options.minify ? 'minified' : 'unminified',
@@ -486,7 +462,9 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     let map = result.outputFiles.find(({path}) => path.endsWith('.map')).text;
 
     if (options.minify) {
-      ({code, map} = await minify(code, map, {mangle: options.mangle}));
+      ({code, map} = await minify(code, map, {
+        mangle: !compiledFile && options.mangle,
+      }));
       map = await massageSourcemaps(map, options);
     }
 
@@ -495,8 +473,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
       fs.outputFile(`${destFile}.map`, map),
     ]);
 
-    // TODO: finishBundle should operate in-mem instead of reading/writing from FS.
-    await finishBundle(srcFilename, destDir, destFilename, options, startTime);
+    await finishBundle(destDir, destFilename, options, startTime);
   }
 
   /**
@@ -571,8 +548,6 @@ async function minify(code, map, {mangle} = {mangle: false}) {
       beautify: !!argv.pretty_print,
       // eslint-disable-next-line google-camelcase/google-camelcase
       keep_quoted_props: true,
-      // // TODO: only add preamble for mainBundles?
-      preamble: ';',
     },
     sourceMap: {content: map},
     module: !!argv.esm,
@@ -583,22 +558,17 @@ async function minify(code, map, {mangle} = {mangle: false}) {
   // - Should not convert computed properties into regular property definition
   if (mangle) {
     // eslint-disable-next-line google-camelcase/google-camelcase
-    terserOptions.mangle.properties = {keep_quoted: true, regex: '_$'};
+    terserOptions.mangle.properties = {keep_quoted: 'strict', regex: '_$'};
     terserOptions.nameCache = nameCache;
 
-    // Disables converting computed properties ({['hello']: 5}) into regular prop ({ hello: 5}).
-    // This was an assumption baked into closure.
+    // TODO: uncomment once terser bugs related to these are fixed
+    // https://github.com/terser/terser/pull/1058
     terserOptions.compress.computed_props = false; // eslint-disable-line google-camelcase/google-camelcase
+    terserOptions.compress.properties = false;
   }
 
   const minified = await terser.minify(code, terserOptions);
-  if (!minified.code) {
-    throw new Error(
-      `Minification resulted in an empty bundle. This should never happen.`
-    );
-  }
-
-  return {code: minified.code, map: minified.map};
+  return {code: minified.code ?? '', map: minified.map};
 }
 
 /**
@@ -641,10 +611,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
     const buildResult =
       options.minify && shouldUseClosure()
         ? compileMinifiedJs(srcDir, srcFilename, destDir, options)
-        : esbuildCompile(srcDir, srcFilename, destDir, {
-            ...options,
-            mangle: true,
-          });
+        : esbuildCompile(srcDir, srcFilename, destDir, options);
     if (options.onWatchBuild) {
       options.onWatchBuild(buildResult);
     }
@@ -730,33 +697,6 @@ async function maybePrintCoverageMessage(covPath = '') {
   const url = 'file://' + path.resolve(covPath);
   log(green('INFO:'), 'Generated code coverage report at', cyan(url));
   await open(url, {wait: false});
-}
-
-/**
- * Writes AMP_CONFIG to a runtime file. Optionally enables localDev mode and
- * fortesting mode. Called by "amp build" and "amp dist" while building
- * various runtime files.
- *
- * @param {string} targetFile File to which the config is to be written.
- * @param {boolean} localDev Whether or not to enable local development.
- * @param {boolean} fortesting Whether or not to enable testing mode.
- * @return {!Promise}
- */
-async function applyAmpConfig(targetFile, localDev, fortesting) {
-  const config = argv.config === 'canary' ? 'canary' : 'prod';
-  const baseConfigFile =
-    'build-system/global-configs/' + config + '-config.json';
-
-  await removeConfig(targetFile);
-  await applyConfig(
-    config,
-    targetFile,
-    baseConfigFile,
-    /* opt_localDev */ localDev,
-    /* opt_localBranch */ true,
-    /* opt_branch */ undefined,
-    /* opt_fortesting */ fortesting
-  );
 }
 
 /**
@@ -871,8 +811,6 @@ function shouldUseClosure() {
 }
 
 module.exports = {
-  MINIFIED_TARGETS,
-  applyAmpConfig,
   bootstrapThirdPartyFrames,
   compileAllJs,
   compileCoreRuntime,
