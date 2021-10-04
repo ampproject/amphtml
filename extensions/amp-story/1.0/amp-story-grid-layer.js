@@ -81,13 +81,14 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
    * @private
    */
   applyAspectRatioAttributes_() {
-    if (this.element.hasAttribute('aspect-ratio')) {
-      setImportantStyles(this.element, {
-        '--aspect-ratio': this.element
-          .getAttribute('aspect-ratio')
-          .replace(':', '/'),
-      });
+    if (!this.element.hasAttribute('aspect-ratio')) {
+      return;
     }
+    setImportantStyles(this.element, {
+      '--aspect-ratio': this.element
+        .getAttribute('aspect-ratio')
+        .replace(':', '/'),
+    });
   }
 
   /**
