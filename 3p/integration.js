@@ -232,7 +232,7 @@ import {rubicon} from '#ads/vendors/rubicon';
 import {runative} from '#ads/vendors/runative';
 import {sas} from '#ads/vendors/sas';
 import {seedingalliance} from '#ads/vendors/seedingalliance';
-import { seedtag } from '#ads/vendors/seedtag';
+import {seedtag} from '#ads/vendors/seedtag';
 import {sekindo} from '#ads/vendors/sekindo';
 import {sharethrough} from '#ads/vendors/sharethrough';
 import {shemedia} from '#ads/vendors/shemedia';
