@@ -88,7 +88,7 @@ function BentoTwitterWithRef(
 
   return (
     <ProxyIframeEmbed
-      allowFullscreen
+      allowfullscreen
       ref={ref}
       title={title}
       {...rest}

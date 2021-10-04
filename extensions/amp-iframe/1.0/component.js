@@ -5,17 +5,22 @@ import {toWin} from '#core/window';
 import {ContainWrapper, useIntersectionObserver} from '#preact/component';
 import {setStyle} from '#core/dom/style';
 import {useMergeRefs} from '#preact/utils';
+import {
+  DEFAULT_THRESHOLD,
+  cloneEntryForCrossOrigin,
+} from '../../../src/utils/intersection-observer-3p-host';
+import {postMessage} from '../../../src/iframe-helper';
+import {dict} from '#core/types/object';
 
 const NOOP = () => {};
 
 /**
- * @param {!IframeDef.Props} props
+ * @param {!BentoIframeDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function Iframe({
+export function BentoIframe({
   allowFullScreen,
   allowPaymentRequest,
-  allowTransparency,
   iframeStyle,
   onLoad = NOOP,
   referrerPolicy,
@@ -29,6 +34,57 @@ export function Iframe({
   const dataRef = useRef(null);
   const isIntersectingRef = useRef(null);
   const containerRef = useRef(null);
+  const observerRef = useRef(null);
+  const targetOriginRef = useRef(null);
+
+  const viewabilityCb = (entries) => {
+    const iframe = iframeRef.current;
+    const targetOrigin = targetOriginRef.current;
+    if (!iframe || !targetOrigin) {
+      return;
+    }
+    postMessage(
+      iframe,
+      MessageType.INTERSECTION,
+      dict({'changes': entries.map(cloneEntryForCrossOrigin)}),
+      targetOrigin
+    );
+  };
+
+  const handleSendIntersectionsPostMessage = useCallback((event) => {
+    const iframe = iframeRef.current;
+    if (!iframe) {
+      return;
+    }
+    if (
+      event.source !== iframe.contentWindow ||
+      event.data?.type !== MessageType.SEND_INTERSECTIONS
+    ) {
+      return;
+    }
+    targetOriginRef.current = event.origin;
+    const win = toWin(iframe.ownerDocument.defaultView);
+    observerRef.current = new win.IntersectionObserver(viewabilityCb, {
+      threshold: DEFAULT_THRESHOLD,
+    });
+    observerRef.current.observe(iframe);
+  }, []);
+
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) {
+      return;
+    }
+    const win = toWin(iframe.ownerDocument.defaultView);
+    win.addEventListener('message', handleSendIntersectionsPostMessage);
+    let observer = observerRef.current;
+
+    return () => {
+      observer?.unobserve(iframe);
+      observer = null;
+      win.removeEventListener('message', handleSendIntersectionsPostMessage);
+    };
+  }, [handleSendIntersectionsPostMessage]);
 
   const updateContainerSize = (height, width) => {
     const container = containerRef.current;
@@ -71,7 +127,7 @@ export function Iframe({
     }
   }, [requestResize]);
 
-  const handlePostMessage = useCallback(
+  const handleEmbedSizePostMessage = useCallback(
     (event) => {
       if (event.data?.type !== MessageType.EMBED_SIZE) {
         return;
@@ -99,12 +155,12 @@ export function Iframe({
       return;
     }
 
-    win.addEventListener('message', handlePostMessage);
+    win.addEventListener('message', handleEmbedSizePostMessage);
 
     return () => {
-      win.removeEventListener('message', handlePostMessage);
+      win.removeEventListener('message', handleEmbedSizePostMessage);
     };
-  }, [handlePostMessage]);
+  }, [handleEmbedSizePostMessage]);
 
   const ioCallback = useCallback(
     ({isIntersecting}) => {
@@ -128,7 +184,6 @@ export function Iframe({
       sandbox,
       allowFullScreen,
       allowPaymentRequest,
-      allowTransparency,
       referrerPolicy,
       onLoad,
       frameBorder: '0',
@@ -139,7 +194,6 @@ export function Iframe({
       sandbox,
       allowFullScreen,
       allowPaymentRequest,
-      allowTransparency,
       referrerPolicy,
       onLoad,
     ]

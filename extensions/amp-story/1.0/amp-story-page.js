@@ -1598,9 +1598,11 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * @private
    */
-  buildAndAppendLoadingSpinner_() {
+  buildAndAppendVideoLoadingSpinner_() {
     this.loadingSpinner_ = new LoadingSpinner(this.win.document);
-    this.element.appendChild(this.loadingSpinner_.build());
+    const loadingSpinnerEl = this.loadingSpinner_.build();
+    loadingSpinnerEl.setAttribute('aria-label', 'Loading video');
+    this.element.appendChild(loadingSpinnerEl);
   }
 
   /**
@@ -1614,7 +1616,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   toggleLoadingSpinner_(isActive) {
     this.mutateElement(() => {
       if (!this.loadingSpinner_) {
-        this.buildAndAppendLoadingSpinner_();
+        this.buildAndAppendVideoLoadingSpinner_();
       }
 
       this.loadingSpinner_.toggle(isActive);

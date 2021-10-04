@@ -77,7 +77,7 @@ UsingVideoIframe.args = {
   controls: true,
   noaudio: false,
   loop: false,
-  ariaLabel: 'Video Player',
+  'aria-label': 'Video Player',
   poster:
     'https://amp.dev/static/samples/img/amp-video-iframe-sample-placeholder.jpg',
   src: 'https://amp.dev/static/samples/files/amp-video-iframe-videojs.html',
