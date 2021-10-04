@@ -72,7 +72,7 @@ export function BentoIframe({
 
   useEffect(() => {
     const iframe = iframeRef.current;
-    if (!iframe) {
+    if (!iframe?.ownerDocument.defaultView) {
       return;
     }
     const win = toWin(iframe.ownerDocument.defaultView);
