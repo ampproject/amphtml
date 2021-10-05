@@ -64,7 +64,7 @@
     "@types/minimist": "1.2.2",
     "@types/fs-extra": "9.0.13",
     "@types/mocha": "8.2.3",
-    "@types/node": "14.17.20",
+    "@types/node": "14.17.21",
     "acorn-globals": "6.0.0",
     "amphtml-validator": "1.0.35",
     "ast-replace": "1.1.3",
