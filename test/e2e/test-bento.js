@@ -1,7 +1,6 @@
 const attachesShadowRoot = {
   'without v0.js': 'bento/minimal.html',
-  'without v0.js and without custom-elements-polyfill.js':
-    'bento/no-ce-polyfill.html',
+  'without v0.js nor custom-elements-polyfill.js': 'bento/no-ce-polyfill.html',
 };
 
 for (const [name, fixture] of Object.entries(attachesShadowRoot)) {
