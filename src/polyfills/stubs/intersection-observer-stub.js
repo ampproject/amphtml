@@ -178,7 +178,10 @@ export class IntersectionObserverStub {
     IntersectionObserverStub[UPGRADERS].push(this.upgrade_.bind(this));
   }
 
-  /** @return {?Element} */
+  /**
+   * @suppress {constantProperty}
+   * @return {?Element}
+   **/
   get root() {
     if (this.inst_) {
       return this.inst_.root;
@@ -187,7 +190,10 @@ export class IntersectionObserverStub {
     return /** @type {!Element} */ (this.options_.root) || null;
   }
 
-  /** @return {string} */
+  /**
+   * @suppress {constantProperty}
+   * @return {string}
+   **/
   get rootMargin() {
     if (this.inst_) {
       return this.inst_.rootMargin;
@@ -198,7 +204,10 @@ export class IntersectionObserverStub {
     return /** @type {string} */ (this.options_.rootMargin);
   }
 
-  /** @return {!Array<number>} */
+  /**
+   * @suppress {constantProperty}
+   * @return {!Array<number>}
+   **/
   get thresholds() {
     if (this.inst_) {
       return this.inst_.thresholds;
