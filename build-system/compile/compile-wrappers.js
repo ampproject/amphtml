@@ -150,8 +150,10 @@ function bento(name, version, latest, isModule, loadPriority) {
 
 exports.bento = bento;
 
-const bentoNpmLoaderFnImpl = (payload) => `
-(${payload}).f({
+const bentoNpmLoaderFnImpl = `
+(function(AMP,_) {
+  <%= contents %>
+})({
   registerElement: function (n, b, s) {
     if (s)
       document.head.appendChild(
@@ -160,14 +162,14 @@ const bentoNpmLoaderFnImpl = (payload) => `
     customElements.define(
       n.replace(/^amp-/, 'bento-'),
       b.CustomElement(b)
-    );
-  },
+    )
+  }
 })`;
 
-const bentoNpmLoaderFnEsm = (payload) =>
-  `export function defineElement(){${bentoNpmLoaderFnImpl(payload)}}`;
-const bentoNpmLoaderFnCjs = (payload) =>
-  `exports.defineElement = function(){${bentoNpmLoaderFnImpl(payload)}}`;
+const bentoNpmLoaderFnEsm = () =>
+  `export function defineElement(){${bentoNpmLoaderFnImpl}}`;
+const bentoNpmLoaderFnCjs = () =>
+  `exports.defineElement = function(){${bentoNpmLoaderFnImpl}}`;
 
 /**
  * Wraps registration of bento component in an exported function.
@@ -181,14 +183,7 @@ const bentoNpmLoaderFnCjs = (payload) =>
  * @return {string}
  */
 function bentoNpm(name, version, latest, isModule, loadPriority) {
-  const payload = extensionPayload(
-    name,
-    version,
-    latest,
-    isModule,
-    loadPriority
-  );
-  return isModule ? bentoNpmLoaderFnEsm(payload) : bentoNpmLoaderFnCjs(payload);
+  return isModule ? bentoNpmLoaderFnEsm() : bentoNpmLoaderFnCjs();
 }
 
 exports.bentoNpm = bentoNpm;
