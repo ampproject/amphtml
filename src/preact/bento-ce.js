@@ -1,9 +1,6 @@
 import {isEsm} from '#core/mode';
 import {toWin} from '#core/window';
 
-/** @type {typeof AMP.BaseElement} */
-let BaseElement;
-
 /**
  * @param {T} klass
  * @return {T}
@@ -29,6 +26,9 @@ function maybeWrapNativeSuper(klass) {
   });
   return Object.setPrototypeOf(Wrapper, klass);
 }
+
+/** @type {typeof AMP.BaseElement} */
+let BaseElement;
 
 if (typeof AMP !== 'undefined' && AMP.BaseElement) {
   BaseElement = AMP.BaseElement;
