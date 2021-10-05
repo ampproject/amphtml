@@ -342,8 +342,8 @@ export class AmpSlideScroll extends BaseCarousel {
   }
 
   /** @override */
-  viewportCallbackTemp(inViewport) {
-    super.viewportCallbackTemp(inViewport);
+  viewportCallback(inViewport) {
+    super.viewportCallback(inViewport);
     if (inViewport) {
       this.autoplay_();
     } else {
@@ -416,7 +416,7 @@ export class AmpSlideScroll extends BaseCarousel {
   layoutCallback() {
     this.unobserveIntersections_ = observeIntersections(
       this.element,
-      ({isIntersecting}) => this.viewportCallbackTemp(isIntersecting)
+      ({isIntersecting}) => this.viewportCallback(isIntersecting)
     );
 
     // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
