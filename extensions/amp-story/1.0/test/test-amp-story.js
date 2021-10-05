@@ -54,7 +54,6 @@ describes.realWin(
      */
     async function createStoryWithPages(count, ids = [], autoAdvance = false) {
       element = win.document.createElement('amp-story');
-      element.getAmpDoc = () => env.ampdoc;
 
       const pageArray = Array(count)
         .fill(undefined)
@@ -172,7 +171,6 @@ describes.realWin(
 
     it('should return a valid page index', async () => {
       await createStoryWithPages(4, ['cover', 'page-1', 'page-2', 'page-3']);
-      await story.buildCallback();
       await story.layoutCallback();
       // Getting all the AmpStoryPage objets.
       const pageElements = story.element.getElementsByTagName('amp-story-page');
