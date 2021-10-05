@@ -1,4 +1,4 @@
-const colors = require('./colors');
+const colors = require('kleur/colors');
 const {exec, execScriptAsync} = require('./exec');
 const {logLocalDev} = require('./logging');
 

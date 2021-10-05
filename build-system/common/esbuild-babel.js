@@ -111,10 +111,12 @@ function getFileBabelOptions(babelOptions, filename) {
     babelOptions = {...babelOptions, plugins};
   }
 
+  // The amp runner automatically sets cwd to the `amphtml` directory.
+  const root = process.cwd();
   return {
     ...babelOptions,
     filename,
-    filenameRelative: path.basename(filename),
+    filenameRelative: path.relative(root, filename),
   };
 }
 

@@ -3,7 +3,7 @@
 const fs = require('fs-extra');
 const markdownLinkCheck = require('markdown-link-check');
 const path = require('path');
-const {cyan, green, red, yellow} = require('../common/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
 const {gitDiffAddedNameOnlyMain} = require('../common/git');
 const {linkCheckGlobs} = require('../test-configs/config');

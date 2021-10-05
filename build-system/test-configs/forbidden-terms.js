@@ -638,7 +638,6 @@ const forbiddenTermsGlobal = {
       'build-system/tasks/build.js',
       'build-system/tasks/default-task.js',
       'build-system/tasks/dist.js',
-      'build-system/tasks/helpers.js',
       'src/config.js',
       'src/core/window/window.extern.js',
       'src/experiments/index.js',
@@ -1088,14 +1087,6 @@ const forbiddenTermsSrcInclusive = {
   "require\\('fancy-log'\\)": {
     message:
       'Instead of fancy-log, use the logging functions in build-system/common/logging.js.',
-  },
-  "require\\('kleur\\/colors'\\)": {
-    message:
-      'Instead of kleur/colors, use the log-coloring functions in build-system/common/colors.js',
-    allowlist: [
-      'build-system/common/colors.js',
-      'third_party/react-dates/scope-require.js',
-    ],
   },
   'detectIsAutoplaySupported': {
     message:

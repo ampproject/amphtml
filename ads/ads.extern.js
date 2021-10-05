@@ -356,6 +356,10 @@ data.onNoAds;
 // amoad.js
 data.sid;
 
+// amplified.js
+data.amplified_id;
+data.amplified_params;
+
 // appnexus.js
 data.tagid;
 data.member;

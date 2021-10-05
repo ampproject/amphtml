@@ -18,7 +18,7 @@ const {
   logOnSameLineLocalDev,
   logWithoutTimestamp,
 } = require('../common/logging');
-const {cyan, green, red, yellow} = require('../common/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {exec} = require('../common/exec');
 const {getFilesToCheck} = require('../common/utils');
 const {prettifyGlobs} = require('../test-configs/config');

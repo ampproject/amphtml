@@ -1,3 +1,5 @@
+import {TOKEN_VALUE} from '#ads/google/a4a/utils';
+
 import {createElementWithAttributes, escapeHtml} from '#core/dom';
 import {dict} from '#core/types/object';
 
@@ -51,6 +53,7 @@ export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
       default-src 'none';
       style-src ${fontProviderAllowList} 'unsafe-inline';
     ">
+    <meta http-equiv="origin-trial" content=${TOKEN_VALUE}>    
     ${sanitizedHeadElements}
   </head>
   <body>${body}</body>
@@ -81,6 +84,9 @@ export function createSecureFrame(win, title, height, width) {
         'allowtransparency': '',
         'scrolling': 'no',
         'sandbox': sandboxVals,
+        'role': 'region',
+        'aria-label': 'Advertisement',
+        'tabindex': '0',
       })
     )
   );

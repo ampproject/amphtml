@@ -14,11 +14,11 @@ const MATCHES_MESSAGING_ORIGIN = () => true;
 const DEFAULT_TITLE = 'Facebook comments';
 
 /**
- * @param {!FacebookDef.Props} props
- * @param {{current: ?FacebookDef.Api}} ref
+ * @param {!BentoFacebookDef.Props} props
+ * @param {{current: ?BentoFacebookDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
-function FacebookWithRef(
+function BentoFacebookWithRef(
   {
     action,
     colorscheme,
@@ -145,6 +145,6 @@ function FacebookWithRef(
   );
 }
 
-const Facebook = forwardRef(FacebookWithRef);
-Facebook.displayName = 'Facebook'; // Make findable for tests.
-export {Facebook};
+const BentoFacebook = forwardRef(BentoFacebookWithRef);
+BentoFacebook.displayName = 'BentoFacebook'; // Make findable for tests.
+export {BentoFacebook};

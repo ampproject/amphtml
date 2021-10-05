@@ -100,7 +100,8 @@ const adConfig = jsonConfiguration({
   'adform': {},
 
   'adfox': {
-    prefetch: 'https://yastatic.net/pcode/adfox/loader.js',
+    prefetch: 'https://yandex.ru/ads/system/context.js',
+    preconnect: ['https://yastatic.net/'],
     renderStartImplemented: true,
   },
 
@@ -292,7 +293,10 @@ const adConfig = jsonConfiguration({
       'https://v.amoad.com',
     ],
   },
-
+  'amplified': {
+    preconnect: 'https://srv.clickfuse.com',
+    renderStartImplemented: true,
+  },
   'aniview': {
     renderStartImplemented: true,
   },
@@ -347,6 +351,10 @@ const adConfig = jsonConfiguration({
   'bringhub': {
     renderStartImplemented: true,
     preconnect: ['https://static.bh-cdn.com', 'https://core-api.bringhub.io'],
+  },
+
+  'broadbandy': {
+    renderStartImplemented: true,
   },
 
   'broadstreetads': {
@@ -818,6 +826,10 @@ const adConfig = jsonConfiguration({
 
   'mytarget': {
     prefetch: 'https://ad.mail.ru/static/ads-async.js',
+    renderStartImplemented: true,
+  },
+
+  'myua': {
     renderStartImplemented: true,
   },
 
@@ -1367,7 +1379,8 @@ const adConfig = jsonConfiguration({
   },
 
   'yandex': {
-    prefetch: 'https://an.yandex.ru/system/context_amp.js',
+    prefetch: 'https://yandex.ru/ads/system/context.js',
+    preconnect: ['https://yastatic.net/'],
     renderStartImplemented: true,
   },
 

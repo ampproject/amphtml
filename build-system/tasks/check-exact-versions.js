@@ -3,7 +3,7 @@
 const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
 const semver = require('semver');
-const {cyan, green, red} = require('../common/colors');
+const {cyan, green, red} = require('kleur/colors');
 const {gitDiffFileMain} = require('../common/git');
 const {log, logLocalDev, logWithoutTimestamp} = require('../common/logging');
 

@@ -7,7 +7,7 @@ const {
   forbiddenTermsGlobal,
   matchForbiddenTerms,
 } = require('../test-configs/forbidden-terms');
-const {cyan, red, yellow} = require('../common/colors');
+const {cyan, red, yellow} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 /**
