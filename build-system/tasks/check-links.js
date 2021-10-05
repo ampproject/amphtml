@@ -112,6 +112,8 @@ function checkLinksInFile(file) {
       {pattern: /https:.*?__component_name\w*__/},
       // Kenshoo requries authentication to access help center articles.
       {pattern: /https:\/\/helpcenter.kenshoo.com\/.*/},
+      // Blue Triangle responds with a 403 for our link checking.
+      {pattern: /https:\/\/help.bluetriangle.com\/.*/},
     ],
   };
 
