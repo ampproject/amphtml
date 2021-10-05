@@ -462,9 +462,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     let map = result.outputFiles.find(({path}) => path.endsWith('.map')).text;
 
     if (options.minify) {
-      ({code, map} = await minify(code, map, {
-        mangle: !compiledFile && options.mangle,
-      }));
+      ({code, map} = await minify(code, map));
       map = await massageSourcemaps(map, options);
     }
 
@@ -533,12 +531,17 @@ const nameCache = {};
  *
  * @param {string} code
  * @param {string} map
- * @param {{mangle: boolean}} options
  * @return {!Promise<{code: string, map: *, error?: Error}>}
  */
-async function minify(code, map, {mangle} = {mangle: false}) {
+async function minify(code, map) {
   const terserOptions = {
-    mangle: {},
+    mangle: {
+      properties: {
+        regex: '_AMP_PRIVATE_$',
+        // eslint-disable-next-line google-camelcase/google-camelcase
+        keep_quoted: /** @type {'strict'} */ ('strict'),
+      },
+    },
     compress: {
       // Settled on this count by incrementing number until there was no more
       // effect on minification quality.
@@ -551,21 +554,9 @@ async function minify(code, map, {mangle} = {mangle: false}) {
     },
     sourceMap: {content: map},
     module: !!argv.esm,
+    nameCache,
   };
-
-  // Enabling property mangling requires disabling two other optimization.
-  // - Should not mangle quoted properties (often used for cross-binary purposes)
-  // - Should not convert computed properties into regular property definition
-  if (mangle) {
-    // eslint-disable-next-line google-camelcase/google-camelcase
-    terserOptions.mangle.properties = {keep_quoted: 'strict', regex: '_$'};
-    terserOptions.nameCache = nameCache;
-
-    // TODO: uncomment once terser bugs related to these are fixed
-    // https://github.com/terser/terser/pull/1058
-    terserOptions.compress.computed_props = false; // eslint-disable-line google-camelcase/google-camelcase
-    terserOptions.compress.properties = false;
-  }
+  // TS complains if defined inline, since it sees type `string` but needs type ("strict" | boolean).
 
   const minified = await terser.minify(code, terserOptions);
   return {code: minified.code ?? '', map: minified.map};

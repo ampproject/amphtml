@@ -55,8 +55,6 @@ The URL of the Facebook post/video/comment. For example, a post or video will
 look like `https://www.facebook.com/zuck/posts/10102593740125791`. A comment or
 comment reply will look like
 `https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185`.
-For comments, see the Facebook documentation on
-[how to get a comment's URL](https://developers.facebook.com/docs/plugins/embedded-comments#how-to-get-a-comments-url).
 
 ### `data-embed-as`
 
@@ -72,9 +70,8 @@ This is not to be confused with
 [`amp-facebook-comments`](https://amp.dev/documentation/examples/components/amp-facebook-comments/).
 
 Check out the documentation for differences between
-[post embeds](https://developers.facebook.com/docs/plugins/embedded-posts),
-[video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player),
-and [comment embeds](https://developers.facebook.com/docs/plugins/embedded-comments).
+[post embeds](https://developers.facebook.com/docs/plugins/embedded-posts) and
+[video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player).
 
 ### `data-include-comment-parent`
 
