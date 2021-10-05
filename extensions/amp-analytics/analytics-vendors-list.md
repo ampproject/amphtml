@@ -299,7 +299,11 @@ Use `extraUrlParams` to add more data. Configuration details can be found at [ke
 
 Type attribute value: `kenshoo`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for Kenshoo. More information and configuration details can be found at [helpcenter.kenshoo.com](https://helpcenter.kenshoo.com/hc/en-us/articles/360025260592).
+
+<!-- markdown-link-check-enable -->
 
 ### Krux
 

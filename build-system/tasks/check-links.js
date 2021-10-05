@@ -110,8 +110,6 @@ function checkLinksInFile(file) {
       // Templated links are merely used to generate other markdown files.
       {pattern: /\$\{[a-z]*\}/},
       {pattern: /https:.*?__component_name\w*__/},
-      // Kenshoo requries authentication to access help center articles.
-      {pattern: /https:\/\/helpcenter.kenshoo.com\/.*/},
     ],
   };
 
