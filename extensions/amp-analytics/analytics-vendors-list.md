@@ -585,7 +585,7 @@ Adds support for Rambler/TOP-100. Configuration details can be found at [top100.
 
 Type attribute value: `topmailru`
 
-Adds support for Top.Mail.Ru. Configuration details can be found at [Top.Mail.Ru Help](https://help.mail.ru/top/amp-analytics).
+Adds support for Top.Mail.Ru. Configuration details can be found at [Top.Mail.Ru Help](https://top.mail.ru/help/en/code/amp).
 
 ### Treasure Data
 
@@ -611,7 +611,7 @@ Adds support for Vpon Analytics. Configuration details can be found at [Vpon Ana
 
 ### Webengage
 
-Type attribute value: `webengage`
+Type attribute value: `webengage`.
 
 <!--
 ### webtrekk (deprecated, see below)
@@ -628,5 +628,3 @@ Type attribute value: `webtrekk_v2`
 <span style="text-decoration: line-through;">`webtrekk`</span> is deprecated. **Use `webtrekk_v2` instead.**
 
 [/tip]
-
-Adds support for Webtrekk. Configuration details can be found at [supportcenter.webtrekk.com](https://supportcenter.webtrekk.com/en/public/amp-analytics.html).
