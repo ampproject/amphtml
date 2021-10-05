@@ -113,6 +113,7 @@ export let InteractiveReactData;
  *    pageIds: !Array<string>,
  *    newPageAvailableId: string,
  *    pageSize: {width: number, height: number},
+ *    title: string,
  * }}
  */
 export let State;
@@ -171,6 +172,7 @@ export const StateProperty = {
   NEW_PAGE_AVAILABLE_ID: 'newPageAvailableId',
   PAGE_IDS: 'pageIds',
   PAGE_SIZE: 'pageSize',
+  TITLE: 'title',
 };
 
 /** @const @enum {string} */
@@ -207,6 +209,7 @@ export const Action = {
   SET_PAGE_SIZE: 'updatePageSize',
   ADD_PANNING_MEDIA_STATE: 'addPanningMediaState',
   SET_VIEWER_CUSTOM_CONTROLS: 'setCustomControls',
+  SET_TITLE: 'setTitle',
 };
 
 /**
@@ -443,6 +446,11 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.VIEWER_CUSTOM_CONTROLS]: data,
+      });
+    case Action.SET_TITLE:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.TITLE]: data,
       });
     default:
       dev().error(TAG, 'Unknown action %s.', action);

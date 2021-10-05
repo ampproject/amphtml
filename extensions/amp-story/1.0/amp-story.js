@@ -370,6 +370,10 @@ export class AmpStory extends AMP.BaseElement {
     // Removes title in order to prevent incorrect titles appearing on link
     // hover. (See 17654)
     if (!this.platform_.isBot()) {
+      this.storeService_.dispatch(
+        Action.SET_TITLE,
+        this.element.getAttribute('title')
+      );
       this.element.removeAttribute('title');
     }
 
