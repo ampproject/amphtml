@@ -32,10 +32,7 @@ import {
   setFullscreenOn,
 } from './utils';
 import {handleCompanionAds} from './monetization';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {px, setStyles} from '#core/dom/style';
 import {removeElement} from '#core/dom';
 
@@ -106,6 +103,9 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.unlisteners_ = [];
     /** @private {?IntersectionObserver3pHost} */
     this.intersectionObserverHostApi_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /**
@@ -363,8 +363,9 @@ class AmpApesterMedia extends AMP.BaseElement {
             })
           )
           .then(() => {
-            observeWithSharedInOb(this.element, (inViewport) =>
-              this.viewportCallback_(inViewport)
+            this.unobserveIntersections_ = observeIntersections(
+              this.element,
+              ({isIntersecting}) => this.viewportCallback_(isIntersecting)
             );
           });
       })
@@ -405,7 +406,8 @@ class AmpApesterMedia extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections = null;
     if (this.iframe_) {
       this.intersectionObserverHostApi_.destroy();
       this.intersectionObserverHostApi_ = null;

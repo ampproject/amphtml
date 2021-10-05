@@ -1,7 +1,7 @@
 /** @externs */
 
 /** @const */
-var SoundcloudDef = {};
+var BentoSoundcloudDef = {};
 
 /**
  * @typedef {{
@@ -13,4 +13,4 @@ var SoundcloudDef = {};
  *   onLoad: (function():undefined|undefined),
  * }}
  */
-SoundcloudDef.Props;
+BentoSoundcloudDef.Props;

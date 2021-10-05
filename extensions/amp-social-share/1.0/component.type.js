@@ -1,7 +1,7 @@
 /** @externs */
 
 /** @const */
-var SocialShareDef = {};
+var BentoSocialShareDef = {};
 
 /**
  * @typedef {{
@@ -18,4 +18,4 @@ var SocialShareDef = {};
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-SocialShareDef.Props;
+BentoSocialShareDef.Props;

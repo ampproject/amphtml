@@ -1506,12 +1506,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await player.load();
 
-      expect(
-        playerEl.querySelector('.i-amphtml-story-player-desktop-panel-prev')
-      ).to.exist;
-      expect(
-        playerEl.querySelector('.i-amphtml-story-player-desktop-panel-next')
-      ).to.exist;
+      expect(playerEl.querySelector('.i-amphtml-story-player-panel-prev')).to
+        .exist;
+      expect(playerEl.querySelector('.i-amphtml-story-player-panel-next')).to
+        .exist;
     });
 
     it('Should get UI state on resize', async () => {

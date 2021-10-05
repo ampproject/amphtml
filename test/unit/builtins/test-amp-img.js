@@ -178,6 +178,18 @@ describes.sandboxed('amp-img', {}, (env) => {
     });
   });
 
+  it('should propagate importance', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      importance: 'high',
+      width: 320,
+      height: 240,
+    }).then((ampImg) => {
+      const img = ampImg.querySelector('img');
+      expect(img.getAttribute('importance')).to.equal('high');
+    });
+  });
+
   it('should propagate data attributes', () => {
     return getImg({
       src: '/examples/img/sample.jpg',
