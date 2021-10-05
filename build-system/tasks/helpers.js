@@ -1,5 +1,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const debounce = require('../common/debounce');
+const del = require('del');
 const esbuild = require('esbuild');
 /** @type {Object} */
 const experimentDefines = require('../global-configs/experiments-const.json');
@@ -67,6 +68,18 @@ const watchDebounceDelay = 1000;
  * @private @const {!Map<string, {rebuild: function():!Promise<void>}>}
  */
 const watchedTargets = new Map();
+
+/**
+ * Cleans up the placeholder directories for fake build modules.
+ */
+function cleanupBuildDir() {
+  del.sync('build/fake-module');
+  del.sync('build/patched-module');
+  del.sync('build/parsers');
+  fs.mkdirsSync('build/fake-module/third_party/babel');
+  fs.mkdirsSync('build/fake-module/src/polyfills/');
+  fs.mkdirsSync('build/fake-polyfills/src/polyfills');
+}
 
 /**
  * @param {!Object} jsBundles
@@ -804,6 +817,7 @@ function shouldUseClosure() {
 
 module.exports = {
   bootstrapThirdPartyFrames,
+  cleanupBuildDir,
   compileAllJs,
   compileCoreRuntime,
   compileJs,

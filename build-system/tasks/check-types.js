@@ -7,7 +7,8 @@ const {
 const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
-const {cleanupBuildDir, closureCompile} = require('../compile/compile');
+const {cleanupBuildDir} = require('./helpers');
+const {closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {cyan, green, red, yellow} = require('kleur/colors');
