@@ -23,7 +23,7 @@ import { loadScript, validateData } from '#3p/3p';
 export function seedtag(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/
   global._seedtag_amp = {
-    allowed_data: ['adunitId', 'placement', 'publisherId'],
+    allowed_data: ['adunitId', 'placement', 'publisherId', 'forceCreative'],
     mandatory_data: ['adunitId', 'placement', 'publisherId'],
     data,
   };
