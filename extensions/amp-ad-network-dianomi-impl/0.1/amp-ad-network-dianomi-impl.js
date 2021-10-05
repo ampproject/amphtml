@@ -1,3 +1,5 @@
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+
 import {userAssert} from '../../../src/log';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 
@@ -22,7 +24,29 @@ const ENVIRONMENTS = {
 
 export class AmpAdNetworkDianomiImpl extends AmpA4A {
   /** @override */
-  getAdUrl() {
+  getAdUrl(consentTuple) {
+    let consentString = '';
+    const consentVars = [
+      'consentState',
+      'consentString',
+      'consentStringType',
+      'gdprApplies',
+      'additionalConsent',
+    ];
+    if (
+      consentTuple &&
+      consentTuple.consentState === CONSENT_POLICY_STATE.UNKNOWN
+    ) {
+      return '';
+    }
+    if (consentTuple) {
+      consentString = consentVars.reduce((acc, currentValue) => {
+        if (consentTuple[currentValue]) {
+          acc = `${acc}&${currentValue}=${consentTuple[currentValue]}`;
+        }
+        return acc;
+      }, '');
+    }
     const paramId = this.element.getAttribute('data-request-param-id');
     const typeAttr = this.element.getAttribute('data-dianomi-type');
     let type = TYPES[0];
@@ -44,7 +68,7 @@ export class AmpAdNetworkDianomiImpl extends AmpA4A {
       'The Dianomi request parameter ID provided is invalid'
     );
 
-    return `https://${env}.dianomi.com/${type}.pl?format=a4a&id=${paramId}`;
+    return `https://${env}.dianomi.com/${type}.pl?format=a4a&id=${paramId}${consentString}`;
   }
 }
 
