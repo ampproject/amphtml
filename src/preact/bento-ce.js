@@ -5,65 +5,19 @@ import {toWin} from '#core/window';
 let BaseElement;
 
 /**
- * @param {K} unusedParent
- * @param {Array<*>} unusedArgs
- * @param {T} unusedKlass
- * @return {T}
- * @template T, K
- */
-function construct(unusedParent, unusedArgs, unusedKlass) {
-  if (isNativeReflectConstruct()) {
-    construct = Reflect.construct;
-  } else {
-    construct = function _construct2(parent, args, klass) {
-      const a3 = [null];
-      a3.push.apply(a3, args);
-      const Constructor = Function.bind.apply(parent, a3);
-      const instance = new Constructor();
-      if (klass) {
-        Object.setPrototypeOf(instance, klass.prototype);
-      }
-      return instance;
-    };
-  }
-  return construct.apply(null, arguments);
-}
-
-/** @return {boolean} */
-function isNativeReflectConstruct() {
-  if (typeof Reflect === 'undefined' || !Reflect.construct) {
-    return false;
-  }
-  if (Reflect.construct.sham) {
-    return false;
-  }
-  if (typeof Proxy === 'function') {
-    return true;
-  }
-  try {
-    Boolean.prototype.valueOf.call(
-      Reflect.construct(Boolean, [], function () {})
-    );
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
  * @param {T} klass
  * @return {T}
  * @template T
  */
 function maybeWrapNativeSuper(klass) {
-  if (isEsm()) {
+  if (isEsm() || typeof Reflect !== 'object' || !Reflect.construct) {
     return klass;
   }
   /**
    * @return {T}
    */
   function Wrapper() {
-    return construct(klass, arguments, Object.getPrototypeOf(this).constructor);
+    return Reflect.construct(klass, arguments, this.constructor);
   }
   Wrapper.prototype = Object.create(klass.prototype, {
     constructor: {
