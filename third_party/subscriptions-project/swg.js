@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.184 */
+/** Version: 0.1.22.186 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -1356,6 +1356,59 @@ class LinkingInfoResponse {
 /**
  * @implements {Message}
  */
+class OpenDialogRequest {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?string} */
+    this.urlPath_ = data[base] == null ? null : data[base];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUrlPath() {
+    return this.urlPath_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUrlPath(value) {
+    this.urlPath_ = value;
+  }
+
+  /**
+   * @param {boolean=} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+        this.urlPath_, // field 1 - url_path
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'OpenDialogRequest';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
 class SkuSelectedResponse {
   /**
    * @param {!Array<*>=} data
@@ -1810,6 +1863,7 @@ const PROTO_MAP = {
   'FinishedLoggingResponse': FinishedLoggingResponse,
   'LinkSaveTokenRequest': LinkSaveTokenRequest,
   'LinkingInfoResponse': LinkingInfoResponse,
+  'OpenDialogRequest': OpenDialogRequest,
   'SkuSelectedResponse': SkuSelectedResponse,
   'SmartBoxMessage': SmartBoxMessage,
   'SubscribeResponse': SubscribeResponse$1,
@@ -4687,7 +4741,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.184',
+    '_client': 'SwG 0.1.22.186',
   });
 }
 
@@ -5955,7 +6009,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.184',
+        '_client': 'SwG 0.1.22.186',
         'supportsEventManager': true,
       },
       args || {}
@@ -6834,7 +6888,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.184');
+    context.setClientVersion('SwG 0.1.22.186');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());

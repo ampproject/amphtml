@@ -262,6 +262,7 @@ describes.realWin('CustomElement register', {amp: true}, (env) => {
         hasAttribute(name) {
           return name == 'custom-element' || name == 'src';
         },
+        addEventListener() {},
         src: 'https://cdn.ampproject.org/v0/amp-test1-0.2.js',
         ownerDocument: doc,
       };
@@ -326,6 +327,7 @@ describes.realWin('CustomElement register', {amp: true}, (env) => {
         hasAttribute(name) {
           return name == 'custom-element' || name == 'src';
         },
+        addEventListener() {},
         src: 'https://cdn.ampproject.org/v0/amp-test2-0.3.js',
         ownerDocument: doc,
       };

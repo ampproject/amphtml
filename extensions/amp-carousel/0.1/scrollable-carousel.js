@@ -7,10 +7,7 @@ import {dev} from '../../../src/log';
 import {isLayoutSizeFixed} from '#core/dom/layout';
 import {listen} from '../../../src/event-helper';
 import {numeric} from '#core/dom/transition';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {realChildElements} from '#core/dom/query';
 
 /** @const {string} */
@@ -35,6 +32,9 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     /** @private {?number} */
     this.scrollTimerId_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /** @override */
@@ -100,8 +100,9 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   layoutCallback() {
-    observeWithSharedInOb(this.element, (inViewport) =>
-      this.viewportCallbackTemp(inViewport)
+    this.unobserveIntersections_ = observeIntersections(
+      this.element,
+      ({isIntersecting}) => this.viewportCallbackTemp(isIntersecting)
     );
 
     this.doLayout_(this.pos_);
@@ -112,7 +113,8 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   unlayoutCallback() {
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections = null;
     return super.unlayoutCallback();
   }
 

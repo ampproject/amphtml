@@ -479,6 +479,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
+      "hasCss": true,
+      "npm": true,
       "wrapper": "bento"
     }
   },
@@ -668,6 +670,16 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
+    }
+  },
+  {
+    "name": "amp-mathml",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "wrapper": "bento",
+      "npm": true
     }
   },
   {
@@ -879,6 +891,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
+      "npm": true,
       "wrapper": "bento"
     }
   },
@@ -959,6 +972,7 @@
       "cssBinaries": [
         "amp-story-consent",
         "amp-story-draggable-drawer-header",
+        "amp-story-form",
         "amp-story-hint",
         "amp-story-info-dialog",
         "amp-story-open-page-attachment",

@@ -45,7 +45,6 @@ function BentoInstagramWithRef(
 
   return (
     <IframeEmbed
-      allowTransparency
       iframeStyle={{opacity}}
       matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
       messageHandler={messageHandler}

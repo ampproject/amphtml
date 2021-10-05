@@ -4,6 +4,8 @@
  */
 
 const [extension, ampVersion, extensionVersion] = process.argv.slice(2);
+const fastGlob = require('fast-glob');
+const path = require('path');
 const {getSemver} = require('./utils');
 const {log} = require('../common/logging');
 const {stat, writeFile} = require('fs/promises');
@@ -21,6 +23,19 @@ async function shouldSkip() {
     log(`${extension} ${extensionVersion} : skipping, does not exist`);
     return true;
   }
+}
+
+/**
+ * Returns relative paths to all the extension's CSS file
+ *
+ * @return {Promise<string[]>}
+ */
+async function getStylesheets() {
+  const extDir = `extensions/${extension}/${extensionVersion}/dist`
+    .split('/')
+    .join(path.sep);
+  const files = await fastGlob(path.join(extDir, '**', '*.css'));
+  return files.map((file) => path.relative(extDir, file));
 }
 
 /**
@@ -42,6 +57,22 @@ async function writePackageJson() {
     return;
   }
 
+  const exports = {
+    '.': './preact',
+    './preact': {
+      import: './dist/component-preact.module.js',
+      require: './dist/component-preact.js',
+    },
+    './react': {
+      import: './dist/component-react.module.js',
+      require: './dist/component-react.js',
+    },
+  };
+
+  for (const stylesheet of await getStylesheets()) {
+    exports[`./${stylesheet}`] = `./dist/${stylesheet}`;
+  }
+
   const json = {
     name: `@ampproject/${extension}`,
     version,
@@ -50,17 +81,7 @@ async function writePackageJson() {
     license: 'Apache-2.0',
     main: './dist/component-preact.js',
     module: './dist/component-preact.module.js',
-    exports: {
-      '.': './preact',
-      './preact': {
-        import: './dist/component-preact.module.js',
-        require: './dist/component-preact.js',
-      },
-      './react': {
-        import: './dist/component-react.module.js',
-        require: './dist/component-react.js',
-      },
-    },
+    exports,
     files: ['dist/*', 'react.js'],
     repository: {
       type: 'git',
