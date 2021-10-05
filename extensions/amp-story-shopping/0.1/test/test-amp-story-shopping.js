@@ -1,5 +1,4 @@
-import '../amp-story-shopping';
-import {htmlFor} from '#core/dom/static-template';
+import {createElementWithAttributes} from '#core/dom';
 
 describes.realWin(
   'amp-story-shopping-v0.1',
@@ -11,24 +10,32 @@ describes.realWin(
   },
   (env) => {
     let win;
-    let doc;
-    let html;
+    let element;
+    let shopping;
 
     beforeEach(() => {
       win = env.win;
-      doc = win.document;
-      html = htmlFor(doc);
     });
 
-    // DO NOT SUBMIT: This is example code only.
-    it('should contain "hello world" when built', async () => {
-      const element = html`
-        <amp-story-shopping width="100" height="10" layout="responsive">
-        </amp-story-shopping>
-      `;
-      doc.body.appendChild(element);
-      await element.whenBuilt();
-      expect(element.querySelector('div').textContent).to.equal('hello world');
+    async function createAmpStoryShopping() {
+      const pageEl = win.document.createElement('amp-story-page');
+      pageEl.id = 'page1';
+      element = createElementWithAttributes(
+        win.document,
+        'amp-story-shopping',
+        {
+          'layout': 'fill',
+        }
+      );
+      pageEl.appendChild(element);
+      win.document.body.appendChild(pageEl);
+
+      shopping = await element.getImpl();
+    }
+
+    it('should build shopping component', async () => {
+      await createAmpStoryShopping();
+      expect(() => shopping.layoutCallback()).to.not.throw();
     });
   }
 );

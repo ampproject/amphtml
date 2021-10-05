@@ -15,13 +15,6 @@ tags: {  # <amp-story-shopping>
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-story-shopping/"
   amp_layout: {
-    supported_layouts: CONTAINER
     supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: FLEX_ITEM
-    supported_layouts: INTRINSIC
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
   }
 }

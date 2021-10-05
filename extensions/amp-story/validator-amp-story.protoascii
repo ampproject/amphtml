@@ -712,6 +712,7 @@ descendant_tag_list: {
   tag: "AMP-STORY-INTERACTIVE-QUIZ"
   tag: "AMP-STORY-INTERACTIVE-RESULTS"
   tag: "AMP-STORY-PANNING-MEDIA"
+  tag: "AMP-STORY-SHOPPING"
   tag: "AMP-TIMEAGO"
   tag: "AMP-TWITTER"
   tag: "AMP-VIDEO"
