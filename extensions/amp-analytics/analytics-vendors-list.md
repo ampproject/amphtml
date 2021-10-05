@@ -109,7 +109,11 @@ Type attribute value: `blueconic`
 
 Type attribute value: `bluetriangle`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for blue Triangle. More details can be found at [help.bluetriangle.com](https://help.bluetriangle.com/hc/en-us/articles/1500006133061).
+
+<!-- markdown-link-check-enable -->
 
 ### Browsi
 
