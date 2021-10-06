@@ -1316,7 +1316,7 @@ export class AmpA4A extends AMP.BaseElement {
     return this.attemptToRenderCreative().then(() => {
       this.unobserveIntersections_ = observeIntersections(
         this.element,
-        ({isIntersecting}) => this.viewportCallbackTemp(isIntersecting)
+        ({isIntersecting}) => this.viewportCallback(isIntersecting)
       );
     });
   }
@@ -1500,12 +1500,11 @@ export class AmpA4A extends AMP.BaseElement {
     }
   }
 
-  // TODO: Rename to viewportCallback once BaseElement.viewportCallback has been removed.
   /**
    * @param {boolean}  inViewport
    * @protected
    */
-  viewportCallbackTemp(inViewport) {
+  viewportCallback(inViewport) {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
