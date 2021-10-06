@@ -294,7 +294,13 @@ function getAdsLocalhost(win) {
   if (adsUrl == 'https://3p.ampproject.net') {
     adsUrl = 'http://ads.localhost'; // local dev with a localhost server
   }
-  return adsUrl + ':' + (win.location.port || win.parent.location.port);
+  return (
+    adsUrl +
+    ':' +
+    (new URL(win.document.baseURI)?.port ||
+      win.location.port ||
+      win.parent.location.port)
+  );
 }
 
 /**

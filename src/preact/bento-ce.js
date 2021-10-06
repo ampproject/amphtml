@@ -1,4 +1,31 @@
+import {isEsm} from '#core/mode';
 import {toWin} from '#core/window';
+
+/**
+ * @param {T} klass
+ * @return {T}
+ * @template T
+ */
+function maybeWrapNativeSuper(klass) {
+  if (isEsm() || typeof Reflect !== 'object' || !Reflect.construct) {
+    return klass;
+  }
+  /**
+   * @return {T}
+   */
+  function Wrapper() {
+    return Reflect.construct(klass, arguments, this.constructor);
+  }
+  Wrapper.prototype = Object.create(klass.prototype, {
+    constructor: {
+      value: Wrapper,
+      enumerable: false,
+      writable: true,
+      configurable: true,
+    },
+  });
+  return Object.setPrototypeOf(Wrapper, klass);
+}
 
 /** @type {typeof AMP.BaseElement} */
 let BaseElement;
@@ -6,6 +33,7 @@ let BaseElement;
 if (typeof AMP !== 'undefined' && AMP.BaseElement) {
   BaseElement = AMP.BaseElement;
 } else {
+  const ExtendableHTMLElement = maybeWrapNativeSuper(HTMLElement);
   class CeBaseElement {
     /**
      * @param {!Element} element
@@ -23,7 +51,7 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
      * @return {typeof HTMLElement}
      */
     static 'CustomElement'(BaseElement) {
-      return class CustomElement extends HTMLElement {
+      return class CustomElement extends ExtendableHTMLElement {
         /** */
         constructor() {
           super();
