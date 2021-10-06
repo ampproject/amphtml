@@ -16,7 +16,7 @@ import {dict, map} from '#core/types/object';
 import {Services} from '#service';
 
 import {VideoSessionManager} from './video-session-manager';
-import {renderIcon, renderInteractionOverlay} from './video/autoplay';
+import {renderEqIcon, renderInteractionOverlay} from './video/autoplay';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
 
 import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
@@ -823,8 +823,7 @@ class VideoEntry {
     ) {
       return;
     }
-
-    const animation = renderIcon(win, element);
+    const animation = renderEqIcon(win, element);
     const children = [animation];
 
     /** @param {boolean} shouldDisplay */

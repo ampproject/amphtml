@@ -36,7 +36,7 @@ export function renderInteractionOverlay(elOrDoc, metadata) {
  * @param {!Element|!Document} elOrDoc
  * @return {!Element}
  */
-export function renderIcon(win, elOrDoc) {
+export function renderEqIcon(win, elOrDoc) {
   const html = htmlFor(elOrDoc);
   const icon = html`
     <i-amphtml-video-icon class="amp-video-eq">

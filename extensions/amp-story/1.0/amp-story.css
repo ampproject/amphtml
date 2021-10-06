@@ -171,8 +171,14 @@ amp-story[hide] {
 }
 
 amp-story .amp-video-eq {
-  height: 14px !important;;
+  height: 14px !important;
   width: 14px !important;
+  z-index: 3 !important;
+  margin-right: calc(50vw - var(--story-page-vw) * 50) !important;
+  margin-bottom: calc(50vh - var(--story-page-vh) * 50) !important;
+  --i-amphtml-story-eq-background-color: #00000033;
+  box-shadow: 0 0 13px 10px var(--i-amphtml-story-eq-background-color);
+  background: var(--i-amphtml-story-eq-background-color);
 }
 
 amp-story .amp-video-eq .amp-video-eq-col {

@@ -113,6 +113,7 @@ import LocalizedStringsTr from './_locales/tr.json' assert {type: 'json'}; // lg
 import LocalizedStringsVi from './_locales/vi.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsZhCn from './_locales/zh-CN.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsZhTw from './_locales/zh-TW.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import {renderEqIcon} from '#service/video/autoplay';
 
 /** @private @const {number} */
 const DESKTOP_WIDTH_THRESHOLD = 1024;
@@ -623,6 +624,22 @@ export class AmpStory extends AMP.BaseElement {
     this.updateAudioIcon_();
     this.updatePausedIcon_();
     this.element.appendChild(this.systemLayer_.build(initialPageId));
+    const eqIcon = renderEqIcon(this.win, this.win.document);
+    this.element.appendChild(eqIcon);
+    this.storeService_.subscribe(
+      StateProperty.PAGE_HAS_AUDIO_STATE,
+      (hasAudio) => {
+        eqIcon.classList.toggle('amp-video-eq-play', hasAudio);
+      },
+      true
+    );
+    this.storeService_.subscribe(
+      StateProperty.MUTED_STATE,
+      (muted) => {
+        eqIcon.classList.toggle('muted', muted);
+      },
+      true
+    );
   }
 
   /** @private */
