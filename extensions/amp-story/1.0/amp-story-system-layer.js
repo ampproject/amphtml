@@ -31,6 +31,7 @@ import {renderAsElement} from './simple-template';
 
 import {setImportantStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
+import {renderEqIcon} from '#service/video/autoplay';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
@@ -426,6 +427,8 @@ export class SystemLayer {
       '.i-amphtml-story-system-layer-buttons'
     );
 
+    this.buildEqualizer_();
+
     this.buildForDevelopmentMode_();
 
     this.initializeListeners_();
@@ -790,6 +793,7 @@ export class SystemLayer {
         : this.getShadowRoot().removeAttribute(
             CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE
           );
+      this.equalizer_.classList.toggle('amp-video-eq-play', pageHasAudio);
     });
   }
 
@@ -820,6 +824,7 @@ export class SystemLayer {
       isMuted
         ? this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, '')
         : this.getShadowRoot().removeAttribute(AUDIO_MUTED_ATTRIBUTE);
+      this.equalizer_.classList.toggle('muted', isMuted);
     });
   }
 
@@ -1192,5 +1197,13 @@ export class SystemLayer {
     }
 
     this.developerLog_.hide();
+  }
+
+  /**
+   * Creates the audio equalizer.
+   */
+  buildEqualizer_() {
+    this.equalizer_ = renderEqIcon(this.win_, this.win_.document);
+    this.parentEl_.appendChild(this.equalizer_);
   }
 }

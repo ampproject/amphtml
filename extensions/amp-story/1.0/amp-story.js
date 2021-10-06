@@ -624,22 +624,6 @@ export class AmpStory extends AMP.BaseElement {
     this.updateAudioIcon_();
     this.updatePausedIcon_();
     this.element.appendChild(this.systemLayer_.build(initialPageId));
-    const eqIcon = renderEqIcon(this.win, this.win.document);
-    this.element.appendChild(eqIcon);
-    this.storeService_.subscribe(
-      StateProperty.PAGE_HAS_AUDIO_STATE,
-      (hasAudio) => {
-        eqIcon.classList.toggle('amp-video-eq-play', hasAudio);
-      },
-      true
-    );
-    this.storeService_.subscribe(
-      StateProperty.MUTED_STATE,
-      (muted) => {
-        eqIcon.classList.toggle('muted', muted);
-      },
-      true
-    );
   }
 
   /** @private */
