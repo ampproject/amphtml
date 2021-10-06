@@ -67,13 +67,7 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
-import {
-  computedStyle,
-  px,
-  resetStyles,
-  setImportantStyles,
-  toggle,
-} from '#core/dom/style';
+import {computedStyle, setImportantStyles, toggle} from '#core/dom/style';
 import {createPseudoLocale} from '#service/localization/strings';
 import {debounce} from '#core/types/function';
 import {dev, devAssert, user} from '../../../src/log';
@@ -301,9 +295,6 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?BackgroundBlur} */
     this.backgroundBlur_ = null;
-
-    /** @private {number} */
-    this.maxSeenMobileViewportHeight_ = 0;
 
     /** @private {?UIType} */
     this.uiState_ = null;
