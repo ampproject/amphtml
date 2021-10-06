@@ -1724,15 +1724,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getUIType_() {
-    const platformIsAndroid = this.platform_.isAndroid();
-    const uiIsCurrentlyMobile = this.uiState_ === UIType.MOBILE;
-    const tagNamesThatTriggerKeyboard = ['INPUT', 'TEXTAREA'];
-    const textFieldHasFocus = tagNamesThatTriggerKeyboard.includes(
-      this.win.document.activeElement?.tagName
-    );
-    const androidSoftKeyboardIsProbablyOpen =
-      platformIsAndroid && uiIsCurrentlyMobile && textFieldHasFocus;
-    if (androidSoftKeyboardIsProbablyOpen) {
+    if (this.androidSoftKeyboardIsProbablyOpen_()) {
       // The opening of the Android soft keyboard triggers a viewport resize
       // that can cause the story's dimensions to appear to be those of a
       // desktop. Here, we assume that the soft keyboard is open if the latest
@@ -1755,6 +1747,24 @@ export class AmpStory extends AMP.BaseElement {
 
     // Desktop one panel UI (default).
     return UIType.DESKTOP_ONE_PANEL;
+  }
+
+  /**
+   * Returns whether the Android soft keyboard is most likely open, as
+   * calculated using multiple factors. Note that this calculation will
+   * incorrectly return true in cases where the user has manually dismissed the
+   * keyboard while retaining focus on a text field.
+   * @return {boolean}
+   * @private
+   */
+  androidSoftKeyboardIsProbablyOpen_() {
+    const platformIsAndroid = this.platform_.isAndroid();
+    const uiIsCurrentlyMobile = this.uiState_ === UIType.MOBILE;
+    const tagNamesThatTriggerKeyboard = ['INPUT', 'TEXTAREA'];
+    const textFieldHasFocus = tagNamesThatTriggerKeyboard.includes(
+      this.win.document.activeElement?.tagName
+    );
+    return platformIsAndroid && uiIsCurrentlyMobile && textFieldHasFocus;
   }
 
   /**
