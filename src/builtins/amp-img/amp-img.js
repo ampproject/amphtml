@@ -29,6 +29,7 @@ export const ATTRIBUTES_TO_PROPAGATE = [
   'crossorigin',
   'referrerpolicy',
   'title',
+  'importance',
   'sizes',
   'srcset',
   'src',
