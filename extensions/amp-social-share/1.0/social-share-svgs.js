@@ -4,7 +4,7 @@ import * as Preact from '#preact';
  * @param {!JsonObject} props
  * @return {PreactDef.Renderable}
  */
-export function SocialShareIcon({style, type}) {
+export function BentoSocialShareIcon({style, type}) {
   switch (type) {
     case 'FACEBOOK':
       return (

@@ -17,6 +17,13 @@ push_builds_only: &push_builds_only
         - main
         - /^amp-release-.*$/
 
+release_builds_only: &release_builds_only
+  filters:
+    branches:
+      only:
+        - nightly
+        - /^amp-release-.*$/
+
 pr_builds_only: &pr_builds_only
   filters:
     branches:
@@ -53,7 +60,7 @@ executors:
     resource_class: xlarge
   jdk-docker-xlarge:
     docker:
-      - image: cimg/openjdk:16.0-node
+      - image: cimg/openjdk:17.0-node
     resource_class: xlarge
   macos-medium:
     macos:
@@ -118,7 +125,6 @@ commands:
     steps:
       - browser-tools/install-chrome:
           replace-existing: true
-          chrome-version: 93.0.4577.63
       - browser-tools/install-chromedriver
   install_firefox:
     steps:
@@ -428,6 +434,39 @@ jobs:
           command: node build-system/pr-check/experiment-e2e-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
       - teardown_vm
+  amp_release:
+    executor:
+      name: node-docker-xlarge
+    parameters:
+      flavor:
+        description: 'Which of the release flavors to build'
+        type: enum
+        enum: ['base', 'experimentA', 'experimentB', 'experimentC']
+      esm:
+        description: 'Whether to build module or nomodule release'
+        type: enum
+        enum: ['no-esm', 'esm']
+    environment:
+      EXP: << parameters.flavor >>
+      FLAVOR: << parameters.flavor >>
+      ESM: << parameters.esm >>
+    steps:
+      - setup_vm
+      - run:
+          name: '⭐ amp release ⭐'
+          command: node --unhandled-rejections=strict build-system/release-workflows/build-release.js
+      - teardown_vm
+  archive_release:
+    executor:
+      name: node-docker-medium
+    steps:
+      - setup_vm
+      - run:
+          name: '⭐ Archive Release Artifacts ⭐'
+          command: node --unhandled-rejections=strict build-system/release-workflows/archive-release.js
+      - store_artifacts:
+          path: /tmp/release.tar.gz
+      - teardown_vm
 
 workflows:
   version: 2
@@ -569,3 +608,23 @@ workflows:
       #     <<: *push_builds_only
       #     requires:
       #       - 'Nomodule Build (Test)'
+
+  'Release':
+    jobs:
+      - initialize_repository:
+          name: 'Initialize Repository'
+          <<: *release_builds_only
+      - amp_release:
+          name: '<< matrix.flavor >> << matrix.esm >>'
+          matrix:
+            parameters:
+              flavor: ['base', 'experimentA', 'experimentB', 'experimentC']
+              esm: ['no-esm', 'esm']
+          <<: *release_builds_only
+          requires:
+            - 'Initialize Repository'
+      - archive_release:
+          name: 'Archive Release'
+          <<: *release_builds_only
+          requires:
+            - amp_release

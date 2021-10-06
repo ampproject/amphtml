@@ -17,4 +17,24 @@ tags: {  # <amp-story-panning-media>
   amp_layout: {
     supported_layouts: FILL
   }
+  attrs: {
+    name: "data-x"
+    value_regex: "-?(0|[0-9]?\\d\\.?\\d*%|100%)"
+  }
+  attrs: {
+    name: "data-y"
+    value_regex: "-?(0|[0-9]?\\d\\.?\\d*%|100%)"
+  }
+  attrs: {
+    name: "data-zoom"
+    value_regex: "\\d+\\.?\\d*"
+  }
+  attrs: {
+    name: "lock-bounds"
+    value: ""
+  }
+  child_tags: {
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "AMP-IMG"
+  }
 }

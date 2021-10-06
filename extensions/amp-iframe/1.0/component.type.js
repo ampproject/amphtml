@@ -1,13 +1,12 @@
 /** @externs */
 
 /** @const */
-var IframeDef = {};
+var BentoIframeDef = {};
 
 /**
  * @typedef {{
  *   allowFullScreen: (boolean),
  *   allowPaymentRequest: (boolean),
- *   allowTransparency: (boolean),
  *   onLoad: (function():undefined),
  *   referrerPolicy: (string),
  *   requestResize: (function(number,number):!Promise|undefined),
@@ -16,4 +15,4 @@ var IframeDef = {};
  *   srcdoc: (string),
  * }}
  */
-IframeDef.Props;
+BentoIframeDef.Props;
