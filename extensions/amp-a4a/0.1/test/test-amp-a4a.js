@@ -263,18 +263,6 @@ describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
     await a4a.adPromise_;
     expect(fallbackSpy).to.be.called;
   });
-
-  it('should ignore shadow DOM requirement without an experiment', async () => {
-    /* toggleExperiment(env.win, 'disable-a4a-non-sd', false, true) // launched: true */
-    false;
-    attachShadowStub.value(undefined);
-    const fallbackSpy = env.sandbox.spy(a4a, 'handleFallback_');
-    env.sandbox.stub(a4a, 'skipClientSideValidation').returns(false);
-    await a4a.buildCallback();
-    a4a.onLayoutMeasure();
-    await a4a.adPromise_;
-    expect(fallbackSpy).to.not.be.called;
-  });
 });
 
 describes.realWin('amp-a4a', {amp: true}, (env) => {

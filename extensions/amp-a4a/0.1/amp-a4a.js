@@ -2555,14 +2555,7 @@ export function signatureVerifierFor(win) {
  */
 export function isPlatformSupported(win) {
   // Require Shadow DOM support for a4a.
-  if (
-    !isNative(win.Element.prototype.attachShadow) &&
-    /* isExperimentOn(win, 'disable-a4a-non-sd') // launched: true */
-    true
-  ) {
-    return false;
-  }
-  return true;
+  return isNative(win.Element.prototype.attachShadow);
 }
 
 /**

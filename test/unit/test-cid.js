@@ -871,7 +871,6 @@ describes.realWin('cid', {amp: true}, (env) => {
 
   describe('CID backup', () => {
     beforeEach(() => {
-      cid.isBackupCidExpOn = true;
       env.sandbox
         .stub(cid.viewerCidApi_, 'isSupported')
         .returns(Promise.resolve(false));
