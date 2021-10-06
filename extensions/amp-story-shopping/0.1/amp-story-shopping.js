@@ -12,17 +12,7 @@ export class AmpStoryShopping extends AMP.BaseElement {
   }
 
   /** @override */
-  buildCallback() {
-    this.container_ = htmlFor(this.element)`
-    <div>
-      <button type="button" role="button" style="background: #fff;">
-        Pause
-      </button>
-    </div>
-  `;
-
-    this.element.appendChild(this.container_);
-  }
+  buildCallback() {}
 
   /** @override */
   layoutCallback() {}
