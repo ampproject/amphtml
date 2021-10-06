@@ -1723,7 +1723,10 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getUIType_() {
-    if (this.androidSoftKeyboardIsProbablyOpen_()) {
+    if (
+      this.uiState_ === UIType.MOBILE &&
+      this.androidSoftKeyboardIsProbablyOpen_()
+    ) {
       // The opening of the Android soft keyboard triggers a viewport resize
       // that can cause the story's dimensions to appear to be those of a
       // desktop. Here, we assume that the soft keyboard is open if the latest
@@ -1758,12 +1761,11 @@ export class AmpStory extends AMP.BaseElement {
    */
   androidSoftKeyboardIsProbablyOpen_() {
     const platformIsAndroid = this.platform_.isAndroid();
-    const uiIsCurrentlyMobile = this.uiState_ === UIType.MOBILE;
     const tagNamesThatTriggerKeyboard = ['INPUT', 'TEXTAREA'];
     const textFieldHasFocus = tagNamesThatTriggerKeyboard.includes(
       this.win.document.activeElement?.tagName
     );
-    return platformIsAndroid && uiIsCurrentlyMobile && textFieldHasFocus;
+    return platformIsAndroid && textFieldHasFocus;
   }
 
   /**
