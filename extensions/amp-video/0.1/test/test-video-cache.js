@@ -237,18 +237,24 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
             sources: [
               {
                 'url': 'video1.mp4',
+                'codec': 'h264',
+                'bitrate_kbps': 2000,
+                type: 'video/mp4',
+              },
+              {
+                'url': 'video2.mp4',
                 'codec': 'vp09.02.30.11',
                 'bitrate_kbps': 1000,
                 type: 'video/mp4',
               },
               {
-                'url': 'video2.mp4',
+                'url': 'video3.mp4',
                 'codec': 'vp09.00.15.08',
                 'bitrate_kbps': 2000,
                 type: 'video/mp4',
               },
               {
-                'url': 'video3.mp4',
+                'url': 'video4.mp4',
                 'codec': 'h264',
                 'bitrate_kbps': 3000,
                 type: 'video/mp4',
@@ -272,6 +278,9 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       const srcCodec2 = addedSources[2]
         .getAttribute('type')
         .match(codecRegex)[0];
+      const srcCodec3 = addedSources[3]
+        .getAttribute('type')
+        .match(codecRegex)[0];
 
       expect(addedSources[0].getAttribute('data-bitrate')).to.equal('2000');
       expect(srcCodec0).to.equal('vp09.00.15.08');
@@ -281,6 +290,9 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
 
       expect(addedSources[2].getAttribute('data-bitrate')).to.equal('3000');
       expect(srcCodec2).to.equal('h264');
+
+      expect(addedSources[3].getAttribute('data-bitrate')).to.equal('2000');
+      expect(srcCodec3).to.equal('h264');
     });
 
     it('should add video[src] as the last fallback source', async () => {
