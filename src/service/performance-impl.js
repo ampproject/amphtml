@@ -60,10 +60,8 @@ function getElementType(node) {
   if (node == null) {
     return ELEMENT_TYPE.other;
   }
-  const {tagName} = getOutermostAmpElement(node);
-  if (tagName == null) {
-    return ELEMENT_TYPE.text;
-  }
+  const outer = getOutermostAmpElement(node);
+  const tagName = outer.tagName || '';
   if (tagName === 'IMG' || tagName === 'AMP-IMG') {
     return ELEMENT_TYPE.image;
   }
@@ -78,6 +76,9 @@ function getElementType(node) {
   }
   if (tagName === 'AMP-AD') {
     return ELEMENT_TYPE.ad;
+  }
+  if (!tagName.startsWith('AMP-') && outer.textContent) {
+    return ELEMENT_TYPE.text;
   }
   return ELEMENT_TYPE.other;
 }
@@ -923,13 +924,13 @@ export class Performance {
  * Traverse node ancestors and return the highest level amp element.
  * Returns the given node if none are found.
  *
- * @param {!HTMLElement} node
- * @return {!HTMLElement}
+ * @param {!Node} node
+ * @return {!Node}
  */
 function getOutermostAmpElement(node) {
   let max = node;
   while ((node = node.parentNode) != null) {
-    if (node.nodeName.startsWith('AMP-')) {
+    if (node.tagName.startsWith('AMP-')) {
       max = node;
     }
   }
