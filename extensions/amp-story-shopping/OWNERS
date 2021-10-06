@@ -1,10 +1,23 @@
 // For an explanation of the OWNERS rules and syntax, see:
-// https://github.com/ampproject/amp-github-apps/blob/main/owners/OWNERS.example
+// https://github.com/ampproject/amp-github-apps/blob/master/owners/OWNERS.example
 
 {
   rules: [
     {
-      owners: [{name: 'ampproject/wg-components'}],
+      owners: [
+        {
+          name: 'jshamble',
+          notify: true,
+        },
+        {
+          name: 'processprocess',
+          notify: true,
+        },
+        {
+          name: 'gmajoulet',
+          notify: true,
+        },
+      ],
     },
   ],
 }
