@@ -368,9 +368,14 @@ export class AmpStory extends AMP.BaseElement {
     this.initializePageIds_();
     this.initializeStoryPlayer_();
 
-    const currentUiType = this.getUIType_();
-    this.storeService_.dispatch(Action.TOGGLE_UI, currentUiType);
-    this.uiState_ = currentUiType;
+    this.uiState_ = this.getUIType_();
+    this.storeService_.dispatch(Action.TOGGLE_UI, this.uiState_);
+    if (this.isLandscapeSupported_()) {
+      this.win.document.documentElement.setAttribute(
+        'data-story-supports-landscape',
+        ''
+      );
+    }
 
     // Removes title in order to prevent incorrect titles appearing on link
     // hover. (See 17654)
@@ -1680,6 +1685,9 @@ export class AmpStory extends AMP.BaseElement {
 
         this.vsync_.mutate(() => {
           this.element.setAttribute('i-amphtml-vertical', '');
+          this.win.document.documentElement.classList.add(
+            'i-amphtml-story-vertical'
+          );
           setImportantStyles(this.win.document.body, {height: 'auto'});
           this.element.removeAttribute('desktop');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
