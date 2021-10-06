@@ -2,6 +2,7 @@ import * as preact from /*OK*/ 'preact';
 // The preactDOM name is explicit, so we can remap to react-dom.
 import * as preactDOM from /*OK*/ 'preact/dom';
 import * as hooks from /*OK*/ 'preact/hooks';
+import * as utils from /*OK*/ 'preact/test-utils';
 
 // Defines the type interfaces for the approved Preact APIs.
 // TODO: isValidElement, Component
@@ -144,4 +145,12 @@ export function useCallback(cb, opt_deps) {
  */
 export function useImperativeHandle(ref, create, opt_deps) {
   return hooks.useImperativeHandle(ref, create, opt_deps);
+}
+
+/**
+ * @param {function():void|Promise<void>} callback
+ * @return {Promise<void>}
+ */
+export function act(callback) {
+  return utils.act(callback);
 }
