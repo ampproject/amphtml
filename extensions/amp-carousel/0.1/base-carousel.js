@@ -60,14 +60,11 @@ export class BaseCarousel extends AMP.BaseElement {
     this.setControlsState();
   }
 
-  // TODO(samouri): rename to viewportCallback once
-  // BaseElement.viewportCallback is deleted
-
   /**
    * @param {boolean} inViewport
    * @protected
    */
-  viewportCallbackTemp(inViewport) {
+  viewportCallback(inViewport) {
     if (inViewport) {
       this.hintControls();
     }
@@ -236,7 +233,7 @@ export class BaseCarousel extends AMP.BaseElement {
   layoutCallback() {
     this.unobserveIntersections_ = observeIntersections(
       this.element,
-      ({isIntersecting}) => this.viewportCallbackTemp(isIntersecting)
+      ({isIntersecting}) => this.viewportCallback(isIntersecting)
     );
     return Promise.resolve();
   }
