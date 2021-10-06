@@ -120,7 +120,7 @@ function applySourcesToVideo(videoEl, sources, maxBitrate) {
         'source',
         {
           'src': source['url'],
-          'type': type,
+          type,
           'data-bitrate': source['bitrate_kbps'],
           'i-amphtml-video-cached-source': '',
         }
