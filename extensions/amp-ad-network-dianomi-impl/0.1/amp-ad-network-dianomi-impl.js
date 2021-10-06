@@ -1,5 +1,7 @@
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 
+import {addParamsToUrl} from 'src/url';
+
 import {userAssert} from '../../../src/log';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 
@@ -25,14 +27,13 @@ const ENVIRONMENTS = {
 export class AmpAdNetworkDianomiImpl extends AmpA4A {
   /** @override */
   getAdUrl(consentTuple) {
-    let consentString = '';
-    const consentVars = [
-      'consentState',
-      'consentString',
-      'consentStringType',
-      'gdprApplies',
-      'additionalConsent',
-    ];
+    let consentVars = {
+      consentState: undefined,
+      consentString: undefined,
+      consentStringType: undefined,
+      gdprApplies: undefined,
+      additionalConsent: undefined,
+    };
     if (
       consentTuple &&
       consentTuple.consentState === CONSENT_POLICY_STATE.UNKNOWN
@@ -40,12 +41,13 @@ export class AmpAdNetworkDianomiImpl extends AmpA4A {
       return '';
     }
     if (consentTuple) {
-      consentString = consentVars.reduce((acc, currentValue) => {
-        if (consentTuple[currentValue]) {
-          acc = `${acc}&${currentValue}=${consentTuple[currentValue]}`;
-        }
-        return acc;
-      }, '');
+      consentVars = {
+        consentState: consentTuple.consentState,
+        consentString: consentTuple.consentString,
+        consentStringType: consentTuple.consentStringType,
+        gdprApplies: consentTuple.gdprApplies,
+        additionalConsent: consentTuple.additionalConsent,
+      };
     }
     const paramId = this.element.getAttribute('data-request-param-id');
     const typeAttr = this.element.getAttribute('data-dianomi-type');
@@ -54,12 +56,16 @@ export class AmpAdNetworkDianomiImpl extends AmpA4A {
     let env = ENVIRONMENTS['live'];
 
     if (envAttr) {
-      assertArray(Object.keys(ENVIRONMENTS), envAttr.toLowerCase(), 'env');
+      elementExistsInArray(
+        Object.keys(ENVIRONMENTS),
+        envAttr.toLowerCase(),
+        'env'
+      );
       env = ENVIRONMENTS[envAttr.toLowerCase()];
     }
 
     if (typeAttr) {
-      assertArray(TYPES, typeAttr.toLowerCase(), 'type');
+      elementExistsInArray(TYPES, typeAttr.toLowerCase(), 'type');
       type = typeAttr.toLowerCase();
     }
 
@@ -68,7 +74,13 @@ export class AmpAdNetworkDianomiImpl extends AmpA4A {
       'The Dianomi request parameter ID provided is invalid'
     );
 
-    return `https://${env}.dianomi.com/${type}.pl?format=a4a&id=${paramId}${consentString}`;
+    const params = {
+      format: 'a4a',
+      id: paramId,
+      ...consentVars,
+    };
+
+    return addParamsToUrl(`https://${env}.dianomi.com/${type}.pl`, params);
   }
 }
 
@@ -78,7 +90,7 @@ export class AmpAdNetworkDianomiImpl extends AmpA4A {
  * @param {string} value
  * @param {string} type
  */
-function assertArray(arr, value, type) {
+function elementExistsInArray(arr, value, type) {
   userAssert(
     arr.includes(value),
     `The Dianomi ${type} parameter '${value}' is not a valid input`
