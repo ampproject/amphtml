@@ -1095,6 +1095,23 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       // Flush LCP again.
       toggleVisibility(perf, false);
 
+      // A textual paragraph
+      const p = document.createElement('p');
+      p.textContent = 'hello';
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {
+              entryType: 'largest-contentful-paint',
+              startTime: 25,
+              element: p,
+            },
+          ];
+        },
+      });
+      // Flush LCP again.
+      toggleVisibility(perf, false);
+
       const lcptEvents = perf.events_.filter(({label}) =>
         label.startsWith('lcpt')
       );
@@ -1105,6 +1122,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       expect(lcptEvents).deep.include({
         label: 'lcpt',
         delta: ELEMENT_TYPE.carousel,
+      });
+      expect(lcptEvents).deep.include({
+        label: 'lcpt',
+        delta: ELEMENT_TYPE.text,
       });
     });
   });
