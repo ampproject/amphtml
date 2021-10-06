@@ -102,7 +102,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
   layoutCallback() {
     this.unobserveIntersections_ = observeIntersections(
       this.element,
-      ({isIntersecting}) => this.viewportCallbackTemp(isIntersecting)
+      ({isIntersecting}) => this.viewportCallback(isIntersecting)
     );
 
     this.doLayout_(this.pos_);
@@ -119,8 +119,8 @@ export class AmpScrollableCarousel extends BaseCarousel {
   }
 
   /** @override */
-  viewportCallbackTemp(inViewport) {
-    super.viewportCallbackTemp(inViewport);
+  viewportCallback(inViewport) {
+    super.viewportCallback(inViewport);
     this.updateInViewport_(this.pos_, this.pos_);
   }
 

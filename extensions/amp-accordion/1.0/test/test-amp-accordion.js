@@ -184,7 +184,7 @@ describes.realWin(
       await waitForExpanded(sections[1], true);
 
       const getExpandedCount = () =>
-        element.querySelectorAll('[expanded]').length;
+        element.querySelectorAll('[aria-expanded="true"]').length;
       expect(getExpandedCount()).to.equal(2);
 
       element.setAttribute('expand-single-section', '');
