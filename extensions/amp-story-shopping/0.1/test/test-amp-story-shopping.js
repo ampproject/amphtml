@@ -1,4 +1,5 @@
 import {createElementWithAttributes} from '#core/dom';
+import '../amp-story-shopping';
 
 describes.realWin(
   'amp-story-shopping-v0.1',
@@ -23,9 +24,7 @@ describes.realWin(
       element = createElementWithAttributes(
         win.document,
         'amp-story-shopping',
-        {
-          'layout': 'fill',
-        }
+        {'layout': 'container'}
       );
       pageEl.appendChild(element);
       win.document.body.appendChild(pageEl);
