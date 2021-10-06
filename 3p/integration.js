@@ -243,7 +243,6 @@ import {rfp} from '#ads/vendors/rfp';
 import {rnetplus} from '#ads/vendors/rnetplus';
 import {rubicon} from '#ads/vendors/rubicon';
 import {runative} from '#ads/vendors/runative';
-import {sabavision} from '#ads/vendors/sabavision';
 import {sas} from '#ads/vendors/sas';
 import {seedingalliance} from '#ads/vendors/seedingalliance';
 import {sekindo} from '#ads/vendors/sekindo';
