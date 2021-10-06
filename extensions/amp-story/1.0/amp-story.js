@@ -1593,34 +1593,8 @@ export class AmpStory extends AMP.BaseElement {
    * @visibleForTesting
    */
   onResize() {
-    const prevUiState = this.uiState_;
     this.uiState_ = this.getUIType_();
     this.storeService_.dispatch(Action.TOGGLE_UI, this.uiState_);
-
-    if (this.uiState_ === UIType.MOBILE) {
-      const currentHeight = this.getViewport().getHeight();
-      if (currentHeight > this.maxSeenMobileViewportHeight_) {
-        this.maxSeenMobileViewportHeight_ = currentHeight;
-        // While the UI state is mobile, maintain story height on viewport
-        // resize to prevent the story page from resizing. This is particularly
-        // necessary on Android, when opening or closing the soft keyboard
-        // triggers a viewport resize.
-        this.mutateElement(() => {
-          setImportantStyles(this.element, {
-            'height': px(this.maxSeenMobileViewportHeight_),
-          });
-        });
-      }
-    } else if (prevUiState === UIType.MOBILE) {
-      // Remove the fixed height when the UI state is no longer mobile.
-      this.mutateElement(() => {
-        resetStyles(this.element, ['height']);
-      });
-      // Reset this value because it could result in a larger than desired
-      // height if the UI changes back to a mobile layout that is smaller than
-      // a previously encountered mobile layout.
-      this.maxSeenMobileViewportHeight_ = 0;
-    }
 
     const isLandscape = this.isLandscape_();
     const isLandscapeSupported = this.isLandscapeSupported_();
