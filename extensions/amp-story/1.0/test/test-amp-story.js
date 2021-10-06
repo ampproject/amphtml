@@ -118,7 +118,8 @@ describes.realWin(
 
       AmpStory.isBrowserSupported = () => true;
 
-      /** Control element lifecycle by preventing automatic callback calls. */
+      // Fakes the size of amp-story so it's not built/laid out until we call build/layoutCallbacks
+      // allowing us to mock function calls before the lifecycle callbacks.
       setImportantStyles(win.document.documentElement, {'height': 'auto'});
     });
 
