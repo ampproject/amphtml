@@ -7,7 +7,7 @@ content sections. This component provides a way for viewers to glance at the
 content outline and jump to any section. Effective use reduces scrolling needs
 on mobile devices.
 
-Use Bento Accordion as a web component ([`<bento-accordion>`](#web-component)), or a Preact/React functional component ([`<BentoAccordion>`](#preact/react-component)).
+Use Bento Accordion as a web component ([`<bento-accordion>`](#web-component)), or a Preact/React functional component ([`<BentoAccordion>`](#preactreact-component)).
 
 -   A Bento Accordion accepts one or more `<section>` elements as its direct
     children.
