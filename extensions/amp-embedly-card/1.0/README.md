@@ -3,7 +3,7 @@
 ## Behavior
 
 The Bento Embedly Card component provides you with responsive and shareable embeds to drive the reach of your websites,
-blog posts, and articles from any URL using [Embedly cards](http://docs.embed.ly/docs/cards). Use it as a web component [`<bento-embedly-card>`](#web-component), or a Preact/React functional component [`<BentoEmbedlyCard>`](#preact/react-Component).
+blog posts, and articles from any URL using [Embedly cards](http://docs.embed.ly/docs/cards). Use it as a web component [`<bento-embedly-card>`](#web-component), or a Preact/React functional component [`<BentoEmbedlyCard>`](#preactreact-component).
 
 Cards are the easiest way to leverage Embedly. For any media, cards provide a responsive embed with built-in embed analytics.
 

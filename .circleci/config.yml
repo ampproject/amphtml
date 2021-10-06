@@ -60,7 +60,7 @@ executors:
     resource_class: xlarge
   jdk-docker-xlarge:
     docker:
-      - image: cimg/openjdk:16.0-node
+      - image: cimg/openjdk:17.0-node
     resource_class: xlarge
   macos-medium:
     macos:
@@ -125,7 +125,6 @@ commands:
     steps:
       - browser-tools/install-chrome:
           replace-existing: true
-          chrome-version: 93.0.4577.63
       - browser-tools/install-chromedriver
   install_firefox:
     steps:

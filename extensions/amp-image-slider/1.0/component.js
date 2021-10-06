@@ -30,7 +30,11 @@ const VALID_IMAGE_TAGNAMES = new Set(['AMP-IMG', 'IMG']);
  * @return {PreactDef.Renderable}
  */
 function DisplayAsWithRef({as: Comp = 'div', ...rest}, ref) {
-  return <Comp {...rest} ref={ref} />;
+  return (
+    <div ref={ref}>
+      <Comp {...rest} />
+    </div>
+  );
 }
 
 const DisplayAs = forwardRef(DisplayAsWithRef);
@@ -485,12 +489,12 @@ export function BentoImageSliderWithRef(
           <div ref={leftLabelRef}>
             <DisplayAs as={firstLabelAs} />
           </div>
-          {/* <DisplayAs as={firstImageAs} ref={leftImageRef} /> */}
-          <img
+          <DisplayAs as={firstImageAs} ref={leftImageRef} />
+          {/* <img
             src="https://amp.dev/static/samples/img/canoe_900x600.jpg"
             ref={leftImageRef}
             style={{width: 600, height: 300}}
-          />
+          /> */}
         </div>
       </div>
       <div
@@ -510,12 +514,12 @@ export function BentoImageSliderWithRef(
           <div ref={rightLabelRef}>
             <DisplayAs as={secondLabelAs} />
           </div>
-          {/* <DisplayAs as={secondImageAs} ref={rightImageRef} /> */}
-          <img
+          <DisplayAs as={secondImageAs} ref={rightImageRef} />
+          {/* <img
             src="https://amp.dev/static/samples/img/canoe_900x600_blur.jpg"
             ref={rightImageRef}
             style={{width: 600, height: 300}}
-          />
+          /> */}
         </div>
       </div>
 

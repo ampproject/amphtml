@@ -1,7 +1,7 @@
 /** @externs */
 
 /** @const */
-var IframeDef = {};
+var BentoIframeDef = {};
 
 /**
  * @typedef {{
@@ -15,4 +15,4 @@ var IframeDef = {};
  *   srcdoc: (string),
  * }}
  */
-IframeDef.Props;
+BentoIframeDef.Props;

@@ -1,10 +1,7 @@
 import {ActionTrust} from '#core/constants/action-constants';
 import {CommonSignals} from '#core/constants/common-signals';
 import {isLayoutSizeDefined} from '#core/dom/layout';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {realChildElements} from '#core/dom/query';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
@@ -93,6 +90,9 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     /** @public {boolean} */
     this.isEventRegistered = false; // for test purpose
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /** @override */
@@ -700,8 +700,9 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    observeWithSharedInOb(this.element, (inViewport) =>
-      this.viewportCallback_(inViewport)
+    this.unobserveIntersections_ = observeIntersections(
+      this.element,
+      ({isIntersecting}) => this.viewportCallback_(isIntersecting)
     );
 
     const appendHints = () => {
@@ -745,7 +746,8 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections = null;
     this.unregisterEvents_();
     return true;
   }

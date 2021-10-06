@@ -919,13 +919,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     };
 
     const mutate = () => {
-      if (enter) {
-        Services.ownersForDoc(this.element)./*OK*/ scheduleUnlayout(
-          this.element,
-          this.carousel_
-        );
-      }
-
       toggle(carousel, enter);
       // Undo opacity 0 from `openLightboxGallery_`
       setStyle(this.element, 'opacity', '');
