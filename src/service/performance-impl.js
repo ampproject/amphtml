@@ -61,23 +61,23 @@ function getElementType(node) {
     return ELEMENT_TYPE.other;
   }
   const outer = getOutermostAmpElement(node);
-  const tagName = outer.tagName || '';
-  if (tagName === 'IMG' || tagName === 'AMP-IMG') {
+  const {nodeName} = outer;
+  if (nodeName === 'IMG' || nodeName === 'AMP-IMG') {
     return ELEMENT_TYPE.image;
   }
-  if (tagName === 'VIDEO' || tagName === 'AMP-VIDEO') {
+  if (nodeName === 'VIDEO' || nodeName === 'AMP-VIDEO') {
     return ELEMENT_TYPE.video;
   }
-  if (tagName === 'AMP-CAROUSEL') {
+  if (nodeName === 'AMP-CAROUSEL') {
     return ELEMENT_TYPE.carousel;
   }
-  if (tagName === 'AMP-BASE-CAROUSEL') {
+  if (nodeName === 'AMP-BASE-CAROUSEL') {
     return ELEMENT_TYPE.bcarousel;
   }
-  if (tagName === 'AMP-AD') {
+  if (nodeName === 'AMP-AD') {
     return ELEMENT_TYPE.ad;
   }
-  if (!tagName.startsWith('AMP-') && outer.textContent) {
+  if (!nodeName.startsWith('AMP-') && outer.textContent) {
     return ELEMENT_TYPE.text;
   }
   return ELEMENT_TYPE.other;
@@ -930,7 +930,7 @@ export class Performance {
 function getOutermostAmpElement(node) {
   let max = node;
   while ((node = node.parentNode) != null) {
-    if (node.tagName.startsWith('AMP-')) {
+    if (node.nodeName.startsWith('AMP-')) {
       max = node;
     }
   }
