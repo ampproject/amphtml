@@ -836,8 +836,11 @@ export class AmpVideo extends AMP.BaseElement {
     if (element.querySelector('i-amphtml-poster')) {
       return;
     }
-    const poster = htmlFor(element)`<i-amphtml-poster></i-amphtml-poster>`;
     const src = element.getAttribute('poster');
+    if (!src) {
+      return;
+    }
+    const poster = htmlFor(element)`<i-amphtml-poster></i-amphtml-poster>`;
     setInitialDisplay(poster, 'block');
     setStyles(poster, {
       'background-image': `url(${src})`,
