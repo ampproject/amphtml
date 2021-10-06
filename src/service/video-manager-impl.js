@@ -2,7 +2,6 @@ import {ActionTrust} from '#core/constants/action-constants';
 import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {measureIntersection} from '#core/dom/layout/intersection';
 import {createViewportObserver} from '#core/dom/layout/viewport-observer';
-import {closestAncestorElementBySelector} from '#core/dom/query';
 import {toggle} from '#core/dom/style';
 import {
   getInternalVideoElementFor,
@@ -821,7 +820,7 @@ class VideoEntry {
     if (
       element.hasAttribute(VideoAttributes.NO_AUDIO) ||
       element.signals().get(VideoServiceSignals.USER_INTERACTED) ||
-      closestAncestorElementBySelector(element, 'amp-story')
+      (this.video.isManagedByPool && this.video.isManagedByPool())
     ) {
       return;
     }

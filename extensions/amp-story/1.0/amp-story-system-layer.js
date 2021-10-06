@@ -793,6 +793,7 @@ export class SystemLayer {
         : this.getShadowRoot().removeAttribute(
             CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE
           );
+      console.log('page has audio:', pageHasAudio);
       this.equalizer_.classList.toggle('amp-video-eq-play', pageHasAudio);
     });
   }

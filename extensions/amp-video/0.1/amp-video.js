@@ -396,7 +396,7 @@ export class AmpVideo extends AMP.BaseElement {
             .promise(1)
             .then(() => {
               // Don't wait for the source to load if media pool is taking over.
-              if (this.isManagedByPool_()) {
+              if (this.isManagedByPool()) {
                 return;
               }
               return this.loadPromise(this.video_);
@@ -423,7 +423,7 @@ export class AmpVideo extends AMP.BaseElement {
 
     // Resolve layoutCallback as soon as all sources are appended when within a
     // story, so it can be handled by the media pool as soon as possible.
-    if (this.isManagedByPool_()) {
+    if (this.isManagedByPool()) {
       return pendingOriginPromise;
     }
 
@@ -664,7 +664,7 @@ export class AmpVideo extends AMP.BaseElement {
    */
   getMaxBitrate_() {
     if (
-      this.isManagedByPool_() &&
+      this.isManagedByPool() &&
       isExperimentOn(this.win, 'amp-story-first-page-max-bitrate') &&
       matches(this.element, 'amp-story-page:first-of-type amp-video')
     ) {
@@ -787,7 +787,7 @@ export class AmpVideo extends AMP.BaseElement {
 
   /** @private */
   updateIsPlaying_(isPlaying) {
-    if (this.isManagedByPool_()) {
+    if (this.isManagedByPool()) {
       return;
     }
     this.pauseHelper_.updatePlaying(isPlaying);
@@ -860,7 +860,7 @@ export class AmpVideo extends AMP.BaseElement {
    * @override
    */
   mute() {
-    if (this.isManagedByPool_()) {
+    if (this.isManagedByPool()) {
       return;
     }
     this.video_.muted = true;
@@ -870,7 +870,7 @@ export class AmpVideo extends AMP.BaseElement {
    * @override
    */
   unmute() {
-    if (this.isManagedByPool_()) {
+    if (this.isManagedByPool()) {
       return;
     }
     this.video_.muted = false;
@@ -878,9 +878,9 @@ export class AmpVideo extends AMP.BaseElement {
 
   /**
    * @return {boolean}
-   * @private
+   * @public
    */
-  isManagedByPool_() {
+  isManagedByPool() {
     return this.element.classList.contains('i-amphtml-poolbound');
   }
 

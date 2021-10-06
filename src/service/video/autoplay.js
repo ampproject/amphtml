@@ -39,12 +39,12 @@ export function renderInteractionOverlay(elOrDoc, metadata) {
 export function renderEqIcon(win, elOrDoc) {
   const html = htmlFor(elOrDoc);
   const icon = html`
-    <i-amphtml-video-icon class="amp-video-eq">
+    <div class="amp-video-eq">
       <div class="amp-video-eq-col">
         <div class="amp-video-eq-filler"></div>
         <div class="amp-video-eq-filler"></div>
       </div>
-    </i-amphtml-video-icon>
+    </div>
   `;
 
   // Copy equalizer column 4x and annotate filler positions for animation.
