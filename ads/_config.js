@@ -166,7 +166,7 @@ const adConfig = jsonConfiguration({
 
   'andbeyond': {
     prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
-    preconnect: 'https://cdn.andbeyond.com',
+    preconnect: 'https://cdn.andbeyond.media',
   },
 
   'adreactor': {},
