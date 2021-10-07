@@ -17,7 +17,8 @@ const builderMap = {
  * @return {import('./types').BuilderMap}
  */
 export function getBuilders(versions) {
-  const builders = /** @type {import('./types').BuilderMap} */ ({});
+  /** @type {import('./types').BuilderMap} */
+  const builders = {};
 
   for (const tag of Object.keys(versions)) {
     const version = versions[tag];

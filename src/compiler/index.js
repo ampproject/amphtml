@@ -14,8 +14,7 @@ function compile(request) {
   const document = request.document ?? {
     root: 0,
     tree: [{tagid: 92, children: []}],
-    // eslint-disable-next-line google-camelcase/google-camelcase
-    quirks_mode: false,
+    'quirks_mode': false,
   };
   const versions = request.versions ?? {'amp-layout': 'v0'};
 
