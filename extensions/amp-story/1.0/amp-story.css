@@ -1,5 +1,3 @@
-
-
 @import './amp-story-access.css';
 @import './amp-story-affiliate-link.css';
 @import './amp-story-desktop-one-panel.css';
@@ -12,6 +10,13 @@
 @import './pagination-buttons.css';
 
 /** Common */
+:root {
+  --story-page-vw: 1vw !important;
+  --story-page-vh: 1vh !important;
+  --story-page-vmin: min(var(--story-page-vw), var(--story-page-vh)) !important;
+  --story-page-vmax: max(var(--story-page-vw), var(--story-page-vh)) !important;
+  font-size: calc(2.5 * var(--story-page-vh, 8px));
+}
 amp-story, amp-story-page, amp-story-cta-layer {
   contain: strict !important;
   overflow: hidden !important;
