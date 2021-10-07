@@ -1,0 +1,79 @@
+name: Release Build
+
+on: pull_request  # DO NOT MERGE
+  # push:
+  #   branches:
+  #     - nightly
+  #     - amp-release-*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        flavor: ['base', 'experimentA', 'experimentB', 'experimentC']
+        esm: ['no-esm', 'esm']
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 100
+
+      - name: Set Up Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: lts/*
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: ⭐ amp release ⭐
+        run: node --unhandled-rejections=strict build-system/release-workflows/build-release.js
+        env:
+          FLAVOR: ${{ matrix.flavor }}
+          ESM: ${{ matrix.esm }}
+
+      - name: Archive Partial Artifacts
+        run: |
+          if [[ -d ${{ matrix.flavor }}/${{ matrix.esm }} ]]; then
+            tar -czf release-${{ matrix.flavor }}-${{ matrix.esm }}.tar.gz ${{ matrix.flavor }}/${{ matrix.esm }}
+          fi
+        working-directory: /tmp/workspace/releases
+
+      - name: Store Partial Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-artifact
+          path: /tmp/workspace/releases/release-${{ matrix.flavor }}-${{ matrix.esm }}.tar.gz
+          if-no-files-found: ignore
+
+  archive:
+    needs: build
+    runs-on: ubuntu-latest
+    # environment: release_build  # DO NOT MERGE
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: build-artifact
+          path: /tmp/restored-workspace/releases
+
+      - name: Expand Partial Artifacts
+        run: ls *.tar.gz | xargs -n1 tar -xzf
+        working-directory: /tmp/restored-workspace/releases/
+
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 100
+
+      - name: Set Up Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: lts/*
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: ⭐ Archive Release Artifacts ⭐
+        run: node --unhandled-rejections=strict build-system/release-workflows/archive-release.js
