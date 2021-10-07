@@ -3,8 +3,9 @@ import {htmlFor} from '#core/dom/static-template';
 
 import {Services} from '#service';
 
-import {urls} from '../../../src/config';
 import {user, userAssert} from '#utils/log';
+
+import {urls} from '../../../src/config';
 import {loadScript} from '../../../src/validator-integration';
 
 /**

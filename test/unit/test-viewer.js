@@ -8,6 +8,7 @@ import {installTimerService} from '#service/timer-impl';
 import {ViewerImpl} from '#service/viewer-impl';
 
 import {dev} from '#utils/log';
+
 import {parseUrlDeprecated, removeFragment} from '../../src/url';
 
 describes.sandboxed('Viewer', {}, (env) => {

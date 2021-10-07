@@ -8,12 +8,12 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {dev} from '#utils/log';
+
 import {
   ViewportBindingDef,
   marginBottomOfLastChild,
 } from './viewport-binding-def';
-
-import {dev} from '#utils/log';
 
 const TAG_ = 'Viewport';
 

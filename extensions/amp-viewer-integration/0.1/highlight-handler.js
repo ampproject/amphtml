@@ -8,9 +8,9 @@ import {parseQueryString} from '#core/types/string/url';
 
 import {Services} from '#service';
 
-import {findSentences, markTextRangeList} from './findtext';
-
 import {listenOnce} from '#utils/event-helper';
+
+import {findSentences, markTextRangeList} from './findtext';
 
 /**
  * The message name sent by viewers to dismiss highlights.

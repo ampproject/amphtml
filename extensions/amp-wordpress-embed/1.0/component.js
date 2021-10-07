@@ -6,6 +6,7 @@ import {useValueRef} from '#preact/component';
 import {IframeEmbed} from '#preact/component/iframe';
 
 import {getData} from '#utils/event-helper';
+
 import {addParamToUrl} from '../../../src/url';
 
 const {useCallback, useEffect, useMemo, useRef, useState} = Preact;

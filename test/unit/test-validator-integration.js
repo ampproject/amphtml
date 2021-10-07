@@ -3,6 +3,7 @@
  */
 
 import * as eventHelper from '#utils/event-helper';
+
 import * as mode from '../../src/mode';
 import {loadScript, maybeValidate} from '../../src/validator-integration';
 

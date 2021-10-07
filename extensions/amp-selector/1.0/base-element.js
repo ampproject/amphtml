@@ -11,9 +11,9 @@ import * as Preact from '#preact';
 import {useCallback, useLayoutEffect, useRef} from '#preact';
 import {PreactBaseElement} from '#preact/base-element';
 
-import {Option, Selector} from './component';
-
 import {devAssert} from '#utils/log';
+
+import {Option, Selector} from './component';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */

@@ -10,11 +10,12 @@ import {dict, map} from '#core/types/object';
 import {Services} from '#service';
 
 import {createCustomEvent} from '#utils/event-helper';
-import {whenContentIniLoad} from '../ini-load';
 import {dev, devAssert} from '#utils/log';
+import {isStoryDocument} from '#utils/story';
+
+import {whenContentIniLoad} from '../ini-load';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service-helpers';
-import {isStoryDocument} from '../utils/story';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance

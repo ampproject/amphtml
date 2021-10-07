@@ -4,9 +4,9 @@ import {expect} from 'chai';
 
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
-import {waitFor} from '#testing/test-helper';
-
 import {user} from '#utils/log';
+
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-date-display 1.0',

@@ -17,7 +17,7 @@ import {
   Action,
   ActionStatus,
   SubscriptionAnalytics,
-} from '#utils/analytics';
+} from '../../../amp-subscriptions/0.1/analytics';
 import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/constants';
 import {
   Entitlement,

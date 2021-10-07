@@ -8,6 +8,7 @@ import {Services} from '#service';
 
 import {getData} from '#utils/event-helper';
 import {dev, devAssert, user} from '#utils/log';
+
 import {parseUrlDeprecated} from '../../../src/url';
 
 /**

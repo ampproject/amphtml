@@ -18,10 +18,6 @@ import {
   stubLegacyElements,
 } from '#service/extensions-impl';
 
-import {BaseElement} from './base-element';
-import {startupChunk} from './chunk';
-import {config} from './config';
-import {reportErrorForWin} from './error-reporting';
 import {
   LogLevel, // eslint-disable-line no-unused-vars
   dev,
@@ -29,6 +25,11 @@ import {
   overrideLogLevel,
   setReportError,
 } from '#utils/log';
+
+import {BaseElement} from './base-element';
+import {startupChunk} from './chunk';
+import {config} from './config';
+import {reportErrorForWin} from './error-reporting';
 import {getMode} from './mode';
 import {MultidocManager} from './multidoc-manager';
 import {hasRenderDelayingServices} from './render-delaying-services';

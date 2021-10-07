@@ -1,7 +1,8 @@
 import {parseSrcset} from '#core/dom/srcset';
 
-import {urls} from './config';
 import {user} from '#utils/log';
+
+import {urls} from './config';
 import {
   checkCorsUrl,
   getSourceUrl,

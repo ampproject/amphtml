@@ -3,6 +3,7 @@ import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
 import {Services} from '#service';
 
 import {user} from '#utils/log';
+
 import {assertHttpsUrl} from '../../../src/url';
 
 const TAG = 'amp-call-tracking';

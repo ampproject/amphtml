@@ -76,6 +76,8 @@ import {Services} from '#service';
 import {Navigation} from '#service/navigation';
 import {RTC_VENDORS} from '#service/real-time-config/callout-vendors';
 
+import {dev, devAssert, user} from '#utils/log';
+
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
@@ -91,7 +93,6 @@ import {
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {isCancellation} from '../../../src/error-reporting';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {dev, devAssert, user} from '#utils/log';
 import {getMode} from '../../../src/mode';
 import {
   AmpA4A,

@@ -5,8 +5,9 @@ import {dict, hasOwn} from '#core/types/object';
 import {endsWith} from '#core/types/string';
 import {parseQueryString} from '#core/types/string/url';
 
-import {urls} from './config';
 import {userAssert} from '#utils/log';
+
+import {urls} from './config';
 
 const SERVING_TYPE_PREFIX = new Set([
   // No viewer

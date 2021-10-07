@@ -12,8 +12,9 @@ import {toArray} from '#core/types/array';
 
 import {Services} from '#service';
 
-import {chunkInstanceForTesting} from '../../../../../src/chunk';
 import {dev, user} from '#utils/log';
+
+import {chunkInstanceForTesting} from '../../../../../src/chunk';
 import {BindEvents} from '../../bind-events';
 import {Bind} from '../../bind-impl';
 

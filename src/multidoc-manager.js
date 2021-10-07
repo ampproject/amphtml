@@ -9,6 +9,7 @@ import {Services} from '#service';
 import {parseExtensionUrl} from '#service/extension-script';
 
 import {dev, user} from '#utils/log';
+
 import {getMode} from './mode';
 import {
   disposeServicesForDoc,

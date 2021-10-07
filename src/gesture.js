@@ -4,6 +4,7 @@ import {findIndex} from '#core/types/array';
 import {toWin} from '#core/window';
 
 import {devAssert} from '#utils/log';
+
 import {Pass} from './pass';
 
 const PROP_ = '__AMP_Gestures';

@@ -8,6 +8,7 @@ import {map} from '#core/types/object';
 import {Services} from '#service';
 
 import {dev, devAssert} from '#utils/log';
+
 import {waitForServices} from './render-delaying-services';
 import {getAmpdoc} from './service-helpers';
 

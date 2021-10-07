@@ -9,6 +9,7 @@ import {dict, map} from '#core/types/object';
 
 import {getData} from '#utils/event-helper';
 import {dev} from '#utils/log';
+
 import {getMode} from '../src/mode';
 
 export class IframeMessagingClient {

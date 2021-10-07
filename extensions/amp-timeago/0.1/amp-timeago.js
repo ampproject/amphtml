@@ -1,9 +1,9 @@
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
 
-import {format, getLocale} from './locales';
-
 import {userAssert} from '#utils/log';
+
+import {format, getLocale} from './locales';
 
 export class AmpTimeAgo extends AMP.BaseElement {
   /** @param {!AmpElement} element */

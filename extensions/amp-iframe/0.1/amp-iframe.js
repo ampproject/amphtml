@@ -1,7 +1,7 @@
 import {playIgnoringError} from '#core/dom/video';
 import {AMPDOC_SINGLETON_NAME} from '#core/constants/enums';
 import {ActionTrust} from '#core/constants/action-constants';
-import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
+import {IntersectionObserver3pHost} from '#utils/intersection-observer-3p-host';
 import {
   LayoutPriority,
   applyFillContent,

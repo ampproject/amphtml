@@ -5,6 +5,7 @@ import {
   actionTrustToString,
 } from '#core/constants/action-constants';
 import {Keys} from '#core/constants/key-codes';
+import {isAmp4Email} from '#core/document/format';
 import {isEnabled} from '#core/dom';
 import {isFiniteNumber} from '#core/types';
 import {isArray, toArray} from '#core/types/array';
@@ -14,10 +15,10 @@ import {toWin} from '#core/window';
 
 import {Services} from '#service';
 
-import {reportError} from '../error-reporting';
 import {getDetail} from '#utils/event-helper';
-import {isAmp4Email} from '#core/document/format';
 import {dev, devAssert, user, userAssert} from '#utils/log';
+
+import {reportError} from '../error-reporting';
 import {getMode} from '../mode';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 

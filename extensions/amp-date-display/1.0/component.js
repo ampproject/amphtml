@@ -6,6 +6,7 @@ import {Wrapper, useRenderer} from '#preact/component';
 import {useResourcesNotify} from '#preact/utils';
 
 import {user} from '#utils/log';
+
 import {getTimeZoneName} from '../format';
 
 /** @const {string} */

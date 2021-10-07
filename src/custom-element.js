@@ -19,6 +19,8 @@ import {Services} from '#service';
 import {ResourceState} from '#service/resource';
 import {getSchedulerForDoc} from '#service/scheduler';
 
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {startupChunk} from './chunk';
 import {shouldBlockOnConsentByMeta} from './consent';
 import {ElementStub} from './element-stub';
@@ -29,7 +31,6 @@ import {
   isCancellation,
   reportError,
 } from './error-reporting';
-import {dev, devAssert, user, userAssert} from '#utils/log';
 import {getMode} from './mode';
 import {applyStaticLayout} from './static-layout';
 import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';

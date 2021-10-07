@@ -5,9 +5,10 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {urls} from '../../../src/config';
 import {listen} from '#utils/event-helper';
 import {dev, user, userAssert} from '#utils/log';
+
+import {urls} from '../../../src/config';
 import {getMode} from '../../../src/mode';
 import {removeFragment} from '../../../src/url';
 

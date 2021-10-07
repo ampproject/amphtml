@@ -2,9 +2,10 @@ import {toWin} from '#core/window';
 
 import {Services} from '#service';
 
+import {dev, userAssert} from '#utils/log';
+
 import {Util} from './util';
 
-import {dev, userAssert} from '#utils/log';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 
 // Popup options

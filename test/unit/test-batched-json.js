@@ -1,7 +1,8 @@
 import {Services} from '#service';
 
-import {UrlReplacementPolicy, batchFetchJsonFor} from '../../src/batched-json';
 import {user} from '#utils/log';
+
+import {UrlReplacementPolicy, batchFetchJsonFor} from '../../src/batched-json';
 
 describes.sandboxed('batchFetchJsonFor', {}, (env) => {
   // Fakes.

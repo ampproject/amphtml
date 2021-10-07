@@ -13,7 +13,7 @@ import {
 } from '#core/dom/query';
 import {createCustomEvent} from '#utils/event-helper';
 import {debounce} from '#core/types/function';
-import {descendsFromStory} from '../../../src/utils/story';
+import {descendsFromStory} from '#utils/story';
 import {dev, devAssert, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {handleAutoscroll} from './autoscroll';

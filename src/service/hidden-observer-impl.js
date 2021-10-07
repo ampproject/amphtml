@@ -1,6 +1,7 @@
 import {Observable} from '#core/data-structures/observable';
 
 import {devAssert} from '#utils/log';
+
 import {registerServiceBuilderForDoc} from '../service-helpers';
 
 /**

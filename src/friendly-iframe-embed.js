@@ -26,11 +26,12 @@ import {Services} from '#service';
 import {installAmpdocServicesForEmbed} from '#service/core-services';
 import {installTimerInEmbedWindow} from '#service/timer-impl';
 
-import {urls} from './config';
 import {loadPromise} from '#utils/event-helper';
+import {dev, devAssert, userAssert} from '#utils/log';
+
+import {urls} from './config';
 import {FIE_EMBED_PROP} from './iframe-helper';
 import {whenContentIniLoad} from './ini-load';
-import {dev, devAssert, userAssert} from '#utils/log';
 import {getMode} from './mode';
 import {
   disposeServicesForEmbed,

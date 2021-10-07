@@ -1,6 +1,6 @@
-import {writeScript} from './3p';
-
 import {userAssert} from '#utils/log';
+
+import {writeScript} from './3p';
 
 /**
  * Get the correct script for the gist.

@@ -4,6 +4,7 @@ import {stringToBytes, utf8Encode} from '#core/types/string/bytes';
 import {Services} from '#service';
 
 import {dev, devAssert, user} from '#utils/log';
+
 import {getService, registerServiceBuilder} from '../service-helpers';
 
 /** @const {string} */

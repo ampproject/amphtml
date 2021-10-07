@@ -18,6 +18,7 @@ import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {Services} from '#service';
 
 import {dev, userAssert} from '#utils/log';
+
 import {addParamToUrl} from '../../../src/url';
 
 export const TAG = 'amp-google-document-embed';

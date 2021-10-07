@@ -1,6 +1,7 @@
 import {Services} from '#service';
 
 import {createCustomEvent} from '#utils/event-helper';
+
 import {whenContentIniLoadMeasure} from '../ini-load';
 
 /**

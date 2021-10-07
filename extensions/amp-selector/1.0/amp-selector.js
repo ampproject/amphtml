@@ -6,11 +6,12 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {createCustomEvent} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
 import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-selector-1.0.css';
-import {createCustomEvent} from '#utils/event-helper';
-import {userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-selector';

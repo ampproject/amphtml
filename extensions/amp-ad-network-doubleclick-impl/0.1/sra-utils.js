@@ -7,6 +7,7 @@ import {isObject} from '#core/types';
 import {utf8Encode} from '#core/types/string/bytes';
 
 import {dev, devAssert} from '#utils/log';
+
 import {RENDERING_TYPE_HEADER, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
 
 /** @type {string} */

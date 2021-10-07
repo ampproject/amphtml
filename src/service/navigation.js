@@ -7,8 +7,9 @@ import {toWin} from '#core/window';
 
 import {Services} from '#service';
 
-import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
 import {dev, user, userAssert} from '#utils/log';
+
+import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
 import {getMode} from '../mode';
 import {openWindowDialog} from '../open-window-dialog';
 import {registerServiceBuilderForDoc} from '../service-helpers';

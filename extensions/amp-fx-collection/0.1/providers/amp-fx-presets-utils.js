@@ -8,6 +8,7 @@ import {mapRange} from '#core/math';
 import {Services} from '#service';
 
 import {userAssert} from '#utils/log';
+
 import {FxType} from '../fx-type';
 
 const MAX_MOBILE_WIDTH = 480;

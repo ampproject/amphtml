@@ -7,6 +7,7 @@ import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 import {getData, listen} from '#utils/event-helper';
+
 import {getMode} from './mode';
 
 /** @fileoverview Entry point for documents inside an <amp-video-iframe>. */

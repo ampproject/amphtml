@@ -9,11 +9,12 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {userAssert} from '#utils/log';
+
 import {BaseElement} from './base-element';
 import {getSocialConfig} from './social-share-config';
 
 import {CSS} from '../../../build/amp-social-share-1.0.css';
-import {userAssert} from '#utils/log';
 import {addParamsToUrl} from '../../../src/url';
 
 /** @const {string} */

@@ -13,10 +13,11 @@ import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
-import {getIframe} from '../../../src/3p-frame';
 import {getData, listen} from '#utils/event-helper';
-import {redispatch} from '../../../src/iframe-video';
 import {dev, userAssert} from '#utils/log';
+
+import {getIframe} from '../../../src/3p-frame';
+import {redispatch} from '../../../src/iframe-video';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 
 const TAG = 'amp-viqeo-player';

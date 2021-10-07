@@ -3,8 +3,9 @@ import {isDisabled, isFieldDefault, isFieldEmpty} from '#core/dom/form';
 import {dict, map} from '#core/types/object';
 
 import {createCustomEvent} from '#utils/event-helper';
-import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {dev} from '#utils/log';
+
+import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 
 export const DIRTINESS_INDICATOR_CLASS = 'amp-form-dirty';
 

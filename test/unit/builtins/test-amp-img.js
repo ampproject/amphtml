@@ -8,10 +8,11 @@ import {Layout, LayoutPriority} from '#core/dom/layout';
 
 import {Services} from '#service';
 
+import {createCustomEvent} from '#utils/event-helper';
+
 import {createIframePromise} from '#testing/iframe';
 
 import {BaseElement} from '../../../src/base-element';
-import {createCustomEvent} from '#utils/event-helper';
 
 describes.sandboxed('amp-img', {}, (env) => {
   let sandbox;

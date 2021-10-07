@@ -8,6 +8,8 @@ import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
 import {getData, listen} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
 import {
   createFrameFor,
   isJsonOrObj,
@@ -17,7 +19,6 @@ import {
   postMessageWhenAvailable,
   redispatch,
 } from '../../../src/iframe-video';
-import {userAssert} from '#utils/log';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 import {
   VIMEO_EVENTS,
