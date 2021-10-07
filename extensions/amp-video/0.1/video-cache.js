@@ -89,30 +89,51 @@ function selectVideoSource(videoEl) {
 function applySourcesToVideo(videoEl, sources, maxBitrate) {
   sources
     .sort((a, b) => {
+      // This comparator sorts the video sources from least to most preferred.
+
+      const A_GOES_FIRST = -1;
+      const B_GOES_FIRST = 1;
+
       // 'codec' values can contain metadata after the '.' that we must strip
       // for sorting purposes. For example, "vp09.00.30.08" contains level,
       // profile, and color depth values that are ignored in this sort.
       const aCodec = a['codec']?.split('.')[0];
       const bCodec = b['codec']?.split('.')[0];
 
-      // The greater the index, the more the codec is preferred.
+      // Codec priority is the primary sorting factor of this comparator.
+      // The greater the codec priority, the more the source is preferred.
       const aCodecPriority = CODECS_IN_ASCENDING_PRIORITY.indexOf(aCodec);
       const bCodecPriority = CODECS_IN_ASCENDING_PRIORITY.indexOf(bCodec);
+      if (aCodecPriority > bCodecPriority) {
+        return B_GOES_FIRST;
+      }
+      if (aCodecPriority < bCodecPriority) {
+        return A_GOES_FIRST;
+      }
 
-      // A positive difference means that source A has a superior codec.
-      const codecDifference = aCodecPriority - bCodecPriority;
+      // Bitrate is the tiebreaking sorting factor of this comparator.
+      // The greater the bitrate, the more the source is preferred.
+      const aBitrate = a['bitrate_kbps'];
+      const bBitrate = b['bitrate_kbps'];
+      if (aBitrate > bBitrate) {
+        return B_GOES_FIRST;
+      }
+      if (aBitrate < bBitrate) {
+        return A_GOES_FIRST;
+      }
 
-      // A positive difference means that source A has a superior bitrate.
-      const bitrateDifference = a['bitrate_kbps'] - b['bitrate_kbps'];
-
-      // Primary sorting factor: codec. Tiebreaking sorting factor: bitrate.
-      // A positive return value means that source A is sorted before source B.
-      return codecDifference == 0 ? bitrateDifference : codecDifference;
+      return 0;
     })
     .forEach((source) => {
+      // This callback inserts each source as the first child within the video.
+      // So, although the sources were just sorted in ascending preference,
+      // they are ultimately arranged within the video element in descending
+      // preference.
+
       if (source['bitrate_kbps'] > maxBitrate) {
         return;
       }
+
       let type = source['type'];
       type += source['codec'] ? '; codecs=' + source['codec'] : '';
       const sourceEl = createElementWithAttributes(
