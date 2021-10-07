@@ -472,7 +472,7 @@ class VideoEntry {
 
     this.hasAutoplay = video.element.hasAttribute(VideoAttributes.AUTOPLAY);
 
-    if (this.hasAutoplay) {
+    if (this.hasAutoplay && !this.isManagedByPool_()) {
       this.manager_.installAutoplayStyles();
     }
 
@@ -820,7 +820,7 @@ class VideoEntry {
     if (
       element.hasAttribute(VideoAttributes.NO_AUDIO) ||
       element.signals().get(VideoServiceSignals.USER_INTERACTED) ||
-      (this.video.isManagedByPool && this.video.isManagedByPool())
+      this.isManagedByPool_()
     ) {
       return;
     }
@@ -1013,6 +1013,13 @@ class VideoEntry {
         'width': width,
       };
     });
+  }
+
+  /**
+   * @private
+   */
+  isManagedByPool_() {
+    return this.video.isManagedByPool && this.video.isManagedByPool();
   }
 }
 

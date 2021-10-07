@@ -32,6 +32,7 @@ import {renderAsElement} from './simple-template';
 import {setImportantStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 import {renderEqIcon} from '#service/video/autoplay';
+import {installAutoplayStylesForDoc} from '#service/video/install-autoplay-styles';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
