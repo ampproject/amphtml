@@ -76,7 +76,7 @@ import {endsWith} from '#core/types/string';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {findIndex, lastItem, toArray} from '#core/types/array';
 import {getConsentPolicyState} from '../../../src/consent';
-import {getDetail} from '../../../src/event-helper';
+import {getDetail} from '#utils/event-helper';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode, isModeDevelopment} from '../../../src/mode';

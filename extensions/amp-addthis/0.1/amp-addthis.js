@@ -51,7 +51,7 @@ import {
 import {getOgImage} from './addthis-utils/meta';
 import {getWidgetOverload} from './addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
 import * as mode from '#core/mode';
-import {listen} from '../../../src/event-helper';
+import {listen} from '#utils/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
 import {setStyle} from '#core/dom/style';
 import {userAssert} from '#utils/log';

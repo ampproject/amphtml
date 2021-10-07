@@ -15,7 +15,7 @@ import {cidServiceForDocForTesting} from '#service/cid-impl';
 
 import {whenCalled} from '#testing/test-helper';
 
-import {createCustomEvent} from '../../../../src/event-helper';
+import {createCustomEvent} from '#utils/event-helper';
 import {
   createFormDataWrapper,
   isFormDataWrapper,

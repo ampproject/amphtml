@@ -16,7 +16,7 @@ import {Services} from '#service';
 
 import {triggerAnalyticsEvent} from './analytics';
 import {urls} from './config';
-import {isLoadErrorMessage} from './event-helper';
+import {isLoadErrorMessage} from '#utils/event-helper';
 import {dev, setReportError} from '#utils/log';
 import {getMode} from './mode';
 import {makeBodyVisibleRecovery} from './style-installer';

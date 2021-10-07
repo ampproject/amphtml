@@ -16,7 +16,7 @@ import {AccessSource, AccessType} from './amp-access-source';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {cancellation} from '../../../src/error-reporting';
-import {listenOnce} from '../../../src/event-helper';
+import {listenOnce} from '#utils/event-helper';
 import {dev, user, userAssert} from '#utils/log';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {getSourceOrigin} from '../../../src/url';

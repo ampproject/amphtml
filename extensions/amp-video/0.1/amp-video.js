@@ -32,7 +32,7 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '#core/dom/static-template';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {isExperimentOn} from '#experiments';
-import {listen, listenOncePromise} from '../../../src/event-helper';
+import {listen, listenOncePromise} from '#utils/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {

@@ -6,7 +6,7 @@ import {dict} from '#core/types/object';
 import {elementByTag} from '#core/dom/query';
 import {expandConsentEndpointUrl} from './consent-config';
 import {getConsentStateValue} from './consent-info';
-import {getData} from '../../../src/event-helper';
+import {getData} from '#utils/event-helper';
 import {getConsentStateManager} from './consent-state-manager';
 import {htmlFor} from '#core/dom/static-template';
 import {insertAtStart, removeElement, tryFocus} from '#core/dom';

@@ -5,7 +5,7 @@ import {setStyle} from '#core/dom/style';
 import {omit} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
-import {getData, listen} from '../../../src/event-helper';
+import {getData, listen} from '#utils/event-helper';
 import {userAssert} from '#utils/log';
 import {addParamsToUrl} from '../../../src/url';
 

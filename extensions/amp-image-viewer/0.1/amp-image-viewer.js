@@ -28,7 +28,7 @@ import {Services} from '#service';
 
 import {CSS} from '../../../build/amp-image-viewer-0.1.css';
 import {Animation} from '../../../src/animation';
-import {createCustomEvent, loadPromise} from '../../../src/event-helper';
+import {createCustomEvent, loadPromise} from '#utils/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {
   DoubletapRecognizer,

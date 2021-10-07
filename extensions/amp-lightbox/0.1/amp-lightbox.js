@@ -17,7 +17,7 @@ import {
   setStyles,
   toggle,
 } from '#core/dom/style';
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent} from '#utils/event-helper';
 import {debounce} from '#core/types/function';
 import {dev, devAssert, user} from '#utils/log';
 import {dict, hasOwn} from '#core/types/object';

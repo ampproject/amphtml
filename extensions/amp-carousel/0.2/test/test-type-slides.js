@@ -1,9 +1,9 @@
 import '../amp-carousel';
-import * as Listen from '../../../../src/event-helper';
+import * as Listen from '#utils/event-helper';
 import {ActionTrust} from '#core/constants/action-constants';
 import {CarouselEvents} from '../../../amp-base-carousel/0.1/carousel-events';
 import {Services} from '#service';
-import {getDetail, listenOncePromise} from '../../../../src/event-helper';
+import {getDetail, listenOncePromise} from '#utils/event-helper';
 
 /**
  * @fileoverview Some simple tests for amp-carousel. Most of the functionality

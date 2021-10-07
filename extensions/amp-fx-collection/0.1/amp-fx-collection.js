@@ -13,7 +13,7 @@ import {
   installScrollToggledFx,
 } from './providers/fx-provider';
 
-import {listen} from '../../../src/event-helper';
+import {listen} from '#utils/event-helper';
 import {devAssert} from '#utils/log';
 
 const TAG = 'amp-fx-collection';

@@ -13,7 +13,7 @@ import {isAnimationNone} from '#testing/test-helper';
 
 import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
-import {loadPromise} from '../../src/event-helper';
+import {loadPromise} from '#utils/event-helper';
 import {
   FriendlyIframeEmbed,
   Installers,

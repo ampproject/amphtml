@@ -9,7 +9,7 @@ import {dict, map} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {createCustomEvent} from '../event-helper';
+import {createCustomEvent} from '#utils/event-helper';
 import {whenContentIniLoad} from '../ini-load';
 import {dev, devAssert} from '#utils/log';
 import {getMode} from '../mode';

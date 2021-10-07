@@ -27,7 +27,7 @@ import {installAmpdocServicesForEmbed} from '#service/core-services';
 import {installTimerInEmbedWindow} from '#service/timer-impl';
 
 import {urls} from './config';
-import {loadPromise} from './event-helper';
+import {loadPromise} from '#utils/event-helper';
 import {FIE_EMBED_PROP} from './iframe-helper';
 import {whenContentIniLoad} from './ini-load';
 import {dev, devAssert, userAssert} from '#utils/log';

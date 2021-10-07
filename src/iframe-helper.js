@@ -6,7 +6,7 @@ import {remove} from '#core/types/array';
 import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
-import {getData} from './event-helper';
+import {getData} from '#utils/event-helper';
 import {dev, devAssert} from '#utils/log';
 import {parseUrlDeprecated} from './url';
 

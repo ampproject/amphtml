@@ -17,7 +17,7 @@ import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {interactiveElementsSelectors} from './amp-story-embedded-component';
-import {listenOnce} from '../../../src/event-helper';
+import {listenOnce} from '#utils/event-helper';
 
 /** @private @const {number} */
 const HOLD_TOUCH_THRESHOLD_MS = 500;

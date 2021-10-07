@@ -15,7 +15,7 @@ import {toWin} from '#core/window';
 import {Services} from '#service';
 
 import {reportError} from '../error-reporting';
-import {getDetail} from '../event-helper';
+import {getDetail} from '#utils/event-helper';
 import {isAmp4Email} from '#core/document/format';
 import {dev, devAssert, user, userAssert} from '#utils/log';
 import {getMode} from '../mode';

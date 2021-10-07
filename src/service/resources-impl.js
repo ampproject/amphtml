@@ -16,7 +16,7 @@ import {TaskQueue} from './task-queue';
 
 import {startupChunk} from '../chunk';
 import {isBlockedByConsent, reportError} from '../error-reporting';
-import {listen, loadPromise} from '../event-helper';
+import {listen, loadPromise} from '#utils/event-helper';
 import {FocusHistory} from '../focus-history';
 import {dev, devAssert} from '#utils/log';
 import {Pass} from '../pass';

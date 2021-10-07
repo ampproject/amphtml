@@ -17,7 +17,7 @@ import {
 import {GaaMeteringRegwall} from '#third_party/subscriptions-project/swg-gaa';
 
 import {CSS} from '../../../build/amp-subscriptions-google-0.1.css';
-import {getData} from '../../../src/event-helper';
+import {getData} from '#utils/event-helper';
 import {devAssert, user, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';

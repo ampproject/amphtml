@@ -54,7 +54,7 @@ import {AdsenseSharedState} from './adsense-shared-state';
 import {ResponsiveState} from './responsive-state';
 
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
-import {getData} from '../../../src/event-helper';
+import {getData} from '#utils/event-helper';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {dev, devAssert, user} from '#utils/log';
 import {getMode} from '../../../src/mode';

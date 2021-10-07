@@ -18,7 +18,7 @@ import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {getConsentPolicyState} from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
+import {getData, listen} from '#utils/event-helper';
 import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
 import {assertHttpsUrl} from '../../../src/url';
 import {VideoEvents} from '../../../src/video-interface';

@@ -39,7 +39,7 @@ import {
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
-import {createCustomEvent, listen} from '../../../src/event-helper';
+import {createCustomEvent, listen} from '#utils/event-helper';
 import {isAmp4Email} from '#core/document/format';
 import {dev, devAssert, user, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';

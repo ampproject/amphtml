@@ -31,7 +31,7 @@ import {
 } from '../../../src/url';
 import {dev, devAssert, user, userAssert} from '#utils/log';
 import {dict, hasOwn} from '#core/types/object';
-import {getData} from '../../../src/event-helper';
+import {getData} from '#utils/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {isArray, isEnumValue, isObject} from '#core/types';
 import {realChildElements} from '#core/dom/query';

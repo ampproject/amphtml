@@ -24,7 +24,7 @@ import {
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
+import {getData, listen} from '#utils/event-helper';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
 import {
   addUnsafeAllowAutoplay,

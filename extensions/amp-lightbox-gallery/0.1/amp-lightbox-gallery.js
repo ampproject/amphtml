@@ -38,7 +38,7 @@ import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {reportError} from '../../../src/error-reporting';
-import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
+import {getData, getDetail, isLoaded, listen} from '#utils/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {SwipeDef, SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {dev, devAssert, userAssert} from '#utils/log';

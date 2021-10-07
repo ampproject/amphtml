@@ -5,7 +5,7 @@ import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {dev} from '#utils/log';
 import {isLayoutSizeFixed} from '#core/dom/layout';
-import {listen} from '../../../src/event-helper';
+import {listen} from '#utils/event-helper';
 import {numeric} from '#core/dom/transition';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {realChildElements} from '#core/dom/query';

@@ -17,7 +17,7 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getData, listen, listenOncePromise} from '../../../src/event-helper';
+import {getData, listen, listenOncePromise} from '#utils/event-helper';
 import {
   createFrameFor,
   objOrParseJson,

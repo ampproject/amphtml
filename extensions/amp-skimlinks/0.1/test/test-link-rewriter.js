@@ -1,7 +1,7 @@
 import {AmpEvents} from '#core/constants/amp-events';
 
 import * as chunkModule from '../../../../src/chunk';
-import {createCustomEvent} from '../../../../src/event-helper';
+import {createCustomEvent} from '#utils/event-helper';
 import {
   ORIGINAL_URL_ATTRIBUTE,
   PRIORITY_META_TAG_NAME,

@@ -2,7 +2,7 @@ import {ActionTrust} from '#core/constants/action-constants';
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-base-carousel-1.0.css';
 import {Services} from '#service';
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent} from '#utils/event-helper';
 import {isExperimentOn} from '#experiments';
 import {toWin} from '#core/window';
 import {userAssert} from '#utils/log';

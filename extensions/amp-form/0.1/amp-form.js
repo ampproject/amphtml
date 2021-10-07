@@ -41,7 +41,7 @@ import {
 
 import {CSS} from '../../../build/amp-form-0.1.css';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent} from '#utils/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {isAmp4Email} from '#core/document/format';
 import {dev, devAssert, user, userAssert} from '#utils/log';

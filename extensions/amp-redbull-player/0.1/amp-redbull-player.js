@@ -9,7 +9,7 @@ import {dict} from '#core/types/object';
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
-import {getData, listen} from '../../../src/event-helper';
+import {getData, listen} from '#utils/event-helper';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
 import {
   SandboxOptions,

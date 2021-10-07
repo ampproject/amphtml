@@ -1,6 +1,6 @@
 import {InlineGalleryEvents} from './inline-gallery-events';
 import {Layout} from '#core/dom/layout';
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent} from '#utils/event-helper';
 import {devAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {htmlFor} from '#core/dom/static-template';

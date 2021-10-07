@@ -6,7 +6,7 @@ import {Services} from '#service';
 
 import {createIframePromise} from '#testing/iframe';
 
-import {loadPromise} from '../../src/event-helper';
+import {loadPromise} from '#utils/event-helper';
 
 describes.sandboxed('3p environment', {}, () => {
   let testWin;

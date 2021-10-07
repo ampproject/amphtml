@@ -19,7 +19,7 @@ import {FilterType} from './filters/filter';
 import {makeInactiveElementSpec} from './filters/inactive-element';
 
 import {getAmpAdResourceId} from '../../../src/ad-helper';
-import {getData} from '../../../src/event-helper';
+import {getData} from '#utils/event-helper';
 import {dev, devAssert, user, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';
 import {openWindowDialog} from '../../../src/open-window-dialog';

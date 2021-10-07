@@ -2,7 +2,7 @@ import {setStyle, setStyles} from '#core/dom/style';
 
 import {delayAfterDeferringToEventLoop} from './utils';
 
-import {listen} from '../../../src/event-helper';
+import {listen} from '#utils/event-helper';
 import {SwipeDef} from '../../../src/gesture-recognizers';
 import {dev} from '#utils/log';
 

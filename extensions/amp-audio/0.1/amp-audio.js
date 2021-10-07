@@ -4,7 +4,7 @@ import {realChildNodes} from '#core/dom/query';
 import {tryPlay} from '#core/dom/video';
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {listen} from '../../../src/event-helper';
+import {listen} from '#utils/event-helper';
 import {dev} from '#utils/log';
 import {
   EMPTY_METADATA,

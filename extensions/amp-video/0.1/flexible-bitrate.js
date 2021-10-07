@@ -4,7 +4,7 @@ import {Services} from '#service';
 import {childElement, childElementsByTag} from '#core/dom/query';
 import {dev, devAssert} from '#utils/log';
 import {isExperimentOn} from '#experiments';
-import {listen, listenOnce} from '../../../src/event-helper';
+import {listen, listenOnce} from '#utils/event-helper';
 import {toArray} from '#core/types/array';
 
 const TAG = 'amp-video';

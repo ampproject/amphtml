@@ -10,7 +10,7 @@ import {clamp} from '#core/math';
 import {Services} from '#service';
 
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
-import {listen, loadPromise} from '../../../src/event-helper';
+import {listen, loadPromise} from '#utils/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {dev, user, userAssert} from '#utils/log';

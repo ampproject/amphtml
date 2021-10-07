@@ -18,7 +18,7 @@ import {VideoDockingEvents, pointerCoords} from './events';
 import {HtmlLiteralTagDef} from './html';
 import {Timeout} from './timeout';
 
-import {createCustomEvent, listen} from '../../../src/event-helper';
+import {createCustomEvent, listen} from '#utils/event-helper';
 import {dev, devAssert} from '#utils/log';
 import {PlayingStates, VideoEvents} from '../../../src/video-interface';
 

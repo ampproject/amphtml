@@ -15,7 +15,7 @@ import {LocalizedStringId} from '#service/localization/strings';
 import {Matrix, Renderer} from '#third_party/zuho/zuho';
 
 import {CSS} from '../../../build/amp-story-360-0.1.css';
-import {listenOncePromise} from '../../../src/event-helper';
+import {listenOncePromise} from '#utils/event-helper';
 import {dev, user, userAssert} from '#utils/log';
 import {
   Action,

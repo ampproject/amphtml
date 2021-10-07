@@ -3,7 +3,7 @@ import {iterateCursor} from '#core/dom';
 
 import {TextMask} from './text-mask';
 
-import {listen} from '../../../src/event-helper';
+import {listen} from '#utils/event-helper';
 
 const SERVICE = 'inputmask';
 const TAG = `amp-${SERVICE}`;

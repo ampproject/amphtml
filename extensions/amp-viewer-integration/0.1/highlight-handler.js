@@ -10,7 +10,7 @@ import {Services} from '#service';
 
 import {findSentences, markTextRangeList} from './findtext';
 
-import {listenOnce} from '../../../src/event-helper';
+import {listenOnce} from '#utils/event-helper';
 
 /**
  * The message name sent by viewers to dismiss highlights.

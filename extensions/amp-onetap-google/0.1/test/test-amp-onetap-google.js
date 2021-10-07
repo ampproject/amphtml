@@ -7,7 +7,7 @@ import {AmpDoc} from '#service/ampdoc-impl';
 import {macroTask} from '#testing/helpers';
 
 import {BaseElement} from '../../../../src/base-element';
-import {loadPromise} from '../../../../src/event-helper';
+import {loadPromise} from '#utils/event-helper';
 import {user} from '#utils/log';
 import {ACTIONS, SENTINEL} from '../amp-onetap-google';
 

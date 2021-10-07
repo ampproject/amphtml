@@ -6,7 +6,7 @@ import {Services} from '#service';
 import {FormEvents} from './form-events';
 import {ValidationBubble} from './validation-bubble';
 
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent} from '#utils/event-helper';
 import {dev} from '#utils/log';
 
 /** @const @private {string} */

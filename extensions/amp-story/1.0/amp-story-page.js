@@ -56,7 +56,7 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '#core/dom/static-template';
 import {isExperimentOn} from '#experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
-import {listen, listenOnce} from '../../../src/event-helper';
+import {listen, listenOnce} from '#utils/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {toggle} from '#core/dom/style';

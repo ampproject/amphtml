@@ -19,7 +19,7 @@ import {Services} from '#service';
 
 import {CSS} from '../../../build/amp-image-lightbox-0.1.css';
 import {Animation} from '../../../src/animation';
-import {isLoaded} from '../../../src/event-helper';
+import {isLoaded} from '#utils/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {
   DoubletapRecognizer,

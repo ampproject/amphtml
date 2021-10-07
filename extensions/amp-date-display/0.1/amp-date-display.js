@@ -5,7 +5,7 @@ import {dashToCamelCase} from '#core/types/string';
 
 import {Services} from '#service';
 
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent} from '#utils/event-helper';
 import {dev, devAssert, user, userAssert} from '#utils/log';
 import {getTimeZoneName} from '../format';
 

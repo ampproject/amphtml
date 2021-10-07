@@ -14,7 +14,7 @@ import {dev, devAssert} from '#utils/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '#core/dom/static-template';
 import {isAmpElement} from '#core/dom/amp-element-helpers';
-import {listen} from '../../../src/event-helper';
+import {listen} from '#utils/event-helper';
 import {resetStyles, setImportantStyles, toggle} from '#core/dom/style';
 
 /** @const {number} */

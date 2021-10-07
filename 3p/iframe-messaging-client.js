@@ -7,7 +7,7 @@ import {
 import {Observable} from '#core/data-structures/observable';
 import {dict, map} from '#core/types/object';
 
-import {getData} from '../src/event-helper';
+import {getData} from '#utils/event-helper';
 import {dev} from '#utils/log';
 import {getMode} from '../src/mode';
 

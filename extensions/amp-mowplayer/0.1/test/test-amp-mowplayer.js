@@ -3,7 +3,7 @@ import {createElementWithAttributes} from '#core/dom';
 
 import {Services} from '#service';
 
-import {listenOncePromise} from '../../../../src/event-helper';
+import {listenOncePromise} from '#utils/event-helper';
 import {VideoEvents} from '../../../../src/video-interface';
 
 const EXAMPLE_VIDEOID = 'v-myfwarfx4tb';

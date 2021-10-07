@@ -18,7 +18,7 @@ import {Services} from '#service';
 
 import {CSS} from '../../../build/amp-pan-zoom-0.1.css';
 import {Animation} from '../../../src/animation';
-import {createCustomEvent, listen} from '../../../src/event-helper';
+import {createCustomEvent, listen} from '#utils/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {
   DoubletapRecognizer,

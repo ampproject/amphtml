@@ -2,7 +2,7 @@ import {AmpEvents} from '#core/constants/amp-events';
 import {isDisabled, isFieldDefault, isFieldEmpty} from '#core/dom/form';
 import {dict, map} from '#core/types/object';
 
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent} from '#utils/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {dev} from '#utils/log';
 

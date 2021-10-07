@@ -11,7 +11,7 @@ import {Services} from '#service';
 import {registerElement} from '#service/custom-element-registry';
 
 import {BaseElement} from '../../base-element';
-import {listen} from '../../event-helper';
+import {listen} from '#utils/event-helper';
 import {dev} from '#utils/log';
 
 /** @const {string} */

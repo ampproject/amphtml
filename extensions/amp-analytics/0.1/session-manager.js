@@ -7,7 +7,7 @@ import {
 import {hasOwn, map} from '#core/types/object';
 import {isDocumentHidden} from '#core/document-visibility';
 import {isObject} from '#core/types';
-import {listen} from 'src/event-helper';
+import {listen} from '#utils/event-helper';
 
 /** @const {string} */
 const TAG = 'amp-analytics/session-manager';

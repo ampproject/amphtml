@@ -5,7 +5,7 @@ import {devAssert, user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 
 import {getAdContainer} from '../../../src/ad-helper';
-import {listen} from '../../../src/event-helper';
+import {listen} from '#utils/event-helper';
 import {setStyle, setStyles} from '#core/dom/style';
 
 const TAG = 'amp-ad-ui';

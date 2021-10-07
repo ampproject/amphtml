@@ -10,7 +10,7 @@ import {
   getResponsiveAttributeValue,
 } from './responsive-attributes';
 import {Services} from '#service';
-import {createCustomEvent, getDetail} from '../../../src/event-helper';
+import {createCustomEvent, getDetail} from '#utils/event-helper';
 import {dev, devAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {

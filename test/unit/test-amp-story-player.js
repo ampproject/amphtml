@@ -6,7 +6,7 @@ import {macroTask} from '#testing/helpers';
 import {AmpStoryComponentManager} from '../../src/amp-story-player/amp-story-component-manager';
 import {AmpStoryPlayer} from '../../src/amp-story-player/amp-story-player-impl';
 import {PageScroller} from '../../src/amp-story-player/page-scroller';
-import {createCustomEvent, listenOncePromise} from '../../src/event-helper';
+import {createCustomEvent, listenOncePromise} from '#utils/event-helper';
 
 describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let win;

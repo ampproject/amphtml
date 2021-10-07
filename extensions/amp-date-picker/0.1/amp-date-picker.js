@@ -25,7 +25,7 @@ import {createSingleDatePicker} from './single-date-picker';
 
 import {CSS} from '../../../build/amp-date-picker-0.1.css';
 import {batchFetchJsonFor} from '../../../src/batched-json';
-import {createCustomEvent, listen} from '../../../src/event-helper';
+import {createCustomEvent, listen} from '#utils/event-helper';
 import {dev, devAssert, user, userAssert} from '#utils/log';
 import {requireExternal} from '../../../src/module';
 

@@ -11,7 +11,7 @@ import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
-import {getData, listen} from '../../../src/event-helper';
+import {getData, listen} from '#utils/event-helper';
 import {
   createFrameFor,
   objOrParseJson,

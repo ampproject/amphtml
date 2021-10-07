@@ -1,4 +1,4 @@
-import * as Listen from '../../../../src/event-helper';
+import * as Listen from '#utils/event-helper';
 import {
   SESSION_MAX_AGE_MILLIS,
   SESSION_VALUES,

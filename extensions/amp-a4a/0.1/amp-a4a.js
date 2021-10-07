@@ -51,7 +51,7 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {cancellation, isCancellation} from '../../../src/error-reporting';
-import {listenOnce} from '../../../src/event-helper';
+import {listenOnce} from '#utils/event-helper';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   installFriendlyIframeEmbed,

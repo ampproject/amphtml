@@ -18,7 +18,7 @@ import {tryParseJson} from '#core/types/object/json';
 import {Services} from '#service';
 
 import {AutoLightboxEvents} from '../../../src/auto-lightbox';
-import {loadPromise} from '../../../src/event-helper';
+import {loadPromise} from '#utils/event-helper';
 import {dev} from '#utils/log';
 
 const TAG = 'amp-auto-lightbox';

@@ -8,7 +8,7 @@ import {
   closestAncestorElementBySelector,
   realChildElements,
 } from '#core/dom/query';
-import {createCustomEvent, listen} from '../../../src/event-helper';
+import {createCustomEvent, listen} from '#utils/event-helper';
 import {dict} from '#core/types/object';
 import {dispatchCustomEvent} from '#core/dom';
 import {getStyle, setStyle} from '#core/dom/style';

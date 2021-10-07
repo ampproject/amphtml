@@ -3,7 +3,7 @@ import {isFiniteNumber} from '#core/types';
 
 import {Services} from '#service';
 
-import {loadPromise} from '../event-helper';
+import {loadPromise} from '#utils/event-helper';
 import {isAmp4Email} from '#core/document/format';
 import {devAssert} from '#utils/log';
 

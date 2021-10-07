@@ -11,7 +11,7 @@ import {
   closestAncestorElementBySelector,
   realChildElements,
 } from '#core/dom/query';
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent} from '#utils/event-helper';
 import {debounce} from '#core/types/function';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert, userAssert} from '#utils/log';

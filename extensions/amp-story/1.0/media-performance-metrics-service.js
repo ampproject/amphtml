@@ -1,7 +1,7 @@
 import {
   MEDIA_LOAD_FAILURE_SRC_PROPERTY,
   listen,
-} from '../../../src/event-helper';
+} from '#utils/event-helper';
 import {Services} from '#service';
 import {TickLabel} from '#core/constants/enums';
 import {dev} from '#utils/log';
