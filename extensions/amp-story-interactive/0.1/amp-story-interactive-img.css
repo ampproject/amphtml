@@ -1,25 +1,13 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 
 .i-amphtml-story-interactive-img-container {
   --i-amphtml-interactive-img-option-size: 7.5em !important;
   --i-amphtml-interactive-img-option-gap: 1em !important;
   --i-amphtml-interactive-img-transform: scale(0.95) !important;
 
-  border-radius: 3.75em 3.75em 4.375em 4.375em !important;
+  /* 4.5em used instead of 4.375em to fix bug that renders pixels
+  from container around the bottom-left and bottom-right corners */
+  border-radius: 3.75em 3.75em 4.5em 4.5em !important;
 }
 
 .i-amphtml-story-interactive-img-option-container {

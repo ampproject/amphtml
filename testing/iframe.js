@@ -1,36 +1,24 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import {deserializeMessage, isAmpMessage} from '#core/3p-frame-messaging';
 import {AmpEvents} from '#core/constants/amp-events';
-import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
-import {FakeLocation} from './fake-dom';
-import {FormEvents} from '../extensions/amp-form/0.1/form-events';
+
+import {install as installCustomElements} from '#polyfills/custom-elements';
+
 import {Services} from '#service';
-import {cssText as ampDocCss} from '../build/ampdoc.css';
-import {cssText as ampSharedCss} from '../build/ampshared.css';
-import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
-import {dev} from '../src/log';
+import {installDocService} from '#service/ampdoc-impl';
 import {
   installAmpdocServices,
   installRuntimeServices,
 } from '#service/core-services';
-import {install as installCustomElements} from '#polyfills/custom-elements';
-import {installDocService} from '#service/ampdoc-impl';
 import {installExtensionsService} from '#service/extensions-impl';
+
+import {FakeLocation} from './fake-dom';
+
+import {cssText as ampDocCss} from '../build/ampdoc.css';
+import {cssText as ampSharedCss} from '../build/ampshared.css';
+import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
+import {FormEvents} from '../extensions/amp-form/0.1/form-events';
 import {parseIfNeeded} from '../src/iframe-helper';
+import {dev} from '../src/log';
 
 let iframeCount = 0;
 
@@ -92,7 +80,7 @@ export function createFixtureIframe(
     if (!html) {
       throw new Error('Cannot find fixture: ' + fixture);
     }
-    html = maybeSwitchToCompiledJs(html);
+    html = maybeSwitchToMinifiedJs(html);
     window.ENABLE_LOG = true;
     // This global function will be called by the iframe immediately when it
     // starts loading. This appears to be the only way to get the correct
@@ -621,14 +609,13 @@ function onInsert(win) {
 }
 
 /**
- * Takes a HTML document that is pointing to unminified JS and HTML
- * binaries and massages the URLs to pointed to compiled binaries
- * instead.
+ * Takes a HTML document that is pointing to unminified JS and HTML binaries and
+ * massages the URLs to pointed to minified binaries instead.
  * @param {string} html
  * @return {string}
  */
-export function maybeSwitchToCompiledJs(html) {
-  if (window.ampTestRuntimeConfig.useCompiledJs) {
+export function maybeSwitchToMinifiedJs(html) {
+  if (window.ampTestRuntimeConfig.useMinifiedJs) {
     return (
       html
         // Main JS

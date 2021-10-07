@@ -1,40 +1,27 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ImaPlayerData} from '#ads/google/ima/ima-player-data';
 
 import {Deferred} from '#core/data-structures/promise';
-import {ImaPlayerData} from '#ads/google/ima/ima-player-data';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
-import {VideoEvents} from '../../../src/video-interface';
-import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {assertHttpsUrl} from '../../../src/url';
-import {childElementsByTag} from '#core/dom/query';
-import {dict} from '#core/types/object';
 import {dispatchCustomEvent, isJsonScriptTag, removeElement} from '#core/dom';
-import {getConsentPolicyState} from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {installVideoManagerForDoc} from '#service/video-manager-impl';
-import {isEnumValue, isObject} from '#core/types';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {
   observeContentSize,
   unobserveContentSize,
 } from '#core/dom/layout/size-observer';
+import {childElementsByTag} from '#core/dom/query';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {isEnumValue, isObject} from '#core/types';
 import {toArray} from '#core/types/array';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {getConsentPolicyState} from '../../../src/consent';
+import {getData, listen} from '../../../src/event-helper';
+import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
+import {assertHttpsUrl} from '../../../src/url';
+import {VideoEvents} from '../../../src/video-interface';
 
 /** @const */
 const TAG = 'amp-ima-video';

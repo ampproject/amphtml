@@ -1,72 +1,56 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as Preact from '#preact';
-import {BaseCarousel} from '../../../amp-base-carousel/1.0/component';
-import {InlineGallery} from '../component';
-import {Pagination} from '../pagination';
-import {Thumbnails} from '../thumbnails';
+import {BentoBaseCarousel} from '../../../amp-base-carousel/1.0/component';
 import {mount} from 'enzyme';
+import {BentoInlineGallery} from '../component';
+import {BentoInlineGalleryPagination} from '../pagination';
+import {BentoInlineGalleryThumbnails} from '../thumbnails';
 
 describes.sandboxed('InlineGallery preact component', {}, () => {
-  describe('Pagination component', () => {
-    it('should render BaseCarousel and Pagination', () => {
+  describe('BentoInlineGalleryPagination component', () => {
+    it('should render BentoBaseCarousels and BentoInlineGalleryPagination', () => {
       const jsx = (
-        <InlineGallery>
-          <BaseCarousel>
+        <BentoInlineGallery>
+          <BentoBaseCarousel>
             <div>slide 1</div>
             <div>slide 2</div>
             <div>slide 3</div>
-          </BaseCarousel>
-          <Pagination />
-        </InlineGallery>
+          </BentoBaseCarousel>
+          <BentoInlineGalleryPagination />
+        </BentoInlineGallery>
       );
       const wrapper = mount(jsx);
-      const carousel = wrapper.find('BaseCarousel');
+      const carousel = wrapper.find('BentoBaseCarousel');
       expect(carousel).to.have.lengthOf(1);
       const slides = carousel.find('[data-slide]');
       expect(slides).to.have.lengthOf(3);
 
-      const pagination = wrapper.find('Pagination');
+      const pagination = wrapper.find('BentoInlineGalleryPagination');
       expect(pagination).to.have.lengthOf(1);
     });
   });
 
   describe('Thumbnail component', () => {
-    it('should render BaseCarousel and Thumbnails', () => {
+    it('should render BentoBaseCarousel and BentoInlineGalleryThumbnails', () => {
       const jsx = (
-        <InlineGallery>
-          <BaseCarousel>
+        <BentoInlineGallery>
+          <BentoBaseCarousel>
             <div>slide 1</div>
             <div>slide 2</div>
             <div>slide 3</div>
-          </BaseCarousel>
-          <Thumbnails />
-        </InlineGallery>
+          </BentoBaseCarousel>
+          <BentoInlineGalleryThumbnails />
+        </BentoInlineGallery>
       );
       const wrapper = mount(jsx);
 
-      const carousels = wrapper.find('BaseCarousel');
+      const carousels = wrapper.find('BentoBaseCarousel');
       expect(carousels).to.have.lengthOf(2);
       const slides = carousels.first().find('[data-slide]');
       expect(slides).to.have.lengthOf(3);
 
-      const thumbnails = wrapper.find('Thumbnails');
+      const thumbnails = wrapper.find('BentoInlineGalleryThumbnails');
       expect(thumbnails).to.have.lengthOf(1);
-      const generatedCarousel = thumbnails.find('BaseCarousel');
+      const generatedCarousel = thumbnails.find('BentoBaseCarousel');
       expect(generatedCarousel).to.have.lengthOf(1);
       expect(generatedCarousel.prop('loop')).to.be.false;
       expect(generatedCarousel.prop('snapAlign')).to.equal('start');
@@ -83,25 +67,25 @@ describes.sandboxed('InlineGallery preact component', {}, () => {
 
     it('should respect thumbnailSrc', () => {
       const jsx = (
-        <InlineGallery>
-          <BaseCarousel>
+        <BentoInlineGallery>
+          <BentoBaseCarousel>
             <div thumbnailSrc="slide1.jpg">slide 1</div>
             <div thumbnailSrc="slide2.jpg">slide 2</div>
             <div thumbnailSrc="slide3.jpg">slide 3</div>
-          </BaseCarousel>
-          <Thumbnails />
-        </InlineGallery>
+          </BentoBaseCarousel>
+          <BentoInlineGalleryThumbnails />
+        </BentoInlineGallery>
       );
       const wrapper = mount(jsx);
 
-      const carousels = wrapper.find('BaseCarousel');
+      const carousels = wrapper.find('BentoBaseCarousel');
       expect(carousels).to.have.lengthOf(2);
       const slides = carousels.first().find('[data-slide]');
       expect(slides).to.have.lengthOf(3);
 
-      const thumbnails = wrapper.find('Thumbnails');
+      const thumbnails = wrapper.find('BentoInlineGalleryThumbnails');
       expect(thumbnails).to.have.lengthOf(1);
-      const generatedCarousel = thumbnails.find('BaseCarousel');
+      const generatedCarousel = thumbnails.find('BentoBaseCarousel');
       expect(generatedCarousel).to.have.lengthOf(1);
       expect(generatedCarousel.prop('loop')).to.be.false;
       expect(generatedCarousel.prop('snapAlign')).to.equal('start');
@@ -124,25 +108,25 @@ describes.sandboxed('InlineGallery preact component', {}, () => {
 
     it('should respect looping with slide alignment', () => {
       const jsx = (
-        <InlineGallery>
-          <BaseCarousel>
+        <BentoInlineGallery>
+          <BentoBaseCarousel>
             <div>slide 1</div>
             <div>slide 2</div>
             <div>slide 3</div>
-          </BaseCarousel>
-          <Thumbnails loop />
-        </InlineGallery>
+          </BentoBaseCarousel>
+          <BentoInlineGalleryThumbnails loop />
+        </BentoInlineGallery>
       );
       const wrapper = mount(jsx);
 
-      const carousels = wrapper.find('BaseCarousel');
+      const carousels = wrapper.find('BentoBaseCarousel');
       expect(carousels).to.have.lengthOf(2);
       const slides = carousels.first().find('[data-slide]');
       expect(slides).to.have.lengthOf(3);
 
-      const thumbnails = wrapper.find('Thumbnails');
+      const thumbnails = wrapper.find('BentoInlineGalleryThumbnails');
       expect(thumbnails).to.have.lengthOf(1);
-      const generatedCarousel = thumbnails.find('BaseCarousel');
+      const generatedCarousel = thumbnails.find('BentoBaseCarousel');
       expect(generatedCarousel).to.have.lengthOf(1);
       expect(generatedCarousel.prop('loop')).to.be.true;
       expect(generatedCarousel.prop('snapAlign')).to.equal('center');

@@ -50,6 +50,7 @@
       <option>adobeanalytics_nativeConfig</option>
       <option>alexametrics</option>
       <option>amplitude</option>
+      <option>appsflyer</option>
       <option>atinternet</option>
       <option>afsanalytics</option>
       <option>baiduanalytics</option>
@@ -284,6 +285,59 @@ For complete documentation and additional examples please see: https://marketing
   }
 </script>
 </amp-analytics>
+
+<!-- AppsFlyer example -->
+<amp-analytics type="appsflyer" id="appsflyer">
+<script type="application/json">
+  {
+    "vars": {
+      "webAppId": "c1e0b335-5b96-486e-8694-01c165df48d1"
+    },
+    "linkers": {
+      "enabled": true
+    },
+    "triggers": {
+      "subscribe": {
+        "on": "click",
+        "request": "event",
+        "selector": "#subscribeBtn",
+        "extraUrlParams": {
+          "data": {
+            "eventType": "EVENT",
+            "eventName": "subscribe_clicked"
+          }
+        }
+      },
+      "purchaseSuccess": {
+        "on": "amp-form-submit-success",
+        "request": "event",
+        "selector": "#purchaseForm",
+        "extraUrlParams": {
+          "data": {
+            "eventType": "EVENT",
+            "eventName": "purchase_success",
+            "eventRevenue": "${formFields[revenue]}",
+            "eventRevenueCurrency": "ILS",
+            "eventValue": "{'key0': 'value0', 'key1': 1}"
+          }
+        }
+      },
+      "login": {
+        "on": "click",
+        "request": "event",
+        "selector": "#loginSubmitButton",
+        "extraUrlParams": {
+          "data": {
+            "eventType": "IDENTIFY",
+            "customerUserId": "AUTHDATA(cuid)"
+          }
+        }
+      }
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End AppsFlyer example -->
 
 <!-- AT Internet tracking -->
 <amp-analytics type="atinternet" id="atinternet">

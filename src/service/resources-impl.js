@@ -1,32 +1,15 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {VisibilityState} from '#core/constants/visibility-state';
 import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
 import {Deferred} from '#core/data-structures/promise';
 import {hasNextNodeInDocumentOrder} from '#core/dom';
 import {expandLayoutRect} from '#core/dom/layout/rect';
+import * as mode from '#core/mode';
 import {remove} from '#core/types/array';
 import {throttle} from '#core/types/function';
 import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
-import {ieMediaCheckAndFix} from './ie-media-bug';
 import {Resource, ResourceState} from './resource';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
 import {TaskQueue} from './task-queue';
@@ -253,20 +236,12 @@ export class ResourcesImpl {
       const input = Services.inputFor(this.win);
       input.setupInputModeClasses(this.ampdoc);
 
-      if (IS_ESM) {
+      if (mode.isEsm()) {
         return;
       }
 
-      ieIntrinsicCheckAndFix(this.win);
-
-      const fixPromise = ieMediaCheckAndFix(this.win);
       const remeasure = () => this.remeasurePass_.schedule();
-      if (fixPromise) {
-        fixPromise.then(remeasure);
-      } else {
-        // No promise means that there's no problem.
-        remeasure();
-      }
+      remeasure();
 
       // Safari 10 and under incorrectly estimates font spacing for
       // `@font-face` fonts. This leads to wild measurement errors. The best

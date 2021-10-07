@@ -1,24 +1,11 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {getValueForExpr} from '#core/types/object';
+import {parseQueryString} from '#core/types/string/url';
+import {WindowInterface} from '#core/window/interface';
 
-import {
-  Action,
-  ActionStatus,
-  SubscriptionAnalyticsEvents,
-} from '../../amp-subscriptions/0.1/analytics';
+import {experimentToggles, isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
 import {
   AnalyticsEvent,
   ConfiguredRuntime,
@@ -27,26 +14,26 @@ import {
   FilterResult,
   SubscribeResponse as SubscribeResponseInterface,
 } from '#third_party/subscriptions-project/swg';
+import {GaaMeteringRegwall} from '#third_party/subscriptions-project/swg-gaa';
+
 import {CSS} from '../../../build/amp-subscriptions-google-0.1.css';
+import {getData} from '../../../src/event-helper';
+import {devAssert, user, userAssert} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {installStylesForDoc} from '../../../src/style-installer';
+import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
+import {
+  Action,
+  ActionStatus,
+  SubscriptionAnalyticsEvents,
+} from '../../amp-subscriptions/0.1/analytics';
+import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants';
 import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl';
 import {
   Entitlement,
   GrantReason,
 } from '../../amp-subscriptions/0.1/entitlement';
-import {GaaMeteringRegwall} from '#third_party/subscriptions-project/swg-gaa';
-import {Services} from '#service';
-import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants';
 import {UrlBuilder} from '../../amp-subscriptions/0.1/url-builder';
-import {WindowInterface} from '#core/window/interface';
-import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
-import {experimentToggles, isExperimentOn} from '#experiments';
-import {getData} from '../../../src/event-helper';
-import {getMode} from '../../../src/mode';
-import {getValueForExpr} from '#core/types/object';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {parseQueryString} from '#core/types/string/url';
-
-import {devAssert, user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-subscriptions-google';
 const PLATFORM_KEY = 'subscribe.google.com';

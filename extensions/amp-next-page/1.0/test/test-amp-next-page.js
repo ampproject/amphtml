@@ -1,25 +1,12 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import '../amp-next-page';
-import {HostPage, PageState} from '../page';
-import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
-import {Services} from '#service';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
+
+import {Services} from '#service';
+
+import {HostPage, PageState} from '../page';
+import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
 
 const MOCK_NEXT_PAGE = `<header>Header</header>
     <div style="height:1000px"></div>
@@ -629,6 +616,56 @@ describes.realWin(
             service.pages_[index].shadowDoc.ampdoc.getParam('cap')
           ).to.equal('cid');
         });
+      });
+
+      it('shadow-doc Viewer calls host-doc messageDeliverer', async () => {
+        const initialMessageDeliverer = env.sandbox.spy();
+        const initialViewer = Services.viewerForDoc(ampdoc);
+        initialViewer.setMessageDeliverer(initialMessageDeliverer, '');
+
+        await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
+
+        for (const index of [1, 2]) {
+          const {ampdoc} = service.pages_[index].shadowDoc;
+          const viewer = Services.viewerForDoc(ampdoc);
+          expect(viewer).to.not.equal(initialViewer);
+
+          const messageDeliverer = viewer.maybeGetMessageDeliverer();
+          expect(messageDeliverer).to.not.be.null;
+
+          const args = [`event${index}`, `data${index}`, true];
+
+          messageDeliverer(...args);
+
+          expect(initialMessageDeliverer.withArgs(...args)).to.have.been
+            .calledOnce;
+        }
+      });
+
+      it('shadow-doc Viewer suppresses viewport message requests', async () => {
+        const initialMessageDeliverer = env.sandbox.spy();
+        const initialViewer = Services.viewerForDoc(ampdoc);
+        initialViewer.setMessageDeliverer(initialMessageDeliverer, '');
+
+        await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
+
+        for (const eventType of ['documentHeight', 'scroll', 'viewport']) {
+          for (const index of [1, 2]) {
+            const {ampdoc} = service.pages_[index].shadowDoc;
+            const viewer = Services.viewerForDoc(ampdoc);
+            expect(viewer).to.not.equal(initialViewer);
+
+            const messageDeliverer = viewer.maybeGetMessageDeliverer();
+            expect(messageDeliverer).to.not.be.null;
+
+            const args = [eventType, `data${index}`, true];
+
+            messageDeliverer(...args);
+
+            expect(initialMessageDeliverer.withArgs(...args)).to.not.have.been
+              .called;
+          }
+        }
       });
     });
 

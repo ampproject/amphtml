@@ -1,20 +1,4 @@
 /**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview
  * GitHub API util functions.
  * TODO: set owner repo defaults
@@ -27,15 +11,14 @@ const {Octokit} = require('@octokit/rest');
 
 // setup
 const octokit = new Octokit({
-  auth: '',
+  auth: process.env.GITHUB_TOKEN,
   userAgent: 'amp release tagger',
-  previews: ['groot-preview'], // to list pull requests by commit
-  timeZone: 'America/New_York',
+  timeZone: 'America/Los_Angeles',
 });
 
 const graphqlWithAuth = graphql.defaults({
   headers: {
-    authorization: `token todo`,
+    authorization: `token ${process.env.GITHUB_TOKEN}`,
   },
 });
 const owner = 'ampproject';
@@ -56,11 +39,31 @@ const config = {
 async function _runQueryInBatches(queryType, queries) {
   const responses = [];
   for (let i = 0; i < queries.length; i += config.batchSize) {
-    const join = queries.slice(i, config.batchSize).join(' ');
+    const join = queries
+      .slice(i, i + Math.min(queries.length, config.batchSize))
+      .join(' ');
     const query = `${queryType} {${join}}`;
-    responses.push(await graphqlWithAuth(query));
+    const data = await graphqlWithAuth({query});
+    responses.push(...Object.values(data));
   }
   return responses;
+}
+
+/**
+ * Create a GitHub issue
+ * @param {string} body
+ * @param {string} label
+ * @param {string} title
+ * @return {Promise<Object>}
+ */
+function createIssue(body, label, title) {
+  return octokit.rest.issues.create({
+    owner,
+    repo,
+    title,
+    body,
+    labels: [label],
+  });
 }
 
 /**
@@ -68,9 +71,10 @@ async function _runQueryInBatches(queryType, queries) {
  * @param {string} tag
  * @param {string} commit
  * @param {string} body
+ * @param {boolean} prerelease
  * @return {Promise<Object>}
  */
-async function createRelease(tag, commit, body) {
+async function createRelease(tag, commit, body, prerelease) {
   return await octokit.rest.repos.createRelease({
     owner,
     repo,
@@ -78,8 +82,25 @@ async function createRelease(tag, commit, body) {
     'tag_name': tag,
     'target_commitish': commit,
     body,
-    prerelease: true,
+    prerelease,
   });
+}
+
+/**
+ * Get a GitHub issue by title
+ * @param {string} title
+ * @return {Promise<GraphQlQueryResponseData|undefined>}
+ */
+async function getIssue(title) {
+  const search = dedent`\
+    search(query:"repo:${owner}/${repo} in:title ${title}", \
+    type: ISSUE, first: 1) { nodes { ... on Issue \
+    { number title body }}}`;
+  const query = `query {${search}}`;
+  const response = await graphqlWithAuth({query});
+  if (response.search?.nodes) {
+    return response.search.nodes[0];
+  }
 }
 
 /**
@@ -90,6 +111,25 @@ async function createRelease(tag, commit, body) {
 async function getRelease(tag) {
   const {data} = await octokit.rest.repos.getReleaseByTag({owner, repo, tag});
   return data;
+}
+
+/**
+ * Update a GitHub issue
+ * @param {string} body
+ * @param {number} number
+ * @param {string} title
+ * @param {'open' | 'closed'} state
+ * @return {Promise<Object>}
+ */
+function updateIssue(body, number, title, state = 'open') {
+  return octokit.rest.issues.update({
+    owner,
+    repo,
+    'issue_number': number,
+    title,
+    body,
+    state,
+  });
 }
 
 /**
@@ -109,11 +149,11 @@ async function updateRelease(id, changes) {
 
 /**
  * Get a list of commits between two commits
- * @param {string} base
  * @param {string} head
+ * @param {string} base
  * @return {Promise<Object>}
  */
-async function compareCommits(base, head) {
+async function compareCommits(head, base) {
   const {data} = await octokit.rest.repos.compareCommits({
     owner,
     repo,
@@ -140,24 +180,104 @@ async function getPullRequests(shas) {
       mergeCommit { commitUrl oid abbreviatedOid }}}}`
     );
   }
-  return await _runQueryInBatches('query', queries);
+  const nodesLists = await _runQueryInBatches('query', queries);
+
+  // Only return pull requests with the merge commit shas
+  const prs = [];
+  for (const nodesList of nodesLists) {
+    for (const node of nodesList.nodes) {
+      if (node.mergeCommit && shas.includes(node.mergeCommit.oid)) {
+        prs.push(node);
+      }
+    }
+  }
+  return prs;
 }
 
 /**
  * Get pull requests between two commits
- * @param {string} commit
- * @param {string} previousCommit
+ * @param {string} head
+ * @param {string} base
  * @return {Promise<Array<GraphQlQueryResponseData>>}
  */
-async function getPullRequestsBetweenCommits(commit, previousCommit) {
-  const {commits} = await compareCommits(previousCommit, commit);
+async function getPullRequestsBetweenCommits(head, base) {
+  const {commits} = await compareCommits(head, base);
   const shas = commits.map((commit) => commit.sha);
   return await getPullRequests(shas);
 }
 
+/**
+ * Get label
+ * @param {string} name
+ * @return {Promise<Object>}
+ */
+async function getLabel(name) {
+  const {data} = await octokit.rest.issues.getLabel({owner, repo, name});
+  return data;
+}
+
+/**
+ * Label pull requests
+ * @param {Array<Object>} prs
+ * @param {string} labelId
+ * @return {Promise<Array<GraphQlQueryResponseData>>}
+ */
+async function labelPullRequests(prs, labelId) {
+  const mutations = [];
+  for (const [i, pr] of prs.entries()) {
+    mutations.push(
+      dedent`\
+      pr${i}: addLabelsToLabelable(input:{labelIds:"${labelId}", \
+      labelableId:"${pr.id}", clientMutationId:"${pr.id}"})\
+      {clientMutationId}`
+    );
+  }
+  return await _runQueryInBatches('mutation', mutations);
+}
+
+/**
+ * Unlabel pull requests
+ * @param {Array<Object>} prs
+ * @param {string} labelId
+ * @return {Promise<Array<GraphQlQueryResponseData>>}
+ */
+async function unlabelPullRequests(prs, labelId) {
+  const mutations = [];
+  for (const [i, pr] of prs.entries()) {
+    mutations.push(
+      dedent`\
+      pr${i}: removeLabelsFromLabelable(input:{labelIds:"${labelId}", \
+      labelableId:"${pr.id}", clientMutationId:"${pr.id}"})\
+      {clientMutationId}`
+    );
+  }
+  return await _runQueryInBatches('mutation', mutations);
+}
+
+/**
+ * Get a git ref
+ * @param {string} tag
+ * @return {Promise<Object>}
+ */
+async function getRef(tag) {
+  const {data} = await octokit.rest.git.getRef({
+    owner,
+    repo,
+    ref: `tags/${tag}`,
+  });
+  return data;
+}
+
 module.exports = {
-  getPullRequestsBetweenCommits,
+  createIssue,
   createRelease,
+  getLabel,
+  getIssue,
+  getPullRequestsBetweenCommits,
   getRelease,
+  labelPullRequests,
+  unlabelPullRequests,
+  updateIssue,
   updateRelease,
+  getRef,
 };

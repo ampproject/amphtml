@@ -15,8 +15,9 @@
  */
 
 import {TAG} from './vars';
-import {dev} from '../../../src/log';
+
 import {getData} from '../../../src/event-helper';
+import {dev} from '../../../src/log';
 import {parseUrlDeprecated} from '../../../src/url';
 
 /** @typedef {{

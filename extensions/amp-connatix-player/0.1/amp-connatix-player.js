@@ -1,29 +1,20 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
 } from '#core/constants/consent-state';
 import {Deferred} from '#core/data-structures/promise';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
-import {addParamsToUrl} from '../../../src/url';
+import {removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {
+  observeContentSize,
+  unobserveContentSize,
+} from '#core/dom/layout/size-observer';
+import {PauseHelper} from '#core/dom/video/pause-helper';
 import {dict} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
@@ -31,14 +22,9 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getData} from '../../../src/event-helper';
-import {
-  observeContentSize,
-  unobserveContentSize,
-} from '#core/dom/layout/size-observer';
-import {removeElement} from '#core/dom';
-import {setIsMediaComponent} from '../../../src/video-interface';
-import {tryParseJson} from '#core/types/object/json';
 import {userAssert} from '../../../src/log';
+import {addParamsToUrl} from '../../../src/url';
+import {setIsMediaComponent} from '../../../src/video-interface';
 
 /**
  * @param {!Array<T>} promises
@@ -83,7 +69,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     this.mediaId_ = '';
 
     /** @private {string} */
-    this.iframeDomain_ = 'https://cdm.connatix.com';
+    this.iframeDomain_ = null;
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -254,7 +240,13 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
     // Media id is optional
     this.mediaId_ = element.getAttribute('data-media-id') || '';
-
+    const elementsPlayer =
+      element.getAttribute('data-elements-player') || false;
+    if (elementsPlayer) {
+      this.iframeDomain_ = 'https://cdm.elements.video';
+    } else {
+      this.iframeDomain_ = 'https://cdm.connatix.com';
+    }
     // will be used by sendCommand in order to send only after the player is rendered
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;

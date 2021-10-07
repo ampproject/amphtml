@@ -1,27 +1,11 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as Preact from '#preact';
-import {FitText, calculateFontSize, setOverflowStyle} from '../component';
+import {BentoFitText, calculateFontSize, setOverflowStyle} from '../component';
 import {computedStyle} from '#core/dom/style';
 import {mount} from 'enzyme';
 import {useStyles} from '../component.jss';
 import {waitFor} from '#testing/test-helper';
 
-describes.realWin('FitText preact component v1.0', {}, (env) => {
+describes.realWin('BentoFitText preact component v1.0', {}, (env) => {
   let win;
 
   const styles = useStyles();
@@ -41,9 +25,9 @@ describes.realWin('FitText preact component v1.0', {}, (env) => {
   it('renders', async () => {
     const ref = Preact.createRef();
     const wrapper = mount(
-      <FitText ref={ref} style={{width: '300px', height: '100px'}}>
+      <BentoFitText ref={ref} style={{width: '300px', height: '100px'}}>
         Hello World
-      </FitText>,
+      </BentoFitText>,
       {attachTo: win.document.body}
     );
 
@@ -59,9 +43,13 @@ describes.realWin('FitText preact component v1.0', {}, (env) => {
   it('should respect minFontSize', async () => {
     const ref = Preact.createRef();
     const wrapper = mount(
-      <FitText ref={ref} style={{width: '1px', height: '1px'}} minFontSize="24">
+      <BentoFitText
+        ref={ref}
+        style={{width: '1px', height: '1px'}}
+        minFontSize="24"
+      >
         Hello World
-      </FitText>,
+      </BentoFitText>,
       {attachTo: win.document.body}
     );
 
@@ -77,13 +65,13 @@ describes.realWin('FitText preact component v1.0', {}, (env) => {
   it('should respect maxFontSize', async () => {
     const ref = Preact.createRef();
     const wrapper = mount(
-      <FitText
+      <BentoFitText
         ref={ref}
         style={{width: '300px', height: '100px'}}
         maxFontSize="48"
       >
         Hello World
-      </FitText>,
+      </BentoFitText>,
       {attachTo: win.document.body}
     );
 
@@ -97,7 +85,7 @@ describes.realWin('FitText preact component v1.0', {}, (env) => {
   });
 });
 
-describes.realWin('FitText calculateFontSize', {}, (env) => {
+describes.realWin('BentoFitText calculateFontSize', {}, (env) => {
   let win, doc;
   let element;
 
@@ -154,7 +142,7 @@ describes.realWin('FitText calculateFontSize', {}, (env) => {
   });
 });
 
-describes.realWin('FitText setOverflowStyle', {}, (env) => {
+describes.realWin('BentoFitText setOverflowStyle', {}, (env) => {
   let win, doc;
   let measurer;
 

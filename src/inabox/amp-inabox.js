@@ -1,25 +1,10 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * The entry point for AMP inabox runtime (inabox-v0.js).
  */
 
 import '#polyfills';
 import {TickLabel} from '#core/constants/enums';
+import * as mode from '#core/mode';
 
 import {Services} from '#service';
 import {installDocService} from '#service/ampdoc-impl';
@@ -41,7 +26,6 @@ import {allowLongTasksInChunking, startupChunk} from '../chunk';
 import {installErrorReporting} from '../error-reporting';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {doNotTrackImpression} from '../impression';
-import {internalRuntimeVersion} from '../internal-version';
 import {getMode} from '../mode';
 import {adopt} from '../runtime';
 import {
@@ -141,11 +125,8 @@ startupChunk(self.document, function initial() {
 if (self.console) {
   (console.info || console.log).call(
     console,
-    `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
+    `Powered by AMP ⚡ HTML – Version ${mode.version()}`,
     self.location.href
   );
 }
-self.document.documentElement.setAttribute(
-  'amp-version',
-  internalRuntimeVersion()
-);
+self.document.documentElement.setAttribute('amp-version', mode.version());

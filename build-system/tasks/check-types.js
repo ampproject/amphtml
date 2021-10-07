@@ -1,21 +1,5 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const argv = require('minimist')(process.argv.slice(2));
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
@@ -26,7 +10,7 @@ const {
 const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
-const {cyan, green, red, yellow} = require('../common/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {logClosureCompilerError} = require('../compile/closure-compile');
 const {log} = require('../common/logging');
@@ -151,12 +135,12 @@ const TYPE_CHECK_TARGETS = {
       'ads/inabox/inabox-host.js',
       'src/web-worker/web-worker.js',
     ],
-    extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
+    extraGlobs: ['src/inabox/*.js', '!node_modules/preact/**'],
     warningLevel: 'QUIET',
   },
   'extensions': () => ({
     entryPoints: getExtensionSrcPaths(),
-    extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
+    extraGlobs: ['src/inabox/*.js', '!node_modules/preact/**'],
     warningLevel: 'QUIET',
   }),
   'integration': {
@@ -220,7 +204,7 @@ async function typeCheck(targetName) {
 
   // If srcGlobs and externGlobs are defined, determine the externs/extraGlobs
   if (srcGlobs.length || externGlobs.length) {
-    opts.externs = externGlobs.flatMap(globby.sync);
+    opts.externs = externGlobs.flatMap(fastGlob.sync);
 
     // Included globs should explicitly exclude any externs
     const excludedExterns = externGlobs.map((glob) => `!${glob}`);

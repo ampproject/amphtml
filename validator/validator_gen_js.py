@@ -1,18 +1,3 @@
-#
-# Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS-IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the license.
-#
 """Generates validator-generated.js.
 
 This script reads validator.protoascii and reflects over its contents
@@ -499,6 +484,22 @@ def PrintEnumFor(enum_desc, out):
       (LocalModuleName(enum_desc.full_name), ','.join([
           '%s.%s' % (LocalModuleName(enum_desc.full_name), n) for n in names
       ])))
+  out.Line('/** @type (!Object<%s, number>) */' %
+           LocalModuleName(enum_desc.full_name))
+  out.Line('%s_NumberByName = {' % LocalModuleName(enum_desc.full_name))
+  out.PushIndent(2)
+  for v in enum_desc.values:
+    out.Line("'%s': %s," % (v.name, v.number))
+  out.PopIndent()
+  out.Line('};')
+  out.Line('/** @type (!Object<number, %s>) */' %
+           LocalModuleName(enum_desc.full_name))
+  out.Line('%s_NameByNumber = {' % LocalModuleName(enum_desc.full_name))
+  out.PushIndent(2)
+  for v in enum_desc.values:
+    out.Line("%s: '%s'," % (v.number, v.name))
+  out.PopIndent()
+  out.Line('};')
 
 
 def TagSpecName(tag_spec):
@@ -779,6 +780,8 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
     additional_tagspecs = []
     for t in rules.tags:
       if t.extension_spec and t.extension_spec.name:
+        # This is satisfied by any of the `v0.js` variants:
+        t.requires.extend(['amphtml javascript runtime (v0.js)'])
         if validator_pb2.HtmlFormat.Code.Value('AMP') in t.html_format:
           tagspec = copy.deepcopy(t)
           # Reset html_format to AMP

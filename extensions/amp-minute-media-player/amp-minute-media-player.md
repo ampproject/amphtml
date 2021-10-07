@@ -7,22 +7,6 @@ teaser:
   text: Displays a Minute Media player.
 ---
 
-<!--
-Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-minute-media-player
 
 ## Example
@@ -111,7 +95,7 @@ Example with FIXED layout - fixed width and height.
        <li>Multiple videos on the same page can be docked.</li>
      </ul>
      In order to use this attribute, the amp-video-docking extension script must be present:
-     <script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"></script>
+     <code>&lt;script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"&gt;&lt;/script&gt;</code>
 </p>
     </td>
   </tr>

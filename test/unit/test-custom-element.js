@@ -1,34 +1,22 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as fakeTimers from '@sinonjs/fake-timers';
+
 import {AmpEvents} from '#core/constants/amp-events';
-import {BaseElement} from '../../src/base-element';
 import {CommonSignals} from '#core/constants/common-signals';
-import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '#core/dom/layout';
-import {Resource, ResourceState} from '#service/resource';
+
 import {Services} from '#service';
+import {elementConnectedCallback} from '#service/custom-element-registry';
+import {Resource, ResourceState} from '#service/resource';
+
+import {BaseElement} from '../../src/base-element';
 import {chunkInstanceForTesting} from '../../src/chunk';
 import {
   createAmpElementForTesting,
   getImplSyncForTesting,
+  markUnresolvedElements,
+  resetUnresolvedElementsForTesting,
 } from '../../src/custom-element';
-import {elementConnectedCallback} from '#service/custom-element-registry';
-import {toggleExperiment} from '#experiments';
+import {ElementStub} from '../../src/element-stub';
 
 describes.realWin('CustomElement', {amp: true}, (env) => {
   // TODO(dvoytenko, #11827): Make this test work on Safari.
@@ -167,6 +155,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       afterEach(() => {
         clock.uninstall();
         resourcesMock.verify();
+        resetUnresolvedElementsForTesting();
       });
 
       function skipMicroTask() {
@@ -587,6 +576,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
       it('Element - build allowed', () => {
         const element = new ElementClass();
+        const getSizerStub = env.sandbox.stub(element, 'getSizer_');
 
         expect(element.isBuilt()).to.equal(false);
         expect(testElementBuildCallback).to.have.not.been.called;
@@ -599,6 +589,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           expect(element).to.not.have.class('i-amphtml-notbuilt');
           expect(element).to.not.have.class('amp-notbuilt');
           expect(element).to.have.class('i-amphtml-built');
+          expect(getSizerStub).to.be.calledOnce;
           expect(testElementBuildCallback).to.be.calledOnce;
           expect(element.signals().get(CommonSignals.BUILT)).to.be.ok;
           return element.whenBuilt(); // Should eventually resolve.
@@ -704,15 +695,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         );
       });
 
-      describe('granular consent experiment', () => {
-        beforeEach(() => {
-          toggleExperiment(win, 'amp-consent-granular-consent', true);
-        });
-
-        afterEach(() => {
-          toggleExperiment(win, 'amp-consent-granular-consent', false);
-        });
-
+      describe('consent', () => {
         describe('getPurposeConsent_', () => {
           let element;
           beforeEach(() => {
@@ -968,9 +951,9 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
         expect(element.everAttached).to.equal(true);
         expect(element.getLayout()).to.equal(Layout.FILL);
-        // Not upgraded yet!
-        expect(element).to.have.class('amp-unresolved');
-        expect(element).to.have.class('i-amphtml-unresolved');
+        // Not upgraded yet, but extension hasn't failed.
+        expect(element).not.to.have.class('amp-unresolved');
+        expect(element).not.to.have.class('i-amphtml-unresolved');
 
         // Upgrade
         resourcesMock.expects('upgraded').withExactArgs(element).once();
@@ -985,6 +968,44 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         // Now it's called.
         expect(element).to.not.have.class('amp-unresolved');
         expect(element).to.not.have.class('i-amphtml-unresolved');
+      });
+
+      it('StubElement - attachedCallback after failed to load', () => {
+        const element = new StubElementClass();
+        markUnresolvedElements('amp-stub');
+        element.setAttribute('layout', 'fill');
+        expect(element.everAttached).to.equal(false);
+        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
+
+        resourcesMock.expects('add').withExactArgs(element).atLeast(1);
+        container.appendChild(element);
+
+        expect(element.everAttached).to.equal(true);
+        expect(element.getLayout()).to.equal(Layout.FILL);
+        // Extension already failed before attachedCallback
+        expect(element).to.have.class('amp-unresolved');
+        expect(element).to.have.class('i-amphtml-unresolved');
+      });
+
+      it('StubElement - attachedCallback before failed to load', () => {
+        const element = new StubElementClass();
+        element.setAttribute('layout', 'fill');
+        expect(element.everAttached).to.equal(false);
+        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
+
+        resourcesMock.expects('add').withExactArgs(element).atLeast(1);
+        container.appendChild(element);
+
+        expect(element.everAttached).to.equal(true);
+        expect(element.getLayout()).to.equal(Layout.FILL);
+        // Not upgraded yet, but extension hasn't failed.
+        expect(element).not.to.have.class('amp-unresolved');
+        expect(element).not.to.have.class('i-amphtml-unresolved');
+
+        // Now it's called.
+        markUnresolvedElements('amp-stub');
+        expect(element).to.have.class('amp-unresolved');
+        expect(element).to.have.class('i-amphtml-unresolved');
       });
 
       it('Element - detachedCallback', () => {

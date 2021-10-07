@@ -1,49 +1,38 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {toggleAttribute} from '#core/dom';
+import {childElementsByTag} from '#core/dom/query';
+import {toArray} from '#core/types/array';
+import {dict, memo} from '#core/types/object';
 
 import * as Preact from '#preact';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionHeader,
-  AccordionSection,
-} from './component';
-import {PreactBaseElement} from '#preact/base-element';
-import {childElementsByTag} from '#core/dom/query';
-import {devAssert} from '../../../src/log';
-import {dict, memo} from '#core/types/object';
-import {forwardRef} from '#preact/compat';
-import {toArray} from '#core/types/array';
-import {toggleAttribute} from '#core/dom';
-import {useDOMHandle} from '#preact/component';
 import {useLayoutEffect, useRef} from '#preact';
+import {PreactBaseElement} from '#preact/base-element';
+import {forwardRef} from '#preact/compat';
+import {useDOMHandle} from '#preact/component';
 import {useSlotContext} from '#preact/slot';
 
-const SECTION_SHIM_PROP = '__AMP_S_SHIM';
+import {
+  BentoAccordion,
+  BentoAccordionContent,
+  BentoAccordionHeader,
+  BentoAccordionSection,
+} from './component';
+
+import {devAssert} from '../../../src/log';
+
 const HEADER_SHIM_PROP = '__AMP_H_SHIM';
 const CONTENT_SHIM_PROP = '__AMP_C_SHIM';
 const SECTION_POST_RENDER = '__AMP_PR';
 const EXPAND_STATE_SHIM_PROP = '__AMP_EXPAND_STATE_SHIM';
 
-/** @extends {PreactBaseElement<AccordionDef.AccordionApi>} */
+/** @extends {PreactBaseElement<BentoAccordionDef.AccordionApi>} */
 export class BaseElement extends PreactBaseElement {
   /** @override */
   init() {
-    const getExpandStateTrigger = (section) => (expanded) =>
+    const getExpandStateTrigger = (section) => (expanded) => {
+      toggleAttribute(section, 'expanded', expanded);
+      section[SECTION_POST_RENDER]?.();
       this.triggerEvent(section, expanded ? 'expand' : 'collapse');
+    };
 
     const {element} = this;
     const mu = new MutationObserver(() => {
@@ -78,11 +67,6 @@ function getState(element, mu, getExpandStateTrigger) {
       section[SECTION_POST_RENDER] = () => mu.takeRecords();
     }
 
-    const sectionShim = memo(
-      section,
-      SECTION_SHIM_PROP,
-      bindSectionShimToElement
-    );
     const headerShim = memo(section, HEADER_SHIM_PROP, bindHeaderShimToElement);
     const contentShim = memo(
       section,
@@ -96,7 +80,6 @@ function getState(element, mu, getExpandStateTrigger) {
     );
     const sectionProps = dict({
       'key': section,
-      'as': sectionShim,
       'expanded': section.hasAttribute('expanded'),
       'id': section.getAttribute('id'),
       'onExpandStateChange': expandStateShim,
@@ -119,10 +102,10 @@ function getState(element, mu, getExpandStateTrigger) {
       'role': section.lastElementChild.getAttribute('role') || undefined,
     });
     return (
-      <AccordionSection {...sectionProps}>
-        <AccordionHeader {...headerProps}></AccordionHeader>
-        <AccordionContent {...contentProps}></AccordionContent>
-      </AccordionSection>
+      <BentoAccordionSection {...sectionProps}>
+        <BentoAccordionHeader {...headerProps}></BentoAccordionHeader>
+        <BentoAccordionContent {...contentProps}></BentoAccordionContent>
+      </BentoAccordionSection>
     );
   });
   return dict({'children': children});
@@ -130,28 +113,7 @@ function getState(element, mu, getExpandStateTrigger) {
 
 /**
  * @param {!Element} sectionElement
- * @param {!AccordionDef.SectionShimProps} props
- * @return {PreactDef.Renderable}
- */
-function SectionShim(sectionElement, {children, expanded}) {
-  useLayoutEffect(() => {
-    toggleAttribute(sectionElement, 'expanded', expanded);
-    if (sectionElement[SECTION_POST_RENDER]) {
-      sectionElement[SECTION_POST_RENDER]();
-    }
-  }, [sectionElement, expanded]);
-  return children;
-}
-
-/**
- * @param {!Element} element
- * @return {function(!AccordionDef.SectionProps):PreactDef.Renderable}
- */
-const bindSectionShimToElement = (element) => SectionShim.bind(null, element);
-
-/**
- * @param {!Element} sectionElement
- * @param {!AccordionDef.HeaderShimProps} props
+ * @param {!BentoAccordionDef.HeaderShimProps} props
  * @return {PreactDef.Renderable}
  */
 function HeaderShim(
@@ -198,13 +160,13 @@ function HeaderShim(
 
 /**
  * @param {!Element} element
- * @return {function(!AccordionDef.HeaderProps):PreactDef.Renderable}
+ * @return {function(!BentoAccordionDef.HeaderProps):PreactDef.Renderable}
  */
 const bindHeaderShimToElement = (element) => HeaderShim.bind(null, element);
 
 /**
  * @param {!Element} sectionElement
- * @param {!AccordionDef.ContentShimProps} props
+ * @param {!BentoAccordionDef.ContentShimProps} props
  * @param {{current: ?}} ref
  * @return {PreactDef.Renderable}
  */
@@ -235,7 +197,7 @@ function ContentShimWithRef(
 
 /**
  * @param {!Element} element
- * @return {function(!AccordionDef.ContentProps):PreactDef.Renderable}
+ * @return {function(!BentoAccordionDef.ContentProps):PreactDef.Renderable}
  */
 const bindContentShimToElement = (element) =>
   forwardRef(
@@ -245,7 +207,7 @@ const bindContentShimToElement = (element) =>
   );
 
 /** @override */
-BaseElement['Component'] = Accordion;
+BaseElement['Component'] = BentoAccordion;
 
 /** @override */
 BaseElement['detached'] = true;

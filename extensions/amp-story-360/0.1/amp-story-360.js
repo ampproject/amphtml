@@ -1,40 +1,27 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * Must be served over https for permissions API to work.
  * For local development, run amp --host="192.168.44.47" --https --extensions=amp-story-360
  */
 
+import {CommonSignals} from '#core/constants/common-signals';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {closest} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
+
+import {Services} from '#service';
+import {LocalizedStringId} from '#service/localization/strings';
+
+import {Matrix, Renderer} from '#third_party/zuho/zuho';
+
+import {CSS} from '../../../build/amp-story-360-0.1.css';
+import {listenOncePromise} from '../../../src/event-helper';
+import {dev, user, userAssert} from '../../../src/log';
 import {
   Action,
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {CSS} from '../../../build/amp-story-360-0.1.css';
-import {CommonSignals} from '#core/constants/common-signals';
-import {LocalizedStringId} from '#service/localization/strings';
-import {Matrix, Renderer} from '#third_party/zuho/zuho';
-import {Services} from '#service';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {closest} from '#core/dom/query';
-import {dev, user, userAssert} from '../../../src/log';
-import {htmlFor} from '#core/dom/static-template';
-import {listenOncePromise} from '../../../src/event-helper';
 import {timeStrToMillis} from '../../amp-story/1.0/utils';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_360';

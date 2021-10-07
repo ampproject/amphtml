@@ -1,22 +1,6 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const argv = require('minimist')(process.argv.slice(2));
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
-const {cyan, green} = require('../common/colors');
+const {cyan, green} = require('kleur/colors');
 const {doServe} = require('./serve');
 const {log} = require('../common/logging');
 const {parseExtensionFlags} = require('./extension-helpers');
@@ -47,7 +31,7 @@ async function defaultTask() {
   printConfigHelp('amp');
   printDefaultTaskHelp();
   parseExtensionFlags(/* preBuild */ true);
-  if (argv.compiled) {
+  if (argv.minified) {
     await runPreDistSteps(/* watch */ true);
   } else {
     await runPreBuildSteps(/* watch */ true);
@@ -65,11 +49,11 @@ module.exports = {
 defaultTask.description =
   'Start the dev server, lazily build JS when requested, and watch for changes';
 defaultTask.flags = {
-  compiled: 'Compile and serve minified binaries',
+  minified: 'Compile and serve minified binaries',
   pseudo_names:
     'Compile with readable names (useful while profiling / debugging production code)',
   pretty_print:
-    'Output compiled code with whitespace (useful while profiling / debugging production code)',
+    'Output code with whitespace (useful while profiling / debugging production code)',
   fortesting: 'Compile production binaries for local testing',
   noconfig: 'Compile production binaries without applying AMP_CONFIG',
   config: 'Set the runtime\'s AMP_CONFIG to one of "prod" or "canary"',

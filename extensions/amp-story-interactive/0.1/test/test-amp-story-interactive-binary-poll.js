@@ -1,19 +1,4 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryInteractiveBinaryPoll} from '../amp-story-interactive-binary-poll';
 import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
@@ -44,6 +29,7 @@ describes.realWin(
       const ampStoryPollEl = win.document.createElement(
         'amp-story-interactive-binary-poll'
       );
+      ampStoryPollEl.getAmpDoc = () => new AmpDocSingle(win);
       ampStoryPollEl.getResources = () => win.__AMP_SERVICES.resources.obj;
       requestService = new AmpStoryRequestService(win);
       registerServiceBuilder(win, 'story-request', function () {

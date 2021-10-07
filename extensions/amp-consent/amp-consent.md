@@ -7,22 +7,6 @@ teaser:
   text: Provides the ability to collect and store a user's consent through a UI control. Also provides the ability to block other AMP components based on the user's consent.
 ---
 
-<!--
-Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-consent
 
 ## Overview
@@ -653,9 +637,12 @@ Join in on the discussion where we are discussing [upcoming potential features](
 
 ## Supported Consent Management Platforms
 
+<!-- markdown-link-check-disable -->
+
 -   AppConsent : [Website](https://sfbx.io/en/produits/) - [Documentation](./cmps/appconsent.md)
 -   ConsentManager : [Website](https://www.consentmanager.net/) - [Documentation](https://help.consentmanager.net/books/cmp/page/using-the-cmp-with-amp-websites)
 -   Didomi : [Website](https://www.didomi.io/) - [Documentation](https://developers.didomi.io/cmp/amp)
+-   Funding Choices : [Website](https://fundingchoices.google.com/start) - [Documentation](./cmps/googlefc.md)
 -   iubenda : [Website](https://www.iubenda.com/) - [Documentation](./cmps/iubenda.md)
 -   LiveRamp : [Website](https://liveramp.com/our-platform/preference-consent-management/) - [Documentation](./cmps/liveramp.md)
 -   Marfeel : [Website](https://www.marfeel.com/) - [Documentation](./cmps/marfeel.md)
