@@ -185,6 +185,7 @@ function externGlobsFromSrcGlobs(srcGlobs) {
  * Typecheck the given target using either tsc or closure.
  *
  * @param {string} targetName
+ * @return {Promise<void>}
  */
 async function typeCheck(targetName) {
   if (TSC_TYPECHECK_TARGETS[targetName]) {
