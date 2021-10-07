@@ -17,7 +17,7 @@ import {parseJson} from '#core/types/object/json';
 import {Services} from '#service';
 
 import {CSS} from '../../../build/amp-accordion-0.1.css';
-import {Animation} from '../../../src/animation';
+import {Animation} from '#utils/animation';
 import {createCustomEvent} from '#utils/event-helper';
 import {dev, devAssert, user, userAssert} from '#utils/log';
 import {removeFragment} from '../../../src/url';

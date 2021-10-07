@@ -1,5 +1,5 @@
 import {ActionTrust} from '#core/constants/action-constants';
-import {Animation} from '../../../src/animation';
+import {Animation} from '#utils/animation';
 import {BaseCarousel} from './base-carousel';
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';

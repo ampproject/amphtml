@@ -1,5 +1,5 @@
 import {ActionTrust} from '#core/constants/action-constants';
-import {Animation} from '../../../src/animation';
+import {Animation} from '#utils/animation';
 import {dev, user, userAssert} from '#utils/log';
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';

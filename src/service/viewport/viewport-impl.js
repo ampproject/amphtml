@@ -22,7 +22,7 @@ import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrap
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {ViewportInterface} from './viewport-interface';
 
-import {Animation} from '../../animation';
+import {Animation} from '#utils/animation';
 import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';
 import {dev, devAssert} from '#utils/log';
 import {getMode} from '../../mode';
