@@ -14,17 +14,17 @@ declare module 'extensions/amp-fit-text/0.1/build-dom' {
 }
 
 declare module '#core/dom' {
-  export const copyChildren: (node: Element) => Element | DocumentFragment;
-  export const removeChildren: (node: Element | DocumentFragment) => void;
+  export const copyChildren: (from: Node, to: Node) => void;
+  export const removeChildren: (node: Node) => void;
 }
 
 declare module '#core/dom/query' {
-  export const realChildNodes: (node: Element) => Element[];
+  export const realChildNodes: (node: Node) => Element[];
 }
 
 declare module '#core/dom/layout' {
   export const applyFillContent: (
-    node: Element,
-    opt_replacedContent?: boolean
+    node: Node,
+    replacedContent?: boolean
   ) => void;
 }
