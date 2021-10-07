@@ -20,6 +20,7 @@ export class FakeWindow {
    */
   constructor(opt_spec) {
     const spec = opt_spec || {};
+    const self = this;
 
     /**
      * This value is reflected on this.document.readyState.
@@ -209,6 +210,15 @@ export class FakeWindow {
     // Timers and animation frames.
     /** @const */
     this.Date = window.Date;
+
+    this.performance = {
+      now() {
+        return self.Date.now();
+      },
+      get timeOrigin() {
+        return 1;
+      },
+    };
 
     /** polyfill setTimeout. */
     this.setTimeout = function () {

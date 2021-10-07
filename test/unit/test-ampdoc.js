@@ -439,7 +439,13 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
       addEventListener: env.sandbox.spy(),
       removeEventListener: env.sandbox.spy(),
     };
-    win = {document: doc};
+    win = {
+      document: doc,
+      performance: {
+        now: Date.now,
+        timeOrigin: 1,
+      },
+    };
 
     childDoc = {
       body: null,
@@ -447,7 +453,13 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
       addEventListener: env.sandbox.spy(),
       removeEventListener: env.sandbox.spy(),
     };
-    childWin = {document: childDoc};
+    childWin = {
+      document: childDoc,
+      performance: {
+        now: Date.now,
+        timeOrigin: 2,
+      },
+    };
 
     top = new AmpDocSingle(win);
     embedSameWindow = new AmpDocFie(win, EMBED_URL, top);
@@ -537,13 +549,13 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
 
     expect(top.getFirstVisibleTime()).to.equal(1);
     expect(embedSameWindow.getFirstVisibleTime()).to.equal(1);
-    expect(embedOtherWindow.getFirstVisibleTime()).to.equal(1);
-    expect(embedChild.getFirstVisibleTime()).to.equal(1);
+    expect(embedOtherWindow.getFirstVisibleTime()).to.equal(2);
+    expect(embedChild.getFirstVisibleTime()).to.equal(2);
 
     expect(top.getLastVisibleTime()).to.equal(1);
     expect(embedSameWindow.getLastVisibleTime()).to.equal(1);
-    expect(embedOtherWindow.getLastVisibleTime()).to.equal(1);
-    expect(embedChild.getLastVisibleTime()).to.equal(1);
+    expect(embedOtherWindow.getLastVisibleTime()).to.equal(2);
+    expect(embedChild.getLastVisibleTime()).to.equal(2);
 
     return Promise.all([
       top.whenFirstVisible(),
@@ -559,6 +571,8 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
       ]);
     });
   });
+
+  // it('should prefer timeOrigin for initial ')
 
   it('should override at construction time', () => {
     top = new AmpDocSingle(win, {visibilityState: 'hidden'});
@@ -700,10 +714,10 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
     expect(top.getLastVisibleTime()).to.equal(1);
     expect(embedSameWindow.getFirstVisibleTime()).to.equal(1);
     expect(embedSameWindow.getLastVisibleTime()).to.equal(1);
-    expect(embedOtherWindow.getFirstVisibleTime()).to.equal(1);
-    expect(embedOtherWindow.getLastVisibleTime()).to.equal(1);
-    expect(embedChild.getFirstVisibleTime()).to.equal(1);
-    expect(embedChild.getLastVisibleTime()).to.equal(1);
+    expect(embedOtherWindow.getFirstVisibleTime()).to.equal(2);
+    expect(embedOtherWindow.getLastVisibleTime()).to.equal(2);
+    expect(embedChild.getFirstVisibleTime()).to.equal(2);
+    expect(embedChild.getLastVisibleTime()).to.equal(2);
 
     clock.tick(1);
     embedOtherWindow.overrideVisibilityState('visible');
@@ -715,9 +729,9 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
     expect(top.getLastVisibleTime()).to.equal(1);
     expect(embedSameWindow.getFirstVisibleTime()).to.equal(1);
     expect(embedSameWindow.getLastVisibleTime()).to.equal(1);
-    expect(embedOtherWindow.getFirstVisibleTime()).to.equal(1);
+    expect(embedOtherWindow.getFirstVisibleTime()).to.equal(2);
     expect(embedOtherWindow.getLastVisibleTime()).to.equal(3);
-    expect(embedChild.getFirstVisibleTime()).to.equal(1);
+    expect(embedChild.getFirstVisibleTime()).to.equal(2);
     expect(embedChild.getLastVisibleTime()).to.equal(3);
   });
 
@@ -852,7 +866,10 @@ describes.realWin('AmpDocSingle', {}, (env) => {
       addEventListener: function () {},
       removeEventListener: function () {},
     };
-    const win = {document: doc};
+    const win = {
+      document: doc,
+      performance: env.win.performance,
+    };
 
     let bodyCallback;
     env.sandbox.stub(dom, 'waitForBodyOpenPromise').callsFake(() => {

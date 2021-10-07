@@ -621,7 +621,7 @@ export class AmpDoc {
           // If the doc was initialized in the visible state, then prefer the
           // timeOrigin of the document over when the JS actually initializes.
           visibleTime = Math.floor(
-            performance.timeOrigin || performance.timing.navigationStart
+            performance.timeOrigin ?? performance.timing.navigationStart
           );
         } else {
           visibleTime = Math.floor(performance.now());
