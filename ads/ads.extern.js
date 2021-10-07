@@ -306,6 +306,19 @@ window.adpushup.initAmp = function (
   extras
 ) {};
 
+// andbeyond.js
+window.andbeyond = {};
+window.andbeyond.initAmp = function (
+  global,
+  width,
+  height,
+  siteid,
+  slotpath,
+  totalampslots,
+  jsontargeting,
+  extras
+) {};
+
 // adreactor.js
 data.zid;
 data.pid;
