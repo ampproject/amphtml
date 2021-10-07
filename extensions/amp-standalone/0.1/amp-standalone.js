@@ -1,7 +1,7 @@
 import {Services} from '#service';
 
 import {listen} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {getWinOrigin} from '../../../src/url';
 
 /**

@@ -15,7 +15,7 @@ import {toArray} from '#core/types/array';
 import {Services} from '#service';
 
 import {CSS} from '../../../build/amp-mega-menu-0.1.css';
-import {dev, userAssert} from '../../../src/log';
+import {dev, userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-mega-menu';

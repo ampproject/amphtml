@@ -21,7 +21,7 @@ import {
 import {installVsyncService} from '#service/vsync-impl';
 
 import {loadPromise} from '../../src/event-helper';
-import {dev} from '../../src/log';
+import {dev} from '#utils/log';
 import {getMode} from '../../src/mode';
 import {setParentWindow} from '../../src/service-helpers';
 

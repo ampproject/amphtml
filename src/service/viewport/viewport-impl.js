@@ -24,7 +24,7 @@ import {ViewportInterface} from './viewport-interface';
 
 import {Animation} from '../../animation';
 import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';
-import {dev, devAssert} from '../../log';
+import {dev, devAssert} from '#utils/log';
 import {getMode} from '../../mode';
 import {
   getParentWindowFrameElement,

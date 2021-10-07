@@ -41,7 +41,7 @@ import {reportError} from '../../../src/error-reporting';
 import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {SwipeDef, SwipeYRecognizer} from '../../../src/gesture-recognizers';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {dev, devAssert, userAssert} from '#utils/log';
 
 /** @const */
 const TAG = 'amp-lightbox-gallery';

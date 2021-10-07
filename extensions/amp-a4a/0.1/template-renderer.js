@@ -2,7 +2,7 @@ import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
 import {Renderer} from './amp-ad-type-defs';
 import {renderCreativeIntoFriendlyFrame} from './friendly-frame-util';
 
-import {devAssert} from '../../../src/log';
+import {devAssert} from '#utils/log';
 
 /**
  * @typedef {{

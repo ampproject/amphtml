@@ -4,7 +4,7 @@ import {parseLinker} from './linker';
 import {parseQueryString} from '#core/types/string/url';
 import {removeParamsFromSearch} from '../../../src/url';
 
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 const TAG = 'amp-analytics/linker-reader';
 

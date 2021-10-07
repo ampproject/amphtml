@@ -13,7 +13,7 @@ import {
   initLogConstructor,
   setReportError,
   user,
-} from '../src/log';
+} from '#utils/log';
 import {isProxyOrigin, parseUrlDeprecated} from '../src/url';
 import ampToolboxCacheUrl from '../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 

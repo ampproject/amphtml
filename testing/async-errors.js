@@ -10,7 +10,7 @@ import {
 } from './console-logging-setup';
 
 import {reportError} from '../src/error-reporting';
-import {setReportError} from '../src/log';
+import {setReportError} from '#utils/log';
 
 let rethrowAsyncSandbox;
 

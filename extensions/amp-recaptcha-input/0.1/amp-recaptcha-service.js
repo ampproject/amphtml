@@ -7,7 +7,7 @@ import ampToolboxCacheUrl from '../../../third_party/amp-toolbox-cache-url/dist/
 
 import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {Services} from '#service';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';

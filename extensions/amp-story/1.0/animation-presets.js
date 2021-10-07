@@ -7,7 +7,7 @@ import {
   whooshIn,
 } from './animation-presets-utils';
 import {px} from '#core/dom/style';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /** @const {string} */
 const FULL_BLEED_CATEGORY = 'full-bleed';

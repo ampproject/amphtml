@@ -7,7 +7,7 @@ import {tryParseJson} from '#core/types/object/json';
 
 import {IframeMessagingClient} from './iframe-messaging-client';
 
-import {dev, devAssert} from '../src/log';
+import {dev, devAssert} from '#utils/log';
 import {parseUrlDeprecated} from '../src/url';
 
 export class AbstractAmpContext {

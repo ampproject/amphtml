@@ -3,7 +3,7 @@ import {isExperimentOn} from '#experiments';
 import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-vimeo-1.0.css';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-vimeo';

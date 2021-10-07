@@ -18,7 +18,7 @@ import {
   objOrParseJson,
   originMatches,
 } from '../../../src/iframe-video';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 import {addParamsToUrl} from '../../../src/url';
 import {VideoEvents} from '../../../src/video-interface';
 

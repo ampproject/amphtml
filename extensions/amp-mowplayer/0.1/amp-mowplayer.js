@@ -21,7 +21,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, userAssert} from '../../../src/log';
+import {dev, userAssert} from '#utils/log';
 import {VideoEvents} from '../../../src/video-interface';
 
 const TAG = 'amp-mowplayer';

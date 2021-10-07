@@ -4,7 +4,7 @@ import {WindowInterface} from '#core/window/interface';
 import {Services} from '#service';
 
 import {getCookie, setCookie} from '../cookies';
-import {dev} from '../log';
+import {dev} from '#utils/log';
 import {isProxyOrigin, parseUrlDeprecated} from '../url';
 
 const GOOGLE_API_URL =

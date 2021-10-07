@@ -12,7 +12,7 @@ import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service-helpers';
-import {user} from '../../../../src/log';
+import {user} from '#utils/log';
 
 describes.realWin('Session Manager', {amp: true}, (env) => {
   let win;

@@ -5,7 +5,7 @@ import {
   copyTextToClipboard,
   isCopyingToClipboardSupported,
 } from '#core/window/clipboard';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user} from '#utils/log';
 import {dict, map} from '#core/types/object';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getRequestService} from './amp-story-request-service';

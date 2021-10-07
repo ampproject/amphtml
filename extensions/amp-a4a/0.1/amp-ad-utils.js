@@ -5,7 +5,7 @@ import {Services} from '#service';
 import {parseExtensionUrl} from '#service/extension-script';
 
 import {urls} from '../../../src/config';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {isSecureUrlDeprecated} from '../../../src/url';
 
 const TAG = 'amp-ad-util';

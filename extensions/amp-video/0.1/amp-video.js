@@ -13,7 +13,7 @@ import {
   matches,
 } from '#core/dom/query';
 import {descendsFromStory} from '../../../src/utils/story';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user} from '#utils/log';
 import {
   addAttributesToElement,
   dispatchCustomEvent,

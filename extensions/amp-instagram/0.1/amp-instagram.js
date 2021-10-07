@@ -29,7 +29,7 @@ import {Services} from '#service';
 
 import {CSS} from '../../../build/amp-instagram-0.1.css';
 import {getData, listen} from '../../../src/event-helper';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 export class AmpInstagram extends AMP.BaseElement {
   /** @param {!AmpElement} element */

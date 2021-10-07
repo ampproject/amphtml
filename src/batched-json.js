@@ -2,7 +2,7 @@ import {getValueForExpr} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {user} from './log';
+import {user} from '#utils/log';
 import {assertHttpsUrl} from './url';
 
 /**

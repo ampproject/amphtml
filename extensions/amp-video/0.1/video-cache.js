@@ -7,7 +7,7 @@ import {
 } from '#core/dom';
 import {matches} from '#core/dom/query';
 import {toArray} from '#core/types/array';
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 /**
  * Add the caching sources to the video if opted in.

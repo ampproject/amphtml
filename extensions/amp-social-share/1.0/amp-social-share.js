@@ -13,7 +13,7 @@ import {BaseElement} from './base-element';
 import {getSocialConfig} from './social-share-config';
 
 import {CSS} from '../../../build/amp-social-share-1.0.css';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 import {addParamsToUrl} from '../../../src/url';
 
 /** @const {string} */

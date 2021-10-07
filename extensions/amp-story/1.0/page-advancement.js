@@ -12,7 +12,7 @@ import {Services} from '#service';
 import {TAPPABLE_ARIA_ROLES} from '#service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest, matches} from '#core/dom/query';
-import {dev, user} from '../../../src/log';
+import {dev, user} from '#utils/log';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {hasTapAction, timeStrToMillis} from './utils';

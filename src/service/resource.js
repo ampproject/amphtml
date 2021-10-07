@@ -17,7 +17,7 @@ import {
   isBlockedByConsent,
   reportError,
 } from '../error-reporting';
-import {dev, devAssert} from '../log';
+import {dev, devAssert} from '#utils/log';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';

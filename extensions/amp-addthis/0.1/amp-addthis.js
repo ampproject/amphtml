@@ -54,7 +54,7 @@ import * as mode from '#core/mode';
 import {listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
 import {setStyle} from '#core/dom/style';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 // The following items will be shared by all AmpAddThis elements on a page, to
 // prevent unnecessary HTTP requests, get accurate analytics, etc., and hence

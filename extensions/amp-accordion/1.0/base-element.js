@@ -17,7 +17,7 @@ import {
   BentoAccordionSection,
 } from './component';
 
-import {devAssert} from '../../../src/log';
+import {devAssert} from '#utils/log';
 
 const HEADER_SHIM_PROP = '__AMP_H_SHIM';
 const CONTENT_SHIM_PROP = '__AMP_C_SHIM';

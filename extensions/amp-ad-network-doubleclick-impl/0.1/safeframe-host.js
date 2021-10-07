@@ -7,7 +7,7 @@ import {tryParseJson} from '#core/types/object/json';
 import {Services} from '#service';
 
 import {getData} from '../../../src/event-helper';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user} from '#utils/log';
 import {parseUrlDeprecated} from '../../../src/url';
 
 /**

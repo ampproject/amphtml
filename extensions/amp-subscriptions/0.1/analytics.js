@@ -1,6 +1,6 @@
 import {dict} from '#core/types/object';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 const TAG = 'amp-subscriptions';
 

@@ -17,7 +17,7 @@ import {ViewerInterface} from './viewer-interface';
 import {urls} from '../config';
 import {reportError} from '../error-reporting';
 import {listen} from '../event-helper';
-import {dev, devAssert} from '../log';
+import {dev, devAssert} from '#utils/log';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 import {
   getSourceOrigin,

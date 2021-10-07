@@ -59,7 +59,7 @@ import {
   preloadFriendlyIframeEmbedExtensions,
 } from '../../../src/friendly-iframe-embed';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {dev, devAssert, logHashParam, user, userAssert} from '../../../src/log';
+import {dev, devAssert, logHashParam, user, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';
 import {assertHttpsUrl} from '../../../src/url';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';

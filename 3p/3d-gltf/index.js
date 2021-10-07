@@ -8,7 +8,7 @@ import {parseJson} from '#core/types/object/json';
 
 import GltfViewer from './viewer';
 
-import {user} from '../../src/log';
+import {user} from '#utils/log';
 
 const seq = (taskA, taskB) => (cb) => taskA(() => taskB(cb));
 const parallel = (taskA, taskB) => (cb) => {

@@ -13,7 +13,7 @@ import {
 import {applyExperimentToVariant} from './apply-experiment';
 import {ATTR_PREFIX, Variants, allocateVariant} from './variant';
 
-import {devAssert, user, userAssert} from '../../../src/log';
+import {devAssert, user, userAssert} from '#utils/log';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 
 const TAG = 'amp-experiment';

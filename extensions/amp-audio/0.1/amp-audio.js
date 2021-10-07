@@ -5,7 +5,7 @@ import {tryPlay} from '#core/dom/video';
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {listen} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {
   EMPTY_METADATA,
   parseFavicon,

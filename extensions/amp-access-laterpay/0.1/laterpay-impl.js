@@ -5,7 +5,7 @@ import {Services} from '#service';
 
 import {CSS} from '../../../build/amp-access-laterpay-0.1.css';
 import {listen} from '../../../src/event-helper';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
 

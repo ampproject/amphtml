@@ -3,7 +3,7 @@ import {parseJson} from '#core/types/object/json';
 import {Services} from '#service';
 
 import {isFormDataWrapper} from '../form-data-wrapper';
-import {dev, user} from '../log';
+import {dev, user} from '#utils/log';
 import {getService, registerServiceBuilder} from '../service-helpers';
 import {getCorsUrl, parseUrlDeprecated} from '../url';
 import {

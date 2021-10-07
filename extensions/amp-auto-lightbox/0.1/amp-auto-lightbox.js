@@ -19,7 +19,7 @@ import {Services} from '#service';
 
 import {AutoLightboxEvents} from '../../../src/auto-lightbox';
 import {loadPromise} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 
 const TAG = 'amp-auto-lightbox';
 

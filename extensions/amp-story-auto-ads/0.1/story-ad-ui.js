@@ -6,7 +6,7 @@ import {StoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
 
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {CSS as ctaButtonCSS} from '../../../build/amp-story-auto-ads-cta-button-0.1.css';
-import {dev, user} from '../../../src/log';
+import {dev, user} from '#utils/log';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {assertHttpsUrl} from '../../../src/url';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';

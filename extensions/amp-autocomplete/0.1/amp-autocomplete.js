@@ -14,7 +14,7 @@ import {
 } from '../../../src/batched-json';
 import {addParamToUrl} from '../../../src/url';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '#utils/log';
 import {
   dict,
   getValueForExpr,

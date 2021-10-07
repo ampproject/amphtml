@@ -1,6 +1,6 @@
 import {Services} from '#service';
 import {cancellation} from '../../../src/error-reporting';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {listenOnce} from '../../../src/event-helper';
 
 const TAG = 'local-viewer';

@@ -13,7 +13,7 @@ import {
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {dev, devAssert, userAssert} from '#utils/log';
 import {getSourceOrigin} from '../../../src/url';
 
 export class AmpState extends AMP.BaseElement {

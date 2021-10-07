@@ -11,7 +11,7 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {listenFor} from '../../../src/iframe-helper';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpO2Player extends AMP.BaseElement {

@@ -8,7 +8,7 @@ import {Services} from '#service';
 
 import {Messenger} from './iframe-api/messenger';
 
-import {dev, userAssert} from '../../../src/log';
+import {dev, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';
 import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
 

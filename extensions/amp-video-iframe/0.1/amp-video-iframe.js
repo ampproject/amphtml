@@ -27,7 +27,7 @@ import {
   objOrParseJson,
   originMatches,
 } from '../../../src/iframe-video';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 import {addParamsToUrl} from '../../../src/url';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,

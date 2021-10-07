@@ -7,7 +7,7 @@ import {TYPE} from './utils';
 
 import {CSS} from '../../../build/amp-mathml-1.0.css';
 import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-mathml';

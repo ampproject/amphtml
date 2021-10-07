@@ -1,6 +1,6 @@
 import {Observable} from '#core/data-structures/observable';
 import {Services} from '#service';
-import {devAssert} from '../../../src/log';
+import {devAssert} from '#utils/log';
 
 /**
  * @typedef {{

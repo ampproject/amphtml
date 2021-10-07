@@ -4,7 +4,7 @@ import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
 import {AnimationRunner} from './animation-runner';
 import {getTotalDuration} from './utils';
 
-import {devAssert} from '../../../../src/log';
+import {devAssert} from '#utils/log';
 import {
   WebAnimationDef,
   WebAnimationPlayState,

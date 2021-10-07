@@ -11,7 +11,7 @@ import {
 } from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
 import {createCustomEvent, getDetail, listen} from '../../../src/event-helper';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {dev, devAssert, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {dispatchCustomEvent} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';

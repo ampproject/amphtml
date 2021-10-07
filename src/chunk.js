@@ -3,7 +3,7 @@ import {PriorityQueue} from '#core/data-structures/priority-queue';
 import {Services} from '#service';
 
 import {getData} from './event-helper';
-import {dev} from './log';
+import {dev} from '#utils/log';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,

@@ -12,7 +12,7 @@ import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
 import {base64EncodeFromBytes} from '#core/types/string/base64';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
-import {user, userAssert} from '../../../src/log';
+import {user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {endsWith} from '#core/types/string';
 import {getConsentDataToForward} from '../../../src/consent';

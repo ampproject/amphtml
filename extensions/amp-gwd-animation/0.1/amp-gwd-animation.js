@@ -11,7 +11,7 @@ import {
 import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
 import {getDetail} from '../../../src/event-helper';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 import {
   getParentWindowFrameElement,
   getServiceForDocOrNull,

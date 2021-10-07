@@ -9,7 +9,7 @@ import {isObject} from '#core/types';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '#core/dom';
 import {tryParseJson} from '#core/types/object/json';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 const TYPE = 'facebook';
 

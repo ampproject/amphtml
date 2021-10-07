@@ -27,7 +27,7 @@ import {
   TapRecognizer,
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
-import {dev, userAssert} from '../../../src/log';
+import {dev, userAssert} from '#utils/log';
 import {continueMotion} from '../../../src/motion';
 
 const TAG = 'amp-image-lightbox';

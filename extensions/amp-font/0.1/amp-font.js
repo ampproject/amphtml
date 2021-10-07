@@ -23,7 +23,7 @@ import {Services} from '#service';
 
 import {FontLoader} from './fontloader';
 
-import {user, userAssert} from '../../../src/log';
+import {user, userAssert} from '#utils/log';
 
 const TAG = 'amp-font';
 

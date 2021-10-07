@@ -30,7 +30,7 @@ import {urls} from './config';
 import {loadPromise} from './event-helper';
 import {FIE_EMBED_PROP} from './iframe-helper';
 import {whenContentIniLoad} from './ini-load';
-import {dev, devAssert, userAssert} from './log';
+import {dev, devAssert, userAssert} from '#utils/log';
 import {getMode} from './mode';
 import {
   disposeServicesForEmbed,

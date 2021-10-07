@@ -41,7 +41,7 @@ import {
 } from '../../../src/batched-json';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {isAmp4Email} from '../../../src/format';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';
 import {Pass} from '../../../src/pass';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';

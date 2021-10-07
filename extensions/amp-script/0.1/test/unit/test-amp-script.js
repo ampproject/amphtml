@@ -4,7 +4,7 @@ import {Services} from '#service';
 
 import {FakeWindow} from '#testing/fake-dom';
 
-import {user} from '../../../../../src/log';
+import {user} from '#utils/log';
 import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,

@@ -29,7 +29,7 @@ import {
   isCancellation,
   reportError,
 } from './error-reporting';
-import {dev, devAssert, user, userAssert} from './log';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 import {getMode} from './mode';
 import {applyStaticLayout} from './static-layout';
 import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';

@@ -36,7 +36,7 @@ import {createViewportRect} from './viewport-rect';
 
 import {CSS} from '../../../build/amp-video-docking-0.1.css';
 import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
   PlayingStates,

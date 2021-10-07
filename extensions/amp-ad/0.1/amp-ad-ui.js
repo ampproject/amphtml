@@ -1,7 +1,7 @@
 import {Services} from '#service';
 import {ancestorElementsByTag} from '#core/dom/query';
 import {createElementWithAttributes, removeElement} from '#core/dom';
-import {devAssert, user, userAssert} from '../../../src/log';
+import {devAssert, user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 
 import {getAdContainer} from '../../../src/ad-helper';

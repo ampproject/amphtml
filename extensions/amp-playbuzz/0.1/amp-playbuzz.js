@@ -34,7 +34,7 @@ import {logo, showMoreArrow} from './images';
 import * as utils from './utils';
 
 import * as events from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
+import {dev, userAssert} from '#utils/log';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   parseUrlDeprecated,

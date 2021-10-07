@@ -23,7 +23,7 @@ import {GoogleCidApi, TokenStatus} from './cid-api';
 import {ViewerCidApi} from './viewer-cid-api';
 
 import {getCookie, setCookie} from '../cookies';
-import {dev, user, userAssert} from '../log';
+import {dev, user, userAssert} from '#utils/log';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,

@@ -17,7 +17,7 @@ import {installPositionObserverServiceForDoc} from '#service/position-observer/p
 import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
 
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 
 const TAG = 'amp-position-observer';
 

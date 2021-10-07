@@ -18,7 +18,7 @@ import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
 import {FormEvents} from '../extensions/amp-form/0.1/form-events';
 import {parseIfNeeded} from '../src/iframe-helper';
-import {dev} from '../src/log';
+import {dev} from '#utils/log';
 
 let iframeCount = 0;
 

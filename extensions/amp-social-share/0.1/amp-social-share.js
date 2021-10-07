@@ -9,7 +9,7 @@ import {Services} from '#service';
 import {getSocialConfig} from './amp-social-share-config';
 
 import {CSS} from '../../../build/amp-social-share-0.1.css';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {addParamsToUrl} from '../../../src/url';
 

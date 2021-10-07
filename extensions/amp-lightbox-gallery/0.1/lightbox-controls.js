@@ -5,7 +5,7 @@ import {dict} from '#core/types/object';
 import {Services} from '#service';
 
 import {createCustomEvent} from '../../../src/event-helper';
-import {devAssert} from '../../../src/log';
+import {devAssert} from '#utils/log';
 
 /**
  * @enum {string}

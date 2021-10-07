@@ -3,7 +3,7 @@ import {observeIntersections} from '#core/dom/layout/viewport-observer';
 
 import {format, getLocale} from './locales';
 
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 export class AmpTimeAgo extends AMP.BaseElement {
   /** @param {!AmpElement} element */

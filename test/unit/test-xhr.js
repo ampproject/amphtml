@@ -9,7 +9,7 @@ import {xhrServiceForTesting} from '#service/xhr-impl';
 
 import {getCookie} from '../../src/cookies';
 import {createFormDataWrapper} from '../../src/form-data-wrapper';
-import {user} from '../../src/log';
+import {user} from '#utils/log';
 import * as mode from '../../src/mode';
 import {assertSuccess} from '../../src/utils/xhr-utils';
 

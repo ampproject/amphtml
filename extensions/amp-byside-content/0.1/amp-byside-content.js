@@ -26,7 +26,7 @@ import {Services} from '#service';
 
 import {CSS} from '../../../build/amp-byside-content-0.1.css';
 import {listenFor} from '../../../src/iframe-helper';
-import {user, userAssert} from '../../../src/log';
+import {user, userAssert} from '#utils/log';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
 
 /** @const {string} */

@@ -12,7 +12,7 @@ import {registerElement} from '#service/custom-element-registry';
 
 import {BaseElement} from '../../base-element';
 import {listen} from '../../event-helper';
-import {dev} from '../../log';
+import {dev} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-img';

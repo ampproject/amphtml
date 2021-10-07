@@ -20,7 +20,7 @@ import {renderIcon, renderInteractionOverlay} from './video/autoplay';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
 
 import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
-import {dev, devAssert, user, userAssert} from '../log';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 import {
   EMPTY_METADATA,
   parseFavicon,

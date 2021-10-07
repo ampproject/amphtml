@@ -13,7 +13,7 @@ import {Services} from '#service';
 import {getFlexibleAdSlotData} from './flexible-ad-slot-utils';
 
 import {getOrCreateAdCid} from '../../../src/ad-cid';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {RefreshManager} from '../../amp-a4a/0.1/refresh-manager';
 

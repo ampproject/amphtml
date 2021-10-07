@@ -1,4 +1,4 @@
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 /**
  * Single implementation of autocomplete. This supports autocompleting

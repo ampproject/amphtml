@@ -15,7 +15,7 @@ import {
   reportErrorToAnalytics,
   reportErrorToServerOrViewer,
 } from '../../src/error-reporting';
-import {user, userAssert} from '../../src/log';
+import {user, userAssert} from '#utils/log';
 import {getRtvVersionForTesting} from '../../src/mode';
 
 describes.fakeWin('installErrorReporting', {}, (env) => {

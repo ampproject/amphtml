@@ -11,7 +11,7 @@ import {
 } from './responsive-attributes';
 import {Services} from '#service';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {
   dispatchCustomEvent,

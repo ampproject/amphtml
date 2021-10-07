@@ -14,7 +14,7 @@ import {
 } from './providers/fx-provider';
 
 import {listen} from '../../../src/event-helper';
-import {devAssert} from '../../../src/log';
+import {devAssert} from '#utils/log';
 
 const TAG = 'amp-fx-collection';
 

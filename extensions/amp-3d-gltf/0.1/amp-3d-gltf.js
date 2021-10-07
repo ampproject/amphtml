@@ -13,7 +13,7 @@ import {Services} from '#service';
 
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 
 const TAG = 'amp-3d-gltf';

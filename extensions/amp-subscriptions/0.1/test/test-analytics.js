@@ -4,7 +4,7 @@ import {
   SubscriptionAnalytics,
   SubscriptionAnalyticsEvents,
 } from '../analytics';
-import {user} from '../../../../src/log';
+import {user} from '#utils/log';
 
 //--> env.sandbox.stub(ServiceUrl, 'adsUrl', url => serverUrl + url);
 

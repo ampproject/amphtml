@@ -20,7 +20,7 @@ import {tryParseJson} from '#core/types/object/json';
 import {Services} from '#service';
 
 import {getData, listen} from '../../../src/event-helper';
-import {user, userAssert} from '../../../src/log';
+import {user, userAssert} from '#utils/log';
 
 const TAG = 'amp-imgur';
 

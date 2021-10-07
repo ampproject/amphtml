@@ -21,7 +21,7 @@ import {ChunkPriority, chunk} from '../../../src/chunk';
 import {reportError} from '../../../src/error-reporting';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {isAmp4Email} from '../../../src/format';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user} from '#utils/log';
 import {getMode} from '../../../src/mode';
 import {rewriteAttributesForElement} from '../../../src/url-rewrite';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';

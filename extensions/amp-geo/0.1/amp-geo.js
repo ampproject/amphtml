@@ -40,7 +40,7 @@ import {GEO_IN_GROUP} from './amp-geo-in-group';
 import {US_CA_CODE, ampGeoPresets} from './amp-geo-presets';
 
 import {urls} from '../../../src/config';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';
 
 /** @const */

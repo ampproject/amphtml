@@ -36,7 +36,7 @@ import {
 } from './web-animation-types';
 
 import {isInFie} from '../../../src/iframe-helper';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 

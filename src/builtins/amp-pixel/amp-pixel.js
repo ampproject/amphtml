@@ -2,7 +2,7 @@ import {Services} from '#service';
 import {registerElement} from '#service/custom-element-registry';
 
 import {BaseElement} from '../../base-element';
-import {dev, userAssert} from '../../log';
+import {dev, userAssert} from '#utils/log';
 import {createPixel} from '../../pixel';
 
 const TAG = 'amp-pixel';

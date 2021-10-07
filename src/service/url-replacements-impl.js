@@ -17,7 +17,7 @@ import {
 } from './variable-source';
 
 import {getTrackImpressionPromise} from '../impression';
-import {dev, devAssert, user, userAssert} from '../log';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 import {
   installServiceInEmbedDoc,
   registerServiceBuilderForDoc,

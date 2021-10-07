@@ -17,7 +17,7 @@ import {backwardWrappingDistance, forwardWrappingDistance} from './array-util';
 import {clamp, mod} from '#core/math';
 import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
 import {debounce} from '#core/types/function';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {dict} from '#core/types/object';
 import {
   getStyle,

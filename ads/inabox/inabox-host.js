@@ -4,7 +4,7 @@
  */
 
 import {InaboxMessagingHost} from './inabox-messaging-host';
-import {dev, initLogConstructor, setReportError, user} from '../../src/log';
+import {dev, initLogConstructor, setReportError, user} from '#utils/log';
 import {getData} from '../../src/event-helper';
 import {reportError} from '../../src/error-reporting';
 

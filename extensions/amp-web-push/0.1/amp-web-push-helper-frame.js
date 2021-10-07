@@ -20,7 +20,7 @@ import {TAG} from './vars';
 import {WindowMessenger} from './window-messenger';
 
 import {reportError} from '../../../src/error-reporting';
-import {initLogConstructor, setReportError, user} from '../../../src/log';
+import {initLogConstructor, setReportError, user} from '#utils/log';
 import {getMode} from '../../../src/mode';
 
 initLogConstructor();

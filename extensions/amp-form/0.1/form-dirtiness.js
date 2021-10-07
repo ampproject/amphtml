@@ -4,7 +4,7 @@ import {dict, map} from '#core/types/object';
 
 import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 
 export const DIRTINESS_INDICATOR_CLASS = 'amp-form-dirty';
 

@@ -4,7 +4,7 @@ import {Services} from '#service';
 
 import {urls} from '../../../src/config';
 import {getData, listen} from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
+import {dev, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {parseUrlDeprecated} from '../../../src/url';

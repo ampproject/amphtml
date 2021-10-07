@@ -21,7 +21,7 @@ import {Services} from '#service';
 import {SubscriptionPlatform as SubscriptionPlatformInterface} from './subscription-platform';
 import {ViewerSubscriptionPlatform} from './viewer-subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 import {dict, getValueForExpr} from '#core/types/object';
 import {getMode} from '../../../src/mode';
 import {getWinOrigin} from '../../../src/url';

@@ -28,7 +28,7 @@ import {
   initLogConstructor,
   overrideLogLevel,
   setReportError,
-} from './log';
+} from '#utils/log';
 import {getMode} from './mode';
 import {MultidocManager} from './multidoc-manager';
 import {hasRenderDelayingServices} from './render-delaying-services';

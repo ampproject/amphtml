@@ -1,4 +1,4 @@
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {isProxyOrigin} from '../../../src/url';
 
 /** @const {string} */

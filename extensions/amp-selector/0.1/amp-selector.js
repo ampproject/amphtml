@@ -12,7 +12,7 @@ import {Services} from '#service';
 
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
+import {dev, userAssert} from '#utils/log';
 
 const TAG = 'amp-selector';
 

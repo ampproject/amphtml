@@ -5,7 +5,7 @@ import {Services} from '#service';
 
 import {loadPromise} from '../event-helper';
 import {isAmp4Email} from '../format';
-import {devAssert} from '../log';
+import {devAssert} from '#utils/log';
 
 /** @typedef {string|number|boolean|undefined|null} */
 export let ResolverReturnDef;

@@ -14,7 +14,7 @@ import {
 import {createCustomEvent} from '../../../src/event-helper';
 import {debounce} from '#core/types/function';
 import {descendsFromStory} from '../../../src/utils/story';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {handleAutoscroll} from './autoscroll';
 import {isRTL, tryFocus} from '#core/dom';

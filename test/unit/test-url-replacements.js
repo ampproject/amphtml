@@ -20,7 +20,7 @@ import {mockWindowInterface, stubServiceForDoc} from '#testing/test-helper';
 import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
 import {setCookie} from '../../src/cookies';
 import * as trackPromise from '../../src/impression';
-import {user} from '../../src/log';
+import {user} from '#utils/log';
 import {registerServiceBuilder} from '../../src/service-helpers';
 import {parseUrlDeprecated} from '../../src/url';
 

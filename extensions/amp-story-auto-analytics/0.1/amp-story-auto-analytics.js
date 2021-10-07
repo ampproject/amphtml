@@ -4,7 +4,7 @@ import {Services} from '#service';
 
 import {buildGtagConfig} from './auto-analytics-configs';
 
-import {devAssert} from '../../../src/log';
+import {devAssert} from '#utils/log';
 
 const buildAutoAnalyticsTemplate = (element) => {
   const html = htmlFor(element);

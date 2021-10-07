@@ -7,7 +7,7 @@ import {TAG as KEY_TAG} from './amp-embedly-key';
 
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /**
  * Component tag identifier.

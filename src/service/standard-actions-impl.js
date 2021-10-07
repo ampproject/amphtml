@@ -7,7 +7,7 @@ import {toWin} from '#core/window';
 
 import {Services} from '#service';
 
-import {dev, user, userAssert} from '../log';
+import {dev, user, userAssert} from '#utils/log';
 import {getAmpdoc, registerServiceBuilderForDoc} from '../service-helpers';
 
 /**

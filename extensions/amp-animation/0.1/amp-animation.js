@@ -12,7 +12,7 @@ import {WebAnimationPlayState} from './web-animation-types';
 import {Builder} from './web-animations';
 
 import {getDetail, listen} from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
+import {dev, userAssert} from '#utils/log';
 import {Pass} from '../../../src/pass';
 
 const TAG = 'amp-animation';

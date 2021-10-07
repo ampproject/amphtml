@@ -1,5 +1,5 @@
 import {Services} from '#service';
-import {dev, user} from '../../../src/log';
+import {dev, user} from '#utils/log';
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,

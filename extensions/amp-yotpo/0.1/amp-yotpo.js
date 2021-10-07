@@ -5,7 +5,7 @@ import {Services} from '#service';
 
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 export class AmpYotpo extends AMP.BaseElement {
   /** @param {!AmpElement} element */

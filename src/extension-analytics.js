@@ -7,7 +7,7 @@ import {toWin} from '#core/window';
 import {Services} from '#service';
 
 import {triggerAnalyticsEvent} from './analytics';
-import {devAssert} from './log';
+import {devAssert} from '#utils/log';
 
 /**
  * Method to create scoped analytics element for any element.

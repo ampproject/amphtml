@@ -5,7 +5,7 @@ import {dict} from '#core/types/object';
 import {Services} from '#service';
 
 import {createCustomEvent} from '../../../src/event-helper';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 const TAG = 'amp-orientation-observer';
 /**

@@ -10,7 +10,7 @@ import {
   postMessageToWindows,
 } from '../../../src/iframe-helper';
 import {applyFillContent} from '#core/dom/layout';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getData} from '../../../src/event-helper';
 import {getHtml} from '#core/dom/get-html';
