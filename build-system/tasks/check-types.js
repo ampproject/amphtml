@@ -53,7 +53,7 @@ const getExtensionSrcPaths = () =>
  *
  * @type {Object<string, Array<string>|Object|function():Object>}
  */
-const TYPE_CHECK_TARGETS = {
+const CLOSURE_TYPE_CHECK_TARGETS = {
   // Below are targets containing individual directories which are fully passing
   // type-checking. Do not remove or disable anything on this list.
   // Goal: Remove 'QUIET' from all of them.
@@ -159,6 +159,17 @@ const TYPE_CHECK_TARGETS = {
 };
 
 /**
+ * Object of targets to check with TypeScript.
+ *
+ * @type {Object<string, {tsconfig: string}>}
+ */
+const TSC_TYPECHECK_TARGETS = {
+  'compiler': {
+    tsconfig: 'src/compiler/tsconfig.json',
+  },
+};
+
+/**
  * Produces a list of extern glob patterns from a list of source glob patterns.
  * ex. ['src/core/** /*.js'] => ['src/core/** /*.extern.js']
  * @param {!Array<string>} srcGlobs
@@ -171,12 +182,38 @@ function externGlobsFromSrcGlobs(srcGlobs) {
 }
 
 /**
- * Performs closure type-checking on the target provided.
- * @param {string} targetName key in TYPE_CHECK_TARGETS
- * @return {!Promise<void>}
+ * Typecheck the given target using either tsc or closure.
+ *
+ * @param {string} targetName
  */
 async function typeCheck(targetName) {
-  let target = TYPE_CHECK_TARGETS[targetName];
+  if (TSC_TYPECHECK_TARGETS[targetName]) {
+    await tscTypeCheck(targetName);
+    return;
+  }
+  await closureTypeCheck(targetName);
+}
+
+/**
+ * Performs tsc type-checking on the target provided.
+ * @param {string} targetName key in TSC_TYPECHECK_TARGETS
+ * @return {!Promise<void>}
+ */
+async function tscTypeCheck(targetName) {
+  execOrThrow(
+    `npx -p typescript tsc --project ${TSC_TYPECHECK_TARGETS[targetName].tsconfig}`,
+    `Type checking ${targetName} failed`
+  );
+  log(green('SUCCESS:'), 'Type-checking passed for target', cyan(targetName));
+}
+
+/**
+ * Performs closure type-checking on the target provided.
+ * @param {string} targetName key in CLOSURE_TYPE_CHECK_TARGETS
+ * @return {!Promise<void>}
+ */
+async function closureTypeCheck(targetName) {
+  let target = CLOSURE_TYPE_CHECK_TARGETS[targetName];
   // Allow targets to be dynamically evaluated
   if (typeof target == 'function') {
     target = target();
@@ -256,12 +293,6 @@ async function typeCheck(targetName) {
 async function checkTypes() {
   const handlerProcess = createCtrlcHandler('check-types');
 
-  execOrThrow(
-    'npx -p typescript tsc --project ./src/compiler/tsconfig.json',
-    'Type checking compiler.js failed'
-  );
-  log(green('SUCCESS:'), 'Type-checking passed for compiler.js');
-
   // Prepare build environment
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
@@ -272,7 +303,9 @@ async function checkTypes() {
   // Use the list of targets if provided, otherwise check all targets
   const targets = argv.targets
     ? argv.targets.split(/,/)
-    : Object.keys(TYPE_CHECK_TARGETS);
+    : Object.keys(TSC_TYPECHECK_TARGETS).concat(
+        Object.keys(CLOSURE_TYPE_CHECK_TARGETS)
+      );
 
   log(`Checking types for targets: ${targets.map(cyan).join(', ')}`);
   displayLifecycleDebugging();
