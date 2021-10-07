@@ -12,7 +12,6 @@ import {getRequestService} from './amp-story-request-service';
 import {isObject} from '#core/types';
 import {listen} from '../../../src/event-helper';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
-import {getStoreService} from './amp-story-store-service';
 
 /**
  * Maps share provider type to visible name.
@@ -206,9 +205,6 @@ export class ShareWidget {
 
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = getRequestService(this.win, storyEl);
-
-    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = getStoreService(this.win);
   }
 
   /**
@@ -278,15 +274,8 @@ export class ShareWidget {
    */
   copyUrlToClipboard_() {
     const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
-    const element = this.win.document.querySelector('amp-story');
-    const shareText =
-      this.storeService_.get('title') +
-      ' by ' +
-      element.getAttribute('publisher') +
-      ' via #WebStories ' +
-      url;
 
-    if (!copyTextToClipboard(this.win, shareText)) {
+    if (!copyTextToClipboard(this.win, url)) {
       const localizationService = getLocalizationService(this.storyEl);
       devAssert(localizationService, 'Could not retrieve LocalizationService.');
       const failureString = localizationService.getLocalizedString(
@@ -296,10 +285,7 @@ export class ShareWidget {
       return;
     }
 
-    Toast.show(
-      this.storyEl,
-      buildCopySuccessfulToast(this.win.document, shareText)
-    );
+    Toast.show(this.storyEl, buildCopySuccessfulToast(this.win.document, url));
   }
 
   /** @private */

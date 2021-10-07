@@ -592,6 +592,7 @@ export class AmpStoryStoreService {
       [StateProperty.PAGE_IDS]: [],
       [StateProperty.PAGE_SIZE]: null,
       [StateProperty.PREVIEW_STATE]: false,
+      [StateProperty.TITLE]: '',
     });
   }
 

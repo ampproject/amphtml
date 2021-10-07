@@ -43,16 +43,11 @@ const getTemplate = (element) => {
 
 /**
  * System amp-social-share button template.
- * @param {!Element} parentEl
- * @param {string} shareText
+ * @param {!Element} element
  * @return {!Element}
  */
-const getAmpSocialSystemShareTemplate = (parentEl, shareText) => {
-  const element = htmlFor(
-    parentEl
-  )`<amp-social-share type="system"></amp-social-share>`;
-  element.setAttribute('data-param-text', shareText);
-  return element;
+const getAmpSocialSystemShareTemplate = (element) => {
+  return htmlFor(element)`<amp-social-share type="system"></amp-social-share>`;
 };
 
 /**
@@ -96,9 +91,6 @@ export class ShareMenu {
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
-
-    /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = null;
   }
 
   /**
@@ -113,10 +105,8 @@ export class ShareMenu {
 
     this.isBuilt_ = true;
 
-    this.ampdoc_ = getAmpdoc(this.parentEl_);
-
     this.isSystemShareSupported_ = this.shareWidget_.isSystemShareSupported(
-      this.ampdoc_
+      getAmpdoc(this.parentEl_)
     );
 
     this.isSystemShareSupported_
@@ -138,15 +128,18 @@ export class ShareMenu {
    * @private
    */
   buildForSystemSharing_() {
-    this.shareWidget_.loadRequiredExtensions(getAmpdoc(this.parentEl_));
+    const ampdoc = getAmpdoc(this.parentEl_);
+    this.shareWidget_.loadRequiredExtensions(ampdoc);
+
+    this.element_ = getAmpSocialSystemShareTemplate(this.parentEl_);
 
     const shareText =
       this.storeService_.get('title') +
       ' by ' +
       this.parentEl_.getAttribute('publisher') +
       ' via #WebStories ' +
-      Services.documentInfoForDoc(this.ampdoc_).canonicalUrl;
-    this.element_ = getAmpSocialSystemShareTemplate(this.parentEl_, shareText);
+      Services.documentInfoForDoc(ampdoc).canonicalUrl;
+    this.element_.setAttribute('data-param-text', shareText);
 
     this.initializeListeners_();
 
