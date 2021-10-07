@@ -19,6 +19,8 @@ import {
 
 import {Services} from '#service';
 
+import {dev, devAssert, userAssert} from '#utils/log';
+
 import {getPlacementAlgo} from './algorithm-utils';
 import {
   AnalyticsEvents,
@@ -33,7 +35,6 @@ import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
 import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
 import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
 import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
-import {dev, devAssert, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {
   StateProperty,

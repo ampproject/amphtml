@@ -8,7 +8,7 @@ import {useMergeRefs} from '#preact/utils';
 import {
   DEFAULT_THRESHOLD,
   cloneEntryForCrossOrigin,
-} from '../../../src/utils/intersection-observer-3p-host';
+} from '#utils/intersection-observer-3p-host';
 import {postMessage} from '../../../src/iframe-helper';
 import {dict} from '#core/types/object';
 

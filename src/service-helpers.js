@@ -7,7 +7,7 @@
 import {Deferred} from '#core/data-structures/promise';
 import {toWin} from '#core/window';
 
-import {dev, devAssert} from './log';
+import {dev, devAssert} from '#utils/log';
 
 /**
  * Holds info about a service.

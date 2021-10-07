@@ -3,7 +3,7 @@ import {DomFingerprint} from '#core/dom/fingerprint';
 import {GEO_IN_GROUP} from '../../../extensions/amp-geo/0.1/amp-geo-in-group';
 import {Services} from '#service';
 import {buildUrl} from './shared/url-builder';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getBinaryType, isExperimentOn, toggleExperiment} from '#experiments';
 import {getConsentPolicyState} from '../../../src/consent';

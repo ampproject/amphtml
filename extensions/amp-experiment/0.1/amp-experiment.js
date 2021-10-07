@@ -1,9 +1,10 @@
 import {Layout} from '#core/dom/layout';
 import {parseJson} from '#core/types/object/json';
 
+import {dev, devAssert, userAssert} from '#utils/log';
+
 import {Variants, allocateVariant} from './variant';
 
-import {dev, devAssert, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 
 const TAG = 'amp-experiment';

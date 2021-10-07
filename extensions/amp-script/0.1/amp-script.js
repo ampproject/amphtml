@@ -13,13 +13,14 @@ import {Purifier} from '#purifier';
 import {Services} from '#service';
 import {calculateExtensionScriptUrl} from '#service/extension-script';
 
+import {dev, user, userAssert} from '#utils/log';
+
 import {UserActivationTracker} from './user-activation-tracker';
 
 import {CSS} from '../../../build/amp-script-0.1.css';
 import {urls} from '../../../src/config';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {cancellation} from '../../../src/error-reporting';
-import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {getService, registerServiceBuilder} from '../../../src/service-helpers';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';

@@ -1,6 +1,6 @@
 import {dict} from '#core/types/object';
 
-import {listen} from '../../../src/event-helper';
+import {listen} from '#utils/event-helper';
 
 /**
  * The list of touch event properites to copy.

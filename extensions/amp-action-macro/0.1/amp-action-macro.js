@@ -2,7 +2,7 @@ import {LayoutPriority} from '#core/dom/layout';
 
 import {Services} from '#service';
 
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-action-macro';

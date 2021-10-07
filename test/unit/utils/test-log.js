@@ -12,7 +12,7 @@ import {
   setReportError,
   user,
   userAssert,
-} from '../../src/log';
+} from '#utils/log';
 
 describes.sandboxed('Logging', {}, (env) => {
   const RETURNS_FINE = () => LogLevel.FINE;

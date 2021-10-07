@@ -4,7 +4,7 @@ import {hasOwn} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {dev, userAssert} from '../../../src/log';
+import {dev, userAssert} from '#utils/log';
 
 export const ATTR_PREFIX = 'amp-x-';
 const nameValidator = /^[\w-]+$/;
