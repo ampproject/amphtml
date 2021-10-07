@@ -1,7 +1,7 @@
 import {isArray, isObject} from '#core/types';
 import {dict} from '#core/types/object';
 
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 /** @const */
 const TAG = 'amp-auto-ads';

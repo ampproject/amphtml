@@ -4,7 +4,7 @@
 import {AttachmentTheme} from './amp-story-page-attachment';
 import {LocalizedStringId} from '#service/localization/strings';
 import {computedStyle, setImportantStyles} from '#core/dom/style';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {
   getRGBFromCssColorValue,

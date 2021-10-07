@@ -2,6 +2,9 @@ import {AmpEvents} from '#core/constants/amp-events';
 import {iterateCursor} from '#core/dom';
 import {tryCallback} from '#core/error';
 
+import {listen} from '#utils/event-helper';
+import {devAssert} from '#utils/log';
+
 import {
   FxBindings,
   FxObservesSignal,
@@ -12,9 +15,6 @@ import {
   installPositionBoundFx,
   installScrollToggledFx,
 } from './providers/fx-provider';
-
-import {listen} from '../../../src/event-helper';
-import {devAssert} from '../../../src/log';
 
 const TAG = 'amp-fx-collection';
 

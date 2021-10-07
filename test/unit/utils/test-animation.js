@@ -1,4 +1,4 @@
-import {Animation} from '../../src/animation';
+import {Animation} from '#utils/animation';
 
 describes.sandboxed('Animation', {}, (env) => {
   let vsync;

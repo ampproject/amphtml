@@ -11,7 +11,7 @@ import {
   scopedQuerySelectorAll,
 } from '#core/dom/query';
 import {createShadowRoot} from '../../../src/shadow-embed';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';
 
 import {setStyle, toggle} from '#core/dom/style';

@@ -3,11 +3,11 @@ import {toWin} from '#core/window';
 
 import {Services} from '#service';
 
+import {createCustomEvent} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
 import {FormEvents} from './form-events';
 import {ValidationBubble} from './validation-bubble';
-
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
 
 /** @const @private {string} */
 const VALIDATION_CACHE_PREFIX = '__AMP_VALIDATION_';

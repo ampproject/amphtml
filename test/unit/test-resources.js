@@ -10,7 +10,7 @@ import {AmpDocSingle} from '#service/ampdoc-impl';
 import {Resource, ResourceState} from '#service/resource';
 import {ResourcesImpl} from '#service/resources-impl';
 
-import {loadPromise} from '../../src/event-helper';
+import {loadPromise} from '#utils/event-helper';
 
 /*eslint "google-camelcase/google-camelcase": 0*/
 describes.realWin('Resources', {amp: true}, (env) => {

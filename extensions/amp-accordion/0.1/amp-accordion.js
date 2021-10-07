@@ -16,10 +16,11 @@ import {parseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
+import {Animation} from '#utils/animation';
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-accordion-0.1.css';
-import {Animation} from '../../../src/animation';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {removeFragment} from '../../../src/url';
 
 const TAG = 'amp-accordion';

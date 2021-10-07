@@ -1,10 +1,11 @@
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {toArray} from '#core/types/array';
 
+import {listen} from '#utils/event-helper';
+
 import {TrackRenderer} from './track-renderer';
 
 import {CSS} from '../../../build/amp-story-captions-0.1.css';
-import {listen} from '../../../src/event-helper';
 
 export class AmpStoryCaptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */

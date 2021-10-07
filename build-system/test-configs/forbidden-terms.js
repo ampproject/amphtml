@@ -332,7 +332,7 @@ const forbiddenTermsGlobal = {
       'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
       'src/amp-story-player/amp-story-component-manager.js',
       'src/runtime.js',
-      'src/log.js',
+      'src/utils/log.js',
       'src/error-reporting.js',
       'src/web-worker/web-worker.js',
       'testing/async-errors.js',
@@ -538,7 +538,7 @@ const forbiddenTermsGlobal = {
       ', depending on your use case.',
     allowlist: [
       'src/core/3p-frame-messaging.js',
-      'src/event-helper.js',
+      'src/utils/event-helper.js',
       'src/core/dom/event-helper-listen.js',
     ],
   },
@@ -919,7 +919,7 @@ const forbiddenTermsSrcInclusive = {
     message: 'Most users should use BaseElement…loadPromise.',
     allowlist: [
       'src/base-element.js',
-      'src/event-helper.js',
+      'src/utils/event-helper.js',
       'src/friendly-iframe-embed.js',
       'src/service/resources-impl.js',
       'src/service/variable-source.js',

@@ -20,7 +20,7 @@ import {RequestHandler, expandPostMessage} from './requests';
 import {Services} from '#service';
 import {SessionManager, sessionServicePromiseForDoc} from './session-manager';
 import {Transport} from './transport';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user} from '#utils/log';
 import {dict, hasOwn} from '#core/types/object';
 import {expandTemplate} from '#core/types/string';
 import {getMode} from '../../../src/mode';

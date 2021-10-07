@@ -16,8 +16,8 @@ import {randomlySelectUnsetExperiments} from '#experiments';
 
 import {Services} from '#service';
 
-import {getData} from '../../../src/event-helper';
-import {dev, devAssert, user} from '../../../src/log';
+import {getData} from '#utils/event-helper';
+import {dev, devAssert, user} from '#utils/log';
 
 const TAG = 'amp-ad-network-adsense-impl';
 
