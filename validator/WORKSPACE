@@ -37,4 +37,5 @@ rules_proto_toolchains()
 
 local_repository(
     name = "amphtml-extensions",
-    path = "../extensions")
+    path = "../extensions",
+)
