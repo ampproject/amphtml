@@ -20,7 +20,7 @@ export class FakeWindow {
    */
   constructor(opt_spec) {
     const spec = opt_spec || {};
-    const self = this;
+    const _this = this;
 
     /**
      * This value is reflected on this.document.readyState.
@@ -213,7 +213,7 @@ export class FakeWindow {
 
     this.performance = {
       now() {
-        return self.Date.now();
+        return _this.Date.now();
       },
       get timeOrigin() {
         return 1;
