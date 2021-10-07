@@ -254,5 +254,13 @@
   "99": {
     "string": "Form successfully submitted",
     "description": "Text displayed to users when they press a button to submit a form, and this submission succeeds."
+  },
+  "100": {
+    "string": "by",
+    "description": "Default share text on social platforms that is followed by the publisher of the story."
+  },
+  "101": {
+    "string": "via",
+    "description": "Default share text on social platforms that is followed by '#WebStories'' to indicate this post contains a Web Story."
   }
 }

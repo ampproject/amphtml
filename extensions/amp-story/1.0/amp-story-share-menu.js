@@ -128,17 +128,22 @@ export class ShareMenu {
    * @private
    */
   buildForSystemSharing_() {
-    const ampdoc = getAmpdoc(this.parentEl_);
-    this.shareWidget_.loadRequiredExtensions(ampdoc);
-
+    this.shareWidget_.loadRequiredExtensions(getAmpdoc(this.parentEl_));
     this.element_ = getAmpSocialSystemShareTemplate(this.parentEl_);
 
     const shareText =
       this.storeService_.get('title') +
-      ' by ' +
+      ' ' +
+      getLocalizationService(this.parentEl_).getLocalizedString(
+        LocalizedStringId.AMP_STORY_SHARE_BY
+      ) +
+      ' ' +
       this.parentEl_.getAttribute('publisher') +
-      ' via #WebStories ' +
-      Services.documentInfoForDoc(ampdoc).canonicalUrl;
+      ' ' +
+      getLocalizationService(this.parentEl_).getLocalizedString(
+        LocalizedStringId.AMP_STORY_SHARE_VIA
+      ) +
+      ' #WebStories';
     this.element_.setAttribute('data-param-text', shareText);
 
     this.initializeListeners_();
