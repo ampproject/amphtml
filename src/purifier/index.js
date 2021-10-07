@@ -2,6 +2,7 @@ import purify from 'dompurify';
 
 import {devAssertElement} from '#core/assert';
 import {removeElement} from '#core/dom';
+import {isAmp4Email} from '#core/format';
 
 import {
   ALLOWLISTED_ATTRS,
@@ -15,7 +16,6 @@ import {
   markElementForDiffing,
 } from './sanitation';
 
-import {isAmp4Email} from '../format';
 import {user} from '../log';
 
 /** @private @const {string} */

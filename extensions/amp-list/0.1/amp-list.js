@@ -15,6 +15,7 @@ import {
   scopedQuerySelectorAll,
 } from '#core/dom/query';
 import {px, setImportantStyles, setStyles, toggle} from '#core/dom/style';
+import {isAmp4Email} from '#core/format';
 import {isArray, toArray} from '#core/types/array';
 import {dict, getValueForExpr} from '#core/types/object';
 
@@ -40,7 +41,6 @@ import {
   requestForBatchFetch,
 } from '../../../src/batched-json';
 import {createCustomEvent, listen} from '../../../src/event-helper';
-import {isAmp4Email} from '../../../src/format';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {Pass} from '../../../src/pass';

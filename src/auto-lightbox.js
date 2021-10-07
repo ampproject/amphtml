@@ -1,7 +1,8 @@
+import {isAmphtml} from '#core/format';
+
 import {Services} from '#service';
 
 import {ChunkPriority, chunk} from './chunk';
-import {isAmphtml} from './format';
 import {dev} from './log';
 import {isStoryDocument} from './utils/story';
 

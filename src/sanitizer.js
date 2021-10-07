@@ -1,3 +1,4 @@
+import {isAmp4Email} from '#core/format';
 import {dict} from '#core/types/object';
 
 import {
@@ -13,7 +14,6 @@ import {
 
 import {htmlSanitizer} from '#third_party/caja/html-sanitizer';
 
-import {isAmp4Email} from './format';
 import {user} from './log';
 import {rewriteAttributeValue} from './url-rewrite';
 

@@ -1,10 +1,10 @@
 import {whenDocumentComplete} from '#core/document-ready';
+import {isAmp4Email} from '#core/format';
 import {isFiniteNumber} from '#core/types';
 
 import {Services} from '#service';
 
 import {loadPromise} from '../event-helper';
-import {isAmp4Email} from '../format';
 import {devAssert} from '../log';
 
 /** @typedef {string|number|boolean|undefined|null} */

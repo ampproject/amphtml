@@ -6,6 +6,7 @@ import {
 } from '#core/constants/action-constants';
 import {Keys} from '#core/constants/key-codes';
 import {isEnabled} from '#core/dom';
+import {isAmp4Email} from '#core/format';
 import {isFiniteNumber} from '#core/types';
 import {isArray, toArray} from '#core/types/array';
 import {debounce, throttle} from '#core/types/function';
@@ -16,7 +17,6 @@ import {Services} from '#service';
 
 import {reportError} from '../error-reporting';
 import {getDetail} from '../event-helper';
-import {isAmp4Email} from '../format';
 import {dev, devAssert, user, userAssert} from '../log';
 import {getMode} from '../mode';
 import {registerServiceBuilderForDoc} from '../service-helpers';
