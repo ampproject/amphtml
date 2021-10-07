@@ -57,7 +57,7 @@ module.exports = function () {
               resolve(dirname(state.file.opts.filename), source.value)
             );
 
-            if (filepath.endsWith('src/log')) {
+            if (filepath.endsWith('src/utils/log')) {
               const propertyMapped = calleeToPropertiesMap.get(
                 specifier.imported.name
               );
