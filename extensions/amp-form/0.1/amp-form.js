@@ -40,7 +40,7 @@ import {
 } from './form-verifiers';
 
 import {CSS} from '../../../build/amp-form-0.1.css';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {triggerAnalyticsEvent} from '#utils/analytics';
 import {createCustomEvent} from '#utils/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {isAmp4Email} from '#core/document/format';

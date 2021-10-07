@@ -26,7 +26,7 @@ import {
   Action,
   ActionStatus,
   SubscriptionAnalyticsEvents,
-} from '../../amp-subscriptions/0.1/analytics';
+} from '#utils/analytics';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants';
 import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl';
 import {

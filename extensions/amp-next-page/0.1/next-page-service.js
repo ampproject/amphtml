@@ -9,7 +9,7 @@ import {installPositionObserverServiceForDoc} from '#service/position-observer/p
 import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
 
 import {CSS} from '../../../build/amp-next-page-0.1.css';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {triggerAnalyticsEvent} from '#utils/analytics';
 import {dev, devAssert, user, userAssert} from '#utils/log';
 import {MultidocManager} from '../../../src/multidoc-manager';
 import {getAmpdoc} from '../../../src/service-helpers';

@@ -3,7 +3,7 @@ import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {realChildNodes} from '#core/dom/query';
 import {tryPlay} from '#core/dom/video';
 
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {triggerAnalyticsEvent} from '#utils/analytics';
 import {listen} from '#utils/event-helper';
 import {dev} from '#utils/log';
 import {

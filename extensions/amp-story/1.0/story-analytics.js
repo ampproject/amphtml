@@ -4,7 +4,7 @@ import {getDataParamsFromAttributes} from '#core/dom';
 import {getVariableService} from './variable-service';
 import {map} from '#core/types/object';
 import {registerServiceBuilder} from '../../../src/service-helpers';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {triggerAnalyticsEvent} from '#utils/analytics';
 
 /** @const {string} */
 export const ANALYTICS_TAG_NAME = '__AMP_ANALYTICS_TAG_NAME__';

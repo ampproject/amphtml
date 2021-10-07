@@ -6,7 +6,7 @@ import {toWin} from '#core/window';
 
 import {Services} from '#service';
 
-import {triggerAnalyticsEvent} from './analytics';
+import {triggerAnalyticsEvent} from '#utils/analytics';
 import {devAssert} from '#utils/log';
 
 /**

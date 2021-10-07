@@ -2,7 +2,7 @@ import {resetExperimentTogglesForTesting, toggleExperiment} from '#experiments';
 
 import {Services} from '#service';
 
-import * as analytics from '../../src/analytics';
+import * as analytics from '#utils/analytics';
 import {
   blockedByConsentError,
   cancellation,

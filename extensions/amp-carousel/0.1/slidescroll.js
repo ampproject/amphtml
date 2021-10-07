@@ -21,7 +21,7 @@ import {
   unobserveContentSize,
 } from '#core/dom/layout/size-observer';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {triggerAnalyticsEvent} from '#utils/analytics';
 import {BaseCarousel} from './base-carousel';
 
 /** @const {string} */

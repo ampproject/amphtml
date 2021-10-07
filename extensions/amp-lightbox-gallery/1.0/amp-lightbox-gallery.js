@@ -9,7 +9,7 @@ import {Services} from '#service';
 import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-lightbox-gallery-1.0.css';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {triggerAnalyticsEvent} from '#utils/analytics';
 import {userAssert} from '#utils/log';
 
 /** @const {string} */

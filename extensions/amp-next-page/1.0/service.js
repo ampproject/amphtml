@@ -23,7 +23,7 @@ import {validatePage, validateUrl} from './utils';
 import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
 
 import {CSS} from '../../../build/amp-next-page-1.0.css';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {triggerAnalyticsEvent} from '#utils/analytics';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,

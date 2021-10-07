@@ -1,4 +1,4 @@
-import * as AmpAnalytics from '../../../../src/analytics';
+import * as AmpAnalytics from '#utils/analytics';
 import {
   ActionStatus,
   SubscriptionAnalytics,

@@ -28,7 +28,7 @@ import {data as testFragments} from './testdata/test_fragments';
 import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
 import {MockA4AImpl, TEST_URL} from './utils';
 
-import * as analytics from '../../../../src/analytics';
+import * as analytics from '#utils/analytics';
 import {cancellation} from '../../../../src/error-reporting';
 import * as analyticsExtension from '../../../../src/extension-analytics';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';

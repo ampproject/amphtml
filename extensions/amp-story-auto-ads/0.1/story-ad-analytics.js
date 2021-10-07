@@ -2,7 +2,7 @@ import {dict} from '#core/types/object';
 
 import {getUniqueId} from './utils';
 
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {triggerAnalyticsEvent} from '#utils/analytics';
 
 /** @const {string} */
 export const STORY_AD_ANALYTICS = 'story-ad-analytics';
