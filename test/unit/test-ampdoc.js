@@ -536,6 +536,25 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
     expect(disposableService.dispose).to.be.calledOnce;
   });
 
+  describe('firstVisibleTime', () => {
+    it('should prefer timeOrigin doc initialized to visible', () => {
+      win.performance.timeOrigin = 10;
+      top = new AmpDocSingle(win, {visibilityState: 'visible'});
+
+      expect(top.getFirstVisibleTime()).to.equal(10);
+    });
+
+    it('should wait for visible', () => {
+      top = new AmpDocSingle(win, {visibilityState: 'prerender'});
+
+      expect(top.getFirstVisibleTime()).to.equal(null);
+
+      clock.tick(100);
+      top.overrideVisibilityState('visible');
+      expect(top.getFirstVisibleTime()).to.equal(101);
+    });
+  });
+
   it('should be visible by default', () => {
     expect(top.getVisibilityState()).to.equal('visible');
     expect(embedSameWindow.getVisibilityState()).to.equal('visible');
@@ -571,8 +590,6 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
       ]);
     });
   });
-
-  // it('should prefer timeOrigin for initial ')
 
   it('should override at construction time', () => {
     top = new AmpDocSingle(win, {visibilityState: 'hidden'});
