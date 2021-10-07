@@ -404,7 +404,7 @@ export class AmpSlideScroll extends BaseCarousel {
   }
 
   /**
-   * @param {!../layout-rect.LayoutSizeDef} size
+   * @param {LayoutSize} size
    * @private
    */
   onResized_(size) {
@@ -531,7 +531,7 @@ export class AmpSlideScroll extends BaseCarousel {
    * Escapes Left and Right arrow key events on the carousel container.
    * This is to prevent them from doubly interacting with surrounding viewer
    * contexts such as email clients when interacting with the amp-carousel.
-   * @param {!Event} event
+   * @param {!KeyboardEvent} event
    * @private
    */
   keydownHandler_(event) {
@@ -999,7 +999,7 @@ export class AmpSlideScroll extends BaseCarousel {
 
   /**
    * @param {string} eventType
-   * @param {!JsonObject} vars A map of vars and their values.
+   * @param {!Object} vars A map of vars and their values.
    * @private
    */
   analyticsEvent_(eventType, vars) {

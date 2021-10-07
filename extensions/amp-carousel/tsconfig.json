@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "paths": {}
+  },
+  "include": ["0.1/*.js", "0.1/*.d.ts"],
+  "exclude": []
+}

@@ -5,6 +5,7 @@
     "outDir": "dist",
     "noEmit": true,
     "paths": {
+      "#src/*": ["./src/*"],
       "#3p/*": ["./3p/*"],
       "#ads/*": ["./ads/*"],
       "#build/*": ["./build/*"],
