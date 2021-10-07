@@ -1,5 +1,5 @@
-import {VisibilityState} from './constants/visibility-state';
-import {getVendorJsPropertyName} from './dom/style';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {getVendorJsPropertyName} from '#core/dom/style';
 
 /**
  * @param {!Document} doc

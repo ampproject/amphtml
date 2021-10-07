@@ -6,7 +6,7 @@ import {Services} from '#service';
 import {hasOwn} from '#core/types/object';
 import {isCookieAllowed} from './cookie-reader';
 import {isObject} from '#core/types';
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 import {variableServiceForDoc} from './variables';
 
 const TAG = 'amp-analytics/cookie-writer';

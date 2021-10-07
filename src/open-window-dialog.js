@@ -1,6 +1,6 @@
 import {includes} from '#core/types/string';
 
-import {dev} from './log';
+import {dev} from '#utils/log';
 
 /**
  * This method wraps around window's open method. It first tries to execute

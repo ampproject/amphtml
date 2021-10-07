@@ -7,7 +7,7 @@ import {
 } from '#core/dom';
 import {matches} from '#core/dom/query';
 import {toArray} from '#core/types/array';
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 /** @const {!Array<string>} */
 const CODECS_IN_ASCENDING_PRIORITY = ['h264', 'vp09'];

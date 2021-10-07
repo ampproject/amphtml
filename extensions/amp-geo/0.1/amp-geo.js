@@ -36,11 +36,12 @@ import {Services} from '#service';
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
+import {dev, user, userAssert} from '#utils/log';
+
 import {GEO_IN_GROUP} from './amp-geo-in-group';
 import {US_CA_CODE, ampGeoPresets} from './amp-geo-presets';
 
 import {urls} from '../../../src/config';
-import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 
 /** @const */

@@ -2,7 +2,8 @@ import * as dom from '#core/dom';
 
 import {extensionScriptInNode} from '#service/extension-script';
 
-import {userAssert} from './log';
+import {userAssert} from '#utils/log';
+
 import {
   getAmpdoc,
   getService,

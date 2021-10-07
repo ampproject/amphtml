@@ -21,7 +21,7 @@ import {
   shouldShowStoryUrlInfo,
   triggerClickFromLightDom,
 } from './utils';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {dict} from '#core/types/object';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getMode} from '../../../src/mode';

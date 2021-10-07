@@ -14,7 +14,7 @@ import {Services} from '#service';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {closest, matches} from '#core/dom/query';
 import {createShadowRootWithStyle, triggerClickFromLightDom} from './utils';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '#core/dom/static-template';
