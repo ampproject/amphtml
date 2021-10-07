@@ -16,7 +16,7 @@ export function andbeyond(global, data) {
     () => {
       loadScript(
         global,
-        'https://cdn.andbeyond.media/' + data.siteid + '/amp.js',
+      'https://cdn.andbeyond.media/' + data.siteid + '/amp.js',
         () => {
           window.andbeyond.initAmp(
             global,
