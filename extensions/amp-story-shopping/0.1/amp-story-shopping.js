@@ -1,5 +1,4 @@
 import {Layout} from '#core/dom/layout';
-import {htmlFor} from '#core/dom/static-template';
 
 import {CSS} from '../../../build/amp-story-shopping-0.1.css';
 
