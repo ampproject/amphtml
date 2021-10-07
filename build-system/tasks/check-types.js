@@ -188,11 +188,9 @@ function externGlobsFromSrcGlobs(srcGlobs) {
  * @return {Promise<void>}
  */
 async function typeCheck(targetName) {
-  if (TSC_TYPECHECK_TARGETS[targetName]) {
-    await tscTypeCheck(targetName);
-    return;
-  }
-  await closureTypeCheck(targetName);
+  return TSC_TYPECHECK_TARGETS[targetName]
+    ? tscTypeCheck(targetName)
+    : closureTypeCheck(targetName);
 }
 
 /**
