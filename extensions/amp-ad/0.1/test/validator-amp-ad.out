@@ -71,14 +71,14 @@ amp-ad/0.1/test/validator-amp-ad.html:63:2 The attribute 'height' in tag 'amp-ad
 |    <!-- Invalid: amp-ad type=custom missing data-url-->
 |    <amp-ad width=300 height=250
 >>   ^~~~~~~~~
-amp-ad/0.1/test/validator-amp-ad.html:65:2 The mandatory attribute 'data-url' is missing in tag 'amp-ad'. (see https://github.com/ampproject/amphtml/blob/main/ads/custom.md)
+amp-ad/0.1/test/validator-amp-ad.html:65:2 The mandatory attribute 'data-url' is missing in tag 'amp-ad'. (see https://github.com/ampproject/amphtml/blob/main/ads/vendors/custom.md)
 |        type="custom"
 |        template="template-1">
 |    </amp-ad>
 |    <!-- Invalid: amp-ad type=custom non-https data-url-->
 |    <amp-ad width=300 height=250
 >>   ^~~~~~~~~
-amp-ad/0.1/test/validator-amp-ad.html:70:2 Invalid URL protocol 'http:' for attribute 'data-url' in tag 'amp-ad'. (see https://github.com/ampproject/amphtml/blob/main/ads/custom.md)
+amp-ad/0.1/test/validator-amp-ad.html:70:2 Invalid URL protocol 'http:' for attribute 'data-url' in tag 'amp-ad'. (see https://github.com/ampproject/amphtml/blob/main/ads/vendors/custom.md)
 |        type="custom"
 |        data-url="http://foobar.com"
 |        template="template-1">
