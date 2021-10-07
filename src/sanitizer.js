@@ -13,7 +13,7 @@ import {
 
 import {htmlSanitizer} from '#third_party/caja/html-sanitizer';
 
-import {isAmp4Email} from './format';
+import {isAmp4Email} from '#core/document/format';
 import {user} from '#utils/log';
 import {rewriteAttributeValue} from './url-rewrite';
 

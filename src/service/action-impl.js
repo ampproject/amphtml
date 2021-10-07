@@ -16,7 +16,7 @@ import {Services} from '#service';
 
 import {reportError} from '../error-reporting';
 import {getDetail} from '../event-helper';
-import {isAmp4Email} from '../format';
+import {isAmp4Email} from '#core/document/format';
 import {dev, devAssert, user, userAssert} from '#utils/log';
 import {getMode} from '../mode';
 import {registerServiceBuilderForDoc} from '../service-helpers';

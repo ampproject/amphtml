@@ -4,7 +4,7 @@ import {isFiniteNumber} from '#core/types';
 import {Services} from '#service';
 
 import {loadPromise} from '../event-helper';
-import {isAmp4Email} from '../format';
+import {isAmp4Email} from '#core/document/format';
 import {devAssert} from '#utils/log';
 
 /** @typedef {string|number|boolean|undefined|null} */

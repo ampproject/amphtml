@@ -40,7 +40,7 @@ import {
   requestForBatchFetch,
 } from '../../../src/batched-json';
 import {createCustomEvent, listen} from '../../../src/event-helper';
-import {isAmp4Email} from '../../../src/format';
+import {isAmp4Email} from '#core/document/format';
 import {dev, devAssert, user, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';
 import {Pass} from '../../../src/pass';

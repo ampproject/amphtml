@@ -15,7 +15,7 @@ import {
   markElementForDiffing,
 } from './sanitation';
 
-import {isAmp4Email} from '../format';
+import {isAmp4Email} from '#core/document/format';
 import {user} from '#utils/log';
 
 /** @private @const {string} */
