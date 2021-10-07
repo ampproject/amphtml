@@ -11,7 +11,11 @@ import {getBuilders} from './builders';
  */
 function compile(request) {
   // TODO(samouri): remove the defaults.
-  const document = request.document ?? /** @type {any} */ ({root: 0, tree: []});
+  const document = request.document ?? {
+    root: 0,
+    tree: [{tagid: 92, children: []}],
+    quirks_mode: false,
+  };
   const versions = request.versions ?? {'amp-layout': 'v0'};
 
   return {document: compiler.renderAst(document, getBuilders(versions))};
