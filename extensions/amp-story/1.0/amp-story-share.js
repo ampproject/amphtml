@@ -12,6 +12,7 @@ import {getRequestService} from './amp-story-request-service';
 import {isObject} from '#core/types';
 import {listen} from '../../../src/event-helper';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
+import {getStoreService} from './amp-story-store-service';
 
 /**
  * Maps share provider type to visible name.
@@ -116,43 +117,39 @@ function buildProviderParams(opt_params) {
 }
 
 /**
- * @param {!Document} doc
  * @param {string} shareType
- * @param {!JsonObject=} opt_params
- * @return {!Node}
+ * @param {string} defaultShareText
+ * @param {string} canonicalUrl
+ * @return {!JsonObject}
  */
-function buildProvider(doc, shareType, opt_params) {
-  const shareProviderLocalizedStringId = devAssert(
-    SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType],
-    `No localized string to display name for share type ${shareType}.`
-  );
-
-  return renderSimpleTemplate(
-    doc,
-    /** @type {!Array<!./simple-template.ElementDef>} */ ([
-      {
-        tag: 'amp-social-share',
-        attrs: /** @type {!JsonObject} */ (
-          Object.assign(
-            dict({
-              'width': 48,
-              'height': 48,
-              'class': 'i-amphtml-story-share-icon',
-              'type': shareType,
-            }),
-            buildProviderParams(opt_params)
-          )
-        ),
-        children: [
-          {
-            tag: 'span',
-            attrs: dict({'class': 'i-amphtml-story-share-label'}),
-            localizedStringId: shareProviderLocalizedStringId,
-          },
-        ],
-      },
-    ])
-  );
+function buildProviderDefaultShareText(
+  shareType,
+  defaultShareText,
+  canonicalUrl
+) {
+  const attrs = dict();
+  switch (shareType) {
+    case 'tumblr':
+    case 'twitter':
+    case 'line':
+      attrs['data-param-text'] = defaultShareText;
+      break;
+    case 'email':
+      attrs['data-param-body'] = defaultShareText + ' ' + canonicalUrl;
+      break;
+    case 'facebook':
+      attrs['data-param-quote'] = defaultShareText;
+      break;
+    case 'pinterest':
+      attrs['data-param-description'] = defaultShareText;
+      break;
+    case 'whatsapp':
+      attrs['data-param-text'] = defaultShareText + ' ' + canonicalUrl;
+      break;
+    case 'sms':
+      attrs['data-param-body'] = defaultShareText + ' ' + canonicalUrl;
+  }
+  return attrs;
 }
 
 /**
@@ -205,6 +202,12 @@ export class ShareWidget {
 
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = getRequestService(this.win, storyEl);
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(this.win);
+
+    /** @private @const {!String} */
+    this.defaultShareText_ = '';
   }
 
   /**
@@ -224,6 +227,20 @@ export class ShareWidget {
     devAssert(!this.root, 'Already built.');
 
     this.ampdoc_ = ampdoc;
+
+    this.defaultShareText_ =
+      this.storeService_.get('title') +
+      ' ' +
+      getLocalizationService(this.storyEl).getLocalizedString(
+        LocalizedStringId.AMP_STORY_SHARE_BY
+      ) +
+      ' ' +
+      this.storyEl.getAttribute('publisher') +
+      ' ' +
+      getLocalizationService(this.storyEl).getLocalizedString(
+        LocalizedStringId.AMP_STORY_SHARE_VIA
+      ) +
+      ' #WebStories';
 
     this.root = renderAsElement(this.win.document, TEMPLATE);
 
@@ -302,7 +319,7 @@ export class ShareWidget {
 
     this.loadRequiredExtensions();
 
-    container.appendChild(buildProvider(this.win.document, 'system'));
+    container.appendChild(this.buildProvider_(this.win.document, 'system'));
   }
 
   /**
@@ -350,7 +367,7 @@ export class ShareWidget {
     /** @type {!Array} */ (providers).forEach((provider) => {
       if (isObject(provider)) {
         this.add_(
-          buildProvider(
+          this.buildProvider_(
             this.win.document,
             provider['provider'],
             /** @type {!JsonObject} */ (provider)
@@ -369,9 +386,54 @@ export class ShareWidget {
         return;
       }
       this.add_(
-        buildProvider(this.win.document, /** @type {string} */ (provider))
+        this.buildProvider_(this.win.document, /** @type {string} */ (provider))
       );
     });
+  }
+
+  /**
+   * @param {!Document} doc
+   * @param {string} shareType
+   * @param {!JsonObject=} opt_params
+   * @return {!Node}
+   */
+  buildProvider_(doc, shareType, opt_params) {
+    const shareProviderLocalizedStringId = devAssert(
+      SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType],
+      `No localized string to display name for share type ${shareType}.`
+    );
+
+    return renderSimpleTemplate(
+      doc,
+      /** @type {!Array<!./simple-template.ElementDef>} */ ([
+        {
+          tag: 'amp-social-share',
+          attrs: /** @type {!JsonObject} */ (
+            Object.assign(
+              dict({
+                'width': 48,
+                'height': 48,
+                'class': 'i-amphtml-story-share-icon',
+                'type': shareType,
+              }),
+              buildProviderDefaultShareText(
+                shareType,
+                this.defaultShareText_,
+                Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl
+              ),
+              buildProviderParams(opt_params)
+            )
+          ),
+          children: [
+            {
+              tag: 'span',
+              attrs: dict({'class': 'i-amphtml-story-share-label'}),
+              localizedStringId: shareProviderLocalizedStringId,
+            },
+          ],
+        },
+      ])
+    );
   }
 
   /**
