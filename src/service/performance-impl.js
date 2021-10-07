@@ -1,7 +1,7 @@
 import {TickLabel} from '#core/constants/enums';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {Signals} from '#core/data-structures/signals';
-import {whenDocumentComplete, whenDocumentReady} from '#core/document-ready';
+import {whenDocumentComplete, whenDocumentReady} from '#core/document/ready';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {computedStyle} from '#core/dom/style';
 import {debounce} from '#core/types/function';

@@ -3,7 +3,7 @@ import {
   addDocumentVisibilityChangeListener,
   isDocumentHidden,
   removeDocumentVisibilityChangeListener,
-} from '#core/document-visibility';
+} from '#core/document/visibility';
 import {rethrowAsync} from '#core/error';
 
 import {Services} from '#service';

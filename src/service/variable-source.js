@@ -1,4 +1,4 @@
-import {whenDocumentComplete} from '#core/document-ready';
+import {whenDocumentComplete} from '#core/document/ready';
 import {isAmp4Email} from '#core/document/format';
 import {isFiniteNumber} from '#core/types';
 

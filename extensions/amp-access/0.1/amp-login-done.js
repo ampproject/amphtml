@@ -4,7 +4,7 @@
  */
 
 import '#polyfills';
-import {onDocumentReady} from '#core/document-ready';
+import {onDocumentReady} from '#core/document/ready';
 
 import {initLogConstructor, setReportError} from '#utils/log';
 

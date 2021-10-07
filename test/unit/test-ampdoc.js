@@ -1,5 +1,5 @@
 import {Signals} from '#core/data-structures/signals';
-import * as docready from '#core/document-ready';
+import * as docready from '#core/document/ready';
 import * as dom from '#core/dom';
 import {
   ShadowDomVersion,
