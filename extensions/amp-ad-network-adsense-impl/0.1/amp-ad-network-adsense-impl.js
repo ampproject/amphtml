@@ -363,6 +363,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'h': sizeToSend.height,
       'ptt': 12,
       'iu': slotname,
+      'fa': {bottom: 1, top: 2}[this.element.getAttribute('sticky')],
       'npa':
         consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
         consentState == CONSENT_POLICY_STATE.UNKNOWN ||
