@@ -1471,24 +1471,30 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   checkPageHasAudio_() {
-    const pageHasAudio =
-      this.element.hasAttribute('background-audio') ||
-      this.element.querySelector('amp-audio') ||
-      this.hasVideoWithAudio_();
+    this.hasVideoWithAudio_().then((hasVideoWithAudio) => {
+      const pageHasAudio =
+        this.element.hasAttribute('background-audio') ||
+        this.element.querySelector('amp-audio') ||
+        hasVideoWithAudio;
 
-    this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, pageHasAudio);
+      this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, pageHasAudio);
+    });
   }
 
   /**
    * Checks if the page has any videos with audio.
-   * @return {boolean}
+   * @return {!Promise<boolean>}
    * @private
    */
   hasVideoWithAudio_() {
     const ampVideoEls = this.element.querySelectorAll('amp-video');
-    return Array.prototype.some.call(
-      ampVideoEls,
-      (video) => !video.hasAttribute('noaudio')
+    return Promise.all(
+      Array.prototype.map.call(ampVideoEls, (videoEl) => videoEl.getImpl())
+    ).then(() =>
+      Array.prototype.some.call(
+        ampVideoEls,
+        (video) => !video.hasAttribute('noaudio')
+      )
     );
   }
 
