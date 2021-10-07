@@ -9,8 +9,8 @@ import {Services} from '#service';
 import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-selector-1.0.css';
-import {createCustomEvent} from '../../../src/event-helper';
-import {userAssert} from '../../../src/log';
+import {createCustomEvent} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-selector';

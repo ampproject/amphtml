@@ -9,9 +9,9 @@ import {dict, map} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {createCustomEvent} from '../event-helper';
+import {createCustomEvent} from '#utils/event-helper';
 import {whenContentIniLoad} from '../ini-load';
-import {dev, devAssert} from '../log';
+import {dev, devAssert} from '#utils/log';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service-helpers';
 import {isStoryDocument} from '../utils/story';

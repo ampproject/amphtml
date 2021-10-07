@@ -6,7 +6,7 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
-import {dev, user, userAssert} from './log';
+import {dev, user, userAssert} from '#utils/log';
 import {getMode} from './mode';
 import {addParamsToUrl, isProxyOrigin, parseUrlDeprecated} from './url';
 

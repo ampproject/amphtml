@@ -11,8 +11,8 @@ import {installViewerServiceForDoc} from '#service/viewer-impl';
 
 import {FakeMutationObserver, FakeWindow} from '#testing/fake-dom';
 
-import {Animation} from '../../src/animation';
-import {user} from '../../src/log';
+import {Animation} from '#utils/animation';
+import {user} from '#utils/log';
 
 describes.sandboxed('FixedLayer', {}, (env) => {
   let parentApi;

@@ -16,7 +16,7 @@ import {
 } from './sanitation';
 
 import {isAmp4Email} from '../format';
-import {user} from '../log';
+import {user} from '#utils/log';
 
 /** @private @const {string} */
 const TAG = 'purifier';

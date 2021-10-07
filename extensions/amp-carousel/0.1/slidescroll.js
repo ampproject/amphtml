@@ -1,6 +1,6 @@
 import {ActionTrust} from '#core/constants/action-constants';
-import {Animation} from '../../../src/animation';
-import {dev, user, userAssert} from '../../../src/log';
+import {Animation} from '#utils/animation';
+import {dev, user, userAssert} from '#utils/log';
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {bezierCurve} from '#core/data-structures/curve';
@@ -8,7 +8,7 @@ import {
   closestAncestorElementBySelector,
   realChildElements,
 } from '#core/dom/query';
-import {createCustomEvent, listen} from '../../../src/event-helper';
+import {createCustomEvent, listen} from '#utils/event-helper';
 import {dict} from '#core/types/object';
 import {dispatchCustomEvent} from '#core/dom';
 import {getStyle, setStyle} from '#core/dom/style';
@@ -21,7 +21,7 @@ import {
   unobserveContentSize,
 } from '#core/dom/layout/size-observer';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {triggerAnalyticsEvent} from '#utils/analytics';
 import {BaseCarousel} from './base-carousel';
 
 /** @const {string} */

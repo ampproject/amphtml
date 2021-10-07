@@ -7,7 +7,7 @@ import {registerExtendedTemplateForDoc} from '#service/template-impl';
 import {poll} from '#testing/iframe';
 
 import {installGlobalSubmitListenerForDoc} from '../../../../../src/document-submit';
-import {listenOncePromise} from '../../../../../src/event-helper';
+import {listenOncePromise} from '#utils/event-helper';
 import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
 import {AmpForm, AmpFormService} from '../../amp-form';
 

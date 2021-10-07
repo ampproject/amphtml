@@ -19,7 +19,7 @@ import {CSS} from '../../../build/amp-script-0.1.css';
 import {urls} from '../../../src/config';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {cancellation} from '../../../src/error-reporting';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';
 import {getService, registerServiceBuilder} from '../../../src/service-helpers';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';

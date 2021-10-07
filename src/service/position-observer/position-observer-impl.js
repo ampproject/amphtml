@@ -7,7 +7,7 @@ import {
   PositionObserverWorker,
 } from './position-observer-worker';
 
-import {dev} from '../../log';
+import {dev} from '#utils/log';
 import {registerServiceBuilderForDoc} from '../../service-helpers';
 
 /** @const @private */

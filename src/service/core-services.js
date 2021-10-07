@@ -30,7 +30,7 @@ import {installXhrService} from './xhr-impl';
 
 import {installGlobalSubmitListenerForDoc} from '../document-submit';
 import {installInputService} from '../input';
-import {devAssert} from '../log';
+import {devAssert} from '#utils/log';
 import {installPreconnectService} from '../preconnect';
 import {
   adoptServiceFactoryForEmbedDoc,

@@ -23,7 +23,7 @@ import {
   AutoLightboxEvents,
   isActionableByTap,
 } from '../../../../src/auto-lightbox';
-import {dev, devAssert, userAssert} from '../../../../src/log';
+import {dev, devAssert, userAssert} from '#utils/log';
 
 const LIGHTBOX_ELIGIBLE_TAGS = new Set(['AMP-IMG', 'IMG']);
 

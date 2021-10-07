@@ -11,7 +11,7 @@ import {dict} from '#core/types/object';
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
-import {getData, listen} from '../../../src/event-helper';
+import {getData, listen} from '#utils/event-helper';
 import {
   createFrameFor,
   isJsonOrObj,
@@ -20,7 +20,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, userAssert} from '../../../src/log';
+import {dev, userAssert} from '#utils/log';
 import {addParamsToUrl} from '../../../src/url';
 import {VideoEvents} from '../../../src/video-interface';
 

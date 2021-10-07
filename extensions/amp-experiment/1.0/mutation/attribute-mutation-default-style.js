@@ -4,7 +4,7 @@ import {dict, hasOwn} from '#core/types/object';
 
 import {assertAttributeMutationFormat} from './mutation';
 
-import {dev, user} from '../../../../src/log';
+import {dev, user} from '#utils/log';
 
 /** @const {RegExp} */
 const NON_SPACE_REGEX = /\S/;

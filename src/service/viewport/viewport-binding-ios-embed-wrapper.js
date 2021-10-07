@@ -13,7 +13,7 @@ import {
   marginBottomOfLastChild,
 } from './viewport-binding-def';
 
-import {dev} from '../../log';
+import {dev} from '#utils/log';
 
 const TAG_ = 'Viewport';
 

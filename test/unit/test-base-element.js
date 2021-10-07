@@ -7,7 +7,7 @@ import {Resource} from '#service/resource';
 
 import {BaseElement} from '../../src/base-element';
 import {createAmpElementForTesting} from '../../src/custom-element';
-import {listenOncePromise} from '../../src/event-helper';
+import {listenOncePromise} from '#utils/event-helper';
 
 describes.realWin('BaseElement', {amp: true}, (env) => {
   let win, doc;

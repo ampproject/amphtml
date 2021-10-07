@@ -40,11 +40,11 @@ import {
 } from './form-verifiers';
 
 import {CSS} from '../../../build/amp-form-0.1.css';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {createCustomEvent} from '../../../src/event-helper';
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {createCustomEvent} from '#utils/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {isAmp4Email} from '../../../src/format';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {installStylesForDoc} from '../../../src/style-installer';

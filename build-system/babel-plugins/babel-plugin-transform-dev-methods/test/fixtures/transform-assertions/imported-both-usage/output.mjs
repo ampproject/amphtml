@@ -1,4 +1,4 @@
-import { dev, user } from '../../../../../../../src/log';
+import {dev, user} from '#utils/log';
 dev().info;
 user().fine;
 
@@ -17,5 +17,4 @@ class Foo {
     dev().error(TAG, 'Should not be removed');
     user().error('Should not be removed');
   }
-
 }

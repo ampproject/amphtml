@@ -1,5 +1,5 @@
 import {reportError} from '../error-reporting';
-import {user} from '../log';
+import {user} from '#utils/log';
 import {getMode} from '../mode';
 import {
   registerServiceBuilder,

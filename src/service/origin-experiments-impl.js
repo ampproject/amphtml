@@ -3,7 +3,7 @@ import {bytesToString, stringToBytes} from '#core/types/string/bytes';
 
 import {Services} from '#service';
 
-import {user} from '../log';
+import {user} from '#utils/log';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,

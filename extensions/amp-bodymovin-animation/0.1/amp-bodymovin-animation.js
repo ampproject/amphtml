@@ -11,8 +11,8 @@ import {Services} from '#service';
 
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {batchFetchJsonFor} from '../../../src/batched-json';
-import {getData, listen} from '../../../src/event-helper';
-import {userAssert} from '../../../src/log';
+import {getData, listen} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
 import {assertHttpsUrl} from '../../../src/url';
 
 const TAG = 'amp-bodymovin-animation';

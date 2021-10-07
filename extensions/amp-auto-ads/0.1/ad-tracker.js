@@ -4,7 +4,7 @@ import {Services} from '#service';
 
 import {measurePageLayoutBox} from './measure-page-layout-box';
 
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 /** @const */
 const TAG = 'amp-auto-ads';

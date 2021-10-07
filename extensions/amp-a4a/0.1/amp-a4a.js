@@ -44,14 +44,14 @@ import {
   getDefaultBootstrapBaseUrl,
 } from '../../../src/3p-frame';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {triggerAnalyticsEvent} from '#utils/analytics';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {cancellation, isCancellation} from '../../../src/error-reporting';
-import {listenOnce} from '../../../src/event-helper';
+import {listenOnce} from '#utils/event-helper';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   installFriendlyIframeEmbed,
@@ -59,7 +59,7 @@ import {
   preloadFriendlyIframeEmbedExtensions,
 } from '../../../src/friendly-iframe-embed';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {dev, devAssert, logHashParam, user, userAssert} from '../../../src/log';
+import {dev, devAssert, logHashParam, user, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';
 import {assertHttpsUrl} from '../../../src/url';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';

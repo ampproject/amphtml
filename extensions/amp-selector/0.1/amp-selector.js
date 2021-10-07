@@ -11,8 +11,8 @@ import {dict} from '#core/types/object';
 import {Services} from '#service';
 
 import {CSS} from '../../../build/amp-selector-0.1.css';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
 
 const TAG = 'amp-selector';
 

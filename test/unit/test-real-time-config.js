@@ -14,7 +14,7 @@ import {
 import {Xhr} from '#service/xhr-impl';
 
 import {cancellation} from '../../src/error-reporting';
-import {dev, user} from '../../src/log';
+import {dev, user} from '#utils/log';
 
 describes.realWin('real-time-config service', {amp: true}, (env) => {
   let element;

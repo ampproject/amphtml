@@ -14,10 +14,10 @@ import {experimentTogglesOrNull, getBinaryType, isCanary} from '#experiments';
 
 import {Services} from '#service';
 
-import {triggerAnalyticsEvent} from './analytics';
+import {triggerAnalyticsEvent} from '#utils/analytics';
 import {urls} from './config';
-import {isLoadErrorMessage} from './event-helper';
-import {dev, setReportError} from './log';
+import {isLoadErrorMessage} from '#utils/event-helper';
+import {dev, setReportError} from '#utils/log';
 import {getMode} from './mode';
 import {makeBodyVisibleRecovery} from './style-installer';
 import {isProxyOrigin} from './url';

@@ -2,7 +2,7 @@ import {removeElement} from '#core/dom';
 import {parseJson} from '#core/types/object/json';
 
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 
 const URL = 'https://svr.nws.ai/a4a';

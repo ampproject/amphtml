@@ -5,7 +5,7 @@ import {Services} from '#service';
 import {OwnersInterface} from './owners-interface';
 import {Resource} from './resource';
 
-import {devAssert} from '../log';
+import {devAssert} from '#utils/log';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 
 /**

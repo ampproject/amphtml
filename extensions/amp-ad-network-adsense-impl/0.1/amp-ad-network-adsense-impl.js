@@ -54,9 +54,9 @@ import {AdsenseSharedState} from './adsense-shared-state';
 import {ResponsiveState} from './responsive-state';
 
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
-import {getData} from '../../../src/event-helper';
+import {getData} from '#utils/event-helper';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user} from '#utils/log';
 import {getMode} from '../../../src/mode';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';

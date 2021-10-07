@@ -15,7 +15,7 @@ import {Services} from '#service';
 import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {measurePageLayoutBox} from './measure-page-layout-box';
 
-import {dev, user} from '../../../src/log';
+import {dev, user} from '#utils/log';
 
 /** @const */
 const TAG = 'amp-auto-ads';

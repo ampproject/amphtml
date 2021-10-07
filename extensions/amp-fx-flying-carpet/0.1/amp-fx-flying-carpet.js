@@ -6,7 +6,7 @@ import {setStyle} from '#core/dom/style';
 import {Services} from '#service';
 
 import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
-import {dev, userAssert} from '../../../src/log';
+import {dev, userAssert} from '#utils/log';
 
 const TAG = 'amp-fx-flying-carpet';
 

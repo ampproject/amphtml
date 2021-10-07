@@ -2,7 +2,7 @@ import {AmpEvents} from '#core/constants/amp-events';
 
 import {createFixtureIframe, expectBodyToBecomeVisible} from '#testing/iframe';
 
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent} from '#utils/event-helper';
 
 describes.sandboxed('Rendering of amp-img', {}, () => {
   const timeout = window.ampTestRuntimeConfig.mochaTimeout;

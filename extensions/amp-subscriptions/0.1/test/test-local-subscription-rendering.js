@@ -1,4 +1,4 @@
-import {Action} from '../analytics';
+import {Action} from '#utils/analytics';
 import {Dialog} from '../dialog';
 import {Entitlement} from '../entitlement';
 import {LocalSubscriptionPlatformRenderer} from '../local-subscription-platform-renderer';

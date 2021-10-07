@@ -12,7 +12,7 @@ import {
 import {createExtensionScript, getExtensionScripts} from './extension-script';
 import {registerExtendedTemplateForDoc} from './template-impl';
 
-import {dev, devAssert, user} from '../log';
+import {dev, devAssert, user} from '#utils/log';
 import {getMode} from '../mode';
 import {
   registerServiceBuilder,

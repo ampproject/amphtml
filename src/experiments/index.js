@@ -12,7 +12,7 @@ import {parseQueryString} from '#core/types/string/url';
 
 import {ExperimentInfoDef} from './experiments.type';
 
-import {dev, user} from '../log';
+import {dev, user} from '#utils/log';
 import {getMode} from '../mode';
 import {getTopWindow} from '../service-helpers';
 

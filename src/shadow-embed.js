@@ -13,7 +13,7 @@ import {Services} from '#service';
 
 import {ShadowCSS} from '#third_party/webcomponentsjs/ShadowCSS';
 
-import {dev, devAssert} from './log';
+import {dev, devAssert} from '#utils/log';
 import {installCssTransformer} from './style-installer';
 import {DomWriterBulk, DomWriterStreamer} from './utils/dom-writer';
 

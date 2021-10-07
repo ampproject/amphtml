@@ -1,4 +1,4 @@
-import {Action, SubscriptionAnalytics} from '../analytics';
+import {Action, SubscriptionAnalytics} from '#utils/analytics';
 import {Dialog} from '../dialog';
 import {ENTITLEMENTS_REQUEST_TIMEOUT} from '../constants';
 import {Entitlement, GrantReason} from '../entitlement';

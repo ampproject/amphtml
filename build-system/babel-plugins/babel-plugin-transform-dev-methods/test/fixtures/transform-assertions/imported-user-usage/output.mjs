@@ -1,4 +1,4 @@
-import { user } from '../../../../../../../src/log';
+import {user} from '#utils/log';
 user().fine;
 user().error('Should not be removed');
 
@@ -13,5 +13,4 @@ export function helloAgain() {
 
 class Foo {
   method() {}
-
 }

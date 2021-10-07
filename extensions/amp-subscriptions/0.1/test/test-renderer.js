@@ -1,4 +1,4 @@
-import {Action} from '../analytics';
+import {Action} from '#utils/analytics';
 import {CSS} from '../../../../build/amp-subscriptions-0.1.css';
 import {Renderer} from '../renderer';
 import {Services} from '#service';

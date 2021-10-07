@@ -31,7 +31,7 @@ import {
 import {WindowMessenger} from './window-messenger';
 
 import {CSS} from '../../../build/amp-web-push-0.1.css';
-import {dev, user} from '../../../src/log';
+import {dev, user} from '#utils/log';
 import {getMode} from '../../../src/mode';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';

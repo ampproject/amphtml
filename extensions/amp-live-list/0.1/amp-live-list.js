@@ -9,7 +9,7 @@ import {
 } from './live-list-manager';
 
 import {CSS} from '../../../build/amp-live-list-0.1.css';
-import {user, userAssert} from '../../../src/log';
+import {user, userAssert} from '#utils/log';
 
 /**
  * @enum {string}

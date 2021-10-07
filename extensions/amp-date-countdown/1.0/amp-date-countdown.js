@@ -7,7 +7,7 @@ import {Services} from '#service';
 
 import {BaseElement} from './base-element';
 
-import {dev, userAssert} from '../../../src/log';
+import {dev, userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-date-countdown';

@@ -1,7 +1,7 @@
 import {getHashParams} from '#core/types/string/url';
 
 import {urls} from './config';
-import {loadPromise} from './event-helper';
+import {loadPromise} from '#utils/event-helper';
 import {isModeDevelopment} from './mode';
 
 /**

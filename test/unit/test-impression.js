@@ -16,7 +16,7 @@ import {
   resetTrackImpressionPromiseForTesting,
   shouldAppendExtraParams,
 } from '../../src/impression';
-import {dev, user} from '../../src/log';
+import {dev, user} from '#utils/log';
 
 describes.realWin('impression', {amp: true}, (env) => {
   let window, document;

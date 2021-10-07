@@ -1,5 +1,5 @@
 import '../amp-delight-player';
-import {listenOncePromise} from '../../../../src/event-helper';
+import {listenOncePromise} from '#utils/event-helper';
 import {VideoEvents} from '../../../../src/video-interface';
 
 describes.realWin(

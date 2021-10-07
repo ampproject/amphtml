@@ -17,8 +17,8 @@ import {
 import {GaaMeteringRegwall} from '#third_party/subscriptions-project/swg-gaa';
 
 import {CSS} from '../../../build/amp-subscriptions-google-0.1.css';
-import {getData} from '../../../src/event-helper';
-import {devAssert, user, userAssert} from '../../../src/log';
+import {getData} from '#utils/event-helper';
+import {devAssert, user, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
@@ -26,7 +26,7 @@ import {
   Action,
   ActionStatus,
   SubscriptionAnalyticsEvents,
-} from '../../amp-subscriptions/0.1/analytics';
+} from '#utils/analytics';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants';
 import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl';
 import {

@@ -3,7 +3,7 @@ import {
   ActionStatus,
   SubscriptionAnalytics,
   SubscriptionAnalyticsEvents,
-} from '../analytics';
+} from '#utils/analytics';
 import {Actions} from '../actions';
 import {UrlBuilder} from '../url-builder';
 import {WebLoginDialog} from '../../../amp-access/0.1/login-dialog';

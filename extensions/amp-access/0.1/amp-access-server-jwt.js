@@ -10,7 +10,7 @@ import {AccessClientAdapter} from './amp-access-client';
 import {JwtHelper} from './jwt';
 
 import {fetchDocument} from '../../../src/document-fetcher';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';
 import {
   assertHttpsUrl,

@@ -18,8 +18,8 @@ import {
 } from './messaging/messaging';
 import {TouchHandler} from './touch-handler';
 
-import {getData, listen, listenOnce} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
+import {getData, listen, listenOnce} from '#utils/event-helper';
+import {dev} from '#utils/log';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {getSourceUrl} from '../../../src/url';
 

@@ -6,7 +6,7 @@ import {isExperimentOn} from '#experiments';
 import {AmpEmbedlyKey, TAG as KEY_TAG} from './amp-embedly-key';
 import {BaseElement} from './base-element';
 
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-embedly-card';

@@ -14,7 +14,7 @@ import {
   isUserErrorMessage,
   setReportError,
   userAssert,
-} from '../src/log';
+} from '#utils/log';
 import {getSourceUrl, isProxyOrigin, parseUrlDeprecated} from '../src/url';
 
 /**

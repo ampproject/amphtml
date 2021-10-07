@@ -15,7 +15,7 @@ import {truncateText} from './truncate-text';
 
 import {CSS} from '../../../build/amp-truncate-text-0.1.css';
 import {CSS as ShadowCSS} from '../../../build/amp-truncate-text-shadow-0.1.css';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 
 /**
  * TODO(sparhami) List of stuff to do / consider:

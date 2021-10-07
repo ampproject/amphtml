@@ -5,7 +5,7 @@ import {forceExperimentBranch} from '#experiments';
 import {AmpAdMetadataTransformer} from './amp-ad-metadata-transformer';
 import {ExternalReorderHeadTransformer} from './external-reorder-head-transformer';
 
-import {user, userAssert} from '../../../src/log';
+import {user, userAssert} from '#utils/log';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 
 const TAG = 'AMP-AD-NETWORK-FAKE-IMPL';

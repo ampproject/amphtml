@@ -5,7 +5,7 @@ import {LinkReplacementCache} from './link-replacement-cache';
 import {TwoStepsResponse} from './two-steps-response';
 
 import {ChunkPriority, chunk} from '../../../../src/chunk';
-import {userAssert} from '../../../../src/log';
+import {userAssert} from '#utils/log';
 
 /** @typedef {!Array<{anchor: !HTMLElement, replacementUrl: ?string}>}} */
 export let AnchorReplacementList;

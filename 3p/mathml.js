@@ -2,7 +2,7 @@ import {setStyle} from '#core/dom/style';
 
 import {writeScript} from './3p';
 
-import {userAssert} from '../src/log';
+import {userAssert} from '#utils/log';
 
 /**
  * Get the correct script for the mathml formula.

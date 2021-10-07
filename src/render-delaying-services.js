@@ -1,6 +1,6 @@
 import {Services} from '#service';
 
-import {devAssert} from './log';
+import {devAssert} from '#utils/log';
 import {getServicePromise} from './service-helpers';
 
 /**

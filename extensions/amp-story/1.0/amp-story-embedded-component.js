@@ -23,7 +23,7 @@ import {
   getSourceOriginForElement,
   triggerClickFromLightDom,
 } from './utils';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {getLocalizationService} from './amp-story-localization-service';

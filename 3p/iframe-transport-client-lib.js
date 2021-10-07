@@ -3,7 +3,7 @@ import './polyfills';
 
 import {IframeTransportClient} from './iframe-transport-client';
 
-import {initLogConstructor, setReportError} from '../src/log';
+import {initLogConstructor, setReportError} from '#utils/log';
 
 initLogConstructor();
 // TODO(alanorozco): Refactor src/error.reportError so it does not contain big

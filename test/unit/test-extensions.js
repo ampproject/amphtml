@@ -11,7 +11,7 @@ import {installTimerService} from '#service/timer-impl';
 
 import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
-import {dev} from '../../src/log';
+import {dev} from '#utils/log';
 import {getServiceForDoc} from '../../src/service-helpers';
 
 class AmpTest extends BaseElement {}

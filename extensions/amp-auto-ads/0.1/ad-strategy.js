@@ -3,7 +3,7 @@ import {tryResolve} from '#core/data-structures/promise';
 import {SizeInfoDef} from './ad-network-config';
 import {PlacementState} from './placement';
 
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 /** @const */
 const TAG = 'amp-auto-ads';

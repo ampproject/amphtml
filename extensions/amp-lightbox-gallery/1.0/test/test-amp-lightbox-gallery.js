@@ -11,7 +11,7 @@ import {ActionInvocation} from '#service/action-impl';
 import {poll} from '#testing/iframe';
 import {waitFor, whenCalled} from '#testing/test-helper';
 
-import * as analytics from '../../../../src/analytics';
+import * as analytics from '#utils/analytics';
 import {installLightboxGallery} from '../amp-lightbox-gallery';
 
 const TAG = 'amp-lightbox-gallery';

@@ -7,7 +7,7 @@ import {Services} from '#service';
 import {RTC_VENDORS} from './callout-vendors';
 
 import {isCancellation} from '../../error-reporting';
-import {dev, user, userAssert} from '../../log';
+import {dev, user, userAssert} from '#utils/log';
 import {getMode} from '../../mode';
 import {registerServiceBuilderForDoc} from '../../service-helpers';
 import {isAmpScriptUri} from '../../url';

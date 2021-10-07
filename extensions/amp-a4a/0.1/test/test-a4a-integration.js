@@ -19,7 +19,7 @@ import {FetchMock, networkFailure} from './fetch-mock';
 import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
 import {MockA4AImpl, TEST_URL} from './utils';
 
-import {loadPromise} from '../../../../src/event-helper';
+import {loadPromise} from '#utils/event-helper';
 import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
 
 // Integration tests for A4A.  These stub out accesses to the outside world

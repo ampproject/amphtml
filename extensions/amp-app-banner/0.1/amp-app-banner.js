@@ -5,7 +5,7 @@ import {dict} from '#core/types/object';
 import {Services} from '#service';
 
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '#utils/log';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 
 const TAG = 'amp-app-banner';

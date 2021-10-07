@@ -15,8 +15,8 @@ import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {AccessVendorAdapter} from './amp-access-vendor';
 import {getLoginUrl, openLoginDialog} from './login-dialog';
 
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {dev, user, userAssert} from '../../../src/log';
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {dev, user, userAssert} from '#utils/log';
 import {assertHttpsUrl} from '../../../src/url';
 
 /** @const */

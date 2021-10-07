@@ -4,7 +4,7 @@ import {Services} from '#service';
 
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 const TYPE = 'reddit';
 

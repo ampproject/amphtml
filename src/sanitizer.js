@@ -14,7 +14,7 @@ import {
 import {htmlSanitizer} from '#third_party/caja/html-sanitizer';
 
 import {isAmp4Email} from './format';
-import {user} from './log';
+import {user} from '#utils/log';
 import {rewriteAttributeValue} from './url-rewrite';
 
 /** @private @const {string} */

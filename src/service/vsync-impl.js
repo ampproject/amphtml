@@ -11,7 +11,7 @@ import {Services} from '#service';
 import {installTimerService} from './timer-impl';
 
 import {cancellation} from '../error-reporting';
-import {dev, devAssert} from '../log';
+import {dev, devAssert} from '#utils/log';
 import {Pass} from '../pass';
 import {getService, registerServiceBuilder} from '../service-helpers';
 

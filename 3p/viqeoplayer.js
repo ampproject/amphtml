@@ -3,7 +3,7 @@ import {tryDecodeUriComponent} from '#core/types/string/url';
 
 import {loadScript} from './3p';
 
-import {getData} from '../src/event-helper';
+import {getData} from '#utils/event-helper';
 
 /**
  * @param {Window} global

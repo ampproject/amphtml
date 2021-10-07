@@ -18,14 +18,14 @@ import {
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
+import {getData, listen} from '#utils/event-helper';
 import {
   createFrameFor,
   mutedOrUnmutedEvent,
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, userAssert} from '../../../src/log';
+import {dev, userAssert} from '#utils/log';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {VideoEvents} from '../../../src/video-interface';
 

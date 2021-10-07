@@ -15,7 +15,7 @@ import {AnchorAdStrategy} from './anchor-ad-strategy';
 import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {getPlacementsFromConfigObj} from './placement';
 
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /** @const */
 const TAG = 'amp-auto-ads';

@@ -6,7 +6,7 @@ import {Services} from '#service';
 
 import {Util} from './util';
 
-import {user, userAssert} from '../../../src/log';
+import {user, userAssert} from '#utils/log';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 

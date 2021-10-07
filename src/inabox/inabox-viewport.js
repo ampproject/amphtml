@@ -20,7 +20,7 @@ import {ViewportInterface} from '#service/viewport/viewport-interface';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 
 import {canInspectWindow} from '../iframe-helper';
-import {dev} from '../log';
+import {dev} from '#utils/log';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 
 /** @const {string} */

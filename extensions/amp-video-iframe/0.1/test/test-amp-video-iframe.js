@@ -7,7 +7,7 @@ import {Services} from '#service';
 import {macroTask} from '#testing/helpers';
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
 
-import {listenOncePromise} from '../../../../src/event-helper';
+import {listenOncePromise} from '#utils/event-helper';
 import {VideoEvents} from '../../../../src/video-interface';
 
 describes.realWin(

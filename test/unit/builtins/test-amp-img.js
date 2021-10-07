@@ -11,7 +11,7 @@ import {Services} from '#service';
 import {createIframePromise} from '#testing/iframe';
 
 import {BaseElement} from '../../../src/base-element';
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent} from '#utils/event-helper';
 
 describes.sandboxed('amp-img', {}, (env) => {
   let sandbox;

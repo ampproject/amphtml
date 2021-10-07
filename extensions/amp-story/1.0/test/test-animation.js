@@ -3,7 +3,7 @@ import {
   AnimationManager,
   AnimationRunner,
   AnimationSequence,
-} from '../animation';
+} from '#utils/animation';
 import {Deferred} from '#core/data-structures/promise';
 import {Services} from '#service';
 import {WebAnimationPlayState} from '../../../amp-animation/0.1/web-animation-types';

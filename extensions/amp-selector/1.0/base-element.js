@@ -13,7 +13,7 @@ import {PreactBaseElement} from '#preact/base-element';
 
 import {Option, Selector} from './component';
 
-import {devAssert} from '../../../src/log';
+import {devAssert} from '#utils/log';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */

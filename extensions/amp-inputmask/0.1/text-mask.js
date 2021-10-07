@@ -5,7 +5,7 @@ import {Services} from '#service';
 import {OutputMode} from './constants';
 import {Mask} from './mask-impl';
 
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 const ELEMENT_MASK_PROPERTY = '__amp_inputmask_masked';
 const ELEMENT_MASK_OUTPUT_PROPERTY = '__amp_inputmask_hidden';

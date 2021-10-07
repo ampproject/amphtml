@@ -5,7 +5,7 @@ import {parseJson} from '#core/types/object/json';
 
 import {loadScript} from './3p';
 
-import {getData} from '../src/event-helper';
+import {getData} from '#utils/event-helper';
 
 const libSourceUrl = dict({
   'canvas':

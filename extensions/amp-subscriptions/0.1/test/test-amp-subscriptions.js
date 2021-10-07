@@ -9,7 +9,7 @@ import {
 import {PlatformStore} from '../platform-store';
 import {ServiceAdapter} from '../service-adapter';
 import {Services} from '#service';
-import {SubscriptionAnalyticsEvents} from '../analytics';
+import {SubscriptionAnalyticsEvents} from '#utils/analytics';
 import {SubscriptionPlatform} from '../subscription-platform';
 import {SubscriptionService} from '../amp-subscriptions';
 import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';

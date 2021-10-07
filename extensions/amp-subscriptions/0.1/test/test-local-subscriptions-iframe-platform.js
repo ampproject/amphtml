@@ -1,4 +1,4 @@
-import {Action, SubscriptionAnalytics} from '../analytics';
+import {Action, SubscriptionAnalytics} from '#utils/analytics';
 import {Dialog} from '../dialog';
 import {Entitlement} from '../entitlement';
 import {LocalSubscriptionIframePlatform} from '../local-subscription-platform-iframe';

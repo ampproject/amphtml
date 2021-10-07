@@ -3,7 +3,7 @@ import './polyfills';
 
 import {AmpContext} from './ampcontext';
 
-import {initLogConstructor, setReportError} from '../src/log';
+import {initLogConstructor, setReportError} from '#utils/log';
 
 initLogConstructor();
 

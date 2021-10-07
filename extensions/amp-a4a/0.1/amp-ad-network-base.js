@@ -4,7 +4,7 @@ import {map} from '#core/types/object';
 import {FailureType, RecoveryModeType} from './amp-ad-type-defs';
 import {sendXhrRequest} from './amp-ad-utils';
 
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 
 const TAG = 'amp-ad-network-base';
 

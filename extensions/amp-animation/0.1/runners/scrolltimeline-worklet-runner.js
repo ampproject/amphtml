@@ -5,7 +5,7 @@ import {Services} from '#service';
 import {AnimationRunner} from './animation-runner';
 import {getTotalDuration} from './utils';
 
-import {dev} from '../../../../src/log';
+import {dev} from '#utils/log';
 
 const moduleName = 'amp-animation-worklet';
 let workletModulePromise;

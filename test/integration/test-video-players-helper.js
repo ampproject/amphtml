@@ -11,7 +11,7 @@ import {
   poll,
 } from '#testing/iframe';
 
-import {getData, listenOncePromise} from '../../src/event-helper';
+import {getData, listenOncePromise} from '#utils/event-helper';
 import {
   VideoAnalyticsEvents,
   VideoEvents,

@@ -6,7 +6,7 @@ import {AdResponseType, Validator, ValidatorResult} from './amp-ad-type-defs';
 import {getAmpAdMetadata} from './amp-ad-utils';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 export const SIGNATURE_VERIFIER_PROPERTY_NAME =
   'AMP_FAST_FETCH_SIGNATURE_VERIFIER_';

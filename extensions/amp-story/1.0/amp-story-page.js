@@ -27,7 +27,7 @@ import {
   EXPANDABLE_COMPONENTS,
   expandableElementsSelectors,
 } from './amp-story-embedded-component';
-import {AnimationManager, hasAnimations} from './animation';
+import {AnimationManager, hasAnimations} from '#utils/animation';
 import {CommonSignals} from '#core/constants/common-signals';
 import {Deferred} from '#core/data-structures/promise';
 import {EventType, dispatch} from './events';
@@ -45,7 +45,7 @@ import {
 } from '#core/dom/query';
 import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
 import {debounce} from '#core/types/function';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
@@ -56,7 +56,7 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '#core/dom/static-template';
 import {isExperimentOn} from '#experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
-import {listen, listenOnce} from '../../../src/event-helper';
+import {listen, listenOnce} from '#utils/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {toggle} from '#core/dom/style';

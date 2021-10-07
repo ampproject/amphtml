@@ -11,7 +11,7 @@ import {exponentialBackoff} from '#core/types/function/exponential-backoff';
 import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
 import {urls} from '../config';
 import {reportError} from '../error-reporting';
-import {dev, initLogConstructor, setReportError} from '../log';
+import {dev, initLogConstructor, setReportError} from '#utils/log';
 
 initLogConstructor();
 setReportError(reportError);

@@ -19,7 +19,7 @@ import {
   resolvePercentageToNumber,
 } from './amp-fx-presets-utils';
 
-import {devAssert} from '../../../../src/log';
+import {devAssert} from '#utils/log';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,

@@ -1,4 +1,4 @@
-import { dev } from '../../../../../../../src/log';
+import {dev} from '#utils/log';
 dev().info;
 dev().fine;
 
@@ -12,5 +12,4 @@ export function helloAgain() {
 
 class Foo {
   method() {}
-
 }

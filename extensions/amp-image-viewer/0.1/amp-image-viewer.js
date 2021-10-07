@@ -27,8 +27,8 @@ import {WindowInterface} from '#core/window/interface';
 import {Services} from '#service';
 
 import {CSS} from '../../../build/amp-image-viewer-0.1.css';
-import {Animation} from '../../../src/animation';
-import {createCustomEvent, loadPromise} from '../../../src/event-helper';
+import {Animation} from '#utils/animation';
+import {createCustomEvent, loadPromise} from '#utils/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {
   DoubletapRecognizer,
@@ -37,7 +37,7 @@ import {
   TapRecognizer,
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
-import {dev, userAssert} from '../../../src/log';
+import {dev, userAssert} from '#utils/log';
 import {continueMotion} from '../../../src/motion';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);

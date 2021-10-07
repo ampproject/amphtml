@@ -2,7 +2,7 @@ import {utf8Encode} from '#core/types/string/bytes';
 
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
 
-import {user} from '../../../../src/log';
+import {user} from '#utils/log';
 import {AdResponseType, ValidatorResult} from '../amp-ad-type-defs';
 import {
   CryptographicValidator,

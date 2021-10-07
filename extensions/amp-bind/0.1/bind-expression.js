@@ -5,7 +5,7 @@ import {dict, hasOwn, map} from '#core/types/object';
 
 import {AstNodeType} from './bind-expr-defines';
 
-import {devAssert, user} from '../../../src/log';
+import {devAssert, user} from '#utils/log';
 import {getMode} from '../../../src/mode';
 
 const TAG = 'amp-bind';

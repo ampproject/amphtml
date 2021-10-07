@@ -681,7 +681,7 @@ Then protect your code with a check for the component-specific flag `isExperimen
 ```javascript
 import {CSS} from '../../../build/amp-my-element-1.0.css';
 import {isExperimentOn} from '#experiments';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /** @const */
 const TAG = 'amp-my-element';

@@ -6,7 +6,7 @@ import {tryParseJson} from '#core/types/object/json';
 
 import {urls} from './config';
 import {getContextMetadata} from './iframe-attributes';
-import {dev, devAssert, user, userAssert} from './log';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 import {assertHttpsUrl, parseUrlDeprecated} from './url';
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */

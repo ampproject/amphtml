@@ -1,4 +1,4 @@
-import {Action, SubscriptionAnalytics} from '../analytics';
+import {Action, SubscriptionAnalytics} from '#utils/analytics';
 import {Dialog} from '../dialog';
 import {Entitlement, GrantReason} from '../entitlement';
 import {PageConfig} from '#third_party/subscriptions-project/config';

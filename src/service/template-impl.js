@@ -2,7 +2,7 @@ import {Deferred} from '#core/data-structures/promise';
 import {rootNodeFor} from '#core/dom';
 import {scopedQuerySelector} from '#core/dom/query';
 
-import {userAssert} from '../log';
+import {userAssert} from '#utils/log';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,

@@ -5,7 +5,7 @@ import {installPlatformService} from '#service/platform-impl';
 
 import {createFixtureIframe, poll} from '#testing/iframe';
 
-import {createCustomEvent} from '../../src/event-helper';
+import {createCustomEvent} from '#utils/event-helper';
 
 const IFRAME_HEIGHT = 3000;
 function createFixture() {

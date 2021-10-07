@@ -17,14 +17,14 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getData, listen, listenOncePromise} from '../../../src/event-helper';
+import {getData, listen, listenOncePromise} from '#utils/event-helper';
 import {
   createFrameFor,
   objOrParseJson,
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 
 /** @const */

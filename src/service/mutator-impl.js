@@ -10,7 +10,7 @@ import {MutatorInterface} from './mutator-interface';
 import {Resource} from './resource';
 
 import {FocusHistory} from '../focus-history';
-import {dev} from '../log';
+import {dev} from '#utils/log';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 
 const FOUR_FRAME_DELAY_ = 70;

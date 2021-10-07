@@ -13,11 +13,7 @@ import {
 } from '#third_party/subscriptions-project/swg';
 import {GaaMeteringRegwall} from '#third_party/subscriptions-project/swg-gaa';
 
-import {
-  Action,
-  ActionStatus,
-  SubscriptionAnalytics,
-} from '../../../amp-subscriptions/0.1/analytics';
+import {Action, ActionStatus, SubscriptionAnalytics} from '#utils/analytics';
 import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/constants';
 import {
   Entitlement,

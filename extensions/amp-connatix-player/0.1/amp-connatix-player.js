@@ -21,8 +21,8 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getData} from '../../../src/event-helper';
-import {userAssert} from '../../../src/log';
+import {getData} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
 import {addParamsToUrl} from '../../../src/url';
 import {setIsMediaComponent} from '../../../src/video-interface';
 

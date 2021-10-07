@@ -8,7 +8,7 @@ import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
 import {runVideoPlayerIntegrationTests} from './test-video-players-helper';
 
-import {listenOncePromise} from '../../src/event-helper';
+import {listenOncePromise} from '#utils/event-helper';
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
 
 // TODO(dvoytenko): These tests time out when run with the prod AMP config.

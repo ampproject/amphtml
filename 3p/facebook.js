@@ -5,7 +5,7 @@ import {dashToUnderline} from '#core/types/string';
 
 import {loadScript} from './3p';
 
-import {devAssert} from '../src/log';
+import {devAssert} from '#utils/log';
 
 /** @const @enum {string} */
 export const FacebookEmbedType = {

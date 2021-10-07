@@ -13,7 +13,7 @@ import {
 
 import {macroTask} from '#testing/helpers';
 
-import {user} from '../../src/log';
+import {user} from '#utils/log';
 
 describes.sandboxed('StandardActions', {}, (env) => {
   let standardActions;

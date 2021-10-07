@@ -6,7 +6,7 @@ import {
   ViewerStorageBinding,
 } from '#service/storage-impl';
 
-import {dev} from '../../src/log';
+import {dev} from '#utils/log';
 
 describes.sandboxed('Storage', {}, (env) => {
   let storage;

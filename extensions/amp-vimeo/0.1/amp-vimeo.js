@@ -7,7 +7,7 @@ import {once} from '#core/types/function';
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
-import {getData, listen} from '../../../src/event-helper';
+import {getData, listen} from '#utils/event-helper';
 import {
   createFrameFor,
   isJsonOrObj,
@@ -17,7 +17,7 @@ import {
   postMessageWhenAvailable,
   redispatch,
 } from '../../../src/iframe-video';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 import {
   VIMEO_EVENTS,

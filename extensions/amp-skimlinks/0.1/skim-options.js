@@ -8,7 +8,7 @@ import {
 } from './constants';
 import {getNormalizedHostnameFromUrl} from './utils';
 
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /**
  *

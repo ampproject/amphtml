@@ -9,7 +9,7 @@ import {createLinker} from './linker';
 import {dict} from '#core/types/object';
 import {getHighestAvailableDomain} from '../../../src/cookies';
 import {isObject} from '#core/types';
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-analytics/linker-manager';
