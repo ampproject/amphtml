@@ -1,11 +1,11 @@
 {
   "requests": {
     "host": "https://hit-pool.upscore.com/amp?",
-    "basePrefix": "u_id=${clientId(upscore)}&hit_id=${pageViewId}&scTop=${scrollTop}&scHeight=${scrollHeight}&vHeight=${viewportHeight}&domain=${domain}&load=${domInteractiveTime}&timespent=${totalEngagedTime}",
-    "initialHit": "author=${author}&o_id=${object_id}&o_type=${object_type}&pubdate=${pubdate}&ref=${documentReferrer}&section=${section}&taxonomy=${taxonomy}&url=${canonicalUrl}&agent=${userAgent}&location=${ampGeo(ISOCountry)}&c_keys=${customKeys}&c_values=${customValues}&content_type=${content_type}&user_status=${user_status}&content_blocked=${content_blocked}",
-    "finalBeat": "${host}${basePrefix}&type=final",
+    "basePrefix": "u_id=${clientId(cid)}&hit_id=${pageViewId}&scTop=${scrollTop}&scHeight=${scrollHeight}&vHeight=${viewportHeight}&domain=${domain}&load=${domInteractiveTime}&timespent=${totalEngagedTime}",
+    "initialHit": "author=${author}&o_id=${object_id}&o_type=${object_type}&pubdate=${pubdate}&ref=${documentReferrer}&section=${section}&taxonomy=${taxonomy}&url=${canonicalUrl}&agent=${userAgent}&location=${ampGeo(ISOCountry)}&c_keys=${custom_keys}&c_values=${custom_values}&content_type=${content_type}&user_status=${user_status}&content_blocked=${content_blocked}",
+    "finalbeat": "${host}${basePrefix}&type=final",
     "heartbeat": "${host}${basePrefix}&type=pulse",
-    "pageView": "${host}${basePrefix}&${initialHit}&type=init",
+    "pageview": "${host}${basePrefix}&${initialHit}&type=init",
     "conversion": "${host}${basePrefix}&type=pulse&conversion=${conversion_value}",
     "videoBase": "${host}url=${canonicalUrl}&video_id=${video_id}",
     "videoTime": "ct=${currentTime}&d=${duration}",
@@ -17,7 +17,7 @@
   "triggers": {
     "initHit": {
       "on": "visible",
-      "request": "pageView"
+      "request": "pageview"
     },
     "pulse": {
       "on": "timer",
@@ -35,7 +35,7 @@
       "visibilitySpec": {
         "totalTimeMin": 5000
       },
-      "request": "finalBeat"
+      "request": "finalbeat"
     },
     "lead": {
       "on": "click",
