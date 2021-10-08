@@ -1,0 +1,396 @@
+# Bento Lightbox Gallery
+
+## Usage
+
+The Bento Lightbox Gallery component provides a "lightbox" experience for other components (e.g., HTML images, Bento carousel). When the user interacts with the element, a UI component expands to fill the viewport until it is closed by the user. Currently, only images are supported.
+
+Use Bento Lightbox Gallery as a web component [`<bento-lightbox-gallery>`](#web-component), or a Preact/React functional component [`<BentoLightboxGallery>`](#preact/react-Component).
+
+### Web Component
+
+You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. As a web component
+
+The examples below demonstrate use of the `<bento-lightbox-gallery>` web component.
+
+#### Example: Import via npm
+
+[example preview="top-frame" playground="false"]
+
+Install via npm:
+
+```sh
+npm install @ampproject/bento-lightbox-gallery
+```
+
+```javascript
+import '@ampproject/bento-lightbox-gallery';
+```
+
+[/example]
+
+#### Example: Import via `<script>`
+
+[example preview="top-frame" playground="false"]
+
+```html
+<head>
+    <script src="https://cdn.ampproject.org/custom-elements-polyfill.js"></script>
+    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <style data-bento-boilerplate>
+    </style>
+    <script async src="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.js"></script>
+    <style>
+      bento-lightbox-gallery {
+        width: 360px;
+        height: 240px;
+      }
+    </style>
+  </head>
+
+  <figure>
+     <img
+       id="my-img"
+       width="360"
+       height="240"
+       src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"
+       lightbox
+     />
+     <figcaption>dog wearing yellow shirt.</figcaption>
+    </figure>
+  <div class="buttons" style="margin-top: 8px;">
+    <button id="change-img">
+      change image
+    </button>
+  </div>
+
+  <script>
+    (async () => {
+      const img = document.queryselector('#my-img');
+      await customelements.whendefined('img');
+      // set up button actions
+      document.queryselector('#change-img').onclick = () => {
+        img.setattribute('src', 'https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80')
+      }
+    })();
+  </script>
+```
+
+[/example]
+
+#### Usage
+
+To use `bento-liightbox-gallery`, ensure the required script is included in your `<head>` section,
+then add the `lightbox` attribute on an `<img>` or `<bento-carousel>` element.
+
+[tip type="read-on"]
+
+To display other types of elements in a lightbox, use [`<bento-lightbox>`](../../amp-lightbox/1.0/README.md).
+
+[/tip]
+
+##### Add Captions
+
+Optionally, you can specify a caption for each element in the lightbox. these
+fields are automatically read and displayed by the `<bento-lightbox-gallery>` in
+the following order of priority:
+
+-   `figcaption` (if the lightboxed element is the child of a figure)
+-   `aria-describedby`
+-   `alt`
+-   `aria-label`
+-   `aria-labelledby`
+
+In the following example, `<bento-lightbox-gallery>` displays the `figcaption`
+value as its description, showing "toront's cn tower was ....".
+
+```html
+<figure>
+  <img
+    id="hero-img"
+    lightbox="toronto"
+    src="https://picsum.photos/1600/900?image=1075"
+    layout="responsive"
+    width="1600"
+    height="900"
+    alt="picture of cn tower."
+  >
+  <figcaption class="image">
+    toronto's cn tower was built in 1976 and was the tallest free-standing
+    structure until 2007.
+  </figcaption>
+</figure>
+```
+
+In the following example, `<bento-lightbox-gallery>` displays the `alt` value as
+its description, showing "picture of cn tower".
+
+```html
+<img
+  id="hero-img"
+  lightbox="toronto"
+  src="https://picsum.photos/1600/900?image=1075"
+  layout="responsive"
+  width="1600"
+  height="900"
+  alt="picture of cn tower"
+>
+```
+
+##### Implement Thumbnail Previews
+
+Lightboxed items have a thumbnail gallery view. you can optionally specify a
+thumbnail item for your lightboxed element via the attribute
+`lightbox-thumbnail-id` that references the `id` of an `<img>` element with
+`layout="nodisplay"`.
+
+```html
+<bento-youtube
+  width="480"
+  height="270"
+  layout="responsive"
+  data-videoid="lbtcb7yls8y"
+  lightbox-thumbnail-id="my-thumbnail-img"
+>
+</bento-youtube>
+
+<img
+  id="my-thumbnail-img"
+  width="200"
+  height="200"
+  layout="nodisplay"
+  src="https://picsum.photos/200/200?image=1074"
+>
+```
+
+If no thumbnail is specified, `<img>` elements will be cropped per
+`object-fit: cover`, `<bento-video>` will use the image `src` specified in its
+`poster` attribute, and placeholder images will be used for lightboxed elements
+that have one.
+
+#### Actions
+
+### `open`
+
+Opens the lightbox gallery. can be triggered by tapping another element, if you
+specify the image `id`: `on="tap:amp-lightbox-gallery.open(id='image-id')"`.
+
+#### Layout And Style
+
+Each bento component has a small css library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
+
+```html
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.css">
+```
+
+### Preact/React Component
+
+The preact/react version of the bentolightboxgallery functions differently than the web component version. The following example will demonstrate the use of `<BentoLightboxGallery>` as a functional component.
+
+#### Example: Import Via npm
+
+[example preview="top-frame" playground="false"]
+
+```sh
+npm install @ampproject/bento-lightbox-gallery
+```
+
+```javascript
+import react from 'react';
+import {
+  bentolightboxgalleryprovider,,
+  withbentolightboxgallery,
+} from '@ampproject/bento-lightbox-gallery/react';
+
+function app() {
+  return (
+      <bentolightboxgalleryprovider>
+        <withbentolightboxgallery>
+          <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80" />
+        </withbentolightboxgallery>
+      </bentolightboxgalleryprovider>
+  );
+}
+
+```
+
+[/example]
+
+#### Example With Multiple Images
+
+[example preview="top-frame" playground="false"]
+
+```javascript
+import react from 'react';
+import {
+  bentolightboxgalleryprovider,,
+  withbentolightboxgallery,
+} from '@ampproject/bento-lightbox-gallery/react';
+
+function app() {
+  return (
+     <BentoLightboxGalleryProvider>
+        <WithBentoLightboxGallery caption="This is the caption for the first image. ">
+          <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80" />
+        </WithBentoLightboxGallery>
+        <WithBentoLightboxGallery
+          as="img"
+          alt="larger img"
+          id="foo"
+          src="https://images.unsplash.com/photo-1583511666407-5f06533f2113?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+          render={() => (
+            <img
+              alt="smaller img"
+              src="https://images.unsplash.com/photo-1583511666407-5f06533f2113?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
+            />
+          )}
+        />
+        <WithBentoLightboxGallery caption="This is the caption for the third image.">
+          <img src="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80" />
+        </WithBentoLightboxGallery>
+        <div>
+          <div>
+            <div>
+              <WithBentoLightboxGallery
+                as="section"
+                render={() => (
+                  <img
+                    alt="only one image"
+                    src="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+                  />
+                )}
+              >
+                <img src="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80" />
+                <img src="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80" />
+              </WithBentoLightboxGallery>
+            </div>
+          </div>
+        </div>
+      </BentoLightboxGalleryProvider>
+  );
+}
+```
+
+[/example]
+
+#### Example Using BentoBaseCarousel
+
+`<BentoLightboxGallery>` can be used with a `<BentoBaseCarousel>` child in order to lightbox all of the carousel's children. As you navigate throught the carousel items in the lightbox, the original carousel slides are synchronised so that when the lightbox is closed, the user ends up on the same slide as they were originally on. Currently, only the `type='slides'` carousel is supported.
+
+[example preview="top-frame" playground="false"]
+
+```javascript
+import react from 'react';
+import {BentoBaseCarousel} from '../../../amp-base-carousel/1.0/component';
+import {
+  bentolightboxgalleryprovider,,
+  withbentolightboxgallery,
+} from '@ampproject/bento-lightbox-gallery/react';
+
+function app() {
+  return (
+       <BentoLightboxGalleryProvider>
+        <BentoBaseCarousel lightbox style={{width: '240px', height: '160px'}}>
+          <img
+            src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"
+            thumbnailSrc="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=120&q=80"
+          />
+          <img
+            src="https://images.unsplash.com/photo-1583511666407-5f06533f2113?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+            thumbnailSrc="https://images.unsplash.com/photo-1583511666407-5f06533f2113?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
+          />
+          <img
+            src="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80"
+            thumbnailSrc="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80"
+          />
+          <img
+            src="https://images.unsplash.com/photo-1583512603806-077998240c7a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+            thumbnailSrc="https://images.unsplash.com/photo-1583512603806-077998240c7a?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
+          />
+          <img
+            src="https://images.unsplash.com/photo-1598133893773-de3574464ef0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+            thumbnailSrc="https://images.unsplash.com/photo-1598133893773-de3574464ef0?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
+          />
+          <img
+            src="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+            thumbnailSrc="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
+          />
+        </BentoBaseCarousel>
+      </BentoLightboxGalleryProvider>
+  );
+}
+
+```
+
+[/example]
+
+#### Example using Both
+
+In this usage the standalone `<img>` elements are lightboxed in a seperate lightbox-gallery group than the carousel elements.
+
+[example preview="top-frame" playground="false"]
+
+```javascript
+import react from 'react';
+import {BentoBaseCarousel} from '../../../amp-base-carousel/1.0/component';
+import {
+  bentolightboxgalleryprovider,,
+  withbentolightboxgallery,
+} from '@ampproject/bento-lightbox-gallery/react';
+
+function app() {
+  return (
+   <BentoLightboxGalleryProvider>
+        <WithBentoLightboxGallery caption="This is the caption for the first image.">
+          <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80" />
+        </WithBentoLightboxGallery>
+        <WithBentoLightboxGallery
+          as="img"
+          alt="larger img"
+          id="foo"
+          src="https://images.unsplash.com/photo-1583511666407-5f06533f2113?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+          render={() => (
+            <img
+              alt="smaller img"
+              src="https://images.unsplash.com/photo-1583511666407-5f06533f2113?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
+            />
+          )}
+        />
+        <WithBentoLightboxGallery aria-label="This is the caption for the third image.">
+          <img src="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80" />
+        </WithBentoLightboxGallery>
+        <BentoBaseCarousel lightbox style={{width: '240px', height: '160px'}}>
+          <img
+            alt="Image 1 long."
+            src="https://images.unsplash.com/photo-1583512603806-077998240c7a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+            thumbnailSrc="https://images.unsplash.com/photo-1583512603806-077998240c7a?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
+          />
+          <img
+            alt="Image 2"
+            src="https://images.unsplash.com/photo-1598133893773-de3574464ef0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+            thumbnailSrc="https://images.unsplash.com/photo-1598133893773-de3574464ef0?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
+          />
+          <img
+            aria-label="Image 3"
+            src="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+            thumbnailSrc="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
+          />
+        </BentoBaseCarousel>
+      </BentoLightboxGalleryProvider>
+
+  );
+}
+```
+
+[/example]
+
+#### Props
+
+##### onBeforeOpen
+
+##### onAfterOpen
+
+##### onAfterClose
+
+##### onViewGrid
+
+##### onToggleCaption
