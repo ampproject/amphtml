@@ -1482,15 +1482,21 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Checks if the page has any videos with audio.
+   * Checks if the page has any videos with audio, waiting for video
+   * buildCallback to check if video cache updates audio for video.
    * @return {!Promise<boolean>}
    * @private
    */
   hasVideoWithAudio_() {
     const ampVideoEls = this.element.querySelectorAll('amp-video');
-    return Promise.all(
-      Array.prototype.map.call(ampVideoEls, (videoEl) => videoEl.getImpl())
-    ).then(() =>
+    const videosBuiltPromise = Promise.all(
+      Array.prototype.map.call(ampVideoEls, (videoEl) =>
+        whenUpgradedToCustomElement(videoEl).then((video) =>
+          video.getImpl(/* waitForBuild */ true)
+        )
+      )
+    );
+    return videosBuiltPromise.then(() =>
       Array.prototype.some.call(
         ampVideoEls,
         (video) => !video.hasAttribute('noaudio')
