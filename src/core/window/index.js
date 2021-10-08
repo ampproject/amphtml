@@ -20,6 +20,6 @@ export function toWin(winOrNull) {
  */
 export function getWin(node) {
   return toWin(
-    (node.ownerDocument || /** @type {!Document} */ (node))?.defaultView
+    (node.ownerDocument || /** @type {!Document} */ (node)).defaultView
   );
 }
