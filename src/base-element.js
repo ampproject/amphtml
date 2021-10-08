@@ -320,15 +320,6 @@ export class BaseElement {
   }
 
   /**
-   * DO NOT CALL. Retained for backward compat during rollout.
-   * @public
-   * @return {!Window}
-   */
-  getWin() {
-    return this.win;
-  }
-
-  /**
    * Returns the associated ampdoc. Only available when `buildCallback` and
    * going forward. It throws an exception before `buildCallback`.
    * @return {!./service/ampdoc-impl.AmpDoc}

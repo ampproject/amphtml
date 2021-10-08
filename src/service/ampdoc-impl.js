@@ -326,15 +326,6 @@ export class AmpDoc {
     return this.parent_;
   }
 
-  /**
-   * DO NOT CALL. Retained for backward compat during rollout.
-   * @return {!Window}
-   * @deprecated Use `ampdoc.win` instead.
-   */
-  getWin() {
-    return this.win;
-  }
-
   /** @return {!Signals} */
   signals() {
     return this.signals_;
