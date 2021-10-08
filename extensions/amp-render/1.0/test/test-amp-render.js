@@ -70,7 +70,7 @@ describes.realWin(
       html = htmlFor(doc);
     });
 
-    it('renders from amp-state', async () => {
+    it.skip('renders from amp-state', async () => {
       const ampState = html`
         <amp-state id="theFood">
           <script type="application/json">
@@ -102,7 +102,7 @@ describes.realWin(
       expect(text).to.equal('Hello Bill');
     });
 
-    it('renders json from src', async () => {
+    it.skip('renders json from src', async () => {
       const fetchStub = env.sandbox
         .stub(BatchedJsonModule, 'batchFetchJsonFor')
         .resolves({name: 'Joe'});
@@ -125,7 +125,7 @@ describes.realWin(
       expect(fetchStub).to.have.been.calledOnce;
     });
 
-    it('should render with layout=container', async () => {
+    it.skip('should render with layout=container', async () => {
       env.sandbox
         .stub(BatchedJsonModule, 'batchFetchJsonFor')
         .resolves({name: 'Joe'});
@@ -161,7 +161,7 @@ describes.realWin(
       expect(setStylesStub).to.be.calledTwice;
     });
 
-    it('layout=container does not resize', async () => {
+    it.skip('layout=container does not resize', async () => {
       env.sandbox
         .stub(BatchedJsonModule, 'batchFetchJsonFor')
         .resolves({name: 'Joe'});
@@ -195,7 +195,7 @@ describes.realWin(
       expect(setStylesStub).to.be.calledOnce;
     });
 
-    it('should error when layout=container is used without placeholder', async () => {
+    it.skip('should error when layout=container is used without placeholder', async () => {
       const errorSpy = env.sandbox.stub(log, 'userAssert');
 
       env.sandbox
@@ -221,7 +221,7 @@ describes.realWin(
       );
     });
 
-    it('renders from amp-script', async () => {
+    it.skip('renders from amp-script', async () => {
       const ampScript = html`
         <amp-script id="dataFunctions" script="local-script" nodom></amp-script>
       `;
@@ -260,7 +260,7 @@ describes.realWin(
       expect(text).to.equal('Hello Joe');
     });
 
-    it('fails gracefully when src is omitted', async () => {
+    it.skip('fails gracefully when src is omitted', async () => {
       element = html`
         <amp-render
           width="auto"
@@ -277,7 +277,7 @@ describes.realWin(
       expect(text).to.equal('Hello ');
     });
 
-    it('re-fetches json on refresh action', async () => {
+    it.skip('re-fetches json on refresh action', async () => {
       const fetchJsonStub = env.sandbox.stub(
         BatchedJsonModule,
         'batchFetchJsonFor'
@@ -315,7 +315,7 @@ describes.realWin(
       expect(options.expr).to.equal('.');
     });
 
-    it('should not re-fetch when src=amp-state', async () => {
+    it.skip('should not re-fetch when src=amp-state', async () => {
       const fetchJsonStub = env.sandbox.stub(
         BatchedJsonModule,
         'batchFetchJsonFor'
@@ -359,7 +359,7 @@ describes.realWin(
       expect(fetchJsonStub).not.to.have.been.called;
     });
 
-    it('should not re-fetch when src=amp-script', async () => {
+    it.skip('should not re-fetch when src=amp-script', async () => {
       const fetchJsonStub = env.sandbox.stub(
         BatchedJsonModule,
         'batchFetchJsonFor'
@@ -409,7 +409,7 @@ describes.realWin(
       expect(fetchJsonStub).not.to.have.been.called;
     });
 
-    it('should use the specified xssi-prefix and key attributes', async () => {
+    it.skip('should use the specified xssi-prefix and key attributes', async () => {
       const json = {
         fullName: {
           firstName: 'Joe',
@@ -453,7 +453,7 @@ describes.realWin(
       expect(options.refresh).to.be.false;
     });
 
-    it('should perform url replacement in src', async () => {
+    it.skip('should perform url replacement in src', async () => {
       const json = {
         fullName: {
           firstName: 'Joe',

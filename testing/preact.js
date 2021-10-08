@@ -15,45 +15,51 @@ import * as preact from /*OK*/ 'preact';
 
 const rafs = [];
 /**
- * @param {*} cb
+ * @param {(ts: (DOMHighResTimeStamp) => number)} cb
  * @return {number}
  */
 function flushableRaf(cb) {
-  cb.__completed = false;
   rafs.push(cb);
-  return requestAnimationFrame((ts) => {
-    if (cb.__completed) {
-      return;
-    }
-    cb.__completed = true;
-    cb(ts);
-  });
+  return requestAnimationFrame(flushRaf);
 }
 
-let flushRender;
+function flushRaf(ts = performance.now()) {
+  // rafs.forEach((fn) => fn(ts));
+  // rafs.length = 0;
+  while (rafs.length > 0) {
+    rafs.shift()(ts);
+  }
+}
+
+let pendingRender;
 
 /**
  * @param {() => void} process
  * @return {Promise<void>}
  */
 function flushableRender(process) {
-  flushRender = () => {
-    flushRender = null;
+  pendingRender = () => {
+    pendingRender = null;
     return process();
   };
-  return Promise.resolve().then(flushRender);
+  return Promise.resolve().then(pendingRender);
 }
 
 /**
  * Flushes all of Preact renders and effects
  * that have been queued up.
  *
+ * Effects may queue up further rerenders, etc. etc,
+ * so this function will wait for everything to resolve.
+ *
  * @return {Promise<void>}
  */
 export async function flush() {
-  await flushRender?.();
-  rafs.forEach((fn) => fn());
-  rafs.length = 0;
+  await flushRaf();
+  while (pendingRender) {
+    await pendingRender();
+    await flushRaf();
+  }
 }
 
 preact.options.requestAnimationFrame = flushableRaf;
