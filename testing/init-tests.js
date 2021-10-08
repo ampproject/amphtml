@@ -12,8 +12,6 @@ import {resetEvtListenerOptsSupportForTesting} from '#core/dom/event-helper-list
 
 import {resetExperimentTogglesForTesting} from '#experiments';
 
-import {flush as flushPreactEffects} from '#preact/test-utils';
-
 import {Services} from '#service';
 import {installDocService} from '#service/ampdoc-impl';
 import {
@@ -32,6 +30,7 @@ import {
   warnForConsoleError,
 } from './console-logging-setup';
 import * as describes from './describes';
+import {flush as flushPreactEffects} from './preact';
 import {TestConfig} from './test-config';
 import {installYieldIt} from './yield';
 
