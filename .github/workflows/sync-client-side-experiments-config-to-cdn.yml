@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - build-system/global-configs/client-side-experiments-config.json
-  pull_request:  # DO NOT MERGE
 
 jobs:
   sync:
