@@ -1,5 +1,5 @@
+// See src/base-element.js for method documentation.
 declare namespace AMP {
-  // See src/base-element.js for method descriptions.
   class BaseElement {
     static R1(): boolean;
     static deferredMount(el?: AmpElement): boolean;
@@ -98,6 +98,8 @@ declare namespace AMP {
   const registerElement: any;
 }
 
+// TODO: Move the types below to better locations.
+// Types below this line should be eventually be moved elsewhere.
 declare type AmpElement = HTMLElement;
 
 declare type Layout =
@@ -126,92 +128,3 @@ declare type LayoutRect = {
 type Mutations = {
   [key: string]: null | boolean | string | number | Array<any> | Object;
 };
-
-// SHAME SHAME SHAME
-// Stubbed out modules below
-
-declare module '#utils/log' {
-  export var dev: any;
-  export var user: any;
-  export var userAssert: any;
-}
-
-declare module '#utils/animation' {
-  export var Animation: any;
-}
-
-declare module '#utils/event-helper' {
-  export var createCustomEvent: any;
-  export var listen: any;
-}
-
-declare module '#experiments' {
-  export var dict: any;
-  export var isExperimentOn: any;
-}
-
-declare module '#service' {
-  export var Services: any;
-}
-declare module '#utils/analytics' {
-  export var triggerAnalyticsEvent: any;
-}
-
-// Core stubs
-// These can be deleted when Core has been converted to TS.
-declare module '#core/constants/key-codes' {
-  export var Keys: any;
-}
-
-declare module '#core/document/format' {
-  export var isAmp4Email: any;
-}
-
-declare module '#core/dom/layout/viewport-observer' {
-  export var observeIntersections: any;
-}
-
-declare module '#core/dom' {
-  export var toggleAttribute: any;
-  export var dispatchCustomEvent: any;
-}
-
-declare module '#core/dom/query' {
-  export var realChildElements: any;
-  export var closestAncestorElementBySelector: any;
-}
-
-declare module '#core/constants/action-constants' {
-  export var ActionTrust: any;
-}
-
-declare module '#core/dom/layout' {
-  export var isLayoutSizeFixed: any;
-  export var isLayoutSizeDefined: any;
-}
-
-declare module '#core/dom/layout/size-observer' {
-  export var observeContentSize: any;
-  export var unobserveContentSize: any;
-}
-
-declare module '#core/types' {
-  export var isFiniteNumber: any;
-}
-
-declare module '#core/types/object' {
-  export var dict: any;
-}
-
-declare module '#core/dom/transition' {
-  export var numeric: any;
-}
-
-declare module '#core/dom/style' {
-  export var getStyle: any;
-  export var setStyle: any;
-}
-
-declare module '#core/data-structures/curve' {
-  export var bezierCurve: any;
-}
