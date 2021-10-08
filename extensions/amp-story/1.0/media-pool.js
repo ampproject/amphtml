@@ -11,11 +11,11 @@ import {
   UnmuteTask,
   UpdateSourcesTask,
 } from './media-tasks';
-import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '../../../src/event-helper';
+import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '#utils/event-helper';
 import {Services} from '#service';
 import {Sources} from './sources';
 import {ampMediaElementFor} from './utils';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {findIndex} from '#core/types/array';
 import {isConnectedNode} from '#core/dom';
 import {matches} from '#core/dom/query';

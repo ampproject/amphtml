@@ -12,12 +12,13 @@ import {toWin} from '#core/window';
 
 import {Services} from '#service';
 
+import {dev, devAssert} from '#utils/log';
+
 import {
   cancellation,
   isBlockedByConsent,
   reportError,
 } from '../error-reporting';
-import {dev, devAssert} from '../log';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';

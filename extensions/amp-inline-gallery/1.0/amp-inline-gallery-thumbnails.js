@@ -4,7 +4,7 @@ import {PreactBaseElement} from '#preact/base-element';
 import {CSS as THUMBNAIL_CSS} from './thumbnails.jss';
 import {BentoInlineGalleryThumbnails} from './thumbnails';
 import {isExperimentOn} from '#experiments';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /** @const {string} */
 export const TAG = 'amp-inline-gallery-thumbnails';

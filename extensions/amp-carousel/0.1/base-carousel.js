@@ -1,6 +1,6 @@
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
-import {isAmp4Email} from '../../../src/format';
+import {isAmp4Email} from '#core/document/format';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {toggleAttribute} from '#core/dom';
 

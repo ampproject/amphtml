@@ -6,7 +6,7 @@ import {
 import {Layout} from '#core/dom/layout';
 import {closest} from '#core/dom/query';
 import {copyChildren, removeChildren} from '#core/dom';
-import {dev, user} from '../../../src/log';
+import {dev, user} from '#utils/log';
 import {getStoryAttributeSrc} from './utils';
 import {htmlFor} from '#core/dom/static-template';
 import {isArray, isObject} from '#core/types';

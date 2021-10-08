@@ -4,11 +4,12 @@ import {createElementWithAttributes, waitForChild} from '#core/dom';
 import {Services} from '#service';
 import {AmpDoc} from '#service/ampdoc-impl';
 
+import {loadPromise} from '#utils/event-helper';
+import {user} from '#utils/log';
+
 import {macroTask} from '#testing/helpers';
 
 import {BaseElement} from '../../../../src/base-element';
-import {loadPromise} from '../../../../src/event-helper';
-import {user} from '../../../../src/log';
 import {ACTIONS, SENTINEL} from '../amp-onetap-google';
 
 const TAG = 'amp-onetap-google';

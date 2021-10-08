@@ -4,6 +4,8 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {userAssert} from '#utils/log';
+
 import {getAdNetworkConfig} from './ad-network-config';
 import {AdStrategy} from './ad-strategy';
 import {
@@ -14,8 +16,6 @@ import {
 import {AnchorAdStrategy} from './anchor-ad-strategy';
 import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {getPlacementsFromConfigObj} from './placement';
-
-import {userAssert} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-auto-ads';

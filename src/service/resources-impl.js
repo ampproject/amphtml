@@ -10,15 +10,16 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {listen, loadPromise} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+
 import {Resource, ResourceState} from './resource';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
 import {TaskQueue} from './task-queue';
 
 import {startupChunk} from '../chunk';
 import {isBlockedByConsent, reportError} from '../error-reporting';
-import {listen, loadPromise} from '../event-helper';
 import {FocusHistory} from '../focus-history';
-import {dev, devAssert} from '../log';
 import {Pass} from '../pass';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 import {getSourceUrl} from '../url';

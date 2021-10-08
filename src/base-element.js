@@ -6,8 +6,9 @@ import {toWin} from '#core/window';
 
 import {Services} from '#service';
 
-import {getData, listen, loadPromise} from './event-helper';
-import {devAssert, user, userAssert} from './log';
+import {getData, listen, loadPromise} from '#utils/event-helper';
+import {devAssert, user, userAssert} from '#utils/log';
+
 import {getMode} from './mode';
 
 /**
@@ -316,15 +317,6 @@ export class BaseElement {
    */
   getLayoutSize() {
     return this.element.getLayoutSize();
-  }
-
-  /**
-   * DO NOT CALL. Retained for backward compat during rollout.
-   * @public
-   * @return {!Window}
-   */
-  getWin() {
-    return this.win;
   }
 
   /**

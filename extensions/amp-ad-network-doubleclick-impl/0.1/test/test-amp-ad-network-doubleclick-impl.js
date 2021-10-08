@@ -1219,6 +1219,14 @@ for (const {config, name} of [
             /(\?|&)ptt=13(&|$)/
           );
         });
+
+        it('should set ppid parameter if set in json', () => {
+          impl.uiHandler = {isStickyAd: () => false};
+          element.setAttribute('json', '{"ppid": "testId"}');
+          return expect(impl.getAdUrl()).to.eventually.match(
+            /(\?|&)ppid=testId(&|$)/
+          );
+        });
       });
 
       describe('#getPageParameters', () => {

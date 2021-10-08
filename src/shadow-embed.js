@@ -11,9 +11,10 @@ import {toWin} from '#core/window';
 
 import {Services} from '#service';
 
+import {dev, devAssert} from '#utils/log';
+
 import {ShadowCSS} from '#third_party/webcomponentsjs/ShadowCSS';
 
-import {dev, devAssert} from './log';
 import {installCssTransformer} from './style-installer';
 import {DomWriterBulk, DomWriterStreamer} from './utils/dom-writer';
 

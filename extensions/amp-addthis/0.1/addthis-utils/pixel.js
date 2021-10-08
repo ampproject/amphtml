@@ -3,7 +3,7 @@ import {Services} from '#service';
 import {addParamsToUrl, parseUrlDeprecated} from '../../../../src/url';
 import {createElementWithAttributes} from '#core/dom';
 import {dict} from '#core/types/object';
-import {getData} from '../../../../src/event-helper';
+import {getData} from '#utils/event-helper';
 import {isObject} from '#core/types';
 import {parseJson} from '#core/types/object/json';
 

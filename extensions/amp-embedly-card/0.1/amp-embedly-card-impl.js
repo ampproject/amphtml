@@ -3,11 +3,12 @@ import {Layout, applyFillContent} from '#core/dom/layout';
 
 import {Services} from '#service';
 
+import {userAssert} from '#utils/log';
+
 import {TAG as KEY_TAG} from './amp-embedly-key';
 
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
-import {userAssert} from '../../../src/log';
 
 /**
  * Component tag identifier.

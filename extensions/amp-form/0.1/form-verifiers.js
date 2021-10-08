@@ -2,7 +2,7 @@ import {LastAddedResolver} from '#core/data-structures/promise';
 import {iterateCursor} from '#core/dom';
 import {isFieldDefault} from '#core/dom/form';
 
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 export const FORM_VERIFY_PARAM = '__amp_form_verify';
 

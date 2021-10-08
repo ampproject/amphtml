@@ -14,7 +14,7 @@ import {
   listenOnce,
   listenOncePromise,
   loadPromise,
-} from '../../src/event-helper';
+} from '#utils/event-helper';
 
 describes.sandboxed('EventHelper', {}, (env) => {
   function getEvent(name, target) {

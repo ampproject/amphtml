@@ -1,7 +1,7 @@
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-sidebar-1.0.css';
 import {isExperimentOn} from '#experiments';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 import {Services} from '#service/';
 
 /** @const {string} */
