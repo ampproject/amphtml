@@ -990,14 +990,10 @@ export class AmpStory extends AMP.BaseElement {
 
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
-    storyLayoutPromise
-      .then(() =>
-        this.whenInitialContentLoaded_(INITIAL_CONTENT_LOAD_TIMEOUT_MS)
-      )
-      .then(() => {
-        this.markStoryAsLoaded_();
-        this.initializeLiveStory_();
-      });
+    this.whenInitialContentLoaded_(INITIAL_CONTENT_LOAD_TIMEOUT_MS).then(() => {
+      this.markStoryAsLoaded_();
+      this.initializeLiveStory_();
+    });
 
     this.maybeLoadStoryEducation_();
 
@@ -1088,7 +1084,9 @@ export class AmpStory extends AMP.BaseElement {
       `amp-story-page#${escapeCssSelectorIdent(this.getInitialPageId_())}`
     );
     const storyLoadPromise = whenUpgradedToCustomElement(initialPageEl).then(
-      () => initialPageEl.signals().whenSignal(CommonSignals.LOAD_END)
+      () => {
+        return initialPageEl.signals().whenSignal(CommonSignals.LOAD_END);
+      }
     );
 
     return this.timer_
