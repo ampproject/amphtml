@@ -6,6 +6,7 @@ import './setup_chai_sinon';
 
 import {configure as configureEnzyme} from 'enzyme';
 import PreactEnzyme from 'enzyme-adapter-preact-pure';
+import {flush as flushPreactEffects} from '#preact';
 
 import {removeElement} from '#core/dom';
 import {resetEvtListenerOptsSupportForTesting} from '#core/dom/event-helper-listen';
@@ -169,6 +170,7 @@ function cleanupTestcase() {
   resetExperimentTogglesForTesting(window);
   resetEvtListenerOptsSupportForTesting();
   cancelTimersForTesting();
+  flushPreactEffects();
 }
 
 /**

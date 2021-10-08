@@ -3,7 +3,6 @@ import {htmlFor} from '#core/dom/static-template';
 import {toggleExperiment} from '#experiments';
 import {waitFor} from '#testing/test-helper';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-import {act} from '#preact';
 
 describes.realWin(
   'amp-iframe-v1.0',
@@ -37,8 +36,7 @@ describes.realWin(
       `;
       doc.body.appendChild(element);
 
-      // TODO(36239): Ensure that effects are properly isolated between all test runs,
-      await act(() => waitRendered());
+      await waitRendered();
       const iframe = element.shadowRoot.querySelector('iframe');
 
       expect(element.parentNode).to.equal(doc.body);

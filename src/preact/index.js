@@ -154,3 +154,38 @@ export function useImperativeHandle(ref, create, opt_deps) {
 export function act(callback) {
   return utils.act(callback);
 }
+
+let rafs = [];
+let flushableRaf = function (cb) {
+  cb.__completed = false;
+  rafs.push(cb);
+  requestAnimationFrame(() => {
+    if (cb.__completed) {
+      return;
+    }
+    cb.__completed = true;
+    cb();
+  });
+};
+
+let flushInternal;
+function flushableRender(process) {
+  process.__completed = false;
+  flushInternal = process;
+  Promise.resolve().then(() => {
+    if (process.__completed) {
+      return;
+    }
+    process.__completed = true;
+    flushInternal = null;
+    return process();
+  });
+}
+preact.options.requestAnimationFrame = flushableRaf;
+preact.options.debounceRendering = flushableRender;
+
+export async function flush() {
+  await flushInternal?.();
+  rafs.forEach((fn) => fn());
+  rafs.length = 0;
+}
