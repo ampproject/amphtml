@@ -3,6 +3,7 @@ import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {realChildNodes} from '#core/dom/query';
 import {tryPlay} from '#core/dom/video';
 
+import {CSS} from '../../../build/amp-audio-0.1.css';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {listen} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
@@ -269,5 +270,5 @@ export class AmpAudio extends AMP.BaseElement {
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {
-  AMP.registerElement(TAG, AmpAudio);
+  AMP.registerElement(TAG, AmpAudio, CSS);
 });
