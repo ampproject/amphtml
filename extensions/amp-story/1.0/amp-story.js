@@ -1084,9 +1084,12 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   whenInitialContentLoaded_(timeoutMs = 0) {
-    const storyLoadPromise = this.pages_[0].element
-      .signals()
-      .whenSignal(CommonSignals.LOAD_END);
+    const initialPageEl = this.element.querySelector(
+      `amp-story-page#${escapeCssSelectorIdent(this.getInitialPageId_())}`
+    );
+    const storyLoadPromise = whenUpgradedToCustomElement(initialPageEl).then(
+      () => initialPageEl.signals().whenSignal(CommonSignals.LOAD_END)
+    );
 
     return this.timer_
       .timeoutPromise(timeoutMs, storyLoadPromise)
