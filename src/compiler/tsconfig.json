@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "paths": {
+      "#compiler": ["./"],
+      "#compiler/*": ["./*"]
+    }
+  },
+  "include": ["**/*.js", "**/*.ts"],
+  "exclude": ["node_modules"]
+}
