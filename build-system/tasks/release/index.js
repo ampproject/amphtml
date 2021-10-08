@@ -233,10 +233,7 @@ function discoverDistFlavors_() {
  * @return {Promise<void>}
  */
 async function compileDistFlavors_(flavorType, command, tempDir) {
-  // TODO(danielrozenberg): remove undefined case when the release automation platform explicitly handles it.
-  if (argv.esm === undefined) {
-    command = `${command} --esm && ${command}`;
-  } else if (argv.esm) {
+  if (argv.esm) {
     command += ' --esm';
   }
   log('Compiling flavor', green(flavorType), 'using', cyan(command));
@@ -439,19 +436,11 @@ async function prependConfig_(outputDir) {
     };
 
     // Mapping of entry file names to a dictionary of AMP_CONFIG additions.
-    const targetsToConfig = MINIFIED_TARGETS.flatMap((minifiedTarget) => {
-      const targets = [];
-      // TODO(danielrozenberg): remove undefined case when the release automation platform explicitly handles it.
-      if (!argv.esm) {
-        // For explicit --no-esm or when no ESM flag is passed.
-        targets.push({file: `${minifiedTarget}.js`, config: {}});
-      }
-      if (argv.esm === undefined || argv.esm) {
-        // For explicit --esm or when no ESM flag is passed.
-        targets.push({file: `${minifiedTarget}.mjs`, config: {esm: 1}});
-      }
-      return targets;
-    });
+    const targetsToConfig = MINIFIED_TARGETS.flatMap((minifiedTarget) => [
+      argv.esm
+        ? {file: `${minifiedTarget}.mjs`, config: {esm: 1}}
+        : {file: `${minifiedTarget}.js`, config: {}},
+    ]);
 
     allPrependPromises.push(
       ...targetsToConfig.map(async (target) => {
@@ -562,7 +551,5 @@ release.flags = {
     'Directory path to emplace release files (defaults to "./release")',
   'flavor':
     'Limit this release build to a single flavor (can be used to split the release work across multiple build machines)',
-  'esm':
-    // TODO(danielrozenberg): remove undefined case when the release automation platform explicitly handles it.
-    'Compile with --esm if true, without --esm if false, and with + without --esm if left unset',
+  'esm': 'Compile with --esm if true, without --esm if false or unspecified',
 };
