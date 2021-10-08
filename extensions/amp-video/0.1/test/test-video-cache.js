@@ -269,6 +269,55 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
     });
   });
 
+  describe('has_audio field', async () => {
+    it('should set noaudio if the cache responds with has_audio: false', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            'has_audio': false,
+            'sources': [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          }),
+      });
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      expect(videoEl).to.have.attribute('noaudio');
+    });
+
+    it('should not set noaudio if the cache responds with has_audio: true', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            'has_audio': true,
+            'sources': [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          }),
+      });
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      expect(videoEl).to.not.have.attribute('noaudio');
+    });
+
+    it('should not set noaudio if the cache responds without has_audio', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            'sources': [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          }),
+      });
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      expect(videoEl).to.not.have.attribute('noaudio');
+    });
+  });
+
   function createVideo(children) {
     const videoEl = createElementWithAttributes(env.win.document, 'amp-video', {
       'cache': 'google',
