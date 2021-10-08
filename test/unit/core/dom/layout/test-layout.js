@@ -8,8 +8,7 @@ import {
   parseLayout,
   parseLength,
 } from '#core/dom/layout';
-
-import {applyStaticLayout} from '../../../../../src/static-layout';
+import {applyStaticLayout} from '#core/static-layout';
 
 describes.sandboxed('DOM - layout', {}, () => {
   let div;
