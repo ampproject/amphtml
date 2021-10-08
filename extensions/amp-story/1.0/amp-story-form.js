@@ -1,7 +1,7 @@
 import {Action, getStoreService} from './amp-story-store-service';
 import {LoadingSpinner} from './loading-spinner';
 import {LocalizedStringId} from '#service/localization/strings';
-import {devAssert} from '../../../src/log';
+import {devAssert} from '#utils/log';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '#core/dom/static-template';

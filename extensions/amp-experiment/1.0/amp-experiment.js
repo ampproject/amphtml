@@ -10,10 +10,11 @@ import {
   originExperimentsForDoc,
 } from '#service/origin-experiments-impl';
 
+import {devAssert, user, userAssert} from '#utils/log';
+
 import {applyExperimentToVariant} from './apply-experiment';
 import {ATTR_PREFIX, Variants, allocateVariant} from './variant';
 
-import {devAssert, user, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 
 const TAG = 'amp-experiment';

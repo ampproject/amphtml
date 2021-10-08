@@ -8,8 +8,9 @@ import {dict} from '#core/types/object';
 import {Services} from '#service';
 import {LocalizedStringId} from '#service/localization/strings';
 
+import {dev} from '#utils/log';
+
 import {CSS} from '../../../build/amp-story-education-0.1.css';
-import {dev} from '../../../src/log';
 import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service';
 import {
   Action,

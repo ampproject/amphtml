@@ -1,7 +1,8 @@
+import {isAmphtml} from '#core/document/format';
+
 import {Services} from '#service';
 
 import {ChunkPriority, chunk} from './chunk';
-import {isAmphtml} from './format';
 
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc

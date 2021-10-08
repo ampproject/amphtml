@@ -2,9 +2,10 @@ import * as WorkerDOM from '@ampproject/worker-dom/dist/amp-production/main.mjs'
 
 import {Services} from '#service';
 
+import {user} from '#utils/log';
+
 import {FakeWindow} from '#testing/fake-dom';
 
-import {user} from '../../../../../src/log';
 import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,

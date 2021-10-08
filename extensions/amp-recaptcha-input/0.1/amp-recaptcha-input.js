@@ -15,7 +15,7 @@ import {
 import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
 import {Layout} from '#core/dom/layout';
 import {setStyles, toggle} from '#core/dom/style';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /** @const */
 const TAG = 'amp-recaptcha-input';

@@ -9,15 +9,16 @@ import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {listenOnce} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
+
 import {AmpAccessEvaluator} from './access-expr';
 import {AccessVars} from './access-vars';
 import {AccessSource, AccessType} from './amp-access-source';
 
 import {CSS} from '../../../build/amp-access-0.1.css';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {cancellation} from '../../../src/error-reporting';
-import {listenOnce} from '../../../src/event-helper';
-import {dev, user, userAssert} from '../../../src/log';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {getSourceOrigin} from '../../../src/url';
 

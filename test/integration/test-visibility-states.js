@@ -4,7 +4,7 @@ import {getVendorJsPropertyName} from '#core/dom/style';
 
 import {Services} from '#service';
 
-import {createCustomEvent} from '../../src/event-helper';
+import {createCustomEvent} from '#utils/event-helper';
 
 const t = describes.sandboxed
   .configure()

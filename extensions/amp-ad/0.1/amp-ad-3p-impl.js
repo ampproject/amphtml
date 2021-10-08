@@ -16,7 +16,7 @@ import {Services} from '#service';
 import {adConfig} from '#ads/_config';
 import {clamp} from '#core/math';
 import {computedStyle, setStyle} from '#core/dom/style';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {dev, devAssert, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getAdCid} from '../../../src/ad-cid';
 import {getAdContainer, isAdPositionAllowed} from '../../../src/ad-helper';

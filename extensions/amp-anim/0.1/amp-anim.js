@@ -1,6 +1,6 @@
 import * as st from '#core/dom/style';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '#core/dom/img';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {propagateAttributes} from '#core/dom/propagate-attributes';

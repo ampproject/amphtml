@@ -6,7 +6,7 @@ import {Transport} from '../transport';
 import {getMode} from '../../../../src/mode';
 import {installDocService} from '#service/ampdoc-impl';
 import {installTimerService} from '#service/timer-impl';
-import {loadPromise} from '../../../../src/event-helper';
+import {loadPromise} from '#utils/event-helper';
 
 describes.realWin(
   'amp-analytics.transport',

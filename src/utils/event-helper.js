@@ -2,7 +2,7 @@ import {internalListenImplementation} from '#core/dom/event-helper-listen';
 import {lastChildElement} from '#core/dom/query';
 import * as mode from '#core/mode';
 
-import {user} from './log';
+import {user} from '#utils/log';
 
 /** @const {string}  */
 const LOAD_FAILURE_PREFIX = 'Failed to load:';

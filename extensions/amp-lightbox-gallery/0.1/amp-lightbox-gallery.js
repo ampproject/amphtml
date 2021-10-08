@@ -20,6 +20,10 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {getData, getDetail, isLoaded, listen} from '#utils/event-helper';
+import {dev, devAssert, userAssert} from '#utils/log';
+
 import {LightboxCaption, OverflowState} from './lightbox-caption';
 import {LightboxControls, LightboxControlsAction} from './lightbox-controls';
 import {
@@ -35,13 +39,10 @@ import {
 } from './utils';
 
 import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {reportError} from '../../../src/error-reporting';
-import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {SwipeDef, SwipeYRecognizer} from '../../../src/gesture-recognizers';
-import {dev, devAssert, userAssert} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-lightbox-gallery';

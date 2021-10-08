@@ -1,6 +1,6 @@
 import {Layout} from '#core/dom/layout';
 
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /** @const {string} */
 export const TAG = 'amp-embedly-key';

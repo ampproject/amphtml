@@ -8,8 +8,9 @@ import {deepEquals} from '#core/types/object/json';
 
 import {Services} from '#service';
 
+import {dev, user} from '#utils/log';
+
 import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
-import {dev, user} from '../../../src/log';
 import {
   Action,
   StateProperty,
