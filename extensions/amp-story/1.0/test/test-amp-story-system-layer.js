@@ -216,4 +216,26 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
     expect(storeService.get(StateProperty.PAUSED_STATE)).to.be.true;
     expect(systemLayer.getShadowRoot()).to.have.attribute('paused');
   });
+
+  describe('system layer equalizer', () => {
+    it('should not show the equalizer if there is no audio', () => {
+      systemLayer.build();
+
+      storeService.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, false);
+      expect(systemLayer.equalizer_).to.not.have.class('amp-video-eq-play');
+    });
+
+    it('should show the equalizer if page has audio', () => {
+      systemLayer.build();
+
+      storeService.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, true);
+      expect(systemLayer.equalizer_).to.have.class('amp-video-eq-play');
+    });
+
+    it('should show the equalizer if story has background audio', () => {
+      storeService.dispatch(Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO, true);
+      systemLayer.build();
+      expect(systemLayer.equalizer_).to.have.class('amp-video-eq-play');
+    });
+  });
 });
