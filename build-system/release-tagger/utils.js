@@ -75,7 +75,7 @@ function createIssue(body, label, title) {
  * @return {Promise<Object>}
  */
 async function createRelease(tag, commit, body, prerelease) {
-  return await octokit.rest.repos.createRelease({
+  const {data} = await octokit.rest.repos.createRelease({
     owner,
     repo,
     name: tag,
@@ -84,6 +84,7 @@ async function createRelease(tag, commit, body, prerelease) {
     body,
     prerelease,
   });
+  return data;
 }
 
 /**
@@ -121,8 +122,8 @@ async function getRelease(tag) {
  * @param {'open' | 'closed'} state
  * @return {Promise<Object>}
  */
-function updateIssue(body, number, title, state = 'open') {
-  return octokit.rest.issues.update({
+async function updateIssue(body, number, title, state = 'open') {
+  const {data} = await octokit.rest.issues.update({
     owner,
     repo,
     'issue_number': number,
@@ -130,6 +131,7 @@ function updateIssue(body, number, title, state = 'open') {
     body,
     state,
   });
+  return data;
 }
 
 /**

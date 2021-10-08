@@ -106,7 +106,7 @@ async function createOrUpdateTracker(head, base, channel, time) {
     new Date(`${time} UTC`).toLocaleString('en-US', {
       timeZone: 'America/Los_Angeles',
     }) + ' PT';
-  const isCherrypick = Number(head) - Number(base) < 1000;
+  const isCherrypick = !head.endsWith('000'); // what about this
   const issue = isCherrypick
     ? await getIssue(`Release ${base}`)
     : await getIssue(`Release ${head}`);

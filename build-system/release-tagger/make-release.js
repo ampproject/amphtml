@@ -160,18 +160,21 @@ function _createBody(head, base, prs) {
          ([major, {packages, unchanged}]) => dedent`\
          <h2>npm packages @ ${getSemver(major, head)}</h2>
          ${Object.entries(packages)
+           .sort()
            .map(
              ([extension, prs]) =>
                `<b>${extension}</b>\n<ul>${[...prs].join('\n')}</ul>`
            )
            .join('\n')}
    
-         <b>Packages not changed:</b> <i>${[...unchanged].join(', ')}</i>`
+         <b>Packages not changed:</b> <i>${[...unchanged]
+           .sort()
+           .join(', ')}</i>`
        )
        .join('\n')}
  
      <h2>Changes by component</h2>
-     ${components.join('')}\
+     ${components.sort().join('')}\
    `;
 
   const patched = head.slice(0, -3) + '000';

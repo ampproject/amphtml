@@ -26,6 +26,7 @@ jobs:
         with:
           node-version: lts/*
       - uses: actions/checkout@v2
+      - run: bash ./.github/workflows/install_dependencies.sh
       - name: Run tagger
         run: |
           npm ci
