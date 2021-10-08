@@ -1,18 +1,4 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 
 /*
  * Styles inserted in iframes rendered by <amp-ima-video>.
@@ -104,7 +90,6 @@ button > svg {
 }
 
 .time {
-  margin-right: 20px;
   text-align: center;
   font-size: 14px;
   text-shadow: 0 0 10px black;
@@ -114,7 +99,12 @@ button > svg {
   height: 30px;
   flex-grow: 1;
   position: relative;
-  margin-right: 20px;
+  margin: 0 20px;
+}
+
+/* Push the next item as if `.progress` was present */
+.progress[hidden] + * {
+  margin-left: auto;
 }
 
 .progress::after {

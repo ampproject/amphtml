@@ -1,24 +1,9 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
-import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
 import {fetchCachedSources} from '../video-cache';
-import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
+import {installPerformanceService} from '#service/performance-impl';
+import {xhrServiceForTesting} from '#service/xhr-impl';
 
 describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
   let cacheUrlService;
@@ -42,6 +27,8 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       sourceUrl: 'https://example.com',
       canonicalUrl: 'https://canonical.com',
     });
+
+    installPerformanceService(env.win);
   });
 
   describe('select sources', () => {
@@ -119,6 +106,17 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
         'https://example-com.cdn.ampproject.org/mbv/s/example.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com'
       );
     });
+
+    it('should send the request to the correct address if the video has a .gif extension', async () => {
+      const videoEl = createVideo([{'src': 'https://website.com/video.gif'}]);
+      const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
+
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      expect(xhrSpy).to.have.been.calledWith(
+        'https://website-com.cdn.ampproject.org/mbv/s/website.com/video.gif?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+      );
+    });
   });
 
   describe('add sources', () => {
@@ -127,7 +125,12 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
         json: () =>
           Promise.resolve({
             sources: [
-              {'url': 'video1.mp4', 'bitrate_kbps': 700, type: 'video/mp4'},
+              {
+                'url': 'video1.mp4',
+                'codec': 'h264',
+                'bitrate_kbps': 700,
+                type: 'video/mp4',
+              },
             ],
           }),
       });
@@ -138,17 +141,81 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       const addedSource = videoEl.querySelector('source');
       expect(addedSource.getAttribute('src')).to.equal('video1.mp4');
       expect(addedSource.getAttribute('data-bitrate')).to.equal('700');
-      expect(addedSource.getAttribute('type')).to.equal('video/mp4');
+      expect(addedSource.getAttribute('type')).to.equal(
+        'video/mp4; codecs=h264'
+      );
     });
 
-    it('should add the sources sorted by bitrate', async () => {
+    it('should add the sources sorted by codec priority', async () => {
       env.sandbox.stub(xhrService, 'fetch').resolves({
         json: () =>
           Promise.resolve({
             sources: [
-              {'url': 'video1.mp4', 'bitrate_kbps': 700, type: 'video/mp4'},
-              {'url': 'video2.mp4', 'bitrate_kbps': 2000, type: 'video/mp4'},
-              {'url': 'video3.mp4', 'bitrate_kbps': 1500, type: 'video/mp4'},
+              {
+                'url': 'video1.mp4',
+                'codec': 'vp09.02.30.11',
+                'bitrate_kbps': 700,
+                type: 'video/mp4',
+              },
+              {
+                'url': 'video2.mp4',
+                'codec': 'unknown',
+                'bitrate_kbps': 2000,
+                type: 'video/mp4',
+              },
+              {
+                'url': 'video3.mp4',
+                'codec': 'h264',
+                'bitrate_kbps': 1500,
+                type: 'video/mp4',
+              },
+            ],
+          }),
+      });
+
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      const addedSources = videoEl.querySelectorAll('source');
+      const codecRegex = /(?<=codecs=)[A-Za-z0-9.]+/;
+      const srcCodec0 = addedSources[0]
+        .getAttribute('type')
+        .match(codecRegex)[0];
+      const srcCodec1 = addedSources[1]
+        .getAttribute('type')
+        .match(codecRegex)[0];
+      const srcCodec2 = addedSources[2]
+        .getAttribute('type')
+        .match(codecRegex)[0];
+      expect(srcCodec0).to.equal('vp09.02.30.11');
+      expect(srcCodec1).to.equal('h264');
+      expect(srcCodec2).to.equal('unknown');
+    });
+
+    it('should add the sources sorted by bitrate, for any subset of sources whose codecs have equivalent priority', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            sources: [
+              {
+                'url': 'video1.mp4',
+                'codec': 'vp09.02.30.11',
+                'bitrate_kbps': 700,
+                type: 'video/mp4',
+              },
+              {
+                'url': 'video2.mp4',
+                'codec': 'vp09.00.15.08',
+                'bitrate_kbps': 2000,
+                type: 'video/mp4',
+              },
+              {
+                'url': 'video3.mp4',
+                'codec': 'vp09.00.25.00',
+                'bitrate_kbps': 1500,
+                type: 'video/mp4',
+              },
             ],
           }),
       });
@@ -163,27 +230,109 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       expect(addedSources[2].getAttribute('data-bitrate')).to.equal('700');
     });
 
+    it('should add the sources sorted first by codec priority, and then by bitrate', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            sources: [
+              {
+                'url': 'video1.mp4',
+                'codec': 'h264',
+                'bitrate_kbps': 2000,
+                type: 'video/mp4',
+              },
+              {
+                'url': 'video2.mp4',
+                'codec': 'vp09.02.30.11',
+                'bitrate_kbps': 1000,
+                type: 'video/mp4',
+              },
+              {
+                'url': 'video3.mp4',
+                'codec': 'vp09.00.15.08',
+                'bitrate_kbps': 2000,
+                type: 'video/mp4',
+              },
+              {
+                'url': 'video4.mp4',
+                'codec': 'h264',
+                'bitrate_kbps': 3000,
+                type: 'video/mp4',
+              },
+            ],
+          }),
+      });
+
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      const addedSources = videoEl.querySelectorAll('source');
+      const codecRegex = /(?<=codecs=)[A-Za-z0-9.]+/;
+      const srcCodec0 = addedSources[0]
+        .getAttribute('type')
+        .match(codecRegex)[0];
+      const srcCodec1 = addedSources[1]
+        .getAttribute('type')
+        .match(codecRegex)[0];
+      const srcCodec2 = addedSources[2]
+        .getAttribute('type')
+        .match(codecRegex)[0];
+      const srcCodec3 = addedSources[3]
+        .getAttribute('type')
+        .match(codecRegex)[0];
+
+      expect(addedSources[0].getAttribute('data-bitrate')).to.equal('2000');
+      expect(srcCodec0).to.equal('vp09.00.15.08');
+
+      expect(addedSources[1].getAttribute('data-bitrate')).to.equal('1000');
+      expect(srcCodec1).to.equal('vp09.02.30.11');
+
+      expect(addedSources[2].getAttribute('data-bitrate')).to.equal('3000');
+      expect(srcCodec2).to.equal('h264');
+
+      expect(addedSources[3].getAttribute('data-bitrate')).to.equal('2000');
+      expect(srcCodec3).to.equal('h264');
+    });
+
     it('should add video[src] as the last fallback source', async () => {
       env.sandbox.stub(xhrService, 'fetch').resolves({
         json: () =>
           Promise.resolve({
             sources: [
-              {'url': 'video1.mp4', 'bitrate_kbps': 700, type: 'video/mp4'},
-              {'url': 'video2.mp4', 'bitrate_kbps': 2000, type: 'video/mp4'},
-              {'url': 'video3.mp4', 'bitrate_kbps': 1500, type: 'video/mp4'},
+              {
+                'url': 'video1.mp4',
+                'codec': 'h264',
+                'bitrate_kbps': 700,
+                type: 'video/mp4',
+              },
+              {
+                'url': 'video2.mp4',
+                'codec': 'h264',
+                'bitrate_kbps': 2000,
+                type: 'video/mp4',
+              },
+              {
+                'url': 'video3.mp4',
+                'codec': 'h264',
+                'bitrate_kbps': 1500,
+                type: 'video/mp4',
+              },
             ],
           }),
       });
 
       const videoEl = createVideo([{src: 'video.mp4'}]);
       videoEl.setAttribute('src', 'video1.mp4');
-      videoEl.setAttribute('type', 'video/mp4');
+      videoEl.setAttribute('type', 'video/mp4; codecs=h264');
 
       await fetchCachedSources(videoEl, env.ampdoc);
 
       const lastSource = videoEl.querySelector('source:last-of-type');
       expect(lastSource.getAttribute('src')).to.equal('video1.mp4');
-      expect(lastSource.getAttribute('type')).to.equal('video/mp4');
+      expect(lastSource.getAttribute('type')).to.equal(
+        'video/mp4; codecs=h264'
+      );
     });
 
     it('should clear the unused sources when video[src]', async () => {
@@ -191,9 +340,24 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
         json: () =>
           Promise.resolve({
             sources: [
-              {'url': 'video1.mp4', 'bitrate_kbps': 700, type: 'video/mp4'},
-              {'url': 'video2.mp4', 'bitrate_kbps': 2000, type: 'video/mp4'},
-              {'url': 'video3.mp4', 'bitrate_kbps': 1500, type: 'video/mp4'},
+              {
+                'url': 'video1.mp4',
+                'codec': 'h264',
+                'bitrate_kbps': 700,
+                type: 'video/mp4',
+              },
+              {
+                'url': 'video2.mp4',
+                'codec': 'h264',
+                'bitrate_kbps': 2000,
+                type: 'video/mp4',
+              },
+              {
+                'url': 'video3.mp4',
+                'codec': 'h264',
+                'bitrate_kbps': 1500,
+                type: 'video/mp4',
+              },
             ],
           }),
       });
@@ -220,7 +384,12 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
         json: () =>
           Promise.resolve({
             sources: [
-              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+              {
+                'url': 'video.mp4',
+                'codec': 'h264',
+                'bitrate_kbps': 700,
+                'type': 'video/mp4',
+              },
             ],
           }),
       });
@@ -231,11 +400,53 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
 
       expect(videoEl.querySelector('source[data-bitrate]')).to.not.be.null;
     });
-    it('should not create the sources if there is amp-orig-src attribute', async () => {
-      const videoEl = createVideo([{'src': 'video.mp4', 'amp-orig-src': ''}]);
+
+    it('should set an attribute on cached video sources', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            sources: [
+              {
+                'url': 'video.mp4',
+                'codec': 'h264',
+                'bitrate_kbps': 700,
+                'type': 'video/mp4',
+              },
+            ],
+          }),
+      });
+
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+
       await fetchCachedSources(videoEl, env.ampdoc);
 
-      expect(videoEl.querySelector('source[data-bitrate]')).to.be.null;
+      const source = videoEl.querySelector('source[data-bitrate]');
+      expect(source).to.exist;
+      expect(source).to.have.attribute('i-amphtml-video-cached-source');
+    });
+
+    it('should not set an attribute on non cached video sources', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            sources: [
+              {
+                'url': 'video.mp4',
+                'codec': 'h264',
+                'bitrate_kbps': 700,
+                'type': 'video/mp4',
+              },
+            ],
+          }),
+      });
+
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      const source = videoEl.querySelector('source:not(source[data-bitrate])');
+      expect(source).to.exist;
+      expect(source).to.not.have.attribute('i-amphtml-video-cached-source');
     });
   });
 

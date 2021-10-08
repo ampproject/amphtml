@@ -1,38 +1,27 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {CommonSignals} from '#core/constants/common-signals';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {isConnectedNode} from '#core/dom';
+import {childElementsByTag} from '#core/dom/query';
+import {setStyle} from '#core/dom/style';
+import {isArray, isObject} from '#core/types';
 
-import {CommonSignals} from './core/constants/common-signals';
-import {Services} from './services';
-import {VisibilityState} from './core/constants/visibility-state';
-import {childElementsByTag} from './core/dom/query';
+import {Services} from '#service';
+import {parseExtensionUrl} from '#service/extension-script';
+
+import {dev, user} from '#utils/log';
+
+import {getMode} from './mode';
+import {
+  disposeServicesForDoc,
+  getServicePromiseOrNullForDoc,
+} from './service-helpers';
 import {
   createShadowDomWriter,
   createShadowRoot,
   importShadowBody,
 } from './shadow-embed';
-import {dev, user} from './log';
-import {disposeServicesForDoc, getServicePromiseOrNullForDoc} from './service';
-import {getMode} from './mode';
 import {installStylesForDoc} from './style-installer';
-import {isArray, isObject} from './core/types';
-import {isConnectedNode} from './dom';
-
-import {parseExtensionUrl} from './service/extension-script';
 import {parseUrlDeprecated} from './url';
-import {setStyle} from './style';
 
 /** @const @private {string} */
 const TAG = 'multidoc-manager';
@@ -128,13 +117,13 @@ export class MultidocManager {
      */
     amp['postMessage'] = viewer.receiveMessage.bind(viewer);
 
-    /** @type {function(string, *, boolean):(!Promise<*>|undefined)} */
+    /** @type {?function(string, *, boolean):(!Promise<*>|undefined)|undefined} */
     let onMessage;
 
     /**
      * Provides a message delivery mechanism by which AMP document can send
      * messages to the viewer.
-     * @param {function(string, *, boolean):(!Promise<*>|undefined)} callback
+     * @param {?function(string, *, boolean):(!Promise<*>|undefined)} callback
      */
     amp['onMessage'] = function (callback) {
       onMessage = callback;
@@ -148,9 +137,7 @@ export class MultidocManager {
       }
 
       // All other messages.
-      if (onMessage) {
-        return onMessage(eventType, data, awaitResponse);
-      }
+      return onMessage?.(eventType, data, awaitResponse);
     }, origin);
 
     /**

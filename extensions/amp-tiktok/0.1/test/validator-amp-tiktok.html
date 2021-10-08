@@ -1,0 +1,92 @@
+<!--
+  Test Description:
+  Tests support for the amp-tiktok tag.
+-->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-tiktok example</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    amp-tiktok {
+      color: red;
+    }
+  </style>
+  <script async custom-element="amp-tiktok" src="https://cdn.ampproject.org/v0/amp-tiktok-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <!-- Valid -->
+  <amp-tiktok width="500" height="500" data-src="6943753342808034566">
+  </amp-tiktok>
+  <!-- Valid -->
+  <amp-tiktok
+    width="700"
+    height="800"
+    data-src="https://www.tiktok.com/@scout2015/video/6943753342808034566">
+  </amp-tiktok>
+  <!-- Valid -->
+  <amp-tiktok width="500" height="800">
+    <blockquote
+      placeholder
+      class="tiktok-embed"
+      cite="https://www.tiktok.com/@countingprimes/video/6948210747285441798"
+      data-video-id="6948210747285441798"
+      style="max-width: 605px; min-width: 325px">
+      <section>
+        <a
+          target="_blank"
+          title="@countingprimes"
+          href="https://www.tiktok.com/@countingprimes"
+          >@countingprimes</a>
+        <p>
+          VIM is great.... right up until you start typing the commands into every
+          single text editor you see. I’d like to apologize for all my unneeded
+          “:wq”’s
+        </p>
+        <a
+          target="_blank"
+          title="♬ original sound - countingprimes"
+          href="https://www.tiktok.com/music/original-sound-6948210588145175302"
+          >♬ original sound - countingprimes</a>
+      </section>
+    </blockquote>
+  </amp-tiktok>
+
+  <!-- Invalid: missing width and height -->
+  <amp-tiktok data-src="6943753342808034566">
+  </amp-tiktok>
+  <!-- Invalid: missing data-src -->
+  <amp-tiktok width="500" height="500">
+  </amp-tiktok>
+  <!-- Invalid: blockquote child missing placeholder attr -->
+  <amp-tiktok width="500" height="800">
+    <blockquote
+      class="tiktok-embed"
+      cite="https://www.tiktok.com/@countingprimes/video/6948210747285441798"
+      data-video-id="6948210747285441798"
+      style="max-width: 605px; min-width: 325px">
+      <section>
+        <a
+          target="_blank"
+          title="@countingprimes"
+          href="https://www.tiktok.com/@countingprimes"
+          >@countingprimes</a>
+        <p>
+          VIM is great.... right up until you start typing the commands into every
+          single text editor you see. I’d like to apologize for all my unneeded
+          “:wq”’s
+        </p>
+        <a
+          target="_blank"
+          title="♬ original sound - countingprimes"
+          href="https://www.tiktok.com/music/original-sound-6948210588145175302"
+          >♬ original sound - countingprimes</a>
+      </section>
+    </blockquote>
+  </amp-tiktok>
+</body>
+</html>

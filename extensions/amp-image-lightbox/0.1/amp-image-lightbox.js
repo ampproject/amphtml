@@ -1,55 +1,40 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Keys} from '#core/constants/key-codes';
+import {bezierCurve} from '#core/data-structures/curve';
+import * as dom from '#core/dom';
+import {
+  layoutRectFromDomRect,
+  layoutRectLtwh,
+  moveLayoutRect,
+} from '#core/dom/layout/rect';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import * as query from '#core/dom/query';
+import {srcsetFromElement} from '#core/dom/srcset';
+import {setStyles, toggle} from '#core/dom/style';
+import * as st from '#core/dom/style';
+import * as tr from '#core/dom/transition';
+import {boundValue, clamp, distance, magnitude} from '#core/math';
+import {WindowInterface} from '#core/window/interface';
 
-import * as dom from '../../../src/dom';
-import * as query from '../../../src/core/dom/query';
-import * as st from '../../../src/style';
-import * as tr from '../../../src/transition';
-import {Animation} from '../../../src/animation';
+import {Services} from '#service';
+
+import {Animation} from '#utils/animation';
+import {isLoaded} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-image-lightbox-0.1.css';
+import {Gestures} from '../../../src/gesture';
 import {
   DoubletapRecognizer,
   SwipeXYRecognizer,
   TapRecognizer,
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
-import {Gestures} from '../../../src/gesture';
-import {Keys} from '../../../src/core/constants/key-codes';
-import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/core/window/interface';
-import {bezierCurve} from '../../../src/core/data-structures/curve';
-import {boundValue, clamp, distance, magnitude} from '../../../src/core/math';
 import {continueMotion} from '../../../src/motion';
-import {dev, userAssert} from '../../../src/log';
-import {isLoaded} from '../../../src/event-helper';
-import {
-  layoutRectFromDomRect,
-  layoutRectLtwh,
-  moveLayoutRect,
-} from '../../../src/core/math/layout-rect';
-import {setStyles, toggle} from '../../../src/style';
-import {srcsetFromElement} from '../../../src/core/dom/srcset';
 
 const TAG = 'amp-image-lightbox';
 
-/** @private @const {!Object<string, boolean>} */
-const SUPPORTED_ELEMENTS_ = {
-  'amp-img': true,
-  'amp-anim': true,
-};
+/** @private @const {!Set<string>} */
+const SUPPORTED_ELEMENTS_ = new Set(['amp-img', 'amp-anim', 'img']);
 
 /** @private @const */
 const ARIA_ATTRIBUTES = ['aria-label', 'aria-describedby', 'aria-labelledby'];
@@ -254,9 +239,15 @@ export class ImageViewer {
     this.setSourceDimensions_(sourceElement, sourceImage);
     this.srcset_ = srcsetFromElement(sourceElement);
 
-    sourceElement.getImpl().then((elem) => {
-      elem.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
-    });
+    if (sourceElement.tagName.toLowerCase() === 'img') {
+      propagateAttributes(ARIA_ATTRIBUTES, sourceElement, this.image_);
+    } else {
+      sourceElement
+        .getImpl()
+        .then((impl) =>
+          propagateAttributes(ARIA_ATTRIBUTES, impl.element, this.image_)
+        );
+    }
 
     if (sourceImage && isLoaded(sourceImage) && sourceImage.src) {
       // Set src provisionally to the known loaded value for fast display.
@@ -870,8 +861,9 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.buildLightbox_();
 
     const source = invocation.caller;
+    const tagName = source.tagName.toLowerCase();
     userAssert(
-      source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
+      source && SUPPORTED_ELEMENTS_.has(tagName),
       'Unsupported element: %s',
       source.tagName
     );

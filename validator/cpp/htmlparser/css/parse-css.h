@@ -1,19 +1,3 @@
-//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
 // A C++ port of third_party/parse_css/parse-css.js, the original
 // Javascript implementation came from https://github.com/tabatkins/parse-css.
 // This library aims to implement the CSS3 syntax module. Some of the original
@@ -499,7 +483,6 @@ class RuleVisitor;
 class Rule : public Token {
  public:
   explicit Rule(TokenType::Code type) : Token(type) {}
-  std::unique_ptr<Token> Clone() const final;
 
   // Accept will first dispatch to the appropriate
   // visitor->VisitRuleType method, then recurse into the children of

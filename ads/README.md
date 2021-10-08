@@ -82,6 +82,8 @@ The AMP runtime provides the following information to the ad:
   <dd>Contains the sanitized  <code>Location</code> object of the primary document. This object contains keys like <code>href</code>, <code>origin</code> and other keys common for <a href="https://developer.mozilla.org/en-US/docs/Web/API/Location">Location</a> objects. In browsers that support <code>location.ancestorOrigins</code> you can trust that the <code>origin</code> of the location is actually correct (so rogue pages cannot claim they represent an origin they do not actually represent).</dd>
   <dt><code>window.context.pageViewId</code></dt>
   <dd>Contains a relatively low entropy id that is the same for all ads shown on a page.</dd>
+  <dt><code>window.context.pageViewId64</code></dt>
+  <dd>Contains a high entropy id, likely to be unique per URL, user and day, that is the same for all ads shown on a page.</dd>
   <dt><code>window.context.referrer</code></dt>
   <dd>Contains the origin of the referrer value of the primary document if available.
     <ul>
@@ -344,7 +346,7 @@ If you're adding support for a new third-party ad service, changes to the follow
 -   `/ads/yournetwork.js`: Implement the main logic here. This is the code that's invoked in the third-party iframe once loaded.
 -   `/ads/yournetwork.md`: Documentation detailing yourr ad service for publishers to read.
 -   `/ads/_config.js`: Add service specific configuration here.
--   `/3p/integration.js`: Register your service here.
+-   `/3p/vendors/yournetwork.js`: Register your service here.
 -   `/extensions/amp-ad/amp-ad.md`: Add a link that points to your publisher doc.
 -   `/examples/ads.amp.html`: Add publisher examples here. Since a real ad isn't guaranteed to fill, a consistently displayed fake ad is highly recommended here to help AMP developers confidently identify new bugs.
 

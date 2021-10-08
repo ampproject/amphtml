@@ -1,18 +1,4 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {createElementWithAttributes} from '#core/dom';
 
 import {
   RANDOM_NUMBER_GENERATORS,
@@ -27,8 +13,7 @@ import {
   randomlySelectUnsetExperiments,
   resetExperimentTogglesForTesting,
   toggleExperiment,
-} from '../../src/experiments';
-import {createElementWithAttributes} from '../../src/dom';
+} from '#experiments';
 
 function fakeLocalStorage(initial = {}) {
   const state = {...initial};
@@ -41,24 +26,50 @@ function fakeLocalStorage(initial = {}) {
 describes.sandboxed('experimentToggles', {}, () => {
   it('should return experiment status map', () => {
     const win = {
-      localStorage: fakeLocalStorage({
-        'amp-experiment-toggles': '-exp3,exp4,exp5',
-      }),
       AMP_CONFIG: {
-        exp1: 1,
-        exp2: 0,
-        exp3: 1,
-        exp4: 0,
+        exp1: 1, // Initialized here
+        exp2: 0, // Initialized here
+        exp3: 1, // Initialized here
+        exp4: 0, // Initialized here
+        exp5: 1, // Initialized here
+        exp6: 0, // Initialized here
         v: '12345667',
       },
+      AMP_EXP: {
+        exp3: 0, // Overrides AMP_CONFIG
+        exp4: 1, // Overrides AMP_CONFIG
+        exp5: 0, // Overrides AMP_CONFIG
+        exp6: 1, // Overrides AMP_CONFIG
+        exp7: 1, // Initialized here
+        exp8: 0, // Initialized here
+        exp9: 1, // Initialized here
+        exp10: 0, // Initialized here
+      },
+      localStorage: fakeLocalStorage({
+        'amp-experiment-toggles': [
+          'exp5', // Overrides AMP_CONFIG and AMP_EXP
+          '-exp6', // Overrides AMP_CONFIG and AMP_EXP
+          '-exp9', // Overrides AMP_EXP
+          'exp10', // Overrides AMP_EXP
+          'exp11', // Initialized here
+          '-exp12', // Initialized here
+        ].join(','),
+      }),
     };
     resetExperimentTogglesForTesting(window);
     expect(experimentToggles(win)).to.deep.equal({
       exp1: true,
       exp2: false,
-      exp3: false, // overridden in cookie
-      exp4: true, // overridden in cookie
+      exp3: false,
+      exp4: true,
       exp5: true,
+      exp6: false,
+      exp7: true,
+      exp8: false,
+      exp9: false,
+      exp10: true,
+      exp11: true,
+      exp12: false,
       // "v" should not appear here
     });
   });

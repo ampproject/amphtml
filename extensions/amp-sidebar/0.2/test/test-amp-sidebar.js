@@ -1,28 +1,12 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-sidebar';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
-import {Keys} from '../../../../src/core/constants/key-codes';
-import {Services} from '../../../../src/services';
-import {assertScreenReaderElement} from '../../../../testing/test-helper';
-import {clearModalStack, getModalStackLength} from '../../../../src/modal';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {toggleExperiment} from '../../../../src/experiments';
+import {ActionTrust} from '#core/constants/action-constants';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
+import {assertScreenReaderElement} from '#testing/test-helper';
+import {clearModalStack, getModalStackLength} from '#core/dom/modal';
+import {createElementWithAttributes} from '#core/dom';
+import {toggleExperiment} from '#experiments';
 
 // Represents the correct value of KeyboardEvent.which for the Escape key
 const KEYBOARD_EVENT_WHICH_ESCAPE = 27;

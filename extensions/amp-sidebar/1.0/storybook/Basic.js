@@ -1,26 +1,10 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../../src/preact';
-import {Sidebar, SidebarToolbar} from '../component';
+import * as Preact from '#preact';
+import {BentoSidebar, BentoSidebarToolbar} from '../component';
 import {boolean, color, select, text, withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'Sidebar',
-  component: Sidebar,
+  component: BentoSidebar,
   decorators: [withKnobs],
 };
 
@@ -28,13 +12,13 @@ export default {
  * @param {!Object} props
  * @return {*}
  */
-function SidebarWithActions(props) {
+function BentoSidebarWithActions(props) {
   // TODO(#30447): replace imperative calls with "button" knobs when the
   // Storybook 6.1 is released.
   const ref = Preact.useRef();
   return (
     <>
-      <Sidebar ref={ref} {...props}>
+      <BentoSidebar ref={ref} {...props}>
         <div style={{margin: 8}}>
           <span>
             Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at
@@ -50,7 +34,7 @@ function SidebarWithActions(props) {
           <button onClick={() => ref.current.close()}>close</button>
           {props.children}
         </div>
-      </Sidebar>
+      </BentoSidebar>
       <div style={{marginTop: 8}}>
         <button onClick={() => ref.current.toggle()}>toggle</button>
         <button onClick={() => ref.current.open()}>open</button>
@@ -70,7 +54,7 @@ export const _default = () => {
 
   return (
     <main>
-      <SidebarWithActions
+      <BentoSidebarWithActions
         side={side}
         style={{color: foregroundColor, backgroundColor}}
         backdropStyle={{backgroundColor: backdropColor}}
@@ -89,18 +73,21 @@ export const toolbar = () => {
 
   return (
     <main>
-      <SidebarWithActions
+      <BentoSidebarWithActions
         side={side}
         style={{color: foregroundColor, backgroundColor}}
         backdropStyle={{backgroundColor: backdropColor}}
       >
-        <SidebarToolbar toolbar={toolbarMedia} toolbarTarget="toolbar-target">
+        <BentoSidebarToolbar
+          toolbar={toolbarMedia}
+          toolbarTarget="toolbar-target"
+        >
           <ul>
             <li>Toolbar Item 1</li>
             <li>Toolbar Item 2</li>
           </ul>
-        </SidebarToolbar>
-      </SidebarWithActions>
+        </BentoSidebarToolbar>
+      </BentoSidebarWithActions>
       <div id="toolbar-target"></div>
     </main>
   );
@@ -113,11 +100,11 @@ export const scroll = () => {
   const backgroundColor = color('background');
   const backdropColor = color('backdrop color');
   const moreBackgroundContent = boolean('more background content', false);
-  const moreSidebarContent = boolean('more sidebar content', false);
+  const moreBentoSidebarContent = boolean('more sidebar content', false);
 
   return (
     <main>
-      <SidebarWithActions
+      <BentoSidebarWithActions
         side={side}
         style={{color: foregroundColor, backgroundColor}}
         backdropStyle={{backgroundColor: backdropColor}}
@@ -255,7 +242,7 @@ export const scroll = () => {
           )
         }
       >
-        {moreSidebarContent && (
+        {moreBentoSidebarContent && (
           <>
             <p>
               Dessert tootsie roll marzipan pastry. Powder powder jelly beans
@@ -384,7 +371,7 @@ export const scroll = () => {
             </p>
           </>
         )}
-      </SidebarWithActions>
+      </BentoSidebarWithActions>
     </main>
   );
 };

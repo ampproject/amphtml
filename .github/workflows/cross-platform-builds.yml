@@ -1,0 +1,22 @@
+name: Cross-Platform Builds
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  compile:
+    if: github.repository == 'ampproject/amphtml'
+    strategy:
+      matrix:
+        platform: [ubuntu, macos, windows]
+        flavor: [Build, Dist]
+    runs-on: ${{ matrix.platform }}-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: bash ./.github/workflows/install_dependencies.sh
+      - name: ${{ matrix.flavor }}
+        run: node build-system/pr-check/cross-platform-builds.js --flavor=${{ matrix.flavor }}

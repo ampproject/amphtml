@@ -1,59 +1,48 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {prepareImageAnimation} from '@ampproject/animations';
 
-import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
-import {CommonSignals} from '../../../src/core/constants/common-signals';
-import {
-  ELIGIBLE_TAP_TAGS,
-  LightboxManager,
-  LightboxThumbnailDataDef,
-  VIDEO_TAGS,
-} from './service/lightbox-manager-impl';
-import {Gestures} from '../../../src/gesture';
-import {Keys} from '../../../src/core/constants/key-codes';
-import {LightboxCaption, OverflowState} from './lightbox-caption';
-import {LightboxControls, LightboxControlsAction} from './lightbox-controls';
-import {Services} from '../../../src/services';
-import {SwipeDef, SwipeYRecognizer} from '../../../src/gesture-recognizers';
-import {SwipeToDismiss} from './swipe-to-dismiss';
+import {CommonSignals} from '#core/constants/common-signals';
+import {Keys} from '#core/constants/key-codes';
+import {getVerticalScrollbarWidth, toggleAttribute} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {
   childElementByTag,
   closest,
   closestAncestorElementBySelector,
   elementByTag,
   scopedQuerySelectorAll,
-} from '../../../src/core/dom/query';
-import {clamp} from '../../../src/core/math';
+} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyle, setStyles, toggle} from '#core/dom/style';
+import {clamp} from '#core/math';
+import {toArray} from '#core/types/array';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {getData, getDetail, isLoaded, listen} from '#utils/event-helper';
+import {dev, devAssert, userAssert} from '#utils/log';
+
+import {LightboxCaption, OverflowState} from './lightbox-caption';
+import {LightboxControls, LightboxControlsAction} from './lightbox-controls';
+import {
+  ELIGIBLE_TAP_TAGS,
+  LightboxManager,
+  LightboxThumbnailDataDef,
+  VIDEO_TAGS,
+} from './service/lightbox-manager-impl';
+import {SwipeToDismiss} from './swipe-to-dismiss';
 import {
   delayAfterDeferringToEventLoop,
   secondsToTimestampString,
 } from './utils';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
-import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
+
+import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
 import {getElementServiceForDoc} from '../../../src/element-service';
-import {getVerticalScrollbarWidth, toggleAttribute} from '../../../src/dom';
-import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
-import {prepareImageAnimation} from '@ampproject/animations';
 import {reportError} from '../../../src/error-reporting';
-import {setStyle, setStyles, toggle} from '../../../src/style';
-import {toArray} from '../../../src/core/types/array';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {Gestures} from '../../../src/gesture';
+import {SwipeDef, SwipeYRecognizer} from '../../../src/gesture-recognizers';
 
 /** @const */
 const TAG = 'amp-lightbox-gallery';
@@ -274,11 +263,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   cloneLightboxableElement_(element) {
-    const fallback = element.getFallback();
-    const shouldCloneFallback =
-      element.classList.contains('amp-notsupported') && !!fallback;
-    if (shouldCloneFallback) {
-      element = fallback;
+    if (element.classList.contains('amp-notsupported')) {
+      const fallback = element.getFallback();
+      if (!!fallback) {
+        element = fallback;
+      }
     }
     const deepClone = !element.classList.contains('i-amphtml-element');
     const clonedNode = element.cloneNode(deepClone);
@@ -307,7 +296,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         element: dev().assertElement(clonedNode),
       };
       let slide = clonedNode;
-      if (ELIGIBLE_TAP_TAGS[clonedNode.tagName]) {
+      if (ELIGIBLE_TAP_TAGS.has(clonedNode.tagName)) {
         const container = this.doc_.createElement('div');
         const imageViewer = htmlFor(this.doc_)`
           <amp-image-viewer layout="fill"></amp-image-viewer>`;
@@ -360,10 +349,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return this.mutateElement(() => {
       const {length} = this.elementsMetadata_[lightboxGroupId];
       this.maybeEnableMultipleItemControls_(length);
-      this.carousel_.getImpl().then((implementation) => {
-        implementation.unlayoutCallback();
-        toggle(this.carousel_, true);
-      });
+      Services.ownersForDoc(this.element)./*OK*/ scheduleUnlayout(
+        this.element,
+        this.carousel_
+      );
+      toggle(this.carousel_, true);
     });
   }
 
@@ -450,11 +440,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     );
     const el = this.lightboxCaption_.getElement();
     el.addEventListener('click', (event) => {
-      triggerAnalyticsEvent(
-        this.element,
-        'descriptionOverflowToggled',
-        dict({})
-      );
+      triggerAnalyticsEvent(this.element, 'descriptionOverflowToggled');
       this.lightboxCaption_.toggleOverflow();
       event.stopPropagation();
       event.preventDefault();
@@ -582,7 +568,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.hideControls_();
       }
     }
-    triggerAnalyticsEvent(this.element, 'controlsToggled', dict({}));
+    triggerAnalyticsEvent(this.element, 'controlsToggled');
   }
 
   /**
@@ -781,7 +767,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       .then(() => {
         setStyle(this.element, 'opacity', '');
         this.showOverlay_();
-        triggerAnalyticsEvent(this.element, 'lightboxOpened', dict({}));
+        triggerAnalyticsEvent(this.element, 'lightboxOpened');
       });
   }
 
@@ -814,7 +800,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     if (!element || !isLoaded(element)) {
       return false;
     }
-    if (!ELIGIBLE_TAP_TAGS[element.tagName]) {
+    if (!ELIGIBLE_TAP_TAGS.has(element.tagName)) {
       return false;
     }
     const img = elementByTag(dev().assertElement(element), 'img');
@@ -1005,6 +991,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   fade_(fadeIn) {
     return this.mutateElement(() => {
       if (fadeIn) {
+        Services.ownersForDoc(this.element)./*OK*/ scheduleUnlayout(
+          this.element,
+          this.carousel_
+        );
         toggle(dev().assertElement(this.carousel_), true);
         toggle(this.element, true);
       }
@@ -1237,7 +1227,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.container_.setAttribute('gallery-view', '');
       toggle(dev().assertElement(this.carousel_), false);
     });
-    triggerAnalyticsEvent(this.element, 'thumbnailsViewToggled', dict({}));
+    triggerAnalyticsEvent(this.element, 'thumbnailsViewToggled');
   }
 
   /**
@@ -1248,6 +1238,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   closeGallery_() {
     return this.mutateElement(() => {
       this.container_.removeAttribute('gallery-view');
+      Services.ownersForDoc(this.element)./*OK*/ scheduleUnlayout(
+        this.element,
+        this.carousel_
+      );
       toggle(dev().assertElement(this.carousel_), true);
       this.updateDescriptionBox_();
     });
@@ -1335,11 +1329,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         const thumbnailElement = this.createThumbnailElement_(thumbnail);
         thumbnails.push(thumbnailElement);
       });
-    this.mutateElement(() => {
-      thumbnails.forEach((thumbnailElement) => {
-        this.gallery_.appendChild(thumbnailElement);
-      });
-    });
+    this.mutateElement(() =>
+      thumbnails.forEach((thumbnailElement) =>
+        this.gallery_.appendChild(thumbnailElement)
+      )
+    );
   }
 
   /**

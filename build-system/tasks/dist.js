@@ -1,22 +1,6 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-const colors = require('../common/colors');
+const colors = require('kleur/colors');
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const path = require('path');
 const {
   bootstrapThirdPartyFrames,
@@ -39,6 +23,10 @@ const {
 const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
+const {
+  VERSION: internalRuntimeVersion,
+} = require('../compile/internal-version');
+const {buildCompiler} = require('../compile/build-compiler');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss, copyCss} = require('./css');
@@ -98,6 +86,7 @@ function printDistHelp(options) {
  * Used by `amp` and `amp dist`.
  *
  * @param {!Object} options
+ * @return {Promise<void>}
  */
 async function runPreDistSteps(options) {
   cleanupBuildDir();
@@ -112,21 +101,13 @@ async function runPreDistSteps(options) {
 
 /**
  * Minified build. Entry point for `amp dist`.
+ * @return {Promise<void>}
  */
 async function dist() {
-  await doDist();
-}
-
-/**
- * Performs a minified build with the given extra args.
- *
- * @param {Object=} extraArgs
- */
-async function doDist(extraArgs = {}) {
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
   const options = {
-    fortesting: extraArgs.fortesting || argv.fortesting,
+    fortesting: argv.fortesting,
     minify: true,
     watch: argv.watch,
   };
@@ -139,10 +120,14 @@ async function doDist(extraArgs = {}) {
   if (argv.core_runtime_only) {
     await compileCoreRuntime(options);
   } else {
-    await buildExperiments();
-    await buildLoginDone('0.1');
-    await buildWebPushPublisherFiles();
-    await compileAllJs(options);
+    await Promise.all([
+      writeVersionFiles(),
+      buildExperiments(),
+      buildLoginDone('0.1'),
+      buildWebPushPublisherFiles(),
+      buildCompiler(),
+      compileAllJs(options),
+    ]);
   }
 
   // This step internally parses the various extension* flags.
@@ -167,7 +152,28 @@ async function doDist(extraArgs = {}) {
 }
 
 /**
+ * Writes the verion.txt file.
+ * @return {!Promise}
+ */
+async function writeVersionFiles() {
+  // TODO: determine which of these are necessary and trim the rest via an I2D.
+  const paths = [
+    'dist',
+    'dist/v0',
+    'dist/v0/examples',
+    'dist.tools/experiments',
+    `dist.3p/${internalRuntimeVersion}`,
+    `dist.3p/${internalRuntimeVersion}/vendor`,
+  ].map((p) => path.join(...p.split('/'), 'version.txt'));
+
+  return Promise.all(
+    paths.map((p) => fs.outputFile(p, internalRuntimeVersion))
+  );
+}
+
+/**
  * Build AMP experiments.js.
+ * @return {Promise<void>}
  */
 async function buildExperiments() {
   await compileJs(
@@ -209,6 +215,7 @@ function buildLoginDone(version) {
 
 /**
  * Build amp-web-push publisher files HTML page.
+ * @return {Promise<void>}
  */
 async function buildWebPushPublisherFiles() {
   const distDir = 'dist/v0';
@@ -240,6 +247,7 @@ async function prebuild() {
 
 /**
  * Copies parsers from the build folder to the dist folder
+ * @return {Promise<void>}
  */
 async function copyParsers() {
   const startTime = Date.now();
@@ -249,6 +257,7 @@ async function copyParsers() {
 
 /**
  * Build amp-web-push publisher files HTML page.
+ * @return {Promise<void>}
  */
 async function preBuildWebPushPublisherFiles() {
   for (const version of WEB_PUSH_PUBLISHER_VERSIONS) {
@@ -260,7 +269,7 @@ async function preBuildWebPushPublisherFiles() {
       const js = await fs.readFile(`${srcPath}/${fileName}.js`, 'utf8');
       const builtName = `${fileName}.js`;
       await fs.outputFile(`${destPath}/${builtName}`, js);
-      const jsFiles = globby.sync(`${srcPath}/*.js`);
+      const jsFiles = await fastGlob(`${srcPath}/*.js`);
       await Promise.all(
         jsFiles.map((jsFile) => {
           return fs.copy(jsFile, `${destPath}/${path.basename(jsFile)}`);
@@ -272,6 +281,7 @@ async function preBuildWebPushPublisherFiles() {
 
 /**
  * post Build amp-web-push publisher files HTML page.
+ * @return {Promise<void>}
  */
 async function postBuildWebPushPublisherFilesVersion() {
   const distDir = 'dist/v0';
@@ -298,6 +308,7 @@ async function postBuildWebPushPublisherFilesVersion() {
 
 /**
  * Precompilation steps required to build experiment js binaries.
+ * @return {Promise<void>}
  */
 async function preBuildExperiments() {
   const expDir = 'tools/experiments';
@@ -321,7 +332,7 @@ async function preBuildExperiments() {
   const js = await fs.readFile(jsSrcPath, 'utf8');
   const builtName = 'experiments.max.js';
   await fs.outputFile(`${jsDir}/${builtName}`, js);
-  const jsFiles = globby.sync(`${expDir}/*.js`);
+  const jsFiles = await fastGlob(`${expDir}/*.js`);
   await Promise.all(
     jsFiles.map((jsFile) => {
       return fs.copy(jsFile, `${jsDir}/${path.basename(jsFile)}`);
@@ -331,6 +342,7 @@ async function preBuildExperiments() {
 
 /**
  * Build "Login Done" page.
+ * @return {Promise<void>}
  */
 async function preBuildLoginDone() {
   await preBuildLoginDoneVersion('0.1');
@@ -339,6 +351,7 @@ async function preBuildLoginDone() {
 /**
  * Build "Login Done" page for the specified version.
  * @param {string} version
+ * @return {Promise<void>}
  */
 async function preBuildLoginDoneVersion(version) {
   const srcDir = `extensions/amp-access/${version}`;
@@ -361,7 +374,7 @@ async function preBuildLoginDoneVersion(version) {
   const js = await fs.readFile(jsPath, 'utf8');
   const builtName = `amp-login-done-${version}.max.js`;
   await fs.outputFile(`${buildDir}/${builtName}`, js);
-  const jsFiles = globby.sync(`${srcDir}/*.js`);
+  const jsFiles = await fastGlob(`${srcDir}/*.js`);
   await Promise.all(
     jsFiles.map((jsFile) => {
       return fs.copy(jsFile, `${buildDir}/${path.basename(jsFile)}`);
@@ -371,7 +384,6 @@ async function preBuildLoginDoneVersion(version) {
 
 module.exports = {
   dist,
-  doDist,
   runPreDistSteps,
 };
 
@@ -383,11 +395,11 @@ dist.flags = {
   pseudo_names:
     'Compile with readable names (useful while profiling / debugging production code)',
   pretty_print:
-    'Output compiled code with whitespace (useful while profiling / debugging production code)',
+    'Output code with whitespace (useful while profiling / debugging production code)',
   fortesting: 'Compile production binaries for local testing',
   noconfig: 'Compile production binaries without applying AMP_CONFIG',
   config: 'Set the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-  coverage: 'Instrument compiled code for collecting coverage information',
+  coverage: 'Instrument code for collecting coverage information',
   extensions: 'Build only the listed extensions',
   extensions_from: 'Build only the extensions from the listed AMP(s)',
   noextensions: 'Build with no extensions',
@@ -404,7 +416,7 @@ dist.flags = {
     'Build runtime with the EXPERIMENT constant set to true',
   sanitize_vars_for_diff:
     'Sanitize the output to diff build results (requires --pseudo_names)',
-  sxg: 'Output the compiled code for the SxG build',
+  sxg: 'Output the minified code for the SxG build',
   warning_level:
     "Optionally set closure's warning level to one of [quiet, default, verbose]",
 };

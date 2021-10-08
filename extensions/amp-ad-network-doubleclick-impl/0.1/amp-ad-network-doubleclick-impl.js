@@ -1,34 +1,20 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 // Because AdSense and DoubleClick are both operated by Google and their A4A
 // implementations share some behavior in common, part of the logic for this
 // implementation is located in the ads/google/a4a directory rather than here.
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
-import '../../../src/service/real-time-config/real-time-config-impl';
-import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
+import '#service/real-time-config/real-time-config-impl';
 import {
-  AmpA4A,
-  ConsentTupleDef,
-  DEFAULT_SAFEFRAME_VERSION,
-  XORIGIN_MODE,
-  assignAdUrlToError,
-} from '../../amp-a4a/0.1/amp-a4a';
+  lineDelimitedStreamer,
+  metaJsonCreativeGrouper,
+} from '#ads/google/a4a/line-delimited-response-handler';
+import {
+  addAmpExperimentIdToElement,
+  addExperimentIdToElement,
+  extractUrlExperimentId,
+  isInManualExperiment,
+} from '#ads/google/a4a/traffic-experiments';
 import {
   AmpAnalyticsConfigDef,
   QQID_HEADER,
@@ -48,87 +34,84 @@ import {
   isCdnProxy,
   isReportingEnabled,
   maybeAppendErrorParameter,
+  maybeInsertOriginTrialToken,
   truncAndTimeUrl,
-} from '../../../ads/google/a4a/utils';
+} from '#ads/google/a4a/utils';
+import {getMultiSizeDimensions} from '#ads/google/utils';
+
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
-} from '../../../src/core/constants/consent-state';
-import {Deferred} from '../../../src/core/data-structures/promise';
+} from '#core/constants/consent-state';
+import {Deferred} from '#core/data-structures/promise';
+import {createElementWithAttributes, isRTL, removeElement} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {domFingerprintPlain} from '#core/dom/fingerprint';
+import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
+import {
+  assertDoesNotContainDisplay,
+  setImportantStyles,
+  setStyles,
+} from '#core/dom/style';
+import {isArray} from '#core/types';
+import {deepMerge, dict} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
+import {stringHash32} from '#core/types/string';
+import {getCryptoRandomBytesArray, utf8Decode} from '#core/types/string/bytes';
+import {parseQueryString} from '#core/types/string/url';
+import {WindowInterface} from '#core/window/interface';
+
+import {
+  getExperimentBranch,
+  isExperimentOn,
+  randomlySelectUnsetExperiments,
+} from '#experiments';
+import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
+import {StoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
+import {StoryAdPlacements} from '#experiments/story-ad-placements';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
+
+import {Services} from '#service';
+import {Navigation} from '#service/navigation';
+import {RTC_VENDORS} from '#service/real-time-config/callout-vendors';
+
+import {dev, devAssert, user} from '#utils/log';
+
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
 } from './flexible-ad-slot-utils';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
-import {Navigation} from '../../../src/service/navigation';
-import {RTC_VENDORS} from '../../../src/service/real-time-config/callout-vendors';
-import {
-  RefreshManager, // eslint-disable-line no-unused-vars
-  getRefreshManager,
-} from '../../amp-a4a/0.1/refresh-manager';
 import {SafeframeHostApi} from './safeframe-host';
-import {Services} from '../../../src/services';
 import {
   TFCD,
   constructSRABlockParameters,
   serializeTargeting,
   sraBlockCallbackHandler,
 } from './sra-utils';
-import {WindowInterface} from '../../../src/core/window/interface';
+
+import {getOrCreateAdCid} from '../../../src/ad-cid';
+import {isCancellation} from '../../../src/error-reporting';
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {getMode} from '../../../src/mode';
 import {
-  addAmpExperimentIdToElement,
-  addExperimentIdToElement,
-  extractUrlExperimentId,
-  isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
+  AmpA4A,
+  ConsentTupleDef,
+  DEFAULT_SAFEFRAME_VERSION,
+  XORIGIN_MODE,
+  assignAdUrlToError,
+} from '../../amp-a4a/0.1/amp-a4a';
 import {
-  assertDoesNotContainDisplay,
-  setImportantStyles,
-  setStyles,
-} from '../../../src/style';
-import {
-  createElementWithAttributes,
-  isRTL,
-  removeElement,
-} from '../../../src/dom';
-import {deepMerge, dict} from '../../../src/core/types/object';
-import {dev, devAssert, user} from '../../../src/log';
-import {domFingerprintPlain} from '../../../src/core/dom/fingerprint';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
+  RefreshManager, // eslint-disable-line no-unused-vars
+  getRefreshManager,
+} from '../../amp-a4a/0.1/refresh-manager';
+import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
   is3pThrottled,
   waitFor3pThrottle,
 } from '../../amp-ad/0.1/concurrent-load';
-import {
-  getCryptoRandomBytesArray,
-  utf8Decode,
-} from '../../../src/core/types/string/bytes';
-import {
-  getExperimentBranch,
-  isExperimentOn,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
-import {getMode} from '../../../src/mode';
-import {getMultiSizeDimensions} from '../../../ads/google/utils';
-
-import {getOrCreateAdCid} from '../../../src/ad-cid';
-
-import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
-import {StoryAdAutoAdvance} from '../../../src/experiments/story-ad-auto-advance';
-import {StoryAdPlacements} from '../../../src/experiments/story-ad-placements';
-import {getPageLayoutBoxBlocking} from '../../../src/core/dom/page-layout-box';
-import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {isArray} from '../../../src/core/types';
-import {isCancellation} from '../../../src/error-reporting';
-import {
-  lineDelimitedStreamer,
-  metaJsonCreativeGrouper,
-} from '../../../ads/google/a4a/line-delimited-response-handler';
-import {parseQueryString} from '../../../src/core/types/string/url';
-import {stringHash32} from '../../../src/core/types/string';
-import {tryParseJson} from '../../../src/core/types/object/json';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -485,14 +468,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           branches: Object.values(ZINDEX_EXP_BRANCHES),
         },
         {
-          experimentId: ADS_INITIAL_INTERSECTION_EXP.id,
-          isTrafficEligible: () => true,
-          branches: [
-            ADS_INITIAL_INTERSECTION_EXP.control,
-            ADS_INITIAL_INTERSECTION_EXP.experiment,
-          ],
-        },
-        {
           experimentId: IDLE_CWV_EXP,
           isTrafficEligible: () => {
             return (
@@ -507,10 +482,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     Object.keys(setExps).forEach(
       (expName) => setExps[expName] && this.experimentIds.push(setExps[expName])
     );
-    const moduleNomoduleExpId = this.getModuleNomoduleExpIds_();
-    if (moduleNomoduleExpId) {
-      this.experimentIds.push(moduleNomoduleExpId);
-    }
 
     const ssrExpIds = this.getSsrExpIds_();
     for (let i = 0; i < ssrExpIds.length; i++) {
@@ -528,12 +499,28 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       addExperimentIdToElement(storyAdPlacementsExpId, this.element);
     }
 
+    const storyAdPageOutlinkExpId = getExperimentBranch(
+      this.win,
+      StoryAdPageOutlink.ID
+    );
+    if (storyAdPageOutlinkExpId) {
+      addExperimentIdToElement(storyAdPageOutlinkExpId, this.element);
+    }
+
     const autoAdvanceExpBranch = getExperimentBranch(
       this.win,
       StoryAdAutoAdvance.ID
     );
     if (autoAdvanceExpBranch) {
       addExperimentIdToElement(autoAdvanceExpBranch, this.element);
+    }
+
+    const storyAdSegmentBranch = getExperimentBranch(
+      this.win,
+      StoryAdSegmentExp.ID
+    );
+    if (storyAdSegmentBranch) {
+      addExperimentIdToElement(storyAdSegmentBranch, this.element);
     }
   }
 
@@ -590,6 +577,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   buildCallback() {
     super.buildCallback();
     this.maybeDeprecationWarn_();
+    maybeInsertOriginTrialToken(this.win);
     this.setPageLevelExperiments(this.extractUrlExperimentId_());
     const pubEnabledSra = !!this.win.document.querySelector(
       'meta[name=amp-ad-doubleclick-sra]'
@@ -734,6 +722,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'spsa': this.isSinglePageStoryAd
         ? `${pageLayoutBox.width}x${pageLayoutBox.height}`
         : null,
+      'ppid': (this.jsonTargeting && this.jsonTargeting['ppid']) || null,
       ...googleBlockParameters(this),
     };
   }
@@ -968,6 +957,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           ).forEach((exclusion) => {
             exclusions[exclusion] = true;
           });
+        }
+        if (rtcResponse.response['ppid']) {
+          this.jsonTargeting['ppid'] = rtcResponse.response['ppid'];
         }
       }
     });
@@ -1247,8 +1239,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  viewportCallbackTemp(inViewport) {
-    super.viewportCallbackTemp(inViewport);
+  viewportCallback(inViewport) {
+    super.viewportCallback(inViewport);
     if (this.reattemptToExpandFluidCreative_ && !inViewport) {
       // If the initial expansion attempt failed (e.g., the slot was within the
       // viewport), then we will re-attempt to expand it here whenever the slot
@@ -1650,16 +1642,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return;
         }
         // Create amp-pixel and append to document to send impression.
-        this.win.document.body.appendChild(
-          createElementWithAttributes(
-            this.win.document,
-            'amp-pixel',
-            dict({
-              'src': url,
-              'referrerpolicy': scrubReferer ? 'no-referrer' : '',
-            })
-          )
-        );
+        this.getAmpDoc()
+          .getBody()
+          .appendChild(
+            createElementWithAttributes(
+              this.win.document,
+              'amp-pixel',
+              dict({
+                'src': url,
+                'referrerpolicy': scrubReferer ? 'no-referrer' : '',
+              })
+            )
+          );
       } catch (unusedError) {}
     });
   }

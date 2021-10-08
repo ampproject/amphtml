@@ -1,18 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 /**
@@ -21,10 +6,10 @@
  * determine which tasks are required to run for pull request builds.
  */
 const config = require('../test-configs/config');
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const minimatch = require('minimatch');
 const path = require('path');
-const {cyan} = require('../common/colors');
+const {cyan} = require('kleur/colors');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {gitDiffNameOnlyMain} = require('../common/git');
 const {isCiBuild} = require('../common/ci');
@@ -129,6 +114,8 @@ const targetMatchers = {
     }
     return (
       file == 'build-system/tasks/ava.js' ||
+      file.startsWith('build-system/release-tagger/') ||
+      file.startsWith('build-system/server/') ||
       file.startsWith('build-system/tasks/get-zindex/') ||
       file.startsWith('build-system/tasks/make-extension/') ||
       file.startsWith('build-system/tasks/markdown-toc/') ||
@@ -170,16 +157,6 @@ const targetMatchers = {
     return (
       file == 'build-system/tasks/caches-json.js' ||
       file == 'build-system/global-configs/caches.json'
-    );
-  },
-  [Targets.DEV_DASHBOARD]: (file) => {
-    if (isOwnersFile(file)) {
-      return false;
-    }
-    return (
-      file == 'build-system/tasks/dev-dashboard-tests.js' ||
-      file == 'build-system/server/app.js' ||
-      file.startsWith('build-system/server/app-index/')
     );
   },
   [Targets.DOCS]: (file) => {
@@ -241,7 +218,18 @@ const targetMatchers = {
     );
   },
   [Targets.LINT_RULES]: (file) => {
-    return file.endsWith('.eslintrc.js') || file == 'package.json';
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return (
+      file.startsWith('build-system/eslint-rules') ||
+      file.endsWith('.eslintrc.js') ||
+      file == '.eslintignore' ||
+      file == '.prettierrc' ||
+      file == '.prettierignore' ||
+      file == 'build-system/test-configs/forbidden-terms.js' ||
+      file == 'package.json'
+    );
   },
   [Targets.OWNERS]: (file) => {
     return isOwnersFile(file) || file == 'build-system/tasks/check-owners.js';
@@ -405,7 +393,7 @@ function expandFileLists() {
   ];
   for (const globName of globNames) {
     const fileListName = globName.replace('Globs', 'Files');
-    fileLists[fileListName] = globby.sync(config[globName], {dot: true});
+    fileLists[fileListName] = fastGlob.sync(config[globName], {dot: true});
   }
 }
 

@@ -1,18 +1,4 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {awaitFrameAfter} from '#testing/helpers';
 
 describes.endtoend(
   'amp-video with video analytics',
@@ -23,16 +9,12 @@ describes.endtoend(
   (env) => {
     let controller;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 
     function isPaused(elem) {
       return controller.getElementProperty(elem, 'paused');
-    }
-
-    function sleep(ms) {
-      return new Promise((res) => setTimeout(res, ms));
     }
 
     it('control buttons should manipulate video box behavior', async () => {
@@ -48,7 +30,7 @@ describes.endtoend(
 
       // Sleep 1 second for the `video-percentage-played` event trigger
       // and the request to be sent
-      await sleep(1000);
+      await awaitFrameAfter(500);
       await expect(
         'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking&id=myVideo'
       ).to.have.been.sent;
@@ -59,7 +41,7 @@ describes.endtoend(
       await expect(isPaused(videoElem2)).to.be.false;
       // Sleep 1 second for the `video-percentage-played` event trigger
       // and the request to be sent
-      await sleep(1000);
+      await awaitFrameAfter(500);
       await expect(
         'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking&id=myVideo2'
       ).to.have.been.sent;

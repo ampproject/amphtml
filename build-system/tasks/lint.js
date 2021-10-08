@@ -1,18 +1,3 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
@@ -23,7 +8,7 @@ const {
   logOnSameLine,
   logOnSameLineLocalDev,
 } = require('../common/logging');
-const {cyan, green, red, yellow} = require('../common/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {ESLint} = require('eslint');
 const {getFilesToCheck} = require('../common/utils');
 const {lintGlobs} = require('../test-configs/config');
@@ -37,6 +22,7 @@ const options = {
 /**
  * Runs the linter on the given set of files.
  * @param {Array<string>} filesToLint
+ * @return {Promise<void>}
  */
 async function runLinter(filesToLint) {
   logLocalDev(green('Starting linter...'));
@@ -132,15 +118,18 @@ function summarizeResults(results, fixedFiles) {
 /**
  * Checks files for formatting (and optionally fixes them) with Eslint.
  * Explicitly makes sure the API doesn't check files in `.eslintignore`.
+ * When local changes are linted (e.g. during CI), we also check if the list of
+ * forbidden terms needs to be updated.
+ * @return {Promise<void>}
  */
 async function lint() {
-  const filesToCheck = getFilesToCheck(
-    lintGlobs,
-    {gitignore: true},
-    '.eslintignore'
-  );
+  const filesToCheck = getFilesToCheck(lintGlobs, {}, '.eslintignore');
   if (filesToCheck.length == 0) {
     return;
+  }
+  const forbiddenTerms = 'build-system/test-configs/forbidden-terms.js';
+  if (argv.local_changes && !filesToCheck.includes(forbiddenTerms)) {
+    filesToCheck.push(forbiddenTerms);
   }
   await runLinter(filesToCheck);
 }

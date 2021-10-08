@@ -14,12 +14,15 @@
  * the License.
  */
 
+import {parseQueryString} from '#core/types/string/url';
+
+import {initLogConstructor, setReportError, user} from '#utils/log';
+
 import {TAG} from './vars';
 import {WindowMessenger} from './window-messenger';
-import {getMode} from '../../../src/mode';
-import {initLogConstructor, setReportError, user} from '../../../src/log';
-import {parseQueryString} from '../../../src/core/types/string/url';
+
 import {reportError} from '../../../src/error-reporting';
+import {getMode} from '../../../src/mode';
 
 initLogConstructor();
 setReportError(reportError);

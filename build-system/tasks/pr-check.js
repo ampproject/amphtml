@@ -1,18 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
@@ -35,6 +20,7 @@ const jobName = 'pr-check.js';
 /**
  * This file runs tests against the local workspace to mimic the CI build as
  * closely as possible.
+ * @return {Promise<void>}
  */
 async function prCheck() {
   const runCheck = (cmd) => {
@@ -93,10 +79,6 @@ async function prCheck() {
     runCheck('amp check-links --local_changes');
   }
 
-  if (buildTargetsInclude(Targets.DEV_DASHBOARD)) {
-    runCheck('amp dev-dashboard-tests');
-  }
-
   if (buildTargetsInclude(Targets.OWNERS)) {
     runCheck('amp check-owners');
   }
@@ -128,7 +110,7 @@ async function prCheck() {
       runCheck('amp clean');
       runCheck('amp dist --fortesting');
     }
-    runCheck('amp integration --nobuild --compiled --headless');
+    runCheck('amp integration --nobuild --minified --headless');
   }
 
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VALIDATOR)) {

@@ -1,24 +1,10 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {createElementWithAttributes} from '#core/dom';
+import {setScopeSelectorSupportedForTesting} from '#core/dom/css-selectors';
+import * as query from '#core/dom/query';
+import {isElement} from '#core/types';
+import {toArray} from '#core/types/array';
 
-import * as query from '../../../../src/core/dom/query';
-import {isElement} from '../../../../src/core/types';
-import {loadPromise} from '../../../../src/event-helper';
-import {setScopeSelectorSupportedForTesting} from '../../../../src/core/dom/css-selectors';
-import {toArray} from '../../../../src/core/types/array';
+import {loadPromise} from '#utils/event-helper';
 
 /** Helper to execute test cases with and without the polyfills. */
 function itWithPolyfill(description, testFn) {
@@ -68,6 +54,39 @@ describes.sandboxed('DOM - query helpers', {}, (env) => {
     expect(
       toArray(query.scopedQuerySelectorAll(grandparent, 'div div'))
     ).to.deep.equal([element1, element2]);
+  });
+
+  describe('realChildElements and realChildNodes', () => {
+    let element;
+    beforeEach(() => {
+      element = document.createElement('div');
+    });
+
+    it('realChildElements should return nothing', () => {
+      expect(query.realChildNodes(element).length).to.equal(0);
+      expect(query.realChildElements(element).length).to.equal(0);
+    });
+
+    it('realChildElements should return content-only nodes', () => {
+      const createWithAttr = (attr) =>
+        createElementWithAttributes(document, 'div', {[attr]: ''});
+
+      element.appendChild(document.createElement('i-amp-service'));
+      element.appendChild(createWithAttr('placeholder'));
+      element.appendChild(createWithAttr('fallback'));
+      element.appendChild(createWithAttr('overflow'));
+      element.appendChild(document.createTextNode('abc'));
+      element.appendChild(document.createElement('content'));
+
+      const nodes = query.realChildNodes(element);
+      expect(nodes.length).to.equal(2);
+      expect(nodes[0].textContent).to.equal('abc');
+      expect(nodes[1].tagName.toLowerCase()).to.equal('content');
+
+      const elements = query.realChildElements(element);
+      expect(elements.length).to.equal(1);
+      expect(elements[0].tagName.toLowerCase()).to.equal('content');
+    });
   });
 
   describe('matches', () => {

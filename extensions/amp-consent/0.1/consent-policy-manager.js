@@ -1,32 +1,16 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   CONSENT_ITEM_STATE,
   ConsentInfoDef,
   PURPOSE_CONSENT_STATE,
 } from './consent-info';
-import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {Observable} from '../../../src/core/data-structures/observable';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {hasOwn, map} from '../../../src/core/types/object';
-import {isFiniteNumber, isObject} from '../../../src/core/types';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {Deferred} from '#core/data-structures/promise';
+import {Observable} from '#core/data-structures/observable';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
+import {hasOwn, map} from '#core/types/object';
+import {isFiniteNumber, isObject} from '#core/types';
 
-import {user, userAssert} from '../../../src/log';
+import {user, userAssert} from '#utils/log';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const TAG = 'consent-policy-manager';

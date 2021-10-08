@@ -1,25 +1,9 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Services} from '../../../src/services';
-import {getChildJsonConfig} from '../../../src/json';
+import {Services} from '#service';
+import {getChildJsonConfig} from '#core/dom';
 import {isProtocolValid} from '../../../src/url';
-import {once} from '../../../src/core/types/function';
-import {registerServiceBuilder} from '../../../src/service';
-import {user, userAssert} from '../../../src/log';
+import {once} from '#core/types/function';
+import {registerServiceBuilder} from '../../../src/service-helpers';
+import {user, userAssert} from '#utils/log';
 
 /** @private @const {string} */
 export const CONFIG_SRC_ATTRIBUTE_NAME = 'src';

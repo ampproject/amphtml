@@ -1,23 +1,8 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
 const puppeteer = require('puppeteer'); // eslint-disable-line no-unused-vars
-const {cyan, green, red, yellow} = require('../../common/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {log: logBase} = require('../../common/logging');
 
 const CSS_SELECTOR_RETRY_MS = 200;
@@ -89,6 +74,7 @@ function log(mode, ...messages) {
  * @param {string} testName the full name of the test.
  * @param {!Array<string>} selectors Array of CSS selector that must eventually
  *     be removed from the page.
+ * @return {Promise<void>}
  * @throws {Error} an encountered error.
  */
 async function verifySelectorsInvisible(page, testName, selectors) {
@@ -119,6 +105,7 @@ async function verifySelectorsInvisible(page, testName, selectors) {
  * @param {string} testName the full name of the test.
  * @param {!Array<string>} selectors Array of CSS selectors that must
  *     eventually appear on the page.
+ * @return {Promise<void>}
  * @throws {Error} an encountered error.
  */
 async function verifySelectorsVisible(page, testName, selectors) {
@@ -155,6 +142,7 @@ async function verifySelectorsVisible(page, testName, selectors) {
  *
  * @param {!puppeteer.Page} page page to wait on.
  * @param {string} testName the full name of the test.
+ * @return {Promise<void>}
  * @throws {Error} an encountered error.
  */
 async function waitForPageLoad(page, testName) {
@@ -217,8 +205,8 @@ async function waitForElementVisibility(page, selector, options) {
         'verbose',
         'Expecting all element visibilities to be',
         cyan(waitForVisible),
-        '; they are',
-        cyan(elementsAreVisible)
+        '; they are:',
+        cyan(elementsAreVisible.join(', '))
       );
     } else {
       log('verbose', 'No', cyan(selector), 'matches found');

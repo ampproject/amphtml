@@ -1,21 +1,5 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const argv = require('minimist')(process.argv.slice(2));
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
@@ -26,7 +10,7 @@ const {
 const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
-const {cyan, green, red, yellow} = require('../common/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {logClosureCompilerError} = require('../compile/closure-compile');
 const {log} = require('../common/logging');
@@ -39,33 +23,6 @@ const CORE_SRCS_GLOBS = [
 
   // Needed for CSS escape polyfill
   'third_party/css-escape/css-escape.js',
-];
-
-/**
- * Files that pass type-checking but don't belong to a passing directory target.
- * Note: This is a TEMPORARY holding point during the transition to type-safety.
- * @type {!Array<string>}
- */
-const PRIDE_FILES_GLOBS = [
-  ...CORE_SRCS_GLOBS,
-
-  // Runtime
-  'build/amp-loader-0.1.css.js',
-  'build/ampdoc.css.js',
-  'build/ampshared.css.js',
-  'src/config.js',
-  'src/dom.js',
-  'src/format.js',
-  'src/internal-version.js',
-  'src/json.js',
-  'src/log.js',
-  'src/mode.js',
-  'src/types.js',
-
-  // Third Party
-  'third_party/webcomponentsjs/ShadowCSS.js',
-  'node_modules/promise-pjs/package.json',
-  'node_modules/promise-pjs/promise.mjs',
 ];
 
 /**
@@ -105,9 +62,7 @@ const TYPE_CHECK_TARGETS = {
     srcGlobs: ['src/amp-story-player/**/*.js'],
     warningLevel: 'QUIET',
   },
-  'src-context': ['src/context/**/*.js', ...CORE_SRCS_GLOBS],
   'src-core': CORE_SRCS_GLOBS,
-  'src-examiner': ['src/examiner/**/*.js'],
   'src-experiments': ['src/experiments/**/*.js', ...CORE_SRCS_GLOBS],
   'src-inabox': {
     srcGlobs: ['src/inabox/**/*.js'],
@@ -120,7 +75,7 @@ const TYPE_CHECK_TARGETS = {
     ...CORE_SRCS_GLOBS,
   ],
   'src-preact': {
-    srcGlobs: ['src/preact/**/*.js', 'src/context/**/*.js', ...CORE_SRCS_GLOBS],
+    srcGlobs: ['src/preact/**/*.js', ...CORE_SRCS_GLOBS],
     warningLevel: 'QUIET',
   },
   'src-purifier': {
@@ -131,6 +86,9 @@ const TYPE_CHECK_TARGETS = {
     srcGlobs: ['src/service/**/*.js'],
     warningLevel: 'QUIET',
   },
+  'src-compiler': {
+    srcGlobs: ['src/compiler/**/*.js'],
+  },
   'src-utils': {
     srcGlobs: ['src/utils/**/*.js'],
     warningLevel: 'QUIET',
@@ -138,16 +96,6 @@ const TYPE_CHECK_TARGETS = {
   'src-web-worker': {
     srcGlobs: ['src/web-worker/**/*.js'],
     warningLevel: 'QUIET',
-  },
-
-  // Opposite of `shame.extern.js`. This target is a catch-all for files that
-  // are currently passing, but whose parent directories are not fully passing.
-  // Adding a file or glob here will cause CI to fail if type errors are
-  // introduced. It is okay to remove a file from this list only when fixing a
-  // bug for cherry-pick.
-  'pride': {
-    srcGlobs: PRIDE_FILES_GLOBS,
-    externGlobs: ['build-system/externs/*.extern.js'],
   },
 
   // Ensures that all files in src and extensions pass the specified set of
@@ -187,12 +135,12 @@ const TYPE_CHECK_TARGETS = {
       'ads/inabox/inabox-host.js',
       'src/web-worker/web-worker.js',
     ],
-    extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
+    extraGlobs: ['src/inabox/*.js', '!node_modules/preact/**'],
     warningLevel: 'QUIET',
   },
   'extensions': () => ({
     entryPoints: getExtensionSrcPaths(),
-    extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
+    extraGlobs: ['src/inabox/*.js', '!node_modules/preact/**'],
     warningLevel: 'QUIET',
   }),
   'integration': {
@@ -256,7 +204,7 @@ async function typeCheck(targetName) {
 
   // If srcGlobs and externGlobs are defined, determine the externs/extraGlobs
   if (srcGlobs.length || externGlobs.length) {
-    opts.externs = externGlobs.flatMap(globby.sync);
+    opts.externs = externGlobs.flatMap(fastGlob.sync);
 
     // Included globs should explicitly exclude any externs
     const excludedExterns = externGlobs.map((glob) => `!${glob}`);

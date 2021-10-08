@@ -1,23 +1,6 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {elementStringOrPassThru} from '../error/message-helpers';
-import {includes} from '../types/string';
-import {isArray, isElement, isString} from '../types';
-import {remove} from '../types/array';
+import {elementStringOrPassThru} from '#core/error/message-helpers';
+import {isArray, isElement, isString} from '#core/types';
+import {remove} from '#core/types/array';
 
 /**
  * @fileoverview This file provides the base implementation for assertion
@@ -59,7 +42,7 @@ export function assert(
   }
 
   // Include the sentinel string if provided and not already present
-  if (sentinel && !includes(opt_message, sentinel)) {
+  if (sentinel && opt_message.indexOf(sentinel) == -1) {
     opt_message += sentinel;
   }
 

@@ -1,26 +1,14 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {AmpEvents} from '#core/constants/amp-events';
+import {removeChildren} from '#core/dom';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {dashToCamelCase} from '#core/types/string';
 
-import {AmpEvents} from '../../../src/core/constants/amp-events';
-import {Services} from '../../../src/services';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dashToCamelCase} from '../../../src/core/types/string/index.js';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeChildren} from '../../../src/dom';
+import {Services} from '#service';
+
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
+import {getTimeZoneName} from '../format';
 
 /** @const {string} */
 const TAG = 'amp-date-display';
@@ -52,6 +40,8 @@ const DEFAULT_DATETIME_OPTIONS = {
   minute: number,
   second: number,
   iso: string,
+  timeZoneName: string,
+  timeZoneNameShort: string,
 }} */
 let VariablesDef;
 
@@ -282,6 +272,8 @@ export class AmpDateDisplay extends AMP.BaseElement {
       second: date.getSeconds(),
       iso: date.toISOString(),
       localeString: this.getLocaleString_(date, locale, localeOptions),
+      timeZoneName: getTimeZoneName(date, locale, localeOptions),
+      timeZoneNameShort: getTimeZoneName(date, locale, localeOptions, 'short'),
     };
   }
 
@@ -322,6 +314,13 @@ export class AmpDateDisplay extends AMP.BaseElement {
       second: date.getUTCSeconds(),
       iso: date.toISOString(),
       localeString: this.getLocaleString_(date, locale, localeOptionsInUTC),
+      timeZoneName: getTimeZoneName(date, locale, localeOptionsInUTC),
+      timeZoneNameShort: getTimeZoneName(
+        date,
+        locale,
+        localeOptionsInUTC,
+        'short'
+      ),
     };
   }
 

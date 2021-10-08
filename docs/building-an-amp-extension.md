@@ -367,7 +367,7 @@ The AMP runtime will not manage scheduling layouting for elements that have
 owners.
 
 ```javascript
-this.cells_ = this.getRealChildren();
+this.cells_ = realChildElements(this.element);
 
 this.cells_.forEach((cell) => {
   Services.ownersForDoc(this.element).setOwner(cell, this.element);

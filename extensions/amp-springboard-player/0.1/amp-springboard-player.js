@@ -1,24 +1,12 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {PauseHelper} from '#core/dom/video/pause-helper';
 
-import {PauseHelper} from '../../../src/utils/pause-helper';
-import {Services} from '../../../src/services';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {Services} from '#service';
+
+import {userAssert} from '#utils/log';
+
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {userAssert} from '../../../src/log';
 
 class AmpSpringboardPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -124,7 +112,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
       encodeURIComponent(this.domain_) +
       '/' +
       encodeURIComponent(items);
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
     this.element.appendChild(iframe);
 
@@ -154,8 +142,8 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('img');
-    this.propagateAttributes(['aria-label'], placeholder);
-    this.applyFillContent(placeholder);
+    propagateAttributes(['aria-label'], this.element, placeholder);
+    applyFillContent(placeholder);
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
     if (placeholder.hasAttribute('aria-label')) {

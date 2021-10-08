@@ -1,66 +1,53 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust} from '#core/constants/action-constants';
+import {AmpEvents} from '#core/constants/amp-events';
+import {Deferred} from '#core/data-structures/promise';
+import {isAmp4Email} from '#core/document/format';
+import {removeChildren, tryFocus} from '#core/dom';
+import {
+  Layout,
+  applyFillContent,
+  getLayoutClass,
+  isLayoutSizeDefined,
+  parseLayout,
+} from '#core/dom/layout';
+import {
+  childElementByAttr,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '#core/dom/query';
+import {px, setImportantStyles, setStyles, toggle} from '#core/dom/style';
+import {isArray, toArray} from '#core/types/array';
+import {dict, getValueForExpr} from '#core/types/object';
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
-import {AmpEvents} from '../../../src/core/constants/amp-events';
-import {CSS} from '../../../build/amp-list-0.1.css';
+import {isExperimentOn} from '#experiments';
+
 import {
   DIFFABLE_AMP_ELEMENTS,
   DIFF_IGNORE,
   DIFF_KEY,
   markElementForDiffing,
-} from '../../../src/purifier/sanitation';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {
-  Layout,
-  getLayoutClass,
-  isLayoutSizeDefined,
-  parseLayout,
-} from '../../../src/layout';
+} from '#purifier/sanitation';
+
+import {Services} from '#service';
+
+import {createCustomEvent, listen} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+import {setupAMPCors, setupInput, setupJsonFetchInit} from '#utils/xhr-utils';
+
+import {setDOM} from '#third_party/set-dom/set-dom';
+
 import {LoadMoreService} from './service/load-more-service';
-import {Pass} from '../../../src/pass';
-import {Services} from '../../../src/services';
-import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
+
+import {CSS} from '../../../build/amp-list-0.1.css';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
-import {
-  childElementByAttr,
-  scopedQuerySelector,
-  scopedQuerySelectorAll,
-} from '../../../src/core/dom/query';
-import {createCustomEvent, listen} from '../../../src/event-helper';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, getValueForExpr} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
+import {Pass} from '../../../src/pass';
+import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
-import {removeChildren, tryFocus} from '../../../src/dom';
-
-import {isAmp4Email} from '../../../src/format';
-import {isArray, toArray} from '../../../src/core/types/array';
-import {isExperimentOn} from '../../../src/experiments';
-import {px, setImportantStyles, setStyles, toggle} from '../../../src/style';
-import {setDOM} from '../../../third_party/set-dom/set-dom';
-import {
-  setupAMPCors,
-  setupInput,
-  setupJsonFetchInit,
-} from '../../../src/utils/xhr-utils';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -559,7 +546,7 @@ export class AmpList extends AMP.BaseElement {
     // to take the height of its children instead,
     // whereas fill-content forces height:0
     if (!this.loadMoreEnabled_ && !this.enableManagedResizing_) {
-      this.applyFillContent(container, true);
+      applyFillContent(container, true);
     }
     return container;
   }
@@ -1404,7 +1391,7 @@ export class AmpList extends AMP.BaseElement {
   /**
    * Undoes previous size-defined layout, must be called in mutation context.
    * @param {string} layoutString
-   * @see src/layout.js
+   * @see src/core/dom/layout/index.js
    */
   undoLayout_(layoutString) {
     const layout = parseLayout(layoutString);

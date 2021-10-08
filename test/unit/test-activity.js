@@ -1,29 +1,15 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Observable} from '#core/data-structures/observable';
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {Observable} from '../../src/core/data-structures/observable';
-import {Services} from '../../src/services';
+import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {markElementScheduledForTesting} from '#service/custom-element-registry';
+import {installPlatformService} from '#service/platform-impl';
+import {installTimerService} from '#service/timer-impl';
+import {installViewerServiceForDoc} from '#service/viewer-impl';
+import {installViewportServiceForDoc} from '#service/viewport/viewport-impl';
+import {installVsyncService} from '#service/vsync-impl';
+
 import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installTimerService} from '../../src/service/timer-impl';
-import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
-import {installViewportServiceForDoc} from '../../src/service/viewport/viewport-impl';
-import {installVsyncService} from '../../src/service/vsync-impl';
-import {markElementScheduledForTesting} from '../../src/service/custom-element-registry';
 
 describes.sandboxed('Activity getTotalEngagedTime', {}, (env) => {
   let clock;

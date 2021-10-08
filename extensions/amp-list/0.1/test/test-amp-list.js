@@ -1,35 +1,17 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust} from '#core/constants/action-constants';
+import {AmpEvents} from '#core/constants/amp-events';
+import {Deferred} from '#core/data-structures/promise';
+import {createElementWithAttributes} from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
-import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
-import {AmpDocService} from '../../../../src/service/ampdoc-impl';
-import {AmpEvents} from '../../../../src/core/constants/amp-events';
-import {AmpList} from '../amp-list';
+import {resetExperimentTogglesForTesting, toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+import {ActionService} from '#service/action-impl';
+import {AmpDocService} from '#service/ampdoc-impl';
+
 import {AmpScriptService} from '../../../amp-script/0.1/amp-script';
-import {Deferred} from '../../../../src/core/data-structures/promise';
-import {Services} from '../../../../src/services';
-import {
-  createElementWithAttributes,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
-import {
-  resetExperimentTogglesForTesting,
-  toggleExperiment,
-} from '../../../../src/experiments';
+import {AmpList} from '../amp-list';
 
 describes.repeated(
   'amp-list',
@@ -333,7 +315,8 @@ describes.repeated(
                   }
                 });
 
-                it('should unlock height for layout=container with successful attemptChangeHeight', () => {
+                // TODO(#35361): disabled in #35360
+                it.skip('should unlock height for layout=container with successful attemptChangeHeight', () => {
                   expect(list.isLayoutSupported('container')).to.be.true;
                   expect(list.enableManagedResizing_).to.be.true;
                   expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
@@ -349,7 +332,8 @@ describes.repeated(
                   return list.layoutCallback();
                 });
 
-                it('should not unlock height for layout=container for unsuccessful attemptChangeHeight', () => {
+                // TODO(#35361): disabled in #35379
+                it.skip('should not unlock height for layout=container for unsuccessful attemptChangeHeight', () => {
                   expect(list.isLayoutSupported('container')).to.be.true;
                   expect(list.enableManagedResizing_).to.be.true;
                   expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
@@ -365,7 +349,8 @@ describes.repeated(
                   return list.layoutCallback();
                 });
 
-                it('should not unlock height for layout=container for null return', () => {
+                // TODO(#35361): disabled in #35360
+                it.skip('should not unlock height for layout=container for null return', () => {
                   expect(list.isLayoutSupported('container')).to.be.true;
                   expect(list.enableManagedResizing_).to.be.true;
                   expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
@@ -384,7 +369,8 @@ describes.repeated(
             );
           });
 
-          it('should attemptChangeHeight rendered contents', () => {
+          // TODO(#35361): disabled in #35360
+          it.skip('should attemptChangeHeight rendered contents', () => {
             const itemElement = doc.createElement('div');
             itemElement.style.height = '1337px';
 
@@ -767,7 +753,8 @@ describes.repeated(
               expect(list.container_.contains(newImg)).to.be.true;
             });
 
-            it('should attemptChangeHeight initial content', async () => {
+            // TODO(#35361): disabled in #35360
+            it.skip('should attemptChangeHeight initial content', async () => {
               const initialContent = doc.createElement('div');
               initialContent.setAttribute('role', 'list');
               initialContent.setAttribute('style', 'height: 123px');

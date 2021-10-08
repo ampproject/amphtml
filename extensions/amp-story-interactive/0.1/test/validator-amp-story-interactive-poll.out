@@ -1,25 +1,10 @@
 FAIL
 |  <!--
-|    Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-|
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|
-|        http://www.apache.org/licenses/LICENSE-2.0
-|
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    Correct poll, as well as 2 incorrect polls and a correct binary poll
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <title>STAMP examples</title>
@@ -54,7 +39,7 @@ FAIL
 |          <!-- Invalid: Poll missing endpoint attribute -->
 |          <amp-story-interactive-poll
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-poll.html:54:8 The mandatory attribute 'endpoint' is missing in tag 'amp-story-interactive-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-poll.html:39:8 The mandatory attribute 'endpoint' is missing in tag 'amp-story-interactive-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
 |            id="missing-endpoint-poll"
 |            option-1-text="France"
 |            option-2-text="Spain"
@@ -67,7 +52,7 @@ amp-story-interactive/0.1/test/validator-amp-story-interactive-poll.html:54:8 Th
 |          <!-- Invalid: Poll cannot have option-{1/2/3/4}-correct attribute -->
 |          <amp-story-interactive-poll
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-poll.html:65:8 The attribute 'option-1-correct' may not appear in tag 'amp-story-interactive-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-poll.html:50:8 The attribute 'option-1-correct' may not appear in tag 'amp-story-interactive-poll'. (see https://amp.dev/documentation/components/amp-story-interactive)
 |            id="extra-correct-poll"
 |            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
 |            option-1-text="France" option-1-correct

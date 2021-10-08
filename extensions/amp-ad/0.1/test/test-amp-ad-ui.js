@@ -1,26 +1,10 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as adHelper from '../../../../src/ad-helper';
-import * as domQuery from '../../../../src/core/dom/query';
+import * as domQuery from '#core/dom/query';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {macroTask} from '../../../../testing/yield';
-import {setStyles} from '../../../../src/style';
+import {createElementWithAttributes} from '#core/dom';
+import {macroTask} from '#testing/helpers';
+import {setStyles} from '#core/dom/style';
 
 describes.realWin(
   'amp-ad-ui handler',
@@ -326,23 +310,40 @@ describes.realWin(
     });
 
     describe('sticky ads', () => {
-      it('should render close buttons on render once', () => {
+      it('should reject invalid sticky type', () => {
+        expectAsyncConsoleError(/Invalid sticky ad type: invalid/, 1);
+        adElement.setAttribute('sticky', 'invalid');
+        const uiHandler = new AmpAdUIHandler(adImpl);
+        expect(uiHandler.stickyAdPosition_).to.be.null;
+      });
+
+      it('should render close buttons', () => {
         expect(uiHandler.unlisteners_).to.be.empty;
         uiHandler.stickyAdPosition_ = 'bottom';
-        uiHandler.onResizeSuccess();
-        expect(uiHandler.closeButtonRendered_).to.be.true;
-        expect(uiHandler.unlisteners_.length).to.equal(2);
+        uiHandler.maybeInitStickyAd();
+        expect(uiHandler.unlisteners_.length).to.equal(1);
         expect(uiHandler.element_.querySelector('.amp-ad-close-button')).to.be
           .not.null;
-
-        uiHandler.onResizeSuccess();
-        expect(uiHandler.unlisteners_.length).to.equal(2);
       });
 
       it('onResizeSuccess top sticky ads shall cause padding top adjustment', () => {
         uiHandler.stickyAdPosition_ = 'top';
         uiHandler.onResizeSuccess();
         expect(uiHandler.topStickyAdScrollListener_).to.not.be.undefined;
+      });
+
+      it('should refuse to load the second sticky ads', () => {
+        for (let i = 0; i < 2; i++) {
+          const adElement = env.win.document.createElement('amp-ad');
+          adElement.setAttribute('sticky', 'top');
+          adElement.setAttribute('class', 'i-amphtml-built');
+          env.win.document.body.insertBefore(adElement, null);
+        }
+        allowConsoleError(() => {
+          expect(() => {
+            uiHandler.validateStickyAd();
+          }).to.throw();
+        });
       });
     });
   }

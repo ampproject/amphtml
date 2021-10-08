@@ -1,25 +1,11 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
+import {vsyncForTesting} from '#service/vsync-impl';
 
+import {user} from '#utils/log';
+
+import {urls} from '../../../../src/config';
 import {AmpGeo} from '../amp-geo';
 import {GEO_IN_GROUP} from '../amp-geo-in-group';
-import {Services} from '../../../../src/services';
-import {urls} from '../../../../src/config';
-import {user} from '../../../../src/log';
-import {vsyncForTesting} from '../../../../src/service/vsync-impl';
 
 describes.realWin(
   'amp-geo',
@@ -98,9 +84,9 @@ describes.realWin(
       geo = new AmpGeo(el);
     });
 
-    afterEach(() => {
-      delete win.__AMP_MODE.geoOverride;
-    });
+    function setGeoOverrideHash(hashValue) {
+      geo.win.location.originalHash = `#amp-geo=${hashValue}`;
+    }
 
     function addConfigElement(opt_elementName, opt_type, opt_textContent) {
       const child = doc.createElement(opt_elementName || 'script');
@@ -188,7 +174,7 @@ describes.realWin(
     });
 
     it('should allow hash to override geo in test', () => {
-      win.__AMP_MODE.geoOverride = 'nz';
+      setGeoOverrideHash('nz');
       addConfigElement('script');
       geo.buildCallback();
 
@@ -209,7 +195,7 @@ describes.realWin(
     });
 
     it('should allow hash to override subdivision in test', () => {
-      win.__AMP_MODE.geoOverride = 'us us-ca';
+      setGeoOverrideHash('us us-ca');
       addConfigElement('script');
       geo.buildCallback();
 
@@ -232,7 +218,7 @@ describes.realWin(
     });
 
     it('should allow preset country groups', () => {
-      win.__AMP_MODE.geoOverride = 'fr';
+      setGeoOverrideHash('fr');
       addConfigElement('script');
       geo.buildCallback();
 
@@ -247,7 +233,7 @@ describes.realWin(
     });
 
     it('should allow preset-us-ca, but not us-ca', () => {
-      win.__AMP_MODE.geoOverride = 'us us-ca';
+      setGeoOverrideHash('us us-ca');
       addConfigElement(
         'script',
         'application/json',
@@ -262,7 +248,7 @@ describes.realWin(
     });
 
     it('should set amp-geo-no-group if no group matches', () => {
-      win.__AMP_MODE.geoOverride = 'za';
+      setGeoOverrideHash('za');
       addConfigElement('script');
       geo.buildCallback();
 
@@ -281,7 +267,7 @@ describes.realWin(
     });
 
     it('should return configured and matched groups in `geo` service', () => {
-      win.__AMP_MODE.geoOverride = 'nz';
+      setGeoOverrideHash('nz');
       addConfigElement('script');
       geo.buildCallback();
 
@@ -295,7 +281,7 @@ describes.realWin(
     });
 
     it('isInCountryGroup works with multiple group targets', () => {
-      win.__AMP_MODE.geoOverride = 'nz';
+      setGeoOverrideHash('nz');
       addConfigElement('script');
       geo.buildCallback();
 
@@ -314,7 +300,7 @@ describes.realWin(
     });
 
     it('isInCountryGroup works with single group targets', () => {
-      win.__AMP_MODE.geoOverride = 'nz';
+      setGeoOverrideHash('nz');
       addConfigElement('script');
       geo.buildCallback();
 
@@ -331,7 +317,7 @@ describes.realWin(
     });
 
     it('should allow uppercase hash to override geo in test', () => {
-      win.__AMP_MODE.geoOverride = 'NZ';
+      setGeoOverrideHash('NZ');
       addConfigElement('script');
       geo.buildCallback();
 
@@ -346,7 +332,7 @@ describes.realWin(
     });
 
     it('should accept uppercase country codes in config', () => {
-      win.__AMP_MODE.geoOverride = 'nz';
+      setGeoOverrideHash('nz');
       addConfigElement(
         'script',
         'application/json',
@@ -384,7 +370,7 @@ describes.realWin(
     });
 
     it('should allow hash to override pre-rendered geo in test', () => {
-      win.__AMP_MODE.geoOverride = 'nz';
+      setGeoOverrideHash('nz');
       doc.body.classList.add('amp-iso-country-mx', 'amp-geo-group-nafta');
       addConfigElement('script');
       geo.buildCallback();

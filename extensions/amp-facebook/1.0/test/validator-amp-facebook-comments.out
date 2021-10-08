@@ -1,0 +1,32 @@
+PASS
+|  <!--
+|    Test Description:
+|    Tests support for the amp-facebook-comments tag.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-facebook" src="https://cdn.ampproject.org/v0/amp-facebook-1.0.js"></script>
+|  </head>
+|  <body>
+|    <!-- Example of a valid amp-facebook (embedded post) -->
+|    <amp-facebook
+|      width=486
+|      height=657
+|      layout="responsive"
+|      data-href="https://www.facebook.com/zuck/posts/10102593740125791">
+|    </amp-facebook>
+|    <!-- Example of a valid amp-facebook-comments -->
+|    <amp-facebook-comments
+|        width=486
+|        height=657
+|        layout="responsive"
+|        data-href="http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html">
+|    </amp-facebook-comments>
+|  </body>
+|  </html>

@@ -1,36 +1,29 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as dom from './dom';
-import * as query from './core/dom/query';
-import {AmpEvents} from './core/constants/amp-events';
-import {CommonSignals} from './core/constants/common-signals';
-import {ElementStub} from './element-stub';
+import {AmpEvents} from '#core/constants/amp-events';
+import {CommonSignals} from '#core/constants/common-signals';
+import {ReadyState} from '#core/constants/ready-state';
+import {tryResolve} from '#core/data-structures/promise';
+import {Signals} from '#core/data-structures/signals';
+import * as dom from '#core/dom';
 import {
-  Layout,
-  LayoutPriority,
-  applyStaticLayout,
-  isInternalElement,
-  isLoadingAllowed,
-} from './layout';
-import {MediaQueryProps} from './core/dom/media-query-props';
-import {ReadyState} from './core/constants/ready-state';
-import {ResourceState} from './service/resource';
-import {Services} from './services';
-import {Signals} from './core/data-structures/signals';
+  UPGRADE_TO_CUSTOMELEMENT_PROMISE,
+  UPGRADE_TO_CUSTOMELEMENT_RESOLVER,
+} from '#core/dom/amp-element-helpers';
+import {Layout, LayoutPriority, isLoadingAllowed} from '#core/dom/layout';
+import {MediaQueryProps} from '#core/dom/media-query-props';
+import * as query from '#core/dom/query';
+import {setStyle} from '#core/dom/style';
+import {rethrowAsync} from '#core/error';
+import {toWin} from '#core/window';
+
+import {Services} from '#service';
+import {ResourceState} from '#service/resource';
+import {getSchedulerForDoc} from '#service/scheduler';
+
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
+import {startupChunk} from './chunk';
+import {shouldBlockOnConsentByMeta} from './consent';
+import {ElementStub} from './element-stub';
 import {
   blockedByConsentError,
   cancellation,
@@ -38,17 +31,9 @@ import {
   isCancellation,
   reportError,
 } from './error-reporting';
-import {dev, devAssert, user, userAssert} from './log';
-import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
 import {getMode} from './mode';
-import {getSchedulerForDoc} from './service/scheduler';
-import {isExperimentOn} from './experiments';
-import {rethrowAsync} from './core/error';
-import {setStyle} from './style';
-import {shouldBlockOnConsentByMeta} from './consent';
-import {startupChunk} from './chunk';
-import {toWin} from './core/window';
-import {tryResolve} from './core/data-structures/promise';
+import {applyStaticLayout} from './static-layout';
+import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
 
 const TAG = 'CustomElement';
 
@@ -71,8 +56,16 @@ const RETURN_TRUE = () => true;
  */
 let templateTagSupported;
 
-/** @type {!Array} */
+/** @type {!Array<AmpElement>} */
 export const stubbedElements = [];
+
+/**
+ * Extensions which have failed to load, making their elements unresolvable.
+ * If null, then any remaining elements which don't immediately have their
+ * implClass available are marked unresolvable.
+ * @type {Set<string>}
+ */
+const unresolvableExtensions = new Set();
 
 /**
  * Whether this platform supports template tags.
@@ -293,10 +286,10 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       /** @private {?MediaQueryProps} */
       this.mediaQueryProps_ = null;
 
-      if (nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
-        nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER](nonStructThis);
-        delete nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER];
-        delete nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_PROMISE];
+      if (nonStructThis[UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
+        nonStructThis[UPGRADE_TO_CUSTOMELEMENT_RESOLVER](nonStructThis);
+        delete nonStructThis[UPGRADE_TO_CUSTOMELEMENT_RESOLVER];
+        delete nonStructThis[UPGRADE_TO_CUSTOMELEMENT_PROMISE];
       }
     }
 
@@ -384,6 +377,18 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     }
 
     /**
+     * When the document is ready (meaning all external resources are loaded or
+     * failed), we mark any stubbed elements as unresolved. If they haven't
+     * been upgraded yet (or pending upgrade or deferredBuild elements), then
+     * the extension failed to load.
+     */
+    markUnresolved() {
+      if (!this.implClass_) {
+        this.classList.add('amp-unresolved', 'i-amphtml-unresolved');
+      }
+    }
+
+    /**
      * Time delay imposed by baseElement upgradeCallback.  If no
      * upgradeCallback specified or not yet executed, delay is 0.
      * @return {number}
@@ -403,8 +408,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       this.upgradeDelayMs_ = win.Date.now() - upgradeStartTime;
       this.upgradeState_ = UpgradeState.UPGRADED;
       this.setReadyStateInternal(ReadyState.BUILDING);
-      this.classList.remove('amp-unresolved');
-      this.classList.remove('i-amphtml-unresolved');
+      this.classList.remove('amp-unresolved', 'i-amphtml-unresolved');
       this.assertLayout_();
       this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
       if (!this.R1()) {
@@ -510,20 +514,13 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
       // Create the instance.
       const implPromise = this.createImpl_();
+      this.getSizer_();
 
       // Wait for consent.
       const consentPromise = implPromise.then(() => {
         const policyId = this.getConsentPolicy_();
-        const isGranularConsentExperimentOn = isExperimentOn(
-          win,
-          'amp-consent-granular-consent'
-        );
-        const purposeConsents =
-          isGranularConsentExperimentOn && !policyId
-            ? this.getPurposesConsent_()
-            : null;
-
-        if (!policyId && !(isGranularConsentExperimentOn && purposeConsents)) {
+        const purposeConsents = !policyId ? this.getPurposesConsent_() : null;
+        if (!policyId && !purposeConsents) {
           return;
         }
         // Must have policyId or granularExp w/ purposeConsents
@@ -553,8 +550,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         () => {
           this.built_ = true;
           this.classList.add('i-amphtml-built');
-          this.classList.remove('i-amphtml-notbuilt');
-          this.classList.remove('amp-notbuilt');
+          this.classList.remove('i-amphtml-notbuilt', 'amp-notbuilt');
           this.signals_.signal(CommonSignals.BUILT);
 
           if (this.R1()) {
@@ -986,6 +982,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       ) {
         // Expect sizer to exist, just not yet discovered.
         this.sizerElement = this.querySelector('i-amphtml-sizer');
+        this.sizerElement?.setAttribute('slot', 'i-amphtml-svc');
       }
       return this.sizerElement || null;
     }
@@ -1161,9 +1158,11 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       this.isConnected_ = true;
 
       if (!this.everAttached) {
-        this.classList.add('i-amphtml-element');
-        this.classList.add('i-amphtml-notbuilt');
-        this.classList.add('amp-notbuilt');
+        this.classList.add(
+          'i-amphtml-element',
+          'i-amphtml-notbuilt',
+          'amp-notbuilt'
+        );
       }
 
       if (!this.ampdoc_) {
@@ -1199,20 +1198,22 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         this.everAttached = true;
 
         try {
-          this.layout_ = applyStaticLayout(
-            this,
-            Services.platformFor(toWin(this.ownerDocument.defaultView)).isIe()
-          );
+          this.layout_ = applyStaticLayout(this);
           this.initMediaAttrs_();
         } catch (e) {
           reportError(e, this);
         }
+
         if (this.implClass_) {
           this.upgradeOrSchedule_();
+        } else if (
+          unresolvableExtensions.has('*') ||
+          unresolvableExtensions.has(this.tagName.toLowerCase())
+        ) {
+          this.markUnresolved();
         }
+
         if (!this.isUpgraded()) {
-          this.classList.add('amp-unresolved');
-          this.classList.add('i-amphtml-unresolved');
           this.dispatchCustomEventForTesting(AmpEvents.STUBBED);
         }
       }
@@ -1254,6 +1255,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       // Schedule build and mount.
       const scheduler = getSchedulerForDoc(this.getAmpDoc());
       scheduler.schedule(this);
+      this.classList.remove('amp-unresolved', 'i-amphtml-unresolved');
 
       if (this.buildingPromise_) {
         // Already built or building: just needs to be mounted.
@@ -1893,30 +1895,6 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     }
 
     /**
-     * Returns the original nodes of the custom element without any service
-     * nodes that could have been added for markup. These nodes can include
-     * Text, Comment and other child nodes.
-     * @return {!Array<!Node>}
-     * @package @final
-     */
-    getRealChildNodes() {
-      return query.childNodes(this, (node) => !isInternalOrServiceNode(node));
-    }
-
-    /**
-     * Returns the original children of the custom element without any service
-     * nodes that could have been added for markup.
-     * @return {!Array<!Element>}
-     * @package @final
-     */
-    getRealChildren() {
-      return query.childElements(
-        this,
-        (element) => !isInternalOrServiceNode(element)
-      );
-    }
-
-    /**
      * Returns an optional placeholder element for this custom element.
      * @return {?Element}
      * @package @final
@@ -2038,7 +2016,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         this.hasAttribute('noloading') ||
         (laidOut && !force) ||
         !isLoadingAllowed(this) ||
-        isInternalOrServiceNode(this)
+        query.isInternalOrServiceNode(this)
       ) {
         return false;
       }
@@ -2168,26 +2146,6 @@ function assertNotTemplate(element) {
 }
 
 /**
- * Returns "true" for internal AMP nodes or for placeholder elements.
- * @param {!Node} node
- * @return {boolean}
- */
-function isInternalOrServiceNode(node) {
-  if (isInternalElement(node)) {
-    return true;
-  }
-  if (
-    node.tagName &&
-    (node.hasAttribute('placeholder') ||
-      node.hasAttribute('fallback') ||
-      node.hasAttribute('overflow'))
-  ) {
-    return true;
-  }
-  return false;
-}
-
-/**
  * Creates a new custom element class prototype.
  *
  * @param {!Window} win The window in which to register the custom element.
@@ -2243,4 +2201,22 @@ export function getImplSyncForTesting(element) {
  */
 export function getActionQueueForTesting(element) {
   return element.actionQueue_;
+}
+
+/**
+ * Marks each element that still stubbed as unresolved.
+ * @param {string=} opt_extension
+ */
+export function markUnresolvedElements(opt_extension) {
+  unresolvableExtensions.add(opt_extension || '*');
+  for (const el of stubbedElements) {
+    if (opt_extension == null || el.tagName.toLowerCase() === opt_extension) {
+      el.markUnresolved();
+    }
+  }
+}
+
+/** */
+export function resetUnresolvedElementsForTesting() {
+  unresolvableExtensions.clear();
 }
