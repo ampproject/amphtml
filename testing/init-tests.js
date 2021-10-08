@@ -6,12 +6,13 @@ import './setup_chai_sinon';
 
 import {configure as configureEnzyme} from 'enzyme';
 import PreactEnzyme from 'enzyme-adapter-preact-pure';
-import {flush as flushPreactEffects} from '#preact';
 
 import {removeElement} from '#core/dom';
 import {resetEvtListenerOptsSupportForTesting} from '#core/dom/event-helper-listen';
 
 import {resetExperimentTogglesForTesting} from '#experiments';
+
+import {flush as flushPreactEffects} from '#preact/test-utils';
 
 import {Services} from '#service';
 import {installDocService} from '#service/ampdoc-impl';

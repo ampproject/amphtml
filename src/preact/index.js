@@ -2,7 +2,6 @@ import * as preact from /*OK*/ 'preact';
 // The preactDOM name is explicit, so we can remap to react-dom.
 import * as preactDOM from /*OK*/ 'preact/dom';
 import * as hooks from /*OK*/ 'preact/hooks';
-import * as utils from /*OK*/ 'preact/test-utils';
 
 // Defines the type interfaces for the approved Preact APIs.
 // TODO: isValidElement, Component
@@ -145,47 +144,4 @@ export function useCallback(cb, opt_deps) {
  */
 export function useImperativeHandle(ref, create, opt_deps) {
   return hooks.useImperativeHandle(ref, create, opt_deps);
-}
-
-/**
- * @param {function():void|Promise<void>} callback
- * @return {Promise<void>}
- */
-export function act(callback) {
-  return utils.act(callback);
-}
-
-let rafs = [];
-let flushableRaf = function (cb) {
-  cb.__completed = false;
-  rafs.push(cb);
-  requestAnimationFrame(() => {
-    if (cb.__completed) {
-      return;
-    }
-    cb.__completed = true;
-    cb();
-  });
-};
-
-let flushInternal;
-function flushableRender(process) {
-  process.__completed = false;
-  flushInternal = process;
-  Promise.resolve().then(() => {
-    if (process.__completed) {
-      return;
-    }
-    process.__completed = true;
-    flushInternal = null;
-    return process();
-  });
-}
-preact.options.requestAnimationFrame = flushableRaf;
-preact.options.debounceRendering = flushableRender;
-
-export async function flush() {
-  await flushInternal?.();
-  rafs.forEach((fn) => fn());
-  rafs.length = 0;
 }
