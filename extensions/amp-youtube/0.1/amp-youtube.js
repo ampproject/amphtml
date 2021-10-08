@@ -19,7 +19,9 @@ import {dict} from '#core/types/object';
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
-import {getData, listen} from '../../../src/event-helper';
+import {getData, listen} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {
   addUnsafeAllowAutoplay,
   createFrameFor,
@@ -29,7 +31,6 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, userAssert} from '../../../src/log';
 import {addParamsToUrl} from '../../../src/url';
 import {VideoEvents} from '../../../src/video-interface';
 

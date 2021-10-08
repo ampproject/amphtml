@@ -3,7 +3,7 @@ import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
 import {BentoInlineGalleryPagination} from './pagination';
 import {PreactBaseElement} from '#preact/base-element';
 import {isExperimentOn} from '#experiments';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /** @const {string} */
 export const TAG = 'amp-inline-gallery-pagination';

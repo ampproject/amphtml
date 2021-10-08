@@ -2,7 +2,7 @@
 
 ## Behavior
 
-The Bento Twitter component allows you to embed a Tweet or Moment. Use it as a web component [`<bento-twitter>`](#web-component), or a Preact/React functional component [`<BentoTwitter>`](#preact/react-Component).
+The Bento Twitter component allows you to embed a Tweet or Moment. Use it as a web component [`<bento-twitter>`](#web-component), or a Preact/React functional component [`<BentoTwitter>`](#preactreact-component).
 
 ### Web Component
 
@@ -208,7 +208,7 @@ Valid timeline source types include <code>profile</code>, <code>likes</code>, <c
   </tr>
   <tr>
     <td width="40%"><strong>options (optional)</strong></td>
-    <td>You can specify options for the Tweet, Moment, or Timeline appearance by passing in an object to the <code>options</code> prop. 
+    <td>You can specify options for the Tweet, Moment, or Timeline appearance by passing in an object to the <code>options</code> prop.
 For details on the available options, see Twitter's docs <a href="https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/guides/embedded-tweet-parameter-reference">for tweets</a>, <a href="https://developer.twitter.com/en/docs/twitter-for-websites/moments/guides/parameter-reference0">for moments</a> and <a href="https://developer.twitter.com/en/docs/twitter-for-websites/timelines/guides/parameter-reference">for timelines</a>. Note: When passing in the `options` prop, make sure to optimize or memoize the object:
 <code>
 const TWITTER_OPTIONS = {

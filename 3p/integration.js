@@ -13,7 +13,7 @@ import './polyfills';
 import {draw3p, init} from './integration-lib';
 import {getMode} from '../src/mode';
 import {register} from './3p';
-import {user} from 'src/log';
+import {user} from '#utils/log';
 
 // 3P - please keep in alphabetic order
 import {beopinion} from './beopinion';

@@ -30,11 +30,12 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import * as events from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {logo, showMoreArrow} from './images';
 import * as utils from './utils';
 
-import * as events from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   parseUrlDeprecated,

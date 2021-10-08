@@ -7,7 +7,7 @@ import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
 } from '../visibility-manager';
-import {user} from '../../../../src/log';
+import {user} from '#utils/log';
 
 describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
   let win;

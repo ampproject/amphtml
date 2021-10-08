@@ -4,9 +4,9 @@ import {
   serializeMessage,
 } from '#core/3p-frame-messaging';
 import {canInspectWindow} from '../../src/iframe-helper';
-import {dev, devAssert} from '../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {dict} from '#core/types/object';
-import {getData} from '../../src/event-helper';
+import {getData} from '#utils/event-helper';
 import {getFrameOverlayManager} from './frame-overlay-manager';
 import {getPositionObserver} from './position-observer';
 

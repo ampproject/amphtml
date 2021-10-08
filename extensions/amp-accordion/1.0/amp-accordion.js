@@ -5,11 +5,12 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {createCustomEvent} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
 import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-accordion-1.0.css';
-import {createCustomEvent} from '../../../src/event-helper';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-accordion';

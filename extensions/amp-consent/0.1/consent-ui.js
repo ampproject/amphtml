@@ -1,12 +1,12 @@
 import {Deferred} from '#core/data-structures/promise';
 import {Services} from '#service';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, user} from '#utils/log';
 import {dict} from '#core/types/object';
 import {elementByTag} from '#core/dom/query';
 import {expandConsentEndpointUrl} from './consent-config';
 import {getConsentStateValue} from './consent-info';
-import {getData} from '../../../src/event-helper';
+import {getData} from '#utils/event-helper';
 import {getConsentStateManager} from './consent-state-manager';
 import {htmlFor} from '#core/dom/static-template';
 import {insertAtStart, removeElement, tryFocus} from '#core/dom';
@@ -234,8 +234,11 @@ export class ConsentUI {
     const {classList} = this.parent_;
     classList.add('amp-active');
     classList.remove('amp-hidden');
-    // Add to fixed layer
-    this.baseInstance_.getViewport().addToFixedLayer(this.parent_);
+
+    this.baseInstance_
+      .getViewport()
+      .addToFixedLayer(this.parent_, /* forceTransfer */ true);
+
     if (this.isCreatedIframe_) {
       // show() can be called multiple times, but notificationsUiManager
       // ensures that only 1 is shown at a time, so no race condition here

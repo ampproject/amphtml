@@ -19,6 +19,9 @@ import {
   StoryAdSegmentExp,
 } from '#experiments/story-ad-progress-segment';
 
+import {getData, listen} from '#utils/event-helper';
+import {dev, devAssert, userAssert} from '#utils/log';
+
 import {
   AnalyticsEvents,
   AnalyticsVars,
@@ -35,10 +38,8 @@ import {
 } from './story-ad-ui';
 import {getFrameDoc, localizeCtaText} from './utils';
 
-import {getData, listen} from '../../../src/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
-import {dev, devAssert, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {

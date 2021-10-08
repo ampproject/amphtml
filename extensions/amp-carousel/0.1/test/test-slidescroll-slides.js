@@ -45,7 +45,7 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
     );
     viewportCallbackSpy = env.sandbox.spy(
       AmpSlideScroll.prototype,
-      'viewportCallbackTemp'
+      'viewportCallback'
     );
   });
 
@@ -151,7 +151,7 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
       })
     );
 
-    carousel.viewportCallbackTemp(true);
+    carousel.viewportCallback(true);
     expect(viewportCallbackSpy).to.have.been.calledWith(true);
     expect(hintControlsSpy).to.have.been.called;
     expect(autoplaySpy).to.have.been.called;
@@ -166,7 +166,7 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
       })
     );
 
-    carousel.viewportCallbackTemp(false);
+    carousel.viewportCallback(false);
     expect(viewportCallbackSpy).to.have.been.calledWith(false);
     expect(hintControlsSpy).to.not.have.been.called;
     expect(autoplaySpy).to.not.have.been.called;

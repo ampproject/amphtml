@@ -17,7 +17,7 @@ import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {addAttributesToElement, removeElement} from '#core/dom';
 import {dict} from '#core/types/object';
 import {matches} from '#core/dom/query';
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 /**
  * @type {string}

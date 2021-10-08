@@ -7,13 +7,13 @@ import ampToolboxCacheUrl from '../../../third_party/amp-toolbox-cache-url/dist/
 
 import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {Services} from '#service';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {getSourceOrigin} from '../../../src/url';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
-import {loadPromise} from '../../../src/event-helper';
+import {loadPromise} from '#utils/event-helper';
 import {removeElement} from '#core/dom';
 import {setStyle} from '#core/dom/style';
 import {urls} from '../../../src/config';

@@ -1,7 +1,7 @@
 import {TickLabel} from '#core/constants/enums';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {Signals} from '#core/data-structures/signals';
-import {whenDocumentComplete, whenDocumentReady} from '#core/document-ready';
+import {whenDocumentComplete, whenDocumentReady} from '#core/document/ready';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {computedStyle} from '#core/dom/style';
 import {debounce} from '#core/types/function';
@@ -9,12 +9,13 @@ import {dict, map} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {createCustomEvent} from '../event-helper';
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+import {isStoryDocument} from '#utils/story';
+
 import {whenContentIniLoad} from '../ini-load';
-import {dev, devAssert} from '../log';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service-helpers';
-import {isStoryDocument} from '../utils/story';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -60,24 +61,25 @@ function getElementType(node) {
   if (node == null) {
     return ELEMENT_TYPE.other;
   }
-  const {tagName} = getOutermostAmpElement(node);
-  if (tagName == null) {
-    return ELEMENT_TYPE.text;
-  }
-  if (tagName === 'IMG' || tagName === 'AMP-IMG') {
+  const outer = getOutermostAmpElement(node);
+  const {nodeName} = outer;
+  if (nodeName === 'IMG' || nodeName === 'AMP-IMG') {
     return ELEMENT_TYPE.image;
   }
-  if (tagName === 'VIDEO' || tagName === 'AMP-VIDEO') {
+  if (nodeName === 'VIDEO' || nodeName === 'AMP-VIDEO') {
     return ELEMENT_TYPE.video;
   }
-  if (tagName === 'AMP-CAROUSEL') {
+  if (nodeName === 'AMP-CAROUSEL') {
     return ELEMENT_TYPE.carousel;
   }
-  if (tagName === 'AMP-BASE-CAROUSEL') {
+  if (nodeName === 'AMP-BASE-CAROUSEL') {
     return ELEMENT_TYPE.bcarousel;
   }
-  if (tagName === 'AMP-AD') {
+  if (nodeName === 'AMP-AD') {
     return ELEMENT_TYPE.ad;
+  }
+  if (!nodeName.startsWith('AMP-') && outer.textContent) {
+    return ELEMENT_TYPE.text;
   }
   return ELEMENT_TYPE.other;
 }
@@ -923,8 +925,8 @@ export class Performance {
  * Traverse node ancestors and return the highest level amp element.
  * Returns the given node if none are found.
  *
- * @param {!HTMLElement} node
- * @return {!HTMLElement}
+ * @param {!Node} node
+ * @return {!Node}
  */
 function getOutermostAmpElement(node) {
   let max = node;

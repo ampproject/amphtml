@@ -11,7 +11,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {debounce} from '#core/types/function';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {escapeCssSelectorNth} from '#core/dom/css-selectors';
 import {getExperimentBranch} from 'src/experiments';
 import {hasOwn, map} from '#core/types/object';
