@@ -469,11 +469,11 @@ async function prependConfig_(outputDir) {
     };
 
     // Mapping of entry file names to a dictionary of AMP_CONFIG additions.
-    const targetsToConfig = MINIFIED_TARGETS.flatMap((minifiedTarget) => [
+    const targetsToConfig = MINIFIED_TARGETS.map((minifiedTarget) =>
       argv.esm
         ? {file: `${minifiedTarget}.mjs`, config: {esm: 1}}
-        : {file: `${minifiedTarget}.js`, config: {}},
-    ]);
+        : {file: `${minifiedTarget}.js`, config: {}}
+    );
 
     allPrependPromises.push(
       ...targetsToConfig.map(async (target) => {
