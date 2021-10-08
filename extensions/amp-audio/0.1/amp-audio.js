@@ -3,6 +3,10 @@ import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {realChildNodes} from '#core/dom/query';
 import {tryPlay} from '#core/dom/video';
 
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {listen} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
 import {CSS} from '../../../build/amp-audio-0.1.css';
 import {
   EMPTY_METADATA,
@@ -15,10 +19,6 @@ import {
 import {getMode} from '../../../src/mode';
 import {assertHttpsUrl} from '../../../src/url';
 import {setIsMediaComponent} from '../../../src/video-interface';
-
-import {triggerAnalyticsEvent} from '#utils/analytics';
-import {listen} from '#utils/event-helper';
-import {dev} from '#utils/log';
 
 const TAG = 'amp-audio';
 
