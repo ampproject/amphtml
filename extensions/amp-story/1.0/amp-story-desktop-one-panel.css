@@ -34,6 +34,7 @@ amp-story[standalone] {
 
   @media(max-height: 538px) {
     :root:not([data-story-supports-landscape]) {
+      /** If changing this, also change amp-story-player-shadow.css **/
       --i-amphtml-story-desktop-one-panel-ratio: 36 / 53;
     }
   }
