@@ -316,7 +316,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.mutateElement(() => {
       const {DESKTOP_FULLBLEED, DESKTOP_ONE_PANEL} = Attributes;
       this.adBadgeContainer_.removeAttribute(DESKTOP_FULLBLEED);
-
       this.adBadgeContainer_.removeAttribute(DESKTOP_ONE_PANEL);
       // TODO(#33969) can no longer be null when launched.
       this.progressBarBackground_?.removeAttribute(DESKTOP_ONE_PANEL);
