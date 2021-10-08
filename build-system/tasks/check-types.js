@@ -48,6 +48,9 @@ const TSC_TYPECHECK_TARGETS = {
   'compiler': {
     tsconfig: 'src/compiler/tsconfig.json',
   },
+  'carousel': {
+    tsconfig: 'extensions/amp-carousel/tsconfig.json',
+  },
 };
 
 /**
