@@ -116,6 +116,18 @@ const CHANNEL_CONFIGS = {
   '25': {type: 'experimentC', configBase: 'prod'}, // Spec name: 'inabox-experimentC'
 };
 
+/** @type {ReadonlySet<string>} */
+const V0_DEDUP_RTV_PREFIXES = new Set([
+  '00',
+  '02',
+  '03',
+  '04',
+  '05',
+  '20',
+  '22',
+  '24',
+]);
+
 /**
  * Path to custom flavors config, see: build-system/global-configs/README.md
  */
@@ -360,6 +372,27 @@ async function populateOrgCdn_(flavorType, rtvPrefixes, tempDir, outputDir) {
 }
 
 /**
+ * Removes the V0 directory from all RTVs except for the Stable (01-prefixed) channel,
+ *
+ * @param {!Array<string>} rtvPrefixes list of 2-digit RTV prefixes to generate.
+ * @param {string} outputDir full directory path to emplace artifacts in.
+ * @return {Promise<void>}
+ */
+async function dedupV0_(rtvPrefixes, outputDir) {
+  await Promise.all(
+    rtvPrefixes
+      .filter((rtvPrefix) => V0_DEDUP_RTV_PREFIXES.has(rtvPrefix))
+      .map((rtvPrefix) => {
+        const rtvNumber = `${rtvPrefix}${VERSION}`;
+        const v0Path = path.join(outputDir, 'org-cdn/rtv', rtvNumber, 'v0');
+        return fs.rm(v0Path, {recursive: true});
+      })
+  );
+
+  logSeparator_();
+}
+
+/**
  * Generates a listing of all files in each org-cdn/rtv/ subdirectory.
 
  * @param {string} outputDir full directory path to emplace artifacts in.
@@ -520,6 +553,11 @@ async function release() {
 
     log('Copying from temporary directory to', cyan('org-cdn'));
     await populateOrgCdn_(flavorType, rtvPrefixes, tempDir, outputDir);
+
+    if (argv.dedup_v0) {
+      log('Deduplicating', cyan('v0/'), 'directory...');
+      await dedupV0_(rtvPrefixes, outputDir);
+    }
   }
 
   log('Generating', cyan('files.txt'), 'files in', cyan('org-cdn/rtv/*'));
@@ -552,4 +590,6 @@ release.flags = {
   'flavor':
     'Limit this release build to a single flavor (can be used to split the release work across multiple build machines)',
   'esm': 'Compile with --esm if true, without --esm if false or unspecified',
+  'dedup_v0':
+    'Removes duplicate copies of the v0/ subdirectory when they are the same files as those in the Stable (01-prefixed) channel',
 };
