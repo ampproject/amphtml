@@ -100,7 +100,9 @@ export class Performance {
     this.win = win;
 
     /** @const {string} */
-    this.eventid_ = base64UrlEncodeFromBytes(getCryptoRandomBytesArray(win, 8));
+    this.eventid_ = base64UrlEncodeFromBytes(
+      getCryptoRandomBytesArray(win, 16)
+    );
 
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
