@@ -10,7 +10,7 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {
   dispatchCustomEvent,
@@ -27,7 +27,7 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
+import {getData, listen} from '#utils/event-helper';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 

@@ -19,6 +19,8 @@ import {Services} from '#service';
 import {ResourceState} from '#service/resource';
 import {getSchedulerForDoc} from '#service/scheduler';
 
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {startupChunk} from './chunk';
 import {shouldBlockOnConsentByMeta} from './consent';
 import {ElementStub} from './element-stub';
@@ -29,7 +31,6 @@ import {
   isCancellation,
   reportError,
 } from './error-reporting';
-import {dev, devAssert, user, userAssert} from './log';
 import {getMode} from './mode';
 import {applyStaticLayout} from './static-layout';
 import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
@@ -55,8 +56,16 @@ const RETURN_TRUE = () => true;
  */
 let templateTagSupported;
 
-/** @type {!Array} */
+/** @type {!Array<AmpElement>} */
 export const stubbedElements = [];
+
+/**
+ * Extensions which have failed to load, making their elements unresolvable.
+ * If null, then any remaining elements which don't immediately have their
+ * implClass available are marked unresolvable.
+ * @type {Set<string>}
+ */
+const unresolvableExtensions = new Set();
 
 /**
  * Whether this platform supports template tags.
@@ -364,6 +373,18 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         // ElementStub, we couldn't. Now that it's upgraded from a stub, go
         // ahead and do the full upgrade.
         this.upgradeOrSchedule_();
+      }
+    }
+
+    /**
+     * When the document is ready (meaning all external resources are loaded or
+     * failed), we mark any stubbed elements as unresolved. If they haven't
+     * been upgraded yet (or pending upgrade or deferredBuild elements), then
+     * the extension failed to load.
+     */
+    markUnresolved() {
+      if (!this.implClass_) {
+        this.classList.add('amp-unresolved', 'i-amphtml-unresolved');
       }
     }
 
@@ -1182,11 +1203,17 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         } catch (e) {
           reportError(e, this);
         }
+
         if (this.implClass_) {
           this.upgradeOrSchedule_();
+        } else if (
+          unresolvableExtensions.has('*') ||
+          unresolvableExtensions.has(this.tagName.toLowerCase())
+        ) {
+          this.markUnresolved();
         }
+
         if (!this.isUpgraded()) {
-          this.classList.add('amp-unresolved', 'i-amphtml-unresolved');
           this.dispatchCustomEventForTesting(AmpEvents.STUBBED);
         }
       }
@@ -2174,4 +2201,22 @@ export function getImplSyncForTesting(element) {
  */
 export function getActionQueueForTesting(element) {
   return element.actionQueue_;
+}
+
+/**
+ * Marks each element that still stubbed as unresolved.
+ * @param {string=} opt_extension
+ */
+export function markUnresolvedElements(opt_extension) {
+  unresolvableExtensions.add(opt_extension || '*');
+  for (const el of stubbedElements) {
+    if (opt_extension == null || el.tagName.toLowerCase() === opt_extension) {
+      el.markUnresolved();
+    }
+  }
+}
+
+/** */
+export function resetUnresolvedElementsForTesting() {
+  unresolvableExtensions.clear();
 }

@@ -2,7 +2,7 @@ import {createElementWithAttributes} from '#core/dom';
 import {dict} from '#core/types/object';
 import {WindowInterface} from '#core/window/interface';
 
-import {user} from './log';
+import {user} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'pixel';

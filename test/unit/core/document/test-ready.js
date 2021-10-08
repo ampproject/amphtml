@@ -3,7 +3,7 @@ import {
   onDocumentReady,
   whenDocumentComplete,
   whenDocumentReady,
-} from '#core/document-ready';
+} from '#core/document/ready';
 
 import {Services} from '#service';
 

@@ -10,9 +10,9 @@ import {
   postMessageToWindows,
 } from '../../../src/iframe-helper';
 import {applyFillContent} from '#core/dom/layout';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {dict} from '#core/types/object';
-import {getData} from '../../../src/event-helper';
+import {getData} from '#utils/event-helper';
 import {getHtml} from '#core/dom/get-html';
 import {isExperimentOn} from '#experiments';
 import {isGoogleAdsA4AValidEnvironment} from '#ads/google/a4a/utils';

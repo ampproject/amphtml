@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 // AUTO GENERATED; DO NOT EDIT.
-// To regenerate this file, see comments in bin/jsongrammargen
+// To regenerate this file, see comments in bin/statestablegen
 
 #ifndef HTMLPARSER__JSON_STATES_H_
 #define HTMLPARSER__JSON_STATES_H_

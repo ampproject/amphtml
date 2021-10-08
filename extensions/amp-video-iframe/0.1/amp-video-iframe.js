@@ -14,8 +14,10 @@ import {dict} from '#core/types/object';
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
+import {getData, listen} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {getConsentDataToForward} from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
 import {
   disableScrollingOnIframe,
   looksLikeTrackingIframe,
@@ -27,7 +29,6 @@ import {
   objOrParseJson,
   originMatches,
 } from '../../../src/iframe-video';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {addParamsToUrl} from '../../../src/url';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,

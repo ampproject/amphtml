@@ -7,8 +7,8 @@ import {
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
 import {deepMerge, dict, hasOwn} from '#core/types/object';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {getData} from '../../../src/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+import {getData} from '#utils/event-helper';
 import {getDataParamsFromAttributes} from '#core/dom';
 import {isAmpElement} from '#core/dom/amp-element-helpers';
 import {isArray, isEnumValue, isFiniteNumber} from '#core/types';

@@ -37,7 +37,7 @@ const fs = require('fs-extra');
 const klaw = require('klaw');
 const path = require('path');
 const tar = require('tar');
-const {cyan, green} = require('kleur/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
 const {log} = require('../../common/logging');
 const {MINIFIED_TARGETS} = require('../prepend-global');
@@ -117,6 +117,22 @@ const CHANNEL_CONFIGS = {
 };
 
 /**
+ * Path to custom flavors config, see: build-system/global-configs/README.md
+ */
+const CUSTOM_FLAVORS_CONFIG_PATH = path.resolve(
+  __dirname,
+  '../../global-configs/custom-flavors-config.json'
+);
+
+/**
+ * Path to custom overlay config, see: build-system/global-configs/README.md
+ */
+const CUSTOM_OVERLAY_CONFIG_PATH = path.resolve(
+  __dirname,
+  '../../global-configs/custom-config.json'
+);
+
+/**
  * Prints a separator line so logs are easy to read.
  */
 function logSeparator_() {
@@ -141,11 +157,27 @@ async function prepareEnvironment_(outputDir, tempDir) {
  * Discovers which AMP flavors are defined in the current working directory.
  *
  * The returned list of flavors will always contain the base flavor, and any
- * defined experiments in ../../global-configs/experiments-config.json.
+ * defined experiments in ../../global-configs/experiments-config.json, as well
+ * as custom flavors in ../../global-configs/custom-flavors-config.json.
  *
  * @return {!Array<!DistFlavorDef>} list of AMP flavors to build.
  */
 function discoverDistFlavors_() {
+  let customFlavorsConfig = [];
+  if (fs.existsSync(CUSTOM_FLAVORS_CONFIG_PATH)) {
+    const flavorsFilename = path.basename(CUSTOM_FLAVORS_CONFIG_PATH);
+    try {
+      customFlavorsConfig = require(CUSTOM_FLAVORS_CONFIG_PATH);
+      log(
+        yellow('Notice:'),
+        'release flavors supplemented by',
+        cyan(flavorsFilename)
+      );
+    } catch (ex) {
+      log(red('Could not load custom flavors from:'), cyan(flavorsFilename));
+    }
+  }
+
   const experimentConfigDefs = Object.entries(experimentsConfig);
   const distFlavors = [
     BASE_FLAVOR_CONFIG,
@@ -171,6 +203,7 @@ function discoverDistFlavors_() {
           ...experimentConfig,
         })
       ),
+    ...customFlavorsConfig,
   ].filter(
     // If --flavor is defined, filter out the rest.
     ({flavorType}) => !argv.flavor || flavorType == argv.flavor
@@ -382,11 +415,29 @@ async function prependConfig_(outputDir) {
   for (const [rtvPrefix, channelConfig] of activeChannels) {
     const rtvNumber = `${rtvPrefix}${VERSION}`;
     const rtvPath = path.join(outputDir, 'org-cdn/rtv', rtvNumber);
+    let overlayConfig = {};
+    if (fs.existsSync(CUSTOM_OVERLAY_CONFIG_PATH)) {
+      const overlayFilename = path.basename(CUSTOM_OVERLAY_CONFIG_PATH);
+      try {
+        overlayConfig = require(CUSTOM_OVERLAY_CONFIG_PATH);
+        log(
+          yellow('Notice:'),
+          cyan(channelConfig.configBase),
+          'config overlaid with',
+          cyan(overlayFilename)
+        );
+      } catch (ex) {
+        log(red('Could not apply overlay from'), cyan(overlayFilename));
+      }
+    }
+
     const channelPartialConfig = {
       v: rtvNumber,
       type: channelConfig.type,
       ...require(`../../global-configs/${channelConfig.configBase}-config.json`),
+      ...overlayConfig,
     };
+
     // Mapping of entry file names to a dictionary of AMP_CONFIG additions.
     const targetsToConfig = MINIFIED_TARGETS.flatMap((minifiedTarget) => {
       const targets = [];
@@ -439,7 +490,7 @@ async function populateNetWildcard_(tempDir, outputDir) {
 }
 
 /**
- * Cleans are deletes the temp directory.
+ * Cleans and deletes the temp directory.
  *
  * @param {string} tempDir full directory path to temporary working directory.
  * @return {Promise<void>}

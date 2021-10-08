@@ -1,8 +1,10 @@
+import {isAmphtml} from '#core/document/format';
+
 import {Services} from '#service';
 
+import {dev} from '#utils/log';
+
 import {ChunkPriority, chunk} from './chunk';
-import {isAmphtml} from './format';
-import {dev} from './log';
 import {isStoryDocument} from './utils/story';
 
 /** @const @enum {string} */

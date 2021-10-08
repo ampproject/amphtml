@@ -6,17 +6,15 @@ import {
   observeContentSize,
   unobserveContentSize,
 } from '#core/dom/layout/size-observer';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {dev, devAssert} from '#utils/log';
+
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
-import {dev, devAssert} from '../../../src/log';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 
 const TAG = 'amp-3d-gltf';
@@ -50,6 +48,9 @@ export class Amp3dGltf extends AMP.BaseElement {
     this.unlistenMessage_ = null;
 
     this.onResized_ = this.onResized_.bind(this);
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /**
@@ -78,7 +79,8 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections = null;
     this.viewportCallback_(false);
     if (this.iframe_) {
       removeElement(this.iframe_);
@@ -143,8 +145,9 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    observeWithSharedInOb(this.element, (inViewport) =>
-      this.viewportCallback_(inViewport)
+    this.unobserveIntersections_ = observeIntersections(
+      this.element,
+      ({isIntersecting}) => this.viewportCallback_(isIntersecting)
     );
     if (!isWebGLSupported()) {
       this.toggleFallback(true);

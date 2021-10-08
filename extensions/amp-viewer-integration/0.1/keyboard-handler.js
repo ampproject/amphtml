@@ -1,7 +1,7 @@
 import {Keys} from '#core/constants/key-codes';
 import {dict} from '#core/types/object';
 
-import {listen} from '../../../src/event-helper';
+import {listen} from '#utils/event-helper';
 
 /**
  * The list of keyboard event properites to forward to the viewer. This should

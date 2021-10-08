@@ -1,4 +1,4 @@
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {dict} from '#core/types/object';
 import {renderAsElement} from './simple-template';
 
@@ -11,7 +11,6 @@ const SPINNER = {
   attrs: dict({
     'class': 'i-amphtml-story-spinner',
     'aria-hidden': 'true',
-    'aria-label': 'Loading video',
   }),
   children: [
     {

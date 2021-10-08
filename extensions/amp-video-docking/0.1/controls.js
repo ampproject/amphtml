@@ -13,13 +13,14 @@ import {once} from '#core/types/function';
 
 import {Services} from '#service';
 
+import {createCustomEvent, listen} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+
 import {applyBreakpointClassname} from './breakpoints';
 import {VideoDockingEvents, pointerCoords} from './events';
 import {HtmlLiteralTagDef} from './html';
 import {Timeout} from './timeout';
 
-import {createCustomEvent, listen} from '../../../src/event-helper';
-import {dev, devAssert} from '../../../src/log';
 import {PlayingStates, VideoEvents} from '../../../src/video-interface';
 
 /**

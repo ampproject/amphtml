@@ -14,7 +14,7 @@
     },
     {
       "name": "story-disable-animations-first-page",
-      "percentage": 0.5
+      "percentage": 0
     },
     {
       "name": "story-load-first-page-only",

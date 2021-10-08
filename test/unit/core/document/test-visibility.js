@@ -3,7 +3,7 @@ import {
   getDocumentVisibilityState,
   isDocumentHidden,
   removeDocumentVisibilityChangeListener,
-} from '#core/document-visibility';
+} from '#core/document/visibility';
 
 describes.sandboxed('document-visibility', {}, (env) => {
   let doc;
