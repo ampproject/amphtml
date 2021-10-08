@@ -35,9 +35,10 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {getData, listen} from '#utils/event-helper';
+import {dev, devAssert, user} from '#utils/log';
+
 import {CSS} from '../../../build/amp-onetap-google-0.1.css';
-import {getData, listen} from '../../../src/event-helper';
-import {dev, devAssert, user} from '../../../src/log';
 import {assertHttpsUrl} from '../../../src/url';
 
 /** @const {string} */

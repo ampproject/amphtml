@@ -15,12 +15,12 @@ import {
   parseUrlDeprecated,
 } from '../../../src/url';
 import {createPixel} from '../../../src/pixel';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '#utils/log';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service-helpers';
 
-import {loadPromise} from '../../../src/event-helper';
+import {loadPromise} from '#utils/event-helper';
 import {removeElement} from '#core/dom';
 import {toWin} from '#core/window';
 import {toggle} from '#core/dom/style';

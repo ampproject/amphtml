@@ -1,4 +1,4 @@
-import {DomWriterBulk, DomWriterStreamer} from '../../../src/utils/dom-writer';
+import {DomWriterBulk, DomWriterStreamer} from '#utils/dom-writer';
 
 describes.fakeWin('DomWriterStreamer', {amp: true}, (env) => {
   describe

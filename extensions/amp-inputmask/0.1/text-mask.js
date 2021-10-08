@@ -2,10 +2,10 @@ import {iterateCursor, removeElement} from '#core/dom';
 
 import {Services} from '#service';
 
+import {userAssert} from '#utils/log';
+
 import {OutputMode} from './constants';
 import {Mask} from './mask-impl';
-
-import {userAssert} from '../../../src/log';
 
 const ELEMENT_MASK_PROPERTY = '__amp_inputmask_masked';
 const ELEMENT_MASK_OUTPUT_PROPERTY = '__amp_inputmask_hidden';

@@ -16,7 +16,7 @@ import {Services} from '#service';
 import {adConfig} from '#ads/_config';
 import {clamp} from '#core/math';
 import {computedStyle, setStyle} from '#core/dom/style';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {dev, devAssert, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getAdCid} from '../../../src/ad-cid';
 import {getAdContainer, isAdPositionAllowed} from '../../../src/ad-helper';
@@ -34,10 +34,7 @@ import {
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {intersectionEntryToJson} from '#core/dom/layout/intersection';
 import {moveLayoutRect} from '#core/dom/layout/rect';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {toWin} from '#core/window';
 
 /** @const {string} Tag name for 3P AD implementation. */
@@ -129,6 +126,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
      * @private {boolean}
      */
     this.isFullWidthRequested_ = false;
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /** @override */
@@ -409,8 +409,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         return this.xOriginIframeHandler_.init(iframe);
       })
       .then(() => {
-        observeWithSharedInOb(this.element, (inViewport) =>
-          this.viewportCallback_(inViewport)
+        this.unobserveIntersections_ = observeIntersections(
+          this.element,
+          ({isIntersecting}) => this.viewportCallback_(isIntersecting)
         );
       });
     incrementLoadingAds(this.win, this.layoutPromise_);
@@ -436,7 +437,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   unlayoutCallback() {
     this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_.length = 0;
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections = null;
 
     this.layoutPromise_ = null;
     this.uiHandler.applyUnlayoutUI();

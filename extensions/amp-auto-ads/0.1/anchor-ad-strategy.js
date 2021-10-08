@@ -3,7 +3,7 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 const TAG = 'amp-auto-ads';
 const STICKY_AD_TAG = 'amp-sticky-ad';

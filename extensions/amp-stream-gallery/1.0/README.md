@@ -1,11 +1,3 @@
----
-$category@: layout
-formats:
-  - websites
-teaser:
-  text: Displays multiple similar pieces of content at a time, for features like related products or articles.
----
-
 # Bento Stream Gallery
 
 ## Usage
@@ -13,7 +5,7 @@ teaser:
 The Bento Stream Gallery is for displaying multiple similar pieces of content at a time along a horizontal axis. To implement a more customized UX, see
 [`bento-base-carousel`](../../amp-base-carousel/1.0/README.md).
 
-Use Bento Stream Gallery as a web component ([`<bento-stream-gallery>`](#web-component)), or a Preact/React functional component ([`<BentoStreamGallery>`](#preact/react-component)).
+Use Bento Stream Gallery as a web component ([`<bento-stream-gallery>`](#web-component)), or a Preact/React functional component ([`<BentoStreamGallery>`](#preactreact-component)).
 
 ### Web Component
 

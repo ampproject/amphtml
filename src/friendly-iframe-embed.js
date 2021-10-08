@@ -2,7 +2,7 @@ import {CommonSignals} from '#core/constants/common-signals';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
-import {isDocumentReady} from '#core/document-ready';
+import {isDocumentReady} from '#core/document/ready';
 import {escapeHtml} from '#core/dom';
 import {layoutRectLtwh, moveLayoutRect} from '#core/dom/layout/rect';
 import {
@@ -26,11 +26,12 @@ import {Services} from '#service';
 import {installAmpdocServicesForEmbed} from '#service/core-services';
 import {installTimerInEmbedWindow} from '#service/timer-impl';
 
+import {loadPromise} from '#utils/event-helper';
+import {dev, devAssert, userAssert} from '#utils/log';
+
 import {urls} from './config';
-import {loadPromise} from './event-helper';
 import {FIE_EMBED_PROP} from './iframe-helper';
 import {whenContentIniLoad} from './ini-load';
-import {dev, devAssert, userAssert} from './log';
 import {getMode} from './mode';
 import {
   disposeServicesForEmbed,

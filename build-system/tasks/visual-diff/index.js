@@ -27,7 +27,7 @@ const {
   shortSha,
 } = require('../../common/git');
 const {buildRuntime} = require('../../common/utils');
-const {cyan, yellow} = require('../../common/colors');
+const {cyan, yellow} = require('kleur/colors');
 const {isCiBuild} = require('../../common/ci');
 const {startServer, stopServer} = require('../serve');
 
@@ -810,7 +810,7 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
   }
 
   if (argv.nobuild) {
-    const isInTestMode = /AMP_CONFIG=\{(?:.+,)?"test":true\b/.test(
+    const isInTestMode = /AMP_CONFIG=\{(?:.+,)?"test":(!0|true)\b/.test(
       fs.readFileSync('dist/v0.js', 'utf8')
     );
     if (!isInTestMode) {

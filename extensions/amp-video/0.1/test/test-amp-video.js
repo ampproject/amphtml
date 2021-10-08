@@ -6,7 +6,7 @@ import {VisibilityState} from '#core/constants/visibility-state';
 import {dispatchCustomEvent} from '#core/dom';
 import {installPerformanceService} from '#service/performance-impl';
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
-import {listenOncePromise} from '../../../../src/event-helper';
+import {listenOncePromise} from '#utils/event-helper';
 import {toggleExperiment} from '#experiments';
 import {xhrServiceForTesting} from '#service/xhr-impl';
 

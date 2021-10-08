@@ -96,9 +96,9 @@ cc_library(
     hdrs = ["amp4ads-parse-css.h"],
     deps = [
         ":parse-css",
-        "@com_github_re2//:re2",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
+        "@com_googlesource_code_re2//:re2",
     ],
 )
 

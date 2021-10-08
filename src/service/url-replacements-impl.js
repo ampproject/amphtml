@@ -5,6 +5,8 @@ import {WindowInterface} from '#core/window/interface';
 
 import {Services} from '#service';
 
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {Expander} from './url-expander/expander';
 import {
   AsyncResolverDef,
@@ -17,7 +19,6 @@ import {
 } from './variable-source';
 
 import {getTrackImpressionPromise} from '../impression';
-import {dev, devAssert, user, userAssert} from '../log';
 import {
   installServiceInEmbedDoc,
   registerServiceBuilderForDoc,

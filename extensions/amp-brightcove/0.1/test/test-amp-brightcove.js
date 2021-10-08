@@ -5,7 +5,7 @@ import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {CommonSignals} from '#core/constants/common-signals';
 import {VideoEvents} from '../../../../src/video-interface';
 import {createElementWithAttributes} from '#core/dom';
-import {listenOncePromise} from '../../../../src/event-helper';
+import {listenOncePromise} from '#utils/event-helper';
 import {macroTask} from '#testing/helpers';
 import {parseUrlDeprecated} from '../../../../src/url';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
