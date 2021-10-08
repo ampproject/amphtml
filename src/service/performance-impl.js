@@ -6,6 +6,8 @@ import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {computedStyle} from '#core/dom/style';
 import {debounce} from '#core/types/function';
 import {dict, map} from '#core/types/object';
+import {base64UrlEncodeFromBytes} from '#core/types/string/base64';
+import {getCryptoRandomBytesArray} from '#core/types/string/bytes';
 
 import {Services} from '#service';
 
@@ -96,6 +98,9 @@ export class Performance {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+
+    /** @const {string} */
+    this.eventid_ = base64UrlEncodeFromBytes(getCryptoRandomBytesArray(win, 8));
 
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
@@ -835,6 +840,7 @@ export class Performance {
         dict({
           'ampexp': this.ampexp_,
           'canonicalUrl': this.documentInfo_.canonicalUrl,
+          'eventid': this.eventid_,
         }),
         /* cancelUnsent */ true
       );
