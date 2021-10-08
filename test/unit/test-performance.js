@@ -1431,7 +1431,6 @@ describes.realWin('log extraParams', {amp: true}, (env) => {
       perf.flush();
       expect(viewerSendMessageStub.lastCall.args[0]).to.equal('sendCsi');
       const {eventid} = viewerSendMessageStub.lastCall.args[1];
-      console.log(eventid);
       expect(() => {
         base64UrlDecodeToBytes(eventid);
       }).not.to.throw();
