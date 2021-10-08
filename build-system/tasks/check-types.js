@@ -16,6 +16,7 @@ const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {logClosureCompilerError} = require('../compile/closure-compile');
 const {log} = require('../common/logging');
 const {typecheckNewServer} = require('../server/typescript-compile');
+const path = require('path');
 
 // We provide glob lists for core src/externs since any other targets are
 // allowed to depend on core.
@@ -37,6 +38,17 @@ const getExtensionSrcPaths = () =>
     .filter((ext) => !ext.noTypeCheck)
     .map(({name, version}) => `extensions/${name}/${version}/${name}.js`)
     .sort();
+
+/**
+ * Object of targets to check with TypeScript.
+ *
+ * @type {Object<string, {tsconfig: string}>}
+ */
+const TSC_TYPECHECK_TARGETS = {
+  'compiler': {
+    tsconfig: 'src/compiler/tsconfig.json',
+  },
+};
 
 /**
  * The main configuration location to add/edit targets for type checking.
@@ -100,7 +112,7 @@ const CLOSURE_TYPE_CHECK_TARGETS = {
   // errors.
   'low-bar': {
     entryPoints: ['src/amp.js'],
-    extraGlobs: ['{src,extensions}/**/*.js', '!src/compiler/**/*.js'],
+    extraGlobs: ['{src,extensions}/**/*.js', getLowBarExclusions()],
     onError(msg) {
       const lowBarErrors = [
         'JSC_BAD_JSDOC_ANNOTATION',
@@ -159,17 +171,6 @@ const CLOSURE_TYPE_CHECK_TARGETS = {
 };
 
 /**
- * Object of targets to check with TypeScript.
- *
- * @type {Object<string, {tsconfig: string}>}
- */
-const TSC_TYPECHECK_TARGETS = {
-  'compiler': {
-    tsconfig: 'src/compiler/tsconfig.json',
-  },
-};
-
-/**
  * Produces a list of extern glob patterns from a list of source glob patterns.
  * ex. ['src/core/** /*.js'] => ['src/core/** /*.extern.js']
  * @param {!Array<string>} srcGlobs
@@ -204,6 +205,18 @@ async function tscTypeCheck(targetName) {
     `Type checking ${targetName} failed`
   );
   log(green('SUCCESS:'), 'Type-checking passed for target', cyan(targetName));
+}
+
+/**
+ * Returns the exclusion glob for telling closure to ignore all paths
+ * being checked via TS.
+ *
+ * @return {string}
+ */
+function getLowBarExclusions() {
+  return Object.values(TSC_TYPECHECK_TARGETS)
+    .map((target) => '!' + path.dirname(target.tsconfig))
+    .join(',');
 }
 
 /**
@@ -302,9 +315,7 @@ async function checkTypes() {
   // Use the list of targets if provided, otherwise check all targets
   const targets = argv.targets
     ? argv.targets.split(/,/)
-    : Object.keys(TSC_TYPECHECK_TARGETS).concat(
-        Object.keys(CLOSURE_TYPE_CHECK_TARGETS)
-      );
+    : Object.keys({...TSC_TYPECHECK_TARGETS, ...CLOSURE_TYPE_CHECK_TARGETS});
 
   log(`Checking types for targets: ${targets.map(cyan).join(', ')}`);
   displayLifecycleDebugging();
