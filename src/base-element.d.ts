@@ -98,8 +98,7 @@ declare namespace AMP {
   const registerElement: any;
 }
 
-// TODO: Move the types below to better locations.
-// Types below this line should be eventually be moved elsewhere.
+// TODO(samouri): Move the types below to better locations.
 declare type AmpElement = HTMLElement;
 
 declare type Layout =

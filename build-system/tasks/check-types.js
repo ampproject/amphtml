@@ -115,7 +115,7 @@ const CLOSURE_TYPE_CHECK_TARGETS = {
   // errors.
   'low-bar': {
     entryPoints: ['src/amp.js'],
-    extraGlobs: ['{src,extensions}/**/*.js', getLowBarExclusions()],
+    extraGlobs: ['{src,extensions}/**/*.js', ...getLowBarExclusions()],
     onError(msg) {
       const lowBarErrors = [
         'JSC_BAD_JSDOC_ANNOTATION',
@@ -214,12 +214,12 @@ async function tscTypeCheck(targetName) {
  * Returns the exclusion glob for telling closure to ignore all paths
  * being checked via TS.
  *
- * @return {string}
+ * @return {string[]}
  */
 function getLowBarExclusions() {
-  return Object.values(TSC_TYPECHECK_TARGETS)
-    .map((target) => '!' + path.dirname(target.tsconfig))
-    .join(',');
+  return Object.values(TSC_TYPECHECK_TARGETS).map(
+    (target) => `!${path.dirname(target.tsconfig)}`
+  );
 }
 
 /**
