@@ -1,5 +1,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fastGlob = require('fast-glob');
+const path = require('path');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
@@ -16,7 +17,6 @@ const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {logClosureCompilerError} = require('../compile/closure-compile');
 const {log} = require('../common/logging');
 const {typecheckNewServer} = require('../server/typescript-compile');
-const path = require('path');
 
 // We provide glob lists for core src/externs since any other targets are
 // allowed to depend on core.
