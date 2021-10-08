@@ -33,24 +33,15 @@ function flushableRaf(cb) {
 let flushRender;
 
 /**
- * Set to ensure a render is only called once.
- * @type {WeakSet<() => void>}
- */
-const flushedRenderSet = new WeakSet();
-
-/**
- * @param {() => voic} process
+ * @param {() => void} process
+ * @return {Promise<void>}
  */
 function flushableRender(process) {
-  flushRender = process;
-  Promise.resolve().then(() => {
-    if (flushedRenderSet.has(process)) {
-      return;
-    }
-    flushedRenderSet.add(process);
+  flushRender = () => {
     flushRender = null;
     return process();
-  });
+  };
+  return Promise.resolve().then(flushRender);
 }
 
 /**

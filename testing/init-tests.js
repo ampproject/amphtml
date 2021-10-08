@@ -159,6 +159,7 @@ function resetTestingState() {
  * Cleans up global state added during tests.
  */
 function cleanupTestcase() {
+  flushPreactEffects();
   setTestRunner(this);
   restoreConsoleSandbox();
   restoreConsoleError();
@@ -170,7 +171,6 @@ function cleanupTestcase() {
   resetExperimentTogglesForTesting(window);
   resetEvtListenerOptsSupportForTesting();
   cancelTimersForTesting();
-  flushPreactEffects();
 }
 
 /**
