@@ -1069,7 +1069,7 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://cdn.run-syndicate.com/sdk/v1/n.js',
     renderStartImplemented: true,
   },
-  
+
   'sabavision': {
     renderStartImplemented: true,
   },
