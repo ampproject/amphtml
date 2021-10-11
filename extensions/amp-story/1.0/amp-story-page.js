@@ -689,7 +689,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           case 'amp-audio':
           case 'amp-video':
             const innerMediaEl = mediaEl.querySelector('audio, video');
-            if (innerMediaEl.readyState >= 2) {
+            if (innerMediaEl && innerMediaEl.readyState >= 2) {
               resolve();
               return;
             }
