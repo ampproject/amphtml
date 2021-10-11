@@ -1,5 +1,5 @@
 import {iterateCursor} from '#core/dom';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {Services} from '#service';
 
@@ -175,7 +175,7 @@ export class FormValidator {
     const previousValidity = this.formValidity_;
     this.formValidity_ = this.checkFormValidity(this.form);
     if (previousValidity !== this.formValidity_) {
-      const win = toWin(this.form.ownerDocument.defaultView);
+      const win = getWin(this.form);
       const type = this.formValidity_ ? FormEvents.VALID : FormEvents.INVALID;
       const event = createCustomEvent(win, type, null, {bubbles: true});
       this.form.dispatchEvent(event);

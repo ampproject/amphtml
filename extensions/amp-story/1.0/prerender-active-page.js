@@ -1,6 +1,6 @@
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {parseQueryString} from '#core/types/string/url';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 /**
  * Returns true if the page should be prerendered (for being an active page or
@@ -9,7 +9,7 @@ import {toWin} from '#core/window';
  * @return {boolean}
  */
 export function isPrerenderActivePage(pageElement) {
-  const win = toWin(pageElement.ownerDocument.defaultView);
+  const win = getWin(pageElement);
   const hashId = parseQueryString(win.location.href)['page'];
   let selector = 'amp-story-page:first-of-type';
   if (hashId) {

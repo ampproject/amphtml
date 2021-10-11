@@ -3,7 +3,7 @@ import {Layout} from '#core/dom/layout';
 import {toggle} from '#core/dom/style';
 import {dict} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
 
@@ -33,9 +33,7 @@ const DEFAULT_RESPONSIVE_DIMENSIONS = dict({
  */
 const getTypeConfigOrUndefined = (element) => {
   const viewer = Services.viewerForDoc(element);
-  const platform = Services.platformFor(
-    toWin(element.ownerDocument.defaultView)
-  );
+  const platform = Services.platformFor(getWin(element));
   const type = userAssert(
     element.getAttribute('type'),
     'The type attribute is required. %s',

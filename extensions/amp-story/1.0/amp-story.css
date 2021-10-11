@@ -82,8 +82,7 @@ amp-story {
   touch-action: manipulation !important;
 }
 
-html.i-amphtml-story-standalone,
-html.i-amphtml-story-standalone body {
+html:root, html:root body {
   font-size: calc(2.5 * var(--story-page-vh, 8px));
   height: 100% !important;
   margin: 0 !important;
@@ -121,7 +120,7 @@ h6 {
   font-size: 0.67rem;
 }
 
-html.i-amphtml-story-standalone #i-amphtml-wrapper body {
+html:root #i-amphtml-wrapper body {
   /** AMP runtime adds a 1px border on iOS iframes, causing the body to be
       1px bigger than the viewport. */
   border-top: none !important;

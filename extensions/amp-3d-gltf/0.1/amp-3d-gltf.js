@@ -80,7 +80,7 @@ export class Amp3dGltf extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.unobserveIntersections_?.();
-    this.unobserveIntersections = null;
+    this.unobserveIntersections_ = null;
     this.viewportCallback_(false);
     if (this.iframe_) {
       removeElement(this.iframe_);

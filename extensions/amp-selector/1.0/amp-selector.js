@@ -1,6 +1,6 @@
 import {ActionTrust} from '#core/constants/action-constants';
 import {dict} from '#core/types/object';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
 
@@ -52,7 +52,7 @@ class AmpSelector extends BaseElement {
   /** @override */
   triggerEvent(element, eventName, detail) {
     const event = createCustomEvent(
-      toWin(element.ownerDocument.defaultView),
+      getWin(element),
       `amp-selector.${eventName}`,
       detail
     );
