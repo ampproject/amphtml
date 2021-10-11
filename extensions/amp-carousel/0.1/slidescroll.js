@@ -404,7 +404,7 @@ export class AmpSlideScroll extends BaseCarousel {
   }
 
   /**
-   * @param {LayoutSize} size
+   * @param {!LayoutSize} size
    * @private
    */
   onResized_(size) {

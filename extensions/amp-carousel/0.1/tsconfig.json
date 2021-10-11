@@ -5,6 +5,6 @@
     "noEmit": true,
     "paths": {}
   },
-  "include": ["0.1/*.js", "0.1/*.d.ts", "../../src/*.d.ts"],
+  "include": ["*.js", "**/*.d.ts", "../../../src/*.d.ts"],
   "exclude": []
 }

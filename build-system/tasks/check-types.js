@@ -1,6 +1,5 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fastGlob = require('fast-glob');
-const path = require('path');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
@@ -42,15 +41,11 @@ const getExtensionSrcPaths = () =>
 /**
  * Object of targets to check with TypeScript.
  *
- * @type {Object<string, {tsconfig: string}>}
+ * @type {Object<string, string>}
  */
 const TSC_TYPECHECK_TARGETS = {
-  'compiler': {
-    tsconfig: 'src/compiler/tsconfig.json',
-  },
-  'carousel': {
-    tsconfig: 'extensions/amp-carousel/tsconfig.json',
-  },
+  'compiler': 'src/compiler',
+  'carousel': 'extensions/amp-carousel/0.1',
 };
 
 /**
@@ -204,7 +199,7 @@ async function typeCheck(targetName) {
  */
 async function tscTypeCheck(targetName) {
   execOrThrow(
-    `npx -p typescript tsc --project ${TSC_TYPECHECK_TARGETS[targetName].tsconfig}`,
+    `npx -p typescript tsc --project ${TSC_TYPECHECK_TARGETS[targetName]}/tsconfig.json`,
     `Type checking ${targetName} failed`
   );
   log(green('SUCCESS:'), 'Type-checking passed for target', cyan(targetName));
@@ -217,9 +212,7 @@ async function tscTypeCheck(targetName) {
  * @return {string[]}
  */
 function getLowBarExclusions() {
-  return Object.values(TSC_TYPECHECK_TARGETS).map(
-    (target) => `!${path.dirname(target.tsconfig)}`
-  );
+  return Object.values(TSC_TYPECHECK_TARGETS).map((dir) => `!${dir}`);
 }
 
 /**
