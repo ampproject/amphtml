@@ -94,8 +94,17 @@ declare namespace AMP {
     getApi(): Promise<Object>;
   }
 
-  const extension: any;
-  const registerElement: any;
+  const extension: (
+    name: string,
+    version: string,
+    installer: (obj: any) => void
+  ) => void;
+
+  const registerElement: (
+    name: string,
+    implClass: BaseElement,
+    css?: string
+  ) => void;
 }
 
 // TODO(samouri): Move the types below to better locations.
