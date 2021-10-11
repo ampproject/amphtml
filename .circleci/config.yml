@@ -469,6 +469,9 @@ jobs:
     steps:
       - setup_vm
       - run:
+          name: 'Store Service Key in JSON File'
+          command: echo "$GCLOUD_SERVICE_KEY" > /tmp/amp-cdn-serving.json
+      - run:
           name: '⭐ Archive Release Artifacts ⭐'
           command: node --unhandled-rejections=strict build-system/release-workflows/archive-release.js
       - store_artifacts:
@@ -635,3 +638,5 @@ workflows:
           <<: *release_builds_only
           requires:
             - amp_release
+          context:
+            - release-build-uploader

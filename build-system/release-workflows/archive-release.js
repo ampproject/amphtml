@@ -2,11 +2,14 @@
 
 const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
+const klaw = require('klaw');
 const path = require('path');
 const {cyan} = require('kleur/colors');
 const {log} = require('../common/logging');
 const {runReleaseJob} = require('./release-job');
+const {Storage} = require('@google-cloud/storage');
 const {timedExecOrDie} = require('../pr-check/utils');
+const {VERSION} = require('../compile/internal-version');
 
 /**
  * @fileoverview Script that builds a release.
@@ -68,7 +71,7 @@ function mergeFilesTxt_(flavor) {
   });
 }
 
-runReleaseJob(jobName, () => {
+runReleaseJob(jobName, async () => {
   fs.ensureDirSync(DEST_DIR);
 
   for (const flavor of fs.readdirSync(SRCS_DIR)) {
@@ -76,8 +79,25 @@ runReleaseJob(jobName, () => {
     mergeFilesTxt_(flavor);
   }
 
+  const storage = new Storage({keyFilename: '/tmp/amp-cdn-serving.json'});
+  const bucket = storage.bucket('org-cdn');
+
+  log('Uploading files to storage:');
+  const uploadsPromises = [];
+  for await (const {path: fullPath, stats} of klaw(DEST_DIR)) {
+    if (stats.isFile()) {
+      const path = fullPath.slice(DEST_DIR.length);
+      const destination = `${VERSION}/${path}`;
+      uploadsPromises.push(async () => {
+        await bucket.upload(path, {destination});
+        log(cyan(fullPath), '→', cyan(destination));
+      });
+    }
+  }
+
+  await Promise.all(uploadsPromises);
+  log('Finished uploading all files.');
+
   log('Archiving releases to', cyan(ARTIFACT_FILE_NAME));
   timedExecOrDie(`cd ${DEST_DIR} && tar -czf ${ARTIFACT_FILE_NAME} *`);
-
-  // TODO(danielrozenberg): actually upload to GCP storage bucket.
 });
