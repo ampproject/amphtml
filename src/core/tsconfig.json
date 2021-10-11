@@ -19,6 +19,8 @@
       "#core/mode/*": ["./mode/*"],
       "#core/types": ["./types"],
       "#core/types/*": ["./types/*"],
+      "#core/window": ["./window"],
+      "#core/window/*": ["./window/*"],
     },
   },
   "include": [
@@ -28,6 +30,7 @@
     "error/**/*.js",
     "mode/**/*.js",
     "types/**/*.js",
+    "window/**/*.js",
     "**/*.d.ts"
   ],
   "exclude": [
