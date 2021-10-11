@@ -3,7 +3,7 @@ import {isProd} from '#core/mode/prod';
 /**
  * Checks whether `val` is a valid value of `enumObj`.
  *
- * @param {!Object<T>} enumObj
+ * @param {!Record<string, T>} enumObj
  * @param {T} val
  * @return {boolean}
  * @template T

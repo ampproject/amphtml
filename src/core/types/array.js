@@ -1,6 +1,6 @@
 /**
  * Converts an array-like object to an array.
- * @param {?IArrayLike<T>|string} arrayLike
+ * @param {?ArrayLike<T>|string} arrayLike
  * @return {!Array<T>}
  * @template T
  */
@@ -11,7 +11,7 @@ export function toArray(arrayLike) {
 /**
  * Determines if value is actually an Array.
  * @param {*} value
- * @return {boolean}
+ * @return {value is Array}
  */
 export const {isArray} = Array;
 

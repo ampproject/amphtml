@@ -4,16 +4,21 @@
     "checkJs": true,
     "noEmit": true,
     "paths": {
-      "#core/mode": ["./"],
-      "#core/mode/*": ["./*"],
-      "#core/constants": ["./"],
-      "#core/constants/*": ["./*"],
+      "#core/mode": ["./mode"],
+      "#core/mode/*": ["./mode/*"],
+      "#core/constants": ["./constants"],
+      "#core/constants/*": ["./constants/*"],
+      "#core/types": ["./types"],
+      "#core/types/*": ["./types/*"],
     },
   },
   "include": [
     "mode/**/*.js",
     "constants/**/*.js",
+    "types/**/*.js",
     "**/*.d.ts"
   ],
-  "exclude": []
+  "exclude": [
+    "**/*.extern.js",
+  ]
 }

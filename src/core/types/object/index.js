@@ -4,7 +4,7 @@ const {hasOwnProperty: hasOwn_, toString: toString_} = Object.prototype;
 /**
  * Determines if value is actually an Object.
  * @param {*} value
- * @return {boolean}
+ * @return {value is Object}
  */
 export function isObject(value) {
   return toString_.call(value) === '[object Object]';

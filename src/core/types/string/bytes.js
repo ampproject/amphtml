@@ -3,6 +3,8 @@ import * as mode from '#core/mode';
 
 /**
  * Interpret a byte array as a UTF-8 string.
+ * See https://developer.mozilla.org/en-US/docs/Web/API/BufferSource for more
+ * details on this data-type.
  * @param {!BufferSource} bytes
  * @return {string}
  */
@@ -10,7 +12,12 @@ export function utf8Decode(bytes) {
   if (typeof TextDecoder !== 'undefined') {
     return new TextDecoder('utf-8').decode(bytes);
   }
-  const asciiString = bytesToString(new Uint8Array(bytes.buffer || bytes));
+  const asciiString = bytesToString(
+    new Uint8Array(
+      /** @type {{buffer: ArrayBuffer}} */ (bytes).buffer ||
+        /** @type {ArrayBuffer} */ (bytes)
+    )
+  );
   return decodeURIComponent(escape(asciiString));
 }
 
@@ -21,7 +28,7 @@ export function utf8Decode(bytes) {
  */
 export function utf8Encode(string) {
   if (typeof TextEncoder !== 'undefined') {
-    return new TextEncoder('utf-8').encode(string);
+    return new TextEncoder().encode(string);
   }
   return stringToBytes(unescape(encodeURIComponent(string)));
 }
@@ -89,9 +96,7 @@ export function getCryptoRandomBytesArray(win, length) {
 
   // Support IE 11
   if (!mode.isEsm()) {
-    crypto = /** @type {!webCrypto.Crypto|undefined} */ (
-      crypto || win.msCrypto
-    );
+    crypto = crypto || win.msCrypto;
     if (!crypto || !crypto.getRandomValues) {
       return null;
     }

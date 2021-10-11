@@ -7,7 +7,7 @@ export {isObject} from './object';
 /**
  * Determines if value is an ELement
  * @param {*} value
- * @return {boolean}
+ * @return {value is Element}
  */
 export function isElement(value) {
   return value?.nodeType == /* Node.ELEMENT_NODE */ 1;
