@@ -77,7 +77,7 @@ exports.rules = [
     filesMatching: '3p/**/*.js',
     mustNotDependOn: SRC_EXCLUDING_CORE,
     allowlist: [
-      '3p/**->src/log.js',
+      '3p/**->src/utils/log.js',
       '3p/**->src/url.js',
       '3p/**->src/config.js',
       '3p/**->src/mode.js',
@@ -86,10 +86,10 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/object-values.js',
       '3p/polyfills.js->src/polyfills/string-starts-with.js',
       '3p/polyfills.js->src/polyfills/promise.js',
-      '3p/messaging.js->src/event-helper.js',
-      '3p/bodymovinanimation.js->src/event-helper.js',
-      '3p/iframe-messaging-client.js->src/event-helper.js',
-      '3p/viqeoplayer.js->src/event-helper.js',
+      '3p/messaging.js->src/utils/event-helper.js',
+      '3p/bodymovinanimation.js->src/utils/event-helper.js',
+      '3p/iframe-messaging-client.js->src/utils/event-helper.js',
+      '3p/viqeoplayer.js->src/utils/event-helper.js',
     ],
   },
   {
@@ -101,7 +101,7 @@ exports.rules = [
     filesMatching: 'ads/**/*.js',
     mustNotDependOn: SRC_EXCLUDING_CORE,
     allowlist: [
-      'ads/**->src/log.js',
+      'ads/**->src/utils/log.js',
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
@@ -113,7 +113,7 @@ exports.rules = [
       'ads/google/a4a/utils.js->src/service/variable-source.js',
       'ads/google/a4a/utils.js->src/ini-load.js',
       // IMA, similar to other non-Ad 3Ps above, needs access to event-helper
-      'ads/google/ima/ima-video.js->src/event-helper.js',
+      'ads/google/ima/ima-video.js->src/utils/event-helper.js',
     ],
   },
   {
@@ -463,7 +463,7 @@ exports.rules = [
     allowlist: [
       'src/core/assert/dev.js->src/core/assert/base.js',
       'src/core/assert/user.js->src/core/assert/base.js',
-      'src/log.js->src/core/assert/base.js',
+      'src/utils/log.js->src/core/assert/base.js',
     ],
   },
 

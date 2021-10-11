@@ -1,11 +1,11 @@
 import {ActionTrust} from '#core/constants/action-constants';
-import {Animation} from '../../../src/animation';
+import {Animation} from '#utils/animation';
 import {BaseCarousel} from './base-carousel';
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {isLayoutSizeFixed} from '#core/dom/layout';
-import {listen} from '../../../src/event-helper';
+import {listen} from '#utils/event-helper';
 import {numeric} from '#core/dom/transition';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {realChildElements} from '#core/dom/query';
@@ -102,7 +102,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
   layoutCallback() {
     this.unobserveIntersections_ = observeIntersections(
       this.element,
-      ({isIntersecting}) => this.viewportCallbackTemp(isIntersecting)
+      ({isIntersecting}) => this.viewportCallback(isIntersecting)
     );
 
     this.doLayout_(this.pos_);
@@ -114,13 +114,13 @@ export class AmpScrollableCarousel extends BaseCarousel {
   /** @override */
   unlayoutCallback() {
     this.unobserveIntersections_?.();
-    this.unobserveIntersections = null;
+    this.unobserveIntersections_ = null;
     return super.unlayoutCallback();
   }
 
   /** @override */
-  viewportCallbackTemp(inViewport) {
-    super.viewportCallbackTemp(inViewport);
+  viewportCallback(inViewport) {
+    super.viewportCallback(inViewport);
     this.updateInViewport_(this.pos_, this.pos_);
   }
 

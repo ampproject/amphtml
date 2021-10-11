@@ -8,9 +8,10 @@ import {Services} from '#service';
 import {installPositionObserverServiceForDoc} from '#service/position-observer/position-observer-impl';
 import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
 
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-next-page-0.1.css';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {MultidocManager} from '../../../src/multidoc-manager';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {installStylesForDoc} from '../../../src/style-installer';

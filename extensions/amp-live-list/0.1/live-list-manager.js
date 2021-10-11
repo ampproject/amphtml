@@ -1,10 +1,11 @@
 import {Services} from '#service';
 import {extensionScriptsInNode} from '#service/extension-script';
 
+import {userAssert} from '#utils/log';
+
 import {Poller} from './poller';
 
 import {fetchDocument} from '../../../src/document-fetcher';
-import {userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {addParamToUrl} from '../../../src/url';

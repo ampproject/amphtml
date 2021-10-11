@@ -1,7 +1,7 @@
 import {computedStyle} from '#core/dom/style';
 import {tryCallback} from '#core/error';
 import {remove} from '#core/types/array';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {LayoutSizeDef} from './rect';
 
@@ -216,7 +216,7 @@ function computeAndCall(type, callback, entry) {
     } else {
       // `borderBoxSize` is not supported: polyfill it via blocking measures.
       const {target} = entry;
-      const win = toWin(target.ownerDocument.defaultView);
+      const win = getWin(target);
       const isVertical = VERTICAL_RE.test(
         computedStyle(win, target)['writing-mode']
       );

@@ -9,7 +9,7 @@ import {rethrowAsync} from '#core/error';
 import {isArray} from '#core/types';
 import {hasOwn, map} from '#core/types/object';
 
-import {devAssert, userAssert} from '../src/log';
+import {devAssert, userAssert} from '#utils/log';
 
 /** @typedef {function(!Window, !Object)}  */
 let ThirdPartyFunctionDef;

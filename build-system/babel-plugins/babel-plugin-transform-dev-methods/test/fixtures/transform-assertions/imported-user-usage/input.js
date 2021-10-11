@@ -1,4 +1,4 @@
-import {user} from '../../../../../../../src/log';
+import {user} from '#utils/log';
 
 user().fine(TAG, 'fine');
 user().fine;

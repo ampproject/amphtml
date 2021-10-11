@@ -1,6 +1,6 @@
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
-import {isAmp4Email} from '../../../src/format';
+import {isAmp4Email} from '#core/document/format';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {toggleAttribute} from '#core/dom';
 
@@ -60,14 +60,11 @@ export class BaseCarousel extends AMP.BaseElement {
     this.setControlsState();
   }
 
-  // TODO(samouri): rename to viewportCallback once
-  // BaseElement.viewportCallback is deleted
-
   /**
    * @param {boolean} inViewport
    * @protected
    */
-  viewportCallbackTemp(inViewport) {
+  viewportCallback(inViewport) {
     if (inViewport) {
       this.hintControls();
     }
@@ -236,7 +233,7 @@ export class BaseCarousel extends AMP.BaseElement {
   layoutCallback() {
     this.unobserveIntersections_ = observeIntersections(
       this.element,
-      ({isIntersecting}) => this.viewportCallbackTemp(isIntersecting)
+      ({isIntersecting}) => this.viewportCallback(isIntersecting)
     );
     return Promise.resolve();
   }
@@ -244,7 +241,7 @@ export class BaseCarousel extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.unobserveIntersections_?.();
-    this.unobserveIntersections = null;
+    this.unobserveIntersections_ = null;
     return true;
   }
 

@@ -24,6 +24,8 @@
       "#purifier/*": ["./src/purifier/*"],
       "#service": ["./src/service"],
       "#service/*": ["./src/service/*"],
+      "#utils": ["./src/utils"],
+      "#utils/*": ["./src/utils/*"],
 
       "#test/*": ["./test/*"],
       "#testing/*": ["./testing/*"],

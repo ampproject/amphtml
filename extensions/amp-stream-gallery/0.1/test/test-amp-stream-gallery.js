@@ -1,6 +1,6 @@
 import '../amp-stream-gallery';
 import {CarouselEvents} from '../../../amp-base-carousel/0.1/carousel-events';
-import {getDetail, listenOncePromise} from '../../../../src/event-helper';
+import {getDetail, listenOncePromise} from '#utils/event-helper';
 import {setStyle, setStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 import {toggleExperiment} from '#experiments';
