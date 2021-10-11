@@ -1,6 +1,6 @@
-import {Filter, FilterType} from './filter';
+import {dev, userAssert} from '#utils/log';
 
-import {dev, userAssert} from '../../../../src/log';
+import {Filter, FilterType} from './filter';
 
 /** @type {string} */
 const TAG = 'amp-ad-exit';

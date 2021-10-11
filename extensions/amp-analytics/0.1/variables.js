@@ -4,7 +4,7 @@ import {TickLabel} from '#core/constants/enums';
 import {asyncStringReplace} from '#core/types/string';
 import {base64UrlEncodeFromString} from '#core/types/string/base64';
 import {cookieReader} from './cookie-reader';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getActiveExperimentBranches, getExperimentBranch} from '#experiments';
 import {

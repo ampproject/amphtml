@@ -19,6 +19,8 @@ import {parseQueryString} from '#core/types/string/url';
 
 import {Services} from '#service';
 
+import {dev, user} from '#utils/log';
+
 import {WebPushWidgetVisibilities} from './amp-web-push-widget';
 import {IFrameHost} from './iframehost';
 import {
@@ -31,7 +33,6 @@ import {
 import {WindowMessenger} from './window-messenger';
 
 import {CSS} from '../../../build/amp-web-push-0.1.css';
-import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';

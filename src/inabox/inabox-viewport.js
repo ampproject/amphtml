@@ -17,10 +17,11 @@ import {Services} from '#service';
 import {ViewportBindingDef} from '#service/viewport/viewport-binding-def';
 import {ViewportInterface} from '#service/viewport/viewport-interface';
 
+import {dev} from '#utils/log';
+
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 
 import {canInspectWindow} from '../iframe-helper';
-import {dev} from '../log';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 
 /** @const {string} */

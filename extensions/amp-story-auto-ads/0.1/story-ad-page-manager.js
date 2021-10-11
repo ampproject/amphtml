@@ -1,5 +1,7 @@
 import {findIndex} from '#core/types/array';
 
+import {devAssert} from '#utils/log';
+
 import {
   AnalyticsEvents,
   AnalyticsVars,
@@ -9,7 +11,6 @@ import {ButtonTextFitter} from './story-ad-button-text-fitter';
 import {StoryAdLocalization} from './story-ad-localization';
 import {StoryAdPage} from './story-ad-page';
 
-import {devAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {getStoreService} from '../../amp-story/1.0/amp-story-store-service';
 

@@ -27,6 +27,11 @@ import {Services} from '#service';
 import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
 import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
 
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {DomTransformStream} from '#utils/dom-tranform-stream';
+import {listenOnce} from '#utils/event-helper';
+import {dev, devAssert, logHashParam, user, userAssert} from '#utils/log';
+
 import {A4AVariableSource} from './a4a-variable-source';
 import {getExtensionsFromMetadata} from './amp-ad-utils';
 import {processHead} from './head-validation';
@@ -44,14 +49,12 @@ import {
   getDefaultBootstrapBaseUrl,
 } from '../../../src/3p-frame';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {cancellation, isCancellation} from '../../../src/error-reporting';
-import {listenOnce} from '../../../src/event-helper';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   installFriendlyIframeEmbed,
@@ -59,10 +62,8 @@ import {
   preloadFriendlyIframeEmbedExtensions,
 } from '../../../src/friendly-iframe-embed';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {dev, devAssert, logHashParam, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {assertHttpsUrl} from '../../../src/url';
-import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
@@ -1316,7 +1317,7 @@ export class AmpA4A extends AMP.BaseElement {
     return this.attemptToRenderCreative().then(() => {
       this.unobserveIntersections_ = observeIntersections(
         this.element,
-        ({isIntersecting}) => this.viewportCallbackTemp(isIntersecting)
+        ({isIntersecting}) => this.viewportCallback(isIntersecting)
       );
     });
   }
@@ -1419,7 +1420,7 @@ export class AmpA4A extends AMP.BaseElement {
   /** @override  */
   unlayoutCallback() {
     this.unobserveIntersections_?.();
-    this.unobserveIntersections = null;
+    this.unobserveIntersections_ = null;
     this.tearDownSlot();
     return true;
   }
@@ -1500,12 +1501,11 @@ export class AmpA4A extends AMP.BaseElement {
     }
   }
 
-  // TODO: Rename to viewportCallback once BaseElement.viewportCallback has been removed.
   /**
    * @param {boolean}  inViewport
    * @protected
    */
-  viewportCallbackTemp(inViewport) {
+  viewportCallback(inViewport) {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
     }

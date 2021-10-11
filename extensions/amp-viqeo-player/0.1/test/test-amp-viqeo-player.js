@@ -1,6 +1,7 @@
 import {Services} from '#service';
 
-import {listenOncePromise} from '../../../../src/event-helper';
+import {listenOncePromise} from '#utils/event-helper';
+
 import {PlayingStates, VideoEvents} from '../../../../src/video-interface';
 import AmpViqeoPlayer from '../amp-viqeo-player';
 

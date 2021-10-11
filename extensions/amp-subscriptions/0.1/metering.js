@@ -1,4 +1,4 @@
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 /** @const */
 const TAG = 'amp-subscriptions';

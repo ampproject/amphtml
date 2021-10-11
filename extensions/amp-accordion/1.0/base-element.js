@@ -10,14 +10,14 @@ import {forwardRef} from '#preact/compat';
 import {useDOMHandle} from '#preact/component';
 import {useSlotContext} from '#preact/slot';
 
+import {devAssert} from '#utils/log';
+
 import {
   BentoAccordion,
   BentoAccordionContent,
   BentoAccordionHeader,
   BentoAccordionSection,
 } from './component';
-
-import {devAssert} from '../../../src/log';
 
 const HEADER_SHIM_PROP = '__AMP_H_SHIM';
 const CONTENT_SHIM_PROP = '__AMP_C_SHIM';

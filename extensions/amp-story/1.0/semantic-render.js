@@ -1,6 +1,6 @@
 import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {dict} from '#core/types/object';
 import {includes} from '#core/types/string';
 

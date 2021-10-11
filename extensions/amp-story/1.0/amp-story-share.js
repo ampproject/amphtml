@@ -5,12 +5,12 @@ import {
   copyTextToClipboard,
   isCopyingToClipboardSupported,
 } from '#core/window/clipboard';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user} from '#utils/log';
 import {dict, map} from '#core/types/object';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getRequestService} from './amp-story-request-service';
 import {isObject} from '#core/types';
-import {listen} from '../../../src/event-helper';
+import {listen} from '#utils/event-helper';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
 
 /**

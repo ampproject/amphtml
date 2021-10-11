@@ -1,9 +1,9 @@
 import {IframeTransportEventDef, MessageType} from '#core/3p-frame-messaging';
 import {tryParseJson} from '#core/types/object/json';
 
-import {IframeMessagingClient} from './iframe-messaging-client';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 
-import {dev, devAssert, user, userAssert} from '../src/log';
+import {IframeMessagingClient} from './iframe-messaging-client';
 
 /** @private @const {string} */
 const TAG_ = 'iframe-transport-client';

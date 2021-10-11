@@ -2,7 +2,7 @@ import * as Preact from '#preact';
 import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
 import {forwardRef, toChildArray} from '#preact/compat';
 import {setStyle} from '#core/dom/style';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 import {
   useCallback,
   useImperativeHandle,
@@ -86,7 +86,7 @@ function BentoStreamGalleryWithRef(props, ref) {
       return;
     }
     // Use local window.
-    const win = toWin(node.ownerDocument.defaultView);
+    const win = getWin(node);
     if (!win) {
       return undefined;
     }

@@ -8,7 +8,8 @@ import {isArray, isObject} from '#core/types';
 import {Services} from '#service';
 import {parseExtensionUrl} from '#service/extension-script';
 
-import {dev, user} from './log';
+import {dev, user} from '#utils/log';
+
 import {getMode} from './mode';
 import {
   disposeServicesForDoc,
