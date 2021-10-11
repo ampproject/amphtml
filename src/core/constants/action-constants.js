@@ -9,7 +9,9 @@ import {devAssert} from '#core/assert';
  * The action service delegates parsing of object literals to the corresponding
  * extension (in the example above, amp-bind).
  *
- * @see ./service/action-impl.ActionInfoDef
+ * See ./service/action-impl.ActionInfoDef
+ * TODO(rcebulko): Revert to @see once type is available
+ *
  * @const {string}
  */
 export const RAW_OBJECT_ARGS_KEY = '__AMP_OBJECT_STRING__';

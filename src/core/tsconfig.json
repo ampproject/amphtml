@@ -4,12 +4,16 @@
     "checkJs": true,
     "noEmit": true,
     "paths": {
-      "#core": ["./"],
-      "#core/*": ["./*"]
+      "#core/mode": ["./"],
+      "#core/mode/*": ["./*"],
+      "#core/constants": ["./"],
+      "#core/constants/*": ["./*"],
     },
   },
   "include": [
     "mode/**/*.js",
+    "constants/**/*.js",
     "**/*.d.ts"
-  ]
+  ],
+  "exclude": []
 }
