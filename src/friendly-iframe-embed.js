@@ -14,7 +14,7 @@ import {
 } from '#core/dom/style';
 import {rethrowAsync} from '#core/error';
 import * as mode from '#core/mode';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {install as installAbortController} from '#polyfills/abort-controller';
 import {install as installCustomElements} from '#polyfills/custom-elements';
@@ -140,7 +140,7 @@ export function installFriendlyIframeEmbed(
   opt_preinstallCallback // TODO(#22733): remove "window" argument.
 ) {
   /** @const {!Window} */
-  const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
+  const win = getTopWindow(getWin(iframe));
   /** @const {!./service/extensions-impl.Extensions} */
   const extensionsService = Services.extensionsFor(win);
   /** @const {!./service/ampdoc-impl.AmpDocService} */
@@ -723,7 +723,7 @@ export class Installers {
     opt_installComplete
   ) {
     const childWin = ampdoc.win;
-    const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
+    const parentWin = getWin(childWin.frameElement);
     setParentWindow(childWin, parentWin);
     const getDelayPromise = getDelayPromiseProducer();
 

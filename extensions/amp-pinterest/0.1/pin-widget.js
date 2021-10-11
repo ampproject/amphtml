@@ -1,6 +1,6 @@
 import {Keys} from '#core/constants/key-codes';
 import {measureIntersection} from '#core/dom/layout/intersection';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {Services} from '#service';
 
@@ -32,7 +32,7 @@ export class PinWidget {
       'The data-url attribute is required for Pin widgets'
     );
     this.element = rootElement;
-    this.xhr = Services.xhrFor(toWin(rootElement.ownerDocument.defaultView));
+    this.xhr = Services.xhrFor(getWin(rootElement));
     this.pinId = '';
     this.alt = '';
     this.pinUrl = '';

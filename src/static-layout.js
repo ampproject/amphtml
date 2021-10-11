@@ -10,7 +10,7 @@ import {
 } from '#core/dom/layout';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyle, setStyles, toggle} from '#core/dom/style';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
 
@@ -171,7 +171,7 @@ export function applyStaticLayout(element) {
   } else if (layout == Layout.FIXED_HEIGHT) {
     setStyle(element, 'height', devAssertString(height));
   } else if (layout == Layout.RESPONSIVE) {
-    if (shouldUseAspectRatioCss(toWin(element.ownerDocument.defaultView))) {
+    if (shouldUseAspectRatioCss(getWin(element))) {
       setStyle(
         element,
         'aspect-ratio',
