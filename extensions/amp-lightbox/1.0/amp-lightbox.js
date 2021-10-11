@@ -4,7 +4,7 @@ import {CSS} from '../../../build/amp-lightbox-1.0.css';
 import {Services} from '#service';
 import {createCustomEvent} from '#utils/event-helper';
 import {isExperimentOn} from '#experiments';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 import {userAssert} from '#utils/log';
 
 /** @const {string} */
@@ -41,7 +41,7 @@ class AmpLightbox extends BaseElement {
   /** @override */
   triggerEvent(element, eventName, detail) {
     const event = createCustomEvent(
-      toWin(element.ownerDocument.defaultView),
+      getWin(element),
       `amp-lightbox.${eventName}`,
       detail
     );

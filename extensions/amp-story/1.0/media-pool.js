@@ -19,7 +19,7 @@ import {dev, devAssert} from '#utils/log';
 import {findIndex} from '#core/types/array';
 import {isConnectedNode} from '#core/dom';
 import {matches} from '#core/dom/query';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 import {userInteractedWith} from '../../../src/video-interface';
 
 /** @const @enum {string} */
@@ -977,7 +977,7 @@ export class MediaPool {
     const newId = String(nextInstanceId++);
     element[POOL_MEDIA_ELEMENT_PROPERTY_NAME] = newId;
     instances[newId] = new MediaPool(
-      toWin(root.getElement().ownerDocument.defaultView),
+      getWin(root.getElement()),
       root.getMaxMediaElementCounts(),
       (element) => root.getElementDistance(element)
     );

@@ -1420,7 +1420,7 @@ export class AmpA4A extends AMP.BaseElement {
   /** @override  */
   unlayoutCallback() {
     this.unobserveIntersections_?.();
-    this.unobserveIntersections = null;
+    this.unobserveIntersections_ = null;
     this.tearDownSlot();
     return true;
   }

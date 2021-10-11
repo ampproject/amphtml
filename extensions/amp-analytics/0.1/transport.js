@@ -22,7 +22,7 @@ import {getTopWindow} from '../../../src/service-helpers';
 
 import {loadPromise} from '#utils/event-helper';
 import {removeElement} from '#core/dom';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 import {toggle} from '#core/dom/style';
 
 /** @const {string} */
@@ -154,7 +154,7 @@ export class Transport {
     }
 
     // In the case of FIE rendering, we should be using the parent doc win.
-    const topWin = getTopWindow(toWin(element.ownerDocument.defaultView));
+    const topWin = getTopWindow(getWin(element));
     const type = element.getAttribute('type');
     // In inabox there is no amp-ad element.
     const ampAdResourceId = this.isInabox_

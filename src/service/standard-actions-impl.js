@@ -3,7 +3,7 @@ import {tryFocus} from '#core/dom';
 import {Layout, getLayoutClass} from '#core/dom/layout';
 import {computedStyle, toggle} from '#core/dom/style';
 import {isFiniteNumber} from '#core/types';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {Services} from '#service';
 
@@ -320,7 +320,7 @@ export class StandardActions {
   handleShow_(invocation) {
     const {node} = invocation;
     const target = dev().assertElement(node);
-    const ownerWindow = toWin(target.ownerDocument.defaultView);
+    const ownerWindow = getWin(target);
 
     if (target.classList.contains(getLayoutClass(Layout.NODISPLAY))) {
       user().warn(
@@ -453,16 +453,6 @@ export class StandardActions {
 
     return null;
   }
-}
-
-/**
- * @param {!Node} node
- * @return {!Window}
- */
-function getWin(node) {
-  return toWin(
-    (node.ownerDocument || /** @type {!Document} */ (node)).defaultView
-  );
 }
 
 /**

@@ -11,10 +11,6 @@ const privateServiceFactory =
 const shouldNeverBeUsed =
   'Usage of this API is not allowed - only for internal purposes.';
 
-const backwardCompat =
-  'This method must not be called. It is only retained ' +
-  'for backward compatibility during rollout.';
-
 const realiasGetMode =
   'Do not re-alias getMode or its return so it can be ' +
   'DCE\'d. Use explicitly like "getMode().localDev" instead.';
@@ -587,9 +583,6 @@ const forbiddenTermsGlobal = {
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
     message: 'Use src/open-window-dialog',
     allowlist: ['src/open-window-dialog.js'],
-  },
-  '\\.getWin\\(': {
-    message: backwardCompat,
   },
   '/\\*\\* @type \\{\\!Element\\} \\*/': {
     message: 'Use assertElement instead of casting to !Element.',

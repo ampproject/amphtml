@@ -1,4 +1,4 @@
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {Services} from '#service';
 
@@ -43,7 +43,7 @@ export class SaveButton {
       'The data-description attribute is required for Save buttons'
     );
     this.element = rootElement;
-    this.xhr = Services.xhrFor(toWin(rootElement.ownerDocument.defaultView));
+    this.xhr = Services.xhrFor(getWin(rootElement));
     this.color = rootElement.getAttribute('data-color');
     this.count = rootElement.getAttribute('data-count');
     this.lang = rootElement.getAttribute('data-lang');
