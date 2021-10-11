@@ -11,9 +11,9 @@ import * as Preact from '#preact';
 import {useCallback, useLayoutEffect, useRef} from '#preact';
 import {PreactBaseElement} from '#preact/base-element';
 
-import {BentoSelector, BentoSelectorOption} from './component';
-
 import {devAssert} from '#utils/log';
+
+import {BentoSelector, BentoSelectorOption} from './component';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */
