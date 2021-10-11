@@ -3,6 +3,7 @@
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,
+    "downlevelIteration": true,
     "target": "es5",
     "lib": ["dom", "esnext", "es6"],
     "paths": {
@@ -10,6 +11,8 @@
       "#core/constants/*": ["./constants/*"],
       "#core/data-structures": ["./data-structures"],
       "#core/data-structures/*": ["./data-structures/*"],
+      "#core/error": ["./error"],
+      "#core/error/*": ["./error/*"],
       "#core/mode": ["./mode"],
       "#core/mode/*": ["./mode/*"],
       "#core/types": ["./types"],
@@ -19,6 +22,7 @@
   "include": [
     "constants/**/*.js",
     "data-structures/**/*.js",
+    "error/**/*.js",
     "mode/**/*.js",
     "types/**/*.js",
     "**/*.d.ts"
