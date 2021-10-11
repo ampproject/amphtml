@@ -4,12 +4,11 @@ const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
 const klaw = require('klaw');
 const path = require('path');
-const {cyan} = require('kleur/colors');
+const {bgWhite, cyan} = require('kleur/colors');
 const {log} = require('../common/logging');
 const {runReleaseJob} = require('./release-job');
 const {Storage} = require('@google-cloud/storage');
 const {timedExecOrDie} = require('../pr-check/utils');
-const {VERSION} = require('../compile/internal-version');
 
 /**
  * @fileoverview Script that builds a release.
@@ -20,6 +19,8 @@ const jobName = 'archive-release.js';
 const SRCS_DIR = '/tmp/restored-workspace/releases';
 const DEST_DIR = '/tmp/release';
 const ARTIFACT_FILE_NAME = '/tmp/release.tar.gz';
+
+const PROGRESS_WIDTH = 40;
 
 /**
  * Merge the outputs of the flavor (both module/nomodule) into the dest dir.
@@ -71,6 +72,67 @@ function mergeFilesTxt_(flavor) {
   });
 }
 
+let printProgressReady = true;
+
+/**
+ * Logs file upload progress every 1 second.
+ *
+ * @param {number} totalFiles
+ * @param {number} uploadedFiles
+ */
+function logProgress_(totalFiles, uploadedFiles) {
+  const percentage = Math.round((uploadedFiles / totalFiles) * PROGRESS_WIDTH);
+  if (printProgressReady || uploadedFiles === totalFiles) {
+    log(
+      '[' +
+        bgWhite(' '.repeat(percentage)) +
+        '.'.repeat(PROGRESS_WIDTH - percentage) +
+        ']',
+      cyan(uploadedFiles),
+      '/',
+      cyan(totalFiles)
+    );
+
+    printProgressReady = false;
+    setTimeout(() => {
+      printProgressReady = true;
+    }, 1000);
+  }
+}
+
+/**
+ * Uploads release files to Google Cloud Storage.
+ * @return {Promise<void>}
+ */
+async function uploadFiles_() {
+  const storage = new Storage({keyFilename: '/tmp/amp-cdn-serving.json'});
+  const bucket = storage.bucket('org-cdn');
+
+  let totalFiles = 0;
+  for await (const {stats} of klaw(DEST_DIR)) {
+    if (stats.isFile()) {
+      totalFiles++;
+    }
+  }
+
+  log('Uploading', cyan(totalFiles), 'files to storage:');
+  const uploadsPromises = [];
+  let uploadedFiles = 0;
+  for await (const {path, stats} of klaw(DEST_DIR)) {
+    if (stats.isFile()) {
+      const destination = path.slice(DEST_DIR.length + 1);
+      uploadsPromises.push(
+        bucket.upload(path, {destination, resumable: false}).then(() => {
+          logProgress_(totalFiles, ++uploadedFiles);
+        })
+      );
+    }
+  }
+
+  await Promise.all(uploadsPromises);
+  log('Finished uploading all files.');
+}
+
 runReleaseJob(jobName, async () => {
   fs.ensureDirSync(DEST_DIR);
 
@@ -79,24 +141,7 @@ runReleaseJob(jobName, async () => {
     mergeFilesTxt_(flavor);
   }
 
-  const storage = new Storage({keyFilename: '/tmp/amp-cdn-serving.json'});
-  const bucket = storage.bucket('org-cdn');
-
-  log('Uploading files to storage:');
-  const uploadsPromises = [];
-  for await (const {path: fullPath, stats} of klaw(DEST_DIR)) {
-    if (stats.isFile()) {
-      const path = fullPath.slice(DEST_DIR.length);
-      const destination = `${VERSION}/${path}`;
-      uploadsPromises.push(async () => {
-        await bucket.upload(path, {destination});
-        log(cyan(fullPath), '→', cyan(destination));
-      });
-    }
-  }
-
-  await Promise.all(uploadsPromises);
-  log('Finished uploading all files.');
+  await uploadFiles_();
 
   log('Archiving releases to', cyan(ARTIFACT_FILE_NAME));
   timedExecOrDie(`cd ${DEST_DIR} && tar -czf ${ARTIFACT_FILE_NAME} *`);
