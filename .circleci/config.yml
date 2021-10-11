@@ -23,7 +23,6 @@ release_builds_only: &release_builds_only
       only:
         - nightly
         - /^amp-release-.*$/
-        - pull/36321  # DO NOT MERGE
 
 pr_builds_only: &pr_builds_only
   filters:
