@@ -10,9 +10,10 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-selector-0.1.css';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
 
 const TAG = 'amp-selector';
 

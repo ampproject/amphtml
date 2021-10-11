@@ -6,13 +6,14 @@ import {isFiniteNumber} from '#core/types';
 
 import {Services} from '#service';
 
+import {getDetail, listen} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {installWebAnimationsIfNecessary} from './install-polyfill';
 import {WebAnimationService} from './web-animation-service';
 import {WebAnimationPlayState} from './web-animation-types';
 import {Builder} from './web-animations';
 
-import {getDetail, listen} from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
 import {Pass} from '../../../src/pass';
 
 const TAG = 'amp-animation';

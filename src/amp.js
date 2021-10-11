@@ -6,6 +6,7 @@
 import './polyfills';
 
 import {TickLabel} from '#core/constants/enums';
+import {whenDocumentComplete} from '#core/document/ready';
 import * as mode from '#core/mode';
 
 import {Services} from '#service';
@@ -21,6 +22,7 @@ import {installPlatformService} from '#service/platform-impl';
 
 import {installAutoLightboxExtension} from './auto-lightbox';
 import {startupChunk} from './chunk';
+import {markUnresolvedElements} from './custom-element';
 import {installErrorReporting} from './error-reporting';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
 import {maybeTrackImpression} from './impression';
@@ -63,6 +65,7 @@ function bootstrap(ampdoc, perf) {
   startupChunk(self.document, function stub() {
     // Pre-stub already known elements.
     stubElementsForDoc(ampdoc);
+    whenDocumentComplete(self.document).then(() => markUnresolvedElements());
   });
   startupChunk(
     self.document,

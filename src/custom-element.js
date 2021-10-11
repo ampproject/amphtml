@@ -13,11 +13,13 @@ import {MediaQueryProps} from '#core/dom/media-query-props';
 import * as query from '#core/dom/query';
 import {setStyle} from '#core/dom/style';
 import {rethrowAsync} from '#core/error';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {Services} from '#service';
 import {ResourceState} from '#service/resource';
 import {getSchedulerForDoc} from '#service/scheduler';
+
+import {dev, devAssert, user, userAssert} from '#utils/log';
 
 import {startupChunk} from './chunk';
 import {shouldBlockOnConsentByMeta} from './consent';
@@ -29,7 +31,6 @@ import {
   isCancellation,
   reportError,
 } from './error-reporting';
-import {dev, devAssert, user, userAssert} from './log';
 import {getMode} from './mode';
 import {applyStaticLayout} from './static-layout';
 import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
@@ -55,8 +56,16 @@ const RETURN_TRUE = () => true;
  */
 let templateTagSupported;
 
-/** @type {!Array} */
+/** @type {!Array<AmpElement>} */
 export const stubbedElements = [];
+
+/**
+ * Extensions which have failed to load, making their elements unresolvable.
+ * If null, then any remaining elements which don't immediately have their
+ * implClass available are marked unresolvable.
+ * @type {Set<string>}
+ */
+const unresolvableExtensions = new Set();
 
 /**
  * Whether this platform supports template tags.
@@ -368,6 +377,18 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     }
 
     /**
+     * When the document is ready (meaning all external resources are loaded or
+     * failed), we mark any stubbed elements as unresolved. If they haven't
+     * been upgraded yet (or pending upgrade or deferredBuild elements), then
+     * the extension failed to load.
+     */
+    markUnresolved() {
+      if (!this.implClass_) {
+        this.classList.add('amp-unresolved', 'i-amphtml-unresolved');
+      }
+    }
+
+    /**
      * Time delay imposed by baseElement upgradeCallback.  If no
      * upgradeCallback specified or not yet executed, delay is 0.
      * @return {number}
@@ -550,7 +571,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           if (this.actionQueue_) {
             // Only schedule when the queue is not empty, which should be
             // the case 99% of the time.
-            Services.timerFor(toWin(this.ownerDocument.defaultView)).delay(
+            Services.timerFor(getWin(this)).delay(
               this.dequeueActions_.bind(this),
               1
             );
@@ -1146,7 +1167,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
       if (!this.ampdoc_) {
         // Ampdoc can now be initialized.
-        const win = toWin(this.ownerDocument.defaultView);
+        const win = getWin(this);
         const ampdocService = Services.ampdocServiceFor(win);
         const ampdoc = ampdocService.getAmpDoc(this);
         this.ampdoc_ = ampdoc;
@@ -1182,11 +1203,17 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         } catch (e) {
           reportError(e, this);
         }
+
         if (this.implClass_) {
           this.upgradeOrSchedule_();
+        } else if (
+          unresolvableExtensions.has('*') ||
+          unresolvableExtensions.has(this.tagName.toLowerCase())
+        ) {
+          this.markUnresolved();
         }
+
         if (!this.isUpgraded()) {
-          this.classList.add('amp-unresolved', 'i-amphtml-unresolved');
           this.dispatchCustomEventForTesting(AmpEvents.STUBBED);
         }
       }
@@ -2174,4 +2201,22 @@ export function getImplSyncForTesting(element) {
  */
 export function getActionQueueForTesting(element) {
   return element.actionQueue_;
+}
+
+/**
+ * Marks each element that still stubbed as unresolved.
+ * @param {string=} opt_extension
+ */
+export function markUnresolvedElements(opt_extension) {
+  unresolvableExtensions.add(opt_extension || '*');
+  for (const el of stubbedElements) {
+    if (opt_extension == null || el.tagName.toLowerCase() === opt_extension) {
+      el.markUnresolved();
+    }
+  }
+}
+
+/** */
+export function resetUnresolvedElementsForTesting() {
+  unresolvableExtensions.clear();
 }

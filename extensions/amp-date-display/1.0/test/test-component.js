@@ -2,7 +2,8 @@ import {mount} from 'enzyme';
 
 import * as Preact from '#preact';
 
-import {user} from '../../../../src/log';
+import {user} from '#utils/log';
+
 import {BentoDateDisplay} from '../component';
 
 describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {

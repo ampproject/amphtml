@@ -1,10 +1,7 @@
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
-import {isAmp4Email} from '../../../src/format';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
+import {isAmp4Email} from '#core/document/format';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {toggleAttribute} from '#core/dom';
 
 const _CONTROL_HIDE_ATTRIBUTE = 'i-amphtml-carousel-hide-buttons';
@@ -30,6 +27,9 @@ export class BaseCarousel extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.showControls_ = false;
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /** @override */
@@ -60,14 +60,11 @@ export class BaseCarousel extends AMP.BaseElement {
     this.setControlsState();
   }
 
-  // TODO(samouri): rename to viewportCallback once
-  // BaseElement.viewportCallback is deleted
-
   /**
    * @param {boolean} inViewport
    * @protected
    */
-  viewportCallbackTemp(inViewport) {
+  viewportCallback(inViewport) {
     if (inViewport) {
       this.hintControls();
     }
@@ -234,14 +231,17 @@ export class BaseCarousel extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    observeWithSharedInOb(this.element, (inViewport) =>
-      this.viewportCallbackTemp(inViewport)
+    this.unobserveIntersections_ = observeIntersections(
+      this.element,
+      ({isIntersecting}) => this.viewportCallback(isIntersecting)
     );
     return Promise.resolve();
   }
+
   /** @override */
   unlayoutCallback() {
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections_ = null;
     return true;
   }
 

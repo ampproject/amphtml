@@ -1,11 +1,12 @@
 import {Services} from '#service';
 
-import {triggerAnalyticsEvent} from '../../src/analytics';
+import {triggerAnalyticsEvent} from '#utils/analytics';
+
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
-} from '../../src/service-helpers';
+} from '../../../src/service-helpers';
 
 describes.realWin(
   'analytics',

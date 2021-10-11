@@ -324,7 +324,7 @@ export function BentoAccordionSection({
   );
 
   return (
-    <Comp {...rest} expanded={expanded}>
+    <Comp {...rest}>
       <SectionContext.Provider value={context}>
         {children}
       </SectionContext.Provider>

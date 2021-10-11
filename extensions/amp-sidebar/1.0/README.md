@@ -4,7 +4,7 @@
 
 The Bento Sidebar provides a way to display meta content intended for temporary access such as navigation, links, buttons, menus. The sidebar can be revealed by a button tap while the main content remains visually underneath.
 
-Use Bento Sidebar as a web component [`<bento-sidebar>`](#web-component), or a Preact/React functional component [`<BentoSidebar>`](#preact/react-Component).
+Use Bento Sidebar as a web component [`<bento-sidebar>`](#web-component), or a Preact/React functional component [`<BentoSidebar>`](#preactreact-component).
 
 ### Web Component
 

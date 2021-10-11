@@ -19,6 +19,8 @@ import {
 
 import {Services} from '#service';
 
+import {dev, devAssert, userAssert} from '#utils/log';
+
 import {getPlacementAlgo} from './algorithm-utils';
 import {
   AnalyticsEvents,
@@ -33,7 +35,6 @@ import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
 import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
 import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
 import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
-import {dev, devAssert, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {
   StateProperty,
@@ -54,6 +55,7 @@ const MUSTACHE_TAG = 'amp-mustache';
 /** @enum {string} */
 export const Attributes = {
   AD_SHOWING: 'ad-showing',
+  DESKTOP_FULLBLEED: 'desktop-fullbleed',
   DESKTOP_ONE_PANEL: 'desktop-one-panel',
   DIR: 'dir',
   PAUSED: 'paused',
@@ -312,11 +314,15 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   onUIStateUpdate_(uiState) {
     this.mutateElement(() => {
-      const {DESKTOP_ONE_PANEL} = Attributes;
+      const {DESKTOP_FULLBLEED, DESKTOP_ONE_PANEL} = Attributes;
+      this.adBadgeContainer_.removeAttribute(DESKTOP_FULLBLEED);
       this.adBadgeContainer_.removeAttribute(DESKTOP_ONE_PANEL);
       // TODO(#33969) can no longer be null when launched.
       this.progressBarBackground_?.removeAttribute(DESKTOP_ONE_PANEL);
 
+      if (uiState === UIType.DESKTOP_FULLBLEED) {
+        this.adBadgeContainer_.setAttribute(DESKTOP_FULLBLEED, '');
+      }
       if (uiState === UIType.DESKTOP_ONE_PANEL) {
         this.adBadgeContainer_.setAttribute(DESKTOP_ONE_PANEL, '');
         this.progressBarBackground_?.setAttribute(DESKTOP_ONE_PANEL, '');

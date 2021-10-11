@@ -2,7 +2,7 @@ import {removeChildren, removeElement} from '#core/dom';
 import {setStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 
-import {listen} from '../../../src/event-helper';
+import {listen} from '#utils/event-helper';
 
 // Class used for sections of text in the future (for ASR-style captions).
 const FUTURE_CUE_SECTION_CLASS = 'amp-story-captions-future';

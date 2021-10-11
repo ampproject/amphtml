@@ -1,5 +1,5 @@
 import {Services} from '#service';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {registerServiceBuilder} from '../../../src/service-helpers';
 
 /**

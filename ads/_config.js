@@ -100,7 +100,8 @@ const adConfig = jsonConfiguration({
   'adform': {},
 
   'adfox': {
-    prefetch: 'https://yastatic.net/pcode/adfox/loader.js',
+    prefetch: 'https://yandex.ru/ads/system/context.js',
+    preconnect: ['https://yastatic.net/'],
     renderStartImplemented: true,
   },
 
@@ -1069,6 +1070,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'sabavision': {
+    renderStartImplemented: true,
+  },
+
   'sas': {
     renderStartImplemented: true,
   },
@@ -1378,7 +1383,8 @@ const adConfig = jsonConfiguration({
   },
 
   'yandex': {
-    prefetch: 'https://an.yandex.ru/system/context_amp.js',
+    prefetch: 'https://yandex.ru/ads/system/context.js',
+    preconnect: ['https://yastatic.net/'],
     renderStartImplemented: true,
   },
 
