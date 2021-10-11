@@ -157,9 +157,10 @@ function resetTestingState() {
 
 /**
  * Cleans up global state added during tests.
+ * @return {Promise<void>}
  */
-function cleanupTestcase() {
-  flushPreactEffects();
+async function cleanupTestcase() {
+  await flushPreactEffects();
   setTestRunner(this);
   restoreConsoleSandbox();
   restoreConsoleError();

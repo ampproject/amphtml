@@ -24,9 +24,7 @@ function flushableRaf(cb) {
 }
 
 function flushRaf(ts = performance.now()) {
-  // rafs.forEach((fn) => fn(ts));
-  // rafs.length = 0;
-  while (rafs.length > 0) {
+  while (rafs.length) {
     rafs.shift()(ts);
   }
 }
