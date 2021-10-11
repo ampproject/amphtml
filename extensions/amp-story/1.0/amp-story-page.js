@@ -66,6 +66,7 @@ import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 import {toArray} from '#core/types/array';
 import {upgradeBackgroundAudio} from './audio';
+import {ReadyState} from '#core/constants/ready-state';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
@@ -688,11 +689,13 @@ export class AmpStoryPage extends AMP.BaseElement {
             break;
           case 'amp-audio':
           case 'amp-video':
-            if (mediaEl.readyState >= 2) {
+            if (
+              mediaEl.readyState == ReadyState.LOADING ||
+              mediaEl.readyState == ReadyState.COMPLETE
+            ) {
               resolve();
               return;
             }
-
             mediaEl.addEventListener('canplay', resolve, true /* useCapture */);
             break;
           default:

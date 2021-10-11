@@ -10,6 +10,7 @@ import {
   childElement,
   childElementByTag,
   childElementsByTag,
+  closestAncestorElementBySelector,
   matches,
 } from '#core/dom/query';
 import {descendsFromStory} from '#utils/story';
