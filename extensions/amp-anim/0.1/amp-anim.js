@@ -96,7 +96,7 @@ export class AmpAnim extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.unobserveIntersections_?.();
-    this.unobserveIntersections = null;
+    this.unobserveIntersections_ = null;
     this.viewportCallback_(false);
     // Release memory held by the image - animations are typically large.
     this.img_.src = SRC_PLACEHOLDER;

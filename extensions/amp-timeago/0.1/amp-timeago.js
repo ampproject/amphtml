@@ -78,7 +78,7 @@ export class AmpTimeAgo extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.unobserveIntersections_?.();
-    this.unobserveIntersections = null;
+    this.unobserveIntersections_ = null;
     return false;
   }
 

@@ -2,7 +2,7 @@ import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
 import {dispatchCustomEvent} from '#core/dom';
 import {Layout, LayoutPriority} from '#core/dom/layout';
 import {isArray} from '#core/types';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {Services} from '#service';
 
@@ -218,7 +218,7 @@ export class BaseElement {
     this.element = element;
 
     /** @public @const {!Window} */
-    this.win = toWin(element.ownerDocument.defaultView);
+    this.win = getWin(element);
 
     /*
     \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  ____|
