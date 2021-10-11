@@ -69,14 +69,15 @@ export function tryResolve(fn) {
 
 /**
  * Resolves with the result of the last promise added.
- * @implements {IThenable}
+ * @implements {PromiseLike}
+ * @template T
  */
 export class LastAddedResolver {
   /**
-   * @param {!Array<!IThenable>=} opt_promises
+   * @param {!Array<!PromiseLike<T>>=} opt_promises
    */
   constructor(opt_promises) {
-    /** @private @const {!Deferred} */
+    /** @private @const {!Deferred<T>} */
     this.deferred_ = new Deferred();
 
     /** @private */
@@ -91,8 +92,8 @@ export class LastAddedResolver {
 
   /**
    * Add a promise to possibly be resolved.
-   * @param {!IThenable} promise
-   * @return {!Promise}
+   * @param {!PromiseLike<T>} promise
+   * @return {!Promise<T>}
    */
   add(promise) {
     const countAtAdd = ++this.count_;
@@ -113,7 +114,6 @@ export class LastAddedResolver {
     return this.deferred_.promise;
   }
 
-  /** @override */
   then(opt_resolve, opt_reject) {
     return this.deferred_.promise.then(opt_resolve, opt_reject);
   }

@@ -67,7 +67,7 @@ export class PriorityQueue {
   }
 
   /**
-   * @param {function(T)} callback
+   * @param {function(T):any} callback
    */
   forEach(callback) {
     let index = this.length;
