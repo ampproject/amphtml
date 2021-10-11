@@ -11,10 +11,10 @@ const {Storage} = require('@google-cloud/storage');
 const {timedExecOrDie} = require('../pr-check/utils');
 
 /**
- * @fileoverview Script that builds a release.
+ * @fileoverview Script that uploads a release build.
  */
 
-const jobName = 'archive-release.js';
+const jobName = 'upload-release.js';
 
 const SRCS_DIR = '/tmp/restored-workspace/releases';
 const DEST_DIR = '/tmp/release';
