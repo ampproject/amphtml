@@ -1,4 +1,3 @@
-/* eslint-disable local/no-forbidden-terms */
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
