@@ -66,7 +66,6 @@ import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 import {toArray} from '#core/types/array';
 import {upgradeBackgroundAudio} from './audio';
-import {ReadyState} from '#core/constants/ready-state';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
